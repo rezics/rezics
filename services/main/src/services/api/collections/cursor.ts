@@ -8,7 +8,8 @@ import type { ListCollectionsQuery } from "./schema";
 const CollectionListCursor = t.Object(
 	{
 		v: t.Literal(1),
-		ownerId: t.Nullable(Uuid),
+		publisherProfileId: t.Nullable(Uuid),
+		editableOnly: t.Boolean(),
 		targetId: t.Nullable(Uuid),
 		containsTargetId: t.Nullable(Uuid),
 		acceptsItemsOnly: t.Boolean(),
@@ -18,8 +19,7 @@ const CollectionListCursor = t.Object(
 		}),
 		search: t.Nullable(t.String({ minLength: 1, maxLength: 200 })),
 		limit: t.Integer({ minimum: 1, maximum: 50 }),
-		ownerListing: t.Boolean(),
-		systemRank: t.Integer({ minimum: 0, maximum: 1 }),
+		favoritesRank: t.Integer({ minimum: 0, maximum: 1 }),
 		updatedAt: t.String({ format: "date-time" }),
 		id: Uuid,
 	},
@@ -27,12 +27,11 @@ const CollectionListCursor = t.Object(
 );
 
 interface CollectionListCursorContext {
-	readonly ownerListing: boolean;
 	readonly query: ListCollectionsQuery;
 }
 
 export interface CollectionListCursorBoundary {
-	readonly systemRank: number;
+	readonly favoritesRank: number;
 	readonly updatedAt: Date;
 	readonly id: string;
 }
@@ -53,7 +52,8 @@ export function decodeCollectionListCursor(
 	try {
 		const cursor = parseJsonCursor(value, CollectionListCursor);
 		if (
-			cursor.ownerId !== (context.query.ownerId ?? null) ||
+			cursor.publisherProfileId !== (context.query.publisherProfileId ?? null) ||
+			cursor.editableOnly !== Boolean(context.query.editableOnly) ||
 			cursor.targetId !== (context.query.targetId ?? null) ||
 			cursor.containsTargetId !== (context.query.containsTargetId ?? null) ||
 			cursor.acceptsItemsOnly !== Boolean(context.query.acceptsItemsOnly) ||
@@ -62,13 +62,12 @@ export function decodeCollectionListCursor(
 				context.query.localizationLanguages ?? [],
 			) ||
 			cursor.search !== normalizedSearch(context.query) ||
-			cursor.limit !== (context.query.limit ?? 20) ||
-			cursor.ownerListing !== context.ownerListing
+			cursor.limit !== (context.query.limit ?? 20)
 		)
 			throw new InvalidPaginationCursor();
 		const updatedAt = new Date(cursor.updatedAt);
 		if (Number.isNaN(updatedAt.getTime())) throw new InvalidPaginationCursor();
-		return { systemRank: cursor.systemRank, updatedAt, id: cursor.id };
+		return { favoritesRank: cursor.favoritesRank, updatedAt, id: cursor.id };
 	} catch {
 		throw new InvalidPaginationCursor();
 	}
@@ -81,15 +80,15 @@ export function encodeCollectionListCursor(
 	return Buffer.from(
 		JSON.stringify({
 			v: 1,
-			ownerId: context.query.ownerId ?? null,
+			publisherProfileId: context.query.publisherProfileId ?? null,
+			editableOnly: Boolean(context.query.editableOnly),
 			targetId: context.query.targetId ?? null,
 			containsTargetId: context.query.containsTargetId ?? null,
 			acceptsItemsOnly: Boolean(context.query.acceptsItemsOnly),
 			localizationLanguages: context.query.localizationLanguages ?? [],
 			search: normalizedSearch(context.query),
 			limit: context.query.limit ?? 20,
-			ownerListing: context.ownerListing,
-			systemRank: boundary.systemRank,
+			favoritesRank: boundary.favoritesRank,
 			updatedAt: boundary.updatedAt.toISOString(),
 			id: boundary.id,
 		}),

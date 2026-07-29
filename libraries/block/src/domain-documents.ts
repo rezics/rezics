@@ -1,9 +1,5 @@
 import { UnitPredicate as UnitPredicateSchema, type UnitPredicate } from "@rezics/filter";
-import type { SearchCategory as SearchCategoryValue, SearchControlPredicate } from "@rezics/filter";
-import {
-	SearchCategory,
-	SearchControlPredicate as SearchControlPredicateSchema,
-} from "@rezics/filter";
+import { SearchCategory } from "@rezics/filter";
 import { type Static, Type } from "@sinclair/typebox";
 
 import { BlockKey, createBlockKey } from "./identity";
@@ -38,51 +34,6 @@ export const PollContentBlock = Type.Object(
 	{ additionalProperties: false, $id: "PollContentBlock" },
 );
 export type PollContentBlock = Static<typeof PollContentBlock>;
-
-export const CollectionDefinitionDocument = Type.Union(
-	[
-		Type.Object(
-			{
-				_type: Type.Literal("collection-definition"),
-				_key: BlockKey,
-				source: Type.Literal("manual"),
-			},
-			{ additionalProperties: false },
-		),
-		Type.Object(
-			{
-				_type: Type.Literal("collection-definition"),
-				_key: BlockKey,
-				source: Type.Literal("search"),
-				categories: Type.Array(SearchCategory, { minItems: 1, maxItems: 9 }),
-				filters: Type.Array(SearchControlPredicateSchema, { maxItems: 50 }),
-			},
-			{ additionalProperties: false },
-		),
-		Type.Object(
-			{
-				_type: Type.Literal("collection-definition"),
-				_key: BlockKey,
-				source: Type.Literal("system"),
-				systemKey: Type.Literal("favorites"),
-			},
-			{ additionalProperties: false },
-		),
-	],
-	{ $id: "CollectionDefinitionDocument" },
-);
-export type CollectionDefinitionDocument = Static<typeof CollectionDefinitionDocument>;
-
-export const CollectionPresentationDocument = Type.Object(
-	{
-		_type: Type.Literal("collection-presentation"),
-		_key: BlockKey,
-		layout: Type.Union([Type.Literal("flat"), Type.Literal("nested"), Type.Literal("shelf")]),
-		order: Type.Union([Type.Literal("manual"), Type.Literal("name"), Type.Literal("added-at")]),
-	},
-	{ additionalProperties: false, $id: "CollectionPresentationDocument" },
-);
-export type CollectionPresentationDocument = Static<typeof CollectionPresentationDocument>;
 
 export const ZoneBoundaryDocument = Type.Object(
 	{
@@ -153,35 +104,6 @@ export function createPollContentBlock(
 	key: BlockKey = createBlockKey(),
 ): PollContentBlock {
 	return { _type: "poll-content", _key: key, options };
-}
-
-export function createManualCollectionDefinitionDocument(
-	key: BlockKey = createBlockKey(),
-): CollectionDefinitionDocument {
-	return { _type: "collection-definition", _key: key, source: "manual" };
-}
-
-export function createSearchCollectionDefinitionDocument(
-	categories: SearchCategoryValue[],
-	filters: SearchControlPredicate[] = [],
-	key: BlockKey = createBlockKey(),
-): CollectionDefinitionDocument {
-	return { _type: "collection-definition", _key: key, source: "search", categories, filters };
-}
-
-export function createSystemCollectionDefinitionDocument(
-	systemKey: "favorites",
-	key: BlockKey = createBlockKey(),
-): CollectionDefinitionDocument {
-	return { _type: "collection-definition", _key: key, source: "system", systemKey };
-}
-
-export function createCollectionPresentationDocument(
-	layout: CollectionPresentationDocument["layout"] = "flat",
-	order: CollectionPresentationDocument["order"] = "manual",
-	key: BlockKey = createBlockKey(),
-): CollectionPresentationDocument {
-	return { _type: "collection-presentation", _key: key, layout, order };
 }
 
 export function createZoneBoundaryDocument(

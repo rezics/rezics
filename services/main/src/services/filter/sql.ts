@@ -396,6 +396,22 @@ export function compileUnitPredicateSql(
 		);
 		conditions.push("some" in relation ? condition : sql`not (${condition})`);
 	}
+	if (filter.publishers) {
+		const relation = filter.publishers;
+		const publisherFilter = "some" in relation ? relation.some : relation.none;
+		const exists = sql`exists (
+			select 1
+			from credit_attribution filter_publisher
+			where filter_publisher.source_unit_id = ${input.unitId}
+				and filter_publisher.role = 'publisher'
+				and ${profileReferenceCondition(
+					publisherFilter,
+					sql`filter_publisher.credited_unit_id`,
+					input.viewerProfileId,
+				)}
+		)`;
+		conditions.push("some" in relation ? exists : sql`not (${exists})`);
+	}
 	if (filter.scores?.received) {
 		const relation = filter.scores.received;
 		const exists = sql`exists (

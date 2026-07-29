@@ -1,13 +1,10 @@
 import { createHash } from "node:crypto";
 
 import {
-	createCollectionPresentationDocument,
 	createDockDocument,
-	createManualCollectionDefinitionDocument,
 	createPollContentBlock,
 	createPortableTextDocument,
 	createUnitReferencedBlockDocument,
-	createSystemCollectionDefinitionDocument,
 	createZoneBoundaryDocument,
 	createZoneThemeDocument,
 	assertWikiPostPortableTextDocument,
@@ -42,6 +39,7 @@ import {
 	platformCapabilityGrant,
 	collection,
 	collectionItem,
+	profileFavoritesCollection,
 	contentStructure,
 	contentStructureNode,
 	contentStructureNodeProgress,
@@ -869,22 +867,26 @@ async function seedCatalog(
 		(batch) => tx.insert(unitDock).values(batch),
 	);
 	await writeBatches(
-		collections.map((value, index) => {
-			const favorites = index < SeedPlan.users;
-			return {
-				id: value.id,
-				ownerProfileId: value.ownerProfileId,
-				source: favorites ? ("system" as const) : ("manual" as const),
-				systemKey: favorites ? ("favorites" as const) : null,
-				definitionDocument: favorites
-					? createSystemCollectionDefinitionDocument("favorites")
-					: createManualCollectionDefinitionDocument(),
-				presentationDocument: createCollectionPresentationDocument(),
-				createdAt: value.createdAt,
-				updatedAt: value.updatedAt,
-			};
-		}),
+		collections.map((value) => ({ id: value.id })),
 		(batch) => tx.insert(collection).values(batch),
+	);
+	await writeBatches(
+		collections.slice(0, SeedPlan.users).map((value) => ({
+			profileId: value.ownerProfileId,
+			collectionId: value.id,
+			createdAt: value.createdAt,
+		})),
+		(batch) => tx.insert(profileFavoritesCollection).values(batch),
+	);
+	await writeBatches(
+		collections.map((value) => ({
+			sourceUnitId: value.id,
+			creditedUnitId: value.ownerProfileId,
+			role: "publisher" as const,
+			createdAt: value.createdAt,
+			updatedAt: value.updatedAt,
+		})),
+		(batch) => tx.insert(creditAttribution).values(batch),
 	);
 	await writeBatches(
 		polls.map((value, index) => {
@@ -1765,7 +1767,6 @@ async function seedStructure(
 					return {
 						collectionId: collectionUnit.id,
 						unitId: target.id,
-						role: index % 5 === 0 ? ("featured" as const) : ("item" as const),
 						position: fractionalPositionAt(index),
 						addedByProfileId: collectionUnit.ownerProfileId,
 						createdAt: collectionUnit.createdAt,

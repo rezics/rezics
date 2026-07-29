@@ -1,14 +1,18 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 
 import { database } from "../../database";
-import { collection } from "../../database/schema";
+import { collection, unitOwnership } from "../../database/schema";
 import { CollectionOwnershipRequired } from "../errors";
 
 async function ensureCollectionOwner(collectionId: string, profileId: string) {
 	const [record] = await database
 		.select({ id: collection.id })
 		.from(collection)
-		.where(and(eq(collection.id, collectionId), eq(collection.ownerProfileId, profileId)))
+		.innerJoin(
+			unitOwnership,
+			and(eq(unitOwnership.unitId, collection.id), eq(unitOwnership.profileId, profileId)),
+		)
+		.where(and(eq(collection.id, collectionId), isNull(unitOwnership.revokedAt)))
 		.limit(1);
 	if (!record) throw new CollectionOwnershipRequired();
 	return record;

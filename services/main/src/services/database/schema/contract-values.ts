@@ -106,8 +106,9 @@ export const CreditAttributionRolesByUnitKind = {
 	],
 	series: ["author", "editor", "publisher"],
 	entity: ["publisher"],
+	collection: ["publisher"],
 } as const satisfies Record<
-	"book" | "software" | "media" | "series" | "entity",
+	"book" | "software" | "media" | "series" | "entity" | "collection",
 	readonly CreditAttributionRole[]
 >;
 export type CreditAttributionUnitKind = keyof typeof CreditAttributionRolesByUnitKind;

@@ -1,14 +1,10 @@
 import { StatusCodes } from "http-status-codes";
-import {
-	createCollectionPresentationDocument,
-	createManualCollectionDefinitionDocument,
-} from "@rezics/block";
-import { and, desc, eq, inArray, lt, ne, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, lt, ne, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database, type DatabaseTransaction } from "../../database";
-import { fractionalPositionBetween } from "../../ordering/position";
+import { fractionalPositionBetween, fractionalPositionsBetween } from "../../ordering/position";
 import {
 	resolvedUnitLocalizationLanguage,
 	toUnitLocalizationStorage,
@@ -17,7 +13,9 @@ import {
 import {
 	collection,
 	collectionItem,
+	creditAttribution,
 	post,
+	profileFavoritesCollection,
 	unit,
 	unitOwnership,
 	unitLocalization,
@@ -40,13 +38,13 @@ import {
 	CreateCollectionBody,
 	FavoriteItemParams,
 	ListCollectionsQuery,
+	MoveCollectionItemsBody,
 	SaveCollectionItemBody,
 	UpdateCollectionBody,
 } from "./schema";
 import { ensureFavorites } from "../../collections/favorites";
 import { getCollection, getCollectionContent } from "./service";
 import { validateCollectionParent } from "./hierarchy";
-import { canListAllOwnedCollections } from "./list-access";
 import { FavoriteResponse, NoContentResponse, SavedResponse } from "../schema/action-response";
 import {
 	toApiErrorResponse,
@@ -59,6 +57,9 @@ import { decodeCollectionListCursor, encodeCollectionListCursor } from "./cursor
 import { ensureImageAssetsAttachable } from "../image-assets/service";
 import { ValidationError } from "../errors";
 import { createProfilePublisherAttribution } from "../../units/attribution";
+import { getAttributionSummariesByUnitIds } from "../../units/attribution";
+import { getUnitUpdateCondition } from "../../authorization/unit/query";
+import { collectionSubtreeIds, orderedCollectionMoveRoots } from "./move";
 
 const CollectionNotFoundResponse = toApiErrorResponse(["CollectionNotFound"]);
 const CollectionMutationNotFoundResponse = toApiErrorResponse([
@@ -75,24 +76,40 @@ const FavoritesDeleteResponse = toApiErrorResponse(["FavoritesDeleteForbidden"])
 const UnitRevisionConflictResponse = toApiErrorResponse(["UnitRevisionConflict"]);
 const InvalidPaginationCursorResponse = toApiErrorResponse(["InvalidPaginationCursor"]);
 
-async function ensureManualCollection(tx: DatabaseTransaction, collectionId: string) {
+async function ensureEditableCollection(tx: DatabaseTransaction, collectionId: string) {
 	const [record] = await tx
-		.select({ source: collection.source, systemKey: collection.systemKey })
+		.select({
+			id: collection.id,
+			favoritesProfileId: profileFavoritesCollection.profileId,
+		})
 		.from(collection)
+		.leftJoin(
+			profileFavoritesCollection,
+			eq(profileFavoritesCollection.collectionId, collection.id),
+		)
 		.where(eq(collection.id, collectionId))
 		.limit(1);
 	if (!record) throw new UnitNotFound();
-	if (record.systemKey === "favorites") throw new FavoritesEditForbidden();
-	if (record.source !== "manual")
-		throw new ValidationError({ collectionId: "only manual Collections accept direct items" });
+	if (record.favoritesProfileId) throw new FavoritesEditForbidden();
 	return record;
 }
 
-async function nextCollectionItemPosition(tx: DatabaseTransaction, collectionId: string) {
+async function nextCollectionItemPosition(
+	tx: DatabaseTransaction,
+	collectionId: string,
+	parentUnitId: string | null = null,
+) {
 	const [last] = await tx
 		.select({ position: collectionItem.position })
 		.from(collectionItem)
-		.where(eq(collectionItem.collectionId, collectionId))
+		.where(
+			and(
+				eq(collectionItem.collectionId, collectionId),
+				parentUnitId
+					? eq(collectionItem.parentUnitId, parentUnitId)
+					: isNull(collectionItem.parentUnitId),
+			),
+		)
 		.orderBy(desc(collectionItem.position), desc(collectionItem.unitId))
 		.limit(1);
 	return fractionalPositionBetween(last?.position, null);
@@ -135,39 +152,32 @@ export default new Elysia({ prefix: "/collections" })
 		"",
 		async ({ query, request }) => {
 			const localizationLanguages = query.localizationLanguages ?? [];
-			const viewerId = query.ownerId
-				? (await resolveIdentity(request.headers, "unit:read")).profile?.unitId
+			const identity = query.editableOnly
+				? await resolveIdentity(request.headers, "unit:read")
 				: undefined;
-			const isOwnerQuery = canListAllOwnedCollections({
-				ownerId: query.ownerId,
-				viewerId,
-			});
-			if (isOwnerQuery && viewerId) await ensureFavorites(viewerId);
-			const cursorContext = { ownerListing: isOwnerQuery, query };
+			const viewerId = identity?.profile?.unitId;
+			if (query.editableOnly && !viewerId) return { items: [], nextCursor: null };
+			if (viewerId) await ensureFavorites(viewerId);
+			const cursorContext = { query };
 			const cursor = decodeCollectionListCursor(query.cursor, cursorContext);
 			const limit = query.limit ?? 20;
-			const systemRank = sql<number>`case
-				when ${collection.systemKey} = 'favorites'::collection_system_key then 1
+			const favoritesRank = sql<number>`case
+				when ${profileFavoritesCollection.profileId} is not null then 1
 				else 0
 			end`;
 			const search = query.search?.trim();
 			const titleMatchesSearch = search
 				? sql<boolean>`position(lower(${search}) in lower(coalesce(${unitLocalization.title}, ''))) > 0`
 				: undefined;
-			const searchCondition = titleMatchesSearch
-				? isOwnerQuery
-					? or(eq(collection.systemKey, "favorites"), titleMatchesSearch)
-					: titleMatchesSearch
-				: undefined;
 			const cursorCondition = cursor
 				? or(
-						lt(systemRank, cursor.systemRank),
+						lt(favoritesRank, cursor.favoritesRank),
 						and(
-							eq(systemRank, cursor.systemRank),
+							eq(favoritesRank, cursor.favoritesRank),
 							lt(unit.updatedAt, cursor.updatedAt),
 						),
 						and(
-							eq(systemRank, cursor.systemRank),
+							eq(favoritesRank, cursor.favoritesRank),
 							eq(unit.updatedAt, cursor.updatedAt),
 							lt(collection.id, cursor.id),
 						),
@@ -176,10 +186,8 @@ export default new Elysia({ prefix: "/collections" })
 			const candidates = await database
 				.select({
 					id: collection.id,
-					ownerId: collection.ownerProfileId,
-					source: collection.source,
-					systemKey: collection.systemKey,
-					systemRank,
+					favoritesProfileId: profileFavoritesCollection.profileId,
+					favoritesRank,
 					language: unitLocalization.language,
 					itemCount: sql<number>`(select count(*) from ${collectionItem} where ${collectionItem.collectionId} = ${collection.id})::int`,
 					containsTarget: query.targetId
@@ -194,6 +202,10 @@ export default new Elysia({ prefix: "/collections" })
 				.from(collection)
 				.innerJoin(unit, eq(unit.id, collection.id))
 				.innerJoin(unitRevisionHead, eq(unitRevisionHead.unitId, unit.id))
+				.leftJoin(
+					profileFavoritesCollection,
+					eq(profileFavoritesCollection.collectionId, collection.id),
+				)
 				.innerJoin(
 					unitLocalization,
 					and(
@@ -206,43 +218,67 @@ export default new Elysia({ prefix: "/collections" })
 				)
 				.where(
 					and(
-						isOwnerQuery ? undefined : eq(unit.status, "published"),
-						isOwnerQuery ? undefined : eq(unit.visibility, "public"),
-						isOwnerQuery ? undefined : ne(collection.source, "system"),
-						query.ownerId ? eq(collection.ownerProfileId, query.ownerId) : undefined,
+						query.editableOnly
+							? and(
+									getUnitUpdateCondition(viewerId!, unit),
+									or(
+										isNull(profileFavoritesCollection.profileId),
+										eq(profileFavoritesCollection.profileId, viewerId!),
+									),
+								)
+							: and(
+									eq(unit.status, "published"),
+									eq(unit.visibility, "public"),
+									eq(unit.moderationStatus, "approved"),
+									isNull(unit.deletedAt),
+									isNull(profileFavoritesCollection.profileId),
+								),
+						query.publisherProfileId
+							? sql`exists(
+								select 1 from ${creditAttribution} publisher_credit
+								where publisher_credit.source_unit_id = ${collection.id}
+									and publisher_credit.credited_unit_id = ${query.publisherProfileId}
+									and publisher_credit.role = 'publisher'
+							)`
+							: undefined,
 						query.containsTargetId
 							? sql`exists(select 1 from ${collectionItem} containing_item where containing_item.collection_id = ${collection.id} and containing_item.unit_id = ${query.containsTargetId})`
 							: undefined,
-						query.acceptsItemsOnly
-							? isOwnerQuery
-								? or(
-										eq(collection.source, "manual"),
-										eq(collection.systemKey, "favorites"),
-									)
-								: sql`false`
-							: undefined,
-						searchCondition,
+						query.acceptsItemsOnly && !query.editableOnly ? sql`false` : undefined,
+						titleMatchesSearch,
 						cursorCondition,
 					),
 				)
-				.orderBy(desc(systemRank), desc(unit.updatedAt), desc(collection.id))
+				.orderBy(desc(favoritesRank), desc(unit.updatedAt), desc(collection.id))
 				.limit(limit + 1);
 			const items = candidates.slice(0, limit);
 			const last = items.at(-1);
+			const attributionMap = await getAttributionSummariesByUnitIds(
+				items.map(({ id }) => id),
+				localizationLanguages,
+			);
 			return {
-				items: items.map(({ coverAssetId, systemRank: _systemRank, ...item }) => ({
-					...item,
-					acceptsItems:
-						isOwnerQuery &&
-						(item.source === "manual" ||
-							(item.source === "system" && item.systemKey === "favorites")),
-					cover: presentImageAsset(coverAssetId, "cover"),
-				})),
+				items: items.map(
+					({
+						coverAssetId,
+						favoritesRank: _favoritesRank,
+						favoritesProfileId,
+						...item
+					}) => ({
+						...item,
+						purpose: favoritesProfileId
+							? ("favorites" as const)
+							: ("collection" as const),
+						acceptsItems: Boolean(query.editableOnly),
+						attributions: attributionMap.get(item.id) ?? [],
+						cover: presentImageAsset(coverAssetId, "cover"),
+					}),
+				),
 				nextCursor:
 					candidates.length > limit && last
 						? encodeCollectionListCursor(
 								{
-									systemRank: last.systemRank,
+									favoritesRank: last.favoritesRank,
 									updatedAt: last.updatedAt,
 									id: last.id,
 								},
@@ -269,21 +305,12 @@ export default new Elysia({ prefix: "/collections" })
 					profile.unitId,
 					unitLocalizationImageAssetReferences(body.localization),
 				);
-				const definitionDocument =
-					body.definitionDocument ?? createManualCollectionDefinitionDocument();
 				const created = await insertUnit(tx, {
 					kind: "collection",
 					visibility: body.visibility ?? "private",
 					statusActor: { kind: "profile", profileId: profile.unitId },
 				});
-				await tx.insert(collection).values({
-					id: created.id,
-					ownerProfileId: profile.unitId,
-					source: definitionDocument.source,
-					definitionDocument,
-					presentationDocument:
-						body.presentationDocument ?? createCollectionPresentationDocument(),
-				});
+				await tx.insert(collection).values({ id: created.id });
 				await tx.insert(unitLocalization).values({
 					unitId: created.id,
 					...toUnitLocalizationStorage(body.localization),
@@ -386,12 +413,15 @@ export default new Elysia({ prefix: "/collections" })
 					])
 				: undefined;
 			const [current] = await database
-				.select({ systemKey: collection.systemKey })
+				.select({ favoritesProfileId: profileFavoritesCollection.profileId })
 				.from(collection)
-				.innerJoin(unit, eq(unit.id, collection.id))
+				.leftJoin(
+					profileFavoritesCollection,
+					eq(profileFavoritesCollection.collectionId, collection.id),
+				)
 				.where(eq(collection.id, params.collectionId))
 				.limit(1);
-			if (current?.systemKey === "favorites") throw new FavoritesEditForbidden();
+			if (current?.favoritesProfileId) throw new FavoritesEditForbidden();
 			await database.transaction(async (tx) => {
 				if (body.localization)
 					await ensureImageAssetsAttachable(
@@ -402,16 +432,6 @@ export default new Elysia({ prefix: "/collections" })
 				const unitUpdate = toUnitVisibilityUpdate(body.visibility);
 				if (unitUpdate)
 					await tx.update(unit).set(unitUpdate).where(eq(unit.id, params.collectionId));
-				if (body.definitionDocument || body.presentationDocument) {
-					await tx
-						.update(collection)
-						.set({
-							source: body.definitionDocument?.source,
-							definitionDocument: body.definitionDocument,
-							presentationDocument: body.presentationDocument,
-						})
-						.where(eq(collection.id, params.collectionId));
-				}
 				if (body.localization) {
 					const storedLocalization = toUnitLocalizationStorage(body.localization);
 					await tx
@@ -466,11 +486,15 @@ export default new Elysia({ prefix: "/collections" })
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensure(params.collectionId, "unit.delete");
 			const [current] = await database
-				.select({ systemKey: collection.systemKey })
+				.select({ favoritesProfileId: profileFavoritesCollection.profileId })
 				.from(collection)
+				.leftJoin(
+					profileFavoritesCollection,
+					eq(profileFavoritesCollection.collectionId, collection.id),
+				)
 				.where(eq(collection.id, params.collectionId))
 				.limit(1);
-			if (current?.systemKey === "favorites") throw new FavoritesDeleteForbidden();
+			if (current?.favoritesProfileId) throw new FavoritesDeleteForbidden();
 			await database.transaction(async (tx) => {
 				await tx
 					.update(unit)
@@ -516,11 +540,7 @@ export default new Elysia({ prefix: "/collections" })
 				await tx.execute(
 					sql`select pg_advisory_xact_lock(hashtextextended(${params.collectionId}::text, 0))`,
 				);
-				await ensureManualCollection(tx, params.collectionId);
-				if (body.items.some(({ role }) => role === "favorite"))
-					throw new ValidationError({
-						items: "the favorite role belongs only to Favorites",
-					});
+				await ensureEditableCollection(tx, params.collectionId);
 				for (const item of body.items) {
 					const decision = await authorization.unit.decideInTransaction(
 						tx,
@@ -544,7 +564,12 @@ export default new Elysia({ prefix: "/collections" })
 				const [last] = await tx
 					.select({ position: collectionItem.position })
 					.from(collectionItem)
-					.where(eq(collectionItem.collectionId, params.collectionId))
+					.where(
+						and(
+							eq(collectionItem.collectionId, params.collectionId),
+							isNull(collectionItem.parentUnitId),
+						),
+					)
 					.orderBy(desc(collectionItem.position), desc(collectionItem.unitId))
 					.limit(1);
 				let lastPosition = last?.position;
@@ -555,7 +580,6 @@ export default new Elysia({ prefix: "/collections" })
 						collectionId: params.collectionId,
 						unitId: item.targetId,
 						parentUnitId: null,
-						role: item.role ?? "item",
 						position,
 						addedByProfileId: profile.unitId,
 					};
@@ -596,6 +620,152 @@ export default new Elysia({ prefix: "/collections" })
 			detail: { summary: "Add collection items atomically", tags: ["Collections"] },
 		},
 	)
+	.post(
+		"/:collectionId/items/move",
+		async ({ params, profile, authorization, body }) => {
+			await authorization.unit.ensure(params.collectionId, "unit.update");
+			const latestRevisionId = await database.transaction(async (tx) => {
+				await tx.execute(
+					sql`select pg_advisory_xact_lock(hashtextextended(${params.collectionId}::text, 0))`,
+				);
+				await ensureEditableCollection(tx, params.collectionId);
+				const memberships = await tx
+					.select({
+						unitId: collectionItem.unitId,
+						parentUnitId: collectionItem.parentUnitId,
+						position: collectionItem.position,
+					})
+					.from(collectionItem)
+					.where(eq(collectionItem.collectionId, params.collectionId))
+					.orderBy(
+						asc(collectionItem.parentUnitId),
+						asc(collectionItem.position),
+						asc(collectionItem.unitId),
+					);
+				const membershipById = new Map(
+					memberships.map((membership) => [membership.unitId, membership]),
+				);
+				const selectedIds = new Set(body.targetIds);
+				if (selectedIds.size !== body.targetIds.length)
+					throw new ValidationError({ targetIds: "targetId values must be unique" });
+				if (body.targetIds.some((targetId) => !membershipById.has(targetId)))
+					throw new ValidationError({
+						targetIds: "every moved item must belong to this Collection",
+					});
+				const moveRootIds = orderedCollectionMoveRoots(selectedIds, memberships);
+				const movingSubtreeIds = collectionSubtreeIds(moveRootIds, memberships);
+
+				let destinationParentId: string | null;
+				let beforePosition: string | null;
+				let afterPosition: string | null;
+				if (body.placement.kind === "after") {
+					const anchor = membershipById.get(body.placement.targetId);
+					if (!anchor)
+						throw new ValidationError({
+							placement: "the destination item must belong to this Collection",
+						});
+					if (movingSubtreeIds.has(anchor.unitId))
+						throw new ValidationError({
+							placement: "the destination cannot be inside a moved subtree",
+						});
+					destinationParentId = anchor.parentUnitId;
+					const siblings = memberships.filter(
+						(membership) =>
+							membership.parentUnitId === destinationParentId &&
+							!moveRootIds.includes(membership.unitId),
+					);
+					const anchorIndex = siblings.findIndex(
+						(membership) => membership.unitId === anchor.unitId,
+					);
+					if (anchorIndex < 0)
+						throw new ValidationError({ placement: "the destination is invalid" });
+					beforePosition = anchor.position;
+					afterPosition = siblings[anchorIndex + 1]?.position ?? null;
+				} else {
+					destinationParentId = body.placement.parentTargetId;
+					if (
+						destinationParentId &&
+						(!membershipById.has(destinationParentId) ||
+							movingSubtreeIds.has(destinationParentId))
+					)
+						throw new ValidationError({
+							placement: "the parent must be outside every moved subtree",
+						});
+					const siblings = memberships.filter(
+						(membership) =>
+							membership.parentUnitId === destinationParentId &&
+							!moveRootIds.includes(membership.unitId),
+					);
+					if (body.placement.kind === "start") {
+						beforePosition = null;
+						afterPosition = siblings[0]?.position ?? null;
+					} else {
+						beforePosition = siblings.at(-1)?.position ?? null;
+						afterPosition = null;
+					}
+				}
+				const positions = fractionalPositionsBetween(
+					beforePosition,
+					afterPosition,
+					moveRootIds.length,
+				);
+				for (const unitId of moveRootIds)
+					await tx
+						.update(collectionItem)
+						.set({
+							parentUnitId: destinationParentId,
+							position: `~moving-${unitId}`,
+						})
+						.where(
+							and(
+								eq(collectionItem.collectionId, params.collectionId),
+								eq(collectionItem.unitId, unitId),
+							),
+						);
+				for (const [index, unitId] of moveRootIds.entries()) {
+					const position = positions[index];
+					if (!position)
+						throw new Error("Fractional position generation returned too few values");
+					await tx
+						.update(collectionItem)
+						.set({
+							parentUnitId: destinationParentId,
+							position,
+						})
+						.where(
+							and(
+								eq(collectionItem.collectionId, params.collectionId),
+								eq(collectionItem.unitId, unitId),
+							),
+						);
+				}
+				const revision = await recordUnitRevision(tx, {
+					unitId: params.collectionId,
+					actorProfileId: profile.unitId,
+					event: "update",
+					baseRevisionId: body.baseRevisionId,
+				});
+				return revision.revisionId;
+			});
+			return { saved: true, latestRevisionId };
+		},
+		{
+			access: "write:unit:update",
+			params: CollectionParams,
+			body: MoveCollectionItemsBody,
+			response: {
+				[StatusCodes.OK]: SavedResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
+				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+				[StatusCodes.CONFLICT]: t.Union([
+					FavoritesEditResponse,
+					UnitRevisionConflictResponse,
+				]),
+			},
+			detail: { summary: "Move collection items atomically", tags: ["Collections"] },
+		},
+	)
 	.put(
 		"/:collectionId/items/:targetId",
 		async ({ params, profile, authorization, body }) => {
@@ -607,14 +777,9 @@ export default new Elysia({ prefix: "/collections" })
 				await tx.execute(
 					sql`select pg_advisory_xact_lock(hashtextextended(${params.collectionId}::text, 0))`,
 				);
-				await ensureManualCollection(tx, params.collectionId);
-				if (body.role === "favorite")
-					throw new ValidationError({
-						role: "the favorite role belongs only to Favorites",
-					});
-				const role = body.role ?? "item";
+				await ensureEditableCollection(tx, params.collectionId);
 				if (body.placement === "review-with-subject") {
-					if (body.parentTargetId !== undefined || body.position !== undefined)
+					if (body.parentTargetId !== undefined)
 						throw new ValidationError({
 							placement: "review placement derives its parent and position",
 						});
@@ -652,7 +817,6 @@ export default new Elysia({ prefix: "/collections" })
 							collectionId: params.collectionId,
 							unitId: review.subjectUnitId,
 							parentUnitId: null,
-							role: "item",
 							position: await nextCollectionItemPosition(tx, params.collectionId),
 							addedByProfileId: profile.unitId,
 						});
@@ -663,40 +827,10 @@ export default new Elysia({ prefix: "/collections" })
 						parentTargetId: review.subjectUnitId,
 					});
 					const [reviewMembership] = await tx
-						.select({ position: collectionItem.position })
-						.from(collectionItem)
-						.where(
-							and(
-								eq(collectionItem.collectionId, params.collectionId),
-								eq(collectionItem.unitId, params.targetId),
-							),
-						)
-						.limit(1);
-					await tx
-						.insert(collectionItem)
-						.values({
-							collectionId: params.collectionId,
-							unitId: params.targetId,
-							parentUnitId: review.subjectUnitId,
-							role,
-							position:
-								reviewMembership?.position ??
-								(await nextCollectionItemPosition(tx, params.collectionId)),
-							addedByProfileId: profile.unitId,
+						.select({
+							parentUnitId: collectionItem.parentUnitId,
+							position: collectionItem.position,
 						})
-						.onConflictDoUpdate({
-							target: [collectionItem.collectionId, collectionItem.unitId],
-							set: { parentUnitId: review.subjectUnitId, role },
-						});
-				} else {
-					const parentTargetId = body.parentTargetId ?? null;
-					await ensureValidCollectionParent(tx, {
-						collectionId: params.collectionId,
-						targetId: params.targetId,
-						parentTargetId,
-					});
-					const [existing] = await tx
-						.select({ position: collectionItem.position })
 						.from(collectionItem)
 						.where(
 							and(
@@ -706,16 +840,63 @@ export default new Elysia({ prefix: "/collections" })
 						)
 						.limit(1);
 					const position =
-						body.position ??
-						existing?.position ??
-						(await nextCollectionItemPosition(tx, params.collectionId));
+						reviewMembership?.parentUnitId === review.subjectUnitId
+							? reviewMembership.position
+							: await nextCollectionItemPosition(
+									tx,
+									params.collectionId,
+									review.subjectUnitId,
+								);
+					await tx
+						.insert(collectionItem)
+						.values({
+							collectionId: params.collectionId,
+							unitId: params.targetId,
+							parentUnitId: review.subjectUnitId,
+							position,
+							addedByProfileId: profile.unitId,
+						})
+						.onConflictDoUpdate({
+							target: [collectionItem.collectionId, collectionItem.unitId],
+							set: {
+								parentUnitId: review.subjectUnitId,
+								position,
+							},
+						});
+				} else {
+					const parentTargetId = body.parentTargetId ?? null;
+					await ensureValidCollectionParent(tx, {
+						collectionId: params.collectionId,
+						targetId: params.targetId,
+						parentTargetId,
+					});
+					const [existing] = await tx
+						.select({
+							parentUnitId: collectionItem.parentUnitId,
+							position: collectionItem.position,
+						})
+						.from(collectionItem)
+						.where(
+							and(
+								eq(collectionItem.collectionId, params.collectionId),
+								eq(collectionItem.unitId, params.targetId),
+							),
+						)
+						.limit(1);
+					const position =
+						existing?.parentUnitId === parentTargetId
+							? existing.position
+							: await nextCollectionItemPosition(
+									tx,
+									params.collectionId,
+									parentTargetId,
+								);
 					await tx
 						.insert(collectionItem)
 						.values({
 							collectionId: params.collectionId,
 							unitId: params.targetId,
 							parentUnitId: parentTargetId,
-							role,
 							position,
 							addedByProfileId: profile.unitId,
 						})
@@ -723,8 +904,7 @@ export default new Elysia({ prefix: "/collections" })
 							target: [collectionItem.collectionId, collectionItem.unitId],
 							set: {
 								parentUnitId: parentTargetId,
-								role,
-								...(body.position === undefined ? {} : { position }),
+								position,
 							},
 						});
 				}
@@ -763,16 +943,65 @@ export default new Elysia({ prefix: "/collections" })
 				await tx.execute(
 					sql`select pg_advisory_xact_lock(hashtextextended(${params.collectionId}::text, 0))`,
 				);
-				await ensureManualCollection(tx, params.collectionId);
-				await tx
-					.update(collectionItem)
-					.set({ parentUnitId: null })
+				await ensureEditableCollection(tx, params.collectionId);
+				const children = await tx
+					.select({
+						unitId: collectionItem.unitId,
+						position: collectionItem.position,
+					})
+					.from(collectionItem)
 					.where(
 						and(
 							eq(collectionItem.collectionId, params.collectionId),
 							eq(collectionItem.parentUnitId, params.targetId),
 						),
+					)
+					.orderBy(asc(collectionItem.position), asc(collectionItem.unitId));
+				if (children.length) {
+					const [lastRoot] = await tx
+						.select({ position: collectionItem.position })
+						.from(collectionItem)
+						.where(
+							and(
+								eq(collectionItem.collectionId, params.collectionId),
+								isNull(collectionItem.parentUnitId),
+								ne(collectionItem.unitId, params.targetId),
+							),
+						)
+						.orderBy(desc(collectionItem.position), desc(collectionItem.unitId))
+						.limit(1);
+					const positions = fractionalPositionsBetween(
+						lastRoot?.position,
+						null,
+						children.length,
 					);
+					for (const child of children)
+						await tx
+							.update(collectionItem)
+							.set({ parentUnitId: null, position: `~promoting-${child.unitId}` })
+							.where(
+								and(
+									eq(collectionItem.collectionId, params.collectionId),
+									eq(collectionItem.unitId, child.unitId),
+								),
+							);
+					for (const [index, child] of children.entries()) {
+						const position = positions[index];
+						if (!position)
+							throw new Error(
+								"Fractional position generation returned too few values",
+							);
+						await tx
+							.update(collectionItem)
+							.set({ position })
+							.where(
+								and(
+									eq(collectionItem.collectionId, params.collectionId),
+									eq(collectionItem.unitId, child.unitId),
+								),
+							);
+					}
+				}
 				await tx
 					.delete(collectionItem)
 					.where(
@@ -821,7 +1050,6 @@ export default new Elysia({ prefix: "/collections" })
 						collectionId,
 						unitId: params.targetId,
 						parentUnitId: null,
-						role: "favorite",
 						position: await nextCollectionItemPosition(tx, collectionId),
 						addedByProfileId: profile.unitId,
 					})
@@ -853,6 +1081,9 @@ export default new Elysia({ prefix: "/collections" })
 		async ({ params, profile, body }) => {
 			const collectionId = await ensureFavorites(profile.unitId);
 			const latestRevisionId = await database.transaction(async (tx) => {
+				await tx.execute(
+					sql`select pg_advisory_xact_lock(hashtextextended(${collectionId}::text, 0))`,
+				);
 				await tx
 					.delete(collectionItem)
 					.where(

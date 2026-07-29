@@ -11,7 +11,7 @@ import { database, type DatabaseTransaction } from "../database";
 import {
 	accounts,
 	apiAccessPolicy,
-	collection,
+	profileFavoritesCollection,
 	platformCapabilityGrant,
 	contentStructure,
 	contentStructureNode,
@@ -1792,11 +1792,10 @@ async function isBootstrapReady(): Promise<boolean> {
 		database.select({ id: profile.id }).from(profile),
 		database
 			.select({
-				id: collection.id,
-				ownerProfileId: collection.ownerProfileId,
+				id: profileFavoritesCollection.collectionId,
+				profileId: profileFavoritesCollection.profileId,
 			})
-			.from(collection)
-			.where(eq(collection.systemKey, "favorites")),
+			.from(profileFavoritesCollection),
 		database
 			.select({ profileId: realmMember.profileId })
 			.from(realmMember)
@@ -1976,7 +1975,7 @@ async function isBootstrapReady(): Promise<boolean> {
 		officialZoneAvatar[0]?.storageKey === OfficialZoneAvatarAsset.storageKey &&
 		profileFavorites.length === allProfiles.length &&
 		allProfiles.every((targetProfile) =>
-			profileFavorites.some((favorites) => favorites.ownerProfileId === targetProfile.id),
+			profileFavorites.some((favorites) => favorites.profileId === targetProfile.id),
 		) &&
 		allProfiles.every((targetProfile) =>
 			profileScoreMemberships.some((membership) => membership.profileId === targetProfile.id),

@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge, Button } from "@rezics/ui";
+import { Button } from "@rezics/ui";
 
 import { FeedItemCard } from "@/features/content-feed/components/feed-item-card";
 import { FeedList } from "@/features/content-feed/components/feed-list";
@@ -12,15 +12,7 @@ import {
 } from "../model/collection-content-tree";
 import type { CollectionContentItem } from "../data/collection-content";
 
-type CollectionLayout = "flat" | "nested" | "shelf";
-
-export function CollectionContentFeed({
-	collectionId,
-	layout,
-}: {
-	readonly collectionId: string;
-	readonly layout: CollectionLayout;
-}) {
+export function CollectionContentFeed({ collectionId }: { readonly collectionId: string }) {
 	const { t } = useTranslation(["actions", "collections", "state"]);
 	const query = useCollectionContent(collectionId);
 	const items = collectionContentItems(query);
@@ -40,45 +32,27 @@ export function CollectionContentFeed({
 			? ({ status: "error", retry: () => void query.refetch() } as const)
 			: ({ status: "ready", items } as const);
 
-	if (layout === "nested" && state.status === "ready")
-		return (
-			<FeedList
-				aria-label={t.collections.contentLabel}
-				emptyBody={t.collections.emptyCollectionBody}
-				emptyTitle={t.collections.emptyCollectionTitle}
-				errorLabel={t.state.error}
-				footer={footer}
-				getItemKey={(group) => group.root.membership.targetId}
-				renderItem={(group, metadata) => (
-					<CollectionContentGroup
-						group={group}
-						position={metadata.position}
-						setSize={metadata.setSize}
-					/>
-				)}
-				retryLabel={t.actions.retry}
-				state={{ status: "ready", items: toCollectionContentGroups(items) }}
-			/>
-		);
-
 	return (
 		<FeedList
 			aria-label={t.collections.contentLabel}
-			className={layout === "shelf" ? "items-start lg:grid-cols-2" : undefined}
 			emptyBody={t.collections.emptyCollectionBody}
 			emptyTitle={t.collections.emptyCollectionTitle}
 			errorLabel={t.state.error}
 			footer={footer}
-			getItemKey={(item) => item.membership.targetId}
-			renderItem={(item, metadata) => (
-				<CollectionFeedItem
-					item={item}
+			getItemKey={(group) => group.root.membership.targetId}
+			renderItem={(group, metadata) => (
+				<CollectionContentGroup
+					group={group}
 					position={metadata.position}
 					setSize={metadata.setSize}
 				/>
 			)}
 			retryLabel={t.actions.retry}
-			state={state}
+			state={
+				state.status === "ready"
+					? { status: "ready", items: toCollectionContentGroups(items) }
+					: state
+			}
 		/>
 	);
 }
@@ -120,15 +94,5 @@ function CollectionFeedItem({
 	readonly position: number;
 	readonly setSize: number;
 }) {
-	const { t } = useTranslation(["collections"]);
-	return (
-		<div className="grid gap-2">
-			{item.membership.role === "featured" ? (
-				<Badge className="ms-3 w-fit sm:ms-4" variant="secondary">
-					{t.collections.items.featured}
-				</Badge>
-			) : null}
-			<FeedItemCard item={item.content} position={position} setSize={setSize} />
-		</div>
-	);
+	return <FeedItemCard item={item.content} position={position} setSize={setSize} />;
 }

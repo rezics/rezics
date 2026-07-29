@@ -7,8 +7,8 @@ import { ensureFavorites, ensureFavoritesInTransaction } from "../collections/fa
 import { database } from "../database";
 import { isFirstUnitLocalization } from "../units/localization";
 import {
-	collection,
 	profile,
+	profileFavoritesCollection,
 	profilePreference,
 	realmMember,
 	unit,
@@ -46,7 +46,7 @@ async function findProfile(authUserId: string): Promise<StoredSessionProfile | u
 			unitId: profile.id,
 			name: unitLocalization.title,
 			email: users.email,
-			favoritesId: collection.id,
+			favoritesId: profileFavoritesCollection.collectionId,
 		})
 		.from(profile)
 		.innerJoin(unit, eq(unit.id, profile.id))
@@ -58,10 +58,7 @@ async function findProfile(authUserId: string): Promise<StoredSessionProfile | u
 				isFirstUnitLocalization(unitLocalization.unitId),
 			),
 		)
-		.leftJoin(
-			collection,
-			and(eq(collection.ownerProfileId, profile.id), eq(collection.systemKey, "favorites")),
-		)
+		.leftJoin(profileFavoritesCollection, eq(profileFavoritesCollection.profileId, profile.id))
 		.where(eq(profile.authUserId, authUserId))
 		.limit(1);
 	return record;

@@ -1,59 +1,35 @@
 import { sql } from "drizzle-orm";
-import {
-	check,
-	foreignKey,
-	index,
-	pgEnum,
-	primaryKey,
-	uniqueIndex,
-	uuid,
-} from "drizzle-orm/pg-core";
+import { check, foreignKey, index, primaryKey, unique, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import {
-	createCreatedAtColumn,
-	createJsonDocumentColumn,
-	createUpdatedAtColumn,
-	fractionalIndexPosition,
-} from "./columns";
+import { createCreatedAtColumn, createUpdatedAtColumn, fractionalIndexPosition } from "./columns";
 import { profile, unit } from "./core";
 
-export const collectionSource = pgEnum("collection_source", ["manual", "search", "system"]);
-export const collectionSystemKey = pgEnum("collection_system_key", ["favorites"]);
-export const collectionItemRole = pgEnum("collection_item_role", ["item", "featured", "favorite"]);
+/**
+ * Marks a Unit as a stored, explicitly ordered Collection.
+ *
+ * Dynamic Collections are intentionally not represented here. If query-backed
+ * Collections are introduced, they must use a separate model whose membership
+ * and ordering semantics cannot be confused with stored Collection items.
+ */
+export const collection = pgTable("collection", {
+	id: uuid()
+		.primaryKey()
+		.references(() => unit.id, { onDelete: "cascade" }),
+});
 
-export const collection = pgTable(
-	"collection",
+export const profileFavoritesCollection = pgTable(
+	"profile_favorites_collection",
 	{
-		id: uuid()
+		profileId: uuid()
 			.primaryKey()
-			.references(() => unit.id, { onDelete: "cascade" }),
-		ownerProfileId: uuid()
+			.references(() => profile.id, { onDelete: "cascade" }),
+		collectionId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
-		source: collectionSource().default("manual").notNull(),
-		systemKey: collectionSystemKey(),
-		/** @UNIT_LOCALIZATION_EXEMPT Structured contract: executable membership rules contain no display copy. */
-		definitionDocument: createJsonDocumentColumn().notNull(),
-		/** @UNIT_LOCALIZATION_EXEMPT Structured contract: layout and order codes contain no display copy. */
-		presentationDocument: createJsonDocumentColumn().notNull(),
+			.references(() => collection.id, { onDelete: "cascade" }),
 		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
 	},
-	(table) => [
-		index("collection_owner_created_at_idx").on(
-			table.ownerProfileId,
-			table.createdAt.desc(),
-			table.id.desc(),
-		),
-		uniqueIndex("collection_owner_system_key")
-			.on(table.ownerProfileId, table.systemKey)
-			.where(sql`${table.source} = 'system'::collection_source`),
-		check(
-			"collection_source_system_key_check",
-			sql`(${table.source} = 'system'::collection_source) = (${table.systemKey} is not null)`,
-		),
-	],
+	(table) => [unique("profile_favorites_collection_collection_id_unique").on(table.collectionId)],
 );
 
 export const collectionItem = pgTable(
@@ -66,7 +42,6 @@ export const collectionItem = pgTable(
 			.notNull()
 			.references(() => unit.id, { onDelete: "restrict" }),
 		parentUnitId: uuid().references(() => unit.id, { onDelete: "restrict" }),
-		role: collectionItemRole().notNull(),
 		position: fractionalIndexPosition()
 			.default(sql`'a0'::text`)
 			.notNull(),
@@ -80,11 +55,14 @@ export const collectionItem = pgTable(
 		primaryKey({ columns: [table.collectionId, table.unitId] }),
 		index("collection_item_collection_position_idx").on(
 			table.collectionId,
+			table.parentUnitId,
 			table.position,
 			table.unitId,
 		),
+		unique("collection_item_sibling_position_unique")
+			.on(table.collectionId, table.parentUnitId, table.position)
+			.nullsNotDistinct(),
 		index("collection_item_unit_idx").on(table.unitId),
-		index("collection_item_parent_idx").on(table.collectionId, table.parentUnitId),
 		index("collection_item_added_by_idx").on(table.addedByProfileId),
 		foreignKey({
 			name: "collection_item_parent_membership_fk",

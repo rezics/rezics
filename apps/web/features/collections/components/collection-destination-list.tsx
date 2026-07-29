@@ -125,7 +125,7 @@ export function CollectionDestinationList({
 					{virtualItems.map((virtualItem) => {
 						const collection = items[virtualItem.index];
 						if (!collection) return null;
-						const isFavorite = collection.systemKey === "favorites";
+						const isFavorite = collection.purpose === "favorites";
 						const isSelfReference = collection.id === targetId;
 						const isChanging = changingCollectionId === collection.id;
 						const title = isFavorite

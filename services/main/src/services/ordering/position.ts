@@ -25,6 +25,17 @@ export function fractionalPositionBetween(
 	return generateKeyBetween(before, after);
 }
 
+/** Generate a stable ordered run strictly between optional neighboring positions. */
+export function fractionalPositionsBetween(
+	before: string | null | undefined,
+	after: string | null | undefined,
+	count: number,
+): string[] {
+	if (!Number.isSafeInteger(count) || count < 0)
+		throw new RangeError("Fractional position count must be a non-negative safe integer");
+	return generateNKeysBetween(before ?? null, after ?? null, count);
+}
+
 /** Return the deterministic key at a zero-based ordinal in a fresh sequence. */
 export function fractionalPositionAt(ordinal: number): string {
 	if (!Number.isSafeInteger(ordinal) || ordinal < 0)

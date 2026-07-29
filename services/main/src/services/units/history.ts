@@ -3,8 +3,6 @@ import { createSchemaFactory } from "drizzle-orm/zod";
 import { z } from "zod";
 import { AvatarTypeValues, FontAwesomeIconPrefixValues } from "@rezics/avatar";
 import {
-	CollectionDefinitionDocument,
-	CollectionPresentationDocument,
 	PollContentBlock,
 	UnitReferencedBlockDocument,
 	ZoneBoundaryDocument,
@@ -109,8 +107,6 @@ const UnitLocalizationContentSchema = z.union([
 	PollContentBlockSchema,
 	UnitReferencedBlockDocumentSchema,
 ]);
-const CollectionDefinitionDocumentSchema = createDocumentSchema(CollectionDefinitionDocument);
-const CollectionPresentationDocumentSchema = createDocumentSchema(CollectionPresentationDocument);
 const ZoneBoundaryDocumentSchema = createDocumentSchema(ZoneBoundaryDocument);
 const ZoneThemeDocumentSchema = createDocumentSchema(ZoneThemeDocument);
 const FractionalPositionSchema = z.string().refine(isFractionalPosition);
@@ -216,12 +212,7 @@ const zoneStateSchema = schemaFactory
 		themeDocument: ZoneThemeDocumentSchema,
 	})
 	.omit({ id: true, createdAt: true, updatedAt: true });
-const collectionStateSchema = schemaFactory
-	.createSelectSchema(collection, {
-		definitionDocument: CollectionDefinitionDocumentSchema,
-		presentationDocument: CollectionPresentationDocumentSchema,
-	})
-	.omit({ id: true, ownerProfileId: true, createdAt: true, updatedAt: true });
+const collectionStateSchema = z.object({});
 const pollStateSchema = schemaFactory
 	.createSelectSchema(poll)
 	.omit({ id: true, closedAt: true, createdAt: true, updatedAt: true });
@@ -480,7 +471,11 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 						.select()
 						.from(collectionItem)
 						.where(eq(collectionItem.collectionId, unitId))
-						.orderBy(collectionItem.position, collectionItem.unitId)
+						.orderBy(
+							collectionItem.parentUnitId,
+							collectionItem.position,
+							collectionItem.unitId,
+						)
 				: empty,
 		pollOptions:
 			record.kind === "poll"
@@ -576,10 +571,7 @@ async function restoreExtension(
 			await tx.update(zone).set(zoneStateSchema.parse(value)).where(eq(zone.id, unitId));
 			break;
 		case "collection":
-			await tx
-				.update(collection)
-				.set(collectionStateSchema.parse(value))
-				.where(eq(collection.id, unitId));
+			collectionStateSchema.parse(value);
 			break;
 		case "poll":
 			await tx.update(poll).set(pollStateSchema.parse(value)).where(eq(poll.id, unitId));

@@ -38,3 +38,28 @@ export function toCollectionContentGroups<Item extends CollectionMembershipItem>
 		})
 		.map((item) => build(item, new Set()));
 }
+
+/** Return every loaded item carried by one of the selected subtree roots. */
+export function collectionSelectionSubtreeIds(
+	items: readonly CollectionMembershipItem[],
+	selectedIds: ReadonlySet<string>,
+): ReadonlySet<string> {
+	const parentById = new Map(
+		items.map(({ membership }) => [membership.targetId, membership.parentTargetId] as const),
+	);
+	const subtreeIds = new Set<string>();
+	for (const { membership } of items) {
+		let currentId: string | null = membership.targetId;
+		const visited = new Set<string>();
+		while (currentId) {
+			if (selectedIds.has(currentId)) {
+				subtreeIds.add(membership.targetId);
+				break;
+			}
+			if (visited.has(currentId)) break;
+			visited.add(currentId);
+			currentId = parentById.get(currentId) ?? null;
+		}
+	}
+	return subtreeIds;
+}

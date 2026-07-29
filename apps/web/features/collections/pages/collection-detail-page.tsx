@@ -10,6 +10,7 @@ import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-t
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { selectLocalization } from "@/lib/localization";
 import { CollectionContentFeed } from "../components/collection-content-feed";
+import { PublisherAttributionLinks } from "@/features/posts/attribution-list";
 
 export function CollectionDetailPage({ collectionId }: { readonly collectionId: string }) {
 	const localizationLanguages = useLocalizationLanguages();
@@ -27,10 +28,10 @@ export function CollectionDetailPage({ collectionId }: { readonly collectionId: 
 		? selectLocalization(query.data.localizations, query.data.language)
 		: null;
 	const title = useChineseContentText(
-		query.data?.systemKey === "favorites"
+		query.data?.purpose === "favorites"
 			? t.collections.favorites
 			: (localization?.title ?? t.ui.unnamed),
-		query.data?.systemKey !== "favorites" && localization?.title ? localization.language : null,
+		query.data?.purpose !== "favorites" && localization?.title ? localization.language : null,
 	);
 	const summary = useChineseContentText(localization?.summary ?? "", localization?.language);
 	if (query.isPending) return <QueryPending />;
@@ -65,12 +66,14 @@ export function CollectionDetailPage({ collectionId }: { readonly collectionId: 
 					<Badge variant="secondary">
 						{t.collections.itemCount({ count: Number(collection.itemCount) })}
 					</Badge>
+					<PublisherAttributionLinks
+						attributions={collection.attributions}
+						emptyLabel={t.collections.publishers.unknown}
+						publisherLabel={t.collections.publishers.label}
+					/>
 				</div>
 			</div>
-			<CollectionContentFeed
-				collectionId={collectionId}
-				layout={collection.presentationDocument.layout}
-			/>
+			<CollectionContentFeed collectionId={collectionId} />
 		</main>
 	);
 }

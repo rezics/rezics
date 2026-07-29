@@ -108,6 +108,16 @@ describe("domain Filter contract", () => {
 		).not.toThrow();
 	});
 
+	it("filters Feed Units by publisher credit rather than access ownership", () => {
+		expect(() =>
+			assertUnitPredicate({
+				publishers: {
+					some: { kind: "profile", id: { in: [RealmId] } },
+				},
+			}),
+		).not.toThrow();
+	});
+
 	it("does not reinterpret an advanced Filter as standard Feed UI state", () => {
 		expect(
 			readSimpleFeedFilter({

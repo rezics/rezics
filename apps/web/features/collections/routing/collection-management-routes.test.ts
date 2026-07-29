@@ -7,8 +7,8 @@ import {
 
 describe("Collection management routes", () => {
 	it("builds a typed section route", () => {
-		expect(collectionManagementSectionHref("collection-1", "presentation")).toBe(
-			"/collections/collection-1/edit/presentation",
+		expect(collectionManagementSectionHref("collection-1", "publishers")).toBe(
+			"/collections/collection-1/edit/publishers",
 		);
 	});
 

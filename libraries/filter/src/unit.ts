@@ -396,6 +396,7 @@ export const UnitPredicate = Type.Recursive(
 				localizations: Type.Optional(toMany(LocalizationFilter)),
 				realms: Type.Optional(toMany(RealmPlacementFilter)),
 				tags: Type.Optional(toMany(TagAssertionFilter)),
+				publishers: Type.Optional(toMany(ProfileReferenceFilter)),
 				scores: Type.Optional(
 					Type.Object(
 						{ received: Type.Optional(toMany(ScoreFilter)) },

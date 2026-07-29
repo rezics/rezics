@@ -13,8 +13,8 @@ export function CollectionsPage() {
 	const session = useHydratedSession();
 	const me = useGetApiUsersMe({}, { query: { enabled: Boolean(session.data) } });
 	const query = useCollectionList({
+		editableOnly: Boolean(me.data?.id),
 		enabled: !session.data || Boolean(me.data?.id),
-		ownerId: me.data?.id,
 	});
 	const { t } = useTranslation(["actions", "collections"]);
 	if (session.isPending || (session.data && me.isPending)) return <QueryPending />;
@@ -37,7 +37,7 @@ export function CollectionsPage() {
 				error={false}
 				href={(collection) => `/collections/${collection.id}`}
 				items={items.map((collection) =>
-					collection.systemKey === "favorites"
+					collection.purpose === "favorites"
 						? { ...collection, title: t.collections.favorites }
 						: collection,
 				)}

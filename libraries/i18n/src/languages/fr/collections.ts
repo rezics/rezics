@@ -20,6 +20,13 @@ export default {
 	itemCount: insert("{{count}} éléments", { count: Number }),
 	directCollectionHint:
 		"Une collection est ajoutée comme un seul élément ; son contenu n’est pas importé récursivement.",
+	publishers: {
+		label: "Éditeur",
+		unknown: "Aucun éditeur crédité",
+		current: "Éditeurs actuels",
+		currentDescription:
+			"Ces profils sont crédités comme éditeurs sur la collection et dans les flux.",
+	},
 	save: {
 		action: "Enregistrer",
 		title: "Enregistrer dans des collections",
@@ -40,7 +47,7 @@ export default {
 	},
 	workspace: {
 		title: "Gestion de la collection",
-		description: `Gérez le contenu, les ${metadataTerms.inline}, la structure, la présentation, les accès et l’historique.`,
+		description: `Gérez le contenu, les ${metadataTerms.inline}, l’ordre, les éditeurs, les accès et l’historique.`,
 		navigation: "Navigation de la gestion de la collection",
 		overview: "Sections de gestion de la collection",
 		backToCollection: "Retour à la collection",
@@ -57,12 +64,11 @@ export default {
 			},
 			items: {
 				label: "Contenu et structure",
-				description:
-					"Ajoutez, supprimez, ordonnez, imbriquez et mettez du contenu en avant.",
+				description: "Ajoutez, supprimez, sélectionnez, ordonnez et imbriquez le contenu.",
 			},
-			presentation: {
-				label: "Présentation",
-				description: "Choisissez la disposition du contenu et la règle de tri.",
+			publishers: {
+				label: "Éditeurs",
+				description: "Gérez les profils d’éditeur affichés publiquement.",
 			},
 			access: {
 				label: "Accès",
@@ -78,31 +84,27 @@ export default {
 	items: {
 		add: "Ajouter du contenu",
 		target: "Contenu",
-		role: "Rôle",
 		parent: "Élément parent",
 		topLevel: "Niveau supérieur",
-		item: "Élément standard",
-		featured: "Élément mis en avant",
-		remove: "Supprimer",
-		moveEarlier: "Déplacer vers le début",
-		moveLater: "Déplacer vers la fin",
-		saveStructure: "Mettre à jour la structure",
+		selectAll: "Sélectionner tous les éléments chargés",
+		clearSelection: "Effacer la sélection",
+		selectedCount: insert("{{count}} éléments sélectionnés", { count: Number }),
+		selectItem: insert("Sélectionner {{title}}", { title: String }),
+		removeItem: insert("Supprimer {{title}}", { title: String }),
+		move: "Déplacer",
+		setAsChild: "Définir comme enfant",
+		moveTitle: "Déplacer les éléments sélectionnés",
+		childTitle: "Définir comme enfants d’un élément",
+		moveDescription:
+			"L’ordre relatif est conservé et la modification est appliquée atomiquement.",
+		destination: "Destination",
+		moveToStart: "Déplacer au début",
+		moveToEnd: "Déplacer à la fin",
+		moveAfter: "Déplacer après un élément",
+		afterItem: "Élément précédent",
+		chooseDestination: "Choisir un élément",
+		applyMove: "Appliquer le déplacement",
 		empty: "Cette collection ne contient pas encore de contenu pouvant être géré.",
-	},
-	presentation: {
-		layout: "Disposition",
-		order: "Ordre",
-		save: "Enregistrer la présentation",
-		layouts: {
-			flat: "Flux sur une colonne",
-			nested: "Groupes parent-enfant",
-			shelf: "Étagère de cartes",
-		},
-		orders: {
-			manual: "Ordre manuel",
-			name: "Nom",
-			"added-at": "Date d’ajout",
-		},
 	},
 	form: {
 		language: "Langue du contenu",

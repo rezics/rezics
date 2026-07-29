@@ -1,19 +1,10 @@
 import { type Static, t } from "elysia";
-import { CollectionDefinitionDocument, CollectionPresentationDocument } from "@rezics/block";
-import {
-	FractionalPosition,
-	LifecycleInput,
-	LocalizationInput,
-	LocalizationLanguageQuery,
-	Uuid,
-} from "../schema";
-
-export const CollectionItemRole = t.UnionEnum(["item", "featured", "favorite"]);
-export type CollectionItemRole = Static<typeof CollectionItemRole>;
+import { LifecycleInput, LocalizationInput, LocalizationLanguageQuery, Uuid } from "../schema";
 
 export const ListCollectionsQuery = t.Object(
 	{
-		ownerId: t.Optional(Uuid),
+		publisherProfileId: t.Optional(Uuid),
+		editableOnly: t.Optional(t.Boolean()),
 		targetId: t.Optional(Uuid),
 		containsTargetId: t.Optional(Uuid),
 		acceptsItemsOnly: t.Optional(t.Boolean()),
@@ -29,8 +20,6 @@ export type ListCollectionsQuery = Static<typeof ListCollectionsQuery>;
 export const CreateCollectionBody = t.Object({
 	localization: LocalizationInput,
 	visibility: LifecycleInput.visibility,
-	definitionDocument: t.Optional(CollectionDefinitionDocument),
-	presentationDocument: t.Optional(CollectionPresentationDocument),
 });
 export type CreateCollectionBody = Static<typeof CreateCollectionBody>;
 
@@ -57,8 +46,6 @@ export const UpdateCollectionBody = t.Object(
 		status: LifecycleInput.status,
 		visibility: LifecycleInput.visibility,
 		localization: t.Optional(LocalizationInput),
-		definitionDocument: t.Optional(CollectionDefinitionDocument),
-		presentationDocument: t.Optional(CollectionPresentationDocument),
 	},
 	{ additionalProperties: false },
 );
@@ -71,9 +58,7 @@ export const SaveCollectionItemBody = t.Object(
 	{
 		baseRevisionId: Uuid,
 		placement: t.UnionEnum(["direct", "review-with-subject"]),
-		role: t.Optional(CollectionItemRole),
 		parentTargetId: t.Optional(t.Nullable(Uuid)),
-		position: t.Optional(FractionalPosition),
 	},
 	{ additionalProperties: false },
 );
@@ -86,7 +71,6 @@ export const AddCollectionItemsBatchBody = t.Object(
 			t.Object(
 				{
 					targetId: Uuid,
-					role: t.Optional(CollectionItemRole),
 				},
 				{ additionalProperties: false },
 			),
@@ -96,6 +80,34 @@ export const AddCollectionItemsBatchBody = t.Object(
 	{ additionalProperties: false },
 );
 export type AddCollectionItemsBatchBody = Static<typeof AddCollectionItemsBatchBody>;
+
+export const CollectionItemPlacement = t.Union([
+	t.Object(
+		{
+			kind: t.UnionEnum(["start", "end"]),
+			parentTargetId: t.Nullable(Uuid),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			kind: t.Literal("after"),
+			targetId: Uuid,
+		},
+		{ additionalProperties: false },
+	),
+]);
+export type CollectionItemPlacement = Static<typeof CollectionItemPlacement>;
+
+export const MoveCollectionItemsBody = t.Object(
+	{
+		baseRevisionId: Uuid,
+		targetIds: t.Array(Uuid, { minItems: 1, maxItems: 100, uniqueItems: true }),
+		placement: CollectionItemPlacement,
+	},
+	{ additionalProperties: false },
+);
+export type MoveCollectionItemsBody = Static<typeof MoveCollectionItemsBody>;
 
 export const CollectionRevisionBody = t.Object(
 	{ baseRevisionId: Uuid },

@@ -19,6 +19,13 @@ export default {
 	itemCount: insert("{{count}} アイテム", { count: Number }),
 	directCollectionHint:
 		"コレクションは1つのアイテムとして追加されます。その内容は再帰的にインポートされません。",
+	publishers: {
+		label: "発行者",
+		unknown: "発行者のクレジットなし",
+		current: "現在の発行者",
+		currentDescription:
+			"これらのプロフィールは、コレクションページとフィードに発行者として表示されます。",
+	},
 	save: {
 		action: "保存",
 		title: "コレクションに保存",
@@ -39,7 +46,7 @@ export default {
 	},
 	workspace: {
 		title: "コレクション管理",
-		description: `コンテンツ、${metadataTerms.inline}、構造、表示、アクセス、履歴を管理します。`,
+		description: `コンテンツ、${metadataTerms.inline}、並び順、発行者、アクセス、履歴を管理します。`,
 		navigation: "コレクション管理ナビゲーション",
 		overview: "コレクション管理エリア",
 		backToCollection: "コレクションに戻る",
@@ -55,11 +62,11 @@ export default {
 			},
 			items: {
 				label: "コンテンツと構造",
-				description: "コンテンツを追加、削除、並べ替え、ネスト化、フィーチャーします。",
+				description: "コンテンツを追加、削除、複数選択して並べ替え、階層化します。",
 			},
-			presentation: {
-				label: "プレゼンテーション",
-				description: "コンテンツのレイアウトと並び順ルールを選択します。",
+			publishers: {
+				label: "発行者",
+				description: "公開表示されるプロフィールの発行者クレジットを管理します。",
 			},
 			access: {
 				label: "アクセス",
@@ -74,31 +81,26 @@ export default {
 	items: {
 		add: "コンテンツを追加",
 		target: "コンテンツ",
-		role: "役割",
 		parent: "親項目",
 		topLevel: "最上位",
-		item: "標準項目",
-		featured: "フィーチャー項目",
-		remove: "削除",
-		moveEarlier: "前に移動",
-		moveLater: "後に移動",
-		saveStructure: "構造を更新",
+		selectAll: "読み込み済みの項目をすべて選択",
+		clearSelection: "選択を解除",
+		selectedCount: insert("{{count}} 件を選択中", { count: Number }),
+		selectItem: insert("「{{title}}」を選択", { title: String }),
+		removeItem: insert("「{{title}}」を削除", { title: String }),
+		move: "移動",
+		setAsChild: "子項目に設定",
+		moveTitle: "選択した項目を移動",
+		childTitle: "別の項目の子に設定",
+		moveDescription: "選択した項目の相対的な順序を保ったまま、一括で変更します。",
+		destination: "移動先",
+		moveToStart: "先頭へ移動",
+		moveToEnd: "末尾へ移動",
+		moveAfter: "指定した項目の後へ移動",
+		afterItem: "直前の項目",
+		chooseDestination: "項目を選択",
+		applyMove: "移動を適用",
 		empty: "このコレクションにはまだ管理可能なコンテンツはありません。",
-	},
-	presentation: {
-		layout: "レイアウト",
-		order: "並び順",
-		save: "プレゼンテーションを保存",
-		layouts: {
-			flat: "シングルカラムフィード",
-			nested: "親子グループ",
-			shelf: "カードシェルフ",
-		},
-		orders: {
-			manual: "手動順序",
-			name: "名前",
-			"added-at": "追加日",
-		},
 	},
 	form: {
 		language: "コンテンツ言語",

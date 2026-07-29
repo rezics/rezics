@@ -1,25 +1,22 @@
-import {
-	createCollectionPresentationDocument,
-	createSystemCollectionDefinitionDocument,
-} from "@rezics/block";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 import { database, type DatabaseExecutor, type DatabaseTransaction } from "../database";
-import { collection, unitLocalization, unitOwnership } from "../database/schema";
+import {
+	collection,
+	creditAttribution,
+	profileFavoritesCollection,
+	unitLocalization,
+	unitOwnership,
+} from "../database/schema";
 import { DefaultContentLanguage } from "../database/schema/contract-values";
 import { insertUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
 
-async function findFavorites(executor: DatabaseExecutor, ownerProfileId: string) {
+async function findFavorites(executor: DatabaseExecutor, profileId: string) {
 	const [existing] = await executor
-		.select({ id: collection.id })
-		.from(collection)
-		.where(
-			and(
-				eq(collection.ownerProfileId, ownerProfileId),
-				eq(collection.systemKey, "favorites"),
-			),
-		)
+		.select({ id: profileFavoritesCollection.collectionId })
+		.from(profileFavoritesCollection)
+		.where(eq(profileFavoritesCollection.profileId, profileId))
 		.limit(1);
 	return existing?.id;
 }
@@ -29,9 +26,9 @@ async function findFavorites(executor: DatabaseExecutor, ownerProfileId: string)
  */
 export async function ensureFavoritesInTransaction(
 	tx: DatabaseTransaction,
-	ownerProfileId: string,
+	profileId: string,
 ): Promise<string> {
-	const existingId = await findFavorites(tx, ownerProfileId);
+	const existingId = await findFavorites(tx, profileId);
 	if (existingId) return existingId;
 
 	const created = await insertUnit(tx, {
@@ -39,15 +36,12 @@ export async function ensureFavoritesInTransaction(
 		status: "published",
 		visibility: "private",
 		publishedAt: new Date(),
-		statusActor: { kind: "profile", profileId: ownerProfileId },
+		statusActor: { kind: "profile", profileId },
 	});
-	await tx.insert(collection).values({
-		id: created.id,
-		ownerProfileId,
-		source: "system",
-		systemKey: "favorites",
-		definitionDocument: createSystemCollectionDefinitionDocument("favorites"),
-		presentationDocument: createCollectionPresentationDocument("flat", "added-at"),
+	await tx.insert(collection).values({ id: created.id });
+	await tx.insert(profileFavoritesCollection).values({
+		profileId,
+		collectionId: created.id,
 	});
 	await tx.insert(unitLocalization).values({
 		unitId: created.id,
@@ -56,12 +50,18 @@ export async function ensureFavoritesInTransaction(
 	});
 	await tx.insert(unitOwnership).values({
 		unitId: created.id,
-		profileId: ownerProfileId,
-		assignedByProfileId: ownerProfileId,
+		profileId,
+		assignedByProfileId: profileId,
+	});
+	await tx.insert(creditAttribution).values({
+		sourceUnitId: created.id,
+		creditedUnitId: profileId,
+		role: "publisher",
+		position: "a0",
 	});
 	await recordUnitRevision(tx, {
 		unitId: created.id,
-		actorProfileId: ownerProfileId,
+		actorProfileId: profileId,
 		event: "create",
 	});
 	return created.id;
@@ -72,16 +72,16 @@ export async function ensureFavoritesInTransaction(
  *
  * @remarks
  * The retry read proves the winner of a concurrent insert after the unique
- * owner/system-key constraint rolls the losing transaction back.
+ * Profile-to-Favorites relation rolls the losing transaction back.
  */
-export async function ensureFavorites(ownerProfileId: string): Promise<string> {
-	const existingId = await findFavorites(database, ownerProfileId);
+export async function ensureFavorites(profileId: string): Promise<string> {
+	const existingId = await findFavorites(database, profileId);
 	if (existingId) return existingId;
 
 	try {
-		return await database.transaction((tx) => ensureFavoritesInTransaction(tx, ownerProfileId));
+		return await database.transaction((tx) => ensureFavoritesInTransaction(tx, profileId));
 	} catch (error) {
-		const racedId = await findFavorites(database, ownerProfileId);
+		const racedId = await findFavorites(database, profileId);
 		if (racedId) return racedId;
 		throw error;
 	}

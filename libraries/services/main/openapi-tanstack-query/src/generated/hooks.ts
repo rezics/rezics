@@ -1530,6 +1530,15 @@ import type {
 	PostApiCollectionsByCollectionIdItemsBatchStatus422,
 	PostApiCollectionsByCollectionIdItemsBatchStatus429,
 	PostApiCollectionsByCollectionIdItemsBatchStatus500,
+	PostApiCollectionsByCollectionIdItemsMoveOptions,
+	PostApiCollectionsByCollectionIdItemsMoveStatus200,
+	PostApiCollectionsByCollectionIdItemsMoveStatus400,
+	PostApiCollectionsByCollectionIdItemsMoveStatus403,
+	PostApiCollectionsByCollectionIdItemsMoveStatus404,
+	PostApiCollectionsByCollectionIdItemsMoveStatus409,
+	PostApiCollectionsByCollectionIdItemsMoveStatus422,
+	PostApiCollectionsByCollectionIdItemsMoveStatus429,
+	PostApiCollectionsByCollectionIdItemsMoveStatus500,
 	PutApiCollectionsByCollectionIdItemsByTargetIdOptions,
 	PutApiCollectionsByCollectionIdItemsByTargetIdStatus200,
 	PutApiCollectionsByCollectionIdItemsByTargetIdStatus400,
@@ -2354,6 +2363,7 @@ import {
 	patchApiCollectionsByCollectionId,
 	deleteApiCollectionsByCollectionId,
 	postApiCollectionsByCollectionIdItemsBatch,
+	postApiCollectionsByCollectionIdItemsMove,
 	putApiCollectionsByCollectionIdItemsByTargetId,
 	deleteApiCollectionsByCollectionIdItemsByTargetId,
 	putApiCollectionsFavoritesItemsByTargetId,
@@ -25863,6 +25873,121 @@ export function usePostApiCollectionsByCollectionIdItemsBatch<TContext>(
 			| PostApiCollectionsByCollectionIdItemsBatchStatus500
 		>,
 		PostApiCollectionsByCollectionIdItemsBatchOptions,
+		TContext
+	>;
+}
+
+export const postApiCollectionsByCollectionIdItemsMoveMutationKey = () =>
+	[{ url: "/api/collections/:collectionId/items/move" }] as const;
+
+export function postApiCollectionsByCollectionIdItemsMoveMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiCollectionsByCollectionIdItemsMoveMutationKey();
+	return mutationOptions<
+		PostApiCollectionsByCollectionIdItemsMoveStatus200,
+		ResponseErrorConfig<
+			| PostApiCollectionsByCollectionIdItemsMoveStatus400
+			| PostApiCollectionsByCollectionIdItemsMoveStatus403
+			| PostApiCollectionsByCollectionIdItemsMoveStatus404
+			| PostApiCollectionsByCollectionIdItemsMoveStatus409
+			| PostApiCollectionsByCollectionIdItemsMoveStatus422
+			| PostApiCollectionsByCollectionIdItemsMoveStatus429
+			| PostApiCollectionsByCollectionIdItemsMoveStatus500
+		>,
+		PostApiCollectionsByCollectionIdItemsMoveOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiCollectionsByCollectionIdItemsMove({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Move collection items atomically
+ * {@link /api/collections/:collectionId/items/move}
+ */
+export function usePostApiCollectionsByCollectionIdItemsMove<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiCollectionsByCollectionIdItemsMoveStatus200,
+			ResponseErrorConfig<
+				| PostApiCollectionsByCollectionIdItemsMoveStatus400
+				| PostApiCollectionsByCollectionIdItemsMoveStatus403
+				| PostApiCollectionsByCollectionIdItemsMoveStatus404
+				| PostApiCollectionsByCollectionIdItemsMoveStatus409
+				| PostApiCollectionsByCollectionIdItemsMoveStatus422
+				| PostApiCollectionsByCollectionIdItemsMoveStatus429
+				| PostApiCollectionsByCollectionIdItemsMoveStatus500
+			>,
+			PostApiCollectionsByCollectionIdItemsMoveOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? postApiCollectionsByCollectionIdItemsMoveMutationKey();
+
+	const baseOptions = postApiCollectionsByCollectionIdItemsMoveMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiCollectionsByCollectionIdItemsMoveStatus200,
+		ResponseErrorConfig<
+			| PostApiCollectionsByCollectionIdItemsMoveStatus400
+			| PostApiCollectionsByCollectionIdItemsMoveStatus403
+			| PostApiCollectionsByCollectionIdItemsMoveStatus404
+			| PostApiCollectionsByCollectionIdItemsMoveStatus409
+			| PostApiCollectionsByCollectionIdItemsMoveStatus422
+			| PostApiCollectionsByCollectionIdItemsMoveStatus429
+			| PostApiCollectionsByCollectionIdItemsMoveStatus500
+		>,
+		PostApiCollectionsByCollectionIdItemsMoveOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiCollectionsByCollectionIdItemsMoveStatus200,
+		ResponseErrorConfig<
+			| PostApiCollectionsByCollectionIdItemsMoveStatus400
+			| PostApiCollectionsByCollectionIdItemsMoveStatus403
+			| PostApiCollectionsByCollectionIdItemsMoveStatus404
+			| PostApiCollectionsByCollectionIdItemsMoveStatus409
+			| PostApiCollectionsByCollectionIdItemsMoveStatus422
+			| PostApiCollectionsByCollectionIdItemsMoveStatus429
+			| PostApiCollectionsByCollectionIdItemsMoveStatus500
+		>,
+		PostApiCollectionsByCollectionIdItemsMoveOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiCollectionsByCollectionIdItemsMoveStatus200,
+		ResponseErrorConfig<
+			| PostApiCollectionsByCollectionIdItemsMoveStatus400
+			| PostApiCollectionsByCollectionIdItemsMoveStatus403
+			| PostApiCollectionsByCollectionIdItemsMoveStatus404
+			| PostApiCollectionsByCollectionIdItemsMoveStatus409
+			| PostApiCollectionsByCollectionIdItemsMoveStatus422
+			| PostApiCollectionsByCollectionIdItemsMoveStatus429
+			| PostApiCollectionsByCollectionIdItemsMoveStatus500
+		>,
+		PostApiCollectionsByCollectionIdItemsMoveOptions,
 		TContext
 	>;
 }

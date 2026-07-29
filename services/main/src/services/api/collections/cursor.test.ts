@@ -4,19 +4,19 @@ import { InvalidPaginationCursor } from "../../pagination/errors";
 import { decodeCollectionListCursor, encodeCollectionListCursor } from "./cursor";
 import type { ListCollectionsQuery } from "./schema";
 
-const ownerId = "019b76da-a800-7300-8000-000000000001";
+const publisherProfileId = "019b76da-a800-7300-8000-000000000001";
 const targetId = "019b76da-a800-7300-8000-000000000002";
 const localizationLanguages: ListCollectionsQuery["localizationLanguages"] = ["zh", "en"];
 const boundary = {
-	systemRank: 1,
+	favoritesRank: 1,
 	updatedAt: new Date("2026-07-29T12:00:00.000Z"),
 	id: "019b76da-a800-7300-8000-000000000003",
 };
 const context = {
-	ownerListing: true,
 	query: {
 		acceptsItemsOnly: true,
-		ownerId,
+		editableOnly: true,
+		publisherProfileId,
 		targetId,
 		localizationLanguages,
 		search: "reading",
@@ -41,7 +41,7 @@ describe("Collection list cursor", () => {
 		expect(() =>
 			decodeCollectionListCursor(cursor, {
 				...context,
-				ownerListing: false,
+				query: { ...context.query, editableOnly: false },
 			}),
 		).toThrow(InvalidPaginationCursor);
 		expect(() =>

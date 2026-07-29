@@ -5,6 +5,7 @@ import {
 	compareFractionalPositions,
 	fractionalPositionAt,
 	fractionalPositionBetween,
+	fractionalPositionsBetween,
 	isFractionalPosition,
 } from "./position";
 
@@ -31,5 +32,19 @@ describe("fractional positions", () => {
 	it("creates deterministic positions from dense ordinals at owned boundaries", () => {
 		expect([0, 1, 2].map(fractionalPositionAt)).toEqual(["a0", "a1", "a2"]);
 		expect(() => fractionalPositionAt(-1)).toThrow(RangeError);
+	});
+
+	it("creates one ordered run for atomic multi-item moves", () => {
+		const after = fractionalPositionBetween(InitialFractionalPosition, null);
+		const positions = fractionalPositionsBetween(InitialFractionalPosition, after, 3);
+
+		expect(positions).toHaveLength(3);
+		expect(
+			[InitialFractionalPosition, ...positions, after].every(
+				(position, index, values) =>
+					index === 0 || compareFractionalPositions(values[index - 1]!, position) < 0,
+			),
+		).toBe(true);
+		expect(() => fractionalPositionsBetween(null, null, -1)).toThrow(RangeError);
 	});
 });

@@ -457,6 +457,8 @@ import type {
 	DeleteApiCollectionsByCollectionIdResponses,
 	PostApiCollectionsByCollectionIdItemsBatchOptions,
 	PostApiCollectionsByCollectionIdItemsBatchResponses,
+	PostApiCollectionsByCollectionIdItemsMoveOptions,
+	PostApiCollectionsByCollectionIdItemsMoveResponses,
 	PutApiCollectionsByCollectionIdItemsByTargetIdOptions,
 	PutApiCollectionsByCollectionIdItemsByTargetIdResponses,
 	DeleteApiCollectionsByCollectionIdItemsByTargetIdOptions,
@@ -5161,6 +5163,26 @@ export function postApiCollectionsByCollectionIdItemsBatch<ThrowOnError extends 
 		],
 		...config,
 	}) as Promise<RequestResult<PostApiCollectionsByCollectionIdItemsBatchResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Move collection items atomically
+ * {@link /api/collections/:collectionId/items/move}
+ */
+export function postApiCollectionsByCollectionIdItemsMove<ThrowOnError extends boolean = true>(
+	options: Options<PostApiCollectionsByCollectionIdItemsMoveOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiCollectionsByCollectionIdItemsMoveResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/collections/{collectionId}/items/move",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiCollectionsByCollectionIdItemsMoveResponses, ThrowOnError>>;
 }
 
 /**

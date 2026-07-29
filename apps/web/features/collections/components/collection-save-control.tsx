@@ -68,8 +68,8 @@ export function CollectionSaveControl({
 	const me = useGetApiUsersMe({}, { query: { enabled: open && Boolean(session) } });
 	const collections = useCollectionList({
 		acceptsItemsOnly: true,
+		editableOnly: true,
 		enabled: open && Boolean(me.data?.id),
-		ownerId: me.data?.id,
 		search: deferredDestinationQuery,
 		targetId,
 	});
@@ -94,7 +94,7 @@ export function CollectionSaveControl({
 		setChangingCollectionId(collection.id);
 		try {
 			let latestRevisionId: string;
-			if (collection.systemKey === "favorites") {
+			if (collection.purpose === "favorites") {
 				if (collection.containsTarget)
 					latestRevisionId = (
 						await removeFavorite.mutateAsync({
@@ -123,7 +123,6 @@ export function CollectionSaveControl({
 						body: {
 							baseRevisionId: collection.latestRevisionId,
 							placement,
-							role: "item",
 						},
 					})
 				).latestRevisionId;
@@ -176,7 +175,6 @@ export function CollectionSaveControl({
 				body: {
 					baseRevisionId: created.latestRevisionId,
 					placement,
-					role: "item",
 				},
 			});
 			setNewCollectionTitle("");

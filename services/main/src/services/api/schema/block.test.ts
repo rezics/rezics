@@ -2,7 +2,6 @@ import {
 	BlockKey,
 	BlockDocument,
 	type BlockDocument as BlockDocumentValue,
-	CollectionDefinitionDocument,
 	DefaultBlockHostPolicy,
 	DockBlockHostPolicy,
 	DockDocument,
@@ -23,10 +22,8 @@ import {
 	collectNavigationReferences,
 	createBlockKey,
 	createDockDocument,
-	createManualCollectionDefinitionDocument,
 	createPollContentBlock,
 	createPortableTextDocument,
-	createSystemCollectionDefinitionDocument,
 	isDocument,
 	isPortableTextDocument,
 	updatePortableTextDocument,
@@ -180,21 +177,6 @@ describe("Block document contracts", () => {
 		expect(isDocument(DockDocument, dock)).toBe(true);
 		expect(isDocument(UnitReferencedBlockDocument, dock)).toBe(false);
 		expect(() => assertDockDocument(dock)).not.toThrow();
-	});
-
-	test("keeps Collection source variants mutually exclusive", () => {
-		const manual = createManualCollectionDefinitionDocument("000000000005");
-		const favorites = createSystemCollectionDefinitionDocument("favorites", "000000000006");
-
-		expect(isDocument(CollectionDefinitionDocument, manual)).toBe(true);
-		expect(isDocument(CollectionDefinitionDocument, favorites)).toBe(true);
-		expect(
-			isDocument(CollectionDefinitionDocument, {
-				_type: "collection-definition",
-				_key: "000000000007",
-				source: "system",
-			}),
-		).toBe(false);
 	});
 
 	test("validates Poll option identifiers without external format registration", () => {

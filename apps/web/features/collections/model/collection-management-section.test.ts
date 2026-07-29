@@ -8,7 +8,7 @@ import {
 const denied = {
 	canEditDetails: false,
 	canManageItems: false,
-	canEditPresentation: false,
+	canManagePublishers: false,
 	canManageLocalizations: false,
 	canManageAccess: false,
 	canViewHistory: false,
@@ -22,14 +22,14 @@ describe("Collection management section manifest", () => {
 		expect(getCollectionManagementSectionIds(denied)).toEqual([]);
 	});
 
-	it("keeps item and presentation permissions separate", () => {
+	it("keeps item and publisher permissions separate", () => {
 		expect(
 			getCollectionManagementSectionIds({
 				...denied,
 				canManageItems: true,
-				canEditPresentation: true,
+				canManagePublishers: true,
 			}),
-		).toEqual(["items", "presentation"]);
+		).toEqual(["items", "publishers"]);
 	});
 
 	it("shows metadata when delete is the only allowed operation", () => {

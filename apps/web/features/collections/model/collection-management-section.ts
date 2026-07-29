@@ -4,7 +4,7 @@ export const CollectionManagementSectionIds = [
 	"content",
 	"metadata",
 	"items",
-	"presentation",
+	"publishers",
 	"access",
 	"history",
 ] as const;
@@ -19,7 +19,7 @@ export function getCollectionManagementSectionIds(
 		if (sectionId === "content") return capabilities.canManageLocalizations;
 		if (sectionId === "metadata") return capabilities.canEditDetails || capabilities.canDelete;
 		if (sectionId === "items") return capabilities.canManageItems;
-		if (sectionId === "presentation") return capabilities.canEditPresentation;
+		if (sectionId === "publishers") return capabilities.canManagePublishers;
 		if (sectionId === "access") return capabilities.canManageAccess;
 		return capabilities.canViewHistory;
 	});

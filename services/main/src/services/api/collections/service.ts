@@ -1,22 +1,17 @@
-import { and, asc, desc, eq, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { t, type UnwrapSchema } from "elysia";
 import type { ContentLanguage } from "@rezics/i18n";
-import {
-	CollectionDefinitionDocument,
-	CollectionPresentationDocument,
-	parseDocument,
-} from "@rezics/block";
 
 import type { Authorization } from "../../authorization";
 import { database } from "../../database";
 import {
 	avatarReferenceFromColumns,
 	resolveUnitLocalizationFromOrdered,
-	resolvedUnitLocalizationLanguage,
 } from "../../units/localization";
 import {
 	collection as collectionTable,
 	collectionItem,
+	profileFavoritesCollection,
 	unit,
 	unitLocalization,
 	unitRevisionHead,
@@ -30,6 +25,7 @@ import { InvalidPaginationCursor } from "../../pagination/errors";
 import { resolveRecommendationViewer } from "../../recommendations/context";
 import { hydrateFeedItems } from "../feed";
 import { FeedContentKindValues } from "../feed/schema";
+import { getAttributionSummariesByUnitIds } from "../../units/attribution";
 
 const CollectionItemsCursor = t.Object(
 	{
@@ -71,11 +67,7 @@ export async function getCollection(
 			id: unit.id,
 			status: unit.status,
 			visibility: unit.visibility,
-			ownerId: collectionTable.ownerProfileId,
-			source: collectionTable.source,
-			systemKey: collectionTable.systemKey,
-			definitionDocument: collectionTable.definitionDocument,
-			presentationDocument: collectionTable.presentationDocument,
+			favoritesProfileId: profileFavoritesCollection.profileId,
 			itemCount: sql<number>`(select count(*) from ${collectionItem} where ${collectionItem.collectionId} = ${collectionTable.id})::int`,
 			latestRevisionId: unitRevisionHead.revisionId,
 			createdAt: unit.createdAt,
@@ -84,37 +76,35 @@ export async function getCollection(
 		.from(collectionTable)
 		.innerJoin(unit, eq(unit.id, collectionTable.id))
 		.innerJoin(unitRevisionHead, eq(unitRevisionHead.unitId, unit.id))
+		.leftJoin(
+			profileFavoritesCollection,
+			eq(profileFavoritesCollection.collectionId, collectionTable.id),
+		)
 		.where(eq(collectionTable.id, collectionId))
 		.limit(1);
 	if (!record) throw new CollectionNotFound();
 	const readDecision = await authorization.unit.decide(collectionId, "unit.read");
 	if (!readDecision.allowed) throw new CollectionNotFound();
-	const definitionDocument = parseDocument(
-		CollectionDefinitionDocument,
-		record.definitionDocument,
-	);
-	const presentationDocument = parseDocument(
-		CollectionPresentationDocument,
-		record.presentationDocument,
-	);
-
-	const localizations = await database
-		.select({
-			language: unitLocalization.language,
-			position: unitLocalization.position,
-			title: unitLocalization.title,
-			summary: unitLocalization.summary,
-			avatarType: unitLocalization.avatarType,
-			avatarAssetId: unitLocalization.avatarAssetId,
-			avatarEmoji: unitLocalization.avatarEmoji,
-			avatarIconPrefix: unitLocalization.avatarIconPrefix,
-			avatarIconName: unitLocalization.avatarIconName,
-			bannerAssetId: unitLocalization.bannerAssetId,
-			coverAssetId: unitLocalization.coverAssetId,
-		})
-		.from(unitLocalization)
-		.where(eq(unitLocalization.unitId, collectionId))
-		.orderBy(unitLocalization.position, unitLocalization.language);
+	const [localizations, attributionMap] = await Promise.all([
+		database
+			.select({
+				language: unitLocalization.language,
+				position: unitLocalization.position,
+				title: unitLocalization.title,
+				summary: unitLocalization.summary,
+				avatarType: unitLocalization.avatarType,
+				avatarAssetId: unitLocalization.avatarAssetId,
+				avatarEmoji: unitLocalization.avatarEmoji,
+				avatarIconPrefix: unitLocalization.avatarIconPrefix,
+				avatarIconName: unitLocalization.avatarIconName,
+				bannerAssetId: unitLocalization.bannerAssetId,
+				coverAssetId: unitLocalization.coverAssetId,
+			})
+			.from(unitLocalization)
+			.where(eq(unitLocalization.unitId, collectionId))
+			.orderBy(unitLocalization.position, unitLocalization.language),
+		getAttributionSummariesByUnitIds([collectionId], localizationLanguages),
+	]);
 	const selectedLocalization = resolveUnitLocalizationFromOrdered(
 		localizations,
 		localizationLanguages,
@@ -126,13 +116,14 @@ export async function getCollection(
 		authorization.unit.decide(collectionId, "unit.history.restore"),
 		authorization.unit.decide(collectionId, "unit.delete"),
 	]);
-	const ordinaryCollection = record.systemKey === null;
+	const ordinaryCollection = record.favoritesProfileId === null;
 	const canUpdate = updateDecision.allowed && ordinaryCollection;
+	const { favoritesProfileId, ...detail } = record;
 	return {
-		...record,
+		...detail,
+		purpose: favoritesProfileId ? "favorites" : "collection",
 		language: selectedLocalization.language,
-		definitionDocument,
-		presentationDocument,
+		attributions: attributionMap.get(collectionId) ?? [],
 		localizations: localizations.map(
 			({
 				avatarType,
@@ -161,8 +152,8 @@ export async function getCollection(
 		),
 		capabilities: {
 			canEditDetails: canUpdate,
-			canManageItems: canUpdate && record.source === "manual",
-			canEditPresentation: canUpdate,
+			canManageItems: updateDecision.allowed,
+			canManagePublishers: canUpdate,
 			canManageLocalizations: canUpdate,
 			canManageAccess: accessDecision.allowed && ordinaryCollection,
 			canViewHistory:
@@ -190,37 +181,60 @@ export async function getCollectionContent(
 		collection.latestRevisionId,
 	);
 	const limit = input.limit ?? 20;
-	const order = collection.presentationDocument.order;
-	const orderBy =
-		order === "name"
-			? [asc(unitLocalization.title), asc(collectionItem.unitId)]
-			: order === "added-at"
-				? [desc(collectionItem.createdAt), desc(collectionItem.unitId)]
-				: [asc(collectionItem.position), asc(collectionItem.unitId)];
-	const memberships = await database
-		.select({
-			targetId: collectionItem.unitId,
-			role: collectionItem.role,
-			parentTargetId: collectionItem.parentUnitId,
-			position: collectionItem.position,
-			createdAt: collectionItem.createdAt,
-		})
-		.from(collectionItem)
-		.innerJoin(unit, eq(unit.id, collectionItem.unitId))
-		.innerJoin(
-			unitLocalization,
-			and(
-				eq(unitLocalization.unitId, unit.id),
-				eq(
-					unitLocalization.language,
-					resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
-				),
-			),
+	const result = await database.execute<{
+		targetId: string;
+		parentTargetId: string | null;
+		position: string;
+		createdAt: Date;
+	}>(sql`
+		with recursive collection_tree (
+			unit_id,
+			parent_unit_id,
+			position,
+			created_at,
+			visited_ids,
+			order_path
+		) as (
+			select
+				root_item.unit_id,
+				root_item.parent_unit_id,
+				root_item.position,
+				root_item.created_at,
+				array[root_item.unit_id],
+				array[root_item.position collate "C", root_item.unit_id::text collate "C"]
+			from ${collectionItem} root_item
+			where root_item.collection_id = ${collectionId}
+				and root_item.parent_unit_id is null
+
+			union all
+
+			select
+				child_item.unit_id,
+				child_item.parent_unit_id,
+				child_item.position,
+				child_item.created_at,
+				parent_item.visited_ids || child_item.unit_id,
+				parent_item.order_path || array[
+					child_item.position collate "C",
+					child_item.unit_id::text collate "C"
+				]
+			from collection_tree parent_item
+			inner join ${collectionItem} child_item
+				on child_item.collection_id = ${collectionId}
+				and child_item.parent_unit_id = parent_item.unit_id
+			where child_item.unit_id <> all(parent_item.visited_ids)
 		)
-		.where(eq(collectionItem.collectionId, collectionId))
-		.orderBy(...orderBy)
-		.offset(offset)
-		.limit(limit + 1);
+		select
+			unit_id as "targetId",
+			parent_unit_id as "parentTargetId",
+			position,
+			created_at as "createdAt"
+		from collection_tree
+		order by order_path collate "C"
+		offset ${offset}
+		limit ${limit + 1}
+	`);
+	const memberships = result.rows;
 	const page = memberships.slice(0, limit);
 	const viewer = await resolveRecommendationViewer(authorization.profileId, false);
 	const contents = await hydrateFeedItems(

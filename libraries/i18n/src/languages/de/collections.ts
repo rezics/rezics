@@ -21,6 +21,13 @@ export default {
 	itemCount: insert("{{count}} Elemente", { count: Number }),
 	directCollectionHint:
 		"Eine Sammlung wird als einzelnes Element hinzugefügt; ihre Inhalte werden nicht rekursiv übernommen.",
+	publishers: {
+		label: "Herausgeber",
+		unknown: "Kein Herausgeber angegeben",
+		current: "Aktuelle Herausgeber",
+		currentDescription:
+			"Diese Profile werden auf der Sammlungsseite und in Feeds als Herausgeber genannt.",
+	},
 	save: {
 		action: "Speichern",
 		title: "In Sammlungen speichern",
@@ -42,7 +49,7 @@ export default {
 	},
 	workspace: {
 		title: "Sammlungsverwaltung",
-		description: `Verwalte Inhalte, ${metadataTerms.inline}, Struktur, Darstellung, Zugriff und Verlauf.`,
+		description: `Verwalte Inhalte, ${metadataTerms.inline}, Reihenfolge, Herausgeber, Zugriff und Verlauf.`,
 		navigation: "Navigation der Sammlungsverwaltung",
 		overview: "Bereiche der Sammlungsverwaltung",
 		backToCollection: "Zurück zur Sammlung",
@@ -59,11 +66,11 @@ export default {
 			items: {
 				label: "Inhalt und Struktur",
 				description:
-					"Füge Inhalte hinzu, entferne, sortiere, verschachtel und hebe sie hervor.",
+					"Füge Inhalte hinzu, entferne, wähle mehrere aus, sortiere und verschachtle sie.",
 			},
-			presentation: {
-				label: "Darstellung",
-				description: "Wähle das Inhaltslayout und die Sortierregel.",
+			publishers: {
+				label: "Herausgeber",
+				description: "Verwalte die öffentlich angezeigten Herausgeberprofile.",
 			},
 			access: {
 				label: "Zugriff",
@@ -78,31 +85,27 @@ export default {
 	items: {
 		add: "Inhalt hinzufügen",
 		target: "Inhalt",
-		role: "Rolle",
 		parent: "Übergeordnetes Element",
 		topLevel: "Oberste Ebene",
-		item: "Standardelement",
-		featured: "Hervorgehobenes Element",
-		remove: "Entfernen",
-		moveEarlier: "Nach vorne verschieben",
-		moveLater: "Nach hinten verschieben",
-		saveStructure: "Struktur aktualisieren",
+		selectAll: "Alle geladenen Elemente auswählen",
+		clearSelection: "Auswahl aufheben",
+		selectedCount: insert("{{count}} Elemente ausgewählt", { count: Number }),
+		selectItem: insert("{{title}} auswählen", { title: String }),
+		removeItem: insert("{{title}} entfernen", { title: String }),
+		move: "Verschieben",
+		setAsChild: "Als untergeordnet festlegen",
+		moveTitle: "Ausgewählte Elemente verschieben",
+		childTitle: "Einem Element unterordnen",
+		moveDescription:
+			"Die relative Reihenfolge bleibt erhalten und die Änderung wird atomar ausgeführt.",
+		destination: "Ziel",
+		moveToStart: "An den Anfang",
+		moveToEnd: "Ans Ende",
+		moveAfter: "Nach einem Element",
+		afterItem: "Vorheriges Element",
+		chooseDestination: "Element auswählen",
+		applyMove: "Verschieben",
 		empty: "Diese Sammlung enthält noch keine verwaltbaren Inhalte.",
-	},
-	presentation: {
-		layout: "Layout",
-		order: "Reihenfolge",
-		save: "Darstellung speichern",
-		layouts: {
-			flat: "Einspaltiger Feed",
-			nested: "Über- und untergeordnete Gruppen",
-			shelf: "Kartenregal",
-		},
-		orders: {
-			manual: "Manuelle Reihenfolge",
-			name: "Name",
-			"added-at": "Hinzugefügt am",
-		},
 	},
 	form: {
 		language: "Inhaltssprache",

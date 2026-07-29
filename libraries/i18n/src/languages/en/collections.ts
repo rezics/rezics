@@ -19,6 +19,13 @@ export default {
 	itemCount: insert("{{count}} items", { count: Number }),
 	directCollectionHint:
 		"A collection is added as one item; its contents are not imported recursively.",
+	publishers: {
+		label: "Publisher",
+		unknown: "No publisher credited",
+		current: "Current publishers",
+		currentDescription:
+			"These Profiles receive publisher credit on the collection page and in feeds.",
+	},
 	save: {
 		action: "Save",
 		title: "Save to collections",
@@ -39,7 +46,7 @@ export default {
 	},
 	workspace: {
 		title: "Collection management",
-		description: `Manage content, ${metadataTerms.inline}, structure, presentation, access, and history.`,
+		description: `Manage content, ${metadataTerms.inline}, ordering, publishers, access, and history.`,
 		navigation: "Collection management navigation",
 		overview: "Collection management areas",
 		backToCollection: "Back to collection",
@@ -55,11 +62,11 @@ export default {
 			},
 			items: {
 				label: "Content & structure",
-				description: "Add, remove, order, nest, and feature content.",
+				description: "Add, remove, multi-select, order, and nest content.",
 			},
-			presentation: {
-				label: "Presentation",
-				description: "Choose the content layout and ordering rule.",
+			publishers: {
+				label: "Publishers",
+				description: "Manage the Profile publisher credits shown publicly.",
 			},
 			access: {
 				label: "Access",
@@ -74,31 +81,27 @@ export default {
 	items: {
 		add: "Add content",
 		target: "Content",
-		role: "Role",
 		parent: "Parent item",
 		topLevel: "Top level",
-		item: "Standard item",
-		featured: "Featured item",
-		remove: "Remove",
-		moveEarlier: "Move earlier",
-		moveLater: "Move later",
-		saveStructure: "Update structure",
+		selectAll: "Select all loaded items",
+		clearSelection: "Clear selection",
+		selectedCount: insert("{{count}} items selected", { count: Number }),
+		selectItem: insert("Select {{title}}", { title: String }),
+		removeItem: insert("Remove {{title}}", { title: String }),
+		move: "Move",
+		setAsChild: "Set as child",
+		moveTitle: "Move selected items",
+		childTitle: "Set as children of an item",
+		moveDescription:
+			"The relative order of selected items is preserved and the change is applied atomically.",
+		destination: "Destination",
+		moveToStart: "Move to beginning",
+		moveToEnd: "Move to end",
+		moveAfter: "Move after an item",
+		afterItem: "Previous item",
+		chooseDestination: "Choose an item",
+		applyMove: "Apply move",
 		empty: "This collection has no manageable content yet.",
-	},
-	presentation: {
-		layout: "Layout",
-		order: "Order",
-		save: "Save presentation",
-		layouts: {
-			flat: "Single-column feed",
-			nested: "Parent-child groups",
-			shelf: "Card shelf",
-		},
-		orders: {
-			manual: "Manual order",
-			name: "Name",
-			"added-at": "Date added",
-		},
 	},
 	form: {
 		language: "Content language",

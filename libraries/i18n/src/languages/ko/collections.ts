@@ -19,6 +19,12 @@ export default {
 	itemCount: insert("{{count}} 항목", { count: Number }),
 	directCollectionHint:
 		"컬렉션은 하나의 항목으로 추가되며, 그 내용이 재귀적으로 가져오지 않습니다.",
+	publishers: {
+		label: "발행자",
+		unknown: "표시된 발행자 없음",
+		current: "현재 발행자",
+		currentDescription: "이 프로필들은 컬렉션 페이지와 피드에서 발행자로 표시됩니다.",
+	},
 	save: {
 		action: "저장",
 		title: "컬렉션에 저장",
@@ -38,7 +44,7 @@ export default {
 	},
 	workspace: {
 		title: "컬렉션 관리",
-		description: `콘텐츠, ${metadataTerms.inline}, 구조, 프레젠테이션, 접근 및 히스토리를 관리하세요.`,
+		description: `콘텐츠, ${metadataTerms.inline}, 순서, 발행자, 접근 및 기록을 관리하세요.`,
 		navigation: "컬렉션 관리 네비게이션",
 		overview: "컬렉션 관리 화면",
 		backToCollection: "컬렉션으로 돌아가기",
@@ -54,11 +60,11 @@ export default {
 			},
 			items: {
 				label: "콘텐츠 및 구조",
-				description: "콘텐츠를 추가, 제거, 정렬, 중첩 및 추천합니다.",
+				description: "콘텐츠를 추가, 제거, 다중 선택하여 정렬하고 계층화합니다.",
 			},
-			presentation: {
-				label: "프레젠테이션",
-				description: "콘텐츠 레이아웃 및 정렬 규칙 선택",
+			publishers: {
+				label: "발행자",
+				description: "공개 표시되는 프로필 발행자 크레딧을 관리합니다.",
 			},
 			access: {
 				label: "접근",
@@ -73,31 +79,26 @@ export default {
 	items: {
 		add: "콘텐츠 추가",
 		target: "콘텐츠",
-		role: "역할",
 		parent: "상위 항목",
 		topLevel: "최상위",
-		item: "표준 항목",
-		featured: "추천 항목",
-		remove: "제거",
-		moveEarlier: "앞쪽으로 이동",
-		moveLater: "뒤쪽으로 이동",
-		saveStructure: "구조 업데이트",
+		selectAll: "불러온 항목 모두 선택",
+		clearSelection: "선택 해제",
+		selectedCount: insert("{{count}}개 항목 선택됨", { count: Number }),
+		selectItem: insert("{{title}} 선택", { title: String }),
+		removeItem: insert("{{title}} 제거", { title: String }),
+		move: "이동",
+		setAsChild: "하위 항목으로 설정",
+		moveTitle: "선택한 항목 이동",
+		childTitle: "다른 항목의 하위로 설정",
+		moveDescription: "선택한 항목의 상대적 순서를 유지한 채 한 번에 변경합니다.",
+		destination: "이동 위치",
+		moveToStart: "맨 앞으로 이동",
+		moveToEnd: "맨 뒤로 이동",
+		moveAfter: "지정 항목 뒤로 이동",
+		afterItem: "앞 항목",
+		chooseDestination: "항목 선택",
+		applyMove: "이동 적용",
 		empty: "이 컬렉션에는 아직 관리 가능한 콘텐츠가 없습니다.",
-	},
-	presentation: {
-		layout: "레이아웃",
-		order: "순서",
-		save: "프레젠테이션 저장",
-		layouts: {
-			flat: "단일 열 피드",
-			nested: "부모-자식 그룹",
-			shelf: "카드 선반",
-		},
-		orders: {
-			manual: "수동 순서",
-			name: "이름",
-			"added-at": "추가 날짜",
-		},
 	},
 	form: {
 		language: "콘텐츠 언어",

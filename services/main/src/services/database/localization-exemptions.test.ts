@@ -24,14 +24,6 @@ const reviewedExemptions = [
 			"Search synonym: language-tagged lookup term, never canonical Unit display copy.",
 	},
 	{
-		file: "src/services/database/schema/collection.ts",
-		rationale: "Structured contract: executable membership rules contain no display copy.",
-	},
-	{
-		file: "src/services/database/schema/collection.ts",
-		rationale: "Structured contract: layout and order codes contain no display copy.",
-	},
-	{
 		file: "src/services/database/schema/communication.ts",
 		rationale:
 			"Authored snapshot: original direct message; translation would alter the message.",

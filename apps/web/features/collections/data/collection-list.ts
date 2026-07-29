@@ -14,14 +14,16 @@ export type CollectionListItem = GetApiCollectionsStatus200["items"][number];
 
 export function useCollectionList({
 	acceptsItemsOnly = false,
+	editableOnly = false,
 	enabled = true,
-	ownerId,
+	publisherProfileId,
 	search,
 	targetId,
 }: {
 	readonly acceptsItemsOnly?: boolean;
+	readonly editableOnly?: boolean;
 	readonly enabled?: boolean;
-	readonly ownerId?: string;
+	readonly publisherProfileId?: string;
 	readonly search?: string;
 	readonly targetId?: string;
 }) {
@@ -31,7 +33,8 @@ export function useCollectionList({
 		limit: 50,
 		localizationLanguages,
 		...(acceptsItemsOnly ? { acceptsItemsOnly: true } : {}),
-		...(ownerId ? { ownerId } : {}),
+		...(editableOnly ? { editableOnly: true } : {}),
+		...(publisherProfileId ? { publisherProfileId } : {}),
 		...(normalizedSearch ? { search: normalizedSearch } : {}),
 		...(targetId ? { targetId } : {}),
 	} satisfies GetApiCollectionsQuery;

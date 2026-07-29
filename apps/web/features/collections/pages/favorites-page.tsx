@@ -30,10 +30,7 @@ function FavoritesContent() {
 			<div className="px-4 sm:px-0">
 				<PageHeading title={t.collections.favorites} />
 			</div>
-			<CollectionContentFeed
-				collectionId={query.data.id}
-				layout={query.data.presentationDocument.layout}
-			/>
+			<CollectionContentFeed collectionId={query.data.id} />
 		</main>
 	);
 }

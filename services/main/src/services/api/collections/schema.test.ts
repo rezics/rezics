@@ -1,4 +1,3 @@
-import { createCollectionPresentationDocument } from "@rezics/block";
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
@@ -6,6 +5,7 @@ import {
 	CollectionDetailQuery,
 	CollectionItemsQuery,
 	ListCollectionsQuery,
+	MoveCollectionItemsBody,
 	SaveCollectionItemBody,
 	UpdateCollectionBody,
 } from "./schema";
@@ -20,6 +20,8 @@ describe("collection list schema", () => {
 				targetId,
 				containsTargetId: targetId,
 				acceptsItemsOnly: true,
+				editableOnly: true,
+				publisherProfileId: targetId,
 				localizationLanguages: ["zh", "en"],
 				search: "reading",
 				cursor: "next-page",
@@ -46,18 +48,35 @@ describe("collection item mutation schema", () => {
 			Check(SaveCollectionItemBody, {
 				baseRevisionId: targetId,
 				placement: "review-with-subject",
-				role: "item",
 			}),
 		).toBe(true);
 		expect(Check(SaveCollectionItemBody, { placement: "direct" })).toBe(false);
 	});
 
-	it("keeps Collection roles closed", () => {
+	it("rejects removed item roles and raw positions", () => {
 		expect(
 			Check(SaveCollectionItemBody, {
 				baseRevisionId: targetId,
 				placement: "direct",
-				role: "chapter",
+				role: "item",
+				position: "a0",
+			}),
+		).toBe(false);
+	});
+
+	it("accepts an atomic ordered multi-item move", () => {
+		expect(
+			Check(MoveCollectionItemsBody, {
+				baseRevisionId: targetId,
+				targetIds: [targetId],
+				placement: { kind: "end", parentTargetId: null },
+			}),
+		).toBe(true);
+		expect(
+			Check(MoveCollectionItemsBody, {
+				baseRevisionId: targetId,
+				targetIds: [targetId, targetId],
+				placement: { kind: "after", targetId },
 			}),
 		).toBe(false);
 	});
@@ -69,13 +88,13 @@ describe("collection item mutation schema", () => {
 });
 
 describe("collection update schema", () => {
-	it("accepts a presentation-only partial update", () => {
+	it("rejects removed presentation documents", () => {
 		expect(
 			Check(UpdateCollectionBody, {
 				baseRevisionId: targetId,
-				presentationDocument: createCollectionPresentationDocument("shelf", "name"),
+				presentationDocument: {},
 			}),
-		).toBe(true);
+		).toBe(false);
 	});
 });
 

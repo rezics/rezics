@@ -2,11 +2,17 @@
 
 import {
 	useDeleteApiCollectionsByCollectionIdItemsByTargetId,
+	usePostApiCollectionsByCollectionIdItemsMove,
 	usePutApiCollectionsByCollectionIdItemsByTargetId,
 } from "@rezics/openapi-tanstack-query";
 import {
 	Button,
-	ChoiceSelect,
+	Checkbox,
+	Dialog,
+	DialogBody,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
 	EntityPicker,
 	Field,
 	FieldGroup,
@@ -18,10 +24,9 @@ import {
 	QueryPending,
 } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
-import { generateKeyBetween } from "fractional-indexing";
-import { ArrowDownIcon, ArrowUpIcon, StarIcon, Trash2Icon } from "lucide-react";
+import { CornerDownRightIcon, MoveIcon, Trash2Icon } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 
 import { FeedItemCard } from "@/features/content-feed/components/feed-item-card";
 import { useTranslation } from "@/i18n/client";
@@ -33,28 +38,63 @@ import {
 	useCollectionContent,
 } from "../data/collection-content";
 import { invalidateCollections } from "../data/collection-cache";
+import {
+	collectionSelectionSubtreeIds,
+	toCollectionContentGroups,
+	type CollectionContentGroup,
+} from "../model/collection-content-tree";
 import { collectionManagementHref } from "../routing/collection-management-routes";
 
 type SelectedUnit = Readonly<{ id: string; label: string }>;
-type EditableCollectionRole = "item" | "featured";
+type MoveMode = "move" | "child";
+type MovePlacementKind = "start" | "end" | "after";
+
+function flattenCollectionItems(items: readonly CollectionContentItem[]) {
+	const ordered: Array<{ readonly item: CollectionContentItem; readonly depth: number }> = [];
+	const visit = (
+		groups: readonly CollectionContentGroup<CollectionContentItem>[],
+		depth: number,
+	) => {
+		for (const group of groups) {
+			ordered.push({ item: group.root, depth });
+			visit(group.children, depth + 1);
+		}
+	};
+	visit(toCollectionContentGroups(items), 0);
+	return ordered;
+}
 
 export function CollectionItemsPage() {
 	const { collection } = useCollectionManagement();
 	const { t } = useTranslation(["actions", "collections", "errors", "ui"]);
 	const queryClient = useQueryClient();
 	const content = useCollectionContent(collection.id, collection.capabilities.canManageItems);
-	const addOrUpdate = usePutApiCollectionsByCollectionIdItemsByTargetId();
+	const add = usePutApiCollectionsByCollectionIdItemsByTargetId();
+	const move = usePostApiCollectionsByCollectionIdItemsMove();
 	const remove = useDeleteApiCollectionsByCollectionIdItemsByTargetId();
 	const [selectedUnit, setSelectedUnit] = useState<SelectedUnit>();
-	const [role, setRole] = useState<EditableCollectionRole>("item");
 	const [parentTargetId, setParentTargetId] = useState("");
+	const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(() => new Set());
+	const [moveMode, setMoveMode] = useState<MoveMode>();
+	const [placementKind, setPlacementKind] = useState<MovePlacementKind>("end");
+	const [destinationTargetId, setDestinationTargetId] = useState("");
+
+	const items = collectionContentItems(content);
+	const orderedItems = useMemo(() => flattenCollectionItems(items), [items]);
+	const pending = add.isPending || move.isPending || remove.isPending;
+	const movingSubtreeIds = useMemo(
+		() => collectionSelectionSubtreeIds(items, selectedIds),
+		[items, selectedIds],
+	);
+	const selectableDestinations = orderedItems.filter(
+		({ item }) => !movingSubtreeIds.has(item.membership.targetId),
+	);
+
 	if (!collection.capabilities.canManageItems)
 		return <p className="text-sm text-destructive">{t.errors.forbidden}</p>;
 	if (content.isPending) return <QueryPending />;
 	if (content.isError && !content.data)
 		return <QueryFailure error={content.error} retry={() => void content.refetch()} />;
-	const items = collectionContentItems(content);
-	const pending = addOrUpdate.isPending || remove.isPending;
 
 	async function refresh() {
 		await invalidateCollections(queryClient, collection.id);
@@ -64,49 +104,16 @@ export function CollectionItemsPage() {
 		event.preventDefault();
 		if (!selectedUnit) return;
 		try {
-			await addOrUpdate.mutateAsync({
+			await add.mutateAsync({
 				path: { collectionId: collection.id, targetId: selectedUnit.id },
 				body: {
 					baseRevisionId: collection.latestRevisionId,
 					placement: "direct",
 					parentTargetId: parentTargetId || null,
-					role,
 				},
 			});
 			setSelectedUnit(undefined);
-			setRole("item");
 			setParentTargetId("");
-			await refresh();
-		} catch {
-			// The typed mutation state supplies the visible API error.
-		}
-	}
-
-	async function updateItem(
-		item: CollectionContentItem,
-		changes: {
-			readonly parentTargetId?: string | null;
-			readonly position?: string;
-			readonly role?: EditableCollectionRole;
-		},
-	) {
-		try {
-			await addOrUpdate.mutateAsync({
-				path: {
-					collectionId: collection.id,
-					targetId: item.membership.targetId,
-				},
-				body: {
-					baseRevisionId: collection.latestRevisionId,
-					placement: "direct",
-					parentTargetId:
-						changes.parentTargetId === undefined
-							? item.membership.parentTargetId
-							: changes.parentTargetId,
-					position: changes.position,
-					role: changes.role ?? toEditableRole(item.membership.role),
-				},
-			});
 			await refresh();
 		} catch {
 			// The typed mutation state supplies the visible API error.
@@ -122,28 +129,58 @@ export function CollectionItemsPage() {
 				},
 				body: { baseRevisionId: collection.latestRevisionId },
 			});
+			setSelectedIds((current) => {
+				const next = new Set(current);
+				next.delete(item.membership.targetId);
+				return next;
+			});
 			await refresh();
 		} catch {
 			// The typed mutation state supplies the visible API error.
 		}
 	}
 
-	function moveItem(index: number, direction: "earlier" | "later") {
-		const item = items[index];
-		if (!item) return;
-		const position =
-			direction === "earlier"
-				? generateKeyBetween(
-						items[index - 2]?.membership.position ?? null,
-						items[index - 1]?.membership.position ?? null,
-					)
-				: generateKeyBetween(
-						items[index + 1]?.membership.position ?? null,
-						items[index + 2]?.membership.position ?? null,
-					);
-		void updateItem(item, { position });
+	async function submitMove() {
+		if (!moveMode || !selectedIds.size) return;
+		const placement =
+			moveMode === "child"
+				? { kind: "end" as const, parentTargetId: destinationTargetId }
+				: placementKind === "after"
+					? { kind: "after" as const, targetId: destinationTargetId }
+					: { kind: placementKind, parentTargetId: null };
+		try {
+			await move.mutateAsync({
+				path: { collectionId: collection.id },
+				body: {
+					baseRevisionId: collection.latestRevisionId,
+					targetIds: [...selectedIds],
+					placement,
+				},
+			});
+			setSelectedIds(new Set());
+			closeMoveDialog();
+			await refresh();
+		} catch {
+			// The typed mutation state supplies the visible API error.
+		}
 	}
 
+	function closeMoveDialog() {
+		setMoveMode(undefined);
+		setPlacementKind("end");
+		setDestinationTargetId("");
+	}
+
+	function toggleSelection(targetId: string, checked: boolean) {
+		setSelectedIds((current) => {
+			const next = new Set(current);
+			if (checked) next.add(targetId);
+			else next.delete(targetId);
+			return next;
+		});
+	}
+
+	const destinationRequired = moveMode === "child" || placementKind === "after";
 	return (
 		<section className="grid gap-6">
 			<ManagementWorkspaceSectionHeader
@@ -166,49 +203,30 @@ export function CollectionItemsPage() {
 							value={selectedUnit}
 						/>
 					</Field>
-					<div className="grid gap-4 sm:grid-cols-2">
-						<Field>
-							<FieldLabel>{t.collections.items.role}</FieldLabel>
-							<ChoiceSelect
-								appearance="field"
-								ariaLabel={t.collections.items.role}
-								className="w-full"
-								onValueChange={([value]) => {
-									if (value) setRole(value);
-								}}
-								options={[
-									{ value: "item", label: t.collections.items.item },
-									{ value: "featured", label: t.collections.items.featured },
-								]}
-								placeholder={t.collections.items.role}
-								value={[role]}
-							/>
-						</Field>
-						<Field>
-							<FieldLabel>{t.collections.items.parent}</FieldLabel>
-							<NativeSelect
-								onChange={(event) => setParentTargetId(event.currentTarget.value)}
-								value={parentTargetId}
-							>
-								<NativeSelectOption value="">
-									{t.collections.items.topLevel}
+					<Field>
+						<FieldLabel>{t.collections.items.parent}</FieldLabel>
+						<NativeSelect
+							onChange={(event) => setParentTargetId(event.currentTarget.value)}
+							value={parentTargetId}
+						>
+							<NativeSelectOption value="">
+								{t.collections.items.topLevel}
+							</NativeSelectOption>
+							{orderedItems.map(({ item }) => (
+								<NativeSelectOption
+									key={item.membership.targetId}
+									value={item.membership.targetId}
+								>
+									{item.content.title ?? t.ui.unnamed}
 								</NativeSelectOption>
-								{items.map((item) => (
-									<NativeSelectOption
-										key={item.membership.targetId}
-										value={item.membership.targetId}
-									>
-										{item.content.title ?? t.ui.unnamed}
-									</NativeSelectOption>
-								))}
-							</NativeSelect>
-						</Field>
-					</div>
+							))}
+						</NativeSelect>
+					</Field>
 				</FieldGroup>
 				<Button
 					className="w-fit"
 					disabled={!selectedUnit}
-					isLoading={addOrUpdate.isPending}
+					isLoading={add.isPending}
 					type="submit"
 					variant="solid"
 				>
@@ -216,99 +234,81 @@ export function CollectionItemsPage() {
 				</Button>
 			</form>
 			<RequestFailure
-				error={addOrUpdate.error ?? remove.error ?? content.error}
+				error={add.error ?? move.error ?? remove.error ?? content.error}
 				fallback={t.ui.retryLater}
 			/>
-			{items.length ? (
+			{orderedItems.length ? (
 				<div className="grid gap-4">
-					{items.map((item, index) => {
-						const currentRole = toEditableRole(item.membership.role);
+					<div className="flex flex-wrap items-center gap-2 rounded-xl border border-border-weak bg-surface-raised p-3">
+						<Button
+							disabled={pending || selectedIds.size === orderedItems.length}
+							onClick={() =>
+								setSelectedIds(
+									new Set(
+										orderedItems.map(({ item }) => item.membership.targetId),
+									),
+								)
+							}
+							size="sm"
+							variant="outline"
+						>
+							{t.collections.items.selectAll}
+						</Button>
+						<Button
+							disabled={pending || !selectedIds.size}
+							onClick={() => setSelectedIds(new Set())}
+							size="sm"
+							variant="quiet"
+						>
+							{t.collections.items.clearSelection}
+						</Button>
+						<span className="me-auto text-muted-foreground text-sm">
+							{t.collections.items.selectedCount({ count: selectedIds.size })}
+						</span>
+						<Button
+							disabled={pending || !selectedIds.size}
+							onClick={() => setMoveMode("move")}
+							size="sm"
+							variant="outline"
+						>
+							<MoveIcon aria-hidden />
+							{t.collections.items.move}
+						</Button>
+						<Button
+							disabled={
+								pending || !selectedIds.size || !selectableDestinations.length
+							}
+							onClick={() => setMoveMode("child")}
+							size="sm"
+							variant="outline"
+						>
+							<CornerDownRightIcon aria-hidden />
+							{t.collections.items.setAsChild}
+						</Button>
+					</div>
+					{orderedItems.map(({ item, depth }) => {
+						const targetId = item.membership.targetId;
+						const title = item.content.title ?? t.ui.unnamed;
 						return (
-							<div className="grid gap-2" key={item.membership.targetId}>
-								<div className="flex flex-wrap items-center gap-2 rounded-xl border border-border-weak bg-surface-raised p-2">
-									<Button
-										aria-label={
-											currentRole === "featured"
-												? t.collections.items.item
-												: t.collections.items.featured
-										}
+							<div
+								className="grid gap-2"
+								key={targetId}
+								style={{ marginInlineStart: `${Math.min(depth, 6) * 1.25}rem` }}
+							>
+								<div className="flex items-center gap-3 rounded-xl border border-border-weak bg-surface-raised p-3">
+									<Checkbox
+										aria-label={t.collections.items.selectItem({ title })}
+										checked={selectedIds.has(targetId)}
 										disabled={pending}
-										onClick={() =>
-											void updateItem(item, {
-												role:
-													currentRole === "featured"
-														? "item"
-														: "featured",
-											})
+										onCheckedChange={({ checked }) =>
+											toggleSelection(targetId, checked === true)
 										}
-										size="sm"
-										variant={
-											currentRole === "featured" ? "secondary" : "outline"
-										}
-									>
-										<StarIcon
-											aria-hidden
-											fill={
-												currentRole === "featured" ? "currentColor" : "none"
-											}
-										/>
-										{currentRole === "featured"
-											? t.collections.items.featured
-											: t.collections.items.item}
-									</Button>
-									<NativeSelect
-										aria-label={t.collections.items.parent}
-										className="min-w-44 flex-1"
-										disabled={pending}
-										onChange={(event) =>
-											void updateItem(item, {
-												parentTargetId: event.currentTarget.value || null,
-											})
-										}
-										value={item.membership.parentTargetId ?? ""}
-									>
-										<NativeSelectOption value="">
-											{t.collections.items.topLevel}
-										</NativeSelectOption>
-										{items
-											.filter(
-												(candidate) =>
-													candidate.membership.targetId !==
-													item.membership.targetId,
-											)
-											.map((candidate) => (
-												<NativeSelectOption
-													key={candidate.membership.targetId}
-													value={candidate.membership.targetId}
-												>
-													{candidate.content.title ?? t.ui.unnamed}
-												</NativeSelectOption>
-											))}
-									</NativeSelect>
-									{collection.presentationDocument.order === "manual" ? (
-										<>
-											<Button
-												aria-label={t.collections.items.moveEarlier}
-												disabled={pending || index === 0}
-												onClick={() => moveItem(index, "earlier")}
-												size="icon-sm"
-												variant="outline"
-											>
-												<ArrowUpIcon aria-hidden />
-											</Button>
-											<Button
-												aria-label={t.collections.items.moveLater}
-												disabled={pending || index === items.length - 1}
-												onClick={() => moveItem(index, "later")}
-												size="icon-sm"
-												variant="outline"
-											>
-												<ArrowDownIcon aria-hidden />
-											</Button>
-										</>
-									) : null}
+									/>
+									<span className="min-w-0 flex-1 truncate font-medium text-sm">
+										{title}
+									</span>
 									<Button
-										aria-label={t.collections.items.remove}
+										aria-label={t.collections.items.removeItem({ title })}
 										disabled={pending}
 										onClick={() => void removeItem(item)}
 										size="icon-sm"
@@ -335,10 +335,100 @@ export function CollectionItemsPage() {
 					{t.actions.loadMore}
 				</Button>
 			) : null}
+			<Dialog
+				onOpenChange={({ open }) => {
+					if (!open) closeMoveDialog();
+				}}
+				open={Boolean(moveMode)}
+			>
+				<DialogContent showCloseButton={!move.isPending} size="sm">
+					<DialogHeader
+						description={t.collections.items.moveDescription}
+						title={
+							moveMode === "child"
+								? t.collections.items.childTitle
+								: t.collections.items.moveTitle
+						}
+					/>
+					<DialogBody>
+						<FieldGroup>
+							{moveMode === "move" ? (
+								<Field>
+									<FieldLabel>{t.collections.items.destination}</FieldLabel>
+									<NativeSelect
+										disabled={move.isPending}
+										onChange={(event) => {
+											setPlacementKind(
+												event.currentTarget.value as MovePlacementKind,
+											);
+											setDestinationTargetId("");
+										}}
+										value={placementKind}
+									>
+										<NativeSelectOption value="start">
+											{t.collections.items.moveToStart}
+										</NativeSelectOption>
+										<NativeSelectOption value="end">
+											{t.collections.items.moveToEnd}
+										</NativeSelectOption>
+										<NativeSelectOption value="after">
+											{t.collections.items.moveAfter}
+										</NativeSelectOption>
+									</NativeSelect>
+								</Field>
+							) : null}
+							{destinationRequired ? (
+								<Field required>
+									<FieldLabel>
+										{moveMode === "child"
+											? t.collections.items.parent
+											: t.collections.items.afterItem}
+									</FieldLabel>
+									<NativeSelect
+										disabled={move.isPending}
+										onChange={(event) =>
+											setDestinationTargetId(event.currentTarget.value)
+										}
+										value={destinationTargetId}
+									>
+										<NativeSelectOption value="">
+											{t.collections.items.chooseDestination}
+										</NativeSelectOption>
+										{selectableDestinations.map(({ item }) => (
+											<NativeSelectOption
+												key={item.membership.targetId}
+												value={item.membership.targetId}
+											>
+												{item.content.title ?? t.ui.unnamed}
+											</NativeSelectOption>
+										))}
+									</NativeSelect>
+								</Field>
+							) : null}
+						</FieldGroup>
+						<RequestFailure error={move.error} fallback={t.ui.retryLater} />
+					</DialogBody>
+					<DialogFooter>
+						<Button
+							disabled={move.isPending}
+							onClick={closeMoveDialog}
+							variant="outline"
+						>
+							{t.collections.cancel}
+						</Button>
+						<Button
+							disabled={
+								!selectedIds.size || (destinationRequired && !destinationTargetId)
+							}
+							isLoading={move.isPending}
+							onClick={() => void submitMove()}
+							variant="solid"
+						>
+							{t.collections.items.applyMove}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 		</section>
 	);
-}
-
-function toEditableRole(role: CollectionContentItem["membership"]["role"]): EditableCollectionRole {
-	return role === "featured" ? "featured" : "item";
 }

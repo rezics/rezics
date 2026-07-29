@@ -6,8 +6,6 @@ import {
 	FontAwesomeProvider,
 } from "@rezics/avatar";
 import {
-	CollectionDefinitionDocument,
-	CollectionPresentationDocument,
 	PortableTextDocument,
 	parseDocument,
 	type PortableTextDocument as PortableTextDocumentValue,
@@ -456,13 +454,12 @@ export const CollectionListResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			id: Uuid,
-			ownerId: Uuid,
-			source: t.UnionEnum(["manual", "search", "system"]),
-			systemKey: t.Nullable(t.Literal("favorites")),
+			purpose: t.UnionEnum(["collection", "favorites"]),
 			language: ContentLanguage,
 			itemCount: t.Integer(),
 			containsTarget: t.Boolean(),
 			acceptsItems: t.Boolean(),
+			attributions: t.Array(UnitAttributionSummaryResponse),
 			latestRevisionId: Uuid,
 			title: NullableText,
 			summary: NullableText,
@@ -912,12 +909,9 @@ export const CollectionDetailResponse = t.Object({
 	status: t.String(),
 	visibility: t.String(),
 	language: ContentLanguage,
-	source: t.Union([t.Literal("manual"), t.Literal("search"), t.Literal("system")]),
-	systemKey: t.Nullable(t.Literal("favorites")),
-	definitionDocument: CollectionDefinitionDocument,
-	presentationDocument: CollectionPresentationDocument,
-	ownerId: Uuid,
+	purpose: t.UnionEnum(["collection", "favorites"]),
 	itemCount: t.Integer(),
+	attributions: t.Array(UnitAttributionSummaryResponse),
 	latestRevisionId: Uuid,
 	createdAt: DateTime,
 	updatedAt: DateTime,
@@ -925,7 +919,7 @@ export const CollectionDetailResponse = t.Object({
 	capabilities: t.Object({
 		canEditDetails: t.Boolean(),
 		canManageItems: t.Boolean(),
-		canEditPresentation: t.Boolean(),
+		canManagePublishers: t.Boolean(),
 		canManageLocalizations: t.Boolean(),
 		canManageAccess: t.Boolean(),
 		canViewHistory: t.Boolean(),
@@ -938,7 +932,6 @@ export const CollectionContentResponse = t.Object({
 		t.Object({
 			membership: t.Object({
 				targetId: Uuid,
-				role: t.UnionEnum(["item", "featured", "favorite"]),
 				parentTargetId: t.Nullable(Uuid),
 				position: FractionalPosition,
 				createdAt: DateTime,

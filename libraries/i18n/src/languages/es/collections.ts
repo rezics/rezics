@@ -21,6 +21,13 @@ export default {
 	itemCount: insert("{{count}} elementos", { count: Number }),
 	directCollectionHint:
 		"Una colección se añade como un solo elemento; su contenido no se importa de forma recursiva.",
+	publishers: {
+		label: "Editorial",
+		unknown: "Sin editorial acreditada",
+		current: "Editoriales actuales",
+		currentDescription:
+			"Estos perfiles reciben el crédito de editorial en la colección y en las fuentes.",
+	},
 	save: {
 		action: "Guardar",
 		title: "Guardar en colecciones",
@@ -42,7 +49,7 @@ export default {
 	},
 	workspace: {
 		title: "Gestión de la colección",
-		description: `Gestiona el contenido, los ${metadataTerms.inline}, la estructura, la presentación, el acceso y el historial.`,
+		description: `Gestiona el contenido, los ${metadataTerms.inline}, el orden, las editoriales, el acceso y el historial.`,
 		navigation: "Navegación de gestión de la colección",
 		overview: "Áreas de gestión de la colección",
 		backToCollection: "Volver a la colección",
@@ -59,11 +66,11 @@ export default {
 			},
 			items: {
 				label: "Contenido y estructura",
-				description: "Añade, elimina, ordena, anida y destaca contenido.",
+				description: "Añade, elimina, selecciona varios elementos, ordénalos y anídalos.",
 			},
-			presentation: {
-				label: "Presentación",
-				description: "Elige el diseño del contenido y la regla de ordenación.",
+			publishers: {
+				label: "Editoriales",
+				description: "Gestiona los perfiles de editorial que se muestran públicamente.",
 			},
 			access: {
 				label: "Acceso",
@@ -78,31 +85,27 @@ export default {
 	items: {
 		add: "Añadir contenido",
 		target: "Contenido",
-		role: "Función",
 		parent: "Elemento superior",
 		topLevel: "Nivel superior",
-		item: "Elemento estándar",
-		featured: "Elemento destacado",
-		remove: "Quitar",
-		moveEarlier: "Mover hacia el principio",
-		moveLater: "Mover hacia el final",
-		saveStructure: "Actualizar estructura",
+		selectAll: "Seleccionar todos los elementos cargados",
+		clearSelection: "Borrar selección",
+		selectedCount: insert("{{count}} elementos seleccionados", { count: Number }),
+		selectItem: insert("Seleccionar {{title}}", { title: String }),
+		removeItem: insert("Quitar {{title}}", { title: String }),
+		move: "Mover",
+		setAsChild: "Convertir en subordinado",
+		moveTitle: "Mover los elementos seleccionados",
+		childTitle: "Subordinar a otro elemento",
+		moveDescription:
+			"Se conserva el orden relativo de los elementos y el cambio se aplica de forma atómica.",
+		destination: "Destino",
+		moveToStart: "Mover al principio",
+		moveToEnd: "Mover al final",
+		moveAfter: "Mover después de un elemento",
+		afterItem: "Elemento anterior",
+		chooseDestination: "Elegir un elemento",
+		applyMove: "Aplicar movimiento",
 		empty: "Esta colección aún no tiene contenido que se pueda gestionar.",
-	},
-	presentation: {
-		layout: "Diseño",
-		order: "Orden",
-		save: "Guardar presentación",
-		layouts: {
-			flat: "Fuente de una columna",
-			nested: "Grupos de elementos superiores y subordinados",
-			shelf: "Estante de tarjetas",
-		},
-		orders: {
-			manual: "Orden manual",
-			name: "Nombre",
-			"added-at": "Fecha de incorporación",
-		},
 	},
 	form: {
 		language: "Idioma del contenido",

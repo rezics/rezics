@@ -13,14 +13,7 @@ import {
 	QueryFailure,
 	QueryPending,
 } from "@rezics/ui";
-import {
-	BookOpenText,
-	Database,
-	History,
-	LayoutTemplate,
-	ListTree,
-	ShieldCheck,
-} from "lucide-react";
+import { BookOpenText, Database, History, Link2, ListTree, ShieldCheck } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { usePathname } from "next/navigation";
 import { createContext, useContext, type ReactNode } from "react";
@@ -122,11 +115,11 @@ function CollectionManagementWorkspaceContent({
 			icon: ListTree,
 		},
 		{
-			id: "presentation",
-			href: collectionManagementSectionHref(collectionId, "presentation"),
-			label: labels.presentation.label,
-			description: labels.presentation.description,
-			icon: LayoutTemplate,
+			id: "publishers",
+			href: collectionManagementSectionHref(collectionId, "publishers"),
+			label: labels.publishers.label,
+			description: labels.publishers.description,
+			icon: Link2,
 		},
 		{
 			id: "access",
@@ -150,7 +143,7 @@ function CollectionManagementWorkspaceContent({
 	const sectionAllowed = Boolean(currentSectionId && visibleSectionIds.has(currentSectionId));
 	const localization = selectLocalization(collection.localizations, collection.language);
 	const title =
-		collection.systemKey === "favorites"
+		collection.purpose === "favorites"
 			? t.collections.favorites
 			: (localization?.title ?? t.collections.workspace.title);
 	const navigation = (
