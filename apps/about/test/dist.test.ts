@@ -40,6 +40,9 @@ describe("Vike prerender output", () => {
 		);
 		expect(product).toContain("application/ld+json");
 		expect(product).toContain('"@type":"WebPage"');
+		expect(product).toContain("你可以用它做什麼");
+		expect(product).toContain("章節內容仍由貼文");
+		expect(product).not.toContain("載入產品內容");
 		const notFound = await readFile(join(dist, "404.html"), "utf8");
 		expect(notFound).toContain("404");
 		expect(notFound).toContain("pages_error");

@@ -1,6 +1,9 @@
 import { extname } from "node:path";
 
 import { parse } from "@babel/parser";
+import { createProcessor } from "@mdx-js/mdx";
+
+const mdxProcessor = createProcessor();
 
 const aboutLocaleByDirectory = {
 	de: "de",
@@ -235,6 +238,75 @@ function checkTerminologyValue(path, source, value, offset, terminologyDefinitio
 	return errors;
 }
 
+function maskMdxEsm(path, source) {
+	if (extname(path) !== ".mdx") return { value: source, errors: [] };
+
+	let sourceFile;
+	try {
+		sourceFile = mdxProcessor.parse(source);
+	} catch (error) {
+		return {
+			value: source,
+			errors: [`${path}: unable to parse localization source: ${error.message}`],
+		};
+	}
+
+	const output = source.split("");
+	for (const node of sourceFile.children) {
+		if (node.type !== "mdxjsEsm") continue;
+		const start = node.position?.start.offset;
+		const end = node.position?.end.offset;
+		if (typeof start !== "number" || typeof end !== "number") continue;
+
+		for (let index = start; index < end; index += 1) {
+			if (source[index] !== "\n" && source[index] !== "\r") output[index] = " ";
+		}
+
+		let esmFile;
+		try {
+			esmFile = parse(node.value, { sourceType: "module", plugins: ["jsx"] });
+		} catch (error) {
+			return {
+				value: source,
+				errors: [`${path}: unable to parse MDX module data: ${error.message}`],
+			};
+		}
+
+		function restoreVisibleStrings(current, parent) {
+			if (!current || typeof current !== "object") return;
+			const isVisibleString =
+				(current.type === "StringLiteral" &&
+					!isModuleSpecifier(current, parent) &&
+					!isPropertyName(current, parent)) ||
+				current.type === "TemplateElement";
+			if (
+				isVisibleString &&
+				typeof current.start === "number" &&
+				typeof current.end === "number"
+			) {
+				const valueStart =
+					current.type === "StringLiteral" ? current.start + 1 : current.start;
+				const valueEnd = current.type === "StringLiteral" ? current.end - 1 : current.end;
+				for (let index = valueStart; index < valueEnd; index += 1) {
+					output[start + index] = source[start + index];
+				}
+			}
+
+			for (const child of Object.values(current)) {
+				if (Array.isArray(child)) {
+					for (const item of child) restoreVisibleStrings(item, current);
+				} else {
+					restoreVisibleStrings(child, current);
+				}
+			}
+		}
+
+		restoreVisibleStrings(esmFile, undefined);
+	}
+
+	return { value: output.join(""), errors: [] };
+}
+
 export function checkTypeScriptSource({
 	path,
 	source,
@@ -303,8 +375,10 @@ export function checkMarkdownSource({
 	terminologyDefinitions,
 	rejectUnapprovedTokens,
 }) {
-	const errors = [];
-	const prose = removeCodeAndLinks(source);
+	const mdxSource = maskMdxEsm(path, source);
+	const errors = [...mdxSource.errors];
+	if (errors.length > 0) return errors;
+	const prose = removeCodeAndLinks(mdxSource.value);
 	for (const definition of terminologyDefinitions.forbidden) {
 		let searchFrom = 0;
 		while (searchFrom < prose.length) {
@@ -318,11 +392,15 @@ export function checkMarkdownSource({
 		}
 	}
 	if (rejectUnapprovedTokens)
-		errors.push(...checkUnapprovedTokens(path, source, source, 0, verbatimDefinitions));
+		errors.push(
+			...checkUnapprovedTokens(path, source, mdxSource.value, 0, verbatimDefinitions),
+		);
 	for (const definition of verbatimDefinitions) {
 		const canonical = definition.value;
 		const lowerCanonical = canonical.toLocaleLowerCase("en-US");
-		for (const match of source.matchAll(/[A-Za-z][A-Za-z0-9]*(?:[-_.][A-Za-z0-9]+)*/g)) {
+		for (const match of mdxSource.value.matchAll(
+			/[A-Za-z][A-Za-z0-9]*(?:[-_.][A-Za-z0-9]+)*/g,
+		)) {
 			const token = match[0];
 			if (token === canonical || token.toLocaleLowerCase("en-US") !== lowerCanonical)
 				continue;

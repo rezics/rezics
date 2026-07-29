@@ -1,5 +1,6 @@
 import { PRODUCT_DEFINITIONS, type RegisteredProduct } from "./content/productRegistry";
 import { getLocaleContent } from "./content/locales";
+import { getProductDocumentMetadata } from "./content/productDocumentMetadata";
 import { ABOUT_LOCALES, DEFAULT_LOCALE, type AboutLocale } from "./i18n/locales";
 import {
 	getAlternatePaths,
@@ -82,8 +83,7 @@ export function createProductPageData(
 	product: RegisteredProduct,
 ): AboutPageData {
 	const localeContent = getLocaleContent(locale);
-	const summary = localeContent.products.byId[product.id].summary;
-	const productName = localeContent.products.common.names[product.id];
+	const productMetadata = getProductDocumentMetadata(locale, product.id);
 	const canonicalPath = getProductPath(locale, product.slug);
 	return {
 		kind: "product",
@@ -91,16 +91,16 @@ export function createProductPageData(
 		productId: product.id,
 		slug: product.slug,
 		metadata: makeMetadata(
-			productName + " — " + localeContent.common.siteName,
-			summary,
+			productMetadata.name + " — " + localeContent.common.siteName,
+			productMetadata.summary,
 			canonicalPath,
 			"product",
 			product.slug,
 			{
 				"@context": "https://schema.org",
 				"@type": "WebPage",
-				name: productName,
-				description: summary,
+				name: productMetadata.name,
+				description: productMetadata.summary,
 				url: new URL(canonicalPath, "https://about.rezics.com").toString(),
 			},
 		),

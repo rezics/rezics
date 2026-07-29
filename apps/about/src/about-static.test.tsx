@@ -9,6 +9,7 @@ import { GlobalFooter } from "./components/products/GlobalFooter";
 import { GlobalHeader } from "./components/products/GlobalHeader";
 import { HomeExperience } from "./components/products/HomeExperience";
 import { getLocaleContent } from "./content/locales";
+import { getProductDocumentMetadata } from "./content/productDocumentMetadata";
 import {
 	PRODUCT_DEFINITIONS,
 	PRODUCT_FAMILIES,
@@ -51,24 +52,25 @@ describe("zh-Hant publication boundary", () => {
 		).toEqual(["zh-hant"]);
 	});
 
-	test("keeps every visible product string in the zh-Hant owner", () => {
+	test("publishes one validated zh-Hant MDX document per product", async () => {
 		const content = getLocaleContent("zh-hant");
 		const productIds: ProductId[] = PRODUCT_DEFINITIONS.map((product) => product.id);
-		const sortedProductIds = [...productIds].sort();
 
 		expect(content.home.meta.title).toBe("REZICS: 與所愛的故事相遇");
-		expect(Object.keys(content.products.common.names).sort()).toEqual(sortedProductIds);
-		expect(Object.keys(content.products.byId).sort()).toEqual(sortedProductIds);
 
 		for (const productId of productIds) {
-			const page = content.products.byId[productId];
-			expect(content.products.common.names[productId].trim().length).toBeGreaterThan(0);
-			expect(page.summary.trim().length).toBeGreaterThan(0);
-			expect(page.introduction.trim().length).toBeGreaterThan(0);
-			expect(page.uses).toHaveLength(3);
-			expect(page.operation).toHaveLength(3);
-			expect(page.boundary.trim().length).toBeGreaterThan(0);
+			const metadata = getProductDocumentMetadata("zh-hant", productId);
+			expect(metadata.name.trim().length).toBeGreaterThan(0);
+			expect(metadata.summary.trim().length).toBeGreaterThan(0);
+			expect(metadata.introduction.trim().length).toBeGreaterThan(0);
 		}
+
+		const productDocuments = await readdir(
+			join(appRoot, "src", "content", "locales", "zh-hant", "products"),
+		);
+		expect(productDocuments.sort()).toEqual(
+			PRODUCT_DEFINITIONS.map((product) => `${product.slug}.mdx`).sort(),
+		);
 	});
 });
 

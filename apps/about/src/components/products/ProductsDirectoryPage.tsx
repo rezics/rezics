@@ -1,6 +1,7 @@
 import { ArrowDown, ArrowRight } from "lucide-react";
 
 import { getLocaleContent } from "../../content/locales";
+import { getProductDocumentMetadata } from "../../content/productDocumentMetadata";
 import { getProductsByFamily } from "../../content/productRegistry";
 import { PRODUCT_FAMILY_IDS } from "../../content/productTypes";
 import type { AboutLocale } from "../../i18n/locales";
@@ -53,9 +54,10 @@ export function ProductsDirectoryPage({ locale }: { readonly locale: AboutLocale
 								</header>
 								<div className="product-link-list">
 									{products.map((product) => {
-										const productId = product.id;
-										const name = copy.products.common.names[productId];
-										const productCopy = copy.products.byId[productId];
+										const metadata = getProductDocumentMetadata(
+											locale,
+											product.id,
+										);
 
 										return (
 											<a
@@ -63,8 +65,8 @@ export function ProductsDirectoryPage({ locale }: { readonly locale: AboutLocale
 												href={getProductPath(locale, product.slug)}
 												key={product.id}
 											>
-												<strong>{name}</strong>
-												<span>{productCopy.summary}</span>
+												<strong>{metadata.name}</strong>
+												<span>{metadata.summary}</span>
 												<ArrowRight aria-hidden size={19} />
 											</a>
 										);

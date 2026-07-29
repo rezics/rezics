@@ -1,6 +1,7 @@
 import { Logo } from "@rezics/ui/custom/logo";
 
 import { getLocaleContent } from "../../content/locales";
+import { getProductDocumentMetadata } from "../../content/productDocumentMetadata";
 import type { AboutLocale } from "../../i18n/locales";
 import {
 	getContactPath,
@@ -15,7 +16,8 @@ const mainSiteUrl = "https://www.rezics.com";
 
 export function GlobalFooter({ locale }: { readonly locale: AboutLocale }) {
 	const copy = getLocaleContent(locale);
-	const names = copy.products.common.names;
+	const productName = (productId: Parameters<typeof getProductDocumentMetadata>[1]) =>
+		getProductDocumentMetadata(locale, productId).name;
 
 	return (
 		<footer className="global-footer">
@@ -33,22 +35,22 @@ export function GlobalFooter({ locale }: { readonly locale: AboutLocale }) {
 
 				<nav aria-labelledby="footer-products">
 					<h2 id="footer-products">{copy.footer.groups.products}</h2>
-					<a href={getProductPath(locale, "book")}>{names.book}</a>
+					<a href={getProductPath(locale, "book")}>{productName("book")}</a>
 					<a href={getProductPath(locale, "content-structure")}>
-						{names["content-structure"]}
+						{productName("content-structure")}
 					</a>
-					<a href={getProductPath(locale, "collection")}>{names.collection}</a>
-					<a href={getProductPath(locale, "realm")}>{names.realm}</a>
+					<a href={getProductPath(locale, "collection")}>{productName("collection")}</a>
+					<a href={getProductPath(locale, "realm")}>{productName("realm")}</a>
 					<a href={getProductsPath(locale)}>{copy.footer.links.allProducts}</a>
 				</nav>
 
 				<nav aria-labelledby="footer-platform">
 					<h2 id="footer-platform">{copy.footer.groups.platform}</h2>
-					<a href={getProductPath(locale, "history")}>{names.history}</a>
-					<a href={getProductPath(locale, "editor")}>{names.editor}</a>
-					<a href={getProductPath(locale, "feed")}>{names.feed}</a>
-					<a href={getProductPath(locale, "progress")}>{names.progress}</a>
-					<a href={getProductPath(locale, "api-oauth")}>{names["api-oauth"]}</a>
+					<a href={getProductPath(locale, "history")}>{productName("history")}</a>
+					<a href={getProductPath(locale, "editor")}>{productName("editor")}</a>
+					<a href={getProductPath(locale, "feed")}>{productName("feed")}</a>
+					<a href={getProductPath(locale, "progress")}>{productName("progress")}</a>
+					<a href={getProductPath(locale, "api-oauth")}>{productName("api-oauth")}</a>
 				</nav>
 
 				<nav aria-labelledby="footer-open">

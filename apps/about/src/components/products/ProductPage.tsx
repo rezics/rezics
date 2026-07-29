@@ -1,6 +1,9 @@
 import { ArrowLeft, ArrowRight, ChevronRight } from "lucide-react";
+import { Suspense } from "react";
+import { getProductDocument } from "virtual:rezics-about-product-documents";
 
 import { getLocaleContent } from "../../content/locales";
+import { getProductDocumentMetadata } from "../../content/productDocumentMetadata";
 import {
 	getParentProduct,
 	getRelatedProducts,
@@ -18,8 +21,8 @@ type ProductPageProps = {
 export function ProductPage({ locale, product }: ProductPageProps) {
 	const copy = getLocaleContent(locale);
 	const productId = product.id;
-	const productCopy = copy.products.byId[productId];
-	const productName = copy.products.common.names[productId];
+	const productMetadata = getProductDocumentMetadata(locale, productId);
+	const ProductDocument = getProductDocument(locale, productId);
 	const family = copy.products.families[product.family];
 	const parent = getParentProduct(product);
 	const related = getRelatedProducts(product);
@@ -33,7 +36,7 @@ export function ProductPage({ locale, product }: ProductPageProps) {
 						<ChevronRight aria-hidden size={14} />
 						<a href={getProductsPath(locale)}>{copy.common.nav.products}</a>
 						<ChevronRight aria-hidden size={14} />
-						<span aria-current="page">{productName}</span>
+						<span aria-current="page">{productMetadata.name}</span>
 					</nav>
 
 					<div className="product-hero">
@@ -45,16 +48,16 @@ export function ProductPage({ locale, product }: ProductPageProps) {
 								<span>{family.index}</span>
 								{family.title}
 							</a>
-							<h1>{productName}</h1>
+							<h1>{productMetadata.name}</h1>
 						</div>
 						<div className="product-hero__copy">
-							<p className="product-summary">{productCopy.summary}</p>
-							<p>{productCopy.introduction}</p>
+							<p className="product-summary">{productMetadata.summary}</p>
+							<p>{productMetadata.introduction}</p>
 							{parent ? (
 								<p className="product-parent">
 									<span>{copy.products.common.labels.parent}</span>
 									<a href={getProductPath(locale, parent.slug)}>
-										{copy.products.common.names[parent.id]}
+										{getProductDocumentMetadata(locale, parent.id).name}
 										<ArrowRight aria-hidden size={15} />
 									</a>
 								</p>
@@ -75,33 +78,16 @@ export function ProductPage({ locale, product }: ProductPageProps) {
 
 			<section className="product-explanation page-section">
 				<div className="page-shell">
-					<article className="explanation-block">
-						<h2>{copy.products.common.labels.uses}</h2>
-						<ol>
-							{productCopy.uses.map((item, index) => (
-								<li key={item}>
-									<span>{String(index + 1).padStart(2, "0")}</span>
-									<p>{item}</p>
-								</li>
-							))}
-						</ol>
-					</article>
-
-					<article className="explanation-block">
-						<h2>{copy.products.common.labels.operation}</h2>
-						<ol>
-							{productCopy.operation.map((item, index) => (
-								<li key={item}>
-									<span>{String(index + 1).padStart(2, "0")}</span>
-									<p>{item}</p>
-								</li>
-							))}
-						</ol>
-					</article>
-
-					<article className="boundary-block">
-						<h2>{copy.products.common.labels.boundary}</h2>
-						<p>{productCopy.boundary}</p>
+					<article className="product-document">
+						<Suspense
+							fallback={
+								<p className="product-document__loading">
+									{copy.products.common.labels.loading}
+								</p>
+							}
+						>
+							<ProductDocument />
+						</Suspense>
 					</article>
 				</div>
 			</section>
@@ -112,13 +98,14 @@ export function ProductPage({ locale, product }: ProductPageProps) {
 					<div className="related-product-list">
 						{related.map((relatedProduct) => {
 							const relatedId = relatedProduct.id;
+							const relatedMetadata = getProductDocumentMetadata(locale, relatedId);
 							return (
 								<a
 									href={getProductPath(locale, relatedProduct.slug)}
 									key={relatedProduct.id}
 								>
-									<strong>{copy.products.common.names[relatedId]}</strong>
-									<span>{copy.products.byId[relatedId].summary}</span>
+									<strong>{relatedMetadata.name}</strong>
+									<span>{relatedMetadata.summary}</span>
 									<ArrowRight aria-hidden size={18} />
 								</a>
 							);

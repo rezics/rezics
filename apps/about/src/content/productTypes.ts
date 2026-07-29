@@ -19,14 +19,6 @@ export type ProductDefinition = {
 	readonly demoKind?: ProductDemoKind;
 };
 
-export type ProductPageCopy = {
-	readonly summary: string;
-	readonly introduction: string;
-	readonly uses: readonly [string, string, string];
-	readonly operation: readonly [string, string, string];
-	readonly boundary: string;
-};
-
 export type AboutPageMeta = {
 	readonly title: string;
 	readonly description: string;

@@ -1,12 +1,15 @@
+import mdx from "@mdx-js/rollup";
 import react from "@vitejs/plugin-react";
 import { fileURLToPath } from "node:url";
 import { defineProject } from "vitest/config";
+
+import { productMetadataPlugin } from "./src/content/productMetadataPlugin";
 
 const root = fileURLToPath(new URL("./", import.meta.url));
 
 export default defineProject({
 	root,
-	plugins: [react()],
+	plugins: [productMetadataPlugin(), mdx(), react()],
 	resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
 	test: {
 		name: "about",

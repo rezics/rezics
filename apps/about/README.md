@@ -19,7 +19,16 @@ be added after their complete, typed content resource is ready.
 
 ## Architecture
 
-- `src/content/locales/zh-hant/content.ts`: all user-visible copy and product explanations.
+- `src/content/locales/zh-hant/content.ts`: shared shell, directory, contact, and interactive
+  component copy for the published locale.
+- `src/content/locales/zh-hant/products/*.mdx`: one editorial document for each product. Each
+  document owns its name, summary, introduction, and freely structured explanation.
+- `src/content/productMetadataPlugin.ts` and `productDocumentMetadata.ts`: expose metadata-only
+  build modules, validate their unknown exports, and prove that every registered product has
+  exactly one document in every published locale.
+- `src/content/productDocuments.client.ts` and `productDocuments.server.ts`: resolve through one
+  environment-aware virtual module, so prerendering receives complete HTML while the browser
+  lazily loads only the selected product body.
 - `src/content/productRegistry.ts`: the 26 product identities, four guided paths, relations,
   and the three products with meaningful interactive demonstrations.
 - `src/components/products/`: the site shell, real homepage, guided Products directory,
@@ -32,6 +41,27 @@ be added after their complete, typed content resource is ready.
 The homepage owns the brand narrative and Contact Us invitation, while `/contact-us/` owns the
 actual contact channels. The Products directory starts from visitor intent rather than exposing
 the registry as an undifferentiated feature list.
+
+## Product documents
+
+The filename must match a registered product slug. Each document exports literal metadata and
+starts its editorial body below the page-owned product heading:
+
+```mdx
+export const metadata = {
+	name: "書籍",
+	summary: "把一本書的作品身分、版本與內容放在同一個產品表面。",
+	introduction: "書籍先是一個可辨認的作品，再有版本、目錄與貢獻關係。",
+};
+
+## First document-owned section
+
+The rest of the structure belongs to this product.
+```
+
+The build rejects missing documents, unknown slugs, duplicate documents, incomplete metadata,
+and executable metadata values. Shared navigation and interactive component states remain in the
+typed locale content contract.
 
 ## Commands
 

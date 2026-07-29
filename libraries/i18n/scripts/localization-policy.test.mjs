@@ -130,6 +130,35 @@ describe("localization terminology policy", () => {
 		expect(errors).toEqual([]);
 	});
 
+	it("checks MDX metadata prose without treating module syntax as visible copy", () => {
+		const approved = checkMarkdownSource({
+			path: "apps/about/src/content/locales/zh-hant/products/example.mdx",
+			source: `export const metadata = {
+	name: "專區",
+	summary: "歡迎來到專區。",
+};
+
+## 詳細內容`,
+			verbatimDefinitions,
+			terminologyDefinitions,
+			rejectUnapprovedTokens: true,
+		});
+		const forbidden = checkMarkdownSource({
+			path: "apps/about/src/content/locales/zh-hant/products/example.mdx",
+			source: `export const metadata = { name: "Zone" };
+
+## 詳細內容`,
+			verbatimDefinitions,
+			terminologyDefinitions,
+			rejectUnapprovedTokens: true,
+		});
+
+		expect(approved).toEqual([]);
+		expect(forbidden).toEqual(
+			expect.arrayContaining([expect.stringContaining('forbidden zone terminology "Zone"')]),
+		);
+	});
+
 	it("rejects empty and self-forbidden registry values", () => {
 		const errors = checkTerminologyRegistry({
 			"zh-Hant": {
