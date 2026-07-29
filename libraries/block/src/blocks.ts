@@ -1,5 +1,5 @@
 import { PortableText, type PortableTextValue } from "@rezics/portable-text";
-import { SearchTemplateId } from "@rezics/filter";
+import { EmbeddableSearchTemplateId } from "@rezics/filter";
 import { type Static, type TSchema, Type } from "@sinclair/typebox";
 
 import { BlockKey, createBlockKey } from "./identity";
@@ -47,7 +47,7 @@ export type PostFullViewBlock = Static<typeof PostFullViewBlock>;
 
 export const SearchFeatureSource = Type.Union([
 	Type.Object(
-		{ kind: Type.Literal("template"), template: SearchTemplateId },
+		{ kind: Type.Literal("template"), template: EmbeddableSearchTemplateId },
 		{ additionalProperties: false },
 	),
 	Type.Object({ kind: Type.Literal("zone") }, { additionalProperties: false }),

@@ -564,6 +564,26 @@ export const CurrentSearchSortRegistry = {
 		requiresQuery: false,
 		meilisearch: ["filters.closesAt:desc", "id:asc"],
 	},
+	"title:asc": {
+		categories: [],
+		requiresQuery: false,
+		meilisearch: [],
+	},
+	"title:desc": {
+		categories: [],
+		requiresQuery: false,
+		meilisearch: [],
+	},
+	"progressLastSeenAt:asc": {
+		categories: [],
+		requiresQuery: false,
+		meilisearch: [],
+	},
+	"progressLastSeenAt:desc": {
+		categories: [],
+		requiresQuery: false,
+		meilisearch: [],
+	},
 } as const satisfies Readonly<Record<SearchSort, SearchSortDefinition>>;
 
 const UuidPattern =

@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
-import { and, desc, eq, inArray, isNull, lt, or, sql } from "drizzle-orm";
+import { FilterSchemaModels } from "@rezics/filter";
+import { and, asc, count, desc, eq, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import { getUnitReadCondition } from "../../authorization/unit/query";
@@ -27,6 +28,7 @@ import {
 	ProgressEntryParams,
 	ProgressLookupResponse,
 	ProgressNodeParams,
+	ProgressSearchBody,
 	ProgressUnitParams,
 	ReplaceProgressEntryBody,
 	UpsertProgressBody,
@@ -39,6 +41,7 @@ import {
 	ProgressListResponse,
 	ProgressNodeListResponse,
 	ProgressResponse,
+	ProgressSearchResponse,
 } from "../schema/response";
 import { NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
@@ -50,6 +53,13 @@ import {
 	recordChapterReading,
 	replaceProgressEntry,
 } from "./service";
+import { presentImageAsset } from "../../units/service";
+import { createProgressSearchCursor, resolveProgressSearchRequest } from "./search";
+
+function toProgressUnitType(value: string): "book" | "media" | "software" {
+	if (value === "book" || value === "media" || value === "software") return value;
+	throw new TypeError("Progress Search returned an unsupported Unit kind");
+}
 
 function toProgressResponse<
 	T extends {
@@ -172,6 +182,7 @@ async function selectProgressSnapshot(profileId: string, unitId: string) {
 
 export default new Elysia({ prefix: "/progress" })
 	.use(session)
+	.model(FilterSchemaModels)
 	.get(
 		"",
 		async ({ profile, query }) => {
@@ -220,6 +231,125 @@ export default new Elysia({ prefix: "/progress" })
 			query: ListProgressQuery,
 			response: { [StatusCodes.OK]: ProgressListResponse },
 			detail: { summary: "List current profile progress", tags: ["Progress"] },
+		},
+	)
+	.post(
+		"/search",
+		async ({ profile, body }) => {
+			const request = resolveProgressSearchRequest(body);
+			const textCondition = request.query
+				? (() => {
+						const escaped = request.query.replace(/[!%_]/g, "!$&");
+						const pattern = `%${escaped}%`;
+						return or(
+							sql`coalesce(${unitLocalization.title}, '') ilike ${pattern} escape '!'`,
+							sql`coalesce(${unitLocalization.summary}, '') ilike ${pattern} escape '!'`,
+						);
+					})()
+				: undefined;
+			const condition = and(
+				eq(unitProgress.profileId, profile.unitId),
+				isNull(unitProgress.deletedAt),
+				getUnitReadCondition(profile.unitId),
+				inArray(unit.kind, ["book", "media", "software"]),
+				textCondition,
+			);
+			const orderBy =
+				request.sort === "title:asc"
+					? [
+							sql`lower(${unitLocalization.title}) asc nulls last`,
+							asc(unitProgress.unitId),
+						]
+					: request.sort === "title:desc"
+						? [
+								sql`lower(${unitLocalization.title}) desc nulls last`,
+								asc(unitProgress.unitId),
+							]
+						: request.sort === "progressLastSeenAt:asc"
+							? [asc(unitProgress.lastSeenAt), asc(unitProgress.unitId)]
+							: [desc(unitProgress.lastSeenAt), asc(unitProgress.unitId)];
+			const baseQuery = database
+				.select({
+					unitId: unitProgress.unitId,
+					status: unitProgress.status,
+					progress: unitProgress.progress,
+					completedCount: unitProgress.completedCount,
+					totalTimeMs: unitProgress.totalTimeMs,
+					firstSeenAt: unitProgress.firstSeenAt,
+					lastSeenAt: unitProgress.lastSeenAt,
+					lastContentStructureNodeId: unitProgress.lastContentStructureNodeId,
+					visibility: unitProgress.visibility,
+					type: unit.kind,
+					language: unitLocalization.language,
+					title: unitLocalization.title,
+					summary: unitLocalization.summary,
+					coverAssetId: unitLocalization.coverAssetId,
+				})
+				.from(unitProgress)
+				.innerJoin(unit, eq(unit.id, unitProgress.unitId))
+				.innerJoin(
+					unitLocalization,
+					and(
+						eq(unitLocalization.unitId, unit.id),
+						eq(
+							unitLocalization.language,
+							resolvedUnitLocalizationLanguage(unit.id, body.localizationLanguages),
+						),
+					),
+				)
+				.where(condition);
+			const countQuery = database
+				.select({ value: count() })
+				.from(unitProgress)
+				.innerJoin(unit, eq(unit.id, unitProgress.unitId))
+				.innerJoin(
+					unitLocalization,
+					and(
+						eq(unitLocalization.unitId, unit.id),
+						eq(
+							unitLocalization.language,
+							resolvedUnitLocalizationLanguage(unit.id, body.localizationLanguages),
+						),
+					),
+				)
+				.where(condition);
+			const [rows, [countRow]] = await Promise.all([
+				baseQuery
+					.orderBy(...orderBy)
+					.offset(request.offset)
+					.limit(request.pageSize + 1),
+				countQuery,
+			]);
+			const total = countRow?.value ?? 0;
+			const items = rows.slice(0, request.pageSize).map(({ coverAssetId, ...row }) => ({
+				...row,
+				type: toProgressUnitType(row.type),
+				totalTimeMs: Number(row.totalTimeMs),
+				lastReadAnchor: null,
+				cover: presentImageAsset(coverAssetId, "cover"),
+			}));
+			const nextOffset = request.offset + items.length;
+			return {
+				items,
+				total,
+				...(rows.length > request.pageSize
+					? {
+							nextCursor: createProgressSearchCursor(request, nextOffset),
+						}
+					: {}),
+			};
+		},
+		{
+			access: "interaction:read",
+			body: ProgressSearchBody,
+			response: {
+				[StatusCodes.OK]: ProgressSearchResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidSearch"]),
+			},
+			detail: {
+				summary: "Search current profile progress with a Search Feature state",
+				tags: ["Progress", "Search"],
+			},
 		},
 	)
 	.get(

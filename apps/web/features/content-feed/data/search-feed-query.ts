@@ -1,4 +1,4 @@
-import type { SearchFeatureSurface, SearchTemplateId } from "@rezics/filter";
+import type { EmbeddableSearchTemplateId, SearchFeatureSurface } from "@rezics/filter";
 import {
 	postApiSearchFeaturesByTemplateFeed,
 	postApiSearchZonesByZoneIdFeatureFeed,
@@ -11,7 +11,7 @@ export type SearchFeedRequest = Pick<
 >;
 
 export type SearchFeedSource =
-	| Readonly<{ kind: "template"; template: SearchTemplateId }>
+	| Readonly<{ kind: "template"; template: EmbeddableSearchTemplateId }>
 	| Readonly<{ kind: "zone"; zoneId: string }>;
 
 export async function fetchSearchFeedPage({

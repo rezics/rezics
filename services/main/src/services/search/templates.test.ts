@@ -28,7 +28,8 @@ describe("Search Feature v1", () => {
 		expect(resolved.document.template.id).toBe(template);
 		expect(resolved.document).not.toHaveProperty("modes");
 		expect(resolved.document.controls.every((control) => !("modes" in control))).toBe(true);
-		expect(resolved.controls.length).toBeGreaterThan(0);
+		if (template === "progress") expect(resolved.controls).toEqual([]);
+		else expect(resolved.controls.length).toBeGreaterThan(0);
 	});
 
 	it("removes the Tag-path category and control option outside development preview", () => {
@@ -116,6 +117,37 @@ describe("Search Feature v1", () => {
 			expect(compiled.request.constraints).toEqual([]);
 		},
 	);
+
+	it("defines personal progress search with only its supported result ordering", () => {
+		const document = createDefaultSearchDocument("progress");
+
+		expect(document.categories).toEqual(["units"]);
+		expect(document.controls).toEqual([]);
+		expect(document.sort.search).toEqual({
+			defaults: {
+				emptyQuery: "progressLastSeenAt:desc",
+				textQuery: "progressLastSeenAt:desc",
+			},
+			options: [
+				"progressLastSeenAt:desc",
+				"progressLastSeenAt:asc",
+				"title:asc",
+				"title:desc",
+			],
+		});
+		expect(resolveSearchDocument(document, true).controls).toEqual([]);
+	});
+
+	it("keeps the personal progress template out of shared Search documents", () => {
+		expect(() =>
+			parseSharedSearchQueryDocument({
+				version: 1,
+				template: "progress",
+				state: {},
+				selections: [],
+			}),
+		).toThrow("Invalid shared Search query document");
+	});
 
 	it("uses schema-controlled Search and Feed sorting profiles", () => {
 		const document = createDefaultSearchDocument("global");

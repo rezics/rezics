@@ -40,11 +40,31 @@ export const SearchTemplateIdValues = [
 	"book",
 	"media",
 	"software",
+	"progress",
 	"realm",
 	"zone",
 ] as const;
 export type SearchTemplateId = (typeof SearchTemplateIdValues)[number];
 export const SearchTemplateId = Type.Union([
+	Type.Literal("global"),
+	Type.Literal("book"),
+	Type.Literal("media"),
+	Type.Literal("software"),
+	Type.Literal("progress"),
+	Type.Literal("realm"),
+	Type.Literal("zone"),
+]);
+
+export const EmbeddableSearchTemplateIdValues = [
+	"global",
+	"book",
+	"media",
+	"software",
+	"realm",
+	"zone",
+] as const satisfies readonly SearchTemplateId[];
+export type EmbeddableSearchTemplateId = (typeof EmbeddableSearchTemplateIdValues)[number];
+export const EmbeddableSearchTemplateId = Type.Union([
 	Type.Literal("global"),
 	Type.Literal("book"),
 	Type.Literal("media"),
@@ -259,7 +279,7 @@ export type SharedSearchQuerySelection = Static<typeof SharedSearchQuerySelectio
 export const SharedSearchQueryDocument = Type.Object(
 	{
 		version: Type.Literal(1),
-		template: SearchTemplateId,
+		template: EmbeddableSearchTemplateId,
 		state: SharedSearchQueryState,
 		selections: Type.Array(SharedSearchQuerySelection, { maxItems: 100 }),
 	},

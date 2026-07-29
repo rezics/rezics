@@ -1,4 +1,5 @@
 import { type Static, t } from "elysia";
+import { SearchFeatureInput } from "@rezics/filter";
 
 import {
 	ProgressDatePrecisionValues,
@@ -22,6 +23,16 @@ export const ListProgressQuery = t.Object(
 	{ additionalProperties: false },
 );
 export type ListProgressQuery = Static<typeof ListProgressQuery>;
+
+const ProgressSearchFeatureExecution = t.Omit(SearchFeatureInput, ["document", "contexts"]);
+export const ProgressSearchBody = t.Object(
+	{
+		...ProgressSearchFeatureExecution.properties,
+		...LocalizationLanguageQuery,
+	},
+	{ additionalProperties: false },
+);
+export type ProgressSearchBody = Static<typeof ProgressSearchBody>;
 
 export const ProgressUnitParams = t.Object({ unitId: Uuid });
 export type ProgressUnitParams = Static<typeof ProgressUnitParams>;

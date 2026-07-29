@@ -263,6 +263,8 @@ export function SearchFeature({
 	appearance = "page",
 	surface,
 	toolbarFilters,
+	queryLabel,
+	queryPlaceholder,
 }: {
 	readonly id: string;
 	readonly definition: SearchFeatureDefinition;
@@ -285,6 +287,8 @@ export function SearchFeature({
 	readonly appearance?: "feed" | "page";
 	readonly surface: SearchFeatureSurface;
 	readonly toolbarFilters?: ReactNode;
+	readonly queryLabel?: string;
+	readonly queryPlaceholder?: string;
 }) {
 	const { t } = useTranslation("search");
 	const { t: localeCopy } = useTranslation("locale");
@@ -622,12 +626,12 @@ export function SearchFeature({
 							className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
 						/>
 						<Input
-							aria-label={t.query}
+							aria-label={queryLabel ?? t.query}
 							className="h-12 ps-10 text-base"
 							id={`${id}-query`}
 							maxLength={500}
 							onChange={(event) => setQuery(event.currentTarget.value)}
-							placeholder={t.placeholder}
+							placeholder={queryPlaceholder ?? t.placeholder}
 							required={document.query.required}
 							type="search"
 							value={query}
@@ -645,127 +649,133 @@ export function SearchFeature({
 				</div>
 			) : null}
 
-			<div aria-label={t.commonFilters} className="grid gap-4 sm:grid-cols-2">
-				{categoryControl ? (
-					<Field>
-						<FieldLabel>{t.contentCategory}</FieldLabel>
-						<ChoiceSelect
-							appearance="field"
-							ariaLabel={t.contentCategory}
-							className="h-10 w-full"
-							multiple
-							onValueChange={(values) => setCategory([...values])}
-							options={SearchCategoryValues.map((value) => ({
-								value,
-								label: t.categoryOptions[value],
-							}))}
-							placeholder={t.allCategories}
-							value={category}
-						/>
-					</Field>
-				) : null}
-				{tagControl ? (
-					<>
+			{categoryControl || tagControl || realmControl || languageControl ? (
+				<div aria-label={t.commonFilters} className="grid gap-4 sm:grid-cols-2">
+					{categoryControl ? (
 						<Field>
-							<FieldLabel>{t.includeTags}</FieldLabel>
+							<FieldLabel>{t.contentCategory}</FieldLabel>
+							<ChoiceSelect
+								appearance="field"
+								ariaLabel={t.contentCategory}
+								className="h-10 w-full"
+								multiple
+								onValueChange={(values) => setCategory([...values])}
+								options={SearchCategoryValues.map((value) => ({
+									value,
+									label: t.categoryOptions[value],
+								}))}
+								placeholder={t.allCategories}
+								value={category}
+							/>
+						</Field>
+					) : null}
+					{tagControl ? (
+						<>
+							<Field>
+								<FieldLabel>{t.includeTags}</FieldLabel>
+								<SearchEntityMultiSelect
+									emptyLabel={t.entitySearchEmpty}
+									errorLabel={t.entitySearchError}
+									index="tags"
+									loadingLabel={t.entitySearchLoading}
+									onChange={setIncludedTags}
+									placeholder={t.tagSearchPlaceholder}
+									removeLabel={t.removeSelection}
+									selected={includedTags}
+								/>
+							</Field>
+							<Field>
+								<FieldLabel>{t.excludeTags}</FieldLabel>
+								<SearchEntityMultiSelect
+									emptyLabel={t.entitySearchEmpty}
+									errorLabel={t.entitySearchError}
+									index="tags"
+									loadingLabel={t.entitySearchLoading}
+									onChange={setExcludedTags}
+									placeholder={t.tagSearchPlaceholder}
+									removeLabel={t.removeSelection}
+									selected={excludedTags}
+								/>
+							</Field>
+						</>
+					) : null}
+					{realmControl ? (
+						<Field>
+							<FieldLabel>{t.realms}</FieldLabel>
 							<SearchEntityMultiSelect
 								emptyLabel={t.entitySearchEmpty}
 								errorLabel={t.entitySearchError}
-								index="tags"
+								index="realms"
 								loadingLabel={t.entitySearchLoading}
-								onChange={setIncludedTags}
-								placeholder={t.tagSearchPlaceholder}
+								onChange={setRealms}
+								placeholder={t.realmSearchPlaceholder}
 								removeLabel={t.removeSelection}
-								selected={includedTags}
+								selected={realms}
 							/>
 						</Field>
+					) : null}
+					{languageControl ? (
 						<Field>
-							<FieldLabel>{t.excludeTags}</FieldLabel>
-							<SearchEntityMultiSelect
-								emptyLabel={t.entitySearchEmpty}
-								errorLabel={t.entitySearchError}
-								index="tags"
-								loadingLabel={t.entitySearchLoading}
-								onChange={setExcludedTags}
-								placeholder={t.tagSearchPlaceholder}
-								removeLabel={t.removeSelection}
-								selected={excludedTags}
+							<FieldLabel>{t.language}</FieldLabel>
+							<ChoiceSelect
+								appearance="field"
+								ariaLabel={t.language}
+								className="h-10 w-full"
+								multiple
+								onValueChange={(values) => setLanguage([...values])}
+								options={ContentLanguageValues.map((value) => ({
+									value,
+									label: localeCopy.contentLanguages[value],
+								}))}
+								placeholder={t.allLanguages}
+								value={language}
 							/>
 						</Field>
-					</>
-				) : null}
-				{realmControl ? (
-					<Field>
-						<FieldLabel>{t.realms}</FieldLabel>
-						<SearchEntityMultiSelect
-							emptyLabel={t.entitySearchEmpty}
-							errorLabel={t.entitySearchError}
-							index="realms"
-							loadingLabel={t.entitySearchLoading}
-							onChange={setRealms}
-							placeholder={t.realmSearchPlaceholder}
-							removeLabel={t.removeSelection}
-							selected={realms}
-						/>
-					</Field>
-				) : null}
-				{languageControl ? (
-					<Field>
-						<FieldLabel>{t.language}</FieldLabel>
-						<ChoiceSelect
-							appearance="field"
-							ariaLabel={t.language}
-							className="h-10 w-full"
-							multiple
-							onValueChange={(values) => setLanguage([...values])}
-							options={ContentLanguageValues.map((value) => ({
-								value,
-								label: localeCopy.contentLanguages[value],
-							}))}
-							placeholder={t.allLanguages}
-							value={language}
-						/>
-					</Field>
-				) : null}
-			</div>
+					) : null}
+				</div>
+			) : null}
 
-			<div className="flex flex-wrap items-center gap-3">
-				<Button
-					onClick={() => {
-						setFilterOpen(false);
-						setBuilderOpen(true);
-					}}
-					size="sm"
-					type="button"
-					variant="quiet"
-				>
-					<Filter aria-hidden />
-					{t.advancedFilters}
-				</Button>
-				{onShare ? (
-					<Button
-						onClick={() => {
-							setShareState("idle");
-							const state = currentState(advanced);
-							void onShare({
-								state,
-								selections: allSelections.filter((selection) =>
-									stateContainsSelection(state, selection),
-								),
-							}).then(
-								() => setShareState("copied"),
-								() => setShareState("failed"),
-							);
-						}}
-						size="sm"
-						type="button"
-						variant="quiet"
-					>
-						<Share2 aria-hidden />
-						{shareState === "copied" ? t.shareCopied : t.shareQuery}
-					</Button>
-				) : null}
-			</div>
+			{controls.length > 0 || onShare ? (
+				<div className="flex flex-wrap items-center gap-3">
+					{controls.length > 0 ? (
+						<Button
+							onClick={() => {
+								setFilterOpen(false);
+								setBuilderOpen(true);
+							}}
+							size="sm"
+							type="button"
+							variant="quiet"
+						>
+							<Filter aria-hidden />
+							{t.advancedFilters}
+						</Button>
+					) : null}
+					{onShare ? (
+						<Button
+							onClick={() => {
+								setShareState("idle");
+								const state = currentState(advanced);
+								void onShare({
+									state,
+									selections: allSelections.filter((selection) =>
+										stateContainsSelection(state, selection),
+									),
+								}).then(
+									() => setShareState("copied"),
+									() => setShareState("failed"),
+								);
+							}}
+							size="sm"
+							type="button"
+							variant="quiet"
+						>
+							<Share2 aria-hidden />
+							{shareState === "copied" ? t.shareCopied : t.shareQuery}
+						</Button>
+					) : null}
+				</div>
+			) : null}
 
 			{shareState === "failed" ? (
 				<p className="text-destructive text-sm" role="alert">
@@ -873,6 +883,7 @@ export function SearchFeature({
 							onValueChange={([nextSort]) => {
 								if (!nextSort) return;
 								setSortOverride(nextSort);
+								execute(advanced, nextSort);
 							}}
 							options={sortOptions}
 							placeholder={t.sort}
@@ -886,21 +897,23 @@ export function SearchFeature({
 			{error ? <p className="sr-only">{t.failed}</p> : null}
 			{children}
 
-			<AdvancedSearchBuilder
-				controls={controls}
-				expression={advanced}
-				facets={facets}
-				onApply={(nextExpression, nextSelections) => {
-					setAdvanced(nextExpression);
-					setAdvancedSelections(nextSelections);
-					execute(nextExpression);
-				}}
-				onOpenChange={setBuilderOpen}
-				open={builderOpen}
-				resolveLabel={resolveLabel}
-				resolveOptionLabel={valueLabel}
-				selections={advancedSelections}
-			/>
+			{controls.length > 0 ? (
+				<AdvancedSearchBuilder
+					controls={controls}
+					expression={advanced}
+					facets={facets}
+					onApply={(nextExpression, nextSelections) => {
+						setAdvanced(nextExpression);
+						setAdvancedSelections(nextSelections);
+						execute(nextExpression);
+					}}
+					onOpenChange={setBuilderOpen}
+					open={builderOpen}
+					resolveLabel={resolveLabel}
+					resolveOptionLabel={valueLabel}
+					selections={advancedSelections}
+				/>
+			) : null}
 		</>
 	);
 }

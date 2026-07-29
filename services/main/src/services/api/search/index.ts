@@ -12,6 +12,7 @@ import {
 	SearchFeatureDefinition,
 	SearchFeatureInput,
 	SearchDocument,
+	EmbeddableSearchTemplateId,
 	SearchFeatureSurface,
 	SharedSearchQueryDocument,
 	SearchTemplateId,
@@ -92,6 +93,9 @@ const ZonePageSearchParams = t.Object({
 	blockKey: BlockKey,
 });
 const SearchFeatureTemplateParams = t.Object({ template: SearchTemplateId });
+const ExecutableSearchFeatureTemplateParams = t.Object({
+	template: EmbeddableSearchTemplateId,
+});
 const SharedSearchQueryParams = t.Object({ id: Uuid });
 const SharedSearchQueryResponse = t.Object({
 	id: Uuid,
@@ -335,7 +339,7 @@ export default new Elysia({ prefix: "/search" })
 			}
 		},
 		{
-			params: SearchFeatureTemplateParams,
+			params: ExecutableSearchFeatureTemplateParams,
 			body: SearchFeatureExecutionBody,
 			response: {
 				[StatusCodes.OK]: SearchResponse,
@@ -378,7 +382,7 @@ export default new Elysia({ prefix: "/search" })
 			}
 		},
 		{
-			params: SearchFeatureTemplateParams,
+			params: ExecutableSearchFeatureTemplateParams,
 			body: SearchFeatureFeedPresentationBody,
 			response: {
 				[StatusCodes.OK]: SearchFeedResponse,

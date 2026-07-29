@@ -238,6 +238,9 @@ export default {
 		},
 	},
 	retryProgress: "重新加载进度",
+	searchProgress: "搜索进度记录",
+	searchProgressPlaceholder: "搜索作品标题或摘要",
+	progressUpdatedAt: insert("进度更新于 {{time}}", { time: String }),
 	progressPercent: insert("{{percent}}%", { percent: Number }),
 	viewProgressHistory: "查看足迹",
 	progressJournal: {

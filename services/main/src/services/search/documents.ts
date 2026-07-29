@@ -41,6 +41,8 @@ export interface ZoneSearchFeatureProjection {
 function validateDocument(value: unknown): SearchDocument {
 	try {
 		const document = parseSearchDocument(value);
+		if (document.template.id === "progress")
+			throw new InvalidSearch("Progress Search cannot be configured as a Zone feature");
 		resolveSearchDocument(document, true);
 		return document;
 	} catch (cause) {

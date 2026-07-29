@@ -5,7 +5,6 @@ import {
 	type GetApiProgressByUnitIdStatus200,
 	useDeleteApiProgressByUnitId,
 	useGetApiProgressByUnitId,
-	useGetApiUsersMePreferences,
 	useGetApiUnitsBookByUnitIdContentStructureNodes,
 	usePostApiProgressByUnitIdComplete,
 	usePutApiProgressByUnitId,
@@ -23,10 +22,7 @@ import {
 } from "react";
 
 import { useTranslation } from "@/i18n/client";
-import {
-	isResourceVisibility,
-	type ResourceVisibility,
-} from "@/features/privacy/model/resource-visibility";
+import { isResourceVisibility } from "@/features/privacy/model/resource-visibility";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
@@ -63,7 +59,6 @@ interface UnitProgressContextValue {
 	readonly completionError: unknown;
 	readonly completionFeedbackCount: number | undefined;
 	readonly currentEntryId: string | null;
-	readonly defaultVisibility: ResourceVisibility;
 	readonly domain: UnitProgressDomain;
 	readonly editorOpen: boolean;
 	readonly isCompleting: boolean;
@@ -91,9 +86,11 @@ export function useUnitProgress(): UnitProgressContextValue {
 export function UnitProgressProvider({
 	children,
 	domain,
+	onEditorClosed,
 }: {
 	readonly children: ReactNode;
 	readonly domain: UnitProgressDomain;
+	readonly onEditorClosed?: () => void;
 }) {
 	const session = useHydratedSession();
 	const authenticated = Boolean(session.data);
@@ -102,9 +99,6 @@ export function UnitProgressProvider({
 		{ path: { unitId: domain.unitId } },
 		{ query: { enabled: authenticated } },
 	);
-	const preferences = useGetApiUsersMePreferences({
-		query: { enabled: authenticated },
-	});
 	const chaptersQuery = useGetApiUnitsBookByUnitIdContentStructureNodes(
 		{ path: { unitId: domain.unitId }, query: { localizationLanguages } },
 		{ query: { enabled: authenticated && domain.type === "book" } },
@@ -118,6 +112,7 @@ export function UnitProgressProvider({
 	const [completionPreview, setCompletionPreview] = useState<UnitProgressRecord>();
 	const [completionFeedbackCount, setCompletionFeedbackCount] = useState<number>();
 	const completionInFlight = useRef(false);
+	const editorWasOpen = useRef(false);
 	const progressQueryKey = useMemo(
 		() => getApiProgressByUnitIdQueryKey({ path: { unitId: domain.unitId } }),
 		[domain.unitId],
@@ -148,16 +143,14 @@ export function UnitProgressProvider({
 		});
 	}, [chaptersQuery.data?.items]);
 	const displayedRecord = completionPreview ?? confirmedRecord;
-	const defaultVisibility =
-		preferences.data?.progressVisibility ?? ("private" satisfies ResourceVisibility);
 	const state = useMemo(
 		() =>
 			deriveUnitProgressState({
 				authenticated,
 				record: displayedRecord,
-				recordError: recordQuery.error ?? preferences.error,
-				recordFailed: recordQuery.isError || preferences.isError,
-				recordPending: recordQuery.isPending || preferences.isPending,
+				recordError: recordQuery.error,
+				recordFailed: recordQuery.isError,
+				recordPending: recordQuery.isPending,
 				sessionPending: session.isPending,
 			}),
 		[
@@ -166,9 +159,6 @@ export function UnitProgressProvider({
 			recordQuery.error,
 			recordQuery.isError,
 			recordQuery.isPending,
-			preferences.error,
-			preferences.isError,
-			preferences.isPending,
 			session.isPending,
 		],
 	);
@@ -178,6 +168,16 @@ export function UnitProgressProvider({
 		const timer = window.setTimeout(() => setCompletionFeedbackCount(undefined), 1_600);
 		return () => window.clearTimeout(timer);
 	}, [completionFeedbackCount]);
+
+	useEffect(() => {
+		if (editorOpen) {
+			editorWasOpen.current = true;
+			return;
+		}
+		if (!editorWasOpen.current) return;
+		editorWasOpen.current = false;
+		onEditorClosed?.();
+	}, [editorOpen, onEditorClosed]);
 
 	const refreshProgress = useCallback(() => {
 		void invalidateProgressQueries(queryClient, domain.unitId).catch(() => undefined);
@@ -307,7 +307,6 @@ export function UnitProgressProvider({
 			completionError: completionMutation.error,
 			completionFeedbackCount,
 			currentEntryId,
-			defaultVisibility,
 			domain,
 			editorOpen,
 			isCompleting: completionPreview !== undefined,
@@ -334,7 +333,6 @@ export function UnitProgressProvider({
 			completionMutation.error,
 			completionPreview,
 			currentEntryId,
-			defaultVisibility,
 			domain,
 			editorOpen,
 			openEditor,

@@ -3,7 +3,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 
-import type { SearchFeatureSurface, SearchTemplateId } from "@rezics/filter";
+import type { EmbeddableSearchTemplateId, SearchFeatureSurface } from "@rezics/filter";
 import { Alert, AlertAction, AlertDescription, Button } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
@@ -191,7 +191,7 @@ export function SearchFeedList({
 	readonly requestedRealmId?: string;
 } & (
 	| Readonly<{ source: SearchFeedSource; template?: never }>
-	| Readonly<{ source?: never; template: SearchTemplateId }>
+	| Readonly<{ source?: never; template: EmbeddableSearchTemplateId }>
 )) {
 	const resolvedSource: SearchFeedSource = source ?? { kind: "template", template };
 	const query = useSearchFeedQuery({

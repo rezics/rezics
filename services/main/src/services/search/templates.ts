@@ -60,6 +60,14 @@ const CommonSorts = [
 	"updatedAt:desc",
 ] as const;
 
+export const ProgressSearchSorts = [
+	"progressLastSeenAt:desc",
+	"progressLastSeenAt:asc",
+	"title:asc",
+	"title:desc",
+] as const satisfies readonly SearchSort[];
+export type ProgressSearchSort = (typeof ProgressSearchSorts)[number];
+
 const CommonFields = [
 	"language",
 	"content-rating",
@@ -168,6 +176,17 @@ const TemplateDefinitions = {
 		maxPageSize: 50,
 		maxResultWindow: 10_000,
 	},
+	progress: {
+		id: "progress",
+		categories: ["units"],
+		fields: [],
+		constraints: [{ field: "kind", operator: "any-of", values: ["book", "media", "software"] }],
+		visible: new Set<SearchField>(),
+		defaultFacets: [],
+		sorts: ProgressSearchSorts,
+		maxPageSize: 50,
+		maxResultWindow: 10_000,
+	},
 	realm: {
 		id: "realm",
 		categories: ["realms"],
@@ -257,7 +276,10 @@ function validateTemplateDocument(document: SearchDocument): SearchTemplateDefin
 		if (!configuration.options.every((sort) => template.sorts.includes(sort)))
 			throw new InvalidSearch("Search document sort is outside its template");
 		for (const sort of configuration.options)
-			if (document.categories.some((category) => !supportsCurrentSearchSort(category, sort)))
+			if (
+				template.id !== "progress" &&
+				document.categories.some((category) => !supportsCurrentSearchSort(category, sort))
+			)
 				throw new InvalidSearch(
 					`Search sort ${sort} does not apply to every document category`,
 				);
@@ -319,11 +341,23 @@ export function createDefaultSearchDocument(templateId: SearchTemplateId): Searc
 		],
 		sort: {
 			search: {
-				defaults: { emptyQuery: "best", textQuery: "relevance" },
+				defaults:
+					templateId === "progress"
+						? {
+								emptyQuery: "progressLastSeenAt:desc",
+								textQuery: "progressLastSeenAt:desc",
+							}
+						: { emptyQuery: "best", textQuery: "relevance" },
 				options: [...template.sorts],
 			},
 			feed: {
-				defaults: { emptyQuery: "best", textQuery: "best" },
+				defaults:
+					templateId === "progress"
+						? {
+								emptyQuery: "progressLastSeenAt:desc",
+								textQuery: "progressLastSeenAt:desc",
+							}
+						: { emptyQuery: "best", textQuery: "best" },
 				options: template.sorts.filter((sort) => sort !== "relevance"),
 			},
 		},

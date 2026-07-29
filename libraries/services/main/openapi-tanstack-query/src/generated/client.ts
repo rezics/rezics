@@ -419,6 +419,8 @@ import type {
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentResponses,
 	GetApiProgressOptions,
 	GetApiProgressResponses,
+	PostApiProgressSearchOptions,
+	PostApiProgressSearchResponses,
 	GetApiProgressByUnitIdOptions,
 	GetApiProgressByUnitIdResponses,
 	PutApiProgressByUnitIdOptions,
@@ -4801,6 +4803,26 @@ export function getApiProgress<ThrowOnError extends boolean = true>(
 		],
 		...config,
 	}) as Promise<RequestResult<GetApiProgressResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Search current profile progress with a Search Feature state
+ * {@link /api/progress/search}
+ */
+export function postApiProgressSearch<ThrowOnError extends boolean = true>(
+	options: Options<PostApiProgressSearchOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiProgressSearchResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/progress/search",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiProgressSearchResponses, ThrowOnError>>;
 }
 
 /**

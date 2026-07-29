@@ -244,6 +244,9 @@ export default {
 		},
 	},
 	retryProgress: "Fortschritt neu laden",
+	searchProgress: "Fortschrittsaufzeichnungen durchsuchen",
+	searchProgressPlaceholder: "Titel oder Zusammenfassungen durchsuchen",
+	progressUpdatedAt: insert("Fortschritt aktualisiert: {{time}}", { time: String }),
 	progressPercent: insert("{{percent}} %", { percent: Number }),
 	viewProgressHistory: "Fortschrittsverlauf ansehen",
 	progressJournal: {

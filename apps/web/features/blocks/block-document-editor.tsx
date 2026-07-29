@@ -6,7 +6,7 @@ import {
 	type UnitReferencedBlock,
 	type UnitReferencedBlockDocument,
 } from "@rezics/block";
-import { SearchTemplateIdValues, type SearchTemplateId } from "@rezics/filter";
+import { EmbeddableSearchTemplateIdValues, type EmbeddableSearchTemplateId } from "@rezics/filter";
 import {
 	Button,
 	Card,
@@ -38,7 +38,7 @@ export interface BlockEditorLabels {
 	readonly showResultCount: string;
 	readonly orientation: string;
 	readonly style: string;
-	readonly sources: Record<SearchTemplateId, string>;
+	readonly sources: Record<EmbeddableSearchTemplateId, string>;
 	readonly appearances: Record<
 		"inline" | "card" | "cover" | "links" | "buttons" | "tabs" | "drawer",
 		string
@@ -73,8 +73,8 @@ function isAddableBlockType(value: string): value is BlockEditorAddableType {
 	return DefaultAddableBlockTypes.some((type) => type === value);
 }
 
-function isSearchTemplateId(value: string): value is SearchTemplateId {
-	return SearchTemplateIdValues.some((template) => template === value);
+function isSearchTemplateId(value: string): value is EmbeddableSearchTemplateId {
+	return EmbeddableSearchTemplateIdValues.some((template) => template === value);
 }
 
 function isUnitRefAppearance(value: string): value is (typeof UnitRefAppearances)[number] {
@@ -363,7 +363,7 @@ function BlockFields({
 								{labels.zoneSearch}
 							</NativeSelectOption>
 						) : null}
-						{SearchTemplateIdValues.map((value) => (
+						{EmbeddableSearchTemplateIdValues.map((value) => (
 							<NativeSelectOption key={value} value={value}>
 								{labels.sources[value]}
 							</NativeSelectOption>

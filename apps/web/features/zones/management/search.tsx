@@ -3,9 +3,9 @@
 import {
 	parseSearchDocument,
 	parseSearchFeatureDefinition,
+	type EmbeddableSearchTemplateId,
 	type SearchDocument,
 	type SearchFeatureDefinition,
-	type SearchTemplateId,
 } from "@rezics/filter";
 import {
 	getApiSearchZonesByZoneIdFeatureQueryKey,
@@ -44,7 +44,7 @@ import { RequestFailure } from "@/i18n/request-failure";
 import { zoneManagementHref } from "./model";
 import { useZoneManagement } from "./workspace";
 
-const Templates: readonly SearchTemplateId[] = [
+const Templates: readonly EmbeddableSearchTemplateId[] = [
 	"global",
 	"book",
 	"media",
@@ -52,6 +52,10 @@ const Templates: readonly SearchTemplateId[] = [
 	"realm",
 	"zone",
 ];
+
+function toEmbeddableSearchTemplateId(value: string): EmbeddableSearchTemplateId {
+	return Templates.find((candidate) => candidate === value) ?? "global";
+}
 
 function hasStatus(error: unknown, status: number): boolean {
 	return (
@@ -195,8 +199,8 @@ function SearchDocumentEditor({
 }) {
 	const { t, locale } = useTranslation(["errors", "search", "ui", "zones"]);
 	const queryClient = useQueryClient();
-	const [templateId, setTemplateId] = useState<SearchTemplateId>(
-		existing?.definition.document.template.id ?? "global",
+	const [templateId, setTemplateId] = useState<EmbeddableSearchTemplateId>(
+		toEmbeddableSearchTemplateId(existing?.definition.document.template.id ?? "global"),
 	);
 	const [draft, setDraft] = useState<SearchDocument | undefined>(existing?.definition.document);
 	const [message, setMessage] = useState("");

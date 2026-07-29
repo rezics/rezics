@@ -242,6 +242,9 @@ export default {
 		},
 	},
 	retryProgress: "진행률 다시 불러오기",
+	searchProgress: "진행 기록 검색",
+	searchProgressPlaceholder: "제목 또는 요약 검색",
+	progressUpdatedAt: insert("진행 상황 업데이트: {{time}}", { time: String }),
 	progressPercent: insert("{{percent}}%", { percent: Number }),
 	viewProgressHistory: "발자취 보기",
 	progressJournal: {

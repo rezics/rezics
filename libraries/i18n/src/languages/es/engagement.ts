@@ -242,6 +242,9 @@ export default {
 		},
 	},
 	retryProgress: "Volver a cargar el progreso",
+	searchProgress: "Buscar registros de progreso",
+	searchProgressPlaceholder: "Buscar títulos o resúmenes",
+	progressUpdatedAt: insert("Progreso actualizado {{time}}", { time: String }),
 	progressPercent: insert("{{percent}} %", { percent: Number }),
 	viewProgressHistory: "Ver diario de progreso",
 	progressJournal: {

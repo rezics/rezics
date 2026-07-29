@@ -1394,6 +1394,12 @@ import type {
 	GetApiProgressStatus422,
 	GetApiProgressStatus429,
 	GetApiProgressStatus500,
+	PostApiProgressSearchOptions,
+	PostApiProgressSearchStatus200,
+	PostApiProgressSearchStatus400,
+	PostApiProgressSearchStatus422,
+	PostApiProgressSearchStatus429,
+	PostApiProgressSearchStatus500,
 	GetApiProgressByUnitIdOptions,
 	GetApiProgressByUnitIdStatus200,
 	GetApiProgressByUnitIdStatus404,
@@ -2412,6 +2418,7 @@ import {
 	getApiChaptersByChapterId,
 	putApiChaptersByChapterIdLocalizationsByLanguageContent,
 	getApiProgress,
+	postApiProgressSearch,
 	getApiProgressByUnitId,
 	putApiProgressByUnitId,
 	deleteApiProgressByUnitId,
@@ -23885,6 +23892,97 @@ export function useGetApiProgress<
 	queryResult.queryKey = queryKey as TQueryKey;
 
 	return queryResult;
+}
+
+export const postApiProgressSearchMutationKey = () => [{ url: "/api/progress/search" }] as const;
+
+export function postApiProgressSearchMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiProgressSearchMutationKey();
+	return mutationOptions<
+		PostApiProgressSearchStatus200,
+		ResponseErrorConfig<
+			| PostApiProgressSearchStatus400
+			| PostApiProgressSearchStatus422
+			| PostApiProgressSearchStatus429
+			| PostApiProgressSearchStatus500
+		>,
+		PostApiProgressSearchOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await postApiProgressSearch({ ...config, body, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Search current profile progress with a Search Feature state
+ * {@link /api/progress/search}
+ */
+export function usePostApiProgressSearch<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiProgressSearchStatus200,
+			ResponseErrorConfig<
+				| PostApiProgressSearchStatus400
+				| PostApiProgressSearchStatus422
+				| PostApiProgressSearchStatus429
+				| PostApiProgressSearchStatus500
+			>,
+			PostApiProgressSearchOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? postApiProgressSearchMutationKey();
+
+	const baseOptions = postApiProgressSearchMutationOptions(config) as UseMutationOptions<
+		PostApiProgressSearchStatus200,
+		ResponseErrorConfig<
+			| PostApiProgressSearchStatus400
+			| PostApiProgressSearchStatus422
+			| PostApiProgressSearchStatus429
+			| PostApiProgressSearchStatus500
+		>,
+		PostApiProgressSearchOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiProgressSearchStatus200,
+		ResponseErrorConfig<
+			| PostApiProgressSearchStatus400
+			| PostApiProgressSearchStatus422
+			| PostApiProgressSearchStatus429
+			| PostApiProgressSearchStatus500
+		>,
+		PostApiProgressSearchOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiProgressSearchStatus200,
+		ResponseErrorConfig<
+			| PostApiProgressSearchStatus400
+			| PostApiProgressSearchStatus422
+			| PostApiProgressSearchStatus429
+			| PostApiProgressSearchStatus500
+		>,
+		PostApiProgressSearchOptions,
+		TContext
+	>;
 }
 
 export const getApiProgressByUnitIdQueryKey = ({

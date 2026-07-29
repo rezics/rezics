@@ -4176,6 +4176,7 @@ export const SearchDocumentV1TemplateIdEnum = {
 	book: "book",
 	media: "media",
 	software: "software",
+	progress: "progress",
 	realm: "realm",
 	zone: "zone",
 } as const;
@@ -4277,6 +4278,10 @@ export const SearchDocumentV1SortSearchDefaultsEmptyQueryEnum = {
 	"replyCount:desc": "replyCount:desc",
 	"closesAt:asc": "closesAt:asc",
 	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
 } as const;
 
 export type SearchDocumentV1SortSearchDefaultsEmptyQueryEnum =
@@ -4297,6 +4302,10 @@ export const SearchDocumentV1SortSearchDefaultsTextQueryEnum = {
 	"replyCount:desc": "replyCount:desc",
 	"closesAt:asc": "closesAt:asc",
 	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
 } as const;
 
 export type SearchDocumentV1SortSearchDefaultsTextQueryEnum =
@@ -4317,6 +4326,10 @@ export const SearchDocumentV1SortSearchOptionsEnum = {
 	"replyCount:desc": "replyCount:desc",
 	"closesAt:asc": "closesAt:asc",
 	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
 } as const;
 
 export type SearchDocumentV1SortSearchOptionsEnum =
@@ -4337,6 +4350,10 @@ export const SearchDocumentV1SortFeedDefaultsEmptyQueryEnum = {
 	"replyCount:desc": "replyCount:desc",
 	"closesAt:asc": "closesAt:asc",
 	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
 } as const;
 
 export type SearchDocumentV1SortFeedDefaultsEmptyQueryEnum =
@@ -4357,6 +4374,10 @@ export const SearchDocumentV1SortFeedDefaultsTextQueryEnum = {
 	"replyCount:desc": "replyCount:desc",
 	"closesAt:asc": "closesAt:asc",
 	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
 } as const;
 
 export type SearchDocumentV1SortFeedDefaultsTextQueryEnum =
@@ -4377,6 +4398,10 @@ export const SearchDocumentV1SortFeedOptionsEnum = {
 	"replyCount:desc": "replyCount:desc",
 	"closesAt:asc": "closesAt:asc",
 	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
 } as const;
 
 export type SearchDocumentV1SortFeedOptionsEnum =
@@ -70283,6 +70308,1074 @@ export type GetApiProgressResponse =
 	| GetApiProgressStatus429
 	| GetApiProgressStatus500;
 
+export const PostApiProgressSearchStatus200ItemsStatusEnum = {
+	backlog: "backlog",
+	active: "active",
+	paused: "paused",
+	completed: "completed",
+	dropped: "dropped",
+} as const;
+
+export type PostApiProgressSearchStatus200ItemsStatusEnum =
+	(typeof PostApiProgressSearchStatus200ItemsStatusEnum)[keyof typeof PostApiProgressSearchStatus200ItemsStatusEnum];
+
+export const PostApiProgressSearchStatus200ItemsVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type PostApiProgressSearchStatus200ItemsVisibilityEnum =
+	(typeof PostApiProgressSearchStatus200ItemsVisibilityEnum)[keyof typeof PostApiProgressSearchStatus200ItemsVisibilityEnum];
+
+export const PostApiProgressSearchStatus200ItemsTypeEnum = {
+	book: "book",
+	media: "media",
+	software: "software",
+} as const;
+
+export type PostApiProgressSearchStatus200ItemsTypeEnum =
+	(typeof PostApiProgressSearchStatus200ItemsTypeEnum)[keyof typeof PostApiProgressSearchStatus200ItemsTypeEnum];
+
+export const PostApiProgressSearchStatus200ItemsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiProgressSearchStatus200ItemsLanguageEnum =
+	(typeof PostApiProgressSearchStatus200ItemsLanguageEnum)[keyof typeof PostApiProgressSearchStatus200ItemsLanguageEnum];
+
+/**
+ * @type object
+ */
+export type PostApiProgressSearchStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @default 'backlog'
+		 * @type string
+		 */
+		status: PostApiProgressSearchStatus200ItemsStatusEnum;
+		/**
+		 * @minLength 0
+		 * @maxLength 1
+		 * @type number
+		 */
+		progress: number;
+		completedCount: string | number;
+		totalTimeMs: string | number;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		firstSeenAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		lastSeenAt: string;
+		lastContentStructureNodeId: (string | null) | null;
+		lastReadAnchor: (void | null) | null;
+		/**
+		 * @type string
+		 */
+		visibility: PostApiProgressSearchStatus200ItemsVisibilityEnum;
+		/**
+		 * @default 'book'
+		 * @type string
+		 */
+		type: PostApiProgressSearchStatus200ItemsTypeEnum;
+		/**
+		 * @type string
+		 */
+		language: PostApiProgressSearchStatus200ItemsLanguageEnum;
+		title: (string | null) | null;
+		summary: (string | null) | null;
+		cover:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+	}[];
+	/**
+	 * @maxLength 4096
+	 * @pattern ^s2_[A-Za-z0-9_-]+$
+	 * @type string | undefined
+	 */
+	nextCursor?: string;
+	total: string | number;
+};
+
+/**
+ * @type object
+ */
+export type PostApiProgressSearchStatus400 = MalformedRequestBody;
+
+export type PostApiProgressSearchStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidSearch'
+				 * @type string
+				 */
+				code: "InvalidSearch";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiProgressSearchStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiProgressSearchStatus500 = InternalError;
+
+export const PostApiProgressSearchRequestInjectionsSourceEnum = {
+	tag: "tag",
+	link: "link",
+} as const;
+
+export type PostApiProgressSearchRequestInjectionsSourceEnum =
+	(typeof PostApiProgressSearchRequestInjectionsSourceEnum)[keyof typeof PostApiProgressSearchRequestInjectionsSourceEnum];
+
+export const PostApiProgressSearchRequestStateSortEnum = {
+	best: "best",
+	relevance: "relevance",
+	"createdAt:asc": "createdAt:asc",
+	"createdAt:desc": "createdAt:desc",
+	"updatedAt:asc": "updatedAt:asc",
+	"updatedAt:desc": "updatedAt:desc",
+	"publishedAt:asc": "publishedAt:asc",
+	"publishedAt:desc": "publishedAt:desc",
+	"followerCount:asc": "followerCount:asc",
+	"followerCount:desc": "followerCount:desc",
+	"replyCount:asc": "replyCount:asc",
+	"replyCount:desc": "replyCount:desc",
+	"closesAt:asc": "closesAt:asc",
+	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
+} as const;
+
+export type PostApiProgressSearchRequestStateSortEnum =
+	(typeof PostApiProgressSearchRequestStateSortEnum)[keyof typeof PostApiProgressSearchRequestStateSortEnum];
+
+export const PostApiProgressSearchRequestLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiProgressSearchRequestLocalizationLanguagesEnum =
+	(typeof PostApiProgressSearchRequestLocalizationLanguagesEnum)[keyof typeof PostApiProgressSearchRequestLocalizationLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type PostApiProgressSearchBody = {
+	/**
+	 * @type array
+	 */
+	injections: {
+		/**
+		 * @type string
+		 */
+		source: PostApiProgressSearchRequestInjectionsSourceEnum;
+		/**
+		 * @type object
+		 */
+		value: {
+			/**
+			 * @minLength 1
+			 * @maxLength 64
+			 * @pattern ^[a-z][a-z0-9-]*$
+			 * @type string
+			 */
+			controlKey: string;
+			filter:
+				| {
+						field:
+							| "category"
+							| "kind"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "credit"
+							| "publisher-profile"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-word-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
+						/**
+						 * @type string
+						 */
+						operator: "equals";
+						value: string | number | boolean;
+				  }
+				| {
+						field:
+							| "category"
+							| "kind"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "credit"
+							| "publisher-profile"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-word-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
+						/**
+						 * @type string
+						 */
+						operator: "not-equals";
+						value: string | number | boolean;
+				  }
+				| {
+						field:
+							| "category"
+							| "kind"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "credit"
+							| "publisher-profile"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-word-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
+						operator: "any-of" | "all-of" | "none-of";
+						/**
+						 * @type array
+						 */
+						values: (string | number | boolean)[];
+				  }
+				| (
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "publisher-profile"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								/**
+								 * @type string
+								 */
+								operator: "range";
+								lower: string | number | boolean;
+								upper?: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "publisher-profile"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								/**
+								 * @type string
+								 */
+								operator: "range";
+								lower?: string | number | boolean;
+								upper: string | number | boolean;
+						  }
+				  )
+				| {
+						field:
+							| "category"
+							| "kind"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "credit"
+							| "publisher-profile"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-word-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
+						/**
+						 * @type string
+						 */
+						operator: "exists";
+						/**
+						 * @type boolean
+						 */
+						value: boolean;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						field: "realm-tag-vote";
+						/**
+						 * @type string
+						 */
+						operator: "matches";
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						realmId: string;
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						tagId: string;
+						score?:
+							| {
+									/**
+									 * @type integer
+									 */
+									lower: number;
+									/**
+									 * @type integer | undefined
+									 */
+									upper?: number;
+							  }
+							| {
+									/**
+									 * @type integer | undefined
+									 */
+									lower?: number;
+									/**
+									 * @type integer
+									 */
+									upper: number;
+							  };
+						voteCount?:
+							| {
+									/**
+									 * @minLength 0
+									 * @type integer
+									 */
+									lower: number;
+									/**
+									 * @minLength 0
+									 * @type integer | undefined
+									 */
+									upper?: number;
+							  }
+							| {
+									/**
+									 * @minLength 0
+									 * @type integer | undefined
+									 */
+									lower?: number;
+									/**
+									 * @minLength 0
+									 * @type integer
+									 */
+									upper: number;
+							  };
+				  };
+		};
+		/**
+		 * @default true
+		 * @type boolean
+		 */
+		removable: boolean;
+	}[];
+	/**
+	 * @type object
+	 */
+	state: {
+		filter?: UnitFilter;
+		/**
+		 * @type string | undefined
+		 */
+		sort?: PostApiProgressSearchRequestStateSortEnum;
+		/**
+		 * @minLength 1
+		 * @maxLength 100
+		 * @type integer | undefined
+		 */
+		pageSize?: number;
+		/**
+		 * @maxLength 4096
+		 * @pattern ^s2_[A-Za-z0-9_-]+$
+		 * @type string | undefined
+		 */
+		cursor?: string;
+		expression?:
+			| {
+					/**
+					 * @minLength 1
+					 * @maxLength 64
+					 * @pattern ^[a-z][a-z0-9-]*$
+					 * @type string
+					 */
+					controlKey: string;
+					filter:
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "publisher-profile"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								/**
+								 * @type string
+								 */
+								operator: "equals";
+								value: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "publisher-profile"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								/**
+								 * @type string
+								 */
+								operator: "not-equals";
+								value: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "publisher-profile"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								operator: "any-of" | "all-of" | "none-of";
+								/**
+								 * @type array
+								 */
+								values: (string | number | boolean)[];
+						  }
+						| (
+								| {
+										field:
+											| "category"
+											| "kind"
+											| "language"
+											| "content-rating"
+											| "ai-disclosure"
+											| "license"
+											| "tag"
+											| "credit"
+											| "publisher-profile"
+											| "realm"
+											| "zone"
+											| "subject"
+											| "target"
+											| "root"
+											| "parent"
+											| "owner"
+											| "join-policy"
+											| "multiple"
+											| "results-visibility"
+											| "closed"
+											| "created-at"
+											| "updated-at"
+											| "published-at"
+											| "closes-at"
+											| "catalog-licensed"
+											| "catalog-release-date"
+											| "book-isbn13"
+											| "book-publication-date"
+											| "book-page-count"
+											| "book-word-count"
+											| "book-format"
+											| "media-kind"
+											| "media-release-date"
+											| "media-runtime-minutes"
+											| "media-episode-count"
+											| "media-season-count"
+											| "software-release-date"
+											| "software-version-label"
+											| "software-platform"
+											| "software-requirement-tier";
+										/**
+										 * @type string
+										 */
+										operator: "range";
+										lower: string | number | boolean;
+										upper?: string | number | boolean;
+								  }
+								| {
+										field:
+											| "category"
+											| "kind"
+											| "language"
+											| "content-rating"
+											| "ai-disclosure"
+											| "license"
+											| "tag"
+											| "credit"
+											| "publisher-profile"
+											| "realm"
+											| "zone"
+											| "subject"
+											| "target"
+											| "root"
+											| "parent"
+											| "owner"
+											| "join-policy"
+											| "multiple"
+											| "results-visibility"
+											| "closed"
+											| "created-at"
+											| "updated-at"
+											| "published-at"
+											| "closes-at"
+											| "catalog-licensed"
+											| "catalog-release-date"
+											| "book-isbn13"
+											| "book-publication-date"
+											| "book-page-count"
+											| "book-word-count"
+											| "book-format"
+											| "media-kind"
+											| "media-release-date"
+											| "media-runtime-minutes"
+											| "media-episode-count"
+											| "media-season-count"
+											| "software-release-date"
+											| "software-version-label"
+											| "software-platform"
+											| "software-requirement-tier";
+										/**
+										 * @type string
+										 */
+										operator: "range";
+										lower?: string | number | boolean;
+										upper: string | number | boolean;
+								  }
+						  )
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "publisher-profile"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								/**
+								 * @type string
+								 */
+								operator: "exists";
+								/**
+								 * @type boolean
+								 */
+								value: boolean;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								field: "realm-tag-vote";
+								/**
+								 * @type string
+								 */
+								operator: "matches";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								realmId: string;
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								tagId: string;
+								score?:
+									| {
+											/**
+											 * @type integer
+											 */
+											lower: number;
+											/**
+											 * @type integer | undefined
+											 */
+											upper?: number;
+									  }
+									| {
+											/**
+											 * @type integer | undefined
+											 */
+											lower?: number;
+											/**
+											 * @type integer
+											 */
+											upper: number;
+									  };
+								voteCount?:
+									| {
+											/**
+											 * @minLength 0
+											 * @type integer
+											 */
+											lower: number;
+											/**
+											 * @minLength 0
+											 * @type integer | undefined
+											 */
+											upper?: number;
+									  }
+									| {
+											/**
+											 * @minLength 0
+											 * @type integer | undefined
+											 */
+											lower?: number;
+											/**
+											 * @minLength 0
+											 * @type integer
+											 */
+											upper: number;
+									  };
+						  };
+			  }
+			| {
+					operator: "all" | "any";
+					/**
+					 * @type array
+					 */
+					clauses: unknown[];
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					operator: "not";
+					/**
+					 * @type unknown
+					 */
+					clause: unknown;
+			  };
+	};
+	/**
+	 * @type array | undefined
+	 */
+	localizationLanguages?: PostApiProgressSearchRequestLocalizationLanguagesEnum[];
+};
+
+/**
+ * @type object
+ */
+export type PostApiProgressSearchOptions = {
+	body: PostApiProgressSearchBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiProgressSearchResponses = {
+	"200": PostApiProgressSearchStatus200;
+	"400": PostApiProgressSearchStatus400;
+	"422": PostApiProgressSearchStatus422;
+	"429": PostApiProgressSearchStatus429;
+	"500": PostApiProgressSearchStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiProgressSearchResponse =
+	| PostApiProgressSearchStatus200
+	| PostApiProgressSearchStatus400
+	| PostApiProgressSearchStatus422
+	| PostApiProgressSearchStatus429
+	| PostApiProgressSearchStatus500;
+
 /**
  * @type object
  */
@@ -103940,6 +105033,7 @@ export const PostApiSearchFeaturesByTemplateExecuteTemplate = {
 	book: "book",
 	media: "media",
 	software: "software",
+	progress: "progress",
 	realm: "realm",
 	zone: "zone",
 } as const;
@@ -104324,6 +105418,10 @@ export const PostApiSearchFeaturesByTemplateExecuteRequestStateSortEnum = {
 	"replyCount:desc": "replyCount:desc",
 	"closesAt:asc": "closesAt:asc",
 	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
 } as const;
 
 export type PostApiSearchFeaturesByTemplateExecuteRequestStateSortEnum =
@@ -108270,6 +109368,10 @@ export const PostApiSearchFeaturesByTemplateFeedRequestStateSortEnum = {
 	"replyCount:desc": "replyCount:desc",
 	"closesAt:asc": "closesAt:asc",
 	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
 } as const;
 
 export type PostApiSearchFeaturesByTemplateFeedRequestStateSortEnum =
@@ -109986,6 +111088,10 @@ export const PostApiSearchZonesByZoneIdFeatureExecuteRequestStateSortEnum = {
 	"replyCount:desc": "replyCount:desc",
 	"closesAt:asc": "closesAt:asc",
 	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
 } as const;
 
 export type PostApiSearchZonesByZoneIdFeatureExecuteRequestStateSortEnum =
@@ -113907,6 +115013,10 @@ export const PostApiSearchZonesByZoneIdFeatureFeedRequestStateSortEnum = {
 	"replyCount:desc": "replyCount:desc",
 	"closesAt:asc": "closesAt:asc",
 	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
 } as const;
 
 export type PostApiSearchZonesByZoneIdFeatureFeedRequestStateSortEnum =
@@ -115590,6 +116700,10 @@ export const PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteRequestStateSo
 	"replyCount:desc": "replyCount:desc",
 	"closesAt:asc": "closesAt:asc",
 	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
 } as const;
 
 export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteRequestStateSortEnum =
@@ -116868,6 +117982,10 @@ export const PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteReque
 	"replyCount:desc": "replyCount:desc",
 	"closesAt:asc": "closesAt:asc",
 	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
 } as const;
 
 export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteRequestStateSortEnum =
@@ -120808,6 +121926,10 @@ export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestStateSo
 	"replyCount:desc": "replyCount:desc",
 	"closesAt:asc": "closesAt:asc",
 	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
 } as const;
 
 export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestStateSortEnum =
@@ -122125,6 +123247,10 @@ export const PostApiSearchSharedQueriesStatus201DocumentStateSortEnum = {
 	"replyCount:desc": "replyCount:desc",
 	"closesAt:asc": "closesAt:asc",
 	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
 } as const;
 
 export type PostApiSearchSharedQueriesStatus201DocumentStateSortEnum =
@@ -122756,6 +123882,10 @@ export const PostApiSearchSharedQueriesRequestStateSortEnum = {
 	"replyCount:desc": "replyCount:desc",
 	"closesAt:asc": "closesAt:asc",
 	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
 } as const;
 
 export type PostApiSearchSharedQueriesRequestStateSortEnum =
@@ -123326,6 +124456,10 @@ export const GetApiSearchSharedQueriesByIdStatus200DocumentStateSortEnum = {
 	"replyCount:desc": "replyCount:desc",
 	"closesAt:asc": "closesAt:asc",
 	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
 } as const;
 
 export type GetApiSearchSharedQueriesByIdStatus200DocumentStateSortEnum =
@@ -124366,6 +125500,10 @@ export const PostApiSearchByIndexRequestSortEnum = {
 	"replyCount:desc": "replyCount:desc",
 	"closesAt:asc": "closesAt:asc",
 	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
 } as const;
 
 export type PostApiSearchByIndexRequestSortEnum =

@@ -1,6 +1,9 @@
 "use client";
 
-import { parseSearchFeatureDefinition, type SearchTemplateId } from "@rezics/filter";
+import {
+	parseSearchFeatureDefinition,
+	type EmbeddableSearchTemplateId,
+} from "@rezics/filter";
 import { useGetApiSearchFeaturesByTemplate } from "@rezics/openapi-tanstack-query";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import { useId, useState } from "react";
@@ -29,7 +32,7 @@ export function SearchFeatureFeed({
 	readonly infinite?: boolean;
 	readonly initialRequest: SearchFeatureFeedRequest;
 	readonly requestedRealmId?: string;
-	readonly template: SearchTemplateId;
+	readonly template: EmbeddableSearchTemplateId;
 }) {
 	const id = useId();
 	const definitionQuery = useGetApiSearchFeaturesByTemplate({

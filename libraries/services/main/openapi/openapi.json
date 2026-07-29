@@ -8107,7 +8107,15 @@
 						"properties": {
 							"id": {
 								"type": "string",
-								"enum": ["global", "book", "media", "software", "realm", "zone"]
+								"enum": [
+									"global",
+									"book",
+									"media",
+									"software",
+									"progress",
+									"realm",
+									"zone"
+								]
 							},
 							"version": { "const": 1, "type": "number" }
 						}
@@ -9348,7 +9356,11 @@
 													"replyCount:asc",
 													"replyCount:desc",
 													"closesAt:asc",
-													"closesAt:desc"
+													"closesAt:desc",
+													"title:asc",
+													"title:desc",
+													"progressLastSeenAt:asc",
+													"progressLastSeenAt:desc"
 												]
 											},
 											"textQuery": {
@@ -9367,7 +9379,11 @@
 													"replyCount:asc",
 													"replyCount:desc",
 													"closesAt:asc",
-													"closesAt:desc"
+													"closesAt:desc",
+													"title:asc",
+													"title:desc",
+													"progressLastSeenAt:asc",
+													"progressLastSeenAt:desc"
 												]
 											}
 										}
@@ -9392,7 +9408,11 @@
 												"replyCount:asc",
 												"replyCount:desc",
 												"closesAt:asc",
-												"closesAt:desc"
+												"closesAt:desc",
+												"title:asc",
+												"title:desc",
+												"progressLastSeenAt:asc",
+												"progressLastSeenAt:desc"
 											]
 										}
 									}
@@ -9425,7 +9445,11 @@
 													"replyCount:asc",
 													"replyCount:desc",
 													"closesAt:asc",
-													"closesAt:desc"
+													"closesAt:desc",
+													"title:asc",
+													"title:desc",
+													"progressLastSeenAt:asc",
+													"progressLastSeenAt:desc"
 												]
 											},
 											"textQuery": {
@@ -9444,7 +9468,11 @@
 													"replyCount:asc",
 													"replyCount:desc",
 													"closesAt:asc",
-													"closesAt:desc"
+													"closesAt:desc",
+													"title:asc",
+													"title:desc",
+													"progressLastSeenAt:asc",
+													"progressLastSeenAt:desc"
 												]
 											}
 										}
@@ -9469,7 +9497,11 @@
 												"replyCount:asc",
 												"replyCount:desc",
 												"closesAt:asc",
-												"closesAt:desc"
+												"closesAt:desc",
+												"title:asc",
+												"title:desc",
+												"progressLastSeenAt:asc",
+												"progressLastSeenAt:desc"
 											]
 										}
 									}
@@ -91646,6 +91678,3040 @@
 				"x-rezics-policy-operation-id": "getApiProgress"
 			}
 		},
+		"/api/progress/search": {
+			"post": {
+				"summary": "Search current profile progress with a Search Feature state",
+				"tags": ["Progress", "Search"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["injections", "state"],
+								"properties": {
+									"injections": {
+										"maxItems": 50,
+										"type": "array",
+										"items": {
+											"additionalProperties": false,
+											"$id": "SearchInjection",
+											"type": "object",
+											"required": ["source", "value", "removable"],
+											"properties": {
+												"source": {
+													"type": "string",
+													"enum": ["tag", "link"]
+												},
+												"value": {
+													"additionalProperties": false,
+													"$id": "SearchControlValue",
+													"type": "object",
+													"required": ["controlKey", "filter"],
+													"properties": {
+														"controlKey": {
+															"minLength": 1,
+															"maxLength": 64,
+															"pattern": "^[a-z][a-z0-9-]*$",
+															"type": "string"
+														},
+														"filter": {
+															"$id": "SearchControlPredicate",
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"field",
+																		"operator",
+																		"value"
+																	],
+																	"properties": {
+																		"field": {
+																			"anyOf": [
+																				{
+																					"const": "category",
+																					"type": "string"
+																				},
+																				{
+																					"const": "kind",
+																					"type": "string"
+																				},
+																				{
+																					"const": "language",
+																					"type": "string"
+																				},
+																				{
+																					"const": "content-rating",
+																					"type": "string"
+																				},
+																				{
+																					"const": "ai-disclosure",
+																					"type": "string"
+																				},
+																				{
+																					"const": "license",
+																					"type": "string"
+																				},
+																				{
+																					"const": "tag",
+																					"type": "string"
+																				},
+																				{
+																					"const": "credit",
+																					"type": "string"
+																				},
+																				{
+																					"const": "publisher-profile",
+																					"type": "string"
+																				},
+																				{
+																					"const": "realm",
+																					"type": "string"
+																				},
+																				{
+																					"const": "zone",
+																					"type": "string"
+																				},
+																				{
+																					"const": "subject",
+																					"type": "string"
+																				},
+																				{
+																					"const": "target",
+																					"type": "string"
+																				},
+																				{
+																					"const": "root",
+																					"type": "string"
+																				},
+																				{
+																					"const": "parent",
+																					"type": "string"
+																				},
+																				{
+																					"const": "owner",
+																					"type": "string"
+																				},
+																				{
+																					"const": "join-policy",
+																					"type": "string"
+																				},
+																				{
+																					"const": "multiple",
+																					"type": "string"
+																				},
+																				{
+																					"const": "results-visibility",
+																					"type": "string"
+																				},
+																				{
+																					"const": "closed",
+																					"type": "string"
+																				},
+																				{
+																					"const": "created-at",
+																					"type": "string"
+																				},
+																				{
+																					"const": "updated-at",
+																					"type": "string"
+																				},
+																				{
+																					"const": "published-at",
+																					"type": "string"
+																				},
+																				{
+																					"const": "closes-at",
+																					"type": "string"
+																				},
+																				{
+																					"const": "catalog-licensed",
+																					"type": "string"
+																				},
+																				{
+																					"const": "catalog-release-date",
+																					"type": "string"
+																				},
+																				{
+																					"const": "book-isbn13",
+																					"type": "string"
+																				},
+																				{
+																					"const": "book-publication-date",
+																					"type": "string"
+																				},
+																				{
+																					"const": "book-page-count",
+																					"type": "string"
+																				},
+																				{
+																					"const": "book-word-count",
+																					"type": "string"
+																				},
+																				{
+																					"const": "book-format",
+																					"type": "string"
+																				},
+																				{
+																					"const": "media-kind",
+																					"type": "string"
+																				},
+																				{
+																					"const": "media-release-date",
+																					"type": "string"
+																				},
+																				{
+																					"const": "media-runtime-minutes",
+																					"type": "string"
+																				},
+																				{
+																					"const": "media-episode-count",
+																					"type": "string"
+																				},
+																				{
+																					"const": "media-season-count",
+																					"type": "string"
+																				},
+																				{
+																					"const": "software-release-date",
+																					"type": "string"
+																				},
+																				{
+																					"const": "software-version-label",
+																					"type": "string"
+																				},
+																				{
+																					"const": "software-platform",
+																					"type": "string"
+																				},
+																				{
+																					"const": "software-requirement-tier",
+																					"type": "string"
+																				}
+																			]
+																		},
+																		"operator": {
+																			"const": "equals",
+																			"type": "string"
+																		},
+																		"value": {
+																			"anyOf": [
+																				{
+																					"minLength": 1,
+																					"maxLength": 500,
+																					"type": "string"
+																				},
+																				{
+																					"type": "number"
+																				},
+																				{
+																					"type": "boolean"
+																				}
+																			]
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"field",
+																		"operator",
+																		"value"
+																	],
+																	"properties": {
+																		"field": {
+																			"anyOf": [
+																				{
+																					"const": "category",
+																					"type": "string"
+																				},
+																				{
+																					"const": "kind",
+																					"type": "string"
+																				},
+																				{
+																					"const": "language",
+																					"type": "string"
+																				},
+																				{
+																					"const": "content-rating",
+																					"type": "string"
+																				},
+																				{
+																					"const": "ai-disclosure",
+																					"type": "string"
+																				},
+																				{
+																					"const": "license",
+																					"type": "string"
+																				},
+																				{
+																					"const": "tag",
+																					"type": "string"
+																				},
+																				{
+																					"const": "credit",
+																					"type": "string"
+																				},
+																				{
+																					"const": "publisher-profile",
+																					"type": "string"
+																				},
+																				{
+																					"const": "realm",
+																					"type": "string"
+																				},
+																				{
+																					"const": "zone",
+																					"type": "string"
+																				},
+																				{
+																					"const": "subject",
+																					"type": "string"
+																				},
+																				{
+																					"const": "target",
+																					"type": "string"
+																				},
+																				{
+																					"const": "root",
+																					"type": "string"
+																				},
+																				{
+																					"const": "parent",
+																					"type": "string"
+																				},
+																				{
+																					"const": "owner",
+																					"type": "string"
+																				},
+																				{
+																					"const": "join-policy",
+																					"type": "string"
+																				},
+																				{
+																					"const": "multiple",
+																					"type": "string"
+																				},
+																				{
+																					"const": "results-visibility",
+																					"type": "string"
+																				},
+																				{
+																					"const": "closed",
+																					"type": "string"
+																				},
+																				{
+																					"const": "created-at",
+																					"type": "string"
+																				},
+																				{
+																					"const": "updated-at",
+																					"type": "string"
+																				},
+																				{
+																					"const": "published-at",
+																					"type": "string"
+																				},
+																				{
+																					"const": "closes-at",
+																					"type": "string"
+																				},
+																				{
+																					"const": "catalog-licensed",
+																					"type": "string"
+																				},
+																				{
+																					"const": "catalog-release-date",
+																					"type": "string"
+																				},
+																				{
+																					"const": "book-isbn13",
+																					"type": "string"
+																				},
+																				{
+																					"const": "book-publication-date",
+																					"type": "string"
+																				},
+																				{
+																					"const": "book-page-count",
+																					"type": "string"
+																				},
+																				{
+																					"const": "book-word-count",
+																					"type": "string"
+																				},
+																				{
+																					"const": "book-format",
+																					"type": "string"
+																				},
+																				{
+																					"const": "media-kind",
+																					"type": "string"
+																				},
+																				{
+																					"const": "media-release-date",
+																					"type": "string"
+																				},
+																				{
+																					"const": "media-runtime-minutes",
+																					"type": "string"
+																				},
+																				{
+																					"const": "media-episode-count",
+																					"type": "string"
+																				},
+																				{
+																					"const": "media-season-count",
+																					"type": "string"
+																				},
+																				{
+																					"const": "software-release-date",
+																					"type": "string"
+																				},
+																				{
+																					"const": "software-version-label",
+																					"type": "string"
+																				},
+																				{
+																					"const": "software-platform",
+																					"type": "string"
+																				},
+																				{
+																					"const": "software-requirement-tier",
+																					"type": "string"
+																				}
+																			]
+																		},
+																		"operator": {
+																			"const": "not-equals",
+																			"type": "string"
+																		},
+																		"value": {
+																			"anyOf": [
+																				{
+																					"minLength": 1,
+																					"maxLength": 500,
+																					"type": "string"
+																				},
+																				{
+																					"type": "number"
+																				},
+																				{
+																					"type": "boolean"
+																				}
+																			]
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"field",
+																		"operator",
+																		"values"
+																	],
+																	"properties": {
+																		"field": {
+																			"anyOf": [
+																				{
+																					"const": "category",
+																					"type": "string"
+																				},
+																				{
+																					"const": "kind",
+																					"type": "string"
+																				},
+																				{
+																					"const": "language",
+																					"type": "string"
+																				},
+																				{
+																					"const": "content-rating",
+																					"type": "string"
+																				},
+																				{
+																					"const": "ai-disclosure",
+																					"type": "string"
+																				},
+																				{
+																					"const": "license",
+																					"type": "string"
+																				},
+																				{
+																					"const": "tag",
+																					"type": "string"
+																				},
+																				{
+																					"const": "credit",
+																					"type": "string"
+																				},
+																				{
+																					"const": "publisher-profile",
+																					"type": "string"
+																				},
+																				{
+																					"const": "realm",
+																					"type": "string"
+																				},
+																				{
+																					"const": "zone",
+																					"type": "string"
+																				},
+																				{
+																					"const": "subject",
+																					"type": "string"
+																				},
+																				{
+																					"const": "target",
+																					"type": "string"
+																				},
+																				{
+																					"const": "root",
+																					"type": "string"
+																				},
+																				{
+																					"const": "parent",
+																					"type": "string"
+																				},
+																				{
+																					"const": "owner",
+																					"type": "string"
+																				},
+																				{
+																					"const": "join-policy",
+																					"type": "string"
+																				},
+																				{
+																					"const": "multiple",
+																					"type": "string"
+																				},
+																				{
+																					"const": "results-visibility",
+																					"type": "string"
+																				},
+																				{
+																					"const": "closed",
+																					"type": "string"
+																				},
+																				{
+																					"const": "created-at",
+																					"type": "string"
+																				},
+																				{
+																					"const": "updated-at",
+																					"type": "string"
+																				},
+																				{
+																					"const": "published-at",
+																					"type": "string"
+																				},
+																				{
+																					"const": "closes-at",
+																					"type": "string"
+																				},
+																				{
+																					"const": "catalog-licensed",
+																					"type": "string"
+																				},
+																				{
+																					"const": "catalog-release-date",
+																					"type": "string"
+																				},
+																				{
+																					"const": "book-isbn13",
+																					"type": "string"
+																				},
+																				{
+																					"const": "book-publication-date",
+																					"type": "string"
+																				},
+																				{
+																					"const": "book-page-count",
+																					"type": "string"
+																				},
+																				{
+																					"const": "book-word-count",
+																					"type": "string"
+																				},
+																				{
+																					"const": "book-format",
+																					"type": "string"
+																				},
+																				{
+																					"const": "media-kind",
+																					"type": "string"
+																				},
+																				{
+																					"const": "media-release-date",
+																					"type": "string"
+																				},
+																				{
+																					"const": "media-runtime-minutes",
+																					"type": "string"
+																				},
+																				{
+																					"const": "media-episode-count",
+																					"type": "string"
+																				},
+																				{
+																					"const": "media-season-count",
+																					"type": "string"
+																				},
+																				{
+																					"const": "software-release-date",
+																					"type": "string"
+																				},
+																				{
+																					"const": "software-version-label",
+																					"type": "string"
+																				},
+																				{
+																					"const": "software-platform",
+																					"type": "string"
+																				},
+																				{
+																					"const": "software-requirement-tier",
+																					"type": "string"
+																				}
+																			]
+																		},
+																		"operator": {
+																			"anyOf": [
+																				{
+																					"const": "any-of",
+																					"type": "string"
+																				},
+																				{
+																					"const": "all-of",
+																					"type": "string"
+																				},
+																				{
+																					"const": "none-of",
+																					"type": "string"
+																				}
+																			]
+																		},
+																		"values": {
+																			"minItems": 1,
+																			"maxItems": 50,
+																			"type": "array",
+																			"items": {
+																				"anyOf": [
+																					{
+																						"minLength": 1,
+																						"maxLength": 500,
+																						"type": "string"
+																					},
+																					{
+																						"type": "number"
+																					},
+																					{
+																						"type": "boolean"
+																					}
+																				]
+																			}
+																		}
+																	}
+																},
+																{
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"field",
+																				"operator",
+																				"lower"
+																			],
+																			"properties": {
+																				"field": {
+																					"anyOf": [
+																						{
+																							"const": "category",
+																							"type": "string"
+																						},
+																						{
+																							"const": "kind",
+																							"type": "string"
+																						},
+																						{
+																							"const": "language",
+																							"type": "string"
+																						},
+																						{
+																							"const": "content-rating",
+																							"type": "string"
+																						},
+																						{
+																							"const": "ai-disclosure",
+																							"type": "string"
+																						},
+																						{
+																							"const": "license",
+																							"type": "string"
+																						},
+																						{
+																							"const": "tag",
+																							"type": "string"
+																						},
+																						{
+																							"const": "credit",
+																							"type": "string"
+																						},
+																						{
+																							"const": "publisher-profile",
+																							"type": "string"
+																						},
+																						{
+																							"const": "realm",
+																							"type": "string"
+																						},
+																						{
+																							"const": "zone",
+																							"type": "string"
+																						},
+																						{
+																							"const": "subject",
+																							"type": "string"
+																						},
+																						{
+																							"const": "target",
+																							"type": "string"
+																						},
+																						{
+																							"const": "root",
+																							"type": "string"
+																						},
+																						{
+																							"const": "parent",
+																							"type": "string"
+																						},
+																						{
+																							"const": "owner",
+																							"type": "string"
+																						},
+																						{
+																							"const": "join-policy",
+																							"type": "string"
+																						},
+																						{
+																							"const": "multiple",
+																							"type": "string"
+																						},
+																						{
+																							"const": "results-visibility",
+																							"type": "string"
+																						},
+																						{
+																							"const": "closed",
+																							"type": "string"
+																						},
+																						{
+																							"const": "created-at",
+																							"type": "string"
+																						},
+																						{
+																							"const": "updated-at",
+																							"type": "string"
+																						},
+																						{
+																							"const": "published-at",
+																							"type": "string"
+																						},
+																						{
+																							"const": "closes-at",
+																							"type": "string"
+																						},
+																						{
+																							"const": "catalog-licensed",
+																							"type": "string"
+																						},
+																						{
+																							"const": "catalog-release-date",
+																							"type": "string"
+																						},
+																						{
+																							"const": "book-isbn13",
+																							"type": "string"
+																						},
+																						{
+																							"const": "book-publication-date",
+																							"type": "string"
+																						},
+																						{
+																							"const": "book-page-count",
+																							"type": "string"
+																						},
+																						{
+																							"const": "book-word-count",
+																							"type": "string"
+																						},
+																						{
+																							"const": "book-format",
+																							"type": "string"
+																						},
+																						{
+																							"const": "media-kind",
+																							"type": "string"
+																						},
+																						{
+																							"const": "media-release-date",
+																							"type": "string"
+																						},
+																						{
+																							"const": "media-runtime-minutes",
+																							"type": "string"
+																						},
+																						{
+																							"const": "media-episode-count",
+																							"type": "string"
+																						},
+																						{
+																							"const": "media-season-count",
+																							"type": "string"
+																						},
+																						{
+																							"const": "software-release-date",
+																							"type": "string"
+																						},
+																						{
+																							"const": "software-version-label",
+																							"type": "string"
+																						},
+																						{
+																							"const": "software-platform",
+																							"type": "string"
+																						},
+																						{
+																							"const": "software-requirement-tier",
+																							"type": "string"
+																						}
+																					]
+																				},
+																				"operator": {
+																					"const": "range",
+																					"type": "string"
+																				},
+																				"lower": {
+																					"anyOf": [
+																						{
+																							"minLength": 1,
+																							"maxLength": 500,
+																							"type": "string"
+																						},
+																						{
+																							"type": "number"
+																						},
+																						{
+																							"type": "boolean"
+																						}
+																					]
+																				},
+																				"upper": {
+																					"anyOf": [
+																						{
+																							"minLength": 1,
+																							"maxLength": 500,
+																							"type": "string"
+																						},
+																						{
+																							"type": "number"
+																						},
+																						{
+																							"type": "boolean"
+																						}
+																					]
+																				}
+																			}
+																		},
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"field",
+																				"operator",
+																				"upper"
+																			],
+																			"properties": {
+																				"field": {
+																					"anyOf": [
+																						{
+																							"const": "category",
+																							"type": "string"
+																						},
+																						{
+																							"const": "kind",
+																							"type": "string"
+																						},
+																						{
+																							"const": "language",
+																							"type": "string"
+																						},
+																						{
+																							"const": "content-rating",
+																							"type": "string"
+																						},
+																						{
+																							"const": "ai-disclosure",
+																							"type": "string"
+																						},
+																						{
+																							"const": "license",
+																							"type": "string"
+																						},
+																						{
+																							"const": "tag",
+																							"type": "string"
+																						},
+																						{
+																							"const": "credit",
+																							"type": "string"
+																						},
+																						{
+																							"const": "publisher-profile",
+																							"type": "string"
+																						},
+																						{
+																							"const": "realm",
+																							"type": "string"
+																						},
+																						{
+																							"const": "zone",
+																							"type": "string"
+																						},
+																						{
+																							"const": "subject",
+																							"type": "string"
+																						},
+																						{
+																							"const": "target",
+																							"type": "string"
+																						},
+																						{
+																							"const": "root",
+																							"type": "string"
+																						},
+																						{
+																							"const": "parent",
+																							"type": "string"
+																						},
+																						{
+																							"const": "owner",
+																							"type": "string"
+																						},
+																						{
+																							"const": "join-policy",
+																							"type": "string"
+																						},
+																						{
+																							"const": "multiple",
+																							"type": "string"
+																						},
+																						{
+																							"const": "results-visibility",
+																							"type": "string"
+																						},
+																						{
+																							"const": "closed",
+																							"type": "string"
+																						},
+																						{
+																							"const": "created-at",
+																							"type": "string"
+																						},
+																						{
+																							"const": "updated-at",
+																							"type": "string"
+																						},
+																						{
+																							"const": "published-at",
+																							"type": "string"
+																						},
+																						{
+																							"const": "closes-at",
+																							"type": "string"
+																						},
+																						{
+																							"const": "catalog-licensed",
+																							"type": "string"
+																						},
+																						{
+																							"const": "catalog-release-date",
+																							"type": "string"
+																						},
+																						{
+																							"const": "book-isbn13",
+																							"type": "string"
+																						},
+																						{
+																							"const": "book-publication-date",
+																							"type": "string"
+																						},
+																						{
+																							"const": "book-page-count",
+																							"type": "string"
+																						},
+																						{
+																							"const": "book-word-count",
+																							"type": "string"
+																						},
+																						{
+																							"const": "book-format",
+																							"type": "string"
+																						},
+																						{
+																							"const": "media-kind",
+																							"type": "string"
+																						},
+																						{
+																							"const": "media-release-date",
+																							"type": "string"
+																						},
+																						{
+																							"const": "media-runtime-minutes",
+																							"type": "string"
+																						},
+																						{
+																							"const": "media-episode-count",
+																							"type": "string"
+																						},
+																						{
+																							"const": "media-season-count",
+																							"type": "string"
+																						},
+																						{
+																							"const": "software-release-date",
+																							"type": "string"
+																						},
+																						{
+																							"const": "software-version-label",
+																							"type": "string"
+																						},
+																						{
+																							"const": "software-platform",
+																							"type": "string"
+																						},
+																						{
+																							"const": "software-requirement-tier",
+																							"type": "string"
+																						}
+																					]
+																				},
+																				"operator": {
+																					"const": "range",
+																					"type": "string"
+																				},
+																				"lower": {
+																					"anyOf": [
+																						{
+																							"minLength": 1,
+																							"maxLength": 500,
+																							"type": "string"
+																						},
+																						{
+																							"type": "number"
+																						},
+																						{
+																							"type": "boolean"
+																						}
+																					]
+																				},
+																				"upper": {
+																					"anyOf": [
+																						{
+																							"minLength": 1,
+																							"maxLength": 500,
+																							"type": "string"
+																						},
+																						{
+																							"type": "number"
+																						},
+																						{
+																							"type": "boolean"
+																						}
+																					]
+																				}
+																			}
+																		}
+																	]
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"field",
+																		"operator",
+																		"value"
+																	],
+																	"properties": {
+																		"field": {
+																			"anyOf": [
+																				{
+																					"const": "category",
+																					"type": "string"
+																				},
+																				{
+																					"const": "kind",
+																					"type": "string"
+																				},
+																				{
+																					"const": "language",
+																					"type": "string"
+																				},
+																				{
+																					"const": "content-rating",
+																					"type": "string"
+																				},
+																				{
+																					"const": "ai-disclosure",
+																					"type": "string"
+																				},
+																				{
+																					"const": "license",
+																					"type": "string"
+																				},
+																				{
+																					"const": "tag",
+																					"type": "string"
+																				},
+																				{
+																					"const": "credit",
+																					"type": "string"
+																				},
+																				{
+																					"const": "publisher-profile",
+																					"type": "string"
+																				},
+																				{
+																					"const": "realm",
+																					"type": "string"
+																				},
+																				{
+																					"const": "zone",
+																					"type": "string"
+																				},
+																				{
+																					"const": "subject",
+																					"type": "string"
+																				},
+																				{
+																					"const": "target",
+																					"type": "string"
+																				},
+																				{
+																					"const": "root",
+																					"type": "string"
+																				},
+																				{
+																					"const": "parent",
+																					"type": "string"
+																				},
+																				{
+																					"const": "owner",
+																					"type": "string"
+																				},
+																				{
+																					"const": "join-policy",
+																					"type": "string"
+																				},
+																				{
+																					"const": "multiple",
+																					"type": "string"
+																				},
+																				{
+																					"const": "results-visibility",
+																					"type": "string"
+																				},
+																				{
+																					"const": "closed",
+																					"type": "string"
+																				},
+																				{
+																					"const": "created-at",
+																					"type": "string"
+																				},
+																				{
+																					"const": "updated-at",
+																					"type": "string"
+																				},
+																				{
+																					"const": "published-at",
+																					"type": "string"
+																				},
+																				{
+																					"const": "closes-at",
+																					"type": "string"
+																				},
+																				{
+																					"const": "catalog-licensed",
+																					"type": "string"
+																				},
+																				{
+																					"const": "catalog-release-date",
+																					"type": "string"
+																				},
+																				{
+																					"const": "book-isbn13",
+																					"type": "string"
+																				},
+																				{
+																					"const": "book-publication-date",
+																					"type": "string"
+																				},
+																				{
+																					"const": "book-page-count",
+																					"type": "string"
+																				},
+																				{
+																					"const": "book-word-count",
+																					"type": "string"
+																				},
+																				{
+																					"const": "book-format",
+																					"type": "string"
+																				},
+																				{
+																					"const": "media-kind",
+																					"type": "string"
+																				},
+																				{
+																					"const": "media-release-date",
+																					"type": "string"
+																				},
+																				{
+																					"const": "media-runtime-minutes",
+																					"type": "string"
+																				},
+																				{
+																					"const": "media-episode-count",
+																					"type": "string"
+																				},
+																				{
+																					"const": "media-season-count",
+																					"type": "string"
+																				},
+																				{
+																					"const": "software-release-date",
+																					"type": "string"
+																				},
+																				{
+																					"const": "software-version-label",
+																					"type": "string"
+																				},
+																				{
+																					"const": "software-platform",
+																					"type": "string"
+																				},
+																				{
+																					"const": "software-requirement-tier",
+																					"type": "string"
+																				}
+																			]
+																		},
+																		"operator": {
+																			"const": "exists",
+																			"type": "string"
+																		},
+																		"value": {
+																			"type": "boolean"
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"$id": "SearchRealmTagVoteFilter",
+																	"type": "object",
+																	"required": [
+																		"field",
+																		"operator",
+																		"realmId",
+																		"tagId"
+																	],
+																	"properties": {
+																		"field": {
+																			"const": "realm-tag-vote",
+																			"type": "string"
+																		},
+																		"operator": {
+																			"const": "matches",
+																			"type": "string"
+																		},
+																		"realmId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"tagId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"score": {
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"lower"
+																					],
+																					"properties": {
+																						"lower": {
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"type": "integer"
+																						}
+																					}
+																				},
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"upper"
+																					],
+																					"properties": {
+																						"lower": {
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"type": "integer"
+																						}
+																					}
+																				}
+																			]
+																		},
+																		"voteCount": {
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"lower"
+																					],
+																					"properties": {
+																						"lower": {
+																							"minimum": 0,
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"minimum": 0,
+																							"type": "integer"
+																						}
+																					}
+																				},
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"upper"
+																					],
+																					"properties": {
+																						"lower": {
+																							"minimum": 0,
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"minimum": 0,
+																							"type": "integer"
+																						}
+																					}
+																				}
+																			]
+																		}
+																	}
+																}
+															]
+														}
+													}
+												},
+												"removable": { "default": true, "type": "boolean" }
+											}
+										}
+									},
+									"state": {
+										"additionalProperties": false,
+										"$id": "SearchFeatureState",
+										"type": "object",
+										"properties": {
+											"filter": { "$ref": "#/components/schemas/UnitFilter" },
+											"sort": {
+												"type": "string",
+												"enum": [
+													"best",
+													"relevance",
+													"createdAt:asc",
+													"createdAt:desc",
+													"updatedAt:asc",
+													"updatedAt:desc",
+													"publishedAt:asc",
+													"publishedAt:desc",
+													"followerCount:asc",
+													"followerCount:desc",
+													"replyCount:asc",
+													"replyCount:desc",
+													"closesAt:asc",
+													"closesAt:desc",
+													"title:asc",
+													"title:desc",
+													"progressLastSeenAt:asc",
+													"progressLastSeenAt:desc"
+												]
+											},
+											"pageSize": {
+												"minimum": 1,
+												"maximum": 100,
+												"type": "integer"
+											},
+											"cursor": {
+												"maxLength": 4096,
+												"pattern": "^s2_[A-Za-z0-9_-]+$",
+												"type": "string"
+											},
+											"expression": {
+												"$id": "SearchControlExpression",
+												"anyOf": [
+													{
+														"additionalProperties": false,
+														"$id": "SearchControlValue",
+														"type": "object",
+														"required": ["controlKey", "filter"],
+														"properties": {
+															"controlKey": {
+																"minLength": 1,
+																"maxLength": 64,
+																"pattern": "^[a-z][a-z0-9-]*$",
+																"type": "string"
+															},
+															"filter": {
+																"$id": "SearchControlPredicate",
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"field",
+																			"operator",
+																			"value"
+																		],
+																		"properties": {
+																			"field": {
+																				"anyOf": [
+																					{
+																						"const": "category",
+																						"type": "string"
+																					},
+																					{
+																						"const": "kind",
+																						"type": "string"
+																					},
+																					{
+																						"const": "language",
+																						"type": "string"
+																					},
+																					{
+																						"const": "content-rating",
+																						"type": "string"
+																					},
+																					{
+																						"const": "ai-disclosure",
+																						"type": "string"
+																					},
+																					{
+																						"const": "license",
+																						"type": "string"
+																					},
+																					{
+																						"const": "tag",
+																						"type": "string"
+																					},
+																					{
+																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
+																						"const": "realm",
+																						"type": "string"
+																					},
+																					{
+																						"const": "zone",
+																						"type": "string"
+																					},
+																					{
+																						"const": "subject",
+																						"type": "string"
+																					},
+																					{
+																						"const": "target",
+																						"type": "string"
+																					},
+																					{
+																						"const": "root",
+																						"type": "string"
+																					},
+																					{
+																						"const": "parent",
+																						"type": "string"
+																					},
+																					{
+																						"const": "owner",
+																						"type": "string"
+																					},
+																					{
+																						"const": "join-policy",
+																						"type": "string"
+																					},
+																					{
+																						"const": "multiple",
+																						"type": "string"
+																					},
+																					{
+																						"const": "results-visibility",
+																						"type": "string"
+																					},
+																					{
+																						"const": "closed",
+																						"type": "string"
+																					},
+																					{
+																						"const": "created-at",
+																						"type": "string"
+																					},
+																					{
+																						"const": "updated-at",
+																						"type": "string"
+																					},
+																					{
+																						"const": "published-at",
+																						"type": "string"
+																					},
+																					{
+																						"const": "closes-at",
+																						"type": "string"
+																					},
+																					{
+																						"const": "catalog-licensed",
+																						"type": "string"
+																					},
+																					{
+																						"const": "catalog-release-date",
+																						"type": "string"
+																					},
+																					{
+																						"const": "book-isbn13",
+																						"type": "string"
+																					},
+																					{
+																						"const": "book-publication-date",
+																						"type": "string"
+																					},
+																					{
+																						"const": "book-page-count",
+																						"type": "string"
+																					},
+																					{
+																						"const": "book-word-count",
+																						"type": "string"
+																					},
+																					{
+																						"const": "book-format",
+																						"type": "string"
+																					},
+																					{
+																						"const": "media-kind",
+																						"type": "string"
+																					},
+																					{
+																						"const": "media-release-date",
+																						"type": "string"
+																					},
+																					{
+																						"const": "media-runtime-minutes",
+																						"type": "string"
+																					},
+																					{
+																						"const": "media-episode-count",
+																						"type": "string"
+																					},
+																					{
+																						"const": "media-season-count",
+																						"type": "string"
+																					},
+																					{
+																						"const": "software-release-date",
+																						"type": "string"
+																					},
+																					{
+																						"const": "software-version-label",
+																						"type": "string"
+																					},
+																					{
+																						"const": "software-platform",
+																						"type": "string"
+																					},
+																					{
+																						"const": "software-requirement-tier",
+																						"type": "string"
+																					}
+																				]
+																			},
+																			"operator": {
+																				"const": "equals",
+																				"type": "string"
+																			},
+																			"value": {
+																				"anyOf": [
+																					{
+																						"minLength": 1,
+																						"maxLength": 500,
+																						"type": "string"
+																					},
+																					{
+																						"type": "number"
+																					},
+																					{
+																						"type": "boolean"
+																					}
+																				]
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"field",
+																			"operator",
+																			"value"
+																		],
+																		"properties": {
+																			"field": {
+																				"anyOf": [
+																					{
+																						"const": "category",
+																						"type": "string"
+																					},
+																					{
+																						"const": "kind",
+																						"type": "string"
+																					},
+																					{
+																						"const": "language",
+																						"type": "string"
+																					},
+																					{
+																						"const": "content-rating",
+																						"type": "string"
+																					},
+																					{
+																						"const": "ai-disclosure",
+																						"type": "string"
+																					},
+																					{
+																						"const": "license",
+																						"type": "string"
+																					},
+																					{
+																						"const": "tag",
+																						"type": "string"
+																					},
+																					{
+																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
+																						"const": "realm",
+																						"type": "string"
+																					},
+																					{
+																						"const": "zone",
+																						"type": "string"
+																					},
+																					{
+																						"const": "subject",
+																						"type": "string"
+																					},
+																					{
+																						"const": "target",
+																						"type": "string"
+																					},
+																					{
+																						"const": "root",
+																						"type": "string"
+																					},
+																					{
+																						"const": "parent",
+																						"type": "string"
+																					},
+																					{
+																						"const": "owner",
+																						"type": "string"
+																					},
+																					{
+																						"const": "join-policy",
+																						"type": "string"
+																					},
+																					{
+																						"const": "multiple",
+																						"type": "string"
+																					},
+																					{
+																						"const": "results-visibility",
+																						"type": "string"
+																					},
+																					{
+																						"const": "closed",
+																						"type": "string"
+																					},
+																					{
+																						"const": "created-at",
+																						"type": "string"
+																					},
+																					{
+																						"const": "updated-at",
+																						"type": "string"
+																					},
+																					{
+																						"const": "published-at",
+																						"type": "string"
+																					},
+																					{
+																						"const": "closes-at",
+																						"type": "string"
+																					},
+																					{
+																						"const": "catalog-licensed",
+																						"type": "string"
+																					},
+																					{
+																						"const": "catalog-release-date",
+																						"type": "string"
+																					},
+																					{
+																						"const": "book-isbn13",
+																						"type": "string"
+																					},
+																					{
+																						"const": "book-publication-date",
+																						"type": "string"
+																					},
+																					{
+																						"const": "book-page-count",
+																						"type": "string"
+																					},
+																					{
+																						"const": "book-word-count",
+																						"type": "string"
+																					},
+																					{
+																						"const": "book-format",
+																						"type": "string"
+																					},
+																					{
+																						"const": "media-kind",
+																						"type": "string"
+																					},
+																					{
+																						"const": "media-release-date",
+																						"type": "string"
+																					},
+																					{
+																						"const": "media-runtime-minutes",
+																						"type": "string"
+																					},
+																					{
+																						"const": "media-episode-count",
+																						"type": "string"
+																					},
+																					{
+																						"const": "media-season-count",
+																						"type": "string"
+																					},
+																					{
+																						"const": "software-release-date",
+																						"type": "string"
+																					},
+																					{
+																						"const": "software-version-label",
+																						"type": "string"
+																					},
+																					{
+																						"const": "software-platform",
+																						"type": "string"
+																					},
+																					{
+																						"const": "software-requirement-tier",
+																						"type": "string"
+																					}
+																				]
+																			},
+																			"operator": {
+																				"const": "not-equals",
+																				"type": "string"
+																			},
+																			"value": {
+																				"anyOf": [
+																					{
+																						"minLength": 1,
+																						"maxLength": 500,
+																						"type": "string"
+																					},
+																					{
+																						"type": "number"
+																					},
+																					{
+																						"type": "boolean"
+																					}
+																				]
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"field",
+																			"operator",
+																			"values"
+																		],
+																		"properties": {
+																			"field": {
+																				"anyOf": [
+																					{
+																						"const": "category",
+																						"type": "string"
+																					},
+																					{
+																						"const": "kind",
+																						"type": "string"
+																					},
+																					{
+																						"const": "language",
+																						"type": "string"
+																					},
+																					{
+																						"const": "content-rating",
+																						"type": "string"
+																					},
+																					{
+																						"const": "ai-disclosure",
+																						"type": "string"
+																					},
+																					{
+																						"const": "license",
+																						"type": "string"
+																					},
+																					{
+																						"const": "tag",
+																						"type": "string"
+																					},
+																					{
+																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
+																						"const": "realm",
+																						"type": "string"
+																					},
+																					{
+																						"const": "zone",
+																						"type": "string"
+																					},
+																					{
+																						"const": "subject",
+																						"type": "string"
+																					},
+																					{
+																						"const": "target",
+																						"type": "string"
+																					},
+																					{
+																						"const": "root",
+																						"type": "string"
+																					},
+																					{
+																						"const": "parent",
+																						"type": "string"
+																					},
+																					{
+																						"const": "owner",
+																						"type": "string"
+																					},
+																					{
+																						"const": "join-policy",
+																						"type": "string"
+																					},
+																					{
+																						"const": "multiple",
+																						"type": "string"
+																					},
+																					{
+																						"const": "results-visibility",
+																						"type": "string"
+																					},
+																					{
+																						"const": "closed",
+																						"type": "string"
+																					},
+																					{
+																						"const": "created-at",
+																						"type": "string"
+																					},
+																					{
+																						"const": "updated-at",
+																						"type": "string"
+																					},
+																					{
+																						"const": "published-at",
+																						"type": "string"
+																					},
+																					{
+																						"const": "closes-at",
+																						"type": "string"
+																					},
+																					{
+																						"const": "catalog-licensed",
+																						"type": "string"
+																					},
+																					{
+																						"const": "catalog-release-date",
+																						"type": "string"
+																					},
+																					{
+																						"const": "book-isbn13",
+																						"type": "string"
+																					},
+																					{
+																						"const": "book-publication-date",
+																						"type": "string"
+																					},
+																					{
+																						"const": "book-page-count",
+																						"type": "string"
+																					},
+																					{
+																						"const": "book-word-count",
+																						"type": "string"
+																					},
+																					{
+																						"const": "book-format",
+																						"type": "string"
+																					},
+																					{
+																						"const": "media-kind",
+																						"type": "string"
+																					},
+																					{
+																						"const": "media-release-date",
+																						"type": "string"
+																					},
+																					{
+																						"const": "media-runtime-minutes",
+																						"type": "string"
+																					},
+																					{
+																						"const": "media-episode-count",
+																						"type": "string"
+																					},
+																					{
+																						"const": "media-season-count",
+																						"type": "string"
+																					},
+																					{
+																						"const": "software-release-date",
+																						"type": "string"
+																					},
+																					{
+																						"const": "software-version-label",
+																						"type": "string"
+																					},
+																					{
+																						"const": "software-platform",
+																						"type": "string"
+																					},
+																					{
+																						"const": "software-requirement-tier",
+																						"type": "string"
+																					}
+																				]
+																			},
+																			"operator": {
+																				"anyOf": [
+																					{
+																						"const": "any-of",
+																						"type": "string"
+																					},
+																					{
+																						"const": "all-of",
+																						"type": "string"
+																					},
+																					{
+																						"const": "none-of",
+																						"type": "string"
+																					}
+																				]
+																			},
+																			"values": {
+																				"minItems": 1,
+																				"maxItems": 50,
+																				"type": "array",
+																				"items": {
+																					"anyOf": [
+																						{
+																							"minLength": 1,
+																							"maxLength": 500,
+																							"type": "string"
+																						},
+																						{
+																							"type": "number"
+																						},
+																						{
+																							"type": "boolean"
+																						}
+																					]
+																				}
+																			}
+																		}
+																	},
+																	{
+																		"anyOf": [
+																			{
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"field",
+																					"operator",
+																					"lower"
+																				],
+																				"properties": {
+																					"field": {
+																						"anyOf": [
+																							{
+																								"const": "category",
+																								"type": "string"
+																							},
+																							{
+																								"const": "kind",
+																								"type": "string"
+																							},
+																							{
+																								"const": "language",
+																								"type": "string"
+																							},
+																							{
+																								"const": "content-rating",
+																								"type": "string"
+																							},
+																							{
+																								"const": "ai-disclosure",
+																								"type": "string"
+																							},
+																							{
+																								"const": "license",
+																								"type": "string"
+																							},
+																							{
+																								"const": "tag",
+																								"type": "string"
+																							},
+																							{
+																								"const": "credit",
+																								"type": "string"
+																							},
+																							{
+																								"const": "publisher-profile",
+																								"type": "string"
+																							},
+																							{
+																								"const": "realm",
+																								"type": "string"
+																							},
+																							{
+																								"const": "zone",
+																								"type": "string"
+																							},
+																							{
+																								"const": "subject",
+																								"type": "string"
+																							},
+																							{
+																								"const": "target",
+																								"type": "string"
+																							},
+																							{
+																								"const": "root",
+																								"type": "string"
+																							},
+																							{
+																								"const": "parent",
+																								"type": "string"
+																							},
+																							{
+																								"const": "owner",
+																								"type": "string"
+																							},
+																							{
+																								"const": "join-policy",
+																								"type": "string"
+																							},
+																							{
+																								"const": "multiple",
+																								"type": "string"
+																							},
+																							{
+																								"const": "results-visibility",
+																								"type": "string"
+																							},
+																							{
+																								"const": "closed",
+																								"type": "string"
+																							},
+																							{
+																								"const": "created-at",
+																								"type": "string"
+																							},
+																							{
+																								"const": "updated-at",
+																								"type": "string"
+																							},
+																							{
+																								"const": "published-at",
+																								"type": "string"
+																							},
+																							{
+																								"const": "closes-at",
+																								"type": "string"
+																							},
+																							{
+																								"const": "catalog-licensed",
+																								"type": "string"
+																							},
+																							{
+																								"const": "catalog-release-date",
+																								"type": "string"
+																							},
+																							{
+																								"const": "book-isbn13",
+																								"type": "string"
+																							},
+																							{
+																								"const": "book-publication-date",
+																								"type": "string"
+																							},
+																							{
+																								"const": "book-page-count",
+																								"type": "string"
+																							},
+																							{
+																								"const": "book-word-count",
+																								"type": "string"
+																							},
+																							{
+																								"const": "book-format",
+																								"type": "string"
+																							},
+																							{
+																								"const": "media-kind",
+																								"type": "string"
+																							},
+																							{
+																								"const": "media-release-date",
+																								"type": "string"
+																							},
+																							{
+																								"const": "media-runtime-minutes",
+																								"type": "string"
+																							},
+																							{
+																								"const": "media-episode-count",
+																								"type": "string"
+																							},
+																							{
+																								"const": "media-season-count",
+																								"type": "string"
+																							},
+																							{
+																								"const": "software-release-date",
+																								"type": "string"
+																							},
+																							{
+																								"const": "software-version-label",
+																								"type": "string"
+																							},
+																							{
+																								"const": "software-platform",
+																								"type": "string"
+																							},
+																							{
+																								"const": "software-requirement-tier",
+																								"type": "string"
+																							}
+																						]
+																					},
+																					"operator": {
+																						"const": "range",
+																						"type": "string"
+																					},
+																					"lower": {
+																						"anyOf": [
+																							{
+																								"minLength": 1,
+																								"maxLength": 500,
+																								"type": "string"
+																							},
+																							{
+																								"type": "number"
+																							},
+																							{
+																								"type": "boolean"
+																							}
+																						]
+																					},
+																					"upper": {
+																						"anyOf": [
+																							{
+																								"minLength": 1,
+																								"maxLength": 500,
+																								"type": "string"
+																							},
+																							{
+																								"type": "number"
+																							},
+																							{
+																								"type": "boolean"
+																							}
+																						]
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"field",
+																					"operator",
+																					"upper"
+																				],
+																				"properties": {
+																					"field": {
+																						"anyOf": [
+																							{
+																								"const": "category",
+																								"type": "string"
+																							},
+																							{
+																								"const": "kind",
+																								"type": "string"
+																							},
+																							{
+																								"const": "language",
+																								"type": "string"
+																							},
+																							{
+																								"const": "content-rating",
+																								"type": "string"
+																							},
+																							{
+																								"const": "ai-disclosure",
+																								"type": "string"
+																							},
+																							{
+																								"const": "license",
+																								"type": "string"
+																							},
+																							{
+																								"const": "tag",
+																								"type": "string"
+																							},
+																							{
+																								"const": "credit",
+																								"type": "string"
+																							},
+																							{
+																								"const": "publisher-profile",
+																								"type": "string"
+																							},
+																							{
+																								"const": "realm",
+																								"type": "string"
+																							},
+																							{
+																								"const": "zone",
+																								"type": "string"
+																							},
+																							{
+																								"const": "subject",
+																								"type": "string"
+																							},
+																							{
+																								"const": "target",
+																								"type": "string"
+																							},
+																							{
+																								"const": "root",
+																								"type": "string"
+																							},
+																							{
+																								"const": "parent",
+																								"type": "string"
+																							},
+																							{
+																								"const": "owner",
+																								"type": "string"
+																							},
+																							{
+																								"const": "join-policy",
+																								"type": "string"
+																							},
+																							{
+																								"const": "multiple",
+																								"type": "string"
+																							},
+																							{
+																								"const": "results-visibility",
+																								"type": "string"
+																							},
+																							{
+																								"const": "closed",
+																								"type": "string"
+																							},
+																							{
+																								"const": "created-at",
+																								"type": "string"
+																							},
+																							{
+																								"const": "updated-at",
+																								"type": "string"
+																							},
+																							{
+																								"const": "published-at",
+																								"type": "string"
+																							},
+																							{
+																								"const": "closes-at",
+																								"type": "string"
+																							},
+																							{
+																								"const": "catalog-licensed",
+																								"type": "string"
+																							},
+																							{
+																								"const": "catalog-release-date",
+																								"type": "string"
+																							},
+																							{
+																								"const": "book-isbn13",
+																								"type": "string"
+																							},
+																							{
+																								"const": "book-publication-date",
+																								"type": "string"
+																							},
+																							{
+																								"const": "book-page-count",
+																								"type": "string"
+																							},
+																							{
+																								"const": "book-word-count",
+																								"type": "string"
+																							},
+																							{
+																								"const": "book-format",
+																								"type": "string"
+																							},
+																							{
+																								"const": "media-kind",
+																								"type": "string"
+																							},
+																							{
+																								"const": "media-release-date",
+																								"type": "string"
+																							},
+																							{
+																								"const": "media-runtime-minutes",
+																								"type": "string"
+																							},
+																							{
+																								"const": "media-episode-count",
+																								"type": "string"
+																							},
+																							{
+																								"const": "media-season-count",
+																								"type": "string"
+																							},
+																							{
+																								"const": "software-release-date",
+																								"type": "string"
+																							},
+																							{
+																								"const": "software-version-label",
+																								"type": "string"
+																							},
+																							{
+																								"const": "software-platform",
+																								"type": "string"
+																							},
+																							{
+																								"const": "software-requirement-tier",
+																								"type": "string"
+																							}
+																						]
+																					},
+																					"operator": {
+																						"const": "range",
+																						"type": "string"
+																					},
+																					"lower": {
+																						"anyOf": [
+																							{
+																								"minLength": 1,
+																								"maxLength": 500,
+																								"type": "string"
+																							},
+																							{
+																								"type": "number"
+																							},
+																							{
+																								"type": "boolean"
+																							}
+																						]
+																					},
+																					"upper": {
+																						"anyOf": [
+																							{
+																								"minLength": 1,
+																								"maxLength": 500,
+																								"type": "string"
+																							},
+																							{
+																								"type": "number"
+																							},
+																							{
+																								"type": "boolean"
+																							}
+																						]
+																					}
+																				}
+																			}
+																		]
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"field",
+																			"operator",
+																			"value"
+																		],
+																		"properties": {
+																			"field": {
+																				"anyOf": [
+																					{
+																						"const": "category",
+																						"type": "string"
+																					},
+																					{
+																						"const": "kind",
+																						"type": "string"
+																					},
+																					{
+																						"const": "language",
+																						"type": "string"
+																					},
+																					{
+																						"const": "content-rating",
+																						"type": "string"
+																					},
+																					{
+																						"const": "ai-disclosure",
+																						"type": "string"
+																					},
+																					{
+																						"const": "license",
+																						"type": "string"
+																					},
+																					{
+																						"const": "tag",
+																						"type": "string"
+																					},
+																					{
+																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
+																						"const": "realm",
+																						"type": "string"
+																					},
+																					{
+																						"const": "zone",
+																						"type": "string"
+																					},
+																					{
+																						"const": "subject",
+																						"type": "string"
+																					},
+																					{
+																						"const": "target",
+																						"type": "string"
+																					},
+																					{
+																						"const": "root",
+																						"type": "string"
+																					},
+																					{
+																						"const": "parent",
+																						"type": "string"
+																					},
+																					{
+																						"const": "owner",
+																						"type": "string"
+																					},
+																					{
+																						"const": "join-policy",
+																						"type": "string"
+																					},
+																					{
+																						"const": "multiple",
+																						"type": "string"
+																					},
+																					{
+																						"const": "results-visibility",
+																						"type": "string"
+																					},
+																					{
+																						"const": "closed",
+																						"type": "string"
+																					},
+																					{
+																						"const": "created-at",
+																						"type": "string"
+																					},
+																					{
+																						"const": "updated-at",
+																						"type": "string"
+																					},
+																					{
+																						"const": "published-at",
+																						"type": "string"
+																					},
+																					{
+																						"const": "closes-at",
+																						"type": "string"
+																					},
+																					{
+																						"const": "catalog-licensed",
+																						"type": "string"
+																					},
+																					{
+																						"const": "catalog-release-date",
+																						"type": "string"
+																					},
+																					{
+																						"const": "book-isbn13",
+																						"type": "string"
+																					},
+																					{
+																						"const": "book-publication-date",
+																						"type": "string"
+																					},
+																					{
+																						"const": "book-page-count",
+																						"type": "string"
+																					},
+																					{
+																						"const": "book-word-count",
+																						"type": "string"
+																					},
+																					{
+																						"const": "book-format",
+																						"type": "string"
+																					},
+																					{
+																						"const": "media-kind",
+																						"type": "string"
+																					},
+																					{
+																						"const": "media-release-date",
+																						"type": "string"
+																					},
+																					{
+																						"const": "media-runtime-minutes",
+																						"type": "string"
+																					},
+																					{
+																						"const": "media-episode-count",
+																						"type": "string"
+																					},
+																					{
+																						"const": "media-season-count",
+																						"type": "string"
+																					},
+																					{
+																						"const": "software-release-date",
+																						"type": "string"
+																					},
+																					{
+																						"const": "software-version-label",
+																						"type": "string"
+																					},
+																					{
+																						"const": "software-platform",
+																						"type": "string"
+																					},
+																					{
+																						"const": "software-requirement-tier",
+																						"type": "string"
+																					}
+																				]
+																			},
+																			"operator": {
+																				"const": "exists",
+																				"type": "string"
+																			},
+																			"value": {
+																				"type": "boolean"
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"$id": "SearchRealmTagVoteFilter",
+																		"type": "object",
+																		"required": [
+																			"field",
+																			"operator",
+																			"realmId",
+																			"tagId"
+																		],
+																		"properties": {
+																			"field": {
+																				"const": "realm-tag-vote",
+																				"type": "string"
+																			},
+																			"operator": {
+																				"const": "matches",
+																				"type": "string"
+																			},
+																			"realmId": {
+																				"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																				"type": "string"
+																			},
+																			"tagId": {
+																				"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																				"type": "string"
+																			},
+																			"score": {
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"lower"
+																						],
+																						"properties": {
+																							"lower": {
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"type": "integer"
+																							}
+																						}
+																					},
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"upper"
+																						],
+																						"properties": {
+																							"lower": {
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"type": "integer"
+																							}
+																						}
+																					}
+																				]
+																			},
+																			"voteCount": {
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"lower"
+																						],
+																						"properties": {
+																							"lower": {
+																								"minimum": 0,
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"minimum": 0,
+																								"type": "integer"
+																							}
+																						}
+																					},
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"upper"
+																						],
+																						"properties": {
+																							"lower": {
+																								"minimum": 0,
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"minimum": 0,
+																								"type": "integer"
+																							}
+																						}
+																					}
+																				]
+																			}
+																		}
+																	}
+																]
+															}
+														}
+													},
+													{
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["operator", "clauses"],
+														"properties": {
+															"operator": {
+																"anyOf": [
+																	{
+																		"const": "all",
+																		"type": "string"
+																	},
+																	{
+																		"const": "any",
+																		"type": "string"
+																	}
+																]
+															},
+															"clauses": {
+																"minItems": 1,
+																"maxItems": 20,
+																"type": "array",
+																"items": {
+																	"$ref": "SearchControlExpression"
+																}
+															}
+														}
+													},
+													{
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["operator", "clause"],
+														"properties": {
+															"operator": {
+																"const": "not",
+																"type": "string"
+															},
+															"clause": {
+																"$ref": "SearchControlExpression"
+															}
+														}
+													}
+												]
+											}
+										}
+									},
+									"localizationLanguages": {
+										"minItems": 1,
+										"maxItems": 7,
+										"uniqueItems": true,
+										"type": "array",
+										"items": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										}
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["items", "total"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"unitId",
+													"status",
+													"progress",
+													"completedCount",
+													"totalTimeMs",
+													"firstSeenAt",
+													"lastSeenAt",
+													"lastContentStructureNodeId",
+													"lastReadAnchor",
+													"visibility",
+													"type",
+													"language",
+													"title",
+													"summary",
+													"cover"
+												],
+												"properties": {
+													"unitId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"status": {
+														"default": "backlog",
+														"type": "string",
+														"enum": [
+															"backlog",
+															"active",
+															"paused",
+															"completed",
+															"dropped"
+														]
+													},
+													"progress": {
+														"minimum": 0,
+														"maximum": 1,
+														"type": "number"
+													},
+													"completedCount": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"totalTimeMs": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"firstSeenAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"lastSeenAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"lastContentStructureNodeId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"lastReadAnchor": {
+														"nullable": true,
+														"anyOf": [{}, { "type": "null" }]
+													},
+													"visibility": {
+														"type": "string",
+														"enum": ["public", "unlisted", "private"]
+													},
+													"type": {
+														"default": "book",
+														"type": "string",
+														"enum": ["book", "media", "software"]
+													},
+													"language": {
+														"type": "string",
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
+													},
+													"title": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													}
+												}
+											}
+										},
+										"nextCursor": {
+											"maxLength": 4096,
+											"pattern": "^s2_[A-Za-z0-9_-]+$",
+											"type": "string"
+										},
+										"total": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "InvalidSearch",
+															"type": "string",
+															"enum": ["InvalidSearch"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiProgressSearch",
+				"x-rezics-policy-operation-id": "postApiProgressSearch"
+			}
+		},
 		"/api/progress/{unitId}": {
 			"get": {
 				"summary": "Get progress state",
@@ -136235,7 +139301,15 @@
 						"required": true,
 						"schema": {
 							"type": "string",
-							"enum": ["global", "book", "media", "software", "realm", "zone"]
+							"enum": [
+								"global",
+								"book",
+								"media",
+								"software",
+								"progress",
+								"realm",
+								"zone"
+							]
 						}
 					}
 				],
@@ -137733,7 +140807,11 @@
 													"replyCount:asc",
 													"replyCount:desc",
 													"closesAt:asc",
-													"closesAt:desc"
+													"closesAt:desc",
+													"title:asc",
+													"title:desc",
+													"progressLastSeenAt:asc",
+													"progressLastSeenAt:desc"
 												]
 											},
 											"pageSize": {
@@ -141066,7 +144144,11 @@
 													"replyCount:asc",
 													"replyCount:desc",
 													"closesAt:asc",
-													"closesAt:desc"
+													"closesAt:desc",
+													"title:asc",
+													"title:desc",
+													"progressLastSeenAt:asc",
+													"progressLastSeenAt:desc"
 												]
 											},
 											"pageSize": {
@@ -150301,7 +153383,11 @@
 													"replyCount:asc",
 													"replyCount:desc",
 													"closesAt:asc",
-													"closesAt:desc"
+													"closesAt:desc",
+													"title:asc",
+													"title:desc",
+													"progressLastSeenAt:asc",
+													"progressLastSeenAt:desc"
 												]
 											},
 											"pageSize": {
@@ -153584,7 +156670,11 @@
 													"replyCount:asc",
 													"replyCount:desc",
 													"closesAt:asc",
-													"closesAt:desc"
+													"closesAt:desc",
+													"title:asc",
+													"title:desc",
+													"progressLastSeenAt:asc",
+													"progressLastSeenAt:desc"
 												]
 											},
 											"pageSize": {
@@ -162907,7 +165997,11 @@
 													"replyCount:asc",
 													"replyCount:desc",
 													"closesAt:asc",
-													"closesAt:desc"
+													"closesAt:desc",
+													"title:asc",
+													"title:desc",
+													"progressLastSeenAt:asc",
+													"progressLastSeenAt:desc"
 												]
 											},
 											"pageSize": {
@@ -166207,7 +169301,11 @@
 													"replyCount:asc",
 													"replyCount:desc",
 													"closesAt:asc",
-													"closesAt:desc"
+													"closesAt:desc",
+													"title:asc",
+													"title:desc",
+													"progressLastSeenAt:asc",
+													"progressLastSeenAt:desc"
 												]
 											},
 											"pageSize": {
@@ -169501,7 +172599,11 @@
 													"replyCount:asc",
 													"replyCount:desc",
 													"closesAt:asc",
-													"closesAt:desc"
+													"closesAt:desc",
+													"title:asc",
+													"title:desc",
+													"progressLastSeenAt:asc",
+													"progressLastSeenAt:desc"
 												]
 											},
 											"pageSize": {
@@ -177681,7 +180783,11 @@
 													"replyCount:asc",
 													"replyCount:desc",
 													"closesAt:asc",
-													"closesAt:desc"
+													"closesAt:desc",
+													"title:asc",
+													"title:desc",
+													"progressLastSeenAt:asc",
+													"progressLastSeenAt:desc"
 												]
 											},
 											"pageSize": {
@@ -179196,7 +182302,11 @@
 																"replyCount:asc",
 																"replyCount:desc",
 																"closesAt:asc",
-																"closesAt:desc"
+																"closesAt:desc",
+																"title:asc",
+																"title:desc",
+																"progressLastSeenAt:asc",
+																"progressLastSeenAt:desc"
 															]
 														},
 														"pageSize": {
@@ -180854,7 +183964,11 @@
 																"replyCount:asc",
 																"replyCount:desc",
 																"closesAt:asc",
-																"closesAt:desc"
+																"closesAt:desc",
+																"title:asc",
+																"title:desc",
+																"progressLastSeenAt:asc",
+																"progressLastSeenAt:desc"
 															]
 														},
 														"pageSize": {
@@ -182528,7 +185642,11 @@
 											"replyCount:asc",
 											"replyCount:desc",
 											"closesAt:asc",
-											"closesAt:desc"
+											"closesAt:desc",
+											"title:asc",
+											"title:desc",
+											"progressLastSeenAt:asc",
+											"progressLastSeenAt:desc"
 										]
 									}
 								}

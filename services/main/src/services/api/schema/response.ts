@@ -799,6 +799,29 @@ export const ProgressListResponse = t.Object({
 		}),
 	),
 });
+export const ProgressSearchResponse = t.Object({
+	items: t.Array(
+		t.Object({
+			unitId: Uuid,
+			status: ProgressStatusResponse,
+			progress: t.Number({ minimum: 0, maximum: 1 }),
+			completedCount: t.Integer({ minimum: 0 }),
+			totalTimeMs: t.Integer({ minimum: 0 }),
+			firstSeenAt: DateTime,
+			lastSeenAt: DateTime,
+			lastContentStructureNodeId: t.Nullable(Uuid),
+			lastReadAnchor: t.Nullable(t.Unknown()),
+			visibility: ResourceVisibility,
+			type: t.UnionEnum(["book", "media", "software"]),
+			language: ContentLanguage,
+			title: NullableText,
+			summary: NullableText,
+			cover: ImageAssetResponse,
+		}),
+	),
+	nextCursor: t.Optional(t.String({ maxLength: 4096, pattern: "^s2_[A-Za-z0-9_-]+$" })),
+	total: t.Integer({ minimum: 0 }),
+});
 export const ProgressResponse = t.Object({
 	profileId: Uuid,
 	unitId: Uuid,

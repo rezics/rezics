@@ -49,6 +49,10 @@ export const SearchSortValues = [
 	"replyCount:desc",
 	"closesAt:asc",
 	"closesAt:desc",
+	"title:asc",
+	"title:desc",
+	"progressLastSeenAt:asc",
+	"progressLastSeenAt:desc",
 ] as const;
 export type SearchSort = (typeof SearchSortValues)[number];
 export const SearchSort = stringEnum(SearchSortValues);

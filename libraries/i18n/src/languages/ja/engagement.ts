@@ -242,6 +242,9 @@ export default {
 		},
 	},
 	retryProgress: "進捗を再読み込み",
+	searchProgress: "進捗記録を検索",
+	searchProgressPlaceholder: "タイトルまたは概要を検索",
+	progressUpdatedAt: insert("進捗更新：{{time}}", { time: String }),
 	progressPercent: insert("{{percent}}%", { percent: Number }),
 	viewProgressHistory: "足跡を見る",
 	progressJournal: {

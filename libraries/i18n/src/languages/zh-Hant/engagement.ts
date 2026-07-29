@@ -235,6 +235,9 @@ export default {
 		},
 	},
 	retryProgress: "重新載入進度",
+	searchProgress: "搜尋進度記錄",
+	searchProgressPlaceholder: "搜尋作品標題或摘要",
+	progressUpdatedAt: insert("進度更新於 {{time}}", { time: String }),
 	progressPercent: insert("{{percent}}%", { percent: Number }),
 	viewProgressHistory: "查看足跡",
 	progressJournal: {
