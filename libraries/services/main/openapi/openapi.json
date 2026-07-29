@@ -90149,6 +90149,52 @@
 															]
 														}
 													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"state",
+														"id",
+														"parentId",
+														"order",
+														"contentUnitId"
+													],
+													"properties": {
+														"state": {
+															"const": "attached",
+															"type": "string"
+														},
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"parentId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"order": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
+														},
+														"contentUnitId": {
+															"format": "uuid",
+															"type": "string"
+														}
+													}
 												}
 											]
 										}

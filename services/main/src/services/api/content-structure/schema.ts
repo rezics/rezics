@@ -145,6 +145,17 @@ const NewBookContentStructureChapterDraftNode = t.Object(
 	{ additionalProperties: false },
 );
 
+const AttachedBookContentStructureDraftNode = t.Object(
+	{
+		state: t.Literal("attached"),
+		id: Uuid,
+		parentId: t.Nullable(Uuid),
+		order: t.Integer({ minimum: 0 }),
+		contentUnitId: Uuid,
+	},
+	{ additionalProperties: false },
+);
+
 export const SaveBookContentStructureDraftBody = t.Object(
 	{
 		baseRevisionId: Uuid,
@@ -153,6 +164,7 @@ export const SaveBookContentStructureDraftBody = t.Object(
 				ExistingBookContentStructureDraftNode,
 				NewBookContentStructureLabelDraftNode,
 				NewBookContentStructureChapterDraftNode,
+				AttachedBookContentStructureDraftNode,
 			]),
 			{ maxItems: 10_000 },
 		),

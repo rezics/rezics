@@ -22,15 +22,21 @@ import { mutateContentStructureWithHistory } from "./history";
 import { loadContentStructureSnapshot } from "./storage";
 import {
 	planBookContentStructureDraft,
+	type AttachedBookDraftNode,
 	type BookDraftNode,
+	type ExistingBookDraftNode,
 	type NewBookDraftNode,
 } from "./book-draft-plan";
+
+type AttachedBookDraftNodeInput = Omit<AttachedBookDraftNode, "title">;
 
 export type SaveBookContentStructureDraftInput = {
 	readonly ownerUnitId: string;
 	readonly baseRevisionId: string;
 	readonly actorProfileId: string;
-	readonly nodes: readonly BookDraftNode[];
+	readonly nodes: readonly (
+		ExistingBookDraftNode | NewBookDraftNode | AttachedBookDraftNodeInput
+	)[];
 };
 
 async function createBookDraftContentUnit(
@@ -174,19 +180,67 @@ export async function saveBookContentStructureDraft(
 				)
 			)
 				throw new ContentStructureInvalid("Book structure contains invalid content nodes");
+			const attachedContentUnitIds = [
+				...new Set(
+					input.nodes.flatMap((node) =>
+						node.state === "attached" ? [node.contentUnitId] : [],
+					),
+				),
+			];
+			const attachedContentRows = attachedContentUnitIds.length
+				? await tx
+						.select({
+							id: unit.id,
+							title: unitLocalization.title,
+							unitKind: unit.kind,
+							postKind: post.kind,
+							labelId: label.id,
+						})
+						.from(unit)
+						.leftJoin(post, eq(post.id, unit.id))
+						.leftJoin(label, eq(label.id, unit.id))
+						.innerJoin(
+							unitLocalization,
+							and(
+								eq(unitLocalization.unitId, unit.id),
+								isFirstUnitLocalization(unitLocalization.unitId),
+							),
+						)
+						.where(
+							and(inArray(unit.id, attachedContentUnitIds), isNull(unit.deletedAt)),
+						)
+				: [];
+			const attachedContentByUnitId = new Map(
+				attachedContentRows.map((row) => [row.id, row] as const),
+			);
+			const draftNodes: BookDraftNode[] = input.nodes.map((node) => {
+				if (node.state !== "attached") return node;
+				const content = attachedContentByUnitId.get(node.contentUnitId);
+				if (
+					!content?.title ||
+					!(
+						(content.unitKind === "post" && content.postKind === "chapter") ||
+						(content.unitKind === "label" && content.labelId !== null)
+					)
+				)
+					throw new ContentStructureInvalid(
+						"Attached Book content Unit must be a Chapter or Label",
+					);
+				return { ...node, title: content.title };
+			});
 			const current = currentRows.map((row) => ({
 				id: row.id,
 				parentId: row.parentId,
 				position: row.position,
 				title: row.title ?? "",
 			}));
-			const plan = planBookContentStructureDraft(current, input.nodes);
+			const plan = planBookContentStructureDraft(current, draftNodes);
 			if (!plan.hasChanges) return { result: {} };
 
 			const currentById = new Map(currentRows.map((row) => [row.id, row]));
 			const contentUnitIds = new Map(currentRows.map((row) => [row.id, row.contentUnitId]));
 			const newNodeIds = plan.nodes
-				.filter((node) => node.state === "new")
+				.filter((node) => node.state !== "existing")
 				.map(({ id }) => id);
 			const collidingNewNodes = newNodeIds.length
 				? await tx
@@ -198,12 +252,15 @@ export async function saveBookContentStructureDraft(
 			if (collidingNewNodes.length)
 				throw new ContentStructureInvalid("New Book draft node ID already exists");
 			for (const node of plan.nodes) {
-				if (node.state !== "new") continue;
-				const contentUnitId = await createBookDraftContentUnit(tx, {
-					bookId: input.ownerUnitId,
-					actorProfileId: input.actorProfileId,
-					node,
-				});
+				if (node.state === "existing") continue;
+				const contentUnitId =
+					node.state === "attached"
+						? node.contentUnitId
+						: await createBookDraftContentUnit(tx, {
+								bookId: input.ownerUnitId,
+								actorProfileId: input.actorProfileId,
+								node,
+							});
 				contentUnitIds.set(node.id, contentUnitId);
 				await tx.insert(contentStructureNode).values({
 					id: node.id,

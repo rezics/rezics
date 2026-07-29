@@ -722,6 +722,15 @@ export default new Elysia()
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensureCanUpdate(params.unitId, [["content-structure"]]);
 			return database.transaction(async (tx) => {
+				const attachedContentUnitIds = [
+					...new Set(
+						body.nodes.flatMap((node) =>
+							node.state === "attached" ? [node.contentUnitId] : [],
+						),
+					),
+				];
+				for (const unitId of attachedContentUnitIds)
+					await authorization.unit.ensureInTransaction(tx, unitId, "unit.read");
 				const result = await saveBookContentStructureDraft(tx, {
 					ownerUnitId: params.unitId,
 					baseRevisionId: body.baseRevisionId,

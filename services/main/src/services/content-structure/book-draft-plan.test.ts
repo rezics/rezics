@@ -58,6 +58,28 @@ describe("Book Content Structure draft planning", () => {
 		expect(result.nodes.find(({ id }) => id === "d")?.state).toBe("new");
 	});
 
+	it("accepts attached content Units as new structure nodes", () => {
+		const result = planBookContentStructureDraft(current, [
+			{ state: "existing", id: "a", parentId: null, order: 0, title: "A" },
+			{ state: "existing", id: "b", parentId: null, order: 1, title: "B" },
+			{ state: "existing", id: "c", parentId: "a", order: 0, title: "C" },
+			{
+				state: "attached",
+				id: "d",
+				parentId: "a",
+				order: 1,
+				title: "D",
+				contentUnitId: "unit-d",
+			},
+		]);
+
+		expect(result.hasStructuralChanges).toBe(true);
+		expect(result.nodes.find(({ id }) => id === "d")).toMatchObject({
+			state: "attached",
+			contentUnitId: "unit-d",
+		});
+	});
+
 	it("rejects missing nodes, gaps, and cycles", () => {
 		expect(() =>
 			planBookContentStructureDraft(current, [

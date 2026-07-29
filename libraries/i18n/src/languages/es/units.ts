@@ -315,12 +315,25 @@ export default {
 		move: "Mover",
 		moveDescription:
 			"Elige una etiqueta para mover el elemento al final de sus elementos subordinados o un capítulo para moverlo justo debajo.",
-		createChapter: "Crear capítulo",
-		createLabel: "Crear etiqueta",
-		createChapterDescription:
-			"Define aquí únicamente el título y la posición del capítulo. Escribe el contenido en el editor de capítulos después de crearlo.",
-		createLabelDescription:
-			"Las etiquetas no tienen contenido y pueden contener capítulos u otras etiquetas.",
+		addChapter: "Añadir capítulo",
+		addLabel: "Añadir etiqueta",
+		addChapterDescription:
+			"Crea un capítulo nuevo o busca un capítulo existente para añadirlo. Al terminar también se guardará la estructura de contenido.",
+		addLabelDescription:
+			"Crea una etiqueta nueva o busca una etiqueta existente para añadirla. Al terminar también se guardará la estructura de contenido.",
+		addMode: "Modo de incorporación",
+		createMode: "Crear",
+		attachMode: "Añadir existente",
+		existingChapter: "Capítulo existente",
+		existingLabel: "Etiqueta existente",
+		searchExistingChapter: "Buscar capítulos existentes",
+		searchExistingLabel: "Buscar etiquetas existentes",
+		createChapterAndSave: "Crear capítulo y guardar",
+		createLabelAndSave: "Crear etiqueta y guardar",
+		attachChapterAndSave: "Añadir capítulo y guardar",
+		attachLabelAndSave: "Añadir etiqueta y guardar",
+		saveCurrentChangesNotice:
+			"Esta acción también guarda los cambios de la estructura de contenido que aún estén pendientes.",
 		choosePosition: "Elegir posición en la estructura",
 		choosePositionDescription:
 			"Elige una etiqueta para añadir el elemento al final de sus elementos subordinados o un capítulo para insertarlo justo debajo.",
@@ -340,13 +353,9 @@ export default {
 		discardDraft: "Descartar cambios del borrador",
 		unsavedDraft: "Hay cambios sin guardar",
 		draftHint:
-			"Crear, cambiar el nombre y mover solo actualizan el borrador. Al guardar, se aplican todos los cambios a la vez.",
+			"Los cambios de nombre y los movimientos permanecen en el borrador hasta que se guardan. Crear o añadir contenido guarda todos los cambios actuales.",
 		development: "El editor de estructura de contenido está en desarrollo",
 		developmentDescription: `La estructura de contenido todavía no está disponible para este tipo de Unit. El acceso de vista previa mediante la ${verbatimTerms.api.value} requiere la capacidad de vista previa de desarrollo.`,
-		post: postTerms.label,
-		attachPost: `Adjuntar ${postTerms.inline} existente`,
-		attachPostDescription: `Elige una ${postTerms.inline} de capítulo que puedas leer y añádela a la estructura de contenido del libro. Su propiedad y contenido no cambiarán.`,
-		attachPostAction: "Añadir a la estructura",
 	},
 	chapter: {
 		title: "Editar capítulo",

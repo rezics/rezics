@@ -318,12 +318,25 @@ export default {
 		move: "Verschieben",
 		moveDescription:
 			"Wähle eine Bezeichnung, um das Element ans Ende ihrer Unterelemente zu verschieben, oder ein Kapitel, um es direkt darunter einzufügen.",
-		createChapter: "Kapitel erstellen",
-		createLabel: "Bezeichnung erstellen",
-		createChapterDescription:
-			"Lege hier nur Kapiteltitel und Position fest. Schreibe den Inhalt nach dem Erstellen im Kapiteleditor.",
-		createLabelDescription:
-			"Bezeichnungen haben keinen Inhalt und können Kapitel oder weitere Bezeichnungen enthalten.",
+		addChapter: "Kapitel hinzufügen",
+		addLabel: "Bezeichnung hinzufügen",
+		addChapterDescription:
+			"Erstelle ein neues Kapitel oder suche nach einem vorhandenen Kapitel. Beim Abschluss wird auch die Inhaltsstruktur gespeichert.",
+		addLabelDescription:
+			"Erstelle eine neue Bezeichnung oder suche nach einer vorhandenen Bezeichnung. Beim Abschluss wird auch die Inhaltsstruktur gespeichert.",
+		addMode: "Art des Hinzufügens",
+		createMode: "Neu erstellen",
+		attachMode: "Vorhandenes hinzufügen",
+		existingChapter: "Vorhandenes Kapitel",
+		existingLabel: "Vorhandene Bezeichnung",
+		searchExistingChapter: "Vorhandene Kapitel suchen",
+		searchExistingLabel: "Vorhandene Bezeichnungen suchen",
+		createChapterAndSave: "Kapitel erstellen und speichern",
+		createLabelAndSave: "Bezeichnung erstellen und speichern",
+		attachChapterAndSave: "Kapitel hinzufügen und speichern",
+		attachLabelAndSave: "Bezeichnung hinzufügen und speichern",
+		saveCurrentChangesNotice:
+			"Diese Aktion speichert auch die derzeit nicht gespeicherten Änderungen an der Inhaltsstruktur.",
 		choosePosition: "Position in der Struktur auswählen",
 		choosePositionDescription:
 			"Wähle eine Bezeichnung, um das Element an ihre Unterelemente anzuhängen, oder ein Kapitel, um es direkt darunter einzufügen.",
@@ -343,13 +356,9 @@ export default {
 		discardDraft: "Entwurfsänderungen verwerfen",
 		unsavedDraft: "Es gibt nicht gespeicherte Änderungen",
 		draftHint:
-			"Erstellen, Umbenennen und Verschieben aktualisieren nur den Entwurf. Beim Speichern werden alle Änderungen auf einmal geschrieben.",
+			"Umbenennen und Verschieben bleiben bis zum Speichern im Entwurf. Beim Erstellen oder Hinzufügen von Inhalten werden alle aktuellen Änderungen gespeichert.",
 		development: "Der Editor für die Inhaltsstruktur befindet sich in Entwicklung",
 		developmentDescription: `Die Inhaltsstruktur ist für diesen Unit-Typ noch nicht verfügbar. Der Vorschauzugriff über die ${verbatimTerms.api.value} erfordert die Berechtigung für Entwicklungsvorschauen.`,
-		post: postTerms.label,
-		attachPost: `Vorhandenen ${postTerms.label} anhängen`,
-		attachPostDescription: `Wähle einen lesbaren Kapitel-${postTerms.inline} und füge ihn der Inhaltsstruktur dieses Buchs hinzu. Eigentum und Inhalt des ${postTerms.inline}s bleiben unverändert.`,
-		attachPostAction: "Zur Inhaltsstruktur hinzufügen",
 	},
 	chapter: {
 		title: "Kapitel bearbeiten",

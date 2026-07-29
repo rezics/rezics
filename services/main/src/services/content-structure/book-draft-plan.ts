@@ -32,7 +32,16 @@ export type NewBookDraftNode =
 			readonly status?: never;
 	  });
 
-export type BookDraftNode = ExistingBookDraftNode | NewBookDraftNode;
+export type AttachedBookDraftNode = {
+	readonly state: "attached";
+	readonly id: string;
+	readonly parentId: string | null;
+	readonly order: number;
+	readonly title: string;
+	readonly contentUnitId: string;
+};
+
+export type BookDraftNode = ExistingBookDraftNode | NewBookDraftNode | AttachedBookDraftNode;
 
 export type CurrentBookDraftNode = {
 	readonly id: string;
@@ -88,7 +97,7 @@ export function planBookContentStructureDraft(
 		if (!title) invalid(`Draft node ${draft.id} has a blank title`);
 		if (draft.state === "existing" && !currentById.has(draft.id))
 			invalid(`Existing draft node ${draft.id} does not belong to this structure`);
-		if (draft.state === "new" && currentById.has(draft.id))
+		if (draft.state !== "existing" && currentById.has(draft.id))
 			invalid(`New draft node ${draft.id} already exists`);
 		draftById.set(draft.id, { ...draft, title });
 	}
@@ -174,7 +183,7 @@ export function planBookContentStructureDraft(
 			};
 		});
 	const hasStructuralChanges =
-		nodes.some((node) => node.state === "new") || changedParents.size > 0;
+		nodes.some((node) => node.state !== "existing") || changedParents.size > 0;
 	return {
 		nodes,
 		hasChanges: hasStructuralChanges || renamedExistingNodeIds.size > 0,

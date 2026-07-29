@@ -3,10 +3,8 @@
 import { toContentLanguage } from "@rezics/i18n";
 import {
 	type GetApiUnitsBookByUnitIdContentStructureNodesStatus200,
-	usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes,
 	usePutApiUnitsBookByUnitIdContentStructure,
 } from "@rezics/openapi-tanstack-query";
-import { generateKeyBetween } from "fractional-indexing";
 import { useQueryClient } from "@tanstack/react-query";
 import {
 	ArrowDownToLine,
@@ -17,7 +15,6 @@ import {
 	ChevronsUpDown,
 	Ellipsis,
 	FileText,
-	Folder,
 	GripVertical,
 	HistoryIcon,
 	ListTree,
@@ -47,7 +44,6 @@ import {
 	DialogContent,
 	DialogFooter,
 	DialogHeader,
-	EntityPicker,
 	Field,
 	FieldLabel,
 	Input,
@@ -82,7 +78,7 @@ import {
 	toBookContentStructureSaveNodes,
 	type BookDraftDropTarget,
 	type BookDraftNode,
-	type NewBookDraftNodeInput,
+	type InsertedBookDraftNodeInput,
 } from "../model/book-content-structure-draft";
 import {
 	collectBookStructureLabelIds,
@@ -104,6 +100,11 @@ import {
 	type BookStructureDestination,
 } from "./book-content-structure-destination-dialog";
 import {
+	BookContentNodeDialog,
+	type BookContentNodeDialogRequest,
+	type BookContentNodeDialogSubmission,
+} from "./book-content-node-dialog";
+import {
 	BookContentStructureChapterViewMetric,
 	BookContentStructureRowText,
 	BookContentStructureSection,
@@ -118,18 +119,9 @@ type EditorDocument = {
 	readonly baseline: readonly BookDraftNode[];
 	readonly draft: readonly BookDraftNode[];
 	readonly ownContentMetricsByNodeId: ReadonlyMap<string, BookStructureContentMetrics>;
-	readonly positionByNodeId: ReadonlyMap<string, string>;
 };
 
-type CreateRequest = {
-	readonly kind: "chapter" | "label";
-	readonly destination: BookStructureDestination;
-};
-
-type PickedPost = {
-	readonly id: string;
-	readonly label: string;
-};
+type CreateRequest = BookContentNodeDialogRequest;
 
 type ActiveDropTarget = BookDraftDropTarget | undefined;
 
@@ -180,7 +172,7 @@ export function BookContentStructureEditor({
 	initial,
 }: {
 	bookId: string;
-	initial: BookStructureResponse & { structureId: string; latestRevisionId: string };
+	initial: BookStructureResponse & { latestRevisionId: string };
 }) {
 	const { t, locale } = useTranslation(["engagement", "units"]);
 	const router = useApplicationRouter();
@@ -192,12 +184,9 @@ export function BookContentStructureEditor({
 		baseline: initialDraft,
 		draft: initialDraft,
 		ownContentMetricsByNodeId: initialContentMetrics,
-		positionByNodeId: new Map(initial.items.map(({ id, position }) => [id, position])),
 	});
 	const [createRequest, setCreateRequest] = useState<CreateRequest>();
-	const [attachOpen, setAttachOpen] = useState(false);
 	const save = usePutApiUnitsBookByUnitIdContentStructure();
-	const attach = usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes();
 	const draftFingerprint = useMemo(
 		() => bookContentStructureDraftFingerprint(document.draft),
 		[document.draft],
@@ -208,14 +197,15 @@ export function BookContentStructureEditor({
 	);
 	const dirty = draftFingerprint !== baselineFingerprint;
 
-	async function saveDraft(refresh = true) {
-		if (!dirty || save.isPending) return undefined;
+	async function saveDraft(draft: readonly BookDraftNode[] = document.draft) {
+		const changed = bookContentStructureDraftFingerprint(draft) !== baselineFingerprint;
+		if (!changed || save.isPending) return undefined;
 		try {
 			const saved = await save.mutateAsync({
 				path: { unitId: bookId },
 				body: {
 					baseRevisionId: document.baseRevisionId,
-					nodes: toBookContentStructureSaveNodes(document.draft),
+					nodes: toBookContentStructureSaveNodes(draft),
 				},
 			});
 			const savedDraft = createBookContentStructureDraft(saved.items);
@@ -224,40 +214,12 @@ export function BookContentStructureEditor({
 				baseline: savedDraft,
 				draft: savedDraft,
 				ownContentMetricsByNodeId: indexOwnContentMetrics(saved.items),
-				positionByNodeId: new Map(saved.items.map(({ id, position }) => [id, position])),
 			});
-			if (refresh) void invalidateBookContentStructure(queryClient, bookId);
+			void invalidateBookContentStructure(queryClient, bookId);
 			return saved;
 		} catch {
 			// The typed mutation renders the visible request failure.
 			return undefined;
-		}
-	}
-
-	async function attachPost(post: PickedPost, destination: BookStructureDestination) {
-		if (attach.isPending || save.isPending) return;
-		const saved = dirty ? await saveDraft(false) : undefined;
-		if (dirty && !saved) return;
-		const nodes = saved ? createBookContentStructureDraft(saved.items) : document.draft;
-		const positions = saved
-			? new Map(saved.items.map(({ id, position }) => [id, position]))
-			: document.positionByNodeId;
-		const placement = resolveAttachPlacement(nodes, positions, destination);
-		if (!placement) return;
-		try {
-			await attach.mutateAsync({
-				path: { unitId: bookId, structureId: initial.structureId },
-				body: {
-					baseRevisionId: saved?.latestRevisionId ?? document.baseRevisionId,
-					content: { kind: "unit", unitId: post.id },
-					...(placement.parentId ? { parentId: placement.parentId } : {}),
-					...(placement.position ? { position: placement.position } : {}),
-				},
-			});
-			setAttachOpen(false);
-			await invalidateBookContentStructure(queryClient, bookId);
-		} catch {
-			// The typed mutation renders the visible request failure.
 		}
 	}
 
@@ -272,33 +234,51 @@ export function BookContentStructureEditor({
 		if (chapterId) router.push(chapterEditorHref(bookId, chapterId));
 	}
 
-	function createNode(title: string, destination: BookStructureDestination) {
-		if (!createRequest) return;
-		const placement = resolveCreatePlacement(document.draft, destination);
+	async function submitNode(submission: BookContentNodeDialogSubmission) {
+		if (!createRequest || save.isPending) return;
+		const placement = resolveCreatePlacement(document.draft, submission.destination);
 		if (!placement) return;
 		const common = {
-			state: "new" as const,
 			id: crypto.randomUUID(),
 			parentId: placement.parentId,
-			title,
-			language: toContentLanguage(locale.target),
 		};
-		const node: NewBookDraftNodeInput =
-			createRequest.kind === "chapter"
+		const node: InsertedBookDraftNodeInput =
+			submission.mode === "attach"
 				? {
 						...common,
-						contentKind: "chapter",
-						content: writePortableText([]),
-						status: "draft",
+						state: "attached",
+						title: submission.unit.label,
+						language: toContentLanguage(locale.target),
+						contentKind: createRequest.kind,
+						contentUnitId: submission.unit.id,
 					}
-				: { ...common, contentKind: "label" };
-		setDocument((current) => ({
-			...current,
-			draft: placement.insertAfterId
-				? addBookDraftNodeAfter(current.draft, node, placement.insertAfterId)
-				: addBookDraftNode(current.draft, node),
-		}));
-		setCreateRequest(undefined);
+				: createRequest.kind === "chapter"
+					? {
+							...common,
+							state: "new",
+							title: submission.title,
+							language: toContentLanguage(locale.target),
+							contentKind: "chapter",
+							content: writePortableText([]),
+							status: "draft",
+						}
+					: {
+							...common,
+							state: "new",
+							title: submission.title,
+							language: toContentLanguage(locale.target),
+							contentKind: "label",
+						};
+		const nextDraft = placement.insertAfterId
+			? addBookDraftNodeAfter(document.draft, node, placement.insertAfterId)
+			: addBookDraftNode(document.draft, node);
+		const saved = await saveDraft(nextDraft);
+		if (saved) setCreateRequest(undefined);
+	}
+
+	function openNodeDialog(request: CreateRequest) {
+		save.reset();
+		setCreateRequest(request);
 	}
 
 	return (
@@ -331,15 +311,6 @@ export function BookContentStructureEditor({
 							<Save aria-hidden />
 							{t.units.content.saveDraft}
 						</Button>
-						<Button
-							disabled={save.isPending || attach.isPending}
-							onClick={() => setAttachOpen(true)}
-							type="button"
-							variant="outline"
-						>
-							<FileText aria-hidden />
-							{t.units.content.attachPost}
-						</Button>
 						<Button asChild size="icon-md" variant="outline">
 							<Link
 								aria-label={t.units.workspace.sections.history.label}
@@ -366,232 +337,28 @@ export function BookContentStructureEditor({
 							draft: change(current.draft),
 						}))
 					}
-					onCreate={setCreateRequest}
+					onCreate={openNodeDialog}
 					onOpenChapter={(nodeId) => void openChapter(nodeId)}
 					ownContentMetricsByNodeId={document.ownContentMetricsByNodeId}
 					pending={save.isPending}
 				/>
 				<RequestFailure error={save.error} />
-				<RequestFailure error={attach.error} />
 			</div>
 			{createRequest ? (
-				<CreateStructureNodeDialog
-					kind={createRequest.kind}
+				<BookContentNodeDialog
+					error={save.error}
 					nodes={document.draft}
-					onClose={() => setCreateRequest(undefined)}
-					onCreate={createNode}
-					requestedDestination={createRequest.destination}
-				/>
-			) : null}
-			{attachOpen ? (
-				<AttachPostDialog
-					nodes={document.draft}
-					onAttach={(post, destination) => void attachPost(post, destination)}
-					onClose={() => setAttachOpen(false)}
-					pending={attach.isPending || save.isPending}
+					onClose={() => {
+						save.reset();
+						setCreateRequest(undefined);
+					}}
+					onSubmit={(submission) => void submitNode(submission)}
+					pending={save.isPending}
+					request={createRequest}
+					unsavedChanges={dirty}
 				/>
 			) : null}
 		</section>
-	);
-}
-
-function AttachPostDialog({
-	nodes,
-	onAttach,
-	onClose,
-	pending,
-}: {
-	readonly nodes: readonly BookDraftNode[];
-	readonly onAttach: (post: PickedPost, destination: BookStructureDestination) => void;
-	readonly onClose: () => void;
-	readonly pending: boolean;
-}) {
-	const { t } = useTranslation(["engagement", "units"]);
-	const [post, setPost] = useState<PickedPost>();
-	const [destination, setDestination] = useState<BookStructureDestination>({ kind: "root" });
-	const [destinationDialogOpen, setDestinationDialogOpen] = useState(false);
-	return (
-		<>
-			<Dialog onOpenChange={({ open }) => !open && onClose()} open>
-				<DialogContent size="lg">
-					<DialogHeader
-						description={t.units.content.attachPostDescription}
-						title={t.units.content.attachPost}
-					/>
-					<DialogBody className="grid gap-5">
-						<Field required>
-							<FieldLabel>{t.units.content.post}</FieldLabel>
-							<EntityPicker
-								index="posts"
-								kind="chapter"
-								onChange={setPost}
-								value={post}
-							/>
-						</Field>
-						<Field>
-							<FieldLabel>{t.units.content.structure}</FieldLabel>
-							<button
-								aria-haspopup="dialog"
-								className="flex min-h-11 w-full items-center gap-3 rounded-xl border border-border-weak bg-muted/35 px-3.5 text-start text-sm outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
-								onClick={() => setDestinationDialogOpen(true)}
-								type="button"
-							>
-								<Folder
-									aria-hidden
-									className="size-4 shrink-0 text-muted-foreground"
-								/>
-								<span className="min-w-0 flex-1 truncate font-medium">
-									{structureDestinationLabel(
-										nodes,
-										destination,
-										t.units.content.root,
-									)}
-								</span>
-								<ChevronRight
-									aria-hidden
-									className="size-4 shrink-0 text-muted-foreground"
-								/>
-							</button>
-						</Field>
-					</DialogBody>
-					<DialogFooter>
-						<DialogClose asChild>
-							<Button type="button" variant="quiet">
-								{t.engagement.cancel}
-							</Button>
-						</DialogClose>
-						<Button
-							disabled={!post || pending}
-							onClick={() => post && onAttach(post, destination)}
-							type="button"
-							variant="solid"
-						>
-							{t.units.content.attachPostAction}
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
-			{destinationDialogOpen ? (
-				<BookContentStructureDestinationDialog
-					description={t.units.content.choosePositionDescription}
-					nodes={nodes}
-					onClose={() => setDestinationDialogOpen(false)}
-					onSelect={(nextDestination) => {
-						setDestination(nextDestination);
-						setDestinationDialogOpen(false);
-					}}
-					selectedDestination={destination}
-					title={t.units.content.choosePosition}
-				/>
-			) : null}
-		</>
-	);
-}
-
-function CreateStructureNodeDialog({
-	kind,
-	nodes,
-	onClose,
-	onCreate,
-	requestedDestination,
-}: {
-	kind: CreateRequest["kind"];
-	nodes: readonly BookDraftNode[];
-	onClose: () => void;
-	onCreate: (title: string, destination: BookStructureDestination) => void;
-	requestedDestination: BookStructureDestination;
-}) {
-	const { t } = useTranslation(["engagement", "units", "ui"]);
-	const [destination, setDestination] = useState<BookStructureDestination>(requestedDestination);
-	const [destinationDialogOpen, setDestinationDialogOpen] = useState(false);
-	const destinationLabel = structureDestinationLabel(nodes, destination, t.units.content.root);
-
-	return (
-		<>
-			<Dialog
-				onOpenChange={({ open }) => {
-					if (!open) onClose();
-				}}
-				open
-			>
-				<DialogContent size="lg">
-					<DialogHeader
-						description={
-							kind === "chapter"
-								? t.units.content.createChapterDescription
-								: t.units.content.createLabelDescription
-						}
-						title={
-							kind === "chapter"
-								? t.units.content.createChapter
-								: t.units.content.createLabel
-						}
-					/>
-					<form
-						onSubmit={(event) => {
-							event.preventDefault();
-							const title = String(
-								new FormData(event.currentTarget).get("title") ?? "",
-							).trim();
-							if (title) onCreate(title, destination);
-						}}
-					>
-						<DialogBody className="grid gap-5">
-							<Field>
-								<FieldLabel>{t.units.content.structure}</FieldLabel>
-								<button
-									aria-haspopup="dialog"
-									className="flex min-h-11 w-full items-center gap-3 rounded-xl border border-border-weak bg-muted/35 px-3.5 text-start text-sm outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
-									onClick={() => setDestinationDialogOpen(true)}
-									type="button"
-								>
-									<Folder
-										aria-hidden
-										className="size-4 shrink-0 text-muted-foreground"
-									/>
-									<span className="min-w-0 flex-1 truncate font-medium">
-										{destinationLabel}
-									</span>
-									<ChevronRight
-										aria-hidden
-										className="size-4 shrink-0 text-muted-foreground"
-									/>
-								</button>
-							</Field>
-							<Field required>
-								<FieldLabel>{t.ui.title}</FieldLabel>
-								<Input autoFocus maxLength={500} name="title" required />
-							</Field>
-						</DialogBody>
-						<DialogFooter>
-							<DialogClose asChild>
-								<Button type="button" variant="quiet">
-									{t.engagement.cancel}
-								</Button>
-							</DialogClose>
-							<Button type="submit" variant="solid">
-								{kind === "chapter"
-									? t.units.content.newChapter
-									: t.units.content.newLabel}
-							</Button>
-						</DialogFooter>
-					</form>
-				</DialogContent>
-			</Dialog>
-			{destinationDialogOpen ? (
-				<BookContentStructureDestinationDialog
-					description={t.units.content.choosePositionDescription}
-					nodes={nodes}
-					onClose={() => setDestinationDialogOpen(false)}
-					onSelect={(nextDestination) => {
-						setDestination(nextDestination);
-						setDestinationDialogOpen(false);
-					}}
-					selectedDestination={destination}
-					title={t.units.content.choosePosition}
-				/>
-			) : null}
-		</>
 	);
 }
 
@@ -599,34 +366,6 @@ type CreatePlacement = {
 	readonly parentId: string | null;
 	readonly insertAfterId?: string;
 };
-
-type AttachPlacement = {
-	readonly parentId?: string;
-	readonly position?: string;
-};
-
-function resolveAttachPlacement(
-	nodes: readonly BookDraftNode[],
-	positionByNodeId: ReadonlyMap<string, string>,
-	destination: BookStructureDestination,
-): AttachPlacement | undefined {
-	if (destination.kind === "root") return {};
-	const target = nodes.find(({ id }) => id === destination.nodeId);
-	if (!target) return undefined;
-	if (destination.placement === "inside")
-		return isBookDraftParentTarget(target) ? { parentId: target.id } : undefined;
-	const siblings = nodes
-		.filter(({ parentId }) => parentId === target.parentId)
-		.toSorted((left, right) => left.order - right.order || left.id.localeCompare(right.id));
-	const targetIndex = siblings.findIndex(({ id }) => id === target.id);
-	const targetPosition = positionByNodeId.get(target.id);
-	if (targetIndex < 0 || !targetPosition) return undefined;
-	const nextPosition = positionByNodeId.get(siblings[targetIndex + 1]?.id ?? "") ?? null;
-	return {
-		...(target.parentId ? { parentId: target.parentId } : {}),
-		position: generateKeyBetween(targetPosition, nextPosition),
-	};
-}
 
 function resolveCreatePlacement(
 	nodes: readonly BookDraftNode[],
@@ -638,15 +377,6 @@ function resolveCreatePlacement(
 	if (destination.placement === "inside")
 		return isBookDraftParentTarget(target) ? { parentId: target.id } : undefined;
 	return { parentId: target.parentId, insertAfterId: target.id };
-}
-
-function structureDestinationLabel(
-	nodes: readonly BookDraftNode[],
-	destination: BookStructureDestination,
-	rootLabel: string,
-): string {
-	if (destination.kind === "root") return rootLabel;
-	return nodes.find(({ id }) => id === destination.nodeId)?.title ?? rootLabel;
 }
 
 function BookContentStructureTree({

@@ -305,11 +305,25 @@ export default {
 		move: "Move",
 		moveDescription:
 			"Choose a label to move to the end of its children, or a chapter to move directly below it.",
-		createChapter: "Create chapter",
-		createLabel: "Create label",
-		createChapterDescription:
-			"Set only the chapter title and position here. Write its content in the chapter editor after creation.",
-		createLabelDescription: "Labels have no content and can contain chapters or other labels.",
+		addChapter: "Add chapter",
+		addLabel: "Add label",
+		addChapterDescription:
+			"Create a new chapter or search for an existing chapter to add. Completing this action also saves the content structure.",
+		addLabelDescription:
+			"Create a new label or search for an existing label to add. Completing this action also saves the content structure.",
+		addMode: "How to add",
+		createMode: "Create",
+		attachMode: "Add existing",
+		existingChapter: "Existing chapter",
+		existingLabel: "Existing label",
+		searchExistingChapter: "Search existing chapters",
+		searchExistingLabel: "Search existing labels",
+		createChapterAndSave: "Create chapter and save",
+		createLabelAndSave: "Create label and save",
+		attachChapterAndSave: "Add chapter and save",
+		attachLabelAndSave: "Add label and save",
+		saveCurrentChangesNotice:
+			"This action also saves the content structure changes that are currently unsaved.",
 		choosePosition: "Choose structure position",
 		choosePositionDescription:
 			"Choose a label to append to its children, or a chapter to insert directly below it.",
@@ -329,13 +343,9 @@ export default {
 		discardDraft: "Discard draft changes",
 		unsavedDraft: "There are unsaved changes",
 		draftHint:
-			"Creating, renaming, and moving only update the draft. Saving writes every change at once.",
+			"Renaming and moving stay in the draft until saved. Creating or adding content saves every current change.",
 		development: "The content structure editor is in development",
 		developmentDescription: `Content structure is not available for this unit type yet. Preview ${verbatimTerms.api.value} access requires the development preview capability.`,
-		post: postTerms.label,
-		attachPost: `Attach existing ${postTerms.label}`,
-		attachPostDescription: `Choose a readable chapter ${postTerms.inline} and add it to this Book's content structure. This does not change the ${postTerms.inline}'s ownership or content.`,
-		attachPostAction: "Add to content structure",
 	},
 	chapter: {
 		title: "Edit chapter",

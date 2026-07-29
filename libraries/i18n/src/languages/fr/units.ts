@@ -314,12 +314,25 @@ export default {
 		move: "Déplacer",
 		moveDescription:
 			"Choisissez un libellé pour déplacer l’élément après ses enfants, ou un chapitre pour le déplacer directement en dessous.",
-		createChapter: "Créer un chapitre",
-		createLabel: "Créer un libellé",
-		createChapterDescription:
-			"Définissez uniquement le titre et la position du chapitre ici. Rédigez son contenu dans l’éditeur de chapitre après sa création.",
-		createLabelDescription:
-			"Les libellés n’ont pas de contenu et peuvent contenir des chapitres ou d’autres libellés.",
+		addChapter: "Ajouter un chapitre",
+		addLabel: "Ajouter un libellé",
+		addChapterDescription:
+			"Créez un chapitre ou recherchez un chapitre existant à ajouter. La structure du contenu sera également enregistrée.",
+		addLabelDescription:
+			"Créez un libellé ou recherchez un libellé existant à ajouter. La structure du contenu sera également enregistrée.",
+		addMode: "Mode d’ajout",
+		createMode: "Créer",
+		attachMode: "Ajouter un élément existant",
+		existingChapter: "Chapitre existant",
+		existingLabel: "Libellé existant",
+		searchExistingChapter: "Rechercher des chapitres existants",
+		searchExistingLabel: "Rechercher des libellés existants",
+		createChapterAndSave: "Créer le chapitre et enregistrer",
+		createLabelAndSave: "Créer le libellé et enregistrer",
+		attachChapterAndSave: "Ajouter le chapitre et enregistrer",
+		attachLabelAndSave: "Ajouter le libellé et enregistrer",
+		saveCurrentChangesNotice:
+			"Cette action enregistre également les modifications de la structure du contenu qui ne le sont pas encore.",
 		choosePosition: "Choisir la position dans la structure",
 		choosePositionDescription:
 			"Choisissez un libellé pour ajouter l’élément après ses enfants, ou un chapitre pour l’insérer directement en dessous.",
@@ -339,13 +352,9 @@ export default {
 		discardDraft: "Abandonner les modifications du brouillon",
 		unsavedDraft: "Certaines modifications ne sont pas enregistrées",
 		draftHint:
-			"La création, le changement de nom et le déplacement mettent uniquement le brouillon à jour. L’enregistrement applique toutes les modifications en une seule fois.",
+			"Les changements de nom et les déplacements restent dans le brouillon jusqu’à l’enregistrement. La création ou l’ajout de contenu enregistre toutes les modifications en cours.",
 		development: "L’éditeur de structure du contenu est en cours de développement",
 		developmentDescription: `La structure du contenu n’est pas encore disponible pour ce type de Unit. L’accès à l’aperçu via l’${verbatimTerms.api.value} exige la capacité d’aperçu de développement.`,
-		post: postTerms.label,
-		attachPost: `Joindre un ${postTerms.inline} existant`,
-		attachPostDescription: `Choisissez un ${postTerms.inline} de chapitre lisible et ajoutez-le à la structure du contenu de ce livre. Sa propriété et son contenu restent inchangés.`,
-		attachPostAction: "Ajouter à la structure",
 	},
 	chapter: {
 		title: "Modifier le chapitre",

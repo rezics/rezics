@@ -8,6 +8,10 @@ type RemoteBookNode = GetApiUnitsBookByUnitIdContentStructureNodesStatus200["ite
 export type BookContentStructureSaveNode =
 	PutApiUnitsBookByUnitIdContentStructureBody["nodes"][number];
 type NewBookContentStructureSaveNode = Extract<BookContentStructureSaveNode, { state: "new" }>;
+type AttachedBookContentStructureSaveNode = Extract<
+	BookContentStructureSaveNode,
+	{ state: "attached" }
+>;
 
 type BookDraftNodeBase = {
 	readonly id: string;
@@ -33,9 +37,17 @@ export type NewBookDraftNode = BookDraftNodeBase &
 		  })
 	);
 
-export type BookDraftNode = ExistingBookDraftNode | NewBookDraftNode;
-export type NewBookDraftNodeInput = NewBookDraftNode extends infer Node
-	? Node extends NewBookDraftNode
+export type AttachedBookDraftNode = BookDraftNodeBase &
+	AttachedBookContentStructureSaveNode & {
+		readonly state: "attached";
+		readonly contentKind: "chapter" | "label";
+		readonly language: ContentLanguage;
+	};
+
+export type InsertedBookDraftNode = NewBookDraftNode | AttachedBookDraftNode;
+export type BookDraftNode = ExistingBookDraftNode | InsertedBookDraftNode;
+export type InsertedBookDraftNodeInput = InsertedBookDraftNode extends infer Node
+	? Node extends InsertedBookDraftNode
 		? Omit<Node, "order">
 		: never
 	: never;
@@ -149,7 +161,7 @@ export function flattenBookDraftTree(nodes: readonly BookDraftTreeNode[]): BookD
 
 export function addBookDraftNode(
 	nodes: readonly BookDraftNode[],
-	node: NewBookDraftNodeInput,
+	node: InsertedBookDraftNodeInput,
 ): BookDraftNode[] {
 	const order = nodes.filter(({ parentId }) => parentId === node.parentId).length;
 	return [...nodes, { ...node, order }];
@@ -157,7 +169,7 @@ export function addBookDraftNode(
 
 export function addBookDraftNodeAfter(
 	nodes: readonly BookDraftNode[],
-	node: NewBookDraftNodeInput,
+	node: InsertedBookDraftNodeInput,
 	siblingId: string,
 ): BookDraftNode[] {
 	const sibling = nodes.find(({ id }) => id === siblingId);
@@ -378,6 +390,14 @@ export function toBookContentStructureSaveNodes(
 					parentId: node.parentId,
 					order: node.order,
 					title: node.title,
+				};
+			if (node.state === "attached")
+				return {
+					state: "attached",
+					id: node.id,
+					parentId: node.parentId,
+					order: node.order,
+					contentUnitId: node.contentUnitId,
 				};
 			if (node.contentKind === "chapter")
 				return {

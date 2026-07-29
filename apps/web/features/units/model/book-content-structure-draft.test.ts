@@ -70,4 +70,29 @@ describe("Book Content Structure draft", () => {
 			bookContentStructureDraftFingerprint([...nodes]),
 		);
 	});
+
+	it("serializes an attached Unit without trusting its presentation", () => {
+		const attached: BookDraftNode = {
+			state: "attached",
+			id: "d",
+			parentId: null,
+			order: 2,
+			title: "Picked presentation",
+			contentUnitId: "ud",
+			contentKind: "chapter",
+			language: "en",
+		};
+
+		expect(
+			toBookContentStructureSaveNodes([...nodes, attached]).find(
+				(node) => node.state === "attached",
+			),
+		).toEqual({
+			state: "attached",
+			id: "d",
+			parentId: null,
+			order: 2,
+			contentUnitId: "ud",
+		});
+	});
 });

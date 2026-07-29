@@ -69382,6 +69382,26 @@ export type PutApiUnitsBookByUnitIdContentStructureBody = {
 				};
 				status: "draft" | "published";
 		  }
+		| {
+				/**
+				 * @type string
+				 */
+				state: "attached";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				parentId: (string | null) | null;
+				order: string | number;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				contentUnitId: string;
+		  }
 	)[];
 };
 

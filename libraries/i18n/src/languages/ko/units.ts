@@ -302,11 +302,25 @@ export default {
 		moveToLast: "이 수준에서 맨 뒤로 이동",
 		move: "이동",
 		moveDescription: "하위 항목 끝으로 이동할 레이블이나 바로 아래로 이동할 챕터를 선택하세요.",
-		createChapter: "챕터 생성",
-		createLabel: "레이블 생성",
-		createChapterDescription:
-			"여기에서 챕터 제목과 위치만 설정하십시오. 생성 후 챕터 편집기에서 내용을 작성하세요.",
-		createLabelDescription: "레이블에는 내용이 없으며 챕터나 다른 레이블을 포함할 수 있습니다.",
+		addChapter: "챕터 추가",
+		addLabel: "레이블 추가",
+		addChapterDescription:
+			"새 챕터를 만들거나 기존 챕터를 검색해 추가합니다. 완료하면 콘텐츠 구조도 함께 저장됩니다.",
+		addLabelDescription:
+			"새 레이블을 만들거나 기존 레이블을 검색해 추가합니다. 완료하면 콘텐츠 구조도 함께 저장됩니다.",
+		addMode: "추가 방법",
+		createMode: "새로 만들기",
+		attachMode: "기존 항목 추가",
+		existingChapter: "기존 챕터",
+		existingLabel: "기존 레이블",
+		searchExistingChapter: "기존 챕터 검색",
+		searchExistingLabel: "기존 레이블 검색",
+		createChapterAndSave: "챕터 만들기 및 저장",
+		createLabelAndSave: "레이블 만들기 및 저장",
+		attachChapterAndSave: "챕터 추가 및 저장",
+		attachLabelAndSave: "레이블 추가 및 저장",
+		saveCurrentChangesNotice:
+			"이 작업을 완료하면 현재 저장되지 않은 콘텐츠 구조 변경 사항도 함께 저장됩니다.",
 		choosePosition: "구조 위치 선택",
 		choosePositionDescription:
 			"하위 항목에 추가할 레이블을 선택하거나 바로 아래에 삽입할 챕터를 선택하세요.",
@@ -326,13 +340,9 @@ export default {
 		discardDraft: "초안 변경 사항 취소",
 		unsavedDraft: "저장되지 않은 변경 사항이 있습니다.",
 		draftHint:
-			"생성, 이름 변경 및 이동은 초안만 업데이트합니다. 저장하면 모든 변경 사항이 한 번에 기록됩니다.",
+			"이름 변경과 이동은 저장할 때까지 초안에 유지됩니다. 콘텐츠를 만들거나 추가하면 현재 변경 사항이 모두 저장됩니다.",
 		development: "콘텐츠 구조 편집기는 개발 중입니다.",
 		developmentDescription: `이 유닛 유형에는 아직 콘텐츠 구조를 사용할 수 없습니다. 미리보기 ${verbatimTerms.api.value} 액세스에는 개발 미리보기 기능이 필요합니다.`,
-		post: postTerms.label,
-		attachPost: `기존 ${postTerms.label} 추가`,
-		attachPostDescription: `읽을 수 있는 챕터 ${postTerms.label}를 선택해 이 책의 콘텐츠 구조에 추가합니다. ${postTerms.label}의 소유권과 내용은 바뀌지 않습니다.`,
-		attachPostAction: "콘텐츠 구조에 추가",
 	},
 	chapter: {
 		title: "챕터 편집",
