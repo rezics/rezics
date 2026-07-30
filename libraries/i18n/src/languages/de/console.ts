@@ -27,6 +27,11 @@ export default {
 			description:
 				"Kontostatus, Plattformzugriff, Sitzungen und Sicherheitsaktivitäten verwalten.",
 		},
+		units: {
+			label: "Unit-Verwaltung",
+			description:
+				"Alle Units durchsuchen und Eigentümerschaft, vorläufige Löschung oder Wiederherstellung protokolliert verwalten.",
+		},
 		moderation: {
 			label: "Globale Inhaltsmoderation",
 			description:
@@ -40,6 +45,74 @@ export default {
 			label: `${verbatimTerms.api.value}-Token-Richtlinien`,
 			description: `Globale Raten-, Parallelitäts- und Kostenlimits für ${verbatimTerms.api.value}-Token verwalten.`,
 		},
+	},
+	units: {
+		searchLabel: "Units suchen",
+		searchPlaceholder: `Nach Titel, Unit-${verbatimTerms.id.value} oder öffentlicher Adresse suchen`,
+		stateFilter: "Lebenszyklusstatus",
+		states: {
+			active: "Aktive Units",
+			deleted: "Vorläufig gelöscht",
+			all: "Alle Units",
+		},
+		listLabel: "Unit-Liste",
+		untitled: "Unbenannte Unit",
+		empty: "Keine Units entsprechen den aktuellen Filtern.",
+		statuses: {
+			draft: "Entwurf",
+			published: "Veröffentlicht",
+			archived: "Archiviert",
+		},
+		active: "Aktiv",
+		deleted: "Vorläufig gelöscht",
+		protected: "Geschützt",
+		kind: "Unit-Typkennung",
+		owner: "Aktueller Eigentümer",
+		noOwner: "Kein aktiver Eigentümer",
+		updatedAt: "Zuletzt aktualisiert",
+		deletedAt: "Vorläufig gelöscht am",
+		restore: "Unit wiederherstellen",
+		softDelete: "Unit vorläufig löschen",
+		overrideOwnership: "Eigentümerschaft neu zuweisen",
+		ownershipPickerTitle: "Neuen Eigentümer auswählen",
+		ownershipPickerDescription:
+			"Die Plattformverwaltung kann diese Unit unabhängig vom Unit-Zugriff jedem aktiven Profil zuweisen.",
+		ownershipSearchLabel: "Geeignete Profile durchsuchen",
+		ownershipSearchPlaceholder: `Nach Name, Profil-${verbatimTerms.id.value} oder öffentlicher Adresse suchen`,
+		ownershipCandidateListLabel: "Geeignete Empfänger der Eigentümerschaft",
+		ownershipCandidatesEmpty: "Keine aktiven Profile entsprechen der Suche.",
+		unnamedProfile: "Unbenanntes Profil",
+		ownershipCandidateSelect: insert("{{profile}} als neuen Eigentümer auswählen", {
+			profile: String,
+		}),
+		ownershipConfirmationTitle: "Eigentümerschaft dieser Unit neu zuweisen?",
+		ownershipConfirmationDescription: insert(
+			"Hierdurch wird {{currentOwner}} sofort durch {{newOwner}} ersetzt. Die Aktion wird protokolliert und betroffene Profile werden benachrichtigt.",
+			{ currentOwner: String, newOwner: String },
+		),
+		newOwner: "Neuer Eigentümer",
+		backToCandidates: "Zurück zu den Profilen",
+		confirmOwnershipOverride: "Neuzuweisung bestätigen",
+		protectedDescription:
+			"Bootstrap-Units und das aktuell verwendete Profil können nicht vorläufig gelöscht werden.",
+		selectUnit: "Eine Unit auswählen",
+		selectUnitDescription: "Lebenszyklusstatus und Schutzdetails aus der Liste öffnen.",
+		restoreTitle: "Diese Unit wiederherstellen?",
+		restoreDescription:
+			"Die Unit erscheint wieder in regulären Abfragen. Eine zuvor veröffentlichte Unit wird als archiviert wiederhergestellt, damit sie nicht ungeprüft erneut veröffentlicht wird.",
+		softDeleteTitle: "Diese Unit vorläufig löschen?",
+		softDeleteDescription:
+			"Die Unit und ihr Verlauf bleiben gespeichert, werden aber sofort aus regulären Produktabfragen und Vorgängen ausgeblendet.",
+		reason: "Verwaltungsgrund",
+		internalNote: "Interne Notiz (optional)",
+		notePlaceholder:
+			"Grundlage des Vorgangs festhalten; sie wird im Sicherheitsprotokoll gespeichert.",
+		confirmationLabel: `Zur Bestätigung die Unit-${verbatimTerms.id.value} eingeben`,
+		confirmationInstruction: insert("Zum Bestätigen {{unitId}} eingeben.", {
+			unitId: String,
+		}),
+		confirmRestore: "Wiederherstellung bestätigen",
+		confirmSoftDelete: "Vorläufiges Löschen bestätigen",
 	},
 	users: {
 		searchLabel: "Benutzer suchen",

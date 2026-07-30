@@ -224,7 +224,6 @@ export function PostDetailPage({
 						}
 						engagementOverflow={
 							<PostOverflowMenu
-								canDelete={post.postKind !== "wiki" && post.capabilities.canEdit}
 								editAction={
 									managementSectionId
 										? {
@@ -238,7 +237,6 @@ export function PostDetailPage({
 								}
 								postId={post.id}
 								realmId={realmId}
-								rootPostId={post.rootPostId}
 							/>
 						}
 						commentsHref="#replies"

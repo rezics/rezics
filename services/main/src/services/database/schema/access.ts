@@ -11,10 +11,12 @@ import {
 
 import { pgTable } from "./base";
 import {
+	DelegableUnitPermissionValues,
+	type DelegableUnitPermission,
+	type UnitPermission,
 	UnitAccessInvitationResolutionValues,
 	UnitAccessRestrictionSubjectKindValues,
 	UnitAccessSubjectKindValues,
-	UnitPermissionValues,
 } from "@rezics/access";
 
 import { toEnumValues } from "./contract-values";
@@ -40,7 +42,40 @@ export const unitAccessRestrictionSubjectKind = pgEnum(
 	"unit_access_restriction_subject_kind",
 	toEnumValues(UnitAccessRestrictionSubjectKindValues),
 );
-export const unitPermission = pgEnum("unit_permission", toEnumValues(UnitPermissionValues));
+/*
+ * PostgreSQL cannot remove enum labels in place. The retired label remains in
+ * the physical enum, while checks on every consuming column make the narrower
+ * application type true for all stored rows.
+ */
+const unitPermissionStorageValues = toEnumValues([
+	"unit.read",
+	"unit.update",
+	"unit.status.update",
+	"unit.history.restore",
+	"unit.access.manage",
+	"unit.ownership.transfer",
+	"unit.association.manage",
+	"unit.tag-curation.manage",
+	"unit.delete",
+	"realm.contribute",
+	"realm.units.create",
+	"realm.post.replies.create",
+	"realm.settings.update",
+	"realm.members.read",
+	"realm.members.manage",
+	"realm.rules.update",
+	"realm.pins.manage",
+	"realm.tags.manage",
+	"realm.units.moderate",
+	"entity.association.credit.request",
+	"entity.association.credit.direct",
+	"entity.association.subject.request",
+	"entity.association.subject.direct",
+] as const satisfies readonly (UnitPermission | "unit.delete")[]) as [
+	UnitPermission,
+	...UnitPermission[],
+];
+export const unitPermission = pgEnum("unit_permission", unitPermissionStorageValues);
 
 const scopeCheck = (scope: AnyPgColumn) =>
 	sql`cardinality(${scope}) <= 8 and (
@@ -97,7 +132,7 @@ export const unitAccessGrant = pgTable(
 		subjectKind: unitAccessSubjectKind().notNull(),
 		profileId: uuid().references(() => profile.id, { onDelete: "cascade" }),
 		realmId: uuid().references(() => realm.id, { onDelete: "cascade" }),
-		permission: unitPermission().notNull(),
+		permission: unitPermission().$type<DelegableUnitPermission>().notNull(),
 		scope: text()
 			.array()
 			.default(sql`array[]::text[]`)
@@ -124,6 +159,14 @@ export const unitAccessGrant = pgTable(
 		index("unit_access_grant_profile_active_idx")
 			.on(table.profileId, table.unitId, table.permission)
 			.where(sql`${table.revokedAt} is null`),
+		index("unit_access_grant_unit_transfer_candidate_idx")
+			.on(table.unitId, table.permission, table.profileId)
+			.where(
+				sql`${table.revokedAt} is null
+					and ${table.expiresAt} is null
+					and ${table.subjectKind} = 'profile'
+					and cardinality(${table.scope}) = 0`,
+			),
 		index("unit_access_grant_realm_active_idx")
 			.on(table.realmId, table.unitId, table.permission)
 			.where(sql`${table.revokedAt} is null`),
@@ -139,6 +182,13 @@ export const unitAccessGrant = pgTable(
 			)`,
 		),
 		check("unit_access_grant_scope_check", scopeCheck(table.scope)),
+		check(
+			"unit_access_grant_permission_delegable_check",
+			sql`${table.permission} not in (
+				'unit.ownership.transfer'::unit_permission,
+				'unit.delete'::unit_permission
+			)`,
+		),
 		check(
 			"unit_access_grant_expiry_check",
 			sql`${table.expiresAt} is null or ${table.expiresAt} > ${table.createdAt}`,
@@ -161,7 +211,7 @@ export const unitAccessInvitation = pgTable(
 		invitedProfileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "cascade" }),
-		permissions: unitPermission().array().notNull(),
+		permissions: unitPermission().$type<DelegableUnitPermission>().array().notNull(),
 		scope: text()
 			.array()
 			.default(sql`array[]::text[]`)
@@ -184,12 +234,21 @@ export const unitAccessInvitation = pgTable(
 		index("unit_access_invitation_profile_unresolved_idx")
 			.on(table.invitedProfileId, table.createdAt.desc(), table.id.desc())
 			.where(sql`${table.resolution} is null`),
+		index("unit_access_invitation_unit_transfer_candidate_idx")
+			.on(table.unitId, table.invitedProfileId)
+			.where(
+				sql`${table.resolution} = 'accepted'
+					and ${table.accessExpiresAt} is null
+					and cardinality(${table.scope}) = 0`,
+			),
 		index("unit_access_invitation_invited_by_idx").on(table.invitedByProfileId),
 		index("unit_access_invitation_resolved_by_idx").on(table.resolvedByProfileId),
 		check("unit_access_invitation_scope_check", scopeCheck(table.scope)),
 		check(
 			"unit_access_invitation_permissions_check",
-			sql`cardinality(${table.permissions}) between 1 and ${UnitPermissionValues.length}`,
+			sql`cardinality(${table.permissions}) between 1 and ${DelegableUnitPermissionValues.length}
+				and array_position(${table.permissions}, 'unit.ownership.transfer'::unit_permission) is null
+				and array_position(${table.permissions}, 'unit.delete'::unit_permission) is null`,
 		),
 		check(
 			"unit_access_invitation_profiles_differ_check",
@@ -221,7 +280,7 @@ export const unitAccessRestriction = pgTable(
 		subjectKind: unitAccessRestrictionSubjectKind().notNull(),
 		profileId: uuid().references(() => profile.id, { onDelete: "cascade" }),
 		realmId: uuid().references(() => realm.id, { onDelete: "cascade" }),
-		permission: unitPermission().notNull(),
+		permission: unitPermission().$type<DelegableUnitPermission>().notNull(),
 		scope: text()
 			.array()
 			.default(sql`array[]::text[]`)
@@ -259,6 +318,13 @@ export const unitAccessRestriction = pgTable(
 			)`,
 		),
 		check("unit_access_restriction_scope_check", scopeCheck(table.scope)),
+		check(
+			"unit_access_restriction_permission_delegable_check",
+			sql`${table.permission} not in (
+				'unit.ownership.transfer'::unit_permission,
+				'unit.delete'::unit_permission
+			)`,
+		),
 		check(
 			"unit_access_restriction_expiry_check",
 			sql`${table.expiresAt} is null or ${table.expiresAt} > ${table.createdAt}`,

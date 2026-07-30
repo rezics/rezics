@@ -2,11 +2,15 @@ import { describe, expect, it } from "vitest";
 
 import {
 	AuthenticatedGrantableUnitPermissionValues,
+	DelegableUnitPermissionValues,
 	DevelopmentPreviewCapability,
+	expandDelegableUnitPermissions,
 	expandPlatformCapabilities,
 	expandUnitPermissions,
 	isUnitPermissionApplicable,
+	isUnitPermissionDelegable,
 	isUnitPermissionGrantableToAuthenticated,
+	isUnitPermissionOwnerOnly,
 	PlatformCapabilityDefinitions,
 	PlatformCapabilityValues,
 	StandardPermissionActionValues,
@@ -94,6 +98,23 @@ describe("permission schema", () => {
 		expect(isUnitPermissionGrantableToAuthenticated("unit.tag-curation.manage")).toBe(false);
 	});
 
+	it("keeps ownership transfer owner-only and outside delegated access", () => {
+		expect(UnitPermissionValues).toContain("unit.ownership.transfer");
+		expect(DelegableUnitPermissionValues).not.toContain("unit.ownership.transfer");
+		expect(isUnitPermissionDelegable("unit.ownership.transfer")).toBe(false);
+		expect(isUnitPermissionOwnerOnly("unit.ownership.transfer")).toBe(true);
+		expect(expandDelegableUnitPermissions(["unit.history.restore"])).toEqual([
+			"unit.read",
+			"unit.update",
+			"unit.history.restore",
+		]);
+		for (const permission of DelegableUnitPermissionValues)
+			expect({
+				delegable: isUnitPermissionDelegable(permission),
+				ownerOnly: isUnitPermissionOwnerOnly(permission),
+			}).toEqual({ delegable: true, ownerOnly: false });
+	});
+
 	it("uses one platform release gate for every development preview", () => {
 		expect(DevelopmentPreviewCapability).toBe("platform.development_preview.access");
 		expect(
@@ -118,6 +139,14 @@ describe("permission schema", () => {
 			"platform.user.read",
 			"platform.session.read",
 			"platform.session.revoke",
+		]);
+		expect(
+			expandPlatformCapabilities(["unit.ownership.override", "unit.delete", "unit.restore"]),
+		).toEqual([
+			"unit.governance.read",
+			"unit.ownership.override",
+			"unit.delete",
+			"unit.restore",
 		]);
 	});
 });

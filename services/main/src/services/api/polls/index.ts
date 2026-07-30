@@ -320,7 +320,7 @@ export default new Elysia({ prefix: "/polls" })
 			return { optionIds: [] };
 		},
 		{
-			access: "write:unit:delete",
+			access: "write:interaction:write",
 			params: PollParams,
 			response: {
 				[StatusCodes.OK]: PollVoteResponse,

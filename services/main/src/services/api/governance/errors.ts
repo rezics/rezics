@@ -164,6 +164,68 @@ export class UnitOwnerRestrictionForbidden extends Data.TaggedError(
 	readonly message = "Owner access is governed by ownership and cannot have direct overrides";
 }
 
+export class UnitOwnershipChanged extends Data.TaggedError("UnitOwnershipChanged") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitOwnershipChanged.status;
+	readonly message = "Unit ownership changed before the operation completed";
+}
+
+export class UnitOwnershipTargetIneligible extends Data.TaggedError(
+	"UnitOwnershipTargetIneligible",
+) {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitOwnershipTargetIneligible.status;
+	readonly message = "The selected Profile is not eligible to receive Unit ownership";
+}
+
+export class UnitOwnershipRelinquishmentForbidden extends Data.TaggedError(
+	"UnitOwnershipRelinquishmentForbidden",
+) {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitOwnershipRelinquishmentForbidden.status;
+	readonly message = "Community ownership cannot be relinquished";
+}
+
+export class UnitOwnershipOverrideConfirmationInvalid extends Data.TaggedError(
+	"UnitOwnershipOverrideConfirmationInvalid",
+) {
+	static readonly status = StatusCodes.BAD_REQUEST as const;
+	readonly status = UnitOwnershipOverrideConfirmationInvalid.status;
+	readonly message = "The Unit ownership override confirmation does not match the target";
+}
+
+export class UnitLifecycleConfirmationInvalid extends Data.TaggedError(
+	"UnitLifecycleConfirmationInvalid",
+) {
+	static readonly status = StatusCodes.BAD_REQUEST as const;
+	readonly status = UnitLifecycleConfirmationInvalid.status;
+	readonly message = "The Unit lifecycle confirmation does not match the target";
+}
+
+export class UnitLifecycleChanged extends Data.TaggedError("UnitLifecycleChanged") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitLifecycleChanged.status;
+	readonly message = "The Unit changed before the lifecycle operation completed";
+}
+
+export class UnitLifecycleProtected extends Data.TaggedError("UnitLifecycleProtected") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitLifecycleProtected.status;
+	readonly message = "Bootstrap and current administrator Units cannot be soft-deleted";
+}
+
+export class UnitAlreadyDeleted extends Data.TaggedError("UnitAlreadyDeleted") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitAlreadyDeleted.status;
+	readonly message = "The Unit is already soft-deleted";
+}
+
+export class UnitNotDeleted extends Data.TaggedError("UnitNotDeleted") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitNotDeleted.status;
+	readonly message = "The Unit is not soft-deleted";
+}
+
 export const GovernanceErrors = [
 	GovernanceNoteNotFound,
 	ModerationTargetNotFound,
@@ -190,4 +252,13 @@ export const GovernanceErrors = [
 	UnitAccessInvitationSelfForbidden,
 	UnitAccessConfigurationInvalid,
 	UnitOwnerRestrictionForbidden,
+	UnitOwnershipChanged,
+	UnitOwnershipTargetIneligible,
+	UnitOwnershipRelinquishmentForbidden,
+	UnitOwnershipOverrideConfirmationInvalid,
+	UnitLifecycleConfirmationInvalid,
+	UnitLifecycleChanged,
+	UnitLifecycleProtected,
+	UnitAlreadyDeleted,
+	UnitNotDeleted,
 ] as const;

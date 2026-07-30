@@ -27,6 +27,11 @@ export default {
 			description:
 				"Gérez l’état des comptes, l’accès à la plateforme, les sessions et l’activité de sécurité.",
 		},
+		units: {
+			label: "Gouvernance des Units",
+			description:
+				"Recherchez toutes les Units et gérez de manière auditée leur propriété, leur suppression provisoire ou leur restauration.",
+		},
 		moderation: {
 			label: "Gouvernance globale des contenus",
 			description:
@@ -40,6 +45,75 @@ export default {
 			label: `Règles des jetons ${verbatimTerms.api.value}`,
 			description: `Gérez les limites globales de débit, de concurrence et de coût des jetons ${verbatimTerms.api.value}.`,
 		},
+	},
+	units: {
+		searchLabel: "Rechercher des Units",
+		searchPlaceholder: "Rechercher par titre, identifiant de Unit ou adresse publique",
+		stateFilter: "État du cycle de vie",
+		states: {
+			active: "Units actives",
+			deleted: "Supprimées provisoirement",
+			all: "Toutes les Units",
+		},
+		listLabel: "Liste des Units",
+		untitled: "Unit sans titre",
+		empty: "Aucune Unit ne correspond aux filtres actuels.",
+		statuses: {
+			draft: "Brouillon",
+			published: "Publiée",
+			archived: "Archivée",
+		},
+		active: "Active",
+		deleted: "Supprimée provisoirement",
+		protected: "Protégée",
+		kind: "Identifiant du type de Unit",
+		owner: "Propriétaire actuel",
+		noOwner: "Aucun propriétaire actif",
+		updatedAt: "Dernière mise à jour",
+		deletedAt: "Suppression provisoire",
+		restore: "Restaurer la Unit",
+		softDelete: "Supprimer provisoirement la Unit",
+		overrideOwnership: "Réattribuer la propriété",
+		ownershipPickerTitle: "Sélectionner un nouveau propriétaire",
+		ownershipPickerDescription:
+			"La gouvernance de la plateforme peut attribuer cette Unit à tout profil actif, indépendamment des accès de collaboration.",
+		ownershipSearchLabel: "Rechercher les profils admissibles",
+		ownershipSearchPlaceholder: `Rechercher par nom, ${verbatimTerms.id.value} de profil ou adresse publique`,
+		ownershipCandidateListLabel: "Profils admissibles à la propriété",
+		ownershipCandidatesEmpty: "Aucun profil actif ne correspond à cette recherche.",
+		unnamedProfile: "Profil sans nom",
+		ownershipCandidateSelect: insert("Sélectionner {{profile}} comme nouveau propriétaire", {
+			profile: String,
+		}),
+		ownershipConfirmationTitle: "Réattribuer la propriété de cette Unit ?",
+		ownershipConfirmationDescription: insert(
+			"Cette action remplace immédiatement {{currentOwner}} par {{newOwner}}. Elle est auditée et les profils concernés sont avertis.",
+			{ currentOwner: String, newOwner: String },
+		),
+		newOwner: "Nouveau propriétaire",
+		backToCandidates: "Retour aux profils",
+		confirmOwnershipOverride: "Confirmer la réattribution",
+		protectedDescription:
+			"Les Units d’initialisation et le profil actuellement utilisé ne peuvent pas être supprimés provisoirement.",
+		selectUnit: "Sélectionnez une Unit",
+		selectUnitDescription:
+			"Ouvrez son état de cycle de vie et ses informations de protection depuis la liste.",
+		restoreTitle: "Restaurer cette Unit ?",
+		restoreDescription:
+			"La Unit réapparaîtra dans les requêtes ordinaires. Si elle était publiée, elle sera restaurée comme archivée afin d’éviter une republication sans contrôle.",
+		softDeleteTitle: "Supprimer provisoirement cette Unit ?",
+		softDeleteDescription:
+			"La Unit et son historique resteront stockés, mais disparaîtront immédiatement des requêtes et opérations ordinaires.",
+		reason: "Motif de gouvernance",
+		internalNote: "Note interne (facultative)",
+		notePlaceholder:
+			"Consignez le fondement de l’opération ; il sera conservé dans le journal d’audit de sécurité.",
+		confirmationLabel: "Saisissez l’identifiant de la Unit pour confirmer",
+		confirmationInstruction: insert("Saisissez {{unitId}} pour confirmer cette opération.", {
+			unitId: String,
+		}),
+		confirmRestore: "Confirmer la restauration",
+		confirmSoftDelete: "Confirmer la suppression provisoire",
 	},
 	users: {
 		searchLabel: "Rechercher des utilisateurs",

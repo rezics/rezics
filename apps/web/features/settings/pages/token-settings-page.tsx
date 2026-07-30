@@ -88,7 +88,7 @@ type PermissionResource =
 	| "recommendation"
 	| "upload"
 	| "report";
-type PermissionAction = "read" | "create" | "update" | "delete" | "write" | "manage";
+type PermissionAction = "read" | "create" | "update" | "write" | "manage";
 
 const ApiTokenGuideUrl = "https://about.rezics.com/docs/api/tokens/";
 
@@ -100,7 +100,6 @@ const PermissionGroups = [
 			["unit:read", "read"],
 			["unit:create", "create"],
 			["unit:update", "update"],
-			["unit:delete", "delete"],
 		],
 	},
 	{
@@ -221,7 +220,6 @@ function PermissionFields({
 								"unit:read": "unitRead",
 								"unit:create": "unitCreate",
 								"unit:update": "unitUpdate",
-								"unit:delete": "unitDelete",
 								"profile:read": "profileRead",
 								"profile:update": "profileUpdate",
 								"interaction:read": "interactionRead",

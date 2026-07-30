@@ -26,6 +26,11 @@ export default {
 			description:
 				"ログインアカウントの状態、プラットフォームアクセス、セッション、セキュリティ活動を管理します。",
 		},
+		units: {
+			label: "ユニットのガバナンス",
+			description:
+				"すべてのユニットを検索し、所有者の変更、論理削除、復元を監査記録付きで実行します。",
+		},
 		moderation: {
 			label: "グローバルコンテンツガバナンス",
 			description:
@@ -39,6 +44,72 @@ export default {
 			label: `${verbatimTerms.api.value} トークンポリシー`,
 			description: `${verbatimTerms.api.value} トークンの全体的なレート、同時実行数、コスト制限を管理します。`,
 		},
+	},
+	units: {
+		searchLabel: "ユニットを検索",
+		searchPlaceholder: `タイトル、ユニット ${verbatimTerms.id.value}、公開アドレスで検索`,
+		stateFilter: "ライフサイクル状態",
+		states: {
+			active: "有効なユニット",
+			deleted: "論理削除済み",
+			all: "すべてのユニット",
+		},
+		listLabel: "ユニット一覧",
+		untitled: "無題のユニット",
+		empty: "現在の条件に一致するユニットはありません。",
+		statuses: {
+			draft: "下書き",
+			published: "公開済み",
+			archived: "アーカイブ済み",
+		},
+		active: "有効",
+		deleted: "論理削除済み",
+		protected: "保護対象",
+		kind: "ユニット種別識別子",
+		owner: "現在の所有者",
+		noOwner: "有効な所有者なし",
+		updatedAt: "最終更新",
+		deletedAt: "論理削除日時",
+		restore: "ユニットを復元",
+		softDelete: "ユニットを論理削除",
+		overrideOwnership: "所有者を強制変更",
+		ownershipPickerTitle: "新しい所有者を選択",
+		ownershipPickerDescription:
+			"プラットフォームガバナンスでは、共同アクセスとは無関係に、このユニットを任意の有効なプロフィールへ割り当てられます。",
+		ownershipSearchLabel: "選択可能なプロフィールを検索",
+		ownershipSearchPlaceholder: `名前、プロフィール ${verbatimTerms.id.value}、公開アドレスで検索`,
+		ownershipCandidateListLabel: "所有権を受け取れるプロフィール",
+		ownershipCandidatesEmpty: "検索条件に一致する有効なプロフィールはありません。",
+		unnamedProfile: "名前のないプロフィール",
+		ownershipCandidateSelect: insert("{{profile}} を新しい所有者として選択", {
+			profile: String,
+		}),
+		ownershipConfirmationTitle: "このユニットの所有者を強制変更しますか？",
+		ownershipConfirmationDescription: insert(
+			"{{currentOwner}} は直ちに {{newOwner}} に置き換えられます。この操作は監査記録に残り、影響を受けるプロフィールに通知されます。",
+			{ currentOwner: String, newOwner: String },
+		),
+		newOwner: "新しい所有者",
+		backToCandidates: "プロフィール一覧に戻る",
+		confirmOwnershipOverride: "所有者の強制変更を確定",
+		protectedDescription: "初期化用ユニットと現在使用中のプロフィールは論理削除できません。",
+		selectUnit: "ユニットを選択",
+		selectUnitDescription: "一覧からライフサイクル状態と保護情報を開きます。",
+		restoreTitle: "このユニットを復元しますか？",
+		restoreDescription:
+			"ユニットは通常の検索結果に戻ります。削除前に公開されていた場合は、未確認のまま再公開されないようアーカイブ状態で復元されます。",
+		softDeleteTitle: "このユニットを論理削除しますか？",
+		softDeleteDescription:
+			"ユニットと履歴は保持されますが、通常の製品検索と操作からは直ちに非表示になります。",
+		reason: "ガバナンス上の理由",
+		internalNote: "内部メモ（任意）",
+		notePlaceholder: "操作の根拠を記録します。セキュリティ監査ログに保存されます。",
+		confirmationLabel: `確認のためユニット ${verbatimTerms.id.value} を入力`,
+		confirmationInstruction: insert("この操作を確認するには {{unitId}} と入力してください。", {
+			unitId: String,
+		}),
+		confirmRestore: "復元を確定",
+		confirmSoftDelete: "論理削除を確定",
 	},
 	users: {
 		searchLabel: "利用者を検索",

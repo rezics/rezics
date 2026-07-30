@@ -1,5 +1,6 @@
 import {
 	AuthenticatedGrantableUnitPermissionValues,
+	DelegableUnitPermissionValues,
 	PlatformCapabilityValues,
 	UnitPermissionValues,
 } from "@rezics/access";
@@ -10,6 +11,8 @@ import {
 	EnforcementKindValues,
 	GovernanceReasonCodeValues,
 	ModerationCaseStateValues,
+	UnitKindValues,
+	UnitStatusValues,
 } from "../../database/schema/contract-values";
 import { DateTime, ContentLanguage, Uuid } from "../schema";
 
@@ -170,16 +173,16 @@ const UnitAccessSubject = t.Union([
 	t.Object({ kind: t.Literal("realm"), realmId: Uuid }, { additionalProperties: false }),
 	t.Object({ kind: t.Literal("authenticated") }, { additionalProperties: false }),
 ]);
-const UnitPermission = t.UnionEnum(UnitPermissionValues);
+const DelegableUnitPermission = t.UnionEnum(DelegableUnitPermissionValues);
 export const ReplaceUnitSubjectAccessBody = t.Object(
 	{
 		subject: UnitAccessSubject,
-		grants: t.Array(UnitPermission, {
-			maxItems: UnitPermissionValues.length,
+		grants: t.Array(DelegableUnitPermission, {
+			maxItems: DelegableUnitPermissionValues.length,
 			uniqueItems: true,
 		}),
-		restrictions: t.Array(UnitPermission, {
-			maxItems: UnitPermissionValues.length,
+		restrictions: t.Array(DelegableUnitPermission, {
+			maxItems: DelegableUnitPermissionValues.length,
 			uniqueItems: true,
 		}),
 		scope: UnitScope,
@@ -191,9 +194,9 @@ export const ReplaceUnitSubjectAccessBody = t.Object(
 export const CreateUnitAccessInvitationBody = t.Object(
 	{
 		invitedProfileId: Uuid,
-		permissions: t.Array(UnitPermission, {
+		permissions: t.Array(DelegableUnitPermission, {
 			minItems: 1,
-			maxItems: UnitPermissionValues.length,
+			maxItems: DelegableUnitPermissionValues.length,
 			uniqueItems: true,
 		}),
 		scope: UnitScope,
@@ -204,13 +207,79 @@ export const CreateUnitAccessInvitationBody = t.Object(
 );
 export const TransferUnitOwnershipBody = t.Object(
 	{
-		owner: t.Object(
-			{ kind: t.Literal("profile"), profileId: Uuid },
-			{ additionalProperties: false },
-		),
+		expectedOwnerProfileId: Uuid,
+		targetProfileId: Uuid,
 	},
 	{ additionalProperties: false },
 );
+export const RelinquishUnitOwnershipBody = t.Object(
+	{ expectedOwnerProfileId: Uuid },
+	{ additionalProperties: false },
+);
+export const OverrideUnitOwnershipBody = t.Object(
+	{
+		expectedOwnerProfileId: NullableUuid,
+		targetProfileId: Uuid,
+		confirmationUnitId: Uuid,
+		reasonCode: GovernanceReasonCode,
+		note: t.Optional(t.String({ minLength: 1, maxLength: 2_000 })),
+	},
+	{ additionalProperties: false },
+);
+export const UnitOwnershipResponse = t.Object({
+	owner: t.Object({
+		profileId: Uuid,
+		label: t.Nullable(t.String()),
+	}),
+});
+export const ListUnitOwnershipCandidatesQuery = t.Object(
+	{
+		query: t.Optional(t.String({ maxLength: 200 })),
+		cursor: t.Optional(Uuid),
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 50 })),
+	},
+	{ additionalProperties: false },
+);
+
+const UnitLifecycleState = t.Union([t.Literal("active"), t.Literal("deleted"), t.Literal("all")]);
+export const ListPlatformUnitsQuery = t.Object(
+	{
+		state: t.Optional(UnitLifecycleState),
+		query: t.Optional(t.String({ maxLength: 200 })),
+		cursor: t.Optional(Uuid),
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
+	},
+	{ additionalProperties: false },
+);
+export const UnitLifecycleCommandBody = t.Object(
+	{
+		expectedUpdatedAt: DateTime,
+		confirmationUnitId: Uuid,
+		reasonCode: GovernanceReasonCode,
+		note: t.Optional(t.String({ minLength: 1, maxLength: 2_000 })),
+	},
+	{ additionalProperties: false },
+);
+const PlatformUnitLifecycleItem = t.Object({
+	id: Uuid,
+	kind: t.UnionEnum(UnitKindValues),
+	title: t.Nullable(t.String()),
+	status: t.UnionEnum(UnitStatusValues),
+	owner: t.Nullable(
+		t.Object({
+			profileId: Uuid,
+			label: t.Nullable(t.String()),
+		}),
+	),
+	deletedAt: t.Nullable(DateTime),
+	updatedAt: DateTime,
+	protected: t.Boolean(),
+});
+export const PlatformUnitListResponse = t.Object({
+	items: t.Array(PlatformUnitLifecycleItem),
+	nextCursor: t.Nullable(Uuid),
+});
+export const PlatformUnitLifecycleResponse = PlatformUnitLifecycleItem;
 export const UnitAccessRestrictionSubject = t.Union([
 	t.Object({ kind: t.Literal("profile"), profileId: Uuid }, { additionalProperties: false }),
 	t.Object({ kind: t.Literal("realm"), realmId: Uuid }, { additionalProperties: false }),
@@ -285,7 +354,7 @@ export const UnitAccessInvitationResponse = t.Object({
 	id: Uuid,
 	unitId: Uuid,
 	invitedProfileId: Uuid,
-	permissions: t.Array(UnitPermission),
+	permissions: t.Array(DelegableUnitPermission),
 	scope: UnitScope,
 	invitedByProfileId: Uuid,
 	expiresAt: DateTime,
@@ -311,19 +380,22 @@ export const UnitAccessInvitationListResponse = t.Object({
 const UnitAccessSubjectRow = t.Object({
 	subject: UnitAccessSubject,
 	label: t.Nullable(t.String()),
-	grants: t.Array(UnitPermission),
-	restrictions: t.Array(UnitPermission),
-	inherited: t.Array(UnitPermission),
+	grants: t.Array(DelegableUnitPermission),
+	restrictions: t.Array(DelegableUnitPermission),
+	inherited: t.Array(DelegableUnitPermission),
 	expiresAt: t.Nullable(DateTime),
 });
 export const UnitAccessSnapshotResponse = t.Object({
 	unitId: Uuid,
+	unitTitle: t.Nullable(t.String()),
 	unitKind: t.String(),
-	permissions: t.Array(UnitPermission),
+	permissions: t.Array(DelegableUnitPermission),
 	authenticatedGrantablePermissions: t.Array(
 		t.UnionEnum(AuthenticatedGrantableUnitPermissionValues),
 	),
 	owner: t.Nullable(t.Object({ profileId: Uuid, label: t.Nullable(t.String()) })),
+	canTransferOwnership: t.Boolean(),
+	canRelinquishOwnership: t.Boolean(),
 	subjects: t.Array(UnitAccessSubjectRow),
 });
 export const UnitAccessCandidateListResponse = t.Object({
@@ -333,6 +405,16 @@ export const UnitAccessCandidateListResponse = t.Object({
 			label: t.Nullable(t.String()),
 		}),
 	),
+});
+export const UnitOwnershipCandidateListResponse = t.Object({
+	items: t.Array(
+		t.Object({
+			profileId: Uuid,
+			label: t.Nullable(t.String()),
+			slug: t.Nullable(t.String()),
+		}),
+	),
+	nextCursor: t.Nullable(Uuid),
 });
 
 const UnitAllowedDecisionResponse = t.Union([

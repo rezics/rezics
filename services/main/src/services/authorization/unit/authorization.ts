@@ -13,6 +13,8 @@ import { UnitAccessRestricted, UnitNotFound, UnitPermissionForbidden } from "../
 import type { PlatformAuthorization } from "../platform/authorization";
 import {
 	isUnitPermissionApplicable,
+	isUnitPermissionDelegable,
+	isUnitPermissionOwnerOnly,
 	resolveUnitAccessOverride,
 	type UnitPermission,
 } from "./policy";
@@ -107,6 +109,24 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 		if (!record || record.deletedAt) return { allowed: false, reason: "missing" };
 		if (!isUnitPermissionApplicable(record.kind, permission))
 			return { allowed: false, reason: "ungranted" };
+
+		if (isUnitPermissionOwnerOnly(permission)) {
+			if (!this.profileId) return { allowed: false, reason: "anonymous" };
+			const [ownership] = await executor
+				.select({ id: unitOwnership.id })
+				.from(unitOwnership)
+				.where(
+					and(
+						eq(unitOwnership.unitId, unitId),
+						eq(unitOwnership.profileId, this.profileId),
+						isNull(unitOwnership.revokedAt),
+					),
+				)
+				.limit(1);
+			return ownership
+				? { allowed: true, source: "owner" }
+				: { allowed: false, reason: "ungranted" };
+		}
 
 		if (this.profileId) {
 			const platformOverride = await this.platform.hasCapability("unit.edit", executor);
@@ -279,6 +299,7 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 		if (!this.profileId) return undefined;
 		const rootDecision = await this.decide(unitId, permission);
 		if (rootDecision.allowed) return [];
+		if (!isUnitPermissionDelegable(permission)) return undefined;
 
 		const grants = await database
 			.select({
@@ -319,6 +340,7 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 
 	async matchesActiveGrant(grantId: string, permission: UnitPermission): Promise<boolean> {
 		if (!this.profileId) return false;
+		if (!isUnitPermissionDelegable(permission)) return false;
 		const [grant] = await database
 			.select({
 				subjectKind: unitAccessGrant.subjectKind,

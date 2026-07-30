@@ -10140,6 +10140,15 @@
 					"UnitAccessInvitationSelfForbidden",
 					"UnitAccessConfigurationInvalid",
 					"UnitOwnerRestrictionForbidden",
+					"UnitOwnershipChanged",
+					"UnitOwnershipTargetIneligible",
+					"UnitOwnershipRelinquishmentForbidden",
+					"UnitOwnershipOverrideConfirmationInvalid",
+					"UnitLifecycleConfirmationInvalid",
+					"UnitLifecycleChanged",
+					"UnitLifecycleProtected",
+					"UnitAlreadyDeleted",
+					"UnitNotDeleted",
 					"ReportRealmMismatch",
 					"ReportAlreadySubmitted",
 					"ReportTargetRevisionUnavailable",
@@ -20850,7 +20859,6 @@
 																"unit:read",
 																"unit:create",
 																"unit:update",
-																"unit:delete",
 																"profile:read",
 																"profile:update",
 																"interaction:read",
@@ -21194,7 +21202,7 @@
 									"name": { "minLength": 1, "maxLength": 120, "type": "string" },
 									"permissions": {
 										"minItems": 1,
-										"maxItems": 19,
+										"maxItems": 18,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -21204,7 +21212,6 @@
 												"unit:read",
 												"unit:create",
 												"unit:update",
-												"unit:delete",
 												"profile:read",
 												"profile:update",
 												"interaction:read",
@@ -21397,7 +21404,6 @@
 													"unit:read",
 													"unit:create",
 													"unit:update",
-													"unit:delete",
 													"profile:read",
 													"profile:update",
 													"interaction:read",
@@ -21765,7 +21771,7 @@
 									"name": { "minLength": 1, "maxLength": 120, "type": "string" },
 									"permissions": {
 										"minItems": 1,
-										"maxItems": 19,
+										"maxItems": 18,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -21775,7 +21781,6 @@
 												"unit:read",
 												"unit:create",
 												"unit:update",
-												"unit:delete",
 												"profile:read",
 												"profile:update",
 												"interaction:read",
@@ -21841,7 +21846,6 @@
 													"unit:read",
 													"unit:create",
 													"unit:update",
-													"unit:delete",
 													"profile:read",
 													"profile:update",
 													"interaction:read",
@@ -22493,7 +22497,6 @@
 													"unit:read",
 													"unit:create",
 													"unit:update",
-													"unit:delete",
 													"profile:read",
 													"profile:update",
 													"interaction:read",
@@ -22927,7 +22930,6 @@
 													"unit:read",
 													"unit:create",
 													"unit:update",
-													"unit:delete",
 													"profile:read",
 													"profile:update",
 													"interaction:read",
@@ -32347,14 +32349,21 @@
 									"type": "object",
 									"required": [
 										"unitId",
+										"unitTitle",
 										"unitKind",
 										"permissions",
 										"authenticatedGrantablePermissions",
 										"owner",
+										"canTransferOwnership",
+										"canRelinquishOwnership",
 										"subjects"
 									],
 									"properties": {
 										"unitId": { "format": "uuid", "type": "string" },
+										"unitTitle": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
 										"unitKind": { "type": "string" },
 										"permissions": {
 											"type": "array",
@@ -32369,7 +32378,6 @@
 													"unit.access.manage",
 													"unit.association.manage",
 													"unit.tag-curation.manage",
-													"unit.delete",
 													"realm.contribute",
 													"realm.units.create",
 													"realm.post.replies.create",
@@ -32428,6 +32436,8 @@
 												{ "type": "null" }
 											]
 										},
+										"canTransferOwnership": { "type": "boolean" },
+										"canRelinquishOwnership": { "type": "boolean" },
 										"subjects": {
 											"type": "array",
 											"items": {
@@ -32506,7 +32516,6 @@
 																"unit.access.manage",
 																"unit.association.manage",
 																"unit.tag-curation.manage",
-																"unit.delete",
 																"realm.contribute",
 																"realm.units.create",
 																"realm.post.replies.create",
@@ -32537,7 +32546,6 @@
 																"unit.access.manage",
 																"unit.association.manage",
 																"unit.tag-curation.manage",
-																"unit.delete",
 																"realm.contribute",
 																"realm.units.create",
 																"realm.post.replies.create",
@@ -32568,7 +32576,6 @@
 																"unit.access.manage",
 																"unit.association.manage",
 																"unit.tag-curation.manage",
-																"unit.delete",
 																"realm.contribute",
 																"realm.units.create",
 																"realm.post.replies.create",
@@ -32745,7 +32752,7 @@
 										]
 									},
 									"grants": {
-										"maxItems": 22,
+										"maxItems": 21,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -32759,7 +32766,6 @@
 												"unit.access.manage",
 												"unit.association.manage",
 												"unit.tag-curation.manage",
-												"unit.delete",
 												"realm.contribute",
 												"realm.units.create",
 												"realm.post.replies.create",
@@ -32778,7 +32784,7 @@
 										}
 									},
 									"restrictions": {
-										"maxItems": 22,
+										"maxItems": 21,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -32792,7 +32798,6 @@
 												"unit.access.manage",
 												"unit.association.manage",
 												"unit.tag-curation.manage",
-												"unit.delete",
 												"realm.contribute",
 												"realm.units.create",
 												"realm.post.replies.create",
@@ -32853,14 +32858,21 @@
 									"type": "object",
 									"required": [
 										"unitId",
+										"unitTitle",
 										"unitKind",
 										"permissions",
 										"authenticatedGrantablePermissions",
 										"owner",
+										"canTransferOwnership",
+										"canRelinquishOwnership",
 										"subjects"
 									],
 									"properties": {
 										"unitId": { "format": "uuid", "type": "string" },
+										"unitTitle": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
 										"unitKind": { "type": "string" },
 										"permissions": {
 											"type": "array",
@@ -32875,7 +32887,6 @@
 													"unit.access.manage",
 													"unit.association.manage",
 													"unit.tag-curation.manage",
-													"unit.delete",
 													"realm.contribute",
 													"realm.units.create",
 													"realm.post.replies.create",
@@ -32934,6 +32945,8 @@
 												{ "type": "null" }
 											]
 										},
+										"canTransferOwnership": { "type": "boolean" },
+										"canRelinquishOwnership": { "type": "boolean" },
 										"subjects": {
 											"type": "array",
 											"items": {
@@ -33012,7 +33025,6 @@
 																"unit.access.manage",
 																"unit.association.manage",
 																"unit.tag-curation.manage",
-																"unit.delete",
 																"realm.contribute",
 																"realm.units.create",
 																"realm.post.replies.create",
@@ -33043,7 +33055,6 @@
 																"unit.access.manage",
 																"unit.association.manage",
 																"unit.tag-curation.manage",
-																"unit.delete",
 																"realm.contribute",
 																"realm.units.create",
 																"realm.post.replies.create",
@@ -33074,7 +33085,6 @@
 																"unit.access.manage",
 																"unit.association.manage",
 																"unit.tag-curation.manage",
-																"unit.delete",
 																"realm.contribute",
 																"realm.units.create",
 																"realm.post.replies.create",
@@ -33484,9 +33494,9 @@
 															"unit.status.update",
 															"unit.history.restore",
 															"unit.access.manage",
+															"unit.ownership.transfer",
 															"unit.association.manage",
 															"unit.tag-curation.manage",
-															"unit.delete",
 															"realm.contribute",
 															"realm.units.create",
 															"realm.post.replies.create",
@@ -33680,9 +33690,9 @@
 				"x-rezics-policy-operation-id": "getApiGovernanceUnitByUnitIdAccessEffective"
 			}
 		},
-		"/api/governance/unit/{unitId}/ownership": {
-			"put": {
-				"summary": "Transfer Unit ownership",
+		"/api/governance/unit/{unitId}/ownership/candidates": {
+			"get": {
+				"summary": "Search eligible Unit ownership recipients",
 				"tags": ["Governance"],
 				"security": [{ "SessionCookie": [] }],
 				"parameters": [
@@ -33691,31 +33701,34 @@
 						"in": "path",
 						"required": true,
 						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "query",
+						"in": "query",
+						"required": false,
+						"schema": { "maxLength": 200, "type": "string" }
+					},
+					{
+						"name": "cursor",
+						"in": "query",
+						"required": false,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 50,
+							"default": 50,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 50, "default": 50, "type": "integer" }
+							]
+						}
 					}
 				],
-				"requestBody": {
-					"content": {
-						"application/json": {
-							"schema": {
-								"additionalProperties": false,
-								"type": "object",
-								"required": ["owner"],
-								"properties": {
-									"owner": {
-										"additionalProperties": false,
-										"type": "object",
-										"required": ["kind", "profileId"],
-										"properties": {
-											"kind": { "const": "profile", "type": "string" },
-											"profileId": { "format": "uuid", "type": "string" }
-										}
-									}
-								}
-							}
-						}
-					},
-					"required": true
-				},
 				"responses": {
 					"200": {
 						"description": "Response for status 200",
@@ -33723,29 +33736,47 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["owner"],
+									"required": ["items", "nextCursor"],
 									"properties": {
-										"owner": {
-											"type": "object",
-											"required": ["kind", "profileId"],
-											"properties": {
-												"kind": { "const": "profile", "type": "string" },
-												"profileId": { "type": "string" }
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": ["profileId", "label", "slug"],
+												"properties": {
+													"profileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"label": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"slug": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													}
+												}
 											}
+										},
+										"nextCursor": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
 										}
 									}
 								}
 							}
 						}
 					},
-					"400": {
-						"description": "Request body could not be parsed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
-							}
-						}
-					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -33759,106 +33790,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "PlatformCapabilityRequired",
+													"default": "UnitPermissionForbidden",
 													"type": "string",
-													"enum": [
-														"PlatformCapabilityRequired",
-														"FreshSessionRequired"
-													]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Response for status 404",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "UnitNotFound",
-													"type": "string",
-													"enum": ["UnitNotFound", "ProfileNotFound"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"operationId": "putApiGovernanceUnitByUnitIdOwnership",
-				"x-rezics-policy-operation-id": "putApiGovernanceUnitByUnitIdOwnership"
-			},
-			"delete": {
-				"summary": "Revoke Unit ownership",
-				"tags": ["Governance"],
-				"security": [{ "SessionCookie": [] }],
-				"parameters": [
-					{
-						"name": "unitId",
-						"in": "path",
-						"required": true,
-						"schema": { "format": "uuid", "type": "string" }
-					}
-				],
-				"responses": {
-					"204": {
-						"description": "Response for status 204",
-						"content": { "type": "void" }
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "PlatformCapabilityRequired",
-													"type": "string",
-													"enum": [
-														"PlatformCapabilityRequired",
-														"FreshSessionRequired"
-													]
+													"enum": ["UnitPermissionForbidden"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -33914,8 +33848,356 @@
 						}
 					}
 				},
-				"operationId": "deleteApiGovernanceUnitByUnitIdOwnership",
-				"x-rezics-policy-operation-id": "deleteApiGovernanceUnitByUnitIdOwnership"
+				"operationId": "getApiGovernanceUnitByUnitIdOwnershipCandidates",
+				"x-rezics-policy-operation-id": "getApiGovernanceUnitByUnitIdOwnershipCandidates"
+			}
+		},
+		"/api/governance/unit/{unitId}/ownership": {
+			"put": {
+				"summary": "Transfer Unit ownership",
+				"tags": ["Governance"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["expectedOwnerProfileId", "targetProfileId"],
+								"properties": {
+									"expectedOwnerProfileId": {
+										"format": "uuid",
+										"type": "string"
+									},
+									"targetProfileId": { "format": "uuid", "type": "string" }
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["owner"],
+									"properties": {
+										"owner": {
+											"type": "object",
+											"required": ["profileId", "label"],
+											"properties": {
+												"profileId": { "format": "uuid", "type": "string" },
+												"label": {
+													"nullable": true,
+													"anyOf": [
+														{ "type": "string" },
+														{ "type": "null" }
+													]
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"FreshSessionRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound", "ProfileNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitOwnershipChanged",
+													"type": "string",
+													"enum": [
+														"UnitOwnershipChanged",
+														"UnitOwnershipTargetIneligible"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiGovernanceUnitByUnitIdOwnership",
+				"x-rezics-policy-operation-id": "putApiGovernanceUnitByUnitIdOwnership"
+			}
+		},
+		"/api/governance/unit/{unitId}/ownership/relinquishment": {
+			"post": {
+				"summary": "Relinquish Unit ownership to Community",
+				"tags": ["Governance"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["expectedOwnerProfileId"],
+								"properties": {
+									"expectedOwnerProfileId": { "format": "uuid", "type": "string" }
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["owner"],
+									"properties": {
+										"owner": {
+											"type": "object",
+											"required": ["profileId", "label"],
+											"properties": {
+												"profileId": { "format": "uuid", "type": "string" },
+												"label": {
+													"nullable": true,
+													"anyOf": [
+														{ "type": "string" },
+														{ "type": "null" }
+													]
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"FreshSessionRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitOwnershipChanged",
+													"type": "string",
+													"enum": [
+														"UnitOwnershipChanged",
+														"UnitOwnershipRelinquishmentForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiGovernanceUnitByUnitIdOwnershipRelinquishment",
+				"x-rezics-policy-operation-id": "postApiGovernanceUnitByUnitIdOwnershipRelinquishment"
 			}
 		},
 		"/api/governance/unit/access-invitations": {
@@ -33983,7 +34265,6 @@
 																"unit.access.manage",
 																"unit.association.manage",
 																"unit.tag-curation.manage",
-																"unit.delete",
 																"realm.contribute",
 																"realm.units.create",
 																"realm.post.replies.create",
@@ -34186,7 +34467,6 @@
 																"unit.access.manage",
 																"unit.association.manage",
 																"unit.tag-curation.manage",
-																"unit.delete",
 																"realm.contribute",
 																"realm.units.create",
 																"realm.post.replies.create",
@@ -34402,7 +34682,7 @@
 									"invitedProfileId": { "format": "uuid", "type": "string" },
 									"permissions": {
 										"minItems": 1,
-										"maxItems": 22,
+										"maxItems": 21,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -34416,7 +34696,6 @@
 												"unit.access.manage",
 												"unit.association.manage",
 												"unit.tag-curation.manage",
-												"unit.delete",
 												"realm.contribute",
 												"realm.units.create",
 												"realm.post.replies.create",
@@ -34495,7 +34774,6 @@
 													"unit.access.manage",
 													"unit.association.manage",
 													"unit.tag-curation.manage",
-													"unit.delete",
 													"realm.contribute",
 													"realm.units.create",
 													"realm.post.replies.create",
@@ -34793,7 +35071,6 @@
 													"unit.access.manage",
 													"unit.association.manage",
 													"unit.tag-curation.manage",
-													"unit.delete",
 													"realm.contribute",
 													"realm.units.create",
 													"realm.post.replies.create",
@@ -35034,7 +35311,6 @@
 													"unit.access.manage",
 													"unit.association.manage",
 													"unit.tag-curation.manage",
-													"unit.delete",
 													"realm.contribute",
 													"realm.units.create",
 													"realm.post.replies.create",
@@ -35337,6 +35613,1178 @@
 				],
 				"operationId": "deleteApiGovernanceUnitByUnitIdAccess-invitationsByInvitationId",
 				"x-rezics-policy-operation-id": "deleteApiGovernanceUnitByUnitIdAccess-invitationsByInvitationId"
+			}
+		},
+		"/api/governance/platform/units": {
+			"get": {
+				"summary": "List Units for platform lifecycle administration",
+				"tags": ["Governance"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "state",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "string", "enum": ["active", "deleted", "all"] }
+					},
+					{
+						"name": "query",
+						"in": "query",
+						"required": false,
+						"schema": { "maxLength": 200, "type": "string" }
+					},
+					{
+						"name": "cursor",
+						"in": "query",
+						"required": false,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 100,
+							"default": 50,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 100, "default": 50, "type": "integer" }
+							]
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["items", "nextCursor"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"id",
+													"kind",
+													"title",
+													"status",
+													"owner",
+													"deletedAt",
+													"updatedAt",
+													"protected"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"kind": {
+														"default": "slug_namespace",
+														"type": "string",
+														"enum": [
+															"slug_namespace",
+															"profile",
+															"book",
+															"software",
+															"media",
+															"video",
+															"audio",
+															"release",
+															"entity",
+															"label",
+															"tag",
+															"structure",
+															"series",
+															"zone",
+															"zone_page",
+															"collection",
+															"post",
+															"poll",
+															"realm",
+															"realm_rule"
+														]
+													},
+													"title": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"status": {
+														"default": "draft",
+														"type": "string",
+														"enum": ["draft", "published", "archived"]
+													},
+													"owner": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["profileId", "label"],
+																"properties": {
+																	"profileId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"label": {
+																		"nullable": true,
+																		"anyOf": [
+																			{ "type": "string" },
+																			{ "type": "null" }
+																		]
+																	}
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"deletedAt": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "date-time",
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"protected": { "type": "boolean" }
+												}
+											}
+										},
+										"nextCursor": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiGovernancePlatformUnits",
+				"x-rezics-policy-operation-id": "getApiGovernancePlatformUnits"
+			}
+		},
+		"/api/governance/platform/units/{unitId}/ownership-candidates": {
+			"get": {
+				"summary": "Search platform Unit ownership override recipients",
+				"tags": ["Governance"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "query",
+						"in": "query",
+						"required": false,
+						"schema": { "maxLength": 200, "type": "string" }
+					},
+					{
+						"name": "cursor",
+						"in": "query",
+						"required": false,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 50,
+							"default": 50,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 50, "default": 50, "type": "integer" }
+							]
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["items", "nextCursor"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": ["profileId", "label", "slug"],
+												"properties": {
+													"profileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"label": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"slug": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													}
+												}
+											}
+										},
+										"nextCursor": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiGovernancePlatformUnitsByUnitIdOwnership-candidates",
+				"x-rezics-policy-operation-id": "getApiGovernancePlatformUnitsByUnitIdOwnership-candidates"
+			}
+		},
+		"/api/governance/platform/units/{unitId}/ownership-override": {
+			"post": {
+				"summary": "Override Unit ownership through platform governance",
+				"tags": ["Governance"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": [
+									"expectedOwnerProfileId",
+									"targetProfileId",
+									"confirmationUnitId",
+									"reasonCode"
+								],
+								"properties": {
+									"expectedOwnerProfileId": {
+										"nullable": true,
+										"anyOf": [
+											{ "format": "uuid", "type": "string" },
+											{ "type": "null" }
+										]
+									},
+									"targetProfileId": { "format": "uuid", "type": "string" },
+									"confirmationUnitId": { "format": "uuid", "type": "string" },
+									"reasonCode": {
+										"type": "string",
+										"enum": [
+											"content_policy",
+											"realm_rules",
+											"spam",
+											"harassment",
+											"unsafe_content",
+											"off_topic",
+											"duplicate",
+											"account_security",
+											"user_request",
+											"appeal",
+											"administrative",
+											"other"
+										]
+									},
+									"note": { "minLength": 1, "maxLength": 2000, "type": "string" }
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["owner"],
+									"properties": {
+										"owner": {
+											"type": "object",
+											"required": ["profileId", "label"],
+											"properties": {
+												"profileId": { "format": "uuid", "type": "string" },
+												"label": {
+													"nullable": true,
+													"anyOf": [
+														{ "type": "string" },
+														{ "type": "null" }
+													]
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "UnitOwnershipOverrideConfirmationInvalid",
+															"type": "string",
+															"enum": [
+																"UnitOwnershipOverrideConfirmationInvalid"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": [
+														"PlatformCapabilityRequired",
+														"FreshSessionRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitOwnershipChanged",
+													"type": "string",
+													"enum": [
+														"UnitOwnershipChanged",
+														"UnitOwnershipTargetIneligible"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiGovernancePlatformUnitsByUnitIdOwnership-override",
+				"x-rezics-policy-operation-id": "postApiGovernancePlatformUnitsByUnitIdOwnership-override"
+			}
+		},
+		"/api/governance/platform/units/{unitId}/delete": {
+			"post": {
+				"summary": "Soft-delete a Unit from the platform Console",
+				"tags": ["Governance"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": [
+									"expectedUpdatedAt",
+									"confirmationUnitId",
+									"reasonCode"
+								],
+								"properties": {
+									"expectedUpdatedAt": {
+										"format": "date-time",
+										"type": "string"
+									},
+									"confirmationUnitId": { "format": "uuid", "type": "string" },
+									"reasonCode": {
+										"type": "string",
+										"enum": [
+											"content_policy",
+											"realm_rules",
+											"spam",
+											"harassment",
+											"unsafe_content",
+											"off_topic",
+											"duplicate",
+											"account_security",
+											"user_request",
+											"appeal",
+											"administrative",
+											"other"
+										]
+									},
+									"note": { "minLength": 1, "maxLength": 2000, "type": "string" }
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"kind",
+										"title",
+										"status",
+										"owner",
+										"deletedAt",
+										"updatedAt",
+										"protected"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"kind": {
+											"default": "slug_namespace",
+											"type": "string",
+											"enum": [
+												"slug_namespace",
+												"profile",
+												"book",
+												"software",
+												"media",
+												"video",
+												"audio",
+												"release",
+												"entity",
+												"label",
+												"tag",
+												"structure",
+												"series",
+												"zone",
+												"zone_page",
+												"collection",
+												"post",
+												"poll",
+												"realm",
+												"realm_rule"
+											]
+										},
+										"title": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"status": {
+											"default": "draft",
+											"type": "string",
+											"enum": ["draft", "published", "archived"]
+										},
+										"owner": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["profileId", "label"],
+													"properties": {
+														"profileId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"label": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														}
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"deletedAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"updatedAt": { "format": "date-time", "type": "string" },
+										"protected": { "type": "boolean" }
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "UnitLifecycleConfirmationInvalid",
+															"type": "string",
+															"enum": [
+																"UnitLifecycleConfirmationInvalid"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": [
+														"PlatformCapabilityRequired",
+														"FreshSessionRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitLifecycleChanged",
+													"type": "string",
+													"enum": [
+														"UnitLifecycleChanged",
+														"UnitLifecycleProtected",
+														"UnitAlreadyDeleted",
+														"UnitNotDeleted"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiGovernancePlatformUnitsByUnitIdDelete",
+				"x-rezics-policy-operation-id": "postApiGovernancePlatformUnitsByUnitIdDelete"
+			}
+		},
+		"/api/governance/platform/units/{unitId}/restore": {
+			"post": {
+				"summary": "Restore a soft-deleted Unit from the platform Console",
+				"tags": ["Governance"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": [
+									"expectedUpdatedAt",
+									"confirmationUnitId",
+									"reasonCode"
+								],
+								"properties": {
+									"expectedUpdatedAt": {
+										"format": "date-time",
+										"type": "string"
+									},
+									"confirmationUnitId": { "format": "uuid", "type": "string" },
+									"reasonCode": {
+										"type": "string",
+										"enum": [
+											"content_policy",
+											"realm_rules",
+											"spam",
+											"harassment",
+											"unsafe_content",
+											"off_topic",
+											"duplicate",
+											"account_security",
+											"user_request",
+											"appeal",
+											"administrative",
+											"other"
+										]
+									},
+									"note": { "minLength": 1, "maxLength": 2000, "type": "string" }
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"kind",
+										"title",
+										"status",
+										"owner",
+										"deletedAt",
+										"updatedAt",
+										"protected"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"kind": {
+											"default": "slug_namespace",
+											"type": "string",
+											"enum": [
+												"slug_namespace",
+												"profile",
+												"book",
+												"software",
+												"media",
+												"video",
+												"audio",
+												"release",
+												"entity",
+												"label",
+												"tag",
+												"structure",
+												"series",
+												"zone",
+												"zone_page",
+												"collection",
+												"post",
+												"poll",
+												"realm",
+												"realm_rule"
+											]
+										},
+										"title": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"status": {
+											"default": "draft",
+											"type": "string",
+											"enum": ["draft", "published", "archived"]
+										},
+										"owner": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["profileId", "label"],
+													"properties": {
+														"profileId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"label": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														}
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"deletedAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"updatedAt": { "format": "date-time", "type": "string" },
+										"protected": { "type": "boolean" }
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "UnitLifecycleConfirmationInvalid",
+															"type": "string",
+															"enum": [
+																"UnitLifecycleConfirmationInvalid"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": [
+														"PlatformCapabilityRequired",
+														"FreshSessionRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitLifecycleChanged",
+													"type": "string",
+													"enum": [
+														"UnitLifecycleChanged",
+														"UnitLifecycleProtected",
+														"UnitAlreadyDeleted",
+														"UnitNotDeleted"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiGovernancePlatformUnitsByUnitIdRestore",
+				"x-rezics-policy-operation-id": "postApiGovernancePlatformUnitsByUnitIdRestore"
 			}
 		},
 		"/api/governance/notes/{postId}": {
@@ -45605,164 +47053,6 @@
 				},
 				"operationId": "putApiZonesByZoneIdPagesByPageId",
 				"x-rezics-policy-operation-id": "putApiZonesByZoneIdPagesByPageId"
-			},
-			"delete": {
-				"summary": "Delete Zone page",
-				"tags": ["Zones"],
-				"responses": {
-					"204": {
-						"description": "Response for status 204",
-						"content": { "type": "void" }
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "UnitPermissionForbidden",
-													"type": "string",
-													"enum": ["UnitPermissionForbidden"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Response for status 404",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "UnitNotFound",
-													"type": "string",
-													"enum": ["UnitNotFound", "ZonePageNotFound"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"409": {
-						"description": "Response for status 409",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "ZonePageInUse",
-													"type": "string",
-													"enum": ["ZonePageInUse"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
-							}
-						}
-					},
-					"429": {
-						"description": "API token resource limit exceeded",
-						"headers": {
-							"Retry-After": {
-								"description": "Seconds until the limiting window or concurrency lease can be retried",
-								"schema": { "type": "integer", "minimum": 1 }
-							}
-						},
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"type": "string",
-													"enum": ["ApiTokenRateLimitExceeded"]
-												},
-												"message": { "type": "string" },
-												"details": {
-													"$ref": "#/components/schemas/JsonValue"
-												}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
-				"parameters": [
-					{
-						"name": "zoneId",
-						"in": "path",
-						"required": true,
-						"schema": { "format": "uuid", "type": "string" }
-					},
-					{
-						"name": "pageId",
-						"in": "path",
-						"required": true,
-						"schema": { "format": "uuid", "type": "string" }
-					}
-				],
-				"operationId": "deleteApiZonesByZoneIdPagesByPageId",
-				"x-rezics-policy-operation-id": "deleteApiZonesByZoneIdPagesByPageId"
 			}
 		},
 		"/api/zones/{zoneId}/pages/{pageId}/placement": {
@@ -51008,7 +52298,10 @@
 															"entity.associations.override",
 															"unit.edit",
 															"platform.development_preview.access",
-															"unit.ownership.transfer",
+															"unit.governance.read",
+															"unit.ownership.override",
+															"unit.delete",
+															"unit.restore",
 															"unit.slug.manage",
 															"unit.slug.namespace.manage",
 															"unit.slug.redirect.release",
@@ -56330,7 +57623,10 @@
 													"entity.associations.override",
 													"unit.edit",
 													"platform.development_preview.access",
-													"unit.ownership.transfer",
+													"unit.governance.read",
+													"unit.ownership.override",
+													"unit.delete",
+													"unit.restore",
 													"unit.slug.manage",
 													"unit.slug.namespace.manage",
 													"unit.slug.redirect.release",
@@ -56489,7 +57785,10 @@
 																		"entity.associations.override",
 																		"unit.edit",
 																		"platform.development_preview.access",
-																		"unit.ownership.transfer",
+																		"unit.governance.read",
+																		"unit.ownership.override",
+																		"unit.delete",
+																		"unit.restore",
 																		"unit.slug.manage",
 																		"unit.slug.namespace.manage",
 																		"unit.slug.redirect.release",
@@ -56652,7 +57951,10 @@
 															"entity.associations.override",
 															"unit.edit",
 															"platform.development_preview.access",
-															"unit.ownership.transfer",
+															"unit.governance.read",
+															"unit.ownership.override",
+															"unit.delete",
+															"unit.restore",
 															"unit.slug.manage",
 															"unit.slug.namespace.manage",
 															"unit.slug.redirect.release",
@@ -56798,7 +58100,7 @@
 								"properties": {
 									"expectedRevision": { "minLength": 1, "type": "string" },
 									"grants": {
-										"maxItems": 27,
+										"maxItems": 30,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -56820,7 +58122,10 @@
 														"entity.associations.override",
 														"unit.edit",
 														"platform.development_preview.access",
-														"unit.ownership.transfer",
+														"unit.governance.read",
+														"unit.ownership.override",
+														"unit.delete",
+														"unit.restore",
 														"unit.slug.manage",
 														"unit.slug.namespace.manage",
 														"unit.slug.redirect.release",
@@ -56904,7 +58209,10 @@
 															"entity.associations.override",
 															"unit.edit",
 															"platform.development_preview.access",
-															"unit.ownership.transfer",
+															"unit.governance.read",
+															"unit.ownership.override",
+															"unit.delete",
+															"unit.restore",
 															"unit.slug.manage",
 															"unit.slug.namespace.manage",
 															"unit.slug.redirect.release",
@@ -73187,190 +74495,6 @@
 				},
 				"operationId": "patchApiUnitsByTypeByUnitId",
 				"x-rezics-policy-operation-id": "patchApiUnitsByTypeByUnitId"
-			},
-			"delete": {
-				"summary": "Delete unit",
-				"tags": ["Units"],
-				"responses": {
-					"204": {
-						"description": "Response for status 204",
-						"content": { "type": "void" }
-					},
-					"401": {
-						"description": "Response for status 401",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "AuthenticationRequired",
-													"type": "string",
-													"enum": ["AuthenticationRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "ApiTokenPermissionRequired",
-													"type": "string",
-													"enum": [
-														"ApiTokenPermissionRequired",
-														"EmailVerificationRequired",
-														"AccountRestricted",
-														"UnitPermissionForbidden"
-													]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Response for status 404",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "UnitNotFound",
-													"type": "string",
-													"enum": ["UnitNotFound"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
-							}
-						}
-					},
-					"429": {
-						"description": "API token resource limit exceeded",
-						"headers": {
-							"Retry-After": {
-								"description": "Seconds until the limiting window or concurrency lease can be retried",
-								"schema": { "type": "integer", "minimum": 1 }
-							}
-						},
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"type": "string",
-													"enum": ["ApiTokenRateLimitExceeded"]
-												},
-												"message": { "type": "string" },
-												"details": {
-													"$ref": "#/components/schemas/JsonValue"
-												}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
-				"parameters": [
-					{
-						"name": "type",
-						"in": "path",
-						"required": true,
-						"schema": {
-							"anyOf": [
-								{
-									"anyOf": [
-										{
-											"anyOf": [
-												{ "const": "book", "type": "string" },
-												{ "const": "software", "type": "string" },
-												{ "const": "media", "type": "string" }
-											]
-										},
-										{ "const": "series", "type": "string" }
-									]
-								},
-								{
-									"anyOf": [
-										{ "const": "video", "type": "string" },
-										{ "const": "audio", "type": "string" }
-									]
-								}
-							]
-						}
-					},
-					{
-						"name": "unitId",
-						"in": "path",
-						"required": true,
-						"schema": { "format": "uuid", "type": "string" }
-					}
-				],
-				"operationId": "deleteApiUnitsByTypeByUnitId",
-				"x-rezics-policy-operation-id": "deleteApiUnitsByTypeByUnitId"
 			}
 		},
 		"/api/units/{type}/{unitId}/variant-context": {
@@ -100399,8 +101523,7 @@
 												"canManageLocalizations",
 												"canManageAccess",
 												"canViewHistory",
-												"canRestoreHistory",
-												"canDelete"
+												"canRestoreHistory"
 											],
 											"properties": {
 												"canEditDetails": { "type": "boolean" },
@@ -100409,8 +101532,7 @@
 												"canManageLocalizations": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canViewHistory": { "type": "boolean" },
-												"canRestoreHistory": { "type": "boolean" },
-												"canDelete": { "type": "boolean" }
+												"canRestoreHistory": { "type": "boolean" }
 											}
 										}
 									}
@@ -101039,8 +102161,7 @@
 												"canManageLocalizations",
 												"canManageAccess",
 												"canViewHistory",
-												"canRestoreHistory",
-												"canDelete"
+												"canRestoreHistory"
 											],
 											"properties": {
 												"canEditDetails": { "type": "boolean" },
@@ -101049,8 +102170,7 @@
 												"canManageLocalizations": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canViewHistory": { "type": "boolean" },
-												"canRestoreHistory": { "type": "boolean" },
-												"canDelete": { "type": "boolean" }
+												"canRestoreHistory": { "type": "boolean" }
 											}
 										}
 									}
@@ -107992,8 +109112,7 @@
 												"canManageLocalizations",
 												"canManageAccess",
 												"canViewHistory",
-												"canRestoreHistory",
-												"canDelete"
+												"canRestoreHistory"
 											],
 											"properties": {
 												"canEditDetails": { "type": "boolean" },
@@ -108002,8 +109121,7 @@
 												"canManageLocalizations": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canViewHistory": { "type": "boolean" },
-												"canRestoreHistory": { "type": "boolean" },
-												"canDelete": { "type": "boolean" }
+												"canRestoreHistory": { "type": "boolean" }
 											}
 										}
 									}
@@ -108964,8 +110082,7 @@
 												"canManageLocalizations",
 												"canManageAccess",
 												"canViewHistory",
-												"canRestoreHistory",
-												"canDelete"
+												"canRestoreHistory"
 											],
 											"properties": {
 												"canEditDetails": { "type": "boolean" },
@@ -108974,8 +110091,7 @@
 												"canManageLocalizations": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canViewHistory": { "type": "boolean" },
-												"canRestoreHistory": { "type": "boolean" },
-												"canDelete": { "type": "boolean" }
+												"canRestoreHistory": { "type": "boolean" }
 											}
 										}
 									}
@@ -109155,181 +110271,6 @@
 				},
 				"operationId": "patchApiCollectionsByCollectionId",
 				"x-rezics-policy-operation-id": "patchApiCollectionsByCollectionId"
-			},
-			"delete": {
-				"summary": "Delete collection",
-				"tags": ["Collections"],
-				"responses": {
-					"204": {
-						"description": "Response for status 204",
-						"content": { "type": "void" }
-					},
-					"400": {
-						"description": "Request body could not be parsed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
-							}
-						}
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "UnitPermissionForbidden",
-													"type": "string",
-													"enum": [
-														"UnitPermissionForbidden",
-														"UnitAccessRestricted"
-													]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"409": {
-						"description": "Response for status 409",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"type": "object",
-											"required": ["error", "requestId"],
-											"properties": {
-												"error": {
-													"type": "object",
-													"required": ["code", "message"],
-													"properties": {
-														"code": {
-															"default": "FavoritesDeleteForbidden",
-															"type": "string",
-															"enum": ["FavoritesDeleteForbidden"]
-														},
-														"message": { "type": "string" },
-														"details": {}
-													}
-												},
-												"requestId": { "type": "string" }
-											}
-										},
-										{
-											"type": "object",
-											"required": ["error", "requestId"],
-											"properties": {
-												"error": {
-													"type": "object",
-													"required": ["code", "message"],
-													"properties": {
-														"code": {
-															"default": "UnitRevisionConflict",
-															"type": "string",
-															"enum": ["UnitRevisionConflict"]
-														},
-														"message": { "type": "string" },
-														"details": {}
-													}
-												},
-												"requestId": { "type": "string" }
-											}
-										}
-									]
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
-							}
-						}
-					},
-					"429": {
-						"description": "API token resource limit exceeded",
-						"headers": {
-							"Retry-After": {
-								"description": "Seconds until the limiting window or concurrency lease can be retried",
-								"schema": { "type": "integer", "minimum": 1 }
-							}
-						},
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"type": "string",
-													"enum": ["ApiTokenRateLimitExceeded"]
-												},
-												"message": { "type": "string" },
-												"details": {
-													"$ref": "#/components/schemas/JsonValue"
-												}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
-				"parameters": [
-					{
-						"name": "collectionId",
-						"in": "path",
-						"required": true,
-						"schema": { "format": "uuid", "type": "string" }
-					}
-				],
-				"requestBody": {
-					"content": {
-						"application/json": {
-							"schema": {
-								"additionalProperties": false,
-								"type": "object",
-								"required": ["baseRevisionId"],
-								"properties": {
-									"baseRevisionId": { "format": "uuid", "type": "string" }
-								}
-							}
-						}
-					},
-					"required": true
-				},
-				"operationId": "deleteApiCollectionsByCollectionId",
-				"x-rezics-policy-operation-id": "deleteApiCollectionsByCollectionId"
 			}
 		},
 		"/api/collections/{collectionId}/items/batch": {
@@ -114673,131 +115614,6 @@
 				},
 				"operationId": "patchApiReviewsByReviewId",
 				"x-rezics-policy-operation-id": "patchApiReviewsByReviewId"
-			},
-			"delete": {
-				"summary": "Delete review",
-				"tags": ["Reviews"],
-				"responses": {
-					"204": {
-						"description": "Response for status 204",
-						"content": { "type": "void" }
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "UnitPermissionForbidden",
-													"type": "string",
-													"enum": ["UnitPermissionForbidden"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Response for status 404",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "UnitNotFound",
-													"type": "string",
-													"enum": ["UnitNotFound"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
-							}
-						}
-					},
-					"429": {
-						"description": "API token resource limit exceeded",
-						"headers": {
-							"Retry-After": {
-								"description": "Seconds until the limiting window or concurrency lease can be retried",
-								"schema": { "type": "integer", "minimum": 1 }
-							}
-						},
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"type": "string",
-													"enum": ["ApiTokenRateLimitExceeded"]
-												},
-												"message": { "type": "string" },
-												"details": {
-													"$ref": "#/components/schemas/JsonValue"
-												}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
-				"parameters": [
-					{
-						"name": "reviewId",
-						"in": "path",
-						"required": true,
-						"schema": { "format": "uuid", "type": "string" }
-					}
-				],
-				"operationId": "deleteApiReviewsByReviewId",
-				"x-rezics-policy-operation-id": "deleteApiReviewsByReviewId"
 			}
 		},
 		"/api/scores/{targetId}": {
@@ -123462,131 +124278,6 @@
 				},
 				"operationId": "patchApiPostsByPostId",
 				"x-rezics-policy-operation-id": "patchApiPostsByPostId"
-			},
-			"delete": {
-				"summary": "Delete post",
-				"tags": ["Posts"],
-				"responses": {
-					"204": {
-						"description": "Response for status 204",
-						"content": { "type": "void" }
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "UnitPermissionForbidden",
-													"type": "string",
-													"enum": ["UnitPermissionForbidden"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Response for status 404",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "UnitNotFound",
-													"type": "string",
-													"enum": ["UnitNotFound", "PostNotFound"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
-							}
-						}
-					},
-					"429": {
-						"description": "API token resource limit exceeded",
-						"headers": {
-							"Retry-After": {
-								"description": "Seconds until the limiting window or concurrency lease can be retried",
-								"schema": { "type": "integer", "minimum": 1 }
-							}
-						},
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"type": "string",
-													"enum": ["ApiTokenRateLimitExceeded"]
-												},
-												"message": { "type": "string" },
-												"details": {
-													"$ref": "#/components/schemas/JsonValue"
-												}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
-				"parameters": [
-					{
-						"name": "postId",
-						"in": "path",
-						"required": true,
-						"schema": { "format": "uuid", "type": "string" }
-					}
-				],
-				"operationId": "deleteApiPostsByPostId",
-				"x-rezics-policy-operation-id": "deleteApiPostsByPostId"
 			}
 		},
 		"/api/posts/{postId}/replies": {
@@ -125778,137 +126469,6 @@
 				},
 				"operationId": "patchApiPostsByPostIdRepliesByReplyPostId",
 				"x-rezics-policy-operation-id": "patchApiPostsByPostIdRepliesByReplyPostId"
-			},
-			"delete": {
-				"summary": "Delete reply post",
-				"tags": ["Posts"],
-				"responses": {
-					"204": {
-						"description": "Response for status 204",
-						"content": { "type": "void" }
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "UnitPermissionForbidden",
-													"type": "string",
-													"enum": ["UnitPermissionForbidden"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Response for status 404",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "ReplyPostNotFound",
-													"type": "string",
-													"enum": ["ReplyPostNotFound", "UnitNotFound"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
-							}
-						}
-					},
-					"429": {
-						"description": "API token resource limit exceeded",
-						"headers": {
-							"Retry-After": {
-								"description": "Seconds until the limiting window or concurrency lease can be retried",
-								"schema": { "type": "integer", "minimum": 1 }
-							}
-						},
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"type": "string",
-													"enum": ["ApiTokenRateLimitExceeded"]
-												},
-												"message": { "type": "string" },
-												"details": {
-													"$ref": "#/components/schemas/JsonValue"
-												}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
-				"parameters": [
-					{
-						"name": "postId",
-						"in": "path",
-						"required": true,
-						"schema": { "format": "uuid", "type": "string" }
-					},
-					{
-						"name": "replyPostId",
-						"in": "path",
-						"required": true,
-						"schema": { "format": "uuid", "type": "string" }
-					}
-				],
-				"operationId": "deleteApiPostsByPostIdRepliesByReplyPostId",
-				"x-rezics-policy-operation-id": "deleteApiPostsByPostIdRepliesByReplyPostId"
 			}
 		},
 		"/api/realms": {

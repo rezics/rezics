@@ -105,10 +105,12 @@ import type {
 	GetApiGovernanceUnitByUnitIdAccessCandidatesResponses,
 	GetApiGovernanceUnitByUnitIdAccessEffectiveOptions,
 	GetApiGovernanceUnitByUnitIdAccessEffectiveResponses,
+	GetApiGovernanceUnitByUnitIdOwnershipCandidatesOptions,
+	GetApiGovernanceUnitByUnitIdOwnershipCandidatesResponses,
 	PutApiGovernanceUnitByUnitIdOwnershipOptions,
 	PutApiGovernanceUnitByUnitIdOwnershipResponses,
-	DeleteApiGovernanceUnitByUnitIdOwnershipOptions,
-	DeleteApiGovernanceUnitByUnitIdOwnershipResponses,
+	PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentOptions,
+	PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentResponses,
 	GetApiGovernanceUnitAccessInvitationsOptions,
 	GetApiGovernanceUnitAccessInvitationsResponses,
 	GetApiGovernanceUnitByUnitIdAccessInvitationsOptions,
@@ -121,6 +123,16 @@ import type {
 	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineResponses,
 	DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdOptions,
 	DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdResponses,
+	GetApiGovernancePlatformUnitsOptions,
+	GetApiGovernancePlatformUnitsResponses,
+	GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesOptions,
+	GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesResponses,
+	PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideOptions,
+	PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideResponses,
+	PostApiGovernancePlatformUnitsByUnitIdDeleteOptions,
+	PostApiGovernancePlatformUnitsByUnitIdDeleteResponses,
+	PostApiGovernancePlatformUnitsByUnitIdRestoreOptions,
+	PostApiGovernancePlatformUnitsByUnitIdRestoreResponses,
 	GetApiGovernanceNotesByPostIdOptions,
 	GetApiGovernanceNotesByPostIdResponses,
 	PatchApiGovernanceNotesByPostIdOptions,
@@ -159,8 +171,6 @@ import type {
 	GetApiZonesByZoneIdPagesByPageIdResponses,
 	PutApiZonesByZoneIdPagesByPageIdOptions,
 	PutApiZonesByZoneIdPagesByPageIdResponses,
-	DeleteApiZonesByZoneIdPagesByPageIdOptions,
-	DeleteApiZonesByZoneIdPagesByPageIdResponses,
 	PutApiZonesByZoneIdPagesByPageIdPlacementOptions,
 	PutApiZonesByZoneIdPagesByPageIdPlacementResponses,
 	DeleteApiZonesByZoneIdPagesByPageIdPlacementOptions,
@@ -319,8 +329,6 @@ import type {
 	GetApiUnitsByTypeByUnitIdResponses,
 	PatchApiUnitsByTypeByUnitIdOptions,
 	PatchApiUnitsByTypeByUnitIdResponses,
-	DeleteApiUnitsByTypeByUnitIdOptions,
-	DeleteApiUnitsByTypeByUnitIdResponses,
 	PatchApiUnitsByTypeByUnitIdVariantContextOptions,
 	PatchApiUnitsByTypeByUnitIdVariantContextResponses,
 	PostApiUnitsByTypeByUnitIdVariantContextPromoteOptions,
@@ -459,8 +467,6 @@ import type {
 	GetApiCollectionsByCollectionIdResponses,
 	PatchApiCollectionsByCollectionIdOptions,
 	PatchApiCollectionsByCollectionIdResponses,
-	DeleteApiCollectionsByCollectionIdOptions,
-	DeleteApiCollectionsByCollectionIdResponses,
 	PostApiCollectionsByCollectionIdItemsBatchOptions,
 	PostApiCollectionsByCollectionIdItemsBatchResponses,
 	PostApiCollectionsByCollectionIdItemsMoveOptions,
@@ -487,8 +493,6 @@ import type {
 	GetApiReviewsByReviewIdResponses,
 	PatchApiReviewsByReviewIdOptions,
 	PatchApiReviewsByReviewIdResponses,
-	DeleteApiReviewsByReviewIdOptions,
-	DeleteApiReviewsByReviewIdResponses,
 	PutApiScoresByTargetIdOptions,
 	PutApiScoresByTargetIdResponses,
 	GetApiScoresByTargetIdOptions,
@@ -529,16 +533,12 @@ import type {
 	GetApiPostsByPostIdResponses,
 	PatchApiPostsByPostIdOptions,
 	PatchApiPostsByPostIdResponses,
-	DeleteApiPostsByPostIdOptions,
-	DeleteApiPostsByPostIdResponses,
 	GetApiPostsByPostIdRepliesOptions,
 	GetApiPostsByPostIdRepliesResponses,
 	PostApiPostsByPostIdRepliesOptions,
 	PostApiPostsByPostIdRepliesResponses,
 	PatchApiPostsByPostIdRepliesByReplyPostIdOptions,
 	PatchApiPostsByPostIdRepliesByReplyPostIdResponses,
-	DeleteApiPostsByPostIdRepliesByReplyPostIdOptions,
-	DeleteApiPostsByPostIdRepliesByReplyPostIdResponses,
 	GetApiRealmsOptions,
 	GetApiRealmsResponses,
 	PostApiRealmsOptions,
@@ -1584,6 +1584,27 @@ export function getApiGovernanceUnitByUnitIdAccessEffective<ThrowOnError extends
 }
 
 /**
+ * @summary Search eligible Unit ownership recipients
+ * {@link /api/governance/unit/:unitId/ownership/candidates}
+ */
+export function getApiGovernanceUnitByUnitIdOwnershipCandidates<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<GetApiGovernanceUnitByUnitIdOwnershipCandidatesOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiGovernanceUnitByUnitIdOwnershipCandidatesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/governance/unit/{unitId}/ownership/candidates",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<GetApiGovernanceUnitByUnitIdOwnershipCandidatesResponses, ThrowOnError>
+	>;
+}
+
+/**
  * @summary Transfer Unit ownership
  * {@link /api/governance/unit/:unitId/ownership}
  */
@@ -1601,20 +1622,26 @@ export function putApiGovernanceUnitByUnitIdOwnership<ThrowOnError extends boole
 }
 
 /**
- * @summary Revoke Unit ownership
- * {@link /api/governance/unit/:unitId/ownership}
+ * @summary Relinquish Unit ownership to Community
+ * {@link /api/governance/unit/:unitId/ownership/relinquishment}
  */
-export function deleteApiGovernanceUnitByUnitIdOwnership<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiGovernanceUnitByUnitIdOwnershipOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiGovernanceUnitByUnitIdOwnershipResponses, ThrowOnError>> {
+export function postApiGovernanceUnitByUnitIdOwnershipRelinquishment<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
 	return request({
-		method: "DELETE",
-		url: "/api/governance/unit/{unitId}/ownership",
+		method: "POST",
+		url: "/api/governance/unit/{unitId}/ownership/relinquishment",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<DeleteApiGovernanceUnitByUnitIdOwnershipResponses, ThrowOnError>>;
+	}) as Promise<
+		RequestResult<PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentResponses, ThrowOnError>
+	>;
 }
 
 /**
@@ -1765,6 +1792,113 @@ export function deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationId<
 			DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdResponses,
 			ThrowOnError
 		>
+	>;
+}
+
+/**
+ * @summary List Units for platform lifecycle administration
+ * {@link /api/governance/platform/units}
+ */
+export function getApiGovernancePlatformUnits<ThrowOnError extends boolean = true>(
+	options: Options<GetApiGovernancePlatformUnitsOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiGovernancePlatformUnitsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/governance/platform/units",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiGovernancePlatformUnitsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Search platform Unit ownership override recipients
+ * {@link /api/governance/platform/units/:unitId/ownership-candidates}
+ */
+export function getApiGovernancePlatformUnitsByUnitIdOwnershipCandidates<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesOptions, ThrowOnError>,
+): Promise<
+	RequestResult<GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/governance/platform/units/{unitId}/ownership-candidates",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<
+			GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary Override Unit ownership through platform governance
+ * {@link /api/governance/platform/units/:unitId/ownership-override}
+ */
+export function postApiGovernancePlatformUnitsByUnitIdOwnershipOverride<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/governance/platform/units/{unitId}/ownership-override",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<
+			PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary Soft-delete a Unit from the platform Console
+ * {@link /api/governance/platform/units/:unitId/delete}
+ */
+export function postApiGovernancePlatformUnitsByUnitIdDelete<ThrowOnError extends boolean = true>(
+	options: Options<PostApiGovernancePlatformUnitsByUnitIdDeleteOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiGovernancePlatformUnitsByUnitIdDeleteResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/governance/platform/units/{unitId}/delete",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<PostApiGovernancePlatformUnitsByUnitIdDeleteResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Restore a soft-deleted Unit from the platform Console
+ * {@link /api/governance/platform/units/:unitId/restore}
+ */
+export function postApiGovernancePlatformUnitsByUnitIdRestore<ThrowOnError extends boolean = true>(
+	options: Options<PostApiGovernancePlatformUnitsByUnitIdRestoreOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiGovernancePlatformUnitsByUnitIdRestoreResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/governance/platform/units/{unitId}/restore",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<PostApiGovernancePlatformUnitsByUnitIdRestoreResponses, ThrowOnError>
 	>;
 }
 
@@ -2110,26 +2244,6 @@ export function putApiZonesByZoneIdPagesByPageId<ThrowOnError extends boolean = 
 		],
 		...config,
 	}) as Promise<RequestResult<PutApiZonesByZoneIdPagesByPageIdResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Delete Zone page
- * {@link /api/zones/:zoneId/pages/:pageId}
- */
-export function deleteApiZonesByZoneIdPagesByPageId<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiZonesByZoneIdPagesByPageIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiZonesByZoneIdPagesByPageIdResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "DELETE",
-		url: "/api/zones/{zoneId}/pages/{pageId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiZonesByZoneIdPagesByPageIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -3715,26 +3829,6 @@ export function patchApiUnitsByTypeByUnitId<ThrowOnError extends boolean = true>
 }
 
 /**
- * @summary Delete unit
- * {@link /api/units/:type/:unitId}
- */
-export function deleteApiUnitsByTypeByUnitId<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiUnitsByTypeByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiUnitsByTypeByUnitIdResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "DELETE",
-		url: "/api/units/{type}/{unitId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiUnitsByTypeByUnitIdResponses, ThrowOnError>>;
-}
-
-/**
  * @summary Update Unit Main relationship
  * {@link /api/units/:type/:unitId/variant-context}
  */
@@ -5192,26 +5286,6 @@ export function patchApiCollectionsByCollectionId<ThrowOnError extends boolean =
 }
 
 /**
- * @summary Delete collection
- * {@link /api/collections/:collectionId}
- */
-export function deleteApiCollectionsByCollectionId<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiCollectionsByCollectionIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiCollectionsByCollectionIdResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "DELETE",
-		url: "/api/collections/{collectionId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiCollectionsByCollectionIdResponses, ThrowOnError>>;
-}
-
-/**
  * @summary Add collection items atomically
  * {@link /api/collections/:collectionId/items/batch}
  */
@@ -5479,26 +5553,6 @@ export function patchApiReviewsByReviewId<ThrowOnError extends boolean = true>(
 		],
 		...config,
 	}) as Promise<RequestResult<PatchApiReviewsByReviewIdResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Delete review
- * {@link /api/reviews/:reviewId}
- */
-export function deleteApiReviewsByReviewId<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiReviewsByReviewIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiReviewsByReviewIdResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "DELETE",
-		url: "/api/reviews/{reviewId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiReviewsByReviewIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -5866,26 +5920,6 @@ export function patchApiPostsByPostId<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary Delete post
- * {@link /api/posts/:postId}
- */
-export function deleteApiPostsByPostId<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiPostsByPostIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiPostsByPostIdResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "DELETE",
-		url: "/api/posts/{postId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiPostsByPostIdResponses, ThrowOnError>>;
-}
-
-/**
  * @summary List a bounded reply-post tree
  * {@link /api/posts/:postId/replies}
  */
@@ -5937,26 +5971,6 @@ export function patchApiPostsByPostIdRepliesByReplyPostId<ThrowOnError extends b
 		],
 		...config,
 	}) as Promise<RequestResult<PatchApiPostsByPostIdRepliesByReplyPostIdResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Delete reply post
- * {@link /api/posts/:postId/replies/:replyPostId}
- */
-export function deleteApiPostsByPostIdRepliesByReplyPostId<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiPostsByPostIdRepliesByReplyPostIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiPostsByPostIdRepliesByReplyPostIdResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "DELETE",
-		url: "/api/posts/{postId}/replies/{replyPostId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiPostsByPostIdRepliesByReplyPostIdResponses, ThrowOnError>>;
 }
 
 /**

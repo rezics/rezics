@@ -50,7 +50,6 @@ import {
 import { recommendationObjectiveExpression } from "../../recommendations/sql-ranking";
 import {
 	IdResponse,
-	NoContentResponse,
 	ScoreAggregateResponse,
 	ScoreResponse,
 	ViewerScoreListResponse,
@@ -667,38 +666,6 @@ export default new Elysia()
 						[StatusCodes.CONFLICT]: toApiErrorResponse(["PostTagMentionVoteConflict"]),
 					},
 					detail: { summary: "Update review", tags: ["Reviews"] },
-				},
-			)
-			.delete(
-				"/:reviewId",
-				async ({ params, profile, authorization }) => {
-					await authorization.unit.ensure(params.reviewId, "unit.delete");
-					await database.transaction(async (tx) => {
-						await tx
-							.update(unit)
-							.set({ deletedAt: new Date() })
-							.where(and(eq(unit.id, params.reviewId), eq(unit.kind, "post")));
-						await recordUnitRevision(tx, {
-							unitId: params.reviewId,
-							actorProfileId: profile.unitId,
-							event: "delete",
-						});
-					});
-					return new Response(null, { status: StatusCodes.NO_CONTENT });
-				},
-				{
-					access: "write:unit:delete",
-					params: ReviewParams,
-					response: {
-						[StatusCodes.NO_CONTENT]: t.Void(),
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
-						[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
-					},
-					detail: {
-						summary: "Delete review",
-						tags: ["Reviews"],
-						responses: NoContentResponse,
-					},
 				},
 			),
 	)

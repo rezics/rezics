@@ -19,6 +19,15 @@ describe("notification translation selection", () => {
 		expect(notificationTranslationKey("system", null)).toBe("system");
 	});
 
+	it("uses dedicated copy for a platform ownership override", () => {
+		expect(
+			notificationTranslationKey("system", {
+				type: "system_event",
+				event: "unit_ownership_override",
+			}),
+		).toBe("unit_ownership_override");
+	});
+
 	it("keeps non-system kinds independent from payload contents", () => {
 		expect(
 			notificationTranslationKey("reply", {

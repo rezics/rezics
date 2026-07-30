@@ -1,4 +1,5 @@
 import { and, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
+import type { DelegableUnitPermission } from "@rezics/access";
 
 import { recordAuditEvent } from "../../audit";
 import { database, type DatabaseTransaction } from "../../database";
@@ -13,7 +14,7 @@ import {
 import { ProfileNotFound } from "../../api/users/errors";
 import { createNotification } from "../../notifications/service";
 import type { UnitAuthorization } from "./authorization";
-import { expandUnitPermissions, type UnitPermission } from "./policy";
+import { expandDelegableUnitPermissions } from "./policy";
 import type { UnitScope } from "./scope";
 
 export type UnitAccessInvitationState =
@@ -73,14 +74,14 @@ export async function createUnitAccessInvitation(
 	input: {
 		readonly unitId: string;
 		readonly invitedProfileId: string;
-		readonly permissions: readonly UnitPermission[];
+		readonly permissions: readonly DelegableUnitPermission[];
 		readonly scope: UnitScope;
 		readonly expiresAt: Date;
 		readonly accessExpiresAt?: Date | null;
 	},
 ) {
 	if (input.invitedProfileId === actorProfileId) throw new UnitAccessInvitationSelfForbidden();
-	const permissions = expandUnitPermissions(input.permissions);
+	const permissions = expandDelegableUnitPermissions(input.permissions);
 	if (!permissions.length) throw new UnitAccessConfigurationInvalid();
 
 	return database.transaction(async (tx) => {

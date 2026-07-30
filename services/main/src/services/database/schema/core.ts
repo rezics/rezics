@@ -25,6 +25,8 @@ import {
 import { pgTable } from "./base";
 import {
 	AiDisclosureValues,
+	CatalogEntryModeValues,
+	type CatalogEntryMode,
 	type ContentLanguage,
 	ContentLanguageValues,
 	ContentRatingValues,
@@ -75,6 +77,7 @@ export const unit = pgTable(
 	{
 		id: createUuidv7PrimaryKey(),
 		kind: text().$type<UnitKind>().notNull(),
+		catalogMode: text().$type<CatalogEntryMode>().default("owned_work").notNull(),
 		status: unitStatus().default("draft").notNull(),
 		visibility: resourceVisibility().default("public").notNull(),
 		contentRating: contentRating().default("general").notNull(),
@@ -99,6 +102,7 @@ export const unit = pgTable(
 		index("unit_moderation_status_idx").on(table.moderationStatus),
 		unique("unit_id_kind_key").on(table.id, table.kind),
 		check("unit_kind_check", inArray(table.kind, UnitKindValues)),
+		check("unit_catalog_mode_check", inArray(table.catalogMode, CatalogEntryModeValues)),
 		check(
 			"unit_publication_check",
 			sql`${table.status} <> 'published'::unit_status or ${table.publishedAt} is not null`,

@@ -1,5 +1,6 @@
 import { type Static, t } from "elysia";
 import { ContentLanguageValues } from "@rezics/i18n";
+import { CatalogEntryModeValues } from "../../database/schema/contract-values";
 
 import {
 	DateTime,
@@ -29,7 +30,7 @@ export const VariantUnitTypeParams = t.Object({ type: VariantUnitType });
 export const CatalogUnitTypeParams = t.Object({ type: CatalogUnitType });
 export const ManageableUnitTypeParams = t.Object({ type: ManageableUnitType });
 
-export const CatalogEntryMode = t.Union([t.Literal("owned_work"), t.Literal("public_entry")]);
+export const CatalogEntryMode = t.Union(CatalogEntryModeValues.map((value) => t.Literal(value)));
 export type CatalogEntryMode = Static<typeof CatalogEntryMode>;
 
 export const PublisherEntityInput = t.Object({ entityId: Uuid }, { additionalProperties: false });

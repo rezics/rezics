@@ -80,7 +80,6 @@ import { presentImageAsset } from "../../units/service";
 import { getPublicCanonicalUnitSlugAddress } from "../../units/slug-address";
 import { replaceZoneSlugAddress } from "../../units/slug-address";
 import {
-	deleteZonePageUnit,
 	deleteZonePagePlacement,
 	getZonePageStructureProjection,
 	getZonePageUnitById,
@@ -1177,85 +1176,6 @@ export default new Elysia()
 					},
 				},
 			)
-			.delete(
-				"/:zoneId/pages/:pageId",
-				async ({ params, profile, authorization }) => {
-					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
-						"zone",
-						"page",
-						params.pageId,
-					]);
-					const page = await database.transaction((tx) =>
-						getZonePageUnitById(tx, params.zoneId, params.pageId),
-					);
-					if (!page) throw new ZonePageNotFound();
-					try {
-						await deleteZonePageUnit({
-							zoneId: params.zoneId,
-							pageId: page.id,
-							actorProfileId: profile.unitId,
-							ensureNotReferenced: async (tx) => {
-								const pages = await listZonePageUnits(tx, params.zoneId);
-								const navigations = await listNavigationStructures(
-									tx,
-									params.zoneId,
-									"zone.navigation",
-								);
-								const docks = await tx
-									.select({ document: unitDock.document })
-									.from(unitDock)
-									.where(
-										and(
-											eq(unitDock.unitId, params.zoneId),
-											isNull(unitDock.deletedAt),
-										),
-									);
-								const referenced =
-									docks.some((dock) =>
-										collectBlockReferences(
-											parseDocument(DockDocument, dock.document),
-										).unitIds.has(page.id),
-									) ||
-									pages
-										.filter((candidate) => candidate.id !== page.id)
-										.some((candidate) =>
-											collectBlockReferences(candidate.document).unitIds.has(
-												page.id,
-											),
-										) ||
-									navigations.some((navigation) =>
-										collectNavigationReferences(
-											navigation.document,
-										).unitIds.has(page.id),
-									);
-								if (referenced) throw new ZonePageInUse();
-							},
-						});
-					} catch (cause) {
-						if (cause instanceof ContentStructureInvalid) throw new ZonePageInUse();
-						throw cause;
-					}
-					return new Response(null, { status: StatusCodes.NO_CONTENT });
-				},
-				{
-					access: "contribute:unit:update",
-					params: ZonePageIdParams,
-					response: {
-						[StatusCodes.NO_CONTENT]: t.Void(),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"ZonePageNotFound",
-						]),
-						[StatusCodes.CONFLICT]: toApiErrorResponse(["ZonePageInUse"]),
-					},
-					detail: {
-						summary: "Delete Zone page",
-						tags: ["Zones"],
-						responses: NoContentResponse,
-					},
-				},
-			)
 			.get(
 				"/:zoneId/navigation",
 				async ({ params, request }) => {
@@ -1604,7 +1524,7 @@ export default new Elysia()
 					return new Response(null, { status: StatusCodes.NO_CONTENT });
 				},
 				{
-					access: "write:unit:delete",
+					access: "contribute:unit:update",
 					params: SeriesReleaseParams,
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
@@ -1844,7 +1764,7 @@ export default new Elysia()
 					return new Response(null, { status: StatusCodes.NO_CONTENT });
 				},
 				{
-					access: "write:unit:delete",
+					access: "contribute:unit:update",
 					params: SoftwareRequirementParams,
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),

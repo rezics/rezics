@@ -455,7 +455,6 @@ function ReplyPostNode({
 								itemId={reply.id}
 								overflowMenu={
 									<PostOverflowMenu
-										canDelete={canEdit}
 										editAction={
 											canEdit
 												? {
@@ -470,7 +469,6 @@ function ReplyPostNode({
 										}
 										postId={reply.id}
 										realmId={realmId}
-										rootPostId={rootPostId}
 									/>
 								}
 								policy={ReplyEngagementPolicy}

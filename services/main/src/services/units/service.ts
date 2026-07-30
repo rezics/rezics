@@ -49,7 +49,6 @@ import {
 	subjectAssociation,
 	unitLink,
 	unitLocalization,
-	unitOwnership,
 	unitProgress,
 	unitTag,
 	unitTagVoteStat,
@@ -81,7 +80,6 @@ import { getAssociationContextPostsByAssociationIds } from "./association-contex
 import { createAssociationRequestInTransaction } from "./association-proposals";
 import { resolvePublisherAttributionCreationMode } from "./attribution-authorization";
 import { wilsonLowerBoundSql } from "../tags/ranking";
-import { OfficialProfileIds } from "../bootstrap/manifest";
 
 export type VariantUnitKind = "book" | "software" | "media";
 export type CatalogUnitKind = VariantUnitKind | "series";
@@ -199,6 +197,7 @@ export async function createUnit(
 		);
 		const created = await insertUnit(tx, {
 			kind,
+			catalogMode: input.catalogMode,
 			visibility: input.visibility ?? "public",
 			contentRating: input.contentRating ?? "general",
 			aiDisclosure: input.aiDisclosure ?? "unknown",
@@ -489,18 +488,12 @@ export async function getUnit(
 		accessDecision,
 		associationDecision,
 		hasDevelopmentPreviewAccess,
-		activeOwnership,
 	] = await Promise.all([
 		authorization.unit.canUpdate(base.id),
 		authorization.unit.decide(base.id, "unit.tag-curation.manage"),
 		authorization.unit.decide(base.id, "unit.access.manage"),
 		authorization.unit.decide(base.id, "unit.association.manage"),
 		authorization.platform.hasCapability(DevelopmentPreviewCapability),
-		database
-			.select({ profileId: unitOwnership.profileId })
-			.from(unitOwnership)
-			.where(and(eq(unitOwnership.unitId, base.id), isNull(unitOwnership.revokedAt)))
-			.limit(1),
 	]);
 	const details = await getUnitDetails(kind, base.id);
 	return {
@@ -587,10 +580,7 @@ export async function getUnit(
 								]
 							: [],
 		variantContext,
-		catalogMode:
-			activeOwnership[0]?.profileId === OfficialProfileIds.community
-				? "public_entry"
-				: "owned_work",
+		catalogMode: base.catalogMode,
 		capabilities: {
 			canEdit,
 			canManageAccess: accessDecision.allowed,
@@ -804,29 +794,6 @@ export async function updateUnit(
 			await ensureUnitVariantLifecycle(tx, unitId);
 	});
 	return getUnit(kind, unitId, authorization);
-}
-
-export async function deleteUnit(
-	kind: ManageableUnitKind,
-	unitId: string,
-	authorization: Authorization<string>,
-): Promise<void> {
-	await authorization.unit.ensure(unitId, "unit.delete");
-	await database.transaction(async (tx) => {
-		const [deleted] = await tx
-			.update(unit)
-			.set({ deletedAt: new Date() })
-			.where(and(eq(unit.id, unitId), eq(unit.kind, kind)))
-			.returning({ id: unit.id });
-		if (!deleted) throw new UnitNotFound(kind);
-		if (kind === "book" || kind === "software" || kind === "media")
-			await ensureUnitVariantLifecycle(tx, unitId);
-		await recordUnitRevision(tx, {
-			unitId,
-			actorProfileId: authorization.profileId,
-			event: "delete",
-		});
-	});
 }
 
 export async function upsertLocalization(

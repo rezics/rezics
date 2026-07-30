@@ -70,4 +70,8 @@ export default {
 		title: "Nueva invitación de acceso",
 		body: "Alguien te ha invitado a acceder a una Unit. Revisa la invitación antes de responder.",
 	},
+	unit_ownership_override: {
+		title: "Titularidad de la Unit modificada",
+		body: "La administración de la plataforma ha cambiado la titularidad de una Unit vinculada a tu perfil.",
+	},
 } satisfies typeof import("../zh-Hant/notifications").default;

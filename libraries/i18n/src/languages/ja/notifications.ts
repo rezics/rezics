@@ -66,4 +66,8 @@ export default {
 		title: "新しいアクセス招待",
 		body: "誰かがあなたをユニットに招待しました。返信する前に招待を確認してください。",
 	},
+	unit_ownership_override: {
+		title: "ユニットの所有者が変更されました",
+		body: "プラットフォーム管理者が、あなたのプロフィールに関係するユニットの所有者を変更しました。",
+	},
 } satisfies typeof import("../zh-Hant/notifications").default;

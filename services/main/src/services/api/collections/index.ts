@@ -42,7 +42,6 @@ import {
 	CollectionStructureRevisionListQuery,
 	CollectionStructureRevisionListResponse,
 	CollectionStructureRevisionParams,
-	CollectionRevisionBody,
 	CreateCollectionBody,
 	FavoriteItemParams,
 	ListCollectionsQuery,
@@ -55,18 +54,14 @@ import {
 import { ensureFavorites } from "../../collections/favorites";
 import { getCollection, getCollectionContent } from "./service";
 import { planCollectionItemInsertions } from "./save";
-import {
-	FavoriteResponse,
-	NoContentResponse,
-	SavedCollectionItemsResponse,
-} from "../schema/action-response";
+import { FavoriteResponse, SavedCollectionItemsResponse } from "../schema/action-response";
 import {
 	toApiErrorResponse,
 	CollectionContentResponse,
 	CollectionDetailResponse,
 	CollectionListResponse,
 } from "../schema/response";
-import { FavoritesDeleteForbidden, FavoritesEditForbidden } from "./errors";
+import { FavoritesEditForbidden } from "./errors";
 import { decodeCollectionListCursor, encodeCollectionListCursor } from "./cursor";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
 import { ValidationError } from "../errors";
@@ -92,7 +87,6 @@ const CollectionMutationForbiddenResponse = toApiErrorResponse([
 ]);
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 const FavoritesEditResponse = toApiErrorResponse(["FavoritesEditForbidden"]);
-const FavoritesDeleteResponse = toApiErrorResponse(["FavoritesDeleteForbidden"]);
 const UnitRevisionConflictResponse = toApiErrorResponse(["UnitRevisionConflict"]);
 const CollectionStructureRevisionConflictResponse = toApiErrorResponse([
 	"CollectionStructureRevisionConflict",
@@ -606,53 +600,6 @@ export default new Elysia({ prefix: "/collections" })
 				]),
 			},
 			detail: { summary: "Update collection", tags: ["Collections"] },
-		},
-	)
-	.delete(
-		"/:collectionId",
-		async ({ params, profile, authorization, body }) => {
-			await authorization.unit.ensure(params.collectionId, "unit.delete");
-			const [current] = await database
-				.select({ favoritesProfileId: profileFavoritesCollection.profileId })
-				.from(collection)
-				.leftJoin(
-					profileFavoritesCollection,
-					eq(profileFavoritesCollection.collectionId, collection.id),
-				)
-				.where(eq(collection.id, params.collectionId))
-				.limit(1);
-			if (current?.favoritesProfileId) throw new FavoritesDeleteForbidden();
-			await database.transaction(async (tx) => {
-				await tx
-					.update(unit)
-					.set({ deletedAt: new Date() })
-					.where(eq(unit.id, params.collectionId));
-				await recordUnitRevision(tx, {
-					unitId: params.collectionId,
-					actorProfileId: profile.unitId,
-					event: "delete",
-					baseRevisionId: body.baseRevisionId,
-				});
-			});
-			return new Response(null, { status: StatusCodes.NO_CONTENT });
-		},
-		{
-			access: "write:unit:delete",
-			params: CollectionParams,
-			body: CollectionRevisionBody,
-			response: {
-				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
-				[StatusCodes.CONFLICT]: t.Union([
-					FavoritesDeleteResponse,
-					UnitRevisionConflictResponse,
-				]),
-			},
-			detail: {
-				summary: "Delete collection",
-				tags: ["Collections"],
-				responses: NoContentResponse,
-			},
 		},
 	)
 	.post(

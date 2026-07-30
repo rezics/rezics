@@ -1,7 +1,10 @@
 import {
+	expandDelegableUnitPermissions,
 	expandUnitPermissions,
 	isUnitPermissionApplicable as isPermissionApplicableToTarget,
+	isUnitPermissionDelegable,
 	isUnitPermissionGrantableToAuthenticated,
+	isUnitPermissionOwnerOnly,
 	type PermissionResourceKind,
 	type UnitPermission,
 	unitPermissionsForTarget,
@@ -9,7 +12,13 @@ import {
 
 import type { UnitKind } from "../../database/schema/contract-values";
 
-export { expandUnitPermissions, isUnitPermissionGrantableToAuthenticated };
+export {
+	expandDelegableUnitPermissions,
+	expandUnitPermissions,
+	isUnitPermissionDelegable,
+	isUnitPermissionGrantableToAuthenticated,
+	isUnitPermissionOwnerOnly,
+};
 export type { UnitPermission };
 export type UnitAccessRestrictionCandidate = {
 	readonly id: string;

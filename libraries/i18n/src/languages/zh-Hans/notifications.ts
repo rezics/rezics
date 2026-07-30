@@ -66,4 +66,8 @@ export default {
 		title: "收到新的访问邀请",
 		body: "有人邀请你访问一个条目。请查看邀请内容后再决定是否接受。",
 	},
+	unit_ownership_override: {
+		title: "条目所有权已变更",
+		body: "平台管理员变更了一个与你个人资料相关的条目所有权。",
+	},
 } satisfies typeof import("../zh-Hant/notifications").default;

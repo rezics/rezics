@@ -5395,6 +5395,15 @@ export const ApiErrorCode = {
 	UnitAccessInvitationSelfForbidden: "UnitAccessInvitationSelfForbidden",
 	UnitAccessConfigurationInvalid: "UnitAccessConfigurationInvalid",
 	UnitOwnerRestrictionForbidden: "UnitOwnerRestrictionForbidden",
+	UnitOwnershipChanged: "UnitOwnershipChanged",
+	UnitOwnershipTargetIneligible: "UnitOwnershipTargetIneligible",
+	UnitOwnershipRelinquishmentForbidden: "UnitOwnershipRelinquishmentForbidden",
+	UnitOwnershipOverrideConfirmationInvalid: "UnitOwnershipOverrideConfirmationInvalid",
+	UnitLifecycleConfirmationInvalid: "UnitLifecycleConfirmationInvalid",
+	UnitLifecycleChanged: "UnitLifecycleChanged",
+	UnitLifecycleProtected: "UnitLifecycleProtected",
+	UnitAlreadyDeleted: "UnitAlreadyDeleted",
+	UnitNotDeleted: "UnitNotDeleted",
 	ReportRealmMismatch: "ReportRealmMismatch",
 	ReportAlreadySubmitted: "ReportAlreadySubmitted",
 	ReportTargetRevisionUnavailable: "ReportTargetRevisionUnavailable",
@@ -13449,7 +13458,6 @@ export const GetApiApiTokensStatus200ItemsPermissionsEnum = {
 	"unit:read": "unit:read",
 	"unit:create": "unit:create",
 	"unit:update": "unit:update",
-	"unit:delete": "unit:delete",
 	"profile:read": "profile:read",
 	"profile:update": "profile:update",
 	"interaction:read": "interaction:read",
@@ -13669,7 +13677,6 @@ export const PostApiApiTokensStatus200PermissionsEnum = {
 	"unit:read": "unit:read",
 	"unit:create": "unit:create",
 	"unit:update": "unit:update",
-	"unit:delete": "unit:delete",
 	"profile:read": "profile:read",
 	"profile:update": "profile:update",
 	"interaction:read": "interaction:read",
@@ -13891,7 +13898,6 @@ export const PostApiApiTokensRequestPermissionsEnum = {
 	"unit:read": "unit:read",
 	"unit:create": "unit:create",
 	"unit:update": "unit:update",
-	"unit:delete": "unit:delete",
 	"profile:read": "profile:read",
 	"profile:update": "profile:update",
 	"interaction:read": "interaction:read",
@@ -14004,7 +14010,6 @@ export const PatchApiApiTokensByTokenIdStatus200PermissionsEnum = {
 	"unit:read": "unit:read",
 	"unit:create": "unit:create",
 	"unit:update": "unit:update",
-	"unit:delete": "unit:delete",
 	"profile:read": "profile:read",
 	"profile:update": "profile:update",
 	"interaction:read": "interaction:read",
@@ -14228,7 +14233,6 @@ export const PatchApiApiTokensByTokenIdRequestPermissionsEnum = {
 	"unit:read": "unit:read",
 	"unit:create": "unit:create",
 	"unit:update": "unit:update",
-	"unit:delete": "unit:delete",
 	"profile:read": "profile:read",
 	"profile:update": "profile:update",
 	"interaction:read": "interaction:read",
@@ -14465,7 +14469,6 @@ export const PutApiApiTokensByTokenIdPolicyStatus200PermissionsEnum = {
 	"unit:read": "unit:read",
 	"unit:create": "unit:create",
 	"unit:update": "unit:update",
-	"unit:delete": "unit:delete",
 	"profile:read": "profile:read",
 	"profile:update": "profile:update",
 	"interaction:read": "interaction:read",
@@ -14806,7 +14809,6 @@ export const GetCurrentApiTokenStatus200PermissionsEnum = {
 	"unit:read": "unit:read",
 	"unit:create": "unit:create",
 	"unit:update": "unit:update",
-	"unit:delete": "unit:delete",
 	"profile:read": "profile:read",
 	"profile:update": "profile:update",
 	"interaction:read": "interaction:read",
@@ -20399,7 +20401,6 @@ export const GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum = {
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
-	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -20442,7 +20443,6 @@ export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum = {
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
-	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -20470,7 +20470,6 @@ export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
-	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -20498,7 +20497,6 @@ export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsInheritedEnum = 
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
-	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -20528,6 +20526,7 @@ export type GetApiGovernanceUnitByUnitIdAccessStatus200 = {
 	 * @type string
 	 */
 	unitId: string;
+	unitTitle: (string | null) | null;
 	/**
 	 * @type string
 	 */
@@ -20551,6 +20550,14 @@ export type GetApiGovernanceUnitByUnitIdAccessStatus200 = {
 				label: (string | null) | null;
 		  } | null)
 		| null;
+	/**
+	 * @type boolean
+	 */
+	canTransferOwnership: boolean;
+	/**
+	 * @type boolean
+	 */
+	canRelinquishOwnership: boolean;
 	/**
 	 * @type array
 	 */
@@ -20729,7 +20736,6 @@ export const PutApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum = {
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
-	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -20772,7 +20778,6 @@ export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum = {
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
-	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -20800,7 +20805,6 @@ export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
-	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -20828,7 +20832,6 @@ export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsInheritedEnum = 
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
-	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -20858,6 +20861,7 @@ export type PutApiGovernanceUnitByUnitIdAccessStatus200 = {
 	 * @type string
 	 */
 	unitId: string;
+	unitTitle: (string | null) | null;
 	/**
 	 * @type string
 	 */
@@ -20881,6 +20885,14 @@ export type PutApiGovernanceUnitByUnitIdAccessStatus200 = {
 				label: (string | null) | null;
 		  } | null)
 		| null;
+	/**
+	 * @type boolean
+	 */
+	canTransferOwnership: boolean;
+	/**
+	 * @type boolean
+	 */
+	canRelinquishOwnership: boolean;
 	/**
 	 * @type array
 	 */
@@ -21088,7 +21100,6 @@ export const PutApiGovernanceUnitByUnitIdAccessRequestGrantsEnum = {
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
-	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -21116,7 +21127,6 @@ export const PutApiGovernanceUnitByUnitIdAccessRequestRestrictionsEnum = {
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
-	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -21434,9 +21444,9 @@ export const GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsPermis
 	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
+	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
-	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -21575,6 +21585,156 @@ export type GetApiGovernanceUnitByUnitIdAccessEffectiveResponse =
 /**
  * @type object
  */
+export type GetApiGovernanceUnitByUnitIdOwnershipCandidatesPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdOwnershipCandidatesQuery = {
+	/**
+	 * @maxLength 200
+	 * @type string | undefined
+	 */
+	query?: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	cursor?: string;
+	/**
+	 * @default 50
+	 */
+	limit?: string | number;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdOwnershipCandidatesStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		label: (string | null) | null;
+		slug: (string | null) | null;
+	}[];
+	nextCursor: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdOwnershipCandidatesStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: "UnitPermissionForbidden";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdOwnershipCandidatesStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdOwnershipCandidatesStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdOwnershipCandidatesStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdOwnershipCandidatesOptions = {
+	body?: never;
+	path: GetApiGovernanceUnitByUnitIdOwnershipCandidatesPath;
+	query?: GetApiGovernanceUnitByUnitIdOwnershipCandidatesQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdOwnershipCandidatesResponses = {
+	"200": GetApiGovernanceUnitByUnitIdOwnershipCandidatesStatus200;
+	"403": GetApiGovernanceUnitByUnitIdOwnershipCandidatesStatus403;
+	"404": GetApiGovernanceUnitByUnitIdOwnershipCandidatesStatus404;
+	"422": GetApiGovernanceUnitByUnitIdOwnershipCandidatesStatus422;
+	"500": GetApiGovernanceUnitByUnitIdOwnershipCandidatesStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiGovernanceUnitByUnitIdOwnershipCandidatesResponse =
+	| GetApiGovernanceUnitByUnitIdOwnershipCandidatesStatus200
+	| GetApiGovernanceUnitByUnitIdOwnershipCandidatesStatus403
+	| GetApiGovernanceUnitByUnitIdOwnershipCandidatesStatus404
+	| GetApiGovernanceUnitByUnitIdOwnershipCandidatesStatus422
+	| GetApiGovernanceUnitByUnitIdOwnershipCandidatesStatus500;
+
+/**
+ * @type object
+ */
 export type PutApiGovernanceUnitByUnitIdOwnershipPath = {
 	/**
 	 * @description
@@ -21593,13 +21753,12 @@ export type PutApiGovernanceUnitByUnitIdOwnershipStatus200 = {
 	 */
 	owner: {
 		/**
-		 * @type string
-		 */
-		kind: "profile";
-		/**
+		 * @description
+		 * Format: `uuid`
 		 * @type string
 		 */
 		profileId: string;
+		label: (string | null) | null;
 	};
 };
 
@@ -21609,7 +21768,7 @@ export type PutApiGovernanceUnitByUnitIdOwnershipStatus200 = {
 export type PutApiGovernanceUnitByUnitIdOwnershipStatus400 = MalformedRequestBody;
 
 export const PutApiGovernanceUnitByUnitIdOwnershipStatus403ErrorCodeEnum = {
-	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
 	FreshSessionRequired: "FreshSessionRequired",
 } as const;
 
@@ -21625,7 +21784,7 @@ export type PutApiGovernanceUnitByUnitIdOwnershipStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'PlatformCapabilityRequired'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
 		code: PutApiGovernanceUnitByUnitIdOwnershipStatus403ErrorCodeEnum;
@@ -21680,6 +21839,42 @@ export type PutApiGovernanceUnitByUnitIdOwnershipStatus404 = {
 	requestId: string;
 };
 
+export const PutApiGovernanceUnitByUnitIdOwnershipStatus409ErrorCodeEnum = {
+	UnitOwnershipChanged: "UnitOwnershipChanged",
+	UnitOwnershipTargetIneligible: "UnitOwnershipTargetIneligible",
+} as const;
+
+export type PutApiGovernanceUnitByUnitIdOwnershipStatus409ErrorCodeEnum =
+	(typeof PutApiGovernanceUnitByUnitIdOwnershipStatus409ErrorCodeEnum)[keyof typeof PutApiGovernanceUnitByUnitIdOwnershipStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiGovernanceUnitByUnitIdOwnershipStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitOwnershipChanged'
+		 * @type string
+		 */
+		code: PutApiGovernanceUnitByUnitIdOwnershipStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
 /**
  * @type object
  */
@@ -21695,20 +21890,17 @@ export type PutApiGovernanceUnitByUnitIdOwnershipStatus500 = InternalError;
  */
 export type PutApiGovernanceUnitByUnitIdOwnershipBody = {
 	/**
-	 * @type object
+	 * @description
+	 * Format: `uuid`
+	 * @type string
 	 */
-	owner: {
-		/**
-		 * @type string
-		 */
-		kind: "profile";
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		profileId: string;
-	};
+	expectedOwnerProfileId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	targetProfileId: string;
 };
 
 /**
@@ -21729,6 +21921,7 @@ export type PutApiGovernanceUnitByUnitIdOwnershipResponses = {
 	"400": PutApiGovernanceUnitByUnitIdOwnershipStatus400;
 	"403": PutApiGovernanceUnitByUnitIdOwnershipStatus403;
 	"404": PutApiGovernanceUnitByUnitIdOwnershipStatus404;
+	"409": PutApiGovernanceUnitByUnitIdOwnershipStatus409;
 	"422": PutApiGovernanceUnitByUnitIdOwnershipStatus422;
 	"500": PutApiGovernanceUnitByUnitIdOwnershipStatus500;
 };
@@ -21741,13 +21934,14 @@ export type PutApiGovernanceUnitByUnitIdOwnershipResponse =
 	| PutApiGovernanceUnitByUnitIdOwnershipStatus400
 	| PutApiGovernanceUnitByUnitIdOwnershipStatus403
 	| PutApiGovernanceUnitByUnitIdOwnershipStatus404
+	| PutApiGovernanceUnitByUnitIdOwnershipStatus409
 	| PutApiGovernanceUnitByUnitIdOwnershipStatus422
 	| PutApiGovernanceUnitByUnitIdOwnershipStatus500;
 
 /**
  * @type object
  */
-export type DeleteApiGovernanceUnitByUnitIdOwnershipPath = {
+export type PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -21757,31 +21951,49 @@ export type DeleteApiGovernanceUnitByUnitIdOwnershipPath = {
 };
 
 /**
- * @type void
+ * @type object
  */
-export type DeleteApiGovernanceUnitByUnitIdOwnershipStatus204 = void;
-
-export const DeleteApiGovernanceUnitByUnitIdOwnershipStatus403ErrorCodeEnum = {
-	PlatformCapabilityRequired: "PlatformCapabilityRequired",
-	FreshSessionRequired: "FreshSessionRequired",
-} as const;
-
-export type DeleteApiGovernanceUnitByUnitIdOwnershipStatus403ErrorCodeEnum =
-	(typeof DeleteApiGovernanceUnitByUnitIdOwnershipStatus403ErrorCodeEnum)[keyof typeof DeleteApiGovernanceUnitByUnitIdOwnershipStatus403ErrorCodeEnum];
+export type PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus200 = {
+	/**
+	 * @type object
+	 */
+	owner: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		label: (string | null) | null;
+	};
+};
 
 /**
  * @type object
  */
-export type DeleteApiGovernanceUnitByUnitIdOwnershipStatus403 = {
+export type PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus400 = MalformedRequestBody;
+
+export const PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	FreshSessionRequired: "FreshSessionRequired",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus403ErrorCodeEnum =
+	(typeof PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus403ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus403 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'PlatformCapabilityRequired'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: DeleteApiGovernanceUnitByUnitIdOwnershipStatus403ErrorCodeEnum;
+		code: PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -21800,7 +22012,7 @@ export type DeleteApiGovernanceUnitByUnitIdOwnershipStatus403 = {
 /**
  * @type object
  */
-export type DeleteApiGovernanceUnitByUnitIdOwnershipStatus404 = {
+export type PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -21825,22 +22037,70 @@ export type DeleteApiGovernanceUnitByUnitIdOwnershipStatus404 = {
 	requestId: string;
 };
 
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdOwnershipStatus422 = ValidationError;
+export const PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus409ErrorCodeEnum = {
+	UnitOwnershipChanged: "UnitOwnershipChanged",
+	UnitOwnershipRelinquishmentForbidden: "UnitOwnershipRelinquishmentForbidden",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus409ErrorCodeEnum =
+	(typeof PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus409ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus409ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type DeleteApiGovernanceUnitByUnitIdOwnershipStatus500 = InternalError;
+export type PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitOwnershipChanged'
+		 * @type string
+		 */
+		code: PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
  */
-export type DeleteApiGovernanceUnitByUnitIdOwnershipOptions = {
-	body?: never;
-	path: DeleteApiGovernanceUnitByUnitIdOwnershipPath;
+export type PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	expectedOwnerProfileId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentOptions = {
+	body: PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentBody;
+	path: PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentPath;
 	query?: never;
 	headers?: never;
 };
@@ -21848,23 +22108,27 @@ export type DeleteApiGovernanceUnitByUnitIdOwnershipOptions = {
 /**
  * @type object
  */
-export type DeleteApiGovernanceUnitByUnitIdOwnershipResponses = {
-	"204": DeleteApiGovernanceUnitByUnitIdOwnershipStatus204;
-	"403": DeleteApiGovernanceUnitByUnitIdOwnershipStatus403;
-	"404": DeleteApiGovernanceUnitByUnitIdOwnershipStatus404;
-	"422": DeleteApiGovernanceUnitByUnitIdOwnershipStatus422;
-	"500": DeleteApiGovernanceUnitByUnitIdOwnershipStatus500;
+export type PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentResponses = {
+	"200": PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus200;
+	"400": PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus400;
+	"403": PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus403;
+	"404": PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus404;
+	"409": PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus409;
+	"422": PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus422;
+	"500": PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type DeleteApiGovernanceUnitByUnitIdOwnershipResponse =
-	| DeleteApiGovernanceUnitByUnitIdOwnershipStatus204
-	| DeleteApiGovernanceUnitByUnitIdOwnershipStatus403
-	| DeleteApiGovernanceUnitByUnitIdOwnershipStatus404
-	| DeleteApiGovernanceUnitByUnitIdOwnershipStatus422
-	| DeleteApiGovernanceUnitByUnitIdOwnershipStatus500;
+export type PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentResponse =
+	| PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus200
+	| PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus400
+	| PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus403
+	| PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus404
+	| PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus409
+	| PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus422
+	| PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentStatus500;
 
 /**
  * @type object
@@ -21884,7 +22148,6 @@ export const GetApiGovernanceUnitAccessInvitationsStatus200ItemsPermissionsEnum 
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
-	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -22051,7 +22314,6 @@ export const GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsPermissi
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
-	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -22276,7 +22538,6 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200PermissionsE
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
-	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -22532,7 +22793,6 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsRequestPermissionsEnu
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
-	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -22646,7 +22906,6 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptS
 		"unit.access.manage": "unit.access.manage",
 		"unit.association.manage": "unit.association.manage",
 		"unit.tag-curation.manage": "unit.tag-curation.manage",
-		"unit.delete": "unit.delete",
 		"realm.contribute": "realm.contribute",
 		"realm.units.create": "realm.units.create",
 		"realm.post.replies.create": "realm.post.replies.create",
@@ -22890,7 +23149,6 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecline
 		"unit.access.manage": "unit.access.manage",
 		"unit.association.manage": "unit.association.manage",
 		"unit.tag-curation.manage": "unit.tag-curation.manage",
-		"unit.delete": "unit.delete",
 		"realm.contribute": "realm.contribute",
 		"realm.units.create": "realm.units.create",
 		"realm.post.replies.create": "realm.post.replies.create",
@@ -23284,6 +23542,1216 @@ export type DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdRespon
 	| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus409
 	| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus422
 	| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus500;
+
+export const GetApiGovernancePlatformUnitsState = {
+	active: "active",
+	deleted: "deleted",
+	all: "all",
+} as const;
+
+export type GetApiGovernancePlatformUnitsState =
+	(typeof GetApiGovernancePlatformUnitsState)[keyof typeof GetApiGovernancePlatformUnitsState];
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitsQuery = {
+	/**
+	 * @type string | undefined
+	 */
+	state?: GetApiGovernancePlatformUnitsState;
+	/**
+	 * @maxLength 200
+	 * @type string | undefined
+	 */
+	query?: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	cursor?: string;
+	/**
+	 * @default 50
+	 */
+	limit?: string | number;
+};
+
+export const GetApiGovernancePlatformUnitsStatus200ItemsKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetApiGovernancePlatformUnitsStatus200ItemsKindEnum =
+	(typeof GetApiGovernancePlatformUnitsStatus200ItemsKindEnum)[keyof typeof GetApiGovernancePlatformUnitsStatus200ItemsKindEnum];
+
+export const GetApiGovernancePlatformUnitsStatus200ItemsStatusEnum = {
+	draft: "draft",
+	published: "published",
+	archived: "archived",
+} as const;
+
+export type GetApiGovernancePlatformUnitsStatus200ItemsStatusEnum =
+	(typeof GetApiGovernancePlatformUnitsStatus200ItemsStatusEnum)[keyof typeof GetApiGovernancePlatformUnitsStatus200ItemsStatusEnum];
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @default 'slug_namespace'
+		 * @type string
+		 */
+		kind: GetApiGovernancePlatformUnitsStatus200ItemsKindEnum;
+		title: (string | null) | null;
+		/**
+		 * @default 'draft'
+		 * @type string
+		 */
+		status: GetApiGovernancePlatformUnitsStatus200ItemsStatusEnum;
+		owner:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					profileId: string;
+					label: (string | null) | null;
+			  } | null)
+			| null;
+		deletedAt: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+		/**
+		 * @type boolean
+		 */
+		protected: boolean;
+	}[];
+	nextCursor: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitsOptions = {
+	body?: never;
+	path?: never;
+	query?: GetApiGovernancePlatformUnitsQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitsResponses = {
+	"200": GetApiGovernancePlatformUnitsStatus200;
+	"403": GetApiGovernancePlatformUnitsStatus403;
+	"422": GetApiGovernancePlatformUnitsStatus422;
+	"500": GetApiGovernancePlatformUnitsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiGovernancePlatformUnitsResponse =
+	| GetApiGovernancePlatformUnitsStatus200
+	| GetApiGovernancePlatformUnitsStatus403
+	| GetApiGovernancePlatformUnitsStatus422
+	| GetApiGovernancePlatformUnitsStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesQuery = {
+	/**
+	 * @maxLength 200
+	 * @type string | undefined
+	 */
+	query?: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	cursor?: string;
+	/**
+	 * @default 50
+	 */
+	limit?: string | number;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		label: (string | null) | null;
+		slug: (string | null) | null;
+	}[];
+	nextCursor: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesOptions = {
+	body?: never;
+	path: GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesPath;
+	query?: GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesResponses = {
+	"200": GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesStatus200;
+	"403": GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesStatus403;
+	"404": GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesStatus404;
+	"422": GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesStatus422;
+	"500": GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesResponse =
+	| GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesStatus200
+	| GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesStatus403
+	| GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesStatus404
+	| GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesStatus422
+	| GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverridePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus200 = {
+	/**
+	 * @type object
+	 */
+	owner: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		label: (string | null) | null;
+	};
+};
+
+export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'UnitOwnershipOverrideConfirmationInvalid'
+				 * @type string
+				 */
+				code: "UnitOwnershipOverrideConfirmationInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+} as const;
+
+export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus403ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus403ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus409ErrorCodeEnum = {
+	UnitOwnershipChanged: "UnitOwnershipChanged",
+	UnitOwnershipTargetIneligible: "UnitOwnershipTargetIneligible",
+} as const;
+
+export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus409ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus409ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitOwnershipChanged'
+		 * @type string
+		 */
+		code: PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus500 = InternalError;
+
+export const PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideRequestReasonCodeEnum = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideRequestReasonCodeEnum =
+	(typeof PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideRequestReasonCodeEnum)[keyof typeof PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideRequestReasonCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideBody = {
+	expectedOwnerProfileId: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	targetProfileId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	confirmationUnitId: string;
+	/**
+	 * @type string
+	 */
+	reasonCode: PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideRequestReasonCodeEnum;
+	/**
+	 * @minLength 1
+	 * @maxLength 2000
+	 * @type string | undefined
+	 */
+	note?: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideOptions = {
+	body: PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideBody;
+	path: PostApiGovernancePlatformUnitsByUnitIdOwnershipOverridePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideResponses = {
+	"200": PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus200;
+	"400": PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus400;
+	"403": PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus403;
+	"404": PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus404;
+	"409": PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus409;
+	"422": PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus422;
+	"500": PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideResponse =
+	| PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus200
+	| PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus400
+	| PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus403
+	| PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus404
+	| PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus409
+	| PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus422
+	| PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdDeletePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const PostApiGovernancePlatformUnitsByUnitIdDeleteStatus200KindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type PostApiGovernancePlatformUnitsByUnitIdDeleteStatus200KindEnum =
+	(typeof PostApiGovernancePlatformUnitsByUnitIdDeleteStatus200KindEnum)[keyof typeof PostApiGovernancePlatformUnitsByUnitIdDeleteStatus200KindEnum];
+
+export const PostApiGovernancePlatformUnitsByUnitIdDeleteStatus200StatusEnum = {
+	draft: "draft",
+	published: "published",
+	archived: "archived",
+} as const;
+
+export type PostApiGovernancePlatformUnitsByUnitIdDeleteStatus200StatusEnum =
+	(typeof PostApiGovernancePlatformUnitsByUnitIdDeleteStatus200StatusEnum)[keyof typeof PostApiGovernancePlatformUnitsByUnitIdDeleteStatus200StatusEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdDeleteStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @default 'slug_namespace'
+	 * @type string
+	 */
+	kind: PostApiGovernancePlatformUnitsByUnitIdDeleteStatus200KindEnum;
+	title: (string | null) | null;
+	/**
+	 * @default 'draft'
+	 * @type string
+	 */
+	status: PostApiGovernancePlatformUnitsByUnitIdDeleteStatus200StatusEnum;
+	owner:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				profileId: string;
+				label: (string | null) | null;
+		  } | null)
+		| null;
+	deletedAt: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+	/**
+	 * @type boolean
+	 */
+	protected: boolean;
+};
+
+export type PostApiGovernancePlatformUnitsByUnitIdDeleteStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'UnitLifecycleConfirmationInvalid'
+				 * @type string
+				 */
+				code: "UnitLifecycleConfirmationInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const PostApiGovernancePlatformUnitsByUnitIdDeleteStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+} as const;
+
+export type PostApiGovernancePlatformUnitsByUnitIdDeleteStatus403ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitsByUnitIdDeleteStatus403ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitsByUnitIdDeleteStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdDeleteStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: PostApiGovernancePlatformUnitsByUnitIdDeleteStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdDeleteStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiGovernancePlatformUnitsByUnitIdDeleteStatus409ErrorCodeEnum = {
+	UnitLifecycleChanged: "UnitLifecycleChanged",
+	UnitLifecycleProtected: "UnitLifecycleProtected",
+	UnitAlreadyDeleted: "UnitAlreadyDeleted",
+	UnitNotDeleted: "UnitNotDeleted",
+} as const;
+
+export type PostApiGovernancePlatformUnitsByUnitIdDeleteStatus409ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitsByUnitIdDeleteStatus409ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitsByUnitIdDeleteStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdDeleteStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitLifecycleChanged'
+		 * @type string
+		 */
+		code: PostApiGovernancePlatformUnitsByUnitIdDeleteStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdDeleteStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdDeleteStatus500 = InternalError;
+
+export const PostApiGovernancePlatformUnitsByUnitIdDeleteRequestReasonCodeEnum = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type PostApiGovernancePlatformUnitsByUnitIdDeleteRequestReasonCodeEnum =
+	(typeof PostApiGovernancePlatformUnitsByUnitIdDeleteRequestReasonCodeEnum)[keyof typeof PostApiGovernancePlatformUnitsByUnitIdDeleteRequestReasonCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdDeleteBody = {
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expectedUpdatedAt: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	confirmationUnitId: string;
+	/**
+	 * @type string
+	 */
+	reasonCode: PostApiGovernancePlatformUnitsByUnitIdDeleteRequestReasonCodeEnum;
+	/**
+	 * @minLength 1
+	 * @maxLength 2000
+	 * @type string | undefined
+	 */
+	note?: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdDeleteOptions = {
+	body: PostApiGovernancePlatformUnitsByUnitIdDeleteBody;
+	path: PostApiGovernancePlatformUnitsByUnitIdDeletePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdDeleteResponses = {
+	"200": PostApiGovernancePlatformUnitsByUnitIdDeleteStatus200;
+	"400": PostApiGovernancePlatformUnitsByUnitIdDeleteStatus400;
+	"403": PostApiGovernancePlatformUnitsByUnitIdDeleteStatus403;
+	"404": PostApiGovernancePlatformUnitsByUnitIdDeleteStatus404;
+	"409": PostApiGovernancePlatformUnitsByUnitIdDeleteStatus409;
+	"422": PostApiGovernancePlatformUnitsByUnitIdDeleteStatus422;
+	"500": PostApiGovernancePlatformUnitsByUnitIdDeleteStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdDeleteResponse =
+	| PostApiGovernancePlatformUnitsByUnitIdDeleteStatus200
+	| PostApiGovernancePlatformUnitsByUnitIdDeleteStatus400
+	| PostApiGovernancePlatformUnitsByUnitIdDeleteStatus403
+	| PostApiGovernancePlatformUnitsByUnitIdDeleteStatus404
+	| PostApiGovernancePlatformUnitsByUnitIdDeleteStatus409
+	| PostApiGovernancePlatformUnitsByUnitIdDeleteStatus422
+	| PostApiGovernancePlatformUnitsByUnitIdDeleteStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdRestorePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const PostApiGovernancePlatformUnitsByUnitIdRestoreStatus200KindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type PostApiGovernancePlatformUnitsByUnitIdRestoreStatus200KindEnum =
+	(typeof PostApiGovernancePlatformUnitsByUnitIdRestoreStatus200KindEnum)[keyof typeof PostApiGovernancePlatformUnitsByUnitIdRestoreStatus200KindEnum];
+
+export const PostApiGovernancePlatformUnitsByUnitIdRestoreStatus200StatusEnum = {
+	draft: "draft",
+	published: "published",
+	archived: "archived",
+} as const;
+
+export type PostApiGovernancePlatformUnitsByUnitIdRestoreStatus200StatusEnum =
+	(typeof PostApiGovernancePlatformUnitsByUnitIdRestoreStatus200StatusEnum)[keyof typeof PostApiGovernancePlatformUnitsByUnitIdRestoreStatus200StatusEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdRestoreStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @default 'slug_namespace'
+	 * @type string
+	 */
+	kind: PostApiGovernancePlatformUnitsByUnitIdRestoreStatus200KindEnum;
+	title: (string | null) | null;
+	/**
+	 * @default 'draft'
+	 * @type string
+	 */
+	status: PostApiGovernancePlatformUnitsByUnitIdRestoreStatus200StatusEnum;
+	owner:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				profileId: string;
+				label: (string | null) | null;
+		  } | null)
+		| null;
+	deletedAt: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+	/**
+	 * @type boolean
+	 */
+	protected: boolean;
+};
+
+export type PostApiGovernancePlatformUnitsByUnitIdRestoreStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'UnitLifecycleConfirmationInvalid'
+				 * @type string
+				 */
+				code: "UnitLifecycleConfirmationInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const PostApiGovernancePlatformUnitsByUnitIdRestoreStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+} as const;
+
+export type PostApiGovernancePlatformUnitsByUnitIdRestoreStatus403ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitsByUnitIdRestoreStatus403ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitsByUnitIdRestoreStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdRestoreStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: PostApiGovernancePlatformUnitsByUnitIdRestoreStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdRestoreStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiGovernancePlatformUnitsByUnitIdRestoreStatus409ErrorCodeEnum = {
+	UnitLifecycleChanged: "UnitLifecycleChanged",
+	UnitLifecycleProtected: "UnitLifecycleProtected",
+	UnitAlreadyDeleted: "UnitAlreadyDeleted",
+	UnitNotDeleted: "UnitNotDeleted",
+} as const;
+
+export type PostApiGovernancePlatformUnitsByUnitIdRestoreStatus409ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitsByUnitIdRestoreStatus409ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitsByUnitIdRestoreStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdRestoreStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitLifecycleChanged'
+		 * @type string
+		 */
+		code: PostApiGovernancePlatformUnitsByUnitIdRestoreStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdRestoreStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdRestoreStatus500 = InternalError;
+
+export const PostApiGovernancePlatformUnitsByUnitIdRestoreRequestReasonCodeEnum = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type PostApiGovernancePlatformUnitsByUnitIdRestoreRequestReasonCodeEnum =
+	(typeof PostApiGovernancePlatformUnitsByUnitIdRestoreRequestReasonCodeEnum)[keyof typeof PostApiGovernancePlatformUnitsByUnitIdRestoreRequestReasonCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdRestoreBody = {
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expectedUpdatedAt: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	confirmationUnitId: string;
+	/**
+	 * @type string
+	 */
+	reasonCode: PostApiGovernancePlatformUnitsByUnitIdRestoreRequestReasonCodeEnum;
+	/**
+	 * @minLength 1
+	 * @maxLength 2000
+	 * @type string | undefined
+	 */
+	note?: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdRestoreOptions = {
+	body: PostApiGovernancePlatformUnitsByUnitIdRestoreBody;
+	path: PostApiGovernancePlatformUnitsByUnitIdRestorePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdRestoreResponses = {
+	"200": PostApiGovernancePlatformUnitsByUnitIdRestoreStatus200;
+	"400": PostApiGovernancePlatformUnitsByUnitIdRestoreStatus400;
+	"403": PostApiGovernancePlatformUnitsByUnitIdRestoreStatus403;
+	"404": PostApiGovernancePlatformUnitsByUnitIdRestoreStatus404;
+	"409": PostApiGovernancePlatformUnitsByUnitIdRestoreStatus409;
+	"422": PostApiGovernancePlatformUnitsByUnitIdRestoreStatus422;
+	"500": PostApiGovernancePlatformUnitsByUnitIdRestoreStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiGovernancePlatformUnitsByUnitIdRestoreResponse =
+	| PostApiGovernancePlatformUnitsByUnitIdRestoreStatus200
+	| PostApiGovernancePlatformUnitsByUnitIdRestoreStatus400
+	| PostApiGovernancePlatformUnitsByUnitIdRestoreStatus403
+	| PostApiGovernancePlatformUnitsByUnitIdRestoreStatus404
+	| PostApiGovernancePlatformUnitsByUnitIdRestoreStatus409
+	| PostApiGovernancePlatformUnitsByUnitIdRestoreStatus422
+	| PostApiGovernancePlatformUnitsByUnitIdRestoreStatus500;
 
 /**
  * @type object
@@ -31448,190 +32916,6 @@ export type PutApiZonesByZoneIdPagesByPageIdResponse =
 /**
  * @type object
  */
-export type DeleteApiZonesByZoneIdPagesByPageIdPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	zoneId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	pageId: string;
-};
-
-/**
- * @type void
- */
-export type DeleteApiZonesByZoneIdPagesByPageIdStatus204 = void;
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdPagesByPageIdStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitPermissionForbidden'
-		 * @type string
-		 */
-		code: "UnitPermissionForbidden";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const DeleteApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	ZonePageNotFound: "ZonePageNotFound",
-} as const;
-
-export type DeleteApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum =
-	(typeof DeleteApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdPagesByPageIdStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: DeleteApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdPagesByPageIdStatus409 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'ZonePageInUse'
-		 * @type string
-		 */
-		code: "ZonePageInUse";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdPagesByPageIdStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdPagesByPageIdStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: "ApiTokenRateLimitExceeded";
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdPagesByPageIdStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdPagesByPageIdOptions = {
-	body?: never;
-	path: DeleteApiZonesByZoneIdPagesByPageIdPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdPagesByPageIdResponses = {
-	"204": DeleteApiZonesByZoneIdPagesByPageIdStatus204;
-	"403": DeleteApiZonesByZoneIdPagesByPageIdStatus403;
-	"404": DeleteApiZonesByZoneIdPagesByPageIdStatus404;
-	"409": DeleteApiZonesByZoneIdPagesByPageIdStatus409;
-	"422": DeleteApiZonesByZoneIdPagesByPageIdStatus422;
-	"429": DeleteApiZonesByZoneIdPagesByPageIdStatus429;
-	"500": DeleteApiZonesByZoneIdPagesByPageIdStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type DeleteApiZonesByZoneIdPagesByPageIdResponse =
-	| DeleteApiZonesByZoneIdPagesByPageIdStatus204
-	| DeleteApiZonesByZoneIdPagesByPageIdStatus403
-	| DeleteApiZonesByZoneIdPagesByPageIdStatus404
-	| DeleteApiZonesByZoneIdPagesByPageIdStatus409
-	| DeleteApiZonesByZoneIdPagesByPageIdStatus422
-	| DeleteApiZonesByZoneIdPagesByPageIdStatus429
-	| DeleteApiZonesByZoneIdPagesByPageIdStatus500;
-
-/**
- * @type object
- */
 export type PutApiZonesByZoneIdPagesByPageIdPlacementPath = {
 	/**
 	 * @description
@@ -36108,7 +37392,10 @@ export const GetApiUsersMeStatus200PlatformCapabilitiesEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"platform.development_preview.access": "platform.development_preview.access",
-	"unit.ownership.transfer": "unit.ownership.transfer",
+	"unit.governance.read": "unit.governance.read",
+	"unit.ownership.override": "unit.ownership.override",
+	"unit.delete": "unit.delete",
+	"unit.restore": "unit.restore",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
 	"unit.slug.redirect.release": "unit.slug.redirect.release",
@@ -41738,7 +43025,10 @@ export const GetApiPlatformAccessPolicyStatus200CapabilitiesEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"platform.development_preview.access": "platform.development_preview.access",
-	"unit.ownership.transfer": "unit.ownership.transfer",
+	"unit.governance.read": "unit.governance.read",
+	"unit.ownership.override": "unit.ownership.override",
+	"unit.delete": "unit.delete",
+	"unit.restore": "unit.restore",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
 	"unit.slug.redirect.release": "unit.slug.redirect.release",
@@ -41857,7 +43147,10 @@ export const GetApiPlatformAccessProfilesStatus200ItemsGrantsCapabilityEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"platform.development_preview.access": "platform.development_preview.access",
-	"unit.ownership.transfer": "unit.ownership.transfer",
+	"unit.governance.read": "unit.governance.read",
+	"unit.ownership.override": "unit.ownership.override",
+	"unit.delete": "unit.delete",
+	"unit.restore": "unit.restore",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
 	"unit.slug.redirect.release": "unit.slug.redirect.release",
@@ -42033,7 +43326,10 @@ export const GetApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnu
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"platform.development_preview.access": "platform.development_preview.access",
-	"unit.ownership.transfer": "unit.ownership.transfer",
+	"unit.governance.read": "unit.governance.read",
+	"unit.ownership.override": "unit.ownership.override",
+	"unit.delete": "unit.delete",
+	"unit.restore": "unit.restore",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
 	"unit.slug.redirect.release": "unit.slug.redirect.release",
@@ -42234,7 +43530,10 @@ export const PutApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnu
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"platform.development_preview.access": "platform.development_preview.access",
-	"unit.ownership.transfer": "unit.ownership.transfer",
+	"unit.governance.read": "unit.governance.read",
+	"unit.ownership.override": "unit.ownership.override",
+	"unit.delete": "unit.delete",
+	"unit.restore": "unit.restore",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
 	"unit.slug.redirect.release": "unit.slug.redirect.release",
@@ -42471,7 +43770,10 @@ export const PutApiPlatformAccessProfilesByProfileIdRequestGrantsCapabilityEnum 
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"platform.development_preview.access": "platform.development_preview.access",
-	"unit.ownership.transfer": "unit.ownership.transfer",
+	"unit.governance.read": "unit.governance.read",
+	"unit.ownership.override": "unit.ownership.override",
+	"unit.delete": "unit.delete",
+	"unit.restore": "unit.restore",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
 	"unit.slug.redirect.release": "unit.slug.redirect.release",
@@ -54997,187 +56299,6 @@ export type PatchApiUnitsByTypeByUnitIdResponse =
 	| PatchApiUnitsByTypeByUnitIdStatus422
 	| PatchApiUnitsByTypeByUnitIdStatus429
 	| PatchApiUnitsByTypeByUnitIdStatus500;
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdPath = {
-	type: (("book" | "software" | "media") | "series") | ("video" | "audio");
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-};
-
-/**
- * @type void
- */
-export type DeleteApiUnitsByTypeByUnitIdStatus204 = void;
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdStatus401 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'AuthenticationRequired'
-		 * @type string
-		 */
-		code: "AuthenticationRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const DeleteApiUnitsByTypeByUnitIdStatus403ErrorCodeEnum = {
-	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
-	EmailVerificationRequired: "EmailVerificationRequired",
-	AccountRestricted: "AccountRestricted",
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-} as const;
-
-export type DeleteApiUnitsByTypeByUnitIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'ApiTokenPermissionRequired'
-		 * @type string
-		 */
-		code: DeleteApiUnitsByTypeByUnitIdStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: "UnitNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: "ApiTokenRateLimitExceeded";
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdOptions = {
-	body?: never;
-	path: DeleteApiUnitsByTypeByUnitIdPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdResponses = {
-	"204": DeleteApiUnitsByTypeByUnitIdStatus204;
-	"401": DeleteApiUnitsByTypeByUnitIdStatus401;
-	"403": DeleteApiUnitsByTypeByUnitIdStatus403;
-	"404": DeleteApiUnitsByTypeByUnitIdStatus404;
-	"422": DeleteApiUnitsByTypeByUnitIdStatus422;
-	"429": DeleteApiUnitsByTypeByUnitIdStatus429;
-	"500": DeleteApiUnitsByTypeByUnitIdStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type DeleteApiUnitsByTypeByUnitIdResponse =
-	| DeleteApiUnitsByTypeByUnitIdStatus204
-	| DeleteApiUnitsByTypeByUnitIdStatus401
-	| DeleteApiUnitsByTypeByUnitIdStatus403
-	| DeleteApiUnitsByTypeByUnitIdStatus404
-	| DeleteApiUnitsByTypeByUnitIdStatus422
-	| DeleteApiUnitsByTypeByUnitIdStatus429
-	| DeleteApiUnitsByTypeByUnitIdStatus500;
 
 export const PatchApiUnitsByTypeByUnitIdVariantContextType = {
 	book: "book",
@@ -75992,10 +77113,6 @@ export type PostApiCollectionsStatus200 = {
 		 * @type boolean
 		 */
 		canRestoreHistory: boolean;
-		/**
-		 * @type boolean
-		 */
-		canDelete: boolean;
 	};
 };
 
@@ -76829,10 +77946,6 @@ export type GetApiCollectionsFavoritesStatus200 = {
 		 * @type boolean
 		 */
 		canRestoreHistory: boolean;
-		/**
-		 * @type boolean
-		 */
-		canDelete: boolean;
 	};
 };
 
@@ -80482,10 +81595,6 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 		 * @type boolean
 		 */
 		canRestoreHistory: boolean;
-		/**
-		 * @type boolean
-		 */
-		canDelete: boolean;
 	};
 };
 
@@ -81014,10 +82123,6 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 		 * @type boolean
 		 */
 		canRestoreHistory: boolean;
-		/**
-		 * @type boolean
-		 */
-		canDelete: boolean;
 	};
 };
 
@@ -81491,195 +82596,6 @@ export type PatchApiCollectionsByCollectionIdResponse =
 	| PatchApiCollectionsByCollectionIdStatus422
 	| PatchApiCollectionsByCollectionIdStatus429
 	| PatchApiCollectionsByCollectionIdStatus500;
-
-/**
- * @type object
- */
-export type DeleteApiCollectionsByCollectionIdPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	collectionId: string;
-};
-
-/**
- * @type void
- */
-export type DeleteApiCollectionsByCollectionIdStatus204 = void;
-
-/**
- * @type object
- */
-export type DeleteApiCollectionsByCollectionIdStatus400 = MalformedRequestBody;
-
-export const DeleteApiCollectionsByCollectionIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitAccessRestricted: "UnitAccessRestricted",
-} as const;
-
-export type DeleteApiCollectionsByCollectionIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiCollectionsByCollectionIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiCollectionsByCollectionIdStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiCollectionsByCollectionIdStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitPermissionForbidden'
-		 * @type string
-		 */
-		code: DeleteApiCollectionsByCollectionIdStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export type DeleteApiCollectionsByCollectionIdStatus409 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'FavoritesDeleteForbidden'
-				 * @type string
-				 */
-				code: "FavoritesDeleteForbidden";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'UnitRevisionConflict'
-				 * @type string
-				 */
-				code: "UnitRevisionConflict";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  };
-
-/**
- * @type object
- */
-export type DeleteApiCollectionsByCollectionIdStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type DeleteApiCollectionsByCollectionIdStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: "ApiTokenRateLimitExceeded";
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiCollectionsByCollectionIdStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type DeleteApiCollectionsByCollectionIdBody = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	baseRevisionId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiCollectionsByCollectionIdOptions = {
-	body: DeleteApiCollectionsByCollectionIdBody;
-	path: DeleteApiCollectionsByCollectionIdPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type DeleteApiCollectionsByCollectionIdResponses = {
-	"204": DeleteApiCollectionsByCollectionIdStatus204;
-	"400": DeleteApiCollectionsByCollectionIdStatus400;
-	"403": DeleteApiCollectionsByCollectionIdStatus403;
-	"409": DeleteApiCollectionsByCollectionIdStatus409;
-	"422": DeleteApiCollectionsByCollectionIdStatus422;
-	"429": DeleteApiCollectionsByCollectionIdStatus429;
-	"500": DeleteApiCollectionsByCollectionIdStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type DeleteApiCollectionsByCollectionIdResponse =
-	| DeleteApiCollectionsByCollectionIdStatus204
-	| DeleteApiCollectionsByCollectionIdStatus400
-	| DeleteApiCollectionsByCollectionIdStatus403
-	| DeleteApiCollectionsByCollectionIdStatus409
-	| DeleteApiCollectionsByCollectionIdStatus422
-	| DeleteApiCollectionsByCollectionIdStatus429
-	| DeleteApiCollectionsByCollectionIdStatus500;
 
 /**
  * @type object
@@ -86050,146 +86966,6 @@ export type PatchApiReviewsByReviewIdResponse =
 	| PatchApiReviewsByReviewIdStatus422
 	| PatchApiReviewsByReviewIdStatus429
 	| PatchApiReviewsByReviewIdStatus500;
-
-/**
- * @type object
- */
-export type DeleteApiReviewsByReviewIdPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	reviewId: string;
-};
-
-/**
- * @type void
- */
-export type DeleteApiReviewsByReviewIdStatus204 = void;
-
-/**
- * @type object
- */
-export type DeleteApiReviewsByReviewIdStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitPermissionForbidden'
-		 * @type string
-		 */
-		code: "UnitPermissionForbidden";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiReviewsByReviewIdStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: "UnitNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiReviewsByReviewIdStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type DeleteApiReviewsByReviewIdStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: "ApiTokenRateLimitExceeded";
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiReviewsByReviewIdStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type DeleteApiReviewsByReviewIdOptions = {
-	body?: never;
-	path: DeleteApiReviewsByReviewIdPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type DeleteApiReviewsByReviewIdResponses = {
-	"204": DeleteApiReviewsByReviewIdStatus204;
-	"403": DeleteApiReviewsByReviewIdStatus403;
-	"404": DeleteApiReviewsByReviewIdStatus404;
-	"422": DeleteApiReviewsByReviewIdStatus422;
-	"429": DeleteApiReviewsByReviewIdStatus429;
-	"500": DeleteApiReviewsByReviewIdStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type DeleteApiReviewsByReviewIdResponse =
-	| DeleteApiReviewsByReviewIdStatus204
-	| DeleteApiReviewsByReviewIdStatus403
-	| DeleteApiReviewsByReviewIdStatus404
-	| DeleteApiReviewsByReviewIdStatus422
-	| DeleteApiReviewsByReviewIdStatus429
-	| DeleteApiReviewsByReviewIdStatus500;
 
 /**
  * @type object
@@ -92519,154 +93295,6 @@ export type PatchApiPostsByPostIdResponse =
 /**
  * @type object
  */
-export type DeleteApiPostsByPostIdPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	postId: string;
-};
-
-/**
- * @type void
- */
-export type DeleteApiPostsByPostIdStatus204 = void;
-
-/**
- * @type object
- */
-export type DeleteApiPostsByPostIdStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitPermissionForbidden'
-		 * @type string
-		 */
-		code: "UnitPermissionForbidden";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const DeleteApiPostsByPostIdStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	PostNotFound: "PostNotFound",
-} as const;
-
-export type DeleteApiPostsByPostIdStatus404ErrorCodeEnum =
-	(typeof DeleteApiPostsByPostIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiPostsByPostIdStatus404ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiPostsByPostIdStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: DeleteApiPostsByPostIdStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiPostsByPostIdStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type DeleteApiPostsByPostIdStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: "ApiTokenRateLimitExceeded";
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiPostsByPostIdStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type DeleteApiPostsByPostIdOptions = {
-	body?: never;
-	path: DeleteApiPostsByPostIdPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type DeleteApiPostsByPostIdResponses = {
-	"204": DeleteApiPostsByPostIdStatus204;
-	"403": DeleteApiPostsByPostIdStatus403;
-	"404": DeleteApiPostsByPostIdStatus404;
-	"422": DeleteApiPostsByPostIdStatus422;
-	"429": DeleteApiPostsByPostIdStatus429;
-	"500": DeleteApiPostsByPostIdStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type DeleteApiPostsByPostIdResponse =
-	| DeleteApiPostsByPostIdStatus204
-	| DeleteApiPostsByPostIdStatus403
-	| DeleteApiPostsByPostIdStatus404
-	| DeleteApiPostsByPostIdStatus422
-	| DeleteApiPostsByPostIdStatus429
-	| DeleteApiPostsByPostIdStatus500;
-
-/**
- * @type object
- */
 export type GetApiPostsByPostIdRepliesPath = {
 	/**
 	 * @description
@@ -94383,160 +95011,6 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdResponse =
 	| PatchApiPostsByPostIdRepliesByReplyPostIdStatus422
 	| PatchApiPostsByPostIdRepliesByReplyPostIdStatus429
 	| PatchApiPostsByPostIdRepliesByReplyPostIdStatus500;
-
-/**
- * @type object
- */
-export type DeleteApiPostsByPostIdRepliesByReplyPostIdPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	postId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	replyPostId: string;
-};
-
-/**
- * @type void
- */
-export type DeleteApiPostsByPostIdRepliesByReplyPostIdStatus204 = void;
-
-/**
- * @type object
- */
-export type DeleteApiPostsByPostIdRepliesByReplyPostIdStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitPermissionForbidden'
-		 * @type string
-		 */
-		code: "UnitPermissionForbidden";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const DeleteApiPostsByPostIdRepliesByReplyPostIdStatus404ErrorCodeEnum = {
-	ReplyPostNotFound: "ReplyPostNotFound",
-	UnitNotFound: "UnitNotFound",
-} as const;
-
-export type DeleteApiPostsByPostIdRepliesByReplyPostIdStatus404ErrorCodeEnum =
-	(typeof DeleteApiPostsByPostIdRepliesByReplyPostIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiPostsByPostIdRepliesByReplyPostIdStatus404ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiPostsByPostIdRepliesByReplyPostIdStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'ReplyPostNotFound'
-		 * @type string
-		 */
-		code: DeleteApiPostsByPostIdRepliesByReplyPostIdStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiPostsByPostIdRepliesByReplyPostIdStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type DeleteApiPostsByPostIdRepliesByReplyPostIdStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: "ApiTokenRateLimitExceeded";
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiPostsByPostIdRepliesByReplyPostIdStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type DeleteApiPostsByPostIdRepliesByReplyPostIdOptions = {
-	body?: never;
-	path: DeleteApiPostsByPostIdRepliesByReplyPostIdPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type DeleteApiPostsByPostIdRepliesByReplyPostIdResponses = {
-	"204": DeleteApiPostsByPostIdRepliesByReplyPostIdStatus204;
-	"403": DeleteApiPostsByPostIdRepliesByReplyPostIdStatus403;
-	"404": DeleteApiPostsByPostIdRepliesByReplyPostIdStatus404;
-	"422": DeleteApiPostsByPostIdRepliesByReplyPostIdStatus422;
-	"429": DeleteApiPostsByPostIdRepliesByReplyPostIdStatus429;
-	"500": DeleteApiPostsByPostIdRepliesByReplyPostIdStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type DeleteApiPostsByPostIdRepliesByReplyPostIdResponse =
-	| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus204
-	| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus403
-	| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus404
-	| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus422
-	| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus429
-	| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus500;
 
 export const GetApiRealmsLocalizationLanguagesEnum = {
 	zh: "zh",

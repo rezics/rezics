@@ -608,34 +608,3 @@ export async function deleteZonePagePlacement(input: {
 		});
 	});
 }
-
-export async function deleteZonePageUnit(input: {
-	readonly zoneId: string;
-	readonly pageId: string;
-	readonly actorProfileId: string;
-	readonly ensureNotReferenced?: (tx: DatabaseTransaction) => Promise<void>;
-}) {
-	return database.transaction(async (tx) => {
-		await tx.execute(
-			sql`select pg_advisory_xact_lock(hashtextextended(${`zone-graph:${input.zoneId}`}::text, 0))`,
-		);
-		const page = await getZonePageUnitById(tx, input.zoneId, input.pageId);
-		if (!page) throw new ContentStructureInvalid("Zone Page Unit is outside this Zone");
-		if (page.placement)
-			throw new ContentStructureInvalid(
-				"Remove the Zone Page from page-structure before deleting it",
-			);
-		const remainingPages = (await listZonePageUnits(tx, input.zoneId)).filter(
-			(candidate) => candidate.id !== input.pageId,
-		);
-		if (!pagesHaveReachableFeed(remainingPages))
-			throw new ContentStructureInvalid("Every Zone requires at least one Feed Page");
-		await input.ensureNotReferenced?.(tx);
-		await tx.update(unit).set({ deletedAt: new Date() }).where(eq(unit.id, input.pageId));
-		await recordUnitRevision(tx, {
-			unitId: input.pageId,
-			actorProfileId: input.actorProfileId,
-			event: "delete",
-		});
-	});
-}

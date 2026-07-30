@@ -22,6 +22,18 @@ describe("platform authorization policy", () => {
 		]);
 	});
 
+	it("treats Unit governance reads as the prerequisite for independent mutations", () => {
+		expect(grantingPlatformCapabilities("unit.governance.read")).toEqual([
+			"unit.governance.read",
+			"unit.ownership.override",
+			"unit.delete",
+			"unit.restore",
+		]);
+		expect(grantingPlatformCapabilities("unit.ownership.override")).toEqual([
+			"unit.ownership.override",
+		]);
+	});
+
 	it.each([
 		[[], "target", false, false],
 		[["target"], "target", false, false],

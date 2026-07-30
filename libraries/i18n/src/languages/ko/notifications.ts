@@ -66,4 +66,8 @@ export default {
 		title: "새 접근 초대",
 		body: "누군가가 유닛 접근을 초대했습니다. 응답하기 전에 초대를 검토하세요.",
 	},
+	unit_ownership_override: {
+		title: "유닛 소유권 변경",
+		body: "플랫폼 관리자가 당신의 프로필과 관련된 유닛의 소유권을 변경했습니다.",
+	},
 } satisfies typeof import("../zh-Hant/notifications").default;

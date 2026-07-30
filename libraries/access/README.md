@@ -115,6 +115,18 @@ When a feature is released, remove its preview check without changing its domain
 This keeps temporary release state out of the durable permission vocabulary and prevents preview
 eligibility from becoming broad mutation authority.
 
+## Unit ownership governance
+
+Ordinary ownership transfer is Unit-scoped. The current owner derives
+`unit.ownership.transfer`, and the permission cannot be delegated through Unit grants,
+restrictions, or invitations.
+
+Platform intervention is a separate control-plane operation. Grant
+`unit.ownership.override` once to a Profile that may reassign any Unit; do not copy it into each
+Unit's access records. `unit.ownership.override`, `unit.delete`, and `unit.restore` each imply the
+read-only `unit.governance.read` prerequisite, while remaining independent mutations with
+separate endpoints, confirmations, and audit actions.
+
 ## Design references
 
 These references guide the model but do not replace this repository's typed contract:

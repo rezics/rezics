@@ -117,6 +117,18 @@ export default {
 	UnitOwnerRestrictionForbidden: "ユニットの所有者は制限できません。",
 	UnitAccessConfigurationInvalid:
 		"このユニットアクセス設定は無効であるか、委任可能な権限を超えています。",
+	UnitOwnershipChanged: "ユニットの所有者が変更されました。再読み込みして再試行してください。",
+	UnitOwnershipTargetIneligible:
+		"選択したプロフィールはユニットの所有権を受け取る条件を満たしていません。",
+	UnitOwnershipRelinquishmentForbidden:
+		"コミュニティが所有するユニットの所有権は放棄できません。",
+	UnitOwnershipOverrideConfirmationInvalid:
+		"入力したユニット識別子が所有者の強制変更対象と一致しません。",
+	UnitLifecycleConfirmationInvalid: "入力したユニット識別子が操作対象と一致しません。",
+	UnitLifecycleChanged: "ユニットが変更されました。再読み込みして再試行してください。",
+	UnitLifecycleProtected: "この保護対象のユニットは論理削除できません。",
+	UnitAlreadyDeleted: "このユニットはすでに論理削除されています。",
+	UnitNotDeleted: "このユニットは論理削除されていません。",
 	InvalidPaginationCursor: "このページリンクは無効か期限切れです。",
 	BookNotFound: "この書籍は見つかりませんでした。",
 	MediaNotFound: "このメディア項目は見つかりませんでした。",

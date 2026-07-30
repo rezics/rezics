@@ -4,6 +4,7 @@ import { ConsoleSectionIds, type ConsoleSectionId } from "./console-section";
 
 export const ConsoleSectionRequiredCapability = {
 	users: "platform.user.read",
+	units: "unit.governance.read",
 	moderation: "platform.moderate",
 	audit: "platform.audit.read",
 	"token-policies": "platform.api_token_policy.manage",

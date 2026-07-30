@@ -128,6 +128,18 @@ export default {
 		"Le propriétaire d’une Unit ne peut pas faire l’objet de restrictions.",
 	UnitAccessConfigurationInvalid:
 		"Cette configuration d’accès à la Unit n’est pas valide ou dépasse les autorisations que vous pouvez déléguer.",
+	UnitOwnershipChanged: "Le propriétaire de la Unit a changé. Actualisez la page et réessayez.",
+	UnitOwnershipTargetIneligible:
+		"Le profil sélectionné ne peut plus recevoir la propriété de la Unit.",
+	UnitOwnershipRelinquishmentForbidden:
+		"Il est impossible de renoncer à la propriété d’une Unit communautaire.",
+	UnitOwnershipOverrideConfirmationInvalid:
+		"L’identifiant de Unit saisi ne correspond pas à la cible de la réattribution.",
+	UnitLifecycleConfirmationInvalid: "L’identifiant de Unit saisi ne correspond pas à la cible.",
+	UnitLifecycleChanged: "La Unit a changé. Actualisez la page et réessayez.",
+	UnitLifecycleProtected: "Cette Unit protégée ne peut pas être supprimée provisoirement.",
+	UnitAlreadyDeleted: "Cette Unit est déjà supprimée provisoirement.",
+	UnitNotDeleted: "Cette Unit n’est pas supprimée provisoirement.",
 	InvalidPaginationCursor: "Ce lien de page n’est pas valide ou a expiré.",
 	BookNotFound: "Ce livre est introuvable.",
 	MediaNotFound: "Cet élément multimédia est introuvable.",

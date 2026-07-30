@@ -124,6 +124,20 @@ export default {
 	UnitOwnerRestrictionForbidden: "Der Eigentümer einer Unit kann nicht eingeschränkt werden.",
 	UnitAccessConfigurationInvalid:
 		"Diese Konfiguration des Unit-Zugriffs ist ungültig oder überschreitet die Berechtigungen, die du delegieren darfst.",
+	UnitOwnershipChanged:
+		"Der Eigentümer der Unit wurde geändert. Lade neu und versuche es erneut.",
+	UnitOwnershipTargetIneligible:
+		"Das gewählte Profil kann das Eigentum an der Unit nicht mehr erhalten.",
+	UnitOwnershipRelinquishmentForbidden:
+		"Das Eigentum an einer gemeinschaftseigenen Unit kann nicht aufgegeben werden.",
+	UnitOwnershipOverrideConfirmationInvalid:
+		"Die eingegebene Unit-Kennung stimmt nicht mit dem Ziel der Eigentumsneuzuweisung überein.",
+	UnitLifecycleConfirmationInvalid:
+		"Die eingegebene Unit-Kennung stimmt nicht mit dem Ziel überein.",
+	UnitLifecycleChanged: "Die Unit wurde geändert. Lade neu und versuche es erneut.",
+	UnitLifecycleProtected: "Diese geschützte Unit kann nicht vorläufig gelöscht werden.",
+	UnitAlreadyDeleted: "Diese Unit wurde bereits vorläufig gelöscht.",
+	UnitNotDeleted: "Diese Unit ist derzeit nicht vorläufig gelöscht.",
 	InvalidPaginationCursor: "Dieser Seitenlink ist ungültig oder abgelaufen.",
 	BookNotFound: "Dieses Buch wurde nicht gefunden.",
 	MediaNotFound: "Dieses Medienelement wurde nicht gefunden.",

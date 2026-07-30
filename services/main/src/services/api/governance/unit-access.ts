@@ -1,13 +1,18 @@
 import { StatusCodes } from "http-status-codes";
-import { AuthenticatedGrantableUnitPermissionValues } from "@rezics/access";
-import { and, eq, inArray, isNull, or, sql } from "drizzle-orm";
-import Elysia, { t } from "elysia";
+import {
+	AuthenticatedGrantableUnitPermissionValues,
+	isUnitPermissionDelegable,
+} from "@rezics/access";
+import { and, eq, exists, gt, inArray, isNull, ne, notExists, or, sql } from "drizzle-orm";
+import Elysia from "elysia";
 
 import { recordAuditEvent } from "../../audit";
 import session from "../../auth/session";
 import { lockUnitAccessState } from "../../authorization/unit/invitations";
+import { replaceUnitOwnership } from "../../authorization/unit/ownership";
+import { OfficialProfileIds } from "../../bootstrap/manifest";
 import {
-	expandUnitPermissions,
+	expandDelegableUnitPermissions,
 	isUnitPermissionApplicable,
 	isUnitPermissionGrantableToAuthenticated,
 	unitPermissionsForKind,
@@ -19,8 +24,10 @@ import {
 	realm,
 	unit,
 	unitAccessGrant,
+	unitAccessInvitation,
 	unitAccessRestriction,
 	unitOwnership,
+	unitSlugAddress,
 } from "../../database/schema";
 import { firstUnitLocalizationTitle } from "../../units/localization";
 import { UnitNotFound } from "../../units/errors";
@@ -29,6 +36,8 @@ import { RealmNotFound } from "../realms/errors";
 import { ProfileNotFound } from "../users/errors";
 import {
 	ListUnitAccessCandidatesQuery,
+	ListUnitOwnershipCandidatesQuery,
+	RelinquishUnitOwnershipBody,
 	ReplaceUnitSubjectAccessBody,
 	TransferUnitOwnershipBody,
 	UnitAccessCandidateListResponse,
@@ -36,11 +45,16 @@ import {
 	UnitEffectiveAccessQuery,
 	UnitEffectiveAccessResponse,
 	UnitGovernanceParams,
+	UnitOwnershipCandidateListResponse,
+	UnitOwnershipResponse,
 } from "./schema";
 import {
 	UnitAccessExpiryInvalid,
 	UnitAccessConfigurationInvalid,
 	UnitOwnerRestrictionForbidden,
+	UnitOwnershipChanged,
+	UnitOwnershipRelinquishmentForbidden,
+	UnitOwnershipTargetIneligible,
 } from "./errors";
 
 type AccessSubject =
@@ -159,10 +173,15 @@ async function recordAccessAudit(
 	});
 }
 
-async function getAccessSnapshot(unitId: string, scope: readonly string[]) {
+async function getAccessSnapshot(
+	unitId: string,
+	scope: readonly string[],
+	viewerProfileId: string,
+) {
 	const [target] = await database
 		.select({
 			id: unit.id,
+			title: firstUnitLocalizationTitle(unit.id),
 			kind: unit.kind,
 			status: unit.status,
 			visibility: unit.visibility,
@@ -271,15 +290,21 @@ async function getAccessSnapshot(unitId: string, scope: readonly string[]) {
 		...(authenticated?.grants ?? []),
 	]);
 	const orderedPermissions = unitPermissionsForKind(target.kind);
+	const delegablePermissions = orderedPermissions.filter(isUnitPermissionDelegable);
 
 	return {
 		unitId,
+		unitTitle: target.title,
 		unitKind: target.kind,
-		permissions: orderedPermissions,
+		permissions: delegablePermissions,
 		authenticatedGrantablePermissions: AuthenticatedGrantableUnitPermissionValues.filter(
-			(permission) => orderedPermissions.includes(permission),
+			(permission) => delegablePermissions.includes(permission),
 		),
 		owner: ownership[0] ?? null,
+		canTransferOwnership: ownership[0]?.profileId === viewerProfileId,
+		canRelinquishOwnership:
+			ownership[0]?.profileId === viewerProfileId &&
+			ownership[0].profileId !== OfficialProfileIds.community,
 		subjects: [...subjects.values()]
 			.map((row) => {
 				const id =
@@ -293,13 +318,15 @@ async function getAccessSnapshot(unitId: string, scope: readonly string[]) {
 						? publicRead
 							? ["unit.read" as const]
 							: []
-						: orderedPermissions.filter((permission) => inheritedBase.has(permission));
+						: delegablePermissions.filter((permission) =>
+								inheritedBase.has(permission),
+							);
 				const expiryValues = [...row.expiries];
 				return {
 					subject: row.subject,
 					label: id ? (labelById.get(id) ?? null) : null,
-					grants: orderedPermissions.filter((permission) => row.grants.has(permission)),
-					restrictions: orderedPermissions.filter((permission) =>
+					grants: delegablePermissions.filter((permission) => row.grants.has(permission)),
+					restrictions: delegablePermissions.filter((permission) =>
 						row.restrictions.has(permission),
 					),
 					inherited,
@@ -319,13 +346,96 @@ async function getAccessSnapshot(unitId: string, scope: readonly string[]) {
 	};
 }
 
+function eligibleOwnershipCandidateCondition(unitId: string) {
+	return and(
+		ne(profileTable.id, OfficialProfileIds.community),
+		isNull(unit.deletedAt),
+		exists(
+			database
+				.select({ id: unitAccessInvitation.id })
+				.from(unitAccessInvitation)
+				.where(
+					and(
+						eq(unitAccessInvitation.unitId, unitId),
+						eq(unitAccessInvitation.invitedProfileId, profileTable.id),
+						eq(unitAccessInvitation.resolution, "accepted"),
+						sql`cardinality(${unitAccessInvitation.scope}) = 0`,
+						isNull(unitAccessInvitation.accessExpiresAt),
+						sql`${unitAccessInvitation.permissions} @> array['unit.update']::unit_permission[]`,
+					),
+				),
+		),
+		exists(
+			database
+				.select({ id: unitAccessGrant.id })
+				.from(unitAccessGrant)
+				.where(
+					and(
+						eq(unitAccessGrant.unitId, unitId),
+						eq(unitAccessGrant.subjectKind, "profile"),
+						eq(unitAccessGrant.profileId, profileTable.id),
+						eq(unitAccessGrant.permission, "unit.update"),
+						sql`cardinality(${unitAccessGrant.scope}) = 0`,
+						isNull(unitAccessGrant.expiresAt),
+						isNull(unitAccessGrant.revokedAt),
+					),
+				),
+		),
+		notExists(
+			database
+				.select({ id: unitAccessRestriction.id })
+				.from(unitAccessRestriction)
+				.where(
+					and(
+						eq(unitAccessRestriction.unitId, unitId),
+						eq(unitAccessRestriction.subjectKind, "profile"),
+						eq(unitAccessRestriction.profileId, profileTable.id),
+						eq(unitAccessRestriction.permission, "unit.update"),
+						sql`cardinality(${unitAccessRestriction.scope}) = 0`,
+						isNull(unitAccessRestriction.revokedAt),
+						or(
+							isNull(unitAccessRestriction.expiresAt),
+							sql`${unitAccessRestriction.expiresAt} > now()`,
+						),
+					),
+				),
+		),
+		notExists(
+			database
+				.select({ id: unitOwnership.id })
+				.from(unitOwnership)
+				.where(
+					and(
+						eq(unitOwnership.unitId, unitId),
+						eq(unitOwnership.profileId, profileTable.id),
+						isNull(unitOwnership.revokedAt),
+					),
+				),
+		),
+	);
+}
+
+async function isEligibleOwnershipCandidate(
+	tx: DatabaseTransaction,
+	unitId: string,
+	profileId: string,
+): Promise<boolean> {
+	const [candidate] = await tx
+		.select({ id: profileTable.id })
+		.from(profileTable)
+		.innerJoin(unit, eq(unit.id, profileTable.id))
+		.where(and(eq(profileTable.id, profileId), eligibleOwnershipCandidateCondition(unitId)))
+		.limit(1);
+	return Boolean(candidate);
+}
+
 export default new Elysia({ prefix: "/unit" })
 	.use(session)
 	.get(
 		"/:unitId/access",
-		async ({ authorization, params, query }) => {
+		async ({ authorization, profile, params, query }) => {
 			await authorization.unit.ensure(params.unitId, "unit.access.manage", query.scope ?? []);
-			return getAccessSnapshot(params.unitId, query.scope ?? []);
+			return getAccessSnapshot(params.unitId, query.scope ?? [], profile.unitId);
 		},
 		{
 			access: "session-only",
@@ -358,10 +468,13 @@ export default new Elysia({ prefix: "/unit" })
 					"unit.access.manage",
 					body.scope,
 				);
-				const requestedGrants = expandUnitPermissions(body.grants);
+				const requestedGrants = expandDelegableUnitPermissions(body.grants);
 				const requestedRestrictions = [...body.restrictions];
 				for (const permission of [...requestedGrants, ...requestedRestrictions]) {
-					if (!isUnitPermissionApplicable(target.kind, permission))
+					if (
+						!isUnitPermissionDelegable(permission) ||
+						!isUnitPermissionApplicable(target.kind, permission)
+					)
 						throw new UnitAccessConfigurationInvalid();
 					await authorization.unit.ensureInTransaction(
 						tx,
@@ -474,7 +587,7 @@ export default new Elysia({ prefix: "/unit" })
 					},
 				});
 			});
-			return getAccessSnapshot(params.unitId, body.scope);
+			return getAccessSnapshot(params.unitId, body.scope, profile.unitId);
 		},
 		{
 			access: "fresh-session-only",
@@ -573,45 +686,108 @@ export default new Elysia({ prefix: "/unit" })
 			},
 		},
 	)
+	.get(
+		"/:unitId/ownership/candidates",
+		async ({ authorization, params, query }) => {
+			await authorization.unit.ensure(params.unitId, "unit.ownership.transfer");
+			const search = query.query?.trim();
+			const limit = query.limit ?? 50;
+			const rows = await database
+				.select({
+					profileId: profileTable.id,
+					label: firstUnitLocalizationTitle(profileTable.id),
+					slug: unitSlugAddress.slug,
+				})
+				.from(profileTable)
+				.innerJoin(unit, eq(unit.id, profileTable.id))
+				.leftJoin(
+					unitSlugAddress,
+					and(
+						eq(unitSlugAddress.targetUnitId, profileTable.id),
+						eq(unitSlugAddress.kind, "canonical"),
+					),
+				)
+				.where(
+					and(
+						eligibleOwnershipCandidateCondition(params.unitId),
+						query.cursor ? gt(profileTable.id, query.cursor) : undefined,
+						search
+							? or(
+									sql`${profileTable.id}::text ilike ${`%${search}%`}`,
+									sql`coalesce(${firstUnitLocalizationTitle(profileTable.id)}, '') ilike ${`%${search}%`}`,
+									sql`coalesce(${unitSlugAddress.slug}, '') ilike ${`%${search}%`}`,
+								)
+							: undefined,
+					),
+				)
+				.orderBy(profileTable.id)
+				.limit(limit + 1);
+			const items = rows.slice(0, limit);
+			return {
+				items,
+				nextCursor: rows.length > limit ? (items.at(-1)?.profileId ?? null) : null,
+			};
+		},
+		{
+			access: "session-only",
+			params: UnitGovernanceParams,
+			query: ListUnitOwnershipCandidatesQuery,
+			response: {
+				[StatusCodes.OK]: UnitOwnershipCandidateListResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
+			detail: { summary: "Search eligible Unit ownership recipients", tags: ["Governance"] },
+		},
+	)
 	.put(
 		"/:unitId/ownership",
 		async ({ authorization, profile, params, body }) => {
-			await authorization.platform.ensureCapability("unit.ownership.transfer");
-			await ensureSubjectExists(body.owner);
 			return database.transaction(async (tx) => {
 				await lockUnitAccessState(tx, [params.unitId]);
-				const [target] = await tx
-					.select({ id: unit.id })
-					.from(unit)
-					.where(and(eq(unit.id, params.unitId), isNull(unit.deletedAt)))
-					.limit(1);
-				if (!target) throw new UnitNotFound();
+				await authorization.unit.ensureInTransaction(
+					tx,
+					params.unitId,
+					"unit.ownership.transfer",
+				);
+				if (body.expectedOwnerProfileId !== profile.unitId)
+					throw new UnitOwnershipChanged();
+				if (!(await isEligibleOwnershipCandidate(tx, params.unitId, body.targetProfileId)))
+					throw new UnitOwnershipTargetIneligible();
 				const now = new Date();
-				await tx
-					.update(unitOwnership)
-					.set({
-						revokedAt: now,
-						revokedByProfileId: profile.unitId,
-						updatedAt: now,
-					})
-					.where(
-						and(
-							eq(unitOwnership.unitId, params.unitId),
-							isNull(unitOwnership.revokedAt),
-						),
-					);
-				await tx.insert(unitOwnership).values({
+				const replaced = await replaceUnitOwnership(tx, {
 					unitId: params.unitId,
-					profileId: body.owner.profileId,
-					assignedByProfileId: profile.unitId,
+					expectedOwnerProfileId: body.expectedOwnerProfileId,
+					targetProfileId: body.targetProfileId,
+					actorProfileId: profile.unitId,
+					now,
 				});
+				if (!replaced.ok) {
+					if (replaced.reason === "owner_unchanged")
+						throw new UnitOwnershipTargetIneligible();
+					throw new UnitOwnershipChanged();
+				}
 				await recordAccessAudit(tx, {
 					actorProfileId: profile.unitId,
 					action: "unit.ownership.transfer",
 					unitId: params.unitId,
-					metadata: { ownerProfileId: body.owner.profileId },
+					metadata: {
+						previousOwnerProfileId: replaced.previousOwnerProfileId,
+						ownerProfileId: body.targetProfileId,
+					},
 				});
-				return { owner: body.owner };
+				const [owner] = await tx
+					.select({
+						profileId: profileTable.id,
+						label: firstUnitLocalizationTitle(profileTable.id),
+					})
+					.from(profileTable)
+					.where(eq(profileTable.id, body.targetProfileId))
+					.limit(1);
+				if (!owner) throw new UnitOwnershipTargetIneligible();
+				return {
+					owner,
+				};
 			});
 		},
 		{
@@ -619,57 +795,87 @@ export default new Elysia({ prefix: "/unit" })
 			params: UnitGovernanceParams,
 			body: TransferUnitOwnershipBody,
 			response: {
-				[StatusCodes.OK]: t.Object({
-					owner: t.Object({ kind: t.Literal("profile"), profileId: t.String() }),
-				}),
+				[StatusCodes.OK]: UnitOwnershipResponse,
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"PlatformCapabilityRequired",
+					"UnitPermissionForbidden",
 					"FreshSessionRequired",
 				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ProfileNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"UnitOwnershipChanged",
+					"UnitOwnershipTargetIneligible",
+				]),
 			},
 			detail: { summary: "Transfer Unit ownership", tags: ["Governance"] },
 		},
 	)
-	.delete(
-		"/:unitId/ownership",
-		async ({ authorization, profile, params }) => {
-			await authorization.platform.ensureCapability("unit.ownership.transfer");
-			await database.transaction(async (tx) => {
+	.post(
+		"/:unitId/ownership/relinquishment",
+		async ({ authorization, profile, params, body }) => {
+			const result = await database.transaction(async (tx) => {
 				await lockUnitAccessState(tx, [params.unitId]);
-				const rows = await tx
-					.update(unitOwnership)
-					.set({
-						revokedAt: new Date(),
-						revokedByProfileId: profile.unitId,
-					})
-					.where(
-						and(
-							eq(unitOwnership.unitId, params.unitId),
-							isNull(unitOwnership.revokedAt),
-						),
-					)
-					.returning({ id: unitOwnership.id });
-				if (!rows.length) throw new UnitNotFound();
+				await authorization.unit.ensureInTransaction(
+					tx,
+					params.unitId,
+					"unit.ownership.transfer",
+				);
+				if (body.expectedOwnerProfileId !== profile.unitId)
+					throw new UnitOwnershipChanged();
+				if (body.expectedOwnerProfileId === OfficialProfileIds.community)
+					throw new UnitOwnershipRelinquishmentForbidden();
+				const now = new Date();
+				const replaced = await replaceUnitOwnership(tx, {
+					unitId: params.unitId,
+					expectedOwnerProfileId: body.expectedOwnerProfileId,
+					targetProfileId: OfficialProfileIds.community,
+					actorProfileId: profile.unitId,
+					now,
+				});
+				if (!replaced.ok) {
+					if (replaced.reason === "owner_unchanged")
+						throw new UnitOwnershipRelinquishmentForbidden();
+					throw new UnitOwnershipChanged();
+				}
 				await recordAccessAudit(tx, {
 					actorProfileId: profile.unitId,
-					action: "unit.ownership.revoke",
+					action: "unit.ownership.relinquish",
 					unitId: params.unitId,
+					metadata: {
+						previousOwnerProfileId: replaced.previousOwnerProfileId,
+						ownerProfileId: OfficialProfileIds.community,
+					},
 				});
+				const [owner] = await tx
+					.select({
+						profileId: profileTable.id,
+						label: firstUnitLocalizationTitle(profileTable.id),
+					})
+					.from(profileTable)
+					.where(eq(profileTable.id, OfficialProfileIds.community))
+					.limit(1);
+				if (!owner) throw new ProfileNotFound();
+				return {
+					owner,
+				};
 			});
-			return new Response(null, { status: StatusCodes.NO_CONTENT });
+			return result;
 		},
 		{
 			access: "fresh-session-only",
 			params: UnitGovernanceParams,
+			body: RelinquishUnitOwnershipBody,
 			response: {
-				[StatusCodes.NO_CONTENT]: t.Void(),
+				[StatusCodes.OK]: UnitOwnershipResponse,
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"PlatformCapabilityRequired",
+					"UnitPermissionForbidden",
 					"FreshSessionRequired",
 				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"UnitOwnershipChanged",
+					"UnitOwnershipRelinquishmentForbidden",
+				]),
 			},
-			detail: { summary: "Revoke Unit ownership", tags: ["Governance"] },
+			detail: { summary: "Relinquish Unit ownership to Community", tags: ["Governance"] },
 		},
 	);

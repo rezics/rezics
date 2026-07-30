@@ -1000,7 +1000,6 @@ export const CollectionDetailResponse = t.Object({
 		canManageAccess: t.Boolean(),
 		canViewHistory: t.Boolean(),
 		canRestoreHistory: t.Boolean(),
-		canDelete: t.Boolean(),
 	}),
 });
 export const CollectionContentResponse = t.Object({

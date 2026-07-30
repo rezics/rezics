@@ -52,13 +52,58 @@ export const UnitPermissionValues = [
 	"unit.status.update",
 	"unit.history.restore",
 	"unit.access.manage",
+	"unit.ownership.transfer",
 	"unit.association.manage",
 	"unit.tag-curation.manage",
-	"unit.delete",
 	...RealmPermissionValues,
 	...EntityAssociationPermissionValues,
 ] as const;
 export type UnitPermission = (typeof UnitPermissionValues)[number];
+
+/**
+ * Unit permissions that may be delegated through grants, restrictions, and invitations.
+ *
+ * @remarks
+ * Ownership transfer is deliberately excluded. It is an owner-only operation whose
+ * authority cannot be delegated independently from ownership.
+ *
+ * @alpha
+ */
+export type DelegableUnitPermission = Exclude<UnitPermission, "unit.ownership.transfer">;
+export type OwnerOnlyUnitPermission = Extract<UnitPermission, "unit.ownership.transfer">;
+
+function deriveDelegableUnitPermissionValues(): readonly [
+	DelegableUnitPermission,
+	...DelegableUnitPermission[],
+] {
+	const values = UnitPermissionValues.filter(
+		(permission): permission is DelegableUnitPermission =>
+			permission !== "unit.ownership.transfer",
+	);
+	const [first, ...rest] = values;
+	if (!first) throw new Error("UnitPermissionValues must contain a delegable permission");
+	return [first, ...rest];
+}
+
+export const DelegableUnitPermissionValues = deriveDelegableUnitPermissionValues();
+
+const DelegableUnitPermissions: ReadonlySet<UnitPermission> = new Set(
+	DelegableUnitPermissionValues,
+);
+
+/** Returns whether a Unit permission may be stored in delegated access records. */
+export function isUnitPermissionDelegable(
+	permission: UnitPermission,
+): permission is DelegableUnitPermission {
+	return DelegableUnitPermissions.has(permission);
+}
+
+/** Returns whether a Unit permission is derived exclusively from current ownership. */
+export function isUnitPermissionOwnerOnly(
+	permission: UnitPermission,
+): permission is OwnerOnlyUnitPermission {
+	return permission === "unit.ownership.transfer";
+}
 
 /**
  * Grants access to product surfaces and APIs that have not been released.
@@ -92,7 +137,10 @@ export const PlatformCapabilityValues = [
 	"entity.associations.override",
 	"unit.edit",
 	DevelopmentPreviewCapability,
-	"unit.ownership.transfer",
+	"unit.governance.read",
+	"unit.ownership.override",
+	"unit.delete",
+	"unit.restore",
 	"unit.slug.manage",
 	"unit.slug.namespace.manage",
 	"unit.slug.redirect.release",
@@ -172,10 +220,29 @@ export const PlatformCapabilityDefinitions = {
 		rationale:
 			"Controls entry to unreleased product surfaces without granting their domain operations.",
 	},
-	"unit.ownership.transfer": {
+	"unit.governance.read": {
+		resource: "unit.governance",
+		action: "read",
+		rationale:
+			"Inspects platform-wide Unit lifecycle and ownership state without authorizing mutations.",
+	},
+	"unit.ownership.override": {
 		resource: "unit.ownership",
-		action: "transfer",
-		rationale: "Transfers ownership outside the target Unit's ordinary access policy.",
+		action: "override",
+		rationale:
+			"Reassigns ownership of any Unit through the platform control plane, independently from per-Unit owner authority.",
+	},
+	"unit.delete": {
+		resource: "unit",
+		action: "delete",
+		rationale:
+			"Soft-deletes any non-bootstrap Unit through the platform Console outside ordinary Unit access.",
+	},
+	"unit.restore": {
+		resource: "unit",
+		action: "restore",
+		rationale:
+			"Restores a platform-soft-deleted Unit without granting authority over its content.",
 	},
 	"unit.slug.manage": {
 		resource: "unit.slug",
@@ -271,6 +338,9 @@ export const PlatformCapabilityImplications: Partial<
 	"platform.access.manage": ["platform.access.read"],
 	"platform.user.status.update": ["platform.user.read"],
 	"platform.session.revoke": ["platform.session.read", "platform.user.read"],
+	"unit.ownership.override": ["unit.governance.read"],
+	"unit.delete": ["unit.governance.read"],
+	"unit.restore": ["unit.governance.read"],
 	"realm.members.manage": ["realm.members.read"],
 };
 
@@ -356,7 +426,15 @@ export const UnitPermissionDefinitions = {
 		resource: "unit.access",
 		action: "manage",
 		rationale:
-			"Access governance intentionally bundles grants, restrictions, invitations, and ownership administration.",
+			"Access governance intentionally bundles grants, restrictions, and invitations without changing ownership.",
+	},
+	"unit.ownership.transfer": {
+		kind: "domain",
+		target: "unit",
+		resource: "unit.ownership",
+		action: "transfer",
+		rationale:
+			"Ownership transfer is reserved to the current owner and cannot be delegated through access grants.",
 	},
 	"unit.association.manage": {
 		kind: "domain",
@@ -373,12 +451,6 @@ export const UnitPermissionDefinitions = {
 		action: "manage",
 		rationale:
 			"Tag curation independently governs pinning, ordering, and removing whole tag applications without limiting community tagging or voting.",
-	},
-	"unit.delete": {
-		kind: "standard",
-		target: "unit",
-		resource: "unit",
-		action: "delete",
 	},
 	"realm.contribute": {
 		kind: "domain",
@@ -500,9 +572,9 @@ export const UnitPermissionImplications: Partial<
 	"unit.status.update": ["unit.read"],
 	"unit.history.restore": ["unit.read", "unit.update"],
 	"unit.access.manage": ["unit.read"],
+	"unit.ownership.transfer": ["unit.read"],
 	"unit.association.manage": ["unit.read"],
 	"unit.tag-curation.manage": ["unit.read"],
-	"unit.delete": ["unit.read"],
 	"realm.contribute": ["unit.read"],
 	"realm.units.create": ["unit.read"],
 	"realm.post.replies.create": ["unit.read"],
@@ -582,4 +654,19 @@ export function expandUnitPermissions(permissions: readonly UnitPermission[]): U
 	};
 	for (const permission of permissions) visit(permission);
 	return UnitPermissionValues.filter((permission) => expanded.has(permission));
+}
+
+/**
+ * Returns the implication-closed set for permissions that are safe to persist
+ * in grants, restrictions, and invitations.
+ *
+ * @alpha
+ */
+export function expandDelegableUnitPermissions(
+	permissions: readonly DelegableUnitPermission[],
+): DelegableUnitPermission[] {
+	const expanded = expandUnitPermissions(permissions);
+	if (!expanded.every(isUnitPermissionDelegable))
+		throw new Error("A delegable Unit permission implied owner-only authority");
+	return expanded;
 }

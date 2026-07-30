@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import Elysia, { t } from "elysia";
+import Elysia from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { decodeCursor, encodeCursor } from "../../pagination";
@@ -7,7 +7,6 @@ import { listUnitStatusEvents } from "../../units/status";
 import {
 	createUnit,
 	deleteUnitContentLanguage,
-	deleteUnit,
 	getUnitLocalizationOrder,
 	getUnit,
 	listUnits,
@@ -46,7 +45,6 @@ import {
 	UnitListResponse,
 	UnitPresentationListResponse,
 } from "../schema/response";
-import { NoContentResponse } from "../schema/action-response";
 import {
 	getUnitSeriesMemberships,
 	promoteUnitVariantToMain,
@@ -364,28 +362,6 @@ export default new Elysia({ prefix: "/units" })
 				[StatusCodes.CONFLICT]: UnitVariantConflictResponse,
 			},
 			detail: { summary: "Promote Unit Variant to Main", tags: ["Units"] },
-		},
-	)
-	.delete(
-		"/:type/:unitId",
-		async ({ params, authorization, status }) => {
-			await deleteUnit(params.type, params.unitId, authorization);
-			return status(StatusCodes.NO_CONTENT, undefined);
-		},
-		{
-			access: "write:unit:delete",
-			params: UnitUnitIdParams,
-			response: {
-				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
-				[StatusCodes.FORBIDDEN]: UnitAuthorizationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
-			},
-			detail: {
-				summary: "Delete unit",
-				tags: ["Units"],
-				responses: NoContentResponse,
-			},
 		},
 	)
 	.put(

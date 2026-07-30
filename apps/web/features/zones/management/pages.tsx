@@ -9,7 +9,6 @@ import {
 import {
 	getApiZonesByZoneIdPagesQueryKey,
 	type GetApiZonesByZoneIdPagesStatus200,
-	useDeleteApiZonesByZoneIdPagesByPageId,
 	useDeleteApiZonesByZoneIdPagesByPageIdPlacement,
 	useGetApiZonesByZoneIdPages,
 	usePostApiZonesByZoneIdPages,
@@ -430,9 +429,6 @@ function PageEditor({
 	const updatePage = usePutApiZonesByZoneIdPagesByPageId({
 		mutation: { onSuccess: invalidate },
 	});
-	const removePage = useDeleteApiZonesByZoneIdPagesByPageId({
-		mutation: { onSuccess: invalidate },
-	});
 	const savePlacement = usePutApiZonesByZoneIdPagesByPageIdPlacement({
 		mutation: { onSuccess: invalidate },
 	});
@@ -454,7 +450,6 @@ function PageEditor({
 	const [parentPageId, setParentPageId] = useState(page?.placement?.parentPageId ?? "");
 	const [home, setHome] = useState(page?.home ?? !pages.some((candidate) => candidate.home));
 	const [indexed, setIndexed] = useState(Boolean(page?.placement));
-	const [confirmingRemove, setConfirmingRemove] = useState(false);
 	const excludedParents = page ? descendantPageIds(placedPages, page.id) : new Set<string>();
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
@@ -517,15 +512,10 @@ function PageEditor({
 	const pending =
 		createPage.isPending ||
 		updatePage.isPending ||
-		removePage.isPending ||
 		savePlacement.isPending ||
 		removePlacement.isPending;
 	const error =
-		createPage.error ??
-		updatePage.error ??
-		removePage.error ??
-		savePlacement.error ??
-		removePlacement.error;
+		createPage.error ?? updatePage.error ?? savePlacement.error ?? removePlacement.error;
 
 	return (
 		<Card appearance="outlined">
@@ -607,36 +597,6 @@ function PageEditor({
 						<Button isLoading={pending} type="submit">
 							{t.zones.management.pages.save}
 						</Button>
-						{page ? (
-							<Button
-								isLoading={pending}
-								onClick={async () => {
-									if (!confirmingRemove) return setConfirmingRemove(true);
-									try {
-										if (page.placement)
-											await removePlacement.mutateAsync({
-												path: { zoneId, pageId: page.id },
-												body: {
-													baseStructureRevisionId:
-														page.placement.latestStructureRevisionId,
-												},
-											});
-										await removePage.mutateAsync({
-											path: { zoneId, pageId: page.id },
-										});
-										onSaved("new");
-									} catch {
-										// Typed mutation states supply the visible request failure.
-									}
-								}}
-								type="button"
-								variant="outline"
-							>
-								{confirmingRemove
-									? t.zones.management.pages.confirmRemove
-									: t.zones.management.pages.remove}
-							</Button>
-						) : null}
 					</div>
 					<RequestFailure error={error} fallback={t.ui.retryLater} />
 				</form>

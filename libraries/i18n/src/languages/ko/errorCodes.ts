@@ -115,6 +115,16 @@ export default {
 	UnitOwnerRestrictionForbidden: "유닛 소유자는 제한될 수 없습니다.",
 	UnitAccessConfigurationInvalid:
 		"이 유닛 접근 설정이 유효하지 않거나 위임할 수 있는 권한을 초과합니다.",
+	UnitOwnershipChanged: "유닛 소유자가 변경되었습니다. 새로 고침 후 다시 시도하세요.",
+	UnitOwnershipTargetIneligible: "선택한 프로필은 유닛 소유권을 받을 조건을 충족하지 않습니다.",
+	UnitOwnershipRelinquishmentForbidden: "커뮤니티가 소유한 유닛의 소유권은 포기할 수 없습니다.",
+	UnitOwnershipOverrideConfirmationInvalid:
+		"입력한 유닛 식별자가 소유권 강제 변경 대상과 일치하지 않습니다.",
+	UnitLifecycleConfirmationInvalid: "입력한 유닛 식별자가 작업 대상과 일치하지 않습니다.",
+	UnitLifecycleChanged: "유닛이 변경되었습니다. 새로 고침 후 다시 시도하세요.",
+	UnitLifecycleProtected: "이 보호 유닛은 소프트 삭제할 수 없습니다.",
+	UnitAlreadyDeleted: "이 유닛은 이미 소프트 삭제되었습니다.",
+	UnitNotDeleted: "이 유닛은 현재 소프트 삭제 상태가 아닙니다.",
 	InvalidPaginationCursor: "이 페이지 링크가 유효하지 않거나 만료되었습니다.",
 	BookNotFound: "이 책을 찾을 수 없습니다.",
 	MediaNotFound: "이 미디어 항목을 찾을 수 없습니다.",

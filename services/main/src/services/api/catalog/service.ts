@@ -42,6 +42,8 @@ export async function createCatalogUnit(
 		);
 		const created = await insertUnit(tx, {
 			kind: type,
+			catalogMode:
+				type === "entity" && "catalogMode" in body ? body.catalogMode : "public_entry",
 			status: "published",
 			visibility: "public",
 			publishedAt: new Date(),

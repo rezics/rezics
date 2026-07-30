@@ -59,7 +59,10 @@ export type NotificationInput = NotificationBase &
 	);
 
 export type NotificationTranslationKey =
-	NotificationInput["kind"] | "report_resolution" | "unit_access_invitation";
+	| NotificationInput["kind"]
+	| "report_resolution"
+	| "unit_access_invitation"
+	| "unit_ownership_override";
 
 export function notificationTranslationKey(
 	kind: NotificationInput["kind"],
@@ -83,6 +86,16 @@ export function notificationTranslationKey(
 		payload.event === "unit_access_invitation"
 	)
 		return "unit_access_invitation";
+	if (
+		kind === "system" &&
+		typeof payload === "object" &&
+		payload !== null &&
+		"type" in payload &&
+		payload.type === "system_event" &&
+		"event" in payload &&
+		payload.event === "unit_ownership_override"
+	)
+		return "unit_ownership_override";
 	return kind;
 }
 

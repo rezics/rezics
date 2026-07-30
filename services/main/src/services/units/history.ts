@@ -15,7 +15,6 @@ import type { Static, TSchema } from "@sinclair/typebox";
 import { type ContentLanguage, ContentLanguageValues, isContentLanguage } from "@rezics/i18n";
 import { PublicationLicenseIds } from "@rezics/license";
 
-import { recordAuditEvent } from "../audit";
 import type { DatabaseTransaction } from "../database";
 import type { Authorization } from "../authorization";
 import { isFirstUnitLocalization } from "./localization";
@@ -43,6 +42,7 @@ import {
 	seriesRelease,
 	subjectAssociation,
 	unit,
+	CatalogEntryModeValues,
 	UnitKindValues,
 	VariantCapableUnitKindValues,
 	unitAlias,
@@ -152,7 +152,10 @@ type UnitSnapshot = z.infer<typeof UnitSnapshotSchema>;
 
 const schemaFactory = createSchemaFactory({ coerce: { date: true } });
 const unitStateSchema = schemaFactory
-	.createSelectSchema(unit, { license: z.enum(PublicationLicenseIds).nullable() })
+	.createSelectSchema(unit, {
+		catalogMode: z.enum(CatalogEntryModeValues),
+		license: z.enum(PublicationLicenseIds).nullable(),
+	})
 	.omit({
 		id: true,
 		kind: true,
@@ -1164,18 +1167,6 @@ export async function recordUnitRevision(
 	if (input.baseRevisionId !== undefined && head?.revisionId !== input.baseRevisionId) {
 		throw new UnitRevisionConflict(head?.revisionId ?? null);
 	}
-	if (input.event === "delete")
-		await recordAuditEvent(tx, {
-			category: "admin_activity",
-			outcome: "succeeded",
-			actor: input.actorProfileId
-				? { kind: "profile", profileId: input.actorProfileId }
-				: { kind: "system" },
-			authority: { kind: "unit", id: input.unitId },
-			action: "unit.delete",
-			target: { kind: "unit", id: input.unitId },
-		});
-
 	const documents = snapshotToDocuments(await snapshotUnit(tx, input.unitId));
 	await syncUnitLocalizationContentMetrics(tx, input.unitId);
 	const previousSlots = head

@@ -5,6 +5,7 @@ import { consoleSectionHref, parseConsoleSection } from "./console-routes";
 describe("console routes", () => {
 	it("builds section routes", () => {
 		expect(consoleSectionHref("users")).toBe("/console/users");
+		expect(consoleSectionHref("units")).toBe("/console/units");
 		expect(consoleSectionHref("moderation")).toBe("/console/moderation");
 		expect(consoleSectionHref("audit")).toBe("/console/audit");
 		expect(consoleSectionHref("token-policies")).toBe("/console/token-policies");
@@ -13,6 +14,7 @@ describe("console routes", () => {
 	it.each([
 		["/console/users", "users"],
 		["/console/users/user-id", "users"],
+		["/console/units", "units"],
 		["/console/moderation", "moderation"],
 		["/console/audit/", "audit"],
 		["/console/token-policies", "token-policies"],

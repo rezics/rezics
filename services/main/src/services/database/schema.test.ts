@@ -54,6 +54,7 @@ import {
 	score,
 	post,
 	postScore,
+	platformCapabilityGrant,
 	profilePreference,
 	unitAccessGrant,
 	unitAccessInvitation,
@@ -185,8 +186,14 @@ describe("database schema contracts", () => {
 		expect(grant.checks.map((constraint) => constraint.name)).toContain(
 			"unit_access_grant_subject_shape_check",
 		);
+		expect(grant.checks.map((constraint) => constraint.name)).toContain(
+			"unit_access_grant_permission_delegable_check",
+		);
 		expect(restriction.checks.map((constraint) => constraint.name)).toContain(
 			"unit_access_restriction_subject_shape_check",
+		);
+		expect(restriction.checks.map((constraint) => constraint.name)).toContain(
+			"unit_access_restriction_permission_delegable_check",
 		);
 		expect(restriction.indexes.map((index) => index.config.name)).toEqual(
 			expect.arrayContaining([
@@ -205,6 +212,7 @@ describe("database schema contracts", () => {
 				"unit_access_grant_active_profile_scope_key",
 				"unit_access_grant_active_realm_scope_key",
 				"unit_access_grant_active_authenticated_scope_key",
+				"unit_access_grant_unit_transfer_candidate_idx",
 			]),
 		);
 		expect(ownership.indexes.map((index) => index.config.name)).toContain(
@@ -225,6 +233,7 @@ describe("database schema contracts", () => {
 			expect.arrayContaining([
 				"unit_access_invitation_unit_unresolved_idx",
 				"unit_access_invitation_profile_unresolved_idx",
+				"unit_access_invitation_unit_transfer_candidate_idx",
 			]),
 		);
 		expect(UnitPermissionValues).toContain("unit.association.manage");
@@ -653,11 +662,18 @@ describe("database schema contracts", () => {
 				"unit.slug.namespace.manage",
 				"unit.slug.redirect.release",
 				"entity.associations.override",
-				"unit.ownership.transfer",
+				"unit.governance.read",
+				"unit.ownership.override",
+				"unit.delete",
+				"unit.restore",
 				"platform.development_preview.access",
 				"platform.api_token_policy.manage",
 			]),
 		);
+		expect(PlatformCapabilityValues).not.toContain("unit.ownership.transfer");
+		expect(
+			getTableConfig(platformCapabilityGrant).checks.map((constraint) => constraint.name),
+		).toContain("platform_capability_grant_current_capability_check");
 		expect(unitSlugAddress.kind.getSQLType()).toBe("text");
 	});
 

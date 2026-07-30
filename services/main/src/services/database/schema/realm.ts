@@ -1,4 +1,4 @@
-import { PlatformCapabilityValues } from "@rezics/access";
+import { type PlatformCapability } from "@rezics/access";
 import { inArray, sql } from "drizzle-orm";
 import {
 	boolean,
@@ -44,10 +44,47 @@ export const realmRuleAcknowledgementMode = pgEnum(
 	toEnumValues(RealmRuleAcknowledgementModeValues),
 );
 export const realmUnitStatus = pgEnum("realm_unit_status", toEnumValues(RealmUnitStatusValues));
-export const platformCapability = pgEnum(
-	"platform_capability",
-	toEnumValues(PlatformCapabilityValues),
-);
+/*
+ * PostgreSQL cannot remove enum labels in place. The retired label remains in
+ * the physical enum, while the grant check proves the narrower application type.
+ */
+const platformCapabilityStorageValues = toEnumValues([
+	"platform.access.read",
+	"platform.access.manage",
+	"platform.audit.read",
+	"platform.user.read",
+	"platform.user.status.update",
+	"platform.session.read",
+	"platform.session.revoke",
+	"entity.associations.override",
+	"unit.edit",
+	"platform.development_preview.access",
+	"unit.ownership.transfer",
+	"unit.delete",
+	"unit.restore",
+	"unit.governance.read",
+	"unit.ownership.override",
+	"unit.slug.manage",
+	"unit.slug.namespace.manage",
+	"unit.slug.redirect.release",
+	"platform.api_token_policy.manage",
+	"platform.moderate",
+	"platform.suppress",
+	"realm.contribute",
+	"realm.units.create",
+	"realm.post.replies.create",
+	"realm.settings.update",
+	"realm.members.read",
+	"realm.members.manage",
+	"realm.rules.update",
+	"realm.pins.manage",
+	"realm.tags.manage",
+	"realm.units.moderate",
+] as const satisfies readonly (PlatformCapability | "unit.ownership.transfer")[]) as [
+	PlatformCapability,
+	...PlatformCapability[],
+];
+export const platformCapability = pgEnum("platform_capability", platformCapabilityStorageValues);
 
 export const realm = pgTable(
 	"realm",
@@ -259,6 +296,10 @@ export const platformCapabilityGrant = pgTable(
 		index("platform_capability_grant_profile_expiry_idx").on(table.profileId, table.expiresAt),
 		index("platform_capability_grant_granted_by_idx").on(table.grantedByProfileId),
 		index("platform_capability_grant_revoked_by_idx").on(table.revokedByProfileId),
+		check(
+			"platform_capability_grant_current_capability_check",
+			sql`${table.capability} <> 'unit.ownership.transfer'::platform_capability`,
+		),
 		check(
 			"platform_capability_grant_revocation_check",
 			sql`(${table.revokedAt} is null) = (${table.revokedByProfileId} is null)`,

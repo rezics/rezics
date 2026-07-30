@@ -66,4 +66,8 @@ export default {
 		title: "收到新的存取邀請",
 		body: "有人邀請你存取一個條目。請檢視邀請內容後再決定是否接受。",
 	},
+	unit_ownership_override: {
+		title: "條目所有權已變更",
+		body: "平台管理員變更了一個與你個人檔案相關的條目所有權。",
+	},
 };

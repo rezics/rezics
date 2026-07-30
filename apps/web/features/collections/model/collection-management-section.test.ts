@@ -13,7 +13,6 @@ const denied = {
 	canManageAccess: false,
 	canViewHistory: false,
 	canRestoreHistory: false,
-	canDelete: false,
 };
 
 describe("Collection management section manifest", () => {
@@ -30,11 +29,5 @@ describe("Collection management section manifest", () => {
 				canManagePublishers: true,
 			}),
 		).toEqual(["items", "publishers"]);
-	});
-
-	it("shows metadata when delete is the only allowed operation", () => {
-		expect(getCollectionManagementSectionIds({ ...denied, canDelete: true })).toEqual([
-			"metadata",
-		]);
 	});
 });

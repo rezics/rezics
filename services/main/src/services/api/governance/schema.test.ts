@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
 	CreateAccountEnforcementBody,
 	CreateUnitAccessInvitationBody,
+	OverrideUnitOwnershipBody,
 	ReplaceUnitSubjectAccessBody,
 	RevokeAccountEnforcementBody,
 	TransferUnitOwnershipBody,
@@ -12,6 +13,7 @@ import {
 } from "./schema";
 
 const profileId = "0195c49b-8f3b-7e18-8c45-c2f36ee8d337";
+const secondProfileId = "0195c49b-8f3b-7e18-8c45-c2f36ee8d338";
 const content = createPortableTextDocument([], "0123456789ab");
 const internalNote = { language: "en", content };
 
@@ -54,10 +56,44 @@ describe("adjacent governance API contracts", () => {
 	it("keeps governance ownership transfer separate from access grants", () => {
 		expect(
 			Check(TransferUnitOwnershipBody, {
-				owner: { kind: "profile", profileId },
+				expectedOwnerProfileId: profileId,
+				targetProfileId: secondProfileId,
 			}),
 		).toBe(true);
-		expect(Check(TransferUnitOwnershipBody, { owner: { kind: "system" } })).toBe(false);
+		expect(
+			Check(TransferUnitOwnershipBody, {
+				expectedOwnerProfileId: profileId,
+				targetProfileId: secondProfileId,
+				owner: { kind: "system" },
+			}),
+		).toBe(false);
+		expect(
+			Check(ReplaceUnitSubjectAccessBody, {
+				subject: { kind: "profile", profileId },
+				grants: ["unit.ownership.transfer"],
+				restrictions: [],
+				scope: [],
+			}),
+		).toBe(false);
+	});
+
+	it("requires an explicit platform ownership override confirmation", () => {
+		expect(
+			Check(OverrideUnitOwnershipBody, {
+				expectedOwnerProfileId: null,
+				targetProfileId: secondProfileId,
+				confirmationUnitId: profileId,
+				reasonCode: "administrative",
+				note: "Recover an ownerless Unit.",
+			}),
+		).toBe(true);
+		expect(
+			Check(OverrideUnitOwnershipBody, {
+				expectedOwnerProfileId: profileId,
+				targetProfileId: secondProfileId,
+				reasonCode: "administrative",
+			}),
+		).toBe(false);
 	});
 
 	it("keeps pending access invitations permission-based", () => {
@@ -73,6 +109,14 @@ describe("adjacent governance API contracts", () => {
 			Check(CreateUnitAccessInvitationBody, {
 				invitedProfileId: profileId,
 				permissions: [],
+				scope: [],
+				invitationExpiresAt: "2026-08-01T00:00:00.000Z",
+			}),
+		).toBe(false);
+		expect(
+			Check(CreateUnitAccessInvitationBody, {
+				invitedProfileId: profileId,
+				permissions: ["unit.ownership.transfer"],
 				scope: [],
 				invitationExpiresAt: "2026-08-01T00:00:00.000Z",
 			}),

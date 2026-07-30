@@ -17,6 +17,7 @@ import {
 } from "@rezics/ui";
 import {
 	ArrowLeft,
+	Boxes,
 	FileClock,
 	Gauge,
 	KeyRound,
@@ -59,6 +60,10 @@ interface ConsoleWorkspaceModel {
 	readonly canModerate: boolean;
 	readonly canReadAudit: boolean;
 	readonly canManageTokenPolicies: boolean;
+	readonly canReadUnits: boolean;
+	readonly canDeleteUnits: boolean;
+	readonly canRestoreUnits: boolean;
+	readonly canOverrideUnitOwnership: boolean;
 }
 
 const ConsoleWorkspaceContext = createContext<ConsoleWorkspaceModel | undefined>(undefined);
@@ -136,6 +141,10 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 		getAccessibleConsoleSectionIds(me.data.platformCapabilities),
 	);
 	const canReadUsers = accessibleSectionIds.has("users");
+	const canReadUnits = accessibleSectionIds.has("units");
+	const canDeleteUnits = capabilities.has("unit.delete");
+	const canRestoreUnits = capabilities.has("unit.restore");
+	const canOverrideUnitOwnership = capabilities.has("unit.ownership.override");
 	const canManageUserStatus = capabilities.has("platform.user.status.update");
 	const canReadSessions = capabilities.has("platform.session.read");
 	const canRevokeSessions = capabilities.has("platform.session.revoke");
@@ -154,6 +163,17 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 						label: labels.users.label,
 						description: labels.users.description,
 						icon: Users,
+					},
+				]
+			: []),
+		...(canReadUnits
+			? [
+					{
+						id: "units" as const,
+						href: consoleSectionHref("units"),
+						label: labels.units.label,
+						description: labels.units.description,
+						icon: Boxes,
 					},
 				]
 			: []),
@@ -195,7 +215,7 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 	if (sections.length === 0) return <ForbiddenPage />;
 
 	const currentSectionId = parseConsoleSection(pathname);
-	const userWorkspace = currentSectionId === "users";
+	const constrainedWorkspace = currentSectionId === "users" || currentSectionId === "units";
 	const model = {
 		sections,
 		canReadUsers,
@@ -207,6 +227,10 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 		canModerate,
 		canReadAudit,
 		canManageTokenPolicies,
+		canReadUnits,
+		canDeleteUnits,
+		canRestoreUnits,
+		canOverrideUnitOwnership,
 	} satisfies ConsoleWorkspaceModel;
 
 	return (
@@ -268,7 +292,7 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 					<main
 						className={cn(
 							"min-h-0 min-w-0",
-							userWorkspace ? "overflow-hidden" : "overflow-y-auto p-4 md:p-6",
+							constrainedWorkspace ? "overflow-hidden" : "overflow-y-auto p-4 md:p-6",
 						)}
 					>
 						{children}

@@ -26,6 +26,11 @@ export default {
 			description:
 				"Manage sign-in account states, platform access, sessions, and security activity.",
 		},
+		units: {
+			label: "Unit governance",
+			description:
+				"Search all Units and perform audited ownership, soft-deletion, or restoration operations.",
+		},
 		moderation: {
 			label: "Global content governance",
 			description:
@@ -39,6 +44,74 @@ export default {
 			label: `${verbatimTerms.api.value} token policies`,
 			description: `Manage global rate, concurrency, and cost limits for ${verbatimTerms.api.value} tokens.`,
 		},
+	},
+	units: {
+		searchLabel: "Search Units",
+		searchPlaceholder: `Search by title, Unit ${verbatimTerms.id.value}, or public address`,
+		stateFilter: "Lifecycle state",
+		states: {
+			active: "Active Units",
+			deleted: "Soft-deleted",
+			all: "All Units",
+		},
+		listLabel: "Unit list",
+		untitled: "Untitled Unit",
+		empty: "No Units match the current filters.",
+		statuses: {
+			draft: "Draft",
+			published: "Published",
+			archived: "Archived",
+		},
+		active: "Active",
+		deleted: "Soft-deleted",
+		protected: "Protected",
+		kind: "Unit kind identifier",
+		owner: "Current owner",
+		noOwner: "No active owner",
+		updatedAt: "Last updated",
+		deletedAt: "Soft-deleted at",
+		restore: "Restore Unit",
+		softDelete: "Soft-delete Unit",
+		overrideOwnership: "Override ownership",
+		ownershipPickerTitle: "Select a new owner",
+		ownershipPickerDescription:
+			"Platform governance can assign this Unit to any active Profile, independently from Unit collaboration access.",
+		ownershipSearchLabel: "Search eligible Profiles",
+		ownershipSearchPlaceholder: `Search by name, Profile ${verbatimTerms.id.value}, or public address`,
+		ownershipCandidateListLabel: "Eligible ownership recipients",
+		ownershipCandidatesEmpty: "No active Profiles match this search.",
+		unnamedProfile: "Unnamed Profile",
+		ownershipCandidateSelect: insert("Select {{profile}} as the new owner", {
+			profile: String,
+		}),
+		ownershipConfirmationTitle: "Override this Unit’s ownership?",
+		ownershipConfirmationDescription: insert(
+			"This immediately replaces {{currentOwner}} with {{newOwner}}. The action is audited and the affected Profiles are notified.",
+			{ currentOwner: String, newOwner: String },
+		),
+		newOwner: "New owner",
+		backToCandidates: "Back to Profiles",
+		confirmOwnershipOverride: "Confirm ownership override",
+		protectedDescription:
+			"Bootstrap Units and the Profile you are currently using cannot be soft-deleted.",
+		selectUnit: "Select a Unit",
+		selectUnitDescription: "Open its lifecycle state and protection details from the list.",
+		restoreTitle: "Restore this Unit?",
+		restoreDescription:
+			"The Unit will return to ordinary queries. A previously published Unit is restored as archived so it is not republished without review.",
+		softDeleteTitle: "Soft-delete this Unit?",
+		softDeleteDescription:
+			"The Unit and its history remain stored, but ordinary product queries and operations will stop exposing it immediately.",
+		reason: "Governance reason",
+		internalNote: "Internal note (optional)",
+		notePlaceholder:
+			"Record the basis for this operation; it will be stored in the security audit log.",
+		confirmationLabel: `Enter the Unit ${verbatimTerms.id.value} to confirm`,
+		confirmationInstruction: insert("Enter {{unitId}} to confirm this operation.", {
+			unitId: String,
+		}),
+		confirmRestore: "Confirm restoration",
+		confirmSoftDelete: "Confirm soft-deletion",
 	},
 	users: {
 		searchLabel: "Search users",

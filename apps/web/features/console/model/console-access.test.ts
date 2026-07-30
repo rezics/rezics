@@ -11,6 +11,7 @@ describe("console access", () => {
 	it("maps every console section to its exact platform capability", () => {
 		expect(ConsoleSectionRequiredCapability).toEqual({
 			users: "platform.user.read",
+			units: "unit.governance.read",
 			moderation: "platform.moderate",
 			audit: "platform.audit.read",
 			"token-policies": "platform.api_token_policy.manage",
@@ -18,9 +19,13 @@ describe("console access", () => {
 	});
 
 	it("derives entry and section access from the same capability mapping", () => {
-		const capabilities = ["platform.audit.read", "platform.moderate"];
+		const capabilities = ["platform.audit.read", "unit.governance.read", "platform.moderate"];
 
-		expect(getAccessibleConsoleSectionIds(capabilities)).toEqual(["moderation", "audit"]);
+		expect(getAccessibleConsoleSectionIds(capabilities)).toEqual([
+			"units",
+			"moderation",
+			"audit",
+		]);
 		expect(hasConsoleAccess(capabilities)).toBe(true);
 		expect(canAccessConsoleSection(capabilities, "moderation")).toBe(true);
 		expect(canAccessConsoleSection(capabilities, "users")).toBe(false);

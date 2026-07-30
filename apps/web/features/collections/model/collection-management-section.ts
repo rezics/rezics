@@ -17,7 +17,7 @@ export function getCollectionManagementSectionIds(
 ): CollectionManagementSectionId[] {
 	return CollectionManagementSectionIds.filter((sectionId) => {
 		if (sectionId === "content") return capabilities.canManageLocalizations;
-		if (sectionId === "metadata") return capabilities.canEditDetails || capabilities.canDelete;
+		if (sectionId === "metadata") return capabilities.canEditDetails;
 		if (sectionId === "items") return capabilities.canManageItems;
 		if (sectionId === "publishers") return capabilities.canManagePublishers;
 		if (sectionId === "access") return capabilities.canManageAccess;

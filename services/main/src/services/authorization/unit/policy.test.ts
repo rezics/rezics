@@ -36,7 +36,7 @@ describe("unit access policy", () => {
 		expect(isUnitPermissionGrantableToAuthenticated("unit.update")).toBe(true);
 		expect(isUnitPermissionGrantableToAuthenticated("realm.contribute")).toBe(true);
 		expect(isUnitPermissionGrantableToAuthenticated("unit.access.manage")).toBe(false);
-		expect(isUnitPermissionGrantableToAuthenticated("unit.delete")).toBe(false);
+		expect(isUnitPermissionGrantableToAuthenticated("unit.ownership.transfer")).toBe(false);
 		expect(isUnitPermissionGrantableToAuthenticated("realm.members.manage")).toBe(false);
 	});
 

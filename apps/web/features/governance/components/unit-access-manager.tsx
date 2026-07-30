@@ -2,12 +2,25 @@
 
 import {
 	type GetApiGovernanceUnitByUnitIdAccessStatus200,
+	type GetApiGovernanceUnitByUnitIdOwnershipCandidatesStatus200,
+	getApiGovernanceUnitByUnitIdOwnershipCandidates,
+	getApiGovernanceUnitByUnitIdOwnershipCandidatesQueryKey,
 	getApiGovernanceUnitByUnitIdAccessQueryKey,
 	useGetApiGovernanceUnitByUnitIdAccess,
 	useGetApiGovernanceUnitByUnitIdAccessCandidates,
+	usePostApiGovernanceUnitByUnitIdOwnershipRelinquishment,
 	usePutApiGovernanceUnitByUnitIdAccess,
+	usePutApiGovernanceUnitByUnitIdOwnership,
 } from "@rezics/openapi-tanstack-query";
 import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
 	Badge,
 	Button,
 	Card,
@@ -18,6 +31,7 @@ import {
 	Dialog,
 	DialogBody,
 	DialogContent,
+	DialogFooter,
 	DialogHeader,
 	Field,
 	FieldLabel,
@@ -36,9 +50,16 @@ import {
 	SheetHeader,
 } from "@rezics/ui";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { KeyRoundIcon, PlusIcon, SearchIcon, UsersRoundIcon } from "lucide-react";
-import { useDeferredValue, useMemo, useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import {
+	ArrowLeftIcon,
+	KeyRoundIcon,
+	PlusIcon,
+	SearchIcon,
+	UserRoundCogIcon,
+	UsersRoundIcon,
+} from "lucide-react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -50,6 +71,7 @@ type Subject = AccessSubject["subject"];
 type EditableMode = "grant" | "restrict";
 type MatrixValue = `${Permission}:${EditableMode}`;
 type SubjectFilter = "all" | "profile" | "realm";
+type OwnershipCandidate = GetApiGovernanceUnitByUnitIdOwnershipCandidatesStatus200["items"][number];
 const AccessScopeOptions = [
 	{ id: "root", scope: [] },
 	{ id: "creditAttributions", scope: ["credit-attributions"] },
@@ -195,6 +217,8 @@ function SubjectAccessTable({
 	const deferredSearch = useDeferredValue(search.trim().toLocaleLowerCase());
 	const [filter, setFilter] = useState<SubjectFilter>("all");
 	const [addOpen, setAddOpen] = useState(false);
+	const [transferOpen, setTransferOpen] = useState(false);
+	const [relinquishOpen, setRelinquishOpen] = useState(false);
 	const [selected, setSelected] = useState<AccessSubject | null>(null);
 	const subjects = useMemo(() => {
 		const byKey = new Map(
@@ -242,10 +266,31 @@ function SubjectAccessTable({
 						<CardTitle>{t.governance.access.subjectsTitle}</CardTitle>
 						<CardDescription>{t.governance.access.subjectsDescription}</CardDescription>
 					</div>
-					<Button onClick={() => setAddOpen(true)} type="button">
-						<PlusIcon />
-						{t.governance.access.addSubject}
-					</Button>
+					<div className="flex flex-wrap gap-2">
+						{scope.length === 0 && snapshot.canTransferOwnership ? (
+							<Button
+								onClick={() => setTransferOpen(true)}
+								type="button"
+								variant="outline"
+							>
+								<UserRoundCogIcon />
+								{t.governance.access.transferOwnership}
+							</Button>
+						) : null}
+						{scope.length === 0 && snapshot.canRelinquishOwnership ? (
+							<Button
+								onClick={() => setRelinquishOpen(true)}
+								type="button"
+								variant="outline"
+							>
+								{t.governance.access.relinquishOwnership}
+							</Button>
+						) : null}
+						<Button onClick={() => setAddOpen(true)} type="button">
+							<PlusIcon />
+							{t.governance.access.addSubject}
+						</Button>
+					</div>
 				</div>
 			</CardHeader>
 			<CardContent className="grid gap-4">
@@ -385,6 +430,24 @@ function SubjectAccessTable({
 				open={addOpen}
 				unitId={unitId}
 			/>
+			{snapshot.owner ? (
+				<>
+					<OwnershipTransferDialogs
+						onOpenChange={setTransferOpen}
+						open={transferOpen}
+						scope={scope}
+						snapshot={snapshot}
+						unitId={unitId}
+					/>
+					<OwnershipRelinquishmentDialog
+						onOpenChange={setRelinquishOpen}
+						open={relinquishOpen}
+						scope={scope}
+						snapshot={snapshot}
+						unitId={unitId}
+					/>
+				</>
+			) : null}
 			{selected ? (
 				<SubjectAccessSheet
 					key={subjectKey(selected.subject)}
@@ -399,6 +462,324 @@ function SubjectAccessTable({
 				/>
 			) : null}
 		</Card>
+	);
+}
+
+function candidateLabel(candidate: OwnershipCandidate) {
+	return candidate.label ?? candidate.slug ?? candidate.profileId;
+}
+
+function OwnershipTransferDialogs({
+	unitId,
+	scope,
+	snapshot,
+	open,
+	onOpenChange,
+}: {
+	readonly unitId: string;
+	readonly scope: readonly string[];
+	readonly snapshot: AccessSnapshot;
+	readonly open: boolean;
+	readonly onOpenChange: (open: boolean) => void;
+}) {
+	const { t } = useTranslation(["governance"]);
+	const queryClient = useQueryClient();
+	const owner = snapshot.owner;
+	const [search, setSearch] = useState("");
+	const deferredSearch = useDeferredValue(search.trim());
+	const [selected, setSelected] = useState<OwnershipCandidate | null>(null);
+	const [confirmationOpen, setConfirmationOpen] = useState(false);
+	const baseQuery = useMemo(
+		() => ({
+			limit: 50,
+			...(deferredSearch ? { query: deferredSearch } : {}),
+		}),
+		[deferredSearch],
+	);
+	const candidates = useInfiniteQuery({
+		queryKey: getApiGovernanceUnitByUnitIdOwnershipCandidatesQueryKey({
+			path: { unitId },
+			query: baseQuery,
+		}),
+		queryFn: async ({ pageParam, signal }) => {
+			const { data } = await getApiGovernanceUnitByUnitIdOwnershipCandidates({
+				path: { unitId },
+				query: { ...baseQuery, ...(pageParam ? { cursor: pageParam } : {}) },
+				signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+		initialPageParam: "",
+		getNextPageParam: (page) => page.nextCursor ?? undefined,
+		enabled: open,
+	});
+	const items = candidates.data?.pages.flatMap((page) => page.items) ?? [];
+	const scrollRef = useRef<HTMLDivElement>(null);
+	const virtualizer = useVirtualizer({
+		count: items.length,
+		getScrollElement: () => scrollRef.current,
+		estimateSize: () => 60,
+		overscan: 8,
+	});
+	const virtualRows = virtualizer.getVirtualItems();
+	const lastVirtualIndex = virtualRows.at(-1)?.index;
+	useEffect(() => {
+		if (
+			lastVirtualIndex !== undefined &&
+			lastVirtualIndex >= items.length - 6 &&
+			candidates.hasNextPage &&
+			!candidates.isFetchingNextPage
+		)
+			void candidates.fetchNextPage();
+	}, [
+		candidates.fetchNextPage,
+		candidates.hasNextPage,
+		candidates.isFetchingNextPage,
+		items.length,
+		lastVirtualIndex,
+	]);
+	const transfer = usePutApiGovernanceUnitByUnitIdOwnership();
+
+	async function confirmTransfer() {
+		if (!owner || !selected || transfer.isPending) return;
+		try {
+			await transfer.mutateAsync({
+				path: { unitId },
+				body: {
+					expectedOwnerProfileId: owner.profileId,
+					targetProfileId: selected.profileId,
+				},
+			});
+			await queryClient.invalidateQueries({
+				queryKey: getApiGovernanceUnitByUnitIdAccessQueryKey({
+					path: { unitId },
+					query: { scope: [...scope] },
+				}),
+			});
+			setConfirmationOpen(false);
+			setSelected(null);
+			onOpenChange(false);
+		} catch {
+			// The typed mutation state renders the request failure below.
+		}
+	}
+
+	return (
+		<>
+			<Dialog
+				onOpenChange={({ open: next }) => {
+					if (!transfer.isPending) onOpenChange(next);
+				}}
+				open={open}
+			>
+				<DialogContent size="lg">
+					<DialogHeader
+						description={t.governance.access.transferOwnershipDescription}
+						title={t.governance.access.transferOwnership}
+					/>
+					<DialogBody className="grid gap-4">
+						<div className="relative">
+							<SearchIcon
+								aria-hidden
+								className="pointer-events-none absolute top-1/2 start-3 size-4 -translate-y-1/2 text-muted-foreground"
+							/>
+							<Input
+								aria-label={t.governance.access.searchOwnershipCandidates}
+								className="ps-9"
+								onChange={(event) => setSearch(event.currentTarget.value)}
+								placeholder={t.governance.access.searchOwnershipCandidates}
+								type="search"
+								value={search}
+							/>
+						</div>
+						{candidates.isError ? (
+							<QueryFailure
+								error={candidates.error}
+								retry={() => void candidates.refetch()}
+							/>
+						) : candidates.isPending ? (
+							<QueryPending />
+						) : items.length ? (
+							<div
+								aria-label={t.governance.access.ownershipCandidates}
+								className="h-80 overflow-auto rounded-xl border"
+								ref={scrollRef}
+								role="listbox"
+							>
+								<div
+									className="relative"
+									style={{ height: virtualizer.getTotalSize() }}
+								>
+									{virtualRows.map((virtualRow) => {
+										const candidate = items[virtualRow.index];
+										if (!candidate) return null;
+										return (
+											<button
+												aria-selected="false"
+												className="absolute inset-x-0 flex items-center justify-between gap-4 border-b px-4 text-start hover:bg-muted/48 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+												key={candidate.profileId}
+												onClick={() => {
+													setSelected(candidate);
+													onOpenChange(false);
+													setConfirmationOpen(true);
+												}}
+												role="option"
+												style={{
+													height: virtualRow.size,
+													transform: `translateY(${virtualRow.start}px)`,
+												}}
+												type="button"
+											>
+												<span className="min-w-0">
+													<span className="block truncate font-medium">
+														{candidateLabel(candidate)}
+													</span>
+													<span className="block truncate text-muted-foreground text-xs">
+														{candidate.slug
+															? `@${candidate.slug}`
+															: candidate.profileId}
+													</span>
+												</span>
+												<span className="text-muted-foreground text-sm">
+													{t.governance.access.selectOwnershipCandidate}
+												</span>
+											</button>
+										);
+									})}
+								</div>
+							</div>
+						) : (
+							<p className="rounded-xl border p-8 text-center text-muted-foreground text-sm">
+								{t.governance.access.noOwnershipCandidates}
+							</p>
+						)}
+					</DialogBody>
+				</DialogContent>
+			</Dialog>
+
+			<Dialog
+				onOpenChange={({ open: next }) => {
+					if (!transfer.isPending) setConfirmationOpen(next);
+				}}
+				open={confirmationOpen}
+			>
+				<DialogContent size="md">
+					<DialogHeader
+						description={
+							selected
+								? t.governance.access.confirmTransferDescription({
+										unit:
+											snapshot.unitTitle ??
+											t.governance.access.untitledOwnershipUnit,
+										profile: candidateLabel(selected),
+									})
+								: undefined
+						}
+						title={t.governance.access.confirmTransferTitle}
+					/>
+					<DialogBody className="grid gap-4">
+						<p className="rounded-lg bg-destructive/8 p-4 text-sm">
+							{t.governance.access.transferOwnershipWarning}
+						</p>
+						<RequestFailure error={transfer.error} />
+					</DialogBody>
+					<DialogFooter>
+						<Button
+							disabled={transfer.isPending}
+							onClick={() => {
+								setConfirmationOpen(false);
+								onOpenChange(true);
+							}}
+							type="button"
+							variant="outline"
+						>
+							<ArrowLeftIcon />
+							{t.governance.access.backToOwnershipCandidates}
+						</Button>
+						<Button
+							isLoading={transfer.isPending}
+							onClick={() => void confirmTransfer()}
+							type="button"
+							variant="destructive"
+						>
+							{t.governance.access.confirmTransfer}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+		</>
+	);
+}
+
+function OwnershipRelinquishmentDialog({
+	unitId,
+	scope,
+	snapshot,
+	open,
+	onOpenChange,
+}: {
+	readonly unitId: string;
+	readonly scope: readonly string[];
+	readonly snapshot: AccessSnapshot;
+	readonly open: boolean;
+	readonly onOpenChange: (open: boolean) => void;
+}) {
+	const { t } = useTranslation(["governance"]);
+	const queryClient = useQueryClient();
+	const owner = snapshot.owner;
+	const relinquish = usePostApiGovernanceUnitByUnitIdOwnershipRelinquishment();
+
+	async function confirm() {
+		if (!owner) return;
+		try {
+			await relinquish.mutateAsync({
+				path: { unitId },
+				body: { expectedOwnerProfileId: owner.profileId },
+			});
+			await queryClient.invalidateQueries({
+				queryKey: getApiGovernanceUnitByUnitIdAccessQueryKey({
+					path: { unitId },
+					query: { scope: [...scope] },
+				}),
+			});
+			onOpenChange(false);
+		} catch {
+			// The typed mutation state renders the request failure below.
+		}
+	}
+
+	return (
+		<AlertDialog
+			onOpenChange={({ open: next }) => {
+				if (!relinquish.isPending) onOpenChange(next);
+			}}
+			open={open}
+		>
+			<AlertDialogContent>
+				<AlertDialogHeader>
+					<AlertDialogTitle>
+						{t.governance.access.relinquishOwnershipTitle}
+					</AlertDialogTitle>
+					<AlertDialogDescription>
+						{t.governance.access.relinquishOwnershipDescription}
+					</AlertDialogDescription>
+				</AlertDialogHeader>
+				<RequestFailure error={relinquish.error} />
+				<AlertDialogFooter>
+					<AlertDialogCancel disabled={relinquish.isPending}>
+						{t.governance.access.cancel}
+					</AlertDialogCancel>
+					<AlertDialogAction
+						isLoading={relinquish.isPending}
+						onClick={() => void confirm()}
+						variant="destructive"
+					>
+						{t.governance.access.confirmRelinquishment}
+					</AlertDialogAction>
+				</AlertDialogFooter>
+			</AlertDialogContent>
+		</AlertDialog>
 	);
 }
 

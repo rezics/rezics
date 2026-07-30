@@ -116,6 +116,17 @@ export default {
 	UnitOwnerRestrictionForbidden: "A Unit owner cannot be restricted.",
 	UnitAccessConfigurationInvalid:
 		"This Unit access configuration is invalid or exceeds the permissions you may delegate.",
+	UnitOwnershipChanged: "The Unit owner changed. Reload and try again.",
+	UnitOwnershipTargetIneligible:
+		"The selected Profile is no longer eligible to receive Unit ownership.",
+	UnitOwnershipRelinquishmentForbidden: "Community-owned Unit ownership cannot be relinquished.",
+	UnitOwnershipOverrideConfirmationInvalid:
+		"The entered Unit identifier does not match the ownership override target.",
+	UnitLifecycleConfirmationInvalid: "The entered Unit identifier does not match the target.",
+	UnitLifecycleChanged: "The Unit changed. Reload and try again.",
+	UnitLifecycleProtected: "This protected Unit cannot be soft-deleted.",
+	UnitAlreadyDeleted: "This Unit is already soft-deleted.",
+	UnitNotDeleted: "This Unit is not currently soft-deleted.",
 	InvalidPaginationCursor: "This page link is invalid or expired.",
 	BookNotFound: "This book could not be found.",
 	MediaNotFound: "This media item could not be found.",

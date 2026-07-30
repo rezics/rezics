@@ -68,4 +68,8 @@ export default {
 		title: "Nouvelle invitation d’accès",
 		body: "Une personne vous a invité à accéder à une Unit. Consultez l’invitation avant de répondre.",
 	},
+	unit_ownership_override: {
+		title: "Propriété de la Unit modifiée",
+		body: "L’administration de la plateforme a modifié la propriété d’une Unit associée à votre profil.",
+	},
 } satisfies typeof import("../zh-Hant/notifications").default;

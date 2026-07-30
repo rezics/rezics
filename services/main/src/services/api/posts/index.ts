@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import type { ContentLanguage } from "@rezics/i18n";
 import { and, desc, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
-import Elysia, { t } from "elysia";
+import Elysia from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
@@ -41,7 +41,7 @@ import {
 	getAttributionSummariesByUnitIds,
 	type UnitAttributionSummary,
 } from "../../units/attribution";
-import { IdResponse, NoContentResponse } from "../schema/action-response";
+import { IdResponse } from "../schema/action-response";
 import {
 	ReplyListResponse,
 	ReplyResponse,
@@ -732,42 +732,6 @@ export default new Elysia()
 					},
 					detail: { summary: "Update post", tags: ["Posts"] },
 				},
-			)
-			.delete(
-				"/:postId",
-				async ({ params, profile, authorization }) => {
-					await ensureEditablePost(params.postId);
-					await authorization.unit.ensure(params.postId, "unit.delete");
-					await database.transaction(async (tx) => {
-						await tx
-							.update(unit)
-							.set({ deletedAt: new Date() })
-							.where(and(eq(unit.id, params.postId), eq(unit.kind, "post")));
-						await recordUnitRevision(tx, {
-							unitId: params.postId,
-							actorProfileId: profile.unitId,
-							event: "delete",
-						});
-					});
-					return new Response(null, { status: StatusCodes.NO_CONTENT });
-				},
-				{
-					access: "write:unit:delete",
-					params: PostParams,
-					response: {
-						[StatusCodes.NO_CONTENT]: t.Void(),
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"PostNotFound",
-						]),
-					},
-					detail: {
-						summary: "Delete post",
-						tags: ["Posts"],
-						responses: NoContentResponse,
-					},
-				},
 			),
 	)
 	.group("/posts/:postId/replies", (app) =>
@@ -1117,42 +1081,6 @@ export default new Elysia()
 						]),
 					},
 					detail: { summary: "Update reply post", tags: ["Posts"] },
-				},
-			)
-			.delete(
-				"/:replyPostId",
-				async ({ params, profile, authorization }) => {
-					await getReplyPost(params.postId, params.replyPostId);
-					await authorization.unit.ensure(params.replyPostId, "unit.delete");
-					await database.transaction(async (tx) => {
-						await tx
-							.update(unit)
-							.set({ deletedAt: new Date() })
-							.where(eq(unit.id, params.replyPostId));
-						await recordUnitRevision(tx, {
-							unitId: params.replyPostId,
-							actorProfileId: profile.unitId,
-							event: "delete",
-						});
-					});
-					return new Response(null, { status: StatusCodes.NO_CONTENT });
-				},
-				{
-					access: "write:interaction:write",
-					params: ReplyParams,
-					response: {
-						[StatusCodes.NO_CONTENT]: t.Void(),
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"ReplyPostNotFound",
-							"UnitNotFound",
-						]),
-					},
-					detail: {
-						summary: "Delete reply post",
-						tags: ["Posts"],
-						responses: NoContentResponse,
-					},
 				},
 			),
 	);
