@@ -69,7 +69,7 @@ export default {
 		title: "ユニットを管理",
 		description: `コンテンツの編集、${metadataTerms.inline}、カタログの関係、アクセス、および改訂履歴。`,
 		backToUnit: "ユニットに戻る",
-		backToContent: "コンテンツに戻る",
+		backToOverview: "設定に戻る",
 		navigation: "ユニット管理ナビゲーション",
 		overview: "すべての管理ツール",
 		sections: {

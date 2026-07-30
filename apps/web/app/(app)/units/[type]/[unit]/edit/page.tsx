@@ -1,1 +1,1 @@
-export { UnitContentPage as default } from "@/features/units/pages/unit-content-page";
+export { UnitManagementOverviewPage as default } from "@/features/units/pages/unit-management-overview-page";

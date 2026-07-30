@@ -46,7 +46,7 @@ export default {
 		navigation: "收藏集管理導覽",
 		overview: "收藏集管理項目",
 		backToCollection: "返回收藏集",
-		backToContent: "返回內容",
+		backToOverview: "返回設定",
 		sections: {
 			content: {
 				label: "內容",

@@ -15,7 +15,6 @@ export function collectionManagementSectionHref(
 	collectionId: string,
 	sectionId: CollectionManagementSectionId,
 ): string {
-	if (sectionId === "content") return collectionManagementHref(collectionId);
 	return `${collectionManagementHref(collectionId)}/${sectionId}`;
 }
 
@@ -24,7 +23,7 @@ export function parseCollectionManagementSection(
 	collectionId: string,
 ): CollectionManagementSectionId | undefined {
 	const base = collectionManagementHref(collectionId);
-	if (pathname === base || pathname === `${base}/`) return "content";
+	if (pathname === base || pathname === `${base}/`) return undefined;
 	return CollectionManagementSectionIds.find(
 		(sectionId) =>
 			pathname === `${base}/${sectionId}` || pathname.startsWith(`${base}/${sectionId}/`),

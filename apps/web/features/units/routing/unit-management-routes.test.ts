@@ -22,16 +22,19 @@ describe("unit management routes", () => {
 		);
 	});
 
-	it("uses the management root for content and metadata for structured fields", () => {
+	it("keeps the management root as the overview and gives content its own route", () => {
 		expect(unitManagementSectionHref("book", "unit-1", "content")).toBe(
-			"/units/book/unit-1/edit",
+			"/units/book/unit-1/edit/content",
 		);
 		expect(unitManagementSectionHref("book", "unit-1", "metadata")).toBe(
 			"/units/book/unit-1/edit/metadata",
 		);
 		expect(parseUnitManagementSection("/units/book/unit-1/edit", "book", "unit-1")).toBe(
-			"content",
+			undefined,
 		);
+		expect(
+			parseUnitManagementSection("/units/book/unit-1/edit/content", "book", "unit-1"),
+		).toBe("content");
 		expect(
 			parseUnitManagementSection("/units/book/unit-1/edit/basic", "book", "unit-1"),
 		).toBeUndefined();

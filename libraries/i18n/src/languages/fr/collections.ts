@@ -49,7 +49,7 @@ export default {
 		navigation: "Navigation de la gestion de la collection",
 		overview: "Sections de gestion de la collection",
 		backToCollection: "Retour à la collection",
-		backToContent: "Retour au contenu",
+		backToOverview: "Retour aux paramètres",
 		sections: {
 			content: {
 				label: "Contenu",

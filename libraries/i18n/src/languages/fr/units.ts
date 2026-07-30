@@ -69,7 +69,7 @@ export default {
 		title: "Gérer la Unit",
 		description: `Modifiez le contenu, les ${metadataTerms.inline}, les relations de catalogue, les accès et l’historique des versions.`,
 		backToUnit: "Retour à la Unit",
-		backToContent: "Retour au contenu",
+		backToOverview: "Retour aux paramètres",
 		navigation: "Navigation de la gestion de la Unit",
 		overview: "Tous les outils de gestion",
 		sections: {

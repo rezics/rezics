@@ -47,7 +47,7 @@ export default {
 		navigation: "컬렉션 관리 네비게이션",
 		overview: "컬렉션 관리 화면",
 		backToCollection: "컬렉션으로 돌아가기",
-		backToContent: "콘텐츠로 돌아가기",
+		backToOverview: "설정으로 돌아가기",
 		sections: {
 			content: {
 				label: "콘텐츠",

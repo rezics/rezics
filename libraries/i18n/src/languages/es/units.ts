@@ -69,7 +69,7 @@ export default {
 		title: "Gestionar Unit",
 		description: `Edita el contenido, los ${metadataTerms.inline}, las relaciones de catálogo, el acceso y el historial de versiones.`,
 		backToUnit: "Volver a la Unit",
-		backToContent: "Volver al contenido",
+		backToOverview: "Volver a los ajustes",
 		navigation: "Navegación de gestión de la Unit",
 		overview: "Todas las herramientas de gestión",
 		sections: {

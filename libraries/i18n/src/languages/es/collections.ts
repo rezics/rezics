@@ -50,7 +50,7 @@ export default {
 		navigation: "Navegación de gestión de la colección",
 		overview: "Áreas de gestión de la colección",
 		backToCollection: "Volver a la colección",
-		backToContent: "Volver al contenido",
+		backToOverview: "Volver a los ajustes",
 		sections: {
 			content: {
 				label: "Contenido",

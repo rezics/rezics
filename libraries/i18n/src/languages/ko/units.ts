@@ -69,7 +69,7 @@ export default {
 		title: "유닛 관리",
 		description: `콘텐츠, ${metadataTerms.inline}, 카탈로그 관계, 접근, 수정 이력 편집.`,
 		backToUnit: "유닛으로 돌아가기",
-		backToContent: "콘텐츠로 돌아가기",
+		backToOverview: "설정으로 돌아가기",
 		navigation: "유닛 관리 탐색",
 		overview: "모든 관리 도구",
 		sections: {

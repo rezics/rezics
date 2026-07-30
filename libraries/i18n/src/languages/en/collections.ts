@@ -48,7 +48,7 @@ export default {
 		navigation: "Collection management navigation",
 		overview: "Collection management areas",
 		backToCollection: "Back to collection",
-		backToContent: "Back to content",
+		backToOverview: "Back to settings",
 		sections: {
 			content: {
 				label: "Content",

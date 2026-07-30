@@ -80,7 +80,10 @@ import {
 	flattenVisibleBookStructureTree,
 	type VisibleBookStructureTreeNode,
 } from "../model/book-content-structure-view";
-import { contentStructureHistoryHref, unitManagementHref } from "../routing/unit-management-routes";
+import {
+	contentStructureHistoryHref,
+	unitManagementSectionHref,
+} from "../routing/unit-management-routes";
 import {
 	BookContentStructureRowFrame,
 	VirtualizedBookContentStructureRows,
@@ -224,7 +227,8 @@ export function MediaContentStructureEditor({
 			const saved = await saveDraft();
 			contentUnitId = saved?.items.find(({ id }) => id === nodeId)?.contentUnitId;
 		}
-		if (contentUnitId) router.push(unitManagementHref(node.contentKind, contentUnitId));
+		if (contentUnitId)
+			router.push(unitManagementSectionHref(node.contentKind, contentUnitId, "content"));
 	}
 
 	return (

@@ -21,16 +21,22 @@ describe("Collection management routes", () => {
 		).toBe("history");
 	});
 
-	it("treats the workspace root as content", () => {
+	it("treats the workspace root as the overview", () => {
 		expect(
 			parseCollectionManagementSection("/collections/collection-1/edit", "collection-1"),
-		).toBe("content");
+		).toBeUndefined();
 	});
 
 	it("builds content and metadata routes without legacy paths", () => {
 		expect(collectionManagementSectionHref("collection-1", "content")).toBe(
-			"/collections/collection-1/edit",
+			"/collections/collection-1/edit/content",
 		);
+		expect(
+			parseCollectionManagementSection(
+				"/collections/collection-1/edit/content",
+				"collection-1",
+			),
+		).toBe("content");
 		expect(collectionManagementSectionHref("collection-1", "metadata")).toBe(
 			"/collections/collection-1/edit/metadata",
 		);

@@ -69,7 +69,7 @@ export default {
 		title: "Manage unit",
 		description: `Edit content, ${metadataTerms.inline}, catalog relationships, access, and revision history.`,
 		backToUnit: "Back to unit",
-		backToContent: "Back to content",
+		backToOverview: "Back to settings",
 		navigation: "Unit management navigation",
 		overview: "All management tools",
 		sections: {

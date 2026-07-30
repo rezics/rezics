@@ -19,7 +19,7 @@ import { useContentLanguageEditor } from "@/features/content-languages/hooks/use
 import { CollectionLocalizationFields } from "../components/collection-localization-fields";
 import { useCollectionManagement } from "../components/collection-management-workspace";
 import { invalidateCollections } from "../data/collection-cache";
-import { collectionHref } from "../routing/collection-management-routes";
+import { collectionManagementHref } from "../routing/collection-management-routes";
 
 export function CollectionContentPage() {
 	const { collection } = useCollectionManagement();
@@ -31,8 +31,8 @@ export function CollectionContentPage() {
 	return (
 		<section className="grid gap-6">
 			<ManagementWorkspaceSectionHeader
-				backHref={collectionHref(collection.id)}
-				backLabel={t.collections.workspace.backToCollection}
+				backHref={collectionManagementHref(collection.id)}
+				backLabel={t.collections.workspace.backToOverview}
 				description={t.collections.workspace.sections.content.description}
 				link={Link}
 				title={t.collections.workspace.sections.content.label}

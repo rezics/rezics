@@ -69,7 +69,7 @@ export default {
 		title: "Unit verwalten",
 		description: `Bearbeite Inhalte, ${metadataTerms.inline}, Katalogbeziehungen, Zugriff und Versionsverlauf.`,
 		backToUnit: "Zurück zur Unit",
-		backToContent: "Zurück zum Inhalt",
+		backToOverview: "Zurück zu den Einstellungen",
 		navigation: "Navigation der Unit-Verwaltung",
 		overview: "Alle Verwaltungswerkzeuge",
 		sections: {

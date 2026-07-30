@@ -69,7 +69,7 @@ export default {
 		title: "管理作品",
 		description: `编辑内容、${metadataTerms.label}、目录关系、访问权限与修订记录。`,
 		backToUnit: "返回作品",
-		backToContent: "返回内容",
+		backToOverview: "返回设置",
 		navigation: "作品管理导航",
 		overview: "所有管理功能",
 		sections: {

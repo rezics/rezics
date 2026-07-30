@@ -194,7 +194,8 @@ function UnitManagementWorkspaceContent({
 	);
 	const currentSectionId = parseUnitManagementSection(pathname, type, unitId);
 	const requestedSection = allSections.find((section) => section.id === currentSectionId);
-	const sectionAllowed = Boolean(currentSectionId && visibleSectionIds.has(currentSectionId));
+	const sectionAllowed =
+		currentSectionId === undefined || visibleSectionIds.has(currentSectionId);
 	return (
 		<ContentLanguageEditorProvider
 			localizations={query.data.localizations}
@@ -236,7 +237,7 @@ function UnitManagementWorkspaceContent({
 						<section>
 							<ManagementWorkspaceSectionHeader
 								backHref={unitManagementHref(type, unitId)}
-								backLabel={t.units.workspace.backToContent}
+								backLabel={t.units.workspace.backToOverview}
 								description={requestedSection.description}
 								link={Link}
 								title={requestedSection.label}

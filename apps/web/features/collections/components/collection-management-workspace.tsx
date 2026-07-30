@@ -140,7 +140,8 @@ function CollectionManagementWorkspaceContent({
 	const sections = allSections.filter(({ id }) => visibleSectionIds.has(id));
 	const currentSectionId = parseCollectionManagementSection(pathname, collectionId);
 	const requestedSection = allSections.find(({ id }) => id === currentSectionId);
-	const sectionAllowed = Boolean(currentSectionId && visibleSectionIds.has(currentSectionId));
+	const sectionAllowed =
+		currentSectionId === undefined || visibleSectionIds.has(currentSectionId);
 	const localization = selectLocalization(collection.localizations, collection.language);
 	const title =
 		collection.purpose === "favorites"
@@ -182,7 +183,7 @@ function CollectionManagementWorkspaceContent({
 						<section>
 							<ManagementWorkspaceSectionHeader
 								backHref={collectionManagementHref(collectionId)}
-								backLabel={t.collections.workspace.backToContent}
+								backLabel={t.collections.workspace.backToOverview}
 								description={requestedSection.description}
 								link={Link}
 								showBackOnMobile={false}
