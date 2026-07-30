@@ -22,6 +22,7 @@ import { RequireSession } from "@/features/auth/require-session";
 import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
 import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/use-form-draft-content-language";
 import { portableTextDraftContentLanguageSample } from "@/features/content-languages/model/draft-content-language-sample";
+import { useDevelopmentPreviewAccess } from "@/features/preview-access/components/development-preview-boundary";
 import { RealmRulesAcknowledgementPrompt } from "@/features/realms/components/realm-rules-acknowledgement-prompt";
 import { useRealmRulesAcknowledgement } from "@/features/realms/hooks/use-realm-rules-acknowledgement";
 import { useTranslation } from "@/i18n/client";
@@ -39,6 +40,8 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const create = usePostApiPosts();
+	const developmentPreview = useDevelopmentPreviewAccess();
+	const hasDevelopmentPreviewAccess = developmentPreview.state === "allowed";
 	const [publishRealmIds, setPublishRealmIds] = useState<readonly string[]>(() =>
 		defaultRealmId ? [defaultRealmId] : [],
 	);
@@ -59,6 +62,7 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 		if (!body.length) return;
 		const contentLanguage = await language.resolveLanguage(formElement);
 		const selectedPublishRealmIds = [...publishRealmIds];
+		const selectedSubject = hasDevelopmentPreviewAccess ? subject : undefined;
 		try {
 			await rulesAcknowledgement.run(async () => {
 				const post = await create.mutateAsync({
@@ -69,7 +73,7 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 						language: contentLanguage,
 						body: writePortableText(body),
 						publishRealmIds: selectedPublishRealmIds,
-						...(subject ? { subjectId: subject.id } : {}),
+						...(selectedSubject ? { subjectId: selectedSubject.id } : {}),
 					},
 				});
 				await invalidatePostQueries(queryClient, post.id);
@@ -117,20 +121,22 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 								{t.posts.publishRealmsHint} {t.posts.publishRealmsLimit}
 							</FieldDescription>
 						</Field>
-						<Field>
-							<FieldLabel>{t.posts.subject}</FieldLabel>
-							<EntityPicker index="units" onChange={setSubject} value={subject} />
-							{subject ? (
-								<Button
-									onClick={() => setSubject(undefined)}
-									size="xs"
-									type="button"
-									variant="quiet"
-								>
-									{t.posts.clearSubject}
-								</Button>
-							) : null}
-						</Field>
+						{hasDevelopmentPreviewAccess ? (
+							<Field>
+								<FieldLabel>{t.posts.subject}</FieldLabel>
+								<EntityPicker index="units" onChange={setSubject} value={subject} />
+								{subject ? (
+									<Button
+										onClick={() => setSubject(undefined)}
+										size="xs"
+										type="button"
+										variant="quiet"
+									>
+										{t.posts.clearSubject}
+									</Button>
+								) : null}
+							</Field>
+						) : null}
 						<DraftContentLanguageField controller={language.controller} />
 						<PostEditorFields
 							body={body}
