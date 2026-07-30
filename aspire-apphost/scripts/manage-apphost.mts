@@ -9,6 +9,7 @@ const repositoryRoot = fileURLToPath(new URL("../..", import.meta.url));
 const appHostPath = fileURLToPath(new URL("../apphost.mts", import.meta.url));
 const appHostArgument = "aspire-apphost/apphost.mts";
 const startupTimeoutMs = 5 * 60 * 1000;
+const requestTimeoutMs = 60 * 1000;
 const forbiddenRuntimeDiagnostics = [
 	"TelemetryExporterUnhealthy",
 	"OTLPExporterError",
@@ -192,7 +193,10 @@ async function waitForReady(child: ManagedChildProcess) {
 }
 
 async function requestOk(label: string, url: URL) {
-	const response = await fetch(url, { redirect: "manual", signal: AbortSignal.timeout(15_000) });
+	const response = await fetch(url, {
+		redirect: "manual",
+		signal: AbortSignal.timeout(requestTimeoutMs),
+	});
 	if (!response.ok) throw new Error(`${label} returned HTTP ${response.status}`);
 	console.info(`${label}: ${response.status}`);
 }

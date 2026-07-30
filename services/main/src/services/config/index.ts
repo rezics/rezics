@@ -28,7 +28,6 @@ const hostname = z
 	}, "must be a hostname without a scheme, port, path, query, or fragment");
 
 export const env = createEnv({
-	skipValidation: process.env.SKIP_VALIDATION === "true",
 	server: {
 		HOST: z.string().min(1).default("0.0.0.0"),
 		PORT: z.coerce.number().int().min(1).max(65_535).default(3001),

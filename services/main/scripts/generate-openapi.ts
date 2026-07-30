@@ -1,5 +1,4 @@
 import { StatusCodes } from "http-status-codes";
-process.env.SKIP_VALIDATION ??= "true";
 process.env.DATABASE_URL ??= "postgres://openapi:openapi@localhost/openapi";
 
 import { mkdirSync, writeFileSync } from "node:fs";

@@ -1,9 +1,6 @@
 "use client";
 
-import {
-	parseSearchFeatureDefinition,
-	type EmbeddableSearchTemplateId,
-} from "@rezics/filter";
+import { parseSearchFeatureDefinition, type EmbeddableSearchTemplateId } from "@rezics/filter";
 import { useGetApiSearchFeaturesByTemplate } from "@rezics/openapi-tanstack-query";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import { useId, useState } from "react";
