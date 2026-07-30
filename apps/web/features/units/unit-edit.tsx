@@ -400,14 +400,16 @@ export function UnitContentEditor({ type, unit }: { type: UnitType; unit: Unit }
 	const selected = unit.localizations.find((entry) => entry.language === language);
 	return (
 		<div className="grid gap-6">
-			<div className="grid gap-4 rounded-2xl border border-border-weak bg-card p-4 sm:p-5">
-				<ContentLanguageControl />
+			<div className="flex flex-wrap items-center gap-4 rounded-2xl bg-card p-4 sm:p-5">
 				<LocalizationMediaFallbackNotice />
 				{selectedLanguageIsPending ? (
 					<p className="text-sm text-muted-foreground">
 						{t.units.contentLanguages.addDescription}
 					</p>
 				) : null}
+				<div className="ms-auto shrink-0">
+					<ContentLanguageControl />
+				</div>
 			</div>
 			<UnitLocalizationForm
 				key={`${unit.id}:${language}:${selected?.updatedAt ?? "new"}`}
