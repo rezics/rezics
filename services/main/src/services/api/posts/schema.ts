@@ -61,11 +61,10 @@ export const GetPostQuery = t.Object(
 export type GetPostQuery = Static<typeof GetPostQuery>;
 
 const PostScoreInput = t.Object({ scoreId: Uuid }, { additionalProperties: false });
-/**
- * TODO: Allow multiple Scores after the frontend can clearly support selecting,
- * ordering, and managing every Score attached to a Post.
- */
-export const ReplacePostScoresBody = t.Array(PostScoreInput, { maxItems: 1 });
+export const MaximumPostScoreCount = 5;
+export const ReplacePostScoresBody = t.Array(PostScoreInput, {
+	maxItems: MaximumPostScoreCount,
+});
 export type ReplacePostScoresBody = Static<typeof ReplacePostScoresBody>;
 
 export const PostScoreResponse = t.Object({

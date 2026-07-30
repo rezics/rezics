@@ -145,6 +145,11 @@ const review = {
 			realmId: "019f9872-bd49-7bb4-a6b7-ec621fca2038",
 			value: 7,
 		},
+		{
+			scoreId: "019f9872-bd49-7bb4-a6b7-ec621fca2039",
+			realmId: "019f9872-bd49-7bb4-a6b7-ec621fca2040",
+			value: 3,
+		},
 	],
 } satisfies FeedPost;
 
@@ -227,6 +232,7 @@ describe("FeedPostCard", () => {
 		);
 
 		expect(screen.getAllByText("7／10")).toHaveLength(1);
+		expect(screen.queryByText("3／10")).toBeNull();
 		expect(screen.queryByText("我的讀書會")).toBeNull();
 		expect(screen.queryByText("9.0／10 · 2 人評分")).toBeNull();
 	});

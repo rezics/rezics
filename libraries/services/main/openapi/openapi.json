@@ -114821,7 +114821,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"maxItems": 1,
+								"maxItems": 5,
 								"type": "array",
 								"items": {
 									"additionalProperties": false,

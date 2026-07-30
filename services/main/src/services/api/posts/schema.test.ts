@@ -2,7 +2,12 @@ import { createPortableTextDocument } from "@rezics/block";
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { CreatePostBody, ReplacePostScoresBody, UpdatePostBody } from "./schema";
+import {
+	CreatePostBody,
+	MaximumPostScoreCount,
+	ReplacePostScoresBody,
+	UpdatePostBody,
+} from "./schema";
 
 const body = createPortableTextDocument([], "0123456789ab");
 const baseRevisionId = "019b76da-a800-7300-8000-000000000001";
@@ -46,12 +51,12 @@ describe("Post localization API contracts", () => {
 });
 
 describe("Post Score API contracts", () => {
-	it("temporarily limits the replacement body to one Score", () => {
-		const items = Array.from({ length: 2 }, (_, index) => ({
-			scoreId: `0195c49b-8f3b-7e18-8c45-c2f36ee8d33${index}`,
+	it("accepts up to five ordered Scores", () => {
+		const items = Array.from({ length: MaximumPostScoreCount + 1 }, (_, index) => ({
+			scoreId: `0195c49b-8f3b-7e18-8c45-c2f36ee8d${String(index).padStart(3, "0")}`,
 		}));
 		expect(Check(ReplacePostScoresBody, [])).toBe(true);
-		expect(Check(ReplacePostScoresBody, items.slice(0, 1))).toBe(true);
+		expect(Check(ReplacePostScoresBody, items.slice(0, MaximumPostScoreCount))).toBe(true);
 		expect(Check(ReplacePostScoresBody, items)).toBe(false);
 	});
 });

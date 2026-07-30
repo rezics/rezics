@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import type { ContentLanguage } from "@rezics/i18n";
-import { and, desc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -171,22 +171,47 @@ export default new Elysia()
 					if (new Set(scoreIds).size !== scoreIds.length) throw new PostScoreDuplicate();
 					await database.transaction(async (tx) => {
 						const [record] = await tx
-							.select({ id: post.id })
+							.select({
+								id: post.id,
+								kind: post.kind,
+								subjectUnitId: post.subjectUnitId,
+							})
 							.from(post)
 							.where(eq(post.id, params.postId))
 							.limit(1);
 						if (!record) throw new PostNotFound();
 						if (scoreIds.length) {
+							const existing = await tx
+								.select({ scoreId: postScore.scoreId })
+								.from(postScore)
+								.where(eq(postScore.postId, params.postId));
+							const existingScoreIds = existing.map(({ scoreId }) => scoreId);
 							const found = await tx
-								.select({ id: score.id })
+								.select({
+									id: score.id,
+									realmId: score.realmId,
+									unitId: score.unitId,
+								})
 								.from(score)
 								.where(
 									and(
 										inArray(score.id, scoreIds),
-										eq(score.profileId, profile.unitId),
+										existingScoreIds.length
+											? or(
+													eq(score.profileId, profile.unitId),
+													inArray(score.id, existingScoreIds),
+												)
+											: eq(score.profileId, profile.unitId),
 									),
 								);
 							if (found.length !== scoreIds.length) throw new PostScoreNotFound();
+							if (
+								record.kind === "review" &&
+								found.some(({ unitId }) => unitId !== record.subjectUnitId)
+							)
+								throw new PostScoreNotFound();
+							if (new Set(found.map(({ realmId }) => realmId)).size !== found.length)
+								throw new PostScoreDuplicate();
 						}
 						await tx.delete(postScore).where(eq(postScore.postId, params.postId));
 						if (body.length)
