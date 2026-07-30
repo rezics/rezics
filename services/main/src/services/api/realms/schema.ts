@@ -227,18 +227,43 @@ export type RealmRulesQuery = Static<typeof RealmRulesQuery>;
 export const RealmPinParams = t.Object({ realmId: Uuid, unitId: Uuid });
 export type RealmPinParams = Static<typeof RealmPinParams>;
 
-const RealmPinKind = t.Union(RealmPinKindValues.map((value) => t.Literal(value)));
+export const RealmPinKind = t.UnionEnum(RealmPinKindValues);
+export type RealmPinKind = Static<typeof RealmPinKind>;
 
-export const CreateRealmPinBody = t.Object({
-	kind: t.Optional(RealmPinKind),
-	position: t.Optional(FractionalPosition),
-});
+export const CreateRealmPinBody = t.Object(
+	{
+		kind: t.Optional(RealmPinKind),
+	},
+	{ additionalProperties: false },
+);
 export type CreateRealmPinBody = Static<typeof CreateRealmPinBody>;
 
 export const RemoveRealmPinQuery = t.Object({
 	kind: t.Optional(RealmPinKind),
 });
 export type RemoveRealmPinQuery = Static<typeof RemoveRealmPinQuery>;
+
+export const RealmPinPlacement = t.Union([
+	t.Object({ kind: t.UnionEnum(["start", "end"]) }, { additionalProperties: false }),
+	t.Object(
+		{
+			kind: t.Literal("after"),
+			unitId: Uuid,
+		},
+		{ additionalProperties: false },
+	),
+]);
+export type RealmPinPlacement = Static<typeof RealmPinPlacement>;
+
+export const MoveRealmPinsBody = t.Object(
+	{
+		unitIds: t.Array(Uuid, { minItems: 1, maxItems: 100, uniqueItems: true }),
+		destinationKind: RealmPinKind,
+		placement: RealmPinPlacement,
+	},
+	{ additionalProperties: false },
+);
+export type MoveRealmPinsBody = Static<typeof MoveRealmPinsBody>;
 
 export const RealmUnitParams = t.Object({ realmId: Uuid, unitId: Uuid });
 export type RealmUnitParams = Static<typeof RealmUnitParams>;

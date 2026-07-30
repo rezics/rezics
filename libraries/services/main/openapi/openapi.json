@@ -132563,7 +132563,11 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"kind": { "type": "string" },
+													"kind": {
+														"default": "pinned",
+														"type": "string",
+														"enum": ["pinned", "highlight"]
+													},
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -138647,6 +138651,200 @@
 				"x-rezics-policy-operation-id": "getApiRealmsByRealmIdPins"
 			}
 		},
+		"/api/realms/{realmId}/pins/move": {
+			"post": {
+				"summary": "Move Realm pins",
+				"tags": ["Realms"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["unitIds", "destinationKind", "placement"],
+								"properties": {
+									"unitIds": {
+										"minItems": 1,
+										"maxItems": 100,
+										"uniqueItems": true,
+										"type": "array",
+										"items": { "format": "uuid", "type": "string" }
+									},
+									"destinationKind": {
+										"default": "pinned",
+										"type": "string",
+										"enum": ["pinned", "highlight"]
+									},
+									"placement": {
+										"anyOf": [
+											{
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["kind"],
+												"properties": {
+													"kind": {
+														"default": "start",
+														"type": "string",
+														"enum": ["start", "end"]
+													}
+												}
+											},
+											{
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["kind", "unitId"],
+												"properties": {
+													"kind": { "const": "after", "type": "string" },
+													"unitId": { "format": "uuid", "type": "string" }
+												}
+											}
+										]
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["saved", "latestRevisionId"],
+									"properties": {
+										"saved": { "type": "boolean" },
+										"latestRevisionId": { "format": "uuid", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmCapabilityRequired",
+													"type": "string",
+													"enum": ["RealmCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ValidationError",
+															"type": "string",
+															"enum": ["ValidationError"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiRealmsByRealmIdPinsMove",
+				"x-rezics-policy-operation-id": "postApiRealmsByRealmIdPinsMove"
+			}
+		},
 		"/api/realms/{realmId}/pins/{unitId}": {
 			"put": {
 				"summary": "Pin Realm unit",
@@ -138670,14 +138868,13 @@
 					"content": {
 						"application/json": {
 							"schema": {
+								"additionalProperties": false,
 								"type": "object",
 								"properties": {
-									"kind": { "type": "string", "enum": ["pinned", "highlight"] },
-									"position": {
-										"format": "fractional-position",
-										"minLength": 2,
-										"maxLength": 512,
-										"type": "string"
+									"kind": {
+										"default": "pinned",
+										"type": "string",
+										"enum": ["pinned", "highlight"]
 									}
 								}
 							}
@@ -138703,7 +138900,11 @@
 									"properties": {
 										"realmId": { "format": "uuid", "type": "string" },
 										"unitId": { "format": "uuid", "type": "string" },
-										"kind": { "type": "string" },
+										"kind": {
+											"default": "pinned",
+											"type": "string",
+											"enum": ["pinned", "highlight"]
+										},
 										"position": {
 											"format": "fractional-position",
 											"minLength": 2,
@@ -138780,10 +138981,34 @@
 						}
 					},
 					"422": {
-						"description": "Request validation failed",
+						"description": "Response for status 422",
 						"content": {
 							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ValidationError",
+															"type": "string",
+															"enum": ["ValidationError"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
 							}
 						}
 					},
@@ -138937,7 +139162,11 @@
 						"name": "kind",
 						"in": "query",
 						"required": false,
-						"schema": { "type": "string", "enum": ["pinned", "highlight"] }
+						"schema": {
+							"default": "pinned",
+							"type": "string",
+							"enum": ["pinned", "highlight"]
+						}
 					}
 				],
 				"operationId": "deleteApiRealmsByRealmIdPinsByUnitId",

@@ -50,10 +50,11 @@ import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { canOpenRealmSettings, getRealmSettingsSectionIds } from "./realm-permissions";
 import { RealmModeration } from "./components/realm-moderation";
 import { RealmPagesSettings } from "./components/realm-configuration-settings";
+import { RealmPinsManager } from "./components/realm-pins-manager";
 import { RealmScoreContextSettings } from "./components/realm-score-context-settings";
 import { RealmTaxonomySettings } from "./components/realm-taxonomy-tree-editor";
 import { RealmMembers } from "./realm-members";
-import { RealmPins, RealmProfileSettings, RealmRules } from "./realm-settings";
+import { RealmProfileSettings, RealmRules } from "./realm-settings";
 import type { RealmSettingsSectionId } from "./model/realm-settings-section";
 import { invalidateRealmDetails } from "./query";
 import {
@@ -409,11 +410,10 @@ function RealmPinsSection({ baseHref, realmId }: { baseHref: string; realmId: st
 	});
 	return (
 		<RealmSettingsSection baseHref={baseHref} section="pins">
-			<RealmPins
-				embedded
+			<RealmPinsManager
+				data={query.data}
 				error={query.error}
 				pending={query.isPending}
-				pins={query.data?.items}
 				realmId={realmId}
 			/>
 		</RealmSettingsSection>

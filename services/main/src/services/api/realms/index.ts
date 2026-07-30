@@ -88,6 +88,7 @@ import {
 	RealmPinResponse,
 	RealmRuleRevisionResponse,
 	RealmRulesResponse,
+	SavedResponse,
 	ScoreContextResponse,
 } from "../schema/action-response";
 import {
@@ -108,6 +109,7 @@ import {
 	ListRealmMembersQuery,
 	ListRealmUnitsQuery,
 	ListRealmsQuery,
+	MoveRealmPinsBody,
 	ModerateRealmUnitBody,
 	UpdateRealmRulesBody,
 	RealmUnitParams,
@@ -181,6 +183,8 @@ import { FeedContentKindValues } from "../feed/schema";
 import { createWikiPost } from "../../posts/wiki";
 import { getContentStructureRevision } from "../../content-structure/service";
 import { RealmUnitTagVoteListQuery, RealmUnitTagVoteListResponse } from "../tags/schema";
+import { ValidationError } from "../errors";
+import { planRealmPinMove } from "./pin-ordering";
 
 const RealmNotFoundResponse = toApiErrorResponse(["RealmNotFound"]);
 const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
@@ -1677,25 +1681,106 @@ export default new Elysia({ prefix: "/realms" })
 			detail: { summary: "List Realm pins", tags: ["Realms"] },
 		},
 	)
+	.post(
+		"/:realmId/pins/move",
+		async ({ params, profile, authorization, body }) => {
+			await ensureRealmFieldsAuthorized(authorization, params.realmId, "realm.pins.manage", [
+				"pins",
+			]);
+			const latestRevisionId = await database.transaction(async (tx) => {
+				await tx.execute(
+					sql`select pg_advisory_xact_lock(hashtextextended(${params.realmId}::text, 0))`,
+				);
+				const pins = await tx
+					.select({
+						unitId: realmPin.unitId,
+						kind: realmPin.kind,
+						position: realmPin.position,
+					})
+					.from(realmPin)
+					.where(eq(realmPin.realmId, params.realmId))
+					.orderBy(realmPin.kind, realmPin.position, realmPin.unitId);
+				const plan = planRealmPinMove(pins, body);
+				if (!plan.ok) throw new ValidationError({ [plan.field]: plan.message });
+
+				for (const planned of plan.positions)
+					await tx
+						.update(realmPin)
+						.set({
+							kind: planned.kind,
+							position: planned.position,
+						})
+						.where(
+							and(
+								eq(realmPin.realmId, params.realmId),
+								eq(realmPin.unitId, planned.unitId),
+							),
+						);
+				const revision = await recordUnitRevision(tx, {
+					unitId: params.realmId,
+					actorProfileId: profile.unitId,
+					event: "update",
+				});
+				await recordAuditEvent(tx, profile.unitId, "realm.pins.move", params.realmId, {
+					unitIds: [...body.unitIds],
+					destinationKind: body.destinationKind,
+					placement: body.placement,
+				});
+				return revision.revisionId;
+			});
+			return { saved: true, latestRevisionId };
+		},
+		{
+			access: "contribute:realm:manage",
+			params: RealmParams,
+			body: MoveRealmPinsBody,
+			response: {
+				[StatusCodes.OK]: SavedResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+			},
+			detail: { summary: "Move Realm pins", tags: ["Realms"] },
+		},
+	)
 	.put(
 		"/:realmId/pins/:unitId",
 		async ({ params, profile, authorization, body }) => {
 			await ensureRealmFieldsAuthorized(authorization, params.realmId, "realm.pins.manage", [
 				"pins",
 			]);
+			if (params.realmId === params.unitId)
+				throw new ValidationError({ unitId: "a Realm cannot pin itself" });
 			await authorization.unit.ensureCanRead(params.unitId);
 			return database.transaction(async (tx) => {
 				await tx.execute(
 					sql`select pg_advisory_xact_lock(hashtextextended(${params.realmId}::text, 0))`,
 				);
 				const kind = body.kind ?? "pinned";
+				const [existing] = await tx
+					.select({
+						realmId: realmPin.realmId,
+						unitId: realmPin.unitId,
+						kind: realmPin.kind,
+						position: realmPin.position,
+						createdAt: realmPin.createdAt,
+						updatedAt: realmPin.updatedAt,
+					})
+					.from(realmPin)
+					.where(
+						and(
+							eq(realmPin.realmId, params.realmId),
+							eq(realmPin.unitId, params.unitId),
+						),
+					)
+					.limit(1);
+				if (existing?.kind === kind) return existing;
 				const [last] = await tx
 					.select({ position: realmPin.position })
 					.from(realmPin)
 					.where(and(eq(realmPin.realmId, params.realmId), eq(realmPin.kind, kind)))
 					.orderBy(desc(realmPin.position), desc(realmPin.unitId))
 					.limit(1);
-				const position = body.position ?? fractionalPositionBetween(last?.position, null);
+				const position = fractionalPositionBetween(last?.position, null);
 				const [entry] = await tx
 					.insert(realmPin)
 					.values({
@@ -1707,7 +1792,7 @@ export default new Elysia({ prefix: "/realms" })
 					})
 					.onConflictDoUpdate({
 						target: [realmPin.realmId, realmPin.unitId],
-						set: body.position === undefined ? { kind } : { kind, position },
+						set: { kind, position },
 					})
 					.returning();
 				if (!entry) throw new Error("Realm pin upsert did not return a row");
@@ -1728,6 +1813,7 @@ export default new Elysia({ prefix: "/realms" })
 			body: CreateRealmPinBody,
 			response: {
 				[StatusCodes.OK]: RealmPinResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},
@@ -1741,6 +1827,9 @@ export default new Elysia({ prefix: "/realms" })
 				"pins",
 			]);
 			await database.transaction(async (tx) => {
+				await tx.execute(
+					sql`select pg_advisory_xact_lock(hashtextextended(${params.realmId}::text, 0))`,
+				);
 				const deleted = await tx
 					.delete(realmPin)
 					.where(

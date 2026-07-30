@@ -579,6 +579,8 @@ import type {
 	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementResponses,
 	GetApiRealmsByRealmIdPinsOptions,
 	GetApiRealmsByRealmIdPinsResponses,
+	PostApiRealmsByRealmIdPinsMoveOptions,
+	PostApiRealmsByRealmIdPinsMoveResponses,
 	PutApiRealmsByRealmIdPinsByUnitIdOptions,
 	PutApiRealmsByRealmIdPinsByUnitIdResponses,
 	DeleteApiRealmsByRealmIdPinsByUnitIdOptions,
@@ -6337,6 +6339,26 @@ export function getApiRealmsByRealmIdPins<ThrowOnError extends boolean = true>(
 	return request({ method: "GET", url: "/api/realms/{realmId}/pins", ...config }) as Promise<
 		RequestResult<GetApiRealmsByRealmIdPinsResponses, ThrowOnError>
 	>;
+}
+
+/**
+ * @summary Move Realm pins
+ * {@link /api/realms/:realmId/pins/move}
+ */
+export function postApiRealmsByRealmIdPinsMove<ThrowOnError extends boolean = true>(
+	options: Options<PostApiRealmsByRealmIdPinsMoveOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiRealmsByRealmIdPinsMoveResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/realms/{realmId}/pins/move",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiRealmsByRealmIdPinsMoveResponses, ThrowOnError>>;
 }
 
 /**

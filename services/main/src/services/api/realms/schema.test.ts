@@ -4,9 +4,11 @@ import { describe, expect, it } from "vitest";
 
 import {
 	AcknowledgeRealmRulesBody,
+	CreateRealmPinBody,
 	ListRealmMembersQuery,
 	ListRealmUnitsQuery,
 	ModerateRealmUnitBody,
+	MoveRealmPinsBody,
 	RealmPinsQuery,
 	RealmRuleRevisionParams,
 	RealmRulesQuery,
@@ -37,6 +39,34 @@ describe("Realm member API contract", () => {
 		expect(Check(RealmPinsQuery, { localizationLanguages: ["zh", "en"] })).toBe(true);
 		expect(Check(RealmPinsQuery, {})).toBe(false);
 		expect(Check(RealmPinsQuery, { localizationLanguages: [] })).toBe(false);
+	});
+
+	it("keeps fractional Realm pin positions out of the public mutation contract", () => {
+		expect(Check(CreateRealmPinBody, { kind: "highlight" })).toBe(true);
+		expect(Check(CreateRealmPinBody, { kind: "pinned", position: "a0" })).toBe(false);
+	});
+
+	it("accepts semantic Realm pin movement within a destination category", () => {
+		expect(
+			Check(MoveRealmPinsBody, {
+				unitIds: ["019f995d-7595-7c99-9183-250790bbfe2f"],
+				destinationKind: "highlight",
+				placement: {
+					kind: "after",
+					unitId: "019f995d-7595-7c99-9183-250790bbfe30",
+				},
+			}),
+		).toBe(true);
+		expect(
+			Check(MoveRealmPinsBody, {
+				unitIds: [
+					"019f995d-7595-7c99-9183-250790bbfe2f",
+					"019f995d-7595-7c99-9183-250790bbfe2f",
+				],
+				destinationKind: "highlight",
+				placement: { kind: "end" },
+			}),
+		).toBe(false);
 	});
 
 	it.each(["explicit", "implicit_on_follow"] as const)(

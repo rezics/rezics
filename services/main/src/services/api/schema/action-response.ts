@@ -13,6 +13,7 @@ import {
 } from ".";
 import {
 	RealmMemberStateValues,
+	RealmPinKindValues,
 	RealmRuleAcknowledgementModeValues,
 } from "../../database/schema/contract-values";
 import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
@@ -184,7 +185,7 @@ export const RealmRulesResponse = t.Object({
 export const RealmPinResponse = t.Object({
 	realmId: Uuid,
 	unitId: Uuid,
-	kind: t.String(),
+	kind: t.UnionEnum(RealmPinKindValues),
 	position: FractionalPosition,
 	createdAt: DateTime,
 	updatedAt: DateTime,

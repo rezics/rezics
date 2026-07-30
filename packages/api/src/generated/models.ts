@@ -100197,6 +100197,14 @@ export type GetApiRealmsByRealmIdPinsQuery = {
 	localizationLanguages: GetApiRealmsByRealmIdPinsLocalizationLanguagesEnum[];
 };
 
+export const GetApiRealmsByRealmIdPinsStatus200ItemsKindEnum = {
+	pinned: "pinned",
+	highlight: "highlight",
+} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ItemsKindEnum =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ItemsKindEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ItemsKindEnum];
+
 export const GetApiRealmsByRealmIdPinsStatus200ContentItemsLanguage = {
 	zh: "zh",
 	en: "en",
@@ -100508,9 +100516,10 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 		 */
 		unitId: string;
 		/**
+		 * @default 'pinned'
 		 * @type string
 		 */
-		kind: string;
+		kind: GetApiRealmsByRealmIdPinsStatus200ItemsKindEnum;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -103201,6 +103210,207 @@ export type GetApiRealmsByRealmIdPinsResponse =
 /**
  * @type object
  */
+export type PostApiRealmsByRealmIdPinsMovePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdPinsMoveStatus200 = {
+	/**
+	 * @type boolean
+	 */
+	saved: boolean;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	latestRevisionId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdPinsMoveStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdPinsMoveStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: "RealmCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiRealmsByRealmIdPinsMoveStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ValidationError'
+				 * @type string
+				 */
+				code: "ValidationError";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdPinsMoveStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdPinsMoveStatus500 = InternalError;
+
+export const PostApiRealmsByRealmIdPinsMoveRequestDestinationKindEnum = {
+	pinned: "pinned",
+	highlight: "highlight",
+} as const;
+
+export type PostApiRealmsByRealmIdPinsMoveRequestDestinationKindEnum =
+	(typeof PostApiRealmsByRealmIdPinsMoveRequestDestinationKindEnum)[keyof typeof PostApiRealmsByRealmIdPinsMoveRequestDestinationKindEnum];
+
+export const PostApiRealmsByRealmIdPinsMoveRequestPlacementKindEnum = {
+	start: "start",
+	end: "end",
+} as const;
+
+export type PostApiRealmsByRealmIdPinsMoveRequestPlacementKindEnum =
+	(typeof PostApiRealmsByRealmIdPinsMoveRequestPlacementKindEnum)[keyof typeof PostApiRealmsByRealmIdPinsMoveRequestPlacementKindEnum];
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdPinsMoveBody = {
+	/**
+	 * @type array
+	 */
+	unitIds: string[];
+	/**
+	 * @default 'pinned'
+	 * @type string
+	 */
+	destinationKind: PostApiRealmsByRealmIdPinsMoveRequestDestinationKindEnum;
+	placement:
+		| {
+				/**
+				 * @default 'start'
+				 * @type string
+				 */
+				kind: PostApiRealmsByRealmIdPinsMoveRequestPlacementKindEnum;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "after";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				unitId: string;
+		  };
+};
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdPinsMoveOptions = {
+	body: PostApiRealmsByRealmIdPinsMoveBody;
+	path: PostApiRealmsByRealmIdPinsMovePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdPinsMoveResponses = {
+	"200": PostApiRealmsByRealmIdPinsMoveStatus200;
+	"400": PostApiRealmsByRealmIdPinsMoveStatus400;
+	"403": PostApiRealmsByRealmIdPinsMoveStatus403;
+	"422": PostApiRealmsByRealmIdPinsMoveStatus422;
+	"429": PostApiRealmsByRealmIdPinsMoveStatus429;
+	"500": PostApiRealmsByRealmIdPinsMoveStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiRealmsByRealmIdPinsMoveResponse =
+	| PostApiRealmsByRealmIdPinsMoveStatus200
+	| PostApiRealmsByRealmIdPinsMoveStatus400
+	| PostApiRealmsByRealmIdPinsMoveStatus403
+	| PostApiRealmsByRealmIdPinsMoveStatus422
+	| PostApiRealmsByRealmIdPinsMoveStatus429
+	| PostApiRealmsByRealmIdPinsMoveStatus500;
+
+/**
+ * @type object
+ */
 export type PutApiRealmsByRealmIdPinsByUnitIdPath = {
 	/**
 	 * @description
@@ -103215,6 +103425,14 @@ export type PutApiRealmsByRealmIdPinsByUnitIdPath = {
 	 */
 	unitId: string;
 };
+
+export const PutApiRealmsByRealmIdPinsByUnitIdStatus200KindEnum = {
+	pinned: "pinned",
+	highlight: "highlight",
+} as const;
+
+export type PutApiRealmsByRealmIdPinsByUnitIdStatus200KindEnum =
+	(typeof PutApiRealmsByRealmIdPinsByUnitIdStatus200KindEnum)[keyof typeof PutApiRealmsByRealmIdPinsByUnitIdStatus200KindEnum];
 
 /**
  * @type object
@@ -103233,9 +103451,10 @@ export type PutApiRealmsByRealmIdPinsByUnitIdStatus200 = {
 	 */
 	unitId: string;
 	/**
+	 * @default 'pinned'
 	 * @type string
 	 */
-	kind: string;
+	kind: PutApiRealmsByRealmIdPinsByUnitIdStatus200KindEnum;
 	/**
 	 * @description
 	 * Format: `fractional-position`
@@ -103319,10 +103538,32 @@ export type PutApiRealmsByRealmIdPinsByUnitIdStatus404 = {
 	requestId: string;
 };
 
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdPinsByUnitIdStatus422 = ValidationError;
+export type PutApiRealmsByRealmIdPinsByUnitIdStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ValidationError'
+				 * @type string
+				 */
+				code: "ValidationError";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
 
 /**
  * @type object
@@ -103366,17 +103607,10 @@ export type PutApiRealmsByRealmIdPinsByUnitIdRequestKindEnum =
  */
 export type PutApiRealmsByRealmIdPinsByUnitIdBody = {
 	/**
+	 * @default 'pinned'
 	 * @type string | undefined
 	 */
 	kind?: PutApiRealmsByRealmIdPinsByUnitIdRequestKindEnum;
-	/**
-	 * @description
-	 * Format: `fractional-position`
-	 * @minLength 2
-	 * @maxLength 512
-	 * @type string | undefined
-	 */
-	position?: string;
 };
 
 /**
@@ -103445,6 +103679,7 @@ export type DeleteApiRealmsByRealmIdPinsByUnitIdKind =
  */
 export type DeleteApiRealmsByRealmIdPinsByUnitIdQuery = {
 	/**
+	 * @default 'pinned'
 	 * @type string | undefined
 	 */
 	kind?: DeleteApiRealmsByRealmIdPinsByUnitIdKind;

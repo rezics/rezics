@@ -9,11 +9,8 @@ import {
 import { publicSlugHref } from "@rezics/slug";
 
 import {
-	getApiRealmsByRealmIdPinsQueryKey,
 	getApiRealmsByRealmIdRulesQueryKey,
-	useDeleteApiRealmsByRealmIdPinsByUnitId,
 	usePatchApiRealmsByRealmId,
-	usePutApiRealmsByRealmIdPinsByUnitId,
 	usePutApiRealmsByRealmIdRules,
 	useReplaceRealmSlugAddress,
 	type GetApiRealmsByRealmIdRulesStatus200,
@@ -23,10 +20,8 @@ import type { PortableTextDocument } from "@rezics/block";
 import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
-import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { useEffect, useState, type FormEvent } from "react";
 
-import { EntityPicker } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
 import { Checkbox } from "@rezics/ui";
@@ -57,7 +52,6 @@ import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
 import { invalidateRealmDetails } from "./query";
 
-type PickedEntity = { id: string; label: string };
 type RuleDraft = {
 	language: ContentLanguage;
 	title: string;
@@ -533,152 +527,5 @@ function RuleRequirement({
 			/>
 			<FieldLabel className="font-normal">{children}</FieldLabel>
 		</Field>
-	);
-}
-
-export function RealmPins({
-	realmId,
-	pins,
-	pending,
-	error,
-	embedded = false,
-}: {
-	realmId: string;
-	pins: readonly { unitId: string; kind: string; position: string }[] | undefined;
-	pending: boolean;
-	error: Parameters<typeof RequestFailure>[0]["error"];
-	embedded?: boolean;
-}) {
-	const { t } = useTranslation(["errors", "media", "realms", "state", "ui"]);
-	const queryClient = useQueryClient();
-	const localizationLanguages = useLocalizationLanguages();
-	const pin = usePutApiRealmsByRealmIdPinsByUnitId();
-	const unpin = useDeleteApiRealmsByRealmIdPinsByUnitId();
-	const [target, setTarget] = useState<PickedEntity>();
-
-	function submit(event: FormEvent<HTMLFormElement>) {
-		event.preventDefault();
-		if (!target) return;
-		const data = new FormData(event.currentTarget);
-		const position = String(data.get("position") ?? "").trim();
-		pin.mutate(
-			{
-				path: { realmId, unitId: target.id },
-				body: {
-					kind: data.get("kind") === "highlight" ? "highlight" : "pinned",
-					...(position ? { position } : {}),
-				},
-			},
-			{
-				onSuccess: async () => {
-					await queryClient.invalidateQueries({
-						queryKey: getApiRealmsByRealmIdPinsQueryKey({
-							path: { realmId },
-							query: { localizationLanguages },
-						}),
-					});
-					setTarget(undefined);
-				},
-			},
-		);
-	}
-
-	return (
-		<section className="grid gap-3">
-			{embedded ? null : <h2 className="font-heading text-xl font-bold">{t.realms.pins}</h2>}
-			<Card>
-				<CardContent className="grid gap-4 p-5">
-					<form className="grid gap-4" onSubmit={submit}>
-						<Field>
-							<FieldLabel>{t.realms.pinTarget}</FieldLabel>
-							<EntityPicker index="units" value={target} onChange={setTarget} />
-						</Field>
-						<div className="grid gap-4 sm:grid-cols-2">
-							<Field>
-								<FieldLabel>{t.realms.pinKind}</FieldLabel>
-								<NativeSelect name="kind" defaultValue="pinned">
-									<NativeSelectOption value="pinned">
-										{t.realms.pinKinds.pinned}
-									</NativeSelectOption>
-									<NativeSelectOption value="highlight">
-										{t.realms.pinKinds.highlight}
-									</NativeSelectOption>
-								</NativeSelect>
-							</Field>
-							<Field>
-								<FieldLabel>{t.realms.pinPosition}</FieldLabel>
-								<Input name="position" maxLength={512} />
-							</Field>
-						</div>
-						<RequestFailure error={pin.error} />
-						<Button
-							variant="solid"
-							type="submit"
-							className="w-fit"
-							disabled={!target}
-							isLoading={pin.isPending}
-						>
-							{t.realms.pin}
-						</Button>
-					</form>
-					{pending ? (
-						<Skeleton className="h-24 rounded-xl" />
-					) : error ? (
-						<RequestFailure error={error} />
-					) : pins?.length ? (
-						<div className="grid gap-2 border-t pt-4">
-							{pins.map((item, index) => (
-								<div
-									key={item.unitId}
-									className="flex items-center justify-between gap-3 rounded-lg border p-3 text-sm"
-								>
-									<div>
-										<p className="font-medium">
-											{t.realms.pinnedContent} {index + 1}
-										</p>
-										<p className="text-muted-foreground">
-											{t.realms.pinPosition}: {item.position}
-										</p>
-									</div>
-									<Button
-										size="sm"
-										variant="quiet"
-										isLoading={unpin.isPending}
-										onClick={() =>
-											unpin.mutate(
-												{
-													path: { realmId, unitId: item.unitId },
-													query: {
-														kind:
-															item.kind === "highlight"
-																? "highlight"
-																: "pinned",
-													},
-												},
-												{
-													onSuccess: () =>
-														queryClient.invalidateQueries({
-															queryKey:
-																getApiRealmsByRealmIdPinsQueryKey({
-																	path: { realmId },
-																	query: {
-																		localizationLanguages,
-																	},
-																}),
-														}),
-												},
-											)
-										}
-									>
-										{t.realms.unpin}
-									</Button>
-								</div>
-							))}
-						</div>
-					) : null}
-					<RequestFailure error={unpin.error} />
-				</CardContent>
-			</Card>
-		</section>
 	);
 }

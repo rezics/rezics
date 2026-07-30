@@ -1943,6 +1943,13 @@ import type {
 	GetApiRealmsByRealmIdPinsStatus404,
 	GetApiRealmsByRealmIdPinsStatus422,
 	GetApiRealmsByRealmIdPinsStatus500,
+	PostApiRealmsByRealmIdPinsMoveOptions,
+	PostApiRealmsByRealmIdPinsMoveStatus200,
+	PostApiRealmsByRealmIdPinsMoveStatus400,
+	PostApiRealmsByRealmIdPinsMoveStatus403,
+	PostApiRealmsByRealmIdPinsMoveStatus422,
+	PostApiRealmsByRealmIdPinsMoveStatus429,
+	PostApiRealmsByRealmIdPinsMoveStatus500,
 	PutApiRealmsByRealmIdPinsByUnitIdOptions,
 	PutApiRealmsByRealmIdPinsByUnitIdStatus200,
 	PutApiRealmsByRealmIdPinsByUnitIdStatus400,
@@ -2521,6 +2528,7 @@ import {
 	getApiRealmsByRealmIdRules,
 	putApiRealmsByRealmIdRulesByRevisionIdAcknowledgement,
 	getApiRealmsByRealmIdPins,
+	postApiRealmsByRealmIdPinsMove,
 	putApiRealmsByRealmIdPinsByUnitId,
 	deleteApiRealmsByRealmIdPinsByUnitId,
 	postApiRealmsByRealmIdTagContexts,
@@ -32374,6 +32382,108 @@ export function useGetApiRealmsByRealmIdPins<
 	queryResult.queryKey = queryKey as TQueryKey;
 
 	return queryResult;
+}
+
+export const postApiRealmsByRealmIdPinsMoveMutationKey = () =>
+	[{ url: "/api/realms/:realmId/pins/move" }] as const;
+
+export function postApiRealmsByRealmIdPinsMoveMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiRealmsByRealmIdPinsMoveMutationKey();
+	return mutationOptions<
+		PostApiRealmsByRealmIdPinsMoveStatus200,
+		ResponseErrorConfig<
+			| PostApiRealmsByRealmIdPinsMoveStatus400
+			| PostApiRealmsByRealmIdPinsMoveStatus403
+			| PostApiRealmsByRealmIdPinsMoveStatus422
+			| PostApiRealmsByRealmIdPinsMoveStatus429
+			| PostApiRealmsByRealmIdPinsMoveStatus500
+		>,
+		PostApiRealmsByRealmIdPinsMoveOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiRealmsByRealmIdPinsMove({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Move Realm pins
+ * {@link /api/realms/:realmId/pins/move}
+ */
+export function usePostApiRealmsByRealmIdPinsMove<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiRealmsByRealmIdPinsMoveStatus200,
+			ResponseErrorConfig<
+				| PostApiRealmsByRealmIdPinsMoveStatus400
+				| PostApiRealmsByRealmIdPinsMoveStatus403
+				| PostApiRealmsByRealmIdPinsMoveStatus422
+				| PostApiRealmsByRealmIdPinsMoveStatus429
+				| PostApiRealmsByRealmIdPinsMoveStatus500
+			>,
+			PostApiRealmsByRealmIdPinsMoveOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? postApiRealmsByRealmIdPinsMoveMutationKey();
+
+	const baseOptions = postApiRealmsByRealmIdPinsMoveMutationOptions(config) as UseMutationOptions<
+		PostApiRealmsByRealmIdPinsMoveStatus200,
+		ResponseErrorConfig<
+			| PostApiRealmsByRealmIdPinsMoveStatus400
+			| PostApiRealmsByRealmIdPinsMoveStatus403
+			| PostApiRealmsByRealmIdPinsMoveStatus422
+			| PostApiRealmsByRealmIdPinsMoveStatus429
+			| PostApiRealmsByRealmIdPinsMoveStatus500
+		>,
+		PostApiRealmsByRealmIdPinsMoveOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiRealmsByRealmIdPinsMoveStatus200,
+		ResponseErrorConfig<
+			| PostApiRealmsByRealmIdPinsMoveStatus400
+			| PostApiRealmsByRealmIdPinsMoveStatus403
+			| PostApiRealmsByRealmIdPinsMoveStatus422
+			| PostApiRealmsByRealmIdPinsMoveStatus429
+			| PostApiRealmsByRealmIdPinsMoveStatus500
+		>,
+		PostApiRealmsByRealmIdPinsMoveOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiRealmsByRealmIdPinsMoveStatus200,
+		ResponseErrorConfig<
+			| PostApiRealmsByRealmIdPinsMoveStatus400
+			| PostApiRealmsByRealmIdPinsMoveStatus403
+			| PostApiRealmsByRealmIdPinsMoveStatus422
+			| PostApiRealmsByRealmIdPinsMoveStatus429
+			| PostApiRealmsByRealmIdPinsMoveStatus500
+		>,
+		PostApiRealmsByRealmIdPinsMoveOptions,
+		TContext
+	>;
 }
 
 export const putApiRealmsByRealmIdPinsByUnitIdMutationKey = () =>
