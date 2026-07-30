@@ -707,6 +707,26 @@ function readSimpleFeedContentFilter(value: UnitPredicate): SimpleFeedContentKin
 }
 
 /**
+ * Reads only a top-level standard Feed content-kind clause while leaving every
+ * other predicate authoritative. This is an execution hint for selecting
+ * Search indexes, not a lossy projection of the complete Filter.
+ */
+export function readSimpleFeedContentKinds(
+	value: unknown,
+): readonly SimpleFeedContentKind[] | undefined {
+	assertUnitPredicate(value);
+	const collect = (clause: UnitPredicate): SimpleFeedContentKind[][] => {
+		const content = readSimpleFeedContentFilter(clause);
+		if (content) return [content];
+		if (clause.all && Object.keys(clause).length === 1)
+			return clause.all.flatMap((child) => collect(child));
+		return [];
+	};
+	const selections = collect(value);
+	return selections.length === 1 ? selections[0] : undefined;
+}
+
+/**
  * Recognizes only the deliberately small filter shape emitted by the standard
  * Feed UI. Complex Filters remain executable but do not become presentation
  * hints accidentally.

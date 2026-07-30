@@ -2,18 +2,18 @@
 
 import { useGetApiUnitsByTypeByUnitId } from "@rezics/openapi-tanstack-query";
 import { Button, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { ArrowLeft } from "lucide-react";
 
-import { UnitReviewFeed } from "@/features/reviews/components/unit-review-feed";
-import { targetedReviewCreateHref } from "@/features/reviews/routing/review-routes";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { UnitExcerptFeed } from "@/features/posts/components/unit-excerpt-feed";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
+import { selectLocalization } from "@/lib/localization";
 import type { CatalogDetailUnitType } from "../model/catalog-detail-section";
 import { isCatalogDetailUnitFor } from "../model/catalog-detail-unit";
 import { catalogDetailHref } from "../routing/catalog-detail-routes";
 
-export function CatalogReviewsPage({
+export function CatalogExcerptsPage({
 	type,
 	unitId,
 }: {
@@ -36,24 +36,12 @@ export function CatalogReviewsPage({
 				retry={() => void query.refetch()}
 			/>
 		);
-	const labels =
-		type === "book"
-			? {
-					title: t.units.detail.tabs.book.reviews,
-					description: t.units.detail.sectionDescriptions.book.reviews,
-				}
-			: type === "media"
-				? {
-						title: t.units.detail.tabs.media.reviews,
-						description: t.units.detail.sectionDescriptions.media.reviews,
-					}
-				: {
-						title: t.units.detail.tabs.software.reviews,
-						description: t.units.detail.sectionDescriptions.software.reviews,
-					};
-	const localization =
-		query.data.localizations.find(({ language }) => language === query.data.language) ??
-		query.data.localizations[0];
+	const localization = selectLocalization(
+		query.data.localizations,
+		query.data.language,
+		query.data.language,
+	);
+
 	return (
 		<main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-6 sm:px-6 sm:py-10">
 			<Button asChild className="w-fit" variant="outline">
@@ -63,20 +51,13 @@ export function CatalogReviewsPage({
 				</Link>
 			</Button>
 			<PageHeading
-				action={
-					<Button asChild variant="solid">
-						<Link href={targetedReviewCreateHref(type, unitId)}>
-							{t.engagement.newReview}
-						</Link>
-					</Button>
-				}
 				description={localization?.title ?? t.ui.unnamed}
-				title={labels.title}
+				title={t.engagement.excerpts}
 			/>
 			<p className="-mt-5 max-w-3xl text-sm leading-6 text-muted-foreground">
-				{labels.description}
+				{t.engagement.excerptPageDescription}
 			</p>
-			<UnitReviewFeed mode="page" targetId={unitId} />
+			<UnitExcerptFeed targetId={unitId} />
 		</main>
 	);
 }

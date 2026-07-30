@@ -1,5 +1,5 @@
 import { type Static, t } from "elysia";
-import { SimpleFeedContentKindValues, type UnitPredicate } from "@rezics/filter";
+import { SimpleFeedContentKindValues, type UnitFilter } from "@rezics/filter";
 import { Type } from "@sinclair/typebox";
 import {
 	FeedSortValues,
@@ -99,7 +99,7 @@ export const DefaultFeedContentKindValues =
 
 export const FeedRequest = t.Object(
 	{
-		filter: t.Optional(Type.Unsafe<UnitPredicate>(Type.Ref("UnitPredicate"))),
+		filter: t.Optional(Type.Unsafe<UnitFilter>(Type.Ref("UnitFilter"))),
 		sort: t.Optional(FeedSortSchema),
 		cursor: t.Optional(t.String({ maxLength: 1024 })),
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),

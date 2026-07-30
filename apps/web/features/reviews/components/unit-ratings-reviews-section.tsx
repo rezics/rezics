@@ -1,27 +1,13 @@
 "use client";
 
-import { useGetApiReviews } from "@rezics/openapi-tanstack-query";
-import { Button, QueryFailure, QueryPending } from "@rezics/ui";
-import { BookOpen, ChevronRight, SlidersHorizontal } from "lucide-react";
+import { Button } from "@rezics/ui";
+import { BookOpen } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
-import { useState } from "react";
 
 import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
 import { useTranslation } from "@/i18n/client";
-import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
-import { toNonNegativeApiInteger } from "@/lib/api-number";
-import { useDefaultScoreRealm } from "../data/default-score-realm";
-import {
-	EmptyReviewFilters,
-	hasReviewFilters,
-	reviewFilterCount,
-	toggleReviewScore,
-	type ReviewFilterModel,
-} from "../model/review-filter-model";
-import { CommunityScoreOverview } from "./community-score-overview";
-import { ReviewFiltersDialog } from "./review-filters-dialog";
-import { ReviewCards } from "./unit-review-list";
 import { UnitScoreControl } from "./unit-score-control";
+import { UnitReviewFeed } from "./unit-review-feed";
 
 export function UnitRatingsReviewsSection({
 	moreReviewsHref,
@@ -35,33 +21,6 @@ export function UnitRatingsReviewsSection({
 	readonly writeReviewHref: string;
 }) {
 	const { t } = useTranslation(["engagement"]);
-	const localizationLanguages = useLocalizationLanguages();
-	const defaultScoreRealm = useDefaultScoreRealm();
-	const [filters, setFilters] = useState<ReviewFilterModel>(EmptyReviewFilters);
-	const [filterDialogOpen, setFilterDialogOpen] = useState(false);
-	const scoreRealm = filters.realm ?? defaultScoreRealm.realm;
-	const baseReviewQuery = {
-		targetId,
-		localizationLanguages,
-		limit: 3,
-		sort: "best",
-	} as const;
-	const summaryQuery = useGetApiReviews({ query: baseReviewQuery });
-	const reviewsQuery = useGetApiReviews({
-		query: {
-			...baseReviewQuery,
-			...(filters.realm ? { realmIds: [filters.realm.id] } : {}),
-			...(filters.languages.length ? { languages: [...filters.languages] } : {}),
-			...(filters.scores.length && scoreRealm
-				? {
-						scoreRealmId: scoreRealm.id,
-						scores: [...filters.scores],
-					}
-				: {}),
-		},
-	});
-	const appliedFilterCount = reviewFilterCount(filters);
-	const hasFilters = hasReviewFilters(filters);
 
 	return (
 		<section className="grid gap-8 border-t border-border-weak pt-8">
@@ -88,82 +47,12 @@ export function UnitRatingsReviewsSection({
 				<h3 className="font-heading text-xl font-bold sm:text-2xl">
 					{t.engagement.communityReviews}
 				</h3>
-				<CommunityScoreOverview
-					realmId={scoreRealm?.id}
-					onScoreFilterToggle={(score) =>
-						setFilters((current) => toggleReviewScore(current, score))
-					}
-					reviewCount={toNonNegativeApiInteger(summaryQuery.data?.totalCount)}
-					selectedScores={filters.scores}
+				<UnitReviewFeed
+					mode="preview"
+					moreReviewsHref={moreReviewsHref}
 					targetId={targetId}
 				/>
-				{summaryQuery.isError ? (
-					<QueryFailure
-						error={summaryQuery.error}
-						retry={() => void summaryQuery.refetch()}
-					/>
-				) : null}
 			</div>
-
-			<div className="flex justify-end">
-				<Button
-					className="h-11 px-4"
-					onClick={() => setFilterDialogOpen(true)}
-					type="button"
-					variant="outline"
-				>
-					<SlidersHorizontal aria-hidden />
-					{t.engagement.reviewFilters}
-					{appliedFilterCount ? (
-						<span className="min-w-5 rounded-sm bg-foreground px-1 text-xs text-background">
-							{appliedFilterCount}
-						</span>
-					) : null}
-				</Button>
-			</div>
-
-			<div aria-live="polite">
-				{reviewsQuery.isPending ? (
-					<QueryPending />
-				) : reviewsQuery.isError ? (
-					<QueryFailure
-						error={reviewsQuery.error}
-						retry={() => void reviewsQuery.refetch()}
-					/>
-				) : reviewsQuery.data.items.length ? (
-					<ReviewCards
-						displayContext={{ kind: "unit", unitId: targetId }}
-						items={reviewsQuery.data.items}
-					/>
-				) : (
-					<p className="text-sm text-muted-foreground">
-						{hasFilters ? t.engagement.emptyFilteredReviews : t.engagement.emptyReviews}
-					</p>
-				)}
-			</div>
-
-			<div className="flex items-center gap-5 py-2">
-				<span aria-hidden className="h-px flex-1 bg-border-weak" />
-				<Link
-					className="flex shrink-0 items-center gap-1 text-sm font-semibold hover:underline"
-					href={moreReviewsHref}
-				>
-					{t.engagement.moreReviewsAndRatings}
-					<ChevronRight aria-hidden className="size-4" />
-				</Link>
-				<span aria-hidden className="h-px flex-1 bg-border-weak" />
-			</div>
-
-			{filterDialogOpen ? (
-				<ReviewFiltersDialog
-					initialFilters={filters}
-					onApply={(nextFilters) => {
-						setFilters(nextFilters);
-						setFilterDialogOpen(false);
-					}}
-					onClose={() => setFilterDialogOpen(false)}
-				/>
-			) : null}
 		</section>
 	);
 }

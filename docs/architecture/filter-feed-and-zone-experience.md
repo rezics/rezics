@@ -65,6 +65,30 @@ filter editor without acquiring Search relevance. Every shared presentation
 adapter must receive the execution surface explicitly; visual appearance must
 never select a sort profile.
 
+“Search Feed” names that presentation adapter: Search Feature executes a
+`UnitFilter` with the `feed` sort profile and hydrates the selected Units into
+canonical Feed items. It is not a second Feed product, a second filtering
+schema, or a text-only execution path. In particular:
+
+| Product surface     | Selection state                           | Execution profile   | Result presentation |
+| ------------------- | ----------------------------------------- | ------------------- | ------------------- |
+| Standard Feed       | `UnitFilter`                              | Feed recommendation | Feed items          |
+| Search results      | `UnitFilter` plus trusted Search controls | Search              | Grouped Search hits |
+| Search Feature Feed | `UnitFilter` plus trusted Search controls | Feed                | Feed items          |
+
+The text box on every row in this table writes `UnitFilter.search`; it never
+writes a sibling “search feed” request. A Search Feature presentation may
+inject fixed, non-removable Search controls. Independently, a product-owned
+canonical Feed list may compose an additional `UnitPredicate` into
+`UnitFilter.where`. The Review list uses the latter path: it fixes content-kind
+and subject predicates, while its scoring-Realm selector composes a
+displayed-Score predicate. When that Feed also has query text, its execution
+adapter maps the fixed content kind to an internal Search category without
+changing the public Filter. Language, Realm placement, Tags, query text, and
+other user-controlled conditions remain SearchDocument controls or
+`UnitFilter` state and are passed unchanged when navigating between compact and
+full-page presentations.
+
 Full-text query text remains request state inside the Filter. It is never
 stored as initial text in a SearchDocument, because stored query copy would
 bypass the localization ownership model. Search-index expressions, cursor
@@ -136,6 +160,11 @@ make one language more relevant than another. Composed fallback-path titles,
 aliases, summaries, descriptions, and published content follow in that order.
 Recommendation score, recent update time, and Unit ID act only as deterministic
 tie-breaks after text relevance.
+
+Search-backed Feed responses preserve total-count exactness. A response may
+report an exact total or a lower bound when the Search Service has not exhausted
+its bounded candidate window. Clients must render that distinction (for
+example, “at least 1,000”) and must not present a lower bound as an exact count.
 
 ## Rationale
 

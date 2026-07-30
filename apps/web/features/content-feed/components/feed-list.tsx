@@ -41,6 +41,7 @@ export function FeedList<Item>({
 	renderItem,
 	retryLabel,
 	semantic = "feed",
+	setSize,
 	state,
 }: {
 	readonly "aria-label": string;
@@ -53,6 +54,7 @@ export function FeedList<Item>({
 	readonly renderItem: (item: Item, metadata: FeedListItemMetadata) => ReactNode;
 	readonly retryLabel: string;
 	readonly semantic?: "feed" | "list";
+	readonly setSize?: number;
 	readonly state: FeedListState<Item>;
 }) {
 	if (state.status === "pending")
@@ -85,7 +87,7 @@ export function FeedList<Item>({
 					<Fragment key={getItemKey(item)}>
 						{renderItem(item, {
 							position: index + 1,
-							setSize: state.items.length,
+							setSize: setSize ?? state.items.length,
 						})}
 					</Fragment>
 				))}

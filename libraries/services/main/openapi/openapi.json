@@ -24248,7 +24248,7 @@
 								"additionalProperties": false,
 								"type": "object",
 								"properties": {
-									"filter": { "$ref": "#/components/schemas/UnitPredicate" },
+									"filter": { "$ref": "#/components/schemas/UnitFilter" },
 									"sort": {
 										"default": "best",
 										"type": "string",
@@ -24292,7 +24292,7 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["items", "nextCursor"],
+									"required": ["items", "nextCursor", "total"],
 									"properties": {
 										"items": {
 											"type": "array",
@@ -30284,6 +30284,28 @@
 										"nextCursor": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"total": {
+											"type": "object",
+											"required": ["value", "relation"],
+											"properties": {
+												"value": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"relation": {
+													"default": "exact",
+													"type": "string",
+													"enum": ["exact", "lower-bound"]
+												}
+											}
 										}
 									}
 								}
@@ -30326,10 +30348,34 @@
 						}
 					},
 					"422": {
-						"description": "Request validation failed",
+						"description": "Response for status 422",
 						"content": {
 							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "InvalidSearch",
+															"type": "string",
+															"enum": ["InvalidSearch"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
 							}
 						}
 					},
@@ -30338,6 +30384,33 @@
 						"content": {
 							"application/json": {
 								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "SearchUnavailable",
+													"type": "string",
+													"enum": ["SearchUnavailable"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
 							}
 						}
 					}

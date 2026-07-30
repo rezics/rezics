@@ -22,6 +22,14 @@ export function catalogReviewsHref(type: CatalogDetailUnitType, unitId: string):
 	return `/units/${type}/${unitId}/reviews`;
 }
 
+export function catalogExcerptsHref(type: CatalogDetailUnitType, unitId: string): string {
+	return `/units/${type}/${unitId}/excerpts`;
+}
+
+export function catalogQuestionsHref(type: CatalogDetailUnitType, unitId: string): string {
+	return `/units/${type}/${unitId}/questions`;
+}
+
 export function catalogTagsHref(type: CatalogDetailUnitType, unitId: string): string {
 	return `/units/${type}/${unitId}/tags`;
 }

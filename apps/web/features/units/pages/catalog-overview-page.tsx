@@ -14,6 +14,7 @@ import { AppLink as Link } from "@/features/application-shell/components/app-lin
 import type { ReactNode } from "react";
 
 import { UnitShelf } from "@/features/explore/unit-shelf";
+import { UnitDiscussionSummarySection } from "@/features/posts/components/unit-discussion-summary-section";
 import { UnitRatingsReviewsSection } from "@/features/reviews/components/unit-ratings-reviews-section";
 import { UnitProgressSummaryCard } from "@/features/progress/components/unit-progress-summary-card";
 import { targetedReviewCreateHref } from "@/features/reviews/routing/review-routes";
@@ -122,6 +123,8 @@ export function CatalogOverviewPage() {
 					type={type}
 					writeReviewHref={targetedReviewCreateHref(type, unit.id)}
 				/>
+
+				<UnitDiscussionSummarySection targetId={unit.id} type={type} />
 
 				{unit.subjectAssociations.length ? (
 					<DetailSection title={t.units.detail.subjectAssociations}>

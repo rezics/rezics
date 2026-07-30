@@ -1,14 +1,29 @@
 import { createHash } from "node:crypto";
 import { StatusCodes } from "http-status-codes";
-import { and, asc, desc, eq, exists, inArray, isNull, lte, or, sql, type SQL } from "drizzle-orm";
+import {
+	and,
+	asc,
+	count,
+	desc,
+	eq,
+	exists,
+	inArray,
+	isNull,
+	lte,
+	or,
+	sql,
+	type SQL,
+} from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
 import type { PresentedAvatar } from "@rezics/avatar";
 import {
-	assertUnitPredicate,
-	canonicalUnitPredicate,
+	assertUnitFilter,
+	canonicalUnitFilter,
 	FilterSchemaModels,
+	readSimpleFeedContentKinds,
 	readSimpleFeedFilter,
+	type SearchCategory,
 	type UnitPredicate,
 } from "@rezics/filter";
 import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
@@ -69,6 +84,9 @@ import { createRecommendationTracking } from "../../recommendations/tracking";
 import { presentAvatar } from "../../units/avatar";
 import { presentImageAsset } from "../../units/service";
 import { compileUnitPredicateSql } from "../../filter/sql";
+import { InvalidSearch, SearchUnavailable } from "../../search/errors";
+import { SearchCategories } from "../../search/schema";
+import { searchDomain } from "../../search/service";
 import {
 	getPublicCanonicalUnitSlugAddresses,
 	type PublicCanonicalUnitSlugAddress,
@@ -263,6 +281,75 @@ export function resolveFeedContentSelection(content?: readonly FeedContentKind[]
 	return { selected: [...selected], unitKinds, postKinds } as const;
 }
 
+const FeedSearchCategoryByContentKind = {
+	"unit:profile": "users",
+	"unit:book": "units",
+	"unit:software": "units",
+	"unit:media": "units",
+	"unit:release": "units",
+	"unit:entity": "entity",
+	"unit:tag": "tags",
+	"unit:structure": "tag-structures",
+	"unit:series": "units",
+	"unit:zone": "units",
+	"unit:collection": "collections",
+	"unit:poll": "polls",
+	"unit:realm": "realms",
+	"post:post": "posts",
+	"post:reply": "posts",
+	"post:excerpt": "posts",
+	"post:review": "reviews",
+	"post:chapter": "posts",
+	"post:wiki": "posts",
+	"post:picture": "posts",
+} as const satisfies Record<FeedContentKind, SearchCategory>;
+
+export function resolveFeedSearchCategories(
+	content?: readonly FeedContentKind[],
+): SearchCategory[] {
+	const requested = new Set(
+		resolveFeedContentSelection(content).selected.map(
+			(kind) => FeedSearchCategoryByContentKind[kind],
+		),
+	);
+	return SearchCategories.filter((category) => requested.has(category));
+}
+
+interface FeedSearchSelection {
+	readonly ids: readonly string[];
+	readonly relation: "exact" | "lower-bound";
+}
+
+async function resolveFeedSearchSelection(input: {
+	readonly content?: readonly FeedContentKind[];
+	readonly filter: UnitPredicate | undefined;
+	readonly profileId: string | undefined;
+	readonly query: string;
+}): Promise<FeedSearchSelection> {
+	const categories = resolveFeedSearchCategories(input.content);
+	const pageSize = Math.max(
+		1,
+		Math.floor(RecommendationPolicy.maxCandidates / categories.length),
+	);
+	const groups = await Promise.all(
+		categories.map((category) =>
+			searchDomain(category, {
+				...(input.filter ? { domainFilter: input.filter } : {}),
+				...(input.profileId ? { profileId: input.profileId } : {}),
+				query: input.query,
+				limit: pageSize,
+				sort: "best",
+			}),
+		),
+	);
+	return {
+		ids: [...new Set(groups.flatMap((group) => group.hits.map((hit) => hit.id)))],
+		relation: groups.every((group) => group.total.relation === "exact")
+			? "exact"
+			: "lower-bound",
+	};
+}
+
 interface FeedEligibilityBaseScope {
 	readonly content?: readonly FeedContentKind[];
 	readonly languages?: readonly ContentLanguage[];
@@ -270,6 +357,7 @@ interface FeedEligibilityBaseScope {
 	readonly realmIds?: readonly string[];
 	readonly subjectId?: string;
 	readonly filter?: UnitPredicate;
+	readonly searchCandidateIds?: readonly string[];
 	readonly reviewScore?: never;
 }
 
@@ -300,7 +388,7 @@ export function resolveFeedLocalizationLanguages(
 
 const FeedCursor = t.Object(
 	{
-		v: t.Literal(7),
+		v: t.Literal(8),
 		sort: FeedSortSchema,
 		filterHash: t.Nullable(t.String({ pattern: "^[0-9a-f]{64}$" })),
 		filterLanguages: t.Array(t.UnionEnum(ContentLanguageValues), { uniqueItems: true }),
@@ -336,7 +424,7 @@ function validateCursor(
 ) {
 	if (!cursor) return;
 	const filterHash = query.filter
-		? createHash("sha256").update(canonicalUnitPredicate(query.filter)).digest("hex")
+		? createHash("sha256").update(canonicalUnitFilter(query.filter)).digest("hex")
 		: null;
 	if (
 		cursor.sort !== (query.sort ?? "best") ||
@@ -450,6 +538,11 @@ export function getFeedEligibilityCondition(
 					...(viewer.profileId ? { viewerProfileId: viewer.profileId } : {}),
 				})
 			: undefined,
+		scope.searchCandidateIds
+			? scope.searchCandidateIds.length
+				? inArray(unit.id, [...scope.searchCandidateIds])
+				: sql`false`
+			: undefined,
 		viewer.contentRatings.length
 			? inArray(unit.contentRating, viewer.contentRatings)
 			: undefined,
@@ -469,6 +562,22 @@ export function getFeedEligibilityCondition(
 			))`
 			: undefined,
 	)!;
+}
+
+async function countFeedItems(
+	viewer: Pick<
+		RecommendationViewer,
+		"contentRatings" | "personalized" | "preferredLanguages" | "profileId"
+	>,
+	scope: FeedEligibilityScope,
+	asOf: Date,
+): Promise<number> {
+	const [row] = await database
+		.select({ value: count() })
+		.from(unit)
+		.leftJoin(post, eq(post.id, unit.id))
+		.where(getFeedEligibilityCondition(viewer, scope, asOf));
+	return toSafeInteger(row?.value ?? 0, "feed total");
 }
 
 export interface CandidateSources {
@@ -1448,28 +1557,49 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 	async ({ body, request }) => {
 		if (body.filter)
 			try {
-				assertUnitPredicate(body.filter);
+				assertUnitFilter(body.filter);
 			} catch {
 				throw new InvalidFeedFilter();
 			}
 		const identity = await resolveIdentity(request.headers, "unit:read");
 		const viewer = await resolveRecommendationViewer(identity.profile?.unitId);
 		const cursor = decodeCursor(body.cursor);
-		const simpleSelection = body.filter ? readSimpleFeedFilter(body.filter) : undefined;
+		const simpleSelection = body.filter?.where
+			? readSimpleFeedFilter(body.filter.where)
+			: undefined;
+		const contentKinds = body.filter?.where
+			? readSimpleFeedContentKinds(body.filter.where)
+			: undefined;
 		const filterLanguages = simpleSelection?.languages ?? [];
 		const localizationLanguages = resolveFeedLocalizationLanguages(
 			body.localizationLanguages,
 			viewer,
 		);
 		validateCursor(cursor, body, viewer.personalized, filterLanguages, localizationLanguages);
-		const scope: FeedEligibilityScope = {
-			...(body.filter ? { filter: body.filter } : {}),
-			...(simpleSelection?.contentKinds.length
-				? { content: simpleSelection.contentKinds }
-				: {}),
+		const baseScope: FeedEligibilityScope = {
+			...(body.filter?.where ? { filter: body.filter.where } : {}),
+			...(contentKinds?.length ? { content: contentKinds } : {}),
 			...(filterLanguages.length ? { languages: filterLanguages } : {}),
 			...(localizationLanguages.length ? { localizationLanguages } : {}),
 			...(simpleSelection?.realmIds.length ? { realmIds: simpleSelection.realmIds } : {}),
+		};
+		let searchSelection: FeedSearchSelection | undefined;
+		if (body.filter && "search" in body.filter)
+			try {
+				searchSelection = await resolveFeedSearchSelection({
+					content: baseScope.content,
+					filter: baseScope.filter,
+					profileId: viewer.profileId,
+					query: body.filter.search.query,
+				});
+			} catch (cause) {
+				if (cause instanceof InvalidSearch || cause instanceof SearchUnavailable)
+					throw cause;
+				throw new SearchUnavailable(cause);
+			}
+		const scope: FeedEligibilityScope = {
+			...baseScope,
+			...(searchSelection ? { searchCandidateIds: searchSelection.ids } : {}),
 		};
 		const snapshot = cursor?.snapshotId
 			? await resolveRecommendationSnapshot(cursor.snapshotId)
@@ -1482,14 +1612,17 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 			throw new InvalidFeedCursor();
 		const sort = body.sort ?? "best";
 		const asOf = cursor ? new Date(cursor.asOf) : new Date();
-		const sources = await getCandidateSources({
-			viewer,
-			query: scope,
-			sort,
-			snapshotId: snapshotContext.id,
-			asOf,
-			...(cursor ? { anchorId: cursor.lastId } : {}),
-		});
+		const [sources, total] = await Promise.all([
+			getCandidateSources({
+				viewer,
+				query: scope,
+				sort,
+				snapshotId: snapshotContext.id,
+				asOf,
+				...(cursor ? { anchorId: cursor.lastId } : {}),
+			}),
+			countFeedItems(viewer, scope, asOf),
+		]);
 		const candidates = await getFeedRankingCandidates({
 			ids: sources.ids,
 			sources,
@@ -1524,15 +1657,19 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 		const last = page.at(-1);
 		return {
 			items,
+			total: {
+				value: total,
+				relation: searchSelection?.relation ?? ("exact" as const),
+			},
 			nextCursor:
 				start + page.length < ranked.length && last
 					? Buffer.from(
 							JSON.stringify({
-								v: 7,
+								v: 8,
 								sort,
 								filterHash: body.filter
 									? createHash("sha256")
-											.update(canonicalUnitPredicate(body.filter))
+											.update(canonicalUnitFilter(body.filter))
 											.digest("hex")
 									: null,
 								filterLanguages,
@@ -1556,6 +1693,8 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 				"InvalidFeedCursor",
 				"InvalidFeedFilter",
 			]),
+			[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidSearch"]),
+			[StatusCodes.SERVICE_UNAVAILABLE]: toApiErrorResponse(["SearchUnavailable"]),
 		},
 		detail: { summary: "Ranked realm feed", tags: ["Feed"] },
 	},

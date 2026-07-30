@@ -4,6 +4,8 @@ import { CatalogDetailSections } from "../model/catalog-detail-section";
 import {
 	catalogCreditsHref,
 	catalogDetailHref,
+	catalogExcerptsHref,
+	catalogQuestionsHref,
 	catalogReviewsHref,
 	catalogTagsHref,
 	getCatalogDetailHrefs,
@@ -65,6 +67,8 @@ describe("catalog detail routes", () => {
 		expect(CatalogDetailSections.book).not.toContain("tags");
 		expect(CatalogDetailSections.book).not.toContain("reviews");
 		expect(catalogReviewsHref("book", UnitId)).toBe(`/units/book/${UnitId}/reviews`);
+		expect(catalogExcerptsHref("book", UnitId)).toBe(`/units/book/${UnitId}/excerpts`);
+		expect(catalogQuestionsHref("book", UnitId)).toBe(`/units/book/${UnitId}/questions`);
 		expect(catalogTagsHref("book", UnitId)).toBe(`/units/book/${UnitId}/tags`);
 	});
 });

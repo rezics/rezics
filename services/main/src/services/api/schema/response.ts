@@ -396,7 +396,7 @@ const SearchHit = t.Object({
 	name: t.Optional(NullableText),
 	summary: t.Optional(NullableText),
 });
-const SearchExactness = t.Object({
+export const SearchExactness = t.Object({
 	value: t.Integer({ minimum: 0 }),
 	relation: t.UnionEnum(["exact", "lower-bound"]),
 });
@@ -678,6 +678,7 @@ export type FeedItemResponseValue =
 export const FeedResponse = t.Object({
 	items: t.Array(t.Union([FeedUnitItemResponse, FeedPostItemResponse])),
 	nextCursor: NullableText,
+	total: SearchExactness,
 });
 
 export const SearchFeedResponse = t.Object({

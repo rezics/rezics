@@ -257,6 +257,7 @@ import type {
 	PostApiFeedQueryStatus400,
 	PostApiFeedQueryStatus422,
 	PostApiFeedQueryStatus500,
+	PostApiFeedQueryStatus503,
 	GetApiReportsMeOptions,
 	GetApiReportsMeStatus200,
 	GetApiReportsMeStatus400,
@@ -6362,7 +6363,10 @@ export function postApiFeedQueryMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiFeedQueryStatus200,
 		ResponseErrorConfig<
-			PostApiFeedQueryStatus400 | PostApiFeedQueryStatus422 | PostApiFeedQueryStatus500
+			| PostApiFeedQueryStatus400
+			| PostApiFeedQueryStatus422
+			| PostApiFeedQueryStatus500
+			| PostApiFeedQueryStatus503
 		>,
 		PostApiFeedQueryOptions,
 		TContext
@@ -6384,7 +6388,10 @@ export function usePostApiFeedQuery<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiFeedQueryStatus200,
 			ResponseErrorConfig<
-				PostApiFeedQueryStatus400 | PostApiFeedQueryStatus422 | PostApiFeedQueryStatus500
+				| PostApiFeedQueryStatus400
+				| PostApiFeedQueryStatus422
+				| PostApiFeedQueryStatus500
+				| PostApiFeedQueryStatus503
 			>,
 			PostApiFeedQueryOptions,
 			TContext
@@ -6399,7 +6406,10 @@ export function usePostApiFeedQuery<TContext>(
 	const baseOptions = postApiFeedQueryMutationOptions(config) as UseMutationOptions<
 		PostApiFeedQueryStatus200,
 		ResponseErrorConfig<
-			PostApiFeedQueryStatus400 | PostApiFeedQueryStatus422 | PostApiFeedQueryStatus500
+			| PostApiFeedQueryStatus400
+			| PostApiFeedQueryStatus422
+			| PostApiFeedQueryStatus500
+			| PostApiFeedQueryStatus503
 		>,
 		PostApiFeedQueryOptions,
 		TContext
@@ -6408,7 +6418,10 @@ export function usePostApiFeedQuery<TContext>(
 	return useMutation<
 		PostApiFeedQueryStatus200,
 		ResponseErrorConfig<
-			PostApiFeedQueryStatus400 | PostApiFeedQueryStatus422 | PostApiFeedQueryStatus500
+			| PostApiFeedQueryStatus400
+			| PostApiFeedQueryStatus422
+			| PostApiFeedQueryStatus500
+			| PostApiFeedQueryStatus503
 		>,
 		PostApiFeedQueryOptions,
 		TContext
@@ -6422,7 +6435,10 @@ export function usePostApiFeedQuery<TContext>(
 	) as UseMutationResult<
 		PostApiFeedQueryStatus200,
 		ResponseErrorConfig<
-			PostApiFeedQueryStatus400 | PostApiFeedQueryStatus422 | PostApiFeedQueryStatus500
+			| PostApiFeedQueryStatus400
+			| PostApiFeedQueryStatus422
+			| PostApiFeedQueryStatus500
+			| PostApiFeedQueryStatus503
 		>,
 		PostApiFeedQueryOptions,
 		TContext

@@ -1,15 +1,10 @@
 "use client";
 
 import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
-import {
-	combineUnitPredicates,
-	createSimpleFeedFilter,
-	type SimpleFeedContentKind,
-	type UnitPredicate,
-} from "@rezics/filter";
+import { type SimpleFeedContentKind, type UnitPredicate } from "@rezics/filter";
 import { postApiFeedQuery, useGetApiRealms, useGetApiTags } from "@rezics/openapi-tanstack-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { ListFilterIcon } from "lucide-react";
+import { ListFilterIcon, Search } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import {
@@ -19,48 +14,78 @@ import {
 	Badge,
 	Button,
 	ChoiceSelect,
+	Input,
 	type ChoiceOption,
 } from "@rezics/ui";
 import { usePresentationPreferences } from "@/features/preferences/data/use-presentation-preferences";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguageState } from "@/i18n/use-localization-languages";
+import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { FeedContentSelector } from "../components/feed-content-selector";
 import { FeedFiltersDialog } from "../components/feed-filters-dialog";
 import { FeedItemCard, type FeedItem } from "../components/feed-item-card";
 import { FeedList } from "../components/feed-list";
+import { createApiFeedFilter } from "../model/api-feed-filter";
+import type { FeedDisplayContext } from "../model/feed-display-context";
 import { FeedSortValues, type FeedSort } from "../model/feed-sort";
 import { resolveFeedFilterLanguages } from "../model/feed-language-filter";
 import { FeedQueryKey } from "../query";
 
 export interface ApiFeedListProps {
+	"aria-label"?: string;
 	additionalFilter?: UnitPredicate;
 	contentKinds?: readonly SimpleFeedContentKind[];
+	displayContext?: FeedDisplayContext;
+	emptyBody?: string;
+	emptyTitle?: string;
 	infinite?: boolean;
 	languages?: readonly ContentLanguage[];
+	limit?: number;
 	onContentKindsChange?: (contentKinds: readonly SimpleFeedContentKind[]) => void;
 	onLanguagesChange?: (languages: readonly ContentLanguage[]) => void;
 	onRealmIdsChange?: (realmIds: readonly string[]) => void;
+	onSearchQueryChange?: (query: string) => void;
 	onSortChange?: (sort: FeedSort) => void;
 	onTagIdsChange?: (tagIds: readonly string[]) => void;
+	paginate?: boolean;
 	realmIds?: readonly string[];
 	renderOverflowActions?: (item: FeedItem) => ReactNode;
+	renderSummary?: (metadata: ApiFeedResultMetadata) => ReactNode;
+	searchQuery?: string;
 	sort?: FeedSort;
 	tagIds?: readonly string[];
 }
 
+export interface ApiFeedResultMetadata {
+	readonly displayedCount: number;
+	readonly total: Readonly<{
+		readonly relation: "exact" | "lower-bound";
+		readonly value: number;
+	}>;
+}
+
 export function ApiFeedList({
+	"aria-label": ariaLabel,
 	additionalFilter,
 	contentKinds = [],
+	displayContext,
+	emptyBody,
+	emptyTitle,
 	infinite = false,
 	languages = [],
+	limit = 20,
 	onContentKindsChange,
 	onLanguagesChange,
 	onRealmIdsChange,
+	onSearchQueryChange,
 	onSortChange,
 	onTagIdsChange,
+	paginate = true,
 	realmIds = [],
 	renderOverflowActions,
+	renderSummary,
+	searchQuery = "",
 	sort = "best",
 	tagIds = [],
 }: ApiFeedListProps) {
@@ -98,21 +123,20 @@ export function ApiFeedList({
 		preferencesReady,
 	]);
 	const baseBody = {
-		limit: 20,
+		limit,
 		...(localizationState.status === "ready"
 			? { localizationLanguages: [...localizationState.languages] }
 			: {}),
 		sort,
 		...(() => {
-			const filter = combineUnitPredicates([
-				createSimpleFeedFilter({
-					contentKinds,
-					languages: filterLanguages,
-					realmIds,
-					tagIds,
-				}),
+			const filter = createApiFeedFilter({
 				additionalFilter,
-			]);
+				contentKinds,
+				languages: filterLanguages,
+				query: searchQuery,
+				realmIds,
+				tagIds,
+			});
 			return filter ? { filter } : {};
 		})(),
 	};
@@ -159,6 +183,12 @@ export function ApiFeedList({
 	const items = query.data?.pages
 		.flatMap((page) => page.items)
 		.filter(({ id }) => !hidden.has(id));
+	const total = query.data?.pages[0]?.total;
+	const feedSetSize = total
+		? total.relation === "exact"
+			? toNonNegativeApiInteger(total.value)
+			: -1
+		: undefined;
 	const setItemHidden = (id: string, value: boolean) =>
 		setHidden((current) => {
 			const next = new Set(current);
@@ -171,6 +201,7 @@ export function ApiFeedList({
 		onContentKindsChange ||
 		onLanguagesChange ||
 		onRealmIdsChange ||
+		onSearchQueryChange ||
 		onTagIdsChange,
 	);
 	const requestedRealmId = realmIds.length === 1 ? realmIds[0] : undefined;
@@ -181,6 +212,7 @@ export function ApiFeedList({
 			data-content={contentKinds.join(",")}
 			data-languages={languages.join(",")}
 			data-realms={realmIds.join(",")}
+			data-search={searchQuery}
 			data-sort={sort}
 			data-tags={tagIds.join(",")}
 		>
@@ -191,18 +223,31 @@ export function ApiFeedList({
 					onContentKindsChange={onContentKindsChange}
 					onLanguagesChange={onLanguagesChange}
 					onRealmIdsChange={onRealmIdsChange}
+					onSearchQueryChange={onSearchQueryChange}
 					onSortChange={onSortChange}
 					onTagIdsChange={onTagIdsChange}
 					realmIds={realmIds}
+					searchQuery={searchQuery}
 					sort={sort}
 					tagIds={tagIds}
 				/>
 			) : null}
+			{renderSummary && total ? (
+				<div aria-atomic="true" aria-live="polite">
+					{renderSummary({
+						displayedCount: items?.length ?? 0,
+						total: {
+							relation: total.relation,
+							value: toNonNegativeApiInteger(total.value),
+						},
+					})}
+				</div>
+			) : null}
 			<FeedList
-				aria-label={t.feed.title}
+				aria-label={ariaLabel ?? t.feed.title}
 				className={showControls ? "mt-3 sm:mt-4" : undefined}
-				emptyBody={t.feed.emptyBody}
-				emptyTitle={t.feed.emptyTitle}
+				emptyBody={emptyBody ?? t.feed.emptyBody}
+				emptyTitle={emptyTitle ?? t.feed.emptyTitle}
 				errorLabel={t.state.error}
 				footer={
 					query.isFetchNextPageError ? (
@@ -218,7 +263,7 @@ export function ApiFeedList({
 								</Button>
 							</AlertAction>
 						</Alert>
-					) : query.hasNextPage ? (
+					) : paginate && query.hasNextPage ? (
 						infinite ? (
 							<div
 								aria-live="polite"
@@ -247,6 +292,7 @@ export function ApiFeedList({
 				renderItem={(item, metadata) => (
 					<FeedItemCard
 						canExclude={Boolean(session.data)}
+						displayContext={displayContext}
 						item={item}
 						onHiddenChange={(value) => setItemHidden(item.id, value)}
 						position={metadata.position}
@@ -256,6 +302,7 @@ export function ApiFeedList({
 					/>
 				)}
 				retryLabel={t.actions.retry}
+				setSize={feedSetSize}
 				state={
 					localizationState.status === "error"
 						? { status: "error", retry: localizationState.retry }
@@ -276,9 +323,11 @@ export function FeedListControls({
 	onContentKindsChange,
 	onLanguagesChange,
 	onRealmIdsChange,
+	onSearchQueryChange,
 	onSortChange,
 	onTagIdsChange,
 	realmIds = [],
+	searchQuery = "",
 	sort,
 	tagIds = [],
 }: Pick<
@@ -288,17 +337,21 @@ export function FeedListControls({
 	| "onContentKindsChange"
 	| "onLanguagesChange"
 	| "onRealmIdsChange"
+	| "onSearchQueryChange"
 	| "onSortChange"
 	| "onTagIdsChange"
 	| "realmIds"
+	| "searchQuery"
 	| "sort"
 	| "tagIds"
 >) {
-	const { t } = useTranslation(["feed", "locale"]);
+	const { t } = useTranslation(["feed", "locale", "search"]);
 	const localizationState = useLocalizationLanguageState();
 	const localizationLanguages =
 		localizationState.status === "ready" ? localizationState.languages : [];
 	const [filtersOpen, setFiltersOpen] = useState(false);
+	const [queryDraft, setQueryDraft] = useState(searchQuery);
+	useEffect(() => setQueryDraft(searchQuery), [searchQuery]);
 	const realms = useGetApiRealms(
 		{ query: { localizationLanguages, limit: 50 } },
 		{
@@ -352,6 +405,40 @@ export function FeedListControls({
 				className="flex flex-wrap items-center justify-start gap-1 border-b border-border-weak pb-5"
 				role="group"
 			>
+				{onSearchQueryChange ? (
+					<form
+						className="flex min-w-64 flex-1 items-stretch gap-2"
+						onSubmit={(event) => {
+							event.preventDefault();
+							onSearchQueryChange(queryDraft.trim());
+						}}
+						role="search"
+					>
+						<div className="relative min-w-0 flex-1">
+							<Search
+								aria-hidden
+								className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+							/>
+							<Input
+								aria-label={t.search.query}
+								className="h-12 ps-10"
+								maxLength={500}
+								onChange={(event) => setQueryDraft(event.currentTarget.value)}
+								placeholder={t.search.placeholder}
+								type="search"
+								value={queryDraft}
+							/>
+						</div>
+						<Button
+							aria-label={t.search.submit}
+							className="h-12 shrink-0"
+							type="submit"
+							variant="outline"
+						>
+							<Search aria-hidden />
+						</Button>
+					</form>
+				) : null}
 				{onSortChange ? (
 					<ChoiceSelect
 						ariaLabel={t.feed.sortLabel}

@@ -15970,6 +15970,14 @@ export const PostApiFeedQueryStatus200ItemsRealmTagContextTagAvatarIconPrefixEnu
 export type PostApiFeedQueryStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum =
 	(typeof PostApiFeedQueryStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum)[keyof typeof PostApiFeedQueryStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum];
 
+export const PostApiFeedQueryStatus200TotalRelationEnum = {
+	exact: "exact",
+	"lower-bound": "lower-bound",
+} as const;
+
+export type PostApiFeedQueryStatus200TotalRelationEnum =
+	(typeof PostApiFeedQueryStatus200TotalRelationEnum)[keyof typeof PostApiFeedQueryStatus200TotalRelationEnum];
+
 /**
  * @type object
  */
@@ -18564,6 +18572,17 @@ export type PostApiFeedQueryStatus200 = {
 		  )
 	)[];
 	nextCursor: (string | null) | null;
+	/**
+	 * @type object
+	 */
+	total: {
+		value: string | number;
+		/**
+		 * @default 'exact'
+		 * @type string
+		 */
+		relation: PostApiFeedQueryStatus200TotalRelationEnum;
+	};
 };
 
 export const PostApiFeedQueryStatus400ErrorCodeEnum = {
@@ -18601,15 +18620,65 @@ export type PostApiFeedQueryStatus400 =
 	  }
 	| MalformedRequestBody;
 
-/**
- * @type object
- */
-export type PostApiFeedQueryStatus422 = ValidationError;
+export type PostApiFeedQueryStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidSearch'
+				 * @type string
+				 */
+				code: "InvalidSearch";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
 
 /**
  * @type object
  */
 export type PostApiFeedQueryStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiFeedQueryStatus503 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'SearchUnavailable'
+		 * @type string
+		 */
+		code: "SearchUnavailable";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 export const PostApiFeedQueryRequestSortEnum = {
 	best: "best",
@@ -18639,10 +18708,7 @@ export type PostApiFeedQueryRequestLocalizationLanguagesEnum =
  * @type object
  */
 export type PostApiFeedQueryBody = {
-	/**
-	 * @type object | undefined
-	 */
-	filter?: UnitPredicate;
+	filter?: UnitFilter;
 	/**
 	 * @default 'best'
 	 * @type string | undefined
@@ -18681,6 +18747,7 @@ export type PostApiFeedQueryResponses = {
 	"400": PostApiFeedQueryStatus400;
 	"422": PostApiFeedQueryStatus422;
 	"500": PostApiFeedQueryStatus500;
+	"503": PostApiFeedQueryStatus503;
 };
 
 /**
@@ -18690,7 +18757,8 @@ export type PostApiFeedQueryResponse =
 	| PostApiFeedQueryStatus200
 	| PostApiFeedQueryStatus400
 	| PostApiFeedQueryStatus422
-	| PostApiFeedQueryStatus500;
+	| PostApiFeedQueryStatus500
+	| PostApiFeedQueryStatus503;
 
 export const GetApiReportsMeLocalizationLanguagesEnum = {
 	zh: "zh",

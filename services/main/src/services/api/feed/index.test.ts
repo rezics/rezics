@@ -8,9 +8,17 @@ import {
 	prioritizeFeedRealmContexts,
 	resolveFeedContentSelection,
 	resolveFeedLocalizationLanguages,
+	resolveFeedSearchCategories,
 } from "./index";
 
 const dialect = new PgDialect();
+
+describe("feed Search categories", () => {
+	it("maps a fixed Review feed to the dedicated Search index", () => {
+		expect(resolveFeedSearchCategories(["post:review"])).toEqual(["reviews"]);
+		expect(resolveFeedSearchCategories(["post:excerpt"])).toEqual(["posts"]);
+	});
+});
 
 describe("feed score candidates", () => {
 	const targetId = "00000000-0000-4000-8000-000000000001";
