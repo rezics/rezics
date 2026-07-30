@@ -14,33 +14,42 @@ import {
 	DialogHeader,
 } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
-import {
-	buildBookDraftTree,
-	type BookDraftNode,
-	type BookDraftTreeNode,
-} from "../model/book-content-structure-draft";
+import { type BookDraftNode } from "../model/book-content-structure-draft";
+import type { MediaDraftNode } from "../model/media-content-structure-draft";
 
-export type BookStructureDestination =
+export type ContentStructureDestination =
 	| { readonly kind: "root" }
 	| {
 			readonly kind: "node";
 			readonly nodeId: string;
 			readonly placement: "inside" | "after";
 	  };
+export type BookStructureDestination = ContentStructureDestination;
+export type ContentStructureDestinationNode = BookDraftNode | MediaDraftNode;
+type ContentStructureDestinationTreeNode = {
+	readonly node: ContentStructureDestinationNode;
+	readonly children: readonly ContentStructureDestinationTreeNode[];
+};
 
-type BookStructureNodeDestination = Extract<BookStructureDestination, { readonly kind: "node" }>;
+type ContentStructureNodeDestination = Extract<
+	ContentStructureDestination,
+	{ readonly kind: "node" }
+>;
 
-export function bookStructureDestinationForNode(node: BookDraftNode): BookStructureNodeDestination {
+export function contentStructureDestinationForNode(
+	node: ContentStructureDestinationNode,
+): ContentStructureNodeDestination {
 	return {
 		kind: "node",
 		nodeId: node.id,
 		placement: node.contentKind === "label" ? "inside" : "after",
 	};
 }
+export const bookStructureDestinationForNode = contentStructureDestinationForNode;
 
 function sameDestination(
-	left: BookStructureDestination | undefined,
-	right: BookStructureDestination,
+	left: ContentStructureDestination | undefined,
+	right: ContentStructureDestination,
 ): boolean {
 	if (!left || left.kind !== right.kind) return false;
 	if (left.kind === "root" && right.kind === "root") return true;
@@ -52,7 +61,50 @@ function sameDestination(
 	);
 }
 
-function collectExpandableIds(nodes: readonly BookDraftTreeNode[]): string[] {
+function compareNodes(
+	left: ContentStructureDestinationNode,
+	right: ContentStructureDestinationNode,
+): number {
+	return left.order - right.order || left.id.localeCompare(right.id);
+}
+
+function buildDestinationTree(
+	nodes: readonly ContentStructureDestinationNode[],
+): readonly ContentStructureDestinationTreeNode[] {
+	const knownIds = new Set(nodes.map(({ id }) => id));
+	const children = new Map<string | null, ContentStructureDestinationNode[]>();
+	for (const node of nodes) {
+		const parentId =
+			node.parentId && node.parentId !== node.id && knownIds.has(node.parentId)
+				? node.parentId
+				: null;
+		const siblings = children.get(parentId);
+		if (siblings) siblings.push(node);
+		else children.set(parentId, [node]);
+	}
+	for (const siblings of children.values()) siblings.sort(compareNodes);
+	const seen = new Set<string>();
+	function visit(
+		node: ContentStructureDestinationNode,
+		ancestors: ReadonlySet<string>,
+	): ContentStructureDestinationTreeNode {
+		seen.add(node.id);
+		const nextAncestors = new Set(ancestors);
+		nextAncestors.add(node.id);
+		return {
+			node,
+			children: (children.get(node.id) ?? [])
+				.filter((child) => !nextAncestors.has(child.id))
+				.map((child) => visit(child, nextAncestors)),
+		};
+	}
+	const roots = (children.get(null) ?? []).map((node) => visit(node, new Set()));
+	for (const node of nodes.toSorted(compareNodes))
+		if (!seen.has(node.id)) roots.push(visit(node, new Set()));
+	return roots;
+}
+
+function collectExpandableIds(nodes: readonly ContentStructureDestinationTreeNode[]): string[] {
 	return nodes.flatMap(({ node, children }) =>
 		children.length
 			? [node.id, ...collectExpandableIds(children)]
@@ -60,7 +112,7 @@ function collectExpandableIds(nodes: readonly BookDraftTreeNode[]): string[] {
 	);
 }
 
-export function BookContentStructureDestinationDialog({
+export function ContentStructureDestinationDialog({
 	description,
 	nodes,
 	onClose,
@@ -70,15 +122,15 @@ export function BookContentStructureDestinationDialog({
 	validTargetIds,
 }: {
 	description: string;
-	nodes: readonly BookDraftNode[];
+	nodes: readonly ContentStructureDestinationNode[];
 	onClose: () => void;
-	onSelect: (destination: BookStructureDestination) => void;
-	selectedDestination?: BookStructureDestination;
+	onSelect: (destination: ContentStructureDestination) => void;
+	selectedDestination?: ContentStructureDestination;
 	title: string;
 	validTargetIds?: ReadonlySet<string>;
 }) {
 	const { t } = useTranslation(["engagement", "units"]);
-	const tree = useMemo(() => buildBookDraftTree(nodes), [nodes]);
+	const tree = useMemo(() => buildDestinationTree(nodes), [nodes]);
 	const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(
 		() => new Set(collectExpandableIds(tree)),
 	);
@@ -144,6 +196,7 @@ export function BookContentStructureDestinationDialog({
 		</Dialog>
 	);
 }
+export const BookContentStructureDestinationDialog = ContentStructureDestinationDialog;
 
 function DestinationTreeRow({
 	depth,
@@ -155,17 +208,17 @@ function DestinationTreeRow({
 	validTargetIds,
 }: {
 	depth: number;
-	entry: BookDraftTreeNode;
+	entry: ContentStructureDestinationTreeNode;
 	expandedIds: ReadonlySet<string>;
-	onSelect: (destination: BookStructureDestination) => void;
+	onSelect: (destination: ContentStructureDestination) => void;
 	onToggle: (nodeId: string) => void;
-	selectedDestination?: BookStructureDestination;
+	selectedDestination?: ContentStructureDestination;
 	validTargetIds?: ReadonlySet<string>;
 }) {
 	const { t } = useTranslation(["units"]);
 	const { node, children } = entry;
 	const expanded = expandedIds.has(node.id);
-	const destination = bookStructureDestinationForNode(node);
+	const destination = contentStructureDestinationForNode(node);
 	const selected = sameDestination(selectedDestination, destination);
 	const selectable = validTargetIds?.has(node.id) ?? true;
 	const isLabel = node.contentKind === "label";

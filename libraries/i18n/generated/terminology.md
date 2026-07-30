@@ -220,6 +220,68 @@ The REZICS Post product concept; this does not refer to the HTTP POST method or 
 | ko | approved | inline | 게시물 | Post, Posts |
 | ko | approved | plural | 게시물 | Post, Posts |
 
+## video
+
+A top-level timed visual-media Unit that can be placed in a Media content structure.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Video |  |
+| en | approved | pluralLabel | Videos |  |
+| en | approved | inline | video |  |
+| en | approved | plural | videos |  |
+| zh-Hant | approved | label | 影片 | Video, Videos, 視頻 |
+| zh-Hant | approved | pluralLabel | 影片 | Video, Videos, 視頻 |
+| zh-Hant | approved | inline | 影片 | Video, Videos, 視頻 |
+| zh-Hant | approved | plural | 影片 | Video, Videos, 視頻 |
+| zh-Hans | approved | label | 视频 | Video, Videos, 影片 |
+| zh-Hans | approved | pluralLabel | 视频 | Video, Videos, 影片 |
+| zh-Hans | approved | inline | 视频 | Video, Videos, 影片 |
+| zh-Hans | approved | plural | 视频 | Video, Videos, 影片 |
+| de | approved | label | Video |  |
+| de | approved | pluralLabel | Videos |  |
+| de | approved | inline | Video |  |
+| de | approved | plural | Videos |  |
+| ja | approved | label | 動画 | Video, Videos |
+| ja | approved | pluralLabel | 動画 | Video, Videos |
+| ja | approved | inline | 動画 | Video, Videos |
+| ja | approved | plural | 動画 | Video, Videos |
+| ko | approved | label | 동영상 | Video, Videos |
+| ko | approved | pluralLabel | 동영상 | Video, Videos |
+| ko | approved | inline | 동영상 | Video, Videos |
+| ko | approved | plural | 동영상 | Video, Videos |
+
+## audio
+
+A top-level timed audio Unit that can be placed in a Media content structure.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Audio |  |
+| en | approved | pluralLabel | Audio |  |
+| en | approved | inline | audio |  |
+| en | approved | plural | audio |  |
+| zh-Hant | approved | label | 音訊 | Audio, Audios, 音頻 |
+| zh-Hant | approved | pluralLabel | 音訊 | Audio, Audios, 音頻 |
+| zh-Hant | approved | inline | 音訊 | Audio, Audios, 音頻 |
+| zh-Hant | approved | plural | 音訊 | Audio, Audios, 音頻 |
+| zh-Hans | approved | label | 音频 | Audio, Audios, 音訊 |
+| zh-Hans | approved | pluralLabel | 音频 | Audio, Audios, 音訊 |
+| zh-Hans | approved | inline | 音频 | Audio, Audios, 音訊 |
+| zh-Hans | approved | plural | 音频 | Audio, Audios, 音訊 |
+| de | approved | label | Audio |  |
+| de | approved | pluralLabel | Audios |  |
+| de | approved | inline | Audio |  |
+| de | approved | plural | Audios |  |
+| ja | approved | label | 音声 | Audio, Audios |
+| ja | approved | pluralLabel | 音声 | Audio, Audios |
+| ja | approved | inline | 音声 | Audio, Audios |
+| ja | approved | plural | 音声 | Audio, Audios |
+| ko | approved | label | 오디오 | Audio, Audios |
+| ko | approved | pluralLabel | 오디오 | Audio, Audios |
+| ko | approved | inline | 오디오 | Audio, Audios |
+| ko | approved | plural | 오디오 | Audio, Audios |
+
 ## label
 
 A lightweight localized-title Unit used as a structural heading or taxonomy entry; this is distinct from an assignable Tag.

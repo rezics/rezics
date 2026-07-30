@@ -130,6 +130,7 @@ export default {
 		"Cette configuration d’accès à la Unit n’est pas valide ou dépasse les autorisations que vous pouvez déléguer.",
 	InvalidPaginationCursor: "Ce lien de page n’est pas valide ou a expiré.",
 	BookNotFound: "Ce livre est introuvable.",
+	MediaNotFound: "Cet élément multimédia est introuvable.",
 	ChapterNotFound: "Ce chapitre est introuvable.",
 	ChapterLanguageNotFound: "Cette langue de chapitre est introuvable.",
 	ReportRealmMismatch: `L’unité signalée n’appartient pas à ce ${realmTerms.inline}.`,

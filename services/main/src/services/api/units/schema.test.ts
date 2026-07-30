@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
 	CatalogUnitTypeParams,
 	CreateUnitBody,
+	ManageableUnitTypeParams,
 	UpdateUnitBody,
 	UnitLocalizationDeleteBody,
 	UnitLocalizationOrderBody,
@@ -81,6 +82,13 @@ describe("Catalog Unit route types", () => {
 	it("keeps Series out of variant-only creation routes", () => {
 		expect(Check(VariantUnitTypeParams, { type: "series" })).toBe(false);
 		expect(Check(VariantUnitTypeParams, { type: "book" })).toBe(true);
+	});
+
+	it("addresses timed media through manageable routes without adding catalog creation types", () => {
+		expect(Check(ManageableUnitTypeParams, { type: "video" })).toBe(true);
+		expect(Check(ManageableUnitTypeParams, { type: "audio" })).toBe(true);
+		expect(Check(CatalogUnitTypeParams, { type: "video" })).toBe(false);
+		expect(Check(CatalogUnitTypeParams, { type: "audio" })).toBe(false);
 	});
 });
 

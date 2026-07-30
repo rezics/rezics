@@ -1376,6 +1376,20 @@ import type {
 	PutApiUnitsBookByUnitIdContentStructureStatus422,
 	PutApiUnitsBookByUnitIdContentStructureStatus429,
 	PutApiUnitsBookByUnitIdContentStructureStatus500,
+	GetApiUnitsMediaByUnitIdContentStructureNodesOptions,
+	GetApiUnitsMediaByUnitIdContentStructureNodesStatus200,
+	GetApiUnitsMediaByUnitIdContentStructureNodesStatus404,
+	GetApiUnitsMediaByUnitIdContentStructureNodesStatus422,
+	GetApiUnitsMediaByUnitIdContentStructureNodesStatus500,
+	PutApiUnitsMediaByUnitIdContentStructureOptions,
+	PutApiUnitsMediaByUnitIdContentStructureStatus200,
+	PutApiUnitsMediaByUnitIdContentStructureStatus400,
+	PutApiUnitsMediaByUnitIdContentStructureStatus403,
+	PutApiUnitsMediaByUnitIdContentStructureStatus404,
+	PutApiUnitsMediaByUnitIdContentStructureStatus409,
+	PutApiUnitsMediaByUnitIdContentStructureStatus422,
+	PutApiUnitsMediaByUnitIdContentStructureStatus429,
+	PutApiUnitsMediaByUnitIdContentStructureStatus500,
 	GetApiChaptersByChapterIdOptions,
 	GetApiChaptersByChapterIdStatus200,
 	GetApiChaptersByChapterIdStatus404,
@@ -1473,6 +1487,7 @@ import type {
 	PutApiProgressByUnitIdNodesByNodeIdStatus500,
 	DeleteApiProgressByUnitIdNodesByNodeIdOptions,
 	DeleteApiProgressByUnitIdNodesByNodeIdStatus200,
+	DeleteApiProgressByUnitIdNodesByNodeIdStatus404,
 	DeleteApiProgressByUnitIdNodesByNodeIdStatus422,
 	DeleteApiProgressByUnitIdNodesByNodeIdStatus429,
 	DeleteApiProgressByUnitIdNodesByNodeIdStatus500,
@@ -2416,6 +2431,8 @@ import {
 	deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId,
 	getApiUnitsBookByUnitIdContentStructureNodes,
 	putApiUnitsBookByUnitIdContentStructure,
+	getApiUnitsMediaByUnitIdContentStructureNodes,
+	putApiUnitsMediaByUnitIdContentStructure,
 	getApiChaptersByChapterId,
 	putApiChaptersByChapterIdLocalizationsByLanguageContent,
 	getApiProgress,
@@ -23609,6 +23626,231 @@ export function usePutApiUnitsBookByUnitIdContentStructure<TContext>(
 	>;
 }
 
+export const getApiUnitsMediaByUnitIdContentStructureNodesQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiUnitsMediaByUnitIdContentStructureNodesOptions, "headers">) =>
+	[
+		{ url: "/api/units/media/:unitId/content-structure/nodes", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type GetApiUnitsMediaByUnitIdContentStructureNodesQueryKey = ReturnType<
+	typeof getApiUnitsMediaByUnitIdContentStructureNodesQueryKey
+>;
+
+export function getApiUnitsMediaByUnitIdContentStructureNodesQueryOptions(
+	{ path, query }: GetApiUnitsMediaByUnitIdContentStructureNodesOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiUnitsMediaByUnitIdContentStructureNodesQueryKey({ path, query });
+	return queryOptions<
+		GetApiUnitsMediaByUnitIdContentStructureNodesStatus200,
+		ResponseErrorConfig<
+			| GetApiUnitsMediaByUnitIdContentStructureNodesStatus404
+			| GetApiUnitsMediaByUnitIdContentStructureNodesStatus422
+			| GetApiUnitsMediaByUnitIdContentStructureNodesStatus500
+		>,
+		GetApiUnitsMediaByUnitIdContentStructureNodesStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiUnitsMediaByUnitIdContentStructureNodes({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List Media Content Structure nodes
+ * {@link /api/units/media/:unitId/content-structure/nodes}
+ */
+export function useGetApiUnitsMediaByUnitIdContentStructureNodes<
+	TData = GetApiUnitsMediaByUnitIdContentStructureNodesStatus200,
+	TQueryData = GetApiUnitsMediaByUnitIdContentStructureNodesStatus200,
+	TQueryKey extends QueryKey = GetApiUnitsMediaByUnitIdContentStructureNodesQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiUnitsMediaByUnitIdContentStructureNodesOptions["path"]
+			| (() => GetApiUnitsMediaByUnitIdContentStructureNodesOptions["path"]);
+		query?:
+			| GetApiUnitsMediaByUnitIdContentStructureNodesOptions["query"]
+			| (() => GetApiUnitsMediaByUnitIdContentStructureNodesOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiUnitsMediaByUnitIdContentStructureNodesStatus200,
+				ResponseErrorConfig<
+					| GetApiUnitsMediaByUnitIdContentStructureNodesStatus404
+					| GetApiUnitsMediaByUnitIdContentStructureNodesStatus422
+					| GetApiUnitsMediaByUnitIdContentStructureNodesStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ??
+		getApiUnitsMediaByUnitIdContentStructureNodesQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiUnitsMediaByUnitIdContentStructureNodesQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiUnitsMediaByUnitIdContentStructureNodesStatus404
+			| GetApiUnitsMediaByUnitIdContentStructureNodesStatus422
+			| GetApiUnitsMediaByUnitIdContentStructureNodesStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiUnitsMediaByUnitIdContentStructureMutationKey = () =>
+	[{ url: "/api/units/media/:unitId/content-structure" }] as const;
+
+export function putApiUnitsMediaByUnitIdContentStructureMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiUnitsMediaByUnitIdContentStructureMutationKey();
+	return mutationOptions<
+		PutApiUnitsMediaByUnitIdContentStructureStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsMediaByUnitIdContentStructureStatus400
+			| PutApiUnitsMediaByUnitIdContentStructureStatus403
+			| PutApiUnitsMediaByUnitIdContentStructureStatus404
+			| PutApiUnitsMediaByUnitIdContentStructureStatus409
+			| PutApiUnitsMediaByUnitIdContentStructureStatus422
+			| PutApiUnitsMediaByUnitIdContentStructureStatus429
+			| PutApiUnitsMediaByUnitIdContentStructureStatus500
+		>,
+		PutApiUnitsMediaByUnitIdContentStructureOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiUnitsMediaByUnitIdContentStructure({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Save a complete Media Content Structure draft
+ * {@link /api/units/media/:unitId/content-structure}
+ */
+export function usePutApiUnitsMediaByUnitIdContentStructure<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiUnitsMediaByUnitIdContentStructureStatus200,
+			ResponseErrorConfig<
+				| PutApiUnitsMediaByUnitIdContentStructureStatus400
+				| PutApiUnitsMediaByUnitIdContentStructureStatus403
+				| PutApiUnitsMediaByUnitIdContentStructureStatus404
+				| PutApiUnitsMediaByUnitIdContentStructureStatus409
+				| PutApiUnitsMediaByUnitIdContentStructureStatus422
+				| PutApiUnitsMediaByUnitIdContentStructureStatus429
+				| PutApiUnitsMediaByUnitIdContentStructureStatus500
+			>,
+			PutApiUnitsMediaByUnitIdContentStructureOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiUnitsMediaByUnitIdContentStructureMutationKey();
+
+	const baseOptions = putApiUnitsMediaByUnitIdContentStructureMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiUnitsMediaByUnitIdContentStructureStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsMediaByUnitIdContentStructureStatus400
+			| PutApiUnitsMediaByUnitIdContentStructureStatus403
+			| PutApiUnitsMediaByUnitIdContentStructureStatus404
+			| PutApiUnitsMediaByUnitIdContentStructureStatus409
+			| PutApiUnitsMediaByUnitIdContentStructureStatus422
+			| PutApiUnitsMediaByUnitIdContentStructureStatus429
+			| PutApiUnitsMediaByUnitIdContentStructureStatus500
+		>,
+		PutApiUnitsMediaByUnitIdContentStructureOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiUnitsMediaByUnitIdContentStructureStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsMediaByUnitIdContentStructureStatus400
+			| PutApiUnitsMediaByUnitIdContentStructureStatus403
+			| PutApiUnitsMediaByUnitIdContentStructureStatus404
+			| PutApiUnitsMediaByUnitIdContentStructureStatus409
+			| PutApiUnitsMediaByUnitIdContentStructureStatus422
+			| PutApiUnitsMediaByUnitIdContentStructureStatus429
+			| PutApiUnitsMediaByUnitIdContentStructureStatus500
+		>,
+		PutApiUnitsMediaByUnitIdContentStructureOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiUnitsMediaByUnitIdContentStructureStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsMediaByUnitIdContentStructureStatus400
+			| PutApiUnitsMediaByUnitIdContentStructureStatus403
+			| PutApiUnitsMediaByUnitIdContentStructureStatus404
+			| PutApiUnitsMediaByUnitIdContentStructureStatus409
+			| PutApiUnitsMediaByUnitIdContentStructureStatus422
+			| PutApiUnitsMediaByUnitIdContentStructureStatus429
+			| PutApiUnitsMediaByUnitIdContentStructureStatus500
+		>,
+		PutApiUnitsMediaByUnitIdContentStructureOptions,
+		TContext
+	>;
+}
+
 export const getApiChaptersByChapterIdQueryKey = ({
 	path,
 	query,
@@ -25116,6 +25358,7 @@ export function deleteApiProgressByUnitIdNodesByNodeIdMutationOptions<TContext =
 	return mutationOptions<
 		DeleteApiProgressByUnitIdNodesByNodeIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiProgressByUnitIdNodesByNodeIdStatus404
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus422
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus429
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus500
@@ -25144,6 +25387,7 @@ export function useDeleteApiProgressByUnitIdNodesByNodeId<TContext>(
 		mutation?: UseMutationOptions<
 			DeleteApiProgressByUnitIdNodesByNodeIdStatus200,
 			ResponseErrorConfig<
+				| DeleteApiProgressByUnitIdNodesByNodeIdStatus404
 				| DeleteApiProgressByUnitIdNodesByNodeIdStatus422
 				| DeleteApiProgressByUnitIdNodesByNodeIdStatus429
 				| DeleteApiProgressByUnitIdNodesByNodeIdStatus500
@@ -25164,6 +25408,7 @@ export function useDeleteApiProgressByUnitIdNodesByNodeId<TContext>(
 	) as UseMutationOptions<
 		DeleteApiProgressByUnitIdNodesByNodeIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiProgressByUnitIdNodesByNodeIdStatus404
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus422
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus429
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus500
@@ -25175,6 +25420,7 @@ export function useDeleteApiProgressByUnitIdNodesByNodeId<TContext>(
 	return useMutation<
 		DeleteApiProgressByUnitIdNodesByNodeIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiProgressByUnitIdNodesByNodeIdStatus404
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus422
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus429
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus500
@@ -25191,6 +25437,7 @@ export function useDeleteApiProgressByUnitIdNodesByNodeId<TContext>(
 	) as UseMutationResult<
 		DeleteApiProgressByUnitIdNodesByNodeIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiProgressByUnitIdNodesByNodeIdStatus404
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus422
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus429
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus500

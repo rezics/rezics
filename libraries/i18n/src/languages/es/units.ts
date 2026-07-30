@@ -4,11 +4,20 @@ import { insert } from "native-i18n";
 
 const { forms: publicationLicenseTerms } = esTerminology.publicationLicense;
 const { forms: postTerms } = esTerminology.post;
+const { forms: videoTerms } = esTerminology.video;
+const { forms: audioTerms } = esTerminology.audio;
 const { forms: followTerms } = esTerminology.follow;
 const { forms: metadataTerms } = esTerminology.metadata;
 
 export default {
-	types: { book: "Libro", software: "Software", media: "Contenido multimedia", series: "Serie" },
+	types: {
+		book: "Libro",
+		software: "Software",
+		media: "Contenido multimedia",
+		series: "Serie",
+		video: videoTerms.label,
+		audio: audioTerms.label,
+	},
 	creation: {
 		modeLabel: "Modo de creación",
 		ownedWork: "Mi obra",
@@ -86,7 +95,7 @@ export default {
 			contentStructure: {
 				label: "Estructura de contenido",
 				description:
-					"Gestiona los capítulos del libro en un editor de árbol plegable y con sangría.",
+					"Gestiona capítulos del libro o elementos multimedia en un editor de árbol plegable y con sangría.",
 				developmentBadge: "En desarrollo",
 			},
 			releases: {
@@ -128,6 +137,7 @@ export default {
 		runtimeMinutes: "Duración (minutos)",
 		episodeCount: "Número de episodios",
 		seasonCount: "Número de temporadas",
+		durationSeconds: "Duración (segundos)",
 		yes: "Sí",
 		no: "No",
 	},
@@ -145,6 +155,7 @@ export default {
 			},
 			media: {
 				overview: "Detalles del contenido multimedia",
+				contents: "Contenido",
 				tags: "Etiquetas",
 				associations: "Asociaciones",
 				reviews: "Reseñas del público",
@@ -175,6 +186,7 @@ export default {
 			media: {
 				overview:
 					"Descripción del contenido multimedia, información de lanzamiento y estado de visualización.",
+				contents: `Explora la estructura de ${videoTerms.inline} y ${audioTerms.inline} y registra tu progreso de reproducción.`,
 				tags: "Revisa las etiquetas globales y las valoraciones contextuales de las fuentes seleccionadas.",
 				associations:
 					"Revisa los temas de esta obra y sus relaciones entre elementos principales y variantes.",
@@ -303,6 +315,10 @@ export default {
 			chapters: Number,
 			labels: Number,
 		}),
+		mediaStructureSummary: insert(
+			`{{videos}} ${videoTerms.plural} · {{audios}} elementos de ${audioTerms.inline} · {{labels}} etiquetas`,
+			{ videos: Number, audios: Number, labels: Number },
+		),
 		childCount: insert("{{count}} elementos subordinados", { count: Number }),
 		totalWordCount: insert("{{count}} palabras en total", { count: Number }),
 		totalCharacterCount: insert("{{count}} caracteres en total", { count: Number }),
@@ -315,32 +331,51 @@ export default {
 		move: "Mover",
 		moveDescription:
 			"Elige una etiqueta para mover el elemento al final de sus elementos subordinados o un capítulo para moverlo justo debajo.",
+		mediaMoveDescription:
+			"Elige una etiqueta para mover la selección al final de sus elementos subordinados o un elemento multimedia para moverla justo debajo.",
 		addChapter: "Añadir capítulo",
 		addLabel: "Añadir etiqueta",
+		addVideo: `Añadir ${videoTerms.inline}`,
+		addAudio: `Añadir ${audioTerms.inline}`,
 		addChapterDescription:
 			"Crea un capítulo nuevo o busca un capítulo existente para añadirlo. Al terminar también se guardará la estructura de contenido.",
 		addLabelDescription:
 			"Crea una etiqueta nueva o busca una etiqueta existente para añadirla. Al terminar también se guardará la estructura de contenido.",
+		addVideoDescription: `Crea un ${videoTerms.inline} o busca uno existente para añadirlo. Esta acción también guarda la estructura de contenido.`,
+		addAudioDescription: `Crea un elemento de ${audioTerms.inline} o busca uno existente para añadirlo. Esta acción también guarda la estructura de contenido.`,
 		addMode: "Modo de incorporación",
 		createMode: "Crear",
 		attachMode: "Añadir existente",
 		existingChapter: "Capítulo existente",
 		existingLabel: "Etiqueta existente",
+		existingMediaItem: "Elemento multimedia existente",
 		searchExistingChapter: "Buscar capítulos existentes",
 		searchExistingLabel: "Buscar etiquetas existentes",
+		searchExistingMediaItem: "Buscar elementos multimedia existentes",
+		mediaKindFilter: "Tipo de contenido",
+		allMediaKinds: "Todos",
 		createChapterAndSave: "Crear capítulo y guardar",
 		createLabelAndSave: "Crear etiqueta y guardar",
+		createMediaItemAndSave: "Crear elemento multimedia y guardar",
 		attachChapterAndSave: "Añadir capítulo y guardar",
 		attachLabelAndSave: "Añadir etiqueta y guardar",
+		attachMediaItemAndSave: "Añadir elemento multimedia y guardar",
 		saveCurrentChangesNotice:
 			"Esta acción también guarda los cambios de la estructura de contenido que aún estén pendientes.",
 		choosePosition: "Elegir posición en la estructura",
 		choosePositionDescription:
 			"Elige una etiqueta para añadir el elemento al final de sus elementos subordinados o un capítulo para insertarlo justo debajo.",
+		mediaChoosePositionDescription:
+			"Elige una etiqueta para añadir el elemento al final de sus elementos subordinados o un elemento multimedia para insertarlo justo debajo.",
 		newChapter: "Nuevo capítulo",
 		newLabel: "Nueva etiqueta",
+		newMediaItem: "Añadir elemento multimedia",
+		newVideo: `Nuevo ${videoTerms.inline}`,
+		newAudio: `Nuevo elemento de ${audioTerms.inline}`,
 		newChapterAfter: "Nuevo capítulo debajo",
 		newLabelAfter: "Nueva etiqueta debajo",
+		newVideoAfter: `Nuevo ${videoTerms.inline} debajo`,
+		newAudioAfter: `Nuevo elemento de ${audioTerms.inline} debajo`,
 		expand: "Expandir",
 		collapse: "Contraer",
 		multiSelect: "Selección múltiple",
@@ -349,6 +384,12 @@ export default {
 		collapseAll: "Contraer todo",
 		dragHandle: "Arrastrar para mover",
 		noContent: "Todavía no hay capítulos.",
+		noMediaContent: `Todavía no hay ${videoTerms.plural} ni elementos de ${audioTerms.inline}.`,
+		durationUnknown: "Duración no indicada",
+		markMediaItemComplete: "Marcar como completado",
+		markMediaItemIncomplete: "Marcar como no completado",
+		mediaItemComplete: "Completado",
+		mediaItemIncomplete: "No completado",
 		saveDraft: "Guardar estructura de contenido",
 		discardDraft: "Descartar cambios del borrador",
 		unsavedDraft: "Hay cambios sin guardar",

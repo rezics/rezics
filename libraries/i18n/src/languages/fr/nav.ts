@@ -4,6 +4,8 @@ import { frTerminology } from "@rezics/i18n/terminology/fr";
 const { forms: followTerms } = frTerminology.follow;
 const { forms: labelTerms } = frTerminology.label;
 const { forms: postTerms } = frTerminology.post;
+const { forms: videoTerms } = frTerminology.video;
+const { forms: audioTerms } = frTerminology.audio;
 const { forms: realmTerms } = frTerminology.realm;
 const { forms: tagStructureTerms } = frTerminology.tagStructure;
 const { forms: unitSlugTerms } = frTerminology.unitSlug;
@@ -66,6 +68,8 @@ export default {
 			book: "Livre",
 			software: "Logiciel",
 			media: "Média",
+			video: videoTerms.label,
+			audio: audioTerms.label,
 			release: "Version",
 			entity: "Entité",
 			label: labelTerms.label,

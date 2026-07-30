@@ -15,6 +15,7 @@ import {
 	contentStructureNodeProgress,
 	contentStructureNode,
 	postProgressEntry,
+	post,
 	unitLocalization,
 	unit,
 	unitProgress,
@@ -53,6 +54,7 @@ import {
 	createProgressEntry,
 	deleteProgressEntry,
 	lockUnitProgress,
+	recordMediaNodeCompletion,
 	recordChapterReading,
 	replaceProgressEntry,
 } from "./service";
@@ -62,6 +64,44 @@ import { createProgressSearchCursor, resolveProgressSearchRequest } from "./sear
 function toProgressUnitType(value: string): "book" | "media" | "software" {
 	if (value === "book" || value === "media" || value === "software") return value;
 	throw new TypeError("Progress Search returned an unsupported Unit kind");
+}
+
+async function findCompletableContentStructureNode(
+	unitId: string,
+	nodeId: string,
+): Promise<"book" | "media" | null> {
+	const [node] = await database
+		.select({
+			structureKind: contentStructure.kind,
+			unitKind: unit.kind,
+			postKind: post.kind,
+		})
+		.from(contentStructureNode)
+		.innerJoin(contentStructure, eq(contentStructure.id, contentStructureNode.structureId))
+		.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
+		.leftJoin(post, eq(post.id, contentStructureNode.contentUnitId))
+		.where(
+			and(
+				eq(contentStructureNode.id, nodeId),
+				eq(contentStructureNode.ownerUnitId, unitId),
+				isNull(contentStructureNode.deletedAt),
+				isNull(contentStructure.deletedAt),
+				isNull(unit.deletedAt),
+			),
+		)
+		.limit(1);
+	if (
+		node?.structureKind === "book.contents" &&
+		node.unitKind === "post" &&
+		node.postKind === "chapter"
+	)
+		return "book";
+	if (
+		node?.structureKind === "media.contents" &&
+		(node.unitKind === "video" || node.unitKind === "audio")
+	)
+		return "media";
+	return null;
 }
 
 function toProgressResponse<
@@ -583,13 +623,26 @@ export default new Elysia({ prefix: "/progress" })
 					contentStructure,
 					eq(contentStructure.id, contentStructureNode.structureId),
 				)
+				.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
+				.leftJoin(post, eq(post.id, contentStructureNode.contentUnitId))
 				.where(
 					and(
 						eq(contentStructureNodeProgress.profileId, profile.unitId),
 						eq(contentStructureNode.ownerUnitId, params.unitId),
-						eq(contentStructure.kind, "book.contents"),
+						or(
+							and(
+								eq(contentStructure.kind, "book.contents"),
+								eq(unit.kind, "post"),
+								eq(post.kind, "chapter"),
+							),
+							and(
+								eq(contentStructure.kind, "media.contents"),
+								inArray(unit.kind, ["video", "audio"]),
+							),
+						),
 						isNull(contentStructureNode.deletedAt),
 						isNull(contentStructure.deletedAt),
+						isNull(unit.deletedAt),
 					),
 				)
 				.orderBy(desc(contentStructureNodeProgress.completedAt));
@@ -790,24 +843,25 @@ export default new Elysia({ prefix: "/progress" })
 		"/:unitId/nodes/:nodeId",
 		async ({ profile, authorization, params }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
-			const [node] = await database
-				.select({ id: contentStructureNode.id })
-				.from(contentStructureNode)
-				.innerJoin(
-					contentStructure,
-					eq(contentStructure.id, contentStructureNode.structureId),
-				)
-				.where(
-					and(
-						eq(contentStructureNode.id, params.nodeId),
-						eq(contentStructureNode.ownerUnitId, params.unitId),
-						eq(contentStructure.kind, "book.contents"),
-						isNull(contentStructureNode.deletedAt),
-						isNull(contentStructure.deletedAt),
-					),
-				)
-				.limit(1);
-			if (!node) throw new ContentStructureNodeNotFound();
+			const nodeKind = await findCompletableContentStructureNode(
+				params.unitId,
+				params.nodeId,
+			);
+			if (!nodeKind) throw new ContentStructureNodeNotFound();
+			if (nodeKind === "media") {
+				const canReadUnpublished = await authorization.unit.canUpdate(params.unitId);
+				await database.transaction((tx) =>
+					recordMediaNodeCompletion(tx, {
+						canReadUnpublished,
+						completed: true,
+						nodeId: params.nodeId,
+						now: new Date(),
+						profileId: profile.unitId,
+						unitId: params.unitId,
+					}),
+				);
+				return { completed: true };
+			}
 			await database
 				.insert(contentStructureNodeProgress)
 				.values({ profileId: profile.unitId, nodeId: params.nodeId })
@@ -829,7 +883,27 @@ export default new Elysia({ prefix: "/progress" })
 	)
 	.delete(
 		"/:unitId/nodes/:nodeId",
-		async ({ profile, params }) => {
+		async ({ profile, authorization, params }) => {
+			await authorization.unit.ensureCanRead(params.unitId);
+			const nodeKind = await findCompletableContentStructureNode(
+				params.unitId,
+				params.nodeId,
+			);
+			if (!nodeKind) throw new ContentStructureNodeNotFound();
+			if (nodeKind === "media") {
+				const canReadUnpublished = await authorization.unit.canUpdate(params.unitId);
+				await database.transaction((tx) =>
+					recordMediaNodeCompletion(tx, {
+						canReadUnpublished,
+						completed: false,
+						nodeId: params.nodeId,
+						now: new Date(),
+						profileId: profile.unitId,
+						unitId: params.unitId,
+					}),
+				);
+				return { completed: false };
+			}
 			await database
 				.delete(contentStructureNodeProgress)
 				.where(
@@ -843,7 +917,13 @@ export default new Elysia({ prefix: "/progress" })
 		{
 			access: "write:interaction:write",
 			params: ProgressNodeParams,
-			response: { [StatusCodes.OK]: CompletionStateResponse },
+			response: {
+				[StatusCodes.OK]: CompletionStateResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"ContentStructureNodeNotFound",
+				]),
+			},
 			detail: { summary: "Uncomplete Content Structure node", tags: ["Progress"] },
 		},
 	);

@@ -46,6 +46,16 @@ export const jaTerminology = defineTerminology("ja", {
 		forms: { label: "投稿", pluralLabel: "投稿", inline: "投稿", plural: "投稿" },
 		forbidden: ["Post", "Posts"],
 	},
+	video: {
+		status: "approved",
+		forms: { label: "動画", pluralLabel: "動画", inline: "動画", plural: "動画" },
+		forbidden: ["Video", "Videos"],
+	},
+	audio: {
+		status: "approved",
+		forms: { label: "音声", pluralLabel: "音声", inline: "音声", plural: "音声" },
+		forbidden: ["Audio", "Audios"],
+	},
 	label: {
 		status: "approved",
 		forms: {

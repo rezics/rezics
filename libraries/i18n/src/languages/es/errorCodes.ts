@@ -128,6 +128,7 @@ export default {
 		"Esta configuración de acceso a la Unit no es válida o supera los permisos que puedes delegar.",
 	InvalidPaginationCursor: "Este enlace de página no es válido o ha vencido.",
 	BookNotFound: "No se ha encontrado este libro.",
+	MediaNotFound: "No se ha encontrado este elemento multimedia.",
 	ChapterNotFound: "No se ha encontrado este capítulo.",
 	ChapterLanguageNotFound: "No se ha encontrado este idioma del capítulo.",
 	ReportRealmMismatch: `La unidad denunciada no pertenece a este ${realmTerms.inline}.`,

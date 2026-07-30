@@ -75,7 +75,8 @@ export function EntityPicker({
 			controller = request;
 			setIsPending(true);
 			setIsError(false);
-			void searchEntities(index, query, request.signal)
+			const requestedKinds = allowedKindsKey?.split("\u0000");
+			void searchEntities(index, query, request.signal, { kinds: requestedKinds })
 				.then(
 					(nextHits) => {
 						if (request.signal.aborted) return;

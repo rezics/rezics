@@ -4,11 +4,20 @@ import { insert } from "native-i18n";
 
 const { forms: publicationLicenseTerms } = frTerminology.publicationLicense;
 const { forms: postTerms } = frTerminology.post;
+const { forms: videoTerms } = frTerminology.video;
+const { forms: audioTerms } = frTerminology.audio;
 const { forms: followTerms } = frTerminology.follow;
 const { forms: metadataTerms } = frTerminology.metadata;
 
 export default {
-	types: { book: "Livre", software: "Logiciel", media: "Média", series: "Série" },
+	types: {
+		book: "Livre",
+		software: "Logiciel",
+		media: "Média",
+		series: "Série",
+		video: videoTerms.label,
+		audio: audioTerms.label,
+	},
 	creation: {
 		modeLabel: "Mode de création",
 		ownedWork: "Mon œuvre",
@@ -86,7 +95,7 @@ export default {
 			contentStructure: {
 				label: "Structure du contenu",
 				description:
-					"Gérez les chapitres du livre dans un éditeur arborescent, indenté et repliable.",
+					"Gérez les chapitres du livre ou les éléments multimédias dans un éditeur arborescent, indenté et repliable.",
 				developmentBadge: "En cours de développement",
 			},
 			releases: {
@@ -128,6 +137,7 @@ export default {
 		runtimeMinutes: "Durée (minutes)",
 		episodeCount: "Nombre d’épisodes",
 		seasonCount: "Nombre de saisons",
+		durationSeconds: "Durée (secondes)",
 		yes: "Oui",
 		no: "Non",
 	},
@@ -145,6 +155,7 @@ export default {
 			},
 			media: {
 				overview: "Détails du média",
+				contents: "Contenu",
 				tags: "Étiquettes",
 				associations: "Associations",
 				reviews: "Avis du public",
@@ -174,6 +185,7 @@ export default {
 			},
 			media: {
 				overview: "Description du média, informations de sortie et état de visionnage.",
+				contents: `Parcourez la structure ${videoTerms.inline} et ${audioTerms.inline} et suivez votre progression d’écoute ou de visionnage.`,
 				tags: "Consultez les étiquettes globales et les appréciations contextuelles des sources sélectionnées.",
 				associations:
 					"Consultez les sujets de cette œuvre et ses relations entre éléments principaux et variantes.",
@@ -302,6 +314,10 @@ export default {
 			chapters: Number,
 			labels: Number,
 		}),
+		mediaStructureSummary: insert(
+			`{{videos}} ${videoTerms.plural} · {{audios}} éléments ${audioTerms.inline} · {{labels}} libellés`,
+			{ videos: Number, audios: Number, labels: Number },
+		),
 		childCount: insert("{{count}} éléments enfants", { count: Number }),
 		totalWordCount: insert("{{count}} mots au total", { count: Number }),
 		totalCharacterCount: insert("{{count}} caractères au total", { count: Number }),
@@ -314,32 +330,51 @@ export default {
 		move: "Déplacer",
 		moveDescription:
 			"Choisissez un libellé pour déplacer l’élément après ses enfants, ou un chapitre pour le déplacer directement en dessous.",
+		mediaMoveDescription:
+			"Choisissez un libellé pour déplacer la sélection après ses enfants, ou un élément multimédia pour la placer directement en dessous.",
 		addChapter: "Ajouter un chapitre",
 		addLabel: "Ajouter un libellé",
+		addVideo: `Ajouter une ${videoTerms.inline}`,
+		addAudio: `Ajouter un élément ${audioTerms.inline}`,
 		addChapterDescription:
 			"Créez un chapitre ou recherchez un chapitre existant à ajouter. La structure du contenu sera également enregistrée.",
 		addLabelDescription:
 			"Créez un libellé ou recherchez un libellé existant à ajouter. La structure du contenu sera également enregistrée.",
+		addVideoDescription: `Créez une ${videoTerms.inline} ou recherchez-en une existante à ajouter. Cette action enregistre aussi la structure du contenu.`,
+		addAudioDescription: `Créez un élément ${audioTerms.inline} ou recherchez-en un existant à ajouter. Cette action enregistre aussi la structure du contenu.`,
 		addMode: "Mode d’ajout",
 		createMode: "Créer",
 		attachMode: "Ajouter un élément existant",
 		existingChapter: "Chapitre existant",
 		existingLabel: "Libellé existant",
+		existingMediaItem: "Élément multimédia existant",
 		searchExistingChapter: "Rechercher des chapitres existants",
 		searchExistingLabel: "Rechercher des libellés existants",
+		searchExistingMediaItem: "Rechercher des éléments multimédias existants",
+		mediaKindFilter: "Type de média",
+		allMediaKinds: "Tous",
 		createChapterAndSave: "Créer le chapitre et enregistrer",
 		createLabelAndSave: "Créer le libellé et enregistrer",
+		createMediaItemAndSave: "Créer l’élément multimédia et enregistrer",
 		attachChapterAndSave: "Ajouter le chapitre et enregistrer",
 		attachLabelAndSave: "Ajouter le libellé et enregistrer",
+		attachMediaItemAndSave: "Ajouter l’élément multimédia et enregistrer",
 		saveCurrentChangesNotice:
 			"Cette action enregistre également les modifications de la structure du contenu qui ne le sont pas encore.",
 		choosePosition: "Choisir la position dans la structure",
 		choosePositionDescription:
 			"Choisissez un libellé pour ajouter l’élément après ses enfants, ou un chapitre pour l’insérer directement en dessous.",
+		mediaChoosePositionDescription:
+			"Choisissez un libellé pour ajouter l’élément après ses enfants, ou un élément multimédia pour l’insérer directement en dessous.",
 		newChapter: "Nouveau chapitre",
 		newLabel: "Nouveau libellé",
+		newMediaItem: "Ajouter un élément multimédia",
+		newVideo: `Nouvelle ${videoTerms.inline}`,
+		newAudio: `Nouvel élément ${audioTerms.inline}`,
 		newChapterAfter: "Nouveau chapitre en dessous",
 		newLabelAfter: "Nouveau libellé en dessous",
+		newVideoAfter: `Nouvelle ${videoTerms.inline} en dessous`,
+		newAudioAfter: `Nouvel élément ${audioTerms.inline} en dessous`,
 		expand: "Déployer",
 		collapse: "Replier",
 		multiSelect: "Sélection multiple",
@@ -348,6 +383,12 @@ export default {
 		collapseAll: "Tout replier",
 		dragHandle: "Faire glisser pour déplacer",
 		noContent: "Il n’y a encore aucun chapitre.",
+		noMediaContent: `Il n’y a encore aucune ${videoTerms.inline} ni aucun élément ${audioTerms.inline}.`,
+		durationUnknown: "Durée non indiquée",
+		markMediaItemComplete: "Marquer comme terminé",
+		markMediaItemIncomplete: "Marquer comme non terminé",
+		mediaItemComplete: "Terminé",
+		mediaItemIncomplete: "Non terminé",
 		saveDraft: "Enregistrer la structure du contenu",
 		discardDraft: "Abandonner les modifications du brouillon",
 		unsavedDraft: "Certaines modifications ne sont pas enregistrées",

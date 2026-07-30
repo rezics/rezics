@@ -49,5 +49,9 @@ export function chapterHistoryHref(bookId: string, chapterId: string): string {
 }
 
 export function bookContentStructureHistoryHref(bookId: string): string {
-	return `${unitManagementSectionHref("book", bookId, "content-structure")}/history`;
+	return contentStructureHistoryHref("book", bookId);
+}
+
+export function contentStructureHistoryHref(type: "book" | "media", unitId: string): string {
+	return `${unitManagementSectionHref(type, unitId, "content-structure")}/history`;
 }

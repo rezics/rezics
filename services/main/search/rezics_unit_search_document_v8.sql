@@ -129,7 +129,7 @@ LEFT JOIN public.unit_variant AS variant_row ON variant_row.variant_unit_id = so
 LEFT JOIN public.unit_follow_stat AS follow_stat ON follow_stat.unit_id = source.unit_id
 LEFT JOIN LATERAL (
 	SELECT CASE
-		WHEN unit_row.kind IN ('book', 'software', 'media', 'zone') THEN 'units'
+		WHEN unit_row.kind IN ('book', 'software', 'media', 'video', 'audio', 'zone') THEN 'units'
 		WHEN unit_row.kind = 'profile' THEN 'users'
 		WHEN unit_row.kind = 'entity' THEN 'entity'
 		WHEN unit_row.kind = 'tag' THEN 'tags'

@@ -80,6 +80,17 @@ export const terminologyConcepts = defineTerminologyConcepts({
 		slots: ["label", "pluralLabel", "inline", "plural"] as const,
 		locales: AllTerminologyLocales,
 	},
+	video: {
+		definition:
+			"A top-level timed visual-media Unit that can be placed in a Media content structure.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	audio: {
+		definition: "A top-level timed audio Unit that can be placed in a Media content structure.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
 	label: {
 		definition:
 			"A lightweight localized-title Unit used as a structural heading or taxonomy entry; this is distinct from an assignable Tag.",

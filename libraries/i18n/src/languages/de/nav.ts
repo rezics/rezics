@@ -4,6 +4,8 @@ import { deTerminology } from "@rezics/i18n/terminology/de";
 const { forms: followTerms } = deTerminology.follow;
 const { forms: labelTerms } = deTerminology.label;
 const { forms: postTerms } = deTerminology.post;
+const { forms: videoTerms } = deTerminology.video;
+const { forms: audioTerms } = deTerminology.audio;
 const { forms: realmTerms } = deTerminology.realm;
 const { forms: tagStructureTerms } = deTerminology.tagStructure;
 const { forms: unitSlugTerms } = deTerminology.unitSlug;
@@ -65,6 +67,8 @@ export default {
 			book: "Buch",
 			software: "Software",
 			media: "Medien",
+			video: videoTerms.label,
+			audio: audioTerms.label,
 			release: "Veröffentlichung",
 			entity: "Entität",
 			label: labelTerms.label,

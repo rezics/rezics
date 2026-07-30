@@ -1,6 +1,9 @@
 "use client";
 
-import { useGetApiUnitsBookByUnitIdContentStructureNodes } from "@rezics/openapi-tanstack-query";
+import {
+	useGetApiUnitsBookByUnitIdContentStructureNodes,
+	useGetApiUnitsMediaByUnitIdContentStructureNodes,
+} from "@rezics/openapi-tanstack-query";
 import { ManagementWorkspaceSectionHeader, QueryFailure, QueryPending } from "@rezics/ui";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
@@ -14,12 +17,23 @@ export function ContentStructureHistoryPage() {
 	const { t } = useTranslation(["errors", "history", "units"]);
 	const { type, unit } = useUnitManagement();
 	const localizationLanguages = useLocalizationLanguages();
-	const query = useGetApiUnitsBookByUnitIdContentStructureNodes({
-		path: { unitId: unit.id },
-		query: { localizationLanguages },
-	});
-	if (type !== "book" || !unit.capabilities.canEdit)
+	const bookQuery = useGetApiUnitsBookByUnitIdContentStructureNodes(
+		{
+			path: { unitId: unit.id },
+			query: { localizationLanguages },
+		},
+		{ query: { enabled: type === "book" } },
+	);
+	const mediaQuery = useGetApiUnitsMediaByUnitIdContentStructureNodes(
+		{
+			path: { unitId: unit.id },
+			query: { localizationLanguages },
+		},
+		{ query: { enabled: type === "media" } },
+	);
+	if ((type !== "book" && type !== "media") || !unit.capabilities.canEdit)
 		return <p className="text-sm text-destructive">{t.errors.forbidden}</p>;
+	const query = type === "book" ? bookQuery : mediaQuery;
 	if (query.isPending) return <QueryPending />;
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
@@ -28,7 +42,7 @@ export function ContentStructureHistoryPage() {
 	return (
 		<section>
 			<ManagementWorkspaceSectionHeader
-				backHref={unitManagementSectionHref("book", unit.id, "content-structure")}
+				backHref={unitManagementSectionHref(type, unit.id, "content-structure")}
 				backLabel={t.units.chapter.backToStructure}
 				description={t.history.description}
 				link={Link}

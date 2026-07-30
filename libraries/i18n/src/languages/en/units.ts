@@ -4,11 +4,20 @@ import { insert } from "native-i18n";
 
 const { forms: publicationLicenseTerms } = enTerminology.publicationLicense;
 const { forms: postTerms } = enTerminology.post;
+const { forms: videoTerms } = enTerminology.video;
+const { forms: audioTerms } = enTerminology.audio;
 const { forms: followTerms } = enTerminology.follow;
 const { forms: metadataTerms } = enTerminology.metadata;
 
 export default {
-	types: { book: "Book", software: "Software", media: "Media", series: "Series" },
+	types: {
+		book: "Book",
+		software: "Software",
+		media: "Media",
+		series: "Series",
+		video: videoTerms.label,
+		audio: audioTerms.label,
+	},
 	creation: {
 		modeLabel: "Creation mode",
 		ownedWork: "My work",
@@ -84,7 +93,8 @@ export default {
 			},
 			contentStructure: {
 				label: "Content structure",
-				description: "Manage Book chapters in a collapsible, indented tree editor.",
+				description:
+					"Manage Book chapters or Media items in a collapsible, indented tree editor.",
 				developmentBadge: "In development",
 			},
 			releases: {
@@ -124,6 +134,7 @@ export default {
 		runtimeMinutes: "Runtime (minutes)",
 		episodeCount: "Episode count",
 		seasonCount: "Season count",
+		durationSeconds: "Duration (seconds)",
 		yes: "Yes",
 		no: "No",
 	},
@@ -141,6 +152,7 @@ export default {
 			},
 			media: {
 				overview: "Media details",
+				contents: "Contents",
 				tags: "Tags",
 				associations: "Associations",
 				reviews: "Audience reviews",
@@ -169,6 +181,7 @@ export default {
 			},
 			media: {
 				overview: "Media description, release information, and viewing state.",
+				contents: `Browse the ${videoTerms.inline} and ${audioTerms.inline} structure and track watching or listening progress.`,
 				tags: "Review global Tags and contextual judgments from your selected sources.",
 				associations: "Review this work's subjects and Main–Variant relationships.",
 				reviews: "Read or write audience reviews.",
@@ -293,6 +306,10 @@ export default {
 			chapters: Number,
 			labels: Number,
 		}),
+		mediaStructureSummary: insert(
+			`{{videos}} ${videoTerms.plural} · {{audios}} ${audioTerms.inline} items · {{labels}} labels`,
+			{ videos: Number, audios: Number, labels: Number },
+		),
 		childCount: insert("{{count}} children", { count: Number }),
 		totalWordCount: insert("{{count}} words total", { count: Number }),
 		totalCharacterCount: insert("{{count}} characters total", { count: Number }),
@@ -305,32 +322,51 @@ export default {
 		move: "Move",
 		moveDescription:
 			"Choose a label to move to the end of its children, or a chapter to move directly below it.",
+		mediaMoveDescription:
+			"Choose a label to move the selection to the end of its children, or a media item to move directly below it.",
 		addChapter: "Add chapter",
 		addLabel: "Add label",
+		addVideo: `Add ${videoTerms.inline}`,
+		addAudio: `Add ${audioTerms.inline}`,
 		addChapterDescription:
 			"Create a new chapter or search for an existing chapter to add. Completing this action also saves the content structure.",
 		addLabelDescription:
 			"Create a new label or search for an existing label to add. Completing this action also saves the content structure.",
+		addVideoDescription: `Create a new ${videoTerms.inline} or search for an existing one to add. Completing this action also saves the content structure.`,
+		addAudioDescription: `Create a new ${audioTerms.inline} item or search for an existing one to add. Completing this action also saves the content structure.`,
 		addMode: "How to add",
 		createMode: "Create",
 		attachMode: "Add existing",
 		existingChapter: "Existing chapter",
 		existingLabel: "Existing label",
+		existingMediaItem: "Existing media item",
 		searchExistingChapter: "Search existing chapters",
 		searchExistingLabel: "Search existing labels",
+		searchExistingMediaItem: "Search existing media items",
+		mediaKindFilter: "Media type",
+		allMediaKinds: "All",
 		createChapterAndSave: "Create chapter and save",
 		createLabelAndSave: "Create label and save",
+		createMediaItemAndSave: "Create media item and save",
 		attachChapterAndSave: "Add chapter and save",
 		attachLabelAndSave: "Add label and save",
+		attachMediaItemAndSave: "Add media item and save",
 		saveCurrentChangesNotice:
 			"This action also saves the content structure changes that are currently unsaved.",
 		choosePosition: "Choose structure position",
 		choosePositionDescription:
 			"Choose a label to append to its children, or a chapter to insert directly below it.",
+		mediaChoosePositionDescription:
+			"Choose a label to append to its children, or a media item to insert directly below it.",
 		newChapter: "New chapter",
 		newLabel: "New label",
+		newMediaItem: "Add media item",
+		newVideo: `New ${videoTerms.inline}`,
+		newAudio: `New ${audioTerms.inline}`,
 		newChapterAfter: "New chapter below",
 		newLabelAfter: "New label below",
+		newVideoAfter: `New ${videoTerms.inline} below`,
+		newAudioAfter: `New ${audioTerms.inline} below`,
 		expand: "Expand",
 		collapse: "Collapse",
 		multiSelect: "Multi-select",
@@ -339,6 +375,12 @@ export default {
 		collapseAll: "Collapse all",
 		dragHandle: "Drag to move",
 		noContent: "There are no chapters yet.",
+		noMediaContent: `There are no ${videoTerms.plural} or ${audioTerms.inline} items yet.`,
+		durationUnknown: "Duration not provided",
+		markMediaItemComplete: "Mark complete",
+		markMediaItemIncomplete: "Mark incomplete",
+		mediaItemComplete: "Complete",
+		mediaItemIncomplete: "Incomplete",
 		saveDraft: "Save content structure",
 		discardDraft: "Discard draft changes",
 		unsavedDraft: "There are unsaved changes",

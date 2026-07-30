@@ -20,9 +20,14 @@ export type VariantUnitType = Static<typeof VariantUnitType>;
 
 export const CatalogUnitType = t.Union([VariantUnitType, t.Literal("series")]);
 export type CatalogUnitType = Static<typeof CatalogUnitType>;
+export const TimedMediaUnitType = t.Union([t.Literal("video"), t.Literal("audio")]);
+export type TimedMediaUnitType = Static<typeof TimedMediaUnitType>;
+export const ManageableUnitType = t.Union([CatalogUnitType, TimedMediaUnitType]);
+export type ManageableUnitType = Static<typeof ManageableUnitType>;
 
 export const VariantUnitTypeParams = t.Object({ type: VariantUnitType });
 export const CatalogUnitTypeParams = t.Object({ type: CatalogUnitType });
+export const ManageableUnitTypeParams = t.Object({ type: ManageableUnitType });
 
 export const CatalogEntryMode = t.Union([t.Literal("owned_work"), t.Literal("public_entry")]);
 export type CatalogEntryMode = Static<typeof CatalogEntryMode>;
@@ -126,6 +131,7 @@ const UnitDetailsInput = t.Object(
 		runtimeMinutes: t.Optional(t.Nullable(t.Integer({ minimum: 1 }))),
 		episodeCount: t.Optional(t.Nullable(t.Integer({ minimum: 1 }))),
 		seasonCount: t.Optional(t.Nullable(t.Integer({ minimum: 1 }))),
+		durationSeconds: t.Optional(t.Nullable(t.Integer({ minimum: 1 }))),
 	},
 	{ additionalProperties: false },
 );
@@ -159,7 +165,7 @@ export const ListUnitsQuery = t.Object(
 export type ListUnitsQuery = Static<typeof ListUnitsQuery>;
 
 export const UnitLookupParams = t.Object({
-	type: CatalogUnitType,
+	type: ManageableUnitType,
 	unitId: Uuid,
 });
 export type UnitLookupParams = Static<typeof UnitLookupParams>;
@@ -168,7 +174,7 @@ export const UnitDetailQuery = t.Object(LocalizationLanguageQuery, {
 });
 export type UnitDetailQuery = Static<typeof UnitDetailQuery>;
 
-export const UnitUnitIdParams = t.Object({ type: CatalogUnitType, unitId: Uuid });
+export const UnitUnitIdParams = t.Object({ type: ManageableUnitType, unitId: Uuid });
 export type UnitUnitIdParams = Static<typeof UnitUnitIdParams>;
 export const VariantUnitUnitIdParams = t.Object({ type: VariantUnitType, unitId: Uuid });
 
@@ -188,7 +194,7 @@ export const PromoteUnitVariantBody = t.Object(
 export type PromoteUnitVariantBody = Static<typeof PromoteUnitVariantBody>;
 
 export const UnitLocalizationParams = t.Object({
-	type: CatalogUnitType,
+	type: ManageableUnitType,
 	unitId: t.String({ format: "uuid" }),
 	language: ContentLanguage,
 });

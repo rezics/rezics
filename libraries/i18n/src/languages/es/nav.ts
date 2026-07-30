@@ -4,6 +4,8 @@ import { esTerminology } from "@rezics/i18n/terminology/es";
 const { forms: followTerms } = esTerminology.follow;
 const { forms: labelTerms } = esTerminology.label;
 const { forms: postTerms } = esTerminology.post;
+const { forms: videoTerms } = esTerminology.video;
+const { forms: audioTerms } = esTerminology.audio;
 const { forms: realmTerms } = esTerminology.realm;
 const { forms: tagStructureTerms } = esTerminology.tagStructure;
 const { forms: unitSlugTerms } = esTerminology.unitSlug;
@@ -65,6 +67,8 @@ export default {
 			book: "Libro",
 			software: "Software",
 			media: "Contenido multimedia",
+			video: videoTerms.label,
+			audio: audioTerms.label,
 			release: "Versión",
 			entity: "Entidad",
 			label: labelTerms.label,

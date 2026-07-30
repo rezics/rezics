@@ -40,6 +40,7 @@ export const CreateContentStructureBody = t.Object(
 	{
 		kind: t.Union([
 			t.Literal("book.contents"),
+			t.Literal("media.contents"),
 			t.Literal("post.contents"),
 			t.Literal("realm.taxonomy"),
 		]),
@@ -172,6 +173,58 @@ export const SaveBookContentStructureDraftBody = t.Object(
 	{ additionalProperties: false },
 );
 export type SaveBookContentStructureDraftBody = Static<typeof SaveBookContentStructureDraftBody>;
+
+export const MediaContentStructureParams = t.Object({ unitId: Uuid });
+export type MediaContentStructureParams = Static<typeof MediaContentStructureParams>;
+export const MediaContentStructureQuery = t.Object(LocalizationLanguageQuery, {
+	additionalProperties: false,
+});
+export type MediaContentStructureQuery = Static<typeof MediaContentStructureQuery>;
+
+const ExistingMediaContentStructureDraftNode = t.Object(
+	{
+		state: t.Literal("existing"),
+		...BookContentStructureDraftNodeBase,
+	},
+	{ additionalProperties: false },
+);
+
+const NewMediaContentStructureDraftNode = t.Object(
+	{
+		state: t.Literal("new"),
+		...BookContentStructureDraftNodeBase,
+		language: ContentLanguage,
+		contentKind: t.UnionEnum(["video", "audio", "label"]),
+	},
+	{ additionalProperties: false },
+);
+
+const AttachedMediaContentStructureDraftNode = t.Object(
+	{
+		state: t.Literal("attached"),
+		id: Uuid,
+		parentId: t.Nullable(Uuid),
+		order: t.Integer({ minimum: 0 }),
+		contentUnitId: Uuid,
+	},
+	{ additionalProperties: false },
+);
+
+export const SaveMediaContentStructureDraftBody = t.Object(
+	{
+		baseRevisionId: Uuid,
+		nodes: t.Array(
+			t.Union([
+				ExistingMediaContentStructureDraftNode,
+				NewMediaContentStructureDraftNode,
+				AttachedMediaContentStructureDraftNode,
+			]),
+			{ maxItems: 10_000 },
+		),
+	},
+	{ additionalProperties: false },
+);
+export type SaveMediaContentStructureDraftBody = Static<typeof SaveMediaContentStructureDraftBody>;
 
 export const ChapterParams = t.Object({ chapterId: Uuid });
 export type ChapterParams = Static<typeof ChapterParams>;

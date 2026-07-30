@@ -4,11 +4,20 @@ import { insert } from "native-i18n";
 
 const { forms: publicationLicenseTerms } = jaTerminology.publicationLicense;
 const { forms: postTerms } = jaTerminology.post;
+const { forms: videoTerms } = jaTerminology.video;
+const { forms: audioTerms } = jaTerminology.audio;
 const { forms: followTerms } = jaTerminology.follow;
 const { forms: metadataTerms } = jaTerminology.metadata;
 
 export default {
-	types: { book: "書籍", software: "ソフトウェア", media: "メディア", series: "シリーズ" },
+	types: {
+		book: "書籍",
+		software: "ソフトウェア",
+		media: "メディア",
+		series: "シリーズ",
+		video: videoTerms.label,
+		audio: audioTerms.label,
+	},
 	creation: {
 		modeLabel: "作成方法",
 		ownedWork: "自分の作品",
@@ -82,7 +91,8 @@ export default {
 			},
 			contentStructure: {
 				label: "コンテンツ構造",
-				description: "折りたたみ可能なインデント付きツリーエディターで書籍章を管理。",
+				description:
+					"折りたたみ可能なインデント付きツリーエディターで書籍の章またはメディア項目を管理。",
 				developmentBadge: "開発中",
 			},
 			releases: {
@@ -122,6 +132,7 @@ export default {
 		runtimeMinutes: "再生時間（分）",
 		episodeCount: "エピソード数",
 		seasonCount: "シーズン数",
+		durationSeconds: "再生時間（秒）",
 		yes: "はい",
 		no: "いいえ",
 	},
@@ -139,6 +150,7 @@ export default {
 			},
 			media: {
 				overview: "メディアの詳細",
+				contents: "コンテンツ",
 				tags: "タグ",
 				associations: "関連付け",
 				reviews: "観客レビュー",
@@ -167,6 +179,7 @@ export default {
 			},
 			media: {
 				overview: "メディアの説明、発売情報、視聴状況。",
+				contents: `${videoTerms.label}と${audioTerms.label}の構造を閲覧し、視聴・聴取の進捗を記録する。`,
 				tags: "選択した情報源からのグローバルタグと文脈上の評価を確認する。",
 				associations: "この作品の主題と主バリアント関係を確認する。",
 				reviews: "観客レビューを読むまたは書く。",
@@ -294,6 +307,10 @@ export default {
 			chapters: Number,
 			labels: Number,
 		}),
+		mediaStructureSummary: insert(
+			`${videoTerms.label} {{videos}} 件 · ${audioTerms.label} {{audios}} 件 · ラベル {{labels}} 件`,
+			{ videos: Number, audios: Number, labels: Number },
+		),
 		childCount: insert("{{count}} 子項目", { count: Number }),
 		totalWordCount: insert("合計 {{count}} 単語", { count: Number }),
 		totalCharacterCount: insert("合計 {{count}} 文字", { count: Number }),
@@ -305,31 +322,50 @@ export default {
 		moveToLast: "このレベルの最後に移動",
 		move: "移動",
 		moveDescription: "子項目の最後に移動するラベルを選択するか、章を直接その下に移動します。",
+		mediaMoveDescription:
+			"ラベルを選ぶとその子項目の末尾へ、メディア項目を選ぶとその項目の直後へ移動します。",
 		addChapter: "章を追加",
 		addLabel: "ラベルを追加",
+		addVideo: `${videoTerms.inline}を追加`,
+		addAudio: `${audioTerms.inline}を追加`,
 		addChapterDescription:
 			"新しい章を作成するか、既存の章を検索して追加します。完了時にコンテンツ構造も保存されます。",
 		addLabelDescription:
 			"新しいラベルを作成するか、既存のラベルを検索して追加します。完了時にコンテンツ構造も保存されます。",
+		addVideoDescription: `新しい${videoTerms.inline}を作成するか、既存の項目を検索して追加します。完了するとコンテンツ構造も保存されます。`,
+		addAudioDescription: `新しい${audioTerms.inline}を作成するか、既存の項目を検索して追加します。完了するとコンテンツ構造も保存されます。`,
 		addMode: "追加方法",
 		createMode: "新規作成",
 		attachMode: "既存から追加",
 		existingChapter: "既存の章",
 		existingLabel: "既存のラベル",
+		existingMediaItem: "既存のメディア項目",
 		searchExistingChapter: "既存の章を検索",
 		searchExistingLabel: "既存のラベルを検索",
+		searchExistingMediaItem: "既存のメディア項目を検索",
+		mediaKindFilter: "メディア種別",
+		allMediaKinds: "すべて",
 		createChapterAndSave: "章を作成して保存",
 		createLabelAndSave: "ラベルを作成して保存",
+		createMediaItemAndSave: "メディア項目を作成して保存",
 		attachChapterAndSave: "章を追加して保存",
 		attachLabelAndSave: "ラベルを追加して保存",
+		attachMediaItemAndSave: "メディア項目を追加して保存",
 		saveCurrentChangesNotice:
 			"この操作により、現在保存されていないコンテンツ構造の変更も保存されます。",
 		choosePosition: "構造の位置を選択",
 		choosePositionDescription: "子に追加するラベル、またはその直下に挿入する章を選択",
+		mediaChoosePositionDescription:
+			"ラベルを選ぶとその子項目の末尾へ、メディア項目を選ぶとその項目の直後へ追加します。",
 		newChapter: "新しい章",
 		newLabel: "新しいラベル",
+		newMediaItem: "メディア項目を追加",
+		newVideo: `新しい${videoTerms.inline}`,
+		newAudio: `新しい${audioTerms.inline}`,
 		newChapterAfter: "下に新しい章",
 		newLabelAfter: "下に新しいラベル",
+		newVideoAfter: `下に新しい${videoTerms.inline}`,
+		newAudioAfter: `下に新しい${audioTerms.inline}`,
 		expand: "展開",
 		collapse: "折りたたむ",
 		multiSelect: "複数選択",
@@ -338,6 +374,12 @@ export default {
 		collapseAll: "すべて折りたたむ",
 		dragHandle: "移動するにはドラッグ",
 		noContent: "まだ章がありません。",
+		noMediaContent: `${videoTerms.label}または${audioTerms.label}はまだありません。`,
+		durationUnknown: "再生時間未設定",
+		markMediaItemComplete: "完了としてマーク",
+		markMediaItemIncomplete: "未完了に戻す",
+		mediaItemComplete: "完了",
+		mediaItemIncomplete: "未完了",
 		saveDraft: "コンテンツ構造を保存",
 		discardDraft: "下書きの変更を破棄",
 		unsavedDraft: "保存されていない変更があります",

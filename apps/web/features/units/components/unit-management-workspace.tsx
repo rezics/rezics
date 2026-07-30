@@ -93,7 +93,8 @@ function UnitManagementWorkspaceContent({
 	const pathname = usePathname();
 	const { t, locale } = useTranslation(["docks", "errors", "units"]);
 	const localizationLanguages = useLocalizationLanguages();
-	const dockAccess = useDockManagementAccess(unitId, type);
+	const timedMedia = type === "video" || type === "audio";
+	const dockAccess = useDockManagementAccess(unitId, type, !timedMedia);
 	const query = useGetApiUnitsByTypeByUnitId({
 		path: { type, unitId },
 		query: { localizationLanguages },
@@ -147,13 +148,11 @@ function UnitManagementWorkspaceContent({
 			href: unitManagementSectionHref(type, unitId, "content-structure"),
 			label: labels.contentStructure.label,
 			description:
-				type === "book"
+				type === "book" || type === "media"
 					? labels.contentStructure.description
 					: t.units.content.developmentDescription,
 			icon: ListTree,
-			...(type === "media" || type === "software"
-				? { badge: labels.contentStructure.developmentBadge }
-				: {}),
+			...(type === "software" ? { badge: labels.contentStructure.developmentBadge } : {}),
 		},
 		{
 			id: "releases",

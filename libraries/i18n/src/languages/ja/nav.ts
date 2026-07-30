@@ -4,6 +4,8 @@ import { jaTerminology } from "@rezics/i18n/terminology/ja";
 const { forms: followTerms } = jaTerminology.follow;
 const { forms: labelTerms } = jaTerminology.label;
 const { forms: postTerms } = jaTerminology.post;
+const { forms: videoTerms } = jaTerminology.video;
+const { forms: audioTerms } = jaTerminology.audio;
 const { forms: realmTerms } = jaTerminology.realm;
 const { forms: tagStructureTerms } = jaTerminology.tagStructure;
 const { forms: unitSlugTerms } = jaTerminology.unitSlug;
@@ -65,6 +67,8 @@ export default {
 			book: "書籍",
 			software: "ソフトウェア",
 			media: "メディア",
+			video: videoTerms.label,
+			audio: audioTerms.label,
 			release: "リリース",
 			entity: "エンティティ",
 			label: labelTerms.label,

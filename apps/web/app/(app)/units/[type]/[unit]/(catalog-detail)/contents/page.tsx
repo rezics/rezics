@@ -9,6 +9,6 @@ export default async function Page({
 	params: Promise<{ type: string; unit: string }>;
 }) {
 	const { type, unit } = await params;
-	if (type !== "book" || !isUnitId(unit)) notFound();
+	if ((type !== "book" && type !== "media") || !isUnitId(unit)) notFound();
 	return <CatalogContentsPage />;
 }

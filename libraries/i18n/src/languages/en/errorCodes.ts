@@ -118,6 +118,7 @@ export default {
 		"This Unit access configuration is invalid or exceeds the permissions you may delegate.",
 	InvalidPaginationCursor: "This page link is invalid or expired.",
 	BookNotFound: "This book could not be found.",
+	MediaNotFound: "This media item could not be found.",
 	ChapterNotFound: "This chapter could not be found.",
 	ChapterLanguageNotFound: "This chapter language could not be found.",
 	ReportRealmMismatch: `The reported Unit does not belong to this ${realmTerms.label}.`,

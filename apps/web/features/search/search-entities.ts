@@ -28,14 +28,21 @@ function indexIncludesKind(index: string, kind: string): boolean {
 	return kindsByIndex[index]?.includes(kind) ?? false;
 }
 
-async function resolveExactUnit(index: string, query: string, signal: AbortSignal) {
+async function resolveExactUnit(
+	index: string,
+	query: string,
+	signal: AbortSignal,
+	kinds?: readonly string[],
+) {
 	if (!isUnitId(query)) return [];
 	const { data } = await postApiUnitsPresentations({
 		body: { ids: [query] },
 		signal,
 	});
 	return data.items
-		.filter((item) => indexIncludesKind(index, item.kind))
+		.filter(
+			(item) => indexIncludesKind(index, item.kind) && (!kinds || kinds.includes(item.kind)),
+		)
 		.map((item) => ({
 			id: item.id,
 			label: item.title ?? item.id,
@@ -44,8 +51,8 @@ async function resolveExactUnit(index: string, query: string, signal: AbortSigna
 		}));
 }
 
-export const searchEntities: EntitySearch = async (index, query, signal) => {
-	const exact = await resolveExactUnit(index, query, signal);
+export const searchEntities: EntitySearch = async (index, query, signal, options) => {
+	const exact = await resolveExactUnit(index, query, signal, options?.kinds);
 	if (exact.length) return exact;
 	if (index === "all") {
 		const { data } = await postApiSearch({
@@ -69,7 +76,7 @@ export const searchEntities: EntitySearch = async (index, query, signal) => {
 	if (!isSearchIndex(index)) return [];
 	const { data } = await postApiSearchByIndex({
 		path: { index },
-		body: { query, limit: 10 },
+		body: { query, kinds: options?.kinds ? [...options.kinds] : undefined, limit: 10 },
 		signal,
 	});
 	const byId = new Map(

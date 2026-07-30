@@ -61,6 +61,16 @@ export const frTerminology = defineTerminology("fr", {
 		},
 		forbidden: ["Post", "Posts"],
 	},
+	video: {
+		status: "approved",
+		forms: { label: "Vidéo", pluralLabel: "Vidéos", inline: "vidéo", plural: "vidéos" },
+		forbidden: [],
+	},
+	audio: {
+		status: "approved",
+		forms: { label: "Audio", pluralLabel: "Audios", inline: "audio", plural: "audios" },
+		forbidden: [],
+	},
 	label: {
 		status: "approved",
 		forms: {

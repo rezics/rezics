@@ -4,6 +4,8 @@ import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 const { forms: followTerms } = zhHansTerminology.follow;
 const { forms: labelTerms } = zhHansTerminology.label;
 const { forms: postTerms } = zhHansTerminology.post;
+const { forms: videoTerms } = zhHansTerminology.video;
+const { forms: audioTerms } = zhHansTerminology.audio;
 const { forms: realmTerms } = zhHansTerminology.realm;
 const { forms: tagStructureTerms } = zhHansTerminology.tagStructure;
 const { forms: unitSlugTerms } = zhHansTerminology.unitSlug;
@@ -65,6 +67,8 @@ export default {
 			book: "书籍",
 			software: "软件",
 			media: "媒体",
+			video: videoTerms.label,
+			audio: audioTerms.label,
 			release: "发行",
 			entity: "实体",
 			label: labelTerms.label,

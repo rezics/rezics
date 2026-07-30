@@ -4,12 +4,21 @@ import { insert } from "native-i18n";
 
 const { forms: publicationLicenseTerms } = zhHansTerminology.publicationLicense;
 const { forms: postTerms } = zhHansTerminology.post;
+const { forms: videoTerms } = zhHansTerminology.video;
+const { forms: audioTerms } = zhHansTerminology.audio;
 const { forms: realmTerms } = zhHansTerminology.realm;
 const { forms: followTerms } = zhHansTerminology.follow;
 const { forms: metadataTerms } = zhHansTerminology.metadata;
 
 export default {
-	types: { book: "书籍", software: "软件", media: "媒体", series: "系列" },
+	types: {
+		book: "书籍",
+		software: "软件",
+		media: "媒体",
+		series: "系列",
+		video: videoTerms.label,
+		audio: audioTerms.label,
+	},
 	creation: {
 		modeLabel: "创建方式",
 		ownedWork: "我的作品",
@@ -82,7 +91,7 @@ export default {
 			},
 			contentStructure: {
 				label: "内容结构",
-				description: "以可收起、有缩进的树状编辑器管理书籍章节。",
+				description: "以可收起、有缩进的树状编辑器管理书籍章节或媒体项目。",
 				developmentBadge: "开发中",
 			},
 			releases: { label: "系列内容", description: "管理系列内的作品、顺序与发布日期。" },
@@ -113,6 +122,7 @@ export default {
 		runtimeMinutes: "片长（分钟）",
 		episodeCount: "集数",
 		seasonCount: "季数",
+		durationSeconds: "时长（秒）",
 		yes: "是",
 		no: "否",
 	},
@@ -130,6 +140,7 @@ export default {
 			},
 			media: {
 				overview: "媒体数据",
+				contents: "内容",
 				tags: "标签",
 				associations: "关联",
 				reviews: "观众评论",
@@ -158,6 +169,7 @@ export default {
 			},
 			media: {
 				overview: "媒体说明、发行信息与观影状态。",
+				contents: `浏览${videoTerms.inline}与${audioTerms.inline}结构，并记录观看或收听进度。`,
 				tags: `查看一般标签与你所选${realmTerms.label}来源的上下文判断。`,
 				associations: "查看这部作品的内容主体，以及主作品与变体关系。",
 				reviews: "查看或撰写观众评论。",
@@ -280,6 +292,10 @@ export default {
 			chapters: Number,
 			labels: Number,
 		}),
+		mediaStructureSummary: insert(
+			`{{videos}} 个${videoTerms.inline} · {{audios}} 个${audioTerms.inline} · {{labels}} 个标目`,
+			{ videos: Number, audios: Number, labels: Number },
+		),
 		childCount: insert("{{count}} 个子项目", { count: Number }),
 		totalWordCount: insert("总计 {{count}} 个词", { count: Number }),
 		totalCharacterCount: insert("总计 {{count}} 字", { count: Number }),
@@ -291,28 +307,47 @@ export default {
 		moveToLast: "移至同层最后",
 		move: "移动",
 		moveDescription: "选择标目会移至其子项目末尾；选择章节会移至该章节下方。",
+		mediaMoveDescription:
+			"选择标目会将所选项目移至其子项目末尾；选择媒体项目会将其移至该项目下方。",
 		addChapter: "新增章节",
 		addLabel: "新增标目",
+		addVideo: `新增${videoTerms.inline}`,
+		addAudio: `新增${audioTerms.inline}`,
 		addChapterDescription: "创建新章节，或搜索并添加现有章节。完成后会同时保存内容结构。",
 		addLabelDescription: "创建新标目，或搜索并添加现有标目。完成后会同时保存内容结构。",
+		addVideoDescription: `创建新${videoTerms.inline}，或搜索并加入已有${videoTerms.inline}。完成后会同时保存内容结构。`,
+		addAudioDescription: `创建新${audioTerms.inline}，或搜索并加入已有${audioTerms.inline}。完成后会同时保存内容结构。`,
 		addMode: "添加方式",
 		createMode: "创建",
 		attachMode: "添加",
 		existingChapter: "现有章节",
 		existingLabel: "现有标目",
+		existingMediaItem: "现有媒体项目",
 		searchExistingChapter: "搜索现有章节",
 		searchExistingLabel: "搜索现有标目",
+		searchExistingMediaItem: "搜索现有媒体项目",
+		mediaKindFilter: "媒体类型",
+		allMediaKinds: "全部",
 		createChapterAndSave: "创建章节并保存",
 		createLabelAndSave: "创建标目并保存",
+		createMediaItemAndSave: "创建媒体项目并保存",
 		attachChapterAndSave: "添加章节并保存",
 		attachLabelAndSave: "添加标目并保存",
+		attachMediaItemAndSave: "添加媒体项目并保存",
 		saveCurrentChangesNotice: "此操作会一并保存当前尚未保存的内容结构变更。",
 		choosePosition: "选择结构位置",
 		choosePositionDescription: "选择标目会加入其子项目末尾；选择章节会插入该章节下方。",
+		mediaChoosePositionDescription:
+			"选择标目会加入其子项目末尾；选择媒体项目会插入该项目下方。",
 		newChapter: "新建章节",
 		newLabel: "新建标目",
+		newMediaItem: "新增媒体项目",
+		newVideo: `新建${videoTerms.inline}`,
+		newAudio: `新建${audioTerms.inline}`,
 		newChapterAfter: "在下方新建章节",
 		newLabelAfter: "在下方新建标目",
+		newVideoAfter: `在下方新建${videoTerms.inline}`,
+		newAudioAfter: `在下方新建${audioTerms.inline}`,
 		expand: "展开",
 		collapse: "折叠",
 		multiSelect: "多选",
@@ -321,6 +356,12 @@ export default {
 		collapseAll: "折叠全部",
 		dragHandle: "拖动以移动",
 		noContent: "还没有章节。",
+		noMediaContent: `还没有${videoTerms.inline}或${audioTerms.inline}。`,
+		durationUnknown: "未提供时长",
+		markMediaItemComplete: "标记为已完成",
+		markMediaItemIncomplete: "取消完成标记",
+		mediaItemComplete: "已完成",
+		mediaItemIncomplete: "未完成",
 		saveDraft: "保存内容结构",
 		discardDraft: "舍弃草稿变更",
 		unsavedDraft: "有尚未保存的变更",

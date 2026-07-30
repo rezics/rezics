@@ -4,11 +4,20 @@ import { insert } from "native-i18n";
 
 const { forms: publicationLicenseTerms } = deTerminology.publicationLicense;
 const { forms: postTerms } = deTerminology.post;
+const { forms: videoTerms } = deTerminology.video;
+const { forms: audioTerms } = deTerminology.audio;
 const { forms: followTerms } = deTerminology.follow;
 const { forms: metadataTerms } = deTerminology.metadata;
 
 export default {
-	types: { book: "Buch", software: "Software", media: "Medien", series: "Reihe" },
+	types: {
+		book: "Buch",
+		software: "Software",
+		media: "Medien",
+		series: "Reihe",
+		video: videoTerms.label,
+		audio: audioTerms.label,
+	},
 	creation: {
 		modeLabel: "Erstellungsart",
 		ownedWork: "Mein Werk",
@@ -85,7 +94,7 @@ export default {
 			contentStructure: {
 				label: "Inhaltsstruktur",
 				description:
-					"Verwalte Buchkapitel in einem ein- und ausklappbaren, eingerückten Baumeditor.",
+					"Verwalte Buchkapitel oder Medienelemente in einem ein- und ausklappbaren, eingerückten Baumeditor.",
 				developmentBadge: "In Entwicklung",
 			},
 			releases: {
@@ -128,6 +137,7 @@ export default {
 		runtimeMinutes: "Laufzeit (Minuten)",
 		episodeCount: "Anzahl der Episoden",
 		seasonCount: "Anzahl der Staffeln",
+		durationSeconds: "Dauer (Sekunden)",
 		yes: "Ja",
 		no: "Nein",
 	},
@@ -145,6 +155,7 @@ export default {
 			},
 			media: {
 				overview: "Mediendetails",
+				contents: "Inhalt",
 				tags: "Tags",
 				associations: "Zuordnungen",
 				reviews: "Publikumsrezensionen",
@@ -175,6 +186,7 @@ export default {
 			media: {
 				overview:
 					"Medienbeschreibung, Veröffentlichungsinformationen und Wiedergabestatus.",
+				contents: `Durchsuche die ${videoTerms.label}- und ${audioTerms.label}struktur und erfasse deinen Wiedergabefortschritt.`,
 				tags: "Prüfe globale Tags und kontextbezogene Bewertungen aus deinen ausgewählten Quellen.",
 				associations:
 					"Prüfe Themen dieses Werks sowie Beziehungen zwischen Haupteinträgen und Varianten.",
@@ -306,6 +318,10 @@ export default {
 			chapters: Number,
 			labels: Number,
 		}),
+		mediaStructureSummary: insert(
+			`{{videos}} ${videoTerms.pluralLabel} · {{audios}} ${audioTerms.label}elemente · {{labels}} Bezeichnungen`,
+			{ videos: Number, audios: Number, labels: Number },
+		),
 		childCount: insert("{{count}} untergeordnete Elemente", { count: Number }),
 		totalWordCount: insert("Insgesamt {{count}} Wörter", { count: Number }),
 		totalCharacterCount: insert("Insgesamt {{count}} Zeichen", { count: Number }),
@@ -318,32 +334,51 @@ export default {
 		move: "Verschieben",
 		moveDescription:
 			"Wähle eine Bezeichnung, um das Element ans Ende ihrer Unterelemente zu verschieben, oder ein Kapitel, um es direkt darunter einzufügen.",
+		mediaMoveDescription:
+			"Wähle eine Bezeichnung, um die Auswahl ans Ende ihrer Unterelemente zu verschieben, oder ein Medienelement, um sie direkt darunter zu verschieben.",
 		addChapter: "Kapitel hinzufügen",
 		addLabel: "Bezeichnung hinzufügen",
+		addVideo: `${videoTerms.label} hinzufügen`,
+		addAudio: `${audioTerms.label} hinzufügen`,
 		addChapterDescription:
 			"Erstelle ein neues Kapitel oder suche nach einem vorhandenen Kapitel. Beim Abschluss wird auch die Inhaltsstruktur gespeichert.",
 		addLabelDescription:
 			"Erstelle eine neue Bezeichnung oder suche nach einer vorhandenen Bezeichnung. Beim Abschluss wird auch die Inhaltsstruktur gespeichert.",
+		addVideoDescription: `Erstelle ein neues ${videoTerms.inline} oder suche ein vorhandenes zum Hinzufügen. Dabei wird auch die Inhaltsstruktur gespeichert.`,
+		addAudioDescription: `Erstelle ein neues ${audioTerms.inline} oder suche ein vorhandenes zum Hinzufügen. Dabei wird auch die Inhaltsstruktur gespeichert.`,
 		addMode: "Art des Hinzufügens",
 		createMode: "Neu erstellen",
 		attachMode: "Vorhandenes hinzufügen",
 		existingChapter: "Vorhandenes Kapitel",
 		existingLabel: "Vorhandene Bezeichnung",
+		existingMediaItem: "Vorhandenes Medienelement",
 		searchExistingChapter: "Vorhandene Kapitel suchen",
 		searchExistingLabel: "Vorhandene Bezeichnungen suchen",
+		searchExistingMediaItem: "Vorhandene Medienelemente suchen",
+		mediaKindFilter: "Medientyp",
+		allMediaKinds: "Alle",
 		createChapterAndSave: "Kapitel erstellen und speichern",
 		createLabelAndSave: "Bezeichnung erstellen und speichern",
+		createMediaItemAndSave: "Medienelement erstellen und speichern",
 		attachChapterAndSave: "Kapitel hinzufügen und speichern",
 		attachLabelAndSave: "Bezeichnung hinzufügen und speichern",
+		attachMediaItemAndSave: "Medienelement hinzufügen und speichern",
 		saveCurrentChangesNotice:
 			"Diese Aktion speichert auch die derzeit nicht gespeicherten Änderungen an der Inhaltsstruktur.",
 		choosePosition: "Position in der Struktur auswählen",
 		choosePositionDescription:
 			"Wähle eine Bezeichnung, um das Element an ihre Unterelemente anzuhängen, oder ein Kapitel, um es direkt darunter einzufügen.",
+		mediaChoosePositionDescription:
+			"Wähle eine Bezeichnung, um das Element an ihre Unterelemente anzuhängen, oder ein Medienelement, um es direkt darunter einzufügen.",
 		newChapter: "Neues Kapitel",
 		newLabel: "Neue Bezeichnung",
+		newMediaItem: "Medienelement hinzufügen",
+		newVideo: `Neues ${videoTerms.inline}`,
+		newAudio: `Neues ${audioTerms.inline}`,
 		newChapterAfter: "Neues Kapitel darunter",
 		newLabelAfter: "Neue Bezeichnung darunter",
+		newVideoAfter: `Neues ${videoTerms.inline} darunter`,
+		newAudioAfter: `Neues ${audioTerms.inline} darunter`,
 		expand: "Ausklappen",
 		collapse: "Einklappen",
 		multiSelect: "Mehrfachauswahl",
@@ -352,6 +387,12 @@ export default {
 		collapseAll: "Alle einklappen",
 		dragHandle: "Zum Verschieben ziehen",
 		noContent: "Es gibt noch keine Kapitel.",
+		noMediaContent: `Es gibt noch keine ${videoTerms.pluralLabel} oder ${audioTerms.label}elemente.`,
+		durationUnknown: "Keine Dauer angegeben",
+		markMediaItemComplete: "Als abgeschlossen markieren",
+		markMediaItemIncomplete: "Als nicht abgeschlossen markieren",
+		mediaItemComplete: "Abgeschlossen",
+		mediaItemIncomplete: "Nicht abgeschlossen",
 		saveDraft: "Inhaltsstruktur speichern",
 		discardDraft: "Entwurfsänderungen verwerfen",
 		unsavedDraft: "Es gibt nicht gespeicherte Änderungen",

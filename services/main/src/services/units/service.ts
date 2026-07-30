@@ -36,6 +36,7 @@ import {
 } from "./localization";
 import {
 	book,
+	audio,
 	catalogUnitContentLicense,
 	contentStructure,
 	creditAttribution,
@@ -53,6 +54,7 @@ import {
 	unitTag,
 	unitTagVoteStat,
 	unitVariant,
+	video,
 } from "../database/schema";
 import { imageAssetPresentationContentUrl } from "../api/image-assets/presentation";
 import { ensureImageAssetsAttachable, imageAssetContentUrl } from "../api/image-assets/service";
@@ -83,6 +85,8 @@ import { OfficialProfileIds } from "../bootstrap/manifest";
 
 export type VariantUnitKind = "book" | "software" | "media";
 export type CatalogUnitKind = VariantUnitKind | "series";
+export type TimedMediaUnitKind = "video" | "audio";
+export type ManageableUnitKind = CatalogUnitKind | TimedMediaUnitKind;
 export type UnitDetail = Static<typeof UnitDetailResponse>;
 type StoredUnitLocalization = typeof unitLocalization.$inferSelect;
 const PublisherRequestLifetimeMs = 30 * 24 * 60 * 60 * 1_000;
@@ -136,6 +140,7 @@ export interface UpdateUnitInput {
 		runtimeMinutes?: number | null;
 		episodeCount?: number | null;
 		seasonCount?: number | null;
+		durationSeconds?: number | null;
 	};
 }
 
@@ -200,17 +205,26 @@ export async function createUnit(
 			license: input.license,
 			statusActor: { kind: "profile", profileId: ownerId },
 		});
-		let bookStructure: typeof contentStructure.$inferSelect | undefined;
+		let createdStructure: typeof contentStructure.$inferSelect | undefined;
 		if (kind === "book") {
 			await tx.insert(book).values({ id: created.id });
-			[bookStructure] = await tx
+			[createdStructure] = await tx
 				.insert(contentStructure)
 				.values({ ownerUnitId: created.id, kind: "book.contents" })
 				.returning();
-			if (!bookStructure) throw new Error("Book Content Structure insertion returned no row");
+			if (!createdStructure)
+				throw new Error("Book Content Structure insertion returned no row");
 		}
 		if (kind === "software") await tx.insert(software).values({ id: created.id });
-		if (kind === "media") await tx.insert(media).values({ id: created.id, kind: "other" });
+		if (kind === "media") {
+			await tx.insert(media).values({ id: created.id, kind: "other" });
+			[createdStructure] = await tx
+				.insert(contentStructure)
+				.values({ ownerUnitId: created.id, kind: "media.contents" })
+				.returning();
+			if (!createdStructure)
+				throw new Error("Media Content Structure insertion returned no row");
+		}
 		await tx.insert(unitLocalization).values({
 			unitId: created.id,
 			...toUnitLocalizationStorage(input.localization),
@@ -271,10 +285,10 @@ export async function createUnit(
 					expiresAt: new Date(Date.now() + PublisherRequestLifetimeMs),
 				});
 		}
-		const bookStructureSnapshot = bookStructure
+		const structureSnapshot = createdStructure
 			? ContentStructureSnapshotSchema.parse({
 					version: 1,
-					structure: bookStructure,
+					structure: createdStructure,
 					nodes: [],
 				})
 			: null;
@@ -283,11 +297,11 @@ export async function createUnit(
 			actorProfileId: ownerId,
 			event: "create",
 		});
-		if (bookStructureSnapshot)
+		if (structureSnapshot)
 			await createContentStructureHistory(tx, {
-				structureId: bookStructureSnapshot.structure.id,
+				structureId: structureSnapshot.structure.id,
 				actorProfileId: ownerId,
-				state: bookStructureSnapshot,
+				state: structureSnapshot,
 			});
 		return created.id;
 	});
@@ -295,11 +309,11 @@ export async function createUnit(
 }
 
 async function getUnitDetails(
-	kind: CatalogUnitKind,
+	kind: ManageableUnitKind,
 	unitId: string,
 ): Promise<UnitDetail["details"]> {
 	const contentLicensed =
-		kind !== "series" &&
+		(kind === "book" || kind === "software" || kind === "media") &&
 		(
 			await database
 				.select({ unitId: catalogUnitContentLicense.unitId })
@@ -348,13 +362,19 @@ async function getUnitDetails(
 			licensed: contentLicensed,
 		};
 	}
+	if (kind === "video" || kind === "audio") {
+		const table = kind === "video" ? video : audio;
+		const [details] = await database.select().from(table).where(eq(table.id, unitId)).limit(1);
+		if (!details) throw new UnitNotFound(kind);
+		return { type: kind, durationSeconds: details.durationSeconds };
+	}
 	const [details] = await database.select().from(series).where(eq(series.id, unitId)).limit(1);
 	if (!details) throw new UnitNotFound(kind);
 	return { type: "series", kind: details.kind };
 }
 
 export async function getUnit(
-	kind: CatalogUnitKind,
+	kind: ManageableUnitKind,
 	unitId: string,
 	authorization: Authorization,
 	localizationLanguages: readonly ContentLanguage[] = [],
@@ -460,7 +480,7 @@ export async function getUnit(
 		"visible progress count",
 	);
 	const variantContext: UnitDetail["variantContext"] =
-		kind === "series"
+		kind === "series" || kind === "video" || kind === "audio"
 			? { role: "standalone" }
 			: await getUnitVariantContext(base.id, authorization.profileId);
 	const [
@@ -544,7 +564,7 @@ export async function getUnit(
 						),
 					},
 		versions:
-			kind === "series"
+			kind === "series" || kind === "video" || kind === "audio"
 				? []
 				: variantContext.role === "standalone"
 					? [{ id: base.id, kind: "primary", canonicalUnitId: null }]
@@ -661,7 +681,7 @@ export async function listUnits(
 }
 
 export async function updateUnit(
-	kind: CatalogUnitKind,
+	kind: ManageableUnitKind,
 	unitId: string,
 	authorization: Authorization<string>,
 	body: UpdateUnitInput,
@@ -737,7 +757,20 @@ export async function updateUnit(
 					seasonCount: details.seasonCount,
 				})
 				.where(eq(media.id, unitId));
-		if (kind !== "series" && details.licensed !== undefined) {
+		if (kind === "video")
+			await tx
+				.update(video)
+				.set({ durationSeconds: details.durationSeconds })
+				.where(eq(video.id, unitId));
+		if (kind === "audio")
+			await tx
+				.update(audio)
+				.set({ durationSeconds: details.durationSeconds })
+				.where(eq(audio.id, unitId));
+		if (
+			(kind === "book" || kind === "software" || kind === "media") &&
+			details.licensed !== undefined
+		) {
 			if (details.licensed)
 				await tx
 					.insert(catalogUnitContentLicense)
@@ -767,13 +800,14 @@ export async function updateUnit(
 				revisionId: revision.revisionId,
 			});
 		}
-		if (kind !== "series") await ensureUnitVariantLifecycle(tx, unitId);
+		if (kind === "book" || kind === "software" || kind === "media")
+			await ensureUnitVariantLifecycle(tx, unitId);
 	});
 	return getUnit(kind, unitId, authorization);
 }
 
 export async function deleteUnit(
-	kind: CatalogUnitKind,
+	kind: ManageableUnitKind,
 	unitId: string,
 	authorization: Authorization<string>,
 ): Promise<void> {
@@ -785,7 +819,8 @@ export async function deleteUnit(
 			.where(and(eq(unit.id, unitId), eq(unit.kind, kind)))
 			.returning({ id: unit.id });
 		if (!deleted) throw new UnitNotFound(kind);
-		if (kind !== "series") await ensureUnitVariantLifecycle(tx, unitId);
+		if (kind === "book" || kind === "software" || kind === "media")
+			await ensureUnitVariantLifecycle(tx, unitId);
 		await recordUnitRevision(tx, {
 			unitId,
 			actorProfileId: authorization.profileId,

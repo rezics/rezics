@@ -4,11 +4,20 @@ import { insert } from "native-i18n";
 
 const { forms: publicationLicenseTerms } = koTerminology.publicationLicense;
 const { forms: postTerms } = koTerminology.post;
+const { forms: videoTerms } = koTerminology.video;
+const { forms: audioTerms } = koTerminology.audio;
 const { forms: followTerms } = koTerminology.follow;
 const { forms: metadataTerms } = koTerminology.metadata;
 
 export default {
-	types: { book: "책", software: "소프트웨어", media: "미디어", series: "시리즈" },
+	types: {
+		book: "책",
+		software: "소프트웨어",
+		media: "미디어",
+		series: "시리즈",
+		video: videoTerms.label,
+		audio: audioTerms.label,
+	},
 	creation: {
 		modeLabel: "생성 방식",
 		ownedWork: "내 작품",
@@ -82,7 +91,7 @@ export default {
 			},
 			contentStructure: {
 				label: "콘텐츠 구조",
-				description: "접이식 들여쓰기 트리 편집기에서 책 챕터 관리.",
+				description: "접이식 들여쓰기 트리 편집기에서 책 챕터 또는 미디어 항목 관리.",
 				developmentBadge: "개발 중",
 			},
 			releases: {
@@ -122,6 +131,7 @@ export default {
 		runtimeMinutes: "재생 시간(분)",
 		episodeCount: "에피소드 수",
 		seasonCount: "시즌 수",
+		durationSeconds: "재생 시간(초)",
 		yes: "예",
 		no: "아니요",
 	},
@@ -139,6 +149,7 @@ export default {
 			},
 			media: {
 				overview: "미디어 세부 정보",
+				contents: "콘텐츠",
 				tags: "태그",
 				associations: "연관 항목",
 				reviews: "관객 리뷰",
@@ -167,6 +178,7 @@ export default {
 			},
 			media: {
 				overview: "미디어 설명, 출시 정보 및 시청 상태",
+				contents: `${videoTerms.label}과 ${audioTerms.label} 구조를 탐색하고 시청 또는 청취 진행률을 기록하세요.`,
 				tags: "선택한 출처에서의 전 세계 태그와 문맥적 판단 검토",
 				associations: "이 작품의 주제와 주요–변형 관계 검토",
 				reviews: "관객 리뷰 읽기 또는 작성",
@@ -291,6 +303,10 @@ export default {
 			chapters: Number,
 			labels: Number,
 		}),
+		mediaStructureSummary: insert(
+			`${videoTerms.label} {{videos}}개 · ${audioTerms.label} {{audios}}개 · 레이블 {{labels}}개`,
+			{ videos: Number, audios: Number, labels: Number },
+		),
 		childCount: insert("{{count}} 하위 항목", { count: Number }),
 		totalWordCount: insert("총 {{count}} 단어", { count: Number }),
 		totalCharacterCount: insert("총 {{count}} 문자", { count: Number }),
@@ -302,32 +318,51 @@ export default {
 		moveToLast: "이 수준에서 맨 뒤로 이동",
 		move: "이동",
 		moveDescription: "하위 항목 끝으로 이동할 레이블이나 바로 아래로 이동할 챕터를 선택하세요.",
+		mediaMoveDescription:
+			"레이블을 선택하면 선택 항목을 하위 항목 끝으로 옮기고, 미디어 항목을 선택하면 해당 항목 아래로 옮깁니다.",
 		addChapter: "챕터 추가",
 		addLabel: "레이블 추가",
+		addVideo: `${videoTerms.inline} 추가`,
+		addAudio: `${audioTerms.inline} 추가`,
 		addChapterDescription:
 			"새 챕터를 만들거나 기존 챕터를 검색해 추가합니다. 완료하면 콘텐츠 구조도 함께 저장됩니다.",
 		addLabelDescription:
 			"새 레이블을 만들거나 기존 레이블을 검색해 추가합니다. 완료하면 콘텐츠 구조도 함께 저장됩니다.",
+		addVideoDescription: `새 ${videoTerms.inline}을 만들거나 기존 항목을 검색해 추가하세요. 완료하면 콘텐츠 구조도 함께 저장됩니다.`,
+		addAudioDescription: `새 ${audioTerms.inline}를 만들거나 기존 항목을 검색해 추가하세요. 완료하면 콘텐츠 구조도 함께 저장됩니다.`,
 		addMode: "추가 방법",
 		createMode: "새로 만들기",
 		attachMode: "기존 항목 추가",
 		existingChapter: "기존 챕터",
 		existingLabel: "기존 레이블",
+		existingMediaItem: "기존 미디어 항목",
 		searchExistingChapter: "기존 챕터 검색",
 		searchExistingLabel: "기존 레이블 검색",
+		searchExistingMediaItem: "기존 미디어 항목 검색",
+		mediaKindFilter: "미디어 유형",
+		allMediaKinds: "전체",
 		createChapterAndSave: "챕터 만들기 및 저장",
 		createLabelAndSave: "레이블 만들기 및 저장",
+		createMediaItemAndSave: "미디어 항목 만들기 및 저장",
 		attachChapterAndSave: "챕터 추가 및 저장",
 		attachLabelAndSave: "레이블 추가 및 저장",
+		attachMediaItemAndSave: "미디어 항목 추가 및 저장",
 		saveCurrentChangesNotice:
 			"이 작업을 완료하면 현재 저장되지 않은 콘텐츠 구조 변경 사항도 함께 저장됩니다.",
 		choosePosition: "구조 위치 선택",
 		choosePositionDescription:
 			"하위 항목에 추가할 레이블을 선택하거나 바로 아래에 삽입할 챕터를 선택하세요.",
+		mediaChoosePositionDescription:
+			"레이블을 선택하면 하위 항목 끝에, 미디어 항목을 선택하면 해당 항목 아래에 추가합니다.",
 		newChapter: "새 챕터",
 		newLabel: "새 레이블",
+		newMediaItem: "미디어 항목 추가",
+		newVideo: `새 ${videoTerms.inline}`,
+		newAudio: `새 ${audioTerms.inline}`,
 		newChapterAfter: "아래에 새 챕터",
 		newLabelAfter: "아래에 새 레이블",
+		newVideoAfter: `아래에 새 ${videoTerms.inline}`,
+		newAudioAfter: `아래에 새 ${audioTerms.inline}`,
 		expand: "확장",
 		collapse: "축소",
 		multiSelect: "다중 선택",
@@ -336,6 +371,12 @@ export default {
 		collapseAll: "모두 축소",
 		dragHandle: "이동하려면 끌기",
 		noContent: "아직 챕터가 없습니다.",
+		noMediaContent: `아직 ${videoTerms.label}이나 ${audioTerms.label}가 없습니다.`,
+		durationUnknown: "재생 시간 미입력",
+		markMediaItemComplete: "완료로 표시",
+		markMediaItemIncomplete: "미완료로 표시",
+		mediaItemComplete: "완료",
+		mediaItemIncomplete: "미완료",
 		saveDraft: "콘텐츠 구조 저장",
 		discardDraft: "초안 변경 사항 취소",
 		unsavedDraft: "저장되지 않은 변경 사항이 있습니다.",

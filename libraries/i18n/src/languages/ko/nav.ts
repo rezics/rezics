@@ -4,6 +4,8 @@ import { koTerminology } from "@rezics/i18n/terminology/ko";
 const { forms: followTerms } = koTerminology.follow;
 const { forms: labelTerms } = koTerminology.label;
 const { forms: postTerms } = koTerminology.post;
+const { forms: videoTerms } = koTerminology.video;
+const { forms: audioTerms } = koTerminology.audio;
 const { forms: realmTerms } = koTerminology.realm;
 const { forms: tagStructureTerms } = koTerminology.tagStructure;
 const { forms: unitSlugTerms } = koTerminology.unitSlug;
@@ -65,6 +67,8 @@ export default {
 			book: "책",
 			software: "소프트웨어",
 			media: "미디어",
+			video: videoTerms.label,
+			audio: audioTerms.label,
 			release: "릴리스",
 			entity: "엔티티",
 			label: labelTerms.label,

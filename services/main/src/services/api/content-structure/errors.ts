@@ -17,6 +17,12 @@ export class BookNotFound extends Data.TaggedError("BookNotFound") {
 	readonly message = "Book not found";
 }
 
+export class MediaNotFound extends Data.TaggedError("MediaNotFound") {
+	static readonly status = StatusCodes.NOT_FOUND as const;
+	readonly status = MediaNotFound.status;
+	readonly message = "Media not found";
+}
+
 export class ContentStructureNodeNotFound extends Data.TaggedError("ContentStructureNodeNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
 	readonly status = ContentStructureNodeNotFound.status;
@@ -40,6 +46,7 @@ export const ContentStructureErrors = [
 	ContentStructureNotFound,
 	ContentStructureRevisionConflict,
 	BookNotFound,
+	MediaNotFound,
 	ContentStructureNodeNotFound,
 	ChapterNotFound,
 	ChapterLanguageNotFound,

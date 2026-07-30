@@ -20,6 +20,8 @@ export function publicUnitHref(kind: string, value: PublicUnitRouteValue): strin
 		case "software":
 		case "media":
 		case "series":
+		case "video":
+		case "audio":
 			return `/units/${kind}/${value.id}`;
 		case "entity":
 			return `/entities/${value.id}`;

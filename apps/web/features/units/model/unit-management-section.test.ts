@@ -36,12 +36,34 @@ describe("unit management section manifest", () => {
 		expect(getUnitManagementSectionIds("software", editable)).not.toContain(
 			"content-structure",
 		);
-		expect(getUnitManagementSectionIds("media", editable)).not.toContain("content-structure");
+		expect(getUnitManagementSectionIds("media", editable)).toContain("content-structure");
 		const previewEditor = { ...editable, hasDevelopmentPreviewAccess: true };
 		expect(getUnitManagementSectionIds("software", previewEditor)).toContain(
 			"content-structure",
 		);
 		expect(getUnitManagementSectionIds("media", previewEditor)).toContain("content-structure");
+	});
+
+	it("keeps timed media Units on the standard content, metadata, access, and history template", () => {
+		const capabilities = {
+			...denied,
+			canEdit: true,
+			canManageAccess: true,
+			canManageAssociations: true,
+			canCurateTags: true,
+		};
+		expect(getUnitManagementSectionIds("video", capabilities)).toEqual([
+			"content",
+			"metadata",
+			"access",
+			"history",
+		]);
+		expect(getUnitManagementSectionIds("audio", capabilities)).toEqual([
+			"content",
+			"metadata",
+			"access",
+			"history",
+		]);
 	});
 
 	it("does not expose a management workspace without a server capability", () => {

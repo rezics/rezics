@@ -51,6 +51,16 @@ export const koTerminology = defineTerminology("ko", {
 		forms: { label: "게시물", pluralLabel: "게시물", inline: "게시물", plural: "게시물" },
 		forbidden: ["Post", "Posts"],
 	},
+	video: {
+		status: "approved",
+		forms: { label: "동영상", pluralLabel: "동영상", inline: "동영상", plural: "동영상" },
+		forbidden: ["Video", "Videos"],
+	},
+	audio: {
+		status: "approved",
+		forms: { label: "오디오", pluralLabel: "오디오", inline: "오디오", plural: "오디오" },
+		forbidden: ["Audio", "Audios"],
+	},
 	label: {
 		status: "approved",
 		forms: {

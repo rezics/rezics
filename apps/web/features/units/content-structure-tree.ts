@@ -6,21 +6,30 @@ type RemoteContentStructureNode =
 
 export type ContentStructureNode = Omit<RemoteContentStructureNode, "contentMetrics">;
 
+type PositionedContentStructureNode = {
+	readonly id: string;
+	readonly parentId: string | null;
+	readonly position: string;
+};
+
 export interface ContentStructureTreeNode<
-	Node extends ContentStructureNode = ContentStructureNode,
+	Node extends PositionedContentStructureNode = ContentStructureNode,
 > {
 	node: Node;
 	children: ContentStructureTreeNode<Node>[];
 }
 
 export interface FlattenedContentStructureTreeNode<
-	Node extends ContentStructureNode = ContentStructureNode,
+	Node extends PositionedContentStructureNode = ContentStructureNode,
 > {
 	node: Node;
 	depth: number;
 }
 
-function comparePosition(left: ContentStructureNode, right: ContentStructureNode) {
+function comparePosition(
+	left: PositionedContentStructureNode,
+	right: PositionedContentStructureNode,
+) {
 	return left.position < right.position ? -1 : left.position > right.position ? 1 : 0;
 }
 
@@ -28,7 +37,7 @@ function comparePosition(left: ContentStructureNode, right: ContentStructureNode
  * Builds a display tree without trusting malformed parent links. Orphaned and
  * cyclic nodes remain visible at the root rather than disappearing from the editor.
  */
-export function buildContentStructureTree<Node extends ContentStructureNode>(
+export function buildContentStructureTree<Node extends PositionedContentStructureNode>(
 	nodes: readonly Node[],
 ): ContentStructureTreeNode<Node>[] {
 	const knownIds = new Set(nodes.map((node) => node.id));
@@ -65,7 +74,7 @@ export function buildContentStructureTree<Node extends ContentStructureNode>(
 	return roots;
 }
 
-export function flattenContentStructureTree<Node extends ContentStructureNode>(
+export function flattenContentStructureTree<Node extends PositionedContentStructureNode>(
 	nodes: readonly ContentStructureTreeNode<Node>[],
 	depth = 0,
 ): FlattenedContentStructureTreeNode<Node>[] {

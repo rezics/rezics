@@ -59,6 +59,8 @@ export const RealmPlacementFilterRealmKindInEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -143,6 +145,8 @@ export const TagAssertionFilterTagKindInEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -316,6 +320,8 @@ export type TagAssertionFilter = {
 							| "book"
 							| "software"
 							| "media"
+							| "video"
+							| "audio"
 							| "release"
 							| "entity"
 							| "label"
@@ -434,6 +440,8 @@ export const ScoreFilterRealmKindInEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -458,6 +466,8 @@ export const ScoreFilterTargetKindInEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -620,6 +630,8 @@ export const PostFilterExplainsRealmTagRealmKindInEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -644,6 +656,8 @@ export const PostFilterExplainsRealmTagTagKindInEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -715,6 +729,8 @@ export type PostFilter = {
 							| "book"
 							| "software"
 							| "media"
+							| "video"
+							| "audio"
 							| "release"
 							| "entity"
 							| "label"
@@ -824,6 +840,8 @@ export type PostFilter = {
 									| "book"
 									| "software"
 									| "media"
+									| "video"
+									| "audio"
 									| "release"
 									| "entity"
 									| "label"
@@ -866,6 +884,8 @@ export type PostFilter = {
 									| "book"
 									| "software"
 									| "media"
+									| "video"
+									| "audio"
 									| "release"
 									| "entity"
 									| "label"
@@ -987,6 +1007,8 @@ export type PostFilter = {
 									| "book"
 									| "software"
 									| "media"
+									| "video"
+									| "audio"
 									| "release"
 									| "entity"
 									| "label"
@@ -1029,6 +1051,8 @@ export type PostFilter = {
 									| "book"
 									| "software"
 									| "media"
+									| "video"
+									| "audio"
 									| "release"
 									| "entity"
 									| "label"
@@ -1129,6 +1153,8 @@ export const RealmTagContextFilterRealmKindInEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -1153,6 +1179,8 @@ export const RealmTagContextFilterTagKindInEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -1267,6 +1295,8 @@ export type CollectionFilter = {
 							| "book"
 							| "software"
 							| "media"
+							| "video"
+							| "audio"
 							| "release"
 							| "entity"
 							| "label"
@@ -1311,6 +1341,8 @@ export type CollectionFilter = {
 							| "book"
 							| "software"
 							| "media"
+							| "video"
+							| "audio"
 							| "release"
 							| "entity"
 							| "label"
@@ -1336,6 +1368,8 @@ export const UnitPredicateKindInEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -1489,6 +1523,8 @@ export type UnitPredicate = {
 								| "book"
 								| "software"
 								| "media"
+								| "video"
+								| "audio"
 								| "release"
 								| "entity"
 								| "label"
@@ -1559,6 +1595,8 @@ export type UnitPredicate = {
 								| "book"
 								| "software"
 								| "media"
+								| "video"
+								| "audio"
 								| "release"
 								| "entity"
 								| "label"
@@ -1630,6 +1668,8 @@ export type UnitPredicate = {
 								| "book"
 								| "software"
 								| "media"
+								| "video"
+								| "audio"
 								| "release"
 								| "entity"
 								| "label"
@@ -1762,6 +1802,8 @@ export type UnitPredicate = {
 											| "book"
 											| "software"
 											| "media"
+											| "video"
+											| "audio"
 											| "release"
 											| "entity"
 											| "label"
@@ -1917,6 +1959,8 @@ export type UnitPredicate = {
 								| "book"
 								| "software"
 								| "media"
+								| "video"
+								| "audio"
 								| "release"
 								| "entity"
 								| "label"
@@ -2049,6 +2093,8 @@ export type UnitPredicate = {
 											| "book"
 											| "software"
 											| "media"
+											| "video"
+											| "audio"
 											| "release"
 											| "entity"
 											| "label"
@@ -2296,6 +2342,8 @@ export type UnitPredicate = {
 									| "book"
 									| "software"
 									| "media"
+									| "video"
+									| "audio"
 									| "release"
 									| "entity"
 									| "label"
@@ -2338,6 +2386,8 @@ export type UnitPredicate = {
 									| "book"
 									| "software"
 									| "media"
+									| "video"
+									| "audio"
 									| "release"
 									| "entity"
 									| "label"
@@ -2459,6 +2509,8 @@ export type UnitPredicate = {
 									| "book"
 									| "software"
 									| "media"
+									| "video"
+									| "audio"
 									| "release"
 									| "entity"
 									| "label"
@@ -2501,6 +2553,8 @@ export type UnitPredicate = {
 									| "book"
 									| "software"
 									| "media"
+									| "video"
+									| "audio"
 									| "release"
 									| "entity"
 									| "label"
@@ -2607,6 +2661,8 @@ export type UnitPredicate = {
 											| "book"
 											| "software"
 											| "media"
+											| "video"
+											| "audio"
 											| "release"
 											| "entity"
 											| "label"
@@ -2716,6 +2772,8 @@ export type UnitPredicate = {
 													| "book"
 													| "software"
 													| "media"
+													| "video"
+													| "audio"
 													| "release"
 													| "entity"
 													| "label"
@@ -2758,6 +2816,8 @@ export type UnitPredicate = {
 													| "book"
 													| "software"
 													| "media"
+													| "video"
+													| "audio"
 													| "release"
 													| "entity"
 													| "label"
@@ -2879,6 +2939,8 @@ export type UnitPredicate = {
 													| "book"
 													| "software"
 													| "media"
+													| "video"
+													| "audio"
 													| "release"
 													| "entity"
 													| "label"
@@ -2921,6 +2983,8 @@ export type UnitPredicate = {
 													| "book"
 													| "software"
 													| "media"
+													| "video"
+													| "audio"
 													| "release"
 													| "entity"
 													| "label"
@@ -2992,6 +3056,8 @@ export type UnitPredicate = {
 									| "book"
 									| "software"
 									| "media"
+									| "video"
+									| "audio"
 									| "release"
 									| "entity"
 									| "label"
@@ -3034,6 +3100,8 @@ export type UnitPredicate = {
 									| "book"
 									| "software"
 									| "media"
+									| "video"
+									| "audio"
 									| "release"
 									| "entity"
 									| "label"
@@ -3105,6 +3173,8 @@ export type UnitPredicate = {
 											| "book"
 											| "software"
 											| "media"
+											| "video"
+											| "audio"
 											| "release"
 											| "entity"
 											| "label"
@@ -3149,6 +3219,8 @@ export type UnitPredicate = {
 											| "book"
 											| "software"
 											| "media"
+											| "video"
+											| "audio"
 											| "release"
 											| "entity"
 											| "label"
@@ -5293,6 +5365,7 @@ export const ApiErrorCode = {
 	ContentStructureNotFound: "ContentStructureNotFound",
 	ContentStructureRevisionConflict: "ContentStructureRevisionConflict",
 	BookNotFound: "BookNotFound",
+	MediaNotFound: "MediaNotFound",
 	ContentStructureNodeNotFound: "ContentStructureNodeNotFound",
 	ChapterNotFound: "ChapterNotFound",
 	ChapterLanguageNotFound: "ChapterLanguageNotFound",
@@ -9260,6 +9333,8 @@ export const GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsCredite
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -9377,6 +9452,8 @@ export const GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttribu
 		book: "book",
 		software: "software",
 		media: "media",
+		video: "video",
+		audio: "audio",
 		release: "release",
 		entity: "entity",
 		label: "label",
@@ -15731,6 +15808,8 @@ export const PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitKindEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -15885,6 +15964,8 @@ export const PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitK
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -18824,6 +18905,8 @@ export const GetApiReportsMeStatus200ItemsTargetUnitKindEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -39319,6 +39402,8 @@ export const GetApiUsersMeFollowingKind = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -39379,6 +39464,8 @@ export const GetApiUsersMeFollowingStatus200ItemsKindEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -39676,6 +39763,8 @@ export const GetApiUsersMeFollowingByUnitIdStatus200KindEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -40316,6 +40405,8 @@ export const PutApiUsersMeFollowingByUnitIdSettingsStatus200KindEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -40548,6 +40639,8 @@ export const PutApiUsersMeFollowingByUnitIdSettingsRequestKindEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -40675,6 +40768,8 @@ export const GetUserProfileActivityStatus200ScoresUnitKindEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -40721,6 +40816,8 @@ export const GetUserProfileActivityStatus200ProgressUnitKindEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -47166,6 +47263,8 @@ export const ResolveUnitSlugAddressStatus200KindEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -47497,6 +47596,8 @@ export const ResolveScopedUnitSlugAddressKind = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -47531,6 +47632,8 @@ export const ResolveScopedUnitSlugAddressStatus200KindEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -48652,6 +48755,8 @@ export const PostApiUnitsPresentationsStatus200ItemsKindEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -49922,6 +50027,8 @@ export const GetApiUnitsByTypeStatus200ItemsAttributionsCreditedUnitKindEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -50324,6 +50431,8 @@ export const PostApiUnitsByTypeStatus200TypeEnum = {
 	software: "software",
 	media: "media",
 	series: "series",
+	video: "video",
+	audio: "audio",
 } as const;
 
 export type PostApiUnitsByTypeStatus200TypeEnum =
@@ -50384,6 +50493,8 @@ export const PostApiUnitsByTypeStatus200AttributionsCreditedUnitKindEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -50755,6 +50866,20 @@ export type PostApiUnitsByTypeStatus200 = {
 				 * @type string
 				 */
 				kind: string;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "video";
+				durationSeconds: ((string | number) | null) | null;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "audio";
+				durationSeconds: ((string | number) | null) | null;
 		  };
 	avatar:
 		| (
@@ -52214,7 +52339,7 @@ export type PostApiUnitsByTypeResponse =
  * @type object
  */
 export type GetApiUnitsByTypeByUnitIdPath = {
-	type: ("book" | "software" | "media") | "series";
+	type: (("book" | "software" | "media") | "series") | ("video" | "audio");
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -52251,6 +52376,8 @@ export const GetApiUnitsByTypeByUnitIdStatus200TypeEnum = {
 	software: "software",
 	media: "media",
 	series: "series",
+	video: "video",
+	audio: "audio",
 } as const;
 
 export type GetApiUnitsByTypeByUnitIdStatus200TypeEnum =
@@ -52311,6 +52438,8 @@ export const GetApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitKindEnum 
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -52682,6 +52811,20 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 				 * @type string
 				 */
 				kind: string;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "video";
+				durationSeconds: ((string | number) | null) | null;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "audio";
+				durationSeconds: ((string | number) | null) | null;
 		  };
 	avatar:
 		| (
@@ -53412,7 +53555,7 @@ export type GetApiUnitsByTypeByUnitIdResponse =
  * @type object
  */
 export type PatchApiUnitsByTypeByUnitIdPath = {
-	type: ("book" | "software" | "media") | "series";
+	type: (("book" | "software" | "media") | "series") | ("video" | "audio");
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -53426,6 +53569,8 @@ export const PatchApiUnitsByTypeByUnitIdStatus200TypeEnum = {
 	software: "software",
 	media: "media",
 	series: "series",
+	video: "video",
+	audio: "audio",
 } as const;
 
 export type PatchApiUnitsByTypeByUnitIdStatus200TypeEnum =
@@ -53486,6 +53631,8 @@ export const PatchApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitKindEnu
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -53857,6 +54004,20 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 				 * @type string
 				 */
 				kind: string;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "video";
+				durationSeconds: ((string | number) | null) | null;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "audio";
+				durationSeconds: ((string | number) | null) | null;
 		  };
 	avatar:
 		| (
@@ -54792,6 +54953,7 @@ export type PatchApiUnitsByTypeByUnitIdBody = {
 		runtimeMinutes?: ((string | number) | null) | null;
 		episodeCount?: ((string | number) | null) | null;
 		seasonCount?: ((string | number) | null) | null;
+		durationSeconds?: ((string | number) | null) | null;
 	};
 };
 
@@ -54838,7 +55000,7 @@ export type PatchApiUnitsByTypeByUnitIdResponse =
  * @type object
  */
 export type DeleteApiUnitsByTypeByUnitIdPath = {
-	type: ("book" | "software" | "media") | "series";
+	type: (("book" | "software" | "media") | "series") | ("video" | "audio");
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -55045,6 +55207,8 @@ export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200TypeEnum = {
 	software: "software",
 	media: "media",
 	series: "series",
+	video: "video",
+	audio: "audio",
 } as const;
 
 export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200TypeEnum =
@@ -55105,6 +55269,8 @@ export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsCredi
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -55479,6 +55645,20 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 				 * @type string
 				 */
 				kind: string;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "video";
+				durationSeconds: ((string | number) | null) | null;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "audio";
+				durationSeconds: ((string | number) | null) | null;
 		  };
 	avatar:
 		| (
@@ -56387,6 +56567,8 @@ export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200TypeEnum = 
 	software: "software",
 	media: "media",
 	series: "series",
+	video: "video",
+	audio: "audio",
 } as const;
 
 export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200TypeEnum =
@@ -56448,6 +56630,8 @@ export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200Attribution
 		book: "book",
 		software: "software",
 		media: "media",
+		video: "video",
+		audio: "audio",
 		release: "release",
 		entity: "entity",
 		label: "label",
@@ -56825,6 +57009,20 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 				 * @type string
 				 */
 				kind: string;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "video";
+				durationSeconds: ((string | number) | null) | null;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "audio";
+				durationSeconds: ((string | number) | null) | null;
 		  };
 	avatar:
 		| (
@@ -57724,7 +57922,7 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageLanguage =
  * @type object
  */
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguagePath = {
-	type: ("book" | "software" | "media") | "series";
+	type: (("book" | "software" | "media") | "series") | ("video" | "audio");
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -57742,6 +57940,8 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200TypeEnum =
 	software: "software",
 	media: "media",
 	series: "series",
+	video: "video",
+	audio: "audio",
 } as const;
 
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200TypeEnum =
@@ -57803,6 +58003,8 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200Attributio
 		book: "book",
 		software: "software",
 		media: "media",
+		video: "video",
+		audio: "audio",
 		release: "release",
 		entity: "entity",
 		label: "label",
@@ -58181,6 +58383,20 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 				 * @type string
 				 */
 				kind: string;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "video";
+				durationSeconds: ((string | number) | null) | null;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "audio";
+				durationSeconds: ((string | number) | null) | null;
 		  };
 	avatar:
 		| (
@@ -61603,6 +61819,8 @@ export const GetApiEntitiesByUnitIdStatus200AttributionsCreditedUnitKindEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -61648,6 +61866,8 @@ export const GetApiEntitiesByUnitIdStatus200OwnerKindEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -63349,6 +63569,8 @@ export const GetApiUnitsByTypeByUnitIdAliasesType = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -63507,6 +63729,8 @@ export const PostApiUnitsByTypeByUnitIdAliasesType = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -63781,6 +64005,8 @@ export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdType = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -63971,6 +64197,8 @@ export const PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteType = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -64152,6 +64380,8 @@ export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteType = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -64345,6 +64575,8 @@ export const PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200CreditedUnitKi
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -66875,6 +67107,7 @@ export type GetApiUnitsByIdByUnitIdContentStructuresPath = {
 
 export const GetApiUnitsByIdByUnitIdContentStructuresStatus200ItemsKindEnum = {
 	"book.contents": "book.contents",
+	"media.contents": "media.contents",
 	"post.contents": "post.contents",
 	"realm.taxonomy": "realm.taxonomy",
 	"wiki.navigation": "wiki.navigation",
@@ -67047,6 +67280,7 @@ export type PostApiUnitsByIdByUnitIdContentStructuresPath = {
 
 export const PostApiUnitsByIdByUnitIdContentStructuresStatus200StructureKindEnum = {
 	"book.contents": "book.contents",
+	"media.contents": "media.contents",
 	"post.contents": "post.contents",
 	"realm.taxonomy": "realm.taxonomy",
 	"wiki.navigation": "wiki.navigation",
@@ -67207,6 +67441,7 @@ export type PostApiUnitsByIdByUnitIdContentStructuresStatus500 = InternalError;
 
 export const PostApiUnitsByIdByUnitIdContentStructuresRequestKindEnum = {
 	"book.contents": "book.contents",
+	"media.contents": "media.contents",
 	"post.contents": "post.contents",
 	"realm.taxonomy": "realm.taxonomy",
 } as const;
@@ -67277,6 +67512,7 @@ export type GetApiUnitsByIdByUnitIdContentStructuresByStructureIdPath = {
 
 export const GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus200KindEnum = {
 	"book.contents": "book.contents",
+	"media.contents": "media.contents",
 	"post.contents": "post.contents",
 	"realm.taxonomy": "realm.taxonomy",
 	"wiki.navigation": "wiki.navigation",
@@ -70018,6 +70254,564 @@ export type PutApiUnitsBookByUnitIdContentStructureResponse =
 	| PutApiUnitsBookByUnitIdContentStructureStatus422
 	| PutApiUnitsBookByUnitIdContentStructureStatus429
 	| PutApiUnitsBookByUnitIdContentStructureStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiUnitsMediaByUnitIdContentStructureNodesPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const GetApiUnitsMediaByUnitIdContentStructureNodesLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUnitsMediaByUnitIdContentStructureNodesLocalizationLanguagesEnum =
+	(typeof GetApiUnitsMediaByUnitIdContentStructureNodesLocalizationLanguagesEnum)[keyof typeof GetApiUnitsMediaByUnitIdContentStructureNodesLocalizationLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type GetApiUnitsMediaByUnitIdContentStructureNodesQuery = {
+	/**
+	 * @type array | undefined
+	 */
+	localizationLanguages?: GetApiUnitsMediaByUnitIdContentStructureNodesLocalizationLanguagesEnum[];
+};
+
+export const GetApiUnitsMediaByUnitIdContentStructureNodesStatus200ItemsContentKindEnum = {
+	video: "video",
+	audio: "audio",
+	label: "label",
+} as const;
+
+export type GetApiUnitsMediaByUnitIdContentStructureNodesStatus200ItemsContentKindEnum =
+	(typeof GetApiUnitsMediaByUnitIdContentStructureNodesStatus200ItemsContentKindEnum)[keyof typeof GetApiUnitsMediaByUnitIdContentStructureNodesStatus200ItemsContentKindEnum];
+
+export const GetApiUnitsMediaByUnitIdContentStructureNodesStatus200ItemsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUnitsMediaByUnitIdContentStructureNodesStatus200ItemsLanguageEnum =
+	(typeof GetApiUnitsMediaByUnitIdContentStructureNodesStatus200ItemsLanguageEnum)[keyof typeof GetApiUnitsMediaByUnitIdContentStructureNodesStatus200ItemsLanguageEnum];
+
+/**
+ * @type object
+ */
+export type GetApiUnitsMediaByUnitIdContentStructureNodesStatus200 = {
+	structureId: (string | null) | null;
+	latestRevisionId: (string | null) | null;
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		parentId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		contentUnitId: string;
+		/**
+		 * @default 'video'
+		 * @type string
+		 */
+		contentKind: GetApiUnitsMediaByUnitIdContentStructureNodesStatus200ItemsContentKindEnum;
+		/**
+		 * @type string
+		 */
+		language: GetApiUnitsMediaByUnitIdContentStructureNodesStatus200ItemsLanguageEnum;
+		/**
+		 * @type string
+		 */
+		title: string;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		durationSeconds: ((string | number) | null) | null;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsMediaByUnitIdContentStructureNodesStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'MediaNotFound'
+		 * @type string
+		 */
+		code: "MediaNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsMediaByUnitIdContentStructureNodesStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiUnitsMediaByUnitIdContentStructureNodesStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiUnitsMediaByUnitIdContentStructureNodesOptions = {
+	body?: never;
+	path: GetApiUnitsMediaByUnitIdContentStructureNodesPath;
+	query?: GetApiUnitsMediaByUnitIdContentStructureNodesQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsMediaByUnitIdContentStructureNodesResponses = {
+	"200": GetApiUnitsMediaByUnitIdContentStructureNodesStatus200;
+	"404": GetApiUnitsMediaByUnitIdContentStructureNodesStatus404;
+	"422": GetApiUnitsMediaByUnitIdContentStructureNodesStatus422;
+	"500": GetApiUnitsMediaByUnitIdContentStructureNodesStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiUnitsMediaByUnitIdContentStructureNodesResponse =
+	| GetApiUnitsMediaByUnitIdContentStructureNodesStatus200
+	| GetApiUnitsMediaByUnitIdContentStructureNodesStatus404
+	| GetApiUnitsMediaByUnitIdContentStructureNodesStatus422
+	| GetApiUnitsMediaByUnitIdContentStructureNodesStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiUnitsMediaByUnitIdContentStructurePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const PutApiUnitsMediaByUnitIdContentStructureStatus200ItemsContentKindEnum = {
+	video: "video",
+	audio: "audio",
+	label: "label",
+} as const;
+
+export type PutApiUnitsMediaByUnitIdContentStructureStatus200ItemsContentKindEnum =
+	(typeof PutApiUnitsMediaByUnitIdContentStructureStatus200ItemsContentKindEnum)[keyof typeof PutApiUnitsMediaByUnitIdContentStructureStatus200ItemsContentKindEnum];
+
+export const PutApiUnitsMediaByUnitIdContentStructureStatus200ItemsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PutApiUnitsMediaByUnitIdContentStructureStatus200ItemsLanguageEnum =
+	(typeof PutApiUnitsMediaByUnitIdContentStructureStatus200ItemsLanguageEnum)[keyof typeof PutApiUnitsMediaByUnitIdContentStructureStatus200ItemsLanguageEnum];
+
+/**
+ * @type object
+ */
+export type PutApiUnitsMediaByUnitIdContentStructureStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	structureId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	latestRevisionId: string;
+	/**
+	 * @type boolean
+	 */
+	revisionCreated: boolean;
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		parentId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		contentUnitId: string;
+		/**
+		 * @default 'video'
+		 * @type string
+		 */
+		contentKind: PutApiUnitsMediaByUnitIdContentStructureStatus200ItemsContentKindEnum;
+		/**
+		 * @type string
+		 */
+		language: PutApiUnitsMediaByUnitIdContentStructureStatus200ItemsLanguageEnum;
+		/**
+		 * @type string
+		 */
+		title: string;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		durationSeconds: ((string | number) | null) | null;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsMediaByUnitIdContentStructureStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PutApiUnitsMediaByUnitIdContentStructureStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: "UnitPermissionForbidden";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsMediaByUnitIdContentStructureStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsMediaByUnitIdContentStructureStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ContentStructureRevisionConflict'
+		 * @type string
+		 */
+		code: "ContentStructureRevisionConflict";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PutApiUnitsMediaByUnitIdContentStructureStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ContentStructureInvalid'
+				 * @type string
+				 */
+				code: "ContentStructureInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiUnitsMediaByUnitIdContentStructureStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsMediaByUnitIdContentStructureStatus500 = InternalError;
+
+export const PutApiUnitsMediaByUnitIdContentStructureRequestNodesLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PutApiUnitsMediaByUnitIdContentStructureRequestNodesLanguageEnum =
+	(typeof PutApiUnitsMediaByUnitIdContentStructureRequestNodesLanguageEnum)[keyof typeof PutApiUnitsMediaByUnitIdContentStructureRequestNodesLanguageEnum];
+
+export const PutApiUnitsMediaByUnitIdContentStructureRequestNodesContentKindEnum = {
+	video: "video",
+	audio: "audio",
+	label: "label",
+} as const;
+
+export type PutApiUnitsMediaByUnitIdContentStructureRequestNodesContentKindEnum =
+	(typeof PutApiUnitsMediaByUnitIdContentStructureRequestNodesContentKindEnum)[keyof typeof PutApiUnitsMediaByUnitIdContentStructureRequestNodesContentKindEnum];
+
+/**
+ * @type object
+ */
+export type PutApiUnitsMediaByUnitIdContentStructureBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	baseRevisionId: string;
+	/**
+	 * @type array
+	 */
+	nodes: (
+		| {
+				/**
+				 * @type string
+				 */
+				state: "existing";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				parentId: (string | null) | null;
+				order: string | number;
+				/**
+				 * @minLength 1
+				 * @maxLength 500
+				 * @type string
+				 */
+				title: string;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				state: "new";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				parentId: (string | null) | null;
+				order: string | number;
+				/**
+				 * @minLength 1
+				 * @maxLength 500
+				 * @type string
+				 */
+				title: string;
+				/**
+				 * @type string
+				 */
+				language: PutApiUnitsMediaByUnitIdContentStructureRequestNodesLanguageEnum;
+				/**
+				 * @default 'video'
+				 * @type string
+				 */
+				contentKind: PutApiUnitsMediaByUnitIdContentStructureRequestNodesContentKindEnum;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				state: "attached";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				parentId: (string | null) | null;
+				order: string | number;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				contentUnitId: string;
+		  }
+	)[];
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsMediaByUnitIdContentStructureOptions = {
+	body: PutApiUnitsMediaByUnitIdContentStructureBody;
+	path: PutApiUnitsMediaByUnitIdContentStructurePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsMediaByUnitIdContentStructureResponses = {
+	"200": PutApiUnitsMediaByUnitIdContentStructureStatus200;
+	"400": PutApiUnitsMediaByUnitIdContentStructureStatus400;
+	"403": PutApiUnitsMediaByUnitIdContentStructureStatus403;
+	"404": PutApiUnitsMediaByUnitIdContentStructureStatus404;
+	"409": PutApiUnitsMediaByUnitIdContentStructureStatus409;
+	"422": PutApiUnitsMediaByUnitIdContentStructureStatus422;
+	"429": PutApiUnitsMediaByUnitIdContentStructureStatus429;
+	"500": PutApiUnitsMediaByUnitIdContentStructureStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiUnitsMediaByUnitIdContentStructureResponse =
+	| PutApiUnitsMediaByUnitIdContentStructureStatus200
+	| PutApiUnitsMediaByUnitIdContentStructureStatus400
+	| PutApiUnitsMediaByUnitIdContentStructureStatus403
+	| PutApiUnitsMediaByUnitIdContentStructureStatus404
+	| PutApiUnitsMediaByUnitIdContentStructureStatus409
+	| PutApiUnitsMediaByUnitIdContentStructureStatus422
+	| PutApiUnitsMediaByUnitIdContentStructureStatus429
+	| PutApiUnitsMediaByUnitIdContentStructureStatus500;
 
 /**
  * @type object
@@ -74226,6 +75020,42 @@ export type DeleteApiProgressByUnitIdNodesByNodeIdStatus200 = {
 	completed: boolean;
 };
 
+export const DeleteApiProgressByUnitIdNodesByNodeIdStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ContentStructureNodeNotFound: "ContentStructureNodeNotFound",
+} as const;
+
+export type DeleteApiProgressByUnitIdNodesByNodeIdStatus404ErrorCodeEnum =
+	(typeof DeleteApiProgressByUnitIdNodesByNodeIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiProgressByUnitIdNodesByNodeIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiProgressByUnitIdNodesByNodeIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: DeleteApiProgressByUnitIdNodesByNodeIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
 /**
  * @type object
  */
@@ -74275,6 +75105,7 @@ export type DeleteApiProgressByUnitIdNodesByNodeIdOptions = {
  */
 export type DeleteApiProgressByUnitIdNodesByNodeIdResponses = {
 	"200": DeleteApiProgressByUnitIdNodesByNodeIdStatus200;
+	"404": DeleteApiProgressByUnitIdNodesByNodeIdStatus404;
 	"422": DeleteApiProgressByUnitIdNodesByNodeIdStatus422;
 	"429": DeleteApiProgressByUnitIdNodesByNodeIdStatus429;
 	"500": DeleteApiProgressByUnitIdNodesByNodeIdStatus500;
@@ -74285,6 +75116,7 @@ export type DeleteApiProgressByUnitIdNodesByNodeIdResponses = {
  */
 export type DeleteApiProgressByUnitIdNodesByNodeIdResponse =
 	| DeleteApiProgressByUnitIdNodesByNodeIdStatus200
+	| DeleteApiProgressByUnitIdNodesByNodeIdStatus404
 	| DeleteApiProgressByUnitIdNodesByNodeIdStatus422
 	| DeleteApiProgressByUnitIdNodesByNodeIdStatus429
 	| DeleteApiProgressByUnitIdNodesByNodeIdStatus500;
@@ -74404,6 +75236,8 @@ export const GetApiCollectionsStatus200ItemsAttributionsCreditedUnitKindEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -74762,6 +75596,8 @@ export const PostApiCollectionsStatus200AttributionsCreditedUnitKindEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -75597,6 +76433,8 @@ export const GetApiCollectionsFavoritesStatus200AttributionsCreditedUnitKindEnum
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -76177,6 +77015,8 @@ export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributio
 		book: "book",
 		software: "software",
 		media: "media",
+		video: "video",
+		audio: "audio",
 		release: "release",
 		entity: "entity",
 		label: "label",
@@ -76337,6 +77177,8 @@ export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyConte
 		book: "book",
 		software: "software",
 		media: "media",
+		video: "video",
+		audio: "audio",
 		release: "release",
 		entity: "entity",
 		label: "label",
@@ -79242,6 +80084,8 @@ export const GetApiCollectionsByCollectionIdStatus200AttributionsCreditedUnitKin
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -79772,6 +80616,8 @@ export const PatchApiCollectionsByCollectionIdStatus200AttributionsCreditedUnitK
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -82835,6 +83681,8 @@ export const GetApiReviewsStatus200ItemsAttributionsCreditedUnitKindEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -82949,6 +83797,8 @@ export const GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitKind
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -84273,6 +85123,8 @@ export const GetApiReviewsByReviewIdStatus200AttributionsCreditedUnitKindEnum = 
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -87847,6 +88699,8 @@ export const GetApiPostsStatus200ItemsAttributionsCreditedUnitKindEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -89216,6 +90070,8 @@ export const GetApiPostsByPostIdStatus200AttributionsCreditedUnitKindEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -91895,6 +92751,8 @@ export const GetApiPostsByPostIdRepliesStatus200ItemsAttributionsCreditedUnitKin
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -92425,6 +93283,8 @@ export const PostApiPostsByPostIdRepliesStatus200AttributionsCreditedUnitKindEnu
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -98779,6 +99639,8 @@ export const GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedU
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -98935,6 +99797,8 @@ export const GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributi
 		book: "book",
 		software: "software",
 		media: "media",
+		video: "video",
+		audio: "audio",
 		release: "release",
 		entity: "entity",
 		label: "label",
@@ -107521,6 +108385,8 @@ export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCredit
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -107679,6 +108545,8 @@ export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttrib
 		book: "book",
 		software: "software",
 		media: "media",
+		video: "video",
+		audio: "audio",
 		release: "release",
 		entity: "entity",
 		label: "label",
@@ -113129,6 +113997,8 @@ export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCred
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	label: "label",
@@ -113287,6 +114157,8 @@ export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttr
 		book: "book",
 		software: "software",
 		media: "media",
+		video: "video",
+		audio: "audio",
 		release: "release",
 		entity: "entity",
 		label: "label",
@@ -120030,6 +120902,8 @@ export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200Items
 		book: "book",
 		software: "software",
 		media: "media",
+		video: "video",
+		audio: "audio",
 		release: "release",
 		entity: "entity",
 		label: "label",
@@ -120194,6 +121068,8 @@ export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200Items
 		book: "book",
 		software: "software",
 		media: "media",
+		video: "video",
+		audio: "audio",
 		release: "release",
 		entity: "entity",
 		label: "label",

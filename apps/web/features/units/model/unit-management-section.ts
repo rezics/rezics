@@ -39,6 +39,12 @@ export function getUnitManagementSectionIds(
 		capabilities.canManageAccess ||
 		capabilities.canManageAssociations ||
 		capabilities.canCurateTags;
+	if (type === "video" || type === "audio")
+		return UnitManagementSectionIds.filter((sectionId) => {
+			if (sectionId === "content" || sectionId === "metadata") return capabilities.canEdit;
+			if (sectionId === "access") return capabilities.canManageAccess;
+			return sectionId === "history" && hasUnitCapability;
+		});
 	return UnitManagementSectionIds.filter((sectionId) => {
 		if (sectionId === "content" || sectionId === "metadata") return capabilities.canEdit;
 		if (sectionId === "relationships")
@@ -48,7 +54,7 @@ export function getUnitManagementSectionIds(
 			return (
 				type !== "series" &&
 				capabilities.canEdit &&
-				(type === "book" || capabilities.hasDevelopmentPreviewAccess)
+				(type === "book" || type === "media" || capabilities.hasDevelopmentPreviewAccess)
 			);
 		if (sectionId === "releases") return type === "series" && capabilities.canEdit;
 		if (sectionId === "docks") return type !== "series" && canManageDocks;

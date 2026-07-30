@@ -8,6 +8,7 @@ import {
 	contentStructureNodeProgress,
 	contentStructureRevisionHead,
 	DefaultResourceVisibility,
+	audio,
 	type ProgressCurrentBasis,
 	type ProgressDatePrecision,
 	type ProgressEntryKind,
@@ -17,6 +18,7 @@ import {
 	unit,
 	unitProgress,
 	unitProgressEntry,
+	video,
 } from "../../database/schema";
 import { ContentStructureNodeNotFound } from "../content-structure/errors";
 import { ValidationError } from "../errors";
@@ -121,7 +123,7 @@ async function resolveContentStructureRevision(
 			and(
 				eq(contentStructureNode.id, nodeId),
 				eq(contentStructureNode.ownerUnitId, unitId),
-				eq(contentStructure.kind, "book.contents"),
+				inArray(contentStructure.kind, ["book.contents", "media.contents"]),
 				isNull(contentStructureNode.deletedAt),
 				isNull(contentStructure.deletedAt),
 			),
@@ -129,6 +131,164 @@ async function resolveContentStructureRevision(
 		.limit(1);
 	if (!node) throw new ContentStructureNodeNotFound();
 	return node.revisionId;
+}
+
+export function deriveMediaNodeCompletionProgress(
+	items: readonly {
+		readonly durationSeconds: number | null;
+		readonly completed: boolean;
+	}[],
+): { readonly progress: number; readonly status: "active" | "completed" } {
+	if (!items.length) throw new TypeError("Media progress requires at least one item");
+	const allDurationsKnown = items.every(
+		(item) =>
+			item.durationSeconds !== null &&
+			Number.isSafeInteger(item.durationSeconds) &&
+			item.durationSeconds > 0,
+	);
+	const completedItems = items.filter(({ completed }) => completed);
+	const progress = allDurationsKnown
+		? completedItems.reduce((sum, item) => sum + (item.durationSeconds ?? 0), 0) /
+			items.reduce((sum, item) => sum + (item.durationSeconds ?? 0), 0)
+		: completedItems.length / items.length;
+	return { progress, status: progress === 1 ? "completed" : "active" };
+}
+
+/**
+ * Records or removes one completed Video or Audio occurrence and materializes
+ * its parent Media progress. Complete durations are weighted only when every
+ * readable item has a known duration; otherwise the deterministic item-count
+ * ratio is used.
+ *
+ * @internal
+ */
+export async function recordMediaNodeCompletion(
+	tx: DatabaseTransaction,
+	input: {
+		readonly canReadUnpublished: boolean;
+		readonly completed: boolean;
+		readonly nodeId: string;
+		readonly now: Date;
+		readonly profileId: string;
+		readonly unitId: string;
+	},
+) {
+	await lockUnitProgress(tx, input.profileId, input.unitId);
+	const readableUnitCondition = input.canReadUnpublished
+		? undefined
+		: and(eq(unit.status, "published"), inArray(unit.visibility, ["public", "unlisted"]));
+	const [target] = await tx
+		.select({ id: contentStructureNode.id })
+		.from(contentStructureNode)
+		.innerJoin(contentStructure, eq(contentStructure.id, contentStructureNode.structureId))
+		.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
+		.where(
+			and(
+				eq(contentStructureNode.id, input.nodeId),
+				eq(contentStructureNode.ownerUnitId, input.unitId),
+				eq(contentStructure.kind, "media.contents"),
+				inArray(unit.kind, ["video", "audio"]),
+				isNull(contentStructureNode.deletedAt),
+				isNull(contentStructure.deletedAt),
+				isNull(unit.deletedAt),
+				readableUnitCondition,
+			),
+		)
+		.limit(1);
+	if (!target) throw new ContentStructureNodeNotFound();
+
+	if (input.completed)
+		await tx
+			.insert(contentStructureNodeProgress)
+			.values({ profileId: input.profileId, nodeId: input.nodeId, completedAt: input.now })
+			.onConflictDoNothing();
+	else
+		await tx
+			.delete(contentStructureNodeProgress)
+			.where(
+				and(
+					eq(contentStructureNodeProgress.profileId, input.profileId),
+					eq(contentStructureNodeProgress.nodeId, input.nodeId),
+				),
+			);
+
+	const items = await tx
+		.select({
+			durationSeconds: sql<number | null>`case
+				when ${unit.kind} = 'video' then ${video.durationSeconds}
+				when ${unit.kind} = 'audio' then ${audio.durationSeconds}
+				else null
+			end`,
+			completedAt: contentStructureNodeProgress.completedAt,
+		})
+		.from(contentStructureNode)
+		.innerJoin(contentStructure, eq(contentStructure.id, contentStructureNode.structureId))
+		.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
+		.leftJoin(video, eq(video.id, contentStructureNode.contentUnitId))
+		.leftJoin(audio, eq(audio.id, contentStructureNode.contentUnitId))
+		.leftJoin(
+			contentStructureNodeProgress,
+			and(
+				eq(contentStructureNodeProgress.profileId, input.profileId),
+				eq(contentStructureNodeProgress.nodeId, contentStructureNode.id),
+			),
+		)
+		.where(
+			and(
+				eq(contentStructureNode.ownerUnitId, input.unitId),
+				eq(contentStructure.kind, "media.contents"),
+				inArray(unit.kind, ["video", "audio"]),
+				isNull(contentStructureNode.deletedAt),
+				isNull(contentStructure.deletedAt),
+				isNull(unit.deletedAt),
+				readableUnitCondition,
+			),
+		);
+	if (!items.length) throw new ContentStructureNodeNotFound();
+	const { progress, status } = deriveMediaNodeCompletionProgress(
+		items.map((item) => ({
+			durationSeconds: item.durationSeconds,
+			completed: item.completedAt !== null,
+		})),
+	);
+	const snapshot = await findProgressSnapshot(tx, input.profileId, input.unitId);
+	const [record] = await tx
+		.insert(unitProgress)
+		.values({
+			profileId: input.profileId,
+			unitId: input.unitId,
+			status,
+			progress,
+			completedCount: snapshot?.completedCount ?? 0,
+			totalTimeMs: snapshot?.totalTimeMs ?? 0n,
+			firstSeenAt: snapshot?.firstSeenAt ?? input.now,
+			lastSeenAt: input.now,
+			lastContentStructureNodeId: status === "completed" ? null : input.nodeId,
+			currentEntryId: null,
+			currentBasis: "reading",
+			visibility: snapshot?.visibility ?? DefaultResourceVisibility,
+			deletedAt: null,
+		})
+		.onConflictDoUpdate({
+			target: [unitProgress.profileId, unitProgress.unitId],
+			set: {
+				status,
+				progress,
+				completedCount: snapshot?.completedCount ?? 0,
+				totalTimeMs: snapshot?.totalTimeMs ?? 0n,
+				firstSeenAt: snapshot?.firstSeenAt ?? input.now,
+				lastSeenAt: input.now,
+				lastContentStructureNodeId: status === "completed" ? null : input.nodeId,
+				currentEntryId: null,
+				currentBasis: "reading",
+				visibility: snapshot?.visibility ?? DefaultResourceVisibility,
+				deletedAt: null,
+				updatedAt: input.now,
+			},
+		})
+		.returning();
+	if (!record) throw new Error("Media node progress upsert did not return a row");
+	return record;
 }
 
 function validateOccurredAt(occurredAt: Date | null, datePrecision: ProgressDatePrecision): void {

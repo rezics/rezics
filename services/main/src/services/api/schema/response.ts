@@ -230,11 +230,13 @@ export const UnitVariantContextResponse = t.Union([
 	),
 ]);
 
-const CatalogUnitTypeResponse = t.Union([
+const ManageableUnitTypeResponse = t.Union([
 	t.Literal("book"),
 	t.Literal("software"),
 	t.Literal("media"),
 	t.Literal("series"),
+	t.Literal("video"),
+	t.Literal("audio"),
 ]);
 
 const UnitDetailsResponse = t.Union([
@@ -274,6 +276,20 @@ const UnitDetailsResponse = t.Union([
 		{ additionalProperties: false },
 	),
 	t.Object({ type: t.Literal("series"), kind: t.String() }, { additionalProperties: false }),
+	t.Object(
+		{
+			type: t.Literal("video"),
+			durationSeconds: t.Nullable(t.Integer({ minimum: 1 })),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			type: t.Literal("audio"),
+			durationSeconds: t.Nullable(t.Integer({ minimum: 1 })),
+		},
+		{ additionalProperties: false },
+	),
 ]);
 
 export const UnitProgressStatisticsResponse = t.Object({
@@ -298,7 +314,7 @@ export const AssociationContextPostResponse = t.Object({
 
 export const UnitDetailResponse = t.Object({
 	id: Uuid,
-	type: CatalogUnitTypeResponse,
+	type: ManageableUnitTypeResponse,
 	status: t.String(),
 	visibility: t.String(),
 	language: t.Nullable(ContentLanguage),
@@ -1150,6 +1166,27 @@ export const SaveBookContentStructureDraftResponse = t.Object({
 	latestRevisionId: Uuid,
 	revisionCreated: t.Boolean(),
 	items: t.Array(BookContentStructureNodeResponse),
+});
+const MediaContentStructureNodeResponse = t.Object({
+	id: Uuid,
+	parentId: t.Nullable(Uuid),
+	contentUnitId: Uuid,
+	contentKind: t.UnionEnum(["video", "audio", "label"]),
+	language: ContentLanguage,
+	title: t.String(),
+	position: FractionalPosition,
+	durationSeconds: t.Nullable(t.Integer({ minimum: 1 })),
+});
+export const MediaContentStructureNodeListResponse = t.Object({
+	structureId: t.Nullable(Uuid),
+	latestRevisionId: t.Nullable(Uuid),
+	items: t.Array(MediaContentStructureNodeResponse),
+});
+export const SaveMediaContentStructureDraftResponse = t.Object({
+	structureId: Uuid,
+	latestRevisionId: Uuid,
+	revisionCreated: t.Boolean(),
+	items: t.Array(MediaContentStructureNodeResponse),
 });
 const GenericContentStructureTargetResponse = t.Union([
 	t.Object({ kind: t.Literal("content") }, { additionalProperties: false }),

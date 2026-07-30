@@ -37,4 +37,5 @@ export * from "./software";
 export * from "./studio";
 export * from "./structure";
 export * from "./tag";
+export * from "./timed-media";
 export * from "./zone";

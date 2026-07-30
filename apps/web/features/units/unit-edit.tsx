@@ -37,7 +37,7 @@ import {
 	type LocalizationImageAssetValue,
 } from "@/features/media/components/localization-image-upload-field";
 import { LocalizationMediaFallbackNotice } from "@/features/media/components/localization-media-fallback-notice";
-import { isVariantUnitType, type UnitType } from "./unit-types";
+import { isVariantUnitType, type CatalogUnitType, type UnitType } from "./unit-types";
 import {
 	CreditAttributionRolesByUnitType,
 	isCreditAttributionRoleForUnitType,
@@ -133,6 +133,11 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 				if (!kind) return undefined;
 				return { kind, runtimeMinutes, episodeCount, seasonCount, licensed };
 			}
+			if (unit.details.type === "video" || unit.details.type === "audio") {
+				const durationSeconds = readPositiveInteger(form, "durationSeconds");
+				if (durationSeconds === undefined) return undefined;
+				return { durationSeconds };
+			}
 			const kind = String(form.get("kind") ?? "").trim();
 			return kind ? { kind } : undefined;
 		})();
@@ -148,7 +153,9 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 					aiDisclosure,
 					license: isPublicationLicenseId(submittedLicense) ? submittedLicense : null,
 					unit: {
-						...(unit.details.type === "series"
+						...(unit.details.type === "series" ||
+						unit.details.type === "video" ||
+						unit.details.type === "audio"
 							? {}
 							: { releasedOn: releasedOn || null }),
 					},
@@ -231,7 +238,9 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 								</NativeSelectOption>
 							</NativeSelect>
 						</Field>
-						{unit.details.type !== "series" && (
+						{unit.details.type !== "series" &&
+						unit.details.type !== "video" &&
+						unit.details.type !== "audio" ? (
 							<Field>
 								<FieldLabel>
 									{unit.details.type === "book"
@@ -244,7 +253,7 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 									type="date"
 								/>
 							</Field>
-						)}
+						) : null}
 						<UnitTypeSpecificFields unit={unit} />
 						<Field>
 							<FieldLabel>{t.units.detail.license}</FieldLabel>
@@ -356,12 +365,26 @@ function UnitTypeSpecificFields({ unit }: { unit: Unit }) {
 				<LicensedField defaultValue={details.licensed} />
 			</>
 		);
-	return (
-		<Field required>
-			<FieldLabel>{t.units.series.kind}</FieldLabel>
-			<Input defaultValue={details.kind} maxLength={64} name="kind" required />
-		</Field>
-	);
+	if (details.type === "video" || details.type === "audio")
+		return (
+			<Field>
+				<FieldLabel>{t.units.fields.durationSeconds}</FieldLabel>
+				<Input
+					defaultValue={details.durationSeconds ?? ""}
+					min={1}
+					name="durationSeconds"
+					type="number"
+				/>
+			</Field>
+		);
+	if ("kind" in details)
+		return (
+			<Field required>
+				<FieldLabel>{t.units.series.kind}</FieldLabel>
+				<Input defaultValue={details.kind} maxLength={64} name="kind" required />
+			</Field>
+		);
+	return null;
 }
 
 export function UnitContentEditor({ type, unit }: { type: UnitType; unit: Unit }) {
@@ -490,7 +513,7 @@ function UnitLocalizationForm({
 	);
 }
 
-export function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }) {
+export function UnitRelationships({ type, unit }: { type: CatalogUnitType; unit: Unit }) {
 	const { t } = useTranslation(["cover", "errors", "tags", "ui", "units"]);
 	const queryClient = useQueryClient();
 	const invalidate = () => invalidateUnitDetail(queryClient, type, unit.id);

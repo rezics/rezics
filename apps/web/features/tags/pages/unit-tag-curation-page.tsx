@@ -39,7 +39,7 @@ import { useState } from "react";
 import { useUnitManagement } from "@/features/units/components/unit-management-workspace";
 import { UnitSectionHeader } from "@/features/units/components/unit-section-header";
 import { invalidateUnitDetail } from "@/features/units/unit-cache";
-import type { UnitType } from "@/features/units/unit-types";
+import { isCatalogUnitType, type CatalogUnitType } from "@/features/units/unit-types";
 import { isCatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
 import { catalogTagsHref } from "@/features/units/routing/catalog-detail-routes";
 import { useTranslation } from "@/i18n/client";
@@ -66,6 +66,7 @@ export function UnitTagCurationPage() {
 	const [announcement, setAnnouncement] = useState("");
 	const groups = partitionUnitTagCuration(unit.tags);
 	const curationVersion = unit.tags.map((tag) => `${tag.tagId}:${tag.updatedAt}`).join("|");
+	if (!isCatalogUnitType(type)) return null;
 	return (
 		<section className="grid gap-8">
 			<UnitSectionHeader
@@ -112,7 +113,7 @@ function UnitTagCurationEditor({
 	ranked,
 	onAnnounce,
 }: {
-	readonly type: UnitType;
+	readonly type: CatalogUnitType;
 	readonly unitId: string;
 	readonly featured: readonly FeaturedTag[];
 	readonly ranked: readonly RankedTag[];

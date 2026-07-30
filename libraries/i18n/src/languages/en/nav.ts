@@ -4,6 +4,8 @@ import { enTerminology } from "@rezics/i18n/terminology/en";
 const { forms: followTerms } = enTerminology.follow;
 const { forms: labelTerms } = enTerminology.label;
 const { forms: postTerms } = enTerminology.post;
+const { forms: videoTerms } = enTerminology.video;
+const { forms: audioTerms } = enTerminology.audio;
 const { forms: realmTerms } = enTerminology.realm;
 const { forms: tagStructureTerms } = enTerminology.tagStructure;
 const { forms: unitSlugTerms } = enTerminology.unitSlug;
@@ -65,6 +67,8 @@ export default {
 			book: "Book",
 			software: "Software",
 			media: "Media",
+			video: videoTerms.label,
+			audio: audioTerms.label,
 			release: "Release",
 			entity: "Entity",
 			label: labelTerms.label,

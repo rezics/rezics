@@ -105,7 +105,7 @@
 								"properties": {
 									"in": {
 										"minItems": 1,
-										"maxItems": 18,
+										"maxItems": 20,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -116,6 +116,8 @@
 												"book",
 												"software",
 												"media",
+												"video",
+												"audio",
 												"release",
 												"entity",
 												"label",
@@ -203,7 +205,7 @@
 								"properties": {
 									"in": {
 										"minItems": 1,
-										"maxItems": 18,
+										"maxItems": 20,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -214,6 +216,8 @@
 												"book",
 												"software",
 												"media",
+												"video",
+												"audio",
 												"release",
 												"entity",
 												"label",
@@ -431,7 +435,7 @@
 												"properties": {
 													"in": {
 														"minItems": 1,
-														"maxItems": 18,
+														"maxItems": 20,
 														"uniqueItems": true,
 														"type": "array",
 														"items": {
@@ -454,6 +458,14 @@
 																},
 																{
 																	"const": "media",
+																	"type": "string"
+																},
+																{
+																	"const": "video",
+																	"type": "string"
+																},
+																{
+																	"const": "audio",
 																	"type": "string"
 																},
 																{
@@ -800,7 +812,7 @@
 								"properties": {
 									"in": {
 										"minItems": 1,
-										"maxItems": 18,
+										"maxItems": 20,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -811,6 +823,8 @@
 												"book",
 												"software",
 												"media",
+												"video",
+												"audio",
 												"release",
 												"entity",
 												"label",
@@ -860,7 +874,7 @@
 								"properties": {
 									"in": {
 										"minItems": 1,
-										"maxItems": 18,
+										"maxItems": 20,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -871,6 +885,8 @@
 												"book",
 												"software",
 												"media",
+												"video",
+												"audio",
 												"release",
 												"entity",
 												"label",
@@ -1010,7 +1026,7 @@
 												"properties": {
 													"in": {
 														"minItems": 1,
-														"maxItems": 18,
+														"maxItems": 20,
 														"uniqueItems": true,
 														"type": "array",
 														"items": {
@@ -1033,6 +1049,14 @@
 																},
 																{
 																	"const": "media",
+																	"type": "string"
+																},
+																{
+																	"const": "video",
+																	"type": "string"
+																},
+																{
+																	"const": "audio",
 																	"type": "string"
 																},
 																{
@@ -1241,7 +1265,7 @@
 																"properties": {
 																	"in": {
 																		"minItems": 1,
-																		"maxItems": 18,
+																		"maxItems": 20,
 																		"uniqueItems": true,
 																		"type": "array",
 																		"items": {
@@ -1264,6 +1288,14 @@
 																				},
 																				{
 																					"const": "media",
+																					"type": "string"
+																				},
+																				{
+																					"const": "video",
+																					"type": "string"
+																				},
+																				{
+																					"const": "audio",
 																					"type": "string"
 																				},
 																				{
@@ -1354,7 +1386,7 @@
 																"properties": {
 																	"in": {
 																		"minItems": 1,
-																		"maxItems": 18,
+																		"maxItems": 20,
 																		"uniqueItems": true,
 																		"type": "array",
 																		"items": {
@@ -1377,6 +1409,14 @@
 																				},
 																				{
 																					"const": "media",
+																					"type": "string"
+																				},
+																				{
+																					"const": "video",
+																					"type": "string"
+																				},
+																				{
+																					"const": "audio",
 																					"type": "string"
 																				},
 																				{
@@ -1615,7 +1655,7 @@
 																"properties": {
 																	"in": {
 																		"minItems": 1,
-																		"maxItems": 18,
+																		"maxItems": 20,
 																		"uniqueItems": true,
 																		"type": "array",
 																		"items": {
@@ -1638,6 +1678,14 @@
 																				},
 																				{
 																					"const": "media",
+																					"type": "string"
+																				},
+																				{
+																					"const": "video",
+																					"type": "string"
+																				},
+																				{
+																					"const": "audio",
 																					"type": "string"
 																				},
 																				{
@@ -1728,7 +1776,7 @@
 																"properties": {
 																	"in": {
 																		"minItems": 1,
-																		"maxItems": 18,
+																		"maxItems": 20,
 																		"uniqueItems": true,
 																		"type": "array",
 																		"items": {
@@ -1751,6 +1799,14 @@
 																				},
 																				{
 																					"const": "media",
+																					"type": "string"
+																				},
+																				{
+																					"const": "video",
+																					"type": "string"
+																				},
+																				{
+																					"const": "audio",
 																					"type": "string"
 																				},
 																				{
@@ -1897,7 +1953,7 @@
 										"properties": {
 											"in": {
 												"minItems": 1,
-												"maxItems": 18,
+												"maxItems": 20,
 												"uniqueItems": true,
 												"type": "array",
 												"items": {
@@ -1908,6 +1964,8 @@
 														"book",
 														"software",
 														"media",
+														"video",
+														"audio",
 														"release",
 														"entity",
 														"label",
@@ -1957,7 +2015,7 @@
 										"properties": {
 											"in": {
 												"minItems": 1,
-												"maxItems": 18,
+												"maxItems": 20,
 												"uniqueItems": true,
 												"type": "array",
 												"items": {
@@ -1968,6 +2026,8 @@
 														"book",
 														"software",
 														"media",
+														"video",
+														"audio",
 														"release",
 														"entity",
 														"label",
@@ -2026,7 +2086,7 @@
 								"properties": {
 									"in": {
 										"minItems": 1,
-										"maxItems": 18,
+										"maxItems": 20,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -2037,6 +2097,8 @@
 												"book",
 												"software",
 												"media",
+												"video",
+												"audio",
 												"release",
 												"entity",
 												"label",
@@ -2086,7 +2148,7 @@
 								"properties": {
 									"in": {
 										"minItems": 1,
-										"maxItems": 18,
+										"maxItems": 20,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -2097,6 +2159,8 @@
 												"book",
 												"software",
 												"media",
+												"video",
+												"audio",
 												"release",
 												"entity",
 												"label",
@@ -2175,7 +2239,7 @@
 												"properties": {
 													"in": {
 														"minItems": 1,
-														"maxItems": 18,
+														"maxItems": 20,
 														"uniqueItems": true,
 														"type": "array",
 														"items": {
@@ -2198,6 +2262,14 @@
 																},
 																{
 																	"const": "media",
+																	"type": "string"
+																},
+																{
+																	"const": "video",
+																	"type": "string"
+																},
+																{
+																	"const": "audio",
 																	"type": "string"
 																},
 																{
@@ -2295,7 +2367,7 @@
 												"properties": {
 													"in": {
 														"minItems": 1,
-														"maxItems": 18,
+														"maxItems": 20,
 														"uniqueItems": true,
 														"type": "array",
 														"items": {
@@ -2318,6 +2390,14 @@
 																},
 																{
 																	"const": "media",
+																	"type": "string"
+																},
+																{
+																	"const": "video",
+																	"type": "string"
+																},
+																{
+																	"const": "audio",
 																	"type": "string"
 																},
 																{
@@ -2428,7 +2508,7 @@
 						"properties": {
 							"in": {
 								"minItems": 1,
-								"maxItems": 18,
+								"maxItems": 20,
 								"uniqueItems": true,
 								"type": "array",
 								"items": {
@@ -2439,6 +2519,8 @@
 										"book",
 										"software",
 										"media",
+										"video",
+										"audio",
 										"release",
 										"entity",
 										"label",
@@ -2638,7 +2720,7 @@
 														"properties": {
 															"in": {
 																"minItems": 1,
-																"maxItems": 18,
+																"maxItems": 20,
 																"uniqueItems": true,
 																"type": "array",
 																"items": {
@@ -2661,6 +2743,14 @@
 																		},
 																		{
 																			"const": "media",
+																			"type": "string"
+																		},
+																		{
+																			"const": "video",
+																			"type": "string"
+																		},
+																		{
+																			"const": "audio",
 																			"type": "string"
 																		},
 																		{
@@ -2818,7 +2908,7 @@
 														"properties": {
 															"in": {
 																"minItems": 1,
-																"maxItems": 18,
+																"maxItems": 20,
 																"uniqueItems": true,
 																"type": "array",
 																"items": {
@@ -2841,6 +2931,14 @@
 																		},
 																		{
 																			"const": "media",
+																			"type": "string"
+																		},
+																		{
+																			"const": "video",
+																			"type": "string"
+																		},
+																		{
+																			"const": "audio",
 																			"type": "string"
 																		},
 																		{
@@ -3002,7 +3100,7 @@
 														"properties": {
 															"in": {
 																"minItems": 1,
-																"maxItems": 18,
+																"maxItems": 20,
 																"uniqueItems": true,
 																"type": "array",
 																"items": {
@@ -3025,6 +3123,14 @@
 																		},
 																		{
 																			"const": "media",
+																			"type": "string"
+																		},
+																		{
+																			"const": "video",
+																			"type": "string"
+																		},
+																		{
+																			"const": "audio",
 																			"type": "string"
 																		},
 																		{
@@ -3300,7 +3406,7 @@
 																		"properties": {
 																			"in": {
 																				"minItems": 1,
-																				"maxItems": 18,
+																				"maxItems": 20,
 																				"uniqueItems": true,
 																				"type": "array",
 																				"items": {
@@ -3323,6 +3429,14 @@
 																						},
 																						{
 																							"const": "media",
+																							"type": "string"
+																						},
+																						{
+																							"const": "video",
+																							"type": "string"
+																						},
+																						{
+																							"const": "audio",
 																							"type": "string"
 																						},
 																						{
@@ -3636,7 +3750,7 @@
 														"properties": {
 															"in": {
 																"minItems": 1,
-																"maxItems": 18,
+																"maxItems": 20,
 																"uniqueItems": true,
 																"type": "array",
 																"items": {
@@ -3659,6 +3773,14 @@
 																		},
 																		{
 																			"const": "media",
+																			"type": "string"
+																		},
+																		{
+																			"const": "video",
+																			"type": "string"
+																		},
+																		{
+																			"const": "audio",
 																			"type": "string"
 																		},
 																		{
@@ -3934,7 +4056,7 @@
 																		"properties": {
 																			"in": {
 																				"minItems": 1,
-																				"maxItems": 18,
+																				"maxItems": 20,
 																				"uniqueItems": true,
 																				"type": "array",
 																				"items": {
@@ -3957,6 +4079,14 @@
 																						},
 																						{
 																							"const": "media",
+																							"type": "string"
+																						},
+																						{
+																							"const": "video",
+																							"type": "string"
+																						},
+																						{
+																							"const": "audio",
 																							"type": "string"
 																						},
 																						{
@@ -4448,7 +4578,7 @@
 																"properties": {
 																	"in": {
 																		"minItems": 1,
-																		"maxItems": 18,
+																		"maxItems": 20,
 																		"uniqueItems": true,
 																		"type": "array",
 																		"items": {
@@ -4471,6 +4601,14 @@
 																				},
 																				{
 																					"const": "media",
+																					"type": "string"
+																				},
+																				{
+																					"const": "video",
+																					"type": "string"
+																				},
+																				{
+																					"const": "audio",
 																					"type": "string"
 																				},
 																				{
@@ -4561,7 +4699,7 @@
 																"properties": {
 																	"in": {
 																		"minItems": 1,
-																		"maxItems": 18,
+																		"maxItems": 20,
 																		"uniqueItems": true,
 																		"type": "array",
 																		"items": {
@@ -4584,6 +4722,14 @@
 																				},
 																				{
 																					"const": "media",
+																					"type": "string"
+																				},
+																				{
+																					"const": "video",
+																					"type": "string"
+																				},
+																				{
+																					"const": "audio",
 																					"type": "string"
 																				},
 																				{
@@ -4822,7 +4968,7 @@
 																"properties": {
 																	"in": {
 																		"minItems": 1,
-																		"maxItems": 18,
+																		"maxItems": 20,
 																		"uniqueItems": true,
 																		"type": "array",
 																		"items": {
@@ -4845,6 +4991,14 @@
 																				},
 																				{
 																					"const": "media",
+																					"type": "string"
+																				},
+																				{
+																					"const": "video",
+																					"type": "string"
+																				},
+																				{
+																					"const": "audio",
 																					"type": "string"
 																				},
 																				{
@@ -4935,7 +5089,7 @@
 																"properties": {
 																	"in": {
 																		"minItems": 1,
-																		"maxItems": 18,
+																		"maxItems": 20,
 																		"uniqueItems": true,
 																		"type": "array",
 																		"items": {
@@ -4958,6 +5112,14 @@
 																				},
 																				{
 																					"const": "media",
+																					"type": "string"
+																				},
+																				{
+																					"const": "video",
+																					"type": "string"
+																				},
+																				{
+																					"const": "audio",
 																					"type": "string"
 																				},
 																				{
@@ -5189,7 +5351,7 @@
 																		"properties": {
 																			"in": {
 																				"minItems": 1,
-																				"maxItems": 18,
+																				"maxItems": 20,
 																				"uniqueItems": true,
 																				"type": "array",
 																				"items": {
@@ -5212,6 +5374,14 @@
 																						},
 																						{
 																							"const": "media",
+																							"type": "string"
+																						},
+																						{
+																							"const": "video",
+																							"type": "string"
+																						},
+																						{
+																							"const": "audio",
 																							"type": "string"
 																						},
 																						{
@@ -5433,7 +5603,7 @@
 																						"properties": {
 																							"in": {
 																								"minItems": 1,
-																								"maxItems": 18,
+																								"maxItems": 20,
 																								"uniqueItems": true,
 																								"type": "array",
 																								"items": {
@@ -5456,6 +5626,14 @@
 																										},
 																										{
 																											"const": "media",
+																											"type": "string"
+																										},
+																										{
+																											"const": "video",
+																											"type": "string"
+																										},
+																										{
+																											"const": "audio",
 																											"type": "string"
 																										},
 																										{
@@ -5550,7 +5728,7 @@
 																						"properties": {
 																							"in": {
 																								"minItems": 1,
-																								"maxItems": 18,
+																								"maxItems": 20,
 																								"uniqueItems": true,
 																								"type": "array",
 																								"items": {
@@ -5573,6 +5751,14 @@
 																										},
 																										{
 																											"const": "media",
+																											"type": "string"
+																										},
+																										{
+																											"const": "video",
+																											"type": "string"
+																										},
+																										{
+																											"const": "audio",
 																											"type": "string"
 																										},
 																										{
@@ -5826,7 +6012,7 @@
 																						"properties": {
 																							"in": {
 																								"minItems": 1,
-																								"maxItems": 18,
+																								"maxItems": 20,
 																								"uniqueItems": true,
 																								"type": "array",
 																								"items": {
@@ -5849,6 +6035,14 @@
 																										},
 																										{
 																											"const": "media",
+																											"type": "string"
+																										},
+																										{
+																											"const": "video",
+																											"type": "string"
+																										},
+																										{
+																											"const": "audio",
 																											"type": "string"
 																										},
 																										{
@@ -5943,7 +6137,7 @@
 																						"properties": {
 																							"in": {
 																								"minItems": 1,
-																								"maxItems": 18,
+																								"maxItems": 20,
 																								"uniqueItems": true,
 																								"type": "array",
 																								"items": {
@@ -5966,6 +6160,14 @@
 																										},
 																										{
 																											"const": "media",
+																											"type": "string"
+																										},
+																										{
+																											"const": "video",
+																											"type": "string"
+																										},
+																										{
+																											"const": "audio",
 																											"type": "string"
 																										},
 																										{
@@ -6119,7 +6321,7 @@
 																"properties": {
 																	"in": {
 																		"minItems": 1,
-																		"maxItems": 18,
+																		"maxItems": 20,
 																		"uniqueItems": true,
 																		"type": "array",
 																		"items": {
@@ -6142,6 +6344,14 @@
 																				},
 																				{
 																					"const": "media",
+																					"type": "string"
+																				},
+																				{
+																					"const": "video",
+																					"type": "string"
+																				},
+																				{
+																					"const": "audio",
 																					"type": "string"
 																				},
 																				{
@@ -6232,7 +6442,7 @@
 																"properties": {
 																	"in": {
 																		"minItems": 1,
-																		"maxItems": 18,
+																		"maxItems": 20,
 																		"uniqueItems": true,
 																		"type": "array",
 																		"items": {
@@ -6255,6 +6465,14 @@
 																				},
 																				{
 																					"const": "media",
+																					"type": "string"
+																				},
+																				{
+																					"const": "video",
+																					"type": "string"
+																				},
+																				{
+																					"const": "audio",
 																					"type": "string"
 																				},
 																				{
@@ -6398,7 +6616,7 @@
 																		"properties": {
 																			"in": {
 																				"minItems": 1,
-																				"maxItems": 18,
+																				"maxItems": 20,
 																				"uniqueItems": true,
 																				"type": "array",
 																				"items": {
@@ -6421,6 +6639,14 @@
 																						},
 																						{
 																							"const": "media",
+																							"type": "string"
+																						},
+																						{
+																							"const": "video",
+																							"type": "string"
+																						},
+																						{
+																							"const": "audio",
 																							"type": "string"
 																						},
 																						{
@@ -6518,7 +6744,7 @@
 																		"properties": {
 																			"in": {
 																				"minItems": 1,
-																				"maxItems": 18,
+																				"maxItems": 20,
 																				"uniqueItems": true,
 																				"type": "array",
 																				"items": {
@@ -6541,6 +6767,14 @@
 																						},
 																						{
 																							"const": "media",
+																							"type": "string"
+																						},
+																						{
+																							"const": "video",
+																							"type": "string"
+																						},
+																						{
+																							"const": "audio",
 																							"type": "string"
 																						},
 																						{
@@ -9876,6 +10110,7 @@
 					"ContentStructureNotFound",
 					"ContentStructureRevisionConflict",
 					"BookNotFound",
+					"MediaNotFound",
 					"ContentStructureNodeNotFound",
 					"ChapterNotFound",
 					"ChapterLanguageNotFound",
@@ -14072,6 +14307,8 @@
 																						"book",
 																						"software",
 																						"media",
+																						"video",
+																						"audio",
 																						"release",
 																						"entity",
 																						"label",
@@ -15054,6 +15291,8 @@
 																										"book",
 																										"software",
 																										"media",
+																										"video",
+																										"audio",
 																										"release",
 																										"entity",
 																										"label",
@@ -15620,6 +15859,8 @@
 																						"book",
 																						"software",
 																						"media",
+																						"video",
+																						"audio",
 																						"release",
 																						"entity",
 																						"label",
@@ -16602,6 +16843,8 @@
 																										"book",
 																										"software",
 																										"media",
+																										"video",
+																										"audio",
 																										"release",
 																										"entity",
 																										"label",
@@ -17198,6 +17441,8 @@
 																						"book",
 																						"software",
 																						"media",
+																						"video",
+																						"audio",
 																						"release",
 																						"entity",
 																						"label",
@@ -18180,6 +18425,8 @@
 																										"book",
 																										"software",
 																										"media",
+																										"video",
+																										"audio",
 																										"release",
 																										"entity",
 																										"label",
@@ -24414,6 +24661,8 @@
 																						"book",
 																						"software",
 																						"media",
+																						"video",
+																						"audio",
 																						"release",
 																						"entity",
 																						"label",
@@ -25520,6 +25769,8 @@
 																								"book",
 																								"software",
 																								"media",
+																								"video",
+																								"audio",
 																								"release",
 																								"entity",
 																								"label",
@@ -26520,6 +26771,8 @@
 																												"book",
 																												"software",
 																												"media",
+																												"video",
+																												"audio",
 																												"release",
 																												"entity",
 																												"label",
@@ -27086,6 +27339,8 @@
 																								"book",
 																								"software",
 																								"media",
+																								"video",
+																								"audio",
 																								"release",
 																								"entity",
 																								"label",
@@ -28086,6 +28341,8 @@
 																												"book",
 																												"software",
 																												"media",
+																												"video",
+																												"audio",
 																												"release",
 																												"entity",
 																												"label",
@@ -28682,6 +28939,8 @@
 																								"book",
 																								"software",
 																								"media",
+																								"video",
+																								"audio",
 																								"release",
 																								"entity",
 																								"label",
@@ -29682,6 +29941,8 @@
 																												"book",
 																												"software",
 																												"media",
+																												"video",
+																												"audio",
 																												"release",
 																												"entity",
 																												"label",
@@ -30541,6 +30802,8 @@
 																					"book",
 																					"software",
 																					"media",
+																					"video",
+																					"audio",
 																					"release",
 																					"entity",
 																					"label",
@@ -53526,6 +53789,8 @@
 								"book",
 								"software",
 								"media",
+								"video",
+								"audio",
 								"release",
 								"entity",
 								"label",
@@ -53652,6 +53917,8 @@
 															"book",
 															"software",
 															"media",
+															"video",
+															"audio",
 															"release",
 															"entity",
 															"label",
@@ -53981,6 +54248,8 @@
 														"book",
 														"software",
 														"media",
+														"video",
+														"audio",
 														"release",
 														"entity",
 														"label",
@@ -54045,6 +54314,8 @@
 														"book",
 														"software",
 														"media",
+														"video",
+														"audio",
 														"release",
 														"entity",
 														"label",
@@ -54560,6 +54831,8 @@
 													"book",
 													"software",
 													"media",
+													"video",
+													"audio",
 													"release",
 													"entity",
 													"label",
@@ -54635,6 +54908,8 @@
 														"book",
 														"software",
 														"media",
+														"video",
+														"audio",
 														"release",
 														"entity",
 														"label",
@@ -54699,6 +54974,8 @@
 														"book",
 														"software",
 														"media",
+														"video",
+														"audio",
 														"release",
 														"entity",
 														"label",
@@ -54926,6 +55203,8 @@
 															"book",
 															"software",
 															"media",
+															"video",
+															"audio",
 															"release",
 															"entity",
 															"label",
@@ -55033,6 +55312,8 @@
 															"book",
 															"software",
 															"media",
+															"video",
+															"audio",
 															"release",
 															"entity",
 															"label",
@@ -62415,6 +62696,8 @@
 												"book",
 												"software",
 												"media",
+												"video",
+												"audio",
 												"release",
 												"entity",
 												"label",
@@ -62718,6 +63001,8 @@
 								"book",
 								"software",
 								"media",
+								"video",
+								"audio",
 								"release",
 								"entity",
 								"label",
@@ -62759,6 +63044,8 @@
 												"book",
 												"software",
 												"media",
+												"video",
+												"audio",
 												"release",
 												"entity",
 												"label",
@@ -63835,6 +64122,8 @@
 															"book",
 															"software",
 															"media",
+															"video",
+															"audio",
 															"release",
 															"entity",
 															"label",
@@ -65160,6 +65449,8 @@
 																				"book",
 																				"software",
 																				"media",
+																				"video",
+																				"audio",
 																				"release",
 																				"entity",
 																				"label",
@@ -66601,7 +66892,14 @@
 										"id": { "format": "uuid", "type": "string" },
 										"type": {
 											"type": "string",
-											"enum": ["book", "software", "media", "series"]
+											"enum": [
+												"book",
+												"software",
+												"media",
+												"series",
+												"video",
+												"audio"
+											]
 										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
@@ -66719,6 +67017,8 @@
 																	"book",
 																	"software",
 																	"media",
+																	"video",
+																	"audio",
 																	"release",
 																	"entity",
 																	"label",
@@ -67227,6 +67527,68 @@
 															"type": "string"
 														},
 														"kind": { "type": "string" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["type", "durationSeconds"],
+													"properties": {
+														"type": {
+															"const": "video",
+															"type": "string"
+														},
+														"durationSeconds": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["type", "durationSeconds"],
+													"properties": {
+														"type": {
+															"const": "audio",
+															"type": "string"
+														},
+														"durationSeconds": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														}
 													}
 												}
 											]
@@ -68559,12 +68921,22 @@
 							"anyOf": [
 								{
 									"anyOf": [
-										{ "const": "book", "type": "string" },
-										{ "const": "software", "type": "string" },
-										{ "const": "media", "type": "string" }
+										{
+											"anyOf": [
+												{ "const": "book", "type": "string" },
+												{ "const": "software", "type": "string" },
+												{ "const": "media", "type": "string" }
+											]
+										},
+										{ "const": "series", "type": "string" }
 									]
 								},
-								{ "const": "series", "type": "string" }
+								{
+									"anyOf": [
+										{ "const": "video", "type": "string" },
+										{ "const": "audio", "type": "string" }
+									]
+								}
 							]
 						}
 					},
@@ -68630,7 +69002,14 @@
 										"id": { "format": "uuid", "type": "string" },
 										"type": {
 											"type": "string",
-											"enum": ["book", "software", "media", "series"]
+											"enum": [
+												"book",
+												"software",
+												"media",
+												"series",
+												"video",
+												"audio"
+											]
 										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
@@ -68748,6 +69127,8 @@
 																	"book",
 																	"software",
 																	"media",
+																	"video",
+																	"audio",
 																	"release",
 																	"entity",
 																	"label",
@@ -69256,6 +69637,68 @@
 															"type": "string"
 														},
 														"kind": { "type": "string" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["type", "durationSeconds"],
+													"properties": {
+														"type": {
+															"const": "video",
+															"type": "string"
+														},
+														"durationSeconds": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["type", "durationSeconds"],
+													"properties": {
+														"type": {
+															"const": "audio",
+															"type": "string"
+														},
+														"durationSeconds": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														}
 													}
 												}
 											]
@@ -70449,12 +70892,22 @@
 							"anyOf": [
 								{
 									"anyOf": [
-										{ "const": "book", "type": "string" },
-										{ "const": "software", "type": "string" },
-										{ "const": "media", "type": "string" }
+										{
+											"anyOf": [
+												{ "const": "book", "type": "string" },
+												{ "const": "software", "type": "string" },
+												{ "const": "media", "type": "string" }
+											]
+										},
+										{ "const": "series", "type": "string" }
 									]
 								},
-								{ "const": "series", "type": "string" }
+								{
+									"anyOf": [
+										{ "const": "video", "type": "string" },
+										{ "const": "audio", "type": "string" }
+									]
+								}
 							]
 						}
 					},
@@ -70638,6 +71091,23 @@
 													},
 													{ "type": "null" }
 												]
+											},
+											"durationSeconds": {
+												"nullable": true,
+												"anyOf": [
+													{
+														"minimum": 1,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 1, "type": "integer" }
+														]
+													},
+													{ "type": "null" }
+												]
 											}
 										}
 									}
@@ -70687,7 +71157,14 @@
 										"id": { "format": "uuid", "type": "string" },
 										"type": {
 											"type": "string",
-											"enum": ["book", "software", "media", "series"]
+											"enum": [
+												"book",
+												"software",
+												"media",
+												"series",
+												"video",
+												"audio"
+											]
 										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
@@ -70805,6 +71282,8 @@
 																	"book",
 																	"software",
 																	"media",
+																	"video",
+																	"audio",
 																	"release",
 																	"entity",
 																	"label",
@@ -71313,6 +71792,68 @@
 															"type": "string"
 														},
 														"kind": { "type": "string" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["type", "durationSeconds"],
+													"properties": {
+														"type": {
+															"const": "video",
+															"type": "string"
+														},
+														"durationSeconds": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["type", "durationSeconds"],
+													"properties": {
+														"type": {
+															"const": "audio",
+															"type": "string"
+														},
+														"durationSeconds": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														}
 													}
 												}
 											]
@@ -72780,12 +73321,22 @@
 							"anyOf": [
 								{
 									"anyOf": [
-										{ "const": "book", "type": "string" },
-										{ "const": "software", "type": "string" },
-										{ "const": "media", "type": "string" }
+										{
+											"anyOf": [
+												{ "const": "book", "type": "string" },
+												{ "const": "software", "type": "string" },
+												{ "const": "media", "type": "string" }
+											]
+										},
+										{ "const": "series", "type": "string" }
 									]
 								},
-								{ "const": "series", "type": "string" }
+								{
+									"anyOf": [
+										{ "const": "video", "type": "string" },
+										{ "const": "audio", "type": "string" }
+									]
+								}
 							]
 						}
 					},
@@ -72887,7 +73438,14 @@
 										"id": { "format": "uuid", "type": "string" },
 										"type": {
 											"type": "string",
-											"enum": ["book", "software", "media", "series"]
+											"enum": [
+												"book",
+												"software",
+												"media",
+												"series",
+												"video",
+												"audio"
+											]
 										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
@@ -73005,6 +73563,8 @@
 																	"book",
 																	"software",
 																	"media",
+																	"video",
+																	"audio",
 																	"release",
 																	"entity",
 																	"label",
@@ -73513,6 +74073,68 @@
 															"type": "string"
 														},
 														"kind": { "type": "string" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["type", "durationSeconds"],
+													"properties": {
+														"type": {
+															"const": "video",
+															"type": "string"
+														},
+														"durationSeconds": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["type", "durationSeconds"],
+													"properties": {
+														"type": {
+															"const": "audio",
+															"type": "string"
+														},
+														"durationSeconds": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														}
 													}
 												}
 											]
@@ -74902,7 +75524,14 @@
 										"id": { "format": "uuid", "type": "string" },
 										"type": {
 											"type": "string",
-											"enum": ["book", "software", "media", "series"]
+											"enum": [
+												"book",
+												"software",
+												"media",
+												"series",
+												"video",
+												"audio"
+											]
 										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
@@ -75020,6 +75649,8 @@
 																	"book",
 																	"software",
 																	"media",
+																	"video",
+																	"audio",
 																	"release",
 																	"entity",
 																	"label",
@@ -75528,6 +76159,68 @@
 															"type": "string"
 														},
 														"kind": { "type": "string" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["type", "durationSeconds"],
+													"properties": {
+														"type": {
+															"const": "video",
+															"type": "string"
+														},
+														"durationSeconds": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["type", "durationSeconds"],
+													"properties": {
+														"type": {
+															"const": "audio",
+															"type": "string"
+														},
+														"durationSeconds": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														}
 													}
 												}
 											]
@@ -76857,12 +77550,22 @@
 							"anyOf": [
 								{
 									"anyOf": [
-										{ "const": "book", "type": "string" },
-										{ "const": "software", "type": "string" },
-										{ "const": "media", "type": "string" }
+										{
+											"anyOf": [
+												{ "const": "book", "type": "string" },
+												{ "const": "software", "type": "string" },
+												{ "const": "media", "type": "string" }
+											]
+										},
+										{ "const": "series", "type": "string" }
 									]
 								},
-								{ "const": "series", "type": "string" }
+								{
+									"anyOf": [
+										{ "const": "video", "type": "string" },
+										{ "const": "audio", "type": "string" }
+									]
+								}
 							]
 						}
 					},
@@ -77266,7 +77969,14 @@
 										"id": { "format": "uuid", "type": "string" },
 										"type": {
 											"type": "string",
-											"enum": ["book", "software", "media", "series"]
+											"enum": [
+												"book",
+												"software",
+												"media",
+												"series",
+												"video",
+												"audio"
+											]
 										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
@@ -77384,6 +78094,8 @@
 																	"book",
 																	"software",
 																	"media",
+																	"video",
+																	"audio",
 																	"release",
 																	"entity",
 																	"label",
@@ -77892,6 +78604,68 @@
 															"type": "string"
 														},
 														"kind": { "type": "string" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["type", "durationSeconds"],
+													"properties": {
+														"type": {
+															"const": "video",
+															"type": "string"
+														},
+														"durationSeconds": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["type", "durationSeconds"],
+													"properties": {
+														"type": {
+															"const": "audio",
+															"type": "string"
+														},
+														"durationSeconds": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														}
 													}
 												}
 											]
@@ -82423,6 +83197,8 @@
 																	"book",
 																	"software",
 																	"media",
+																	"video",
+																	"audio",
 																	"release",
 																	"entity",
 																	"label",
@@ -82634,6 +83410,8 @@
 																"book",
 																"software",
 																"media",
+																"video",
+																"audio",
 																"release",
 																"entity",
 																"label",
@@ -84136,6 +84914,8 @@
 								"book",
 								"software",
 								"media",
+								"video",
+								"audio",
 								"release",
 								"entity",
 								"label",
@@ -84317,6 +85097,8 @@
 								"book",
 								"software",
 								"media",
+								"video",
+								"audio",
 								"release",
 								"entity",
 								"label",
@@ -84688,6 +85470,8 @@
 								"book",
 								"software",
 								"media",
+								"video",
+								"audio",
 								"release",
 								"entity",
 								"label",
@@ -84739,6 +85523,8 @@
 								"book",
 								"software",
 								"media",
+								"video",
+								"audio",
 								"release",
 								"entity",
 								"label",
@@ -84937,6 +85723,8 @@
 								"book",
 								"software",
 								"media",
+								"video",
+								"audio",
 								"release",
 								"entity",
 								"label",
@@ -85239,6 +86027,8 @@
 														"book",
 														"software",
 														"media",
+														"video",
+														"audio",
 														"release",
 														"entity",
 														"label",
@@ -87744,6 +88534,7 @@
 														"type": "string",
 														"enum": [
 															"book.contents",
+															"media.contents",
 															"post.contents",
 															"realm.taxonomy",
 															"wiki.navigation",
@@ -87881,7 +88672,12 @@
 								"properties": {
 									"kind": {
 										"type": "string",
-										"enum": ["book.contents", "post.contents", "realm.taxonomy"]
+										"enum": [
+											"book.contents",
+											"media.contents",
+											"post.contents",
+											"realm.taxonomy"
+										]
 									}
 								}
 							}
@@ -87920,6 +88716,7 @@
 													"type": "string",
 													"enum": [
 														"book.contents",
+														"media.contents",
 														"post.contents",
 														"realm.taxonomy",
 														"wiki.navigation",
@@ -88116,6 +88913,7 @@
 													"type": "string",
 													"enum": [
 														"book.contents",
+														"media.contents",
 														"post.contents",
 														"realm.taxonomy",
 														"wiki.navigation",
@@ -91041,6 +91839,642 @@
 				},
 				"operationId": "putApiUnitsBookByUnitIdContent-structure",
 				"x-rezics-policy-operation-id": "putApiUnitsBookByUnitIdContent-structure"
+			}
+		},
+		"/api/units/media/{unitId}/content-structure/nodes": {
+			"get": {
+				"summary": "List Media Content Structure nodes",
+				"tags": ["Content Structure"],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 7,
+							"uniqueItems": true,
+							"type": "array",
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["structureId", "latestRevisionId", "items"],
+									"properties": {
+										"structureId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"latestRevisionId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"id",
+													"parentId",
+													"contentUnitId",
+													"contentKind",
+													"language",
+													"title",
+													"position",
+													"durationSeconds"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"parentId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"contentUnitId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"contentKind": {
+														"default": "video",
+														"type": "string",
+														"enum": ["video", "audio", "label"]
+													},
+													"language": {
+														"type": "string",
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
+													},
+													"title": { "type": "string" },
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													},
+													"durationSeconds": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"minimum": 1,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 1,
+																		"type": "integer"
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "MediaNotFound",
+													"type": "string",
+													"enum": ["MediaNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiUnitsMediaByUnitIdContent-structureNodes",
+				"x-rezics-policy-operation-id": "getApiUnitsMediaByUnitIdContent-structureNodes"
+			}
+		},
+		"/api/units/media/{unitId}/content-structure": {
+			"put": {
+				"summary": "Save a complete Media Content Structure draft",
+				"tags": ["Content Structure"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["baseRevisionId", "nodes"],
+								"properties": {
+									"baseRevisionId": { "format": "uuid", "type": "string" },
+									"nodes": {
+										"maxItems": 10000,
+										"type": "array",
+										"items": {
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"state",
+														"id",
+														"parentId",
+														"order",
+														"title"
+													],
+													"properties": {
+														"state": {
+															"const": "existing",
+															"type": "string"
+														},
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"parentId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"order": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
+														},
+														"title": {
+															"minLength": 1,
+															"maxLength": 500,
+															"type": "string"
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"state",
+														"id",
+														"parentId",
+														"order",
+														"title",
+														"language",
+														"contentKind"
+													],
+													"properties": {
+														"state": {
+															"const": "new",
+															"type": "string"
+														},
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"parentId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"order": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
+														},
+														"title": {
+															"minLength": 1,
+															"maxLength": 500,
+															"type": "string"
+														},
+														"language": {
+															"type": "string",
+															"enum": [
+																"zh",
+																"en",
+																"ja",
+																"ko",
+																"de",
+																"fr",
+																"es"
+															]
+														},
+														"contentKind": {
+															"default": "video",
+															"type": "string",
+															"enum": ["video", "audio", "label"]
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"state",
+														"id",
+														"parentId",
+														"order",
+														"contentUnitId"
+													],
+													"properties": {
+														"state": {
+															"const": "attached",
+															"type": "string"
+														},
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"parentId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"order": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
+														},
+														"contentUnitId": {
+															"format": "uuid",
+															"type": "string"
+														}
+													}
+												}
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"structureId",
+										"latestRevisionId",
+										"revisionCreated",
+										"items"
+									],
+									"properties": {
+										"structureId": { "format": "uuid", "type": "string" },
+										"latestRevisionId": { "format": "uuid", "type": "string" },
+										"revisionCreated": { "type": "boolean" },
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"id",
+													"parentId",
+													"contentUnitId",
+													"contentKind",
+													"language",
+													"title",
+													"position",
+													"durationSeconds"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"parentId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"contentUnitId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"contentKind": {
+														"default": "video",
+														"type": "string",
+														"enum": ["video", "audio", "label"]
+													},
+													"language": {
+														"type": "string",
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
+													},
+													"title": { "type": "string" },
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													},
+													"durationSeconds": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"minimum": 1,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 1,
+																		"type": "integer"
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": ["UnitPermissionForbidden"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ContentStructureRevisionConflict",
+													"type": "string",
+													"enum": ["ContentStructureRevisionConflict"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ContentStructureInvalid",
+															"type": "string",
+															"enum": ["ContentStructureInvalid"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiUnitsMediaByUnitIdContent-structure",
+				"x-rezics-policy-operation-id": "putApiUnitsMediaByUnitIdContent-structure"
 			}
 		},
 		"/api/chapters/{chapterId}": {
@@ -97469,6 +98903,36 @@
 							}
 						}
 					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"ContentStructureNodeNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"422": {
 						"description": "Request validation failed",
 						"content": {
@@ -97730,6 +99194,8 @@
 																				"book",
 																				"software",
 																				"media",
+																				"video",
+																				"audio",
 																				"release",
 																				"entity",
 																				"label",
@@ -98518,6 +99984,8 @@
 																	"book",
 																	"software",
 																	"media",
+																	"video",
+																	"audio",
 																	"release",
 																	"entity",
 																	"label",
@@ -99156,6 +100624,8 @@
 																	"book",
 																	"software",
 																	"media",
+																	"video",
+																	"audio",
 																	"release",
 																	"entity",
 																	"label",
@@ -99852,6 +101322,8 @@
 																								"book",
 																								"software",
 																								"media",
+																								"video",
+																								"audio",
 																								"release",
 																								"entity",
 																								"label",
@@ -100980,6 +102452,8 @@
 																										"book",
 																										"software",
 																										"media",
+																										"video",
+																										"audio",
 																										"release",
 																										"entity",
 																										"label",
@@ -102012,6 +103486,8 @@
 																														"book",
 																														"software",
 																														"media",
+																														"video",
+																														"audio",
 																														"release",
 																														"entity",
 																														"label",
@@ -102584,6 +104060,8 @@
 																										"book",
 																										"software",
 																										"media",
+																										"video",
+																										"audio",
 																										"release",
 																										"entity",
 																										"label",
@@ -103616,6 +105094,8 @@
 																														"book",
 																														"software",
 																														"media",
+																														"video",
+																														"audio",
 																														"release",
 																														"entity",
 																														"label",
@@ -104218,6 +105698,8 @@
 																										"book",
 																										"software",
 																										"media",
+																										"video",
+																										"audio",
 																										"release",
 																										"entity",
 																										"label",
@@ -105250,6 +106732,8 @@
 																														"book",
 																														"software",
 																														"media",
+																														"video",
+																														"audio",
 																														"release",
 																														"entity",
 																														"label",
@@ -106081,6 +107565,8 @@
 																	"book",
 																	"software",
 																	"media",
+																	"video",
+																	"audio",
 																	"release",
 																	"entity",
 																	"label",
@@ -107051,6 +108537,8 @@
 																	"book",
 																	"software",
 																	"media",
+																	"video",
+																	"audio",
 																	"release",
 																	"entity",
 																	"label",
@@ -109867,6 +111355,8 @@
 																				"book",
 																				"software",
 																				"media",
+																				"video",
+																				"audio",
 																				"release",
 																				"entity",
 																				"label",
@@ -110816,6 +112306,8 @@
 																								"book",
 																								"software",
 																								"media",
+																								"video",
+																								"audio",
 																								"release",
 																								"entity",
 																								"label",
@@ -111957,6 +113449,8 @@
 																	"book",
 																	"software",
 																	"media",
+																	"video",
+																	"audio",
 																	"release",
 																	"entity",
 																	"label",
@@ -115779,6 +117273,8 @@
 																				"book",
 																				"software",
 																				"media",
+																				"video",
+																				"audio",
 																				"release",
 																				"entity",
 																				"label",
@@ -117614,6 +119110,8 @@
 																			"book",
 																			"software",
 																			"media",
+																			"video",
+																			"audio",
 																			"release",
 																			"entity",
 																			"label",
@@ -118361,6 +119859,8 @@
 																			"book",
 																			"software",
 																			"media",
+																			"video",
+																			"audio",
 																			"release",
 																			"entity",
 																			"label",
@@ -119108,6 +120608,8 @@
 																			"book",
 																			"software",
 																			"media",
+																			"video",
+																			"audio",
 																			"release",
 																			"entity",
 																			"label",
@@ -119854,6 +121356,8 @@
 																			"book",
 																			"software",
 																			"media",
+																			"video",
+																			"audio",
 																			"release",
 																			"entity",
 																			"label",
@@ -120671,6 +122175,8 @@
 																			"book",
 																			"software",
 																			"media",
+																			"video",
+																			"audio",
 																			"release",
 																			"entity",
 																			"label",
@@ -122130,6 +123636,8 @@
 																				"book",
 																				"software",
 																				"media",
+																				"video",
+																				"audio",
 																				"release",
 																				"entity",
 																				"label",
@@ -123087,6 +124595,8 @@
 																	"book",
 																	"software",
 																	"media",
+																	"video",
+																	"audio",
 																	"release",
 																	"entity",
 																	"label",
@@ -130209,6 +131719,8 @@
 																						"book",
 																						"software",
 																						"media",
+																						"video",
+																						"audio",
 																						"release",
 																						"entity",
 																						"label",
@@ -131315,6 +132827,8 @@
 																								"book",
 																								"software",
 																								"media",
+																								"video",
+																								"audio",
 																								"release",
 																								"entity",
 																								"label",
@@ -132315,6 +133829,8 @@
 																												"book",
 																												"software",
 																												"media",
+																												"video",
+																												"audio",
 																												"release",
 																												"entity",
 																												"label",
@@ -132881,6 +134397,8 @@
 																								"book",
 																								"software",
 																								"media",
+																								"video",
+																								"audio",
 																								"release",
 																								"entity",
 																								"label",
@@ -133881,6 +135399,8 @@
 																												"book",
 																												"software",
 																												"media",
+																												"video",
+																												"audio",
 																												"release",
 																												"entity",
 																												"label",
@@ -134477,6 +135997,8 @@
 																								"book",
 																								"software",
 																								"media",
+																								"video",
+																								"audio",
 																								"release",
 																								"entity",
 																								"label",
@@ -135477,6 +136999,8 @@
 																												"book",
 																												"software",
 																												"media",
+																												"video",
+																												"audio",
 																												"release",
 																												"entity",
 																												"label",
@@ -147169,6 +148693,8 @@
 																						"book",
 																						"software",
 																						"media",
+																						"video",
+																						"audio",
 																						"release",
 																						"entity",
 																						"label",
@@ -148275,6 +149801,8 @@
 																								"book",
 																								"software",
 																								"media",
+																								"video",
+																								"audio",
 																								"release",
 																								"entity",
 																								"label",
@@ -149275,6 +150803,8 @@
 																												"book",
 																												"software",
 																												"media",
+																												"video",
+																												"audio",
 																												"release",
 																												"entity",
 																												"label",
@@ -149841,6 +151371,8 @@
 																								"book",
 																								"software",
 																								"media",
+																								"video",
+																								"audio",
 																								"release",
 																								"entity",
 																								"label",
@@ -150841,6 +152373,8 @@
 																												"book",
 																												"software",
 																												"media",
+																												"video",
+																												"audio",
 																												"release",
 																												"entity",
 																												"label",
@@ -151437,6 +152971,8 @@
 																								"book",
 																								"software",
 																								"media",
+																								"video",
+																								"audio",
 																								"release",
 																								"entity",
 																								"label",
@@ -152437,6 +153973,8 @@
 																												"book",
 																												"software",
 																												"media",
+																												"video",
+																												"audio",
 																												"release",
 																												"entity",
 																												"label",
@@ -159695,6 +161233,8 @@
 																						"book",
 																						"software",
 																						"media",
+																						"video",
+																						"audio",
 																						"release",
 																						"entity",
 																						"label",
@@ -160801,6 +162341,8 @@
 																								"book",
 																								"software",
 																								"media",
+																								"video",
+																								"audio",
 																								"release",
 																								"entity",
 																								"label",
@@ -161801,6 +163343,8 @@
 																												"book",
 																												"software",
 																												"media",
+																												"video",
+																												"audio",
 																												"release",
 																												"entity",
 																												"label",
@@ -162367,6 +163911,8 @@
 																								"book",
 																								"software",
 																								"media",
+																								"video",
+																								"audio",
 																								"release",
 																								"entity",
 																								"label",
@@ -163367,6 +164913,8 @@
 																												"book",
 																												"software",
 																												"media",
+																												"video",
+																												"audio",
 																												"release",
 																												"entity",
 																												"label",
@@ -163963,6 +165511,8 @@
 																								"book",
 																								"software",
 																								"media",
+																								"video",
+																								"audio",
 																								"release",
 																								"entity",
 																								"label",
@@ -164963,6 +166513,8 @@
 																												"book",
 																												"software",
 																												"media",
+																												"video",
+																												"audio",
 																												"release",
 																												"entity",
 																												"label",
@@ -175644,6 +177196,8 @@
 																						"book",
 																						"software",
 																						"media",
+																						"video",
+																						"audio",
 																						"release",
 																						"entity",
 																						"label",
@@ -176750,6 +178304,8 @@
 																								"book",
 																								"software",
 																								"media",
+																								"video",
+																								"audio",
 																								"release",
 																								"entity",
 																								"label",
@@ -177750,6 +179306,8 @@
 																												"book",
 																												"software",
 																												"media",
+																												"video",
+																												"audio",
 																												"release",
 																												"entity",
 																												"label",
@@ -178316,6 +179874,8 @@
 																								"book",
 																								"software",
 																								"media",
+																								"video",
+																								"audio",
 																								"release",
 																								"entity",
 																								"label",
@@ -179316,6 +180876,8 @@
 																												"book",
 																												"software",
 																												"media",
+																												"video",
+																												"audio",
 																												"release",
 																												"entity",
 																												"label",
@@ -179912,6 +181474,8 @@
 																								"book",
 																								"software",
 																								"media",
+																								"video",
+																								"audio",
 																								"release",
 																								"entity",
 																								"label",
@@ -180912,6 +182476,8 @@
 																												"book",
 																												"software",
 																												"media",
+																												"video",
+																												"audio",
 																												"release",
 																												"entity",
 																												"label",

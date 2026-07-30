@@ -8,5 +8,5 @@ export function canAccessContentStructureApi(
 	unitKind: UnitKind,
 	hasDevelopmentPreviewAccess: boolean,
 ): boolean {
-	return (unitKind !== "media" && unitKind !== "software") || hasDevelopmentPreviewAccess;
+	return unitKind !== "software" || hasDevelopmentPreviewAccess;
 }

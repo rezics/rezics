@@ -62,6 +62,21 @@ export type BookDraftPlan = {
 	readonly renamedExistingNodeIds: ReadonlySet<string>;
 };
 
+export type ContentStructureDraftNodeBase = {
+	readonly state: "existing" | "new" | "attached";
+	readonly id: string;
+	readonly parentId: string | null;
+	readonly order: number;
+	readonly title: string;
+};
+
+export type ContentStructureDraftPlan<Node extends ContentStructureDraftNodeBase> = {
+	readonly nodes: readonly (Node & { readonly position: string })[];
+	readonly hasChanges: boolean;
+	readonly hasStructuralChanges: boolean;
+	readonly renamedExistingNodeIds: ReadonlySet<string>;
+};
+
 function invalid(message: string): never {
 	throw new ContentStructureInvalid(message);
 }
@@ -79,12 +94,12 @@ function sameIds(left: readonly string[], right: readonly string[]): boolean {
  * Proves that a complete Book Content Structure draft is a closed, acyclic tree
  * and derives the minimal sibling lists that need new fractional positions.
  */
-export function planBookContentStructureDraft(
+export function planContentStructureDraft<Node extends ContentStructureDraftNodeBase>(
 	currentNodes: readonly CurrentBookDraftNode[],
-	draftNodes: readonly BookDraftNode[],
-): BookDraftPlan {
+	draftNodes: readonly Node[],
+): ContentStructureDraftPlan<Node> {
 	const currentById = new Map(currentNodes.map((node) => [node.id, node]));
-	const draftById = new Map<string, BookDraftNode>();
+	const draftById = new Map<string, Node>();
 	for (const draft of draftNodes) {
 		if (draftById.has(draft.id)) invalid(`Duplicate draft node ${draft.id}`);
 		if (
@@ -170,7 +185,7 @@ export function planBookContentStructureDraft(
 				return (left.parentId ?? "").localeCompare(right.parentId ?? "");
 			return left.order - right.order;
 		})
-		.map((node): PlannedBookDraftNode => {
+		.map((node): Node & { readonly position: string } => {
 			const current = currentById.get(node.id);
 			if (node.state === "existing" && current && current.title !== node.title)
 				renamedExistingNodeIds.add(node.id);
@@ -190,4 +205,15 @@ export function planBookContentStructureDraft(
 		hasStructuralChanges,
 		renamedExistingNodeIds,
 	};
+}
+
+/**
+ * Proves that a complete Book Content Structure draft is a closed, acyclic tree
+ * and derives the minimal sibling lists that need new fractional positions.
+ */
+export function planBookContentStructureDraft(
+	currentNodes: readonly CurrentBookDraftNode[],
+	draftNodes: readonly BookDraftNode[],
+): BookDraftPlan {
+	return planContentStructureDraft(currentNodes, draftNodes);
 }

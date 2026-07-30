@@ -15,6 +15,8 @@ export const FilterUnitKindValues = [
 	"book",
 	"software",
 	"media",
+	"video",
+	"audio",
 	"release",
 	"entity",
 	"label",

@@ -126,6 +126,7 @@ export default {
 		"Diese Konfiguration des Unit-Zugriffs ist ungültig oder überschreitet die Berechtigungen, die du delegieren darfst.",
 	InvalidPaginationCursor: "Dieser Seitenlink ist ungültig oder abgelaufen.",
 	BookNotFound: "Dieses Buch wurde nicht gefunden.",
+	MediaNotFound: "Dieses Medienelement wurde nicht gefunden.",
 	ChapterNotFound: "Dieses Kapitel wurde nicht gefunden.",
 	ChapterLanguageNotFound: "Diese Kapitelsprache wurde nicht gefunden.",
 	ReportRealmMismatch: `Die gemeldete Unit gehört nicht zu diesem ${realmTerms.inline}.`,

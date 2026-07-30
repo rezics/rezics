@@ -111,6 +111,7 @@ export default {
 	UnitAccessConfigurationInvalid: "这组条目权限设置无效或超出你可授予的范围。",
 	InvalidPaginationCursor: "该分页链接无效或已过期。",
 	BookNotFound: "找不到这本书。",
+	MediaNotFound: "找不到这个媒体项目。",
 	ChapterNotFound: "找不到这个章节。",
 	ChapterLanguageNotFound: "找不到该章节的语言版本。",
 	ReportRealmMismatch: `被举报的条目不属于这个${realmTerms.inline}。`,

@@ -1,12 +1,13 @@
 import {
 	getApiChaptersByChapterIdQueryKey,
 	getApiUnitsBookByUnitIdContentStructureNodesQueryKey,
+	getApiUnitsMediaByUnitIdContentStructureNodesQueryKey,
 	getApiUnitsByTypeByUnitIdQueryKey,
 	getApiUnitsByTypeQueryKey,
 } from "@rezics/openapi-tanstack-query";
 import type { QueryClient } from "@tanstack/react-query";
 
-import type { UnitType } from "./unit-types";
+import { isCatalogUnitType, type UnitType } from "./unit-types";
 
 export async function invalidateUnitDetail(
 	queryClient: QueryClient,
@@ -18,7 +19,7 @@ export async function invalidateUnitDetail(
 		queryClient.invalidateQueries({
 			queryKey: getApiUnitsByTypeByUnitIdQueryKey({ path: { type, unitId } }),
 		}),
-		...(includeList
+		...(includeList && isCatalogUnitType(type)
 			? [
 					queryClient.invalidateQueries({
 						queryKey: getApiUnitsByTypeQueryKey({ path: { type } }),
@@ -32,6 +33,14 @@ export async function invalidateBookContentStructure(queryClient: QueryClient, b
 	await queryClient.invalidateQueries({
 		queryKey: getApiUnitsBookByUnitIdContentStructureNodesQueryKey({
 			path: { unitId: bookId },
+		}),
+	});
+}
+
+export async function invalidateMediaContentStructure(queryClient: QueryClient, mediaId: string) {
+	await queryClient.invalidateQueries({
+		queryKey: getApiUnitsMediaByUnitIdContentStructureNodesQueryKey({
+			path: { unitId: mediaId },
 		}),
 	});
 }

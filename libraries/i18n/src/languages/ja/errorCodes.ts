@@ -119,6 +119,7 @@ export default {
 		"このユニットアクセス設定は無効であるか、委任可能な権限を超えています。",
 	InvalidPaginationCursor: "このページリンクは無効か期限切れです。",
 	BookNotFound: "この書籍は見つかりませんでした。",
+	MediaNotFound: "このメディア項目は見つかりませんでした。",
 	ChapterNotFound: "この章は見つかりませんでした。",
 	ChapterLanguageNotFound: "この章の言語は見つかりませんでした。",
 	ReportRealmMismatch: `報告対象のユニットはこの${realmTerms.label}に属していません。`,

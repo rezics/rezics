@@ -21,6 +21,8 @@ export const UnitKindValues = [
 	"book",
 	"software",
 	"media",
+	"video",
+	"audio",
 	"release",
 	"entity",
 	"label",
@@ -45,6 +47,7 @@ export const CommunityCatalogUnitKindValues = [
 ] as const;
 
 export const VariantCapableUnitKindValues = ["book", "software", "media"] as const;
+export const TimedMediaUnitKindValues = ["video", "audio"] as const;
 
 export type UnitKind = (typeof UnitKindValues)[number];
 export type NonRealmUnitKind = Exclude<UnitKind, "realm">;
@@ -58,6 +61,7 @@ function deriveNonRealmUnitKindValues(): readonly [NonRealmUnitKind, ...NonRealm
 
 export const NonRealmUnitKindValues = deriveNonRealmUnitKindValues();
 export type VariantCapableUnitKind = (typeof VariantCapableUnitKindValues)[number];
+export type TimedMediaUnitKind = (typeof TimedMediaUnitKindValues)[number];
 
 export const CreditAttributionRoleValues = [
 	"author",
@@ -227,6 +231,7 @@ export const RealmScoreContextPostKindValues = [
 /** Persisted as text so kind schemas can evolve without a PostgreSQL enum migration. */
 export const ContentStructureKindValues = [
 	"book.contents",
+	"media.contents",
 	"post.contents",
 	"realm.taxonomy",
 	"wiki.navigation",

@@ -4,12 +4,21 @@ import { insert } from "native-i18n";
 
 const { forms: publicationLicenseTerms } = zhHantTerminology.publicationLicense;
 const { forms: postTerms } = zhHantTerminology.post;
+const { forms: videoTerms } = zhHantTerminology.video;
+const { forms: audioTerms } = zhHantTerminology.audio;
 const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: followTerms } = zhHantTerminology.follow;
 const { forms: metadataTerms } = zhHantTerminology.metadata;
 
 export default {
-	types: { book: "書籍", software: "軟體", media: "媒體", series: "系列" },
+	types: {
+		book: "書籍",
+		software: "軟體",
+		media: "媒體",
+		series: "系列",
+		video: videoTerms.label,
+		audio: audioTerms.label,
+	},
 	creation: {
 		modeLabel: "建立方式",
 		ownedWork: "我的作品",
@@ -82,7 +91,7 @@ export default {
 			},
 			contentStructure: {
 				label: "內容結構",
-				description: "以可收合、有縮排的樹狀編輯器管理書籍章節。",
+				description: "以可收合、有縮排的樹狀編輯器管理書籍章節或媒體項目。",
 				developmentBadge: "開發中",
 			},
 			releases: { label: "系列內容", description: "管理系列內的作品、順序與發布日期。" },
@@ -113,6 +122,7 @@ export default {
 		runtimeMinutes: "片長（分鐘）",
 		episodeCount: "集數",
 		seasonCount: "季數",
+		durationSeconds: "時長（秒）",
 		yes: "是",
 		no: "否",
 	},
@@ -130,6 +140,7 @@ export default {
 			},
 			media: {
 				overview: "媒體資料",
+				contents: "內容",
 				tags: "標籤",
 				associations: "關聯",
 				reviews: "觀眾評論",
@@ -158,6 +169,7 @@ export default {
 			},
 			media: {
 				overview: "媒體說明、發行資訊與觀影狀態。",
+				contents: `瀏覽${videoTerms.inline}與${audioTerms.inline}結構，並記錄觀看或收聽進度。`,
 				tags: `檢視一般標籤與你所選${realmTerms.label}來源的情境判斷。`,
 				associations: "檢視這部作品的內容主體，以及主作品與變體關係。",
 				reviews: "查看或撰寫觀眾評論。",
@@ -280,6 +292,14 @@ export default {
 			chapters: Number,
 			labels: Number,
 		}),
+		mediaStructureSummary: insert(
+			`{{videos}} 部${videoTerms.inline} · {{audios}} 段${audioTerms.inline} · {{labels}} 個標目`,
+			{
+				videos: Number,
+				audios: Number,
+				labels: Number,
+			},
+		),
 		childCount: insert("{{count}} 個子項目", { count: Number }),
 		totalWordCount: insert("總計 {{count}} 個詞", { count: Number }),
 		totalCharacterCount: insert("總計 {{count}} 字", { count: Number }),
@@ -291,28 +311,47 @@ export default {
 		moveToLast: "移至同層最後",
 		move: "移動",
 		moveDescription: "選擇標目會移至其子項目末尾；選擇章節會移至該章節下方。",
+		mediaMoveDescription:
+			"選擇標目會將所選項目移至其子項目末尾；選擇媒體項目會將其移至該項目下方。",
 		addChapter: "新增章節",
 		addLabel: "新增標目",
+		addVideo: `新增${videoTerms.inline}`,
+		addAudio: `新增${audioTerms.inline}`,
 		addChapterDescription: "建立新的章節，或搜尋並加入既有章節。完成後會同時儲存內容結構。",
 		addLabelDescription: "建立新的標目，或搜尋並加入既有標目。完成後會同時儲存內容結構。",
+		addVideoDescription: `建立新的${videoTerms.inline}，或搜尋並加入既有${videoTerms.inline}。完成後會同時儲存內容結構。`,
+		addAudioDescription: `建立新的${audioTerms.inline}，或搜尋並加入既有${audioTerms.inline}。完成後會同時儲存內容結構。`,
 		addMode: "新增方式",
 		createMode: "建立",
 		attachMode: "加入",
 		existingChapter: "既有章節",
 		existingLabel: "既有標目",
+		existingMediaItem: "既有媒體項目",
 		searchExistingChapter: "搜尋既有章節",
 		searchExistingLabel: "搜尋既有標目",
+		searchExistingMediaItem: "搜尋既有媒體項目",
+		mediaKindFilter: "媒體類型",
+		allMediaKinds: "全部",
 		createChapterAndSave: "建立章節並儲存",
 		createLabelAndSave: "建立標目並儲存",
+		createMediaItemAndSave: "建立媒體項目並儲存",
 		attachChapterAndSave: "加入章節並儲存",
 		attachLabelAndSave: "加入標目並儲存",
+		attachMediaItemAndSave: "加入媒體項目並儲存",
 		saveCurrentChangesNotice: "此操作會一併儲存目前尚未儲存的內容結構變更。",
 		choosePosition: "選擇結構位置",
 		choosePositionDescription: "選擇標目會加入其子項目末尾；選擇章節會插入該章節下方。",
+		mediaChoosePositionDescription:
+			"選擇標目會加入其子項目末尾；選擇媒體項目會插入該項目下方。",
 		newChapter: "新建章節",
 		newLabel: "新建標目",
+		newMediaItem: "新增媒體項目",
+		newVideo: `新建${videoTerms.inline}`,
+		newAudio: `新建${audioTerms.inline}`,
 		newChapterAfter: "在下方新建章節",
 		newLabelAfter: "在下方新建標目",
+		newVideoAfter: `在下方新建${videoTerms.inline}`,
+		newAudioAfter: `在下方新建${audioTerms.inline}`,
 		expand: "展開",
 		collapse: "摺疊",
 		multiSelect: "多選",
@@ -321,6 +360,12 @@ export default {
 		collapseAll: "摺疊全部",
 		dragHandle: "拖曳以移動",
 		noContent: "還沒有章節。",
+		noMediaContent: `還沒有${videoTerms.inline}或${audioTerms.inline}。`,
+		durationUnknown: "未提供時長",
+		markMediaItemComplete: "標記為已完成",
+		markMediaItemIncomplete: "取消完成標記",
+		mediaItemComplete: "已完成",
+		mediaItemIncomplete: "未完成",
 		saveDraft: "儲存內容結構",
 		discardDraft: "捨棄草稿變更",
 		unsavedDraft: "有尚未儲存的變更",

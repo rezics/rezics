@@ -252,6 +252,12 @@ export const ContentStructureKindPolicies = {
 		acceptsContent: (kind, postKind) =>
 			kind === "label" || (kind === "post" && postKind === "chapter"),
 	},
+	"media.contents": {
+		ownerKinds: ["media"],
+		targets: ["content"],
+		progress: "node_completion",
+		acceptsContent: (kind) => kind === "label" || kind === "video" || kind === "audio",
+	},
 	"post.contents": {
 		ownerKinds: ["post"],
 		targets: ["content"],

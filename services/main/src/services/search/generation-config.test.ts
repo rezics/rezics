@@ -71,7 +71,7 @@ describe("current search generation deployment wiring", () => {
 		);
 		expect(enrichment).toContain(`'projectionVersion', ${CurrentSearchProjectionVersion}`);
 		expect(enrichment).toContain(
-			"WHEN unit_row.kind IN ('book', 'software', 'media', 'zone') THEN 'units'",
+			"WHEN unit_row.kind IN ('book', 'software', 'media', 'video', 'audio', 'zone') THEN 'units'",
 		);
 		expect(enrichment).toContain("WHEN unit_row.kind = 'realm' THEN 'realms'");
 		expect(settings).toContain(`"./settings/current-v${CurrentSearchProjectionVersion}.json"`);

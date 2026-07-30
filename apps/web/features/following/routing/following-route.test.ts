@@ -16,6 +16,8 @@ describe("following routes", () => {
 		expect(followingHref("book", "book-id")).toBe("/units/book/book-id");
 		expect(followingHref("software", "software-id")).toBe("/units/software/software-id");
 		expect(followingHref("media", "media-id")).toBe("/units/media/media-id");
+		expect(followingHref("video", "video-id")).toBe("/units/video/video-id");
+		expect(followingHref("audio", "audio-id")).toBe("/units/audio/audio-id");
 		expect(followingHref("entity", "entity-id")).toBe("/entities/entity-id");
 		expect(followingHref("tag", "tag-id")).toBe("/tags/tag-id");
 		expect(followingHref("structure", "structure-id")).toBe("/tag-structures/structure-id");
@@ -43,6 +45,8 @@ describe("following routes", () => {
 			"book",
 			"software",
 			"media",
+			"video",
+			"audio",
 			"release",
 			"entity",
 			"label",

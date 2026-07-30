@@ -14,12 +14,14 @@ import { resolvedUnitLocalizationLanguage } from "../../units/localization";
 import {
 	contentStructure,
 	contentStructureNode,
+	audio,
 	label,
 	post,
 	unit,
 	unitOwnership,
 	unitLocalization,
 	unitLocalizationContentMetric,
+	video,
 } from "../../database/schema";
 import { findPostTargetingLock } from "../../posts/targeting";
 import { recordUnitRevision } from "../../units/history";
@@ -37,12 +39,15 @@ import {
 	contentStructureTargetFromRow,
 } from "../../content-structure/storage";
 import { insertUnit } from "../../units/create";
-import { BookNotFound, ChapterLanguageNotFound, ChapterNotFound } from "./errors";
+import { BookNotFound, ChapterLanguageNotFound, ChapterNotFound, MediaNotFound } from "./errors";
 import { ContentStructureNotFound } from "../../content-structure/errors";
 import { saveBookContentStructureDraft } from "../../content-structure/book-draft";
+import { saveMediaContentStructureDraft } from "../../content-structure/media-draft";
 import {
 	BookContentStructureParams,
 	BookContentStructureQuery,
+	MediaContentStructureParams,
+	MediaContentStructureQuery,
 	ChapterLocalizationParams,
 	ChapterParams,
 	ReadChapterQuery,
@@ -58,11 +63,14 @@ import {
 	ContentStructureRevisionListQuery,
 	RestoreContentStructureRevisionBody,
 	SaveBookContentStructureDraftBody,
+	SaveMediaContentStructureDraftBody,
 } from "./schema";
 import {
 	ChapterDetailResponse,
 	ContentStructureNodeListResponse,
 	SaveBookContentStructureDraftResponse,
+	MediaContentStructureNodeListResponse,
+	SaveMediaContentStructureDraftResponse,
 	toPortableTextResponse,
 	UpdateStateResponse,
 	ContentStructureDetailResponse,
@@ -187,7 +195,7 @@ async function ensureReleasedContentStructureApi(
 		.from(unit)
 		.where(and(eq(unit.id, unitId), isNull(unit.deletedAt)))
 		.limit(1);
-	const previewRequired = owner?.kind === "media" || owner?.kind === "software";
+	const previewRequired = owner?.kind === "software";
 	const hasDevelopmentPreviewAccess =
 		previewRequired &&
 		(await authorization.platform.hasCapability(DevelopmentPreviewCapability, tx));
@@ -297,6 +305,105 @@ async function readBookContentStructure(
 						wordCount: hasReadableContent ? (row.wordCount ?? 0) : 0,
 						characterCount: hasReadableContent ? (row.characterCount ?? 0) : 0,
 					},
+				};
+			}),
+	};
+}
+
+async function readMediaContentStructure(
+	tx: DatabaseTransaction,
+	mediaId: string,
+	canEditMedia: boolean,
+	localizationLanguages: readonly ContentLanguage[] = [],
+) {
+	const [structure] = await tx
+		.select({ id: contentStructure.id })
+		.from(contentStructure)
+		.where(
+			and(
+				eq(contentStructure.ownerUnitId, mediaId),
+				eq(contentStructure.kind, "media.contents"),
+				isNull(contentStructure.deletedAt),
+			),
+		)
+		.limit(1);
+	if (!structure) return { structureId: null, latestRevisionId: null, items: [] };
+	const rows = await tx
+		.select({
+			id: contentStructureNode.id,
+			parentId: contentStructureNode.parentId,
+			contentUnitId: contentStructureNode.contentUnitId,
+			unitKind: unit.kind,
+			language: unitLocalization.language,
+			title: unitLocalization.title,
+			position: contentStructureNode.position,
+			videoId: video.id,
+			videoDurationSeconds: video.durationSeconds,
+			audioId: audio.id,
+			audioDurationSeconds: audio.durationSeconds,
+			labelId: label.id,
+			unitStatus: unit.status,
+			unitVisibility: unit.visibility,
+		})
+		.from(contentStructureNode)
+		.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
+		.leftJoin(video, eq(video.id, contentStructureNode.contentUnitId))
+		.leftJoin(audio, eq(audio.id, contentStructureNode.contentUnitId))
+		.leftJoin(label, eq(label.id, contentStructureNode.contentUnitId))
+		.innerJoin(
+			unitLocalization,
+			and(
+				eq(unitLocalization.unitId, contentStructureNode.contentUnitId),
+				eq(
+					unitLocalization.language,
+					resolvedUnitLocalizationLanguage(
+						contentStructureNode.contentUnitId,
+						localizationLanguages,
+					),
+				),
+			),
+		)
+		.where(
+			and(
+				eq(contentStructureNode.structureId, structure.id),
+				isNull(contentStructureNode.deletedAt),
+			),
+		)
+		.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id));
+	return {
+		structureId: structure.id,
+		latestRevisionId: await getContentStructureRevision(tx, mediaId, structure.id),
+		items: rows
+			.filter((row) =>
+				isContentStructureNodeReadable(canEditMedia, row.unitStatus, row.unitVisibility),
+			)
+			.map((row) => {
+				const contentKind =
+					row.unitKind === "video" && row.videoId
+						? ("video" as const)
+						: row.unitKind === "audio" && row.audioId
+							? ("audio" as const)
+							: row.unitKind === "label" && row.labelId
+								? ("label" as const)
+								: null;
+				if (!contentKind)
+					throw new Error(
+						`Invalid Media content node ${row.id} unit ${row.contentUnitId}`,
+					);
+				return {
+					id: row.id,
+					parentId: row.parentId,
+					contentUnitId: row.contentUnitId,
+					contentKind,
+					language: row.language,
+					title: row.title ?? "",
+					position: row.position,
+					durationSeconds:
+						contentKind === "video"
+							? row.videoDurationSeconds
+							: contentKind === "audio"
+								? row.audioDurationSeconds
+								: null,
 				};
 			}),
 	};
@@ -764,6 +871,81 @@ export default new Elysia()
 			},
 			detail: {
 				summary: "Save a complete Book Content Structure draft",
+				tags: ["Content Structure"],
+			},
+		},
+	)
+	.get(
+		"/units/media/:unitId/content-structure/nodes",
+		async ({ params, query, request }) => {
+			const { authorization } = await resolveIdentity(request.headers, "unit:read");
+			if (!(await authorization.unit.canRead(params.unitId))) throw new MediaNotFound();
+			const canEditMedia = await authorization.unit.canUpdate(params.unitId);
+			return database.transaction((tx) =>
+				readMediaContentStructure(
+					tx,
+					params.unitId,
+					canEditMedia,
+					query.localizationLanguages,
+				),
+			);
+		},
+		{
+			params: MediaContentStructureParams,
+			query: MediaContentStructureQuery,
+			response: {
+				[StatusCodes.OK]: MediaContentStructureNodeListResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["MediaNotFound"]),
+			},
+			detail: {
+				summary: "List Media Content Structure nodes",
+				tags: ["Content Structure"],
+			},
+		},
+	)
+	.put(
+		"/units/media/:unitId/content-structure",
+		async ({ params, profile, authorization, body }) => {
+			await authorization.unit.ensureCanUpdate(params.unitId, [["content-structure"]]);
+			return database.transaction(async (tx) => {
+				const attachedContentUnitIds = [
+					...new Set(
+						body.nodes.flatMap((node) =>
+							node.state === "attached" ? [node.contentUnitId] : [],
+						),
+					),
+				];
+				for (const unitId of attachedContentUnitIds)
+					await authorization.unit.ensureInTransaction(tx, unitId, "unit.read");
+				const result = await saveMediaContentStructureDraft(tx, {
+					ownerUnitId: params.unitId,
+					baseRevisionId: body.baseRevisionId,
+					actorProfileId: profile.unitId,
+					nodes: body.nodes,
+				});
+				const saved = await readMediaContentStructure(tx, params.unitId, true);
+				if (!saved.structureId || !saved.latestRevisionId) throw new MediaNotFound();
+				return {
+					structureId: saved.structureId,
+					latestRevisionId: saved.latestRevisionId,
+					items: saved.items,
+					revisionCreated: result.revisionCreated,
+				};
+			});
+		},
+		{
+			access: "contribute:unit:update",
+			params: MediaContentStructureParams,
+			body: SaveMediaContentStructureDraftBody,
+			response: {
+				[StatusCodes.OK]: SaveMediaContentStructureDraftResponse,
+				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
+			},
+			detail: {
+				summary: "Save a complete Media Content Structure draft",
 				tags: ["Content Structure"],
 			},
 		},

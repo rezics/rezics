@@ -411,6 +411,10 @@ import type {
 	GetApiUnitsBookByUnitIdContentStructureNodesResponses,
 	PutApiUnitsBookByUnitIdContentStructureOptions,
 	PutApiUnitsBookByUnitIdContentStructureResponses,
+	GetApiUnitsMediaByUnitIdContentStructureNodesOptions,
+	GetApiUnitsMediaByUnitIdContentStructureNodesResponses,
+	PutApiUnitsMediaByUnitIdContentStructureOptions,
+	PutApiUnitsMediaByUnitIdContentStructureResponses,
 	GetApiChaptersByChapterIdOptions,
 	GetApiChaptersByChapterIdResponses,
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentOptions,
@@ -4720,6 +4724,44 @@ export function putApiUnitsBookByUnitIdContentStructure<ThrowOnError extends boo
 		],
 		...config,
 	}) as Promise<RequestResult<PutApiUnitsBookByUnitIdContentStructureResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List Media Content Structure nodes
+ * {@link /api/units/media/:unitId/content-structure/nodes}
+ */
+export function getApiUnitsMediaByUnitIdContentStructureNodes<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUnitsMediaByUnitIdContentStructureNodesOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiUnitsMediaByUnitIdContentStructureNodesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/units/media/{unitId}/content-structure/nodes",
+		...config,
+	}) as Promise<
+		RequestResult<GetApiUnitsMediaByUnitIdContentStructureNodesResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Save a complete Media Content Structure draft
+ * {@link /api/units/media/:unitId/content-structure}
+ */
+export function putApiUnitsMediaByUnitIdContentStructure<ThrowOnError extends boolean = true>(
+	options: Options<PutApiUnitsMediaByUnitIdContentStructureOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiUnitsMediaByUnitIdContentStructureResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/units/media/{unitId}/content-structure",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiUnitsMediaByUnitIdContentStructureResponses, ThrowOnError>>;
 }
 
 /**

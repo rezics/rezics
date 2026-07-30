@@ -29,6 +29,9 @@ describe("catalog detail routes", () => {
 		expect(catalogDetailHref("book", UnitId, "contents")).toBe(
 			`/units/book/${UnitId}/contents`,
 		);
+		expect(catalogDetailHref("media", UnitId, "contents")).toBe(
+			`/units/media/${UnitId}/contents`,
+		);
 		expect(catalogDetailHref("software", UnitId, "requirements")).toBe(
 			`/units/software/${UnitId}/requirements`,
 		);
@@ -42,7 +45,7 @@ describe("catalog detail routes", () => {
 
 	it("rejects a section that belongs to another domain", () => {
 		expect(
-			parseCatalogDetailSection(`/units/media/${UnitId}/contents`, "media", UnitId),
+			parseCatalogDetailSection(`/units/media/${UnitId}/requirements`, "media", UnitId),
 		).toBeUndefined();
 		expect(
 			parseCatalogDetailSection(`/units/book/${UnitId}/requirements`, "book", UnitId),

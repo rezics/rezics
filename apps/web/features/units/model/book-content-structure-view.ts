@@ -4,7 +4,7 @@ export type BookStructureViewNode = {
 	readonly id: string;
 	readonly title: string;
 	readonly language: ContentLanguage;
-	readonly contentKind: "chapter" | "label";
+	readonly contentKind: "chapter" | "video" | "audio" | "label";
 };
 
 export type BookStructureViewTreeNode<Node extends BookStructureViewNode> = {

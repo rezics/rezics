@@ -3,7 +3,7 @@
 import { PublicationLicenseRegistry } from "@rezics/license";
 
 import { useGetApiUnitsByTypeByUnitId } from "@rezics/openapi-tanstack-query";
-import { BookOpen, Gamepad2, LibraryBig, PlaySquare } from "lucide-react";
+import { AudioLines, BookOpen, Gamepad2, LibraryBig, PlaySquare, Video } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { Card, CardContent } from "@rezics/ui";
@@ -29,13 +29,34 @@ import { CatalogSubjectGroups } from "./components/catalog-subject-groups";
 import { canOpenUnitManagement } from "./model/unit-management-section";
 import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import { LocalizedText } from "@/features/content-language-display/chinese-content-display-context";
+import { toNonNegativeApiInteger } from "@/lib/api-number";
+import { isVariantUnitType } from "./unit-types";
 
-const Icons = { book: BookOpen, software: Gamepad2, media: PlaySquare, series: LibraryBig };
+const Icons = {
+	book: BookOpen,
+	software: Gamepad2,
+	media: PlaySquare,
+	series: LibraryBig,
+	video: Video,
+	audio: AudioLines,
+};
 
 function formatDate(value: string | null, language: string) {
 	if (!value) return undefined;
 	const date = new Date(value);
 	return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat(language).format(date);
+}
+
+function formatDuration(value: string | number | null): string | undefined {
+	if (value === null) return undefined;
+	const seconds = toNonNegativeApiInteger(value);
+	if (seconds <= 0) return undefined;
+	const hours = Math.floor(seconds / 3600);
+	const minutes = Math.floor((seconds % 3600) / 60);
+	const remainingSeconds = seconds % 60;
+	return hours
+		? `${hours}:${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`
+		: `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
 }
 
 function tagSearchHref(type: UnitType, tagId: string, label: string): string {
@@ -56,7 +77,8 @@ function DetailSection({ title, children }: { title: string; children: React.Rea
 export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 	const localizationLanguages = useLocalizationLanguages();
 	const { data: session } = useHydratedSession();
-	const dockAccess = useDockManagementAccess(unit, type, Boolean(session));
+	const timedMedia = type === "video" || type === "audio";
+	const dockAccess = useDockManagementAccess(unit, type, Boolean(session) && !timedMedia);
 	const { t, locale } = useTranslation([
 		"engagement",
 		"feed",
@@ -145,6 +167,12 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 		[t.ui.contentRating, rating],
 		[t.units.detail.aiDisclosure, aiDisclosure],
 		[t.units.detail.releasedOn, formatDate(item.releasedOn, locale.current)],
+		[
+			t.units.fields.durationSeconds,
+			item.details.type === "video" || item.details.type === "audio"
+				? formatDuration(item.details.durationSeconds)
+				: undefined,
+		],
 		[t.units.detail.license, licenseValue],
 		[t.units.detail.updatedAt, formatDate(item.updatedAt, locale.current)],
 	] as const;
@@ -186,10 +214,10 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 						) : null}
 						{item.capabilities.canEdit && (
 							<>
-								{type === "book" && (
+								{(type === "book" || type === "media") && (
 									<Button variant="outline" asChild>
 										<Link
-											href={`/units/book/${item.id}/edit/content-structure`}
+											href={`/units/${type}/${item.id}/edit/content-structure`}
 										>
 											{t.units.content.edit}
 										</Link>
@@ -214,13 +242,16 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 				className="-mt-8 flex gap-1 overflow-x-auto border-b"
 				aria-label={t.units.detail.sections}
 			>
-				{[
-					[t.units.detail.information, "#overview"],
-					[t.units.content.title, "#contents"],
-					[t.posts.replies, "#replies"],
-					[t.engagement.reviews, "#reviews"],
-					[t.units.detail.versions, "#versions"],
-				].map(([label, href], index) => (
+				{(timedMedia
+					? [[t.units.detail.information, "#overview"]]
+					: [
+							[t.units.detail.information, "#overview"],
+							[t.units.content.title, "#contents"],
+							[t.posts.replies, "#replies"],
+							[t.engagement.reviews, "#reviews"],
+							[t.units.detail.versions, "#versions"],
+						]
+				).map(([label, href], index) => (
 					<a
 						key={href}
 						className={
@@ -265,7 +296,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 				</div>
 
 				<aside className="flex min-w-0 flex-col gap-6">
-					{type !== "series" ? (
+					{isVariantUnitType(type) ? (
 						<UnitDockRenderer
 							ownerUnitId={item.id}
 							target={{ ownerKind: type, dockKind: "main" }}
@@ -419,7 +450,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 					)}
 				</aside>
 			</div>
-			{type !== "series" ? (
+			{isVariantUnitType(type) ? (
 				<DetailSection title={t.feed.relatedWorks}>
 					<UnitShelf type={type} seedUnitId={item.id} />
 				</DetailSection>

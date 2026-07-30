@@ -45,6 +45,7 @@ type ExistingStructureMutation = MutationActor & {
 
 const SingletonContentStructureKinds = new Set<ContentStructureKind>([
 	"book.contents",
+	"media.contents",
 	"post.contents",
 	"realm.taxonomy",
 	"page-structure",

@@ -46,6 +46,16 @@ export const zhHansTerminology = defineTerminology("zh-Hans", {
 		forms: { label: "帖子", pluralLabel: "帖子", inline: "帖子", plural: "帖子" },
 		forbidden: ["Post", "Posts"],
 	},
+	video: {
+		status: "approved",
+		forms: { label: "视频", pluralLabel: "视频", inline: "视频", plural: "视频" },
+		forbidden: ["Video", "Videos", "影片"],
+	},
+	audio: {
+		status: "approved",
+		forms: { label: "音频", pluralLabel: "音频", inline: "音频", plural: "音频" },
+		forbidden: ["Audio", "Audios", "音訊"],
+	},
 	label: {
 		status: "approved",
 		forms: {

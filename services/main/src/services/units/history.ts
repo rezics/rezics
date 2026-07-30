@@ -20,6 +20,7 @@ import type { DatabaseTransaction } from "../database";
 import type { Authorization } from "../authorization";
 import { isFirstUnitLocalization } from "./localization";
 import {
+	audio,
 	book,
 	collection,
 	entity,
@@ -59,6 +60,7 @@ import {
 	unitStructureApplication,
 	unitTag,
 	unitVariant,
+	video,
 	zone,
 } from "../database/schema";
 import {
@@ -189,6 +191,12 @@ const softwareStateSchema = schemaFactory
 const mediaStateSchema = schemaFactory
 	.createSelectSchema(media)
 	.omit({ id: true, createdAt: true, updatedAt: true });
+const videoStateSchema = schemaFactory
+	.createSelectSchema(video)
+	.omit({ id: true, unitKind: true, createdAt: true, updatedAt: true });
+const audioStateSchema = schemaFactory
+	.createSelectSchema(audio)
+	.omit({ id: true, unitKind: true, createdAt: true, updatedAt: true });
 const entityStateSchema = schemaFactory
 	.createSelectSchema(entity)
 	.omit({ id: true, createdAt: true, updatedAt: true });
@@ -297,6 +305,16 @@ async function snapshotExtension(
 			return parseSnapshotState(
 				mediaStateSchema,
 				(await tx.select().from(media).where(eq(media.id, unitId)).limit(1))[0],
+			);
+		case "video":
+			return parseSnapshotState(
+				videoStateSchema,
+				(await tx.select().from(video).where(eq(video.id, unitId)).limit(1))[0],
+			);
+		case "audio":
+			return parseSnapshotState(
+				audioStateSchema,
+				(await tx.select().from(audio).where(eq(audio.id, unitId)).limit(1))[0],
 			);
 		case "entity":
 			return parseSnapshotState(
@@ -525,6 +543,12 @@ async function restoreExtension(
 			break;
 		case "media":
 			await tx.update(media).set(mediaStateSchema.parse(value)).where(eq(media.id, unitId));
+			break;
+		case "video":
+			await tx.update(video).set(videoStateSchema.parse(value)).where(eq(video.id, unitId));
+			break;
+		case "audio":
+			await tx.update(audio).set(audioStateSchema.parse(value)).where(eq(audio.id, unitId));
 			break;
 		case "entity":
 			await tx

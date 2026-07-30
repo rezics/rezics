@@ -25,13 +25,13 @@ import { RequireSession } from "@/features/auth/require-session";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
-import type { UnitType, VariantUnitType } from "./unit-types";
+import type { CatalogUnitType, VariantUnitType } from "./unit-types";
 import {
 	LocalizationImageUploadField,
 	type LocalizationImageAssetValue,
 } from "@/features/media/components/localization-image-upload-field";
 
-export function UnitBrowsePage({ type }: { type: UnitType }) {
+export function UnitBrowsePage({ type }: { type: CatalogUnitType }) {
 	const { t } = useTranslation(["actions", "media", "ui", "units"]);
 	const localizationLanguages = useLocalizationLanguages();
 	const baseQuery = { limit: 20, localizationLanguages };
@@ -85,7 +85,7 @@ export function UnitBrowsePage({ type }: { type: UnitType }) {
 	);
 }
 
-export function UnitCreatePage({ type }: { type: UnitType }) {
+export function UnitCreatePage({ type }: { type: CatalogUnitType }) {
 	return type === "series" ? <SeriesCreatePage /> : <VariantUnitCreatePage type={type} />;
 }
 

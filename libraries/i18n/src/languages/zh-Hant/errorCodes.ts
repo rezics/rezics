@@ -111,6 +111,7 @@ export default {
 	UnitAccessConfigurationInvalid: "這組條目權限設定無效或超出你可授予的範圍。",
 	InvalidPaginationCursor: "該分頁連結無效或已過期。",
 	BookNotFound: "找不到這本書。",
+	MediaNotFound: "找不到這個媒體項目。",
 	ChapterNotFound: "找不到這個章節。",
 	ChapterLanguageNotFound: "找不到該章節的語言版本。",
 	ReportRealmMismatch: `被檢舉的條目不屬於這個${realmTerms.inline}。`,

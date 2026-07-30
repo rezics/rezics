@@ -1,12 +1,16 @@
 "use client";
 
-import { useGetApiUnitsBookByUnitIdContentStructureNodes } from "@rezics/openapi-tanstack-query";
+import {
+	useGetApiUnitsBookByUnitIdContentStructureNodes,
+	useGetApiUnitsMediaByUnitIdContentStructureNodes,
+} from "@rezics/openapi-tanstack-query";
 import { Card, CardContent, QueryFailure, QueryPending } from "@rezics/ui";
 
 import { DevelopmentPreviewBoundary } from "@/features/preview-access/components/development-preview-boundary";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { BookContentStructureEditor } from "../components/book-content-structure-editor";
+import { MediaContentStructureEditor } from "../components/media-content-structure-editor";
 import { UnitSectionHeader } from "../components/unit-section-header";
 import type { UnitType } from "../unit-types";
 
@@ -19,10 +23,49 @@ export function ContentStructurePage({
 }) {
 	return type === "book" ? (
 		<BookContentStructurePage bookId={unitId} />
+	) : type === "media" ? (
+		<MediaContentStructurePage mediaId={unitId} />
 	) : (
 		<DevelopmentPreviewBoundary>
 			<UnreleasedContentStructurePage />
 		</DevelopmentPreviewBoundary>
+	);
+}
+
+function MediaContentStructurePage({ mediaId }: { mediaId: string }) {
+	const { t } = useTranslation(["ui"]);
+	const localizationLanguages = useLocalizationLanguages();
+	const query = useGetApiUnitsMediaByUnitIdContentStructureNodes(
+		{
+			path: { unitId: mediaId },
+			query: { localizationLanguages },
+		},
+		{
+			query: {
+				refetchOnReconnect: false,
+				refetchOnWindowFocus: false,
+			},
+		},
+	);
+	if (query.isPending) return <QueryPending />;
+	if (query.isError)
+		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (!query.data?.structureId || !query.data.latestRevisionId)
+		return (
+			<div className="grid min-h-64 w-full place-items-center">
+				<p className="text-sm text-destructive">{t.ui.retryLater}</p>
+			</div>
+		);
+	return (
+		<MediaContentStructureEditor
+			initial={{
+				...query.data,
+				structureId: query.data.structureId,
+				latestRevisionId: query.data.latestRevisionId,
+			}}
+			key={query.data.latestRevisionId}
+			mediaId={mediaId}
+		/>
 	);
 }
 
@@ -68,8 +111,8 @@ function BookContentStructurePage({ bookId }: { bookId: string }) {
  *
  * @alpha
  * @remarks
- * Media and Software remain visibly unavailable in the product. Their generic
- * API surface is independently protected by the development preview capability.
+ * Software remains visibly unavailable in the product. Its generic API surface
+ * is independently protected by the development preview capability.
  */
 export function UnreleasedContentStructurePage() {
 	const { t } = useTranslation(["units"]);

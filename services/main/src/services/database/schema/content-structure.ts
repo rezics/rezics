@@ -40,7 +40,7 @@ export const contentStructure = pgTable(
 		uniqueIndex("content_structure_singleton_kind_key")
 			.on(table.ownerUnitId, table.kind)
 			.where(
-				sql`${table.deletedAt} is null and ${table.kind} in ('book.contents', 'post.contents', 'realm.taxonomy', 'page-structure')`,
+				sql`${table.deletedAt} is null and ${table.kind} in ('book.contents', 'media.contents', 'post.contents', 'realm.taxonomy', 'page-structure')`,
 			),
 		index("content_structure_owner_kind_idx")
 			.on(table.ownerUnitId, table.kind, table.createdAt, table.id)

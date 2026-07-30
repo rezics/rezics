@@ -60,10 +60,15 @@ export interface UnitMentionPresentation extends EntityPickerHit {
 	kind: string;
 }
 
+export interface EntitySearchOptions {
+	readonly kinds?: readonly string[];
+}
+
 export type EntitySearch = (
 	index: string,
 	query: string,
 	signal: AbortSignal,
+	options?: EntitySearchOptions,
 ) => Promise<readonly EntityPickerHit[]>;
 export type UnitMentionResolver = (
 	unitIds: readonly string[],

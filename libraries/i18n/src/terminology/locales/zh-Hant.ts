@@ -46,6 +46,16 @@ export const zhHantTerminology = defineTerminology("zh-Hant", {
 		forms: { label: "貼文", pluralLabel: "貼文", inline: "貼文", plural: "貼文" },
 		forbidden: ["Post", "Posts", "帖子"],
 	},
+	video: {
+		status: "approved",
+		forms: { label: "影片", pluralLabel: "影片", inline: "影片", plural: "影片" },
+		forbidden: ["Video", "Videos", "視頻"],
+	},
+	audio: {
+		status: "approved",
+		forms: { label: "音訊", pluralLabel: "音訊", inline: "音訊", plural: "音訊" },
+		forbidden: ["Audio", "Audios", "音頻"],
+	},
 	label: {
 		status: "approved",
 		forms: {

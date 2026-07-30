@@ -37,6 +37,8 @@ export function followingHref(
 		case "book":
 		case "software":
 		case "media":
+		case "video":
+		case "audio":
 			return `/units/${kind}/${id}`;
 		case "entity":
 			return `/entities/${id}`;

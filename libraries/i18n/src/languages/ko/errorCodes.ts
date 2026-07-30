@@ -117,6 +117,7 @@ export default {
 		"이 유닛 접근 설정이 유효하지 않거나 위임할 수 있는 권한을 초과합니다.",
 	InvalidPaginationCursor: "이 페이지 링크가 유효하지 않거나 만료되었습니다.",
 	BookNotFound: "이 책을 찾을 수 없습니다.",
+	MediaNotFound: "이 미디어 항목을 찾을 수 없습니다.",
 	ChapterNotFound: "이 장을 찾을 수 없습니다.",
 	ChapterLanguageNotFound: "이 장의 언어를 찾을 수 없습니다.",
 	ReportRealmMismatch: `신고한 유닛은 이 ${realmTerms.label}에 속하지 않습니다.`,
