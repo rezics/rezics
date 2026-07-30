@@ -225,6 +225,10 @@ export default {
 			progress: "Playback progress",
 			completedCount: "Complete views",
 			totalMinutes: "Total viewing minutes",
+			currentItem: "Current item",
+			noItem: "No item selected",
+			estimatedFromItem:
+				"Estimated from the selected item's position in this work; you can still adjust it.",
 			history: {
 				completion: insert("Finished watching this work on {{date}}.", { date: String }),
 				update: insert("Reached {{percent}}% on {{date}}.", {

@@ -225,6 +225,10 @@ export default {
 			progress: "再生進行",
 			completedCount: "完了視聴",
 			totalMinutes: "総視聴分数",
+			currentItem: "現在の項目",
+			noItem: "項目が選択されていません",
+			estimatedFromItem:
+				"選択した項目の作品内での位置から進捗を推定しました。必要に応じて調整できます。",
 			history: {
 				completion: insert("{{date}} にこの作品を見終えました。", { date: String }),
 				update: insert("{{date}} に {{percent}}% まで視聴しました。", {

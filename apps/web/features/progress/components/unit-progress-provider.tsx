@@ -6,6 +6,7 @@ import {
 	useDeleteApiProgressByUnitId,
 	useGetApiProgressByUnitId,
 	useGetApiUnitsBookByUnitIdContentStructureNodes,
+	useGetApiUnitsMediaByUnitIdContentStructureNodes,
 	usePostApiProgressByUnitIdComplete,
 	usePutApiProgressByUnitId,
 } from "@rezics/openapi-tanstack-query";
@@ -28,6 +29,7 @@ import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { invalidateProgressQueries } from "../data/progress-cache";
 import { estimateBookChapterProgresses } from "../model/book-progress-estimate";
+import { estimateMediaItemProgresses } from "../model/media-progress-estimate";
 import {
 	clampProgress,
 	completeProgressOptimistically,
@@ -41,23 +43,25 @@ import {
 } from "../model/progress-record";
 import { deriveUnitProgressState, type UnitProgressState } from "../model/progress-state";
 
-interface ProgressChapter {
+interface ProgressContentStructureNode {
 	readonly estimatedPercentage: number;
 	readonly id: string;
 	readonly title: string;
 }
 
+const EmptyContentStructureNodes: readonly ProgressContentStructureNode[] = [];
+
 interface UnitProgressContextValue {
 	readonly addToBacklog: () => Promise<boolean>;
-	readonly chapters: readonly ProgressChapter[];
-	readonly chaptersError: unknown;
-	readonly chaptersPending: boolean;
 	readonly closeEditor: () => void;
 	readonly completeCurrentProgress: (
 		update?: Pick<UnitProgressUpdate, "totalTimeMs" | "visibility">,
 	) => Promise<boolean>;
 	readonly completionError: unknown;
 	readonly completionFeedbackCount: number | undefined;
+	readonly contentStructureNodes: readonly ProgressContentStructureNode[];
+	readonly contentStructureNodesError: unknown;
+	readonly contentStructureNodesPending: boolean;
 	readonly currentEntryId: string | null;
 	readonly domain: UnitProgressDomain;
 	readonly editorOpen: boolean;
@@ -105,6 +109,10 @@ export function UnitProgressProvider({
 	const chaptersQuery = useGetApiUnitsBookByUnitIdContentStructureNodes(
 		{ path: { unitId: domain.unitId }, query: { localizationLanguages } },
 		{ query: { enabled: authenticated && domain.type === "book" } },
+	);
+	const mediaItemsQuery = useGetApiUnitsMediaByUnitIdContentStructureNodes(
+		{ path: { unitId: domain.unitId }, query: { localizationLanguages } },
+		{ query: { enabled: authenticated && domain.type === "media" } },
 	);
 	const {
 		error: saveError,
@@ -159,6 +167,40 @@ export function UnitProgressProvider({
 				: [];
 		});
 	}, [chaptersQuery.data?.items]);
+	const mediaItems = useMemo(() => {
+		const nodes = mediaItemsQuery.data?.items ?? [];
+		const titleById = new Map(nodes.map((node) => [node.id, node.title]));
+		return estimateMediaItemProgresses(nodes).flatMap((estimate) => {
+			const title = titleById.get(estimate.id);
+			return title !== undefined
+				? [
+						{
+							id: estimate.id,
+							title,
+							estimatedPercentage: estimate.percentage,
+						},
+					]
+				: [];
+		});
+	}, [mediaItemsQuery.data?.items]);
+	const contentStructureNodes =
+		domain.type === "book"
+			? chapters
+			: domain.type === "media"
+				? mediaItems
+				: EmptyContentStructureNodes;
+	const contentStructureNodesError =
+		domain.type === "book"
+			? chaptersQuery.error
+			: domain.type === "media"
+				? mediaItemsQuery.error
+				: undefined;
+	const contentStructureNodesPending =
+		domain.type === "book"
+			? chaptersQuery.isPending
+			: domain.type === "media"
+				? mediaItemsQuery.isPending
+				: false;
 	const displayedRecord = completionPreview ?? confirmedRecord;
 	const state = useMemo(
 		() =>
@@ -315,13 +357,13 @@ export function UnitProgressProvider({
 	const value = useMemo<UnitProgressContextValue>(
 		() => ({
 			addToBacklog,
-			chapters,
-			chaptersError: chaptersQuery.error,
-			chaptersPending: chaptersQuery.isPending,
 			closeEditor,
 			completeCurrentProgress,
 			completionError,
 			completionFeedbackCount,
+			contentStructureNodes,
+			contentStructureNodesError,
+			contentStructureNodesPending,
 			currentEntryId,
 			domain,
 			editorOpen,
@@ -340,14 +382,14 @@ export function UnitProgressProvider({
 		}),
 		[
 			addToBacklog,
-			chapters,
-			chaptersQuery.error,
-			chaptersQuery.isPending,
 			closeEditor,
 			completeCurrentProgress,
 			completionError,
 			completionFeedbackCount,
 			completionPreview,
+			contentStructureNodes,
+			contentStructureNodesError,
+			contentStructureNodesPending,
 			currentEntryId,
 			domain,
 			editorOpen,

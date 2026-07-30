@@ -26,6 +26,35 @@ const queryResults = vi.hoisted(() => ({
 		error: undefined,
 		isPending: false,
 	},
+	mediaItems: {
+		data: {
+			state: "initialized",
+			items: [
+				{
+					id: "019f0000-0000-7000-8000-000000000001",
+					parentId: null,
+					contentUnitId: "019f0000-0000-7000-8000-000000000011",
+					contentKind: "video",
+					language: "zh",
+					title: "第一集",
+					position: "a0",
+					durationSeconds: 100,
+				},
+				{
+					id: "019f0000-0000-7000-8000-000000000002",
+					parentId: null,
+					contentUnitId: "019f0000-0000-7000-8000-000000000012",
+					contentKind: "audio",
+					language: "zh",
+					title: "第二集",
+					position: "a1",
+					durationSeconds: 300,
+				},
+			],
+		},
+		error: undefined,
+		isPending: false,
+	},
 	progress: {
 		data: {
 			state: "tracked",
@@ -58,6 +87,7 @@ vi.mock("@rezics/openapi-tanstack-query", async (importOriginal) => {
 		}),
 		useGetApiProgressByUnitId: () => queryResults.progress,
 		useGetApiUnitsBookByUnitIdContentStructureNodes: () => queryResults.chapters,
+		useGetApiUnitsMediaByUnitIdContentStructureNodes: () => queryResults.mediaItems,
 		usePostApiProgressByUnitIdComplete: () => ({
 			error: undefined,
 			mutateAsync: actions.completeProgress,
@@ -110,22 +140,32 @@ function ProgressEditorProbe() {
 	observedEditorActions.removeProgress.add(progress.removeProgress);
 	observedEditorActions.saveProgress.add(progress.saveProgress);
 	return (
-		<button onClick={progress.openEditor} type="button">
-			{progress.editorOpen ? "open" : "closed"}
-		</button>
+		<>
+			<button onClick={progress.openEditor} type="button">
+				{progress.editorOpen ? "open" : "closed"}
+			</button>
+			<output data-testid="content-structure-nodes">
+				{progress.contentStructureNodes
+					.map(({ estimatedPercentage, title }) => `${title}:${estimatedPercentage}`)
+					.join(",")}
+			</output>
+		</>
 	);
 }
 
-function renderProvider(
-	props: Pick<ComponentProps<typeof UnitProgressProvider>, "initialEditorOpen"> = {},
-) {
+function renderProvider({
+	domain: providerDomain = domain,
+	...props
+}: Pick<ComponentProps<typeof UnitProgressProvider>, "initialEditorOpen"> & {
+	readonly domain?: ComponentProps<typeof UnitProgressProvider>["domain"];
+} = {}) {
 	const queryClient = new QueryClient({
 		defaultOptions: { queries: { retry: false } },
 	});
 	return render(
 		<QueryClientProvider client={queryClient}>
 			<TranslationProvider initial={translation.snapshot}>
-				<UnitProgressProvider domain={domain} {...props}>
+				<UnitProgressProvider domain={providerDomain} {...props}>
 					<ProgressEditorProbe />
 				</UnitProgressProvider>
 			</TranslationProvider>
@@ -162,5 +202,18 @@ describe("UnitProgressProvider editor lifecycle", () => {
 		for (const observed of Object.values(observedEditorActions)) {
 			expect(observed.size).toBe(1);
 		}
+	});
+
+	it("exposes duration-weighted Media content structure positions", () => {
+		renderProvider({
+			domain: {
+				type: "media",
+				unitId: "019f9000-0000-7000-8000-000000000002",
+			},
+		});
+
+		expect(screen.getByTestId("content-structure-nodes").textContent).toBe(
+			"第一集:25,第二集:100",
+		);
 	});
 });

@@ -230,6 +230,10 @@ export default {
 			progress: "재생 진행",
 			completedCount: "완료 시청",
 			totalMinutes: "총 시청 시간",
+			currentItem: "현재 항목",
+			noItem: "선택한 항목 없음",
+			estimatedFromItem:
+				"선택한 항목의 작품 내 위치를 바탕으로 진행률을 추정했습니다. 필요하면 조정할 수 있습니다.",
 			history: {
 				completion: insert("{{date}}에 이 작품을 다 봤습니다.", { date: String }),
 				update: insert("{{date}}에 {{percent}}%까지 시청했습니다.", {

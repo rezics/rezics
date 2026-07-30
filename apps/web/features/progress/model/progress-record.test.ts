@@ -88,8 +88,14 @@ describe("progress record input", () => {
 		expect(createBacklogUpdate("media")).toEqual({
 			status: "backlog",
 			progress: 0,
+			lastContentStructureNodeId: null,
 		});
 		expect(createRereadUpdate("book")).toEqual({
+			status: "active",
+			progress: 0,
+			lastContentStructureNodeId: null,
+		});
+		expect(createRereadUpdate("media")).toEqual({
 			status: "active",
 			progress: 0,
 			lastContentStructureNodeId: null,
@@ -110,6 +116,18 @@ describe("progress record input", () => {
 			status: "active",
 			progress: 0.42,
 			lastContentStructureNodeId: activeBook.lastContentStructureNodeId,
+		});
+		expect(
+			createResumeUpdate("media", {
+				...activeBook,
+				status: "paused",
+				totalTimeMs: 5_400_000,
+			}),
+		).toEqual({
+			status: "active",
+			progress: 0.42,
+			lastContentStructureNodeId: activeBook.lastContentStructureNodeId,
+			totalTimeMs: 5_400_000,
 		});
 	});
 
@@ -138,11 +156,12 @@ describe("progress record input", () => {
 				status: "paused",
 				percentage: "67",
 				totalMinutes: "90",
-				lastNodeId: "",
+				lastNodeId: activeBook.lastContentStructureNodeId ?? "",
 			}),
 		).toEqual({
 			status: "paused",
 			progress: 0.67,
+			lastContentStructureNodeId: activeBook.lastContentStructureNodeId,
 			totalTimeMs: 5_400_000,
 		});
 		expect(

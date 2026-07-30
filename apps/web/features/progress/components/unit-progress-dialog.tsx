@@ -30,7 +30,6 @@ import {
 	RadioGroupLabel,
 	Slider,
 	SliderLabel,
-	SliderValue,
 } from "@rezics/ui";
 import { RotateCcw, Trash2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
@@ -361,8 +360,7 @@ function BookProgressFields({
 	readonly draft: ProgressDraft;
 	readonly onChange: (draft: ProgressDraft | ((draft: ProgressDraft) => ProgressDraft)) => void;
 }) {
-	const progress = useUnitProgress();
-	const { t } = useTranslation(["engagement", "ui"]);
+	const { t } = useTranslation(["engagement"]);
 	const copy = t.engagement.progressByType.book;
 	const showPosition = draft.status !== "backlog" && draft.status !== "completed";
 
@@ -371,36 +369,13 @@ function BookProgressFields({
 	return (
 		<>
 			<PercentageField draft={draft} label={copy.progress} onChange={onChange} />
-			<Field>
-				<FieldLabel htmlFor="unit-progress-chapter">{copy.lastChapter}</FieldLabel>
-				<NativeSelect
-					disabled={progress.chaptersPending || Boolean(progress.chaptersError)}
-					id="unit-progress-chapter"
-					onChange={(event) => {
-						const selectedNodeId = event.currentTarget.value;
-						const estimate = progress.chapters.find(
-							(chapter) => chapter.id === selectedNodeId,
-						)?.estimatedPercentage;
-						onChange((current) => ({
-							...current,
-							lastNodeId: selectedNodeId,
-							percentage: String(estimate ?? current.percentage),
-						}));
-					}}
-					value={draft.lastNodeId}
-				>
-					<NativeSelectOption value="">{copy.noChapter}</NativeSelectOption>
-					{progress.chapters.map((chapter) => (
-						<NativeSelectOption key={chapter.id} value={chapter.id}>
-							{chapter.title}
-						</NativeSelectOption>
-					))}
-				</NativeSelect>
-				{draft.lastNodeId ? (
-					<p className="text-sm text-muted-foreground">{copy.estimatedFromContents}</p>
-				) : null}
-				<RequestFailure error={progress.chaptersError} fallback={t.ui.retryLater} />
-			</Field>
+			<ContentStructureNodeField
+				description={copy.estimatedFromContents}
+				draft={draft}
+				label={copy.lastChapter}
+				noSelectionLabel={copy.noChapter}
+				onChange={onChange}
+			/>
 		</>
 	);
 }
@@ -418,10 +393,72 @@ function MediaProgressFields({
 	return (
 		<>
 			{showPosition ? (
-				<PercentageField draft={draft} label={copy.progress} onChange={onChange} />
+				<>
+					<PercentageField draft={draft} label={copy.progress} onChange={onChange} />
+					<ContentStructureNodeField
+						description={copy.estimatedFromItem}
+						draft={draft}
+						label={copy.currentItem}
+						noSelectionLabel={copy.noItem}
+						onChange={onChange}
+					/>
+				</>
 			) : null}
 			<TotalMinutesField draft={draft} label={copy.totalMinutes} onChange={onChange} />
 		</>
+	);
+}
+
+function ContentStructureNodeField({
+	description,
+	draft,
+	label,
+	noSelectionLabel,
+	onChange,
+}: {
+	readonly description: string;
+	readonly draft: ProgressDraft;
+	readonly label: string;
+	readonly noSelectionLabel: string;
+	readonly onChange: (draft: ProgressDraft | ((draft: ProgressDraft) => ProgressDraft)) => void;
+}) {
+	const progress = useUnitProgress();
+	const { t } = useTranslation(["ui"]);
+	return (
+		<Field>
+			<FieldLabel htmlFor="unit-progress-content-structure-node">{label}</FieldLabel>
+			<NativeSelect
+				disabled={
+					progress.contentStructureNodesPending ||
+					Boolean(progress.contentStructureNodesError)
+				}
+				id="unit-progress-content-structure-node"
+				onChange={(event) => {
+					const selectedNodeId = event.currentTarget.value;
+					const estimate = progress.contentStructureNodes.find(
+						(node) => node.id === selectedNodeId,
+					)?.estimatedPercentage;
+					onChange((current) => ({
+						...current,
+						lastNodeId: selectedNodeId,
+						percentage: String(estimate ?? current.percentage),
+					}));
+				}}
+				value={draft.lastNodeId}
+			>
+				<NativeSelectOption value="">{noSelectionLabel}</NativeSelectOption>
+				{progress.contentStructureNodes.map((node) => (
+					<NativeSelectOption key={node.id} value={node.id}>
+						{node.title}
+					</NativeSelectOption>
+				))}
+			</NativeSelect>
+			{draft.lastNodeId ? <FieldDescription>{description}</FieldDescription> : null}
+			<RequestFailure
+				error={progress.contentStructureNodesError}
+				fallback={t.ui.retryLater}
+			/>
+		</Field>
 	);
 }
 
@@ -470,7 +507,6 @@ function PercentageField({
 				>
 					<div className="flex items-center gap-3">
 						<SliderLabel>{label}</SliderLabel>
-						<SliderValue />
 					</div>
 				</Slider>
 				<Input

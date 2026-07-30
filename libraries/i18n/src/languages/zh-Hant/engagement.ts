@@ -224,6 +224,9 @@ export default {
 			progress: "播放進度",
 			completedCount: "完整觀看次數",
 			totalMinutes: "累計觀看分鐘",
+			currentItem: "目前項目",
+			noItem: "尚未選擇項目",
+			estimatedFromItem: "已依所選項目在作品中的位置估算進度，你仍可自行調整。",
 			history: {
 				completion: insert("於 {{date}} 看完了這部作品。", { date: String }),
 				update: insert("於 {{date}} 看到 {{percent}}%。", {

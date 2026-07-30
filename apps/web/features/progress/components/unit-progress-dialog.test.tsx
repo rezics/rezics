@@ -84,10 +84,10 @@ function setProgressState(
 ) {
 	progressContext.current = {
 		...actions,
-		chapters: [],
-		chaptersError: undefined,
-		chaptersPending: false,
 		completionError: undefined,
+		contentStructureNodes: [],
+		contentStructureNodesError: undefined,
+		contentStructureNodesPending: false,
 		domain: {
 			type,
 			unitId: "019f0000-0000-7000-8000-000000000001",
@@ -171,12 +171,56 @@ describe("UnitProgressDialog", () => {
 
 		await vi.waitFor(() =>
 			expect(actions.saveProgress).toHaveBeenCalledWith({
+				lastContentStructureNodeId: null,
 				progress: 0.75,
 				status: "active",
 				totalTimeMs: 0,
 				visibility: "public",
 			}),
 		);
+	});
+
+	it("selects a media content item and estimates its progress", async () => {
+		setProgressState(null, "media");
+		progressContext.current = {
+			...progressContext.current,
+			contentStructureNodes: [
+				{
+					estimatedPercentage: 57,
+					id: "019f0000-0000-7000-8000-000000000057",
+					title: "第 2 集",
+				},
+			],
+		};
+		renderDialog();
+
+		fireEvent.change(screen.getByRole("combobox", { name: "目前項目" }), {
+			target: { value: "019f0000-0000-7000-8000-000000000057" },
+		});
+		expect(
+			(screen.getByRole("spinbutton", { name: "播放進度" }) as HTMLInputElement).value,
+		).toBe("57");
+		fireEvent.click(screen.getByRole("button", { name: "更新進度" }));
+
+		await vi.waitFor(() =>
+			expect(actions.saveProgress).toHaveBeenCalledWith({
+				lastContentStructureNodeId: "019f0000-0000-7000-8000-000000000057",
+				progress: 0.57,
+				status: "active",
+				totalTimeMs: 0,
+				visibility: "public",
+			}),
+		);
+	});
+
+	it("shows the editable percentage without a duplicate slider value", () => {
+		setProgressState({ ...existingRecord, progress: 0.57 }, "media");
+		renderDialog();
+
+		expect(
+			(screen.getByRole("spinbutton", { name: "播放進度" }) as HTMLInputElement).value,
+		).toBe("57");
+		expect(screen.queryByText("57")).toBeNull();
 	});
 
 	it("offers an explicitly individual visibility control when editing existing progress", async () => {

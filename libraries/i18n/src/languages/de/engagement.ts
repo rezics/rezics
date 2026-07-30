@@ -229,6 +229,10 @@ export default {
 			progress: "Wiedergabefortschritt",
 			completedCount: "Vollständige Wiedergaben",
 			totalMinutes: "Gesamte Wiedergabezeit in Minuten",
+			currentItem: "Aktuelles Element",
+			noItem: "Kein Element ausgewählt",
+			estimatedFromItem:
+				"Anhand der Position des ausgewählten Elements im Werk geschätzt; du kannst den Wert weiterhin anpassen.",
 			history: {
 				completion: insert("Dieses Werk am {{date}} vollständig angesehen.", {
 					date: String,

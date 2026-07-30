@@ -226,6 +226,10 @@ export default {
 			progress: "Progression de lecture",
 			completedCount: "Visionnages achevés",
 			totalMinutes: "Minutes de visionnage totales",
+			currentItem: "Élément actuel",
+			noItem: "Aucun élément sélectionné",
+			estimatedFromItem:
+				"Estimation basée sur la position de l’élément sélectionné dans l’œuvre ; vous pouvez encore l’ajuster.",
 			history: {
 				completion: insert("Œuvre visionnée en entier le {{date}}.", { date: String }),
 				update: insert("Visionnage porté à {{percent}} % le {{date}}.", {

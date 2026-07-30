@@ -224,6 +224,9 @@ export default {
 			progress: "播放进度",
 			completedCount: "完整观看次数",
 			totalMinutes: "累计观看分钟",
+			currentItem: "当前项目",
+			noItem: "尚未选择项目",
+			estimatedFromItem: "已根据所选项目在作品中的位置估算进度，你仍可自行调整。",
 			history: {
 				completion: insert("于 {{date}} 看完了这部作品。", { date: String }),
 				update: insert("于 {{date}} 看到 {{percent}}%。", {

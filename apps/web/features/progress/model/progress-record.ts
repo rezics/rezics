@@ -122,7 +122,7 @@ export function createBacklogUpdate(type: UnitProgressDomain["type"]): UnitProgr
 	return {
 		status: "backlog",
 		progress: 0,
-		...(type === "book" ? { lastContentStructureNodeId: null } : {}),
+		...(type === "software" ? {} : { lastContentStructureNodeId: null }),
 	};
 }
 
@@ -130,7 +130,7 @@ export function createRereadUpdate(type: UnitProgressDomain["type"]): UnitProgre
 	return {
 		status: "active",
 		progress: 0,
-		...(type === "book" ? { lastContentStructureNodeId: null } : {}),
+		...(type === "software" ? {} : { lastContentStructureNodeId: null }),
 	};
 }
 
@@ -143,7 +143,12 @@ export function createResumeUpdate(
 		progress: type === "software" ? 0 : record.progress,
 		...(type === "book"
 			? { lastContentStructureNodeId: record.lastContentStructureNodeId }
-			: { totalTimeMs: record.totalTimeMs }),
+			: type === "media"
+				? {
+						lastContentStructureNodeId: record.lastContentStructureNodeId,
+						totalTimeMs: record.totalTimeMs,
+					}
+				: { totalTimeMs: record.totalTimeMs }),
 	};
 }
 
@@ -201,6 +206,7 @@ export function createProgressUpdate(
 	return {
 		status: draft.status,
 		progress,
+		lastContentStructureNodeId: atBoundary ? null : draft.lastNodeId || null,
 		totalTimeMs: totalMinutes * 60_000,
 	};
 }

@@ -424,12 +424,18 @@ function ProgressEntryDetails({
 	const progress = useUnitProgress();
 	const { locale, t } = useTranslation(["engagement"]);
 	const copy = t.engagement.progressJournal;
-	const chapter =
-		type === "book"
-			? progress.chapters.find(
+	const contentStructureNode =
+		type === "software"
+			? undefined
+			: progress.contentStructureNodes.find(
 					(candidate) => candidate.id === entry.lastContentStructureNodeId,
-				)
-			: undefined;
+				);
+	const contentStructureNodeLabel =
+		type === "book"
+			? t.engagement.progressByType.book.lastChapter
+			: type === "media"
+				? t.engagement.progressByType.media.currentItem
+				: undefined;
 	const date = formatProgressEntryDate(
 		entry.occurredAt,
 		entry.datePrecision,
@@ -459,12 +465,10 @@ function ProgressEntryDetails({
 							percent: Math.round(entry.progress * 100),
 						})}
 					</dd>
-					{chapter ? (
+					{contentStructureNode && contentStructureNodeLabel ? (
 						<>
-							<dt className="text-muted-foreground">
-								{t.engagement.progressByType.book.lastChapter}
-							</dt>
-							<dd className="text-right">{chapter.title}</dd>
+							<dt className="text-muted-foreground">{contentStructureNodeLabel}</dt>
+							<dd className="text-right">{contentStructureNode.title}</dd>
 						</>
 					) : null}
 					{type === "book" ? null : (

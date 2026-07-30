@@ -248,6 +248,20 @@ function PositionFields({
 	const progress = useUnitProgress();
 	const { t } = useTranslation(["engagement", "ui"]);
 	const copy = t.engagement.progressJournal;
+	const contentStructureCopy =
+		type === "book"
+			? {
+					description: t.engagement.progressByType.book.estimatedFromContents,
+					label: t.engagement.progressByType.book.lastChapter,
+					noSelectionLabel: t.engagement.progressByType.book.noChapter,
+				}
+			: type === "media"
+				? {
+						description: t.engagement.progressByType.media.estimatedFromItem,
+						label: t.engagement.progressByType.media.currentItem,
+						noSelectionLabel: t.engagement.progressByType.media.noItem,
+					}
+				: undefined;
 	return (
 		<>
 			{type === "software" ? null : (
@@ -271,18 +285,21 @@ function PositionFields({
 					/>
 				</Field>
 			)}
-			{type === "book" ? (
+			{contentStructureCopy ? (
 				<Field>
-					<FieldLabel htmlFor="progress-entry-chapter">
-						{t.engagement.progressByType.book.lastChapter}
+					<FieldLabel htmlFor="progress-entry-content-structure-node">
+						{contentStructureCopy.label}
 					</FieldLabel>
 					<NativeSelect
-						disabled={progress.chaptersPending || Boolean(progress.chaptersError)}
-						id="progress-entry-chapter"
+						disabled={
+							progress.contentStructureNodesPending ||
+							Boolean(progress.contentStructureNodesError)
+						}
+						id="progress-entry-content-structure-node"
 						onChange={(event) => {
 							const lastNodeId = event.currentTarget.value;
-							const estimatedPercentage = progress.chapters.find(
-								(chapter) => chapter.id === lastNodeId,
+							const estimatedPercentage = progress.contentStructureNodes.find(
+								(node) => node.id === lastNodeId,
 							)?.estimatedPercentage;
 							onChange((current) => ({
 								...current,
@@ -296,20 +313,21 @@ function PositionFields({
 						value={draft.lastNodeId}
 					>
 						<NativeSelectOption value="">
-							{t.engagement.progressByType.book.noChapter}
+							{contentStructureCopy.noSelectionLabel}
 						</NativeSelectOption>
-						{progress.chapters.map((chapter) => (
-							<NativeSelectOption key={chapter.id} value={chapter.id}>
-								{chapter.title}
+						{progress.contentStructureNodes.map((node) => (
+							<NativeSelectOption key={node.id} value={node.id}>
+								{node.title}
 							</NativeSelectOption>
 						))}
 					</NativeSelect>
 					{draft.lastNodeId ? (
-						<FieldDescription>
-							{t.engagement.progressByType.book.estimatedFromContents}
-						</FieldDescription>
+						<FieldDescription>{contentStructureCopy.description}</FieldDescription>
 					) : null}
-					<RequestFailure error={progress.chaptersError} fallback={t.ui.retryLater} />
+					<RequestFailure
+						error={progress.contentStructureNodesError}
+						fallback={t.ui.retryLater}
+					/>
 				</Field>
 			) : null}
 			{type === "book" ? null : (

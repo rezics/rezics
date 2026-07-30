@@ -225,6 +225,10 @@ export default {
 			progress: "Progreso de reproducción",
 			completedCount: "Visualizaciones completadas",
 			totalMinutes: "Minutos totales de visualización",
+			currentItem: "Elemento actual",
+			noItem: "Ningún elemento seleccionado",
+			estimatedFromItem:
+				"Estimado a partir de la posición del elemento seleccionado en la obra; todavía puedes ajustarlo.",
 			history: {
 				completion: insert("Terminaste de ver esta obra el {{date}}.", { date: String }),
 				update: insert("Llegaste al {{percent}} % el {{date}}.", {
