@@ -12,6 +12,7 @@ import {
 	FeedUnitItemResponse,
 	FeedWikiItemResponse,
 	LocalizedContentMetricResponse,
+	MediaContentStructureNodeListResponse,
 	OrdinaryPostDetailResponse,
 	PostDetailResponse,
 	ReviewDetailResponse,
@@ -189,6 +190,40 @@ describe("API response values", () => {
 				chapterCount: 3,
 				wordCount: 200.5,
 				characterCount: 400,
+			}),
+		).toBe(false);
+	});
+
+	it("keeps uninitialized Media structures distinct from initialized revisions", () => {
+		const structureId = "00000000-0000-7000-8000-000000000001";
+		const latestRevisionId = "00000000-0000-7000-8000-000000000002";
+
+		expect(
+			Check(MediaContentStructureNodeListResponse, {
+				state: "uninitialized",
+				items: [],
+			}),
+		).toBe(true);
+		expect(
+			Check(MediaContentStructureNodeListResponse, {
+				state: "uninitialized",
+				structureId,
+				latestRevisionId,
+				items: [],
+			}),
+		).toBe(false);
+		expect(
+			Check(MediaContentStructureNodeListResponse, {
+				state: "initialized",
+				structureId,
+				latestRevisionId,
+				items: [],
+			}),
+		).toBe(true);
+		expect(
+			Check(MediaContentStructureNodeListResponse, {
+				state: "initialized",
+				items: [],
 			}),
 		).toBe(false);
 	});

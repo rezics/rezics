@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, isNull, ne } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
 import {
@@ -56,6 +56,17 @@ function ensureDirectContentStructureEditing(kind: ContentStructureKind): void {
 		throw new ContentStructureInvalid(
 			"Navigation structures must be edited through the NavigationDocument adapter",
 		);
+}
+
+/** Serializes singleton Content Structure creation for one owner and kind. @internal */
+export async function lockContentStructureOwnerKind(
+	tx: DatabaseTransaction,
+	ownerUnitId: string,
+	kind: ContentStructureKind,
+): Promise<void> {
+	await tx.execute(
+		sql`select pg_advisory_xact_lock(hashtextextended(${"content-structure-owner:" + ownerUnitId + ":" + kind}::text, 0))`,
+	);
 }
 
 async function resolveRealmTagQueryStrategy(
@@ -168,6 +179,7 @@ export async function createContentStructure(
 	ensureDirectContentStructureEditing(input.kind);
 	if (input.documentKey != null)
 		throw new ContentStructureInvalid("Non-navigation structures cannot have a document key");
+	await lockContentStructureOwnerKind(tx, input.ownerUnitId, input.kind);
 	if (SingletonContentStructureKinds.has(input.kind)) {
 		const [existing] = await tx
 			.select({ id: contentStructure.id })

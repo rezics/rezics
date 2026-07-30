@@ -33,7 +33,6 @@ export function ContentStructurePage({
 }
 
 function MediaContentStructurePage({ mediaId }: { mediaId: string }) {
-	const { t } = useTranslation(["ui"]);
 	const localizationLanguages = useLocalizationLanguages();
 	const query = useGetApiUnitsMediaByUnitIdContentStructureNodes(
 		{
@@ -50,20 +49,10 @@ function MediaContentStructurePage({ mediaId }: { mediaId: string }) {
 	if (query.isPending) return <QueryPending />;
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
-	if (!query.data?.structureId || !query.data.latestRevisionId)
-		return (
-			<div className="grid min-h-64 w-full place-items-center">
-				<p className="text-sm text-destructive">{t.ui.retryLater}</p>
-			</div>
-		);
 	return (
 		<MediaContentStructureEditor
-			initial={{
-				...query.data,
-				structureId: query.data.structureId,
-				latestRevisionId: query.data.latestRevisionId,
-			}}
-			key={query.data.latestRevisionId}
+			initial={query.data}
+			key={query.data.state === "initialized" ? query.data.latestRevisionId : "uninitialized"}
 			mediaId={mediaId}
 		/>
 	);

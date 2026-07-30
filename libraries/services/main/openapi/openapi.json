@@ -93020,98 +93020,128 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["structureId", "latestRevisionId", "items"],
-									"properties": {
-										"structureId": {
-											"nullable": true,
-											"anyOf": [
-												{ "format": "uuid", "type": "string" },
-												{ "type": "null" }
-											]
+									"anyOf": [
+										{
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["state", "items"],
+											"properties": {
+												"state": {
+													"const": "uninitialized",
+													"type": "string"
+												},
+												"items": {
+													"type": "array",
+													"minItems": 0,
+													"maxItems": 0
+												}
+											}
 										},
-										"latestRevisionId": {
-											"nullable": true,
-											"anyOf": [
-												{ "format": "uuid", "type": "string" },
-												{ "type": "null" }
-											]
-										},
-										"items": {
-											"type": "array",
-											"items": {
-												"type": "object",
-												"required": [
-													"id",
-													"parentId",
-													"contentUnitId",
-													"contentKind",
-													"language",
-													"title",
-													"position",
-													"durationSeconds"
-												],
-												"properties": {
-													"id": { "format": "uuid", "type": "string" },
-													"parentId": {
-														"nullable": true,
-														"anyOf": [
-															{ "format": "uuid", "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"contentUnitId": {
-														"format": "uuid",
-														"type": "string"
-													},
-													"contentKind": {
-														"default": "video",
-														"type": "string",
-														"enum": ["video", "audio", "label"]
-													},
-													"language": {
-														"type": "string",
-														"enum": [
-															"zh",
-															"en",
-															"ja",
-															"ko",
-															"de",
-															"fr",
-															"es"
-														]
-													},
-													"title": { "type": "string" },
-													"position": {
-														"format": "fractional-position",
-														"minLength": 2,
-														"maxLength": 512,
-														"type": "string"
-													},
-													"durationSeconds": {
-														"nullable": true,
-														"anyOf": [
-															{
-																"minimum": 1,
+										{
+											"additionalProperties": false,
+											"type": "object",
+											"required": [
+												"state",
+												"structureId",
+												"latestRevisionId",
+												"items"
+											],
+											"properties": {
+												"state": {
+													"const": "initialized",
+													"type": "string"
+												},
+												"structureId": {
+													"format": "uuid",
+													"type": "string"
+												},
+												"latestRevisionId": {
+													"format": "uuid",
+													"type": "string"
+												},
+												"items": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"required": [
+															"id",
+															"parentId",
+															"contentUnitId",
+															"contentKind",
+															"language",
+															"title",
+															"position",
+															"durationSeconds"
+														],
+														"properties": {
+															"id": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"parentId": {
+																"nullable": true,
 																"anyOf": [
 																	{
-																		"format": "integer",
-																		"default": 0,
+																		"format": "uuid",
 																		"type": "string"
 																	},
-																	{
-																		"minimum": 1,
-																		"type": "integer"
-																	}
+																	{ "type": "null" }
 																]
 															},
-															{ "type": "null" }
-														]
+															"contentUnitId": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"contentKind": {
+																"default": "video",
+																"type": "string",
+																"enum": ["video", "audio", "label"]
+															},
+															"language": {
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
+																]
+															},
+															"title": { "type": "string" },
+															"position": {
+																"format": "fractional-position",
+																"minLength": 2,
+																"maxLength": 512,
+																"type": "string"
+															},
+															"durationSeconds": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"minimum": 1,
+																		"anyOf": [
+																			{
+																				"format": "integer",
+																				"default": 0,
+																				"type": "string"
+																			},
+																			{
+																				"minimum": 1,
+																				"type": "integer"
+																			}
+																		]
+																	},
+																	{ "type": "null" }
+																]
+															}
+														}
 													}
 												}
 											}
 										}
-									}
+									]
 								}
 							}
 						}
@@ -93183,9 +93213,38 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["baseRevisionId", "nodes"],
+								"required": ["base", "nodes"],
 								"properties": {
-									"baseRevisionId": { "format": "uuid", "type": "string" },
+									"base": {
+										"anyOf": [
+											{
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["kind"],
+												"properties": {
+													"kind": {
+														"const": "uninitialized",
+														"type": "string"
+													}
+												}
+											},
+											{
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["kind", "revisionId"],
+												"properties": {
+													"kind": {
+														"const": "revision",
+														"type": "string"
+													},
+													"revisionId": {
+														"format": "uuid",
+														"type": "string"
+													}
+												}
+											}
+										]
+									},
 									"nodes": {
 										"maxItems": 10000,
 										"type": "array",
@@ -93367,12 +93426,14 @@
 								"schema": {
 									"type": "object",
 									"required": [
+										"state",
 										"structureId",
 										"latestRevisionId",
 										"revisionCreated",
 										"items"
 									],
 									"properties": {
+										"state": { "const": "initialized", "type": "string" },
 										"structureId": { "format": "uuid", "type": "string" },
 										"latestRevisionId": { "format": "uuid", "type": "string" },
 										"revisionCreated": { "type": "boolean" },

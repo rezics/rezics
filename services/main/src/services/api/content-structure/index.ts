@@ -327,7 +327,7 @@ async function readMediaContentStructure(
 			),
 		)
 		.limit(1);
-	if (!structure) return { structureId: null, latestRevisionId: null, items: [] };
+	if (!structure) return { state: "uninitialized" as const, items: [] as [] };
 	const rows = await tx
 		.select({
 			id: contentStructureNode.id,
@@ -370,9 +370,13 @@ async function readMediaContentStructure(
 			),
 		)
 		.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id));
+	const latestRevisionId = await getContentStructureRevision(tx, mediaId, structure.id);
+	if (!latestRevisionId)
+		throw new Error("Initialized Media Content Structure has no head revision");
 	return {
+		state: "initialized" as const,
 		structureId: structure.id,
-		latestRevisionId: await getContentStructureRevision(tx, mediaId, structure.id),
+		latestRevisionId,
 		items: rows
 			.filter((row) =>
 				isContentStructureNodeReadable(canEditMedia, row.unitStatus, row.unitVisibility),
@@ -919,16 +923,15 @@ export default new Elysia()
 					await authorization.unit.ensureInTransaction(tx, unitId, "unit.read");
 				const result = await saveMediaContentStructureDraft(tx, {
 					ownerUnitId: params.unitId,
-					baseRevisionId: body.baseRevisionId,
+					base: body.base,
 					actorProfileId: profile.unitId,
 					nodes: body.nodes,
 				});
 				const saved = await readMediaContentStructure(tx, params.unitId, true);
-				if (!saved.structureId || !saved.latestRevisionId) throw new MediaNotFound();
+				if (saved.state !== "initialized")
+					throw new Error("Saved Media Content Structure is uninitialized");
 				return {
-					structureId: saved.structureId,
-					latestRevisionId: saved.latestRevisionId,
-					items: saved.items,
+					...saved,
 					revisionCreated: result.revisionCreated,
 				};
 			});

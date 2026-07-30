@@ -28,7 +28,10 @@ describe("Content Structure API schemas", () => {
 	});
 
 	it("accepts new Video and Audio Units with title-only metadata", () => {
-		const baseRevisionId = "018ff2b7-7c00-7000-8000-000000000001";
+		const base = {
+			kind: "revision",
+			revisionId: "018ff2b7-7c00-7000-8000-000000000001",
+		} as const;
 		const common = {
 			state: "new",
 			parentId: null,
@@ -38,7 +41,7 @@ describe("Content Structure API schemas", () => {
 		} as const;
 		expect(
 			Value.Check(SaveMediaContentStructureDraftBody, {
-				baseRevisionId,
+				base,
 				nodes: [
 					{
 						...common,
@@ -55,7 +58,7 @@ describe("Content Structure API schemas", () => {
 		).toBe(true);
 		expect(
 			Value.Check(SaveMediaContentStructureDraftBody, {
-				baseRevisionId,
+				base,
 				nodes: [
 					{
 						...common,
@@ -63,6 +66,39 @@ describe("Content Structure API schemas", () => {
 						contentKind: "chapter",
 					},
 				],
+			}),
+		).toBe(false);
+	});
+
+	it("keeps first-save and revision bases mutually exclusive", () => {
+		expect(
+			Value.Check(SaveMediaContentStructureDraftBody, {
+				base: { kind: "uninitialized" },
+				nodes: [],
+			}),
+		).toBe(true);
+		expect(
+			Value.Check(SaveMediaContentStructureDraftBody, {
+				base: {
+					kind: "revision",
+					revisionId: "018ff2b7-7c00-7000-8000-000000000001",
+				},
+				nodes: [],
+			}),
+		).toBe(true);
+		expect(
+			Value.Check(SaveMediaContentStructureDraftBody, {
+				base: {
+					kind: "uninitialized",
+					revisionId: "018ff2b7-7c00-7000-8000-000000000001",
+				},
+				nodes: [],
+			}),
+		).toBe(false);
+		expect(
+			Value.Check(SaveMediaContentStructureDraftBody, {
+				base: { kind: "revision" },
+				nodes: [],
 			}),
 		).toBe(false);
 	});

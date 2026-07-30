@@ -13,8 +13,16 @@ import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { ContentStructureRevisionHistory } from "../components/content-structure-revision-history";
 
+type ContentStructureHistorySource =
+	| { readonly kind: "uninitialized" }
+	| {
+			readonly kind: "initialized";
+			readonly latestRevisionId: string;
+			readonly structureId: string;
+	  };
+
 export function ContentStructureHistoryPage() {
-	const { t } = useTranslation(["errors", "history", "units"]);
+	const { t } = useTranslation(["errors"]);
 	const { type, unit } = useUnitManagement();
 	const localizationLanguages = useLocalizationLanguages();
 	const bookQuery = useGetApiUnitsBookByUnitIdContentStructureNodes(
@@ -33,27 +41,77 @@ export function ContentStructureHistoryPage() {
 	);
 	if ((type !== "book" && type !== "media") || !unit.capabilities.canEdit)
 		return <p className="text-sm text-destructive">{t.errors.forbidden}</p>;
-	const query = type === "book" ? bookQuery : mediaQuery;
-	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
-	if (!query.data.structureId || !query.data.latestRevisionId)
-		return <p className="text-sm text-destructive">{t.errors.invalid}</p>;
+	if (type === "book") {
+		if (bookQuery.isPending) return <QueryPending />;
+		if (bookQuery.isError)
+			return <QueryFailure error={bookQuery.error} retry={() => void bookQuery.refetch()} />;
+		if (!bookQuery.data.structureId || !bookQuery.data.latestRevisionId)
+			return <p className="text-sm text-destructive">{t.errors.invalid}</p>;
+		return (
+			<ContentStructureHistoryView
+				canRestore={unit.capabilities.canEdit}
+				source={{
+					kind: "initialized",
+					latestRevisionId: bookQuery.data.latestRevisionId,
+					structureId: bookQuery.data.structureId,
+				}}
+				type={type}
+				unitId={unit.id}
+			/>
+		);
+	}
+	if (mediaQuery.isPending) return <QueryPending />;
+	if (mediaQuery.isError)
+		return <QueryFailure error={mediaQuery.error} retry={() => void mediaQuery.refetch()} />;
+	return (
+		<ContentStructureHistoryView
+			canRestore={unit.capabilities.canEdit}
+			source={
+				mediaQuery.data.state === "initialized"
+					? {
+							kind: "initialized",
+							latestRevisionId: mediaQuery.data.latestRevisionId,
+							structureId: mediaQuery.data.structureId,
+						}
+					: { kind: "uninitialized" }
+			}
+			type={type}
+			unitId={unit.id}
+		/>
+	);
+}
+
+function ContentStructureHistoryView({
+	canRestore,
+	source,
+	type,
+	unitId,
+}: {
+	readonly canRestore: boolean;
+	readonly source: ContentStructureHistorySource;
+	readonly type: "book" | "media";
+	readonly unitId: string;
+}) {
+	const { t } = useTranslation(["history", "units"]);
 	return (
 		<section>
 			<ManagementWorkspaceSectionHeader
-				backHref={unitManagementSectionHref(type, unit.id, "content-structure")}
+				backHref={unitManagementSectionHref(type, unitId, "content-structure")}
 				backLabel={t.units.chapter.backToStructure}
 				description={t.history.description}
 				link={Link}
 				title={t.history.title}
 			/>
-			<ContentStructureRevisionHistory
-				canRestore={unit.capabilities.canEdit}
-				latestRevisionId={query.data.latestRevisionId}
-				structureId={query.data.structureId}
-				unitId={unit.id}
-			/>
+			{source.kind === "initialized" ? (
+				<ContentStructureRevisionHistory
+					canRestore={canRestore}
+					latestRevisionId={source.latestRevisionId}
+					structureId={source.structureId}
+					unitId={unitId}
+				/>
+			) : (
+				<p className="text-sm text-muted-foreground">{t.history.noRevisions}</p>
+			)}
 		</section>
 	);
 }

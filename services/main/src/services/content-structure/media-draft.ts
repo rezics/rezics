@@ -17,9 +17,14 @@ import { recordUnitRevision } from "../units/history";
 import { isFirstUnitLocalization } from "../units/localization";
 import { planContentStructureDraft, type ContentStructureDraftNodeBase } from "./book-draft-plan";
 import { diffContentStructureSnapshots } from "./contracts";
-import { ContentStructureInvalid, ContentStructureNotFound } from "./errors";
-import { mutateContentStructureWithHistory } from "./history";
-import { loadContentStructureSnapshot } from "./storage";
+import { ContentStructureInvalid, ContentStructureRevisionConflict } from "./errors";
+import {
+	createContentStructureHistory,
+	getContentStructureHeadRevision,
+	mutateContentStructureWithHistory,
+} from "./history";
+import { lockContentStructureOwnerKind } from "./service";
+import { ensureContentStructureKindOwner, loadContentStructureSnapshot } from "./storage";
 
 export type ExistingMediaDraftNode = ContentStructureDraftNodeBase & {
 	readonly state: "existing";
@@ -38,9 +43,12 @@ export type AttachedMediaDraftNode = ContentStructureDraftNodeBase & {
 
 export type MediaDraftNode = ExistingMediaDraftNode | NewMediaDraftNode | AttachedMediaDraftNode;
 
+export type MediaContentStructureDraftBase =
+	{ readonly kind: "uninitialized" } | { readonly kind: "revision"; readonly revisionId: string };
+
 export type SaveMediaContentStructureDraftInput = {
 	readonly ownerUnitId: string;
-	readonly baseRevisionId: string;
+	readonly base: MediaContentStructureDraftBase;
 	readonly actorProfileId: string;
 	readonly nodes: readonly (
 		ExistingMediaDraftNode | NewMediaDraftNode | Omit<AttachedMediaDraftNode, "title">
@@ -104,7 +112,9 @@ export async function saveMediaContentStructureDraft(
 	tx: DatabaseTransaction,
 	input: SaveMediaContentStructureDraftInput,
 ) {
-	const [structure] = await tx
+	await ensureContentStructureKindOwner(tx, input.ownerUnitId, "media.contents");
+	await lockContentStructureOwnerKind(tx, input.ownerUnitId, "media.contents");
+	let [structure] = await tx
 		.select()
 		.from(contentStructure)
 		.where(
@@ -115,215 +125,245 @@ export async function saveMediaContentStructureDraft(
 			),
 		)
 		.limit(1);
-	if (!structure) throw new ContentStructureNotFound();
+	let initializing = false;
+	if (input.base.kind === "uninitialized") {
+		if (structure) {
+			const latestRevisionId = await getContentStructureHeadRevision(tx, structure.id);
+			if (!latestRevisionId)
+				throw new Error("Existing Media Content Structure has no head revision");
+			throw new ContentStructureRevisionConflict(latestRevisionId);
+		}
+		[structure] = await tx
+			.insert(contentStructure)
+			.values({ ownerUnitId: input.ownerUnitId, kind: "media.contents" })
+			.returning();
+		if (!structure) throw new Error("Media Content Structure insertion returned no row");
+		initializing = true;
+	} else if (!structure) {
+		throw new ContentStructureRevisionConflict(null);
+	}
+	const targetStructure = structure;
 
-	return mutateContentStructureWithHistory(
-		tx,
-		{
-			structureId: structure.id,
-			baseRevisionId: input.baseRevisionId,
-			actorProfileId: input.actorProfileId,
-		},
-		async () => {
-			const before = await loadContentStructureSnapshot(tx, {
-				structureId: structure.id,
-				ownerUnitId: input.ownerUnitId,
-			});
-			if (before.structure.kind !== "media.contents")
-				throw new ContentStructureInvalid("Media draft targets a non-Media structure");
+	const mutate = async () => {
+		const before = await loadContentStructureSnapshot(tx, {
+			structureId: targetStructure.id,
+			ownerUnitId: input.ownerUnitId,
+		});
+		if (before.structure.kind !== "media.contents")
+			throw new ContentStructureInvalid("Media draft targets a non-Media structure");
 
-			const currentRows = await tx
-				.select({
-					id: contentStructureNode.id,
-					contentUnitId: contentStructureNode.contentUnitId,
-					parentId: contentStructureNode.parentId,
-					position: contentStructureNode.position,
-					title: unitLocalization.title,
-					unitKind: unit.kind,
-					labelId: label.id,
-					videoId: video.id,
-					audioId: audio.id,
-				})
-				.from(contentStructureNode)
-				.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
-				.leftJoin(label, eq(label.id, contentStructureNode.contentUnitId))
-				.leftJoin(video, eq(video.id, contentStructureNode.contentUnitId))
-				.leftJoin(audio, eq(audio.id, contentStructureNode.contentUnitId))
-				.innerJoin(
-					unitLocalization,
-					and(
-						eq(unitLocalization.unitId, contentStructureNode.contentUnitId),
-						isFirstUnitLocalization(unitLocalization.unitId),
-					),
-				)
-				.where(
-					and(
-						eq(contentStructureNode.structureId, structure.id),
-						isNull(contentStructureNode.deletedAt),
-					),
-				)
-				.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id));
-			if (currentRows.some((row) => row.title === null || !isMediaContentUnit(row)))
-				throw new ContentStructureInvalid("Media structure contains invalid content nodes");
-
-			const attachedContentUnitIds = [
-				...new Set(
-					input.nodes.flatMap((node) =>
-						node.state === "attached" ? [node.contentUnitId] : [],
-					),
+		const currentRows = await tx
+			.select({
+				id: contentStructureNode.id,
+				contentUnitId: contentStructureNode.contentUnitId,
+				parentId: contentStructureNode.parentId,
+				position: contentStructureNode.position,
+				title: unitLocalization.title,
+				unitKind: unit.kind,
+				labelId: label.id,
+				videoId: video.id,
+				audioId: audio.id,
+			})
+			.from(contentStructureNode)
+			.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
+			.leftJoin(label, eq(label.id, contentStructureNode.contentUnitId))
+			.leftJoin(video, eq(video.id, contentStructureNode.contentUnitId))
+			.leftJoin(audio, eq(audio.id, contentStructureNode.contentUnitId))
+			.innerJoin(
+				unitLocalization,
+				and(
+					eq(unitLocalization.unitId, contentStructureNode.contentUnitId),
+					isFirstUnitLocalization(unitLocalization.unitId),
 				),
-			];
-			const attachedContentRows = attachedContentUnitIds.length
-				? await tx
-						.select({
-							id: unit.id,
-							title: unitLocalization.title,
-							unitKind: unit.kind,
-							labelId: label.id,
-							videoId: video.id,
-							audioId: audio.id,
-						})
-						.from(unit)
-						.leftJoin(label, eq(label.id, unit.id))
-						.leftJoin(video, eq(video.id, unit.id))
-						.leftJoin(audio, eq(audio.id, unit.id))
-						.innerJoin(
-							unitLocalization,
-							and(
-								eq(unitLocalization.unitId, unit.id),
-								isFirstUnitLocalization(unitLocalization.unitId),
-							),
-						)
-						.where(
-							and(inArray(unit.id, attachedContentUnitIds), isNull(unit.deletedAt)),
-						)
-				: [];
-			const attachedContentByUnitId = new Map(
-				attachedContentRows.map((row) => [row.id, row] as const),
-			);
-			const draftNodes: MediaDraftNode[] = input.nodes.map((node) => {
-				if (node.state !== "attached") return node;
-				const content = attachedContentByUnitId.get(node.contentUnitId);
-				if (!content?.title || !isMediaContentUnit(content))
-					throw new ContentStructureInvalid(
-						"Attached Media content Unit must be a Video, Audio, or Label",
-					);
-				return { ...node, title: content.title };
-			});
-			const current = currentRows.map((row) => ({
-				id: row.id,
-				parentId: row.parentId,
-				position: row.position,
-				title: row.title ?? "",
-			}));
-			const plan = planContentStructureDraft(current, draftNodes);
-			if (!plan.hasChanges) return { result: {} };
+			)
+			.where(
+				and(
+					eq(contentStructureNode.structureId, targetStructure.id),
+					isNull(contentStructureNode.deletedAt),
+				),
+			)
+			.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id));
+		if (currentRows.some((row) => row.title === null || !isMediaContentUnit(row)))
+			throw new ContentStructureInvalid("Media structure contains invalid content nodes");
 
-			const currentById = new Map(currentRows.map((row) => [row.id, row]));
-			const contentUnitIds = new Map(currentRows.map((row) => [row.id, row.contentUnitId]));
-			const newNodeIds = plan.nodes
-				.filter((node) => node.state !== "existing")
-				.map(({ id }) => id);
-			const collidingNewNodes = newNodeIds.length
-				? await tx
-						.select({ id: contentStructureNode.id })
-						.from(contentStructureNode)
-						.where(inArray(contentStructureNode.id, newNodeIds))
-						.limit(1)
-				: [];
-			if (collidingNewNodes.length)
-				throw new ContentStructureInvalid("New Media draft node ID already exists");
-
-			for (const node of plan.nodes) {
-				if (node.state === "existing") continue;
-				const contentUnitId =
-					node.state === "attached"
-						? node.contentUnitId
-						: await createMediaDraftContentUnit(tx, {
-								actorProfileId: input.actorProfileId,
-								node,
-							});
-				contentUnitIds.set(node.id, contentUnitId);
-				await tx.insert(contentStructureNode).values({
-					id: node.id,
-					structureId: structure.id,
-					ownerUnitId: input.ownerUnitId,
-					parentId: null,
-					contentUnitId,
-					position: node.position,
-				});
-			}
-
-			for (const node of plan.nodes) {
-				const currentNode = currentById.get(node.id);
-				if (
-					currentNode &&
-					currentNode.parentId === node.parentId &&
-					currentNode.position === node.position
-				)
-					continue;
-				await tx
-					.update(contentStructureNode)
-					.set({ parentId: node.parentId, position: node.position })
-					.where(
+		const attachedContentUnitIds = [
+			...new Set(
+				input.nodes.flatMap((node) =>
+					node.state === "attached" ? [node.contentUnitId] : [],
+				),
+			),
+		];
+		const attachedContentRows = attachedContentUnitIds.length
+			? await tx
+					.select({
+						id: unit.id,
+						title: unitLocalization.title,
+						unitKind: unit.kind,
+						labelId: label.id,
+						videoId: video.id,
+						audioId: audio.id,
+					})
+					.from(unit)
+					.leftJoin(label, eq(label.id, unit.id))
+					.leftJoin(video, eq(video.id, unit.id))
+					.leftJoin(audio, eq(audio.id, unit.id))
+					.innerJoin(
+						unitLocalization,
 						and(
-							eq(contentStructureNode.id, node.id),
-							eq(contentStructureNode.structureId, structure.id),
-							isNull(contentStructureNode.deletedAt),
-						),
-					);
-			}
-
-			for (const nodeId of plan.renamedExistingNodeIds) {
-				const node = plan.nodes.find((candidate) => candidate.id === nodeId);
-				const contentUnitId = contentUnitIds.get(nodeId);
-				if (!node || !contentUnitId)
-					throw new ContentStructureInvalid("Renamed Media node is unavailable");
-				const updated = await tx
-					.update(unitLocalization)
-					.set({ title: node.title })
-					.where(
-						and(
-							eq(unitLocalization.unitId, contentUnitId),
+							eq(unitLocalization.unitId, unit.id),
 							isFirstUnitLocalization(unitLocalization.unitId),
 						),
 					)
-					.returning({ unitId: unitLocalization.unitId });
-				if (!updated.length)
-					throw new ContentStructureInvalid("Renamed Media localization is unavailable");
-				await recordUnitRevision(tx, {
-					unitId: contentUnitId,
-					actorProfileId: input.actorProfileId,
-					event: "update",
-				});
-			}
+					.where(and(inArray(unit.id, attachedContentUnitIds), isNull(unit.deletedAt)))
+			: [];
+		const attachedContentByUnitId = new Map(
+			attachedContentRows.map((row) => [row.id, row] as const),
+		);
+		const draftNodes: MediaDraftNode[] = input.nodes.map((node) => {
+			if (node.state !== "attached") return node;
+			const content = attachedContentByUnitId.get(node.contentUnitId);
+			if (!content?.title || !isMediaContentUnit(content))
+				throw new ContentStructureInvalid(
+					"Attached Media content Unit must be a Video, Audio, or Label",
+				);
+			return { ...node, title: content.title };
+		});
+		const current = currentRows.map((row) => ({
+			id: row.id,
+			parentId: row.parentId,
+			position: row.position,
+			title: row.title ?? "",
+		}));
+		const plan = planContentStructureDraft(current, draftNodes);
+		if (!plan.hasChanges) return { result: {} };
 
-			const nextUpdatedAt = new Date(
-				Math.max(Date.now(), before.structure.updatedAt.getTime() + 1),
-			);
-			await tx
-				.update(contentStructure)
-				.set({ updatedAt: nextUpdatedAt })
-				.where(eq(contentStructure.id, structure.id));
-			const after = await loadContentStructureSnapshot(tx, {
-				structureId: structure.id,
+		const currentById = new Map(currentRows.map((row) => [row.id, row]));
+		const contentUnitIds = new Map(currentRows.map((row) => [row.id, row.contentUnitId]));
+		const newNodeIds = plan.nodes
+			.filter((node) => node.state !== "existing")
+			.map(({ id }) => id);
+		const collidingNewNodes = newNodeIds.length
+			? await tx
+					.select({ id: contentStructureNode.id })
+					.from(contentStructureNode)
+					.where(inArray(contentStructureNode.id, newNodeIds))
+					.limit(1)
+			: [];
+		if (collidingNewNodes.length)
+			throw new ContentStructureInvalid("New Media draft node ID already exists");
+
+		for (const node of plan.nodes) {
+			if (node.state === "existing") continue;
+			const contentUnitId =
+				node.state === "attached"
+					? node.contentUnitId
+					: await createMediaDraftContentUnit(tx, {
+							actorProfileId: input.actorProfileId,
+							node,
+						});
+			contentUnitIds.set(node.id, contentUnitId);
+			await tx.insert(contentStructureNode).values({
+				id: node.id,
+				structureId: targetStructure.id,
 				ownerUnitId: input.ownerUnitId,
+				parentId: null,
+				contentUnitId,
+				position: node.position,
 			});
-			const delta = diffContentStructureSnapshots(before, after);
-			if (!delta)
-				throw new Error("Changed Media Content Structure draft produced no revision delta");
-			return {
-				result: {},
-				change: {
-					kind: "delta" as const,
-					delta,
-					checkpoint: () =>
-						loadContentStructureSnapshot(tx, {
-							structureId: structure.id,
-							ownerUnitId: input.ownerUnitId,
-						}),
-				},
-			};
+		}
+
+		for (const node of plan.nodes) {
+			const currentNode = currentById.get(node.id);
+			if (
+				currentNode &&
+				currentNode.parentId === node.parentId &&
+				currentNode.position === node.position
+			)
+				continue;
+			await tx
+				.update(contentStructureNode)
+				.set({ parentId: node.parentId, position: node.position })
+				.where(
+					and(
+						eq(contentStructureNode.id, node.id),
+						eq(contentStructureNode.structureId, targetStructure.id),
+						isNull(contentStructureNode.deletedAt),
+					),
+				);
+		}
+
+		for (const nodeId of plan.renamedExistingNodeIds) {
+			const node = plan.nodes.find((candidate) => candidate.id === nodeId);
+			const contentUnitId = contentUnitIds.get(nodeId);
+			if (!node || !contentUnitId)
+				throw new ContentStructureInvalid("Renamed Media node is unavailable");
+			const updated = await tx
+				.update(unitLocalization)
+				.set({ title: node.title })
+				.where(
+					and(
+						eq(unitLocalization.unitId, contentUnitId),
+						isFirstUnitLocalization(unitLocalization.unitId),
+					),
+				)
+				.returning({ unitId: unitLocalization.unitId });
+			if (!updated.length)
+				throw new ContentStructureInvalid("Renamed Media localization is unavailable");
+			await recordUnitRevision(tx, {
+				unitId: contentUnitId,
+				actorProfileId: input.actorProfileId,
+				event: "update",
+			});
+		}
+
+		const nextUpdatedAt = new Date(
+			Math.max(Date.now(), before.structure.updatedAt.getTime() + 1),
+		);
+		await tx
+			.update(contentStructure)
+			.set({ updatedAt: nextUpdatedAt })
+			.where(eq(contentStructure.id, targetStructure.id));
+		const after = await loadContentStructureSnapshot(tx, {
+			structureId: targetStructure.id,
+			ownerUnitId: input.ownerUnitId,
+		});
+		const delta = diffContentStructureSnapshots(before, after);
+		if (!delta)
+			throw new Error("Changed Media Content Structure draft produced no revision delta");
+		return {
+			result: {},
+			change: {
+				kind: "delta" as const,
+				delta,
+				checkpoint: () =>
+					loadContentStructureSnapshot(tx, {
+						structureId: targetStructure.id,
+						ownerUnitId: input.ownerUnitId,
+					}),
+			},
+		};
+	};
+	if (initializing) {
+		const outcome = await mutate();
+		const revision = await createContentStructureHistory(tx, {
+			structureId: targetStructure.id,
+			actorProfileId: input.actorProfileId,
+			state: await loadContentStructureSnapshot(tx, {
+				structureId: targetStructure.id,
+				ownerUnitId: input.ownerUnitId,
+			}),
+		});
+		return { ...outcome.result, ...revision };
+	}
+	if (input.base.kind !== "revision")
+		throw new TypeError("Initialized Media Content Structure requires a revision base");
+	return mutateContentStructureWithHistory(
+		tx,
+		{
+			structureId: targetStructure.id,
+			baseRevisionId: input.base.revisionId,
+			actorProfileId: input.actorProfileId,
 		},
+		mutate,
 	);
 }

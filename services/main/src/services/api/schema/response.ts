@@ -1177,12 +1177,26 @@ const MediaContentStructureNodeResponse = t.Object({
 	position: FractionalPosition,
 	durationSeconds: t.Nullable(t.Integer({ minimum: 1 })),
 });
-export const MediaContentStructureNodeListResponse = t.Object({
-	structureId: t.Nullable(Uuid),
-	latestRevisionId: t.Nullable(Uuid),
-	items: t.Array(MediaContentStructureNodeResponse),
-});
+export const MediaContentStructureNodeListResponse = t.Union([
+	t.Object(
+		{
+			state: t.Literal("uninitialized"),
+			items: t.Tuple([]),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			state: t.Literal("initialized"),
+			structureId: Uuid,
+			latestRevisionId: Uuid,
+			items: t.Array(MediaContentStructureNodeResponse),
+		},
+		{ additionalProperties: false },
+	),
+]);
 export const SaveMediaContentStructureDraftResponse = t.Object({
+	state: t.Literal("initialized"),
 	structureId: Uuid,
 	latestRevisionId: Uuid,
 	revisionCreated: t.Boolean(),

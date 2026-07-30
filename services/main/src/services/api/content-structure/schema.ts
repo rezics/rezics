@@ -210,9 +210,14 @@ const AttachedMediaContentStructureDraftNode = t.Object(
 	{ additionalProperties: false },
 );
 
+const MediaContentStructureDraftBase = t.Union([
+	t.Object({ kind: t.Literal("uninitialized") }, { additionalProperties: false }),
+	t.Object({ kind: t.Literal("revision"), revisionId: Uuid }, { additionalProperties: false }),
+]);
+
 export const SaveMediaContentStructureDraftBody = t.Object(
 	{
-		baseRevisionId: Uuid,
+		base: MediaContentStructureDraftBase,
 		nodes: t.Array(
 			t.Union([
 				ExistingMediaContentStructureDraftNode,

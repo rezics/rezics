@@ -71205,53 +71205,75 @@ export const GetApiUnitsMediaByUnitIdContentStructureNodesStatus200ItemsLanguage
 export type GetApiUnitsMediaByUnitIdContentStructureNodesStatus200ItemsLanguageEnum =
 	(typeof GetApiUnitsMediaByUnitIdContentStructureNodesStatus200ItemsLanguageEnum)[keyof typeof GetApiUnitsMediaByUnitIdContentStructureNodesStatus200ItemsLanguageEnum];
 
-/**
- * @type object
- */
-export type GetApiUnitsMediaByUnitIdContentStructureNodesStatus200 = {
-	structureId: (string | null) | null;
-	latestRevisionId: (string | null) | null;
-	/**
-	 * @type array
-	 */
-	items: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		id: string;
-		parentId: (string | null) | null;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		contentUnitId: string;
-		/**
-		 * @default 'video'
-		 * @type string
-		 */
-		contentKind: GetApiUnitsMediaByUnitIdContentStructureNodesStatus200ItemsContentKindEnum;
-		/**
-		 * @type string
-		 */
-		language: GetApiUnitsMediaByUnitIdContentStructureNodesStatus200ItemsLanguageEnum;
-		/**
-		 * @type string
-		 */
-		title: string;
-		/**
-		 * @description
-		 * Format: `fractional-position`
-		 * @minLength 2
-		 * @maxLength 512
-		 * @type string
-		 */
-		position: string;
-		durationSeconds: ((string | number) | null) | null;
-	}[];
-};
+export type GetApiUnitsMediaByUnitIdContentStructureNodesStatus200 =
+	| {
+			/**
+			 * @type string
+			 */
+			state: "uninitialized";
+			/**
+			 * @type array
+			 */
+			items: [];
+	  }
+	| {
+			/**
+			 * @type string
+			 */
+			state: "initialized";
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			structureId: string;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			latestRevisionId: string;
+			/**
+			 * @type array
+			 */
+			items: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				parentId: (string | null) | null;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				contentUnitId: string;
+				/**
+				 * @default 'video'
+				 * @type string
+				 */
+				contentKind: GetApiUnitsMediaByUnitIdContentStructureNodesStatus200ItemsContentKindEnum;
+				/**
+				 * @type string
+				 */
+				language: GetApiUnitsMediaByUnitIdContentStructureNodesStatus200ItemsLanguageEnum;
+				/**
+				 * @type string
+				 */
+				title: string;
+				/**
+				 * @description
+				 * Format: `fractional-position`
+				 * @minLength 2
+				 * @maxLength 512
+				 * @type string
+				 */
+				position: string;
+				durationSeconds: ((string | number) | null) | null;
+			}[];
+	  };
 
 /**
  * @type object
@@ -71358,6 +71380,10 @@ export type PutApiUnitsMediaByUnitIdContentStructureStatus200ItemsLanguageEnum =
  * @type object
  */
 export type PutApiUnitsMediaByUnitIdContentStructureStatus200 = {
+	/**
+	 * @type string
+	 */
+	state: "initialized";
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -71587,12 +71613,25 @@ export type PutApiUnitsMediaByUnitIdContentStructureRequestNodesContentKindEnum 
  * @type object
  */
 export type PutApiUnitsMediaByUnitIdContentStructureBody = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	baseRevisionId: string;
+	base:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "uninitialized";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "revision";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				revisionId: string;
+		  };
 	/**
 	 * @type array
 	 */

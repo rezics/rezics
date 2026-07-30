@@ -3,6 +3,7 @@
 import { toContentLanguage } from "@rezics/i18n";
 import {
 	type GetApiUnitsMediaByUnitIdContentStructureNodesStatus200,
+	type PutApiUnitsMediaByUnitIdContentStructureBody,
 	usePutApiUnitsMediaByUnitIdContentStructure,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
@@ -97,9 +98,10 @@ import {
 import { UnitSectionHeader } from "./unit-section-header";
 
 type MediaStructureResponse = GetApiUnitsMediaByUnitIdContentStructureNodesStatus200;
+type MediaStructureDraftBase = PutApiUnitsMediaByUnitIdContentStructureBody["base"];
 
 type EditorDocument = {
-	readonly baseRevisionId: string;
+	readonly base: MediaStructureDraftBase;
 	readonly baseline: readonly MediaDraftNode[];
 	readonly draft: readonly MediaDraftNode[];
 };
@@ -129,17 +131,22 @@ export function MediaContentStructureEditor({
 	initial,
 	mediaId,
 }: {
-	readonly initial: MediaStructureResponse & { readonly latestRevisionId: string };
+	readonly initial: MediaStructureResponse;
 	readonly mediaId: string;
 }) {
 	const { t, locale } = useTranslation(["engagement", "units", "ui"]);
 	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
-	const initialDraft = useMemo(() => createMediaContentStructureDraft(initial.items), [initial]);
-	const [document, setDocument] = useState<EditorDocument>({
-		baseRevisionId: initial.latestRevisionId,
-		baseline: initialDraft,
-		draft: initialDraft,
+	const [document, setDocument] = useState<EditorDocument>(() => {
+		const initialDraft = createMediaContentStructureDraft(initial.items);
+		return {
+			base:
+				initial.state === "initialized"
+					? { kind: "revision", revisionId: initial.latestRevisionId }
+					: { kind: "uninitialized" },
+			baseline: initialDraft,
+			draft: initialDraft,
+		};
 	});
 	const [createRequest, setCreateRequest] = useState<MediaContentNodeDialogRequest>();
 	const save = usePutApiUnitsMediaByUnitIdContentStructure();
@@ -160,13 +167,13 @@ export function MediaContentStructureEditor({
 			const saved = await save.mutateAsync({
 				path: { unitId: mediaId },
 				body: {
-					baseRevisionId: document.baseRevisionId,
+					base: document.base,
 					nodes: toMediaContentStructureSaveNodes(draft),
 				},
 			});
 			const savedDraft = createMediaContentStructureDraft(saved.items);
 			setDocument({
-				baseRevisionId: saved.latestRevisionId,
+				base: { kind: "revision", revisionId: saved.latestRevisionId },
 				baseline: savedDraft,
 				draft: savedDraft,
 			});
@@ -247,14 +254,16 @@ export function MediaContentStructureEditor({
 							<Save aria-hidden />
 							{t.units.content.saveDraft}
 						</Button>
-						<Button asChild size="icon-md" variant="outline">
-							<Link
-								aria-label={t.units.workspace.sections.history.label}
-								href={contentStructureHistoryHref("media", mediaId)}
-							>
-								<HistoryIcon aria-hidden />
-							</Link>
-						</Button>
+						{document.base.kind === "revision" ? (
+							<Button asChild size="icon-md" variant="outline">
+								<Link
+									aria-label={t.units.workspace.sections.history.label}
+									href={contentStructureHistoryHref("media", mediaId)}
+								>
+									<HistoryIcon aria-hidden />
+								</Link>
+							</Button>
+						) : null}
 					</>
 				}
 				description={t.units.workspace.sections.contentStructure.description}
