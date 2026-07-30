@@ -18,4 +18,10 @@ describe("tagSearchHref", () => {
 			]),
 		).toBe("/search?template=media&tag=tag-a,tag-b&tagLabel=Fantasy+duplicate,Mystery");
 	});
+
+	it("uses the global search template for a series", () => {
+		expect(tagSearchHref("series", [{ tagId: "tag-a", label: "Fantasy" }])).toBe(
+			"/search?tag=tag-a&tagLabel=Fantasy",
+		);
+	});
 });

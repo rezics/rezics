@@ -161,6 +161,12 @@ export default {
 	resultsHidden: "Les résultats apparaîtront après la clôture du sondage.",
 	emptyPolls: "Aucun sondage pour le moment.",
 	progress: "Progression",
+	scoreActionByType: {
+		book: "Noter ce livre",
+		media: "Noter cette œuvre",
+		software: "Noter ce logiciel",
+		series: "Noter cette série",
+	},
 	progressByType: {
 		book: {
 			title: "Progression de lecture",

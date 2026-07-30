@@ -24,6 +24,7 @@ import { useRef, useState, type MouseEvent } from "react";
 import { SignInButton } from "@/features/auth/auth-portal";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { postHref } from "@/features/posts/url";
+import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
 import { useTranslation } from "@/i18n/client";
 import type { TagPresentation } from "../model/tag-presentation";
 import { isModifiedLinkActivation } from "../model/tag-selection";
@@ -49,7 +50,7 @@ export function TagBadgeCard({
 	readonly onClearVote: (item: TagPresentation) => void;
 	readonly onToggleSelected: (tagId: string, label: string) => void;
 	readonly onVote: (item: TagPresentation, value: -1 | 1) => void;
-	readonly type: "book" | "media" | "software";
+	readonly type: CatalogDetailUnitType;
 }) {
 	const { t } = useTranslation(["tags"]);
 	const [open, setOpen] = useState(false);

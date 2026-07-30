@@ -2,7 +2,15 @@
 
 import { isContentLanguage, toContentLanguage, type ContentLanguage } from "@rezics/i18n";
 import { usePathname, useSearchParams } from "next/navigation";
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import {
+	createContext,
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useState,
+	type ReactNode,
+} from "react";
 
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { useTranslation } from "@/i18n/client";
@@ -43,6 +51,15 @@ export function ContentLanguageEditorProvider({
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
 	const [dirty, setDirty] = useState(false);
+	useEffect(() => {
+		if (!dirty) return;
+		const warnBeforeUnload = (event: BeforeUnloadEvent) => {
+			event.preventDefault();
+			event.returnValue = "";
+		};
+		window.addEventListener("beforeunload", warnBeforeUnload);
+		return () => window.removeEventListener("beforeunload", warnBeforeUnload);
+	}, [dirty]);
 	const languages = useMemo(() => {
 		const parsed = parseContentLanguageOrder(localizations.map(({ language }) => language));
 		if (!parsed) throw new Error("A Unit editor requires at least one unique content language");

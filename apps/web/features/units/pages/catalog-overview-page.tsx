@@ -17,6 +17,7 @@ import { UnitShelf } from "@/features/explore/unit-shelf";
 import { UnitDiscussionSummarySection } from "@/features/posts/components/unit-discussion-summary-section";
 import { UnitRatingsReviewsSection } from "@/features/reviews/components/unit-ratings-reviews-section";
 import { UnitProgressSummaryCard } from "@/features/progress/components/unit-progress-summary-card";
+import { isProgressTrackableUnitType } from "@/features/progress/model/progress-record";
 import { targetedReviewCreateHref } from "@/features/reviews/routing/review-routes";
 import { UnitTagSummary } from "@/features/tags/components/unit-tag-summary";
 import { useTranslation } from "@/i18n/client";
@@ -26,6 +27,7 @@ import {
 	PrimaryBookAuthorSection,
 } from "../components/catalog-attribution-sections";
 import { CatalogSubjectGroups } from "../components/catalog-subject-groups";
+import { SeriesReleaseFeed } from "../components/series-release-feed";
 import { useCatalogDetail } from "../components/catalog-detail-workspace";
 import { catalogCreditsHref, catalogReviewsHref } from "../routing/catalog-detail-routes";
 
@@ -115,6 +117,12 @@ export function CatalogOverviewPage() {
 			<div className="grid min-w-0 content-start gap-6">
 				{primaryAuthor ? <PrimaryBookAuthorSection attribution={primaryAuthor} /> : null}
 
+				{type === "series" ? (
+					<DetailSection title={t.units.series.releases}>
+						<SeriesReleaseFeed limit={4} seriesId={unit.id} />
+					</DetailSection>
+				) : null}
+
 				<UnitTagSummary type={type} unitId={unit.id} />
 
 				<UnitRatingsReviewsSection
@@ -144,13 +152,17 @@ export function CatalogOverviewPage() {
 					</DetailSection>
 				) : null}
 
-				<DetailSection title={t.feed.relatedWorks}>
-					<UnitShelf seedUnitId={unit.id} type={type} />
-				</DetailSection>
+				{type === "series" ? null : (
+					<DetailSection title={t.feed.relatedWorks}>
+						<UnitShelf seedUnitId={unit.id} type={type} />
+					</DetailSection>
+				)}
 			</div>
 
 			<aside className="grid min-w-0 content-start gap-5">
-				<UnitProgressSummaryCard className="hidden lg:flex" />
+				{isProgressTrackableUnitType(type) ? (
+					<UnitProgressSummaryCard className="hidden lg:flex" />
+				) : null}
 
 				<DetailSection title={t.units.detail.information}>
 					<DataList>
@@ -226,5 +238,7 @@ function getDomainFacts(
 					detail.unit.details.licensed ? t.units.fields.yes : t.units.fields.no,
 				],
 			];
+		case "series":
+			return [[t.units.series.kind, detail.unit.details.kind]];
 	}
 }

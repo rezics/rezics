@@ -348,6 +348,38 @@ describe("FeedUnitCard", () => {
 		expect(screen.getByText("8.6／10 · 10 人評分")).toBeTruthy();
 	});
 
+	it("presents a Series as a rated work", () => {
+		const series = {
+			...unitCommon,
+			id: "019f9872-bd49-7bb4-a6b7-ec621fca2050",
+			unitKind: "series",
+			title: "測試系列",
+			summary: "系列摘要",
+			cover: null,
+			presentation: {
+				kind: "rated-work",
+				scores: {
+					preferred: null,
+					global: {
+						realmId: "019b76da-a800-7300-8000-000000000002",
+						realmTitle: "全域評分",
+						totalScore: 46,
+						totalCount: 5,
+					},
+				},
+			},
+		} satisfies FeedUnit;
+
+		render(
+			<TranslationProvider initial={translation.snapshot}>
+				<FeedUnitCard canExclude={false} unit={series} />
+			</TranslationProvider>,
+		);
+
+		expect(screen.getByText("測試系列")).toBeTruthy();
+		expect(screen.getByText("9.2／10 · 5 人評分")).toBeTruthy();
+	});
+
 	it("uses the preferred score when both score candidates exist", () => {
 		const book = {
 			...unitCommon,

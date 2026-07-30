@@ -15,9 +15,9 @@ import {
 import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
-import { useState, type FormEvent } from "react";
+import { useDeferredValue, useState, type FormEvent } from "react";
 
-import { EntityPicker } from "@rezics/ui";
+import { Badge, EntityPicker } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
@@ -37,7 +37,14 @@ import {
 	type LocalizationImageAssetValue,
 } from "@/features/media/components/localization-image-upload-field";
 import { LocalizationMediaFallbackNotice } from "@/features/media/components/localization-media-fallback-notice";
-import { isVariantUnitType, type CatalogUnitType, type UnitType } from "./unit-types";
+import { FeedCard } from "@/features/content-feed/components/feed-card";
+import { FeedUnitContent } from "@/features/content-feed/components/feed-unit-content";
+import {
+	isCatalogUnitType,
+	isVariantUnitType,
+	type CatalogUnitType,
+	type UnitType,
+} from "./unit-types";
 import {
 	CreditAttributionRolesByUnitType,
 	isCreditAttributionRoleForUnitType,
@@ -392,8 +399,8 @@ export function UnitContentEditor({ type, unit }: { type: UnitType; unit: Unit }
 	const { selectedLanguage: language, selectedLanguageIsPending } = useContentLanguageEditor();
 	const selected = unit.localizations.find((entry) => entry.language === language);
 	return (
-		<Card>
-			<CardContent className="grid gap-6 p-6">
+		<div className="grid gap-6">
+			<div className="grid gap-4 rounded-2xl border border-border-weak bg-card p-4 sm:p-5">
 				<ContentLanguageControl />
 				<LocalizationMediaFallbackNotice />
 				{selectedLanguageIsPending ? (
@@ -401,15 +408,15 @@ export function UnitContentEditor({ type, unit }: { type: UnitType; unit: Unit }
 						{t.units.contentLanguages.addDescription}
 					</p>
 				) : null}
-				<UnitLocalizationForm
-					key={`${unit.id}:${language}:${selected?.updatedAt ?? "new"}`}
-					language={language}
-					localization={selected}
-					type={type}
-					unit={unit}
-				/>
-			</CardContent>
-		</Card>
+			</div>
+			<UnitLocalizationForm
+				key={`${unit.id}:${language}:${selected?.updatedAt ?? "new"}`}
+				language={language}
+				localization={selected}
+				type={type}
+				unit={unit}
+			/>
+		</div>
 	);
 }
 
@@ -424,15 +431,19 @@ function UnitLocalizationForm({
 	language: ContentLanguage;
 	localization: Unit["localizations"][number] | undefined;
 }) {
-	const { t } = useTranslation(["cover", "errors", "locale", "ui", "units"]);
+	const { t } = useTranslation(["cover", "editor", "errors", "feed", "locale", "ui", "units"]);
 	const queryClient = useQueryClient();
-	const { setDirty, languagesChanged } = useContentLanguageEditor();
+	const { dirty, setDirty, languagesChanged } = useContentLanguageEditor();
+	const [title, setTitle] = useState(localization?.title ?? "");
+	const [summary, setSummary] = useState(localization?.summary ?? "");
 	const [description, setDescription] = useState<PortableTextValue>(() =>
 		readPortableText(localization?.description),
 	);
 	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(
 		localization?.cover ?? null,
 	);
+	const deferredTitle = useDeferredValue(title);
+	const deferredSummary = useDeferredValue(summary);
 	const coverOptions: LocalizationImageAssetOption[] = unit.localizations.flatMap((entry) =>
 		entry.language !== language && entry.cover
 			? [{ ...entry.cover, label: t.locale.contentLanguages[entry.language] }]
@@ -446,13 +457,12 @@ function UnitLocalizationForm({
 	});
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		const form = new FormData(event.currentTarget);
 		try {
 			await update.mutateAsync({
 				path: { type, unitId: unit.id, language },
 				body: {
-					title: String(form.get("title") ?? "").trim(),
-					summary: String(form.get("summary") ?? "").trim(),
+					title: title.trim(),
+					summary: summary.trim(),
 					description: writePortableText(description, localization?.description),
 					coverAssetId: cover?.id ?? null,
 				},
@@ -463,52 +473,93 @@ function UnitLocalizationForm({
 			// The typed mutation state supplies the visible API error.
 		}
 	}
+	const previewKindLabel = isCatalogUnitType(type)
+		? t.feed.content.kinds[`unit:${type}`]
+		: t.units.types[type];
 	return (
-		<form onChange={() => setDirty(true)} onSubmit={submit}>
-			<FieldGroup>
-				<Field required>
-					<FieldLabel>{t.ui.title}</FieldLabel>
-					<Input
-						defaultValue={localization?.title ?? ""}
-						maxLength={500}
-						name="title"
-						required
-					/>
-				</Field>
-				<Field>
-					<FieldLabel>{t.ui.summary}</FieldLabel>
-					<Textarea
-						defaultValue={localization?.summary ?? ""}
-						maxLength={2000}
-						name="summary"
-					/>
-				</Field>
-				<PortableTextEditor
-					label={t.ui.description}
-					onChange={(value) => {
-						setDescription(value);
-						setDirty(true);
-					}}
-					value={description}
-				/>
-				<Field>
-					<FieldLabel>{t.cover.title}</FieldLabel>
-					<LocalizationImageUploadField
-						fallback={fallbackCover}
+		<form
+			className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)]"
+			onSubmit={submit}
+		>
+			<div className="min-w-0">
+				<FieldGroup>
+					<Field required>
+						<FieldLabel>{t.ui.title}</FieldLabel>
+						<Input
+							maxLength={500}
+							name="title"
+							onChange={(event) => {
+								setTitle(event.target.value);
+								setDirty(true);
+							}}
+							required
+							value={title}
+						/>
+					</Field>
+					<Field>
+						<FieldLabel>{t.ui.summary}</FieldLabel>
+						<Textarea
+							maxLength={2000}
+							name="summary"
+							onChange={(event) => {
+								setSummary(event.target.value);
+								setDirty(true);
+							}}
+							value={summary}
+						/>
+					</Field>
+					<PortableTextEditor
+						label={t.ui.description}
 						onChange={(value) => {
-							setCover(value);
+							setDescription(value);
 							setDirty(true);
 						}}
-						options={coverOptions}
-						role="cover"
-						value={cover}
+						value={description}
 					/>
-				</Field>
-				<Button variant="solid" isLoading={update.isPending} type="submit">
-					{t.ui.save}
-				</Button>
-				<RequestFailure error={update.error} fallback={t.ui.retryLater} />
-			</FieldGroup>
+					<Field>
+						<FieldLabel>{t.cover.title}</FieldLabel>
+						<LocalizationImageUploadField
+							fallback={fallbackCover}
+							onChange={(value) => {
+								setCover(value);
+								setDirty(true);
+							}}
+							options={coverOptions}
+							role="cover"
+							value={cover}
+						/>
+					</Field>
+					<div className="flex flex-wrap items-center gap-3">
+						<Button
+							disabled={!dirty || !title.trim()}
+							isLoading={update.isPending}
+							type="submit"
+							variant="solid"
+						>
+							{t.ui.save}
+						</Button>
+						{dirty ? (
+							<Badge variant="secondary">{t.units.content.unsavedDraft}</Badge>
+						) : null}
+					</div>
+					<RequestFailure error={update.error} fallback={t.ui.retryLater} />
+				</FieldGroup>
+			</div>
+			<aside className="grid gap-3 lg:sticky lg:top-6">
+				<h3 className="font-heading font-bold text-sm">{t.editor.preview}</h3>
+				<FeedCard aria-label={t.editor.preview}>
+					<FeedUnitContent
+						coverUrl={cover?.url ?? fallbackCover?.url}
+						headingId={`unit-content-preview-${unit.id}-${language}`}
+						headingLevel={3}
+						kind={type}
+						kindLabel={previewKindLabel}
+						standalone
+						summary={deferredSummary.trim()}
+						title={deferredTitle.trim() || t.ui.unnamed}
+					/>
+				</FeedCard>
+			</aside>
 		</form>
 	);
 }

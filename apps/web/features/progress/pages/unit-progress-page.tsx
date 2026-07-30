@@ -38,7 +38,6 @@ import {
 import { useQueryState } from "nuqs";
 import { RequireSession } from "@/features/auth/require-session";
 import { postHref } from "@/features/posts/url";
-import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
 import { isCatalogDetailUnitFor } from "@/features/units/model/catalog-detail-unit";
 import { catalogDetailHref } from "@/features/units/routing/catalog-detail-routes";
 import { useTranslation } from "@/i18n/client";
@@ -55,6 +54,7 @@ import { UnitProgressProvider, useUnitProgress } from "../components/unit-progre
 import { useProgressEntries } from "../data/progress-entries";
 import { invalidateProgressQueries } from "../data/progress-cache";
 import { formatProgressEntryDate, type ProgressEntry } from "../model/progress-entry";
+import type { ProgressTrackableUnitType } from "../model/progress-record";
 import { progressRecordFromEditableState } from "../model/progress-state";
 import {
 	AllProgressHistoryStatuses,
@@ -68,7 +68,7 @@ export function UnitProgressPage({
 	type,
 	unitId,
 }: {
-	readonly type: CatalogDetailUnitType;
+	readonly type: ProgressTrackableUnitType;
 	readonly unitId: string;
 }) {
 	return (
@@ -84,7 +84,7 @@ function UnitProgressPageContent({
 	type,
 	unitId,
 }: {
-	readonly type: CatalogDetailUnitType;
+	readonly type: ProgressTrackableUnitType;
 	readonly unitId: string;
 }) {
 	const localizationLanguages = useLocalizationLanguages();
@@ -354,7 +354,7 @@ function ProgressTimelineItem({
 	readonly entry: ProgressEntry;
 	readonly onSelect: () => void;
 	readonly selected: boolean;
-	readonly type: CatalogDetailUnitType;
+	readonly type: ProgressTrackableUnitType;
 }) {
 	const progress = useUnitProgress();
 	const { locale, t } = useTranslation(["engagement"]);
@@ -419,7 +419,7 @@ function ProgressEntryDetails({
 	readonly entry: ProgressEntry;
 	readonly onDelete: () => void;
 	readonly onEdit: () => void;
-	readonly type: CatalogDetailUnitType;
+	readonly type: ProgressTrackableUnitType;
 }) {
 	const progress = useUnitProgress();
 	const { locale, t } = useTranslation(["engagement"]);

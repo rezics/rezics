@@ -8,13 +8,14 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from "@rezics/ui";
-import { BookOpen, Gamepad2, Pencil, PlaySquare } from "lucide-react";
+import { BookOpen, Gamepad2, LibraryBig, Pencil, PlaySquare } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { CollectionPickerButton } from "@/features/collections/components/collection-picker-button";
 import { FollowButton } from "@/features/following/components/follow-button";
 import { UnitProgressAction } from "@/features/progress/components/unit-progress-action";
 import { UnitProgressStatistics } from "@/features/progress/components/unit-progress-statistics";
+import { isProgressTrackableUnitType } from "@/features/progress/model/progress-record";
 import { UnitScoreControl } from "@/features/reviews/components/unit-score-control";
 import { UnitReportOverflowMenu } from "@/features/reports/components/unit-report-dialog";
 import { useTranslation } from "@/i18n/client";
@@ -31,6 +32,7 @@ const CatalogIcons = {
 	book: BookOpen,
 	media: PlaySquare,
 	software: Gamepad2,
+	series: LibraryBig,
 } as const;
 
 export function CatalogDetailHero<Type extends CatalogDetailUnitType>({
@@ -54,7 +56,9 @@ export function CatalogDetailHero<Type extends CatalogDetailUnitType>({
 					sizes="(min-width: 1024px) 13rem, 13rem"
 					src={unit.cover?.url}
 				/>
-				<UnitProgressAction buttonClassName="min-h-10" className="w-full" />
+				{isProgressTrackableUnitType(type) ? (
+					<UnitProgressAction buttonClassName="min-h-10" className="w-full" />
+				) : null}
 				<CollectionPickerButton
 					targetId={unit.id}
 					triggerClassName="min-h-10 w-full"
@@ -115,7 +119,7 @@ export function CatalogDetailHero<Type extends CatalogDetailUnitType>({
 					</ShowMoreContent>
 				) : null}
 
-				{unit.progressStatistics ? (
+				{isProgressTrackableUnitType(type) && unit.progressStatistics ? (
 					<UnitProgressStatistics
 						active={toNonNegativeApiInteger(unit.progressStatistics.active)}
 						backlog={toNonNegativeApiInteger(unit.progressStatistics.backlog)}
@@ -128,11 +132,6 @@ export function CatalogDetailHero<Type extends CatalogDetailUnitType>({
 }
 
 function CatalogIcon({ type }: { readonly type: CatalogDetailUnitType }) {
-	const Icon =
-		type === "book"
-			? CatalogIcons.book
-			: type === "media"
-				? CatalogIcons.media
-				: CatalogIcons.software;
+	const Icon = CatalogIcons[type];
 	return <Icon aria-hidden className="size-9" />;
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { isProgressTrackableUnitType } from "../model/progress-record";
 import {
 	AllProgressHistoryStatuses,
 	progressEntryReviewHref,
@@ -13,6 +14,7 @@ const UnitId = "019f0000-0000-7000-8000-000000000001";
 describe("Progress routes", () => {
 	it("keeps the Progress page outside the Unit tab route contract", () => {
 		expect(unitProgressHref("book", UnitId)).toBe(`/units/book/${UnitId}/progress`);
+		expect(isProgressTrackableUnitType("series")).toBe(false);
 	});
 
 	it("carries only the selected Progress entry into Review creation", () => {

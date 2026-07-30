@@ -8,7 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import type { ReactNode } from "react";
 
-import { CardContent, cn, Cover, IdentityAvatar } from "@rezics/ui";
+import { CardContent, cn, IdentityAvatar } from "@rezics/ui";
 import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { resolvePostPresentationTitle } from "@/features/posts/model/post-presentation-title";
@@ -36,6 +36,7 @@ import {
 	type FeedTargetScore,
 } from "./feed-card";
 import { FeedEngagementBar, FeedOverflowMenu } from "./feed-card-actions";
+import { FeedUnitContent } from "./feed-unit-content";
 import {
 	isCurrentFeedSubject,
 	type FeedDisplayContext,
@@ -357,15 +358,8 @@ export function FeedUnitCard({
 				showAttributions={!isRealm}
 				timestamp={isRealm ? undefined : formatRelativeTime(unit.createdAt, locale.target)}
 			/>
-			<CardContent
-				className={cn(
-					"grid gap-4 px-4 pb-0 pt-3 sm:px-5",
-					identityPresentation
-						? "grid-cols-[4.5rem_minmax(0,1fr)] sm:grid-cols-[5rem_minmax(0,1fr)]"
-						: "grid-cols-[5rem_minmax(0,1fr)] sm:grid-cols-[7.5rem_minmax(0,1fr)]",
-				)}
-			>
-				{identityPresentation ? (
+			{identityPresentation ? (
+				<CardContent className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-4 px-4 pb-0 pt-3 sm:grid-cols-[5rem_minmax(0,1fr)] sm:px-5">
 					<FeedItemMain className="block" href={href} onOpen={trackOpen}>
 						<IdentityAvatar
 							avatar={identityPresentation.avatar}
@@ -374,53 +368,56 @@ export function FeedUnitCard({
 							imageAlt={title}
 						/>
 					</FeedItemMain>
-				) : (
-					<FeedItemMain className="block" href={href} onOpen={trackOpen}>
-						<Cover
-							alt={title}
-							className="w-full rounded-xl border border-border-weak shadow-sm/5"
-							fallback={<UnitCoverFallback kind={unit.unitKind} />}
-							sizes="(min-width: 640px) 120px, 80px"
-							src={unit.cover?.url}
-						/>
-					</FeedItemMain>
-				)}
-				<div className="min-w-0">
-					<p className="font-semibold text-brand text-xs">
-						{t.feed.content.kinds[`unit:${unit.unitKind}`]}
-					</p>
-					<FeedItemMain href={href} onOpen={trackOpen}>
-						<h2
-							className="mt-1 font-heading font-black text-[1.05rem] leading-snug"
-							id={`feed-item-${unit.id}`}
-						>
-							{title}
-						</h2>
-						{rating ? <FeedCardRating rating={rating} /> : null}
-						{displayedSummary ? (
-							<p className="mt-2 line-clamp-3 text-muted-foreground text-sm leading-6">
-								{displayedSummary}
-							</p>
-						) : null}
-						{isRealm && identityPresentation?.memberCount !== null ? (
-							<p className="mt-2 text-xs font-medium text-muted-foreground">
-								{t.realms.memberCount({
-									count: toNonNegativeApiInteger(
-										identityPresentation?.memberCount ?? 0,
-									),
-								})}
-							</p>
-						) : null}
-						{unit.collection ? (
+					<div className="min-w-0">
+						<p className="font-semibold text-brand text-xs">
+							{t.feed.content.kinds[`unit:${unit.unitKind}`]}
+						</p>
+						<FeedItemMain href={href} onOpen={trackOpen}>
+							<h2
+								className="mt-1 font-heading font-black text-[1.05rem] leading-snug"
+								id={`feed-item-${unit.id}`}
+							>
+								{title}
+							</h2>
+							{displayedSummary ? (
+								<p className="mt-2 line-clamp-3 text-muted-foreground text-sm leading-6">
+									{displayedSummary}
+								</p>
+							) : null}
+							{isRealm && identityPresentation.memberCount !== null ? (
+								<p className="mt-2 text-xs font-medium text-muted-foreground">
+									{t.realms.memberCount({
+										count: toNonNegativeApiInteger(
+											identityPresentation.memberCount,
+										),
+									})}
+								</p>
+							) : null}
+						</FeedItemMain>
+					</div>
+				</CardContent>
+			) : (
+				<FeedUnitContent
+					coverUrl={unit.cover?.url}
+					headingId={`feed-item-${unit.id}`}
+					href={href}
+					kind={unit.unitKind}
+					kindLabel={t.feed.content.kinds[`unit:${unit.unitKind}`]}
+					metadata={
+						unit.collection ? (
 							<p className="mt-2 text-xs font-medium text-muted-foreground">
 								{t.feed.collectionDirectItems({
 									count: toNonNegativeApiInteger(unit.collection.directItemCount),
 								})}
 							</p>
-						) : null}
-					</FeedItemMain>
-				</div>
-			</CardContent>
+						) : undefined
+					}
+					onOpen={trackOpen}
+					rating={rating ? <FeedCardRating rating={rating} /> : undefined}
+					summary={displayedSummary}
+					title={title}
+				/>
+			)}
 			<CardContent className="px-4 pb-4 sm:px-5">
 				<FeedItemActions
 					href={href}
@@ -441,8 +438,8 @@ export function FeedUnitCard({
 	);
 }
 
-function isRatedWorkKind(kind: string): kind is "book" | "media" | "software" {
-	return kind === "book" || kind === "media" || kind === "software";
+function isRatedWorkKind(kind: string): kind is "book" | "media" | "software" | "series" {
+	return kind === "book" || kind === "media" || kind === "software" || kind === "series";
 }
 
 function toFeedTargetScore(

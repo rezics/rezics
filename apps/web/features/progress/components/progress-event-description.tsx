@@ -1,12 +1,12 @@
 "use client";
 
-import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
 import { useTranslation } from "@/i18n/client";
 import {
 	formatProgressEntryDate,
 	type ProgressDatePrecision,
 	type ProgressEntryKind,
 } from "../model/progress-entry";
+import type { ProgressTrackableUnitType } from "../model/progress-record";
 
 export interface ProgressEventLike {
 	readonly datePrecision: ProgressDatePrecision;
@@ -20,7 +20,7 @@ export function ProgressEventDescription({
 	type,
 }: {
 	readonly entry: ProgressEventLike;
-	readonly type: CatalogDetailUnitType;
+	readonly type: ProgressTrackableUnitType;
 }) {
 	const { locale, t } = useTranslation(["engagement"]);
 	const date = formatProgressEntryDate(

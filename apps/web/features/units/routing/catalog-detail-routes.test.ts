@@ -21,7 +21,7 @@ describe("catalog detail routes", () => {
 	});
 
 	it("builds every domain-specific tab as a distinct page", () => {
-		for (const type of ["book", "media", "software"] as const) {
+		for (const type of ["book", "media", "software", "series"] as const) {
 			expect(getCatalogDetailHrefs(type, UnitId).map(({ id }) => id)).toEqual(
 				CatalogDetailSections[type],
 			);
@@ -34,6 +34,9 @@ describe("catalog detail routes", () => {
 		);
 		expect(catalogDetailHref("software", UnitId, "requirements")).toBe(
 			`/units/software/${UnitId}/requirements`,
+		);
+		expect(catalogDetailHref("series", UnitId, "releases")).toBe(
+			`/units/series/${UnitId}/releases`,
 		);
 		expect(catalogDetailHref("book", UnitId, "associations")).toBe(
 			`/units/book/${UnitId}/associations`,
@@ -58,6 +61,9 @@ describe("catalog detail routes", () => {
 		).toBeUndefined();
 		expect(
 			parseCatalogDetailSection(`/units/media/${UnitId}/versions`, "media", UnitId),
+		).toBeUndefined();
+		expect(
+			parseCatalogDetailSection(`/units/series/${UnitId}/contents`, "series", UnitId),
 		).toBeUndefined();
 	});
 

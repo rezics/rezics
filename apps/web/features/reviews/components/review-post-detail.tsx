@@ -9,9 +9,9 @@ import { FeedOverflowMenu } from "@/features/content-feed/components/feed-card-a
 import { PostDetailArticle } from "@/features/posts/components/post-detail-article";
 import { resolvePostPresentationTitle } from "@/features/posts/model/post-presentation-title";
 import { ProgressEventDescription } from "@/features/progress/components/progress-event-description";
+import { isProgressTrackableUnitType } from "@/features/progress/model/progress-record";
 import { getPostManagementSectionIds } from "@/features/posts/model/post-management-section";
 import { postManagementSectionHref } from "@/features/posts/routing/post-management-routes";
-import { isCatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
 import { useTranslation } from "@/i18n/client";
 import { ReviewAttachedScores } from "./review-attached-scores";
 
@@ -35,7 +35,7 @@ export function ReviewPostDetail({ review }: { readonly review: ReviewPost }) {
 		<>
 			{review.progressEntry &&
 			review.subject &&
-			isCatalogDetailUnitType(review.subject.type) ? (
+			isProgressTrackableUnitType(review.subject.type) ? (
 				<Card appearance="outlined" className="mb-5">
 					<CardHeader>
 						<CardTitle>{t.engagement.progressJournal.linkedReview}</CardTitle>

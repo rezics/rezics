@@ -1,6 +1,6 @@
-import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
 import { urlStateOptions } from "@/lib/search-params";
 import { parseAsStringLiteral } from "nuqs/server";
+import type { ProgressTrackableUnitType } from "../model/progress-record";
 
 export const AllProgressHistoryStatuses = "all" as const;
 export const ProgressHistoryFilters = [AllProgressHistoryStatuses, "active", "completed"] as const;
@@ -17,12 +17,12 @@ export function toProgressHistoryFilter(value: string | null | undefined): Progr
 	);
 }
 
-export function unitProgressHref(type: CatalogDetailUnitType, unitId: string): string {
+export function unitProgressHref(type: ProgressTrackableUnitType, unitId: string): string {
 	return `/units/${type}/${unitId}/progress`;
 }
 
 export function progressEntryReviewHref(
-	type: CatalogDetailUnitType,
+	type: ProgressTrackableUnitType,
 	unitId: string,
 	entryId: string,
 ): string {

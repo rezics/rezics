@@ -7,6 +7,7 @@ import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { CatalogDetailSectionFrame } from "../components/catalog-detail-section-frame";
 import { useCatalogDetail } from "../components/catalog-detail-workspace";
+import { catalogDetailPageCopy } from "../model/catalog-detail-copy";
 
 export function CatalogCollectionsPage() {
 	const detail = useCatalogDetail();
@@ -19,21 +20,7 @@ export function CatalogCollectionsPage() {
 			localizationLanguages,
 		},
 	});
-	const labels =
-		detail.type === "book"
-			? {
-					title: t.units.detail.tabs.book.collections,
-					description: t.units.detail.sectionDescriptions.book.collections,
-				}
-			: detail.type === "media"
-				? {
-						title: t.units.detail.tabs.media.collections,
-						description: t.units.detail.sectionDescriptions.media.collections,
-					}
-				: {
-						title: t.units.detail.tabs.software.collections,
-						description: t.units.detail.sectionDescriptions.software.collections,
-					};
+	const labels = catalogDetailPageCopy(t, detail.type, "collections");
 
 	return (
 		<CatalogDetailSectionFrame description={labels.description} title={labels.title}>

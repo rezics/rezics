@@ -10,6 +10,7 @@ import { createContext, useContext, type ReactNode } from "react";
 import { UnitProgressDialog } from "@/features/progress/components/unit-progress-dialog";
 import { UnitProgressProvider } from "@/features/progress/components/unit-progress-provider";
 import { UnitProgressSummaryCard } from "@/features/progress/components/unit-progress-summary-card";
+import { isProgressTrackableUnitType } from "@/features/progress/model/progress-record";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -88,13 +89,20 @@ function CatalogDetailWorkspaceContent<Type extends CatalogDetailUnitType>({
 		);
 
 	const value = { type, unit: query.data } as CatalogDetailContextValue;
+	const shell = (
+		<CatalogDetailShell type={type} unit={query.data}>
+			{children}
+		</CatalogDetailShell>
+	);
 	return (
 		<CatalogDetailContext.Provider value={value}>
-			<UnitProgressProvider domain={{ type, unitId: query.data.id }}>
-				<CatalogDetailShell type={type} unit={query.data}>
-					{children}
-				</CatalogDetailShell>
-			</UnitProgressProvider>
+			{isProgressTrackableUnitType(type) ? (
+				<UnitProgressProvider domain={{ type, unitId: query.data.id }}>
+					{shell}
+				</UnitProgressProvider>
+			) : (
+				shell
+			)}
 		</CatalogDetailContext.Provider>
 	);
 }
@@ -115,7 +123,9 @@ function CatalogDetailShell<Type extends CatalogDetailUnitType>({
 		<main className="mx-auto flex w-full max-w-[76rem] flex-col gap-6 px-4 py-5 sm:px-6 sm:py-8">
 			<CatalogDetailHero type={type} unit={unit} />
 
-			<UnitProgressSummaryCard className="lg:hidden" />
+			{isProgressTrackableUnitType(type) ? (
+				<UnitProgressSummaryCard className="lg:hidden" />
+			) : null}
 
 			<nav
 				aria-label={t.units.detail.sections}
@@ -138,7 +148,7 @@ function CatalogDetailShell<Type extends CatalogDetailUnitType>({
 			</nav>
 
 			{children}
-			<UnitProgressDialog />
+			{isProgressTrackableUnitType(type) ? <UnitProgressDialog /> : null}
 		</main>
 	);
 }
@@ -155,5 +165,7 @@ export function catalogSectionLabel<Type extends CatalogDetailUnitType>(
 			return t.units.detail.tabs.media[sectionId as CatalogDetailSectionIdFor<"media">];
 		case "software":
 			return t.units.detail.tabs.software[sectionId as CatalogDetailSectionIdFor<"software">];
+		case "series":
+			return t.units.detail.tabs.series[sectionId as CatalogDetailSectionIdFor<"series">];
 	}
 }

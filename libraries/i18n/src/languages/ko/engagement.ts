@@ -165,6 +165,12 @@ export default {
 	resultsHidden: "설문조사 종료 후 결과가 표시됩니다.",
 	emptyPolls: "아직 설문조사가 없습니다.",
 	progress: "진행률",
+	scoreActionByType: {
+		book: "이 책 평가하기",
+		media: "이 작품 평가하기",
+		software: "이 소프트웨어 평가하기",
+		series: "이 시리즈 평가하기",
+	},
 	progressByType: {
 		book: {
 			title: "읽기 진행률",

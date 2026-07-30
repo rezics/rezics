@@ -7,10 +7,20 @@ import {
 	usePutApiSeriesBySeriesIdReleasesByReleaseId,
 } from "@rezics/openapi-tanstack-query";
 import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
 	Button,
-	Card,
-	CardContent,
-	Cover,
+	Dialog,
+	DialogBody,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
 	EntityPicker,
 	Field,
 	FieldGroup,
@@ -21,13 +31,13 @@ import {
 } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { generateKeyBetween } from "fractional-indexing";
-import { ArrowDown, ArrowUp, LibraryBig } from "lucide-react";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { ArrowDown, ArrowUp, Plus } from "lucide-react";
 import { type FormEvent, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
+import { SeriesReleaseCard, type SeriesReleaseItem } from "../components/series-release-card";
 import { UnitSectionHeader } from "../components/unit-section-header";
 import { useUnitManagement } from "../components/unit-management-workspace";
 
@@ -38,6 +48,8 @@ export function SeriesReleasesPage() {
 	const { type, unit } = useUnitManagement();
 	const queryClient = useQueryClient();
 	const [selectedUnit, setSelectedUnit] = useState<SelectedUnit>();
+	const [addOpen, setAddOpen] = useState(false);
+	const [releasePendingRemoval, setReleasePendingRemoval] = useState<SeriesReleaseItem>();
 	const localizationLanguages = useLocalizationLanguages();
 	const queryParams = {
 		path: { seriesId: unit.id },
@@ -72,6 +84,7 @@ export function SeriesReleasesPage() {
 			});
 			setSelectedUnit(undefined);
 			formElement.reset();
+			setAddOpen(false);
 		} catch {
 			// The typed mutation state supplies the visible API error.
 		}
@@ -103,37 +116,16 @@ export function SeriesReleasesPage() {
 	return (
 		<section>
 			<UnitSectionHeader
+				action={
+					<Button onClick={() => setAddOpen(true)}>
+						<Plus aria-hidden />
+						{t.units.series.addRelease}
+					</Button>
+				}
 				description={t.units.workspace.sections.releases.description}
 				title={t.units.workspace.sections.releases.label}
 			/>
 			<div className="grid gap-6">
-				<Card appearance="outlined">
-					<CardContent className="p-6">
-						<form onSubmit={addRelease}>
-							<FieldGroup>
-								<Field required>
-									<FieldLabel>{t.units.series.releaseUnit}</FieldLabel>
-									<EntityPicker
-										index="units"
-										onChange={setSelectedUnit}
-										value={selectedUnit}
-									/>
-								</Field>
-								<Field>
-									<FieldLabel>{t.units.series.releasedOn}</FieldLabel>
-									<Input name="releasedOn" type="date" />
-								</Field>
-								<Button
-									disabled={!selectedUnit}
-									isLoading={update.isPending}
-									type="submit"
-								>
-									{t.units.series.addRelease}
-								</Button>
-							</FieldGroup>
-						</form>
-					</CardContent>
-				</Card>
 				{query.isPending ? (
 					<QueryPending />
 				) : query.isError ? (
@@ -142,27 +134,9 @@ export function SeriesReleasesPage() {
 					<ol className="grid gap-3">
 						{items.map((item, index) => (
 							<li key={item.releaseUnitId}>
-								<Card appearance="outlined">
-									<CardContent className="flex items-center gap-4 p-4">
-										<Cover
-											alt={item.release.title ?? item.release.id}
-											className="size-12 shrink-0 rounded-md"
-											fallback={<LibraryBig aria-hidden className="size-5" />}
-											src={item.release.cover?.url}
-										/>
-										<div className="min-w-0 flex-1">
-											<Link
-												className="font-medium hover:underline"
-												href={`/units/${item.release.type}/${item.release.id}`}
-											>
-												{item.release.title ?? item.release.id}
-											</Link>
-											<p className="text-sm text-muted-foreground">
-												{t.units.types[item.release.type]}
-												{item.releasedOn ? ` · ${item.releasedOn}` : ""}
-											</p>
-										</div>
-										<div className="flex gap-1">
+								<SeriesReleaseCard
+									actions={
+										<>
 											<Button
 												aria-label={t.units.series.moveEarlier}
 												disabled={index === 0 || update.isPending}
@@ -184,23 +158,19 @@ export function SeriesReleasesPage() {
 												<ArrowDown aria-hidden />
 											</Button>
 											<Button
-												isLoading={remove.isPending}
-												onClick={() =>
-													remove.mutate({
-														path: {
-															seriesId: unit.id,
-															releaseId: item.releaseUnitId,
-														},
-													})
-												}
+												disabled={remove.isPending}
+												onClick={() => setReleasePendingRemoval(item)}
 												size="sm"
 												variant="outline"
 											>
 												{t.units.series.removeRelease}
 											</Button>
-										</div>
-									</CardContent>
-								</Card>
+										</>
+									}
+									item={item}
+									position={index + 1}
+									setSize={items.length}
+								/>
 							</li>
 						))}
 					</ol>
@@ -209,6 +179,97 @@ export function SeriesReleasesPage() {
 				)}
 				<RequestFailure error={update.error ?? remove.error} fallback={t.ui.retryLater} />
 			</div>
+			<Dialog
+				onOpenChange={({ open }) => {
+					if (!update.isPending) setAddOpen(open);
+					if (!open && !update.isPending) setSelectedUnit(undefined);
+				}}
+				open={addOpen}
+			>
+				<DialogContent showCloseButton={!update.isPending} size="sm">
+					<DialogHeader
+						description={t.units.workspace.sections.releases.description}
+						title={t.units.series.addRelease}
+					/>
+					<form onSubmit={addRelease}>
+						<DialogBody>
+							<FieldGroup>
+								<Field required>
+									<FieldLabel>{t.units.series.releaseUnit}</FieldLabel>
+									<EntityPicker
+										index="units"
+										kinds={["book", "media", "software"]}
+										onChange={setSelectedUnit}
+										value={selectedUnit}
+									/>
+								</Field>
+								<Field>
+									<FieldLabel>{t.units.series.releasedOn}</FieldLabel>
+									<Input name="releasedOn" type="date" />
+								</Field>
+							</FieldGroup>
+						</DialogBody>
+						<DialogFooter>
+							<Button
+								disabled={update.isPending}
+								onClick={() => setAddOpen(false)}
+								type="button"
+								variant="outline"
+							>
+								{t.units.contentLanguages.cancel}
+							</Button>
+							<Button
+								disabled={!selectedUnit}
+								isLoading={update.isPending}
+								type="submit"
+							>
+								{t.units.series.addRelease}
+							</Button>
+						</DialogFooter>
+					</form>
+				</DialogContent>
+			</Dialog>
+			<AlertDialog
+				onOpenChange={({ open }) => {
+					if (!open && !remove.isPending) setReleasePendingRemoval(undefined);
+				}}
+				open={Boolean(releasePendingRemoval)}
+			>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>{t.units.series.removeRelease}</AlertDialogTitle>
+						<AlertDialogDescription>
+							{t.units.series.removeReleaseConfirm({
+								title:
+									releasePendingRemoval?.release.title ??
+									releasePendingRemoval?.release.id ??
+									t.ui.unnamed,
+							})}
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel disabled={remove.isPending}>
+							{t.units.contentLanguages.cancel}
+						</AlertDialogCancel>
+						<AlertDialogAction
+							disabled={!releasePendingRemoval || remove.isPending}
+							onClick={() => {
+								if (!releasePendingRemoval) return;
+								remove.mutate({
+									path: {
+										seriesId: unit.id,
+										releaseId: releasePendingRemoval.releaseUnitId,
+									},
+								});
+								setReleasePendingRemoval(undefined);
+							}}
+							variant="destructive"
+						>
+							{t.units.series.removeRelease}
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</section>
 	);
 }

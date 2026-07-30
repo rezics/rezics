@@ -74,7 +74,7 @@ export function UnitScoreControl({
 	const [draftVisibility, setDraftVisibility] =
 		useState<ResourceVisibility>(DefaultResourceVisibility);
 	const [pendingDefaultScore, setPendingDefaultScore] = useState<UnitScore>();
-	const copy = t.engagement.progressByType[type];
+	const scoreAction = t.engagement.scoreActionByType[type];
 
 	const scoredRealms = useMemo(
 		() =>
@@ -186,7 +186,7 @@ export function UnitScoreControl({
 				) : (
 					<Rating
 						allowHalf
-						aria-label={copy.scoreAction}
+						aria-label={scoreAction}
 						className="text-muted-foreground **:data-[highlighted]:text-warning **:data-[slot=rating-item-indicator]:size-7"
 						count={RatingCount}
 						disabled={disabled}
@@ -206,7 +206,7 @@ export function UnitScoreControl({
 				)}
 				<p className="text-center text-sm text-muted-foreground">
 					{displayedScore === undefined
-						? copy.scoreAction
+						? scoreAction
 						: t.engagement.scoreOutOfTen({
 								score: String(displayedScore),
 							})}
@@ -225,10 +225,7 @@ export function UnitScoreControl({
 				open={dialogOpen}
 			>
 				<DialogContent showCloseButton={false} size="sm">
-					<DialogHeader
-						description={t.engagement.scoreEditorHint}
-						title={copy.scoreAction}
-					/>
+					<DialogHeader description={t.engagement.scoreEditorHint} title={scoreAction} />
 					<DialogBody className="grid gap-5">
 						<Field>
 							<FieldLabel>{t.engagement.scoreRealm}</FieldLabel>
@@ -286,7 +283,7 @@ export function UnitScoreControl({
 						<div className="grid justify-items-center gap-2">
 							<Rating
 								allowHalf
-								aria-label={copy.scoreAction}
+								aria-label={scoreAction}
 								className="**:data-[slot=rating-item-indicator]:size-8"
 								count={RatingCount}
 								disabled={!selectedRealm || mutation.isPending}

@@ -161,6 +161,12 @@ export default {
 	resultsHidden: "投票結束後顯示結果。",
 	emptyPolls: "還沒有投票。",
 	progress: "進度記錄",
+	scoreActionByType: {
+		book: "為這本書評分",
+		media: "為這部作品評分",
+		software: "為這套軟體評分",
+		series: "為這個系列評分",
+	},
 	progressByType: {
 		book: {
 			title: "閱讀進度",

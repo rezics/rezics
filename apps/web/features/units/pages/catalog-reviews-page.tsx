@@ -10,6 +10,7 @@ import { targetedReviewCreateHref } from "@/features/reviews/routing/review-rout
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import type { CatalogDetailUnitType } from "../model/catalog-detail-section";
+import { catalogDetailPageCopy } from "../model/catalog-detail-copy";
 import { isCatalogDetailUnitFor } from "../model/catalog-detail-unit";
 import { catalogDetailHref } from "../routing/catalog-detail-routes";
 
@@ -36,21 +37,7 @@ export function CatalogReviewsPage({
 				retry={() => void query.refetch()}
 			/>
 		);
-	const labels =
-		type === "book"
-			? {
-					title: t.units.detail.tabs.book.reviews,
-					description: t.units.detail.sectionDescriptions.book.reviews,
-				}
-			: type === "media"
-				? {
-						title: t.units.detail.tabs.media.reviews,
-						description: t.units.detail.sectionDescriptions.media.reviews,
-					}
-				: {
-						title: t.units.detail.tabs.software.reviews,
-						description: t.units.detail.sectionDescriptions.software.reviews,
-					};
+	const labels = catalogDetailPageCopy(t, type, "reviews");
 	const localization =
 		query.data.localizations.find(({ language }) => language === query.data.language) ??
 		query.data.localizations[0];

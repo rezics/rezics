@@ -31,6 +31,7 @@ export const FeedRatedWorkUnitKindValues = [
 	"book",
 	"software",
 	"media",
+	"series",
 ] as const satisfies readonly FeedUnitKind[];
 export type FeedRatedWorkUnitKind = (typeof FeedRatedWorkUnitKindValues)[number];
 
@@ -46,7 +47,6 @@ export const FeedGeneralUnitKindValues = [
 	"release",
 	"entity",
 	"structure",
-	"series",
 	"collection",
 	"poll",
 ] as const satisfies readonly Exclude<FeedUnitKind, FeedRatedWorkUnitKind | FeedIdentityUnitKind>[];

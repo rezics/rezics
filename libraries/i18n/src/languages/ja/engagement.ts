@@ -160,6 +160,12 @@ export default {
 	resultsHidden: "アンケート終了後に結果が表示されます。",
 	emptyPolls: "まだアンケートはありません。",
 	progress: "進行状況",
+	scoreActionByType: {
+		book: "この本を評価",
+		media: "この作品を評価",
+		software: "このソフトウェアを評価",
+		series: "このシリーズを評価",
+	},
 	progressByType: {
 		book: {
 			title: "読書進捗",

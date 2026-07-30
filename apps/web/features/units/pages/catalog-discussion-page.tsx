@@ -11,27 +11,14 @@ import { useTranslation } from "@/i18n/client";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { CatalogDetailSectionFrame } from "../components/catalog-detail-section-frame";
 import { useCatalogDetail } from "../components/catalog-detail-workspace";
+import { catalogDetailPageCopy } from "../model/catalog-detail-copy";
 
 export function CatalogDiscussionPage() {
 	const detail = useCatalogDetail();
 	const router = useApplicationRouter();
 	const { data: session } = useHydratedSession();
 	const { t } = useTranslation(["actions", "units"]);
-	const labels =
-		detail.type === "book"
-			? {
-					title: t.units.detail.tabs.book.discussion,
-					description: t.units.detail.sectionDescriptions.book.discussion,
-				}
-			: detail.type === "media"
-				? {
-						title: t.units.detail.tabs.media.discussion,
-						description: t.units.detail.sectionDescriptions.media.discussion,
-					}
-				: {
-						title: t.units.detail.tabs.software.discussion,
-						description: t.units.detail.sectionDescriptions.software.discussion,
-					};
+	const labels = catalogDetailPageCopy(t, detail.type, "discussion");
 	return (
 		<CatalogDetailSectionFrame description={labels.description} title={labels.title}>
 			<Card>

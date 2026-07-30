@@ -7,10 +7,17 @@ export const ProgressStatuses = ["backlog", "active", "paused", "completed", "dr
 
 export type ProgressStatus = (typeof ProgressStatuses)[number];
 
-export type UnitProgressDomain =
-	| { readonly type: "book"; readonly unitId: string }
-	| { readonly type: "media"; readonly unitId: string }
-	| { readonly type: "software"; readonly unitId: string };
+export const ProgressTrackableUnitTypes = ["book", "media", "software"] as const;
+export type ProgressTrackableUnitType = (typeof ProgressTrackableUnitTypes)[number];
+
+export type UnitProgressDomain = {
+	readonly type: ProgressTrackableUnitType;
+	readonly unitId: string;
+};
+
+export function isProgressTrackableUnitType(value: string): value is ProgressTrackableUnitType {
+	return ProgressTrackableUnitTypes.some((candidate) => candidate === value);
+}
 
 export interface UnitProgressRecord<Status extends ProgressStatus = ProgressStatus> {
 	readonly completedCount: number;

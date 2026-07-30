@@ -1,4 +1,5 @@
 import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
+import type { EmbeddableSearchTemplateId } from "@rezics/filter";
 import { searchParamsParsers } from "@/lib/search-params";
 import { createSerializer } from "nuqs/server";
 
@@ -8,6 +9,10 @@ export interface TagSearchTarget {
 }
 
 const serializeSearch = createSerializer(searchParamsParsers);
+
+function tagSearchTemplate(type: CatalogDetailUnitType): EmbeddableSearchTemplateId {
+	return type === "series" ? "global" : type;
+}
 
 export function unitTagsHref(type: CatalogDetailUnitType, unitId: string): string {
 	return `/units/${type}/${unitId}/tags`;
@@ -19,7 +24,7 @@ export function tagSearchHref(
 ): string {
 	const unique = new Map(tags.map((tag) => [tag.tagId, tag]));
 	return `/search${serializeSearch({
-		template: type,
+		template: tagSearchTemplate(type),
 		tag: [...unique.values()].map(({ tagId }) => tagId),
 		tagLabel: [...unique.values()].map(({ label }) => label),
 	})}`;
