@@ -39,6 +39,7 @@ export function CatalogDiscussionPage() {
 					{session ? (
 						<SubjectPostComposer
 							onCreated={(postId) => router.push(postDiscussionHref(postId))}
+							postKind="post"
 							subjectId={detail.unit.id}
 						/>
 					) : (

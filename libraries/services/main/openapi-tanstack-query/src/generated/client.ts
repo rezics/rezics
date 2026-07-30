@@ -5770,7 +5770,7 @@ export function getApiPosts<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary Create post
+ * @summary Create post or excerpt
  * {@link /api/posts}
  */
 export function postApiPosts<ThrowOnError extends boolean = true>(

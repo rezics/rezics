@@ -26,14 +26,32 @@ const OptionalPostSummary = t.Optional(t.String({ minLength: 1, maxLength: 2_000
 const NullablePostTitle = t.Nullable(t.String({ minLength: 1, maxLength: 500 }));
 const NullablePostSummary = t.Nullable(t.String({ minLength: 1, maxLength: 2_000 }));
 
-export const CreatePostBody = t.Object({
+const CreatePostFields = {
 	title: OptionalPostTitle,
 	summary: OptionalPostSummary,
 	body: PortableTextDocument,
 	language: ContentLanguage,
 	realmId: t.Optional(Uuid),
-	subjectId: t.Optional(Uuid),
-});
+} as const;
+
+export const CreatePostBody = t.Union([
+	t.Object(
+		{
+			...CreatePostFields,
+			postKind: t.Literal("post"),
+			subjectId: t.Optional(Uuid),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			...CreatePostFields,
+			postKind: t.Literal("excerpt"),
+			subjectId: Uuid,
+		},
+		{ additionalProperties: false },
+	),
+]);
 export type CreatePostBody = Static<typeof CreatePostBody>;
 
 export const CreateWikiBody = t.Object(

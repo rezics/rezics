@@ -1091,6 +1091,10 @@ export const ReplyPostDetailResponse = t.Object({
 	...PostThreadDetailFields,
 	postKind: t.Literal("reply"),
 });
+export const ExcerptPostDetailResponse = t.Object({
+	...PostThreadDetailFields,
+	postKind: t.Literal("excerpt"),
+});
 export const WikiPostDetailResponse = t.Object({
 	...PostThreadDetailFields,
 	postKind: t.Literal("wiki"),
@@ -1122,6 +1126,7 @@ export const ReviewDetailResponse = t.Object({
 export const PostDetailResponse = t.Union([
 	OrdinaryPostDetailResponse,
 	ReplyPostDetailResponse,
+	ExcerptPostDetailResponse,
 	ReviewDetailResponse,
 	WikiPostDetailResponse,
 ]);

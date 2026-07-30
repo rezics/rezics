@@ -33,6 +33,7 @@ export default {
 	signInToReply: "Sign in to reply",
 	openReplyComposer: "Join the discussion",
 	openDiscussionComposer: "Start a discussion",
+	openExcerptComposer: "Add an excerpt",
 	hideChildReplies: "Hide child replies",
 	showChildReplies: "Show child replies",
 	replyingLocked: `New reply ${postTerms.plural} are disabled for this target.`,

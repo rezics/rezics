@@ -28,7 +28,7 @@ import { nullablePostLocalizationText } from "../model/post-localization-input";
 import { invalidatePostQueries } from "../query";
 import { postDetailHref } from "../routing/post-management-routes";
 
-type OrdinaryPost = Extract<GetApiPostsByPostIdStatus200, { postKind: "post" }>;
+type OrdinaryPost = Extract<GetApiPostsByPostIdStatus200, { postKind: "post" | "excerpt" }>;
 type ReplyPost = Extract<GetApiPostsByPostIdStatus200, { postKind: "reply" }>;
 
 export function PostEditPage() {

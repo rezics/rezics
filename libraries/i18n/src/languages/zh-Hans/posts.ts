@@ -31,6 +31,7 @@ export default {
 	signInToReply: "登录后回复",
 	openReplyComposer: "加入讨论",
 	openDiscussionComposer: "发起讨论",
+	openExcerptComposer: "添加摘录",
 	hideChildReplies: "隐藏后续回复",
 	showChildReplies: "显示后续回复",
 	replyingLocked: `此对象当前禁止新的回复${postTerms.plural}。`,

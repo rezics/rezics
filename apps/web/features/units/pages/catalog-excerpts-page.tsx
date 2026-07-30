@@ -1,14 +1,17 @@
 "use client";
 
 import { useGetApiUnitsByTypeByUnitId } from "@rezics/openapi-tanstack-query";
-import { Button, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
+import { Button, Card, CardContent, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
 import { ArrowLeft } from "lucide-react";
 
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { SignInButton } from "@/features/auth/auth-portal";
 import { UnitExcerptFeed } from "@/features/posts/components/unit-excerpt-feed";
+import { SubjectPostComposer } from "@/features/posts/subject-post-composer";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { selectLocalization } from "@/lib/localization";
+import { useHydratedSession } from "@/lib/use-hydrated-session";
 import type { CatalogDetailUnitType } from "../model/catalog-detail-section";
 import { isCatalogDetailUnitFor } from "../model/catalog-detail-unit";
 import { catalogDetailHref } from "../routing/catalog-detail-routes";
@@ -20,8 +23,9 @@ export function CatalogExcerptsPage({
 	readonly type: CatalogDetailUnitType;
 	readonly unitId: string;
 }) {
-	const { t } = useTranslation(["engagement", "ui", "units"]);
+	const { t } = useTranslation(["actions", "engagement", "ui", "units"]);
 	const localizationLanguages = useLocalizationLanguages();
+	const { data: session } = useHydratedSession();
 	const query = useGetApiUnitsByTypeByUnitId({
 		path: { type, unitId },
 		query: { localizationLanguages },
@@ -57,6 +61,20 @@ export function CatalogExcerptsPage({
 			<p className="-mt-5 max-w-3xl text-sm leading-6 text-muted-foreground">
 				{t.engagement.excerptPageDescription}
 			</p>
+			<Card>
+				<CardContent className="p-5 sm:p-6">
+					{session ? (
+						<SubjectPostComposer postKind="excerpt" subjectId={unitId} />
+					) : (
+						<SignInButton
+							className="h-11 w-full justify-start rounded-xl text-muted-foreground"
+							variant="outline"
+						>
+							{t.actions.login}
+						</SignInButton>
+					)}
+				</CardContent>
+			</Card>
 			<UnitExcerptFeed targetId={unitId} />
 		</main>
 	);

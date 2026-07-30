@@ -80,7 +80,9 @@ import { createWikiPost } from "../../posts/wiki";
 
 const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
 const ordinaryPostKind = sql<"post" | "reply">`${post.kind}::text`;
-const interactivePostKind = sql<"post" | "reply" | "review" | "wiki">`${post.kind}::text`;
+const interactivePostKind = sql<
+	"post" | "reply" | "excerpt" | "review" | "wiki"
+>`${post.kind}::text`;
 
 const replyCount = sql<unknown>`coalesce(case when ${post.kind} = 'reply'::post_kind
 	then ${postReplyStat.undeletedDirectCount}
@@ -350,6 +352,7 @@ export default new Elysia()
 						});
 						await tx.insert(post).values({
 							id: created.id,
+							kind: body.postKind,
 							subjectUnitId: body.subjectId,
 						});
 						await tx.insert(unitLocalization).values({
@@ -410,7 +413,7 @@ export default new Elysia()
 							"PostTargetingLocked",
 						]),
 					},
-					detail: { summary: "Create post", tags: ["Posts"] },
+					detail: { summary: "Create post or excerpt", tags: ["Posts"] },
 				},
 			)
 			.post(
@@ -505,7 +508,7 @@ export default new Elysia()
 						.where(
 							and(
 								eq(post.id, params.postId),
-								sql`${post.kind} in ('post'::post_kind, 'reply'::post_kind, 'review'::post_kind, 'wiki'::post_kind)`,
+								sql`${post.kind} in ('post'::post_kind, 'reply'::post_kind, 'excerpt'::post_kind, 'review'::post_kind, 'wiki'::post_kind)`,
 								query.realmId
 									? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${query.realmId} and rc.status = 'visible')`
 									: undefined,
@@ -632,6 +635,8 @@ export default new Elysia()
 					};
 					if (row.postKind === "reply")
 						return { ...threadDetail, postKind: "reply" as const };
+					if (row.postKind === "excerpt")
+						return { ...threadDetail, postKind: "excerpt" as const };
 					if (row.postKind === "wiki")
 						return { ...threadDetail, postKind: "wiki" as const };
 					return { ...threadDetail, postKind: "post" as const };
@@ -653,7 +658,7 @@ export default new Elysia()
 			.patch(
 				"/:postId",
 				async ({ params, profile, authorization, body }) => {
-					await ensureOrdinaryPost(params.postId);
+					await ensureEditablePost(params.postId);
 					await authorization.unit.ensureCanUpdate(params.postId, [
 						["localizations", body.language],
 					]);
@@ -729,7 +734,7 @@ export default new Elysia()
 			.delete(
 				"/:postId",
 				async ({ params, profile, authorization }) => {
-					await ensureOrdinaryPost(params.postId);
+					await ensureEditablePost(params.postId);
 					await authorization.unit.ensure(params.postId, "unit.delete");
 					await database.transaction(async (tx) => {
 						await tx
@@ -1186,12 +1191,15 @@ async function ensureRootPost(postId: string, realmId?: string) {
 	if (!row) throw new PostNotFound();
 }
 
-async function ensureOrdinaryPost(postId: string) {
+async function ensureEditablePost(postId: string) {
 	const [row] = await database
 		.select({ id: post.id })
 		.from(post)
 		.where(
-			and(eq(post.id, postId), sql`${post.kind} in ('post'::post_kind, 'reply'::post_kind)`),
+			and(
+				eq(post.id, postId),
+				sql`${post.kind} in ('post'::post_kind, 'reply'::post_kind, 'excerpt'::post_kind)`,
+			),
 		)
 		.limit(1);
 	if (!row) throw new PostNotFound();

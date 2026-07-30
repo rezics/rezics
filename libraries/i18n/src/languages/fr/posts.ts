@@ -33,6 +33,7 @@ export default {
 	signInToReply: "Connectez-vous pour répondre",
 	openReplyComposer: "Participer à la discussion",
 	openDiscussionComposer: "Lancer une discussion",
+	openExcerptComposer: "Ajouter un extrait",
 	hideChildReplies: "Masquer les réponses suivantes",
 	showChildReplies: "Afficher les réponses suivantes",
 	replyingLocked: `La création de ${postTerms.plural} de réponse est désactivée pour cette cible.`,

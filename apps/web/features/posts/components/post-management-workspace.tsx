@@ -37,7 +37,7 @@ import {
 } from "../routing/post-management-routes";
 
 type OrdinaryPostManagementResource = Readonly<{
-	item: Extract<GetApiPostsByPostIdStatus200, { postKind: "post" | "reply" }>;
+	item: Extract<GetApiPostsByPostIdStatus200, { postKind: "post" | "reply" | "excerpt" }>;
 }>;
 
 type ReviewManagementResource = Readonly<{
@@ -60,7 +60,11 @@ export function usePostManagement(): PostManagementContextValue {
 
 export function useOrdinaryPostManagement(): OrdinaryPostManagementResource {
 	const { resource } = usePostManagement();
-	if (resource.item.postKind !== "post" && resource.item.postKind !== "reply")
+	if (
+		resource.item.postKind !== "post" &&
+		resource.item.postKind !== "reply" &&
+		resource.item.postKind !== "excerpt"
+	)
 		throw new Error("Ordinary Post management is unavailable for this Post kind");
 	return { item: resource.item };
 }

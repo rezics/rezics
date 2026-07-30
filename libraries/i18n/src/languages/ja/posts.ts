@@ -31,6 +31,7 @@ export default {
 	signInToReply: "返信するにはサインイン",
 	openReplyComposer: "議論に参加",
 	openDiscussionComposer: "ディスカッションを始める",
+	openExcerptComposer: "抜粋を追加",
 	hideChildReplies: "子返信を非表示",
 	showChildReplies: "子返信を表示",
 	replyingLocked: `この対象では新しい ${postTerms.plural} の返信は無効です。`,

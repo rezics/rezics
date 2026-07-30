@@ -75,6 +75,7 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 					body: {
 						...(title ? { title } : {}),
 						...(summary ? { summary } : {}),
+						postKind: "post",
 						language: toContentLanguage(locale.target),
 						body: writePortableText(body),
 						...(selectedRealm ? { realmId: selectedRealm.id } : {}),

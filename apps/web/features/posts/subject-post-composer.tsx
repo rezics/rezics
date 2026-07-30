@@ -41,9 +41,11 @@ const editorPreloadIntentHandlers = {
 
 export function SubjectPostComposer({
 	onCreated,
+	postKind,
 	subjectId,
 }: {
 	onCreated?: (postId: string) => void | Promise<void>;
+	postKind: "post" | "excerpt";
 	subjectId: string;
 }) {
 	const { locale, t } = useTranslation(["errors", "posts", "ui"]);
@@ -68,7 +70,8 @@ export function SubjectPostComposer({
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		const form = new FormData(event.currentTarget);
+		const formElement = event.currentTarget;
+		const form = new FormData(formElement);
 		const title = optionalPostLocalizationText(form, "title");
 		const summary = optionalPostLocalizationText(form, "summary");
 		if (!body.length) {
@@ -83,6 +86,7 @@ export function SubjectPostComposer({
 					body: {
 						...(title ? { title } : {}),
 						...(summary ? { summary } : {}),
+						postKind,
 						language: toContentLanguage(locale.target),
 						body: writePortableText(body),
 						subjectId,
@@ -90,6 +94,10 @@ export function SubjectPostComposer({
 					},
 				});
 				await invalidatePostQueries(queryClient, result.id);
+				formElement.reset();
+				setRealm(undefined);
+				setBody([]);
+				setExpanded(false);
 				await onCreated?.(result.id);
 			});
 		} catch {
@@ -152,7 +160,9 @@ export function SubjectPostComposer({
 					}}
 					type="button"
 				>
-					{t.posts.openDiscussionComposer}
+					{postKind === "excerpt"
+						? t.posts.openExcerptComposer
+						: t.posts.openDiscussionComposer}
 				</button>
 			)}
 			<RealmRulesAcknowledgementPrompt controller={rulesAcknowledgement} intent="publish" />

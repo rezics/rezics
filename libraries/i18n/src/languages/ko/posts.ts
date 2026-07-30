@@ -33,6 +33,7 @@ export default {
 	signInToReply: "답글을 달려면 로그인하십시오",
 	openReplyComposer: "토론에 참여",
 	openDiscussionComposer: "토론 시작하기",
+	openExcerptComposer: "발췌 추가",
 	hideChildReplies: "하위 답글 숨기기",
 	showChildReplies: "하위 답글 표시",
 	replyingLocked: `이 대상에는 새 ${postTerms.plural} 답글이 비활성화되어 있습니다.`,

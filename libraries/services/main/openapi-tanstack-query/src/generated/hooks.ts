@@ -29055,7 +29055,7 @@ export function postApiPostsMutationOptions<TContext = unknown>(
 }
 
 /**
- * @summary Create post
+ * @summary Create post or excerpt
  * {@link /api/posts}
  */
 export function usePostApiPosts<TContext>(

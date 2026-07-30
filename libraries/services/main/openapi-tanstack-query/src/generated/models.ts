@@ -35991,6 +35991,27 @@ export const GetApiUsersMeStatus200AvatarIconPrefixEnum = {
 export type GetApiUsersMeStatus200AvatarIconPrefixEnum =
 	(typeof GetApiUsersMeStatus200AvatarIconPrefixEnum)[keyof typeof GetApiUsersMeStatus200AvatarIconPrefixEnum];
 
+export const GetApiUsersMeStatus200LocalizationsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUsersMeStatus200LocalizationsLanguageEnum =
+	(typeof GetApiUsersMeStatus200LocalizationsLanguageEnum)[keyof typeof GetApiUsersMeStatus200LocalizationsLanguageEnum];
+
+export const GetApiUsersMeStatus200LocalizationsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiUsersMeStatus200LocalizationsAvatarIconPrefixEnum =
+	(typeof GetApiUsersMeStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof GetApiUsersMeStatus200LocalizationsAvatarIconPrefixEnum];
+
 export const GetApiUsersMeStatus200PlatformCapabilitiesEnum = {
 	"platform.access.read": "platform.access.read",
 	"platform.access.manage": "platform.access.manage",
@@ -36302,6 +36323,264 @@ export type GetApiUsersMeStatus200 = {
 	 * @type string
 	 */
 	onboarding: string;
+	/**
+	 * @type array
+	 */
+	localizations: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @type string
+		 */
+		language: GetApiUsersMeStatus200LocalizationsLanguageEnum;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		title: (string | null) | null;
+		summary: (string | null) | null;
+		description:
+			| ({
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "image";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								assetId: string;
+								/**
+								 * @type string | undefined
+								 */
+								alt?: string;
+								/**
+								 * @type string | undefined
+								 */
+								caption?: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!(?:block|image)$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+			  } | null)
+			| null;
+		avatar:
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: GetApiUsersMeStatus200LocalizationsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
+			| null;
+		banner:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		cover:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
 	/**
 	 * @type array
 	 */
@@ -74702,6 +74981,20 @@ export type PostApiCollectionsStatus200 = {
 				| null;
 		};
 	}[];
+	cover:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -75523,6 +75816,20 @@ export type GetApiCollectionsFavoritesStatus200 = {
 				| null;
 		};
 	}[];
+	cover:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -79155,6 +79462,20 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 				| null;
 		};
 	}[];
+	cover:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -79671,6 +79992,20 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 				| null;
 		};
 	}[];
+	cover:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -88064,53 +88399,88 @@ export const PostApiPostsRequestLanguageEnum = {
 export type PostApiPostsRequestLanguageEnum =
 	(typeof PostApiPostsRequestLanguageEnum)[keyof typeof PostApiPostsRequestLanguageEnum];
 
-/**
- * @type object
- */
-export type PostApiPostsBody = {
-	/**
-	 * @minLength 1
-	 * @maxLength 500
-	 * @type string | undefined
-	 */
-	title?: string;
-	/**
-	 * @minLength 1
-	 * @maxLength 2000
-	 * @type string | undefined
-	 */
-	summary?: string;
-	/**
-	 * @type object
-	 */
-	body: {
-		/**
-		 * @type string
-		 */
-		_type: "portable-text";
-		/**
-		 * @pattern ^[0-9a-f]{12}$
-		 * @type string
-		 */
-		_key: string;
-		/**
-		 * @type array
-		 */
-		content: (
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "block";
-					/**
-					 * @type array
-					 */
-					children: (
-						| {
+export type PostApiPostsBody =
+	| {
+			/**
+			 * @minLength 1
+			 * @maxLength 500
+			 * @type string | undefined
+			 */
+			title?: string;
+			/**
+			 * @minLength 1
+			 * @maxLength 2000
+			 * @type string | undefined
+			 */
+			summary?: string;
+			/**
+			 * @type object
+			 */
+			body: {
+				/**
+				 * @type string
+				 */
+				_type: "portable-text";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type array
+				 */
+				content: (
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "block";
+							/**
+							 * @type array
+							 */
+							children: (
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "span";
+										/**
+										 * @type string
+										 */
+										text: string;
+										/**
+										 * @type array | undefined
+										 */
+										marks?: string[];
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "unit-mention";
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										unitId: string;
+								  }
+							)[];
+							/**
+							 * @type array | undefined
+							 */
+							markDefs?: {
 								/**
 								 * @type string
 								 */
@@ -88118,17 +88488,163 @@ export type PostApiPostsBody = {
 								/**
 								 * @type string
 								 */
-								_type: "span";
-								/**
-								 * @type string
-								 */
-								text: string;
-								/**
-								 * @type array | undefined
-								 */
-								marks?: string[];
-						  }
-						| {
+								_type: string;
+								[key: string]: unknown;
+							}[];
+							/**
+							 * @type string | undefined
+							 */
+							listItem?: string;
+							/**
+							 * @type string | undefined
+							 */
+							style?: string;
+							/**
+							 * @minLength 1
+							 * @type integer | undefined
+							 */
+							level?: number;
+							[key: string]: unknown;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "image";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							assetId: string;
+							/**
+							 * @type string | undefined
+							 */
+							alt?: string;
+							/**
+							 * @type string | undefined
+							 */
+							caption?: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @pattern ^(?!(?:block|image)$).+
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+					  }
+				)[];
+			};
+			/**
+			 * @type string
+			 */
+			language: PostApiPostsRequestLanguageEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string | undefined
+			 */
+			realmId?: string;
+			/**
+			 * @type string
+			 */
+			postKind: "post";
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string | undefined
+			 */
+			subjectId?: string;
+	  }
+	| {
+			/**
+			 * @minLength 1
+			 * @maxLength 500
+			 * @type string | undefined
+			 */
+			title?: string;
+			/**
+			 * @minLength 1
+			 * @maxLength 2000
+			 * @type string | undefined
+			 */
+			summary?: string;
+			/**
+			 * @type object
+			 */
+			body: {
+				/**
+				 * @type string
+				 */
+				_type: "portable-text";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type array
+				 */
+				content: (
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "block";
+							/**
+							 * @type array
+							 */
+							children: (
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "span";
+										/**
+										 * @type string
+										 */
+										text: string;
+										/**
+										 * @type array | undefined
+										 */
+										marks?: string[];
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "unit-mention";
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										unitId: string;
+								  }
+							)[];
+							/**
+							 * @type array | undefined
+							 */
+							markDefs?: {
 								/**
 								 * @type string
 								 */
@@ -88136,97 +88652,82 @@ export type PostApiPostsBody = {
 								/**
 								 * @type string
 								 */
-								_type: "unit-mention";
-								/**
-								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-								 * @type string
-								 */
-								unitId: string;
-						  }
-					)[];
-					/**
-					 * @type array | undefined
-					 */
-					markDefs?: {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type string
-						 */
-						_type: string;
-						[key: string]: unknown;
-					}[];
-					/**
-					 * @type string | undefined
-					 */
-					listItem?: string;
-					/**
-					 * @type string | undefined
-					 */
-					style?: string;
-					/**
-					 * @minLength 1
-					 * @type integer | undefined
-					 */
-					level?: number;
-					[key: string]: unknown;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "image";
-					/**
-					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-					 * @type string
-					 */
-					assetId: string;
-					/**
-					 * @type string | undefined
-					 */
-					alt?: string;
-					/**
-					 * @type string | undefined
-					 */
-					caption?: string;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @pattern ^(?!(?:block|image)$).+
-					 * @type string
-					 */
-					_type: string;
-					[key: string]: unknown;
-			  }
-		)[];
-	};
-	/**
-	 * @type string
-	 */
-	language: PostApiPostsRequestLanguageEnum;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string | undefined
-	 */
-	realmId?: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string | undefined
-	 */
-	subjectId?: string;
-};
+								_type: string;
+								[key: string]: unknown;
+							}[];
+							/**
+							 * @type string | undefined
+							 */
+							listItem?: string;
+							/**
+							 * @type string | undefined
+							 */
+							style?: string;
+							/**
+							 * @minLength 1
+							 * @type integer | undefined
+							 */
+							level?: number;
+							[key: string]: unknown;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "image";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							assetId: string;
+							/**
+							 * @type string | undefined
+							 */
+							alt?: string;
+							/**
+							 * @type string | undefined
+							 */
+							caption?: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @pattern ^(?!(?:block|image)$).+
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+					  }
+				)[];
+			};
+			/**
+			 * @type string
+			 */
+			language: PostApiPostsRequestLanguageEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string | undefined
+			 */
+			realmId?: string;
+			/**
+			 * @type string
+			 */
+			postKind: "excerpt";
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			subjectId: string;
+	  };
 
 /**
  * @type object
@@ -89550,6 +90051,376 @@ export type GetApiPostsByPostIdStatus200 =
 			 * @type string
 			 */
 			postKind: "reply";
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @type array
+			 */
+			attributions: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @default 'author'
+				 * @type string
+				 */
+				role: GetApiPostsByPostIdStatus200AttributionsRoleEnum;
+				/**
+				 * @description
+				 * Format: `fractional-position`
+				 * @minLength 2
+				 * @maxLength 512
+				 * @type string
+				 */
+				position: string;
+				/**
+				 * @type object
+				 */
+				creditedUnit: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @default 'slug_namespace'
+					 * @type string
+					 */
+					kind: GetApiPostsByPostIdStatus200AttributionsCreditedUnitKindEnum;
+					/**
+					 * @type string
+					 */
+					language: GetApiPostsByPostIdStatus200AttributionsCreditedUnitLanguageEnum;
+					slugAddress:
+						| ({
+								/**
+								 * @minLength 1
+								 * @maxLength 63
+								 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+								 * @type string
+								 */
+								slug: string;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								scopeUnitId: string;
+								/**
+								 * @type array
+								 */
+								canonicalPath: string[];
+						  } | null)
+						| null;
+					title: (string | null) | null;
+					summary: (string | null) | null;
+					avatar:
+						| (
+								| (
+										| {
+												/**
+												 * @type string
+												 */
+												type: "image";
+												/**
+												 * @type object
+												 */
+												image: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													id: string;
+													/**
+													 * @type string
+													 */
+													url: string;
+												};
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "emoji";
+												/**
+												 * @maxLength 64
+												 * @type string
+												 */
+												emoji: string;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "icon";
+												/**
+												 * @type object
+												 */
+												icon: {
+													/**
+													 * @type string
+													 */
+													provider: "font-awesome";
+													/**
+													 * @type string
+													 */
+													prefix: GetApiPostsByPostIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum;
+													/**
+													 * @maxLength 128
+													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+													 * @type string
+													 */
+													name: string;
+												};
+										  }
+								  )
+								| null
+						  )
+						| null;
+				};
+			}[];
+			realmId: (string | null) | null;
+			subjectId: (string | null) | null;
+			rootPostId: (string | null) | null;
+			parentPostId: (string | null) | null;
+			replyCount: string | number;
+			/**
+			 * @type string
+			 */
+			language: GetApiPostsByPostIdStatus200LanguageEnum;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			/**
+			 * @type object
+			 */
+			body: {
+				/**
+				 * @type string
+				 */
+				_type: "portable-text";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type array
+				 */
+				content: (
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "block";
+							/**
+							 * @type array
+							 */
+							children: (
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "span";
+										/**
+										 * @type string
+										 */
+										text: string;
+										/**
+										 * @type array | undefined
+										 */
+										marks?: string[];
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "unit-mention";
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										unitId: string;
+								  }
+							)[];
+							/**
+							 * @type array | undefined
+							 */
+							markDefs?: {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+							}[];
+							/**
+							 * @type string | undefined
+							 */
+							listItem?: string;
+							/**
+							 * @type string | undefined
+							 */
+							style?: string;
+							/**
+							 * @minLength 1
+							 * @type integer | undefined
+							 */
+							level?: number;
+							[key: string]: unknown;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "image";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							assetId: string;
+							/**
+							 * @type string | undefined
+							 */
+							alt?: string;
+							/**
+							 * @type string | undefined
+							 */
+							caption?: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @pattern ^(?!(?:block|image)$).+
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+					  }
+				)[];
+			};
+			latestRevisionId: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			createdAt: string;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			updatedAt: string;
+			subject:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @type string
+						 */
+						type: string;
+						/**
+						 * @type string
+						 */
+						language: GetApiPostsByPostIdStatus200SubjectLanguageEnum;
+						title: (string | null) | null;
+						summary: (string | null) | null;
+						cover:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+							  } | null)
+							| null;
+				  } | null)
+				| null;
+			/**
+			 * @type array
+			 */
+			scores: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				scoreId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				realmId: string;
+				value: string | number;
+			}[];
+			/**
+			 * @type object
+			 */
+			capabilities: {
+				/**
+				 * @type boolean
+				 */
+				canEdit: boolean;
+				/**
+				 * @type boolean
+				 */
+				canManageAttributions: boolean;
+				/**
+				 * @type boolean
+				 */
+				canManageAccess: boolean;
+				/**
+				 * @type boolean
+				 */
+				canReply: boolean;
+			};
+			/**
+			 * @type string
+			 */
+			postKind: "excerpt";
 	  }
 	| {
 			/**

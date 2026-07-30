@@ -35,6 +35,16 @@ describe("post management section manifest", () => {
 		).toEqual(["main", "history"]);
 	});
 
+	it("keeps Excerpts in the ordinary Post management lifecycle", () => {
+		expect(
+			getPostManagementSectionIds({
+				...ordinaryDenied,
+				postKind: "excerpt",
+				capabilities: { ...ordinaryDenied.capabilities, canEdit: true },
+			}),
+		).toEqual(["main", "history"]);
+	});
+
 	it("exposes attribution and access sections only with their exact capabilities", () => {
 		expect(
 			getPostManagementSectionIds({
