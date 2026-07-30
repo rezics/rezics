@@ -40,6 +40,16 @@ export default {
 		title: "基本タグ",
 		description: `グローバルタグおよび${tagStructureTerms.pluralLabel}、いかなる${realmTerms.label}による文脈判断なし。`,
 	},
+	voteContext: {
+		title: "文脈ごとに投票",
+		description: `グローバル、または参加権限のある${realmTerms.label}を選択します。リスト、得票数、自分の投票にはその文脈が使われます。`,
+		select: "投票文脈を選択",
+	},
+	details: {
+		title: "その他のタグ文脈",
+		description: `グローバルタグと選択した${realmTerms.label}の情報源は、それぞれの文脈を保ちます。現在の投票文脈はここには重複表示されません。`,
+		empty: "ほかのタグ情報源は選択されていません。",
+	},
 	structures: {
 		title: tagStructureTerms.pluralLabel,
 		description: `${tagStructureTerms.pluralLabel}は意味のある階層を保持し、フラットタグの前に表示されます。`,
@@ -132,6 +142,9 @@ export default {
 	realms: {
 		title: `${realmTerms.label} タグの文脈`,
 		description: `各${realmTerms.inline}は独立した文脈です。その判断はグローバルタグや他の${realmTerms.inline}と統合されることはありません。`,
+		addTitle: `この${realmTerms.label}でタグ投票を追加`,
+		addDescription: `まず既存のタグを検索します。追加すると、この${realmTerms.inline}で「適合」に投票します。`,
+		add: "投票を追加",
 		policy: `${realmTerms.label}-設定タグ`,
 		votes: `${realmTerms.label}メンバーの投票`,
 		context: "投票文脈を表示",

@@ -40,6 +40,16 @@ export default {
 		title: "基本标签",
 		description: `由一般标签与${tagStructureTerms.pluralLabel}组成，不带入任何${realmTerms.label}的上下文判断。`,
 	},
+	voteContext: {
+		title: "按语境投票",
+		description: `选择一般语境，或选择你有参与权限的${realmTerms.label}。下方列表、票数与你的投票都会使用这个语境。`,
+		select: "选择投票语境",
+	},
+	details: {
+		title: "其他标签语境",
+		description: `一般标签与你${followTerms.action}的${realmTerms.label}标签分别保留原有语境；当前投票语境不会在这里重复显示。`,
+		empty: "尚未选择其他标签来源。",
+	},
 	structures: {
 		title: tagStructureTerms.pluralLabel,
 		description: `${tagStructureTerms.pluralLabel}会保留有意义的阶层，并优先于扁平标签显示。`,
@@ -126,6 +136,9 @@ export default {
 	realms: {
 		title: `${realmTerms.label}标签上下文`,
 		description: `各${realmTerms.inline}的判断彼此独立，不会与一般标签或其他${realmTerms.inline}合并计分。`,
+		addTitle: `在这个${realmTerms.label}中添加标签投票`,
+		addDescription: `先搜索既有标签；添加时会在这个${realmTerms.inline}中投下一票“符合”。`,
+		add: "添加投票",
 		policy: `${realmTerms.label}设置的标签`,
 		votes: `${realmTerms.label}成员投票`,
 		context: "查看投票上下文",

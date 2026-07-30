@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import {
 	CreateTagStructureBody,
+	RealmUnitTagVoteListQuery,
 	UnitTagLandscapeQuery,
 	UpdateTagStructureBody,
 	UpsertRealmTagSubscriptionBody,
@@ -19,6 +20,13 @@ describe("Tag API schemas", () => {
 			}),
 		).toBe(true);
 		expect(Value.Check(UnitTagLandscapeQuery, { sourceLimit: 31 })).toBe(false);
+		expect(
+			Value.Check(RealmUnitTagVoteListQuery, {
+				localizationLanguages: ["en", "zh"],
+				limit: 50,
+			}),
+		).toBe(true);
+		expect(Value.Check(RealmUnitTagVoteListQuery, { limit: 51 })).toBe(false);
 	});
 
 	it("requires a community-immutable ordered path of distinct Tag ids", () => {

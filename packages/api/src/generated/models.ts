@@ -46635,7 +46635,7 @@ export const GetApiUnitsByTypeByUnitIdTagsStatus200RealmsVotedTagsAvatarIconPref
 export type GetApiUnitsByTypeByUnitIdTagsStatus200RealmsVotedTagsAvatarIconPrefixEnum =
 	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200RealmsVotedTagsAvatarIconPrefixEnum)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200RealmsVotedTagsAvatarIconPrefixEnum];
 
-export const GetApiUnitsByTypeByUnitIdTagsStatus200RealmsPolicyTagsLanguage = {
+export const GetApiUnitsByTypeByUnitIdTagsStatus200VoteRealmsLanguage = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -46645,16 +46645,16 @@ export const GetApiUnitsByTypeByUnitIdTagsStatus200RealmsPolicyTagsLanguage = {
 	es: "es",
 } as const;
 
-export type GetApiUnitsByTypeByUnitIdTagsStatus200RealmsPolicyTagsLanguage =
-	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200RealmsPolicyTagsLanguage)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200RealmsPolicyTagsLanguage];
+export type GetApiUnitsByTypeByUnitIdTagsStatus200VoteRealmsLanguage =
+	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200VoteRealmsLanguage)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200VoteRealmsLanguage];
 
-export const GetApiUnitsByTypeByUnitIdTagsStatus200RealmsPolicyTagsAvatarIconPrefixEnum = {
+export const GetApiUnitsByTypeByUnitIdTagsStatus200VoteRealmsAvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
 } as const;
 
-export type GetApiUnitsByTypeByUnitIdTagsStatus200RealmsPolicyTagsAvatarIconPrefixEnum =
-	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200RealmsPolicyTagsAvatarIconPrefixEnum)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200RealmsPolicyTagsAvatarIconPrefixEnum];
+export type GetApiUnitsByTypeByUnitIdTagsStatus200VoteRealmsAvatarIconPrefixEnum =
+	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200VoteRealmsAvatarIconPrefixEnum)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200VoteRealmsAvatarIconPrefixEnum];
 
 /**
  * @type object
@@ -46885,10 +46885,6 @@ export type GetApiUnitsByTypeByUnitIdTagsStatus200 = {
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		/**
-		 * @type boolean
-		 */
-		canVote: boolean;
-		/**
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
@@ -46908,6 +46904,10 @@ export type GetApiUnitsByTypeByUnitIdTagsStatus200 = {
 		 * @type string
 		 */
 		updatedAt: string;
+		/**
+		 * @type boolean
+		 */
+		canVote: boolean;
 		/**
 		 * @type array
 		 */
@@ -47008,112 +47008,84 @@ export type GetApiUnitsByTypeByUnitIdTagsStatus200 = {
 			voteCount: string | number;
 			viewerVote: ((-1 | 1) | null) | null;
 		}[];
+	}[];
+	/**
+	 * @type array
+	 */
+	voteRealms: {
 		/**
-		 * @type array
+		 * @description
+		 * Format: `uuid`
+		 * @type string
 		 */
-		policyTags: {
-			/**
-			 * @description
-			 * Format: `uuid`
-			 * @type string
-			 */
-			tagId: string;
-			language:
-				(GetApiUnitsByTypeByUnitIdTagsStatus200RealmsPolicyTagsLanguage | null) | null;
-			title: (string | null) | null;
-			summary: (string | null) | null;
-			avatar:
-				| (
-						| (
-								| {
+		realmId: string;
+		language: (GetApiUnitsByTypeByUnitIdTagsStatus200VoteRealmsLanguage | null) | null;
+		title: (string | null) | null;
+		summary: (string | null) | null;
+		avatar:
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
 										/**
 										 * @type string
 										 */
-										type: "image";
-										/**
-										 * @type object
-										 */
-										image: {
-											/**
-											 * @description
-											 * Format: `uuid`
-											 * @type string
-											 */
-											id: string;
-											/**
-											 * @type string
-											 */
-											url: string;
-										};
-								  }
-								| {
-										/**
-										 * @type string
-										 */
-										type: "emoji";
-										/**
-										 * @maxLength 64
-										 * @type string
-										 */
-										emoji: string;
-								  }
-								| {
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
 										/**
 										 * @type string
 										 */
-										type: "icon";
+										provider: "font-awesome";
 										/**
-										 * @type object
+										 * @type string
 										 */
-										icon: {
-											/**
-											 * @type string
-											 */
-											provider: "font-awesome";
-											/**
-											 * @type string
-											 */
-											prefix: GetApiUnitsByTypeByUnitIdTagsStatus200RealmsPolicyTagsAvatarIconPrefixEnum;
-											/**
-											 * @maxLength 128
-											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-											 * @type string
-											 */
-											name: string;
-										};
-								  }
-						  )
-						| null
-				  )
-				| null;
-			/**
-			 * @description
-			 * Format: `date-time`
-			 * @type string
-			 */
-			createdAt: string;
-			/**
-			 * @description
-			 * Format: `date-time`
-			 * @type string
-			 */
-			updatedAt: string;
-			/**
-			 * @description
-			 * Format: `uuid`
-			 * @type string
-			 */
-			realmId: string;
-			contextPostId: (string | null) | null;
-			/**
-			 * @description
-			 * Format: `fractional-position`
-			 * @minLength 2
-			 * @maxLength 512
-			 * @type string
-			 */
-			position: string;
-		}[];
+										prefix: GetApiUnitsByTypeByUnitIdTagsStatus200VoteRealmsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
+			| null;
 	}[];
 };
 
@@ -47984,10 +47956,6 @@ export type GetApiUsersMeTagRealmSubscriptionsStatus200 = {
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		/**
-		 * @type boolean
-		 */
-		canVote: boolean;
-		/**
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
@@ -48134,10 +48102,6 @@ export type PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200 = {
 	language: (PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200Language | null) | null;
 	title: (string | null) | null;
 	summary: (string | null) | null;
-	/**
-	 * @type boolean
-	 */
-	canVote: boolean;
 	/**
 	 * @description
 	 * Format: `fractional-position`
@@ -104682,6 +104646,316 @@ export type DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdResponse =
 	| DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus403
 	| DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus422
 	| DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const GetApiRealmsByRealmIdUnitsByUnitIdTagsLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsLocalizationLanguagesEnum =
+	(typeof GetApiRealmsByRealmIdUnitsByUnitIdTagsLocalizationLanguagesEnum)[keyof typeof GetApiRealmsByRealmIdUnitsByUnitIdTagsLocalizationLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsQuery = {
+	/**
+	 * @type array | undefined
+	 */
+	localizationLanguages?: GetApiRealmsByRealmIdUnitsByUnitIdTagsLocalizationLanguagesEnum[];
+	/**
+	 * @default 50
+	 */
+	limit?: string | number;
+};
+
+export const GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200TagsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200TagsLanguage =
+	(typeof GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200TagsLanguage)[keyof typeof GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200TagsLanguage];
+
+export const GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200TagsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200TagsAvatarIconPrefixEnum =
+	(typeof GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200TagsAvatarIconPrefixEnum)[keyof typeof GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200TagsAvatarIconPrefixEnum];
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @type array
+	 */
+	tags: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		tagId: string;
+		language: (GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200TagsLanguage | null) | null;
+		title: (string | null) | null;
+		summary: (string | null) | null;
+		avatar:
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200TagsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
+			| null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		realmId: string;
+		contextPostId: (string | null) | null;
+		score: string | number;
+		voteCount: string | number;
+		viewerVote: ((-1 | 1) | null) | null;
+	}[];
+};
+
+export const GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus403ErrorCodeEnum = {
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+} as const;
+
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus403ErrorCodeEnum =
+	(typeof GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus403ErrorCodeEnum)[keyof typeof GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsOptions = {
+	body?: never;
+	path: GetApiRealmsByRealmIdUnitsByUnitIdTagsPath;
+	query?: GetApiRealmsByRealmIdUnitsByUnitIdTagsQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsResponses = {
+	"200": GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200;
+	"403": GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus403;
+	"404": GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus404;
+	"422": GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus422;
+	"429": GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus429;
+	"500": GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsResponse =
+	| GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200
+	| GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus403
+	| GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus404
+	| GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus422
+	| GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus429
+	| GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus500;
 
 /**
  * @type object

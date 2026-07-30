@@ -1,8 +1,15 @@
-import type { GetApiUnitsByTypeByUnitIdTagsStatus200 } from "@rezics/openapi-tanstack-query";
+import type {
+	GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200,
+	GetApiUnitsByTypeByUnitIdTagsStatus200,
+} from "@rezics/openapi-tanstack-query";
 
 import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
 import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
-import type { RealmTagGroupPresentation, TagPresentation } from "../model/tag-presentation";
+import type {
+	RealmTagGroupPresentation,
+	RealmTagVoteContextPresentation,
+	TagPresentation,
+} from "../model/tag-presentation";
 
 type UnitTagLandscape = GetApiUnitsByTypeByUnitIdTagsStatus200;
 
@@ -34,7 +41,6 @@ export function presentGlobalTags(input: {
 			voteCount: toNonNegativeApiInteger(tag.voteCount),
 			viewerVote: tag.viewerVote,
 			canVote: input.signedIn,
-			...(input.signedIn ? {} : { unavailableReason: "signed-out" as const }),
 		},
 	}));
 }
@@ -43,75 +49,74 @@ export function presentRealmTagGroups(input: {
 	readonly data: UnitTagLandscape;
 	readonly unitId: string;
 }): readonly RealmTagGroupPresentation[] {
-	return input.data.realms.flatMap((realm) => {
-		const byTagId = new Map<string, TagPresentation>();
-		for (const tag of realm.policyTags) {
-			byTagId.set(tag.tagId, {
-				itemKey: `realm:${realm.realmId}:${tag.tagId}`,
-				identity: {
-					tagId: tag.tagId,
-					language: tag.language,
-					title: tag.title,
-					summary: tag.summary,
-					avatar: tag.avatar,
-				},
-				context: {
-					kind: "realm",
-					realmId: realm.realmId,
-					realmLanguage: realm.language,
-					realmTitle: realm.title,
-					policy: true,
-					...(tag.contextPostId ? { contextPostId: tag.contextPostId } : {}),
-				},
-				vote: { kind: "not-applicable", reason: "policy" },
-			});
-		}
-		for (const tag of realm.votedTags) {
-			const policy = byTagId.has(tag.tagId);
-			byTagId.set(tag.tagId, {
-				itemKey: `realm:${realm.realmId}:${tag.tagId}`,
-				identity: {
-					tagId: tag.tagId,
-					language: tag.language,
-					title: tag.title,
-					summary: tag.summary,
-					avatar: tag.avatar,
-				},
-				context: {
-					kind: "realm",
-					realmId: realm.realmId,
-					realmLanguage: realm.language,
-					realmTitle: realm.title,
-					policy,
-					...(tag.contextPostId ? { contextPostId: tag.contextPostId } : {}),
-				},
-				vote: {
-					kind: "available",
-					target: {
-						kind: "realm",
-						realmId: realm.realmId,
-						unitId: input.unitId,
-						tagId: tag.tagId,
-					},
-					score: toFiniteApiNumber(tag.score) ?? 0,
-					voteCount: toNonNegativeApiInteger(tag.voteCount),
-					viewerVote: tag.viewerVote,
-					canVote: realm.canVote,
-					...(realm.canVote ? {} : { unavailableReason: "not-member" as const }),
-				},
-			});
-		}
-		const tags = [...byTagId.values()];
-		return tags.length
-			? [
-					{
-						realmId: realm.realmId,
-						language: realm.language,
-						title: realm.title,
-						summary: realm.summary,
-						tags,
-					},
-				]
-			: [];
+	return input.data.realms.map((realm) => ({
+		realmId: realm.realmId,
+		language: realm.language,
+		title: realm.title,
+		summary: realm.summary,
+		canVote: realm.canVote,
+		tags: presentRealmTags({
+			realm,
+			tags: realm.votedTags,
+			unitId: input.unitId,
+			canVote: realm.canVote,
+		}),
+	}));
+}
+
+export function presentRealmTagVoteContexts(
+	data: UnitTagLandscape,
+): readonly RealmTagVoteContextPresentation[] {
+	return data.voteRealms.map((realm) => ({ ...realm }));
+}
+
+export function presentSelectedRealmTags(input: {
+	readonly context: RealmTagVoteContextPresentation;
+	readonly data: GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200;
+	readonly unitId: string;
+}): readonly TagPresentation[] {
+	return presentRealmTags({
+		realm: input.context,
+		tags: input.data.tags,
+		unitId: input.unitId,
+		canVote: true,
 	});
+}
+
+function presentRealmTags(input: {
+	readonly realm: Pick<RealmTagVoteContextPresentation, "realmId" | "language" | "title">;
+	readonly tags: GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200["tags"];
+	readonly unitId: string;
+	readonly canVote: boolean;
+}): readonly TagPresentation[] {
+	return input.tags.map((tag) => ({
+		itemKey: `realm:${input.realm.realmId}:${tag.tagId}`,
+		identity: {
+			tagId: tag.tagId,
+			language: tag.language,
+			title: tag.title,
+			summary: tag.summary,
+			avatar: tag.avatar,
+		},
+		context: {
+			kind: "realm",
+			realmId: input.realm.realmId,
+			realmLanguage: input.realm.language,
+			realmTitle: input.realm.title,
+			...(tag.contextPostId ? { contextPostId: tag.contextPostId } : {}),
+		},
+		vote: {
+			kind: "available",
+			target: {
+				kind: "realm",
+				realmId: input.realm.realmId,
+				unitId: input.unitId,
+				tagId: tag.tagId,
+			},
+			score: toFiniteApiNumber(tag.score) ?? 0,
+			voteCount: toNonNegativeApiInteger(tag.voteCount),
+			viewerVote: tag.viewerVote,
+			canVote: input.canVote,
+		},
+	}));
 }

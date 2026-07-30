@@ -1991,6 +1991,13 @@ import type {
 	DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus403,
 	DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus422,
 	DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus500,
+	GetApiRealmsByRealmIdUnitsByUnitIdTagsOptions,
+	GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200,
+	GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus403,
+	GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus404,
+	GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus422,
+	GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus429,
+	GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus500,
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteOptions,
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus200,
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus400,
@@ -2521,6 +2528,7 @@ import {
 	putApiRealmsByRealmIdTagsByTagIdContext,
 	putApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId,
 	deleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId,
+	getApiRealmsByRealmIdUnitsByUnitIdTags,
 	putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote,
 	deleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote,
 	getApiRealmsByRealmIdUnits,
@@ -33100,6 +33108,121 @@ export function useDeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId<TConte
 		DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdOptions,
 		TContext
 	>;
+}
+
+export const getApiRealmsByRealmIdUnitsByUnitIdTagsQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiRealmsByRealmIdUnitsByUnitIdTagsOptions, "headers">) =>
+	[
+		{ url: "/api/realms/:realmId/units/:unitId/tags", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type GetApiRealmsByRealmIdUnitsByUnitIdTagsQueryKey = ReturnType<
+	typeof getApiRealmsByRealmIdUnitsByUnitIdTagsQueryKey
+>;
+
+export function getApiRealmsByRealmIdUnitsByUnitIdTagsQueryOptions(
+	{ path, query }: GetApiRealmsByRealmIdUnitsByUnitIdTagsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiRealmsByRealmIdUnitsByUnitIdTagsQueryKey({ path, query });
+	return queryOptions<
+		GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus403
+			| GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus404
+			| GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus422
+			| GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus429
+			| GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus500
+		>,
+		GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiRealmsByRealmIdUnitsByUnitIdTags({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List Realm-scoped Unit Tag votes
+ * {@link /api/realms/:realmId/units/:unitId/tags}
+ */
+export function useGetApiRealmsByRealmIdUnitsByUnitIdTags<
+	TData = GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200,
+	TQueryData = GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200,
+	TQueryKey extends QueryKey = GetApiRealmsByRealmIdUnitsByUnitIdTagsQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiRealmsByRealmIdUnitsByUnitIdTagsOptions["path"]
+			| (() => GetApiRealmsByRealmIdUnitsByUnitIdTagsOptions["path"]);
+		query?:
+			| GetApiRealmsByRealmIdUnitsByUnitIdTagsOptions["query"]
+			| (() => GetApiRealmsByRealmIdUnitsByUnitIdTagsOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200,
+				ResponseErrorConfig<
+					| GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus403
+					| GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus404
+					| GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus422
+					| GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus429
+					| GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiRealmsByRealmIdUnitsByUnitIdTagsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiRealmsByRealmIdUnitsByUnitIdTagsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus403
+			| GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus404
+			| GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus422
+			| GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus429
+			| GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
 }
 
 export const putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteMutationKey = () =>

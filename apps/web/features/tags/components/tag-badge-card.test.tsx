@@ -56,7 +56,6 @@ const pinnedTag = {
 		voteCount: 1,
 		viewerVote: null,
 		canVote: false,
-		unavailableReason: "signed-out",
 	},
 } satisfies TagPresentation;
 

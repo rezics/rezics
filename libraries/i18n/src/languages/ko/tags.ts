@@ -40,6 +40,16 @@ export default {
 		title: "기본 태그",
 		description: `글로벌 태그와 ${tagStructureTerms.pluralLabel}, 모든 ${realmTerms.label}의 맥락적 판단 없이.`,
 	},
+	voteContext: {
+		title: "문맥별 투표",
+		description: `글로벌 또는 참여 권한이 있는 ${realmTerms.label}을 선택하세요. 목록, 득표수와 내 투표에는 해당 문맥이 적용됩니다.`,
+		select: "투표 문맥 선택",
+	},
+	details: {
+		title: "다른 태그 문맥",
+		description: `글로벌 태그와 선택한 ${realmTerms.label} 소스는 각자의 문맥을 유지합니다. 현재 투표 문맥은 여기에 중복 표시되지 않습니다.`,
+		empty: "선택한 다른 태그 소스가 없습니다.",
+	},
 	structures: {
 		title: tagStructureTerms.pluralLabel,
 		description: `${tagStructureTerms.pluralLabel}는 의미 있는 계층을 유지하며 평면 태그 앞에 표시됩니다.`,
@@ -132,6 +142,9 @@ export default {
 	realms: {
 		title: `${realmTerms.label} 태그 문맥`,
 		description: `각 ${realmTerms.inline}는 독립적인 문맥입니다. 그 판단은 글로벌 태그나 다른 ${realmTerms.inline}과 결합되지 않습니다.`,
+		addTitle: `이 ${realmTerms.label}에서 태그 투표 추가`,
+		addDescription: `먼저 기존 태그를 검색하세요. 태그를 추가하면 이 ${realmTerms.inline}에서 ‘적합’에 투표합니다.`,
+		add: "투표 추가",
 		policy: `${realmTerms.label}-세트 태그`,
 		votes: `${realmTerms.label} 회원 투표`,
 		context: "투표 문맥 보기",

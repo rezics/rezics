@@ -1,23 +1,18 @@
-export function selectPopulatedRealmTagSources<
+export function selectRealmTagSources<
 	Source extends { readonly realmId: string },
 	VotedTag,
-	PolicyTag,
 >(input: {
 	readonly sources: readonly Source[];
 	readonly votedTags: ReadonlyMap<string, VotedTag[]>;
-	readonly policyTags: ReadonlyMap<string, PolicyTag[]>;
+	readonly canVoteRealmIds: ReadonlySet<string>;
 	readonly limit: number;
 }): (Source & {
+	readonly canVote: boolean;
 	readonly votedTags: VotedTag[];
-	readonly policyTags: PolicyTag[];
 })[] {
-	const populated = [];
-	for (const source of input.sources) {
-		const votedTags = input.votedTags.get(source.realmId) ?? [];
-		const policyTags = input.policyTags.get(source.realmId) ?? [];
-		if (!votedTags.length && !policyTags.length) continue;
-		populated.push({ ...source, votedTags, policyTags });
-		if (populated.length === input.limit) break;
-	}
-	return populated;
+	return input.sources.slice(0, input.limit).map((source) => ({
+		...source,
+		canVote: input.canVoteRealmIds.has(source.realmId),
+		votedTags: input.votedTags.get(source.realmId) ?? [],
+	}));
 }

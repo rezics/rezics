@@ -41,6 +41,16 @@ export default {
 		title: "Einfache Tags",
 		description: `Globale Tags und ${tagStructureTerms.pluralLabel} ohne kontextbezogene Bewertungen eines ${realmTerms.inline}s.`,
 	},
+	voteContext: {
+		title: "Nach Kontext abstimmen",
+		description: `Wähle „Global“ oder einen ${realmTerms.label}, in dem du mitwirken darfst. Liste, Wertungen und deine Stimmen verwenden diesen Kontext.`,
+		select: "Abstimmungskontext auswählen",
+	},
+	details: {
+		title: "Weitere Tag-Kontexte",
+		description: `Globale Tags und deine ausgewählten ${realmTerms.label}-Quellen behalten ihren eigenen Kontext. Der aktive Abstimmungskontext wird hier nicht wiederholt.`,
+		empty: "Keine weiteren Tag-Quellen ausgewählt.",
+	},
 	structures: {
 		title: tagStructureTerms.pluralLabel,
 		description: `${tagStructureTerms.pluralLabel} bewahren sinnvolle Hierarchien und werden vor ungeordneten Tags angezeigt.`,
@@ -136,6 +146,9 @@ export default {
 	realms: {
 		title: `${realmTerms.label}-Tag-Kontexte`,
 		description: `Jeder ${realmTerms.inline} ist ein unabhängiger Kontext. Seine Bewertungen werden nie mit globalen Tags oder einem anderen ${realmTerms.inline} zusammengeführt.`,
+		addTitle: `Tag-Stimme in diesem ${realmTerms.label} hinzufügen`,
+		addDescription: `Suche zuerst nach vorhandenen Tags. Beim Hinzufügen wird in diesem ${realmTerms.inline} zugleich mit „Passt“ abgestimmt.`,
+		add: "Stimme hinzufügen",
 		policy: `Vom ${realmTerms.inline} festgelegte Tags`,
 		votes: `Stimmen der Mitglieder des ${realmTerms.inline}s`,
 		context: "Abstimmungskontext anzeigen",

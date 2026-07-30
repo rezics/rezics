@@ -61725,7 +61725,7 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["structures", "global", "realms"],
+									"required": ["structures", "global", "realms", "voteRealms"],
 									"properties": {
 										"structures": {
 											"type": "array",
@@ -62216,12 +62216,11 @@
 													"language",
 													"title",
 													"summary",
-													"canVote",
 													"position",
 													"createdAt",
 													"updatedAt",
-													"votedTags",
-													"policyTags"
+													"canVote",
+													"votedTags"
 												],
 												"properties": {
 													"realmId": {
@@ -62260,7 +62259,6 @@
 															{ "type": "null" }
 														]
 													},
-													"canVote": { "type": "boolean" },
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -62275,6 +62273,7 @@
 														"format": "date-time",
 														"type": "string"
 													},
+													"canVote": { "type": "boolean" },
 													"votedTags": {
 														"type": "array",
 														"items": {
@@ -62495,189 +62494,156 @@
 																}
 															}
 														}
+													}
+												}
+											}
+										},
+										"voteRealms": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"realmId",
+													"language",
+													"title",
+													"summary",
+													"avatar"
+												],
+												"properties": {
+													"realmId": {
+														"format": "uuid",
+														"type": "string"
 													},
-													"policyTags": {
-														"type": "array",
-														"items": {
-															"type": "object",
-															"required": [
-																"tagId",
-																"language",
-																"title",
-																"summary",
-																"avatar",
-																"createdAt",
-																"updatedAt",
-																"realmId",
-																"contextPostId",
-																"position"
-															],
-															"properties": {
-																"tagId": {
-																	"format": "uuid",
-																	"type": "string"
-																},
-																"language": {
-																	"nullable": true,
-																	"anyOf": [
-																		{
-																			"type": "string",
-																			"enum": [
-																				"zh",
-																				"en",
-																				"ja",
-																				"ko",
-																				"de",
-																				"fr",
-																				"es"
-																			]
-																		},
-																		{ "type": "null" }
-																	]
-																},
-																"title": {
-																	"nullable": true,
-																	"anyOf": [
-																		{ "type": "string" },
-																		{ "type": "null" }
-																	]
-																},
-																"summary": {
-																	"nullable": true,
-																	"anyOf": [
-																		{ "type": "string" },
-																		{ "type": "null" }
-																	]
-																},
-																"avatar": {
-																	"nullable": true,
-																	"anyOf": [
-																		{
-																			"anyOf": [
-																				{
-																					"additionalProperties": false,
-																					"type": "object",
-																					"required": [
-																						"type",
-																						"image"
-																					],
-																					"properties": {
-																						"type": {
-																							"const": "image",
-																							"type": "string"
-																						},
-																						"image": {
-																							"type": "object",
-																							"required": [
-																								"id",
-																								"url"
-																							],
-																							"properties": {
-																								"id": {
-																									"format": "uuid",
-																									"type": "string"
-																								},
-																								"url": {
-																									"type": "string"
-																								}
-																							}
-																						}
-																					}
-																				},
-																				{
-																					"additionalProperties": false,
-																					"type": "object",
-																					"required": [
-																						"type",
-																						"emoji"
-																					],
-																					"properties": {
-																						"type": {
-																							"const": "emoji",
-																							"type": "string"
-																						},
-																						"emoji": {
-																							"maxLength": 64,
-																							"type": "string"
-																						}
-																					}
-																				},
-																				{
-																					"additionalProperties": false,
-																					"type": "object",
-																					"required": [
-																						"type",
-																						"icon"
-																					],
-																					"properties": {
-																						"type": {
-																							"const": "icon",
-																							"type": "string"
-																						},
-																						"icon": {
-																							"additionalProperties": false,
-																							"type": "object",
-																							"required": [
-																								"provider",
-																								"prefix",
-																								"name"
-																							],
-																							"properties": {
-																								"provider": {
-																									"const": "font-awesome",
-																									"type": "string"
-																								},
-																								"prefix": {
-																									"type": "string",
-																									"enum": [
-																										"fas",
-																										"fab"
-																									]
-																								},
-																								"name": {
-																									"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-																									"maxLength": 128,
-																									"type": "string"
-																								}
-																							}
-																						}
+													"language": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"title": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"type",
+																			"image"
+																		],
+																		"properties": {
+																			"type": {
+																				"const": "image",
+																				"type": "string"
+																			},
+																			"image": {
+																				"type": "object",
+																				"required": [
+																					"id",
+																					"url"
+																				],
+																				"properties": {
+																					"id": {
+																						"format": "uuid",
+																						"type": "string"
+																					},
+																					"url": {
+																						"type": "string"
 																					}
 																				}
-																			]
-																		},
-																		{ "type": "null" }
-																	]
-																},
-																"createdAt": {
-																	"format": "date-time",
-																	"type": "string"
-																},
-																"updatedAt": {
-																	"format": "date-time",
-																	"type": "string"
-																},
-																"realmId": {
-																	"format": "uuid",
-																	"type": "string"
-																},
-																"contextPostId": {
-																	"nullable": true,
-																	"anyOf": [
-																		{
-																			"format": "uuid",
-																			"type": "string"
-																		},
-																		{ "type": "null" }
-																	]
-																},
-																"position": {
-																	"format": "fractional-position",
-																	"minLength": 2,
-																	"maxLength": 512,
-																	"type": "string"
-																}
-															}
-														}
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"type",
+																			"emoji"
+																		],
+																		"properties": {
+																			"type": {
+																				"const": "emoji",
+																				"type": "string"
+																			},
+																			"emoji": {
+																				"maxLength": 64,
+																				"type": "string"
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"type",
+																			"icon"
+																		],
+																		"properties": {
+																			"type": {
+																				"const": "icon",
+																				"type": "string"
+																			},
+																			"icon": {
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"provider",
+																					"prefix",
+																					"name"
+																				],
+																				"properties": {
+																					"provider": {
+																						"const": "font-awesome",
+																						"type": "string"
+																					},
+																					"prefix": {
+																						"type": "string",
+																						"enum": [
+																							"fas",
+																							"fab"
+																						]
+																					},
+																					"name": {
+																						"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																						"maxLength": 128,
+																						"type": "string"
+																					}
+																				}
+																			}
+																		}
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
 													}
 												}
 											}
@@ -63603,7 +63569,6 @@
 													"language",
 													"title",
 													"summary",
-													"canVote",
 													"position",
 													"createdAt",
 													"updatedAt"
@@ -63645,7 +63610,6 @@
 															{ "type": "null" }
 														]
 													},
-													"canVote": { "type": "boolean" },
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -63782,7 +63746,6 @@
 										"language",
 										"title",
 										"summary",
-										"canVote",
 										"position",
 										"createdAt",
 										"updatedAt"
@@ -63815,7 +63778,6 @@
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
-										"canVote": { "type": "boolean" },
 										"position": {
 											"format": "fractional-position",
 											"minLength": 2,
@@ -140020,6 +139982,391 @@
 				],
 				"operationId": "deleteApiRealmsByRealmIdUnitsByUnitIdPolicy-tagsByTagId",
 				"x-rezics-policy-operation-id": "deleteApiRealmsByRealmIdUnitsByUnitIdPolicy-tagsByTagId"
+			}
+		},
+		"/api/realms/{realmId}/units/{unitId}/tags": {
+			"get": {
+				"summary": "List Realm-scoped Unit Tag votes",
+				"tags": ["Realms"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 7,
+							"uniqueItems": true,
+							"type": "array",
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
+						}
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 50,
+							"default": 50,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 50, "default": 50, "type": "integer" }
+							]
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["realmId", "tags"],
+									"properties": {
+										"realmId": { "format": "uuid", "type": "string" },
+										"tags": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"tagId",
+													"language",
+													"title",
+													"summary",
+													"avatar",
+													"createdAt",
+													"updatedAt",
+													"realmId",
+													"contextPostId",
+													"score",
+													"voteCount",
+													"viewerVote"
+												],
+												"properties": {
+													"tagId": { "format": "uuid", "type": "string" },
+													"language": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"title": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"type",
+																			"image"
+																		],
+																		"properties": {
+																			"type": {
+																				"const": "image",
+																				"type": "string"
+																			},
+																			"image": {
+																				"type": "object",
+																				"required": [
+																					"id",
+																					"url"
+																				],
+																				"properties": {
+																					"id": {
+																						"format": "uuid",
+																						"type": "string"
+																					},
+																					"url": {
+																						"type": "string"
+																					}
+																				}
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"type",
+																			"emoji"
+																		],
+																		"properties": {
+																			"type": {
+																				"const": "emoji",
+																				"type": "string"
+																			},
+																			"emoji": {
+																				"maxLength": 64,
+																				"type": "string"
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"type",
+																			"icon"
+																		],
+																		"properties": {
+																			"type": {
+																				"const": "icon",
+																				"type": "string"
+																			},
+																			"icon": {
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"provider",
+																					"prefix",
+																					"name"
+																				],
+																				"properties": {
+																					"provider": {
+																						"const": "font-awesome",
+																						"type": "string"
+																					},
+																					"prefix": {
+																						"type": "string",
+																						"enum": [
+																							"fas",
+																							"fab"
+																						]
+																					},
+																					"name": {
+																						"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																						"maxLength": 128,
+																						"type": "string"
+																					}
+																				}
+																			}
+																		}
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"realmId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"contextPostId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"score": {
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "type": "integer" }
+														]
+													},
+													"voteCount": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"viewerVote": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"const": -1,
+																		"type": "number"
+																	},
+																	{ "const": 1, "type": "number" }
+																]
+															},
+															{ "type": "null" }
+														]
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmCapabilityRequired",
+													"type": "string",
+													"enum": [
+														"RealmCapabilityRequired",
+														"UnitAccessRestricted",
+														"UnitPermissionForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiRealmsByRealmIdUnitsByUnitIdTags",
+				"x-rezics-policy-operation-id": "getApiRealmsByRealmIdUnitsByUnitIdTags"
 			}
 		},
 		"/api/realms/{realmId}/units/{unitId}/tags/{tagId}/vote": {

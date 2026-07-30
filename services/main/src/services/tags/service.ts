@@ -1,6 +1,7 @@
 import { and, desc, eq, inArray, isNull, notInArray, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type { ContentLanguage } from "@rezics/i18n";
+import { getRealmContributionCondition } from "../authorization/realm/query";
 import { getUnitReadCondition } from "../authorization/unit/query";
 import { database } from "../database";
 import { toSafeInteger } from "../database/integer";
@@ -12,7 +13,6 @@ import {
 	realmTagVote,
 	realmTagVoteStat,
 	realmUnit,
-	realmUnitTag,
 	tag,
 	unit,
 	unitEffectiveTag,
@@ -29,7 +29,7 @@ import {
 	type LocalizationLanguageQuery,
 } from "../units/localization";
 import { presentAvatar } from "../units/avatar";
-import { selectPopulatedRealmTagSources } from "./landscape";
+import { selectRealmTagSources } from "./landscape";
 import { compareGlobalTagRank } from "./ranking";
 
 export type TagVoteValue = -1 | 1 | null;
@@ -43,8 +43,8 @@ const viewerUnitTagVote = alias(unitEffectiveTagVote, "viewer_unit_tag_vote");
 const viewerRealmTagVote = alias(realmTagVote, "viewer_realm_tag_vote");
 const globalTagUnit = alias(unit, "global_tag_unit");
 const realmSourceUnit = alias(unit, "realm_tag_source_unit");
+const voteContextRealmUnit = alias(unit, "realm_tag_vote_context_unit");
 const votedTagUnit = alias(unit, "realm_voted_tag_unit");
-const policyTagUnit = alias(unit, "realm_policy_tag_unit");
 const contextPostUnit = alias(unit, "realm_tag_context_post_unit");
 const contextRealmUnit = alias(realmUnit, "realm_tag_context_realm_unit");
 const unitTagWilsonConfidence = sql<number>`case
@@ -190,7 +190,6 @@ export async function listRealmTagSubscriptions(input: {
 				realmSourceUnit.id,
 				input.localizationLanguages,
 			),
-			canVote: sql<boolean>`coalesce(${realmMember.state} = 'active', false)`,
 			position: profileRealmTagSubscription.position,
 			createdAt: profileRealmTagSubscription.createdAt,
 			updatedAt: profileRealmTagSubscription.updatedAt,
@@ -221,6 +220,54 @@ export async function listRealmTagSubscriptions(input: {
 			),
 		)
 		.orderBy(profileRealmTagSubscription.position, profileRealmTagSubscription.realmId);
+}
+
+export async function listRealmTagVoteContexts(input: {
+	readonly profileId: string;
+	readonly localizationLanguages?: LocalizationLanguageQuery;
+}) {
+	const rows = await database
+		.select({
+			realmId: realm.id,
+			language: resolvedUnitLocalizationLanguage(
+				voteContextRealmUnit.id,
+				input.localizationLanguages,
+			),
+			title: resolvedUnitLocalizationTitle(
+				voteContextRealmUnit.id,
+				input.localizationLanguages,
+			),
+			summary: resolvedUnitLocalizationSummary(
+				voteContextRealmUnit.id,
+				input.localizationLanguages,
+			),
+			avatar: resolvedUnitLocalizationAvatar(
+				voteContextRealmUnit.id,
+				input.localizationLanguages,
+			),
+		})
+		.from(realmMember)
+		.innerJoin(realm, eq(realm.id, realmMember.realmId))
+		.innerJoin(voteContextRealmUnit, eq(voteContextRealmUnit.id, realm.id))
+		.leftJoin(
+			profileRealmTagSubscription,
+			and(
+				eq(profileRealmTagSubscription.profileId, input.profileId),
+				eq(profileRealmTagSubscription.realmId, realm.id),
+			),
+		)
+		.where(
+			and(
+				eq(realmMember.profileId, input.profileId),
+				eq(realmMember.state, "active"),
+				getRealmContributionCondition(input.profileId, voteContextRealmUnit),
+			),
+		)
+		.orderBy(sql`${profileRealmTagSubscription.position} asc nulls last`, realm.id);
+	return rows.map((row) => ({
+		...row,
+		avatar: presentAvatar(row.avatar),
+	}));
 }
 
 export async function upsertRealmTagSubscription(input: {
@@ -278,7 +325,7 @@ type RealmVotedTag = {
 	readonly updatedAt: Date;
 };
 
-async function listRealmVotedTags(input: {
+export async function listRealmVotedTags(input: {
 	readonly unitId: string;
 	readonly viewerProfileId: string;
 	readonly realmIds: readonly string[];
@@ -378,90 +425,6 @@ async function listRealmVotedTags(input: {
 	return grouped;
 }
 
-async function listRealmPolicyTags(input: {
-	readonly unitId: string;
-	readonly viewerProfileId: string;
-	readonly realmIds: readonly string[];
-	readonly localizationLanguages?: LocalizationLanguageQuery;
-	readonly perRealmLimit: number;
-}) {
-	if (input.realmIds.length === 0) return new Map<string, RealmPolicyTag[]>();
-	const contextIsReadable = sql<boolean>`
-		${contextRealmUnit.status} = 'visible'
-		and ${getUnitReadCondition(input.viewerProfileId, {}, contextPostUnit)}
-	`;
-	const rows = await database
-		.select({
-			realmId: realmUnitTag.realmId,
-			tagId: realmUnitTag.tagId,
-			language: resolvedUnitLocalizationLanguage(
-				policyTagUnit.id,
-				input.localizationLanguages,
-			),
-			title: resolvedUnitLocalizationTitle(policyTagUnit.id, input.localizationLanguages),
-			summary: sql<string | null>`case
-				when ${contextIsReadable}
-				then ${resolvedUnitLocalizationSummary(contextPostUnit.id, input.localizationLanguages)}
-				else null
-			end`,
-			avatar: resolvedUnitLocalizationAvatar(policyTagUnit.id, input.localizationLanguages),
-			contextPostId: sql<string | null>`case
-				when ${contextIsReadable} then ${realmTagContext.contextPostId}
-				else null
-			end`,
-			position: realmUnitTag.position,
-			createdAt: realmUnitTag.createdAt,
-			updatedAt: realmUnitTag.updatedAt,
-		})
-		.from(realmUnitTag)
-		.innerJoin(tag, eq(tag.id, realmUnitTag.tagId))
-		.innerJoin(policyTagUnit, eq(policyTagUnit.id, realmUnitTag.tagId))
-		.leftJoin(
-			realmTagContext,
-			and(
-				eq(realmTagContext.realmId, realmUnitTag.realmId),
-				eq(realmTagContext.tagId, realmUnitTag.tagId),
-			),
-		)
-		.leftJoin(contextPostUnit, eq(contextPostUnit.id, realmTagContext.contextPostId))
-		.leftJoin(
-			contextRealmUnit,
-			and(
-				eq(contextRealmUnit.realmId, realmTagContext.realmId),
-				eq(contextRealmUnit.unitId, realmTagContext.contextPostId),
-			),
-		)
-		.where(
-			and(
-				eq(realmUnitTag.unitId, input.unitId),
-				inArray(realmUnitTag.realmId, [...input.realmIds]),
-				getUnitReadCondition(input.viewerProfileId, {}, policyTagUnit),
-			),
-		)
-		.orderBy(realmUnitTag.realmId, realmUnitTag.position, realmUnitTag.tagId);
-	const grouped = new Map<string, RealmPolicyTag[]>();
-	for (const row of rows) {
-		const items = grouped.get(row.realmId) ?? [];
-		if (items.length < input.perRealmLimit)
-			items.push({ ...row, avatar: presentAvatar(row.avatar) });
-		grouped.set(row.realmId, items);
-	}
-	return grouped;
-}
-
-type RealmPolicyTag = {
-	readonly realmId: string;
-	readonly tagId: string;
-	readonly language: ContentLanguage | null;
-	readonly title: string | null;
-	readonly summary: string | null;
-	readonly avatar: ReturnType<typeof presentAvatar>;
-	readonly contextPostId: string | null;
-	readonly position: string;
-	readonly createdAt: Date;
-	readonly updatedAt: Date;
-};
-
 export async function getUnitTagLandscape(input: {
 	readonly unitId: string;
 	readonly viewerProfileId?: string;
@@ -491,9 +454,10 @@ export async function getUnitTagLandscape(input: {
 				),
 			}),
 			realms: [],
+			voteRealms: [],
 		};
 	}
-	const [structures, allSubscriptions] = await Promise.all([
+	const [structures, allSubscriptions, voteRealms] = await Promise.all([
 		input.includeStructures
 			? listVisibleUnitTagStructures({
 					unitId: input.unitId,
@@ -506,6 +470,10 @@ export async function getUnitTagLandscape(input: {
 			profileId: input.viewerProfileId,
 			localizationLanguages: input.localizationLanguages,
 		}),
+		listRealmTagVoteContexts({
+			profileId: input.viewerProfileId,
+			localizationLanguages: input.localizationLanguages,
+		}),
 	]);
 	const global = await listGlobalUnitTags({
 		unitId: input.unitId,
@@ -515,30 +483,22 @@ export async function getUnitTagLandscape(input: {
 		excludedTagIds: structures.flatMap(({ members }) => members.map(({ tagId }) => tagId)),
 	});
 	const realmIds = allSubscriptions.map(({ realmId }) => realmId);
-	const [votedTags, policyTags] = await Promise.all([
-		listRealmVotedTags({
-			unitId: input.unitId,
-			viewerProfileId: input.viewerProfileId,
-			realmIds,
-			localizationLanguages: input.localizationLanguages,
-			perRealmLimit: input.perRealmLimit,
-		}),
-		listRealmPolicyTags({
-			unitId: input.unitId,
-			viewerProfileId: input.viewerProfileId,
-			realmIds,
-			localizationLanguages: input.localizationLanguages,
-			perRealmLimit: input.perRealmLimit,
-		}),
-	]);
+	const votedTags = await listRealmVotedTags({
+		unitId: input.unitId,
+		viewerProfileId: input.viewerProfileId,
+		realmIds,
+		localizationLanguages: input.localizationLanguages,
+		perRealmLimit: input.perRealmLimit,
+	});
 	return {
 		structures,
 		global,
-		realms: selectPopulatedRealmTagSources({
+		realms: selectRealmTagSources({
 			sources: allSubscriptions,
 			votedTags,
-			policyTags,
+			canVoteRealmIds: new Set(voteRealms.map(({ realmId }) => realmId)),
 			limit: input.sourceLimit,
 		}),
+		voteRealms,
 	};
 }

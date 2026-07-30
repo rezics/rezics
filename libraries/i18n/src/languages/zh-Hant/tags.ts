@@ -40,6 +40,16 @@ export default {
 		title: "基本標籤",
 		description: `由一般標籤與${tagStructureTerms.pluralLabel}組成，不帶入任何${realmTerms.label}的情境判斷。`,
 	},
+	voteContext: {
+		title: "依情境投票",
+		description: `選擇一般情境，或選擇你有參與權限的${realmTerms.label}。下方清單、票數與你的投票都會使用這個情境。`,
+		select: "選擇投票情境",
+	},
+	details: {
+		title: "其他標籤情境",
+		description: `一般標籤與你${followTerms.action}的${realmTerms.label}標籤各自保留原本情境；目前投票情境不會在這裡重複顯示。`,
+		empty: "尚未選擇其他標籤來源。",
+	},
 	structures: {
 		title: tagStructureTerms.pluralLabel,
 		description: `${tagStructureTerms.pluralLabel}會保留有意義的階層，並優先於扁平標籤顯示。`,
@@ -126,6 +136,9 @@ export default {
 	realms: {
 		title: `${realmTerms.label}標籤情境`,
 		description: `各${realmTerms.inline}的判斷彼此獨立，不會與一般標籤或其他${realmTerms.inline}合併計分。`,
+		addTitle: `在這個${realmTerms.label}中新增標籤投票`,
+		addDescription: `先搜尋既有標籤；新增時會在這個${realmTerms.inline}中投下一票「符合」。`,
+		add: "新增投票",
 		policy: `${realmTerms.label}設定的標籤`,
 		votes: `${realmTerms.label}成員投票`,
 		context: "查看投票情境",

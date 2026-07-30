@@ -21,7 +21,6 @@ import { Check, Info, Search, X } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useRef, useState, type MouseEvent } from "react";
 
-import { SignInButton } from "@/features/auth/auth-portal";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { postHref } from "@/features/posts/url";
 import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
@@ -171,9 +170,6 @@ export function TagBadgeCard({
 							{item.context.kind === "global" && item.context.pinned ? (
 								<Badge variant="secondary">{t.tags.global.pinned}</Badge>
 							) : null}
-							{item.context.kind === "realm" && item.context.policy ? (
-								<Badge variant="secondary">{t.tags.card.policy}</Badge>
-							) : null}
 						</div>
 						<PopoverDescription>{contextLabel}</PopoverDescription>
 						<PopoverClose asChild>
@@ -194,38 +190,15 @@ export function TagBadgeCard({
 							</p>
 						) : null}
 						{item.vote.kind === "available" ? (
-							item.vote.canVote ? (
-								<TagVoteControls
-									canVote
-									isPending={isPending}
-									onClear={() => onClearVote(item)}
-									onVote={(value) => onVote(item, value)}
-									score={item.vote.score}
-									viewerVote={item.vote.viewerVote}
-									voteCount={item.vote.voteCount}
-								/>
-							) : item.vote.unavailableReason === "signed-out" ? (
-								<div className="grid gap-2">
-									<p className="text-xs text-muted-foreground">
-										{t.tags.vote.signInDescription}
-									</p>
-									<SignInButton className="w-fit" size="sm" variant="outline">
-										{t.tags.vote.signIn}
-									</SignInButton>
-								</div>
-							) : (
-								<div className="grid gap-1">
-									<p className="text-xs text-muted-foreground">
-										{t.tags.vote.summary({
-											score: String(item.vote.score),
-											count: String(item.vote.voteCount),
-										})}
-									</p>
-									<p className="text-xs text-muted-foreground">
-										{t.tags.realms.cannotVote}
-									</p>
-								</div>
-							)
+							<TagVoteControls
+								canVote={item.vote.canVote}
+								isPending={isPending}
+								onClear={() => onClearVote(item)}
+								onVote={(value) => onVote(item, value)}
+								score={item.vote.score}
+								viewerVote={item.vote.viewerVote}
+								voteCount={item.vote.voteCount}
+							/>
 						) : null}
 						<div className="flex flex-wrap items-center gap-1 border-t border-border-weak pt-2">
 							<Button asChild className="w-fit" size="sm" variant="quiet">
@@ -291,6 +264,5 @@ function tagBadgeVariant(
 ): "default" | "secondary" | "outline" | "success" | "destructive" {
 	if (item.vote.kind === "available" && item.vote.viewerVote === 1) return "success";
 	if (item.vote.kind === "available" && item.vote.viewerVote === -1) return "destructive";
-	if (item.context.kind === "realm" && item.context.policy) return "secondary";
 	return "outline";
 }

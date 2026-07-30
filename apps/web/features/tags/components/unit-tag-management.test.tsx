@@ -22,6 +22,11 @@ vi.mock("@/i18n/client", () => ({
 					addDescription: "Choose a Tag.",
 					add: "Add Tag",
 				},
+				realms: {
+					addTitle: "Add a Realm Tag vote",
+					addDescription: "Choose a Tag.",
+					add: "Add vote",
+				},
 			},
 			ui: { retryLater: "Try again later" },
 		},
@@ -46,9 +51,10 @@ const baseProps = {
 	addPending: false,
 	addStructureError: null,
 	addStructurePending: false,
+	canVote: true,
+	contextKind: "global",
 	onAddStructure: vi.fn(async () => undefined),
 	onAddTag: vi.fn(async () => undefined),
-	signedIn: true,
 } satisfies Omit<ComponentProps<typeof UnitTagManagement>, "hasDevelopmentPreviewAccess">;
 
 describe("UnitTagManagement", () => {
@@ -67,5 +73,22 @@ describe("UnitTagManagement", () => {
 
 		expect(screen.getByText("Create a Tag path")).toBeTruthy();
 		expect(screen.getByTestId("picker-tag-structures")).toBeTruthy();
+	});
+
+	it("keeps Tag-path management out of Realm vote contexts", () => {
+		render(
+			<UnitTagManagement {...baseProps} contextKind="realm" hasDevelopmentPreviewAccess />,
+		);
+
+		expect(screen.queryByTestId("picker-tag-structures")).toBeNull();
+		expect(screen.getByText("Add a Realm Tag vote")).toBeTruthy();
+		expect(screen.getByTestId("picker-tags")).toBeTruthy();
+	});
+
+	it("renders no add controls without vote permission", () => {
+		render(<UnitTagManagement {...baseProps} canVote={false} hasDevelopmentPreviewAccess />);
+
+		expect(screen.queryByTestId("picker-tags")).toBeNull();
+		expect(screen.queryByTestId("picker-tag-structures")).toBeNull();
 	});
 });

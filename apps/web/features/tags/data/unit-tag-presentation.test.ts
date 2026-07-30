@@ -35,20 +35,6 @@ function landscape(): GetApiUnitsByTypeByUnitIdTagsStatus200 {
 				position: "a0",
 				createdAt: Timestamp,
 				updatedAt: Timestamp,
-				policyTags: [
-					{
-						realmId: "realm-a",
-						tagId: "shared-tag",
-						language: "en",
-						title: "Policy title",
-						summary: null,
-						avatar: null,
-						contextPostId: "post-a",
-						position: "a0",
-						createdAt: Timestamp,
-						updatedAt: Timestamp,
-					},
-				],
 				votedTags: [
 					{
 						realmId: "realm-a",
@@ -67,11 +53,20 @@ function landscape(): GetApiUnitsByTypeByUnitIdTagsStatus200 {
 				],
 			},
 		],
+		voteRealms: [
+			{
+				realmId: "realm-a",
+				language: "en",
+				title: "Readers",
+				summary: null,
+				avatar: null,
+			},
+		],
 	};
 }
 
 describe("Unit Tag presentation", () => {
-	it("keeps the global vote target explicit and records signed-out availability", () => {
+	it("keeps the global vote target explicit and hides signed-out vote actions", () => {
 		const [tag] = presentGlobalTags({
 			data: landscape(),
 			type: "book",
@@ -90,11 +85,10 @@ describe("Unit Tag presentation", () => {
 			voteCount: 6,
 			viewerVote: 1,
 			canVote: false,
-			unavailableReason: "signed-out",
 		});
 	});
 
-	it("merges policy and voted entries within one Realm without mixing vote context", () => {
+	it("keeps each Realm vote target bound to its source context", () => {
 		const [group] = presentRealmTagGroups({ data: landscape(), unitId: UnitId });
 		expect(group?.tags).toHaveLength(1);
 		expect(group?.tags[0]).toMatchObject({
@@ -107,7 +101,6 @@ describe("Unit Tag presentation", () => {
 			context: {
 				kind: "realm",
 				realmId: "realm-a",
-				policy: true,
 				contextPostId: "post-a",
 			},
 			vote: {

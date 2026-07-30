@@ -1,21 +1,22 @@
 import { describe, expect, it } from "vitest";
 
-import { selectPopulatedRealmTagSources } from "./landscape";
+import { selectRealmTagSources } from "./landscape";
 
-describe("selectPopulatedRealmTagSources", () => {
-	it("applies the limit after skipping empty sources and preserves source order", () => {
-		const sources = ["empty-a", "realm-a", "empty-b", "realm-b", "realm-c"].map((realmId) => ({
+describe("selectRealmTagSources", () => {
+	it("preserves empty subscribed sources, source order, limits, and exact vote permission", () => {
+		const sources = ["empty-a", "realm-a", "empty-b", "realm-b"].map((realmId) => ({
 			realmId,
 		}));
-		const selected = selectPopulatedRealmTagSources({
+		const selected = selectRealmTagSources({
 			sources,
-			votedTags: new Map([
-				["realm-a", [{ tagId: "tag-a" }]],
-				["realm-c", [{ tagId: "tag-c" }]],
-			]),
-			policyTags: new Map([["realm-b", [{ tagId: "tag-b" }]]]),
-			limit: 2,
+			votedTags: new Map([["realm-a", [{ tagId: "tag-a" }]]]),
+			canVoteRealmIds: new Set(["realm-a", "realm-b"]),
+			limit: 3,
 		});
-		expect(selected.map(({ realmId }) => realmId)).toEqual(["realm-a", "realm-b"]);
+		expect(selected).toEqual([
+			{ realmId: "empty-a", canVote: false, votedTags: [] },
+			{ realmId: "realm-a", canVote: true, votedTags: [{ tagId: "tag-a" }] },
+			{ realmId: "empty-b", canVote: false, votedTags: [] },
+		]);
 	});
 });

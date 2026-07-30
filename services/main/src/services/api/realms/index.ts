@@ -65,6 +65,7 @@ import {
 import { listGovernanceNotes } from "../../governance/note-service";
 import { createNotification } from "../../notifications/service";
 import { findRealmMembership, getCurrentRealmRules } from "../../realms/service";
+import { listRealmVotedTags } from "../../tags/service";
 import type { DatabaseTransaction } from "../../database";
 import { recordUnitRevision } from "../../units/history";
 import { insertUnit } from "../../units/create";
@@ -179,6 +180,7 @@ import { hydrateFeedItems } from "../feed";
 import { FeedContentKindValues } from "../feed/schema";
 import { createWikiPost } from "../../posts/wiki";
 import { getContentStructureRevision } from "../../content-structure/service";
+import { RealmUnitTagVoteListQuery, RealmUnitTagVoteListResponse } from "../tags/schema";
 
 const RealmNotFoundResponse = toApiErrorResponse(["RealmNotFound"]);
 const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
@@ -2110,6 +2112,44 @@ export default new Elysia({ prefix: "/realms" })
 				summary: "Remove Realm Policy Tag",
 				tags: ["Realms"],
 				responses: NoContentResponse,
+			},
+		},
+	)
+	.get(
+		"/:realmId/units/:unitId/tags",
+		async ({ params, profile, authorization, query }) => {
+			await Promise.all([
+				authorization.realm.ensureParticipation(params.realmId),
+				authorization.unit.ensureCanRead(params.unitId),
+			]);
+			const tags = await listRealmVotedTags({
+				unitId: params.unitId,
+				viewerProfileId: profile.unitId,
+				realmIds: [params.realmId],
+				localizationLanguages: query.localizationLanguages,
+				perRealmLimit: query.limit ?? 50,
+			});
+			return {
+				realmId: params.realmId,
+				tags: tags.get(params.realmId) ?? [],
+			};
+		},
+		{
+			access: "interaction:read",
+			params: RealmUnitParams,
+			query: RealmUnitTagVoteListQuery,
+			response: {
+				[StatusCodes.OK]: RealmUnitTagVoteListResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"RealmCapabilityRequired",
+					"UnitAccessRestricted",
+					"UnitPermissionForbidden",
+				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
+			detail: {
+				summary: "List Realm-scoped Unit Tag votes",
+				tags: ["Realms"],
 			},
 		},
 	)

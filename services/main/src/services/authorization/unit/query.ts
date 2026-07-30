@@ -1,3 +1,4 @@
+import type { DelegableUnitPermission } from "@rezics/access";
 import { and, eq, exists, inArray, isNull, not, or, sql, type SQLWrapper } from "drizzle-orm";
 
 import { database } from "../../database";
@@ -174,9 +175,10 @@ export function getUnitReadCondition(
 	);
 }
 
-/** Return the SQL predicate equivalent of a root-scoped `unit.update` decision. */
-export function getUnitUpdateCondition(
+/** Return the SQL predicate equivalent of a root-scoped delegable Unit permission decision. */
+export function getUnitRootPermissionCondition(
 	profileId: string,
+	permission: DelegableUnitPermission,
 	target: Pick<UnitReadTarget, "id" | "deletedAt"> = unit,
 ) {
 	const ownership = exists(
@@ -214,7 +216,7 @@ export function getUnitUpdateCondition(
 			.where(
 				and(
 					eq(unitAccessRestriction.unitId, target.id),
-					eq(unitAccessRestriction.permission, "unit.update"),
+					eq(unitAccessRestriction.permission, permission),
 					sql`cardinality(${unitAccessRestriction.scope}) = 0`,
 					eq(unitAccessRestriction.subjectKind, "profile"),
 					eq(unitAccessRestriction.profileId, profileId),
@@ -229,7 +231,7 @@ export function getUnitUpdateCondition(
 			.where(
 				and(
 					eq(unitAccessRestriction.unitId, target.id),
-					eq(unitAccessRestriction.permission, "unit.update"),
+					eq(unitAccessRestriction.permission, permission),
 					sql`cardinality(${unitAccessRestriction.scope}) = 0`,
 					eq(unitAccessRestriction.subjectKind, "realm"),
 					activeRestriction(),
@@ -255,7 +257,7 @@ export function getUnitUpdateCondition(
 			.where(
 				and(
 					eq(unitAccessGrant.unitId, target.id),
-					eq(unitAccessGrant.permission, "unit.update"),
+					eq(unitAccessGrant.permission, permission),
 					sql`cardinality(${unitAccessGrant.scope}) = 0`,
 					activeGrant(),
 					or(
@@ -291,4 +293,12 @@ export function getUnitUpdateCondition(
 			and(not(profileRestriction), not(realmRestriction), matchingGrant),
 		),
 	);
+}
+
+/** Return the SQL predicate equivalent of a root-scoped `unit.update` decision. */
+export function getUnitUpdateCondition(
+	profileId: string,
+	target: Pick<UnitReadTarget, "id" | "deletedAt"> = unit,
+) {
+	return getUnitRootPermissionCondition(profileId, "unit.update", target);
 }

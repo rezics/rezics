@@ -41,6 +41,16 @@ export default {
 		title: "Etiquetas básicas",
 		description: `Etiquetas globales y ${tagStructureTerms.plural}, sin valoraciones contextuales de ningún ${realmTerms.inline}.`,
 	},
+	voteContext: {
+		title: "Votar por contexto",
+		description: `Elige el contexto global o un ${realmTerms.label} en el que puedas participar. La lista, los resultados y tus votos usarán ese contexto.`,
+		select: "Elegir un contexto de votación",
+	},
+	details: {
+		title: "Otros contextos de etiquetas",
+		description: `Las etiquetas globales y tus fuentes de ${realmTerms.label} conservan sus propios contextos. El contexto de votación activo no se repite aquí.`,
+		empty: "No hay otras fuentes de etiquetas seleccionadas.",
+	},
 	structures: {
 		title: tagStructureTerms.pluralLabel,
 		description: `Las ${tagStructureTerms.plural} conservan una jerarquía con significado y se muestran antes que las etiquetas sin jerarquía.`,
@@ -136,6 +146,9 @@ export default {
 	realms: {
 		title: `Contextos de etiquetas de los ${realmTerms.plural}`,
 		description: `Cada ${realmTerms.inline} es un contexto independiente. Sus valoraciones nunca se combinan con las etiquetas globales ni con otro ${realmTerms.inline}.`,
+		addTitle: `Añadir un voto de etiqueta en este ${realmTerms.label}`,
+		addDescription: `Busca primero entre las etiquetas existentes. Al añadir una, también votas «Encaja» en este ${realmTerms.inline}.`,
+		add: "Añadir voto",
 		policy: `Etiquetas definidas por el ${realmTerms.inline}`,
 		votes: `Votos de los miembros del ${realmTerms.inline}`,
 		context: "Ver contexto de votación",

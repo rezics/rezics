@@ -72,7 +72,7 @@ const UnitTagStructureResponse = t.Object({
 	updatedAt: DateTime,
 });
 
-const RealmVotedTagResponse = t.Object({
+export const RealmVotedTagResponse = t.Object({
 	...LocalizedTagSummary,
 	realmId: Uuid,
 	contextPostId: t.Nullable(Uuid),
@@ -81,11 +81,12 @@ const RealmVotedTagResponse = t.Object({
 	viewerVote: TagVoteValue,
 });
 
-const RealmPolicyTagResponse = t.Object({
-	...LocalizedTagSummary,
+export const RealmTagVoteContextResponse = t.Object({
 	realmId: Uuid,
-	contextPostId: t.Nullable(Uuid),
-	position: FractionalPosition,
+	language: t.Nullable(ContentLanguage),
+	title: t.Nullable(t.String()),
+	summary: t.Nullable(t.String()),
+	avatar: AvatarResponse,
 });
 
 export const RealmTagSubscriptionResponse = t.Object({
@@ -93,7 +94,6 @@ export const RealmTagSubscriptionResponse = t.Object({
 	language: t.Nullable(ContentLanguage),
 	title: t.Nullable(t.String()),
 	summary: t.Nullable(t.String()),
-	canVote: t.Boolean(),
 	position: FractionalPosition,
 	createdAt: DateTime,
 	updatedAt: DateTime,
@@ -105,11 +105,26 @@ export const UnitTagLandscapeResponse = t.Object({
 	realms: t.Array(
 		t.Object({
 			...RealmTagSubscriptionResponse.properties,
+			canVote: t.Boolean(),
 			votedTags: t.Array(RealmVotedTagResponse),
-			policyTags: t.Array(RealmPolicyTagResponse),
 		}),
 	),
+	voteRealms: t.Array(RealmTagVoteContextResponse),
 });
+
+export const RealmUnitTagVoteListResponse = t.Object({
+	realmId: Uuid,
+	tags: t.Array(RealmVotedTagResponse),
+});
+
+export const RealmUnitTagVoteListQuery = t.Object(
+	{
+		...LocalizationLanguageQuery,
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 50 })),
+	},
+	{ additionalProperties: false },
+);
+export type RealmUnitTagVoteListQuery = Static<typeof RealmUnitTagVoteListQuery>;
 
 export const RealmTagSubscriptionListQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,

@@ -41,6 +41,16 @@ export default {
 		title: "Étiquettes de base",
 		description: `Étiquettes globales et ${tagStructureTerms.plural}, sans appréciation contextuelle d’un ${realmTerms.inline}.`,
 	},
+	voteContext: {
+		title: "Voter par contexte",
+		description: `Choisissez le contexte global ou un ${realmTerms.label} auquel vous pouvez contribuer. La liste, les résultats et vos votes utiliseront ce contexte.`,
+		select: "Choisir un contexte de vote",
+	},
+	details: {
+		title: "Autres contextes d’étiquettes",
+		description: `Les étiquettes globales et vos sources de ${realmTerms.label} conservent leur propre contexte. Le contexte de vote actif n’est pas répété ici.`,
+		empty: "Aucune autre source d’étiquettes n’est sélectionnée.",
+	},
 	structures: {
 		title: tagStructureTerms.pluralLabel,
 		description: `Les ${tagStructureTerms.plural} préservent une hiérarchie porteuse de sens et apparaissent avant les étiquettes non hiérarchisées.`,
@@ -136,6 +146,9 @@ export default {
 	realms: {
 		title: `Contextes d’étiquettes des ${realmTerms.plural}`,
 		description: `Chaque ${realmTerms.inline} constitue un contexte indépendant. Ses appréciations ne sont jamais fusionnées avec les étiquettes globales ni avec un autre ${realmTerms.inline}.`,
+		addTitle: `Ajouter un vote d’étiquette dans ce ${realmTerms.label}`,
+		addDescription: `Recherchez d’abord les étiquettes existantes. En ajouter une vote aussi « Correspond » dans ce ${realmTerms.inline}.`,
+		add: "Ajouter le vote",
 		policy: `Étiquettes définies par le ${realmTerms.inline}`,
 		votes: `Votes des membres du ${realmTerms.inline}`,
 		context: "Afficher le contexte de vote",

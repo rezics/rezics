@@ -36,9 +36,8 @@ export type TagVotePresentation =
 			readonly voteCount: number;
 			readonly viewerVote: -1 | 1 | null;
 			readonly canVote: boolean;
-			readonly unavailableReason?: "signed-out" | "not-member";
 	  }
-	| { readonly kind: "not-applicable"; readonly reason: "policy" | "structure-member" };
+	| { readonly kind: "not-applicable"; readonly reason: "structure-member" };
 
 export type TagContextPresentation =
 	| {
@@ -50,7 +49,6 @@ export type TagContextPresentation =
 			readonly realmId: string;
 			readonly realmLanguage: ContentLanguage | null;
 			readonly realmTitle: string | null;
-			readonly policy: boolean;
 			readonly contextPostId?: string;
 	  }
 	| {
@@ -70,5 +68,21 @@ export interface RealmTagGroupPresentation {
 	readonly language: ContentLanguage | null;
 	readonly title: string | null;
 	readonly summary: string | null;
+	readonly canVote: boolean;
 	readonly tags: readonly TagPresentation[];
 }
+
+export interface RealmTagVoteContextPresentation {
+	readonly realmId: string;
+	readonly language: ContentLanguage | null;
+	readonly title: string | null;
+	readonly summary: string | null;
+	readonly avatar: PresentedAvatar | null;
+}
+
+export type TagVoteContextSelection =
+	| { readonly kind: "global" }
+	| {
+			readonly kind: "realm";
+			readonly realm: RealmTagVoteContextPresentation;
+	  };

@@ -41,6 +41,16 @@ export default {
 		title: "Basic Tags",
 		description: `Global Tags and ${tagStructureTerms.pluralLabel}, without contextual judgments from any ${realmTerms.label}.`,
 	},
+	voteContext: {
+		title: "Vote by context",
+		description: `Choose Global or a ${realmTerms.label} you can contribute to. The list, scores, and your votes use that context.`,
+		select: "Choose a voting context",
+	},
+	details: {
+		title: "Other Tag contexts",
+		description: `Global Tags and your selected ${realmTerms.label} sources keep their own contexts. The active voting context is not repeated here.`,
+		empty: "No other Tag sources are selected.",
+	},
 	structures: {
 		title: tagStructureTerms.pluralLabel,
 		description: `${tagStructureTerms.pluralLabel} preserve meaningful hierarchy and are shown before flat Tags.`,
@@ -133,6 +143,9 @@ export default {
 	realms: {
 		title: `${realmTerms.label} Tag contexts`,
 		description: `Each ${realmTerms.inline} is an independent context. Its judgments are never merged with global Tags or another ${realmTerms.inline}.`,
+		addTitle: `Add a Tag vote in this ${realmTerms.label}`,
+		addDescription: `Search existing Tags first. Adding one casts a “Fits” vote in this ${realmTerms.inline}.`,
+		add: "Add vote",
 		policy: `${realmTerms.label}-set Tags`,
 		votes: `${realmTerms.label} member votes`,
 		context: "View voting context",
