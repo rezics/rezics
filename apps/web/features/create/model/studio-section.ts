@@ -24,12 +24,14 @@ export function isStudioSectionId(value: string): value is StudioSectionId {
 	return StudioSectionIds.some((sectionId) => sectionId === value);
 }
 
+export const StudioTagCreateHref = "/create/tag/new";
+
 export const StudioSectionCreateHrefs = {
 	book: "/units/book/new",
 	software: "/units/software/new",
 	media: "/units/media/new",
 	entity: "/entities/new",
-	tag: "/tags/new",
+	tag: StudioTagCreateHref,
 	realm: "/realms/new",
 	zone: "/zones/new",
 	post: "/posts/new",

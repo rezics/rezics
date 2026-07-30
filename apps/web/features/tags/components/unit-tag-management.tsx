@@ -1,11 +1,13 @@
 "use client";
 
 import { Button, Card, CardContent, EntityPicker } from "@rezics/ui";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import { unitTagVoteCreateHref, type UnitTagVoteCreateTarget } from "../routing/tag-create-route";
 
 interface PickedEntity {
 	readonly id: string;
@@ -18,8 +20,8 @@ export function UnitTagManagement({
 	addStructureError,
 	addStructurePending,
 	canVote,
-	contextKind,
 	hasDevelopmentPreviewAccess,
+	tagCreateTarget,
 	onAddStructure,
 	onAddTag,
 }: {
@@ -28,8 +30,8 @@ export function UnitTagManagement({
 	readonly addStructureError: unknown;
 	readonly addStructurePending: boolean;
 	readonly canVote: boolean;
-	readonly contextKind: "global" | "realm";
 	readonly hasDevelopmentPreviewAccess: boolean;
+	readonly tagCreateTarget: UnitTagVoteCreateTarget;
 	readonly onAddStructure: (structureId: string) => Promise<void>;
 	readonly onAddTag: (tagId: string) => Promise<void>;
 }) {
@@ -37,6 +39,7 @@ export function UnitTagManagement({
 	const [selectedTag, setSelectedTag] = useState<PickedEntity>();
 	const [selectedStructure, setSelectedStructure] = useState<PickedEntity>();
 	if (!canVote) return null;
+	const contextKind = tagCreateTarget.context.kind;
 	const showStructureManagement = contextKind === "global" && hasDevelopmentPreviewAccess;
 	const addCopy = contextKind === "global" ? t.tags.global : t.tags.realms;
 	return (
@@ -89,7 +92,25 @@ export function UnitTagManagement({
 						<p className="text-sm text-muted-foreground">{addCopy.addDescription}</p>
 					</div>
 					<div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
-						<EntityPicker index="tags" onChange={setSelectedTag} value={selectedTag} />
+						<EntityPicker
+							index="tags"
+							maxLength={500}
+							onChange={setSelectedTag}
+							renderNoResultsAction={(query) => (
+								<div className="grid justify-items-start gap-2 rounded-xl border border-border-weak bg-muted/30 p-3 text-sm">
+									<p className="text-muted-foreground">
+										{t.tags.create.noResults({ query })}
+									</p>
+									<Button asChild size="sm" variant="outline">
+										<Link href={unitTagVoteCreateHref(query, tagCreateTarget)}>
+											<Plus aria-hidden className="size-4" />
+											{t.tags.create.inStudio({ query })}
+										</Link>
+									</Button>
+								</div>
+							)}
+							value={selectedTag}
+						/>
 						<Button
 							disabled={!selectedTag}
 							isLoading={addPending}

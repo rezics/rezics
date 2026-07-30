@@ -1,6 +1,7 @@
 import { insert } from "native-i18n";
 
 import { enTerminology } from "@rezics/i18n/terminology/en";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = enTerminology.realm;
 const { forms: followTerms } = enTerminology.follow;
@@ -89,6 +90,27 @@ export default {
 		reasonLabel: "Correction reason",
 		reasonPlaceholder: "Explain why this administrative correction is necessary.",
 		submit: "Save audited correction",
+	},
+	create: {
+		noResults: insert("No Tag matches “{{query}}”.", { query: String }),
+		inStudio: insert(`Create “{{query}}” in ${verbatimTerms.studio.value}`, {
+			query: String,
+		}),
+		title: "Create a Tag",
+		description: "Create a reusable global Tag after checking the existing Tags.",
+		voteDescription:
+			"Create this Tag, then return to the work and record a “Fits” vote in the current context.",
+		backToUnitTags: "Back to the work’s Tags",
+		backToStudioTags: `Back to Tags in ${verbatimTerms.studio.value}`,
+		submit: "Create Tag",
+		submitAndVote: "Create Tag and vote “Fits”",
+		applying: "Tag created. Recording your vote…",
+		partialTitle: "Tag created, vote not recorded",
+		partialDescription:
+			"The Tag was created, but it could not be applied to the work or receive your vote. You can safely retry without creating another Tag.",
+		retryVote: "Retry vote",
+		returnToUnitTags: "Return to the work’s Tags",
+		completed: "The Tag was created and your “Fits” vote was recorded.",
 	},
 	global: {
 		title: "Global Tags",

@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { tagSearchHref } from "./tag-links";
+import { loadUnitTagsRouteState, tagSearchHref, unitTagsHref } from "./tag-links";
+
+const UnitId = "00000000-0000-7000-8000-000000000001";
+const RealmId = "00000000-0000-7000-8000-000000000002";
+const TagId = "00000000-0000-7000-8000-000000000003";
 
 describe("tagSearchHref", () => {
 	it("serializes one Tag through the shared search URL contract", () => {
@@ -23,5 +27,33 @@ describe("tagSearchHref", () => {
 		expect(tagSearchHref("series", [{ tagId: "tag-a", label: "Fantasy" }])).toBe(
 			"/search?tag=tag-a&tagLabel=Fantasy",
 		);
+	});
+});
+
+describe("Unit Tag page routes", () => {
+	it("round-trips a Realm context and newly created Tag", async () => {
+		const href = unitTagsHref("book", UnitId, {
+			context: { kind: "realm", realmId: RealmId },
+			createdTagId: TagId,
+		});
+		const url = new URL(href, "https://rezics.example");
+
+		expect(url.pathname).toBe(`/units/book/${UnitId}/tags`);
+		await expect(loadUnitTagsRouteState(Object.fromEntries(url.searchParams))).resolves.toEqual(
+			{
+				context: { kind: "realm", realmId: RealmId },
+				createdTagId: TagId,
+			},
+		);
+	});
+
+	it("falls back to global context and ignores invalid identifiers", async () => {
+		await expect(
+			loadUnitTagsRouteState({
+				context: "realm",
+				realmId: "not-a-realm",
+				createdTagId: "not-a-tag",
+			}),
+		).resolves.toEqual({ context: { kind: "global" } });
 	});
 });

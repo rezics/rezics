@@ -1,10 +1,17 @@
 "use client";
 
 import { useGetApiUnitsByTypeByUnitId } from "@rezics/openapi-tanstack-query";
-import { Button, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
-import { ArrowLeft } from "lucide-react";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import {
+	Alert,
+	AlertDescription,
+	Button,
+	PageHeading,
+	QueryFailure,
+	QueryPending,
+} from "@rezics/ui";
+import { ArrowLeft, CircleCheck } from "lucide-react";
 
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { UnitTagExplorer } from "@/features/tags/components/unit-tag-explorer";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
@@ -14,11 +21,14 @@ import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { selectLocalization } from "@/lib/localization";
+import type { UnitTagsRouteState } from "../routing/tag-links";
 
 export function UnitTagsPage({
+	routeState,
 	type,
 	unitId,
 }: {
+	readonly routeState: UnitTagsRouteState;
 	readonly type: CatalogDetailUnitType;
 	readonly unitId: string;
 }) {
@@ -64,7 +74,19 @@ export function UnitTagsPage({
 			<p className="-mt-5 max-w-3xl text-sm leading-6 text-muted-foreground">
 				{t.tags.page.description}
 			</p>
-			<UnitTagExplorer surface="page" type={type} unitId={unitId} />
+			{routeState.createdTagId ? (
+				<Alert role="status" variant="success">
+					<CircleCheck aria-hidden />
+					<AlertDescription>{t.tags.create.completed}</AlertDescription>
+				</Alert>
+			) : null}
+			<UnitTagExplorer
+				highlightedTagId={routeState.createdTagId}
+				initialVoteContext={routeState.context}
+				surface="page"
+				type={type}
+				unitId={unitId}
+			/>
 		</main>
 	);
 }

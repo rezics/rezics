@@ -1,7 +1,10 @@
-import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
 import type { EmbeddableSearchTemplateId } from "@rezics/filter";
+import { createLoader, createSerializer, parseAsString, parseAsStringLiteral } from "nuqs/server";
+
+import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
+import { isUnitId } from "@/features/units/model/unit-id";
 import { searchParamsParsers } from "@/lib/search-params";
-import { createSerializer } from "nuqs/server";
+import type { UnitTagVoteContextAddress } from "./tag-create-route";
 
 export interface TagSearchTarget {
 	readonly tagId: string;
@@ -9,13 +12,54 @@ export interface TagSearchTarget {
 }
 
 const serializeSearch = createSerializer(searchParamsParsers);
+const unitTagsRouteParsers = {
+	context: parseAsStringLiteral(["global", "realm"] as const),
+	createdTagId: parseAsString,
+	realmId: parseAsString,
+};
+const loadUnitTagsRouteSearchParams = createLoader(unitTagsRouteParsers);
+const serializeUnitTagsRouteSearchParams = createSerializer(unitTagsRouteParsers);
 
 function tagSearchTemplate(type: CatalogDetailUnitType): EmbeddableSearchTemplateId {
 	return type === "series" ? "global" : type;
 }
 
-export function unitTagsHref(type: CatalogDetailUnitType, unitId: string): string {
-	return `/units/${type}/${unitId}/tags`;
+export interface UnitTagsRouteState {
+	readonly context: UnitTagVoteContextAddress;
+	readonly createdTagId?: string;
+}
+
+export async function loadUnitTagsRouteState(
+	searchParams:
+		| Promise<Record<string, string | string[] | undefined>>
+		| Record<string, string | string[] | undefined>,
+): Promise<UnitTagsRouteState> {
+	const parsed = loadUnitTagsRouteSearchParams(await searchParams);
+	const createdTagId =
+		parsed.createdTagId && isUnitId(parsed.createdTagId) ? parsed.createdTagId : undefined;
+	if (parsed.context === "realm" && parsed.realmId && isUnitId(parsed.realmId))
+		return {
+			context: { kind: "realm", realmId: parsed.realmId },
+			...(createdTagId ? { createdTagId } : {}),
+		};
+	return {
+		context: { kind: "global" },
+		...(createdTagId ? { createdTagId } : {}),
+	};
+}
+
+export function unitTagsHref(
+	type: CatalogDetailUnitType,
+	unitId: string,
+	state?: UnitTagsRouteState,
+): string {
+	const pathname = `/units/${type}/${unitId}/tags`;
+	if (!state) return pathname;
+	return `${pathname}${serializeUnitTagsRouteSearchParams({
+		context: state.context.kind,
+		createdTagId: state.createdTagId ?? null,
+		realmId: state.context.kind === "realm" ? state.context.realmId : null,
+	})}`;
 }
 
 export function tagSearchHref(

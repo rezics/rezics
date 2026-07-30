@@ -1,6 +1,7 @@
 import { insert } from "native-i18n";
 
 import { frTerminology } from "@rezics/i18n/terminology/fr";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = frTerminology.realm;
 const { forms: followTerms } = frTerminology.follow;
@@ -89,6 +90,30 @@ export default {
 		reasonLabel: "Motif de la correction",
 		reasonPlaceholder: "Expliquez pourquoi cette correction administrative est nécessaire.",
 		submit: "Enregistrer la correction consignée",
+	},
+	create: {
+		noResults: insert("Aucune étiquette ne correspond à « {{query}} ».", {
+			query: String,
+		}),
+		inStudio: insert(`Créer « {{query}} » dans ${verbatimTerms.studio.value}`, {
+			query: String,
+		}),
+		title: "Créer une étiquette",
+		description:
+			"Créez une étiquette globale réutilisable après avoir vérifié les étiquettes existantes.",
+		voteDescription:
+			"Après sa création, vous reviendrez à l’œuvre et voterez « Correspond » dans le contexte actuel.",
+		backToUnitTags: "Revenir aux étiquettes de l’œuvre",
+		backToStudioTags: `Revenir aux étiquettes dans ${verbatimTerms.studio.value}`,
+		submit: "Créer l’étiquette",
+		submitAndVote: "Créer l’étiquette et voter « Correspond »",
+		applying: "Étiquette créée. Enregistrement de votre vote…",
+		partialTitle: "Étiquette créée, vote non enregistré",
+		partialDescription:
+			"L’étiquette a été créée, mais elle n’a pas pu être appliquée à l’œuvre ou recevoir votre vote. Vous pouvez réessayer sans créer une autre étiquette.",
+		retryVote: "Réessayer le vote",
+		returnToUnitTags: "Revenir aux étiquettes de l’œuvre",
+		completed: "L’étiquette a été créée et votre vote « Correspond » a été enregistré.",
 	},
 	global: {
 		title: "Étiquettes globales",

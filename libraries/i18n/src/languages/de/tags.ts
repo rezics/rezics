@@ -1,6 +1,7 @@
 import { insert } from "native-i18n";
 
 import { deTerminology } from "@rezics/i18n/terminology/de";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = deTerminology.realm;
 const { forms: followTerms } = deTerminology.follow;
@@ -89,6 +90,28 @@ export default {
 		reasonLabel: "Grund der Korrektur",
 		reasonPlaceholder: "Erkläre, warum diese administrative Korrektur erforderlich ist.",
 		submit: "Protokollierte Korrektur speichern",
+	},
+	create: {
+		noResults: insert("Kein Tag stimmt mit „{{query}}“ überein.", { query: String }),
+		inStudio: insert(`„{{query}}“ in ${verbatimTerms.studio.value} erstellen`, {
+			query: String,
+		}),
+		title: "Tag erstellen",
+		description:
+			"Erstelle nach der Prüfung bestehender Tags einen wiederverwendbaren globalen Tag.",
+		voteDescription:
+			"Nach dem Erstellen kehrst du zum Werk zurück und stimmst im aktuellen Kontext mit „Passt“.",
+		backToUnitTags: "Zurück zu den Tags des Werks",
+		backToStudioTags: `Zurück zu Tags in ${verbatimTerms.studio.value}`,
+		submit: "Tag erstellen",
+		submitAndVote: "Tag erstellen und mit „Passt“ stimmen",
+		applying: "Tag erstellt. Deine Stimme wird erfasst…",
+		partialTitle: "Tag erstellt, Stimme nicht erfasst",
+		partialDescription:
+			"Der Tag wurde erstellt, konnte aber nicht auf das Werk angewendet oder mit deiner Stimme versehen werden. Du kannst es sicher erneut versuchen, ohne einen weiteren Tag zu erstellen.",
+		retryVote: "Abstimmung wiederholen",
+		returnToUnitTags: "Zu den Tags des Werks",
+		completed: "Der Tag wurde erstellt und deine Stimme „Passt“ wurde erfasst.",
 	},
 	global: {
 		title: "Globale Tags",

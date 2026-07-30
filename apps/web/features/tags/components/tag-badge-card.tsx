@@ -33,6 +33,7 @@ import { TagVoteControls } from "./tag-vote-controls";
 export function TagBadgeCard({
 	item,
 	fallbackLabel,
+	highlighted = false,
 	isPending,
 	selected,
 	selectionMode,
@@ -43,6 +44,7 @@ export function TagBadgeCard({
 }: {
 	readonly item: TagPresentation;
 	readonly fallbackLabel: string;
+	readonly highlighted?: boolean;
 	readonly isPending: boolean;
 	readonly selected: boolean;
 	readonly selectionMode: boolean;
@@ -97,6 +99,7 @@ export function TagBadgeCard({
 		<Badge
 			className={cn(
 				"max-w-full gap-0 overflow-visible p-0",
+				highlighted && "ring-2 ring-success/50",
 				selected && "ring-2 ring-primary/40",
 			)}
 			pill

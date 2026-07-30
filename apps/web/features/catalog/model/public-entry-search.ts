@@ -1,3 +1,5 @@
+import { StudioTagCreateHref } from "@/features/create/model/studio-section";
+
 export const PublicEntryEntityKinds = ["person", "organization", "character"] as const;
 export type PublicEntryEntityKind = (typeof PublicEntryEntityKinds)[number];
 
@@ -147,7 +149,7 @@ export function publicEntryCreationHref(subject: PublicEntrySearchSubject, query
 			search.set("kind", subject.kind);
 			break;
 		case "tag":
-			pathname = "/tags/new";
+			pathname = StudioTagCreateHref;
 			break;
 	}
 	return `${pathname}?${search}`;

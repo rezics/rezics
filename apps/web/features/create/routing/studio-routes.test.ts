@@ -9,6 +9,7 @@ describe("Studio routes", () => {
 		expect(parseStudioSection("/create/review")).toBe("review");
 		expect(parseStudioSection("/create/review/")).toBe("review");
 		expect(parseStudioSection("/create/entity/search")).toBe("entity");
+		expect(parseStudioSection("/create/tag/new")).toBe("tag");
 		expect(parseStudioSection("/create/zone")).toBe("zone");
 		expect(parseStudioSection("/create/wiki")).toBe("wiki");
 		expect(parseStudioSection("/create")).toBeUndefined();
@@ -22,5 +23,6 @@ describe("Studio routes", () => {
 		expect(studioContentHref("wiki", "unit-id")).toBe("/posts/unit-id");
 		expect(studioSectionCreateHref("book")).toBe("/units/book/new");
 		expect(studioSectionCreateHref("wiki")).toBe("/wiki/new");
+		expect(studioSectionCreateHref("tag")).toBe("/create/tag/new");
 	});
 });

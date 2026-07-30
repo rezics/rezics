@@ -1,6 +1,7 @@
 import { insert } from "native-i18n";
 
 import { esTerminology } from "@rezics/i18n/terminology/es";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = esTerminology.realm;
 const { forms: followTerms } = esTerminology.follow;
@@ -89,6 +90,30 @@ export default {
 		reasonLabel: "Motivo de la corrección",
 		reasonPlaceholder: "Explica por qué es necesaria esta corrección administrativa.",
 		submit: "Guardar la corrección auditada",
+	},
+	create: {
+		noResults: insert("No se encontró ninguna etiqueta que coincida con «{{query}}».", {
+			query: String,
+		}),
+		inStudio: insert(`Crear «{{query}}» en ${verbatimTerms.studio.value}`, {
+			query: String,
+		}),
+		title: "Crear una etiqueta",
+		description:
+			"Crea una etiqueta global reutilizable después de comprobar las etiquetas existentes.",
+		voteDescription:
+			"Después de crearla, volverás a la obra y votarás «Encaja» en el contexto actual.",
+		backToUnitTags: "Volver a las etiquetas de la obra",
+		backToStudioTags: `Volver a Etiquetas en ${verbatimTerms.studio.value}`,
+		submit: "Crear etiqueta",
+		submitAndVote: "Crear etiqueta y votar «Encaja»",
+		applying: "Etiqueta creada. Registrando tu voto…",
+		partialTitle: "Etiqueta creada, voto no registrado",
+		partialDescription:
+			"La etiqueta se creó, pero no se pudo aplicar a la obra ni registrar tu voto. Puedes volver a intentarlo sin crear otra etiqueta.",
+		retryVote: "Reintentar el voto",
+		returnToUnitTags: "Volver a las etiquetas de la obra",
+		completed: "Se creó la etiqueta y se registró tu voto «Encaja».",
 	},
 	global: {
 		title: "Etiquetas globales",

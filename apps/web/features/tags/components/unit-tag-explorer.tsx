@@ -66,11 +66,17 @@ const SurfaceLimits = {
 	},
 } as const;
 
+const InitialTagVoteContext = { kind: "global" } as const satisfies TagVoteContextRequest;
+
 export function UnitTagExplorer({
+	highlightedTagId,
+	initialVoteContext = InitialTagVoteContext,
 	surface,
 	type,
 	unitId,
 }: {
+	readonly highlightedTagId?: string;
+	readonly initialVoteContext?: TagVoteContextRequest;
 	readonly surface: "section" | "page";
 	readonly type: CatalogDetailUnitType;
 	readonly unitId: string;
@@ -81,9 +87,8 @@ export function UnitTagExplorer({
 	const { t } = useTranslation(["tags", "ui"]);
 	const localizationLanguages = useLocalizationLanguages();
 	const queryClient = useQueryClient();
-	const [requestedVoteContext, setRequestedVoteContext] = useState<TagVoteContextRequest>({
-		kind: "global",
-	});
+	const [requestedVoteContext, setRequestedVoteContext] =
+		useState<TagVoteContextRequest>(initialVoteContext);
 	const [selection, dispatchSelection] = useReducer(
 		tagSelectionReducer,
 		InitialTagSelectionState,
@@ -311,6 +316,7 @@ export function UnitTagExplorer({
 									empty={t.tags.global.empty}
 									fallbackLabel={t.tags.unnamedTag}
 									headingLevel="h3"
+									highlightedTagId={highlightedTagId}
 									items={globalTags}
 									onClearVote={clearVote}
 									onToggleSelected={toggleSelected}
@@ -346,6 +352,7 @@ export function UnitTagExplorer({
 									/>
 								}
 								headingLevel="h3"
+								highlightedTagId={highlightedTagId}
 								items={activeTags}
 								onClearVote={clearVote}
 								onToggleSelected={toggleSelected}
@@ -375,13 +382,23 @@ export function UnitTagExplorer({
 							addStructureError={addStructure.error}
 							addStructurePending={addStructure.isPending}
 							canVote={activeVoteContext.kind === "realm" || Boolean(session)}
-							contextKind={activeVoteContext.kind}
 							hasDevelopmentPreviewAccess={hasDevelopmentPreviewAccess}
 							key={
 								activeVoteContext.kind === "global"
 									? "global"
 									: `realm:${activeVoteContext.realm.realmId}`
 							}
+							tagCreateTarget={{
+								type,
+								unitId,
+								context:
+									activeVoteContext.kind === "global"
+										? { kind: "global" }
+										: {
+												kind: "realm",
+												realmId: activeVoteContext.realm.realmId,
+											},
+							}}
 							onAddStructure={(structureId) =>
 								addStructure
 									.mutateAsync({

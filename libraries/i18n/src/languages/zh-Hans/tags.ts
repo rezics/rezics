@@ -1,6 +1,7 @@
 import { insert } from "native-i18n";
 
 import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = zhHansTerminology.realm;
 const { forms: followTerms } = zhHansTerminology.follow;
@@ -88,6 +89,26 @@ export default {
 		reasonLabel: "修正理由",
 		reasonPlaceholder: "说明为何需要进行这项管理修正。",
 		submit: "保存并记录修正",
+	},
+	create: {
+		noResults: insert("找不到符合“{{query}}”的标签。", { query: String }),
+		inStudio: insert(`在 ${verbatimTerms.studio.value} 创建“{{query}}”`, {
+			query: String,
+		}),
+		title: "创建标签",
+		description: "确认没有合适的已有标签后，创建可重复使用的一般标签。",
+		voteDescription: "创建后将返回原作品，并在当前上下文投下“符合”。",
+		backToUnitTags: "返回作品标签",
+		backToStudioTags: `返回 ${verbatimTerms.studio.value} 标签`,
+		submit: "创建标签",
+		submitAndVote: "创建标签并投下“符合”",
+		applying: "标签已创建，正在记录你的投票……",
+		partialTitle: "标签已创建，但尚未完成投票",
+		partialDescription:
+			"标签已成功创建，但无法应用到原作品或记录你的投票。你可以安全地重试，不会重复创建标签。",
+		retryVote: "重试投票",
+		returnToUnitTags: "返回作品标签",
+		completed: "已创建标签并记录你的“符合”投票。",
 	},
 	global: {
 		title: "一般标签",

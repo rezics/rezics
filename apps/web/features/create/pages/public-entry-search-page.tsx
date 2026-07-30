@@ -27,6 +27,10 @@ import {
 } from "@/features/catalog/model/public-entry-search";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
+import {
+	type UnitTagVoteCreateTarget,
+	unitTagVoteCreateHref,
+} from "@/features/tags/routing/tag-create-route";
 import { studioSectionHref } from "../routing/studio-routes";
 
 type PublicEntrySearchHit = PostApiSearchByIndexStatus200["hits"][number];
@@ -43,9 +47,11 @@ type PublicEntrySearchState =
 export function PublicEntrySearchPage({
 	initialQuery,
 	subject,
+	unitTagVoteTarget,
 }: {
 	readonly initialQuery: string;
 	readonly subject: PublicEntrySearchSubject;
+	readonly unitTagVoteTarget?: UnitTagVoteCreateTarget;
 }) {
 	const { t } = useTranslation("create");
 	const localizationLanguages = useLocalizationLanguages();
@@ -167,10 +173,17 @@ export function PublicEntrySearchPage({
 							<AlertAction>
 								<Button asChild size="sm" variant="solid">
 									<Link
-										href={publicEntryCreationHref(
-											subject,
-											displayedState.query,
-										)}
+										href={
+											subject.kind === "tag" && unitTagVoteTarget
+												? unitTagVoteCreateHref(
+														displayedState.query,
+														unitTagVoteTarget,
+													)
+												: publicEntryCreationHref(
+														subject,
+														displayedState.query,
+													)
+										}
 									>
 										{messages.createAction}
 									</Link>

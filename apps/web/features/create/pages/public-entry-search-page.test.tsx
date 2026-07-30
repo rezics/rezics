@@ -125,6 +125,32 @@ describe("PublicEntrySearchPage", () => {
 		);
 		expect(
 			(await screen.findByRole("link", { name: "Continue to create" })).getAttribute("href"),
-		).toContain("/tags/new?");
+		).toContain("/create/tag/new?");
+	});
+
+	it("preserves a Unit Tag vote target when duplicate search continues to creation", async () => {
+		render(
+			<PublicEntrySearchPage
+				initialQuery="science"
+				subject={TagPublicEntrySearchSubject}
+				unitTagVoteTarget={{
+					type: "book",
+					unitId: "00000000-0000-7000-8000-000000000001",
+					context: {
+						kind: "realm",
+						realmId: "00000000-0000-7000-8000-000000000002",
+					},
+				}}
+			/>,
+		);
+
+		fireEvent.click(screen.getByRole("button", { name: "Search" }));
+
+		const createLink = await screen.findByRole("link", { name: "Continue to create" });
+		const url = new URL(createLink.getAttribute("href") ?? "", "https://rezics.example");
+		expect(url.pathname).toBe("/create/tag/new");
+		expect(url.searchParams.get("intent")).toBe("unit-tag-vote");
+		expect(url.searchParams.get("context")).toBe("realm");
+		expect(url.searchParams.get("realmId")).toBe("00000000-0000-7000-8000-000000000002");
 	});
 });

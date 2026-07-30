@@ -4,13 +4,11 @@ import type { ContentLanguage } from "@rezics/i18n";
 import {
 	getApiEntitiesQueryKey,
 	getApiEntitiesByUnitIdQueryKey,
-	getApiTagsQueryKey,
 	type GetApiEntitiesByUnitIdStatus200,
 	useGetApiEntities,
 	useGetApiEntitiesByUnitId,
 	useGetApiTags,
 	usePostApiEntities,
-	usePostApiTags,
 	usePutApiEntitiesByUnitIdLocalizationsByLanguage,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
@@ -22,7 +20,6 @@ import {
 	isPublicEntryEntityKind,
 	isPublicEntrySearchConfirmed,
 	PublicEntrySearchConfirmationParam,
-	TagPublicEntrySearchSubject,
 	type PublicEntryEntityKind,
 } from "./model/public-entry-search";
 import { type FormEvent, useState } from "react";
@@ -48,6 +45,7 @@ import { useChineseContentText } from "@/features/content-language-display/chine
 import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import { ContentLanguageEditorProvider } from "@/features/content-languages/hooks/use-content-language-editor";
 import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
+import { StudioTagCreateHref } from "@/features/create/model/studio-section";
 import {
 	LocalizationImageUploadField,
 	type LocalizationImageAssetOption,
@@ -190,7 +188,7 @@ export function TagsPage() {
 	const localizationLanguages = useLocalizationLanguages();
 	const query = useGetApiTags({ query: { localizationLanguages, limit: 50 } });
 	return (
-		<CatalogFrame title={t.catalog.tags} createHref="/tags/new">
+		<CatalogFrame title={t.catalog.tags} createHref={StudioTagCreateHref}>
 			<CatalogUnitList
 				items={query.data?.items}
 				pending={query.isPending}
@@ -646,106 +644,6 @@ export function EntityCreatePage() {
 					{error && <p className="text-destructive text-sm">{t.ui.retryLater}</p>}
 					<Button
 						disabled={catalogMode === "public_entry" && !searchConfirmed}
-						variant="solid"
-						type="submit"
-						isLoading={create.isPending}
-					>
-						{t.ui.submit}
-					</Button>
-				</FieldGroup>
-			</form>
-		</CreateFrame>
-	);
-}
-
-export function TagCreatePage() {
-	const { t } = useTranslation([
-		"actions",
-		"catalog",
-		"create",
-		"errors",
-		"governance",
-		"media",
-		"ui",
-	]);
-	const router = useApplicationRouter();
-	const queryClient = useQueryClient();
-	const searchParams = useSearchParams();
-	const searchConfirmation = searchParams.get(PublicEntrySearchConfirmationParam);
-	const [title, setTitle] = useState(() => searchParams.get("title") ?? "");
-	const [error, setError] = useState(false);
-	const language = useFormDraftContentLanguage(["title", "summary"]);
-	const create = usePostApiTags({
-		mutation: {
-			onSuccess: async () => {
-				await queryClient.invalidateQueries({ queryKey: getApiTagsQueryKey() });
-				router.push("/tags");
-			},
-		},
-	});
-	const searchConfirmed = isPublicEntrySearchConfirmed(
-		TagPublicEntrySearchSubject,
-		title,
-		searchConfirmation,
-	);
-	async function submit(event: FormEvent<HTMLFormElement>) {
-		event.preventDefault();
-		setError(false);
-		const formElement = event.currentTarget;
-		const form = new FormData(formElement);
-		const submittedTitle = String(form.get("title") ?? "").trim();
-		if (
-			!isPublicEntrySearchConfirmed(
-				TagPublicEntrySearchSubject,
-				submittedTitle,
-				searchConfirmation,
-			)
-		)
-			return;
-		const contentLanguage = await language.resolveLanguage(formElement);
-		try {
-			await create.mutateAsync({
-				body: {
-					localization: {
-						language: contentLanguage,
-						title: submittedTitle,
-						...(String(form.get("summary") ?? "").trim()
-							? { summary: String(form.get("summary")).trim() }
-							: {}),
-					},
-				},
-			});
-		} catch {
-			setError(true);
-		}
-	}
-	return (
-		<CreateFrame title={t.catalog.newTag}>
-			<form onInput={language.onInput} onSubmit={(event) => void submit(event)}>
-				<FieldGroup>
-					<Field required>
-						<FieldLabel>{t.ui.title}</FieldLabel>
-						<Input
-							maxLength={500}
-							name="title"
-							onChange={(event) => setTitle(event.currentTarget.value)}
-							required
-							value={title}
-						/>
-					</Field>
-					<PublicEntrySearchPrompt
-						confirmed={searchConfirmed}
-						query={title}
-						subject={TagPublicEntrySearchSubject}
-					/>
-					<Field>
-						<FieldLabel>{t.ui.summary}</FieldLabel>
-						<Textarea name="summary" maxLength={2000} />
-					</Field>
-					<DraftContentLanguageField controller={language.controller} />
-					{error && <p className="text-destructive text-sm">{t.ui.retryLater}</p>}
-					<Button
-						disabled={!searchConfirmed}
 						variant="solid"
 						type="submit"
 						isLoading={create.isPending}

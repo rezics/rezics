@@ -1,7 +1,7 @@
 "use client";
 
 import { useFilter, useListCollection } from "@ark-ui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import { useEntitySearch, useUiMessages, type EntitySearch } from "./ui-provider";
 import { IdentityAvatar } from "./identity-avatar";
@@ -26,24 +26,43 @@ export interface EntityPickerValue {
 	readonly avatar?: import("@rezics/avatar").PresentedAvatar | null;
 }
 
+type EntityPickerSearchResolution =
+	| { readonly status: "idle" }
+	| { readonly status: "pending"; readonly query: string }
+	| { readonly status: "ready"; readonly query: string }
+	| { readonly status: "error"; readonly query: string };
+
 export function EntityPicker({
 	ariaLabel,
 	index,
 	kind,
 	kinds,
+	maxLength,
 	value,
 	onChange,
 	onClear,
 	search,
+	renderNoResultsAction,
 }: {
 	ariaLabel?: string;
 	index: string;
 	kind?: string;
 	kinds?: readonly string[];
+	maxLength?: number;
 	value?: EntityPickerValue;
 	onChange: (value: EntityPickerValue) => void;
 	onClear?: () => void;
 	search?: EntitySearch;
+	/**
+	 * Renders an owner-provided action after a successful search returns no matches.
+	 *
+	 * @remarks
+	 * The action is placed after the combobox so it remains in the normal keyboard
+	 * tab order instead of becoming an interactive descendant of the listbox.
+	 *
+	 * @alpha
+	 */
+	renderNoResultsAction?: (query: string) => ReactNode;
 }) {
 	const messages = useUiMessages();
 	const contextSearch = useEntitySearch();
@@ -56,8 +75,9 @@ export function EntityPicker({
 		itemToValue: (item) => item.id,
 	});
 	const [inputValue, setInputValue] = useState(value?.label ?? "");
-	const [isPending, setIsPending] = useState(false);
-	const [isError, setIsError] = useState(false);
+	const [searchResolution, setSearchResolution] = useState<EntityPickerSearchResolution>({
+		status: "idle",
+	});
 	const allowedKinds = kinds ?? (kind ? [kind] : undefined);
 	const allowedKindsKey = allowedKinds?.join("\u0000");
 
@@ -65,41 +85,35 @@ export function EntityPicker({
 		const query = inputValue.trim();
 		if (!query || !searchEntities) {
 			set([]);
-			setIsPending(false);
-			setIsError(false);
+			setSearchResolution({ status: "idle" });
 			return;
 		}
+		setSearchResolution({ status: "pending", query });
 		let controller: AbortController | undefined;
 		const timer = window.setTimeout(() => {
 			const request = new AbortController();
 			controller = request;
-			setIsPending(true);
-			setIsError(false);
 			const requestedKinds = allowedKindsKey?.split("\u0000");
-			void searchEntities(index, query, request.signal, { kinds: requestedKinds })
-				.then(
-					(nextHits) => {
-						if (request.signal.aborted) return;
-						const allowed = allowedKindsKey
-							? new Set(allowedKindsKey.split("\u0000"))
-							: undefined;
-						set(
-							nextHits.filter(
-								(hit) =>
-									!allowed || (hit.kind !== undefined && allowed.has(hit.kind)),
-							),
-						);
-					},
-					() => {
-						if (!request.signal.aborted) {
-							set([]);
-							setIsError(true);
-						}
-					},
-				)
-				.finally(() => {
-					if (!request.signal.aborted) setIsPending(false);
-				});
+			void searchEntities(index, query, request.signal, { kinds: requestedKinds }).then(
+				(nextHits) => {
+					if (request.signal.aborted) return;
+					const allowed = allowedKindsKey
+						? new Set(allowedKindsKey.split("\u0000"))
+						: undefined;
+					set(
+						nextHits.filter(
+							(hit) => !allowed || (hit.kind !== undefined && allowed.has(hit.kind)),
+						),
+					);
+					setSearchResolution({ status: "ready", query });
+				},
+				() => {
+					if (!request.signal.aborted) {
+						set([]);
+						setSearchResolution({ status: "error", query });
+					}
+				},
+			);
 		}, 250);
 		return () => {
 			window.clearTimeout(timer);
@@ -110,6 +124,17 @@ export function EntityPicker({
 	useEffect(() => {
 		setInputValue(value?.label ?? "");
 	}, [value?.id, value?.label]);
+
+	const query = inputValue.trim();
+	const currentResolution =
+		searchResolution.status !== "idle" && searchResolution.query === query
+			? searchResolution
+			: ({ status: "idle" } as const);
+	const isPending = Boolean(query && searchEntities) && currentResolution.status === "idle";
+	const showNoResultsAction =
+		currentResolution.status === "ready" &&
+		collection.items.length === 0 &&
+		renderNoResultsAction;
 
 	return (
 		<div className="grid gap-2">
@@ -131,15 +156,16 @@ export function EntityPicker({
 			>
 				<ComboboxInput
 					aria-label={ariaLabel ?? messages.searchPlaceholder}
+					maxLength={maxLength}
 					placeholder={messages.searchPlaceholder}
 					type="search"
 				/>
 				<ComboboxContent>
-					{isPending ? (
+					{isPending || currentResolution.status === "pending" ? (
 						<p className="px-2 py-1.5 text-muted-foreground text-sm">
 							{messages.loading}
 						</p>
-					) : isError ? (
+					) : currentResolution.status === "error" ? (
 						<p className="px-2 py-1.5 text-destructive text-sm" role="alert">
 							{messages.error}
 						</p>
@@ -164,6 +190,9 @@ export function EntityPicker({
 					)}
 				</ComboboxContent>
 			</Combobox>
+			{showNoResultsAction ? (
+				<div aria-live="polite">{renderNoResultsAction(query)}</div>
+			) : null}
 		</div>
 	);
 }

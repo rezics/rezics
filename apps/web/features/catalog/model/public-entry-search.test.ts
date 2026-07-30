@@ -89,6 +89,14 @@ describe("public-entry search routes and confirmation", () => {
 		).toBe(true);
 	});
 
+	it("keeps Tag creation inside Studio", () => {
+		const href = publicEntryCreationHref(TagPublicEntrySearchSubject, "Science");
+		const url = new URL(href, "https://rezics.example");
+
+		expect(url.pathname).toBe("/create/tag/new");
+		expect(url.searchParams.get("title")).toBe("Science");
+	});
+
 	it("links search hits to the subject's public detail route", () => {
 		expect(
 			publicEntrySearchResultHref(unitPublicEntrySearchSubject("software"), "unit-id"),

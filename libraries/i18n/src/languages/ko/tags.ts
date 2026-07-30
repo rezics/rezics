@@ -1,6 +1,7 @@
 import { insert } from "native-i18n";
 
 import { koTerminology } from "@rezics/i18n/terminology/ko";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = koTerminology.realm;
 const { forms: followTerms } = koTerminology.follow;
@@ -88,6 +89,28 @@ export default {
 		reasonLabel: "수정 사유",
 		reasonPlaceholder: "왜 이 관리적 수정을 해야 하는지 설명하세요.",
 		submit: "감사된 수정을 저장하세요.",
+	},
+	create: {
+		noResults: insert("‘{{query}}’와 일치하는 태그를 찾지 못했습니다.", {
+			query: String,
+		}),
+		inStudio: insert(`${verbatimTerms.studio.value}에서 ‘{{query}}’ 만들기`, {
+			query: String,
+		}),
+		title: "태그 만들기",
+		description: "기존 태그를 확인한 뒤 재사용할 수 있는 글로벌 태그를 만듭니다.",
+		voteDescription: "태그를 만든 뒤 원래 작품으로 돌아가 현재 맥락에서 ‘적합’에 투표합니다.",
+		backToUnitTags: "작품 태그로 돌아가기",
+		backToStudioTags: `${verbatimTerms.studio.value} 태그로 돌아가기`,
+		submit: "태그 만들기",
+		submitAndVote: "태그를 만들고 ‘적합’에 투표",
+		applying: "태그를 만들었습니다. 투표를 기록하는 중입니다…",
+		partialTitle: "태그는 만들어졌지만 투표가 기록되지 않았습니다",
+		partialDescription:
+			"태그는 만들어졌지만 작품에 적용하거나 투표를 기록하지 못했습니다. 태그를 중복으로 만들지 않고 안전하게 다시 시도할 수 있습니다.",
+		retryVote: "투표 다시 시도",
+		returnToUnitTags: "작품 태그로 돌아가기",
+		completed: "태그를 만들고 ‘적합’ 투표를 기록했습니다.",
 	},
 	global: {
 		title: "글로벌 태그",

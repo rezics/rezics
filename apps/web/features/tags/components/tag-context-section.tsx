@@ -15,6 +15,7 @@ export function TagContextSection({
 	fallbackLabel,
 	heading,
 	headingLevel = "h3",
+	highlightedTagId,
 	items,
 	pendingItemKey,
 	selectedTagIds,
@@ -32,6 +33,7 @@ export function TagContextSection({
 	readonly fallbackLabel: string;
 	readonly heading?: ReactNode;
 	readonly headingLevel?: "h2" | "h3" | "h4";
+	readonly highlightedTagId?: string;
 	readonly items: readonly TagPresentation[];
 	readonly pendingItemKey?: string;
 	readonly selectedTagIds: ReadonlySet<string>;
@@ -61,6 +63,7 @@ export function TagContextSection({
 					{items.map((item) => (
 						<TagBadgeCard
 							fallbackLabel={fallbackLabel}
+							highlighted={highlightedTagId === item.identity.tagId}
 							isPending={pendingItemKey === item.itemKey}
 							item={item}
 							key={item.itemKey}

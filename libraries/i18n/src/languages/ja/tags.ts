@@ -1,6 +1,7 @@
 import { insert } from "native-i18n";
 
 import { jaTerminology } from "@rezics/i18n/terminology/ja";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = jaTerminology.realm;
 const { forms: followTerms } = jaTerminology.follow;
@@ -88,6 +89,28 @@ export default {
 		reasonLabel: "修正理由",
 		reasonPlaceholder: "この管理者による修正が必要な理由を説明してください。",
 		submit: "監査された修正を保存する",
+	},
+	create: {
+		noResults: insert("「{{query}}」に一致するタグは見つかりませんでした。", {
+			query: String,
+		}),
+		inStudio: insert(`${verbatimTerms.studio.value} で「{{query}}」を作成`, {
+			query: String,
+		}),
+		title: "タグを作成",
+		description: "既存のタグを確認したうえで、再利用できるグローバルタグを作成します。",
+		voteDescription: "作成後に元の作品へ戻り、現在のコンテキストで「適合」に投票します。",
+		backToUnitTags: "作品のタグに戻る",
+		backToStudioTags: `${verbatimTerms.studio.value} のタグに戻る`,
+		submit: "タグを作成",
+		submitAndVote: "タグを作成して「適合」に投票",
+		applying: "タグを作成しました。投票を記録しています…",
+		partialTitle: "タグは作成されましたが、投票は記録されていません",
+		partialDescription:
+			"タグは作成されましたが、作品への適用または投票の記録に失敗しました。タグを重複して作成することなく、安全に再試行できます。",
+		retryVote: "投票を再試行",
+		returnToUnitTags: "作品のタグに戻る",
+		completed: "タグを作成し、あなたの「適合」票を記録しました。",
 	},
 	global: {
 		title: "グローバルタグ",

@@ -1,6 +1,7 @@
 import { insert } from "native-i18n";
 
 import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: followTerms } = zhHantTerminology.follow;
@@ -88,6 +89,26 @@ export default {
 		reasonLabel: "修正理由",
 		reasonPlaceholder: "說明為何需要進行這項管理修正。",
 		submit: "儲存並記錄修正",
+	},
+	create: {
+		noResults: insert("找不到符合「{{query}}」的標籤。", { query: String }),
+		inStudio: insert(`在 ${verbatimTerms.studio.value} 建立「{{query}}」`, {
+			query: String,
+		}),
+		title: "建立標籤",
+		description: "確認沒有合適的既有標籤後，建立可重複使用的一般標籤。",
+		voteDescription: "建立後將返回原作品，並在目前情境投下「符合」。",
+		backToUnitTags: "返回作品標籤",
+		backToStudioTags: `返回 ${verbatimTerms.studio.value} 標籤`,
+		submit: "建立標籤",
+		submitAndVote: "建立標籤並投下「符合」",
+		applying: "標籤已建立，正在記錄你的投票……",
+		partialTitle: "標籤已建立，但尚未完成投票",
+		partialDescription:
+			"標籤已成功建立，但無法套用至原作品或記錄你的投票。你可以安全地重試，不會重複建立標籤。",
+		retryVote: "重試投票",
+		returnToUnitTags: "返回作品標籤",
+		completed: "已建立標籤並記錄你的「符合」投票。",
 	},
 	global: {
 		title: "一般標籤",
