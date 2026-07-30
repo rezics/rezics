@@ -1,3 +1,6 @@
+import { insert } from "native-i18n";
+import { AuthPolicyNoticeBindings } from "../../auth-policy-notice";
+
 export default {
 	loginFailed: "La connexion a échoué.",
 	loginDescription: "Connectez-vous à votre compte pour continuer.",
@@ -16,6 +19,14 @@ export default {
 	forgotPassword: "Mot de passe oublié ?",
 	registerFailed: "L’inscription a échoué.",
 	registerDescription: "Créez un compte pour commencer à organiser et à discuter des contenus.",
+	policyNotice: {
+		message: insert(
+			"En continuant, vous acceptez notre {{userAgreement}} et reconnaissez avoir compris notre {{privacyPolicy}}.",
+			AuthPolicyNoticeBindings,
+		),
+		userAgreement: "Accord d’utilisation",
+		privacyPolicy: "Politique de confidentialité",
+	},
 	securityVerificationLabel: "Vérification de sécurité",
 	securityVerificationFailed: "La vérification de sécurité a échoué. Réessayez.",
 	securityVerificationRequired: "Effectuez d’abord la vérification de sécurité.",

@@ -2,7 +2,12 @@
 
 import { usePathname } from "next/navigation";
 import { useQueryStates } from "nuqs";
-import { toContentLanguage, type Translation } from "@rezics/i18n";
+import {
+	AuthPolicyNoticeSlots,
+	toContentLanguage,
+	type AuthPolicyNoticeSlot,
+	type Translation,
+} from "@rezics/i18n";
 import {
 	useCallback,
 	useEffect,
@@ -33,6 +38,11 @@ import { authSearchParamsParsers } from "@/lib/search-params";
 import { AuthPortalContext, type AuthPortalOptions, useAuthPortal } from "./auth-portal-context";
 import { AuthPasswordField, AuthTextField } from "./components/auth-form-field";
 import { TurnstileWidget } from "./components/turnstile-widget";
+
+const AuthPolicyHrefs = {
+	userAgreement: "https://about.rezics.com/policies/user-agreement",
+	privacyPolicy: "https://about.rezics.com/policies/privacy-policy",
+} as const satisfies Record<AuthPolicyNoticeSlot["kind"], string>;
 
 type AuthPortalState = {
 	destination: string;
@@ -345,6 +355,7 @@ function LoginForm({
 					</Button>
 				</FieldGroup>
 			</form>
+			<AuthPolicyNotice />
 			<AuthModeFooter prefix={t.auth.noAccount} onClick={() => onModeChange("register")}>
 				{t.auth.createAccount}
 			</AuthModeFooter>
@@ -459,6 +470,7 @@ function RegisterForm({
 					</Button>
 				</FieldGroup>
 			</form>
+			<AuthPolicyNotice />
 			<AuthModeFooter prefix={t.auth.haveAccount} onClick={() => onModeChange("login")}>
 				{t.actions.login}
 			</AuthModeFooter>
@@ -704,6 +716,31 @@ function VerifyEmailForm({
 				{t.auth.backToLogin}
 			</AuthModeFooter>
 		</>
+	);
+}
+
+function AuthPolicyNotice() {
+	const { t } = useTranslation("auth");
+	const content = t.policyNotice.message(AuthPolicyNoticeSlots);
+
+	return (
+		<p className="mt-4 text-center text-muted-foreground text-xs leading-5">
+			{content.map((part) =>
+				typeof part === "string" ? (
+					part
+				) : (
+					<a
+						className="text-link underline-offset-4 hover:text-link-hover hover:underline"
+						href={AuthPolicyHrefs[part.kind]}
+						key={part.kind}
+						rel="noopener noreferrer"
+						target="_blank"
+					>
+						{t.policyNotice[part.kind]}
+					</a>
+				),
+			)}
+		</p>
 	);
 }
 

@@ -18,7 +18,7 @@ import {
 } from "@rezics/avatar";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import type { UnitPredicate } from "@rezics/filter";
-import { OfficialRealmUnitIds, ZoneHomePageSlug } from "@rezics/slug";
+import { OfficialRealmUnitIds, OfficialZoneUnitIds, ZoneHomePageSlug } from "@rezics/slug";
 
 import { TopLevelSlugNamespaceUnitIds } from "../units/slug-system";
 
@@ -530,7 +530,7 @@ function createCatalogZoneBoundaryDocument(kind: "book" | "media" | "software", 
 
 export const OfficialZoneManifest = [
 	{
-		id: "019b76da-a800-7400-8000-000000000001",
+		id: OfficialZoneUnitIds.book,
 		slug: "book",
 		localizations: [
 			{
@@ -572,7 +572,7 @@ export const OfficialZoneManifest = [
 		}),
 	},
 	{
-		id: "019b76da-a800-7400-8000-000000000002",
+		id: OfficialZoneUnitIds.media,
 		slug: "media",
 		localizations: [
 			{
@@ -614,7 +614,7 @@ export const OfficialZoneManifest = [
 		}),
 	},
 	{
-		id: "019b76da-a800-7400-8000-000000000003",
+		id: OfficialZoneUnitIds.software,
 		slug: "software",
 		localizations: [
 			{
@@ -656,7 +656,7 @@ export const OfficialZoneManifest = [
 		}),
 	},
 	{
-		id: "019b76da-a800-7400-8000-000000000004",
+		id: OfficialZoneUnitIds.realm,
 		slug: "realm",
 		localizations: [
 			{
@@ -698,7 +698,7 @@ export const OfficialZoneManifest = [
 		}),
 	},
 	{
-		id: "019b76da-a800-7400-8000-000000000005",
+		id: OfficialZoneUnitIds.zone,
 		slug: "zone",
 		localizations: [
 			{

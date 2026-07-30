@@ -1,3 +1,6 @@
+import { insert } from "native-i18n";
+import { AuthPolicyNoticeBindings } from "../../auth-policy-notice";
+
 export default {
 	loginFailed: "Die Anmeldung ist fehlgeschlagen.",
 	loginDescription: "Melde dich mit deinem Konto an, um fortzufahren.",
@@ -16,6 +19,14 @@ export default {
 	forgotPassword: "Passwort vergessen?",
 	registerFailed: "Die Registrierung ist fehlgeschlagen.",
 	registerDescription: "Erstelle ein Konto, um Inhalte zu kuratieren und zu diskutieren.",
+	policyNotice: {
+		message: insert(
+			"Indem du fortfährst, stimmst du unserer {{userAgreement}} zu und bestätigst, dass du die {{privacyPolicy}} verstanden hast.",
+			AuthPolicyNoticeBindings,
+		),
+		userAgreement: "Nutzungsvereinbarung",
+		privacyPolicy: "Datenschutzrichtlinie",
+	},
 	securityVerificationLabel: "Sicherheitsüberprüfung",
 	securityVerificationFailed:
 		"Die Sicherheitsüberprüfung ist fehlgeschlagen. Versuche es erneut.",

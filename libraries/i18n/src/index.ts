@@ -25,4 +25,5 @@ export type {
 	StoredUiLocale,
 	UiLocale,
 } from "./locale-contract";
+export { AuthPolicyNoticeSlots, type AuthPolicyNoticeSlot } from "./auth-policy-notice";
 export type { Translation } from "./resources";

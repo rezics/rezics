@@ -4,7 +4,7 @@ import type { UiLocale } from "@rezics/i18n";
 import type { GetApiUsersMeStatus200 } from "@rezics/openapi-tanstack-query";
 import { useGetApiNotificationsUnreadCount } from "@rezics/openapi-tanstack-query";
 import { Button, ChoiceSelect, Skeleton } from "@rezics/ui";
-import { Bell, Plus, UserRound } from "lucide-react";
+import { Bell, Plus } from "lucide-react";
 
 import { normalizeUnreadCount } from "@/features/notifications/model/unread-count";
 import { NotificationsHref } from "@/features/notifications/routing/notification-routes";
@@ -112,19 +112,24 @@ export function SignedInHeaderActions({
 }
 
 export function SignedOutHeaderActions({
-	createLabel,
 	loginLabel,
 	locale,
+	signupLabel,
 	theme,
 }: {
-	createLabel: string;
 	loginLabel: string;
 	locale: HeaderLocaleSelection;
+	signupLabel: string;
 	theme: HeaderThemeSelection;
 }) {
 	return (
 		<>
-			<CreateAction href="/login?next=/create" label={createLabel} />
+			<Button asChild size="lg" variant="solid">
+				<AppLink href="/register">{signupLabel}</AppLink>
+			</Button>
+			<Button asChild size="lg" variant="brand">
+				<AppLink href="/login">{loginLabel}</AppLink>
+			</Button>
 			<div className="hidden xl:block">
 				<ChoiceSelect
 					ariaLabel={locale.label}
@@ -139,17 +144,6 @@ export function SignedOutHeaderActions({
 				/>
 			</div>
 			<ThemePreferenceMenu onChange={theme.onChange} preference={theme.preference} />
-			<Button
-				asChild
-				className="size-11 lg:h-9 lg:w-auto lg:px-3.5"
-				size="icon-xl"
-				variant="brand"
-			>
-				<AppLink aria-label={loginLabel} href="/login" title={loginLabel}>
-					<UserRound aria-hidden data-icon="inline-start" />
-					<span className="hidden lg:inline">{loginLabel}</span>
-				</AppLink>
-			</Button>
 		</>
 	);
 }

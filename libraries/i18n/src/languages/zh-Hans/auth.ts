@@ -1,3 +1,6 @@
+import { insert } from "native-i18n";
+import { AuthPolicyNoticeBindings } from "../../auth-policy-notice";
+
 export default {
 	loginFailed: "登录失败。",
 	loginDescription: "使用你的账户继续。",
@@ -16,6 +19,14 @@ export default {
 	forgotPassword: "忘记密码？",
 	registerFailed: "注册失败。",
 	registerDescription: "创建账户，开始整理与讨论。",
+	policyNotice: {
+		message: insert(
+			"继续即表示你同意我们的{{userAgreement}}，并确认你已了解{{privacyPolicy}}。",
+			AuthPolicyNoticeBindings,
+		),
+		userAgreement: "用户协议",
+		privacyPolicy: "隐私政策",
+	},
 	securityVerificationLabel: "安全验证",
 	securityVerificationFailed: "安全验证失败，请再试一次。",
 	securityVerificationRequired: "请先完成安全验证。",

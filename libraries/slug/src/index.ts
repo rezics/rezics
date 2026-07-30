@@ -75,6 +75,19 @@ export const OfficialRealmUnitIds = {
 	rule: "019b76da-a800-7300-8000-000000000003",
 } as const;
 
+/**
+ * Immutable identities for the first-party Zones followed by default.
+ *
+ * @alpha
+ */
+export const OfficialZoneUnitIds = {
+	book: "019b76da-a800-7400-8000-000000000001",
+	media: "019b76da-a800-7400-8000-000000000002",
+	software: "019b76da-a800-7400-8000-000000000003",
+	realm: "019b76da-a800-7400-8000-000000000004",
+	zone: "019b76da-a800-7400-8000-000000000005",
+} as const;
+
 export type TopLevelSlugNamespace = keyof typeof TopLevelSlugNamespaceUnitIds;
 
 export const PublicSlugRouteManifest = [

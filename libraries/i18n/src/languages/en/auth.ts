@@ -1,3 +1,6 @@
+import { insert } from "native-i18n";
+import { AuthPolicyNoticeBindings } from "../../auth-policy-notice";
+
 export default {
 	loginFailed: "Sign-in failed.",
 	loginDescription: "Use your account to continue.",
@@ -16,6 +19,14 @@ export default {
 	forgotPassword: "Forgot password?",
 	registerFailed: "Registration failed.",
 	registerDescription: "Create an account to start curating and discussing.",
+	policyNotice: {
+		message: insert(
+			"By continuing, you agree to our {{userAgreement}} and acknowledge that you understand the {{privacyPolicy}}.",
+			AuthPolicyNoticeBindings,
+		),
+		userAgreement: "User Agreement",
+		privacyPolicy: "Privacy Policy",
+	},
 	securityVerificationLabel: "Security verification",
 	securityVerificationFailed: "Security verification failed. Try again.",
 	securityVerificationRequired: "Complete the security verification first.",

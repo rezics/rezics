@@ -3,6 +3,7 @@
 import { Bookmark, Gauge, Globe2, House, PanelsTopLeft } from "lucide-react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, type ReactNode } from "react";
+import { FontAwesomeProvider } from "@rezics/avatar";
 import {
 	getApiUsersMePreferencesQueryKey,
 	useGetApiUsersMe,
@@ -12,6 +13,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { AppShell as SharedAppShell, Button } from "@rezics/ui";
 import { toStoredUiLocale, toUiLocale, UiLocaleValues } from "@rezics/i18n";
+import { OfficialZoneUnitIds } from "@rezics/slug";
 
 import { followingManagementHref } from "@/features/following/routing/following-route";
 import { ChineseContentDisplayProvider } from "@/features/content-language-display/chinese-content-display-context";
@@ -40,6 +42,24 @@ const Links = [
 	{ href: "/me/progress", key: "progress", icon: Gauge },
 ] as const;
 
+type OfficialZoneKey = keyof typeof OfficialZoneUnitIds;
+
+const AnonymousSidebarZoneKeys = [
+	"book",
+	"media",
+	"software",
+	"realm",
+	"zone",
+] as const satisfies readonly OfficialZoneKey[];
+
+const OfficialZoneAvatarNames = {
+	book: "book-open",
+	media: "clapperboard",
+	software: "code",
+	realm: "people-group",
+	zone: "compass",
+} as const satisfies Record<OfficialZoneKey, string>;
+
 export function ApplicationShell({ children }: { children: ReactNode }) {
 	return (
 		<HeaderSearchProvider>
@@ -56,6 +76,7 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 	const session = authSession.data;
 	const { t, locale } = useTranslation([
 		"actions",
+		"auth",
 		"betterAuthErrorCodes",
 		"brand",
 		"errorCodes",
@@ -146,6 +167,22 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 				]
 			: [],
 	);
+	const anonymousZoneItems = AnonymousSidebarZoneKeys.map((key) => {
+		const unitId = OfficialZoneUnitIds[key];
+		return {
+			id: unitId,
+			href: sidebarFollowingHref("zone", unitId),
+			label: t.nav.following.types[key],
+			avatar: {
+				type: "icon",
+				icon: {
+					provider: FontAwesomeProvider,
+					prefix: "fas",
+					name: OfficialZoneAvatarNames[key],
+				},
+			},
+		} as const;
+	});
 
 	useEffect(() => {
 		localeChangedByUser.current = false;
@@ -199,9 +236,9 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 						<>
 							{authSession.status === "anonymous" ? (
 								<SignedOutHeaderActions
-									createLabel={t.actions.create}
 									locale={localeSelection}
 									loginLabel={t.actions.login}
+									signupLabel={t.auth.createAccount}
 									theme={{
 										preference: theme.preference,
 										onChange: theme.setPreference,
@@ -237,45 +274,50 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 					label: t.nav[key],
 					icon,
 				}))}
-				following={
+				sidebarSupplement={
 					session
 						? {
-								groups: [
-									{
-										id: "zone",
-										label: t.nav.sidebar.zones,
-										allLabel: t.nav.sidebar.allZones,
-										allHref: followingManagementHref("zone"),
-										emptyLabel: t.nav.sidebar.zonesEmpty,
-										icon: PanelsTopLeft,
-										isLoading:
-											localizationState.status === "restoring" ||
-											followedZones.isPending,
-										isError:
-											localizationState.status === "error" ||
-											followedZones.isError,
-										items: zoneItems,
-									},
-									{
-										id: "realm",
-										label: t.nav.sidebar.realms,
-										allLabel: t.nav.sidebar.allRealms,
-										allHref: followingManagementHref("realm"),
-										emptyLabel: t.nav.sidebar.realmsEmpty,
-										icon: Globe2,
-										isLoading:
-											localizationState.status === "restoring" ||
-											followedRealms.isPending,
-										isError:
-											localizationState.status === "error" ||
-											followedRealms.isError,
-										items: realmItems,
-									},
-								],
-								loadingLabel: t.nav.sidebar.loading,
-								errorLabel: t.nav.sidebar.error,
+								kind: "following",
+								content: {
+									groups: [
+										{
+											id: "zone",
+											label: t.nav.sidebar.zones,
+											allLabel: t.nav.sidebar.allZones,
+											allHref: followingManagementHref("zone"),
+											emptyLabel: t.nav.sidebar.zonesEmpty,
+											icon: PanelsTopLeft,
+											isLoading:
+												localizationState.status === "restoring" ||
+												followedZones.isPending,
+											isError:
+												localizationState.status === "error" ||
+												followedZones.isError,
+											items: zoneItems,
+										},
+										{
+											id: "realm",
+											label: t.nav.sidebar.realms,
+											allLabel: t.nav.sidebar.allRealms,
+											allHref: followingManagementHref("realm"),
+											emptyLabel: t.nav.sidebar.realmsEmpty,
+											icon: Globe2,
+											isLoading:
+												localizationState.status === "restoring" ||
+												followedRealms.isPending,
+											isError:
+												localizationState.status === "error" ||
+												followedRealms.isError,
+											items: realmItems,
+										},
+									],
+									loadingLabel: t.nav.sidebar.loading,
+									errorLabel: t.nav.sidebar.error,
+								},
 							}
-						: undefined
+						: authSession.status === "anonymous"
+							? { kind: "shortcuts", items: anonymousZoneItems }
+							: undefined
 				}
 			>
 				{children}

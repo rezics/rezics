@@ -1,3 +1,6 @@
+import { insert } from "native-i18n";
+import { AuthPolicyNoticeBindings } from "../../auth-policy-notice";
+
 export default {
 	loginFailed: "로그인 실패.",
 	loginDescription: "계속하려면 계정을 사용하세요.",
@@ -16,6 +19,14 @@ export default {
 	forgotPassword: "비밀번호를 잊으셨나요?",
 	registerFailed: "등록 실패.",
 	registerDescription: "계정을 만들어 큐레이션하고 토론을 시작하세요.",
+	policyNotice: {
+		message: insert(
+			"계속하면 {{userAgreement}}에 동의하고 {{privacyPolicy}}을 이해했음을 인정하는 것입니다.",
+			AuthPolicyNoticeBindings,
+		),
+		userAgreement: "이용자 계약",
+		privacyPolicy: "개인정보 처리방침",
+	},
 	securityVerificationLabel: "보안 확인",
 	securityVerificationFailed: "보안 확인에 실패했습니다. 다시 시도하세요.",
 	securityVerificationRequired: "먼저 보안 확인을 완료하세요.",

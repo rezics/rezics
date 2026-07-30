@@ -1,3 +1,6 @@
+import { insert } from "native-i18n";
+import { AuthPolicyNoticeBindings } from "../../auth-policy-notice";
+
 export default {
 	loginFailed: "サインインに失敗しました。",
 	loginDescription: "アカウントを使って続行してください。",
@@ -16,6 +19,14 @@ export default {
 	forgotPassword: "パスワードをお忘れですか？",
 	registerFailed: "登録に失敗しました。",
 	registerDescription: "アカウントを作成して、キュレーションとディスカッションを始めましょう。",
+	policyNotice: {
+		message: insert(
+			"続行することで、{{userAgreement}}に同意し、{{privacyPolicy}}を理解したことを確認したものとみなされます。",
+			AuthPolicyNoticeBindings,
+		),
+		userAgreement: "利用規約",
+		privacyPolicy: "プライバシーポリシー",
+	},
 	securityVerificationLabel: "セキュリティ確認",
 	securityVerificationFailed: "セキュリティ確認に失敗しました。もう一度お試しください。",
 	securityVerificationRequired: "先にセキュリティ確認を完了してください。",

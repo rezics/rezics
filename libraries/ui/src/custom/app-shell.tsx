@@ -76,6 +76,16 @@ export interface AppShellFollowing {
 	errorLabel: string;
 }
 
+export type AppShellSidebarSupplement =
+	| {
+			readonly kind: "following";
+			readonly content: AppShellFollowing;
+	  }
+	| {
+			readonly kind: "shortcuts";
+			readonly items: readonly AppShellFollowingItem[];
+	  };
+
 export interface AppShellSidebarLabels {
 	title: string;
 	description: string;
@@ -322,30 +332,72 @@ function FollowingAccordionGroup({
 	);
 }
 
+function SidebarShortcutList({
+	currentPath,
+	currentSearch,
+	fallbackLabel,
+	items,
+	link,
+	onNavigate,
+}: {
+	currentPath: string;
+	currentSearch: string;
+	fallbackLabel: string;
+	items: readonly AppShellFollowingItem[];
+	link: ElementType;
+	onNavigate?: () => void;
+}) {
+	const Link = link;
+	return (
+		<div className="grid gap-1 px-3 py-2">
+			{items.map((item) => {
+				const active = isCurrentHref(currentPath, currentSearch, item.href);
+				return (
+					<Link
+						aria-current={active ? "page" : undefined}
+						className={cn(
+							SidebarRowClassName,
+							active && "bg-surface-selected text-foreground",
+						)}
+						href={item.href}
+						key={item.id}
+						onClick={onNavigate}
+					>
+						<FollowingMark fallbackLabel={fallbackLabel} item={item} />
+						<span className="min-w-0 flex-1 truncate">{item.label}</span>
+					</Link>
+				);
+			})}
+		</div>
+	);
+}
+
 function SidebarContents({
 	brandName,
 	currentPath,
 	currentSearch,
 	expandedFollowingGroups,
-	following,
 	link,
 	navigation,
 	navigationLabel,
 	onFollowingGroupsChange,
 	onNavigate,
+	supplement,
 }: {
 	brandName: string;
 	currentPath: string;
 	currentSearch: string;
 	expandedFollowingGroups: AppShellFollowingGroupId[];
-	following?: AppShellFollowing;
 	link: ElementType;
 	navigation: readonly AppShellNavigationItem[];
 	navigationLabel: string;
 	onFollowingGroupsChange: (value: readonly string[]) => void;
 	onNavigate?: () => void;
+	supplement?: AppShellSidebarSupplement;
 }) {
 	const Link = link;
+	const following = supplement?.kind === "following" ? supplement.content : undefined;
+	const shortcuts = supplement?.kind === "shortcuts" ? supplement.items : undefined;
 
 	return (
 		<ScrollArea
@@ -374,33 +426,46 @@ function SidebarContents({
 				})}
 			</nav>
 
-			{following ? (
+			{following || shortcuts?.length ? (
 				<>
 					<Separator className="mx-4 data-[orientation=horizontal]:w-auto" />
-					<p aria-live="polite" className="sr-only" role="status">
-						{following.groups.some((group) => group.isLoading)
-							? following.loadingLabel
-							: null}
-					</p>
-					<Accordion
-						className="grid gap-1 px-3 py-2"
-						multiple
-						onValueChange={({ value }) => onFollowingGroupsChange(value)}
-						value={expandedFollowingGroups}
-					>
-						{following.groups.map((group) => (
-							<FollowingAccordionGroup
-								currentPath={currentPath}
-								currentSearch={currentSearch}
-								errorLabel={following.errorLabel}
-								fallbackLabel={brandName}
-								group={group}
-								key={group.id}
-								link={link}
-								onNavigate={onNavigate}
-							/>
-						))}
-					</Accordion>
+					{following ? (
+						<>
+							<p aria-live="polite" className="sr-only" role="status">
+								{following.groups.some((group) => group.isLoading)
+									? following.loadingLabel
+									: null}
+							</p>
+							<Accordion
+								className="grid gap-1 px-3 py-2"
+								multiple
+								onValueChange={({ value }) => onFollowingGroupsChange(value)}
+								value={expandedFollowingGroups}
+							>
+								{following.groups.map((group) => (
+									<FollowingAccordionGroup
+										currentPath={currentPath}
+										currentSearch={currentSearch}
+										errorLabel={following.errorLabel}
+										fallbackLabel={brandName}
+										group={group}
+										key={group.id}
+										link={link}
+										onNavigate={onNavigate}
+									/>
+								))}
+							</Accordion>
+						</>
+					) : shortcuts ? (
+						<SidebarShortcutList
+							currentPath={currentPath}
+							currentSearch={currentSearch}
+							fallbackLabel={brandName}
+							items={shortcuts}
+							link={link}
+							onNavigate={onNavigate}
+						/>
+					) : null}
 				</>
 			) : null}
 		</ScrollArea>
@@ -419,7 +484,7 @@ export function AppShell({
 	sidebar,
 	skipToContentLabel,
 	headerActions,
-	following,
+	sidebarSupplement,
 }: {
 	children: ReactNode;
 	brandName: string;
@@ -439,7 +504,7 @@ export function AppShell({
 	sidebar: AppShellSidebarLabels;
 	skipToContentLabel: string;
 	headerActions: ReactNode;
-	following?: AppShellFollowing;
+	sidebarSupplement?: AppShellSidebarSupplement;
 }) {
 	const Link = link;
 	const { state: desktopSidebarState, toggle: toggleDesktopSidebar } = useDesktopSidebarState();
@@ -555,11 +620,11 @@ export function AppShell({
 						currentPath={currentPath}
 						currentSearch={currentSearch}
 						expandedFollowingGroups={expandedFollowingGroups}
-						following={following}
 						link={link}
 						navigation={navigation}
 						navigationLabel={navigationLabel}
 						onFollowingGroupsChange={updateFollowingGroups}
+						supplement={sidebarSupplement}
 					/>
 				) : null}
 				<Button
@@ -607,12 +672,12 @@ export function AppShell({
 						currentPath={currentPath}
 						currentSearch={currentSearch}
 						expandedFollowingGroups={expandedFollowingGroups}
-						following={following}
 						link={link}
 						navigation={navigation}
 						navigationLabel={navigationLabel}
 						onFollowingGroupsChange={updateFollowingGroups}
 						onNavigate={() => setMobileSidebarOpen(false)}
+						supplement={sidebarSupplement}
 					/>
 				</MobileSidebarSheetContent>
 			</Sheet>

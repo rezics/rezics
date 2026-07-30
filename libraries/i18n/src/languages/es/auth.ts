@@ -1,3 +1,6 @@
+import { insert } from "native-i18n";
+import { AuthPolicyNoticeBindings } from "../../auth-policy-notice";
+
 export default {
 	loginFailed: "No se pudo iniciar sesión.",
 	loginDescription: "Inicia sesión en tu cuenta para continuar.",
@@ -16,6 +19,14 @@ export default {
 	forgotPassword: "¿Has olvidado la contraseña?",
 	registerFailed: "No se pudo completar el registro.",
 	registerDescription: "Crea una cuenta para empezar a organizar y debatir contenidos.",
+	policyNotice: {
+		message: insert(
+			"Al continuar, aceptas nuestro {{userAgreement}} y reconoces que comprendes nuestra {{privacyPolicy}}.",
+			AuthPolicyNoticeBindings,
+		),
+		userAgreement: "Acuerdo de usuario",
+		privacyPolicy: "Política de privacidad",
+	},
 	securityVerificationLabel: "Verificación de seguridad",
 	securityVerificationFailed: "La verificación de seguridad ha fallado. Inténtalo de nuevo.",
 	securityVerificationRequired: "Completa primero la verificación de seguridad.",
