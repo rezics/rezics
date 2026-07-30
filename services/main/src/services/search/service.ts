@@ -56,6 +56,7 @@ import {
 	resolvedUnitLocalizationTitle,
 } from "../units/localization";
 import { InvalidSearch } from "./errors";
+import { CurrentSearchUnitKindsByCategory } from "./contracts";
 import {
 	getCurrentSearchFieldDefinition,
 	resolveCurrentSearchFilterDefinition,
@@ -91,19 +92,6 @@ const facetCreditAttribution = alias(creditAttribution, "facet_credit_attributio
 const facetOwnership = alias(unitOwnership, "facet_ownership");
 const { metrics } = getActiveObservability();
 type SearchHitWithoutSlugAddress = Omit<SearchHit, "slugAddress">;
-
-const categoryKinds: Record<SearchCategory, readonly string[]> = {
-	units: ["book", "software", "media", "zone"],
-	users: ["profile"],
-	entity: ["entity"],
-	tags: ["tag"],
-	"tag-structures": ["structure"],
-	posts: ["post"],
-	realms: ["realm"],
-	collections: ["collection"],
-	reviews: ["post"],
-	polls: ["poll"],
-};
 
 function toTextArray(values: readonly string[]): SQL {
 	return sql`ARRAY[${sql.join(
@@ -649,7 +637,7 @@ function buildSearchConditions(
 
 	const conditions: SQL[] = [
 		readCondition,
-		sql`${unit.kind}::text = ANY(${toTextArray(categoryKinds[category])})`,
+		sql`${unit.kind}::text = ANY(${toTextArray(CurrentSearchUnitKindsByCategory[category])})`,
 	];
 	if (category === "posts") conditions.push(sql`${post.kind} <> 'review'::post_kind`);
 	if (category === "reviews") conditions.push(sql`${post.kind} = 'review'`);

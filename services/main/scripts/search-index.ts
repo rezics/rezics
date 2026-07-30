@@ -10,6 +10,7 @@ import {
 	type SearchIndexGenerationState,
 } from "../src/services/database/schema";
 import {
+	CurrentSearchNonStructureUnitKinds,
 	parseCurrentSearchDocument,
 	parseRevisionSearchDocument,
 	SearchProjectionVersions,
@@ -433,11 +434,14 @@ async function verifyDocuments(
 	const countResult = await database.execute<{ count: string }>(
 		kind === "current"
 			? sql`select count(*)::text as count
-				from search_unit_projection_source source
-				join unit on unit.id = source.unit_id
-				where unit.kind in ('book', 'software', 'media', 'zone', 'profile', 'entity', 'tag', 'post', 'realm', 'collection', 'poll')
-					or (
-						unit.kind = 'structure'
+					from search_unit_projection_source source
+					join unit on unit.id = source.unit_id
+					where unit.kind in (${sql.join(
+						CurrentSearchNonStructureUnitKinds.map((kind) => sql`${kind}`),
+						sql`, `,
+					)})
+						or (
+							unit.kind = 'structure'
 						and exists (
 							select 1
 							from unit_structure_vote_stat definition_stat

@@ -2,7 +2,8 @@ import { readFile } from "node:fs/promises";
 
 import { describe, expect, it } from "vitest";
 
-import { CurrentSearchProjectionVersion } from "./contracts";
+import { TimedMediaUnitKindValues } from "../database/schema";
+import { CurrentSearchProjectionVersion, CurrentSearchUnitKindsByCategory } from "./contracts";
 import { getSearchSettingsFingerprint, SearchProjectionSettings } from "./settings";
 
 const currentSettingsGenerationDates = new Map([
@@ -70,8 +71,13 @@ describe("current search generation deployment wiring", () => {
 			`file: "rezics_unit_search_document_v${CurrentSearchProjectionVersion}.sql"`,
 		);
 		expect(enrichment).toContain(`'projectionVersion', ${CurrentSearchProjectionVersion}`);
+		expect(CurrentSearchUnitKindsByCategory.units).toEqual(
+			expect.arrayContaining([...TimedMediaUnitKindValues]),
+		);
 		expect(enrichment).toContain(
-			"WHEN unit_row.kind IN ('book', 'software', 'media', 'video', 'audio', 'zone') THEN 'units'",
+			`WHEN unit_row.kind IN (${CurrentSearchUnitKindsByCategory.units
+				.map((kind) => `'${kind}'`)
+				.join(", ")}) THEN 'units'`,
 		);
 		expect(enrichment).toContain("WHEN unit_row.kind = 'realm' THEN 'realms'");
 		expect(settings).toContain(`"./settings/current-v${CurrentSearchProjectionVersion}.json"`);

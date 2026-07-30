@@ -1,8 +1,10 @@
 import { type Static, Type } from "@sinclair/typebox";
 import { Check } from "@sinclair/typebox/value";
+import type { SearchCategory } from "@rezics/filter";
 import { isPortableTextValueBlock, normalizePortableText } from "@rezics/portable-text";
 import { PublicationLicenseIds } from "@rezics/license";
 
+import type { UnitKind } from "../database/schema/contract-values";
 import type { SearchProjectionKind } from "../database/schema/search";
 
 const Uuid = Type.String({
@@ -25,6 +27,27 @@ export const SearchProjectionVersions = {
 	current: CurrentSearchProjectionVersion,
 	history: HistorySearchProjectionVersion,
 } as const satisfies Record<SearchProjectionKind, number>;
+
+export const CurrentSearchUnitKindsByCategory = {
+	units: ["book", "software", "media", "video", "audio", "zone"],
+	users: ["profile"],
+	entity: ["entity"],
+	tags: ["tag"],
+	"tag-structures": ["structure"],
+	posts: ["post"],
+	realms: ["realm"],
+	collections: ["collection"],
+	reviews: ["post"],
+	polls: ["poll"],
+} as const satisfies Record<SearchCategory, readonly UnitKind[]>;
+
+export const CurrentSearchNonStructureUnitKinds = [
+	...new Set(
+		Object.entries(CurrentSearchUnitKindsByCategory).flatMap(([category, kinds]) =>
+			category === "tag-structures" ? [] : kinds,
+		),
+	),
+] satisfies readonly UnitKind[];
 
 export const CurrentSearchDocument = Type.Object(
 	{

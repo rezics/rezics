@@ -193,6 +193,16 @@ describe("domain search SQL", () => {
 		expect(query.sql).toContain("'summary'");
 	});
 
+	it("keeps timed media in the Units category authorization query", async () => {
+		await searchDomain("units", {});
+
+		const statement = execute.mock.calls.at(-1)?.[0] as SQL | undefined;
+		if (!statement) throw new Error("Search did not execute a query");
+		expect(dialect.sqlToQuery(statement).params).toEqual(
+			expect.arrayContaining(["video", "audio"]),
+		);
+	});
+
 	it("compiles every registry-declared field capability into PostgreSQL", () => {
 		for (const field of SearchFieldValues) {
 			const definition = CurrentSearchFieldRegistry[field];
