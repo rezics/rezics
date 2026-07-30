@@ -2,7 +2,6 @@
 
 import { createZoneBoundaryDocument, createZoneThemeDocument } from "@rezics/block";
 import { SearchCategoryValues, type SearchCategory } from "@rezics/filter";
-import { toContentLanguage } from "@rezics/i18n";
 import { usePostApiZones } from "@rezics/openapi-tanstack-query";
 import {
 	Alert,
@@ -22,13 +21,15 @@ import { useApplicationRouter } from "@/features/application-shell/hooks/use-app
 import { type FormEvent, useState } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
+import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
+import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/use-form-draft-content-language";
 import { DevelopmentPreviewBoundary } from "@/features/preview-access/components/development-preview-boundary";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { toApiDateTime } from "./model/zone-form";
 
 function ZoneCreateContent() {
-	const { locale, t } = useTranslation(["search", "zones"]);
+	const { t } = useTranslation(["search", "zones"]);
 	const router = useApplicationRouter();
 	const create = usePostApiZones();
 	const [categories, setCategories] = useState<readonly SearchCategory[]>(["units"]);
@@ -38,10 +39,12 @@ function ZoneCreateContent() {
 	const [density, setDensity] = useState<"comfortable" | "compact">("comfortable");
 	const [startsAt, setStartsAt] = useState("");
 	const [endsAt, setEndsAt] = useState("");
+	const language = useFormDraftContentLanguage(["title", "summary"]);
 
-	function submit(event: FormEvent<HTMLFormElement>) {
+	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		const data = new FormData(event.currentTarget);
+		const formElement = event.currentTarget;
+		const data = new FormData(formElement);
 		const title = String(data.get("title") ?? "").trim();
 		const summary = String(data.get("summary") ?? "").trim();
 		if (!title) return;
@@ -49,11 +52,12 @@ function ZoneCreateContent() {
 			setCategoriesInvalid(true);
 			return;
 		}
+		const contentLanguage = await language.resolveLanguage(formElement);
 		create.mutate(
 			{
 				body: {
 					localization: {
-						language: toContentLanguage(locale.target),
+						language: contentLanguage,
 						title,
 						...(summary ? { summary } : {}),
 					},
@@ -80,7 +84,11 @@ function ZoneCreateContent() {
 					<PageHeading title={t.zones.create.title} />
 					<p className="text-muted-foreground">{t.zones.create.description}</p>
 				</div>
-				<form className="grid gap-6" onSubmit={submit}>
+				<form
+					className="grid gap-6"
+					onInput={language.onInput}
+					onSubmit={(event) => void submit(event)}
+				>
 					<FieldGroup>
 						<Field required>
 							<FieldLabel>{t.zones.create.name}</FieldLabel>
@@ -90,6 +98,7 @@ function ZoneCreateContent() {
 							<FieldLabel>{t.zones.create.summary}</FieldLabel>
 							<Textarea maxLength={2000} name="summary" />
 						</Field>
+						<DraftContentLanguageField controller={language.controller} />
 						<Field invalid={categoriesInvalid} required>
 							<FieldLabel>{t.zones.create.categories}</FieldLabel>
 							<ChoiceSelect

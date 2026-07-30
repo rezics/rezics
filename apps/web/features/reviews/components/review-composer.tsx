@@ -1,14 +1,27 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
 import { usePostApiReviews } from "@rezics/openapi-tanstack-query";
 import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 
-import { Button, EntityPicker, Field, FieldGroup, FieldLabel, Input, Textarea } from "@rezics/ui";
+import {
+	Button,
+	EntityPicker,
+	Field,
+	FieldDescription,
+	FieldGroup,
+	FieldLabel,
+	Input,
+	Textarea,
+	UnitMultiPicker,
+} from "@rezics/ui";
+import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
+import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/use-form-draft-content-language";
+import { portableTextDraftContentLanguageSample } from "@/features/content-languages/model/draft-content-language-sample";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { optionalPostLocalizationText } from "@/features/posts/model/post-localization-input";
+import { MaximumPostPublishRealmCount } from "@/features/posts/model/post-publication";
 import { RealmRulesAcknowledgementPrompt } from "@/features/realms/components/realm-rules-acknowledgement-prompt";
 import { useRealmRulesAcknowledgement } from "@/features/realms/hooks/use-realm-rules-acknowledgement";
 import { useTranslation } from "@/i18n/client";
@@ -34,16 +47,21 @@ export function ReviewComposer({
 }) {
 	const create = usePostApiReviews();
 	const queryClient = useQueryClient();
-	const { locale, t } = useTranslation(["engagement", "errors", "posts", "ui"]);
+	const { t } = useTranslation(["engagement", "errors", "posts", "ui"]);
 	const [target, setTarget] = useState<ReviewComposerTarget>();
-	const [realm, setRealm] = useState<ReviewComposerTarget>();
+	const [publishRealmIds, setPublishRealmIds] = useState<readonly string[]>([]);
+	const [selectedScoreRealm, setSelectedScoreRealm] = useState<ReviewComposerTarget>();
 	const [score, setScore] = useState<number>();
 	const [body, setBody] = useState<PortableTextValue>([]);
 	const [invalid, setInvalid] = useState(false);
 	const defaultScoreRealm = useDefaultScoreRealm();
 	const selectedTarget = fixedTarget ?? target;
-	const scoreRealm = realm ?? defaultScoreRealm.realm;
-	const rulesAcknowledgement = useRealmRulesAcknowledgement(realm?.id);
+	const scoreRealm = selectedScoreRealm ?? defaultScoreRealm.realm;
+	const language = useFormDraftContentLanguage(
+		["title", "summary"],
+		portableTextDraftContentLanguageSample(body),
+	);
+	const rulesAcknowledgement = useRealmRulesAcknowledgement(publishRealmIds);
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -56,18 +74,19 @@ export function ReviewComposer({
 		const title = optionalPostLocalizationText(form, "title");
 		const summary = optionalPostLocalizationText(form, "summary");
 		setInvalid(false);
-		const selectedRealm = realm;
+		const contentLanguage = await language.resolveLanguage(formElement);
+		const selectedPublishRealmIds = [...publishRealmIds];
 		try {
 			await rulesAcknowledgement.run(async () => {
 				const result = await create.mutateAsync({
 					body: {
 						targetId: selectedTarget.id,
 						...(progressEntryId ? { progressEntryId } : {}),
-						...(selectedRealm ? { realmId: selectedRealm.id } : {}),
+						publishRealmIds: selectedPublishRealmIds,
 						...(score !== undefined && scoreRealm
 							? { score: { realmId: scoreRealm.id, value: score } }
 							: {}),
-						language: toContentLanguage(locale.target),
+						language: contentLanguage,
 						...(title ? { title } : {}),
 						...(summary ? { summary } : {}),
 						body: writePortableText(body),
@@ -83,7 +102,9 @@ export function ReviewComposer({
 				formElement.reset();
 				setBody([]);
 				setScore(undefined);
-				setRealm(undefined);
+				setPublishRealmIds([]);
+				setSelectedScoreRealm(undefined);
+				language.reset();
 				if (!fixedTarget) setTarget(undefined);
 			});
 		} catch {
@@ -93,7 +114,11 @@ export function ReviewComposer({
 
 	return (
 		<>
-			<form className="grid gap-6" onSubmit={(event) => void submit(event)}>
+			<form
+				className="grid gap-6"
+				onInput={language.onInput}
+				onSubmit={(event) => void submit(event)}
+			>
 				<FieldGroup>
 					{progressEntryId ? (
 						<p className="rounded-lg bg-primary/8 px-4 py-3 text-sm">
@@ -107,11 +132,27 @@ export function ReviewComposer({
 						</Field>
 					)}
 					<Field>
-						<FieldLabel>{t.engagement.reviewRealm}</FieldLabel>
-						<EntityPicker index="realms" onChange={setRealm} value={realm} />
-						<p className="text-sm text-muted-foreground">
-							{t.engagement.reviewScoreRealmHint}
-						</p>
+						<FieldLabel>{t.posts.publishRealms}</FieldLabel>
+						<UnitMultiPicker
+							ariaLabel={t.posts.publishRealms}
+							index="realms"
+							maxValues={MaximumPostPublishRealmCount}
+							onValuesChange={setPublishRealmIds}
+							removeLabel={t.posts.removePublishRealm}
+							values={publishRealmIds}
+						/>
+						<FieldDescription>
+							{t.posts.publishRealmsHint} {t.posts.publishRealmsLimit}
+						</FieldDescription>
+					</Field>
+					<Field>
+						<FieldLabel>{t.engagement.scoreRealm}</FieldLabel>
+						<EntityPicker
+							index="realms"
+							onChange={setSelectedScoreRealm}
+							value={selectedScoreRealm}
+						/>
+						<FieldDescription>{t.engagement.reviewScoreRealmHint}</FieldDescription>
 					</Field>
 					<Field>
 						<FieldLabel>{t.posts.titleOptional}</FieldLabel>
@@ -128,6 +169,7 @@ export function ReviewComposer({
 						required
 						value={body}
 					/>
+					<DraftContentLanguageField controller={language.controller} />
 				</FieldGroup>
 				{invalid ? (
 					<p className="text-sm text-destructive" role="alert">

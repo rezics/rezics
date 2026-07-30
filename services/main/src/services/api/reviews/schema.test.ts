@@ -18,6 +18,7 @@ const review = {
 	targetId,
 	language: "en",
 	body: createPortableTextDocument([], "0123456789ab"),
+	publishRealmIds: [],
 };
 
 describe("review creation schema", () => {
@@ -41,7 +42,7 @@ describe("review creation schema", () => {
 		expect(
 			Check(CreateReviewBody, {
 				...review,
-				realmId,
+				publishRealmIds: [realmId],
 				score: { realmId: realmId, value: 8 },
 			}),
 		).toBe(true);

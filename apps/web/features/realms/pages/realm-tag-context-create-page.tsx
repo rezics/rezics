@@ -1,6 +1,5 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
 import {
 	useGetApiRealmsByRealmId,
 	usePostApiRealmsByRealmIdTagContexts,
@@ -28,6 +27,9 @@ import { useState, type FormEvent } from "react";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { RequireSession } from "@/features/auth/require-session";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
+import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
+import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/use-form-draft-content-language";
+import { portableTextDraftContentLanguageSample } from "@/features/content-languages/model/draft-content-language-sample";
 import { PostEditorFields } from "@/features/posts/components/post-editor-fields";
 import { invalidatePostQueries } from "@/features/posts/query";
 import { postHref } from "@/features/posts/url";
@@ -42,7 +44,7 @@ type PickedTag = { readonly id: string; readonly label: string };
 type WikiAccessMode = "public_entry" | "restricted";
 
 export function RealmTagContextCreatePage({ realmId }: { readonly realmId: string }) {
-	const { locale, t } = useTranslation(["posts", "realms", "ui"]);
+	const { t } = useTranslation(["posts", "realms", "ui"]);
 	const localizationLanguages = useLocalizationLanguages();
 	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
@@ -54,7 +56,11 @@ export function RealmTagContextCreatePage({ realmId }: { readonly realmId: strin
 	const [tag, setTag] = useState<PickedTag>();
 	const [accessMode, setAccessMode] = useState<WikiAccessMode>("restricted");
 	const [body, setBody] = useState<PortableTextValue>([]);
-	const rulesAcknowledgement = useRealmRulesAcknowledgement(realmId);
+	const language = useFormDraftContentLanguage(
+		["title", "summary"],
+		portableTextDraftContentLanguageSample(body),
+	);
+	const rulesAcknowledgement = useRealmRulesAcknowledgement([realmId]);
 	const realmLocalization = realm.data
 		? selectLocalization(realm.data.localizations, realm.data.language)
 		: undefined;
@@ -63,15 +69,17 @@ export function RealmTagContextCreatePage({ realmId }: { readonly realmId: strin
 		realmLocalization?.language,
 	);
 
-	function submit(event: FormEvent<HTMLFormElement>) {
+	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		if (!tag || !body.length) return;
-		const form = new FormData(event.currentTarget);
+		const formElement = event.currentTarget;
+		const form = new FormData(formElement);
 		const title = String(form.get("title") ?? "").trim();
 		const summary = String(form.get("summary") ?? "").trim();
 		if (!title || !summary) return;
-		void rulesAcknowledgement
-			.run(async () => {
+		const contentLanguage = await language.resolveLanguage(formElement);
+		try {
+			await rulesAcknowledgement.run(async () => {
 				const context = await create.mutateAsync({
 					path: { realmId },
 					body: {
@@ -80,7 +88,7 @@ export function RealmTagContextCreatePage({ realmId }: { readonly realmId: strin
 						title,
 						summary,
 						body: writePortableText(body),
-						language: toContentLanguage(locale.target),
+						language: contentLanguage,
 					},
 				});
 				await invalidatePostQueries(queryClient, context.contextPostId);
@@ -90,8 +98,10 @@ export function RealmTagContextCreatePage({ realmId }: { readonly realmId: strin
 						realmId,
 					}),
 				);
-			})
-			.catch(() => undefined);
+			});
+		} catch {
+			// The typed mutation state supplies the visible API error.
+		}
 	}
 
 	return (
@@ -106,7 +116,7 @@ export function RealmTagContextCreatePage({ realmId }: { readonly realmId: strin
 					<p className="text-muted-foreground text-sm">
 						{t.realms.tagContext.createDescription}
 					</p>
-					<form onSubmit={submit}>
+					<form onInput={language.onInput} onSubmit={(event) => void submit(event)}>
 						<FieldGroup>
 							<Field>
 								<FieldLabel>{t.posts.realm}</FieldLabel>
@@ -157,6 +167,7 @@ export function RealmTagContextCreatePage({ realmId }: { readonly realmId: strin
 								<FieldLabel>{t.ui.summary}</FieldLabel>
 								<Textarea maxLength={2_000} name="summary" required />
 							</Field>
+							<DraftContentLanguageField controller={language.controller} />
 							<PostEditorFields
 								body={body}
 								error={create.error}

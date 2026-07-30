@@ -64,7 +64,7 @@ export async function createGovernanceNotePost(
 	await ensureSubjectPostTargetingAllowed(tx, {
 		sourcePostId: created.id,
 		subjectUnitId: input.subjectUnitId,
-		...(input.realmId ? { realmId: input.realmId } : {}),
+		...(input.realmId ? { realmIds: [input.realmId] } : {}),
 	});
 	await tx.insert(post).values({
 		id: created.id,

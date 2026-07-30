@@ -33,6 +33,7 @@ import {
 	findPostTargetingLock,
 	getPostTargetingLockedUnitIds,
 } from "../../posts/targeting";
+import { publishPostToRealms } from "../../posts/publication";
 import { getPostSubjectPresentation } from "../../posts/presentation";
 import { selectPostScores } from "../../posts/scores";
 import { selectPostProgressEntry } from "../../posts/progress";
@@ -326,7 +327,7 @@ export default new Elysia()
 				"",
 				async ({ profile, authorization, body }) => {
 					await authorization.realm.ensureUnitCreation(
-						body.realmId,
+						body.publishRealmIds,
 						"realm.units.create",
 					);
 					if (body.subjectId) {
@@ -348,7 +349,7 @@ export default new Elysia()
 						await ensureSubjectPostTargetingAllowed(tx, {
 							sourcePostId: created.id,
 							subjectUnitId: body.subjectId,
-							...(body.realmId ? { realmId: body.realmId } : {}),
+							realmIds: body.publishRealmIds,
 						});
 						await tx.insert(post).values({
 							id: created.id,
@@ -377,15 +378,10 @@ export default new Elysia()
 							sourceUnitId: created.id,
 							profileId: profile.unitId,
 						});
-						if (body.realmId) {
-							await ensurePostMountTargetingAllowed(tx, {
-								postId: created.id,
-								realmId: body.realmId,
-							});
-							await tx
-								.insert(realmUnit)
-								.values({ realmId: body.realmId, unitId: created.id });
-						}
+						await publishPostToRealms(tx, {
+							postId: created.id,
+							realmIds: body.publishRealmIds,
+						});
 						await recordUnitRevision(tx, {
 							unitId: created.id,
 							actorProfileId: profile.unitId,
@@ -420,7 +416,7 @@ export default new Elysia()
 				"/wiki",
 				async ({ profile, authorization, body }) => {
 					await authorization.realm.ensureUnitCreation(
-						body.realmId,
+						body.publishRealmIds,
 						"realm.units.create",
 					);
 					if (body.subjectId) await authorization.unit.ensureCanRead(body.subjectId);
@@ -432,7 +428,7 @@ export default new Elysia()
 							title: body.title,
 							body: body.body,
 							language: body.language,
-							...(body.realmId ? { realmId: body.realmId } : {}),
+							publishRealmIds: body.publishRealmIds,
 							...(body.subjectId ? { subjectId: body.subjectId } : {}),
 						});
 						return created.id;
@@ -846,7 +842,7 @@ export default new Elysia()
 					);
 					await ensureRootPost(params.postId, body.realmId);
 					await authorization.realm.ensureUnitCreation(
-						body.realmId,
+						body.realmId ? [body.realmId] : [],
 						"realm.post.replies.create",
 					);
 					const createdReply = await database.transaction(async (tx) => {
@@ -929,7 +925,7 @@ export default new Elysia()
 						if (body.realmId) {
 							await ensurePostMountTargetingAllowed(tx, {
 								postId: created.id,
-								realmId: body.realmId,
+								realmIds: [body.realmId],
 							});
 							await tx.insert(realmUnit).values({
 								realmId: body.realmId,

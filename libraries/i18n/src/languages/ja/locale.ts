@@ -1,3 +1,5 @@
+import { insert } from "native-i18n";
+
 export default {
 	label: "言語",
 	uiLocales: {
@@ -18,6 +20,19 @@ export default {
 		de: "ドイツ語",
 		fr: "フランス語",
 		es: "スペイン語",
+	},
+	draftContentLanguage: {
+		label: "コンテンツの言語",
+		useAutomatic: "自動検出に戻す",
+		automaticOption: insert("自動検出 · {{language}}", { language: String }),
+		manual: "手動で選択されています。自動検出は停止中です。",
+		idle: "検出に十分な内容が入力されるまでは、第一言語の設定を使用します。",
+		detecting: "コンテンツの言語を検出しています…",
+		detected: insert("{{language}}として自動検出されました。", { language: String }),
+		insufficient: "確実に検出できる内容量ではないため、第一言語の設定を使用します。",
+		ambiguous: "言語を確実に判定できないため、第一言語の設定を使用します。",
+		unsupported: "検出された言語は未対応のため、第一言語の設定を使用します。",
+		failed: "言語検出を一時的に利用できないため、第一言語の設定を使用します。",
 	},
 	chineseContentDisplay: {
 		label: "中国語コンテンツ表示",

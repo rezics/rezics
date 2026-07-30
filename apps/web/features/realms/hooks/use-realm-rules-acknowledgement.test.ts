@@ -37,6 +37,19 @@ vi.mock("@/i18n/use-localization-languages", () => ({
 import { useRealmRulesAcknowledgement } from "./use-realm-rules-acknowledgement";
 
 const apiError = (code: string) => ({ data: { error: { code } } });
+const rulesError = (realmIds: readonly string[]) => ({
+	data: {
+		error: {
+			code: "RealmRulesAcceptanceRequired",
+			details: {
+				realms: realmIds.map((realmId) => ({
+					realmId,
+					revisionId: `revision-${realmId}`,
+				})),
+			},
+		},
+	},
+});
 
 beforeEach(() => {
 	generated.acknowledge.mutateAsync.mockReset();
@@ -51,7 +64,7 @@ describe("useRealmRulesAcknowledgement", () => {
 			.mockRejectedValueOnce(apiError("RealmRulesAcceptanceRequired"))
 			.mockResolvedValue(undefined);
 		const { result } = renderHook(() =>
-			useRealmRulesAcknowledgement("019f995d-7595-7c99-9183-250790bbfe30"),
+			useRealmRulesAcknowledgement(["019f995d-7595-7c99-9183-250790bbfe30"]),
 		);
 
 		await act(async () => result.current.run(operation));
@@ -78,7 +91,7 @@ describe("useRealmRulesAcknowledgement", () => {
 			apiError("RealmRuleRevisionChanged"),
 		);
 		const { result } = renderHook(() =>
-			useRealmRulesAcknowledgement("019f995d-7595-7c99-9183-250790bbfe30"),
+			useRealmRulesAcknowledgement(["019f995d-7595-7c99-9183-250790bbfe30"]),
 		);
 
 		await act(async () => result.current.run(operation));
@@ -93,10 +106,43 @@ describe("useRealmRulesAcknowledgement", () => {
 		const error = apiError("RealmCapabilityRequired");
 		const operation = vi.fn<() => Promise<void>>().mockRejectedValue(error);
 		const { result } = renderHook(() =>
-			useRealmRulesAcknowledgement("019f995d-7595-7c99-9183-250790bbfe30"),
+			useRealmRulesAcknowledgement(["019f995d-7595-7c99-9183-250790bbfe30"]),
 		);
 
 		await expect(result.current.run(operation)).rejects.toBe(error);
+		expect(result.current.open).toBe(false);
+	});
+
+	it("acknowledges every Realm named by an aggregate creation failure before retrying", async () => {
+		const operation = vi
+			.fn<() => Promise<void>>()
+			.mockRejectedValueOnce(rulesError(["realm-a", "realm-b"]))
+			.mockResolvedValue(undefined);
+		const { result } = renderHook(() =>
+			useRealmRulesAcknowledgement(["realm-a", "realm-b", "realm-c"]),
+		);
+
+		await act(async () => result.current.run(operation));
+		await act(async () => result.current.confirm());
+		expect(result.current.open).toBe(true);
+		expect(operation).toHaveBeenCalledOnce();
+		expect(generated.acknowledge.mutateAsync).toHaveBeenNthCalledWith(1, {
+			path: {
+				realmId: "realm-a",
+				revisionId: "019f995d-7595-7c99-9183-250790bbfe2f",
+			},
+			body: { language: "zh" },
+		});
+
+		await act(async () => result.current.confirm());
+		expect(generated.acknowledge.mutateAsync).toHaveBeenNthCalledWith(2, {
+			path: {
+				realmId: "realm-b",
+				revisionId: "019f995d-7595-7c99-9183-250790bbfe2f",
+			},
+			body: { language: "zh" },
+		});
+		expect(operation).toHaveBeenCalledTimes(2);
 		expect(result.current.open).toBe(false);
 	});
 });

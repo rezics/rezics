@@ -1,103 +1,99 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
-import { useGetApiRealmsByRealmId, usePostApiPostsWiki } from "@rezics/openapi-tanstack-query";
+import { usePostApiPostsWiki } from "@rezics/openapi-tanstack-query";
 import type { PortableTextValue } from "@rezics/portable-text";
 import {
 	Button,
 	EntityPicker,
 	Field,
+	FieldDescription,
 	FieldGroup,
 	FieldLabel,
 	Input,
 	NativeSelect,
 	NativeSelectOption,
 	PageHeading,
+	UnitMultiPicker,
 } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
+import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
+import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/use-form-draft-content-language";
+import { portableTextDraftContentLanguageSample } from "@/features/content-languages/model/draft-content-language-sample";
 import { RealmRulesAcknowledgementPrompt } from "@/features/realms/components/realm-rules-acknowledgement-prompt";
 import { useRealmRulesAcknowledgement } from "@/features/realms/hooks/use-realm-rules-acknowledgement";
 import { useTranslation } from "@/i18n/client";
-import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { writePortableText } from "@/lib/block";
-import { selectLocalization } from "@/lib/localization";
 import { PostEditorFields } from "../components/post-editor-fields";
 import { invalidatePostQueries } from "../query";
 import { postHref } from "../url";
+import { MaximumPostPublishRealmCount } from "../model/post-publication";
 
 type PickedEntity = { id: string; label: string };
 type WikiAccessMode = "public_entry" | "restricted";
 
 export function WikiCreatePage({ defaultRealmId }: { defaultRealmId?: string }) {
-	const { t, locale } = useTranslation(["posts", "ui"]);
+	const { t } = useTranslation(["posts", "ui"]);
 	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const create = usePostApiPostsWiki();
-	const localizationLanguages = useLocalizationLanguages();
-	const defaultRealm = useGetApiRealmsByRealmId(
-		{
-			path: { realmId: defaultRealmId ?? "" },
-			query: { localizationLanguages },
-		},
-		{ query: { enabled: Boolean(defaultRealmId) } },
-	);
 	const [accessMode, setAccessMode] = useState<WikiAccessMode>("restricted");
-	const [realm, setRealm] = useState<PickedEntity>();
+	const [publishRealmIds, setPublishRealmIds] = useState<readonly string[]>(() =>
+		defaultRealmId ? [defaultRealmId] : [],
+	);
 	const [subject, setSubject] = useState<PickedEntity>();
 	const [body, setBody] = useState<PortableTextValue>([]);
-	const rulesAcknowledgement = useRealmRulesAcknowledgement(realm?.id);
+	const language = useFormDraftContentLanguage(
+		["title"],
+		portableTextDraftContentLanguageSample(body),
+	);
+	const rulesAcknowledgement = useRealmRulesAcknowledgement(publishRealmIds);
 
-	useEffect(() => {
-		if (!defaultRealm.data || realm) return;
-		const localization = selectLocalization(
-			defaultRealm.data.localizations,
-			defaultRealm.data.language,
-			defaultRealm.data.language,
-		);
-		setRealm({
-			id: defaultRealm.data.id,
-			label: localization?.title ?? defaultRealm.data.id,
-		});
-	}, [defaultRealm.data, realm]);
-
-	function submit(event: FormEvent<HTMLFormElement>) {
+	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		const data = new FormData(event.currentTarget);
+		const formElement = event.currentTarget;
+		const data = new FormData(formElement);
 		const title = String(data.get("title") ?? "").trim();
 		if (!title || !body.length) return;
-		const selectedRealm = realm;
-		void rulesAcknowledgement
-			.run(async () => {
+		const contentLanguage = await language.resolveLanguage(formElement);
+		const selectedPublishRealmIds = [...publishRealmIds];
+		try {
+			await rulesAcknowledgement.run(async () => {
 				const wiki = await create.mutateAsync({
 					body: {
 						accessMode,
 						title,
-						language: toContentLanguage(locale.target),
+						language: contentLanguage,
 						body: writePortableText(body),
-						...(selectedRealm ? { realmId: selectedRealm.id } : {}),
+						publishRealmIds: selectedPublishRealmIds,
 						...(subject ? { subjectId: subject.id } : {}),
 					},
 				});
 				await invalidatePostQueries(queryClient, wiki.id);
+				const contextRealmId =
+					defaultRealmId && selectedPublishRealmIds.includes(defaultRealmId)
+						? defaultRealmId
+						: selectedPublishRealmIds[0];
 				router.push(
 					postHref(
 						wiki.id,
-						selectedRealm ? { kind: "realm", realmId: selectedRealm.id } : undefined,
+						contextRealmId ? { kind: "realm", realmId: contextRealmId } : undefined,
 					),
 				);
-			})
-			.catch(() => undefined);
+			});
+		} catch {
+			// The typed mutation state supplies the visible API error.
+		}
 	}
 
 	return (
 		<RequireSession>
 			<main className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-4 py-10 sm:px-6">
 				<PageHeading title={t.posts.wikiCreateTitle} />
-				<form onSubmit={submit}>
+				<form onInput={language.onInput} onSubmit={(event) => void submit(event)}>
 					<FieldGroup>
 						<Field required>
 							<FieldLabel>{t.posts.wikiAccessMode}</FieldLabel>
@@ -129,18 +125,18 @@ export function WikiCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 							<Input maxLength={500} name="title" required />
 						</Field>
 						<Field>
-							<FieldLabel>{t.posts.realm}</FieldLabel>
-							<EntityPicker index="realms" onChange={setRealm} value={realm} />
-							{realm ? (
-								<Button
-									onClick={() => setRealm(undefined)}
-									size="xs"
-									type="button"
-									variant="quiet"
-								>
-									{t.posts.clearRealm}
-								</Button>
-							) : null}
+							<FieldLabel>{t.posts.publishRealms}</FieldLabel>
+							<UnitMultiPicker
+								ariaLabel={t.posts.publishRealms}
+								index="realms"
+								maxValues={MaximumPostPublishRealmCount}
+								onValuesChange={setPublishRealmIds}
+								removeLabel={t.posts.removePublishRealm}
+								values={publishRealmIds}
+							/>
+							<FieldDescription>
+								{t.posts.publishRealmsHint} {t.posts.publishRealmsLimit}
+							</FieldDescription>
 						</Field>
 						<Field>
 							<FieldLabel>{t.posts.subject}</FieldLabel>
@@ -156,6 +152,7 @@ export function WikiCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 								</Button>
 							) : null}
 						</Field>
+						<DraftContentLanguageField controller={language.controller} />
 						<PostEditorFields
 							body={body}
 							error={create.error}

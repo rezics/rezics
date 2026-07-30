@@ -8,9 +8,10 @@ import {
 } from "../authorization/unit/ownership";
 import { OfficialProfileIds } from "../bootstrap/manifest";
 import type { DatabaseTransaction } from "../database";
-import { post, realmUnit, unitLocalization } from "../database/schema";
+import { post, unitLocalization } from "../database/schema";
 import { applyNewPostTagMentionVotes } from "./tag-mentions";
-import { ensurePostMountTargetingAllowed, ensureSubjectPostTargetingAllowed } from "./targeting";
+import { publishPostToRealms } from "./publication";
+import { ensureSubjectPostTargetingAllowed } from "./targeting";
 import { createProfilePublisherAttribution } from "../units/attribution";
 import { insertUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
@@ -23,7 +24,7 @@ export type CreateWikiPostInput = {
 	readonly summary?: string;
 	readonly body: PortableTextDocument;
 	readonly language: ContentLanguage;
-	readonly realmId?: string;
+	readonly publishRealmIds: readonly string[];
 	readonly subjectId?: string;
 };
 
@@ -55,7 +56,7 @@ export async function createWikiPost(
 	await ensureSubjectPostTargetingAllowed(tx, {
 		sourcePostId: created.id,
 		subjectUnitId: input.subjectId,
-		...(input.realmId ? { realmId: input.realmId } : {}),
+		realmIds: input.publishRealmIds,
 	});
 	await tx.insert(post).values({
 		id: created.id,
@@ -82,13 +83,10 @@ export async function createWikiPost(
 		profileId:
 			input.accessMode === "public_entry" ? OfficialProfileIds.community : input.profileId,
 	});
-	if (input.realmId) {
-		await ensurePostMountTargetingAllowed(tx, {
-			postId: created.id,
-			realmId: input.realmId,
-		});
-		await tx.insert(realmUnit).values({ realmId: input.realmId, unitId: created.id });
-	}
+	await publishPostToRealms(tx, {
+		postId: created.id,
+		realmIds: input.publishRealmIds,
+	});
 	const revision = await recordUnitRevision(tx, {
 		unitId: created.id,
 		actorProfileId: input.profileId,

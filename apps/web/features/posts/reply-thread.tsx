@@ -1,7 +1,5 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
-
 import {
 	getApiPostsByPostIdReplies,
 	getApiPostsByPostIdRepliesQueryKey,
@@ -31,6 +29,9 @@ import {
 	ThreadBranch,
 } from "@rezics/ui";
 import { SignInButton } from "@/features/auth/auth-portal";
+import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
+import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/use-form-draft-content-language";
+import { portableTextDraftContentLanguageSample } from "@/features/content-languages/model/draft-content-language-sample";
 import { ConnectedFeedEngagementBar } from "@/features/content-feed/components/feed-card-actions";
 import type { FeedActionPolicy } from "@/features/content-feed/model/feed-action-policy";
 import {
@@ -541,13 +542,14 @@ function ReplyPostComposer({
 	onCancel?: () => void;
 	onReplyCreated: (reply: ReplyPost) => void;
 }) {
-	const { t, locale } = useTranslation(["actions", "posts", "ui"]);
+	const { t } = useTranslation(["actions", "posts", "ui"]);
 	const queryClient = useQueryClient();
 	const create = usePostApiPostsByPostIdReplies();
 	const [expanded, setExpanded] = useState(initiallyExpanded);
 	const [body, setBody] = useState<PortableTextValue>([]);
 	const [editorKey, setEditorKey] = useState(0);
-	const rulesAcknowledgement = useRealmRulesAcknowledgement(realmId);
+	const language = useFormDraftContentLanguage([], portableTextDraftContentLanguageSample(body));
+	const rulesAcknowledgement = useRealmRulesAcknowledgement(realmId ? [realmId] : []);
 
 	useEffect(() => {
 		if (initiallyExpanded || expanded) return;
@@ -562,33 +564,37 @@ function ReplyPostComposer({
 		return () => clearTimeout(timeoutId);
 	}, [expanded, initiallyExpanded]);
 
-	function submit(event: FormEvent<HTMLFormElement>) {
+	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		void rulesAcknowledgement
-			.run(async () => {
+		const contentLanguage = await language.resolveLanguage(event.currentTarget);
+		try {
+			await rulesAcknowledgement.run(async () => {
 				const createdReply = await create.mutateAsync({
 					path: { postId: rootPostId },
 					body: {
 						...(parentPostId ? { parentPostId } : {}),
 						...(realmId ? { realmId } : {}),
-						language: toContentLanguage(locale.target),
+						language: contentLanguage,
 						body: writePortableText(body),
 					},
 				});
 				onReplyCreated(createdReply);
 				await invalidatePostQueries(queryClient, rootPostId);
 				setBody([]);
+				language.reset();
 				setEditorKey((value) => value + 1);
 				setExpanded(false);
 				onComplete?.();
-			})
-			.catch(() => undefined);
+			});
+		} catch {
+			// The typed mutation state supplies the visible API error.
+		}
 	}
 
 	return (
 		<>
 			{expanded ? (
-				<form className="mt-2" onSubmit={submit}>
+				<form className="mt-2" onSubmit={(event) => void submit(event)}>
 					<FieldGroup>
 						<PortableTextEditor
 							ariaLabel={t.posts.replyBody}
@@ -596,6 +602,7 @@ function ReplyPostComposer({
 							onChange={setBody}
 							value={body}
 						/>
+						<DraftContentLanguageField controller={language.controller} />
 						<RequestFailure error={create.error} />
 						<div className="flex flex-wrap gap-2">
 							<Button

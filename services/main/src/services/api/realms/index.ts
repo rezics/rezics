@@ -1872,7 +1872,7 @@ export default new Elysia({ prefix: "/realms" })
 		async ({ params, body, profile, authorization }) => {
 			await Promise.all([
 				authorization.realm.ensureCapability(params.realmId, "realm.tags.manage"),
-				authorization.realm.ensureUnitCreation(params.realmId, "realm.units.create"),
+				authorization.realm.ensureUnitCreation([params.realmId], "realm.units.create"),
 				authorization.unit.ensureCanRead(body.tagId),
 			]);
 			const contextPostId = await database.transaction(async (tx) => {
@@ -1904,7 +1904,7 @@ export default new Elysia({ prefix: "/realms" })
 					summary: body.summary,
 					body: body.body,
 					language: body.language,
-					realmId: params.realmId,
+					publishRealmIds: [params.realmId],
 				});
 				await tx.insert(realmTagContext).values({
 					realmId: params.realmId,

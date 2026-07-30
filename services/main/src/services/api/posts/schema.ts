@@ -26,12 +26,18 @@ const OptionalPostSummary = t.Optional(t.String({ minLength: 1, maxLength: 2_000
 const NullablePostTitle = t.Nullable(t.String({ minLength: 1, maxLength: 500 }));
 const NullablePostSummary = t.Nullable(t.String({ minLength: 1, maxLength: 2_000 }));
 
+export const MaximumPostPublishRealmCount = 10;
+export const PostPublishRealmIds = t.Array(Uuid, {
+	maxItems: MaximumPostPublishRealmCount,
+	uniqueItems: true,
+});
+
 const CreatePostFields = {
 	title: OptionalPostTitle,
 	summary: OptionalPostSummary,
 	body: PortableTextDocument,
 	language: ContentLanguage,
-	realmId: t.Optional(Uuid),
+	publishRealmIds: PostPublishRealmIds,
 } as const;
 
 export const CreatePostBody = t.Union([
@@ -60,7 +66,7 @@ export const CreateWikiBody = t.Object(
 		title: t.String({ minLength: 1, maxLength: 500 }),
 		body: PortableTextDocument,
 		language: ContentLanguage,
-		realmId: t.Optional(Uuid),
+		publishRealmIds: PostPublishRealmIds,
 		subjectId: t.Optional(Uuid),
 	},
 	{ additionalProperties: false },

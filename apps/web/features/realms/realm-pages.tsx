@@ -1,7 +1,5 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
-
 import {
 	useDeleteApiRealmsByRealmIdMembership,
 	useGetApiRealms,
@@ -33,6 +31,8 @@ import { Textarea } from "@rezics/ui";
 import { BookOpenIcon, InfoIcon, LayoutListIcon, TagsIcon, UsersIcon } from "lucide-react";
 import { SignInButton } from "@/features/auth/auth-portal";
 import { RequireSession } from "@/features/auth/require-session";
+import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
+import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/use-form-draft-content-language";
 import { UnitDockRenderer, useDockManagementAccess } from "@/features/docks";
 import { FollowButton } from "@/features/following/components/follow-button";
 import {
@@ -151,24 +151,27 @@ function RealmListCard({ realm }: { readonly realm: GetApiRealmsStatus200["items
 }
 
 function RealmCreateContent() {
-	const { t, locale } = useTranslation(["actions", "media", "posts", "realms", "state", "ui"]);
+	const { t } = useTranslation(["actions", "media", "posts", "realms", "state", "ui"]);
 	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(null);
 	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(null);
+	const language = useFormDraftContentLanguage(["title", "summary"]);
 	const create = usePostApiRealms();
 
-	function submit(event: FormEvent<HTMLFormElement>) {
+	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		const data = new FormData(event.currentTarget);
+		const formElement = event.currentTarget;
+		const data = new FormData(formElement);
 		const title = String(data.get("title") ?? "").trim();
 		const summary = String(data.get("summary") ?? "").trim();
 		if (!title) return;
+		const contentLanguage = await language.resolveLanguage(formElement);
 		create.mutate(
 			{
 				body: {
 					localization: {
-						language: toContentLanguage(locale.target),
+						language: contentLanguage,
 						title,
 						avatar: avatarPresentationToInput(avatar),
 						bannerAssetId: banner?.id ?? null,
@@ -191,7 +194,7 @@ function RealmCreateContent() {
 		<RequireSession>
 			<main className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-4 py-10 sm:px-6">
 				<PageHeading title={t.realms.createTitle} />
-				<form onSubmit={submit}>
+				<form onInput={language.onInput} onSubmit={(event) => void submit(event)}>
 					<FieldGroup>
 						<Field required>
 							<FieldLabel>{t.ui.title}</FieldLabel>
@@ -201,6 +204,7 @@ function RealmCreateContent() {
 							<FieldLabel>{t.ui.summary}</FieldLabel>
 							<Textarea name="summary" maxLength={2000} />
 						</Field>
+						<DraftContentLanguageField controller={language.controller} />
 						<Field>
 							<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
 							<AvatarField onChange={setAvatar} value={avatar} />
@@ -629,7 +633,7 @@ function RealmActions({
 	const { data: session } = useHydratedSession();
 	const join = usePutApiRealmsByRealmIdMembership();
 	const leave = useDeleteApiRealmsByRealmIdMembership();
-	const rulesAcknowledgement = useRealmRulesAcknowledgement(realm.id);
+	const rulesAcknowledgement = useRealmRulesAcknowledgement([realm.id]);
 	const membership = realm.viewerMembership;
 
 	async function joinRealm() {

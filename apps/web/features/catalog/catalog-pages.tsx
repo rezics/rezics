@@ -1,5 +1,5 @@
 "use client";
-import { toContentLanguage, type ContentLanguage } from "@rezics/i18n";
+import type { ContentLanguage } from "@rezics/i18n";
 
 import {
 	getApiEntitiesQueryKey,
@@ -32,6 +32,8 @@ import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
+import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
+import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/use-form-draft-content-language";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import { ContentLanguageEditorProvider } from "@/features/content-languages/hooks/use-content-language-editor";
@@ -462,7 +464,7 @@ function CreateFrame({
 }
 
 export function EntityCreatePage() {
-	const { t, locale } = useTranslation([
+	const { t } = useTranslation([
 		"actions",
 		"catalog",
 		"errors",
@@ -477,6 +479,7 @@ export function EntityCreatePage() {
 	const [catalogMode, setCatalogMode] = useState<"owned_work" | "public_entry">("owned_work");
 	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(null);
 	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(null);
+	const language = useFormDraftContentLanguage(["title", "summary"]);
 	const create = usePostApiEntities({
 		mutation: {
 			onSuccess: async (result) => {
@@ -488,14 +491,16 @@ export function EntityCreatePage() {
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		setError(false);
-		const form = new FormData(event.currentTarget);
+		const formElement = event.currentTarget;
+		const form = new FormData(formElement);
+		const contentLanguage = await language.resolveLanguage(formElement);
 		try {
 			await create.mutateAsync({
 				body: {
 					catalogMode,
 					kind: String(form.get("kind") ?? "person"),
 					localization: {
-						language: toContentLanguage(locale.target),
+						language: contentLanguage,
 						title: String(form.get("title") ?? "").trim(),
 						avatar: avatarPresentationToInput(avatar),
 						bannerAssetId: banner?.id ?? null,
@@ -511,7 +516,7 @@ export function EntityCreatePage() {
 	}
 	return (
 		<CreateFrame title={t.catalog.newEntity}>
-			<form onSubmit={submit}>
+			<form onInput={language.onInput} onSubmit={(event) => void submit(event)}>
 				<FieldGroup>
 					<Field required>
 						<FieldLabel>{t.units.creation.modeLabel}</FieldLabel>
@@ -559,6 +564,7 @@ export function EntityCreatePage() {
 						<FieldLabel>{t.ui.summary}</FieldLabel>
 						<Textarea name="summary" maxLength={2000} />
 					</Field>
+					<DraftContentLanguageField controller={language.controller} />
 					<Field>
 						<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
 						<AvatarField onChange={setAvatar} value={avatar} />
@@ -582,17 +588,11 @@ export function EntityCreatePage() {
 }
 
 export function TagCreatePage() {
-	const { t, locale } = useTranslation([
-		"actions",
-		"catalog",
-		"errors",
-		"governance",
-		"media",
-		"ui",
-	]);
+	const { t } = useTranslation(["actions", "catalog", "errors", "governance", "media", "ui"]);
 	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const [error, setError] = useState(false);
+	const language = useFormDraftContentLanguage(["title", "summary"]);
 	const create = usePostApiTags({
 		mutation: {
 			onSuccess: async () => {
@@ -604,12 +604,14 @@ export function TagCreatePage() {
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		setError(false);
-		const form = new FormData(event.currentTarget);
+		const formElement = event.currentTarget;
+		const form = new FormData(formElement);
+		const contentLanguage = await language.resolveLanguage(formElement);
 		try {
 			await create.mutateAsync({
 				body: {
 					localization: {
-						language: toContentLanguage(locale.target),
+						language: contentLanguage,
 						title: String(form.get("title") ?? "").trim(),
 						...(String(form.get("summary") ?? "").trim()
 							? { summary: String(form.get("summary")).trim() }
@@ -623,7 +625,7 @@ export function TagCreatePage() {
 	}
 	return (
 		<CreateFrame title={t.catalog.newTag}>
-			<form onSubmit={submit}>
+			<form onInput={language.onInput} onSubmit={(event) => void submit(event)}>
 				<FieldGroup>
 					<Field required>
 						<FieldLabel>{t.ui.title}</FieldLabel>
@@ -633,6 +635,7 @@ export function TagCreatePage() {
 						<FieldLabel>{t.ui.summary}</FieldLabel>
 						<Textarea name="summary" maxLength={2000} />
 					</Field>
+					<DraftContentLanguageField controller={language.controller} />
 					{error && <p className="text-destructive text-sm">{t.ui.retryLater}</p>}
 					<Button variant="solid" type="submit" isLoading={create.isPending}>
 						{t.ui.submit}

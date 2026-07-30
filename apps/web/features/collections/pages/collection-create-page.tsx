@@ -1,6 +1,5 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
 import { usePostApiCollections } from "@rezics/openapi-tanstack-query";
 import { Button, PageHeading } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
@@ -8,6 +7,8 @@ import { useApplicationRouter } from "@/features/application-shell/hooks/use-app
 import { useState, type FormEvent } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
+import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
+import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/use-form-draft-content-language";
 import type { LocalizationImageAssetValue } from "@/features/media/components/localization-image-upload-field";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -18,19 +19,22 @@ export function CollectionCreatePage() {
 	const create = usePostApiCollections();
 	const queryClient = useQueryClient();
 	const router = useApplicationRouter();
-	const { locale, t } = useTranslation(["collections", "ui"]);
+	const { t } = useTranslation(["collections", "ui"]);
 	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(null);
+	const language = useFormDraftContentLanguage(["title", "summary"]);
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		const form = new FormData(event.currentTarget);
+		const formElement = event.currentTarget;
+		const form = new FormData(formElement);
 		const title = String(form.get("title") ?? "").trim();
 		if (!title) return;
+		const contentLanguage = await language.resolveLanguage(formElement);
 		try {
 			const result = await create.mutateAsync({
 				body: {
 					localization: {
-						language: toContentLanguage(locale.target),
+						language: contentLanguage,
 						title,
 						coverAssetId: cover?.id ?? null,
 						...(String(form.get("summary") ?? "").trim()
@@ -54,8 +58,13 @@ export function CollectionCreatePage() {
 					<PageHeading title={t.collections.newCollection} />
 					<p className="text-muted-foreground">{t.collections.createDescription}</p>
 				</div>
-				<form className="grid gap-6" onSubmit={(event) => void submit(event)}>
+				<form
+					className="grid gap-6"
+					onInput={language.onInput}
+					onSubmit={(event) => void submit(event)}
+				>
 					<CollectionLocalizationFields cover={cover} onCoverChange={setCover} />
+					<DraftContentLanguageField controller={language.controller} />
 					<RequestFailure error={create.error} fallback={t.ui.retryLater} />
 					<Button isLoading={create.isPending} type="submit" variant="solid">
 						{t.ui.create}

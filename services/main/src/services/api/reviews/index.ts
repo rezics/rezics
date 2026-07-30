@@ -15,7 +15,6 @@ import {
 	postProgressEntry,
 	postReplyStat,
 	postScore,
-	realmUnit,
 	recommendationUnitStat,
 	score,
 	scoreStat,
@@ -30,11 +29,8 @@ import { insertUnit } from "../../units/create";
 import { fractionalPositionAt } from "../../ordering/position";
 import { parseJsonCursor } from "../../pagination";
 import { InvalidPaginationCursor } from "../../pagination/errors";
-import {
-	ensurePostMountTargetingAllowed,
-	ensureSubjectPostTargetingAllowed,
-	findPostTargetingLock,
-} from "../../posts/targeting";
+import { ensureSubjectPostTargetingAllowed, findPostTargetingLock } from "../../posts/targeting";
+import { publishPostToRealms } from "../../posts/publication";
 import { getPostSubjectPresentation } from "../../posts/presentation";
 import { selectPostScores } from "../../posts/scores";
 import { selectPostProgressEntry } from "../../posts/progress";
@@ -332,7 +328,7 @@ export default new Elysia()
 				async ({ profile, authorization, body }) => {
 					await authorization.unit.ensureCanRead(body.targetId);
 					await authorization.realm.ensureUnitCreation(
-						body.realmId,
+						body.publishRealmIds,
 						"realm.units.create",
 					);
 					await authorization.realm.ensureParticipation(body.score?.realmId);
@@ -380,7 +376,7 @@ export default new Elysia()
 						await ensureSubjectPostTargetingAllowed(tx, {
 							sourcePostId: created.id,
 							subjectUnitId: body.targetId,
-							...(body.realmId ? { realmId: body.realmId } : {}),
+							realmIds: body.publishRealmIds,
 						});
 						await tx.insert(post).values({
 							id: created.id,
@@ -429,15 +425,10 @@ export default new Elysia()
 								progressEntryId: body.progressEntryId,
 								position: fractionalPositionAt(0),
 							});
-						if (body.realmId) {
-							await ensurePostMountTargetingAllowed(tx, {
-								postId: created.id,
-								realmId: body.realmId,
-							});
-							await tx
-								.insert(realmUnit)
-								.values({ realmId: body.realmId, unitId: created.id });
-						}
+						await publishPostToRealms(tx, {
+							postId: created.id,
+							realmIds: body.publishRealmIds,
+						});
 						await recordUnitRevision(tx, {
 							unitId: created.id,
 							actorProfileId: profile.unitId,

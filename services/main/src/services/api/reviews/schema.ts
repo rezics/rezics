@@ -2,6 +2,7 @@ import { type Static, t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
 
 import { ContentLanguage, LocalizationLanguageQuery, ResourceVisibility, Uuid } from "../schema";
+import { PostPublishRealmIds } from "../posts/schema";
 
 export const ReviewSortValues = ["best", "new"] as const;
 export const ReviewSortSchema = t.UnionEnum(ReviewSortValues, { default: "best" });
@@ -64,7 +65,7 @@ export function resolveReviewScoreFilter(
 export const CreateReviewBody = t.Object({
 	targetId: Uuid,
 	progressEntryId: t.Optional(Uuid),
-	realmId: t.Optional(Uuid),
+	publishRealmIds: PostPublishRealmIds,
 	score: t.Optional(
 		t.Object(
 			{

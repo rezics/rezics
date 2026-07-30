@@ -4,7 +4,13 @@ import { resources } from "@rezics/i18n/resources";
 import { ApiClientError } from "@rezics/openapi-tanstack-query";
 import { describe, expect, it } from "vitest";
 
-import { getErrorCode, getErrorText, getErrorStatus, hasErrorCode } from "./errors";
+import {
+	getErrorCode,
+	getErrorDetails,
+	getErrorText,
+	getErrorStatus,
+	hasErrorCode,
+} from "./errors";
 
 const i18n = create(resources);
 
@@ -27,8 +33,15 @@ describe("localized errors", () => {
 
 		expect(getErrorCode(error)).toBe("UnitChanged");
 		expect(getErrorStatus(error)).toBe(StatusCodes.CONFLICT);
+		expect(getErrorDetails(error)).toBeUndefined();
 		expect(getErrorText(t, error)).toBe(t.errorCodes.UnitChanged);
 		expect(hasErrorCode(error, "UnitChanged")).toBe(true);
+	});
+
+	it("keeps error details unknown until an owning feature validates them", () => {
+		const details = { realms: [{ realmId: "realm-a", revisionId: "revision-a" }] };
+		expect(getErrorDetails({ data: { error: { details } } })).toBe(details);
+		expect(getErrorDetails({ data: { error: null } })).toBeUndefined();
 	});
 
 	it("reads Better Auth failures from their direct code", async () => {

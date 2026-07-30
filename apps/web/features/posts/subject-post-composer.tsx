@@ -1,6 +1,5 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
 import { usePostApiPosts } from "@rezics/openapi-tanstack-query";
 import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
@@ -8,14 +7,18 @@ import { useEffect, useState, type ComponentProps, type FormEvent } from "react"
 
 import {
 	Button,
-	EntityPicker,
 	Field,
+	FieldDescription,
 	FieldGroup,
 	FieldLabel,
 	Input,
 	Spinner,
 	Textarea,
+	UnitMultiPicker,
 } from "@rezics/ui";
+import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
+import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/use-form-draft-content-language";
+import { portableTextDraftContentLanguageSample } from "@/features/content-languages/model/draft-content-language-sample";
 import {
 	PortableTextEditor,
 	preloadPortableTextEditor,
@@ -26,12 +29,8 @@ import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { writePortableText } from "@/lib/block";
 import { optionalPostLocalizationText } from "./model/post-localization-input";
+import { MaximumPostPublishRealmCount } from "./model/post-publication";
 import { invalidatePostQueries } from "./query";
-
-interface PickedRealm {
-	readonly id: string;
-	readonly label: string;
-}
 
 const editorPreloadIntentHandlers = {
 	onFocus: preloadPortableTextEditor,
@@ -48,14 +47,18 @@ export function SubjectPostComposer({
 	postKind: "post" | "excerpt";
 	subjectId: string;
 }) {
-	const { locale, t } = useTranslation(["errors", "posts", "ui"]);
+	const { t } = useTranslation(["errors", "posts", "ui"]);
 	const create = usePostApiPosts();
 	const queryClient = useQueryClient();
 	const [expanded, setExpanded] = useState(false);
-	const [realm, setRealm] = useState<PickedRealm>();
+	const [publishRealmIds, setPublishRealmIds] = useState<readonly string[]>([]);
 	const [body, setBody] = useState<PortableTextValue>([]);
 	const [invalid, setInvalid] = useState(false);
-	const rulesAcknowledgement = useRealmRulesAcknowledgement(realm?.id);
+	const language = useFormDraftContentLanguage(
+		["title", "summary"],
+		portableTextDraftContentLanguageSample(body),
+	);
+	const rulesAcknowledgement = useRealmRulesAcknowledgement(publishRealmIds);
 
 	useEffect(() => {
 		if (expanded) return;
@@ -79,7 +82,8 @@ export function SubjectPostComposer({
 			return;
 		}
 		setInvalid(false);
-		const selectedRealm = realm;
+		const contentLanguage = await language.resolveLanguage(formElement);
+		const selectedPublishRealmIds = [...publishRealmIds];
 		try {
 			await rulesAcknowledgement.run(async () => {
 				const result = await create.mutateAsync({
@@ -87,16 +91,17 @@ export function SubjectPostComposer({
 						...(title ? { title } : {}),
 						...(summary ? { summary } : {}),
 						postKind,
-						language: toContentLanguage(locale.target),
+						language: contentLanguage,
 						body: writePortableText(body),
 						subjectId,
-						...(selectedRealm ? { realmId: selectedRealm.id } : {}),
+						publishRealmIds: selectedPublishRealmIds,
 					},
 				});
 				await invalidatePostQueries(queryClient, result.id);
 				formElement.reset();
-				setRealm(undefined);
+				setPublishRealmIds([]);
 				setBody([]);
+				language.reset();
 				setExpanded(false);
 				await onCreated?.(result.id);
 			});
@@ -108,7 +113,11 @@ export function SubjectPostComposer({
 	return (
 		<>
 			{expanded ? (
-				<form className="grid gap-6" onSubmit={(event) => void submit(event)}>
+				<form
+					className="grid gap-6"
+					onInput={language.onInput}
+					onSubmit={(event) => void submit(event)}
+				>
 					<FieldGroup>
 						<Field>
 							<FieldLabel>{t.posts.titleOptional}</FieldLabel>
@@ -119,8 +128,18 @@ export function SubjectPostComposer({
 							<Textarea maxLength={2_000} name="summary" />
 						</Field>
 						<Field>
-							<FieldLabel>{t.posts.realm}</FieldLabel>
-							<EntityPicker index="realms" onChange={setRealm} value={realm} />
+							<FieldLabel>{t.posts.publishRealms}</FieldLabel>
+							<UnitMultiPicker
+								ariaLabel={t.posts.publishRealms}
+								index="realms"
+								maxValues={MaximumPostPublishRealmCount}
+								onValuesChange={setPublishRealmIds}
+								removeLabel={t.posts.removePublishRealm}
+								values={publishRealmIds}
+							/>
+							<FieldDescription>
+								{t.posts.publishRealmsHint} {t.posts.publishRealmsLimit}
+							</FieldDescription>
 						</Field>
 						<PortableTextEditor
 							label={t.ui.body}
@@ -128,6 +147,7 @@ export function SubjectPostComposer({
 							required
 							value={body}
 						/>
+						<DraftContentLanguageField controller={language.controller} />
 					</FieldGroup>
 					{invalid ? (
 						<p className="text-sm text-destructive" role="alert">

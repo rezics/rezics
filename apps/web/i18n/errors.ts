@@ -25,6 +25,12 @@ export function getErrorCode(error: unknown): string | undefined {
 	return typeof error.code === "string" ? error.code : undefined;
 }
 
+export function getErrorDetails(error: unknown): unknown {
+	if (!isRecord(error)) return undefined;
+	const data = error.data;
+	return isRecord(data) && isRecord(data.error) ? data.error.details : undefined;
+}
+
 export function getErrorStatus(error: unknown): number | undefined {
 	if (!isRecord(error)) return undefined;
 	const status = error.status;

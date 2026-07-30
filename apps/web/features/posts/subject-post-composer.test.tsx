@@ -37,7 +37,7 @@ vi.mock("@rezics/openapi-tanstack-query", () => ({
 
 vi.mock("@rezics/ui", async (importOriginal) => ({
 	...(await importOriginal<typeof import("@rezics/ui")>()),
-	EntityPicker: () => <div data-testid="realm-picker" />,
+	UnitMultiPicker: () => <div data-testid="realm-picker" />,
 }));
 
 vi.mock("@tanstack/react-query", async (importOriginal) => ({
@@ -73,6 +73,19 @@ vi.mock("@/features/realms/hooks/use-realm-rules-acknowledgement", () => ({
 	}),
 }));
 
+vi.mock("@/features/content-languages/components/draft-content-language-field", () => ({
+	DraftContentLanguageField: () => null,
+}));
+
+vi.mock("@/features/content-languages/hooks/use-form-draft-content-language", () => ({
+	useFormDraftContentLanguage: () => ({
+		controller: {},
+		onInput: vi.fn(),
+		reset: vi.fn(),
+		resolveLanguage: async () => "en",
+	}),
+}));
+
 vi.mock("@/i18n/client", () => ({
 	useTranslation: () => ({
 		locale: { target: "en" },
@@ -83,7 +96,10 @@ vi.mock("@/i18n/client", () => ({
 				openDiscussionComposer: "Start a discussion",
 				openExcerptComposer: "Add an excerpt",
 				publish: "Publish",
-				realm: "Realm",
+				publishRealms: "Publish Realms",
+				publishRealmsHint: "Realm hint",
+				publishRealmsLimit: "Realm limit",
+				removePublishRealm: "Remove Realm",
 				summaryOptional: "Summary (optional)",
 				titleOptional: "Title (optional)",
 			},
@@ -132,6 +148,7 @@ describe("SubjectPostComposer", () => {
 			expect(mutateAsync).toHaveBeenCalledWith({
 				body: expect.objectContaining({
 					postKind: "excerpt",
+					publishRealmIds: [],
 					subjectId: "019b76da-a800-7300-8000-000000000002",
 				}),
 			}),

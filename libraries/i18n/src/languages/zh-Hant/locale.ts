@@ -1,3 +1,5 @@
+import { insert } from "native-i18n";
+
 export default {
 	label: "語言",
 	uiLocales: {
@@ -18,6 +20,19 @@ export default {
 		de: "德文",
 		fr: "法文",
 		es: "西班牙文",
+	},
+	draftContentLanguage: {
+		label: "內容語言",
+		useAutomatic: "改用自動偵測",
+		automaticOption: insert("自動偵測 · {{language}}", { language: String }),
+		manual: "已手動選擇；自動偵測已暫停。",
+		idle: "在內容足以辨識前，會使用你的第一語言偏好。",
+		detecting: "正在偵測內容語言⋯⋯",
+		detected: insert("已自動偵測為{{language}}。", { language: String }),
+		insufficient: "內容尚不足以可靠辨識，會使用你的第一語言偏好。",
+		ambiguous: "無法可靠判斷內容語言，會使用你的第一語言偏好。",
+		unsupported: "偵測到目前不支援的語言，會使用你的第一語言偏好。",
+		failed: "語言偵測暫時無法使用，會使用你的第一語言偏好。",
 	},
 	chineseContentDisplay: {
 		label: "中文內容顯示",

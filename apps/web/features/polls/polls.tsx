@@ -1,7 +1,5 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
-
 import {
 	getApiPollsByPollIdQueryKey,
 	postApiSearchByIndex,
@@ -26,6 +24,9 @@ import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { RadioGroup, RadioGroupItem } from "@rezics/ui";
 import { SignInButton } from "@/features/auth/auth-portal";
 import { RequireSession } from "@/features/auth/require-session";
+import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
+import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/use-form-draft-content-language";
+import { joinDraftContentLanguageSample } from "@/features/content-languages/model/draft-content-language-sample";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -85,15 +86,20 @@ export function PollCreate() {
 	const create = usePostApiPolls();
 	const queryClient = useQueryClient();
 	const router = useApplicationRouter();
-	const { locale, t } = useTranslation(["actions", "engagement", "errors", "ui"]);
+	const { t } = useTranslation(["actions", "engagement", "errors", "ui"]);
 	const [options, setOptions] = useState([
 		{ key: crypto.randomUUID(), label: "" },
 		{ key: crypto.randomUUID(), label: "" },
 	]);
 	const [invalid, setInvalid] = useState(false);
+	const language = useFormDraftContentLanguage(
+		["question"],
+		joinDraftContentLanguageSample(options.map((option) => option.label)),
+	);
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		const form = new FormData(event.currentTarget);
+		const formElement = event.currentTarget;
+		const form = new FormData(formElement);
 		const question = String(form.get("question") ?? "").trim();
 		const labels = options.map((option) => option.label.trim()).filter(Boolean);
 		const uniqueLabels = new Set(labels.map((option) => option.toLocaleLowerCase()));
@@ -110,11 +116,12 @@ export function PollCreate() {
 		const voteMode = form.get("voteMode") === "multiple" ? "multiple" : "single";
 		const resultsVisibility =
 			form.get("resultsVisibility") === "after_close" ? "after_close" : "live";
+		const contentLanguage = await language.resolveLanguage(formElement);
 		try {
 			const result = await create.mutateAsync({
 				body: {
 					question,
-					language: toContentLanguage(locale.target),
+					language: contentLanguage,
 					options: labels.map((label) => ({ sourceKind: "literal" as const, label })),
 					voteMode,
 					anonymous: form.get("anonymous") === "on",
@@ -134,12 +141,17 @@ export function PollCreate() {
 		<RequireSession>
 			<main className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-4 py-10 sm:px-6">
 				<PageHeading title={t.engagement.newPoll} />
-				<form className="flex flex-col gap-6" onSubmit={(event) => void submit(event)}>
+				<form
+					className="flex flex-col gap-6"
+					onInput={language.onInput}
+					onSubmit={(event) => void submit(event)}
+				>
 					<FieldGroup>
 						<Field required>
 							<FieldLabel>{t.engagement.pollQuestion}</FieldLabel>
 							<Input maxLength={500} name="question" required />
 						</Field>
+						<DraftContentLanguageField controller={language.controller} />
 						<Field>
 							<FieldLabel>{t.engagement.pollOptions}</FieldLabel>
 							<div className="flex flex-col gap-2">

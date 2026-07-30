@@ -1,6 +1,5 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
 import { isPublicationLicenseId, PublicationLicenseIds } from "@rezics/license";
 
 import {
@@ -22,6 +21,8 @@ import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
+import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
+import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/use-form-draft-content-language";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -90,10 +91,11 @@ export function UnitCreatePage({ type }: { type: CatalogUnitType }) {
 }
 
 function SeriesCreatePage() {
-	const { t, locale } = useTranslation(["actions", "media", "ui", "units"]);
+	const { t } = useTranslation(["actions", "media", "ui", "units"]);
 	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(null);
+	const language = useFormDraftContentLanguage(["title", "summary"]);
 	const create = usePostApiSeries({
 		mutation: {
 			onSuccess: async (created) => {
@@ -106,17 +108,19 @@ function SeriesCreatePage() {
 	});
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		const form = new FormData(event.currentTarget);
+		const formElement = event.currentTarget;
+		const form = new FormData(formElement);
 		const title = String(form.get("title") ?? "").trim();
 		const kind = String(form.get("kind") ?? "").trim();
 		const summary = String(form.get("summary") ?? "").trim();
 		if (!title || !kind) return;
+		const contentLanguage = await language.resolveLanguage(formElement);
 		try {
 			await create.mutateAsync({
 				body: {
 					kind,
 					localization: {
-						language: toContentLanguage(locale.target),
+						language: contentLanguage,
 						title,
 						...(summary ? { summary } : {}),
 						coverAssetId: cover?.id ?? null,
@@ -131,7 +135,7 @@ function SeriesCreatePage() {
 		<RequireSession>
 			<main className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-4 py-10 sm:px-6">
 				<PageHeading title={`${t.actions.create} ${t.units.types.series}`} />
-				<form onSubmit={submit}>
+				<form onInput={language.onInput} onSubmit={(event) => void submit(event)}>
 					<FieldGroup>
 						<Field required>
 							<FieldLabel>{t.ui.title}</FieldLabel>
@@ -145,6 +149,7 @@ function SeriesCreatePage() {
 							<FieldLabel>{t.ui.summary}</FieldLabel>
 							<Textarea maxLength={2000} name="summary" />
 						</Field>
+						<DraftContentLanguageField controller={language.controller} />
 						<Field>
 							<FieldLabel>{t.media.roles.cover.title}</FieldLabel>
 							<LocalizationImageUploadField
@@ -165,7 +170,7 @@ function SeriesCreatePage() {
 }
 
 function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
-	const { t, locale } = useTranslation(["actions", "licenses", "media", "ui", "units"]);
+	const { t } = useTranslation(["actions", "licenses", "media", "ui", "units"]);
 	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(null);
@@ -173,6 +178,7 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 	const [publisher, setPublisher] = useState<EntityPickerValue>();
 	const [versionKind, setVersionKind] = useState<"main" | "variant">("main");
 	const [mainVersion, setMainVersion] = useState<EntityPickerValue>();
+	const language = useFormDraftContentLanguage(["title", "summary"]);
 	const create = usePostApiUnitsByType({
 		mutation: {
 			onSuccess: async (unit) => {
@@ -185,7 +191,8 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 	});
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		const form = new FormData(event.currentTarget);
+		const formElement = event.currentTarget;
+		const form = new FormData(formElement);
 		const summary = String(form.get("summary") ?? "").trim();
 		const submittedLicense = form.get("license");
 		if (catalogMode === "owned_work" && !publisher) return;
@@ -196,6 +203,7 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 			!isPublicationLicenseId(submittedLicense)
 		)
 			return;
+		const contentLanguage = await language.resolveLanguage(formElement);
 		try {
 			const version =
 				versionKind === "variant" && mainVersion
@@ -204,7 +212,7 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 			const common = {
 				version,
 				localization: {
-					language: toContentLanguage(locale.target),
+					language: contentLanguage,
 					title: String(form.get("title") ?? "").trim(),
 					...(summary ? { summary } : {}),
 					coverAssetId: cover?.id ?? null,
@@ -258,7 +266,7 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 		<RequireSession>
 			<main className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-4 py-10 sm:px-6">
 				<PageHeading title={`${t.actions.create} ${t.units.types[type]}`} />
-				<form onSubmit={submit}>
+				<form onInput={language.onInput} onSubmit={(event) => void submit(event)}>
 					<FieldGroup>
 						<Field required>
 							<FieldLabel>{t.ui.title}</FieldLabel>
@@ -361,6 +369,7 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 							<FieldLabel>{t.ui.summary}</FieldLabel>
 							<Textarea maxLength={2000} name="summary" />
 						</Field>
+						<DraftContentLanguageField controller={language.controller} />
 						<Field>
 							<FieldLabel>{t.media.roles.cover.title}</FieldLabel>
 							<LocalizationImageUploadField

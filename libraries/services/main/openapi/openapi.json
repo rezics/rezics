@@ -114401,11 +114401,16 @@
 						"application/json": {
 							"schema": {
 								"type": "object",
-								"required": ["targetId", "language", "body"],
+								"required": ["targetId", "publishRealmIds", "language", "body"],
 								"properties": {
 									"targetId": { "format": "uuid", "type": "string" },
 									"progressEntryId": { "format": "uuid", "type": "string" },
-									"realmId": { "format": "uuid", "type": "string" },
+									"publishRealmIds": {
+										"maxItems": 10,
+										"uniqueItems": true,
+										"type": "array",
+										"items": { "format": "uuid", "type": "string" }
+									},
 									"score": {
 										"additionalProperties": false,
 										"type": "object",
@@ -119286,7 +119291,12 @@
 									{
 										"additionalProperties": false,
 										"type": "object",
-										"required": ["body", "language", "postKind"],
+										"required": [
+											"body",
+											"language",
+											"publishRealmIds",
+											"postKind"
+										],
 										"properties": {
 											"title": {
 												"minLength": 1,
@@ -119551,7 +119561,12 @@
 												"type": "string",
 												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
 											},
-											"realmId": { "format": "uuid", "type": "string" },
+											"publishRealmIds": {
+												"maxItems": 10,
+												"uniqueItems": true,
+												"type": "array",
+												"items": { "format": "uuid", "type": "string" }
+											},
 											"postKind": { "const": "post", "type": "string" },
 											"subjectId": { "format": "uuid", "type": "string" }
 										}
@@ -119559,7 +119574,13 @@
 									{
 										"additionalProperties": false,
 										"type": "object",
-										"required": ["body", "language", "postKind", "subjectId"],
+										"required": [
+											"body",
+											"language",
+											"publishRealmIds",
+											"postKind",
+											"subjectId"
+										],
 										"properties": {
 											"title": {
 												"minLength": 1,
@@ -119824,7 +119845,12 @@
 												"type": "string",
 												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
 											},
-											"realmId": { "format": "uuid", "type": "string" },
+											"publishRealmIds": {
+												"maxItems": 10,
+												"uniqueItems": true,
+												"type": "array",
+												"items": { "format": "uuid", "type": "string" }
+											},
 											"postKind": { "const": "excerpt", "type": "string" },
 											"subjectId": { "format": "uuid", "type": "string" }
 										}
@@ -120009,7 +120035,13 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["accessMode", "title", "body", "language"],
+								"required": [
+									"accessMode",
+									"title",
+									"body",
+									"language",
+									"publishRealmIds"
+								],
 								"properties": {
 									"accessMode": {
 										"type": "string",
@@ -120252,7 +120284,12 @@
 										"type": "string",
 										"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
 									},
-									"realmId": { "format": "uuid", "type": "string" },
+									"publishRealmIds": {
+										"maxItems": 10,
+										"uniqueItems": true,
+										"type": "array",
+										"items": { "format": "uuid", "type": "string" }
+									},
 									"subjectId": { "format": "uuid", "type": "string" }
 								}
 							}

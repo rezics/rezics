@@ -103,15 +103,19 @@ export function UnitPicker({
  * @alpha
  */
 export function UnitMultiPicker({
+	ariaLabel,
 	index = "units",
 	kinds,
+	maxValues,
 	name,
 	onValuesChange,
 	removeLabel,
 	values,
 }: {
+	readonly ariaLabel?: string;
 	readonly index?: string;
 	readonly kinds?: readonly string[];
+	readonly maxValues?: number;
 	readonly name?: string;
 	readonly onValuesChange: (values: readonly string[]) => void;
 	readonly removeLabel: string;
@@ -156,14 +160,17 @@ export function UnitMultiPicker({
 					})}
 				</div>
 			) : null}
-			<EntityPicker
-				index={index}
-				key={values.join("\u0000")}
-				kinds={kinds}
-				onChange={(next) => {
-					if (!values.includes(next.id)) onValuesChange([...values, next.id]);
-				}}
-			/>
+			{maxValues === undefined || values.length < maxValues ? (
+				<EntityPicker
+					ariaLabel={ariaLabel}
+					index={index}
+					key={values.join("\u0000")}
+					kinds={kinds}
+					onChange={(next) => {
+						if (!values.includes(next.id)) onValuesChange([...values, next.id]);
+					}}
+				/>
+			) : null}
 		</div>
 	);
 }

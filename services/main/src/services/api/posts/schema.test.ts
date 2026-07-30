@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 
 import {
 	CreatePostBody,
+	CreateWikiBody,
+	MaximumPostPublishRealmCount,
 	MaximumPostScoreCount,
 	PostScoreListResponse,
 	ReplacePostScoresBody,
@@ -12,10 +14,13 @@ import {
 
 const body = createPortableTextDocument([], "0123456789ab");
 const baseRevisionId = "019b76da-a800-7300-8000-000000000001";
+const publishRealmIds = ["019b76da-a800-7300-8000-000000000010"];
 
 describe("Post localization API contracts", () => {
 	it("allows creating a Post without a title or summary", () => {
-		expect(Check(CreatePostBody, { postKind: "post", language: "en", body })).toBe(true);
+		expect(
+			Check(CreatePostBody, { postKind: "post", language: "en", body, publishRealmIds: [] }),
+		).toBe(true);
 		expect(
 			Check(CreatePostBody, {
 				postKind: "post",
@@ -23,6 +28,7 @@ describe("Post localization API contracts", () => {
 				title: "A title",
 				summary: "A concise preview",
 				body,
+				publishRealmIds,
 			}),
 		).toBe(true);
 	});
@@ -34,19 +40,65 @@ describe("Post localization API contracts", () => {
 				language: "en",
 				subjectId: "019b76da-a800-7300-8000-000000000002",
 				body,
+				publishRealmIds: [],
 			}),
 		).toBe(true);
-		expect(Check(CreatePostBody, { postKind: "excerpt", language: "en", body })).toBe(false);
-		expect(Check(CreatePostBody, { language: "en", body })).toBe(false);
+		expect(
+			Check(CreatePostBody, {
+				postKind: "excerpt",
+				language: "en",
+				body,
+				publishRealmIds: [],
+			}),
+		).toBe(false);
+		expect(Check(CreatePostBody, { language: "en", body, publishRealmIds: [] })).toBe(false);
 	});
 
 	it("rejects blank authored metadata", () => {
-		expect(Check(CreatePostBody, { postKind: "post", language: "en", title: "", body })).toBe(
-			false,
+		expect(
+			Check(CreatePostBody, {
+				postKind: "post",
+				language: "en",
+				title: "",
+				body,
+				publishRealmIds: [],
+			}),
+		).toBe(false);
+		expect(
+			Check(CreatePostBody, {
+				postKind: "post",
+				language: "en",
+				summary: "",
+				body,
+				publishRealmIds: [],
+			}),
+		).toBe(false);
+	});
+
+	it("requires a bounded, unique publication Realm set", () => {
+		const realms = Array.from(
+			{ length: MaximumPostPublishRealmCount + 1 },
+			(_, index) => `019b76da-a800-7300-8000-${String(index).padStart(12, "0")}`,
 		);
-		expect(Check(CreatePostBody, { postKind: "post", language: "en", summary: "", body })).toBe(
-			false,
-		);
+		const post = { postKind: "post", language: "en", body };
+		expect(Check(CreatePostBody, post)).toBe(false);
+		expect(Check(CreatePostBody, { ...post, publishRealmIds: realms.slice(0, 10) })).toBe(true);
+		expect(Check(CreatePostBody, { ...post, publishRealmIds: realms })).toBe(false);
+		expect(
+			Check(CreatePostBody, {
+				...post,
+				publishRealmIds: [realms[0], realms[0]],
+			}),
+		).toBe(false);
+		expect(
+			Check(CreateWikiBody, {
+				accessMode: "restricted",
+				title: "Wiki",
+				language: "en",
+				body,
+				publishRealmIds: [],
+			}),
+		).toBe(true);
 	});
 
 	it("uses explicit nulls to clear authored metadata during replacement", () => {

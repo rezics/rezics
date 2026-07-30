@@ -86078,11 +86078,9 @@ export type PostApiReviewsBody = {
 	 */
 	progressEntryId?: string;
 	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string | undefined
+	 * @type array
 	 */
-	realmId?: string;
+	publishRealmIds: string[];
 	/**
 	 * @type object | undefined
 	 */
@@ -90493,11 +90491,9 @@ export type PostApiPostsBody =
 			 */
 			language: PostApiPostsRequestLanguageEnum;
 			/**
-			 * @description
-			 * Format: `uuid`
-			 * @type string | undefined
+			 * @type array
 			 */
-			realmId?: string;
+			publishRealmIds: string[];
 			/**
 			 * @type string
 			 */
@@ -90657,11 +90653,9 @@ export type PostApiPostsBody =
 			 */
 			language: PostApiPostsRequestLanguageEnum;
 			/**
-			 * @description
-			 * Format: `uuid`
-			 * @type string | undefined
+			 * @type array
 			 */
-			realmId?: string;
+			publishRealmIds: string[];
 			/**
 			 * @type string
 			 */
@@ -91040,11 +91034,9 @@ export type PostApiPostsWikiBody = {
 	 */
 	language: PostApiPostsWikiRequestLanguageEnum;
 	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string | undefined
+	 * @type array
 	 */
-	realmId?: string;
+	publishRealmIds: string[];
 	/**
 	 * @description
 	 * Format: `uuid`

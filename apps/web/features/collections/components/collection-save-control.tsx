@@ -1,6 +1,5 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
 import {
 	useDeleteApiCollectionsByCollectionIdItemsByTargetId,
 	useDeleteApiCollectionsFavoritesItemsByTargetId,
@@ -16,6 +15,8 @@ import { useCallback, useDeferredValue, useId, useState, type FormEvent } from "
 
 import { Button, Dialog, DialogContent, DialogFooter, DialogHeader, Input } from "@rezics/ui";
 import { useAuthPortal } from "@/features/auth/auth-portal-context";
+import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
+import { useDraftContentLanguage } from "@/features/content-languages/hooks/use-draft-content-language";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
@@ -40,7 +41,7 @@ export function CollectionSaveControl({
 	readonly triggerClassName?: string;
 	readonly triggerVariant?: "outline" | "secondary" | "quiet";
 }) {
-	const { locale, t } = useTranslation(["actions", "collections", "ui"]);
+	const { t } = useTranslation(["actions", "collections", "ui"]);
 	const { data: session } = useHydratedSession();
 	const { openAuthPortal } = useAuthPortal();
 	const queryClient = useQueryClient();
@@ -59,6 +60,7 @@ export function CollectionSaveControl({
 		>
 	>(() => new Map());
 	const [newCollectionTitle, setNewCollectionTitle] = useState("");
+	const newCollectionLanguage = useDraftContentLanguage(newCollectionTitle);
 	const open = controlledOpen ?? internalOpen;
 	const setOpen = onOpenChange ?? setInternalOpen;
 	const me = useGetApiUsersMe({}, { query: { enabled: open && Boolean(session) } });
@@ -161,11 +163,12 @@ export function CollectionSaveControl({
 		event.preventDefault();
 		const title = newCollectionTitle.trim();
 		if (!title) return;
+		const contentLanguage = await newCollectionLanguage.resolveLanguage(title);
 		try {
 			const created = await create.mutateAsync({
 				body: {
 					localization: {
-						language: toContentLanguage(locale.target),
+						language: contentLanguage,
 						title,
 					},
 					visibility: "private",
@@ -178,6 +181,7 @@ export function CollectionSaveControl({
 				},
 			});
 			setNewCollectionTitle("");
+			newCollectionLanguage.enableAutomaticDetection();
 			await invalidateCollections(queryClient, created.id);
 		} catch {
 			// The typed mutation states supply the visible API error.
@@ -273,6 +277,7 @@ export function CollectionSaveControl({
 								<PlusIcon aria-hidden />
 							</Button>
 						</div>
+						<DraftContentLanguageField controller={newCollectionLanguage} />
 					</form>
 					<RequestFailure
 						error={

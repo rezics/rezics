@@ -16,9 +16,12 @@ import type { PlatformAuthorization } from "../platform/authorization";
 import type { UnitAuthorization } from "../unit/authorization";
 import { type RealmCapability } from "./policy";
 
-async function ensureRulesAccepted(realmId: string, profileId: string): Promise<void> {
+async function findRequiredRulesAcceptance(
+	realmId: string,
+	profileId: string,
+): Promise<{ readonly realmId: string; readonly revisionId: string } | undefined> {
 	const rules = await getCurrentRealmRules(realmId);
-	if (!rules?.revisionId || !rules.requireOnPost) return;
+	if (!rules?.revisionId || !rules.requireOnPost) return undefined;
 	const [acknowledgement] = await database
 		.select({ revisionId: realmRuleAcknowledgementTable.revisionId })
 		.from(realmRuleAcknowledgementTable)
@@ -29,7 +32,7 @@ async function ensureRulesAccepted(realmId: string, profileId: string): Promise<
 			),
 		)
 		.limit(1);
-	if (!acknowledgement) throw new RealmRulesAcceptanceRequired(rules);
+	return acknowledgement ? undefined : { realmId, revisionId: rules.revisionId };
 }
 
 export class RealmAuthorization<ProfileId extends string | undefined> {
@@ -97,11 +100,26 @@ export class RealmAuthorization<ProfileId extends string | undefined> {
 
 	async ensureUnitCreation(
 		this: RealmAuthorization<string>,
-		realmId: string | undefined,
+		realmIds: readonly string[],
 		permission: RealmUnitCreatePermission,
 	): Promise<void> {
-		if (!realmId) return;
-		await this.ensureCapability(realmId, permission);
-		await ensureRulesAccepted(realmId, this.profileId);
+		const normalizedRealmIds = [...new Set(realmIds)].sort();
+		if (!normalizedRealmIds.length) return;
+		await Promise.all(
+			normalizedRealmIds.map((realmId) => this.ensureCapability(realmId, permission)),
+		);
+		const requirements = (
+			await Promise.all(
+				normalizedRealmIds.map((realmId) =>
+					findRequiredRulesAcceptance(realmId, this.profileId),
+				),
+			)
+		).filter(
+			(
+				requirement,
+			): requirement is { readonly realmId: string; readonly revisionId: string } =>
+				requirement !== undefined,
+		);
+		if (requirements.length) throw new RealmRulesAcceptanceRequired({ realms: requirements });
 	}
 }

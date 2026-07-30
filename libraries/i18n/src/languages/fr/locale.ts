@@ -1,3 +1,5 @@
+import { insert } from "native-i18n";
+
 export default {
 	label: "Langue",
 	uiLocales: {
@@ -18,6 +20,22 @@ export default {
 		de: "Allemand",
 		fr: "Français",
 		es: "Espagnol",
+	},
+	draftContentLanguage: {
+		label: "Langue du contenu",
+		useAutomatic: "Détecter automatiquement",
+		automaticOption: insert("Automatique · {{language}}", { language: String }),
+		manual: "Sélection manuelle ; la détection automatique est suspendue.",
+		idle: "Votre première préférence linguistique est utilisée jusqu’à ce que le contenu soit suffisant.",
+		detecting: "Détection de la langue du contenu…",
+		detected: insert("Langue détectée automatiquement : {{language}}.", { language: String }),
+		insufficient:
+			"Le contenu est insuffisant pour une détection fiable ; votre première préférence linguistique est utilisée.",
+		ambiguous:
+			"La langue du contenu est incertaine ; votre première préférence linguistique est utilisée.",
+		unsupported:
+			"La langue détectée n’est pas encore prise en charge ; votre première préférence linguistique est utilisée.",
+		failed: "La détection de la langue est temporairement indisponible ; votre première préférence linguistique est utilisée.",
 	},
 	chineseContentDisplay: {
 		label: "Affichage des contenus en chinois",

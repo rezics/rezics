@@ -64,7 +64,7 @@ async function ensurePostTargetingAllowed(
 	input: {
 		readonly sourcePostId: string;
 		readonly targets: readonly PostTarget[];
-		readonly realmId?: string;
+		readonly realmIds?: readonly string[];
 	},
 ): Promise<void> {
 	const targets = normalizeTargets(input.targets);
@@ -92,10 +92,7 @@ async function ensurePostTargetingAllowed(
 		.where(eq(realmUnit.unitId, input.sourcePostId))
 		.orderBy(realmUnit.realmId);
 	const realmIds = [
-		...new Set([
-			...mountedRealms.map((row) => row.realmId),
-			...(input.realmId ? [input.realmId] : []),
-		]),
+		...new Set([...mountedRealms.map((row) => row.realmId), ...(input.realmIds ?? [])]),
 	].sort();
 	if (!realmIds.length) return;
 
@@ -124,13 +121,13 @@ export async function ensureSubjectPostTargetingAllowed(
 	input: {
 		readonly sourcePostId: string;
 		readonly subjectUnitId?: string | null;
-		readonly realmId?: string;
+		readonly realmIds?: readonly string[];
 	},
 ): Promise<void> {
 	return ensurePostTargetingAllowed(tx, {
 		sourcePostId: input.sourcePostId,
 		targets: input.subjectUnitId ? [{ relation: "subject", unitId: input.subjectUnitId }] : [],
-		...(input.realmId ? { realmId: input.realmId } : {}),
+		...(input.realmIds ? { realmIds: input.realmIds } : {}),
 	});
 }
 
@@ -151,13 +148,13 @@ export async function ensureReplyPostTargetingAllowed(
 				? [{ relation: "parent" as const, unitId: input.parentPostId }]
 				: []),
 		],
-		...(input.realmId ? { realmId: input.realmId } : {}),
+		...(input.realmId ? { realmIds: [input.realmId] } : {}),
 	});
 }
 
 export async function ensurePostMountTargetingAllowed(
 	tx: DatabaseTransaction,
-	input: { readonly postId: string; readonly realmId: string },
+	input: { readonly postId: string; readonly realmIds: readonly string[] },
 ): Promise<void> {
 	const [stored] = await tx
 		.select({
@@ -183,7 +180,7 @@ export async function ensurePostMountTargetingAllowed(
 				? [{ relation: "parent" as const, unitId: stored.parentPostId }]
 				: []),
 		],
-		realmId: input.realmId,
+		realmIds: input.realmIds,
 	});
 }
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { createBlockKey, createPortableTextDocument } from "@rezics/block";
-import { toContentLanguage } from "@rezics/i18n";
 import {
 	GetApiReportsPlatformCasesState,
 	PostApiGovernanceModerationActionsRequestReasonCodeEnum,
@@ -43,6 +42,8 @@ import { AppLink as Link } from "@/features/application-shell/components/app-lin
 import { useState, type FormEvent } from "react";
 
 import { publicUnitHref } from "@/features/units/routing/public-unit-route";
+import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
+import { useDraftContentLanguage } from "@/features/content-languages/hooks/use-draft-content-language";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -73,6 +74,7 @@ export function ConsoleModerationPage() {
 	});
 	const [reasonCode, setReasonCode] = useState<GovernanceReasonCode>("content_policy");
 	const [note, setNote] = useState("");
+	const noteLanguage = useDraftContentLanguage(note);
 	const [removeConfirmationOpen, setRemoveConfirmationOpen] = useState(false);
 	const cases = useGetApiReportsPlatformCases(
 		{ query: { state, localizationLanguages, limit: 100 } },
@@ -101,7 +103,7 @@ export function ConsoleModerationPage() {
 			? [
 					{
 						role: "internal_note" as const,
-						language: toContentLanguage(locale.target),
+						language: await noteLanguage.resolveLanguage(normalizedNote),
 						content: createPortableTextDocument([
 							{
 								_type: "block" as const,
@@ -134,6 +136,7 @@ export function ConsoleModerationPage() {
 		try {
 			await mutation.mutateAsync({ body });
 			setNote("");
+			noteLanguage.enableAutomaticDetection();
 			toast.create({ title: t.console.moderation.succeeded, type: "success" });
 			await queryClient.invalidateQueries({
 				queryKey: getApiReportsPlatformCasesQueryKey(),
@@ -283,6 +286,7 @@ export function ConsoleModerationPage() {
 										value={note}
 									/>
 								</Field>
+								<DraftContentLanguageField controller={noteLanguage} />
 								<RequestFailure error={mutation.error} />
 								<Button
 									disabled={!noteValid}
