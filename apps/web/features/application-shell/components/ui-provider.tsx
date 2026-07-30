@@ -1,5 +1,6 @@
 "use client";
 
+import type { ContentLanguage } from "@rezics/i18n";
 import { useMemo, type ReactNode } from "react";
 
 import { UiProvider } from "@rezics/ui";
@@ -10,7 +11,23 @@ import { useTranslation } from "@/i18n/client";
 import { getErrorText } from "@/i18n/errors";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 
-export function TranslatedUiProvider({ children }: Readonly<{ children: ReactNode }>) {
+export function ApplicationUiProvider({ children }: Readonly<{ children: ReactNode }>) {
+	const localizationLanguages = useLocalizationLanguages();
+
+	return (
+		<TranslatedUiProvider localizationLanguages={localizationLanguages}>
+			{children}
+		</TranslatedUiProvider>
+	);
+}
+
+export function TranslatedUiProvider({
+	children,
+	localizationLanguages,
+}: Readonly<{
+	children: ReactNode;
+	localizationLanguages: readonly ContentLanguage[];
+}>) {
 	const { t } = useTranslation([
 		"actions",
 		"betterAuthErrorCodes",
@@ -21,7 +38,6 @@ export function TranslatedUiProvider({ children }: Readonly<{ children: ReactNod
 		"state",
 		"ui",
 	]);
-	const localizationLanguages = useLocalizationLanguages();
 	const searchEntities = useMemo(
 		() => createEntitySearch(localizationLanguages),
 		[localizationLanguages],

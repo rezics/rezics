@@ -12,7 +12,7 @@ import { AuthSessionProvider } from "@/features/auth/session-provider";
 import { SessionQueryClientBoundary } from "@/features/auth/session-query-client-boundary";
 import type { InitialAuthSession } from "@/features/auth/server/initial-session.server";
 import { NavigationProgressProvider } from "@/features/application-shell/navigation-progress";
-import { TranslatedUiProvider } from "@/features/application-shell/components/ui-provider";
+import { ApplicationUiProvider } from "@/features/application-shell/components/ui-provider";
 import { PwaLifecycle } from "@/features/pwa/pwa-lifecycle";
 import { TranslationProvider } from "@/i18n/client";
 import type { RootTranslationNamespaces } from "@/i18n/namespaces";
@@ -34,22 +34,22 @@ export function AppProviders({
 	return (
 		<NuqsAdapter defaultOptions={urlStateOptions}>
 			<TranslationProvider initial={initialTranslation}>
-				<TranslatedUiProvider>
-					<NavigationProgressProvider>
-						<AuthSessionProvider initialSession={initialSession}>
-							<SessionQueryClientBoundary
-								dehydratedState={dehydratedState}
-								initialSession={initialSession}
-							>
+				<NavigationProgressProvider>
+					<AuthSessionProvider initialSession={initialSession}>
+						<SessionQueryClientBoundary
+							dehydratedState={dehydratedState}
+							initialSession={initialSession}
+						>
+							<ApplicationUiProvider>
 								<AuthPortalProvider turnstileSiteKey={turnstileSiteKey}>
 									{children}
 									<Toaster />
 								</AuthPortalProvider>
-							</SessionQueryClientBoundary>
-							<PwaLifecycle />
-						</AuthSessionProvider>
-					</NavigationProgressProvider>
-				</TranslatedUiProvider>
+							</ApplicationUiProvider>
+						</SessionQueryClientBoundary>
+						<PwaLifecycle />
+					</AuthSessionProvider>
+				</NavigationProgressProvider>
 			</TranslationProvider>
 		</NuqsAdapter>
 	);

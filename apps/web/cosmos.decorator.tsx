@@ -5,7 +5,7 @@ import { FixtureContentLanguages, type FixtureContentLanguage } from "@rezics/fi
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { create } from "native-i18n";
 import { useFixtureSelect } from "react-cosmos/client";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { TranslatedUiProvider } from "@/features/application-shell/components/ui-provider";
 import { TranslationProvider } from "@/i18n/client";
@@ -49,6 +49,7 @@ export default function CosmosDecorator({ children }: { children: ReactNode }) {
 	const [queryClient] = useState(
 		() => new QueryClient({ defaultOptions: { queries: { retry: false } } }),
 	);
+	const localizationLanguages = useMemo(() => [contentLanguage], [contentLanguage]);
 
 	useEffect(() => {
 		document.documentElement.classList.toggle("dark", theme === "dark");
@@ -67,13 +68,13 @@ export default function CosmosDecorator({ children }: { children: ReactNode }) {
 			<style>{appThemeCss}</style>
 			<TranslationProvider initial={initialTranslation} key={locale}>
 				<FixtureProvider contentLanguage={contentLanguage}>
-					<TranslatedUiProvider>
-						<QueryClientProvider client={queryClient}>
+					<QueryClientProvider client={queryClient}>
+						<TranslatedUiProvider localizationLanguages={localizationLanguages}>
 							<main className="min-h-screen bg-background p-3 text-foreground sm:p-8">
 								<div className="mx-auto w-full max-w-3xl min-w-0">{children}</div>
 							</main>
-						</QueryClientProvider>
-					</TranslatedUiProvider>
+						</TranslatedUiProvider>
+					</QueryClientProvider>
 				</FixtureProvider>
 			</TranslationProvider>
 		</>
