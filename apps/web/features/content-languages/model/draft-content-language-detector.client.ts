@@ -1,6 +1,7 @@
 import { isContentLanguage } from "@rezics/i18n";
 
 import type { DraftContentLanguageDetection } from "./detect-draft-content-language";
+import DraftContentLanguageDetectionWorker from "./draft-content-language-detection.worker?worker";
 
 type PendingDetection = {
 	readonly reject: (reason: unknown) => void;
@@ -40,9 +41,7 @@ function rejectPendingDetections(reason: unknown): void {
 function getDetectionWorker(): Worker | undefined {
 	if (typeof Worker === "undefined") return undefined;
 	if (worker) return worker;
-	worker = new Worker(new URL("./draft-content-language-detection.worker.ts", import.meta.url), {
-		type: "module",
-	});
+	worker = new DraftContentLanguageDetectionWorker();
 	worker.addEventListener("message", (event: MessageEvent<unknown>) => {
 		if (!isDetectionResponse(event.data)) {
 			rejectPendingDetections(new Error("Invalid language detection worker response."));
