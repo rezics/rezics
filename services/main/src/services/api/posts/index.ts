@@ -545,12 +545,14 @@ export default new Elysia()
 						canManageScores,
 					] = await Promise.all([
 						getAttributionSummariesByUnitIds([row.id], localizationLanguages),
-						selectPostScores(row.id, viewerProfileId).then((items) =>
-							items.map(({ scoreId, realmId, value }) => ({
-								scoreId,
-								realmId,
-								value,
-							})),
+						selectPostScores(row.id, viewerProfileId, localizationLanguages).then(
+							(items) =>
+								items.map(({ scoreId, realmId, realmTitle, value }) => ({
+									scoreId,
+									realmId,
+									realmTitle,
+									value,
+								})),
 						),
 						row.postKind === "review"
 							? selectPostProgressEntry(row.id, viewerProfileId)

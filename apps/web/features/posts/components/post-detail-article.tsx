@@ -9,12 +9,7 @@ import { Card, CardContent, CardHeader } from "@rezics/ui";
 import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { ConnectedFeedEngagementBar } from "@/features/content-feed/components/feed-card-actions";
-import {
-	FeedCardRating,
-	type FeedTargetRating,
-} from "@/features/content-feed/components/feed-card";
 import type { FeedActionPolicy } from "@/features/content-feed/model/feed-action-policy";
-import { apiValueToUnitScore } from "@/features/reviews/model/score-value";
 import { useTranslation } from "@/i18n/client";
 import { readPortableText } from "@/lib/block";
 import {
@@ -45,7 +40,6 @@ export interface PostDetailArticleValue {
 	readonly summary?: string | null;
 	readonly body: PortableTextDocument | null;
 	readonly createdAt: string;
-	readonly scores: readonly { readonly value: string | number }[];
 }
 
 export function PostDetailArticle({
@@ -68,19 +62,11 @@ export function PostDetailArticle({
 	const { locale, t } = useTranslation(["feed", "posts"]);
 	const displayedTitle = useChineseContentText(post.title, post.titleLanguage);
 	const displayedSummary = useChineseContentText(post.summary ?? "", post.language);
-	const attachedScore = post.scores[0];
-	const attachedScoreValue = attachedScore ? apiValueToUnitScore(attachedScore.value) : undefined;
-	const rating: FeedTargetRating | undefined = attachedScoreValue
-		? { kind: "attached", value: attachedScoreValue }
-		: undefined;
 	const content = (
 		<>
-			<div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-				<p className="font-semibold text-brand text-xs">
-					{t.feed.content.kinds[`post:${post.postKind}`]}
-				</p>
-				{rating ? <FeedCardRating className="mt-0" rating={rating} /> : null}
-			</div>
+			<p className="font-semibold text-brand text-xs">
+				{t.feed.content.kinds[`post:${post.postKind}`]}
+			</p>
 			<h1
 				className="mt-2 font-heading font-black text-2xl leading-tight sm:text-3xl"
 				id={`post-detail-${post.id}`}

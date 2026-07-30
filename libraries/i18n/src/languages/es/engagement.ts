@@ -52,7 +52,7 @@ export default {
 	noScoredRealms: `Todavía no hay puntuaciones en ningún ${realmTerms.inline}.`,
 	scoreAssociation: "Asociación de puntuación",
 	scoreAssociationDescription:
-		"Gestiona las puntuaciones vinculadas a esta reseña y su orden. Las tarjetas de lista y la página de la reseña solo muestran la primera.",
+		"Gestiona las puntuaciones vinculadas a esta reseña y su orden. Las tarjetas de lista solo muestran la primera; la página de la reseña las muestra todas en este orden.",
 	scoreAssociationOption: insert("{{realm}} · {{score}}/10", {
 		realm: String,
 		score: String,

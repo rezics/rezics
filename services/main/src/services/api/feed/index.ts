@@ -1280,6 +1280,10 @@ export async function hydrateFeedItems(
 						postId: postScore.postId,
 						scoreId: score.id,
 						realmId: score.realmId,
+						realmTitle: resolvedUnitLocalizationTitle(
+							feedReviewScoreRealm.id,
+							displayLanguages,
+						),
 						value: score.value,
 						position: postScore.position,
 					})
@@ -1408,7 +1412,15 @@ export async function hydrateFeedItems(
 			globalRealmId: globalScoreRealmId,
 			targetId,
 		});
-	const scoresByPostId = new Map<string, { scoreId: string; realmId: string; value: number }[]>();
+	const scoresByPostId = new Map<
+		string,
+		{
+			scoreId: string;
+			realmId: string;
+			realmTitle: string | null;
+			value: number;
+		}[]
+	>();
 	for (const { postId, position: _position, ...reviewScore } of reviewScores) {
 		const current = scoresByPostId.get(postId) ?? [];
 		current.push(reviewScore);

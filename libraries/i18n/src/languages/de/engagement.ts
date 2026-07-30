@@ -53,7 +53,7 @@ export default {
 	noScoredRealms: `Noch keine Bewertungen in einem ${realmTerms.inline}.`,
 	scoreAssociation: "Bewertungszuordnung",
 	scoreAssociationDescription:
-		"Verwalte die Bewertungen dieser Rezension und ihre Reihenfolge. In Listenkarten und auf der Rezensionsseite erscheint nur die erste Bewertung.",
+		"Verwalte die Bewertungen dieser Rezension und ihre Reihenfolge. Listenkarten zeigen nur die erste Bewertung; auf der Rezensionsseite erscheinen alle Bewertungen in dieser Reihenfolge.",
 	scoreAssociationOption: insert("{{realm}} · {{score}}/10", {
 		realm: String,
 		score: String,

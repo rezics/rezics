@@ -59,7 +59,9 @@ export function createReviewScoreDrafts(
 					state: "stored",
 					scoreId: score.scoreId,
 					realmId: score.realmId,
-					realmLabel: knownRealm ? toRealmLabel(knownRealm) : score.realmId,
+					realmLabel: knownRealm
+						? toRealmLabel(knownRealm)
+						: (score.realmTitle ?? score.realmId),
 					value,
 					persistedValue: value,
 				},

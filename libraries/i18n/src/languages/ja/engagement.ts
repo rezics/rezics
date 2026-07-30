@@ -52,7 +52,7 @@ export default {
 	noScoredRealms: `現在、どの${realmTerms.label}にもスコアはありません。`,
 	scoreAssociation: "スコアの関連付け",
 	scoreAssociationDescription:
-		"このレビューに関連付けるスコアと順序を管理します。一覧カードとレビューページには先頭のスコアだけが表示されます。",
+		"このレビューに関連付けるスコアと順序を管理します。一覧カードには先頭のスコアだけが表示され、レビューページにはすべてのスコアがこの順序で表示されます。",
 	scoreAssociationOption: insert("{{realm}} · {{score}}/10", {
 		realm: String,
 		score: String,

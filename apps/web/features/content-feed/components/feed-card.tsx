@@ -63,6 +63,7 @@ export interface FeedTargetScore {
 export type FeedTargetRating =
 	| {
 			readonly kind: "attached";
+			readonly realmLabel: string;
 			readonly value: UnitScore;
 	  }
 	| {
@@ -285,9 +286,13 @@ export function FeedCardRating({
 	if (rating.kind === "attached")
 		return (
 			<p
-				className={cn("mt-1 flex items-center gap-1.5 text-xs", className)}
+				className={cn(
+					"mt-1 flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs",
+					className,
+				)}
 				data-slot="feed-card-rating"
 			>
+				<span className="truncate text-muted-foreground">{rating.realmLabel}</span>
 				<StarIcon aria-hidden className="size-3.5 fill-warning text-warning" />
 				<span className="font-semibold tabular-nums text-foreground">
 					{t.engagement.scoreOutOfTen({ score: String(rating.value) })}

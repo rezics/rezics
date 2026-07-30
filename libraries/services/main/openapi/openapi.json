@@ -17286,6 +17286,7 @@
 																	"required": [
 																		"scoreId",
 																		"realmId",
+																		"realmTitle",
 																		"value"
 																	],
 																	"properties": {
@@ -17296,6 +17297,15 @@
 																		"realmId": {
 																			"format": "uuid",
 																			"type": "string"
+																		},
+																		"realmTitle": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"type": "string"
+																				},
+																				{ "type": "null" }
+																			]
 																		},
 																		"value": {
 																			"minimum": 1,
@@ -28784,6 +28794,7 @@
 																			"required": [
 																				"scoreId",
 																				"realmId",
+																				"realmTitle",
 																				"value"
 																			],
 																			"properties": {
@@ -28794,6 +28805,17 @@
 																				"realmId": {
 																					"format": "uuid",
 																					"type": "string"
+																				},
+																				"realmTitle": {
+																					"nullable": true,
+																					"anyOf": [
+																						{
+																							"type": "string"
+																						},
+																						{
+																							"type": "null"
+																						}
+																					]
 																				},
 																				"value": {
 																					"minimum": 1,
@@ -105541,6 +105563,7 @@
 																					"required": [
 																						"scoreId",
 																						"realmId",
+																						"realmTitle",
 																						"value"
 																					],
 																					"properties": {
@@ -105551,6 +105574,17 @@
 																						"realmId": {
 																							"format": "uuid",
 																							"type": "string"
+																						},
+																						"realmTitle": {
+																							"nullable": true,
+																							"anyOf": [
+																								{
+																									"type": "string"
+																								},
+																								{
+																									"type": "null"
+																								}
+																							]
 																						},
 																						"value": {
 																							"minimum": 1,
@@ -112735,6 +112769,7 @@
 															"required": [
 																"scoreId",
 																"realmId",
+																"realmTitle",
 																"value"
 															],
 															"properties": {
@@ -112745,6 +112780,13 @@
 																"realmId": {
 																	"format": "uuid",
 																	"type": "string"
+																},
+																"realmTitle": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
 																},
 																"value": {
 																	"minimum": 1,
@@ -114009,7 +114051,12 @@
 											"type": "array",
 											"items": {
 												"type": "object",
-												"required": ["scoreId", "realmId", "value"],
+												"required": [
+													"scoreId",
+													"realmId",
+													"realmTitle",
+													"value"
+												],
 												"properties": {
 													"scoreId": {
 														"format": "uuid",
@@ -114018,6 +114065,13 @@
 													"realmId": {
 														"format": "uuid",
 														"type": "string"
+													},
+													"realmTitle": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
 													},
 													"value": {
 														"minimum": 1,
@@ -116747,6 +116801,7 @@
 													"profileId",
 													"unitId",
 													"realmId",
+													"realmTitle",
 													"value",
 													"visibility",
 													"position",
@@ -116768,6 +116823,13 @@
 													"realmId": {
 														"format": "uuid",
 														"type": "string"
+													},
+													"realmTitle": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
 													},
 													"value": {
 														"minimum": 1,
@@ -116903,6 +116965,7 @@
 													"profileId",
 													"unitId",
 													"realmId",
+													"realmTitle",
 													"value",
 													"visibility",
 													"position",
@@ -116924,6 +116987,13 @@
 													"realmId": {
 														"format": "uuid",
 														"type": "string"
+													},
+													"realmTitle": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
 													},
 													"value": {
 														"minimum": 1,
@@ -119716,7 +119786,12 @@
 													"type": "array",
 													"items": {
 														"type": "object",
-														"required": ["scoreId", "realmId", "value"],
+														"required": [
+															"scoreId",
+															"realmId",
+															"realmTitle",
+															"value"
+														],
 														"properties": {
 															"scoreId": {
 																"format": "uuid",
@@ -119725,6 +119800,13 @@
 															"realmId": {
 																"format": "uuid",
 																"type": "string"
+															},
+															"realmTitle": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string" },
+																	{ "type": "null" }
+																]
 															},
 															"value": {
 																"minimum": 1,
@@ -120465,7 +120547,12 @@
 													"type": "array",
 													"items": {
 														"type": "object",
-														"required": ["scoreId", "realmId", "value"],
+														"required": [
+															"scoreId",
+															"realmId",
+															"realmTitle",
+															"value"
+														],
 														"properties": {
 															"scoreId": {
 																"format": "uuid",
@@ -120474,6 +120561,13 @@
 															"realmId": {
 																"format": "uuid",
 																"type": "string"
+															},
+															"realmTitle": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string" },
+																	{ "type": "null" }
+																]
 															},
 															"value": {
 																"minimum": 1,
@@ -121214,7 +121308,12 @@
 													"type": "array",
 													"items": {
 														"type": "object",
-														"required": ["scoreId", "realmId", "value"],
+														"required": [
+															"scoreId",
+															"realmId",
+															"realmTitle",
+															"value"
+														],
 														"properties": {
 															"scoreId": {
 																"format": "uuid",
@@ -121223,6 +121322,13 @@
 															"realmId": {
 																"format": "uuid",
 																"type": "string"
+															},
+															"realmTitle": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string" },
+																	{ "type": "null" }
+																]
 															},
 															"value": {
 																"minimum": 1,
@@ -121949,7 +122055,12 @@
 													"type": "array",
 													"items": {
 														"type": "object",
-														"required": ["scoreId", "realmId", "value"],
+														"required": [
+															"scoreId",
+															"realmId",
+															"realmTitle",
+															"value"
+														],
 														"properties": {
 															"scoreId": {
 																"format": "uuid",
@@ -121958,6 +122069,13 @@
 															"realmId": {
 																"format": "uuid",
 																"type": "string"
+															},
+															"realmTitle": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string" },
+																	{ "type": "null" }
+																]
 															},
 															"value": {
 																"minimum": 1,
@@ -122781,7 +122899,12 @@
 													"type": "array",
 													"items": {
 														"type": "object",
-														"required": ["scoreId", "realmId", "value"],
+														"required": [
+															"scoreId",
+															"realmId",
+															"realmTitle",
+															"value"
+														],
 														"properties": {
 															"scoreId": {
 																"format": "uuid",
@@ -122790,6 +122913,13 @@
 															"realmId": {
 																"format": "uuid",
 																"type": "string"
+															},
+															"realmTitle": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string" },
+																	{ "type": "null" }
+																]
 															},
 															"value": {
 																"minimum": 1,
@@ -135842,6 +135972,7 @@
 																			"required": [
 																				"scoreId",
 																				"realmId",
+																				"realmTitle",
 																				"value"
 																			],
 																			"properties": {
@@ -135852,6 +135983,17 @@
 																				"realmId": {
 																					"format": "uuid",
 																					"type": "string"
+																				},
+																				"realmTitle": {
+																					"nullable": true,
+																					"anyOf": [
+																						{
+																							"type": "string"
+																						},
+																						{
+																							"type": "null"
+																						}
+																					]
 																				},
 																				"value": {
 																					"minimum": 1,
@@ -152816,6 +152958,7 @@
 																			"required": [
 																				"scoreId",
 																				"realmId",
+																				"realmTitle",
 																				"value"
 																			],
 																			"properties": {
@@ -152826,6 +152969,17 @@
 																				"realmId": {
 																					"format": "uuid",
 																					"type": "string"
+																				},
+																				"realmTitle": {
+																					"nullable": true,
+																					"anyOf": [
+																						{
+																							"type": "string"
+																						},
+																						{
+																							"type": "null"
+																						}
+																					]
 																				},
 																				"value": {
 																					"minimum": 1,
@@ -165356,6 +165510,7 @@
 																			"required": [
 																				"scoreId",
 																				"realmId",
+																				"realmTitle",
 																				"value"
 																			],
 																			"properties": {
@@ -165366,6 +165521,17 @@
 																				"realmId": {
 																					"format": "uuid",
 																					"type": "string"
+																				},
+																				"realmTitle": {
+																					"nullable": true,
+																					"anyOf": [
+																						{
+																							"type": "string"
+																						},
+																						{
+																							"type": "null"
+																						}
+																					]
 																				},
 																				"value": {
 																					"minimum": 1,
@@ -181319,6 +181485,7 @@
 																			"required": [
 																				"scoreId",
 																				"realmId",
+																				"realmTitle",
 																				"value"
 																			],
 																			"properties": {
@@ -181329,6 +181496,17 @@
 																				"realmId": {
 																					"format": "uuid",
 																					"type": "string"
+																				},
+																				"realmTitle": {
+																					"nullable": true,
+																					"anyOf": [
+																						{
+																							"type": "string"
+																						},
+																						{
+																							"type": "null"
+																						}
+																					]
 																				},
 																				"value": {
 																					"minimum": 1,

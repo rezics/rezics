@@ -37,6 +37,7 @@ import { postManagementSectionHref } from "@/features/posts/routing/post-managem
 import { isCatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import { ReviewAttachedScores } from "./review-attached-scores";
 
 type ReviewPost = Extract<GetApiPostsByPostIdStatus200, { postKind: "review" }>;
 
@@ -165,11 +166,11 @@ export function ReviewPostDetail({ review }: { readonly review: ReviewPost }) {
 					summary: review.summary,
 					body: review.body,
 					createdAt: review.createdAt,
-					scores: review.scores,
 				}}
 				replyCount={Number(review.replyCount)}
 				variant="thread"
 			/>
+			<ReviewAttachedScores reviewId={review.id} scores={review.scores} />
 			<RequestFailure error={remove.error} fallback={t.ui.retryLater} />
 		</>
 	);

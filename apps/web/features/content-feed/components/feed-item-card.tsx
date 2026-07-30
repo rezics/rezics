@@ -152,9 +152,14 @@ export function FeedPostCard({
 	const realms = toFeedRealmContexts(post.realms, t.ui.unnamed);
 	const attachedScore = post.postKind === "review" ? post.scores[0] : undefined;
 	const attachedScoreValue = attachedScore ? apiValueToUnitScore(attachedScore.value) : undefined;
-	const attachedRating: FeedTargetRating | undefined = attachedScoreValue
-		? { kind: "attached", value: attachedScoreValue }
-		: undefined;
+	const attachedRating: FeedTargetRating | undefined =
+		attachedScore && attachedScoreValue
+			? {
+					kind: "attached",
+					realmLabel: attachedScore.realmTitle ?? attachedScore.realmId,
+					value: attachedScoreValue,
+				}
+			: undefined;
 	const subjectRating: FeedTargetRating | undefined =
 		post.subject && isRatedWorkKind(post.subject.type)
 			? attachedRating

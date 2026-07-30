@@ -26,7 +26,7 @@ const translation = await create(resources).getTranslation(
 afterEach(cleanup);
 
 describe("PostDetailArticle", () => {
-	it("renders Review content, attached Score, and the shared reaction bar", () => {
+	it("renders Review content and the shared reaction bar", () => {
 		const body = createPortableTextDocument([
 			{
 				_type: "block",
@@ -57,15 +57,12 @@ describe("PostDetailArticle", () => {
 						summary: "不暴雷的摘要",
 						body,
 						createdAt: "2026-07-25T04:00:00.000Z",
-						scores: [{ value: 8 }, { value: 4 }],
 					}}
 				/>
 			</TranslationProvider>,
 		);
 
 		expect(screen.getByRole("heading", { level: 1, name: "完整評論" })).toBeTruthy();
-		expect(screen.getByText("8／10")).toBeTruthy();
-		expect(screen.queryByText("4／10")).toBeNull();
 		expect(screen.getByText("不暴雷的摘要")).toBeTruthy();
 		expect(screen.getByText("完整評論內容")).toBeTruthy();
 		expect(container.querySelector('[data-slot="connected-reaction-bar"]')).toBeTruthy();
@@ -104,7 +101,6 @@ describe("PostDetailArticle", () => {
 						titleLanguage: "zh",
 						body: null,
 						createdAt: "2026-07-25T04:00:00.000Z",
-						scores: [],
 					}}
 					variant="thread"
 				/>

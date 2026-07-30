@@ -53,7 +53,7 @@ export default {
 	noScoredRealms: `尚未在任何${realmTerms.label}中评分。`,
 	scoreAssociation: "评分关联",
 	scoreAssociationDescription:
-		"管理这篇评论绑定的评分及其顺序；列表卡片与评论页面只会显示第一项。",
+		"管理这篇评论绑定的评分及其顺序；列表卡片只显示第一项，评论页面会按顺序显示全部评分。",
 	scoreAssociationOption: insert("{{realm}} · {{score}}／10", {
 		realm: String,
 		score: String,

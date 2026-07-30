@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
 	CreatePostBody,
 	MaximumPostScoreCount,
+	PostScoreListResponse,
 	ReplacePostScoresBody,
 	UpdatePostBody,
 } from "./schema";
@@ -76,5 +77,25 @@ describe("Post Score API contracts", () => {
 		expect(Check(ReplacePostScoresBody, [])).toBe(true);
 		expect(Check(ReplacePostScoresBody, items.slice(0, MaximumPostScoreCount))).toBe(true);
 		expect(Check(ReplacePostScoresBody, items)).toBe(false);
+	});
+
+	it("returns the localized Realm title with every attached Score", () => {
+		const score = {
+			scoreId: "019b76da-a800-7300-8000-000000000001",
+			profileId: "019b76da-a800-7300-8000-000000000002",
+			unitId: "019b76da-a800-7300-8000-000000000003",
+			realmId: "019b76da-a800-7300-8000-000000000004",
+			realmTitle: "Global Scores",
+			value: 8,
+			visibility: "public",
+			position: "a0",
+			updatedAt: "2026-07-30T00:00:00.000Z",
+		};
+		expect(Check(PostScoreListResponse, { items: [score] })).toBe(true);
+		expect(Check(PostScoreListResponse, { items: [{ ...score, realmTitle: null }] })).toBe(
+			true,
+		);
+		const { realmTitle: _realmTitle, ...scoreWithoutRealmTitle } = score;
+		expect(Check(PostScoreListResponse, { items: [scoreWithoutRealmTitle] })).toBe(false);
 	});
 });

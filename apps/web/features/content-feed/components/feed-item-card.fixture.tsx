@@ -185,6 +185,7 @@ const contextualReview = {
 		{
 			scoreId: "019f9d16-1000-7000-8000-000000000061",
 			realmId: realmContext.id,
+			realmTitle: realmContext.title,
 			value: 9,
 		},
 	],

@@ -541,12 +541,14 @@ export default new Elysia()
 						targetingLock,
 					] = await Promise.all([
 						getAttributionSummariesByUnitIds([review.id], localizationLanguages),
-						selectPostScores(review.id, viewerProfileId).then((items) =>
-							items.map(({ scoreId, realmId, value }) => ({
-								scoreId,
-								realmId,
-								value,
-							})),
+						selectPostScores(review.id, viewerProfileId, localizationLanguages).then(
+							(items) =>
+								items.map(({ scoreId, realmId, realmTitle, value }) => ({
+									scoreId,
+									realmId,
+									realmTitle,
+									value,
+								})),
 						),
 						selectPostProgressEntry(review.id, viewerProfileId),
 						subjectPromise,

@@ -53,7 +53,7 @@ export default {
 	noScoredRealms: `Aucune note dans un ${realmTerms.inline} pour le moment.`,
 	scoreAssociation: "Association de note",
 	scoreAssociationDescription:
-		"Gérez les notes liées à cet avis et leur ordre. Les cartes de liste et la page de l’avis n’affichent que la première.",
+		"Gérez les notes liées à cet avis et leur ordre. Les cartes de liste n’affichent que la première ; la page de l’avis les affiche toutes dans cet ordre.",
 	scoreAssociationOption: insert("{{realm}} · {{score}}/10", {
 		realm: String,
 		score: String,

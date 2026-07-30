@@ -196,11 +196,17 @@ describe("API response values", () => {
 	it("requires Scores only for Review Feed items", () => {
 		expect(FeedReviewItemResponse.required).toContain("scores");
 		expect(FeedReviewItemResponse.properties.postKind.const).toBe("review");
+		expect(FeedReviewItemResponse.properties.scores.items.required).toEqual([
+			"scoreId",
+			"realmId",
+			"realmTitle",
+			"value",
+		]);
 		expect("scores" in FeedNonReviewPostItemResponse.properties).toBe(false);
 	});
 
 	it("keeps Post detail presentation and engagement context explicit", () => {
-		expect(PostDetailResponse.anyOf).toHaveLength(4);
+		expect(PostDetailResponse.anyOf).toHaveLength(5);
 		expect(OrdinaryPostDetailResponse.required).toContain("subject");
 		expect(OrdinaryPostDetailResponse.required).toContain("scores");
 		expect(OrdinaryPostDetailResponse.properties.capabilities.required).toEqual([
@@ -212,6 +218,12 @@ describe("API response values", () => {
 		expect(ReviewDetailResponse.required).toContain("postKind");
 		expect(ReviewDetailResponse.required).toContain("subject");
 		expect(ReviewDetailResponse.required).toContain("scores");
+		expect(ReviewDetailResponse.properties.scores.items.required).toEqual([
+			"scoreId",
+			"realmId",
+			"realmTitle",
+			"value",
+		]);
 		expect(ReviewDetailResponse.required).toContain("replyCount");
 		expect(ReviewDetailResponse.properties.capabilities.required).toEqual([
 			"canEdit",

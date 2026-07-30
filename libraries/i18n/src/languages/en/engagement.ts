@@ -52,7 +52,7 @@ export default {
 	noScoredRealms: `No Scores in any ${realmTerms.label} yet.`,
 	scoreAssociation: "Score association",
 	scoreAssociationDescription:
-		"Manage this review’s attached Scores and their order. List cards and the review page show only the first Score.",
+		"Manage this review’s attached Scores and their order. List cards show only the first Score; the review page shows every attached Score in this order.",
 	scoreAssociationOption: insert("{{realm}} · {{score}}/10", {
 		realm: String,
 		score: String,

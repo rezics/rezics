@@ -143,11 +143,13 @@ const review = {
 		{
 			scoreId: "019f9872-bd49-7bb4-a6b7-ec621fca2037",
 			realmId: "019f9872-bd49-7bb4-a6b7-ec621fca2038",
+			realmTitle: "REZICS 評分",
 			value: 7,
 		},
 		{
 			scoreId: "019f9872-bd49-7bb4-a6b7-ec621fca2039",
 			realmId: "019f9872-bd49-7bb4-a6b7-ec621fca2040",
+			realmTitle: "第二評分領域",
 			value: 3,
 		},
 	],
@@ -231,8 +233,10 @@ describe("FeedPostCard", () => {
 			</TranslationProvider>,
 		);
 
+		expect(screen.getByText("REZICS 評分")).toBeTruthy();
 		expect(screen.getAllByText("7／10")).toHaveLength(1);
 		expect(screen.queryByText("3／10")).toBeNull();
+		expect(screen.queryByText("第二評分領域")).toBeNull();
 		expect(screen.queryByText("我的讀書會")).toBeNull();
 		expect(screen.queryByText("9.0／10 · 2 人評分")).toBeNull();
 	});
@@ -248,6 +252,7 @@ describe("FeedPostCard", () => {
 		);
 
 		expect(container.querySelector('[data-slot="feed-card-target"]')).toBeNull();
+		expect(screen.getByText("REZICS 評分")).toBeTruthy();
 		expect(screen.getAllByText("7／10")).toHaveLength(1);
 		expect(screen.queryByText("我的讀書會")).toBeNull();
 	});

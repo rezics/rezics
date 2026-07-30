@@ -90,6 +90,7 @@ export const PostScoreResponse = t.Object({
 	profileId: Uuid,
 	unitId: Uuid,
 	realmId: Uuid,
+	realmTitle: t.Nullable(t.String()),
 	value: t.Integer({ minimum: 1, maximum: 10 }),
 	visibility: ResourceVisibility,
 	position: FractionalPosition,

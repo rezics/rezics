@@ -253,7 +253,6 @@ export function PostDetailPage({
 							summary: post.summary,
 							body: post.body,
 							createdAt: post.createdAt,
-							scores: post.scores,
 						}}
 						replyCount={Number(post.replyCount)}
 						variant="thread"

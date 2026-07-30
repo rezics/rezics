@@ -10897,6 +10897,7 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 					 * @type string
 					 */
 					realmId: string;
+					realmTitle: (string | null) | null;
 					value: string | number;
 				}[];
 		  }
@@ -17892,6 +17893,7 @@ export type PostApiFeedQueryStatus200 = {
 							 * @type string
 							 */
 							realmId: string;
+							realmTitle: (string | null) | null;
 							value: string | number;
 						}[];
 				  }
@@ -79135,6 +79137,7 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 								 * @type string
 								 */
 								realmId: string;
+								realmTitle: (string | null) | null;
 								value: string | number;
 							}[];
 					  }
@@ -84539,6 +84542,7 @@ export type GetApiReviewsStatus200 = {
 			 * @type string
 			 */
 			realmId: string;
+			realmTitle: (string | null) | null;
 			value: string | number;
 		}[];
 		/**
@@ -85570,6 +85574,7 @@ export type GetApiReviewsByReviewIdStatus200 = {
 		 * @type string
 		 */
 		realmId: string;
+		realmTitle: (string | null) | null;
 		value: string | number;
 	}[];
 	progressEntry:
@@ -88272,6 +88277,7 @@ export type GetApiPostsByPostIdScoresStatus200 = {
 		 * @type string
 		 */
 		realmId: string;
+		realmTitle: (string | null) | null;
 		value: string | number;
 		/**
 		 * @type string
@@ -88414,6 +88420,7 @@ export type PutApiPostsByPostIdScoresStatus200 = {
 		 * @type string
 		 */
 		realmId: string;
+		realmTitle: (string | null) | null;
 		value: string | number;
 		/**
 		 * @type string
@@ -90510,6 +90517,7 @@ export type GetApiPostsByPostIdStatus200 =
 				 * @type string
 				 */
 				realmId: string;
+				realmTitle: (string | null) | null;
 				value: string | number;
 			}[];
 			/**
@@ -90880,6 +90888,7 @@ export type GetApiPostsByPostIdStatus200 =
 				 * @type string
 				 */
 				realmId: string;
+				realmTitle: (string | null) | null;
 				value: string | number;
 			}[];
 			/**
@@ -91250,6 +91259,7 @@ export type GetApiPostsByPostIdStatus200 =
 				 * @type string
 				 */
 				realmId: string;
+				realmTitle: (string | null) | null;
 				value: string | number;
 			}[];
 			/**
@@ -91625,6 +91635,7 @@ export type GetApiPostsByPostIdStatus200 =
 				 * @type string
 				 */
 				realmId: string;
+				realmTitle: (string | null) | null;
 				value: string | number;
 			}[];
 			progressEntry:
@@ -92028,6 +92039,7 @@ export type GetApiPostsByPostIdStatus200 =
 				 * @type string
 				 */
 				realmId: string;
+				realmTitle: (string | null) | null;
 				value: string | number;
 			}[];
 			/**
@@ -101765,6 +101777,7 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 							 * @type string
 							 */
 							realmId: string;
+							realmTitle: (string | null) | null;
 							value: string | number;
 						}[];
 				  }
@@ -110482,6 +110495,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 							 * @type string
 							 */
 							realmId: string;
+							realmTitle: (string | null) | null;
 							value: string | number;
 						}[];
 				  }
@@ -116095,6 +116109,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 							 * @type string
 							 */
 							realmId: string;
+							realmTitle: (string | null) | null;
 							value: string | number;
 						}[];
 				  }
@@ -123010,6 +123025,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 							 * @type string
 							 */
 							realmId: string;
+							realmTitle: (string | null) | null;
 							value: string | number;
 						}[];
 				  }

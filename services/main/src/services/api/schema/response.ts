@@ -592,6 +592,7 @@ const PostSubjectPresentationFields = {
 const PostAttachedScoreResponse = t.Object({
 	scoreId: Uuid,
 	realmId: Uuid,
+	realmTitle: NullableText,
 	value: t.Integer({ minimum: 1, maximum: 10 }),
 });
 

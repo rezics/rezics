@@ -5,17 +5,26 @@ import { getProfileActivityReadCondition } from "../authorization/profile-activi
 import { getUnitReadCondition } from "../authorization/unit/query";
 import { database } from "../database";
 import { postScore, profilePreference, score, unit } from "../database/schema";
+import {
+	resolvedUnitLocalizationTitle,
+	type LocalizationLanguageQuery,
+} from "../units/localization";
 
 const scoreTargetUnit = alias(unit, "post_score_target_unit");
 const scoreRealm = alias(unit, "post_score_realm");
 
-export function selectPostScores(postId: string, viewerProfileId?: string) {
+export function selectPostScores(
+	postId: string,
+	viewerProfileId?: string,
+	localizationLanguages: LocalizationLanguageQuery = [],
+) {
 	return database
 		.select({
 			scoreId: score.id,
 			profileId: score.profileId,
 			unitId: score.unitId,
 			realmId: score.realmId,
+			realmTitle: resolvedUnitLocalizationTitle(scoreRealm.id, localizationLanguages),
 			value: score.value,
 			visibility: score.visibility,
 			position: postScore.position,

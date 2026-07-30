@@ -52,7 +52,7 @@ export default {
 	noScoredRealms: `아직 어떤 ${realmTerms.label}에도 점수가 없습니다.`,
 	scoreAssociation: "점수 연결",
 	scoreAssociationDescription:
-		"이 리뷰에 연결된 점수와 순서를 관리합니다. 목록 카드와 리뷰 페이지에는 첫 번째 점수만 표시됩니다.",
+		"이 리뷰에 연결된 점수와 순서를 관리합니다. 목록 카드에는 첫 번째 점수만 표시되고, 리뷰 페이지에는 모든 점수가 이 순서대로 표시됩니다.",
 	scoreAssociationOption: insert("{{realm}} · {{score}}/10", {
 		realm: String,
 		score: String,

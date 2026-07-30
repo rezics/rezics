@@ -52,7 +52,8 @@ export default {
 	editScores: "管理評分",
 	noScoredRealms: `尚未在任何${realmTerms.label}評分。`,
 	scoreAssociation: "評分關聯",
-	scoreAssociationDescription: "管理這篇評論綁定的評分與順序；列表卡片與評論頁面只會顯示第一項。",
+	scoreAssociationDescription:
+		"管理這篇評論綁定的評分與順序；列表卡片只顯示第一項，評論頁面會依序顯示全部評分。",
 	scoreAssociationOption: insert("{{realm}} · {{score}}／10", {
 		realm: String,
 		score: String,
