@@ -7,7 +7,7 @@ export function studioSectionHref(sectionId: StudioSectionId): string {
 }
 
 export function parseStudioSection(pathname: string): StudioSectionId | undefined {
-	const match = /^\/create\/([^/]+)\/?$/.exec(pathname);
+	const match = /^\/create\/([^/]+)(?:\/.*)?$/.exec(pathname);
 	const value = match?.[1];
 	return value && isStudioSectionId(value) ? value : undefined;
 }

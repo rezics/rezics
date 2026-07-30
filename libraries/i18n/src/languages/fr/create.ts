@@ -67,6 +67,50 @@ export default {
 		label: `Explication de Tag du ${realmTerms.label}`,
 		description: `Créez l’explication wiki de ce ${realmTerms.inline} pour un Tag.`,
 	},
+	publicEntrySearch: {
+		policyTitle: "Rechercher avant de créer",
+		policy: "Afin de préserver une communauté saine, effectuez une recherche avant de créer une entrée publique et vérifiez que le contenu souhaité n’existe pas déjà. Tout usage abusif de cette fonction peut entraîner des sanctions.",
+		requiredTitle: "Vérifiez d’abord les entrées existantes",
+		requiredDescription: "Effectuez une recherche avant d’envoyer cette entrée publique.",
+		prompt: insert("Rechercher les {{subject}} existants", { subject: String }),
+		confirmedTitle: insert("Les {{subject}} existants ont été recherchés", {
+			subject: String,
+		}),
+		confirmedDescription:
+			"Ce titre a été recherché. Toute modification du titre ou du type nécessite une nouvelle recherche.",
+		pageTitle: insert("Rechercher les {{subject}} existants", { subject: String }),
+		pageDescription: insert(
+			"Vérifiez si les {{subject}} que vous souhaitez créer existent déjà.",
+			{
+				subject: String,
+			},
+		),
+		backToSection: insert("Retour aux {{subject}}", { subject: String }),
+		searchLabel: insert("Rechercher des {{subject}}", { subject: String }),
+		searchPlaceholder: insert("Saisissez le nom des {{subject}}", { subject: String }),
+		searchAction: "Rechercher",
+		searchHint:
+			"Saisissez un nom et lancez la recherche pour rendre l’option de création disponible.",
+		searchFailed:
+			"La recherche est temporairement indisponible. Réessayez avant de créer une entrée publique.",
+		resultsTitle: "Entrées existantes possibles",
+		noResultsTitle: insert("Aucun {{subject}} correspondant trouvé", { subject: String }),
+		noResultsDescription:
+			"Après avoir vérifié les termes de recherche, vous pouvez poursuivre la création.",
+		notListedTitle: "Aucun de ces résultats ne correspond ?",
+		notListedDescription:
+			"Examinez d’abord les entrées similaires. Ne continuez que si aucune ne correspond au contenu recherché.",
+		createAction: "Poursuivre la création",
+		subjects: {
+			book: "livres",
+			software: "logiciels",
+			media: "médias",
+			person: "personnes",
+			organization: "organisations",
+			character: "personnages",
+			tag: "étiquettes",
+		},
+	},
 	list: {
 		create: "Créer",
 		empty: "Aucun contenu ne correspond aux filtres actuels.",

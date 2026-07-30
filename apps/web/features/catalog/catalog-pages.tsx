@@ -16,7 +16,17 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
+import { PublicEntrySearchPrompt } from "./components/public-entry-search-prompt";
+import {
+	entityPublicEntrySearchSubject,
+	isPublicEntryEntityKind,
+	isPublicEntrySearchConfirmed,
+	PublicEntrySearchConfirmationParam,
+	TagPublicEntrySearchSubject,
+	type PublicEntryEntityKind,
+} from "./model/public-entry-search";
 import { type FormEvent, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { BookOpenIcon } from "lucide-react";
 
 import { Banner, Cover, PageHeading } from "@rezics/ui";
@@ -467,6 +477,7 @@ export function EntityCreatePage() {
 	const { t } = useTranslation([
 		"actions",
 		"catalog",
+		"create",
 		"errors",
 		"governance",
 		"media",
@@ -475,8 +486,18 @@ export function EntityCreatePage() {
 	]);
 	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
+	const searchParams = useSearchParams();
+	const searchConfirmation = searchParams.get(PublicEntrySearchConfirmationParam);
+	const [title, setTitle] = useState(() => searchParams.get("title") ?? "");
+	const [kind, setKind] = useState<PublicEntryEntityKind>(() => {
+		const candidate = searchParams.get("kind");
+		return isPublicEntryEntityKind(candidate) ? candidate : "person";
+	});
+	const searchSubject = entityPublicEntrySearchSubject(kind);
 	const [error, setError] = useState(false);
-	const [catalogMode, setCatalogMode] = useState<"owned_work" | "public_entry">("owned_work");
+	const [catalogMode, setCatalogMode] = useState<"owned_work" | "public_entry">(() =>
+		searchParams.get("catalogMode") === "public_entry" ? "public_entry" : "owned_work",
+	);
 	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(null);
 	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(null);
 	const language = useFormDraftContentLanguage(["title", "summary"]);
@@ -488,20 +509,27 @@ export function EntityCreatePage() {
 			},
 		},
 	});
+	const searchConfirmed = isPublicEntrySearchConfirmed(searchSubject, title, searchConfirmation);
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		setError(false);
 		const formElement = event.currentTarget;
 		const form = new FormData(formElement);
+		const submittedTitle = String(form.get("title") ?? "").trim();
+		if (
+			catalogMode === "public_entry" &&
+			!isPublicEntrySearchConfirmed(searchSubject, submittedTitle, searchConfirmation)
+		)
+			return;
 		const contentLanguage = await language.resolveLanguage(formElement);
 		try {
 			await create.mutateAsync({
 				body: {
 					catalogMode,
-					kind: String(form.get("kind") ?? "person"),
+					kind,
 					localization: {
 						language: contentLanguage,
-						title: String(form.get("title") ?? "").trim(),
+						title: submittedTitle,
 						avatar: avatarPresentationToInput(avatar),
 						bannerAssetId: banner?.id ?? null,
 						...(String(form.get("summary") ?? "").trim()
@@ -546,11 +574,24 @@ export function EntityCreatePage() {
 					</Field>
 					<Field required>
 						<FieldLabel>{t.ui.title}</FieldLabel>
-						<Input name="title" required maxLength={500} />
+						<Input
+							maxLength={500}
+							name="title"
+							onChange={(event) => setTitle(event.currentTarget.value)}
+							required
+							value={title}
+						/>
 					</Field>
 					<Field required>
 						<FieldLabel>{t.catalog.kind}</FieldLabel>
-						<NativeSelect name="kind" defaultValue="person">
+						<NativeSelect
+							name="kind"
+							onChange={(event) => {
+								const candidate = event.currentTarget.value;
+								if (isPublicEntryEntityKind(candidate)) setKind(candidate);
+							}}
+							value={kind}
+						>
 							<NativeSelectOption value="person">{t.ui.person}</NativeSelectOption>
 							<NativeSelectOption value="organization">
 								{t.ui.organization}
@@ -560,6 +601,13 @@ export function EntityCreatePage() {
 							</NativeSelectOption>
 						</NativeSelect>
 					</Field>
+					{catalogMode === "public_entry" ? (
+						<PublicEntrySearchPrompt
+							confirmed={searchConfirmed}
+							query={title}
+							subject={searchSubject}
+						/>
+					) : null}
 					<Field>
 						<FieldLabel>{t.ui.summary}</FieldLabel>
 						<Textarea name="summary" maxLength={2000} />
@@ -578,7 +626,12 @@ export function EntityCreatePage() {
 						/>
 					</Field>
 					{error && <p className="text-destructive text-sm">{t.ui.retryLater}</p>}
-					<Button variant="solid" type="submit" isLoading={create.isPending}>
+					<Button
+						disabled={catalogMode === "public_entry" && !searchConfirmed}
+						variant="solid"
+						type="submit"
+						isLoading={create.isPending}
+					>
 						{t.ui.submit}
 					</Button>
 				</FieldGroup>
@@ -588,9 +641,20 @@ export function EntityCreatePage() {
 }
 
 export function TagCreatePage() {
-	const { t } = useTranslation(["actions", "catalog", "errors", "governance", "media", "ui"]);
+	const { t } = useTranslation([
+		"actions",
+		"catalog",
+		"create",
+		"errors",
+		"governance",
+		"media",
+		"ui",
+	]);
 	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
+	const searchParams = useSearchParams();
+	const searchConfirmation = searchParams.get(PublicEntrySearchConfirmationParam);
+	const [title, setTitle] = useState(() => searchParams.get("title") ?? "");
 	const [error, setError] = useState(false);
 	const language = useFormDraftContentLanguage(["title", "summary"]);
 	const create = usePostApiTags({
@@ -601,18 +665,32 @@ export function TagCreatePage() {
 			},
 		},
 	});
+	const searchConfirmed = isPublicEntrySearchConfirmed(
+		TagPublicEntrySearchSubject,
+		title,
+		searchConfirmation,
+	);
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		setError(false);
 		const formElement = event.currentTarget;
 		const form = new FormData(formElement);
+		const submittedTitle = String(form.get("title") ?? "").trim();
+		if (
+			!isPublicEntrySearchConfirmed(
+				TagPublicEntrySearchSubject,
+				submittedTitle,
+				searchConfirmation,
+			)
+		)
+			return;
 		const contentLanguage = await language.resolveLanguage(formElement);
 		try {
 			await create.mutateAsync({
 				body: {
 					localization: {
 						language: contentLanguage,
-						title: String(form.get("title") ?? "").trim(),
+						title: submittedTitle,
 						...(String(form.get("summary") ?? "").trim()
 							? { summary: String(form.get("summary")).trim() }
 							: {}),
@@ -629,15 +707,31 @@ export function TagCreatePage() {
 				<FieldGroup>
 					<Field required>
 						<FieldLabel>{t.ui.title}</FieldLabel>
-						<Input name="title" required maxLength={500} />
+						<Input
+							maxLength={500}
+							name="title"
+							onChange={(event) => setTitle(event.currentTarget.value)}
+							required
+							value={title}
+						/>
 					</Field>
+					<PublicEntrySearchPrompt
+						confirmed={searchConfirmed}
+						query={title}
+						subject={TagPublicEntrySearchSubject}
+					/>
 					<Field>
 						<FieldLabel>{t.ui.summary}</FieldLabel>
 						<Textarea name="summary" maxLength={2000} />
 					</Field>
 					<DraftContentLanguageField controller={language.controller} />
 					{error && <p className="text-destructive text-sm">{t.ui.retryLater}</p>}
-					<Button variant="solid" type="submit" isLoading={create.isPending}>
+					<Button
+						disabled={!searchConfirmed}
+						variant="solid"
+						type="submit"
+						isLoading={create.isPending}
+					>
 						{t.ui.submit}
 					</Button>
 				</FieldGroup>

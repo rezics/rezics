@@ -8,6 +8,7 @@ describe("Studio routes", () => {
 		expect(studioSectionHref("realm")).toBe("/create/realm");
 		expect(parseStudioSection("/create/review")).toBe("review");
 		expect(parseStudioSection("/create/review/")).toBe("review");
+		expect(parseStudioSection("/create/entity/search")).toBe("entity");
 		expect(parseStudioSection("/create/zone")).toBe("zone");
 		expect(parseStudioSection("/create/wiki")).toBe("wiki");
 		expect(parseStudioSection("/create")).toBeUndefined();

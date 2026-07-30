@@ -72,6 +72,45 @@ export default {
 		label: `Explicación de etiqueta del ${realmTerms.label}`,
 		description: `Crea la explicación wiki de este ${realmTerms.inline} para una etiqueta.`,
 	},
+	publicEntrySearch: {
+		policyTitle: "Busca antes de crear",
+		policy: "Para mantener una comunidad saludable, busca antes de crear una entrada pública y confirma que el contenido que quieres crear todavía no existe. El uso indebido de esta función puede conllevar sanciones.",
+		requiredTitle: "Comprueba primero las entradas existentes",
+		requiredDescription: "Debes completar una búsqueda antes de enviar esta entrada pública.",
+		prompt: insert("Buscar {{subject}} existentes", { subject: String }),
+		confirmedTitle: insert("Se han buscado {{subject}} existentes", { subject: String }),
+		confirmedDescription:
+			"Este título ya se ha buscado. Si cambias el título o el tipo, deberás volver a buscar.",
+		pageTitle: insert("Buscar {{subject}} existentes", { subject: String }),
+		pageDescription: insert("Comprueba si los {{subject}} que quieres crear ya existen.", {
+			subject: String,
+		}),
+		backToSection: insert("Volver a {{subject}}", { subject: String }),
+		searchLabel: insert("Buscar {{subject}}", { subject: String }),
+		searchPlaceholder: insert("Introduce el nombre de los {{subject}}", { subject: String }),
+		searchAction: "Buscar",
+		searchHint:
+			"Introduce un nombre y ejecuta la búsqueda para habilitar la opción de creación.",
+		searchFailed:
+			"La búsqueda no está disponible temporalmente. Vuelve a intentarlo antes de crear una entrada pública.",
+		resultsTitle: "Posibles entradas existentes",
+		noResultsTitle: insert("No se encontraron {{subject}} coincidentes", { subject: String }),
+		noResultsDescription:
+			"Después de comprobar que los términos son correctos, puedes continuar con la creación.",
+		notListedTitle: "¿Ninguno de estos resultados coincide?",
+		notListedDescription:
+			"Revisa primero las entradas similares. Continúa solo si ninguna es el contenido que necesitas.",
+		createAction: "Continuar con la creación",
+		subjects: {
+			book: "libros",
+			software: "entradas de software",
+			media: "entradas multimedia",
+			person: "personas",
+			organization: "organizaciones",
+			character: "personajes",
+			tag: "etiquetas",
+		},
+	},
 	list: {
 		create: "Crear",
 		empty: "Ningún contenido coincide con los filtros actuales.",

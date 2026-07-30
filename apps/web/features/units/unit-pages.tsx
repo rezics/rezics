@@ -11,7 +11,14 @@ import {
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
+import { PublicEntrySearchPrompt } from "@/features/catalog/components/public-entry-search-prompt";
+import {
+	isPublicEntrySearchConfirmed,
+	PublicEntrySearchConfirmationParam,
+	unitPublicEntrySearchSubject,
+} from "@/features/catalog/model/public-entry-search";
 import { type FormEvent, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { EntityPicker, type EntityPickerValue, PageHeading } from "@rezics/ui";
 import { UnitList } from "@rezics/ui";
@@ -170,11 +177,17 @@ function SeriesCreatePage() {
 }
 
 function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
-	const { t } = useTranslation(["actions", "licenses", "media", "ui", "units"]);
+	const { t } = useTranslation(["actions", "create", "licenses", "media", "ui", "units"]);
 	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
+	const searchParams = useSearchParams();
+	const searchSubject = unitPublicEntrySearchSubject(type);
+	const searchConfirmation = searchParams.get(PublicEntrySearchConfirmationParam);
+	const [title, setTitle] = useState(() => searchParams.get("title") ?? "");
 	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(null);
-	const [catalogMode, setCatalogMode] = useState<"owned_work" | "public_entry">("owned_work");
+	const [catalogMode, setCatalogMode] = useState<"owned_work" | "public_entry">(() =>
+		searchParams.get("catalogMode") === "public_entry" ? "public_entry" : "owned_work",
+	);
 	const [publisher, setPublisher] = useState<EntityPickerValue>();
 	const [versionKind, setVersionKind] = useState<"main" | "variant">("main");
 	const [mainVersion, setMainVersion] = useState<EntityPickerValue>();
@@ -189,13 +202,20 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 			},
 		},
 	});
+	const searchConfirmed = isPublicEntrySearchConfirmed(searchSubject, title, searchConfirmation);
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		const formElement = event.currentTarget;
 		const form = new FormData(formElement);
+		const submittedTitle = String(form.get("title") ?? "").trim();
 		const summary = String(form.get("summary") ?? "").trim();
 		const submittedLicense = form.get("license");
 		if (catalogMode === "owned_work" && !publisher) return;
+		if (
+			catalogMode === "public_entry" &&
+			!isPublicEntrySearchConfirmed(searchSubject, submittedTitle, searchConfirmation)
+		)
+			return;
 		if (versionKind === "variant" && !mainVersion) return;
 		if (
 			submittedLicense !== null &&
@@ -213,7 +233,7 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 				version,
 				localization: {
 					language: contentLanguage,
-					title: String(form.get("title") ?? "").trim(),
+					title: submittedTitle,
 					...(summary ? { summary } : {}),
 					coverAssetId: cover?.id ?? null,
 				},
@@ -270,7 +290,13 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 					<FieldGroup>
 						<Field required>
 							<FieldLabel>{t.ui.title}</FieldLabel>
-							<Input maxLength={500} name="title" required />
+							<Input
+								maxLength={500}
+								name="title"
+								onChange={(event) => setTitle(event.currentTarget.value)}
+								required
+								value={title}
+							/>
 						</Field>
 						<Field required>
 							<FieldLabel>{t.units.creation.modeLabel}</FieldLabel>
@@ -298,6 +324,13 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 									: t.units.creation.publicEntryDescription}
 							</p>
 						</Field>
+						{catalogMode === "public_entry" ? (
+							<PublicEntrySearchPrompt
+								confirmed={searchConfirmed}
+								query={title}
+								subject={searchSubject}
+							/>
+						) : null}
 						<Field required={catalogMode === "owned_work"}>
 							<FieldLabel>{t.units.creation.publisherEntity}</FieldLabel>
 							<EntityPicker
@@ -446,6 +479,7 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 						<Button
 							disabled={
 								(catalogMode === "owned_work" && !publisher) ||
+								(catalogMode === "public_entry" && !searchConfirmed) ||
 								(versionKind === "variant" && !mainVersion)
 							}
 							variant="solid"

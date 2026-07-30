@@ -55,6 +55,46 @@ export default {
 		label: `${realmTerms.label} Tag explanation`,
 		description: `Create this ${realmTerms.label}'s Wiki explanation of a Tag.`,
 	},
+	publicEntrySearch: {
+		policyTitle: "Search before creating",
+		policy: "To maintain a healthy community, search before creating a public entry and confirm that the content you want to create does not already exist. Misuse of the ability to create public entries may result in penalties.",
+		requiredTitle: "Check existing entries first",
+		requiredDescription: "Complete a search before submitting this public entry.",
+		prompt: insert("Search existing {{subject}}", { subject: String }),
+		confirmedTitle: insert("Existing {{subject}} searched", { subject: String }),
+		confirmedDescription:
+			"This title has been searched. Changing the title or kind requires another search.",
+		pageTitle: insert("Search existing {{subject}}", { subject: String }),
+		pageDescription: insert(
+			"Check whether the {{subject}} you want to create already exists.",
+			{
+				subject: String,
+			},
+		),
+		backToSection: insert("Back to {{subject}}", { subject: String }),
+		searchLabel: insert("Search {{subject}}", { subject: String }),
+		searchPlaceholder: insert("Enter the name of the {{subject}}", { subject: String }),
+		searchAction: "Search",
+		searchHint: "Enter a name and run the search to make the creation option available.",
+		searchFailed: "Search is temporarily unavailable. Retry before creating a public entry.",
+		resultsTitle: "Possible existing entries",
+		noResultsTitle: insert("No matching {{subject}} found", { subject: String }),
+		noResultsDescription:
+			"After checking that the search terms are correct, you can continue to creation.",
+		notListedTitle: "None of these results match?",
+		notListedDescription:
+			"Review similar entries first. Continue only when none of them is the content you need.",
+		createAction: "Continue to create",
+		subjects: {
+			book: "books",
+			software: "software entries",
+			media: "media entries",
+			person: "people",
+			organization: "organizations",
+			character: "characters",
+			tag: "tags",
+		},
+	},
 	list: {
 		create: "Create",
 		empty: "No content matches the current filters.",

@@ -68,6 +68,46 @@ export default {
 		label: `${realmTerms.label}-Tag-Erklärung`,
 		description: `Erstelle die Wiki-Erklärung dieses ${realmTerms.inline}s zu einem Tag.`,
 	},
+	publicEntrySearch: {
+		policyTitle: "Vor dem Erstellen suchen",
+		policy: "Um ein gutes Miteinander zu wahren, suche vor dem Erstellen eines öffentlichen Eintrags und vergewissere dich, dass der gewünschte Inhalt noch nicht existiert. Der Missbrauch dieser Funktion kann Sanktionen nach sich ziehen.",
+		requiredTitle: "Zuerst vorhandene Einträge prüfen",
+		requiredDescription:
+			"Führe eine Suche durch, bevor du diesen öffentlichen Eintrag absendest.",
+		prompt: insert("Vorhandene {{subject}} durchsuchen", { subject: String }),
+		confirmedTitle: insert("Vorhandene {{subject}} wurden durchsucht", { subject: String }),
+		confirmedDescription:
+			"Dieser Titel wurde gesucht. Nach einer Änderung von Titel oder Art ist eine neue Suche erforderlich.",
+		pageTitle: insert("Vorhandene {{subject}} durchsuchen", { subject: String }),
+		pageDescription: insert("Prüfe, ob die gewünschten {{subject}} bereits existieren.", {
+			subject: String,
+		}),
+		backToSection: insert("Zurück zu {{subject}}", { subject: String }),
+		searchLabel: insert("{{subject}} durchsuchen", { subject: String }),
+		searchPlaceholder: insert("Namen der {{subject}} eingeben", { subject: String }),
+		searchAction: "Suchen",
+		searchHint:
+			"Gib einen Namen ein und führe die Suche aus, um die Erstellungsoption freizuschalten.",
+		searchFailed:
+			"Die Suche ist vorübergehend nicht verfügbar. Versuche es erneut, bevor du einen öffentlichen Eintrag erstellst.",
+		resultsTitle: "Möglicherweise vorhandene Einträge",
+		noResultsTitle: insert("Keine passenden {{subject}} gefunden", { subject: String }),
+		noResultsDescription:
+			"Wenn die Suchbegriffe korrekt sind, kannst du mit der Erstellung fortfahren.",
+		notListedTitle: "Keines dieser Ergebnisse passt?",
+		notListedDescription:
+			"Prüfe zuerst ähnliche Einträge. Fahre nur fort, wenn keiner davon der gesuchte Inhalt ist.",
+		createAction: "Mit dem Erstellen fortfahren",
+		subjects: {
+			book: "Bücher",
+			software: "Softwareeinträge",
+			media: "Medieneinträge",
+			person: "Personen",
+			organization: "Organisationen",
+			character: "Figuren",
+			tag: "Tags",
+		},
+	},
 	list: {
 		create: "Erstellen",
 		empty: "Keine Inhalte entsprechen den aktuellen Filtern.",
