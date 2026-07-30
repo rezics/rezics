@@ -185,6 +185,7 @@ export default {
 			"unit.ownership.transfer": "所有権の移転",
 			"unit.association.manage": "関連管理",
 			"unit.tag-curation.manage": "タグ選定を管理",
+			"unit.realm-publication.manage": `${realmTerms.label}への公開を管理`,
 			"realm.contribute": `${realmTerms.label} に貢献`,
 			"realm.units.create": "ユニット作成",
 			"realm.post.replies.create": "返信作成",

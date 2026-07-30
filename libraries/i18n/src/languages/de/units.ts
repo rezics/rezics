@@ -6,6 +6,7 @@ const { forms: publicationLicenseTerms } = deTerminology.publicationLicense;
 const { forms: postTerms } = deTerminology.post;
 const { forms: videoTerms } = deTerminology.video;
 const { forms: audioTerms } = deTerminology.audio;
+const { forms: realmTerms } = deTerminology.realm;
 const { forms: followTerms } = deTerminology.follow;
 const { forms: metadataTerms } = deTerminology.metadata;
 
@@ -91,6 +92,10 @@ export default {
 				description:
 					"Hebe globale Tags hervor und lege fest, in welcher Reihenfolge sie zuerst erscheinen.",
 			},
+			realms: {
+				label: `${realmTerms.label}-Veröffentlichung`,
+				description: `Veröffentlichung, Zurückziehen und erneutes Veröffentlichen je ${realmTerms.label} verwalten.`,
+			},
 			contentStructure: {
 				label: "Inhaltsstruktur",
 				description:
@@ -113,6 +118,33 @@ export default {
 					"Prüfe, vergleiche, widerrufe oder stelle Inhaltsversionen wieder her.",
 			},
 		},
+	},
+	realmPublications: {
+		title: `Veröffentlichung in ${realmTerms.pluralLabel}`,
+		description: `Verwalte die dauerhaft erhaltenen Aufnahmerelationen zwischen diesem Inhalt und ${realmTerms.pluralLabel}. Ein Zurückziehen deaktiviert die Veröffentlichung, ohne die Relation zu löschen.`,
+		addTitle: `In einem ${realmTerms.label} veröffentlichen`,
+		addDescription: `Füge jeweils einen ${realmTerms.label} hinzu, damit Veröffentlichungsrecht und Regeln getrennt geprüft werden.`,
+		realmLabel: realmTerms.label,
+		add: "Veröffentlichen",
+		publicationStateFilter: "Veröffentlichungsstatus",
+		realmStatusFilter: `${realmTerms.label}-Moderationsstatus`,
+		all: "Alle",
+		current: "Aktuelle Moderationsstatus",
+		publicationStates: { active: "Veröffentlicht", withdrawn: "Zurückgezogen" },
+		realmStatuses: {
+			pending: "Prüfung ausstehend",
+			visible: "Genehmigt",
+			hidden: "Ausgeblendet",
+			removed: "Entfernt",
+		},
+		effectivelyVisible: `Derzeit im ${realmTerms.label} sichtbar`,
+		notEffectivelyVisible: `Derzeit nicht im ${realmTerms.label} sichtbar`,
+		empty: "Keine Veröffentlichungsrelation entspricht den aktuellen Filtern.",
+		withdraw: "Zurückziehen",
+		republish: "Erneut veröffentlichen",
+		loadMore: "Mehr laden",
+		unnamedRealm: `Unbenannter ${realmTerms.label}`,
+		governanceReason: insert("Moderationsgrund: {{reason}}", { reason: String }),
 	},
 	series: {
 		kind: "Art der Reihe",

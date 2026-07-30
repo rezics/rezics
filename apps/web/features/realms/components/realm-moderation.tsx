@@ -15,13 +15,17 @@ import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "@/i18n/client";
 import { useRealmModerationQueue } from "../data/realm-moderation-query";
 import { realmModerationUnits } from "../model/realm-moderation-cache";
-import { RealmModerationStatuses, toRealmModerationStatus } from "../model/moderation-contract";
+import { RealmModerationStatuses } from "../model/moderation-contract";
 import {
 	AllRealmModerationStatuses,
 	AllRealmReportStates,
+	CurrentRealmModerationStatuses,
 	ReportedRealmUnits,
 	realmModerationFilterParser,
+	realmPublicationFilterParser,
 	realmReportFilterParser,
+	toRealmModerationFilter,
+	toRealmPublicationFilter,
 	toRealmReportFilter,
 } from "../routing/realm-moderation-route";
 import { RealmModerationQueue } from "./realm-moderation-queue";
@@ -34,11 +38,15 @@ export function RealmModeration({
 	readonly realmId: string;
 	readonly embedded?: boolean;
 }) {
-	const { t } = useTranslation(["realms", "reports", "state"]);
+	const { t } = useTranslation(["realms", "reports", "state", "units"]);
 	const [filter, setFilter] = useQueryState("status", realmModerationFilterParser);
+	const [publicationFilter, setPublicationFilter] = useQueryState(
+		"publication",
+		realmPublicationFilterParser,
+	);
 	const [reportFilter, setReportFilter] = useQueryState("reported", realmReportFilterParser);
 	const [selectedUnitId, setSelectedUnitId] = useState<string>();
-	const queue = useRealmModerationQueue(realmId, filter, reportFilter);
+	const queue = useRealmModerationQueue(realmId, filter, publicationFilter, reportFilter);
 	const units = useMemo(() => realmModerationUnits(queue.data), [queue.data]);
 	const selectedUnit = units.find((unit) => unit.unitId === selectedUnitId);
 	const loadNextPage = useCallback(() => {
@@ -58,19 +66,22 @@ export function RealmModeration({
 						</p>
 					) : null}
 				</div>
-				<div className="grid w-full gap-3 sm:w-auto sm:grid-cols-2">
+				<div className="grid w-full gap-3 sm:w-auto sm:grid-cols-3">
 					<Field className="w-full sm:w-52">
 						<FieldLabel>{t.realms.moderationFilter}</FieldLabel>
 						<NativeSelect
 							value={filter}
 							onChange={(event) => {
-								const nextFilter = toRealmModerationStatus(
+								const nextFilter = toRealmModerationFilter(
 									event.currentTarget.value,
 								);
 								setSelectedUnitId(undefined);
 								void setFilter(nextFilter);
 							}}
 						>
+							<NativeSelectOption value={CurrentRealmModerationStatuses}>
+								{t.units.realmPublications.current}
+							</NativeSelectOption>
 							<NativeSelectOption value={AllRealmModerationStatuses}>
 								{t.realms.allModerationStates}
 							</NativeSelectOption>
@@ -79,6 +90,28 @@ export function RealmModeration({
 									{t.realms.moderationStates[status]}
 								</NativeSelectOption>
 							))}
+						</NativeSelect>
+					</Field>
+					<Field className="w-full sm:w-52">
+						<FieldLabel>{t.units.realmPublications.publicationStateFilter}</FieldLabel>
+						<NativeSelect
+							value={publicationFilter}
+							onChange={(event) => {
+								setSelectedUnitId(undefined);
+								void setPublicationFilter(
+									toRealmPublicationFilter(event.currentTarget.value),
+								);
+							}}
+						>
+							<NativeSelectOption value="active">
+								{t.units.realmPublications.publicationStates.active}
+							</NativeSelectOption>
+							<NativeSelectOption value="withdrawn">
+								{t.units.realmPublications.publicationStates.withdrawn}
+							</NativeSelectOption>
+							<NativeSelectOption value="all">
+								{t.units.realmPublications.all}
+							</NativeSelectOption>
 						</NativeSelect>
 					</Field>
 					<Field className="w-full sm:w-52">
@@ -121,11 +154,13 @@ export function RealmModeration({
 				<div className="grid min-h-48 place-items-center rounded-xl border border-dashed p-8 text-center">
 					<div className="grid gap-3">
 						<p className="text-muted-foreground text-sm">{t.state.empty}</p>
-						{filter === AllRealmModerationStatuses &&
+						{filter === CurrentRealmModerationStatuses &&
+						publicationFilter === "active" &&
 						reportFilter === AllRealmReportStates ? null : (
 							<Button
 								onClick={() => {
-									void setFilter(AllRealmModerationStatuses);
+									void setFilter(CurrentRealmModerationStatuses);
+									void setPublicationFilter("active");
 									void setReportFilter(AllRealmReportStates);
 								}}
 								size="sm"

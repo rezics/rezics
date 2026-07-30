@@ -251,4 +251,8 @@ export default {
 	AssociationContextPostInvalid: `El contexto de la relación debe ser una ${postTerms.inline} de wiki.`,
 	ProgressEntryNotFound: "No se ha encontrado este evento de progreso.",
 	PostTagMentionVoteConflict: `Esta mención de etiqueta entra en conflicto con tu voto negativo actual en la ${postTerms.inline}.`,
+	UnitRealmPublicationNotFound: `Este contenido no tiene una relación de inclusión con ese ${realmTerms.label}.`,
+	UnitRealmPublicationAlreadyExists: `Este contenido ya tiene una relación de inclusión con ese ${realmTerms.label}.`,
+	UnitRealmPublicationTransitionInvalid:
+		"La relación de inclusión ya se encuentra en el estado solicitado.",
 } satisfies typeof import("../zh-Hant/errorCodes").default;

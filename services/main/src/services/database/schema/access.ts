@@ -56,6 +56,7 @@ const unitPermissionStorageValues = toEnumValues([
 	"unit.ownership.transfer",
 	"unit.association.manage",
 	"unit.tag-curation.manage",
+	"unit.realm-publication.manage",
 	"unit.delete",
 	"realm.contribute",
 	"realm.units.create",

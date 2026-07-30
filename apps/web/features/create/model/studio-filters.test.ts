@@ -17,6 +17,7 @@ describe("Studio filters", () => {
 			"unit.update",
 			"unit.status.update",
 			"unit.access.manage",
+			"unit.realm-publication.manage",
 		]);
 		expect(StudioWorkStates).toEqual(["actionable", "blocked"]);
 		expect(StudioStatuses).toEqual(["draft", "published", "archived"]);

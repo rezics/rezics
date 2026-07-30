@@ -118,6 +118,11 @@ export const FilterRealmUnitStatusValues = ["pending", "visible", "hidden", "rem
 export type FilterRealmUnitStatus = (typeof FilterRealmUnitStatusValues)[number];
 export const FilterRealmUnitStatus = stringEnum(FilterRealmUnitStatusValues);
 
+export const FilterRealmUnitPublicationStateValues = ["active", "withdrawn"] as const;
+export type FilterRealmUnitPublicationState =
+	(typeof FilterRealmUnitPublicationStateValues)[number];
+export const FilterRealmUnitPublicationState = stringEnum(FilterRealmUnitPublicationStateValues);
+
 export const FilterContentLanguageValues = ["zh", "en", "ja", "ko", "de", "fr", "es"] as const;
 export type FilterContentLanguage = (typeof FilterContentLanguageValues)[number];
 export const FilterContentLanguage = stringEnum(FilterContentLanguageValues);
@@ -150,6 +155,11 @@ export const RealmUnitStatusFilter = inFilter(
 	FilterRealmUnitStatusValues.length,
 );
 export type RealmUnitStatusFilter = Static<typeof RealmUnitStatusFilter>;
+export const RealmUnitPublicationStateFilter = inFilter(
+	FilterRealmUnitPublicationState,
+	FilterRealmUnitPublicationStateValues.length,
+);
+export type RealmUnitPublicationStateFilter = Static<typeof RealmUnitPublicationStateFilter>;
 
 export const IntegerFilter = Type.Union([
 	Type.Object(
@@ -303,6 +313,7 @@ export const RealmPlacementFilter = Type.Recursive(
 				...logicFields(This),
 				realm: Type.Optional(UnitReferenceFilter),
 				status: Type.Optional(RealmUnitStatusFilter),
+				publicationState: Type.Optional(RealmUnitPublicationStateFilter),
 			},
 			{ minProperties: 1, additionalProperties: false },
 		),
@@ -622,6 +633,7 @@ export function createSimpleFeedFilter(input: {
 				some: {
 					realm: { id: { in: uniqueSortedStrings(input.realmIds) } },
 					status: { in: ["visible"] },
+					publicationState: { in: ["active"] },
 				},
 			},
 		});
@@ -767,7 +779,9 @@ export function readSimpleFeedFilter(value: unknown): SimpleFeedFilterSelection 
 			!clause.realms.some.realm.kind &&
 			clause.realms.some.status?.in.length === 1 &&
 			clause.realms.some.status.in[0] === "visible" &&
-			Object.keys(clause.realms.some).length === 2
+			clause.realms.some.publicationState?.in.length === 1 &&
+			clause.realms.some.publicationState.in[0] === "active" &&
+			Object.keys(clause.realms.some).length === 3
 		) {
 			realmIds.push(...clause.realms.some.realm.id.in);
 			continue;

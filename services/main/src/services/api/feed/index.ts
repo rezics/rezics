@@ -156,6 +156,7 @@ async function getFeedRealmContextsByUnitIds(
 			and(
 				inArray(realmUnit.unitId, [...unitIds]),
 				eq(realmUnit.status, "visible"),
+				eq(realmUnit.publicationState, "active"),
 				eq(feedContextRealm.status, "published"),
 				eq(feedContextRealm.visibility, "public"),
 				isNull(feedContextRealm.deletedAt),
@@ -490,6 +491,7 @@ export function getFeedEligibilityCondition(
 						sql`, `,
 					)})
 					and scoped_content.status = 'visible'
+					and scoped_content.publication_state = 'active'
 			)`
 			: undefined,
 		scope.subjectId ? eq(post.subjectUnitId, scope.subjectId) : undefined,
@@ -696,7 +698,11 @@ async function getCandidateSources(input: {
 					.leftJoin(post, eq(post.id, unit.id))
 					.innerJoin(
 						realmUnit,
-						and(eq(realmUnit.unitId, unit.id), eq(realmUnit.status, "visible")),
+						and(
+							eq(realmUnit.unitId, unit.id),
+							eq(realmUnit.status, "visible"),
+							eq(realmUnit.publicationState, "active"),
+						),
 					)
 					.innerJoin(
 						unitFollow,
@@ -799,6 +805,7 @@ export function getFeedCandidateRealmIdExpression(
 		select candidate_realm.realm_id from realm_unit candidate_realm
 		where candidate_realm.unit_id = ${unit.id}
 			and candidate_realm.status = 'visible'
+			and candidate_realm.publication_state = 'active'
 			${
 				realmIds?.length
 					? sql`and candidate_realm.realm_id in (${sql.join(
@@ -1224,6 +1231,7 @@ export async function hydrateFeedItems(
 							eq(realmUnit.realmId, realmTagContext.realmId),
 							eq(realmUnit.unitId, realmTagContext.contextPostId),
 							eq(realmUnit.status, "visible"),
+							eq(realmUnit.publicationState, "active"),
 						),
 					)
 					.innerJoin(
@@ -1259,6 +1267,7 @@ export async function hydrateFeedItems(
 							eq(realmUnit.realmId, realmTagContext.realmId),
 							eq(realmUnit.unitId, realmTagContext.contextPostId),
 							eq(realmUnit.status, "visible"),
+							eq(realmUnit.publicationState, "active"),
 						),
 					)
 					.innerJoin(

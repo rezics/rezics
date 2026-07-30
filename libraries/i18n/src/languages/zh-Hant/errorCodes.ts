@@ -216,4 +216,7 @@ export default {
 	AssociationContextPostInvalid: `關聯脈絡必須是知識型${postTerms.inline}。`,
 	ProgressEntryNotFound: "找不到這筆進度事件。",
 	PostTagMentionVoteConflict: `這個標籤提及與你對該${postTerms.inline}的既有負票衝突。`,
+	UnitRealmPublicationNotFound: `找不到這項內容與該${realmTerms.label}的發布關係。`,
+	UnitRealmPublicationAlreadyExists: `這項內容已與該${realmTerms.label}建立發布關係。`,
+	UnitRealmPublicationTransitionInvalid: "這項發布關係已經處於要求的狀態。",
 };

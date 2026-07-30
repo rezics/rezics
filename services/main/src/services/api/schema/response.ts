@@ -390,6 +390,7 @@ export const UnitDetailResponse = t.Object({
 		canManageAccess: t.Boolean(),
 		canManageAssociations: t.Boolean(),
 		canCurateTags: t.Boolean(),
+		canManageRealmPublications: t.Boolean(),
 		hasDevelopmentPreviewAccess: t.Boolean(),
 	}),
 });
@@ -1003,6 +1004,7 @@ export const CollectionDetailResponse = t.Object({
 		canManagePublishers: t.Boolean(),
 		canManageLocalizations: t.Boolean(),
 		canManageAccess: t.Boolean(),
+		canManageRealmPublications: t.Boolean(),
 		canViewHistory: t.Boolean(),
 		canRestoreHistory: t.Boolean(),
 	}),
@@ -1100,6 +1102,7 @@ const PostThreadDetailFields = {
 	capabilities: t.Object({
 		canEdit: t.Boolean(),
 		canManageAttributions: t.Boolean(),
+		canManageRealmPublications: t.Boolean(),
 		canManageAccess: t.Boolean(),
 		canReply: t.Boolean(),
 	}),
@@ -1139,6 +1142,7 @@ export const ReviewDetailResponse = t.Object({
 	capabilities: t.Object({
 		canEdit: t.Boolean(),
 		canManageAttributions: t.Boolean(),
+		canManageRealmPublications: t.Boolean(),
 		canManageAccess: t.Boolean(),
 		canManageScores: t.Boolean(),
 		canReply: t.Boolean(),

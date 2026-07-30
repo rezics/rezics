@@ -143,6 +143,7 @@ export default {
 			"unit.update": "Darf bearbeiten",
 			"unit.status.update": "Darf den Status ändern",
 			"unit.access.manage": "Darf den Zugriff verwalten",
+			"unit.realm-publication.manage": `Darf Veröffentlichungen in ${realmTerms.label} verwalten`,
 		},
 		workStates: { actionable: "Bearbeitbar", blocked: "Derzeit blockiert" },
 		statuses: { draft: "Entwurf", published: "Veröffentlicht", archived: "Archiviert" },

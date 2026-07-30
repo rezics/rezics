@@ -217,6 +217,7 @@ export async function saveRealmTaxonomyDraft(
 							eq(realmUnit.realmId, input.ownerUnitId),
 							inArray(realmUnit.unitId, wikiUnitIds),
 							eq(realmUnit.status, "visible"),
+							eq(realmUnit.publicationState, "active"),
 						),
 					);
 				const mountedIds = new Set(mounted.map(({ unitId }) => unitId));

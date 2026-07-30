@@ -192,6 +192,7 @@ export default {
 			"unit.ownership.transfer": "Transferir la propiedad",
 			"unit.association.manage": "Gestionar las asociaciones",
 			"unit.tag-curation.manage": "Gestionar la selección de etiquetas",
+			"unit.realm-publication.manage": `Gestionar la difusión en ${realmTerms.label}`,
 			"realm.contribute": `Contribuir al ${realmTerms.inline}`,
 			"realm.units.create": "Crear Units",
 			"realm.post.replies.create": "Crear respuestas",

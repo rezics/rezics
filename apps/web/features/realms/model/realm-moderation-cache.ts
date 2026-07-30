@@ -31,7 +31,9 @@ export function updateRealmModerationPages(
 ): RealmModerationPages | undefined {
 	if (!data) return data;
 	const removeFromFilteredQueue =
-		(filter !== "all" && target.status !== filter) ||
+		(filter === "current"
+			? target.status === "removed"
+			: filter !== "all" && target.status !== filter) ||
 		(reportFilter === ReportedRealmUnits && Number(target.openReportCount) === 0);
 	return {
 		...data,

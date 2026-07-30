@@ -6,6 +6,7 @@ const { forms: publicationLicenseTerms } = esTerminology.publicationLicense;
 const { forms: postTerms } = esTerminology.post;
 const { forms: videoTerms } = esTerminology.video;
 const { forms: audioTerms } = esTerminology.audio;
+const { forms: realmTerms } = esTerminology.realm;
 const { forms: followTerms } = esTerminology.follow;
 const { forms: metadataTerms } = esTerminology.metadata;
 
@@ -92,6 +93,10 @@ export default {
 				description:
 					"Destaca etiquetas globales y organiza el orden en el que aparecen primero.",
 			},
+			realms: {
+				label: `Difusión en ${realmTerms.pluralLabel}`,
+				description: `Gestiona la difusión, la retirada y la redifusión en cada ${realmTerms.label}.`,
+			},
 			contentStructure: {
 				label: "Estructura de contenido",
 				description:
@@ -113,6 +118,33 @@ export default {
 				description: "Revisa, compara, deshace o restaura versiones del contenido.",
 			},
 		},
+	},
+	realmPublications: {
+		title: `Difusión en ${realmTerms.pluralLabel}`,
+		description: `Gestiona las relaciones de inclusión que se conservan permanentemente entre este contenido y los ${realmTerms.pluralLabel}. Retirar una difusión la desactiva sin borrar la relación.`,
+		addTitle: `Publicar en un ${realmTerms.label}`,
+		addDescription: `Añade un ${realmTerms.label} cada vez para comprobar por separado su permiso de difusión y sus reglas.`,
+		realmLabel: realmTerms.label,
+		add: "Publicar",
+		publicationStateFilter: "Estado de difusión",
+		realmStatusFilter: `Estado de gobernanza del ${realmTerms.label}`,
+		all: "Todos",
+		current: "Estados de gobernanza actuales",
+		publicationStates: { active: "Publicado", withdrawn: "Retirado" },
+		realmStatuses: {
+			pending: "Pendiente de revisión",
+			visible: "Aprobado",
+			hidden: "Oculto",
+			removed: "Eliminado por gobernanza",
+		},
+		effectivelyVisible: `Visible actualmente en el ${realmTerms.label}`,
+		notEffectivelyVisible: `No visible actualmente en el ${realmTerms.label}`,
+		empty: "Ninguna relación de difusión coincide con los filtros actuales.",
+		withdraw: "Retirar",
+		republish: "Volver a publicar",
+		loadMore: "Cargar más",
+		unnamedRealm: `${realmTerms.label} sin nombre`,
+		governanceReason: insert("Motivo de gobernanza: {{reason}}", { reason: String }),
 	},
 	series: {
 		kind: "Tipo de serie",

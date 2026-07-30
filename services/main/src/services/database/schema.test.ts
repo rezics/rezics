@@ -48,6 +48,9 @@ import {
 	profileRealmTagSubscription,
 	realmUnitStatus,
 	realmUnitStatusEvent,
+	realmUnitPublicationEvent,
+	realmUnitPublicationState,
+	realmUnit,
 	RealmUnitMutationCommandValues,
 	RealmRuleAcknowledgementModeValues,
 	scoreStat,
@@ -412,6 +415,7 @@ describe("database schema contracts", () => {
 
 	it("centralizes governance contracts and Post-identity note bindings", () => {
 		expect(realmUnitStatus.enumValues).toEqual(["pending", "visible", "hidden", "removed"]);
+		expect(realmUnitPublicationState.enumValues).toEqual(["active", "withdrawn"]);
 		expect(RealmUnitMutationCommandValues).toEqual([
 			"approve",
 			"hide",
@@ -446,6 +450,23 @@ describe("database schema contracts", () => {
 			"realm_unit_status_event_action_key",
 		);
 		expect(event.columns.map((column) => column.name)).not.toContain("annotation_document");
+
+		const publication = getTableConfig(realmUnit);
+		expect(publication.columns.map((column) => column.name)).toContain("publication_state");
+		expect(publication.indexes.map((index) => index.config.name)).toEqual(
+			expect.arrayContaining([
+				"realm_unit_moderation_queue_idx",
+				"realm_unit_unit_publication_status_updated_idx",
+			]),
+		);
+
+		const publicationEvent = getTableConfig(realmUnitPublicationEvent);
+		expect(publicationEvent.foreignKeys.map((key) => key.getName())).toContain(
+			"realm_unit_publication_event_relation_fkey",
+		);
+		expect(publicationEvent.checks.map((constraint) => constraint.name)).toContain(
+			"realm_unit_publication_event_transition_check",
+		);
 
 		const action = getTableConfig(moderationAction);
 		expect(governanceReasonCode.enumValues).toEqual(GovernanceReasonCodeValues);

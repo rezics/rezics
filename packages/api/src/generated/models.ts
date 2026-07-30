@@ -89,6 +89,14 @@ export const RealmPlacementFilterStatusInEnum = {
 export type RealmPlacementFilterStatusInEnum =
 	(typeof RealmPlacementFilterStatusInEnum)[keyof typeof RealmPlacementFilterStatusInEnum];
 
+export const RealmPlacementFilterPublicationStateInEnum = {
+	active: "active",
+	withdrawn: "withdrawn",
+} as const;
+
+export type RealmPlacementFilterPublicationStateInEnum =
+	(typeof RealmPlacementFilterPublicationStateInEnum)[keyof typeof RealmPlacementFilterPublicationStateInEnum];
+
 /**
  * @type object
  */
@@ -136,6 +144,15 @@ export type RealmPlacementFilter = {
 		 * @type array
 		 */
 		in: RealmPlacementFilterStatusInEnum[];
+	};
+	/**
+	 * @type object | undefined
+	 */
+	publicationState?: {
+		/**
+		 * @type array
+		 */
+		in: RealmPlacementFilterPublicationStateInEnum[];
 	};
 };
 
@@ -1550,6 +1567,15 @@ export type UnitPredicate = {
 						 */
 						in: ("pending" | "visible" | "hidden" | "removed")[];
 					};
+					/**
+					 * @type object | undefined
+					 */
+					publicationState?: {
+						/**
+						 * @type array
+						 */
+						in: ("active" | "withdrawn")[];
+					};
 				};
 		  }
 		| {
@@ -1621,6 +1647,15 @@ export type UnitPredicate = {
 						 * @type array
 						 */
 						in: ("pending" | "visible" | "hidden" | "removed")[];
+					};
+					/**
+					 * @type object | undefined
+					 */
+					publicationState?: {
+						/**
+						 * @type array
+						 */
+						in: ("active" | "withdrawn")[];
 					};
 				};
 		  };
@@ -5271,6 +5306,9 @@ export const ApiErrorCode = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
 	UnitChanged: "UnitChanged",
+	UnitRealmPublicationNotFound: "UnitRealmPublicationNotFound",
+	UnitRealmPublicationAlreadyExists: "UnitRealmPublicationAlreadyExists",
+	UnitRealmPublicationTransitionInvalid: "UnitRealmPublicationTransitionInvalid",
 	UnitRevisionConflict: "UnitRevisionConflict",
 	UnitLocalizationOrderChanged: "UnitLocalizationOrderChanged",
 	UnitLocalizationOrderInvalid: "UnitLocalizationOrderInvalid",
@@ -20435,6 +20473,7 @@ export const GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum = {
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -20477,6 +20516,7 @@ export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum = {
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -20504,6 +20544,7 @@ export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -20531,6 +20572,7 @@ export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsInheritedEnum = 
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -20770,6 +20812,7 @@ export const PutApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum = {
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -20812,6 +20855,7 @@ export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum = {
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -20839,6 +20883,7 @@ export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -20866,6 +20911,7 @@ export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsInheritedEnum = 
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -21134,6 +21180,7 @@ export const PutApiGovernanceUnitByUnitIdAccessRequestGrantsEnum = {
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -21161,6 +21208,7 @@ export const PutApiGovernanceUnitByUnitIdAccessRequestRestrictionsEnum = {
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -21481,6 +21529,7 @@ export const GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsPermis
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -22182,6 +22231,7 @@ export const GetApiGovernanceUnitAccessInvitationsStatus200ItemsPermissionsEnum 
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -22348,6 +22398,7 @@ export const GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsPermissi
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -22572,6 +22623,7 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200PermissionsE
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -22827,6 +22879,7 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsRequestPermissionsEnu
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -22940,6 +22993,7 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptS
 		"unit.access.manage": "unit.access.manage",
 		"unit.association.manage": "unit.association.manage",
 		"unit.tag-curation.manage": "unit.tag-curation.manage",
+		"unit.realm-publication.manage": "unit.realm-publication.manage",
 		"realm.contribute": "realm.contribute",
 		"realm.units.create": "realm.units.create",
 		"realm.post.replies.create": "realm.post.replies.create",
@@ -23183,6 +23237,7 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecline
 		"unit.access.manage": "unit.access.manage",
 		"unit.association.manage": "unit.association.manage",
 		"unit.tag-curation.manage": "unit.tag-curation.manage",
+		"unit.realm-publication.manage": "unit.realm-publication.manage",
 		"realm.contribute": "realm.contribute",
 		"realm.units.create": "realm.units.create",
 		"realm.post.replies.create": "realm.post.replies.create",
@@ -38819,6 +38874,7 @@ export const ListCurrentUserStudioContentPermission = {
 	"unit.update": "unit.update",
 	"unit.status.update": "unit.status.update",
 	"unit.access.manage": "unit.access.manage",
+	"unit.realm-publication.manage": "unit.realm-publication.manage",
 } as const;
 
 export type ListCurrentUserStudioContentPermission =
@@ -38993,6 +39049,7 @@ export const ListCurrentUserStudioContentStatus200ItemsPermissionsEnum = {
 	"unit.update": "unit.update",
 	"unit.status.update": "unit.status.update",
 	"unit.access.manage": "unit.access.manage",
+	"unit.realm-publication.manage": "unit.realm-publication.manage",
 } as const;
 
 export type ListCurrentUserStudioContentStatus200ItemsPermissionsEnum =
@@ -50250,6 +50307,978 @@ export type PostApiUnitsPresentationsResponse =
 /**
  * @type object
  */
+export type GetApiUnitsByIdByUnitIdRealmPublicationsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const GetApiUnitsByIdByUnitIdRealmPublicationsPublicationState = {
+	active: "active",
+	withdrawn: "withdrawn",
+	all: "all",
+} as const;
+
+export type GetApiUnitsByIdByUnitIdRealmPublicationsPublicationState =
+	(typeof GetApiUnitsByIdByUnitIdRealmPublicationsPublicationState)[keyof typeof GetApiUnitsByIdByUnitIdRealmPublicationsPublicationState];
+
+export const GetApiUnitsByIdByUnitIdRealmPublicationsRealmStatus = {
+	current: "current",
+	pending: "pending",
+	visible: "visible",
+	hidden: "hidden",
+	removed: "removed",
+	all: "all",
+} as const;
+
+export type GetApiUnitsByIdByUnitIdRealmPublicationsRealmStatus =
+	(typeof GetApiUnitsByIdByUnitIdRealmPublicationsRealmStatus)[keyof typeof GetApiUnitsByIdByUnitIdRealmPublicationsRealmStatus];
+
+export const GetApiUnitsByIdByUnitIdRealmPublicationsLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUnitsByIdByUnitIdRealmPublicationsLocalizationLanguagesEnum =
+	(typeof GetApiUnitsByIdByUnitIdRealmPublicationsLocalizationLanguagesEnum)[keyof typeof GetApiUnitsByIdByUnitIdRealmPublicationsLocalizationLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdRealmPublicationsQuery = {
+	/**
+	 * @default 'active'
+	 * @type string | undefined
+	 */
+	publicationState?: GetApiUnitsByIdByUnitIdRealmPublicationsPublicationState;
+	/**
+	 * @default 'current'
+	 * @type string | undefined
+	 */
+	realmStatus?: GetApiUnitsByIdByUnitIdRealmPublicationsRealmStatus;
+	/**
+	 * @type array
+	 */
+	localizationLanguages: GetApiUnitsByIdByUnitIdRealmPublicationsLocalizationLanguagesEnum[];
+	/**
+	 * @minLength 1
+	 * @maxLength 1024
+	 * @type string | undefined
+	 */
+	cursor?: string;
+	/**
+	 * @default 50
+	 */
+	limit?: string | number;
+};
+
+export const GetApiUnitsByIdByUnitIdRealmPublicationsStatus200ItemsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUnitsByIdByUnitIdRealmPublicationsStatus200ItemsLanguageEnum =
+	(typeof GetApiUnitsByIdByUnitIdRealmPublicationsStatus200ItemsLanguageEnum)[keyof typeof GetApiUnitsByIdByUnitIdRealmPublicationsStatus200ItemsLanguageEnum];
+
+export const GetApiUnitsByIdByUnitIdRealmPublicationsStatus200ItemsPublicationStateEnum = {
+	active: "active",
+	withdrawn: "withdrawn",
+} as const;
+
+export type GetApiUnitsByIdByUnitIdRealmPublicationsStatus200ItemsPublicationStateEnum =
+	(typeof GetApiUnitsByIdByUnitIdRealmPublicationsStatus200ItemsPublicationStateEnum)[keyof typeof GetApiUnitsByIdByUnitIdRealmPublicationsStatus200ItemsPublicationStateEnum];
+
+export const GetApiUnitsByIdByUnitIdRealmPublicationsStatus200ItemsStatusEnum = {
+	pending: "pending",
+	visible: "visible",
+	hidden: "hidden",
+	removed: "removed",
+} as const;
+
+export type GetApiUnitsByIdByUnitIdRealmPublicationsStatus200ItemsStatusEnum =
+	(typeof GetApiUnitsByIdByUnitIdRealmPublicationsStatus200ItemsStatusEnum)[keyof typeof GetApiUnitsByIdByUnitIdRealmPublicationsStatus200ItemsStatusEnum];
+
+export const GetApiUnitsByIdByUnitIdRealmPublicationsStatus200ItemsLatestGovernanceReasonCodeEnum =
+	{
+		content_policy: "content_policy",
+		realm_rules: "realm_rules",
+		spam: "spam",
+		harassment: "harassment",
+		unsafe_content: "unsafe_content",
+		off_topic: "off_topic",
+		duplicate: "duplicate",
+		account_security: "account_security",
+		user_request: "user_request",
+		appeal: "appeal",
+		administrative: "administrative",
+		other: "other",
+	} as const;
+
+export type GetApiUnitsByIdByUnitIdRealmPublicationsStatus200ItemsLatestGovernanceReasonCodeEnum =
+	(typeof GetApiUnitsByIdByUnitIdRealmPublicationsStatus200ItemsLatestGovernanceReasonCodeEnum)[keyof typeof GetApiUnitsByIdByUnitIdRealmPublicationsStatus200ItemsLatestGovernanceReasonCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdRealmPublicationsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		realmId: string;
+		/**
+		 * @type string
+		 */
+		realmKind: "realm";
+		/**
+		 * @type string
+		 */
+		language: GetApiUnitsByIdByUnitIdRealmPublicationsStatus200ItemsLanguageEnum;
+		title: (string | null) | null;
+		/**
+		 * @default 'active'
+		 * @type string
+		 */
+		publicationState: GetApiUnitsByIdByUnitIdRealmPublicationsStatus200ItemsPublicationStateEnum;
+		/**
+		 * @default 'pending'
+		 * @type string
+		 */
+		status: GetApiUnitsByIdByUnitIdRealmPublicationsStatus200ItemsStatusEnum;
+		/**
+		 * @type boolean
+		 */
+		effectivelyVisible: boolean;
+		latestGovernance:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					actionId: string;
+					/**
+					 * @default 'content_policy'
+					 * @type string
+					 */
+					reasonCode: GetApiUnitsByIdByUnitIdRealmPublicationsStatus200ItemsLatestGovernanceReasonCodeEnum;
+					/**
+					 * @description
+					 * Format: `date-time`
+					 * @type string
+					 */
+					createdAt: string;
+			  } | null)
+			| null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+	nextCursor: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdRealmPublicationsStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InvalidPaginationCursor'
+		 * @type string
+		 */
+		code: "InvalidPaginationCursor";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const GetApiUnitsByIdByUnitIdRealmPublicationsStatus403ErrorCodeEnum = {
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountRestricted: "AccountRestricted",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+} as const;
+
+export type GetApiUnitsByIdByUnitIdRealmPublicationsStatus403ErrorCodeEnum =
+	(typeof GetApiUnitsByIdByUnitIdRealmPublicationsStatus403ErrorCodeEnum)[keyof typeof GetApiUnitsByIdByUnitIdRealmPublicationsStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdRealmPublicationsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiTokenPermissionRequired'
+		 * @type string
+		 */
+		code: GetApiUnitsByIdByUnitIdRealmPublicationsStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdRealmPublicationsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdRealmPublicationsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdRealmPublicationsStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdRealmPublicationsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdRealmPublicationsOptions = {
+	body?: never;
+	path: GetApiUnitsByIdByUnitIdRealmPublicationsPath;
+	query: GetApiUnitsByIdByUnitIdRealmPublicationsQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdRealmPublicationsResponses = {
+	"200": GetApiUnitsByIdByUnitIdRealmPublicationsStatus200;
+	"400": GetApiUnitsByIdByUnitIdRealmPublicationsStatus400;
+	"403": GetApiUnitsByIdByUnitIdRealmPublicationsStatus403;
+	"404": GetApiUnitsByIdByUnitIdRealmPublicationsStatus404;
+	"422": GetApiUnitsByIdByUnitIdRealmPublicationsStatus422;
+	"429": GetApiUnitsByIdByUnitIdRealmPublicationsStatus429;
+	"500": GetApiUnitsByIdByUnitIdRealmPublicationsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiUnitsByIdByUnitIdRealmPublicationsResponse =
+	| GetApiUnitsByIdByUnitIdRealmPublicationsStatus200
+	| GetApiUnitsByIdByUnitIdRealmPublicationsStatus400
+	| GetApiUnitsByIdByUnitIdRealmPublicationsStatus403
+	| GetApiUnitsByIdByUnitIdRealmPublicationsStatus404
+	| GetApiUnitsByIdByUnitIdRealmPublicationsStatus422
+	| GetApiUnitsByIdByUnitIdRealmPublicationsStatus429
+	| GetApiUnitsByIdByUnitIdRealmPublicationsStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+/**
+ * @type void
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus204 = void;
+
+export const PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus403ErrorCodeEnum = {
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountRestricted: "AccountRestricted",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+} as const;
+
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus403ErrorCodeEnum =
+	(typeof PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus403ErrorCodeEnum)[keyof typeof PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiTokenPermissionRequired'
+		 * @type string
+		 */
+		code: PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus409ErrorCodeEnum = {
+	UnitRealmPublicationAlreadyExists: "UnitRealmPublicationAlreadyExists",
+	UnitRealmPublicationTransitionInvalid: "UnitRealmPublicationTransitionInvalid",
+	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
+} as const;
+
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus409ErrorCodeEnum =
+	(typeof PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus409ErrorCodeEnum)[keyof typeof PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitRealmPublicationAlreadyExists'
+		 * @type string
+		 */
+		code: PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdOptions = {
+	body?: never;
+	path: PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdResponses = {
+	"204": PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus204;
+	"403": PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus403;
+	"404": PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus404;
+	"409": PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus409;
+	"422": PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus422;
+	"429": PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus429;
+	"500": PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdResponse =
+	| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus204
+	| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus403
+	| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus404
+	| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus409
+	| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus422
+	| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus429
+	| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+/**
+ * @type void
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus204 = void;
+
+export const PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus403ErrorCodeEnum = {
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountRestricted: "AccountRestricted",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+} as const;
+
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus403ErrorCodeEnum =
+	(typeof PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus403ErrorCodeEnum)[keyof typeof PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiTokenPermissionRequired'
+		 * @type string
+		 */
+		code: PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	UnitRealmPublicationNotFound: "UnitRealmPublicationNotFound",
+} as const;
+
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus404ErrorCodeEnum =
+	(typeof PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus404ErrorCodeEnum)[keyof typeof PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus409ErrorCodeEnum = {
+	UnitRealmPublicationAlreadyExists: "UnitRealmPublicationAlreadyExists",
+	UnitRealmPublicationTransitionInvalid: "UnitRealmPublicationTransitionInvalid",
+	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
+} as const;
+
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus409ErrorCodeEnum =
+	(typeof PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus409ErrorCodeEnum)[keyof typeof PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitRealmPublicationAlreadyExists'
+		 * @type string
+		 */
+		code: PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawOptions = {
+	body?: never;
+	path: PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawResponses = {
+	"204": PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus204;
+	"403": PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus403;
+	"404": PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus404;
+	"409": PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus409;
+	"422": PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus422;
+	"429": PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus429;
+	"500": PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawResponse =
+	| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus204
+	| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus403
+	| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus404
+	| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus409
+	| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus422
+	| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus429
+	| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+/**
+ * @type void
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus204 = void;
+
+export const PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus403ErrorCodeEnum = {
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountRestricted: "AccountRestricted",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+} as const;
+
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus403ErrorCodeEnum =
+	(typeof PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus403ErrorCodeEnum)[keyof typeof PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiTokenPermissionRequired'
+		 * @type string
+		 */
+		code: PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	UnitRealmPublicationNotFound: "UnitRealmPublicationNotFound",
+} as const;
+
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus404ErrorCodeEnum =
+	(typeof PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus404ErrorCodeEnum)[keyof typeof PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus409ErrorCodeEnum = {
+	UnitRealmPublicationAlreadyExists: "UnitRealmPublicationAlreadyExists",
+	UnitRealmPublicationTransitionInvalid: "UnitRealmPublicationTransitionInvalid",
+	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
+} as const;
+
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus409ErrorCodeEnum =
+	(typeof PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus409ErrorCodeEnum)[keyof typeof PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitRealmPublicationAlreadyExists'
+		 * @type string
+		 */
+		code: PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishOptions = {
+	body?: never;
+	path: PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishResponses = {
+	"204": PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus204;
+	"403": PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus403;
+	"404": PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus404;
+	"409": PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus409;
+	"422": PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus422;
+	"429": PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus429;
+	"500": PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishResponse =
+	| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus204
+	| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus403
+	| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus404
+	| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus409
+	| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus422
+	| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus429
+	| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus500;
+
+/**
+ * @type object
+ */
 export type GetApiUnitsByIdByUnitIdSeriesMembershipsPath = {
 	/**
 	 * @description
@@ -52932,6 +53961,10 @@ export type PostApiUnitsByTypeStatus200 = {
 		/**
 		 * @type boolean
 		 */
+		canManageRealmPublications: boolean;
+		/**
+		 * @type boolean
+		 */
 		hasDevelopmentPreviewAccess: boolean;
 	};
 };
@@ -54911,6 +55944,10 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		/**
 		 * @type boolean
 		 */
+		canManageRealmPublications: boolean;
+		/**
+		 * @type boolean
+		 */
 		hasDevelopmentPreviewAccess: boolean;
 	};
 };
@@ -56135,6 +57172,10 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		 * @type boolean
 		 */
 		canCurateTags: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageRealmPublications: boolean;
 		/**
 		 * @type boolean
 		 */
@@ -57634,6 +58675,10 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 		/**
 		 * @type boolean
 		 */
+		canManageRealmPublications: boolean;
+		/**
+		 * @type boolean
+		 */
 		hasDevelopmentPreviewAccess: boolean;
 	};
 };
@@ -59031,6 +60076,10 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 		 * @type boolean
 		 */
 		canCurateTags: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageRealmPublications: boolean;
 		/**
 		 * @type boolean
 		 */
@@ -60441,6 +61490,10 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		 * @type boolean
 		 */
 		canCurateTags: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageRealmPublications: boolean;
 		/**
 		 * @type boolean
 		 */
@@ -77416,6 +78469,10 @@ export type PostApiCollectionsStatus200 = {
 		/**
 		 * @type boolean
 		 */
+		canManageRealmPublications: boolean;
+		/**
+		 * @type boolean
+		 */
 		canViewHistory: boolean;
 		/**
 		 * @type boolean
@@ -78246,6 +79303,10 @@ export type GetApiCollectionsFavoritesStatus200 = {
 		 * @type boolean
 		 */
 		canManageAccess: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageRealmPublications: boolean;
 		/**
 		 * @type boolean
 		 */
@@ -81898,6 +82959,10 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 		/**
 		 * @type boolean
 		 */
+		canManageRealmPublications: boolean;
+		/**
+		 * @type boolean
+		 */
 		canViewHistory: boolean;
 		/**
 		 * @type boolean
@@ -82423,6 +83488,10 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 		 * @type boolean
 		 */
 		canManageAccess: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageRealmPublications: boolean;
 		/**
 		 * @type boolean
 		 */
@@ -86844,6 +87913,10 @@ export type GetApiReviewsByReviewIdStatus200 = {
 		 * @type boolean
 		 */
 		canManageAttributions: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageRealmPublications: boolean;
 		/**
 		 * @type boolean
 		 */
@@ -91611,6 +92684,10 @@ export type GetApiPostsByPostIdStatus200 =
 				/**
 				 * @type boolean
 				 */
+				canManageRealmPublications: boolean;
+				/**
+				 * @type boolean
+				 */
 				canManageAccess: boolean;
 				/**
 				 * @type boolean
@@ -91982,6 +93059,10 @@ export type GetApiPostsByPostIdStatus200 =
 				/**
 				 * @type boolean
 				 */
+				canManageRealmPublications: boolean;
+				/**
+				 * @type boolean
+				 */
 				canManageAccess: boolean;
 				/**
 				 * @type boolean
@@ -92350,6 +93431,10 @@ export type GetApiPostsByPostIdStatus200 =
 				 * @type boolean
 				 */
 				canManageAttributions: boolean;
+				/**
+				 * @type boolean
+				 */
+				canManageRealmPublications: boolean;
 				/**
 				 * @type boolean
 				 */
@@ -92762,6 +93847,10 @@ export type GetApiPostsByPostIdStatus200 =
 				/**
 				 * @type boolean
 				 */
+				canManageRealmPublications: boolean;
+				/**
+				 * @type boolean
+				 */
 				canManageAccess: boolean;
 				/**
 				 * @type boolean
@@ -93130,6 +94219,10 @@ export type GetApiPostsByPostIdStatus200 =
 				 * @type boolean
 				 */
 				canManageAttributions: boolean;
+				/**
+				 * @type boolean
+				 */
+				canManageRealmPublications: boolean;
 				/**
 				 * @type boolean
 				 */
@@ -105826,14 +106919,25 @@ export type GetApiRealmsByRealmIdUnitsPath = {
 };
 
 export const GetApiRealmsByRealmIdUnitsStatus = {
+	current: "current",
 	pending: "pending",
 	visible: "visible",
 	hidden: "hidden",
 	removed: "removed",
+	all: "all",
 } as const;
 
 export type GetApiRealmsByRealmIdUnitsStatus =
 	(typeof GetApiRealmsByRealmIdUnitsStatus)[keyof typeof GetApiRealmsByRealmIdUnitsStatus];
+
+export const GetApiRealmsByRealmIdUnitsPublicationState = {
+	active: "active",
+	withdrawn: "withdrawn",
+	all: "all",
+} as const;
+
+export type GetApiRealmsByRealmIdUnitsPublicationState =
+	(typeof GetApiRealmsByRealmIdUnitsPublicationState)[keyof typeof GetApiRealmsByRealmIdUnitsPublicationState];
 
 export const GetApiRealmsByRealmIdUnitsLocalizationLanguagesEnum = {
 	zh: "zh",
@@ -105853,9 +106957,15 @@ export type GetApiRealmsByRealmIdUnitsLocalizationLanguagesEnum =
  */
 export type GetApiRealmsByRealmIdUnitsQuery = {
 	/**
+	 * @default 'current'
 	 * @type string | undefined
 	 */
 	status?: GetApiRealmsByRealmIdUnitsStatus;
+	/**
+	 * @default 'active'
+	 * @type string | undefined
+	 */
+	publicationState?: GetApiRealmsByRealmIdUnitsPublicationState;
 	/**
 	 * @type boolean | undefined
 	 */
@@ -105898,6 +107008,14 @@ export const GetApiRealmsByRealmIdUnitsStatus200ItemsStatusEnum = {
 
 export type GetApiRealmsByRealmIdUnitsStatus200ItemsStatusEnum =
 	(typeof GetApiRealmsByRealmIdUnitsStatus200ItemsStatusEnum)[keyof typeof GetApiRealmsByRealmIdUnitsStatus200ItemsStatusEnum];
+
+export const GetApiRealmsByRealmIdUnitsStatus200ItemsPublicationStateEnum = {
+	active: "active",
+	withdrawn: "withdrawn",
+} as const;
+
+export type GetApiRealmsByRealmIdUnitsStatus200ItemsPublicationStateEnum =
+	(typeof GetApiRealmsByRealmIdUnitsStatus200ItemsPublicationStateEnum)[keyof typeof GetApiRealmsByRealmIdUnitsStatus200ItemsPublicationStateEnum];
 
 export const GetApiRealmsByRealmIdUnitsStatus200ItemsAllowedCommandsEnum = {
 	approve: "approve",
@@ -105946,6 +107064,11 @@ export type GetApiRealmsByRealmIdUnitsStatus200 = {
 		 * @type string
 		 */
 		status: GetApiRealmsByRealmIdUnitsStatus200ItemsStatusEnum;
+		/**
+		 * @default 'active'
+		 * @type string
+		 */
+		publicationState: GetApiRealmsByRealmIdUnitsStatus200ItemsPublicationStateEnum;
 		/**
 		 * @type boolean
 		 */
@@ -106535,6 +107658,14 @@ export const PatchApiRealmsByRealmIdUnitsByUnitIdStatus200TargetStatusEnum = {
 export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200TargetStatusEnum =
 	(typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus200TargetStatusEnum)[keyof typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus200TargetStatusEnum];
 
+export const PatchApiRealmsByRealmIdUnitsByUnitIdStatus200TargetPublicationStateEnum = {
+	active: "active",
+	withdrawn: "withdrawn",
+} as const;
+
+export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200TargetPublicationStateEnum =
+	(typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus200TargetPublicationStateEnum)[keyof typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus200TargetPublicationStateEnum];
+
 export const PatchApiRealmsByRealmIdUnitsByUnitIdStatus200TargetAllowedCommandsEnum = {
 	approve: "approve",
 	hide: "hide",
@@ -106614,6 +107745,11 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200 = {
 		 * @type string
 		 */
 		status: PatchApiRealmsByRealmIdUnitsByUnitIdStatus200TargetStatusEnum;
+		/**
+		 * @default 'active'
+		 * @type string
+		 */
+		publicationState: PatchApiRealmsByRealmIdUnitsByUnitIdStatus200TargetPublicationStateEnum;
 		/**
 		 * @type boolean
 		 */

@@ -14,7 +14,14 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { realm, realmRule, realmRuleRevision, realmUnit, realmUnitStatus } from "./realm";
+import {
+	realm,
+	realmRule,
+	realmRuleRevision,
+	realmUnit,
+	realmUnitPublicationState,
+	realmUnitStatus,
+} from "./realm";
 import {
 	EnforcementKindValues,
 	GovernanceReasonCodeValues,
@@ -381,6 +388,45 @@ export const realmUnitStatusEvent = pgTable(
 		check(
 			"realm_unit_status_event_transition_check",
 			sql`${table.fromStatus} is null or ${table.fromStatus} <> ${table.toStatus}`,
+		),
+	],
+);
+
+/**
+ * Append-only Unit-side publication intent history.
+ *
+ * Realm governance transitions are recorded independently in
+ * `realm_unit_status_event`; neither axis is allowed to overwrite the other.
+ */
+export const realmUnitPublicationEvent = pgTable(
+	"realm_unit_publication_event",
+	{
+		id: createUuidv7PrimaryKey(),
+		realmId: uuid().notNull(),
+		unitId: uuid().notNull(),
+		fromState: realmUnitPublicationState("from_state"),
+		toState: realmUnitPublicationState("to_state").notNull(),
+		changedByProfileId: uuid().references(() => profile.id, {
+			onDelete: "set null",
+		}),
+		createdAt: createCreatedAtColumn(),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.realmId, table.unitId],
+			foreignColumns: [realmUnit.realmId, realmUnit.unitId],
+			name: "realm_unit_publication_event_relation_fkey",
+		}).onDelete("restrict"),
+		index("realm_unit_publication_event_history_idx").on(
+			table.unitId,
+			table.realmId,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
+		index("realm_unit_publication_event_actor_idx").on(table.changedByProfileId),
+		check(
+			"realm_unit_publication_event_transition_check",
+			sql`${table.fromState} is null or ${table.fromState} <> ${table.toState}`,
 		),
 	],
 );

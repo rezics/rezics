@@ -186,6 +186,7 @@ export default {
 			"unit.ownership.transfer": "소유권 이전",
 			"unit.association.manage": "연관 관리",
 			"unit.tag-curation.manage": "태그 선별 관리",
+			"unit.realm-publication.manage": `${realmTerms.label} 게시 관리`,
 			"realm.contribute": `${realmTerms.label}에 기여`,
 			"realm.units.create": "유닛 생성",
 			"realm.post.replies.create": "답글 생성",

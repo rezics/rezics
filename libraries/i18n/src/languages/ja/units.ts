@@ -6,6 +6,7 @@ const { forms: publicationLicenseTerms } = jaTerminology.publicationLicense;
 const { forms: postTerms } = jaTerminology.post;
 const { forms: videoTerms } = jaTerminology.video;
 const { forms: audioTerms } = jaTerminology.audio;
+const { forms: realmTerms } = jaTerminology.realm;
 const { forms: followTerms } = jaTerminology.follow;
 const { forms: metadataTerms } = jaTerminology.metadata;
 
@@ -89,6 +90,10 @@ export default {
 				label: "タグ",
 				description: "グローバルタグを注目タグに設定し、優先表示の順序を管理。",
 			},
+			realms: {
+				label: `${realmTerms.label}への公開`,
+				description: `${realmTerms.label}ごとの公開、取り下げ、再公開を管理します。`,
+			},
 			contentStructure: {
 				label: "コンテンツ構造",
 				description:
@@ -108,6 +113,33 @@ export default {
 				description: "コンテンツの改訂をレビュー、比較、元に戻す、または復元。",
 			},
 		},
+	},
+	realmPublications: {
+		title: `${realmTerms.label}への公開`,
+		description: `このコンテンツと${realmTerms.pluralLabel}の間に永続的に保持される収録関係を管理します。取り下げても関係は削除されず、公開だけが停止します。`,
+		addTitle: `${realmTerms.label}に公開`,
+		addDescription: `公開権限とルールを個別に確認するため、${realmTerms.label}を一つずつ追加します。`,
+		realmLabel: realmTerms.label,
+		add: "公開",
+		publicationStateFilter: "公開状態",
+		realmStatusFilter: `${realmTerms.label}の管理状態`,
+		all: "すべて",
+		current: "現在の管理状態",
+		publicationStates: { active: "公開中", withdrawn: "取り下げ済み" },
+		realmStatuses: {
+			pending: "審査待ち",
+			visible: "承認済み",
+			hidden: "非表示",
+			removed: "削除済み",
+		},
+		effectivelyVisible: `現在${realmTerms.label}に表示されています`,
+		notEffectivelyVisible: `現在${realmTerms.label}には表示されていません`,
+		empty: "現在の絞り込み条件に一致する公開関係はありません。",
+		withdraw: "取り下げる",
+		republish: "再公開",
+		loadMore: "さらに読み込む",
+		unnamedRealm: `名称未設定の${realmTerms.label}`,
+		governanceReason: insert("管理上の理由：{{reason}}", { reason: String }),
 	},
 	series: {
 		kind: "シリーズ種類",

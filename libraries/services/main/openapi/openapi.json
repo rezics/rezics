@@ -154,6 +154,20 @@
 								}
 							}
 						}
+					},
+					"publicationState": {
+						"additionalProperties": false,
+						"type": "object",
+						"required": ["in"],
+						"properties": {
+							"in": {
+								"minItems": 1,
+								"maxItems": 2,
+								"uniqueItems": true,
+								"type": "array",
+								"items": { "type": "string", "enum": ["active", "withdrawn"] }
+							}
+						}
 					}
 				}
 			},
@@ -2844,6 +2858,31 @@
 														}
 													}
 												}
+											},
+											"publicationState": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["in"],
+												"properties": {
+													"in": {
+														"minItems": 1,
+														"maxItems": 2,
+														"uniqueItems": true,
+														"type": "array",
+														"items": {
+															"anyOf": [
+																{
+																	"const": "active",
+																	"type": "string"
+																},
+																{
+																	"const": "withdrawn",
+																	"type": "string"
+																}
+															]
+														}
+													}
+												}
 											}
 										}
 									}
@@ -3026,6 +3065,31 @@
 																},
 																{
 																	"const": "removed",
+																	"type": "string"
+																}
+															]
+														}
+													}
+												}
+											},
+											"publicationState": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["in"],
+												"properties": {
+													"in": {
+														"minItems": 1,
+														"maxItems": 2,
+														"uniqueItems": true,
+														"type": "array",
+														"items": {
+															"anyOf": [
+																{
+																	"const": "active",
+																	"type": "string"
+																},
+																{
+																	"const": "withdrawn",
 																	"type": "string"
 																}
 															]
@@ -10016,6 +10080,9 @@
 					"UnitPermissionForbidden",
 					"UnitAccessRestricted",
 					"UnitChanged",
+					"UnitRealmPublicationNotFound",
+					"UnitRealmPublicationAlreadyExists",
+					"UnitRealmPublicationTransitionInvalid",
 					"UnitRevisionConflict",
 					"UnitLocalizationOrderChanged",
 					"UnitLocalizationOrderInvalid",
@@ -32408,6 +32475,7 @@
 													"unit.access.manage",
 													"unit.association.manage",
 													"unit.tag-curation.manage",
+													"unit.realm-publication.manage",
 													"realm.contribute",
 													"realm.units.create",
 													"realm.post.replies.create",
@@ -32546,6 +32614,7 @@
 																"unit.access.manage",
 																"unit.association.manage",
 																"unit.tag-curation.manage",
+																"unit.realm-publication.manage",
 																"realm.contribute",
 																"realm.units.create",
 																"realm.post.replies.create",
@@ -32576,6 +32645,7 @@
 																"unit.access.manage",
 																"unit.association.manage",
 																"unit.tag-curation.manage",
+																"unit.realm-publication.manage",
 																"realm.contribute",
 																"realm.units.create",
 																"realm.post.replies.create",
@@ -32606,6 +32676,7 @@
 																"unit.access.manage",
 																"unit.association.manage",
 																"unit.tag-curation.manage",
+																"unit.realm-publication.manage",
 																"realm.contribute",
 																"realm.units.create",
 																"realm.post.replies.create",
@@ -32782,7 +32853,7 @@
 										]
 									},
 									"grants": {
-										"maxItems": 21,
+										"maxItems": 22,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -32796,6 +32867,7 @@
 												"unit.access.manage",
 												"unit.association.manage",
 												"unit.tag-curation.manage",
+												"unit.realm-publication.manage",
 												"realm.contribute",
 												"realm.units.create",
 												"realm.post.replies.create",
@@ -32814,7 +32886,7 @@
 										}
 									},
 									"restrictions": {
-										"maxItems": 21,
+										"maxItems": 22,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -32828,6 +32900,7 @@
 												"unit.access.manage",
 												"unit.association.manage",
 												"unit.tag-curation.manage",
+												"unit.realm-publication.manage",
 												"realm.contribute",
 												"realm.units.create",
 												"realm.post.replies.create",
@@ -32917,6 +32990,7 @@
 													"unit.access.manage",
 													"unit.association.manage",
 													"unit.tag-curation.manage",
+													"unit.realm-publication.manage",
 													"realm.contribute",
 													"realm.units.create",
 													"realm.post.replies.create",
@@ -33055,6 +33129,7 @@
 																"unit.access.manage",
 																"unit.association.manage",
 																"unit.tag-curation.manage",
+																"unit.realm-publication.manage",
 																"realm.contribute",
 																"realm.units.create",
 																"realm.post.replies.create",
@@ -33085,6 +33160,7 @@
 																"unit.access.manage",
 																"unit.association.manage",
 																"unit.tag-curation.manage",
+																"unit.realm-publication.manage",
 																"realm.contribute",
 																"realm.units.create",
 																"realm.post.replies.create",
@@ -33115,6 +33191,7 @@
 																"unit.access.manage",
 																"unit.association.manage",
 																"unit.tag-curation.manage",
+																"unit.realm-publication.manage",
 																"realm.contribute",
 																"realm.units.create",
 																"realm.post.replies.create",
@@ -33527,6 +33604,7 @@
 															"unit.ownership.transfer",
 															"unit.association.manage",
 															"unit.tag-curation.manage",
+															"unit.realm-publication.manage",
 															"realm.contribute",
 															"realm.units.create",
 															"realm.post.replies.create",
@@ -34295,6 +34373,7 @@
 																"unit.access.manage",
 																"unit.association.manage",
 																"unit.tag-curation.manage",
+																"unit.realm-publication.manage",
 																"realm.contribute",
 																"realm.units.create",
 																"realm.post.replies.create",
@@ -34497,6 +34576,7 @@
 																"unit.access.manage",
 																"unit.association.manage",
 																"unit.tag-curation.manage",
+																"unit.realm-publication.manage",
 																"realm.contribute",
 																"realm.units.create",
 																"realm.post.replies.create",
@@ -34712,7 +34792,7 @@
 									"invitedProfileId": { "format": "uuid", "type": "string" },
 									"permissions": {
 										"minItems": 1,
-										"maxItems": 21,
+										"maxItems": 22,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -34726,6 +34806,7 @@
 												"unit.access.manage",
 												"unit.association.manage",
 												"unit.tag-curation.manage",
+												"unit.realm-publication.manage",
 												"realm.contribute",
 												"realm.units.create",
 												"realm.post.replies.create",
@@ -34804,6 +34885,7 @@
 													"unit.access.manage",
 													"unit.association.manage",
 													"unit.tag-curation.manage",
+													"unit.realm-publication.manage",
 													"realm.contribute",
 													"realm.units.create",
 													"realm.post.replies.create",
@@ -35101,6 +35183,7 @@
 													"unit.access.manage",
 													"unit.association.manage",
 													"unit.tag-curation.manage",
+													"unit.realm-publication.manage",
 													"realm.contribute",
 													"realm.units.create",
 													"realm.post.replies.create",
@@ -35341,6 +35424,7 @@
 													"unit.access.manage",
 													"unit.association.manage",
 													"unit.tag-curation.manage",
+													"unit.realm-publication.manage",
 													"realm.contribute",
 													"realm.units.create",
 													"realm.post.replies.create",
@@ -53654,7 +53738,12 @@
 						"required": false,
 						"schema": {
 							"type": "string",
-							"enum": ["unit.update", "unit.status.update", "unit.access.manage"]
+							"enum": [
+								"unit.update",
+								"unit.status.update",
+								"unit.access.manage",
+								"unit.realm-publication.manage"
+							]
 						}
 					},
 					{
@@ -53885,7 +53974,8 @@
 															"enum": [
 																"unit.update",
 																"unit.status.update",
-																"unit.access.manage"
+																"unit.access.manage",
+																"unit.realm-publication.manage"
 															]
 														}
 													},
@@ -65924,6 +66014,867 @@
 				"x-rezics-policy-operation-id": "postApiUnitsPresentations"
 			}
 		},
+		"/api/units/by-id/{unitId}/realm-publications": {
+			"get": {
+				"summary": "List a Unit's Realm publications",
+				"tags": ["Units", "Realms"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "publicationState",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"default": "active",
+							"type": "string",
+							"enum": ["active", "withdrawn", "all"]
+						}
+					},
+					{
+						"name": "realmStatus",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"default": "current",
+							"type": "string",
+							"enum": ["current", "pending", "visible", "hidden", "removed", "all"]
+						}
+					},
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 7,
+							"uniqueItems": true,
+							"type": "array",
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
+						}
+					},
+					{
+						"name": "cursor",
+						"in": "query",
+						"required": false,
+						"schema": { "minLength": 1, "maxLength": 1024, "type": "string" }
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 100,
+							"default": 50,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 100, "default": 50, "type": "integer" }
+							]
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["items", "nextCursor"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"realmId",
+													"realmKind",
+													"language",
+													"title",
+													"publicationState",
+													"status",
+													"effectivelyVisible",
+													"latestGovernance",
+													"createdAt",
+													"updatedAt"
+												],
+												"properties": {
+													"realmId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"realmKind": {
+														"const": "realm",
+														"type": "string"
+													},
+													"language": {
+														"type": "string",
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
+													},
+													"title": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"publicationState": {
+														"default": "active",
+														"type": "string",
+														"enum": ["active", "withdrawn"]
+													},
+													"status": {
+														"default": "pending",
+														"type": "string",
+														"enum": [
+															"pending",
+															"visible",
+															"hidden",
+															"removed"
+														]
+													},
+													"effectivelyVisible": { "type": "boolean" },
+													"latestGovernance": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": [
+																	"actionId",
+																	"reasonCode",
+																	"createdAt"
+																],
+																"properties": {
+																	"actionId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"reasonCode": {
+																		"default": "content_policy",
+																		"type": "string",
+																		"enum": [
+																			"content_policy",
+																			"realm_rules",
+																			"spam",
+																			"harassment",
+																			"unsafe_content",
+																			"off_topic",
+																			"duplicate",
+																			"account_security",
+																			"user_request",
+																			"appeal",
+																			"administrative",
+																			"other"
+																		]
+																	},
+																	"createdAt": {
+																		"format": "date-time",
+																		"type": "string"
+																	}
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										},
+										"nextCursor": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "InvalidPaginationCursor",
+													"type": "string",
+													"enum": ["InvalidPaginationCursor"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ApiTokenPermissionRequired",
+													"type": "string",
+													"enum": [
+														"ApiTokenPermissionRequired",
+														"EmailVerificationRequired",
+														"AccountRestricted",
+														"UnitAccessRestricted",
+														"UnitPermissionForbidden",
+														"RealmCapabilityRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiUnitsBy-idByUnitIdRealm-publications",
+				"x-rezics-policy-operation-id": "getApiUnitsBy-idByUnitIdRealm-publications"
+			}
+		},
+		"/api/units/by-id/{unitId}/realm-publications/{realmId}": {
+			"post": {
+				"summary": "Publish a Unit to one Realm",
+				"tags": ["Units", "Realms"],
+				"responses": {
+					"204": {
+						"description": "Response for status 204",
+						"content": { "type": "void" }
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ApiTokenPermissionRequired",
+													"type": "string",
+													"enum": [
+														"ApiTokenPermissionRequired",
+														"EmailVerificationRequired",
+														"AccountRestricted",
+														"UnitAccessRestricted",
+														"UnitPermissionForbidden",
+														"RealmCapabilityRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitRealmPublicationAlreadyExists",
+													"type": "string",
+													"enum": [
+														"UnitRealmPublicationAlreadyExists",
+														"UnitRealmPublicationTransitionInvalid",
+														"RealmRulesAcceptanceRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"operationId": "postApiUnitsBy-idByUnitIdRealm-publicationsByRealmId",
+				"x-rezics-policy-operation-id": "postApiUnitsBy-idByUnitIdRealm-publicationsByRealmId"
+			}
+		},
+		"/api/units/by-id/{unitId}/realm-publications/{realmId}/withdraw": {
+			"post": {
+				"summary": "Withdraw a Unit from one Realm",
+				"tags": ["Units", "Realms"],
+				"responses": {
+					"204": {
+						"description": "Response for status 204",
+						"content": { "type": "void" }
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ApiTokenPermissionRequired",
+													"type": "string",
+													"enum": [
+														"ApiTokenPermissionRequired",
+														"EmailVerificationRequired",
+														"AccountRestricted",
+														"UnitAccessRestricted",
+														"UnitPermissionForbidden",
+														"RealmCapabilityRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"UnitRealmPublicationNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitRealmPublicationAlreadyExists",
+													"type": "string",
+													"enum": [
+														"UnitRealmPublicationAlreadyExists",
+														"UnitRealmPublicationTransitionInvalid",
+														"RealmRulesAcceptanceRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"operationId": "postApiUnitsBy-idByUnitIdRealm-publicationsByRealmIdWithdraw",
+				"x-rezics-policy-operation-id": "postApiUnitsBy-idByUnitIdRealm-publicationsByRealmIdWithdraw"
+			}
+		},
+		"/api/units/by-id/{unitId}/realm-publications/{realmId}/republish": {
+			"post": {
+				"summary": "Republish a Unit to one Realm",
+				"tags": ["Units", "Realms"],
+				"responses": {
+					"204": {
+						"description": "Response for status 204",
+						"content": { "type": "void" }
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ApiTokenPermissionRequired",
+													"type": "string",
+													"enum": [
+														"ApiTokenPermissionRequired",
+														"EmailVerificationRequired",
+														"AccountRestricted",
+														"UnitAccessRestricted",
+														"UnitPermissionForbidden",
+														"RealmCapabilityRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"UnitRealmPublicationNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitRealmPublicationAlreadyExists",
+													"type": "string",
+													"enum": [
+														"UnitRealmPublicationAlreadyExists",
+														"UnitRealmPublicationTransitionInvalid",
+														"RealmRulesAcceptanceRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"operationId": "postApiUnitsBy-idByUnitIdRealm-publicationsByRealmIdRepublish",
+				"x-rezics-policy-operation-id": "postApiUnitsBy-idByUnitIdRealm-publicationsByRealmIdRepublish"
+			}
+		},
 		"/api/units/by-id/{unitId}/series-memberships": {
 			"get": {
 				"summary": "List Unit Series memberships",
@@ -70407,6 +71358,7 @@
 												"canManageAccess",
 												"canManageAssociations",
 												"canCurateTags",
+												"canManageRealmPublications",
 												"hasDevelopmentPreviewAccess"
 											],
 											"properties": {
@@ -70414,6 +71366,7 @@
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
 												"canCurateTags": { "type": "boolean" },
+												"canManageRealmPublications": { "type": "boolean" },
 												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
 										}
@@ -72543,6 +73496,7 @@
 												"canManageAccess",
 												"canManageAssociations",
 												"canCurateTags",
+												"canManageRealmPublications",
 												"hasDevelopmentPreviewAccess"
 											],
 											"properties": {
@@ -72550,6 +73504,7 @@
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
 												"canCurateTags": { "type": "boolean" },
+												"canManageRealmPublications": { "type": "boolean" },
 												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
 										}
@@ -74724,6 +75679,7 @@
 												"canManageAccess",
 												"canManageAssociations",
 												"canCurateTags",
+												"canManageRealmPublications",
 												"hasDevelopmentPreviewAccess"
 											],
 											"properties": {
@@ -74731,6 +75687,7 @@
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
 												"canCurateTags": { "type": "boolean" },
+												"canManageRealmPublications": { "type": "boolean" },
 												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
 										}
@@ -76847,6 +77804,7 @@
 												"canManageAccess",
 												"canManageAssociations",
 												"canCurateTags",
+												"canManageRealmPublications",
 												"hasDevelopmentPreviewAccess"
 											],
 											"properties": {
@@ -76854,6 +77812,7 @@
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
 												"canCurateTags": { "type": "boolean" },
+												"canManageRealmPublications": { "type": "boolean" },
 												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
 										}
@@ -78959,6 +79918,7 @@
 												"canManageAccess",
 												"canManageAssociations",
 												"canCurateTags",
+												"canManageRealmPublications",
 												"hasDevelopmentPreviewAccess"
 											],
 											"properties": {
@@ -78966,6 +79926,7 @@
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
 												"canCurateTags": { "type": "boolean" },
+												"canManageRealmPublications": { "type": "boolean" },
 												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
 										}
@@ -81430,6 +82391,7 @@
 												"canManageAccess",
 												"canManageAssociations",
 												"canCurateTags",
+												"canManageRealmPublications",
 												"hasDevelopmentPreviewAccess"
 											],
 											"properties": {
@@ -81437,6 +82399,7 @@
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
 												"canCurateTags": { "type": "boolean" },
+												"canManageRealmPublications": { "type": "boolean" },
 												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
 										}
@@ -102083,6 +103046,7 @@
 												"canManagePublishers",
 												"canManageLocalizations",
 												"canManageAccess",
+												"canManageRealmPublications",
 												"canViewHistory",
 												"canRestoreHistory"
 											],
@@ -102092,6 +103056,7 @@
 												"canManagePublishers": { "type": "boolean" },
 												"canManageLocalizations": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
+												"canManageRealmPublications": { "type": "boolean" },
 												"canViewHistory": { "type": "boolean" },
 												"canRestoreHistory": { "type": "boolean" }
 											}
@@ -102721,6 +103686,7 @@
 												"canManagePublishers",
 												"canManageLocalizations",
 												"canManageAccess",
+												"canManageRealmPublications",
 												"canViewHistory",
 												"canRestoreHistory"
 											],
@@ -102730,6 +103696,7 @@
 												"canManagePublishers": { "type": "boolean" },
 												"canManageLocalizations": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
+												"canManageRealmPublications": { "type": "boolean" },
 												"canViewHistory": { "type": "boolean" },
 												"canRestoreHistory": { "type": "boolean" }
 											}
@@ -109672,6 +110639,7 @@
 												"canManagePublishers",
 												"canManageLocalizations",
 												"canManageAccess",
+												"canManageRealmPublications",
 												"canViewHistory",
 												"canRestoreHistory"
 											],
@@ -109681,6 +110649,7 @@
 												"canManagePublishers": { "type": "boolean" },
 												"canManageLocalizations": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
+												"canManageRealmPublications": { "type": "boolean" },
 												"canViewHistory": { "type": "boolean" },
 												"canRestoreHistory": { "type": "boolean" }
 											}
@@ -110642,6 +111611,7 @@
 												"canManagePublishers",
 												"canManageLocalizations",
 												"canManageAccess",
+												"canManageRealmPublications",
 												"canViewHistory",
 												"canRestoreHistory"
 											],
@@ -110651,6 +111621,7 @@
 												"canManagePublishers": { "type": "boolean" },
 												"canManageLocalizations": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
+												"canManageRealmPublications": { "type": "boolean" },
 												"canViewHistory": { "type": "boolean" },
 												"canRestoreHistory": { "type": "boolean" }
 											}
@@ -115686,6 +116657,7 @@
 											"required": [
 												"canEdit",
 												"canManageAttributions",
+												"canManageRealmPublications",
 												"canManageAccess",
 												"canManageScores",
 												"canReply"
@@ -115693,6 +116665,7 @@
 											"properties": {
 												"canEdit": { "type": "boolean" },
 												"canManageAttributions": { "type": "boolean" },
+												"canManageRealmPublications": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageScores": { "type": "boolean" },
 												"canReply": { "type": "boolean" }
@@ -121246,12 +122219,16 @@
 													"required": [
 														"canEdit",
 														"canManageAttributions",
+														"canManageRealmPublications",
 														"canManageAccess",
 														"canReply"
 													],
 													"properties": {
 														"canEdit": { "type": "boolean" },
 														"canManageAttributions": {
+															"type": "boolean"
+														},
+														"canManageRealmPublications": {
 															"type": "boolean"
 														},
 														"canManageAccess": { "type": "boolean" },
@@ -122007,12 +122984,16 @@
 													"required": [
 														"canEdit",
 														"canManageAttributions",
+														"canManageRealmPublications",
 														"canManageAccess",
 														"canReply"
 													],
 													"properties": {
 														"canEdit": { "type": "boolean" },
 														"canManageAttributions": {
+															"type": "boolean"
+														},
+														"canManageRealmPublications": {
 															"type": "boolean"
 														},
 														"canManageAccess": { "type": "boolean" },
@@ -122768,12 +123749,16 @@
 													"required": [
 														"canEdit",
 														"canManageAttributions",
+														"canManageRealmPublications",
 														"canManageAccess",
 														"canReply"
 													],
 													"properties": {
 														"canEdit": { "type": "boolean" },
 														"canManageAttributions": {
+															"type": "boolean"
+														},
+														"canManageRealmPublications": {
 															"type": "boolean"
 														},
 														"canManageAccess": { "type": "boolean" },
@@ -123597,6 +124582,7 @@
 													"required": [
 														"canEdit",
 														"canManageAttributions",
+														"canManageRealmPublications",
 														"canManageAccess",
 														"canManageScores",
 														"canReply"
@@ -123604,6 +124590,9 @@
 													"properties": {
 														"canEdit": { "type": "boolean" },
 														"canManageAttributions": {
+															"type": "boolean"
+														},
+														"canManageRealmPublications": {
 															"type": "boolean"
 														},
 														"canManageAccess": { "type": "boolean" },
@@ -124359,12 +125348,16 @@
 													"required": [
 														"canEdit",
 														"canManageAttributions",
+														"canManageRealmPublications",
 														"canManageAccess",
 														"canReply"
 													],
 													"properties": {
 														"canEdit": { "type": "boolean" },
 														"canManageAttributions": {
+															"type": "boolean"
+														},
+														"canManageRealmPublications": {
 															"type": "boolean"
 														},
 														"canManageAccess": { "type": "boolean" },
@@ -141369,8 +142362,19 @@
 						"in": "query",
 						"required": false,
 						"schema": {
+							"default": "current",
 							"type": "string",
-							"enum": ["pending", "visible", "hidden", "removed"]
+							"enum": ["current", "pending", "visible", "hidden", "removed", "all"]
+						}
+					},
+					{
+						"name": "publicationState",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"default": "active",
+							"type": "string",
+							"enum": ["active", "withdrawn", "all"]
 						}
 					},
 					{
@@ -141435,6 +142439,7 @@
 													"language",
 													"title",
 													"status",
+													"publicationState",
 													"postTargetingLocked",
 													"openReportCount",
 													"allowedCommands",
@@ -141479,6 +142484,11 @@
 															"hidden",
 															"removed"
 														]
+													},
+													"publicationState": {
+														"default": "active",
+														"type": "string",
+														"enum": ["active", "withdrawn"]
 													},
 													"postTargetingLocked": { "type": "boolean" },
 													"openReportCount": {
@@ -142991,6 +144001,7 @@
 											"type": "object",
 											"required": [
 												"status",
+												"publicationState",
 												"postTargetingLocked",
 												"openReportCount",
 												"allowedCommands",
@@ -143005,6 +144016,11 @@
 														"hidden",
 														"removed"
 													]
+												},
+												"publicationState": {
+													"default": "active",
+													"type": "string",
+													"enum": ["active", "withdrawn"]
 												},
 												"postTargetingLocked": { "type": "boolean" },
 												"openReportCount": {

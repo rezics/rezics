@@ -35,7 +35,7 @@ export function RealmModerationQueue({
 	readonly onSelect: (unit: RealmModerationUnit) => void;
 	readonly onLoadNextPage: () => void;
 }) {
-	const { t, locale } = useTranslation(["posts", "realms", "reports"]);
+	const { t, locale } = useTranslation(["posts", "realms", "reports", "units"]);
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const count = units.length + (hasNextPage ? 1 : 0);
 	const virtualizer = useVirtualizer({
@@ -133,6 +133,13 @@ export function RealmModerationQueue({
 										<span className="flex min-w-0 items-center gap-2">
 											<Badge variant={StatusBadgeVariants[unit.status]}>
 												{t.realms.moderationStates[unit.status]}
+											</Badge>
+											<Badge variant="secondary">
+												{
+													t.units.realmPublications.publicationStates[
+														unit.publicationState
+													]
+												}
 											</Badge>
 											{openReportCount ? (
 												<Badge variant="warning">

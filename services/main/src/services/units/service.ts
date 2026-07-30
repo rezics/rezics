@@ -485,12 +485,14 @@ export async function getUnit(
 	const [
 		canEdit,
 		canCurateTags,
+		canManageRealmPublications,
 		accessDecision,
 		associationDecision,
 		hasDevelopmentPreviewAccess,
 	] = await Promise.all([
 		authorization.unit.canUpdate(base.id),
 		authorization.unit.decide(base.id, "unit.tag-curation.manage"),
+		authorization.unit.decide(base.id, "unit.realm-publication.manage"),
 		authorization.unit.decide(base.id, "unit.access.manage"),
 		authorization.unit.decide(base.id, "unit.association.manage"),
 		authorization.platform.hasCapability(DevelopmentPreviewCapability),
@@ -586,6 +588,7 @@ export async function getUnit(
 			canManageAccess: accessDecision.allowed,
 			canManageAssociations: associationDecision.allowed,
 			canCurateTags: canCurateTags.allowed,
+			canManageRealmPublications: canManageRealmPublications.allowed,
 			hasDevelopmentPreviewAccess,
 		},
 	};

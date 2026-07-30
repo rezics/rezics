@@ -428,6 +428,7 @@ export default new Elysia()
 						await publishPostToRealms(tx, {
 							postId: created.id,
 							realmIds: body.publishRealmIds,
+							actorProfileId: profile.unitId,
 						});
 						await recordUnitRevision(tx, {
 							unitId: created.id,
@@ -504,7 +505,7 @@ export default new Elysia()
 								eq(post.id, params.reviewId),
 								eq(post.kind, "review"),
 								query.realmId
-									? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${query.realmId} and rc.status = 'visible')`
+									? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${query.realmId} and rc.status = 'visible' and rc.publication_state = 'active')`
 									: undefined,
 							),
 						)
@@ -527,6 +528,7 @@ export default new Elysia()
 						canManageAttributions,
 						accessDecision,
 						canManageScores,
+						canManageRealmPublications,
 						replyCreationDecision,
 						targetingLock,
 					] = await Promise.all([
@@ -546,6 +548,7 @@ export default new Elysia()
 						authorization.unit.canUpdate(params.reviewId, ["credit-attributions"]),
 						authorization.unit.decide(params.reviewId, "unit.access.manage"),
 						authorization.unit.canUpdate(params.reviewId, ["relations", "scores"]),
+						authorization.unit.decide(params.reviewId, "unit.realm-publication.manage"),
 						query.realmId
 							? authorization.unit.decide(query.realmId, "realm.post.replies.create")
 							: Promise.resolve({ allowed: true } as const),
@@ -580,6 +583,7 @@ export default new Elysia()
 							canManageAttributions,
 							canManageAccess: accessDecision.allowed,
 							canManageScores,
+							canManageRealmPublications: canManageRealmPublications.allowed,
 							canReply: replyCreationDecision.allowed && !targetingLock,
 						},
 					};

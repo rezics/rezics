@@ -17,6 +17,7 @@ import {
 import {
 	BookOpenText,
 	Database,
+	Globe2,
 	History,
 	LibraryBig,
 	Link2,
@@ -142,6 +143,13 @@ function UnitManagementWorkspaceContent({
 			label: labels.tags.label,
 			description: labels.tags.description,
 			icon: Tags,
+		},
+		{
+			id: "realms",
+			href: unitManagementSectionHref(type, unitId, "realms"),
+			label: labels.realms.label,
+			description: labels.realms.description,
+			icon: Globe2,
 		},
 		{
 			id: "content-structure",

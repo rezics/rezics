@@ -7,6 +7,7 @@ const denied = {
 	canManageAccess: false,
 	canManageAssociations: false,
 	canCurateTags: false,
+	canManageRealmPublications: false,
 	hasDevelopmentPreviewAccess: false,
 };
 
@@ -16,6 +17,15 @@ describe("unit management section manifest", () => {
 			"access",
 			"history",
 		]);
+	});
+
+	it("keeps Realm publication and history available to a publication-only manager", () => {
+		expect(
+			getUnitManagementSectionIds("book", {
+				...denied,
+				canManageRealmPublications: true,
+			}),
+		).toEqual(["realms", "history"]);
 	});
 
 	it("keeps Tag curation and history available to a Tag-only manager", () => {

@@ -235,7 +235,13 @@ LEFT JOIN LATERAL (
 	WHERE alias_row.unit_id = source.unit_id AND alias_row.deleted_at IS NULL AND coalesce(alias_stat.score, 0) >= 3
 ) AS alias_data ON true
 LEFT JOIN LATERAL (SELECT jsonb_agg(tag_id ORDER BY tag_id) AS tag_ids FROM public.unit_effective_tag WHERE unit_id = source.unit_id) AS tag_data ON true
-LEFT JOIN LATERAL (SELECT jsonb_agg(realm_id ORDER BY realm_id) AS realm_ids FROM public.realm_unit WHERE unit_id = source.unit_id AND status = 'visible') AS realm_data ON true
+LEFT JOIN LATERAL (
+	SELECT jsonb_agg(realm_id ORDER BY realm_id) AS realm_ids
+	FROM public.realm_unit
+	WHERE unit_id = source.unit_id
+		AND status = 'visible'
+		AND publication_state = 'active'
+) AS realm_data ON true
 LEFT JOIN LATERAL (
 	SELECT jsonb_agg(
 		(realm_id::text || ':' || tag_id::text)

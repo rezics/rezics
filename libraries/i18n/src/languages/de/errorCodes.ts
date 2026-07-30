@@ -249,4 +249,8 @@ export default {
 	AssociationContextPostInvalid: `Der Beziehungskontext muss ein Wiki-${postTerms.inline} sein.`,
 	ProgressEntryNotFound: "Dieses Fortschrittsereignis wurde nicht gefunden.",
 	PostTagMentionVoteConflict: `Diese Tag-Erwähnung steht im Konflikt mit deiner vorhandenen Gegenstimme für den ${postTerms.inline}.`,
+	UnitRealmPublicationNotFound: `Für diesen Inhalt besteht keine Veröffentlichungsrelation mit diesem ${realmTerms.label}.`,
+	UnitRealmPublicationAlreadyExists: `Für diesen Inhalt besteht bereits eine Veröffentlichungsrelation mit diesem ${realmTerms.label}.`,
+	UnitRealmPublicationTransitionInvalid:
+		"Die Veröffentlichungsrelation befindet sich bereits im angeforderten Status.",
 } satisfies typeof import("../zh-Hant/errorCodes").default;

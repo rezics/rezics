@@ -1024,6 +1024,38 @@ import type {
 	PostApiUnitsPresentationsStatus400,
 	PostApiUnitsPresentationsStatus422,
 	PostApiUnitsPresentationsStatus500,
+	GetApiUnitsByIdByUnitIdRealmPublicationsOptions,
+	GetApiUnitsByIdByUnitIdRealmPublicationsStatus200,
+	GetApiUnitsByIdByUnitIdRealmPublicationsStatus400,
+	GetApiUnitsByIdByUnitIdRealmPublicationsStatus403,
+	GetApiUnitsByIdByUnitIdRealmPublicationsStatus404,
+	GetApiUnitsByIdByUnitIdRealmPublicationsStatus422,
+	GetApiUnitsByIdByUnitIdRealmPublicationsStatus429,
+	GetApiUnitsByIdByUnitIdRealmPublicationsStatus500,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdOptions,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus204,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus403,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus404,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus409,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus422,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus429,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus500,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawOptions,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus204,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus403,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus404,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus409,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus422,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus429,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus500,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishOptions,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus204,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus403,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus404,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus409,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus422,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus429,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus500,
 	GetApiUnitsByIdByUnitIdSeriesMembershipsOptions,
 	GetApiUnitsByIdByUnitIdSeriesMembershipsStatus200,
 	GetApiUnitsByIdByUnitIdSeriesMembershipsStatus404,
@@ -2394,6 +2426,10 @@ import {
 	createSlugNamespaceWithPlatformAccess,
 	releaseSlugRedirectWithPlatformAccess,
 	postApiUnitsPresentations,
+	getApiUnitsByIdByUnitIdRealmPublications,
+	postApiUnitsByIdByUnitIdRealmPublicationsByRealmId,
+	postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdraw,
+	postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublish,
 	getApiUnitsByIdByUnitIdSeriesMemberships,
 	getApiUnitsByIdByUnitIdStatusEvents,
 	getApiUnitsByIdByUnitIdLocalizationOrder,
@@ -18348,6 +18384,455 @@ export function usePostApiUnitsPresentations<TContext>(
 			| PostApiUnitsPresentationsStatus500
 		>,
 		PostApiUnitsPresentationsOptions,
+		TContext
+	>;
+}
+
+export const getApiUnitsByIdByUnitIdRealmPublicationsQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiUnitsByIdByUnitIdRealmPublicationsOptions, "headers">) =>
+	[
+		{ url: "/api/units/by-id/:unitId/realm-publications", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type GetApiUnitsByIdByUnitIdRealmPublicationsQueryKey = ReturnType<
+	typeof getApiUnitsByIdByUnitIdRealmPublicationsQueryKey
+>;
+
+export function getApiUnitsByIdByUnitIdRealmPublicationsQueryOptions(
+	{ path, query }: GetApiUnitsByIdByUnitIdRealmPublicationsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiUnitsByIdByUnitIdRealmPublicationsQueryKey({ path, query });
+	return queryOptions<
+		GetApiUnitsByIdByUnitIdRealmPublicationsStatus200,
+		ResponseErrorConfig<
+			| GetApiUnitsByIdByUnitIdRealmPublicationsStatus400
+			| GetApiUnitsByIdByUnitIdRealmPublicationsStatus403
+			| GetApiUnitsByIdByUnitIdRealmPublicationsStatus404
+			| GetApiUnitsByIdByUnitIdRealmPublicationsStatus422
+			| GetApiUnitsByIdByUnitIdRealmPublicationsStatus429
+			| GetApiUnitsByIdByUnitIdRealmPublicationsStatus500
+		>,
+		GetApiUnitsByIdByUnitIdRealmPublicationsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiUnitsByIdByUnitIdRealmPublications({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List a Unit's Realm publications
+ * {@link /api/units/by-id/:unitId/realm-publications}
+ */
+export function useGetApiUnitsByIdByUnitIdRealmPublications<
+	TData = GetApiUnitsByIdByUnitIdRealmPublicationsStatus200,
+	TQueryData = GetApiUnitsByIdByUnitIdRealmPublicationsStatus200,
+	TQueryKey extends QueryKey = GetApiUnitsByIdByUnitIdRealmPublicationsQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiUnitsByIdByUnitIdRealmPublicationsOptions["path"]
+			| (() => GetApiUnitsByIdByUnitIdRealmPublicationsOptions["path"]);
+		query:
+			| GetApiUnitsByIdByUnitIdRealmPublicationsOptions["query"]
+			| (() => GetApiUnitsByIdByUnitIdRealmPublicationsOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiUnitsByIdByUnitIdRealmPublicationsStatus200,
+				ResponseErrorConfig<
+					| GetApiUnitsByIdByUnitIdRealmPublicationsStatus400
+					| GetApiUnitsByIdByUnitIdRealmPublicationsStatus403
+					| GetApiUnitsByIdByUnitIdRealmPublicationsStatus404
+					| GetApiUnitsByIdByUnitIdRealmPublicationsStatus422
+					| GetApiUnitsByIdByUnitIdRealmPublicationsStatus429
+					| GetApiUnitsByIdByUnitIdRealmPublicationsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ??
+		getApiUnitsByIdByUnitIdRealmPublicationsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiUnitsByIdByUnitIdRealmPublicationsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiUnitsByIdByUnitIdRealmPublicationsStatus400
+			| GetApiUnitsByIdByUnitIdRealmPublicationsStatus403
+			| GetApiUnitsByIdByUnitIdRealmPublicationsStatus404
+			| GetApiUnitsByIdByUnitIdRealmPublicationsStatus422
+			| GetApiUnitsByIdByUnitIdRealmPublicationsStatus429
+			| GetApiUnitsByIdByUnitIdRealmPublicationsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdMutationKey = () =>
+	[{ url: "/api/units/by-id/:unitId/realm-publications/:realmId" }] as const;
+
+export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdMutationKey();
+	return mutationOptions<
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus204,
+		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus403
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus404
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus409
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus422
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus429
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus500
+		>,
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await postApiUnitsByIdByUnitIdRealmPublicationsByRealmId({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Publish a Unit to one Realm
+ * {@link /api/units/by-id/:unitId/realm-publications/:realmId}
+ */
+export function usePostApiUnitsByIdByUnitIdRealmPublicationsByRealmId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus204,
+			ResponseErrorConfig<
+				| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus403
+				| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus404
+				| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus409
+				| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus422
+				| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus429
+				| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus500
+			>,
+			PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdMutationKey();
+
+	const baseOptions = postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus204,
+		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus403
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus404
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus409
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus422
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus429
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus500
+		>,
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus204,
+		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus403
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus404
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus409
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus422
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus429
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus500
+		>,
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus204,
+		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus403
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus404
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus409
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus422
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus429
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus500
+		>,
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdOptions,
+		TContext
+	>;
+}
+
+export const postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawMutationKey = () =>
+	[{ url: "/api/units/by-id/:unitId/realm-publications/:realmId/withdraw" }] as const;
+
+export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawMutationKey();
+	return mutationOptions<
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus204,
+		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus403
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus404
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus409
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus422
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus429
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus500
+		>,
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdraw({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Withdraw a Unit from one Realm
+ * {@link /api/units/by-id/:unitId/realm-publications/:realmId/withdraw}
+ */
+export function usePostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdraw<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus204,
+			ResponseErrorConfig<
+				| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus403
+				| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus404
+				| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus409
+				| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus422
+				| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus429
+				| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus500
+			>,
+			PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawMutationKey();
+
+	const baseOptions = postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus204,
+		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus403
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus404
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus409
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus422
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus429
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus500
+		>,
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus204,
+		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus403
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus404
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus409
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus422
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus429
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus500
+		>,
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus204,
+		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus403
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus404
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus409
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus422
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus429
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus500
+		>,
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawOptions,
+		TContext
+	>;
+}
+
+export const postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishMutationKey = () =>
+	[{ url: "/api/units/by-id/:unitId/realm-publications/:realmId/republish" }] as const;
+
+export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishMutationKey();
+	return mutationOptions<
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus204,
+		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus403
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus404
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus409
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus422
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus429
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus500
+		>,
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublish({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Republish a Unit to one Realm
+ * {@link /api/units/by-id/:unitId/realm-publications/:realmId/republish}
+ */
+export function usePostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublish<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus204,
+			ResponseErrorConfig<
+				| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus403
+				| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus404
+				| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus409
+				| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus422
+				| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus429
+				| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus500
+			>,
+			PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishMutationKey();
+
+	const baseOptions = postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus204,
+		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus403
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus404
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus409
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus422
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus429
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus500
+		>,
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus204,
+		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus403
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus404
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus409
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus422
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus429
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus500
+		>,
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus204,
+		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus403
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus404
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus409
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus422
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus429
+			| PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus500
+		>,
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishOptions,
 		TContext
 	>;
 }

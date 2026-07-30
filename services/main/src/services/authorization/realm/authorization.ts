@@ -1,7 +1,7 @@
 import type { RealmUnitCreatePermission } from "@rezics/access";
 import { and, eq } from "drizzle-orm";
 
-import { database } from "../../database";
+import { database, type DatabaseExecutor, type DatabaseTransaction } from "../../database";
 import {
 	realm as realmTable,
 	realmRuleAcceptance as realmRuleAcknowledgementTable,
@@ -19,10 +19,11 @@ import { type RealmCapability } from "./policy";
 async function findRequiredRulesAcceptance(
 	realmId: string,
 	profileId: string,
+	executor: DatabaseExecutor = database,
 ): Promise<{ readonly realmId: string; readonly revisionId: string } | undefined> {
-	const rules = await getCurrentRealmRules(realmId);
+	const rules = await getCurrentRealmRules(realmId, executor);
 	if (!rules?.revisionId || !rules.requireOnPost) return undefined;
-	const [acknowledgement] = await database
+	const [acknowledgement] = await executor
 		.select({ revisionId: realmRuleAcknowledgementTable.revisionId })
 		.from(realmRuleAcknowledgementTable)
 		.where(
@@ -90,6 +91,18 @@ export class RealmAuthorization<ProfileId extends string | undefined> {
 		throw new RealmCapabilityRequired();
 	}
 
+	async ensureCapabilityInTransaction(
+		this: RealmAuthorization<string>,
+		tx: DatabaseTransaction,
+		realmId: string,
+		capability: RealmCapability,
+	): Promise<RealmMembership | undefined> {
+		const current = await findRealmMembership(realmId, this.profileId, tx);
+		const decision = await this.unit.decideInTransaction(tx, realmId, capability);
+		if (decision.allowed || (await this.platform.hasCapability(capability, tx))) return current;
+		throw new RealmCapabilityRequired();
+	}
+
 	async ensureParticipation(
 		this: RealmAuthorization<string>,
 		realmId: string | undefined,
@@ -121,5 +134,19 @@ export class RealmAuthorization<ProfileId extends string | undefined> {
 				requirement !== undefined,
 		);
 		if (requirements.length) throw new RealmRulesAcceptanceRequired({ realms: requirements });
+	}
+
+	async ensureUnitCreationInTransaction(
+		this: RealmAuthorization<string>,
+		tx: DatabaseTransaction,
+		realmIds: readonly string[],
+		permission: RealmUnitCreatePermission,
+	): Promise<void> {
+		const normalizedRealmIds = [...new Set(realmIds)].sort();
+		for (const realmId of normalizedRealmIds) {
+			await this.ensureCapabilityInTransaction(tx, realmId, permission);
+			const requirement = await findRequiredRulesAcceptance(realmId, this.profileId, tx);
+			if (requirement) throw new RealmRulesAcceptanceRequired({ realms: [requirement] });
+		}
 	}
 }

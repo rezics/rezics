@@ -1,5 +1,6 @@
 import type { DatabaseTransaction } from "../database";
 import { realmUnit } from "../database/schema";
+import { recordInitialRealmUnitPublicationEvents } from "../units/realm-publication";
 import { ensurePostMountTargetingAllowed } from "./targeting";
 
 /** Returns a stable, duplicate-free Realm publication set. */
@@ -18,6 +19,7 @@ export async function publishPostToRealms(
 	input: {
 		readonly postId: string;
 		readonly realmIds: readonly string[];
+		readonly actorProfileId: string;
 	},
 ): Promise<void> {
 	const realmIds = normalizePublishRealmIds(input.realmIds);
@@ -32,4 +34,8 @@ export async function publishPostToRealms(
 			unitId: input.postId,
 		})),
 	);
+	await recordInitialRealmUnitPublicationEvents(tx, {
+		relations: realmIds.map((realmId) => ({ realmId, unitId: input.postId })),
+		actorProfileId: input.actorProfileId,
+	});
 }

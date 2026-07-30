@@ -307,6 +307,7 @@ export const RealmPageKindValues = ["main", "tags", "wiki"] as const;
 export type RealmPageKind = (typeof RealmPageKindValues)[number];
 export const RealmPinKindValues = ["pinned", "highlight"] as const;
 export const RealmUnitStatusValues = ["pending", "visible", "hidden", "removed"] as const;
+export const RealmUnitPublicationStateValues = ["active", "withdrawn"] as const;
 export const UserAccountStateValues = ["active", "suspended", "closed"] as const;
 export type UserAccountState = (typeof UserAccountStateValues)[number];
 export const UserAccountStateReasonValues = [

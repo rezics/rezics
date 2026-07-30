@@ -6,6 +6,7 @@ const { forms: publicationLicenseTerms } = frTerminology.publicationLicense;
 const { forms: postTerms } = frTerminology.post;
 const { forms: videoTerms } = frTerminology.video;
 const { forms: audioTerms } = frTerminology.audio;
+const { forms: realmTerms } = frTerminology.realm;
 const { forms: followTerms } = frTerminology.follow;
 const { forms: metadataTerms } = frTerminology.metadata;
 
@@ -92,6 +93,10 @@ export default {
 				description:
 					"Mettez en avant des étiquettes globales et organisez leur ordre d’affichage prioritaire.",
 			},
+			realms: {
+				label: `Diffusion dans les ${realmTerms.pluralLabel}`,
+				description: `Gérer la diffusion, le retrait et la rediffusion pour chaque ${realmTerms.label}.`,
+			},
 			contentStructure: {
 				label: "Structure du contenu",
 				description:
@@ -113,6 +118,33 @@ export default {
 				description: "Consultez, comparez, annulez ou restaurez les versions du contenu.",
 			},
 		},
+	},
+	realmPublications: {
+		title: `Diffusion dans les ${realmTerms.pluralLabel}`,
+		description: `Gérez les relations d’inclusion conservées durablement entre ce contenu et les ${realmTerms.pluralLabel}. Le retrait désactive la diffusion sans supprimer la relation.`,
+		addTitle: `Publier dans un ${realmTerms.label}`,
+		addDescription: `Ajoutez un ${realmTerms.label} à la fois afin de vérifier séparément son autorisation de diffusion et ses règles.`,
+		realmLabel: realmTerms.label,
+		add: "Publier",
+		publicationStateFilter: "État de diffusion",
+		realmStatusFilter: `État de gouvernance du ${realmTerms.label}`,
+		all: "Tous",
+		current: "États de gouvernance actuels",
+		publicationStates: { active: "Publié", withdrawn: "Retiré" },
+		realmStatuses: {
+			pending: "En attente d’examen",
+			visible: "Approuvé",
+			hidden: "Masqué",
+			removed: "Retiré par la gouvernance",
+		},
+		effectivelyVisible: `Actuellement visible dans le ${realmTerms.label}`,
+		notEffectivelyVisible: `Non visible actuellement dans le ${realmTerms.label}`,
+		empty: "Aucune relation de diffusion ne correspond aux filtres actuels.",
+		withdraw: "Retirer",
+		republish: "Republier",
+		loadMore: "Charger davantage",
+		unnamedRealm: `${realmTerms.label} sans nom`,
+		governanceReason: insert("Motif de gouvernance : {{reason}}", { reason: String }),
 	},
 	series: {
 		kind: "Type de série",

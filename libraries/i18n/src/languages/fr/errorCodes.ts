@@ -252,4 +252,7 @@ export default {
 	AssociationContextPostInvalid: `Le contexte de la relation doit être une ${postTerms.inline} de wiki.`,
 	ProgressEntryNotFound: "Cet événement de progression est introuvable.",
 	PostTagMentionVoteConflict: `Cette mention d’étiquette entre en conflit avec votre vote négatif existant sur la ${postTerms.inline}.`,
+	UnitRealmPublicationNotFound: `Ce contenu n’a aucune relation d’inclusion avec ce ${realmTerms.label}.`,
+	UnitRealmPublicationAlreadyExists: `Ce contenu possède déjà une relation d’inclusion avec ce ${realmTerms.label}.`,
+	UnitRealmPublicationTransitionInvalid: "La relation d’inclusion est déjà dans l’état demandé.",
 } satisfies typeof import("../zh-Hant/errorCodes").default;

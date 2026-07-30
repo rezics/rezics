@@ -98,7 +98,8 @@ describe("bounded reply tree query", () => {
 		const statement = execute.mock.calls[0]?.[0] as SQL | undefined;
 		if (!statement) throw new Error("Realm reply tree query did not execute");
 		const query = dialect.sqlToQuery(statement);
-		expect(query.sql.match(/reply_realm/g)).toHaveLength(8);
+		expect(query.sql.match(/reply_realm/g)).toHaveLength(10);
+		expect(query.sql.match(/publication_state/g)).toHaveLength(3);
 		expect(query.sql).toContain("omitted_realm");
 		expect(query.params).toContain(realmId);
 

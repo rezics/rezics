@@ -130,6 +130,7 @@ export default {
 			"unit.update": "Can edit",
 			"unit.status.update": "Can change status",
 			"unit.access.manage": "Can manage access",
+			"unit.realm-publication.manage": `Can manage ${realmTerms.label} publication`,
 		},
 		workStates: { actionable: "Actionable", blocked: "Currently blocked" },
 		statuses: { draft: "Draft", published: "Published", archived: "Archived" },

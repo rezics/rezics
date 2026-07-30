@@ -13,6 +13,7 @@ const page = {
 			language: "zh",
 			title: "待處理項目",
 			status: "pending",
+			publicationState: "active",
 			postTargetingLocked: false,
 			openReportCount: 1,
 			allowedCommands: ["approve", "remove", "lock_post_targeting", "note"],
@@ -31,6 +32,7 @@ const pages: InfiniteData<RealmModerationPage> = {
 
 const visibleTarget = {
 	status: "visible",
+	publicationState: "active",
 	postTargetingLocked: false,
 	openReportCount: 0,
 	allowedCommands: ["hide", "remove", "lock_post_targeting", "note"],

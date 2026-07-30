@@ -28,6 +28,7 @@ export function parseUnitManagementSection(
 	if (pathname === `${base}/metadata`) return "metadata";
 	if (pathname === `${base}/relationships`) return "relationships";
 	if (pathname === `${base}/tags`) return "tags";
+	if (pathname === `${base}/realms`) return "realms";
 	if (
 		pathname === `${base}/content-structure` ||
 		pathname.startsWith(`${base}/content-structure/`)

@@ -311,6 +311,14 @@ import type {
 	ReleaseSlugRedirectWithPlatformAccessResponses,
 	PostApiUnitsPresentationsOptions,
 	PostApiUnitsPresentationsResponses,
+	GetApiUnitsByIdByUnitIdRealmPublicationsOptions,
+	GetApiUnitsByIdByUnitIdRealmPublicationsResponses,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdOptions,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdResponses,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawOptions,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawResponses,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishOptions,
+	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishResponses,
 	GetApiUnitsByIdByUnitIdSeriesMembershipsOptions,
 	GetApiUnitsByIdByUnitIdSeriesMembershipsResponses,
 	GetApiUnitsByIdByUnitIdStatusEventsOptions,
@@ -3667,6 +3675,119 @@ export function postApiUnitsPresentations<ThrowOnError extends boolean = true>(
 
 	return request({ method: "POST", url: "/api/units/presentations", ...config }) as Promise<
 		RequestResult<PostApiUnitsPresentationsResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary List a Unit's Realm publications
+ * {@link /api/units/by-id/:unitId/realm-publications}
+ */
+export function getApiUnitsByIdByUnitIdRealmPublications<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUnitsByIdByUnitIdRealmPublicationsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiUnitsByIdByUnitIdRealmPublicationsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/units/by-id/{unitId}/realm-publications",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdRealmPublicationsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Publish a Unit to one Realm
+ * {@link /api/units/by-id/:unitId/realm-publications/:realmId}
+ */
+export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/units/by-id/{unitId}/realm-publications/{realmId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Withdraw a Unit from one Realm
+ * {@link /api/units/by-id/:unitId/realm-publications/:realmId/withdraw}
+ */
+export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdraw<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/units/by-id/{unitId}/realm-publications/{realmId}/withdraw",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<
+			PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary Republish a Unit to one Realm
+ * {@link /api/units/by-id/:unitId/realm-publications/:realmId/republish}
+ */
+export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublish<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishResponses,
+		ThrowOnError
+	>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/units/by-id/{unitId}/realm-publications/{realmId}/republish",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<
+			PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishResponses,
+			ThrowOnError
+		>
 	>;
 }
 

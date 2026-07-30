@@ -106,6 +106,7 @@ export async function selectReplyTree(input: {
 			WHERE reply_realm.realm_id = ${input.realmId}
 				AND reply_realm.unit_id = anchor_reply.post_id
 				AND reply_realm.status = 'visible'
+				AND reply_realm.publication_state = 'active'
 		)`
 		: sql``;
 	const childRealmCondition = input.realmId
@@ -114,6 +115,7 @@ export async function selectReplyTree(input: {
 			WHERE reply_realm.realm_id = ${input.realmId}
 				AND reply_realm.unit_id = candidate_reply.post_id
 				AND reply_realm.status = 'visible'
+				AND reply_realm.publication_state = 'active'
 		)`
 		: sql``;
 
@@ -204,6 +206,7 @@ export async function selectReplyTree(input: {
 							WHERE omitted_realm.realm_id = ${input.realmId}
 								AND omitted_realm.unit_id = omitted_reply.post_id
 								AND omitted_realm.status = 'visible'
+								AND omitted_realm.publication_state = 'active'
 						)`
 							: sql``
 					}

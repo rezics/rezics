@@ -22,6 +22,7 @@ import {
 	RealmPageKindValues,
 	RealmPinKindValues,
 	RealmRuleAcknowledgementModeValues,
+	RealmUnitPublicationStateValues,
 	RealmUnitStatusValues,
 	toEnumValues,
 } from "./contract-values";
@@ -44,6 +45,10 @@ export const realmRuleAcknowledgementMode = pgEnum(
 	toEnumValues(RealmRuleAcknowledgementModeValues),
 );
 export const realmUnitStatus = pgEnum("realm_unit_status", toEnumValues(RealmUnitStatusValues));
+export const realmUnitPublicationState = pgEnum(
+	"realm_unit_publication_state",
+	toEnumValues(RealmUnitPublicationStateValues),
+);
 /*
  * PostgreSQL cannot remove enum labels in place. The retired label remains in
  * the physical enum, while the grant check proves the narrower application type.
@@ -250,6 +255,9 @@ export const realmUnit = pgTable(
 		/** Rejects new Post relations targeting this Unit in this Realm. */
 		postTargetingLocked: boolean().default(false).notNull(),
 		status: realmUnitStatus().default("visible").notNull(),
+		publicationState: realmUnitPublicationState("publication_state")
+			.default("active")
+			.notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
@@ -257,17 +265,25 @@ export const realmUnit = pgTable(
 		primaryKey({ columns: [table.realmId, table.unitId] }),
 		index("realm_unit_realm_status_created_idx").on(
 			table.realmId,
+			table.publicationState,
 			table.status,
 			table.createdAt.desc(),
 			table.unitId,
 		),
 		index("realm_unit_moderation_queue_idx").on(
 			table.realmId,
+			table.publicationState,
 			table.status,
 			table.updatedAt.desc(),
 			table.unitId.desc(),
 		),
-		index("realm_unit_unit_realm_idx").on(table.unitId, table.realmId),
+		index("realm_unit_unit_publication_status_updated_idx").on(
+			table.unitId,
+			table.publicationState,
+			table.status,
+			table.updatedAt.desc(),
+			table.realmId.desc(),
+		),
 		check("realm_unit_not_self_check", sql`${table.realmId} <> ${table.unitId}`),
 	],
 );

@@ -184,6 +184,7 @@ export default {
 			"unit.ownership.transfer": "移轉擁有權",
 			"unit.association.manage": "管理關聯",
 			"unit.tag-curation.manage": "管理標籤精選",
+			"unit.realm-publication.manage": `管理${realmTerms.label}發布`,
 			"realm.contribute": `參與${realmTerms.label}`,
 			"realm.units.create": "建立條目",
 			"realm.post.replies.create": "建立回覆",

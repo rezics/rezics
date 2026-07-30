@@ -146,6 +146,7 @@ export default {
 			"unit.update": "Peut modifier",
 			"unit.status.update": "Peut changer le statut",
 			"unit.access.manage": "Peut gérer les accès",
+			"unit.realm-publication.manage": `Peut gérer la diffusion dans ${realmTerms.label}`,
 		},
 		workStates: { actionable: "Action possible", blocked: "Actuellement bloqué" },
 		statuses: { draft: "Brouillon", published: "Publié", archived: "Archivé" },

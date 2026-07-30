@@ -11,6 +11,7 @@ import {
 	RealmPinKindValues,
 	RealmRuleAcknowledgementModeValues,
 	RealmTagQueryStrategyValues,
+	RealmUnitPublicationStateValues,
 	RealmUnitStatusValues,
 	RealmUnitMutationCommandValues,
 	UnitStatusValues,
@@ -37,6 +38,7 @@ const RealmMemberState = t.Union(RealmMemberStateValues.map((value) => t.Literal
 const RealmPageKind = t.UnionEnum(RealmPageKindValues);
 
 const RealmUnitStatus = t.UnionEnum(RealmUnitStatusValues, { default: undefined });
+const RealmUnitPublicationState = t.UnionEnum(RealmUnitPublicationStateValues);
 const GovernanceReasonCode = t.UnionEnum(GovernanceReasonCodeValues);
 
 export const ListRealmsQuery = t.Object(
@@ -342,7 +344,16 @@ export const RealmTagVoteResponse = t.Object({
 
 export const ListRealmUnitsQuery = t.Object(
 	{
-		status: t.Optional(RealmUnitStatus),
+		status: t.Optional(
+			t.UnionEnum(["current", ...RealmUnitStatusValues, "all"], {
+				default: "current",
+			}),
+		),
+		publicationState: t.Optional(
+			t.UnionEnum([...RealmUnitPublicationStateValues, "all"], {
+				default: "active",
+			}),
+		),
 		reported: t.Optional(t.Boolean()),
 		...LocalizationLanguageQuery,
 		cursor: t.Optional(t.String({ minLength: 1, maxLength: 1024 })),
@@ -393,6 +404,7 @@ export type ModerateRealmUnitBody = Static<typeof ModerateRealmUnitBody>;
 const RealmModerationCommand = t.UnionEnum(RealmModerationCommandValues);
 const RealmUnitModerationTargetResponse = t.Object({
 	status: RealmUnitStatus,
+	publicationState: RealmUnitPublicationState,
 	postTargetingLocked: t.Boolean(),
 	openReportCount: t.Integer({ minimum: 0 }),
 	allowedCommands: t.Array(RealmModerationCommand, { minItems: 1 }),
@@ -408,6 +420,7 @@ export const RealmUnitListResponse = t.Object({
 			language: ContentLanguage,
 			title: t.Nullable(t.String()),
 			status: RealmUnitStatus,
+			publicationState: RealmUnitPublicationState,
 			postTargetingLocked: t.Boolean(),
 			openReportCount: t.Integer({ minimum: 0 }),
 			allowedCommands: t.Array(RealmModerationCommand, { minItems: 1 }),

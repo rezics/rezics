@@ -12,8 +12,8 @@ import { useInfiniteQuery, type QueryClient } from "@tanstack/react-query";
 import { invalidatePostQueries } from "@/features/posts/query";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import {
-	AllRealmModerationStatuses,
 	ReportedRealmUnits,
+	type RealmPublicationFilter,
 	type RealmReportFilter,
 	type RealmModerationFilter,
 } from "../routing/realm-moderation-route";
@@ -35,13 +35,15 @@ export type {
 export function useRealmModerationQueue(
 	realmId: string,
 	filter: RealmModerationFilter,
+	publicationFilter: RealmPublicationFilter,
 	reportFilter: RealmReportFilter,
 ) {
 	const localizationLanguages = useLocalizationLanguages();
 	const baseQuery = {
 		localizationLanguages,
 		limit: RealmModerationPageSize,
-		...(filter === AllRealmModerationStatuses ? {} : { status: filter }),
+		status: filter,
+		publicationState: publicationFilter,
 		...(reportFilter === ReportedRealmUnits ? { reported: true } : {}),
 	} satisfies GetApiRealmsByRealmIdUnitsQuery;
 

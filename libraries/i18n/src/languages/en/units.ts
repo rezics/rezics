@@ -6,6 +6,7 @@ const { forms: publicationLicenseTerms } = enTerminology.publicationLicense;
 const { forms: postTerms } = enTerminology.post;
 const { forms: videoTerms } = enTerminology.video;
 const { forms: audioTerms } = enTerminology.audio;
+const { forms: realmTerms } = enTerminology.realm;
 const { forms: followTerms } = enTerminology.follow;
 const { forms: metadataTerms } = enTerminology.metadata;
 
@@ -91,6 +92,10 @@ export default {
 				description:
 					"Feature global Tags and arrange the order in which they appear first.",
 			},
+			realms: {
+				label: `${realmTerms.label} publication`,
+				description: `Manage publication, withdrawal, and republication for each ${realmTerms.label}.`,
+			},
 			contentStructure: {
 				label: "Content structure",
 				description:
@@ -110,6 +115,33 @@ export default {
 				description: "Review, compare, undo, or restore content revisions.",
 			},
 		},
+	},
+	realmPublications: {
+		title: `${realmTerms.label} publication`,
+		description: `Manage the permanent inclusion relationships between this content and ${realmTerms.pluralLabel}. Withdrawing deactivates publication without deleting a relationship.`,
+		addTitle: `Publish to a ${realmTerms.label}`,
+		addDescription: `Add one ${realmTerms.label} at a time so its publication permission and rules are checked independently.`,
+		realmLabel: realmTerms.label,
+		add: "Publish",
+		publicationStateFilter: "Publication state",
+		realmStatusFilter: `${realmTerms.label} governance state`,
+		all: "All",
+		current: "Current governance states",
+		publicationStates: { active: "Published", withdrawn: "Withdrawn" },
+		realmStatuses: {
+			pending: "Pending review",
+			visible: "Approved",
+			hidden: "Hidden",
+			removed: "Removed",
+		},
+		effectivelyVisible: `Currently visible in the ${realmTerms.label}`,
+		notEffectivelyVisible: `Not currently visible in the ${realmTerms.label}`,
+		empty: "No publication relationships match the current filters.",
+		withdraw: "Withdraw",
+		republish: "Republish",
+		loadMore: "Load more",
+		unnamedRealm: `Unnamed ${realmTerms.label}`,
+		governanceReason: insert("Governance reason: {{reason}}", { reason: String }),
 	},
 	series: {
 		kind: "Series kind",

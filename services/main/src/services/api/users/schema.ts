@@ -49,6 +49,7 @@ export const StudioPermissionValues = [
 	"unit.update",
 	"unit.status.update",
 	"unit.access.manage",
+	"unit.realm-publication.manage",
 ] as const;
 export const StudioPermission = t.UnionEnum(StudioPermissionValues, { default: undefined });
 export type StudioPermission = Static<typeof StudioPermission>;

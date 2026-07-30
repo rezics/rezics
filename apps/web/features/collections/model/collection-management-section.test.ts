@@ -13,6 +13,7 @@ const denied = {
 	canManageAccess: false,
 	canViewHistory: false,
 	canRestoreHistory: false,
+	canManageRealmPublications: false,
 };
 
 describe("Collection management section manifest", () => {
@@ -29,5 +30,14 @@ describe("Collection management section manifest", () => {
 				canManagePublishers: true,
 			}),
 		).toEqual(["items", "publishers"]);
+	});
+
+	it("exposes Realm publication independently", () => {
+		expect(
+			getCollectionManagementSectionIds({
+				...denied,
+				canManageRealmPublications: true,
+			}),
+		).toEqual(["realms"]);
 	});
 });

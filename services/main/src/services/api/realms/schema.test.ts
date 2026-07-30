@@ -143,8 +143,9 @@ describe("Realm update API contract", () => {
 });
 
 describe("Realm moderation API contract", () => {
-	it("treats an omitted status filter as all Realm Unit states", () => {
-		expect(ListRealmUnitsQuery.properties.status.default).toBeUndefined();
+	it("defaults to current, actively published Realm Unit states", () => {
+		expect(ListRealmUnitsQuery.properties.status.default).toBe("current");
+		expect(ListRealmUnitsQuery.properties.publicationState.default).toBe("active");
 		expect(Check(ListRealmUnitsQuery, { localizationLanguages: ["zh", "en"] })).toBe(true);
 		expect(
 			Check(ListRealmUnitsQuery, {
@@ -166,6 +167,7 @@ describe("Realm moderation API contract", () => {
 						language: "zh",
 						title: "待處理項目",
 						status: "pending",
+						publicationState: "active",
 						postTargetingLocked: false,
 						openReportCount: 2,
 						allowedCommands: ["approve", "remove", "lock_post_targeting", "note"],
@@ -233,6 +235,7 @@ describe("Realm moderation API contract", () => {
 				createdAt: "2026-07-27T12:30:00.000Z",
 				target: {
 					status: "visible",
+					publicationState: "active",
 					postTargetingLocked: false,
 					openReportCount: 0,
 					allowedCommands: ["hide", "remove", "lock_post_targeting", "note"],

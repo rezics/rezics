@@ -1,6 +1,11 @@
 import { type Static, t } from "elysia";
 import { ContentLanguageValues } from "@rezics/i18n";
-import { CatalogEntryModeValues } from "../../database/schema/contract-values";
+import {
+	CatalogEntryModeValues,
+	GovernanceReasonCodeValues,
+	RealmUnitPublicationStateValues,
+	RealmUnitStatusValues,
+} from "../../database/schema/contract-values";
 
 import {
 	DateTime,
@@ -44,6 +49,52 @@ export const UnitVersionInput = t.Union([
 export type UnitVersionInput = Static<typeof UnitVersionInput>;
 
 export const UnitStatusEventParams = t.Object({ unitId: Uuid });
+export const UnitRealmPublicationParams = t.Object({
+	unitId: Uuid,
+	realmId: Uuid,
+});
+export const ListUnitRealmPublicationsQuery = t.Object(
+	{
+		publicationState: t.Optional(
+			t.UnionEnum([...RealmUnitPublicationStateValues, "all"], {
+				default: "active",
+			}),
+		),
+		realmStatus: t.Optional(
+			t.UnionEnum(["current", ...RealmUnitStatusValues, "all"], {
+				default: "current",
+			}),
+		),
+		localizationLanguages: LocalizationLanguagePriority,
+		cursor: t.Optional(t.String({ minLength: 1, maxLength: 1024 })),
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
+	},
+	{ additionalProperties: false },
+);
+export type ListUnitRealmPublicationsQuery = Static<typeof ListUnitRealmPublicationsQuery>;
+export const UnitRealmPublicationListResponse = t.Object({
+	items: t.Array(
+		t.Object({
+			realmId: Uuid,
+			realmKind: t.Literal("realm"),
+			language: ContentLanguage,
+			title: t.Nullable(t.String()),
+			publicationState: t.UnionEnum(RealmUnitPublicationStateValues),
+			status: t.UnionEnum(RealmUnitStatusValues),
+			effectivelyVisible: t.Boolean(),
+			latestGovernance: t.Nullable(
+				t.Object({
+					actionId: Uuid,
+					reasonCode: t.UnionEnum(GovernanceReasonCodeValues),
+					createdAt: DateTime,
+				}),
+			),
+			createdAt: DateTime,
+			updatedAt: DateTime,
+		}),
+	),
+	nextCursor: t.Nullable(t.String()),
+});
 export const UnitSeriesMembershipQuery = t.Object(
 	{ localizationLanguages: LocalizationLanguagePriority },
 	{ additionalProperties: false },

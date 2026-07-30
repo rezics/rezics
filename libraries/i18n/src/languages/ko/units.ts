@@ -6,6 +6,7 @@ const { forms: publicationLicenseTerms } = koTerminology.publicationLicense;
 const { forms: postTerms } = koTerminology.post;
 const { forms: videoTerms } = koTerminology.video;
 const { forms: audioTerms } = koTerminology.audio;
+const { forms: realmTerms } = koTerminology.realm;
 const { forms: followTerms } = koTerminology.follow;
 const { forms: metadataTerms } = koTerminology.metadata;
 
@@ -89,6 +90,10 @@ export default {
 				label: "태그",
 				description: "글로벌 태그를 추천으로 설정하고 우선 표시 순서를 관리합니다.",
 			},
+			realms: {
+				label: `${realmTerms.label} 게시`,
+				description: `${realmTerms.label}별 게시, 철회, 재게시 상태를 관리합니다.`,
+			},
 			contentStructure: {
 				label: "콘텐츠 구조",
 				description: "접이식 들여쓰기 트리 편집기에서 책 챕터 또는 미디어 항목 관리.",
@@ -107,6 +112,33 @@ export default {
 				description: "콘텐츠 수정 사항을 검토, 비교, 실행 취소 또는 복원하세요.",
 			},
 		},
+	},
+	realmPublications: {
+		title: `${realmTerms.label} 게시`,
+		description: `이 콘텐츠와 ${realmTerms.pluralLabel} 사이에 영구히 유지되는 수록 관계를 관리합니다. 철회해도 관계는 삭제되지 않고 게시만 중지됩니다.`,
+		addTitle: `${realmTerms.label}에 게시`,
+		addDescription: `게시 권한과 규칙을 각각 확인할 수 있도록 ${realmTerms.label}을 한 번에 하나씩 추가합니다.`,
+		realmLabel: realmTerms.label,
+		add: "게시",
+		publicationStateFilter: "게시 상태",
+		realmStatusFilter: `${realmTerms.label} 관리 상태`,
+		all: "전체",
+		current: "현재 관리 상태",
+		publicationStates: { active: "게시됨", withdrawn: "철회됨" },
+		realmStatuses: {
+			pending: "검토 대기",
+			visible: "승인됨",
+			hidden: "숨김",
+			removed: "제거됨",
+		},
+		effectivelyVisible: `현재 ${realmTerms.label}에 표시됨`,
+		notEffectivelyVisible: `현재 ${realmTerms.label}에 표시되지 않음`,
+		empty: "현재 필터와 일치하는 게시 관계가 없습니다.",
+		withdraw: "철회",
+		republish: "다시 게시",
+		loadMore: "더 보기",
+		unnamedRealm: `이름 없는 ${realmTerms.label}`,
+		governanceReason: insert("관리 사유: {{reason}}", { reason: String }),
 	},
 	series: {
 		kind: "시리즈 종류",

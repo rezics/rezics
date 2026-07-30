@@ -86,6 +86,7 @@ export async function createWikiPost(
 	await publishPostToRealms(tx, {
 		postId: created.id,
 		realmIds: input.publishRealmIds,
+		actorProfileId: input.profileId,
 	});
 	const revision = await recordUnitRevision(tx, {
 		unitId: created.id,

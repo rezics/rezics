@@ -12,6 +12,7 @@ const ordinaryDenied = {
 		canEdit: false,
 		canManageAttributions: false,
 		canManageAccess: false,
+		canManageRealmPublications: false,
 	},
 } as const satisfies PostManagementCapabilitySource;
 
@@ -21,6 +22,7 @@ const reviewDenied = {
 		canEdit: false,
 		canManageAttributions: false,
 		canManageAccess: false,
+		canManageRealmPublications: false,
 		canManageScores: false,
 	},
 } as const satisfies PostManagementCapabilitySource;
@@ -33,6 +35,18 @@ describe("post management section manifest", () => {
 				capabilities: { ...ordinaryDenied.capabilities, canEdit: true },
 			}),
 		).toEqual(["main", "history"]);
+	});
+
+	it("exposes Realm publication only with its exact capability", () => {
+		expect(
+			getPostManagementSectionIds({
+				...ordinaryDenied,
+				capabilities: {
+					...ordinaryDenied.capabilities,
+					canManageRealmPublications: true,
+				},
+			}),
+		).toEqual(["realms", "history"]);
 	});
 
 	it("keeps Excerpts in the ordinary Post management lifecycle", () => {

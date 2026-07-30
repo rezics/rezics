@@ -93,6 +93,10 @@ function realmPlacementCondition(filter: RealmPlacementFilter): SQL {
 		);
 	if (filter.status)
 		conditions.push(valuesCondition(sql`filter_realm_unit.status`, filter.status.in));
+	if (filter.publicationState)
+		conditions.push(
+			valuesCondition(sql`filter_realm_unit.publication_state`, filter.publicationState.in),
+		);
 	return conjunction(conditions);
 }
 

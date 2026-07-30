@@ -131,11 +131,13 @@ export async function getCollection(
 		localizationLanguages,
 	);
 	if (!selectedLocalization) throw new CollectionNotFound();
-	const [updateDecision, accessDecision, restoreDecision] = await Promise.all([
-		authorization.unit.decide(collectionId, "unit.update"),
-		authorization.unit.decide(collectionId, "unit.access.manage"),
-		authorization.unit.decide(collectionId, "unit.history.restore"),
-	]);
+	const [updateDecision, accessDecision, restoreDecision, realmPublicationDecision] =
+		await Promise.all([
+			authorization.unit.decide(collectionId, "unit.update"),
+			authorization.unit.decide(collectionId, "unit.access.manage"),
+			authorization.unit.decide(collectionId, "unit.history.restore"),
+			authorization.unit.decide(collectionId, "unit.realm-publication.manage"),
+		]);
 	const ordinaryCollection = record.favoritesProfileId === null;
 	const canUpdate = updateDecision.allowed && ordinaryCollection;
 	const { favoritesProfileId, ...detail } = record;
@@ -184,6 +186,7 @@ export async function getCollection(
 			canManagePublishers: canUpdate,
 			canManageLocalizations: canUpdate,
 			canManageAccess: accessDecision.allowed && ordinaryCollection,
+			canManageRealmPublications: realmPublicationDecision.allowed && ordinaryCollection,
 			canViewHistory:
 				updateDecision.allowed || accessDecision.allowed || restoreDecision.allowed,
 			canRestoreHistory: restoreDecision.allowed && ordinaryCollection,

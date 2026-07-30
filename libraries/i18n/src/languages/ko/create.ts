@@ -126,6 +126,7 @@ export default {
 			"unit.update": "편집 가능",
 			"unit.status.update": "상태를 변경할 수 있음",
 			"unit.access.manage": "접근을 관리할 수 있음",
+			"unit.realm-publication.manage": `${realmTerms.label} 게시를 관리할 수 있음`,
 		},
 		workStates: { actionable: "실행 가능", blocked: "현재 차단됨" },
 		statuses: { draft: "초안", published: "게시됨", archived: "보관됨" },

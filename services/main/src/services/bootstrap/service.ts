@@ -68,6 +68,7 @@ import { lockPlatformAccess } from "../platform-access";
 import { storage } from "../storage";
 import { insertUnit, insertUnitIfMissing } from "../units/create";
 import { recordUnitRevision } from "../units/history";
+import { recordInitialRealmUnitPublicationEvents } from "../units/realm-publication";
 import { avatarReferenceToColumns } from "../units/localization";
 import { replaceZonePageSlugAddress } from "../units/slug-address";
 import { listZonePageUnits } from "../zones/pages";
@@ -1062,7 +1063,7 @@ async function ensureOfficialWikiPost(
 			})) || changed;
 	}
 	changed = (await ensureOwnership(tx, value.wikiPost.id, value.ownerProfileId)) || changed;
-	await tx
+	const insertedRealmUnit = await tx
 		.insert(realmUnit)
 		.values({
 			realmId: OfficialRealmManifest.id,
@@ -1072,7 +1073,12 @@ async function ensureOfficialWikiPost(
 			createdAt,
 			updatedAt: createdAt,
 		})
-		.onConflictDoNothing();
+		.onConflictDoNothing()
+		.returning({ realmId: realmUnit.realmId, unitId: realmUnit.unitId });
+	await recordInitialRealmUnitPublicationEvents(tx, {
+		relations: insertedRealmUnit.map((relation) => ({ ...relation, createdAt })),
+		actorProfileId: value.ownerProfileId,
+	});
 	if (changed)
 		await recordUnitRevision(tx, {
 			unitId: value.wikiPost.id,
@@ -1409,7 +1415,11 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 				updatedAt: createdAt,
 			})
 			.onConflictDoNothing()
-			.returning({ unitId: realmUnit.unitId });
+			.returning({ realmId: realmUnit.realmId, unitId: realmUnit.unitId });
+		await recordInitialRealmUnitPublicationEvents(tx, {
+			relations: insertedRealmUnit.map((relation) => ({ ...relation, createdAt })),
+			actorProfileId: value.ownerProfileId,
+		});
 		changed ||= insertedRealmUnit.length > 0;
 		if (changed)
 			await recordUnitRevision(tx, {

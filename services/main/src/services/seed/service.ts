@@ -11,7 +11,7 @@ import {
 } from "@rezics/block";
 import { defaultKeyHasher } from "@better-auth/api-key";
 import { hashPassword } from "better-auth/crypto";
-import { and, eq, isNull, notInArray, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, notInArray, sql } from "drizzle-orm";
 import { OfficialRealmUnitIds, ZoneHomePageSlug } from "@rezics/slug";
 import { PlatformCapabilityValues } from "@rezics/access";
 
@@ -130,6 +130,7 @@ import { createDockHistory, getDockRevisionId } from "../api/docks/history";
 import { RecommendationPolicyVersion } from "../recommendations/policy";
 import { fractionalPositionAt } from "../ordering/position";
 import { recordUnitRevision, restoreUnitRevision } from "../units/history";
+import { recordInitialRealmUnitPublicationEvents } from "../units/realm-publication";
 import { replaceZonePageSlugAddress } from "../units/slug-address";
 import { ensureOfficialZoneFollows } from "../bootstrap/official-zone-follows";
 import { bindStandardPolicyToToken } from "../auth/api-token/policy-service";
@@ -1368,6 +1369,16 @@ async function seedToaruWiki(
 		createdAt: wikiPost.createdAt,
 		updatedAt: wikiPost.updatedAt,
 	});
+	await recordInitialRealmUnitPublicationEvents(tx, {
+		relations: [
+			{
+				realmId: OfficialRealmManifest.id,
+				unitId: wikiPost.id,
+				createdAt: wikiPost.createdAt,
+			},
+		],
+		actorProfileId: owner.id,
+	});
 
 	const pageDocument = createUnitReferencedBlockDocument(
 		[{ _type: "post-full-view", _key: "a40000000002", postId: wikiPost.id }],
@@ -1943,6 +1954,15 @@ async function seedStructure(
 	await writeBatches(
 		realmUnitRows.map((row) => ({ ...row, postTargetingLocked: false })),
 		(batch) => tx.insert(realmUnit).values(batch),
+	);
+	await writeBatches(realmUnitRows, (batch) =>
+		recordInitialRealmUnitPublicationEvents(tx, {
+			relations: batch.map(({ realmId, unitId, createdAt }) => ({
+				realmId,
+				unitId,
+				createdAt,
+			})),
+		}),
 	);
 	for (const row of realmUnitRows.filter((candidate) => candidate.postTargetingLocked))
 		await tx
@@ -2851,7 +2871,7 @@ async function seedCoverageContracts(
 		createdAt,
 		updatedAt: createdAt,
 	});
-	await tx
+	const insertedRealmUnits = await tx
 		.insert(realmUnit)
 		.values([
 			{
@@ -2876,10 +2896,21 @@ async function seedCoverageContracts(
 				updatedAt: createdAt,
 			},
 		])
-		.onConflictDoUpdate({
-			target: [realmUnit.realmId, realmUnit.unitId],
-			set: { status: "visible", updatedAt: createdAt },
-		});
+		.onConflictDoNothing()
+		.returning({ realmId: realmUnit.realmId, unitId: realmUnit.unitId });
+	await recordInitialRealmUnitPublicationEvents(tx, {
+		relations: insertedRealmUnits.map((relation) => ({ ...relation, createdAt })),
+		actorProfileId: actor.id,
+	});
+	await tx
+		.update(realmUnit)
+		.set({ status: "visible", updatedAt: createdAt })
+		.where(
+			and(
+				eq(realmUnit.realmId, targetRealm.id),
+				inArray(realmUnit.unitId, [target.id, contextPost.id, associationContextPost.id]),
+			),
+		);
 	await tx.insert(realmUnitTag).values({
 		realmId: targetRealm.id,
 		unitId: target.id,

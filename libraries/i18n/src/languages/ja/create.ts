@@ -132,6 +132,7 @@ export default {
 			"unit.update": "編集可能",
 			"unit.status.update": "ステータスを変更可能",
 			"unit.access.manage": "アクセスを管理可能",
+			"unit.realm-publication.manage": `${realmTerms.label}への公開を管理可能`,
 		},
 		workStates: { actionable: "実行可能", blocked: "現在ブロック中" },
 		statuses: { draft: "下書き", published: "公開", archived: "アーカイブ済み" },

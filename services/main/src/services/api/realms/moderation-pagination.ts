@@ -1,16 +1,29 @@
 import { t } from "elysia";
 
-import { RealmUnitStatusValues } from "../../database/schema/contract-values";
+import {
+	RealmUnitPublicationStateValues,
+	RealmUnitStatusValues,
+} from "../../database/schema/contract-values";
 import { parseJsonCursor } from "../../pagination";
 import { InvalidPaginationCursor } from "../../pagination/errors";
 
 export type RealmUnitModerationStatus = (typeof RealmUnitStatusValues)[number];
+export type RealmUnitModerationStatusFilter = RealmUnitModerationStatus | "current" | "all";
+export type RealmUnitModerationPublicationStateFilter =
+	(typeof RealmUnitPublicationStateValues)[number] | "all";
+
+function isRealmUnitModerationStatus(
+	value: RealmUnitModerationStatusFilter,
+): value is RealmUnitModerationStatus {
+	return RealmUnitStatusValues.some((status) => status === value);
+}
 
 const RealmUnitModerationCursor = t.Object(
 	{
-		v: t.Literal(2),
+		v: t.Literal(3),
 		realmId: t.String({ format: "uuid" }),
-		statusFilter: t.Nullable(t.UnionEnum(RealmUnitStatusValues)),
+		statusFilter: t.UnionEnum(["current", ...RealmUnitStatusValues, "all"]),
+		publicationStateFilter: t.UnionEnum([...RealmUnitPublicationStateValues, "all"]),
 		reported: t.Boolean(),
 		status: t.UnionEnum(RealmUnitStatusValues),
 		updatedAt: t.String({ format: "date-time" }),
@@ -35,7 +48,8 @@ export type RealmUnitModerationCursorBoundary = {
 
 type RealmUnitModerationCursorScope = {
 	readonly realmId: string;
-	readonly status?: RealmUnitModerationStatus;
+	readonly status: RealmUnitModerationStatusFilter;
+	readonly publicationState: RealmUnitModerationPublicationStateFilter;
 	readonly reported?: boolean;
 };
 
@@ -45,9 +59,10 @@ export function encodeRealmUnitModerationCursor(
 ): string {
 	return Buffer.from(
 		JSON.stringify({
-			v: 2,
+			v: 3,
 			realmId: scope.realmId,
-			statusFilter: scope.status ?? null,
+			statusFilter: scope.status,
+			publicationStateFilter: scope.publicationState,
 			reported: scope.reported ?? false,
 			status: boundary.status,
 			updatedAt: boundary.updatedAt.toISOString(),
@@ -65,9 +80,10 @@ export function decodeRealmUnitModerationCursor(
 		const cursor = parseJsonCursor(value, RealmUnitModerationCursor);
 		if (
 			cursor.realmId !== scope.realmId ||
-			cursor.statusFilter !== (scope.status ?? null) ||
+			cursor.statusFilter !== scope.status ||
+			cursor.publicationStateFilter !== scope.publicationState ||
 			cursor.reported !== (scope.reported ?? false) ||
-			(scope.status !== undefined && cursor.status !== scope.status)
+			(isRealmUnitModerationStatus(scope.status) && cursor.status !== scope.status)
 		)
 			throw new InvalidPaginationCursor();
 		const updatedAt = new Date(cursor.updatedAt);

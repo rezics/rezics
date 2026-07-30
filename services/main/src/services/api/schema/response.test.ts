@@ -248,6 +248,7 @@ describe("API response values", () => {
 		expect(OrdinaryPostDetailResponse.properties.capabilities.required).toEqual([
 			"canEdit",
 			"canManageAttributions",
+			"canManageRealmPublications",
 			"canManageAccess",
 			"canReply",
 		]);
@@ -264,6 +265,7 @@ describe("API response values", () => {
 		expect(ReviewDetailResponse.properties.capabilities.required).toEqual([
 			"canEdit",
 			"canManageAttributions",
+			"canManageRealmPublications",
 			"canManageAccess",
 			"canManageScores",
 			"canReply",

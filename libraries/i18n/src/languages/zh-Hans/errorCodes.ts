@@ -216,4 +216,7 @@ export default {
 	AssociationContextPostInvalid: `关联脉络必须是知识型${postTerms.inline}。`,
 	ProgressEntryNotFound: "找不到这条进度事件。",
 	PostTagMentionVoteConflict: `这个标签提及与你对该${postTerms.inline}的既有负票冲突。`,
+	UnitRealmPublicationNotFound: `找不到这项内容与该${realmTerms.label}的发布关系。`,
+	UnitRealmPublicationAlreadyExists: `这项内容已与该${realmTerms.label}建立发布关系。`,
+	UnitRealmPublicationTransitionInvalid: "这项发布关系已经处于要求的状态。",
 } satisfies typeof import("../zh-Hant/errorCodes").default;

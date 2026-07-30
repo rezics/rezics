@@ -14,7 +14,7 @@ import {
 	QueryFailure,
 	QueryPending,
 } from "@rezics/ui";
-import { BookOpenText, History, Link2, ShieldCheck } from "lucide-react";
+import { BookOpenText, Globe2, History, Link2, ShieldCheck } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { createContext, useContext, type ReactNode } from "react";
@@ -169,6 +169,13 @@ function LoadedPostManagementWorkspace({
 			label: t.posts.workspace.sections.attributions.label,
 			description: t.posts.workspace.sections.attributions.description,
 			icon: Link2,
+		},
+		{
+			id: "realms",
+			href: postManagementSectionHref(postId, "realms"),
+			label: t.units.workspace.sections.realms.label,
+			description: t.units.workspace.sections.realms.description,
+			icon: Globe2,
 		},
 		{
 			id: "access",

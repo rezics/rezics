@@ -410,6 +410,7 @@ async function readRealmTaxonomy(
 						eq(realmUnit.realmId, realmTagContext.realmId),
 						eq(realmUnit.unitId, realmTagContext.contextPostId),
 						eq(realmUnit.status, "visible"),
+						eq(realmUnit.publicationState, "active"),
 					),
 				)
 				.where(
@@ -963,7 +964,20 @@ export default new Elysia({ prefix: "/realms" })
 			const [context] = await database
 				.select({ contextPostId: realmScoreContext.contextPostId })
 				.from(realmScoreContext)
-				.where(eq(realmScoreContext.realmId, params.realmId))
+				.innerJoin(
+					realmUnit,
+					and(
+						eq(realmUnit.realmId, realmScoreContext.realmId),
+						eq(realmUnit.unitId, realmScoreContext.contextPostId),
+					),
+				)
+				.where(
+					and(
+						eq(realmScoreContext.realmId, params.realmId),
+						eq(realmUnit.status, "visible"),
+						eq(realmUnit.publicationState, "active"),
+					),
+				)
 				.limit(1);
 			if (context)
 				await authorization.unit.ensureCanRead(
@@ -1005,6 +1019,8 @@ export default new Elysia({ prefix: "/realms" })
 						and(
 							eq(realmUnit.realmId, params.realmId),
 							eq(realmUnit.unitId, body.contextPostId),
+							eq(realmUnit.status, "visible"),
+							eq(realmUnit.publicationState, "active"),
 						),
 					)
 					.limit(1);
@@ -1964,6 +1980,7 @@ export default new Elysia({ prefix: "/realms" })
 						eq(realmUnit.realmId, params.realmId),
 						eq(realmUnit.unitId, record.contextPostId),
 						eq(realmUnit.status, "visible"),
+						eq(realmUnit.publicationState, "active"),
 					),
 				)
 				.limit(1);
@@ -2016,6 +2033,7 @@ export default new Elysia({ prefix: "/realms" })
 							eq(realmUnit.realmId, params.realmId),
 							eq(realmUnit.unitId, body.contextPostId),
 							eq(realmUnit.status, "visible"),
+							eq(realmUnit.publicationState, "active"),
 							eq(post.kind, "wiki"),
 						),
 					)
@@ -2102,6 +2120,7 @@ export default new Elysia({ prefix: "/realms" })
 								eq(realmUnit.realmId, params.realmId),
 								eq(realmUnit.unitId, params.unitId),
 								eq(realmUnit.status, "visible"),
+								eq(realmUnit.publicationState, "active"),
 							),
 						)
 						.limit(1),
@@ -2340,9 +2359,12 @@ export default new Elysia({ prefix: "/realms" })
 		async ({ params, query, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.units.moderate");
 			const limit = query.limit ?? 50;
+			const statusFilter = query.status ?? "current";
+			const publicationStateFilter = query.publicationState ?? "active";
 			const cursor = decodeRealmUnitModerationCursor(query.cursor, {
 				realmId: params.realmId,
-				status: query.status,
+				status: statusFilter,
+				publicationState: publicationStateFilter,
 				reported: query.reported,
 			});
 			const statusOrder = sql<number>`case ${realmUnit.status} when 'pending' then 0 when 'hidden' then 1 when 'removed' then 2 else 3 end`;
@@ -2357,6 +2379,7 @@ export default new Elysia({ prefix: "/realms" })
 					),
 					title: resolvedUnitLocalizationTitle(unit.id, query.localizationLanguages),
 					status: realmUnit.status,
+					publicationState: realmUnit.publicationState,
 					postTargetingLocked: realmUnit.postTargetingLocked,
 					openReportCount: sql<number>`(
 						select count(*)::int
@@ -2376,7 +2399,14 @@ export default new Elysia({ prefix: "/realms" })
 				.where(
 					and(
 						eq(realmUnit.realmId, params.realmId),
-						query.status ? eq(realmUnit.status, query.status) : undefined,
+						statusFilter === "current"
+							? inArray(realmUnit.status, ["pending", "visible", "hidden"])
+							: statusFilter === "all"
+								? undefined
+								: eq(realmUnit.status, statusFilter),
+						publicationStateFilter === "all"
+							? undefined
+							: eq(realmUnit.publicationState, publicationStateFilter),
 						query.reported
 							? sql`exists (
 									select 1
@@ -2432,7 +2462,8 @@ export default new Elysia({ prefix: "/realms" })
 						? encodeRealmUnitModerationCursor(
 								{
 									realmId: params.realmId,
-									status: query.status,
+									status: statusFilter,
+									publicationState: publicationStateFilter,
 									reported: query.reported,
 								},
 								{
@@ -2666,6 +2697,7 @@ export default new Elysia({ prefix: "/realms" })
 				const [updatedTarget] = await tx
 					.select({
 						status: realmUnit.status,
+						publicationState: realmUnit.publicationState,
 						postTargetingLocked: realmUnit.postTargetingLocked,
 						openReportCount: sql<number>`(
 							select count(*)::int

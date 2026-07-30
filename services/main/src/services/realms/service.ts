@@ -1,11 +1,15 @@
 import { and, desc, eq } from "drizzle-orm";
 
-import { database, type DatabaseTransaction } from "../database";
+import { database, type DatabaseExecutor, type DatabaseTransaction } from "../database";
 import { realmMember, realmRuleAcceptance, realmRuleRevision } from "../database/schema";
 
-export async function findRealmMembership(realmId: string, profileId: string) {
+export async function findRealmMembership(
+	realmId: string,
+	profileId: string,
+	executor: DatabaseExecutor = database,
+) {
 	const row = (
-		await database
+		await executor
 			.select({
 				realmId: realmMember.realmId,
 				profileId: realmMember.profileId,
@@ -22,9 +26,9 @@ export async function findRealmMembership(realmId: string, profileId: string) {
 
 export type RealmMembership = NonNullable<Awaited<ReturnType<typeof findRealmMembership>>>;
 
-export async function getCurrentRealmRules(realmId: string) {
+export async function getCurrentRealmRules(realmId: string, executor: DatabaseExecutor = database) {
 	return (
-		await database
+		await executor
 			.select({
 				revisionId: realmRuleRevision.id,
 				version: realmRuleRevision.version,

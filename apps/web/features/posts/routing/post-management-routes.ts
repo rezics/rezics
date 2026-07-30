@@ -23,6 +23,7 @@ export function parsePostManagementSection(
 	const base = postManagementHref(postId);
 	if (pathname === base || pathname === `${base}/`) return "main";
 	if (pathname === `${base}/attributions`) return "attributions";
+	if (pathname === `${base}/realms`) return "realms";
 	if (pathname === `${base}/access`) return "access";
 	if (pathname === `${base}/history` || pathname.startsWith(`${base}/history/`)) return "history";
 	return undefined;

@@ -189,6 +189,7 @@ export default {
 			"unit.ownership.transfer": "Eigentum übertragen",
 			"unit.association.manage": "Zuordnungen verwalten",
 			"unit.tag-curation.manage": "Tag-Kuratierung verwalten",
+			"unit.realm-publication.manage": `Veröffentlichung in ${realmTerms.label} verwalten`,
 			"realm.contribute": `Zum ${realmTerms.inline} beitragen`,
 			"realm.units.create": "Units erstellen",
 			"realm.post.replies.create": "Antworten erstellen",

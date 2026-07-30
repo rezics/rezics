@@ -188,6 +188,7 @@ export default {
 			"unit.ownership.transfer": "Transfer ownership",
 			"unit.association.manage": "Manage associations",
 			"unit.tag-curation.manage": "Manage Tag curation",
+			"unit.realm-publication.manage": `Manage ${realmTerms.label} publication`,
 			"realm.contribute": `Contribute to ${realmTerms.label}`,
 			"realm.units.create": "Create Units",
 			"realm.post.replies.create": "Create replies",

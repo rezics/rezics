@@ -13,7 +13,15 @@ import {
 	QueryFailure,
 	QueryPending,
 } from "@rezics/ui";
-import { BookOpenText, Database, History, Link2, ListTree, ShieldCheck } from "lucide-react";
+import {
+	BookOpenText,
+	Database,
+	Globe2,
+	History,
+	Link2,
+	ListTree,
+	ShieldCheck,
+} from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { usePathname } from "next/navigation";
 import { createContext, useContext, type ReactNode } from "react";
@@ -80,7 +88,7 @@ function CollectionManagementWorkspaceContent({
 		path: { collectionId },
 		query: { localizationLanguages },
 	});
-	const { t } = useTranslation(["collections", "errors", "ui"]);
+	const { t } = useTranslation(["collections", "errors", "ui", "units"]);
 	if (query.isPending) return <QueryPending />;
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
@@ -120,6 +128,13 @@ function CollectionManagementWorkspaceContent({
 			label: labels.publishers.label,
 			description: labels.publishers.description,
 			icon: Link2,
+		},
+		{
+			id: "realms",
+			href: collectionManagementSectionHref(collectionId, "realms"),
+			label: t.units.workspace.sections.realms.label,
+			description: t.units.workspace.sections.realms.description,
+			icon: Globe2,
 		},
 		{
 			id: "access",

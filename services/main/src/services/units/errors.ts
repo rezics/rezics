@@ -44,6 +44,34 @@ export class UnitChanged extends Data.TaggedError("UnitChanged") {
 	}
 }
 
+export class UnitRealmPublicationNotFound extends Data.TaggedError("UnitRealmPublicationNotFound") {
+	static readonly status = StatusCodes.NOT_FOUND as const;
+	readonly status = UnitRealmPublicationNotFound.status;
+	readonly message = "Unit Realm publication was not found";
+}
+
+export class UnitRealmPublicationAlreadyExists extends Data.TaggedError(
+	"UnitRealmPublicationAlreadyExists",
+) {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitRealmPublicationAlreadyExists.status;
+	readonly message = "Unit Realm publication already exists";
+}
+
+export class UnitRealmPublicationTransitionInvalid extends Data.TaggedError(
+	"UnitRealmPublicationTransitionInvalid",
+) {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitRealmPublicationTransitionInvalid.status;
+	readonly message = "Unit Realm publication is already in the requested state";
+	readonly details: { readonly publicationState: "active" | "withdrawn" };
+
+	constructor(publicationState: "active" | "withdrawn") {
+		super();
+		this.details = { publicationState };
+	}
+}
+
 export class UnitRevisionConflict extends Data.TaggedError("UnitRevisionConflict") {
 	static readonly status = StatusCodes.CONFLICT as const;
 	readonly status = UnitRevisionConflict.status;
@@ -253,6 +281,9 @@ export const UnitErrors = [
 	UnitPermissionForbidden,
 	UnitAccessRestricted,
 	UnitChanged,
+	UnitRealmPublicationNotFound,
+	UnitRealmPublicationAlreadyExists,
+	UnitRealmPublicationTransitionInvalid,
 	UnitRevisionConflict,
 	UnitLocalizationOrderChanged,
 	UnitLocalizationOrderInvalid,

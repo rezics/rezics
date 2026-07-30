@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import Elysia from "elysia";
+import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { decodeCursor, encodeCursor } from "../../pagination";
@@ -39,6 +39,9 @@ import {
 	UnitSeriesMembershipListResponse,
 	UnitSeriesMembershipQuery,
 	ResolveUnitPresentationsBody,
+	ListUnitRealmPublicationsQuery,
+	UnitRealmPublicationListResponse,
+	UnitRealmPublicationParams,
 } from "./schema";
 import {
 	toApiErrorResponse,
@@ -52,6 +55,13 @@ import {
 	updateUnitVariantContext,
 } from "../../units/variants";
 import { getReadableUnitPresentationsByIds } from "../../units/attribution";
+import {
+	createUnitRealmPublication,
+	listUnitRealmPublications,
+	republishUnitRealmPublication,
+	withdrawUnitRealmPublication,
+} from "../../units/realm-publication";
+import { NoContentResponse } from "../schema/action-response";
 
 const AuthenticationRequiredResponse = toApiErrorResponse(["AuthenticationRequired"]);
 const UnitReadFailureResponse = toApiErrorResponse(["UnitNotFound"]);
@@ -90,6 +100,23 @@ const UnitAuthorizationForbiddenResponse = toApiErrorResponse([
 	"UnitPermissionForbidden",
 ]);
 const UnitChangedResponse = toApiErrorResponse(["UnitChanged"]);
+const UnitRealmPublicationForbiddenResponse = toApiErrorResponse([
+	"ApiTokenPermissionRequired",
+	"EmailVerificationRequired",
+	"AccountRestricted",
+	"UnitAccessRestricted",
+	"UnitPermissionForbidden",
+	"RealmCapabilityRequired",
+]);
+const UnitRealmPublicationNotFoundResponse = toApiErrorResponse([
+	"UnitNotFound",
+	"UnitRealmPublicationNotFound",
+]);
+const UnitRealmPublicationConflictResponse = toApiErrorResponse([
+	"UnitRealmPublicationAlreadyExists",
+	"UnitRealmPublicationTransitionInvalid",
+	"RealmRulesAcceptanceRequired",
+]);
 const UnitVariantConflictResponse = toApiErrorResponse([
 	"UnitVariantKindMismatch",
 	"UnitVariantTargetIsVariant",
@@ -119,6 +146,122 @@ export default new Elysia({ prefix: "/units" })
 			body: ResolveUnitPresentationsBody,
 			response: { [StatusCodes.OK]: UnitPresentationListResponse },
 			detail: { summary: "Resolve readable Unit presentations", tags: ["Units"] },
+		},
+	)
+	.get(
+		"/by-id/:unitId/realm-publications",
+		async ({ params, query, authorization }) => {
+			const limit = query.limit ?? 50;
+			const cursor = decodeCursor(query.cursor);
+			const rows = await listUnitRealmPublications({
+				unitId: params.unitId,
+				authorization,
+				localizationLanguages: query.localizationLanguages,
+				publicationState: query.publicationState ?? "active",
+				status: query.realmStatus ?? "current",
+				cursor: cursor ? [new Date(cursor[0]), cursor[1]] : undefined,
+				limit: limit + 1,
+			});
+			const hasMore = rows.length > limit;
+			const items = hasMore ? rows.slice(0, limit) : rows;
+			const last = items.at(-1);
+			return {
+				items,
+				nextCursor: hasMore && last ? encodeCursor(last.updatedAt, last.realmId) : null,
+			};
+		},
+		{
+			access: "contribute:unit:update",
+			params: UnitStatusEventParams,
+			query: ListUnitRealmPublicationsQuery,
+			response: {
+				[StatusCodes.OK]: UnitRealmPublicationListResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+				[StatusCodes.FORBIDDEN]: UnitRealmPublicationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
+			detail: {
+				summary: "List a Unit's Realm publications",
+				tags: ["Units", "Realms"],
+			},
+		},
+	)
+	.post(
+		"/by-id/:unitId/realm-publications/:realmId",
+		async ({ params, authorization }) => {
+			await createUnitRealmPublication({
+				unitId: params.unitId,
+				realmId: params.realmId,
+				authorization,
+			});
+			return new Response(null, { status: StatusCodes.NO_CONTENT });
+		},
+		{
+			access: "contribute:unit:update",
+			params: UnitRealmPublicationParams,
+			response: {
+				[StatusCodes.NO_CONTENT]: t.Void(),
+				[StatusCodes.FORBIDDEN]: UnitRealmPublicationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+				[StatusCodes.CONFLICT]: UnitRealmPublicationConflictResponse,
+			},
+			detail: {
+				summary: "Publish a Unit to one Realm",
+				tags: ["Units", "Realms"],
+				responses: NoContentResponse,
+			},
+		},
+	)
+	.post(
+		"/by-id/:unitId/realm-publications/:realmId/withdraw",
+		async ({ params, authorization }) => {
+			await withdrawUnitRealmPublication({
+				unitId: params.unitId,
+				realmId: params.realmId,
+				authorization,
+			});
+			return new Response(null, { status: StatusCodes.NO_CONTENT });
+		},
+		{
+			access: "contribute:unit:update",
+			params: UnitRealmPublicationParams,
+			response: {
+				[StatusCodes.NO_CONTENT]: t.Void(),
+				[StatusCodes.FORBIDDEN]: UnitRealmPublicationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: UnitRealmPublicationNotFoundResponse,
+				[StatusCodes.CONFLICT]: UnitRealmPublicationConflictResponse,
+			},
+			detail: {
+				summary: "Withdraw a Unit from one Realm",
+				tags: ["Units", "Realms"],
+				responses: NoContentResponse,
+			},
+		},
+	)
+	.post(
+		"/by-id/:unitId/realm-publications/:realmId/republish",
+		async ({ params, authorization }) => {
+			await republishUnitRealmPublication({
+				unitId: params.unitId,
+				realmId: params.realmId,
+				authorization,
+			});
+			return new Response(null, { status: StatusCodes.NO_CONTENT });
+		},
+		{
+			access: "contribute:unit:update",
+			params: UnitRealmPublicationParams,
+			response: {
+				[StatusCodes.NO_CONTENT]: t.Void(),
+				[StatusCodes.FORBIDDEN]: UnitRealmPublicationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: UnitRealmPublicationNotFoundResponse,
+				[StatusCodes.CONFLICT]: UnitRealmPublicationConflictResponse,
+			},
+			detail: {
+				summary: "Republish a Unit to one Realm",
+				tags: ["Units", "Realms"],
+				responses: NoContentResponse,
+			},
 		},
 	)
 	.get(

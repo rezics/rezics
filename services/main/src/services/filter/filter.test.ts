@@ -5,6 +5,7 @@ import {
 	createSimpleFeedFilter,
 	FilterContentLanguageValues,
 	FilterPostKindValues,
+	FilterRealmUnitPublicationStateValues,
 	FilterRealmUnitStatusValues,
 	FilterUnitKindValues,
 	mergeUnitFilter,
@@ -14,16 +15,21 @@ import {
 	SimpleFeedContentKindValues,
 	unitFilterSearchQuery,
 } from "@rezics/filter";
+import { sql } from "drizzle-orm";
+import { PgDialect } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
 import {
 	ContentLanguageValues,
 	PostKindValues,
+	RealmUnitPublicationStateValues,
 	RealmUnitStatusValues,
 	UnitKindValues,
 } from "../database/schema/contract-values";
+import { compileUnitPredicateSql } from "./sql";
 
 const RealmId = "00000000-0000-4000-8000-000000000001";
 const TagId = "00000000-0000-4000-8000-000000000002";
+const dialect = new PgDialect();
 
 describe("domain Filter contract", () => {
 	it("stays aligned with the canonical Unit, Post, and language vocabularies", () => {
@@ -31,6 +37,7 @@ describe("domain Filter contract", () => {
 		expect(FilterPostKindValues).toEqual(PostKindValues);
 		expect(FilterContentLanguageValues).toEqual(ContentLanguageValues);
 		expect(FilterRealmUnitStatusValues).toEqual(RealmUnitStatusValues);
+		expect(FilterRealmUnitPublicationStateValues).toEqual(RealmUnitPublicationStateValues);
 	});
 
 	it("round-trips the standard Feed selection without widening it", () => {
@@ -48,6 +55,33 @@ describe("domain Filter contract", () => {
 			realmIds: [RealmId],
 			tagIds: [TagId],
 		});
+		expect(filter).toMatchObject({
+			all: expect.arrayContaining([
+				{
+					realms: {
+						some: {
+							realm: { id: { in: [RealmId] } },
+							status: { in: ["visible"] },
+							publicationState: { in: ["active"] },
+						},
+					},
+				},
+			]),
+		});
+	});
+
+	it("compiles Feed Realm intent through the public Filter schema", () => {
+		const filter = createSimpleFeedFilter({ realmIds: [RealmId] });
+		if (!filter) throw new Error("Expected a Realm Filter");
+		const query = dialect.sqlToQuery(
+			compileUnitPredicateSql(filter, {
+				unitId: sql`candidate.id`,
+				unitKind: sql`candidate.kind`,
+			}),
+		);
+
+		expect(query.sql).toContain("filter_realm_unit.publication_state");
+		expect(query.params).toEqual([RealmId, "visible", "active"]);
 	});
 
 	it("builds the standard content selection as Unit-or-Post eligibility", () => {

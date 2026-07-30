@@ -72,6 +72,10 @@ describe("permission schema", () => {
 			"unit.read",
 			"realm.post.replies.create",
 		]);
+		expect(expandUnitPermissions(["unit.realm-publication.manage"])).toEqual([
+			"unit.read",
+			"unit.realm-publication.manage",
+		]);
 	});
 
 	it("scopes Realm and Entity permissions to their logical targets", () => {
@@ -96,6 +100,9 @@ describe("permission schema", () => {
 		expect(isUnitPermissionGrantableToAuthenticated("realm.post.replies.create")).toBe(true);
 		expect(isUnitPermissionGrantableToAuthenticated("unit.access.manage")).toBe(false);
 		expect(isUnitPermissionGrantableToAuthenticated("unit.tag-curation.manage")).toBe(false);
+		expect(isUnitPermissionGrantableToAuthenticated("unit.realm-publication.manage")).toBe(
+			false,
+		);
 	});
 
 	it("keeps ownership transfer owner-only and outside delegated access", () => {

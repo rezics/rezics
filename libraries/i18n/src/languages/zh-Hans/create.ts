@@ -106,6 +106,7 @@ export default {
 			"unit.update": "可编辑",
 			"unit.status.update": "可变更状态",
 			"unit.access.manage": "可管理访问权",
+			"unit.realm-publication.manage": `可管理${realmTerms.label}发布`,
 		},
 		workStates: { actionable: "可操作", blocked: "当前受阻" },
 		statuses: { draft: "草稿", published: "已发布", archived: "已封存" },

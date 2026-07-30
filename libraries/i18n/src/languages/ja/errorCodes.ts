@@ -234,4 +234,7 @@ export default {
 	AssociationContextPostInvalid: `関係コンテキストはウィキの ${postTerms.label} である必要があります。`,
 	ProgressEntryNotFound: "この進捗イベントが見つかりませんでした。",
 	PostTagMentionVoteConflict: `このタグメンションは既存の ${postTerms.label} へのダウンボートと競合しています。`,
+	UnitRealmPublicationNotFound: `このコンテンツと${realmTerms.label}の公開関係が見つかりません。`,
+	UnitRealmPublicationAlreadyExists: `このコンテンツには既に${realmTerms.label}との公開関係があります。`,
+	UnitRealmPublicationTransitionInvalid: "公開関係は既に要求された状態です。",
 } satisfies typeof import("../zh-Hant/errorCodes").default;

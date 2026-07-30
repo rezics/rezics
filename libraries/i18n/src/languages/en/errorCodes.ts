@@ -230,4 +230,8 @@ export default {
 	AssociationContextPostInvalid: `The relationship context must be a wiki ${postTerms.label}.`,
 	ProgressEntryNotFound: "This progress event could not be found.",
 	PostTagMentionVoteConflict: `This Tag mention conflicts with your existing downvote on the ${postTerms.label}.`,
+	UnitRealmPublicationNotFound: `This content has no publication relationship with that ${realmTerms.label}.`,
+	UnitRealmPublicationAlreadyExists: `This content already has a publication relationship with that ${realmTerms.label}.`,
+	UnitRealmPublicationTransitionInvalid:
+		"The publication relationship is already in the requested state.",
 } satisfies typeof import("../zh-Hant/errorCodes").default;

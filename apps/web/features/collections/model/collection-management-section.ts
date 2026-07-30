@@ -5,6 +5,7 @@ export const CollectionManagementSectionIds = [
 	"metadata",
 	"items",
 	"publishers",
+	"realms",
 	"access",
 	"history",
 ] as const;
@@ -20,6 +21,7 @@ export function getCollectionManagementSectionIds(
 		if (sectionId === "metadata") return capabilities.canEditDetails;
 		if (sectionId === "items") return capabilities.canManageItems;
 		if (sectionId === "publishers") return capabilities.canManagePublishers;
+		if (sectionId === "realms") return capabilities.canManageRealmPublications;
 		if (sectionId === "access") return capabilities.canManageAccess;
 		return capabilities.canViewHistory;
 	});

@@ -134,6 +134,7 @@ export async function ensureContentStructureNodeAllowed(
 						eq(realmUnit.realmId, input.ownerUnitId),
 						inArray(realmUnit.unitId, wikiUnitIds),
 						eq(realmUnit.status, "visible"),
+						eq(realmUnit.publicationState, "active"),
 					),
 				);
 			if (new Set(mounted.map(({ unitId }) => unitId)).size !== new Set(wikiUnitIds).size)

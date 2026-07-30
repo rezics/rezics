@@ -89,7 +89,9 @@ async function ensurePostTargetingAllowed(
 	const mountedRealms = await tx
 		.select({ realmId: realmUnit.realmId })
 		.from(realmUnit)
-		.where(eq(realmUnit.unitId, input.sourcePostId))
+		.where(
+			and(eq(realmUnit.unitId, input.sourcePostId), eq(realmUnit.publicationState, "active")),
+		)
 		.orderBy(realmUnit.realmId);
 	const realmIds = [
 		...new Set([...mountedRealms.map((row) => row.realmId), ...(input.realmIds ?? [])]),
@@ -103,7 +105,13 @@ async function ensurePostTargetingAllowed(
 			postTargetingLocked: realmUnit.postTargetingLocked,
 		})
 		.from(realmUnit)
-		.where(and(inArray(realmUnit.realmId, realmIds), inArray(realmUnit.unitId, targetIds)))
+		.where(
+			and(
+				inArray(realmUnit.realmId, realmIds),
+				inArray(realmUnit.unitId, targetIds),
+				eq(realmUnit.publicationState, "active"),
+			),
+		)
 		.orderBy(realmUnit.realmId, realmUnit.unitId)
 		.for("share");
 	const realmLock = realmTargets.find((target) => target.postTargetingLocked);
@@ -207,7 +215,13 @@ export async function findPostTargetingLock(
 	const realmTargets = await executor
 		.select({ unitId: realmUnit.unitId, postTargetingLocked: realmUnit.postTargetingLocked })
 		.from(realmUnit)
-		.where(and(eq(realmUnit.realmId, input.realmId), inArray(realmUnit.unitId, targetIds)))
+		.where(
+			and(
+				eq(realmUnit.realmId, input.realmId),
+				inArray(realmUnit.unitId, targetIds),
+				eq(realmUnit.publicationState, "active"),
+			),
+		)
 		.orderBy(realmUnit.unitId);
 	const realmLock = realmTargets.find((target) => target.postTargetingLocked);
 	return realmLock
@@ -240,6 +254,7 @@ export async function getPostTargetingLockedUnitIds(
 				eq(realmUnit.realmId, input.realmId),
 				inArray(realmUnit.unitId, targetUnitIds),
 				eq(realmUnit.postTargetingLocked, true),
+				eq(realmUnit.publicationState, "active"),
 			),
 		);
 	for (const row of realmRows) locked.add(row.unitId);

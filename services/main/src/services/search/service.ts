@@ -526,12 +526,14 @@ function compileFilter(category: SearchCategory, filter: SearchControlPredicate)
 					from ${realmUnit}
 					where ${realmUnit.unitId} = ${unit.id}
 						and ${realmUnit.status} = 'visible'
+						and ${realmUnit.publicationState} = 'active'
 				) @> ${toUuidArray(values)}`
 				: sql`exists (
 					select 1 from ${realmUnit}
 					where ${realmUnit.unitId} = ${unit.id}
 						and ${realmUnit.realmId} = any(${toUuidArray(values)})
 						and ${realmUnit.status} = 'visible'
+						and ${realmUnit.publicationState} = 'active'
 				)`;
 		return filter.operator === "not-equals" || filter.operator === "none-of"
 			? sql`not (${match})`

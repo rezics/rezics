@@ -3,6 +3,7 @@ export const UnitManagementSectionIds = [
 	"metadata",
 	"relationships",
 	"tags",
+	"realms",
 	"content-structure",
 	"releases",
 	"docks",
@@ -24,7 +25,8 @@ export function canOpenUnitManagement(capabilities: UnitCapabilities, canManageD
 		capabilities.canEdit ||
 		capabilities.canManageAccess ||
 		capabilities.canManageAssociations ||
-		capabilities.canCurateTags
+		capabilities.canCurateTags ||
+		capabilities.canManageRealmPublications
 	);
 }
 
@@ -38,10 +40,12 @@ export function getUnitManagementSectionIds(
 		capabilities.canEdit ||
 		capabilities.canManageAccess ||
 		capabilities.canManageAssociations ||
-		capabilities.canCurateTags;
+		capabilities.canCurateTags ||
+		capabilities.canManageRealmPublications;
 	if (type === "video" || type === "audio")
 		return UnitManagementSectionIds.filter((sectionId) => {
 			if (sectionId === "content" || sectionId === "metadata") return capabilities.canEdit;
+			if (sectionId === "realms") return capabilities.canManageRealmPublications;
 			if (sectionId === "access") return capabilities.canManageAccess;
 			return sectionId === "history" && hasUnitCapability;
 		});
@@ -50,6 +54,7 @@ export function getUnitManagementSectionIds(
 		if (sectionId === "relationships")
 			return capabilities.canEdit || capabilities.canManageAssociations;
 		if (sectionId === "tags") return capabilities.canEdit || capabilities.canCurateTags;
+		if (sectionId === "realms") return capabilities.canManageRealmPublications;
 		if (sectionId === "content-structure")
 			return (
 				type !== "series" &&

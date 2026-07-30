@@ -29,7 +29,7 @@ vi.mock("@tanstack/react-virtual", () => ({
 }));
 
 const translation = await create(resources).getTranslation(
-	["posts", "realms", "reports"],
+	["posts", "realms", "reports", "units"],
 	["zh-Hant"],
 );
 
@@ -40,6 +40,7 @@ const unit = {
 	language: "zh",
 	title: "測試內容",
 	status: "pending",
+	publicationState: "active",
 	postTargetingLocked: false,
 	openReportCount: 0,
 	allowedCommands: ["approve", "remove", "lock_post_targeting", "note"],

@@ -14,7 +14,6 @@ import {
 	postReplyStat,
 	postScore,
 	profile as profileTable,
-	realmUnit,
 	score,
 	unit,
 	unitOwnership,
@@ -27,7 +26,6 @@ import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import { insertUnit } from "../../units/create";
 import {
-	ensurePostMountTargetingAllowed,
 	ensureReplyPostTargetingAllowed,
 	ensureSubjectPostTargetingAllowed,
 	findPostTargetingLock,
@@ -294,7 +292,7 @@ export default new Elysia()
 								eq(unit.visibility, "public"),
 								isNull(unit.deletedAt),
 								query.realmId
-									? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${query.realmId} and rc.status = 'visible')`
+									? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${query.realmId} and rc.status = 'visible' and rc.publication_state = 'active')`
 									: undefined,
 								query.subjectId
 									? eq(post.subjectUnitId, query.subjectId)
@@ -381,6 +379,7 @@ export default new Elysia()
 						await publishPostToRealms(tx, {
 							postId: created.id,
 							realmIds: body.publishRealmIds,
+							actorProfileId: profile.unitId,
 						});
 						await recordUnitRevision(tx, {
 							unitId: created.id,
@@ -506,7 +505,7 @@ export default new Elysia()
 								eq(post.id, params.postId),
 								sql`${post.kind} in ('post'::post_kind, 'reply'::post_kind, 'excerpt'::post_kind, 'review'::post_kind, 'wiki'::post_kind)`,
 								query.realmId
-									? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${query.realmId} and rc.status = 'visible')`
+									? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${query.realmId} and rc.status = 'visible' and rc.publication_state = 'active')`
 									: undefined,
 							),
 						)
@@ -535,6 +534,7 @@ export default new Elysia()
 						subject,
 						canEdit,
 						canManageAttributions,
+						canManageRealmPublications,
 						accessDecision,
 						replyCreationDecision,
 						targetingLock,
@@ -558,6 +558,7 @@ export default new Elysia()
 							? Promise.resolve(false)
 							: authorization.unit.canUpdate(row.id, ["localizations"]),
 						authorization.unit.canUpdate(row.id, ["credit-attributions"]),
+						authorization.unit.decide(row.id, "unit.realm-publication.manage"),
 						authorization.unit.decide(row.id, "unit.access.manage"),
 						query.realmId
 							? authorization.unit.decide(query.realmId, "realm.post.replies.create")
@@ -611,6 +612,7 @@ export default new Elysia()
 							capabilities: {
 								canEdit,
 								canManageAttributions,
+								canManageRealmPublications: canManageRealmPublications.allowed,
 								canManageAccess: accessDecision.allowed,
 								canManageScores,
 								canReply: replyCreationDecision.allowed && !targetingLock,
@@ -627,6 +629,7 @@ export default new Elysia()
 						capabilities: {
 							canEdit,
 							canManageAttributions,
+							canManageRealmPublications: canManageRealmPublications.allowed,
 							canManageAccess: accessDecision.allowed,
 							canReply: replyCreationDecision.allowed && !targetingLock,
 						},
@@ -868,7 +871,7 @@ export default new Elysia()
 										eq(postReply.postId, body.parentPostId),
 										isNull(unit.deletedAt),
 										body.realmId
-											? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${postReply.postId} and rc.realm_id = ${body.realmId} and rc.status = 'visible')`
+											? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${postReply.postId} and rc.realm_id = ${body.realmId} and rc.status = 'visible' and rc.publication_state = 'active')`
 											: undefined,
 									),
 								)
@@ -922,16 +925,12 @@ export default new Elysia()
 							sourceUnitId: created.id,
 							profileId: profile.unitId,
 						});
-						if (body.realmId) {
-							await ensurePostMountTargetingAllowed(tx, {
+						if (body.realmId)
+							await publishPostToRealms(tx, {
 								postId: created.id,
 								realmIds: [body.realmId],
+								actorProfileId: profile.unitId,
 							});
-							await tx.insert(realmUnit).values({
-								realmId: body.realmId,
-								unitId: created.id,
-							});
-						}
 						const revision = await recordUnitRevision(tx, {
 							unitId: created.id,
 							actorProfileId: profile.unitId,
@@ -1109,7 +1108,7 @@ async function ensureRootPost(postId: string, realmId?: string) {
 				ne(post.kind, "reply"),
 				isNull(unit.deletedAt),
 				realmId
-					? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${realmId} and rc.status = 'visible')`
+					? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${realmId} and rc.status = 'visible' and rc.publication_state = 'active')`
 					: undefined,
 			),
 		)

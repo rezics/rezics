@@ -227,4 +227,7 @@ export default {
 	AssociationContextPostInvalid: `관계 컨텍스트는 위키 ${postTerms.label}여야 합니다.`,
 	ProgressEntryNotFound: "이 진행 이벤트를 찾을 수 없습니다.",
 	PostTagMentionVoteConflict: `이 태그 언급은 ${postTerms.label}에 대한 기존 반대 투표와 충돌합니다.`,
+	UnitRealmPublicationNotFound: `이 콘텐츠와 ${realmTerms.label}의 게시 관계를 찾을 수 없습니다.`,
+	UnitRealmPublicationAlreadyExists: `이 콘텐츠에는 이미 ${realmTerms.label} 게시 관계가 있습니다.`,
+	UnitRealmPublicationTransitionInvalid: "게시 관계가 이미 요청한 상태입니다.",
 } satisfies typeof import("../zh-Hant/errorCodes").default;
