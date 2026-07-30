@@ -3,7 +3,7 @@
 import { Skeleton } from "@rezics/ui";
 import { postApiFeedQuery } from "@rezics/openapi-tanstack-query";
 import { useQuery } from "@tanstack/react-query";
-import { CircleHelp, MessagesSquare, Quote } from "lucide-react";
+import { MessageCircleQuestionMark, MessagesSquare, Quote } from "lucide-react";
 import { useMemo, type ReactNode } from "react";
 
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
@@ -122,7 +122,7 @@ export function UnitDiscussionSummarySection({
 				<DiscussionMetric
 					count={numberFormat.format(0)}
 					href={catalogQuestionsHref(type, targetId)}
-					icon={<CircleHelp className="size-9" />}
+					icon={<MessageCircleQuestionMark className="size-9" />}
 					label={t.engagement.questions}
 				/>
 			</div>
