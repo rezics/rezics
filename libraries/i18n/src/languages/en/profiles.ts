@@ -4,6 +4,7 @@ import { enTerminology } from "@rezics/i18n/terminology/en";
 
 const { forms: postTerms } = enTerminology.post;
 const { forms: realmTerms } = enTerminology.realm;
+const { forms: entityTerms } = enTerminology.entity;
 
 export default {
 	memberSince: insert("Joined {{date}}", { date: String }),
@@ -33,7 +34,7 @@ export default {
 		dropped: "Dropped",
 	},
 	contentTitle: "Published content",
-	contentDescription: `Public ${postTerms.pluralLabel} and reviews credited to this user, plus collections and catalog entries they own.`,
+	contentDescription: `Public ${postTerms.pluralLabel} and reviews credited to this user, plus collections and ${entityTerms.plural} they own.`,
 	contentEmptyTitle: "No public content yet",
 	contentEmptyDescription: "Public content published or owned by this user will appear here.",
 } satisfies typeof import("../zh-Hant/profiles").default;

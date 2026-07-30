@@ -27,11 +27,11 @@ import { type FormEvent, useState } from "react";
 
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
-import { PublicEntrySearchPrompt } from "@/features/catalog/components/public-entry-search-prompt";
+import { CommunityUnitSearchPrompt } from "@/features/create/components/community-unit-search-prompt";
 import {
-	isPublicEntrySearchConfirmed,
-	TagPublicEntrySearchSubject,
-} from "@/features/catalog/model/public-entry-search";
+	isCommunityUnitSearchConfirmed,
+	TagCommunityUnitSearchSubject,
+} from "@/features/create/model/community-unit-search";
 import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
 import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/use-form-draft-content-language";
 import { studioSectionHref } from "@/features/create/routing/studio-routes";
@@ -48,11 +48,11 @@ type UnitTagVoteCompletionState =
 export function TagCreatePage({
 	initialTitle,
 	intent,
-	publicEntrySearchConfirmation,
+	communityUnitSearchConfirmation,
 }: {
 	readonly initialTitle: string;
 	readonly intent: TagCreateIntent;
-	readonly publicEntrySearchConfirmation: string | null;
+	readonly communityUnitSearchConfirmation: string | null;
 }) {
 	const { t } = useTranslation(["tags", "ui"]);
 	const router = useApplicationRouter();
@@ -65,10 +65,10 @@ export function TagCreatePage({
 	const create = usePostApiTags();
 	const applyGlobal = usePutApiUnitsByTypeByUnitIdTagsByTagId();
 	const applyRealm = usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote();
-	const searchConfirmed = isPublicEntrySearchConfirmed(
-		TagPublicEntrySearchSubject,
+	const searchConfirmed = isCommunityUnitSearchConfirmed(
+		TagCommunityUnitSearchSubject,
 		title,
-		publicEntrySearchConfirmation,
+		communityUnitSearchConfirmation,
 	);
 	const returnHref =
 		intent.kind === "unit-tag-vote"
@@ -130,10 +130,10 @@ export function TagCreatePage({
 		const form = new FormData(formElement);
 		const submittedTitle = String(form.get("title") ?? "").trim();
 		if (
-			!isPublicEntrySearchConfirmed(
-				TagPublicEntrySearchSubject,
+			!isCommunityUnitSearchConfirmed(
+				TagCommunityUnitSearchSubject,
 				submittedTitle,
-				publicEntrySearchConfirmation,
+				communityUnitSearchConfirmation,
 			)
 		)
 			return;
@@ -226,11 +226,11 @@ export function TagCreatePage({
 									value={title}
 								/>
 							</Field>
-							<PublicEntrySearchPrompt
+							<CommunityUnitSearchPrompt
 								confirmed={searchConfirmed}
 								query={title}
 								searchHref={searchHref}
-								subject={TagPublicEntrySearchSubject}
+								subject={TagCommunityUnitSearchSubject}
 							/>
 							<Field>
 								<FieldLabel>{t.ui.summary}</FieldLabel>

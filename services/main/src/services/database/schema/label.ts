@@ -2,7 +2,7 @@ import { uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createUpdatedAtColumn } from "./columns";
-import { unit } from "./core";
+import { unit } from "./unit";
 
 /**
  * A lightweight localized-title Unit for headings and display labels.

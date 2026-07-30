@@ -80,7 +80,7 @@ use the shared pure measuring function for immediate editor feedback, but the se
 client-supplied counts.
 
 Hosted Book totals sum currently readable, published chapter occurrences by content language.
-They remain explicitly separate from `book.word_count`, which is authoritative editorial catalog
+They remain explicitly separate from `book.word_count`, which is authoritative editorial
 metadata and may describe a Book whose text is not hosted by REZICS.
 
 ## Naming and identities

@@ -9,7 +9,7 @@ export const resources = defineResources({
 			betterAuthErrorCodes: () =>
 				import("./languages/zh-Hant/betterAuthErrorCodes").then((module) => module.default),
 			brand: () => import("./languages/zh-Hant/brand").then((module) => module.default),
-			catalog: () => import("./languages/zh-Hant/catalog").then((module) => module.default),
+			entities: () => import("./languages/zh-Hant/entities").then((module) => module.default),
 			cover: () => import("./languages/zh-Hant/cover").then((module) => module.default),
 			collections: () =>
 				import("./languages/zh-Hant/collections").then((module) => module.default),
@@ -55,7 +55,7 @@ export const resources = defineResources({
 			betterAuthErrorCodes: () =>
 				import("./languages/zh-Hans/betterAuthErrorCodes").then((module) => module.default),
 			brand: () => import("./languages/zh-Hans/brand").then((module) => module.default),
-			catalog: () => import("./languages/zh-Hans/catalog").then((module) => module.default),
+			entities: () => import("./languages/zh-Hans/entities").then((module) => module.default),
 			cover: () => import("./languages/zh-Hans/cover").then((module) => module.default),
 			collections: () =>
 				import("./languages/zh-Hans/collections").then((module) => module.default),
@@ -101,7 +101,7 @@ export const resources = defineResources({
 			betterAuthErrorCodes: () =>
 				import("./languages/en/betterAuthErrorCodes").then((module) => module.default),
 			brand: () => import("./languages/en/brand").then((module) => module.default),
-			catalog: () => import("./languages/en/catalog").then((module) => module.default),
+			entities: () => import("./languages/en/entities").then((module) => module.default),
 			cover: () => import("./languages/en/cover").then((module) => module.default),
 			collections: () =>
 				import("./languages/en/collections").then((module) => module.default),
@@ -144,7 +144,7 @@ export const resources = defineResources({
 			betterAuthErrorCodes: () =>
 				import("./languages/ja/betterAuthErrorCodes").then((module) => module.default),
 			brand: () => import("./languages/ja/brand").then((module) => module.default),
-			catalog: () => import("./languages/ja/catalog").then((module) => module.default),
+			entities: () => import("./languages/ja/entities").then((module) => module.default),
 			cover: () => import("./languages/ja/cover").then((module) => module.default),
 			collections: () =>
 				import("./languages/ja/collections").then((module) => module.default),
@@ -187,7 +187,7 @@ export const resources = defineResources({
 			betterAuthErrorCodes: () =>
 				import("./languages/ko/betterAuthErrorCodes").then((module) => module.default),
 			brand: () => import("./languages/ko/brand").then((module) => module.default),
-			catalog: () => import("./languages/ko/catalog").then((module) => module.default),
+			entities: () => import("./languages/ko/entities").then((module) => module.default),
 			cover: () => import("./languages/ko/cover").then((module) => module.default),
 			collections: () =>
 				import("./languages/ko/collections").then((module) => module.default),
@@ -230,7 +230,7 @@ export const resources = defineResources({
 			betterAuthErrorCodes: () =>
 				import("./languages/de/betterAuthErrorCodes").then((module) => module.default),
 			brand: () => import("./languages/de/brand").then((module) => module.default),
-			catalog: () => import("./languages/de/catalog").then((module) => module.default),
+			entities: () => import("./languages/de/entities").then((module) => module.default),
 			cover: () => import("./languages/de/cover").then((module) => module.default),
 			collections: () =>
 				import("./languages/de/collections").then((module) => module.default),
@@ -273,7 +273,7 @@ export const resources = defineResources({
 			betterAuthErrorCodes: () =>
 				import("./languages/fr/betterAuthErrorCodes").then((module) => module.default),
 			brand: () => import("./languages/fr/brand").then((module) => module.default),
-			catalog: () => import("./languages/fr/catalog").then((module) => module.default),
+			entities: () => import("./languages/fr/entities").then((module) => module.default),
 			cover: () => import("./languages/fr/cover").then((module) => module.default),
 			collections: () =>
 				import("./languages/fr/collections").then((module) => module.default),
@@ -316,7 +316,7 @@ export const resources = defineResources({
 			betterAuthErrorCodes: () =>
 				import("./languages/es/betterAuthErrorCodes").then((module) => module.default),
 			brand: () => import("./languages/es/brand").then((module) => module.default),
-			catalog: () => import("./languages/es/catalog").then((module) => module.default),
+			entities: () => import("./languages/es/entities").then((module) => module.default),
 			cover: () => import("./languages/es/cover").then((module) => module.default),
 			collections: () =>
 				import("./languages/es/collections").then((module) => module.default),

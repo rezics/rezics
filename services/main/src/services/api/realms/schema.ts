@@ -292,7 +292,7 @@ export type PutRealmTagContextBody = Static<typeof PutRealmTagContextBody>;
 export const CreateRealmTagContextBody = t.Object(
 	{
 		tagId: Uuid,
-		accessMode: t.Union([t.Literal("public_entry"), t.Literal("restricted")]),
+		accessMode: t.Union([t.Literal("community_owned"), t.Literal("restricted")]),
 		title: t.String({ minLength: 1, maxLength: 500 }),
 		summary: t.String({ minLength: 1, maxLength: 2_000 }),
 		body: PortableTextDocument,

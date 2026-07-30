@@ -5,6 +5,7 @@ import { jaTerminology } from "@rezics/i18n/terminology/ja";
 const { forms: followTerms } = jaTerminology.follow;
 const { forms: postTerms } = jaTerminology.post;
 const { forms: realmTerms } = jaTerminology.realm;
+const { forms: entityTerms } = jaTerminology.entity;
 const { forms: tagStructureTerms } = jaTerminology.tagStructure;
 const { forms: zoneTerms } = jaTerminology.zone;
 
@@ -50,7 +51,7 @@ export default {
 			"unit:software": "ソフトウェア",
 			"unit:media": "メディア",
 			"unit:release": "リリース",
-			"unit:entity": "カタログのエントリー",
+			"unit:entity": entityTerms.pluralLabel,
 			"unit:tag": "タグ",
 			"unit:structure": tagStructureTerms.pluralLabel,
 			"unit:series": "シリーズ",

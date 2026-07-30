@@ -19,7 +19,7 @@ import { recordUnitRevision } from "../units/history";
 export type CreateWikiPostInput = {
 	readonly profileId: string;
 	readonly authorization: Authorization<string>;
-	readonly accessMode: "public_entry" | "restricted";
+	readonly accessMode: "community_owned" | "restricted";
 	readonly title: string;
 	readonly summary?: string;
 	readonly body: PortableTextDocument;
@@ -76,12 +76,13 @@ export async function createWikiPost(
 		profileId: input.profileId,
 		nextBody: input.body,
 	});
-	if (input.accessMode === "public_entry") await createPublicEditableUnitAccess(tx, created.id);
+	if (input.accessMode === "community_owned")
+		await createPublicEditableUnitAccess(tx, created.id);
 	else await createProfileOwnedUnitAccess(tx, created.id, input.profileId);
 	await createProfilePublisherAttribution(tx, {
 		sourceUnitId: created.id,
 		profileId:
-			input.accessMode === "public_entry" ? OfficialProfileIds.community : input.profileId,
+			input.accessMode === "community_owned" ? OfficialProfileIds.community : input.profileId,
 	});
 	await publishPostToRealms(tx, {
 		postId: created.id,

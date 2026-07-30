@@ -3,6 +3,7 @@ import { koTerminology } from "@rezics/i18n/terminology/ko";
 
 const { forms: realmTerms } = koTerminology.realm;
 const { forms: zoneTerms } = koTerminology.zone;
+const { forms: entityTerms } = koTerminology.entity;
 
 export default {
 	loading: "편집기 로딩 중…",
@@ -32,7 +33,7 @@ export default {
 	mentionSearchPrompt: "검색하려면 입력하세요.",
 	mentionUsers: "사용자",
 	mentionTags: "태그",
-	mentionEntities: "엔터티",
+	mentionEntities: entityTerms.label,
 	mentionRealms: realmTerms.pluralLabel,
 	mentionZones: zoneTerms.pluralLabel,
 	unavailableMention: "사용할 수 없는 유닛",

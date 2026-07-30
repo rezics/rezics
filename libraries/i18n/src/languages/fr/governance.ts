@@ -5,6 +5,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { frTerminology } from "@rezics/i18n/terminology/fr";
 
 const { forms: realmTerms } = frTerminology.realm;
+const { forms: entityTerms } = frTerminology.entity;
 const { forms: postTerms } = frTerminology.post;
 
 export default {
@@ -38,7 +39,7 @@ export default {
 	associationProposals: "Propositions d’association",
 	associationProposalDescription:
 		"L’association réelle n’est créée qu’après l’acceptation de la proposition par l’autre partie.",
-	targetEntity: "Entité de catalogue cible",
+	targetEntity: `${entityTerms.label} cible`,
 	targetUnit: "Unit créditée",
 	sourceUnit: "Unit source",
 	associationRole: "Rôle de l’association",
@@ -55,8 +56,7 @@ export default {
 		"platform.user.status.update": "Gérer l’état des comptes utilisateurs",
 		"platform.session.read": "Consulter les sessions des utilisateurs",
 		"platform.session.revoke": "Révoquer les sessions des utilisateurs",
-		"entity.associations.override":
-			"Contourner les autorisations d’association des entités de catalogue",
+		"entity.associations.override": `Contourner les autorisations d’association des ${entityTerms.plural}`,
 		"unit.edit": "Modifier toutes les Units",
 		"platform.development_preview.access": "Accéder aux aperçus de développement non publiés",
 		"unit.governance.read": "Consulter la gouvernance de toutes les Units",
@@ -97,8 +97,8 @@ export default {
 			root: "Élément entier",
 			creditAttributions: "Attributions de contribution de la source",
 			subjectAssociations: "Associations de sujet de la source",
-			creditTargets: "Cible entité : attributions de contribution",
-			subjectTargets: "Cible entité : associations de sujet",
+			creditTargets: `Cible ${entityTerms.inline} : attributions de contribution`,
+			subjectTargets: `Cible ${entityTerms.inline} : associations de sujet`,
 		},
 		publicTitle: "Autorisations publiques",
 		publicDescription: `Autorisations accordées directement à chaque utilisateur connecté à ${verbatimTerms.rezics.value}. Ce socle global est géré séparément des sujets individuels.`,
@@ -181,7 +181,7 @@ export default {
 		permissionCategories: {
 			unit: "Unit",
 			realm: realmTerms.label,
-			entity: "Associations d’entités",
+			entity: `Associations d’${entityTerms.plural}`,
 		},
 		permissions: {
 			"unit.read": "Lire",

@@ -25,7 +25,7 @@ import { UnitShelf } from "@/features/explore/unit-shelf";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { BookContents } from "./components/book-contents";
 import type { UnitType } from "./unit-types";
-import { CatalogSubjectGroups } from "./components/catalog-subject-groups";
+import { UnitSubjectGroups } from "./components/unit-subject-groups";
 import { canOpenUnitManagement } from "./model/unit-management-section";
 import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import { LocalizedText } from "@/features/content-language-display/chinese-content-display-context";
@@ -385,7 +385,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 						<DetailSection title={t.units.detail.subjectAssociations}>
 							<Card>
 								<CardContent className="p-5">
-									<CatalogSubjectGroups associations={item.subjectAssociations} />
+									<UnitSubjectGroups associations={item.subjectAssociations} />
 								</CardContent>
 							</Card>
 						</DetailSection>

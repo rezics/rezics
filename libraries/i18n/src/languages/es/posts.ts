@@ -22,7 +22,7 @@ export default {
 	publisher: "Editorial",
 	wikiCreateTitle: "Crear entrada Wiki",
 	wikiAccessMode: "Permiso de edición",
-	wikiPublicEntry: "Entrada pública",
+	wikiCommunityUnit: "Entrada pública",
 	wikiPublicDescription:
 		"Cualquier persona con sesión iniciada puede editarla; quien la crea no recibe permisos especiales.",
 	wikiRestricted: "Restringida",

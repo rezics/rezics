@@ -9,6 +9,7 @@ const { forms: audioTerms } = koTerminology.audio;
 const { forms: realmTerms } = koTerminology.realm;
 const { forms: followTerms } = koTerminology.follow;
 const { forms: metadataTerms } = koTerminology.metadata;
+const { forms: entityTerms } = koTerminology.entity;
 
 export default {
 	types: {
@@ -23,10 +24,10 @@ export default {
 		modeLabel: "생성 방식",
 		ownedWork: "내 작품",
 		ownedWorkDescription: "내 프로필이 이 작품을 소유하고 관리합니다.",
-		publicEntry: "공개 항목",
-		publicEntryDescription:
+		communityUnit: "공개 항목",
+		communityUnitDescription:
 			"커뮤니티가 소유하며 로그인한 모든 사용자가 편집할 수 있습니다. 생성자에게 별도 권한은 부여되지 않습니다.",
-		publisherEntity: "게시자 엔터티",
+		publisherEntity: `게시자 ${entityTerms.label}`,
 		publisherOwnedDescription:
 			"내 작품에는 게시자가 필요합니다. 직접 연결이 제한된 경우 동의 요청을 보냅니다.",
 		publisherPublicDescription:
@@ -90,7 +91,7 @@ export default {
 	},
 	workspace: {
 		title: "유닛 관리",
-		description: `콘텐츠, ${metadataTerms.inline}, 카탈로그 관계, 접근, 수정 이력 편집.`,
+		description: `콘텐츠, ${metadataTerms.inline}, 유닛 관계, 접근, 수정 이력을 편집합니다.`,
 		backToUnit: "유닛으로 돌아가기",
 		backToOverview: "설정으로 돌아가기",
 		navigation: "유닛 관리 탐색",
@@ -105,7 +106,7 @@ export default {
 				description: `수명 주기, 가시성, 평가, 라이선스 및 유형별 ${metadataTerms.inline} 관리.`,
 			},
 			relationships: {
-				label: "카탈로그 관계",
+				label: "유닛 관계",
 				description: "저작권, 주제, 출처 링크 및 변형 관계 관리.",
 			},
 			tags: {
@@ -183,7 +184,8 @@ export default {
 		publicationDate: "출판 날짜",
 		pageCount: "페이지 수",
 		format: "제본 또는 형식",
-		licensed: "라이선스 있음",
+		contentLicense: "콘텐츠 라이선스",
+		viewContentLicense: "라이선스 약관 보기",
 		versionLabel: "버전 라벨",
 		mediaKind: "미디어 종류",
 		releaseDate: "출시일",
@@ -326,7 +328,7 @@ export default {
 		title: "편집 유닛",
 		settings: "설정",
 		languageCode: "언어 코드",
-		relationships: "카탈로그 관계",
+		relationships: "유닛 관계",
 		creditRole: "크레딧 역할",
 		subjectRole: "주제 역할",
 		linkUrl: `출처 ${verbatimTerms.url.value}`,
@@ -468,8 +470,8 @@ export default {
 		language: "챕터 언어",
 		useLanguage: "언어 전환",
 		save: "챕터 저장",
-		publicEntryContentPolicyTitle: "공개 항목에서는 챕터 본문을 여기서 편집할 수 없습니다",
-		publicEntryContentPolicyDescription: `이 책은 공개 카탈로그 항목입니다. 콘텐츠 구조를 정리하거나 읽을 수 있는 기존 ${postTerms.label}를 추가할 수 있지만, 카탈로그 편집기에서는 ${postTerms.label} 본문 편집기를 제공하지 않습니다.`,
+		communityUnitContentPolicyTitle: "공개 항목에서는 챕터 본문을 여기서 편집할 수 없습니다",
+		communityUnitContentPolicyDescription: `이 책은 커뮤니티에서 관리합니다. 콘텐츠 구조를 정리하거나 읽을 수 있는 기존 ${postTerms.label}를 추가할 수 있지만, 이 편집기에서는 ${postTerms.label} 본문 편집기를 제공하지 않습니다.`,
 		wordCount: insert("{{count}} 단어", { count: Number }),
 		characterCount: insert("{{count}} 글자", { count: Number }),
 	},

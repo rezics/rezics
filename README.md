@@ -2,12 +2,12 @@
 
 _inherited · create · spread_
 
-REZICS is a community-driven, cross-language catalog of works. Communities form
+REZICS is a community-driven, cross-language knowledge network for works. Communities form
 around shared interests, classify and discuss the works they care about, and
 keep a work's index, discussion, and collective knowledge together.
 
 Everything — books, games, media, posts, shelves, tags, and realms — is modeled
-as a unified `Unit`, allowing the same catalog, classification, attribution, and
+as a unified `Unit`, allowing the same identity, classification, attribution, and
 social layers to work across content types and languages.
 
 ## Repository structure
@@ -201,7 +201,7 @@ projections before running its verifier. Use the confirmed root
 `task --yes local:reset` workflow when replacing existing disposable data; it
 also coordinates the external search projection. CI runs `task seed:contract`
 against fresh infrastructure, including a full external-index rebuild and
-zone-scoped lookup of each official catalog fixture.
+zone-scoped lookup of each official workspace fixture.
 
 Existing databases created by the previous Drizzle migrator need a one-time
 baseline before their first Atlas-managed deployment. After taking a backup,

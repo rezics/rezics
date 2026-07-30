@@ -210,7 +210,7 @@ export const zhHantContent = {
 			},
 			structure: {
 				title: "同一份內容，不同的出現位置",
-				description: "選擇一個出現位置，看看它在目錄中負責什麼。",
+				description: "選擇一個出現位置，看看它在內容結構中負責什麼。",
 				nodes: [
 					{
 						label: "序章",

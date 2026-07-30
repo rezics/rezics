@@ -7,6 +7,7 @@ const { forms: postTerms } = esTerminology.post;
 const { forms: videoTerms } = esTerminology.video;
 const { forms: audioTerms } = esTerminology.audio;
 const { forms: realmTerms } = esTerminology.realm;
+const { forms: entityTerms } = esTerminology.entity;
 const { forms: tagStructureTerms } = esTerminology.tagStructure;
 const { forms: unitSlugTerms } = esTerminology.unitSlug;
 const { forms: zoneTerms } = esTerminology.zone;
@@ -15,7 +16,7 @@ export default {
 	home: "Inicio",
 	studio: verbatimTerms.studio.value,
 	units: "Units",
-	entity: "Entidad",
+	entity: entityTerms.label,
 	realm: realmTerms.label,
 	collections: "Colecciones",
 	favorites: "Guardado",
@@ -70,7 +71,7 @@ export default {
 			video: videoTerms.label,
 			audio: audioTerms.label,
 			release: "Versión",
-			entity: "Entidad",
+			entity: entityTerms.label,
 			label: labelTerms.label,
 			tag: "Etiqueta",
 			structure: tagStructureTerms.label,

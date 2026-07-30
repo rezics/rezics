@@ -7,6 +7,7 @@ const { forms: postTerms } = zhHantTerminology.post;
 const { forms: videoTerms } = zhHantTerminology.video;
 const { forms: audioTerms } = zhHantTerminology.audio;
 const { forms: realmTerms } = zhHantTerminology.realm;
+const { forms: entityTerms } = zhHantTerminology.entity;
 const { forms: tagStructureTerms } = zhHantTerminology.tagStructure;
 const { forms: unitSlugTerms } = zhHantTerminology.unitSlug;
 const { forms: zoneTerms } = zhHantTerminology.zone;
@@ -15,7 +16,7 @@ export default {
 	home: "主頁",
 	studio: verbatimTerms.studio.value,
 	units: "作品",
-	entity: "目錄",
+	entity: entityTerms.label,
 	realm: realmTerms.label,
 	collections: "收藏集",
 	favorites: "收藏",
@@ -70,7 +71,7 @@ export default {
 			video: videoTerms.label,
 			audio: audioTerms.label,
 			release: "發行",
-			entity: "實體",
+			entity: entityTerms.label,
 			label: labelTerms.label,
 			tag: "標籤",
 			structure: tagStructureTerms.label,

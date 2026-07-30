@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 
 import {
 	auditEvent,
-	catalogUnitContentLicense,
+	unitContentLicense,
 	contentStructure,
 	contentStructureNode,
 	unitLocalizationContentMetric,
@@ -32,7 +32,7 @@ import {
 	governanceReasonCode,
 	GovernanceNoteRoleValues,
 	GovernanceReasonCodeValues,
-	CommunityCatalogUnitKindValues,
+	CommunityOwnedUnitKindValues,
 	CreditAttributionRoleValues,
 	isCreditAttributionRoleForUnitKind,
 	isCreditAttributionUnitKind,
@@ -64,7 +64,7 @@ import {
 	unitAccessRestriction,
 	unitFollow,
 	unitFollowNotificationPreference,
-	unitLink,
+	unitSourceLink,
 	unitOwnership,
 	unitOwnershipClaim,
 	unitOwnershipClaimResolution,
@@ -173,14 +173,27 @@ describe("database schema contracts", () => {
 		);
 	});
 
-	it("limits Catalog content License markers to supported Catalog Unit kinds", () => {
-		const marker = getTableConfig(catalogUnitContentLicense);
-		expect(getTableName(catalogUnitContentLicense)).toBe("catalog_unit_content_license");
-		expect(marker.foreignKeys.map((key) => key.getName())).toContain(
-			"catalog_unit_content_license_unit_kind_fkey",
+	it("preserves versioned Unit content License grant and revocation history", () => {
+		const grant = getTableConfig(unitContentLicense);
+		expect(getTableName(unitContentLicense)).toBe("unit_content_license");
+		expect(grant.columns.map((column) => column.name)).toEqual(
+			expect.arrayContaining([
+				"id",
+				"unit_id",
+				"granted_by_profile_id",
+				"reference_license_slug",
+				"granted_at",
+				"revoked_at",
+			]),
 		);
-		expect(marker.checks.map((constraint) => constraint.name)).toContain(
-			"catalog_unit_content_license_kind_check",
+		expect(grant.indexes.map((index) => index.config.name)).toContain(
+			"unit_content_license_active_unit_key",
+		);
+		expect(grant.checks.map((constraint) => constraint.name)).toEqual(
+			expect.arrayContaining([
+				"unit_content_license_reference_slug_check",
+				"unit_content_license_revocation_check",
+			]),
 		);
 	});
 
@@ -420,7 +433,7 @@ describe("database schema contracts", () => {
 	});
 
 	it("stores source links without arbitrary presentation or type metadata", () => {
-		const link = getTableConfig(unitLink);
+		const link = getTableConfig(unitSourceLink);
 		expect(link.columns.map((column) => column.name)).toEqual(
 			expect.arrayContaining([
 				"unit_id",
@@ -692,7 +705,7 @@ describe("database schema contracts", () => {
 		expect(UnitKindValues).toContain("slug_namespace");
 		expect(UnitKindValues).not.toContain("redirect");
 		expect(NonRealmUnitKindValues).toEqual(UnitKindValues.filter((kind) => kind !== "realm"));
-		expect(CommunityCatalogUnitKindValues).toEqual([
+		expect(CommunityOwnedUnitKindValues).toEqual([
 			"book",
 			"software",
 			"media",

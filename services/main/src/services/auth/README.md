@@ -32,8 +32,8 @@ when a bearer credential is present.
 `api-permissions.ts` is the canonical registry for every API-key permission.
 The public flat values, TypeBox request contract, Better Auth permission
 statements, verification, and presentation all derive from this registry.
-Catalog objects use `unit:read`, `unit:create`, and `unit:update`;
-there is intentionally no parallel `catalog:*` namespace.
+Unit resources use `unit:read`, `unit:create`, and `unit:update`;
+authorization remains under the single `unit:*` namespace.
 
 API-key permission is only an API entry capability. It does not prove that the
 actor may edit a particular object. Unit ownership, scoped permission grants

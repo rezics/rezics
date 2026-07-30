@@ -7,6 +7,7 @@ const { forms: postTerms } = jaTerminology.post;
 const { forms: videoTerms } = jaTerminology.video;
 const { forms: audioTerms } = jaTerminology.audio;
 const { forms: realmTerms } = jaTerminology.realm;
+const { forms: entityTerms } = jaTerminology.entity;
 const { forms: tagStructureTerms } = jaTerminology.tagStructure;
 const { forms: unitSlugTerms } = jaTerminology.unitSlug;
 const { forms: zoneTerms } = jaTerminology.zone;
@@ -15,7 +16,7 @@ export default {
 	home: "ホーム",
 	studio: verbatimTerms.studio.value,
 	units: "ユニット",
-	entity: "エンティティ",
+	entity: entityTerms.label,
 	realm: realmTerms.label,
 	collections: "コレクション",
 	favorites: "保存済み",
@@ -70,7 +71,7 @@ export default {
 			video: videoTerms.label,
 			audio: audioTerms.label,
 			release: "リリース",
-			entity: "エンティティ",
+			entity: entityTerms.label,
 			label: labelTerms.label,
 			tag: "タグ",
 			structure: tagStructureTerms.label,

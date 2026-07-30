@@ -1,7 +1,7 @@
 import { type Static, t } from "elysia";
 
 import {
-	CatalogEntryModeValues,
+	UnitOwnershipModeValues,
 	GovernanceReasonCodeValues,
 	UnitOwnershipClaimResolutionValues,
 } from "../database/schema/contract-values";
@@ -55,7 +55,7 @@ export const PlatformUnitOwnershipClaimResponse = t.Object(
 		unitId: Uuid,
 		unitKind: UnitKind,
 		unitTitle: t.Nullable(t.String()),
-		catalogMode: t.UnionEnum(CatalogEntryModeValues),
+		ownershipMode: t.UnionEnum(UnitOwnershipModeValues),
 		currentOwnerProfileId: t.Nullable(Uuid),
 		claimantProfileId: Uuid,
 		claimantLabel: t.Nullable(t.String()),

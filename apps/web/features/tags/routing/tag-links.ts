@@ -1,7 +1,7 @@
 import type { EmbeddableSearchTemplateId } from "@rezics/filter";
 import { createLoader, createSerializer, parseAsString, parseAsStringLiteral } from "nuqs/server";
 
-import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
+import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
 import { isUnitId } from "@/features/units/model/unit-id";
 import { searchParamsParsers } from "@/lib/search-params";
 import type { UnitTagVoteContextAddress } from "./tag-create-route";
@@ -20,7 +20,7 @@ const unitTagsRouteParsers = {
 const loadUnitTagsRouteSearchParams = createLoader(unitTagsRouteParsers);
 const serializeUnitTagsRouteSearchParams = createSerializer(unitTagsRouteParsers);
 
-function tagSearchTemplate(type: CatalogDetailUnitType): EmbeddableSearchTemplateId {
+function tagSearchTemplate(type: UnitDetailUnitType): EmbeddableSearchTemplateId {
 	return type === "series" ? "global" : type;
 }
 
@@ -49,7 +49,7 @@ export async function loadUnitTagsRouteState(
 }
 
 export function unitTagsHref(
-	type: CatalogDetailUnitType,
+	type: UnitDetailUnitType,
 	unitId: string,
 	state?: UnitTagsRouteState,
 ): string {
@@ -62,10 +62,7 @@ export function unitTagsHref(
 	})}`;
 }
 
-export function tagSearchHref(
-	type: CatalogDetailUnitType,
-	tags: readonly TagSearchTarget[],
-): string {
+export function tagSearchHref(type: UnitDetailUnitType, tags: readonly TagSearchTarget[]): string {
 	const unique = new Map(tags.map((tag) => [tag.tagId, tag]));
 	return `/search${serializeSearch({
 		template: tagSearchTemplate(type),

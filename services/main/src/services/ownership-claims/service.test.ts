@@ -10,7 +10,6 @@ describe("Unit ownership claim policy", () => {
 			expect(
 				isUnitOwnershipClaimEligible({
 					kind,
-					catalogMode: "public_entry",
 					deletedAt: null,
 					ownerProfileId: OfficialProfileIds.community,
 				}),
@@ -21,25 +20,16 @@ describe("Unit ownership claim policy", () => {
 	it.each([
 		{
 			kind: "series",
-			catalogMode: "public_entry",
 			deletedAt: null,
 			ownerProfileId: OfficialProfileIds.community,
 		},
 		{
 			kind: "book",
-			catalogMode: "owned_work",
-			deletedAt: null,
-			ownerProfileId: OfficialProfileIds.community,
-		},
-		{
-			kind: "book",
-			catalogMode: "public_entry",
 			deletedAt: new Date(),
 			ownerProfileId: OfficialProfileIds.community,
 		},
 		{
 			kind: "book",
-			catalogMode: "public_entry",
 			deletedAt: null,
 			ownerProfileId: "019b76da-a800-7300-8000-000000000099",
 		},

@@ -4,7 +4,7 @@ import { Button } from "@rezics/ui";
 import { BookOpen } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
-import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
+import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
 import { useTranslation } from "@/i18n/client";
 import { UnitScoreControl } from "./unit-score-control";
 import { UnitReviewFeed } from "./unit-review-feed";
@@ -17,7 +17,7 @@ export function UnitRatingsReviewsSection({
 }: {
 	readonly moreReviewsHref: string;
 	readonly targetId: string;
-	readonly type: CatalogDetailUnitType;
+	readonly type: UnitDetailUnitType;
 	readonly writeReviewHref: string;
 }) {
 	const { t } = useTranslation(["engagement"]);

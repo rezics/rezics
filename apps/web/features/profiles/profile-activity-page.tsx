@@ -7,8 +7,8 @@ import { AppLink as Link } from "@/features/application-shell/components/app-lin
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { clampProgress, toProgressStatus } from "@/features/progress/model/progress-record";
-import { isCatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
-import { catalogDetailHref } from "@/features/units/routing/catalog-detail-routes";
+import { isUnitDetailUnitType } from "@/features/units/model/unit-detail-section";
+import { unitDetailHref } from "@/features/units/routing/unit-detail-routes";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { useProfileContext } from "./profile-layout";
 
@@ -55,8 +55,8 @@ export function ProfileActivityPage() {
 							</h3>
 							<div className="mt-3 grid gap-3">
 								{activity.data.scores.map((item) => {
-									const href = isCatalogDetailUnitType(item.unitKind)
-										? catalogDetailHref(item.unitKind, item.unitId)
+									const href = isUnitDetailUnitType(item.unitKind)
+										? unitDetailHref(item.unitKind, item.unitId)
 										: undefined;
 									const title = item.unitTitle ?? t.ui.unnamed;
 									return (
@@ -116,8 +116,8 @@ export function ProfileActivityPage() {
 							</h3>
 							<div className="mt-3 grid gap-3">
 								{activity.data.progress.map((item) => {
-									const href = isCatalogDetailUnitType(item.unitKind)
-										? catalogDetailHref(item.unitKind, item.unitId)
+									const href = isUnitDetailUnitType(item.unitKind)
+										? unitDetailHref(item.unitKind, item.unitId)
 										: undefined;
 									const title = item.unitTitle ?? t.ui.unnamed;
 									const percentage = Math.round(

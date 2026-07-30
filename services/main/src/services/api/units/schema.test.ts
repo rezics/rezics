@@ -2,7 +2,7 @@ import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
 import {
-	CatalogUnitTypeParams,
+	WorkUnitTypeParams,
 	CreateUnitBody,
 	ManageableUnitTypeParams,
 	ResolveUnitPresentationsBody,
@@ -15,7 +15,7 @@ import {
 
 const localization = { language: "en", title: "Example" };
 const publicMainUnit = {
-	catalogMode: "public_entry",
+	ownershipMode: "community_owned",
 	version: { kind: "main" },
 	localization,
 } as const;
@@ -66,18 +66,18 @@ describe("Unit publication License inputs", () => {
 	});
 });
 
-describe("Catalog creation semantics", () => {
+describe("Unit creation semantics", () => {
 	it("requires a publisher Entity for owned works", () => {
 		expect(
 			Check(CreateUnitBody, {
-				catalogMode: "owned_work",
+				ownershipMode: "profile_owned",
 				version: { kind: "main" },
 				localization,
 			}),
 		).toBe(false);
 		expect(
 			Check(CreateUnitBody, {
-				catalogMode: "owned_work",
+				ownershipMode: "profile_owned",
 				publisher: { entityId: "019b0000-0000-7000-8000-000000000001" },
 				version: { kind: "main" },
 				localization,
@@ -104,9 +104,9 @@ describe("Catalog creation semantics", () => {
 	});
 });
 
-describe("Catalog Unit route types", () => {
+describe("Work Unit route types", () => {
 	it("accepts Series on generic read and update routes", () => {
-		expect(Check(CatalogUnitTypeParams, { type: "series" })).toBe(true);
+		expect(Check(WorkUnitTypeParams, { type: "series" })).toBe(true);
 	});
 
 	it("keeps Series out of variant-only creation routes", () => {
@@ -114,11 +114,11 @@ describe("Catalog Unit route types", () => {
 		expect(Check(VariantUnitTypeParams, { type: "book" })).toBe(true);
 	});
 
-	it("addresses timed media through manageable routes without adding catalog creation types", () => {
+	it("addresses timed media through manageable routes without adding work creation types", () => {
 		expect(Check(ManageableUnitTypeParams, { type: "video" })).toBe(true);
 		expect(Check(ManageableUnitTypeParams, { type: "audio" })).toBe(true);
-		expect(Check(CatalogUnitTypeParams, { type: "video" })).toBe(false);
-		expect(Check(CatalogUnitTypeParams, { type: "audio" })).toBe(false);
+		expect(Check(WorkUnitTypeParams, { type: "video" })).toBe(false);
+		expect(Check(WorkUnitTypeParams, { type: "audio" })).toBe(false);
 	});
 });
 

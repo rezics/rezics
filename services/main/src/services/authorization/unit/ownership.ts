@@ -6,6 +6,14 @@ import { unitAccessGrant, unitAccessRestriction, unitOwnership } from "../../dat
 import { OfficialProfileIds } from "../../bootstrap/manifest";
 import { expandDelegableUnitPermissions } from "./policy";
 
+export type UnitOwnershipMode = "profile_owned" | "community_owned";
+
+export function unitOwnershipModeFromOwnerProfileId(
+	ownerProfileId: string | null,
+): UnitOwnershipMode {
+	return ownerProfileId === OfficialProfileIds.community ? "community_owned" : "profile_owned";
+}
+
 export async function createProfileOwnedUnitAccess(
 	tx: DatabaseTransaction,
 	unitId: string,
@@ -172,10 +180,10 @@ export async function createPublicEditableUnitAccess(
 }
 
 /**
- * Community catalog entries are stewarded by the ordinary Rezics Community Profile,
+ * Community-owned Units are stewarded by the ordinary Rezics Community Profile,
  * while their submitter receives explicit editing permissions without ownership.
  */
-export async function createCommunityCatalogAccess(
+export async function createCommunityContributedUnitAccess(
 	tx: DatabaseTransaction,
 	unitId: string,
 	contributorProfileId: string,

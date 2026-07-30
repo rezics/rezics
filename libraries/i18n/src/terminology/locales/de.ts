@@ -99,6 +99,16 @@ export const deTerminology = defineTerminology("de", {
 		},
 		forbidden: [],
 	},
+	entity: {
+		status: "approved",
+		forms: {
+			label: "Entität",
+			pluralLabel: "Entitäten",
+			inline: "Entität",
+			plural: "Entitäten",
+		},
+		forbidden: ["Catalog"],
+	},
 	metadata: {
 		status: "approved",
 		forms: { label: "Metadaten", inline: "Metadaten" },

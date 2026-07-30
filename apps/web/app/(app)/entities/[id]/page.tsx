@@ -1,4 +1,4 @@
-import { EntityDetailPage } from "@/features/catalog/catalog-pages";
+import { EntityDetailPage } from "@/features/units/unit-resource-pages";
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
 	return <EntityDetailPage id={(await params).id} />;
 }

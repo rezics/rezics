@@ -22,7 +22,7 @@ export default {
 	publisher: "Herausgeber",
 	wikiCreateTitle: "Wiki-Eintrag erstellen",
 	wikiAccessMode: "Bearbeitungszugriff",
-	wikiPublicEntry: "Öffentlicher Eintrag",
+	wikiCommunityUnit: "Öffentlicher Eintrag",
 	wikiPublicDescription:
 		"Alle angemeldeten Personen können ihn bearbeiten; die erstellende Person erhält keine Sonderrechte.",
 	wikiRestricted: "Eingeschränkt",

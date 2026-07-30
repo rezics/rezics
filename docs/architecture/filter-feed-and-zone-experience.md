@@ -118,7 +118,7 @@ Every live Zone must have:
 Zone creation provisions both requirements in the same database transaction as
 the Zone. The default page is published, addressed as `home`, placed in the
 Zone page structure, and owned by the Zone creator. The Search template is an
-explicit bootstrap input. Ordinary Zones use `global`; official catalog Zones
+explicit bootstrap input. Ordinary Zones use `global`; official work Zones
 use their Book, Media, or Software template from their bootstrap manifest.
 
 Bootstrap reconciles this invariant for every Zone, not only official Zones.
@@ -126,8 +126,8 @@ Readiness fails when any live Zone lacks either capability. Updating or deleting
 Zone Pages may not remove the final Feed Block, and the Zone Search API does not
 permit disabling Search.
 
-Official Bootstrap data includes Book, Media, Software, Realm, and Zone catalog
-Zones. Each has its own kind boundary, default Search template, Feed home page,
+Official Bootstrap data includes Book, Media, Software, Realm, and Zone
+workspaces. Each has its own kind boundary, default Search template, Feed home page,
 and deterministic Bootstrap identity.
 
 ## Validation and execution

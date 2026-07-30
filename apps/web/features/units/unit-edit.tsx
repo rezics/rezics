@@ -1,7 +1,12 @@
 "use client";
 
 import type { ContentLanguage } from "@rezics/i18n";
-import { isPublicationLicenseId, PublicationLicenseIds } from "@rezics/license";
+import {
+	CurrentUnitContentLicenseSlug,
+	isPublicationLicenseId,
+	PublicationLicenseIds,
+	type UnitContentLicenseSlug,
+} from "@rezics/license";
 
 import {
 	type GetApiUnitsByTypeByUnitIdStatus200,
@@ -39,18 +44,14 @@ import {
 import { LocalizationMediaFallbackNotice } from "@/features/media/components/localization-media-fallback-notice";
 import { FeedCard } from "@/features/content-feed/components/feed-card";
 import { FeedUnitContent } from "@/features/content-feed/components/feed-unit-content";
-import {
-	isCatalogUnitType,
-	isVariantUnitType,
-	type CatalogUnitType,
-	type UnitType,
-} from "./unit-types";
+import { isWorkUnitType, isVariantUnitType, type WorkUnitType, type UnitType } from "./unit-types";
 import {
 	CreditAttributionRolesByUnitType,
 	isCreditAttributionRoleForUnitType,
 	isSubjectAssociationRole,
 	SubjectAssociationRoles,
 } from "./attribution-role";
+import { unitContentLicenseHref } from "./model/unit-content-license";
 
 export type EditableUnit = GetApiUnitsByTypeByUnitIdStatus200;
 type Unit = EditableUnit;
@@ -108,7 +109,10 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 			submittedAiDisclosure === "machine_generated"
 				? submittedAiDisclosure
 				: "unknown";
-		const licensed = form.get("licensed") === "true";
+		const contentLicense = form.get("contentLicense") === "true";
+		const contentLicenseInput = contentLicense
+			? { referenceLicenseSlug: CurrentUnitContentLicenseSlug }
+			: null;
 		const details = (() => {
 			if (unit.details.type === "book") {
 				const pageCount = readPositiveInteger(form, "pageCount");
@@ -118,13 +122,13 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 					publicationDate: releasedOn || null,
 					pageCount,
 					format: String(form.get("format") ?? "").trim() || null,
-					licensed,
+					contentLicense: contentLicenseInput,
 				};
 			}
 			if (unit.details.type === "software")
 				return {
 					versionLabel: String(form.get("versionLabel") ?? "").trim() || null,
-					licensed,
+					contentLicense: contentLicenseInput,
 				};
 			if (unit.details.type === "media") {
 				const runtimeMinutes = readPositiveInteger(form, "runtimeMinutes");
@@ -138,7 +142,13 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 					return undefined;
 				const kind = String(form.get("kind") ?? "").trim();
 				if (!kind) return undefined;
-				return { kind, runtimeMinutes, episodeCount, seasonCount, licensed };
+				return {
+					kind,
+					runtimeMinutes,
+					episodeCount,
+					seasonCount,
+					contentLicense: contentLicenseInput,
+				};
 			}
 			if (unit.details.type === "video" || unit.details.type === "audio") {
 				const durationSeconds = readPositiveInteger(form, "durationSeconds");
@@ -286,12 +296,23 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 	);
 }
 
-function LicensedField({ defaultValue }: { defaultValue: boolean }) {
+function ContentLicenseField({
+	defaultSlug,
+}: {
+	readonly defaultSlug: UnitContentLicenseSlug | null;
+}) {
 	const { t } = useTranslation(["units"]);
 	return (
 		<Field>
-			<FieldLabel>{t.units.fields.licensed}</FieldLabel>
-			<NativeSelect defaultValue={String(defaultValue)} name="licensed">
+			<FieldLabel>
+				<a
+					className="text-link hover:text-link-hover hover:underline"
+					href={unitContentLicenseHref(defaultSlug ?? CurrentUnitContentLicenseSlug)}
+				>
+					{t.units.fields.contentLicense}
+				</a>
+			</FieldLabel>
+			<NativeSelect defaultValue={String(defaultSlug !== null)} name="contentLicense">
 				<NativeSelectOption value="false">{t.units.fields.no}</NativeSelectOption>
 				<NativeSelectOption value="true">{t.units.fields.yes}</NativeSelectOption>
 			</NativeSelect>
@@ -322,7 +343,9 @@ function UnitTypeSpecificFields({ unit }: { unit: Unit }) {
 					<FieldLabel>{t.units.fields.format}</FieldLabel>
 					<Input defaultValue={details.format ?? ""} name="format" />
 				</Field>
-				<LicensedField defaultValue={details.licensed} />
+				<ContentLicenseField
+					defaultSlug={details.contentLicense?.referenceLicenseSlug ?? null}
+				/>
 			</>
 		);
 	if (details.type === "software")
@@ -332,7 +355,9 @@ function UnitTypeSpecificFields({ unit }: { unit: Unit }) {
 					<FieldLabel>{t.units.fields.versionLabel}</FieldLabel>
 					<Input defaultValue={details.versionLabel ?? ""} name="versionLabel" />
 				</Field>
-				<LicensedField defaultValue={details.licensed} />
+				<ContentLicenseField
+					defaultSlug={details.contentLicense?.referenceLicenseSlug ?? null}
+				/>
 			</>
 		);
 	if (details.type === "media")
@@ -369,7 +394,9 @@ function UnitTypeSpecificFields({ unit }: { unit: Unit }) {
 						type="number"
 					/>
 				</Field>
-				<LicensedField defaultValue={details.licensed} />
+				<ContentLicenseField
+					defaultSlug={details.contentLicense?.referenceLicenseSlug ?? null}
+				/>
 			</>
 		);
 	if (details.type === "video" || details.type === "audio")
@@ -475,7 +502,7 @@ function UnitLocalizationForm({
 			// The typed mutation state supplies the visible API error.
 		}
 	}
-	const previewKindLabel = isCatalogUnitType(type)
+	const previewKindLabel = isWorkUnitType(type)
 		? t.feed.content.kinds[`unit:${type}`]
 		: t.units.types[type];
 	return (
@@ -566,7 +593,7 @@ function UnitLocalizationForm({
 	);
 }
 
-export function UnitRelationships({ type, unit }: { type: CatalogUnitType; unit: Unit }) {
+export function UnitRelationships({ type, unit }: { type: WorkUnitType; unit: Unit }) {
 	const { t } = useTranslation(["cover", "errors", "tags", "ui", "units"]);
 	const queryClient = useQueryClient();
 	const invalidate = () => invalidateUnitDetail(queryClient, type, unit.id);

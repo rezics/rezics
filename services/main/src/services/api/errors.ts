@@ -9,7 +9,7 @@ import { SearchErrors } from "../search/errors";
 import { UnitErrors } from "../units/errors";
 import { EntityErrors } from "../entities/errors";
 import { FollowingErrors } from "../following/errors";
-import { CatalogErrors } from "./catalog/errors";
+import { UnitResourceErrors } from "./unit-resources/errors";
 import { CollectionErrors } from "./collections/errors";
 import { ContentStructureErrors } from "./content-structure/errors";
 import { DomainExtensionErrors } from "./domain-extensions/errors";
@@ -83,7 +83,7 @@ export const ApiErrors = [
 	...PostErrors,
 	...NotificationErrors,
 	...OwnershipClaimErrors,
-	...CatalogErrors,
+	...UnitResourceErrors,
 	...MessageErrors,
 	...CollectionErrors,
 	...RealmErrors,

@@ -12,10 +12,11 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { unitAlias } from "./catalog";
+import { unitAlias } from "./unit-alias";
 import { createTimestampMsColumn, createUpdatedAtColumn, createUuidv7PrimaryKey } from "./columns";
 import { conversation, message } from "./communication";
-import { profile, unit } from "./core";
+import { profile } from "./profile";
+import { unit } from "./unit";
 import { post } from "./post";
 import { reactionKind } from "./reaction";
 import { realm } from "./realm";

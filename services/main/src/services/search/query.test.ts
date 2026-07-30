@@ -17,7 +17,7 @@ const ProfileContentExpression = {
 		{
 			operator: "all",
 			clauses: [
-				{ field: "category", operator: "any-of", values: ["entity", "collections"] },
+				{ field: "category", operator: "any-of", values: ["entities", "collections"] },
 				{ field: "owner", operator: "equals", value: ProfileId },
 			],
 		},
@@ -28,7 +28,7 @@ describe("category Search expression specialization", () => {
 	it.each([
 		["posts", "credit"],
 		["reviews", "credit"],
-		["entity", "owner"],
+		["entities", "owner"],
 		["collections", "owner"],
 	] as const)("retains only the %s category's %s predicate", (category, field) => {
 		expect(specializeSearchExpressionForCategory(category, ProfileContentExpression)).toEqual({
@@ -55,7 +55,7 @@ describe("category Search expression specialization", () => {
 		expect(specializeSearchExpressionForCategory("posts", expression)).toEqual({
 			state: "match-none",
 		});
-		expect(specializeSearchExpressionForCategory("entity", expression)).toEqual({
+		expect(specializeSearchExpressionForCategory("entities", expression)).toEqual({
 			state: "match-all",
 		});
 	});
@@ -64,10 +64,10 @@ describe("category Search expression specialization", () => {
 		const expression = {
 			field: "category",
 			operator: "all-of",
-			values: ["entity", "collections"],
+			values: ["entities", "collections"],
 		} satisfies SearchExpression;
 
-		expect(specializeSearchExpressionForCategory("entity", expression)).toEqual({
+		expect(specializeSearchExpressionForCategory("entities", expression)).toEqual({
 			state: "match-none",
 		});
 	});
@@ -76,12 +76,12 @@ describe("category Search expression specialization", () => {
 		const expression = {
 			operator: "all",
 			clauses: [
-				{ field: "category", operator: "equals", value: "entity" },
+				{ field: "category", operator: "equals", value: "entities" },
 				{ field: "language", operator: "equals", value: "zh-Hant" },
 			],
 		} satisfies SearchExpression;
 
-		expect(specializeSearchExpressionForCategory("entity", expression)).toEqual({
+		expect(specializeSearchExpressionForCategory("entities", expression)).toEqual({
 			state: "expression",
 			expression: { field: "language", operator: "equals", value: "zh-Hant" },
 		});

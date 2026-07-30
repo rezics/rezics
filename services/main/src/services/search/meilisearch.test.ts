@@ -49,7 +49,7 @@ describe("Meilisearch expression compiler", () => {
 
 	it("pushes Entity ownership through the indexed owner profile IDs", () => {
 		expect(
-			compileMeilisearchExpression("entity", {
+			compileMeilisearchExpression("entities", {
 				field: "owner",
 				operator: "equals",
 				value: "019b0000-0000-7000-8000-000000000004",
@@ -80,7 +80,7 @@ describe("Meilisearch expression compiler", () => {
 		);
 		vi.stubGlobal("fetch", fetchMock);
 		const common = {
-			indexUid: "rezics_units_v8_20260729",
+			indexUid: "rezics_units_v9_20260731",
 			query: "book",
 			offset: 0,
 			limit: 20,
@@ -110,7 +110,7 @@ describe("Meilisearch expression compiler", () => {
 
 		await searchCandidates([
 			{
-				indexUid: "rezics_units_v8_20260729",
+				indexUid: "rezics_units_v9_20260731",
 				category: "units",
 				query: "book",
 				offset: 0,
@@ -146,7 +146,7 @@ describe("Meilisearch expression compiler", () => {
 
 		await searchCandidates([
 			{
-				indexUid: "rezics_units_v8_20260729",
+				indexUid: "rezics_units_v9_20260731",
 				category: "units",
 				query: "the complete title",
 				offset: 0,

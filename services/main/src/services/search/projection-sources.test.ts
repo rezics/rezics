@@ -7,7 +7,7 @@ import { CurrentProjectionSources, HistoryProjectionSources } from "./projection
 
 const migrationDirectory = fileURLToPath(new URL("../database/migrations", import.meta.url));
 const currentEnrichment = fileURLToPath(
-	new URL("../../../search/rezics_unit_search_document_v8.sql", import.meta.url),
+	new URL("../../../search/rezics_unit_search_document_v9.sql", import.meta.url),
 );
 
 describe("search projection source registry", () => {

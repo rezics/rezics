@@ -91,7 +91,7 @@ describe("database bootstrap manifest", () => {
 		);
 	});
 
-	it("bootstraps the five official catalog experiences as renderable Zones", () => {
+	it("bootstraps the five official work experiences as renderable Zones", () => {
 		expect(OfficialZoneManifest.map((value) => value.slug)).toEqual([
 			"book",
 			"media",

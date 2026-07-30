@@ -8,6 +8,7 @@ const { forms: realmTerms } = jaTerminology.realm;
 const { forms: tagStructureTerms } = jaTerminology.tagStructure;
 const { forms: unitSlugTerms } = jaTerminology.unitSlug;
 const { forms: zoneTerms } = jaTerminology.zone;
+const { forms: entityTerms } = jaTerminology.entity;
 
 export default {
 	MalformedRequestBody: "提出されたコンテンツを読み取ることができませんでした。",
@@ -151,8 +152,8 @@ export default {
 	ReplyDepthExceeded: "この返信は最大スレッド深度を超えます。",
 	InvalidNotificationCursor: "この通知ページのリンクは無効であるか、期限切れです。",
 	NotificationNotFound: "この通知は見つかりませんでした。",
-	EntityEntryNotFound: "このエンティティエントリは見つかりませんでした。",
-	EntityAssociationRestricted: "このエンティティはその種類の関連付けを受け入れません。",
+	EntityEntryNotFound: `この${entityTerms.label}エントリは見つかりませんでした。`,
+	EntityAssociationRestricted: `この${entityTerms.label}はその種類の関連付けを受け入れません。`,
 	AssociationProposalNotFound: "この関連付け提案は見つかりませんでした。",
 	AssociationProposalConflict: "この関連付け提案は既に実行できません。",
 	AssociationProposalExpired: "この関連付け提案は期限切れです。",

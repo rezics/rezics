@@ -31,7 +31,7 @@ import {
 	ResourceVisibilityValues,
 	type ResourceVisibility,
 } from "@/features/privacy/model/resource-visibility";
-import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
+import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -49,7 +49,7 @@ export function UnitScoreControl({
 	type,
 }: {
 	readonly targetId: string;
-	readonly type: CatalogDetailUnitType;
+	readonly type: UnitDetailUnitType;
 }) {
 	const { data: session, isPending: sessionPending } = useHydratedSession();
 	const { openAuthPortal } = useAuthPortal();

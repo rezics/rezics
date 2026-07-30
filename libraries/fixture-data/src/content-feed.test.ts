@@ -3,12 +3,12 @@ import { describe, expect, it } from "vitest";
 import { FixtureContentLanguages, getFeedFixtureData } from "./content-feed";
 
 describe("content feed fixture data", () => {
-	it("provides a complete localized catalog for every supported content language", () => {
-		const catalogs = FixtureContentLanguages.map(getFeedFixtureData);
+	it("provides complete localized fixtures for every supported content language", () => {
+		const fixtures = FixtureContentLanguages.map(getFeedFixtureData);
 
-		expect(catalogs).toHaveLength(FixtureContentLanguages.length);
-		expect(catalogs.every((catalog) => catalog.post.title.length > 0)).toBe(true);
-		expect(new Set(catalogs.map((catalog) => catalog.post.title)).size).toBe(
+		expect(fixtures).toHaveLength(FixtureContentLanguages.length);
+		expect(fixtures.every((fixture) => fixture.post.title.length > 0)).toBe(true);
+		expect(new Set(fixtures.map((fixture) => fixture.post.title)).size).toBe(
 			FixtureContentLanguages.length,
 		);
 	});

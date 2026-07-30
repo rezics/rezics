@@ -37,7 +37,7 @@ export const UnitKindValues = [
 	"realm",
 	"realm_rule",
 ] as const;
-export const CommunityCatalogUnitKindValues = [
+export const CommunityOwnedUnitKindValues = [
 	"book",
 	"software",
 	"media",
@@ -48,7 +48,7 @@ export const CommunityCatalogUnitKindValues = [
 
 export const VariantCapableUnitKindValues = ["book", "software", "media"] as const;
 export const TimedMediaUnitKindValues = ["video", "audio"] as const;
-export const CatalogEntryModeValues = ["owned_work", "public_entry"] as const;
+export const UnitOwnershipModeValues = ["profile_owned", "community_owned"] as const;
 export const UnitOwnershipClaimableUnitKindValues = [
 	"entity",
 	"book",
@@ -63,7 +63,7 @@ export const UnitOwnershipClaimResolutionValues = [
 ] as const;
 
 export type UnitKind = (typeof UnitKindValues)[number];
-export type CatalogEntryMode = (typeof CatalogEntryModeValues)[number];
+export type UnitOwnershipMode = (typeof UnitOwnershipModeValues)[number];
 export type UnitOwnershipClaimableUnitKind = (typeof UnitOwnershipClaimableUnitKindValues)[number];
 export type UnitOwnershipClaimResolution = (typeof UnitOwnershipClaimResolutionValues)[number];
 export type NonRealmUnitKind = Exclude<UnitKind, "realm">;

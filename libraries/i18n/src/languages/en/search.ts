@@ -6,11 +6,12 @@ const { forms: postTerms } = enTerminology.post;
 const { forms: realmTerms } = enTerminology.realm;
 const { forms: zoneTerms } = enTerminology.zone;
 const { forms: tagStructureTerms } = enTerminology.tagStructure;
+const { forms: entityTerms } = enTerminology.entity;
 const { forms: followTerms } = enTerminology.follow;
 
 export default {
 	title: "Search",
-	placeholder: `Search units, entities, tags, ${postTerms.plural}, ${realmTerms.plural}, or users`,
+	placeholder: `Search units, ${entityTerms.plural}, tags, ${postTerms.plural}, ${realmTerms.plural}, or users`,
 	withinLabel: insert("Search within {{name}}", { name: String }),
 	withinPlaceholder: insert("Search {{name}}", { name: String }),
 	advancedFilters: "Advanced filters",
@@ -39,7 +40,7 @@ export default {
 	resultGroups: {
 		units: "Works",
 		users: "Users",
-		entity: "Catalog",
+		entities: entityTerms.pluralLabel,
 		tags: "Tags",
 		"tag-structures": tagStructureTerms.pluralLabel,
 		posts: postTerms.plural,
@@ -51,7 +52,7 @@ export default {
 	categoryOptions: {
 		units: "Works",
 		users: "Users",
-		entity: "Catalog",
+		entities: entityTerms.pluralLabel,
 		tags: "Tags",
 		"tag-structures": tagStructureTerms.pluralLabel,
 		posts: postTerms.plural,
@@ -173,8 +174,7 @@ export default {
 		"updated-at": "Updated date",
 		"published-at": "Published date",
 		"closes-at": "Closing date",
-		"catalog-licensed": "Catalog license available",
-		"catalog-release-date": "Catalog release date",
+		"content-license": "Unit content license active",
 		"book-isbn13": verbatimTerms.isbn13.value,
 		"book-publication-date": "Publication date",
 		"book-page-count": "Page count",

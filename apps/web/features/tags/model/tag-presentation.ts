@@ -1,7 +1,7 @@
 import type { PresentedAvatar } from "@rezics/avatar";
 import type { ContentLanguage } from "@rezics/i18n";
 
-import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
+import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
 
 export type TagItemKey =
 	`global:${string}` | `realm:${string}:${string}` | `structure:${string}:${string}`;
@@ -17,7 +17,7 @@ export interface TagIdentity {
 export type TagVoteTarget =
 	| {
 			readonly kind: "global";
-			readonly type: CatalogDetailUnitType;
+			readonly type: UnitDetailUnitType;
 			readonly unitId: string;
 			readonly tagId: string;
 	  }

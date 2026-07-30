@@ -37,7 +37,7 @@ export default new Elysia({ prefix: "/ownership-claims" })
 					"UnitOwnershipClaimAlreadyPending",
 				]),
 			},
-			detail: { summary: "Claim ownership of a public catalog entry", tags: ["Governance"] },
+			detail: { summary: "Claim ownership of a community-owned Unit", tags: ["Governance"] },
 		},
 	)
 	.post(

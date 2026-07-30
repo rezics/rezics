@@ -7,6 +7,7 @@ const { forms: postTerms } = koTerminology.post;
 const { forms: videoTerms } = koTerminology.video;
 const { forms: audioTerms } = koTerminology.audio;
 const { forms: realmTerms } = koTerminology.realm;
+const { forms: entityTerms } = koTerminology.entity;
 const { forms: tagStructureTerms } = koTerminology.tagStructure;
 const { forms: unitSlugTerms } = koTerminology.unitSlug;
 const { forms: zoneTerms } = koTerminology.zone;
@@ -15,7 +16,7 @@ export default {
 	home: "홈",
 	studio: verbatimTerms.studio.value,
 	units: "유닛",
-	entity: "엔티티",
+	entity: entityTerms.label,
 	realm: realmTerms.label,
 	collections: "컬렉션",
 	favorites: "저장됨",
@@ -70,7 +71,7 @@ export default {
 			video: videoTerms.label,
 			audio: audioTerms.label,
 			release: "릴리스",
-			entity: "엔티티",
+			entity: entityTerms.label,
 			label: labelTerms.label,
 			tag: "태그",
 			structure: tagStructureTerms.label,

@@ -35,6 +35,7 @@ import {
 import {
 	assertSearchExpression,
 	combineSearchExpressions,
+	specializeSearchExpressionForCategory,
 	type CompiledSearchRequest,
 	type SearchExpression,
 } from "./query";
@@ -83,8 +84,8 @@ const CommonFields = [
 	"published-at",
 ] as const satisfies readonly SearchField[];
 
-const CatalogFields = ["catalog-licensed"] as const satisfies readonly SearchField[];
-const CatalogZoneCategories = ["units", "posts", "reviews", "collections"] as const;
+const ContentLicenseFields = ["content-license"] as const satisfies readonly SearchField[];
+const WorkZoneCategories = ["units", "posts", "reviews", "collections"] as const;
 
 const TemplateDefinitions = {
 	global: {
@@ -110,10 +111,10 @@ const TemplateDefinitions = {
 	},
 	book: {
 		id: "book",
-		categories: CatalogZoneCategories,
+		categories: WorkZoneCategories,
 		fields: [
 			...CommonFields,
-			...CatalogFields,
+			...ContentLicenseFields,
 			"book-isbn13",
 			"book-publication-date",
 			"book-page-count",
@@ -129,11 +130,10 @@ const TemplateDefinitions = {
 	},
 	media: {
 		id: "media",
-		categories: CatalogZoneCategories,
+		categories: WorkZoneCategories,
 		fields: [
 			...CommonFields,
-			...CatalogFields,
-			"catalog-release-date",
+			...ContentLicenseFields,
 			"media-kind",
 			"media-release-date",
 			"media-runtime-minutes",
@@ -155,11 +155,10 @@ const TemplateDefinitions = {
 	},
 	software: {
 		id: "software",
-		categories: CatalogZoneCategories,
+		categories: WorkZoneCategories,
 		fields: [
 			...CommonFields,
-			...CatalogFields,
-			"catalog-release-date",
+			...ContentLicenseFields,
 			"software-release-date",
 			"software-version-label",
 			"software-platform",
@@ -536,7 +535,7 @@ function scopeForContexts(contexts: readonly SearchFeatureContext[]) {
 										{
 											field: "category",
 											operator: "any-of",
-											values: ["posts", "reviews", "entity", "collections"],
+											values: ["posts", "reviews", "entities", "collections"],
 										},
 										{
 											operator: "all",
@@ -670,14 +669,6 @@ export function compileSearchFeatureInput(
 	const requestedPageSize = input.state.pageSize ?? input.document.results.pageSize;
 	if (requestedPageSize > input.document.results.maxPageSize)
 		throw new InvalidSearch("Search page size exceeds the configured maximum");
-	// Search executes one authorized cursor per category. Shared presentations
-	// distribute their requested budget across those cursors so a mixed page
-	// does not multiply the configured size by the number of categories.
-	const pageSize =
-		execution.pageBudget === "shared"
-			? Math.max(1, Math.floor(requestedPageSize / input.document.categories.length))
-			: requestedPageSize;
-
 	const baseline = new Map<string, SearchControlValue>();
 	for (const value of input.document.defaults) baseline.set(value.controlKey, value);
 	// Link and Tag injections are composed constraints, not editable defaults.
@@ -713,6 +704,21 @@ export function compileSearchFeatureInput(
 			...(searchExpression ? [searchExpression] : []),
 		]);
 	if (searchExpression) assertSearchExpression(searchExpression, { maxDepth: 6, maxNodes: 100 });
+	const categories = searchExpression
+		? input.document.categories.filter(
+				(category) =>
+					specializeSearchExpressionForCategory(category, searchExpression).state !==
+					"match-none",
+			)
+		: input.document.categories;
+	if (!categories.length) throw new InvalidSearch("Search filters exclude every category");
+	// Search executes one authorized cursor per effective category. A category
+	// filter must narrow this divisor, otherwise an Entities-only page of 20
+	// becomes 2 merely because the document originally declared ten categories.
+	const pageSize =
+		execution.pageBudget === "shared"
+			? Math.max(1, Math.floor(requestedPageSize / categories.length))
+			: requestedPageSize;
 	const facets = input.document.results.facets.map((controlKey) => {
 		const control = controls.get(controlKey);
 		if (!control) throw new InvalidSearch(`Facet control ${controlKey} is unavailable`);
@@ -728,7 +734,7 @@ export function compileSearchFeatureInput(
 	return {
 		request: {
 			scope: context.scope,
-			categories: input.document.categories,
+			categories,
 			query,
 			constraints: [...template.constraints, ...context.contextFilters],
 			searchExpression,

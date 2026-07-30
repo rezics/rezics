@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import { and, eq, exists, inArray, sql, type SQL } from "drizzle-orm";
+import { and, eq, exists, inArray, isNull, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import {
 	type SearchControlPredicate,
@@ -18,7 +18,7 @@ import { getUnitReadCondition } from "../authorization/unit/query";
 import { database } from "../database";
 import {
 	book,
-	catalogUnitContentLicense,
+	unitContentLicense,
 	collection,
 	creditAttribution,
 	contentStructure,
@@ -154,9 +154,9 @@ function validateRequest(category: SearchCategory, request: DomainSearchRequest)
 		],
 		["licenses", SearchFieldByDomainRequestFilter.license, Boolean(request.licenses?.length)],
 		[
-			"contentLicensed",
-			SearchFieldByDomainRequestFilter.contentLicensed,
-			request.contentLicensed !== undefined,
+			"contentLicenseActive",
+			SearchFieldByDomainRequestFilter.contentLicenseActive,
+			request.contentLicenseActive !== undefined,
 		],
 		[
 			"creditedUnitId",
@@ -311,28 +311,28 @@ function compileFilter(category: SearchCategory, filter: SearchControlPredicate)
 			return sql`${!matches}`;
 		return sql`${matches}`;
 	}
-	if (filter.field === "catalog-licensed") {
+	if (filter.field === "content-license") {
 		const condition = and(
 			inArray(unit.kind, VariantCapableUnitKindValues),
 			booleanColumnCondition(
 				exists(
 					database
-						.select({ unitId: catalogUnitContentLicense.unitId })
-						.from(catalogUnitContentLicense)
-						.where(eq(catalogUnitContentLicense.unitId, unit.id)),
+						.select({ unitId: unitContentLicense.unitId })
+						.from(unitContentLicense)
+						.where(
+							and(
+								eq(unitContentLicense.unitId, unit.id),
+								isNull(unitContentLicense.revokedAt),
+							),
+						),
 				),
 				filter,
 			),
 		);
-		if (!condition) throw new Error("Catalog License filter produced no SQL condition");
+		if (!condition) throw new Error("Unit content License filter produced no SQL condition");
 		return condition;
 	}
-	if (filter.field === "catalog-release-date")
-		return sql`${unit.kind} in ('media', 'software') and ${scalarColumnCondition(
-			sql`coalesce(${media.releaseDate}, ${software.releaseDate})`,
-			filter,
-		)}`;
-	const catalogScalar: Partial<
+	const typeSpecificScalar: Partial<
 		Record<SearchControlPredicate["field"], { readonly kind: string; readonly column: SQL }>
 	> = {
 		"book-isbn13": { kind: "book", column: sql`${book.isbn13}` },
@@ -343,13 +343,13 @@ function compileFilter(category: SearchCategory, filter: SearchControlPredicate)
 		"software-release-date": { kind: "software", column: sql`${software.releaseDate}` },
 		"software-version-label": { kind: "software", column: sql`${software.versionLabel}` },
 	};
-	const scalarCatalog = catalogScalar[filter.field];
-	if (scalarCatalog)
-		return sql`${unit.kind}::text = ${scalarCatalog.kind} and ${scalarColumnCondition(
-			scalarCatalog.column,
+	const scalarDefinition = typeSpecificScalar[filter.field];
+	if (scalarDefinition)
+		return sql`${unit.kind}::text = ${scalarDefinition.kind} and ${scalarColumnCondition(
+			scalarDefinition.column,
 			filter,
 		)}`;
-	const catalogNumeric: Partial<
+	const typeSpecificNumeric: Partial<
 		Record<SearchControlPredicate["field"], { readonly kind: string; readonly column: SQL }>
 	> = {
 		"book-page-count": { kind: "book", column: sql`${book.pageCount}` },
@@ -358,10 +358,10 @@ function compileFilter(category: SearchCategory, filter: SearchControlPredicate)
 		"media-episode-count": { kind: "media", column: sql`${media.episodeCount}` },
 		"media-season-count": { kind: "media", column: sql`${media.seasonCount}` },
 	};
-	const numericCatalog = catalogNumeric[filter.field];
-	if (numericCatalog)
-		return sql`${unit.kind}::text = ${numericCatalog.kind} and ${numericColumnCondition(
-			numericCatalog.column,
+	const numericDefinition = typeSpecificNumeric[filter.field];
+	if (numericDefinition)
+		return sql`${unit.kind}::text = ${numericDefinition.kind} and ${numericColumnCondition(
+			numericDefinition.column,
 			filter,
 		)}`;
 	if (filter.field === "software-platform")
@@ -553,7 +553,7 @@ function compileFilter(category: SearchCategory, filter: SearchControlPredicate)
 
 	const columnByField: Partial<Record<SearchControlPredicate["field"], SQL>> = {
 		kind:
-			category === "entity"
+			category === "entities"
 				? sql`${entity.kind}`
 				: category === "posts"
 					? sql`${post.kind}`
@@ -716,11 +716,11 @@ function buildEffectiveSearchExpression(
 	addValues(SearchFieldByDomainRequestFilter.contentRating, request.contentRatings);
 	addValues(SearchFieldByDomainRequestFilter.aiDisclosure, request.aiDisclosures);
 	addValues(SearchFieldByDomainRequestFilter.license, request.licenses);
-	if (request.contentLicensed !== undefined)
+	if (request.contentLicenseActive !== undefined)
 		filters.push({
-			field: SearchFieldByDomainRequestFilter.contentLicensed,
+			field: SearchFieldByDomainRequestFilter.contentLicenseActive,
 			operator: "equals",
-			value: request.contentLicensed,
+			value: request.contentLicenseActive,
 		});
 	addValue(SearchFieldByDomainRequestFilter.creditedUnitId, request.creditedUnitId);
 	addValue(SearchFieldByDomainRequestFilter.realmId, request.realmId);
@@ -1091,13 +1091,13 @@ function facetSpec(
 	if (
 		field === "kind" &&
 		(category === "units" ||
-			category === "entity" ||
+			category === "entities" ||
 			category === "posts" ||
 			category === "reviews")
 	)
 		return {
 			value:
-				category === "entity"
+				category === "entities"
 					? sql`${entity.kind}`
 					: category === "reviews"
 						? sql`${subjectUnit.kind}`

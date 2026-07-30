@@ -5,7 +5,7 @@ import { createElysiaObservability } from "@rezics/observability/elysia";
 import Elysia from "elysia";
 
 import { enterAuditRequestContext, getAuditRequestContext } from "../audit";
-import catalog from "./catalog";
+import unitResources from "./unit-resources";
 import associationProposals from "./association-proposals";
 import audit from "./audit";
 import collections from "./collections";
@@ -185,7 +185,7 @@ export default new Elysia({ normalize: "typebox" })
 				.use(slugAddresses)
 				.use(units)
 				.use(history)
-				.use(catalog)
+				.use(unitResources)
 				.use(contentStructure)
 				.use(progress)
 				.use(collections)

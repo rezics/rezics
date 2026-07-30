@@ -8354,7 +8354,7 @@
 							"enum": [
 								"units",
 								"users",
-								"entity",
+								"entities",
 								"tags",
 								"tag-structures",
 								"posts",
@@ -8427,7 +8427,7 @@
 							"enum": [
 								"units",
 								"users",
-								"entity",
+								"entities",
 								"tags",
 								"tag-structures",
 								"posts",
@@ -8516,11 +8516,7 @@
 														},
 														{ "const": "closes-at", "type": "string" },
 														{
-															"const": "catalog-licensed",
-															"type": "string"
-														},
-														{
-															"const": "catalog-release-date",
+															"const": "content-license",
 															"type": "string"
 														},
 														{
@@ -8642,11 +8638,7 @@
 														},
 														{ "const": "closes-at", "type": "string" },
 														{
-															"const": "catalog-licensed",
-															"type": "string"
-														},
-														{
-															"const": "catalog-release-date",
+															"const": "content-license",
 															"type": "string"
 														},
 														{
@@ -8771,11 +8763,7 @@
 														},
 														{ "const": "closes-at", "type": "string" },
 														{
-															"const": "catalog-licensed",
-															"type": "string"
-														},
-														{
-															"const": "catalog-release-date",
+															"const": "content-license",
 															"type": "string"
 														},
 														{
@@ -8964,11 +8952,7 @@
 																	"type": "string"
 																},
 																{
-																	"const": "catalog-licensed",
-																	"type": "string"
-																},
-																{
-																	"const": "catalog-release-date",
+																	"const": "content-license",
 																	"type": "string"
 																},
 																{
@@ -9161,11 +9145,7 @@
 																	"type": "string"
 																},
 																{
-																	"const": "catalog-licensed",
-																	"type": "string"
-																},
-																{
-																	"const": "catalog-release-date",
+																	"const": "content-license",
 																	"type": "string"
 																},
 																{
@@ -9306,11 +9286,7 @@
 														},
 														{ "const": "closes-at", "type": "string" },
 														{
-															"const": "catalog-licensed",
-															"type": "string"
-														},
-														{
-															"const": "catalog-release-date",
+															"const": "content-license",
 															"type": "string"
 														},
 														{
@@ -9499,8 +9475,7 @@
 										"updated-at",
 										"published-at",
 										"closes-at",
-										"catalog-licensed",
-										"catalog-release-date",
+										"content-license",
 										"book-isbn13",
 										"book-publication-date",
 										"book-page-count",
@@ -9882,8 +9857,7 @@
 										"updated-at",
 										"published-at",
 										"closes-at",
-										"catalog-licensed",
-										"catalog-release-date",
+										"content-license",
 										"book-isbn13",
 										"book-publication-date",
 										"book-page-count",
@@ -13910,7 +13884,7 @@
 		},
 		"/api/ownership-claims": {
 			"post": {
-				"summary": "Claim ownership of a public catalog entry",
+				"summary": "Claim ownership of a community-owned Unit",
 				"tags": ["Governance"],
 				"security": [{ "SessionCookie": [] }],
 				"requestBody": {
@@ -14142,7 +14116,7 @@
 		},
 		"/api/recommendations/units": {
 			"get": {
-				"summary": "Recommend catalog units",
+				"summary": "Recommend Units",
 				"tags": ["Recommendations"],
 				"parameters": [
 					{
@@ -37195,7 +37169,7 @@
 													"unitId",
 													"unitKind",
 													"unitTitle",
-													"catalogMode",
+													"ownershipMode",
 													"currentOwnerProfileId",
 													"claimantProfileId",
 													"claimantLabel",
@@ -37246,10 +37220,10 @@
 															{ "type": "null" }
 														]
 													},
-													"catalogMode": {
-														"default": "owned_work",
+													"ownershipMode": {
+														"default": "profile_owned",
 														"type": "string",
-														"enum": ["owned_work", "public_entry"]
+														"enum": ["profile_owned", "community_owned"]
 													},
 													"currentOwnerProfileId": {
 														"nullable": true,
@@ -69216,14 +69190,14 @@
 										"additionalProperties": false,
 										"type": "object",
 										"required": [
-											"catalogMode",
+											"ownershipMode",
 											"publisher",
 											"version",
 											"localization"
 										],
 										"properties": {
-											"catalogMode": {
-												"const": "owned_work",
+											"ownershipMode": {
+												"const": "profile_owned",
 												"type": "string"
 											},
 											"publisher": {
@@ -69717,10 +69691,10 @@
 									{
 										"additionalProperties": false,
 										"type": "object",
-										"required": ["catalogMode", "version", "localization"],
+										"required": ["ownershipMode", "version", "localization"],
 										"properties": {
-											"catalogMode": {
-												"const": "public_entry",
+											"ownershipMode": {
+												"const": "community_owned",
 												"type": "string"
 											},
 											"publisher": {
@@ -70250,7 +70224,7 @@
 										"progressStatistics",
 										"versions",
 										"variantContext",
-										"catalogMode",
+										"ownershipMode",
 										"ownershipClaim",
 										"capabilities"
 									],
@@ -70615,7 +70589,7 @@
 														"wordCount",
 														"publishedContentMetrics",
 														"format",
-														"licensed"
+														"contentLicense"
 													],
 													"properties": {
 														"type": {
@@ -70755,7 +70729,38 @@
 																{ "type": "null" }
 															]
 														},
-														"licensed": { "type": "boolean" }
+														"contentLicense": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"referenceLicenseSlug",
+																		"grantedByProfileId",
+																		"grantedAt"
+																	],
+																	"properties": {
+																		"referenceLicenseSlug": {
+																			"default": "rezics-unit-content-license-v1",
+																			"type": "string",
+																			"enum": [
+																				"rezics-unit-content-license-v1"
+																			]
+																		},
+																		"grantedByProfileId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"grantedAt": {
+																			"format": "date-time",
+																			"type": "string"
+																		}
+																	}
+																},
+																{ "type": "null" }
+															]
+														}
 													}
 												},
 												{
@@ -70765,7 +70770,7 @@
 														"type",
 														"releaseDate",
 														"versionLabel",
-														"licensed"
+														"contentLicense"
 													],
 													"properties": {
 														"type": {
@@ -70789,7 +70794,38 @@
 																{ "type": "null" }
 															]
 														},
-														"licensed": { "type": "boolean" }
+														"contentLicense": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"referenceLicenseSlug",
+																		"grantedByProfileId",
+																		"grantedAt"
+																	],
+																	"properties": {
+																		"referenceLicenseSlug": {
+																			"default": "rezics-unit-content-license-v1",
+																			"type": "string",
+																			"enum": [
+																				"rezics-unit-content-license-v1"
+																			]
+																		},
+																		"grantedByProfileId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"grantedAt": {
+																			"format": "date-time",
+																			"type": "string"
+																		}
+																	}
+																},
+																{ "type": "null" }
+															]
+														}
 													}
 												},
 												{
@@ -70802,7 +70838,7 @@
 														"runtimeMinutes",
 														"episodeCount",
 														"seasonCount",
-														"licensed"
+														"contentLicense"
 													],
 													"properties": {
 														"type": {
@@ -70880,7 +70916,38 @@
 																{ "type": "null" }
 															]
 														},
-														"licensed": { "type": "boolean" }
+														"contentLicense": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"referenceLicenseSlug",
+																		"grantedByProfileId",
+																		"grantedAt"
+																	],
+																	"properties": {
+																		"referenceLicenseSlug": {
+																			"default": "rezics-unit-content-license-v1",
+																			"type": "string",
+																			"enum": [
+																				"rezics-unit-content-license-v1"
+																			]
+																		},
+																		"grantedByProfileId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"grantedAt": {
+																			"format": "date-time",
+																			"type": "string"
+																		}
+																	}
+																},
+																{ "type": "null" }
+															]
+														}
 													}
 												},
 												{
@@ -72087,10 +72154,10 @@
 												}
 											]
 										},
-										"catalogMode": {
-											"default": "owned_work",
+										"ownershipMode": {
+											"default": "profile_owned",
 											"type": "string",
-											"enum": ["owned_work", "public_entry"]
+											"enum": ["profile_owned", "community_owned"]
 										},
 										"ownershipClaim": {
 											"nullable": true,
@@ -72420,7 +72487,7 @@
 										"progressStatistics",
 										"versions",
 										"variantContext",
-										"catalogMode",
+										"ownershipMode",
 										"ownershipClaim",
 										"capabilities"
 									],
@@ -72785,7 +72852,7 @@
 														"wordCount",
 														"publishedContentMetrics",
 														"format",
-														"licensed"
+														"contentLicense"
 													],
 													"properties": {
 														"type": {
@@ -72925,7 +72992,38 @@
 																{ "type": "null" }
 															]
 														},
-														"licensed": { "type": "boolean" }
+														"contentLicense": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"referenceLicenseSlug",
+																		"grantedByProfileId",
+																		"grantedAt"
+																	],
+																	"properties": {
+																		"referenceLicenseSlug": {
+																			"default": "rezics-unit-content-license-v1",
+																			"type": "string",
+																			"enum": [
+																				"rezics-unit-content-license-v1"
+																			]
+																		},
+																		"grantedByProfileId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"grantedAt": {
+																			"format": "date-time",
+																			"type": "string"
+																		}
+																	}
+																},
+																{ "type": "null" }
+															]
+														}
 													}
 												},
 												{
@@ -72935,7 +73033,7 @@
 														"type",
 														"releaseDate",
 														"versionLabel",
-														"licensed"
+														"contentLicense"
 													],
 													"properties": {
 														"type": {
@@ -72959,7 +73057,38 @@
 																{ "type": "null" }
 															]
 														},
-														"licensed": { "type": "boolean" }
+														"contentLicense": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"referenceLicenseSlug",
+																		"grantedByProfileId",
+																		"grantedAt"
+																	],
+																	"properties": {
+																		"referenceLicenseSlug": {
+																			"default": "rezics-unit-content-license-v1",
+																			"type": "string",
+																			"enum": [
+																				"rezics-unit-content-license-v1"
+																			]
+																		},
+																		"grantedByProfileId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"grantedAt": {
+																			"format": "date-time",
+																			"type": "string"
+																		}
+																	}
+																},
+																{ "type": "null" }
+															]
+														}
 													}
 												},
 												{
@@ -72972,7 +73101,7 @@
 														"runtimeMinutes",
 														"episodeCount",
 														"seasonCount",
-														"licensed"
+														"contentLicense"
 													],
 													"properties": {
 														"type": {
@@ -73050,7 +73179,38 @@
 																{ "type": "null" }
 															]
 														},
-														"licensed": { "type": "boolean" }
+														"contentLicense": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"referenceLicenseSlug",
+																		"grantedByProfileId",
+																		"grantedAt"
+																	],
+																	"properties": {
+																		"referenceLicenseSlug": {
+																			"default": "rezics-unit-content-license-v1",
+																			"type": "string",
+																			"enum": [
+																				"rezics-unit-content-license-v1"
+																			]
+																		},
+																		"grantedByProfileId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"grantedAt": {
+																			"format": "date-time",
+																			"type": "string"
+																		}
+																	}
+																},
+																{ "type": "null" }
+															]
+														}
 													}
 												},
 												{
@@ -74257,10 +74417,10 @@
 												}
 											]
 										},
-										"catalogMode": {
-											"default": "owned_work",
+										"ownershipMode": {
+											"default": "profile_owned",
 											"type": "string",
-											"enum": ["owned_work", "public_entry"]
+											"enum": ["profile_owned", "community_owned"]
 										},
 										"ownershipClaim": {
 											"nullable": true,
@@ -74520,7 +74680,26 @@
 												"nullable": true,
 												"anyOf": [{ "type": "string" }, { "type": "null" }]
 											},
-											"licensed": { "type": "boolean" },
+											"contentLicense": {
+												"nullable": true,
+												"anyOf": [
+													{
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["referenceLicenseSlug"],
+														"properties": {
+															"referenceLicenseSlug": {
+																"default": "rezics-unit-content-license-v1",
+																"type": "string",
+																"enum": [
+																	"rezics-unit-content-license-v1"
+																]
+															}
+														}
+													},
+													{ "type": "null" }
+												]
+											},
 											"versionLabel": {
 												"nullable": true,
 												"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -74635,7 +74814,7 @@
 										"progressStatistics",
 										"versions",
 										"variantContext",
-										"catalogMode",
+										"ownershipMode",
 										"ownershipClaim",
 										"capabilities"
 									],
@@ -75000,7 +75179,7 @@
 														"wordCount",
 														"publishedContentMetrics",
 														"format",
-														"licensed"
+														"contentLicense"
 													],
 													"properties": {
 														"type": {
@@ -75140,7 +75319,38 @@
 																{ "type": "null" }
 															]
 														},
-														"licensed": { "type": "boolean" }
+														"contentLicense": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"referenceLicenseSlug",
+																		"grantedByProfileId",
+																		"grantedAt"
+																	],
+																	"properties": {
+																		"referenceLicenseSlug": {
+																			"default": "rezics-unit-content-license-v1",
+																			"type": "string",
+																			"enum": [
+																				"rezics-unit-content-license-v1"
+																			]
+																		},
+																		"grantedByProfileId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"grantedAt": {
+																			"format": "date-time",
+																			"type": "string"
+																		}
+																	}
+																},
+																{ "type": "null" }
+															]
+														}
 													}
 												},
 												{
@@ -75150,7 +75360,7 @@
 														"type",
 														"releaseDate",
 														"versionLabel",
-														"licensed"
+														"contentLicense"
 													],
 													"properties": {
 														"type": {
@@ -75174,7 +75384,38 @@
 																{ "type": "null" }
 															]
 														},
-														"licensed": { "type": "boolean" }
+														"contentLicense": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"referenceLicenseSlug",
+																		"grantedByProfileId",
+																		"grantedAt"
+																	],
+																	"properties": {
+																		"referenceLicenseSlug": {
+																			"default": "rezics-unit-content-license-v1",
+																			"type": "string",
+																			"enum": [
+																				"rezics-unit-content-license-v1"
+																			]
+																		},
+																		"grantedByProfileId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"grantedAt": {
+																			"format": "date-time",
+																			"type": "string"
+																		}
+																	}
+																},
+																{ "type": "null" }
+															]
+														}
 													}
 												},
 												{
@@ -75187,7 +75428,7 @@
 														"runtimeMinutes",
 														"episodeCount",
 														"seasonCount",
-														"licensed"
+														"contentLicense"
 													],
 													"properties": {
 														"type": {
@@ -75265,7 +75506,38 @@
 																{ "type": "null" }
 															]
 														},
-														"licensed": { "type": "boolean" }
+														"contentLicense": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"referenceLicenseSlug",
+																		"grantedByProfileId",
+																		"grantedAt"
+																	],
+																	"properties": {
+																		"referenceLicenseSlug": {
+																			"default": "rezics-unit-content-license-v1",
+																			"type": "string",
+																			"enum": [
+																				"rezics-unit-content-license-v1"
+																			]
+																		},
+																		"grantedByProfileId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"grantedAt": {
+																			"format": "date-time",
+																			"type": "string"
+																		}
+																	}
+																},
+																{ "type": "null" }
+															]
+														}
 													}
 												},
 												{
@@ -76472,10 +76744,10 @@
 												}
 											]
 										},
-										"catalogMode": {
-											"default": "owned_work",
+										"ownershipMode": {
+											"default": "profile_owned",
 											"type": "string",
-											"enum": ["owned_work", "public_entry"]
+											"enum": ["profile_owned", "community_owned"]
 										},
 										"ownershipClaim": {
 											"nullable": true,
@@ -76792,7 +77064,7 @@
 										"progressStatistics",
 										"versions",
 										"variantContext",
-										"catalogMode",
+										"ownershipMode",
 										"ownershipClaim",
 										"capabilities"
 									],
@@ -77157,7 +77429,7 @@
 														"wordCount",
 														"publishedContentMetrics",
 														"format",
-														"licensed"
+														"contentLicense"
 													],
 													"properties": {
 														"type": {
@@ -77297,7 +77569,38 @@
 																{ "type": "null" }
 															]
 														},
-														"licensed": { "type": "boolean" }
+														"contentLicense": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"referenceLicenseSlug",
+																		"grantedByProfileId",
+																		"grantedAt"
+																	],
+																	"properties": {
+																		"referenceLicenseSlug": {
+																			"default": "rezics-unit-content-license-v1",
+																			"type": "string",
+																			"enum": [
+																				"rezics-unit-content-license-v1"
+																			]
+																		},
+																		"grantedByProfileId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"grantedAt": {
+																			"format": "date-time",
+																			"type": "string"
+																		}
+																	}
+																},
+																{ "type": "null" }
+															]
+														}
 													}
 												},
 												{
@@ -77307,7 +77610,7 @@
 														"type",
 														"releaseDate",
 														"versionLabel",
-														"licensed"
+														"contentLicense"
 													],
 													"properties": {
 														"type": {
@@ -77331,7 +77634,38 @@
 																{ "type": "null" }
 															]
 														},
-														"licensed": { "type": "boolean" }
+														"contentLicense": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"referenceLicenseSlug",
+																		"grantedByProfileId",
+																		"grantedAt"
+																	],
+																	"properties": {
+																		"referenceLicenseSlug": {
+																			"default": "rezics-unit-content-license-v1",
+																			"type": "string",
+																			"enum": [
+																				"rezics-unit-content-license-v1"
+																			]
+																		},
+																		"grantedByProfileId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"grantedAt": {
+																			"format": "date-time",
+																			"type": "string"
+																		}
+																	}
+																},
+																{ "type": "null" }
+															]
+														}
 													}
 												},
 												{
@@ -77344,7 +77678,7 @@
 														"runtimeMinutes",
 														"episodeCount",
 														"seasonCount",
-														"licensed"
+														"contentLicense"
 													],
 													"properties": {
 														"type": {
@@ -77422,7 +77756,38 @@
 																{ "type": "null" }
 															]
 														},
-														"licensed": { "type": "boolean" }
+														"contentLicense": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"referenceLicenseSlug",
+																		"grantedByProfileId",
+																		"grantedAt"
+																	],
+																	"properties": {
+																		"referenceLicenseSlug": {
+																			"default": "rezics-unit-content-license-v1",
+																			"type": "string",
+																			"enum": [
+																				"rezics-unit-content-license-v1"
+																			]
+																		},
+																		"grantedByProfileId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"grantedAt": {
+																			"format": "date-time",
+																			"type": "string"
+																		}
+																	}
+																},
+																{ "type": "null" }
+															]
+														}
 													}
 												},
 												{
@@ -78629,10 +78994,10 @@
 												}
 											]
 										},
-										"catalogMode": {
-											"default": "owned_work",
+										"ownershipMode": {
+											"default": "profile_owned",
 											"type": "string",
-											"enum": ["owned_work", "public_entry"]
+											"enum": ["profile_owned", "community_owned"]
 										},
 										"ownershipClaim": {
 											"nullable": true,
@@ -78938,7 +79303,7 @@
 										"progressStatistics",
 										"versions",
 										"variantContext",
-										"catalogMode",
+										"ownershipMode",
 										"ownershipClaim",
 										"capabilities"
 									],
@@ -79303,7 +79668,7 @@
 														"wordCount",
 														"publishedContentMetrics",
 														"format",
-														"licensed"
+														"contentLicense"
 													],
 													"properties": {
 														"type": {
@@ -79443,7 +79808,38 @@
 																{ "type": "null" }
 															]
 														},
-														"licensed": { "type": "boolean" }
+														"contentLicense": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"referenceLicenseSlug",
+																		"grantedByProfileId",
+																		"grantedAt"
+																	],
+																	"properties": {
+																		"referenceLicenseSlug": {
+																			"default": "rezics-unit-content-license-v1",
+																			"type": "string",
+																			"enum": [
+																				"rezics-unit-content-license-v1"
+																			]
+																		},
+																		"grantedByProfileId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"grantedAt": {
+																			"format": "date-time",
+																			"type": "string"
+																		}
+																	}
+																},
+																{ "type": "null" }
+															]
+														}
 													}
 												},
 												{
@@ -79453,7 +79849,7 @@
 														"type",
 														"releaseDate",
 														"versionLabel",
-														"licensed"
+														"contentLicense"
 													],
 													"properties": {
 														"type": {
@@ -79477,7 +79873,38 @@
 																{ "type": "null" }
 															]
 														},
-														"licensed": { "type": "boolean" }
+														"contentLicense": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"referenceLicenseSlug",
+																		"grantedByProfileId",
+																		"grantedAt"
+																	],
+																	"properties": {
+																		"referenceLicenseSlug": {
+																			"default": "rezics-unit-content-license-v1",
+																			"type": "string",
+																			"enum": [
+																				"rezics-unit-content-license-v1"
+																			]
+																		},
+																		"grantedByProfileId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"grantedAt": {
+																			"format": "date-time",
+																			"type": "string"
+																		}
+																	}
+																},
+																{ "type": "null" }
+															]
+														}
 													}
 												},
 												{
@@ -79490,7 +79917,7 @@
 														"runtimeMinutes",
 														"episodeCount",
 														"seasonCount",
-														"licensed"
+														"contentLicense"
 													],
 													"properties": {
 														"type": {
@@ -79568,7 +79995,38 @@
 																{ "type": "null" }
 															]
 														},
-														"licensed": { "type": "boolean" }
+														"contentLicense": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"referenceLicenseSlug",
+																		"grantedByProfileId",
+																		"grantedAt"
+																	],
+																	"properties": {
+																		"referenceLicenseSlug": {
+																			"default": "rezics-unit-content-license-v1",
+																			"type": "string",
+																			"enum": [
+																				"rezics-unit-content-license-v1"
+																			]
+																		},
+																		"grantedByProfileId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"grantedAt": {
+																			"format": "date-time",
+																			"type": "string"
+																		}
+																	}
+																},
+																{ "type": "null" }
+															]
+														}
 													}
 												},
 												{
@@ -80775,10 +81233,10 @@
 												}
 											]
 										},
-										"catalogMode": {
-											"default": "owned_work",
+										"ownershipMode": {
+											"default": "profile_owned",
 											"type": "string",
-											"enum": ["owned_work", "public_entry"]
+											"enum": ["profile_owned", "community_owned"]
 										},
 										"ownershipClaim": {
 											"nullable": true,
@@ -81443,7 +81901,7 @@
 										"progressStatistics",
 										"versions",
 										"variantContext",
-										"catalogMode",
+										"ownershipMode",
 										"ownershipClaim",
 										"capabilities"
 									],
@@ -81808,7 +82266,7 @@
 														"wordCount",
 														"publishedContentMetrics",
 														"format",
-														"licensed"
+														"contentLicense"
 													],
 													"properties": {
 														"type": {
@@ -81948,7 +82406,38 @@
 																{ "type": "null" }
 															]
 														},
-														"licensed": { "type": "boolean" }
+														"contentLicense": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"referenceLicenseSlug",
+																		"grantedByProfileId",
+																		"grantedAt"
+																	],
+																	"properties": {
+																		"referenceLicenseSlug": {
+																			"default": "rezics-unit-content-license-v1",
+																			"type": "string",
+																			"enum": [
+																				"rezics-unit-content-license-v1"
+																			]
+																		},
+																		"grantedByProfileId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"grantedAt": {
+																			"format": "date-time",
+																			"type": "string"
+																		}
+																	}
+																},
+																{ "type": "null" }
+															]
+														}
 													}
 												},
 												{
@@ -81958,7 +82447,7 @@
 														"type",
 														"releaseDate",
 														"versionLabel",
-														"licensed"
+														"contentLicense"
 													],
 													"properties": {
 														"type": {
@@ -81982,7 +82471,38 @@
 																{ "type": "null" }
 															]
 														},
-														"licensed": { "type": "boolean" }
+														"contentLicense": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"referenceLicenseSlug",
+																		"grantedByProfileId",
+																		"grantedAt"
+																	],
+																	"properties": {
+																		"referenceLicenseSlug": {
+																			"default": "rezics-unit-content-license-v1",
+																			"type": "string",
+																			"enum": [
+																				"rezics-unit-content-license-v1"
+																			]
+																		},
+																		"grantedByProfileId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"grantedAt": {
+																			"format": "date-time",
+																			"type": "string"
+																		}
+																	}
+																},
+																{ "type": "null" }
+															]
+														}
 													}
 												},
 												{
@@ -81995,7 +82515,7 @@
 														"runtimeMinutes",
 														"episodeCount",
 														"seasonCount",
-														"licensed"
+														"contentLicense"
 													],
 													"properties": {
 														"type": {
@@ -82073,7 +82593,38 @@
 																{ "type": "null" }
 															]
 														},
-														"licensed": { "type": "boolean" }
+														"contentLicense": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"referenceLicenseSlug",
+																		"grantedByProfileId",
+																		"grantedAt"
+																	],
+																	"properties": {
+																		"referenceLicenseSlug": {
+																			"default": "rezics-unit-content-license-v1",
+																			"type": "string",
+																			"enum": [
+																				"rezics-unit-content-license-v1"
+																			]
+																		},
+																		"grantedByProfileId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"grantedAt": {
+																			"format": "date-time",
+																			"type": "string"
+																		}
+																	}
+																},
+																{ "type": "null" }
+															]
+														}
 													}
 												},
 												{
@@ -83280,10 +83831,10 @@
 												}
 											]
 										},
-										"catalogMode": {
-											"default": "owned_work",
+										"ownershipMode": {
+											"default": "profile_owned",
 											"type": "string",
-											"enum": ["owned_work", "public_entry"]
+											"enum": ["profile_owned", "community_owned"]
 										},
 										"ownershipClaim": {
 											"nullable": true,
@@ -85521,11 +86072,11 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["catalogMode", "localization"],
+								"required": ["ownershipMode", "localization"],
 								"properties": {
-									"catalogMode": {
+									"ownershipMode": {
 										"type": "string",
-										"enum": ["owned_work", "public_entry"]
+										"enum": ["profile_owned", "community_owned"]
 									},
 									"kind": { "minLength": 1, "maxLength": 64, "type": "string" },
 									"localization": {
@@ -86040,7 +86591,7 @@
 										"id",
 										"kind",
 										"verified",
-										"catalogMode",
+										"ownershipMode",
 										"ownershipClaim",
 										"language",
 										"avatar",
@@ -86059,10 +86610,10 @@
 										"id": { "format": "uuid", "type": "string" },
 										"kind": { "type": "string" },
 										"verified": { "type": "boolean" },
-										"catalogMode": {
-											"default": "owned_work",
+										"ownershipMode": {
+											"default": "profile_owned",
 											"type": "string",
-											"enum": ["owned_work", "public_entry"]
+											"enum": ["profile_owned", "community_owned"]
 										},
 										"ownershipClaim": {
 											"nullable": true,
@@ -97379,11 +97930,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -97573,11 +98120,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -97767,11 +98310,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -97980,11 +98519,7 @@
 																							"type": "string"
 																						},
 																						{
-																							"const": "catalog-licensed",
-																							"type": "string"
-																						},
-																						{
-																							"const": "catalog-release-date",
+																							"const": "content-license",
 																							"type": "string"
 																						},
 																						{
@@ -98189,11 +98724,7 @@
 																							"type": "string"
 																						},
 																						{
-																							"const": "catalog-licensed",
-																							"type": "string"
-																						},
-																						{
-																							"const": "catalog-release-date",
+																							"const": "content-license",
 																							"type": "string"
 																						},
 																						{
@@ -98400,11 +98931,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -98748,11 +99275,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -98942,11 +99465,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -99136,11 +99655,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -99349,11 +99864,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "catalog-licensed",
-																								"type": "string"
-																							},
-																							{
-																								"const": "catalog-release-date",
+																								"const": "content-license",
 																								"type": "string"
 																							},
 																							{
@@ -99558,11 +100069,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "catalog-licensed",
-																								"type": "string"
-																							},
-																							{
-																								"const": "catalog-release-date",
+																								"const": "content-license",
 																								"type": "string"
 																							},
 																							{
@@ -99769,11 +100276,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -121988,7 +122491,7 @@
 								"properties": {
 									"accessMode": {
 										"type": "string",
-										"enum": ["public_entry", "restricted"]
+										"enum": ["community_owned", "restricted"]
 									},
 									"title": { "minLength": 1, "maxLength": 500, "type": "string" },
 									"body": {
@@ -141488,7 +141991,7 @@
 									"tagId": { "format": "uuid", "type": "string" },
 									"accessMode": {
 										"type": "string",
-										"enum": ["public_entry", "restricted"]
+										"enum": ["community_owned", "restricted"]
 									},
 									"title": { "minLength": 1, "maxLength": 500, "type": "string" },
 									"summary": {
@@ -146526,11 +147029,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -146720,11 +147219,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -146914,11 +147409,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -147127,11 +147618,7 @@
 																							"type": "string"
 																						},
 																						{
-																							"const": "catalog-licensed",
-																							"type": "string"
-																						},
-																						{
-																							"const": "catalog-release-date",
+																							"const": "content-license",
 																							"type": "string"
 																						},
 																						{
@@ -147336,11 +147823,7 @@
 																							"type": "string"
 																						},
 																						{
-																							"const": "catalog-licensed",
-																							"type": "string"
-																						},
-																						{
-																							"const": "catalog-release-date",
+																							"const": "content-license",
 																							"type": "string"
 																						},
 																						{
@@ -147547,11 +148030,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -147895,11 +148374,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -148089,11 +148564,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -148283,11 +148754,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -148496,11 +148963,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "catalog-licensed",
-																								"type": "string"
-																							},
-																							{
-																								"const": "catalog-release-date",
+																								"const": "content-license",
 																								"type": "string"
 																							},
 																							{
@@ -148705,11 +149168,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "catalog-licensed",
-																								"type": "string"
-																							},
-																							{
-																								"const": "catalog-release-date",
+																								"const": "content-license",
 																								"type": "string"
 																							},
 																							{
@@ -148916,11 +149375,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -149914,11 +150369,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -150108,11 +150559,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -150302,11 +150749,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -150515,11 +150958,7 @@
 																							"type": "string"
 																						},
 																						{
-																							"const": "catalog-licensed",
-																							"type": "string"
-																						},
-																						{
-																							"const": "catalog-release-date",
+																							"const": "content-license",
 																							"type": "string"
 																						},
 																						{
@@ -150724,11 +151163,7 @@
 																							"type": "string"
 																						},
 																						{
-																							"const": "catalog-licensed",
-																							"type": "string"
-																						},
-																						{
-																							"const": "catalog-release-date",
+																							"const": "content-license",
 																							"type": "string"
 																						},
 																						{
@@ -150935,11 +151370,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -151283,11 +151714,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -151477,11 +151904,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -151671,11 +152094,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -151884,11 +152303,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "catalog-licensed",
-																								"type": "string"
-																							},
-																							{
-																								"const": "catalog-release-date",
+																								"const": "content-license",
 																								"type": "string"
 																							},
 																							{
@@ -152093,11 +152508,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "catalog-licensed",
-																								"type": "string"
-																							},
-																							{
-																								"const": "catalog-release-date",
+																								"const": "content-license",
 																								"type": "string"
 																							},
 																							{
@@ -152304,11 +152715,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -159189,11 +159596,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -159383,11 +159786,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -159577,11 +159976,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -159790,11 +160185,7 @@
 																							"type": "string"
 																						},
 																						{
-																							"const": "catalog-licensed",
-																							"type": "string"
-																						},
-																						{
-																							"const": "catalog-release-date",
+																							"const": "content-license",
 																							"type": "string"
 																						},
 																						{
@@ -159999,11 +160390,7 @@
 																							"type": "string"
 																						},
 																						{
-																							"const": "catalog-licensed",
-																							"type": "string"
-																						},
-																						{
-																							"const": "catalog-release-date",
+																							"const": "content-license",
 																							"type": "string"
 																						},
 																						{
@@ -160210,11 +160597,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -160558,11 +160941,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -160752,11 +161131,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -160946,11 +161321,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -161159,11 +161530,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "catalog-licensed",
-																								"type": "string"
-																							},
-																							{
-																								"const": "catalog-release-date",
+																								"const": "content-license",
 																								"type": "string"
 																							},
 																							{
@@ -161368,11 +161735,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "catalog-licensed",
-																								"type": "string"
-																							},
-																							{
-																								"const": "catalog-release-date",
+																								"const": "content-license",
 																								"type": "string"
 																							},
 																							{
@@ -161579,11 +161942,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -162526,11 +162885,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -162720,11 +163075,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -162914,11 +163265,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -163127,11 +163474,7 @@
 																							"type": "string"
 																						},
 																						{
-																							"const": "catalog-licensed",
-																							"type": "string"
-																						},
-																						{
-																							"const": "catalog-release-date",
+																							"const": "content-license",
 																							"type": "string"
 																						},
 																						{
@@ -163336,11 +163679,7 @@
 																							"type": "string"
 																						},
 																						{
-																							"const": "catalog-licensed",
-																							"type": "string"
-																						},
-																						{
-																							"const": "catalog-release-date",
+																							"const": "content-license",
 																							"type": "string"
 																						},
 																						{
@@ -163547,11 +163886,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -163895,11 +164230,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -164089,11 +164420,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -164283,11 +164610,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -164496,11 +164819,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "catalog-licensed",
-																								"type": "string"
-																							},
-																							{
-																								"const": "catalog-release-date",
+																								"const": "content-license",
 																								"type": "string"
 																							},
 																							{
@@ -164705,11 +165024,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "catalog-licensed",
-																								"type": "string"
-																							},
-																							{
-																								"const": "catalog-release-date",
+																								"const": "content-license",
 																								"type": "string"
 																							},
 																							{
@@ -164916,11 +165231,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -171889,11 +172200,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -172083,11 +172390,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -172277,11 +172580,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -172490,11 +172789,7 @@
 																							"type": "string"
 																						},
 																						{
-																							"const": "catalog-licensed",
-																							"type": "string"
-																						},
-																						{
-																							"const": "catalog-release-date",
+																							"const": "content-license",
 																							"type": "string"
 																						},
 																						{
@@ -172699,11 +172994,7 @@
 																							"type": "string"
 																						},
 																						{
-																							"const": "catalog-licensed",
-																							"type": "string"
-																						},
-																						{
-																							"const": "catalog-release-date",
+																							"const": "content-license",
 																							"type": "string"
 																						},
 																						{
@@ -172910,11 +173201,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -173258,11 +173545,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -173452,11 +173735,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -173646,11 +173925,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -173859,11 +174134,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "catalog-licensed",
-																								"type": "string"
-																							},
-																							{
-																								"const": "catalog-release-date",
+																								"const": "content-license",
 																								"type": "string"
 																							},
 																							{
@@ -174068,11 +174339,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "catalog-licensed",
-																								"type": "string"
-																							},
-																							{
-																								"const": "catalog-release-date",
+																								"const": "content-license",
 																								"type": "string"
 																							},
 																							{
@@ -174279,11 +174546,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -175238,11 +175501,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -175432,11 +175691,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -175626,11 +175881,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -175839,11 +176090,7 @@
 																							"type": "string"
 																						},
 																						{
-																							"const": "catalog-licensed",
-																							"type": "string"
-																						},
-																						{
-																							"const": "catalog-release-date",
+																							"const": "content-license",
 																							"type": "string"
 																						},
 																						{
@@ -176048,11 +176295,7 @@
 																							"type": "string"
 																						},
 																						{
-																							"const": "catalog-licensed",
-																							"type": "string"
-																						},
-																						{
-																							"const": "catalog-release-date",
+																							"const": "content-license",
 																							"type": "string"
 																						},
 																						{
@@ -176259,11 +176502,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -176607,11 +176846,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -176801,11 +177036,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -176995,11 +177226,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -177208,11 +177435,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "catalog-licensed",
-																								"type": "string"
-																							},
-																							{
-																								"const": "catalog-release-date",
+																								"const": "content-license",
 																								"type": "string"
 																							},
 																							{
@@ -177417,11 +177640,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "catalog-licensed",
-																								"type": "string"
-																							},
-																							{
-																								"const": "catalog-release-date",
+																								"const": "content-license",
 																								"type": "string"
 																							},
 																							{
@@ -177628,11 +177847,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -178586,11 +178801,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -178780,11 +178991,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -178974,11 +179181,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -179187,11 +179390,7 @@
 																							"type": "string"
 																						},
 																						{
-																							"const": "catalog-licensed",
-																							"type": "string"
-																						},
-																						{
-																							"const": "catalog-release-date",
+																							"const": "content-license",
 																							"type": "string"
 																						},
 																						{
@@ -179396,11 +179595,7 @@
 																							"type": "string"
 																						},
 																						{
-																							"const": "catalog-licensed",
-																							"type": "string"
-																						},
-																						{
-																							"const": "catalog-release-date",
+																							"const": "content-license",
 																							"type": "string"
 																						},
 																						{
@@ -179607,11 +179802,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "catalog-licensed",
-																					"type": "string"
-																				},
-																				{
-																					"const": "catalog-release-date",
+																					"const": "content-license",
 																					"type": "string"
 																				},
 																				{
@@ -179955,11 +180146,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -180149,11 +180336,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -180343,11 +180526,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -180556,11 +180735,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "catalog-licensed",
-																								"type": "string"
-																							},
-																							{
-																								"const": "catalog-release-date",
+																								"const": "content-license",
 																								"type": "string"
 																							},
 																							{
@@ -180765,11 +180940,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "catalog-licensed",
-																								"type": "string"
-																							},
-																							{
-																								"const": "catalog-release-date",
+																								"const": "content-license",
 																								"type": "string"
 																							},
 																							{
@@ -180976,11 +181147,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -187466,7 +187633,7 @@
 											"enum": [
 												"units",
 												"users",
-												"entity",
+												"entities",
 												"tags",
 												"tag-structures",
 												"posts",
@@ -188216,11 +188383,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -188410,11 +188573,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -188604,11 +188763,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -188817,11 +188972,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "catalog-licensed",
-																								"type": "string"
-																							},
-																							{
-																								"const": "catalog-release-date",
+																								"const": "content-license",
 																								"type": "string"
 																							},
 																							{
@@ -189026,11 +189177,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "catalog-licensed",
-																								"type": "string"
-																							},
-																							{
-																								"const": "catalog-release-date",
+																								"const": "content-license",
 																								"type": "string"
 																							},
 																							{
@@ -189237,11 +189384,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "catalog-licensed",
-																						"type": "string"
-																					},
-																					{
-																						"const": "catalog-release-date",
+																						"const": "content-license",
 																						"type": "string"
 																					},
 																					{
@@ -189497,8 +189640,7 @@
 														"updated-at",
 														"published-at",
 														"closes-at",
-														"catalog-licensed",
-														"catalog-release-date",
+														"content-license",
 														"book-isbn13",
 														"book-publication-date",
 														"book-page-count",
@@ -189738,11 +189880,7 @@
 																									"type": "string"
 																								},
 																								{
-																									"const": "catalog-licensed",
-																									"type": "string"
-																								},
-																								{
-																									"const": "catalog-release-date",
+																									"const": "content-license",
 																									"type": "string"
 																								},
 																								{
@@ -189932,11 +190070,7 @@
 																									"type": "string"
 																								},
 																								{
-																									"const": "catalog-licensed",
-																									"type": "string"
-																								},
-																								{
-																									"const": "catalog-release-date",
+																									"const": "content-license",
 																									"type": "string"
 																								},
 																								{
@@ -190126,11 +190260,7 @@
 																									"type": "string"
 																								},
 																								{
-																									"const": "catalog-licensed",
-																									"type": "string"
-																								},
-																								{
-																									"const": "catalog-release-date",
+																									"const": "content-license",
 																									"type": "string"
 																								},
 																								{
@@ -190339,11 +190469,7 @@
 																											"type": "string"
 																										},
 																										{
-																											"const": "catalog-licensed",
-																											"type": "string"
-																										},
-																										{
-																											"const": "catalog-release-date",
+																											"const": "content-license",
 																											"type": "string"
 																										},
 																										{
@@ -190548,11 +190674,7 @@
 																											"type": "string"
 																										},
 																										{
-																											"const": "catalog-licensed",
-																											"type": "string"
-																										},
-																										{
-																											"const": "catalog-release-date",
+																											"const": "content-license",
 																											"type": "string"
 																										},
 																										{
@@ -190759,11 +190881,7 @@
 																									"type": "string"
 																								},
 																								{
-																									"const": "catalog-licensed",
-																									"type": "string"
-																								},
-																								{
-																									"const": "catalog-release-date",
+																									"const": "content-license",
 																									"type": "string"
 																								},
 																								{
@@ -191030,8 +191148,7 @@
 																	"updated-at",
 																	"published-at",
 																	"closes-at",
-																	"catalog-licensed",
-																	"catalog-release-date",
+																	"content-license",
 																	"book-isbn13",
 																	"book-publication-date",
 																	"book-page-count",
@@ -191400,11 +191517,7 @@
 																									"type": "string"
 																								},
 																								{
-																									"const": "catalog-licensed",
-																									"type": "string"
-																								},
-																								{
-																									"const": "catalog-release-date",
+																									"const": "content-license",
 																									"type": "string"
 																								},
 																								{
@@ -191594,11 +191707,7 @@
 																									"type": "string"
 																								},
 																								{
-																									"const": "catalog-licensed",
-																									"type": "string"
-																								},
-																								{
-																									"const": "catalog-release-date",
+																									"const": "content-license",
 																									"type": "string"
 																								},
 																								{
@@ -191788,11 +191897,7 @@
 																									"type": "string"
 																								},
 																								{
-																									"const": "catalog-licensed",
-																									"type": "string"
-																								},
-																								{
-																									"const": "catalog-release-date",
+																									"const": "content-license",
 																									"type": "string"
 																								},
 																								{
@@ -192001,11 +192106,7 @@
 																											"type": "string"
 																										},
 																										{
-																											"const": "catalog-licensed",
-																											"type": "string"
-																										},
-																										{
-																											"const": "catalog-release-date",
+																											"const": "content-license",
 																											"type": "string"
 																										},
 																										{
@@ -192210,11 +192311,7 @@
 																											"type": "string"
 																										},
 																										{
-																											"const": "catalog-licensed",
-																											"type": "string"
-																										},
-																										{
-																											"const": "catalog-release-date",
+																											"const": "content-license",
 																											"type": "string"
 																										},
 																										{
@@ -192421,11 +192518,7 @@
 																									"type": "string"
 																								},
 																								{
-																									"const": "catalog-licensed",
-																									"type": "string"
-																								},
-																								{
-																									"const": "catalog-release-date",
+																									"const": "content-license",
 																									"type": "string"
 																								},
 																								{
@@ -192692,8 +192785,7 @@
 																	"updated-at",
 																	"published-at",
 																	"closes-at",
-																	"catalog-licensed",
-																	"catalog-release-date",
+																	"content-license",
 																	"book-isbn13",
 																	"book-publication-date",
 																	"book-page-count",
@@ -192823,7 +192915,7 @@
 							"enum": [
 								"units",
 								"users",
-								"entity",
+								"entities",
 								"tags",
 								"tag-structures",
 								"posts",
@@ -192912,7 +193004,7 @@
 											]
 										}
 									},
-									"contentLicensed": { "type": "boolean" },
+									"contentLicenseActive": { "type": "boolean" },
 									"creditedUnitId": { "minLength": 1, "type": "string" },
 									"realmId": { "minLength": 1, "type": "string" },
 									"subjectId": { "minLength": 1, "type": "string" },

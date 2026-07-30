@@ -4,7 +4,7 @@ import { check, foreignKey, index, integer, pgEnum, unique, uuid } from "drizzle
 import { pgTable } from "./base";
 import { PostKindValues, toEnumValues } from "./contract-values";
 import { createCreatedAtColumn, createUpdatedAtColumn } from "./columns";
-import { unit } from "./core";
+import { unit } from "./unit";
 
 export const postKind = pgEnum("post_kind", toEnumValues(PostKindValues));
 

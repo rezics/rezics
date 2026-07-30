@@ -6,8 +6,8 @@ import { useApplicationRouter } from "@/features/application-shell/hooks/use-app
 
 import { RequireSession } from "@/features/auth/require-session";
 import { postHref } from "@/features/posts/url";
-import { isCatalogDetailUnitFor } from "@/features/units/model/catalog-detail-unit";
-import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
+import { isUnitDetailUnitFor } from "@/features/units/model/unit-detail-unit";
+import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -21,7 +21,7 @@ export function TargetedReviewCreatePage({
 }: {
 	readonly progressEntryId?: string;
 	readonly targetId: string;
-	readonly type: CatalogDetailUnitType;
+	readonly type: UnitDetailUnitType;
 }) {
 	const localizationLanguages = useLocalizationLanguages();
 	const query = useGetApiUnitsByTypeByUnitId({
@@ -39,10 +39,10 @@ export function TargetedReviewCreatePage({
 	if (query.isPending) return <QueryPending />;
 	if (query.isError || !query.data)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
-	if (!isCatalogDetailUnitFor(query.data, type))
+	if (!isUnitDetailUnitFor(query.data, type))
 		return (
 			<QueryFailure
-				error={new Error("Catalog Unit type mismatch")}
+				error={new Error("Unit Unit type mismatch")}
 				retry={() => void query.refetch()}
 			/>
 		);

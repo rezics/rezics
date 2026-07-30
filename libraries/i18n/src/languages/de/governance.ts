@@ -5,6 +5,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { deTerminology } from "@rezics/i18n/terminology/de";
 
 const { forms: realmTerms } = deTerminology.realm;
+const { forms: entityTerms } = deTerminology.entity;
 const { forms: postTerms } = deTerminology.post;
 
 export default {
@@ -37,7 +38,7 @@ export default {
 	associationProposals: "Zuordnungsvorschläge",
 	associationProposalDescription:
 		"Die tatsächliche Zuordnung wird erst erstellt, nachdem die andere Seite den Vorschlag angenommen hat.",
-	targetEntity: "Zielentität im Katalog",
+	targetEntity: `Ziel-${entityTerms.label}`,
 	targetUnit: "Zugeordnete Unit",
 	sourceUnit: "Quell-Unit",
 	associationRole: "Zuordnungsrolle",
@@ -54,8 +55,7 @@ export default {
 		"platform.user.status.update": "Kontostatus von Benutzern verwalten",
 		"platform.session.read": "Benutzersitzungen anzeigen",
 		"platform.session.revoke": "Benutzersitzungen widerrufen",
-		"entity.associations.override":
-			"Berechtigungen für Zuordnungen zu Katalogentitäten übergehen",
+		"entity.associations.override": `Berechtigungen für Zuordnungen zu ${entityTerms.plural} übergehen`,
 		"unit.edit": "Alle Units bearbeiten",
 		"platform.development_preview.access":
 			"Auf unveröffentlichte Entwicklungsvorschauen zugreifen",
@@ -97,8 +97,8 @@ export default {
 			root: "Gesamte Einheit",
 			creditAttributions: "Quellseitige Mitwirkungszuordnungen",
 			subjectAssociations: "Quellseitige Themenzuordnungen",
-			creditTargets: "Entitätsziel: Mitwirkungszuordnungen",
-			subjectTargets: "Entitätsziel: Themenzuordnungen",
+			creditTargets: `${entityTerms.label}sziel: Mitwirkungszuordnungen`,
+			subjectTargets: `${entityTerms.label}sziel: Themenzuordnungen`,
 		},
 		publicTitle: "Öffentliche Berechtigungen",
 		publicDescription: `Berechtigungen, die allen angemeldeten Benutzern von ${verbatimTerms.rezics.value} direkt gewährt werden. Diese globale Grundlage wird getrennt von einzelnen Subjekten verwaltet.`,
@@ -178,7 +178,7 @@ export default {
 		permissionCategories: {
 			unit: "Unit",
 			realm: realmTerms.label,
-			entity: "Entitätszuordnungen",
+			entity: `${entityTerms.label}szuordnungen`,
 		},
 		permissions: {
 			"unit.read": "Lesen",

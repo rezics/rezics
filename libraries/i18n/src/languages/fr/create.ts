@@ -5,6 +5,7 @@ import { frTerminology } from "@rezics/i18n/terminology/fr";
 
 const { forms: postTerms } = frTerminology.post;
 const { forms: realmTerms } = frTerminology.realm;
+const { forms: entityTerms } = frTerminology.entity;
 const { forms: zoneTerms } = frTerminology.zone;
 
 export default {
@@ -30,8 +31,8 @@ export default {
 			description: "Consultez et gérez les médias liés à votre travail.",
 		},
 		entity: {
-			label: "Entrées de catalogue",
-			description: "Consultez et gérez les entrées de catalogue liées à votre travail.",
+			label: entityTerms.pluralLabel,
+			description: `Consultez et gérez les ${entityTerms.plural} liées à votre travail.`,
 		},
 		tag: {
 			label: "Étiquettes",
@@ -67,7 +68,7 @@ export default {
 		label: `Explication de Tag du ${realmTerms.label}`,
 		description: `Créez l’explication wiki de ce ${realmTerms.inline} pour un Tag.`,
 	},
-	publicEntrySearch: {
+	communityUnitSearch: {
 		policyTitle: "Rechercher avant de créer",
 		policy: "Afin de préserver une communauté saine, effectuez une recherche avant de créer une entrée publique et vérifiez que le contenu souhaité n’existe pas déjà. Tout usage abusif de cette fonction peut entraîner des sanctions.",
 		requiredTitle: "Vérifiez d’abord les entrées existantes",

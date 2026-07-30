@@ -104,7 +104,7 @@ describe("Search Feature v1", () => {
 	});
 
 	it.each(["book", "media", "software"] as const)(
-		"lets the %s catalog template search direct Units and related content",
+		"lets the %s work template search direct Units and related content",
 		(template) => {
 			const document = createDefaultSearchDocument(template);
 			expect(document.categories).toEqual(["units", "posts", "reviews", "collections"]);
@@ -220,6 +220,26 @@ describe("Search Feature v1", () => {
 		expect(sharedSearch.inputIdentity).not.toBe(grouped.inputIdentity);
 		expect(sharedSearch.inputIdentity).not.toBe(sharedFeed.inputIdentity);
 
+		const entitiesOnly = compileSearchFeatureInputForPolicy(
+			{
+				...globalInput,
+				state: {
+					pageSize: 20,
+					expression: {
+						controlKey: "category",
+						filter: {
+							field: "category",
+							operator: "equals",
+							value: "entities",
+						},
+					},
+				},
+			},
+			SharedSearchPolicy,
+		);
+		expect(entitiesOnly.request.categories).toEqual(["entities"]);
+		expect(entitiesOnly.request.pageSize).toBe(20);
+
 		const realmDocument = createDefaultSearchDocument("realm");
 		expect(
 			compileSearchFeatureInputForPolicy(
@@ -321,7 +341,7 @@ describe("Search Feature v1", () => {
 								{
 									field: "category",
 									operator: "any-of",
-									values: ["posts", "reviews", "entity", "collections"],
+									values: ["posts", "reviews", "entities", "collections"],
 								},
 								{
 									operator: "all",

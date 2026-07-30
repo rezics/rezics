@@ -5,6 +5,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 
 const { forms: realmTerms } = zhHansTerminology.realm;
+const { forms: entityTerms } = zhHansTerminology.entity;
 const { forms: postTerms } = zhHansTerminology.post;
 
 export default {
@@ -36,7 +37,7 @@ export default {
 	subjectAssociations: "主题关联",
 	associationProposals: "关联提案",
 	associationProposalDescription: "提案经另一方接受后才会创建实际关联。",
-	targetEntity: "目标目录实体",
+	targetEntity: `目标${entityTerms.label}`,
 	targetUnit: "署名对象",
 	sourceUnit: "来源条目",
 	associationRole: "关联角色",
@@ -53,7 +54,7 @@ export default {
 		"platform.user.status.update": "管理用户账户状态",
 		"platform.session.read": "查看用户会话",
 		"platform.session.revoke": "撤销用户会话",
-		"entity.associations.override": "略过目录实体关联权限",
+		"entity.associations.override": `略过${entityTerms.inline}关联权限`,
 		"unit.edit": "编辑所有条目",
 		"platform.development_preview.access": "使用尚未发布的开发预览功能",
 		"unit.governance.read": "查看所有条目的治理数据",
@@ -94,8 +95,8 @@ export default {
 			root: "整个内容单元",
 			creditAttributions: "来源：贡献署名",
 			subjectAssociations: "来源：主题关联",
-			creditTargets: "目录条目目标：贡献署名",
-			subjectTargets: "目录条目目标：主题关联",
+			creditTargets: `${entityTerms.label}目标：贡献署名`,
+			subjectTargets: `${entityTerms.label}目标：主题关联`,
 		},
 		publicTitle: "公共权限",
 		publicDescription: `直接授予所有已登录 ${verbatimTerms.rezics.value} 用户的权限。这是全局基线，因此与个别授权对象分开管理。`,
@@ -173,7 +174,7 @@ export default {
 		permissionCategories: {
 			unit: "条目",
 			realm: realmTerms.label,
-			entity: "实体关联",
+			entity: `${entityTerms.label}关联`,
 		},
 		permissions: {
 			"unit.read": "查看",

@@ -14,6 +14,7 @@ import { hashPassword } from "better-auth/crypto";
 import { and, eq, inArray, isNull, notInArray, sql } from "drizzle-orm";
 import { OfficialRealmUnitIds, ZoneHomePageSlug } from "@rezics/slug";
 import { PlatformCapabilityValues } from "@rezics/access";
+import { CurrentUnitContentLicenseSlug } from "@rezics/license";
 
 import { env } from "../config";
 import { Authorization } from "../authorization";
@@ -35,7 +36,7 @@ import {
 	apikeys,
 	auditEvent,
 	book,
-	catalogUnitContentLicense,
+	unitContentLicense,
 	platformCapabilityGrant,
 	collection,
 	collectionItem,
@@ -96,9 +97,9 @@ import {
 	unitAccessRestriction,
 	unitAssociationProposal,
 	creditAttribution,
-	CommunityCatalogUnitKindValues,
+	CommunityOwnedUnitKindValues,
 	unitOwnership,
-	unitLink,
+	unitSourceLink,
 	unitLocalization,
 	unitDock,
 	unitSlugAddress,
@@ -347,7 +348,7 @@ async function insertUnitDetails(
 	);
 	const ownershipRows: (typeof unitOwnership.$inferInsert)[] = [];
 	const grantRows: (typeof unitAccessGrant.$inferInsert)[] = [];
-	const communityCatalogKinds: ReadonlySet<string> = new Set(CommunityCatalogUnitKindValues);
+	const communityOwnedKinds: ReadonlySet<string> = new Set(CommunityOwnedUnitKindValues);
 	for (const value of values) {
 		const ownershipCommon = {
 			unitId: value.id,
@@ -374,7 +375,7 @@ async function insertUnitDetails(
 					createdAt: value.createdAt,
 					updatedAt: value.updatedAt,
 				});
-		} else if (communityCatalogKinds.has(value.kind)) {
+		} else if (communityOwnedKinds.has(value.kind)) {
 			ownershipRows.push({
 				...ownershipCommon,
 				profileId: communityOwnerProfileId,
@@ -570,7 +571,7 @@ async function seedProfiles(
 	return profiles;
 }
 
-interface SeedCatalog {
+interface SeedUnitFixtures {
 	entities: CreatedUnit[];
 	tags: CreatedUnit[];
 	books: CreatedUnit[];
@@ -599,7 +600,7 @@ interface SeedStructure {
 	readonly realmUnits: readonly { realmId: string; unitId: string }[];
 }
 
-async function seedOfficialZoneCatalogFixtures(
+async function seedOfficialZoneFixtures(
 	tx: DatabaseTransaction,
 	data: SeedData,
 	input: {
@@ -626,7 +627,7 @@ async function seedOfficialZoneCatalogFixtures(
 					summary:
 						language === "zh"
 							? "用來驗證官方資料庫搜尋、分面與內容動態的固定情境資料。"
-							: "Stable scenario content for official catalog search, facets, and feeds.",
+							: "Stable scenario content for official Unit search, facets, and feeds.",
 					description: createPortableTextDocument(data.portableText(language, 2)),
 					createdAt: value.createdAt,
 					updatedAt: value.updatedAt,
@@ -645,11 +646,11 @@ async function seedOfficialZoneCatalogFixtures(
 	}
 }
 
-async function seedCatalog(
+async function seedUnitFixtures(
 	tx: DatabaseTransaction,
 	data: SeedData,
 	profiles: readonly CreatedProfile[],
-): Promise<SeedCatalog> {
+): Promise<SeedUnitFixtures> {
 	let stateIndex = 0;
 	const descriptors = (
 		kind: UnitKind,
@@ -743,8 +744,8 @@ async function seedCatalog(
 		softwareUnits[0],
 	];
 	if (!fixtureBook || !fixtureMedia || !fixtureSoftware)
-		throw new Error("Official Zone catalog scenarios require Book, Media, and Software Units");
-	await seedOfficialZoneCatalogFixtures(tx, data, {
+		throw new Error("Official Zone Unit scenarios require Book, Media, and Software Units");
+	await seedOfficialZoneFixtures(tx, data, {
 		book: fixtureBook,
 		media: fixtureMedia,
 		software: fixtureSoftware,
@@ -809,25 +810,28 @@ async function seedCatalog(
 				.filter((_, index) => index % 3 === 0)
 				.map((value) => ({
 					unitId: value.id,
-					unitKind: "book" as const,
-					createdAt: value.createdAt,
+					grantedByProfileId: value.ownerProfileId,
+					referenceLicenseSlug: CurrentUnitContentLicenseSlug,
+					grantedAt: value.createdAt,
 				})),
 			...softwareUnits
 				.filter((_, index) => index % 4 === 0)
 				.map((value) => ({
 					unitId: value.id,
-					unitKind: "software" as const,
-					createdAt: value.createdAt,
+					grantedByProfileId: value.ownerProfileId,
+					referenceLicenseSlug: CurrentUnitContentLicenseSlug,
+					grantedAt: value.createdAt,
 				})),
 			...mediaItems
 				.filter((_, index) => index % 5 === 0)
 				.map((value) => ({
 					unitId: value.id,
-					unitKind: "media" as const,
-					createdAt: value.createdAt,
+					grantedByProfileId: value.ownerProfileId,
+					referenceLicenseSlug: CurrentUnitContentLicenseSlug,
+					grantedAt: value.createdAt,
 				})),
 		],
-		(batch) => tx.insert(catalogUnitContentLicense).values(batch),
+		(batch) => tx.insert(unitContentLicense).values(batch),
 	);
 	await writeBatches(
 		seriesItems.map((value, index) => ({
@@ -964,7 +968,7 @@ async function seedCatalog(
 	);
 	const linkInputs = Array.from({ length: SeedPlan.links }, (_, index) => {
 		const target = itemAt(works, index);
-		const url = `https://example.test/catalog/${target.id}`;
+		const url = `https://example.test/units/${target.id}`;
 		return {
 			unitId: target.id,
 			sourceEntityId: itemAt(entities, index).id,
@@ -978,9 +982,9 @@ async function seedCatalog(
 	for (const batch of chunks(linkInputs)) {
 		links.push(
 			...(await tx
-				.insert(unitLink)
+				.insert(unitSourceLink)
 				.values(batch)
-				.returning({ id: unitLink.id, unitId: unitLink.unitId })),
+				.returning({ id: unitSourceLink.id, unitId: unitSourceLink.unitId })),
 		);
 	}
 	const tagRows = Array.from({ length: SeedPlan.unitTags }, (_, index) => ({
@@ -1201,9 +1205,9 @@ async function seedToaruWiki(
 	tx: DatabaseTransaction,
 	data: SeedData,
 	profiles: readonly CreatedProfile[],
-	catalog: SeedCatalog,
+	unitFixtures: SeedUnitFixtures,
 ): Promise<void> {
-	const zoneUnit = itemAt(catalog.zones, 0);
+	const zoneUnit = itemAt(unitFixtures.zones, 0);
 	const owner = itemAt(profiles, 0);
 	const createdAt = latestDate(zoneUnit.createdAt, owner.createdAt);
 	await tx
@@ -1525,7 +1529,7 @@ async function seedContent(
 	tx: DatabaseTransaction,
 	data: SeedData,
 	profiles: readonly CreatedProfile[],
-	catalog: SeedCatalog,
+	unitFixtures: SeedUnitFixtures,
 ): Promise<SeedContent> {
 	let stateIndex = 2_000;
 	const descriptor = (
@@ -1553,7 +1557,7 @@ async function seedContent(
 	const firstLevelReplyDescriptors = rootDescriptors
 		.slice(0, SeedPlan.replies)
 		.map((root, index) => {
-			const realmUnit = index % 3 === 0 ? itemAt(catalog.realms, index) : null;
+			const realmUnit = index % 3 === 0 ? itemAt(unitFixtures.realms, index) : null;
 			return descriptor(index, "reply", "reply", [
 				root.createdAt,
 				...(realmUnit ? [realmUnit.createdAt] : []),
@@ -1596,7 +1600,7 @@ async function seedContent(
 	await writeBatches(
 		rootPosts.map((value, index) => ({
 			id: value.id,
-			subjectUnitId: index % 4 === 0 ? null : itemAt(catalog.works, index * 11).id,
+			subjectUnitId: index % 4 === 0 ? null : itemAt(unitFixtures.works, index * 11).id,
 			kind: "post" as const,
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
@@ -1606,7 +1610,7 @@ async function seedContent(
 	await writeBatches(
 		reviews.map((value, index) => ({
 			id: value.id,
-			subjectUnitId: itemAt(catalog.works, index * 13).id,
+			subjectUnitId: itemAt(unitFixtures.works, index * 13).id,
 			kind: "review" as const,
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
@@ -1616,7 +1620,7 @@ async function seedContent(
 	await writeBatches(
 		chapters.map((value, index) => ({
 			id: value.id,
-			subjectUnitId: itemAt(catalog.books, index).id,
+			subjectUnitId: itemAt(unitFixtures.books, index).id,
 			kind: "chapter" as const,
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
@@ -1665,12 +1669,12 @@ async function seedContent(
 		(batch) => tx.insert(postReply).values(batch),
 	);
 
-	const rootGroups = chapterLabels.slice(0, catalog.books.length);
-	const childGroups = chapterLabels.slice(catalog.books.length);
+	const rootGroups = chapterLabels.slice(0, unitFixtures.books.length);
+	const childGroups = chapterLabels.slice(unitFixtures.books.length);
 	const structures = await tx
 		.insert(contentStructure)
 		.values(
-			catalog.books.map((bookUnit) => ({
+			unitFixtures.books.map((bookUnit) => ({
 				ownerUnitId: bookUnit.id,
 				kind: "book.contents" as const,
 				createdAt: bookUnit.createdAt,
@@ -1684,7 +1688,7 @@ async function seedContent(
 	const structureByBook = new Map(
 		structures.map((structure) => [structure.ownerUnitId, structure.id]),
 	);
-	const rootNodeInputs = catalog.books.map((bookUnit, index) => ({
+	const rootNodeInputs = unitFixtures.books.map((bookUnit, index) => ({
 		structureId:
 			structureByBook.get(bookUnit.id) ??
 			(() => {
@@ -1713,7 +1717,7 @@ async function seedContent(
 	const childInputs = Array.from(
 		{ length: SeedPlan.contentStructureNodes - rootNodes.length },
 		(_, index) => {
-			const bookUnit = itemAt(catalog.books, index);
+			const bookUnit = itemAt(unitFixtures.books, index);
 			const parent = rootByBook.get(bookUnit.id);
 			if (!parent) throw new Error(`Missing seed root node for book ${bookUnit.id}`);
 			return {
@@ -1728,7 +1732,7 @@ async function seedContent(
 					index < chapters.length
 						? itemAt(chapters, index).id
 						: itemAt(childGroups, index - chapters.length).id,
-				position: fractionalPositionAt(1 + Math.floor(index / catalog.books.length)),
+				position: fractionalPositionAt(1 + Math.floor(index / unitFixtures.books.length)),
 				contentRating: index % 11 === 0 ? ("r15" as const) : ("general" as const),
 				createdAt: bookUnit.createdAt,
 				updatedAt: bookUnit.updatedAt,
@@ -1761,21 +1765,21 @@ async function seedStructure(
 	tx: DatabaseTransaction,
 	data: SeedData,
 	profiles: readonly CreatedProfile[],
-	catalog: SeedCatalog,
+	unitFixtures: SeedUnitFixtures,
 	content: SeedContent,
 ): Promise<SeedStructure> {
 	const collectionTargets = [
-		...catalog.works,
-		...catalog.series,
-		...catalog.tags,
-		...catalog.polls,
+		...unitFixtures.works,
+		...unitFixtures.series,
+		...unitFixtures.tags,
+		...unitFixtures.polls,
 		...content.rootPosts,
 		...content.reviews,
 	];
 	await writeBatches(
-		catalog.collections.flatMap((collectionUnit, collectionIndex) =>
+		unitFixtures.collections.flatMap((collectionUnit, collectionIndex) =>
 			Array.from(
-				{ length: SeedPlan.collectionItems / catalog.collections.length },
+				{ length: SeedPlan.collectionItems / unitFixtures.collections.length },
 				(_, index) => {
 					const target = itemAt(collectionTargets, collectionIndex * 23 + index);
 					return {
@@ -1792,7 +1796,7 @@ async function seedStructure(
 		(batch) => tx.insert(collectionItem).values(batch),
 	);
 
-	const editableUnits = [...catalog.works, ...catalog.series, ...content.rootPosts];
+	const editableUnits = [...unitFixtures.works, ...unitFixtures.series, ...content.rootPosts];
 	await writeBatches(
 		Array.from({ length: 150 }, (_, index) => {
 			const target = itemAt(editableUnits, index);
@@ -1814,29 +1818,35 @@ async function seedStructure(
 		(batch) => tx.insert(unitAccessGrant).values(batch),
 	);
 
-	const memberRows = catalog.realms.flatMap((realmUnit, realmIndex) => {
+	const memberRows = unitFixtures.realms.flatMap((realmUnit, realmIndex) => {
 		const otherProfiles = profiles.filter((value) => value.id !== realmUnit.ownerProfileId);
-		return Array.from({ length: SeedPlan.realmMembers / catalog.realms.length }, (_, index) => {
-			const member =
-				index === 0
-					? profiles.find((value) => value.id === realmUnit.ownerProfileId)
-					: itemAt(otherProfiles, realmIndex * 7 + index - 1);
-			if (!member) throw new Error(`Missing owner profile for Realm ${realmUnit.id}`);
-			const joinedAt = latestDate(realmUnit.createdAt, member.createdAt);
-			return {
-				realmId: realmUnit.id,
-				profileId: member.id,
-				state: itemAt(["active", "active", "active", "pending", "muted"] as const, index),
-				joinedAt,
-				updatedAt: joinedAt,
-			};
-		});
+		return Array.from(
+			{ length: SeedPlan.realmMembers / unitFixtures.realms.length },
+			(_, index) => {
+				const member =
+					index === 0
+						? profiles.find((value) => value.id === realmUnit.ownerProfileId)
+						: itemAt(otherProfiles, realmIndex * 7 + index - 1);
+				if (!member) throw new Error(`Missing owner profile for Realm ${realmUnit.id}`);
+				const joinedAt = latestDate(realmUnit.createdAt, member.createdAt);
+				return {
+					realmId: realmUnit.id,
+					profileId: member.id,
+					state: itemAt(
+						["active", "active", "active", "pending", "muted"] as const,
+						index,
+					),
+					joinedAt,
+					updatedAt: joinedAt,
+				};
+			},
+		);
 	});
 	await writeBatches(memberRows, (batch) => tx.insert(realmMember).values(batch));
 	await writeBatches(
-		catalog.realms.flatMap((realmUnit, realmIndex) =>
+		unitFixtures.realms.flatMap((realmUnit, realmIndex) =>
 			Array.from(
-				{ length: SeedPlan.realmUnitFollows / catalog.realms.length },
+				{ length: SeedPlan.realmUnitFollows / unitFixtures.realms.length },
 				(_, index) => ({
 					followerProfileId: itemAt(profiles, realmIndex * 5 + index).id,
 					unitId: realmUnit.id,
@@ -1849,7 +1859,7 @@ async function seedStructure(
 
 	const revisions: (typeof realmRuleRevision.$inferSelect)[] = [];
 	for (const batch of chunks(
-		catalog.realms.map((realmUnit, index) => ({
+		unitFixtures.realms.map((realmUnit, index) => ({
 			realmId: realmUnit.id,
 			version: 1,
 			acknowledgementMode:
@@ -1913,16 +1923,16 @@ async function seedStructure(
 		(batch) => tx.insert(realmRuleAcceptance).values(batch),
 	);
 	const realmTargets = [
-		...catalog.works,
-		...catalog.series,
-		...catalog.tags,
-		...catalog.polls,
+		...unitFixtures.works,
+		...unitFixtures.series,
+		...unitFixtures.tags,
+		...unitFixtures.polls,
 		...content.rootPosts,
 		...content.reviews,
 	];
 	await writeBatches(
-		catalog.realms.flatMap((realmUnit, realmIndex) =>
-			Array.from({ length: SeedPlan.realmPins / catalog.realms.length }, (_, index) => ({
+		unitFixtures.realms.flatMap((realmUnit, realmIndex) =>
+			Array.from({ length: SeedPlan.realmPins / unitFixtures.realms.length }, (_, index) => ({
 				realmId: realmUnit.id,
 				unitId: itemAt(realmTargets, realmIndex * 37 + index).id,
 				kind: index % 3 === 0 ? ("highlight" as const) : ("pinned" as const),
@@ -1934,8 +1944,8 @@ async function seedStructure(
 		),
 		(batch) => tx.insert(realmPin).values(batch),
 	);
-	const realmUnitRows = catalog.realms.flatMap((realmUnit, realmIndex) =>
-		Array.from({ length: SeedPlan.realmUnits / catalog.realms.length }, (_, index) => {
+	const realmUnitRows = unitFixtures.realms.flatMap((realmUnit, realmIndex) =>
+		Array.from({ length: SeedPlan.realmUnits / unitFixtures.realms.length }, (_, index) => {
 			const target = itemAt(realmTargets, realmIndex * 53 + index);
 			const createdAt = latestDate(realmUnit.createdAt, target.createdAt);
 			return {
@@ -1991,12 +2001,15 @@ async function seedStructure(
 		(batch) => tx.insert(platformCapabilityGrant).values(batch),
 	);
 	await writeBatches(
-		catalog.zones.flatMap((zoneUnit, zoneIndex) =>
-			Array.from({ length: SeedPlan.zoneUnitFollows / catalog.zones.length }, (_, index) => ({
-				unitId: zoneUnit.id,
-				followerProfileId: itemAt(profiles, zoneIndex * 7 + index).id,
-				createdAt: zoneUnit.createdAt,
-			})),
+		unitFixtures.zones.flatMap((zoneUnit, zoneIndex) =>
+			Array.from(
+				{ length: SeedPlan.zoneUnitFollows / unitFixtures.zones.length },
+				(_, index) => ({
+					unitId: zoneUnit.id,
+					followerProfileId: itemAt(profiles, zoneIndex * 7 + index).id,
+					createdAt: zoneUnit.createdAt,
+				}),
+			),
 		),
 		(batch) => tx.insert(unitFollow).values(batch),
 	);
@@ -2008,7 +2021,7 @@ async function seedInteractions(
 	tx: DatabaseTransaction,
 	data: SeedData,
 	profiles: readonly CreatedProfile[],
-	catalog: SeedCatalog,
+	unitFixtures: SeedUnitFixtures,
 	content: SeedContent,
 ): Promise<void> {
 	await writeBatches(
@@ -2054,7 +2067,7 @@ async function seedInteractions(
 	await writeBatches(
 		profiles.flatMap((seedProfile, profileIndex) =>
 			Array.from({ length: SeedPlan.unitProgress / profiles.length }, (_, index) => {
-				const target = itemAt(catalog.works, profileIndex * 17 + index);
+				const target = itemAt(unitFixtures.works, profileIndex * 17 + index);
 				const createdAt = latestDate(
 					data.pastDate(365),
 					seedProfile.createdAt,
@@ -2111,10 +2124,10 @@ async function seedInteractions(
 	);
 
 	const interactionTargets = [
-		...catalog.works,
-		...catalog.series,
-		...catalog.tags,
-		...catalog.polls,
+		...unitFixtures.works,
+		...unitFixtures.series,
+		...unitFixtures.tags,
+		...unitFixtures.polls,
 		...content.rootPosts,
 		...content.reviews,
 	];
@@ -2123,7 +2136,7 @@ async function seedInteractions(
 			Array.from({ length: SeedPlan.unitReactions / profiles.length }, (_, index) => {
 				const target = itemAt(interactionTargets, profileIndex * 67 + index);
 				const realmUnit =
-					index % 3 === 0 ? itemAt(catalog.realms, profileIndex + index) : null;
+					index % 3 === 0 ? itemAt(unitFixtures.realms, profileIndex + index) : null;
 				const createdAt = latestDate(
 					data.pastDate(365),
 					seedProfile.createdAt,
@@ -2163,7 +2176,7 @@ async function seedInteractions(
 		profiles.flatMap((seedProfile, profileIndex) =>
 			Array.from({ length: SeedPlan.scores / profiles.length }, (_, index) => {
 				const target = itemAt(interactionTargets, profileIndex * 31 + index);
-				const realmUnit = itemAt(catalog.realms, profileIndex + index);
+				const realmUnit = itemAt(unitFixtures.realms, profileIndex + index);
 				const createdAt = latestDate(
 					data.pastDate(365),
 					seedProfile.createdAt,
@@ -2199,10 +2212,10 @@ async function seedInteractions(
 	await writeBatches(
 		profiles.flatMap((seedProfile, profileIndex) =>
 			Array.from({ length: SeedPlan.pollVotes / profiles.length }, (_, index) => {
-				const pollUnit = itemAt(catalog.polls, profileIndex * 7 + index);
+				const pollUnit = itemAt(unitFixtures.polls, profileIndex * 7 + index);
 				const option = itemAt(optionsByPoll.get(pollUnit.id) ?? [], profileIndex + index);
 				const realmUnit =
-					index % 2 === 0 ? itemAt(catalog.realms, profileIndex + index) : null;
+					index % 2 === 0 ? itemAt(unitFixtures.realms, profileIndex + index) : null;
 				return {
 					pollId: pollUnit.id,
 					profileId: seedProfile.id,
@@ -2373,14 +2386,14 @@ async function seedGovernance(
 	tx: DatabaseTransaction,
 	data: SeedData,
 	profiles: readonly CreatedProfile[],
-	catalog: SeedCatalog,
+	unitFixtures: SeedUnitFixtures,
 	content: SeedContent,
 	structure: SeedStructure,
 ): Promise<void> {
 	const governanceTargets = [
-		...catalog.works,
-		...catalog.series,
-		...catalog.polls,
+		...unitFixtures.works,
+		...unitFixtures.series,
+		...unitFixtures.polls,
 		...content.rootPosts,
 		...content.reviews,
 	];
@@ -2678,14 +2691,14 @@ async function seedRecommendations(
 	tx: DatabaseTransaction,
 	data: SeedData,
 	profiles: readonly CreatedProfile[],
-	catalog: SeedCatalog,
+	unitFixtures: SeedUnitFixtures,
 	content: SeedContent,
 ): Promise<void> {
 	const targets = [
-		...catalog.works,
-		...catalog.series,
-		...catalog.tags,
-		...catalog.polls,
+		...unitFixtures.works,
+		...unitFixtures.series,
+		...unitFixtures.tags,
+		...unitFixtures.polls,
 		...content.rootPosts,
 		...content.reviews,
 	];
@@ -2745,14 +2758,14 @@ async function seedRecommendations(
 
 /**
  * Covers cross-cutting contracts whose behavior is otherwise invisible in a
- * large catalog-shaped fixture. Each row is intentionally minimal and points
+ * large Unit-shaped fixture. Each row is intentionally minimal and points
  * at the richer scenarios created above.
  */
 async function seedCoverageContracts(
 	tx: DatabaseTransaction,
 	data: SeedData,
 	profiles: readonly CreatedProfile[],
-	catalog: SeedCatalog,
+	unitFixtures: SeedUnitFixtures,
 	content: SeedContent,
 ): Promise<void> {
 	const actor = itemAt(profiles, 0);
@@ -2760,11 +2773,11 @@ async function seedCoverageContracts(
 		profiles.filter((value) => value.id !== actor.id),
 		0,
 	);
-	const target = itemAt(catalog.works, 0);
-	const targetEntity = itemAt(catalog.entities, 0);
-	const targetTag = itemAt(catalog.tags, 0);
-	const secondTag = itemAt(catalog.tags, 1);
-	const targetRealm = itemAt(catalog.realms, 0);
+	const target = itemAt(unitFixtures.works, 0);
+	const targetEntity = itemAt(unitFixtures.entities, 0);
+	const targetTag = itemAt(unitFixtures.tags, 0);
+	const secondTag = itemAt(unitFixtures.tags, 1);
+	const targetRealm = itemAt(unitFixtures.realms, 0);
 	const contextPost = itemAt(content.rootPosts, 0);
 	const [associationContextPost] = await tx
 		.select({ id: post.id, createdAt: post.createdAt })
@@ -2822,7 +2835,7 @@ async function seedCoverageContracts(
 		updatedAt: createdAt,
 	});
 	await tx.insert(unitAssociationProposal).values({
-		sourceUnitId: itemAt(catalog.works, 1).id,
+		sourceUnitId: itemAt(unitFixtures.works, 1).id,
 		targetUnitId: targetEntity.id,
 		kind: "subject",
 		role: "related_subject",
@@ -2844,7 +2857,7 @@ async function seedCoverageContracts(
 		updatedAt: createdAt,
 	});
 	await tx.insert(unitAccessRestriction).values({
-		unitId: itemAt(catalog.works, 2).id,
+		unitId: itemAt(unitFixtures.works, 2).id,
 		subjectKind: "profile",
 		profileId: collaborator.id,
 		permission: "unit.update",
@@ -2989,7 +3002,7 @@ async function seedCoverageContracts(
 	await insertUnitDetails(tx, data, [releaseUnit]);
 	await tx.insert(release).values({
 		id: releaseUnit.id,
-		parentUnitId: itemAt(catalog.softwareUnits, 0).id,
+		parentUnitId: itemAt(unitFixtures.softwareUnits, 0).id,
 		versionLabel: "1.0.0-seed",
 		releasedOn: dateOnly(createdAt),
 		createdAt,
@@ -3007,7 +3020,7 @@ async function seedHistory(
 	tx: DatabaseTransaction,
 	data: SeedData,
 	profiles: readonly CreatedProfile[],
-	catalog: SeedCatalog,
+	unitFixtures: SeedUnitFixtures,
 	content: SeedContent,
 ): Promise<void> {
 	const storedCollections = await tx.select({ id: collection.id }).from(collection);
@@ -3037,14 +3050,14 @@ async function seedHistory(
 	const historyUnits = [
 		...profiles.map((value) => ({ id: value.id, actorProfileId: value.id })),
 		...[
-			...catalog.entities,
-			...catalog.tags,
-			...catalog.works,
-			...catalog.series,
-			...catalog.realms,
-			...catalog.zones,
-			...catalog.collections,
-			...catalog.polls,
+			...unitFixtures.entities,
+			...unitFixtures.tags,
+			...unitFixtures.works,
+			...unitFixtures.series,
+			...unitFixtures.realms,
+			...unitFixtures.zones,
+			...unitFixtures.collections,
+			...unitFixtures.polls,
 			...content.allPosts,
 		].map((value) => ({ id: value.id, actorProfileId: value.ownerProfileId })),
 	];
@@ -3063,7 +3076,7 @@ async function seedHistory(
 	}
 
 	const updatedRevisionByUnit = new Map<string, string>();
-	for (const [index, value] of catalog.works.slice(0, SeedPlan.historyUpdates).entries()) {
+	for (const [index, value] of unitFixtures.works.slice(0, SeedPlan.historyUpdates).entries()) {
 		await tx
 			.update(unitLocalization)
 			.set({
@@ -3087,7 +3100,7 @@ async function seedHistory(
 		});
 		updatedRevisionByUnit.set(value.id, result.revisionId);
 	}
-	for (const value of catalog.works.slice(0, SeedPlan.historyRestores)) {
+	for (const value of unitFixtures.works.slice(0, SeedPlan.historyRestores)) {
 		const sourceRevisionId = initialRevisionByUnit.get(value.id);
 		const baseRevisionId = updatedRevisionByUnit.get(value.id);
 		if (!sourceRevisionId || !baseRevisionId) {
@@ -3114,7 +3127,7 @@ export interface SeedResult {
 
 const RequiredSeedScenarios = [
 	"identities",
-	"catalog",
+	"units",
 	"official-zone-content",
 	"content",
 	"structure",
@@ -3166,33 +3179,33 @@ export class DatabaseSeedService {
 					profiles.map(({ id }) => id),
 					{ sequenceIsEmpty: true },
 				);
-				console.info("Seeding catalog scenario");
-				const catalog = await seedCatalog(tx, data, profiles);
+				console.info("Seeding Unit fixtures scenario");
+				const unitFixtures = await seedUnitFixtures(tx, data, profiles);
 				console.info("Seeding official Zone content scenario");
-				await seedToaruWiki(tx, data, profiles, catalog);
+				await seedToaruWiki(tx, data, profiles, unitFixtures);
 				console.info("Seeding content scenario");
-				const content = await seedContent(tx, data, profiles, catalog);
+				const content = await seedContent(tx, data, profiles, unitFixtures);
 				console.info("Seeding structure scenario");
-				const structure = await seedStructure(tx, data, profiles, catalog, content);
+				const structure = await seedStructure(tx, data, profiles, unitFixtures, content);
 				console.info("Seeding interactions scenario");
-				await seedInteractions(tx, data, profiles, catalog, content);
+				await seedInteractions(tx, data, profiles, unitFixtures, content);
 				console.info("Seeding feature contracts scenario");
-				await seedCoverageContracts(tx, data, profiles, catalog, content);
+				await seedCoverageContracts(tx, data, profiles, unitFixtures, content);
 				if (includesSeedScenario(options, "communications")) {
 					console.info("Seeding communications scenario");
 					await seedCommunications(tx, data, profiles, content);
 				}
 				if (includesSeedScenario(options, "governance")) {
 					console.info("Seeding history scenario");
-					await seedHistory(tx, data, profiles, catalog, content);
+					await seedHistory(tx, data, profiles, unitFixtures, content);
 					console.info("Seeding governance scenario");
-					await seedGovernance(tx, data, profiles, catalog, content, structure);
+					await seedGovernance(tx, data, profiles, unitFixtures, content, structure);
 				}
 				console.info("Seeding recommendation scenario");
-				await seedRecommendations(tx, data, profiles, catalog, content);
+				await seedRecommendations(tx, data, profiles, unitFixtures, content);
 				if (!includesSeedScenario(options, "governance")) {
 					console.info("Seeding history scenario");
-					await seedHistory(tx, data, profiles, catalog, content);
+					await seedHistory(tx, data, profiles, unitFixtures, content);
 				}
 			},
 			{ isolationLevel: "serializable" },

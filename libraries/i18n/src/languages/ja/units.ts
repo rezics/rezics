@@ -9,6 +9,7 @@ const { forms: audioTerms } = jaTerminology.audio;
 const { forms: realmTerms } = jaTerminology.realm;
 const { forms: followTerms } = jaTerminology.follow;
 const { forms: metadataTerms } = jaTerminology.metadata;
+const { forms: entityTerms } = jaTerminology.entity;
 
 export default {
 	types: {
@@ -23,10 +24,10 @@ export default {
 		modeLabel: "作成方法",
 		ownedWork: "自分の作品",
 		ownedWorkDescription: "あなたのプロフィールがこの作品を所有し、管理します。",
-		publicEntry: "公開項目",
-		publicEntryDescription:
+		communityUnit: "公開項目",
+		communityUnitDescription:
 			"コミュニティが所有し、ログイン中の全員が編集できます。作成者に特別な権限は付与されません。",
-		publisherEntity: "発行者エンティティ",
+		publisherEntity: `発行者${entityTerms.label}`,
 		publisherOwnedDescription:
 			"自分の作品には発行者が必要です。直接関連付けが制限されている場合は同意リクエストを送信します。",
 		publisherPublicDescription:
@@ -91,7 +92,7 @@ export default {
 	},
 	workspace: {
 		title: "ユニットを管理",
-		description: `コンテンツの編集、${metadataTerms.inline}、カタログの関係、アクセス、および改訂履歴。`,
+		description: `コンテンツ、${metadataTerms.inline}、ユニット間の関係、アクセス、改訂履歴を編集します。`,
 		backToUnit: "ユニットに戻る",
 		backToOverview: "設定に戻る",
 		navigation: "ユニット管理ナビゲーション",
@@ -106,7 +107,7 @@ export default {
 				description: `ライフサイクル、表示、評価、ライセンス、およびタイプ別${metadataTerms.inline}を管理。`,
 			},
 			relationships: {
-				label: "カタログの関係",
+				label: "ユニット間の関係",
 				description: "クレジット、主題、ソースリンク、およびバリアント関係を管理。",
 			},
 			tags: {
@@ -185,7 +186,8 @@ export default {
 		publicationDate: "出版日",
 		pageCount: "ページ数",
 		format: "製本または形式",
-		licensed: "ライセンス済み",
+		contentLicense: "コンテンツライセンス",
+		viewContentLicense: "ライセンス条項を見る",
 		versionLabel: "バージョンラベル",
 		mediaKind: "メディア種類",
 		releaseDate: "リリース日",
@@ -328,7 +330,7 @@ export default {
 		title: "編集ユニット",
 		settings: "設定",
 		languageCode: "言語コード",
-		relationships: "カタログの関係",
+		relationships: "ユニット間の関係",
 		creditRole: "クレジットの役割",
 		subjectRole: "主題の役割",
 		linkUrl: `ソース${verbatimTerms.url.value}`,
@@ -472,8 +474,8 @@ export default {
 		language: "章の言語",
 		useLanguage: "言語を切り替える",
 		save: "章を保存する",
-		publicEntryContentPolicyTitle: "公開項目では章本文をここで編集できません",
-		publicEntryContentPolicyDescription: `この書籍は公開カタログ項目です。コンテンツ構造の整理や閲覧可能な既存${postTerms.label}の追加はできますが、カタログエディターには${postTerms.label}本文エディターがありません。`,
+		communityUnitContentPolicyTitle: "公開項目では章本文をここで編集できません",
+		communityUnitContentPolicyDescription: `この書籍はコミュニティによって管理されています。コンテンツ構造の整理や閲覧可能な既存${postTerms.label}の追加はできますが、このエディターには${postTerms.label}本文エディターがありません。`,
 		wordCount: insert("{{count}} 単語", { count: Number }),
 		characterCount: insert("{{count}} 文字", { count: Number }),
 	},

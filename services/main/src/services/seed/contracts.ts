@@ -3,7 +3,7 @@ export type SeedProfile = (typeof SeedProfileValues)[number];
 
 export const SeedScenarioValues = [
 	"identities",
-	"catalog",
+	"units",
 	"official-zone-content",
 	"content",
 	"structure",

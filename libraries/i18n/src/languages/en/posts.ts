@@ -22,7 +22,7 @@ export default {
 	publisher: "Publisher",
 	wikiCreateTitle: "Create Wiki entry",
 	wikiAccessMode: "Editing access",
-	wikiPublicEntry: "Public entry",
+	wikiCommunityUnit: "Public entry",
 	wikiPublicDescription:
 		"Every signed-in user can edit it; the creator receives no special access.",
 	wikiRestricted: "Restricted",

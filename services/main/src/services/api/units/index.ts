@@ -29,7 +29,7 @@ import {
 	UnitLookupParams,
 	UnitUnitIdParams,
 	VariantUnitUnitIdParams,
-	CatalogUnitTypeParams,
+	WorkUnitTypeParams,
 	VariantUnitTypeParams,
 	UnitStatusEventListQuery,
 	UnitStatusEventListResponse,
@@ -394,7 +394,7 @@ export default new Elysia({ prefix: "/units" })
 			};
 		},
 		{
-			params: CatalogUnitTypeParams,
+			params: WorkUnitTypeParams,
 			query: ListUnitsQuery,
 			response: {
 				[StatusCodes.OK]: UnitListResponse,

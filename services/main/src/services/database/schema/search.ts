@@ -23,7 +23,7 @@ import {
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
 } from "./columns";
-import { profile } from "./core";
+import { profile } from "./profile";
 import { revisionContent } from "./history";
 import { zone } from "./zone";
 

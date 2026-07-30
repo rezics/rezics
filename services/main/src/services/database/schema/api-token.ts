@@ -20,7 +20,7 @@ import {
 	createUuidv7PrimaryKey,
 } from "./columns";
 import { ApiTokenPolicyKindValues, ApiTokenUsageBucketKindValues } from "./contract-values";
-import { profile } from "./core";
+import { profile } from "./profile";
 
 export type ApiTokenPolicyKind = (typeof ApiTokenPolicyKindValues)[number];
 export type ApiTokenUsageBucketKind = (typeof ApiTokenUsageBucketKindValues)[number];

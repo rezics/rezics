@@ -8,6 +8,7 @@ const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: tagStructureTerms } = zhHantTerminology.tagStructure;
 const { forms: unitSlugTerms } = zhHantTerminology.unitSlug;
 const { forms: zoneTerms } = zhHantTerminology.zone;
+const { forms: entityTerms } = zhHantTerminology.entity;
 
 export default {
 	MalformedRequestBody: "無法解析提交內容的格式。",
@@ -138,8 +139,8 @@ export default {
 	ReplyDepthExceeded: "該回覆超過討論串的最大層級。",
 	InvalidNotificationCursor: "該通知分頁連結無效或已過期。",
 	NotificationNotFound: "找不到這則通知。",
-	EntityEntryNotFound: "找不到這個實體條目。",
-	EntityAssociationRestricted: "該實體不接受這種結構化關聯。",
+	EntityEntryNotFound: `找不到這個${entityTerms.label}條目。`,
+	EntityAssociationRestricted: `該${entityTerms.label}不接受這種結構化關聯。`,
 	AssociationProposalNotFound: "找不到這項關聯提案。",
 	AssociationProposalConflict: "這項關聯提案已無法繼續處理。",
 	AssociationProposalExpired: "這項關聯提案已過期。",

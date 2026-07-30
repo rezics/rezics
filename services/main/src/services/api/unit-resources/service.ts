@@ -1,0 +1,103 @@
+import { eq } from "drizzle-orm";
+
+import { database } from "../../database";
+import { entity, tag, unit, unitAccessGrant, unitLocalization } from "../../database/schema";
+import { UnitNotFound } from "../../units/errors";
+import { recordUnitRevision } from "../../units/history";
+import {
+	createCommunityContributedUnitAccess,
+	createProfileOwnedUnitAccess,
+	createPublicEditableUnitAccess,
+} from "../../authorization/unit/ownership";
+import { insertUnit } from "../../units/create";
+import {
+	toUnitLocalizationStorage,
+	unitLocalizationImageAssetReferences,
+} from "../../units/localization";
+import { ensureImageAssetsAttachable } from "../image-assets/service";
+import { createProfilePublisherAttribution } from "../../units/attribution";
+import { OfficialProfileIds } from "../../bootstrap/manifest";
+import type { CreateUnitResourceBody, CreateEntityBody } from "./schema";
+
+export function createUnitResource(
+	type: "entity",
+	ownerId: string,
+	body: CreateEntityBody,
+): Promise<string>;
+export function createUnitResource(
+	type: "tag",
+	ownerId: string,
+	body: CreateUnitResourceBody,
+): Promise<string>;
+export async function createUnitResource(
+	type: "entity" | "tag",
+	ownerId: string,
+	body: CreateUnitResourceBody | CreateEntityBody,
+) {
+	return database.transaction(async (tx) => {
+		await ensureImageAssetsAttachable(
+			tx,
+			ownerId,
+			unitLocalizationImageAssetReferences(body.localization),
+		);
+		const created = await insertUnit(tx, {
+			kind: type,
+			status: "published",
+			visibility: "public",
+			publishedAt: new Date(),
+			statusActor: { kind: "profile", profileId: ownerId },
+		});
+		if (type === "entity") {
+			if (!("ownershipMode" in body))
+				throw new TypeError("Entity creation requires an ownership mode");
+			await tx.insert(entity).values({ id: created.id, kind: body.kind ?? "person" });
+			const grantedByProfileId =
+				body.ownershipMode === "community_owned" ? OfficialProfileIds.community : ownerId;
+			await tx.insert(unitAccessGrant).values(
+				(
+					[
+						"unit.read",
+						"entity.association.credit.request",
+						"entity.association.subject.request",
+						"entity.association.subject.direct",
+					] as const
+				).map((permission) => ({
+					unitId: created.id,
+					subjectKind: "authenticated" as const,
+					permission,
+					scope: [],
+					grantedByProfileId,
+				})),
+			);
+		} else await tx.insert(tag).values({ id: created.id });
+		await tx
+			.insert(unitLocalization)
+			.values({ unitId: created.id, ...toUnitLocalizationStorage(body.localization) });
+		if (type === "entity") {
+			if (!("ownershipMode" in body))
+				throw new TypeError("Entity creation requires an ownership mode");
+			if (body.ownershipMode === "profile_owned") {
+				await createProfileOwnedUnitAccess(tx, created.id, ownerId);
+				await createProfilePublisherAttribution(tx, {
+					sourceUnitId: created.id,
+					profileId: ownerId,
+				});
+			} else await createPublicEditableUnitAccess(tx, created.id);
+		} else await createCommunityContributedUnitAccess(tx, created.id, ownerId);
+		await recordUnitRevision(tx, {
+			unitId: created.id,
+			actorProfileId: ownerId,
+			event: "create",
+		});
+		return created.id;
+	});
+}
+
+export async function checkUnitType(unitId: string, type: (typeof unit.$inferSelect)["kind"]) {
+	const [unitRecord] = await database
+		.select({ type: unit.kind })
+		.from(unit)
+		.where(eq(unit.id, unitId))
+		.limit(1);
+	if (!unitRecord || unitRecord.type !== type) throw new UnitNotFound();
+}

@@ -281,6 +281,30 @@ publicationLicense	The terms under which a Unit's work is made available to the 
 publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	ja	approved	inline	公開ライセンス	Publication license
 publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	ko	approved	label	게시 라이선스	Publication license
 publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	ko	approved	inline	게시 라이선스	Publication license
+entity	A Unit representing a person, organization, or platform that can participate in attributions and subject associations.	en	approved	label	Entity	Catalog | catalog
+entity	A Unit representing a person, organization, or platform that can participate in attributions and subject associations.	en	approved	pluralLabel	Entities	Catalog | catalog
+entity	A Unit representing a person, organization, or platform that can participate in attributions and subject associations.	en	approved	inline	entity	Catalog | catalog
+entity	A Unit representing a person, organization, or platform that can participate in attributions and subject associations.	en	approved	plural	entities	Catalog | catalog
+entity	A Unit representing a person, organization, or platform that can participate in attributions and subject associations.	zh-Hant	approved	label	實體	Catalog | Entity
+entity	A Unit representing a person, organization, or platform that can participate in attributions and subject associations.	zh-Hant	approved	pluralLabel	實體	Catalog | Entity
+entity	A Unit representing a person, organization, or platform that can participate in attributions and subject associations.	zh-Hant	approved	inline	實體	Catalog | Entity
+entity	A Unit representing a person, organization, or platform that can participate in attributions and subject associations.	zh-Hant	approved	plural	實體	Catalog | Entity
+entity	A Unit representing a person, organization, or platform that can participate in attributions and subject associations.	zh-Hans	approved	label	实体	Catalog | Entity
+entity	A Unit representing a person, organization, or platform that can participate in attributions and subject associations.	zh-Hans	approved	pluralLabel	实体	Catalog | Entity
+entity	A Unit representing a person, organization, or platform that can participate in attributions and subject associations.	zh-Hans	approved	inline	实体	Catalog | Entity
+entity	A Unit representing a person, organization, or platform that can participate in attributions and subject associations.	zh-Hans	approved	plural	实体	Catalog | Entity
+entity	A Unit representing a person, organization, or platform that can participate in attributions and subject associations.	de	approved	label	Entität	Catalog
+entity	A Unit representing a person, organization, or platform that can participate in attributions and subject associations.	de	approved	pluralLabel	Entitäten	Catalog
+entity	A Unit representing a person, organization, or platform that can participate in attributions and subject associations.	de	approved	inline	Entität	Catalog
+entity	A Unit representing a person, organization, or platform that can participate in attributions and subject associations.	de	approved	plural	Entitäten	Catalog
+entity	A Unit representing a person, organization, or platform that can participate in attributions and subject associations.	ja	approved	label	エンティティ	Catalog
+entity	A Unit representing a person, organization, or platform that can participate in attributions and subject associations.	ja	approved	pluralLabel	エンティティ	Catalog
+entity	A Unit representing a person, organization, or platform that can participate in attributions and subject associations.	ja	approved	inline	エンティティ	Catalog
+entity	A Unit representing a person, organization, or platform that can participate in attributions and subject associations.	ja	approved	plural	エンティティ	Catalog
+entity	A Unit representing a person, organization, or platform that can participate in attributions and subject associations.	ko	approved	label	엔터티	Catalog
+entity	A Unit representing a person, organization, or platform that can participate in attributions and subject associations.	ko	approved	pluralLabel	엔터티	Catalog
+entity	A Unit representing a person, organization, or platform that can participate in attributions and subject associations.	ko	approved	inline	엔터티	Catalog
+entity	A Unit representing a person, organization, or platform that can participate in attributions and subject associations.	ko	approved	plural	엔터티	Catalog
 metadata	Structured administrative and type-specific information about a Unit, distinct from its localized editorial content.	en	approved	label	Metadata	Basic information
 metadata	Structured administrative and type-specific information about a Unit, distinct from its localized editorial content.	en	approved	inline	metadata	Basic information
 metadata	Structured administrative and type-specific information about a Unit, distinct from its localized editorial content.	zh-Hant	approved	label	中繼資料	Metadata | 基本資訊

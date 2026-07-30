@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import {
+	CurrentUnitContentLicenseSlug,
 	isPublicationLicenseId,
+	isUnitContentLicenseSlug,
 	parseNullablePublicationLicenseId,
+	parseUnitContentLicenseSlug,
 	PublicationLicenseIds,
 	PublicationLicenseRegistry,
+	UnitContentLicenseSlugs,
 } from ".";
 
 describe("publication License registry", () => {
@@ -37,5 +41,18 @@ describe("publication License registry", () => {
 		expect(isPublicationLicenseId("unknown")).toBe(false);
 		expect(() => parseNullablePublicationLicenseId("unknown")).toThrow();
 		expect(parseNullablePublicationLicenseId(null)).toBeNull();
+	});
+
+	it("keeps Unit content license slugs closed and versioned", () => {
+		expect(UnitContentLicenseSlugs).toEqual(["rezics-unit-content-license-v1"]);
+		expect(CurrentUnitContentLicenseSlug).toBe("rezics-unit-content-license-v1");
+		expect(isUnitContentLicenseSlug(CurrentUnitContentLicenseSlug)).toBe(true);
+		expect(isUnitContentLicenseSlug("rezics-unit-content-license-v2")).toBe(false);
+		expect(parseUnitContentLicenseSlug(CurrentUnitContentLicenseSlug)).toBe(
+			CurrentUnitContentLicenseSlug,
+		);
+		expect(() => parseUnitContentLicenseSlug("unknown")).toThrow(
+			"Unknown Unit content license slug",
+		);
 	});
 });

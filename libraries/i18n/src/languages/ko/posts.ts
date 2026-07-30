@@ -22,7 +22,7 @@ export default {
 	publisher: "게시자",
 	wikiCreateTitle: "위키 항목 만들기",
 	wikiAccessMode: "편집 권한",
-	wikiPublicEntry: "공개 항목",
+	wikiCommunityUnit: "공개 항목",
 	wikiPublicDescription:
 		"로그인한 모든 사용자가 편집할 수 있으며 생성자에게 별도 권한은 부여되지 않습니다.",
 	wikiRestricted: "제한됨",

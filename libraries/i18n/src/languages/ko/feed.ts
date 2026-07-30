@@ -5,6 +5,7 @@ import { koTerminology } from "@rezics/i18n/terminology/ko";
 const { forms: followTerms } = koTerminology.follow;
 const { forms: postTerms } = koTerminology.post;
 const { forms: realmTerms } = koTerminology.realm;
+const { forms: entityTerms } = koTerminology.entity;
 const { forms: tagStructureTerms } = koTerminology.tagStructure;
 const { forms: zoneTerms } = koTerminology.zone;
 
@@ -50,7 +51,7 @@ export default {
 			"unit:software": "소프트웨어",
 			"unit:media": "미디어",
 			"unit:release": "발매",
-			"unit:entity": "카탈로그 항목",
+			"unit:entity": entityTerms.pluralLabel,
 			"unit:tag": "태그",
 			"unit:structure": tagStructureTerms.pluralLabel,
 			"unit:series": "시리즈",

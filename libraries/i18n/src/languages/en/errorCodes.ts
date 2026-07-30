@@ -8,6 +8,7 @@ const { forms: realmTerms } = enTerminology.realm;
 const { forms: tagStructureTerms } = enTerminology.tagStructure;
 const { forms: unitSlugTerms } = enTerminology.unitSlug;
 const { forms: zoneTerms } = enTerminology.zone;
+const { forms: entityTerms } = enTerminology.entity;
 
 export default {
 	MalformedRequestBody: "The submitted content could not be read.",
@@ -150,8 +151,8 @@ export default {
 	ReplyDepthExceeded: "This reply would exceed the maximum thread depth.",
 	InvalidNotificationCursor: "This notification page link is invalid or expired.",
 	NotificationNotFound: "This notification could not be found.",
-	EntityEntryNotFound: "This entity entry could not be found.",
-	EntityAssociationRestricted: "This entity does not accept that kind of association.",
+	EntityEntryNotFound: `This ${entityTerms.inline} entry could not be found.`,
+	EntityAssociationRestricted: `This ${entityTerms.inline} does not accept that kind of association.`,
 	AssociationProposalNotFound: "This association proposal could not be found.",
 	AssociationProposalConflict: "This association proposal is no longer actionable.",
 	AssociationProposalExpired: "This association proposal has expired.",

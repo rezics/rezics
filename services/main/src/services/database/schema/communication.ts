@@ -28,7 +28,9 @@ import {
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
 } from "./columns";
-import { profile, unit, unitFollow } from "./core";
+import { unitFollow } from "./follow";
+import { profile } from "./profile";
+import { unit } from "./unit";
 
 export const notificationKind = pgEnum("notification_kind", toEnumValues(NotificationKindValues));
 export const notificationEmailStatus = pgEnum("notification_email_status", [

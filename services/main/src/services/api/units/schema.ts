@@ -1,7 +1,8 @@
 import { type Static, t } from "elysia";
 import { ContentLanguageValues } from "@rezics/i18n";
+import { UnitContentLicenseSlugs } from "@rezics/license";
 import {
-	CatalogEntryModeValues,
+	UnitOwnershipModeValues,
 	GovernanceReasonCodeValues,
 	RealmUnitPublicationStateValues,
 	RealmUnitStatusValues,
@@ -25,19 +26,19 @@ export const VariantUnitType = t.Union([
 ]);
 export type VariantUnitType = Static<typeof VariantUnitType>;
 
-export const CatalogUnitType = t.Union([VariantUnitType, t.Literal("series")]);
-export type CatalogUnitType = Static<typeof CatalogUnitType>;
+export const WorkUnitType = t.Union([VariantUnitType, t.Literal("series")]);
+export type WorkUnitType = Static<typeof WorkUnitType>;
 export const TimedMediaUnitType = t.Union([t.Literal("video"), t.Literal("audio")]);
 export type TimedMediaUnitType = Static<typeof TimedMediaUnitType>;
-export const ManageableUnitType = t.Union([CatalogUnitType, TimedMediaUnitType]);
+export const ManageableUnitType = t.Union([WorkUnitType, TimedMediaUnitType]);
 export type ManageableUnitType = Static<typeof ManageableUnitType>;
 
 export const VariantUnitTypeParams = t.Object({ type: VariantUnitType });
-export const CatalogUnitTypeParams = t.Object({ type: CatalogUnitType });
+export const WorkUnitTypeParams = t.Object({ type: WorkUnitType });
 export const ManageableUnitTypeParams = t.Object({ type: ManageableUnitType });
 
-export const CatalogEntryMode = t.Union(CatalogEntryModeValues.map((value) => t.Literal(value)));
-export type CatalogEntryMode = Static<typeof CatalogEntryMode>;
+export const UnitOwnershipMode = t.Union(UnitOwnershipModeValues.map((value) => t.Literal(value)));
+export type UnitOwnershipMode = Static<typeof UnitOwnershipMode>;
 
 export const PublisherEntityInput = t.Object({ entityId: Uuid }, { additionalProperties: false });
 export type PublisherEntityInput = Static<typeof PublisherEntityInput>;
@@ -162,7 +163,7 @@ const CreateUnitFields = {
 export const CreateUnitBody = t.Union([
 	t.Object(
 		{
-			catalogMode: t.Literal("owned_work"),
+			ownershipMode: t.Literal("profile_owned"),
 			publisher: PublisherEntityInput,
 			...CreateUnitFields,
 		},
@@ -170,7 +171,7 @@ export const CreateUnitBody = t.Union([
 	),
 	t.Object(
 		{
-			catalogMode: t.Literal("public_entry"),
+			ownershipMode: t.Literal("community_owned"),
 			publisher: t.Optional(PublisherEntityInput),
 			...CreateUnitFields,
 		},
@@ -186,7 +187,14 @@ const UnitDetailsInput = t.Object(
 		pageCount: t.Optional(t.Nullable(t.Integer({ minimum: 1 }))),
 		wordCount: t.Optional(t.Nullable(t.Integer({ minimum: 0 }))),
 		format: t.Optional(t.Nullable(t.String())),
-		licensed: t.Optional(t.Boolean()),
+		contentLicense: t.Optional(
+			t.Nullable(
+				t.Object(
+					{ referenceLicenseSlug: t.UnionEnum(UnitContentLicenseSlugs) },
+					{ additionalProperties: false },
+				),
+			),
+		),
 		versionLabel: t.Optional(t.Nullable(t.String())),
 		kind: t.Optional(t.String({ minLength: 1 })),
 		runtimeMinutes: t.Optional(t.Nullable(t.Integer({ minimum: 1 }))),

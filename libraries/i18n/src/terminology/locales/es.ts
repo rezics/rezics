@@ -91,6 +91,16 @@ export const esTerminology = defineTerminology("es", {
 		forms: { label: "Licencia de publicación", inline: "licencia de publicación" },
 		forbidden: [],
 	},
+	entity: {
+		status: "approved",
+		forms: {
+			label: "Entidad",
+			pluralLabel: "Entidades",
+			inline: "entidad",
+			plural: "entidades",
+		},
+		forbidden: ["Catalog"],
+	},
 	metadata: {
 		status: "approved",
 		forms: { label: "Metadatos", inline: "metadatos" },

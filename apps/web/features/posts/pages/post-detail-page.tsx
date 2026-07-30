@@ -34,8 +34,8 @@ import { RelatedPostRecommendations } from "../post-list";
 import { ReplyPostThread } from "../reply-thread";
 import { postManagementSectionHref } from "../routing/post-management-routes";
 import { postHref, type PostInteractionContext } from "../url";
-import { isCatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
-import { catalogDetailHref } from "@/features/units/routing/catalog-detail-routes";
+import { isUnitDetailUnitType } from "@/features/units/model/unit-detail-section";
+import { unitDetailHref } from "@/features/units/routing/unit-detail-routes";
 
 type WikiPost = Extract<GetApiPostsByPostIdStatus200, { postKind: "wiki" }>;
 
@@ -99,8 +99,8 @@ export function PostDetailPage({
 		return <QueryPending />;
 	const post = query.data;
 	const discussionHref =
-		returnToDiscussion && post.subject && isCatalogDetailUnitType(post.subject.type)
-			? catalogDetailHref(post.subject.type, post.subject.id, "discussion")
+		returnToDiscussion && post.subject && isUnitDetailUnitType(post.subject.type)
+			? unitDetailHref(post.subject.type, post.subject.id, "discussion")
 			: undefined;
 	if (wikiZone && context?.kind !== "zone") return <QueryPending />;
 	const changeRealm = (nextContext: PostRealmContextSelection) => {

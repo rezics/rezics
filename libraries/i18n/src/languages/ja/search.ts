@@ -6,11 +6,12 @@ const { forms: postTerms } = jaTerminology.post;
 const { forms: realmTerms } = jaTerminology.realm;
 const { forms: zoneTerms } = jaTerminology.zone;
 const { forms: tagStructureTerms } = jaTerminology.tagStructure;
+const { forms: entityTerms } = jaTerminology.entity;
 const { forms: followTerms } = jaTerminology.follow;
 
 export default {
 	title: "検索",
-	placeholder: `ユニット、エンティティ、タグ、${postTerms.plural}、${realmTerms.plural}、またはユーザーを検索`,
+	placeholder: `作品、${entityTerms.label}、タグ、${postTerms.plural}、${realmTerms.plural}、またはユーザーを検索`,
 	withinLabel: insert("{{name}}内を検索", { name: String }),
 	withinPlaceholder: insert("{{name}}を検索", { name: String }),
 	advancedFilters: "高度なフィルター",
@@ -39,7 +40,7 @@ export default {
 	resultGroups: {
 		units: "作品",
 		users: "ユーザー",
-		entity: "カタログ",
+		entities: entityTerms.pluralLabel,
 		tags: "タグ",
 		"tag-structures": tagStructureTerms.pluralLabel,
 		posts: postTerms.plural,
@@ -51,7 +52,7 @@ export default {
 	categoryOptions: {
 		units: "作品",
 		users: "ユーザー",
-		entity: "カタログ",
+		entities: entityTerms.pluralLabel,
 		tags: "タグ",
 		"tag-structures": tagStructureTerms.pluralLabel,
 		posts: postTerms.plural,
@@ -173,8 +174,7 @@ export default {
 		"updated-at": "更新日",
 		"published-at": "公開日",
 		"closes-at": "終了日",
-		"catalog-licensed": "カタログライセンス利用可能",
-		"catalog-release-date": "カタログ公開日",
+		"content-license": "ユニットコンテンツライセンス有効",
 		"book-isbn13": verbatimTerms.isbn13.value,
 		"book-publication-date": "出版日",
 		"book-page-count": "ページ数",

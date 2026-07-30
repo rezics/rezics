@@ -3,7 +3,7 @@ import { check, foreignKey, index, text, unique, uuid } from "drizzle-orm/pg-cor
 
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createUuidv7PrimaryKey } from "./columns";
-import { profile } from "./core";
+import { profile } from "./profile";
 import { unitDock } from "./dock";
 import { revisionContent } from "./history";
 

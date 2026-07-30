@@ -7,7 +7,7 @@ import {
 	FractionalPosition,
 	Uuid,
 } from "../schema";
-import { CatalogUnitType } from "../units/schema";
+import { WorkUnitType } from "../units/schema";
 import { AvatarResponse } from "../schema/response";
 
 const TagVoteValue = t.Nullable(t.Union([t.Literal(-1), t.Literal(1)]));
@@ -23,7 +23,7 @@ const LocalizedTagSummary = {
 } as const;
 
 export const UnitTagLandscapeParams = t.Object({
-	type: CatalogUnitType,
+	type: WorkUnitType,
 	unitId: Uuid,
 });
 export type UnitTagLandscapeParams = Static<typeof UnitTagLandscapeParams>;
@@ -247,7 +247,7 @@ export const VoteSummaryResponse = t.Object({
 });
 
 export const UnitTagStructureParams = t.Object({
-	type: CatalogUnitType,
+	type: WorkUnitType,
 	unitId: Uuid,
 	structureId: Uuid,
 });

@@ -34,7 +34,8 @@ import {
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
 } from "./columns";
-import { profile, unit } from "./core";
+import { profile } from "./profile";
+import { unit } from "./unit";
 
 export const realmJoinPolicy = pgEnum("realm_join_policy", toEnumValues(RealmJoinPolicyValues));
 export const realmMemberState = pgEnum("realm_member_state", toEnumValues(RealmMemberStateValues));

@@ -4,26 +4,26 @@ import { ownershipClaimPlacement } from "./ownership-claim-placement";
 
 describe("ownership claim placement", () => {
 	it("shows a public Entity claim outside the overflow menu", () => {
-		expect(ownershipClaimPlacement({ unitType: "entity", catalogMode: "public_entry" })).toBe(
-			"external",
-		);
+		expect(
+			ownershipClaimPlacement({ unitType: "entity", ownershipMode: "community_owned" }),
+		).toBe("external");
 	});
 
 	it.each(["book", "media", "software"])(
 		"keeps a public %s claim in the overflow menu",
 		(unitType) => {
-			expect(ownershipClaimPlacement({ unitType, catalogMode: "public_entry" })).toBe(
+			expect(ownershipClaimPlacement({ unitType, ownershipMode: "community_owned" })).toBe(
 				"overflow",
 			);
 		},
 	);
 
 	it("does not offer claims for owned or unsupported entries", () => {
-		expect(ownershipClaimPlacement({ unitType: "entity", catalogMode: "owned_work" })).toBe(
-			"none",
-		);
-		expect(ownershipClaimPlacement({ unitType: "series", catalogMode: "public_entry" })).toBe(
-			"none",
-		);
+		expect(
+			ownershipClaimPlacement({ unitType: "entity", ownershipMode: "profile_owned" }),
+		).toBe("none");
+		expect(
+			ownershipClaimPlacement({ unitType: "series", ownershipMode: "community_owned" }),
+		).toBe("none");
 	});
 });

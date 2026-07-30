@@ -10,6 +10,7 @@ import {
 	parseDocument,
 	type PortableTextDocument as PortableTextDocumentValue,
 } from "@rezics/block";
+import { UnitContentLicenseSlugs } from "@rezics/license";
 import {
 	ChineseContentDisplay,
 	ContentLanguage,
@@ -242,6 +243,15 @@ const ManageableUnitTypeResponse = t.Union([
 	t.Literal("audio"),
 ]);
 
+const UnitContentLicenseResponse = t.Object(
+	{
+		referenceLicenseSlug: t.UnionEnum(UnitContentLicenseSlugs),
+		grantedByProfileId: Uuid,
+		grantedAt: DateTime,
+	},
+	{ additionalProperties: false },
+);
+
 const UnitDetailsResponse = t.Union([
 	t.Object(
 		{
@@ -249,11 +259,11 @@ const UnitDetailsResponse = t.Union([
 			isbn13: NullableText,
 			publicationDate: t.Nullable(t.String({ format: "date" })),
 			pageCount: t.Nullable(t.Integer({ minimum: 1 })),
-			/** Editorial catalog metadata; never derived from hosted chapters. */
+			/** Editorial metadata; never derived from hosted chapters. */
 			wordCount: t.Nullable(t.Integer({ minimum: 0 })),
 			publishedContentMetrics: t.Array(LocalizedContentMetricResponse),
 			format: NullableText,
-			licensed: t.Boolean(),
+			contentLicense: t.Nullable(UnitContentLicenseResponse),
 		},
 		{ additionalProperties: false },
 	),
@@ -262,7 +272,7 @@ const UnitDetailsResponse = t.Union([
 			type: t.Literal("software"),
 			releaseDate: t.Nullable(t.String({ format: "date" })),
 			versionLabel: NullableText,
-			licensed: t.Boolean(),
+			contentLicense: t.Nullable(UnitContentLicenseResponse),
 		},
 		{ additionalProperties: false },
 	),
@@ -274,7 +284,7 @@ const UnitDetailsResponse = t.Union([
 			runtimeMinutes: t.Nullable(t.Integer({ minimum: 1 })),
 			episodeCount: t.Nullable(t.Integer({ minimum: 1 })),
 			seasonCount: t.Nullable(t.Integer({ minimum: 1 })),
-			licensed: t.Boolean(),
+			contentLicense: t.Nullable(UnitContentLicenseResponse),
 		},
 		{ additionalProperties: false },
 	),
@@ -394,7 +404,7 @@ export const UnitDetailResponse = t.Object({
 		}),
 	),
 	variantContext: UnitVariantContextResponse,
-	catalogMode: t.UnionEnum(["owned_work", "public_entry"]),
+	ownershipMode: t.UnionEnum(["profile_owned", "community_owned"]),
 	ownershipClaim: t.Nullable(PendingUnitOwnershipClaimSummaryResponse),
 	capabilities: t.Object({
 		canEdit: t.Boolean(),
@@ -963,7 +973,7 @@ export const EntityDetailResponse = t.Object({
 	id: Uuid,
 	kind: t.String(),
 	verified: t.Boolean(),
-	catalogMode: t.UnionEnum(["owned_work", "public_entry"]),
+	ownershipMode: t.UnionEnum(["profile_owned", "community_owned"]),
 	ownershipClaim: t.Nullable(PendingUnitOwnershipClaimSummaryResponse),
 	language: t.Nullable(ContentLanguage),
 	avatar: AvatarResponse,

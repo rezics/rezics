@@ -23,7 +23,7 @@ export const CurrentProjectionSources = {
 	poll: ["id"],
 	unit_follow_stat: ["unit_id"],
 	book: ["id"],
-	catalog_unit_content_license: ["unit_id"],
+	unit_content_license: ["unit_id"],
 	media: ["id"],
 	software: ["id"],
 	software_requirement: ["software_id"],

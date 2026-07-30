@@ -35,7 +35,8 @@ import {
 } from "./columns";
 import { contentStructureNode } from "./content-structure";
 import { contentStructureRevision } from "./content-structure-history";
-import { profile, resourceVisibility, unit } from "./core";
+import { profile } from "./profile";
+import { resourceVisibility, unit } from "./unit";
 import { post } from "./post";
 
 export const progressStatus = pgEnum("progress_status", toEnumValues(ProgressStatusValues));

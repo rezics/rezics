@@ -1031,7 +1031,7 @@ export function putApiNotificationsPreferences<ThrowOnError extends boolean = tr
 }
 
 /**
- * @summary Claim ownership of a public catalog entry
+ * @summary Claim ownership of a community-owned Unit
  * {@link /api/ownership-claims}
  */
 export function postApiOwnershipClaims<ThrowOnError extends boolean = true>(
@@ -1065,7 +1065,7 @@ export function postApiOwnershipClaimsByClaimIdWithdraw<ThrowOnError extends boo
 }
 
 /**
- * @summary Recommend catalog units
+ * @summary Recommend Units
  * {@link /api/recommendations/units}
  */
 export function getApiRecommendationsUnits<ThrowOnError extends boolean = true>(

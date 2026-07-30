@@ -40,7 +40,8 @@ import {
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
 } from "./columns";
-import { moderationStatus, profile, unit } from "./core";
+import { profile } from "./profile";
+import { moderationStatus, unit } from "./unit";
 import { unitRevision } from "./history";
 import { post } from "./post";
 

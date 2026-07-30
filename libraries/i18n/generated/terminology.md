@@ -363,6 +363,37 @@ The terms under which a Unit's work is made available to the public; this is not
 | ko | approved | label | 게시 라이선스 | Publication license |
 | ko | approved | inline | 게시 라이선스 | Publication license |
 
+## entity
+
+A Unit representing a person, organization, or platform that can participate in attributions and subject associations.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Entity | Catalog, catalog |
+| en | approved | pluralLabel | Entities | Catalog, catalog |
+| en | approved | inline | entity | Catalog, catalog |
+| en | approved | plural | entities | Catalog, catalog |
+| zh-Hant | approved | label | 實體 | Catalog, Entity |
+| zh-Hant | approved | pluralLabel | 實體 | Catalog, Entity |
+| zh-Hant | approved | inline | 實體 | Catalog, Entity |
+| zh-Hant | approved | plural | 實體 | Catalog, Entity |
+| zh-Hans | approved | label | 实体 | Catalog, Entity |
+| zh-Hans | approved | pluralLabel | 实体 | Catalog, Entity |
+| zh-Hans | approved | inline | 实体 | Catalog, Entity |
+| zh-Hans | approved | plural | 实体 | Catalog, Entity |
+| de | approved | label | Entität | Catalog |
+| de | approved | pluralLabel | Entitäten | Catalog |
+| de | approved | inline | Entität | Catalog |
+| de | approved | plural | Entitäten | Catalog |
+| ja | approved | label | エンティティ | Catalog |
+| ja | approved | pluralLabel | エンティティ | Catalog |
+| ja | approved | inline | エンティティ | Catalog |
+| ja | approved | plural | エンティティ | Catalog |
+| ko | approved | label | 엔터티 | Catalog |
+| ko | approved | pluralLabel | 엔터티 | Catalog |
+| ko | approved | inline | 엔터티 | Catalog |
+| ko | approved | plural | 엔터티 | Catalog |
+
 ## metadata
 
 Structured administrative and type-specific information about a Unit, distinct from its localized editorial content.

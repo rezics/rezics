@@ -5,7 +5,7 @@ import { Button, Card, CardContent } from "@rezics/ui";
 import { ChevronRight } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
-import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
+import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
 import { useTranslation } from "@/i18n/client";
 import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
 import type { TagPresentation } from "../model/tag-presentation";
@@ -55,7 +55,7 @@ export function TagStructureList({
 	readonly selectionMode: boolean;
 	readonly structures: readonly TagStructure[];
 	readonly surface: "section" | "page";
-	readonly type: CatalogDetailUnitType;
+	readonly type: UnitDetailUnitType;
 }) {
 	const { t } = useTranslation(["tags"]);
 	if (!structures.length) {

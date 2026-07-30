@@ -42,12 +42,11 @@ import {
 	seriesRelease,
 	subjectAssociation,
 	unit,
-	CatalogEntryModeValues,
 	UnitKindValues,
 	VariantCapableUnitKindValues,
 	unitAlias,
 	creditAttribution,
-	unitLink,
+	unitSourceLink,
 	unitLocalization,
 	unitRevision,
 	unitRevisionHead,
@@ -153,7 +152,6 @@ type UnitSnapshot = z.infer<typeof UnitSnapshotSchema>;
 const schemaFactory = createSchemaFactory({ coerce: { date: true } });
 const unitStateSchema = schemaFactory
 	.createSelectSchema(unit, {
-		catalogMode: z.enum(CatalogEntryModeValues),
 		license: z.enum(PublicationLicenseIds).nullable(),
 	})
 	.omit({
@@ -239,7 +237,7 @@ const subjectAssociationRowSchema = schemaFactory.createSelectSchema(subjectAsso
 	position: FractionalPositionSchema,
 	role: z.enum(SubjectAssociationRoleValues),
 });
-const unitLinkRowSchema = schemaFactory.createSelectSchema(unitLink, {
+const unitSourceLinkRowSchema = schemaFactory.createSelectSchema(unitSourceLink, {
 	position: FractionalPositionSchema,
 });
 const unitTagRowSchema = schemaFactory.createSelectSchema(unitTag, {
@@ -437,9 +435,9 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 		.orderBy(subjectAssociation.id);
 	const links = await tx
 		.select()
-		.from(unitLink)
-		.where(eq(unitLink.unitId, unitId))
-		.orderBy(unitLink.id);
+		.from(unitSourceLink)
+		.where(eq(unitSourceLink.unitId, unitId))
+		.orderBy(unitSourceLink.id);
 	const tags = await tx
 		.select()
 		.from(unitTag)
@@ -780,7 +778,7 @@ export async function restoreUnitSnapshot(
 		await tx.delete(softwareRequirement).where(eq(softwareRequirement.softwareId, unitId));
 	await tx.delete(creditAttribution).where(eq(creditAttribution.sourceUnitId, unitId));
 	await tx.delete(subjectAssociation).where(eq(subjectAssociation.unitId, unitId));
-	await tx.delete(unitLink).where(eq(unitLink.unitId, unitId));
+	await tx.delete(unitSourceLink).where(eq(unitSourceLink.unitId, unitId));
 	await tx.delete(unitTag).where(eq(unitTag.unitId, unitId));
 	await tx.delete(unitStructureApplication).where(eq(unitStructureApplication.unitId, unitId));
 	await tx.delete(unitVariant).where(eq(unitVariant.variantUnitId, unitId));
@@ -788,8 +786,8 @@ export async function restoreUnitSnapshot(
 	if (subjectAssociations.length) await tx.insert(subjectAssociation).values(subjectAssociations);
 	if (snapshot.owned.links.length)
 		await tx
-			.insert(unitLink)
-			.values(snapshot.owned.links.map((row) => unitLinkRowSchema.parse(row)));
+			.insert(unitSourceLink)
+			.values(snapshot.owned.links.map((row) => unitSourceLinkRowSchema.parse(row)));
 	if (snapshot.owned.tags.length)
 		await tx
 			.insert(unitTag)

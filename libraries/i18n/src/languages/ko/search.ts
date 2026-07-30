@@ -6,11 +6,12 @@ const { forms: postTerms } = koTerminology.post;
 const { forms: realmTerms } = koTerminology.realm;
 const { forms: zoneTerms } = koTerminology.zone;
 const { forms: tagStructureTerms } = koTerminology.tagStructure;
+const { forms: entityTerms } = koTerminology.entity;
 const { forms: followTerms } = koTerminology.follow;
 
 export default {
 	title: "검색",
-	placeholder: `유닛, 엔티티, 태그, ${postTerms.plural}, ${realmTerms.plural} 또는 사용자를 검색`,
+	placeholder: `작품, ${entityTerms.label}, 태그, ${postTerms.plural}, ${realmTerms.plural} 또는 사용자를 검색`,
 	withinLabel: insert("{{name}} 내에서 검색", { name: String }),
 	withinPlaceholder: insert("{{name}} 검색", { name: String }),
 	advancedFilters: "고급 필터",
@@ -39,7 +40,7 @@ export default {
 	resultGroups: {
 		units: "작품",
 		users: "사용자",
-		entity: "카탈로그",
+		entities: entityTerms.pluralLabel,
 		tags: "태그",
 		"tag-structures": tagStructureTerms.pluralLabel,
 		posts: postTerms.plural,
@@ -51,7 +52,7 @@ export default {
 	categoryOptions: {
 		units: "작품",
 		users: "사용자",
-		entity: "카탈로그",
+		entities: entityTerms.pluralLabel,
 		tags: "태그",
 		"tag-structures": tagStructureTerms.pluralLabel,
 		posts: postTerms.plural,
@@ -173,8 +174,7 @@ export default {
 		"updated-at": "업데이트 날짜",
 		"published-at": "게시 날짜",
 		"closes-at": "마감 날짜",
-		"catalog-licensed": "카탈로그 사용 가능한 라이선스",
-		"catalog-release-date": "카탈로그 발표 날짜",
+		"content-license": "유닛 콘텐츠 라이선스 활성",
 		"book-isbn13": verbatimTerms.isbn13.value,
 		"book-publication-date": "출판 날짜",
 		"book-page-count": "페이지 수",

@@ -9,7 +9,8 @@ import {
 	fractionalIndexPosition,
 } from "./columns";
 import { DefaultResourceVisibility } from "./contract-values";
-import { profile, resourceVisibility, unit } from "./core";
+import { profile } from "./profile";
+import { resourceVisibility, unit } from "./unit";
 import { post } from "./post";
 import { realm, realmUnit } from "./realm";
 

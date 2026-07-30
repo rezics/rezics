@@ -4,7 +4,7 @@ import type { ContentLanguage } from "@rezics/i18n";
 import type { ReactNode } from "react";
 
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
-import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
+import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
 import type { TagPresentation } from "../model/tag-presentation";
 import { TagBadgeCard } from "./tag-badge-card";
 
@@ -40,7 +40,7 @@ export function TagContextSection({
 	readonly selectionMode: boolean;
 	readonly title: string;
 	readonly titleLanguage?: ContentLanguage | null;
-	readonly type: CatalogDetailUnitType;
+	readonly type: UnitDetailUnitType;
 	readonly onClearVote: (item: TagPresentation) => void;
 	readonly onToggleSelected: (tagId: string, label: string) => void;
 	readonly onVote: (item: TagPresentation, value: -1 | 1) => void;

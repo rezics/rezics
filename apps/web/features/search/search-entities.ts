@@ -17,7 +17,7 @@ function indexIncludesKind(index: string, kind: string): boolean {
 	if (index === "all" || index === "units") return true;
 	const kindsByIndex: Readonly<Record<string, readonly string[]>> = {
 		users: ["profile"],
-		entity: ["entity"],
+		entities: ["entity"],
 		tags: ["tag"],
 		"tag-structures": ["structure"],
 		posts: ["post"],

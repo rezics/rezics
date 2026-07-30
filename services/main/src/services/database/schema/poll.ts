@@ -24,7 +24,8 @@ import {
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
 } from "./columns";
-import { profile, unit } from "./core";
+import { profile } from "./profile";
+import { unit } from "./unit";
 import { realm } from "./realm";
 
 export const pollMode = pgEnum("poll_mode", toEnumValues(PollModeValues));

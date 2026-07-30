@@ -5,6 +5,7 @@ import { koTerminology } from "@rezics/i18n/terminology/ko";
 
 const { forms: postTerms } = koTerminology.post;
 const { forms: realmTerms } = koTerminology.realm;
+const { forms: entityTerms } = koTerminology.entity;
 const { forms: zoneTerms } = koTerminology.zone;
 
 export default {
@@ -24,8 +25,8 @@ export default {
 		},
 		media: { label: "미디어", description: "귀하의 작업과 관련된 미디어 보기 및 관리" },
 		entity: {
-			label: "카탈로그 항목",
-			description: "귀하의 작업과 관련된 카탈로그 항목 보기 및 관리",
+			label: entityTerms.pluralLabel,
+			description: `작업과 관련된 ${entityTerms.plural} 보기 및 관리`,
 		},
 		tag: { label: "태그", description: "귀하의 작업과 관련된 태그 보기 및 관리" },
 		realm: {
@@ -55,7 +56,7 @@ export default {
 		label: `${realmTerms.label} 태그 설명`,
 		description: `이 ${realmTerms.label}에서 태그를 설명하는 위키 문서를 만듭니다.`,
 	},
-	publicEntrySearch: {
+	communityUnitSearch: {
 		policyTitle: "만들기 전에 검색하세요",
 		policy: "건강한 커뮤니티 환경을 유지하기 위해 공개 항목을 만들기 전에 검색하여 만들려는 콘텐츠가 아직 존재하지 않는지 확인하세요. 공개 항목 만들기 기능을 악용하면 제재를 받을 수 있습니다.",
 		requiredTitle: "기존 항목을 먼저 확인하세요",

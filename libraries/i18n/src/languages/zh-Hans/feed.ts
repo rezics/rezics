@@ -5,6 +5,7 @@ import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 const { forms: followTerms } = zhHansTerminology.follow;
 const { forms: postTerms } = zhHansTerminology.post;
 const { forms: realmTerms } = zhHansTerminology.realm;
+const { forms: entityTerms } = zhHansTerminology.entity;
 const { forms: tagStructureTerms } = zhHansTerminology.tagStructure;
 const { forms: zoneTerms } = zhHansTerminology.zone;
 
@@ -50,7 +51,7 @@ export default {
 			"unit:software": "软件",
 			"unit:media": "媒体",
 			"unit:release": "发行版本",
-			"unit:entity": "目录条目",
+			"unit:entity": entityTerms.pluralLabel,
 			"unit:tag": "标签",
 			"unit:structure": tagStructureTerms.pluralLabel,
 			"unit:series": "系列",

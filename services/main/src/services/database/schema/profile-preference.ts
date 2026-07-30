@@ -22,7 +22,8 @@ import {
 	type StoredUiLocale,
 	StoredUiLocaleValues,
 } from "./contract-values";
-import { contentRating, profile, resourceVisibility } from "./core";
+import { profile } from "./profile";
+import { contentRating, resourceVisibility } from "./unit";
 import { realm } from "./realm";
 
 export const profilePreference = pgTable(

@@ -39,9 +39,9 @@ import { useState } from "react";
 import { useUnitManagement } from "@/features/units/components/unit-management-workspace";
 import { UnitSectionHeader } from "@/features/units/components/unit-section-header";
 import { invalidateUnitDetail } from "@/features/units/unit-cache";
-import { isCatalogUnitType, type CatalogUnitType } from "@/features/units/unit-types";
-import { isCatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
-import { catalogTagsHref } from "@/features/units/routing/catalog-detail-routes";
+import { isWorkUnitType, type WorkUnitType } from "@/features/units/unit-types";
+import { isUnitDetailUnitType } from "@/features/units/model/unit-detail-section";
+import { unitTagsHref } from "@/features/units/routing/unit-detail-routes";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import {
@@ -66,14 +66,14 @@ export function UnitTagCurationPage() {
 	const [announcement, setAnnouncement] = useState("");
 	const groups = partitionUnitTagCuration(unit.tags);
 	const curationVersion = unit.tags.map((tag) => `${tag.tagId}:${tag.updatedAt}`).join("|");
-	if (!isCatalogUnitType(type)) return null;
+	if (!isWorkUnitType(type)) return null;
 	return (
 		<section className="grid gap-8">
 			<UnitSectionHeader
 				description={t.tags.management.description}
 				title={t.tags.management.title}
 			/>
-			{isCatalogDetailUnitType(type) ? (
+			{isUnitDetailUnitType(type) ? (
 				<Card appearance="outlined" className="max-w-3xl">
 					<CardHeader>
 						<CardTitle>{t.tags.management.addSectionTitle}</CardTitle>
@@ -81,7 +81,7 @@ export function UnitTagCurationPage() {
 					</CardHeader>
 					<CardContent>
 						<Button asChild variant="solid">
-							<Link href={catalogTagsHref(type, unit.id)}>
+							<Link href={unitTagsHref(type, unit.id)}>
 								<Plus aria-hidden />
 								{t.tags.management.addSectionAction}
 							</Link>
@@ -113,7 +113,7 @@ function UnitTagCurationEditor({
 	ranked,
 	onAnnounce,
 }: {
-	readonly type: CatalogUnitType;
+	readonly type: WorkUnitType;
 	readonly unitId: string;
 	readonly featured: readonly FeaturedTag[];
 	readonly ranked: readonly RankedTag[];

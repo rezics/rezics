@@ -3,7 +3,7 @@ import type {
 	GetApiUnitsByTypeByUnitIdTagsStatus200,
 } from "@rezics/openapi-tanstack-query";
 
-import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
+import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
 import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
 import type {
 	RealmTagGroupPresentation,
@@ -15,7 +15,7 @@ type UnitTagLandscape = GetApiUnitsByTypeByUnitIdTagsStatus200;
 
 export function presentGlobalTags(input: {
 	readonly data: UnitTagLandscape;
-	readonly type: CatalogDetailUnitType;
+	readonly type: UnitDetailUnitType;
 	readonly unitId: string;
 	readonly signedIn: boolean;
 }): readonly TagPresentation[] {

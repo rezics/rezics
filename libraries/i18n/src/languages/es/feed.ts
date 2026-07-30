@@ -5,6 +5,7 @@ import { esTerminology } from "@rezics/i18n/terminology/es";
 const { forms: followTerms } = esTerminology.follow;
 const { forms: postTerms } = esTerminology.post;
 const { forms: realmTerms } = esTerminology.realm;
+const { forms: entityTerms } = esTerminology.entity;
 const { forms: tagStructureTerms } = esTerminology.tagStructure;
 const { forms: zoneTerms } = esTerminology.zone;
 
@@ -50,7 +51,7 @@ export default {
 			"unit:software": "Software",
 			"unit:media": "Contenido multimedia",
 			"unit:release": "Versiones",
-			"unit:entity": "Entradas de catálogo",
+			"unit:entity": entityTerms.pluralLabel,
 			"unit:tag": "Etiquetas",
 			"unit:structure": tagStructureTerms.pluralLabel,
 			"unit:series": "Series",

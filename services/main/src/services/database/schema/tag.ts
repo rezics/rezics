@@ -12,7 +12,8 @@ import {
 
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createUpdatedAtColumn, fractionalIndexPosition } from "./columns";
-import { profile, unit } from "./core";
+import { profile } from "./profile";
+import { unit } from "./unit";
 import { post } from "./post";
 import { realm, realmUnit } from "./realm";
 

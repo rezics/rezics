@@ -9,7 +9,7 @@ import {
 	UserAccountStateValues,
 	toEnumValues,
 } from "./contract-values";
-import { profile } from "./core";
+import { profile } from "./profile";
 
 export const userAccountStateValue = pgEnum(
 	"user_account_state_value",

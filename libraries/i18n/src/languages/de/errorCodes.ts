@@ -8,6 +8,7 @@ const { forms: realmTerms } = deTerminology.realm;
 const { forms: tagStructureTerms } = deTerminology.tagStructure;
 const { forms: unitSlugTerms } = deTerminology.unitSlug;
 const { forms: zoneTerms } = deTerminology.zone;
+const { forms: entityTerms } = deTerminology.entity;
 
 export default {
 	MalformedRequestBody: "Der übermittelte Inhalt konnte nicht gelesen werden.",
@@ -164,8 +165,8 @@ export default {
 	InvalidNotificationCursor:
 		"Dieser Link zur Benachrichtigungsseite ist ungültig oder abgelaufen.",
 	NotificationNotFound: "Diese Benachrichtigung wurde nicht gefunden.",
-	EntityEntryNotFound: "Dieser Entitätseintrag wurde nicht gefunden.",
-	EntityAssociationRestricted: "Diese Entität akzeptiert diese Art der Zuordnung nicht.",
+	EntityEntryNotFound: `Dieser ${entityTerms.label}seintrag wurde nicht gefunden.`,
+	EntityAssociationRestricted: `Diese ${entityTerms.label} akzeptiert diese Art der Zuordnung nicht.`,
 	AssociationProposalNotFound: "Dieser Zuordnungsvorschlag wurde nicht gefunden.",
 	AssociationProposalConflict: "Auf diesen Zuordnungsvorschlag kann nicht mehr reagiert werden.",
 	AssociationProposalExpired: "Dieser Zuordnungsvorschlag ist abgelaufen.",

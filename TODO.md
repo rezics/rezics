@@ -1,1 +1,1 @@
-- [ ] catalog_unit_content_license https://outline.rezics.com/doc/catalog_unit_content_license-j0nu2NNWV9
+- [x] `unit_content_license` with `rezics-unit-content-license-v1`

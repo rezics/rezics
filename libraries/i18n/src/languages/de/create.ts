@@ -5,6 +5,7 @@ import { deTerminology } from "@rezics/i18n/terminology/de";
 
 const { forms: postTerms } = deTerminology.post;
 const { forms: realmTerms } = deTerminology.realm;
+const { forms: entityTerms } = deTerminology.entity;
 const { forms: zoneTerms } = deTerminology.zone;
 
 export default {
@@ -31,8 +32,8 @@ export default {
 			description: "Zeige Medien zu deiner Arbeit an und verwalte sie.",
 		},
 		entity: {
-			label: "Katalogeinträge",
-			description: "Zeige Katalogeinträge zu deiner Arbeit an und verwalte sie.",
+			label: entityTerms.pluralLabel,
+			description: `Zeige ${entityTerms.plural} zu deiner Arbeit an und verwalte sie.`,
 		},
 		tag: { label: "Tags", description: "Zeige Tags zu deiner Arbeit an und verwalte sie." },
 		realm: {
@@ -68,7 +69,7 @@ export default {
 		label: `${realmTerms.label}-Tag-Erklärung`,
 		description: `Erstelle die Wiki-Erklärung dieses ${realmTerms.inline}s zu einem Tag.`,
 	},
-	publicEntrySearch: {
+	communityUnitSearch: {
 		policyTitle: "Vor dem Erstellen suchen",
 		policy: "Um ein gutes Miteinander zu wahren, suche vor dem Erstellen eines öffentlichen Eintrags und vergewissere dich, dass der gewünschte Inhalt noch nicht existiert. Der Missbrauch dieser Funktion kann Sanktionen nach sich ziehen.",
 		requiredTitle: "Zuerst vorhandene Einträge prüfen",

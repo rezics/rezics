@@ -39,7 +39,7 @@ vi.mock("./generation", () => ({
 	getActiveSearchGeneration: vi.fn().mockResolvedValue({
 		id: "019f7eed-5d42-7102-8387-cc1d13b176d2",
 		kind: "current",
-		indexUid: "rezics_units_v8_20260729",
+		indexUid: "rezics_units_v9_20260731",
 		projectionVersion: 6,
 		settingsFingerprint: "a".repeat(64),
 	}),
@@ -242,7 +242,14 @@ describe("domain search SQL", () => {
 			).resolves.toBeDefined();
 			executed.push(category);
 		}
-		expect(executed).toEqual(["units", "entity", "posts", "realms", "collections", "reviews"]);
+		expect(executed).toEqual([
+			"units",
+			"entities",
+			"posts",
+			"realms",
+			"collections",
+			"reviews",
+		]);
 	});
 
 	it("maps current filters and sorts to their owning tables", async () => {
@@ -264,16 +271,16 @@ describe("domain search SQL", () => {
 			expect.objectContaining({ sort: "followerCount:desc" }),
 		]);
 
-		await searchDomain("entity", { kinds: ["person"] });
+		await searchDomain("entities", { kinds: ["person"] });
 		expect(lastQuery()).toContain('("entity"."kind")::text');
 
-		await searchDomain("entity", {
+		await searchDomain("entities", {
 			ownerId: "11111111-1111-1111-8111-111111111111",
 		});
 		expect(lastQuery()).toContain('"unit_ownership"."revoked_at" is null');
 		expect(searchCandidates).toHaveBeenLastCalledWith([
 			expect.objectContaining({
-				category: "entity",
+				category: "entities",
 				expression: {
 					field: "owner",
 					operator: "equals",
@@ -346,7 +353,7 @@ describe("domain search SQL", () => {
 		await expect(searchDomain("tags", { multiple: true })).rejects.toBeInstanceOf(
 			InvalidSearch,
 		);
-		await expect(searchDomain("posts", { contentLicensed: true })).rejects.toBeInstanceOf(
+		await expect(searchDomain("posts", { contentLicenseActive: true })).rejects.toBeInstanceOf(
 			InvalidSearch,
 		);
 		await expect(searchDomain("posts", { joinPolicies: ["open"] })).rejects.toBeInstanceOf(
@@ -355,14 +362,12 @@ describe("domain search SQL", () => {
 		expect(execute).not.toHaveBeenCalled();
 	});
 
-	it("keeps catalog applicability and correlated requirements authoritative in PostgreSQL", async () => {
-		await searchDomain("units", { contentLicensed: true });
-		expect(lastQuery()).toContain('from "catalog_unit_content_license"');
+	it("keeps type applicability and correlated requirements authoritative in PostgreSQL", async () => {
+		await searchDomain("units", { contentLicenseActive: true });
+		expect(lastQuery()).toContain('from "unit_content_license"');
 
-		await searchDomain("units", { contentLicensed: false });
-		expect(lastQuery()).toMatch(
-			/exists \(select .* from "catalog_unit_content_license".*\) = \$/s,
-		);
+		await searchDomain("units", { contentLicenseActive: false });
+		expect(lastQuery()).toMatch(/exists \(select .* from "unit_content_license".*\) = \$/s);
 
 		await searchDomain("units", {
 			searchExpression: {

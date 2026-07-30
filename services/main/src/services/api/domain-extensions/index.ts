@@ -45,7 +45,7 @@ import {
 	seriesRelease,
 	unitOwnership,
 	unit,
-	unitLink,
+	unitSourceLink,
 	unitLocalization,
 	zone,
 	unitDock,
@@ -215,9 +215,11 @@ async function createBaseUnit(
 async function ensureRequirementSource(softwareId: string, sourceExternalLinkId?: string | null) {
 	if (!sourceExternalLinkId) return;
 	const [source] = await database
-		.select({ id: unitLink.id })
-		.from(unitLink)
-		.where(and(eq(unitLink.id, sourceExternalLinkId), eq(unitLink.unitId, softwareId)))
+		.select({ id: unitSourceLink.id })
+		.from(unitSourceLink)
+		.where(
+			and(eq(unitSourceLink.id, sourceExternalLinkId), eq(unitSourceLink.unitId, softwareId)),
+		)
 		.limit(1);
 	if (!source) throw new SoftwareSystemRequirementSourceInvalid();
 }

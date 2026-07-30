@@ -5,6 +5,7 @@ import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 
 const { forms: postTerms } = zhHantTerminology.post;
 const { forms: realmTerms } = zhHantTerminology.realm;
+const { forms: entityTerms } = zhHantTerminology.entity;
 const { forms: zoneTerms } = zhHantTerminology.zone;
 
 export default {
@@ -20,7 +21,10 @@ export default {
 		book: { label: "書籍", description: "查看及管理與您相關的書籍。" },
 		software: { label: "軟體", description: "查看及管理與您相關的軟體條目。" },
 		media: { label: "媒體", description: "查看及管理與您相關的媒體內容。" },
-		entity: { label: "目錄條目", description: "查看及管理與您相關的目錄條目。" },
+		entity: {
+			label: entityTerms.pluralLabel,
+			description: `查看及管理與您相關的${entityTerms.plural}。`,
+		},
 		tag: { label: "標籤", description: "查看及管理與您相關的標籤。" },
 		realm: {
 			label: realmTerms.label,
@@ -37,7 +41,7 @@ export default {
 		label: `${realmTerms.label}標籤解釋`,
 		description: `建立此${realmTerms.label}對某個標籤的百科說明。`,
 	},
-	publicEntrySearch: {
+	communityUnitSearch: {
 		policyTitle: "建立前請先搜尋",
 		policy: "為了維持良好的社群環境，建立公共條目前，請先搜尋並確認您想建立的內容尚不存在。若您濫用建立公共條目的權限，可能會受到處分。",
 		requiredTitle: "必須先檢查既有條目",

@@ -19,7 +19,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useReducer, useRef, useState } from "react";
 
-import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
+import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
 import { useDevelopmentPreviewAccess } from "@/features/preview-access/components/development-preview-boundary";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -78,7 +78,7 @@ export function UnitTagExplorer({
 	readonly highlightedTagId?: string;
 	readonly initialVoteContext?: TagVoteContextRequest;
 	readonly surface: "section" | "page";
-	readonly type: CatalogDetailUnitType;
+	readonly type: UnitDetailUnitType;
 	readonly unitId: string;
 }) {
 	const { data: session } = useHydratedSession();

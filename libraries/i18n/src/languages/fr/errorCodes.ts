@@ -8,6 +8,7 @@ const { forms: realmTerms } = frTerminology.realm;
 const { forms: tagStructureTerms } = frTerminology.tagStructure;
 const { forms: unitSlugTerms } = frTerminology.unitSlug;
 const { forms: zoneTerms } = frTerminology.zone;
+const { forms: entityTerms } = frTerminology.entity;
 
 export default {
 	MalformedRequestBody: "Le contenu envoyé n’a pas pu être lu.",
@@ -165,8 +166,8 @@ export default {
 	ReplyDepthExceeded: "Cette réponse dépasserait la profondeur maximale de la discussion.",
 	InvalidNotificationCursor: "Ce lien de page de notifications n’est pas valide ou a expiré.",
 	NotificationNotFound: "Cette notification est introuvable.",
-	EntityEntryNotFound: "Cette entrée d’entité est introuvable.",
-	EntityAssociationRestricted: "Cette entité n’accepte pas ce type d’association.",
+	EntityEntryNotFound: `Cette entrée d’${entityTerms.inline} est introuvable.`,
+	EntityAssociationRestricted: `Cette ${entityTerms.inline} n’accepte pas ce type d’association.`,
 	AssociationProposalNotFound: "Cette proposition d’association est introuvable.",
 	AssociationProposalConflict:
 		"Il n’est plus possible de répondre à cette proposition d’association.",

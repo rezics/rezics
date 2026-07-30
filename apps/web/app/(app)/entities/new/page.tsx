@@ -1,1 +1,1 @@
-export { EntityCreatePage as default } from "@/features/catalog/catalog-pages";
+export { EntityCreatePage as default } from "@/features/units/unit-resource-pages";

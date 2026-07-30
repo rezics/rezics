@@ -22,7 +22,7 @@ export default {
 	publisher: "發佈者",
 	wikiCreateTitle: "建立共筆條目",
 	wikiAccessMode: "編輯權限",
-	wikiPublicEntry: "公共條目",
+	wikiCommunityUnit: "公共條目",
 	wikiPublicDescription: "所有已登入使用者都能編輯，建立者不會取得特殊權限。",
 	wikiRestricted: "有限制",
 	wikiRestrictedDescription: "只有建立者及之後明確授權的人可以編輯。",

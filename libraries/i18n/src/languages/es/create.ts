@@ -5,6 +5,7 @@ import { esTerminology } from "@rezics/i18n/terminology/es";
 
 const { forms: postTerms } = esTerminology.post;
 const { forms: realmTerms } = esTerminology.realm;
+const { forms: entityTerms } = esTerminology.entity;
 const { forms: zoneTerms } = esTerminology.zone;
 
 export default {
@@ -31,9 +32,8 @@ export default {
 			description: "Consulta y gestiona el contenido multimedia relacionado con tu trabajo.",
 		},
 		entity: {
-			label: "Entradas de catálogo",
-			description:
-				"Consulta y gestiona las entradas de catálogo relacionadas con tu trabajo.",
+			label: entityTerms.pluralLabel,
+			description: `Consulta y gestiona las ${entityTerms.plural} relacionadas con tu trabajo.`,
 		},
 		tag: {
 			label: "Etiquetas",
@@ -72,7 +72,7 @@ export default {
 		label: `Explicación de etiqueta del ${realmTerms.label}`,
 		description: `Crea la explicación wiki de este ${realmTerms.inline} para una etiqueta.`,
 	},
-	publicEntrySearch: {
+	communityUnitSearch: {
 		policyTitle: "Busca antes de crear",
 		policy: "Para mantener una comunidad saludable, busca antes de crear una entrada pública y confirma que el contenido que quieres crear todavía no existe. El uso indebido de esta función puede conllevar sanciones.",
 		requiredTitle: "Comprueba primero las entradas existentes",

@@ -17,7 +17,7 @@ function officialPositionsBefore(rightBoundary: string | null): string[] {
 }
 
 /**
- * Subscribe Profiles to the official catalog Zones at the front of their
+ * Subscribe Profiles to the official work Zones at the front of their
  * non-favorite sequence. Existing favorite choices are preserved.
  */
 export async function ensureOfficialZoneFollows(

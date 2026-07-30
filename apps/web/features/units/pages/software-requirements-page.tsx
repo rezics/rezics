@@ -14,11 +14,11 @@ import {
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { useTranslation } from "@/i18n/client";
-import { CatalogDetailSectionFrame } from "../components/catalog-detail-section-frame";
-import { useCatalogDetail } from "../components/catalog-detail-workspace";
+import { UnitDetailSectionFrame } from "../components/unit-detail-section-frame";
+import { useUnitDetail } from "../components/unit-detail-workspace";
 
 export function SoftwareRequirementsPage() {
-	const detail = useCatalogDetail();
+	const detail = useUnitDetail();
 	if (detail.type !== "software")
 		throw new Error("Software requirements cannot be rendered for another Unit type");
 	return (
@@ -38,7 +38,7 @@ function SoftwareRequirementsContent({
 	});
 	const { locale, t } = useTranslation(["units"]);
 	return (
-		<CatalogDetailSectionFrame
+		<UnitDetailSectionFrame
 			description={t.units.detail.sectionDescriptions.software.requirements}
 			title={t.units.detail.tabs.software.requirements}
 		>
@@ -131,7 +131,7 @@ function SoftwareRequirementsContent({
 			) : (
 				<p className="text-sm text-muted-foreground">{t.units.detail.noRequirements}</p>
 			)}
-		</CatalogDetailSectionFrame>
+		</UnitDetailSectionFrame>
 	);
 }
 

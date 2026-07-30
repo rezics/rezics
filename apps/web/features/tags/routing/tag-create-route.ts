@@ -1,14 +1,14 @@
 import { createLoader, createSerializer, parseAsString, parseAsStringLiteral } from "nuqs/server";
 
 import {
-	publicEntrySearchConfirmation,
-	TagPublicEntrySearchSubject,
-} from "@/features/catalog/model/public-entry-search";
+	communityUnitSearchConfirmation,
+	TagCommunityUnitSearchSubject,
+} from "@/features/create/model/community-unit-search";
 import { StudioTagCreateHref } from "@/features/create/model/studio-section";
 import {
-	CatalogDetailUnitTypes,
-	type CatalogDetailUnitType,
-} from "@/features/units/model/catalog-detail-section";
+	UnitDetailUnitTypes,
+	type UnitDetailUnitType,
+} from "@/features/units/model/unit-detail-section";
 import { isUnitId } from "@/features/units/model/unit-id";
 
 const TagCreateIntentValues = ["unit-tag-vote"] as const;
@@ -17,11 +17,11 @@ const TagVoteContextValues = ["global", "realm"] as const;
 const tagCreateRouteParsers = {
 	context: parseAsStringLiteral(TagVoteContextValues),
 	intent: parseAsStringLiteral(TagCreateIntentValues),
-	publicEntrySearch: parseAsString,
+	communityUnitSearch: parseAsString,
 	realmId: parseAsString,
 	title: parseAsString.withDefault(""),
 	unitId: parseAsString,
-	unitType: parseAsStringLiteral(CatalogDetailUnitTypes),
+	unitType: parseAsStringLiteral(UnitDetailUnitTypes),
 };
 
 const loadTagCreateRouteSearchParams = createLoader(tagCreateRouteParsers);
@@ -31,7 +31,7 @@ export type UnitTagVoteContextAddress =
 	{ readonly kind: "global" } | { readonly kind: "realm"; readonly realmId: string };
 
 export interface UnitTagVoteCreateTarget {
-	readonly type: CatalogDetailUnitType;
+	readonly type: UnitDetailUnitType;
 	readonly unitId: string;
 	readonly context: UnitTagVoteContextAddress;
 }
@@ -44,7 +44,7 @@ export type TagCreateRoute =
 	| {
 			readonly status: "ready";
 			readonly initialTitle: string;
-			readonly publicEntrySearchConfirmation: string | null;
+			readonly communityUnitSearchConfirmation: string | null;
 			readonly intent: TagCreateIntent;
 	  }
 	| { readonly status: "invalid" };
@@ -57,7 +57,7 @@ export async function loadTagCreateRoute(
 	const parsed = loadTagCreateRouteSearchParams(await searchParams);
 	const common = {
 		initialTitle: parsed.title,
-		publicEntrySearchConfirmation: parsed.publicEntrySearch,
+		communityUnitSearchConfirmation: parsed.communityUnitSearch,
 	} as const;
 	if (!parsed.intent) return { status: "ready", intent: { kind: "standalone" }, ...common };
 	if (!parsed.unitType || !parsed.unitId || !isUnitId(parsed.unitId) || !parsed.context)
@@ -92,7 +92,7 @@ export function unitTagVoteCreateHref(query: string, target: UnitTagVoteCreateTa
 	return `${StudioTagCreateHref}${serializeTagCreateRouteSearchParams({
 		context: target.context.kind,
 		intent: "unit-tag-vote",
-		publicEntrySearch: publicEntrySearchConfirmation(TagPublicEntrySearchSubject, title),
+		communityUnitSearch: communityUnitSearchConfirmation(TagCommunityUnitSearchSubject, title),
 		realmId: target.context.kind === "realm" ? target.context.realmId : null,
 		title,
 		unitId: target.unitId,

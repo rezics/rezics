@@ -15,7 +15,8 @@ import {
 import { pgTable } from "./base";
 import { type UnitStructureKind, UnitStructureKindValues } from "./contract-values";
 import { createCreatedAtColumn, createUpdatedAtColumn, fractionalIndexPosition } from "./columns";
-import { profile, unit } from "./core";
+import { profile } from "./profile";
+import { unit } from "./unit";
 import { tag } from "./tag";
 
 export const UnitStructureDefinitionVersion = 1 as const;

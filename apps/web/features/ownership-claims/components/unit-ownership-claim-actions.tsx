@@ -34,13 +34,13 @@ function useOwnershipClaimRequest() {
 	};
 }
 
-export function CatalogUnitOverflowMenu({
-	catalogMode,
+export function UnitUnitOverflowMenu({
+	ownershipMode,
 	pendingClaim,
 	type,
 	unitId,
 }: {
-	readonly catalogMode: string;
+	readonly ownershipMode: string;
 	readonly pendingClaim: PendingUnitOwnershipClaim | null;
 	readonly type: "book" | "media" | "software" | "series";
 	readonly unitId: string;
@@ -48,7 +48,7 @@ export function CatalogUnitOverflowMenu({
 	const { t } = useTranslation(["units"]);
 	const queryClient = useQueryClient();
 	const claimRequest = useOwnershipClaimRequest();
-	const placement = ownershipClaimPlacement({ unitType: type, catalogMode });
+	const placement = ownershipClaimPlacement({ unitType: type, ownershipMode });
 
 	return (
 		<>
@@ -85,18 +85,18 @@ export function CatalogUnitOverflowMenu({
 }
 
 export function EntityOwnershipClaimButton({
-	catalogMode,
+	ownershipMode,
 	pendingClaim,
 	unitId,
 }: {
-	readonly catalogMode: string;
+	readonly ownershipMode: string;
 	readonly pendingClaim: PendingUnitOwnershipClaim | null;
 	readonly unitId: string;
 }) {
 	const { t } = useTranslation(["units"]);
 	const queryClient = useQueryClient();
 	const claimRequest = useOwnershipClaimRequest();
-	const placement = ownershipClaimPlacement({ unitType: "entity", catalogMode });
+	const placement = ownershipClaimPlacement({ unitType: "entity", ownershipMode });
 	if (placement !== "external") return null;
 
 	return (

@@ -4,8 +4,8 @@ const defineProduct = <const T extends ProductDefinition>(definition: T): T => d
 
 export const PRODUCT_DEFINITIONS = [
 	defineProduct({
-		id: "catalog",
-		slug: "catalog",
+		id: "unit",
+		slug: "unit",
 		family: "discover",
 		pageClass: "surface",
 		implementationStatus: "documented",
@@ -17,7 +17,7 @@ export const PRODUCT_DEFINITIONS = [
 		family: "discover",
 		pageClass: "surface",
 		implementationStatus: "documented",
-		relatedProductIds: ["catalog", "gamebook", "release", "content-structure", "entity"],
+		relatedProductIds: ["unit", "gamebook", "release", "content-structure", "entity"],
 	}),
 	defineProduct({
 		id: "gamebook",
@@ -35,7 +35,7 @@ export const PRODUCT_DEFINITIONS = [
 		family: "discover",
 		pageClass: "surface",
 		implementationStatus: "documented",
-		relatedProductIds: ["catalog", "series", "release", "entity", "tag"],
+		relatedProductIds: ["unit", "series", "release", "entity", "tag"],
 	}),
 	defineProduct({
 		id: "software",
@@ -43,7 +43,7 @@ export const PRODUCT_DEFINITIONS = [
 		family: "discover",
 		pageClass: "surface",
 		implementationStatus: "documented",
-		relatedProductIds: ["catalog", "release", "series", "entity", "tag"],
+		relatedProductIds: ["unit", "release", "series", "entity", "tag"],
 	}),
 	defineProduct({
 		id: "series",
@@ -51,7 +51,7 @@ export const PRODUCT_DEFINITIONS = [
 		family: "discover",
 		pageClass: "surface",
 		implementationStatus: "documented",
-		relatedProductIds: ["catalog", "book", "media", "software", "release"],
+		relatedProductIds: ["unit", "book", "media", "software", "release"],
 	}),
 	defineProduct({
 		id: "release",
@@ -59,7 +59,7 @@ export const PRODUCT_DEFINITIONS = [
 		family: "discover",
 		pageClass: "surface",
 		implementationStatus: "documented",
-		relatedProductIds: ["catalog", "book", "media", "software", "series"],
+		relatedProductIds: ["unit", "book", "media", "software", "series"],
 	}),
 	defineProduct({
 		id: "entity",
@@ -75,7 +75,7 @@ export const PRODUCT_DEFINITIONS = [
 		family: "discover",
 		pageClass: "surface",
 		implementationStatus: "implemented",
-		relatedProductIds: ["catalog", "post", "collection", "realm", "zone"],
+		relatedProductIds: ["unit", "post", "collection", "realm", "zone"],
 	}),
 	defineProduct({
 		id: "post",
@@ -126,7 +126,7 @@ export const PRODUCT_DEFINITIONS = [
 		family: "create",
 		pageClass: "surface",
 		implementationStatus: "documented",
-		relatedProductIds: ["review", "catalog", "feed", "history"],
+		relatedProductIds: ["review", "unit", "feed", "history"],
 	}),
 	defineProduct({
 		id: "content-structure",
@@ -151,7 +151,7 @@ export const PRODUCT_DEFINITIONS = [
 		family: "continue",
 		pageClass: "surface",
 		implementationStatus: "implemented",
-		relatedProductIds: ["library", "catalog", "progress", "realm", "tag"],
+		relatedProductIds: ["library", "unit", "progress", "realm", "tag"],
 	}),
 	defineProduct({
 		id: "library",
@@ -160,7 +160,7 @@ export const PRODUCT_DEFINITIONS = [
 		pageClass: "manifestation",
 		implementationStatus: "planned",
 		canonicalParentId: "collection",
-		relatedProductIds: ["collection", "book", "catalog", "progress"],
+		relatedProductIds: ["collection", "book", "unit", "progress"],
 	}),
 	defineProduct({
 		id: "realm",
@@ -168,7 +168,7 @@ export const PRODUCT_DEFINITIONS = [
 		family: "continue",
 		pageClass: "surface",
 		implementationStatus: "implemented",
-		relatedProductIds: ["zone", "feed", "collection", "catalog", "tag"],
+		relatedProductIds: ["zone", "feed", "collection", "unit", "tag"],
 	}),
 	defineProduct({
 		id: "zone",
@@ -217,7 +217,7 @@ export const PRODUCT_DEFINITIONS = [
 		family: "open",
 		pageClass: "capability",
 		implementationStatus: "implemented",
-		relatedProductIds: ["api-oauth", "content-structure", "editor", "catalog"],
+		relatedProductIds: ["api-oauth", "content-structure", "editor", "unit"],
 	}),
 ] as const;
 

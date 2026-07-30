@@ -10,7 +10,7 @@ import {
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
 } from "./columns";
-import { unit } from "./core";
+import { unit } from "./unit";
 
 /** A Unit-owned composition surface whose placement is decided by its product route. */
 export const unitDock = pgTable(

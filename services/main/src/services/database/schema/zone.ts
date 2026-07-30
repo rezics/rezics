@@ -8,7 +8,7 @@ import {
 	createTimestampMsColumn,
 	createUpdatedAtColumn,
 } from "./columns";
-import { unit } from "./core";
+import { unit } from "./unit";
 
 export const zone = pgTable(
 	"zone",

@@ -24,7 +24,7 @@ describe("Seed service contracts", () => {
 			referenceTime: new Date("2026-07-24T00:00:00.000Z"),
 		});
 
-		expect(includesSeedScenario(demo, "catalog")).toBe(true);
+		expect(includesSeedScenario(demo, "units")).toBe(true);
 		expect(includesSeedScenario(demo, "communications")).toBe(false);
 		expect(includesSeedScenario(demo, "governance")).toBe(false);
 	});

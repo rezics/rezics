@@ -13,7 +13,7 @@ import {
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createUuidv7PrimaryKey } from "./columns";
 import { contentStructure } from "./content-structure";
-import { profile } from "./core";
+import { profile } from "./profile";
 import { revisionContent } from "./history";
 
 /** One immutable commit in a Content Structure aggregate's independent revision stream. */

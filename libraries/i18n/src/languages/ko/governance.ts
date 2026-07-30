@@ -5,6 +5,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { koTerminology } from "@rezics/i18n/terminology/ko";
 
 const { forms: realmTerms } = koTerminology.realm;
+const { forms: entityTerms } = koTerminology.entity;
 const { forms: postTerms } = koTerminology.post;
 
 export default {
@@ -36,7 +37,7 @@ export default {
 	subjectAssociations: "주제 연결",
 	associationProposals: "연결 제안",
 	associationProposalDescription: "상대방이 제안을 수락한 후에야 실제 연결이 생성됩니다.",
-	targetEntity: "대상 카탈로그 엔터티",
+	targetEntity: `대상 ${entityTerms.label}`,
 	targetUnit: "크레딧 유닛",
 	sourceUnit: "출처 유닛",
 	associationRole: "연결 역할",
@@ -53,7 +54,7 @@ export default {
 		"platform.user.status.update": "사용자 계정 상태 관리",
 		"platform.session.read": "사용자 세션 보기",
 		"platform.session.revoke": "사용자 세션 취소",
-		"entity.associations.override": "카탈로그 엔터티 연관 권한 우회",
+		"entity.associations.override": `${entityTerms.inline} 연관 권한 우회`,
 		"unit.edit": "모든 유닛 편집",
 		"platform.development_preview.access": "출시되지 않은 개발 미리보기 접근",
 		"unit.governance.read": "모든 유닛의 관리 정보 보기",
@@ -94,8 +95,8 @@ export default {
 			root: "전체 콘텐츠 단위",
 			creditAttributions: "출처 크레딧 귀속",
 			subjectAssociations: "출처 주제 연결",
-			creditTargets: "엔터티 대상 크레딧 귀속",
-			subjectTargets: "엔터티 대상 주제 연결",
+			creditTargets: `${entityTerms.label} 대상 크레딧 귀속`,
+			subjectTargets: `${entityTerms.label} 대상 주제 연결`,
 		},
 		publicTitle: "공개 권한",
 		publicDescription: `모든 로그인한 ${verbatimTerms.rezics.value} 사용자에게 직접 부여된 권한. 이 글로벌 기준은 개별 주체와 별도로 관리됩니다.`,
@@ -175,7 +176,7 @@ export default {
 		permissionCategories: {
 			unit: "유닛",
 			realm: realmTerms.label,
-			entity: "엔터티 연관",
+			entity: `${entityTerms.label} 연관`,
 		},
 		permissions: {
 			"unit.read": "읽기",

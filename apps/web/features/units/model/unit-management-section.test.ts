@@ -35,7 +35,7 @@ describe("unit management section manifest", () => {
 		]);
 	});
 
-	it("adds type-owned editors only to their matching catalog unit", () => {
+	it("adds type-owned editors only to their matching unit unit", () => {
 		const editable = { ...denied, canEdit: true };
 		expect(getUnitManagementSectionIds("book", editable)).toContain("tags");
 		expect(getUnitManagementSectionIds("book", { ...editable, canCurateTags: true })).toContain(

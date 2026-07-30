@@ -3,7 +3,7 @@ import { check, date, index, integer, text, uniqueIndex, uuid } from "drizzle-or
 
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createUpdatedAtColumn } from "./columns";
-import { unit } from "./core";
+import { unit } from "./unit";
 
 export const book = pgTable(
 	"book",

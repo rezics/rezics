@@ -3,7 +3,8 @@ import { index, pgEnum, primaryKey, unique, uuid } from "drizzle-orm/pg-core";
 import { pgTable } from "./base";
 import { ReactionKindValues, toEnumValues } from "./contract-values";
 import { createCreatedAtColumn, createUpdatedAtColumn, createUuidv7PrimaryKey } from "./columns";
-import { profile, unit } from "./core";
+import { profile } from "./profile";
+import { unit } from "./unit";
 import { realm } from "./realm";
 
 export const reactionKind = pgEnum("reaction_kind", toEnumValues(ReactionKindValues));

@@ -26,7 +26,7 @@ import {
 	voteTagStructureApplication,
 } from "../../tag-structures/service";
 import { UnitNotFound } from "../../units/errors";
-import { checkUnitType } from "../catalog/service";
+import { checkUnitType } from "../unit-resources/service";
 import { RealmNotFound } from "../realms/errors";
 import { toApiErrorResponse } from "../schema/response";
 import {

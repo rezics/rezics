@@ -5,6 +5,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { enTerminology } from "@rezics/i18n/terminology/en";
 
 const { forms: realmTerms } = enTerminology.realm;
+const { forms: entityTerms } = enTerminology.entity;
 const { forms: postTerms } = enTerminology.post;
 
 export default {
@@ -37,7 +38,7 @@ export default {
 	associationProposals: "Association proposals",
 	associationProposalDescription:
 		"The real association is created only after the other side accepts the proposal.",
-	targetEntity: "Target catalog Entity",
+	targetEntity: `Target ${entityTerms.label}`,
 	targetUnit: "Credited Unit",
 	sourceUnit: "Source Unit",
 	associationRole: "Association role",
@@ -54,7 +55,7 @@ export default {
 		"platform.user.status.update": "Manage user account states",
 		"platform.session.read": "View user sessions",
 		"platform.session.revoke": "Revoke user sessions",
-		"entity.associations.override": "Bypass catalog Entity association permissions",
+		"entity.associations.override": `Bypass ${entityTerms.inline} association permissions`,
 		"unit.edit": "Edit every Unit",
 		"platform.development_preview.access": "Access unreleased development previews",
 		"unit.governance.read": "Inspect governance data for every Unit",
@@ -95,8 +96,8 @@ export default {
 			root: "Whole Unit",
 			creditAttributions: "Source credit attributions",
 			subjectAssociations: "Source subject associations",
-			creditTargets: "Entity target credit attributions",
-			subjectTargets: "Entity target subject associations",
+			creditTargets: `${entityTerms.label} target credit attributions`,
+			subjectTargets: `${entityTerms.label} target subject associations`,
 		},
 		publicTitle: "Public permissions",
 		publicDescription:
@@ -177,7 +178,7 @@ export default {
 		permissionCategories: {
 			unit: "Unit",
 			realm: realmTerms.label,
-			entity: "Entity associations",
+			entity: `${entityTerms.label} associations`,
 		},
 		permissions: {
 			"unit.read": "Read",

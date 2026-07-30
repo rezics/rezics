@@ -17,7 +17,7 @@ import {
 	type RealmTagQueryStrategy,
 	RealmTagQueryStrategyValues,
 } from "./contract-values";
-import { contentRating, unit } from "./core";
+import { contentRating, unit } from "./unit";
 
 /** A stable Unit-owned ordered-tree resource. */
 export const contentStructure = pgTable(

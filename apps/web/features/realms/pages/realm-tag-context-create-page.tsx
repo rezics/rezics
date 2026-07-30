@@ -41,7 +41,7 @@ import { writePortableText } from "@/lib/block";
 import { selectLocalization } from "@/lib/localization";
 
 type PickedTag = { readonly id: string; readonly label: string };
-type WikiAccessMode = "public_entry" | "restricted";
+type WikiAccessMode = "community_owned" | "restricted";
 
 export function RealmTagContextCreatePage({ realmId }: { readonly realmId: string }) {
 	const { t } = useTranslation(["posts", "realms", "ui"]);
@@ -144,8 +144,8 @@ export function RealmTagContextCreatePage({ realmId }: { readonly realmId: strin
 								<NativeSelect
 									onChange={(event) =>
 										setAccessMode(
-											event.currentTarget.value === "public_entry"
-												? "public_entry"
+											event.currentTarget.value === "community_owned"
+												? "community_owned"
 												: "restricted",
 										)
 									}
@@ -154,8 +154,8 @@ export function RealmTagContextCreatePage({ realmId }: { readonly realmId: strin
 									<NativeSelectOption value="restricted">
 										{t.posts.wikiRestricted}
 									</NativeSelectOption>
-									<NativeSelectOption value="public_entry">
-										{t.posts.wikiPublicEntry}
+									<NativeSelectOption value="community_owned">
+										{t.posts.wikiCommunityUnit}
 									</NativeSelectOption>
 								</NativeSelect>
 							</Field>

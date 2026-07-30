@@ -49,7 +49,7 @@ empty successful search.
   into the same expression, not a second execution path. PostgreSQL remains authoritative, while
   Meilisearch may omit a pushdown only when doing so preserves a candidate superset.
 - `kind` is the searchable content subtype, not the Unit storage type. It maps to the Unit kind
-  for catalog Units, the Entity kind for Entities, the Post kind for Posts, and the reviewed
+  for work Units, the Entity kind for Entities, the Post kind for Posts, and the reviewed
   subject's Unit kind for Reviews. Categories without a meaningful subtype do not expose this
   filter or facet.
 - Realm and Tag filters are independent sibling predicates. A query containing one Realm and two
@@ -62,11 +62,11 @@ empty successful search.
 Lifecycle commands:
 
 ```sh
-task services-main:search:index -- check --projection current --index rezics_units_v8_20260729
-task services-main:search:index -- prepare --projection current --index rezics_units_v8_20260729_143000
-task services-main:search:index -- reconcile --projection current --index rezics_units_v8_20260729_143000
-task services-main:search:index -- promote --projection current --index rezics_units_v8_20260729_143000
-task services-main:search:index -- retire --projection current --index rezics_units_v8_20260729_143000
+task services-main:search:index -- check --projection current --index rezics_units_v9_20260731
+task services-main:search:index -- prepare --projection current --index rezics_units_v9_20260731_143000
+task services-main:search:index -- reconcile --projection current --index rezics_units_v9_20260731_143000
+task services-main:search:index -- promote --projection current --index rezics_units_v9_20260731_143000
+task services-main:search:index -- retire --projection current --index rezics_units_v9_20260731_143000
 task services-main:search:config:check
 ```
 

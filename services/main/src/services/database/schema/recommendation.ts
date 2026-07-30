@@ -29,7 +29,8 @@ import {
 	createUuidv7PrimaryKey,
 	displayPosition,
 } from "./columns";
-import { profile, unit } from "./core";
+import { profile } from "./profile";
+import { unit } from "./unit";
 import { realm } from "./realm";
 
 export const recommendationSurface = pgEnum(

@@ -5,6 +5,7 @@ import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 
 const { forms: postTerms } = zhHansTerminology.post;
 const { forms: realmTerms } = zhHansTerminology.realm;
+const { forms: entityTerms } = zhHansTerminology.entity;
 const { forms: zoneTerms } = zhHansTerminology.zone;
 
 export default {
@@ -20,7 +21,10 @@ export default {
 		book: { label: "书籍", description: "查看及管理与您相关的书籍。" },
 		software: { label: "软件", description: "查看及管理与您相关的软件条目。" },
 		media: { label: "媒体", description: "查看及管理与您相关的媒体内容。" },
-		entity: { label: "目录条目", description: "查看及管理与您相关的目录条目。" },
+		entity: {
+			label: entityTerms.pluralLabel,
+			description: `查看及管理与您相关的${entityTerms.plural}。`,
+		},
 		tag: { label: "标签", description: "查看及管理与您相关的标签。" },
 		realm: {
 			label: realmTerms.label,
@@ -37,7 +41,7 @@ export default {
 		label: `${realmTerms.label}标签解释`,
 		description: `创建此${realmTerms.label}对某个标签的百科说明。`,
 	},
-	publicEntrySearch: {
+	communityUnitSearch: {
 		policyTitle: "创建前请先搜索",
 		policy: "为了维护良好的社区环境，创建公共条目前，请先搜索并确认您想创建的内容尚不存在。如果您滥用创建公共条目的权限，可能会受到处罚。",
 		requiredTitle: "必须先检查现有条目",

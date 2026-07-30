@@ -5,6 +5,7 @@ import { deTerminology } from "@rezics/i18n/terminology/de";
 const { forms: followTerms } = deTerminology.follow;
 const { forms: postTerms } = deTerminology.post;
 const { forms: realmTerms } = deTerminology.realm;
+const { forms: entityTerms } = deTerminology.entity;
 const { forms: tagStructureTerms } = deTerminology.tagStructure;
 const { forms: zoneTerms } = deTerminology.zone;
 
@@ -50,7 +51,7 @@ export default {
 			"unit:software": "Software",
 			"unit:media": "Medien",
 			"unit:release": "Veröffentlichungen",
-			"unit:entity": "Katalogeinträge",
+			"unit:entity": entityTerms.pluralLabel,
 			"unit:tag": "Tags",
 			"unit:structure": tagStructureTerms.pluralLabel,
 			"unit:series": "Reihen",

@@ -3,7 +3,8 @@ import { check, index, primaryKey, unique, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createUpdatedAtColumn, fractionalIndexPosition } from "./columns";
-import { profile, unit } from "./core";
+import { profile } from "./profile";
+import { unit } from "./unit";
 
 /**
  * Marks a Unit as a stored, explicitly ordered Collection.

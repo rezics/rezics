@@ -9,6 +9,7 @@ const { forms: audioTerms } = esTerminology.audio;
 const { forms: realmTerms } = esTerminology.realm;
 const { forms: followTerms } = esTerminology.follow;
 const { forms: metadataTerms } = esTerminology.metadata;
+const { forms: entityTerms } = esTerminology.entity;
 
 export default {
 	types: {
@@ -23,14 +24,12 @@ export default {
 		modeLabel: "Modo de creación",
 		ownedWork: "Mi obra",
 		ownedWorkDescription: "Tu perfil posee y administra esta obra.",
-		publicEntry: "Entrada pública",
-		publicEntryDescription:
+		communityUnit: "Entrada pública",
+		communityUnitDescription:
 			"Pertenece a la comunidad y cualquier persona con sesión iniciada puede editarla; quien la crea no recibe permisos especiales.",
-		publisherEntity: "Entidad editorial",
-		publisherOwnedDescription:
-			"Tu obra necesita una entidad editorial. Si la asociación directa está restringida, se envía una solicitud de consentimiento.",
-		publisherPublicDescription:
-			"La entidad editorial es opcional. Si se requiere consentimiento, la entrada pública envía una solicitud, no una invitación.",
+		publisherEntity: `${entityTerms.label} editorial`,
+		publisherOwnedDescription: `Tu obra necesita una ${entityTerms.inline} editorial. Si la asociación directa está restringida, se envía una solicitud de consentimiento.`,
+		publisherPublicDescription: `La ${entityTerms.inline} editorial es opcional. Si se requiere consentimiento, la entrada pública envía una solicitud, no una invitación.`,
 		versionRole: "Tipo de versión",
 		mainVersion: "Versión principal",
 		variantVersion: "Variante",
@@ -91,7 +90,7 @@ export default {
 	},
 	workspace: {
 		title: "Gestionar Unit",
-		description: `Edita el contenido, los ${metadataTerms.inline}, las relaciones de catálogo, el acceso y el historial de versiones.`,
+		description: `Edita el contenido, los ${metadataTerms.inline}, las relaciones entre unidades, el acceso y el historial de versiones.`,
 		backToUnit: "Volver a la Unit",
 		backToOverview: "Volver a los ajustes",
 		navigation: "Navegación de gestión de la Unit",
@@ -107,7 +106,7 @@ export default {
 				description: `Gestiona el ciclo de vida, la visibilidad, la clasificación, la licencia y los ${metadataTerms.inline} propios del tipo.`,
 			},
 			relationships: {
-				label: "Relaciones de catálogo",
+				label: "Relaciones entre unidades",
 				description:
 					"Gestiona los créditos, temas, enlaces de origen y relaciones de variantes.",
 			},
@@ -189,7 +188,8 @@ export default {
 		publicationDate: "Fecha de edición",
 		pageCount: "Número de páginas",
 		format: "Encuadernación o formato",
-		licensed: "Con licencia",
+		contentLicense: "Licencia de contenido",
+		viewContentLicense: "Ver las condiciones de la licencia",
 		versionLabel: "Etiqueta de versión",
 		mediaKind: "Tipo de contenido multimedia",
 		releaseDate: "Fecha de lanzamiento",
@@ -337,7 +337,7 @@ export default {
 		title: "Editar Unit",
 		settings: "Configuración",
 		languageCode: "Código de idioma",
-		relationships: "Relaciones de catálogo",
+		relationships: "Relaciones entre unidades",
 		creditRole: "Función de crédito",
 		subjectRole: "Función del tema",
 		linkUrl: `${verbatimTerms.url.value} de origen`,
@@ -481,9 +481,9 @@ export default {
 		language: "Idioma del capítulo",
 		useLanguage: "Cambiar idioma",
 		save: "Guardar capítulo",
-		publicEntryContentPolicyTitle:
+		communityUnitContentPolicyTitle:
 			"Las entradas públicas no permiten editar aquí el cuerpo del capítulo",
-		publicEntryContentPolicyDescription: `Este libro es una entrada pública del catálogo. Puedes organizar su estructura de contenido o adjuntar una ${postTerms.inline} existente que puedas leer, pero el editor del catálogo no ofrece un editor para su cuerpo.`,
+		communityUnitContentPolicyDescription: `Este libro está mantenido por la comunidad. Puedes organizar su estructura de contenido o adjuntar una ${postTerms.inline} existente que puedas leer, pero este editor no ofrece un editor para su cuerpo.`,
 		wordCount: insert("{{count}} palabras", { count: Number }),
 		characterCount: insert("{{count}} caracteres", { count: Number }),
 	},

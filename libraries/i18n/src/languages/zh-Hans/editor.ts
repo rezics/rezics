@@ -3,6 +3,7 @@ import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 
 const { forms: realmTerms } = zhHansTerminology.realm;
 const { forms: zoneTerms } = zhHansTerminology.zone;
+const { forms: entityTerms } = zhHansTerminology.entity;
 
 export default {
 	loading: "正在加载编辑器…",
@@ -32,7 +33,7 @@ export default {
 	mentionSearchPrompt: "请输入文本以搜索。",
 	mentionUsers: "用户",
 	mentionTags: "标签",
-	mentionEntities: "实体",
+	mentionEntities: entityTerms.label,
 	mentionRealms: realmTerms.label,
 	mentionZones: zoneTerms.label,
 	unavailableMention: "无法显示的项目",

@@ -3,6 +3,7 @@ import { jaTerminology } from "@rezics/i18n/terminology/ja";
 
 const { forms: realmTerms } = jaTerminology.realm;
 const { forms: zoneTerms } = jaTerminology.zone;
+const { forms: entityTerms } = jaTerminology.entity;
 
 export default {
 	loading: "編集者を読み込み中…",
@@ -32,7 +33,7 @@ export default {
 	mentionSearchPrompt: "検索するために入力",
 	mentionUsers: "ユーザー",
 	mentionTags: "タグ",
-	mentionEntities: "エンティティ",
+	mentionEntities: entityTerms.label,
 	mentionRealms: realmTerms.pluralLabel,
 	mentionZones: zoneTerms.pluralLabel,
 	unavailableMention: "利用できないユニット",

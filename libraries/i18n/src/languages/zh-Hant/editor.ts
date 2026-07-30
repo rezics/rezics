@@ -3,6 +3,7 @@ import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 
 const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: zoneTerms } = zhHantTerminology.zone;
+const { forms: entityTerms } = zhHantTerminology.entity;
 
 export default {
 	loading: "正在載入編輯器…",
@@ -32,7 +33,7 @@ export default {
 	mentionSearchPrompt: "請輸入文字以搜尋。",
 	mentionUsers: "使用者",
 	mentionTags: "標籤",
-	mentionEntities: "實體",
+	mentionEntities: entityTerms.label,
 	mentionRealms: realmTerms.label,
 	mentionZones: zoneTerms.label,
 	unavailableMention: "無法顯示的項目",

@@ -2,7 +2,7 @@ import { sql } from "drizzle-orm";
 import { check, date, index, text, unique, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { unitLink } from "./catalog";
+import { unitSourceLink } from "./unit-source-link";
 import {
 	createCreatedAtColumn,
 	createJsonObjectColumn,
@@ -10,7 +10,7 @@ import {
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
 } from "./columns";
-import { unit } from "./core";
+import { unit } from "./unit";
 import { entity } from "./entity";
 
 export const software = pgTable("software", {
@@ -38,7 +38,7 @@ export const softwareRequirement = pgTable(
 			onDelete: "set null",
 		}),
 		tier: text().notNull(),
-		sourceLinkId: uuid().references(() => unitLink.id, {
+		sourceLinkId: uuid().references(() => unitSourceLink.id, {
 			onDelete: "set null",
 		}),
 		hardware: createJsonObjectColumn().notNull(),

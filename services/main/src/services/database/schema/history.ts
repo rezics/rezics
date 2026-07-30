@@ -21,7 +21,8 @@ import {
 	UnitStatusActorKindValues,
 	toEnumValues,
 } from "./contract-values";
-import { profile, unit, unitStatus } from "./core";
+import { profile } from "./profile";
+import { unit, unitStatus } from "./unit";
 
 export const UnitRevisionSlotRoleValues = [
 	"main",

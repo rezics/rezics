@@ -3,7 +3,10 @@ import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
 import { recordAuditEvent } from "../audit";
 import { OfficialProfileIds } from "../bootstrap/manifest";
 import type { PlatformAuthorization } from "../authorization/platform/authorization";
-import { replaceUnitOwnership } from "../authorization/unit/ownership";
+import {
+	replaceUnitOwnership,
+	unitOwnershipModeFromOwnerProfileId,
+} from "../authorization/unit/ownership";
 import { lockUnitAccessState } from "../authorization/unit/invitations";
 import { database, type DatabaseTransaction } from "../database";
 import {
@@ -42,13 +45,11 @@ export function unitOwnershipClaimState(
 
 export function isUnitOwnershipClaimEligible(input: {
 	readonly kind: string;
-	readonly catalogMode: string;
 	readonly deletedAt: Date | null;
 	readonly ownerProfileId: string | null;
 }): boolean {
 	return (
 		ClaimableUnitKinds.has(input.kind) &&
-		input.catalogMode === "public_entry" &&
 		input.deletedAt === null &&
 		input.ownerProfileId === OfficialProfileIds.community
 	);
@@ -92,7 +93,6 @@ async function loadClaimableUnit(tx: DatabaseTransaction, unitId: string) {
 		.select({
 			id: unit.id,
 			kind: unit.kind,
-			catalogMode: unit.catalogMode,
 			deletedAt: unit.deletedAt,
 			ownerProfileId: activeOwnerProfileId(unit.id),
 		})
@@ -214,7 +214,6 @@ export async function listPlatformUnitOwnershipClaims(input: {
 			unitId: unitOwnershipClaim.unitId,
 			unitKind: unit.kind,
 			unitTitle: firstUnitLocalizationTitle(unit.id),
-			catalogMode: unit.catalogMode,
 			currentOwnerProfileId: activeOwnerProfileId(unit.id),
 			claimantProfileId: unitOwnershipClaim.claimantProfileId,
 			claimantLabel: firstUnitLocalizationTitle(unitOwnershipClaim.claimantProfileId),
@@ -250,6 +249,7 @@ export async function listPlatformUnitOwnershipClaims(input: {
 		.limit(input.limit + 1);
 	const items = rows.slice(0, input.limit).map((row) => ({
 		...row,
+		ownershipMode: unitOwnershipModeFromOwnerProfileId(row.currentOwnerProfileId),
 		state: unitOwnershipClaimState(row),
 	}));
 	const last = items.at(-1);
@@ -393,10 +393,6 @@ export async function decidePlatformUnitOwnershipClaim(
 		});
 		if (!replaced.ok) throw new UnitOwnershipClaimChanged();
 
-		await tx
-			.update(unit)
-			.set({ catalogMode: "owned_work", updatedAt: now })
-			.where(eq(unit.id, claim.unitId));
 		const [resolved] = await tx
 			.update(unitOwnershipClaim)
 			.set({
@@ -433,7 +429,7 @@ export async function decidePlatformUnitOwnershipClaim(
 			unitId: claim.unitId,
 			actorProfileId: input.actorProfileId,
 			event: "update",
-			message: "Return public entry ownership to approved claimant",
+			message: "Transfer community-owned Unit to approved claimant",
 		});
 		await recordAuditEvent(tx, {
 			category: "admin_activity",

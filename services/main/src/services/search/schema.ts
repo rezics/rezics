@@ -57,7 +57,7 @@ export interface DomainSearchRequest {
 	contentRatings?: string[];
 	aiDisclosures?: string[];
 	licenses?: PublicationLicenseId[];
-	contentLicensed?: boolean;
+	contentLicenseActive?: boolean;
 	creditedUnitId?: string;
 	realmId?: string;
 	subjectId?: string;
@@ -82,7 +82,7 @@ export const SearchFieldByDomainRequestFilter = {
 	contentRating: "content-rating",
 	aiDisclosure: "ai-disclosure",
 	license: "license",
-	contentLicensed: "catalog-licensed",
+	contentLicenseActive: "content-license",
 	creditedUnitId: "credit",
 	realmId: "realm",
 	tagId: "tag",

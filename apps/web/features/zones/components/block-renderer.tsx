@@ -70,7 +70,7 @@ import { SearchFeature, type SearchFeatureRequest } from "@/features/search/sear
 import { zonePageHref } from "@/features/slugs/unit-route";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
-import { catalogZoneFeedContentKinds } from "../model/catalog-zone-feed";
+import { workZoneFeedContentKinds } from "../model/work-zone-feed";
 import type { ZoneRenderNavigation, ZoneRenderProjection } from "../model/zone-render";
 
 type RenderUnit = ZoneRenderProjection["references"]["units"][number];
@@ -814,7 +814,7 @@ function ZoneFeedBlock({
 				surface="feed"
 				total={page?.total}
 				renderToolbarFilters={(template) => {
-					const options = catalogZoneFeedContentKinds(template);
+					const options = workZoneFeedContentKinds(template);
 					return options ? (
 						<FeedContentSelector
 							onValueChange={selectContentKinds}

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
-	isPublicEntrySearchConfirmed,
-	TagPublicEntrySearchSubject,
-} from "@/features/catalog/model/public-entry-search";
+	isCommunityUnitSearchConfirmed,
+	TagCommunityUnitSearchSubject,
+} from "@/features/create/model/community-unit-search";
 import {
 	loadTagCreateRoute,
 	unitTagVoteCreateHref,
@@ -24,16 +24,16 @@ describe("Tag creation routes", () => {
 
 		expect(url.pathname).toBe("/create/tag/new");
 		expect(
-			isPublicEntrySearchConfirmed(
-				TagPublicEntrySearchSubject,
+			isCommunityUnitSearchConfirmed(
+				TagCommunityUnitSearchSubject,
 				"science",
-				url.searchParams.get("publicEntrySearch"),
+				url.searchParams.get("communityUnitSearch"),
 			),
 		).toBe(true);
 		await expect(loadTagCreateRoute(Object.fromEntries(url.searchParams))).resolves.toEqual({
 			status: "ready",
 			initialTitle: "science",
-			publicEntrySearchConfirmation: url.searchParams.get("publicEntrySearch"),
+			communityUnitSearchConfirmation: url.searchParams.get("communityUnitSearch"),
 			intent: {
 				kind: "unit-tag-vote",
 				type: "book",
@@ -84,7 +84,7 @@ describe("Tag creation routes", () => {
 		await expect(loadTagCreateRoute({ title: "science" })).resolves.toEqual({
 			status: "ready",
 			initialTitle: "science",
-			publicEntrySearchConfirmation: null,
+			communityUnitSearchConfirmation: null,
 			intent: { kind: "standalone" },
 		});
 	});

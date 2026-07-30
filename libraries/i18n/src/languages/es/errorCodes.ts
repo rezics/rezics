@@ -8,6 +8,7 @@ const { forms: realmTerms } = esTerminology.realm;
 const { forms: tagStructureTerms } = esTerminology.tagStructure;
 const { forms: unitSlugTerms } = esTerminology.unitSlug;
 const { forms: zoneTerms } = esTerminology.zone;
+const { forms: entityTerms } = esTerminology.entity;
 
 export default {
 	MalformedRequestBody: "No se ha podido leer el contenido enviado.",
@@ -164,8 +165,8 @@ export default {
 	ReplyDepthExceeded: "Esta respuesta superaría la profundidad máxima de la conversación.",
 	InvalidNotificationCursor: "Este enlace de página de notificaciones no es válido o ha vencido.",
 	NotificationNotFound: "No se ha encontrado esta notificación.",
-	EntityEntryNotFound: "No se ha encontrado esta entrada de entidad.",
-	EntityAssociationRestricted: "Esta entidad no acepta ese tipo de asociación.",
+	EntityEntryNotFound: `No se ha encontrado esta entrada de ${entityTerms.inline}.`,
+	EntityAssociationRestricted: `Esta ${entityTerms.inline} no acepta ese tipo de asociación.`,
 	AssociationProposalNotFound: "No se ha encontrado esta propuesta de asociación.",
 	AssociationProposalConflict: "Ya no se puede responder a esta propuesta de asociación.",
 	AssociationProposalExpired: "Esta propuesta de asociación ha vencido.",

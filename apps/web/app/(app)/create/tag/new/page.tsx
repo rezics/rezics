@@ -16,7 +16,7 @@ export default async function Page({
 			<TagCreatePage
 				initialTitle={route.initialTitle}
 				intent={route.intent}
-				publicEntrySearchConfirmation={route.publicEntrySearchConfirmation}
+				communityUnitSearchConfirmation={route.communityUnitSearchConfirmation}
 			/>
 		</TranslationBoundary>
 	);

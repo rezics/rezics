@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 
-import { isCatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
+import { isUnitDetailUnitType } from "@/features/units/model/unit-detail-section";
 import { isUnitId } from "@/features/units/model/unit-id";
-import { CatalogCreditsPage } from "@/features/units/pages/catalog-credits-page";
+import { UnitCreditsPage } from "@/features/units/pages/unit-credits-page";
 
 export default async function Page({
 	params,
@@ -10,6 +10,6 @@ export default async function Page({
 	params: Promise<{ type: string; unit: string }>;
 }) {
 	const { type, unit } = await params;
-	if (!isCatalogDetailUnitType(type) || !isUnitId(unit)) notFound();
-	return <CatalogCreditsPage type={type} unitId={unit} />;
+	if (!isUnitDetailUnitType(type) || !isUnitId(unit)) notFound();
+	return <UnitCreditsPage type={type} unitId={unit} />;
 }

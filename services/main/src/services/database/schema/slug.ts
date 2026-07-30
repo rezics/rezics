@@ -4,7 +4,7 @@ import { check, index, text, unique, uniqueIndex, uuid } from "drizzle-orm/pg-co
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createUpdatedAtColumn, createUuidv7PrimaryKey } from "./columns";
 import { SlugAddressKindValues, type SlugAddressKind } from "./contract-values";
-import { unit } from "./core";
+import { unit } from "./unit";
 
 /**
  * Optional address entries for ID-addressed Units.

@@ -8,6 +8,7 @@ const { forms: realmTerms } = zhHansTerminology.realm;
 const { forms: tagStructureTerms } = zhHansTerminology.tagStructure;
 const { forms: unitSlugTerms } = zhHansTerminology.unitSlug;
 const { forms: zoneTerms } = zhHansTerminology.zone;
+const { forms: entityTerms } = zhHansTerminology.entity;
 
 export default {
 	MalformedRequestBody: "无法解析提交内容的格式。",
@@ -138,8 +139,8 @@ export default {
 	ReplyDepthExceeded: "该回复超过讨论串的最大层级。",
 	InvalidNotificationCursor: "该通知分页链接无效或已过期。",
 	NotificationNotFound: "找不到这则通知。",
-	EntityEntryNotFound: "找不到这个实体条目。",
-	EntityAssociationRestricted: "该实体不接受这种结构化关联。",
+	EntityEntryNotFound: `找不到这个${entityTerms.label}条目。`,
+	EntityAssociationRestricted: `该${entityTerms.label}不接受这种结构化关联。`,
 	AssociationProposalNotFound: "找不到这项关联提案。",
 	AssociationProposalConflict: "这项关联提案已无法继续处理。",
 	AssociationProposalExpired: "这项关联提案已过期。",

@@ -536,9 +536,9 @@ function createOfficialZoneContent(input: {
 	};
 }
 
-const CatalogZoneCategories = ["units", "posts", "reviews", "collections"] as const;
+const WorkZoneCategories = ["units", "posts", "reviews", "collections"] as const;
 
-function createCatalogZoneBoundaryDocument(kind: "book" | "media" | "software", key: string) {
+function createWorkZoneBoundaryDocument(kind: "book" | "media" | "software", key: string) {
 	const filter = {
 		any: [
 			{ kind: { in: [kind] } },
@@ -546,7 +546,7 @@ function createCatalogZoneBoundaryDocument(kind: "book" | "media" | "software", 
 			{ collection: { is: { items: { some: { kind: { in: [kind] } } } } } },
 		],
 	} satisfies UnitPredicate;
-	return createZoneBoundaryDocument([...CatalogZoneCategories], filter, key);
+	return createZoneBoundaryDocument([...WorkZoneCategories], filter, key);
 }
 
 export const OfficialZoneManifest = [
@@ -567,7 +567,7 @@ export const OfficialZoneManifest = [
 		],
 		ownerProfileId: OfficialProfileIds.editorial,
 		searchTemplate: "book",
-		boundaryDocument: createCatalogZoneBoundaryDocument("book", "b00757a70001"),
+		boundaryDocument: createWorkZoneBoundaryDocument("book", "b00757a70001"),
 		themeDocument: createZoneThemeDocument({ accent: "#a16207" }, "b00757a70002"),
 		avatar: officialZoneIcon("book-open"),
 		...createOfficialZoneContent({
@@ -609,7 +609,7 @@ export const OfficialZoneManifest = [
 		],
 		ownerProfileId: OfficialProfileIds.editorial,
 		searchTemplate: "media",
-		boundaryDocument: createCatalogZoneBoundaryDocument("media", "b00757a70004"),
+		boundaryDocument: createWorkZoneBoundaryDocument("media", "b00757a70004"),
 		themeDocument: createZoneThemeDocument({ accent: "#db2777" }, "b00757a70005"),
 		avatar: officialZoneIcon("clapperboard"),
 		...createOfficialZoneContent({
@@ -651,7 +651,7 @@ export const OfficialZoneManifest = [
 		],
 		ownerProfileId: OfficialProfileIds.editorial,
 		searchTemplate: "software",
-		boundaryDocument: createCatalogZoneBoundaryDocument("software", "b00757a70007"),
+		boundaryDocument: createWorkZoneBoundaryDocument("software", "b00757a70007"),
 		themeDocument: createZoneThemeDocument({ accent: "#0d9488" }, "b00757a70008"),
 		avatar: officialZoneIcon("code"),
 		...createOfficialZoneContent({

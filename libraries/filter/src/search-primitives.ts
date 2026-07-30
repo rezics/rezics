@@ -22,7 +22,7 @@ function stringEnum<const Values extends readonly [string, ...string[]]>(values:
 export const SearchCategoryValues = [
 	"units",
 	"users",
-	"entity",
+	"entities",
 	"tags",
 	"tag-structures",
 	"posts",
@@ -88,8 +88,7 @@ export const SearchScalarFieldValues = [
 	"updated-at",
 	"published-at",
 	"closes-at",
-	"catalog-licensed",
-	"catalog-release-date",
+	"content-license",
 	"book-isbn13",
 	"book-publication-date",
 	"book-page-count",

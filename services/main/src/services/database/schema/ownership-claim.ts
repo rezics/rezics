@@ -8,7 +8,8 @@ import {
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
 } from "./columns";
-import { profile, unit } from "./core";
+import { profile } from "./profile";
+import { unit } from "./unit";
 import {
 	toEnumValues,
 	UnitOwnershipClaimResolutionValues,
@@ -22,7 +23,7 @@ export const unitOwnershipClaimResolution = pgEnum(
 );
 
 /**
- * One request to return a community-owned public catalog entry to its claimant.
+ * One request to return a community-owned public Unit to its claimant.
  *
  * Resolved rows are historical workflow records. Effective authority always
  * comes from `unit_ownership`, never from this table.

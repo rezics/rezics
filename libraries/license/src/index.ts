@@ -9,6 +9,10 @@ export const PublicationLicenseIds = [
 
 export type PublicationLicenseId = (typeof PublicationLicenseIds)[number];
 
+export const UnitContentLicenseSlugs = ["rezics-unit-content-license-v1"] as const;
+export type UnitContentLicenseSlug = (typeof UnitContentLicenseSlugs)[number];
+export const CurrentUnitContentLicenseSlug = UnitContentLicenseSlugs[0];
+
 type LicenseDefinition<Id extends PublicationLicenseId> = {
 	readonly kind: "license";
 	readonly id: Id;
@@ -78,4 +82,16 @@ export function parsePublicationLicenseId(value: unknown): PublicationLicenseId 
 
 export function parseNullablePublicationLicenseId(value: unknown): PublicationLicenseId | null {
 	return value === null ? null : parsePublicationLicenseId(value);
+}
+
+export function isUnitContentLicenseSlug(value: unknown): value is UnitContentLicenseSlug {
+	return (
+		typeof value === "string" &&
+		UnitContentLicenseSlugs.some((licenseSlug) => licenseSlug === value)
+	);
+}
+
+export function parseUnitContentLicenseSlug(value: unknown): UnitContentLicenseSlug {
+	if (!isUnitContentLicenseSlug(value)) throw new TypeError("Unknown Unit content license slug");
+	return value;
 }

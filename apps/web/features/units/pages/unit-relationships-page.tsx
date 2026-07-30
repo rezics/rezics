@@ -6,12 +6,12 @@ import { useUnitManagement } from "../components/unit-management-workspace";
 import { UnitSectionHeader } from "../components/unit-section-header";
 import { UnitRelationships } from "../unit-edit";
 import { CreditAttributionRolesByUnitType } from "../attribution-role";
-import { isCatalogUnitType } from "../unit-types";
+import { isWorkUnitType } from "../unit-types";
 
 export function UnitRelationshipsPage() {
 	const { t } = useTranslation(["errors", "units"]);
 	const { type, unit } = useUnitManagement();
-	if (!unit.capabilities.canEdit || !isCatalogUnitType(type))
+	if (!unit.capabilities.canEdit || !isWorkUnitType(type))
 		return <p className="text-sm text-destructive">{t.errors.forbidden}</p>;
 	return (
 		<section>

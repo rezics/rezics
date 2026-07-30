@@ -9,12 +9,12 @@ import { useMemo, type ReactNode } from "react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { createSubjectFeedPredicate } from "@/features/content-feed/model/subject-feed-filter";
 import { FeedQueryKey } from "@/features/content-feed/query";
-import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
+import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
 import {
-	catalogDetailHref,
-	catalogExcerptsHref,
-	catalogQuestionsHref,
-} from "@/features/units/routing/catalog-detail-routes";
+	unitDetailHref,
+	unitExcerptsHref,
+	unitQuestionsHref,
+} from "@/features/units/routing/unit-detail-routes";
 import { useTranslation } from "@/i18n/client";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
 
@@ -77,7 +77,7 @@ export function UnitDiscussionSummarySection({
 	type,
 }: {
 	readonly targetId: string;
-	readonly type: CatalogDetailUnitType;
+	readonly type: UnitDetailUnitType;
 }) {
 	const { locale, t } = useTranslation(["engagement"]);
 	const excerpts = useSubjectFeedTotal("excerpt", targetId);
@@ -107,21 +107,21 @@ export function UnitDiscussionSummarySection({
 			<div className="grid gap-2 sm:grid-cols-3">
 				<DiscussionMetric
 					count={displayTotal(excerpts.data?.total)}
-					href={catalogExcerptsHref(type, targetId)}
+					href={unitExcerptsHref(type, targetId)}
 					icon={<Quote className="size-9" />}
 					label={t.engagement.excerpts}
 					pending={excerpts.isPending}
 				/>
 				<DiscussionMetric
 					count={displayTotal(discussions.data?.total)}
-					href={catalogDetailHref(type, targetId, "discussion")}
+					href={unitDetailHref(type, targetId, "discussion")}
 					icon={<MessagesSquare className="size-9" />}
 					label={t.engagement.discussions}
 					pending={discussions.isPending}
 				/>
 				<DiscussionMetric
 					count={numberFormat.format(0)}
-					href={catalogQuestionsHref(type, targetId)}
+					href={unitQuestionsHref(type, targetId)}
 					icon={<MessageCircleQuestionMark className="size-9" />}
 					label={t.engagement.questions}
 				/>

@@ -4,6 +4,7 @@ import { koTerminology } from "@rezics/i18n/terminology/ko";
 
 const { forms: postTerms } = koTerminology.post;
 const { forms: realmTerms } = koTerminology.realm;
+const { forms: entityTerms } = koTerminology.entity;
 
 export default {
 	memberSince: insert("{{date}} 가입", { date: String }),
@@ -33,7 +34,7 @@ export default {
 		dropped: "중단",
 	},
 	contentTitle: "게시된 콘텐츠",
-	contentDescription: `이 사용자의 공개 ${postTerms.pluralLabel} 및 리뷰, 그리고 그들이 소유한 컬렉션 및 카탈로그 항목.`,
+	contentDescription: `이 사용자의 공개 ${postTerms.pluralLabel} 및 리뷰, 그리고 소유한 컬렉션 및 ${entityTerms.plural}.`,
 	contentEmptyTitle: "아직 공개된 콘텐츠가 없습니다.",
 	contentEmptyDescription: "사용자가 게시하거나 소유한 공개 콘텐츠가 여기에 나타납니다.",
 } satisfies typeof import("../zh-Hant/profiles").default;

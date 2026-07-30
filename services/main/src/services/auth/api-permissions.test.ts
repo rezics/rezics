@@ -18,17 +18,17 @@ describe("API permissions", () => {
 		expect(fromApiKeyPermissions(toApiKeyPermissions(selected))).toEqual(selected);
 	});
 
-	it("keeps Unit as the canonical catalog capability", () => {
+	it("keeps Unit as the canonical content capability", () => {
 		expect(ApiPermissionValues).toContain("unit:create");
 		expect(ApiPermissionValues).toContain("unit:update");
-		expect(ApiPermissionValues.some((permission) => permission.startsWith("catalog:"))).toBe(
+		expect(ApiPermissionValues.some((permission) => permission.startsWith("unknown:"))).toBe(
 			false,
 		);
 	});
 
 	it("rejects unknown permission strings", () => {
 		expect(isApiPermission("unit:update")).toBe(true);
-		expect(isApiPermission("catalog:write")).toBe(false);
+		expect(isApiPermission("unknown:write")).toBe(false);
 		expect(fromApiKeyPermissions({ unit: ["admin"] })).toEqual([]);
 	});
 });

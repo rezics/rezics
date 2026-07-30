@@ -33,7 +33,7 @@ import { postHref } from "../url";
 import { MaximumPostPublishRealmCount } from "../model/post-publication";
 
 type PickedEntity = { id: string; label: string };
-type WikiAccessMode = "public_entry" | "restricted";
+type WikiAccessMode = "community_owned" | "restricted";
 
 export function WikiCreatePage({ defaultRealmId }: { defaultRealmId?: string }) {
 	const { t } = useTranslation(["posts", "ui"]);
@@ -100,8 +100,8 @@ export function WikiCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 							<NativeSelect
 								onChange={(event) =>
 									setAccessMode(
-										event.currentTarget.value === "public_entry"
-											? "public_entry"
+										event.currentTarget.value === "community_owned"
+											? "community_owned"
 											: "restricted",
 									)
 								}
@@ -110,12 +110,12 @@ export function WikiCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 								<NativeSelectOption value="restricted">
 									{t.posts.wikiRestricted}
 								</NativeSelectOption>
-								<NativeSelectOption value="public_entry">
-									{t.posts.wikiPublicEntry}
+								<NativeSelectOption value="community_owned">
+									{t.posts.wikiCommunityUnit}
 								</NativeSelectOption>
 							</NativeSelect>
 							<p className="text-muted-foreground text-sm">
-								{accessMode === "public_entry"
+								{accessMode === "community_owned"
 									? t.posts.wikiPublicDescription
 									: t.posts.wikiRestrictedDescription}
 							</p>

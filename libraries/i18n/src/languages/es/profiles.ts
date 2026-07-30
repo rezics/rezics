@@ -4,6 +4,7 @@ import { esTerminology } from "@rezics/i18n/terminology/es";
 
 const { forms: postTerms } = esTerminology.post;
 const { forms: realmTerms } = esTerminology.realm;
+const { forms: entityTerms } = esTerminology.entity;
 
 export default {
 	memberSince: insert("Se unió el {{date}}", { date: String }),
@@ -33,7 +34,7 @@ export default {
 		dropped: "Abandonado",
 	},
 	contentTitle: "Contenido publicado",
-	contentDescription: `Las ${postTerms.plural} públicas y reseñas atribuidas a esta persona, además de sus colecciones y entradas de catálogo.`,
+	contentDescription: `Las ${postTerms.plural} públicas y reseñas atribuidas a esta persona, además de sus colecciones y ${entityTerms.plural}.`,
 	contentEmptyTitle: "Todavía no hay contenido público",
 	contentEmptyDescription:
 		"El contenido público que publique o posea esta persona aparecerá aquí.",

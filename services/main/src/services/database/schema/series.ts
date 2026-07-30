@@ -3,7 +3,7 @@ import { check, date, index, primaryKey, text, uuid } from "drizzle-orm/pg-core"
 
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createUpdatedAtColumn, fractionalIndexPosition } from "./columns";
-import { unit } from "./core";
+import { unit } from "./unit";
 
 export const series = pgTable(
 	"series",

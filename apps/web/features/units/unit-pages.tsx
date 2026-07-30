@@ -11,12 +11,12 @@ import {
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
-import { PublicEntrySearchPrompt } from "@/features/catalog/components/public-entry-search-prompt";
+import { CommunityUnitSearchPrompt } from "@/features/create/components/community-unit-search-prompt";
 import {
-	isPublicEntrySearchConfirmed,
-	PublicEntrySearchConfirmationParam,
-	unitPublicEntrySearchSubject,
-} from "@/features/catalog/model/public-entry-search";
+	isCommunityUnitSearchConfirmed,
+	CommunityUnitSearchConfirmationParam,
+	unitCommunityUnitSearchSubject,
+} from "@/features/create/model/community-unit-search";
 import { type FormEvent, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
@@ -33,13 +33,13 @@ import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
-import type { CatalogUnitType, VariantUnitType } from "./unit-types";
+import type { WorkUnitType, VariantUnitType } from "./unit-types";
 import {
 	LocalizationImageUploadField,
 	type LocalizationImageAssetValue,
 } from "@/features/media/components/localization-image-upload-field";
 
-export function UnitBrowsePage({ type }: { type: CatalogUnitType }) {
+export function UnitBrowsePage({ type }: { type: WorkUnitType }) {
 	const { t } = useTranslation(["actions", "media", "ui", "units"]);
 	const localizationLanguages = useLocalizationLanguages();
 	const baseQuery = { limit: 20, localizationLanguages };
@@ -93,7 +93,7 @@ export function UnitBrowsePage({ type }: { type: CatalogUnitType }) {
 	);
 }
 
-export function UnitCreatePage({ type }: { type: CatalogUnitType }) {
+export function UnitCreatePage({ type }: { type: WorkUnitType }) {
 	return type === "series" ? <SeriesCreatePage /> : <VariantUnitCreatePage type={type} />;
 }
 
@@ -181,12 +181,14 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const searchParams = useSearchParams();
-	const searchSubject = unitPublicEntrySearchSubject(type);
-	const searchConfirmation = searchParams.get(PublicEntrySearchConfirmationParam);
+	const searchSubject = unitCommunityUnitSearchSubject(type);
+	const searchConfirmation = searchParams.get(CommunityUnitSearchConfirmationParam);
 	const [title, setTitle] = useState(() => searchParams.get("title") ?? "");
 	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(null);
-	const [catalogMode, setCatalogMode] = useState<"owned_work" | "public_entry">(() =>
-		searchParams.get("catalogMode") === "public_entry" ? "public_entry" : "owned_work",
+	const [ownershipMode, setOwnershipMode] = useState<"profile_owned" | "community_owned">(() =>
+		searchParams.get("ownershipMode") === "community_owned"
+			? "community_owned"
+			: "profile_owned",
 	);
 	const [publisher, setPublisher] = useState<EntityPickerValue>();
 	const [versionKind, setVersionKind] = useState<"main" | "variant">("main");
@@ -202,7 +204,11 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 			},
 		},
 	});
-	const searchConfirmed = isPublicEntrySearchConfirmed(searchSubject, title, searchConfirmation);
+	const searchConfirmed = isCommunityUnitSearchConfirmed(
+		searchSubject,
+		title,
+		searchConfirmation,
+	);
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		const formElement = event.currentTarget;
@@ -210,10 +216,10 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 		const submittedTitle = String(form.get("title") ?? "").trim();
 		const summary = String(form.get("summary") ?? "").trim();
 		const submittedLicense = form.get("license");
-		if (catalogMode === "owned_work" && !publisher) return;
+		if (ownershipMode === "profile_owned" && !publisher) return;
 		if (
-			catalogMode === "public_entry" &&
-			!isPublicEntrySearchConfirmed(searchSubject, submittedTitle, searchConfirmation)
+			ownershipMode === "community_owned" &&
+			!isCommunityUnitSearchConfirmed(searchSubject, submittedTitle, searchConfirmation)
 		)
 			return;
 		if (versionKind === "variant" && !mainVersion) return;
@@ -266,14 +272,14 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 			await create.mutateAsync({
 				path: { type },
 				body:
-					catalogMode === "owned_work" && publisher
+					ownershipMode === "profile_owned" && publisher
 						? {
-								catalogMode,
+								ownershipMode,
 								publisher: { entityId: publisher.id },
 								...common,
 							}
 						: {
-								catalogMode: "public_entry",
+								ownershipMode: "community_owned",
 								...(publisher ? { publisher: { entityId: publisher.id } } : {}),
 								...common,
 							},
@@ -301,37 +307,37 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 						<Field required>
 							<FieldLabel>{t.units.creation.modeLabel}</FieldLabel>
 							<NativeSelect
-								name="catalogMode"
+								name="ownershipMode"
 								onChange={(event) =>
-									setCatalogMode(
-										event.currentTarget.value === "public_entry"
-											? "public_entry"
-											: "owned_work",
+									setOwnershipMode(
+										event.currentTarget.value === "community_owned"
+											? "community_owned"
+											: "profile_owned",
 									)
 								}
-								value={catalogMode}
+								value={ownershipMode}
 							>
-								<NativeSelectOption value="owned_work">
+								<NativeSelectOption value="profile_owned">
 									{t.units.creation.ownedWork}
 								</NativeSelectOption>
-								<NativeSelectOption value="public_entry">
-									{t.units.creation.publicEntry}
+								<NativeSelectOption value="community_owned">
+									{t.units.creation.communityUnit}
 								</NativeSelectOption>
 							</NativeSelect>
 							<p className="text-muted-foreground text-sm">
-								{catalogMode === "owned_work"
+								{ownershipMode === "profile_owned"
 									? t.units.creation.ownedWorkDescription
-									: t.units.creation.publicEntryDescription}
+									: t.units.creation.communityUnitDescription}
 							</p>
 						</Field>
-						{catalogMode === "public_entry" ? (
-							<PublicEntrySearchPrompt
+						{ownershipMode === "community_owned" ? (
+							<CommunityUnitSearchPrompt
 								confirmed={searchConfirmed}
 								query={title}
 								subject={searchSubject}
 							/>
 						) : null}
-						<Field required={catalogMode === "owned_work"}>
+						<Field required={ownershipMode === "profile_owned"}>
 							<FieldLabel>{t.units.creation.publisherEntity}</FieldLabel>
 							<EntityPicker
 								index="entity"
@@ -340,7 +346,7 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 								value={publisher}
 							/>
 							<p className="text-muted-foreground text-sm">
-								{catalogMode === "owned_work"
+								{ownershipMode === "profile_owned"
 									? t.units.creation.publisherOwnedDescription
 									: t.units.creation.publisherPublicDescription}
 							</p>
@@ -478,8 +484,8 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 						<RequestFailure error={create.error} fallback={t.ui.retryLater} />
 						<Button
 							disabled={
-								(catalogMode === "owned_work" && !publisher) ||
-								(catalogMode === "public_entry" && !searchConfirmed) ||
+								(ownershipMode === "profile_owned" && !publisher) ||
+								(ownershipMode === "community_owned" && !searchConfirmed) ||
 								(versionKind === "variant" && !mainVersion)
 							}
 							variant="solid"

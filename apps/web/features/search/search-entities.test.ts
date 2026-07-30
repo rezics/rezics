@@ -10,7 +10,7 @@ vi.mock("@rezics/openapi-tanstack-query", () => ({
 	PostApiSearchByIndexIndex: {
 		units: "units",
 		users: "users",
-		entity: "entity",
+		entities: "entities",
 		tags: "tags",
 		"tag-structures": "tag-structures",
 		posts: "posts",

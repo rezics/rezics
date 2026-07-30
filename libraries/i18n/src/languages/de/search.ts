@@ -6,11 +6,12 @@ const { forms: postTerms } = deTerminology.post;
 const { forms: realmTerms } = deTerminology.realm;
 const { forms: zoneTerms } = deTerminology.zone;
 const { forms: tagStructureTerms } = deTerminology.tagStructure;
+const { forms: entityTerms } = deTerminology.entity;
 const { forms: followTerms } = deTerminology.follow;
 
 export default {
 	title: "Suche",
-	placeholder: `Units, Entitäten, Tags, ${postTerms.plural}, ${realmTerms.plural} oder Benutzer suchen`,
+	placeholder: `Werke, ${entityTerms.pluralLabel}, Tags, ${postTerms.plural}, ${realmTerms.plural} oder Benutzer suchen`,
 	withinLabel: insert("In {{name}} suchen", { name: String }),
 	withinPlaceholder: insert("{{name}} durchsuchen", { name: String }),
 	advancedFilters: "Erweiterte Filter",
@@ -39,7 +40,7 @@ export default {
 	resultGroups: {
 		units: "Werke",
 		users: "Benutzer",
-		entity: "Katalog",
+		entities: entityTerms.pluralLabel,
 		tags: "Tags",
 		"tag-structures": tagStructureTerms.pluralLabel,
 		posts: postTerms.plural,
@@ -51,7 +52,7 @@ export default {
 	categoryOptions: {
 		units: "Werke",
 		users: "Benutzer",
-		entity: "Katalog",
+		entities: entityTerms.pluralLabel,
 		tags: "Tags",
 		"tag-structures": tagStructureTerms.pluralLabel,
 		posts: postTerms.plural,
@@ -174,8 +175,7 @@ export default {
 		"updated-at": "Aktualisierungsdatum",
 		"published-at": "Veröffentlichungsdatum",
 		"closes-at": "Schließdatum",
-		"catalog-licensed": "Kataloglizenz verfügbar",
-		"catalog-release-date": "Katalog-Veröffentlichungsdatum",
+		"content-license": "Inhaltslizenz aktiv",
 		"book-isbn13": verbatimTerms.isbn13.value,
 		"book-publication-date": "Erscheinungsdatum",
 		"book-page-count": "Seitenzahl",

@@ -6,11 +6,12 @@ const { forms: postTerms } = esTerminology.post;
 const { forms: realmTerms } = esTerminology.realm;
 const { forms: zoneTerms } = esTerminology.zone;
 const { forms: tagStructureTerms } = esTerminology.tagStructure;
+const { forms: entityTerms } = esTerminology.entity;
 const { forms: followTerms } = esTerminology.follow;
 
 export default {
 	title: "Buscar",
-	placeholder: `Buscar Units, entidades, etiquetas, ${postTerms.plural}, ${realmTerms.plural} o usuarios`,
+	placeholder: `Buscar obras, ${entityTerms.plural}, etiquetas, ${postTerms.plural}, ${realmTerms.plural} o usuarios`,
 	withinLabel: insert("Buscar en {{name}}", { name: String }),
 	withinPlaceholder: insert("Buscar en {{name}}", { name: String }),
 	advancedFilters: "Filtros avanzados",
@@ -39,7 +40,7 @@ export default {
 	resultGroups: {
 		units: "Obras",
 		users: "Usuarios",
-		entity: "Catálogo",
+		entities: entityTerms.pluralLabel,
 		tags: "Etiquetas",
 		"tag-structures": tagStructureTerms.pluralLabel,
 		posts: postTerms.plural,
@@ -51,7 +52,7 @@ export default {
 	categoryOptions: {
 		units: "Obras",
 		users: "Usuarios",
-		entity: "Catálogo",
+		entities: entityTerms.pluralLabel,
 		tags: "Etiquetas",
 		"tag-structures": tagStructureTerms.pluralLabel,
 		posts: postTerms.plural,
@@ -157,7 +158,7 @@ export default {
 		license: "Licencia",
 		tag: "Etiqueta",
 		credit: "Crédito",
-		"publisher-profile": "Perfil de la entidad editorial",
+		"publisher-profile": `Perfil de la ${entityTerms.inline} editorial`,
 		realm: realmTerms.label,
 		"realm-tag-vote": `Votación de etiquetas del ${realmTerms.inline}`,
 		zone: zoneTerms.label,
@@ -174,8 +175,7 @@ export default {
 		"updated-at": "Fecha de actualización",
 		"published-at": "Fecha de puesta en línea",
 		"closes-at": "Fecha de cierre",
-		"catalog-licensed": "Licencia de catálogo disponible",
-		"catalog-release-date": "Fecha de lanzamiento en el catálogo",
+		"content-license": "Licencia de contenido de la unidad activa",
 		"book-isbn13": verbatimTerms.isbn13.value,
 		"book-publication-date": "Fecha de edición",
 		"book-page-count": "Número de páginas",

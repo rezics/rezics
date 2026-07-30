@@ -5,6 +5,7 @@ import { enTerminology } from "@rezics/i18n/terminology/en";
 
 const { forms: postTerms } = enTerminology.post;
 const { forms: realmTerms } = enTerminology.realm;
+const { forms: entityTerms } = enTerminology.entity;
 const { forms: zoneTerms } = enTerminology.zone;
 
 export default {
@@ -24,8 +25,8 @@ export default {
 		},
 		media: { label: "Media", description: "View and manage media related to your work." },
 		entity: {
-			label: "Catalog entries",
-			description: "View and manage catalog entries related to your work.",
+			label: entityTerms.pluralLabel,
+			description: `View and manage ${entityTerms.plural} related to your work.`,
 		},
 		tag: { label: "Tags", description: "View and manage tags related to your work." },
 		realm: {
@@ -55,7 +56,7 @@ export default {
 		label: `${realmTerms.label} Tag explanation`,
 		description: `Create this ${realmTerms.label}'s Wiki explanation of a Tag.`,
 	},
-	publicEntrySearch: {
+	communityUnitSearch: {
 		policyTitle: "Search before creating",
 		policy: "To maintain a healthy community, search before creating a public entry and confirm that the content you want to create does not already exist. Misuse of the ability to create public entries may result in penalties.",
 		requiredTitle: "Check existing entries first",

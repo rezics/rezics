@@ -4,6 +4,7 @@ import { deTerminology } from "@rezics/i18n/terminology/de";
 
 const { forms: postTerms } = deTerminology.post;
 const { forms: realmTerms } = deTerminology.realm;
+const { forms: entityTerms } = deTerminology.entity;
 
 export default {
 	memberSince: insert("Beigetreten am {{date}}", { date: String }),
@@ -33,7 +34,7 @@ export default {
 		dropped: "Abgebrochen",
 	},
 	contentTitle: "Veröffentlichte Inhalte",
-	contentDescription: `Öffentliche ${postTerms.pluralLabel} und Rezensionen, die dieser Person zugeordnet sind, sowie eigene Sammlungen und Katalogeinträge.`,
+	contentDescription: `Öffentliche ${postTerms.pluralLabel} und Rezensionen, die dieser Person zugeordnet sind, sowie eigene Sammlungen und ${entityTerms.plural}.`,
 	contentEmptyTitle: "Noch keine öffentlichen Inhalte",
 	contentEmptyDescription:
 		"Von dieser Person veröffentlichte oder verwaltete öffentliche Inhalte erscheinen hier.",

@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 import { UnitBrowsePage } from "@/features/units/unit-pages";
-import { isCatalogUnitType } from "@/features/units/unit-types";
+import { isWorkUnitType } from "@/features/units/unit-types";
 
 export default async function Page({ params }: { params: Promise<{ type: string }> }) {
 	const { type } = await params;
-	if (!isCatalogUnitType(type)) notFound();
+	if (!isWorkUnitType(type)) notFound();
 	return <UnitBrowsePage type={type} />;
 }

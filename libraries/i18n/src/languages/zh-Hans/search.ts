@@ -6,11 +6,12 @@ const { forms: postTerms } = zhHansTerminology.post;
 const { forms: realmTerms } = zhHansTerminology.realm;
 const { forms: zoneTerms } = zhHansTerminology.zone;
 const { forms: tagStructureTerms } = zhHansTerminology.tagStructure;
+const { forms: entityTerms } = zhHansTerminology.entity;
 const { forms: followTerms } = zhHansTerminology.follow;
 
 export default {
 	title: "搜索",
-	placeholder: `搜索作品、目录、标签、${postTerms.plural}、${realmTerms.plural}或用户`,
+	placeholder: `搜索作品、${entityTerms.plural}、标签、${postTerms.plural}、${realmTerms.plural}或用户`,
 	withinLabel: insert("在「{{name}}」中搜索", { name: String }),
 	withinPlaceholder: insert("搜索「{{name}}」", { name: String }),
 	advancedFilters: "高级筛选",
@@ -39,7 +40,7 @@ export default {
 	resultGroups: {
 		units: "作品",
 		users: "用户",
-		entity: "目录",
+		entities: entityTerms.pluralLabel,
 		tags: "标签",
 		"tag-structures": tagStructureTerms.pluralLabel,
 		posts: postTerms.plural,
@@ -51,7 +52,7 @@ export default {
 	categoryOptions: {
 		units: "作品",
 		users: "用户",
-		entity: "目录",
+		entities: entityTerms.pluralLabel,
 		tags: "标签",
 		"tag-structures": tagStructureTerms.pluralLabel,
 		posts: postTerms.plural,
@@ -172,8 +173,7 @@ export default {
 		"updated-at": "更新日期",
 		"published-at": "发布日期",
 		"closes-at": "截止日期",
-		"catalog-licensed": "已取得目录授权",
-		"catalog-release-date": "目录发行日期",
+		"content-license": "内容许可有效",
 		"book-isbn13": verbatimTerms.isbn13.value,
 		"book-publication-date": "出版日期",
 		"book-page-count": "页数",

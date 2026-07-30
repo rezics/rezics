@@ -62,7 +62,7 @@ export type CreatePostBody = Static<typeof CreatePostBody>;
 
 export const CreateWikiBody = t.Object(
 	{
-		accessMode: t.Union([t.Literal("public_entry"), t.Literal("restricted")]),
+		accessMode: t.Union([t.Literal("community_owned"), t.Literal("restricted")]),
 		title: t.String({ minLength: 1, maxLength: 500 }),
 		body: PortableTextDocument,
 		language: ContentLanguage,

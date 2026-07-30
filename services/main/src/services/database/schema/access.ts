@@ -26,7 +26,8 @@ import {
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
 } from "./columns";
-import { profile, unit } from "./core";
+import { profile } from "./profile";
+import { unit } from "./unit";
 import { governanceReasonCode } from "./governance";
 import { realm } from "./realm";
 

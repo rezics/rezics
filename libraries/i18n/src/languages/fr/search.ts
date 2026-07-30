@@ -6,10 +6,11 @@ const { forms: postTerms } = frTerminology.post;
 const { forms: realmTerms } = frTerminology.realm;
 const { forms: zoneTerms } = frTerminology.zone;
 const { forms: tagStructureTerms } = frTerminology.tagStructure;
+const { forms: entityTerms } = frTerminology.entity;
 
 export default {
 	title: "Recherche",
-	placeholder: `Rechercher des Units, entités, étiquettes, ${postTerms.plural}, ${realmTerms.plural} ou utilisateurs`,
+	placeholder: `Rechercher des œuvres, ${entityTerms.plural}, étiquettes, ${postTerms.plural}, ${realmTerms.plural} ou utilisateurs`,
 	withinLabel: insert("Rechercher dans {{name}}", { name: String }),
 	withinPlaceholder: insert("Rechercher dans {{name}}", { name: String }),
 	advancedFilters: "Filtres avancés",
@@ -38,7 +39,7 @@ export default {
 	resultGroups: {
 		units: "Œuvres",
 		users: "Utilisateurs",
-		entity: "Catalogue",
+		entities: entityTerms.pluralLabel,
 		tags: "Étiquettes",
 		"tag-structures": tagStructureTerms.pluralLabel,
 		posts: postTerms.plural,
@@ -50,7 +51,7 @@ export default {
 	categoryOptions: {
 		units: "Œuvres",
 		users: "Utilisateurs",
-		entity: "Catalogue",
+		entities: entityTerms.pluralLabel,
 		tags: "Étiquettes",
 		"tag-structures": tagStructureTerms.pluralLabel,
 		posts: postTerms.plural,
@@ -159,7 +160,7 @@ export default {
 		license: "Licence",
 		tag: "Étiquette",
 		credit: "Crédit",
-		"publisher-profile": "Profil de l’entité éditrice",
+		"publisher-profile": `Profil de l’${entityTerms.inline} éditrice`,
 		realm: realmTerms.label,
 		"realm-tag-vote": `Vote d’étiquette du ${realmTerms.inline}`,
 		zone: zoneTerms.label,
@@ -176,8 +177,7 @@ export default {
 		"updated-at": "Date de mise à jour",
 		"published-at": "Date de mise en ligne",
 		"closes-at": "Date de clôture",
-		"catalog-licensed": "Licence de catalogue disponible",
-		"catalog-release-date": "Date de sortie au catalogue",
+		"content-license": "Licence de contenu de l’unité active",
 		"book-isbn13": verbatimTerms.isbn13.value,
 		"book-publication-date": "Date d’édition",
 		"book-page-count": "Nombre de pages",

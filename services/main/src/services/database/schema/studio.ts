@@ -3,7 +3,8 @@ import { check, index, integer, primaryKey, text, uniqueIndex, uuid } from "driz
 
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createTimestampMsColumn, createUuidv7PrimaryKey } from "./columns";
-import { profile, unit } from "./core";
+import { profile } from "./profile";
+import { unit } from "./unit";
 
 export const StudioWorkRelationValues = ["created", "contributed"] as const;
 export type StudioWorkRelation = (typeof StudioWorkRelationValues)[number];

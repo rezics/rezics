@@ -9,7 +9,8 @@ import {
 	createUuidv7PrimaryKey,
 	fractionalIndexPosition,
 } from "./columns";
-import { profile, unit } from "./core";
+import { profile } from "./profile";
+import { unit } from "./unit";
 import { post } from "./post";
 import {
 	AssociationKindValues,

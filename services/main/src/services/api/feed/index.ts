@@ -287,7 +287,7 @@ const FeedSearchCategoryByContentKind = {
 	"unit:software": "units",
 	"unit:media": "units",
 	"unit:release": "units",
-	"unit:entity": "entity",
+	"unit:entity": "entities",
 	"unit:tag": "tags",
 	"unit:structure": "tag-structures",
 	"unit:series": "units",

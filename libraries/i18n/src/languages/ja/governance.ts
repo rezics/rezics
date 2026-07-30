@@ -5,6 +5,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { jaTerminology } from "@rezics/i18n/terminology/ja";
 
 const { forms: realmTerms } = jaTerminology.realm;
+const { forms: entityTerms } = jaTerminology.entity;
 const { forms: postTerms } = jaTerminology.post;
 
 export default {
@@ -36,7 +37,7 @@ export default {
 	subjectAssociations: "対象関連",
 	associationProposals: "関連提案",
 	associationProposalDescription: "実際の関連は、相手が提案を承諾した後にのみ作成されます。",
-	targetEntity: "対象カタログエンティティ",
+	targetEntity: `対象${entityTerms.label}`,
 	targetUnit: "クレジットユニット",
 	sourceUnit: "ソースユニット",
 	associationRole: "関連の役割",
@@ -53,7 +54,7 @@ export default {
 		"platform.user.status.update": "利用者アカウントの状態を管理",
 		"platform.session.read": "利用者のセッションを表示",
 		"platform.session.revoke": "利用者のセッションを取り消す",
-		"entity.associations.override": "カタログエンティティの関連権限を回避する",
+		"entity.associations.override": `${entityTerms.inline}の関連権限を回避する`,
 		"unit.edit": "すべてのユニットを編集する",
 		"platform.development_preview.access": "未リリースの開発プレビューにアクセスする",
 		"unit.governance.read": "すべてのユニットのガバナンス情報を閲覧する",
@@ -94,8 +95,8 @@ export default {
 			root: "項目全体",
 			creditAttributions: "参照元のクレジット帰属",
 			subjectAssociations: "参照元の主題関連付け",
-			creditTargets: "エンティティ対象のクレジット帰属",
-			subjectTargets: "エンティティ対象の主題関連付け",
+			creditTargets: `${entityTerms.label}対象のクレジット帰属`,
+			subjectTargets: `${entityTerms.label}対象の主題関連付け`,
 		},
 		publicTitle: "公開権限",
 		publicDescription: `サインインしているすべての${verbatimTerms.rezics.value}ユーザーに直接付与された権限。このグローバルなベースラインは個々の対象とは別に管理されます。`,
@@ -174,7 +175,7 @@ export default {
 		permissionCategories: {
 			unit: "ユニット",
 			realm: realmTerms.label,
-			entity: "エンティティ関連",
+			entity: `${entityTerms.label}関連`,
 		},
 		permissions: {
 			"unit.read": "読み取り",

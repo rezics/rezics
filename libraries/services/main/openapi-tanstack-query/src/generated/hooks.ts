@@ -4339,7 +4339,7 @@ export function postApiOwnershipClaimsMutationOptions<TContext = unknown>(
 }
 
 /**
- * @summary Claim ownership of a public catalog entry
+ * @summary Claim ownership of a community-owned Unit
  * {@link /api/ownership-claims}
  */
 export function usePostApiOwnershipClaims<TContext>(
@@ -4544,7 +4544,7 @@ export function getApiRecommendationsUnitsQueryOptions(
 }
 
 /**
- * @summary Recommend catalog units
+ * @summary Recommend Units
  * {@link /api/recommendations/units}
  */
 export function useGetApiRecommendationsUnits<

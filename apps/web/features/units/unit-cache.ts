@@ -7,7 +7,7 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import type { QueryClient } from "@tanstack/react-query";
 
-import { isCatalogUnitType, type UnitType } from "./unit-types";
+import { isWorkUnitType, type UnitType } from "./unit-types";
 
 export async function invalidateUnitDetail(
 	queryClient: QueryClient,
@@ -19,7 +19,7 @@ export async function invalidateUnitDetail(
 		queryClient.invalidateQueries({
 			queryKey: getApiUnitsByTypeByUnitIdQueryKey({ path: { type, unitId } }),
 		}),
-		...(includeList && isCatalogUnitType(type)
+		...(includeList && isWorkUnitType(type)
 			? [
 					queryClient.invalidateQueries({
 						queryKey: getApiUnitsByTypeQueryKey({ path: { type } }),

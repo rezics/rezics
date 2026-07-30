@@ -109,6 +109,12 @@ export const terminologyConcepts = defineTerminologyConcepts({
 		slots: ["label", "inline"] as const,
 		locales: WebTerminologyLocales,
 	},
+	entity: {
+		definition:
+			"A Unit representing a person, organization, or platform that can participate in attributions and subject associations.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
 	metadata: {
 		definition:
 			"Structured administrative and type-specific information about a Unit, distinct from its localized editorial content.",

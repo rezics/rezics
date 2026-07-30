@@ -5,6 +5,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { esTerminology } from "@rezics/i18n/terminology/es";
 
 const { forms: realmTerms } = esTerminology.realm;
+const { forms: entityTerms } = esTerminology.entity;
 const { forms: postTerms } = esTerminology.post;
 
 export default {
@@ -37,7 +38,7 @@ export default {
 	associationProposals: "Propuestas de asociación",
 	associationProposalDescription:
 		"La asociación real solo se crea después de que la otra parte acepte la propuesta.",
-	targetEntity: "Entidad de catálogo de destino",
+	targetEntity: `${entityTerms.label} de destino`,
 	targetUnit: "Unit acreditada",
 	sourceUnit: "Unit de origen",
 	associationRole: "Función de la asociación",
@@ -54,8 +55,7 @@ export default {
 		"platform.user.status.update": "Gestionar el estado de las cuentas",
 		"platform.session.read": "Consultar las sesiones de los usuarios",
 		"platform.session.revoke": "Revocar sesiones de usuarios",
-		"entity.associations.override":
-			"Omitir los permisos de asociación de entidades de catálogo",
+		"entity.associations.override": `Omitir los permisos de asociación de ${entityTerms.plural}`,
 		"unit.edit": "Editar todas las Units",
 		"platform.development_preview.access":
 			"Acceder a vistas previas de desarrollo no publicadas",
@@ -97,8 +97,8 @@ export default {
 			root: "Elemento completo",
 			creditAttributions: "Atribuciones de crédito de la fuente",
 			subjectAssociations: "Asociaciones de tema de la fuente",
-			creditTargets: "Destino entidad: atribuciones de crédito",
-			subjectTargets: "Destino entidad: asociaciones de tema",
+			creditTargets: `Destino ${entityTerms.inline}: atribuciones de crédito`,
+			subjectTargets: `Destino ${entityTerms.inline}: asociaciones de tema`,
 		},
 		publicTitle: "Permisos públicos",
 		publicDescription: `Permisos concedidos directamente a todos los usuarios que hayan iniciado sesión en ${verbatimTerms.rezics.value}. Esta base global se gestiona por separado de los sujetos individuales.`,
@@ -181,7 +181,7 @@ export default {
 		permissionCategories: {
 			unit: "Unit",
 			realm: realmTerms.label,
-			entity: "Asociaciones de entidades",
+			entity: `Asociaciones de ${entityTerms.plural}`,
 		},
 		permissions: {
 			"unit.read": "Leer",

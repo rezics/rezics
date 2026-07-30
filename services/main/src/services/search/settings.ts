@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import currentSettings from "./settings/current-v8.json";
+import currentSettings from "./settings/current-v9.json";
 import historySettings from "./settings/history-v1.json";
 
 import type { SearchProjectionKind } from "../database/schema/search";

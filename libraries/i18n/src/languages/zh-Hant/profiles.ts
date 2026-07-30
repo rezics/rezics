@@ -4,6 +4,7 @@ import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 
 const { forms: postTerms } = zhHantTerminology.post;
 const { forms: realmTerms } = zhHantTerminology.realm;
+const { forms: entityTerms } = zhHantTerminology.entity;
 
 export default {
 	memberSince: insert("於 {{date}} 加入", { date: String }),
@@ -32,7 +33,7 @@ export default {
 		dropped: "已放棄",
 	},
 	contentTitle: "發布內容",
-	contentDescription: `公開歸屬於這位使用者的${postTerms.plural}與評論，以及其擁有的收藏集和目錄條目。`,
+	contentDescription: `公開歸屬於這位使用者的${postTerms.plural}與評論，以及其擁有的收藏集和${entityTerms.plural}。`,
 	contentEmptyTitle: "這裡還沒有公開內容",
 	contentEmptyDescription: "這位使用者發布或擁有的公開內容會顯示在這裡。",
 };

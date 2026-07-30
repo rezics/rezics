@@ -143,7 +143,7 @@ async function ensureCreditSourceRoleAllowed(
 		.where(and(eq(unit.id, sourceUnitId), isNull(unit.deletedAt)))
 		.limit(1);
 	if (!record) throw new UnitNotFound();
-	// Catalog kinds with a domain role matrix must honor it. Other Unit kinds
+	// Unit kinds with a domain role matrix must honor it. Other Unit kinds
 	// retain the generic credit vocabulary used by their existing proposal UI.
 	if (
 		isCreditAttributionUnitKind(record.kind) &&

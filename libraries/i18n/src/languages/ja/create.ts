@@ -5,6 +5,7 @@ import { jaTerminology } from "@rezics/i18n/terminology/ja";
 
 const { forms: postTerms } = jaTerminology.post;
 const { forms: realmTerms } = jaTerminology.realm;
+const { forms: entityTerms } = jaTerminology.entity;
 const { forms: zoneTerms } = jaTerminology.zone;
 
 export default {
@@ -27,8 +28,8 @@ export default {
 			description: "あなたの作業に関連するメディアを表示および管理します。",
 		},
 		entity: {
-			label: "カタログのエントリー",
-			description: "あなたの作業に関連するカタログの項目を表示および管理します。",
+			label: entityTerms.pluralLabel,
+			description: `あなたの作業に関連する${entityTerms.plural}を表示および管理します。`,
 		},
 		tag: { label: "タグ", description: "あなたの作業に関連するタグを表示および管理します。" },
 		realm: {
@@ -61,7 +62,7 @@ export default {
 		label: `${realmTerms.label}タグ解説`,
 		description: `この${realmTerms.label}におけるタグのウィキ解説を作成します。`,
 	},
-	publicEntrySearch: {
+	communityUnitSearch: {
 		policyTitle: "作成前に検索してください",
 		policy: "良好なコミュニティ環境を維持するため、公開項目を作成する前に検索し、作成したい内容がまだ存在しないことを確認してください。公開項目の作成機能を悪用した場合、処分の対象となることがあります。",
 		requiredTitle: "既存の項目を先に確認してください",

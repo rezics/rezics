@@ -5,9 +5,9 @@ import type { ComponentProps, ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
-	publicEntrySearchConfirmation,
-	TagPublicEntrySearchSubject,
-} from "@/features/catalog/model/public-entry-search";
+	communityUnitSearchConfirmation,
+	TagCommunityUnitSearchSubject,
+} from "@/features/create/model/community-unit-search";
 
 const state = vi.hoisted(() => ({
 	applyGlobal: vi.fn(),
@@ -55,8 +55,8 @@ vi.mock("@/features/application-shell/components/app-link", () => ({
 	),
 }));
 
-vi.mock("@/features/catalog/components/public-entry-search-prompt", () => ({
-	PublicEntrySearchPrompt: ({ confirmed }: { readonly confirmed: boolean }) => (
+vi.mock("@/features/create/components/community-unit-search-prompt", () => ({
+	CommunityUnitSearchPrompt: ({ confirmed }: { readonly confirmed: boolean }) => (
 		<div data-testid="search-confirmation">{String(confirmed)}</div>
 	),
 }));
@@ -166,7 +166,7 @@ const UnitId = "00000000-0000-7000-8000-000000000001";
 const RealmId = "00000000-0000-7000-8000-000000000002";
 const TagId = "00000000-0000-7000-8000-000000000003";
 const Title = "Science";
-const Confirmation = publicEntrySearchConfirmation(TagPublicEntrySearchSubject, Title);
+const Confirmation = communityUnitSearchConfirmation(TagCommunityUnitSearchSubject, Title);
 
 beforeEach(() => {
 	cleanup();
@@ -192,7 +192,7 @@ describe("TagCreatePage", () => {
 					unitId: UnitId,
 					context: { kind: "global" },
 				}}
-				publicEntrySearchConfirmation={Confirmation}
+				communityUnitSearchConfirmation={Confirmation}
 			/>,
 		);
 
@@ -231,7 +231,7 @@ describe("TagCreatePage", () => {
 					unitId: UnitId,
 					context: { kind: "realm", realmId: RealmId },
 				}}
-				publicEntrySearchConfirmation={Confirmation}
+				communityUnitSearchConfirmation={Confirmation}
 			/>,
 		);
 
@@ -260,7 +260,7 @@ describe("TagCreatePage", () => {
 					unitId: UnitId,
 					context: { kind: "global" },
 				}}
-				publicEntrySearchConfirmation={Confirmation}
+				communityUnitSearchConfirmation={Confirmation}
 			/>,
 		);
 

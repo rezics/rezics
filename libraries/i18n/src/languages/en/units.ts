@@ -9,6 +9,7 @@ const { forms: audioTerms } = enTerminology.audio;
 const { forms: realmTerms } = enTerminology.realm;
 const { forms: followTerms } = enTerminology.follow;
 const { forms: metadataTerms } = enTerminology.metadata;
+const { forms: entityTerms } = enTerminology.entity;
 
 export default {
 	types: {
@@ -23,10 +24,10 @@ export default {
 		modeLabel: "Creation mode",
 		ownedWork: "My work",
 		ownedWorkDescription: "Your Profile owns and governs this work.",
-		publicEntry: "Public entry",
-		publicEntryDescription:
+		communityUnit: "Public entry",
+		communityUnitDescription:
 			"Community-owned and editable by every signed-in user; the creator receives no special access.",
-		publisherEntity: "Publisher Entity",
+		publisherEntity: `Publisher ${entityTerms.label}`,
 		publisherOwnedDescription:
 			"A publisher is required for your work. A consent request is sent when direct association is restricted.",
 		publisherPublicDescription:
@@ -91,7 +92,7 @@ export default {
 	},
 	workspace: {
 		title: "Manage unit",
-		description: `Edit content, ${metadataTerms.inline}, catalog relationships, access, and revision history.`,
+		description: `Edit content, ${metadataTerms.inline}, Unit relationships, access, and revision history.`,
 		backToUnit: "Back to unit",
 		backToOverview: "Back to settings",
 		navigation: "Unit management navigation",
@@ -107,7 +108,7 @@ export default {
 				description: `Manage lifecycle, visibility, rating, license, and type-specific ${metadataTerms.inline}.`,
 			},
 			relationships: {
-				label: "Catalog relationships",
+				label: "Unit relationships",
 				description: "Manage credits, subjects, source links, and variant relationships.",
 			},
 			tags: {
@@ -187,7 +188,8 @@ export default {
 		publicationDate: "Publication date",
 		pageCount: "Page count",
 		format: "Binding or format",
-		licensed: "Licensed",
+		contentLicense: "Content license",
+		viewContentLicense: "View license terms",
 		versionLabel: "Version label",
 		mediaKind: "Media kind",
 		releaseDate: "Release date",
@@ -330,7 +332,7 @@ export default {
 		title: "Edit unit",
 		settings: "Settings",
 		languageCode: "Language code",
-		relationships: "Catalog relationships",
+		relationships: "Unit relationships",
 		creditRole: "Credit role",
 		subjectRole: "Subject role",
 		linkUrl: `Source ${verbatimTerms.url.value}`,
@@ -473,8 +475,8 @@ export default {
 		language: "Chapter language",
 		useLanguage: "Switch language",
 		save: "Save chapter",
-		publicEntryContentPolicyTitle: "Public entries do not provide chapter body editing",
-		publicEntryContentPolicyDescription: `This Book is a public catalog entry. You can still organize its content structure or attach an existing readable ${postTerms.inline}, but the catalog editor does not provide a ${postTerms.inline} body editor.`,
+		communityUnitContentPolicyTitle: "Public entries do not provide chapter body editing",
+		communityUnitContentPolicyDescription: `This Book is maintained by the community. You can organize its content structure or attach an existing readable ${postTerms.inline}, but this editor does not provide a ${postTerms.inline} body editor.`,
 		wordCount: insert("{{count}} words", { count: Number }),
 		characterCount: insert("{{count}} characters", { count: Number }),
 	},

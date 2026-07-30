@@ -64,7 +64,7 @@ import {
 	flattenVisibleBookStructureTree,
 	isBookStructureDisplayLabel,
 } from "./model/book-content-structure-view";
-import { catalogDetailHref } from "./routing/catalog-detail-routes";
+import { unitDetailHref } from "./routing/unit-detail-routes";
 import { invalidateChapterContent } from "./unit-cache";
 import { chapterHistoryHref, unitManagementSectionHref } from "./routing/unit-management-routes";
 
@@ -349,7 +349,7 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 				<Button asChild className="size-11 sm:size-10" size="icon-xl" variant="quiet">
 					<Link
 						aria-label={t.units.reader.backToContents}
-						href={catalogDetailHref("book", bookId, "contents")}
+						href={unitDetailHref("book", bookId, "contents")}
 					>
 						<ArrowLeftIcon aria-hidden />
 					</Link>
@@ -607,12 +607,12 @@ function ChapterLocalizationEditorContent({
 	if (book.isPending) return <QueryPending />;
 	if (book.isError) return <QueryFailure error={book.error} retry={() => void book.refetch()} />;
 	if (!book.data) return <QueryPending />;
-	if (book.data.catalogMode === "public_entry")
+	if (book.data.ownershipMode === "community_owned")
 		return (
 			<main className="mx-auto flex min-h-64 w-full max-w-4xl flex-col items-start justify-center gap-5 px-4 py-10">
 				<PageHeading
-					description={t.units.chapter.publicEntryContentPolicyDescription}
-					title={t.units.chapter.publicEntryContentPolicyTitle}
+					description={t.units.chapter.communityUnitContentPolicyDescription}
+					title={t.units.chapter.communityUnitContentPolicyTitle}
 				/>
 				<Button asChild variant="outline">
 					<Link href={unitManagementSectionHref("book", bookId, "content-structure")}>

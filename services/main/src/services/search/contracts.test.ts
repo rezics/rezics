@@ -73,7 +73,7 @@ describe("versioned search projection contracts", () => {
 				profileIds: [],
 				realmIds: [],
 			},
-			catalog: { licensed: false, releaseAt: null },
+			contentLicense: { active: false },
 			book: {
 				isbn13: "9780000000000",
 				publicationAt: null,
@@ -157,7 +157,7 @@ describe("versioned search projection contracts", () => {
 				profileIds: [],
 				realmIds: [],
 			},
-			catalog: { licensed: false, releaseAt: null },
+			contentLicense: { active: false },
 			book: { isbn13: null, publicationAt: null, pageCount: null, format: null },
 			media: null,
 			software: null,

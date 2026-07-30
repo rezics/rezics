@@ -38,8 +38,8 @@ import {
 import { useQueryState } from "nuqs";
 import { RequireSession } from "@/features/auth/require-session";
 import { postHref } from "@/features/posts/url";
-import { isCatalogDetailUnitFor } from "@/features/units/model/catalog-detail-unit";
-import { catalogDetailHref } from "@/features/units/routing/catalog-detail-routes";
+import { isUnitDetailUnitFor } from "@/features/units/model/unit-detail-unit";
+import { unitDetailHref } from "@/features/units/routing/unit-detail-routes";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
@@ -100,10 +100,10 @@ function UnitProgressPageContent({
 	if (query.isPending) return <QueryPending />;
 	if (query.isError || !query.data)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
-	if (!isCatalogDetailUnitFor(query.data, type))
+	if (!isUnitDetailUnitFor(query.data, type))
 		return (
 			<QueryFailure
-				error={new Error("Catalog Unit type mismatch")}
+				error={new Error("Unit Unit type mismatch")}
 				retry={() => void query.refetch()}
 			/>
 		);
@@ -134,7 +134,7 @@ function ProgressJournal({ title }: { readonly title?: string }) {
 	return (
 		<main className="mx-auto flex w-full max-w-6xl flex-col gap-7 px-4 py-6 sm:px-6 sm:py-10">
 			<Button asChild className="w-fit" variant="outline">
-				<Link href={catalogDetailHref(progress.domain.type, progress.domain.unitId)}>
+				<Link href={unitDetailHref(progress.domain.type, progress.domain.unitId)}>
 					<ArrowLeft aria-hidden />
 					{t.engagement.progressJournal.backToUnit}
 				</Link>

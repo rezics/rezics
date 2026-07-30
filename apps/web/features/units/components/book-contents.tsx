@@ -47,7 +47,7 @@ import {
 	EmptyBookContentStructureList,
 	VirtualizedBookContentStructureRows,
 } from "./book-content-structure-list";
-import { CatalogShareDialog } from "./catalog-share-action";
+import { UnitShareDialog } from "./unit-share-action";
 
 type BookStructureResponse = GetApiUnitsBookByUnitIdContentStructureNodesStatus200;
 type BookStructureNode = BookStructureResponse["items"][number];
@@ -381,7 +381,7 @@ function BookContentsList({
 				)}
 			</BookContentStructureSection>
 			{shareTarget ? (
-				<CatalogShareDialog
+				<UnitShareDialog
 					href={shareTarget.href}
 					onOpenChange={(open) => {
 						if (!open) setShareTarget(undefined);

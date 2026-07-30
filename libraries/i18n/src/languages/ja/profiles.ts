@@ -4,6 +4,7 @@ import { jaTerminology } from "@rezics/i18n/terminology/ja";
 
 const { forms: postTerms } = jaTerminology.post;
 const { forms: realmTerms } = jaTerminology.realm;
+const { forms: entityTerms } = jaTerminology.entity;
 
 export default {
 	memberSince: insert("{{date}} に参加しました", { date: String }),
@@ -33,7 +34,7 @@ export default {
 		dropped: "中止",
 	},
 	contentTitle: "公開されたコンテンツ",
-	contentDescription: `このユーザー名義の公開${postTerms.pluralLabel}とレビュー、およびこのユーザーが所有するコレクションとカタログ項目。`,
+	contentDescription: `このユーザー名義の公開${postTerms.pluralLabel}とレビュー、およびこのユーザーが所有するコレクションと${entityTerms.plural}。`,
 	contentEmptyTitle: "まだ公開されたコンテンツはありません",
 	contentEmptyDescription: "このユーザーが公開または所有する公開コンテンツはここに表示されます。",
 } satisfies typeof import("../zh-Hant/profiles").default;

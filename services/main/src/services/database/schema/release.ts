@@ -3,7 +3,7 @@ import { check, date, index, text, unique, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createUpdatedAtColumn } from "./columns";
-import { unit } from "./core";
+import { unit } from "./unit";
 
 export const release = pgTable(
 	"release",

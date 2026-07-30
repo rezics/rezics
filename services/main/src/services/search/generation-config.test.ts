@@ -9,6 +9,7 @@ import { getSearchSettingsFingerprint, SearchProjectionSettings } from "./settin
 const currentSettingsGenerationDates = new Map([
 	["bd2f6511f881cd25ea9919b272143ea8e5433fe62da5e9cf809ef0a456781176", "20260726"],
 	["801c99608f68b41d09c7fbd65bac885f16866b686794ce6b74c937e2fa5504d1", "20260729"],
+	["7efde91e87ed031507dda6c1af721dc54ce4f76fbe30f5b31793826f726c6226", "20260731"],
 ]);
 const currentSettingsFingerprint = getSearchSettingsFingerprint("current");
 const generationDate = currentSettingsGenerationDates.get(currentSettingsFingerprint);

@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import { UnitTagsPage } from "@/features/tags/pages/unit-tags-page";
 import { loadUnitTagsRouteState } from "@/features/tags/routing/tag-links";
-import { isCatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
+import { isUnitDetailUnitType } from "@/features/units/model/unit-detail-section";
 import { isUnitId } from "@/features/units/model/unit-id";
 
 export default async function Page({
@@ -16,6 +16,6 @@ export default async function Page({
 		params,
 		loadUnitTagsRouteState(searchParams),
 	]);
-	if (!isCatalogDetailUnitType(type) || !isUnitId(unit)) notFound();
+	if (!isUnitDetailUnitType(type) || !isUnitId(unit)) notFound();
 	return <UnitTagsPage routeState={routeState} type={type} unitId={unit} />;
 }

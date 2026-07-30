@@ -18,7 +18,7 @@ import {
 	resolveRecommendationSnapshot,
 	resolveRecommendationViewer,
 } from "../../recommendations/context";
-import { recommendUnits } from "../../recommendations/catalog";
+import { recommendUnits } from "../../recommendations/units";
 import { RecommendationPolicyVersion } from "../../recommendations/policy";
 import { recommendRelatedPosts } from "../../recommendations/related-posts";
 import { verifyRecommendationTracking } from "../../recommendations/tracking";
@@ -228,7 +228,7 @@ export default new Elysia({ prefix: "/recommendations" })
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},
-			detail: { summary: "Recommend catalog units", tags: ["Recommendations"] },
+			detail: { summary: "Recommend Units", tags: ["Recommendations"] },
 		},
 	)
 	.get(

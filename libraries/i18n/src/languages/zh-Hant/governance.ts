@@ -5,6 +5,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 
 const { forms: realmTerms } = zhHantTerminology.realm;
+const { forms: entityTerms } = zhHantTerminology.entity;
 const { forms: postTerms } = zhHantTerminology.post;
 
 export default {
@@ -36,7 +37,7 @@ export default {
 	subjectAssociations: "主題關聯",
 	associationProposals: "關聯提案",
 	associationProposalDescription: "提案經另一方接受後才會建立實際關聯。",
-	targetEntity: "目標目錄實體",
+	targetEntity: `目標${entityTerms.label}`,
 	targetUnit: "署名對象",
 	sourceUnit: "來源條目",
 	associationRole: "關聯角色",
@@ -53,7 +54,7 @@ export default {
 		"platform.user.status.update": "管理使用者帳號狀態",
 		"platform.session.read": "檢視使用者工作階段",
 		"platform.session.revoke": "撤銷使用者工作階段",
-		"entity.associations.override": "略過目錄實體關聯權限",
+		"entity.associations.override": `略過${entityTerms.inline}關聯權限`,
 		"unit.edit": "編輯所有條目",
 		"platform.development_preview.access": "使用尚未發布的開發預覽功能",
 		"unit.governance.read": "檢視所有條目的治理資料",
@@ -94,8 +95,8 @@ export default {
 			root: "整個內容單元",
 			creditAttributions: "來源：貢獻署名",
 			subjectAssociations: "來源：主題關聯",
-			creditTargets: "目錄條目目標：貢獻署名",
-			subjectTargets: "目錄條目目標：主題關聯",
+			creditTargets: `${entityTerms.label}目標：貢獻署名`,
+			subjectTargets: `${entityTerms.label}目標：主題關聯`,
 		},
 		publicTitle: "公共權限",
 		publicDescription: `直接授予所有已登入 ${verbatimTerms.rezics.value} 使用者的權限。這是全域基線，因此與個別授權對象分開管理。`,
@@ -173,7 +174,7 @@ export default {
 		permissionCategories: {
 			unit: "條目",
 			realm: realmTerms.label,
-			entity: "實體關聯",
+			entity: `${entityTerms.label}關聯`,
 		},
 		permissions: {
 			"unit.read": "檢視",

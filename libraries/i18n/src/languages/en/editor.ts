@@ -3,6 +3,7 @@ import { enTerminology } from "@rezics/i18n/terminology/en";
 
 const { forms: realmTerms } = enTerminology.realm;
 const { forms: zoneTerms } = enTerminology.zone;
+const { forms: entityTerms } = enTerminology.entity;
 
 export default {
 	loading: "Loading editor…",
@@ -32,7 +33,7 @@ export default {
 	mentionSearchPrompt: "Type to search.",
 	mentionUsers: "Users",
 	mentionTags: "Tags",
-	mentionEntities: "Entities",
+	mentionEntities: entityTerms.pluralLabel,
 	mentionRealms: realmTerms.pluralLabel,
 	mentionZones: zoneTerms.pluralLabel,
 	unavailableMention: "Unavailable Unit",

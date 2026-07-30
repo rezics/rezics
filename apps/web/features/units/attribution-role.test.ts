@@ -7,7 +7,7 @@ import {
 } from "./attribution-role";
 
 describe("attribution role model", () => {
-	it("keeps the restored role registry scoped to each catalog Unit type", () => {
+	it("keeps the restored role registry scoped to each unit Unit type", () => {
 		expect(CreditAttributionRolesByUnitType.book).toContain("author");
 		expect(CreditAttributionRolesByUnitType.book).toContain("translator");
 		expect(CreditAttributionRolesByUnitType.software).toContain("developer");

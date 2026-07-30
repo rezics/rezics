@@ -1,6 +1,6 @@
 import { and, desc, eq, sql } from "drizzle-orm";
 
-import { TagApplicationNotFound, UnitTagCurationChanged } from "../api/catalog/errors";
+import { TagApplicationNotFound, UnitTagCurationChanged } from "../api/unit-resources/errors";
 import { database } from "../database";
 import { toSafeInteger } from "../database/integer";
 import { unitTag, unitTagVoteStat } from "../database/schema";

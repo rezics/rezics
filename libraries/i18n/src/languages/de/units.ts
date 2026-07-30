@@ -9,6 +9,7 @@ const { forms: audioTerms } = deTerminology.audio;
 const { forms: realmTerms } = deTerminology.realm;
 const { forms: followTerms } = deTerminology.follow;
 const { forms: metadataTerms } = deTerminology.metadata;
+const { forms: entityTerms } = deTerminology.entity;
 
 export default {
 	types: {
@@ -23,10 +24,10 @@ export default {
 		modeLabel: "Erstellungsart",
 		ownedWork: "Mein Werk",
 		ownedWorkDescription: "Dein Profil besitzt und verwaltet dieses Werk.",
-		publicEntry: "Öffentlicher Eintrag",
-		publicEntryDescription:
+		communityUnit: "Öffentlicher Eintrag",
+		communityUnitDescription:
 			"Im Besitz der Community und für alle angemeldeten Personen bearbeitbar; die erstellende Person erhält keine Sonderrechte.",
-		publisherEntity: "Verlags-Entität",
+		publisherEntity: `Verlags-${entityTerms.label}`,
 		publisherOwnedDescription:
 			"Für dein Werk ist ein Verlag erforderlich. Bei eingeschränkter Direktzuordnung wird eine Zustimmungsanfrage gesendet.",
 		publisherPublicDescription:
@@ -93,7 +94,7 @@ export default {
 	},
 	workspace: {
 		title: "Unit verwalten",
-		description: `Bearbeite Inhalte, ${metadataTerms.inline}, Katalogbeziehungen, Zugriff und Versionsverlauf.`,
+		description: `Bearbeite Inhalte, ${metadataTerms.inline}, Werkbeziehungen, Zugriff und Versionsverlauf.`,
 		backToUnit: "Zurück zur Unit",
 		backToOverview: "Zurück zu den Einstellungen",
 		navigation: "Navigation der Unit-Verwaltung",
@@ -109,7 +110,7 @@ export default {
 				description: `Verwalte Lebenszyklus, Sichtbarkeit, Einstufung, Lizenz und typspezifische ${metadataTerms.inline}.`,
 			},
 			relationships: {
-				label: "Katalogbeziehungen",
+				label: "Werkbeziehungen",
 				description: "Verwalte Mitwirkende, Themen, Quelllinks und Variantenbeziehungen.",
 			},
 			tags: {
@@ -192,7 +193,8 @@ export default {
 		publicationDate: "Erscheinungsdatum",
 		pageCount: "Seitenzahl",
 		format: "Einband oder Format",
-		licensed: "Lizenziert",
+		contentLicense: "Inhaltslizenz",
+		viewContentLicense: "Lizenzbedingungen ansehen",
 		versionLabel: "Versionsbezeichnung",
 		mediaKind: "Medienart",
 		releaseDate: "Erscheinungsdatum",
@@ -340,7 +342,7 @@ export default {
 		title: "Unit bearbeiten",
 		settings: "Einstellungen",
 		languageCode: "Sprachcode",
-		relationships: "Katalogbeziehungen",
+		relationships: "Werkbeziehungen",
 		creditRole: "Mitwirkendenrolle",
 		subjectRole: "Themenrolle",
 		linkUrl: `Quell-${verbatimTerms.url.value}`,
@@ -487,9 +489,9 @@ export default {
 		language: "Kapitelsprache",
 		useLanguage: "Sprache wechseln",
 		save: "Kapitel speichern",
-		publicEntryContentPolicyTitle:
+		communityUnitContentPolicyTitle:
 			"Öffentliche Einträge bieten hier keine Bearbeitung des Kapiteltexts",
-		publicEntryContentPolicyDescription: `Dieses Buch ist ein öffentlicher Katalogeintrag. Du kannst seine Inhaltsstruktur ordnen oder einen vorhandenen lesbaren ${postTerms.inline} anhängen; der Katalogeditor bietet jedoch keinen Editor für den ${postTerms.inline}-Text.`,
+		communityUnitContentPolicyDescription: `Dieses Buch wird gemeinschaftlich gepflegt. Du kannst seine Inhaltsstruktur ordnen oder einen vorhandenen lesbaren ${postTerms.inline} anhängen; dieser Editor bietet jedoch keinen Editor für den ${postTerms.inline}-Text.`,
 		wordCount: insert("{{count}} Wörter", { count: Number }),
 		characterCount: insert("{{count}} Zeichen", { count: Number }),
 	},
