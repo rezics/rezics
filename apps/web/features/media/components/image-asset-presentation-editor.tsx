@@ -184,7 +184,7 @@ function FixedCropArea({
 						? "aspect-square max-w-md"
 						: role === "banner"
 							? "aspect-[4/1]"
-							: "aspect-[3/4] max-h-[58svh] w-auto",
+							: "aspect-[3/4] max-w-[min(42rem,43.5svh)]",
 				)}
 				onKeyDown={handleKeyDown}
 				onPointerCancel={() => {
