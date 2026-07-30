@@ -36,3 +36,39 @@ export const media = pgTable(
 		),
 	],
 );
+
+export const video = pgTable(
+	"video",
+	{
+		id: uuid()
+			.primaryKey()
+			.references(() => unit.id, { onDelete: "cascade" }),
+		durationSeconds: integer(),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		check(
+			"video_duration_seconds_check",
+			sql`${table.durationSeconds} is null or ${table.durationSeconds} > 0`,
+		),
+	],
+);
+
+export const audio = pgTable(
+	"audio",
+	{
+		id: uuid()
+			.primaryKey()
+			.references(() => unit.id, { onDelete: "cascade" }),
+		durationSeconds: integer(),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		check(
+			"audio_duration_seconds_check",
+			sql`${table.durationSeconds} is null or ${table.durationSeconds} > 0`,
+		),
+	],
+);

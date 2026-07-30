@@ -13,7 +13,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { type UnitKind, type UnitStructureKind, UnitStructureKindValues } from "./contract-values";
+import { type UnitStructureKind, UnitStructureKindValues } from "./contract-values";
 import { createCreatedAtColumn, createUpdatedAtColumn, fractionalIndexPosition } from "./columns";
 import { profile, unit } from "./core";
 import { tag } from "./tag";
@@ -33,8 +33,9 @@ export const UnitStructureMaximumMembers = 16 as const;
 export const unitStructure = pgTable(
 	"unit_structure",
 	{
-		id: uuid().primaryKey(),
-		unitKind: text().$type<"structure">().default("structure").notNull(),
+		id: uuid()
+			.primaryKey()
+			.references(() => unit.id, { onDelete: "cascade" }),
 		kind: text().$type<UnitStructureKind>().notNull(),
 		definitionVersion: integer().default(UnitStructureDefinitionVersion).notNull(),
 		memberUnitIds: uuid().array().notNull(),
@@ -45,18 +46,12 @@ export const unitStructure = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		foreignKey({
-			columns: [table.id, table.unitKind],
-			foreignColumns: [unit.id, unit.kind],
-			name: "unit_structure_unit_kind_fkey",
-		}).onDelete("cascade"),
 		unique("unit_structure_definition_key").on(
 			table.kind,
 			table.definitionVersion,
 			table.memberUnitIds,
 		),
 		index("unit_structure_created_by_idx").on(table.createdByProfileId, table.createdAt),
-		check("unit_structure_unit_kind_check", sql`${table.unitKind} = 'structure'`),
 		check("unit_structure_kind_check", inArray(table.kind, UnitStructureKindValues)),
 		check(
 			"unit_structure_definition_version_check",
@@ -85,8 +80,9 @@ export const unitStructureMember = pgTable(
 			.notNull()
 			.references(() => unitStructure.id, { onDelete: "cascade" }),
 		ordinal: integer().notNull(),
-		memberUnitId: uuid().notNull(),
-		memberUnitKind: text().$type<UnitKind>().notNull(),
+		memberUnitId: uuid()
+			.notNull()
+			.references(() => unit.id, { onDelete: "restrict" }),
 	},
 	(table) => [
 		primaryKey({ columns: [table.structureId, table.ordinal] }),
@@ -94,11 +90,6 @@ export const unitStructureMember = pgTable(
 			table.structureId,
 			table.memberUnitId,
 		),
-		foreignKey({
-			columns: [table.memberUnitId, table.memberUnitKind],
-			foreignColumns: [unit.id, unit.kind],
-			name: "unit_structure_member_unit_kind_fkey",
-		}).onDelete("restrict"),
 		index("unit_structure_member_unit_idx").on(
 			table.memberUnitId,
 			table.structureId,

@@ -11,6 +11,7 @@
 - Abstractions must compress meaning, not merely shorten syntax: they should capture invariants, protocols, lifecycles, or genuinely reusable complete semantics. Delete one-use wrappers that only forward, rename, or pass arguments when the inline form is equally clear. Framework entry points, public package entry points, generated code, and upstream mirrors are external-contract boundaries and are not judged by call count; within a boundary, still express intent directly.
 - Follow the [access permission schema](./libraries/access/README.md) when adding or changing authorization keys, implications, or grantability.
 - Use only the `public` database schema. Use `snake_case` for physical table, column, constraint, and index names; use lower camel case for TypeScript exports.
+- Model a Unit subtype or marker table with its `id` as both the primary key and a direct foreign key to `unit.id`; do not copy `unit.kind` into that table. Store a Unit kind beside a foreign key only when the relationship itself requires a database-enforced kind invariant.
 - Declare Drizzle `relations` only when a `database.query` relation query needs them. Table-definition foreign keys provide integrity; do not pre-maintain bidirectional relation metadata.
 
 ## TSDoc release maturity

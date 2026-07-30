@@ -196,10 +196,10 @@ const mediaStateSchema = schemaFactory
 	.omit({ id: true, createdAt: true, updatedAt: true });
 const videoStateSchema = schemaFactory
 	.createSelectSchema(video)
-	.omit({ id: true, unitKind: true, createdAt: true, updatedAt: true });
+	.omit({ id: true, createdAt: true, updatedAt: true });
 const audioStateSchema = schemaFactory
 	.createSelectSchema(audio)
-	.omit({ id: true, unitKind: true, createdAt: true, updatedAt: true });
+	.omit({ id: true, createdAt: true, updatedAt: true });
 const entityStateSchema = schemaFactory
 	.createSelectSchema(entity)
 	.omit({ id: true, createdAt: true, updatedAt: true });
@@ -227,7 +227,7 @@ const pollStateSchema = schemaFactory
 	.omit({ id: true, closedAt: true, createdAt: true, updatedAt: true });
 const unitStructureStateSchema = schemaFactory
 	.createSelectSchema(unitStructure)
-	.omit({ id: true, unitKind: true, createdAt: true, updatedAt: true });
+	.omit({ id: true, createdAt: true, updatedAt: true });
 const unitAliasRowSchema = schemaFactory.createSelectSchema(unitAlias, {
 	language: z.enum(ContentLanguageValues).nullable(),
 });

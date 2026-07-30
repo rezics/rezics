@@ -1,4 +1,4 @@
-h1:zSUxgD6x8icUD87MyrGZWVj5pf1z/pT67TgUhgu5aQM=
+h1:4615FeFeUO6DRLAuWuSjJKLMz8AOXeqWBEbbT94+mxo=
 20260718070400_current_baseline.sql h1:u9QkCNmNKf+J8LE4/Lz03NbMrJf4RTid39bT22xn5ew=
 20260718070401_history_invariants.sql h1:ZtbZeYtN6E3/SM2hzpdVuXS7pICASEq93v29wpj7dDs=
 20260718154924_unit_realm_restrictions.sql h1:87+KV38BAlkYD150B4fAMEe19exDPGV12bR3dfNuHjA=
@@ -95,3 +95,4 @@ h1:zSUxgD6x8icUD87MyrGZWVj5pf1z/pT67TgUhgu5aQM=
 20260730061613_unit_ownership_platform_lifecycle.sql h1:LMixofSLM0Asl4gNlPSExA3lhfPa4slTjiuwgUSarok=
 20260730061614_unit_ownership_platform_lifecycle_schema.sql h1:LlVs2PAMNRnrWJK8h4pHYAjYLVn8UK2zKpO4TLZIuuQ=
 20260730070445_unit_ownership_platform_override.sql h1:x1tU2sS9RvESwwuH9NONggFHxC6DXYIDiQy09Of5EQ4=
+20260730104743_normalize_unit_subtype_foreign_keys.sql h1:3HJQOErTRBTV9Rzu6OF+9krmE8Adov4BZcoD++65NnU=
