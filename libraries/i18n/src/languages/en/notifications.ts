@@ -71,4 +71,16 @@ export default {
 		title: "Unit ownership changed",
 		body: "A platform administrator changed the ownership of a Unit connected to your Profile.",
 	},
+	unit_ownership_claim_approved: {
+		title: "Entry ownership claim approved",
+		body: "Management ownership of this entry has transferred to your Profile.",
+	},
+	unit_ownership_claim_rejected: {
+		title: "Entry ownership claim not approved",
+		body: "Platform governance rejected your entry ownership claim.",
+	},
+	unit_ownership_claim_superseded: {
+		title: "Entry ownership claim closed",
+		body: "Another claim was approved, so your claim closed automatically.",
+	},
 } satisfies typeof import("../zh-Hant/notifications").default;

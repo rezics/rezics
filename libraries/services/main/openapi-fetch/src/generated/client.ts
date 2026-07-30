@@ -49,6 +49,10 @@ import type {
 	GetApiNotificationsPreferencesResponses,
 	PutApiNotificationsPreferencesOptions,
 	PutApiNotificationsPreferencesResponses,
+	PostApiOwnershipClaimsOptions,
+	PostApiOwnershipClaimsResponses,
+	PostApiOwnershipClaimsByClaimIdWithdrawOptions,
+	PostApiOwnershipClaimsByClaimIdWithdrawResponses,
 	GetApiRecommendationsUnitsOptions,
 	GetApiRecommendationsUnitsResponses,
 	GetApiRecommendationsPostsByPostIdOptions,
@@ -133,6 +137,10 @@ import type {
 	PostApiGovernancePlatformUnitsByUnitIdDeleteResponses,
 	PostApiGovernancePlatformUnitsByUnitIdRestoreOptions,
 	PostApiGovernancePlatformUnitsByUnitIdRestoreResponses,
+	GetApiGovernancePlatformOwnershipClaimsOptions,
+	GetApiGovernancePlatformOwnershipClaimsResponses,
+	PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionOptions,
+	PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionResponses,
 	GetApiGovernanceNotesByPostIdOptions,
 	GetApiGovernanceNotesByPostIdResponses,
 	PatchApiGovernanceNotesByPostIdOptions,
@@ -1020,6 +1028,40 @@ export function putApiNotificationsPreferences<ThrowOnError extends boolean = tr
 		],
 		...config,
 	}) as Promise<RequestResult<PutApiNotificationsPreferencesResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Claim ownership of a public catalog entry
+ * {@link /api/ownership-claims}
+ */
+export function postApiOwnershipClaims<ThrowOnError extends boolean = true>(
+	options: Options<PostApiOwnershipClaimsOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiOwnershipClaimsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/ownership-claims",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<PostApiOwnershipClaimsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Withdraw a pending Unit ownership claim
+ * {@link /api/ownership-claims/:claimId/withdraw}
+ */
+export function postApiOwnershipClaimsByClaimIdWithdraw<ThrowOnError extends boolean = true>(
+	options: Options<PostApiOwnershipClaimsByClaimIdWithdrawOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiOwnershipClaimsByClaimIdWithdrawResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/ownership-claims/{claimId}/withdraw",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<PostApiOwnershipClaimsByClaimIdWithdrawResponses, ThrowOnError>>;
 }
 
 /**
@@ -1913,6 +1955,52 @@ export function postApiGovernancePlatformUnitsByUnitIdRestore<ThrowOnError exten
 		...config,
 	}) as Promise<
 		RequestResult<PostApiGovernancePlatformUnitsByUnitIdRestoreResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary List platform Unit ownership claims
+ * {@link /api/governance/platform/ownership-claims}
+ */
+export function getApiGovernancePlatformOwnershipClaims<ThrowOnError extends boolean = true>(
+	options: Options<GetApiGovernancePlatformOwnershipClaimsOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiGovernancePlatformOwnershipClaimsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/governance/platform/ownership-claims",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiGovernancePlatformOwnershipClaimsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Resolve a Unit ownership claim
+ * {@link /api/governance/platform/ownership-claims/:claimId/decision}
+ */
+export function postApiGovernancePlatformOwnershipClaimsByClaimIdDecision<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/governance/platform/ownership-claims/{claimId}/decision",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<
+			PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionResponses,
+			ThrowOnError
+		>
 	>;
 }
 

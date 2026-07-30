@@ -74,4 +74,16 @@ export default {
 		title: "Titularidad de la Unit modificada",
 		body: "La administración de la plataforma ha cambiado la titularidad de una Unit vinculada a tu perfil.",
 	},
+	unit_ownership_claim_approved: {
+		title: "Reclamación de titularidad aprobada",
+		body: "La titularidad de gestión de esta Unit se ha transferido a tu perfil.",
+	},
+	unit_ownership_claim_rejected: {
+		title: "Reclamación de titularidad no aprobada",
+		body: "La gobernanza de la plataforma ha rechazado tu reclamación.",
+	},
+	unit_ownership_claim_superseded: {
+		title: "Reclamación de titularidad cerrada",
+		body: "Se aprobó otra reclamación, por lo que la tuya se cerró automáticamente.",
+	},
 } satisfies typeof import("../zh-Hant/notifications").default;

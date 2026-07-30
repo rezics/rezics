@@ -51,6 +51,7 @@ import {
 import unitAccessRoutes from "./unit-access";
 import unitAccessInvitationRoutes from "./unit-access-invitations";
 import unitLifecycleRoutes from "./unit-lifecycle";
+import ownershipClaimRoutes from "./ownership-claims";
 import {
 	executeAuthorizedModerationAction,
 	loadModerationCaseForAction,
@@ -158,6 +159,7 @@ export default new Elysia({ prefix: "/governance" })
 	.use(unitAccessRoutes)
 	.use(unitAccessInvitationRoutes)
 	.use(unitLifecycleRoutes)
+	.use(ownershipClaimRoutes)
 	.get(
 		"/notes/:postId",
 		async ({ params, authorization }) => {

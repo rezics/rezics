@@ -21,6 +21,7 @@ export * from "./governance";
 export * from "./history";
 export * from "./label";
 export * from "./media";
+export * from "./ownership-claim";
 export * from "./poll";
 export * from "./post";
 export * from "./progress";

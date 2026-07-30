@@ -133,6 +133,17 @@ export default {
 		"No se puede renunciar a la propiedad de una Unit de la comunidad.",
 	UnitOwnershipOverrideConfirmationInvalid:
 		"El identificador de Unit introducido no coincide con el destino de la reasignación.",
+	UnitOwnershipClaimUnavailable:
+		"Solo se puede reclamar la titularidad de Units públicas compatibles que aún pertenezcan a la comunidad.",
+	UnitOwnershipClaimAlreadyPending:
+		"Ya tienes una reclamación de titularidad pendiente para esta Unit.",
+	UnitOwnershipClaimNotFound: "No se ha encontrado esta reclamación de titularidad de Unit.",
+	UnitOwnershipClaimChanged:
+		"La reclamación o la titularidad de origen ha cambiado. Recarga e inténtalo de nuevo.",
+	UnitOwnershipClaimConfirmationInvalid:
+		"El identificador de reclamación introducido no coincide con el destino de la revisión.",
+	UnitOwnershipClaimSelfDecisionForbidden:
+		"El solicitante no puede revisar su propia reclamación de titularidad.",
 	UnitLifecycleConfirmationInvalid:
 		"El identificador de Unit introducido no coincide con el destino.",
 	UnitLifecycleChanged: "La Unit ha cambiado. Recarga e inténtalo de nuevo.",

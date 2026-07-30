@@ -120,6 +120,14 @@ export default {
 	UnitOwnershipRelinquishmentForbidden: "커뮤니티가 소유한 유닛의 소유권은 포기할 수 없습니다.",
 	UnitOwnershipOverrideConfirmationInvalid:
 		"입력한 유닛 식별자가 소유권 강제 변경 대상과 일치하지 않습니다.",
+	UnitOwnershipClaimUnavailable:
+		"소유권 요청은 커뮤니티가 소유한 지원 대상 공개 유닛에만 제출할 수 있습니다.",
+	UnitOwnershipClaimAlreadyPending: "이 유닛에 대해 검토 중인 소유권 요청이 이미 있습니다.",
+	UnitOwnershipClaimNotFound: "이 유닛 소유권 요청을 찾을 수 없습니다.",
+	UnitOwnershipClaimChanged:
+		"소유권 요청 또는 원래 소유권이 변경되었습니다. 새로 고침 후 다시 시도하세요.",
+	UnitOwnershipClaimConfirmationInvalid: "입력한 요청 식별자가 검토 대상과 일치하지 않습니다.",
+	UnitOwnershipClaimSelfDecisionForbidden: "요청자는 자신의 소유권 요청을 검토할 수 없습니다.",
 	UnitLifecycleConfirmationInvalid: "입력한 유닛 식별자가 작업 대상과 일치하지 않습니다.",
 	UnitLifecycleChanged: "유닛이 변경되었습니다. 새로 고침 후 다시 시도하세요.",
 	UnitLifecycleProtected: "이 보호 유닛은 소프트 삭제할 수 없습니다.",

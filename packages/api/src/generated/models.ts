@@ -5458,6 +5458,12 @@ export const ApiErrorCode = {
 	PostTagMentionVoteConflict: "PostTagMentionVoteConflict",
 	InvalidNotificationCursor: "InvalidNotificationCursor",
 	NotificationNotFound: "NotificationNotFound",
+	UnitOwnershipClaimUnavailable: "UnitOwnershipClaimUnavailable",
+	UnitOwnershipClaimAlreadyPending: "UnitOwnershipClaimAlreadyPending",
+	UnitOwnershipClaimNotFound: "UnitOwnershipClaimNotFound",
+	UnitOwnershipClaimChanged: "UnitOwnershipClaimChanged",
+	UnitOwnershipClaimConfirmationInvalid: "UnitOwnershipClaimConfirmationInvalid",
+	UnitOwnershipClaimSelfDecisionForbidden: "UnitOwnershipClaimSelfDecisionForbidden",
 	AliasNotFound: "AliasNotFound",
 	TagApplicationNotFound: "TagApplicationNotFound",
 	UnitTagCurationChanged: "UnitTagCurationChanged",
@@ -9039,6 +9045,284 @@ export type PutApiNotificationsPreferencesResponse =
 	| PutApiNotificationsPreferencesStatus422
 	| PutApiNotificationsPreferencesStatus429
 	| PutApiNotificationsPreferencesStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiOwnershipClaimsStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @type string
+	 */
+	state: "pending";
+	/**
+	 * @type string
+	 */
+	details: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiOwnershipClaimsStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PostApiOwnershipClaimsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiOwnershipClaimsStatus409ErrorCodeEnum = {
+	UnitOwnershipClaimUnavailable: "UnitOwnershipClaimUnavailable",
+	UnitOwnershipClaimAlreadyPending: "UnitOwnershipClaimAlreadyPending",
+} as const;
+
+export type PostApiOwnershipClaimsStatus409ErrorCodeEnum =
+	(typeof PostApiOwnershipClaimsStatus409ErrorCodeEnum)[keyof typeof PostApiOwnershipClaimsStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiOwnershipClaimsStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitOwnershipClaimUnavailable'
+		 * @type string
+		 */
+		code: PostApiOwnershipClaimsStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiOwnershipClaimsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiOwnershipClaimsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiOwnershipClaimsBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 2000
+	 * @pattern .*\S.*
+	 * @type string
+	 */
+	details: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiOwnershipClaimsOptions = {
+	body: PostApiOwnershipClaimsBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiOwnershipClaimsResponses = {
+	"200": PostApiOwnershipClaimsStatus200;
+	"400": PostApiOwnershipClaimsStatus400;
+	"404": PostApiOwnershipClaimsStatus404;
+	"409": PostApiOwnershipClaimsStatus409;
+	"422": PostApiOwnershipClaimsStatus422;
+	"500": PostApiOwnershipClaimsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiOwnershipClaimsResponse =
+	| PostApiOwnershipClaimsStatus200
+	| PostApiOwnershipClaimsStatus400
+	| PostApiOwnershipClaimsStatus404
+	| PostApiOwnershipClaimsStatus409
+	| PostApiOwnershipClaimsStatus422
+	| PostApiOwnershipClaimsStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiOwnershipClaimsByClaimIdWithdrawPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	claimId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiOwnershipClaimsByClaimIdWithdrawStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiOwnershipClaimsByClaimIdWithdrawStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitOwnershipClaimNotFound'
+		 * @type string
+		 */
+		code: "UnitOwnershipClaimNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiOwnershipClaimsByClaimIdWithdrawStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitOwnershipClaimChanged'
+		 * @type string
+		 */
+		code: "UnitOwnershipClaimChanged";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiOwnershipClaimsByClaimIdWithdrawStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiOwnershipClaimsByClaimIdWithdrawStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiOwnershipClaimsByClaimIdWithdrawOptions = {
+	body?: never;
+	path: PostApiOwnershipClaimsByClaimIdWithdrawPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiOwnershipClaimsByClaimIdWithdrawResponses = {
+	"200": PostApiOwnershipClaimsByClaimIdWithdrawStatus200;
+	"404": PostApiOwnershipClaimsByClaimIdWithdrawStatus404;
+	"409": PostApiOwnershipClaimsByClaimIdWithdrawStatus409;
+	"422": PostApiOwnershipClaimsByClaimIdWithdrawStatus422;
+	"500": PostApiOwnershipClaimsByClaimIdWithdrawStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiOwnershipClaimsByClaimIdWithdrawResponse =
+	| PostApiOwnershipClaimsByClaimIdWithdrawStatus200
+	| PostApiOwnershipClaimsByClaimIdWithdrawStatus404
+	| PostApiOwnershipClaimsByClaimIdWithdrawStatus409
+	| PostApiOwnershipClaimsByClaimIdWithdrawStatus422
+	| PostApiOwnershipClaimsByClaimIdWithdrawStatus500;
 
 export const GetApiRecommendationsUnitsType = {
 	book: "book",
@@ -24841,6 +25125,521 @@ export type PostApiGovernancePlatformUnitsByUnitIdRestoreResponse =
 	| PostApiGovernancePlatformUnitsByUnitIdRestoreStatus409
 	| PostApiGovernancePlatformUnitsByUnitIdRestoreStatus422
 	| PostApiGovernancePlatformUnitsByUnitIdRestoreStatus500;
+
+export const GetApiGovernancePlatformOwnershipClaimsState = {
+	pending: "pending",
+	approved: "approved",
+	rejected: "rejected",
+	withdrawn: "withdrawn",
+	superseded: "superseded",
+} as const;
+
+export type GetApiGovernancePlatformOwnershipClaimsState =
+	(typeof GetApiGovernancePlatformOwnershipClaimsState)[keyof typeof GetApiGovernancePlatformOwnershipClaimsState];
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformOwnershipClaimsQuery = {
+	/**
+	 * @type string | undefined
+	 */
+	state?: GetApiGovernancePlatformOwnershipClaimsState;
+	/**
+	 * @minLength 1
+	 * @maxLength 512
+	 * @type string | undefined
+	 */
+	cursor?: string;
+	/**
+	 * @default 50
+	 */
+	limit?: string | number;
+};
+
+export const GetApiGovernancePlatformOwnershipClaimsStatus200ItemsUnitKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetApiGovernancePlatformOwnershipClaimsStatus200ItemsUnitKindEnum =
+	(typeof GetApiGovernancePlatformOwnershipClaimsStatus200ItemsUnitKindEnum)[keyof typeof GetApiGovernancePlatformOwnershipClaimsStatus200ItemsUnitKindEnum];
+
+export const GetApiGovernancePlatformOwnershipClaimsStatus200ItemsCatalogModeEnum = {
+	owned_work: "owned_work",
+	public_entry: "public_entry",
+} as const;
+
+export type GetApiGovernancePlatformOwnershipClaimsStatus200ItemsCatalogModeEnum =
+	(typeof GetApiGovernancePlatformOwnershipClaimsStatus200ItemsCatalogModeEnum)[keyof typeof GetApiGovernancePlatformOwnershipClaimsStatus200ItemsCatalogModeEnum];
+
+export const GetApiGovernancePlatformOwnershipClaimsStatus200ItemsStateEnum = {
+	pending: "pending",
+	approved: "approved",
+	rejected: "rejected",
+	withdrawn: "withdrawn",
+	superseded: "superseded",
+} as const;
+
+export type GetApiGovernancePlatformOwnershipClaimsStatus200ItemsStateEnum =
+	(typeof GetApiGovernancePlatformOwnershipClaimsStatus200ItemsStateEnum)[keyof typeof GetApiGovernancePlatformOwnershipClaimsStatus200ItemsStateEnum];
+
+export const GetApiGovernancePlatformOwnershipClaimsStatus200ItemsResolution = {
+	approved: "approved",
+	rejected: "rejected",
+	withdrawn: "withdrawn",
+	superseded: "superseded",
+} as const;
+
+export type GetApiGovernancePlatformOwnershipClaimsStatus200ItemsResolution =
+	(typeof GetApiGovernancePlatformOwnershipClaimsStatus200ItemsResolution)[keyof typeof GetApiGovernancePlatformOwnershipClaimsStatus200ItemsResolution];
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformOwnershipClaimsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @type string
+		 */
+		unitKind: GetApiGovernancePlatformOwnershipClaimsStatus200ItemsUnitKindEnum;
+		unitTitle: (string | null) | null;
+		/**
+		 * @default 'owned_work'
+		 * @type string
+		 */
+		catalogMode: GetApiGovernancePlatformOwnershipClaimsStatus200ItemsCatalogModeEnum;
+		currentOwnerProfileId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		claimantProfileId: string;
+		claimantLabel: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		sourceOwnershipId: string;
+		/**
+		 * @type string
+		 */
+		details: string;
+		/**
+		 * @type string
+		 */
+		state: GetApiGovernancePlatformOwnershipClaimsStatus200ItemsStateEnum;
+		resolution: (GetApiGovernancePlatformOwnershipClaimsStatus200ItemsResolution | null) | null;
+		resolvedAt: (string | null) | null;
+		resolvedByProfileId: (string | null) | null;
+		resultingOwnershipId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+	}[];
+	nextCursor: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformOwnershipClaimsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type GetApiGovernancePlatformOwnershipClaimsStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidPaginationCursor'
+				 * @type string
+				 */
+				code: "InvalidPaginationCursor";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformOwnershipClaimsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformOwnershipClaimsOptions = {
+	body?: never;
+	path?: never;
+	query?: GetApiGovernancePlatformOwnershipClaimsQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformOwnershipClaimsResponses = {
+	"200": GetApiGovernancePlatformOwnershipClaimsStatus200;
+	"403": GetApiGovernancePlatformOwnershipClaimsStatus403;
+	"422": GetApiGovernancePlatformOwnershipClaimsStatus422;
+	"500": GetApiGovernancePlatformOwnershipClaimsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiGovernancePlatformOwnershipClaimsResponse =
+	| GetApiGovernancePlatformOwnershipClaimsStatus200
+	| GetApiGovernancePlatformOwnershipClaimsStatus403
+	| GetApiGovernancePlatformOwnershipClaimsStatus422
+	| GetApiGovernancePlatformOwnershipClaimsStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	claimId: string;
+};
+
+export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus200 =
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @type string
+			 */
+			state: "approved";
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			ownershipId: string;
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @type string
+			 */
+			state: "rejected";
+			/**
+			 * @type null
+			 */
+			ownershipId: null;
+	  };
+
+export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'UnitOwnershipClaimConfirmationInvalid'
+				 * @type string
+				 */
+				code: "UnitOwnershipClaimConfirmationInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	UnitOwnershipClaimSelfDecisionForbidden: "UnitOwnershipClaimSelfDecisionForbidden",
+} as const;
+
+export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus403ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus403ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus404ErrorCodeEnum = {
+	UnitOwnershipClaimNotFound: "UnitOwnershipClaimNotFound",
+	UnitNotFound: "UnitNotFound",
+} as const;
+
+export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus404ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus404ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitOwnershipClaimNotFound'
+		 * @type string
+		 */
+		code: PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitOwnershipClaimChanged'
+		 * @type string
+		 */
+		code: "UnitOwnershipClaimChanged";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus500 = InternalError;
+
+export const PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestDecisionEnum = {
+	approved: "approved",
+	rejected: "rejected",
+} as const;
+
+export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestDecisionEnum =
+	(typeof PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestDecisionEnum)[keyof typeof PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestDecisionEnum];
+
+export const PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestReasonCodeEnum = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestReasonCodeEnum =
+	(typeof PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestReasonCodeEnum)[keyof typeof PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestReasonCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionBody = {
+	/**
+	 * @type string
+	 */
+	decision: PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestDecisionEnum;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	confirmationClaimId: string;
+	/**
+	 * @default 'content_policy'
+	 * @type string
+	 */
+	reasonCode: PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestReasonCodeEnum;
+	/**
+	 * @minLength 1
+	 * @maxLength 2000
+	 * @type string | undefined
+	 */
+	note?: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionOptions = {
+	body: PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionBody;
+	path: PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionResponses = {
+	"200": PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus200;
+	"400": PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus400;
+	"403": PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus403;
+	"404": PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus404;
+	"409": PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus409;
+	"422": PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus422;
+	"500": PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionResponse =
+	| PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus200
+	| PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus400
+	| PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus403
+	| PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus404
+	| PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus409
+	| PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus422
+	| PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus500;
 
 /**
  * @type object
@@ -53938,6 +54737,30 @@ export type PostApiUnitsByTypeStatus200 = {
 	 * @type string
 	 */
 	catalogMode: PostApiUnitsByTypeStatus200CatalogModeEnum;
+	ownershipClaim:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				state: "pending";
+				/**
+				 * @type string
+				 */
+				details: string;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				createdAt: string;
+		  } | null)
+		| null;
 	/**
 	 * @type object
 	 */
@@ -55921,6 +56744,30 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 	 * @type string
 	 */
 	catalogMode: GetApiUnitsByTypeByUnitIdStatus200CatalogModeEnum;
+	ownershipClaim:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				state: "pending";
+				/**
+				 * @type string
+				 */
+				details: string;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				createdAt: string;
+		  } | null)
+		| null;
 	/**
 	 * @type object
 	 */
@@ -57152,6 +57999,30 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 	 * @type string
 	 */
 	catalogMode: PatchApiUnitsByTypeByUnitIdStatus200CatalogModeEnum;
+	ownershipClaim:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				state: "pending";
+				/**
+				 * @type string
+				 */
+				details: string;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				createdAt: string;
+		  } | null)
+		| null;
 	/**
 	 * @type object
 	 */
@@ -58652,6 +59523,30 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 	 * @type string
 	 */
 	catalogMode: PatchApiUnitsByTypeByUnitIdVariantContextStatus200CatalogModeEnum;
+	ownershipClaim:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				state: "pending";
+				/**
+				 * @type string
+				 */
+				details: string;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				createdAt: string;
+		  } | null)
+		| null;
 	/**
 	 * @type object
 	 */
@@ -60056,6 +60951,30 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 	 * @type string
 	 */
 	catalogMode: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200CatalogModeEnum;
+	ownershipClaim:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				state: "pending";
+				/**
+				 * @type string
+				 */
+				details: string;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				createdAt: string;
+		  } | null)
+		| null;
 	/**
 	 * @type object
 	 */
@@ -61470,6 +62389,30 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 	 * @type string
 	 */
 	catalogMode: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200CatalogModeEnum;
+	ownershipClaim:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				state: "pending";
+				/**
+				 * @type string
+				 */
+				details: string;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				createdAt: string;
+		  } | null)
+		| null;
 	/**
 	 * @type object
 	 */
@@ -64192,6 +65135,14 @@ export type GetApiEntitiesByUnitIdQuery = {
 	localizationLanguages?: GetApiEntitiesByUnitIdLocalizationLanguagesEnum[];
 };
 
+export const GetApiEntitiesByUnitIdStatus200CatalogModeEnum = {
+	owned_work: "owned_work",
+	public_entry: "public_entry",
+} as const;
+
+export type GetApiEntitiesByUnitIdStatus200CatalogModeEnum =
+	(typeof GetApiEntitiesByUnitIdStatus200CatalogModeEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200CatalogModeEnum];
+
 export const GetApiEntitiesByUnitIdStatus200Language = {
 	zh: "zh",
 	en: "en",
@@ -64408,6 +65359,35 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 	 * @type boolean
 	 */
 	verified: boolean;
+	/**
+	 * @default 'owned_work'
+	 * @type string
+	 */
+	catalogMode: GetApiEntitiesByUnitIdStatus200CatalogModeEnum;
+	ownershipClaim:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				state: "pending";
+				/**
+				 * @type string
+				 */
+				details: string;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				createdAt: string;
+		  } | null)
+		| null;
 	language: (GetApiEntitiesByUnitIdStatus200Language | null) | null;
 	avatar:
 		| (

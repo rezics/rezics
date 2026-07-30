@@ -21,6 +21,7 @@ import { HistoryErrors } from "./history/errors";
 import { ImageAssetErrors } from "./image-assets/errors";
 import { MessageErrors } from "./messages/errors";
 import { NotificationErrors } from "./notifications/errors";
+import { OwnershipClaimErrors } from "../ownership-claims/errors";
 import { PollErrors } from "./polls/errors";
 import { PostErrors } from "./posts/errors";
 import { ProgressErrors } from "./progress/errors";
@@ -81,6 +82,7 @@ export const ApiErrors = [
 	...ReportErrors,
 	...PostErrors,
 	...NotificationErrors,
+	...OwnershipClaimErrors,
 	...CatalogErrors,
 	...MessageErrors,
 	...CollectionErrors,

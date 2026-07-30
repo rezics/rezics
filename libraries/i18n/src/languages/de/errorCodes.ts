@@ -132,6 +132,17 @@ export default {
 		"Das Eigentum an einer gemeinschaftseigenen Unit kann nicht aufgegeben werden.",
 	UnitOwnershipOverrideConfirmationInvalid:
 		"Die eingegebene Unit-Kennung stimmt nicht mit dem Ziel der Eigentumsneuzuweisung überein.",
+	UnitOwnershipClaimUnavailable:
+		"Ein Eigentumsantrag ist nur für unterstützte öffentliche Units möglich, die noch der Gemeinschaft gehören.",
+	UnitOwnershipClaimAlreadyPending:
+		"Für diese Unit hast du bereits einen ausstehenden Eigentumsantrag.",
+	UnitOwnershipClaimNotFound: "Dieser Eigentumsantrag für die Unit wurde nicht gefunden.",
+	UnitOwnershipClaimChanged:
+		"Der Eigentumsantrag oder die ursprüngliche Eigentümerschaft wurde geändert. Lade neu und versuche es erneut.",
+	UnitOwnershipClaimConfirmationInvalid:
+		"Die eingegebene Antragskennung stimmt nicht mit dem Prüfziel überein.",
+	UnitOwnershipClaimSelfDecisionForbidden:
+		"Antragstellende dürfen ihren eigenen Eigentumsantrag nicht prüfen.",
 	UnitLifecycleConfirmationInvalid:
 		"Die eingegebene Unit-Kennung stimmt nicht mit dem Ziel überein.",
 	UnitLifecycleChanged: "Die Unit wurde geändert. Lade neu und versuche es erneut.",

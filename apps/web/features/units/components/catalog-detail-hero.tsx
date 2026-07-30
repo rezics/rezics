@@ -17,7 +17,7 @@ import { UnitProgressAction } from "@/features/progress/components/unit-progress
 import { UnitProgressStatistics } from "@/features/progress/components/unit-progress-statistics";
 import { isProgressTrackableUnitType } from "@/features/progress/model/progress-record";
 import { UnitScoreControl } from "@/features/reviews/components/unit-score-control";
-import { UnitReportOverflowMenu } from "@/features/reports/components/unit-report-dialog";
+import { CatalogUnitOverflowMenu } from "@/features/ownership-claims/components/unit-ownership-claim-actions";
 import { useTranslation } from "@/i18n/client";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { readPortableText } from "@/lib/block";
@@ -95,7 +95,12 @@ export function CatalogDetailHero<Type extends CatalogDetailUnitType>({
 							</Tooltip>
 						) : null}
 						<CatalogShareAction unitId={unit.id} />
-						<UnitReportOverflowMenu unitId={unit.id} />
+						<CatalogUnitOverflowMenu
+							catalogMode={unit.catalogMode}
+							pendingClaim={unit.ownershipClaim}
+							type={type}
+							unitId={unit.id}
+						/>
 					</div>
 				</div>
 

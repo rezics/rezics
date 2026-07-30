@@ -72,4 +72,16 @@ export default {
 		title: "Unit-Eigentümerschaft geändert",
 		body: "Die Plattformverwaltung hat die Eigentümerschaft einer mit deinem Profil verbundenen Unit geändert.",
 	},
+	unit_ownership_claim_approved: {
+		title: "Eigentumsantrag genehmigt",
+		body: "Die Verwaltungseigentümerschaft dieser Unit wurde auf dein Profil übertragen.",
+	},
+	unit_ownership_claim_rejected: {
+		title: "Eigentumsantrag nicht genehmigt",
+		body: "Die Plattformverwaltung hat deinen Eigentumsantrag abgelehnt.",
+	},
+	unit_ownership_claim_superseded: {
+		title: "Eigentumsantrag geschlossen",
+		body: "Ein anderer Antrag wurde genehmigt, daher wurde dein Antrag automatisch geschlossen.",
+	},
 } satisfies typeof import("../zh-Hant/notifications").default;

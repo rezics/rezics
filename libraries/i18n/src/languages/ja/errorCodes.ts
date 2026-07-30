@@ -124,6 +124,14 @@ export default {
 		"コミュニティが所有するユニットの所有権は放棄できません。",
 	UnitOwnershipOverrideConfirmationInvalid:
 		"入力したユニット識別子が所有者の強制変更対象と一致しません。",
+	UnitOwnershipClaimUnavailable:
+		"所有権を申請できるのは、コミュニティが所有する対応済みの公開ユニットのみです。",
+	UnitOwnershipClaimAlreadyPending: "このユニットには審査中の所有権申請がすでにあります。",
+	UnitOwnershipClaimNotFound: "このユニット所有権申請は見つかりませんでした。",
+	UnitOwnershipClaimChanged:
+		"所有権申請または元の所有権が変更されました。再読み込みして再試行してください。",
+	UnitOwnershipClaimConfirmationInvalid: "入力した申請識別子が審査対象と一致しません。",
+	UnitOwnershipClaimSelfDecisionForbidden: "申請者は自分の所有権申請を審査できません。",
 	UnitLifecycleConfirmationInvalid: "入力したユニット識別子が操作対象と一致しません。",
 	UnitLifecycleChanged: "ユニットが変更されました。再読み込みして再試行してください。",
 	UnitLifecycleProtected: "この保護対象のユニットは論理削除できません。",

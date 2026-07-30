@@ -36,6 +36,29 @@ export default {
 		variantVersion: "Variante",
 		mainVersionEntity: "Versión principal relacionada",
 	},
+	ownershipClaim: {
+		action: "Reclamar esta Unit",
+		pendingAction: "Reclamación en revisión",
+		title: "Reclamar la titularidad de la Unit",
+		description:
+			"Envía una reclamación si tienes derecho a representar a la persona, organización, marca u obra descrita por esta Unit.",
+		detailsLabel: "Fundamento de la reclamación",
+		detailsPlaceholder:
+			"Explica tu relación con esta Unit y cómo puede verificarla la plataforma.",
+		detailsHint:
+			"Proporciona fuentes públicas que acrediten la representación o la relación de derechos. No envíes datos personales confidenciales.",
+		effectNotice: `La aprobación transfiere a tu perfil la titularidad de gestión de esta Unit en ${verbatimTerms.rezics.value}. No certifica tu identidad ni determina derechos de autor u otros derechos legales.`,
+		submit: "Enviar reclamación",
+		cancel: "Cancelar",
+		submitted: "Reclamación enviada",
+		submittedDescription: "Recibirás una notificación después de la revisión de la plataforma.",
+		pendingTitle: "Reclamación en revisión",
+		pendingDescription: "La plataforma aún no ha decidido esta reclamación de titularidad.",
+		submittedDetails: "Fundamento enviado",
+		withdraw: "Retirar reclamación",
+		withdrawn: "Reclamación retirada",
+		withdrawnDescription: "Esta reclamación ya no está pendiente de revisión.",
+	},
 	attributionRoles: {
 		author: "Autor",
 		"co-author": "Coautor",

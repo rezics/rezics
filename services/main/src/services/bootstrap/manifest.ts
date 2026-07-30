@@ -405,6 +405,27 @@ export const RezicsRuleRealmManifest = {
 					},
 				],
 			},
+			{
+				id: "019b76da-a800-7360-8000-000000000006",
+				localizations: [
+					{
+						language: "zh",
+						title: "不當認領或持有條目",
+						content: bootstrapRuleContent(
+							"請檢舉由無權代表其所指人物、組織、品牌或作品的使用者認領或持有的條目，例如冒用身分、權利人或官方名義。請在補充說明中指出正確的代表或權利關係，並提供可供核實的公開來源。",
+							["b00759060001", "b00759060002", "b00759060003"],
+						),
+					},
+					{
+						language: "en",
+						title: "Improper entry claim or ownership",
+						content: bootstrapRuleContent(
+							"Report an entry claimed or held by a user who is not entitled to represent the person, organization, brand, or work it describes, including impersonation of an identity, rightsholder, or official capacity. In the additional details, identify the proper representative or rights relationship and provide publicly verifiable sources.",
+							["b00759060004", "b00759060005", "b00759060006"],
+						),
+					},
+				],
+			},
 		],
 	},
 } as const;

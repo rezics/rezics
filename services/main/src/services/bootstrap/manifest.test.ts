@@ -224,12 +224,12 @@ describe("database bootstrap manifest", () => {
 			expect.objectContaining({ language: "zh", title: "REZICS Rule" }),
 			expect.objectContaining({ language: "en", title: "REZICS Rule" }),
 		]);
-		expect(RezicsRuleRealmManifest.rules.items).toHaveLength(5);
+		expect(RezicsRuleRealmManifest.rules.items).toHaveLength(6);
 		expect(RezicsRuleRealmManifest.rules.items.at(-1)?.localizations).toEqual([
-			expect.objectContaining({ language: "zh", title: "智慧財產權侵害" }),
+			expect.objectContaining({ language: "zh", title: "不當認領或持有條目" }),
 			expect.objectContaining({
 				language: "en",
-				title: "Intellectual property infringement",
+				title: "Improper entry claim or ownership",
 			}),
 		]);
 		expect(

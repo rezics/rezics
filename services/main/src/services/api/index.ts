@@ -19,6 +19,7 @@ import imageAssetContent from "./image-assets/content";
 import imageAssets from "./image-assets";
 import messages from "./messages";
 import notifications from "./notifications";
+import ownershipClaims from "./ownership-claims";
 import recommendations from "./recommendations";
 import feed from "./feed";
 import reports from "./reports";
@@ -165,6 +166,7 @@ export default new Elysia({ normalize: "typebox" })
 				.use(associationProposals)
 				.use(health)
 				.use(notifications)
+				.use(ownershipClaims)
 				.use(recommendations)
 				.use(messages)
 				.use(tokens)

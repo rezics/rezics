@@ -32,6 +32,11 @@ export default {
 			description:
 				"Alle Units durchsuchen und Eigentümerschaft, vorläufige Löschung oder Wiederherstellung protokolliert verwalten.",
 		},
+		ownershipClaims: {
+			label: "Eigentumsanträge",
+			description:
+				"Eigentumsanträge für öffentliche Units prüfen und die Verwaltungseigentümerschaft an die berechtigte Person zurückgeben.",
+		},
 		moderation: {
 			label: "Globale Inhaltsmoderation",
 			description:
@@ -113,6 +118,49 @@ export default {
 		}),
 		confirmRestore: "Wiederherstellung bestätigen",
 		confirmSoftDelete: "Vorläufiges Löschen bestätigen",
+	},
+	ownershipClaims: {
+		stateFilter: "Antragsstatus",
+		allStates: "Alle Status",
+		states: {
+			pending: "Wird geprüft",
+			approved: "Genehmigt",
+			rejected: "Abgelehnt",
+			withdrawn: "Zurückgezogen",
+			superseded: "Durch anderen Antrag ersetzt",
+		},
+		listLabel: "Liste der Eigentumsanträge",
+		untitledUnit: "Unit ohne Titel",
+		unnamedClaimant: "Antragsteller ohne Namen",
+		empty: "Keine Eigentumsanträge entsprechen dem aktuellen Status.",
+		loadMore: "Mehr laden",
+		openUnit: "Unit öffnen",
+		claimant: "Antragsteller",
+		submittedAt: "Eingereicht",
+		details: "Begründung des Antrags",
+		approve: "Genehmigen",
+		reject: "Ablehnen",
+		readOnly: "Du kannst Anträge prüfen, aber nicht genehmigen oder ablehnen.",
+		resolved: "Dieser Antrag wurde bearbeitet und die Entscheidung kann nicht geändert werden.",
+		selectClaim: "Antrag auswählen",
+		selectClaimDescription: "Wähle einen Antrag, um Person, Unit und Begründung zu prüfen.",
+		approveTitle: "Diesen Eigentumsantrag genehmigen?",
+		approveDescription:
+			"Die Unit wird sofort von der Gemeinschaft auf die antragstellende Person übertragen und zu einem individuell verwalteten Werk. Bestehende öffentliche Zugriffe bleiben erhalten; andere offene Anträge werden beendet.",
+		rejectTitle: "Diesen Eigentumsantrag ablehnen?",
+		rejectDescription:
+			"Der Antrag wird ohne Eigentumsübertragung geschlossen und die antragstellende Person erhält die Entscheidung.",
+		reason: "Verwaltungsgrund",
+		internalNote: "Interne Notiz (optional)",
+		notePlaceholder:
+			"Prüfquellen und Entscheidungsgrundlage dokumentieren. Die Notiz wird im Sicherheitsprotokoll gespeichert.",
+		confirmationLabel: `Antrags-${verbatimTerms.id.value} zur Bestätigung eingeben`,
+		confirmationInstruction: insert(
+			"Gib {{claimId}} ein, um diese Entscheidung zu bestätigen.",
+			{ claimId: String },
+		),
+		confirmApprove: "Genehmigung bestätigen",
+		confirmReject: "Ablehnung bestätigen",
 	},
 	users: {
 		searchLabel: "Benutzer suchen",

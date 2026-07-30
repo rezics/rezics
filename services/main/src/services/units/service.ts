@@ -80,6 +80,7 @@ import { getAssociationContextPostsByAssociationIds } from "./association-contex
 import { createAssociationRequestInTransaction } from "./association-proposals";
 import { resolvePublisherAttributionCreationMode } from "./attribution-authorization";
 import { wilsonLowerBoundSql } from "../tags/ranking";
+import { getPendingUnitOwnershipClaim } from "../ownership-claims/service";
 
 export type VariantUnitKind = "book" | "software" | "media";
 export type CatalogUnitKind = VariantUnitKind | "series";
@@ -489,6 +490,7 @@ export async function getUnit(
 		accessDecision,
 		associationDecision,
 		hasDevelopmentPreviewAccess,
+		ownershipClaim,
 	] = await Promise.all([
 		authorization.unit.canUpdate(base.id),
 		authorization.unit.decide(base.id, "unit.tag-curation.manage"),
@@ -496,6 +498,7 @@ export async function getUnit(
 		authorization.unit.decide(base.id, "unit.access.manage"),
 		authorization.unit.decide(base.id, "unit.association.manage"),
 		authorization.platform.hasCapability(DevelopmentPreviewCapability),
+		getPendingUnitOwnershipClaim(base.id, authorization.profileId),
 	]);
 	const details = await getUnitDetails(kind, base.id);
 	return {
@@ -583,6 +586,7 @@ export async function getUnit(
 							: [],
 		variantContext,
 		catalogMode: base.catalogMode,
+		ownershipClaim: ownershipClaim ? { ...ownershipClaim, state: "pending" as const } : null,
 		capabilities: {
 			canEdit,
 			canManageAccess: accessDecision.allowed,

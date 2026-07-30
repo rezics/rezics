@@ -26,7 +26,7 @@ import {
 	toast,
 } from "@rezics/ui";
 import { EllipsisIcon, FlagIcon } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useAuthPortal } from "@/features/auth/auth-portal-context";
@@ -227,7 +227,13 @@ export function UnitReportDialog({
 	);
 }
 
-export function UnitReportOverflowMenu({ realmId, unitId }: UnitReportTarget) {
+export function UnitReportOverflowMenu({
+	additionalItems,
+	realmId,
+	unitId,
+}: UnitReportTarget & {
+	readonly additionalItems?: ReactNode;
+}) {
 	const { t } = useTranslation(["reports"]);
 	const { data: session } = useHydratedSession();
 	const { openAuthPortal } = useAuthPortal();
@@ -253,6 +259,7 @@ export function UnitReportOverflowMenu({ realmId, unitId }: UnitReportTarget) {
 					</Button>
 				</MenuTrigger>
 				<MenuContent>
+					{additionalItems}
 					<UnitReportMenuItem onSelect={requestReport} />
 				</MenuContent>
 			</Menu>

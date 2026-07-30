@@ -36,6 +36,31 @@ export default {
 		variantVersion: "Variantenversion",
 		mainVersionEntity: "Zugehörige Hauptversion",
 	},
+	ownershipClaim: {
+		action: "Eigentum an dieser Unit beantragen",
+		pendingAction: "Eigentumsantrag wird geprüft",
+		title: "Eigentum an der Unit beantragen",
+		description:
+			"Stelle einen Antrag, wenn du berechtigt bist, die von dieser Unit beschriebene Person, Organisation, Marke oder das Werk zu vertreten.",
+		detailsLabel: "Begründung des Antrags",
+		detailsPlaceholder:
+			"Erkläre deine Beziehung zu dieser Unit und wie die Plattform sie prüfen kann.",
+		detailsHint:
+			"Gib öffentliche Quellen an, die die Vertretungs- oder Rechtebeziehung belegen. Übermittle keine vertraulichen personenbezogenen Daten.",
+		effectNotice: `Bei Genehmigung wird nur die Verwaltungseigentümerschaft dieser ${verbatimTerms.rezics.value}-Unit auf dein Profil übertragen. Dies ist weder eine Identitätszertifizierung noch eine Feststellung zu Urheberrecht oder anderen Rechten.`,
+		submit: "Antrag senden",
+		cancel: "Abbrechen",
+		submitted: "Antrag gesendet",
+		submittedDescription:
+			"Nach der Prüfung durch die Plattformverwaltung wirst du benachrichtigt.",
+		pendingTitle: "Eigentumsantrag wird geprüft",
+		pendingDescription:
+			"Die Plattformverwaltung hat über diesen Antrag noch nicht entschieden.",
+		submittedDetails: "Deine eingereichte Begründung",
+		withdraw: "Antrag zurückziehen",
+		withdrawn: "Antrag zurückgezogen",
+		withdrawnDescription: "Dieser Eigentumsantrag wartet nicht mehr auf eine Prüfung.",
+	},
 	attributionRoles: {
 		author: "Autor",
 		"co-author": "Co-Autor",

@@ -36,6 +36,30 @@ export default {
 		variantVersion: "Variante",
 		mainVersionEntity: "Version principale associée",
 	},
+	ownershipClaim: {
+		action: "Revendiquer cette Unit",
+		pendingAction: "Revendication en cours d’examen",
+		title: "Revendiquer la propriété de la Unit",
+		description:
+			"Envoyez une revendication si vous êtes habilité à représenter la personne, l’organisation, la marque ou l’œuvre décrite par cette Unit.",
+		detailsLabel: "Fondement de la revendication",
+		detailsPlaceholder:
+			"Expliquez votre lien avec cette Unit et comment la plateforme peut le vérifier.",
+		detailsHint:
+			"Fournissez des sources publiques établissant le lien de représentation ou de droits. N’envoyez pas de données personnelles confidentielles.",
+		effectNotice: `L’approbation transfère à votre profil la propriété de gestion de cette Unit sur ${verbatimTerms.rezics.value}. Il ne s’agit ni d’une certification d’identité ni d’une décision sur le droit d’auteur ou d’autres droits.`,
+		submit: "Envoyer la revendication",
+		cancel: "Annuler",
+		submitted: "Revendication envoyée",
+		submittedDescription:
+			"Vous serez informé après l’examen par la gouvernance de la plateforme.",
+		pendingTitle: "Revendication en cours d’examen",
+		pendingDescription: "La gouvernance de la plateforme n’a pas encore rendu sa décision.",
+		submittedDetails: "Fondement envoyé",
+		withdraw: "Retirer la revendication",
+		withdrawn: "Revendication retirée",
+		withdrawnDescription: "Cette revendication de propriété n’est plus en attente d’examen.",
+	},
 	attributionRoles: {
 		author: "Auteur",
 		"co-author": "Coauteur",

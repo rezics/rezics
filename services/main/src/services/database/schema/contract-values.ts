@@ -49,9 +49,23 @@ export const CommunityCatalogUnitKindValues = [
 export const VariantCapableUnitKindValues = ["book", "software", "media"] as const;
 export const TimedMediaUnitKindValues = ["video", "audio"] as const;
 export const CatalogEntryModeValues = ["owned_work", "public_entry"] as const;
+export const UnitOwnershipClaimableUnitKindValues = [
+	"entity",
+	"book",
+	"media",
+	"software",
+] as const;
+export const UnitOwnershipClaimResolutionValues = [
+	"approved",
+	"rejected",
+	"withdrawn",
+	"superseded",
+] as const;
 
 export type UnitKind = (typeof UnitKindValues)[number];
 export type CatalogEntryMode = (typeof CatalogEntryModeValues)[number];
+export type UnitOwnershipClaimableUnitKind = (typeof UnitOwnershipClaimableUnitKindValues)[number];
+export type UnitOwnershipClaimResolution = (typeof UnitOwnershipClaimResolutionValues)[number];
 export type NonRealmUnitKind = Exclude<UnitKind, "realm">;
 
 function deriveNonRealmUnitKindValues(): readonly [NonRealmUnitKind, ...NonRealmUnitKind[]] {

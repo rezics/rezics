@@ -30,6 +30,11 @@ export default {
 			description:
 				"모든 유닛을 검색하고 소유권 변경, 소프트 삭제 또는 복원을 감사 기록과 함께 수행합니다.",
 		},
+		ownershipClaims: {
+			label: "소유권 요청",
+			description:
+				"공개 유닛의 소유권 요청을 검토하고 적절한 요청자에게 관리 소유권을 돌려줍니다.",
+		},
 		moderation: {
 			label: "전역 콘텐츠 거버넌스",
 			description:
@@ -109,6 +114,47 @@ export default {
 		}),
 		confirmRestore: "복원 확인",
 		confirmSoftDelete: "소프트 삭제 확인",
+	},
+	ownershipClaims: {
+		stateFilter: "요청 상태",
+		allStates: "모든 상태",
+		states: {
+			pending: "검토 대기",
+			approved: "승인됨",
+			rejected: "거부됨",
+			withdrawn: "철회됨",
+			superseded: "다른 요청으로 종료됨",
+		},
+		listLabel: "소유권 요청 목록",
+		untitledUnit: "제목 없는 유닛",
+		unnamedClaimant: "이름 없는 요청자",
+		empty: "현재 상태에 해당하는 소유권 요청이 없습니다.",
+		loadMore: "더 불러오기",
+		openUnit: "유닛 열기",
+		claimant: "요청자",
+		submittedAt: "제출 시간",
+		details: "요청 근거",
+		approve: "승인",
+		reject: "거부",
+		readOnly: "요청을 볼 수 있지만 승인하거나 거부할 권한은 없습니다.",
+		resolved: "이 요청은 처리되었으며 결과를 다시 변경할 수 없습니다.",
+		selectClaim: "요청 선택",
+		selectClaimDescription: "목록에서 요청자, 유닛, 제출 근거를 검토하세요.",
+		approveTitle: "이 소유권 요청을 승인할까요?",
+		approveDescription:
+			"유닛이 즉시 커뮤니티에서 요청자에게 이전되고 개인 관리 작품으로 바뀝니다. 기존 공개 협업 권한은 유지되며 다른 대기 요청은 종료됩니다.",
+		rejectTitle: "이 소유권 요청을 거부할까요?",
+		rejectDescription:
+			"유닛 소유권을 이전하지 않고 요청을 종료하며 요청자에게 검토 결과를 알립니다.",
+		reason: "거버넌스 사유",
+		internalNote: "내부 메모(선택 사항)",
+		notePlaceholder: "확인 자료와 판단 근거를 기록합니다. 보안 감사 기록에 저장됩니다.",
+		confirmationLabel: `확인하려면 요청 ${verbatimTerms.id.value} 입력`,
+		confirmationInstruction: insert("이 결정을 확인하려면 {{claimId}}을(를) 입력하세요.", {
+			claimId: String,
+		}),
+		confirmApprove: "승인 확인",
+		confirmReject: "거부 확인",
 	},
 	users: {
 		searchLabel: "사용자 검색",

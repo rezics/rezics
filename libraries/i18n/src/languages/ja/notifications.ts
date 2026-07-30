@@ -70,4 +70,16 @@ export default {
 		title: "ユニットの所有者が変更されました",
 		body: "プラットフォーム管理者が、あなたのプロフィールに関係するユニットの所有者を変更しました。",
 	},
+	unit_ownership_claim_approved: {
+		title: "ユニット所有権の申請が承認されました",
+		body: "このユニットの管理上の所有権があなたのプロフィールに移りました。",
+	},
+	unit_ownership_claim_rejected: {
+		title: "ユニット所有権の申請は承認されませんでした",
+		body: "プラットフォーム運営が所有権申請を却下しました。",
+	},
+	unit_ownership_claim_superseded: {
+		title: "ユニット所有権の申請が終了しました",
+		body: "別の申請が承認されたため、あなたの申請は自動的に終了しました。",
+	},
 } satisfies typeof import("../zh-Hant/notifications").default;

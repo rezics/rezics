@@ -28,6 +28,20 @@ describe("notification translation selection", () => {
 		).toBe("unit_ownership_override");
 	});
 
+	it.each([
+		["approved", "unit_ownership_claim_approved"],
+		["rejected", "unit_ownership_claim_rejected"],
+		["superseded", "unit_ownership_claim_superseded"],
+	] as const)("uses dedicated copy for an ownership claim %s decision", (resolution, key) => {
+		expect(
+			notificationTranslationKey("system", {
+				type: "system_event",
+				event: "unit_ownership_claim_resolution",
+				references: { resolution },
+			}),
+		).toBe(key);
+	});
+
 	it("keeps non-system kinds independent from payload contents", () => {
 		expect(
 			notificationTranslationKey("reply", {

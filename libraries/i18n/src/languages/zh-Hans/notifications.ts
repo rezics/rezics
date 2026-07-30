@@ -70,4 +70,16 @@ export default {
 		title: "条目所有权已变更",
 		body: "平台管理员变更了一个与你个人资料相关的条目所有权。",
 	},
+	unit_ownership_claim_approved: {
+		title: "条目所有权认领已批准",
+		body: "这个条目的管理所有权已转移到你的个人资料。",
+	},
+	unit_ownership_claim_rejected: {
+		title: "条目所有权认领未获批准",
+		body: "平台治理人员已拒绝你提出的条目所有权认领。",
+	},
+	unit_ownership_claim_superseded: {
+		title: "条目所有权认领已结束",
+		body: "另一项认领已获批准，因此你提出的认领已自动结束。",
+	},
 } satisfies typeof import("../zh-Hant/notifications").default;

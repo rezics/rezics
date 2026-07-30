@@ -36,6 +36,28 @@ export default {
 		variantVersion: "변형 버전",
 		mainVersionEntity: "연결할 메인 버전",
 	},
+	ownershipClaim: {
+		action: "이 유닛 소유권 요청",
+		pendingAction: "소유권 검토 중",
+		title: "유닛 소유권 요청",
+		description:
+			"이 유닛이 나타내는 인물, 조직, 브랜드 또는 저작물을 대표할 권한이 있다면 요청을 제출하세요.",
+		detailsLabel: "요청 근거",
+		detailsPlaceholder: "이 유닛과의 관계 및 플랫폼이 이를 확인할 방법을 설명하세요.",
+		detailsHint:
+			"대표 또는 권리 관계를 확인할 수 있는 공개 자료를 제공하세요. 기밀 개인정보는 제출하지 마세요.",
+		effectNotice: `승인되면 이 ${verbatimTerms.rezics.value} 유닛의 관리 소유권만 당신의 프로필로 이전됩니다. 신원 인증이나 저작권 및 기타 법적 권리에 대한 판단이 아닙니다.`,
+		submit: "요청 제출",
+		cancel: "취소",
+		submitted: "요청이 제출되었습니다",
+		submittedDescription: "플랫폼 운영 검토 후 결과를 알려드립니다.",
+		pendingTitle: "소유권 검토 중",
+		pendingDescription: "이 유닛 소유권 요청은 아직 검토가 완료되지 않았습니다.",
+		submittedDetails: "제출한 요청 근거",
+		withdraw: "요청 철회",
+		withdrawn: "요청이 철회되었습니다",
+		withdrawnDescription: "이 유닛 소유권 요청은 더 이상 검토를 기다리지 않습니다.",
+	},
 	attributionRoles: {
 		author: "작가",
 		"co-author": "공동 작가",

@@ -103,6 +103,7 @@ import {
 } from "../../entities/errors";
 import { AssociationContextPostInvalid } from "../../units/errors";
 import { updateDirectUnitTagCuration } from "../../tags/curation";
+import { getPendingUnitOwnershipClaim } from "../../ownership-claims/service";
 
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
@@ -265,6 +266,7 @@ export default new Elysia()
 							id: unit.id,
 							kind: entity.kind,
 							verified: entity.verified,
+							catalogMode: unit.catalogMode,
 							createdAt: unit.createdAt,
 							updatedAt: unit.updatedAt,
 						})
@@ -368,6 +370,7 @@ export default new Elysia()
 						accessDecision,
 						creditDecision,
 						subjectDecision,
+						ownershipClaim,
 					] = await Promise.all([
 						identity.authorization.unit.canUpdate(params.unitId, ["localizations"]),
 						identity.authorization.unit.canUpdate(params.unitId, [
@@ -383,6 +386,10 @@ export default new Elysia()
 							params.unitId,
 							"unit.association.manage",
 							["associations", "subject"],
+						),
+						getPendingUnitOwnershipClaim(
+							params.unitId,
+							identity.authorization.profileId,
 						),
 					]);
 					return {
@@ -414,6 +421,9 @@ export default new Elysia()
 						localizations,
 						attributions,
 						owner: ownerSummary,
+						ownershipClaim: ownershipClaim
+							? { ...ownershipClaim, state: "pending" as const }
+							: null,
 						capabilities: {
 							canEdit,
 							canEditCreditAttributions,

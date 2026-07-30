@@ -66,6 +66,8 @@ import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-t
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { selectLocalization } from "@/lib/localization";
 import { profileHref } from "@/features/profiles/profile-route";
+import { EntityOwnershipClaimButton } from "@/features/ownership-claims/components/unit-ownership-claim-actions";
+import { UnitReportOverflowMenu } from "@/features/reports/components/unit-report-dialog";
 
 function CatalogFrame({
 	title,
@@ -200,7 +202,15 @@ export function TagsPage() {
 }
 
 export function EntityDetailPage({ id }: { id: string }) {
-	const { t } = useTranslation(["actions", "catalog", "errors", "governance", "media", "ui"]);
+	const { t } = useTranslation([
+		"actions",
+		"catalog",
+		"errors",
+		"governance",
+		"media",
+		"ui",
+		"units",
+	]);
 	const localizationLanguages = useLocalizationLanguages();
 	const query = useGetApiEntitiesByUnitId({
 		path: { unitId: id },
@@ -266,21 +276,29 @@ export function EntityDetailPage({ id }: { id: string }) {
 						</p>
 					) : null}
 					{displayedSummary ? <p>{displayedSummary}</p> : null}
-					{query.data.capabilities.canEdit ? (
-						<Button variant="solid" asChild className="w-fit">
-							<Link href={`/entities/${query.data.id}/edit`}>{t.ui.edit}</Link>
-						</Button>
-					) : null}
-					{query.data.capabilities.canManageAccess ||
-					query.data.capabilities.canEditCreditAttributions ||
-					query.data.capabilities.canManageCreditAssociations ||
-					query.data.capabilities.canManageSubjectAssociations ? (
-						<Button asChild className="w-fit" variant="outline">
-							<Link href={`/entities/${query.data.id}/governance`}>
-								{t.governance.open}
-							</Link>
-						</Button>
-					) : null}
+					<div className="flex flex-wrap items-center gap-2">
+						<EntityOwnershipClaimButton
+							catalogMode={query.data.catalogMode}
+							pendingClaim={query.data.ownershipClaim}
+							unitId={query.data.id}
+						/>
+						{query.data.capabilities.canEdit ? (
+							<Button variant="solid" asChild className="w-fit">
+								<Link href={`/entities/${query.data.id}/edit`}>{t.ui.edit}</Link>
+							</Button>
+						) : null}
+						{query.data.capabilities.canManageAccess ||
+						query.data.capabilities.canEditCreditAttributions ||
+						query.data.capabilities.canManageCreditAssociations ||
+						query.data.capabilities.canManageSubjectAssociations ? (
+							<Button asChild className="w-fit" variant="outline">
+								<Link href={`/entities/${query.data.id}/governance`}>
+									{t.governance.open}
+								</Link>
+							</Button>
+						) : null}
+						<UnitReportOverflowMenu unitId={query.data.id} />
+					</div>
 				</CardContent>
 			</Card>
 		</CatalogFrame>

@@ -315,6 +315,16 @@ export const AssociationContextPostResponse = t.Object({
 	),
 });
 
+const PendingUnitOwnershipClaimSummaryResponse = t.Object(
+	{
+		id: Uuid,
+		state: t.Literal("pending"),
+		details: t.String(),
+		createdAt: DateTime,
+	},
+	{ additionalProperties: false },
+);
+
 export const UnitDetailResponse = t.Object({
 	id: Uuid,
 	type: ManageableUnitTypeResponse,
@@ -385,6 +395,7 @@ export const UnitDetailResponse = t.Object({
 	),
 	variantContext: UnitVariantContextResponse,
 	catalogMode: t.UnionEnum(["owned_work", "public_entry"]),
+	ownershipClaim: t.Nullable(PendingUnitOwnershipClaimSummaryResponse),
 	capabilities: t.Object({
 		canEdit: t.Boolean(),
 		canManageAccess: t.Boolean(),
@@ -952,6 +963,8 @@ export const EntityDetailResponse = t.Object({
 	id: Uuid,
 	kind: t.String(),
 	verified: t.Boolean(),
+	catalogMode: t.UnionEnum(["owned_work", "public_entry"]),
+	ownershipClaim: t.Nullable(PendingUnitOwnershipClaimSummaryResponse),
 	language: t.Nullable(ContentLanguage),
 	avatar: AvatarResponse,
 	banner: ImageAssetResponse,

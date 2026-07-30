@@ -70,4 +70,16 @@ export default {
 		title: "유닛 소유권 변경",
 		body: "플랫폼 관리자가 당신의 프로필과 관련된 유닛의 소유권을 변경했습니다.",
 	},
+	unit_ownership_claim_approved: {
+		title: "유닛 소유권 요청 승인",
+		body: "이 유닛의 관리 소유권이 당신의 프로필로 이전되었습니다.",
+	},
+	unit_ownership_claim_rejected: {
+		title: "유닛 소유권 요청 미승인",
+		body: "플랫폼 운영에서 소유권 요청을 거부했습니다.",
+	},
+	unit_ownership_claim_superseded: {
+		title: "유닛 소유권 요청 종료",
+		body: "다른 요청이 승인되어 당신의 요청이 자동으로 종료되었습니다.",
+	},
 } satisfies typeof import("../zh-Hant/notifications").default;

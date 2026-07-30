@@ -66,6 +66,8 @@ import {
 	unitFollowNotificationPreference,
 	unitLink,
 	unitOwnership,
+	unitOwnershipClaim,
+	unitOwnershipClaimResolution,
 	unitAliasVoteStat,
 	unitReactionStat,
 	unitTagVoteStat,
@@ -93,6 +95,7 @@ import {
 	UnitRevisionSlotRoleValues,
 	UnitStatusActorKindValues,
 	UnitKindValues,
+	UnitOwnershipClaimResolutionValues,
 	VariantCapableUnitKindValues,
 } from "./schema";
 
@@ -220,6 +223,26 @@ describe("database schema contracts", () => {
 		);
 		expect(ownership.indexes.map((index) => index.config.name)).toContain(
 			"unit_ownership_active_unit_key",
+		);
+	});
+
+	it("keeps Unit ownership claims as an independent historical workflow", () => {
+		const claim = getTableConfig(unitOwnershipClaim);
+		expect(getTableName(unitOwnershipClaim)).toBe("unit_ownership_claim");
+		expect(unitOwnershipClaimResolution.enumValues).toEqual(UnitOwnershipClaimResolutionValues);
+		expect(claim.indexes.map((index) => index.config.name)).toEqual(
+			expect.arrayContaining([
+				"unit_ownership_claim_pending_profile_unit_key",
+				"unit_ownership_claim_resulting_ownership_key",
+				"unit_ownership_claim_pending_created_at_idx",
+			]),
+		);
+		expect(claim.checks.map((constraint) => constraint.name)).toEqual(
+			expect.arrayContaining([
+				"unit_ownership_claim_details_not_blank",
+				"unit_ownership_claim_resolution_shape_check",
+				"unit_ownership_claim_distinct_ownership_check",
+			]),
 		);
 	});
 

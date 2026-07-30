@@ -10232,6 +10232,12 @@
 					"PostTagMentionVoteConflict",
 					"InvalidNotificationCursor",
 					"NotificationNotFound",
+					"UnitOwnershipClaimUnavailable",
+					"UnitOwnershipClaimAlreadyPending",
+					"UnitOwnershipClaimNotFound",
+					"UnitOwnershipClaimChanged",
+					"UnitOwnershipClaimConfirmationInvalid",
+					"UnitOwnershipClaimSelfDecisionForbidden",
 					"AliasNotFound",
 					"TagApplicationNotFound",
 					"UnitTagCurationChanged",
@@ -13900,6 +13906,238 @@
 				},
 				"operationId": "putApiNotificationsPreferences",
 				"x-rezics-policy-operation-id": "putApiNotificationsPreferences"
+			}
+		},
+		"/api/ownership-claims": {
+			"post": {
+				"summary": "Claim ownership of a public catalog entry",
+				"tags": ["Governance"],
+				"security": [{ "SessionCookie": [] }],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["unitId", "details"],
+								"properties": {
+									"unitId": { "format": "uuid", "type": "string" },
+									"details": {
+										"minLength": 1,
+										"maxLength": 2000,
+										"pattern": ".*\\S.*",
+										"type": "string"
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"additionalProperties": false,
+									"type": "object",
+									"required": ["id", "state", "details", "createdAt"],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"state": { "const": "pending", "type": "string" },
+										"details": { "type": "string" },
+										"createdAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitOwnershipClaimUnavailable",
+													"type": "string",
+													"enum": [
+														"UnitOwnershipClaimUnavailable",
+														"UnitOwnershipClaimAlreadyPending"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiOwnership-claims",
+				"x-rezics-policy-operation-id": "postApiOwnership-claims"
+			}
+		},
+		"/api/ownership-claims/{claimId}/withdraw": {
+			"post": {
+				"summary": "Withdraw a pending Unit ownership claim",
+				"tags": ["Governance"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "claimId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["id"],
+									"properties": { "id": { "format": "uuid", "type": "string" } }
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitOwnershipClaimNotFound",
+													"type": "string",
+													"enum": ["UnitOwnershipClaimNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitOwnershipClaimChanged",
+													"type": "string",
+													"enum": ["UnitOwnershipClaimChanged"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiOwnership-claimsByClaimIdWithdraw",
+				"x-rezics-policy-operation-id": "postApiOwnership-claimsByClaimIdWithdraw"
 			}
 		},
 		"/api/recommendations/units": {
@@ -36899,6 +37137,508 @@
 				},
 				"operationId": "postApiGovernancePlatformUnitsByUnitIdRestore",
 				"x-rezics-policy-operation-id": "postApiGovernancePlatformUnitsByUnitIdRestore"
+			}
+		},
+		"/api/governance/platform/ownership-claims": {
+			"get": {
+				"summary": "List platform Unit ownership claims",
+				"tags": ["Governance"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "state",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": ["pending", "approved", "rejected", "withdrawn", "superseded"]
+						}
+					},
+					{
+						"name": "cursor",
+						"in": "query",
+						"required": false,
+						"schema": { "minLength": 1, "maxLength": 512, "type": "string" }
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 100,
+							"default": 50,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 100, "default": 50, "type": "integer" }
+							]
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"additionalProperties": false,
+									"type": "object",
+									"required": ["items", "nextCursor"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": [
+													"id",
+													"unitId",
+													"unitKind",
+													"unitTitle",
+													"catalogMode",
+													"currentOwnerProfileId",
+													"claimantProfileId",
+													"claimantLabel",
+													"sourceOwnershipId",
+													"details",
+													"state",
+													"resolution",
+													"resolvedAt",
+													"resolvedByProfileId",
+													"resultingOwnershipId",
+													"createdAt"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"unitId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"unitKind": {
+														"type": "string",
+														"enum": [
+															"slug_namespace",
+															"profile",
+															"book",
+															"software",
+															"media",
+															"video",
+															"audio",
+															"release",
+															"entity",
+															"label",
+															"tag",
+															"structure",
+															"series",
+															"zone",
+															"zone_page",
+															"collection",
+															"post",
+															"poll",
+															"realm",
+															"realm_rule"
+														]
+													},
+													"unitTitle": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"catalogMode": {
+														"default": "owned_work",
+														"type": "string",
+														"enum": ["owned_work", "public_entry"]
+													},
+													"currentOwnerProfileId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"claimantProfileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"claimantLabel": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"sourceOwnershipId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"details": { "type": "string" },
+													"state": {
+														"type": "string",
+														"enum": [
+															"pending",
+															"approved",
+															"rejected",
+															"withdrawn",
+															"superseded"
+														]
+													},
+													"resolution": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"default": "approved",
+																"type": "string",
+																"enum": [
+																	"approved",
+																	"rejected",
+																	"withdrawn",
+																	"superseded"
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"resolvedAt": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "date-time",
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
+													},
+													"resolvedByProfileId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"resultingOwnershipId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										},
+										"nextCursor": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "InvalidPaginationCursor",
+															"type": "string",
+															"enum": ["InvalidPaginationCursor"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiGovernancePlatformOwnership-claims",
+				"x-rezics-policy-operation-id": "getApiGovernancePlatformOwnership-claims"
+			}
+		},
+		"/api/governance/platform/ownership-claims/{claimId}/decision": {
+			"post": {
+				"summary": "Resolve a Unit ownership claim",
+				"tags": ["Governance"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "claimId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["decision", "confirmationClaimId", "reasonCode"],
+								"properties": {
+									"decision": {
+										"type": "string",
+										"enum": ["approved", "rejected"]
+									},
+									"confirmationClaimId": { "format": "uuid", "type": "string" },
+									"reasonCode": {
+										"default": "content_policy",
+										"type": "string",
+										"enum": [
+											"content_policy",
+											"realm_rules",
+											"spam",
+											"harassment",
+											"unsafe_content",
+											"off_topic",
+											"duplicate",
+											"account_security",
+											"user_request",
+											"appeal",
+											"administrative",
+											"other"
+										]
+									},
+									"note": { "minLength": 1, "maxLength": 2000, "type": "string" }
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["id", "state", "ownershipId"],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"state": { "const": "approved", "type": "string" },
+												"ownershipId": {
+													"format": "uuid",
+													"type": "string"
+												}
+											}
+										},
+										{
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["id", "state", "ownershipId"],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"state": { "const": "rejected", "type": "string" },
+												"ownershipId": { "type": "null" }
+											}
+										}
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "UnitOwnershipClaimConfirmationInvalid",
+															"type": "string",
+															"enum": [
+																"UnitOwnershipClaimConfirmationInvalid"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": [
+														"PlatformCapabilityRequired",
+														"FreshSessionRequired",
+														"UnitOwnershipClaimSelfDecisionForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitOwnershipClaimNotFound",
+													"type": "string",
+													"enum": [
+														"UnitOwnershipClaimNotFound",
+														"UnitNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitOwnershipClaimChanged",
+													"type": "string",
+													"enum": ["UnitOwnershipClaimChanged"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiGovernancePlatformOwnership-claimsByClaimIdDecision",
+				"x-rezics-policy-operation-id": "postApiGovernancePlatformOwnership-claimsByClaimIdDecision"
 			}
 		},
 		"/api/governance/notes/{postId}": {
@@ -69511,6 +70251,7 @@
 										"versions",
 										"variantContext",
 										"catalogMode",
+										"ownershipClaim",
 										"capabilities"
 									],
 									"properties": {
@@ -71350,6 +72091,37 @@
 											"default": "owned_work",
 											"type": "string",
 											"enum": ["owned_work", "public_entry"]
+										},
+										"ownershipClaim": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"id",
+														"state",
+														"details",
+														"createdAt"
+													],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"state": {
+															"const": "pending",
+															"type": "string"
+														},
+														"details": { "type": "string" },
+														"createdAt": {
+															"format": "date-time",
+															"type": "string"
+														}
+													}
+												},
+												{ "type": "null" }
+											]
 										},
 										"capabilities": {
 											"type": "object",
@@ -71649,6 +72421,7 @@
 										"versions",
 										"variantContext",
 										"catalogMode",
+										"ownershipClaim",
 										"capabilities"
 									],
 									"properties": {
@@ -73488,6 +74261,37 @@
 											"default": "owned_work",
 											"type": "string",
 											"enum": ["owned_work", "public_entry"]
+										},
+										"ownershipClaim": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"id",
+														"state",
+														"details",
+														"createdAt"
+													],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"state": {
+															"const": "pending",
+															"type": "string"
+														},
+														"details": { "type": "string" },
+														"createdAt": {
+															"format": "date-time",
+															"type": "string"
+														}
+													}
+												},
+												{ "type": "null" }
+											]
 										},
 										"capabilities": {
 											"type": "object",
@@ -73832,6 +74636,7 @@
 										"versions",
 										"variantContext",
 										"catalogMode",
+										"ownershipClaim",
 										"capabilities"
 									],
 									"properties": {
@@ -75671,6 +76476,37 @@
 											"default": "owned_work",
 											"type": "string",
 											"enum": ["owned_work", "public_entry"]
+										},
+										"ownershipClaim": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"id",
+														"state",
+														"details",
+														"createdAt"
+													],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"state": {
+															"const": "pending",
+															"type": "string"
+														},
+														"details": { "type": "string" },
+														"createdAt": {
+															"format": "date-time",
+															"type": "string"
+														}
+													}
+												},
+												{ "type": "null" }
+											]
 										},
 										"capabilities": {
 											"type": "object",
@@ -75957,6 +76793,7 @@
 										"versions",
 										"variantContext",
 										"catalogMode",
+										"ownershipClaim",
 										"capabilities"
 									],
 									"properties": {
@@ -77796,6 +78633,37 @@
 											"default": "owned_work",
 											"type": "string",
 											"enum": ["owned_work", "public_entry"]
+										},
+										"ownershipClaim": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"id",
+														"state",
+														"details",
+														"createdAt"
+													],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"state": {
+															"const": "pending",
+															"type": "string"
+														},
+														"details": { "type": "string" },
+														"createdAt": {
+															"format": "date-time",
+															"type": "string"
+														}
+													}
+												},
+												{ "type": "null" }
+											]
 										},
 										"capabilities": {
 											"type": "object",
@@ -78071,6 +78939,7 @@
 										"versions",
 										"variantContext",
 										"catalogMode",
+										"ownershipClaim",
 										"capabilities"
 									],
 									"properties": {
@@ -79910,6 +80779,37 @@
 											"default": "owned_work",
 											"type": "string",
 											"enum": ["owned_work", "public_entry"]
+										},
+										"ownershipClaim": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"id",
+														"state",
+														"details",
+														"createdAt"
+													],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"state": {
+															"const": "pending",
+															"type": "string"
+														},
+														"details": { "type": "string" },
+														"createdAt": {
+															"format": "date-time",
+															"type": "string"
+														}
+													}
+												},
+												{ "type": "null" }
+											]
 										},
 										"capabilities": {
 											"type": "object",
@@ -80544,6 +81444,7 @@
 										"versions",
 										"variantContext",
 										"catalogMode",
+										"ownershipClaim",
 										"capabilities"
 									],
 									"properties": {
@@ -82383,6 +83284,37 @@
 											"default": "owned_work",
 											"type": "string",
 											"enum": ["owned_work", "public_entry"]
+										},
+										"ownershipClaim": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"id",
+														"state",
+														"details",
+														"createdAt"
+													],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"state": {
+															"const": "pending",
+															"type": "string"
+														},
+														"details": { "type": "string" },
+														"createdAt": {
+															"format": "date-time",
+															"type": "string"
+														}
+													}
+												},
+												{ "type": "null" }
+											]
 										},
 										"capabilities": {
 											"type": "object",
@@ -85108,6 +86040,8 @@
 										"id",
 										"kind",
 										"verified",
+										"catalogMode",
+										"ownershipClaim",
 										"language",
 										"avatar",
 										"banner",
@@ -85125,6 +86059,42 @@
 										"id": { "format": "uuid", "type": "string" },
 										"kind": { "type": "string" },
 										"verified": { "type": "boolean" },
+										"catalogMode": {
+											"default": "owned_work",
+											"type": "string",
+											"enum": ["owned_work", "public_entry"]
+										},
+										"ownershipClaim": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"id",
+														"state",
+														"details",
+														"createdAt"
+													],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"state": {
+															"const": "pending",
+															"type": "string"
+														},
+														"details": { "type": "string" },
+														"createdAt": {
+															"format": "date-time",
+															"type": "string"
+														}
+													}
+												},
+												{ "type": "null" }
+											]
+										},
 										"language": {
 											"nullable": true,
 											"anyOf": [

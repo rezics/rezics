@@ -72,4 +72,16 @@ export default {
 		title: "Propriété de la Unit modifiée",
 		body: "L’administration de la plateforme a modifié la propriété d’une Unit associée à votre profil.",
 	},
+	unit_ownership_claim_approved: {
+		title: "Revendication de propriété approuvée",
+		body: "La gestion de cette Unit a été transférée à votre profil.",
+	},
+	unit_ownership_claim_rejected: {
+		title: "Revendication de propriété non approuvée",
+		body: "La gouvernance de la plateforme a rejeté votre revendication.",
+	},
+	unit_ownership_claim_superseded: {
+		title: "Revendication de propriété close",
+		body: "Une autre revendication a été approuvée, la vôtre a donc été close automatiquement.",
+	},
 } satisfies typeof import("../zh-Hant/notifications").default;

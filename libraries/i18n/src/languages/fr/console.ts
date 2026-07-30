@@ -32,6 +32,11 @@ export default {
 			description:
 				"Recherchez toutes les Units et gérez de manière auditée leur propriété, leur suppression provisoire ou leur restauration.",
 		},
+		ownershipClaims: {
+			label: "Revendications de propriété",
+			description:
+				"Examinez les revendications portant sur les Units publiques et restituez leur gestion au demandeur légitime.",
+		},
 		moderation: {
 			label: "Gouvernance globale des contenus",
 			description:
@@ -114,6 +119,50 @@ export default {
 		}),
 		confirmRestore: "Confirmer la restauration",
 		confirmSoftDelete: "Confirmer la suppression provisoire",
+	},
+	ownershipClaims: {
+		stateFilter: "État de la revendication",
+		allStates: "Tous les états",
+		states: {
+			pending: "En attente d’examen",
+			approved: "Approuvée",
+			rejected: "Rejetée",
+			withdrawn: "Retirée",
+			superseded: "Remplacée par une autre revendication",
+		},
+		listLabel: "Liste des revendications de propriété",
+		untitledUnit: "Unit sans titre",
+		unnamedClaimant: "Demandeur sans nom",
+		empty: "Aucune revendication ne correspond à l’état actuel.",
+		loadMore: "Charger davantage",
+		openUnit: "Ouvrir la Unit",
+		claimant: "Demandeur",
+		submittedAt: "Date d’envoi",
+		details: "Fondement de la revendication",
+		approve: "Approuver",
+		reject: "Rejeter",
+		readOnly:
+			"Vous pouvez consulter les revendications, mais pas les approuver ni les rejeter.",
+		resolved: "Cette revendication est traitée et sa décision ne peut plus être modifiée.",
+		selectClaim: "Sélectionner une revendication",
+		selectClaimDescription:
+			"Choisissez une revendication pour examiner le demandeur, la Unit et son fondement.",
+		approveTitle: "Approuver cette revendication de propriété ?",
+		approveDescription:
+			"La Unit est immédiatement transférée de la communauté au demandeur et devient une œuvre gérée individuellement. Les accès publics existants sont conservés et les autres demandes en attente sont closes.",
+		rejectTitle: "Rejeter cette revendication de propriété ?",
+		rejectDescription:
+			"La revendication est close sans transfert de propriété, puis le demandeur reçoit la décision.",
+		reason: "Motif de gouvernance",
+		internalNote: "Note interne (facultative)",
+		notePlaceholder:
+			"Consignez les sources de vérification et le fondement de la décision. La note rejoint le journal d’audit de sécurité.",
+		confirmationLabel: `Saisir l’${verbatimTerms.id.value} de la revendication pour confirmer`,
+		confirmationInstruction: insert("Saisissez {{claimId}} pour confirmer cette décision.", {
+			claimId: String,
+		}),
+		confirmApprove: "Confirmer l’approbation",
+		confirmReject: "Confirmer le rejet",
 	},
 	users: {
 		searchLabel: "Rechercher des utilisateurs",

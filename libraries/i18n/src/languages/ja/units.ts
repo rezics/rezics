@@ -36,6 +36,29 @@ export default {
 		variantVersion: "派生バージョン",
 		mainVersionEntity: "関連するメインバージョン",
 	},
+	ownershipClaim: {
+		action: "このユニットの所有権を申請",
+		pendingAction: "所有権を審査中",
+		title: "ユニット所有権の申請",
+		description:
+			"このユニットが示す人物、組織、ブランド、または作品を代表する権限がある場合に申請してください。",
+		detailsLabel: "申請の根拠",
+		detailsPlaceholder:
+			"このユニットとの関係と、プラットフォームが確認できる方法を説明してください。",
+		detailsHint:
+			"代表関係または権利関係を確認できる公開情報を提示してください。機密性の高い個人情報は送信しないでください。",
+		effectNotice: `承認されると、この ${verbatimTerms.rezics.value} ユニットの管理上の所有権があなたのプロフィールに移ります。本人認証や、著作権その他の法的権利の判断ではありません。`,
+		submit: "申請を送信",
+		cancel: "キャンセル",
+		submitted: "申請を送信しました",
+		submittedDescription: "プラットフォーム運営による審査後に結果をお知らせします。",
+		pendingTitle: "所有権を審査中",
+		pendingDescription: "このユニット所有権申請はまだ審査が完了していません。",
+		submittedDetails: "送信した申請根拠",
+		withdraw: "申請を取り下げる",
+		withdrawn: "申請を取り下げました",
+		withdrawnDescription: "このユニット所有権申請は審査待ちではなくなりました。",
+	},
 	attributionRoles: {
 		author: "著者",
 		"co-author": "共著者",

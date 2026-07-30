@@ -135,6 +135,17 @@ export default {
 		"Il est impossible de renoncer à la propriété d’une Unit communautaire.",
 	UnitOwnershipOverrideConfirmationInvalid:
 		"L’identifiant de Unit saisi ne correspond pas à la cible de la réattribution.",
+	UnitOwnershipClaimUnavailable:
+		"Une revendication de propriété n’est possible que pour une Unit publique prise en charge et toujours détenue par la communauté.",
+	UnitOwnershipClaimAlreadyPending:
+		"Vous avez déjà une revendication de propriété en attente pour cette Unit.",
+	UnitOwnershipClaimNotFound: "Cette revendication de propriété de Unit est introuvable.",
+	UnitOwnershipClaimChanged:
+		"La revendication ou la propriété d’origine a changé. Actualisez la page et réessayez.",
+	UnitOwnershipClaimConfirmationInvalid:
+		"L’identifiant de revendication saisi ne correspond pas à la cible de l’examen.",
+	UnitOwnershipClaimSelfDecisionForbidden:
+		"Le demandeur ne peut pas examiner sa propre revendication de propriété.",
 	UnitLifecycleConfirmationInvalid: "L’identifiant de Unit saisi ne correspond pas à la cible.",
 	UnitLifecycleChanged: "La Unit a changé. Actualisez la page et réessayez.",
 	UnitLifecycleProtected: "Cette Unit protégée ne peut pas être supprimée provisoirement.",

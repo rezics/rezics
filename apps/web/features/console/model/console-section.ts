@@ -1,6 +1,7 @@
 export const ConsoleSectionIds = [
 	"users",
 	"units",
+	"ownership-claims",
 	"moderation",
 	"audit",
 	"token-policies",

@@ -122,6 +122,15 @@ export default {
 	UnitOwnershipRelinquishmentForbidden: "Community-owned Unit ownership cannot be relinquished.",
 	UnitOwnershipOverrideConfirmationInvalid:
 		"The entered Unit identifier does not match the ownership override target.",
+	UnitOwnershipClaimUnavailable:
+		"Ownership claims are available only for supported public entries still held by the community.",
+	UnitOwnershipClaimAlreadyPending: "You already have a pending ownership claim for this entry.",
+	UnitOwnershipClaimNotFound: "This entry ownership claim could not be found.",
+	UnitOwnershipClaimChanged:
+		"The ownership claim or its source ownership changed. Reload and try again.",
+	UnitOwnershipClaimConfirmationInvalid:
+		"The entered claim identifier does not match the review target.",
+	UnitOwnershipClaimSelfDecisionForbidden: "A claimant cannot review their own ownership claim.",
 	UnitLifecycleConfirmationInvalid: "The entered Unit identifier does not match the target.",
 	UnitLifecycleChanged: "The Unit changed. Reload and try again.",
 	UnitLifecycleProtected: "This protected Unit cannot be soft-deleted.",

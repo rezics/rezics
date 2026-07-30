@@ -70,4 +70,16 @@ export default {
 		title: "條目所有權已變更",
 		body: "平台管理員變更了一個與你個人檔案相關的條目所有權。",
 	},
+	unit_ownership_claim_approved: {
+		title: "條目所有權認領已核准",
+		body: "這個條目的管理所有權已移轉到你的個人檔案。",
+	},
+	unit_ownership_claim_rejected: {
+		title: "條目所有權認領未獲核准",
+		body: "平台治理人員已拒絕你提出的條目所有權認領。",
+	},
+	unit_ownership_claim_superseded: {
+		title: "條目所有權認領已結束",
+		body: "另一項認領已獲核准，因此你提出的認領已自動結束。",
+	},
 };

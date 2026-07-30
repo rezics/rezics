@@ -32,6 +32,11 @@ export default {
 			description:
 				"Busca todas las Units y gestiona de forma auditada su titularidad, eliminación provisional o restauración.",
 		},
+		ownershipClaims: {
+			label: "Reclamaciones de titularidad",
+			description:
+				"Revisa las reclamaciones de Units públicas y devuelve la titularidad de gestión a la persona adecuada.",
+		},
 		moderation: {
 			label: "Gobernanza global de contenido",
 			description:
@@ -113,6 +118,49 @@ export default {
 		}),
 		confirmRestore: "Confirmar restauración",
 		confirmSoftDelete: "Confirmar eliminación provisional",
+	},
+	ownershipClaims: {
+		stateFilter: "Estado de la reclamación",
+		allStates: "Todos los estados",
+		states: {
+			pending: "Pendiente de revisión",
+			approved: "Aprobada",
+			rejected: "Rechazada",
+			withdrawn: "Retirada",
+			superseded: "Sustituida por otra reclamación",
+		},
+		listLabel: "Lista de reclamaciones de titularidad",
+		untitledUnit: "Unit sin título",
+		unnamedClaimant: "Solicitante sin nombre",
+		empty: "No hay reclamaciones que coincidan con el estado actual.",
+		loadMore: "Cargar más",
+		openUnit: "Abrir Unit",
+		claimant: "Solicitante",
+		submittedAt: "Enviada",
+		details: "Fundamento de la reclamación",
+		approve: "Aprobar",
+		reject: "Rechazar",
+		readOnly: "Puedes revisar reclamaciones, pero no aprobarlas ni rechazarlas.",
+		resolved: "Esta reclamación ya está resuelta y no se puede cambiar la decisión.",
+		selectClaim: "Selecciona una reclamación",
+		selectClaimDescription:
+			"Elige una reclamación para revisar al solicitante, la Unit y el fundamento enviado.",
+		approveTitle: "¿Aprobar esta reclamación de titularidad?",
+		approveDescription:
+			"La Unit se transfiere inmediatamente de la comunidad al solicitante y pasa a ser una obra de gestión individual. Se conservan los accesos públicos existentes y se cierran las demás solicitudes pendientes.",
+		rejectTitle: "¿Rechazar esta reclamación de titularidad?",
+		rejectDescription:
+			"La reclamación se cierra sin transferir la titularidad y se notifica la decisión al solicitante.",
+		reason: "Motivo de gobernanza",
+		internalNote: "Nota interna (opcional)",
+		notePlaceholder:
+			"Registra las fuentes de verificación y el fundamento de la decisión. Se guardará en la auditoría de seguridad.",
+		confirmationLabel: `Introduce el ${verbatimTerms.id.value} de la reclamación para confirmar`,
+		confirmationInstruction: insert("Introduce {{claimId}} para confirmar esta decisión.", {
+			claimId: String,
+		}),
+		confirmApprove: "Confirmar aprobación",
+		confirmReject: "Confirmar rechazo",
 	},
 	users: {
 		searchLabel: "Buscar usuarios",

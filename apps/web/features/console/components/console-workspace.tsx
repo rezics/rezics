@@ -20,6 +20,7 @@ import {
 	Boxes,
 	FileClock,
 	Gauge,
+	Handshake,
 	KeyRound,
 	Menu,
 	ShieldCheck,
@@ -61,6 +62,8 @@ interface ConsoleWorkspaceModel {
 	readonly canReadAudit: boolean;
 	readonly canManageTokenPolicies: boolean;
 	readonly canReadUnits: boolean;
+	readonly canReadOwnershipClaims: boolean;
+	readonly canDecideOwnershipClaims: boolean;
 	readonly canDeleteUnits: boolean;
 	readonly canRestoreUnits: boolean;
 	readonly canOverrideUnitOwnership: boolean;
@@ -142,6 +145,8 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 	);
 	const canReadUsers = accessibleSectionIds.has("users");
 	const canReadUnits = accessibleSectionIds.has("units");
+	const canReadOwnershipClaims = accessibleSectionIds.has("ownership-claims");
+	const canDecideOwnershipClaims = capabilities.has("unit.ownership.override");
 	const canDeleteUnits = capabilities.has("unit.delete");
 	const canRestoreUnits = capabilities.has("unit.restore");
 	const canOverrideUnitOwnership = capabilities.has("unit.ownership.override");
@@ -174,6 +179,17 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 						label: labels.units.label,
 						description: labels.units.description,
 						icon: Boxes,
+					},
+				]
+			: []),
+		...(canReadOwnershipClaims
+			? [
+					{
+						id: "ownership-claims" as const,
+						href: consoleSectionHref("ownership-claims"),
+						label: labels.ownershipClaims.label,
+						description: labels.ownershipClaims.description,
+						icon: Handshake,
 					},
 				]
 			: []),
@@ -228,6 +244,8 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 		canReadAudit,
 		canManageTokenPolicies,
 		canReadUnits,
+		canReadOwnershipClaims,
+		canDecideOwnershipClaims,
 		canDeleteUnits,
 		canRestoreUnits,
 		canOverrideUnitOwnership,

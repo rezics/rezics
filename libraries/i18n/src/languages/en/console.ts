@@ -31,6 +31,11 @@ export default {
 			description:
 				"Search all Units and perform audited ownership, soft-deletion, or restoration operations.",
 		},
+		ownershipClaims: {
+			label: "Ownership claims",
+			description:
+				"Review public-entry ownership claims and return management ownership to the appropriate claimant.",
+		},
 		moderation: {
 			label: "Global content governance",
 			description:
@@ -112,6 +117,48 @@ export default {
 		}),
 		confirmRestore: "Confirm restoration",
 		confirmSoftDelete: "Confirm soft-deletion",
+	},
+	ownershipClaims: {
+		stateFilter: "Claim state",
+		allStates: "All states",
+		states: {
+			pending: "Pending review",
+			approved: "Approved",
+			rejected: "Rejected",
+			withdrawn: "Withdrawn",
+			superseded: "Superseded by another claim",
+		},
+		listLabel: "Ownership claim list",
+		untitledUnit: "Untitled Unit",
+		unnamedClaimant: "Unnamed claimant",
+		empty: "No ownership claims match the current state.",
+		loadMore: "Load more",
+		openUnit: "Open Unit",
+		claimant: "Claimant",
+		submittedAt: "Submitted",
+		details: "Basis for the claim",
+		approve: "Approve",
+		reject: "Reject",
+		readOnly: "You can review claims but cannot approve or reject them.",
+		resolved: "This claim has been resolved and its decision cannot be changed.",
+		selectClaim: "Select a claim",
+		selectClaimDescription: "Choose a claim to review its claimant, Unit, and submitted basis.",
+		approveTitle: "Approve this ownership claim?",
+		approveDescription:
+			"The Unit immediately transfers from the community to the claimant and becomes an individually managed work. Existing public collaboration grants remain, and other pending claims are superseded.",
+		rejectTitle: "Reject this ownership claim?",
+		rejectDescription:
+			"The claim closes without transferring Unit ownership, and the claimant receives a decision notification.",
+		reason: "Governance reason",
+		internalNote: "Internal note (optional)",
+		notePlaceholder:
+			"Record verification sources and the decision basis. This is written to the security audit log.",
+		confirmationLabel: `Enter the claim ${verbatimTerms.id.value} to confirm`,
+		confirmationInstruction: insert("Enter {{claimId}} to confirm this decision.", {
+			claimId: String,
+		}),
+		confirmApprove: "Confirm approval",
+		confirmReject: "Confirm rejection",
 	},
 	users: {
 		searchLabel: "Search users",

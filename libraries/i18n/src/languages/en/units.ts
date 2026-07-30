@@ -36,6 +36,29 @@ export default {
 		variantVersion: "Variant version",
 		mainVersionEntity: "Related Main version",
 	},
+	ownershipClaim: {
+		action: "Claim this entry",
+		pendingAction: "Claim under review",
+		title: "Claim entry ownership",
+		description:
+			"Submit a claim if you are entitled to represent the person, organization, brand, or work described by this entry.",
+		detailsLabel: "Basis for your claim",
+		detailsPlaceholder:
+			"Explain your relationship to this entry and how the platform can verify it.",
+		detailsHint:
+			"Provide public sources that establish the representative or rights relationship. Do not submit confidential personal information.",
+		effectNotice: `Approval transfers management ownership of this ${verbatimTerms.rezics.value} entry to your Profile. It is not identity certification or a determination of copyright or other legal rights.`,
+		submit: "Submit claim",
+		cancel: "Cancel",
+		submitted: "Claim submitted",
+		submittedDescription: "You will be notified after platform governance reviews it.",
+		pendingTitle: "Claim under review",
+		pendingDescription: "Platform governance has not yet decided this entry ownership claim.",
+		submittedDetails: "Your submitted basis",
+		withdraw: "Withdraw claim",
+		withdrawn: "Claim withdrawn",
+		withdrawnDescription: "This entry ownership claim is no longer awaiting review.",
+	},
 	attributionRoles: {
 		author: "Author",
 		"co-author": "Co-author",

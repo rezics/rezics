@@ -31,6 +31,11 @@ export default {
 			description:
 				"すべてのユニットを検索し、所有者の変更、論理削除、復元を監査記録付きで実行します。",
 		},
+		ownershipClaims: {
+			label: "所有権申請",
+			description:
+				"公開ユニットの所有権申請を審査し、適切な申請者へ管理上の所有権を返還します。",
+		},
 		moderation: {
 			label: "グローバルコンテンツガバナンス",
 			description:
@@ -110,6 +115,47 @@ export default {
 		}),
 		confirmRestore: "復元を確定",
 		confirmSoftDelete: "論理削除を確定",
+	},
+	ownershipClaims: {
+		stateFilter: "申請状態",
+		allStates: "すべての状態",
+		states: {
+			pending: "審査待ち",
+			approved: "承認済み",
+			rejected: "却下済み",
+			withdrawn: "取下げ済み",
+			superseded: "別の申請により終了",
+		},
+		listLabel: "所有権申請一覧",
+		untitledUnit: "無題のユニット",
+		unnamedClaimant: "名称未設定の申請者",
+		empty: "現在の状態に一致する所有権申請はありません。",
+		loadMore: "さらに読み込む",
+		openUnit: "ユニットを開く",
+		claimant: "申請者",
+		submittedAt: "申請日時",
+		details: "申請の根拠",
+		approve: "承認",
+		reject: "却下",
+		readOnly: "申請を閲覧できますが、承認または却下する権限がありません。",
+		resolved: "この申請は処理済みで、結果を再変更できません。",
+		selectClaim: "申請を選択",
+		selectClaimDescription: "一覧から申請者、ユニット、申請根拠を確認してください。",
+		approveTitle: "この所有権申請を承認しますか？",
+		approveDescription:
+			"ユニットは直ちにコミュニティから申請者へ移され、個人管理の作品になります。既存の公開共同編集権限は維持され、他の審査中申請は終了します。",
+		rejectTitle: "この所有権申請を却下しますか？",
+		rejectDescription: "ユニットの所有権を移さずに申請を終了し、申請者へ審査結果を通知します。",
+		reason: "ガバナンス上の理由",
+		internalNote: "内部メモ（任意）",
+		notePlaceholder:
+			"確認に用いた情報源と判断根拠を記録します。セキュリティ監査記録に保存されます。",
+		confirmationLabel: `確認のため申請 ${verbatimTerms.id.value} を入力`,
+		confirmationInstruction: insert("この判断を確定するには {{claimId}} と入力してください。", {
+			claimId: String,
+		}),
+		confirmApprove: "承認を確定",
+		confirmReject: "却下を確定",
 	},
 	users: {
 		searchLabel: "利用者を検索",
