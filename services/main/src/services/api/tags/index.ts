@@ -67,6 +67,7 @@ export default new Elysia()
 				);
 				return getTagHierarchy({
 					tagId: params.tagId,
+					authorization: identity.authorization.unit,
 					localizationLanguages: query.localizationLanguages,
 					childLimit: query.childLimit ?? 30,
 					grandchildLimit: query.grandchildLimit ?? 12,

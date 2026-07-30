@@ -45,6 +45,10 @@ import { nextUnitStructureDefinitionUpdatedAt, replaceUnitStructureDefinition } 
 export type BinaryVote = -1 | 1;
 export type OptionalBinaryVote = BinaryVote | null;
 
+type TagHierarchyAuthorization = {
+	readonly ensureCanRead: (unitId: string, onDenied: () => TagNotFound) => Promise<void>;
+};
+
 export function toTagStructureConstraintError(error: unknown): InvalidTagStructure | undefined {
 	const constraint = databaseConstraintName(error);
 	if (
@@ -810,23 +814,16 @@ async function hydrateHierarchyTags(
 
 export async function getTagHierarchy(input: {
 	readonly tagId: string;
+	readonly authorization: TagHierarchyAuthorization;
 	readonly localizationLanguages?: LocalizationLanguageQuery;
 	readonly childLimit: number;
 	readonly grandchildLimit: number;
 }) {
+	await input.authorization.ensureCanRead(input.tagId, () => new TagNotFound());
 	const [tagRecord] = await database
 		.select({ id: tag.id })
 		.from(tag)
-		.innerJoin(unit, eq(unit.id, tag.id))
-		.where(
-			and(
-				eq(tag.id, input.tagId),
-				eq(unit.status, "published"),
-				eq(unit.visibility, "public"),
-				eq(unit.moderationStatus, "approved"),
-				isNull(unit.deletedAt),
-			),
-		)
+		.where(eq(tag.id, input.tagId))
 		.limit(1);
 	if (!tagRecord) throw new TagNotFound();
 	const directEdges = await listRankedHierarchyEdges([input.tagId]);
