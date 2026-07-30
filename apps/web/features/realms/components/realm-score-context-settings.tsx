@@ -28,6 +28,7 @@ import { Trash2 } from "lucide-react";
 import { useCallback, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import {
 	RealmScoreContextPostKinds,
@@ -60,11 +61,13 @@ function RealmScoreContextSettingsForm({
 	const queryClient = useQueryClient();
 	const save = usePutApiRealmsByRealmIdScoreContext();
 	const remove = useDeleteApiRealmsByRealmIdScoreContext();
+	const localizationLanguages = useLocalizationLanguages();
 	const [contextPostId, setContextPostId] = useState(initialContextPostId ?? undefined);
 	const [confirmRemove, setConfirmRemove] = useState(false);
 	const search = useCallback<EntitySearch>(
-		(_index, query, signal) => searchRealmScoreContextPosts(realmId, query, signal),
-		[realmId],
+		(_index, query, signal) =>
+			searchRealmScoreContextPosts(realmId, query, signal, localizationLanguages),
+		[localizationLanguages, realmId],
 	);
 
 	async function refreshContext() {

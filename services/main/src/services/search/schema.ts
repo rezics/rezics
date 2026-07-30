@@ -23,6 +23,9 @@ export interface SearchHit {
 	slugAddress: PublicSlugAddressValue | null;
 	category: string;
 	kind: string;
+	language: ContentLanguage;
+	title: string | null;
+	summary: string | null;
 	titles: string[];
 	summaries: string[];
 	avatar?: PresentedAvatar | null;
@@ -34,6 +37,7 @@ export interface SearchHit {
 				readonly unit: {
 					readonly id: string;
 					readonly type: "book" | "software" | "media";
+					readonly language: ContentLanguage;
 					readonly title: string | null;
 					readonly cover: { readonly id: string; readonly url: string } | null;
 				};
@@ -47,6 +51,7 @@ export interface DomainSearchRequest {
 	offset?: number;
 	cursor?: string;
 	limit?: number;
+	localizationLanguages?: readonly ContentLanguage[];
 	Languages?: ContentLanguage[];
 	kinds?: string[];
 	contentRatings?: string[];

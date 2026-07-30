@@ -16,6 +16,7 @@ import {
 	creditAttribution,
 } from "../database/schema";
 import type { RecommendationReason } from "../api/recommendations/schema";
+import type { ContentLanguage } from "@rezics/i18n";
 import type { RecommendationSnapshotContext, RecommendationViewer } from "./context";
 import { RecommendationPolicy, RecommendationPolicyVersion } from "./policy";
 import { rankRecommendations } from "./ranking";
@@ -30,14 +31,19 @@ export async function recommendRelatedPosts(input: {
 	seed: { id: string; subjectId: string | null; creditedUnitIds: readonly string[] };
 	asOf: Date;
 	pageSize: number;
+	localizationLanguages: readonly ContentLanguage[];
 	afterId?: string;
 	requestId: string;
 }) {
+	const feedQuery = {
+		...RelatedPostFeedQuery,
+		localizationLanguages: input.localizationLanguages,
+	};
 	const snapshotId = input.snapshot?.id;
 	const seedIds = [input.seed.id, ...(input.seed.subjectId ? [input.seed.subjectId] : [])];
 	const eligible = getFeedEligibilityCondition(
 		input.viewer,
-		RelatedPostFeedQuery,
+		feedQuery,
 		input.asOf,
 		input.afterId,
 	);
@@ -167,7 +173,7 @@ export async function recommendRelatedPosts(input: {
 		ids: sources.ids,
 		sources,
 		viewer: input.viewer,
-		query: RelatedPostFeedQuery,
+		query: feedQuery,
 		snapshotId: snapshotId ?? null,
 		asOf: input.asOf,
 		...(input.afterId ? { anchorId: input.afterId } : {}),
@@ -181,7 +187,7 @@ export async function recommendRelatedPosts(input: {
 	const start = input.afterId ? ranked.findIndex(({ id }) => id === input.afterId) + 1 : 0;
 	if (input.afterId && start === 0) return null;
 	const page = ranked.slice(start, start + input.pageSize);
-	const items = await hydrateFeedItems(page, input.viewer, RelatedPostFeedQuery, input.asOf, {
+	const items = await hydrateFeedItems(page, input.viewer, feedQuery, input.asOf, {
 		kind: "recommendation",
 		reasons: reason,
 		surface: "post_related",

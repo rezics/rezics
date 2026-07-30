@@ -4,6 +4,7 @@ import {
 	postApiSearchByIndex,
 	postApiUnitsPresentations,
 } from "@rezics/openapi-tanstack-query";
+import type { ContentLanguage } from "@rezics/i18n";
 import type { EntitySearch } from "@rezics/ui";
 
 import { isUnitId } from "@/features/units/model/unit-id";
@@ -32,11 +33,12 @@ async function resolveExactUnit(
 	index: string,
 	query: string,
 	signal: AbortSignal,
+	localizationLanguages: readonly ContentLanguage[],
 	kinds?: readonly string[],
 ) {
 	if (!isUnitId(query)) return [];
 	const { data } = await postApiUnitsPresentations({
-		body: { ids: [query] },
+		body: { ids: [query], localizationLanguages: [...localizationLanguages] },
 		signal,
 	});
 	return data.items
@@ -51,43 +53,62 @@ async function resolveExactUnit(
 		}));
 }
 
-export const searchEntities: EntitySearch = async (index, query, signal, options) => {
-	const exact = await resolveExactUnit(index, query, signal, options?.kinds);
-	if (exact.length) return exact;
-	if (index === "all") {
-		const { data } = await postApiSearch({
-			body: { query, limitPerIndex: 3 },
+export function createEntitySearch(
+	localizationLanguages: readonly ContentLanguage[],
+): EntitySearch {
+	return async (index, query, signal, options) => {
+		const exact = await resolveExactUnit(
+			index,
+			query,
+			signal,
+			localizationLanguages,
+			options?.kinds,
+		);
+		if (exact.length) return exact;
+		if (index === "all") {
+			const { data } = await postApiSearch({
+				body: {
+					query,
+					limitPerIndex: 3,
+					localizationLanguages: [...localizationLanguages],
+				},
+				signal,
+			});
+			const byId = new Map(
+				data.groups
+					.flatMap((group) =>
+						group.hits.map((hit) => ({
+							id: hit.id,
+							label: hit.title ?? hit.name ?? hit.id,
+							kind: hit.kind,
+							avatar: hit.avatar,
+						})),
+					)
+					.map((hit) => [hit.id, hit] as const),
+			);
+			return [...byId.values()].slice(0, 20);
+		}
+		if (!isSearchIndex(index)) return [];
+		const { data } = await postApiSearchByIndex({
+			path: { index },
+			body: {
+				query,
+				kinds: options?.kinds ? [...options.kinds] : undefined,
+				limit: 10,
+				localizationLanguages: [...localizationLanguages],
+			},
 			signal,
 		});
 		const byId = new Map(
-			data.groups
-				.flatMap((group) =>
-					group.hits.map((hit) => ({
-						id: hit.id,
-						label: hit.titles[0] ?? hit.name ?? hit.id,
-						kind: hit.kind,
-						avatar: hit.avatar,
-					})),
-				)
+			data.hits
+				.map((hit) => ({
+					id: hit.id,
+					label: hit.title ?? hit.name ?? hit.id,
+					kind: hit.kind,
+					avatar: hit.avatar,
+				}))
 				.map((hit) => [hit.id, hit] as const),
 		);
-		return [...byId.values()].slice(0, 20);
-	}
-	if (!isSearchIndex(index)) return [];
-	const { data } = await postApiSearchByIndex({
-		path: { index },
-		body: { query, kinds: options?.kinds ? [...options.kinds] : undefined, limit: 10 },
-		signal,
-	});
-	const byId = new Map(
-		data.hits
-			.map((hit) => ({
-				id: hit.id,
-				label: hit.titles[0] ?? hit.name ?? hit.id,
-				kind: hit.kind,
-				avatar: hit.avatar,
-			}))
-			.map((hit) => [hit.id, hit] as const),
-	);
-	return [...byId.values()].slice(0, 10);
-};
+		return [...byId.values()].slice(0, 10);
+	};
+}

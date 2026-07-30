@@ -1,7 +1,7 @@
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { RecommendationTrackingSchema } from "./schema";
+import { RecommendationTrackingSchema, RelatedPostQuery, UnitRecommendationQuery } from "./schema";
 
 const tracking = {
 	requestId: "00000000-0000-7000-8000-000000000001",
@@ -21,4 +21,15 @@ describe("recommendation tracking schema", () => {
 			false,
 		);
 	});
+});
+
+describe("recommendation presentation localization", () => {
+	it.each([UnitRecommendationQuery, RelatedPostQuery])(
+		"requires a non-empty localization priority",
+		(schema) => {
+			expect(Check(schema, { localizationLanguages: ["zh", "en"] })).toBe(true);
+			expect(Check(schema, {})).toBe(false);
+			expect(Check(schema, { localizationLanguages: [] })).toBe(false);
+		},
+	);
 });

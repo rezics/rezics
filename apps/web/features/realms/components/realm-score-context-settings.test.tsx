@@ -22,6 +22,10 @@ vi.mock("@/i18n/client", async () => {
 	return createReactI18n(resources);
 });
 
+vi.mock("@/i18n/use-localization-languages", () => ({
+	useLocalizationLanguages: () => ["zh", "en"],
+}));
+
 vi.mock("@rezics/openapi-tanstack-query", () => ({
 	getApiRealmsByRealmIdScoreContextQueryKey: (input: unknown) => ["realm-score-context", input],
 	useDeleteApiRealmsByRealmIdScoreContext: () => ({

@@ -4232,13 +4232,13 @@ export function usePutApiNotificationsPreferences<TContext>(
 
 export const getApiRecommendationsUnitsQueryKey = ({
 	query,
-}: Omit<GetApiRecommendationsUnitsOptions, "headers"> = {}) =>
+}: Omit<GetApiRecommendationsUnitsOptions, "headers">) =>
 	[{ url: "/api/recommendations/units" }, ...(query ? [query] : [])] as const;
 
 type GetApiRecommendationsUnitsQueryKey = ReturnType<typeof getApiRecommendationsUnitsQueryKey>;
 
 export function getApiRecommendationsUnitsQueryOptions(
-	{ query }: GetApiRecommendationsUnitsOptions = {},
+	{ query }: GetApiRecommendationsUnitsOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
 	const queryKey = getApiRecommendationsUnitsQueryKey({ query });
@@ -4278,10 +4278,10 @@ export function useGetApiRecommendationsUnits<
 	{
 		query,
 	}: {
-		query?:
+		query:
 			| GetApiRecommendationsUnitsOptions["query"]
 			| (() => GetApiRecommendationsUnitsOptions["query"]);
-	} = {},
+	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
@@ -4387,7 +4387,7 @@ export function useGetApiRecommendationsPostsByPostId<
 		path:
 			| GetApiRecommendationsPostsByPostIdOptions["path"]
 			| (() => GetApiRecommendationsPostsByPostIdOptions["path"]);
-		query?:
+		query:
 			| GetApiRecommendationsPostsByPostIdOptions["query"]
 			| (() => GetApiRecommendationsPostsByPostIdOptions["query"]);
 	},
@@ -18338,18 +18338,22 @@ export function usePostApiUnitsPresentations<TContext>(
 
 export const getApiUnitsByIdByUnitIdSeriesMembershipsQueryKey = ({
 	path,
+	query,
 }: Omit<GetApiUnitsByIdByUnitIdSeriesMembershipsOptions, "headers">) =>
-	[{ url: "/api/units/by-id/:unitId/series-memberships", params: path }] as const;
+	[
+		{ url: "/api/units/by-id/:unitId/series-memberships", params: path },
+		...(query ? [query] : []),
+	] as const;
 
 type GetApiUnitsByIdByUnitIdSeriesMembershipsQueryKey = ReturnType<
 	typeof getApiUnitsByIdByUnitIdSeriesMembershipsQueryKey
 >;
 
 export function getApiUnitsByIdByUnitIdSeriesMembershipsQueryOptions(
-	{ path }: GetApiUnitsByIdByUnitIdSeriesMembershipsOptions,
+	{ path, query }: GetApiUnitsByIdByUnitIdSeriesMembershipsOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiUnitsByIdByUnitIdSeriesMembershipsQueryKey({ path });
+	const queryKey = getApiUnitsByIdByUnitIdSeriesMembershipsQueryKey({ path, query });
 	return queryOptions<
 		GetApiUnitsByIdByUnitIdSeriesMembershipsStatus200,
 		ResponseErrorConfig<
@@ -18365,6 +18369,7 @@ export function getApiUnitsByIdByUnitIdSeriesMembershipsQueryOptions(
 			const { data } = await getApiUnitsByIdByUnitIdSeriesMemberships({
 				...config,
 				path,
+				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
 			});
@@ -18384,10 +18389,14 @@ export function useGetApiUnitsByIdByUnitIdSeriesMemberships<
 >(
 	{
 		path,
+		query,
 	}: {
 		path:
 			| GetApiUnitsByIdByUnitIdSeriesMembershipsOptions["path"]
 			| (() => GetApiUnitsByIdByUnitIdSeriesMembershipsOptions["path"]);
+		query:
+			| GetApiUnitsByIdByUnitIdSeriesMembershipsOptions["query"]
+			| (() => GetApiUnitsByIdByUnitIdSeriesMembershipsOptions["query"]);
 	},
 	options: {
 		query?: Partial<
@@ -18408,7 +18417,10 @@ export function useGetApiUnitsByIdByUnitIdSeriesMemberships<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
 	const queryKey =
 		resolvedOptions?.queryKey ??
 		getApiUnitsByIdByUnitIdSeriesMembershipsQueryKey(resolvedParams);
@@ -32255,16 +32267,17 @@ export function usePutApiRealmsByRealmIdRulesByRevisionIdAcknowledgement<TContex
 
 export const getApiRealmsByRealmIdPinsQueryKey = ({
 	path,
+	query,
 }: Omit<GetApiRealmsByRealmIdPinsOptions, "headers">) =>
-	[{ url: "/api/realms/:realmId/pins", params: path }] as const;
+	[{ url: "/api/realms/:realmId/pins", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiRealmsByRealmIdPinsQueryKey = ReturnType<typeof getApiRealmsByRealmIdPinsQueryKey>;
 
 export function getApiRealmsByRealmIdPinsQueryOptions(
-	{ path }: GetApiRealmsByRealmIdPinsOptions,
+	{ path, query }: GetApiRealmsByRealmIdPinsOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiRealmsByRealmIdPinsQueryKey({ path });
+	const queryKey = getApiRealmsByRealmIdPinsQueryKey({ path, query });
 	return queryOptions<
 		GetApiRealmsByRealmIdPinsStatus200,
 		ResponseErrorConfig<
@@ -32280,6 +32293,7 @@ export function getApiRealmsByRealmIdPinsQueryOptions(
 			const { data } = await getApiRealmsByRealmIdPins({
 				...config,
 				path,
+				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
 			});
@@ -32299,10 +32313,14 @@ export function useGetApiRealmsByRealmIdPins<
 >(
 	{
 		path,
+		query,
 	}: {
 		path:
 			| GetApiRealmsByRealmIdPinsOptions["path"]
 			| (() => GetApiRealmsByRealmIdPinsOptions["path"]);
+		query:
+			| GetApiRealmsByRealmIdPinsOptions["query"]
+			| (() => GetApiRealmsByRealmIdPinsOptions["query"]);
 	},
 	options: {
 		query?: Partial<
@@ -32323,7 +32341,10 @@ export function useGetApiRealmsByRealmIdPins<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
 	const queryKey = resolvedOptions?.queryKey ?? getApiRealmsByRealmIdPinsQueryKey(resolvedParams);
 
 	const queryResult = useQuery(

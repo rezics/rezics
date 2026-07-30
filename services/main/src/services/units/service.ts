@@ -481,7 +481,7 @@ export async function getUnit(
 	const variantContext: UnitDetail["variantContext"] =
 		kind === "series" || kind === "video" || kind === "audio"
 			? { role: "standalone" }
-			: await getUnitVariantContext(base.id, authorization.profileId);
+			: await getUnitVariantContext(base.id, authorization.profileId, localizationLanguages);
 	const [
 		canEdit,
 		canCurateTags,

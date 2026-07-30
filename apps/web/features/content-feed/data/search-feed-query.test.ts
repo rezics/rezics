@@ -29,6 +29,7 @@ describe("Search Feed page requests", () => {
 
 		await fetchSearchFeedPage({
 			cursor: "s2_cursor",
+			localizationLanguages: ["zh", "en"],
 			request,
 			signal,
 			source: { kind: "template", template: "global" },
@@ -39,6 +40,7 @@ describe("Search Feed page requests", () => {
 			path: { template: "global" },
 			body: {
 				...request,
+				localizationLanguages: ["zh", "en"],
 				state: { sort: "best", cursor: "s2_cursor" },
 				surface: "search",
 			},
@@ -54,6 +56,7 @@ describe("Search Feed page requests", () => {
 		const signal = new AbortController().signal;
 
 		await fetchSearchFeedPage({
+			localizationLanguages: ["zh", "en"],
 			request,
 			signal,
 			source: { kind: "zone", zoneId: "00000000-0000-7000-8000-000000000002" },
@@ -64,6 +67,7 @@ describe("Search Feed page requests", () => {
 			path: { zoneId: "00000000-0000-7000-8000-000000000002" },
 			body: {
 				injections: request.injections,
+				localizationLanguages: ["zh", "en"],
 				state: request.state,
 				surface: "feed",
 			},

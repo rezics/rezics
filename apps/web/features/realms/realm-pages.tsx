@@ -301,7 +301,7 @@ export function RealmDetailPage({ id, page = "main" }: { id: string; page?: Real
 		},
 	);
 	const pins = useGetApiRealmsByRealmIdPins(
-		{ path: { realmId: id } },
+		{ path: { realmId: id }, query: { localizationLanguages } },
 		{
 			query: { enabled: Boolean(query.data) },
 		},

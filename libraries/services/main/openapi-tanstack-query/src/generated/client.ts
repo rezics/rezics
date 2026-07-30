@@ -1015,7 +1015,7 @@ export function putApiNotificationsPreferences<ThrowOnError extends boolean = tr
  * {@link /api/recommendations/units}
  */
 export function getApiRecommendationsUnits<ThrowOnError extends boolean = true>(
-	options: Options<GetApiRecommendationsUnitsOptions, ThrowOnError> = {},
+	options: Options<GetApiRecommendationsUnitsOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiRecommendationsUnitsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 

@@ -402,7 +402,11 @@ function RealmRulesSection({ baseHref, realmId }: { baseHref: string; realmId: s
 }
 
 function RealmPinsSection({ baseHref, realmId }: { baseHref: string; realmId: string }) {
-	const query = useGetApiRealmsByRealmIdPins({ path: { realmId } });
+	const localizationLanguages = useLocalizationLanguages();
+	const query = useGetApiRealmsByRealmIdPins({
+		path: { realmId },
+		query: { localizationLanguages },
+	});
 	return (
 		<RealmSettingsSection baseHref={baseHref} section="pins">
 			<RealmPins

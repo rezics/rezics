@@ -24,6 +24,7 @@ import type { FeedItem } from "@/features/content-feed/components/feed-item-card
 import { FeedQueryKey } from "@/features/content-feed/query";
 import { useTranslation } from "@/i18n/client";
 import { getErrorText } from "@/i18n/errors";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 
 type PickedTag = { readonly id: string; readonly label: string };
@@ -47,6 +48,7 @@ export function RealmFeedManagementActions({
 		"state",
 	]);
 	const queryClient = useQueryClient();
+	const localizationLanguages = useLocalizationLanguages();
 	const pin = usePutApiRealmsByRealmIdPinsByUnitId();
 	const addPolicyTag = usePutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId();
 	const [policyDialogOpen, setPolicyDialogOpen] = useState(false);
@@ -59,7 +61,10 @@ export function RealmFeedManagementActions({
 				body: { kind: "pinned" },
 			});
 			await queryClient.invalidateQueries({
-				queryKey: getApiRealmsByRealmIdPinsQueryKey({ path: { realmId } }),
+				queryKey: getApiRealmsByRealmIdPinsQueryKey({
+					path: { realmId },
+					query: { localizationLanguages },
+				}),
 			});
 			toast.create({ title: t.realms.feedManagement.pinned, type: "success" });
 		} catch (error) {

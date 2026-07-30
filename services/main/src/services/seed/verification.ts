@@ -260,6 +260,7 @@ export async function verifySeedSearch(): Promise<void> {
 				},
 			},
 			{ sortProfile: "search", pageBudget: "per-category" },
+			["en"],
 			undefined,
 			true,
 		);

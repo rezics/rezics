@@ -2,7 +2,7 @@ import { type Static, t } from "elysia";
 import { PublicationLicenseIds } from "@rezics/license";
 
 import { SearchCategories, SearchSorts } from "../../search/schema";
-import { ContentLanguage } from "../schema";
+import { ContentLanguage, LocalizationLanguagePriority } from "../schema";
 
 const SearchCategory = t.Union(SearchCategories.map((category) => t.Literal(category)));
 
@@ -17,6 +17,7 @@ export const DomainSearchBody = t.Object(
 		query: t.Optional(t.String({ maxLength: 500, default: "" })),
 		cursor: t.Optional(t.String({ maxLength: 4096, pattern: "^s2_[A-Za-z0-9_-]+$" })),
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
+		localizationLanguages: LocalizationLanguagePriority,
 		Languages: t.Optional(SearchLanguageList),
 		kinds: t.Optional(SearchStringList),
 		contentRatings: t.Optional(SearchStringList),
@@ -44,6 +45,7 @@ export const GroupedSearchBody = t.Object(
 	{
 		query: t.Optional(t.String({ maxLength: 500, default: "" })),
 		indexes: t.Optional(t.Array(SearchCategory, { minItems: 1, maxItems: 10 })),
+		localizationLanguages: LocalizationLanguagePriority,
 		Languages: t.Optional(SearchLanguageList),
 		limitPerIndex: t.Optional(t.Integer({ minimum: 1, maximum: 20, default: 5 })),
 	},

@@ -40,7 +40,6 @@ import {
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationSummary,
 	resolvedUnitLocalizationTitle,
-	firstUnitLocalizationTitle,
 } from "../../units/localization";
 import {
 	post,
@@ -968,7 +967,7 @@ export async function hydrateFeedItems(
 				when ${unit.kind} = 'structure' then (
 					select string_agg(
 						coalesce(
-							${firstUnitLocalizationTitle(unitStructureMember.memberUnitId)},
+							${resolvedUnitLocalizationTitle(unitStructureMember.memberUnitId, displayLanguages)},
 							${unitStructureMember.memberUnitId}::text
 						),
 						' › ' order by ${unitStructureMember.ordinal}

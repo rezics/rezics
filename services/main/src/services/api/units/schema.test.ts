@@ -5,9 +5,11 @@ import {
 	CatalogUnitTypeParams,
 	CreateUnitBody,
 	ManageableUnitTypeParams,
+	ResolveUnitPresentationsBody,
 	UpdateUnitBody,
 	UnitLocalizationDeleteBody,
 	UnitLocalizationOrderBody,
+	UnitSeriesMembershipQuery,
 	VariantUnitTypeParams,
 } from "./schema";
 
@@ -17,6 +19,34 @@ const publicMainUnit = {
 	version: { kind: "main" },
 	localization,
 } as const;
+
+describe("Unit presentation localization", () => {
+	it("requires an ordered, non-empty localization priority", () => {
+		const id = "019b0000-0000-7000-8000-000000000001";
+		expect(
+			Check(ResolveUnitPresentationsBody, {
+				ids: [id],
+				localizationLanguages: ["zh", "en"],
+			}),
+		).toBe(true);
+		expect(Check(ResolveUnitPresentationsBody, { ids: [id] })).toBe(false);
+		expect(
+			Check(ResolveUnitPresentationsBody, {
+				ids: [id],
+				localizationLanguages: [],
+			}),
+		).toBe(false);
+	});
+
+	it("requires localization priority for Series membership cards", () => {
+		expect(
+			Check(UnitSeriesMembershipQuery, {
+				localizationLanguages: ["zh", "en"],
+			}),
+		).toBe(true);
+		expect(Check(UnitSeriesMembershipQuery, {})).toBe(false);
+	});
+});
 
 describe("Unit publication License inputs", () => {
 	it("accepts registered License IDs and null", () => {

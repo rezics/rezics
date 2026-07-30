@@ -7,6 +7,7 @@ import {
 	FractionalPosition,
 	ContentLanguage,
 	LifecycleInput,
+	LocalizationLanguagePriority,
 	LocalizationLanguageQuery,
 	LocalizationInput,
 	Uuid,
@@ -43,8 +44,15 @@ export const UnitVersionInput = t.Union([
 export type UnitVersionInput = Static<typeof UnitVersionInput>;
 
 export const UnitStatusEventParams = t.Object({ unitId: Uuid });
+export const UnitSeriesMembershipQuery = t.Object(
+	{ localizationLanguages: LocalizationLanguagePriority },
+	{ additionalProperties: false },
+);
 export const ResolveUnitPresentationsBody = t.Object(
-	{ ids: t.Array(Uuid, { minItems: 1, maxItems: 100, uniqueItems: true }) },
+	{
+		ids: t.Array(Uuid, { minItems: 1, maxItems: 100, uniqueItems: true }),
+		localizationLanguages: LocalizationLanguagePriority,
+	},
 	{ additionalProperties: false },
 );
 export const UnitStatusEventListQuery = t.Object({
@@ -77,6 +85,7 @@ export const UnitSeriesMembershipListResponse = t.Object({
 		t.Object({
 			series: t.Object({
 				id: Uuid,
+				language: ContentLanguage,
 				title: t.Nullable(t.String()),
 				cover: t.Nullable(t.Object({ id: Uuid, url: t.String() })),
 			}),

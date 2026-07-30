@@ -84,9 +84,9 @@ type SearchResult = {
 	readonly id: string;
 	readonly category: string;
 	readonly kind: string;
-	readonly titles: readonly string[];
+	readonly title: string | null;
 	readonly name?: string | null;
-	readonly summary?: string | null;
+	readonly summary: string | null;
 };
 type SearchPresentation = {
 	readonly results: "list" | "grid" | "compact";
@@ -520,7 +520,7 @@ function SearchResults({
 									zone: context.projection.zone,
 								})
 							: unitIdHref(result.kind, result.id);
-					const title = result.titles[0] ?? result.name ?? t.untitledResult;
+					const title = result.title ?? result.name ?? t.untitledResult;
 					const content = (
 						<div className="rounded-lg border border-border-weak px-3 py-2 transition-colors hover:bg-accent">
 							<p className="font-medium text-sm">{title}</p>
@@ -878,6 +878,7 @@ function DockFeedBlock({
 	presentation: FeedPresentation;
 }) {
 	const context = useZoneBlocks();
+	const localizationLanguages = useLocalizationLanguages();
 	const mutation = usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute();
 	return (
 		<ZoneFeedBlock
@@ -887,6 +888,7 @@ function DockFeedBlock({
 				mutation.mutateAsync({
 					body: {
 						...body,
+						localizationLanguages,
 						surface: { kind: "dock" },
 					},
 					path: { blockKey, zoneId: context.projection.zone.id },
@@ -911,6 +913,7 @@ function PageFeedBlock({
 	presentation: FeedPresentation;
 }) {
 	const context = useZoneBlocks();
+	const localizationLanguages = useLocalizationLanguages();
 	const mutation = usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute();
 	return (
 		<ZoneFeedBlock
@@ -920,6 +923,7 @@ function PageFeedBlock({
 				mutation.mutateAsync({
 					body: {
 						...body,
+						localizationLanguages,
 						surface: { kind: "page", pageId },
 					},
 					path: { blockKey, zoneId: context.projection.zone.id },
@@ -1037,6 +1041,7 @@ function SearchUnitList({
 	pageId?: string;
 }) {
 	const context = useZoneBlocks();
+	const localizationLanguages = useLocalizationLanguages();
 	const dockMutation = usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute();
 	const pageMutation = usePostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecute();
 	const presentation = {
@@ -1051,7 +1056,7 @@ function SearchUnitList({
 				error={dockMutation.isError}
 				execute={(body) =>
 					dockMutation.mutateAsync({
-						body,
+						body: { ...body, localizationLanguages },
 						path: { blockKey, zoneId: context.projection.zone.id },
 					})
 				}
@@ -1068,7 +1073,7 @@ function SearchUnitList({
 			error={pageMutation.isError}
 			execute={(body) =>
 				pageMutation.mutateAsync({
-					body,
+					body: { ...body, localizationLanguages },
 					path: { blockKey, pageId, zoneId: context.projection.zone.id },
 				})
 			}

@@ -149,7 +149,9 @@ export const UnitPresentationListResponse = t.Object({
 		t.Object({
 			id: Uuid,
 			kind: t.UnionEnum(UnitKindValues),
+			language: ContentLanguage,
 			title: NullableText,
+			summary: NullableText,
 			avatar: AvatarResponse,
 		}),
 	),
@@ -199,6 +201,7 @@ export const UnitVariantSummaryResponse = t.Object(
 	{
 		id: Uuid,
 		type: t.UnionEnum(["book", "software", "media"]),
+		language: ContentLanguage,
 		title: NullableText,
 		cover: ImageAssetResponse,
 	},
@@ -396,6 +399,8 @@ const SearchHit = t.Object({
 	slugAddress: NullablePublicSlugAddressResponse,
 	category: t.String(),
 	kind: t.String(),
+	language: ContentLanguage,
+	title: NullableText,
 	titles: t.Array(t.String()),
 	summaries: t.Array(t.String()),
 	avatar: t.Optional(AvatarResponse),
@@ -410,7 +415,7 @@ const SearchHit = t.Object({
 		]),
 	),
 	name: t.Optional(NullableText),
-	summary: t.Optional(NullableText),
+	summary: NullableText,
 });
 export const SearchExactness = t.Object({
 	value: t.Integer({ minimum: 0 }),

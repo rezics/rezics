@@ -6,7 +6,6 @@ import { creditAttribution, unit, unitFollowStat } from "../database/schema";
 import { toSafeInteger } from "../database/integer";
 import type { CreditAttributionRole, UnitKind } from "../database/schema/contract-values";
 import {
-	firstUnitLocalizationTitle,
 	resolvedUnitLocalizationAvatar,
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationSummary,
@@ -40,7 +39,10 @@ export type UnitAttributionSummary = {
 
 export type UnitSummary = UnitAttributionSummary["creditedUnit"];
 
-export type UnitMentionPresentation = Pick<UnitSummary, "id" | "kind" | "title" | "avatar">;
+export type UnitPresentation = Pick<
+	UnitSummary,
+	"id" | "kind" | "language" | "title" | "summary" | "avatar"
+>;
 
 export type UnitAttributionSummaryWithStatistics = Omit<UnitAttributionSummary, "creditedUnit"> & {
 	readonly creditedUnit: UnitSummary & {
@@ -93,29 +95,40 @@ export async function getPublicUnitSummariesByIds(
 	);
 }
 
-/** Resolve mention presentation for every Unit readable by the current viewer. */
-export async function getReadableUnitPresentationsByIds(
-	unitIds: readonly string[],
-	profileId?: string,
-): Promise<Map<string, UnitMentionPresentation>> {
+/** Resolve a locale-aware presentation for every Unit readable by the current viewer. */
+export async function getReadableUnitPresentationsByIds(input: {
+	readonly unitIds: readonly string[];
+	readonly localizationLanguages: LocalizationLanguageQuery;
+	readonly profileId?: string;
+}): Promise<Map<string, UnitPresentation>> {
+	const { unitIds, localizationLanguages, profileId } = input;
 	if (!unitIds.length) return new Map();
 	const rows = await database
 		.select({
 			id: unit.id,
 			kind: unit.kind,
-			title: firstUnitLocalizationTitle(unit.id),
-			avatar: resolvedUnitLocalizationAvatar(unit.id),
+			language: resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
+			title: resolvedUnitLocalizationTitle(unit.id, localizationLanguages),
+			summary: resolvedUnitLocalizationSummary(unit.id, localizationLanguages),
+			avatar: resolvedUnitLocalizationAvatar(unit.id, localizationLanguages),
 		})
 		.from(unit)
 		.where(and(inArray(unit.id, [...unitIds]), getUnitReadCondition(profileId)));
 	return new Map(
-		rows.map(({ avatar, ...row }) => [
-			row.id,
-			{
-				...row,
-				avatar: presentAvatar(avatar),
-			},
-		]),
+		rows.flatMap(({ avatar, ...row }) =>
+			row.language
+				? [
+						[
+							row.id,
+							{
+								...row,
+								language: row.language,
+								avatar: presentAvatar(avatar),
+							},
+						] as const,
+					]
+				: [],
+		),
 	);
 }
 

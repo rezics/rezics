@@ -1,4 +1,5 @@
 import type { EmbeddableSearchTemplateId, SearchFeatureSurface } from "@rezics/filter";
+import type { ContentLanguage } from "@rezics/i18n";
 import {
 	postApiSearchFeaturesByTemplateFeed,
 	postApiSearchZonesByZoneIdFeatureFeed,
@@ -16,12 +17,14 @@ export type SearchFeedSource =
 
 export async function fetchSearchFeedPage({
 	cursor,
+	localizationLanguages,
 	request,
 	signal,
 	source,
 	surface,
 }: {
 	readonly cursor?: string;
+	readonly localizationLanguages: readonly ContentLanguage[];
 	readonly request: SearchFeedRequest;
 	readonly signal?: AbortSignal;
 	readonly source: SearchFeedSource;
@@ -34,7 +37,7 @@ export async function fetchSearchFeedPage({
 	if (source.kind === "template") {
 		const { data } = await postApiSearchFeaturesByTemplateFeed({
 			path: { template: source.template },
-			body: { ...request, state, surface },
+			body: { ...request, localizationLanguages: [...localizationLanguages], state, surface },
 			signal,
 		});
 		return data;
@@ -43,6 +46,7 @@ export async function fetchSearchFeedPage({
 		path: { zoneId: source.zoneId },
 		body: {
 			injections: request.injections,
+			localizationLanguages: [...localizationLanguages],
 			state,
 			surface,
 		},

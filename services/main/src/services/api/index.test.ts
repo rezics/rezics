@@ -271,7 +271,7 @@ describe("API root", () => {
 			new Request("http://localhost/api/search/tag-structures", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: "{}",
+				body: JSON.stringify({ localizationLanguages: ["en"] }),
 			}),
 		);
 

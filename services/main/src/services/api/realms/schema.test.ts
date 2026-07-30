@@ -7,6 +7,7 @@ import {
 	ListRealmMembersQuery,
 	ListRealmUnitsQuery,
 	ModerateRealmUnitBody,
+	RealmPinsQuery,
 	RealmRuleRevisionParams,
 	RealmRulesQuery,
 	RealmUnitListResponse,
@@ -30,6 +31,12 @@ describe("Realm member API contract", () => {
 	it("uses the shared localization fallback query for Realm rules", () => {
 		expect(Check(RealmRulesQuery, { localizationLanguages: ["en", "zh"] })).toBe(true);
 		expect(Check(RealmRulesQuery, { localizationLanguages: [] })).toBe(false);
+	});
+
+	it("requires localization priority when presenting Realm pins", () => {
+		expect(Check(RealmPinsQuery, { localizationLanguages: ["zh", "en"] })).toBe(true);
+		expect(Check(RealmPinsQuery, {})).toBe(false);
+		expect(Check(RealmPinsQuery, { localizationLanguages: [] })).toBe(false);
 	});
 
 	it.each(["explicit", "implicit_on_follow"] as const)(

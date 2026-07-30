@@ -1,4 +1,5 @@
 import { and, asc, eq, inArray, or, sql } from "drizzle-orm";
+import type { ContentLanguage } from "@rezics/i18n";
 
 import { recordAuditEvent } from "../audit";
 import type { UnitAuthorization } from "../authorization/unit/authorization";
@@ -9,13 +10,17 @@ import {
 	series,
 	seriesRelease,
 	unit,
-	unitLocalization,
 	unitVariant,
 	type VariantCapableUnitKind,
 	VariantCapableUnitKindValues,
 } from "../database/schema";
 import { imageAssetPresentationContentUrl } from "../api/image-assets/presentation";
-import { isFirstUnitLocalization, firstUnitLocalizationCoverAssetId } from "./localization";
+import {
+	resolvedUnitLocalizationImageAssetId,
+	resolvedUnitLocalizationLanguage,
+	resolvedUnitLocalizationTitle,
+	type LocalizationLanguageQuery,
+} from "./localization";
 import {
 	UnitNotFound,
 	UnitVariantChanged,
@@ -54,6 +59,7 @@ export function toUnitVariantConstraintError(error: unknown) {
 export type UnitVariantSummary = {
 	readonly id: string;
 	readonly type: VariantCapableUnitKind;
+	readonly language: ContentLanguage;
 	readonly title: string | null;
 	readonly cover: { readonly id: string; readonly url: string } | null;
 };
@@ -72,6 +78,7 @@ export type UnitVariantContext =
 export type UnitSeriesMembership = {
 	readonly series: {
 		readonly id: string;
+		readonly language: ContentLanguage;
 		readonly title: string | null;
 		readonly cover: { readonly id: string; readonly url: string } | null;
 	};
@@ -183,6 +190,7 @@ export async function resolveMainUnitId(
 async function readableSummaries(
 	unitIds: readonly string[],
 	profileId?: string,
+	localizationLanguages: LocalizationLanguageQuery = [],
 ): Promise<Map<string, UnitVariantSummary>> {
 	const ids = [...new Set(unitIds)];
 	if (!ids.length) return new Map();
@@ -190,21 +198,23 @@ async function readableSummaries(
 		.select({
 			id: unit.id,
 			type: unit.kind,
-			title: unitLocalization.title,
-			coverAssetId: firstUnitLocalizationCoverAssetId(unit.id),
+			language: resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
+			title: resolvedUnitLocalizationTitle(unit.id, localizationLanguages),
+			coverAssetId: resolvedUnitLocalizationImageAssetId(
+				unit.id,
+				"cover",
+				localizationLanguages,
+			),
 		})
 		.from(unit)
-		.leftJoin(
-			unitLocalization,
-			and(eq(unitLocalization.unitId, unit.id), isFirstUnitLocalization(unit.id)),
-		)
 		.where(and(inArray(unit.id, ids), getUnitReadCondition(profileId)));
 	const summaries = new Map<string, UnitVariantSummary>();
 	for (const row of rows) {
-		if (!isVariantCapableUnitKind(row.type)) continue;
+		if (!isVariantCapableUnitKind(row.type) || !row.language) continue;
 		summaries.set(row.id, {
 			id: row.id,
 			type: row.type,
+			language: row.language,
 			title: row.title,
 			cover: row.coverAssetId
 				? {
@@ -220,6 +230,7 @@ async function readableSummaries(
 export async function getUnitVariantContext(
 	unitId: string,
 	profileId?: string,
+	localizationLanguages: LocalizationLanguageQuery = [],
 ): Promise<UnitVariantContext> {
 	const relationships = await database
 		.select()
@@ -228,7 +239,11 @@ export async function getUnitVariantContext(
 		.orderBy(asc(unitVariant.createdAt), asc(unitVariant.variantUnitId));
 	const outbound = relationships.find(({ variantUnitId }) => variantUnitId === unitId);
 	if (outbound) {
-		const summaries = await readableSummaries([outbound.mainUnitId], profileId);
+		const summaries = await readableSummaries(
+			[outbound.mainUnitId],
+			profileId,
+			localizationLanguages,
+		);
 		const main = summaries.get(outbound.mainUnitId);
 		return {
 			role: "variant",
@@ -240,6 +255,7 @@ export async function getUnitVariantContext(
 	const summaries = await readableSummaries(
 		relationships.map(({ variantUnitId }) => variantUnitId),
 		profileId,
+		localizationLanguages,
 	);
 	return {
 		role: "main",
@@ -253,6 +269,7 @@ export async function getUnitVariantContext(
 export async function getUnitSeriesMemberships(
 	unitId: string,
 	profileId?: string,
+	localizationLanguages: LocalizationLanguageQuery = [],
 ): Promise<UnitSeriesMembership[]> {
 	const mainUnitId = await resolveMainUnitId(database, unitId);
 	const [readableMain] =
@@ -270,16 +287,17 @@ export async function getUnitSeriesMemberships(
 			releaseUnitId: seriesRelease.releaseUnitId,
 			position: seriesRelease.position,
 			releasedOn: seriesRelease.releasedOn,
-			title: unitLocalization.title,
-			coverAssetId: firstUnitLocalizationCoverAssetId(unit.id),
+			language: resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
+			title: resolvedUnitLocalizationTitle(unit.id, localizationLanguages),
+			coverAssetId: resolvedUnitLocalizationImageAssetId(
+				unit.id,
+				"cover",
+				localizationLanguages,
+			),
 		})
 		.from(unit)
 		.innerJoin(series, eq(series.id, unit.id))
 		.innerJoin(seriesRelease, eq(seriesRelease.seriesId, series.id))
-		.leftJoin(
-			unitLocalization,
-			and(eq(unitLocalization.unitId, unit.id), isFirstUnitLocalization(unit.id)),
-		)
 		.where(
 			and(
 				inArray(seriesRelease.releaseUnitId, releaseUnitIds),
@@ -293,10 +311,11 @@ export async function getUnitSeriesMemberships(
 		);
 	const memberships = new Map<string, UnitSeriesMembership>();
 	for (const row of rows) {
-		if (memberships.has(row.seriesId)) continue;
+		if (memberships.has(row.seriesId) || !row.language) continue;
 		memberships.set(row.seriesId, {
 			series: {
 				id: row.seriesId,
+				language: row.language,
 				title: row.title,
 				cover: row.coverAssetId
 					? {

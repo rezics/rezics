@@ -33,15 +33,15 @@ import { RequestFailure } from "@/i18n/request-failure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 
 const PollSearch = { query: "", limit: 50, sort: "createdAt:desc" as const };
-const PollSearchQueryKey = [{ url: "/api/search/polls" }, PollSearch] as const;
 
 export function PollsPage() {
+	const localizationLanguages = useLocalizationLanguages();
 	const query = useQuery({
-		queryKey: PollSearchQueryKey,
+		queryKey: [{ url: "/api/search/polls" }, { ...PollSearch, localizationLanguages }],
 		queryFn: async ({ signal }) => {
 			const { data } = await postApiSearchByIndex({
 				path: { index: "polls" },
-				body: PollSearch,
+				body: { ...PollSearch, localizationLanguages },
 				signal,
 			});
 			return data;
@@ -67,8 +67,8 @@ export function PollsPage() {
 						<Link key={poll.id} href={`/polls/${poll.id}`}>
 							<Card className="transition-colors hover:bg-surface-hover">
 								<CardHeader
-									description={poll.summaries[0] ?? undefined}
-									title={poll.titles[0] ?? t.ui.unnamed}
+									description={poll.summary ?? undefined}
+									title={poll.title ?? t.ui.unnamed}
 								/>
 							</Card>
 						</Link>
@@ -124,9 +124,7 @@ export function PollCreate() {
 						: {}),
 				},
 			});
-			await queryClient.invalidateQueries({
-				queryKey: PollSearchQueryKey,
-			});
+			await queryClient.invalidateQueries({ queryKey: [{ url: "/api/search/polls" }] });
 			router.push(`/polls/${result.id}`);
 		} catch {
 			// The typed mutation state supplies the visible API error.

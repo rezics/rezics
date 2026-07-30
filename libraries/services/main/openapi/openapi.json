@@ -13877,6 +13877,21 @@
 								{ "minimum": 1, "maximum": 50, "default": 20, "type": "integer" }
 							]
 						}
+					},
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 7,
+							"uniqueItems": true,
+							"type": "array",
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
+						}
 					}
 				],
 				"responses": {
@@ -14178,6 +14193,21 @@
 								{ "format": "integer", "default": 0, "type": "string" },
 								{ "minimum": 1, "maximum": 50, "default": 20, "type": "integer" }
 							]
+						}
+					},
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 7,
+							"uniqueItems": true,
+							"type": "array",
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					}
 				],
@@ -65412,7 +65442,7 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["ids"],
+								"required": ["ids", "localizationLanguages"],
 								"properties": {
 									"ids": {
 										"minItems": 1,
@@ -65420,6 +65450,16 @@
 										"uniqueItems": true,
 										"type": "array",
 										"items": { "format": "uuid", "type": "string" }
+									},
+									"localizationLanguages": {
+										"minItems": 1,
+										"maxItems": 7,
+										"uniqueItems": true,
+										"type": "array",
+										"items": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										}
 									}
 								}
 							}
@@ -65440,7 +65480,14 @@
 											"type": "array",
 											"items": {
 												"type": "object",
-												"required": ["id", "kind", "title", "avatar"],
+												"required": [
+													"id",
+													"kind",
+													"language",
+													"title",
+													"summary",
+													"avatar"
+												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
 													"kind": {
@@ -65469,7 +65516,26 @@
 															"realm_rule"
 														]
 													},
+													"language": {
+														"type": "string",
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
+													},
 													"title": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"summary": {
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
@@ -65622,6 +65688,21 @@
 						"in": "path",
 						"required": true,
 						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 7,
+							"uniqueItems": true,
+							"type": "array",
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
+						}
 					}
 				],
 				"responses": {
@@ -65647,11 +65728,28 @@
 												"properties": {
 													"series": {
 														"type": "object",
-														"required": ["id", "title", "cover"],
+														"required": [
+															"id",
+															"language",
+															"title",
+															"cover"
+														],
 														"properties": {
 															"id": {
 																"format": "uuid",
 																"type": "string"
+															},
+															"language": {
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
+																]
 															},
 															"title": {
 																"nullable": true,
@@ -69867,6 +69965,7 @@
 																"required": [
 																	"id",
 																	"type",
+																	"language",
 																	"title",
 																	"cover"
 																],
@@ -69882,6 +69981,18 @@
 																			"book",
 																			"software",
 																			"media"
+																		]
+																	},
+																	"language": {
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	"title": {
@@ -69952,6 +70063,7 @@
 																			"required": [
 																				"id",
 																				"type",
+																				"language",
 																				"title",
 																				"cover"
 																			],
@@ -69967,6 +70079,18 @@
 																						"book",
 																						"software",
 																						"media"
+																					]
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
 																					]
 																				},
 																				"title": {
@@ -71977,6 +72101,7 @@
 																"required": [
 																	"id",
 																	"type",
+																	"language",
 																	"title",
 																	"cover"
 																],
@@ -71992,6 +72117,18 @@
 																			"book",
 																			"software",
 																			"media"
+																		]
+																	},
+																	"language": {
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	"title": {
@@ -72062,6 +72199,7 @@
 																			"required": [
 																				"id",
 																				"type",
+																				"language",
 																				"title",
 																				"cover"
 																			],
@@ -72077,6 +72215,18 @@
 																						"book",
 																						"software",
 																						"media"
+																					]
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
 																					]
 																				},
 																				"title": {
@@ -74132,6 +74282,7 @@
 																"required": [
 																	"id",
 																	"type",
+																	"language",
 																	"title",
 																	"cover"
 																],
@@ -74147,6 +74298,18 @@
 																			"book",
 																			"software",
 																			"media"
+																		]
+																	},
+																	"language": {
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	"title": {
@@ -74217,6 +74380,7 @@
 																			"required": [
 																				"id",
 																				"type",
+																				"language",
 																				"title",
 																				"cover"
 																			],
@@ -74232,6 +74396,18 @@
 																						"book",
 																						"software",
 																						"media"
+																					]
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
 																					]
 																				},
 																				"title": {
@@ -76229,6 +76405,7 @@
 																"required": [
 																	"id",
 																	"type",
+																	"language",
 																	"title",
 																	"cover"
 																],
@@ -76244,6 +76421,18 @@
 																			"book",
 																			"software",
 																			"media"
+																		]
+																	},
+																	"language": {
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	"title": {
@@ -76314,6 +76503,7 @@
 																			"required": [
 																				"id",
 																				"type",
+																				"language",
 																				"title",
 																				"cover"
 																			],
@@ -76329,6 +76519,18 @@
 																						"book",
 																						"software",
 																						"media"
+																					]
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
 																					]
 																				},
 																				"title": {
@@ -78315,6 +78517,7 @@
 																"required": [
 																	"id",
 																	"type",
+																	"language",
 																	"title",
 																	"cover"
 																],
@@ -78330,6 +78533,18 @@
 																			"book",
 																			"software",
 																			"media"
+																		]
+																	},
+																	"language": {
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	"title": {
@@ -78400,6 +78615,7 @@
 																			"required": [
 																				"id",
 																				"type",
+																				"language",
 																				"title",
 																				"cover"
 																			],
@@ -78415,6 +78631,18 @@
 																						"book",
 																						"software",
 																						"media"
+																					]
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
 																					]
 																				},
 																				"title": {
@@ -80760,6 +80988,7 @@
 																"required": [
 																	"id",
 																	"type",
+																	"language",
 																	"title",
 																	"cover"
 																],
@@ -80775,6 +81004,18 @@
 																			"book",
 																			"software",
 																			"media"
+																		]
+																	},
+																	"language": {
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	"title": {
@@ -80845,6 +81086,7 @@
 																			"required": [
 																				"id",
 																				"type",
+																				"language",
 																				"title",
 																				"cover"
 																			],
@@ -80860,6 +81102,18 @@
 																						"book",
 																						"software",
 																						"media"
+																					]
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
 																					]
 																				},
 																				"title": {
@@ -132300,6 +132554,21 @@
 						"in": "path",
 						"required": true,
 						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 7,
+							"uniqueItems": true,
+							"type": "array",
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
+						}
 					}
 				],
 				"responses": {
@@ -143154,7 +143423,12 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["contexts", "injections", "state"],
+								"required": [
+									"contexts",
+									"injections",
+									"state",
+									"localizationLanguages"
+								],
 								"properties": {
 									"contexts": {
 										"maxItems": 4,
@@ -145982,6 +146256,16 @@
 												]
 											}
 										}
+									},
+									"localizationLanguages": {
+										"minItems": 1,
+										"maxItems": 7,
+										"uniqueItems": true,
+										"type": "array",
+										"items": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										}
 									}
 								}
 							}
@@ -146078,8 +146362,11 @@
 																"slugAddress",
 																"category",
 																"kind",
+																"language",
+																"title",
 																"titles",
-																"summaries"
+																"summaries",
+																"summary"
 															],
 															"properties": {
 																"id": {
@@ -146126,6 +146413,25 @@
 																},
 																"category": { "type": "string" },
 																"kind": { "type": "string" },
+																"language": {
+																	"type": "string",
+																	"enum": [
+																		"zh",
+																		"en",
+																		"ja",
+																		"ko",
+																		"de",
+																		"fr",
+																		"es"
+																	]
+																},
+																"title": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
 																"titles": {
 																	"type": "array",
 																	"items": { "type": "string" }
@@ -146271,6 +146577,7 @@
 																					"required": [
 																						"id",
 																						"type",
+																						"language",
 																						"title",
 																						"cover"
 																					],
@@ -146286,6 +146593,18 @@
 																								"book",
 																								"software",
 																								"media"
+																							]
+																						},
+																						"language": {
+																							"type": "string",
+																							"enum": [
+																								"zh",
+																								"en",
+																								"ja",
+																								"ko",
+																								"de",
+																								"fr",
+																								"es"
 																							]
 																						},
 																						"title": {
@@ -146491,7 +146810,13 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["contexts", "injections", "state", "surface"],
+								"required": [
+									"contexts",
+									"injections",
+									"state",
+									"localizationLanguages",
+									"surface"
+								],
 								"properties": {
 									"contexts": {
 										"maxItems": 4,
@@ -149318,6 +149643,16 @@
 													}
 												]
 											}
+										}
+									},
+									"localizationLanguages": {
+										"minItems": 1,
+										"maxItems": 7,
+										"uniqueItems": true,
+										"type": "array",
+										"items": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
 										}
 									},
 									"surface": { "type": "string", "enum": ["search", "feed"] }
@@ -155833,7 +156168,7 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["injections", "state"],
+								"required": ["injections", "state", "localizationLanguages"],
 								"properties": {
 									"injections": {
 										"maxItems": 50,
@@ -158584,6 +158919,16 @@
 												]
 											}
 										}
+									},
+									"localizationLanguages": {
+										"minItems": 1,
+										"maxItems": 7,
+										"uniqueItems": true,
+										"type": "array",
+										"items": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										}
 									}
 								}
 							}
@@ -158680,8 +159025,11 @@
 																"slugAddress",
 																"category",
 																"kind",
+																"language",
+																"title",
 																"titles",
-																"summaries"
+																"summaries",
+																"summary"
 															],
 															"properties": {
 																"id": {
@@ -158728,6 +159076,25 @@
 																},
 																"category": { "type": "string" },
 																"kind": { "type": "string" },
+																"language": {
+																	"type": "string",
+																	"enum": [
+																		"zh",
+																		"en",
+																		"ja",
+																		"ko",
+																		"de",
+																		"fr",
+																		"es"
+																	]
+																},
+																"title": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
 																"titles": {
 																	"type": "array",
 																	"items": { "type": "string" }
@@ -158873,6 +159240,7 @@
 																					"required": [
 																						"id",
 																						"type",
+																						"language",
 																						"title",
 																						"cover"
 																					],
@@ -158888,6 +159256,18 @@
 																								"book",
 																								"software",
 																								"media"
+																							]
+																						},
+																						"language": {
+																							"type": "string",
+																							"enum": [
+																								"zh",
+																								"en",
+																								"ja",
+																								"ko",
+																								"de",
+																								"fr",
+																								"es"
 																							]
 																						},
 																						"title": {
@@ -159120,7 +159500,12 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["injections", "state", "surface"],
+								"required": [
+									"injections",
+									"state",
+									"localizationLanguages",
+									"surface"
+								],
 								"properties": {
 									"injections": {
 										"maxItems": 50,
@@ -161870,6 +162255,16 @@
 													}
 												]
 											}
+										}
+									},
+									"localizationLanguages": {
+										"minItems": 1,
+										"maxItems": 7,
+										"uniqueItems": true,
+										"type": "array",
+										"items": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
 										}
 									},
 									"surface": { "type": "string", "enum": ["search", "feed"] }
@@ -168473,7 +168868,7 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["injections", "state"],
+								"required": ["injections", "state", "localizationLanguages"],
 								"properties": {
 									"injections": {
 										"maxItems": 50,
@@ -171224,6 +171619,16 @@
 												]
 											}
 										}
+									},
+									"localizationLanguages": {
+										"minItems": 1,
+										"maxItems": 7,
+										"uniqueItems": true,
+										"type": "array",
+										"items": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										}
 									}
 								}
 							}
@@ -171320,8 +171725,11 @@
 																"slugAddress",
 																"category",
 																"kind",
+																"language",
+																"title",
 																"titles",
-																"summaries"
+																"summaries",
+																"summary"
 															],
 															"properties": {
 																"id": {
@@ -171368,6 +171776,25 @@
 																},
 																"category": { "type": "string" },
 																"kind": { "type": "string" },
+																"language": {
+																	"type": "string",
+																	"enum": [
+																		"zh",
+																		"en",
+																		"ja",
+																		"ko",
+																		"de",
+																		"fr",
+																		"es"
+																	]
+																},
+																"title": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
 																"titles": {
 																	"type": "array",
 																	"items": { "type": "string" }
@@ -171513,6 +171940,7 @@
 																					"required": [
 																						"id",
 																						"type",
+																						"language",
 																						"title",
 																						"cover"
 																					],
@@ -171528,6 +171956,18 @@
 																								"book",
 																								"software",
 																								"media"
+																							]
+																						},
+																						"language": {
+																							"type": "string",
+																							"enum": [
+																								"zh",
+																								"en",
+																								"ja",
+																								"ko",
+																								"de",
+																								"fr",
+																								"es"
 																							]
 																						},
 																						"title": {
@@ -171777,7 +172217,7 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["injections", "state"],
+								"required": ["injections", "state", "localizationLanguages"],
 								"properties": {
 									"injections": {
 										"maxItems": 50,
@@ -174528,6 +174968,16 @@
 												]
 											}
 										}
+									},
+									"localizationLanguages": {
+										"minItems": 1,
+										"maxItems": 7,
+										"uniqueItems": true,
+										"type": "array",
+										"items": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										}
 									}
 								}
 							}
@@ -174624,8 +175074,11 @@
 																"slugAddress",
 																"category",
 																"kind",
+																"language",
+																"title",
 																"titles",
-																"summaries"
+																"summaries",
+																"summary"
 															],
 															"properties": {
 																"id": {
@@ -174672,6 +175125,25 @@
 																},
 																"category": { "type": "string" },
 																"kind": { "type": "string" },
+																"language": {
+																	"type": "string",
+																	"enum": [
+																		"zh",
+																		"en",
+																		"ja",
+																		"ko",
+																		"de",
+																		"fr",
+																		"es"
+																	]
+																},
+																"title": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
 																"titles": {
 																	"type": "array",
 																	"items": { "type": "string" }
@@ -174817,6 +175289,7 @@
 																					"required": [
 																						"id",
 																						"type",
+																						"language",
 																						"title",
 																						"cover"
 																					],
@@ -174832,6 +175305,18 @@
 																								"book",
 																								"software",
 																								"media"
+																							]
+																						},
+																						"language": {
+																							"type": "string",
+																							"enum": [
+																								"zh",
+																								"en",
+																								"ja",
+																								"ko",
+																								"de",
+																								"fr",
+																								"es"
 																							]
 																						},
 																						"title": {
@@ -175075,7 +175560,12 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["injections", "state", "surface"],
+								"required": [
+									"injections",
+									"state",
+									"localizationLanguages",
+									"surface"
+								],
 								"properties": {
 									"injections": {
 										"maxItems": 50,
@@ -177825,6 +178315,16 @@
 													}
 												]
 											}
+										}
+									},
+									"localizationLanguages": {
+										"minItems": 1,
+										"maxItems": 7,
+										"uniqueItems": true,
+										"type": "array",
+										"items": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
 										}
 									},
 									"surface": {
@@ -184071,6 +184571,7 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
+								"required": ["localizationLanguages"],
 								"properties": {
 									"query": { "maxLength": 500, "default": "", "type": "string" },
 									"indexes": {
@@ -184091,6 +184592,16 @@
 												"reviews",
 												"polls"
 											]
+										}
+									},
+									"localizationLanguages": {
+										"minItems": 1,
+										"maxItems": 7,
+										"uniqueItems": true,
+										"type": "array",
+										"items": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
 										}
 									},
 									"Languages": {
@@ -184210,8 +184721,11 @@
 																"slugAddress",
 																"category",
 																"kind",
+																"language",
+																"title",
 																"titles",
-																"summaries"
+																"summaries",
+																"summary"
 															],
 															"properties": {
 																"id": {
@@ -184258,6 +184772,25 @@
 																},
 																"category": { "type": "string" },
 																"kind": { "type": "string" },
+																"language": {
+																	"type": "string",
+																	"enum": [
+																		"zh",
+																		"en",
+																		"ja",
+																		"ko",
+																		"de",
+																		"fr",
+																		"es"
+																	]
+																},
+																"title": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
 																"titles": {
 																	"type": "array",
 																	"items": { "type": "string" }
@@ -184403,6 +184936,7 @@
 																					"required": [
 																						"id",
 																						"type",
+																						"language",
 																						"title",
 																						"cover"
 																					],
@@ -184418,6 +184952,18 @@
 																								"book",
 																								"software",
 																								"media"
+																							]
+																						},
+																						"language": {
+																							"type": "string",
+																							"enum": [
+																								"zh",
+																								"en",
+																								"ja",
+																								"ko",
+																								"de",
+																								"fr",
+																								"es"
 																							]
 																						},
 																						"title": {
@@ -189412,6 +189958,7 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
+								"required": ["localizationLanguages"],
 								"properties": {
 									"query": { "maxLength": 500, "default": "", "type": "string" },
 									"cursor": {
@@ -189432,6 +189979,16 @@
 												"type": "integer"
 											}
 										]
+									},
+									"localizationLanguages": {
+										"minItems": 1,
+										"maxItems": 7,
+										"uniqueItems": true,
+										"type": "array",
+										"items": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										}
 									},
 									"Languages": {
 										"maxItems": 50,
@@ -189539,8 +190096,11 @@
 													"slugAddress",
 													"category",
 													"kind",
+													"language",
+													"title",
 													"titles",
-													"summaries"
+													"summaries",
+													"summary"
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
@@ -189584,6 +190144,25 @@
 													},
 													"category": { "type": "string" },
 													"kind": { "type": "string" },
+													"language": {
+														"type": "string",
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
+													},
+													"title": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
 													"titles": {
 														"type": "array",
 														"items": { "type": "string" }
@@ -189722,6 +190301,7 @@
 																		"required": [
 																			"id",
 																			"type",
+																			"language",
 																			"title",
 																			"cover"
 																		],
@@ -189737,6 +190317,18 @@
 																					"book",
 																					"software",
 																					"media"
+																				]
+																			},
+																			"language": {
+																				"type": "string",
+																				"enum": [
+																					"zh",
+																					"en",
+																					"ja",
+																					"ko",
+																					"de",
+																					"fr",
+																					"es"
 																				]
 																			},
 																			"title": {

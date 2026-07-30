@@ -14,6 +14,7 @@ import { recommendationReasonLabel } from "@/features/recommendations/reason";
 import { invalidateRecommendationQueries } from "@/features/recommendations/query";
 import { useRecommendationTracking } from "@/features/recommendations/tracking";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 
 type RecommendedUnit = GetApiRecommendationsUnitsStatus200["items"][number];
@@ -35,11 +36,13 @@ export function UnitShelf({
 }) {
 	const { t } = useTranslation(["feed", "state", "ui"]);
 	const { data: session } = useHydratedSession();
+	const localizationLanguages = useLocalizationLanguages();
 	const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
 	const query = useGetApiRecommendationsUnits({
 		query: {
 			type,
 			limit: 6,
+			localizationLanguages,
 			...(personalized === undefined ? {} : { personalized }),
 			...(seedUnitId ? { seedUnitId } : {}),
 		},

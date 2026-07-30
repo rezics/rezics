@@ -18,6 +18,7 @@ import {
 	SearchTemplateId,
 } from "@rezics/filter";
 import { FilterSchemaModels } from "@rezics/filter";
+import type { ContentLanguage } from "@rezics/i18n";
 import { getActiveObservability } from "@rezics/observability";
 import { type Static, Type } from "@sinclair/typebox";
 import { and, eq, isNull } from "drizzle-orm";
@@ -60,7 +61,7 @@ import { ZonePageNotFound } from "../domain-extensions/errors";
 import { DockNotFound } from "../docks/errors";
 import { hydrateFeedItems } from "../feed";
 import { FeedContentKindValues } from "../feed/schema";
-import { DateTime, Uuid } from "../schema";
+import { DateTime, LocalizationLanguagePriority, Uuid } from "../schema";
 import { findFeedBlock, findSearchFeatureSource } from "./block-source";
 import { mixSearchGroupHits } from "./mixed-feed";
 import { DomainSearchBody, DomainSearchParams, GroupedSearchBody } from "./schema";
@@ -102,7 +103,13 @@ const SharedSearchQueryResponse = t.Object({
 	document: SharedSearchQueryDocument,
 	createdAt: DateTime,
 });
-const SearchFeatureExecutionBody = t.Omit(SearchFeatureInput, ["document"]);
+const SearchFeatureExecutionBody = t.Object(
+	{
+		...t.Omit(SearchFeatureInput, ["document"]).properties,
+		localizationLanguages: LocalizationLanguagePriority,
+	},
+	{ additionalProperties: false },
+);
 const SearchFeatureFeedPresentationBody = t.Object(
 	{
 		...SearchFeatureExecutionBody.properties,
@@ -111,7 +118,13 @@ const SearchFeatureFeedPresentationBody = t.Object(
 	{ additionalProperties: false },
 );
 const ZoneSearchFeatureParams = t.Object({ zoneId: Uuid });
-const ZoneSearchFeatureExecutionBody = t.Pick(SearchFeatureInput, ["injections", "state"]);
+const ZoneSearchFeatureExecutionBody = t.Object(
+	{
+		...t.Pick(SearchFeatureInput, ["injections", "state"]).properties,
+		localizationLanguages: LocalizationLanguagePriority,
+	},
+	{ additionalProperties: false },
+);
 const ZoneSearchFeatureFeedPresentationBody = t.Object(
 	{
 		...ZoneSearchFeatureExecutionBody.properties,
@@ -243,6 +256,7 @@ async function executeZoneBlock(input: {
 			state: request.state,
 		},
 		input.execution,
+		request.localizationLanguages,
 		input.profileId,
 		input.hasDevelopmentPreviewAccess,
 	);
@@ -262,11 +276,13 @@ async function executeZoneFeedBlock(input: {
 		source: block.feature,
 		execution: { sortProfile: "feed", pageBudget: "shared" },
 	});
-	return presentSearchResultAsFeed(result, input.profileId);
+	const request = input.body as typeof ZoneFeedBlockExecutionBody.static;
+	return presentSearchResultAsFeed(result, request.localizationLanguages, input.profileId);
 }
 
 async function presentSearchResultAsFeed(
 	result: Awaited<ReturnType<typeof executeSearchFeatureInput>>,
+	localizationLanguages: readonly ContentLanguage[],
 	profileId?: string,
 ) {
 	const candidates = mixSearchGroupHits(result.groups).map(({ id }) => ({
@@ -277,7 +293,7 @@ async function presentSearchResultAsFeed(
 	const items = await hydrateFeedItems(
 		candidates,
 		viewer,
-		{ content: FeedContentKindValues },
+		{ content: FeedContentKindValues, localizationLanguages },
 		new Date(),
 		{ kind: "contextual" },
 	);
@@ -322,12 +338,14 @@ export default new Elysia({ prefix: "/search" })
 					await identity.authorization.platform.hasCapability(
 						DevelopmentPreviewCapability,
 					);
+				const { localizationLanguages, ...featureInput } = body;
 				return await executeSearchFeatureInput(
 					{
 						document: createDefaultSearchDocument(params.template),
-						...body,
+						...featureInput,
 					},
 					{ sortProfile: "search", pageBudget: "per-category" },
+					localizationLanguages,
 					identity.authorization.profileId,
 					hasDevelopmentPreviewAccess,
 				);
@@ -366,10 +384,15 @@ export default new Elysia({ prefix: "/search" })
 						state: body.state,
 					},
 					{ sortProfile: body.surface, pageBudget: "shared" },
+					body.localizationLanguages,
 					identity.authorization.profileId,
 					hasDevelopmentPreviewAccess,
 				);
-				return presentSearchResultAsFeed(result, identity.authorization.profileId);
+				return presentSearchResultAsFeed(
+					result,
+					body.localizationLanguages,
+					identity.authorization.profileId,
+				);
 			} catch (cause) {
 				if (cause instanceof InvalidSearch || cause instanceof SearchUnavailable)
 					throw cause;
@@ -480,6 +503,7 @@ export default new Elysia({ prefix: "/search" })
 					state: body.state,
 				},
 				{ sortProfile: "search", pageBudget: "per-category" },
+				body.localizationLanguages,
 				identity.authorization.profileId,
 				hasDevelopmentPreviewAccess,
 			);
@@ -524,10 +548,15 @@ export default new Elysia({ prefix: "/search" })
 						state: body.state,
 					},
 					{ sortProfile: body.surface, pageBudget: "shared" },
+					body.localizationLanguages,
 					identity.authorization.profileId,
 					hasDevelopmentPreviewAccess,
 				);
-				return presentSearchResultAsFeed(result, identity.authorization.profileId);
+				return presentSearchResultAsFeed(
+					result,
+					body.localizationLanguages,
+					identity.authorization.profileId,
+				);
 			} catch (cause) {
 				if (
 					cause instanceof InvalidSearch ||

@@ -21,6 +21,7 @@ import {
 	searchSortConfiguration,
 	unitFilterSearchQuery,
 } from "@rezics/filter";
+import type { ContentLanguage } from "@rezics/i18n";
 
 import { InvalidSearch } from "./errors";
 import {
@@ -773,6 +774,7 @@ export function mapSearchFeatureFacets(
 export async function executeSearchFeatureInput(
 	input: unknown,
 	execution: SearchExecutionPolicy,
+	localizationLanguages: readonly ContentLanguage[],
 	profileId: string | undefined,
 	hasDevelopmentPreviewAccess: boolean,
 ) {
@@ -780,6 +782,7 @@ export async function executeSearchFeatureInput(
 	const { executeCompiledSearch } = await import("./execution");
 	const result = await executeCompiledSearch(
 		compiled.request,
+		localizationLanguages,
 		profileId,
 		compiled.enforcedZoneId,
 		compiled.inputIdentity,

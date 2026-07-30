@@ -12,6 +12,7 @@ import { SearchFeatureFeed } from "@/features/content-feed/components/search-fea
 import { SearchFeedList } from "@/features/content-feed/data/search-feed-list";
 import type { FeedDisplayContext } from "@/features/content-feed/model/feed-display-context";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 
 export function PostList({
@@ -101,10 +102,11 @@ export function PostList({
 export function RelatedPostRecommendations({ postId }: { postId: string }) {
 	const { t } = useTranslation(["feed"]);
 	const { data: session } = useHydratedSession();
+	const localizationLanguages = useLocalizationLanguages();
 	const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
 	const query = useGetApiRecommendationsPostsByPostId({
 		path: { postId },
-		query: { limit: 4 },
+		query: { limit: 4, localizationLanguages },
 	});
 	if (query.isPending) return <RelatedFeedSkeleton />;
 	if (query.isError || !query.data?.items.length) return null;

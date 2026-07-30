@@ -89,6 +89,7 @@ export function UnitDockRenderer({
 	readonly target: DockTarget;
 }) {
 	const { t } = useTranslation(["docks"]);
+	const localizationLanguages = useLocalizationLanguages();
 	const dock = useGetApiUnitsByIdByUnitIdDocksByKind({
 		path: { unitId: ownerUnitId, kind: target.dockKind },
 	});
@@ -126,12 +127,12 @@ export function UnitDockRenderer({
 		[presentationIds],
 	);
 	const presentations = useQuery({
-		queryKey: ["unit-dock-presentations", ...presentationIds],
+		queryKey: ["unit-dock-presentations", localizationLanguages, ...presentationIds],
 		queryFn: async ({ signal }) => {
 			const responses = await Promise.all(
 				presentationBatches.map(async (ids) => {
 					const { data } = await postApiUnitsPresentations({
-						body: { ids: [...ids] },
+						body: { ids: [...ids], localizationLanguages },
 						signal,
 						throwOnError: true,
 					});

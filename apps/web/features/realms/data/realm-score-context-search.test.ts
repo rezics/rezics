@@ -20,7 +20,7 @@ describe("searchRealmScoreContextPosts", () => {
 					{
 						id: "post-id",
 						kind: "wiki",
-						titles: ["評分準則"],
+						title: "評分準則",
 						name: null,
 						avatar: null,
 					},
@@ -29,7 +29,7 @@ describe("searchRealmScoreContextPosts", () => {
 		});
 		const signal = new AbortController().signal;
 
-		const result = await searchRealmScoreContextPosts("realm-id", "準則", signal);
+		const result = await searchRealmScoreContextPosts("realm-id", "準則", signal, ["zh", "en"]);
 
 		expect(api.postApiSearchByIndex).toHaveBeenCalledWith({
 			path: { index: "posts" },
@@ -38,6 +38,7 @@ describe("searchRealmScoreContextPosts", () => {
 				realmId: "realm-id",
 				kinds: ["post", "wiki"],
 				limit: 10,
+				localizationLanguages: ["zh", "en"],
 			},
 			signal,
 		});

@@ -11,12 +11,12 @@ import {
 	ComboboxItem,
 	ComboboxList,
 	IdentityAvatar,
+	useEntitySearch,
 } from "@rezics/ui";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
-import { searchEntities } from "./search-entities";
 
 export interface SearchEntityOption extends EntityPickerHit {
 	readonly kind: string;
@@ -51,6 +51,7 @@ export function SearchEntityMultiSelect({
 	readonly removeLabel: string;
 }) {
 	const { t: nav } = useTranslation("nav");
+	const searchEntities = useEntitySearch();
 	const { collection, set } = useListCollection<SearchEntityOption>({
 		initialItems: [...selected],
 		itemToString: (item) => item.label,
@@ -76,6 +77,10 @@ export function SearchEntityMultiSelect({
 		}
 		const request = new AbortController();
 		const timer = window.setTimeout(() => {
+			if (!searchEntities) {
+				setIsError(true);
+				return;
+			}
 			setIsPending(true);
 			setIsError(false);
 			void searchEntities(index, query, request.signal)
@@ -103,7 +108,7 @@ export function SearchEntityMultiSelect({
 			window.clearTimeout(timer);
 			request.abort();
 		};
-	}, [index, inputValue, selected, set]);
+	}, [index, inputValue, searchEntities, selected, set]);
 
 	return (
 		<Combobox

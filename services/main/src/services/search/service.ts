@@ -48,8 +48,12 @@ import {
 } from "../database/schema";
 import { env } from "../config";
 import {
-	firstUnitLocalizationCoverAssetId,
 	firstUnitLocalizationTitle,
+	localizationLanguageOrder,
+	resolvedUnitLocalizationImageAssetId,
+	resolvedUnitLocalizationLanguage,
+	resolvedUnitLocalizationSummary,
+	resolvedUnitLocalizationTitle,
 } from "../units/localization";
 import { InvalidSearch } from "./errors";
 import {
@@ -795,7 +799,11 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 		{ discoverableOnly: true },
 		searchMainUnit,
 	);
-	const searchMainCoverAssetId = firstUnitLocalizationCoverAssetId(searchMainUnit.id);
+	const localizedSearchMainCoverAssetId = resolvedUnitLocalizationImageAssetId(
+		searchMainUnit.id,
+		"cover",
+		request.localizationLanguages,
+	);
 	const hits: SearchHitWithoutSlugAddress[] = [];
 	const seen = new Set<string>();
 	let authorizedCount = 0;
@@ -850,6 +858,19 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 				'id', ${unit.id},
 				'category', ${category}::text,
 				'kind', ${hitType},
+				'language', ${resolvedUnitLocalizationLanguage(unit.id, request.localizationLanguages)},
+				'title', case when ${category}::text = 'tag-structures' then (
+					select string_agg(
+						coalesce(
+							${resolvedUnitLocalizationTitle(unitStructureMember.memberUnitId, request.localizationLanguages)},
+							${unitStructureMember.memberUnitId}::text
+						),
+						' › ' order by ${unitStructureMember.ordinal}
+					)
+					from ${unitStructureMember}
+					where ${unitStructureMember.structureId} = ${unit.id}
+				) else ${resolvedUnitLocalizationTitle(unit.id, request.localizationLanguages)} end,
+				'summary', ${resolvedUnitLocalizationSummary(unit.id, request.localizationLanguages)},
 				'titles', case when ${category}::text = 'tag-structures' then coalesce((
 					select jsonb_build_array(string_agg(
 						coalesce(${firstUnitLocalizationTitle(unitStructureMember.memberUnitId)},
@@ -895,7 +916,10 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 					FROM ${unitLocalization}
 					WHERE ${unitLocalization.unitId} = ${unit.id}
 						AND ${unitLocalization.avatarType} IS NOT NULL
-					ORDER BY ${unitLocalization.position}, ${unitLocalization.language}
+					ORDER BY
+						${localizationLanguageOrder(unitLocalization.language, request.localizationLanguages)},
+						${unitLocalization.position},
+						${unitLocalization.language}
 					LIMIT 1
 				)
 			)
@@ -921,11 +945,12 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 						'unit', jsonb_build_object(
 							'id', ${searchMainUnit.id},
 							'type', ${searchMainUnit.kind},
-							'title', ${firstUnitLocalizationTitle(searchMainUnit.id)},
-							'cover', case when ${searchMainCoverAssetId} is null then null
+							'language', ${resolvedUnitLocalizationLanguage(searchMainUnit.id, request.localizationLanguages)},
+							'title', ${resolvedUnitLocalizationTitle(searchMainUnit.id, request.localizationLanguages)},
+							'cover', case when ${localizedSearchMainCoverAssetId} is null then null
 								else jsonb_build_object(
-									'id', ${searchMainCoverAssetId},
-									'url', '/image-assets/' || ${searchMainCoverAssetId} || '/presentations/cover/content'
+									'id', ${localizedSearchMainCoverAssetId},
+									'url', '/image-assets/' || ${localizedSearchMainCoverAssetId} || '/presentations/cover/content'
 								) end
 						)
 					) else jsonb_build_object('state', 'unavailable') end
@@ -1210,6 +1235,7 @@ export async function searchGrouped(request: {
 	profileId?: string;
 	query?: string;
 	indexes: SearchCategory[];
+	localizationLanguages: readonly ContentLanguage[];
 	Languages?: ContentLanguage[];
 	limitPerIndex?: number;
 }) {
@@ -1219,6 +1245,7 @@ export async function searchGrouped(request: {
 			const result = await searchDomain(category, {
 				profileId: request.profileId,
 				query: request.query,
+				localizationLanguages: request.localizationLanguages,
 				Languages: request.Languages,
 				limit: request.limitPerIndex ?? 5,
 			});

@@ -23,6 +23,7 @@ import type { PortableTextDocument } from "@rezics/block";
 import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { EntityPicker } from "@rezics/ui";
@@ -550,6 +551,7 @@ export function RealmPins({
 }) {
 	const { t } = useTranslation(["errors", "media", "realms", "state", "ui"]);
 	const queryClient = useQueryClient();
+	const localizationLanguages = useLocalizationLanguages();
 	const pin = usePutApiRealmsByRealmIdPinsByUnitId();
 	const unpin = useDeleteApiRealmsByRealmIdPinsByUnitId();
 	const [target, setTarget] = useState<PickedEntity>();
@@ -570,7 +572,10 @@ export function RealmPins({
 			{
 				onSuccess: async () => {
 					await queryClient.invalidateQueries({
-						queryKey: getApiRealmsByRealmIdPinsQueryKey({ path: { realmId } }),
+						queryKey: getApiRealmsByRealmIdPinsQueryKey({
+							path: { realmId },
+							query: { localizationLanguages },
+						}),
 					});
 					setTarget(undefined);
 				},
@@ -656,6 +661,9 @@ export function RealmPins({
 															queryKey:
 																getApiRealmsByRealmIdPinsQueryKey({
 																	path: { realmId },
+																	query: {
+																		localizationLanguages,
+																	},
 																}),
 														}),
 												},

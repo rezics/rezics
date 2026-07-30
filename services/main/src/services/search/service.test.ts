@@ -178,6 +178,21 @@ describe("domain search SQL", () => {
 		expect(queries).toContain("'cover'");
 	});
 
+	it("threads localization priority into Search result presentation", async () => {
+		await searchDomain("units", { localizationLanguages: ["zh", "en"] });
+
+		const statement = execute.mock.calls.at(-1)?.[0] as SQL | undefined;
+		if (!statement) throw new Error("Search did not execute a query");
+		const query = dialect.sqlToQuery(statement);
+		const firstChinese = query.params.indexOf("zh");
+		const firstEnglish = query.params.indexOf("en");
+		expect(firstChinese).toBeGreaterThanOrEqual(0);
+		expect(firstEnglish).toBeGreaterThan(firstChinese);
+		expect(query.sql).toContain("'language'");
+		expect(query.sql).toContain("'title'");
+		expect(query.sql).toContain("'summary'");
+	});
+
 	it("compiles every registry-declared field capability into PostgreSQL", () => {
 		for (const field of SearchFieldValues) {
 			const definition = CurrentSearchFieldRegistry[field];

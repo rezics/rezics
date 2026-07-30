@@ -3,7 +3,7 @@ import type { ContentLanguage } from "@rezics/i18n";
 
 import { database } from "../database";
 import { toSafeInteger } from "../database/integer";
-import { firstUnitLocalizationCoverAssetId } from "../units/localization";
+import { resolvedUnitLocalizationImageAssetId } from "../units/localization";
 import { compareFractionalPositions } from "../ordering/position";
 import {
 	recommendationProfileInterest,
@@ -110,6 +110,7 @@ export async function recommendUnits(input: {
 	inheritedSeedUnitId?: string;
 	asOf: Date;
 	pageSize: number;
+	localizationLanguages: readonly ContentLanguage[];
 	afterId?: string;
 	requestId: string;
 }) {
@@ -329,7 +330,11 @@ export async function recommendUnits(input: {
 				publishedAt: unit.publishedAt,
 				createdAt: unit.createdAt,
 				updatedAt: unit.updatedAt,
-				coverAssetId: firstUnitLocalizationCoverAssetId(unit.id),
+				coverAssetId: resolvedUnitLocalizationImageAssetId(
+					unit.id,
+					"cover",
+					input.localizationLanguages,
+				),
 			})
 			.from(unit)
 			.where(and(inArray(unit.id, pageIds), condition)),
@@ -358,7 +363,7 @@ export async function recommendUnits(input: {
 			const kind = detail.kind;
 			const localization = selectLocalization(
 				localizationById.get(detail.id) ?? [],
-				input.viewer.preferredLanguages,
+				input.localizationLanguages,
 			);
 			return [
 				(async () => ({

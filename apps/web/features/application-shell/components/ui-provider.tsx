@@ -1,13 +1,14 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 
 import { UiProvider } from "@rezics/ui";
 
-import { searchEntities } from "@/features/search/search-entities";
-import { resolveUnitMentions } from "@/features/editor/resolve-unit-mentions";
+import { createEntitySearch } from "@/features/search/search-entities";
+import { createUnitMentionResolver } from "@/features/editor/resolve-unit-mentions";
 import { useTranslation } from "@/i18n/client";
 import { getErrorText } from "@/i18n/errors";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 
 export function TranslatedUiProvider({ children }: Readonly<{ children: ReactNode }>) {
 	const { t } = useTranslation([
@@ -20,6 +21,15 @@ export function TranslatedUiProvider({ children }: Readonly<{ children: ReactNod
 		"state",
 		"ui",
 	]);
+	const localizationLanguages = useLocalizationLanguages();
+	const searchEntities = useMemo(
+		() => createEntitySearch(localizationLanguages),
+		[localizationLanguages],
+	);
+	const resolveUnitMentions = useMemo(
+		() => createUnitMentionResolver(localizationLanguages),
+		[localizationLanguages],
+	);
 
 	return (
 		<UiProvider

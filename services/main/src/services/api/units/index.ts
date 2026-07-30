@@ -37,6 +37,7 @@ import {
 	UpdateUnitVariantContextBody,
 	PromoteUnitVariantBody,
 	UnitSeriesMembershipListResponse,
+	UnitSeriesMembershipQuery,
 	ResolveUnitPresentationsBody,
 } from "./schema";
 import {
@@ -102,10 +103,11 @@ export default new Elysia({ prefix: "/units" })
 		"/presentations",
 		async ({ body, request }) => {
 			const identity = await resolveIdentity(request.headers, "unit:read");
-			const presentations = await getReadableUnitPresentationsByIds(
-				body.ids,
-				identity.authorization.profileId,
-			);
+			const presentations = await getReadableUnitPresentationsByIds({
+				unitIds: body.ids,
+				localizationLanguages: body.localizationLanguages,
+				profileId: identity.authorization.profileId,
+			});
 			return {
 				items: body.ids.flatMap((id) => {
 					const presentation = presentations.get(id);
@@ -121,16 +123,21 @@ export default new Elysia({ prefix: "/units" })
 	)
 	.get(
 		"/by-id/:unitId/series-memberships",
-		async ({ params, request }) => {
+		async ({ params, query, request }) => {
 			const authorization = (await resolveIdentity(request.headers, "unit:read"))
 				.authorization;
 			await authorization.unit.ensureCanRead(params.unitId);
 			return {
-				items: await getUnitSeriesMemberships(params.unitId, authorization.profileId),
+				items: await getUnitSeriesMemberships(
+					params.unitId,
+					authorization.profileId,
+					query.localizationLanguages,
+				),
 			};
 		},
 		{
 			params: UnitStatusEventParams,
+			query: UnitSeriesMembershipQuery,
 			response: {
 				[StatusCodes.OK]: UnitSeriesMembershipListResponse,
 				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,

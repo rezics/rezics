@@ -123,6 +123,7 @@ import {
 	RealmUnitModerationHistoryResponse,
 	RealmMemberParams,
 	RealmParams,
+	RealmPinsQuery,
 	RealmDetailQuery,
 	RealmTaxonomyQuery,
 	SaveRealmTaxonomyDraftBody,
@@ -1628,7 +1629,7 @@ export default new Elysia({ prefix: "/realms" })
 	)
 	.get(
 		"/:realmId/pins",
-		async ({ params, request }) => {
+		async ({ params, query, request }) => {
 			await ensureRealmVisible(params.realmId, request.headers);
 			const identity = await resolveIdentity(request.headers, "unit:read");
 			const items = await database
@@ -1655,7 +1656,10 @@ export default new Elysia({ prefix: "/realms" })
 						realmId: params.realmId,
 					})),
 					viewer,
-					{ content: FeedContentKindValues },
+					{
+						content: FeedContentKindValues,
+						localizationLanguages: query.localizationLanguages,
+					},
 					new Date(),
 					{ kind: "contextual" },
 				),
@@ -1663,6 +1667,7 @@ export default new Elysia({ prefix: "/realms" })
 		},
 		{
 			params: RealmParams,
+			query: RealmPinsQuery,
 			response: {
 				[StatusCodes.OK]: RealmPinListResponse,
 				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,

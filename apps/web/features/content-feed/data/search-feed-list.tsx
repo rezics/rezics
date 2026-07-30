@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import type { EmbeddableSearchTemplateId, SearchFeatureSurface } from "@rezics/filter";
 import { Alert, AlertAction, AlertDescription, Button } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { FeedItemCard } from "../components/feed-item-card";
 import { FeedList } from "../components/feed-list";
@@ -30,12 +31,14 @@ export function useSearchFeedQuery({
 	readonly source: SearchFeedSource;
 	readonly surface: SearchFeatureSurface;
 }) {
+	const localizationLanguages = useLocalizationLanguages();
 	return useInfiniteQuery({
 		enabled,
-		queryKey: [...SearchFeedQueryKey, surface, source, request],
+		queryKey: [...SearchFeedQueryKey, surface, source, request, localizationLanguages],
 		queryFn: ({ pageParam, signal }) =>
 			fetchSearchFeedPage({
 				...(pageParam ? { cursor: pageParam } : {}),
+				localizationLanguages,
 				request,
 				signal,
 				source,

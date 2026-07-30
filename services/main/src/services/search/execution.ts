@@ -8,6 +8,7 @@ import {
 } from "@rezics/filter";
 import { ZoneBoundaryDocument, parseDocument } from "@rezics/block";
 import { getActiveObservability } from "@rezics/observability";
+import type { ContentLanguage } from "@rezics/i18n";
 import { eq } from "drizzle-orm";
 
 import { database } from "../database";
@@ -68,6 +69,7 @@ async function resolveScope(compiled: CompiledSearchRequest): Promise<{
 /** Executes an already proven, engine-independent Filter request. */
 export async function executeCompiledSearch(
 	compiled: CompiledSearchRequest,
+	localizationLanguages: readonly ContentLanguage[],
 	profileId?: string,
 	enforcedZoneId?: string,
 	inputIdentity?: string,
@@ -149,6 +151,7 @@ export async function executeCompiledSearch(
 					return { state: "skipped", category } as const;
 				const domainRequest = {
 					profileId,
+					localizationLanguages,
 					query: compiled.query,
 					offset: cursor?.categories[category]?.offset ?? 0,
 					limit: compiled.pageSize,

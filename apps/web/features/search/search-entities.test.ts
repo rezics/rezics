@@ -22,7 +22,7 @@ vi.mock("@rezics/openapi-tanstack-query", () => ({
 	...api,
 }));
 
-import { searchEntities } from "./search-entities";
+import { createEntitySearch } from "./search-entities";
 
 const unitId = "019fa2b0-1000-7000-8000-000000000001";
 
@@ -33,6 +33,8 @@ beforeEach(() => {
 });
 
 describe("searchEntities", () => {
+	const searchEntities = createEntitySearch(["zh", "en"]);
+
 	it("resolves an exact UUID into a normal Unit presentation", async () => {
 		api.postApiSearchByIndex.mockResolvedValue({ data: { hits: [] } });
 		api.postApiUnitsPresentations.mockResolvedValue({
@@ -59,15 +61,45 @@ describe("searchEntities", () => {
 			},
 		]);
 		expect(api.postApiUnitsPresentations).toHaveBeenCalledWith(
-			expect.objectContaining({ body: { ids: [unitId] } }),
+			expect.objectContaining({
+				body: { ids: [unitId], localizationLanguages: ["zh", "en"] },
+			}),
 		);
 	});
 
 	it("does not perform an exact lookup for ordinary text", async () => {
-		api.postApiSearchByIndex.mockResolvedValue({ data: { hits: [] } });
+		api.postApiSearchByIndex.mockResolvedValue({
+			data: {
+				hits: [
+					{
+						id: unitId,
+						kind: "book",
+						title: "中文書名",
+						titles: ["한국어 제목", "中文書名"],
+						name: null,
+						avatar: null,
+					},
+				],
+			},
+		});
 
-		await searchEntities("units", "群體智慧", new AbortController().signal);
+		const result = await searchEntities("units", "群體智慧", new AbortController().signal);
 
 		expect(api.postApiUnitsPresentations).not.toHaveBeenCalled();
+		expect(api.postApiSearchByIndex).toHaveBeenCalledWith(
+			expect.objectContaining({
+				body: expect.objectContaining({
+					localizationLanguages: ["zh", "en"],
+				}),
+			}),
+		);
+		expect(result).toEqual([
+			{
+				id: unitId,
+				label: "中文書名",
+				kind: "book",
+				avatar: null,
+			},
+		]);
 	});
 });
