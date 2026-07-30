@@ -13,7 +13,7 @@ export function usePostDetailContext(postId: string) {
 		queryFn: async ({ signal }): Promise<FeedPost | null> => {
 			const { data } = await postApiFeedQuery({
 				body: {
-					filter: { id: { in: [postId] } },
+					filter: { where: { id: { in: [postId] } } },
 					limit: 1,
 				},
 				signal,
