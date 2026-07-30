@@ -124,12 +124,6 @@ export function SignedOutHeaderActions({
 }) {
 	return (
 		<>
-			<Button asChild size="lg" variant="solid">
-				<AppLink href="/register">{signupLabel}</AppLink>
-			</Button>
-			<Button asChild size="lg" variant="brand">
-				<AppLink href="/login">{loginLabel}</AppLink>
-			</Button>
 			<div className="hidden xl:block">
 				<ChoiceSelect
 					ariaLabel={locale.label}
@@ -144,6 +138,12 @@ export function SignedOutHeaderActions({
 				/>
 			</div>
 			<ThemePreferenceMenu onChange={theme.onChange} preference={theme.preference} />
+			<Button asChild size="lg" variant="solid">
+				<AppLink href="/register">{signupLabel}</AppLink>
+			</Button>
+			<Button asChild size="lg" variant="brand">
+				<AppLink href="/login">{loginLabel}</AppLink>
+			</Button>
 		</>
 	);
 }

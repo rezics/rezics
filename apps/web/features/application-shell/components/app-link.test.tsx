@@ -1,10 +1,13 @@
 /** @vitest-environment jsdom */
 
 import { forwardRef, type AnchorHTMLAttributes, type ReactNode } from "react";
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const linkState = vi.hoisted(() => ({ pending: false }));
+const authPortalState = vi.hoisted(() => ({
+	openAuthPortal: vi.fn(),
+}));
 
 vi.mock("next/link", () => ({
 	default: forwardRef<
@@ -24,7 +27,7 @@ vi.mock("next/link", () => ({
 }));
 
 vi.mock("@/features/auth/auth-portal-context", () => ({
-	useOptionalAuthPortal: () => null,
+	useOptionalAuthPortal: () => authPortalState,
 }));
 
 vi.mock("@/i18n/client", () => ({
@@ -36,6 +39,7 @@ import { AppLink } from "./app-link";
 
 beforeEach(() => {
 	linkState.pending = false;
+	authPortalState.openAuthPortal.mockReset();
 	vi.useFakeTimers();
 });
 
@@ -45,6 +49,21 @@ afterEach(() => {
 });
 
 describe("AppLink", () => {
+	it.each([
+		{ href: "/login", mode: "login", options: undefined },
+		{ href: "/login?next=%2Fcreate", mode: "login", options: { destination: "/create" } },
+		{ href: "/register", mode: "register", options: undefined },
+	] as const)("opens the $mode portal without route navigation", ({ href, mode, options }) => {
+		render(
+			<NavigationProgressProvider>
+				<AppLink href={href}>Authentication</AppLink>
+			</NavigationProgressProvider>,
+		);
+
+		expect(fireEvent.click(screen.getByRole("link", { name: "Authentication" }))).toBe(false);
+		expect(authPortalState.openAuthPortal).toHaveBeenCalledExactlyOnceWith(mode, options);
+	});
+
 	it("reports the enclosing Next Link pending lifecycle", () => {
 		const view = render(
 			<NavigationProgressProvider>

@@ -355,7 +355,7 @@ function LoginForm({
 					</Button>
 				</FieldGroup>
 			</form>
-			<AuthPolicyNotice />
+			<AuthPolicyNotice policyNotice={t.auth.policyNotice} />
 			<AuthModeFooter prefix={t.auth.noAccount} onClick={() => onModeChange("register")}>
 				{t.auth.createAccount}
 			</AuthModeFooter>
@@ -470,7 +470,7 @@ function RegisterForm({
 					</Button>
 				</FieldGroup>
 			</form>
-			<AuthPolicyNotice />
+			<AuthPolicyNotice policyNotice={t.auth.policyNotice} />
 			<AuthModeFooter prefix={t.auth.haveAccount} onClick={() => onModeChange("login")}>
 				{t.actions.login}
 			</AuthModeFooter>
@@ -719,9 +719,8 @@ function VerifyEmailForm({
 	);
 }
 
-function AuthPolicyNotice() {
-	const { t } = useTranslation("auth");
-	const content = t.policyNotice.message(AuthPolicyNoticeSlots);
+function AuthPolicyNotice({ policyNotice }: { policyNotice: Translation["auth"]["policyNotice"] }) {
+	const content = policyNotice.message(AuthPolicyNoticeSlots);
 
 	return (
 		<p className="mt-4 text-center text-muted-foreground text-xs leading-5">
@@ -736,7 +735,7 @@ function AuthPolicyNotice() {
 						rel="noopener noreferrer"
 						target="_blank"
 					>
-						{t.policyNotice[part.kind]}
+						{policyNotice[part.kind]}
 					</a>
 				),
 			)}
