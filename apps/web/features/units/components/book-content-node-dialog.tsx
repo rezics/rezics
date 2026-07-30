@@ -19,7 +19,7 @@ import {
 	TabsTrigger,
 } from "@rezics/ui";
 import { ChevronRight, Folder } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -83,6 +83,7 @@ export function BookContentNodeDialog({
 	readonly unsavedChanges: boolean;
 }) {
 	const { t } = useTranslation(["engagement", "units", "ui"]);
+	const formId = useId();
 	const [input, setInput] = useState<DialogInput>({
 		mode: "create",
 		create: { title: "" },
@@ -117,29 +118,31 @@ export function BookContentNodeDialog({
 			>
 				<DialogContent size="lg">
 					<DialogHeader description={description} title={title} />
-					<form
-						onSubmit={(event) => {
-							event.preventDefault();
-							if (pending) return;
-							if (input.mode === "create") {
-								const normalizedTitle = input.create.title.trim();
-								if (normalizedTitle)
+					<DialogBody>
+						<form
+							className="grid gap-5"
+							id={formId}
+							onSubmit={(event) => {
+								event.preventDefault();
+								if (pending) return;
+								if (input.mode === "create") {
+									const normalizedTitle = input.create.title.trim();
+									if (normalizedTitle)
+										onSubmit({
+											mode: "create",
+											title: normalizedTitle,
+											destination,
+										});
+									return;
+								}
+								if (input.attach.unit)
 									onSubmit({
-										mode: "create",
-										title: normalizedTitle,
+										mode: "attach",
+										unit: input.attach.unit,
 										destination,
 									});
-								return;
-							}
-							if (input.attach.unit)
-								onSubmit({
-									mode: "attach",
-									unit: input.attach.unit,
-									destination,
-								});
-						}}
-					>
-						<DialogBody className="grid gap-5">
+							}}
+						>
 							<Tabs
 								onValueChange={({ value }) => {
 									if (!isDialogMode(value) || value === input.mode) return;
@@ -237,23 +240,24 @@ export function BookContentNodeDialog({
 								</p>
 							) : null}
 							<RequestFailure error={error} />
-						</DialogBody>
-						<DialogFooter>
-							<DialogClose asChild>
-								<Button disabled={pending} type="button" variant="quiet">
-									{t.engagement.cancel}
-								</Button>
-							</DialogClose>
-							<Button
-								disabled={!canSubmit || pending}
-								isLoading={pending}
-								type="submit"
-								variant="solid"
-							>
-								{submitLabel}
+						</form>
+					</DialogBody>
+					<DialogFooter>
+						<DialogClose asChild>
+							<Button disabled={pending} type="button" variant="quiet">
+								{t.engagement.cancel}
 							</Button>
-						</DialogFooter>
-					</form>
+						</DialogClose>
+						<Button
+							disabled={!canSubmit || pending}
+							form={formId}
+							isLoading={pending}
+							type="submit"
+							variant="solid"
+						>
+							{submitLabel}
+						</Button>
+					</DialogFooter>
 				</DialogContent>
 			</Dialog>
 			{destinationDialogOpen ? (

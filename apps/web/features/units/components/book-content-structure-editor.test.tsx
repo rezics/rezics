@@ -241,7 +241,18 @@ describe("BookContentStructureEditor node dialog", () => {
 		fireEvent.change(screen.getByRole("textbox", { name: "標題" }), {
 			target: { value: "第一章" },
 		});
-		fireEvent.click(screen.getByRole("button", { name: "建立章節並儲存" }));
+		const submitButton = screen.getByRole("button", { name: "建立章節並儲存" });
+		const formId = submitButton.getAttribute("form");
+		expect(formId).not.toBeNull();
+		if (!formId) throw new Error("Expected an explicitly associated form");
+		expect(
+			submitButton.closest("[data-slot='dialog-footer']")?.parentElement?.dataset.slot,
+		).toBe("dialog-content");
+		expect(submitButton).toBeInstanceOf(HTMLButtonElement);
+		if (!(submitButton instanceof HTMLButtonElement))
+			throw new Error("Expected a submit button");
+		expect(submitButton.form).toBe(document.getElementById(formId));
+		fireEvent.click(submitButton);
 
 		await vi.waitFor(() => expect(state.mutateAsync).toHaveBeenCalledOnce());
 		const options = state.mutateAsync.mock.calls[0]?.[0] as

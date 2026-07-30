@@ -21,7 +21,7 @@ import {
 	TabsTrigger,
 } from "@rezics/ui";
 import { ChevronRight, Folder } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -93,6 +93,7 @@ export function MediaContentNodeDialog({
 	readonly unsavedChanges: boolean;
 }) {
 	const { t } = useTranslation(["engagement", "units", "ui"]);
+	const formId = useId();
 	const [mode, setMode] = useState<DialogMode>("create");
 	const [title, setTitle] = useState("");
 	const [unit, setUnit] = useState<EntityPickerValue>();
@@ -133,30 +134,32 @@ export function MediaContentNodeDialog({
 			>
 				<DialogContent size="lg">
 					<DialogHeader description={description} title={dialogTitle} />
-					<form
-						onSubmit={(event) => {
-							event.preventDefault();
-							if (pending) return;
-							if (mode === "create") {
-								const normalizedTitle = title.trim();
-								if (normalizedTitle)
+					<DialogBody>
+						<form
+							className="grid gap-5"
+							id={formId}
+							onSubmit={(event) => {
+								event.preventDefault();
+								if (pending) return;
+								if (mode === "create") {
+									const normalizedTitle = title.trim();
+									if (normalizedTitle)
+										onSubmit({
+											mode: "create",
+											title: normalizedTitle,
+											contentKind: request.kind,
+											destination,
+										});
+									return;
+								}
+								if (unit && attachKind)
 									onSubmit({
-										mode: "create",
-										title: normalizedTitle,
-										contentKind: request.kind,
+										mode: "attach",
+										unit: { ...unit, kind: attachKind },
 										destination,
 									});
-								return;
-							}
-							if (unit && attachKind)
-								onSubmit({
-									mode: "attach",
-									unit: { ...unit, kind: attachKind },
-									destination,
-								});
-						}}
-					>
-						<DialogBody className="grid gap-5">
+							}}
+						>
 							<Tabs
 								onValueChange={({ value }) => {
 									if (isDialogMode(value)) setMode(value);
@@ -278,29 +281,30 @@ export function MediaContentNodeDialog({
 								</p>
 							) : null}
 							<RequestFailure error={error} />
-						</DialogBody>
-						<DialogFooter>
-							<DialogClose asChild>
-								<Button disabled={pending} type="button" variant="quiet">
-									{t.engagement.cancel}
-								</Button>
-							</DialogClose>
-							<Button
-								disabled={!canSubmit || pending}
-								isLoading={pending}
-								type="submit"
-								variant="solid"
-							>
-								{mode === "create"
-									? label
-										? t.units.content.createLabelAndSave
-										: t.units.content.createMediaItemAndSave
-									: label
-										? t.units.content.attachLabelAndSave
-										: t.units.content.attachMediaItemAndSave}
+						</form>
+					</DialogBody>
+					<DialogFooter>
+						<DialogClose asChild>
+							<Button disabled={pending} type="button" variant="quiet">
+								{t.engagement.cancel}
 							</Button>
-						</DialogFooter>
-					</form>
+						</DialogClose>
+						<Button
+							disabled={!canSubmit || pending}
+							form={formId}
+							isLoading={pending}
+							type="submit"
+							variant="solid"
+						>
+							{mode === "create"
+								? label
+									? t.units.content.createLabelAndSave
+									: t.units.content.createMediaItemAndSave
+								: label
+									? t.units.content.attachLabelAndSave
+									: t.units.content.attachMediaItemAndSave}
+						</Button>
+					</DialogFooter>
 				</DialogContent>
 			</Dialog>
 			{destinationDialogOpen ? (
