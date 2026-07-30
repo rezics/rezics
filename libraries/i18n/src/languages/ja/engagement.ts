@@ -130,9 +130,6 @@ export default {
 	joinDiscussion: "ディスカッションに参加",
 	discussions: "ディスカッション",
 	questions: "質問",
-	questionsInDevelopmentTitle: "質問機能は開発中です",
-	questionsInDevelopmentDescription:
-		"このページはまだ利用できません。機能の準備が整うと、質問がここに表示されます。",
 	reaction: "リアクション",
 	upvote: "いいね",
 	downvote: "よくないね",

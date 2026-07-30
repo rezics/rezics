@@ -130,9 +130,6 @@ export default {
 	joinDiscussion: "Join the discussion",
 	discussions: "Discussions",
 	questions: "Questions",
-	questionsInDevelopmentTitle: "Questions are in development",
-	questionsInDevelopmentDescription:
-		"This page is not available yet. Questions will appear here when the feature is ready.",
 	reaction: "Reaction",
 	upvote: "Upvote",
 	downvote: "Downvote",

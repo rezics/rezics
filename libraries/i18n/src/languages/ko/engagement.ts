@@ -135,9 +135,6 @@ export default {
 	joinDiscussion: "토론에 참여하기",
 	discussions: "토론",
 	questions: "질문",
-	questionsInDevelopmentTitle: "질문 기능을 개발 중입니다",
-	questionsInDevelopmentDescription:
-		"아직 이 페이지를 사용할 수 없습니다. 기능이 준비되면 질문이 여기에 표시됩니다.",
 	reaction: "반응",
 	upvote: "좋아요",
 	downvote: "싫어요",

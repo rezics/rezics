@@ -134,9 +134,6 @@ export default {
 	joinDiscussion: "Diskutiere mit",
 	discussions: "Diskussionen",
 	questions: "Fragen",
-	questionsInDevelopmentTitle: "Fragen sind in Entwicklung",
-	questionsInDevelopmentDescription:
-		"Diese Seite ist noch nicht verfügbar. Sobald die Funktion fertig ist, erscheinen Fragen hier.",
 	reaction: "Reaktion",
 	upvote: "Dafür stimmen",
 	downvote: "Dagegen stimmen",

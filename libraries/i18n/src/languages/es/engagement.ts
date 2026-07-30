@@ -130,9 +130,6 @@ export default {
 	joinDiscussion: "Únete a la conversación",
 	discussions: "Debates",
 	questions: "Preguntas",
-	questionsInDevelopmentTitle: "Las preguntas están en desarrollo",
-	questionsInDevelopmentDescription:
-		"Esta página aún no está disponible. Las preguntas aparecerán aquí cuando la función esté lista.",
 	reaction: "Reacción",
 	upvote: "Votar a favor",
 	downvote: "Votar en contra",

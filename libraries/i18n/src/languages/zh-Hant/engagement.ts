@@ -132,8 +132,6 @@ export default {
 	joinDiscussion: "加入討論",
 	discussions: "討論",
 	questions: "問題",
-	questionsInDevelopmentTitle: "問題功能開發中",
-	questionsInDevelopmentDescription: "這個頁面尚未開放；功能完成後，問題會顯示在這裡。",
 	reaction: "反應",
 	upvote: "贊成",
 	downvote: "不贊成",

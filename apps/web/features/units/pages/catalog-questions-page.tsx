@@ -1,18 +1,11 @@
 "use client";
 
 import { useGetApiUnitsByTypeByUnitId } from "@rezics/openapi-tanstack-query";
-import {
-	Alert,
-	AlertDescription,
-	AlertTitle,
-	Button,
-	PageHeading,
-	QueryFailure,
-	QueryPending,
-} from "@rezics/ui";
-import { ArrowLeft, Construction } from "lucide-react";
+import { Button, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
+import { ArrowLeft } from "lucide-react";
 
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { PreviewAccessNotice } from "@/features/preview-access/components/preview-access-notice";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { selectLocalization } from "@/lib/localization";
@@ -61,13 +54,7 @@ export function CatalogQuestionsPage({
 				description={localization?.title ?? t.ui.unnamed}
 				title={t.engagement.questions}
 			/>
-			<Alert>
-				<Construction aria-hidden />
-				<AlertTitle>{t.engagement.questionsInDevelopmentTitle}</AlertTitle>
-				<AlertDescription>
-					{t.engagement.questionsInDevelopmentDescription}
-				</AlertDescription>
-			</Alert>
+			<PreviewAccessNotice />
 		</main>
 	);
 }
