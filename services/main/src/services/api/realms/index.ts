@@ -22,8 +22,11 @@ import { fractionalPositionBetween } from "../../ordering/position";
 import {
 	avatarReferenceFromColumns,
 	firstUnitLocalizationTitle,
+	resolveUnitLocalizationAvatarFromOrdered,
 	resolveUnitLocalizationFromOrdered,
+	resolveUnitLocalizationImageAssetIdFromOrdered,
 	resolvedUnitLocalizationAvatar,
+	resolvedUnitLocalizationImageAssetId,
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationSummary,
 	resolvedUnitLocalizationTitle,
@@ -338,11 +341,10 @@ async function readRealmTaxonomy(
 			language: unitLocalization.language,
 			title: unitLocalization.title,
 			summary: unitLocalization.summary,
-			avatarType: unitLocalization.avatarType,
-			avatarAssetId: unitLocalization.avatarAssetId,
-			avatarEmoji: unitLocalization.avatarEmoji,
-			avatarIconPrefix: unitLocalization.avatarIconPrefix,
-			avatarIconName: unitLocalization.avatarIconName,
+			avatar: resolvedUnitLocalizationAvatar(
+				contentStructureNode.contentUnitId,
+				localizationLanguages,
+			),
 			position: contentStructureNode.position,
 			queryStrategy: contentStructureNode.realmTagQueryStrategy,
 		})
@@ -447,7 +449,7 @@ async function readRealmTaxonomy(
 				language: row.language,
 				title: row.title,
 				summary: row.summary,
-				avatar: presentAvatar(avatarReferenceFromColumns(row)),
+				avatar: presentAvatar(row.avatar),
 				position: row.position,
 				queryStrategy: row.queryStrategy,
 				contextPostId: context?.contextPostId ?? null,
@@ -476,13 +478,17 @@ export default new Elysia({ prefix: "/realms" })
 					language: unitLocalization.language,
 					title: unitLocalization.title,
 					summary: unitLocalization.summary,
-					avatarType: unitLocalization.avatarType,
-					avatarAssetId: unitLocalization.avatarAssetId,
-					avatarEmoji: unitLocalization.avatarEmoji,
-					avatarIconPrefix: unitLocalization.avatarIconPrefix,
-					avatarIconName: unitLocalization.avatarIconName,
-					bannerAssetId: unitLocalization.bannerAssetId,
-					coverAssetId: unitLocalization.coverAssetId,
+					avatar: resolvedUnitLocalizationAvatar(unit.id, localizationLanguages),
+					bannerAssetId: resolvedUnitLocalizationImageAssetId(
+						unit.id,
+						"banner",
+						localizationLanguages,
+					),
+					coverAssetId: resolvedUnitLocalizationImageAssetId(
+						unit.id,
+						"cover",
+						localizationLanguages,
+					),
 					createdAt: unit.createdAt,
 					updatedAt: unit.updatedAt,
 				})
@@ -505,32 +511,13 @@ export default new Elysia({ prefix: "/realms" })
 				items.map((item) => item.id),
 			);
 			return {
-				items: items.map(
-					({
-						avatarType,
-						avatarAssetId,
-						avatarEmoji,
-						avatarIconPrefix,
-						avatarIconName,
-						bannerAssetId,
-						coverAssetId,
-						...item
-					}) => ({
-						...item,
-						slugAddress: slugAddresses.get(item.id) ?? null,
-						avatar: presentAvatar(
-							avatarReferenceFromColumns({
-								avatarType,
-								avatarAssetId,
-								avatarEmoji,
-								avatarIconPrefix,
-								avatarIconName,
-							}),
-						),
-						banner: presentImageAsset(bannerAssetId, "banner"),
-						cover: presentImageAsset(coverAssetId, "cover"),
-					}),
-				),
+				items: items.map(({ avatar, bannerAssetId, coverAssetId, ...item }) => ({
+					...item,
+					slugAddress: slugAddresses.get(item.id) ?? null,
+					avatar: presentAvatar(avatar),
+					banner: presentImageAsset(bannerAssetId, "banner"),
+					cover: presentImageAsset(coverAssetId, "cover"),
+				})),
 			};
 		},
 		{
@@ -756,9 +743,25 @@ export default new Elysia({ prefix: "/realms" })
 				...realmRecord,
 				slugAddress: await getPublicCanonicalUnitSlugAddress(record.id),
 				language: selectedLocalization.language,
-				avatar: presentAvatar(avatarReferenceFromColumns(selectedLocalization)),
-				banner: presentImageAsset(selectedLocalization.bannerAssetId, "banner"),
-				cover: presentImageAsset(selectedLocalization.coverAssetId, "cover"),
+				avatar: presentAvatar(
+					resolveUnitLocalizationAvatarFromOrdered(localizations, localizationLanguages),
+				),
+				banner: presentImageAsset(
+					resolveUnitLocalizationImageAssetIdFromOrdered(
+						localizations,
+						"banner",
+						localizationLanguages,
+					),
+					"banner",
+				),
+				cover: presentImageAsset(
+					resolveUnitLocalizationImageAssetIdFromOrdered(
+						localizations,
+						"cover",
+						localizationLanguages,
+					),
+					"cover",
+				),
 				localizations: localizations.map(
 					({
 						avatarType,

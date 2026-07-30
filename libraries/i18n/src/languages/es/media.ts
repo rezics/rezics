@@ -13,6 +13,23 @@ export default {
 	current: "Sustitución para el idioma actual",
 	displayPreview: "Área mostrada",
 	editPresentation: "Ajustar el área mostrada",
+	localizationFallback: {
+		notice: "Cada recurso de imagen aplica la sustitución de idioma de forma independiente.",
+		title: "Sustitución de idioma para imágenes",
+		description:
+			"El avatar, el banner y la portada se resuelven por separado del idioma elegido para el texto.",
+		viewerPreferences:
+			"Las imágenes se buscan según las preferencias de idioma de cada persona. Si un idioma no contiene esa imagen, se omite y la búsqueda continúa con el siguiente idioma preferido.",
+		defaultOrder:
+			"Si ninguno de los idiomas preferidos contiene la imagen, la búsqueda continúa según el orden de localización predeterminado del contenido.",
+		noImage:
+			"Si ninguna localización contiene la imagen, no se devuelve una imagen localizada.",
+		textDifference:
+			"El texto sigue una regla distinta: se elige una localización completa y el título, el resumen y la descripción no se sustituyen campo por campo desde idiomas diferentes.",
+		example:
+			"Por ejemplo, si una persona prefiere chino y después inglés, el chino contiene el texto y el banner, pero no el avatar, y el inglés contiene un avatar, verá el texto y el banner en chino junto con el avatar en inglés.",
+		close: "Cerrar las reglas de sustitución de idioma para imágenes",
+	},
 	presentationEditor: {
 		title: {
 			avatar: "Ajustar avatar",
@@ -60,7 +77,6 @@ export default {
 		typeLabel: "Tipo de avatar",
 		tabs: { image: "Imagen", icon: "Icono", emoji: "Emoji" },
 		preview: "Vista previa del avatar",
-		inherited: "Avatar heredado",
 		icon: {
 			search: "Buscar iconos",
 			featured: "Iconos habituales",

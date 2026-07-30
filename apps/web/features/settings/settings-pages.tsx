@@ -45,13 +45,16 @@ import { OfficialRealmUnitIds } from "@rezics/slug";
 import { SlugAddressForm } from "@/features/slugs/slug-address-form";
 import {
 	LocalizationImageUploadField,
+	type LocalizationImageAssetOption,
 	type LocalizationImageAssetValue,
 } from "@/features/media/components/localization-image-upload-field";
 import {
 	AvatarField,
+	type AvatarFieldOption,
 	type AvatarFieldValue,
 	avatarPresentationToInput,
 } from "@/features/media/components/avatar-field";
+import { LocalizationMediaFallbackNotice } from "@/features/media/components/localization-media-fallback-notice";
 import { useSetLocale, useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { authClient } from "@/lib/auth-client";
@@ -102,7 +105,10 @@ export function ProfileSettings() {
 	const fallbackLanguages = useLocalizationLanguages();
 	const localizationLanguages =
 		requestedLanguage && isContentLanguage(requestedLanguage)
-			? [requestedLanguage]
+			? [
+					requestedLanguage,
+					...fallbackLanguages.filter((language) => language !== requestedLanguage),
+				]
 			: fallbackLanguages;
 	const profile = useGetApiUsersMe({ query: { localizationLanguages } });
 	if (profile.isPending) return <QueryPending />;
@@ -140,6 +146,17 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 	const queryClient = useQueryClient();
 	const { selectedLanguage, selectedLanguageIsPending, setDirty, languagesChanged } =
 		useContentLanguageEditor();
+	const localization = current.localizations.find((entry) => entry.language === selectedLanguage);
+	const avatarOptions: AvatarFieldOption[] = current.localizations.flatMap((entry) =>
+		entry.language !== selectedLanguage && entry.avatar
+			? [{ ...entry.avatar, label: t.locale.contentLanguages[entry.language] }]
+			: [],
+	);
+	const bannerOptions: LocalizationImageAssetOption[] = current.localizations.flatMap((entry) =>
+		entry.language !== selectedLanguage && entry.banner
+			? [{ ...entry.banner, label: t.locale.contentLanguages[entry.language] }]
+			: [],
+	);
 	const update = usePatchApiUsersMe({
 		mutation: {
 			onSuccess: (profile) =>
@@ -166,10 +183,10 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 	});
 	const [saved, setSaved] = useState(false);
 	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(
-		selectedLanguageIsPending ? null : current.avatar,
+		selectedLanguageIsPending ? null : (localization?.avatar ?? null),
 	);
 	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(
-		selectedLanguageIsPending ? null : current.banner,
+		selectedLanguageIsPending ? null : (localization?.banner ?? null),
 	);
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -197,25 +214,30 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 	}
 	return (
 		<SettingsFrame action={<ContentLanguageControl />} title={t.settings.profile}>
+			<LocalizationMediaFallbackNotice />
 			<form onChange={() => setDirty(true)} onSubmit={submit}>
 				<FieldGroup>
 					<Field>
 						<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
 						<AvatarField
+							fallback={avatarOptions[0] ?? null}
 							onChange={(value) => {
 								setAvatar(value);
 								setDirty(true);
 							}}
+							options={avatarOptions}
 							value={avatar}
 						/>
 					</Field>
 					<Field>
 						<FieldLabel>{t.media.roles.banner.title}</FieldLabel>
 						<LocalizationImageUploadField
+							fallback={bannerOptions[0] ?? null}
 							onChange={(value) => {
 								setBanner(value);
 								setDirty(true);
 							}}
+							options={bannerOptions}
 							role="banner"
 							value={banner}
 						/>
@@ -223,7 +245,9 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 					<Field required>
 						<FieldLabel>{t.ui.displayName}</FieldLabel>
 						<Input
-							defaultValue={selectedLanguageIsPending ? "" : (current.name ?? "")}
+							defaultValue={
+								selectedLanguageIsPending ? "" : (localization?.title ?? "")
+							}
 							maxLength={120}
 							name="name"
 							required
@@ -233,7 +257,9 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 						<FieldLabel>{t.ui.introduction}</FieldLabel>
 						<Textarea
 							name="summary"
-							defaultValue={selectedLanguageIsPending ? "" : (current.summary ?? "")}
+							defaultValue={
+								selectedLanguageIsPending ? "" : (localization?.summary ?? "")
+							}
 						/>
 					</Field>
 					{saved && <p className="text-success-foreground text-sm">{t.ui.saved}</p>}

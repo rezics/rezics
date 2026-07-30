@@ -10,7 +10,11 @@ import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
 import {
 	avatarReferenceFromColumns,
+	resolveUnitLocalizationAvatarFromOrdered,
 	resolveUnitLocalizationFromOrdered,
+	resolveUnitLocalizationImageAssetIdFromOrdered,
+	resolvedUnitLocalizationAvatar,
+	resolvedUnitLocalizationImageAssetId,
 	resolvedUnitLocalizationLanguage,
 } from "../../units/localization";
 import { fractionalPositionBetween } from "../../ordering/position";
@@ -180,13 +184,17 @@ export default new Elysia()
 							kind: entity.kind,
 							verified: entity.verified,
 							language: unitLocalization.language,
-							avatarType: unitLocalization.avatarType,
-							avatarAssetId: unitLocalization.avatarAssetId,
-							avatarEmoji: unitLocalization.avatarEmoji,
-							avatarIconPrefix: unitLocalization.avatarIconPrefix,
-							avatarIconName: unitLocalization.avatarIconName,
-							bannerAssetId: unitLocalization.bannerAssetId,
-							coverAssetId: unitLocalization.coverAssetId,
+							avatar: resolvedUnitLocalizationAvatar(unit.id, localizationLanguages),
+							bannerAssetId: resolvedUnitLocalizationImageAssetId(
+								unit.id,
+								"banner",
+								localizationLanguages,
+							),
+							coverAssetId: resolvedUnitLocalizationImageAssetId(
+								unit.id,
+								"cover",
+								localizationLanguages,
+							),
 							title: unitLocalization.title,
 							summary: unitLocalization.summary,
 						})
@@ -217,32 +225,13 @@ export default new Elysia()
 						.orderBy(desc(unit.createdAt))
 						.limit(query.limit ?? 20);
 					return {
-						items: items.map(
-							({
-								avatarType,
-								avatarAssetId,
-								avatarEmoji,
-								avatarIconPrefix,
-								avatarIconName,
-								bannerAssetId,
-								coverAssetId,
-								...item
-							}) => ({
-								...item,
-								kind: item.kind ?? "unknown",
-								avatar: presentAvatar(
-									avatarReferenceFromColumns({
-										avatarType,
-										avatarAssetId,
-										avatarEmoji,
-										avatarIconPrefix,
-										avatarIconName,
-									}),
-								),
-								banner: presentImageAsset(bannerAssetId, "banner"),
-								cover: presentImageAsset(coverAssetId, "cover"),
-							}),
-						),
+						items: items.map(({ avatar, bannerAssetId, coverAssetId, ...item }) => ({
+							...item,
+							kind: item.kind ?? "unknown",
+							avatar: presentAvatar(avatar),
+							banner: presentImageAsset(bannerAssetId, "banner"),
+							cover: presentImageAsset(coverAssetId, "cover"),
+						})),
 					};
 				},
 				{
@@ -400,9 +389,28 @@ export default new Elysia()
 						...entityEntry,
 						kind: entry.kind ?? "unknown",
 						language: selectedLocalization.language,
-						avatar: presentAvatar(avatarReferenceFromColumns(selectedLocalization)),
-						banner: presentImageAsset(selectedLocalization.bannerAssetId, "banner"),
-						cover: presentImageAsset(selectedLocalization.coverAssetId, "cover"),
+						avatar: presentAvatar(
+							resolveUnitLocalizationAvatarFromOrdered(
+								storedLocalizations,
+								localizationLanguages,
+							),
+						),
+						banner: presentImageAsset(
+							resolveUnitLocalizationImageAssetIdFromOrdered(
+								storedLocalizations,
+								"banner",
+								localizationLanguages,
+							),
+							"banner",
+						),
+						cover: presentImageAsset(
+							resolveUnitLocalizationImageAssetIdFromOrdered(
+								storedLocalizations,
+								"cover",
+								localizationLanguages,
+							),
+							"cover",
+						),
 						localizations,
 						attributions,
 						owner: ownerSummary,

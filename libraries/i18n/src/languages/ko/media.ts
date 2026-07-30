@@ -13,6 +13,21 @@ export default {
 	current: "현재 언어 재정의",
 	displayPreview: "표시 범위",
 	editPresentation: "표시 범위 조정",
+	localizationFallback: {
+		notice: "모든 이미지 자산은 언어 대체 규칙을 각각 독립적으로 적용합니다.",
+		title: "이미지 언어 대체 규칙",
+		description: "아바타, 배너, 표지는 텍스트에 선택된 언어와 별개로 각각 결정됩니다.",
+		viewerPreferences:
+			"이미지는 각 사용자의 언어 선호 순서대로 검색합니다. 해당 언어에 그 이미지가 없으면 건너뛰고 다음 선호 언어를 계속 검색합니다.",
+		defaultOrder:
+			"사용자의 선호 언어에 이미지가 하나도 없으면 콘텐츠의 기본 현지화 순서대로 계속 검색합니다.",
+		noImage: "어떤 언어에도 이미지가 설정되지 않았다면 현지화 이미지를 반환하지 않습니다.",
+		textDifference:
+			"텍스트는 규칙이 다릅니다. 하나의 완전한 언어 버전을 선택하므로 제목, 요약, 설명을 필드별로 다른 언어에서 대체하지 않습니다.",
+		example:
+			"예를 들어 사용자가 중국어, 영어 순으로 선호하고 중국어에는 텍스트와 배너만, 영어에는 아바타가 있다면 중국어 텍스트와 배너, 영어 아바타가 표시됩니다.",
+		close: "이미지 언어 대체 규칙 닫기",
+	},
 	presentationEditor: {
 		title: {
 			avatar: "아바타 조정",
@@ -60,7 +75,6 @@ export default {
 		typeLabel: "아바타 유형",
 		tabs: { image: "이미지", icon: "아이콘", emoji: "이모지" },
 		preview: "아바타 미리보기",
-		inherited: "상속된 아바타",
 		icon: {
 			search: "아이콘 검색",
 			featured: "일반 아이콘",

@@ -141,11 +141,6 @@ export function AvatarField({
 						)}
 					</Button>
 				</DialogTrigger>
-				{value === null && fallback ? (
-					<p className="text-muted-foreground text-xs">
-						{t.media.avatarPicker.inherited}
-					</p>
-				) : null}
 			</div>
 
 			<DialogContent showCloseButton={false} size="sm">

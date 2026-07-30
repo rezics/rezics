@@ -24,7 +24,11 @@ import {
 	avatarReferenceToColumns,
 	removeUnitLocalization,
 	reorderUnitLocalizations,
+	resolveUnitLocalizationAvatarFromOrdered,
 	resolveUnitLocalizationFromOrdered,
+	resolveUnitLocalizationImageAssetIdFromOrdered,
+	resolvedUnitLocalizationAvatar,
+	resolvedUnitLocalizationImageAssetId,
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationTitle,
 	toUnitLocalizationStorage,
@@ -501,16 +505,24 @@ export async function getUnit(
 					: null,
 		details,
 		avatar: presentAvatar(
-			avatarReferenceFromColumns({
-				avatarType: selectedLocalization.avatarType,
-				avatarAssetId: selectedLocalization.avatarAssetId,
-				avatarEmoji: selectedLocalization.avatarEmoji,
-				avatarIconPrefix: selectedLocalization.avatarIconPrefix,
-				avatarIconName: selectedLocalization.avatarIconName,
-			}),
+			resolveUnitLocalizationAvatarFromOrdered(localizations, localizationLanguages),
 		),
-		banner: presentImageAsset(selectedLocalization.bannerAssetId, "banner"),
-		cover: presentImageAsset(selectedLocalization.coverAssetId, "cover"),
+		banner: presentImageAsset(
+			resolveUnitLocalizationImageAssetIdFromOrdered(
+				localizations,
+				"banner",
+				localizationLanguages,
+			),
+			"banner",
+		),
+		cover: presentImageAsset(
+			resolveUnitLocalizationImageAssetIdFromOrdered(
+				localizations,
+				"cover",
+				localizationLanguages,
+			),
+			"cover",
+		),
 		localizations: localizations.map(presentUnitLocalization),
 		subjectAssociations,
 		links,
@@ -585,13 +597,17 @@ export async function listUnits(
 			updatedAt: unit.updatedAt,
 			title: unitLocalization.title,
 			summary: unitLocalization.summary,
-			avatarType: unitLocalization.avatarType,
-			avatarAssetId: unitLocalization.avatarAssetId,
-			avatarEmoji: unitLocalization.avatarEmoji,
-			avatarIconPrefix: unitLocalization.avatarIconPrefix,
-			avatarIconName: unitLocalization.avatarIconName,
-			bannerAssetId: unitLocalization.bannerAssetId,
-			coverAssetId: unitLocalization.coverAssetId,
+			avatar: resolvedUnitLocalizationAvatar(unit.id, localizationLanguages),
+			bannerAssetId: resolvedUnitLocalizationImageAssetId(
+				unit.id,
+				"banner",
+				localizationLanguages,
+			),
+			coverAssetId: resolvedUnitLocalizationImageAssetId(
+				unit.id,
+				"cover",
+				localizationLanguages,
+			),
 		})
 		.from(unit)
 		.innerJoin(
@@ -634,32 +650,13 @@ export async function listUnits(
 		localizationLanguages,
 	);
 	return Promise.all(
-		rows.map(
-			async ({
-				avatarType,
-				avatarAssetId,
-				avatarEmoji,
-				avatarIconPrefix,
-				avatarIconName,
-				bannerAssetId,
-				coverAssetId,
-				...row
-			}) => ({
-				...row,
-				attributions: attributions.get(row.id) ?? [],
-				avatar: presentAvatar(
-					avatarReferenceFromColumns({
-						avatarType,
-						avatarAssetId,
-						avatarEmoji,
-						avatarIconPrefix,
-						avatarIconName,
-					}),
-				),
-				banner: presentImageAsset(bannerAssetId, "banner"),
-				cover: presentImageAsset(coverAssetId, "cover"),
-			}),
-		),
+		rows.map(async ({ avatar, bannerAssetId, coverAssetId, ...row }) => ({
+			...row,
+			attributions: attributions.get(row.id) ?? [],
+			avatar: presentAvatar(avatar),
+			banner: presentImageAsset(bannerAssetId, "banner"),
+			cover: presentImageAsset(coverAssetId, "cover"),
+		})),
 	);
 }
 

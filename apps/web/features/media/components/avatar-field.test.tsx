@@ -85,7 +85,7 @@ describe("AvatarField", () => {
 		expect(tabs[0]?.getAttribute("aria-selected")).toBe("true");
 	});
 
-	it("shows inherited state without exposing a remove action", async () => {
+	it("shows the fallback preview without per-field policy copy or a remove action", async () => {
 		const onChange = vi.fn();
 		renderField(
 			<AvatarField
@@ -95,7 +95,7 @@ describe("AvatarField", () => {
 			/>,
 		);
 
-		expect(screen.getByText("繼承的頭像")).toBeTruthy();
+		expect(screen.queryByText("繼承的頭像")).toBeNull();
 		fireEvent.click(screen.getByRole("button", { name: "編輯頭像" }));
 		expect(await screen.findByRole("dialog")).toBeTruthy();
 		expect(screen.queryByRole("button", { name: "使用繼承頭像" })).toBeNull();

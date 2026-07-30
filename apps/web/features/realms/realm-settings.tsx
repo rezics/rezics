@@ -46,6 +46,7 @@ import {
 	type AvatarFieldValue,
 	avatarPresentationToInput,
 } from "@/features/media/components/avatar-field";
+import { LocalizationMediaFallbackNotice } from "@/features/media/components/localization-media-fallback-notice";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
 import { useTranslation } from "@/i18n/client";
@@ -154,6 +155,7 @@ export function RealmProfileSettings({
 			<Card>
 				<CardContent className="grid gap-6 p-5">
 					<ContentLanguageControl />
+					<LocalizationMediaFallbackNotice />
 					<form className="grid gap-6" onChange={() => setDirty(true)} onSubmit={submit}>
 						<FieldGroup>
 							<Field required>

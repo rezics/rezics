@@ -13,6 +13,20 @@ export default {
 	current: "目前語言的覆蓋圖片",
 	displayPreview: "實際顯示範圍",
 	editPresentation: "調整顯示範圍",
+	localizationFallback: {
+		notice: "所有圖片資產都會獨立套用語言遞補規則。",
+		title: "圖片語言遞補規則",
+		description: "頭像、橫幅與封面會分別解析，不受文字內容所選語言限制。",
+		viewerPreferences:
+			"顯示圖片時，系統會先依每位使用者的語言偏好搜尋。若某個語言未設定該圖片，會跳過並繼續搜尋下一個偏好語言。",
+		defaultOrder: "若使用者偏好的語言都未設定該圖片，系統會繼續依照內容的預設語言順序搜尋。",
+		noImage: "若所有語言都未設定，則不會傳回在地化圖片。",
+		textDifference:
+			"文字內容的規則不同：系統會選擇一個完整的語言版本，標題、摘要與描述不會分別從不同語言遞補。",
+		example:
+			"例如，使用者偏好中文、英文，而中文有文字與橫幅但沒有頭像，英文有頭像；使用者會看到中文文字、中文橫幅與英文頭像。",
+		close: "關閉圖片語言遞補規則",
+	},
 	presentationEditor: {
 		title: {
 			avatar: "調整頭像",
@@ -58,7 +72,6 @@ export default {
 		typeLabel: "頭像類型",
 		tabs: { image: "圖片", icon: "圖示", emoji: "表情符號" },
 		preview: "頭像預覽",
-		inherited: "繼承的頭像",
 		icon: {
 			search: "搜尋圖示",
 			featured: "常用圖示",

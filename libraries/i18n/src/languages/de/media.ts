@@ -13,6 +13,23 @@ export default {
 	current: "Überschreibung für die aktuelle Sprache",
 	displayPreview: "Angezeigter Bereich",
 	editPresentation: "Angezeigten Bereich anpassen",
+	localizationFallback: {
+		notice: "Für jedes Bild gilt die Sprachersatzregel unabhängig.",
+		title: "Sprachersatz für Bilder",
+		description:
+			"Avatar, Banner und Cover werden jeweils unabhängig von der für den Text gewählten Sprache ermittelt.",
+		viewerPreferences:
+			"Bilder werden in der Reihenfolge der Spracheinstellungen der jeweiligen Person gesucht. Fehlt das Bild in einer Sprache, wird mit der nächsten bevorzugten Sprache fortgefahren.",
+		defaultOrder:
+			"Enthält keine der bevorzugten Sprachen dieses Bild, wird die Suche in der standardmäßigen Lokalisierungsreihenfolge des Inhalts fortgesetzt.",
+		noImage:
+			"Wenn das Bild in keiner Lokalisierung vorhanden ist, wird kein lokalisiertes Bild zurückgegeben.",
+		textDifference:
+			"Für Text gilt eine andere Regel: Es wird eine vollständige Lokalisierung gewählt; Titel, Zusammenfassung und Beschreibung werden nicht feldweise aus verschiedenen Sprachen ersetzt.",
+		example:
+			"Bevorzugt eine Person beispielsweise Chinesisch und danach Englisch, enthält Chinesisch Text und Banner, aber keinen Avatar, und enthält Englisch einen Avatar, sieht sie chinesischen Text, das chinesische Banner und den englischen Avatar.",
+		close: "Regeln zum Sprachersatz für Bilder schließen",
+	},
 	presentationEditor: {
 		title: {
 			avatar: "Avatar anpassen",
@@ -60,7 +77,6 @@ export default {
 		typeLabel: "Avatartyp",
 		tabs: { image: "Bild", icon: "Symbol", emoji: "Emoji" },
 		preview: "Avatarvorschau",
-		inherited: "Übernommener Avatar",
 		icon: {
 			search: "Symbole suchen",
 			featured: "Häufig verwendete Symbole",

@@ -6,7 +6,10 @@ import Elysia, { t } from "elysia";
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import session from "../../auth/session";
 import { database } from "../../database";
-import { resolvedUnitLocalizationLanguage } from "../../units/localization";
+import {
+	resolvedUnitLocalizationImageAssetId,
+	resolvedUnitLocalizationLanguage,
+} from "../../units/localization";
 import {
 	contentStructure,
 	contentStructureNodeProgress,
@@ -283,7 +286,11 @@ export default new Elysia({ prefix: "/progress" })
 					language: unitLocalization.language,
 					title: unitLocalization.title,
 					summary: unitLocalization.summary,
-					coverAssetId: unitLocalization.coverAssetId,
+					coverAssetId: resolvedUnitLocalizationImageAssetId(
+						unit.id,
+						"cover",
+						body.localizationLanguages,
+					),
 				})
 				.from(unitProgress)
 				.innerJoin(unit, eq(unit.id, unitProgress.unitId))

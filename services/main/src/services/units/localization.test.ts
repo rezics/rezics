@@ -153,3 +153,28 @@ describe("resolveUnitLocalizationImageAssetIdFromOrdered", () => {
 		).toBeNull();
 	});
 });
+
+describe("text and image fallback boundaries", () => {
+	it("keeps text atomic while resolving each image role independently", () => {
+		const rows = [
+			{
+				...localizations[1],
+				language: "zh" as const,
+				title: "中文文字",
+				avatarType: null,
+				avatarEmoji: null,
+				bannerAssetId: "banner-zh",
+			},
+			{ ...localizations[0], language: "en" as const, title: "English text" },
+		];
+
+		expect(resolveUnitLocalizationFromOrdered(rows, ["zh", "en"])?.title).toBe("中文文字");
+		expect(resolveUnitLocalizationAvatarFromOrdered(rows, ["zh", "en"])).toEqual({
+			type: "image",
+			image: { assetId: "avatar-default" },
+		});
+		expect(resolveUnitLocalizationImageAssetIdFromOrdered(rows, "banner", ["zh", "en"])).toBe(
+			"banner-zh",
+		);
+	});
+});

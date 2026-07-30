@@ -66,7 +66,9 @@ import { ContentStructureInvalid, ContentStructureNotFound } from "../../content
 import { insertUnit } from "../../units/create";
 import {
 	avatarReferenceFromColumns,
+	resolveUnitLocalizationAvatarFromOrdered,
 	resolveUnitLocalizationFromOrdered,
+	resolveUnitLocalizationImageAssetIdFromOrdered,
 	resolvedUnitLocalizationImageAssetId,
 	resolvedUnitLocalizationLanguage,
 	toUnitLocalizationStorage,
@@ -254,9 +256,25 @@ async function toZoneResponse(
 		...record,
 		slugAddress: await getPublicCanonicalUnitSlugAddress(record.id),
 		language: selected.language,
-		avatar: presentAvatar(avatarReferenceFromColumns(selected)),
-		banner: presentImageAsset(selected.bannerAssetId, "banner"),
-		cover: presentImageAsset(selected.coverAssetId, "cover"),
+		avatar: presentAvatar(
+			resolveUnitLocalizationAvatarFromOrdered(localizations, localizationLanguages),
+		),
+		banner: presentImageAsset(
+			resolveUnitLocalizationImageAssetIdFromOrdered(
+				localizations,
+				"banner",
+				localizationLanguages,
+			),
+			"banner",
+		),
+		cover: presentImageAsset(
+			resolveUnitLocalizationImageAssetIdFromOrdered(
+				localizations,
+				"cover",
+				localizationLanguages,
+			),
+			"cover",
+		),
 		localizations: localizations.map(
 			({
 				avatarType,
@@ -354,9 +372,17 @@ function presentRenderUnit(
 		language: selected.language,
 		title: selected.title,
 		summary: selected.summary,
-		avatar: presentAvatar(avatarReferenceFromColumns(selected)),
-		banner: presentImageAsset(selected.bannerAssetId, "banner"),
-		cover: presentImageAsset(selected.coverAssetId, "cover"),
+		avatar: presentAvatar(
+			resolveUnitLocalizationAvatarFromOrdered(rows, localizationLanguages),
+		),
+		banner: presentImageAsset(
+			resolveUnitLocalizationImageAssetIdFromOrdered(rows, "banner", localizationLanguages),
+			"banner",
+		),
+		cover: presentImageAsset(
+			resolveUnitLocalizationImageAssetIdFromOrdered(rows, "cover", localizationLanguages),
+			"cover",
+		),
 	};
 }
 

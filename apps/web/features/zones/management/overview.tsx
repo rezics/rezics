@@ -35,6 +35,7 @@ import {
 	type AvatarFieldOption,
 	type AvatarFieldValue,
 } from "@/features/media/components/avatar-field";
+import { LocalizationMediaFallbackNotice } from "@/features/media/components/localization-media-fallback-notice";
 import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
 import { useTranslation } from "@/i18n/client";
@@ -113,6 +114,7 @@ function ZoneManagementOverviewForLanguage() {
 			<Card appearance="outlined" className="mt-6">
 				<CardContent className="grid gap-6 p-6">
 					{zone.capabilities.canManage ? <ContentLanguageControl /> : null}
+					{zone.capabilities.canManage ? <LocalizationMediaFallbackNotice /> : null}
 					<form className="grid gap-6" onChange={() => setDirty(true)} onSubmit={submit}>
 						<h2 className="font-semibold text-lg">
 							{t.zones.management.profile.title}

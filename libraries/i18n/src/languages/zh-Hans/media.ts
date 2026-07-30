@@ -13,6 +13,20 @@ export default {
 	current: "当前语言的封面图片",
 	displayPreview: "实际显示范围",
 	editPresentation: "调整显示范围",
+	localizationFallback: {
+		notice: "所有图片资源都会独立应用语言递补规则。",
+		title: "图片语言递补规则",
+		description: "头像、横幅和封面会分别解析，不受文字内容所选语言限制。",
+		viewerPreferences:
+			"显示图片时，系统会先按每位用户的语言偏好查找。如果某种语言未设置该图片，则会跳过并继续查找下一个偏好语言。",
+		defaultOrder: "如果用户偏好的语言都未设置该图片，系统会继续按照内容的默认语言顺序查找。",
+		noImage: "如果所有语言都未设置，则不会返回本地化图片。",
+		textDifference:
+			"文字内容的规则不同：系统会选择一个完整的语言版本，标题、摘要和描述不会分别从不同语言递补。",
+		example:
+			"例如，用户偏好中文、英文，而中文有文字和横幅但没有头像，英文有头像；用户会看到中文文字、中文横幅和英文头像。",
+		close: "关闭图片语言递补规则",
+	},
 	presentationEditor: {
 		title: {
 			avatar: "调整头像",
@@ -58,7 +72,6 @@ export default {
 		typeLabel: "头像类型",
 		tabs: { image: "图片", icon: "图标", emoji: "表情符号" },
 		preview: "头像预览",
-		inherited: "继承的头像",
 		icon: {
 			search: "搜索图标",
 			featured: "常用图标",

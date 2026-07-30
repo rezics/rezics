@@ -47,6 +47,7 @@ import {
 	type AvatarFieldValue,
 	avatarPresentationToInput,
 } from "@/features/media/components/avatar-field";
+import { LocalizationMediaFallbackNotice } from "@/features/media/components/localization-media-fallback-notice";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
@@ -381,6 +382,7 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 
 	return (
 		<CreateFrame action={<ContentLanguageControl />} title={t.catalog.entities}>
+			<LocalizationMediaFallbackNotice />
 			<form onChange={() => setDirty(true)} onSubmit={submit}>
 				<FieldGroup>
 					<Field required>

@@ -36,6 +36,7 @@ import {
 	type LocalizationImageAssetOption,
 	type LocalizationImageAssetValue,
 } from "@/features/media/components/localization-image-upload-field";
+import { LocalizationMediaFallbackNotice } from "@/features/media/components/localization-media-fallback-notice";
 import { isVariantUnitType, type UnitType } from "./unit-types";
 import {
 	CreditAttributionRolesByUnitType,
@@ -371,6 +372,7 @@ export function UnitContentEditor({ type, unit }: { type: UnitType; unit: Unit }
 		<Card>
 			<CardContent className="grid gap-6 p-6">
 				<ContentLanguageControl />
+				<LocalizationMediaFallbackNotice />
 				{selectedLanguageIsPending ? (
 					<p className="text-sm text-muted-foreground">
 						{t.units.contentLanguages.addDescription}

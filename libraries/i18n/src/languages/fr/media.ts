@@ -13,6 +13,23 @@ export default {
 	current: "Remplacement pour la langue actuelle",
 	displayPreview: "Aire affichée",
 	editPresentation: "Ajuster la zone affichée",
+	localizationFallback: {
+		notice: "Chaque ressource d’image applique indépendamment le repli linguistique.",
+		title: "Repli linguistique des images",
+		description:
+			"L’avatar, la bannière et la couverture sont résolus séparément de la langue choisie pour le texte.",
+		viewerPreferences:
+			"Les images sont recherchées selon les préférences linguistiques de chaque personne. Si une langue ne fournit pas l’image concernée, elle est ignorée et la recherche continue.",
+		defaultOrder:
+			"Si aucune langue préférée ne fournit cette image, la recherche continue selon l’ordre de localisation par défaut du contenu.",
+		noImage:
+			"Si aucune localisation ne fournit l’image, aucune image localisée n’est renvoyée.",
+		textDifference:
+			"Le texte suit une règle différente : une localisation complète est choisie, sans repli champ par champ du titre, du résumé ou de la description.",
+		example:
+			"Par exemple, si une personne préfère le chinois puis l’anglais, que le chinois fournit le texte et la bannière mais pas l’avatar, et que l’anglais fournit un avatar, elle voit le texte et la bannière en chinois ainsi que l’avatar anglais.",
+		close: "Fermer les règles de repli linguistique des images",
+	},
 	presentationEditor: {
 		title: {
 			avatar: "Ajuster l’avatar",
@@ -60,7 +77,6 @@ export default {
 		typeLabel: "Type d’avatar",
 		tabs: { image: "Image", icon: "Icône", emoji: "Emoji" },
 		preview: "Aperçu de l’avatar",
-		inherited: "Avatar hérité",
 		icon: {
 			search: "Rechercher des icônes",
 			featured: "Icônes courantes",

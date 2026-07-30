@@ -13,6 +13,22 @@ export default {
 	current: "Current language override",
 	displayPreview: "Displayed area",
 	editPresentation: "Adjust displayed area",
+	localizationFallback: {
+		notice: "Every image asset follows language fallback independently.",
+		title: "Image language fallback",
+		description:
+			"Avatars, banners, and covers are resolved separately from the language selected for text.",
+		viewerPreferences:
+			"Images are searched in each viewer’s language preference order. If a language has no image for that role, it is skipped and the search continues.",
+		defaultOrder:
+			"If none of the viewer’s preferred languages provides that image, the search continues in the content’s default localization order.",
+		noImage: "If no localization provides the image, no localized image is returned.",
+		textDifference:
+			"Text works differently: one complete localization is selected, so the title, summary, and description do not fall back field by field.",
+		example:
+			"For example, if a viewer prefers Chinese and then English, Chinese provides the text and banner but no avatar, and English provides an avatar, the viewer sees Chinese text, the Chinese banner, and the English avatar.",
+		close: "Close image language fallback rules",
+	},
 	presentationEditor: {
 		title: {
 			avatar: "Adjust avatar",
@@ -60,7 +76,6 @@ export default {
 		typeLabel: "Avatar type",
 		tabs: { image: "Image", icon: "Icon", emoji: "Emoji" },
 		preview: "Avatar preview",
-		inherited: "Inherited avatar",
 		icon: {
 			search: "Search icons",
 			featured: "Common icons",

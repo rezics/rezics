@@ -30,6 +30,7 @@ import { getUnitReadCondition } from "../../authorization/unit/query";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
+import { presentUnitLocalization } from "../../units/service";
 import { assignCurrentProfileSlugAddress } from "../../units/slug-address";
 import {
 	BlockResponse,
@@ -68,7 +69,7 @@ import {
 	ReplaceFollowingSettingsBody,
 	UpdatePrivacyPreferencesBody,
 } from "./schema";
-import { getProfile, presentProfile, PublicProfileSelection } from "./service";
+import { getProfile, presentProfile, publicProfileSelection } from "./service";
 import {
 	followUnit,
 	getFollowingStatus,
@@ -120,10 +121,18 @@ export default new Elysia({ prefix: "/users" })
 	.get(
 		"/me",
 		async ({ authorization, profile, query, user }) => {
-			const platformCapabilities =
-				await authorization.platform.decideCapabilities(PlatformCapabilityValues);
+			const [platformCapabilities, currentProfile, localizations] = await Promise.all([
+				authorization.platform.decideCapabilities(PlatformCapabilityValues),
+				getProfile(profile.unitId, query.localizationLanguages),
+				database
+					.select()
+					.from(unitLocalization)
+					.where(eq(unitLocalization.unitId, profile.unitId))
+					.orderBy(unitLocalization.position, unitLocalization.language),
+			]);
 			return {
-				...(await getProfile(profile.unitId, query.localizationLanguages)),
+				...currentProfile,
+				localizations: localizations.map(presentUnitLocalization),
 				email: user.email,
 				emailVerified: user.emailVerified,
 				onboarding: user.emailVerified ? "complete" : "verify_email",
@@ -681,7 +690,7 @@ export default new Elysia({ prefix: "/users" })
 		async ({ params, query, request }) => {
 			const localizationLanguages = query.localizationLanguages ?? [];
 			const [result] = await database
-				.select(PublicProfileSelection)
+				.select(publicProfileSelection(localizationLanguages))
 				.from(profileTable)
 				.innerJoin(unit, eq(unit.id, profileTable.id))
 				.innerJoin(

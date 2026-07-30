@@ -724,6 +724,7 @@ export const CurrentProfileResponse = t.Intersect([
 		email: t.String(),
 		emailVerified: t.Boolean(),
 		onboarding: t.String(),
+		localizations: t.Array(LocalizationResponse),
 		platformCapabilities: t.Array(t.UnionEnum(PlatformCapabilityValues), {
 			uniqueItems: true,
 		}),
@@ -968,6 +969,7 @@ export const CollectionDetailResponse = t.Object({
 	purpose: t.UnionEnum(["collection", "favorites"]),
 	itemCount: t.Integer(),
 	attributions: t.Array(UnitAttributionSummaryResponse),
+	cover: ImageAssetResponse,
 	latestRevisionId: Uuid,
 	latestItemsRevisionId: Uuid,
 	createdAt: DateTime,

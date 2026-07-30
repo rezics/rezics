@@ -11,6 +11,7 @@ import { AppLink as Link } from "@/features/application-shell/components/app-lin
 import { useState, type FormEvent } from "react";
 
 import type { LocalizationImageAssetValue } from "@/features/media/components/localization-image-upload-field";
+import { LocalizationMediaFallbackNotice } from "@/features/media/components/localization-media-fallback-notice";
 import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -37,6 +38,7 @@ export function CollectionContentPage() {
 				title={t.collections.workspace.sections.content.label}
 			/>
 			<ContentLanguageControl />
+			<LocalizationMediaFallbackNotice />
 			<CollectionLocalizationEditor
 				collection={collection}
 				initial={localization}

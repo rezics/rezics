@@ -7,6 +7,7 @@ import { database } from "../../database";
 import {
 	avatarReferenceFromColumns,
 	resolveUnitLocalizationFromOrdered,
+	resolveUnitLocalizationImageAssetIdFromOrdered,
 } from "../../units/localization";
 import {
 	collection as collectionTable,
@@ -143,6 +144,14 @@ export async function getCollection(
 		...detail,
 		purpose: favoritesProfileId ? "favorites" : "collection",
 		language: selectedLocalization.language,
+		cover: presentImageAsset(
+			resolveUnitLocalizationImageAssetIdFromOrdered(
+				localizations,
+				"cover",
+				localizationLanguages,
+			),
+			"cover",
+		),
 		attributions: attributionMap.get(collectionId) ?? [],
 		localizations: localizations.map(
 			({

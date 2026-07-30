@@ -1,10 +1,12 @@
 import { and, eq } from "drizzle-orm";
 import { PortableTextDocument, parseNullableDocument } from "@rezics/block";
 import type { ContentLanguage } from "@rezics/i18n";
+import type { AvatarReference } from "@rezics/avatar";
 
 import { database } from "../../database";
 import {
-	avatarReferenceFromColumns,
+	resolvedUnitLocalizationAvatar,
+	resolvedUnitLocalizationImageAssetId,
 	resolvedUnitLocalizationLanguage,
 } from "../../units/localization";
 import { profile as profileTable, unit, unitLocalization } from "../../database/schema";
@@ -13,23 +15,25 @@ import { presentImageAsset } from "../../units/service";
 import { getPublicCanonicalUnitSlugAddress } from "../../units/slug-address";
 import { ProfileNotFound } from "./errors";
 
-export const PublicProfileSelection = {
-	id: unit.id,
-	status: unit.status,
-	visibility: unit.visibility,
-	language: unitLocalization.language,
-	name: unitLocalization.title,
-	avatarType: unitLocalization.avatarType,
-	avatarAssetId: unitLocalization.avatarAssetId,
-	avatarEmoji: unitLocalization.avatarEmoji,
-	avatarIconPrefix: unitLocalization.avatarIconPrefix,
-	avatarIconName: unitLocalization.avatarIconName,
-	bannerAssetId: unitLocalization.bannerAssetId,
-	summary: unitLocalization.summary,
-	description: unitLocalization.description,
-	createdAt: unit.createdAt,
-	updatedAt: unit.updatedAt,
-};
+export function publicProfileSelection(localizationLanguages: readonly ContentLanguage[] = []) {
+	return {
+		id: unit.id,
+		status: unit.status,
+		visibility: unit.visibility,
+		language: unitLocalization.language,
+		name: unitLocalization.title,
+		avatar: resolvedUnitLocalizationAvatar(unit.id, localizationLanguages),
+		bannerAssetId: resolvedUnitLocalizationImageAssetId(
+			unit.id,
+			"banner",
+			localizationLanguages,
+		),
+		summary: unitLocalization.summary,
+		description: unitLocalization.description,
+		createdAt: unit.createdAt,
+		updatedAt: unit.updatedAt,
+	};
+}
 
 export async function getProfile(
 	unitId: string,
@@ -37,7 +41,7 @@ export async function getProfile(
 ) {
 	const profile = (
 		await database
-			.select(PublicProfileSelection)
+			.select(publicProfileSelection(localizationLanguages))
 			.from(profileTable)
 			.innerJoin(unit, eq(unit.id, profileTable.id))
 			.innerJoin(
@@ -60,41 +64,21 @@ export async function getProfile(
 export async function presentProfile<
 	T extends {
 		id: string;
-		avatarType: typeof unitLocalization.$inferSelect.avatarType;
-		avatarAssetId: string | null;
-		avatarEmoji: string | null;
-		avatarIconPrefix: typeof unitLocalization.$inferSelect.avatarIconPrefix;
-		avatarIconName: string | null;
+		avatar: AvatarReference | null;
 		bannerAssetId: string | null;
 		status: string;
 		visibility: string;
 		description: unknown;
 	},
 >(profile: T) {
-	const {
-		avatarType,
-		avatarAssetId,
-		avatarEmoji,
-		avatarIconPrefix,
-		avatarIconName,
-		bannerAssetId,
-		...publicProfile
-	} = profile;
+	const { avatar, bannerAssetId, ...publicProfile } = profile;
 	return {
 		...publicProfile,
 		slugAddress: await getPublicCanonicalUnitSlugAddress(profile.id),
 		status: profile.status.toLowerCase(),
 		visibility: profile.visibility.toLowerCase(),
 		description: parseNullableDocument(PortableTextDocument, profile.description),
-		avatar: presentAvatar(
-			avatarReferenceFromColumns({
-				avatarType,
-				avatarAssetId,
-				avatarEmoji,
-				avatarIconPrefix,
-				avatarIconName,
-			}),
-		),
+		avatar: presentAvatar(avatar),
 		banner: presentImageAsset(bannerAssetId, "banner"),
 	};
 }

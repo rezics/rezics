@@ -56,11 +56,11 @@ export function CollectionDetailPage({ collectionId }: { readonly collectionId: 
 					title={title}
 				/>
 				<div className="flex flex-wrap items-center gap-3">
-					{localization?.cover ? (
+					{collection.cover ? (
 						<Cover
 							alt={title}
 							className="w-24 rounded-xl border border-border-weak shadow-sm/5"
-							src={localization.cover.url}
+							src={collection.cover.url}
 						/>
 					) : null}
 					<Badge variant="secondary">

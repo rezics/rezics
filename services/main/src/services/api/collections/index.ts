@@ -6,6 +6,7 @@ import session, { resolveIdentity } from "../../auth/session";
 import { database, type DatabaseTransaction } from "../../database";
 import { fractionalPositionBetween, fractionalPositionsBetween } from "../../ordering/position";
 import {
+	resolvedUnitLocalizationImageAssetId,
 	resolvedUnitLocalizationLanguage,
 	toUnitLocalizationStorage,
 	unitLocalizationImageAssetReferences,
@@ -310,7 +311,11 @@ export default new Elysia({ prefix: "/collections" })
 					latestItemsRevisionId: collectionStructureRevisionHead.revisionId,
 					title: unitLocalization.title,
 					summary: unitLocalization.summary,
-					coverAssetId: unitLocalization.coverAssetId,
+					coverAssetId: resolvedUnitLocalizationImageAssetId(
+						unit.id,
+						"cover",
+						localizationLanguages,
+					),
 					updatedAt: unit.updatedAt,
 				})
 				.from(collection)
