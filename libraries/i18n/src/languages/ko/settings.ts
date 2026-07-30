@@ -99,8 +99,10 @@ export default {
 	tokens: {
 		title: `${verbatimTerms.api.value} 토큰`,
 		description: "최소 권한과 토큰별 제한이 적용된 자동화 자격 증명을 생성하세요.",
-		securityWarningTitle: "토큰은 비밀번호입니다",
-		securityWarning: `토큰을 ${verbatimTerms.ai.value}에게 직접 제공하면 피할 수 없는 유출 위험이 발생합니다. 에이전트에게 전용 작업 공간을 사용하고 빈 ${verbatimTerms.envFile.value} 파일을 생성하도록 요청한 다음, 토큰을 직접 입력하세요. 에이전트는 해당 파일을 절대 읽거나, 표시하거나, 기록하거나 커밋해서는 안 됩니다.`,
+		securityWarningTitle: `${verbatimTerms.api.value} 토큰을 안전하게 관리하세요`,
+		securityWarning:
+			"토큰은 비밀번호처럼 안전하게 보관하고 공유하거나 버전 관리 시스템에 커밋하지 마세요. 필요한 권한만 부여하고 적절한 만료 기간을 설정하세요. 노출이 의심되면 즉시 폐기하고 새 토큰을 생성하세요.",
+		securityGuide: "사용 안내 보기",
 		createTitle: "토큰 생성",
 		createDescription:
 			"비밀은 한 번만 표시됩니다. 필요한 최소 권한과 보수적인 제한을 먼저 선택하세요.",

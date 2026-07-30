@@ -97,8 +97,10 @@ export default {
 	tokens: {
 		title: `${verbatimTerms.api.value} 權杖`,
 		description: "以最小必要權限建立自動化憑證，並分別限制每個權杖的用量。",
-		securityWarningTitle: "權杖等同密碼",
-		securityWarning: `直接把權杖提供給 ${verbatimTerms.ai.value} 會產生無法避免的外洩風險。請讓代理程式使用獨立工作區建立空白的 ${verbatimTerms.envFile.value} 檔案，再由你親自填入權杖；代理程式不得讀取、顯示、記錄或提交該檔案。`,
+		securityWarningTitle: `妥善保管 ${verbatimTerms.api.value} 權杖`,
+		securityWarning:
+			"請像保管密碼一樣保管權杖，切勿分享或提交至版本控制。只授予必要權限並設定適當的有效期限；若懷疑權杖已外洩，請立即撤銷並建立新的權杖。",
+		securityGuide: "查看使用教學",
 		createTitle: "建立權杖",
 		createDescription: "密鑰只會顯示一次。請先選擇最小必要權限與保守的用量上限。",
 		name: "名稱",

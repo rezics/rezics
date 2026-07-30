@@ -110,8 +110,10 @@ export default {
 		title: `Jetons ${verbatimTerms.api.value}`,
 		description:
 			"Créez des identifiants d’automatisation avec le minimum d’accès nécessaire et des limites propres à chaque jeton.",
-		securityWarningTitle: "Un jeton est un mot de passe",
-		securityWarning: `Donner directement un jeton à une ${verbatimTerms.ai.value} crée un risque de fuite inévitable. Demandez à l’agent d’utiliser un environnement de travail dédié et de créer un fichier ${verbatimTerms.envFile.value} vide, puis saisissez vous-même le jeton. L’agent ne doit jamais lire, afficher, journaliser ni valider ce fichier.`,
+		securityWarningTitle: `Protégez vos jetons ${verbatimTerms.api.value}`,
+		securityWarning:
+			"Traitez les jetons comme des mots de passe : ne les partagez pas et ne les enregistrez pas dans le gestionnaire de versions. Accordez uniquement les autorisations nécessaires et définissez une expiration appropriée. Si un jeton a pu être exposé, révoquez-le et remplacez-le immédiatement.",
+		securityGuide: "Consulter le guide d’utilisation",
 		createTitle: "Créer un jeton",
 		createDescription:
 			"Le secret n’est affiché qu’une seule fois. Commencez par choisir le minimum d’accès nécessaire et des limites prudentes.",

@@ -109,8 +109,10 @@ export default {
 		title: `${verbatimTerms.api.value}-Token`,
 		description:
 			"Erstelle Automatisierungszugänge mit dem geringstmöglichen Zugriff und eigenen Begrenzungen pro Token.",
-		securityWarningTitle: "Ein Token ist ein Passwort",
-		securityWarning: `Wenn du ein Token direkt an ${verbatimTerms.ai.value} weitergibst, entsteht ein unvermeidbares Offenlegungsrisiko. Bitte den Agenten, einen eigenen Arbeitsbereich und eine leere ${verbatimTerms.envFile.value}-Datei anzulegen, und trage das Token dann selbst ein. Der Agent darf diese Datei niemals lesen, anzeigen, protokollieren oder einchecken.`,
+		securityWarningTitle: `${verbatimTerms.api.value}-Token sicher aufbewahren`,
+		securityWarning:
+			"Behandle Token wie Passwörter: Teile sie nicht und übertrage sie nicht in die Versionsverwaltung. Vergib nur die erforderlichen Berechtigungen und lege eine angemessene Gültigkeitsdauer fest. Wenn ein Token offengelegt worden sein könnte, widerrufe und ersetze es sofort.",
+		securityGuide: "Anleitung ansehen",
 		createTitle: "Token erstellen",
 		createDescription:
 			"Das Geheimnis wird nur einmal angezeigt. Wähle zuerst den geringstmöglichen Zugriff und vorsichtige Begrenzungen.",

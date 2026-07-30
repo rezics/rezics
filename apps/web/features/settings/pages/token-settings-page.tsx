@@ -11,7 +11,7 @@ import {
 	usePutApiApiTokensByTokenIdPolicy,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
-import { KeyRound, Plus, ShieldAlert, Trash2, XIcon } from "lucide-react";
+import { ExternalLink, KeyRound, Plus, ShieldAlert, Trash2, XIcon } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useState, type FormEvent } from "react";
 
@@ -89,6 +89,8 @@ type PermissionResource =
 	| "upload"
 	| "report";
 type PermissionAction = "read" | "create" | "update" | "delete" | "write" | "manage";
+
+const ApiTokenGuideUrl = "https://about.rezics.com/docs/api/tokens/";
 
 const PermissionGroups = [
 	{
@@ -950,7 +952,7 @@ function TokenCard({
 }
 
 export function TokenSettingsPage() {
-	const { t, locale } = useTranslation(["settings"]);
+	const { t, locale } = useTranslation(["editor", "settings"]);
 	const queryClient = useQueryClient();
 	const tokens = useGetApiApiTokens();
 	const refresh = () => queryClient.invalidateQueries({ queryKey: getApiApiTokensQueryKey() });
@@ -965,10 +967,22 @@ export function TokenSettingsPage() {
 				title={t.settings.tokens.title}
 			/>
 			<div className="grid gap-6">
-				<Alert variant="destructive">
+				<Alert variant="warning">
 					<ShieldAlert />
 					<AlertTitle>{t.settings.tokens.securityWarningTitle}</AlertTitle>
-					<AlertDescription>{t.settings.tokens.securityWarning}</AlertDescription>
+					<AlertDescription>
+						<span>{t.settings.tokens.securityWarning}</span>
+						<a
+							className="inline-flex w-fit items-center gap-1 font-medium text-foreground underline decoration-border underline-offset-4 hover:decoration-current"
+							href={ApiTokenGuideUrl}
+							rel="noreferrer"
+							target="_blank"
+						>
+							{t.settings.tokens.securityGuide}
+							<ExternalLink aria-hidden className="size-3.5" />
+							<span className="sr-only"> ({t.editor.openInNewTab})</span>
+						</a>
+					</AlertDescription>
 				</Alert>
 				<CreateTokenCard refresh={refresh} />
 				<div className="grid gap-4">

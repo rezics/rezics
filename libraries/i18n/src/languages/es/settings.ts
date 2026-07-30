@@ -111,8 +111,10 @@ export default {
 		title: `Tokens de ${verbatimTerms.api.value}`,
 		description:
 			"Crea credenciales de automatización con el menor acceso necesario y límites específicos para cada token.",
-		securityWarningTitle: "Un token es una contraseña",
-		securityWarning: `Dar un token directamente a una ${verbatimTerms.ai.value} crea un riesgo de filtración inevitable. Pide al agente que use un espacio de trabajo específico y cree un archivo ${verbatimTerms.envFile.value} vacío; después, introduce tú mismo el token. El agente nunca debe leer, mostrar, registrar ni confirmar ese archivo.`,
+		securityWarningTitle: `Protege tus tokens de ${verbatimTerms.api.value}`,
+		securityWarning:
+			"Trata los tokens como contraseñas: no los compartas ni los guardes en el control de versiones. Concede solo los permisos necesarios y define una caducidad adecuada. Si un token puede haber quedado expuesto, revócalo y sustitúyelo de inmediato.",
+		securityGuide: "Ver la guía de uso",
 		createTitle: "Crear token",
 		createDescription:
 			"El secreto se muestra una sola vez. Empieza eligiendo el menor acceso necesario y límites prudentes.",

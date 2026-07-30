@@ -103,8 +103,10 @@ export default {
 		title: `${verbatimTerms.api.value} tokens`,
 		description:
 			"Create automation credentials with the least access required and per-token limits.",
-		securityWarningTitle: "A token is a password",
-		securityWarning: `Giving a token directly to ${verbatimTerms.ai.value} creates an unavoidable leakage risk. Ask the agent to use a dedicated workspace and create an empty ${verbatimTerms.envFile.value} file, then fill in the token yourself. The agent must never read, display, log, or commit that file.`,
+		securityWarningTitle: `Keep ${verbatimTerms.api.value} tokens secure`,
+		securityWarning:
+			"Treat tokens like passwords: never share them or commit them to version control. Grant only the permissions needed and set an appropriate expiration. Revoke and replace any token that may have been exposed.",
+		securityGuide: "View the usage guide",
 		createTitle: "Create token",
 		createDescription:
 			"The secret is shown once. Choose the least access needed and conservative limits first.",

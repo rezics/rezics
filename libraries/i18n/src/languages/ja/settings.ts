@@ -105,8 +105,10 @@ export default {
 		title: `${verbatimTerms.api.value}トークン`,
 		description:
 			"必要最低限のアクセス権とトークンごとの制限で自動化用の資格情報を作成してください。",
-		securityWarningTitle: "トークンはパスワードです",
-		securityWarning: `トークンを直接 ${verbatimTerms.ai.value} に渡すと、避けられない漏えいのリスクが生じます。エージェントに専用のワークスペースを使用させ、空の ${verbatimTerms.envFile.value} ファイルを作成させ、その後で自分でトークンを入力してください。エージェントはそのファイルを決して読み取ったり、表示したり、ログに記録したり、コミットしたりしてはいけません。`,
+		securityWarningTitle: `${verbatimTerms.api.value}トークンを安全に管理する`,
+		securityWarning:
+			"トークンはパスワードと同様に扱い、共有したりバージョン管理にコミットしたりしないでください。必要な権限だけを付与し、適切な有効期限を設定してください。漏えいした可能性がある場合は、直ちに取り消して新しいトークンを作成してください。",
+		securityGuide: "使用方法を見る",
 		createTitle: "トークンを作成",
 		createDescription:
 			"秘密情報は一度だけ表示されます。まず、必要最小限のアクセス権と保守的な制限を選択してください。",

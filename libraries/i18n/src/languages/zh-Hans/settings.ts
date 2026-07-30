@@ -97,8 +97,10 @@ export default {
 	tokens: {
 		title: `${verbatimTerms.api.value} 令牌`,
 		description: "以最小必要权限创建自动化凭证，并分别限制每个令牌的用量。",
-		securityWarningTitle: "令牌等同密码",
-		securityWarning: `直接把令牌提供给 ${verbatimTerms.ai.value} 会产生无法避免的外泄风险。请让代理使用独立工作区创建空白的 ${verbatimTerms.envFile.value} 文件，再由你亲自填入令牌；代理不得读取、显示、记录或提交该文件。`,
+		securityWarningTitle: `妥善保管 ${verbatimTerms.api.value} 令牌`,
+		securityWarning:
+			"请像保管密码一样保管令牌，切勿分享或提交到版本控制系统。只授予必要权限并设置适当的有效期；如果怀疑令牌已经泄露，请立即撤销并创建新令牌。",
+		securityGuide: "查看使用教程",
 		createTitle: "创建令牌",
 		createDescription: "密钥只会显示一次。请先选择最小必要权限与保守的用量上限。",
 		name: "名称",
