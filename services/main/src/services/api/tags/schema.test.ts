@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 
 import {
 	CreateTagStructureBody,
+	RealmTagSubscriptionResponse,
 	RealmUnitTagVoteListQuery,
 	UnitTagLandscapeQuery,
+	UnitTagLandscapeResponse,
 	UpdateTagStructureBody,
 	UpsertRealmTagSubscriptionBody,
 } from "./schema";
@@ -55,5 +57,30 @@ describe("Tag API schemas", () => {
 		expect(Value.Check(UpsertRealmTagSubscriptionBody, {})).toBe(true);
 		expect(Value.Check(UpsertRealmTagSubscriptionBody, { position: "a0" })).toBe(true);
 		expect(Value.Check(UpsertRealmTagSubscriptionBody, { position: "" })).toBe(false);
+	});
+
+	it("requires Realm avatars and rejects empty Unit Tag sources", () => {
+		const subscription = {
+			realmId: "018f2f3a-7ac0-7000-8000-000000000001",
+			language: "en",
+			title: "Readers",
+			summary: null,
+			avatar: { type: "emoji", emoji: "📚" },
+			position: "a0",
+			createdAt: "2026-07-30T00:00:00.000Z",
+			updatedAt: "2026-07-30T00:00:00.000Z",
+		};
+		expect(Value.Check(RealmTagSubscriptionResponse, subscription)).toBe(true);
+		expect(
+			Value.Check(RealmTagSubscriptionResponse, { ...subscription, avatar: undefined }),
+		).toBe(false);
+		expect(
+			Value.Check(UnitTagLandscapeResponse, {
+				structures: [],
+				global: [],
+				realms: [{ ...subscription, canVote: false, votedTags: [] }],
+				voteRealms: [],
+			}),
+		).toBe(false);
 	});
 });

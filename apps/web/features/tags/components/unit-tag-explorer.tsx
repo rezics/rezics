@@ -45,6 +45,7 @@ import {
 } from "../model/tag-vote-context";
 import { unitTagsHref } from "../routing/tag-links";
 import { TagContextSection } from "./tag-context-section";
+import { RealmTagContextHeading } from "./realm-tag-context-heading";
 import { TagSelectionToolbar } from "./tag-selection-toolbar";
 import { presentStructureMembers, TagStructureList } from "./tag-structure-list";
 import { TagVoteContextSelector } from "./tag-vote-context-selector";
@@ -338,6 +339,12 @@ export function UnitTagExplorer({
 								}
 								empty={t.tags.realms.empty}
 								fallbackLabel={t.tags.unnamedTag}
+								heading={
+									<RealmTagContextHeading
+										fallbackTitle={t.tags.unnamedRealm}
+										realm={activeVoteContext.realm}
+									/>
+								}
 								headingLevel="h3"
 								items={activeTags}
 								onClearVote={clearVote}
@@ -441,6 +448,12 @@ export function UnitTagExplorer({
 										descriptionLanguage={group.summary ? group.language : null}
 										empty={t.tags.realms.empty}
 										fallbackLabel={t.tags.unnamedTag}
+										heading={
+											<RealmTagContextHeading
+												fallbackTitle={t.tags.unnamedRealm}
+												realm={group}
+											/>
+										}
 										headingLevel="h3"
 										items={group.tags}
 										key={group.realmId}
@@ -494,6 +507,12 @@ export function UnitTagExplorer({
 										descriptionLanguage={group.summary ? group.language : null}
 										empty={t.tags.realms.empty}
 										fallbackLabel={t.tags.unnamedTag}
+										heading={
+											<RealmTagContextHeading
+												fallbackTitle={t.tags.unnamedRealm}
+												realm={group}
+											/>
+										}
 										headingLevel={groupHeadingLevel}
 										items={group.tags}
 										key={group.realmId}

@@ -31,6 +31,7 @@ function landscape(): GetApiUnitsByTypeByUnitIdTagsStatus200 {
 				language: "en",
 				title: "Readers",
 				summary: null,
+				avatar: { type: "emoji", emoji: "📚" },
 				canVote: true,
 				position: "a0",
 				createdAt: Timestamp,
@@ -90,6 +91,7 @@ describe("Unit Tag presentation", () => {
 
 	it("keeps each Realm vote target bound to its source context", () => {
 		const [group] = presentRealmTagGroups({ data: landscape(), unitId: UnitId });
+		expect(group?.avatar).toEqual({ type: "emoji", emoji: "📚" });
 		expect(group?.tags).toHaveLength(1);
 		expect(group?.tags[0]).toMatchObject({
 			identity: {

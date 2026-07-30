@@ -62216,6 +62216,7 @@
 													"language",
 													"title",
 													"summary",
+													"avatar",
 													"position",
 													"createdAt",
 													"updatedAt",
@@ -62259,6 +62260,105 @@
 															{ "type": "null" }
 														]
 													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"type",
+																			"image"
+																		],
+																		"properties": {
+																			"type": {
+																				"const": "image",
+																				"type": "string"
+																			},
+																			"image": {
+																				"type": "object",
+																				"required": [
+																					"id",
+																					"url"
+																				],
+																				"properties": {
+																					"id": {
+																						"format": "uuid",
+																						"type": "string"
+																					},
+																					"url": {
+																						"type": "string"
+																					}
+																				}
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"type",
+																			"emoji"
+																		],
+																		"properties": {
+																			"type": {
+																				"const": "emoji",
+																				"type": "string"
+																			},
+																			"emoji": {
+																				"maxLength": 64,
+																				"type": "string"
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"type",
+																			"icon"
+																		],
+																		"properties": {
+																			"type": {
+																				"const": "icon",
+																				"type": "string"
+																			},
+																			"icon": {
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"provider",
+																					"prefix",
+																					"name"
+																				],
+																				"properties": {
+																					"provider": {
+																						"const": "font-awesome",
+																						"type": "string"
+																					},
+																					"prefix": {
+																						"type": "string",
+																						"enum": [
+																							"fas",
+																							"fab"
+																						]
+																					},
+																					"name": {
+																						"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																						"maxLength": 128,
+																						"type": "string"
+																					}
+																				}
+																			}
+																		}
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
+													},
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -62275,6 +62375,7 @@
 													},
 													"canVote": { "type": "boolean" },
 													"votedTags": {
+														"minItems": 1,
 														"type": "array",
 														"items": {
 															"type": "object",
@@ -63569,6 +63670,7 @@
 													"language",
 													"title",
 													"summary",
+													"avatar",
 													"position",
 													"createdAt",
 													"updatedAt"
@@ -63607,6 +63709,105 @@
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"type",
+																			"image"
+																		],
+																		"properties": {
+																			"type": {
+																				"const": "image",
+																				"type": "string"
+																			},
+																			"image": {
+																				"type": "object",
+																				"required": [
+																					"id",
+																					"url"
+																				],
+																				"properties": {
+																					"id": {
+																						"format": "uuid",
+																						"type": "string"
+																					},
+																					"url": {
+																						"type": "string"
+																					}
+																				}
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"type",
+																			"emoji"
+																		],
+																		"properties": {
+																			"type": {
+																				"const": "emoji",
+																				"type": "string"
+																			},
+																			"emoji": {
+																				"maxLength": 64,
+																				"type": "string"
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"type",
+																			"icon"
+																		],
+																		"properties": {
+																			"type": {
+																				"const": "icon",
+																				"type": "string"
+																			},
+																			"icon": {
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"provider",
+																					"prefix",
+																					"name"
+																				],
+																				"properties": {
+																					"provider": {
+																						"const": "font-awesome",
+																						"type": "string"
+																					},
+																					"prefix": {
+																						"type": "string",
+																						"enum": [
+																							"fas",
+																							"fab"
+																						]
+																					},
+																					"name": {
+																						"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																						"maxLength": 128,
+																						"type": "string"
+																					}
+																				}
+																			}
+																		}
+																	}
+																]
+															},
 															{ "type": "null" }
 														]
 													},
@@ -63746,6 +63947,7 @@
 										"language",
 										"title",
 										"summary",
+										"avatar",
 										"position",
 										"createdAt",
 										"updatedAt"
@@ -63777,6 +63979,88 @@
 										"summary": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"avatar": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["type", "image"],
+															"properties": {
+																"type": {
+																	"const": "image",
+																	"type": "string"
+																},
+																"image": {
+																	"type": "object",
+																	"required": ["id", "url"],
+																	"properties": {
+																		"id": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"url": { "type": "string" }
+																	}
+																}
+															}
+														},
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["type", "emoji"],
+															"properties": {
+																"type": {
+																	"const": "emoji",
+																	"type": "string"
+																},
+																"emoji": {
+																	"maxLength": 64,
+																	"type": "string"
+																}
+															}
+														},
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["type", "icon"],
+															"properties": {
+																"type": {
+																	"const": "icon",
+																	"type": "string"
+																},
+																"icon": {
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"provider",
+																		"prefix",
+																		"name"
+																	],
+																	"properties": {
+																		"provider": {
+																			"const": "font-awesome",
+																			"type": "string"
+																		},
+																		"prefix": {
+																			"type": "string",
+																			"enum": ["fas", "fab"]
+																		},
+																		"name": {
+																			"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																			"maxLength": 128,
+																			"type": "string"
+																		}
+																	}
+																}
+															}
+														}
+													]
+												},
+												{ "type": "null" }
+											]
 										},
 										"position": {
 											"format": "fractional-position",

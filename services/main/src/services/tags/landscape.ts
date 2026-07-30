@@ -10,9 +10,18 @@ export function selectRealmTagSources<
 	readonly canVote: boolean;
 	readonly votedTags: VotedTag[];
 })[] {
-	return input.sources.slice(0, input.limit).map((source) => ({
-		...source,
-		canVote: input.canVoteRealmIds.has(source.realmId),
-		votedTags: input.votedTags.get(source.realmId) ?? [],
-	}));
+	return input.sources
+		.flatMap((source) => {
+			const votedTags = input.votedTags.get(source.realmId);
+			return votedTags?.length
+				? [
+						{
+							...source,
+							canVote: input.canVoteRealmIds.has(source.realmId),
+							votedTags,
+						},
+					]
+				: [];
+		})
+		.slice(0, input.limit);
 }

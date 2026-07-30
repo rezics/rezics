@@ -46614,6 +46614,14 @@ export const GetApiUnitsByTypeByUnitIdTagsStatus200RealmsLanguage = {
 export type GetApiUnitsByTypeByUnitIdTagsStatus200RealmsLanguage =
 	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200RealmsLanguage)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200RealmsLanguage];
 
+export const GetApiUnitsByTypeByUnitIdTagsStatus200RealmsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdTagsStatus200RealmsAvatarIconPrefixEnum =
+	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200RealmsAvatarIconPrefixEnum)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200RealmsAvatarIconPrefixEnum];
+
 export const GetApiUnitsByTypeByUnitIdTagsStatus200RealmsVotedTagsLanguage = {
 	zh: "zh",
 	en: "en",
@@ -46884,6 +46892,70 @@ export type GetApiUnitsByTypeByUnitIdTagsStatus200 = {
 		language: (GetApiUnitsByTypeByUnitIdTagsStatus200RealmsLanguage | null) | null;
 		title: (string | null) | null;
 		summary: (string | null) | null;
+		avatar:
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: GetApiUnitsByTypeByUnitIdTagsStatus200RealmsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
+			| null;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -47938,6 +48010,14 @@ export const GetApiUsersMeTagRealmSubscriptionsStatus200ItemsLanguage = {
 export type GetApiUsersMeTagRealmSubscriptionsStatus200ItemsLanguage =
 	(typeof GetApiUsersMeTagRealmSubscriptionsStatus200ItemsLanguage)[keyof typeof GetApiUsersMeTagRealmSubscriptionsStatus200ItemsLanguage];
 
+export const GetApiUsersMeTagRealmSubscriptionsStatus200ItemsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiUsersMeTagRealmSubscriptionsStatus200ItemsAvatarIconPrefixEnum =
+	(typeof GetApiUsersMeTagRealmSubscriptionsStatus200ItemsAvatarIconPrefixEnum)[keyof typeof GetApiUsersMeTagRealmSubscriptionsStatus200ItemsAvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -47955,6 +48035,70 @@ export type GetApiUsersMeTagRealmSubscriptionsStatus200 = {
 		language: (GetApiUsersMeTagRealmSubscriptionsStatus200ItemsLanguage | null) | null;
 		title: (string | null) | null;
 		summary: (string | null) | null;
+		avatar:
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: GetApiUsersMeTagRealmSubscriptionsStatus200ItemsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
+			| null;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -48089,6 +48233,14 @@ export const PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200Language = {
 export type PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200Language =
 	(typeof PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200Language)[keyof typeof PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200Language];
 
+export const PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200AvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200AvatarIconPrefixEnum =
+	(typeof PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200AvatarIconPrefixEnum)[keyof typeof PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200AvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -48102,6 +48254,70 @@ export type PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200 = {
 	language: (PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200Language | null) | null;
 	title: (string | null) | null;
 	summary: (string | null) | null;
+	avatar:
+		| (
+				| (
+						| {
+								/**
+								 * @type string
+								 */
+								type: "image";
+								/**
+								 * @type object
+								 */
+								image: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+								};
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "emoji";
+								/**
+								 * @maxLength 64
+								 * @type string
+								 */
+								emoji: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "icon";
+								/**
+								 * @type object
+								 */
+								icon: {
+									/**
+									 * @type string
+									 */
+									provider: "font-awesome";
+									/**
+									 * @type string
+									 */
+									prefix: PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200AvatarIconPrefixEnum;
+									/**
+									 * @maxLength 128
+									 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+									 * @type string
+									 */
+									name: string;
+								};
+						  }
+				  )
+				| null
+		  )
+		| null;
 	/**
 	 * @description
 	 * Format: `fractional-position`

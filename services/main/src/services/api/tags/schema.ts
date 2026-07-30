@@ -94,6 +94,7 @@ export const RealmTagSubscriptionResponse = t.Object({
 	language: t.Nullable(ContentLanguage),
 	title: t.Nullable(t.String()),
 	summary: t.Nullable(t.String()),
+	avatar: AvatarResponse,
 	position: FractionalPosition,
 	createdAt: DateTime,
 	updatedAt: DateTime,
@@ -106,7 +107,7 @@ export const UnitTagLandscapeResponse = t.Object({
 		t.Object({
 			...RealmTagSubscriptionResponse.properties,
 			canVote: t.Boolean(),
-			votedTags: t.Array(RealmVotedTagResponse),
+			votedTags: t.Array(RealmVotedTagResponse, { minItems: 1 }),
 		}),
 	),
 	voteRealms: t.Array(RealmTagVoteContextResponse),

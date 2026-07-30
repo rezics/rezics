@@ -178,7 +178,7 @@ export async function listRealmTagSubscriptions(input: {
 	readonly profileId: string;
 	readonly localizationLanguages?: LocalizationLanguageQuery;
 }) {
-	return database
+	const rows = await database
 		.select({
 			realmId: profileRealmTagSubscription.realmId,
 			language: resolvedUnitLocalizationLanguage(
@@ -190,6 +190,7 @@ export async function listRealmTagSubscriptions(input: {
 				realmSourceUnit.id,
 				input.localizationLanguages,
 			),
+			avatar: resolvedUnitLocalizationAvatar(realmSourceUnit.id, input.localizationLanguages),
 			position: profileRealmTagSubscription.position,
 			createdAt: profileRealmTagSubscription.createdAt,
 			updatedAt: profileRealmTagSubscription.updatedAt,
@@ -220,6 +221,10 @@ export async function listRealmTagSubscriptions(input: {
 			),
 		)
 		.orderBy(profileRealmTagSubscription.position, profileRealmTagSubscription.realmId);
+	return rows.map((row) => ({
+		...row,
+		avatar: presentAvatar(row.avatar),
+	}));
 }
 
 export async function listRealmTagVoteContexts(input: {

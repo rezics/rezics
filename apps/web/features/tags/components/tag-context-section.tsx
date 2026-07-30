@@ -1,6 +1,7 @@
 "use client";
 
 import type { ContentLanguage } from "@rezics/i18n";
+import type { ReactNode } from "react";
 
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
@@ -12,6 +13,7 @@ export function TagContextSection({
 	descriptionLanguage,
 	empty,
 	fallbackLabel,
+	heading,
 	headingLevel = "h3",
 	items,
 	pendingItemKey,
@@ -28,6 +30,7 @@ export function TagContextSection({
 	readonly descriptionLanguage?: ContentLanguage | null;
 	readonly empty: string;
 	readonly fallbackLabel: string;
+	readonly heading?: ReactNode;
 	readonly headingLevel?: "h2" | "h3" | "h4";
 	readonly items: readonly TagPresentation[];
 	readonly pendingItemKey?: string;
@@ -46,7 +49,7 @@ export function TagContextSection({
 	return (
 		<section className="grid gap-3">
 			<div className="grid gap-1">
-				<Heading className="font-semibold">{displayedTitle}</Heading>
+				<Heading className="min-w-0 font-semibold">{heading ?? displayedTitle}</Heading>
 				{displayedDescription ? (
 					<p className="text-sm leading-6 text-muted-foreground">
 						{displayedDescription}

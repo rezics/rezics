@@ -68,6 +68,7 @@ export interface RealmTagGroupPresentation {
 	readonly language: ContentLanguage | null;
 	readonly title: string | null;
 	readonly summary: string | null;
+	readonly avatar: PresentedAvatar | null;
 	readonly canVote: boolean;
 	readonly tags: readonly TagPresentation[];
 }

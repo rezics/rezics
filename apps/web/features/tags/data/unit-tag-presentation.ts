@@ -54,6 +54,7 @@ export function presentRealmTagGroups(input: {
 		language: realm.language,
 		title: realm.title,
 		summary: realm.summary,
+		avatar: realm.avatar,
 		canVote: realm.canVote,
 		tags: presentRealmTags({
 			realm,
