@@ -100,7 +100,7 @@ export function UnitDiscussionSummarySection({
 			: numberFormat.format(0);
 
 	return (
-		<section className="grid gap-4 border-t border-border-weak pt-8">
+		<section className="grid gap-4 pt-8">
 			<h2 className="font-heading text-2xl font-bold sm:text-3xl">
 				{t.engagement.joinDiscussion}
 			</h2>
