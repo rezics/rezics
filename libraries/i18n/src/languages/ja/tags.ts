@@ -20,7 +20,7 @@ export default {
 			context: String,
 		}),
 		close: "タグカードを閉じる",
-		globalContext: "グローバルタグ",
+		globalContext: "グローバル文脈",
 		structureContext: tagStructureTerms.label,
 		policy: `${realmTerms.label}-セット`,
 		search: "このタグを検索",
@@ -113,9 +113,9 @@ export default {
 		completed: "タグを作成し、あなたの「適合」票を記録しました。",
 	},
 	global: {
-		title: "グローバルタグ",
+		title: "グローバル文脈",
 		description:
-			"グローバルタグは、インタラクションアクセスを持つ全員によって提案され、判断されます。",
+			"グローバル文脈では、各タグ自体の説明をタグの説明として使用します。インタラクションアクセスを持つ全員が判断に参加できます。",
 		addTitle: "グローバルタグを追加する",
 		addDescription:
 			"まず既存のタグを検索してください。追加すると同時に「適合」投票も行われます。",

@@ -14,7 +14,7 @@ vi.mock("@/i18n/client", () => ({
 		t: {
 			state: { empty: "No results" },
 			tags: {
-				global: { title: "Global Tags" },
+				global: { title: "Global context" },
 				unnamedRealm: "Unnamed Realm",
 				voteContext: { select: "Choose a voting context" },
 			},
@@ -66,14 +66,14 @@ describe("TagVoteContextSelector", () => {
 		);
 
 		const input = screen.getByRole("combobox", { name: "Choose a voting context" });
-		expect(input).toHaveProperty("value", "Global Tags");
+		expect(input).toHaveProperty("value", "Global context");
 		fireEvent.click(input);
 		await waitFor(() => expect(input).toHaveProperty("value", ""));
 
 		fireEvent.change(input, { target: { value: "ocean" } });
 		expect(await screen.findByText("Blue Realm")).toBeTruthy();
 		expect(screen.queryByText("Green Realm")).toBeNull();
-		expect(screen.queryByText("Global Tags")).toBeNull();
+		expect(screen.queryByText("Global context")).toBeNull();
 
 		const option = screen.getByText("Blue Realm").closest('[role="option"]');
 		if (!option) throw new Error("Expected the matching Realm option to be rendered.");

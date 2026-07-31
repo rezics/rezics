@@ -20,7 +20,7 @@ export default {
 			context: String,
 		}),
 		close: "태그 카드 닫기",
-		globalContext: "글로벌 태그",
+		globalContext: "글로벌 문맥",
 		structureContext: tagStructureTerms.label,
 		policy: `${realmTerms.label}-세트`,
 		search: "이 태그 검색",
@@ -113,8 +113,9 @@ export default {
 		completed: "태그를 만들고 ‘적합’ 투표를 기록했습니다.",
 	},
 	global: {
-		title: "글로벌 태그",
-		description: "글로벌 태그는 상호작용 접근 권한이 있는 모든 사람이 제안하고 판단합니다.",
+		title: "글로벌 문맥",
+		description:
+			"글로벌 문맥에서는 각 태그 자체의 설명을 태그 설명으로 사용하며, 상호작용 접근 권한이 있는 모든 사람이 판단에 참여할 수 있습니다.",
 		addTitle: "글로벌 태그 추가",
 		addDescription: "먼저 기존 태그를 검색하세요. 추가하면 ‘적합’ 투표도 함께 진행됩니다.",
 		add: "태그 추가",

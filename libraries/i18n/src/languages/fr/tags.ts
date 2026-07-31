@@ -21,7 +21,7 @@ export default {
 			context: String,
 		}),
 		close: "Fermer la fiche de l’étiquette",
-		globalContext: "Étiquettes globales",
+		globalContext: "Contexte global",
 		structureContext: tagStructureTerms.label,
 		policy: `Définie par le ${realmTerms.inline}`,
 		search: "Rechercher cette étiquette",
@@ -116,9 +116,9 @@ export default {
 		completed: "L’étiquette a été créée et votre vote « Correspond » a été enregistré.",
 	},
 	global: {
-		title: "Étiquettes globales",
+		title: "Contexte global",
 		description:
-			"Les étiquettes globales sont proposées et évaluées par toutes les personnes disposant d’un accès d’interaction.",
+			"Dans le contexte global, l’explication d’une étiquette provient de sa propre fiche ; toute personne disposant d’un accès d’interaction peut participer à son évaluation.",
 		addTitle: "Ajouter une étiquette globale",
 		addDescription:
 			"Recherchez d’abord les étiquettes existantes. En ajouter une compte également comme un vote « Correspond ».",

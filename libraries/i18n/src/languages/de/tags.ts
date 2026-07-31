@@ -21,7 +21,7 @@ export default {
 			context: String,
 		}),
 		close: "Tag-Karte schließen",
-		globalContext: "Globale Tags",
+		globalContext: "Globaler Kontext",
 		structureContext: tagStructureTerms.label,
 		policy: `Vom ${realmTerms.inline} festgelegt`,
 		search: "Diesen Tag durchsuchen",
@@ -114,9 +114,9 @@ export default {
 		completed: "Der Tag wurde erstellt und deine Stimme „Passt“ wurde erfasst.",
 	},
 	global: {
-		title: "Globale Tags",
+		title: "Globaler Kontext",
 		description:
-			"Globale Tags werden von allen Personen mit Interaktionszugriff vorgeschlagen und bewertet.",
+			"Im globalen Kontext stammt die Erklärung eines Tags aus dem Tag-Eintrag selbst; alle Personen mit Interaktionszugriff können an der Bewertung mitwirken.",
 		addTitle: "Globalen Tag hinzufügen",
 		addDescription:
 			"Suche zuerst nach vorhandenen Tags. Beim Hinzufügen wird zugleich mit „Passt“ abgestimmt.",

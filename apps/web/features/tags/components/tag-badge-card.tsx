@@ -150,7 +150,7 @@ export function TagBadgeCard({
 							<div className="flex min-w-0 items-center gap-1">
 								<PopoverTitle asChild>
 									<Link
-										className="min-w-0 truncate rounded-sm outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/40"
+										className="min-w-0 truncate rounded-sm underline-offset-4 leading-normal outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/40"
 										href={detailHref}
 									>
 										{label}

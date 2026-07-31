@@ -21,7 +21,7 @@ export default {
 			context: String,
 		}),
 		close: "Close Tag card",
-		globalContext: "Global Tags",
+		globalContext: "Global context",
 		structureContext: tagStructureTerms.label,
 		policy: `${realmTerms.label}-set`,
 		search: "Search this Tag",
@@ -113,8 +113,9 @@ export default {
 		completed: "The Tag was created and your “Fits” vote was recorded.",
 	},
 	global: {
-		title: "Global Tags",
-		description: "Global Tags are proposed and judged by everyone with interaction access.",
+		title: "Global context",
+		description:
+			"In the global context, a Tag's explanation comes from the Tag entry itself; everyone with interaction access can contribute judgments.",
 		addTitle: "Add a global Tag",
 		addDescription: "Search existing Tags first. Adding one also casts a “Fits” vote.",
 		add: "Add Tag",

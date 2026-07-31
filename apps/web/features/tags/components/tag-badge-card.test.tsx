@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 
 import { resources } from "@rezics/i18n/resources";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { create } from "native-i18n";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -26,6 +26,14 @@ vi.mock("./tag-vote-controls", () => ({
 vi.stubGlobal(
 	"ResizeObserver",
 	class ResizeObserverMock {
+		observe() {}
+		unobserve() {}
+		disconnect() {}
+	},
+);
+vi.stubGlobal(
+	"IntersectionObserver",
+	class IntersectionObserverMock {
 		observe() {}
 		unobserve() {}
 		disconnect() {}
@@ -62,7 +70,7 @@ const pinnedTag = {
 afterEach(cleanup);
 
 describe("TagBadgeCard", () => {
-	it("uses the ordinary outline style for a pinned global Tag", () => {
+	it("uses the ordinary outline style and a linked card title for a pinned global Tag", async () => {
 		render(
 			<TranslationProvider initial={translation.snapshot}>
 				<TagBadgeCard
@@ -79,10 +87,16 @@ describe("TagBadgeCard", () => {
 			</TranslationProvider>,
 		);
 
-		const trigger = screen.getByRole("link", { name: /置頂標籤/ });
+		const trigger = screen.getByRole("link", {
+			name: "開啟「置頂標籤」標籤卡片（全域情境）",
+		});
 		expect(trigger.closest('[data-slot="badge"]')?.getAttribute("data-variant")).toBe(
 			"outline",
 		);
+		fireEvent.click(trigger);
+		const titleLink = await screen.findByRole("link", { name: "置頂標籤" });
+		expect(titleLink.classList.contains("hover:underline")).toBe(true);
+		expect(titleLink.classList.contains("leading-normal")).toBe(true);
 	});
 
 	it("projects Chinese Tag content into the selected display script", async () => {

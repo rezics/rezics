@@ -21,7 +21,7 @@ export default {
 			context: String,
 		}),
 		close: "Cerrar la tarjeta de la etiqueta",
-		globalContext: "Etiquetas globales",
+		globalContext: "Contexto global",
 		structureContext: tagStructureTerms.label,
 		policy: `Definida por el ${realmTerms.inline}`,
 		search: "Buscar esta etiqueta",
@@ -116,9 +116,9 @@ export default {
 		completed: "Se creó la etiqueta y se registró tu voto «Encaja».",
 	},
 	global: {
-		title: "Etiquetas globales",
+		title: "Contexto global",
 		description:
-			"Todas las personas con acceso de interacción pueden proponer y valorar etiquetas globales.",
+			"En el contexto global, la explicación de cada etiqueta procede de su propia ficha; todas las personas con acceso de interacción pueden participar en la valoración.",
 		addTitle: "Añadir una etiqueta global",
 		addDescription:
 			"Busca primero entre las etiquetas existentes. Añadir una también cuenta como un voto «Encaja».",

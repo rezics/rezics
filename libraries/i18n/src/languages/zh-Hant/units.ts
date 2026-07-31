@@ -128,7 +128,7 @@ export default {
 			},
 			tags: {
 				label: "標籤",
-				description: "精選一般標籤，並調整其優先顯示順序。",
+				description: "精選全域情境中的標籤，並調整其優先顯示順序。",
 			},
 			realms: {
 				label: `${realmTerms.label}發布`,
@@ -253,7 +253,7 @@ export default {
 			book: {
 				overview: "書籍說明、出版資訊與閱讀狀態。",
 				contents: "瀏覽章節結構並繼續閱讀。",
-				tags: `檢視一般標籤與你所選${realmTerms.label}來源的情境判斷。`,
+				tags: `檢視全域情境中的標籤與你所選${realmTerms.label}來源的情境判斷。`,
 				associations: "檢視這本書的內容主體，以及主作品與變體關係。",
 				reviews: "查看或撰寫以評分為選填內容的讀者書評。",
 				collections: "瀏覽收錄這本書的公開收藏集。",
@@ -262,7 +262,7 @@ export default {
 			media: {
 				overview: "媒體說明、發行資訊與觀影狀態。",
 				contents: `瀏覽${videoTerms.inline}與${audioTerms.inline}結構，並記錄觀看或收聽進度。`,
-				tags: `檢視一般標籤與你所選${realmTerms.label}來源的情境判斷。`,
+				tags: `檢視全域情境中的標籤與你所選${realmTerms.label}來源的情境判斷。`,
 				associations: "檢視這部作品的內容主體，以及主作品與變體關係。",
 				reviews: "查看或撰寫觀眾評論。",
 				collections: "瀏覽收錄這部作品的公開收藏集。",
@@ -271,7 +271,7 @@ export default {
 			software: {
 				overview: "軟體說明、版本資訊與使用狀態。",
 				requirements: "查看各平台與級別的系統需求。",
-				tags: `檢視一般標籤與你所選${realmTerms.label}來源的情境判斷。`,
+				tags: `檢視全域情境中的標籤與你所選${realmTerms.label}來源的情境判斷。`,
 				associations: "檢視這套軟體的內容主體，以及主作品與變體關係。",
 				reviews: "查看或撰寫軟體使用者評論。",
 				collections: "瀏覽收錄這套軟體的公開收藏集。",
@@ -280,7 +280,7 @@ export default {
 			series: {
 				overview: "系列說明、作品資訊與整體評價。",
 				releases: "依系列順序瀏覽收錄的作品。",
-				tags: `檢視一般標籤與你所選${realmTerms.label}來源的情境判斷。`,
+				tags: `檢視全域情境中的標籤與你所選${realmTerms.label}來源的情境判斷。`,
 				associations: "檢視與這個系列關聯的內容主體。",
 				reviews: "查看或撰寫對整個系列的評論。",
 				collections: "瀏覽收錄這個系列的公開收藏集。",
