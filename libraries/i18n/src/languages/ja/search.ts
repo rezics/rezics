@@ -160,7 +160,7 @@ export default {
 		license: "ライセンス",
 		tag: "タグ",
 		credit: "クレジット",
-		"publisher-profile": "発行者プロフィール",
+		"credited-profile": "クレジット対象プロフィール",
 		realm: realmTerms.label,
 		"realm-tag-context": `${realmTerms.label} タグ説明`,
 		"realm-tag-vote": `${realmTerms.label} タグ投票`,

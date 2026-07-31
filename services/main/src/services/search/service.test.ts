@@ -39,7 +39,7 @@ vi.mock("./generation", () => ({
 	getActiveSearchGeneration: vi.fn().mockResolvedValue({
 		id: "019f7eed-5d42-7102-8387-cc1d13b176d2",
 		kind: "current",
-		indexUid: "rezics_units_v10_20260731",
+		indexUid: "rezics_units_v11_20260731",
 		projectionVersion: 6,
 		settingsFingerprint: "a".repeat(64),
 	}),
@@ -216,6 +216,23 @@ describe("domain search SQL", () => {
 		}
 	});
 
+	it("resolves Profile credits directly and through exactly one credited Entity", () => {
+		const query = dialect.sqlToQuery(
+			compilePostgresSearchExpression("units", {
+				field: "credited-profile",
+				operator: "equals",
+				value: "019b0000-0000-7000-8000-000000000001",
+			}),
+		).sql;
+
+		expect(query).toContain("direct_credit.credited_unit_id as profile_id");
+		expect(query).not.toContain("direct_credit.role");
+		expect(query).toContain("credited_entity.id = source_credit.credited_unit_id");
+		expect(query).toContain("entity_profile.source_unit_id = credited_entity.id");
+		expect(query).toContain("entity_profile.role = 'publisher'");
+		expect(query).not.toContain("source_credit.role");
+	});
+
 	it("binds Realm Tag context aliases to their physical tables", () => {
 		const query = dialect.sqlToQuery(
 			compilePostgresSearchExpression(
@@ -265,11 +282,14 @@ describe("domain search SQL", () => {
 		}
 		expect(executed).toEqual([
 			"units",
+			"users",
 			"entities",
+			"tags",
 			"posts",
 			"realms",
 			"collections",
 			"reviews",
+			"polls",
 		]);
 	});
 

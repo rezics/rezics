@@ -39,12 +39,10 @@ export type CreditAttributionDraftValidation =
 				readonly role: CreditAttributionRole;
 			}[];
 			readonly issues: Readonly<Record<string, CreditAttributionDraftIssue>>;
-			readonly publisherRequired: false;
 	  }
 	| {
 			readonly ok: false;
 			readonly issues: Readonly<Record<string, CreditAttributionDraftIssue>>;
-			readonly publisherRequired: boolean;
 	  };
 
 const EmptyIssue: CreditAttributionDraftIssue = {
@@ -55,7 +53,6 @@ const EmptyIssue: CreditAttributionDraftIssue = {
 
 export function validateCreditAttributionDrafts(
 	type: VariantUnitType,
-	ownershipMode: "profile_owned" | "community_owned",
 	drafts: readonly CreditAttributionDraft[],
 ): CreditAttributionDraftValidation {
 	const creditAttributions: {
@@ -88,19 +85,10 @@ export function validateCreditAttributionDrafts(
 		creditAttributions.push({ entityId: draft.entity.id, role });
 	}
 
-	const publisherRequired =
-		ownershipMode === "profile_owned" &&
-		!creditAttributions.some(({ role }) => role === "publisher");
-	if (invalid || publisherRequired)
-		return {
-			ok: false,
-			issues,
-			publisherRequired,
-		};
+	if (invalid) return { ok: false, issues };
 	return {
 		ok: true,
 		creditAttributions,
 		issues,
-		publisherRequired: false,
 	};
 }

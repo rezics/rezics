@@ -50,8 +50,6 @@ export default {
 		creditEntityRequired: `${entityTerms.label} auswählen.`,
 		creditRoleRequired: "Rolle auswählen.",
 		creditDuplicate: `Diese ${entityTerms.inline} ist bereits mit dieser Rolle eingetragen.`,
-		publisherAttributionRequired:
-			"Ein eigenes Werk muss mindestens eine Mitwirkung als Verlag enthalten.",
 		creditRequestConfirmationTitle: "Mitwirkendeneinladungen bestätigen",
 		creditRequestConfirmationDescription: `Einige ausgewählte ${entityTerms.plural} müssen zustimmen, bevor ihre Mitwirkung angezeigt werden kann. Bestätige, um das Werk zu erstellen und die Einladungen zu senden.`,
 		creditRequestConfirmationCancel: "Abbrechen",

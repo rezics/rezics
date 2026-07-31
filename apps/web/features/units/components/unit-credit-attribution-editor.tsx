@@ -148,16 +148,9 @@ export function UnitCreditAttributionEditor({
 										aria-label={t.units.creation.removeCreditAttribution({
 											number,
 										})}
-										onClick={() => {
-											const remaining = value.filter(
-												(item) => item.key !== draft.key,
-											);
-											onChange(
-												remaining.length > 0
-													? remaining
-													: [createCreditAttributionDraft(type)],
-											);
-										}}
+										onClick={() =>
+											onChange(value.filter((item) => item.key !== draft.key))
+										}
 										size="icon-md"
 										type="button"
 										variant="quiet"
@@ -173,11 +166,6 @@ export function UnitCreditAttributionEditor({
 					);
 				})}
 			</div>
-			{validation?.publisherRequired ? (
-				<p className="text-destructive text-sm" role="alert">
-					{t.units.creation.publisherAttributionRequired}
-				</p>
-			) : null}
 			<Button
 				className="w-fit"
 				onClick={() => onChange([...value, createCreditAttributionDraft(type)])}

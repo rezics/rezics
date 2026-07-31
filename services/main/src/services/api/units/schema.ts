@@ -185,9 +185,6 @@ export const CreateUnitBody = t.Union([
 			ownershipMode: t.Literal("profile_owned"),
 			contentLicense: t.Optional(UnitContentLicenseGrantInput),
 			creditAttributions: t.Array(CreateUnitCreditAttributionInput, {
-				contains: t.Object({ role: t.Literal("publisher") }),
-				minContains: 1,
-				minItems: 1,
 				uniqueItems: true,
 			}),
 			...CreateUnitFields,

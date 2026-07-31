@@ -161,7 +161,7 @@ export default {
 		license: "Lizenz",
 		tag: "Tag",
 		credit: "Mitwirkende",
-		"publisher-profile": "Verlagsprofil",
+		"credited-profile": "Genanntes Profil",
 		realm: realmTerms.label,
 		"realm-tag-context": `Tag-Erklärung im ${realmTerms.inline}`,
 		"realm-tag-vote": `Tag-Abstimmung im ${realmTerms.inline}`,

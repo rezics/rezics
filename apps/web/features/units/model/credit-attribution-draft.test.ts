@@ -26,7 +26,7 @@ describe("Unit creation credit attribution drafts", () => {
 		["media", "director"],
 	] as const)("accepts the supported %s role %s", (type, role) => {
 		expect(
-			validateCreditAttributionDrafts(type, "community_owned", [
+			validateCreditAttributionDrafts(type, [
 				{
 					key: "credit",
 					entity: { id: "entity-id", label: "Entity" },
@@ -39,20 +39,20 @@ describe("Unit creation credit attribution drafts", () => {
 		});
 	});
 
-	it("requires an existing publisher role only for profile-owned works", () => {
+	it("accepts author-only and empty credit lists", () => {
 		expect(
-			validateCreditAttributionDrafts("book", "profile_owned", [
+			validateCreditAttributionDrafts("book", [
 				{
 					key: "author",
 					entity: { id: "author-id", label: "Author" },
 					role: "author",
 				},
 			]),
-		).toMatchObject({ ok: false, publisherRequired: true });
-		expect(validateCreditAttributionDrafts("book", "profile_owned", [publisher])).toMatchObject(
-			{ ok: true, publisherRequired: false },
-		);
-		expect(validateCreditAttributionDrafts("book", "community_owned", [])).toMatchObject({
+		).toMatchObject({
+			ok: true,
+			creditAttributions: [{ entityId: "author-id", role: "author" }],
+		});
+		expect(validateCreditAttributionDrafts("book", [])).toMatchObject({
 			ok: true,
 			creditAttributions: [],
 		});
@@ -60,13 +60,13 @@ describe("Unit creation credit attribution drafts", () => {
 
 	it("allows one Entity to hold different roles but rejects an exact duplicate", () => {
 		expect(
-			validateCreditAttributionDrafts("book", "community_owned", [
+			validateCreditAttributionDrafts("book", [
 				publisher,
 				{ ...publisher, key: "author", role: "author" },
 			]),
 		).toMatchObject({ ok: true });
 		expect(
-			validateCreditAttributionDrafts("book", "community_owned", [
+			validateCreditAttributionDrafts("book", [
 				publisher,
 				{ ...publisher, key: "duplicate" },
 			]),
@@ -78,7 +78,7 @@ describe("Unit creation credit attribution drafts", () => {
 
 	it("reports incomplete rows instead of silently discarding them", () => {
 		expect(
-			validateCreditAttributionDrafts("media", "community_owned", [
+			validateCreditAttributionDrafts("media", [
 				{ key: "missing-entity", role: "director" },
 				{
 					key: "missing-role",

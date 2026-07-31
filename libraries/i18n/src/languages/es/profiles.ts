@@ -2,8 +2,8 @@ import { insert } from "native-i18n";
 
 import { esTerminology } from "@rezics/i18n/terminology/es";
 
-const { forms: postTerms } = esTerminology.post;
 const { forms: realmTerms } = esTerminology.realm;
+const { forms: zoneTerms } = esTerminology.zone;
 const { forms: entityTerms } = esTerminology.entity;
 
 export default {
@@ -33,9 +33,8 @@ export default {
 		completed: "Completado",
 		dropped: "Abandonado",
 	},
-	contentTitle: "Contenido publicado",
-	contentDescription: `Las ${postTerms.plural} públicas y reseñas atribuidas a esta persona, además de sus colecciones y ${entityTerms.plural}.`,
+	contentTitle: "Contenido público",
+	contentDescription: `Contenido público atribuido directamente a esta persona o a una ${entityTerms.inline} que la acredita como editora, además de sus ${realmTerms.pluralLabel} y ${zoneTerms.pluralLabel}.`,
 	contentEmptyTitle: "Todavía no hay contenido público",
-	contentEmptyDescription:
-		"El contenido público que publique o posea esta persona aparecerá aquí.",
+	contentEmptyDescription: `Aquí aparecerán el contenido público atribuido y los ${realmTerms.pluralLabel} o ${zoneTerms.pluralLabel} que posea.`,
 } satisfies typeof import("../zh-Hant/profiles").default;

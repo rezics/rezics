@@ -50,7 +50,6 @@ export default {
 		creditEntityRequired: `${entityTerms.label}를 선택하세요.`,
 		creditRoleRequired: "역할을 선택하세요.",
 		creditDuplicate: `이 ${entityTerms.label}에는 같은 역할이 이미 설정되어 있습니다.`,
-		publisherAttributionRequired: "소유 작품에는 게시자 크레딧이 하나 이상 있어야 합니다.",
 		creditRequestConfirmationTitle: "크레딧 초대 확인",
 		creditRequestConfirmationDescription: `선택한 일부 ${entityTerms.plural}은 크레딧을 표시하기 전에 동의가 필요합니다. 확인하면 작품을 만들고 초대를 보냅니다.`,
 		creditRequestConfirmationCancel: "취소",

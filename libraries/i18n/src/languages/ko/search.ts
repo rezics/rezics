@@ -160,7 +160,7 @@ export default {
 		license: "라이선스",
 		tag: "태그",
 		credit: "크레딧",
-		"publisher-profile": "게시자 프로필",
+		"credited-profile": "크레딧 프로필",
 		realm: realmTerms.label,
 		"realm-tag-context": `${realmTerms.label} 태그 설명`,
 		"realm-tag-vote": `${realmTerms.label} 태그 투표`,

@@ -330,7 +330,7 @@ describe("Search Feature v1", () => {
 		expect(compiled.request.searchExpression).toMatchObject({ operator: "all" });
 	});
 
-	it("scopes Profile search to publisher chains and current Realm or Zone ownership", () => {
+	it("scopes Profile search to credits and current Realm or Zone ownership", () => {
 		const compiled = compileSearchFeatureInput({
 			document: createDefaultSearchDocument("global"),
 			contexts: [{ kind: "profile", profileId: ProfileId }],
@@ -345,32 +345,22 @@ describe("Search Feature v1", () => {
 					operator: "all",
 					clauses: [
 						{
-							operator: "any",
-							clauses: [
-								{
-									field: "category",
-									operator: "any-of",
-									values: ["posts", "reviews", "entities", "collections"],
-								},
-								{
-									operator: "all",
-									clauses: [
-										{
-											field: "category",
-											operator: "equals",
-											value: "units",
-										},
-										{
-											field: "kind",
-											operator: "any-of",
-											values: ["book", "media", "software"],
-										},
-									],
-								},
+							field: "category",
+							operator: "any-of",
+							values: [
+								"units",
+								"users",
+								"entities",
+								"tags",
+								"posts",
+								"realms",
+								"collections",
+								"reviews",
+								"polls",
 							],
 						},
 						{
-							field: "publisher-profile",
+							field: "credited-profile",
 							operator: "equals",
 							value: ProfileId,
 						},

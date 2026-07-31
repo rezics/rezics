@@ -2,8 +2,8 @@ import { insert } from "native-i18n";
 
 import { koTerminology } from "@rezics/i18n/terminology/ko";
 
-const { forms: postTerms } = koTerminology.post;
 const { forms: realmTerms } = koTerminology.realm;
+const { forms: zoneTerms } = koTerminology.zone;
 const { forms: entityTerms } = koTerminology.entity;
 
 export default {
@@ -33,8 +33,8 @@ export default {
 		completed: "완료",
 		dropped: "중단",
 	},
-	contentTitle: "게시된 콘텐츠",
-	contentDescription: `이 사용자의 공개 ${postTerms.pluralLabel} 및 리뷰, 그리고 소유한 컬렉션 및 ${entityTerms.plural}.`,
+	contentTitle: "공개 콘텐츠",
+	contentDescription: `이 사용자에게 직접 크레딧되거나 사용자를 게시자로 크레딧한 ${entityTerms.inline}를 통해 연결된 공개 콘텐츠와 사용자가 소유한 ${realmTerms.pluralLabel} 및 ${zoneTerms.pluralLabel}을 표시합니다.`,
 	contentEmptyTitle: "아직 공개된 콘텐츠가 없습니다.",
-	contentEmptyDescription: "사용자가 게시하거나 소유한 공개 콘텐츠가 여기에 나타납니다.",
+	contentEmptyDescription: `크레딧된 공개 콘텐츠와 소유한 ${realmTerms.pluralLabel} 또는 ${zoneTerms.pluralLabel}이 여기에 표시됩니다.`,
 } satisfies typeof import("../zh-Hant/profiles").default;

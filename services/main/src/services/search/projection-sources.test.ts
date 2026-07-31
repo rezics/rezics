@@ -7,11 +7,11 @@ import { CurrentProjectionSources, HistoryProjectionSources } from "./projection
 
 const migrationDirectory = fileURLToPath(new URL("../database/migrations", import.meta.url));
 const currentEnrichment = fileURLToPath(
-	new URL("../../../search/rezics_unit_search_document_v10.sql", import.meta.url),
+	new URL("../../../search/rezics_unit_search_document_v11.sql", import.meta.url),
 );
 const contentLicenseGovernanceMigration = fileURLToPath(
 	new URL(
-		"../database/migrations/20260731160000_unit_content_license_governance.sql",
+		"../database/migrations/20260731160001_unit_content_license_governance.sql",
 		import.meta.url,
 	),
 );
@@ -50,6 +50,14 @@ describe("search projection source registry", () => {
 		expect(sql).not.toContain("FROM public.unit_access_binding");
 	});
 
+	it("projects Series Units into the works category", async () => {
+		const sql = await readFile(currentEnrichment, "utf8");
+		expect(CurrentProjectionSources).toHaveProperty("series");
+		expect(sql).toContain(
+			"unit_row.kind IN ('book', 'software', 'media', 'series', 'video', 'audio', 'zone')",
+		);
+	});
+
 	it("projects only the active immutable Unit content license grant", async () => {
 		const [sql, migration] = await Promise.all([
 			readFile(currentEnrichment, "utf8"),
@@ -65,10 +73,16 @@ describe("search projection source registry", () => {
 		expect(migration).toContain('CREATE TRIGGER "unit_content_license_guard_mutation"');
 	});
 
-	it("invalidates works when an Entity publisher chain changes", async () => {
+	it("projects and invalidates direct or one-Entity-hop Profile credits", async () => {
 		const sql = await readFile(currentEnrichment, "utf8");
-		expect(sql).toContain("AS publisher_data");
-		expect(sql).toContain("entity_profile.source_unit_id = publisher_entity.id");
+		expect(sql).toContain("'creditedProfileIds'");
+		expect(sql).toContain("AS credited_profile_data");
+		expect(sql).toContain("direct_credit.source_unit_id = source.unit_id");
+		expect(sql).not.toContain("direct_credit.role = 'publisher'");
+		expect(sql).toContain("entity_profile.source_unit_id = credited_entity.id");
+		expect(sql).toContain("entity_profile.role = 'publisher'");
+		expect(sql).toContain("source_credit.source_unit_id = source.unit_id");
+		expect(sql).not.toContain("source_credit.role = 'publisher'");
 		const migrations = (
 			await Promise.all(
 				(await readdir(migrationDirectory))
@@ -76,6 +90,8 @@ describe("search projection source registry", () => {
 					.map((name) => readFile(`${migrationDirectory}/${name}`, "utf8")),
 			)
 		).join("\n");
-		expect(migrations).toContain("search_touch_publisher_chain_statement");
+		expect(migrations).toContain("search_touch_credited_profile_chain_statement");
+		expect(migrations).toContain("credited_entity.id = ANY(changed_ids)");
+		expect(migrations).toContain("credited_entity.id = ANY(first_sources)");
 	});
 });

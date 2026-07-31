@@ -50,8 +50,6 @@ export default {
 		creditEntityRequired: `Selecciona una ${entityTerms.inline}.`,
 		creditRoleRequired: "Selecciona una función.",
 		creditDuplicate: `Esta ${entityTerms.inline} ya tiene esta función.`,
-		publisherAttributionRequired:
-			"Una obra propia debe incluir al menos un crédito de Editorial.",
 		creditRequestConfirmationTitle: "Confirmar invitaciones de crédito",
 		creditRequestConfirmationDescription: `Algunas ${entityTerms.plural} seleccionadas deben dar su consentimiento antes de que aparezcan sus créditos. Confirma para crear la obra y enviar las invitaciones.`,
 		creditRequestConfirmationCancel: "Cancelar",

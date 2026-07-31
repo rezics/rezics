@@ -2,8 +2,8 @@ import { insert } from "native-i18n";
 
 import { deTerminology } from "@rezics/i18n/terminology/de";
 
-const { forms: postTerms } = deTerminology.post;
 const { forms: realmTerms } = deTerminology.realm;
+const { forms: zoneTerms } = deTerminology.zone;
 const { forms: entityTerms } = deTerminology.entity;
 
 export default {
@@ -33,9 +33,8 @@ export default {
 		completed: "Abgeschlossen",
 		dropped: "Abgebrochen",
 	},
-	contentTitle: "Veröffentlichte Inhalte",
-	contentDescription: `Öffentliche ${postTerms.pluralLabel} und Rezensionen, die dieser Person zugeordnet sind, sowie eigene Sammlungen und ${entityTerms.plural}.`,
+	contentTitle: "Öffentliche Inhalte",
+	contentDescription: `Öffentliche Inhalte, die dieser Person direkt oder über eine ${entityTerms.inline} zugeordnet sind, die sie als Herausgeberin nennt, sowie eigene ${realmTerms.pluralLabel} und ${zoneTerms.pluralLabel}.`,
 	contentEmptyTitle: "Noch keine öffentlichen Inhalte",
-	contentEmptyDescription:
-		"Von dieser Person veröffentlichte oder verwaltete öffentliche Inhalte erscheinen hier.",
+	contentEmptyDescription: `Öffentlich zugeordnete Inhalte und eigene ${realmTerms.pluralLabel} oder ${zoneTerms.pluralLabel} erscheinen hier.`,
 } satisfies typeof import("../zh-Hant/profiles").default;

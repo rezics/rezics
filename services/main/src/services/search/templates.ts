@@ -86,6 +86,7 @@ const CommonFields = [
 
 const ContentLicenseFields = ["content-license"] as const satisfies readonly SearchField[];
 const WorkZoneCategories = ["units", "posts", "reviews", "collections"] as const;
+const CreditedProfileCategories = getCurrentSearchFieldDefinition("credited-profile").categories;
 
 const TemplateDefinitions = {
 	global: {
@@ -101,7 +102,7 @@ const TemplateDefinitions = {
 			"root",
 			"parent",
 			"owner",
-			"publisher-profile",
+			"credited-profile",
 		],
 		constraints: [],
 		visible: new Set<SearchField>(["category", "kind", "language", "content-rating", "tag"]),
@@ -531,32 +532,12 @@ function scopeForContexts(contexts: readonly SearchFeatureContext[]) {
 							operator: "all",
 							clauses: [
 								{
-									operator: "any",
-									clauses: [
-										{
-											field: "category",
-											operator: "any-of",
-											values: ["posts", "reviews", "entities", "collections"],
-										},
-										{
-											operator: "all",
-											clauses: [
-												{
-													field: "category",
-													operator: "equals",
-													value: "units",
-												},
-												{
-													field: "kind",
-													operator: "any-of",
-													values: ["book", "media", "software"],
-												},
-											],
-										},
-									],
+									field: "category",
+									operator: "any-of",
+									values: [...CreditedProfileCategories],
 								},
 								{
-									field: "publisher-profile",
+									field: "credited-profile",
 									operator: "equals",
 									value: profile.profileId,
 								},

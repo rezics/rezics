@@ -50,7 +50,6 @@ export default {
 		creditEntityRequired: `Choose an ${entityTerms.inline}.`,
 		creditRoleRequired: "Choose a role.",
 		creditDuplicate: `This ${entityTerms.inline} already has this role.`,
-		publisherAttributionRequired: "An owned work must include at least one Publisher credit.",
 		creditRequestConfirmationTitle: "Confirm credit invitations",
 		creditRequestConfirmationDescription: `Some selected ${entityTerms.plural} require consent before their credits can appear. Confirm to create this work and send the invitations.`,
 		creditRequestConfirmationCancel: "Cancel",

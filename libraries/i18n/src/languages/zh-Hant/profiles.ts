@@ -2,8 +2,8 @@ import { insert } from "native-i18n";
 
 import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 
-const { forms: postTerms } = zhHantTerminology.post;
 const { forms: realmTerms } = zhHantTerminology.realm;
+const { forms: zoneTerms } = zhHantTerminology.zone;
 const { forms: entityTerms } = zhHantTerminology.entity;
 
 export default {
@@ -32,8 +32,8 @@ export default {
 		completed: "已完成",
 		dropped: "已放棄",
 	},
-	contentTitle: "發布內容",
-	contentDescription: `公開歸屬於這位使用者的${postTerms.plural}與評論，以及其擁有的收藏集和${entityTerms.plural}。`,
+	contentTitle: "公開內容",
+	contentDescription: `顯示直接署名給這位使用者，或透過將其署名為發布者的${entityTerms.inline}連結的公開內容，以及其擁有的${realmTerms.pluralLabel}與${zoneTerms.pluralLabel}。`,
 	contentEmptyTitle: "這裡還沒有公開內容",
-	contentEmptyDescription: "這位使用者發布或擁有的公開內容會顯示在這裡。",
+	contentEmptyDescription: `署名的公開內容及其擁有的${realmTerms.pluralLabel}或${zoneTerms.pluralLabel}會顯示在這裡。`,
 };

@@ -163,7 +163,7 @@ export default {
 		license: "Licence",
 		tag: "Étiquette",
 		credit: "Crédit",
-		"publisher-profile": `Profil de l’${entityTerms.inline} éditrice`,
+		"credited-profile": "Profil crédité",
 		realm: realmTerms.label,
 		"realm-tag-context": `Explication d’étiquette du ${realmTerms.inline}`,
 		"realm-tag-vote": `Vote d’étiquette du ${realmTerms.inline}`,

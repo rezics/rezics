@@ -48,19 +48,20 @@ describe("Profile content page requests", () => {
 		expect(
 			normalizeProfileContentKinds([
 				"unit:book",
+				"unit:series",
 				"post:picture",
 				"unit:collection",
 				"post:picture",
 			]),
-		).toEqual(["unit:book", "unit:collection", "post:picture"]);
+		).toEqual(["unit:book", "unit:series", "unit:collection", "post:picture"]);
 	});
 
 	it("parses only Profile feed content kinds from the URL", () => {
 		expect(profileContentParser.parseServerSide(undefined)).toEqual([]);
 		expect(
 			profileContentParser.parseServerSide(
-				"unit:entity,unit:book,post:review,post:picture,unknown",
+				"unit:entity,unit:book,unit:series,post:review,post:picture,unknown",
 			),
-		).toEqual(["unit:entity", "unit:book", "post:review", "post:picture"]);
+		).toEqual(["unit:entity", "unit:book", "unit:series", "post:review", "post:picture"]);
 	});
 });

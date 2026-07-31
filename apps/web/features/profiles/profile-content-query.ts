@@ -7,6 +7,7 @@ export const ProfileContentKindValues = [
 	"unit:book",
 	"unit:software",
 	"unit:media",
+	"unit:series",
 	"unit:entity",
 	"unit:zone",
 	"unit:collection",

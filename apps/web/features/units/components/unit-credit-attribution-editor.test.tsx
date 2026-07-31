@@ -116,7 +116,7 @@ describe("UnitCreditAttributionEditor", () => {
 		});
 	});
 
-	it("uses an icon-only removal control and preserves one blank row", () => {
+	it("uses an icon-only removal control and permits an empty credit list", () => {
 		vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValue(
 			"019fa2b0-1000-7000-8000-000000000002",
 		);
@@ -132,8 +132,6 @@ describe("UnitCreditAttributionEditor", () => {
 
 		expect(remove.textContent).toBe("");
 		fireEvent.click(remove);
-		expect(onChange).toHaveBeenCalledWith([
-			{ key: "019fa2b0-1000-7000-8000-000000000002", role: "director" },
-		]);
+		expect(onChange).toHaveBeenCalledWith([]);
 	});
 });

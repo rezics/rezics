@@ -83469,18 +83469,6 @@
 												}
 											},
 											"creditAttributions": {
-												"contains": {
-													"type": "object",
-													"required": ["role"],
-													"properties": {
-														"role": {
-															"const": "publisher",
-															"type": "string"
-														}
-													}
-												},
-												"minContains": 1,
-												"minItems": 1,
 												"uniqueItems": true,
 												"type": "array",
 												"items": {

@@ -160,7 +160,7 @@ export default {
 		license: "License",
 		tag: "Tag",
 		credit: "Credit",
-		"publisher-profile": "Publisher Profile",
+		"credited-profile": "Credited Profile",
 		realm: realmTerms.label,
 		"realm-tag-context": `${realmTerms.label} Tag explanation`,
 		"realm-tag-vote": `${realmTerms.label} Tag vote`,

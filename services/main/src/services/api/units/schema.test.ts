@@ -26,7 +26,7 @@ const ownedMainUnit = {
 	creditAttributions: [
 		{
 			entityId: "019b0000-0000-7000-8000-000000000001",
-			role: "publisher",
+			role: "author",
 		},
 	],
 	creditAttributionRequestConsent: "direct_only",
@@ -129,7 +129,7 @@ describe("Unit content License inputs", () => {
 });
 
 describe("Unit creation semantics", () => {
-	it("requires a publisher credit attribution for owned works", () => {
+	it("keeps ownership independent from public credit roles", () => {
 		expect(
 			Check(CreateUnitBody, {
 				ownershipMode: "profile_owned",
@@ -138,7 +138,7 @@ describe("Unit creation semantics", () => {
 				version: { kind: "main" },
 				localization,
 			}),
-		).toBe(false);
+		).toBe(true);
 		expect(
 			Check(CreateUnitBody, {
 				ownershipMode: "profile_owned",
@@ -152,7 +152,7 @@ describe("Unit creation semantics", () => {
 				version: { kind: "main" },
 				localization,
 			}),
-		).toBe(false);
+		).toBe(true);
 		expect(
 			Check(CreateUnitBody, {
 				ownershipMode: "profile_owned",

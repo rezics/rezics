@@ -50,8 +50,6 @@ export default {
 		creditEntityRequired: `Sélectionnez une ${entityTerms.inline}.`,
 		creditRoleRequired: "Sélectionnez un rôle.",
 		creditDuplicate: `Cette ${entityTerms.inline} possède déjà ce rôle.`,
-		publisherAttributionRequired:
-			"Une œuvre personnelle doit comporter au moins un crédit de Maison d’édition.",
 		creditRequestConfirmationTitle: "Confirmer les invitations de crédit",
 		creditRequestConfirmationDescription: `Certaines ${entityTerms.plural} sélectionnées doivent donner leur accord avant l’affichage de leurs crédits. Confirmez pour créer l’œuvre et envoyer les invitations.`,
 		creditRequestConfirmationCancel: "Annuler",

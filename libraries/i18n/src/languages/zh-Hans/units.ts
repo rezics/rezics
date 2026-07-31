@@ -47,7 +47,6 @@ export default {
 		creditEntityRequired: `请选择${entityTerms.label}。`,
 		creditRoleRequired: "请选择角色。",
 		creditDuplicate: `这个${entityTerms.label}已经设置相同角色。`,
-		publisherAttributionRequired: "自有作品必须至少有一笔出版者署名。",
 		creditRequestConfirmationTitle: "确认署名邀请",
 		creditRequestConfirmationDescription: `部分所选${entityTerms.plural}需要取得同意后才能显示署名。确认后将创建此作品并发送署名邀请。`,
 		creditRequestConfirmationCancel: "取消",

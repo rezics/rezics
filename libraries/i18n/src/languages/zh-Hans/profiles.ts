@@ -2,8 +2,8 @@ import { insert } from "native-i18n";
 
 import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 
-const { forms: postTerms } = zhHansTerminology.post;
 const { forms: realmTerms } = zhHansTerminology.realm;
+const { forms: zoneTerms } = zhHansTerminology.zone;
 const { forms: entityTerms } = zhHansTerminology.entity;
 
 export default {
@@ -32,8 +32,8 @@ export default {
 		completed: "已完成",
 		dropped: "已放弃",
 	},
-	contentTitle: "发布内容",
-	contentDescription: `公开归属于这位用户的${postTerms.plural}与评论，以及其拥有的收藏集和${entityTerms.plural}。`,
+	contentTitle: "公开内容",
+	contentDescription: `显示直接署名给这位用户，或通过将其署名为发布者的${entityTerms.inline}关联的公开内容，以及其拥有的${realmTerms.pluralLabel}与${zoneTerms.pluralLabel}。`,
 	contentEmptyTitle: "这里还没有公开内容",
-	contentEmptyDescription: "这位用户发布或拥有的公开内容会显示在这里。",
+	contentEmptyDescription: `署名的公开内容及其拥有的${realmTerms.pluralLabel}或${zoneTerms.pluralLabel}会显示在这里。`,
 } satisfies typeof import("../zh-Hant/profiles").default;

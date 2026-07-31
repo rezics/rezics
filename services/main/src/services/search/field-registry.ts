@@ -129,13 +129,13 @@ export const CurrentSearchFieldRegistry = {
 		meilisearch: ["equality"],
 		residual: false,
 	},
-	"publisher-profile": {
-		categories: ["units", "entities", "posts", "collections", "reviews"],
+	"credited-profile": {
+		categories: allCategories,
 		scalar: "uuid",
 		operators: equality,
 		facet: "none",
 		sort: "none",
-		documentPath: "filters.publisherProfileIds",
+		documentPath: "filters.creditedProfileIds",
 		meilisearch: ["equality"],
 		residual: true,
 	},

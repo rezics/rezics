@@ -2,8 +2,8 @@ import { insert } from "native-i18n";
 
 import { jaTerminology } from "@rezics/i18n/terminology/ja";
 
-const { forms: postTerms } = jaTerminology.post;
 const { forms: realmTerms } = jaTerminology.realm;
+const { forms: zoneTerms } = jaTerminology.zone;
 const { forms: entityTerms } = jaTerminology.entity;
 
 export default {
@@ -33,8 +33,8 @@ export default {
 		completed: "完了",
 		dropped: "中止",
 	},
-	contentTitle: "公開されたコンテンツ",
-	contentDescription: `このユーザー名義の公開${postTerms.pluralLabel}とレビュー、およびこのユーザーが所有するコレクションと${entityTerms.plural}。`,
+	contentTitle: "公開コンテンツ",
+	contentDescription: `このユーザーに直接、またはこのユーザーを発行者としてクレジットする${entityTerms.inline}を通じて帰属する公開コンテンツと、このユーザーが所有する${realmTerms.pluralLabel}および${zoneTerms.pluralLabel}を表示します。`,
 	contentEmptyTitle: "まだ公開されたコンテンツはありません",
-	contentEmptyDescription: "このユーザーが公開または所有する公開コンテンツはここに表示されます。",
+	contentEmptyDescription: `クレジットされた公開コンテンツと、所有する${realmTerms.pluralLabel}または${zoneTerms.pluralLabel}はここに表示されます。`,
 } satisfies typeof import("../zh-Hant/profiles").default;

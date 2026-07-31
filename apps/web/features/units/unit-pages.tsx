@@ -240,11 +240,7 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 		const summary = String(form.get("summary") ?? "").trim();
 		const submittedLicense = form.get("license");
 		const submittedContentLicense = form.get("contentLicense");
-		const creditValidation = validateCreditAttributionDrafts(
-			type,
-			ownershipMode,
-			creditAttributions,
-		);
+		const creditValidation = validateCreditAttributionDrafts(type, creditAttributions);
 		setCreditValidationRequested(true);
 		if (!creditValidation.ok) return;
 		if (ownershipMode === "community_owned" && !searchConfirmed) return;
@@ -390,11 +386,7 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 							type={type}
 							validation={
 								creditValidationRequested
-									? validateCreditAttributionDrafts(
-											type,
-											ownershipMode,
-											creditAttributions,
-										)
+									? validateCreditAttributionDrafts(type, creditAttributions)
 									: undefined
 							}
 							value={creditAttributions}

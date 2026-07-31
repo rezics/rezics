@@ -50,7 +50,6 @@ export default {
 		creditEntityRequired: `${entityTerms.label}を選択してください。`,
 		creditRoleRequired: "役割を選択してください。",
 		creditDuplicate: `この${entityTerms.label}には同じ役割がすでに設定されています。`,
-		publisherAttributionRequired: "所有作品には発行者のクレジットが1件以上必要です。",
 		creditRequestConfirmationTitle: "クレジット招待を確認",
 		creditRequestConfirmationDescription: `選択した一部の${entityTerms.plural}は、クレジットを表示する前に同意が必要です。確認すると作品を作成し、招待を送信します。`,
 		creditRequestConfirmationCancel: "キャンセル",

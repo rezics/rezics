@@ -161,7 +161,7 @@ export default {
 		license: "Licencia",
 		tag: "Etiqueta",
 		credit: "Crédito",
-		"publisher-profile": `Perfil de la ${entityTerms.inline} editorial`,
+		"credited-profile": "Perfil acreditado",
 		realm: realmTerms.label,
 		"realm-tag-context": `Explicación de etiqueta del ${realmTerms.inline}`,
 		"realm-tag-vote": `Votación de etiquetas del ${realmTerms.inline}`,

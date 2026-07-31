@@ -2,8 +2,8 @@ import { insert } from "native-i18n";
 
 import { enTerminology } from "@rezics/i18n/terminology/en";
 
-const { forms: postTerms } = enTerminology.post;
 const { forms: realmTerms } = enTerminology.realm;
+const { forms: zoneTerms } = enTerminology.zone;
 const { forms: entityTerms } = enTerminology.entity;
 
 export default {
@@ -33,8 +33,8 @@ export default {
 		completed: "Completed",
 		dropped: "Dropped",
 	},
-	contentTitle: "Published content",
-	contentDescription: `Public ${postTerms.pluralLabel} and reviews credited to this user, plus collections and ${entityTerms.plural} they own.`,
+	contentTitle: "Public content",
+	contentDescription: `Public content credited directly to this user or to an ${entityTerms.inline} that credits them as publisher, plus ${realmTerms.pluralLabel} and ${zoneTerms.pluralLabel} they own.`,
 	contentEmptyTitle: "No public content yet",
-	contentEmptyDescription: "Public content published or owned by this user will appear here.",
+	contentEmptyDescription: `Public credited content and owned ${realmTerms.pluralLabel} or ${zoneTerms.pluralLabel} will appear here.`,
 } satisfies typeof import("../zh-Hant/profiles").default;

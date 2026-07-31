@@ -47,7 +47,6 @@ export default {
 		creditEntityRequired: `請選擇${entityTerms.label}。`,
 		creditRoleRequired: "請選擇角色。",
 		creditDuplicate: `這個${entityTerms.label}已經設定相同角色。`,
-		publisherAttributionRequired: "自有作品必須至少有一筆出版者署名。",
 		creditRequestConfirmationTitle: "確認署名邀請",
 		creditRequestConfirmationDescription: `部分選取的${entityTerms.plural}需要取得同意後才能顯示署名。確認後將建立此作品並送出署名邀請。`,
 		creditRequestConfirmationCancel: "取消",
