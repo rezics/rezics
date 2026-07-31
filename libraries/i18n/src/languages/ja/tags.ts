@@ -170,7 +170,6 @@ export default {
 		add: "投票を追加",
 		policy: `${realmTerms.label}-設定タグ`,
 		votes: `${realmTerms.label}メンバーの投票`,
-		context: "投票文脈を表示",
 		empty: "あなたが選択したタグのソースはまだこの作品を判断していません。",
 		cannotVote: `この${realmTerms.inline}に参加して、そのコンテキスト投票に参加してください。`,
 	},

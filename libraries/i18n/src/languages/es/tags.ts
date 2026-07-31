@@ -176,7 +176,6 @@ export default {
 		add: "Añadir voto",
 		policy: `Etiquetas definidas por el ${realmTerms.inline}`,
 		votes: `Votos de los miembros del ${realmTerms.inline}`,
-		context: "Ver contexto de votación",
 		empty: "Las fuentes de etiquetas seleccionadas todavía no han valorado esta obra.",
 		cannotVote: `Únete a este ${realmTerms.inline} para participar en su votación contextual.`,
 	},

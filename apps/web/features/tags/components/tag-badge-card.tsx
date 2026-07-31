@@ -222,11 +222,6 @@ export function TagBadgeCard({
 								</Link>
 							</Button>
 							*/}
-							{item.context.kind === "realm" && item.context.contextPostId ? (
-								<Button asChild className="w-fit" size="sm" variant="quiet">
-									<Link href={detailHref}>{t.tags.realms.context}</Link>
-								</Button>
-							) : null}
 							{/* Temporarily hidden while selection remains available from selection mode.
 							<Button
 								aria-pressed={selected}

@@ -67,6 +67,28 @@ const pinnedTag = {
 	},
 } satisfies TagPresentation;
 
+const realmTag = {
+	itemKey:
+		"realm:019f995d-74b4-7b8a-93fe-5147949611df:019f995d-731c-71dd-b8cd-2bc781fb07e7",
+	identity: pinnedTag.identity,
+	context: {
+		kind: "realm",
+		realmId: "019f995d-74b4-7b8a-93fe-5147949611df",
+		realmLanguage: "zh",
+		realmTitle: "測試領域",
+		contextPostId: "019f995d-747a-719e-b663-cbe3bed525a9",
+	},
+	vote: {
+		...pinnedTag.vote,
+		target: {
+			kind: "realm",
+			realmId: "019f995d-74b4-7b8a-93fe-5147949611df",
+			unitId: "019f995d-73ad-7692-88d4-39741cbe6c34",
+			tagId: "019f995d-731c-71dd-b8cd-2bc781fb07e7",
+		},
+	},
+} satisfies TagPresentation;
+
 afterEach(cleanup);
 
 describe("TagBadgeCard", () => {
@@ -119,5 +141,35 @@ describe("TagBadgeCard", () => {
 		);
 
 		expect(await screen.findByRole("link", { name: /置顶标签/ })).toBeTruthy();
+	});
+
+	it("uses the linked title as the Realm voting-context destination", async () => {
+		render(
+			<TranslationProvider initial={translation.snapshot}>
+				<TagBadgeCard
+					fallbackLabel="未命名標籤"
+					isPending={false}
+					item={realmTag}
+					onClearVote={vi.fn()}
+					onToggleSelected={vi.fn()}
+					onVote={vi.fn()}
+					selected={false}
+					selectionMode={false}
+					type="book"
+				/>
+			</TranslationProvider>,
+		);
+
+		fireEvent.click(
+			screen.getByRole("link", {
+				name: "開啟「置頂標籤」標籤卡片（測試領域）",
+			}),
+		);
+
+		const titleLink = await screen.findByRole("link", { name: "置頂標籤" });
+		expect(titleLink.getAttribute("href")).toBe(
+			"/posts/019f995d-747a-719e-b663-cbe3bed525a9?realmId=019f995d-74b4-7b8a-93fe-5147949611df",
+		);
+		expect(screen.queryByRole("link", { name: "查看投票情境" })).toBeNull();
 	});
 });

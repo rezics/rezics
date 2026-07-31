@@ -163,7 +163,6 @@ export default {
 		add: "新增投票",
 		policy: `${realmTerms.label}設定的標籤`,
 		votes: `${realmTerms.label}成員投票`,
-		context: "查看投票情境",
 		empty: "你選擇的標籤來源目前沒有對這個作品提出判斷。",
 		cannotVote: `加入這個${realmTerms.inline}後才能參與該情境的投票。`,
 	},

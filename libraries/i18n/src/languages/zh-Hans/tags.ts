@@ -162,7 +162,6 @@ export default {
 		add: "添加投票",
 		policy: `${realmTerms.label}设置的标签`,
 		votes: `${realmTerms.label}成员投票`,
-		context: "查看投票上下文",
 		empty: "你选择的标签来源当前没有对这个作品提出判断。",
 		cannotVote: `加入这个${realmTerms.inline}后才能参与该上下文的投票。`,
 	},

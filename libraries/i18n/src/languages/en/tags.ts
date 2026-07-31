@@ -171,7 +171,6 @@ export default {
 		add: "Add vote",
 		policy: `${realmTerms.label}-set Tags`,
 		votes: `${realmTerms.label} member votes`,
-		context: "View voting context",
 		empty: "Your selected Tag sources have not judged this work yet.",
 		cannotVote: `Join this ${realmTerms.inline} to participate in its contextual vote.`,
 	},

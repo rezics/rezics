@@ -171,7 +171,6 @@ export default {
 		add: "투표 추가",
 		policy: `${realmTerms.label}-세트 태그`,
 		votes: `${realmTerms.label} 회원 투표`,
-		context: "투표 문맥 보기",
 		empty: "선택한 태그 출처가 이 작품을 아직 판단하지 않았습니다.",
 		cannotVote: `컨텍스트 투표에 참여하려면 이 ${realmTerms.inline}에 가입하세요.`,
 	},

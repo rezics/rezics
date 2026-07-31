@@ -174,7 +174,6 @@ export default {
 		add: "Stimme hinzufügen",
 		policy: `Vom ${realmTerms.inline} festgelegte Tags`,
 		votes: `Stimmen der Mitglieder des ${realmTerms.inline}s`,
-		context: "Abstimmungskontext anzeigen",
 		empty: "Die ausgewählten Tag-Quellen haben dieses Werk noch nicht bewertet.",
 		cannotVote: `Tritt diesem ${realmTerms.inline} bei, um an seiner kontextbezogenen Abstimmung teilzunehmen.`,
 	},
