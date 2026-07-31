@@ -65,12 +65,11 @@ export default {
 	communityUnitSearch: {
 		policyTitle: "作成前に検索してください",
 		policy: "良好なコミュニティ環境を維持するため、公開項目を作成する前に検索し、作成したい内容がまだ存在しないことを確認してください。公開項目の作成機能を悪用した場合、処分の対象となることがあります。",
-		requiredTitle: "既存の項目を先に確認してください",
-		requiredDescription: "この公開項目を送信する前に検索を完了する必要があります。",
+		confirmationLabel: insert(
+			"既存の{{subject}}を調べ、この項目がまだ存在しないことを確認しました。",
+			{ subject: String },
+		),
 		prompt: insert("既存の{{subject}}を検索", { subject: String }),
-		confirmedTitle: insert("既存の{{subject}}を検索済み", { subject: String }),
-		confirmedDescription:
-			"現在のタイトルは検索済みです。タイトルまたは種類を変更した場合は、再検索が必要です。",
 		pageTitle: insert("既存の{{subject}}を検索", { subject: String }),
 		pageDescription: insert("作成したい{{subject}}がすでに存在するか確認します。", {
 			subject: String,
@@ -79,8 +78,8 @@ export default {
 		searchLabel: insert("{{subject}}を検索", { subject: String }),
 		searchPlaceholder: insert("{{subject}}の名前を入力", { subject: String }),
 		searchAction: "検索",
-		searchHint: "名前を入力して検索すると、作成オプションが表示されます。",
-		searchFailed: "現在検索を利用できません。公開項目を作成する前に、もう一度お試しください。",
+		searchHint: "名前を入力して、既存の可能性がある項目を検索してください。",
+		searchFailed: "検索は一時的に利用できません。再試行するか、作成フォームに戻ってください。",
 		resultsTitle: "既存の可能性がある項目",
 		noResultsTitle: insert("一致する{{subject}}が見つかりません", { subject: String }),
 		noResultsDescription: "検索語が正しいことを確認したうえで、作成に進むことができます。",

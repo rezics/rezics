@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-	isCommunityUnitSearchConfirmed,
-	TagCommunityUnitSearchSubject,
-} from "@/features/create/model/community-unit-search";
-import {
 	loadTagCreateRoute,
 	unitTagVoteCreateHref,
 	unitTagVoteDuplicateSearchHref,
@@ -23,17 +19,10 @@ describe("Tag creation routes", () => {
 		const url = new URL(href, "https://rezics.example");
 
 		expect(url.pathname).toBe("/create/tag/new");
-		expect(
-			isCommunityUnitSearchConfirmed(
-				TagCommunityUnitSearchSubject,
-				"science",
-				url.searchParams.get("communityUnitSearch"),
-			),
-		).toBe(true);
+		expect(url.searchParams.get("communityUnitSearch")).toBeNull();
 		await expect(loadTagCreateRoute(Object.fromEntries(url.searchParams))).resolves.toEqual({
 			status: "ready",
 			initialTitle: "science",
-			communityUnitSearchConfirmation: url.searchParams.get("communityUnitSearch"),
 			intent: {
 				kind: "unit-tag-vote",
 				type: "book",
@@ -84,7 +73,6 @@ describe("Tag creation routes", () => {
 		await expect(loadTagCreateRoute({ title: "science" })).resolves.toEqual({
 			status: "ready",
 			initialTitle: "science",
-			communityUnitSearchConfirmation: null,
 			intent: { kind: "standalone" },
 		});
 	});

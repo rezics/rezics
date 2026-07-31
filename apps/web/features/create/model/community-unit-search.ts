@@ -38,8 +38,6 @@ export type CommunityUnitSearchSubject =
 			readonly section: "tag";
 	  };
 
-export const CommunityUnitSearchConfirmationParam = "communityUnitSearch";
-
 export function unitCommunityUnitSearchSubject(
 	section: "book" | "software" | "media",
 ): CommunityUnitSearchSubject {
@@ -99,29 +97,6 @@ export function normalizeCommunityUnitSearchQuery(query: string): string {
 	return query.trim().replace(/\s+/g, " ").toLowerCase();
 }
 
-export function communityUnitSearchConfirmation(
-	subject: CommunityUnitSearchSubject,
-	query: string,
-): string {
-	return JSON.stringify([
-		1,
-		subject.section,
-		subject.kind,
-		normalizeCommunityUnitSearchQuery(query),
-	]);
-}
-
-export function isCommunityUnitSearchConfirmed(
-	subject: CommunityUnitSearchSubject,
-	query: string,
-	confirmation: string | null | undefined,
-): boolean {
-	return (
-		normalizeCommunityUnitSearchQuery(query).length > 0 &&
-		confirmation === communityUnitSearchConfirmation(subject, query)
-	);
-}
-
 export function communityUnitSearchHref(
 	subject: CommunityUnitSearchSubject,
 	query: string,
@@ -138,10 +113,6 @@ export function communityUnitCreationHref(
 ): string {
 	const trimmedQuery = query.trim();
 	const search = new URLSearchParams({
-		[CommunityUnitSearchConfirmationParam]: communityUnitSearchConfirmation(
-			subject,
-			trimmedQuery,
-		),
 		title: trimmedQuery,
 	});
 	let pathname: string;

@@ -59,12 +59,11 @@ export default {
 	communityUnitSearch: {
 		policyTitle: "Search before creating",
 		policy: "To maintain a healthy community, search before creating a public entry and confirm that the content you want to create does not already exist. Misuse of the ability to create public entries may result in penalties.",
-		requiredTitle: "Check existing entries first",
-		requiredDescription: "Complete a search before submitting this public entry.",
+		confirmationLabel: insert(
+			"I checked the existing {{subject}} and confirmed that this entry does not already exist.",
+			{ subject: String },
+		),
 		prompt: insert("Search existing {{subject}}", { subject: String }),
-		confirmedTitle: insert("Existing {{subject}} searched", { subject: String }),
-		confirmedDescription:
-			"This title has been searched. Changing the title or kind requires another search.",
 		pageTitle: insert("Search existing {{subject}}", { subject: String }),
 		pageDescription: insert(
 			"Check whether the {{subject}} you want to create already exists.",
@@ -76,8 +75,8 @@ export default {
 		searchLabel: insert("Search {{subject}}", { subject: String }),
 		searchPlaceholder: insert("Enter the name of the {{subject}}", { subject: String }),
 		searchAction: "Search",
-		searchHint: "Enter a name and run the search to make the creation option available.",
-		searchFailed: "Search is temporarily unavailable. Retry before creating a public entry.",
+		searchHint: "Enter a name to search for possible existing entries.",
+		searchFailed: "Search is temporarily unavailable. Retry or return to the creation form.",
 		resultsTitle: "Possible existing entries",
 		noResultsTitle: insert("No matching {{subject}} found", { subject: String }),
 		noResultsDescription:

@@ -72,13 +72,11 @@ export default {
 	communityUnitSearch: {
 		policyTitle: "Vor dem Erstellen suchen",
 		policy: "Um ein gutes Miteinander zu wahren, suche vor dem Erstellen eines öffentlichen Eintrags und vergewissere dich, dass der gewünschte Inhalt noch nicht existiert. Der Missbrauch dieser Funktion kann Sanktionen nach sich ziehen.",
-		requiredTitle: "Zuerst vorhandene Einträge prüfen",
-		requiredDescription:
-			"Führe eine Suche durch, bevor du diesen öffentlichen Eintrag absendest.",
+		confirmationLabel: insert(
+			"Ich habe die vorhandenen {{subject}} geprüft und bestätigt, dass dieser Eintrag noch nicht existiert.",
+			{ subject: String },
+		),
 		prompt: insert("Vorhandene {{subject}} durchsuchen", { subject: String }),
-		confirmedTitle: insert("Vorhandene {{subject}} wurden durchsucht", { subject: String }),
-		confirmedDescription:
-			"Dieser Titel wurde gesucht. Nach einer Änderung von Titel oder Art ist eine neue Suche erforderlich.",
 		pageTitle: insert("Vorhandene {{subject}} durchsuchen", { subject: String }),
 		pageDescription: insert("Prüfe, ob die gewünschten {{subject}} bereits existieren.", {
 			subject: String,
@@ -87,10 +85,9 @@ export default {
 		searchLabel: insert("{{subject}} durchsuchen", { subject: String }),
 		searchPlaceholder: insert("Namen der {{subject}} eingeben", { subject: String }),
 		searchAction: "Suchen",
-		searchHint:
-			"Gib einen Namen ein und führe die Suche aus, um die Erstellungsoption freizuschalten.",
+		searchHint: "Gib einen Namen ein, um nach möglicherweise vorhandenen Einträgen zu suchen.",
 		searchFailed:
-			"Die Suche ist vorübergehend nicht verfügbar. Versuche es erneut, bevor du einen öffentlichen Eintrag erstellst.",
+			"Die Suche ist vorübergehend nicht verfügbar. Versuche es erneut oder kehre zum Erstellungsformular zurück.",
 		resultsTitle: "Möglicherweise vorhandene Einträge",
 		noResultsTitle: insert("Keine passenden {{subject}} gefunden", { subject: String }),
 		noResultsDescription:

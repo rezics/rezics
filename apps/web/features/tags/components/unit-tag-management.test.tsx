@@ -138,7 +138,7 @@ describe("UnitTagManagement", () => {
 		expect(url.searchParams.get("unitId")).toBe("00000000-0000-7000-8000-000000000001");
 		expect(url.searchParams.get("context")).toBe("global");
 		expect(url.searchParams.get("realmId")).toBeNull();
-		expect(url.searchParams.get("communityUnitSearch")).toBeTruthy();
+		expect(url.searchParams.get("communityUnitSearch")).toBeNull();
 	});
 
 	it("keeps the active Realm in the Studio creation intent", () => {

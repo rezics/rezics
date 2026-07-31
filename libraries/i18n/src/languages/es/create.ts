@@ -75,12 +75,11 @@ export default {
 	communityUnitSearch: {
 		policyTitle: "Busca antes de crear",
 		policy: "Para mantener una comunidad saludable, busca antes de crear una entrada pública y confirma que el contenido que quieres crear todavía no existe. El uso indebido de esta función puede conllevar sanciones.",
-		requiredTitle: "Comprueba primero las entradas existentes",
-		requiredDescription: "Debes completar una búsqueda antes de enviar esta entrada pública.",
+		confirmationLabel: insert(
+			"He buscado entre {{subject}} existentes y he confirmado que esta entrada aún no existe.",
+			{ subject: String },
+		),
 		prompt: insert("Buscar {{subject}} existentes", { subject: String }),
-		confirmedTitle: insert("Se han buscado {{subject}} existentes", { subject: String }),
-		confirmedDescription:
-			"Este título ya se ha buscado. Si cambias el título o el tipo, deberás volver a buscar.",
 		pageTitle: insert("Buscar {{subject}} existentes", { subject: String }),
 		pageDescription: insert("Comprueba si los {{subject}} que quieres crear ya existen.", {
 			subject: String,
@@ -89,10 +88,9 @@ export default {
 		searchLabel: insert("Buscar {{subject}}", { subject: String }),
 		searchPlaceholder: insert("Introduce el nombre de los {{subject}}", { subject: String }),
 		searchAction: "Buscar",
-		searchHint:
-			"Introduce un nombre y ejecuta la búsqueda para habilitar la opción de creación.",
+		searchHint: "Introduce un nombre para buscar entradas que quizá ya existan.",
 		searchFailed:
-			"La búsqueda no está disponible temporalmente. Vuelve a intentarlo antes de crear una entrada pública.",
+			"La búsqueda no está disponible temporalmente. Vuelve a intentarlo o regresa al formulario de creación.",
 		resultsTitle: "Posibles entradas existentes",
 		noResultsTitle: insert("No se encontraron {{subject}} coincidentes", { subject: String }),
 		noResultsDescription:

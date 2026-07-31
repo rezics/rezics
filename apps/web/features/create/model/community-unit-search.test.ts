@@ -2,10 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
 	entityCommunityUnitSearchSubject,
-	isCommunityUnitSearchConfirmed,
 	parseCommunityUnitSearchSubject,
 	communityUnitCreationHref,
-	communityUnitSearchConfirmation,
 	communityUnitSearchHref,
 	communityUnitSearchResultHref,
 	TagCommunityUnitSearchSubject,
@@ -43,7 +41,7 @@ describe("unit public-entry search subjects", () => {
 	});
 });
 
-describe("public-entry search routes and confirmation", () => {
+describe("public-entry search routes", () => {
 	it("carries the exact subject and current title into Studio search", () => {
 		expect(
 			communityUnitSearchHref(unitCommunityUnitSearchSubject("media"), "  The Bear  "),
@@ -53,23 +51,7 @@ describe("public-entry search routes and confirmation", () => {
 		);
 	});
 
-	it("binds confirmation to the normalized query and exact subject", () => {
-		const subject = unitCommunityUnitSearchSubject("book");
-		const confirmation = communityUnitSearchConfirmation(subject, "  Dune   Messiah ");
-
-		expect(isCommunityUnitSearchConfirmed(subject, "dune messiah", confirmation)).toBe(true);
-		expect(isCommunityUnitSearchConfirmed(subject, "Dune", confirmation)).toBe(false);
-		expect(
-			isCommunityUnitSearchConfirmed(
-				unitCommunityUnitSearchSubject("media"),
-				"Dune Messiah",
-				confirmation,
-			),
-		).toBe(false);
-		expect(isCommunityUnitSearchConfirmed(subject, "", confirmation)).toBe(false);
-	});
-
-	it("returns to the correct creator only after a completed search", () => {
+	it("returns to the correct creator after an optional duplicate search", () => {
 		const href = communityUnitCreationHref(
 			entityCommunityUnitSearchSubject("organization"),
 			"OpenAI",
@@ -80,13 +62,7 @@ describe("public-entry search routes and confirmation", () => {
 		expect(url.searchParams.get("ownershipMode")).toBe("community_owned");
 		expect(url.searchParams.get("kind")).toBe("organization");
 		expect(url.searchParams.get("title")).toBe("OpenAI");
-		expect(
-			isCommunityUnitSearchConfirmed(
-				entityCommunityUnitSearchSubject("organization"),
-				"OpenAI",
-				url.searchParams.get("communityUnitSearch"),
-			),
-		).toBe(true);
+		expect(url.searchParams.get("communityUnitSearch")).toBeNull();
 	});
 
 	it("keeps Tag creation inside Studio", () => {

@@ -4,11 +4,6 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import type { ComponentProps, ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import {
-	communityUnitSearchConfirmation,
-	TagCommunityUnitSearchSubject,
-} from "@/features/create/model/community-unit-search";
-
 const state = vi.hoisted(() => ({
 	applyGlobal: vi.fn(),
 	applyRealm: vi.fn(),
@@ -56,8 +51,16 @@ vi.mock("@/features/application-shell/components/app-link", () => ({
 }));
 
 vi.mock("@/features/create/components/community-unit-search-prompt", () => ({
-	CommunityUnitSearchPrompt: ({ confirmed }: { readonly confirmed: boolean }) => (
-		<div data-testid="search-confirmation">{String(confirmed)}</div>
+	CommunityUnitSearchPrompt: ({
+		confirmed,
+		onConfirmedChange,
+	}: {
+		readonly confirmed: boolean;
+		readonly onConfirmedChange: (confirmed: boolean) => void;
+	}) => (
+		<button type="button" onClick={() => onConfirmedChange(!confirmed)}>
+			{confirmed ? "Search confirmed" : "Confirm search"}
+		</button>
 	),
 }));
 
@@ -166,7 +169,6 @@ const UnitId = "00000000-0000-7000-8000-000000000001";
 const RealmId = "00000000-0000-7000-8000-000000000002";
 const TagId = "00000000-0000-7000-8000-000000000003";
 const Title = "Science";
-const Confirmation = communityUnitSearchConfirmation(TagCommunityUnitSearchSubject, Title);
 
 beforeEach(() => {
 	cleanup();
@@ -182,6 +184,22 @@ beforeEach(() => {
 });
 
 describe("TagCreatePage", () => {
+	it("requires confirmation again after the title changes", () => {
+		render(<TagCreatePage initialTitle={Title} intent={{ kind: "standalone" }} />);
+
+		const submit = screen.getByRole("button", { name: "Create Tag" });
+		expect(submit.hasAttribute("disabled")).toBe(true);
+
+		fireEvent.click(screen.getByRole("button", { name: "Confirm search" }));
+		expect(submit.hasAttribute("disabled")).toBe(false);
+
+		fireEvent.change(screen.getByDisplayValue(Title), {
+			target: { value: "Natural science" },
+		});
+		expect(submit.hasAttribute("disabled")).toBe(true);
+		expect(screen.getByRole("button", { name: "Confirm search" })).toBeTruthy();
+	});
+
 	it("creates, applies, and returns to the original global Unit Tag context", async () => {
 		render(
 			<TagCreatePage
@@ -192,11 +210,15 @@ describe("TagCreatePage", () => {
 					unitId: UnitId,
 					context: { kind: "global" },
 				}}
-				communityUnitSearchConfirmation={Confirmation}
 			/>,
 		);
 
-		expect(screen.getByTestId("search-confirmation").textContent).toBe("true");
+		expect(
+			screen
+				.getByRole("button", { name: 'Create Tag and vote "Fits"' })
+				.hasAttribute("disabled"),
+		).toBe(true);
+		fireEvent.click(screen.getByRole("button", { name: "Confirm search" }));
 		fireEvent.click(screen.getByRole("button", { name: 'Create Tag and vote "Fits"' }));
 
 		await waitFor(() =>
@@ -231,10 +253,10 @@ describe("TagCreatePage", () => {
 					unitId: UnitId,
 					context: { kind: "realm", realmId: RealmId },
 				}}
-				communityUnitSearchConfirmation={Confirmation}
 			/>,
 		);
 
+		fireEvent.click(screen.getByRole("button", { name: "Confirm search" }));
 		fireEvent.click(screen.getByRole("button", { name: 'Create Tag and vote "Fits"' }));
 
 		await waitFor(() =>
@@ -260,10 +282,10 @@ describe("TagCreatePage", () => {
 					unitId: UnitId,
 					context: { kind: "global" },
 				}}
-				communityUnitSearchConfirmation={Confirmation}
 			/>,
 		);
 
+		fireEvent.click(screen.getByRole("button", { name: "Confirm search" }));
 		fireEvent.click(screen.getByRole("button", { name: 'Create Tag and vote "Fits"' }));
 		expect(
 			await screen.findByRole("heading", {

@@ -28,10 +28,7 @@ import { type FormEvent, useState } from "react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { CommunityUnitSearchPrompt } from "@/features/create/components/community-unit-search-prompt";
-import {
-	isCommunityUnitSearchConfirmed,
-	TagCommunityUnitSearchSubject,
-} from "@/features/create/model/community-unit-search";
+import { TagCommunityUnitSearchSubject } from "@/features/create/model/community-unit-search";
 import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
 import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/use-form-draft-content-language";
 import { studioSectionHref } from "@/features/create/routing/studio-routes";
@@ -48,16 +45,15 @@ type UnitTagVoteCompletionState =
 export function TagCreatePage({
 	initialTitle,
 	intent,
-	communityUnitSearchConfirmation,
 }: {
 	readonly initialTitle: string;
 	readonly intent: TagCreateIntent;
-	readonly communityUnitSearchConfirmation: string | null;
 }) {
 	const { t } = useTranslation(["tags", "ui"]);
 	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const [title, setTitle] = useState(initialTitle);
+	const [searchConfirmed, setSearchConfirmed] = useState(false);
 	const [voteCompletion, setVoteCompletion] = useState<UnitTagVoteCompletionState>({
 		status: "idle",
 	});
@@ -65,11 +61,6 @@ export function TagCreatePage({
 	const create = usePostApiTags();
 	const applyGlobal = usePutApiUnitsByTypeByUnitIdTagsByTagId();
 	const applyRealm = usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote();
-	const searchConfirmed = isCommunityUnitSearchConfirmed(
-		TagCommunityUnitSearchSubject,
-		title,
-		communityUnitSearchConfirmation,
-	);
 	const returnHref =
 		intent.kind === "unit-tag-vote"
 			? unitTagsHref(intent.type, intent.unitId, { context: intent.context })
@@ -129,14 +120,7 @@ export function TagCreatePage({
 		const formElement = event.currentTarget;
 		const form = new FormData(formElement);
 		const submittedTitle = String(form.get("title") ?? "").trim();
-		if (
-			!isCommunityUnitSearchConfirmed(
-				TagCommunityUnitSearchSubject,
-				submittedTitle,
-				communityUnitSearchConfirmation,
-			)
-		)
-			return;
+		if (!searchConfirmed) return;
 		const contentLanguage = await language.resolveLanguage(formElement);
 		let created: { readonly id: string };
 		try {
@@ -221,13 +205,17 @@ export function TagCreatePage({
 									autoFocus
 									maxLength={500}
 									name="title"
-									onChange={(event) => setTitle(event.currentTarget.value)}
+									onChange={(event) => {
+										setTitle(event.currentTarget.value);
+										setSearchConfirmed(false);
+									}}
 									required
 									value={title}
 								/>
 							</Field>
 							<CommunityUnitSearchPrompt
 								confirmed={searchConfirmed}
+								onConfirmedChange={setSearchConfirmed}
 								query={title}
 								searchHref={searchHref}
 								subject={TagCommunityUnitSearchSubject}

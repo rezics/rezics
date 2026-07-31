@@ -13,11 +13,7 @@ export default async function Page({
 	if (route.status === "invalid") notFound();
 	return (
 		<TranslationBoundary namespaces={["tags"]}>
-			<TagCreatePage
-				initialTitle={route.initialTitle}
-				intent={route.intent}
-				communityUnitSearchConfirmation={route.communityUnitSearchConfirmation}
-			/>
+			<TagCreatePage initialTitle={route.initialTitle} intent={route.intent} />
 		</TranslationBoundary>
 	);
 }

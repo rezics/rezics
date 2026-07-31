@@ -16,11 +16,7 @@ import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { CommunityUnitSearchPrompt } from "@/features/create/components/community-unit-search-prompt";
-import {
-	isCommunityUnitSearchConfirmed,
-	CommunityUnitSearchConfirmationParam,
-	unitCommunityUnitSearchSubject,
-} from "@/features/create/model/community-unit-search";
+import { unitCommunityUnitSearchSubject } from "@/features/create/model/community-unit-search";
 import { type FormEvent, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
@@ -198,12 +194,12 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 	const queryClient = useQueryClient();
 	const searchParams = useSearchParams();
 	const searchSubject = unitCommunityUnitSearchSubject(type);
-	const searchConfirmation = searchParams.get(CommunityUnitSearchConfirmationParam);
 	const initialOwnershipMode =
 		searchParams.get("ownershipMode") === "community_owned"
 			? ("community_owned" as const)
 			: ("profile_owned" as const);
 	const [title, setTitle] = useState(() => searchParams.get("title") ?? "");
+	const [searchConfirmed, setSearchConfirmed] = useState(false);
 	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(null);
 	const [ownershipMode, setOwnershipMode] = useState<"profile_owned" | "community_owned">(
 		initialOwnershipMode,
@@ -230,11 +226,6 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 	const [pendingCreditRequestSubmission, setPendingCreditRequestSubmission] = useState<
 		Parameters<typeof create.mutateAsync>[0] | null
 	>(null);
-	const searchConfirmed = isCommunityUnitSearchConfirmed(
-		searchSubject,
-		title,
-		searchConfirmation,
-	);
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		const formElement = event.currentTarget;
@@ -250,11 +241,7 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 		);
 		setCreditValidationRequested(true);
 		if (!creditValidation.ok) return;
-		if (
-			ownershipMode === "community_owned" &&
-			!isCommunityUnitSearchConfirmed(searchSubject, submittedTitle, searchConfirmation)
-		)
-			return;
+		if (ownershipMode === "community_owned" && !searchConfirmed) return;
 		if (versionKind === "variant" && !mainVersion) return;
 		if (
 			submittedLicense !== null &&
@@ -365,7 +352,10 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 							<Input
 								maxLength={500}
 								name="title"
-								onChange={(event) => setTitle(event.currentTarget.value)}
+								onChange={(event) => {
+									setTitle(event.currentTarget.value);
+									setSearchConfirmed(false);
+								}}
 								required
 								value={title}
 							/>
@@ -400,6 +390,7 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 						{ownershipMode === "community_owned" ? (
 							<CommunityUnitSearchPrompt
 								confirmed={searchConfirmed}
+								onConfirmedChange={setSearchConfirmed}
 								query={title}
 								subject={searchSubject}
 							/>

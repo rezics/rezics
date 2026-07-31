@@ -18,8 +18,6 @@ import { CommunityUnitSearchPrompt } from "@/features/create/components/communit
 import {
 	entityCommunityUnitSearchSubject,
 	isCommunityUnitEntityKind,
-	isCommunityUnitSearchConfirmed,
-	CommunityUnitSearchConfirmationParam,
 	type CommunityUnitEntityKind,
 } from "@/features/create/model/community-unit-search";
 import { type FormEvent, useState } from "react";
@@ -503,8 +501,8 @@ export function EntityCreatePage() {
 	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const searchParams = useSearchParams();
-	const searchConfirmation = searchParams.get(CommunityUnitSearchConfirmationParam);
 	const [title, setTitle] = useState(() => searchParams.get("title") ?? "");
+	const [searchConfirmed, setSearchConfirmed] = useState(false);
 	const [kind, setKind] = useState<CommunityUnitEntityKind>(() => {
 		const candidate = searchParams.get("kind");
 		return isCommunityUnitEntityKind(candidate) ? candidate : "person";
@@ -527,22 +525,13 @@ export function EntityCreatePage() {
 			},
 		},
 	});
-	const searchConfirmed = isCommunityUnitSearchConfirmed(
-		searchSubject,
-		title,
-		searchConfirmation,
-	);
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		setError(false);
 		const formElement = event.currentTarget;
 		const form = new FormData(formElement);
 		const submittedTitle = String(form.get("title") ?? "").trim();
-		if (
-			ownershipMode === "community_owned" &&
-			!isCommunityUnitSearchConfirmed(searchSubject, submittedTitle, searchConfirmation)
-		)
-			return;
+		if (ownershipMode === "community_owned" && !searchConfirmed) return;
 		const contentLanguage = await language.resolveLanguage(formElement);
 		try {
 			await create.mutateAsync({
@@ -599,7 +588,10 @@ export function EntityCreatePage() {
 						<Input
 							maxLength={500}
 							name="title"
-							onChange={(event) => setTitle(event.currentTarget.value)}
+							onChange={(event) => {
+								setTitle(event.currentTarget.value);
+								setSearchConfirmed(false);
+							}}
 							required
 							value={title}
 						/>
@@ -610,7 +602,10 @@ export function EntityCreatePage() {
 							name="kind"
 							onChange={(event) => {
 								const candidate = event.currentTarget.value;
-								if (isCommunityUnitEntityKind(candidate)) setKind(candidate);
+								if (isCommunityUnitEntityKind(candidate)) {
+									setKind(candidate);
+									setSearchConfirmed(false);
+								}
 							}}
 							value={kind}
 						>
@@ -626,6 +621,7 @@ export function EntityCreatePage() {
 					{ownershipMode === "community_owned" ? (
 						<CommunityUnitSearchPrompt
 							confirmed={searchConfirmed}
+							onConfirmedChange={setSearchConfirmed}
 							query={title}
 							subject={searchSubject}
 						/>

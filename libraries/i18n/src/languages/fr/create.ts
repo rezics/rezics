@@ -71,14 +71,11 @@ export default {
 	communityUnitSearch: {
 		policyTitle: "Rechercher avant de créer",
 		policy: "Afin de préserver une communauté saine, effectuez une recherche avant de créer une entrée publique et vérifiez que le contenu souhaité n’existe pas déjà. Tout usage abusif de cette fonction peut entraîner des sanctions.",
-		requiredTitle: "Vérifiez d’abord les entrées existantes",
-		requiredDescription: "Effectuez une recherche avant d’envoyer cette entrée publique.",
+		confirmationLabel: insert(
+			"J’ai effectué une recherche parmi les {{subject}} et confirmé que cette entrée n’existe pas déjà.",
+			{ subject: String },
+		),
 		prompt: insert("Rechercher les {{subject}} existants", { subject: String }),
-		confirmedTitle: insert("Les {{subject}} existants ont été recherchés", {
-			subject: String,
-		}),
-		confirmedDescription:
-			"Ce titre a été recherché. Toute modification du titre ou du type nécessite une nouvelle recherche.",
 		pageTitle: insert("Rechercher les {{subject}} existants", { subject: String }),
 		pageDescription: insert(
 			"Vérifiez si les {{subject}} que vous souhaitez créer existent déjà.",
@@ -90,10 +87,9 @@ export default {
 		searchLabel: insert("Rechercher des {{subject}}", { subject: String }),
 		searchPlaceholder: insert("Saisissez le nom des {{subject}}", { subject: String }),
 		searchAction: "Rechercher",
-		searchHint:
-			"Saisissez un nom et lancez la recherche pour rendre l’option de création disponible.",
+		searchHint: "Saisissez un nom pour rechercher les entrées susceptibles d’exister déjà.",
 		searchFailed:
-			"La recherche est temporairement indisponible. Réessayez avant de créer une entrée publique.",
+			"La recherche est temporairement indisponible. Réessayez ou revenez au formulaire de création.",
 		resultsTitle: "Entrées existantes possibles",
 		noResultsTitle: insert("Aucun {{subject}} correspondant trouvé", { subject: String }),
 		noResultsDescription:

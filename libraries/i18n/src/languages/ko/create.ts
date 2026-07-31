@@ -59,12 +59,11 @@ export default {
 	communityUnitSearch: {
 		policyTitle: "만들기 전에 검색하세요",
 		policy: "건강한 커뮤니티 환경을 유지하기 위해 공개 항목을 만들기 전에 검색하여 만들려는 콘텐츠가 아직 존재하지 않는지 확인하세요. 공개 항목 만들기 기능을 악용하면 제재를 받을 수 있습니다.",
-		requiredTitle: "기존 항목을 먼저 확인하세요",
-		requiredDescription: "이 공개 항목을 제출하기 전에 검색을 완료해야 합니다.",
+		confirmationLabel: insert(
+			"기존 {{subject}}을(를) 살펴보고 이 항목이 아직 존재하지 않음을 확인했습니다.",
+			{ subject: String },
+		),
 		prompt: insert("기존 {{subject}} 검색", { subject: String }),
-		confirmedTitle: insert("기존 {{subject}} 검색 완료", { subject: String }),
-		confirmedDescription:
-			"현재 제목은 검색을 완료했습니다. 제목이나 종류를 변경하면 다시 검색해야 합니다.",
 		pageTitle: insert("기존 {{subject}} 검색", { subject: String }),
 		pageDescription: insert("만들려는 {{subject}}이(가) 이미 존재하는지 확인하세요.", {
 			subject: String,
@@ -73,8 +72,8 @@ export default {
 		searchLabel: insert("{{subject}} 검색", { subject: String }),
 		searchPlaceholder: insert("{{subject}} 이름 입력", { subject: String }),
 		searchAction: "검색",
-		searchHint: "이름을 입력하고 검색하면 만들기 옵션을 사용할 수 있습니다.",
-		searchFailed: "현재 검색을 사용할 수 없습니다. 공개 항목을 만들기 전에 다시 시도하세요.",
+		searchHint: "이름을 입력해 기존에 있을 수 있는 항목을 검색하세요.",
+		searchFailed: "현재 검색을 사용할 수 없습니다. 다시 시도하거나 만들기 양식으로 돌아가세요.",
 		resultsTitle: "이미 존재할 수 있는 항목",
 		noResultsTitle: insert("일치하는 {{subject}}을(를) 찾지 못했습니다", { subject: String }),
 		noResultsDescription: "검색어가 올바른지 확인한 후 만들기를 계속할 수 있습니다.",

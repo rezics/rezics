@@ -44,11 +44,10 @@ export default {
 	communityUnitSearch: {
 		policyTitle: "创建前请先搜索",
 		policy: "为了维护良好的社区环境，创建公共条目前，请先搜索并确认您想创建的内容尚不存在。如果您滥用创建公共条目的权限，可能会受到处罚。",
-		requiredTitle: "必须先检查现有条目",
-		requiredDescription: "完成搜索后，才能提交这个公共条目。",
+		confirmationLabel: insert("我已检查现有{{subject}}，并确认这个条目尚不存在。", {
+			subject: String,
+		}),
 		prompt: insert("搜索现有{{subject}}", { subject: String }),
-		confirmedTitle: insert("已搜索现有{{subject}}", { subject: String }),
-		confirmedDescription: "当前标题已完成搜索；如果更改标题或类别，必须重新搜索。",
 		pageTitle: insert("搜索现有{{subject}}", { subject: String }),
 		pageDescription: insert("先确认您想创建的{{subject}}是否已存在。", {
 			subject: String,
@@ -57,8 +56,8 @@ export default {
 		searchLabel: insert("搜索{{subject}}", { subject: String }),
 		searchPlaceholder: insert("输入{{subject}}的名称", { subject: String }),
 		searchAction: "搜索",
-		searchHint: "输入名称并执行搜索后，系统才会提供创建选项。",
-		searchFailed: "搜索暂时不可用。请重试；搜索成功前不能创建公共条目。",
+		searchHint: "输入名称以搜索可能已存在的条目。",
+		searchFailed: "搜索暂时不可用。请重试，或返回创建表单。",
 		resultsTitle: "可能已经存在的条目",
 		noResultsTitle: insert("未找到匹配的{{subject}}", { subject: String }),
 		noResultsDescription: "确认搜索词正确后，您可以继续前往创建。",
