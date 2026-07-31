@@ -170,6 +170,7 @@ export default {
 		"This Tag curation changed elsewhere. The latest order has been loaded; try again.",
 	TagNotFound: "This Tag could not be found.",
 	UnitVersionNotFound: "This Unit version could not be found.",
+	UnitSourceLinkNotFound: "This Unit source link could not be found.",
 	UnitVariantKindMismatch: "A Variant and its Main must use the same supported Unit type.",
 	UnitVariantTargetIsVariant: "A Variant must point directly to a Main.",
 	UnitVariantSourceHasVariants: "A Main with Variants cannot become a Variant.",

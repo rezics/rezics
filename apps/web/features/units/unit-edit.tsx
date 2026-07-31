@@ -10,18 +10,13 @@ import {
 import {
 	type GetApiUnitsByTypeByUnitIdStatus200,
 	usePatchApiUnitsByTypeByUnitId,
-	usePostApiUnitsByTypeByUnitIdCreditAttributions,
-	usePostApiUnitsByTypeByUnitIdLinks,
-	usePostApiUnitsByTypeByUnitIdSubjectAssociations,
 	usePutApiUnitsByTypeByUnitIdLocalizationsByLanguage,
-	usePutApiUnitsByTypeByUnitIdVersionOfByCanonicalId,
 } from "@rezics/openapi-tanstack-query";
 import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useDeferredValue, useState, type FormEvent } from "react";
 
-import { Badge, EntityPicker } from "@rezics/ui";
+import { Badge } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
@@ -43,18 +38,11 @@ import {
 import { LocalizationMediaFallbackNotice } from "@/features/media/components/localization-media-fallback-notice";
 import { FeedCard } from "@/features/content-feed/components/feed-card";
 import { FeedUnitContent } from "@/features/content-feed/components/feed-unit-content";
-import { isWorkUnitType, isVariantUnitType, type WorkUnitType, type UnitType } from "./unit-types";
-import {
-	CreditAttributionRolesByUnitType,
-	isCreditAttributionRoleForUnitType,
-	isSubjectAssociationRole,
-	SubjectAssociationRoles,
-} from "./attribution-role";
+import { isWorkUnitType, type UnitType } from "./unit-types";
 import { UnitContentLicenseField } from "./components/unit-content-license-field";
 
 export type EditableUnit = GetApiUnitsByTypeByUnitIdStatus200;
 type Unit = EditableUnit;
-type SelectedEntity = { id: string; label: string };
 
 function readPositiveInteger(form: FormData, name: string): number | null | undefined {
 	const raw = String(form.get(name) ?? "").trim();
@@ -572,253 +560,5 @@ function UnitLocalizationForm({
 				</FeedCard>
 			</aside>
 		</form>
-	);
-}
-
-export function UnitRelationships({ type, unit }: { type: WorkUnitType; unit: Unit }) {
-	const { t } = useTranslation(["cover", "errors", "tags", "ui", "units"]);
-	const queryClient = useQueryClient();
-	const invalidate = () => invalidateUnitDetail(queryClient, type, unit.id);
-	const credit = usePostApiUnitsByTypeByUnitIdCreditAttributions({
-		mutation: { onSuccess: invalidate },
-	});
-	const subject = usePostApiUnitsByTypeByUnitIdSubjectAssociations({
-		mutation: { onSuccess: invalidate },
-	});
-	const link = usePostApiUnitsByTypeByUnitIdLinks({ mutation: { onSuccess: invalidate } });
-	const version = usePutApiUnitsByTypeByUnitIdVersionOfByCanonicalId({
-		mutation: { onSuccess: invalidate },
-	});
-	const [creditEntity, setCreditEntity] = useState<SelectedEntity>();
-	const [subjectEntity, setSubjectEntity] = useState<SelectedEntity>();
-	const [subjectContextPost, setSubjectContextPost] = useState<SelectedEntity>();
-	const [linkSource, setLinkSource] = useState<SelectedEntity>();
-	const [canonicalUnit, setCanonicalUnit] = useState<SelectedEntity>();
-
-	return (
-		<Card>
-			<CardContent className="grid gap-8 p-6">
-				<h2 className="font-heading text-xl font-bold">{t.units.editor.relationships}</h2>
-				<form
-					className="grid gap-4"
-					onSubmit={async (event) => {
-						event.preventDefault();
-						if (!creditEntity) return;
-						const formElement = event.currentTarget;
-						const form = new FormData(formElement);
-						const role = String(form.get("role") ?? "");
-						if (!isCreditAttributionRoleForUnitType(type, role)) return;
-						try {
-							await credit.mutateAsync({
-								path: { type, unitId: unit.id },
-								body: {
-									creditedUnitId: creditEntity.id,
-									role,
-								},
-							});
-							setCreditEntity(undefined);
-							formElement.reset();
-						} catch {
-							// The typed mutation state supplies the visible API error.
-						}
-					}}
-				>
-					<EntityPicker
-						ariaLabel={t.units.editor.credit}
-						index="entities"
-						onChange={setCreditEntity}
-						placeholder={t.ui.pickerPlaceholders.entity}
-						value={creditEntity}
-					/>
-					<Field required>
-						<FieldLabel>{t.units.editor.creditRole}</FieldLabel>
-						<NativeSelect name="role" required>
-							{CreditAttributionRolesByUnitType[type].map((role) => (
-								<NativeSelectOption key={role} value={role}>
-									{t.units.attributionRoles[role]}
-								</NativeSelectOption>
-							))}
-						</NativeSelect>
-					</Field>
-					<Button
-						disabled={!creditEntity}
-						isLoading={credit.isPending}
-						type="submit"
-						variant="outline"
-					>
-						{t.units.editor.credit}
-					</Button>
-					<RequestFailure error={credit.error} fallback={t.ui.retryLater} />
-				</form>
-
-				<form
-					className="grid gap-4"
-					onSubmit={async (event) => {
-						event.preventDefault();
-						if (!subjectEntity) return;
-						const formElement = event.currentTarget;
-						const form = new FormData(formElement);
-						const role = String(form.get("role") ?? "");
-						if (!isSubjectAssociationRole(role)) return;
-						try {
-							await subject.mutateAsync({
-								path: { type, unitId: unit.id },
-								body: {
-									entityId: subjectEntity.id,
-									...(subjectContextPost
-										? { contextPostId: subjectContextPost.id }
-										: {}),
-									role,
-								},
-							});
-							setSubjectEntity(undefined);
-							setSubjectContextPost(undefined);
-							formElement.reset();
-						} catch {
-							// The typed mutation state supplies the visible API error.
-						}
-					}}
-				>
-					<EntityPicker
-						ariaLabel={t.units.editor.subjectAssociation}
-						index="entities"
-						onChange={setSubjectEntity}
-						placeholder={t.ui.pickerPlaceholders.entity}
-						value={subjectEntity}
-					/>
-					<Field>
-						<FieldLabel>{t.units.editor.contextWikiPost}</FieldLabel>
-						<div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
-							<EntityPicker
-								ariaLabel={t.units.editor.contextWikiPost}
-								index="posts"
-								kind="wiki"
-								onChange={setSubjectContextPost}
-								placeholder={t.ui.pickerPlaceholders.post}
-								value={subjectContextPost}
-							/>
-							{subjectContextPost ? (
-								<Button
-									onClick={() => setSubjectContextPost(undefined)}
-									type="button"
-									variant="outline"
-								>
-									{t.ui.clear}
-								</Button>
-							) : null}
-						</div>
-					</Field>
-					<Field required>
-						<FieldLabel>{t.units.editor.subjectRole}</FieldLabel>
-						<NativeSelect name="role" required>
-							{SubjectAssociationRoles.map((role) => (
-								<NativeSelectOption key={role} value={role}>
-									{t.units.subjectAssociationRoles[role]}
-								</NativeSelectOption>
-							))}
-						</NativeSelect>
-					</Field>
-					<Button
-						disabled={!subjectEntity}
-						isLoading={subject.isPending}
-						type="submit"
-						variant="outline"
-					>
-						{t.units.editor.subjectAssociation}
-					</Button>
-					<RequestFailure error={subject.error} fallback={t.ui.retryLater} />
-				</form>
-
-				<form
-					className="grid gap-4"
-					onSubmit={async (event) => {
-						event.preventDefault();
-						if (!linkSource) return;
-						const formElement = event.currentTarget;
-						const form = new FormData(formElement);
-						try {
-							await link.mutateAsync({
-								path: { type, unitId: unit.id },
-								body: {
-									url: String(form.get("url") ?? "").trim(),
-									sourceEntityUnitId: linkSource.id,
-								},
-							});
-							setLinkSource(undefined);
-							formElement.reset();
-						} catch {
-							// The typed mutation state supplies the visible API error.
-						}
-					}}
-				>
-					<EntityPicker
-						ariaLabel={t.units.editor.link}
-						index="entities"
-						onChange={setLinkSource}
-						placeholder={t.ui.pickerPlaceholders.entity}
-						value={linkSource}
-					/>
-					<Field required>
-						<FieldLabel>{t.units.editor.linkUrl}</FieldLabel>
-						<Input name="url" required type="url" />
-					</Field>
-					<Button
-						disabled={!linkSource}
-						isLoading={link.isPending}
-						type="submit"
-						variant="outline"
-					>
-						{t.units.editor.link}
-					</Button>
-					<RequestFailure error={link.error} fallback={t.ui.retryLater} />
-				</form>
-
-				<div className="grid gap-4">
-					<p className="text-sm text-muted-foreground">{t.tags.page.manageOnTagPage}</p>
-					<Button asChild className="w-fit" variant="outline">
-						<Link href={`/units/${type}/${unit.id}/tags`}>{t.tags.page.viewAll}</Link>
-					</Button>
-				</div>
-
-				{isVariantUnitType(type) ? (
-					<div className="grid gap-4">
-						<Field>
-							<FieldLabel>{t.units.editor.canonicalUnit}</FieldLabel>
-							<EntityPicker
-								ariaLabel={t.units.editor.canonicalUnit}
-								index="units"
-								onChange={setCanonicalUnit}
-								placeholder={t.ui.pickerPlaceholders.unit}
-								value={canonicalUnit}
-							/>
-						</Field>
-						<Button
-							disabled={!canonicalUnit || canonicalUnit.id === unit.id}
-							isLoading={version.isPending}
-							onClick={async () => {
-								if (!canonicalUnit || canonicalUnit.id === unit.id) return;
-								try {
-									await version.mutateAsync({
-										path: {
-											type,
-											unitId: unit.id,
-											canonicalId: canonicalUnit.id,
-										},
-									});
-									setCanonicalUnit(undefined);
-								} catch {
-									// The typed mutation state supplies the visible API error.
-								}
-							}}
-							type="button"
-							variant="outline"
-						>
-							{t.units.editor.version}
-						</Button>
-						<RequestFailure error={version.error} fallback={t.ui.retryLater} />
-					</div>
-				) : null}
-			</CardContent>
-		</Card>
 	);
 }

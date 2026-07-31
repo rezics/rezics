@@ -156,6 +156,7 @@ export default {
 	UnitTagCurationChanged: "这笔标签精选已在其他地方变更；已加载最新顺序，请再试一次。",
 	TagNotFound: "找不到这个标签。",
 	UnitVersionNotFound: "找不到这个条目版本。",
+	UnitSourceLinkNotFound: "找不到这个作品的来源链接。",
 	UnitVariantKindMismatch: "变体与主版本必须使用相同且受支持的条目类型。",
 	UnitVariantTargetIsVariant: "变体必须直接指向主版本。",
 	UnitVariantSourceHasVariants: "已有变体的主版本不能成为变体。",

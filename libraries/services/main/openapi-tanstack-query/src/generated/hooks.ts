@@ -1338,6 +1338,13 @@ import type {
 	PostApiUnitsByTypeByUnitIdLinksStatus422,
 	PostApiUnitsByTypeByUnitIdLinksStatus429,
 	PostApiUnitsByTypeByUnitIdLinksStatus500,
+	DeleteApiUnitsByTypeByUnitIdLinksByLinkIdOptions,
+	DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus204,
+	DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus403,
+	DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404,
+	DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus422,
+	DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429,
+	DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus500,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdOptions,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdStatus200,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdStatus400,
@@ -2499,6 +2506,7 @@ import {
 	postApiUnitsByTypeByUnitIdSubjectAssociations,
 	deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationId,
 	postApiUnitsByTypeByUnitIdLinks,
+	deleteApiUnitsByTypeByUnitIdLinksByLinkId,
 	putApiUnitsByTypeByUnitIdTagsByTagId,
 	patchApiUnitsByTypeByUnitIdTagsByTagId,
 	deleteApiUnitsByTypeByUnitIdTagsByTagId,
@@ -23168,6 +23176,110 @@ export function usePostApiUnitsByTypeByUnitIdLinks<TContext>(
 			| PostApiUnitsByTypeByUnitIdLinksStatus500
 		>,
 		PostApiUnitsByTypeByUnitIdLinksOptions,
+		TContext
+	>;
+}
+
+export const deleteApiUnitsByTypeByUnitIdLinksByLinkIdMutationKey = () =>
+	[{ url: "/api/units/:type/:unitId/links/:linkId" }] as const;
+
+export function deleteApiUnitsByTypeByUnitIdLinksByLinkIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = deleteApiUnitsByTypeByUnitIdLinksByLinkIdMutationKey();
+	return mutationOptions<
+		DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus403
+			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404
+			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429
+			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus500
+		>,
+		DeleteApiUnitsByTypeByUnitIdLinksByLinkIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiUnitsByTypeByUnitIdLinksByLinkId({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Remove unit source link
+ * {@link /api/units/:type/:unitId/links/:linkId}
+ */
+export function useDeleteApiUnitsByTypeByUnitIdLinksByLinkId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus204,
+			ResponseErrorConfig<
+				| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus403
+				| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404
+				| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus422
+				| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429
+				| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus500
+			>,
+			DeleteApiUnitsByTypeByUnitIdLinksByLinkIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? deleteApiUnitsByTypeByUnitIdLinksByLinkIdMutationKey();
+
+	const baseOptions = deleteApiUnitsByTypeByUnitIdLinksByLinkIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus403
+			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404
+			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429
+			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus500
+		>,
+		DeleteApiUnitsByTypeByUnitIdLinksByLinkIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus403
+			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404
+			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429
+			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus500
+		>,
+		DeleteApiUnitsByTypeByUnitIdLinksByLinkIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus403
+			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404
+			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429
+			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus500
+		>,
+		DeleteApiUnitsByTypeByUnitIdLinksByLinkIdOptions,
 		TContext
 	>;
 }

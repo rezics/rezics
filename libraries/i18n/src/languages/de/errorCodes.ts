@@ -187,6 +187,7 @@ export default {
 		"Diese Tag-Kuratierung wurde an anderer Stelle geändert. Die neueste Reihenfolge wurde geladen; versuche es erneut.",
 	TagNotFound: "Dieser Tag wurde nicht gefunden.",
 	UnitVersionNotFound: "Diese Unit-Version wurde nicht gefunden.",
+	UnitSourceLinkNotFound: "Dieser Quellenlink des Werks wurde nicht gefunden.",
 	UnitVariantKindMismatch:
 		"Eine Variante und ihr Haupteintrag müssen denselben unterstützten Unit-Typ verwenden.",
 	UnitVariantTargetIsVariant: "Eine Variante muss direkt auf einen Haupteintrag verweisen.",

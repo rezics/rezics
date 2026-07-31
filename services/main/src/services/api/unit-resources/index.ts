@@ -60,6 +60,7 @@ import {
 	UnitAssociationParams,
 	UnitAliasParams,
 	UnitAliasUnitParams,
+	UnitSourceLinkParams,
 	UnitUnitParams,
 	UnitTagParams,
 	UnitVersionParams,
@@ -98,7 +99,12 @@ import {
 	UnitVersionResponse,
 	VoteResponse,
 } from "../schema/response";
-import { AliasNotFound, TagApplicationNotFound, UnitVersionNotFound } from "./errors";
+import {
+	AliasNotFound,
+	TagApplicationNotFound,
+	UnitSourceLinkNotFound,
+	UnitVersionNotFound,
+} from "./errors";
 import { TagNotFound } from "../tags/errors";
 import {
 	CreditAttributionNotFound,
@@ -1084,6 +1090,50 @@ export default new Elysia()
 						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
 					},
 					detail: { summary: "Add unit source link", tags: ["Units"] },
+				},
+			)
+			.delete(
+				"/links/:linkId",
+				async ({ params, profile, authorization }) => {
+					await checkUnitType(params.unitId, params.type);
+					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
+						"external-links",
+					]);
+					await database.transaction(async (tx) => {
+						const deleted = await tx
+							.delete(unitSourceLink)
+							.where(
+								and(
+									eq(unitSourceLink.id, params.linkId),
+									eq(unitSourceLink.unitId, params.unitId),
+								),
+							)
+							.returning({ id: unitSourceLink.id });
+						if (!deleted.length) throw new UnitSourceLinkNotFound();
+						await recordUnitRevision(tx, {
+							unitId: params.unitId,
+							actorProfileId: profile.unitId,
+							event: "update",
+						});
+					});
+					return new Response(null, { status: StatusCodes.NO_CONTENT });
+				},
+				{
+					access: "write:unit:update",
+					params: UnitSourceLinkParams,
+					response: {
+						[StatusCodes.NO_CONTENT]: t.Void(),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"UnitSourceLinkNotFound",
+						]),
+					},
+					detail: {
+						summary: "Remove unit source link",
+						tags: ["Units"],
+						responses: NoContentResponse,
+					},
 				},
 			)
 			.put(

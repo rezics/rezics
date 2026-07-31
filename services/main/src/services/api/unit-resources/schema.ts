@@ -118,6 +118,13 @@ export const UnitAssociationParams = t.Object({
 });
 export type UnitAssociationParams = Static<typeof UnitAssociationParams>;
 
+export const UnitSourceLinkParams = t.Object({
+	type: WorkUnitType,
+	unitId: Uuid,
+	linkId: Uuid,
+});
+export type UnitSourceLinkParams = Static<typeof UnitSourceLinkParams>;
+
 export const UnitTagParams = t.Object({ type: WorkUnitType, unitId: Uuid, tagId: Uuid });
 export type UnitTagParams = Static<typeof UnitTagParams>;
 

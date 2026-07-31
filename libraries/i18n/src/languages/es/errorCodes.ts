@@ -187,6 +187,7 @@ export default {
 		"Esta selección de etiquetas se ha modificado en otro lugar. Se ha cargado el orden más reciente; inténtalo de nuevo.",
 	TagNotFound: "No se ha encontrado esta etiqueta.",
 	UnitVersionNotFound: "No se ha encontrado esta versión de la Unit.",
+	UnitSourceLinkNotFound: "No se ha encontrado este enlace de fuente de la obra.",
 	UnitVariantKindMismatch:
 		"Una variante y su elemento principal deben usar el mismo tipo de Unit compatible.",
 	UnitVariantTargetIsVariant: "Una variante debe apuntar directamente a un elemento principal.",

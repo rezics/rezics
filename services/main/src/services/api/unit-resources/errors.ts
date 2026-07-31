@@ -38,9 +38,16 @@ export class UnitVersionNotFound extends Data.TaggedError("UnitVersionNotFound")
 	readonly message = "Unit version not found";
 }
 
+export class UnitSourceLinkNotFound extends Data.TaggedError("UnitSourceLinkNotFound") {
+	static readonly status = StatusCodes.NOT_FOUND as const;
+	readonly status = UnitSourceLinkNotFound.status;
+	readonly message = "Unit source link not found";
+}
+
 export const UnitResourceErrors = [
 	AliasNotFound,
 	TagApplicationNotFound,
 	UnitTagCurationChanged,
 	UnitVersionNotFound,
+	UnitSourceLinkNotFound,
 ] as const;

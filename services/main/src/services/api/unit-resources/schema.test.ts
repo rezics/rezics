@@ -1,7 +1,12 @@
 import { Value } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { AddUnitLinkBody, ListEntityEntriesQuery, UpdateUnitTagCurationBody } from "./schema";
+import {
+	AddUnitLinkBody,
+	ListEntityEntriesQuery,
+	UnitSourceLinkParams,
+	UpdateUnitTagCurationBody,
+} from "./schema";
 
 describe("Unit resource API schemas", () => {
 	it("accepts only direct-permission or public credit Entity searches", () => {
@@ -37,6 +42,23 @@ describe("Unit resource API schemas", () => {
 			false,
 		);
 		expect(Value.Check(AddUnitLinkBody, { ...sourceLink, label: "Official page" })).toBe(false);
+	});
+
+	it("requires a Unit-scoped link identifier for source-link removal", () => {
+		expect(
+			Value.Check(UnitSourceLinkParams, {
+				type: "software",
+				unitId: "018ff2b7-7c00-7000-8000-000000000001",
+				linkId: "018ff2b7-7c00-7000-8000-000000000002",
+			}),
+		).toBe(true);
+		expect(
+			Value.Check(UnitSourceLinkParams, {
+				type: "software",
+				unitId: "018ff2b7-7c00-7000-8000-000000000001",
+				linkId: "not-a-unit-link-id",
+			}),
+		).toBe(false);
 	});
 
 	it("requires a position exactly when a Unit Tag is pinned", () => {

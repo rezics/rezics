@@ -165,6 +165,7 @@ export default {
 		"이 태그 선별이 다른 곳에서 변경되었습니다. 최신 순서를 불러왔으니 다시 시도하세요.",
 	TagNotFound: "이 태그를 찾을 수 없습니다.",
 	UnitVersionNotFound: "이 유닛 버전을 찾을 수 없습니다.",
+	UnitSourceLinkNotFound: "이 작품의 출처 링크를 찾을 수 없습니다.",
 	UnitVariantKindMismatch: "변형과 주 버전은 동일한 지원 유닛 유형을 사용해야 합니다.",
 	UnitVariantTargetIsVariant: "변형은 반드시 주 버전을 직접 가리켜야 합니다.",
 	UnitVariantSourceHasVariants: "변형이 있는 주 버전은 변형이 될 수 없습니다.",

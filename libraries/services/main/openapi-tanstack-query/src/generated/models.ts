@@ -5462,6 +5462,7 @@ export const ApiErrorCode = {
 	TagApplicationNotFound: "TagApplicationNotFound",
 	UnitTagCurationChanged: "UnitTagCurationChanged",
 	UnitVersionNotFound: "UnitVersionNotFound",
+	UnitSourceLinkNotFound: "UnitSourceLinkNotFound",
 	InvalidMessageCursor: "InvalidMessageCursor",
 	ConversationNotFound: "ConversationNotFound",
 	ConversationParticipantsInvalid: "ConversationParticipantsInvalid",
@@ -69925,6 +69926,169 @@ export type PostApiUnitsByTypeByUnitIdLinksResponse =
 	| PostApiUnitsByTypeByUnitIdLinksStatus422
 	| PostApiUnitsByTypeByUnitIdLinksStatus429
 	| PostApiUnitsByTypeByUnitIdLinksStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdPath = {
+	type: ("book" | "software" | "media") | "series";
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	linkId: string;
+};
+
+/**
+ * @type void
+ */
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus204 = void;
+
+export const DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	UnitSourceLinkNotFound: "UnitSourceLinkNotFound",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdOptions = {
+	body?: never;
+	path: DeleteApiUnitsByTypeByUnitIdLinksByLinkIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdResponses = {
+	"204": DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus204;
+	"403": DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus403;
+	"404": DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404;
+	"422": DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus422;
+	"429": DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429;
+	"500": DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdResponse =
+	| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus204
+	| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus403
+	| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404
+	| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus422
+	| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429
+	| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus500;
 
 /**
  * @type object

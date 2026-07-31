@@ -401,6 +401,8 @@ import type {
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdResponses,
 	PostApiUnitsByTypeByUnitIdLinksOptions,
 	PostApiUnitsByTypeByUnitIdLinksResponses,
+	DeleteApiUnitsByTypeByUnitIdLinksByLinkIdOptions,
+	DeleteApiUnitsByTypeByUnitIdLinksByLinkIdResponses,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdOptions,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdResponses,
 	PatchApiUnitsByTypeByUnitIdTagsByTagIdOptions,
@@ -4632,6 +4634,26 @@ export function postApiUnitsByTypeByUnitIdLinks<ThrowOnError extends boolean = t
 		],
 		...config,
 	}) as Promise<RequestResult<PostApiUnitsByTypeByUnitIdLinksResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Remove unit source link
+ * {@link /api/units/:type/:unitId/links/:linkId}
+ */
+export function deleteApiUnitsByTypeByUnitIdLinksByLinkId<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiUnitsByTypeByUnitIdLinksByLinkIdOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiUnitsByTypeByUnitIdLinksByLinkIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/units/{type}/{unitId}/links/{linkId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<DeleteApiUnitsByTypeByUnitIdLinksByLinkIdResponses, ThrowOnError>>;
 }
 
 /**

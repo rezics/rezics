@@ -10218,6 +10218,7 @@
 					"TagApplicationNotFound",
 					"UnitTagCurationChanged",
 					"UnitVersionNotFound",
+					"UnitSourceLinkNotFound",
 					"InvalidMessageCursor",
 					"ConversationNotFound",
 					"ConversationParticipantsInvalid",
@@ -91565,6 +91566,162 @@
 				},
 				"operationId": "postApiUnitsByTypeByUnitIdLinks",
 				"x-rezics-policy-operation-id": "postApiUnitsByTypeByUnitIdLinks"
+			}
+		},
+		"/api/units/{type}/{unitId}/links/{linkId}": {
+			"delete": {
+				"summary": "Remove unit source link",
+				"tags": ["Units"],
+				"responses": {
+					"204": {
+						"description": "Response for status 204",
+						"content": { "type": "void" }
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"UnitSourceLinkNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "type",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"anyOf": [
+								{
+									"anyOf": [
+										{ "const": "book", "type": "string" },
+										{ "const": "software", "type": "string" },
+										{ "const": "media", "type": "string" }
+									]
+								},
+								{ "const": "series", "type": "string" }
+							]
+						}
+					},
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "linkId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"operationId": "deleteApiUnitsByTypeByUnitIdLinksByLinkId",
+				"x-rezics-policy-operation-id": "deleteApiUnitsByTypeByUnitIdLinksByLinkId"
 			}
 		},
 		"/api/units/{type}/{unitId}/tags/{tagId}": {

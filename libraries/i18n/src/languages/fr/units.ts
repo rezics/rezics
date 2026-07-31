@@ -361,6 +361,103 @@ export default {
 		canonicalUnit: "Unit principale",
 		saveSettings: "Enregistrer les réglages",
 	},
+	relationshipManagement: {
+		credits: "Crédits",
+		creditsDescription:
+			"Personnes et organisations ayant créé, développé ou publié cette œuvre.",
+		subjects: "Sujets",
+		subjectsDescription:
+			"Personnes, organisations et thèmes représentés ou abordés dans cette œuvre.",
+		links: "Liens vers les sources",
+		linksDescription: "Justificatifs externes et pages de référence associés à cette œuvre.",
+		variants: "Œuvre principale et variantes",
+		variantsDescription:
+			"Gérer la structure directe entre l’œuvre principale et ses variantes.",
+		addCredit: "Ajouter un crédit",
+		addCreditDescription: "Choisissez la personne ou l’organisation à créditer et son rôle.",
+		creditedEntity: "Personne ou organisation créditée",
+		addSubject: "Ajouter un sujet",
+		addSubjectDescription:
+			"Choisissez le sujet, son rôle et, si nécessaire, une page de contexte.",
+		subjectEntity: "Sujet",
+		addLink: "Ajouter une source",
+		addLinkDescription: "Identifiez la source et liez sa page de référence publique.",
+		sourceEntity: "Source",
+		urlPlaceholder: `${verbatimTerms.https.value}://`,
+		cancel: "Annuler",
+		confirmRemove: "Supprimer",
+		noCredits: "Aucun crédit pour le moment",
+		noCreditsDescription:
+			"Ajoutez les personnes ou organisations ayant contribué à cette œuvre.",
+		noSubjects: "Aucun sujet pour le moment",
+		noSubjectsDescription:
+			"Ajoutez les personnes, organisations ou thèmes représentés dans l’œuvre.",
+		noLinks: "Aucun lien source pour le moment",
+		noLinksDescription:
+			"Ajoutez une page publique fiable qui étaye les informations sur l’œuvre.",
+		noVariants: "Aucune variante pour le moment",
+		noVariantsDescription:
+			"Cette œuvre est l’œuvre principale et ne possède aucune variante liée.",
+		pendingRequests: "Consentement en attente",
+		unavailableUnit: "Élément indisponible",
+		contextPost: insert("Contexte : {{title}}", { title: String }),
+		removeCreditTitle: "Supprimer ce crédit ?",
+		removeCreditDescription: insert("Supprimer {{name}} des crédits de cette œuvre ?", {
+			name: String,
+		}),
+		removeCreditLabel: insert("Supprimer le crédit de {{name}}", { name: String }),
+		removeSubjectTitle: "Supprimer ce sujet ?",
+		removeSubjectDescription: insert("Supprimer {{name}} des sujets de cette œuvre ?", {
+			name: String,
+		}),
+		removeSubjectLabel: insert("Supprimer le sujet {{name}}", { name: String }),
+		removeLinkTitle: "Supprimer ce lien source ?",
+		removeLinkDescription: insert("Supprimer le lien source provenant de {{name}} ?", {
+			name: String,
+		}),
+		removeLinkLabel: insert("Supprimer le lien source de {{name}}", { name: String }),
+		openLinkLabel: insert("Ouvrir le lien source de {{name}}", { name: String }),
+		creditAdded: "Crédit ajouté",
+		subjectAdded: "Sujet ajouté",
+		linkAdded: "Lien source ajouté",
+		creditRemoved: "Crédit supprimé",
+		subjectRemoved: "Sujet supprimé",
+		linkRemoved: "Lien source supprimé",
+		requestConfirmationTitle: "Le consentement est requis",
+		requestConfirmationDescription:
+			"Cet élément contrôle les relations entrantes. Envoyez une demande afin que ses responsables puissent examiner la relation.",
+		sendRequest: "Envoyer la demande",
+		requestSent: "Demande envoyée",
+		requestSentDescription: "La relation apparaîtra après son acceptation par l’autre partie.",
+		main: "Œuvre principale",
+		variant: "Variante",
+		standalone: "Œuvre indépendante",
+		standaloneDescription:
+			"Cette œuvre n’est liée à aucune œuvre principale et ne possède aucune variante.",
+		attachMain: "Choisir l’œuvre principale",
+		changeMain: "Changer l’œuvre principale",
+		changeMainDescription:
+			"Choisissez une œuvre principale du même type. L’état actuel sera vérifié à l’enregistrement.",
+		mainUnit: "Œuvre principale",
+		saveMain: "Enregistrer l’œuvre principale",
+		mainUpdated: "Œuvre principale mise à jour",
+		detachMain: "Détacher de l’œuvre principale",
+		detachMainTitle: "Détacher de l’œuvre principale ?",
+		detachMainDescription:
+			"Cette œuvre deviendra indépendante. L’œuvre principale et les autres variantes resteront inchangées.",
+		mainDetached: "Œuvre détachée de l’œuvre principale",
+		mainUnavailable: "Œuvre principale indisponible",
+		mainUnavailableDescription:
+			"L’œuvre principale actuelle n’est pas accessible et ne peut pas être modifiée ici en toute sécurité.",
+		promote: "Définir comme principale",
+		promoteTitle: "Définir cette variante comme œuvre principale ?",
+		promoteDescription: insert(
+			"Définir {{name}} comme œuvre principale ? Cette œuvre et les autres variantes seront déplacées sous celle-ci.",
+			{ name: String },
+		),
+		promoteLabel: insert("Définir {{name}} comme œuvre principale", { name: String }),
+		promoted: "Variante définie comme œuvre principale",
+	},
 	contentLanguages: {
 		controlLabel: "Langue du contenu",
 		settings: "Réglages des langues",
