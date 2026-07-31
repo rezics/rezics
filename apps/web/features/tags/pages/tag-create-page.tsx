@@ -19,6 +19,7 @@ import {
 	ManagementWorkspaceSectionHeader,
 	Textarea,
 } from "@rezics/ui";
+import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
 import { LoaderCircle, TriangleAlert } from "lucide-react";
 import { type FormEvent, useState } from "react";
@@ -29,9 +30,12 @@ import { CommunityUnitSearchPrompt } from "@/features/create/components/communit
 import { TagCommunityUnitSearchSubject } from "@/features/create/model/community-unit-search";
 import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
 import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/use-form-draft-content-language";
+import { portableTextDraftContentLanguageSample } from "@/features/content-languages/model/draft-content-language-sample";
 import { studioSectionHref } from "@/features/create/routing/studio-routes";
+import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import { writePortableText } from "@/lib/block";
 import { type TagCreateIntent, unitTagVoteDuplicateSearchHref } from "../routing/tag-create-route";
 import { unitTagsHref } from "../routing/tag-links";
 
@@ -51,11 +55,15 @@ export function TagCreatePage({
 	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const [title, setTitle] = useState(initialTitle);
+	const [body, setBody] = useState<PortableTextValue>([]);
 	const [searchConfirmed, setSearchConfirmed] = useState(false);
 	const [voteCompletion, setVoteCompletion] = useState<UnitTagVoteCompletionState>({
 		status: "idle",
 	});
-	const language = useFormDraftContentLanguage(["title", "summary"]);
+	const language = useFormDraftContentLanguage(
+		["title", "summary"],
+		portableTextDraftContentLanguageSample(body),
+	);
 	const create = usePostApiTags();
 	const applyGlobal = usePutApiUnitsByTypeByUnitIdTagsByTagId();
 	const returnHref =
@@ -109,6 +117,7 @@ export function TagCreatePage({
 						...(String(form.get("summary") ?? "").trim()
 							? { summary: String(form.get("summary")).trim() }
 							: {}),
+						...(body.length ? { description: writePortableText(body) } : {}),
 					},
 				},
 			});
@@ -198,6 +207,7 @@ export function TagCreatePage({
 								<FieldLabel>{t.ui.summary}</FieldLabel>
 								<Textarea maxLength={2000} name="summary" />
 							</Field>
+							<PortableTextEditor label={t.ui.body} onChange={setBody} value={body} />
 							<DraftContentLanguageField controller={language.controller} />
 							<RequestFailure error={create.error} fallback={t.ui.retryLater} />
 							<Button

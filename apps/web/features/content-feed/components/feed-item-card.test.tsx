@@ -33,7 +33,8 @@ vi.mock("@/features/recommendations/tracking", () => ({
 }));
 
 vi.mock("./feed-card-actions", () => ({
-	FeedEngagementBar: () => null,
+	FeedEngagementBar: ({ discussionHref }: { readonly discussionHref?: string }) =>
+		discussionHref ? <a aria-label="discussion action" href={discussionHref} /> : null,
 	FeedOverflowMenu: () => null,
 }));
 
@@ -419,6 +420,9 @@ describe("FeedUnitCard", () => {
 		expect(screen.getByText("我的讀書會")).toBeTruthy();
 		expect(screen.getByText("9.0／10 · 2 人評分")).toBeTruthy();
 		expect(screen.queryByText("全域評分")).toBeNull();
+		expect(screen.getByLabelText("discussion action").getAttribute("href")).toBe(
+			`/units/book/${book.id}/discussion`,
+		);
 	});
 
 	it("renders Realm identity through its avatar without showing its banner", () => {
@@ -496,5 +500,8 @@ describe("FeedUnitCard", () => {
 						link.getAttribute("href") === `/posts/${contextPostId}?realmId=${realmId}`,
 				),
 		).toBe(true);
+		expect(screen.getByLabelText("discussion action").getAttribute("href")).toBe(
+			`/tags/${tag.id}/discussion`,
+		);
 	});
 });

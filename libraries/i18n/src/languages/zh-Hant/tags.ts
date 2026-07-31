@@ -5,6 +5,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: followTerms } = zhHantTerminology.follow;
+const { forms: postTerms } = zhHantTerminology.post;
 const { forms: tagStructureTerms } = zhHantTerminology.tagStructure;
 
 export default {
@@ -64,6 +65,22 @@ export default {
 		pathLabel: `依序排列的${tagStructureTerms.label}`,
 	},
 	detail: {
+		sections: "標籤詳情頁籤",
+		tabs: { overview: "總覽", discussion: "討論", content: "相關內容", structure: "階層" },
+		overviewTitle: "標籤正文",
+		overviewDescription: "閱讀這個標籤的完整說明；摘要仍用於卡片及快速瀏覽。",
+		bodyEmpty: "這個標籤尚未填寫正文。",
+		discussionTitle: "討論",
+		discussionDescription: `建立以這個標籤為主題的${postTerms.label}，並參與既有討論。`,
+		contentTitle: "相關內容",
+		contentDescription: "瀏覽套用這個標籤的作品與其他內容。",
+		structureTitle: "標籤階層",
+		structureDescription: "檢視這個標籤在社群通過之標籤結構中的位置。",
+		editTitle: "編輯標籤內容",
+		editDescription: "更新目前內容語言的標題、摘要與正文。",
+		editNavigation: "標籤內容管理",
+		backToTag: "返回標籤",
+		backToEditOverview: "返回編輯總覽",
 		childrenTitle: "直接子標籤",
 		childrenDescription: `這些關係來自通過投票且由社群鎖定的${tagStructureTerms.label}；每個子標籤下方會顯示其直接子標籤。`,
 		noChildren: "這個標籤目前沒有通過的直接子標籤。",

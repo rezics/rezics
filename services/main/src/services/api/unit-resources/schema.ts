@@ -64,6 +64,17 @@ export const ListTagsQuery = t.Object(
 );
 export type ListTagsQuery = Static<typeof ListTagsQuery>;
 
+export const TagDetailQuery = t.Object(LocalizationLanguageQuery, {
+	additionalProperties: false,
+});
+export type TagDetailQuery = Static<typeof TagDetailQuery>;
+
+export const TagDetailParams = t.Object({ tagId: Uuid });
+export type TagDetailParams = Static<typeof TagDetailParams>;
+
+export const TagLocalizationParams = t.Object({ tagId: Uuid, language: ContentLanguage });
+export type TagLocalizationParams = Static<typeof TagLocalizationParams>;
+
 export const AddUnitCreditBody = t.Object({
 	creditedUnitId: Uuid,
 	role: t.UnionEnum(CreditAttributionRoleValues),

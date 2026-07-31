@@ -289,8 +289,8 @@ import type {
 	DeleteApiPlatformUsersByUserIdSessionsResponses,
 	DeleteApiPlatformUsersByUserIdSessionsBySessionIdOptions,
 	DeleteApiPlatformUsersByUserIdSessionsBySessionIdResponses,
-	GetApiTagsByTagIdOptions,
-	GetApiTagsByTagIdResponses,
+	GetApiTagsByTagIdHierarchyOptions,
+	GetApiTagsByTagIdHierarchyResponses,
 	PostApiTagStructuresOptions,
 	PostApiTagStructuresResponses,
 	GetApiTagStructuresByStructureIdOptions,
@@ -395,6 +395,10 @@ import type {
 	GetApiTagsResponses,
 	PostApiTagsOptions,
 	PostApiTagsResponses,
+	GetApiTagsByTagIdOptions,
+	GetApiTagsByTagIdResponses,
+	PutApiTagsByTagIdLocalizationsByLanguageOptions,
+	PutApiTagsByTagIdLocalizationsByLanguageResponses,
 	GetApiUnitsByTypeByUnitIdAliasesOptions,
 	GetApiUnitsByTypeByUnitIdAliasesResponses,
 	PostApiUnitsByTypeByUnitIdAliasesOptions,
@@ -3487,22 +3491,22 @@ export function deleteApiPlatformUsersByUserIdSessionsBySessionId<
 
 /**
  * @summary Get a Tag with direct children and grandchildren
- * {@link /api/tags/:tagId}
+ * {@link /api/tags/:tagId/hierarchy}
  */
-export function getApiTagsByTagId<ThrowOnError extends boolean = true>(
-	options: Options<GetApiTagsByTagIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiTagsByTagIdResponses, ThrowOnError>> {
+export function getApiTagsByTagIdHierarchy<ThrowOnError extends boolean = true>(
+	options: Options<GetApiTagsByTagIdHierarchyOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiTagsByTagIdHierarchyResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/tags/{tagId}",
+		url: "/api/tags/{tagId}/hierarchy",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<GetApiTagsByTagIdResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiTagsByTagIdHierarchyResponses, ThrowOnError>>;
 }
 
 /**
@@ -4555,6 +4559,40 @@ export function postApiTags<ThrowOnError extends boolean = true>(
 		],
 		...config,
 	}) as Promise<RequestResult<PostApiTagsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Get tag detail
+ * {@link /api/tags/:tagId}
+ */
+export function getApiTagsByTagId<ThrowOnError extends boolean = true>(
+	options: Options<GetApiTagsByTagIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiTagsByTagIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/tags/{tagId}", ...config }) as Promise<
+		RequestResult<GetApiTagsByTagIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Create or replace tag localization
+ * {@link /api/tags/:tagId/localizations/:language}
+ */
+export function putApiTagsByTagIdLocalizationsByLanguage<ThrowOnError extends boolean = true>(
+	options: Options<PutApiTagsByTagIdLocalizationsByLanguageOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiTagsByTagIdLocalizationsByLanguageResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/tags/{tagId}/localizations/{language}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiTagsByTagIdLocalizationsByLanguageResponses, ThrowOnError>>;
 }
 
 /**

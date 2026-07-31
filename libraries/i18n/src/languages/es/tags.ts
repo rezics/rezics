@@ -5,6 +5,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = esTerminology.realm;
 const { forms: followTerms } = esTerminology.follow;
+const { forms: postTerms } = esTerminology.post;
 const { forms: tagStructureTerms } = esTerminology.tagStructure;
 
 export default {
@@ -65,6 +66,30 @@ export default {
 		pathLabel: `${tagStructureTerms.label} ordenada`,
 	},
 	detail: {
+		sections: "Pestañas de detalles de la etiqueta",
+		tabs: {
+			overview: "Resumen",
+			discussion: "Debate",
+			content: "Contenido relacionado",
+			structure: "Jerarquía",
+		},
+		overviewTitle: "Descripción de la etiqueta",
+		overviewDescription:
+			"Lee la explicación completa de esta etiqueta. El resumen permanece visible en tarjetas y vistas previas.",
+		bodyEmpty: "Esta etiqueta todavía no tiene una descripción detallada.",
+		discussionTitle: "Debate",
+		discussionDescription: `Crea ${postTerms.plural} sobre esta etiqueta y participa en los debates existentes.`,
+		contentTitle: "Contenido relacionado",
+		contentDescription: "Explora obras y otros contenidos que usan esta etiqueta.",
+		structureTitle: "Jerarquía de la etiqueta",
+		structureDescription:
+			"Consulta dónde aparece esta etiqueta en estructuras aprobadas por la comunidad.",
+		editTitle: "Editar el contenido de la etiqueta",
+		editDescription:
+			"Actualiza el título, el resumen y la descripción en el idioma de contenido actual.",
+		editNavigation: "Gestión del contenido de la etiqueta",
+		backToTag: "Volver a la etiqueta",
+		backToEditOverview: "Volver al resumen de edición",
 		childrenTitle: "Etiquetas subordinadas directas",
 		childrenDescription: `Estas relaciones proceden de ${tagStructureTerms.plural} aceptadas y bloqueadas por la comunidad. Cada elemento subordinado muestra sus propios elementos subordinados directos.`,
 		noChildren: "Esta etiqueta todavía no tiene elementos subordinados directos aceptados.",

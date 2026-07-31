@@ -59,7 +59,7 @@ import { AttributionLinks } from "./attribution-list";
 import { postHref } from "./url";
 
 const ReplyEngagementPolicy = {
-	comments: false,
+	discussion: "none",
 	primary: "none",
 } as const satisfies FeedActionPolicy;
 

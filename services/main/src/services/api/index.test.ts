@@ -192,7 +192,7 @@ describe("API root", () => {
 
 	it("requires authentication before checking the Tag hierarchy preview capability", async () => {
 		const response = await api.handle(
-			new Request("http://localhost/api/tags/00000000-0000-7000-8000-000000000001"),
+			new Request("http://localhost/api/tags/00000000-0000-7000-8000-000000000001/hierarchy"),
 		);
 
 		expect(response.status).toBe(StatusCodes.UNAUTHORIZED);
@@ -239,7 +239,7 @@ describe("API root", () => {
 		const document = toOpenAPISchema(api);
 		const methods = ["delete", "get", "post", "put"] as const;
 		const previewProtectedOperations = Object.entries(document.paths).flatMap(([path, item]) =>
-			path === "/api/tags/{tagId}" ||
+			path === "/api/tags/{tagId}/hierarchy" ||
 			path.startsWith("/api/tag-structures") ||
 			path.includes("/tag-structures/")
 				? methods.flatMap((method) => {
@@ -253,7 +253,7 @@ describe("API root", () => {
 		);
 
 		expect(previewProtectedOperations).toEqual([
-			"GET /api/tags/{tagId}",
+			"GET /api/tags/{tagId}/hierarchy",
 			"POST /api/tag-structures",
 			"GET /api/tag-structures/{structureId}",
 			"PUT /api/tag-structures/{structureId}",

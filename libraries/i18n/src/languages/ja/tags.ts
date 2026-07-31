@@ -5,6 +5,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = jaTerminology.realm;
 const { forms: followTerms } = jaTerminology.follow;
+const { forms: postTerms } = jaTerminology.post;
 const { forms: tagStructureTerms } = jaTerminology.tagStructure;
 
 export default {
@@ -64,6 +65,28 @@ export default {
 		pathLabel: `順序付き${tagStructureTerms.label}`,
 	},
 	detail: {
+		sections: "タグ詳細タブ",
+		tabs: {
+			overview: "概要",
+			discussion: "ディスカッション",
+			content: "関連コンテンツ",
+			structure: "階層",
+		},
+		overviewTitle: "タグ本文",
+		overviewDescription:
+			"このタグの詳しい説明を表示します。要約はカードやプレビューに表示されます。",
+		bodyEmpty: "このタグにはまだ本文がありません。",
+		discussionTitle: "ディスカッション",
+		discussionDescription: `このタグを主題に${postTerms.label}を作成し、既存のディスカッションに参加できます。`,
+		contentTitle: "関連コンテンツ",
+		contentDescription: "このタグが付けられた作品やその他のコンテンツを表示します。",
+		structureTitle: "タグ階層",
+		structureDescription: "コミュニティで承認されたタグ構造内での位置を確認できます。",
+		editTitle: "タグの内容を編集",
+		editDescription: "現在のコンテンツ言語のタイトル、要約、本文を更新します。",
+		editNavigation: "タグ内容の管理",
+		backToTag: "タグに戻る",
+		backToEditOverview: "編集の概要に戻る",
 		childrenTitle: "直接の子タグ",
 		childrenDescription: `これらの関係は、承認されたコミュニティロック中の${tagStructureTerms.pluralLabel}から来ています。各子は自身の直接の子を表示します。`,
 		noChildren: "このタグにはまだ承認された直接の子タグがありません。",

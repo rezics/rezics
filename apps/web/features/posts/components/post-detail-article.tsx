@@ -25,7 +25,7 @@ type PostKind = Extract<
 >["postKind"];
 
 const PostDetailActionPolicy = {
-	comments: true,
+	discussion: "replies",
 	primary: "none",
 } as const satisfies FeedActionPolicy;
 
@@ -89,7 +89,7 @@ export function PostDetailArticle({
 			) : null}
 			<div className="mt-6 border-border-weak border-t pt-2">
 				<ConnectedFeedEngagementBar
-					href={commentsHref}
+					discussionHref={commentsHref}
 					itemId={post.id}
 					overflowMenu={engagementOverflow}
 					policy={PostDetailActionPolicy}

@@ -5,6 +5,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = enTerminology.realm;
 const { forms: followTerms } = enTerminology.follow;
+const { forms: postTerms } = enTerminology.post;
 const { forms: tagStructureTerms } = enTerminology.tagStructure;
 
 export default {
@@ -65,6 +66,28 @@ export default {
 		pathLabel: `Ordered ${tagStructureTerms.label}`,
 	},
 	detail: {
+		sections: "Tag detail tabs",
+		tabs: {
+			overview: "Overview",
+			discussion: "Discussion",
+			content: "Related content",
+			structure: "Hierarchy",
+		},
+		overviewTitle: "Tag body",
+		overviewDescription:
+			"Read the full explanation of this Tag. Its summary remains available on cards and previews.",
+		bodyEmpty: "This Tag does not have a body yet.",
+		discussionTitle: "Discussion",
+		discussionDescription: `Create ${postTerms.pluralLabel} about this Tag and join existing discussions.`,
+		contentTitle: "Related content",
+		contentDescription: "Browse works and other content that use this Tag.",
+		structureTitle: "Tag hierarchy",
+		structureDescription: "See where this Tag appears in community-accepted Tag structures.",
+		editTitle: "Edit Tag content",
+		editDescription: "Update the title, summary, and body in the current content language.",
+		editNavigation: "Tag content management",
+		backToTag: "Back to Tag",
+		backToEditOverview: "Back to edit overview",
 		childrenTitle: "Direct child Tags",
 		childrenDescription: `These relationships come from accepted, community-locked ${tagStructureTerms.pluralLabel}. Each child shows its direct children.`,
 		noChildren: "This Tag has no accepted direct children yet.",

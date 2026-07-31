@@ -13,7 +13,7 @@ describe("getFeedActionPolicy", () => {
 			"review" as const,
 		]) {
 			expect(getFeedActionPolicy({ itemType: "post", postKind })).toEqual({
-				comments: true,
+				discussion: "replies",
 				primary: "none",
 			});
 		}
@@ -23,8 +23,17 @@ describe("getFeedActionPolicy", () => {
 		"gives %s Units a follow action",
 		(unitKind) => {
 			expect(getFeedActionPolicy({ itemType: "unit", unitKind })).toEqual({
-				comments: false,
+				discussion: "none",
 				primary: "follow",
+			});
+		},
+	);
+
+	it.each(["book", "media", "software", "series", "tag"] as const)(
+		"gives %s Units a discussion destination",
+		(unitKind) => {
+			expect(getFeedActionPolicy({ itemType: "unit", unitKind })).toMatchObject({
+				discussion: "discussions",
 			});
 		},
 	);

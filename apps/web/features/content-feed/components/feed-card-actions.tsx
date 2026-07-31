@@ -118,10 +118,11 @@ export function FeedVoteControl({
 
 export function FeedEngagementBar({
 	actions,
+	discussionHref,
 	href,
 	initialReaction,
 	itemId,
-	onCommentsClick,
+	onDiscussionClick,
 	overflowMenu,
 	policy,
 	reactionDisabled = false,
@@ -129,12 +130,14 @@ export function FeedEngagementBar({
 	replyCount = 0,
 	score,
 	showErrors = true,
+	showShare = true,
 }: {
 	actions?: ReactNode;
+	discussionHref?: string;
 	href?: string;
 	initialReaction: FeedReaction;
 	itemId: string;
-	onCommentsClick?: () => void;
+	onDiscussionClick?: () => void;
 	overflowMenu?: ReactNode;
 	policy: FeedActionPolicy;
 	reactionDisabled?: boolean;
@@ -142,8 +145,9 @@ export function FeedEngagementBar({
 	replyCount?: number;
 	score: number;
 	showErrors?: boolean;
+	showShare?: boolean;
 }) {
-	const { locale, t } = useTranslation(["feed", "ui"]);
+	const { locale, t } = useTranslation(["engagement", "feed", "ui"]);
 	const { data: session } = useHydratedSession();
 	const { openAuthPortal } = useAuthPortal();
 	const queryClient = useQueryClient();
@@ -199,11 +203,13 @@ export function FeedEngagementBar({
 					reaction={reaction}
 					score={formattedScore}
 				/>
-				{policy.comments && href ? (
+				{policy.discussion !== "none" && discussionHref ? (
 					<Button asChild className="min-h-8" size="sm" variant="secondary">
-						<Link href={href} onClick={onCommentsClick}>
+						<Link href={discussionHref} onClick={onDiscussionClick}>
 							<MessageCircleIcon aria-hidden data-icon="inline-start" />
-							{t.feed.actions.comments({ count: replyCount })}
+							{policy.discussion === "replies"
+								? t.feed.actions.comments({ count: replyCount })
+								: t.engagement.discussions}
 						</Link>
 					</Button>
 				) : null}
@@ -223,7 +229,7 @@ export function FeedEngagementBar({
 					/>
 				) : null}
 				{actions}
-				<FeedShareSurface href={href} itemId={itemId} />
+				{showShare ? <FeedShareSurface href={href} itemId={itemId} /> : null}
 				{overflowMenu}
 			</div>
 			{showErrors ? (
@@ -238,6 +244,7 @@ export function FeedEngagementBar({
 
 export function ConnectedFeedEngagementBar({
 	actions,
+	discussionHref,
 	href,
 	itemId,
 	overflowMenu,
@@ -245,8 +252,10 @@ export function ConnectedFeedEngagementBar({
 	realmId,
 	replyCount = 0,
 	showErrors = true,
+	showShare = true,
 }: {
 	readonly actions?: ReactNode;
+	readonly discussionHref?: string;
 	readonly href?: string;
 	readonly itemId: string;
 	readonly overflowMenu?: ReactNode;
@@ -254,6 +263,7 @@ export function ConnectedFeedEngagementBar({
 	readonly realmId?: string;
 	readonly replyCount?: number;
 	readonly showErrors?: boolean;
+	readonly showShare?: boolean;
 }) {
 	const reactions = useGetApiReactionsUnitsByUnitId({
 		path: { unitId: itemId },
@@ -269,6 +279,7 @@ export function ConnectedFeedEngagementBar({
 		<>
 			<FeedEngagementBar
 				actions={actions}
+				discussionHref={discussionHref}
 				href={href}
 				initialReaction={parseFeedReaction(reactions.data?.viewerReaction)}
 				itemId={itemId}
@@ -279,6 +290,7 @@ export function ConnectedFeedEngagementBar({
 				replyCount={replyCount}
 				score={(counts.get("upvote") ?? 0) - (counts.get("downvote") ?? 0)}
 				showErrors={showErrors}
+				showShare={showShare}
 			/>
 			{showErrors ? <RequestFailure error={reactions.error} /> : null}
 		</>

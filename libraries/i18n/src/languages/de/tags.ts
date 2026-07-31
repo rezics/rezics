@@ -5,6 +5,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = deTerminology.realm;
 const { forms: followTerms } = deTerminology.follow;
+const { forms: postTerms } = deTerminology.post;
 const { forms: tagStructureTerms } = deTerminology.tagStructure;
 
 export default {
@@ -65,6 +66,30 @@ export default {
 		pathLabel: `Geordneter ${tagStructureTerms.label}`,
 	},
 	detail: {
+		sections: "Registerkarten der Tag-Details",
+		tabs: {
+			overview: "Übersicht",
+			discussion: "Diskussion",
+			content: "Verwandte Inhalte",
+			structure: "Hierarchie",
+		},
+		overviewTitle: "Tag-Beschreibung",
+		overviewDescription:
+			"Lies die vollständige Erklärung dieses Tags. Die Zusammenfassung bleibt auf Karten und in Vorschauen sichtbar.",
+		bodyEmpty: "Dieser Tag hat noch keine ausführliche Beschreibung.",
+		discussionTitle: "Diskussion",
+		discussionDescription: `Erstelle ${postTerms.pluralLabel} zu diesem Tag und beteilige dich an Diskussionen.`,
+		contentTitle: "Verwandte Inhalte",
+		contentDescription: "Durchsuche Werke und andere Inhalte, die diesen Tag verwenden.",
+		structureTitle: "Tag-Hierarchie",
+		structureDescription:
+			"Sieh, wo dieser Tag in von der Community angenommenen Tag-Strukturen vorkommt.",
+		editTitle: "Tag-Inhalt bearbeiten",
+		editDescription:
+			"Aktualisiere Titel, Zusammenfassung und Beschreibung in der aktuellen Inhaltssprache.",
+		editNavigation: "Tag-Inhalte verwalten",
+		backToTag: "Zurück zum Tag",
+		backToEditOverview: "Zurück zur Bearbeitungsübersicht",
 		childrenTitle: "Direkt untergeordnete Tags",
 		childrenDescription: `Diese Beziehungen stammen aus angenommenen und von der Community gesperrten ${tagStructureTerms.pluralLabel}. Für jedes untergeordnete Element werden seine direkten Unterelemente angezeigt.`,
 		noChildren: "Dieser Tag hat noch keine angenommenen direkten Unterelemente.",

@@ -26,6 +26,7 @@ import { useTranslation } from "@/i18n/client";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { readPortableText } from "@/lib/block";
 import { getFeedActionPolicy } from "../model/feed-action-policy";
+import { feedUnitDiscussionHref } from "../model/feed-discussion-route";
 import {
 	FeedCard,
 	FeedCardContent,
@@ -293,6 +294,7 @@ export function FeedPostCard({
 			) : null}
 			<CardContent className="px-4 pb-4 sm:px-5">
 				<FeedItemActions
+					discussionHref={href}
 					href={href}
 					item={post}
 					onOpen={trackOpen}
@@ -360,6 +362,11 @@ export function FeedUnitCard({
 		realmTagContext?.summary ?? unit.summary ?? "",
 		realmTagContext?.language ?? unit.language,
 	);
+	const discussionBaseHref = feedUnitDiscussionHref(unit.unitKind, unit.id);
+	const discussionHref =
+		preserveDisplayedLanguage && unit.language && discussionBaseHref
+			? withContentLanguage(discussionBaseHref, unit.language)
+			: discussionBaseHref;
 	const isRealm = unit.unitKind === "realm";
 
 	return (
@@ -438,6 +445,7 @@ export function FeedUnitCard({
 			)}
 			<CardContent className="px-4 pb-4 sm:px-5">
 				<FeedItemActions
+					discussionHref={discussionHref}
 					href={href}
 					item={unit}
 					onOpen={trackOpen}
@@ -554,11 +562,13 @@ function FeedItemMain({
 }
 
 function FeedItemActions({
+	discussionHref,
 	href,
 	item,
 	onOpen,
 	overflowMenu,
 }: {
+	discussionHref?: string;
 	href?: string;
 	item: FeedItem;
 	onOpen: () => void;
@@ -571,10 +581,11 @@ function FeedItemActions({
 	);
 	return (
 		<FeedEngagementBar
+			discussionHref={discussionHref}
 			href={href}
 			initialReaction={parseFeedReaction(item.viewerReaction)}
 			itemId={item.id}
-			onCommentsClick={onOpen}
+			onDiscussionClick={onOpen}
 			overflowMenu={overflowMenu}
 			policy={policy}
 			realmId={item.realmId ?? undefined}

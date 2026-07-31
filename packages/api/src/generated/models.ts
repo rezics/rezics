@@ -50572,7 +50572,7 @@ export type DeleteApiPlatformUsersByUserIdSessionsBySessionIdResponse =
 /**
  * @type object
  */
-export type GetApiTagsByTagIdPath = {
+export type GetApiTagsByTagIdHierarchyPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -50581,7 +50581,7 @@ export type GetApiTagsByTagIdPath = {
 	tagId: string;
 };
 
-export const GetApiTagsByTagIdLocalizationLanguagesEnum = {
+export const GetApiTagsByTagIdHierarchyLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -50591,17 +50591,17 @@ export const GetApiTagsByTagIdLocalizationLanguagesEnum = {
 	es: "es",
 } as const;
 
-export type GetApiTagsByTagIdLocalizationLanguagesEnum =
-	(typeof GetApiTagsByTagIdLocalizationLanguagesEnum)[keyof typeof GetApiTagsByTagIdLocalizationLanguagesEnum];
+export type GetApiTagsByTagIdHierarchyLocalizationLanguagesEnum =
+	(typeof GetApiTagsByTagIdHierarchyLocalizationLanguagesEnum)[keyof typeof GetApiTagsByTagIdHierarchyLocalizationLanguagesEnum];
 
 /**
  * @type object
  */
-export type GetApiTagsByTagIdQuery = {
+export type GetApiTagsByTagIdHierarchyQuery = {
 	/**
 	 * @type array | undefined
 	 */
-	localizationLanguages?: GetApiTagsByTagIdLocalizationLanguagesEnum[];
+	localizationLanguages?: GetApiTagsByTagIdHierarchyLocalizationLanguagesEnum[];
 	/**
 	 * @default 30
 	 */
@@ -50612,7 +50612,7 @@ export type GetApiTagsByTagIdQuery = {
 	grandchildLimit?: string | number;
 };
 
-export const GetApiTagsByTagIdStatus200Language = {
+export const GetApiTagsByTagIdHierarchyStatus200Language = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -50622,10 +50622,10 @@ export const GetApiTagsByTagIdStatus200Language = {
 	es: "es",
 } as const;
 
-export type GetApiTagsByTagIdStatus200Language =
-	(typeof GetApiTagsByTagIdStatus200Language)[keyof typeof GetApiTagsByTagIdStatus200Language];
+export type GetApiTagsByTagIdHierarchyStatus200Language =
+	(typeof GetApiTagsByTagIdHierarchyStatus200Language)[keyof typeof GetApiTagsByTagIdHierarchyStatus200Language];
 
-export const GetApiTagsByTagIdStatus200ChildrenLanguage = {
+export const GetApiTagsByTagIdHierarchyStatus200ChildrenLanguage = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -50635,10 +50635,10 @@ export const GetApiTagsByTagIdStatus200ChildrenLanguage = {
 	es: "es",
 } as const;
 
-export type GetApiTagsByTagIdStatus200ChildrenLanguage =
-	(typeof GetApiTagsByTagIdStatus200ChildrenLanguage)[keyof typeof GetApiTagsByTagIdStatus200ChildrenLanguage];
+export type GetApiTagsByTagIdHierarchyStatus200ChildrenLanguage =
+	(typeof GetApiTagsByTagIdHierarchyStatus200ChildrenLanguage)[keyof typeof GetApiTagsByTagIdHierarchyStatus200ChildrenLanguage];
 
-export const GetApiTagsByTagIdStatus200ChildrenChildrenLanguage = {
+export const GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenLanguage = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -50648,20 +50648,20 @@ export const GetApiTagsByTagIdStatus200ChildrenChildrenLanguage = {
 	es: "es",
 } as const;
 
-export type GetApiTagsByTagIdStatus200ChildrenChildrenLanguage =
-	(typeof GetApiTagsByTagIdStatus200ChildrenChildrenLanguage)[keyof typeof GetApiTagsByTagIdStatus200ChildrenChildrenLanguage];
+export type GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenLanguage =
+	(typeof GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenLanguage)[keyof typeof GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenLanguage];
 
 /**
  * @type object
  */
-export type GetApiTagsByTagIdStatus200 = {
+export type GetApiTagsByTagIdHierarchyStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
 	tagId: string;
-	language: (GetApiTagsByTagIdStatus200Language | null) | null;
+	language: (GetApiTagsByTagIdHierarchyStatus200Language | null) | null;
 	title: (string | null) | null;
 	summary: (string | null) | null;
 	/**
@@ -50674,7 +50674,7 @@ export type GetApiTagsByTagIdStatus200 = {
 		 * @type string
 		 */
 		tagId: string;
-		language: (GetApiTagsByTagIdStatus200ChildrenLanguage | null) | null;
+		language: (GetApiTagsByTagIdHierarchyStatus200ChildrenLanguage | null) | null;
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		score: string | number;
@@ -50689,7 +50689,7 @@ export type GetApiTagsByTagIdStatus200 = {
 			 * @type string
 			 */
 			tagId: string;
-			language: (GetApiTagsByTagIdStatus200ChildrenChildrenLanguage | null) | null;
+			language: (GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenLanguage | null) | null;
 			title: (string | null) | null;
 			summary: (string | null) | null;
 			score: string | number;
@@ -50701,7 +50701,7 @@ export type GetApiTagsByTagIdStatus200 = {
 /**
  * @type object
  */
-export type GetApiTagsByTagIdStatus401 = {
+export type GetApiTagsByTagIdHierarchyStatus401 = {
 	/**
 	 * @type object
 	 */
@@ -50729,7 +50729,7 @@ export type GetApiTagsByTagIdStatus401 = {
 /**
  * @type object
  */
-export type GetApiTagsByTagIdStatus403 = {
+export type GetApiTagsByTagIdHierarchyStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -50757,7 +50757,7 @@ export type GetApiTagsByTagIdStatus403 = {
 /**
  * @type object
  */
-export type GetApiTagsByTagIdStatus404 = {
+export type GetApiTagsByTagIdHierarchyStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -50785,20 +50785,20 @@ export type GetApiTagsByTagIdStatus404 = {
 /**
  * @type object
  */
-export type GetApiTagsByTagIdStatus422 = ValidationError;
+export type GetApiTagsByTagIdHierarchyStatus422 = ValidationError;
 
-export const GetApiTagsByTagIdStatus429ErrorCodeEnum = {
+export const GetApiTagsByTagIdHierarchyStatus429ErrorCodeEnum = {
 	ApiQuotaExceeded: "ApiQuotaExceeded",
 	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
 } as const;
 
-export type GetApiTagsByTagIdStatus429ErrorCodeEnum =
-	(typeof GetApiTagsByTagIdStatus429ErrorCodeEnum)[keyof typeof GetApiTagsByTagIdStatus429ErrorCodeEnum];
+export type GetApiTagsByTagIdHierarchyStatus429ErrorCodeEnum =
+	(typeof GetApiTagsByTagIdHierarchyStatus429ErrorCodeEnum)[keyof typeof GetApiTagsByTagIdHierarchyStatus429ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type GetApiTagsByTagIdStatus429 = {
+export type GetApiTagsByTagIdHierarchyStatus429 = {
 	/**
 	 * @type object
 	 */
@@ -50806,7 +50806,7 @@ export type GetApiTagsByTagIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: GetApiTagsByTagIdStatus429ErrorCodeEnum;
+		code: GetApiTagsByTagIdHierarchyStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -50822,42 +50822,42 @@ export type GetApiTagsByTagIdStatus429 = {
 /**
  * @type object
  */
-export type GetApiTagsByTagIdStatus500 = InternalError;
+export type GetApiTagsByTagIdHierarchyStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type GetApiTagsByTagIdOptions = {
+export type GetApiTagsByTagIdHierarchyOptions = {
 	body?: never;
-	path: GetApiTagsByTagIdPath;
-	query?: GetApiTagsByTagIdQuery;
+	path: GetApiTagsByTagIdHierarchyPath;
+	query?: GetApiTagsByTagIdHierarchyQuery;
 	headers?: never;
 };
 
 /**
  * @type object
  */
-export type GetApiTagsByTagIdResponses = {
-	"200": GetApiTagsByTagIdStatus200;
-	"401": GetApiTagsByTagIdStatus401;
-	"403": GetApiTagsByTagIdStatus403;
-	"404": GetApiTagsByTagIdStatus404;
-	"422": GetApiTagsByTagIdStatus422;
-	"429": GetApiTagsByTagIdStatus429;
-	"500": GetApiTagsByTagIdStatus500;
+export type GetApiTagsByTagIdHierarchyResponses = {
+	"200": GetApiTagsByTagIdHierarchyStatus200;
+	"401": GetApiTagsByTagIdHierarchyStatus401;
+	"403": GetApiTagsByTagIdHierarchyStatus403;
+	"404": GetApiTagsByTagIdHierarchyStatus404;
+	"422": GetApiTagsByTagIdHierarchyStatus422;
+	"429": GetApiTagsByTagIdHierarchyStatus429;
+	"500": GetApiTagsByTagIdHierarchyStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type GetApiTagsByTagIdResponse =
-	| GetApiTagsByTagIdStatus200
-	| GetApiTagsByTagIdStatus401
-	| GetApiTagsByTagIdStatus403
-	| GetApiTagsByTagIdStatus404
-	| GetApiTagsByTagIdStatus422
-	| GetApiTagsByTagIdStatus429
-	| GetApiTagsByTagIdStatus500;
+export type GetApiTagsByTagIdHierarchyResponse =
+	| GetApiTagsByTagIdHierarchyStatus200
+	| GetApiTagsByTagIdHierarchyStatus401
+	| GetApiTagsByTagIdHierarchyStatus403
+	| GetApiTagsByTagIdHierarchyStatus404
+	| GetApiTagsByTagIdHierarchyStatus422
+	| GetApiTagsByTagIdHierarchyStatus429
+	| GetApiTagsByTagIdHierarchyStatus500;
 
 /**
  * @type object
@@ -72735,6 +72735,923 @@ export type PostApiTagsResponse =
 	| PostApiTagsStatus422
 	| PostApiTagsStatus429
 	| PostApiTagsStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	tagId: string;
+};
+
+export const GetApiTagsByTagIdLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagsByTagIdLocalizationLanguagesEnum =
+	(typeof GetApiTagsByTagIdLocalizationLanguagesEnum)[keyof typeof GetApiTagsByTagIdLocalizationLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdQuery = {
+	/**
+	 * @type array | undefined
+	 */
+	localizationLanguages?: GetApiTagsByTagIdLocalizationLanguagesEnum[];
+};
+
+export const GetApiTagsByTagIdStatus200LanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagsByTagIdStatus200LanguageEnum =
+	(typeof GetApiTagsByTagIdStatus200LanguageEnum)[keyof typeof GetApiTagsByTagIdStatus200LanguageEnum];
+
+export const GetApiTagsByTagIdStatus200AvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiTagsByTagIdStatus200AvatarIconPrefixEnum =
+	(typeof GetApiTagsByTagIdStatus200AvatarIconPrefixEnum)[keyof typeof GetApiTagsByTagIdStatus200AvatarIconPrefixEnum];
+
+export const GetApiTagsByTagIdStatus200LocalizationsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagsByTagIdStatus200LocalizationsLanguageEnum =
+	(typeof GetApiTagsByTagIdStatus200LocalizationsLanguageEnum)[keyof typeof GetApiTagsByTagIdStatus200LocalizationsLanguageEnum];
+
+export const GetApiTagsByTagIdStatus200LocalizationsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiTagsByTagIdStatus200LocalizationsAvatarIconPrefixEnum =
+	(typeof GetApiTagsByTagIdStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof GetApiTagsByTagIdStatus200LocalizationsAvatarIconPrefixEnum];
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @type string
+	 */
+	language: GetApiTagsByTagIdStatus200LanguageEnum;
+	avatar:
+		| (
+				| (
+						| {
+								/**
+								 * @type string
+								 */
+								type: "image";
+								/**
+								 * @type object
+								 */
+								image: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+								};
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "emoji";
+								/**
+								 * @maxLength 64
+								 * @type string
+								 */
+								emoji: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "icon";
+								/**
+								 * @type object
+								 */
+								icon: {
+									/**
+									 * @type string
+									 */
+									provider: "font-awesome";
+									/**
+									 * @type string
+									 */
+									prefix: GetApiTagsByTagIdStatus200AvatarIconPrefixEnum;
+									/**
+									 * @maxLength 128
+									 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+									 * @type string
+									 */
+									name: string;
+								};
+						  }
+				  )
+				| null
+		  )
+		| null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+	/**
+	 * @type array
+	 */
+	localizations: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @type string
+		 */
+		language: GetApiTagsByTagIdStatus200LocalizationsLanguageEnum;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		title: (string | null) | null;
+		summary: (string | null) | null;
+		description:
+			| ({
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "image";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								assetId: string;
+								/**
+								 * @type string | undefined
+								 */
+								alt?: string;
+								/**
+								 * @type string | undefined
+								 */
+								caption?: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!(?:block|image)$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+			  } | null)
+			| null;
+		avatar:
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: GetApiTagsByTagIdStatus200LocalizationsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
+			| null;
+		banner:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		cover:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+	/**
+	 * @type object
+	 */
+	capabilities: {
+		/**
+		 * @type boolean
+		 */
+		canEdit: boolean;
+	};
+};
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'TagNotFound'
+		 * @type string
+		 */
+		code: "TagNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdOptions = {
+	body?: never;
+	path: GetApiTagsByTagIdPath;
+	query?: GetApiTagsByTagIdQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdResponses = {
+	"200": GetApiTagsByTagIdStatus200;
+	"404": GetApiTagsByTagIdStatus404;
+	"422": GetApiTagsByTagIdStatus422;
+	"500": GetApiTagsByTagIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiTagsByTagIdResponse =
+	| GetApiTagsByTagIdStatus200
+	| GetApiTagsByTagIdStatus404
+	| GetApiTagsByTagIdStatus422
+	| GetApiTagsByTagIdStatus500;
+
+export const PutApiTagsByTagIdLocalizationsByLanguageLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PutApiTagsByTagIdLocalizationsByLanguageLanguage =
+	(typeof PutApiTagsByTagIdLocalizationsByLanguageLanguage)[keyof typeof PutApiTagsByTagIdLocalizationsByLanguageLanguage];
+
+/**
+ * @type object
+ */
+export type PutApiTagsByTagIdLocalizationsByLanguagePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	tagId: string;
+	/**
+	 * @type string
+	 */
+	language: PutApiTagsByTagIdLocalizationsByLanguageLanguage;
+};
+
+/**
+ * @type object
+ */
+export type PutApiTagsByTagIdLocalizationsByLanguageStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiTagsByTagIdLocalizationsByLanguageStatus400 = MalformedRequestBody;
+
+export const PutApiTagsByTagIdLocalizationsByLanguageStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+} as const;
+
+export type PutApiTagsByTagIdLocalizationsByLanguageStatus403ErrorCodeEnum =
+	(typeof PutApiTagsByTagIdLocalizationsByLanguageStatus403ErrorCodeEnum)[keyof typeof PutApiTagsByTagIdLocalizationsByLanguageStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiTagsByTagIdLocalizationsByLanguageStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: PutApiTagsByTagIdLocalizationsByLanguageStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiTagsByTagIdLocalizationsByLanguageStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ImageAssetNotFound: "ImageAssetNotFound",
+} as const;
+
+export type PutApiTagsByTagIdLocalizationsByLanguageStatus404ErrorCodeEnum =
+	(typeof PutApiTagsByTagIdLocalizationsByLanguageStatus404ErrorCodeEnum)[keyof typeof PutApiTagsByTagIdLocalizationsByLanguageStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiTagsByTagIdLocalizationsByLanguageStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PutApiTagsByTagIdLocalizationsByLanguageStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiTagsByTagIdLocalizationsByLanguageStatus422 = ValidationError;
+
+export const PutApiTagsByTagIdLocalizationsByLanguageStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiTagsByTagIdLocalizationsByLanguageStatus429ErrorCodeEnum =
+	(typeof PutApiTagsByTagIdLocalizationsByLanguageStatus429ErrorCodeEnum)[keyof typeof PutApiTagsByTagIdLocalizationsByLanguageStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiTagsByTagIdLocalizationsByLanguageStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: PutApiTagsByTagIdLocalizationsByLanguageStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiTagsByTagIdLocalizationsByLanguageStatus500 = InternalError;
+
+export const PutApiTagsByTagIdLocalizationsByLanguageRequestAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PutApiTagsByTagIdLocalizationsByLanguageRequestAvatarIconPrefixEnum =
+	(typeof PutApiTagsByTagIdLocalizationsByLanguageRequestAvatarIconPrefixEnum)[keyof typeof PutApiTagsByTagIdLocalizationsByLanguageRequestAvatarIconPrefixEnum];
+
+/**
+ * @type object
+ */
+export type PutApiTagsByTagIdLocalizationsByLanguageBody = {
+	/**
+	 * @minLength 1
+	 * @maxLength 500
+	 * @type string
+	 */
+	title: string;
+	/**
+	 * @maxLength 2000
+	 * @type string | undefined
+	 */
+	summary?: string;
+	/**
+	 * @type object | undefined
+	 */
+	description?: {
+		/**
+		 * @type string
+		 */
+		_type: "portable-text";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		content: (
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type string
+					 */
+					_type: "block";
+					/**
+					 * @type array
+					 */
+					children: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "span";
+								/**
+								 * @type string
+								 */
+								text: string;
+								/**
+								 * @type array | undefined
+								 */
+								marks?: string[];
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "unit-mention";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								unitId: string;
+						  }
+					)[];
+					/**
+					 * @type array | undefined
+					 */
+					markDefs?: {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+					}[];
+					/**
+					 * @type string | undefined
+					 */
+					listItem?: string;
+					/**
+					 * @type string | undefined
+					 */
+					style?: string;
+					/**
+					 * @minLength 1
+					 * @type integer | undefined
+					 */
+					level?: number;
+					[key: string]: unknown;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type string
+					 */
+					_type: "image";
+					/**
+					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+					 * @type string
+					 */
+					assetId: string;
+					/**
+					 * @type string | undefined
+					 */
+					alt?: string;
+					/**
+					 * @type string | undefined
+					 */
+					caption?: string;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @pattern ^(?!(?:block|image)$).+
+					 * @type string
+					 */
+					_type: string;
+					[key: string]: unknown;
+			  }
+		)[];
+	};
+	avatar?:
+		| (
+				| (
+						| {
+								/**
+								 * @type string
+								 */
+								type: "image";
+								/**
+								 * @type object
+								 */
+								image: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									assetId: string;
+								};
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "emoji";
+								/**
+								 * @description
+								 * Format: `single-emoji-grapheme`
+								 * @maxLength 64
+								 * @type string
+								 */
+								emoji: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "icon";
+								/**
+								 * @type object
+								 */
+								icon: {
+									/**
+									 * @type string
+									 */
+									provider: "font-awesome";
+									/**
+									 * @type string
+									 */
+									prefix: PutApiTagsByTagIdLocalizationsByLanguageRequestAvatarIconPrefixEnum;
+									/**
+									 * @maxLength 128
+									 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+									 * @type string
+									 */
+									name: string;
+								};
+						  }
+				  )
+				| null
+		  )
+		| null;
+	bannerAssetId?: (string | null) | null;
+	coverAssetId?: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type PutApiTagsByTagIdLocalizationsByLanguageOptions = {
+	body: PutApiTagsByTagIdLocalizationsByLanguageBody;
+	path: PutApiTagsByTagIdLocalizationsByLanguagePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiTagsByTagIdLocalizationsByLanguageResponses = {
+	"200": PutApiTagsByTagIdLocalizationsByLanguageStatus200;
+	"400": PutApiTagsByTagIdLocalizationsByLanguageStatus400;
+	"403": PutApiTagsByTagIdLocalizationsByLanguageStatus403;
+	"404": PutApiTagsByTagIdLocalizationsByLanguageStatus404;
+	"422": PutApiTagsByTagIdLocalizationsByLanguageStatus422;
+	"429": PutApiTagsByTagIdLocalizationsByLanguageStatus429;
+	"500": PutApiTagsByTagIdLocalizationsByLanguageStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiTagsByTagIdLocalizationsByLanguageResponse =
+	| PutApiTagsByTagIdLocalizationsByLanguageStatus200
+	| PutApiTagsByTagIdLocalizationsByLanguageStatus400
+	| PutApiTagsByTagIdLocalizationsByLanguageStatus403
+	| PutApiTagsByTagIdLocalizationsByLanguageStatus404
+	| PutApiTagsByTagIdLocalizationsByLanguageStatus422
+	| PutApiTagsByTagIdLocalizationsByLanguageStatus429
+	| PutApiTagsByTagIdLocalizationsByLanguageStatus500;
 
 export const GetApiUnitsByTypeByUnitIdAliasesType = {
 	slug_namespace: "slug_namespace",

@@ -25,6 +25,8 @@ export function publicUnitHref(kind: string, value: PublicUnitRouteValue): strin
 			return `/units/${kind}/${value.id}`;
 		case "entity":
 			return `/entities/${value.id}`;
+		case "tag":
+			return `/tags/${value.id}`;
 		case "structure":
 			return `/tag-structures/${value.id}`;
 		case "collection":

@@ -55,6 +55,9 @@ import {
 	EntityLocalizationParams,
 	ListEntityEntriesQuery,
 	ListTagsQuery,
+	TagDetailParams,
+	TagDetailQuery,
+	TagLocalizationParams,
 	TagUnitBody,
 	UpdateUnitTagCurationBody,
 	UnitAssociationParams,
@@ -93,6 +96,7 @@ import {
 	EntityListResponse,
 	SubjectAssociationResponse,
 	TagApplicationResponse,
+	TagDetailResponse,
 	TagListResponse,
 	toPortableTextResponse,
 	UnitSourceLinkResponse,
@@ -574,6 +578,95 @@ export default new Elysia()
 					body: CreateUnitResourceBody,
 					response: { [StatusCodes.OK]: IdResponse },
 					detail: { summary: "Create tag", tags: ["Tags"] },
+				},
+			)
+			.get(
+				"/:tagId",
+				async ({ params, query, request }) => {
+					const identity = await resolveIdentity(request, "unit:read");
+					const localizationLanguages = query.localizationLanguages ?? [];
+					const [tagEntry] = await database
+						.select({
+							id: unit.id,
+							createdAt: unit.createdAt,
+							updatedAt: unit.updatedAt,
+						})
+						.from(tag)
+						.innerJoin(unit, eq(unit.id, tag.id))
+						.where(and(eq(tag.id, params.tagId), publiclyReadableUnitCondition()))
+						.limit(1);
+					if (!tagEntry) throw new TagNotFound();
+					const storedLocalizations = await database
+						.select()
+						.from(unitLocalization)
+						.where(eq(unitLocalization.unitId, params.tagId))
+						.orderBy(asc(unitLocalization.position), asc(unitLocalization.language));
+					const selectedLocalization = resolveUnitLocalizationFromOrdered(
+						storedLocalizations,
+						localizationLanguages,
+					);
+					if (!selectedLocalization) throw new TagNotFound();
+					const canEdit = await identity.authorization.unit.canUpdate(params.tagId, [
+						"localizations",
+					]);
+					return {
+						...tagEntry,
+						language: selectedLocalization.language,
+						avatar: presentAvatar(
+							resolveUnitLocalizationAvatarFromOrdered(
+								storedLocalizations,
+								localizationLanguages,
+							),
+						),
+						localizations: storedLocalizations.map((row) => ({
+							unitId: row.unitId,
+							language: row.language,
+							position: row.position,
+							title: row.title,
+							summary: row.summary,
+							description:
+								row.description === null
+									? null
+									: toPortableTextResponse(row.description),
+							avatar: presentAvatar(avatarReferenceFromColumns(row)),
+							banner: presentImageAsset(row.bannerAssetId, "banner"),
+							cover: presentImageAsset(row.coverAssetId, "cover"),
+							createdAt: row.createdAt,
+							updatedAt: row.updatedAt,
+						})),
+						capabilities: { canEdit },
+					};
+				},
+				{
+					params: TagDetailParams,
+					query: TagDetailQuery,
+					response: {
+						[StatusCodes.OK]: TagDetailResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagNotFound"]),
+					},
+					detail: { summary: "Get tag detail", tags: ["Tags"] },
+				},
+			)
+			.put(
+				"/:tagId/localizations/:language",
+				async ({ params, authorization, body }) => {
+					await checkUnitType(params.tagId, "tag");
+					await upsertLocalization(params.tagId, authorization, {
+						...body,
+						language: params.language,
+					});
+					return { id: params.tagId };
+				},
+				{
+					access: "contribute:unit:update",
+					params: TagLocalizationParams,
+					body: UnitLocalizationBody,
+					response: {
+						[StatusCodes.OK]: IdResponse,
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: UnitResourceMutationNotFoundResponse,
+					},
+					detail: { summary: "Create or replace tag localization", tags: ["Tags"] },
 				},
 			),
 	)

@@ -5,6 +5,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = zhHansTerminology.realm;
 const { forms: followTerms } = zhHansTerminology.follow;
+const { forms: postTerms } = zhHansTerminology.post;
 const { forms: tagStructureTerms } = zhHansTerminology.tagStructure;
 
 export default {
@@ -64,6 +65,22 @@ export default {
 		pathLabel: `依序排列的${tagStructureTerms.label}`,
 	},
 	detail: {
+		sections: "标签详情页签",
+		tabs: { overview: "总览", discussion: "讨论", content: "相关内容", structure: "层级" },
+		overviewTitle: "标签正文",
+		overviewDescription: "阅读这个标签的完整说明；摘要仍用于卡片和快速浏览。",
+		bodyEmpty: "这个标签尚未填写正文。",
+		discussionTitle: "讨论",
+		discussionDescription: `创建以这个标签为主题的${postTerms.label}，并参与已有讨论。`,
+		contentTitle: "相关内容",
+		contentDescription: "浏览应用了这个标签的作品和其他内容。",
+		structureTitle: "标签层级",
+		structureDescription: "查看这个标签在社区通过的标签结构中的位置。",
+		editTitle: "编辑标签内容",
+		editDescription: "更新当前内容语言的标题、摘要和正文。",
+		editNavigation: "标签内容管理",
+		backToTag: "返回标签",
+		backToEditOverview: "返回编辑总览",
 		childrenTitle: "直接子标签",
 		childrenDescription: `这些关系来自通过投票且由社区锁定的${tagStructureTerms.label}；每个子标签下方会显示其直接子标签。`,
 		noChildren: "这个标签当前没有通过的直接子标签。",

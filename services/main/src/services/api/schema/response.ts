@@ -501,6 +501,15 @@ export const TagListResponse = t.Object({
 		}),
 	),
 });
+export const TagDetailResponse = t.Object({
+	id: Uuid,
+	language: ContentLanguage,
+	avatar: AvatarResponse,
+	createdAt: DateTime,
+	updatedAt: DateTime,
+	localizations: t.Array(LocalizationResponse, { minItems: 1 }),
+	capabilities: t.Object({ canEdit: t.Boolean() }),
+});
 export const CollectionListResponse = t.Object({
 	items: t.Array(
 		t.Object({

@@ -69,6 +69,45 @@ vi.mock("@/features/content-languages/hooks/use-form-draft-content-language", ()
 	}),
 }));
 
+vi.mock("@/features/content-languages/model/draft-content-language-sample", () => ({
+	portableTextDraftContentLanguageSample: () => undefined,
+}));
+
+vi.mock("@/features/editor/portable-text-editor", () => ({
+	PortableTextEditor: ({
+		label,
+		onChange,
+	}: {
+		readonly label: string;
+		readonly onChange: (value: readonly unknown[]) => void;
+	}) => (
+		<button
+			type="button"
+			onClick={() =>
+				onChange([
+					{
+						_key: "body-block",
+						_type: "block",
+						children: [{ _key: "body-span", _type: "span", marks: [], text: "Body" }],
+						markDefs: [],
+						style: "normal",
+					},
+				])
+			}
+		>
+			{label}
+		</button>
+	),
+}));
+
+vi.mock("@/lib/block", () => ({
+	writePortableText: (content: readonly unknown[]) => ({
+		_key: "body-document",
+		_type: "portable-text",
+		content,
+	}),
+}));
+
 vi.mock("@/i18n/client", () => ({
 	useTranslation: () => ({
 		t: {
@@ -90,6 +129,7 @@ vi.mock("@/i18n/client", () => ({
 				},
 			},
 			ui: {
+				body: "Body",
 				retryLater: "Try again later",
 				summary: "Summary",
 				title: "Title",
@@ -230,6 +270,25 @@ describe("TagCreatePage", () => {
 		expect(destination.pathname).toBe(`/units/book/${UnitId}/tags`);
 		expect(destination.searchParams.get("context")).toBe("global");
 		expect(destination.searchParams.get("createdTagId")).toBe(TagId);
+	});
+
+	it("stores an optional full body separately from the Tag summary", async () => {
+		render(<TagCreatePage initialTitle={Title} intent={{ kind: "standalone" }} />);
+
+		fireEvent.click(screen.getByRole("button", { name: "Body" }));
+		fireEvent.click(screen.getByRole("button", { name: "Confirm search" }));
+		fireEvent.click(screen.getByRole("button", { name: "Create Tag" }));
+
+		await waitFor(() => expect(state.create).toHaveBeenCalledOnce());
+		expect(state.create.mock.calls[0]?.[0].body.localization).toMatchObject({
+			language: "en",
+			title: Title,
+			description: {
+				_key: "body-document",
+				_type: "portable-text",
+				content: [expect.objectContaining({ _type: "block" })],
+			},
+		});
 	});
 
 	it("retries only the vote after creation succeeds but application fails", async () => {

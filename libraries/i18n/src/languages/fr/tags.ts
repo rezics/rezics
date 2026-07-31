@@ -5,6 +5,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = frTerminology.realm;
 const { forms: followTerms } = frTerminology.follow;
+const { forms: postTerms } = frTerminology.post;
 const { forms: tagStructureTerms } = frTerminology.tagStructure;
 
 export default {
@@ -65,6 +66,30 @@ export default {
 		pathLabel: `${tagStructureTerms.label} ordonné`,
 	},
 	detail: {
+		sections: "Onglets des détails du tag",
+		tabs: {
+			overview: "Vue d’ensemble",
+			discussion: "Discussion",
+			content: "Contenu associé",
+			structure: "Hiérarchie",
+		},
+		overviewTitle: "Description du tag",
+		overviewDescription:
+			"Consultez l’explication complète de ce tag. Son résumé reste affiché dans les cartes et les aperçus.",
+		bodyEmpty: "Ce tag n’a pas encore de description détaillée.",
+		discussionTitle: "Discussion",
+		discussionDescription: `Créez des ${postTerms.plural} sur ce tag et participez aux discussions existantes.`,
+		contentTitle: "Contenu associé",
+		contentDescription: "Parcourez les œuvres et autres contenus qui utilisent ce tag.",
+		structureTitle: "Hiérarchie du tag",
+		structureDescription:
+			"Repérez ce tag dans les structures de tags approuvées par la communauté.",
+		editTitle: "Modifier le contenu du tag",
+		editDescription:
+			"Mettez à jour le titre, le résumé et la description dans la langue de contenu actuelle.",
+		editNavigation: "Gestion du contenu du tag",
+		backToTag: "Retour au tag",
+		backToEditOverview: "Retour à la vue d’ensemble de l’édition",
 		childrenTitle: "Étiquettes enfants directes",
 		childrenDescription: `Ces relations proviennent de ${tagStructureTerms.plural} acceptés et verrouillés par la communauté. Chaque enfant affiche ses propres enfants directs.`,
 		noChildren: "Cette étiquette ne possède encore aucun enfant direct accepté.",

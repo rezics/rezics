@@ -5,6 +5,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = koTerminology.realm;
 const { forms: followTerms } = koTerminology.follow;
+const { forms: postTerms } = koTerminology.post;
 const { forms: tagStructureTerms } = koTerminology.tagStructure;
 
 export default {
@@ -64,6 +65,23 @@ export default {
 		pathLabel: `정렬된 ${tagStructureTerms.label}`,
 	},
 	detail: {
+		sections: "태그 상세 탭",
+		tabs: { overview: "개요", discussion: "토론", content: "관련 콘텐츠", structure: "계층" },
+		overviewTitle: "태그 본문",
+		overviewDescription:
+			"이 태그의 전체 설명을 읽습니다. 요약은 카드와 미리보기에 계속 표시됩니다.",
+		bodyEmpty: "이 태그에는 아직 본문이 없습니다.",
+		discussionTitle: "토론",
+		discussionDescription: `이 태그를 주제로 ${postTerms.label}을 만들고 기존 토론에 참여합니다.`,
+		contentTitle: "관련 콘텐츠",
+		contentDescription: "이 태그를 사용하는 작품과 기타 콘텐츠를 둘러봅니다.",
+		structureTitle: "태그 계층",
+		structureDescription: "커뮤니티에서 승인된 태그 구조에서 이 태그의 위치를 확인합니다.",
+		editTitle: "태그 콘텐츠 편집",
+		editDescription: "현재 콘텐츠 언어의 제목, 요약, 본문을 업데이트합니다.",
+		editNavigation: "태그 콘텐츠 관리",
+		backToTag: "태그로 돌아가기",
+		backToEditOverview: "편집 개요로 돌아가기",
 		childrenTitle: "직접 하위 태그",
 		childrenDescription: `이러한 관계는 승인된, 커뮤니티 잠금된 ${tagStructureTerms.pluralLabel}에서 가져옵니다. 각 하위는 자신의 직접 하위를 표시합니다.`,
 		noChildren: "이 태그에는 아직 승인된 직접 하위가 없습니다.",

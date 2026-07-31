@@ -948,14 +948,14 @@ import type {
 	DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus404,
 	DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus422,
 	DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus500,
-	GetApiTagsByTagIdOptions,
-	GetApiTagsByTagIdStatus200,
-	GetApiTagsByTagIdStatus401,
-	GetApiTagsByTagIdStatus403,
-	GetApiTagsByTagIdStatus404,
-	GetApiTagsByTagIdStatus422,
-	GetApiTagsByTagIdStatus429,
-	GetApiTagsByTagIdStatus500,
+	GetApiTagsByTagIdHierarchyOptions,
+	GetApiTagsByTagIdHierarchyStatus200,
+	GetApiTagsByTagIdHierarchyStatus401,
+	GetApiTagsByTagIdHierarchyStatus403,
+	GetApiTagsByTagIdHierarchyStatus404,
+	GetApiTagsByTagIdHierarchyStatus422,
+	GetApiTagsByTagIdHierarchyStatus429,
+	GetApiTagsByTagIdHierarchyStatus500,
 	PostApiTagStructuresOptions,
 	PostApiTagStructuresStatus200,
 	PostApiTagStructuresStatus400,
@@ -1320,6 +1320,19 @@ import type {
 	PostApiTagsStatus422,
 	PostApiTagsStatus429,
 	PostApiTagsStatus500,
+	GetApiTagsByTagIdOptions,
+	GetApiTagsByTagIdStatus200,
+	GetApiTagsByTagIdStatus404,
+	GetApiTagsByTagIdStatus422,
+	GetApiTagsByTagIdStatus500,
+	PutApiTagsByTagIdLocalizationsByLanguageOptions,
+	PutApiTagsByTagIdLocalizationsByLanguageStatus200,
+	PutApiTagsByTagIdLocalizationsByLanguageStatus400,
+	PutApiTagsByTagIdLocalizationsByLanguageStatus403,
+	PutApiTagsByTagIdLocalizationsByLanguageStatus404,
+	PutApiTagsByTagIdLocalizationsByLanguageStatus422,
+	PutApiTagsByTagIdLocalizationsByLanguageStatus429,
+	PutApiTagsByTagIdLocalizationsByLanguageStatus500,
 	GetApiUnitsByTypeByUnitIdAliasesOptions,
 	GetApiUnitsByTypeByUnitIdAliasesStatus200,
 	GetApiUnitsByTypeByUnitIdAliasesStatus422,
@@ -2552,7 +2565,7 @@ import {
 	getApiPlatformUsersByUserIdSessions,
 	deleteApiPlatformUsersByUserIdSessions,
 	deleteApiPlatformUsersByUserIdSessionsBySessionId,
-	getApiTagsByTagId,
+	getApiTagsByTagIdHierarchy,
 	postApiTagStructures,
 	getApiTagStructuresByStructureId,
 	putApiTagStructuresByStructureId,
@@ -2605,6 +2618,8 @@ import {
 	putApiEntitiesByUnitIdLocalizationsByLanguage,
 	getApiTags,
 	postApiTags,
+	getApiTagsByTagId,
+	putApiTagsByTagIdLocalizationsByLanguage,
 	getApiUnitsByTypeByUnitIdAliases,
 	postApiUnitsByTypeByUnitIdAliases,
 	deleteApiUnitsByTypeByUnitIdAliasesByAliasId,
@@ -17310,35 +17325,35 @@ export function useDeleteApiPlatformUsersByUserIdSessionsBySessionId<TContext>(
 	>;
 }
 
-export const getApiTagsByTagIdQueryKey = ({
+export const getApiTagsByTagIdHierarchyQueryKey = ({
 	path,
 	query,
-}: Omit<GetApiTagsByTagIdOptions, "headers">) =>
-	[{ url: "/api/tags/:tagId", params: path }, ...(query ? [query] : [])] as const;
+}: Omit<GetApiTagsByTagIdHierarchyOptions, "headers">) =>
+	[{ url: "/api/tags/:tagId/hierarchy", params: path }, ...(query ? [query] : [])] as const;
 
-type GetApiTagsByTagIdQueryKey = ReturnType<typeof getApiTagsByTagIdQueryKey>;
+type GetApiTagsByTagIdHierarchyQueryKey = ReturnType<typeof getApiTagsByTagIdHierarchyQueryKey>;
 
-export function getApiTagsByTagIdQueryOptions(
-	{ path, query }: GetApiTagsByTagIdOptions,
+export function getApiTagsByTagIdHierarchyQueryOptions(
+	{ path, query }: GetApiTagsByTagIdHierarchyOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiTagsByTagIdQueryKey({ path, query });
+	const queryKey = getApiTagsByTagIdHierarchyQueryKey({ path, query });
 	return queryOptions<
-		GetApiTagsByTagIdStatus200,
+		GetApiTagsByTagIdHierarchyStatus200,
 		ResponseErrorConfig<
-			| GetApiTagsByTagIdStatus401
-			| GetApiTagsByTagIdStatus403
-			| GetApiTagsByTagIdStatus404
-			| GetApiTagsByTagIdStatus422
-			| GetApiTagsByTagIdStatus429
-			| GetApiTagsByTagIdStatus500
+			| GetApiTagsByTagIdHierarchyStatus401
+			| GetApiTagsByTagIdHierarchyStatus403
+			| GetApiTagsByTagIdHierarchyStatus404
+			| GetApiTagsByTagIdHierarchyStatus422
+			| GetApiTagsByTagIdHierarchyStatus429
+			| GetApiTagsByTagIdHierarchyStatus500
 		>,
-		GetApiTagsByTagIdStatus200,
+		GetApiTagsByTagIdHierarchyStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiTagsByTagId({
+			const { data } = await getApiTagsByTagIdHierarchy({
 				...config,
 				path,
 				query,
@@ -17352,31 +17367,35 @@ export function getApiTagsByTagIdQueryOptions(
 
 /**
  * @summary Get a Tag with direct children and grandchildren
- * {@link /api/tags/:tagId}
+ * {@link /api/tags/:tagId/hierarchy}
  */
-export function useGetApiTagsByTagId<
-	TData = GetApiTagsByTagIdStatus200,
-	TQueryData = GetApiTagsByTagIdStatus200,
-	TQueryKey extends QueryKey = GetApiTagsByTagIdQueryKey,
+export function useGetApiTagsByTagIdHierarchy<
+	TData = GetApiTagsByTagIdHierarchyStatus200,
+	TQueryData = GetApiTagsByTagIdHierarchyStatus200,
+	TQueryKey extends QueryKey = GetApiTagsByTagIdHierarchyQueryKey,
 >(
 	{
 		path,
 		query,
 	}: {
-		path: GetApiTagsByTagIdOptions["path"] | (() => GetApiTagsByTagIdOptions["path"]);
-		query?: GetApiTagsByTagIdOptions["query"] | (() => GetApiTagsByTagIdOptions["query"]);
+		path:
+			| GetApiTagsByTagIdHierarchyOptions["path"]
+			| (() => GetApiTagsByTagIdHierarchyOptions["path"]);
+		query?:
+			| GetApiTagsByTagIdHierarchyOptions["query"]
+			| (() => GetApiTagsByTagIdHierarchyOptions["query"]);
 	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiTagsByTagIdStatus200,
+				GetApiTagsByTagIdHierarchyStatus200,
 				ResponseErrorConfig<
-					| GetApiTagsByTagIdStatus401
-					| GetApiTagsByTagIdStatus403
-					| GetApiTagsByTagIdStatus404
-					| GetApiTagsByTagIdStatus422
-					| GetApiTagsByTagIdStatus429
-					| GetApiTagsByTagIdStatus500
+					| GetApiTagsByTagIdHierarchyStatus401
+					| GetApiTagsByTagIdHierarchyStatus403
+					| GetApiTagsByTagIdHierarchyStatus404
+					| GetApiTagsByTagIdHierarchyStatus422
+					| GetApiTagsByTagIdHierarchyStatus429
+					| GetApiTagsByTagIdHierarchyStatus500
 				>,
 				TData,
 				TQueryData,
@@ -17392,11 +17411,12 @@ export function useGetApiTagsByTagId<
 		path: typeof path === "function" ? path() : path,
 		query: typeof query === "function" ? query() : query,
 	};
-	const queryKey = resolvedOptions?.queryKey ?? getApiTagsByTagIdQueryKey(resolvedParams);
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiTagsByTagIdHierarchyQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiTagsByTagIdQueryOptions(resolvedParams, config),
+			...getApiTagsByTagIdHierarchyQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -17404,12 +17424,12 @@ export function useGetApiTagsByTagId<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiTagsByTagIdStatus401
-			| GetApiTagsByTagIdStatus403
-			| GetApiTagsByTagIdStatus404
-			| GetApiTagsByTagIdStatus422
-			| GetApiTagsByTagIdStatus429
-			| GetApiTagsByTagIdStatus500
+			| GetApiTagsByTagIdHierarchyStatus401
+			| GetApiTagsByTagIdHierarchyStatus403
+			| GetApiTagsByTagIdHierarchyStatus404
+			| GetApiTagsByTagIdHierarchyStatus422
+			| GetApiTagsByTagIdHierarchyStatus429
+			| GetApiTagsByTagIdHierarchyStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -22921,6 +22941,211 @@ export function usePostApiTags<TContext>(
 			| PostApiTagsStatus500
 		>,
 		PostApiTagsOptions,
+		TContext
+	>;
+}
+
+export const getApiTagsByTagIdQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiTagsByTagIdOptions, "headers">) =>
+	[{ url: "/api/tags/:tagId", params: path }, ...(query ? [query] : [])] as const;
+
+type GetApiTagsByTagIdQueryKey = ReturnType<typeof getApiTagsByTagIdQueryKey>;
+
+export function getApiTagsByTagIdQueryOptions(
+	{ path, query }: GetApiTagsByTagIdOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiTagsByTagIdQueryKey({ path, query });
+	return queryOptions<
+		GetApiTagsByTagIdStatus200,
+		ResponseErrorConfig<
+			GetApiTagsByTagIdStatus404 | GetApiTagsByTagIdStatus422 | GetApiTagsByTagIdStatus500
+		>,
+		GetApiTagsByTagIdStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiTagsByTagId({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get tag detail
+ * {@link /api/tags/:tagId}
+ */
+export function useGetApiTagsByTagId<
+	TData = GetApiTagsByTagIdStatus200,
+	TQueryData = GetApiTagsByTagIdStatus200,
+	TQueryKey extends QueryKey = GetApiTagsByTagIdQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: GetApiTagsByTagIdOptions["path"] | (() => GetApiTagsByTagIdOptions["path"]);
+		query?: GetApiTagsByTagIdOptions["query"] | (() => GetApiTagsByTagIdOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiTagsByTagIdStatus200,
+				ResponseErrorConfig<
+					| GetApiTagsByTagIdStatus404
+					| GetApiTagsByTagIdStatus422
+					| GetApiTagsByTagIdStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? getApiTagsByTagIdQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiTagsByTagIdQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			GetApiTagsByTagIdStatus404 | GetApiTagsByTagIdStatus422 | GetApiTagsByTagIdStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiTagsByTagIdLocalizationsByLanguageMutationKey = () =>
+	[{ url: "/api/tags/:tagId/localizations/:language" }] as const;
+
+export function putApiTagsByTagIdLocalizationsByLanguageMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiTagsByTagIdLocalizationsByLanguageMutationKey();
+	return mutationOptions<
+		PutApiTagsByTagIdLocalizationsByLanguageStatus200,
+		ResponseErrorConfig<
+			| PutApiTagsByTagIdLocalizationsByLanguageStatus400
+			| PutApiTagsByTagIdLocalizationsByLanguageStatus403
+			| PutApiTagsByTagIdLocalizationsByLanguageStatus404
+			| PutApiTagsByTagIdLocalizationsByLanguageStatus422
+			| PutApiTagsByTagIdLocalizationsByLanguageStatus429
+			| PutApiTagsByTagIdLocalizationsByLanguageStatus500
+		>,
+		PutApiTagsByTagIdLocalizationsByLanguageOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiTagsByTagIdLocalizationsByLanguage({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Create or replace tag localization
+ * {@link /api/tags/:tagId/localizations/:language}
+ */
+export function usePutApiTagsByTagIdLocalizationsByLanguage<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiTagsByTagIdLocalizationsByLanguageStatus200,
+			ResponseErrorConfig<
+				| PutApiTagsByTagIdLocalizationsByLanguageStatus400
+				| PutApiTagsByTagIdLocalizationsByLanguageStatus403
+				| PutApiTagsByTagIdLocalizationsByLanguageStatus404
+				| PutApiTagsByTagIdLocalizationsByLanguageStatus422
+				| PutApiTagsByTagIdLocalizationsByLanguageStatus429
+				| PutApiTagsByTagIdLocalizationsByLanguageStatus500
+			>,
+			PutApiTagsByTagIdLocalizationsByLanguageOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiTagsByTagIdLocalizationsByLanguageMutationKey();
+
+	const baseOptions = putApiTagsByTagIdLocalizationsByLanguageMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiTagsByTagIdLocalizationsByLanguageStatus200,
+		ResponseErrorConfig<
+			| PutApiTagsByTagIdLocalizationsByLanguageStatus400
+			| PutApiTagsByTagIdLocalizationsByLanguageStatus403
+			| PutApiTagsByTagIdLocalizationsByLanguageStatus404
+			| PutApiTagsByTagIdLocalizationsByLanguageStatus422
+			| PutApiTagsByTagIdLocalizationsByLanguageStatus429
+			| PutApiTagsByTagIdLocalizationsByLanguageStatus500
+		>,
+		PutApiTagsByTagIdLocalizationsByLanguageOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiTagsByTagIdLocalizationsByLanguageStatus200,
+		ResponseErrorConfig<
+			| PutApiTagsByTagIdLocalizationsByLanguageStatus400
+			| PutApiTagsByTagIdLocalizationsByLanguageStatus403
+			| PutApiTagsByTagIdLocalizationsByLanguageStatus404
+			| PutApiTagsByTagIdLocalizationsByLanguageStatus422
+			| PutApiTagsByTagIdLocalizationsByLanguageStatus429
+			| PutApiTagsByTagIdLocalizationsByLanguageStatus500
+		>,
+		PutApiTagsByTagIdLocalizationsByLanguageOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiTagsByTagIdLocalizationsByLanguageStatus200,
+		ResponseErrorConfig<
+			| PutApiTagsByTagIdLocalizationsByLanguageStatus400
+			| PutApiTagsByTagIdLocalizationsByLanguageStatus403
+			| PutApiTagsByTagIdLocalizationsByLanguageStatus404
+			| PutApiTagsByTagIdLocalizationsByLanguageStatus422
+			| PutApiTagsByTagIdLocalizationsByLanguageStatus429
+			| PutApiTagsByTagIdLocalizationsByLanguageStatus500
+		>,
+		PutApiTagsByTagIdLocalizationsByLanguageOptions,
 		TContext
 	>;
 }

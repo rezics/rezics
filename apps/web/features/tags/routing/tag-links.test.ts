@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
 
-import { loadUnitTagsRouteState, tagSearchHref, unitTagsHref } from "./tag-links";
+import {
+	getTagDetailHrefs,
+	loadUnitTagsRouteState,
+	parseTagDetailSection,
+	parseTagManagementSection,
+	tagDetailHref,
+	tagManagementHref,
+	tagSearchHref,
+	unitTagsHref,
+} from "./tag-links";
 
 const UnitId = "00000000-0000-7000-8000-000000000001";
 const RealmId = "00000000-0000-7000-8000-000000000002";
@@ -55,5 +64,31 @@ describe("Unit Tag page routes", () => {
 				createdTagId: "not-a-tag",
 			}),
 		).resolves.toEqual({ context: { kind: "global" } });
+	});
+});
+
+describe("Tag detail routes", () => {
+	it("keeps Discussion as the Tag-owned second tab", () => {
+		expect(getTagDetailHrefs(TagId)).toEqual([
+			{ id: "overview", href: `/tags/${TagId}` },
+			{ id: "discussion", href: `/tags/${TagId}/discussion` },
+			{ id: "content", href: `/tags/${TagId}/content` },
+			{ id: "structure", href: `/tags/${TagId}/structure` },
+		]);
+	});
+
+	it("round-trips Tag detail sections without accepting nested routes", () => {
+		const href = tagDetailHref(TagId, "discussion");
+		expect(parseTagDetailSection(href, TagId)).toBe("discussion");
+		expect(parseTagDetailSection(`${href}/nested`, TagId)).toBeUndefined();
+	});
+});
+
+describe("Tag management routes", () => {
+	it("keeps the content editor inside the shared management workspace", () => {
+		const href = tagManagementHref(TagId, "content");
+		expect(href).toBe(`/tags/${TagId}/edit/content`);
+		expect(parseTagManagementSection(href, TagId)).toBe("content");
+		expect(parseTagManagementSection(`${href}/nested`, TagId)).toBeUndefined();
 	});
 });

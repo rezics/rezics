@@ -58,7 +58,7 @@ export default new Elysia()
 	.use(session)
 	.group("/tags", (app) =>
 		app.get(
-			"/:tagId",
+			"/:tagId/hierarchy",
 			async ({ params, query, request }) => {
 				const identity = await resolveIdentity(request, "unit:read");
 				if (!identity.profile) throw new AuthenticationRequired();
