@@ -62,11 +62,14 @@ describe("CommunityUnitSearchPrompt", () => {
 			/>,
 		);
 
-		expect(
-			screen
-				.getByRole("link", { name: "Search existing organizations" })
-				.getAttribute("href"),
-		).toBe("/create/entity/search?kind=organization&q=OpenAI");
+		const searchLink = screen.getByRole("link", {
+			name: "Search existing organizations",
+		});
+		expect(searchLink.getAttribute("href")).toBe(
+			"/create/entity/search?kind=organization&q=OpenAI",
+		);
+		expect(searchLink.getAttribute("rel")).toBe("noopener noreferrer");
+		expect(searchLink.getAttribute("target")).toBe("_blank");
 		expect(screen.getByText("Search before creating a public entry.")).toBeTruthy();
 		expect(screen.getByText("Search is required.")).toBeTruthy();
 	});

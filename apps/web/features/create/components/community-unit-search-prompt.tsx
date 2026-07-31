@@ -52,6 +52,8 @@ export function CommunityUnitSearchPrompt({
 						<Link
 							className="w-fit rounded-sm font-medium text-foreground underline decoration-current/40 underline-offset-4 outline-none hover:decoration-current focus-visible:ring-[3px] focus-visible:ring-ring/32"
 							href={searchHref ?? communityUnitSearchHref(subject, query)}
+							rel="noopener noreferrer"
+							target="_blank"
 						>
 							{messages.prompt({ subject: subjectLabel })}
 						</Link>
