@@ -203,6 +203,8 @@ export type SlugAddressKind = (typeof SlugAddressKindValues)[number];
 
 export const UnitStatusValues = ["draft", "published", "archived"] as const;
 export const UnitStatusActorKindValues = ["profile", "system", "import"] as const;
+export const WorkReleaseStatusValues = ["ongoing", "hiatus", "completed", "cancelled"] as const;
+export type WorkReleaseStatus = (typeof WorkReleaseStatusValues)[number];
 export const ResourceVisibilityValues = ["public", "unlisted", "private"] as const;
 export type ResourceVisibility = (typeof ResourceVisibilityValues)[number];
 export const DefaultResourceVisibility = "public" satisfies ResourceVisibility;

@@ -210,6 +210,7 @@ export default {
 		publicationDate: "Publication date",
 		pageCount: "Page count",
 		format: "Binding or format",
+		releaseStatus: "Work release status",
 		contentLicense: `License to ${verbatimTerms.rezics.value}`,
 		versionLabel: "Version label",
 		mediaKind: "Media kind",
@@ -220,6 +221,12 @@ export default {
 		durationSeconds: "Duration (seconds)",
 		yes: "Yes",
 		no: "No",
+	},
+	releaseStatuses: {
+		ongoing: "Ongoing",
+		hiatus: "On hiatus",
+		completed: "Completed",
+		cancelled: "Cancelled",
 	},
 	detail: {
 		sections: "Unit sections",

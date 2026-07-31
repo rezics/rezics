@@ -191,6 +191,7 @@ export default {
 		publicationDate: "出版日期",
 		pageCount: "页数",
 		format: "装帧或格式",
+		releaseStatus: "作品更新状态",
 		contentLicense: `向 ${verbatimTerms.rezics.value} 授权`,
 		versionLabel: "版本名称",
 		mediaKind: "媒体类型",
@@ -201,6 +202,12 @@ export default {
 		durationSeconds: "时长（秒）",
 		yes: "是",
 		no: "否",
+	},
+	releaseStatuses: {
+		ongoing: "更新中",
+		hiatus: "暂停更新",
+		completed: "已完结",
+		cancelled: "已取消",
 	},
 	detail: {
 		sections: "条目章节",

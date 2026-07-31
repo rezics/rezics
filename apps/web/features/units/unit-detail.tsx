@@ -146,8 +146,13 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 		) : (
 			licenseLabel
 		);
+	const releaseStatus =
+		item.details.type === "book" || item.details.type === "media"
+			? t.units.releaseStatuses[item.details.releaseStatus]
+			: undefined;
 	const facts = [
 		[t.units.detail.type, t.units.types[type]],
+		[t.units.fields.releaseStatus, releaseStatus],
 		[
 			t.ui.status,
 			item.status === "published"

@@ -214,6 +214,7 @@ export default {
 		publicationDate: "Date d’édition",
 		pageCount: "Nombre de pages",
 		format: "Reliure ou format",
+		releaseStatus: "Statut de parution de l’œuvre",
 		contentLicense: `Licence accordée à ${verbatimTerms.rezics.value}`,
 		versionLabel: "Libellé de version",
 		mediaKind: "Type de média",
@@ -224,6 +225,12 @@ export default {
 		durationSeconds: "Durée (secondes)",
 		yes: "Oui",
 		no: "Non",
+	},
+	releaseStatuses: {
+		ongoing: "En cours",
+		hiatus: "En pause",
+		completed: "Terminée",
+		cancelled: "Annulée",
 	},
 	detail: {
 		sections: "Sections de la Unit",

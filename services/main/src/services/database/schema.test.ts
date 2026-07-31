@@ -11,6 +11,7 @@ import {
 	auditEvent,
 	apiAccountQuotaBinding,
 	apiQuotaPolicy,
+	book,
 	apiTokenQuotaBinding,
 	unitContentLicense,
 	contentStructure,
@@ -98,10 +99,12 @@ import {
 	unitVariant,
 	imageAssetPresentation,
 	imageObject,
+	media,
 	ImageAssetPresentationFitValues,
 	ImageAssetPresentationRoleValues,
 	UnitRevisionSlotRoleValues,
 	UnitStatusActorKindValues,
+	WorkReleaseStatusValues,
 	UnitKindValues,
 	UnitOwnershipClaimResolutionValues,
 	VariantCapableUnitKindValues,
@@ -110,6 +113,19 @@ import {
 const dialect = new PgDialect();
 
 describe("database schema contracts", () => {
+	it("keeps Book and Media release statuses required and database constrained", () => {
+		expect(WorkReleaseStatusValues).toEqual(["ongoing", "hiatus", "completed", "cancelled"]);
+		for (const [table, constraintName] of [
+			[book, "book_release_status_check"],
+			[media, "media_release_status_check"],
+		] as const) {
+			const config = getTableConfig(table);
+			const releaseStatus = config.columns.find((column) => column.name === "release_status");
+			expect(releaseStatus?.notNull).toBe(true);
+			expect(config.checks.map((constraint) => constraint.name)).toContain(constraintName);
+		}
+	});
+
 	it("enforces matching subject kinds for account and token quota assignments", () => {
 		const policy = getTableConfig(apiQuotaPolicy);
 		const accountBinding = getTableConfig(apiAccountQuotaBinding);

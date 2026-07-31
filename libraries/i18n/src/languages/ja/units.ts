@@ -208,6 +208,7 @@ export default {
 		publicationDate: "出版日",
 		pageCount: "ページ数",
 		format: "製本または形式",
+		releaseStatus: "作品の更新状況",
 		contentLicense: `${verbatimTerms.rezics.value} へのライセンス付与`,
 		versionLabel: "バージョンラベル",
 		mediaKind: "メディア種類",
@@ -218,6 +219,12 @@ export default {
 		durationSeconds: "再生時間（秒）",
 		yes: "はい",
 		no: "いいえ",
+	},
+	releaseStatuses: {
+		ongoing: "更新中",
+		hiatus: "更新休止中",
+		completed: "完結済み",
+		cancelled: "打ち切り",
 	},
 	detail: {
 		sections: "ユニットセクション",

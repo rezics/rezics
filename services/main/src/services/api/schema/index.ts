@@ -19,6 +19,7 @@ import {
 	StoredUiLocaleValues,
 	UnitKindValues,
 	UnitStatusValues,
+	WorkReleaseStatusValues,
 } from "../../database/schema/contract-values";
 import { isFractionalPosition } from "../../ordering/position";
 
@@ -63,6 +64,10 @@ export type StoredUiLocale = Static<typeof StoredUiLocale>;
 /** A persisted Unit discriminator accepted and returned by the public API. */
 export const UnitKind = t.UnionEnum(UnitKindValues, { default: undefined });
 export type UnitKind = Static<typeof UnitKind>;
+
+/** The release lifecycle of a Book or Media work, independent of Unit publication. */
+export const WorkReleaseStatus = t.UnionEnum(WorkReleaseStatusValues, { default: undefined });
+export type WorkReleaseStatus = Static<typeof WorkReleaseStatus>;
 
 /** A persisted Unit discriminator excluding Realm-only settings branches. */
 export const NonRealmUnitKind = t.UnionEnum(NonRealmUnitKindValues, { default: undefined });

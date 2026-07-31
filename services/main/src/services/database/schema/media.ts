@@ -1,8 +1,9 @@
-import { sql } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import { check, date, index, integer, text, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createUpdatedAtColumn } from "./columns";
+import { WorkReleaseStatusValues } from "./contract-values";
 import { unit } from "./unit";
 
 export const media = pgTable(
@@ -11,6 +12,7 @@ export const media = pgTable(
 		id: uuid()
 			.primaryKey()
 			.references(() => unit.id, { onDelete: "cascade" }),
+		releaseStatus: text({ enum: WorkReleaseStatusValues }).notNull(),
 		kind: text().notNull(),
 		releaseDate: date(),
 		runtimeMinutes: integer(),
@@ -34,6 +36,7 @@ export const media = pgTable(
 			"media_season_count_check",
 			sql`${table.seasonCount} is null or ${table.seasonCount} > 0`,
 		),
+		check("media_release_status_check", inArray(table.releaseStatus, WorkReleaseStatusValues)),
 	],
 );
 

@@ -25,6 +25,7 @@ import { toSafeInteger } from "../database/integer";
 import {
 	type CreditAttributionRole,
 	isCreditAttributionRoleForUnitKind,
+	type WorkReleaseStatus,
 } from "../database/schema/contract-values";
 import { ContentStructureSnapshotSchema } from "../content-structure/contracts";
 import { createContentStructureHistory } from "../content-structure/history";
@@ -143,6 +144,10 @@ export type CreateUnitInput = CreateUnitAccessInput & {
 	contentRating?: "general" | "r15" | "r18" | "r18g";
 	aiDisclosure?: "unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
 	license?: PublicationLicenseId | null;
+	details:
+		| { readonly type: "book"; readonly releaseStatus: WorkReleaseStatus }
+		| { readonly type: "software" }
+		| { readonly type: "media"; readonly releaseStatus: WorkReleaseStatus };
 };
 
 export interface UpdateUnitInput {
@@ -170,6 +175,7 @@ export interface UpdateUnitInput {
 		episodeCount?: number | null;
 		seasonCount?: number | null;
 		durationSeconds?: number | null;
+		releaseStatus?: WorkReleaseStatus;
 	};
 }
 
@@ -215,10 +221,10 @@ export function presentUnitLocalization({
 }
 
 export async function createUnit(
-	kind: VariantUnitKind,
 	authorization: Authorization<string>,
 	input: CreateUnitInput,
 ): Promise<UnitDetail> {
+	const kind = input.details.type;
 	const ownerId = authorization.profileId;
 	const unitId = await database.transaction(async (tx) => {
 		await ensureImageAssetsAttachable(
@@ -256,8 +262,10 @@ export async function createUnit(
 			statusActor: { kind: "profile", profileId: ownerId },
 		});
 		let createdStructure: typeof contentStructure.$inferSelect | undefined;
-		if (kind === "book") {
-			await tx.insert(book).values({ id: created.id });
+		if (input.details.type === "book") {
+			await tx
+				.insert(book)
+				.values({ id: created.id, releaseStatus: input.details.releaseStatus });
 			[createdStructure] = await tx
 				.insert(contentStructure)
 				.values({ ownerUnitId: created.id, kind: "book.contents" })
@@ -265,9 +273,13 @@ export async function createUnit(
 			if (!createdStructure)
 				throw new Error("Book Content Structure insertion returned no row");
 		}
-		if (kind === "software") await tx.insert(software).values({ id: created.id });
-		if (kind === "media") {
-			await tx.insert(media).values({ id: created.id, kind: "other" });
+		if (input.details.type === "software") await tx.insert(software).values({ id: created.id });
+		if (input.details.type === "media") {
+			await tx.insert(media).values({
+				id: created.id,
+				kind: "other",
+				releaseStatus: input.details.releaseStatus,
+			});
 			[createdStructure] = await tx
 				.insert(contentStructure)
 				.values({ ownerUnitId: created.id, kind: "media.contents" })
@@ -391,6 +403,7 @@ async function getUnitDetails(
 		if (!details) throw new UnitNotFound(kind);
 		return {
 			type: "book",
+			releaseStatus: details.releaseStatus,
 			isbn13: details.isbn13,
 			publicationDate: details.publicationDate,
 			pageCount: details.pageCount,
@@ -419,6 +432,7 @@ async function getUnitDetails(
 		if (!details) throw new UnitNotFound(kind);
 		return {
 			type: "media",
+			releaseStatus: details.releaseStatus,
 			releaseDate: details.releaseDate,
 			kind: details.kind,
 			runtimeMinutes: details.runtimeMinutes,
@@ -809,6 +823,7 @@ export async function updateUnit(
 			await tx
 				.update(book)
 				.set({
+					releaseStatus: details.releaseStatus,
 					isbn13: details.isbn13,
 					publicationDate:
 						details.publicationDate === undefined
@@ -831,6 +846,7 @@ export async function updateUnit(
 			await tx
 				.update(media)
 				.set({
+					releaseStatus: details.releaseStatus,
 					releaseDate: releasedOn,
 					kind: details.kind,
 					runtimeMinutes: details.runtimeMinutes,

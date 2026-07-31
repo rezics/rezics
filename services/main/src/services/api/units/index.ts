@@ -62,6 +62,7 @@ import {
 	withdrawUnitRealmPublication,
 } from "../../units/realm-publication";
 import { NoContentResponse } from "../schema/action-response";
+import { ValidationError } from "../errors";
 
 const AuthenticationRequiredResponse = toApiErrorResponse(["AuthenticationRequired"]);
 const UnitReadFailureResponse = toApiErrorResponse(["UnitNotFound"]);
@@ -420,7 +421,11 @@ export default new Elysia({ prefix: "/units" })
 	.post(
 		"/:type",
 		async ({ params, authorization, body }) => {
-			return createUnit(params.type, authorization, body);
+			if (params.type !== body.details.type)
+				throw new ValidationError({
+					details: "must match the requested Unit type",
+				});
+			return createUnit(authorization, body);
 		},
 		{
 			access: "contribute:unit:create",
@@ -429,6 +434,7 @@ export default new Elysia({ prefix: "/units" })
 			response: {
 				[StatusCodes.OK]: UnitDetailResponse,
 				[StatusCodes.BAD_REQUEST]: UnitCreateBadRequestResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.FORBIDDEN]: UnitCreateForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,

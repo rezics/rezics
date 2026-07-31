@@ -113,6 +113,7 @@ import {
 	unitTagVote,
 	unitVariant,
 	users,
+	WorkReleaseStatusValues,
 	zone,
 	zonePage,
 } from "../database/schema";
@@ -778,6 +779,7 @@ async function seedUnitFixtures(
 	await writeBatches(
 		books.map((value, index) => ({
 			id: value.id,
+			releaseStatus: itemAt(WorkReleaseStatusValues, index),
 			isbn13: data.fakerByLanguage.en.string.numeric(13),
 			publicationDate: dateOnly(data.pastDate(7_300)),
 			pageCount: 80 + ((index * 37) % 900),
@@ -800,6 +802,7 @@ async function seedUnitFixtures(
 	await writeBatches(
 		mediaItems.map((value, index) => ({
 			id: value.id,
+			releaseStatus: itemAt(WorkReleaseStatusValues, index),
 			kind: itemAt(["movie", "series", "animation", "documentary"], index),
 			releaseDate: dateOnly(data.pastDate(7_300)),
 			runtimeMinutes: 20 + ((index * 17) % 180),

@@ -23,6 +23,7 @@ import {
 	ResourceVisibility,
 	StoredUiLocale,
 	Uuid,
+	WorkReleaseStatus,
 } from ".";
 import {
 	ContentRatingValues,
@@ -256,6 +257,7 @@ const UnitDetailsResponse = t.Union([
 	t.Object(
 		{
 			type: t.Literal("book"),
+			releaseStatus: WorkReleaseStatus,
 			isbn13: NullableText,
 			publicationDate: t.Nullable(t.String({ format: "date" })),
 			pageCount: t.Nullable(t.Integer({ minimum: 1 })),
@@ -279,6 +281,7 @@ const UnitDetailsResponse = t.Union([
 	t.Object(
 		{
 			type: t.Literal("media"),
+			releaseStatus: WorkReleaseStatus,
 			releaseDate: t.Nullable(t.String({ format: "date" })),
 			kind: t.String(),
 			runtimeMinutes: t.Nullable(t.Integer({ minimum: 1 })),

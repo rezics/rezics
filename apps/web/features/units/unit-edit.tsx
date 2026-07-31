@@ -40,6 +40,8 @@ import { FeedCard } from "@/features/content-feed/components/feed-card";
 import { FeedUnitContent } from "@/features/content-feed/components/feed-unit-content";
 import { isWorkUnitType, type UnitType } from "./unit-types";
 import { UnitContentLicenseField } from "./components/unit-content-license-field";
+import { WorkReleaseStatusField } from "./components/work-release-status-field";
+import { isWorkReleaseStatus } from "./model/work-release-status";
 
 export type EditableUnit = GetApiUnitsByTypeByUnitIdStatus200;
 type Unit = EditableUnit;
@@ -68,6 +70,7 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 		const submittedVisibility = form.get("visibility");
 		const submittedContentRating = form.get("contentRating");
 		const submittedAiDisclosure = form.get("aiDisclosure");
+		const submittedReleaseStatus = form.get("releaseStatus");
 		const submittedLicense = form.get("license");
 		if (
 			submittedLicense !== null &&
@@ -108,9 +111,11 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 			: undefined;
 		const details = (() => {
 			if (unit.details.type === "book") {
+				if (!isWorkReleaseStatus(submittedReleaseStatus)) return undefined;
 				const pageCount = readPositiveInteger(form, "pageCount");
 				if (pageCount === undefined) return undefined;
 				return {
+					releaseStatus: submittedReleaseStatus,
 					isbn13: String(form.get("isbn13") ?? "").trim() || null,
 					publicationDate: releasedOn || null,
 					pageCount,
@@ -124,6 +129,7 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 					...(contentLicenseGrant ? { contentLicense: contentLicenseGrant } : {}),
 				};
 			if (unit.details.type === "media") {
+				if (!isWorkReleaseStatus(submittedReleaseStatus)) return undefined;
 				const runtimeMinutes = readPositiveInteger(form, "runtimeMinutes");
 				const episodeCount = readPositiveInteger(form, "episodeCount");
 				const seasonCount = readPositiveInteger(form, "seasonCount");
@@ -136,6 +142,7 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 				const kind = String(form.get("kind") ?? "").trim();
 				if (!kind) return undefined;
 				return {
+					releaseStatus: submittedReleaseStatus,
 					kind,
 					runtimeMinutes,
 					episodeCount,
@@ -306,6 +313,7 @@ function UnitTypeSpecificFields({ unit }: { unit: Unit }) {
 	if (details.type === "book")
 		return (
 			<>
+				<WorkReleaseStatusField defaultValue={details.releaseStatus} />
 				<Field>
 					<FieldLabel>{t.units.fields.isbn13}</FieldLabel>
 					<Input defaultValue={details.isbn13 ?? ""} name="isbn13" pattern="[0-9]{13}" />
@@ -337,6 +345,7 @@ function UnitTypeSpecificFields({ unit }: { unit: Unit }) {
 	if (details.type === "media")
 		return (
 			<>
+				<WorkReleaseStatusField defaultValue={details.releaseStatus} />
 				<Field required>
 					<FieldLabel>{t.units.fields.mediaKind}</FieldLabel>
 					<Input defaultValue={details.kind} name="kind" required />

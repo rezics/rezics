@@ -83448,7 +83448,8 @@
 											"creditAttributions",
 											"creditAttributionRequestConsent",
 											"version",
-											"localization"
+											"localization",
+											"details"
 										],
 										"properties": {
 											"ownershipMode": {
@@ -84039,6 +84040,61 @@
 													},
 													{ "type": "null" }
 												]
+											},
+											"details": {
+												"anyOf": [
+													{
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["type", "releaseStatus"],
+														"properties": {
+															"type": {
+																"const": "book",
+																"type": "string"
+															},
+															"releaseStatus": {
+																"type": "string",
+																"enum": [
+																	"ongoing",
+																	"hiatus",
+																	"completed",
+																	"cancelled"
+																]
+															}
+														}
+													},
+													{
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["type"],
+														"properties": {
+															"type": {
+																"const": "software",
+																"type": "string"
+															}
+														}
+													},
+													{
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["type", "releaseStatus"],
+														"properties": {
+															"type": {
+																"const": "media",
+																"type": "string"
+															},
+															"releaseStatus": {
+																"type": "string",
+																"enum": [
+																	"ongoing",
+																	"hiatus",
+																	"completed",
+																	"cancelled"
+																]
+															}
+														}
+													}
+												]
 											}
 										}
 									},
@@ -84050,7 +84106,8 @@
 											"creditAttributions",
 											"creditAttributionRequestConsent",
 											"version",
-											"localization"
+											"localization",
+											"details"
 										],
 										"properties": {
 											"ownershipMode": {
@@ -84628,6 +84685,61 @@
 													},
 													{ "type": "null" }
 												]
+											},
+											"details": {
+												"anyOf": [
+													{
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["type", "releaseStatus"],
+														"properties": {
+															"type": {
+																"const": "book",
+																"type": "string"
+															},
+															"releaseStatus": {
+																"type": "string",
+																"enum": [
+																	"ongoing",
+																	"hiatus",
+																	"completed",
+																	"cancelled"
+																]
+															}
+														}
+													},
+													{
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["type"],
+														"properties": {
+															"type": {
+																"const": "software",
+																"type": "string"
+															}
+														}
+													},
+													{
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["type", "releaseStatus"],
+														"properties": {
+															"type": {
+																"const": "media",
+																"type": "string"
+															},
+															"releaseStatus": {
+																"type": "string",
+																"enum": [
+																	"ongoing",
+																	"hiatus",
+																	"completed",
+																	"cancelled"
+																]
+															}
+														}
+													}
+												]
 											}
 										}
 									}
@@ -85029,6 +85141,7 @@
 													"type": "object",
 													"required": [
 														"type",
+														"releaseStatus",
 														"isbn13",
 														"publicationDate",
 														"pageCount",
@@ -85041,6 +85154,15 @@
 														"type": {
 															"const": "book",
 															"type": "string"
+														},
+														"releaseStatus": {
+															"type": "string",
+															"enum": [
+																"ongoing",
+																"hiatus",
+																"completed",
+																"cancelled"
+															]
 														},
 														"isbn13": {
 															"nullable": true,
@@ -85279,6 +85401,7 @@
 													"type": "object",
 													"required": [
 														"type",
+														"releaseStatus",
 														"releaseDate",
 														"kind",
 														"runtimeMinutes",
@@ -85290,6 +85413,15 @@
 														"type": {
 															"const": "media",
 															"type": "string"
+														},
+														"releaseStatus": {
+															"type": "string",
+															"enum": [
+																"ongoing",
+																"hiatus",
+																"completed",
+																"cancelled"
+															]
 														},
 														"releaseDate": {
 															"nullable": true,
@@ -86817,10 +86949,34 @@
 						}
 					},
 					"422": {
-						"description": "Request validation failed",
+						"description": "Response for status 422",
 						"content": {
 							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ValidationError",
+															"type": "string",
+															"enum": ["ValidationError"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
 							}
 						}
 					},
@@ -87322,6 +87478,7 @@
 													"type": "object",
 													"required": [
 														"type",
+														"releaseStatus",
 														"isbn13",
 														"publicationDate",
 														"pageCount",
@@ -87334,6 +87491,15 @@
 														"type": {
 															"const": "book",
 															"type": "string"
+														},
+														"releaseStatus": {
+															"type": "string",
+															"enum": [
+																"ongoing",
+																"hiatus",
+																"completed",
+																"cancelled"
+															]
 														},
 														"isbn13": {
 															"nullable": true,
@@ -87572,6 +87738,7 @@
 													"type": "object",
 													"required": [
 														"type",
+														"releaseStatus",
 														"releaseDate",
 														"kind",
 														"runtimeMinutes",
@@ -87583,6 +87750,15 @@
 														"type": {
 															"const": "media",
 															"type": "string"
+														},
+														"releaseStatus": {
+															"type": "string",
+															"enum": [
+																"ongoing",
+																"hiatus",
+																"completed",
+																"cancelled"
+															]
 														},
 														"releaseDate": {
 															"nullable": true,
@@ -89243,6 +89419,15 @@
 													},
 													{ "type": "null" }
 												]
+											},
+											"releaseStatus": {
+												"type": "string",
+												"enum": [
+													"ongoing",
+													"hiatus",
+													"completed",
+													"cancelled"
+												]
 											}
 										}
 									}
@@ -89644,6 +89829,7 @@
 													"type": "object",
 													"required": [
 														"type",
+														"releaseStatus",
 														"isbn13",
 														"publicationDate",
 														"pageCount",
@@ -89656,6 +89842,15 @@
 														"type": {
 															"const": "book",
 															"type": "string"
+														},
+														"releaseStatus": {
+															"type": "string",
+															"enum": [
+																"ongoing",
+																"hiatus",
+																"completed",
+																"cancelled"
+															]
 														},
 														"isbn13": {
 															"nullable": true,
@@ -89894,6 +90089,7 @@
 													"type": "object",
 													"required": [
 														"type",
+														"releaseStatus",
 														"releaseDate",
 														"kind",
 														"runtimeMinutes",
@@ -89905,6 +90101,15 @@
 														"type": {
 															"const": "media",
 															"type": "string"
+														},
+														"releaseStatus": {
+															"type": "string",
+															"enum": [
+																"ongoing",
+																"hiatus",
+																"completed",
+																"cancelled"
+															]
 														},
 														"releaseDate": {
 															"nullable": true,
@@ -91900,6 +92105,7 @@
 													"type": "object",
 													"required": [
 														"type",
+														"releaseStatus",
 														"isbn13",
 														"publicationDate",
 														"pageCount",
@@ -91912,6 +92118,15 @@
 														"type": {
 															"const": "book",
 															"type": "string"
+														},
+														"releaseStatus": {
+															"type": "string",
+															"enum": [
+																"ongoing",
+																"hiatus",
+																"completed",
+																"cancelled"
+															]
 														},
 														"isbn13": {
 															"nullable": true,
@@ -92150,6 +92365,7 @@
 													"type": "object",
 													"required": [
 														"type",
+														"releaseStatus",
 														"releaseDate",
 														"kind",
 														"runtimeMinutes",
@@ -92161,6 +92377,15 @@
 														"type": {
 															"const": "media",
 															"type": "string"
+														},
+														"releaseStatus": {
+															"type": "string",
+															"enum": [
+																"ongoing",
+																"hiatus",
+																"completed",
+																"cancelled"
+															]
 														},
 														"releaseDate": {
 															"nullable": true,
@@ -94144,6 +94369,7 @@
 													"type": "object",
 													"required": [
 														"type",
+														"releaseStatus",
 														"isbn13",
 														"publicationDate",
 														"pageCount",
@@ -94156,6 +94382,15 @@
 														"type": {
 															"const": "book",
 															"type": "string"
+														},
+														"releaseStatus": {
+															"type": "string",
+															"enum": [
+																"ongoing",
+																"hiatus",
+																"completed",
+																"cancelled"
+															]
 														},
 														"isbn13": {
 															"nullable": true,
@@ -94394,6 +94629,7 @@
 													"type": "object",
 													"required": [
 														"type",
+														"releaseStatus",
 														"releaseDate",
 														"kind",
 														"runtimeMinutes",
@@ -94405,6 +94641,15 @@
 														"type": {
 															"const": "media",
 															"type": "string"
+														},
+														"releaseStatus": {
+															"type": "string",
+															"enum": [
+																"ongoing",
+																"hiatus",
+																"completed",
+																"cancelled"
+															]
 														},
 														"releaseDate": {
 															"nullable": true,
@@ -96747,6 +96992,7 @@
 													"type": "object",
 													"required": [
 														"type",
+														"releaseStatus",
 														"isbn13",
 														"publicationDate",
 														"pageCount",
@@ -96759,6 +97005,15 @@
 														"type": {
 															"const": "book",
 															"type": "string"
+														},
+														"releaseStatus": {
+															"type": "string",
+															"enum": [
+																"ongoing",
+																"hiatus",
+																"completed",
+																"cancelled"
+															]
 														},
 														"isbn13": {
 															"nullable": true,
@@ -96997,6 +97252,7 @@
 													"type": "object",
 													"required": [
 														"type",
+														"releaseStatus",
 														"releaseDate",
 														"kind",
 														"runtimeMinutes",
@@ -97008,6 +97264,15 @@
 														"type": {
 															"const": "media",
 															"type": "string"
+														},
+														"releaseStatus": {
+															"type": "string",
+															"enum": [
+																"ongoing",
+																"hiatus",
+																"completed",
+																"cancelled"
+															]
 														},
 														"releaseDate": {
 															"nullable": true,

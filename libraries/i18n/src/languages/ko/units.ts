@@ -206,6 +206,7 @@ export default {
 		publicationDate: "출판 날짜",
 		pageCount: "페이지 수",
 		format: "제본 또는 형식",
+		releaseStatus: "작품 업데이트 상태",
 		contentLicense: `${verbatimTerms.rezics.value}에 라이선스 부여`,
 		versionLabel: "버전 라벨",
 		mediaKind: "미디어 종류",
@@ -216,6 +217,12 @@ export default {
 		durationSeconds: "재생 시간(초)",
 		yes: "예",
 		no: "아니요",
+	},
+	releaseStatuses: {
+		ongoing: "업데이트 중",
+		hiatus: "업데이트 일시 중단",
+		completed: "완결",
+		cancelled: "취소됨",
 	},
 	detail: {
 		sections: "유닛 섹션",

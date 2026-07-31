@@ -215,6 +215,7 @@ export default {
 		publicationDate: "Erscheinungsdatum",
 		pageCount: "Seitenzahl",
 		format: "Einband oder Format",
+		releaseStatus: "Veröffentlichungsstatus des Werks",
 		contentLicense: `Lizenz für ${verbatimTerms.rezics.value}`,
 		versionLabel: "Versionsbezeichnung",
 		mediaKind: "Medienart",
@@ -225,6 +226,12 @@ export default {
 		durationSeconds: "Dauer (Sekunden)",
 		yes: "Ja",
 		no: "Nein",
+	},
+	releaseStatuses: {
+		ongoing: "Laufend",
+		hiatus: "Pausiert",
+		completed: "Abgeschlossen",
+		cancelled: "Abgebrochen",
 	},
 	detail: {
 		sections: "Unit-Bereiche",

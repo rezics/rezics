@@ -58,6 +58,8 @@ import {
 	type WorkOwnershipMode,
 	WorkOwnershipField,
 } from "./components/work-ownership-field";
+import { WorkReleaseStatusField } from "./components/work-release-status-field";
+import { isWorkReleaseStatus } from "./model/work-release-status";
 
 export function UnitBrowsePage({ type }: { type: WorkUnitType }) {
 	const { t } = useTranslation(["actions", "media", "ui", "units"]);
@@ -240,6 +242,7 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 		const summary = String(form.get("summary") ?? "").trim();
 		const submittedLicense = form.get("license");
 		const submittedContentLicense = form.get("contentLicense");
+		const submittedReleaseStatus = form.get("releaseStatus");
 		const creditValidation = validateCreditAttributionDrafts(type, creditAttributions);
 		setCreditValidationRequested(true);
 		if (!creditValidation.ok) return;
@@ -258,6 +261,17 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 		)
 			return;
 		const contentLanguage = await language.resolveLanguage(formElement);
+		const details =
+			type === "book"
+				? isWorkReleaseStatus(submittedReleaseStatus)
+					? { type: "book" as const, releaseStatus: submittedReleaseStatus }
+					: undefined
+				: type === "media"
+					? isWorkReleaseStatus(submittedReleaseStatus)
+						? { type: "media" as const, releaseStatus: submittedReleaseStatus }
+						: undefined
+					: { type: "software" as const };
+		if (!details) return;
 		let request: Parameters<typeof create.mutateAsync>[0] | undefined;
 		try {
 			const version =
@@ -266,6 +280,7 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 					: ({ kind: "main" } as const);
 			const common = {
 				version,
+				details,
 				localization: {
 					language: contentLanguage,
 					title: submittedTitle,
@@ -449,6 +464,7 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 								role="cover"
 							/>
 						</Field>
+						{type === "book" || type === "media" ? <WorkReleaseStatusField /> : null}
 						<Field>
 							<FieldLabel>{t.ui.visibility}</FieldLabel>
 							<NativeSelect defaultValue="public" name="visibility">

@@ -58590,6 +58590,16 @@ export const PostApiUnitsByTypeStatus200AttributionsCreditedUnitAvatarIconPrefix
 export type PostApiUnitsByTypeStatus200AttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof PostApiUnitsByTypeStatus200AttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiUnitsByTypeStatus200AttributionsCreditedUnitAvatarIconPrefixEnum];
 
+export const PostApiUnitsByTypeStatus200DetailsReleaseStatusEnum = {
+	ongoing: "ongoing",
+	hiatus: "hiatus",
+	completed: "completed",
+	cancelled: "cancelled",
+} as const;
+
+export type PostApiUnitsByTypeStatus200DetailsReleaseStatusEnum =
+	(typeof PostApiUnitsByTypeStatus200DetailsReleaseStatusEnum)[keyof typeof PostApiUnitsByTypeStatus200DetailsReleaseStatusEnum];
+
 export const PostApiUnitsByTypeStatus200DetailsPublishedContentMetricsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -58887,6 +58897,10 @@ export type PostApiUnitsByTypeStatus200 = {
 				 * @type string
 				 */
 				type: "book";
+				/**
+				 * @type string
+				 */
+				releaseStatus: PostApiUnitsByTypeStatus200DetailsReleaseStatusEnum;
 				isbn13: (string | null) | null;
 				publicationDate: (string | null) | null;
 				pageCount: ((string | number) | null) | null;
@@ -58960,6 +58974,10 @@ export type PostApiUnitsByTypeStatus200 = {
 				 * @type string
 				 */
 				type: "media";
+				/**
+				 * @type string
+				 */
+				releaseStatus: PostApiUnitsByTypeStatus200DetailsReleaseStatusEnum;
 				releaseDate: (string | null) | null;
 				/**
 				 * @type string
@@ -59878,10 +59896,32 @@ export type PostApiUnitsByTypeStatus409 = {
 	requestId: string;
 };
 
-/**
- * @type object
- */
-export type PostApiUnitsByTypeStatus422 = ValidationError;
+export type PostApiUnitsByTypeStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ValidationError'
+				 * @type string
+				 */
+				code: "ValidationError";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
 
 export const PostApiUnitsByTypeStatus429ErrorCodeEnum = {
 	ApiQuotaExceeded: "ApiQuotaExceeded",
@@ -59971,6 +60011,16 @@ export const PostApiUnitsByTypeRequestLicense = {
 
 export type PostApiUnitsByTypeRequestLicense =
 	(typeof PostApiUnitsByTypeRequestLicense)[keyof typeof PostApiUnitsByTypeRequestLicense];
+
+export const PostApiUnitsByTypeRequestDetailsReleaseStatusEnum = {
+	ongoing: "ongoing",
+	hiatus: "hiatus",
+	completed: "completed",
+	cancelled: "cancelled",
+} as const;
+
+export type PostApiUnitsByTypeRequestDetailsReleaseStatusEnum =
+	(typeof PostApiUnitsByTypeRequestDetailsReleaseStatusEnum)[keyof typeof PostApiUnitsByTypeRequestDetailsReleaseStatusEnum];
 
 export type PostApiUnitsByTypeBody =
 	| {
@@ -60264,6 +60314,33 @@ export type PostApiUnitsByTypeBody =
 			aiDisclosure?:
 				"unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
 			license?: (PostApiUnitsByTypeRequestLicense | null) | null;
+			details:
+				| {
+						/**
+						 * @type string
+						 */
+						type: "book";
+						/**
+						 * @type string
+						 */
+						releaseStatus: PostApiUnitsByTypeRequestDetailsReleaseStatusEnum;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						type: "software";
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						type: "media";
+						/**
+						 * @type string
+						 */
+						releaseStatus: PostApiUnitsByTypeRequestDetailsReleaseStatusEnum;
+				  };
 	  }
 	| {
 			/**
@@ -60545,6 +60622,33 @@ export type PostApiUnitsByTypeBody =
 			aiDisclosure?:
 				"unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
 			license?: (PostApiUnitsByTypeRequestLicense | null) | null;
+			details:
+				| {
+						/**
+						 * @type string
+						 */
+						type: "book";
+						/**
+						 * @type string
+						 */
+						releaseStatus: PostApiUnitsByTypeRequestDetailsReleaseStatusEnum;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						type: "software";
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						type: "media";
+						/**
+						 * @type string
+						 */
+						releaseStatus: PostApiUnitsByTypeRequestDetailsReleaseStatusEnum;
+				  };
 	  };
 
 /**
@@ -60729,6 +60833,16 @@ export const GetApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitAvatarIco
 
 export type GetApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof GetApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const GetApiUnitsByTypeByUnitIdStatus200DetailsReleaseStatusEnum = {
+	ongoing: "ongoing",
+	hiatus: "hiatus",
+	completed: "completed",
+	cancelled: "cancelled",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200DetailsReleaseStatusEnum =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200DetailsReleaseStatusEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200DetailsReleaseStatusEnum];
 
 export const GetApiUnitsByTypeByUnitIdStatus200DetailsPublishedContentMetricsLanguageEnum = {
 	zh: "zh",
@@ -61027,6 +61141,10 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 				 * @type string
 				 */
 				type: "book";
+				/**
+				 * @type string
+				 */
+				releaseStatus: GetApiUnitsByTypeByUnitIdStatus200DetailsReleaseStatusEnum;
 				isbn13: (string | null) | null;
 				publicationDate: (string | null) | null;
 				pageCount: ((string | number) | null) | null;
@@ -61100,6 +61218,10 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 				 * @type string
 				 */
 				type: "media";
+				/**
+				 * @type string
+				 */
+				releaseStatus: GetApiUnitsByTypeByUnitIdStatus200DetailsReleaseStatusEnum;
 				releaseDate: (string | null) | null;
 				/**
 				 * @type string
@@ -62036,6 +62158,16 @@ export const PatchApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitAvatarI
 export type PatchApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof PatchApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum];
 
+export const PatchApiUnitsByTypeByUnitIdStatus200DetailsReleaseStatusEnum = {
+	ongoing: "ongoing",
+	hiatus: "hiatus",
+	completed: "completed",
+	cancelled: "cancelled",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200DetailsReleaseStatusEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200DetailsReleaseStatusEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200DetailsReleaseStatusEnum];
+
 export const PatchApiUnitsByTypeByUnitIdStatus200DetailsPublishedContentMetricsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -62333,6 +62465,10 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 				 * @type string
 				 */
 				type: "book";
+				/**
+				 * @type string
+				 */
+				releaseStatus: PatchApiUnitsByTypeByUnitIdStatus200DetailsReleaseStatusEnum;
 				isbn13: (string | null) | null;
 				publicationDate: (string | null) | null;
 				pageCount: ((string | number) | null) | null;
@@ -62406,6 +62542,10 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 				 * @type string
 				 */
 				type: "media";
+				/**
+				 * @type string
+				 */
+				releaseStatus: PatchApiUnitsByTypeByUnitIdStatus200DetailsReleaseStatusEnum;
 				releaseDate: (string | null) | null;
 				/**
 				 * @type string
@@ -63384,6 +63524,16 @@ export const PatchApiUnitsByTypeByUnitIdRequestLicense = {
 export type PatchApiUnitsByTypeByUnitIdRequestLicense =
 	(typeof PatchApiUnitsByTypeByUnitIdRequestLicense)[keyof typeof PatchApiUnitsByTypeByUnitIdRequestLicense];
 
+export const PatchApiUnitsByTypeByUnitIdRequestDetailsReleaseStatusEnum = {
+	ongoing: "ongoing",
+	hiatus: "hiatus",
+	completed: "completed",
+	cancelled: "cancelled",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdRequestDetailsReleaseStatusEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdRequestDetailsReleaseStatusEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdRequestDetailsReleaseStatusEnum];
+
 /**
  * @type object
  */
@@ -63447,6 +63597,10 @@ export type PatchApiUnitsByTypeByUnitIdBody = {
 		episodeCount?: ((string | number) | null) | null;
 		seasonCount?: ((string | number) | null) | null;
 		durationSeconds?: ((string | number) | null) | null;
+		/**
+		 * @type string | undefined
+		 */
+		releaseStatus?: PatchApiUnitsByTypeByUnitIdRequestDetailsReleaseStatusEnum;
 	};
 };
 
@@ -63623,6 +63777,16 @@ export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsCredi
 
 export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200DetailsReleaseStatusEnum = {
+	ongoing: "ongoing",
+	hiatus: "hiatus",
+	completed: "completed",
+	cancelled: "cancelled",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200DetailsReleaseStatusEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200DetailsReleaseStatusEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200DetailsReleaseStatusEnum];
 
 export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200DetailsPublishedContentMetricsLanguageEnum =
 	{
@@ -63924,6 +64088,10 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 				 * @type string
 				 */
 				type: "book";
+				/**
+				 * @type string
+				 */
+				releaseStatus: PatchApiUnitsByTypeByUnitIdVariantContextStatus200DetailsReleaseStatusEnum;
 				isbn13: (string | null) | null;
 				publicationDate: (string | null) | null;
 				pageCount: ((string | number) | null) | null;
@@ -63997,6 +64165,10 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 				 * @type string
 				 */
 				type: "media";
+				/**
+				 * @type string
+				 */
+				releaseStatus: PatchApiUnitsByTypeByUnitIdVariantContextStatus200DetailsReleaseStatusEnum;
 				releaseDate: (string | null) | null;
 				/**
 				 * @type string
@@ -65108,6 +65280,16 @@ export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200Attribution
 export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AttributionsCreditedUnitAvatarIconPrefixEnum];
 
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200DetailsReleaseStatusEnum = {
+	ongoing: "ongoing",
+	hiatus: "hiatus",
+	completed: "completed",
+	cancelled: "cancelled",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200DetailsReleaseStatusEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200DetailsReleaseStatusEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200DetailsReleaseStatusEnum];
+
 export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200DetailsPublishedContentMetricsLanguageEnum =
 	{
 		zh: "zh",
@@ -65411,6 +65593,10 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 				 * @type string
 				 */
 				type: "book";
+				/**
+				 * @type string
+				 */
+				releaseStatus: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200DetailsReleaseStatusEnum;
 				isbn13: (string | null) | null;
 				publicationDate: (string | null) | null;
 				pageCount: ((string | number) | null) | null;
@@ -65484,6 +65670,10 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 				 * @type string
 				 */
 				type: "media";
+				/**
+				 * @type string
+				 */
+				releaseStatus: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200DetailsReleaseStatusEnum;
 				releaseDate: (string | null) | null;
 				/**
 				 * @type string
@@ -66604,6 +66794,16 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200Attributio
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AttributionsCreditedUnitAvatarIconPrefixEnum];
 
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200DetailsReleaseStatusEnum = {
+	ongoing: "ongoing",
+	hiatus: "hiatus",
+	completed: "completed",
+	cancelled: "cancelled",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200DetailsReleaseStatusEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200DetailsReleaseStatusEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200DetailsReleaseStatusEnum];
+
 export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200DetailsPublishedContentMetricsLanguageEnum =
 	{
 		zh: "zh",
@@ -66908,6 +67108,10 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 				 * @type string
 				 */
 				type: "book";
+				/**
+				 * @type string
+				 */
+				releaseStatus: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200DetailsReleaseStatusEnum;
 				isbn13: (string | null) | null;
 				publicationDate: (string | null) | null;
 				pageCount: ((string | number) | null) | null;
@@ -66981,6 +67185,10 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 				 * @type string
 				 */
 				type: "media";
+				/**
+				 * @type string
+				 */
+				releaseStatus: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200DetailsReleaseStatusEnum;
 				releaseDate: (string | null) | null;
 				/**
 				 * @type string

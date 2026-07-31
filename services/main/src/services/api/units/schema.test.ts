@@ -20,6 +20,7 @@ const publicMainUnit = {
 	creditAttributionRequestConsent: "direct_only",
 	version: { kind: "main" },
 	localization,
+	details: { type: "book", releaseStatus: "ongoing" },
 } as const;
 const ownedMainUnit = {
 	ownershipMode: "profile_owned",
@@ -32,6 +33,7 @@ const ownedMainUnit = {
 	creditAttributionRequestConsent: "direct_only",
 	version: { kind: "main" },
 	localization,
+	details: { type: "book", releaseStatus: "ongoing" },
 } as const;
 
 describe("Unit presentation localization", () => {
@@ -132,30 +134,24 @@ describe("Unit creation semantics", () => {
 	it("keeps ownership independent from public credit roles", () => {
 		expect(
 			Check(CreateUnitBody, {
-				ownershipMode: "profile_owned",
+				...ownedMainUnit,
 				creditAttributions: [],
-				creditAttributionRequestConsent: "direct_only",
-				version: { kind: "main" },
-				localization,
 			}),
 		).toBe(true);
 		expect(
 			Check(CreateUnitBody, {
-				ownershipMode: "profile_owned",
+				...ownedMainUnit,
 				creditAttributions: [
 					{
 						entityId: "019b0000-0000-7000-8000-000000000001",
 						role: "author",
 					},
 				],
-				creditAttributionRequestConsent: "direct_only",
-				version: { kind: "main" },
-				localization,
 			}),
 		).toBe(true);
 		expect(
 			Check(CreateUnitBody, {
-				ownershipMode: "profile_owned",
+				...ownedMainUnit,
 				creditAttributions: [
 					{
 						entityId: "019b0000-0000-7000-8000-000000000001",
@@ -166,9 +162,6 @@ describe("Unit creation semantics", () => {
 						role: "author",
 					},
 				],
-				creditAttributionRequestConsent: "direct_only",
-				version: { kind: "main" },
-				localization,
 			}),
 		).toBe(true);
 	});
@@ -225,6 +218,60 @@ describe("Unit creation semantics", () => {
 				},
 			}),
 		).toBe(true);
+	});
+});
+
+describe("Book and Media release status inputs", () => {
+	it("requires one closed release status when creating a Book or Media Unit", () => {
+		for (const releaseStatus of ["ongoing", "hiatus", "completed", "cancelled"])
+			expect(
+				Check(CreateUnitBody, {
+					...publicMainUnit,
+					details: { type: "media", releaseStatus },
+				}),
+			).toBe(true);
+		expect(
+			Check(CreateUnitBody, {
+				...publicMainUnit,
+				details: { type: "book" },
+			}),
+		).toBe(false);
+		expect(
+			Check(CreateUnitBody, {
+				...publicMainUnit,
+				details: { type: "media", releaseStatus: "releasing" },
+			}),
+		).toBe(false);
+	});
+
+	it("does not attach a release status to Software creation details", () => {
+		expect(
+			Check(CreateUnitBody, {
+				...publicMainUnit,
+				details: { type: "software" },
+			}),
+		).toBe(true);
+		expect(
+			Check(CreateUnitBody, {
+				...publicMainUnit,
+				details: { type: "software", releaseStatus: "ongoing" },
+			}),
+		).toBe(false);
+	});
+
+	it("accepts only the closed release status set for metadata updates", () => {
+		expect(
+			Check(UpdateUnitBody, {
+				updatedAt: "2026-08-01T00:00:00.000Z",
+				details: { releaseStatus: "cancelled" },
+			}),
+		).toBe(true);
+		expect(
+			Check(UpdateUnitBody, {
+				updatedAt: "2026-08-01T00:00:00.000Z",
+				details: { releaseStatus: "unknown" },
+			}),
+		).toBe(false);
 	});
 });
 

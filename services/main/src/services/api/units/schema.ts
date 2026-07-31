@@ -18,6 +18,7 @@ import {
 	LocalizationLanguageQuery,
 	LocalizationInput,
 	Uuid,
+	WorkReleaseStatus,
 } from "../schema";
 
 export const VariantUnitType = t.Union([
@@ -177,6 +178,17 @@ const CreateUnitFields = {
 	contentRating: LifecycleInput.contentRating,
 	aiDisclosure: LifecycleInput.aiDisclosure,
 	license: LifecycleInput.license,
+	details: t.Union([
+		t.Object(
+			{ type: t.Literal("book"), releaseStatus: WorkReleaseStatus },
+			{ additionalProperties: false },
+		),
+		t.Object({ type: t.Literal("software") }, { additionalProperties: false }),
+		t.Object(
+			{ type: t.Literal("media"), releaseStatus: WorkReleaseStatus },
+			{ additionalProperties: false },
+		),
+	]),
 } as const;
 
 export const CreateUnitBody = t.Union([
@@ -218,6 +230,7 @@ const UnitDetailsInput = t.Object(
 		episodeCount: t.Optional(t.Nullable(t.Integer({ minimum: 1 }))),
 		seasonCount: t.Optional(t.Nullable(t.Integer({ minimum: 1 }))),
 		durationSeconds: t.Optional(t.Nullable(t.Integer({ minimum: 1 }))),
+		releaseStatus: t.Optional(WorkReleaseStatus),
 	},
 	{ additionalProperties: false },
 );
