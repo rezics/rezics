@@ -188,7 +188,7 @@ export default {
 		"media-episode-count": "集數",
 		"media-season-count": "季數",
 		"software-release-date": "軟體發行日期",
-		"software-version-label": "版本名稱",
+		"software-version-label": "版本",
 		"software-platform": "平台",
 		"software-requirement-tier": "系統需求等級",
 	},

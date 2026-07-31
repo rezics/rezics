@@ -180,7 +180,7 @@ export default {
 		pageCount: "頁數",
 		format: "裝幀或格式",
 		contentLicense: "內容授權",
-		versionLabel: "版本名稱",
+		versionLabel: "版本",
 		mediaKind: "媒體類型",
 		releaseDate: "發行日期",
 		runtimeMinutes: "片長（分鐘）",
