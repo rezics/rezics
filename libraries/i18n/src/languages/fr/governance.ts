@@ -71,6 +71,8 @@ export default {
 		"platform.api_quota_policy.update": `Modifier les politiques de quota ${verbatimTerms.api.value}`,
 		"platform.user.api_quota.read": `Consulter les quotas ${verbatimTerms.api.value} des utilisateurs`,
 		"platform.user.api_quota.update": `Gérer les quotas ${verbatimTerms.api.value} des utilisateurs`,
+		"platform.user.api_token.api_quota.read": `Consulter les quotas des jetons ${verbatimTerms.api.value} des utilisateurs`,
+		"platform.user.api_token.api_quota.update": `Gérer les quotas des jetons ${verbatimTerms.api.value} des utilisateurs`,
 		"platform.moderate": "Modérer les Units de la plateforme",
 		"platform.suppress": "Masquer le contenu et les versions de la plateforme",
 		"realm.contribute": `Participer à tous les ${realmTerms.plural}`,

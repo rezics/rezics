@@ -19,7 +19,22 @@ const accountPolicy = {
 	validUntil: null,
 	assignmentReason: null,
 	configurationOverride: {},
-	configuration: DefaultApiQuotaPolicies.standard.configuration,
+	configuration: DefaultApiQuotaPolicies.accountStandard.configuration,
+	source: "standard_default" as const,
+};
+
+const tokenPolicy = {
+	tokenId: "01983000-0000-7000-8000-000000000003",
+	policyId: "01983000-0000-7000-8000-000000000004",
+	key: "token-standard-default",
+	class: "standard" as const,
+	schemaVersion: 1,
+	policyRevision: 1,
+	bindingRevision: null,
+	validUntil: null,
+	assignmentReason: null,
+	configurationOverride: {},
+	configuration: DefaultApiQuotaPolicies.tokenStandard.configuration,
 	source: "standard_default" as const,
 };
 
@@ -27,10 +42,11 @@ describe("API quota admission model", () => {
 	it("always includes an account constraint even when a token has its own safeguards", () => {
 		const constraints = buildApiQuotaConstraints({
 			accountUserId: accountPolicy.userId,
-			tokenId: "01983000-0000-7000-8000-000000000003",
+			tokenId: tokenPolicy.tokenId,
 			operation: resolveApiQuotaOperation("getApiUnits"),
 			accountPolicy,
-			tokenOverride: {
+			tokenPolicy,
+			tokenSafeguard: {
 				limits: { requestRate: { requestsPerMinute: 5, burstCapacity: 2 } },
 			},
 		});
@@ -44,6 +60,7 @@ describe("API quota admission model", () => {
 			accountUserId: accountPolicy.userId,
 			operation: resolveApiQuotaOperation("getApiUnits"),
 			accountPolicy,
+			tokenPolicy,
 		};
 		const first = buildApiQuotaConstraints({ ...common, tokenId: "token-a" });
 		const second = buildApiQuotaConstraints({ ...common, tokenId: "token-b" });

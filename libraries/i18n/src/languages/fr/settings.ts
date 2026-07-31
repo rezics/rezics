@@ -188,7 +188,7 @@ export default {
 			reportWrite: "Envoyer des signalements",
 		},
 		limits: "Limites d’utilisation",
-		standardLimitsDescription: `Tous les jetons partagent le quota du compte. Les protections propres à un jeton ne peuvent que réduire la capacité disponible. Attribuer le quota de compte ${verbatimTerms.privilegedApiQuotaClass.value} exige un accès à la plateforme.`,
+		standardLimitsDescription: `Chaque jeton possède sa propre politique de plateforme et partage aussi le quota du compte. Votre protection facultative ne peut que réduire sa capacité ; l’accès ${verbatimTerms.privilegedApiQuotaClass.value} exige une autorité de plateforme.`,
 		limitsDescription:
 			"Les quotas doivent rester dans les plages autorisées par la règle actuelle. Les limites globales et propres à une opération s’appliquent conjointement.",
 		limitRanges: insert(

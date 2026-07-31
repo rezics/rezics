@@ -29,9 +29,18 @@ export class ApiAccountQuotaRevisionConflict extends Data.TaggedError(
 	readonly message = "Account API quota assignment changed; reload before saving";
 }
 
+export class ApiTokenQuotaRevisionConflict extends Data.TaggedError(
+	"ApiTokenQuotaRevisionConflict",
+) {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = ApiTokenQuotaRevisionConflict.status;
+	readonly message = "API token quota assignment changed; reload before saving";
+}
+
 export const ApiQuotaPolicyErrors = [
 	ApiQuotaPolicyNotFound,
 	ApiQuotaPolicyInvalid,
 	ApiQuotaPolicyRevisionConflict,
 	ApiAccountQuotaRevisionConflict,
+	ApiTokenQuotaRevisionConflict,
 ] as const;

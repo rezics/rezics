@@ -22,6 +22,7 @@ export default {
 	ApiQuotaPolicyInvalid: `${verbatimTerms.api.value} 配額政策設定無效。`,
 	ApiQuotaPolicyRevisionConflict: `${verbatimTerms.api.value} 配額政策已變更，請重新載入後再儲存。`,
 	ApiAccountQuotaRevisionConflict: `帳戶 ${verbatimTerms.api.value} 配額已變更，請重新載入後再儲存。`,
+	ApiTokenQuotaRevisionConflict: `${verbatimTerms.api.value} 權杖配額指派已變更，請重新載入後再儲存。`,
 	ApiTokenLimitReached: `此帳戶已達 ${verbatimTerms.api.value} 權杖數量上限。`,
 	ApiTokenQuotaOverrideInvalid: `${verbatimTerms.api.value} 權杖的配額覆寫設定無效。`,
 	ApiTokenQuotaOverrideRevisionConflict: `${verbatimTerms.api.value} 權杖的配額覆寫已變更，請重新載入後再儲存。`,

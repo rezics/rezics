@@ -606,25 +606,55 @@ function TokenQuotaEditor({
 	refresh: () => Promise<unknown>;
 }) {
 	const { t } = useTranslation(["settings", "ui"]);
-	const ranges = getTokenQuotaLimitRanges("privileged");
-	const accountLimits = token.quota.account.limits;
+	const policyLimits = token.quota.token.limits;
+	const classRanges = getTokenQuotaLimitRanges(token.quota.token.class);
+	const ranges: TokenQuotaLimitRanges = {
+		requestsPerMinute: {
+			minimum: classRanges.requestsPerMinute.minimum,
+			maximum: Math.min(
+				classRanges.requestsPerMinute.maximum,
+				Number(policyLimits.requestRate.requestsPerMinute),
+			),
+		},
+		burstCapacity: {
+			minimum: classRanges.burstCapacity.minimum,
+			maximum: Math.min(
+				classRanges.burstCapacity.maximum,
+				Number(policyLimits.requestRate.burstCapacity),
+			),
+		},
+		maxConcurrentRequests: {
+			minimum: classRanges.maxConcurrentRequests.minimum,
+			maximum: Math.min(
+				classRanges.maxConcurrentRequests.maximum,
+				Number(policyLimits.maxConcurrentRequests),
+			),
+		},
+		dailyCostUnits: {
+			minimum: classRanges.dailyCostUnits.minimum,
+			maximum: Math.min(
+				classRanges.dailyCostUnits.maximum,
+				Number(policyLimits.dailyCostUnits),
+			),
+		},
+	};
 	const storedOverride = token.quota.tokenOverride?.configurationOverride;
 	const effectiveOverrideLimits: CompleteQuotaLimits = {
 		requestRate: {
 			requestsPerMinute: Number(
 				storedOverride?.limits?.requestRate?.requestsPerMinute ??
-					accountLimits.requestRate.requestsPerMinute,
+					policyLimits.requestRate.requestsPerMinute,
 			),
 			burstCapacity: Number(
 				storedOverride?.limits?.requestRate?.burstCapacity ??
-					accountLimits.requestRate.burstCapacity,
+					policyLimits.requestRate.burstCapacity,
 			),
 		},
 		maxConcurrentRequests: Number(
-			storedOverride?.limits?.maxConcurrentRequests ?? accountLimits.maxConcurrentRequests,
+			storedOverride?.limits?.maxConcurrentRequests ?? policyLimits.maxConcurrentRequests,
 		),
 		dailyCostUnits: Number(
-			storedOverride?.limits?.dailyCostUnits ?? accountLimits.dailyCostUnits,
+			storedOverride?.limits?.dailyCostUnits ?? policyLimits.dailyCostUnits,
 		),
 	};
 	const [limitValues, setLimitValues] = useState<TokenQuotaLimitValues>(() =>
@@ -896,9 +926,9 @@ function TokenCard({
 		mutation: { onSuccess: refresh },
 	});
 	const policyLabel =
-		token.quota.account.source === "privileged_fallback"
+		token.quota.token.source === "privileged_fallback"
 			? t.settings.tokens.trustedFallback
-			: token.quota.account.class === "privileged"
+			: token.quota.token.class === "privileged"
 				? t.settings.tokens.privilegedPolicy
 				: t.settings.tokens.standardPolicy;
 
@@ -918,7 +948,7 @@ function TokenCard({
 						</Badge>
 						<Badge
 							variant={
-								token.quota.account.class === "privileged" ? "warning" : "outline"
+								token.quota.token.class === "privileged" ? "warning" : "outline"
 							}
 						>
 							{policyLabel}
@@ -946,7 +976,7 @@ function TokenCard({
 						</dt>
 						<dd>
 							{Number(
-								token.quota.account.limits.requestRate.requestsPerMinute,
+								token.quota.token.limits.requestRate.requestsPerMinute,
 							).toLocaleString(locale)}
 						</dd>
 					</div>
@@ -955,16 +985,16 @@ function TokenCard({
 							{t.settings.tokens.maxConcurrentRequests}
 						</dt>
 						<dd>
-							{Number(
-								token.quota.account.limits.maxConcurrentRequests,
-							).toLocaleString(locale)}
+							{Number(token.quota.token.limits.maxConcurrentRequests).toLocaleString(
+								locale,
+							)}
 						</dd>
 					</div>
 				</dl>
-				{token.quota.account.class === "privileged" && token.quota.account.validUntil ? (
+				{token.quota.token.class === "privileged" && token.quota.token.validUntil ? (
 					<p className="text-sm text-warning">
 						{t.settings.tokens.trustedUntil}:{" "}
-						{formatDate(token.quota.account.validUntil, locale)}
+						{formatDate(token.quota.token.validUntil, locale)}
 					</p>
 				) : null}
 				<div className="flex flex-wrap gap-2">
@@ -1041,7 +1071,7 @@ function TokenCard({
 				) : null}
 				{editor === "quota" ? (
 					<TokenQuotaEditor
-						key={`${token.quota.account.policyRevision}:${token.quota.tokenOverride?.revision ?? 0}`}
+						key={`${token.quota.token.policyRevision}:${token.quota.token.bindingRevision ?? 0}:${token.quota.tokenOverride?.revision ?? 0}`}
 						token={token}
 						refresh={refresh}
 					/>

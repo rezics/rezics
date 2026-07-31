@@ -176,7 +176,7 @@ export default {
 			reportWrite: "신고 제출",
 		},
 		limits: "사용 한도",
-		standardLimitsDescription: `모든 토큰은 계정 할당량을 공유합니다. 토큰별 보호 제한은 사용 가능한 용량을 줄이는 데만 사용할 수 있습니다. ${verbatimTerms.privilegedApiQuotaClass.value} 계정 할당량을 지정하려면 플랫폼 접근 권한이 필요합니다.`,
+		standardLimitsDescription: `각 토큰에는 별도의 플랫폼 정책이 있으며 계정 할당량도 함께 공유합니다. 선택한 보호 제한은 토큰 용량을 줄이는 데만 사용할 수 있으며 ${verbatimTerms.privilegedApiQuotaClass.value} 접근 권한 지정에는 플랫폼 권한이 필요합니다.`,
 		limitsDescription:
 			"할당량은 현재 정책에서 허용하는 범위 내에 있어야 합니다. 전역 및 작업별 제한이 함께 적용됩니다.",
 		limitRanges: insert(

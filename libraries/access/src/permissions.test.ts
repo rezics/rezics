@@ -164,6 +164,12 @@ describe("permission schema", () => {
 			"platform.session.read",
 			"platform.session.revoke",
 		]);
+		expect(expandPlatformCapabilities(["platform.user.api_token.api_quota.update"])).toEqual([
+			"platform.user.read",
+			"platform.api_quota_policy.read",
+			"platform.user.api_token.api_quota.read",
+			"platform.user.api_token.api_quota.update",
+		]);
 		expect(
 			expandPlatformCapabilities(["unit.ownership.override", "unit.delete", "unit.restore"]),
 		).toEqual([

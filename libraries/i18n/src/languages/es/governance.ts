@@ -71,6 +71,8 @@ export default {
 		"platform.api_quota_policy.update": `Actualizar políticas de cuotas de ${verbatimTerms.api.value}`,
 		"platform.user.api_quota.read": `Ver cuotas de ${verbatimTerms.api.value} de usuarios`,
 		"platform.user.api_quota.update": `Gestionar cuotas de ${verbatimTerms.api.value} de usuarios`,
+		"platform.user.api_token.api_quota.read": `Ver cuotas de tokens de ${verbatimTerms.api.value} de usuarios`,
+		"platform.user.api_token.api_quota.update": `Gestionar cuotas de tokens de ${verbatimTerms.api.value} de usuarios`,
 		"platform.moderate": "Moderar Units de la plataforma",
 		"platform.suppress": "Ocultar contenido y versiones de la plataforma",
 		"realm.contribute": `Participar en todos los ${realmTerms.plural}`,

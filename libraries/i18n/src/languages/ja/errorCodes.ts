@@ -22,6 +22,7 @@ export default {
 	ApiQuotaPolicyInvalid: `${verbatimTerms.api.value} クォータポリシーの設定が無効です。`,
 	ApiQuotaPolicyRevisionConflict: `${verbatimTerms.api.value} クォータポリシーが変更されました。再読み込みしてから保存してください。`,
 	ApiAccountQuotaRevisionConflict: `アカウントの ${verbatimTerms.api.value} クォータが変更されました。再読み込みしてから保存してください。`,
+	ApiTokenQuotaRevisionConflict: `${verbatimTerms.api.value} トークンのクォータ割り当てが変更されました。再読み込みしてから保存してください。`,
 	ApiTokenLimitReached: `このアカウントは ${verbatimTerms.api.value} トークン数の上限に達しています。`,
 	ApiTokenQuotaOverrideInvalid: `${verbatimTerms.api.value} トークンのクォータ上書き設定が無効です。`,
 	ApiTokenQuotaOverrideRevisionConflict: `${verbatimTerms.api.value} トークンのクォータ上書きが変更されました。再読み込みしてから保存してください。`,

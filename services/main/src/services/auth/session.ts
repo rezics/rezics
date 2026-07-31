@@ -29,8 +29,10 @@ import {
 import {
 	getApiTokenQuotaOverride,
 	resolveApiAccountQuotaPolicy,
+	resolveApiTokenQuotaPolicy,
 	type ApiTokenQuotaOverrideSummary,
 	type ResolvedApiAccountQuotaPolicy,
+	type ResolvedApiTokenQuotaPolicy,
 } from "./api-quota/policy-service";
 
 type BaseIdentity = {
@@ -53,7 +55,8 @@ export type ApiKeyIdentity = BaseIdentity & {
 		id: string;
 		permissions: readonly ApiPermission[];
 		operationId: string;
-		quotaPolicy: ResolvedApiAccountQuotaPolicy;
+		accountQuotaPolicy: ResolvedApiAccountQuotaPolicy;
+		tokenQuotaPolicy: ResolvedApiTokenQuotaPolicy;
 		tokenQuotaOverride: ApiTokenQuotaOverrideSummary | undefined;
 		quotaLease: ApiQuotaLease;
 	};
@@ -199,16 +202,18 @@ async function resolveApiKey(
 		if (accountAccess === "write") await authorization.account.ensureCanWrite();
 		else await authorization.account.ensureCanContribute();
 	}
-	const [quotaPolicy, tokenQuotaRecord] = await Promise.all([
+	const [accountQuotaPolicy, tokenQuotaPolicy, tokenQuotaRecord] = await Promise.all([
 		resolveApiAccountQuotaPolicy(user.id),
+		resolveApiTokenQuotaPolicy(verified.key.id),
 		getApiTokenQuotaOverride(verified.key.id),
 	]);
 	const quotaLease = await enforceApiQuota({
 		accountUserId: user.id,
 		tokenId: verified.key.id,
 		operation,
-		accountPolicy: quotaPolicy,
-		tokenOverride: tokenQuotaRecord?.configurationOverride,
+		accountPolicy: accountQuotaPolicy,
+		tokenPolicy: tokenQuotaPolicy,
+		tokenSafeguard: tokenQuotaRecord?.configurationOverride,
 	});
 
 	try {
@@ -222,7 +227,8 @@ async function resolveApiKey(
 				id: verified.key.id,
 				permissions,
 				operationId,
-				quotaPolicy,
+				accountQuotaPolicy,
+				tokenQuotaPolicy,
 				tokenQuotaOverride: tokenQuotaRecord,
 				quotaLease,
 			},

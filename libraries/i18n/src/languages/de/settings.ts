@@ -187,7 +187,7 @@ export default {
 			reportWrite: "Meldungen senden",
 		},
 		limits: "Nutzungsbegrenzungen",
-		standardLimitsDescription: `Alle Token teilen das Kontokontingent. Schutzlimits einzelner Token können die verfügbare Kapazität nur verringern. Die Zuweisung des ${verbatimTerms.privilegedApiQuotaClass.value}-Kontokontingents erfordert Plattformzugriff.`,
+		standardLimitsDescription: `Jeder Token hat eine eigene Plattformrichtlinie und teilt zusätzlich das Kontokontingent. Dein optionales Schutzlimit kann die Tokenkapazität nur verringern; ${verbatimTerms.privilegedApiQuotaClass.value}-Zugriff erfordert Plattformberechtigung.`,
 		limitsDescription:
 			"Kontingente müssen innerhalb der zulässigen Bereiche der aktuellen Richtlinie bleiben. Globale und aktionsspezifische Begrenzungen gelten gemeinsam.",
 		limitRanges: insert(

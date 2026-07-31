@@ -21,6 +21,7 @@ export default {
 	ApiQuotaPolicyInvalid: `${verbatimTerms.api.value} 할당량 정책 설정이 올바르지 않습니다.`,
 	ApiQuotaPolicyRevisionConflict: `${verbatimTerms.api.value} 할당량 정책이 변경되었습니다. 새로고침한 후 저장하세요.`,
 	ApiAccountQuotaRevisionConflict: `계정 ${verbatimTerms.api.value} 할당량이 변경되었습니다. 새로고침한 후 저장하세요.`,
+	ApiTokenQuotaRevisionConflict: `${verbatimTerms.api.value} 토큰 할당량 지정이 변경되었습니다. 새로고침한 후 저장하세요.`,
 	ApiTokenLimitReached: `이 계정은 ${verbatimTerms.api.value} 토큰 수 제한에 도달했습니다.`,
 	ApiTokenQuotaOverrideInvalid: `${verbatimTerms.api.value} 토큰 할당량 재정의가 올바르지 않습니다.`,
 	ApiTokenQuotaOverrideRevisionConflict: `${verbatimTerms.api.value} 토큰 할당량 재정의가 변경되었습니다. 새로고침한 후 저장하세요.`,

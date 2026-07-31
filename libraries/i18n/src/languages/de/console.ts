@@ -48,7 +48,7 @@ export default {
 		},
 		apiQuotas: {
 			label: `${verbatimTerms.api.value}-Kontingente`,
-			description: `Kontoweite Raten-, Parallelitäts-, Kosten- und Tokenlimits für ${verbatimTerms.api.value} verwalten.`,
+			description: `Globale ${verbatimTerms.api.value}-Kontingentrichtlinien, Zuweisungen und Ausnahmen für Konten und Token verwalten.`,
 		},
 	},
 	units: {
@@ -259,11 +259,13 @@ export default {
 	},
 	apiQuotas: {
 		policyList: "Richtlinien",
+		assignments: "Zuweisungen",
 		revision: insert("Revision {{revision}}", { revision: Number }),
 		enabled: "Aktiviert",
 		disabled: "Deaktiviert",
 		empty: `Es sind keine ${verbatimTerms.api.value}-Token-Richtlinien verfügbar.`,
 		policyClass: "Richtlinienklasse",
+		subjects: { account: "Konto", token: `${verbatimTerms.api.value}-Token` },
 		classes: { standard: "Standard", privileged: "Privilegiert" },
 		schemaVersion: insert("Schema {{version}}", { version: Number }),
 		requestsPerMinute: "Anfragen pro Minute",

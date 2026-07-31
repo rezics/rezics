@@ -69,6 +69,8 @@ export default {
 		"platform.api_quota_policy.update": `更新 ${verbatimTerms.api.value} 配额策略`,
 		"platform.user.api_quota.read": `查看用户 ${verbatimTerms.api.value} 配额`,
 		"platform.user.api_quota.update": `管理用户 ${verbatimTerms.api.value} 配额`,
+		"platform.user.api_token.api_quota.read": `查看用户 ${verbatimTerms.api.value} 令牌配额`,
+		"platform.user.api_token.api_quota.update": `管理用户 ${verbatimTerms.api.value} 令牌配额`,
 		"platform.moderate": "运行平台内容治理",
 		"platform.suppress": "隐藏平台内容与修订",
 		"realm.contribute": `参与所有${realmTerms.pluralLabel}`,

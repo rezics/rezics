@@ -70,6 +70,8 @@ export default {
 		"platform.api_quota_policy.update": `Update ${verbatimTerms.api.value} quota policies`,
 		"platform.user.api_quota.read": `View user ${verbatimTerms.api.value} quotas`,
 		"platform.user.api_quota.update": `Manage user ${verbatimTerms.api.value} quotas`,
+		"platform.user.api_token.api_quota.read": `View user ${verbatimTerms.api.value} token quotas`,
+		"platform.user.api_token.api_quota.update": `Manage user ${verbatimTerms.api.value} token quotas`,
 		"platform.moderate": "Moderate platform Units",
 		"platform.suppress": "Suppress platform content and revisions",
 		"realm.contribute": `Participate in every ${realmTerms.label}`,

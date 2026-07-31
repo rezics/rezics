@@ -22,6 +22,7 @@ export default {
 	ApiQuotaPolicyInvalid: `${verbatimTerms.api.value} 配额策略配置无效。`,
 	ApiQuotaPolicyRevisionConflict: `${verbatimTerms.api.value} 配额策略已更改，请重新加载后再保存。`,
 	ApiAccountQuotaRevisionConflict: `账户 ${verbatimTerms.api.value} 配额已更改，请重新加载后再保存。`,
+	ApiTokenQuotaRevisionConflict: `${verbatimTerms.api.value} 令牌配额分配已更改，请重新加载后再保存。`,
 	ApiTokenLimitReached: `此账户已达到 ${verbatimTerms.api.value} 令牌数量上限。`,
 	ApiTokenQuotaOverrideInvalid: `${verbatimTerms.api.value} 令牌的配额覆盖配置无效。`,
 	ApiTokenQuotaOverrideRevisionConflict: `${verbatimTerms.api.value} 令牌的配额覆盖已更改，请重新加载后再保存。`,

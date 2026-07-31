@@ -46,18 +46,19 @@ API-key identities.
 API keys use the `rz_api_` prefix, are SHA-256 hashed by Better Auth, and expire
 after 90 days by default (maximum 365 days). Better Auth retains its
 credential-verification abuse limiter. Product capacity is enforced separately
-by the account quota system described in
+by the account-and-token quota system described in
 [`docs/architecture/api-quotas.md`](../../../../../docs/architecture/api-quotas.md).
 The full secret is returned once at creation.
 
 ## API quotas
 
-The authenticated Better Auth user ID is the hard quota principal. Every token
-for that account consumes the same account-global and operation-specific rate,
-concurrency, and UTC daily-cost constraints. Creating another token therefore
-does not create capacity. A token may have an additional owner-managed
-safeguard, but it is evaluated alongside the account constraints and can only
-make that token more restrictive.
+The authenticated Better Auth user ID and verified API-key ID are independent
+quota subjects. Every request consumes the account-global and applicable
+operation constraints plus the token-global and applicable operation
+constraints. Creating another token therefore does not create account capacity,
+and a permissive token policy cannot bypass the account policy. A token may have
+an additional owner-managed safeguard, but it is intersected with the platform
+token policy and can only make that token more restrictive.
 
 Quota admission is one PostgreSQL transaction protected by sorted advisory
 locks. A denial rolls back every tentative counter and lease. Accepted daily

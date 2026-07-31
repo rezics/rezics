@@ -42,7 +42,7 @@ export default {
 		},
 		apiQuotas: {
 			label: `${verbatimTerms.api.value} 配额`,
-			description: `管理账户共享的 ${verbatimTerms.api.value} 速率、并发、成本与令牌数量策略。`,
+			description: `管理账户与令牌的全局 ${verbatimTerms.api.value} 配额策略、分配及覆盖设置。`,
 		},
 	},
 	units: {
@@ -239,11 +239,13 @@ export default {
 	},
 	apiQuotas: {
 		policyList: "策略",
+		assignments: "分配",
 		revision: insert("修订版 {{revision}}", { revision: Number }),
 		enabled: "已启用",
 		disabled: "已停用",
 		empty: `目前没有可管理的 ${verbatimTerms.api.value} 令牌策略。`,
 		policyClass: "策略类别",
+		subjects: { account: "账户", token: `${verbatimTerms.api.value} 令牌` },
 		classes: { standard: "标准", privileged: "特权" },
 		schemaVersion: insert("结构版本 {{version}}", { version: Number }),
 		requestsPerMinute: "每分钟请求数",

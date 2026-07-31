@@ -55,6 +55,20 @@ export const ApiAccountQuotaPolicyResponse = t.Object({
 	operations: PrivilegedApiQuotaOperations,
 });
 
+export const ApiTokenQuotaPolicyResponse = t.Object({
+	key: t.String(),
+	class: t.UnionEnum(ApiQuotaPolicyClassValues),
+	source: t.UnionEnum(["assigned", "standard_default", "privileged_fallback"]),
+	schemaVersion: t.Integer({ minimum: 1 }),
+	policyRevision: t.Integer({ minimum: 1 }),
+	bindingRevision: t.Nullable(t.Integer({ minimum: 1 })),
+	validUntil: t.Nullable(DateTime),
+	assignmentReason: t.Nullable(t.String()),
+	configurationOverride: ApiTokenQuotaOverrideInput,
+	limits: PrivilegedApiQuotaLimits,
+	operations: PrivilegedApiQuotaOperations,
+});
+
 export const ApiTokenQuotaOverrideResponse = t.Nullable(
 	t.Object({
 		configurationOverride: ApiTokenQuotaOverrideInput,
@@ -65,6 +79,7 @@ export const ApiTokenQuotaOverrideResponse = t.Nullable(
 
 export const ApiTokenQuotaResponse = t.Object({
 	account: ApiAccountQuotaPolicyResponse,
+	token: ApiTokenQuotaPolicyResponse,
 	tokenOverride: ApiTokenQuotaOverrideResponse,
 });
 

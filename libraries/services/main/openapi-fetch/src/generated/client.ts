@@ -95,6 +95,12 @@ import type {
 	GetApiApiQuotaPoliciesAccountsByUserIdResponses,
 	PutApiApiQuotaPoliciesAccountsByUserIdOptions,
 	PutApiApiQuotaPoliciesAccountsByUserIdResponses,
+	GetApiApiQuotaPoliciesAccountsByUserIdTokensOptions,
+	GetApiApiQuotaPoliciesAccountsByUserIdTokensResponses,
+	PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdOptions,
+	PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdResponses,
+	DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdOptions,
+	DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdResponses,
 	PostApiFeedQueryOptions,
 	PostApiFeedQueryResponses,
 	GetApiReportsMeOptions,
@@ -1528,6 +1534,74 @@ export function deleteApiApiQuotaPoliciesAccountsByUserId<ThrowOnError extends b
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<DeleteApiApiQuotaPoliciesAccountsByUserIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List a user's API token quotas
+ * {@link /api/api-quota-policies/accounts/:userId/tokens}
+ */
+export function getApiApiQuotaPoliciesAccountsByUserIdTokens<ThrowOnError extends boolean = true>(
+	options: Options<GetApiApiQuotaPoliciesAccountsByUserIdTokensOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiApiQuotaPoliciesAccountsByUserIdTokensResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/api-quota-policies/accounts/{userId}/tokens",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<GetApiApiQuotaPoliciesAccountsByUserIdTokensResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Assign an API token quota policy
+ * {@link /api/api-quota-policies/accounts/:userId/tokens/:tokenId}
+ */
+export function putApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/api-quota-policies/accounts/{userId}/tokens/{tokenId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Reset an API token quota policy
+ * {@link /api/api-quota-policies/accounts/:userId/tokens/:tokenId}
+ */
+export function deleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdOptions, ThrowOnError>,
+): Promise<
+	RequestResult<DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/api-quota-policies/accounts/{userId}/tokens/{tokenId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<
+			DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdResponses,
+			ThrowOnError
+		>
+	>;
 }
 
 /**

@@ -156,6 +156,8 @@ export const PlatformCapabilityValues = [
 	"platform.api_quota_policy.update",
 	"platform.user.api_quota.read",
 	"platform.user.api_quota.update",
+	"platform.user.api_token.api_quota.read",
+	"platform.user.api_token.api_quota.update",
 	"platform.moderate",
 	"platform.suppress",
 	...RealmPermissionValues,
@@ -296,6 +298,18 @@ export const PlatformCapabilityDefinitions = {
 		action: "update",
 		rationale: "Assigns or resets a user's API quota policy and custom constraints.",
 	},
+	"platform.user.api_token.api_quota.read": {
+		resource: "platform.user.api_token.api_quota",
+		action: "read",
+		rationale:
+			"Inspects a user's API token inventory and each token's effective quota without exposing token secrets.",
+	},
+	"platform.user.api_token.api_quota.update": {
+		resource: "platform.user.api_token.api_quota",
+		action: "update",
+		rationale:
+			"Assigns or resets quota policies and custom constraints for an individual API token.",
+	},
 	"platform.moderate": {
 		resource: "platform",
 		action: "moderate",
@@ -385,6 +399,11 @@ export const PlatformCapabilityImplications: Partial<
 	"platform.user.api_quota.read": ["platform.user.read"],
 	"platform.user.api_quota.update": [
 		"platform.user.api_quota.read",
+		"platform.api_quota_policy.read",
+	],
+	"platform.user.api_token.api_quota.read": ["platform.user.read"],
+	"platform.user.api_token.api_quota.update": [
+		"platform.user.api_token.api_quota.read",
 		"platform.api_quota_policy.read",
 	],
 	"unit.ownership.override": ["unit.governance.read"],

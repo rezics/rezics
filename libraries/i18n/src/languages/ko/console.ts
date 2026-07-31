@@ -46,7 +46,7 @@ export default {
 		},
 		apiQuotas: {
 			label: `${verbatimTerms.api.value} 할당량`,
-			description: `계정 단위 ${verbatimTerms.api.value} 속도, 동시 요청, 비용 및 토큰 수 제한을 관리합니다.`,
+			description: `계정과 토큰의 전역 ${verbatimTerms.api.value} 할당량 정책, 지정 및 재정의를 관리합니다.`,
 		},
 	},
 	units: {
@@ -248,11 +248,13 @@ export default {
 	},
 	apiQuotas: {
 		policyList: "정책",
+		assignments: "할당",
 		revision: insert("개정 {{revision}}", { revision: Number }),
 		enabled: "활성",
 		disabled: "비활성",
 		empty: `관리할 ${verbatimTerms.api.value} 토큰 정책이 없습니다.`,
 		policyClass: "정책 등급",
+		subjects: { account: "계정", token: `${verbatimTerms.api.value} 토큰` },
 		classes: { standard: "표준", privileged: "특권" },
 		schemaVersion: insert("스키마 {{version}}", { version: Number }),
 		requestsPerMinute: "분당 요청 수",

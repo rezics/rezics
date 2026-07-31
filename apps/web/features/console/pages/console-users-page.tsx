@@ -53,6 +53,7 @@ import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { PlatformAccessEditor } from "../components/platform-access-editor";
 import { AccountApiQuotaEditor } from "../components/account-api-quota-editor";
+import { TokenApiQuotaManager } from "../components/token-api-quota-manager";
 import { useConsoleWorkspace } from "../components/console-workspace";
 
 type PlatformUser = GetApiPlatformUsersStatus200["items"][number];
@@ -327,7 +328,8 @@ export function ConsoleUsersPage({ selectedUserId }: { readonly selectedUserId: 
 function UserInspector({ userId }: { readonly userId: string }) {
 	const { locale, t } = useTranslation(["console", "errors"]);
 	const [tab, setTab] = useState<InspectorTab>("overview");
-	const { canReadAccess, canReadSessions, canReadAccountApiQuotas } = useConsoleWorkspace();
+	const { canReadAccess, canReadSessions, canReadAccountApiQuotas, canReadTokenApiQuotas } =
+		useConsoleWorkspace();
 	const user = useGetApiPlatformUsersByUserId({ path: { userId } });
 
 	if (user.isPending) return <QueryPending />;
@@ -369,7 +371,10 @@ function UserInspector({ userId }: { readonly userId: string }) {
 						<TabsTrigger disabled={!canReadAccess} value="access">
 							{t.console.users.tabs.access}
 						</TabsTrigger>
-						<TabsTrigger disabled={!canReadAccountApiQuotas} value="apiQuota">
+						<TabsTrigger
+							disabled={!canReadAccountApiQuotas && !canReadTokenApiQuotas}
+							value="apiQuota"
+						>
 							{t.console.users.tabs.apiQuota}
 						</TabsTrigger>
 						<TabsTrigger disabled={!canReadSessions} value="sessions">
@@ -388,7 +393,12 @@ function UserInspector({ userId }: { readonly userId: string }) {
 						<UserPlatformAccess profileId={user.data.profileId} userId={userId} />
 					</TabsContent>
 					<TabsContent value="apiQuota">
-						<AccountApiQuotaEditor userId={userId} />
+						<div className="grid gap-6">
+							{canReadAccountApiQuotas ? (
+								<AccountApiQuotaEditor userId={userId} />
+							) : null}
+							<TokenApiQuotaManager userId={userId} />
+						</div>
 					</TabsContent>
 					<TabsContent value="sessions">
 						<UserSessions userId={userId} />

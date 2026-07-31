@@ -173,7 +173,7 @@ export default {
 			reportWrite: "提交檢舉",
 		},
 		limits: "用量限制",
-		standardLimitsDescription: `所有權杖共用帳戶額度；個別權杖的防護限制只能降低可用容量。指派 ${verbatimTerms.privilegedApiQuotaClass.value} 帳戶額度需要平台權限。`,
+		standardLimitsDescription: `每個權杖都有獨立的平台政策，同時仍共用帳戶配額。你設定的選用防護限制只能降低權杖容量；指派 ${verbatimTerms.privilegedApiQuotaClass.value} 存取權需要平台權限。`,
 		limitsDescription:
 			"你只能在目前策略允許的範圍內設定用量上限；全域限制與個別操作限制會同時生效。",
 		limitRanges: insert(

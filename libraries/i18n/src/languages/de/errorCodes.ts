@@ -22,6 +22,7 @@ export default {
 	ApiQuotaPolicyInvalid: `Die Konfiguration der ${verbatimTerms.api.value}-Kontingentrichtlinie ist ungültig.`,
 	ApiQuotaPolicyRevisionConflict: `Die ${verbatimTerms.api.value}-Kontingentrichtlinie wurde geändert. Lade sie vor dem Speichern neu.`,
 	ApiAccountQuotaRevisionConflict: `Das ${verbatimTerms.api.value}-Kontingent des Kontos wurde geändert. Lade es vor dem Speichern neu.`,
+	ApiTokenQuotaRevisionConflict: `Die ${verbatimTerms.api.value}-Token-Kontingentzuweisung wurde geändert. Lade sie vor dem Speichern neu.`,
 	ApiTokenLimitReached: `Dieses Konto hat die Höchstzahl an ${verbatimTerms.api.value}-Token erreicht.`,
 	ApiTokenQuotaOverrideInvalid: `Die Kontingentüberschreibung des ${verbatimTerms.api.value}-Tokens ist ungültig.`,
 	ApiTokenQuotaOverrideRevisionConflict: `Die Kontingentüberschreibung des ${verbatimTerms.api.value}-Tokens wurde geändert. Lade sie vor dem Speichern neu.`,

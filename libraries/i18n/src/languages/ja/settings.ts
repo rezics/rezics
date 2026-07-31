@@ -183,7 +183,7 @@ export default {
 			reportWrite: "報告を送信",
 		},
 		limits: "使用制限",
-		standardLimitsDescription: `すべてのトークンはアカウントクォータを共有します。トークンごとの保護制限で減らせるのは利用可能な容量だけです。${verbatimTerms.privilegedApiQuotaClass.value}アカウントクォータの割り当てにはプラットフォームアクセスが必要です。`,
+		standardLimitsDescription: `各トークンには個別のプラットフォームポリシーがあり、同時にアカウントクォータも共有します。任意の保護制限で減らせるのはトークン容量だけです。${verbatimTerms.privilegedApiQuotaClass.value}アクセスの割り当てにはプラットフォーム権限が必要です。`,
 		limitsDescription:
 			"クォータは現在のポリシーで許可されている範囲内に収める必要があります。グローバルおよび操作別の制限は同時に適用されます。",
 		limitRanges: insert(

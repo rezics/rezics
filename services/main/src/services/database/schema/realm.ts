@@ -78,6 +78,8 @@ const platformCapabilityStorageValues = toEnumValues([
 	"platform.api_quota_policy.update",
 	"platform.user.api_quota.read",
 	"platform.user.api_quota.update",
+	"platform.user.api_token.api_quota.read",
+	"platform.user.api_token.api_quota.update",
 	"platform.moderate",
 	"platform.suppress",
 	"realm.contribute",

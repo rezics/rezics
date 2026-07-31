@@ -69,6 +69,8 @@ export default {
 		"platform.api_quota_policy.update": `${verbatimTerms.api.value} 할당량 정책 수정`,
 		"platform.user.api_quota.read": `사용자 ${verbatimTerms.api.value} 할당량 보기`,
 		"platform.user.api_quota.update": `사용자 ${verbatimTerms.api.value} 할당량 관리`,
+		"platform.user.api_token.api_quota.read": `사용자 ${verbatimTerms.api.value} 토큰 할당량 보기`,
+		"platform.user.api_token.api_quota.update": `사용자 ${verbatimTerms.api.value} 토큰 할당량 관리`,
 		"platform.moderate": "플랫폼 유닛 중재",
 		"platform.suppress": "플랫폼 콘텐츠 및 수정 사항 숨기기",
 		"realm.contribute": `모든 ${realmTerms.label} 참여`,

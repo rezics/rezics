@@ -4316,7 +4316,7 @@ export const SearchDocumentV1ControlsFieldEnum = {
 	license: "license",
 	tag: "tag",
 	credit: "credit",
-	"publisher-profile": "publisher-profile",
+	"credited-profile": "credited-profile",
 	realm: "realm",
 	"realm-tag-context": "realm-tag-context",
 	zone: "zone",
@@ -4579,7 +4579,7 @@ export type SearchDocumentV1 = {
 						| "license"
 						| "tag"
 						| "credit"
-						| "publisher-profile"
+						| "credited-profile"
 						| "realm"
 						| "realm-tag-context"
 						| "zone"
@@ -4627,7 +4627,7 @@ export type SearchDocumentV1 = {
 						| "license"
 						| "tag"
 						| "credit"
-						| "publisher-profile"
+						| "credited-profile"
 						| "realm"
 						| "realm-tag-context"
 						| "zone"
@@ -4675,7 +4675,7 @@ export type SearchDocumentV1 = {
 						| "license"
 						| "tag"
 						| "credit"
-						| "publisher-profile"
+						| "credited-profile"
 						| "realm"
 						| "realm-tag-context"
 						| "zone"
@@ -4724,7 +4724,7 @@ export type SearchDocumentV1 = {
 								| "license"
 								| "tag"
 								| "credit"
-								| "publisher-profile"
+								| "credited-profile"
 								| "realm"
 								| "realm-tag-context"
 								| "zone"
@@ -4773,7 +4773,7 @@ export type SearchDocumentV1 = {
 								| "license"
 								| "tag"
 								| "credit"
-								| "publisher-profile"
+								| "credited-profile"
 								| "realm"
 								| "realm-tag-context"
 								| "zone"
@@ -4823,7 +4823,7 @@ export type SearchDocumentV1 = {
 						| "license"
 						| "tag"
 						| "credit"
-						| "publisher-profile"
+						| "credited-profile"
 						| "realm"
 						| "realm-tag-context"
 						| "zone"
@@ -5104,7 +5104,7 @@ export const SearchFeatureDefinitionV1ControlsFieldEnum = {
 	license: "license",
 	tag: "tag",
 	credit: "credit",
-	"publisher-profile": "publisher-profile",
+	"credited-profile": "credited-profile",
 	realm: "realm",
 	"realm-tag-context": "realm-tag-context",
 	zone: "zone",
@@ -5363,6 +5363,7 @@ export const ApiErrorCode = {
 	ApiQuotaPolicyInvalid: "ApiQuotaPolicyInvalid",
 	ApiQuotaPolicyRevisionConflict: "ApiQuotaPolicyRevisionConflict",
 	ApiAccountQuotaRevisionConflict: "ApiAccountQuotaRevisionConflict",
+	ApiTokenQuotaRevisionConflict: "ApiTokenQuotaRevisionConflict",
 	TagNotFound: "TagNotFound",
 	TagStructureNotFound: "TagStructureNotFound",
 	TagStructureApplicationNotFound: "TagStructureApplicationNotFound",
@@ -14017,6 +14018,23 @@ export const GetApiApiTokensStatus200ItemsQuotaAccountSourceEnum = {
 export type GetApiApiTokensStatus200ItemsQuotaAccountSourceEnum =
 	(typeof GetApiApiTokensStatus200ItemsQuotaAccountSourceEnum)[keyof typeof GetApiApiTokensStatus200ItemsQuotaAccountSourceEnum];
 
+export const GetApiApiTokensStatus200ItemsQuotaTokenClassEnum = {
+	standard: "standard",
+	privileged: "privileged",
+} as const;
+
+export type GetApiApiTokensStatus200ItemsQuotaTokenClassEnum =
+	(typeof GetApiApiTokensStatus200ItemsQuotaTokenClassEnum)[keyof typeof GetApiApiTokensStatus200ItemsQuotaTokenClassEnum];
+
+export const GetApiApiTokensStatus200ItemsQuotaTokenSourceEnum = {
+	assigned: "assigned",
+	standard_default: "standard_default",
+	privileged_fallback: "privileged_fallback",
+} as const;
+
+export type GetApiApiTokensStatus200ItemsQuotaTokenSourceEnum =
+	(typeof GetApiApiTokensStatus200ItemsQuotaTokenSourceEnum)[keyof typeof GetApiApiTokensStatus200ItemsQuotaTokenSourceEnum];
+
 /**
  * @type object
  */
@@ -14157,6 +14175,129 @@ export type GetApiApiTokensStatus200 = {
 					dailyCostUnits: string | number;
 				};
 				maxActiveTokens: string | number;
+				/**
+				 * @type object
+				 */
+				operations: {
+					/**
+					 * @type object | undefined
+					 */
+					"search.execute"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+					/**
+					 * @type object | undefined
+					 */
+					"image.upload"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+				};
+			};
+			/**
+			 * @type object
+			 */
+			token: {
+				/**
+				 * @type string
+				 */
+				key: string;
+				/**
+				 * @default 'standard'
+				 * @type string
+				 */
+				class: GetApiApiTokensStatus200ItemsQuotaTokenClassEnum;
+				/**
+				 * @default 'assigned'
+				 * @type string
+				 */
+				source: GetApiApiTokensStatus200ItemsQuotaTokenSourceEnum;
+				schemaVersion: string | number;
+				policyRevision: string | number;
+				bindingRevision: ((string | number) | null) | null;
+				validUntil: (string | null) | null;
+				assignmentReason: (string | null) | null;
+				/**
+				 * @type object
+				 */
+				configurationOverride: {
+					/**
+					 * @type object | undefined
+					 */
+					limits?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+					/**
+					 * @type object | undefined
+					 */
+					operations?: {
+						/**
+						 * @type object | undefined
+						 */
+						"search.execute"?: {
+							/**
+							 * @type object | undefined
+							 */
+							requestRate?: {
+								requestsPerMinute: string | number;
+								burstCapacity: string | number;
+							};
+							maxConcurrentRequests?: string | number;
+							dailyCostUnits?: string | number;
+						};
+						/**
+						 * @type object | undefined
+						 */
+						"image.upload"?: {
+							/**
+							 * @type object | undefined
+							 */
+							requestRate?: {
+								requestsPerMinute: string | number;
+								burstCapacity: string | number;
+							};
+							maxConcurrentRequests?: string | number;
+							dailyCostUnits?: string | number;
+						};
+					};
+				};
+				/**
+				 * @type object
+				 */
+				limits: {
+					/**
+					 * @type object
+					 */
+					requestRate: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests: string | number;
+					dailyCostUnits: string | number;
+				};
 				/**
 				 * @type object
 				 */
@@ -14389,6 +14530,23 @@ export const PostApiApiTokensStatus200QuotaAccountSourceEnum = {
 export type PostApiApiTokensStatus200QuotaAccountSourceEnum =
 	(typeof PostApiApiTokensStatus200QuotaAccountSourceEnum)[keyof typeof PostApiApiTokensStatus200QuotaAccountSourceEnum];
 
+export const PostApiApiTokensStatus200QuotaTokenClassEnum = {
+	standard: "standard",
+	privileged: "privileged",
+} as const;
+
+export type PostApiApiTokensStatus200QuotaTokenClassEnum =
+	(typeof PostApiApiTokensStatus200QuotaTokenClassEnum)[keyof typeof PostApiApiTokensStatus200QuotaTokenClassEnum];
+
+export const PostApiApiTokensStatus200QuotaTokenSourceEnum = {
+	assigned: "assigned",
+	standard_default: "standard_default",
+	privileged_fallback: "privileged_fallback",
+} as const;
+
+export type PostApiApiTokensStatus200QuotaTokenSourceEnum =
+	(typeof PostApiApiTokensStatus200QuotaTokenSourceEnum)[keyof typeof PostApiApiTokensStatus200QuotaTokenSourceEnum];
+
 /**
  * @type object
  */
@@ -14524,6 +14682,129 @@ export type PostApiApiTokensStatus200 = {
 				dailyCostUnits: string | number;
 			};
 			maxActiveTokens: string | number;
+			/**
+			 * @type object
+			 */
+			operations: {
+				/**
+				 * @type object | undefined
+				 */
+				"search.execute"?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+				/**
+				 * @type object | undefined
+				 */
+				"image.upload"?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+			};
+		};
+		/**
+		 * @type object
+		 */
+		token: {
+			/**
+			 * @type string
+			 */
+			key: string;
+			/**
+			 * @default 'standard'
+			 * @type string
+			 */
+			class: PostApiApiTokensStatus200QuotaTokenClassEnum;
+			/**
+			 * @default 'assigned'
+			 * @type string
+			 */
+			source: PostApiApiTokensStatus200QuotaTokenSourceEnum;
+			schemaVersion: string | number;
+			policyRevision: string | number;
+			bindingRevision: ((string | number) | null) | null;
+			validUntil: (string | null) | null;
+			assignmentReason: (string | null) | null;
+			/**
+			 * @type object
+			 */
+			configurationOverride: {
+				/**
+				 * @type object | undefined
+				 */
+				limits?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+				/**
+				 * @type object | undefined
+				 */
+				operations?: {
+					/**
+					 * @type object | undefined
+					 */
+					"search.execute"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+					/**
+					 * @type object | undefined
+					 */
+					"image.upload"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+				};
+			};
+			/**
+			 * @type object
+			 */
+			limits: {
+				/**
+				 * @type object
+				 */
+				requestRate: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests: string | number;
+				dailyCostUnits: string | number;
+			};
 			/**
 			 * @type object
 			 */
@@ -14859,6 +15140,23 @@ export const PatchApiApiTokensByTokenIdStatus200QuotaAccountSourceEnum = {
 export type PatchApiApiTokensByTokenIdStatus200QuotaAccountSourceEnum =
 	(typeof PatchApiApiTokensByTokenIdStatus200QuotaAccountSourceEnum)[keyof typeof PatchApiApiTokensByTokenIdStatus200QuotaAccountSourceEnum];
 
+export const PatchApiApiTokensByTokenIdStatus200QuotaTokenClassEnum = {
+	standard: "standard",
+	privileged: "privileged",
+} as const;
+
+export type PatchApiApiTokensByTokenIdStatus200QuotaTokenClassEnum =
+	(typeof PatchApiApiTokensByTokenIdStatus200QuotaTokenClassEnum)[keyof typeof PatchApiApiTokensByTokenIdStatus200QuotaTokenClassEnum];
+
+export const PatchApiApiTokensByTokenIdStatus200QuotaTokenSourceEnum = {
+	assigned: "assigned",
+	standard_default: "standard_default",
+	privileged_fallback: "privileged_fallback",
+} as const;
+
+export type PatchApiApiTokensByTokenIdStatus200QuotaTokenSourceEnum =
+	(typeof PatchApiApiTokensByTokenIdStatus200QuotaTokenSourceEnum)[keyof typeof PatchApiApiTokensByTokenIdStatus200QuotaTokenSourceEnum];
+
 /**
  * @type object
  */
@@ -14994,6 +15292,129 @@ export type PatchApiApiTokensByTokenIdStatus200 = {
 				dailyCostUnits: string | number;
 			};
 			maxActiveTokens: string | number;
+			/**
+			 * @type object
+			 */
+			operations: {
+				/**
+				 * @type object | undefined
+				 */
+				"search.execute"?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+				/**
+				 * @type object | undefined
+				 */
+				"image.upload"?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+			};
+		};
+		/**
+		 * @type object
+		 */
+		token: {
+			/**
+			 * @type string
+			 */
+			key: string;
+			/**
+			 * @default 'standard'
+			 * @type string
+			 */
+			class: PatchApiApiTokensByTokenIdStatus200QuotaTokenClassEnum;
+			/**
+			 * @default 'assigned'
+			 * @type string
+			 */
+			source: PatchApiApiTokensByTokenIdStatus200QuotaTokenSourceEnum;
+			schemaVersion: string | number;
+			policyRevision: string | number;
+			bindingRevision: ((string | number) | null) | null;
+			validUntil: (string | null) | null;
+			assignmentReason: (string | null) | null;
+			/**
+			 * @type object
+			 */
+			configurationOverride: {
+				/**
+				 * @type object | undefined
+				 */
+				limits?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+				/**
+				 * @type object | undefined
+				 */
+				operations?: {
+					/**
+					 * @type object | undefined
+					 */
+					"search.execute"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+					/**
+					 * @type object | undefined
+					 */
+					"image.upload"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+				};
+			};
+			/**
+			 * @type object
+			 */
+			limits: {
+				/**
+				 * @type object
+				 */
+				requestRate: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests: string | number;
+				dailyCostUnits: string | number;
+			};
 			/**
 			 * @type object
 			 */
@@ -15500,6 +15921,23 @@ export const PutApiApiTokensByTokenIdQuotaOverrideStatus200QuotaAccountSourceEnu
 export type PutApiApiTokensByTokenIdQuotaOverrideStatus200QuotaAccountSourceEnum =
 	(typeof PutApiApiTokensByTokenIdQuotaOverrideStatus200QuotaAccountSourceEnum)[keyof typeof PutApiApiTokensByTokenIdQuotaOverrideStatus200QuotaAccountSourceEnum];
 
+export const PutApiApiTokensByTokenIdQuotaOverrideStatus200QuotaTokenClassEnum = {
+	standard: "standard",
+	privileged: "privileged",
+} as const;
+
+export type PutApiApiTokensByTokenIdQuotaOverrideStatus200QuotaTokenClassEnum =
+	(typeof PutApiApiTokensByTokenIdQuotaOverrideStatus200QuotaTokenClassEnum)[keyof typeof PutApiApiTokensByTokenIdQuotaOverrideStatus200QuotaTokenClassEnum];
+
+export const PutApiApiTokensByTokenIdQuotaOverrideStatus200QuotaTokenSourceEnum = {
+	assigned: "assigned",
+	standard_default: "standard_default",
+	privileged_fallback: "privileged_fallback",
+} as const;
+
+export type PutApiApiTokensByTokenIdQuotaOverrideStatus200QuotaTokenSourceEnum =
+	(typeof PutApiApiTokensByTokenIdQuotaOverrideStatus200QuotaTokenSourceEnum)[keyof typeof PutApiApiTokensByTokenIdQuotaOverrideStatus200QuotaTokenSourceEnum];
+
 /**
  * @type object
  */
@@ -15635,6 +16073,129 @@ export type PutApiApiTokensByTokenIdQuotaOverrideStatus200 = {
 				dailyCostUnits: string | number;
 			};
 			maxActiveTokens: string | number;
+			/**
+			 * @type object
+			 */
+			operations: {
+				/**
+				 * @type object | undefined
+				 */
+				"search.execute"?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+				/**
+				 * @type object | undefined
+				 */
+				"image.upload"?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+			};
+		};
+		/**
+		 * @type object
+		 */
+		token: {
+			/**
+			 * @type string
+			 */
+			key: string;
+			/**
+			 * @default 'standard'
+			 * @type string
+			 */
+			class: PutApiApiTokensByTokenIdQuotaOverrideStatus200QuotaTokenClassEnum;
+			/**
+			 * @default 'assigned'
+			 * @type string
+			 */
+			source: PutApiApiTokensByTokenIdQuotaOverrideStatus200QuotaTokenSourceEnum;
+			schemaVersion: string | number;
+			policyRevision: string | number;
+			bindingRevision: ((string | number) | null) | null;
+			validUntil: (string | null) | null;
+			assignmentReason: (string | null) | null;
+			/**
+			 * @type object
+			 */
+			configurationOverride: {
+				/**
+				 * @type object | undefined
+				 */
+				limits?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+				/**
+				 * @type object | undefined
+				 */
+				operations?: {
+					/**
+					 * @type object | undefined
+					 */
+					"search.execute"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+					/**
+					 * @type object | undefined
+					 */
+					"image.upload"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+				};
+			};
+			/**
+			 * @type object
+			 */
+			limits: {
+				/**
+				 * @type object
+				 */
+				requestRate: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests: string | number;
+				dailyCostUnits: string | number;
+			};
 			/**
 			 * @type object
 			 */
@@ -16209,6 +16770,23 @@ export const GetCurrentApiTokenStatus200QuotaAccountSourceEnum = {
 export type GetCurrentApiTokenStatus200QuotaAccountSourceEnum =
 	(typeof GetCurrentApiTokenStatus200QuotaAccountSourceEnum)[keyof typeof GetCurrentApiTokenStatus200QuotaAccountSourceEnum];
 
+export const GetCurrentApiTokenStatus200QuotaTokenClassEnum = {
+	standard: "standard",
+	privileged: "privileged",
+} as const;
+
+export type GetCurrentApiTokenStatus200QuotaTokenClassEnum =
+	(typeof GetCurrentApiTokenStatus200QuotaTokenClassEnum)[keyof typeof GetCurrentApiTokenStatus200QuotaTokenClassEnum];
+
+export const GetCurrentApiTokenStatus200QuotaTokenSourceEnum = {
+	assigned: "assigned",
+	standard_default: "standard_default",
+	privileged_fallback: "privileged_fallback",
+} as const;
+
+export type GetCurrentApiTokenStatus200QuotaTokenSourceEnum =
+	(typeof GetCurrentApiTokenStatus200QuotaTokenSourceEnum)[keyof typeof GetCurrentApiTokenStatus200QuotaTokenSourceEnum];
+
 /**
  * @type object
  */
@@ -16337,6 +16915,129 @@ export type GetCurrentApiTokenStatus200 = {
 				dailyCostUnits: string | number;
 			};
 			maxActiveTokens: string | number;
+			/**
+			 * @type object
+			 */
+			operations: {
+				/**
+				 * @type object | undefined
+				 */
+				"search.execute"?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+				/**
+				 * @type object | undefined
+				 */
+				"image.upload"?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+			};
+		};
+		/**
+		 * @type object
+		 */
+		token: {
+			/**
+			 * @type string
+			 */
+			key: string;
+			/**
+			 * @default 'standard'
+			 * @type string
+			 */
+			class: GetCurrentApiTokenStatus200QuotaTokenClassEnum;
+			/**
+			 * @default 'assigned'
+			 * @type string
+			 */
+			source: GetCurrentApiTokenStatus200QuotaTokenSourceEnum;
+			schemaVersion: string | number;
+			policyRevision: string | number;
+			bindingRevision: ((string | number) | null) | null;
+			validUntil: (string | null) | null;
+			assignmentReason: (string | null) | null;
+			/**
+			 * @type object
+			 */
+			configurationOverride: {
+				/**
+				 * @type object | undefined
+				 */
+				limits?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+				/**
+				 * @type object | undefined
+				 */
+				operations?: {
+					/**
+					 * @type object | undefined
+					 */
+					"search.execute"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+					/**
+					 * @type object | undefined
+					 */
+					"image.upload"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+				};
+			};
+			/**
+			 * @type object
+			 */
+			limits: {
+				/**
+				 * @type object
+				 */
+				requestRate: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests: string | number;
+				dailyCostUnits: string | number;
+			};
 			/**
 			 * @type object
 			 */
@@ -16535,6 +17236,14 @@ export type GetCurrentApiTokenResponse =
 	| GetCurrentApiTokenStatus429
 	| GetCurrentApiTokenStatus500;
 
+export const GetApiApiQuotaPoliciesStatus200ItemsSubjectKindEnum = {
+	account: "account",
+	token: "token",
+} as const;
+
+export type GetApiApiQuotaPoliciesStatus200ItemsSubjectKindEnum =
+	(typeof GetApiApiQuotaPoliciesStatus200ItemsSubjectKindEnum)[keyof typeof GetApiApiQuotaPoliciesStatus200ItemsSubjectKindEnum];
+
 export const GetApiApiQuotaPoliciesStatus200ItemsClassEnum = {
 	standard: "standard",
 	privileged: "privileged",
@@ -16562,64 +17271,116 @@ export type GetApiApiQuotaPoliciesStatus200 = {
 		 */
 		key: string;
 		/**
+		 * @default 'account'
+		 * @type string
+		 */
+		subjectKind: GetApiApiQuotaPoliciesStatus200ItemsSubjectKindEnum;
+		/**
 		 * @default 'standard'
 		 * @type string
 		 */
 		class: GetApiApiQuotaPoliciesStatus200ItemsClassEnum;
 		schemaVersion: string | number;
-		/**
-		 * @type object
-		 */
-		configuration: {
-			/**
-			 * @type object
-			 */
-			limits: {
-				/**
-				 * @type object
-				 */
-				requestRate: {
-					requestsPerMinute: string | number;
-					burstCapacity: string | number;
-				};
-				maxConcurrentRequests: string | number;
-				dailyCostUnits: string | number;
-			};
-			maxActiveTokens: string | number;
-			/**
-			 * @type object
-			 */
-			operations: {
-				/**
-				 * @type object | undefined
-				 */
-				"search.execute"?: {
+		configuration:
+			| {
 					/**
-					 * @type object | undefined
+					 * @type object
 					 */
-					requestRate?: {
-						requestsPerMinute: string | number;
-						burstCapacity: string | number;
+					limits: {
+						/**
+						 * @type object
+						 */
+						requestRate: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests: string | number;
+						dailyCostUnits: string | number;
 					};
-					maxConcurrentRequests?: string | number;
-					dailyCostUnits?: string | number;
-				};
-				/**
-				 * @type object | undefined
-				 */
-				"image.upload"?: {
+					maxActiveTokens: string | number;
 					/**
-					 * @type object | undefined
+					 * @type object
 					 */
-					requestRate?: {
-						requestsPerMinute: string | number;
-						burstCapacity: string | number;
+					operations: {
+						/**
+						 * @type object | undefined
+						 */
+						"search.execute"?: {
+							/**
+							 * @type object | undefined
+							 */
+							requestRate?: {
+								requestsPerMinute: string | number;
+								burstCapacity: string | number;
+							};
+							maxConcurrentRequests?: string | number;
+							dailyCostUnits?: string | number;
+						};
+						/**
+						 * @type object | undefined
+						 */
+						"image.upload"?: {
+							/**
+							 * @type object | undefined
+							 */
+							requestRate?: {
+								requestsPerMinute: string | number;
+								burstCapacity: string | number;
+							};
+							maxConcurrentRequests?: string | number;
+							dailyCostUnits?: string | number;
+						};
 					};
-					maxConcurrentRequests?: string | number;
-					dailyCostUnits?: string | number;
-				};
-			};
-		};
+			  }
+			| {
+					/**
+					 * @type object
+					 */
+					limits: {
+						/**
+						 * @type object
+						 */
+						requestRate: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests: string | number;
+						dailyCostUnits: string | number;
+					};
+					/**
+					 * @type object
+					 */
+					operations: {
+						/**
+						 * @type object | undefined
+						 */
+						"search.execute"?: {
+							/**
+							 * @type object | undefined
+							 */
+							requestRate?: {
+								requestsPerMinute: string | number;
+								burstCapacity: string | number;
+							};
+							maxConcurrentRequests?: string | number;
+							dailyCostUnits?: string | number;
+						};
+						/**
+						 * @type object | undefined
+						 */
+						"image.upload"?: {
+							/**
+							 * @type object | undefined
+							 */
+							requestRate?: {
+								requestsPerMinute: string | number;
+								burstCapacity: string | number;
+							};
+							maxConcurrentRequests?: string | number;
+							dailyCostUnits?: string | number;
+						};
+					};
+			  };
 		revision: string | number;
 		/**
 		 * @type boolean
@@ -16744,6 +17505,14 @@ export type PutApiApiQuotaPoliciesByPolicyKeyPath = {
 	policyKey: string;
 };
 
+export const PutApiApiQuotaPoliciesByPolicyKeyStatus200SubjectKindEnum = {
+	account: "account",
+	token: "token",
+} as const;
+
+export type PutApiApiQuotaPoliciesByPolicyKeyStatus200SubjectKindEnum =
+	(typeof PutApiApiQuotaPoliciesByPolicyKeyStatus200SubjectKindEnum)[keyof typeof PutApiApiQuotaPoliciesByPolicyKeyStatus200SubjectKindEnum];
+
 export const PutApiApiQuotaPoliciesByPolicyKeyStatus200ClassEnum = {
 	standard: "standard",
 	privileged: "privileged",
@@ -16767,64 +17536,116 @@ export type PutApiApiQuotaPoliciesByPolicyKeyStatus200 = {
 	 */
 	key: string;
 	/**
+	 * @default 'account'
+	 * @type string
+	 */
+	subjectKind: PutApiApiQuotaPoliciesByPolicyKeyStatus200SubjectKindEnum;
+	/**
 	 * @default 'standard'
 	 * @type string
 	 */
 	class: PutApiApiQuotaPoliciesByPolicyKeyStatus200ClassEnum;
 	schemaVersion: string | number;
-	/**
-	 * @type object
-	 */
-	configuration: {
-		/**
-		 * @type object
-		 */
-		limits: {
-			/**
-			 * @type object
-			 */
-			requestRate: {
-				requestsPerMinute: string | number;
-				burstCapacity: string | number;
-			};
-			maxConcurrentRequests: string | number;
-			dailyCostUnits: string | number;
-		};
-		maxActiveTokens: string | number;
-		/**
-		 * @type object
-		 */
-		operations: {
-			/**
-			 * @type object | undefined
-			 */
-			"search.execute"?: {
+	configuration:
+		| {
 				/**
-				 * @type object | undefined
+				 * @type object
 				 */
-				requestRate?: {
-					requestsPerMinute: string | number;
-					burstCapacity: string | number;
+				limits: {
+					/**
+					 * @type object
+					 */
+					requestRate: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests: string | number;
+					dailyCostUnits: string | number;
 				};
-				maxConcurrentRequests?: string | number;
-				dailyCostUnits?: string | number;
-			};
-			/**
-			 * @type object | undefined
-			 */
-			"image.upload"?: {
+				maxActiveTokens: string | number;
 				/**
-				 * @type object | undefined
+				 * @type object
 				 */
-				requestRate?: {
-					requestsPerMinute: string | number;
-					burstCapacity: string | number;
+				operations: {
+					/**
+					 * @type object | undefined
+					 */
+					"search.execute"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+					/**
+					 * @type object | undefined
+					 */
+					"image.upload"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
 				};
-				maxConcurrentRequests?: string | number;
-				dailyCostUnits?: string | number;
-			};
-		};
-	};
+		  }
+		| {
+				/**
+				 * @type object
+				 */
+				limits: {
+					/**
+					 * @type object
+					 */
+					requestRate: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests: string | number;
+					dailyCostUnits: string | number;
+				};
+				/**
+				 * @type object
+				 */
+				operations: {
+					/**
+					 * @type object | undefined
+					 */
+					"search.execute"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+					/**
+					 * @type object | undefined
+					 */
+					"image.upload"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+				};
+		  };
 	revision: string | number;
 	/**
 	 * @type boolean
@@ -17000,59 +17821,106 @@ export type PutApiApiQuotaPoliciesByPolicyKeyStatus500 = InternalError;
  */
 export type PutApiApiQuotaPoliciesByPolicyKeyBody = {
 	expectedRevision: string | number;
-	/**
-	 * @type object
-	 */
-	configuration: {
-		/**
-		 * @type object
-		 */
-		limits: {
-			/**
-			 * @type object
-			 */
-			requestRate: {
-				requestsPerMinute: string | number;
-				burstCapacity: string | number;
-			};
-			maxConcurrentRequests: string | number;
-			dailyCostUnits: string | number;
-		};
-		maxActiveTokens: string | number;
-		/**
-		 * @type object
-		 */
-		operations: {
-			/**
-			 * @type object | undefined
-			 */
-			"search.execute"?: {
+	configuration:
+		| {
 				/**
-				 * @type object | undefined
+				 * @type object
 				 */
-				requestRate?: {
-					requestsPerMinute: string | number;
-					burstCapacity: string | number;
+				limits: {
+					/**
+					 * @type object
+					 */
+					requestRate: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests: string | number;
+					dailyCostUnits: string | number;
 				};
-				maxConcurrentRequests?: string | number;
-				dailyCostUnits?: string | number;
-			};
-			/**
-			 * @type object | undefined
-			 */
-			"image.upload"?: {
+				maxActiveTokens: string | number;
 				/**
-				 * @type object | undefined
+				 * @type object
 				 */
-				requestRate?: {
-					requestsPerMinute: string | number;
-					burstCapacity: string | number;
+				operations: {
+					/**
+					 * @type object | undefined
+					 */
+					"search.execute"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+					/**
+					 * @type object | undefined
+					 */
+					"image.upload"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
 				};
-				maxConcurrentRequests?: string | number;
-				dailyCostUnits?: string | number;
-			};
-		};
-	};
+		  }
+		| {
+				/**
+				 * @type object
+				 */
+				limits: {
+					/**
+					 * @type object
+					 */
+					requestRate: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests: string | number;
+					dailyCostUnits: string | number;
+				};
+				/**
+				 * @type object
+				 */
+				operations: {
+					/**
+					 * @type object | undefined
+					 */
+					"search.execute"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+					/**
+					 * @type object | undefined
+					 */
+					"image.upload"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+				};
+		  };
 	/**
 	 * @minLength 1
 	 * @maxLength 1000
@@ -18156,6 +19024,1113 @@ export type DeleteApiApiQuotaPoliciesAccountsByUserIdResponse =
 	| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus409
 	| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus422
 	| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiApiQuotaPoliciesAccountsByUserIdTokensPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	userId: string;
+};
+
+export const GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus200ItemsQuotaClassEnum = {
+	standard: "standard",
+	privileged: "privileged",
+} as const;
+
+export type GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus200ItemsQuotaClassEnum =
+	(typeof GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus200ItemsQuotaClassEnum)[keyof typeof GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus200ItemsQuotaClassEnum];
+
+export const GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus200ItemsQuotaSourceEnum = {
+	assigned: "assigned",
+	standard_default: "standard_default",
+	privileged_fallback: "privileged_fallback",
+} as const;
+
+export type GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus200ItemsQuotaSourceEnum =
+	(typeof GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus200ItemsQuotaSourceEnum)[keyof typeof GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus200ItemsQuotaSourceEnum];
+
+/**
+ * @type object
+ */
+export type GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @type string
+		 */
+		name: string;
+		/**
+		 * @type string
+		 */
+		tokenPrefix: string;
+		/**
+		 * @type boolean
+		 */
+		enabled: boolean;
+		expiresAt: (string | null) | null;
+		lastUsedAt: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+		/**
+		 * @type object
+		 */
+		quota: {
+			/**
+			 * @type string
+			 */
+			key: string;
+			/**
+			 * @default 'standard'
+			 * @type string
+			 */
+			class: GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus200ItemsQuotaClassEnum;
+			/**
+			 * @default 'assigned'
+			 * @type string
+			 */
+			source: GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus200ItemsQuotaSourceEnum;
+			schemaVersion: string | number;
+			policyRevision: string | number;
+			bindingRevision: ((string | number) | null) | null;
+			validUntil: (string | null) | null;
+			assignmentReason: (string | null) | null;
+			/**
+			 * @type object
+			 */
+			configurationOverride: {
+				/**
+				 * @type object | undefined
+				 */
+				limits?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+				/**
+				 * @type object | undefined
+				 */
+				operations?: {
+					/**
+					 * @type object | undefined
+					 */
+					"search.execute"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+					/**
+					 * @type object | undefined
+					 */
+					"image.upload"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+				};
+			};
+			/**
+			 * @type object
+			 */
+			limits: {
+				/**
+				 * @type object
+				 */
+				requestRate: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests: string | number;
+				dailyCostUnits: string | number;
+			};
+			/**
+			 * @type object
+			 */
+			operations: {
+				/**
+				 * @type object | undefined
+				 */
+				"search.execute"?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+				/**
+				 * @type object | undefined
+				 */
+				"image.upload"?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+			};
+		};
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InteractiveSessionRequired'
+		 * @type string
+		 */
+		code: "InteractiveSessionRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus403ErrorCodeEnum = {
+	FreshSessionRequired: "FreshSessionRequired",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus403ErrorCodeEnum =
+	(typeof GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus403ErrorCodeEnum)[keyof typeof GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'FreshSessionRequired'
+		 * @type string
+		 */
+		code: GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UserNotFound'
+		 * @type string
+		 */
+		code: "UserNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiApiQuotaPoliciesAccountsByUserIdTokensOptions = {
+	body?: never;
+	path: GetApiApiQuotaPoliciesAccountsByUserIdTokensPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiApiQuotaPoliciesAccountsByUserIdTokensResponses = {
+	"200": GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus200;
+	"401": GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus401;
+	"403": GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus403;
+	"404": GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus404;
+	"422": GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus422;
+	"500": GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiApiQuotaPoliciesAccountsByUserIdTokensResponse =
+	| GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus200
+	| GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus401
+	| GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus403
+	| GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus404
+	| GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus422
+	| GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	userId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	tokenId: string;
+};
+
+export const PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200ClassEnum = {
+	standard: "standard",
+	privileged: "privileged",
+} as const;
+
+export type PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200ClassEnum =
+	(typeof PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200ClassEnum)[keyof typeof PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200ClassEnum];
+
+export const PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200SourceEnum = {
+	assigned: "assigned",
+	standard_default: "standard_default",
+	privileged_fallback: "privileged_fallback",
+} as const;
+
+export type PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200SourceEnum =
+	(typeof PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200SourceEnum)[keyof typeof PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200SourceEnum];
+
+/**
+ * @type object
+ */
+export type PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200 = {
+	/**
+	 * @type string
+	 */
+	key: string;
+	/**
+	 * @default 'standard'
+	 * @type string
+	 */
+	class: PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200ClassEnum;
+	/**
+	 * @default 'assigned'
+	 * @type string
+	 */
+	source: PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200SourceEnum;
+	schemaVersion: string | number;
+	policyRevision: string | number;
+	bindingRevision: ((string | number) | null) | null;
+	validUntil: (string | null) | null;
+	assignmentReason: (string | null) | null;
+	/**
+	 * @type object
+	 */
+	configurationOverride: {
+		/**
+		 * @type object | undefined
+		 */
+		limits?: {
+			/**
+			 * @type object | undefined
+			 */
+			requestRate?: {
+				requestsPerMinute: string | number;
+				burstCapacity: string | number;
+			};
+			maxConcurrentRequests?: string | number;
+			dailyCostUnits?: string | number;
+		};
+		/**
+		 * @type object | undefined
+		 */
+		operations?: {
+			/**
+			 * @type object | undefined
+			 */
+			"search.execute"?: {
+				/**
+				 * @type object | undefined
+				 */
+				requestRate?: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+			/**
+			 * @type object | undefined
+			 */
+			"image.upload"?: {
+				/**
+				 * @type object | undefined
+				 */
+				requestRate?: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+		};
+	};
+	/**
+	 * @type object
+	 */
+	limits: {
+		/**
+		 * @type object
+		 */
+		requestRate: {
+			requestsPerMinute: string | number;
+			burstCapacity: string | number;
+		};
+		maxConcurrentRequests: string | number;
+		dailyCostUnits: string | number;
+	};
+	/**
+	 * @type object
+	 */
+	operations: {
+		/**
+		 * @type object | undefined
+		 */
+		"search.execute"?: {
+			/**
+			 * @type object | undefined
+			 */
+			requestRate?: {
+				requestsPerMinute: string | number;
+				burstCapacity: string | number;
+			};
+			maxConcurrentRequests?: string | number;
+			dailyCostUnits?: string | number;
+		};
+		/**
+		 * @type object | undefined
+		 */
+		"image.upload"?: {
+			/**
+			 * @type object | undefined
+			 */
+			requestRate?: {
+				requestsPerMinute: string | number;
+				burstCapacity: string | number;
+			};
+			maxConcurrentRequests?: string | number;
+			dailyCostUnits?: string | number;
+		};
+	};
+};
+
+/**
+ * @type object
+ */
+export type PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InteractiveSessionRequired'
+		 * @type string
+		 */
+		code: "InteractiveSessionRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403ErrorCodeEnum = {
+	FreshSessionRequired: "FreshSessionRequired",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403ErrorCodeEnum =
+	(typeof PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403ErrorCodeEnum)[keyof typeof PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'FreshSessionRequired'
+		 * @type string
+		 */
+		code: PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus404ErrorCodeEnum = {
+	UserNotFound: "UserNotFound",
+	ApiQuotaPolicyNotFound: "ApiQuotaPolicyNotFound",
+} as const;
+
+export type PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus404ErrorCodeEnum =
+	(typeof PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus404ErrorCodeEnum)[keyof typeof PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UserNotFound'
+		 * @type string
+		 */
+		code: PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiTokenQuotaRevisionConflict'
+		 * @type string
+		 */
+		code: "ApiTokenQuotaRevisionConflict";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ApiQuotaPolicyInvalid'
+				 * @type string
+				 */
+				code: "ApiQuotaPolicyInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdBody = {
+	expectedRevision: string | number;
+	/**
+	 * @minLength 1
+	 * @maxLength 64
+	 * @type string
+	 */
+	policyKey: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string | undefined
+	 */
+	validUntil?: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 1000
+	 * @type string
+	 */
+	reason: string;
+	/**
+	 * @type object | undefined
+	 */
+	configurationOverride?: {
+		/**
+		 * @type object | undefined
+		 */
+		limits?: {
+			/**
+			 * @type object | undefined
+			 */
+			requestRate?: {
+				requestsPerMinute: string | number;
+				burstCapacity: string | number;
+			};
+			maxConcurrentRequests?: string | number;
+			dailyCostUnits?: string | number;
+		};
+		/**
+		 * @type object | undefined
+		 */
+		operations?: {
+			/**
+			 * @type object | undefined
+			 */
+			"search.execute"?: {
+				/**
+				 * @type object | undefined
+				 */
+				requestRate?: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+			/**
+			 * @type object | undefined
+			 */
+			"image.upload"?: {
+				/**
+				 * @type object | undefined
+				 */
+				requestRate?: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+		};
+	};
+};
+
+/**
+ * @type object
+ */
+export type PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdOptions = {
+	body: PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdBody;
+	path: PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdResponses = {
+	"200": PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200;
+	"400": PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus400;
+	"401": PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus401;
+	"403": PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403;
+	"404": PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus404;
+	"409": PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus409;
+	"422": PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus422;
+	"500": PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdResponse =
+	| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200
+	| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus400
+	| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus401
+	| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403
+	| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus404
+	| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus409
+	| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus422
+	| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	userId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	tokenId: string;
+};
+
+export const DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200ClassEnum = {
+	standard: "standard",
+	privileged: "privileged",
+} as const;
+
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200ClassEnum =
+	(typeof DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200ClassEnum)[keyof typeof DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200ClassEnum];
+
+export const DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200SourceEnum = {
+	assigned: "assigned",
+	standard_default: "standard_default",
+	privileged_fallback: "privileged_fallback",
+} as const;
+
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200SourceEnum =
+	(typeof DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200SourceEnum)[keyof typeof DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200SourceEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200 = {
+	/**
+	 * @type string
+	 */
+	key: string;
+	/**
+	 * @default 'standard'
+	 * @type string
+	 */
+	class: DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200ClassEnum;
+	/**
+	 * @default 'assigned'
+	 * @type string
+	 */
+	source: DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200SourceEnum;
+	schemaVersion: string | number;
+	policyRevision: string | number;
+	bindingRevision: ((string | number) | null) | null;
+	validUntil: (string | null) | null;
+	assignmentReason: (string | null) | null;
+	/**
+	 * @type object
+	 */
+	configurationOverride: {
+		/**
+		 * @type object | undefined
+		 */
+		limits?: {
+			/**
+			 * @type object | undefined
+			 */
+			requestRate?: {
+				requestsPerMinute: string | number;
+				burstCapacity: string | number;
+			};
+			maxConcurrentRequests?: string | number;
+			dailyCostUnits?: string | number;
+		};
+		/**
+		 * @type object | undefined
+		 */
+		operations?: {
+			/**
+			 * @type object | undefined
+			 */
+			"search.execute"?: {
+				/**
+				 * @type object | undefined
+				 */
+				requestRate?: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+			/**
+			 * @type object | undefined
+			 */
+			"image.upload"?: {
+				/**
+				 * @type object | undefined
+				 */
+				requestRate?: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+		};
+	};
+	/**
+	 * @type object
+	 */
+	limits: {
+		/**
+		 * @type object
+		 */
+		requestRate: {
+			requestsPerMinute: string | number;
+			burstCapacity: string | number;
+		};
+		maxConcurrentRequests: string | number;
+		dailyCostUnits: string | number;
+	};
+	/**
+	 * @type object
+	 */
+	operations: {
+		/**
+		 * @type object | undefined
+		 */
+		"search.execute"?: {
+			/**
+			 * @type object | undefined
+			 */
+			requestRate?: {
+				requestsPerMinute: string | number;
+				burstCapacity: string | number;
+			};
+			maxConcurrentRequests?: string | number;
+			dailyCostUnits?: string | number;
+		};
+		/**
+		 * @type object | undefined
+		 */
+		"image.upload"?: {
+			/**
+			 * @type object | undefined
+			 */
+			requestRate?: {
+				requestsPerMinute: string | number;
+				burstCapacity: string | number;
+			};
+			maxConcurrentRequests?: string | number;
+			dailyCostUnits?: string | number;
+		};
+	};
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus400 =
+	MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InteractiveSessionRequired'
+		 * @type string
+		 */
+		code: "InteractiveSessionRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403ErrorCodeEnum = {
+	FreshSessionRequired: "FreshSessionRequired",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'FreshSessionRequired'
+		 * @type string
+		 */
+		code: DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UserNotFound'
+		 * @type string
+		 */
+		code: "UserNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiTokenQuotaRevisionConflict'
+		 * @type string
+		 */
+		code: "ApiTokenQuotaRevisionConflict";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdBody = {
+	expectedRevision: string | number;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdOptions = {
+	body: DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdBody;
+	path: DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdResponses = {
+	"200": DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200;
+	"400": DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus400;
+	"401": DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus401;
+	"403": DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403;
+	"404": DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus404;
+	"409": DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus409;
+	"422": DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus422;
+	"500": DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdResponse =
+	| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200
+	| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus400
+	| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus401
+	| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403
+	| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus404
+	| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus409
+	| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus422
+	| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus500;
 
 export const PostApiFeedQueryStatus200ItemsLanguage = {
 	zh: "zh",
@@ -40845,6 +42820,8 @@ export const GetApiUsersMeStatus200PlatformCapabilitiesEnum = {
 	"platform.api_quota_policy.update": "platform.api_quota_policy.update",
 	"platform.user.api_quota.read": "platform.user.api_quota.read",
 	"platform.user.api_quota.update": "platform.user.api_quota.update",
+	"platform.user.api_token.api_quota.read": "platform.user.api_token.api_quota.read",
+	"platform.user.api_token.api_quota.update": "platform.user.api_token.api_quota.update",
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
 	"realm.contribute": "realm.contribute",
@@ -46384,6 +48361,8 @@ export const GetApiPlatformAccessPolicyStatus200CapabilitiesEnum = {
 	"platform.api_quota_policy.update": "platform.api_quota_policy.update",
 	"platform.user.api_quota.read": "platform.user.api_quota.read",
 	"platform.user.api_quota.update": "platform.user.api_quota.update",
+	"platform.user.api_token.api_quota.read": "platform.user.api_token.api_quota.read",
+	"platform.user.api_token.api_quota.update": "platform.user.api_token.api_quota.update",
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
 	"realm.contribute": "realm.contribute",
@@ -46512,6 +48491,8 @@ export const GetApiPlatformAccessProfilesStatus200ItemsGrantsCapabilityEnum = {
 	"platform.api_quota_policy.update": "platform.api_quota_policy.update",
 	"platform.user.api_quota.read": "platform.user.api_quota.read",
 	"platform.user.api_quota.update": "platform.user.api_quota.update",
+	"platform.user.api_token.api_quota.read": "platform.user.api_token.api_quota.read",
+	"platform.user.api_token.api_quota.update": "platform.user.api_token.api_quota.update",
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
 	"realm.contribute": "realm.contribute",
@@ -46697,6 +48678,8 @@ export const GetApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnu
 	"platform.api_quota_policy.update": "platform.api_quota_policy.update",
 	"platform.user.api_quota.read": "platform.user.api_quota.read",
 	"platform.user.api_quota.update": "platform.user.api_quota.update",
+	"platform.user.api_token.api_quota.read": "platform.user.api_token.api_quota.read",
+	"platform.user.api_token.api_quota.update": "platform.user.api_token.api_quota.update",
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
 	"realm.contribute": "realm.contribute",
@@ -46907,6 +48890,8 @@ export const PutApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnu
 	"platform.api_quota_policy.update": "platform.api_quota_policy.update",
 	"platform.user.api_quota.read": "platform.user.api_quota.read",
 	"platform.user.api_quota.update": "platform.user.api_quota.update",
+	"platform.user.api_token.api_quota.read": "platform.user.api_token.api_quota.read",
+	"platform.user.api_token.api_quota.update": "platform.user.api_token.api_quota.update",
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
 	"realm.contribute": "realm.contribute",
@@ -47153,6 +49138,8 @@ export const PutApiPlatformAccessProfilesByProfileIdRequestGrantsCapabilityEnum 
 	"platform.api_quota_policy.update": "platform.api_quota_policy.update",
 	"platform.user.api_quota.read": "platform.user.api_quota.read",
 	"platform.user.api_quota.update": "platform.user.api_quota.update",
+	"platform.user.api_token.api_quota.read": "platform.user.api_token.api_quota.read",
+	"platform.user.api_token.api_quota.update": "platform.user.api_token.api_quota.update",
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
 	"realm.contribute": "realm.contribute",
@@ -79328,7 +81315,7 @@ export type PostApiProgressSearchBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -79376,7 +81363,7 @@ export type PostApiProgressSearchBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -79424,7 +81411,7 @@ export type PostApiProgressSearchBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -79473,7 +81460,7 @@ export type PostApiProgressSearchBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -79522,7 +81509,7 @@ export type PostApiProgressSearchBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -79572,7 +81559,7 @@ export type PostApiProgressSearchBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -79727,7 +81714,7 @@ export type PostApiProgressSearchBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -79775,7 +81762,7 @@ export type PostApiProgressSearchBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -79823,7 +81810,7 @@ export type PostApiProgressSearchBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -79872,7 +81859,7 @@ export type PostApiProgressSearchBody = {
 											| "license"
 											| "tag"
 											| "credit"
-											| "publisher-profile"
+											| "credited-profile"
 											| "realm"
 											| "realm-tag-context"
 											| "zone"
@@ -79921,7 +81908,7 @@ export type PostApiProgressSearchBody = {
 											| "license"
 											| "tag"
 											| "credit"
-											| "publisher-profile"
+											| "credited-profile"
 											| "realm"
 											| "realm-tag-context"
 											| "zone"
@@ -79971,7 +81958,7 @@ export type PostApiProgressSearchBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -116946,7 +118933,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -116994,7 +118981,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -117042,7 +119029,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -117091,7 +119078,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -117140,7 +119127,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -117190,7 +119177,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -117345,7 +119332,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -117393,7 +119380,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -117441,7 +119428,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -117490,7 +119477,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 											| "license"
 											| "tag"
 											| "credit"
-											| "publisher-profile"
+											| "credited-profile"
 											| "realm"
 											| "realm-tag-context"
 											| "zone"
@@ -117539,7 +119526,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 											| "license"
 											| "tag"
 											| "credit"
-											| "publisher-profile"
+											| "credited-profile"
 											| "realm"
 											| "realm-tag-context"
 											| "zone"
@@ -117589,7 +119576,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -120989,7 +122976,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -121037,7 +123024,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -121085,7 +123072,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -121134,7 +123121,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -121183,7 +123170,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -121233,7 +123220,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -121388,7 +123375,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -121436,7 +123423,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -121484,7 +123471,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -121533,7 +123520,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 											| "license"
 											| "tag"
 											| "credit"
-											| "publisher-profile"
+											| "credited-profile"
 											| "realm"
 											| "realm-tag-context"
 											| "zone"
@@ -121582,7 +123569,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 											| "license"
 											| "tag"
 											| "credit"
-											| "publisher-profile"
+											| "credited-profile"
 											| "realm"
 											| "realm-tag-context"
 											| "zone"
@@ -121632,7 +123619,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -122734,7 +124721,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -122782,7 +124769,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -122830,7 +124817,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -122879,7 +124866,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -122928,7 +124915,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -122978,7 +124965,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -123133,7 +125120,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -123181,7 +125168,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -123229,7 +125216,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -123278,7 +125265,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 											| "license"
 											| "tag"
 											| "credit"
-											| "publisher-profile"
+											| "credited-profile"
 											| "realm"
 											| "realm-tag-context"
 											| "zone"
@@ -123327,7 +125314,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 											| "license"
 											| "tag"
 											| "credit"
-											| "publisher-profile"
+											| "credited-profile"
 											| "realm"
 											| "realm-tag-context"
 											| "zone"
@@ -123377,7 +125364,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -126752,7 +128739,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -126800,7 +128787,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -126848,7 +128835,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -126897,7 +128884,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -126946,7 +128933,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -126996,7 +128983,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -127151,7 +129138,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -127199,7 +129186,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -127247,7 +129234,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -127296,7 +129283,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 											| "license"
 											| "tag"
 											| "credit"
-											| "publisher-profile"
+											| "credited-profile"
 											| "realm"
 											| "realm-tag-context"
 											| "zone"
@@ -127345,7 +129332,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 											| "license"
 											| "tag"
 											| "credit"
-											| "publisher-profile"
+											| "credited-profile"
 											| "realm"
 											| "realm-tag-context"
 											| "zone"
@@ -127395,7 +129382,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -128520,7 +130507,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -128568,7 +130555,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -128616,7 +130603,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -128665,7 +130652,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -128714,7 +130701,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -128764,7 +130751,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -128919,7 +130906,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -128967,7 +130954,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -129015,7 +131002,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -129064,7 +131051,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 											| "license"
 											| "tag"
 											| "credit"
-											| "publisher-profile"
+											| "credited-profile"
 											| "realm"
 											| "realm-tag-context"
 											| "zone"
@@ -129113,7 +131100,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 											| "license"
 											| "tag"
 											| "credit"
-											| "publisher-profile"
+											| "credited-profile"
 											| "realm"
 											| "realm-tag-context"
 											| "zone"
@@ -129163,7 +131150,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -129892,7 +131879,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -129940,7 +131927,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -129988,7 +131975,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -130037,7 +132024,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -130086,7 +132073,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -130136,7 +132123,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -130291,7 +132278,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -130339,7 +132326,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -130387,7 +132374,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -130436,7 +132423,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 											| "license"
 											| "tag"
 											| "credit"
-											| "publisher-profile"
+											| "credited-profile"
 											| "realm"
 											| "realm-tag-context"
 											| "zone"
@@ -130485,7 +132472,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 											| "license"
 											| "tag"
 											| "credit"
-											| "publisher-profile"
+											| "credited-profile"
 											| "realm"
 											| "realm-tag-context"
 											| "zone"
@@ -130535,7 +132522,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -133923,7 +135910,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -133971,7 +135958,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -134019,7 +136006,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -134068,7 +136055,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -134117,7 +136104,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -134167,7 +136154,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
-							| "publisher-profile"
+							| "credited-profile"
 							| "realm"
 							| "realm-tag-context"
 							| "zone"
@@ -134322,7 +136309,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -134370,7 +136357,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -134418,7 +136405,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -134467,7 +136454,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 											| "license"
 											| "tag"
 											| "credit"
-											| "publisher-profile"
+											| "credited-profile"
 											| "realm"
 											| "realm-tag-context"
 											| "zone"
@@ -134516,7 +136503,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 											| "license"
 											| "tag"
 											| "credit"
-											| "publisher-profile"
+											| "credited-profile"
 											| "realm"
 											| "realm-tag-context"
 											| "zone"
@@ -134566,7 +136553,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -135311,7 +137298,7 @@ export const PostApiSearchSharedQueriesStatus201DocumentSelectionsFieldEnum = {
 	license: "license",
 	tag: "tag",
 	credit: "credit",
-	"publisher-profile": "publisher-profile",
+	"credited-profile": "credited-profile",
 	realm: "realm",
 	"realm-tag-context": "realm-tag-context",
 	zone: "zone",
@@ -135406,7 +137393,7 @@ export type PostApiSearchSharedQueriesStatus201 = {
 										| "license"
 										| "tag"
 										| "credit"
-										| "publisher-profile"
+										| "credited-profile"
 										| "realm"
 										| "realm-tag-context"
 										| "zone"
@@ -135454,7 +137441,7 @@ export type PostApiSearchSharedQueriesStatus201 = {
 										| "license"
 										| "tag"
 										| "credit"
-										| "publisher-profile"
+										| "credited-profile"
 										| "realm"
 										| "realm-tag-context"
 										| "zone"
@@ -135502,7 +137489,7 @@ export type PostApiSearchSharedQueriesStatus201 = {
 										| "license"
 										| "tag"
 										| "credit"
-										| "publisher-profile"
+										| "credited-profile"
 										| "realm"
 										| "realm-tag-context"
 										| "zone"
@@ -135551,7 +137538,7 @@ export type PostApiSearchSharedQueriesStatus201 = {
 												| "license"
 												| "tag"
 												| "credit"
-												| "publisher-profile"
+												| "credited-profile"
 												| "realm"
 												| "realm-tag-context"
 												| "zone"
@@ -135600,7 +137587,7 @@ export type PostApiSearchSharedQueriesStatus201 = {
 												| "license"
 												| "tag"
 												| "credit"
-												| "publisher-profile"
+												| "credited-profile"
 												| "realm"
 												| "realm-tag-context"
 												| "zone"
@@ -135650,7 +137637,7 @@ export type PostApiSearchSharedQueriesStatus201 = {
 										| "license"
 										| "tag"
 										| "credit"
-										| "publisher-profile"
+										| "credited-profile"
 										| "realm"
 										| "realm-tag-context"
 										| "zone"
@@ -135954,7 +137941,7 @@ export const PostApiSearchSharedQueriesRequestSelectionsFieldEnum = {
 	license: "license",
 	tag: "tag",
 	credit: "credit",
-	"publisher-profile": "publisher-profile",
+	"credited-profile": "credited-profile",
 	realm: "realm",
 	"realm-tag-context": "realm-tag-context",
 	zone: "zone",
@@ -136039,7 +138026,7 @@ export type PostApiSearchSharedQueriesBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -136087,7 +138074,7 @@ export type PostApiSearchSharedQueriesBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -136135,7 +138122,7 @@ export type PostApiSearchSharedQueriesBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -136184,7 +138171,7 @@ export type PostApiSearchSharedQueriesBody = {
 											| "license"
 											| "tag"
 											| "credit"
-											| "publisher-profile"
+											| "credited-profile"
 											| "realm"
 											| "realm-tag-context"
 											| "zone"
@@ -136233,7 +138220,7 @@ export type PostApiSearchSharedQueriesBody = {
 											| "license"
 											| "tag"
 											| "credit"
-											| "publisher-profile"
+											| "credited-profile"
 											| "realm"
 											| "realm-tag-context"
 											| "zone"
@@ -136283,7 +138270,7 @@ export type PostApiSearchSharedQueriesBody = {
 									| "license"
 									| "tag"
 									| "credit"
-									| "publisher-profile"
+									| "credited-profile"
 									| "realm"
 									| "realm-tag-context"
 									| "zone"
@@ -136528,7 +138515,7 @@ export const GetApiSearchSharedQueriesByIdStatus200DocumentSelectionsFieldEnum =
 	license: "license",
 	tag: "tag",
 	credit: "credit",
-	"publisher-profile": "publisher-profile",
+	"credited-profile": "credited-profile",
 	realm: "realm",
 	"realm-tag-context": "realm-tag-context",
 	zone: "zone",
@@ -136623,7 +138610,7 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 										| "license"
 										| "tag"
 										| "credit"
-										| "publisher-profile"
+										| "credited-profile"
 										| "realm"
 										| "realm-tag-context"
 										| "zone"
@@ -136671,7 +138658,7 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 										| "license"
 										| "tag"
 										| "credit"
-										| "publisher-profile"
+										| "credited-profile"
 										| "realm"
 										| "realm-tag-context"
 										| "zone"
@@ -136719,7 +138706,7 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 										| "license"
 										| "tag"
 										| "credit"
-										| "publisher-profile"
+										| "credited-profile"
 										| "realm"
 										| "realm-tag-context"
 										| "zone"
@@ -136768,7 +138755,7 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 												| "license"
 												| "tag"
 												| "credit"
-												| "publisher-profile"
+												| "credited-profile"
 												| "realm"
 												| "realm-tag-context"
 												| "zone"
@@ -136817,7 +138804,7 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 												| "license"
 												| "tag"
 												| "credit"
-												| "publisher-profile"
+												| "credited-profile"
 												| "realm"
 												| "realm-tag-context"
 												| "zone"
@@ -136867,7 +138854,7 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 										| "license"
 										| "tag"
 										| "credit"
-										| "publisher-profile"
+										| "credited-profile"
 										| "realm"
 										| "realm-tag-context"
 										| "zone"

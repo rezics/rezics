@@ -22,6 +22,7 @@ export default {
 	ApiQuotaPolicyInvalid: `The ${verbatimTerms.api.value} quota policy configuration is invalid.`,
 	ApiQuotaPolicyRevisionConflict: `The ${verbatimTerms.api.value} quota policy changed. Reload before saving.`,
 	ApiAccountQuotaRevisionConflict: `The account ${verbatimTerms.api.value} quota changed. Reload before saving.`,
+	ApiTokenQuotaRevisionConflict: `The ${verbatimTerms.api.value} token quota assignment changed. Reload before saving.`,
 	ApiTokenLimitReached: `This account has reached its ${verbatimTerms.api.value} token limit.`,
 	ApiTokenQuotaOverrideInvalid: `The ${verbatimTerms.api.value} token quota override is invalid.`,
 	ApiTokenQuotaOverrideRevisionConflict: `The ${verbatimTerms.api.value} token quota override changed. Reload before saving.`,

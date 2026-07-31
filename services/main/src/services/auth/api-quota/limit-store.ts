@@ -7,13 +7,13 @@ import { apiQuotaDailyUsage, apiQuotaRateState, apiQuotaRequestLease } from "../
 import { ApiQuotaExceeded, type ApiQuotaExceededDetails } from "../errors";
 import type { ResolvedApiQuotaOperation } from "./operation";
 import {
+	applyApiTokenQuotaSafeguard,
 	resolveApiQuotaLimits,
-	resolveApiTokenQuotaLimits,
 	type ApiQuotaLimitOverride,
 	type ApiQuotaLimits,
 	type ApiTokenQuotaOverride,
 } from "./policy-schema";
-import type { ResolvedApiAccountQuotaPolicy } from "./policy-service";
+import type { ResolvedApiAccountQuotaPolicy, ResolvedApiTokenQuotaPolicy } from "./policy-service";
 
 const { logger } = getActiveObservability();
 
@@ -66,10 +66,14 @@ export function buildApiQuotaConstraints(input: {
 	tokenId: string;
 	operation: ResolvedApiQuotaOperation;
 	accountPolicy: ResolvedApiAccountQuotaPolicy;
-	tokenOverride?: ApiTokenQuotaOverride;
+	tokenPolicy: ResolvedApiTokenQuotaPolicy;
+	tokenSafeguard?: ApiTokenQuotaOverride;
 }): ApiQuotaConstraint[] {
 	const account = resolveApiQuotaLimits(input.accountPolicy.configuration, input.operation.scope);
-	const token = resolveApiTokenQuotaLimits(input.tokenOverride, input.operation.scope);
+	const token = resolveApiQuotaLimits(
+		applyApiTokenQuotaSafeguard(input.tokenPolicy.configuration, input.tokenSafeguard),
+		input.operation.scope,
+	);
 	const operationScope = input.operation.scope;
 	return [
 		{
@@ -86,15 +90,11 @@ export function buildApiQuotaConstraints(input: {
 					},
 				]
 			: []),
-		...(token.global
-			? [
-					{
-						subject: { kind: "token" as const, id: input.tokenId },
-						scope: ApiQuotaGlobalScope,
-						limits: token.global,
-					},
-				]
-			: []),
+		{
+			subject: { kind: "token", id: input.tokenId },
+			scope: ApiQuotaGlobalScope,
+			limits: token.global,
+		},
 		...(operationScope && token.operation
 			? [
 					{
@@ -311,7 +311,8 @@ export async function enforceApiQuota(input: {
 	tokenId: string;
 	operation: ResolvedApiQuotaOperation;
 	accountPolicy: ResolvedApiAccountQuotaPolicy;
-	tokenOverride?: ApiTokenQuotaOverride;
+	tokenPolicy: ResolvedApiTokenQuotaPolicy;
+	tokenSafeguard?: ApiTokenQuotaOverride;
 	now?: Date;
 }): Promise<ApiQuotaLease> {
 	const now = input.now ?? new Date();

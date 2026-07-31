@@ -6,27 +6,35 @@ import {
 	apiAccountQuotaBinding,
 	apiQuotaPolicy,
 	apiQuotaPolicyRevision,
+	apiTokenQuotaBinding,
 	apiTokenQuotaOverride,
 	type ApiQuotaPolicyClass,
+	type ApiQuotaPolicySubjectKind,
 } from "../../database/schema";
 import {
 	ApiQuotaPolicyDocumentInvalid,
 	ApiQuotaPolicySchemaVersion,
 	DefaultApiQuotaPolicies,
 	applyApiAccountQuotaOverride,
+	applyApiTokenQuotaOverride,
 	decodeApiAccountQuotaOverride,
+	decodeApiAccountQuotaPolicyConfiguration,
 	decodeApiQuotaPolicyConfiguration,
+	decodeApiTokenQuotaPolicyConfiguration,
 	decodeApiTokenQuotaOverride,
 	type ApiAccountQuotaOverride,
+	type ApiAccountQuotaPolicyConfiguration,
 	type ApiQuotaPolicyConfiguration,
 	type ApiTokenQuotaOverride,
+	type ApiTokenQuotaPolicyConfiguration,
 } from "./policy-schema";
 
 const { logger } = getActiveObservability();
 
 type PolicyRow = typeof apiQuotaPolicy.$inferSelect;
 type PolicyRevisionRow = typeof apiQuotaPolicyRevision.$inferSelect;
-type BindingRow = typeof apiAccountQuotaBinding.$inferSelect;
+type AccountBindingRow = typeof apiAccountQuotaBinding.$inferSelect;
+type TokenBindingRow = typeof apiTokenQuotaBinding.$inferSelect;
 
 type CurrentPolicyRecord = {
 	policy: PolicyRow;
@@ -44,13 +52,29 @@ export type ResolvedApiAccountQuotaPolicy = {
 	validUntil: Date | null;
 	assignmentReason: string | null;
 	configurationOverride: ApiAccountQuotaOverride;
-	configuration: ApiQuotaPolicyConfiguration;
+	configuration: ApiAccountQuotaPolicyConfiguration;
+	source: "assigned" | "standard_default" | "privileged_fallback";
+};
+
+export type ResolvedApiTokenQuotaPolicy = {
+	tokenId: string;
+	policyId: string;
+	key: string;
+	class: ApiQuotaPolicyClass;
+	schemaVersion: number;
+	policyRevision: number;
+	bindingRevision: number | null;
+	validUntil: Date | null;
+	assignmentReason: string | null;
+	configurationOverride: ApiTokenQuotaOverride;
+	configuration: ApiTokenQuotaPolicyConfiguration;
 	source: "assigned" | "standard_default" | "privileged_fallback";
 };
 
 export type ApiQuotaPolicySummary = {
 	id: string;
 	key: string;
+	subjectKind: ApiQuotaPolicySubjectKind;
 	class: ApiQuotaPolicyClass;
 	schemaVersion: number;
 	configuration: ApiQuotaPolicyConfiguration;
@@ -66,10 +90,10 @@ export type ApiTokenQuotaOverrideSummary = {
 	updatedAt: Date;
 };
 
-export class ApiAccountQuotaAssignmentInvalid extends Error {
+export class ApiQuotaAssignmentInvalid extends Error {
 	constructor() {
 		super("Privileged API quota assignments require a future expiry and a reason");
-		this.name = "ApiAccountQuotaAssignmentInvalid";
+		this.name = "ApiQuotaAssignmentInvalid";
 	}
 }
 
@@ -92,20 +116,31 @@ async function findCurrentPolicyByKey(
 	return record;
 }
 
-async function requireStandardPolicy(executor: DatabaseExecutor): Promise<CurrentPolicyRecord> {
-	const standard = await findCurrentPolicyByKey(executor, DefaultApiQuotaPolicies.standard.key);
-	if (!standard?.policy.enabled || standard.policy.class !== "standard")
-		throw new Error("The default Standard API quota policy is unavailable");
+async function requireStandardPolicy(
+	executor: DatabaseExecutor,
+	subjectKind: ApiQuotaPolicySubjectKind,
+): Promise<CurrentPolicyRecord> {
+	const key =
+		subjectKind === "account"
+			? DefaultApiQuotaPolicies.accountStandard.key
+			: DefaultApiQuotaPolicies.tokenStandard.key;
+	const standard = await findCurrentPolicyByKey(executor, key);
+	if (
+		!standard?.policy.enabled ||
+		standard.policy.class !== "standard" ||
+		standard.policy.subjectKind !== subjectKind
+	)
+		throw new Error(`The default Standard ${subjectKind} API quota policy is unavailable`);
 	return standard;
 }
 
 function resolvePolicyDocument(
 	userId: string,
 	record: CurrentPolicyRecord,
-	binding: BindingRow | undefined,
+	binding: AccountBindingRow | undefined,
 	source: ResolvedApiAccountQuotaPolicy["source"],
 ): ResolvedApiAccountQuotaPolicy {
-	const configuration = decodeApiQuotaPolicyConfiguration(
+	const configuration = decodeApiAccountQuotaPolicyConfiguration(
 		record.policy.class,
 		record.revision.schemaVersion,
 		record.revision.configuration,
@@ -137,11 +172,11 @@ async function resolveStandardFallback(
 	executor: DatabaseExecutor,
 	userId: string,
 	source: "standard_default" | "privileged_fallback",
-	binding?: BindingRow,
+	binding?: AccountBindingRow,
 ): Promise<ResolvedApiAccountQuotaPolicy> {
 	const resolved = resolvePolicyDocument(
 		userId,
-		await requireStandardPolicy(executor),
+		await requireStandardPolicy(executor, "account"),
 		undefined,
 		source,
 	);
@@ -221,7 +256,9 @@ function presentPolicy(record: CurrentPolicyRecord): ApiQuotaPolicySummary {
 		key: record.policy.key,
 		class: record.policy.class,
 		schemaVersion: record.revision.schemaVersion,
+		subjectKind: record.policy.subjectKind,
 		configuration: decodeApiQuotaPolicyConfiguration(
+			record.policy.subjectKind,
 			record.policy.class,
 			record.revision.schemaVersion,
 			record.revision.configuration,
@@ -262,8 +299,9 @@ export async function reviseApiQuotaPolicy(
 	const current = await findCurrentPolicyByKey(tx, input.key);
 	if (!current || current.revision.revision !== input.expectedRevision) return undefined;
 	const reason = input.reason.trim();
-	if (reason === "") throw new ApiAccountQuotaAssignmentInvalid();
+	if (reason === "") throw new ApiQuotaAssignmentInvalid();
 	const configuration = decodeApiQuotaPolicyConfiguration(
+		current.policy.subjectKind,
 		current.policy.class,
 		ApiQuotaPolicySchemaVersion,
 		input.configuration,
@@ -309,8 +347,8 @@ export async function assignApiAccountQuotaPolicy(
 	},
 ): Promise<ResolvedApiAccountQuotaPolicy | undefined> {
 	const current = await findCurrentPolicyByKey(tx, input.policyKey);
-	if (!current?.policy.enabled) return undefined;
-	decodeApiQuotaPolicyConfiguration(
+	if (!current?.policy.enabled || current.policy.subjectKind !== "account") return undefined;
+	decodeApiAccountQuotaPolicyConfiguration(
 		current.policy.class,
 		current.revision.schemaVersion,
 		current.revision.configuration,
@@ -326,7 +364,7 @@ export async function assignApiAccountQuotaPolicy(
 		reason === "" ||
 		(current.policy.class === "privileged" && (!input.validUntil || input.validUntil <= now))
 	)
-		throw new ApiAccountQuotaAssignmentInvalid();
+		throw new ApiQuotaAssignmentInvalid();
 
 	if (input.expectedRevision === 0) {
 		const [inserted] = await tx
@@ -378,6 +416,208 @@ export async function resetApiAccountQuotaPolicy(
 			),
 		)
 		.returning({ userId: apiAccountQuotaBinding.userId });
+	return deleted !== undefined;
+}
+
+function resolveTokenPolicyDocument(
+	tokenId: string,
+	record: CurrentPolicyRecord,
+	binding: TokenBindingRow | undefined,
+	source: ResolvedApiTokenQuotaPolicy["source"],
+): ResolvedApiTokenQuotaPolicy {
+	const configuration = decodeApiTokenQuotaPolicyConfiguration(
+		record.policy.class,
+		record.revision.schemaVersion,
+		record.revision.configuration,
+	);
+	const override = binding ? decodeApiTokenQuotaOverride(binding.configurationOverride) : {};
+	return {
+		tokenId,
+		policyId: record.policy.id,
+		key: record.policy.key,
+		class: record.policy.class,
+		schemaVersion: record.revision.schemaVersion,
+		policyRevision: record.revision.revision,
+		bindingRevision: binding?.revision ?? null,
+		validUntil: binding?.validUntil ?? null,
+		assignmentReason: binding?.assignmentReason ?? null,
+		configurationOverride: override,
+		configuration: applyApiTokenQuotaOverride(configuration, override),
+		source,
+	};
+}
+
+async function resolveTokenStandardFallback(
+	executor: DatabaseExecutor,
+	tokenId: string,
+	source: "standard_default" | "privileged_fallback",
+	binding?: TokenBindingRow,
+): Promise<ResolvedApiTokenQuotaPolicy> {
+	const resolved = resolveTokenPolicyDocument(
+		tokenId,
+		await requireStandardPolicy(executor, "token"),
+		undefined,
+		source,
+	);
+	return binding
+		? {
+				...resolved,
+				bindingRevision: binding.revision,
+				validUntil: binding.validUntil,
+				assignmentReason: binding.assignmentReason,
+				configurationOverride: {},
+			}
+		: resolved;
+}
+
+export async function resolveApiTokenQuotaPolicy(
+	tokenId: string,
+	options: { executor?: DatabaseExecutor; now?: Date } = {},
+): Promise<ResolvedApiTokenQuotaPolicy> {
+	const executor = options.executor ?? database;
+	const now = options.now ?? new Date();
+	const [record] = await executor
+		.select({
+			binding: apiTokenQuotaBinding,
+			policy: apiQuotaPolicy,
+			revision: apiQuotaPolicyRevision,
+		})
+		.from(apiTokenQuotaBinding)
+		.innerJoin(apiQuotaPolicy, eq(apiQuotaPolicy.id, apiTokenQuotaBinding.policyId))
+		.innerJoin(
+			apiQuotaPolicyRevision,
+			and(
+				eq(apiQuotaPolicyRevision.policyId, apiQuotaPolicy.id),
+				eq(apiQuotaPolicyRevision.revision, apiQuotaPolicy.currentRevision),
+			),
+		)
+		.where(eq(apiTokenQuotaBinding.tokenId, tokenId))
+		.limit(1);
+
+	if (!record) return resolveTokenStandardFallback(executor, tokenId, "standard_default");
+
+	const currentPolicy = { policy: record.policy, revision: record.revision };
+	const privilegedUnavailable =
+		record.policy.class === "privileged" &&
+		(!record.policy.enabled ||
+			record.binding.validUntil === null ||
+			record.binding.validUntil <= now);
+	if (privilegedUnavailable)
+		return resolveTokenStandardFallback(
+			executor,
+			tokenId,
+			"privileged_fallback",
+			record.binding,
+		);
+	if (!record.policy.enabled)
+		throw new Error(`Assigned API quota policy is disabled: ${record.policy.key}`);
+
+	try {
+		return resolveTokenPolicyDocument(tokenId, currentPolicy, record.binding, "assigned");
+	} catch (error) {
+		if (
+			record.policy.class !== "privileged" ||
+			!(error instanceof ApiQuotaPolicyDocumentInvalid)
+		)
+			throw error;
+		logger.error("Invalid Privileged token API quota policy; using Standard fallback", {
+			eventName: "api_quota.token_policy.privileged_fallback",
+			errorCode: "ApiQuotaPolicyDocumentInvalid",
+			error,
+			attributes: {
+				tokenId,
+				policyId: record.policy.id,
+				policyKey: record.policy.key,
+			},
+		});
+		return resolveTokenStandardFallback(
+			executor,
+			tokenId,
+			"privileged_fallback",
+			record.binding,
+		);
+	}
+}
+
+export async function assignApiTokenQuotaPolicy(
+	tx: DatabaseTransaction,
+	input: {
+		tokenId: string;
+		policyKey: string;
+		expectedRevision: number;
+		validUntil?: Date;
+		reason: string;
+		override: unknown;
+		actorProfileId: string;
+		now?: Date;
+	},
+): Promise<ResolvedApiTokenQuotaPolicy | undefined> {
+	const current = await findCurrentPolicyByKey(tx, input.policyKey);
+	if (!current?.policy.enabled || current.policy.subjectKind !== "token") return undefined;
+	decodeApiTokenQuotaPolicyConfiguration(
+		current.policy.class,
+		current.revision.schemaVersion,
+		current.revision.configuration,
+	);
+	const override = decodeApiTokenQuotaOverride(input.override);
+	const reason = input.reason.trim();
+	const now = input.now ?? new Date();
+	if (
+		reason === "" ||
+		(current.policy.class === "privileged" && (!input.validUntil || input.validUntil <= now))
+	)
+		throw new ApiQuotaAssignmentInvalid();
+
+	if (input.expectedRevision === 0) {
+		const [inserted] = await tx
+			.insert(apiTokenQuotaBinding)
+			.values({
+				tokenId: input.tokenId,
+				policyId: current.policy.id,
+				configurationOverride: override,
+				validUntil: current.policy.class === "privileged" ? input.validUntil : null,
+				assignmentReason: reason,
+				assignedByProfileId: input.actorProfileId,
+			})
+			.onConflictDoNothing({ target: apiTokenQuotaBinding.tokenId })
+			.returning({ tokenId: apiTokenQuotaBinding.tokenId });
+		if (!inserted) return undefined;
+	} else {
+		const [updated] = await tx
+			.update(apiTokenQuotaBinding)
+			.set({
+				policyId: current.policy.id,
+				configurationOverride: override,
+				validUntil: current.policy.class === "privileged" ? input.validUntil : null,
+				assignmentReason: reason,
+				assignedByProfileId: input.actorProfileId,
+				revision: sql`${apiTokenQuotaBinding.revision} + 1`,
+			})
+			.where(
+				and(
+					eq(apiTokenQuotaBinding.tokenId, input.tokenId),
+					eq(apiTokenQuotaBinding.revision, input.expectedRevision),
+				),
+			)
+			.returning({ tokenId: apiTokenQuotaBinding.tokenId });
+		if (!updated) return undefined;
+	}
+	return resolveApiTokenQuotaPolicy(input.tokenId, { executor: tx, now });
+}
+
+export async function resetApiTokenQuotaPolicy(
+	tx: DatabaseTransaction,
+	input: { tokenId: string; expectedRevision: number },
+): Promise<boolean> {
+	const [deleted] = await tx
+		.delete(apiTokenQuotaBinding)
+		.where(
+			and(
+				eq(apiTokenQuotaBinding.tokenId, input.tokenId),
+				eq(apiTokenQuotaBinding.revision, input.expectedRevision),
+			),
+		)
+		.returning({ tokenId: apiTokenQuotaBinding.tokenId });
 	return deleted !== undefined;
 }
 

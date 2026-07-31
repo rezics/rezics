@@ -47,7 +47,7 @@ export default {
 		},
 		apiQuotas: {
 			label: `${verbatimTerms.api.value} クォータ`,
-			description: `アカウント単位の ${verbatimTerms.api.value} レート、同時実行数、コスト、トークン数制限を管理します。`,
+			description: `アカウントとトークンのグローバルな ${verbatimTerms.api.value} クォータポリシー、割り当て、上書きを管理します。`,
 		},
 	},
 	units: {
@@ -251,11 +251,13 @@ export default {
 	},
 	apiQuotas: {
 		policyList: "ポリシー",
+		assignments: "割り当て",
 		revision: insert("リビジョン {{revision}}", { revision: Number }),
 		enabled: "有効",
 		disabled: "無効",
 		empty: `管理可能な ${verbatimTerms.api.value} トークンポリシーはありません。`,
 		policyClass: "ポリシークラス",
+		subjects: { account: "アカウント", token: `${verbatimTerms.api.value} トークン` },
 		classes: { standard: "標準", privileged: "特権" },
 		schemaVersion: insert("スキーマ {{version}}", { version: Number }),
 		requestsPerMinute: "1分あたりのリクエスト数",

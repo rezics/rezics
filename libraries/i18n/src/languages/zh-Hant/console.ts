@@ -42,7 +42,7 @@ export default {
 		},
 		apiQuotas: {
 			label: `${verbatimTerms.api.value} 配額`,
-			description: `管理帳戶共用的 ${verbatimTerms.api.value} 速率、並行、成本與權杖數量政策。`,
+			description: `管理帳戶與權杖的全域 ${verbatimTerms.api.value} 配額政策、指派及覆蓋設定。`,
 		},
 	},
 	units: {
@@ -243,11 +243,13 @@ export default {
 	},
 	apiQuotas: {
 		policyList: "政策",
+		assignments: "指派",
 		revision: insert("修訂版 {{revision}}", { revision: Number }),
 		enabled: "已啟用",
 		disabled: "已停用",
 		empty: `目前沒有可管理的 ${verbatimTerms.api.value} 配額政策。`,
 		policyClass: "政策類別",
+		subjects: { account: "帳戶", token: `${verbatimTerms.api.value} 權杖` },
 		classes: {
 			standard: "標準",
 			privileged: "特權",

@@ -47,7 +47,7 @@ export default {
 		},
 		apiQuotas: {
 			label: `${verbatimTerms.api.value} quotas`,
-			description: `Manage account-wide ${verbatimTerms.api.value} rate, concurrency, cost, and token-count policies.`,
+			description: `Manage global account and token ${verbatimTerms.api.value} quota policies, assignments, and overrides.`,
 		},
 	},
 	units: {
@@ -259,11 +259,13 @@ export default {
 	},
 	apiQuotas: {
 		policyList: "Policies",
+		assignments: "Assignments",
 		revision: insert("Revision {{revision}}", { revision: Number }),
 		enabled: "Enabled",
 		disabled: "Disabled",
 		empty: `There are no ${verbatimTerms.api.value} quota policies to manage.`,
 		policyClass: "Policy class",
+		subjects: { account: "Account", token: `${verbatimTerms.api.value} token` },
 		classes: {
 			standard: "Standard",
 			privileged: verbatimTerms.privilegedApiQuotaClass.value,

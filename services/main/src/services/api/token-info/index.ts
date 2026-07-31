@@ -42,7 +42,8 @@ export default new Elysia({ prefix: "/token" }).use(session).get(
 			.where(eq(apikeys.id, credential.id))
 			.limit(1);
 		if (!key) throw new Error("Verified API token record is unavailable");
-		const account = credential.quotaPolicy;
+		const account = credential.accountQuotaPolicy;
+		const token = credential.tokenQuotaPolicy;
 		const tokenOverride = credential.tokenQuotaOverride;
 		return {
 			id: key.id,
@@ -66,6 +67,19 @@ export default new Elysia({ prefix: "/token" }).use(session).get(
 					limits: account.configuration.limits,
 					maxActiveTokens: account.configuration.maxActiveTokens,
 					operations: account.configuration.operations,
+				},
+				token: {
+					key: token.key,
+					class: token.class,
+					source: token.source,
+					schemaVersion: token.schemaVersion,
+					policyRevision: token.policyRevision,
+					bindingRevision: token.bindingRevision,
+					validUntil: token.validUntil,
+					assignmentReason: token.assignmentReason,
+					configurationOverride: token.configurationOverride,
+					limits: token.configuration.limits,
+					operations: token.configuration.operations,
 				},
 				tokenOverride: tokenOverride
 					? {

@@ -4,19 +4,19 @@ import {
 	ApiQuotaPolicyDocumentInvalid,
 	DefaultApiQuotaPolicies,
 	applyApiAccountQuotaOverride,
+	applyApiTokenQuotaSafeguard,
 	decodeApiAccountQuotaOverride,
-	decodeApiQuotaPolicyConfiguration,
+	decodeApiAccountQuotaPolicyConfiguration,
 	decodeApiTokenQuotaOverride,
 	resolveApiQuotaLimits,
-	resolveApiTokenQuotaLimits,
 } from "./policy-schema";
 
 describe("API quota policy documents", () => {
 	it("decodes the default policy and applies an account override", () => {
-		const configuration = decodeApiQuotaPolicyConfiguration(
+		const configuration = decodeApiAccountQuotaPolicyConfiguration(
 			"standard",
 			1,
-			DefaultApiQuotaPolicies.standard.configuration,
+			DefaultApiQuotaPolicies.accountStandard.configuration,
 		);
 		const override = decodeApiAccountQuotaOverride("standard", 1, {
 			limits: { requestRate: { requestsPerMinute: 120, burstCapacity: 10 } },
@@ -49,7 +49,7 @@ describe("API quota policy documents", () => {
 
 	it("resolves account global and operation constraints together", () => {
 		const configuration = applyApiAccountQuotaOverride(
-			DefaultApiQuotaPolicies.standard.configuration,
+			DefaultApiQuotaPolicies.accountStandard.configuration,
 			{
 				operations: {
 					"search.execute": {
@@ -59,23 +59,31 @@ describe("API quota policy documents", () => {
 			},
 		);
 		expect(resolveApiQuotaLimits(configuration, "search.execute")).toEqual({
-			global: DefaultApiQuotaPolicies.standard.configuration.limits,
+			global: DefaultApiQuotaPolicies.accountStandard.configuration.limits,
 			operation: {
-				...DefaultApiQuotaPolicies.standard.configuration.limits,
+				...DefaultApiQuotaPolicies.accountStandard.configuration.limits,
 				requestRate: { requestsPerMinute: 10, burstCapacity: 2 },
 			},
 		});
 	});
 
-	it("keeps token safeguards independent from the account policy", () => {
+	it("only lets an owner-managed token safeguard tighten the token policy", () => {
 		const override = decodeApiTokenQuotaOverride({
-			limits: { requestRate: { requestsPerMinute: 30, burstCapacity: 5 } },
+			limits: { requestRate: { requestsPerMinute: 300, burstCapacity: 5 } },
 			operations: { "image.upload": { dailyCostUnits: 50 } },
 		});
-		expect(resolveApiTokenQuotaLimits(override, "image.upload")).toEqual({
-			global: { requestRate: { requestsPerMinute: 30, burstCapacity: 5 } },
+		const effective = applyApiTokenQuotaSafeguard(
+			DefaultApiQuotaPolicies.tokenStandard.configuration,
+			override,
+		);
+		expect(resolveApiQuotaLimits(effective, "image.upload")).toEqual({
+			global: {
+				...DefaultApiQuotaPolicies.tokenStandard.configuration.limits,
+				requestRate: { requestsPerMinute: 60, burstCapacity: 5 },
+			},
 			operation: {
-				requestRate: { requestsPerMinute: 30, burstCapacity: 5 },
+				...DefaultApiQuotaPolicies.tokenStandard.configuration.limits,
+				requestRate: { requestsPerMinute: 60, burstCapacity: 5 },
 				dailyCostUnits: 50,
 			},
 		});

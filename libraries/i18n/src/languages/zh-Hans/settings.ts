@@ -173,7 +173,7 @@ export default {
 			reportWrite: "提交举报",
 		},
 		limits: "用量限制",
-		standardLimitsDescription: `所有令牌共享账户配额；单个令牌的防护限制只能降低可用容量。分配 ${verbatimTerms.privilegedApiQuotaClass.value} 账户配额需要平台权限。`,
+		standardLimitsDescription: `每个令牌都有独立的平台策略，同时仍共享账户配额。你设置的可选防护限制只能降低令牌容量；分配 ${verbatimTerms.privilegedApiQuotaClass.value} 访问权限需要平台权限。`,
 		limitsDescription:
 			"你只能在当前策略允许的范围内设置用量上限；全局限制与个别操作限制会同时生效。",
 		limitRanges: insert(

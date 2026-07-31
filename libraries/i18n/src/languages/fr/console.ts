@@ -48,7 +48,7 @@ export default {
 		},
 		apiQuotas: {
 			label: `Quotas ${verbatimTerms.api.value}`,
-			description: `Gérez par compte les limites de débit, de concurrence, de coût et de nombre de jetons ${verbatimTerms.api.value}.`,
+			description: `Gérez les politiques, attributions et dérogations globales de quota ${verbatimTerms.api.value} des comptes et des jetons.`,
 		},
 	},
 	units: {
@@ -262,11 +262,13 @@ export default {
 	},
 	apiQuotas: {
 		policyList: "Règles",
+		assignments: "Attributions",
 		revision: insert("Révision {{revision}}", { revision: Number }),
 		enabled: "Activée",
 		disabled: "Désactivée",
 		empty: `Aucune règle de jeton ${verbatimTerms.api.value} n’est disponible.`,
 		policyClass: "Classe de politique",
+		subjects: { account: "Compte", token: `Jeton ${verbatimTerms.api.value}` },
 		classes: { standard: "Standard", privileged: "Privilégiée" },
 		schemaVersion: insert("Schéma {{version}}", { version: Number }),
 		requestsPerMinute: "Requêtes par minute",

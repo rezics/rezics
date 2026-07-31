@@ -189,7 +189,7 @@ export default {
 			reportWrite: "Enviar denuncias",
 		},
 		limits: "Límites de uso",
-		standardLimitsDescription: `Todos los tokens comparten la cuota de la cuenta. Las protecciones de cada token solo pueden reducir la capacidad disponible. Asignar la cuota de cuenta ${verbatimTerms.privilegedApiQuotaClass.value} requiere acceso a la plataforma.`,
+		standardLimitsDescription: `Cada token tiene su propia política de plataforma y también comparte la cuota de la cuenta. Tu protección opcional solo puede reducir la capacidad del token; asignar acceso ${verbatimTerms.privilegedApiQuotaClass.value} requiere autoridad de plataforma.`,
 		limitsDescription:
 			"Las cuotas deben mantenerse dentro de los intervalos permitidos por la política actual. Los límites globales y específicos de una operación se aplican conjuntamente.",
 		limitRanges: insert(

@@ -5,6 +5,7 @@ import {
 	boolean,
 	check,
 	date,
+	foreignKey,
 	index,
 	integer,
 	primaryKey,
@@ -22,16 +23,18 @@ import {
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
 } from "./columns";
-import { ApiQuotaPolicyClassValues } from "./contract-values";
+import { ApiQuotaPolicyClassValues, ApiQuotaPolicySubjectKindValues } from "./contract-values";
 import { profile } from "./profile";
 
 export type ApiQuotaPolicyClass = (typeof ApiQuotaPolicyClassValues)[number];
+export type ApiQuotaPolicySubjectKind = (typeof ApiQuotaPolicySubjectKindValues)[number];
 
 export const apiQuotaPolicy = pgTable(
 	"api_quota_policy",
 	{
 		id: createUuidv7PrimaryKey(),
 		key: text().notNull().unique(),
+		subjectKind: text().$type<ApiQuotaPolicySubjectKind>().notNull(),
 		class: text().$type<ApiQuotaPolicyClass>().notNull(),
 		currentRevision: integer().default(1).notNull(),
 		enabled: boolean().default(true).notNull(),
@@ -40,8 +43,13 @@ export const apiQuotaPolicy = pgTable(
 	},
 	(table) => [
 		check("api_quota_policy_key_check", sql`${table.key} ~ '^[a-z][a-z0-9_-]{0,63}$'`),
+		check(
+			"api_quota_policy_subject_kind_check",
+			sql`${table.subjectKind} in ('account', 'token')`,
+		),
 		check("api_quota_policy_class_check", sql`${table.class} in ('standard', 'privileged')`),
 		check("api_quota_policy_current_revision_check", sql`${table.currentRevision} > 0`),
+		uniqueIndex("api_quota_policy_id_subject_kind_key").on(table.id, table.subjectKind),
 	],
 );
 
@@ -80,9 +88,8 @@ export const apiAccountQuotaBinding = pgTable(
 		userId: uuid()
 			.primaryKey()
 			.references(() => users.id, { onDelete: "cascade" }),
-		policyId: uuid()
-			.notNull()
-			.references(() => apiQuotaPolicy.id, { onDelete: "restrict" }),
+		policyId: uuid().notNull(),
+		policySubjectKind: text().$type<"account">().default("account").notNull(),
 		configurationOverride: createJsonDocumentColumn()
 			.default(sql`'{}'::jsonb`)
 			.notNull(),
@@ -96,9 +103,18 @@ export const apiAccountQuotaBinding = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
+		foreignKey({
+			columns: [table.policyId, table.policySubjectKind],
+			foreignColumns: [apiQuotaPolicy.id, apiQuotaPolicy.subjectKind],
+			name: "api_account_quota_binding_policy_kind_fkey",
+		}).onDelete("restrict"),
 		index("api_account_quota_binding_policy_idx").on(table.policyId),
 		index("api_account_quota_binding_assigned_by_idx").on(table.assignedByProfileId),
 		check("api_account_quota_binding_revision_check", sql`${table.revision} > 0`),
+		check(
+			"api_account_quota_binding_policy_kind_check",
+			sql`${table.policySubjectKind} = 'account'`,
+		),
 		check(
 			"api_account_quota_binding_configuration_json_object_check",
 			sql`jsonb_typeof(${table.configurationOverride}) = 'object'`,
@@ -111,6 +127,51 @@ export const apiAccountQuotaBinding = pgTable(
 			"api_account_quota_binding_reason_check",
 			sql`btrim(${table.assignmentReason}) <> ''`,
 		),
+	],
+);
+
+export const apiTokenQuotaBinding = pgTable(
+	"api_token_quota_binding",
+	{
+		tokenId: uuid()
+			.primaryKey()
+			.references(() => apikeys.id, { onDelete: "cascade" }),
+		policyId: uuid().notNull(),
+		policySubjectKind: text().$type<"token">().default("token").notNull(),
+		configurationOverride: createJsonDocumentColumn()
+			.default(sql`'{}'::jsonb`)
+			.notNull(),
+		validUntil: createTimestampMsColumn(),
+		assignmentReason: text().notNull(),
+		assignedByProfileId: uuid()
+			.notNull()
+			.references(() => profile.id, { onDelete: "restrict" }),
+		revision: integer().default(1).notNull(),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.policyId, table.policySubjectKind],
+			foreignColumns: [apiQuotaPolicy.id, apiQuotaPolicy.subjectKind],
+			name: "api_token_quota_binding_policy_kind_fkey",
+		}).onDelete("restrict"),
+		index("api_token_quota_binding_policy_idx").on(table.policyId),
+		index("api_token_quota_binding_assigned_by_idx").on(table.assignedByProfileId),
+		check(
+			"api_token_quota_binding_policy_kind_check",
+			sql`${table.policySubjectKind} = 'token'`,
+		),
+		check("api_token_quota_binding_revision_check", sql`${table.revision} > 0`),
+		check(
+			"api_token_quota_binding_configuration_json_object_check",
+			sql`jsonb_typeof(${table.configurationOverride}) = 'object'`,
+		),
+		check(
+			"api_token_quota_binding_validity_check",
+			sql`${table.validUntil} is null or ${table.validUntil} > ${table.createdAt}`,
+		),
+		check("api_token_quota_binding_reason_check", sql`btrim(${table.assignmentReason}) <> ''`),
 	],
 );
 

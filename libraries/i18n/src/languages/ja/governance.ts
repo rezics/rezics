@@ -69,6 +69,8 @@ export default {
 		"platform.api_quota_policy.update": `${verbatimTerms.api.value} クォータポリシーを更新する`,
 		"platform.user.api_quota.read": `ユーザーの ${verbatimTerms.api.value} クォータを表示する`,
 		"platform.user.api_quota.update": `ユーザーの ${verbatimTerms.api.value} クォータを管理する`,
+		"platform.user.api_token.api_quota.read": `ユーザーの ${verbatimTerms.api.value} トークンクォータを表示する`,
+		"platform.user.api_token.api_quota.update": `ユーザーの ${verbatimTerms.api.value} トークンクォータを管理する`,
 		"platform.moderate": "プラットフォームユニットを管理する",
 		"platform.suppress": "プラットフォームのコンテンツと改訂を抑制する",
 		"realm.contribute": `すべての ${realmTerms.label} に参加する`,

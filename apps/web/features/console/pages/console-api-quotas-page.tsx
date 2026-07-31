@@ -3,6 +3,7 @@
 import {
 	getApiApiQuotaPoliciesQueryKey,
 	useGetApiApiQuotaPolicies,
+	useGetApiPlatformUsers,
 	usePutApiApiQuotaPoliciesByPolicyKey,
 	type GetApiApiQuotaPoliciesStatus200,
 	type PutApiApiQuotaPoliciesByPolicyKeyBody,
@@ -21,15 +22,22 @@ import {
 	Input,
 	QueryFailure,
 	QueryPending,
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
 	Textarea,
 	cn,
 } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, type FormEvent } from "react";
+import { Search } from "lucide-react";
+import { useDeferredValue, useState, type FormEvent } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import { AccountApiQuotaEditor } from "../components/account-api-quota-editor";
 import { useConsoleWorkspace } from "../components/console-workspace";
+import { TokenApiQuotaManager } from "../components/token-api-quota-manager";
 
 type Policy = GetApiApiQuotaPoliciesStatus200["items"][number];
 type PolicyConfiguration = PutApiApiQuotaPoliciesByPolicyKeyBody["configuration"];
@@ -101,6 +109,38 @@ function parseOperations(value: string): Operations | undefined {
 }
 
 export function ConsoleApiQuotasPage() {
+	const { t } = useTranslation(["console"]);
+	const { canReadAccountApiQuotas, canReadTokenApiQuotas } = useConsoleWorkspace();
+	const canReadAssignments = canReadAccountApiQuotas || canReadTokenApiQuotas;
+	return (
+		<section>
+			<header className="mb-5">
+				<h1 className="font-semibold text-xl tracking-tight">
+					{t.console.sections.apiQuotas.label}
+				</h1>
+				<p className="mt-1 text-muted-foreground text-sm">
+					{t.console.sections.apiQuotas.description}
+				</p>
+			</header>
+			<Tabs defaultValue="policies">
+				<TabsList className="mb-5" variant="underline">
+					<TabsTrigger value="policies">{t.console.apiQuotas.policyList}</TabsTrigger>
+					<TabsTrigger disabled={!canReadAssignments} value="assignments">
+						{t.console.apiQuotas.assignments}
+					</TabsTrigger>
+				</TabsList>
+				<TabsContent value="policies">
+					<PolicyManagement />
+				</TabsContent>
+				<TabsContent value="assignments">
+					<QuotaAssignments />
+				</TabsContent>
+			</Tabs>
+		</section>
+	);
+}
+
+function PolicyManagement() {
 	const { t } = useTranslation(["console", "errors"]);
 	const { canReadApiQuotaPolicies } = useConsoleWorkspace();
 	const policies = useGetApiApiQuotaPolicies({
@@ -116,65 +156,137 @@ export function ConsoleApiQuotasPage() {
 	const selected =
 		policies.data.items.find((policy) => policy.key === selectedKey) ?? policies.data.items[0];
 
+	return selected ? (
+		<div className="grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)]">
+			<Card appearance="outlined">
+				<CardHeader>
+					<CardTitle>{t.console.apiQuotas.policyList}</CardTitle>
+				</CardHeader>
+				<CardContent className="grid gap-1">
+					{policies.data.items.map((policy) => (
+						<button
+							className={cn(
+								"flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-start text-sm",
+								policy.key === selected.key
+									? "bg-primary/10 text-primary"
+									: "hover:bg-accent",
+							)}
+							key={policy.id}
+							onClick={() => setSelectedKey(policy.key)}
+							type="button"
+						>
+							<span className="min-w-0">
+								<span className="block truncate font-medium">{policy.key}</span>
+								<span className="text-muted-foreground text-xs">
+									{t.console.apiQuotas.subjects[policy.subjectKind]} ·{" "}
+									{t.console.apiQuotas.revision({
+										revision: Number(policy.revision),
+									})}
+								</span>
+							</span>
+							<Badge variant={policy.enabled ? "success" : "outline"}>
+								{policy.enabled
+									? t.console.apiQuotas.enabled
+									: t.console.apiQuotas.disabled}
+							</Badge>
+						</button>
+					))}
+				</CardContent>
+			</Card>
+			<ApiQuotaPolicyEditor key={`${selected.key}:${selected.revision}`} policy={selected} />
+		</div>
+	) : (
+		<p className="rounded-lg border border-border p-6 text-center text-muted-foreground text-sm">
+			{t.console.apiQuotas.empty}
+		</p>
+	);
+}
+
+function QuotaAssignments() {
+	const { t } = useTranslation(["console"]);
+	const { canReadAccountApiQuotas, canReadTokenApiQuotas } = useConsoleWorkspace();
+	const canReadAssignments = canReadAccountApiQuotas || canReadTokenApiQuotas;
+	const [search, setSearch] = useState("");
+	const deferredSearch = useDeferredValue(search.trim());
+	const [selectedUserId, setSelectedUserId] = useState<string>();
+	const users = useGetApiPlatformUsers(
+		{
+			query: {
+				limit: 25,
+				...(deferredSearch ? { search: deferredSearch } : {}),
+			},
+		},
+		{ query: { enabled: canReadAssignments && deferredSearch.length >= 2 } },
+	);
+	const selected = users.data?.items.find((user) => user.userId === selectedUserId);
+
 	return (
-		<section>
-			<header className="mb-5">
-				<h1 className="font-semibold text-xl tracking-tight">
-					{t.console.sections.apiQuotas.label}
-				</h1>
-				<p className="mt-1 text-muted-foreground text-sm">
-					{t.console.sections.apiQuotas.description}
-				</p>
-			</header>
+		<div className="grid gap-4 lg:grid-cols-[20rem_minmax(0,1fr)]">
+			<Card appearance="outlined">
+				<CardHeader>
+					<CardTitle>{t.console.users.searchLabel}</CardTitle>
+				</CardHeader>
+				<CardContent className="grid gap-3">
+					<label className="relative">
+						<Search className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+						<Input
+							aria-label={t.console.users.searchLabel}
+							className="ps-9"
+							onChange={(event) => setSearch(event.currentTarget.value)}
+							placeholder={t.console.users.searchPlaceholder}
+							value={search}
+						/>
+					</label>
+					{users.isFetching ? <QueryPending /> : null}
+					{users.isError ? (
+						<QueryFailure error={users.error} retry={() => void users.refetch()} />
+					) : null}
+					<div className="grid gap-1">
+						{users.data?.items.map((user) => (
+							<button
+								className={cn(
+									"rounded-lg px-3 py-2 text-start",
+									selectedUserId === user.userId
+										? "bg-primary/10 text-primary"
+										: "hover:bg-accent",
+								)}
+								key={user.userId}
+								onClick={() => setSelectedUserId(user.userId)}
+								type="button"
+							>
+								<span className="block truncate font-medium text-sm">
+									{user.name}
+								</span>
+								<span className="block truncate text-muted-foreground text-xs">
+									{user.email}
+								</span>
+							</button>
+						))}
+					</div>
+				</CardContent>
+			</Card>
 			{selected ? (
-				<div className="grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)]">
-					<Card appearance="outlined">
-						<CardHeader>
-							<CardTitle>{t.console.apiQuotas.policyList}</CardTitle>
-						</CardHeader>
-						<CardContent className="grid gap-1">
-							{policies.data.items.map((policy) => (
-								<button
-									className={cn(
-										"flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-start text-sm",
-										policy.key === selected.key
-											? "bg-primary/10 text-primary"
-											: "hover:bg-accent",
-									)}
-									key={policy.id}
-									onClick={() => setSelectedKey(policy.key)}
-									type="button"
-								>
-									<span className="min-w-0">
-										<span className="block truncate font-medium">
-											{policy.key}
-										</span>
-										<span className="text-muted-foreground text-xs">
-											{t.console.apiQuotas.revision({
-												revision: Number(policy.revision),
-											})}
-										</span>
-									</span>
-									<Badge variant={policy.enabled ? "success" : "outline"}>
-										{policy.enabled
-											? t.console.apiQuotas.enabled
-											: t.console.apiQuotas.disabled}
-									</Badge>
-								</button>
-							))}
-						</CardContent>
-					</Card>
-					<ApiQuotaPolicyEditor
-						key={`${selected.key}:${selected.revision}`}
-						policy={selected}
-					/>
+				<div className="grid gap-6">
+					<header>
+						<h2 className="font-semibold">{selected.name}</h2>
+						<p className="text-muted-foreground text-sm">{selected.email}</p>
+					</header>
+					{canReadAccountApiQuotas ? (
+						<AccountApiQuotaEditor userId={selected.userId} />
+					) : null}
+					<TokenApiQuotaManager userId={selected.userId} />
 				</div>
 			) : (
-				<p className="rounded-lg border border-border p-6 text-center text-muted-foreground text-sm">
-					{t.console.apiQuotas.empty}
-				</p>
+				<div className="grid min-h-64 place-items-center rounded-lg border border-border p-8 text-center">
+					<div>
+						<p className="font-medium">{t.console.users.selectUser}</p>
+						<p className="mt-1 text-muted-foreground text-sm">
+							{t.console.users.selectUserDescription}
+						</p>
+					</div>
+				</div>
 			)}
-		</section>
+		</div>
 	);
 }
 
@@ -194,8 +306,11 @@ function ApiQuotaPolicyEditor({ policy }: { readonly policy: Policy }) {
 	const [dailyCostUnits, setDailyCostUnits] = useState(
 		Number(policy.configuration.limits.dailyCostUnits),
 	);
-	const [maxActiveTokens, setMaxActiveTokens] = useState(
-		Number(policy.configuration.maxActiveTokens),
+	const isAccountPolicy = policy.subjectKind === "account";
+	const [maxActiveTokens, setMaxActiveTokens] = useState(() =>
+		"maxActiveTokens" in policy.configuration
+			? Number(policy.configuration.maxActiveTokens)
+			: 1,
 	);
 	const [operationsText, setOperationsText] = useState(() =>
 		JSON.stringify(policy.configuration.operations, null, 2),
@@ -216,7 +331,7 @@ function ApiQuotaPolicyEditor({ policy }: { readonly policy: Policy }) {
 		burstCapacity,
 		maxConcurrentRequests,
 		dailyCostUnits,
-		maxActiveTokens,
+		...(isAccountPolicy ? [maxActiveTokens] : []),
 	].every((value) => Number.isInteger(value) && value > 0);
 	const submit = (event: FormEvent) => {
 		event.preventDefault();
@@ -227,15 +342,24 @@ function ApiQuotaPolicyEditor({ policy }: { readonly policy: Policy }) {
 			body: {
 				expectedRevision: policy.revision,
 				reason: trimmedReason,
-				configuration: {
-					limits: {
-						requestRate: { requestsPerMinute, burstCapacity },
-						maxConcurrentRequests,
-						dailyCostUnits,
-					},
-					maxActiveTokens,
-					operations,
-				},
+				configuration: isAccountPolicy
+					? {
+							limits: {
+								requestRate: { requestsPerMinute, burstCapacity },
+								maxConcurrentRequests,
+								dailyCostUnits,
+							},
+							maxActiveTokens,
+							operations,
+						}
+					: {
+							limits: {
+								requestRate: { requestsPerMinute, burstCapacity },
+								maxConcurrentRequests,
+								dailyCostUnits,
+							},
+							operations,
+						},
 			},
 		});
 	};
@@ -247,6 +371,7 @@ function ApiQuotaPolicyEditor({ policy }: { readonly policy: Policy }) {
 					<div>
 						<CardTitle>{policy.key}</CardTitle>
 						<CardDescription>
+							{t.console.apiQuotas.subjects[policy.subjectKind]} ·{" "}
 							{t.console.apiQuotas.policyClass}:{" "}
 							{t.console.apiQuotas.classes[policy.class]}
 						</CardDescription>
@@ -260,7 +385,12 @@ function ApiQuotaPolicyEditor({ policy }: { readonly policy: Policy }) {
 			</CardHeader>
 			<CardContent>
 				<form className="grid gap-5" onSubmit={submit}>
-					<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+					<div
+						className={cn(
+							"grid gap-4 sm:grid-cols-2",
+							isAccountPolicy ? "xl:grid-cols-5" : "xl:grid-cols-4",
+						)}
+					>
 						<NumericQuotaField
 							disabled={!canUpdateApiQuotaPolicies}
 							label={t.console.apiQuotas.requestsPerMinute}
@@ -285,12 +415,14 @@ function ApiQuotaPolicyEditor({ policy }: { readonly policy: Policy }) {
 							onChange={setDailyCostUnits}
 							value={dailyCostUnits}
 						/>
-						<NumericQuotaField
-							disabled={!canUpdateApiQuotaPolicies}
-							label={t.console.apiQuotas.maxActiveTokens}
-							onChange={setMaxActiveTokens}
-							value={maxActiveTokens}
-						/>
+						{isAccountPolicy ? (
+							<NumericQuotaField
+								disabled={!canUpdateApiQuotaPolicies}
+								label={t.console.apiQuotas.maxActiveTokens}
+								onChange={setMaxActiveTokens}
+								value={maxActiveTokens}
+							/>
+						) : null}
 					</div>
 					<Field invalid={operations === undefined}>
 						<FieldLabel>{t.console.apiQuotas.operationOverrides}</FieldLabel>

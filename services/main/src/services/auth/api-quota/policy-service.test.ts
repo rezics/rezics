@@ -2,13 +2,14 @@ import { describe, expect, it } from "vitest";
 
 import type { DatabaseExecutor } from "../../database";
 import { DefaultApiQuotaPolicies } from "./policy-schema";
-import { resolveApiAccountQuotaPolicy } from "./policy-service";
+import { resolveApiAccountQuotaPolicy, resolveApiTokenQuotaPolicy } from "./policy-service";
 
 const now = new Date("2026-07-31T10:00:00.000Z");
 
 const standardPolicy = {
 	id: "01983000-0000-7000-8000-000000000001",
-	key: DefaultApiQuotaPolicies.standard.key,
+	key: DefaultApiQuotaPolicies.accountStandard.key,
+	subjectKind: "account" as const,
 	class: "standard" as const,
 	currentRevision: 1,
 	enabled: true,
@@ -20,7 +21,7 @@ const standardRevision = {
 	policyId: standardPolicy.id,
 	revision: 1,
 	schemaVersion: 1,
-	configuration: DefaultApiQuotaPolicies.standard.configuration,
+	configuration: DefaultApiQuotaPolicies.accountStandard.configuration,
 	changeReason: "Initial policy",
 	createdByProfileId: null,
 	createdAt: new Date("2026-07-01T00:00:00.000Z"),
@@ -29,19 +30,20 @@ const standardRevision = {
 const privilegedPolicy = {
 	...standardPolicy,
 	id: "01983000-0000-7000-8000-000000000002",
-	key: DefaultApiQuotaPolicies.privileged.key,
+	key: DefaultApiQuotaPolicies.accountPrivileged.key,
 	class: "privileged" as const,
 };
 
 const privilegedRevision = {
 	...standardRevision,
 	policyId: privilegedPolicy.id,
-	configuration: DefaultApiQuotaPolicies.privileged.configuration,
+	configuration: DefaultApiQuotaPolicies.accountPrivileged.configuration,
 };
 
 const privilegedBinding = {
 	userId: "01983000-0000-7000-8000-000000000010",
 	policyId: privilegedPolicy.id,
+	policySubjectKind: "account" as const,
 	configurationOverride: {},
 	validUntil: new Date("2026-08-01T10:00:00.000Z"),
 	assignmentReason: "Reviewed integration workload",
@@ -86,7 +88,9 @@ describe("API account quota policy resolution", () => {
 
 		expect(resolved.source).toBe("standard_default");
 		expect(resolved.class).toBe("standard");
-		expect(resolved.configuration).toEqual(DefaultApiQuotaPolicies.standard.configuration);
+		expect(resolved.configuration).toEqual(
+			DefaultApiQuotaPolicies.accountStandard.configuration,
+		);
 	});
 
 	it("applies an account override without changing the source policy revision", async () => {
@@ -129,5 +133,36 @@ describe("API account quota policy resolution", () => {
 		expect(resolved.bindingRevision).toBe(binding.revision);
 		expect(resolved.configurationOverride).toEqual({});
 		expect(resolved.configuration.limits.dailyCostUnits).toBe(2_000);
+	});
+});
+
+describe("API token quota policy resolution", () => {
+	it("uses an independent Standard token policy when a token has no binding", async () => {
+		const tokenStandardPolicy = {
+			...standardPolicy,
+			id: "01983000-0000-7000-8000-000000000030",
+			key: DefaultApiQuotaPolicies.tokenStandard.key,
+			subjectKind: "token" as const,
+		};
+		const tokenStandardRevision = {
+			...standardRevision,
+			policyId: tokenStandardPolicy.id,
+			configuration: DefaultApiQuotaPolicies.tokenStandard.configuration,
+		};
+		const resolved = await resolveApiTokenQuotaPolicy(
+			"01983000-0000-7000-8000-000000000031",
+			{
+				executor: queuedSelectExecutor(
+					[],
+					[{ policy: tokenStandardPolicy, revision: tokenStandardRevision }],
+				),
+				now,
+			},
+		);
+
+		expect(resolved.source).toBe("standard_default");
+		expect(resolved.configuration).toEqual(
+			DefaultApiQuotaPolicies.tokenStandard.configuration,
+		);
 	});
 });

@@ -48,7 +48,7 @@ export default {
 		},
 		apiQuotas: {
 			label: `Cuotas de ${verbatimTerms.api.value}`,
-			description: `Gestiona los límites por cuenta de frecuencia, concurrencia, coste y cantidad de tokens de ${verbatimTerms.api.value}.`,
+			description: `Gestiona las políticas, asignaciones y excepciones globales de cuotas de ${verbatimTerms.api.value} para cuentas y tokens.`,
 		},
 	},
 	units: {
@@ -260,11 +260,13 @@ export default {
 	},
 	apiQuotas: {
 		policyList: "Políticas",
+		assignments: "Asignaciones",
 		revision: insert("Revisión {{revision}}", { revision: Number }),
 		enabled: "Habilitada",
 		disabled: "Deshabilitada",
 		empty: `No hay políticas de tokens de ${verbatimTerms.api.value} disponibles.`,
 		policyClass: "Clase de política",
+		subjects: { account: "Cuenta", token: `Token de ${verbatimTerms.api.value}` },
 		classes: { standard: "Estándar", privileged: "Privilegiada" },
 		schemaVersion: insert("Esquema {{version}}", { version: Number }),
 		requestsPerMinute: "Solicitudes por minuto",

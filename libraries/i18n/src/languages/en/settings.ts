@@ -181,7 +181,7 @@ export default {
 			reportWrite: "Submit reports",
 		},
 		limits: "Usage limits",
-		standardLimitsDescription: `Every token shares the account quota. Optional token safeguards can only reduce capacity within the ranges below; assigning the ${verbatimTerms.privilegedApiQuotaClass.value} account quota requires platform access.`,
+		standardLimitsDescription: `Every token has its own platform policy and also shares the account quota. Your optional safeguard can only reduce token capacity; assigning ${verbatimTerms.privilegedApiQuotaClass.value} access requires platform authority.`,
 		limitsDescription:
 			"Quotas must remain within the current policy's allowed ranges. Global and operation-specific limits apply together.",
 		limitRanges: insert(

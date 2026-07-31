@@ -293,6 +293,31 @@ import type {
 	PutApiApiQuotaPoliciesAccountsByUserIdStatus409,
 	PutApiApiQuotaPoliciesAccountsByUserIdStatus422,
 	PutApiApiQuotaPoliciesAccountsByUserIdStatus500,
+	GetApiApiQuotaPoliciesAccountsByUserIdTokensOptions,
+	GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus200,
+	GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus401,
+	GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus403,
+	GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus404,
+	GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus422,
+	GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus500,
+	PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdOptions,
+	PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200,
+	PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus400,
+	PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus401,
+	PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403,
+	PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus404,
+	PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus409,
+	PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus422,
+	PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus500,
+	DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdOptions,
+	DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200,
+	DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus400,
+	DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus401,
+	DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403,
+	DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus404,
+	DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus409,
+	DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus422,
+	DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus500,
 	PostApiFeedQueryOptions,
 	PostApiFeedQueryStatus200,
 	PostApiFeedQueryStatus400,
@@ -2430,6 +2455,9 @@ import {
 	putApiApiQuotaPoliciesByPolicyKey,
 	getApiApiQuotaPoliciesAccountsByUserId,
 	putApiApiQuotaPoliciesAccountsByUserId,
+	getApiApiQuotaPoliciesAccountsByUserIdTokens,
+	putApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId,
+	deleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId,
 	postApiFeedQuery,
 	getApiReportsMe,
 	getApiReportsUnitsByUnitIdDestinations,
@@ -7091,6 +7119,342 @@ export function useDeleteApiApiQuotaPoliciesAccountsByUserId<TContext>(
 			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus500
 		>,
 		DeleteApiApiQuotaPoliciesAccountsByUserIdOptions,
+		TContext
+	>;
+}
+
+export const getApiApiQuotaPoliciesAccountsByUserIdTokensQueryKey = ({
+	path,
+}: Omit<GetApiApiQuotaPoliciesAccountsByUserIdTokensOptions, "headers">) =>
+	[{ url: "/api/api-quota-policies/accounts/:userId/tokens", params: path }] as const;
+
+type GetApiApiQuotaPoliciesAccountsByUserIdTokensQueryKey = ReturnType<
+	typeof getApiApiQuotaPoliciesAccountsByUserIdTokensQueryKey
+>;
+
+export function getApiApiQuotaPoliciesAccountsByUserIdTokensQueryOptions(
+	{ path }: GetApiApiQuotaPoliciesAccountsByUserIdTokensOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiApiQuotaPoliciesAccountsByUserIdTokensQueryKey({ path });
+	return queryOptions<
+		GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus200,
+		ResponseErrorConfig<
+			| GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus401
+			| GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus403
+			| GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus404
+			| GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus422
+			| GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus500
+		>,
+		GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiApiQuotaPoliciesAccountsByUserIdTokens({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List a user's API token quotas
+ * {@link /api/api-quota-policies/accounts/:userId/tokens}
+ */
+export function useGetApiApiQuotaPoliciesAccountsByUserIdTokens<
+	TData = GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus200,
+	TQueryData = GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus200,
+	TQueryKey extends QueryKey = GetApiApiQuotaPoliciesAccountsByUserIdTokensQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiApiQuotaPoliciesAccountsByUserIdTokensOptions["path"]
+			| (() => GetApiApiQuotaPoliciesAccountsByUserIdTokensOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus200,
+				ResponseErrorConfig<
+					| GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus401
+					| GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus403
+					| GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus404
+					| GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus422
+					| GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ??
+		getApiApiQuotaPoliciesAccountsByUserIdTokensQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiApiQuotaPoliciesAccountsByUserIdTokensQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus401
+			| GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus403
+			| GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus404
+			| GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus422
+			| GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdMutationKey = () =>
+	[{ url: "/api/api-quota-policies/accounts/:userId/tokens/:tokenId" }] as const;
+
+export function putApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = putApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdMutationKey();
+	return mutationOptions<
+		PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200,
+		ResponseErrorConfig<
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus400
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus401
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus404
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus409
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus422
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus500
+		>,
+		PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Assign an API token quota policy
+ * {@link /api/api-quota-policies/accounts/:userId/tokens/:tokenId}
+ */
+export function usePutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200,
+			ResponseErrorConfig<
+				| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus400
+				| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus401
+				| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403
+				| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus404
+				| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus409
+				| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus422
+				| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus500
+			>,
+			PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		putApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdMutationKey();
+
+	const baseOptions = putApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200,
+		ResponseErrorConfig<
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus400
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus401
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus404
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus409
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus422
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus500
+		>,
+		PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200,
+		ResponseErrorConfig<
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus400
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus401
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus404
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus409
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus422
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus500
+		>,
+		PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200,
+		ResponseErrorConfig<
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus400
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus401
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus404
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus409
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus422
+			| PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus500
+		>,
+		PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdOptions,
+		TContext
+	>;
+}
+
+export const deleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdMutationKey = () =>
+	[{ url: "/api/api-quota-policies/accounts/:userId/tokens/:tokenId" }] as const;
+
+export function deleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = deleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdMutationKey();
+	return mutationOptions<
+		DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200,
+		ResponseErrorConfig<
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus400
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus401
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus404
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus409
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus422
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus500
+		>,
+		DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await deleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Reset an API token quota policy
+ * {@link /api/api-quota-policies/accounts/:userId/tokens/:tokenId}
+ */
+export function useDeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200,
+			ResponseErrorConfig<
+				| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus400
+				| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus401
+				| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403
+				| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus404
+				| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus409
+				| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus422
+				| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus500
+			>,
+			DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		deleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdMutationKey();
+
+	const baseOptions = deleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200,
+		ResponseErrorConfig<
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus400
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus401
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus404
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus409
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus422
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus500
+		>,
+		DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200,
+		ResponseErrorConfig<
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus400
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus401
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus404
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus409
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus422
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus500
+		>,
+		DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus200,
+		ResponseErrorConfig<
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus400
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus401
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus403
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus404
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus409
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus422
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdStatus500
+		>,
+		DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdOptions,
 		TContext
 	>;
 }

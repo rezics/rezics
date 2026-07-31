@@ -69,6 +69,8 @@ export default {
 		"platform.api_quota_policy.update": `更新 ${verbatimTerms.api.value} 配額政策`,
 		"platform.user.api_quota.read": `檢視使用者 ${verbatimTerms.api.value} 配額`,
 		"platform.user.api_quota.update": `管理使用者 ${verbatimTerms.api.value} 配額`,
+		"platform.user.api_token.api_quota.read": `檢視使用者 ${verbatimTerms.api.value} 權杖配額`,
+		"platform.user.api_token.api_quota.update": `管理使用者 ${verbatimTerms.api.value} 權杖配額`,
 		"platform.moderate": "執行平台內容治理",
 		"platform.suppress": "隱藏平台內容與修訂",
 		"realm.contribute": `參與所有${realmTerms.pluralLabel}`,

@@ -1515,6 +1515,7 @@ async function ensureDefaultApiQuotaPolicies(tx: DatabaseTransaction): Promise<v
 			.insert(apiQuotaPolicy)
 			.values({
 				key: definition.key,
+				subjectKind: definition.subjectKind,
 				class: definition.class,
 				currentRevision: 1,
 				enabled: true,
@@ -1901,6 +1902,7 @@ async function isBootstrapReady(): Promise<boolean> {
 		database
 			.select({
 				key: apiQuotaPolicy.key,
+				subjectKind: apiQuotaPolicy.subjectKind,
 				class: apiQuotaPolicy.class,
 				schemaVersion: apiQuotaPolicyRevision.schemaVersion,
 				enabled: apiQuotaPolicy.enabled,
@@ -1929,6 +1931,7 @@ async function isBootstrapReady(): Promise<boolean> {
 			defaultApiQuotaPolicies.some(
 				(actual) =>
 					actual.key === expected.key &&
+					actual.subjectKind === expected.subjectKind &&
 					actual.class === expected.class &&
 					actual.schemaVersion === ApiQuotaPolicySchemaVersion &&
 					(actual.class !== "standard" || actual.enabled),

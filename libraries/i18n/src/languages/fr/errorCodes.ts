@@ -22,6 +22,7 @@ export default {
 	ApiQuotaPolicyInvalid: `La configuration de la politique de quota ${verbatimTerms.api.value} n’est pas valide.`,
 	ApiQuotaPolicyRevisionConflict: `La politique de quota ${verbatimTerms.api.value} a changé. Rechargez-la avant d’enregistrer.`,
 	ApiAccountQuotaRevisionConflict: `Le quota ${verbatimTerms.api.value} du compte a changé. Rechargez-le avant d’enregistrer.`,
+	ApiTokenQuotaRevisionConflict: `L’attribution de quota du jeton ${verbatimTerms.api.value} a changé. Rechargez-la avant d’enregistrer.`,
 	ApiTokenLimitReached: `Ce compte a atteint sa limite de jetons ${verbatimTerms.api.value}.`,
 	ApiTokenQuotaOverrideInvalid: `La dérogation de quota du jeton ${verbatimTerms.api.value} n’est pas valide.`,
 	ApiTokenQuotaOverrideRevisionConflict: `La dérogation de quota du jeton ${verbatimTerms.api.value} a changé. Rechargez-la avant d’enregistrer.`,

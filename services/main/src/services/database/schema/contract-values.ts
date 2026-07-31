@@ -469,6 +469,7 @@ export const AssociationProposalDirectionValues = ["request", "invitation"] as c
 export const AssociationProposalResolutionValues = ["accepted", "declined", "cancelled"] as const;
 
 export const ApiQuotaPolicyClassValues = ["standard", "privileged"] as const;
+export const ApiQuotaPolicySubjectKindValues = ["account", "token"] as const;
 
 export function toEnumValues<T extends string>(values: readonly [T, ...T[]]): [T, ...T[]] {
 	return [...values];

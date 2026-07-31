@@ -1,7 +1,7 @@
 import { Value } from "@sinclair/typebox/value";
 import { type Static, t } from "elysia";
 
-import type { ApiQuotaPolicyClass } from "../../database/schema";
+import type { ApiQuotaPolicyClass, ApiQuotaPolicySubjectKind } from "../../database/schema";
 import { ApiQuotaOperationIds, type ApiQuotaOperationId } from "./operation";
 
 export const ApiQuotaPolicySchemaVersion = 1 as const;
@@ -67,7 +67,23 @@ export const PrivilegedApiQuotaOperations = t.Partial(t.Object(PrivilegedOperati
 	additionalProperties: false,
 });
 
-export const StandardApiQuotaPolicyConfiguration = t.Object(
+export const StandardApiTokenQuotaPolicyConfiguration = t.Object(
+	{
+		limits: StandardApiQuotaLimits,
+		operations: StandardApiQuotaOperations,
+	},
+	{ additionalProperties: false },
+);
+
+export const PrivilegedApiTokenQuotaPolicyConfiguration = t.Object(
+	{
+		limits: PrivilegedApiQuotaLimits,
+		operations: PrivilegedApiQuotaOperations,
+	},
+	{ additionalProperties: false },
+);
+
+export const StandardApiAccountQuotaPolicyConfiguration = t.Object(
 	{
 		limits: StandardApiQuotaLimits,
 		maxActiveTokens: t.Integer({ minimum: 1, maximum: 20 }),
@@ -76,7 +92,7 @@ export const StandardApiQuotaPolicyConfiguration = t.Object(
 	{ additionalProperties: false },
 );
 
-export const PrivilegedApiQuotaPolicyConfiguration = t.Object(
+export const PrivilegedApiAccountQuotaPolicyConfiguration = t.Object(
 	{
 		limits: PrivilegedApiQuotaLimits,
 		maxActiveTokens: t.Integer({ minimum: 1, maximum: 50 }),
@@ -113,11 +129,15 @@ export const ApiTokenQuotaOverrideInput = t.Object(
 
 export type ApiQuotaLimits = Static<typeof PrivilegedApiQuotaLimits>;
 export type ApiQuotaLimitOverride = Static<typeof PrivilegedApiQuotaLimitOverride>;
-export type ApiQuotaPolicyConfiguration = {
+export type ApiTokenQuotaPolicyConfiguration = {
 	limits: ApiQuotaLimits;
-	maxActiveTokens: number;
 	operations: Partial<Record<ApiQuotaOperationId, ApiQuotaLimitOverride>>;
 };
+export type ApiAccountQuotaPolicyConfiguration = ApiTokenQuotaPolicyConfiguration & {
+	maxActiveTokens: number;
+};
+export type ApiQuotaPolicyConfiguration =
+	ApiAccountQuotaPolicyConfiguration | ApiTokenQuotaPolicyConfiguration;
 export type ApiAccountQuotaOverride = {
 	limits?: ApiQuotaLimitOverride;
 	maxActiveTokens?: number;
@@ -129,8 +149,9 @@ export type ApiTokenQuotaOverride = {
 };
 
 export const DefaultApiQuotaPolicies = {
-	standard: {
+	accountStandard: {
 		key: "standard-default",
+		subjectKind: "account",
 		class: "standard",
 		schemaVersion: ApiQuotaPolicySchemaVersion,
 		configuration: {
@@ -143,8 +164,9 @@ export const DefaultApiQuotaPolicies = {
 			operations: {},
 		},
 	},
-	privileged: {
+	accountPrivileged: {
 		key: "privileged-default",
+		subjectKind: "account",
 		class: "privileged",
 		schemaVersion: ApiQuotaPolicySchemaVersion,
 		configuration: {
@@ -157,10 +179,39 @@ export const DefaultApiQuotaPolicies = {
 			operations: {},
 		},
 	},
+	tokenStandard: {
+		key: "token-standard-default",
+		subjectKind: "token",
+		class: "standard",
+		schemaVersion: ApiQuotaPolicySchemaVersion,
+		configuration: {
+			limits: {
+				requestRate: { requestsPerMinute: 60, burstCapacity: 10 },
+				maxConcurrentRequests: 2,
+				dailyCostUnits: 2_000,
+			},
+			operations: {},
+		},
+	},
+	tokenPrivileged: {
+		key: "token-privileged-default",
+		subjectKind: "token",
+		class: "privileged",
+		schemaVersion: ApiQuotaPolicySchemaVersion,
+		configuration: {
+			limits: {
+				requestRate: { requestsPerMinute: 600, burstCapacity: 100 },
+				maxConcurrentRequests: 16,
+				dailyCostUnits: 100_000,
+			},
+			operations: {},
+		},
+	},
 } as const satisfies Record<
-	"standard" | "privileged",
+	"accountStandard" | "accountPrivileged" | "tokenStandard" | "tokenPrivileged",
 	{
 		key: string;
+		subjectKind: ApiQuotaPolicySubjectKind;
 		class: ApiQuotaPolicyClass;
 		schemaVersion: typeof ApiQuotaPolicySchemaVersion;
 		configuration: ApiQuotaPolicyConfiguration;
@@ -179,12 +230,6 @@ export class ApiQuotaPolicyDocumentInvalid extends Error {
 	}
 }
 
-function schemaForConfiguration(policyClass: ApiQuotaPolicyClass) {
-	return policyClass === "standard"
-		? StandardApiQuotaPolicyConfiguration
-		: PrivilegedApiQuotaPolicyConfiguration;
-}
-
 function schemaForAccountOverride(policyClass: ApiQuotaPolicyClass) {
 	return policyClass === "standard"
 		? StandardApiAccountQuotaOverride
@@ -201,13 +246,49 @@ function requireSupportedVersion(
 }
 
 export function decodeApiQuotaPolicyConfiguration(
+	subjectKind: ApiQuotaPolicySubjectKind,
 	policyClass: ApiQuotaPolicyClass,
 	schemaVersion: number,
 	value: unknown,
 ): ApiQuotaPolicyConfiguration {
+	return subjectKind === "account"
+		? decodeApiAccountQuotaPolicyConfiguration(policyClass, schemaVersion, value)
+		: decodeApiTokenQuotaPolicyConfiguration(policyClass, schemaVersion, value);
+}
+
+export function decodeApiAccountQuotaPolicyConfiguration(
+	policyClass: ApiQuotaPolicyClass,
+	schemaVersion: number,
+	value: unknown,
+): ApiAccountQuotaPolicyConfiguration {
 	requireSupportedVersion(policyClass, schemaVersion, "configuration");
 	try {
-		return Value.Decode(schemaForConfiguration(policyClass), value);
+		return Value.Decode(
+			policyClass === "standard"
+				? StandardApiAccountQuotaPolicyConfiguration
+				: PrivilegedApiAccountQuotaPolicyConfiguration,
+			value,
+		);
+	} catch (cause) {
+		throw new ApiQuotaPolicyDocumentInvalid(policyClass, schemaVersion, "configuration", {
+			cause,
+		});
+	}
+}
+
+export function decodeApiTokenQuotaPolicyConfiguration(
+	policyClass: ApiQuotaPolicyClass,
+	schemaVersion: number,
+	value: unknown,
+): ApiTokenQuotaPolicyConfiguration {
+	requireSupportedVersion(policyClass, schemaVersion, "configuration");
+	try {
+		return Value.Decode(
+			policyClass === "standard"
+				? StandardApiTokenQuotaPolicyConfiguration
+				: PrivilegedApiTokenQuotaPolicyConfiguration,
+			value,
+		);
 	} catch (cause) {
 		throw new ApiQuotaPolicyDocumentInvalid(policyClass, schemaVersion, "configuration", {
 			cause,
@@ -243,11 +324,11 @@ export function decodeApiTokenQuotaOverride(value: unknown): ApiTokenQuotaOverri
 	}
 }
 
-export function applyApiAccountQuotaOverride(
-	configuration: ApiQuotaPolicyConfiguration,
-	override: ApiAccountQuotaOverride,
-): ApiQuotaPolicyConfiguration {
-	const operations: ApiQuotaPolicyConfiguration["operations"] = {
+function applyOperationsOverride(
+	configuration: ApiTokenQuotaPolicyConfiguration,
+	override: ApiTokenQuotaOverride,
+): ApiTokenQuotaPolicyConfiguration["operations"] {
+	const operations: ApiTokenQuotaPolicyConfiguration["operations"] = {
 		...configuration.operations,
 	};
 	for (const operationId of ApiQuotaOperationIds) {
@@ -258,15 +339,83 @@ export function applyApiAccountQuotaOverride(
 			...operationOverride,
 		};
 	}
+	return operations;
+}
+
+export function applyApiAccountQuotaOverride(
+	configuration: ApiAccountQuotaPolicyConfiguration,
+	override: ApiAccountQuotaOverride,
+): ApiAccountQuotaPolicyConfiguration {
 	return {
 		limits: { ...configuration.limits, ...override.limits },
 		maxActiveTokens: override.maxActiveTokens ?? configuration.maxActiveTokens,
-		operations,
+		operations: applyOperationsOverride(configuration, override),
 	};
 }
 
+export function applyApiTokenQuotaOverride(
+	configuration: ApiTokenQuotaPolicyConfiguration,
+	override: ApiTokenQuotaOverride,
+): ApiTokenQuotaPolicyConfiguration {
+	return {
+		limits: { ...configuration.limits, ...override.limits },
+		operations: applyOperationsOverride(configuration, override),
+	};
+}
+
+function capLimits(limits: ApiQuotaLimits, cap: ApiQuotaLimitOverride | undefined): ApiQuotaLimits {
+	if (!cap) return limits;
+	return {
+		requestRate: cap.requestRate
+			? {
+					requestsPerMinute: Math.min(
+						limits.requestRate.requestsPerMinute,
+						cap.requestRate.requestsPerMinute,
+					),
+					burstCapacity: Math.min(
+						limits.requestRate.burstCapacity,
+						cap.requestRate.burstCapacity,
+					),
+				}
+			: limits.requestRate,
+		maxConcurrentRequests:
+			cap.maxConcurrentRequests === undefined
+				? limits.maxConcurrentRequests
+				: Math.min(limits.maxConcurrentRequests, cap.maxConcurrentRequests),
+		dailyCostUnits:
+			cap.dailyCostUnits === undefined
+				? limits.dailyCostUnits
+				: Math.min(limits.dailyCostUnits, cap.dailyCostUnits),
+	};
+}
+
+/** Applies an owner-managed token safeguard without allowing it to widen platform policy. */
+export function applyApiTokenQuotaSafeguard(
+	configuration: ApiTokenQuotaPolicyConfiguration,
+	safeguard: ApiTokenQuotaOverride | undefined,
+): ApiTokenQuotaPolicyConfiguration {
+	if (!safeguard) return configuration;
+	const limits = capLimits(configuration.limits, safeguard.limits);
+	const operations: ApiTokenQuotaPolicyConfiguration["operations"] = {
+		...configuration.operations,
+	};
+	for (const operationId of ApiQuotaOperationIds) {
+		const operationCap = safeguard.operations?.[operationId];
+		if (!operationCap) continue;
+		const policyOperationLimits = {
+			...configuration.limits,
+			...configuration.operations[operationId],
+		};
+		operations[operationId] = capLimits(policyOperationLimits, {
+			...safeguard.limits,
+			...operationCap,
+		});
+	}
+	return { limits, operations };
+}
+
 export function resolveApiQuotaLimits(
-	configuration: ApiQuotaPolicyConfiguration,
+	configuration: ApiTokenQuotaPolicyConfiguration,
 	operationId: ApiQuotaOperationId | null,
 ): { global: ApiQuotaLimits; operation?: ApiQuotaLimits } {
 	if (!operationId) return { global: configuration.limits };
@@ -274,16 +423,4 @@ export function resolveApiQuotaLimits(
 	return operation
 		? { global: configuration.limits, operation: { ...configuration.limits, ...operation } }
 		: { global: configuration.limits };
-}
-
-export function resolveApiTokenQuotaLimits(
-	override: ApiTokenQuotaOverride | undefined,
-	operationId: ApiQuotaOperationId | null,
-): { global?: ApiQuotaLimitOverride; operation?: ApiQuotaLimitOverride } {
-	if (!override) return {};
-	const operation = operationId ? override.operations?.[operationId] : undefined;
-	return {
-		...(override.limits ? { global: override.limits } : {}),
-		...(operation ? { operation: { ...override.limits, ...operation } } : {}),
-	};
 }

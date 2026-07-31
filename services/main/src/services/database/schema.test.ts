@@ -9,6 +9,9 @@ import { describe, expect, it } from "vitest";
 
 import {
 	auditEvent,
+	apiAccountQuotaBinding,
+	apiQuotaPolicy,
+	apiTokenQuotaBinding,
 	unitContentLicense,
 	contentStructure,
 	contentStructureNode,
@@ -107,6 +110,30 @@ import {
 const dialect = new PgDialect();
 
 describe("database schema contracts", () => {
+	it("enforces matching subject kinds for account and token quota assignments", () => {
+		const policy = getTableConfig(apiQuotaPolicy);
+		const accountBinding = getTableConfig(apiAccountQuotaBinding);
+		const tokenBinding = getTableConfig(apiTokenQuotaBinding);
+
+		expect(policy.columns.map((column) => column.name)).toContain("subject_kind");
+		expect(policy.indexes.map((index) => index.config.name)).toContain(
+			"api_quota_policy_id_subject_kind_key",
+		);
+		expect(accountBinding.foreignKeys.map((key) => key.getName())).toContain(
+			"api_account_quota_binding_policy_kind_fkey",
+		);
+		expect(tokenBinding.foreignKeys.map((key) => key.getName())).toContain(
+			"api_token_quota_binding_policy_kind_fkey",
+		);
+		expect(tokenBinding.checks.map((constraint) => constraint.name)).toEqual(
+			expect.arrayContaining([
+				"api_token_quota_binding_policy_kind_check",
+				"api_token_quota_binding_validity_check",
+				"api_token_quota_binding_reason_check",
+			]),
+		);
+	});
+
 	it("uses PostgreSQL uuidv7 for generated identifiers", () => {
 		expect(dialect.sqlToQuery(unit.id.default as SQL).sql).toBe("uuidv7()");
 		expect(dialect.sqlToQuery(sharedSearchQuery.id.default as SQL).sql).toBe("uuidv7()");
@@ -763,6 +790,8 @@ describe("database schema contracts", () => {
 				"platform.api_quota_policy.update",
 				"platform.user.api_quota.read",
 				"platform.user.api_quota.update",
+				"platform.user.api_token.api_quota.read",
+				"platform.user.api_token.api_quota.update",
 			]),
 		);
 		expect(PlatformCapabilityValues).not.toContain("unit.ownership.transfer");

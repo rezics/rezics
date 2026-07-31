@@ -11,8 +11,10 @@ import {
 	getApiTokenQuotaOverride,
 	replaceApiTokenQuotaOverride,
 	resolveApiAccountQuotaPolicy,
+	resolveApiTokenQuotaPolicy,
 	type ApiTokenQuotaOverrideSummary,
 	type ResolvedApiAccountQuotaPolicy,
+	type ResolvedApiTokenQuotaPolicy,
 } from "../../auth/api-quota/policy-service";
 import { auth } from "../../auth";
 import session from "../../auth/session";
@@ -77,9 +79,26 @@ function presentTokenQuotaOverride(override: ApiTokenQuotaOverrideSummary | unde
 		: null;
 }
 
+function presentTokenQuota(policy: ResolvedApiTokenQuotaPolicy) {
+	return {
+		key: policy.key,
+		class: policy.class,
+		source: policy.source,
+		schemaVersion: policy.schemaVersion,
+		policyRevision: policy.policyRevision,
+		bindingRevision: policy.bindingRevision,
+		validUntil: policy.validUntil,
+		assignmentReason: policy.assignmentReason,
+		configurationOverride: policy.configurationOverride,
+		limits: policy.configuration.limits,
+		operations: policy.configuration.operations,
+	};
+}
+
 function presentToken(
 	key: BetterAuthApiKey,
 	accountQuota: ResolvedApiAccountQuotaPolicy,
+	tokenQuota: ResolvedApiTokenQuotaPolicy,
 	tokenQuotaOverride: ApiTokenQuotaOverrideSummary | undefined,
 ) {
 	return {
@@ -94,6 +113,7 @@ function presentToken(
 		updatedAt: key.updatedAt,
 		quota: {
 			account: presentAccountQuota(accountQuota),
+			token: presentTokenQuota(tokenQuota),
 			tokenOverride: presentTokenQuotaOverride(tokenQuotaOverride),
 		},
 	};
@@ -187,13 +207,18 @@ export default new Elysia({ prefix: "/api-tokens" })
 				}),
 				resolveApiAccountQuotaPolicy(user.id),
 			]);
-			const tokenOverrides = await Promise.all(
-				result.apiKeys.map((key) => getApiTokenQuotaOverride(key.id)),
+			const tokenQuotas = await Promise.all(
+				result.apiKeys.map(async (key) =>
+					Promise.all([
+						resolveApiTokenQuotaPolicy(key.id),
+						getApiTokenQuotaOverride(key.id),
+					]),
+				),
 			);
 			return {
 				itemLimit: accountQuota.configuration.maxActiveTokens,
 				items: result.apiKeys.map((key, index) =>
-					presentToken(key, accountQuota, tokenOverrides[index]),
+					presentToken(key, accountQuota, tokenQuotas[index]![0], tokenQuotas[index]![1]),
 				),
 			};
 		},
@@ -239,7 +264,12 @@ export default new Elysia({ prefix: "/api-tokens" })
 					});
 				});
 				return {
-					...presentToken(newlyCreated, reserved.accountQuota, undefined),
+					...presentToken(
+						newlyCreated,
+						reserved.accountQuota,
+						await resolveApiTokenQuotaPolicy(newlyCreated.id),
+						undefined,
+					),
 					token: newlyCreated.key,
 				};
 			} catch (error) {
@@ -312,11 +342,12 @@ export default new Elysia({ prefix: "/api-tokens" })
 						},
 					});
 				});
-				const [accountQuota, tokenOverride] = await Promise.all([
+				const [accountQuota, tokenQuota, tokenOverride] = await Promise.all([
 					resolveApiAccountQuotaPolicy(user.id),
+					resolveApiTokenQuotaPolicy(updated.id),
 					getApiTokenQuotaOverride(updated.id),
 				]);
-				return presentToken(updated, accountQuota, tokenOverride);
+				return presentToken(updated, accountQuota, tokenQuota, tokenOverride);
 			} catch (error) {
 				if (reservation) await releaseActiveTokenSlot(reservation.reservationId);
 				throw error;
@@ -360,7 +391,11 @@ export default new Elysia({ prefix: "/api-tokens" })
 					});
 					return value;
 				});
-				return presentToken(key, await resolveApiAccountQuotaPolicy(user.id), replaced);
+				const [accountQuota, tokenQuota] = await Promise.all([
+					resolveApiAccountQuotaPolicy(user.id),
+					resolveApiTokenQuotaPolicy(key.id),
+				]);
+				return presentToken(key, accountQuota, tokenQuota, replaced);
 			} catch (error) {
 				if (error instanceof ApiQuotaPolicyDocumentInvalid)
 					throw new ApiTokenQuotaOverrideInvalid();

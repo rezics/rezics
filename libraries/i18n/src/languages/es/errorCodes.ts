@@ -22,6 +22,7 @@ export default {
 	ApiQuotaPolicyInvalid: `La configuración de la política de cuotas de ${verbatimTerms.api.value} no es válida.`,
 	ApiQuotaPolicyRevisionConflict: `La política de cuotas de ${verbatimTerms.api.value} cambió. Vuelve a cargarla antes de guardar.`,
 	ApiAccountQuotaRevisionConflict: `La cuota de ${verbatimTerms.api.value} de la cuenta cambió. Vuelve a cargarla antes de guardar.`,
+	ApiTokenQuotaRevisionConflict: `La asignación de cuota del token de ${verbatimTerms.api.value} cambió. Vuelve a cargarla antes de guardar.`,
 	ApiTokenLimitReached: `Esta cuenta alcanzó el límite de tokens de ${verbatimTerms.api.value}.`,
 	ApiTokenQuotaOverrideInvalid: `La anulación de cuota del token de ${verbatimTerms.api.value} no es válida.`,
 	ApiTokenQuotaOverrideRevisionConflict: `La anulación de cuota del token de ${verbatimTerms.api.value} cambió. Vuelve a cargarla antes de guardar.`,

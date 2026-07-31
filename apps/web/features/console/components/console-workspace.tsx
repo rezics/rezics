@@ -64,6 +64,8 @@ interface ConsoleWorkspaceModel {
 	readonly canUpdateApiQuotaPolicies: boolean;
 	readonly canReadAccountApiQuotas: boolean;
 	readonly canUpdateAccountApiQuotas: boolean;
+	readonly canReadTokenApiQuotas: boolean;
+	readonly canUpdateTokenApiQuotas: boolean;
 	readonly canReadUnits: boolean;
 	readonly canReadOwnershipClaims: boolean;
 	readonly canDecideOwnershipClaims: boolean;
@@ -164,6 +166,8 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 	const canUpdateApiQuotaPolicies = capabilities.has("platform.api_quota_policy.update");
 	const canReadAccountApiQuotas = capabilities.has("platform.user.api_quota.read");
 	const canUpdateAccountApiQuotas = capabilities.has("platform.user.api_quota.update");
+	const canReadTokenApiQuotas = capabilities.has("platform.user.api_token.api_quota.read");
+	const canUpdateTokenApiQuotas = capabilities.has("platform.user.api_token.api_quota.update");
 	const labels = t.console.sections;
 	const sections = [
 		...(canReadUsers
@@ -252,6 +256,8 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 		canUpdateApiQuotaPolicies,
 		canReadAccountApiQuotas,
 		canUpdateAccountApiQuotas,
+		canReadTokenApiQuotas,
+		canUpdateTokenApiQuotas,
 		canReadUnits,
 		canReadOwnershipClaims,
 		canDecideOwnershipClaims,

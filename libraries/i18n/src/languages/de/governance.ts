@@ -72,6 +72,8 @@ export default {
 		"platform.api_quota_policy.update": `${verbatimTerms.api.value}-Kontingentrichtlinien aktualisieren`,
 		"platform.user.api_quota.read": `${verbatimTerms.api.value}-Kontingente von Benutzern anzeigen`,
 		"platform.user.api_quota.update": `${verbatimTerms.api.value}-Kontingente von Benutzern verwalten`,
+		"platform.user.api_token.api_quota.read": `${verbatimTerms.api.value}-Token-Kontingente von Benutzern anzeigen`,
+		"platform.user.api_token.api_quota.update": `${verbatimTerms.api.value}-Token-Kontingente von Benutzern verwalten`,
 		"platform.moderate": "Plattform-Units moderieren",
 		"platform.suppress": "Plattforminhalte und Versionen unterdrücken",
 		"realm.contribute": `An jedem ${realmTerms.inline} teilnehmen`,

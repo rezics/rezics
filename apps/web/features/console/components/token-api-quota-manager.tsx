@@ -1,14 +1,14 @@
 "use client";
 
 import {
-	getApiApiQuotaPoliciesAccountsByUserIdQueryKey,
-	useDeleteApiApiQuotaPoliciesAccountsByUserId,
-	useGetApiApiQuotaPolicies,
-	useGetApiApiQuotaPoliciesAccountsByUserId,
-	usePutApiApiQuotaPoliciesAccountsByUserId,
-	type GetApiApiQuotaPoliciesAccountsByUserIdStatus200,
+	getApiApiQuotaPoliciesAccountsByUserIdTokensQueryKey,
+	type GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus200,
 	type GetApiApiQuotaPoliciesStatus200,
-	type PutApiApiQuotaPoliciesAccountsByUserIdBody,
+	type PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdBody,
+	useDeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId,
+	useGetApiApiQuotaPolicies,
+	useGetApiApiQuotaPoliciesAccountsByUserIdTokens,
+	usePutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId,
 } from "@rezics/openapi-tanstack-query";
 import {
 	Badge,
@@ -34,50 +34,26 @@ import { useState, type FormEvent } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import { getTokenQuotaLimitRanges } from "@/features/settings/model/token-quota-limits";
 import { useConsoleWorkspace } from "./console-workspace";
 
-type AccountQuota = GetApiApiQuotaPoliciesAccountsByUserIdStatus200;
+type ManagedToken = GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus200["items"][number];
 type Policy = GetApiApiQuotaPoliciesStatus200["items"][number];
-type AccountPolicy = Policy & {
-	readonly subjectKind: "account";
-	readonly configuration: Extract<Policy["configuration"], { maxActiveTokens: string | number }>;
-};
-type AccountOverride = NonNullable<
-	PutApiApiQuotaPoliciesAccountsByUserIdBody["configurationOverride"]
+type TokenOverride = NonNullable<
+	PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdBody["configurationOverride"]
 >;
-type Operations = NonNullable<AccountOverride["operations"]>;
+type Operations = NonNullable<TokenOverride["operations"]>;
 type OperationLimits = NonNullable<Operations[keyof Operations]>;
-type PolicyClass = Policy["class"];
+type LimitValues = Record<
+	"requestsPerMinute" | "burstCapacity" | "maxConcurrentRequests" | "dailyCostUnits",
+	string
+>;
 
 const OperationIds = [
 	"search.execute",
 	"image.upload",
 ] as const satisfies readonly (keyof Operations)[];
 const OperationLimitKeys = ["requestRate", "maxConcurrentRequests", "dailyCostUnits"] as const;
-
-function isAccountPolicy(policy: Policy): policy is AccountPolicy {
-	return policy.subjectKind === "account" && "maxActiveTokens" in policy.configuration;
-}
-
-const LimitRanges = {
-	standard: {
-		requestsPerMinute: { minimum: 1, maximum: 300 },
-		burstCapacity: { minimum: 1, maximum: 300 },
-		maxConcurrentRequests: { minimum: 1, maximum: 4 },
-		dailyCostUnits: { minimum: 1, maximum: 10_000 },
-		maxActiveTokens: { minimum: 1, maximum: 20 },
-	},
-	privileged: {
-		requestsPerMinute: { minimum: 1, maximum: 5_000 },
-		burstCapacity: { minimum: 1, maximum: 5_000 },
-		maxConcurrentRequests: { minimum: 1, maximum: 64 },
-		dailyCostUnits: { minimum: 1, maximum: 1_000_000 },
-		maxActiveTokens: { minimum: 1, maximum: 50 },
-	},
-} as const;
-
-type LimitName = keyof (typeof LimitRanges)["standard"];
-type LimitValues = Record<LimitName, string>;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -97,12 +73,12 @@ function parseIntegerInRange(
 
 function parseOperationLimits(
 	value: unknown,
-	policyClass: PolicyClass,
+	policyClass: Policy["class"],
 ): OperationLimits | undefined {
 	if (!isRecord(value) || Object.keys(value).length === 0) return undefined;
 	if (Object.keys(value).some((key) => !OperationLimitKeys.some((allowed) => allowed === key)))
 		return undefined;
-	const ranges = LimitRanges[policyClass];
+	const ranges = getTokenQuotaLimitRanges(policyClass);
 	const result: OperationLimits = {};
 	if (value.requestRate !== undefined) {
 		if (
@@ -124,22 +100,22 @@ function parseOperationLimits(
 		result.requestRate = { requestsPerMinute, burstCapacity };
 	}
 	if (value.maxConcurrentRequests !== undefined) {
-		const maxConcurrentRequests = parseIntegerInRange(
+		const parsed = parseIntegerInRange(
 			value.maxConcurrentRequests,
 			ranges.maxConcurrentRequests,
 		);
-		if (maxConcurrentRequests === undefined) return undefined;
-		result.maxConcurrentRequests = maxConcurrentRequests;
+		if (parsed === undefined) return undefined;
+		result.maxConcurrentRequests = parsed;
 	}
 	if (value.dailyCostUnits !== undefined) {
-		const dailyCostUnits = parseIntegerInRange(value.dailyCostUnits, ranges.dailyCostUnits);
-		if (dailyCostUnits === undefined) return undefined;
-		result.dailyCostUnits = dailyCostUnits;
+		const parsed = parseIntegerInRange(value.dailyCostUnits, ranges.dailyCostUnits);
+		if (parsed === undefined) return undefined;
+		result.dailyCostUnits = parsed;
 	}
 	return result;
 }
 
-function parseOperations(value: string, policyClass: PolicyClass): Operations | undefined {
+function parseOperations(value: string, policyClass: Policy["class"]): Operations | undefined {
 	try {
 		const parsed: unknown = JSON.parse(value);
 		if (!isRecord(parsed)) return undefined;
@@ -158,21 +134,20 @@ function parseOperations(value: string, policyClass: PolicyClass): Operations | 
 	}
 }
 
-function initialLimitValues(quota: AccountQuota): LimitValues {
-	const override = quota.configurationOverride;
+function initialLimits(token: ManagedToken): LimitValues {
+	const override = token.quota.configurationOverride.limits;
 	return {
 		requestsPerMinute: String(
-			override.limits?.requestRate?.requestsPerMinute ??
-				quota.limits.requestRate.requestsPerMinute,
+			override?.requestRate?.requestsPerMinute ??
+				token.quota.limits.requestRate.requestsPerMinute,
 		),
 		burstCapacity: String(
-			override.limits?.requestRate?.burstCapacity ?? quota.limits.requestRate.burstCapacity,
+			override?.requestRate?.burstCapacity ?? token.quota.limits.requestRate.burstCapacity,
 		),
 		maxConcurrentRequests: String(
-			override.limits?.maxConcurrentRequests ?? quota.limits.maxConcurrentRequests,
+			override?.maxConcurrentRequests ?? token.quota.limits.maxConcurrentRequests,
 		),
-		dailyCostUnits: String(override.limits?.dailyCostUnits ?? quota.limits.dailyCostUnits),
-		maxActiveTokens: String(override.maxActiveTokens ?? quota.maxActiveTokens),
+		dailyCostUnits: String(override?.dailyCostUnits ?? token.quota.limits.dailyCostUnits),
 	};
 }
 
@@ -183,100 +158,111 @@ function localDateTime(value: string | null): string {
 	return new Date(date.getTime() - offset).toISOString().slice(0, 16);
 }
 
-function hasConfigurationOverride(quota: AccountQuota): boolean {
-	return Object.keys(quota.configurationOverride).length > 0;
+function hasOverride(token: ManagedToken): boolean {
+	return Object.keys(token.quota.configurationOverride).length > 0;
 }
 
-export function AccountApiQuotaEditor({ userId }: { readonly userId: string }) {
-	const { t } = useTranslation(["console"]);
-	const { canReadAccountApiQuotas, canUpdateAccountApiQuotas } = useConsoleWorkspace();
-	const quota = useGetApiApiQuotaPoliciesAccountsByUserId(
+export function TokenApiQuotaManager({ userId }: { readonly userId: string }) {
+	const { t } = useTranslation(["console", "settings"]);
+	const { canReadTokenApiQuotas, canUpdateTokenApiQuotas } = useConsoleWorkspace();
+	const tokens = useGetApiApiQuotaPoliciesAccountsByUserIdTokens(
 		{ path: { userId } },
-		{ query: { enabled: canReadAccountApiQuotas } },
+		{ query: { enabled: canReadTokenApiQuotas } },
 	);
 	const policies = useGetApiApiQuotaPolicies({
-		query: { enabled: canUpdateAccountApiQuotas },
+		query: { enabled: canUpdateTokenApiQuotas },
 	});
 
-	if (!canReadAccountApiQuotas)
-		return <p className="text-destructive text-sm">{t.console.users.quotaUnavailable}</p>;
-	if (quota.isPending || (canUpdateAccountApiQuotas && policies.isPending))
+	if (!canReadTokenApiQuotas) return null;
+	if (tokens.isPending || (canUpdateTokenApiQuotas && policies.isPending))
 		return <QueryPending />;
-	if (quota.isError || !quota.data)
-		return <QueryFailure error={quota.error} retry={() => void quota.refetch()} />;
-	if (canUpdateAccountApiQuotas && (policies.isError || !policies.data))
+	if (tokens.isError || !tokens.data)
+		return <QueryFailure error={tokens.error} retry={() => void tokens.refetch()} />;
+	if (canUpdateTokenApiQuotas && (policies.isError || !policies.data))
 		return <QueryFailure error={policies.error} retry={() => void policies.refetch()} />;
 
+	const tokenPolicies = (policies.data?.items ?? []).filter(
+		(policy) => policy.subjectKind === "token" && policy.enabled,
+	);
 	return (
-		<AccountApiQuotaForm
-			key={`${userId}:${quota.data.key}:${quota.data.policyRevision}:${quota.data.bindingRevision ?? 0}`}
-			policies={policies.data?.items ?? []}
-			quota={quota.data}
-			userId={userId}
-		/>
+		<section className="grid gap-4">
+			<header>
+				<h3 className="font-semibold">{t.settings.tokens.listTitle}</h3>
+				<p className="mt-1 text-muted-foreground text-sm">
+					{t.settings.tokens.listDescription}
+				</p>
+			</header>
+			{tokens.data.items.length === 0 ? (
+				<p className="rounded-lg border border-border p-6 text-center text-muted-foreground text-sm">
+					{t.settings.tokens.empty}
+				</p>
+			) : (
+				tokens.data.items.map((token) => (
+					<TokenQuotaCard
+						key={`${token.id}:${token.quota.policyRevision}:${token.quota.bindingRevision ?? 0}`}
+						policies={tokenPolicies}
+						token={token}
+						userId={userId}
+					/>
+				))
+			)}
+		</section>
 	);
 }
 
-function AccountApiQuotaForm({
+function TokenQuotaCard({
 	policies,
-	quota,
+	token,
 	userId,
 }: {
 	readonly policies: readonly Policy[];
-	readonly quota: AccountQuota;
+	readonly token: ManagedToken;
 	readonly userId: string;
 }) {
-	const { t } = useTranslation(["console"]);
-	const { canUpdateAccountApiQuotas } = useConsoleWorkspace();
+	const { locale, t } = useTranslation(["console", "settings"]);
+	const { canUpdateTokenApiQuotas } = useConsoleWorkspace();
 	const queryClient = useQueryClient();
-	const enabledPolicies = policies.filter(
-		(policy): policy is AccountPolicy => policy.enabled && isAccountPolicy(policy),
-	);
-	const [policyKey, setPolicyKey] = useState(quota.key);
-	const selectedPolicy =
-		enabledPolicies.find((policy) => policy.key === policyKey) ?? enabledPolicies[0];
-	const selectedClass = selectedPolicy?.class ?? quota.class;
-	const [customize, setCustomize] = useState(hasConfigurationOverride(quota));
-	const [limits, setLimits] = useState<LimitValues>(() => initialLimitValues(quota));
+	const [policyKey, setPolicyKey] = useState(token.quota.key);
+	const selectedPolicy = policies.find((policy) => policy.key === policyKey) ?? policies[0];
+	const selectedClass = selectedPolicy?.class ?? token.quota.class;
+	const [customize, setCustomize] = useState(hasOverride(token));
+	const [limits, setLimits] = useState<LimitValues>(() => initialLimits(token));
 	const [operationsText, setOperationsText] = useState(() =>
-		JSON.stringify(quota.configurationOverride.operations ?? {}, null, 2),
+		JSON.stringify(token.quota.configurationOverride.operations ?? {}, null, 2),
 	);
-	const [validUntil, setValidUntil] = useState(() => localDateTime(quota.validUntil));
+	const [validUntil, setValidUntil] = useState(() => localDateTime(token.quota.validUntil));
 	const [reason, setReason] = useState("");
 	const [invalid, setInvalid] = useState(false);
 	const operations = parseOperations(operationsText, selectedClass);
-	const queryKey = getApiApiQuotaPoliciesAccountsByUserIdQueryKey({ path: { userId } });
-	const refresh = async () => {
-		await queryClient.invalidateQueries({ queryKey });
-	};
-	const assign = usePutApiApiQuotaPoliciesAccountsByUserId<unknown>({
+	const queryKey = getApiApiQuotaPoliciesAccountsByUserIdTokensQueryKey({
+		path: { userId },
+	});
+	const refresh = async () => queryClient.invalidateQueries({ queryKey });
+	const assign = usePutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId<unknown>({
 		mutation: { onSuccess: refresh },
 	});
-	const reset = useDeleteApiApiQuotaPoliciesAccountsByUserId<unknown>({
+	const reset = useDeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId<unknown>({
 		mutation: { onSuccess: refresh },
 	});
 
 	function selectPolicy(nextKey: string) {
 		setPolicyKey(nextKey);
-		const nextPolicy = enabledPolicies.find((policy) => policy.key === nextKey);
-		if (!nextPolicy) return;
+		const next = policies.find((policy) => policy.key === nextKey);
+		if (!next) return;
 		setLimits({
-			requestsPerMinute: String(
-				nextPolicy.configuration.limits.requestRate.requestsPerMinute,
-			),
-			burstCapacity: String(nextPolicy.configuration.limits.requestRate.burstCapacity),
-			maxConcurrentRequests: String(nextPolicy.configuration.limits.maxConcurrentRequests),
-			dailyCostUnits: String(nextPolicy.configuration.limits.dailyCostUnits),
-			maxActiveTokens: String(nextPolicy.configuration.maxActiveTokens),
+			requestsPerMinute: String(next.configuration.limits.requestRate.requestsPerMinute),
+			burstCapacity: String(next.configuration.limits.requestRate.burstCapacity),
+			maxConcurrentRequests: String(next.configuration.limits.maxConcurrentRequests),
+			dailyCostUnits: String(next.configuration.limits.dailyCostUnits),
 		});
 		setOperationsText("{}");
 		setInvalid(false);
-		if (nextPolicy.class === "standard") setValidUntil("");
+		if (next.class === "standard") setValidUntil("");
 	}
 
-	function parsedLimits(): AccountOverride | undefined {
+	function configurationOverride(): TokenOverride | undefined {
 		if (!customize) return {};
-		const ranges = LimitRanges[selectedClass];
+		const ranges = getTokenQuotaLimitRanges(selectedClass);
 		const requestsPerMinute = parseIntegerInRange(
 			Number(limits.requestsPerMinute),
 			ranges.requestsPerMinute,
@@ -293,16 +279,11 @@ function AccountApiQuotaForm({
 			Number(limits.dailyCostUnits),
 			ranges.dailyCostUnits,
 		);
-		const maxActiveTokens = parseIntegerInRange(
-			Number(limits.maxActiveTokens),
-			ranges.maxActiveTokens,
-		);
 		if (
 			requestsPerMinute === undefined ||
 			burstCapacity === undefined ||
 			maxConcurrentRequests === undefined ||
 			dailyCostUnits === undefined ||
-			maxActiveTokens === undefined ||
 			operations === undefined
 		)
 			return undefined;
@@ -312,30 +293,29 @@ function AccountApiQuotaForm({
 				maxConcurrentRequests,
 				dailyCostUnits,
 			},
-			maxActiveTokens,
 			operations,
 		};
 	}
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		if (!selectedPolicy || !canUpdateAccountApiQuotas) return;
-		const configurationOverride = parsedLimits();
+		if (!selectedPolicy || !canUpdateTokenApiQuotas) return;
+		const override = configurationOverride();
 		const trimmedReason = reason.trim();
 		const expiry = validUntil ? new Date(validUntil) : undefined;
 		const expiryValid =
 			selectedPolicy.class === "standard" ||
 			(expiry !== undefined && Number.isFinite(expiry.getTime()) && expiry > new Date());
-		const formInvalid = !configurationOverride || !trimmedReason || !expiryValid;
+		const formInvalid = override === undefined || !trimmedReason || !expiryValid;
 		setInvalid(formInvalid);
 		if (formInvalid) return;
 		await assign.mutateAsync({
-			path: { userId },
+			path: { userId, tokenId: token.id },
 			body: {
-				expectedRevision: Number(quota.bindingRevision ?? 0),
+				expectedRevision: Number(token.quota.bindingRevision ?? 0),
 				policyKey: selectedPolicy.key,
 				reason: trimmedReason,
-				configurationOverride,
+				configurationOverride: override,
 				...(selectedPolicy.class === "privileged" && expiry
 					? { validUntil: expiry.toISOString() }
 					: {}),
@@ -344,70 +324,79 @@ function AccountApiQuotaForm({
 	}
 
 	async function resetAssignment() {
-		if (quota.bindingRevision === null || !canUpdateAccountApiQuotas) return;
+		if (token.quota.bindingRevision === null || !canUpdateTokenApiQuotas) return;
 		await reset.mutateAsync({
-			path: { userId },
-			body: { expectedRevision: Number(quota.bindingRevision) },
+			path: { userId, tokenId: token.id },
+			body: { expectedRevision: Number(token.quota.bindingRevision) },
 		});
 	}
 
-	const ranges = LimitRanges[selectedClass];
-	const sourceLabel = t.console.users.accountQuota.sources[quota.source];
+	const ranges = getTokenQuotaLimitRanges(selectedClass);
+	const formatter = new Intl.DateTimeFormat(locale.current, {
+		dateStyle: "medium",
+		timeStyle: "short",
+	});
 	return (
 		<Card appearance="outlined">
 			<CardHeader>
 				<div className="flex flex-wrap items-start justify-between gap-3">
-					<div>
-						<CardTitle>{t.console.users.accountQuota.title}</CardTitle>
-						<CardDescription>
-							{t.console.users.accountQuota.description}
+					<div className="min-w-0">
+						<CardTitle className="break-words">{token.name}</CardTitle>
+						<CardDescription className="mt-1 font-mono">
+							{token.tokenPrefix}
 						</CardDescription>
 					</div>
 					<div className="flex flex-wrap gap-2">
+						<Badge variant={token.enabled ? "success" : "secondary"}>
+							{token.enabled ? t.settings.tokens.enabled : t.settings.tokens.disabled}
+						</Badge>
 						<Badge variant="secondary">
-							{t.console.apiQuotas.classes[quota.class]}
+							{t.console.apiQuotas.classes[token.quota.class]}
 						</Badge>
 						<Badge
-							variant={quota.source === "privileged_fallback" ? "warning" : "outline"}
+							variant={
+								token.quota.source === "privileged_fallback" ? "warning" : "outline"
+							}
 						>
-							{sourceLabel}
+							{t.console.users.accountQuota.sources[token.quota.source]}
 						</Badge>
 					</div>
 				</div>
 			</CardHeader>
 			<CardContent className="grid gap-5">
-				<div className="grid gap-3 rounded-lg bg-muted/35 p-4 text-sm sm:grid-cols-2 xl:grid-cols-5">
+				<div className="grid gap-3 rounded-lg bg-muted/35 p-4 text-sm sm:grid-cols-2 xl:grid-cols-4">
 					<QuotaValue
 						label={t.console.apiQuotas.requestsPerMinute}
-						value={quota.limits.requestRate.requestsPerMinute}
+						value={token.quota.limits.requestRate.requestsPerMinute}
 					/>
 					<QuotaValue
 						label={t.console.apiQuotas.burstCapacity}
-						value={quota.limits.requestRate.burstCapacity}
+						value={token.quota.limits.requestRate.burstCapacity}
 					/>
 					<QuotaValue
 						label={t.console.apiQuotas.maxConcurrentRequests}
-						value={quota.limits.maxConcurrentRequests}
+						value={token.quota.limits.maxConcurrentRequests}
 					/>
 					<QuotaValue
 						label={t.console.apiQuotas.dailyCostUnits}
-						value={quota.limits.dailyCostUnits}
-					/>
-					<QuotaValue
-						label={t.console.apiQuotas.maxActiveTokens}
-						value={quota.maxActiveTokens}
+						value={token.quota.limits.dailyCostUnits}
 					/>
 				</div>
-				{canUpdateAccountApiQuotas && selectedPolicy ? (
+				{token.expiresAt ? (
+					<p className="text-muted-foreground text-xs">
+						{t.settings.tokens.expires}: {formatter.format(new Date(token.expiresAt))}
+					</p>
+				) : null}
+				{canUpdateTokenApiQuotas && selectedPolicy ? (
 					<form className="grid gap-5" onSubmit={submit}>
 						<div className="grid gap-4 sm:grid-cols-2">
 							<Field required>
-								<FieldLabel>{t.console.users.accountQuota.policy}</FieldLabel>
+								<FieldLabel>{t.settings.tokens.policy}</FieldLabel>
 								<NativeSelect
 									onChange={(event) => selectPolicy(event.currentTarget.value)}
 									value={selectedPolicy.key}
 								>
-									{enabledPolicies.map((policy) => (
+									{policies.map((policy) => (
 										<NativeSelectOption key={policy.id} value={policy.key}>
 											{policy.key} ·{" "}
 											{t.console.apiQuotas.classes[policy.class]}
@@ -439,16 +428,16 @@ function AccountApiQuotaForm({
 							/>
 							<div>
 								<FieldLabel className="font-normal">
-									{t.console.users.accountQuota.customize}
+									{t.settings.tokens.configureLimits}
 								</FieldLabel>
 								<FieldDescription>
-									{t.console.users.accountQuota.customizeDescription}
+									{t.settings.tokens.limitsDescription}
 								</FieldDescription>
 							</div>
 						</Field>
 						{customize ? (
 							<>
-								<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+								<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
 									{(
 										[
 											[
@@ -461,10 +450,6 @@ function AccountApiQuotaForm({
 												t.console.apiQuotas.maxConcurrentRequests,
 											],
 											["dailyCostUnits", t.console.apiQuotas.dailyCostUnits],
-											[
-												"maxActiveTokens",
-												t.console.apiQuotas.maxActiveTokens,
-											],
 										] as const
 									).map(([name, label]) => (
 										<Field key={name} required>
@@ -490,7 +475,7 @@ function AccountApiQuotaForm({
 										{t.console.apiQuotas.operationOverrides}
 									</FieldLabel>
 									<Textarea
-										className="min-h-48 font-mono text-xs"
+										className="min-h-40 font-mono text-xs"
 										onChange={(event) =>
 											setOperationsText(event.currentTarget.value)
 										}
@@ -516,18 +501,17 @@ function AccountApiQuotaForm({
 							/>
 						</Field>
 						{invalid ? (
-							<p className="text-destructive text-sm">
+							<p className="text-destructive text-sm" role="alert">
 								{t.console.users.accountQuota.invalid}
 							</p>
 						) : null}
 						<RequestFailure
 							error={assign.error ?? reset.error}
-							fallback={t.console.users.accountQuota.updateFailed}
+							fallback={t.console.apiQuotas.updateFailed}
 						/>
 						<div className="flex flex-wrap justify-end gap-2">
-							{quota.bindingRevision !== null ? (
+							{token.quota.bindingRevision !== null ? (
 								<Button
-									disabled={assign.isPending}
 									isLoading={reset.isPending}
 									onClick={() => void resetAssignment()}
 									type="button"
@@ -536,21 +520,12 @@ function AccountApiQuotaForm({
 									{t.console.users.accountQuota.reset}
 								</Button>
 							) : null}
-							<Button
-								disabled={reset.isPending || !reason.trim()}
-								isLoading={assign.isPending}
-								type="submit"
-								variant="solid"
-							>
-								{t.console.users.accountQuota.save}
+							<Button isLoading={assign.isPending} type="submit" variant="solid">
+								{t.console.apiQuotas.save}
 							</Button>
 						</div>
 					</form>
-				) : (
-					<p className="text-muted-foreground text-sm">
-						{t.console.users.accountQuota.readOnly}
-					</p>
-				)}
+				) : null}
 			</CardContent>
 		</Card>
 	);
@@ -560,7 +535,7 @@ function QuotaValue({ label, value }: { readonly label: string; readonly value: 
 	return (
 		<div>
 			<p className="text-muted-foreground">{label}</p>
-			<p className="mt-1 font-medium tabular-nums">{Number(value).toLocaleString()}</p>
+			<p className="mt-1 font-semibold tabular-nums">{Number(value).toLocaleString()}</p>
 		</div>
 	);
 }
