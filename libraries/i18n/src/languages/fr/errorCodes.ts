@@ -255,6 +255,8 @@ export default {
 	RealmTagContextPostNotMounted: `La ${postTerms.inline} utilisée comme explication de l’étiquette doit être visible dans le ${realmTerms.inline}.`,
 	RealmTagContextAlreadyExists: `Ce ${realmTerms.inline} possède déjà une explication pour cette étiquette.`,
 	RealmTagContextPostAlreadyUsed: `Cette ${postTerms.inline} explique déjà une autre étiquette dans un ${realmTerms.inline}.`,
+	RealmTagVotingDisabled: `Le vote sur les étiquettes n’est pas activé dans ce ${realmTerms.inline}.`,
+	RealmTagContextRequired: `Ce ${realmTerms.inline} doit d’abord fournir une explication officielle et actuellement visible de cette étiquette.`,
 	RealmTagSelfReferenceForbidden: "Un Tag ne peut pas être appliqué à lui-même.",
 	SearchDocumentRevisionConflict:
 		"La configuration de recherche a changé. Rechargez-la avant d’enregistrer.",

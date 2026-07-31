@@ -92,6 +92,7 @@ export default {
 		noResultsTitle: insert("Keine passenden {{subject}} gefunden", { subject: String }),
 		noResultsDescription:
 			"Wenn die Suchbegriffe korrekt sind, kannst du mit der Erstellung fortfahren.",
+		realmTagContextOnly: `Hier erscheinen nur Tags, die in diesem ${realmTerms.inline} offiziell erklärt werden. Fehlt ein Tag, muss die Verwaltung des ${realmTerms.inline} zuerst eine Tag-Erklärung anlegen.`,
 		notListedTitle: "Keines dieser Ergebnisse passt?",
 		notListedDescription:
 			"Prüfe zuerst ähnliche Einträge. Fahre nur fort, wenn keiner davon der gesuchte Inhalt ist.",

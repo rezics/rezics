@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 const enrichmentPath = fileURLToPath(
-	new URL("../../../search/rezics_unit_search_document_v9.sql", import.meta.url),
+	new URL("../../../search/rezics_unit_search_document_v10.sql", import.meta.url),
 );
 const workerPath = fileURLToPath(new URL("../recommendations/worker.ts", import.meta.url));
 
@@ -32,6 +32,7 @@ describe("recommendation search projection boundary", () => {
 		expect(enrichment).toContain("WHEN 'posts' THEN post_row.kind::text");
 		expect(enrichment).toContain("WHEN 'reviews' THEN subject_unit_row.kind");
 		expect(enrichment).toContain("'realmTagVoteKeys'");
+		expect(enrichment).toContain("'realmTagContextRealmIds'");
 		expect(enrichment).toContain("FROM public.realm_tag_vote_stat");
 		expect(enrichment).not.toContain(
 			"FROM public.realm_unit WHERE unit_id = source.unit_id AND realm_id",

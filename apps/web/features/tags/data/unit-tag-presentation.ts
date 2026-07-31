@@ -104,7 +104,7 @@ function presentRealmTags(input: {
 			realmId: input.realm.realmId,
 			realmLanguage: input.realm.language,
 			realmTitle: input.realm.title,
-			...(tag.contextPostId ? { contextPostId: tag.contextPostId } : {}),
+			contextPostId: tag.contextPostId,
 		},
 		vote: {
 			kind: "available",

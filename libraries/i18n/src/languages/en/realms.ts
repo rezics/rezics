@@ -90,6 +90,12 @@ export default {
 		moveDown: "Move page later",
 		disable: "Disable page",
 	},
+	tagVotingSettings: {
+		title: `${realmTerms.label} Tag voting`,
+		description: `A ${realmTerms.label} manager must explicitly enable this feature. Members can then vote only on Tags that this ${realmTerms.label} formally explains.`,
+		enabled: `Enable ${realmTerms.label} Tag voting`,
+		enabledDescription: `Search and voting show only Tags with a currently visible explanation from this ${realmTerms.label}.`,
+	},
 	scoreContextSettings: {
 		title: "Scoring guidelines",
 		description: `Choose a visible ordinary ${postTerms.label} or Wiki article mounted in this ${realmTerms.inline} to explain its scoring scale and criteria.`,

@@ -51,15 +51,19 @@ vi.mock("@rezics/ui", () => ({
 	EntityPicker: ({
 		index,
 		renderNoResultsAction,
+		search,
 	}: {
 		readonly index: string;
 		readonly renderNoResultsAction?: (query: string) => ReactNode;
+		readonly search?: unknown;
 	}) => (
 		<div
 			data-has-no-results-action={Boolean(renderNoResultsAction)}
+			data-has-scoped-search={Boolean(search)}
 			data-testid={`picker-${index}`}
 		/>
 	),
+	useEntitySearch: () => vi.fn(async () => []),
 }));
 
 import { UnitTagManagement } from "./unit-tag-management";
@@ -114,7 +118,8 @@ describe("UnitTagManagement", () => {
 
 		expect(screen.queryByTestId("picker-tag-structures")).toBeNull();
 		expect(screen.getByText("Add a Realm Tag vote")).toBeTruthy();
-		expect(screen.getByTestId("picker-tags")).toBeTruthy();
+		expect(screen.getByTestId("picker-tags").dataset.hasScopedSearch).toBe("true");
+		expect(screen.queryByRole("link", { name: "Create a Tag" })).toBeNull();
 	});
 
 	it("renders no add controls without vote permission", () => {
@@ -140,7 +145,7 @@ describe("UnitTagManagement", () => {
 		expect(url.searchParams.get("communityUnitSearch")).toBeNull();
 	});
 
-	it("keeps the active Realm in the always-visible creation intent", () => {
+	it("does not offer global Tag creation in a Realm vote context", () => {
 		render(
 			<UnitTagManagement
 				{...baseProps}
@@ -155,10 +160,6 @@ describe("UnitTagManagement", () => {
 			/>,
 		);
 
-		const link = screen.getByRole("link", { name: "Create a Tag" });
-		const url = new URL(link.getAttribute("href") ?? "", "https://rezics.example");
-		expect(url.searchParams.get("title")).toBeNull();
-		expect(url.searchParams.get("context")).toBe("realm");
-		expect(url.searchParams.get("realmId")).toBe("00000000-0000-7000-8000-000000000002");
+		expect(screen.queryByRole("link", { name: "Create a Tag" })).toBeNull();
 	});
 });

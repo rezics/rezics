@@ -93,6 +93,12 @@ export default {
 		moveDown: "Mover la página hacia atrás",
 		disable: "Desactivar página",
 	},
+	tagVotingSettings: {
+		title: `Votación de etiquetas del ${realmTerms.inline}`,
+		description: `La administración del ${realmTerms.inline} debe activar expresamente esta función. Después, los miembros solo podrán votar etiquetas que este ${realmTerms.inline} explique formalmente.`,
+		enabled: "Activar la votación de etiquetas",
+		enabledDescription: `La búsqueda y la votación solo muestran etiquetas con una explicación actualmente visible en este ${realmTerms.inline}.`,
+	},
 	scoreContextSettings: {
 		title: "Criterios de puntuación",
 		description: `Elige una ${postTerms.inline} normal o un artículo wiki visible e incorporado a este ${realmTerms.inline} para explicar su escala y sus criterios de puntuación.`,

@@ -94,6 +94,12 @@ export default {
 		moveDown: "Seite nach hinten verschieben",
 		disable: "Seite deaktivieren",
 	},
+	tagVotingSettings: {
+		title: `Tag-Abstimmungen im ${realmTerms.inline}`,
+		description: `Diese Funktion muss von der Verwaltung des ${realmTerms.inline} ausdrücklich aktiviert werden. Danach können Mitglieder nur über Tags abstimmen, die in diesem ${realmTerms.inline} offiziell erklärt werden.`,
+		enabled: "Tag-Abstimmungen aktivieren",
+		enabledDescription: `Suche und Abstimmung zeigen nur Tags mit einer derzeit sichtbaren Erklärung aus diesem ${realmTerms.inline}.`,
+	},
 	scoreContextSettings: {
 		title: "Bewertungsrichtlinien",
 		description: `Wähle einen sichtbaren regulären ${postTerms.label} oder Wiki-Artikel aus diesem ${realmTerms.inline}, der dessen Bewertungsskala und Kriterien erklärt.`,

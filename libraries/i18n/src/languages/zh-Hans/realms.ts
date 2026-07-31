@@ -72,6 +72,12 @@ export default {
 		moveDown: "向后移动页面",
 		disable: "停用页面",
 	},
+	tagVotingSettings: {
+		title: `${realmTerms.label}标签投票`,
+		description: `这是必须由${realmTerms.label}管理员明确开启的功能。开启后，成员只能对该${realmTerms.label}已正式说明的标签投票。`,
+		enabled: `开启${realmTerms.label}标签投票`,
+		enabledDescription: `搜索与投票只会显示该${realmTerms.label}已有标签说明，并且说明目前可见的标签。`,
+	},
 	scoreContextSettings: {
 		title: "评分准则",
 		description: `选择挂载在此${realmTerms.label}且可见的普通${postTerms.label}或百科文章，用于说明评分尺度与标准。`,

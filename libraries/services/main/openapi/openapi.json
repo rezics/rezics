@@ -10266,6 +10266,8 @@
 					"RealmTagContextAlreadyExists",
 					"RealmTagContextPostNotMounted",
 					"RealmTagContextPostAlreadyUsed",
+					"RealmTagVotingDisabled",
+					"RealmTagContextRequired",
 					"RealmTagSelfReferenceForbidden",
 					"WikiNavigationNotFound",
 					"WikiNavigationInUse",
@@ -63842,14 +63844,8 @@
 																	"type": "string"
 																},
 																"contextPostId": {
-																	"nullable": true,
-																	"anyOf": [
-																		{
-																			"format": "uuid",
-																			"type": "string"
-																		},
-																		{ "type": "null" }
-																	]
+																	"format": "uuid",
+																	"type": "string"
 																},
 																"score": {
 																	"anyOf": [
@@ -131945,6 +131941,7 @@
 										"visibility",
 										"language",
 										"joinPolicy",
+										"realmTagVotingEnabled",
 										"pages",
 										"latestRevisionId",
 										"memberCount",
@@ -132018,6 +132015,7 @@
 											]
 										},
 										"joinPolicy": { "type": "string" },
+										"realmTagVotingEnabled": { "type": "boolean" },
 										"pages": {
 											"minItems": 1,
 											"maxItems": 3,
@@ -132446,6 +132444,7 @@
 										"type": "string",
 										"enum": ["open", "approval"]
 									},
+									"realmTagVotingEnabled": { "type": "boolean" },
 									"visibility": {
 										"type": "string",
 										"enum": ["public", "unlisted", "private"]
@@ -144505,11 +144504,8 @@
 														"type": "string"
 													},
 													"contextPostId": {
-														"nullable": true,
-														"anyOf": [
-															{ "format": "uuid", "type": "string" },
-															{ "type": "null" }
-														]
+														"format": "uuid",
+														"type": "string"
 													},
 													"score": {
 														"anyOf": [
@@ -144828,6 +144824,33 @@
 							}
 						}
 					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmTagVotingDisabled",
+													"type": "string",
+													"enum": ["RealmTagVotingDisabled"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"422": {
 						"description": "Response for status 422",
 						"content": {
@@ -144843,9 +144866,10 @@
 													"required": ["code", "message"],
 													"properties": {
 														"code": {
-															"default": "RealmTagSelfReferenceForbidden",
+															"default": "RealmTagContextRequired",
 															"type": "string",
 															"enum": [
+																"RealmTagContextRequired",
 																"RealmTagSelfReferenceForbidden"
 															]
 														},
@@ -194928,6 +194952,10 @@
 									"contentLicenseActive": { "type": "boolean" },
 									"creditedUnitId": { "minLength": 1, "type": "string" },
 									"realmId": { "minLength": 1, "type": "string" },
+									"realmTagContextRealmId": {
+										"format": "uuid",
+										"type": "string"
+									},
 									"subjectId": { "minLength": 1, "type": "string" },
 									"targetId": { "minLength": 1, "type": "string" },
 									"rootId": { "minLength": 1, "type": "string" },

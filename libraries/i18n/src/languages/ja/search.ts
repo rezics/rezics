@@ -162,6 +162,7 @@ export default {
 		credit: "クレジット",
 		"publisher-profile": "発行者プロフィール",
 		realm: realmTerms.label,
+		"realm-tag-context": `${realmTerms.label} タグ説明`,
 		"realm-tag-vote": `${realmTerms.label} タグ投票`,
 		zone: zoneTerms.label,
 		subject: "件名",

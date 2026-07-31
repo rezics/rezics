@@ -163,6 +163,7 @@ export default {
 		credit: "Mitwirkende",
 		"publisher-profile": "Verlagsprofil",
 		realm: realmTerms.label,
+		"realm-tag-context": `Tag-Erklärung im ${realmTerms.inline}`,
 		"realm-tag-vote": `Tag-Abstimmung im ${realmTerms.inline}`,
 		zone: zoneTerms.label,
 		subject: "Thema",

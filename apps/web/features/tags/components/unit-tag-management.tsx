@@ -1,8 +1,8 @@
 "use client";
 
-import { Button, EntityPicker } from "@rezics/ui";
+import { Button, EntityPicker, useEntitySearch, type EntitySearch } from "@rezics/ui";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useTranslation } from "@/i18n/client";
@@ -36,10 +36,24 @@ export function UnitTagManagement({
 	readonly onAddTag: (tagId: string) => Promise<void>;
 }) {
 	const { t } = useTranslation(["tags", "ui"]);
+	const searchEntities = useEntitySearch();
 	const [selectedTag, setSelectedTag] = useState<PickedEntity>();
 	const [selectedStructure, setSelectedStructure] = useState<PickedEntity>();
-	if (!canVote) return null;
 	const contextKind = tagCreateTarget.context.kind;
+	const contextRealmId =
+		tagCreateTarget.context.kind === "realm" ? tagCreateTarget.context.realmId : undefined;
+	const tagSearch = useMemo<EntitySearch | undefined>(
+		() =>
+			contextRealmId && searchEntities
+				? (index, query, signal, options) =>
+						searchEntities(index, query, signal, {
+							...options,
+							realmTagContextRealmId: contextRealmId,
+						})
+				: undefined,
+		[contextRealmId, searchEntities],
+	);
+	if (!canVote) return null;
 	const showStructureManagement = contextKind === "global" && hasDevelopmentPreviewAccess;
 	const addCopy = contextKind === "global" ? t.tags.global : t.tags.realms;
 	return (
@@ -93,12 +107,20 @@ export function UnitTagManagement({
 						<h2 className="font-semibold">{addCopy.addTitle}</h2>
 						<p className="text-sm text-muted-foreground">{addCopy.addDescription}</p>
 					</div>
-					<Button asChild variant="outline">
-						<Link href={unitTagVoteCreateHref("", tagCreateTarget)}>
-							<Plus aria-hidden className="size-4" />
-							{t.tags.create.title}
-						</Link>
-					</Button>
+					{tagCreateTarget.context.kind === "global" ? (
+						<Button asChild variant="outline">
+							<Link
+								href={unitTagVoteCreateHref("", {
+									type: tagCreateTarget.type,
+									unitId: tagCreateTarget.unitId,
+									context: { kind: "global" },
+								})}
+							>
+								<Plus aria-hidden className="size-4" />
+								{t.tags.create.title}
+							</Link>
+						</Button>
+					) : null}
 				</div>
 				<div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
 					<EntityPicker
@@ -107,6 +129,7 @@ export function UnitTagManagement({
 						maxLength={500}
 						onChange={setSelectedTag}
 						placeholder={t.ui.pickerPlaceholders.tag}
+						search={tagSearch}
 						value={selectedTag}
 					/>
 					<Button

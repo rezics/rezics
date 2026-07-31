@@ -214,6 +214,8 @@ export default {
 	RealmTagContextPostNotMounted: `作為標籤說明的${postTerms.inline}必須在該${realmTerms.inline}中可見。`,
 	RealmTagContextAlreadyExists: `此${realmTerms.inline}已有這個標籤的說明。`,
 	RealmTagContextPostAlreadyUsed: `該${postTerms.inline}已用於說明另一個${realmTerms.inline}標籤。`,
+	RealmTagVotingDisabled: `此${realmTerms.inline}尚未開啟標籤投票。`,
+	RealmTagContextRequired: `此${realmTerms.inline}必須先為該標籤建立目前可見的正式說明。`,
 	RealmTagSelfReferenceForbidden: "不能將標籤套用到該標籤本身。",
 	SearchDocumentRevisionConflict: "搜尋設定已變更，請重新載入後再儲存。",
 	ZoneSearchFeatureNotFound: `此${zoneTerms.inline}尚未啟用搜尋功能。`,

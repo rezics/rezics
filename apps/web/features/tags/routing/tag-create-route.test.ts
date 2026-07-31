@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
 	loadTagCreateRoute,
+	loadTagCreationRoute,
 	unitTagVoteCreateHref,
 	unitTagVoteDuplicateSearchHref,
 } from "./tag-create-route";
@@ -33,15 +34,15 @@ describe("Tag creation routes", () => {
 	});
 
 	it("keeps a valid Realm address and rejects incomplete or invalid addresses", async () => {
-		const href = unitTagVoteCreateHref("science", {
-			type: "media",
-			unitId: UnitId,
-			context: { kind: "realm", realmId: RealmId },
-		});
-		const url = new URL(href, "https://rezics.example");
-
 		await expect(
-			loadTagCreateRoute(Object.fromEntries(url.searchParams)),
+			loadTagCreateRoute({
+				context: "realm",
+				intent: "unit-tag-vote",
+				realmId: RealmId,
+				title: "science",
+				unitId: UnitId,
+				unitType: "media",
+			}),
 		).resolves.toMatchObject({
 			status: "ready",
 			intent: {
@@ -64,6 +65,19 @@ describe("Tag creation routes", () => {
 				context: "global",
 				intent: "unit-tag-vote",
 				unitId: "not-a-unit-id",
+				unitType: "media",
+			}),
+		).resolves.toEqual({ status: "invalid" });
+	});
+
+	it("rejects Realm vote intents at the Tag creation boundary", async () => {
+		await expect(
+			loadTagCreationRoute({
+				context: "realm",
+				intent: "unit-tag-vote",
+				realmId: RealmId,
+				title: "science",
+				unitId: UnitId,
 				unitType: "media",
 			}),
 		).resolves.toEqual({ status: "invalid" });

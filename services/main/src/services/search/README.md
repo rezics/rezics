@@ -58,15 +58,18 @@ empty successful search.
 - `realm-tag-vote` is a separate atomic relationship filter identified by `(realmId, tagId)` for
   each candidate Unit. The exact context identity may be pushed to Meilisearch, while score and
   vote-count bounds are always rechecked against the authoritative PostgreSQL aggregate.
+- `realm-tag-context` restricts Tag discovery to Tags formally explained by one Realm. Meilisearch
+  uses the projected Realm ID set only to reduce the candidate set; PostgreSQL still verifies that
+  Realm voting is enabled and the canonical Context Post is actively mounted and readable.
 
 Lifecycle commands:
 
 ```sh
-task services-main:search:index -- check --projection current --index rezics_units_v9_20260731
-task services-main:search:index -- prepare --projection current --index rezics_units_v9_20260731_143000
-task services-main:search:index -- reconcile --projection current --index rezics_units_v9_20260731_143000
-task services-main:search:index -- promote --projection current --index rezics_units_v9_20260731_143000
-task services-main:search:index -- retire --projection current --index rezics_units_v9_20260731_143000
+task services-main:search:index -- check --projection current --index rezics_units_v10_20260731
+task services-main:search:index -- prepare --projection current --index rezics_units_v10_20260731_143000
+task services-main:search:index -- reconcile --projection current --index rezics_units_v10_20260731_143000
+task services-main:search:index -- promote --projection current --index rezics_units_v10_20260731_143000
+task services-main:search:index -- retire --projection current --index rezics_units_v10_20260731_143000
 task services-main:search:config:check
 ```
 

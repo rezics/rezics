@@ -53,6 +53,7 @@ import { RealmPagesSettings } from "./components/realm-configuration-settings";
 import { RealmPinsManager } from "./components/realm-pins-manager";
 import { RealmScoreContextSettings } from "./components/realm-score-context-settings";
 import { RealmTaxonomySettings } from "./components/realm-taxonomy-tree-editor";
+import { RealmTagVotingSettings } from "./components/realm-tag-voting-settings";
 import { RealmMembers } from "./realm-members";
 import { RealmProfileSettings, RealmRules } from "./realm-settings";
 import type { RealmSettingsSectionId } from "./model/realm-settings-section";
@@ -271,7 +272,10 @@ function RealmSettingsWorkspaceContent({
 					</RealmSettingsSection>
 				) : section === "tags" ? (
 					<RealmSettingsSection baseHref={baseHref} section="tags">
-						<RealmTaxonomySettings realmId={realmId} />
+						<div className="grid gap-8">
+							<RealmTagVotingSettings realm={realm.data} />
+							<RealmTaxonomySettings realmId={realmId} />
+						</div>
 					</RealmSettingsSection>
 				) : section === "members" ? (
 					<RealmMembersSection

@@ -5492,6 +5492,8 @@ export const ApiErrorCode = {
 	RealmTagContextAlreadyExists: "RealmTagContextAlreadyExists",
 	RealmTagContextPostNotMounted: "RealmTagContextPostNotMounted",
 	RealmTagContextPostAlreadyUsed: "RealmTagContextPostAlreadyUsed",
+	RealmTagVotingDisabled: "RealmTagVotingDisabled",
+	RealmTagContextRequired: "RealmTagContextRequired",
 	RealmTagSelfReferenceForbidden: "RealmTagSelfReferenceForbidden",
 	WikiNavigationNotFound: "WikiNavigationNotFound",
 	WikiNavigationInUse: "WikiNavigationInUse",
@@ -48392,7 +48394,12 @@ export type GetApiUnitsByTypeByUnitIdTagsStatus200 = {
 			 * @type string
 			 */
 			realmId: string;
-			contextPostId: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			contextPostId: string;
 			score: string | number;
 			voteCount: string | number;
 			viewerVote: ((-1 | 1) | null) | null;
@@ -99622,6 +99629,10 @@ export type GetApiRealmsByRealmIdStatus200 = {
 	 */
 	joinPolicy: string;
 	/**
+	 * @type boolean
+	 */
+	realmTagVotingEnabled: boolean;
+	/**
 	 * @type array
 	 */
 	pages: GetApiRealmsByRealmIdStatus200PagesEnum[];
@@ -100156,6 +100167,10 @@ export type PatchApiRealmsByRealmIdBody = {
 	 * @type string | undefined
 	 */
 	joinPolicy?: PatchApiRealmsByRealmIdRequestJoinPolicyEnum;
+	/**
+	 * @type boolean | undefined
+	 */
+	realmTagVotingEnabled?: boolean;
 	/**
 	 * @type string | undefined
 	 */
@@ -108541,7 +108556,12 @@ export type GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200 = {
 		 * @type string
 		 */
 		realmId: string;
-		contextPostId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		contextPostId: string;
 		score: string | number;
 		voteCount: string | number;
 		viewerVote: ((-1 | 1) | null) | null;
@@ -108801,6 +108821,42 @@ export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404 = {
 	requestId: string;
 };
 
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmTagVotingDisabled'
+		 * @type string
+		 */
+		code: "RealmTagVotingDisabled";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422ErrorCodeEnum = {
+	RealmTagContextRequired: "RealmTagContextRequired",
+	RealmTagSelfReferenceForbidden: "RealmTagSelfReferenceForbidden",
+} as const;
+
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422ErrorCodeEnum];
+
 export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422 =
 	| {
 			/**
@@ -108808,10 +108864,10 @@ export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422 =
 			 */
 			error: {
 				/**
-				 * @default 'RealmTagSelfReferenceForbidden'
+				 * @default 'RealmTagContextRequired'
 				 * @type string
 				 */
-				code: "RealmTagSelfReferenceForbidden";
+				code: PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -108893,6 +108949,7 @@ export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteResponses = {
 	"400": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus400;
 	"403": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403;
 	"404": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404;
+	"409": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus409;
 	"422": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422;
 	"429": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429;
 	"500": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus500;
@@ -108906,6 +108963,7 @@ export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteResponse =
 	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus400
 	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403
 	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus409
 	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422
 	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429
 	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus500;
@@ -132882,6 +132940,12 @@ export type PostApiSearchByIndexBody = {
 	 * @type string | undefined
 	 */
 	realmId?: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	realmTagContextRealmId?: string;
 	/**
 	 * @minLength 1
 	 * @type string | undefined

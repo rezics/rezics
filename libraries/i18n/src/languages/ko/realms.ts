@@ -88,6 +88,12 @@ export default {
 		moveDown: "페이지를 뒤로 이동",
 		disable: "페이지 비활성화",
 	},
+	tagVotingSettings: {
+		title: `${realmTerms.label} 태그 투표`,
+		description: `이 기능은 ${realmTerms.label} 관리자가 명시적으로 켜야 합니다. 켠 뒤에는 이 ${realmTerms.label}에서 공식적으로 설명한 태그에만 회원이 투표할 수 있습니다.`,
+		enabled: `${realmTerms.label} 태그 투표 켜기`,
+		enabledDescription: `검색과 투표에는 이 ${realmTerms.label}에서 현재 볼 수 있는 설명이 있는 태그만 표시됩니다.`,
+	},
 	scoreContextSettings: {
 		title: "평가 기준",
 		description: `이 ${realmTerms.label}에 장착되어 있고 볼 수 있는 일반 ${postTerms.label}이나 위키 문서를 선택해 평가 척도와 기준을 설명합니다.`,

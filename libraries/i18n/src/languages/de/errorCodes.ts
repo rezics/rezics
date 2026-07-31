@@ -252,6 +252,8 @@ export default {
 	RealmTagContextPostNotMounted: `Der ${postTerms.inline} mit der Tag-Erklärung muss im ${realmTerms.inline} sichtbar sein.`,
 	RealmTagContextAlreadyExists: `In diesem ${realmTerms.inline} gibt es bereits eine Erklärung für diesen Tag.`,
 	RealmTagContextPostAlreadyUsed: `Dieser ${postTerms.inline} erklärt bereits einen anderen Tag in einem ${realmTerms.inline}.`,
+	RealmTagVotingDisabled: `Tag-Abstimmungen sind in diesem ${realmTerms.inline} nicht aktiviert.`,
+	RealmTagContextRequired: `Dieses ${realmTerms.inline} muss den Tag zuerst in einer derzeit sichtbaren offiziellen Erklärung beschreiben.`,
 	RealmTagSelfReferenceForbidden: "Ein Tag kann nicht auf sich selbst angewendet werden.",
 	SearchDocumentRevisionConflict:
 		"Die Suchkonfiguration wurde geändert. Lade sie vor dem Speichern neu.",

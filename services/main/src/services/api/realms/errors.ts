@@ -94,6 +94,18 @@ export class RealmTagContextPostAlreadyUsed extends Data.TaggedError(
 	readonly message = "The Wiki Post already explains another Realm Tag";
 }
 
+export class RealmTagVotingDisabled extends Data.TaggedError("RealmTagVotingDisabled") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = RealmTagVotingDisabled.status;
+	readonly message = "Realm-scoped Tag voting is not enabled for this Realm";
+}
+
+export class RealmTagContextRequired extends Data.TaggedError("RealmTagContextRequired") {
+	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
+	readonly status = RealmTagContextRequired.status;
+	readonly message = "This Realm must explicitly explain the Tag before it can receive votes";
+}
+
 export class RealmTagSelfReferenceForbidden extends Data.TaggedError(
 	"RealmTagSelfReferenceForbidden",
 ) {
@@ -135,6 +147,8 @@ export const RealmErrors = [
 	RealmTagContextAlreadyExists,
 	RealmTagContextPostNotMounted,
 	RealmTagContextPostAlreadyUsed,
+	RealmTagVotingDisabled,
+	RealmTagContextRequired,
 	RealmTagSelfReferenceForbidden,
 	WikiNavigationNotFound,
 	WikiNavigationInUse,

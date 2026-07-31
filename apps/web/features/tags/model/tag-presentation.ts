@@ -49,7 +49,7 @@ export type TagContextPresentation =
 			readonly realmId: string;
 			readonly realmLanguage: ContentLanguage | null;
 			readonly realmTitle: string | null;
-			readonly contextPostId?: string;
+			readonly contextPostId: string | null;
 	  }
 	| {
 			readonly kind: "structure";

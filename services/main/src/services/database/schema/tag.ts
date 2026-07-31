@@ -157,6 +157,7 @@ export const realmTagContext = pgTable(
 			name: "realm_tag_context_post_realm_fkey",
 		}).onDelete("restrict"),
 		index("realm_tag_context_post_idx").on(table.contextPostId),
+		index("realm_tag_context_tag_realm_idx").on(table.tagId, table.realmId),
 	],
 );
 
@@ -191,6 +192,11 @@ export const realmTagVote = pgTable(
 			columns: [table.tagId],
 			foreignColumns: [tag.id],
 			name: "realm_tag_vote_tag_fkey",
+		}).onDelete("cascade"),
+		foreignKey({
+			columns: [table.realmId, table.tagId],
+			foreignColumns: [realmTagContext.realmId, realmTagContext.tagId],
+			name: "realm_tag_vote_context_fkey",
 		}).onDelete("cascade"),
 		index("realm_tag_vote_profile_idx").on(table.profileId),
 		index("realm_tag_vote_realm_tag_unit_idx").on(table.realmId, table.tagId, table.unitId),

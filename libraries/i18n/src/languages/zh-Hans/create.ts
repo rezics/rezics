@@ -61,6 +61,7 @@ export default {
 		resultsTitle: "可能已经存在的条目",
 		noResultsTitle: insert("未找到匹配的{{subject}}", { subject: String }),
 		noResultsDescription: "确认搜索词正确后，您可以继续前往创建。",
+		realmTagContextOnly: `这里只会显示该${realmTerms.label}已正式说明的标签。如果缺少标签，请先由${realmTerms.label}管理员创建标签说明。`,
 		notListedTitle: "这些结果都不是您要找的内容？",
 		notListedDescription: "请先检查相似条目；如果都不匹配，再继续创建新条目。",
 		createAction: "继续创建",

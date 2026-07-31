@@ -2,7 +2,7 @@ import { type Static, t } from "elysia";
 import { PublicationLicenseIds } from "@rezics/license";
 
 import { SearchCategories, SearchSorts } from "../../search/schema";
-import { ContentLanguage, LocalizationLanguagePriority } from "../schema";
+import { ContentLanguage, LocalizationLanguagePriority, Uuid } from "../schema";
 
 const SearchCategory = t.Union(SearchCategories.map((category) => t.Literal(category)));
 
@@ -26,6 +26,7 @@ export const DomainSearchBody = t.Object(
 		contentLicenseActive: t.Optional(t.Boolean()),
 		creditedUnitId: t.Optional(t.String({ minLength: 1 })),
 		realmId: t.Optional(t.String({ minLength: 1 })),
+		realmTagContextRealmId: t.Optional(Uuid),
 		subjectId: t.Optional(t.String({ minLength: 1 })),
 		targetId: t.Optional(t.String({ minLength: 1 })),
 		rootId: t.Optional(t.String({ minLength: 1 })),

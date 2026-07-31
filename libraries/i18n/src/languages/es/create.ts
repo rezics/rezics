@@ -95,6 +95,7 @@ export default {
 		noResultsTitle: insert("No se encontraron {{subject}} coincidentes", { subject: String }),
 		noResultsDescription:
 			"Después de comprobar que los términos son correctos, puedes continuar con la creación.",
+		realmTagContextOnly: `Aquí solo aparecen las etiquetas explicadas formalmente por este ${realmTerms.inline}. Si falta alguna, la administración del ${realmTerms.inline} debe crear primero su explicación.`,
 		notListedTitle: "¿Ninguno de estos resultados coincide?",
 		notListedDescription:
 			"Revisa primero las entradas similares. Continúa solo si ninguna es el contenido que necesitas.",

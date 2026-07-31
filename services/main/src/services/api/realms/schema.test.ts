@@ -142,6 +142,10 @@ describe("Realm update API contract", () => {
 	it("accepts a join-policy-only partial update", () => {
 		expect(Check(UpdateRealmBody, { joinPolicy: "approval" })).toBe(true);
 	});
+
+	it("accepts an explicit Realm Tag voting feature flag", () => {
+		expect(Check(UpdateRealmBody, { realmTagVotingEnabled: true })).toBe(true);
+	});
 });
 
 describe("Realm moderation API contract", () => {

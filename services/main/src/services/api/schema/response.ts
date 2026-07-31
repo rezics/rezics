@@ -1052,6 +1052,7 @@ export const RealmDetailResponse = t.Object({
 	visibility: t.String(),
 	language: t.Nullable(ContentLanguage),
 	joinPolicy: t.String(),
+	realmTagVotingEnabled: t.Boolean(),
 	pages: t.Array(t.UnionEnum(RealmPageKindValues), {
 		minItems: 1,
 		maxItems: 3,

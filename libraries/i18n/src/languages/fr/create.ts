@@ -94,6 +94,7 @@ export default {
 		noResultsTitle: insert("Aucun {{subject}} correspondant trouvé", { subject: String }),
 		noResultsDescription:
 			"Après avoir vérifié les termes de recherche, vous pouvez poursuivre la création.",
+		realmTagContextOnly: `Seules les étiquettes officiellement expliquées par ce ${realmTerms.inline} apparaissent ici. Si une étiquette manque, la gestion du ${realmTerms.inline} doit d’abord créer son explication.`,
 		notListedTitle: "Aucun de ces résultats ne correspond ?",
 		notListedDescription:
 			"Examinez d’abord les entrées similaires. Ne continuez que si aucune ne correspond au contenu recherché.",

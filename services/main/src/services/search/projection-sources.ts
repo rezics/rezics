@@ -10,6 +10,7 @@ export const CurrentProjectionSources = {
 	unit_structure_member: ["structure_id", "member_unit_id"],
 	unit_structure_vote_stat: ["structure_id"],
 	realm_tag_vote: ["unit_id"],
+	realm_tag_context: ["realm_id", "tag_id"],
 	realm_unit_tag: ["unit_id"],
 	realm_unit: ["unit_id"],
 	credit_attribution: ["source_unit_id"],

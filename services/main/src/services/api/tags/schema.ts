@@ -75,7 +75,7 @@ const UnitTagStructureResponse = t.Object({
 export const RealmVotedTagResponse = t.Object({
 	...LocalizedTagSummary,
 	realmId: Uuid,
-	contextPostId: t.Nullable(Uuid),
+	contextPostId: Uuid,
 	score: t.Integer(),
 	voteCount: t.Integer({ minimum: 0 }),
 	viewerVote: TagVoteValue,

@@ -100,6 +100,7 @@ export const realm = pgTable(
 			.primaryKey()
 			.references(() => unit.id, { onDelete: "cascade" }),
 		joinPolicy: realmJoinPolicy().default("open").notNull(),
+		realmTagVotingEnabled: boolean("realm_tag_voting_enabled").default(false).notNull(),
 		enabledPages: realmPageKind("enabled_pages")
 			.array()
 			.default(sql`array['main']::realm_page_kind[]`)

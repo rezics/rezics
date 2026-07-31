@@ -231,6 +231,8 @@ export default {
 	RealmTagContextPostNotMounted: `The ${postTerms.label} used as the Tag explanation must be visible in the ${realmTerms.label}.`,
 	RealmTagContextAlreadyExists: `This ${realmTerms.label} already has an explanation for that Tag.`,
 	RealmTagContextPostAlreadyUsed: `That ${postTerms.label} already explains another Tag in a ${realmTerms.label}.`,
+	RealmTagVotingDisabled: `Tag voting is not enabled for this ${realmTerms.label}.`,
+	RealmTagContextRequired: `This ${realmTerms.label} must first provide a currently visible formal explanation for the Tag.`,
 	RealmTagSelfReferenceForbidden: "A Tag cannot be applied to itself.",
 	SearchDocumentRevisionConflict: "The search configuration changed. Reload it before saving.",
 	ZoneSearchFeatureNotFound: `This ${zoneTerms.inline} has no enabled search feature.`,

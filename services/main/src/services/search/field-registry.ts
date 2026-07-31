@@ -149,6 +149,16 @@ export const CurrentSearchFieldRegistry = {
 		meilisearch: ["equality"],
 		residual: false,
 	},
+	"realm-tag-context": {
+		categories: ["tags"],
+		scalar: "uuid",
+		operators: ["equals"],
+		facet: "none",
+		sort: "none",
+		documentPath: "filters.realmTagContextRealmIds",
+		meilisearch: ["equality"],
+		residual: true,
+	},
 	"realm-tag-vote": {
 		categories: allCategories,
 		scalar: "realm-tag-vote",

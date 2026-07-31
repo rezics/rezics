@@ -2077,6 +2077,7 @@ import type {
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus400,
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403,
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus409,
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422,
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429,
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus500,
@@ -34403,6 +34404,7 @@ export function putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteMutationOptions
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus400
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus409
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus500
@@ -34435,6 +34437,7 @@ export function usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote<TContext>(
 				| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus400
 				| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403
 				| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404
+				| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus409
 				| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422
 				| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429
 				| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus500
@@ -34459,6 +34462,7 @@ export function usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote<TContext>(
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus400
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus409
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus500
@@ -34473,6 +34477,7 @@ export function usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote<TContext>(
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus400
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus409
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus500
@@ -34492,6 +34497,7 @@ export function usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote<TContext>(
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus400
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus409
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus500

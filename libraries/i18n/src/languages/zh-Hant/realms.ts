@@ -72,6 +72,12 @@ export default {
 		moveDown: "向後移動頁面",
 		disable: "停用頁面",
 	},
+	tagVotingSettings: {
+		title: `${realmTerms.label}標籤投票`,
+		description: `這是必須由${realmTerms.label}管理者明確開啟的功能。開啟後，成員只能對此${realmTerms.label}已正式說明的標籤投票。`,
+		enabled: `開啟${realmTerms.label}標籤投票`,
+		enabledDescription: `搜尋與投票只會顯示此${realmTerms.label}已有標籤解釋，且解釋目前可見的標籤。`,
+	},
 	scoreContextSettings: {
 		title: "評分準則",
 		description: `選擇掛載在此${realmTerms.label}且可見的一般${postTerms.label}或百科文章，用來說明評分尺度與判準。`,

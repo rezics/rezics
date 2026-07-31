@@ -74,6 +74,7 @@ export const SearchScalarFieldValues = [
 	"credit",
 	"publisher-profile",
 	"realm",
+	"realm-tag-context",
 	"zone",
 	"subject",
 	"target",

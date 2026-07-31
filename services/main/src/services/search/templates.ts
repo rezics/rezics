@@ -78,6 +78,7 @@ const CommonFields = [
 	"tag",
 	"credit",
 	"realm",
+	"realm-tag-context",
 	"realm-tag-vote",
 	"created-at",
 	"updated-at",

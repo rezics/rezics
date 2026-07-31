@@ -214,6 +214,8 @@ export default {
 	RealmTagContextPostNotMounted: `作为标签说明的${postTerms.inline}必须在该${realmTerms.inline}中可见。`,
 	RealmTagContextAlreadyExists: `此${realmTerms.inline}已有这个标签的说明。`,
 	RealmTagContextPostAlreadyUsed: `该${postTerms.inline}已用于说明另一个${realmTerms.inline}标签。`,
+	RealmTagVotingDisabled: `该${realmTerms.inline}尚未开启标签投票。`,
+	RealmTagContextRequired: `该${realmTerms.inline}必须先为此标签创建当前可见的正式说明。`,
 	RealmTagSelfReferenceForbidden: "不能将标签应用到该标签本身。",
 	SearchDocumentRevisionConflict: "搜索设置已变更，请重新加载后再保存。",
 	ZoneSearchFeatureNotFound: `此${zoneTerms.inline}尚未激活搜索功能。`,

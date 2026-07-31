@@ -60,6 +60,9 @@ export function CommunityUnitSearchPage({
 	const [query, setQuery] = useState(initialQuery);
 	const [state, setState] = useState<CommunityUnitSearchState>({ status: "idle" });
 	const search = usePostApiSearchByIndex();
+	const realmTagContextRealmId =
+		unitTagVoteTarget?.context.kind === "realm" ? unitTagVoteTarget.context.realmId : undefined;
+	const canCreateTag = subject.kind !== "tag" || unitTagVoteTarget?.context.kind !== "realm";
 	const normalizedQuery = normalizeCommunityUnitSearchQuery(query);
 	const displayedState =
 		state.status !== "idle" &&
@@ -78,6 +81,7 @@ export function CommunityUnitSearchPage({
 					query: submittedQuery,
 					limit: 20,
 					localizationLanguages: [...localizationLanguages],
+					...(realmTagContextRealmId ? { realmTagContextRealmId } : {}),
 					...("filterKind" in subject ? { kinds: [subject.filterKind] } : {}),
 				},
 			});
@@ -167,29 +171,35 @@ export function CommunityUnitSearchPage({
 									: messages.notListedTitle}
 							</AlertTitle>
 							<AlertDescription>
-								{resultItems.length === 0
-									? messages.noResultsDescription
-									: messages.notListedDescription}
+								{realmTagContextRealmId
+									? messages.realmTagContextOnly
+									: resultItems.length === 0
+										? messages.noResultsDescription
+										: messages.notListedDescription}
 							</AlertDescription>
-							<AlertAction>
-								<Button asChild size="sm" variant="solid">
-									<Link
-										href={
-											subject.kind === "tag" && unitTagVoteTarget
-												? unitTagVoteCreateHref(
-														displayedState.query,
-														unitTagVoteTarget,
-													)
-												: communityUnitCreationHref(
-														subject,
-														displayedState.query,
-													)
-										}
-									>
-										{messages.createAction}
-									</Link>
-								</Button>
-							</AlertAction>
+							{canCreateTag ? (
+								<AlertAction>
+									<Button asChild size="sm" variant="solid">
+										<Link
+											href={
+												subject.kind === "tag" &&
+												unitTagVoteTarget?.context.kind === "global"
+													? unitTagVoteCreateHref(displayedState.query, {
+															type: unitTagVoteTarget.type,
+															unitId: unitTagVoteTarget.unitId,
+															context: { kind: "global" },
+														})
+													: communityUnitCreationHref(
+															subject,
+															displayedState.query,
+														)
+											}
+										>
+											{messages.createAction}
+										</Link>
+									</Button>
+								</AlertAction>
+							) : null}
 						</Alert>
 					</section>
 				)}

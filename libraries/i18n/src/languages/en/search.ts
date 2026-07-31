@@ -162,6 +162,7 @@ export default {
 		credit: "Credit",
 		"publisher-profile": "Publisher Profile",
 		realm: realmTerms.label,
+		"realm-tag-context": `${realmTerms.label} Tag explanation`,
 		"realm-tag-vote": `${realmTerms.label} Tag vote`,
 		zone: zoneTerms.label,
 		subject: "Subject",

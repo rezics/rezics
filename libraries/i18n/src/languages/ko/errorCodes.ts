@@ -226,6 +226,8 @@ export default {
 	RealmTagContextPostNotMounted: `태그 설명으로 사용하는 ${postTerms.label}는 ${realmTerms.label}에서 보여야 합니다.`,
 	RealmTagContextAlreadyExists: `이 ${realmTerms.label}에는 해당 태그 설명이 이미 있습니다.`,
 	RealmTagContextPostAlreadyUsed: `해당 ${postTerms.label}는 이미 다른 ${realmTerms.label} 태그를 설명하고 있습니다.`,
+	RealmTagVotingDisabled: `이 ${realmTerms.label}에서는 태그 투표가 켜져 있지 않습니다.`,
+	RealmTagContextRequired: `이 ${realmTerms.label}에는 현재 볼 수 있는 태그의 공식 설명이 먼저 필요합니다.`,
 	RealmTagSelfReferenceForbidden: "태그를 자기 자신에게 적용할 수 없습니다.",
 	SearchDocumentRevisionConflict: "검색 구성이 변경되었습니다. 저장하기 전에 다시 로드하십시오.",
 	ZoneSearchFeatureNotFound: `이 ${zoneTerms.inline}에는 활성화된 검색 기능이 없습니다.`,

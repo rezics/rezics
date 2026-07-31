@@ -60,6 +60,7 @@ export interface DomainSearchRequest {
 	contentLicenseActive?: boolean;
 	creditedUnitId?: string;
 	realmId?: string;
+	realmTagContextRealmId?: string;
 	subjectId?: string;
 	targetId?: string;
 	rootId?: string;
@@ -85,6 +86,7 @@ export const SearchFieldByDomainRequestFilter = {
 	contentLicenseActive: "content-license",
 	creditedUnitId: "credit",
 	realmId: "realm",
+	realmTagContextRealmId: "realm-tag-context",
 	tagId: "tag",
 	subjectId: "subject",
 	targetId: "target",

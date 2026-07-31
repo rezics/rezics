@@ -32,6 +32,7 @@ import {
 	profile,
 	unitFollowStat,
 	realm,
+	realmTagContext,
 	realmTagVoteStat,
 	realmUnit,
 	software,
@@ -90,6 +91,9 @@ const facetUnitTag = alias(unitEffectiveTag, "facet_unit_tag");
 const facetRealmUnit = alias(realmUnit, "facet_realm_unit");
 const facetCreditAttribution = alias(creditAttribution, "facet_credit_attribution");
 const facetOwnership = alias(unitOwnership, "facet_ownership");
+const scopedRealmTagContextRealm = alias(realm, "scoped_realm_tag_context_realm");
+const scopedRealmTagContextPostUnit = alias(unit, "scoped_realm_tag_context_post_unit");
+const scopedRealmTagContextRealmUnit = alias(realmUnit, "scoped_realm_tag_context_realm_unit");
 const { metrics } = getActiveObservability();
 type SearchHitWithoutSlugAddress = Omit<SearchHit, "slugAddress">;
 
@@ -164,6 +168,11 @@ function validateRequest(category: SearchCategory, request: DomainSearchRequest)
 			Boolean(request.creditedUnitId),
 		],
 		["realmId", SearchFieldByDomainRequestFilter.realmId, Boolean(request.realmId)],
+		[
+			"realmTagContextRealmId",
+			SearchFieldByDomainRequestFilter.realmTagContextRealmId,
+			Boolean(request.realmTagContextRealmId),
+		],
 		["subjectId", SearchFieldByDomainRequestFilter.subjectId, Boolean(request.subjectId)],
 		["targetId", SearchFieldByDomainRequestFilter.targetId, Boolean(request.targetId)],
 		["rootId", SearchFieldByDomainRequestFilter.rootId, Boolean(request.rootId)],
@@ -281,8 +290,33 @@ function softwareRequirementRowCondition(filter: SearchControlPredicate, column:
 		: matches;
 }
 
-function compileFilter(category: SearchCategory, filter: SearchControlPredicate): SQL {
+function compileFilter(
+	category: SearchCategory,
+	filter: SearchControlPredicate,
+	profileId?: string,
+): SQL {
 	resolveCurrentSearchFilterDefinition(category, filter);
+	if (filter.field === "realm-tag-context") {
+		if (!("value" in filter) || typeof filter.value !== "string")
+			throw new InvalidSearch("realm-tag-context requires a Realm UUID");
+		return sql`exists (
+			select 1
+			from ${realmTagContext}
+			inner join ${scopedRealmTagContextRealm}
+				on ${scopedRealmTagContextRealm.id} = ${realmTagContext.realmId}
+			inner join ${scopedRealmTagContextRealmUnit}
+				on ${scopedRealmTagContextRealmUnit.realmId} = ${realmTagContext.realmId}
+				and ${scopedRealmTagContextRealmUnit.unitId} = ${realmTagContext.contextPostId}
+			inner join ${scopedRealmTagContextPostUnit}
+				on ${scopedRealmTagContextPostUnit.id} = ${realmTagContext.contextPostId}
+			where ${realmTagContext.tagId} = ${unit.id}
+				and ${realmTagContext.realmId} = ${filter.value}::uuid
+				and ${scopedRealmTagContextRealm.realmTagVotingEnabled} = true
+				and ${scopedRealmTagContextRealmUnit.status} = 'visible'
+				and ${scopedRealmTagContextRealmUnit.publicationState} = 'active'
+				and ${getUnitReadCondition(profileId, {}, scopedRealmTagContextPostUnit)}
+		)`;
+	}
 	if (filter.field === "realm-tag-vote") {
 		const conditions: SQL[] = [
 			sql`${realmTagVoteStat.unitId} = ${unit.id}`,
@@ -588,10 +622,11 @@ function compileFilter(category: SearchCategory, filter: SearchControlPredicate)
 export function compilePostgresSearchExpression(
 	category: SearchCategory,
 	expression: SearchExpression,
+	profileId?: string,
 ): SQL {
-	if ("field" in expression) return compileFilter(category, expression);
+	if ("field" in expression) return compileFilter(category, expression, profileId);
 	if (expression.operator === "not")
-		return sql`not (${compilePostgresSearchExpression(category, expression.clause)})`;
+		return sql`not (${compilePostgresSearchExpression(category, expression.clause, profileId)})`;
 	if (expression.operator === "all") {
 		const requirementFilters = expression.clauses.filter(
 			(clause): clause is SearchControlPredicate =>
@@ -614,7 +649,7 @@ export function compilePostgresSearchExpression(
 			);
 			const otherConditions = expression.clauses
 				.filter((clause) => !requirementClauses.has(clause))
-				.map((clause) => compilePostgresSearchExpression(category, clause));
+				.map((clause) => compilePostgresSearchExpression(category, clause, profileId));
 			return sql`(${unit.kind} = 'software' and exists (
 				select 1 from ${softwareRequirement}
 				where ${softwareRequirement.softwareId} = ${unit.id}
@@ -623,7 +658,7 @@ export function compilePostgresSearchExpression(
 		}
 	}
 	const clauses = expression.clauses.map((clause) =>
-		compilePostgresSearchExpression(category, clause),
+		compilePostgresSearchExpression(category, clause, profileId),
 	);
 	return sql`(${sql.join(clauses, expression.operator === "all" ? sql` and ` : sql` or `)})`;
 }
@@ -686,7 +721,8 @@ function buildSearchConditions(
 				: direct,
 		);
 	}
-	if (expression) conditions.push(compilePostgresSearchExpression(category, expression));
+	if (expression)
+		conditions.push(compilePostgresSearchExpression(category, expression, request.profileId));
 	if (request.domainFilter)
 		conditions.push(
 			compileUnitPredicateSql(request.domainFilter, {
@@ -724,6 +760,10 @@ function buildEffectiveSearchExpression(
 		});
 	addValue(SearchFieldByDomainRequestFilter.creditedUnitId, request.creditedUnitId);
 	addValue(SearchFieldByDomainRequestFilter.realmId, request.realmId);
+	addValue(
+		SearchFieldByDomainRequestFilter.realmTagContextRealmId,
+		request.realmTagContextRealmId,
+	);
 	addValue(SearchFieldByDomainRequestFilter.subjectId, request.subjectId);
 	addValue(SearchFieldByDomainRequestFilter.targetId, request.targetId);
 	addValue(SearchFieldByDomainRequestFilter.rootId, request.rootId);

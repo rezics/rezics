@@ -810,9 +810,10 @@ describe("database schema contracts", () => {
 				"realm_tag_vote_stat_realm_fkey",
 				"realm_tag_vote_stat_unit_fkey",
 				"realm_tag_vote_stat_tag_fkey",
+				"realm_tag_vote_stat_context_fkey",
 			]),
 		);
-		expect(getTableConfig(realmTagVote).foreignKeys.map((key) => key.getName())).not.toContain(
+		expect(getTableConfig(realmTagVote).foreignKeys.map((key) => key.getName())).toContain(
 			"realm_tag_vote_context_fkey",
 		);
 		const context = getTableConfig(realmTagContext);
@@ -824,10 +825,15 @@ describe("database schema contracts", () => {
 			context.indexes.find((index) => index.config.name === "realm_tag_context_post_unique")
 				?.config.unique,
 		).toBe(true);
+		expect(context.indexes.map((index) => index.config.name)).toContain(
+			"realm_tag_context_tag_realm_idx",
+		);
 	});
 
 	it("stores enabled Realm Pages as one constrained ordered value", () => {
 		const config = getTableConfig(realm);
+		expect(realm.realmTagVotingEnabled.notNull).toBe(true);
+		expect(realm.realmTagVotingEnabled.hasDefault).toBe(true);
 		expect(realm.enabledPages.enumValues).toEqual(["main", "tags", "wiki"]);
 		expect(config.checks.map((check) => check.name)).toEqual(
 			expect.arrayContaining([

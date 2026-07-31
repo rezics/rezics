@@ -163,6 +163,7 @@ export default {
 		credit: "Crédito",
 		"publisher-profile": `Perfil de la ${entityTerms.inline} editorial`,
 		realm: realmTerms.label,
+		"realm-tag-context": `Explicación de etiqueta del ${realmTerms.inline}`,
 		"realm-tag-vote": `Votación de etiquetas del ${realmTerms.inline}`,
 		zone: zoneTerms.label,
 		subject: "Tema",

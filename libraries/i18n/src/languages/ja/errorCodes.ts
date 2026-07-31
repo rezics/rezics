@@ -234,6 +234,8 @@ export default {
 	RealmTagContextPostNotMounted: `タグ説明として使われている ${postTerms.label} は ${realmTerms.label} に表示されている必要があります。`,
 	RealmTagContextAlreadyExists: `この ${realmTerms.label} には、そのタグの説明がすでにあります。`,
 	RealmTagContextPostAlreadyUsed: `その ${postTerms.label} は、すでに別の ${realmTerms.label} タグを説明しています。`,
+	RealmTagVotingDisabled: `この ${realmTerms.label} ではタグ投票が有効になっていません。`,
+	RealmTagContextRequired: `この ${realmTerms.label} には、現在表示できるタグの正式な説明が先に必要です。`,
 	RealmTagSelfReferenceForbidden: "タグをそのタグ自身に適用することはできません。",
 	SearchDocumentRevisionConflict: "検索設定が変更されました。保存する前にリロードしてください。",
 	ZoneSearchFeatureNotFound: `この ${zoneTerms.inline} には有効な検索機能がありません。`,

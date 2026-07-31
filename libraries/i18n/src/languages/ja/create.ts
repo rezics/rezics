@@ -83,6 +83,7 @@ export default {
 		resultsTitle: "既存の可能性がある項目",
 		noResultsTitle: insert("一致する{{subject}}が見つかりません", { subject: String }),
 		noResultsDescription: "検索語が正しいことを確認したうえで、作成に進むことができます。",
+		realmTagContextOnly: `ここには、この${realmTerms.label}が正式に説明しているタグだけが表示されます。タグがない場合は、先に${realmTerms.label}の管理者がタグ説明を作成してください。`,
 		notListedTitle: "どの検索結果にも該当しませんか？",
 		notListedDescription:
 			"類似する項目を先に確認し、該当するものがない場合のみ新規作成に進んでください。",

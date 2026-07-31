@@ -75,13 +75,9 @@ export function createEntitySearch(
 				avatar: item.avatar,
 			}));
 		}
-		const exact = await resolveExactUnit(
-			index,
-			query,
-			signal,
-			localizationLanguages,
-			options?.kinds,
-		);
+		const exact = options?.realmTagContextRealmId
+			? []
+			: await resolveExactUnit(index, query, signal, localizationLanguages, options?.kinds);
 		if (exact.length) return exact;
 		if (index === "all") {
 			const { data } = await postApiSearch({
@@ -112,6 +108,7 @@ export function createEntitySearch(
 			body: {
 				query,
 				kinds: options?.kinds ? [...options.kinds] : undefined,
+				realmTagContextRealmId: options?.realmTagContextRealmId,
 				limit: 10,
 				localizationLanguages: [...localizationLanguages],
 			},

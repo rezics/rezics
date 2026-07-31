@@ -94,6 +94,12 @@ export default {
 		moveDown: "Déplacer la page vers l’arrière",
 		disable: "Désactiver la page",
 	},
+	tagVotingSettings: {
+		title: `Vote sur les étiquettes du ${realmTerms.inline}`,
+		description: `La gestion du ${realmTerms.inline} doit activer explicitement cette fonctionnalité. Les membres ne peuvent ensuite voter que pour les étiquettes officiellement expliquées par ce ${realmTerms.inline}.`,
+		enabled: "Activer le vote sur les étiquettes",
+		enabledDescription: `La recherche et le vote n’affichent que les étiquettes dont l’explication est actuellement visible dans ce ${realmTerms.inline}.`,
+	},
 	scoreContextSettings: {
 		title: "Critères de notation",
 		description: `Choisissez une ${postTerms.inline} ordinaire ou un article wiki visible et rattaché à ce ${realmTerms.inline} pour expliquer son échelle et ses critères de notation.`,

@@ -77,6 +77,7 @@ export default {
 		resultsTitle: "이미 존재할 수 있는 항목",
 		noResultsTitle: insert("일치하는 {{subject}}을(를) 찾지 못했습니다", { subject: String }),
 		noResultsDescription: "검색어가 올바른지 확인한 후 만들기를 계속할 수 있습니다.",
+		realmTagContextOnly: `여기에는 이 ${realmTerms.label}에서 공식적으로 설명한 태그만 표시됩니다. 태그가 없다면 먼저 ${realmTerms.label} 관리자가 태그 설명을 만들어야 합니다.`,
 		notListedTitle: "검색 결과 중 원하는 항목이 없나요?",
 		notListedDescription:
 			"유사한 항목을 먼저 확인하고, 해당하는 항목이 없을 때만 새 항목을 만드세요.",

@@ -90,6 +90,12 @@ export default {
 		moveDown: "ページを後ろへ移動",
 		disable: "ページを無効化",
 	},
+	tagVotingSettings: {
+		title: `${realmTerms.label}のタグ投票`,
+		description: `この機能は${realmTerms.label}の管理者が明示的に有効にする必要があります。有効にすると、メンバーはこの${realmTerms.label}が正式に説明しているタグにのみ投票できます。`,
+		enabled: `${realmTerms.label}のタグ投票を有効にする`,
+		enabledDescription: `検索と投票には、この${realmTerms.label}で現在表示できる説明があるタグだけが表示されます。`,
+	},
 	scoreContextSettings: {
 		title: "評価ガイドライン",
 		description: `この${realmTerms.label}にマウントされた、表示可能な通常の${postTerms.label}またはウィキ記事を選び、評価尺度と基準を説明します。`,

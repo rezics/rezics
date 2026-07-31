@@ -34,6 +34,7 @@ vi.mock("@/i18n/client", () => ({
 					`No matching ${subject} found`,
 				notListedDescription: "Review similar entries.",
 				notListedTitle: "None match?",
+				realmTagContextOnly: "Only explicitly explained Realm Tags are available.",
 				pageDescription: ({ subject }: { readonly subject: string }) =>
 					`Check existing ${subject}.`,
 				pageTitle: ({ subject }: { readonly subject: string }) =>
@@ -131,7 +132,7 @@ describe("CommunityUnitSearchPage", () => {
 		).toContain("/create/tag/new?");
 	});
 
-	it("preserves a Unit Tag vote target when duplicate search continues to creation", async () => {
+	it("scopes Realm Tag search to explicit Contexts and does not offer creation", async () => {
 		render(
 			<CommunityUnitSearchPage
 				initialQuery="science"
@@ -149,11 +150,20 @@ describe("CommunityUnitSearchPage", () => {
 
 		fireEvent.click(screen.getByRole("button", { name: "Search" }));
 
-		const createLink = await screen.findByRole("link", { name: "Continue to create" });
-		const url = new URL(createLink.getAttribute("href") ?? "", "https://rezics.example");
-		expect(url.pathname).toBe("/create/tag/new");
-		expect(url.searchParams.get("intent")).toBe("unit-tag-vote");
-		expect(url.searchParams.get("context")).toBe("realm");
-		expect(url.searchParams.get("realmId")).toBe("00000000-0000-7000-8000-000000000002");
+		await waitFor(() =>
+			expect(api.mutateAsync).toHaveBeenCalledWith({
+				body: {
+					limit: 20,
+					localizationLanguages: ["zh-Hant", "en"],
+					query: "science",
+					realmTagContextRealmId: "00000000-0000-7000-8000-000000000002",
+				},
+				path: { index: "tags" },
+			}),
+		);
+		expect(
+			await screen.findByText("Only explicitly explained Realm Tags are available."),
+		).toBeTruthy();
+		expect(screen.queryByRole("link", { name: "Continue to create" })).toBeNull();
 	});
 });

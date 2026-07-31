@@ -6,7 +6,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const state = vi.hoisted(() => ({
 	applyGlobal: vi.fn(),
-	applyRealm: vi.fn(),
 	create: vi.fn(),
 	invalidateQueries: vi.fn(),
 	push: vi.fn(),
@@ -14,18 +13,12 @@ const state = vi.hoisted(() => ({
 
 vi.mock("@rezics/openapi-tanstack-query", () => ({
 	PostApiSearchByIndexIndex: { Tags: "tags" },
-	getApiRealmsByRealmIdUnitsByUnitIdTagsQueryKey: (input: unknown) => ["realm-tags", input],
 	getApiTagsQueryKey: () => ["tags"],
 	getApiUnitsByTypeByUnitIdTagsQueryKey: (input: unknown) => ["unit-tags", input],
 	usePostApiTags: () => ({
 		error: null,
 		isPending: false,
 		mutateAsync: state.create,
-	}),
-	usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote: () => ({
-		error: null,
-		isPending: false,
-		mutateAsync: state.applyRealm,
 	}),
 	usePutApiUnitsByTypeByUnitIdTagsByTagId: () => ({
 		error: null,
@@ -166,20 +159,17 @@ vi.mock("@rezics/ui", () => ({
 import { TagCreatePage } from "./tag-create-page";
 
 const UnitId = "00000000-0000-7000-8000-000000000001";
-const RealmId = "00000000-0000-7000-8000-000000000002";
 const TagId = "00000000-0000-7000-8000-000000000003";
 const Title = "Science";
 
 beforeEach(() => {
 	cleanup();
 	state.applyGlobal.mockReset();
-	state.applyRealm.mockReset();
 	state.create.mockReset();
 	state.invalidateQueries.mockReset();
 	state.push.mockReset();
 	state.create.mockResolvedValue({ id: TagId });
 	state.applyGlobal.mockResolvedValue({});
-	state.applyRealm.mockResolvedValue({});
 	state.invalidateQueries.mockResolvedValue(undefined);
 });
 
@@ -235,40 +225,11 @@ describe("TagCreatePage", () => {
 			path: { type: "book", unitId: UnitId, tagId: TagId },
 			body: {},
 		});
-		expect(state.applyRealm).not.toHaveBeenCalled();
 		await waitFor(() => expect(state.push).toHaveBeenCalledOnce());
 		const destination = new URL(state.push.mock.calls[0]?.[0], "https://rezics.example");
 		expect(destination.pathname).toBe(`/units/book/${UnitId}/tags`);
 		expect(destination.searchParams.get("context")).toBe("global");
 		expect(destination.searchParams.get("createdTagId")).toBe(TagId);
-	});
-
-	it("records a Realm vote with the preserved Realm identity", async () => {
-		render(
-			<TagCreatePage
-				initialTitle={Title}
-				intent={{
-					kind: "unit-tag-vote",
-					type: "media",
-					unitId: UnitId,
-					context: { kind: "realm", realmId: RealmId },
-				}}
-			/>,
-		);
-
-		fireEvent.click(screen.getByRole("button", { name: "Confirm search" }));
-		fireEvent.click(screen.getByRole("button", { name: 'Create Tag and vote "Fits"' }));
-
-		await waitFor(() =>
-			expect(state.applyRealm).toHaveBeenCalledWith({
-				path: { realmId: RealmId, unitId: UnitId, tagId: TagId },
-				body: { value: 1 },
-			}),
-		);
-		expect(state.applyGlobal).not.toHaveBeenCalled();
-		const destination = new URL(state.push.mock.calls[0]?.[0], "https://rezics.example");
-		expect(destination.searchParams.get("context")).toBe("realm");
-		expect(destination.searchParams.get("realmId")).toBe(RealmId);
 	});
 
 	it("retries only the vote after creation succeeds but application fails", async () => {

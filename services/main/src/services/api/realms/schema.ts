@@ -143,6 +143,7 @@ export type SaveRealmTaxonomyDraftBody = Static<typeof SaveRealmTaxonomyDraftBod
 
 export const UpdateRealmBody = t.Object({
 	joinPolicy: t.Optional(RealmJoinPolicy),
+	realmTagVotingEnabled: t.Optional(t.Boolean()),
 	visibility: t.Optional(RealmVisibility),
 	status: t.Optional(RealmStatus),
 	localization: t.Optional(LocalizationInput),

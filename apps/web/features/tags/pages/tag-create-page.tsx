@@ -1,11 +1,9 @@
 "use client";
 
 import {
-	getApiRealmsByRealmIdUnitsByUnitIdTagsQueryKey,
 	getApiTagsQueryKey,
 	getApiUnitsByTypeByUnitIdTagsQueryKey,
 	usePostApiTags,
-	usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote,
 	usePutApiUnitsByTypeByUnitIdTagsByTagId,
 } from "@rezics/openapi-tanstack-query";
 import {
@@ -60,52 +58,31 @@ export function TagCreatePage({
 	const language = useFormDraftContentLanguage(["title", "summary"]);
 	const create = usePostApiTags();
 	const applyGlobal = usePutApiUnitsByTypeByUnitIdTagsByTagId();
-	const applyRealm = usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote();
 	const returnHref =
 		intent.kind === "unit-tag-vote"
 			? unitTagsHref(intent.type, intent.unitId, { context: intent.context })
 			: studioSectionHref("tag");
-	const isApplying =
-		voteCompletion.status === "applying" || applyGlobal.isPending || applyRealm.isPending;
+	const isApplying = voteCompletion.status === "applying" || applyGlobal.isPending;
 
 	async function finishUnitTagVote(tagId: string) {
 		if (intent.kind !== "unit-tag-vote" || isApplying) return;
 		setVoteCompletion({ status: "applying", tagId });
 		try {
-			if (intent.context.kind === "global")
-				await applyGlobal.mutateAsync({
-					path: { type: intent.type, unitId: intent.unitId, tagId },
-					body: {},
-				});
-			else
-				await applyRealm.mutateAsync({
-					path: {
-						realmId: intent.context.realmId,
-						unitId: intent.unitId,
-						tagId,
-					},
-					body: { value: 1 },
-				});
+			await applyGlobal.mutateAsync({
+				path: { type: intent.type, unitId: intent.unitId, tagId },
+				body: {},
+			});
 		} catch {
 			setVoteCompletion({ status: "failed", tagId });
 			return;
 		}
-		const invalidations = [
+		await Promise.all([
 			queryClient.invalidateQueries({
 				queryKey: getApiUnitsByTypeByUnitIdTagsQueryKey({
 					path: { type: intent.type, unitId: intent.unitId },
 				}),
 			}),
-		];
-		if (intent.context.kind === "realm")
-			invalidations.push(
-				queryClient.invalidateQueries({
-					queryKey: getApiRealmsByRealmIdUnitsByUnitIdTagsQueryKey({
-						path: { realmId: intent.context.realmId, unitId: intent.unitId },
-					}),
-				}),
-			);
-		await Promise.all(invalidations);
+		]);
 		router.push(
 			unitTagsHref(intent.type, intent.unitId, {
 				context: intent.context,
@@ -191,10 +168,7 @@ export function TagCreatePage({
 								<Link href={returnHref}>{t.tags.create.returnToUnitTags}</Link>
 							</Button>
 						</AlertAction>
-						<RequestFailure
-							error={applyGlobal.error ?? applyRealm.error}
-							fallback={t.ui.retryLater}
-						/>
+						<RequestFailure error={applyGlobal.error} fallback={t.ui.retryLater} />
 					</Alert>
 				) : (
 					<form onInput={language.onInput} onSubmit={(event) => void submit(event)}>

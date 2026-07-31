@@ -21,7 +21,7 @@ import { post } from "./post";
 import { reactionKind } from "./reaction";
 import { realm } from "./realm";
 import { unitEffectiveTag, unitStructure, unitStructureApplication } from "./structure";
-import { tag } from "./tag";
+import { realmTagContext, tag } from "./tag";
 
 const aggregateCount = () => bigint({ mode: "bigint" }).default(0n).notNull();
 
@@ -172,6 +172,11 @@ export const realmTagVoteStat = pgTable(
 			columns: [table.tagId],
 			foreignColumns: [tag.id],
 			name: "realm_tag_vote_stat_tag_fkey",
+		}).onDelete("cascade"),
+		foreignKey({
+			columns: [table.realmId, table.tagId],
+			foreignColumns: [realmTagContext.realmId, realmTagContext.tagId],
+			name: "realm_tag_vote_stat_context_fkey",
 		}).onDelete("cascade"),
 		index("realm_tag_vote_stat_realm_tag_unit_idx").on(
 			table.realmId,

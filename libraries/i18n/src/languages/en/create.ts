@@ -81,6 +81,7 @@ export default {
 		noResultsTitle: insert("No matching {{subject}} found", { subject: String }),
 		noResultsDescription:
 			"After checking that the search terms are correct, you can continue to creation.",
+		realmTagContextOnly: `Only Tags formally explained by this ${realmTerms.label} appear here. Ask a ${realmTerms.label} manager to add a Tag explanation if one is missing.`,
 		notListedTitle: "None of these results match?",
 		notListedDescription:
 			"Review similar entries first. Continue only when none of them is the content you need.",

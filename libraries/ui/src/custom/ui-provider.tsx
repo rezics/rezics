@@ -62,6 +62,8 @@ export interface UnitMentionPresentation extends EntityPickerHit {
 export interface EntitySearchOptions {
 	readonly kinds?: readonly string[];
 	readonly creditAttributionSearch?: "direct" | "public";
+	/** Restrict Tag results to Tags explicitly explained by this Realm. */
+	readonly realmTagContextRealmId?: string;
 }
 
 export type EntitySearch = (

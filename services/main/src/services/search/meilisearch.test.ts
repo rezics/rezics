@@ -47,6 +47,16 @@ describe("Meilisearch expression compiler", () => {
 		).toBeUndefined();
 	});
 
+	it("pushes the Realm Tag Context candidate set", () => {
+		expect(
+			compileMeilisearchExpression("tags", {
+				field: "realm-tag-context",
+				operator: "equals",
+				value: "019b0000-0000-7000-8000-000000000002",
+			}),
+		).toBe('(filters.realmTagContextRealmIds = "019b0000-0000-7000-8000-000000000002")');
+	});
+
 	it("pushes Entity ownership through the indexed owner profile IDs", () => {
 		expect(
 			compileMeilisearchExpression("entities", {
@@ -80,7 +90,7 @@ describe("Meilisearch expression compiler", () => {
 		);
 		vi.stubGlobal("fetch", fetchMock);
 		const common = {
-			indexUid: "rezics_units_v9_20260731",
+			indexUid: "rezics_units_v10_20260731",
 			query: "book",
 			offset: 0,
 			limit: 20,
@@ -110,7 +120,7 @@ describe("Meilisearch expression compiler", () => {
 
 		await searchCandidates([
 			{
-				indexUid: "rezics_units_v9_20260731",
+				indexUid: "rezics_units_v10_20260731",
 				category: "units",
 				query: "book",
 				offset: 0,
@@ -146,7 +156,7 @@ describe("Meilisearch expression compiler", () => {
 
 		await searchCandidates([
 			{
-				indexUid: "rezics_units_v9_20260731",
+				indexUid: "rezics_units_v10_20260731",
 				category: "units",
 				query: "the complete title",
 				offset: 0,

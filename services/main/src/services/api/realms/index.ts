@@ -8,6 +8,7 @@ import { recordAuditEvent as appendAuditEvent } from "../../audit";
 import session, { resolveIdentity } from "../../auth/session";
 import type { Authorization } from "../../authorization";
 import { RealmRulesAcceptanceRequired } from "../../authorization/errors";
+import { getUnitReadCondition } from "../../authorization/unit/query";
 import {
 	isRealmJoinable,
 	isRealmVisible,
@@ -170,7 +171,9 @@ import {
 	RealmTagContextAlreadyExists,
 	RealmTagContextPostAlreadyUsed,
 	RealmTagContextPostNotMounted,
+	RealmTagContextRequired,
 	RealmTagSelfReferenceForbidden,
+	RealmTagVotingDisabled,
 } from "./errors";
 import { PostNotFound } from "../posts/errors";
 import { UnitNotFound } from "../../units/errors";
@@ -307,6 +310,48 @@ async function recordAuditEvent(
 function presentRealmTagVote(value: number | null): -1 | 1 | null {
 	if (value === null || value === -1 || value === 1) return value;
 	throw new Error("Realm Tag vote has an invalid persisted value");
+}
+
+async function ensureRealmTagVoteEligibility(
+	tx: DatabaseTransaction,
+	input: {
+		readonly realmId: string;
+		readonly tagId: string;
+		readonly viewerProfileId: string;
+	},
+) {
+	const [realmPolicy] = await tx
+		.select({ enabled: realm.realmTagVotingEnabled })
+		.from(realm)
+		.where(eq(realm.id, input.realmId))
+		.for("share")
+		.limit(1);
+	if (!realmPolicy) throw new RealmNotFound();
+	if (!realmPolicy.enabled) throw new RealmTagVotingDisabled();
+
+	const [context] = await tx
+		.select({ tagId: realmTagContext.tagId })
+		.from(realmTagContext)
+		.innerJoin(
+			realmUnit,
+			and(
+				eq(realmUnit.realmId, realmTagContext.realmId),
+				eq(realmUnit.unitId, realmTagContext.contextPostId),
+			),
+		)
+		.innerJoin(unit, eq(unit.id, realmTagContext.contextPostId))
+		.where(
+			and(
+				eq(realmTagContext.realmId, input.realmId),
+				eq(realmTagContext.tagId, input.tagId),
+				eq(realmUnit.status, "visible"),
+				eq(realmUnit.publicationState, "active"),
+				getUnitReadCondition(input.viewerProfileId),
+			),
+		)
+		.for("share")
+		.limit(1);
+	if (!context) throw new RealmTagContextRequired();
 }
 
 async function getRealmTagContextSummary(realmId: string, tagId: string) {
@@ -723,6 +768,7 @@ export default new Elysia({ prefix: "/realms" })
 					status: unit.status,
 					visibility: unit.visibility,
 					joinPolicy: realm.joinPolicy,
+					realmTagVotingEnabled: realm.realmTagVotingEnabled,
 					pages: realm.enabledPages,
 					latestRevisionId: unitRevisionHead.revisionId,
 					memberCount: sql<number>`(
@@ -1198,7 +1244,15 @@ export default new Elysia({ prefix: "/realms" })
 				if (body.joinPolicy)
 					await tx
 						.update(realm)
-						.set({ joinPolicy: body.joinPolicy })
+						.set({ joinPolicy: body.joinPolicy, updatedAt: new Date() })
+						.where(eq(realm.id, params.realmId));
+				if (body.realmTagVotingEnabled !== undefined)
+					await tx
+						.update(realm)
+						.set({
+							realmTagVotingEnabled: body.realmTagVotingEnabled,
+							updatedAt: new Date(),
+						})
 						.where(eq(realm.id, params.realmId));
 				if (body.localization) {
 					const storedLocalization = toUnitLocalizationStorage(body.localization);
@@ -2322,24 +2376,31 @@ export default new Elysia({ prefix: "/realms" })
 				authorization.unit.ensureCanRead(params.unitId),
 				authorization.unit.ensureCanRead(params.tagId),
 			]);
-			await database
-				.insert(realmTagVote)
-				.values({
+			await database.transaction(async (tx) => {
+				await ensureRealmTagVoteEligibility(tx, {
 					realmId: params.realmId,
-					unitId: params.unitId,
 					tagId: params.tagId,
-					profileId: profile.unitId,
-					value: body.value,
-				})
-				.onConflictDoUpdate({
-					target: [
-						realmTagVote.realmId,
-						realmTagVote.unitId,
-						realmTagVote.tagId,
-						realmTagVote.profileId,
-					],
-					set: { value: body.value, updatedAt: new Date() },
+					viewerProfileId: profile.unitId,
 				});
+				await tx
+					.insert(realmTagVote)
+					.values({
+						realmId: params.realmId,
+						unitId: params.unitId,
+						tagId: params.tagId,
+						profileId: profile.unitId,
+						value: body.value,
+					})
+					.onConflictDoUpdate({
+						target: [
+							realmTagVote.realmId,
+							realmTagVote.unitId,
+							realmTagVote.tagId,
+							realmTagVote.profileId,
+						],
+						set: { value: body.value, updatedAt: new Date() },
+					});
+			});
 			return getRealmTagVoteSummary(
 				params.realmId,
 				params.unitId,
@@ -2359,7 +2420,9 @@ export default new Elysia({ prefix: "/realms" })
 					"UnitPermissionForbidden",
 				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmTagVotingDisabled"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
+					"RealmTagContextRequired",
 					"RealmTagSelfReferenceForbidden",
 				]),
 			},
