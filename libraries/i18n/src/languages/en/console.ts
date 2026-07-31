@@ -322,6 +322,12 @@ export default {
 			{ title: String },
 		),
 		confirmRemoval: "Remove content",
+		confirmLicenseInvalidationTitle: "Invalidate this content license?",
+		confirmLicenseInvalidationDescription: insert(
+			"{{title}}’s current content license will become invalid. The grant record will be retained and can be restored by a platform administrator.",
+			{ title: String },
+		),
+		confirmLicenseInvalidation: "Invalidate license",
 		reportCount: insert("{{count}} reports", { count: Number }),
 		moderationStatuses: {
 			approved: "Approved",
@@ -330,6 +336,8 @@ export default {
 		},
 		targetingLocked: `New ${postTerms.label} targeting locked`,
 		targetingUnlocked: `New ${postTerms.label} targeting allowed`,
+		contentLicenseActive: "Content license active",
+		contentLicenseInvalidated: "Content license invalidated",
 		openContent: "Open content",
 	},
 	audit: {

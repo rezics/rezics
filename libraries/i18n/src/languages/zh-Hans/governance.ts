@@ -59,6 +59,7 @@ export default {
 		"platform.development_preview.access": "使用尚未发布的开发预览功能",
 		"unit.governance.read": "查看所有条目的治理数据",
 		"unit.ownership.override": "强制转移任意条目的所有权",
+		"unit.content_license.manage": "使条目内容授权失效或恢复",
 		"unit.delete": "软删除任意条目",
 		"unit.restore": "还原已软删除的条目",
 		"unit.slug.manage": "管理条目公开网址",

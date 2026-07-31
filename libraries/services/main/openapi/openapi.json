@@ -12967,6 +12967,8 @@
 																					"restore",
 																					"lock_post_targeting",
 																					"unlock_post_targeting",
+																					"invalidate_content_license",
+																					"restore_content_license",
 																					"warning",
 																					"silence",
 																					"suspension",
@@ -12988,6 +12990,7 @@
 																				"type": "string",
 																				"enum": [
 																					"content_policy",
+																					"copyright",
 																					"realm_rules",
 																					"spam",
 																					"harassment",
@@ -13052,6 +13055,8 @@
 																					"restore",
 																					"lock_post_targeting",
 																					"unlock_post_targeting",
+																					"invalidate_content_license",
+																					"restore_content_license",
 																					"warning",
 																					"silence",
 																					"suspension",
@@ -13073,6 +13078,7 @@
 																				"type": "string",
 																				"enum": [
 																					"content_policy",
+																					"copyright",
 																					"realm_rules",
 																					"spam",
 																					"harassment",
@@ -31998,6 +32004,7 @@
 													"title",
 													"moderationStatus",
 													"postTargetingLocked",
+													"contentLicense",
 													"openReportCount",
 													"allowedCommands",
 													"reports",
@@ -32052,6 +32059,57 @@
 														"enum": ["approved", "pending", "removed"]
 													},
 													"postTargetingLocked": { "type": "boolean" },
+													"contentLicense": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"id",
+																			"status"
+																		],
+																		"properties": {
+																			"id": {
+																				"format": "uuid",
+																				"type": "string"
+																			},
+																			"status": {
+																				"const": "active",
+																				"type": "string"
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"id",
+																			"status",
+																			"invalidationActionId"
+																		],
+																		"properties": {
+																			"id": {
+																				"format": "uuid",
+																				"type": "string"
+																			},
+																			"status": {
+																				"const": "invalidated",
+																				"type": "string"
+																			},
+																			"invalidationActionId": {
+																				"format": "uuid",
+																				"type": "string"
+																			}
+																		}
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
+													},
 													"openReportCount": {
 														"minimum": 0,
 														"anyOf": [
@@ -32075,6 +32133,8 @@
 																"restore",
 																"lock_post_targeting",
 																"unlock_post_targeting",
+																"invalidate_content_license",
+																"restore_content_license",
 																"dismiss",
 																"note"
 															]
@@ -33147,6 +33207,7 @@
 										"type": "string",
 										"enum": [
 											"content_policy",
+											"copyright",
 											"realm_rules",
 											"spam",
 											"harassment",
@@ -36348,6 +36409,7 @@
 										"type": "string",
 										"enum": [
 											"content_policy",
+											"copyright",
 											"realm_rules",
 											"spam",
 											"harassment",
@@ -36572,6 +36634,7 @@
 										"type": "string",
 										"enum": [
 											"content_policy",
+											"copyright",
 											"realm_rules",
 											"spam",
 											"harassment",
@@ -36861,6 +36924,7 @@
 										"type": "string",
 										"enum": [
 											"content_policy",
+											"copyright",
 											"realm_rules",
 											"spam",
 											"harassment",
@@ -37420,6 +37484,7 @@
 										"type": "string",
 										"enum": [
 											"content_policy",
+											"copyright",
 											"realm_rules",
 											"spam",
 											"harassment",
@@ -40438,6 +40503,7 @@
 												"type": "string",
 												"enum": [
 													"content_policy",
+													"copyright",
 													"realm_rules",
 													"spam",
 													"harassment",
@@ -40779,6 +40845,10 @@
 														"const": "unlock_post_targeting",
 														"type": "string"
 													},
+													{
+														"const": "invalidate_content_license",
+														"type": "string"
+													},
 													{ "const": "mute_member", "type": "string" },
 													{ "const": "remove_member", "type": "string" },
 													{ "const": "ban_member", "type": "string" },
@@ -40804,6 +40874,360 @@
 												"type": "string",
 												"enum": [
 													"content_policy",
+													"copyright",
+													"realm_rules",
+													"spam",
+													"harassment",
+													"unsafe_content",
+													"off_topic",
+													"duplicate",
+													"account_security",
+													"user_request",
+													"appeal",
+													"administrative",
+													"other"
+												]
+											},
+											"notes": {
+												"maxItems": 2,
+												"type": "array",
+												"items": {
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["role", "language", "content"],
+													"properties": {
+														"role": {
+															"anyOf": [
+																{
+																	"const": "internal_note",
+																	"type": "string"
+																},
+																{
+																	"const": "public_notice",
+																	"type": "string"
+																}
+															]
+														},
+														"language": {
+															"type": "string",
+															"enum": [
+																"zh",
+																"en",
+																"ja",
+																"ko",
+																"de",
+																"fr",
+																"es"
+															]
+														},
+														"content": {
+															"additionalProperties": false,
+															"$id": "PortableTextDocument",
+															"type": "object",
+															"required": [
+																"_type",
+																"_key",
+																"content"
+															],
+															"properties": {
+																"_type": {
+																	"const": "portable-text",
+																	"type": "string"
+																},
+																"_key": {
+																	"pattern": "^[0-9a-f]{12}$",
+																	"$id": "BlockKey",
+																	"type": "string"
+																},
+																"content": {
+																	"$id": "PortableText",
+																	"type": "array",
+																	"items": {
+																		"$id": "PortableTextBlock",
+																		"anyOf": [
+																			{
+																				"additionalProperties": {
+																					"$id": "#/components/schemas/JsonValue",
+																					"anyOf": [
+																						{
+																							"type": "null"
+																						},
+																						{
+																							"type": "boolean"
+																						},
+																						{
+																							"type": "number"
+																						},
+																						{
+																							"type": "string"
+																						},
+																						{
+																							"type": "array",
+																							"items": {
+																								"$ref": "#/components/schemas/JsonValue"
+																							}
+																						},
+																						{
+																							"type": "object",
+																							"patternProperties": {
+																								"^(.*)$": {
+																									"$ref": "#/components/schemas/JsonValue"
+																								}
+																							}
+																						}
+																					]
+																				},
+																				"$id": "PortableTextTextBlock",
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type",
+																					"children"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"const": "block",
+																						"type": "string"
+																					},
+																					"children": {
+																						"type": "array",
+																						"items": {
+																							"$id": "PortableTextChild",
+																							"anyOf": [
+																								{
+																									"additionalProperties": false,
+																									"$id": "PortableTextSpan",
+																									"type": "object",
+																									"required": [
+																										"_key",
+																										"_type",
+																										"text"
+																									],
+																									"properties": {
+																										"_key": {
+																											"type": "string"
+																										},
+																										"_type": {
+																											"const": "span",
+																											"type": "string"
+																										},
+																										"text": {
+																											"type": "string"
+																										},
+																										"marks": {
+																											"type": "array",
+																											"items": {
+																												"type": "string"
+																											}
+																										}
+																									}
+																								},
+																								{
+																									"additionalProperties": false,
+																									"$id": "PortableTextUnitMention",
+																									"type": "object",
+																									"required": [
+																										"_key",
+																										"_type",
+																										"unitId"
+																									],
+																									"properties": {
+																										"_key": {
+																											"type": "string"
+																										},
+																										"_type": {
+																											"const": "unit-mention",
+																											"type": "string"
+																										},
+																										"unitId": {
+																											"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																											"type": "string"
+																										}
+																									}
+																								}
+																							]
+																						}
+																					},
+																					"markDefs": {
+																						"type": "array",
+																						"items": {
+																							"additionalProperties": {
+																								"$id": "#/components/schemas/JsonValue",
+																								"anyOf": [
+																									{
+																										"type": "null"
+																									},
+																									{
+																										"type": "boolean"
+																									},
+																									{
+																										"type": "number"
+																									},
+																									{
+																										"type": "string"
+																									},
+																									{
+																										"type": "array",
+																										"items": {
+																											"$ref": "#/components/schemas/JsonValue"
+																										}
+																									},
+																									{
+																										"type": "object",
+																										"patternProperties": {
+																											"^(.*)$": {
+																												"$ref": "#/components/schemas/JsonValue"
+																											}
+																										}
+																									}
+																								]
+																							},
+																							"$id": "PortableTextObject",
+																							"type": "object",
+																							"required": [
+																								"_key",
+																								"_type"
+																							],
+																							"properties": {
+																								"_key": {
+																									"type": "string"
+																								},
+																								"_type": {
+																									"type": "string"
+																								}
+																							}
+																						}
+																					},
+																					"listItem": {
+																						"type": "string"
+																					},
+																					"style": {
+																						"type": "string"
+																					},
+																					"level": {
+																						"minimum": 1,
+																						"type": "integer"
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"$id": "PortableTextImage",
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type",
+																					"assetId"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"const": "image",
+																						"type": "string"
+																					},
+																					"assetId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"alt": {
+																						"type": "string"
+																					},
+																					"caption": {
+																						"type": "string"
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": {
+																					"$id": "#/components/schemas/JsonValue",
+																					"anyOf": [
+																						{
+																							"type": "null"
+																						},
+																						{
+																							"type": "boolean"
+																						},
+																						{
+																							"type": "number"
+																						},
+																						{
+																							"type": "string"
+																						},
+																						{
+																							"type": "array",
+																							"items": {
+																								"$ref": "#/components/schemas/JsonValue"
+																							}
+																						},
+																						{
+																							"type": "object",
+																							"patternProperties": {
+																								"^(.*)$": {
+																									"$ref": "#/components/schemas/JsonValue"
+																								}
+																							}
+																						}
+																					]
+																				},
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"pattern": "^(?!(?:block|image)$).+",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		]
+																	}
+																}
+															}
+														}
+													}
+												}
+											},
+											"idempotencyKey": {
+												"minLength": 1,
+												"maxLength": 256,
+												"type": "string"
+											},
+											"kind": {
+												"const": "restore_content_license",
+												"type": "string"
+											},
+											"reversesActionId": {
+												"format": "uuid",
+												"type": "string"
+											}
+										}
+									},
+									{
+										"additionalProperties": false,
+										"type": "object",
+										"required": [
+											"caseId",
+											"reasonCode",
+											"kind",
+											"reversesActionId"
+										],
+										"properties": {
+											"caseId": { "format": "uuid", "type": "string" },
+											"reasonCode": {
+												"type": "string",
+												"enum": [
+													"content_policy",
+													"copyright",
 													"realm_rules",
 													"spam",
 													"harassment",
@@ -41148,6 +41572,7 @@
 												"type": "string",
 												"enum": [
 													"content_policy",
+													"copyright",
 													"realm_rules",
 													"spam",
 													"harassment",
@@ -41500,6 +41925,9 @@
 										"previousState",
 										"resultingState",
 										"previousPostTargetingLocked",
+										"contentLicenseId",
+										"previousContentLicenseStatus",
+										"resultingContentLicenseStatus",
 										"resultingStatus",
 										"resultingPostTargetingLocked",
 										"reasonCode",
@@ -41523,6 +41951,37 @@
 										"previousPostTargetingLocked": {
 											"nullable": true,
 											"anyOf": [{ "type": "boolean" }, { "type": "null" }]
+										},
+										"contentLicenseId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"previousContentLicenseStatus": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": "active", "type": "string" },
+														{ "const": "invalidated", "type": "string" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"resultingContentLicenseStatus": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": "active", "type": "string" },
+														{ "const": "invalidated", "type": "string" }
+													]
+												},
+												{ "type": "null" }
+											]
 										},
 										"resultingStatus": {
 											"nullable": true,
@@ -41747,6 +42206,7 @@
 										"type": "string",
 										"enum": [
 											"content_policy",
+											"copyright",
 											"realm_rules",
 											"spam",
 											"harassment",
@@ -42245,6 +42705,7 @@
 										"type": "string",
 										"enum": [
 											"content_policy",
+											"copyright",
 											"realm_rules",
 											"spam",
 											"harassment",
@@ -53131,6 +53592,7 @@
 															"platform.development_preview.access",
 															"unit.governance.read",
 															"unit.ownership.override",
+															"unit.content_license.manage",
 															"unit.delete",
 															"unit.restore",
 															"unit.slug.manage",
@@ -58462,6 +58924,7 @@
 													"platform.development_preview.access",
 													"unit.governance.read",
 													"unit.ownership.override",
+													"unit.content_license.manage",
 													"unit.delete",
 													"unit.restore",
 													"unit.slug.manage",
@@ -58624,6 +59087,7 @@
 																		"platform.development_preview.access",
 																		"unit.governance.read",
 																		"unit.ownership.override",
+																		"unit.content_license.manage",
 																		"unit.delete",
 																		"unit.restore",
 																		"unit.slug.manage",
@@ -58790,6 +59254,7 @@
 															"platform.development_preview.access",
 															"unit.governance.read",
 															"unit.ownership.override",
+															"unit.content_license.manage",
 															"unit.delete",
 															"unit.restore",
 															"unit.slug.manage",
@@ -58937,7 +59402,7 @@
 								"properties": {
 									"expectedRevision": { "minLength": 1, "type": "string" },
 									"grants": {
-										"maxItems": 30,
+										"maxItems": 31,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -58961,6 +59426,7 @@
 														"platform.development_preview.access",
 														"unit.governance.read",
 														"unit.ownership.override",
+														"unit.content_license.manage",
 														"unit.delete",
 														"unit.restore",
 														"unit.slug.manage",
@@ -59048,6 +59514,7 @@
 															"platform.development_preview.access",
 															"unit.governance.read",
 															"unit.ownership.override",
+															"unit.content_license.manage",
 															"unit.delete",
 															"unit.restore",
 															"unit.slug.manage",
@@ -65762,6 +66229,7 @@
 										"type": "string",
 										"enum": [
 											"content_policy",
+											"copyright",
 											"realm_rules",
 											"spam",
 											"harassment",
@@ -66058,6 +66526,7 @@
 										"type": "string",
 										"enum": [
 											"content_policy",
+											"copyright",
 											"realm_rules",
 											"spam",
 											"harassment",
@@ -66463,6 +66932,7 @@
 										"type": "string",
 										"enum": [
 											"content_policy",
+											"copyright",
 											"realm_rules",
 											"spam",
 											"harassment",
@@ -66888,6 +67358,7 @@
 																		"type": "string",
 																		"enum": [
 																			"content_policy",
+																			"copyright",
 																			"realm_rules",
 																			"spam",
 																			"harassment",
@@ -85391,6 +85862,7 @@
 										"type": "string",
 										"enum": [
 											"content_policy",
+											"copyright",
 											"realm_rules",
 											"spam",
 											"harassment",
@@ -144616,6 +145088,8 @@
 															"restore",
 															"lock_post_targeting",
 															"unlock_post_targeting",
+															"invalidate_content_license",
+															"restore_content_license",
 															"warning",
 															"silence",
 															"suspension",
@@ -144693,6 +145167,7 @@
 														"type": "string",
 														"enum": [
 															"content_policy",
+															"copyright",
 															"realm_rules",
 															"spam",
 															"harassment",
@@ -145166,6 +145641,7 @@
 												"type": "string",
 												"enum": [
 													"content_policy",
+													"copyright",
 													"realm_rules",
 													"spam",
 													"harassment",
@@ -145514,6 +145990,7 @@
 												"type": "string",
 												"enum": [
 													"content_policy",
+													"copyright",
 													"realm_rules",
 													"spam",
 													"harassment",
@@ -145857,6 +146334,9 @@
 										"previousState",
 										"resultingState",
 										"previousPostTargetingLocked",
+										"contentLicenseId",
+										"previousContentLicenseStatus",
+										"resultingContentLicenseStatus",
 										"resultingStatus",
 										"resultingPostTargetingLocked",
 										"reasonCode",
@@ -145881,6 +146361,37 @@
 										"previousPostTargetingLocked": {
 											"nullable": true,
 											"anyOf": [{ "type": "boolean" }, { "type": "null" }]
+										},
+										"contentLicenseId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"previousContentLicenseStatus": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": "active", "type": "string" },
+														{ "const": "invalidated", "type": "string" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"resultingContentLicenseStatus": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": "active", "type": "string" },
+														{ "const": "invalidated", "type": "string" }
+													]
+												},
+												{ "type": "null" }
+											]
 										},
 										"resultingStatus": {
 											"nullable": true,

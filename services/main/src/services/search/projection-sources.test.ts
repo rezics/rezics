@@ -9,6 +9,12 @@ const migrationDirectory = fileURLToPath(new URL("../database/migrations", impor
 const currentEnrichment = fileURLToPath(
 	new URL("../../../search/rezics_unit_search_document_v9.sql", import.meta.url),
 );
+const contentLicenseGovernanceMigration = fileURLToPath(
+	new URL(
+		"../database/migrations/20260731160000_unit_content_license_governance.sql",
+		import.meta.url,
+	),
+);
 
 describe("search projection source registry", () => {
 	it("installs a trigger for every declared current and history source", async () => {
@@ -44,12 +50,19 @@ describe("search projection source registry", () => {
 		expect(sql).not.toContain("FROM public.unit_access_binding");
 	});
 
-	it("projects the immutable Unit content license without a revocation predicate", async () => {
-		const sql = await readFile(currentEnrichment, "utf8");
+	it("projects only the active immutable Unit content license grant", async () => {
+		const [sql, migration] = await Promise.all([
+			readFile(currentEnrichment, "utf8"),
+			readFile(contentLicenseGovernanceMigration, "utf8"),
+		]);
 		expect(sql).toContain(
-			"LEFT JOIN public.unit_content_license AS content_license_row ON content_license_row.unit_id = source.unit_id",
+			"ON content_license_row.unit_id = source.unit_id\n\tAND content_license_row.status = 'active'",
 		);
 		expect(sql).not.toContain("content_license_row.revoked_at");
+		expect(migration).toContain(
+			'CREATE TRIGGER "search_projection_touch_unit_content_license_update"',
+		);
+		expect(migration).toContain('CREATE TRIGGER "unit_content_license_guard_mutation"');
 	});
 
 	it("invalidates works when an Entity publisher chain changes", async () => {

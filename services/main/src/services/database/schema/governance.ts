@@ -42,6 +42,7 @@ import {
 } from "./columns";
 import { profile } from "./profile";
 import { moderationStatus, unit } from "./unit";
+import { unitContentLicense, unitContentLicenseStatus } from "./unit-content-license";
 import { unitRevision } from "./history";
 import { post } from "./post";
 
@@ -301,6 +302,9 @@ export const moderationAction = pgTable(
 		kind: moderationActionKind().notNull(),
 		resultingStatus: moderationStatus(),
 		resultingPostTargetingLocked: boolean(),
+		contentLicenseId: uuid(),
+		previousContentLicenseStatus: unitContentLicenseStatus(),
+		resultingContentLicenseStatus: unitContentLicenseStatus(),
 		reasonCode: governanceReasonCode().notNull(),
 		reversesActionId: uuid(),
 		previousState: text(),
@@ -317,6 +321,11 @@ export const moderationAction = pgTable(
 			foreignColumns: [table.id],
 			name: "moderation_action_reverses_fkey",
 		}).onDelete("restrict"),
+		foreignKey({
+			columns: [table.contentLicenseId],
+			foreignColumns: [unitContentLicense.id],
+			name: "moderation_action_content_license_fkey",
+		}).onDelete("restrict"),
 		uniqueIndex("moderation_action_actor_case_idempotency_key")
 			.on(table.actorProfileId, table.caseId, table.idempotencyKey)
 			.where(sql`${table.idempotencyKey} is not null`),
@@ -327,6 +336,11 @@ export const moderationAction = pgTable(
 			table.id.desc(),
 		),
 		index("moderation_action_reverses_idx").on(table.reversesActionId),
+		index("moderation_action_content_license_created_at_idx").on(
+			table.contentLicenseId,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
 		check(
 			"moderation_action_state_outcome_check",
 			sql`(${table.previousState} is null) = (${table.resultingState} is null)`,
@@ -337,7 +351,33 @@ export const moderationAction = pgTable(
 		),
 		check(
 			"moderation_action_single_outcome_check",
-			sql`${table.previousState} is null or ${table.previousPostTargetingLocked} is null`,
+			sql`num_nonnulls(
+				${table.previousState},
+				${table.previousPostTargetingLocked},
+				${table.previousContentLicenseStatus}
+			) <= 1`,
+		),
+		check(
+			"moderation_action_content_license_transition_check",
+			sql`(
+				${table.kind} = 'invalidate_content_license'
+				and ${table.contentLicenseId} is not null
+				and ${table.previousContentLicenseStatus} = 'active'
+				and ${table.resultingContentLicenseStatus} = 'invalidated'
+			) or (
+				${table.kind} = 'restore_content_license'
+				and ${table.contentLicenseId} is not null
+				and ${table.previousContentLicenseStatus} = 'invalidated'
+				and ${table.resultingContentLicenseStatus} = 'active'
+			) or (
+				${table.kind} not in (
+					'invalidate_content_license',
+					'restore_content_license'
+				)
+				and ${table.contentLicenseId} is null
+				and ${table.previousContentLicenseStatus} is null
+				and ${table.resultingContentLicenseStatus} is null
+			)`,
 		),
 		check(
 			"moderation_action_request_fingerprint_check",
@@ -349,7 +389,7 @@ export const moderationAction = pgTable(
 		),
 		check(
 			"moderation_action_reversal_check",
-			sql`(${table.kind} in ('reverse', 'revoke_enforcement')) = (${table.reversesActionId} is not null)`,
+			sql`(${table.kind} in ('reverse', 'revoke_enforcement', 'restore_content_license')) = (${table.reversesActionId} is not null)`,
 		),
 	],
 );

@@ -395,6 +395,8 @@ export default {
 		restore: "Wiederherstellen",
 		lock_post_targeting: `Neue ${postTerms.pluralLabel} mit dieser Unit als Ziel sperren`,
 		unlock_post_targeting: `Neue ${postTerms.pluralLabel} mit dieser Unit als Ziel erlauben`,
+		invalidate_content_license: "Inhaltslizenz ungültig machen",
+		restore_content_license: "Inhaltslizenz wiederherstellen",
 		warning: "Warnen",
 		silence: "Stummschalten",
 		suspension: "Sperren",
@@ -413,6 +415,7 @@ export default {
 	},
 	governanceReasons: {
 		content_policy: "Inhaltsrichtlinie",
+		copyright: "Urheberrecht",
 		realm_rules: `Regeln des ${realmTerms.inline}s`,
 		spam: "Spam",
 		harassment: "Belästigung",

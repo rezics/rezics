@@ -10,6 +10,7 @@ import {
 	ActiveReportCaseStateValues,
 	type ContentLanguage,
 	type ModerationCaseStateValues,
+	moderationAction,
 	moderationCase,
 	platformUnitReport,
 	realm,
@@ -18,6 +19,7 @@ import {
 	realmUnit,
 	realmUnitReport,
 	unit,
+	unitContentLicense,
 	unitRevisionHead,
 } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
@@ -472,6 +474,9 @@ export default new Elysia().use(session).group("", (app) =>
 			"/reports/platform/cases",
 			async ({ query, authorization }) => {
 				await authorization.platform.ensureCapability("platform.moderate");
+				const canManageContentLicenses = await authorization.platform.hasCapability(
+					"unit.content_license.manage",
+				);
 				const rows = await database
 					.selectDistinct({
 						caseId: moderationCase.id,
@@ -501,23 +506,116 @@ export default new Elysia().use(session).group("", (app) =>
 					.orderBy(desc(moderationCase.updatedAt), desc(moderationCase.id))
 					.limit(query.limit ?? 50);
 				if (rows.length === 0) return { items: [] };
-				const reportRows = await database
-					.select(platformReportSelection(query.localizationLanguages))
-					.from(platformUnitReport)
-					.innerJoin(moderationCase, eq(moderationCase.id, platformUnitReport.caseId))
-					.where(
-						inArray(
-							platformUnitReport.caseId,
-							rows.map((row) => row.caseId),
+				const [reportRows, contentLicenseRows] = await Promise.all([
+					database
+						.select(platformReportSelection(query.localizationLanguages))
+						.from(platformUnitReport)
+						.innerJoin(moderationCase, eq(moderationCase.id, platformUnitReport.caseId))
+						.where(
+							inArray(
+								platformUnitReport.caseId,
+								rows.map((row) => row.caseId),
+							),
+						)
+						.orderBy(desc(platformUnitReport.createdAt), desc(platformUnitReport.id)),
+					database
+						.select({
+							id: unitContentLicense.id,
+							unitId: unitContentLicense.unitId,
+							status: unitContentLicense.status,
+							grantedAt: unitContentLicense.grantedAt,
+						})
+						.from(unitContentLicense)
+						.where(
+							inArray(
+								unitContentLicense.unitId,
+								rows.map((row) => row.unitId),
+							),
+						)
+						.orderBy(
+							sql`${unitContentLicense.status} = 'active' desc`,
+							desc(unitContentLicense.grantedAt),
+							desc(unitContentLicense.id),
 						),
-					)
-					.orderBy(desc(platformUnitReport.createdAt), desc(platformUnitReport.id));
+				]);
 				const reportsByCase = new Map<string, ReturnType<typeof presentPlatformReport>[]>();
 				for (const reportRow of reportRows) {
 					const presented = presentPlatformReport(reportRow);
 					const reports = reportsByCase.get(reportRow.caseId) ?? [];
 					reports.push(presented);
 					reportsByCase.set(reportRow.caseId, reports);
+				}
+				const contentLicenseByUnit = new Map<string, (typeof contentLicenseRows)[number]>();
+				for (const contentLicense of contentLicenseRows)
+					if (!contentLicenseByUnit.has(contentLicense.unitId))
+						contentLicenseByUnit.set(contentLicense.unitId, contentLicense);
+				const invalidatedContentLicenses = [...contentLicenseByUnit.values()].filter(
+					(contentLicense) => contentLicense.status === "invalidated",
+				);
+				const invalidationActionRows = invalidatedContentLicenses.length
+					? await database
+							.select({
+								id: moderationAction.id,
+								contentLicenseId: moderationAction.contentLicenseId,
+								createdAt: moderationAction.createdAt,
+							})
+							.from(moderationAction)
+							.where(
+								and(
+									inArray(
+										moderationAction.contentLicenseId,
+										invalidatedContentLicenses.map(
+											(contentLicense) => contentLicense.id,
+										),
+									),
+									eq(moderationAction.kind, "invalidate_content_license"),
+									eq(
+										moderationAction.resultingContentLicenseStatus,
+										"invalidated",
+									),
+								),
+							)
+							.orderBy(desc(moderationAction.createdAt), desc(moderationAction.id))
+					: [];
+				const invalidationActionByContentLicense = new Map<string, string>();
+				for (const action of invalidationActionRows)
+					if (
+						action.contentLicenseId &&
+						!invalidationActionByContentLicense.has(action.contentLicenseId)
+					)
+						invalidationActionByContentLicense.set(action.contentLicenseId, action.id);
+				const presentedContentLicenseByUnit = new Map<
+					string,
+					| {
+							id: string;
+							status: "active";
+					  }
+					| {
+							id: string;
+							status: "invalidated";
+							invalidationActionId: string;
+					  }
+				>();
+				for (const contentLicense of contentLicenseByUnit.values()) {
+					if (contentLicense.status === "active") {
+						presentedContentLicenseByUnit.set(contentLicense.unitId, {
+							id: contentLicense.id,
+							status: "active",
+						});
+						continue;
+					}
+					const invalidationActionId = invalidationActionByContentLicense.get(
+						contentLicense.id,
+					);
+					if (!invalidationActionId)
+						throw new Error(
+							`Invalidated content license ${contentLicense.id} has no invalidation action`,
+						);
+					presentedContentLicenseByUnit.set(contentLicense.unitId, {
+						id: contentLicense.id,
+						status: "invalidated",
+						invalidationActionId,
+					});
 				}
 				return {
 					items: rows.map((row) => {
@@ -527,14 +625,20 @@ export default new Elysia().use(session).group("", (app) =>
 						if (!reports?.length)
 							throw new Error(`Platform report case ${row.caseId} has no reports`);
 						const hasOpenReports = isActiveReportCaseState(row.caseState);
+						const contentLicense =
+							presentedContentLicenseByUnit.get(row.unitId) ?? null;
 						return {
 							...row,
 							language: row.language,
+							contentLicense,
 							openReportCount: hasOpenReports ? reports.length : 0,
 							allowedCommands: [
 								...getPlatformUnitModerationCommands(
 									row.moderationStatus,
 									row.postTargetingLocked,
+									canManageContentLicenses
+										? (contentLicense?.status ?? null)
+										: null,
 									hasOpenReports,
 								),
 							],

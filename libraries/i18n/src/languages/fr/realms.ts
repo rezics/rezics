@@ -395,6 +395,8 @@ export default {
 		restore: "Restaurer",
 		lock_post_targeting: `Bloquer les nouvelles ${postTerms.plural} ciblant cette Unit`,
 		unlock_post_targeting: `Autoriser les nouvelles ${postTerms.plural} ciblant cette Unit`,
+		invalidate_content_license: "Invalider la licence du contenu",
+		restore_content_license: "Rétablir la licence du contenu",
 		warning: "Avertir",
 		silence: "Réduire au silence",
 		suspension: "Suspendre",
@@ -413,6 +415,7 @@ export default {
 	},
 	governanceReasons: {
 		content_policy: "Règle de contenu",
+		copyright: "Droit d’auteur",
 		realm_rules: `Règles du ${realmTerms.inline}`,
 		spam: "Contenu indésirable",
 		harassment: "Harcèlement",

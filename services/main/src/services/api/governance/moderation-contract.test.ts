@@ -6,11 +6,13 @@ import {
 	assertModerationActionCompatible,
 	getPlatformUnitModerationCommands,
 	getRealmUnitModerationCommands,
+	isContentLicenseModerationCommand,
 	isModerationActionCompatible,
 	resolvePostTargetingLockState,
 	resolveModerationCaseState,
 	resolveRealmMemberState,
 	resolveRealmUnitStatus,
+	resolveUnitContentLicenseStatus,
 	resolveUnitModerationStatus,
 } from "./moderation-contract";
 import { fingerprintModerationAction } from "./moderation-service";
@@ -20,6 +22,12 @@ describe("moderation action contracts", () => {
 		expect(isModerationActionCompatible("realm_unit", "hide")).toBe(true);
 		expect(isModerationActionCompatible("unit", "hide")).toBe(false);
 		expect(isModerationActionCompatible("realm_member", "approve")).toBe(false);
+		expect(isModerationActionCompatible("unit", "invalidate_content_license")).toBe(true);
+		expect(isModerationActionCompatible("realm_unit", "invalidate_content_license")).toBe(
+			false,
+		);
+		expect(isContentLicenseModerationCommand("restore_content_license")).toBe(true);
+		expect(isContentLicenseModerationCommand("restore")).toBe(false);
 		expect(() => assertModerationActionCompatible("unit", "hide")).toThrow(
 			"not valid for this target",
 		);
@@ -72,7 +80,7 @@ describe("moderation action contracts", () => {
 			"lock_post_targeting",
 			"note",
 		]);
-		expect(getPlatformUnitModerationCommands("approved", true, true)).toEqual([
+		expect(getPlatformUnitModerationCommands("approved", true, null, true)).toEqual([
 			"remove",
 			"unlock_post_targeting",
 			"dismiss",
@@ -83,11 +91,32 @@ describe("moderation action contracts", () => {
 			"lock_post_targeting",
 			"note",
 		]);
+		expect(getPlatformUnitModerationCommands("approved", false, "active")).toEqual([
+			"remove",
+			"lock_post_targeting",
+			"invalidate_content_license",
+			"note",
+		]);
+		expect(getPlatformUnitModerationCommands("approved", false, "invalidated")).toEqual([
+			"remove",
+			"lock_post_targeting",
+			"restore_content_license",
+			"note",
+		]);
 	});
 
 	it("derives Unit and Realm member transitions", () => {
 		expect(resolveUnitModerationStatus("pending", "approve")).toBe("approved");
 		expect(resolveUnitModerationStatus("removed", "restore")).toBe("approved");
+		expect(resolveUnitContentLicenseStatus("active", "invalidate_content_license")).toBe(
+			"invalidated",
+		);
+		expect(resolveUnitContentLicenseStatus("invalidated", "restore_content_license")).toBe(
+			"active",
+		);
+		expect(() => resolveUnitContentLicenseStatus("active", "restore_content_license")).toThrow(
+			"would not change the target",
+		);
 		expect(resolveRealmMemberState("active", "mute_member")).toBe("muted");
 		expect(resolveRealmMemberState("removed", "ban_member")).toBe("banned");
 		expect(resolveRealmMemberState("banned", "restore_member")).toBe("active");

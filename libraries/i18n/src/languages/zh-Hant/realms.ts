@@ -364,6 +364,8 @@ export default {
 		restore: "恢復",
 		lock_post_targeting: `禁止新的${postTerms.plural}指向此條目`,
 		unlock_post_targeting: `允許新的${postTerms.plural}指向此條目`,
+		invalidate_content_license: "使內容授權失效",
+		restore_content_license: "恢復內容授權",
 		warning: "警告",
 		silence: "禁止發言",
 		suspension: "暫停",
@@ -382,6 +384,7 @@ export default {
 	},
 	governanceReasons: {
 		content_policy: "內容政策",
+		copyright: "著作權",
 		realm_rules: `${realmTerms.label}規則`,
 		spam: "垃圾內容",
 		harassment: "騷擾",

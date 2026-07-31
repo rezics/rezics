@@ -51,6 +51,7 @@ import { useConsoleWorkspace } from "../components/console-workspace";
 
 type PlatformReportCase = GetApiReportsPlatformCasesStatus200["items"][number];
 type PlatformCommand = PlatformReportCase["allowedCommands"][number];
+type ConfirmedCommand = Extract<PlatformCommand, "remove" | "invalidate_content_license">;
 
 const CaseStates = Object.values(GetApiReportsPlatformCasesState);
 const GovernanceReasonCodes = Object.values(
@@ -75,7 +76,7 @@ export function ConsoleModerationPage() {
 	const [reasonCode, setReasonCode] = useState<GovernanceReasonCode>("content_policy");
 	const [note, setNote] = useState("");
 	const noteLanguage = useDraftContentLanguage(note);
-	const [removeConfirmationOpen, setRemoveConfirmationOpen] = useState(false);
+	const [confirmedCommand, setConfirmedCommand] = useState<ConfirmedCommand | null>(null);
 	const cases = useGetApiReportsPlatformCases(
 		{ query: { state, localizationLanguages, limit: 100 } },
 		{ query: { enabled: canModerate } },
@@ -132,6 +133,14 @@ export function ConsoleModerationPage() {
 		if (command === "note") {
 			if (!notes) return;
 			body = { ...common, kind: "note", notes };
+		} else if (command === "restore_content_license") {
+			if (selected.contentLicense?.status !== "invalidated") return;
+			body = {
+				...common,
+				kind: "restore_content_license",
+				reversesActionId: selected.contentLicense.invalidationActionId,
+				...(notes ? { notes } : {}),
+			};
 		} else body = { ...common, kind: command, ...(notes ? { notes } : {}) };
 		try {
 			await mutation.mutateAsync({ body });
@@ -149,8 +158,8 @@ export function ConsoleModerationPage() {
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		if (!noteValid) return;
-		if (command === "remove") {
-			setRemoveConfirmationOpen(true);
+		if (command === "remove" || command === "invalidate_content_license") {
+			setConfirmedCommand(command);
 			return;
 		}
 		void applyModeration();
@@ -292,7 +301,12 @@ export function ConsoleModerationPage() {
 									disabled={!noteValid}
 									isLoading={mutation.isPending}
 									type="submit"
-									variant={command === "remove" ? "destructive" : "solid"}
+									variant={
+										command === "remove" ||
+										command === "invalidate_content_license"
+											? "destructive"
+											: "solid"
+									}
 								>
 									{t.console.moderation.submit}
 								</Button>
@@ -309,19 +323,25 @@ export function ConsoleModerationPage() {
 			</div>
 			<AlertDialog
 				onOpenChange={({ open }) => {
-					if (!mutation.isPending) setRemoveConfirmationOpen(open);
+					if (!mutation.isPending && !open) setConfirmedCommand(null);
 				}}
-				open={removeConfirmationOpen}
+				open={confirmedCommand !== null}
 			>
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>
-							{t.console.moderation.confirmRemovalTitle}
+							{confirmedCommand === "invalidate_content_license"
+								? t.console.moderation.confirmLicenseInvalidationTitle
+								: t.console.moderation.confirmRemovalTitle}
 						</AlertDialogTitle>
 						<AlertDialogDescription>
-							{t.console.moderation.confirmRemovalDescription({
-								title: selected?.title ?? t.console.moderation.untitled,
-							})}
+							{confirmedCommand === "invalidate_content_license"
+								? t.console.moderation.confirmLicenseInvalidationDescription({
+										title: selected?.title ?? t.console.moderation.untitled,
+									})
+								: t.console.moderation.confirmRemovalDescription({
+										title: selected?.title ?? t.console.moderation.untitled,
+									})}
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
@@ -331,12 +351,14 @@ export function ConsoleModerationPage() {
 						<AlertDialogAction
 							disabled={mutation.isPending}
 							onClick={() => {
-								setRemoveConfirmationOpen(false);
+								setConfirmedCommand(null);
 								void applyModeration();
 							}}
 							variant="destructive"
 						>
-							{t.console.moderation.confirmRemoval}
+							{confirmedCommand === "invalidate_content_license"
+								? t.console.moderation.confirmLicenseInvalidation
+								: t.console.moderation.confirmRemoval}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>
@@ -412,6 +434,17 @@ function CaseSnapshot({ item }: { readonly item: PlatformReportCase }) {
 						? t.console.moderation.targetingLocked
 						: t.console.moderation.targetingUnlocked}
 				</Badge>
+				{item.contentLicense ? (
+					<Badge
+						variant={
+							item.contentLicense.status === "invalidated" ? "warning" : "outline"
+						}
+					>
+						{item.contentLicense.status === "invalidated"
+							? t.console.moderation.contentLicenseInvalidated
+							: t.console.moderation.contentLicenseActive}
+					</Badge>
+				) : null}
 				<Badge variant="outline">{t.reports.caseStates[item.caseState]}</Badge>
 			</div>
 			{href ? (

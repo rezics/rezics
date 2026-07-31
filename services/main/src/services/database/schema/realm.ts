@@ -70,6 +70,7 @@ const platformCapabilityStorageValues = toEnumValues([
 	"unit.restore",
 	"unit.governance.read",
 	"unit.ownership.override",
+	"unit.content_license.manage",
 	"unit.slug.manage",
 	"unit.slug.namespace.manage",
 	"unit.slug.redirect.release",

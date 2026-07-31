@@ -306,6 +306,12 @@ export default {
 			{ title: String },
 		),
 		confirmRemoval: "コンテンツを削除",
+		confirmLicenseInvalidationTitle: "このコンテンツライセンスを無効にしますか？",
+		confirmLicenseInvalidationDescription: insert(
+			"{{title}}の現在のコンテンツライセンスを無効にします。付与記録は保持され、プラットフォーム管理者が復元できます。",
+			{ title: String },
+		),
+		confirmLicenseInvalidation: "ライセンスを無効化",
 		reportCount: insert("報告 {{count}} 件", { count: Number }),
 		moderationStatuses: {
 			approved: "承認済み",
@@ -314,6 +320,8 @@ export default {
 		},
 		targetingLocked: `新しい${postTerms.label}からの参照を禁止`,
 		targetingUnlocked: `新しい${postTerms.label}からの参照を許可`,
+		contentLicenseActive: "コンテンツライセンスは有効",
+		contentLicenseInvalidated: "コンテンツライセンスは無効",
 		openContent: "コンテンツを開く",
 	},
 	audit: {

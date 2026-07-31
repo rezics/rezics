@@ -220,6 +220,7 @@ export const AiDisclosureValues = [
 	"machine_generated",
 ] as const;
 export const ModerationStatusValues = ["approved", "pending", "removed"] as const;
+export const UnitContentLicenseStatusValues = ["active", "invalidated"] as const;
 export const ContentStatusValues = ["draft", "published", "archived"] as const;
 export const ImageAssetStatusValues = ["pending", "ready", "failed"] as const;
 export const ImageAssetAccessValues = ["private", "public"] as const;
@@ -352,11 +353,14 @@ export const PlatformUnitModerationCommandValues = [
 	"restore",
 	"lock_post_targeting",
 	"unlock_post_targeting",
+	"invalidate_content_license",
+	"restore_content_license",
 	"dismiss",
 	"note",
 ] as const;
 export const GovernanceReasonCodeValues = [
 	"content_policy",
+	"copyright",
 	"realm_rules",
 	"spam",
 	"harassment",
@@ -390,6 +394,8 @@ export const ModerationActionKindValues = [
 	"restore",
 	"lock_post_targeting",
 	"unlock_post_targeting",
+	"invalidate_content_license",
+	"restore_content_license",
 	...EnforcementKindValues,
 	"revoke_enforcement",
 	"mute_member",

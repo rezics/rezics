@@ -14,12 +14,14 @@ import {
 	realmUnitReport,
 	realmUnitStatusEvent,
 	unit,
+	unitContentLicense,
 	unitOwnership,
 } from "../../database/schema";
 import { createGovernanceNotePost, listGovernanceNotes } from "../../governance/note-service";
 import { createNotification } from "../../notifications/service";
 import {
 	ModerationActionIncompatible,
+	ModerationActionNoEffect,
 	ModerationIdempotencyConflict,
 	ModerationNoteRoleDuplicate,
 	ModerationRealmMissing,
@@ -36,9 +38,11 @@ import {
 	resolveModerationCaseState,
 	resolveRealmMemberState,
 	resolveRealmUnitStatus,
+	resolveUnitContentLicenseStatus,
 	resolveUnitModerationStatus,
 	type RealmMemberState,
 	type RealmUnitStatus,
+	type UnitContentLicenseStatus,
 	type UnitModerationStatus,
 } from "./moderation-contract";
 import type { CreateModerationActionBody } from "./schema";
@@ -51,6 +55,9 @@ export const moderationActionSelection = {
 	previousState: moderationAction.previousState,
 	resultingState: moderationAction.resultingState,
 	previousPostTargetingLocked: moderationAction.previousPostTargetingLocked,
+	contentLicenseId: moderationAction.contentLicenseId,
+	previousContentLicenseStatus: moderationAction.previousContentLicenseStatus,
+	resultingContentLicenseStatus: moderationAction.resultingContentLicenseStatus,
 	resultingStatus: moderationAction.resultingStatus,
 	resultingPostTargetingLocked: moderationAction.resultingPostTargetingLocked,
 	reasonCode: moderationAction.reasonCode,
@@ -92,7 +99,15 @@ type LockActionPlan = {
 	resultingPostTargetingLocked: boolean;
 };
 
-type ModerationActionPlan = StateActionPlan | LockActionPlan | { type: "case_only" };
+type ContentLicenseActionPlan = {
+	type: "unit_content_license_state";
+	contentLicenseId: string;
+	previousContentLicenseStatus: UnitContentLicenseStatus;
+	resultingContentLicenseStatus: UnitContentLicenseStatus;
+};
+
+type ModerationActionPlan =
+	StateActionPlan | LockActionPlan | ContentLicenseActionPlan | { type: "case_only" };
 
 function canonicalize(value: unknown): unknown {
 	if (Array.isArray(value)) return value.map(canonicalize);
@@ -309,6 +324,134 @@ async function loadPostTargetingLockPlan(
 	};
 }
 
+async function lockContentLicenseTargetUnit(
+	tx: DatabaseTransaction,
+	row: ModerationCaseRecord,
+): Promise<void> {
+	if (row.targetKind !== "unit" || row.authority !== "platform")
+		throw new ModerationActionIncompatible();
+	const [target] = await tx
+		.select({ id: unit.id })
+		.from(unit)
+		.where(eq(unit.id, row.targetId))
+		.for("update")
+		.limit(1);
+	if (!target) throw new ModerationTargetNotFound();
+}
+
+async function loadContentLicenseInvalidationPlan(
+	tx: DatabaseTransaction,
+	row: ModerationCaseRecord,
+): Promise<ContentLicenseActionPlan> {
+	await lockContentLicenseTargetUnit(tx, row);
+	const [current] = await tx
+		.select({
+			id: unitContentLicense.id,
+			status: unitContentLicense.status,
+		})
+		.from(unitContentLicense)
+		.where(
+			and(
+				eq(unitContentLicense.unitId, row.targetId),
+				eq(unitContentLicense.status, "active"),
+			),
+		)
+		.for("update")
+		.limit(1);
+	if (!current) throw new ModerationActionNoEffect();
+	return {
+		type: "unit_content_license_state",
+		contentLicenseId: current.id,
+		previousContentLicenseStatus: current.status,
+		resultingContentLicenseStatus: resolveUnitContentLicenseStatus(
+			current.status,
+			"invalidate_content_license",
+		),
+	};
+}
+
+async function loadContentLicenseRestorationPlan(
+	tx: DatabaseTransaction,
+	row: ModerationCaseRecord,
+	reversesActionId: string,
+): Promise<ContentLicenseActionPlan> {
+	await lockContentLicenseTargetUnit(tx, row);
+	const [invalidation] = await tx
+		.select({
+			id: moderationAction.id,
+			caseId: moderationAction.caseId,
+			kind: moderationAction.kind,
+			contentLicenseId: moderationAction.contentLicenseId,
+			previousContentLicenseStatus: moderationAction.previousContentLicenseStatus,
+			resultingContentLicenseStatus: moderationAction.resultingContentLicenseStatus,
+		})
+		.from(moderationAction)
+		.where(eq(moderationAction.id, reversesActionId))
+		.limit(1);
+	if (
+		!invalidation ||
+		invalidation.kind !== "invalidate_content_license" ||
+		!invalidation.contentLicenseId ||
+		invalidation.previousContentLicenseStatus !== "active" ||
+		invalidation.resultingContentLicenseStatus !== "invalidated"
+	)
+		throw new ModerationReversedActionInvalid();
+	const [invalidationCase] = await tx
+		.select({
+			authority: moderationCase.authority,
+			targetKind: moderationCase.targetKind,
+			targetId: moderationCase.targetId,
+		})
+		.from(moderationCase)
+		.where(eq(moderationCase.id, invalidation.caseId))
+		.limit(1);
+	if (
+		!invalidationCase ||
+		invalidationCase.authority !== "platform" ||
+		invalidationCase.targetKind !== "unit" ||
+		invalidationCase.targetId !== row.targetId
+	)
+		throw new ModerationReversedActionInvalid();
+	const [existingRestoration] = await tx
+		.select({ id: moderationAction.id })
+		.from(moderationAction)
+		.where(eq(moderationAction.reversesActionId, invalidation.id))
+		.limit(1);
+	if (existingRestoration) throw new ModerationReversalUnavailable();
+	const [current] = await tx
+		.select({
+			id: unitContentLicense.id,
+			unitId: unitContentLicense.unitId,
+			status: unitContentLicense.status,
+		})
+		.from(unitContentLicense)
+		.where(eq(unitContentLicense.id, invalidation.contentLicenseId))
+		.for("update")
+		.limit(1);
+	if (!current || current.unitId !== row.targetId) throw new ModerationReversedActionInvalid();
+	if (current.status !== "invalidated") throw new ModerationReversalUnavailable();
+	const [activeGrant] = await tx
+		.select({ id: unitContentLicense.id })
+		.from(unitContentLicense)
+		.where(
+			and(
+				eq(unitContentLicense.unitId, row.targetId),
+				eq(unitContentLicense.status, "active"),
+			),
+		)
+		.limit(1);
+	if (activeGrant) throw new ModerationReversalUnavailable();
+	return {
+		type: "unit_content_license_state",
+		contentLicenseId: current.id,
+		previousContentLicenseStatus: current.status,
+		resultingContentLicenseStatus: resolveUnitContentLicenseStatus(
+			current.status,
+			"restore_content_license",
+		),
+	};
+}
+
 async function loadReversalPlan(
 	tx: DatabaseTransaction,
 	row: ModerationCaseRecord,
@@ -464,6 +607,10 @@ async function deriveActionPlan(
 ): Promise<ModerationActionPlan> {
 	assertModerationActionCompatible(row.targetKind, body.kind);
 	if (body.kind === "reverse") return loadReversalPlan(tx, row, body.reversesActionId);
+	if (body.kind === "invalidate_content_license")
+		return loadContentLicenseInvalidationPlan(tx, row);
+	if (body.kind === "restore_content_license")
+		return loadContentLicenseRestorationPlan(tx, row, body.reversesActionId);
 	if (body.kind === "approve" || body.kind === "remove" || body.kind === "restore") {
 		if (row.targetKind === "realm_unit") return loadRealmUnitStatePlan(tx, row, body.kind);
 		return loadUnitStatePlan(tx, row, body.kind);
@@ -571,6 +718,21 @@ async function executeActionPlan(
 		if (!updated) throw new ModerationTransitionInvalid();
 		return;
 	}
+	if (plan.type === "unit_content_license_state") {
+		const [updated] = await tx
+			.update(unitContentLicense)
+			.set({ status: plan.resultingContentLicenseStatus })
+			.where(
+				and(
+					eq(unitContentLicense.id, plan.contentLicenseId),
+					eq(unitContentLicense.unitId, row.targetId),
+					eq(unitContentLicense.status, plan.previousContentLicenseStatus),
+				),
+			)
+			.returning({ id: unitContentLicense.id });
+		if (!updated) throw new ModerationTransitionInvalid();
+		return;
+	}
 }
 
 export async function executeAuthorizedModerationAction(
@@ -660,6 +822,14 @@ export async function executeAuthorizedModerationAction(
 	const resultingPostTargetingLocked = isPostTargetingLockPlan
 		? plan.resultingPostTargetingLocked
 		: null;
+	const isContentLicensePlan = plan.type === "unit_content_license_state";
+	const contentLicenseId = isContentLicensePlan ? plan.contentLicenseId : null;
+	const previousContentLicenseStatus = isContentLicensePlan
+		? plan.previousContentLicenseStatus
+		: null;
+	const resultingContentLicenseStatus = isContentLicensePlan
+		? plan.resultingContentLicenseStatus
+		: null;
 	const [created] = await tx
 		.insert(moderationAction)
 		.values({
@@ -669,11 +839,16 @@ export async function executeAuthorizedModerationAction(
 			previousState,
 			resultingState,
 			previousPostTargetingLocked,
+			contentLicenseId,
+			previousContentLicenseStatus,
+			resultingContentLicenseStatus,
 			resultingStatus: plan.type === "unit_state" ? plan.resultingState : null,
 			resultingPostTargetingLocked,
 			reasonCode: input.body.reasonCode,
 			reversesActionId:
-				input.body.kind === "reverse" ? input.body.reversesActionId : undefined,
+				input.body.kind === "reverse" || input.body.kind === "restore_content_license"
+					? input.body.reversesActionId
+					: undefined,
 			idempotencyKey: input.body.idempotencyKey,
 			requestFingerprint: fingerprint,
 		})

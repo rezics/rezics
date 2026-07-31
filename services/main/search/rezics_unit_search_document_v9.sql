@@ -120,7 +120,9 @@ LEFT JOIN public.post_reply_stat AS reply_stat ON reply_stat.post_id = source.un
 LEFT JOIN public.realm AS realm_row ON realm_row.id = source.unit_id
 LEFT JOIN public.poll AS poll_row ON poll_row.id = source.unit_id
 LEFT JOIN public.book AS book_row ON book_row.id = source.unit_id
-LEFT JOIN public.unit_content_license AS content_license_row ON content_license_row.unit_id = source.unit_id
+LEFT JOIN public.unit_content_license AS content_license_row
+	ON content_license_row.unit_id = source.unit_id
+	AND content_license_row.status = 'active'
 LEFT JOIN public.media AS media_row ON media_row.id = source.unit_id
 LEFT JOIN public.software AS software_row ON software_row.id = source.unit_id
 LEFT JOIN public.unit_structure AS structure_row ON structure_row.id = source.unit_id

@@ -61,6 +61,8 @@ export default {
 			"Auf unveröffentlichte Entwicklungsvorschauen zugreifen",
 		"unit.governance.read": "Verwaltungsdaten aller Units einsehen",
 		"unit.ownership.override": "Eigentümerschaft einer beliebigen Unit neu zuweisen",
+		"unit.content_license.manage":
+			"Inhaltslizenzen von Units ungültig machen oder wiederherstellen",
 		"unit.delete": "Beliebige Units vorläufig löschen",
 		"unit.restore": "Vorläufig gelöschte Units wiederherstellen",
 		"unit.slug.manage": "Öffentliche Unit-Adressen verwalten",

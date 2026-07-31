@@ -59,6 +59,7 @@ export default {
 		"platform.development_preview.access": "출시되지 않은 개발 미리보기 접근",
 		"unit.governance.read": "모든 유닛의 관리 정보 보기",
 		"unit.ownership.override": "모든 유닛의 소유자 강제 변경",
+		"unit.content_license.manage": "유닛 콘텐츠 라이선스 무효화 또는 복원",
 		"unit.delete": "모든 유닛 소프트 삭제",
 		"unit.restore": "소프트 삭제된 유닛 복원",
 		"unit.slug.manage": "유닛 공개 주소 관리",

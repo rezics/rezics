@@ -173,7 +173,7 @@ describe("database schema contracts", () => {
 		);
 	});
 
-	it("keeps one immutable Unit content License grant per Unit", () => {
+	it("keeps immutable Unit content License facts with one active grant per Unit", () => {
 		const grant = getTableConfig(unitContentLicense);
 		expect(getTableName(unitContentLicense)).toBe("unit_content_license");
 		expect(grant.columns.map((column) => column.name)).toEqual(
@@ -183,11 +183,22 @@ describe("database schema contracts", () => {
 				"granted_by_profile_id",
 				"reference_license_slug",
 				"granted_at",
+				"status",
 			]),
 		);
-		expect(grant.indexes.map((index) => index.config.name)).toContain(
-			"unit_content_license_unit_key",
+		expect(grant.indexes.map((index) => index.config.name)).toEqual(
+			expect.arrayContaining([
+				"unit_content_license_active_unit_key",
+				"unit_content_license_unit_granted_at_idx",
+			]),
 		);
+		expect(
+			grant.indexes.find(
+				(index) => index.config.name === "unit_content_license_active_unit_key",
+			)?.config.where,
+		).toBeDefined();
+		expect(unitContentLicense.status.enumValues).toEqual(["active", "invalidated"]);
+		expect(unitContentLicense.status.hasDefault).toBe(true);
 		expect(
 			grant.foreignKeys.find(
 				(key) => key.getName() === "unit_content_license_unit_id_unit_id_fk",
@@ -513,11 +524,22 @@ describe("database schema contracts", () => {
 		expect(action.indexes.map((index) => index.config.name)).toContain(
 			"moderation_action_actor_case_idempotency_key",
 		);
+		expect(action.indexes.map((index) => index.config.name)).toContain(
+			"moderation_action_content_license_created_at_idx",
+		);
+		expect(action.columns.map((column) => column.name)).toEqual(
+			expect.arrayContaining([
+				"content_license_id",
+				"previous_content_license_status",
+				"resulting_content_license_status",
+			]),
+		);
 		expect(action.checks.map((constraint) => constraint.name)).toEqual(
 			expect.arrayContaining([
 				"moderation_action_state_outcome_check",
 				"moderation_action_post_targeting_lock_outcome_check",
 				"moderation_action_single_outcome_check",
+				"moderation_action_content_license_transition_check",
 				"moderation_action_request_fingerprint_check",
 			]),
 		);
@@ -723,6 +745,7 @@ describe("database schema contracts", () => {
 				"entity.associations.override",
 				"unit.governance.read",
 				"unit.ownership.override",
+				"unit.content_license.manage",
 				"unit.delete",
 				"unit.restore",
 				"platform.development_preview.access",

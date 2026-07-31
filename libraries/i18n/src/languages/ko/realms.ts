@@ -384,6 +384,8 @@ export default {
 		restore: "복원",
 		lock_post_targeting: `이 유닛을 대상으로 하는 새로운 ${postTerms.pluralLabel} 차단`,
 		unlock_post_targeting: `이 유닛을 대상으로 하는 새로운 ${postTerms.pluralLabel} 허용`,
+		invalidate_content_license: "콘텐츠 라이선스 무효화",
+		restore_content_license: "콘텐츠 라이선스 복원",
 		warning: "경고",
 		silence: "침묵",
 		suspension: "일시 중단",
@@ -402,6 +404,7 @@ export default {
 	},
 	governanceReasons: {
 		content_policy: "콘텐츠 정책",
+		copyright: "저작권",
 		realm_rules: `${realmTerms.label} 규칙`,
 		spam: "스팸",
 		harassment: "괴롭힘",

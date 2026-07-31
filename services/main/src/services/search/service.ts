@@ -319,7 +319,12 @@ function compileFilter(category: SearchCategory, filter: SearchControlPredicate)
 					database
 						.select({ unitId: unitContentLicense.unitId })
 						.from(unitContentLicense)
-						.where(eq(unitContentLicense.unitId, unit.id)),
+						.where(
+							and(
+								eq(unitContentLicense.unitId, unit.id),
+								eq(unitContentLicense.status, "active"),
+							),
+						),
 				),
 				filter,
 			),

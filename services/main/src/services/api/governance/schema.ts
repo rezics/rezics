@@ -97,6 +97,7 @@ export const CreateModerationActionBody = t.Union([
 				t.Literal("restore"),
 				t.Literal("lock_post_targeting"),
 				t.Literal("unlock_post_targeting"),
+				t.Literal("invalidate_content_license"),
 				t.Literal("mute_member"),
 				t.Literal("remove_member"),
 				t.Literal("ban_member"),
@@ -104,6 +105,14 @@ export const CreateModerationActionBody = t.Union([
 				t.Literal("dismiss"),
 				t.Literal("escalate"),
 			]),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			...ModerationActionCommon,
+			kind: t.Literal("restore_content_license"),
+			reversesActionId: Uuid,
 		},
 		{ additionalProperties: false },
 	),
@@ -317,6 +326,13 @@ export const ModerationActionResponse = t.Object({
 	previousState: t.Nullable(t.String()),
 	resultingState: t.Nullable(t.String()),
 	previousPostTargetingLocked: t.Nullable(t.Boolean()),
+	contentLicenseId: t.Nullable(Uuid),
+	previousContentLicenseStatus: t.Nullable(
+		t.Union([t.Literal("active"), t.Literal("invalidated")]),
+	),
+	resultingContentLicenseStatus: t.Nullable(
+		t.Union([t.Literal("active"), t.Literal("invalidated")]),
+	),
 	resultingStatus: t.Nullable(t.String()),
 	resultingPostTargetingLocked: t.Nullable(t.Boolean()),
 	reasonCode: t.String(),

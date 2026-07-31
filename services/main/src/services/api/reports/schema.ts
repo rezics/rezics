@@ -191,6 +191,24 @@ const PlatformModerationStatus = t.Union([
 	t.Literal("removed"),
 ]);
 
+const PlatformReportCaseContentLicense = t.Union([
+	t.Object(
+		{
+			id: Uuid,
+			status: t.Literal("active"),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			id: Uuid,
+			status: t.Literal("invalidated"),
+			invalidationActionId: Uuid,
+		},
+		{ additionalProperties: false },
+	),
+]);
+
 export const PlatformReportCaseResponse = t.Object({
 	caseId: Uuid,
 	caseState: t.UnionEnum(ModerationCaseStateValues, { default: undefined }),
@@ -200,6 +218,7 @@ export const PlatformReportCaseResponse = t.Object({
 	title: t.Nullable(t.String()),
 	moderationStatus: PlatformModerationStatus,
 	postTargetingLocked: t.Boolean(),
+	contentLicense: t.Nullable(PlatformReportCaseContentLicense),
 	openReportCount: t.Integer({ minimum: 0 }),
 	allowedCommands: t.Array(t.UnionEnum(PlatformUnitModerationCommandValues), {
 		minItems: 1,

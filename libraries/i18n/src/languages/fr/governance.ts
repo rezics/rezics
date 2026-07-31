@@ -61,6 +61,7 @@ export default {
 		"platform.development_preview.access": "Accéder aux aperçus de développement non publiés",
 		"unit.governance.read": "Consulter la gouvernance de toutes les Units",
 		"unit.ownership.override": "Réattribuer la propriété de n’importe quelle Unit",
+		"unit.content_license.manage": "Invalider ou rétablir les licences de contenu des Units",
 		"unit.delete": "Supprimer provisoirement n’importe quelle Unit",
 		"unit.restore": "Restaurer les Units supprimées provisoirement",
 		"unit.slug.manage": "Gérer les adresses publiques des Units",

@@ -299,6 +299,12 @@ export default {
 			title: String,
 		}),
 		confirmRemoval: "콘텐츠 삭제",
+		confirmLicenseInvalidationTitle: "이 콘텐츠 라이선스를 무효화할까요?",
+		confirmLicenseInvalidationDescription: insert(
+			"{{title}}의 현재 콘텐츠 라이선스가 무효화됩니다. 부여 기록은 유지되며 플랫폼 관리자가 복원할 수 있습니다.",
+			{ title: String },
+		),
+		confirmLicenseInvalidation: "라이선스 무효화",
 		reportCount: insert("신고 {{count}}건", { count: Number }),
 		moderationStatuses: {
 			approved: "승인됨",
@@ -307,6 +313,8 @@ export default {
 		},
 		targetingLocked: `새 ${postTerms.label} 연결 차단됨`,
 		targetingUnlocked: `새 ${postTerms.label} 연결 허용됨`,
+		contentLicenseActive: "콘텐츠 라이선스 유효",
+		contentLicenseInvalidated: "콘텐츠 라이선스 무효",
 		openContent: "콘텐츠 열기",
 	},
 	audit: {

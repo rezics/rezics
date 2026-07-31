@@ -12,6 +12,7 @@ import {
 	type RealmMemberStateValues,
 	type RealmModerationCommandValues,
 	type RealmUnitStatusValues,
+	type UnitContentLicenseStatusValues,
 } from "../../database/schema/contract-values";
 
 export type ModerationActionCommand = CreateModerationActionBody["kind"];
@@ -22,6 +23,16 @@ export type RealmMemberState = (typeof RealmMemberStateValues)[number];
 export type ModerationCaseState = (typeof ModerationCaseStateValues)[number];
 export type UnitModerationStatus = "approved" | "pending" | "removed";
 export type PlatformUnitModerationCommand = (typeof PlatformUnitModerationCommandValues)[number];
+export type UnitContentLicenseStatus = (typeof UnitContentLicenseStatusValues)[number];
+
+export function isContentLicenseModerationCommand(
+	action: ModerationActionCommand,
+): action is Extract<
+	ModerationActionCommand,
+	"invalidate_content_license" | "restore_content_license"
+> {
+	return action === "invalidate_content_license" || action === "restore_content_license";
+}
 
 export function isActiveReportCaseState(state: ModerationCaseState): boolean {
 	return ActiveReportCaseStateValues.some((candidate) => candidate === state);
@@ -62,14 +73,22 @@ const PlatformUnitStateCommands = {
 export function getPlatformUnitModerationCommands(
 	status: UnitModerationStatus,
 	postTargetingLocked: boolean,
+	contentLicenseStatus: UnitContentLicenseStatus | null = null,
 	hasOpenReports = false,
 ): readonly PlatformUnitModerationCommand[] {
 	const reportCommands: readonly PlatformUnitModerationCommand[] = hasOpenReports
 		? ["dismiss"]
 		: [];
+	const contentLicenseCommands: readonly PlatformUnitModerationCommand[] =
+		contentLicenseStatus === "active"
+			? ["invalidate_content_license"]
+			: contentLicenseStatus === "invalidated"
+				? ["restore_content_license"]
+				: [];
 	return [
 		...PlatformUnitStateCommands[status],
 		postTargetingLocked ? "unlock_post_targeting" : "lock_post_targeting",
+		...contentLicenseCommands,
 		...reportCommands,
 		"note",
 	];
@@ -82,6 +101,8 @@ const ActionsByTarget = {
 		"restore",
 		"lock_post_targeting",
 		"unlock_post_targeting",
+		"invalidate_content_license",
+		"restore_content_license",
 		"dismiss",
 		...SharedAdministrativeActions,
 	],
@@ -189,6 +210,21 @@ export function resolvePostTargetingLockState(
 	const next = action === "lock_post_targeting";
 	if (current === next) throw new ModerationActionNoEffect();
 	return next;
+}
+
+export function resolveUnitContentLicenseStatus(
+	current: UnitContentLicenseStatus,
+	action: Extract<
+		ModerationActionCommand,
+		"invalidate_content_license" | "restore_content_license"
+	>,
+): UnitContentLicenseStatus {
+	switch (action) {
+		case "invalidate_content_license":
+			return resolveStateTransition(current, ["active"], "invalidated");
+		case "restore_content_license":
+			return resolveStateTransition(current, ["invalidated"], "active");
+	}
 }
 
 export function resolveModerationCaseState(

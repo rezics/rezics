@@ -140,6 +140,7 @@ export const PlatformCapabilityValues = [
 	DevelopmentPreviewCapability,
 	"unit.governance.read",
 	"unit.ownership.override",
+	"unit.content_license.manage",
 	"unit.delete",
 	"unit.restore",
 	"unit.slug.manage",
@@ -232,6 +233,12 @@ export const PlatformCapabilityDefinitions = {
 		action: "override",
 		rationale:
 			"Reassigns ownership of any Unit through the platform control plane, independently from per-Unit owner authority.",
+	},
+	"unit.content_license.manage": {
+		resource: "unit.content_license",
+		action: "manage",
+		rationale:
+			"Invalidates or restores platform recognition of Unit content license grants through audited governance cases.",
 	},
 	"unit.delete": {
 		resource: "unit",
@@ -340,6 +347,7 @@ export const PlatformCapabilityImplications: Partial<
 	"platform.user.status.update": ["platform.user.read"],
 	"platform.session.revoke": ["platform.session.read", "platform.user.read"],
 	"unit.ownership.override": ["unit.governance.read"],
+	"unit.content_license.manage": ["unit.governance.read"],
 	"unit.delete": ["unit.governance.read"],
 	"unit.restore": ["unit.governance.read"],
 	"realm.members.manage": ["realm.members.read"],

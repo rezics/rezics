@@ -318,6 +318,12 @@ export default {
 			{ title: String },
 		),
 		confirmRemoval: "Inhalt entfernen",
+		confirmLicenseInvalidationTitle: "Diese Inhaltslizenz ungültig machen?",
+		confirmLicenseInvalidationDescription: insert(
+			"Die aktuelle Inhaltslizenz von {{title}} wird ungültig. Der Vergabevermerk bleibt erhalten und kann von der Plattformverwaltung wiederhergestellt werden.",
+			{ title: String },
+		),
+		confirmLicenseInvalidation: "Lizenz ungültig machen",
 		reportCount: insert("{{count}} Meldungen", { count: Number }),
 		moderationStatuses: {
 			approved: "Freigegeben",
@@ -326,6 +332,8 @@ export default {
 		},
 		targetingLocked: `Neue ${postTerms.label}-Verweise gesperrt`,
 		targetingUnlocked: `Neue ${postTerms.label}-Verweise erlaubt`,
+		contentLicenseActive: "Inhaltslizenz gültig",
+		contentLicenseInvalidated: "Inhaltslizenz ungültig",
 		openContent: "Inhalt öffnen",
 	},
 	audit: {

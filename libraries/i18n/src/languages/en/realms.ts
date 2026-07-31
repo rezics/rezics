@@ -389,6 +389,8 @@ export default {
 		restore: "Restore",
 		lock_post_targeting: `Block new ${postTerms.pluralLabel} targeting this Unit`,
 		unlock_post_targeting: `Allow new ${postTerms.pluralLabel} targeting this Unit`,
+		invalidate_content_license: "Invalidate content license",
+		restore_content_license: "Restore content license",
 		warning: "Warning",
 		silence: "Silence",
 		suspension: "Suspend",
@@ -407,6 +409,7 @@ export default {
 	},
 	governanceReasons: {
 		content_policy: "Content policy",
+		copyright: "Copyright",
 		realm_rules: `${realmTerms.label} rules`,
 		spam: "Spam",
 		harassment: "Harassment",

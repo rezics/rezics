@@ -60,6 +60,7 @@ export default {
 		"platform.development_preview.access": "Access unreleased development previews",
 		"unit.governance.read": "Inspect governance data for every Unit",
 		"unit.ownership.override": "Override the owner of any Unit",
+		"unit.content_license.manage": "Invalidate or restore Unit content licenses",
 		"unit.delete": "Soft-delete any Unit",
 		"unit.restore": "Restore soft-deleted Units",
 		"unit.slug.manage": "Manage Unit public addresses",

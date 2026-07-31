@@ -306,6 +306,12 @@ export default {
 			title: String,
 		}),
 		confirmRemoval: "移除內容",
+		confirmLicenseInvalidationTitle: "要使這項內容授權失效嗎？",
+		confirmLicenseInvalidationDescription: insert(
+			"「{{title}}」目前的內容授權將失效；授權紀錄會保留，且可由平台管理員恢復。",
+			{ title: String },
+		),
+		confirmLicenseInvalidation: "使授權失效",
 		reportCount: insert("{{count}} 則檢舉", { count: Number }),
 		moderationStatuses: {
 			approved: "已核准",
@@ -314,6 +320,8 @@ export default {
 		},
 		targetingLocked: `已禁止新的${postTerms.label}指向`,
 		targetingUnlocked: `允許新的${postTerms.label}指向`,
+		contentLicenseActive: "內容授權有效",
+		contentLicenseInvalidated: "內容授權已失效",
 		openContent: "開啟內容",
 	},
 	audit: {

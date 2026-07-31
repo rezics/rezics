@@ -377,7 +377,12 @@ async function getUnitDetails(
 							grantedAt: unitContentLicense.grantedAt,
 						})
 						.from(unitContentLicense)
-						.where(eq(unitContentLicense.unitId, unitId))
+						.where(
+							and(
+								eq(unitContentLicense.unitId, unitId),
+								eq(unitContentLicense.status, "active"),
+							),
+						)
 						.limit(1)
 				)[0] ?? null)
 			: null;
@@ -854,7 +859,7 @@ export async function updateUnit(
 					grantedByProfileId: authorization.profileId,
 					referenceLicenseSlug: details.contentLicense.referenceLicenseSlug,
 				})
-				.onConflictDoNothing({ target: unitContentLicense.unitId });
+				.onConflictDoNothing();
 		if (kind === "series" && details.kind !== undefined)
 			await tx.update(series).set({ kind: details.kind }).where(eq(series.id, unitId));
 		const revision = await recordUnitRevision(tx, {

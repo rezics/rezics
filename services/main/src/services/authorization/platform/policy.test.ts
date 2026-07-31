@@ -26,6 +26,7 @@ describe("platform authorization policy", () => {
 		expect(grantingPlatformCapabilities("unit.governance.read")).toEqual([
 			"unit.governance.read",
 			"unit.ownership.override",
+			"unit.content_license.manage",
 			"unit.delete",
 			"unit.restore",
 		]);

@@ -8102,6 +8102,8 @@ export const GetApiNotificationsStatus200ItemsPayloadActionKindEnum = {
 	restore: "restore",
 	lock_post_targeting: "lock_post_targeting",
 	unlock_post_targeting: "unlock_post_targeting",
+	invalidate_content_license: "invalidate_content_license",
+	restore_content_license: "restore_content_license",
 	warning: "warning",
 	silence: "silence",
 	suspension: "suspension",
@@ -8124,6 +8126,7 @@ export type GetApiNotificationsStatus200ItemsPayloadActionKindEnum =
 
 export const GetApiNotificationsStatus200ItemsPayloadReasonCodeEnum = {
 	content_policy: "content_policy",
+	copyright: "copyright",
 	realm_rules: "realm_rules",
 	spam: "spam",
 	harassment: "harassment",
@@ -20089,6 +20092,8 @@ export const GetApiReportsPlatformCasesStatus200ItemsAllowedCommandsEnum = {
 	restore: "restore",
 	lock_post_targeting: "lock_post_targeting",
 	unlock_post_targeting: "unlock_post_targeting",
+	invalidate_content_license: "invalidate_content_license",
+	restore_content_license: "restore_content_license",
 	dismiss: "dismiss",
 	note: "note",
 } as const;
@@ -20165,6 +20170,43 @@ export type GetApiReportsPlatformCasesStatus200 = {
 		 * @type boolean
 		 */
 		postTargetingLocked: boolean;
+		contentLicense:
+			| (
+					| (
+							| {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									status: "active";
+							  }
+							| {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									status: "invalidated";
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									invalidationActionId: string;
+							  }
+					  )
+					| null
+			  )
+			| null;
 		openReportCount: string | number;
 		/**
 		 * @type array
@@ -21509,6 +21551,7 @@ export type PutApiGovernanceUnitByUnitIdAccessRequestRestrictionsEnum =
 
 export const PutApiGovernanceUnitByUnitIdAccessRequestReasonCodeEnum = {
 	content_policy: "content_policy",
+	copyright: "copyright",
 	realm_rules: "realm_rules",
 	spam: "spam",
 	harassment: "harassment",
@@ -24417,6 +24460,7 @@ export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus500 = I
 
 export const PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideRequestReasonCodeEnum = {
 	content_policy: "content_policy",
+	copyright: "copyright",
 	realm_rules: "realm_rules",
 	spam: "spam",
 	harassment: "harassment",
@@ -24730,6 +24774,7 @@ export type PostApiGovernancePlatformUnitsByUnitIdDeleteStatus500 = InternalErro
 
 export const PostApiGovernancePlatformUnitsByUnitIdDeleteRequestReasonCodeEnum = {
 	content_policy: "content_policy",
+	copyright: "copyright",
 	realm_rules: "realm_rules",
 	spam: "spam",
 	harassment: "harassment",
@@ -25042,6 +25087,7 @@ export type PostApiGovernancePlatformUnitsByUnitIdRestoreStatus500 = InternalErr
 
 export const PostApiGovernancePlatformUnitsByUnitIdRestoreRequestReasonCodeEnum = {
 	content_policy: "content_policy",
+	copyright: "copyright",
 	realm_rules: "realm_rules",
 	spam: "spam",
 	harassment: "harassment",
@@ -25558,6 +25604,7 @@ export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestDeci
 
 export const PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestReasonCodeEnum = {
 	content_policy: "content_policy",
+	copyright: "copyright",
 	realm_rules: "realm_rules",
 	spam: "spam",
 	harassment: "harassment",
@@ -27696,6 +27743,9 @@ export type PostApiGovernanceModerationActionsStatus200 = {
 	previousState: (string | null) | null;
 	resultingState: (string | null) | null;
 	previousPostTargetingLocked: (boolean | null) | null;
+	contentLicenseId: (string | null) | null;
+	previousContentLicenseStatus: (("active" | "invalidated") | null) | null;
+	resultingContentLicenseStatus: (("active" | "invalidated") | null) | null;
 	resultingStatus: (string | null) | null;
 	resultingPostTargetingLocked: (boolean | null) | null;
 	/**
@@ -27886,6 +27936,7 @@ export type PostApiGovernanceModerationActionsStatus500 = InternalError;
 
 export const PostApiGovernanceModerationActionsRequestReasonCodeEnum = {
 	content_policy: "content_policy",
+	copyright: "copyright",
 	realm_rules: "realm_rules",
 	spam: "spam",
 	harassment: "harassment",
@@ -28080,12 +28131,181 @@ export type PostApiGovernanceModerationActionsBody =
 				| "restore"
 				| "lock_post_targeting"
 				| "unlock_post_targeting"
+				| "invalidate_content_license"
 				| "mute_member"
 				| "remove_member"
 				| "ban_member"
 				| "restore_member"
 				| "dismiss"
 				| "escalate";
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			caseId: string;
+			/**
+			 * @type string
+			 */
+			reasonCode: PostApiGovernanceModerationActionsRequestReasonCodeEnum;
+			/**
+			 * @type array | undefined
+			 */
+			notes?: {
+				role: "internal_note" | "public_notice";
+				/**
+				 * @type string
+				 */
+				language: PostApiGovernanceModerationActionsRequestNotesLanguageEnum;
+				/**
+				 * @type object
+				 */
+				content: {
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "image";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								assetId: string;
+								/**
+								 * @type string | undefined
+								 */
+								alt?: string;
+								/**
+								 * @type string | undefined
+								 */
+								caption?: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!(?:block|image)$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+				};
+			}[];
+			/**
+			 * @minLength 1
+			 * @maxLength 256
+			 * @type string | undefined
+			 */
+			idempotencyKey?: string;
+			/**
+			 * @type string
+			 */
+			kind: "restore_content_license";
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			reversesActionId: string;
 	  }
 	| {
 			/**
@@ -28628,6 +28848,7 @@ export type PostApiGovernanceModerationEnforcementsRequestKindEnum =
 
 export const PostApiGovernanceModerationEnforcementsRequestReasonCodeEnum = {
 	content_policy: "content_policy",
+	copyright: "copyright",
 	realm_rules: "realm_rules",
 	spam: "spam",
 	harassment: "harassment",
@@ -29070,6 +29291,7 @@ export type PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus50
 
 export const PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeRequestReasonCodeEnum = {
 	content_policy: "content_policy",
+	copyright: "copyright",
 	realm_rules: "realm_rules",
 	spam: "spam",
 	harassment: "harassment",
@@ -38277,6 +38499,7 @@ export const GetApiUsersMeStatus200PlatformCapabilitiesEnum = {
 	"platform.development_preview.access": "platform.development_preview.access",
 	"unit.governance.read": "unit.governance.read",
 	"unit.ownership.override": "unit.ownership.override",
+	"unit.content_license.manage": "unit.content_license.manage",
 	"unit.delete": "unit.delete",
 	"unit.restore": "unit.restore",
 	"unit.slug.manage": "unit.slug.manage",
@@ -43912,6 +44135,7 @@ export const GetApiPlatformAccessPolicyStatus200CapabilitiesEnum = {
 	"platform.development_preview.access": "platform.development_preview.access",
 	"unit.governance.read": "unit.governance.read",
 	"unit.ownership.override": "unit.ownership.override",
+	"unit.content_license.manage": "unit.content_license.manage",
 	"unit.delete": "unit.delete",
 	"unit.restore": "unit.restore",
 	"unit.slug.manage": "unit.slug.manage",
@@ -44034,6 +44258,7 @@ export const GetApiPlatformAccessProfilesStatus200ItemsGrantsCapabilityEnum = {
 	"platform.development_preview.access": "platform.development_preview.access",
 	"unit.governance.read": "unit.governance.read",
 	"unit.ownership.override": "unit.ownership.override",
+	"unit.content_license.manage": "unit.content_license.manage",
 	"unit.delete": "unit.delete",
 	"unit.restore": "unit.restore",
 	"unit.slug.manage": "unit.slug.manage",
@@ -44213,6 +44438,7 @@ export const GetApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnu
 	"platform.development_preview.access": "platform.development_preview.access",
 	"unit.governance.read": "unit.governance.read",
 	"unit.ownership.override": "unit.ownership.override",
+	"unit.content_license.manage": "unit.content_license.manage",
 	"unit.delete": "unit.delete",
 	"unit.restore": "unit.restore",
 	"unit.slug.manage": "unit.slug.manage",
@@ -44417,6 +44643,7 @@ export const PutApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnu
 	"platform.development_preview.access": "platform.development_preview.access",
 	"unit.governance.read": "unit.governance.read",
 	"unit.ownership.override": "unit.ownership.override",
+	"unit.content_license.manage": "unit.content_license.manage",
 	"unit.delete": "unit.delete",
 	"unit.restore": "unit.restore",
 	"unit.slug.manage": "unit.slug.manage",
@@ -44657,6 +44884,7 @@ export const PutApiPlatformAccessProfilesByProfileIdRequestGrantsCapabilityEnum 
 	"platform.development_preview.access": "platform.development_preview.access",
 	"unit.governance.read": "unit.governance.read",
 	"unit.ownership.override": "unit.ownership.override",
+	"unit.content_license.manage": "unit.content_license.manage",
 	"unit.delete": "unit.delete",
 	"unit.restore": "unit.restore",
 	"unit.slug.manage": "unit.slug.manage",
@@ -50560,6 +50788,7 @@ export type ReplaceUnitSlugAddressWithPlatformAccessStatus500 = InternalError;
 
 export const ReplaceUnitSlugAddressWithPlatformAccessRequestReasonCodeEnum = {
 	content_policy: "content_policy",
+	copyright: "copyright",
 	realm_rules: "realm_rules",
 	spam: "spam",
 	harassment: "harassment",
@@ -50860,6 +51089,7 @@ export type CreateSlugNamespaceWithPlatformAccessStatus500 = InternalError;
 
 export const CreateSlugNamespaceWithPlatformAccessRequestReasonCodeEnum = {
 	content_policy: "content_policy",
+	copyright: "copyright",
 	realm_rules: "realm_rules",
 	spam: "spam",
 	harassment: "harassment",
@@ -51057,6 +51287,7 @@ export type ReleaseSlugRedirectWithPlatformAccessStatus500 = InternalError;
 
 export const ReleaseSlugRedirectWithPlatformAccessRequestReasonCodeEnum = {
 	content_policy: "content_policy",
+	copyright: "copyright",
 	realm_rules: "realm_rules",
 	spam: "spam",
 	harassment: "harassment",
@@ -51438,6 +51669,7 @@ export type GetApiUnitsByIdByUnitIdRealmPublicationsStatus200ItemsStatusEnum =
 export const GetApiUnitsByIdByUnitIdRealmPublicationsStatus200ItemsLatestGovernanceReasonCodeEnum =
 	{
 		content_policy: "content_policy",
+		copyright: "copyright",
 		realm_rules: "realm_rules",
 		spam: "spam",
 		harassment: "harassment",
@@ -64662,6 +64894,7 @@ export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus500 = Intern
 
 export const PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestReasonCodeEnum = {
 	content_policy: "content_policy",
+	copyright: "copyright",
 	realm_rules: "realm_rules",
 	spam: "spam",
 	harassment: "harassment",
@@ -109044,6 +109277,8 @@ export const GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsKindEnum = {
 	restore: "restore",
 	lock_post_targeting: "lock_post_targeting",
 	unlock_post_targeting: "unlock_post_targeting",
+	invalidate_content_license: "invalidate_content_license",
+	restore_content_license: "restore_content_license",
 	warning: "warning",
 	silence: "silence",
 	suspension: "suspension",
@@ -109086,6 +109321,7 @@ export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsResultingStat
 
 export const GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsReasonCodeEnum = {
 	content_policy: "content_policy",
+	copyright: "copyright",
 	realm_rules: "realm_rules",
 	spam: "spam",
 	harassment: "harassment",
@@ -109523,6 +109759,9 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200 = {
 	previousState: (string | null) | null;
 	resultingState: (string | null) | null;
 	previousPostTargetingLocked: (boolean | null) | null;
+	contentLicenseId: (string | null) | null;
+	previousContentLicenseStatus: (("active" | "invalidated") | null) | null;
+	resultingContentLicenseStatus: (("active" | "invalidated") | null) | null;
 	resultingStatus: (string | null) | null;
 	resultingPostTargetingLocked: (boolean | null) | null;
 	/**
@@ -109739,6 +109978,7 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus500 = InternalError;
 
 export const PatchApiRealmsByRealmIdUnitsByUnitIdRequestReasonCodeEnum = {
 	content_policy: "content_policy",
+	copyright: "copyright",
 	realm_rules: "realm_rules",
 	spam: "spam",
 	harassment: "harassment",

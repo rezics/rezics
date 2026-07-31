@@ -317,6 +317,12 @@ export default {
 			{ title: String },
 		),
 		confirmRemoval: "Retirer le contenu",
+		confirmLicenseInvalidationTitle: "Invalider cette licence de contenu ?",
+		confirmLicenseInvalidationDescription: insert(
+			"La licence de contenu actuelle de {{title}} sera invalidée. La trace de son octroi sera conservée et un administrateur de la plateforme pourra la rétablir.",
+			{ title: String },
+		),
+		confirmLicenseInvalidation: "Invalider la licence",
 		reportCount: insert("{{count}} signalements", { count: Number }),
 		moderationStatuses: {
 			approved: "Approuvé",
@@ -325,6 +331,8 @@ export default {
 		},
 		targetingLocked: `Nouvelles références de ${postTerms.plural} bloquées`,
 		targetingUnlocked: `Nouvelles références de ${postTerms.plural} autorisées`,
+		contentLicenseActive: "Licence de contenu valide",
+		contentLicenseInvalidated: "Licence de contenu invalidée",
 		openContent: "Ouvrir le contenu",
 	},
 	audit: {

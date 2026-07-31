@@ -387,6 +387,8 @@ export default {
 		restore: "復元",
 		lock_post_targeting: `このユニットをターゲットにする新しい ${postTerms.pluralLabel} をブロック`,
 		unlock_post_targeting: `このユニットを対象にした新しい${postTerms.pluralLabel}を許可`,
+		invalidate_content_license: "コンテンツライセンスを無効化",
+		restore_content_license: "コンテンツライセンスを復元",
 		warning: "警告",
 		silence: "サイレンス",
 		suspension: "一時停止",
@@ -405,6 +407,7 @@ export default {
 	},
 	governanceReasons: {
 		content_policy: "コンテンツポリシー",
+		copyright: "著作権",
 		realm_rules: `${realmTerms.label}ルール`,
 		spam: "スパム",
 		harassment: "ハラスメント",

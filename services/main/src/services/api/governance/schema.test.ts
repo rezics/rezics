@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import {
 	CreateAccountEnforcementBody,
+	CreateModerationActionBody,
 	CreateUnitAccessInvitationBody,
 	OverrideUnitOwnershipBody,
 	ReplaceUnitSubjectAccessBody,
@@ -22,6 +23,31 @@ describe("adjacent governance API contracts", () => {
 		expect(Check(UpdateModerationCaseBody, { internalNote })).toBe(true);
 		expect(Check(UpdateModerationCaseBody, { reason: "copied rationale" })).toBe(false);
 		expect(Check(UpdateModerationCaseBody, { safeSummary: "copied summary" })).toBe(false);
+	});
+
+	it("requires restoration to reference the exact license invalidation action", () => {
+		expect(
+			Check(CreateModerationActionBody, {
+				caseId: profileId,
+				kind: "invalidate_content_license",
+				reasonCode: "copyright",
+			}),
+		).toBe(true);
+		expect(
+			Check(CreateModerationActionBody, {
+				caseId: profileId,
+				kind: "restore_content_license",
+				reasonCode: "appeal",
+				reversesActionId: secondProfileId,
+			}),
+		).toBe(true);
+		expect(
+			Check(CreateModerationActionBody, {
+				caseId: profileId,
+				kind: "restore_content_license",
+				reasonCode: "appeal",
+			}),
+		).toBe(false);
 	});
 
 	it("replaces grants and restrictions for one Unit authorization subject", () => {
