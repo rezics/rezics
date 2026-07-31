@@ -13,6 +13,7 @@ import {
 	type ApiFeedResultMetadata,
 } from "@/features/content-feed/data/api-feed-list";
 import { createSubjectFeedPredicate } from "@/features/content-feed/model/subject-feed-filter";
+import { RealmScoreContextLink } from "@/features/realms/components/realm-score-context-link";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
@@ -111,6 +112,9 @@ export function UnitReviewFeed({
 						options={scoreRealmOptions}
 						value={scoreRealm}
 					/>
+					{scoreRealm ? (
+						<RealmScoreContextLink realmId={scoreRealm.id} showUnavailable />
+					) : null}
 				</Field>
 				<CommunityScoreOverview
 					realmId={scoreRealm?.id}

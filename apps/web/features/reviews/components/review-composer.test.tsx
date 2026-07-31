@@ -26,6 +26,9 @@ const { body, invalidateReviews, mutateAsync } = vi.hoisted(() => ({
 	invalidateReviews: vi.fn(async () => undefined),
 	mutateAsync: vi.fn(async () => ({ id: "review-1" })),
 }));
+const defaultScoreRealm = vi.hoisted(() => ({
+	value: undefined as { id: string; label: string } | undefined,
+}));
 
 vi.mock("@rezics/openapi-tanstack-query", () => ({
 	usePostApiReviews: () => ({
@@ -37,9 +40,15 @@ vi.mock("@rezics/openapi-tanstack-query", () => ({
 
 vi.mock("@rezics/ui", async (importOriginal) => ({
 	...(await importOriginal<typeof import("@rezics/ui")>()),
-	EntityPicker: ({ onChange }: { onChange: (value: { id: string; label: string }) => void }) => (
+	EntityPicker: ({
+		onChange,
+		value,
+	}: {
+		onChange: (value: { id: string; label: string }) => void;
+		value?: { id: string; label: string };
+	}) => (
 		<button onClick={() => onChange({ id: "score-realm", label: "Score Realm" })} type="button">
-			Choose score Realm
+			{value?.label ?? "Choose score Realm"}
 		</button>
 	),
 	UnitMultiPicker: ({
@@ -124,7 +133,7 @@ vi.mock("@/i18n/request-failure", () => ({
 }));
 
 vi.mock("../data/default-score-realm", () => ({
-	useDefaultScoreRealm: () => ({ error: null, realm: undefined }),
+	useDefaultScoreRealm: () => ({ error: null, realm: defaultScoreRealm.value }),
 }));
 
 vi.mock("../data/review-cache", () => ({
@@ -139,13 +148,48 @@ vi.mock("./score-input", () => ({
 	),
 }));
 
+vi.mock("./score-realm-picker", () => ({
+	ScoreRealmPicker: ({
+		onChange,
+		value,
+	}: {
+		onChange: (value: { id: string; label: string }) => void;
+		value?: { id: string; label: string };
+	}) => (
+		<button onClick={() => onChange({ id: "score-realm", label: "Score Realm" })} type="button">
+			{value?.label ?? "Choose score Realm"}
+		</button>
+	),
+}));
+
+vi.mock("@/features/realms/components/realm-score-context-link", () => ({
+	RealmScoreContextLink: ({ realmId }: { realmId: string }) => (
+		<span data-testid="score-guidelines">{realmId}</span>
+	),
+}));
+
 afterEach(() => {
 	cleanup();
 	mutateAsync.mockClear();
 	invalidateReviews.mockClear();
+	defaultScoreRealm.value = undefined;
 });
 
 describe("ReviewComposer", () => {
+	it("renders the resolved default scoring Realm and its guidelines entry", () => {
+		defaultScoreRealm.value = { id: "default-score-realm", label: "Realm Score" };
+
+		render(
+			<ReviewComposer
+				onCreated={vi.fn()}
+				target={{ id: "review-target", label: "Review target" }}
+			/>,
+		);
+
+		expect(screen.getByRole("button", { name: "Realm Score" })).toBeTruthy();
+		expect(screen.getByTestId("score-guidelines").textContent).toBe("default-score-realm");
+	});
+
 	it("keeps publication Realms separate from the scoring Realm", async () => {
 		render(
 			<ReviewComposer

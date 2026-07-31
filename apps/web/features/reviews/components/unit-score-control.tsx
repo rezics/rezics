@@ -248,7 +248,10 @@ export function UnitScoreControl({
 											realm: selectedRealm.label,
 										})}
 									</p>
-									<RealmScoreContextLink realmId={selectedRealm.id} />
+									<RealmScoreContextLink
+										realmId={selectedRealm.id}
+										showUnavailable
+									/>
 								</div>
 							) : null}
 						</Field>

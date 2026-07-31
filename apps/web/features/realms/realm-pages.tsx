@@ -68,6 +68,7 @@ import { useChineseContentText } from "@/features/content-language-display/chine
 import { canOpenRealmSettings, isRealmOwner } from "./realm-permissions";
 import { invalidateRealmDetails } from "./query";
 import { RealmFeed } from "./components/realm-feed";
+import { RealmScoreContextCard } from "./components/realm-score-context-card";
 import { RealmTaxonomyPage } from "./components/realm-taxonomy-page";
 import { RealmWikiPage } from "./components/realm-wiki-page";
 import { RealmPinnedContentSection } from "./components/realm-pinned-content-section";
@@ -535,6 +536,7 @@ function RealmInfoSections({
 				rules={rules.items}
 				title={t.realms.rules}
 			/>
+			<RealmScoreContextCard canManage={realm.capabilities.canUpdateSettings} realm={realm} />
 			<RealmSidebarMembersSection
 				label={t.realms.members}
 				valueLabel={t.realms.memberCount({

@@ -22,6 +22,7 @@ import { portableTextDraftContentLanguageSample } from "@/features/content-langu
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { optionalPostLocalizationText } from "@/features/posts/model/post-localization-input";
 import { MaximumPostPublishRealmCount } from "@/features/posts/model/post-publication";
+import { RealmScoreContextLink } from "@/features/realms/components/realm-score-context-link";
 import { RealmRulesAcknowledgementPrompt } from "@/features/realms/components/realm-rules-acknowledgement-prompt";
 import { useRealmRulesAcknowledgement } from "@/features/realms/hooks/use-realm-rules-acknowledgement";
 import { useTranslation } from "@/i18n/client";
@@ -30,6 +31,7 @@ import { writePortableText } from "@/lib/block";
 import { invalidateReviews } from "../data/review-cache";
 import { useDefaultScoreRealm } from "../data/default-score-realm";
 import { ScoreInput } from "./score-input";
+import { ScoreRealmPicker } from "./score-realm-picker";
 
 export interface ReviewComposerTarget {
 	readonly id: string;
@@ -57,6 +59,13 @@ export function ReviewComposer({
 	const defaultScoreRealm = useDefaultScoreRealm();
 	const selectedTarget = fixedTarget ?? target;
 	const scoreRealm = selectedScoreRealm ?? defaultScoreRealm.realm;
+	const scoreRealmOptions = [
+		...new Map(
+			[defaultScoreRealm.realm, selectedScoreRealm]
+				.filter((realm) => realm !== undefined)
+				.map((realm) => [realm.id, realm]),
+		).values(),
+	];
 	const language = useFormDraftContentLanguage(
 		["title", "summary"],
 		portableTextDraftContentLanguageSample(body),
@@ -154,13 +163,14 @@ export function ReviewComposer({
 					</Field>
 					<Field>
 						<FieldLabel>{t.engagement.scoreRealm}</FieldLabel>
-						<EntityPicker
-							ariaLabel={t.engagement.scoreRealm}
-							index="realms"
-							onChange={setSelectedScoreRealm}
-							placeholder={t.ui.pickerPlaceholders.realm}
-							value={selectedScoreRealm}
+						<ScoreRealmPicker
+							onChange={(realm) => setSelectedScoreRealm(realm)}
+							options={scoreRealmOptions}
+							value={scoreRealm}
 						/>
+						{scoreRealm ? (
+							<RealmScoreContextLink realmId={scoreRealm.id} showUnavailable />
+						) : null}
 						<FieldDescription>{t.engagement.reviewScoreRealmHint}</FieldDescription>
 					</Field>
 					<Field>

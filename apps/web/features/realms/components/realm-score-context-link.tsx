@@ -11,13 +11,22 @@ import { useTranslation } from "@/i18n/client";
 export function RealmScoreContextLink({
 	className,
 	realmId,
+	showUnavailable = false,
 }: {
 	readonly className?: string;
 	readonly realmId: string;
+	readonly showUnavailable?: boolean;
 }) {
 	const query = useGetApiRealmsByRealmIdScoreContext({ path: { realmId } });
+	const { t } = useTranslation(["realms"]);
+	if (query.isPending || query.isError) return null;
 	const contextPostId = query.data?.contextPostId;
-	if (!contextPostId) return null;
+	if (!contextPostId)
+		return showUnavailable ? (
+			<p className={cn("text-muted-foreground text-sm", className)}>
+				{t.realms.scoreContextSettings.notConfigured}
+			</p>
+		) : null;
 	return (
 		<RealmScoreContextPostLink
 			className={className}

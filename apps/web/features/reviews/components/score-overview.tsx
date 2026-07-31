@@ -45,7 +45,7 @@ export function ScoreOverview({ realmId, targetId }: { realmId: string; targetId
 								</div>
 							))}
 						</div>
-						<RealmScoreContextLink realmId={realmId} />
+						<RealmScoreContextLink realmId={realmId} showUnavailable />
 					</>
 				) : null}
 				<RequestFailure error={query.error} fallback={t.ui.retryLater} />

@@ -48,10 +48,11 @@ export function ScoreRealmPicker({
 		itemToString: (item) => item.label,
 		itemToValue: (item) => item.id,
 	});
-	const [inputValue, setInputValue] = useState(value?.label ?? "");
 	const [open, setOpen] = useState(false);
+	const [searchQuery, setSearchQuery] = useState("");
 	const [isPending, setIsPending] = useState(false);
 	const [isError, setIsError] = useState(false);
+	const inputValue = open ? searchQuery : (value?.label ?? "");
 
 	useEffect(() => {
 		if (!open) {
@@ -105,16 +106,16 @@ export function ScoreRealmPicker({
 		<Combobox
 			collection={collection}
 			inputValue={inputValue}
-			onInputValueChange={({ inputValue: nextInputValue }) => setInputValue(nextInputValue)}
+			onInputValueChange={({ inputValue: nextInputValue }) => setSearchQuery(nextInputValue)}
 			onOpenChange={({ open: nextOpen }) => {
 				setOpen(nextOpen);
-				setInputValue(nextOpen ? "" : (value?.label ?? ""));
+				if (nextOpen) setSearchQuery("");
 			}}
 			onValueChange={({ value: selectedValues }) => {
 				const selected = collection.items.find((item) => item.id === selectedValues[0]);
 				if (!selected) return;
 				onChange(selected);
-				setInputValue(selected.label);
+				setSearchQuery(selected.label);
 			}}
 			open={open}
 			value={value ? [value.id] : []}

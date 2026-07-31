@@ -3,10 +3,11 @@
 import { resources } from "@rezics/i18n/resources";
 import { cleanup, render, screen } from "@testing-library/react";
 import { create } from "native-i18n";
+import type { AnchorHTMLAttributes } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { TranslationProvider } from "@/i18n/client";
-import { RealmScoreContextLink } from "./realm-score-context-link";
+import { RealmScoreContextCard } from "./realm-score-context-card";
 
 const state = vi.hoisted(() => ({
 	contextPostId: null as string | null,
@@ -20,11 +21,14 @@ vi.mock("@/i18n/client", async () => {
 vi.mock("@rezics/openapi-tanstack-query", () => ({
 	useGetApiRealmsByRealmIdScoreContext: () => ({
 		data: { contextPostId: state.contextPostId },
+		error: null,
+		isError: false,
+		isPending: false,
 	}),
 }));
 
 vi.mock("@/features/application-shell/components/app-link", () => ({
-	AppLink: ({ children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+	AppLink: ({ children, ...props }: AnchorHTMLAttributes<HTMLAnchorElement>) => (
 		<a {...props}>{children}</a>
 	),
 }));
@@ -37,38 +41,33 @@ beforeEach(() => {
 
 afterEach(cleanup);
 
-describe("RealmScoreContextLink", () => {
-	it("stays absent when the Realm has no scoring guidelines", () => {
+describe("RealmScoreContextCard", () => {
+	it("shows the public empty state and manager settings entry", () => {
 		render(
 			<TranslationProvider initial={translation.snapshot}>
-				<RealmScoreContextLink realmId="realm-id" />
+				<RealmScoreContextCard canManage realm={{ id: "realm/id" }} />
 			</TranslationProvider>,
 		);
 
-		expect(screen.queryByRole("link")).toBeNull();
-	});
-
-	it("explains when the selected Realm has no scoring guidelines", () => {
-		render(
-			<TranslationProvider initial={translation.snapshot}>
-				<RealmScoreContextLink realmId="realm-id" showUnavailable />
-			</TranslationProvider>,
-		);
-
+		expect(screen.getByRole("heading", { name: "評分準則" })).toBeTruthy();
 		expect(screen.getByText("尚未設定評分準則文章。")).toBeTruthy();
+		expect(screen.getByRole("link", { name: "領域設定" }).getAttribute("href")).toBe(
+			"/realm/realm%2Fid/settings/scoring",
+		);
 	});
 
-	it("links the configured guidelines through the Realm presentation context", () => {
+	it("links configured guidelines without exposing manager controls to readers", () => {
 		state.contextPostId = "post/id";
 
 		render(
 			<TranslationProvider initial={translation.snapshot}>
-				<RealmScoreContextLink realmId="realm/id" />
+				<RealmScoreContextCard canManage={false} realm={{ id: "realm/id" }} />
 			</TranslationProvider>,
 		);
 
 		expect(screen.getByRole("link", { name: "查看評分準則" }).getAttribute("href")).toBe(
 			"/posts/post%2Fid?realmId=realm%2Fid",
 		);
+		expect(screen.queryByRole("link", { name: "領域設定" })).toBeNull();
 	});
 });
