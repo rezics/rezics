@@ -1,9 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { isAvailableZonePageSlug, TopLevelSlugNamespaceUnitIds } from "@rezics/slug";
 
-import { postDiscussionHref, postHref } from "./url";
+import { postCreateHref, postDiscussionHref, postHref } from "./url";
 
 describe("postHref", () => {
+	it("links the creation route with an optional default Realm", () => {
+		expect(postCreateHref()).toBe("/posts/new");
+		expect(postCreateHref("realm/1")).toBe("/posts/new?realmId=realm%2F1");
+	});
+
 	it("uses the global Post interaction route without context", () => {
 		expect(postHref("post-1")).toBe("/posts/post-1");
 	});

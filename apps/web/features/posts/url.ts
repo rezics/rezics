@@ -22,6 +22,12 @@ export interface ZonePostContext {
 
 export type PostInteractionContext = RealmPostContext | ZonePostContext;
 
+export function postCreateHref(defaultRealmId?: string): string {
+	return defaultRealmId
+		? `/posts/new?realmId=${encodeURIComponent(defaultRealmId)}`
+		: "/posts/new";
+}
+
 export function postHref(postId: string, context?: PostInteractionContext, hash?: string): string {
 	const baseHref =
 		context?.kind === "zone"

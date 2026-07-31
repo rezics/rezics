@@ -50,7 +50,7 @@ import {
 	type AvatarFieldValue,
 	avatarPresentationToInput,
 } from "@/features/media/components/avatar-field";
-import { postHref } from "@/features/posts/url";
+import { postCreateHref, postHref } from "@/features/posts/url";
 import { tagDetailHref } from "@/features/tags/routing/tag-links";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { selectLocalization } from "@/lib/localization";
@@ -675,7 +675,7 @@ function RealmActions({
 					)}
 					{canPost ? (
 						<Button variant="solid" asChild>
-							<Link href={`/create?realmId=${realm.id}`}>{t.posts.create}</Link>
+							<Link href={postCreateHref(realm.id)}>{t.posts.create}</Link>
 						</Button>
 					) : null}
 					{canManage && (
