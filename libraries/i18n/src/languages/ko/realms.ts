@@ -118,6 +118,7 @@ export default {
 		description: `만들 콘텐츠 유형을 선택합니다. 콘텐츠는 이 ${realmTerms.label}에 바로 게시됩니다.`,
 		modeLabel: "콘텐츠 유형",
 		modes: { post: postTerms.label, wiki: "위키", tagContext: "태그 맥락" },
+		modeUnavailable: "이 콘텐츠 유형은 현재 사용할 수 없습니다.",
 		communityEditableDescription: `모든 로그인 사용자가 이 위키 문서를 편집할 수 있습니다. 이 ${realmTerms.label}의 접근 관리자는 접근 권한을 변경하거나 문서를 잠글 수 있습니다.`,
 		restrictedDescription: `명시적으로 권한을 받은 사용자만 이 위키 문서를 편집할 수 있습니다. 이 ${realmTerms.label}의 접근 관리자는 관리 권한을 유지합니다.`,
 	},
@@ -249,6 +250,14 @@ export default {
 		createDescription: `이 ${realmTerms.label}에서 태그를 설명하는 공식 문서입니다. 항상 위키 문서이며 태그 카드의 요약과 상세 링크가 됩니다.`,
 		tag: "설명할 태그",
 		publish: "태그 설명 게시",
+		sourceLabel: "설명 작성 방식",
+		createNew: "새 위키 설명 만들기",
+		useExisting: "기존 위키 문서 사용",
+		existingWiki: "기존 위키 문서",
+		existingWikiHint: `이 ${realmTerms.label}에 이미 게시되어 있고 현재 볼 수 있는 위키 문서만 사용할 수 있습니다.`,
+		bindExistingDescription:
+			"태그에 이미 설명이 있다면 이전 위키 문서를 삭제하지 않고 연결만 변경합니다.",
+		bindExisting: "태그 설명으로 사용",
 	},
 	feedManagement: {
 		manageContent: "이 콘텐츠 중재…",

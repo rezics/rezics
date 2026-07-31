@@ -122,6 +122,7 @@ export default {
 		description: `Choose the kind of content to create. It will be published directly in this ${realmTerms.inline}.`,
 		modeLabel: "Content kind",
 		modes: { post: postTerms.label, wiki: "Wiki", tagContext: "Tag Context" },
+		modeUnavailable: "This content kind is not currently available.",
 		communityEditableDescription: `Every signed-in user can edit this Wiki. This ${realmTerms.label}'s access managers can change its access or lock it.`,
 		restrictedDescription: `Only explicitly authorized people can edit this Wiki. This ${realmTerms.label}'s access managers retain governance access.`,
 	},
@@ -255,6 +256,14 @@ export default {
 		createDescription: `A ${realmTerms.label} Tag explanation is this ${realmTerms.inline}'s canonical account of a Tag. It is always a Wiki article and supplies the Tag card summary and detail destination.`,
 		tag: "Tag to explain",
 		publish: "Publish Tag explanation",
+		sourceLabel: "Explanation source",
+		createNew: "Create a new Wiki explanation",
+		useExisting: "Use an existing Wiki article",
+		existingWiki: "Existing Wiki article",
+		existingWikiHint: `Only currently visible Wiki articles already published in this ${realmTerms.inline} can be used.`,
+		bindExistingDescription:
+			"If the Tag already has an explanation, this changes the relationship without deleting the previous Wiki article.",
+		bindExisting: "Use Wiki as Tag explanation",
 	},
 	feedManagement: {
 		manageContent: "Moderate this content…",

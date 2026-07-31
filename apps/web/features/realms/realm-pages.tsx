@@ -37,7 +37,6 @@ import { UnitDockRenderer, useDockManagementAccess } from "@/features/docks";
 import { FollowButton } from "@/features/following/components/follow-button";
 import {
 	realmHref,
-	realmContentCreateHref,
 	realmPageHref,
 	realmSettingsHref,
 	type RealmPageId,
@@ -63,6 +62,7 @@ import {
 	useLocalizationLanguageState,
 } from "@/i18n/use-localization-languages";
 import { useHeaderSearchOverride } from "@/features/application-shell/header-search";
+import { realmContentCreateHref } from "./routing/realm-content-create-route";
 import { RequestFailure } from "@/i18n/request-failure";
 import { publicUnitHref } from "@/features/units/routing/public-unit-route";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";

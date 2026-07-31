@@ -126,6 +126,7 @@ export default {
 		description: `Elige el tipo de contenido. Se publicará directamente en este ${realmTerms.inline}.`,
 		modeLabel: "Tipo de contenido",
 		modes: { post: postTerms.label, wiki: "Wiki", tagContext: "Contexto de etiqueta" },
+		modeUnavailable: "Este tipo de contenido no está disponible actualmente.",
 		communityEditableDescription: `Todos los usuarios que hayan iniciado sesión pueden editar este artículo wiki. Los administradores de acceso de este ${realmTerms.inline} pueden cambiar su acceso o bloquearlo.`,
 		restrictedDescription: `Solo las personas autorizadas expresamente pueden editar este artículo wiki. Los administradores de acceso de este ${realmTerms.inline} conservan la autoridad de gestión.`,
 	},
@@ -260,6 +261,14 @@ export default {
 		createDescription: `Es la explicación canónica de una etiqueta en este ${realmTerms.inline}. Siempre es un artículo wiki y aporta el resumen y el destino de detalle de la tarjeta.`,
 		tag: "Etiqueta que se explicará",
 		publish: "Publicar explicación",
+		sourceLabel: "Origen de la explicación",
+		createNew: "Crear una explicación wiki nueva",
+		useExisting: "Usar un artículo wiki existente",
+		existingWiki: "Artículo wiki existente",
+		existingWikiHint: `Solo se pueden usar artículos wiki visibles que ya estén publicados en este ${realmTerms.inline}.`,
+		bindExistingDescription:
+			"Si la etiqueta ya tiene una explicación, se cambiará la relación sin eliminar el artículo wiki anterior.",
+		bindExisting: "Usar como explicación de la etiqueta",
 	},
 	feedManagement: {
 		manageContent: "Moderar este contenido…",

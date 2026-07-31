@@ -122,6 +122,7 @@ export default {
 		description: `作成するコンテンツの種類を選択します。コンテンツはこの${realmTerms.label}に直接公開されます。`,
 		modeLabel: "コンテンツの種類",
 		modes: { post: postTerms.label, wiki: "ウィキ", tagContext: "タグコンテキスト" },
+		modeUnavailable: "このコンテンツの種類は現在利用できません。",
 		communityEditableDescription: `サインインしているすべてのユーザーがこの記事を編集できます。この${realmTerms.label}のアクセス管理者は、アクセスの変更や記事のロックができます。`,
 		restrictedDescription: `明示的に許可されたユーザーだけがこの記事を編集できます。この${realmTerms.label}のアクセス管理者は管理権限を保持します。`,
 	},
@@ -254,6 +255,14 @@ export default {
 		createDescription: `この${realmTerms.label}におけるタグの正式な解説です。必ずウィキ記事として作成され、タグカードの概要と詳細リンクになります。`,
 		tag: "解説するタグ",
 		publish: "タグ解説を公開",
+		sourceLabel: "解説の作成方法",
+		createNew: "新しいウィキ解説を作成",
+		useExisting: "既存のウィキ記事を使用",
+		existingWiki: "既存のウィキ記事",
+		existingWikiHint: `この${realmTerms.label}ですでに公開され、現在表示できるウィキ記事だけを使用できます。`,
+		bindExistingDescription:
+			"タグにすでに解説がある場合、以前のウィキ記事を削除せずに関連付けを変更します。",
+		bindExisting: "タグ解説として使用",
 	},
 	feedManagement: {
 		manageContent: "このコンテンツをモデレーション…",

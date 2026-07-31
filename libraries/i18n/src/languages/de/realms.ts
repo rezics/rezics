@@ -126,6 +126,7 @@ export default {
 		description: `Wähle die Art des Inhalts. Er wird direkt in diesem ${realmTerms.inline} veröffentlicht.`,
 		modeLabel: "Inhaltsart",
 		modes: { post: postTerms.label, wiki: "Wiki", tagContext: "Tag-Kontext" },
+		modeUnavailable: "Diese Inhaltsart ist derzeit nicht verfügbar.",
 		communityEditableDescription: `Alle angemeldeten Benutzer können diesen Wiki-Artikel bearbeiten. Die Zugriffsverwalter dieses ${realmTerms.inline} können den Zugriff ändern oder den Artikel sperren.`,
 		restrictedDescription: `Nur ausdrücklich berechtigte Personen können diesen Wiki-Artikel bearbeiten. Die Zugriffsverwalter dieses ${realmTerms.inline} behalten die Verwaltungsrechte.`,
 	},
@@ -260,6 +261,14 @@ export default {
 		createDescription: `Eine ${realmTerms.label}-Tag-Erklärung ist die maßgebliche Beschreibung eines Tags in diesem ${realmTerms.inline}. Sie ist immer ein Wiki-Artikel und liefert Zusammenfassung und Detailziel der Tag-Karte.`,
 		tag: "Zu erklärender Tag",
 		publish: "Tag-Erklärung veröffentlichen",
+		sourceLabel: "Quelle der Erklärung",
+		createNew: "Neue Wiki-Erklärung erstellen",
+		useExisting: "Vorhandenen Wiki-Artikel verwenden",
+		existingWiki: "Vorhandener Wiki-Artikel",
+		existingWikiHint: `Nur derzeit sichtbare Wiki-Artikel, die bereits in diesem ${realmTerms.inline} veröffentlicht sind, können verwendet werden.`,
+		bindExistingDescription:
+			"Wenn der Tag bereits eine Erklärung hat, wird die Verknüpfung geändert, ohne den vorherigen Wiki-Artikel zu löschen.",
+		bindExisting: "Wiki als Tag-Erklärung verwenden",
 	},
 	feedManagement: {
 		manageContent: "Diesen Inhalt moderieren …",

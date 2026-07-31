@@ -32,8 +32,8 @@ import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import {
 	RealmScoreContextPostKinds,
-	searchRealmScoreContextPosts,
-} from "../data/realm-score-context-search";
+	searchRealmMountedPosts,
+} from "../data/realm-mounted-post-search";
 import { RealmScoreContextPostLink } from "./realm-score-context-link";
 
 export function RealmScoreContextSettings({ realmId }: { readonly realmId: string }) {
@@ -66,7 +66,13 @@ function RealmScoreContextSettingsForm({
 	const [confirmRemove, setConfirmRemove] = useState(false);
 	const search = useCallback<EntitySearch>(
 		(_index, query, signal) =>
-			searchRealmScoreContextPosts(realmId, query, signal, localizationLanguages),
+			searchRealmMountedPosts({
+				realmId,
+				query,
+				signal,
+				localizationLanguages,
+				kinds: RealmScoreContextPostKinds,
+			}),
 		[localizationLanguages, realmId],
 	);
 

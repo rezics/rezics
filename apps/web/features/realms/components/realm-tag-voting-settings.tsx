@@ -18,6 +18,7 @@ import {
 	AlertDialogTitle,
 	Button,
 	Card,
+	CardAction,
 	CardContent,
 	CardDescription,
 	CardHeader,
@@ -32,7 +33,7 @@ import {
 } from "@rezics/ui";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { ArrowRightIcon, BookOpenTextIcon, TagsIcon, Trash2Icon } from "lucide-react";
+import { ArrowRightIcon, BookOpenTextIcon, PlusIcon, TagsIcon, Trash2Icon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
@@ -41,7 +42,9 @@ import { tagDetailHref } from "@/features/tags/routing/tag-links";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
+import { isRealmTagContextComposerAvailable } from "../model/realm-content-composer";
 import { invalidateRealmDetails } from "../query";
+import { realmContentCreateHref } from "../routing/realm-content-create-route";
 
 export function RealmTagVotingSettings({
 	realm,
@@ -52,6 +55,14 @@ export function RealmTagVotingSettings({
 	const queryClient = useQueryClient();
 	const update = usePutApiRealmsByRealmIdTagVoting();
 	const pendingValue = update.isPending ? update.variables?.body.enabled : undefined;
+	const tagContextCreateHref =
+		!update.isPending &&
+		isRealmTagContextComposerAvailable({
+			tagVotingEnabled: realm.realmTagVotingEnabled,
+			canManageTagContexts: realm.capabilities.canManageTagContexts,
+		})
+			? realmContentCreateHref(realm, "tag-context")
+			: undefined;
 
 	async function setEnabled(enabled: boolean) {
 		if (!realm.capabilities.canUpdateTagVoting) return;
@@ -82,13 +93,22 @@ export function RealmTagVotingSettings({
 			</Field>
 			<RequestFailure error={update.error} />
 			{realm.capabilities.canManageTagContexts ? (
-				<RealmTagContextRelationshipList realmId={realm.id} />
+				<RealmTagContextRelationshipList
+					createHref={tagContextCreateHref}
+					realmId={realm.id}
+				/>
 			) : null}
 		</div>
 	);
 }
 
-function RealmTagContextRelationshipList({ realmId }: { readonly realmId: string }) {
+function RealmTagContextRelationshipList({
+	realmId,
+	createHref,
+}: {
+	readonly realmId: string;
+	readonly createHref?: string;
+}) {
 	const { t } = useTranslation("realms");
 	const queryClient = useQueryClient();
 	const localizationLanguages = useLocalizationLanguages();
@@ -167,6 +187,16 @@ function RealmTagContextRelationshipList({ realmId }: { readonly realmId: string
 					<CardDescription>
 						{t.tagVotingSettings.relationshipsDescription}
 					</CardDescription>
+					{createHref ? (
+						<CardAction>
+							<Button asChild variant="solid">
+								<Link href={createHref}>
+									<PlusIcon aria-hidden="true" />
+									{t.tagContext.createTitle}
+								</Link>
+							</Button>
+						</CardAction>
+					) : null}
 				</CardHeader>
 				<CardContent>
 					{query.isPending ? <QueryPending /> : null}

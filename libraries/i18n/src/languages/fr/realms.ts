@@ -127,6 +127,7 @@ export default {
 		description: `Choisissez le type de contenu. Il sera publié directement dans ce ${realmTerms.inline}.`,
 		modeLabel: "Type de contenu",
 		modes: { post: postTerms.label, wiki: "Wiki", tagContext: "Contexte d’étiquette" },
+		modeUnavailable: "Ce type de contenu n’est pas disponible actuellement.",
 		communityEditableDescription: `Tous les utilisateurs connectés peuvent modifier cet article wiki. Les gestionnaires d’accès de ce ${realmTerms.inline} peuvent modifier son accès ou le verrouiller.`,
 		restrictedDescription: `Seules les personnes explicitement autorisées peuvent modifier cet article wiki. Les gestionnaires d’accès de ce ${realmTerms.inline} conservent leurs droits de gestion.`,
 	},
@@ -261,6 +262,14 @@ export default {
 		createDescription: `Il s’agit de l’explication canonique d’un Tag dans ce ${realmTerms.inline}. Elle est toujours un article wiki et fournit le résumé et la destination de la carte.`,
 		tag: "Tag à expliquer",
 		publish: "Publier l’explication",
+		sourceLabel: "Source de l’explication",
+		createNew: "Créer une nouvelle explication wiki",
+		useExisting: "Utiliser un article wiki existant",
+		existingWiki: "Article wiki existant",
+		existingWikiHint: `Seuls les articles wiki actuellement visibles et déjà publiés dans ce ${realmTerms.inline} peuvent être utilisés.`,
+		bindExistingDescription:
+			"Si le Tag possède déjà une explication, le lien sera remplacé sans supprimer l’ancien article wiki.",
+		bindExisting: "Utiliser comme explication du Tag",
 	},
 	feedManagement: {
 		manageContent: "Modérer ce contenu…",

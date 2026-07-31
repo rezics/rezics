@@ -22,7 +22,12 @@ function realmContextOptionValue(realmId: string): RealmContextOptionValue {
 	return `realm:${realmId}`;
 }
 
-function realmName(realm: PostRealmContext, unnamed: string): string {
+type RealmContextBarValue = Pick<PostRealmContext, "avatar" | "id" | "slugAddress"> & {
+	readonly language?: PostRealmContext["language"] | null;
+	readonly title?: string | null;
+};
+
+function realmName(realm: Pick<RealmContextBarValue, "title">, unnamed: string): string {
 	return realm.title ?? unnamed;
 }
 
@@ -129,11 +134,11 @@ export function PostRealmContextSelector({
 }
 
 /**
- * Presents the active Realm identity and navigation above a contextual Post.
+ * Presents the active Realm identity and navigation above Realm-contextual content.
  *
  * @alpha
  */
-export function PostRealmContextBar({ realm }: { readonly realm: PostRealmContext }) {
+export function PostRealmContextBar({ realm }: { readonly realm: RealmContextBarValue }) {
 	const { t } = useTranslation(["posts", "ui"]);
 	const contextHref = realmHref(realm);
 	const name = useChineseContentText(
