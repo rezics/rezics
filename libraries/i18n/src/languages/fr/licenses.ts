@@ -37,6 +37,13 @@ export default {
 		viewTerms: `Consulter ${verbatimTerms.rezicsUnitContentLicenseV1.value}`,
 		grantNotice:
 			"Une fois accordée, cette licence ne peut plus être révoquée et continue de couvrir les contributions ultérieures et les transferts de propriété.",
+		noneNotice:
+			"Aucune licence de contenu ne sera accordée. Choisissez « Aucune » uniquement si cette œuvre sert d’entrée d’index et si son contenu ne sera ni publié ni hébergé.",
+		noneConfirmationTitle: `Créer sans licence de contenu pour ${verbatimTerms.rezics.value} ?`,
+		noneConfirmationNotice: `Si vous souhaitez publier ou héberger le contenu de cette œuvre sur ${verbatimTerms.rezics.value}, conservez la licence de contenu. Si l’entrée sert uniquement à indexer l’œuvre, aucune licence de contenu n’est nécessaire. Sans cette licence, ne publiez pas le texte de l’œuvre ni d’autre contenu protégé par le droit d’auteur dans cette entrée.`,
+		keepLicense: "Conserver la licence",
+		confirmNone: "Continuer sans licence",
+		publicWorkNotice: `Les œuvres communautaires n’accordent aucune licence de contenu à ${verbatimTerms.rezics.value} et ne doivent contenir que des informations d’index sur l’œuvre.`,
 		grantedNotice:
 			"Cette licence de contenu a été accordée de façon permanente pour ce contenu.",
 		contributionNotice: `Le contenu que vous fournissez pendant l’application de cette licence est concédé à ${verbatimTerms.rezics.value} selon les mêmes conditions ; aucune sélection de licence distincte n’est nécessaire.`,

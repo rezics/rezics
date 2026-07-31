@@ -270,7 +270,8 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 							unit.details.type === "software" ||
 							unit.details.type === "media") ? (
 							<UnitContentLicenseField
-								defaultSlug={
+								context="edit"
+								grantedSlug={
 									unit.details.contentLicense?.referenceLicenseSlug ?? null
 								}
 							/>

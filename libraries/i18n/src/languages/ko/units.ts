@@ -21,11 +21,26 @@ export default {
 		audio: audioTerms.label,
 	},
 	creation: {
-		modeLabel: "생성 방식",
-		ownedWork: "내 작품",
-		ownedWorkDescription: "내 프로필이 이 작품을 소유하고 관리합니다.",
-		communityUnit: "공개 항목",
-		communityUnitDescription:
+		workOwnershipLabel: "작품 소유 방식",
+		ownedWork: "소유 작품",
+		ownedWorkDescription:
+			"내 프로필이 이 작품을 소유하고 관리합니다. 편집 권한은 나중에 권한 설정에서 부여할 수 있습니다.",
+		publicWork: "공공 작품",
+		publicWorkDescription:
+			"커뮤니티가 소유하며 로그인한 모든 사용자가 편집할 수 있습니다. 생성자에게 별도 권한은 부여되지 않습니다.",
+		publicWorkLearnMore: "공공 작품이란?",
+		publicWorkHelpTitle: "공공 작품이란?",
+		publicWorkHelpOwnership:
+			"공공 작품은 커뮤니티가 소유하고 공동으로 관리합니다. 작품을 만들어도 소유자 지위나 추가 권한을 얻지 않으며, 로그인한 모든 사용자가 같은 공통 권한으로 편집할 수 있습니다.",
+		publicWorkHelpIndexing:
+			"일반적으로 저작권을 보유하지 않은 기존 작품의 검색 가능한 색인 정보를 만들 때 사용합니다.",
+		publicWorkHelpAlternative:
+			"저작권을 보유하고 있거나 직접 관리하면서 특정 대상에게 협업을 허용하려면 ‘소유 작품’을 선택한 뒤 생성 후 권한 설정에서 적절한 편집 권한을 부여하세요.",
+		entryOwnershipLabel: "항목 소유 방식",
+		ownedEntry: "내 항목",
+		ownedEntryDescription: "내 프로필이 이 항목을 소유하고 관리합니다.",
+		publicEntry: "공개 항목",
+		publicEntryDescription:
 			"커뮤니티가 소유하며 로그인한 모든 사용자가 편집할 수 있습니다. 생성자에게 별도 권한은 부여되지 않습니다.",
 		creditAttributionsTitle: "크레딧",
 		creditEntityLabel: insert(`${entityTerms.label} {{number}}`, { number: Number }),
@@ -35,7 +50,7 @@ export default {
 		creditEntityRequired: `${entityTerms.label}를 선택하세요.`,
 		creditRoleRequired: "역할을 선택하세요.",
 		creditDuplicate: `이 ${entityTerms.label}에는 같은 역할이 이미 설정되어 있습니다.`,
-		publisherAttributionRequired: "내 작품에는 게시자 크레딧이 하나 이상 있어야 합니다.",
+		publisherAttributionRequired: "소유 작품에는 게시자 크레딧이 하나 이상 있어야 합니다.",
 		creditRequestConfirmationTitle: "크레딧 초대 확인",
 		creditRequestConfirmationDescription: `선택한 일부 ${entityTerms.plural}은 크레딧을 표시하기 전에 동의가 필요합니다. 확인하면 작품을 만들고 초대를 보냅니다.`,
 		creditRequestConfirmationCancel: "취소",
@@ -563,7 +578,7 @@ export default {
 		language: "챕터 언어",
 		useLanguage: "언어 전환",
 		save: "챕터 저장",
-		communityUnitContentPolicyTitle: "공개 항목에서는 챕터 본문을 여기서 편집할 수 없습니다",
+		communityUnitContentPolicyTitle: "공공 작품에서는 챕터 본문을 여기서 편집할 수 없습니다",
 		communityUnitContentPolicyDescription: `이 책은 커뮤니티에서 관리합니다. 콘텐츠 구조를 정리하거나 읽을 수 있는 기존 ${postTerms.label}를 추가할 수 있지만, 이 편집기에서는 ${postTerms.label} 본문 편집기를 제공하지 않습니다.`,
 		wordCount: insert("{{count}} 단어", { count: Number }),
 		characterCount: insert("{{count}} 글자", { count: Number }),

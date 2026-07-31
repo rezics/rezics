@@ -15,6 +15,7 @@ import {
 	AlertDialogFooter,
 	AlertDialogHeader,
 	AlertDialogTitle,
+	Badge,
 	Button,
 	Field,
 	FieldDescription,
@@ -32,6 +33,17 @@ import { useTranslation } from "@/i18n/client";
 import { unitContentLicenseHref } from "../model/unit-content-license";
 
 const NoUnitContentLicenseSelection = "none";
+
+type UnitContentLicenseFieldProps =
+	| { readonly context: "create" }
+	| {
+			readonly context: "edit";
+			readonly grantedSlug: UnitContentLicenseSlug | null;
+	  };
+
+type PendingContentLicenseChange =
+	| { readonly kind: "select-none" }
+	| { readonly kind: "grant"; readonly slug: UnitContentLicenseSlug };
 
 function UnitContentLicenseLink({
 	referenceSlug,
@@ -76,17 +88,21 @@ function UnitContentLicenseSummary({
 	);
 }
 
-export function UnitContentLicenseField({
-	defaultSlug,
-}: {
-	readonly defaultSlug: UnitContentLicenseSlug | null;
-}) {
+export function UnitContentLicenseField(props: UnitContentLicenseFieldProps) {
 	const { t } = useTranslation(["licenses", "units"]);
-	const [selectedSlug, setSelectedSlug] = useState<UnitContentLicenseSlug | null>(defaultSlug);
-	const [pendingSlug, setPendingSlug] = useState<UnitContentLicenseSlug | null>(null);
-	const committedSlug = defaultSlug ?? selectedSlug;
+	const existingGrant = props.context === "edit" ? props.grantedSlug : null;
+	const [selectedSlug, setSelectedSlug] = useState<UnitContentLicenseSlug | null>(() =>
+		props.context === "create" ? CurrentUnitContentLicenseSlug : props.grantedSlug,
+	);
+	const [pendingChange, setPendingChange] = useState<PendingContentLicenseChange | null>(null);
+	const committedSlug = existingGrant ?? selectedSlug;
 	const referenceSlug =
-		defaultSlug ?? pendingSlug ?? selectedSlug ?? CurrentUnitContentLicenseSlug;
+		existingGrant ??
+		(pendingChange?.kind === "grant" ? pendingChange.slug : selectedSlug) ??
+		CurrentUnitContentLicenseSlug;
+	const grantAlreadyExists = existingGrant !== null;
+	const pendingNoneSelection = pendingChange?.kind === "select-none";
+	const pendingGrant = pendingChange?.kind === "grant";
 
 	return (
 		<>
@@ -110,18 +126,24 @@ export function UnitContentLicenseField({
 						</HoverCardTrigger>
 						<HoverCardContent className="grid w-[min(22rem,calc(100vw-2rem))] gap-3">
 							<UnitContentLicenseSummary
-								granted={defaultSlug !== null}
+								granted={grantAlreadyExists}
 								referenceSlug={referenceSlug}
 							/>
 						</HoverCardContent>
 					</HoverCard>
 				</div>
 				<NativeSelect
-					disabled={defaultSlug !== null}
+					disabled={grantAlreadyExists}
 					name="contentLicense"
 					onChange={(event) => {
 						const selection = event.currentTarget.value;
-						if (isUnitContentLicenseSlug(selection)) setPendingSlug(selection);
+						if (isUnitContentLicenseSlug(selection)) {
+							if (props.context === "create") setSelectedSlug(selection);
+							else setPendingChange({ kind: "grant", slug: selection });
+							return;
+						}
+						if (props.context === "create" && selectedSlug !== null)
+							setPendingChange({ kind: "select-none" });
 						else setSelectedSlug(null);
 					}}
 					value={committedSlug ?? NoUnitContentLicenseSelection}
@@ -133,40 +155,73 @@ export function UnitContentLicenseField({
 						{t.licenses.unitContent.options[CurrentUnitContentLicenseSlug].label}
 					</NativeSelectOption>
 				</NativeSelect>
+				<FieldDescription>
+					{grantAlreadyExists
+						? t.licenses.unitContent.grantedNotice
+						: committedSlug
+							? t.licenses.unitContent.grantNotice
+							: t.licenses.unitContent.noneNotice}
+				</FieldDescription>
 			</Field>
 			<AlertDialog
 				onOpenChange={(open) => {
-					if (!open) setPendingSlug(null);
+					if (!open) setPendingChange(null);
 				}}
-				open={pendingSlug !== null}
+				open={pendingChange !== null}
 			>
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>
-							{t.licenses.unitContent.options[referenceSlug].label}
+							{pendingNoneSelection
+								? t.licenses.unitContent.noneConfirmationTitle
+								: t.licenses.unitContent.options[referenceSlug].label}
 						</AlertDialogTitle>
 					</AlertDialogHeader>
 					<AlertDialogBody className="flex flex-col gap-3">
 						<AlertDialogDescription>
-							{t.licenses.unitContent.grantNotice}
+							{pendingNoneSelection
+								? t.licenses.unitContent.noneConfirmationNotice
+								: t.licenses.unitContent.grantNotice}
 						</AlertDialogDescription>
-						<UnitContentLicenseLink referenceSlug={referenceSlug} />
+						{pendingGrant ? (
+							<UnitContentLicenseLink referenceSlug={referenceSlug} />
+						) : null}
 					</AlertDialogBody>
 					<AlertDialogFooter>
-						<AlertDialogCancel onClick={() => setPendingSlug(null)}>
-							{t.licenses.unitContent.cancelGrant}
+						<AlertDialogCancel onClick={() => setPendingChange(null)}>
+							{pendingNoneSelection
+								? t.licenses.unitContent.keepLicense
+								: t.licenses.unitContent.cancelGrant}
 						</AlertDialogCancel>
 						<AlertDialogAction
 							onClick={() => {
-								if (pendingSlug) setSelectedSlug(pendingSlug);
-								setPendingSlug(null);
+								if (pendingChange?.kind === "grant")
+									setSelectedSlug(pendingChange.slug);
+								if (pendingChange?.kind === "select-none") setSelectedSlug(null);
+								setPendingChange(null);
 							}}
 						>
-							{t.licenses.unitContent.confirmGrant}
+							{pendingNoneSelection
+								? t.licenses.unitContent.confirmNone
+								: t.licenses.unitContent.confirmGrant}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
 		</>
+	);
+}
+
+export function PublicWorkContentLicenseField() {
+	const { t } = useTranslation(["licenses", "units"]);
+
+	return (
+		<Field>
+			<FieldLabel>{t.units.fields.contentLicense}</FieldLabel>
+			<Badge className="w-fit" variant="outline">
+				{t.licenses.unitContent.none}
+			</Badge>
+			<FieldDescription>{t.licenses.unitContent.publicWorkNotice}</FieldDescription>
+		</Field>
 	);
 }

@@ -21,11 +21,26 @@ export default {
 		audio: audioTerms.label,
 	},
 	creation: {
-		modeLabel: "Creation mode",
-		ownedWork: "My work",
-		ownedWorkDescription: "Your Profile owns and governs this work.",
-		communityUnit: "Public entry",
-		communityUnitDescription:
+		workOwnershipLabel: "Work ownership",
+		ownedWork: "Owned work",
+		ownedWorkDescription:
+			"Your Profile owns and governs this work. You can share edit access later in permissions.",
+		publicWork: "Public work",
+		publicWorkDescription:
+			"Community-owned and editable by every signed-in user; the creator receives no special access.",
+		publicWorkLearnMore: "What is a public work?",
+		publicWorkHelpTitle: "What is a public work?",
+		publicWorkHelpOwnership:
+			"Public works are owned and maintained by the community. Creating one does not give you ownership or additional access; every signed-in user edits with the same shared permissions.",
+		publicWorkHelpIndexing:
+			"Public works are generally used to create searchable index information for existing works whose copyright you do not hold.",
+		publicWorkHelpAlternative:
+			"If you hold the copyright, or want to govern a work while opening collaboration to selected people, choose “Owned work” and grant the appropriate edit access in permissions after creation.",
+		entryOwnershipLabel: "Entry ownership",
+		ownedEntry: "My entry",
+		ownedEntryDescription: "Your Profile owns and governs this entry.",
+		publicEntry: "Public entry",
+		publicEntryDescription:
 			"Community-owned and editable by every signed-in user; the creator receives no special access.",
 		creditAttributionsTitle: "Credits",
 		creditEntityLabel: insert(`${entityTerms.label} {{number}}`, { number: Number }),
@@ -35,7 +50,7 @@ export default {
 		creditEntityRequired: `Choose an ${entityTerms.inline}.`,
 		creditRoleRequired: "Choose a role.",
 		creditDuplicate: `This ${entityTerms.inline} already has this role.`,
-		publisherAttributionRequired: "My work must include at least one Publisher credit.",
+		publisherAttributionRequired: "An owned work must include at least one Publisher credit.",
 		creditRequestConfirmationTitle: "Confirm credit invitations",
 		creditRequestConfirmationDescription: `Some selected ${entityTerms.plural} require consent before their credits can appear. Confirm to create this work and send the invitations.`,
 		creditRequestConfirmationCancel: "Cancel",
@@ -570,7 +585,7 @@ export default {
 		language: "Chapter language",
 		useLanguage: "Switch language",
 		save: "Save chapter",
-		communityUnitContentPolicyTitle: "Public entries do not provide chapter body editing",
+		communityUnitContentPolicyTitle: "Public works do not provide chapter body editing",
 		communityUnitContentPolicyDescription: `This Book is maintained by the community. You can organize its content structure or attach an existing readable ${postTerms.inline}, but this editor does not provide a ${postTerms.inline} body editor.`,
 		wordCount: insert("{{count}} words", { count: Number }),
 		characterCount: insert("{{count}} characters", { count: Number }),

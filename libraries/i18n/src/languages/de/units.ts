@@ -21,11 +21,26 @@ export default {
 		audio: audioTerms.label,
 	},
 	creation: {
-		modeLabel: "Erstellungsart",
-		ownedWork: "Mein Werk",
-		ownedWorkDescription: "Dein Profil besitzt und verwaltet dieses Werk.",
-		communityUnit: "Öffentlicher Eintrag",
-		communityUnitDescription:
+		workOwnershipLabel: "Eigentumsform des Werks",
+		ownedWork: "Eigenes Werk",
+		ownedWorkDescription:
+			"Dein Profil besitzt und verwaltet dieses Werk. Bearbeitungsrechte kannst du später in den Berechtigungen vergeben.",
+		publicWork: "Gemeinschaftswerk",
+		publicWorkDescription:
+			"Im Besitz der Community und für alle angemeldeten Personen bearbeitbar; die erstellende Person erhält keine Sonderrechte.",
+		publicWorkLearnMore: "Was ist ein Gemeinschaftswerk?",
+		publicWorkHelpTitle: "Was ist ein Gemeinschaftswerk?",
+		publicWorkHelpOwnership:
+			"Gemeinschaftswerke gehören der Community und werden gemeinsam gepflegt. Durch das Erstellen erhältst du weder Eigentum noch zusätzliche Rechte; alle angemeldeten Personen bearbeiten sie mit denselben gemeinsamen Berechtigungen.",
+		publicWorkHelpIndexing:
+			"Gemeinschaftswerke dienen in der Regel dazu, durchsuchbare Verzeichniseinträge für bestehende Werke anzulegen, deren Urheberrecht du nicht besitzt.",
+		publicWorkHelpAlternative:
+			"Wenn du das Urheberrecht besitzt oder ein von dir verwaltetes Werk für ausgewählte Personen zur Mitarbeit öffnen möchtest, wähle „Eigenes Werk“ und vergib nach dem Erstellen die passenden Bearbeitungsrechte.",
+		entryOwnershipLabel: "Eigentumsform des Eintrags",
+		ownedEntry: "Mein Eintrag",
+		ownedEntryDescription: "Dein Profil besitzt und verwaltet diesen Eintrag.",
+		publicEntry: "Öffentlicher Eintrag",
+		publicEntryDescription:
 			"Im Besitz der Community und für alle angemeldeten Personen bearbeitbar; die erstellende Person erhält keine Sonderrechte.",
 		creditAttributionsTitle: "Mitwirkendenangaben",
 		creditEntityLabel: insert(`${entityTerms.label} {{number}}`, { number: Number }),
@@ -36,7 +51,7 @@ export default {
 		creditRoleRequired: "Rolle auswählen.",
 		creditDuplicate: `Diese ${entityTerms.inline} ist bereits mit dieser Rolle eingetragen.`,
 		publisherAttributionRequired:
-			"Mein Werk muss mindestens eine Mitwirkung als Verlag enthalten.",
+			"Ein eigenes Werk muss mindestens eine Mitwirkung als Verlag enthalten.",
 		creditRequestConfirmationTitle: "Mitwirkendeneinladungen bestätigen",
 		creditRequestConfirmationDescription: `Einige ausgewählte ${entityTerms.plural} müssen zustimmen, bevor ihre Mitwirkung angezeigt werden kann. Bestätige, um das Werk zu erstellen und die Einladungen zu senden.`,
 		creditRequestConfirmationCancel: "Abbrechen",
@@ -591,7 +606,7 @@ export default {
 		useLanguage: "Sprache wechseln",
 		save: "Kapitel speichern",
 		communityUnitContentPolicyTitle:
-			"Öffentliche Einträge bieten hier keine Bearbeitung des Kapiteltexts",
+			"Gemeinschaftswerke bieten hier keine Bearbeitung des Kapiteltexts",
 		communityUnitContentPolicyDescription: `Dieses Buch wird gemeinschaftlich gepflegt. Du kannst seine Inhaltsstruktur ordnen oder einen vorhandenen lesbaren ${postTerms.inline} anhängen; dieser Editor bietet jedoch keinen Editor für den ${postTerms.inline}-Text.`,
 		wordCount: insert("{{count}} Wörter", { count: Number }),
 		characterCount: insert("{{count}} Zeichen", { count: Number }),

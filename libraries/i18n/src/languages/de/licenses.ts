@@ -37,6 +37,13 @@ export default {
 		none: "Keine",
 		viewTerms: `Bedingungen für ${verbatimTerms.rezicsUnitContentLicenseV1.value} anzeigen`,
 		grantNotice: `Nach der Erteilung kann diese Lizenz nicht widerrufen werden und gilt weiterhin für künftige ${postTerms.pluralLabel} zu diesem Inhalt sowie bei Eigentumsübertragungen.`,
+		noneNotice:
+			"Es wird keine Inhaltslizenz erteilt. Wähle „Keine“ nur, wenn dieses Werk ausschließlich als Verzeichniseintrag dient und keine Inhalte des Werks veröffentlicht oder bereitgestellt werden.",
+		noneConfirmationTitle: `Ohne Inhaltslizenz für ${verbatimTerms.rezics.value} erstellen?`,
+		noneConfirmationNotice: `Wenn du Inhalte dieses Werks auf ${verbatimTerms.rezics.value} veröffentlichen oder bereitstellen möchtest, behalte die Inhaltslizenz bei. Dient der Eintrag nur als Verzeichnis des Werks, ist keine Inhaltslizenz erforderlich. Veröffentliche ohne Inhaltslizenz weder den Werktext noch andere urheberrechtlich geschützte Inhalte in diesem Eintrag.`,
+		keepLicense: "Lizenz beibehalten",
+		confirmNone: "Keine Lizenz verwenden",
+		publicWorkNotice: `Gemeinschaftswerke erteilen ${verbatimTerms.rezics.value} keine Inhaltslizenz und sollten nur Verzeichnisangaben zum Werk enthalten.`,
 		grantedNotice: "Für diesen Inhalt wurde diese Inhaltslizenz dauerhaft erteilt.",
 		contributionNotice: `Inhalte, die Sie während der Geltung dieser Lizenz beisteuern, werden ${verbatimTerms.rezics.value} zu denselben Bedingungen lizenziert; eine gesonderte Lizenzauswahl ist nicht erforderlich.`,
 		cancelGrant: "Abbrechen",

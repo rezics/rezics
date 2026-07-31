@@ -21,11 +21,26 @@ export default {
 		audio: audioTerms.label,
 	},
 	creation: {
-		modeLabel: "作成方法",
-		ownedWork: "自分の作品",
-		ownedWorkDescription: "あなたのプロフィールがこの作品を所有し、管理します。",
-		communityUnit: "公開項目",
-		communityUnitDescription:
+		workOwnershipLabel: "作品の所有形態",
+		ownedWork: "所有作品",
+		ownedWorkDescription:
+			"あなたのプロフィールがこの作品を所有し、管理します。編集権限は後から権限設定で付与できます。",
+		publicWork: "公共作品",
+		publicWorkDescription:
+			"コミュニティが所有し、ログイン中の全員が編集できます。作成者に特別な権限は付与されません。",
+		publicWorkLearnMore: "公共作品とは？",
+		publicWorkHelpTitle: "公共作品とは？",
+		publicWorkHelpOwnership:
+			"公共作品はコミュニティが所有し、共同で管理します。作成しても所有者としての地位や追加権限は付与されず、ログイン中の全員が共通の権限で編集できます。",
+		publicWorkHelpIndexing:
+			"通常は、あなたが著作権を保有していない既存作品について、検索可能な索引情報を作成するために使用します。",
+		publicWorkHelpAlternative:
+			"著作権を保有している場合や、自分で管理しながら特定の相手との共同作業に開放したい場合は「所有作品」を選び、作成後に権限設定で適切な編集権限を付与してください。",
+		entryOwnershipLabel: "項目の所有形態",
+		ownedEntry: "自分の項目",
+		ownedEntryDescription: "あなたのプロフィールがこの項目を所有し、管理します。",
+		publicEntry: "公開項目",
+		publicEntryDescription:
 			"コミュニティが所有し、ログイン中の全員が編集できます。作成者に特別な権限は付与されません。",
 		creditAttributionsTitle: "クレジット",
 		creditEntityLabel: insert(`${entityTerms.label} {{number}}`, { number: Number }),
@@ -35,7 +50,7 @@ export default {
 		creditEntityRequired: `${entityTerms.label}を選択してください。`,
 		creditRoleRequired: "役割を選択してください。",
 		creditDuplicate: `この${entityTerms.label}には同じ役割がすでに設定されています。`,
-		publisherAttributionRequired: "自分の作品には発行者のクレジットが1件以上必要です。",
+		publisherAttributionRequired: "所有作品には発行者のクレジットが1件以上必要です。",
 		creditRequestConfirmationTitle: "クレジット招待を確認",
 		creditRequestConfirmationDescription: `選択した一部の${entityTerms.plural}は、クレジットを表示する前に同意が必要です。確認すると作品を作成し、招待を送信します。`,
 		creditRequestConfirmationCancel: "キャンセル",
@@ -568,7 +583,7 @@ export default {
 		language: "章の言語",
 		useLanguage: "言語を切り替える",
 		save: "章を保存する",
-		communityUnitContentPolicyTitle: "公開項目では章本文をここで編集できません",
+		communityUnitContentPolicyTitle: "公共作品では章本文をここで編集できません",
 		communityUnitContentPolicyDescription: `この書籍はコミュニティによって管理されています。コンテンツ構造の整理や閲覧可能な既存${postTerms.label}の追加はできますが、このエディターには${postTerms.label}本文エディターがありません。`,
 		wordCount: insert("{{count}} 単語", { count: Number }),
 		characterCount: insert("{{count}} 文字", { count: Number }),

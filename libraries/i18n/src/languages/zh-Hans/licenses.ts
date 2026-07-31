@@ -34,6 +34,13 @@ export default {
 		none: "无",
 		viewTerms: `查看 ${verbatimTerms.rezicsUnitContentLicenseV1.value}`,
 		grantNotice: "授予后不可撤销，并继续适用于该内容的后续贡献和所有权转让。",
+		noneNotice:
+			"不会授予内容许可。只有在这项作品仅用于索引资料，且不会发布或托管作品内容时，才应选择“无”。",
+		noneConfirmationTitle: `不授予 ${verbatimTerms.rezics.value} 内容许可？`,
+		noneConfirmationNotice: `如果你要在 ${verbatimTerms.rezics.value} 发布或托管作品内容，应保留内容许可。如果这个条目只用于索引作品资料，则不需要许可。没有内容许可时，请勿在这个条目中发布作品正文或其他受版权保护的内容。`,
+		keepLicense: "保留许可",
+		confirmNone: "改为无许可",
+		publicWorkNotice: `公共作品不会向 ${verbatimTerms.rezics.value} 授予内容许可，应仅用于收录作品的索引资料。`,
 		grantedNotice: "该内容已永久采用此内容许可。",
 		contributionNotice: `你在此许可生效期间提交的内容，将按照相同条款许可给 ${verbatimTerms.rezics.value}；无需另行选择许可。`,
 		cancelGrant: "取消",

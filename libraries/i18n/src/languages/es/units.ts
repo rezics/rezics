@@ -21,11 +21,26 @@ export default {
 		audio: audioTerms.label,
 	},
 	creation: {
-		modeLabel: "Modo de creación",
-		ownedWork: "Mi obra",
-		ownedWorkDescription: "Tu perfil posee y administra esta obra.",
-		communityUnit: "Entrada pública",
-		communityUnitDescription:
+		workOwnershipLabel: "Titularidad de la obra",
+		ownedWork: "Obra propia",
+		ownedWorkDescription:
+			"Tu perfil posee y administra esta obra. Después podrás conceder acceso de edición desde los permisos.",
+		publicWork: "Obra comunitaria",
+		publicWorkDescription:
+			"Pertenece a la comunidad y cualquier persona con sesión iniciada puede editarla; quien la crea no recibe permisos especiales.",
+		publicWorkLearnMore: "¿Qué es una obra comunitaria?",
+		publicWorkHelpTitle: "¿Qué es una obra comunitaria?",
+		publicWorkHelpOwnership:
+			"Las obras comunitarias pertenecen a la comunidad y se mantienen de forma colectiva. Crearlas no te concede la titularidad ni permisos adicionales; todas las personas con sesión iniciada las editan con los mismos permisos compartidos.",
+		publicWorkHelpIndexing:
+			"Normalmente se usan para crear información de índice que permita buscar obras existentes cuyos derechos de autor no posees.",
+		publicWorkHelpAlternative:
+			"Si posees los derechos de autor o quieres administrar una obra y permitir que determinadas personas colaboren, elige «Obra propia» y concede los permisos de edición adecuados después de crearla.",
+		entryOwnershipLabel: "Titularidad de la entrada",
+		ownedEntry: "Mi entrada",
+		ownedEntryDescription: "Tu perfil posee y administra esta entrada.",
+		publicEntry: "Entrada pública",
+		publicEntryDescription:
 			"Pertenece a la comunidad y cualquier persona con sesión iniciada puede editarla; quien la crea no recibe permisos especiales.",
 		creditAttributionsTitle: "Créditos",
 		creditEntityLabel: insert(`${entityTerms.label} {{number}}`, { number: Number }),
@@ -35,7 +50,8 @@ export default {
 		creditEntityRequired: `Selecciona una ${entityTerms.inline}.`,
 		creditRoleRequired: "Selecciona una función.",
 		creditDuplicate: `Esta ${entityTerms.inline} ya tiene esta función.`,
-		publisherAttributionRequired: "Mi obra debe incluir al menos un crédito de Editorial.",
+		publisherAttributionRequired:
+			"Una obra propia debe incluir al menos un crédito de Editorial.",
 		creditRequestConfirmationTitle: "Confirmar invitaciones de crédito",
 		creditRequestConfirmationDescription: `Algunas ${entityTerms.plural} seleccionadas deben dar su consentimiento antes de que aparezcan sus créditos. Confirma para crear la obra y enviar las invitaciones.`,
 		creditRequestConfirmationCancel: "Cancelar",
@@ -584,7 +600,7 @@ export default {
 		useLanguage: "Cambiar idioma",
 		save: "Guardar capítulo",
 		communityUnitContentPolicyTitle:
-			"Las entradas públicas no permiten editar aquí el cuerpo del capítulo",
+			"Las obras comunitarias no permiten editar aquí el cuerpo del capítulo",
 		communityUnitContentPolicyDescription: `Este libro está mantenido por la comunidad. Puedes organizar su estructura de contenido o adjuntar una ${postTerms.inline} existente que puedas leer, pero este editor no ofrece un editor para su cuerpo.`,
 		wordCount: insert("{{count}} palabras", { count: Number }),
 		characterCount: insert("{{count}} caracteres", { count: Number }),

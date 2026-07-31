@@ -569,7 +569,7 @@ export function EntityCreatePage() {
 			<form onInput={language.onInput} onSubmit={(event) => void submit(event)}>
 				<FieldGroup>
 					<Field required>
-						<FieldLabel>{t.units.creation.modeLabel}</FieldLabel>
+						<FieldLabel>{t.units.creation.entryOwnershipLabel}</FieldLabel>
 						<NativeSelect
 							name="ownershipMode"
 							onChange={(event) =>
@@ -582,16 +582,16 @@ export function EntityCreatePage() {
 							value={ownershipMode}
 						>
 							<NativeSelectOption value="profile_owned">
-								{t.units.creation.ownedWork}
+								{t.units.creation.ownedEntry}
 							</NativeSelectOption>
 							<NativeSelectOption value="community_owned">
-								{t.units.creation.communityUnit}
+								{t.units.creation.publicEntry}
 							</NativeSelectOption>
 						</NativeSelect>
 						<p className="text-muted-foreground text-sm">
 							{ownershipMode === "profile_owned"
-								? t.units.creation.ownedWorkDescription
-								: t.units.creation.communityUnitDescription}
+								? t.units.creation.ownedEntryDescription
+								: t.units.creation.publicEntryDescription}
 						</p>
 					</Field>
 					<Field required>

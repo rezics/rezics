@@ -49,7 +49,15 @@ import {
 	validateCreditAttributionDrafts,
 } from "./model/credit-attribution-draft";
 import { CreditAttributionRequestConfirmationDialog } from "./components/credit-attribution-request-confirmation-dialog";
-import { UnitContentLicenseField } from "./components/unit-content-license-field";
+import {
+	PublicWorkContentLicenseField,
+	UnitContentLicenseField,
+} from "./components/unit-content-license-field";
+import {
+	isWorkOwnershipMode,
+	type WorkOwnershipMode,
+	WorkOwnershipField,
+} from "./components/work-ownership-field";
 
 export function UnitBrowsePage({ type }: { type: WorkUnitType }) {
 	const { t } = useTranslation(["actions", "media", "ui", "units"]);
@@ -194,16 +202,14 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 	const queryClient = useQueryClient();
 	const searchParams = useSearchParams();
 	const searchSubject = unitCommunityUnitSearchSubject(type);
-	const initialOwnershipMode =
-		searchParams.get("ownershipMode") === "community_owned"
-			? ("community_owned" as const)
-			: ("profile_owned" as const);
+	const requestedOwnershipMode = searchParams.get("ownershipMode");
+	const initialOwnershipMode: WorkOwnershipMode = isWorkOwnershipMode(requestedOwnershipMode)
+		? requestedOwnershipMode
+		: "profile_owned";
 	const [title, setTitle] = useState(() => searchParams.get("title") ?? "");
 	const [searchConfirmed, setSearchConfirmed] = useState(false);
 	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(null);
-	const [ownershipMode, setOwnershipMode] = useState<"profile_owned" | "community_owned">(
-		initialOwnershipMode,
-	);
+	const [ownershipMode, setOwnershipMode] = useState<WorkOwnershipMode>(initialOwnershipMode);
 	const [creditAttributions, setCreditAttributions] = useState<readonly CreditAttributionDraft[]>(
 		() => [createCreditAttributionDraft(type)],
 	);
@@ -360,33 +366,13 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 								value={title}
 							/>
 						</Field>
-						<Field required>
-							<FieldLabel>{t.units.creation.modeLabel}</FieldLabel>
-							<NativeSelect
-								name="ownershipMode"
-								onChange={(event) => {
-									const nextOwnershipMode =
-										event.currentTarget.value === "community_owned"
-											? "community_owned"
-											: "profile_owned";
-									setOwnershipMode(nextOwnershipMode);
-									setCreditValidationRequested(false);
-								}}
-								value={ownershipMode}
-							>
-								<NativeSelectOption value="profile_owned">
-									{t.units.creation.ownedWork}
-								</NativeSelectOption>
-								<NativeSelectOption value="community_owned">
-									{t.units.creation.communityUnit}
-								</NativeSelectOption>
-							</NativeSelect>
-							<p className="text-muted-foreground text-sm">
-								{ownershipMode === "profile_owned"
-									? t.units.creation.ownedWorkDescription
-									: t.units.creation.communityUnitDescription}
-							</p>
-						</Field>
+						<WorkOwnershipField
+							onChange={(nextOwnershipMode) => {
+								setOwnershipMode(nextOwnershipMode);
+								setCreditValidationRequested(false);
+							}}
+							value={ownershipMode}
+						/>
 						{ownershipMode === "community_owned" ? (
 							<CommunityUnitSearchPrompt
 								confirmed={searchConfirmed}
@@ -536,8 +522,10 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 							</NativeSelect>
 						</Field>
 						{ownershipMode === "profile_owned" ? (
-							<UnitContentLicenseField defaultSlug={null} />
-						) : null}
+							<UnitContentLicenseField context="create" />
+						) : (
+							<PublicWorkContentLicenseField />
+						)}
 						<RequestFailure
 							error={
 								hasErrorCode(

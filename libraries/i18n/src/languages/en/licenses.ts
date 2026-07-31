@@ -37,6 +37,13 @@ export default {
 		viewTerms: `View ${verbatimTerms.rezicsUnitContentLicenseV1.value}`,
 		grantNotice:
 			"Once granted, this license cannot be revoked and continues to cover later contributions and ownership transfers.",
+		noneNotice:
+			"No content license will be granted. Choose None only when this work is an index entry and will not publish or host the work’s content.",
+		noneConfirmationTitle: `Create without a content license for ${verbatimTerms.rezics.value}?`,
+		noneConfirmationNotice: `If you want to publish or host this work’s content on ${verbatimTerms.rezics.value}, keep the content license. If this entry only indexes the work, no content license is needed. Without one, do not publish the work’s text or other copyrighted content in this entry.`,
+		keepLicense: "Keep license",
+		confirmNone: "Use no license",
+		publicWorkNotice: `Public works do not grant a content license to ${verbatimTerms.rezics.value} and should only contain index information about the work.`,
 		grantedNotice: "This content license has been permanently granted for this content.",
 		contributionNotice: `Content you contribute while this license applies is licensed to ${verbatimTerms.rezics.value} under the same terms; no separate license selection is required.`,
 		cancelGrant: "Cancel",

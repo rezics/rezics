@@ -21,11 +21,26 @@ export default {
 		audio: audioTerms.label,
 	},
 	creation: {
-		modeLabel: "Mode de création",
-		ownedWork: "Mon œuvre",
-		ownedWorkDescription: "Votre profil possède et administre cette œuvre.",
-		communityUnit: "Entrée publique",
-		communityUnitDescription:
+		workOwnershipLabel: "Propriété de l’œuvre",
+		ownedWork: "Œuvre personnelle",
+		ownedWorkDescription:
+			"Votre profil possède et administre cette œuvre. Vous pourrez ensuite accorder des droits de modification dans les autorisations.",
+		publicWork: "Œuvre communautaire",
+		publicWorkDescription:
+			"Propriété de la communauté et modifiable par toute personne connectée ; la personne qui la crée ne reçoit aucun droit particulier.",
+		publicWorkLearnMore: "Qu’est-ce qu’une œuvre communautaire ?",
+		publicWorkHelpTitle: "Qu’est-ce qu’une œuvre communautaire ?",
+		publicWorkHelpOwnership:
+			"Les œuvres communautaires appartiennent à la communauté et sont entretenues collectivement. Leur création ne vous confère ni propriété ni droits supplémentaires ; toutes les personnes connectées les modifient avec les mêmes autorisations partagées.",
+		publicWorkHelpIndexing:
+			"Elles servent généralement à créer des informations d’index consultables pour des œuvres existantes dont vous ne détenez pas les droits d’auteur.",
+		publicWorkHelpAlternative:
+			"Si vous détenez les droits d’auteur ou souhaitez administrer une œuvre tout en l’ouvrant à certaines personnes, choisissez « Œuvre personnelle », puis accordez les droits de modification appropriés après sa création.",
+		entryOwnershipLabel: "Propriété de l’entrée",
+		ownedEntry: "Mon entrée",
+		ownedEntryDescription: "Votre profil possède et administre cette entrée.",
+		publicEntry: "Entrée publique",
+		publicEntryDescription:
 			"Propriété de la communauté et modifiable par toute personne connectée ; la personne qui la crée ne reçoit aucun droit particulier.",
 		creditAttributionsTitle: "Crédits",
 		creditEntityLabel: insert(`${entityTerms.label} {{number}}`, { number: Number }),
@@ -36,7 +51,7 @@ export default {
 		creditRoleRequired: "Sélectionnez un rôle.",
 		creditDuplicate: `Cette ${entityTerms.inline} possède déjà ce rôle.`,
 		publisherAttributionRequired:
-			"Mon œuvre doit comporter au moins un crédit de Maison d’édition.",
+			"Une œuvre personnelle doit comporter au moins un crédit de Maison d’édition.",
 		creditRequestConfirmationTitle: "Confirmer les invitations de crédit",
 		creditRequestConfirmationDescription: `Certaines ${entityTerms.plural} sélectionnées doivent donner leur accord avant l’affichage de leurs crédits. Confirmez pour créer l’œuvre et envoyer les invitations.`,
 		creditRequestConfirmationCancel: "Annuler",
@@ -590,7 +605,7 @@ export default {
 		useLanguage: "Changer de langue",
 		save: "Enregistrer le chapitre",
 		communityUnitContentPolicyTitle:
-			"Les entrées publiques ne permettent pas de modifier ici le corps du chapitre",
+			"Les œuvres communautaires ne permettent pas de modifier ici le corps du chapitre",
 		communityUnitContentPolicyDescription: `Ce livre est géré par la communauté. Vous pouvez organiser sa structure du contenu ou joindre un ${postTerms.inline} existant et lisible, mais cet éditeur ne propose pas d’éditeur pour son corps.`,
 		wordCount: insert("{{count}} mots", { count: Number }),
 		characterCount: insert("{{count}} caractères", { count: Number }),

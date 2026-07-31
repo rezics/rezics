@@ -7,7 +7,10 @@ import { create } from "native-i18n";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { TranslationProvider } from "@/i18n/client";
-import { UnitContentLicenseField } from "./unit-content-license-field";
+import {
+	PublicWorkContentLicenseField,
+	UnitContentLicenseField,
+} from "./unit-content-license-field";
 
 vi.mock("@/i18n/client", async () => {
 	const { create: createReactI18n } = await import("native-i18n/react/client");
@@ -35,37 +38,104 @@ const translation = await create(resources).getTranslation(["licenses", "units"]
 
 afterEach(cleanup);
 
+function contentLicenseSelect(container: HTMLElement): HTMLSelectElement {
+	const select = container.querySelector<HTMLSelectElement>('select[name="contentLicense"]');
+	if (!select) throw new Error("Expected a content license select");
+	return select;
+}
+
+function renderedForm(container: HTMLElement): HTMLFormElement {
+	const form = container.querySelector("form");
+	if (!form) throw new Error("Expected a form");
+	return form;
+}
+
 describe("UnitContentLicenseField", () => {
-	it("leaves a selected grant uncommitted when confirmation is canceled", async () => {
+	it("defaults a new work to the current content license", () => {
 		const { container } = render(
 			<TranslationProvider initial={translation.snapshot}>
-				<UnitContentLicenseField defaultSlug={null} />
+				<UnitContentLicenseField context="create" />
 			</TranslationProvider>,
 		);
-		const select = container.querySelector<HTMLSelectElement>('select[name="contentLicense"]');
-		expect(select).not.toBeNull();
+		const select = contentLicenseSelect(container);
 
-		fireEvent.change(select!, { target: { value: CurrentUnitContentLicenseSlug } });
-
-		expect(await screen.findByRole("alertdialog")).toBeTruthy();
-		expect(
-			screen.getByText("授權後不可撤銷，並持續適用於這項內容的後續貢獻及所有權移轉。"),
-		).toBeTruthy();
-		expect(select).toHaveProperty("value", "none");
-
-		fireEvent.click(screen.getByRole("button", { name: "取消" }));
-		expect(select).toHaveProperty("value", "none");
+		expect(select).toHaveProperty("value", CurrentUnitContentLicenseSlug);
+		expect(screen.queryByRole("alertdialog")).toBeNull();
 	});
 
-	it("commits a selected grant after confirmation", async () => {
+	it("carries the new-work default through the form boundary", () => {
 		const { container } = render(
 			<TranslationProvider initial={translation.snapshot}>
-				<UnitContentLicenseField defaultSlug={null} />
+				<form>
+					<UnitContentLicenseField context="create" />
+				</form>
 			</TranslationProvider>,
 		);
-		const select = container.querySelector<HTMLSelectElement>('select[name="contentLicense"]');
-		fireEvent.change(select!, { target: { value: CurrentUnitContentLicenseSlug } });
+		const form = renderedForm(container);
+
+		expect(new FormData(form).get("contentLicense")).toBe(CurrentUnitContentLicenseSlug);
+	});
+
+	it("makes a public work license impossible to submit", () => {
+		const { container } = render(
+			<TranslationProvider initial={translation.snapshot}>
+				<form>
+					<PublicWorkContentLicenseField />
+				</form>
+			</TranslationProvider>,
+		);
+		const form = renderedForm(container);
+
+		expect(
+			screen.getByText("公共作品不會向 REZICS 授予內容授權，應只用來收錄作品的索引資料。"),
+		).toBeTruthy();
+		expect(new FormData(form).has("contentLicense")).toBe(false);
+	});
+
+	it("keeps the default grant when switching to none is canceled", async () => {
+		const { container } = render(
+			<TranslationProvider initial={translation.snapshot}>
+				<UnitContentLicenseField context="create" />
+			</TranslationProvider>,
+		);
+		const select = contentLicenseSelect(container);
+
+		fireEvent.change(select, { target: { value: "none" } });
+
+		expect(await screen.findByRole("alertdialog")).toBeTruthy();
+		expect(screen.getByText(/如果你要在 REZICS 發佈或託管作品內容/)).toBeTruthy();
+		expect(select).toHaveProperty("value", CurrentUnitContentLicenseSlug);
+
+		fireEvent.click(screen.getByRole("button", { name: "保留授權" }));
+		expect(select).toHaveProperty("value", CurrentUnitContentLicenseSlug);
+	});
+
+	it("commits none after the warning is confirmed", async () => {
+		const { container } = render(
+			<TranslationProvider initial={translation.snapshot}>
+				<UnitContentLicenseField context="create" />
+			</TranslationProvider>,
+		);
+		const select = contentLicenseSelect(container);
+		fireEvent.change(select, { target: { value: "none" } });
 		await screen.findByRole("alertdialog");
+		fireEvent.click(screen.getByRole("button", { name: "改為無授權" }));
+		await waitFor(() => expect(select).toHaveProperty("value", "none"));
+	});
+
+	it("still requires confirmation before granting an unlicensed existing work", async () => {
+		const { container } = render(
+			<TranslationProvider initial={translation.snapshot}>
+				<UnitContentLicenseField context="edit" grantedSlug={null} />
+			</TranslationProvider>,
+		);
+		const select = contentLicenseSelect(container);
+		expect(select).toHaveProperty("value", "none");
+
+		fireEvent.change(select, { target: { value: CurrentUnitContentLicenseSlug } });
+		expect(await screen.findByRole("alertdialog")).toBeTruthy();
+		expect(select).toHaveProperty("value", "none");
+
 		fireEvent.click(screen.getByRole("button", { name: "確認授權" }));
 		await waitFor(() => expect(select).toHaveProperty("value", CurrentUnitContentLicenseSlug));
 	});
@@ -73,10 +143,13 @@ describe("UnitContentLicenseField", () => {
 	it("keeps an existing irrevocable grant selected and disabled", () => {
 		const { container } = render(
 			<TranslationProvider initial={translation.snapshot}>
-				<UnitContentLicenseField defaultSlug={CurrentUnitContentLicenseSlug} />
+				<UnitContentLicenseField
+					context="edit"
+					grantedSlug={CurrentUnitContentLicenseSlug}
+				/>
 			</TranslationProvider>,
 		);
-		const select = container.querySelector<HTMLSelectElement>('select[name="contentLicense"]');
+		const select = contentLicenseSelect(container);
 
 		expect(select).toHaveProperty("value", CurrentUnitContentLicenseSlug);
 		expect(select).toHaveProperty("disabled", true);
