@@ -10,11 +10,8 @@ export const PostManagementSectionIds = [
 
 export type PostManagementSectionId = (typeof PostManagementSectionIds)[number];
 
-type OrdinaryPostCapabilities = Pick<
-	Extract<
-		GetApiPostsByPostIdStatus200,
-		{ postKind: "post" | "reply" | "excerpt" | "wiki" }
-	>["capabilities"],
+type PostContentCapabilities = Pick<
+	Exclude<GetApiPostsByPostIdStatus200, { postKind: "review" }>["capabilities"],
 	"canEdit" | "canManageAccess" | "canManageAttributions" | "canManageRealmPublications"
 >;
 
@@ -29,8 +26,8 @@ type ReviewCapabilities = Pick<
 
 export type PostManagementCapabilitySource =
 	| Readonly<{
-			postKind: "post" | "reply" | "excerpt" | "wiki";
-			capabilities: OrdinaryPostCapabilities;
+			postKind: Exclude<GetApiPostsByPostIdStatus200["postKind"], "review">;
+			capabilities: PostContentCapabilities;
 	  }>
 	| Readonly<{ postKind: "review"; capabilities: ReviewCapabilities }>;
 

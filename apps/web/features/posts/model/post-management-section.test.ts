@@ -6,7 +6,7 @@ import {
 	type PostManagementCapabilitySource,
 } from "./post-management-section";
 
-const ordinaryDenied = {
+const contentDenied = {
 	postKind: "post",
 	capabilities: {
 		canEdit: false,
@@ -28,11 +28,11 @@ const reviewDenied = {
 } as const satisfies PostManagementCapabilitySource;
 
 describe("post management section manifest", () => {
-	it("opens an ordinary Post directly on its main editor", () => {
+	it("opens a content-editable Post directly on its main editor", () => {
 		expect(
 			getPostManagementSectionIds({
-				...ordinaryDenied,
-				capabilities: { ...ordinaryDenied.capabilities, canEdit: true },
+				...contentDenied,
+				capabilities: { ...contentDenied.capabilities, canEdit: true },
 			}),
 		).toEqual(["main", "history"]);
 	});
@@ -40,21 +40,31 @@ describe("post management section manifest", () => {
 	it("exposes Realm publication only with its exact capability", () => {
 		expect(
 			getPostManagementSectionIds({
-				...ordinaryDenied,
+				...contentDenied,
 				capabilities: {
-					...ordinaryDenied.capabilities,
+					...contentDenied.capabilities,
 					canManageRealmPublications: true,
 				},
 			}),
 		).toEqual(["realms", "history"]);
 	});
 
-	it("keeps Excerpts in the ordinary Post management lifecycle", () => {
+	it("keeps Excerpts in the shared Post content editing lifecycle", () => {
 		expect(
 			getPostManagementSectionIds({
-				...ordinaryDenied,
+				...contentDenied,
 				postKind: "excerpt",
-				capabilities: { ...ordinaryDenied.capabilities, canEdit: true },
+				capabilities: { ...contentDenied.capabilities, canEdit: true },
+			}),
+		).toEqual(["main", "history"]);
+	});
+
+	it("keeps Wikis in the shared Post content editing lifecycle", () => {
+		expect(
+			getPostManagementSectionIds({
+				...contentDenied,
+				postKind: "wiki",
+				capabilities: { ...contentDenied.capabilities, canEdit: true },
 			}),
 		).toEqual(["main", "history"]);
 	});
@@ -62,9 +72,9 @@ describe("post management section manifest", () => {
 	it("exposes attribution and access sections only with their exact capabilities", () => {
 		expect(
 			getPostManagementSectionIds({
-				...ordinaryDenied,
+				...contentDenied,
 				capabilities: {
-					...ordinaryDenied.capabilities,
+					...contentDenied.capabilities,
 					canManageAttributions: true,
 					canManageAccess: true,
 				},
@@ -82,9 +92,9 @@ describe("post management section manifest", () => {
 	});
 
 	it("does not open the workspace without a management capability", () => {
-		expect(canOpenPostManagement(ordinaryDenied)).toBe(false);
+		expect(canOpenPostManagement(contentDenied)).toBe(false);
 		expect(canOpenPostManagement(reviewDenied)).toBe(false);
-		expect(getPostManagementSectionIds(ordinaryDenied)).toEqual([]);
+		expect(getPostManagementSectionIds(contentDenied)).toEqual([]);
 		expect(getPostManagementSectionIds(reviewDenied)).toEqual([]);
 	});
 });

@@ -22,6 +22,7 @@ import {
 } from "../../database/schema";
 import { createNotification } from "../../notifications/service";
 import { fractionalPositionAt } from "../../ordering/position";
+import { usesSharedPostLocalizationRoute } from "../../posts/localization-route";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import { insertUnit } from "../../units/create";
@@ -565,9 +566,7 @@ export default new Elysia()
 							? selectPostProgressEntry(row.id, viewerProfileId)
 							: Promise.resolve([]),
 						subjectPromise,
-						row.postKind === "wiki"
-							? Promise.resolve(false)
-							: authorization.unit.canUpdate(row.id, ["localizations"]),
+						authorization.unit.canUpdate(row.id, ["localizations"]),
 						authorization.unit.canUpdate(row.id, ["credit-attributions"]),
 						authorization.unit.decide(row.id, "unit.realm-publication.manage"),
 						authorization.unit.decide(row.id, "unit.access.manage"),
@@ -671,7 +670,7 @@ export default new Elysia()
 			.patch(
 				"/:postId",
 				async ({ params, profile, authorization, body }) => {
-					await ensureEditablePost(params.postId);
+					await ensureSharedPostLocalizationTarget(params.postId);
 					await authorization.unit.ensureCanUpdate(params.postId, [
 						["localizations", body.language],
 					]);
@@ -1150,16 +1149,11 @@ async function ensureRootPost(postId: string, realmId?: string) {
 	if (!row) throw new PostNotFound();
 }
 
-async function ensureEditablePost(postId: string) {
+async function ensureSharedPostLocalizationTarget(postId: string) {
 	const [row] = await database
-		.select({ id: post.id })
+		.select({ id: post.id, kind: post.kind })
 		.from(post)
-		.where(
-			and(
-				eq(post.id, postId),
-				sql`${post.kind} in ('post'::post_kind, 'reply'::post_kind, 'excerpt'::post_kind)`,
-			),
-		)
+		.where(eq(post.id, postId))
 		.limit(1);
-	if (!row) throw new PostNotFound();
+	if (!row || !usesSharedPostLocalizationRoute(row.kind)) throw new PostNotFound();
 }

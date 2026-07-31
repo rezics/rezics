@@ -20,26 +20,26 @@ import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
 import { PostEditorFields } from "../components/post-editor-fields";
 import { PostManagementSectionHeader } from "../components/post-management-section-header";
-import {
-	useOrdinaryPostManagement,
-	usePostManagement,
-} from "../components/post-management-workspace";
+import { usePostManagement } from "../components/post-management-workspace";
 import { nullablePostLocalizationText } from "../model/post-localization-input";
 import { invalidatePostQueries } from "../query";
 import { postDetailHref } from "../routing/post-management-routes";
 
-type OrdinaryPost = Extract<GetApiPostsByPostIdStatus200, { postKind: "post" | "excerpt" }>;
+type RootPostContent = Exclude<GetApiPostsByPostIdStatus200, { postKind: "review" | "reply" }>;
 type ReplyPost = Extract<GetApiPostsByPostIdStatus200, { postKind: "reply" }>;
 
 export function PostEditPage() {
 	const { resource } = usePostManagement();
 	if (resource.item.postKind === "review") return <ReviewEditPage />;
-	return <OrdinaryPostEditPage />;
+	return <PostContentEditPage post={resource.item} />;
 }
 
-function OrdinaryPostEditPage() {
+function PostContentEditPage({
+	post,
+}: {
+	post: Exclude<GetApiPostsByPostIdStatus200, { postKind: "review" }>;
+}) {
 	const { t } = useTranslation(["errors", "posts"]);
-	const { item: post } = useOrdinaryPostManagement();
 	const { selectedLanguage } = useContentLanguageEditor();
 	if (!post.capabilities.canEdit)
 		return <p className="text-sm text-destructive">{t.errors.forbidden}</p>;
@@ -58,14 +58,14 @@ function OrdinaryPostEditPage() {
 				{post.postKind === "reply" ? (
 					<ReplyPostEditForm key={`${post.id}:${selectedLanguage}`} post={post} />
 				) : (
-					<OrdinaryPostEditForm key={`${post.id}:${selectedLanguage}`} post={post} />
+					<PostContentEditForm key={`${post.id}:${selectedLanguage}`} post={post} />
 				)}
 			</div>
 		</section>
 	);
 }
 
-function OrdinaryPostEditForm({ post }: { post: OrdinaryPost }) {
+function PostContentEditForm({ post }: { post: RootPostContent }) {
 	const { t } = useTranslation(["posts", "ui"]);
 	const router = useApplicationRouter();
 	const queryClient = useQueryClient();

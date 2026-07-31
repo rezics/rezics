@@ -36,10 +36,6 @@ import {
 	postManagementSectionHref,
 } from "../routing/post-management-routes";
 
-type OrdinaryPostManagementResource = Readonly<{
-	item: Extract<GetApiPostsByPostIdStatus200, { postKind: "post" | "reply" | "excerpt" }>;
-}>;
-
 type ReviewManagementResource = Readonly<{
 	item: Extract<GetApiPostsByPostIdStatus200, { postKind: "review" }>;
 }>;
@@ -56,17 +52,6 @@ export function usePostManagement(): PostManagementContextValue {
 	const value = useContext(PostManagementContext);
 	if (!value) throw new Error("Post management context is unavailable outside its workspace");
 	return value;
-}
-
-export function useOrdinaryPostManagement(): OrdinaryPostManagementResource {
-	const { resource } = usePostManagement();
-	if (
-		resource.item.postKind !== "post" &&
-		resource.item.postKind !== "reply" &&
-		resource.item.postKind !== "excerpt"
-	)
-		throw new Error("Ordinary Post management is unavailable for this Post kind");
-	return { item: resource.item };
 }
 
 export function useReviewManagement(): ReviewManagementResource {
