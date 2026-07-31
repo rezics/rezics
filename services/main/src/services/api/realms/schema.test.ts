@@ -14,6 +14,8 @@ import {
 	RealmRulesQuery,
 	RealmUnitListResponse,
 	RealmUnitModerationActionResponse,
+	RealmUnitModerationQuery,
+	RealmUnitModerationResponse,
 	UpdateRealmBody,
 	UpdateRealmRulesBody,
 } from "./schema";
@@ -181,6 +183,27 @@ describe("Realm moderation API contract", () => {
 		).toBe(true);
 	});
 
+	it("returns one directly addressed moderation target with localized presentation", () => {
+		expect(Check(RealmUnitModerationQuery, { localizationLanguages: ["zh", "en"] })).toBe(true);
+		expect(
+			Check(RealmUnitModerationResponse, {
+				realmId: "019fa3ab-72a9-7792-b2e3-43aa8a9c755d",
+				unitId: "019fa3ab-72a9-7792-b2e3-43aa8a9c755e",
+				unitKind: "post",
+				language: "zh",
+				title: "待處理項目",
+				status: "pending",
+				publicationState: "active",
+				postTargetingLocked: false,
+				openReportCount: 2,
+				allowedCommands: ["approve", "remove", "lock_post_targeting", "note"],
+				moderationStatus: "pending",
+				createdAt: "2026-07-27T12:00:00.000Z",
+				updatedAt: "2026-07-27T12:30:00.000Z",
+			}),
+		).toBe(true);
+	});
+
 	it("accepts commands and rejects client-authored resulting state", () => {
 		expect(
 			Check(ModerateRealmUnitBody, {
@@ -227,6 +250,9 @@ describe("Realm moderation API contract", () => {
 				previousState: "pending",
 				resultingState: "visible",
 				previousPostTargetingLocked: null,
+				contentLicenseId: null,
+				previousContentLicenseStatus: null,
+				resultingContentLicenseStatus: null,
 				resultingStatus: "visible",
 				resultingPostTargetingLocked: null,
 				reasonCode: "realm_rules",

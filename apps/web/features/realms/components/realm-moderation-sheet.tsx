@@ -70,16 +70,16 @@ type ModerationAnnotationRole = "internal_note" | "public_notice";
 export function RealmModerationSheet({
 	realmId,
 	unit,
-	cacheQuery,
-	filter,
-	reportFilter,
+	queueCache,
 	onOpenChange,
 }: {
 	readonly realmId: string;
 	readonly unit: RealmModerationUnit;
-	readonly cacheQuery: GetApiRealmsByRealmIdUnitsQuery;
-	readonly filter: RealmModerationFilter;
-	readonly reportFilter: RealmReportFilter;
+	readonly queueCache?: Readonly<{
+		readonly query: GetApiRealmsByRealmIdUnitsQuery;
+		readonly filter: RealmModerationFilter;
+		readonly reportFilter: RealmReportFilter;
+	}>;
 	readonly onOpenChange: (open: boolean) => void;
 }) {
 	const { t, locale } = useTranslation(["locale", "posts", "realms", "reports"]);
@@ -147,15 +147,16 @@ export function RealmModerationSheet({
 				path: { realmId, unitId: unit.unitId },
 				body,
 			});
-			updateRealmModerationQueueCache(
-				queryClient,
-				realmId,
-				cacheQuery,
-				filter,
-				reportFilter,
-				unit.unitId,
-				result.target,
-			);
+			if (queueCache)
+				updateRealmModerationQueueCache(
+					queryClient,
+					realmId,
+					queueCache.query,
+					queueCache.filter,
+					queueCache.reportFilter,
+					unit.unitId,
+					result.target,
+				);
 			onOpenChange(false);
 			toast.create({ title: t.realms.moderationSucceeded, type: "success" });
 			refreshRealmModerationData(queryClient, realmId, unit.unitId);

@@ -176,12 +176,14 @@ export function RealmModeration({
 
 			{selectedUnit ? (
 				<RealmModerationSheet
-					cacheQuery={queue.baseQuery}
-					filter={filter}
-					reportFilter={reportFilter}
 					key={selectedUnit.unitId}
 					onOpenChange={(open) => {
 						if (!open) setSelectedUnitId(undefined);
+					}}
+					queueCache={{
+						filter,
+						query: queue.baseQuery,
+						reportFilter,
 					}}
 					realmId={realmId}
 					unit={selectedUnit}

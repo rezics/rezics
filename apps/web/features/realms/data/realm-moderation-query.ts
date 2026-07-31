@@ -2,6 +2,7 @@
 
 import {
 	getApiRealmsByRealmIdUnits,
+	getApiRealmsByRealmIdUnitsByUnitIdQueryKey,
 	getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey,
 	getApiRealmsByRealmIdReportsQueryKey,
 	getApiRealmsByRealmIdUnitsQueryKey,
@@ -9,6 +10,7 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import { useInfiniteQuery, type QueryClient } from "@tanstack/react-query";
 
+import { FeedQueryKey } from "@/features/content-feed/query";
 import { invalidatePostQueries } from "@/features/posts/query";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import {
@@ -88,8 +90,14 @@ export function refreshRealmModerationData(
 	unitId: string,
 ): void {
 	void Promise.all([
+		queryClient.invalidateQueries({ queryKey: FeedQueryKey }),
 		queryClient.invalidateQueries({
 			queryKey: getApiRealmsByRealmIdUnitsQueryKey({ path: { realmId } }),
+		}),
+		queryClient.invalidateQueries({
+			queryKey: getApiRealmsByRealmIdUnitsByUnitIdQueryKey({
+				path: { realmId, unitId },
+			}),
 		}),
 		queryClient.invalidateQueries({
 			queryKey: getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey({

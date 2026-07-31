@@ -363,6 +363,11 @@ export const ListRealmUnitsQuery = t.Object(
 );
 export type ListRealmUnitsQuery = Static<typeof ListRealmUnitsQuery>;
 
+export const RealmUnitModerationQuery = t.Object(LocalizationLanguageQuery, {
+	additionalProperties: false,
+});
+export type RealmUnitModerationQuery = Static<typeof RealmUnitModerationQuery>;
+
 export const RealmUnitHistoryQuery = t.Object(
 	{ limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })) },
 	{ additionalProperties: false },
@@ -411,24 +416,24 @@ const RealmUnitModerationTargetResponse = t.Object({
 	updatedAt: DateTime,
 });
 
+export const RealmUnitModerationResponse = t.Object({
+	realmId: Uuid,
+	unitId: Uuid,
+	unitKind: t.String(),
+	language: ContentLanguage,
+	title: t.Nullable(t.String()),
+	status: RealmUnitStatus,
+	publicationState: RealmUnitPublicationState,
+	postTargetingLocked: t.Boolean(),
+	openReportCount: t.Integer({ minimum: 0 }),
+	allowedCommands: t.Array(RealmModerationCommand, { minItems: 1 }),
+	moderationStatus: t.String(),
+	createdAt: DateTime,
+	updatedAt: DateTime,
+});
+
 export const RealmUnitListResponse = t.Object({
-	items: t.Array(
-		t.Object({
-			realmId: Uuid,
-			unitId: Uuid,
-			unitKind: t.String(),
-			language: ContentLanguage,
-			title: t.Nullable(t.String()),
-			status: RealmUnitStatus,
-			publicationState: RealmUnitPublicationState,
-			postTargetingLocked: t.Boolean(),
-			openReportCount: t.Integer({ minimum: 0 }),
-			allowedCommands: t.Array(RealmModerationCommand, { minItems: 1 }),
-			moderationStatus: t.String(),
-			createdAt: DateTime,
-			updatedAt: DateTime,
-		}),
-	),
+	items: t.Array(RealmUnitModerationResponse),
 	nextCursor: t.Nullable(t.String()),
 });
 

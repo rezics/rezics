@@ -106,6 +106,7 @@ export function RealmTaxonomyPage({ realm }: { readonly realm: GetApiRealmsByRea
 						})}
 						canManagePins={realm.capabilities.canManagePins}
 						canManageTags={realm.capabilities.canManageTags}
+						canModerateUnits={realm.capabilities.canModerateUnits}
 						realmId={realm.id}
 					/>
 				</section>

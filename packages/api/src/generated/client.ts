@@ -621,10 +621,12 @@ import type {
 	DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteResponses,
 	GetApiRealmsByRealmIdUnitsOptions,
 	GetApiRealmsByRealmIdUnitsResponses,
-	GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions,
-	GetApiRealmsByRealmIdUnitsByUnitIdHistoryResponses,
+	GetApiRealmsByRealmIdUnitsByUnitIdOptions,
+	GetApiRealmsByRealmIdUnitsByUnitIdResponses,
 	PatchApiRealmsByRealmIdUnitsByUnitIdOptions,
 	PatchApiRealmsByRealmIdUnitsByUnitIdResponses,
+	GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions,
+	GetApiRealmsByRealmIdUnitsByUnitIdHistoryResponses,
 	GetApiRealmsByRealmIdWikiNavigationOptions,
 	GetApiRealmsByRealmIdWikiNavigationResponses,
 	PostApiRealmsByRealmIdWikiNavigationOptions,
@@ -6827,20 +6829,20 @@ export function getApiRealmsByRealmIdUnits<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary Get Realm Unit moderation history
- * {@link /api/realms/:realmId/units/:unitId/history}
+ * @summary Get Realm Unit for moderation
+ * {@link /api/realms/:realmId/units/:unitId}
  */
-export function getApiRealmsByRealmIdUnitsByUnitIdHistory<ThrowOnError extends boolean = true>(
-	options: Options<GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdHistoryResponses, ThrowOnError>> {
+export function getApiRealmsByRealmIdUnitsByUnitId<ThrowOnError extends boolean = true>(
+	options: Options<GetApiRealmsByRealmIdUnitsByUnitIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/realms/{realmId}/units/{unitId}/history",
+		url: "/api/realms/{realmId}/units/{unitId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdHistoryResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -6861,6 +6863,23 @@ export function patchApiRealmsByRealmIdUnitsByUnitId<ThrowOnError extends boolea
 		],
 		...config,
 	}) as Promise<RequestResult<PatchApiRealmsByRealmIdUnitsByUnitIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Get Realm Unit moderation history
+ * {@link /api/realms/:realmId/units/:unitId/history}
+ */
+export function getApiRealmsByRealmIdUnitsByUnitIdHistory<ThrowOnError extends boolean = true>(
+	options: Options<GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/realms/{realmId}/units/{unitId}/history",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdHistoryResponses, ThrowOnError>>;
 }
 
 /**

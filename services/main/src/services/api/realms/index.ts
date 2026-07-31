@@ -121,6 +121,8 @@ import {
 	RealmTagVoteResponse,
 	RealmPolicyTagResponse,
 	RealmUnitListResponse,
+	RealmUnitModerationQuery,
+	RealmUnitModerationResponse,
 	RealmUnitHistoryQuery,
 	RealmUnitModerationActionResponse,
 	RealmUnitModerationHistoryResponse,
@@ -206,6 +208,56 @@ function presentGovernanceReasonCode(value: string) {
 	const reasonCode = GovernanceReasonCodeValues.find((candidate) => candidate === value);
 	if (!reasonCode) throw new Error("Realm moderation action has an invalid reason code");
 	return reasonCode;
+}
+
+function realmUnitModerationSelection(
+	localizationLanguages: ListRealmUnitsQuery["localizationLanguages"],
+) {
+	return {
+		realmId: realmUnit.realmId,
+		unitId: realmUnit.unitId,
+		unitKind: unit.kind,
+		language: resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
+		title: resolvedUnitLocalizationTitle(unit.id, localizationLanguages),
+		status: realmUnit.status,
+		publicationState: realmUnit.publicationState,
+		postTargetingLocked: realmUnit.postTargetingLocked,
+		openReportCount: sql<number>`(
+			select count(*)::int
+			from ${realmUnitReport}
+			inner join ${moderationCase}
+				on ${moderationCase.id} = ${realmUnitReport.caseId}
+			where ${realmUnitReport.realmId} = ${realmUnit.realmId}
+				and ${realmUnitReport.unitId} = ${realmUnit.unitId}
+				and ${inArray(moderationCase.state, ActiveReportCaseStateValues)}
+		)`,
+		moderationStatus: unit.moderationStatus,
+		createdAt: realmUnit.createdAt,
+		updatedAt: realmUnit.updatedAt,
+	};
+}
+
+function presentRealmUnitModeration<
+	Item extends {
+		readonly language: ContentLanguage | null;
+		readonly openReportCount: number;
+		readonly postTargetingLocked: boolean;
+		readonly status: (typeof RealmUnitStatusValues)[number];
+		readonly unitId: string;
+	},
+>(item: Item) {
+	if (!item.language) throw new Error(`Realm Unit ${item.unitId} has no localization`);
+	return {
+		...item,
+		language: item.language,
+		allowedCommands: [
+			...getRealmUnitModerationCommands(
+				item.status,
+				item.postTargetingLocked,
+				item.openReportCount > 0,
+			),
+		],
+	};
 }
 
 async function ensureRealmFieldsAuthorized(
@@ -2369,31 +2421,7 @@ export default new Elysia({ prefix: "/realms" })
 			});
 			const statusOrder = sql<number>`case ${realmUnit.status} when 'pending' then 0 when 'hidden' then 1 when 'removed' then 2 else 3 end`;
 			const rows = await database
-				.select({
-					realmId: realmUnit.realmId,
-					unitId: realmUnit.unitId,
-					unitKind: unit.kind,
-					language: resolvedUnitLocalizationLanguage(
-						unit.id,
-						query.localizationLanguages,
-					),
-					title: resolvedUnitLocalizationTitle(unit.id, query.localizationLanguages),
-					status: realmUnit.status,
-					publicationState: realmUnit.publicationState,
-					postTargetingLocked: realmUnit.postTargetingLocked,
-					openReportCount: sql<number>`(
-						select count(*)::int
-						from ${realmUnitReport}
-						inner join ${moderationCase}
-							on ${moderationCase.id} = ${realmUnitReport.caseId}
-						where ${realmUnitReport.realmId} = ${realmUnit.realmId}
-							and ${realmUnitReport.unitId} = ${realmUnit.unitId}
-							and ${inArray(moderationCase.state, ActiveReportCaseStateValues)}
-					)`,
-					moderationStatus: unit.moderationStatus,
-					createdAt: realmUnit.createdAt,
-					updatedAt: realmUnit.updatedAt,
-				})
+				.select(realmUnitModerationSelection(query.localizationLanguages))
 				.from(realmUnit)
 				.innerJoin(unit, eq(unit.id, realmUnit.unitId))
 				.where(
@@ -2439,21 +2467,7 @@ export default new Elysia({ prefix: "/realms" })
 				.limit(limit + 1);
 			const hasMore = rows.length > limit;
 			const page = rows.slice(0, limit);
-			const items = page.map((item) => {
-				if (!item.language)
-					throw new Error(`Realm Unit ${item.unitId} has no localization`);
-				return {
-					...item,
-					language: item.language,
-					allowedCommands: [
-						...getRealmUnitModerationCommands(
-							item.status,
-							item.postTargetingLocked,
-							item.openReportCount > 0,
-						),
-					],
-				};
-			});
+			const items = page.map(presentRealmUnitModeration);
 			const last = page.at(-1);
 			return {
 				items,
@@ -2485,6 +2499,33 @@ export default new Elysia({ prefix: "/realms" })
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
 			},
 			detail: { summary: "List Realm Units for moderation", tags: ["Realms"] },
+		},
+	)
+	.get(
+		"/:realmId/units/:unitId",
+		async ({ params, query, authorization }) => {
+			await authorization.realm.ensureCapability(params.realmId, "realm.units.moderate");
+			const [item] = await database
+				.select(realmUnitModerationSelection(query.localizationLanguages))
+				.from(realmUnit)
+				.innerJoin(unit, eq(unit.id, realmUnit.unitId))
+				.where(
+					and(eq(realmUnit.realmId, params.realmId), eq(realmUnit.unitId, params.unitId)),
+				)
+				.limit(1);
+			if (!item) throw new RealmUnitNotFound();
+			return presentRealmUnitModeration(item);
+		},
+		{
+			access: "session-only",
+			params: RealmUnitParams,
+			query: RealmUnitModerationQuery,
+			response: {
+				[StatusCodes.OK]: RealmUnitModerationResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmUnitNotFound"]),
+			},
+			detail: { summary: "Get Realm Unit for moderation", tags: ["Realms"] },
 		},
 	)
 	.get(

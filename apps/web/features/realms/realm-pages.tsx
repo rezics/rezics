@@ -438,6 +438,7 @@ export function RealmDetailPage({ id, page = "main" }: { id: string; page?: Real
 						<RealmFeed
 							canManagePins={realm.capabilities.canManagePins}
 							canManageTags={realm.capabilities.canManageTags}
+							canModerateUnits={realm.capabilities.canModerateUnits}
 							realmId={realm.id}
 						/>
 					</div>

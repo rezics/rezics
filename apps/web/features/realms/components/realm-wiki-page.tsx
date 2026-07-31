@@ -69,6 +69,7 @@ export function RealmWikiPage({ realm }: { readonly realm: GetApiRealmsByRealmId
 					additionalFilter={additionalFilter}
 					canManagePins={realm.capabilities.canManagePins}
 					canManageTags={realm.capabilities.canManageTags}
+					canModerateUnits={realm.capabilities.canModerateUnits}
 					contentKinds={["post:wiki"]}
 					realmId={realm.id}
 					showControls={false}

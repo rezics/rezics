@@ -2093,12 +2093,12 @@ import type {
 	GetApiRealmsByRealmIdUnitsStatus403,
 	GetApiRealmsByRealmIdUnitsStatus422,
 	GetApiRealmsByRealmIdUnitsStatus500,
-	GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions,
-	GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200,
-	GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus403,
-	GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus404,
-	GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus422,
-	GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus500,
+	GetApiRealmsByRealmIdUnitsByUnitIdOptions,
+	GetApiRealmsByRealmIdUnitsByUnitIdStatus200,
+	GetApiRealmsByRealmIdUnitsByUnitIdStatus403,
+	GetApiRealmsByRealmIdUnitsByUnitIdStatus404,
+	GetApiRealmsByRealmIdUnitsByUnitIdStatus422,
+	GetApiRealmsByRealmIdUnitsByUnitIdStatus500,
 	PatchApiRealmsByRealmIdUnitsByUnitIdOptions,
 	PatchApiRealmsByRealmIdUnitsByUnitIdStatus200,
 	PatchApiRealmsByRealmIdUnitsByUnitIdStatus400,
@@ -2108,6 +2108,12 @@ import type {
 	PatchApiRealmsByRealmIdUnitsByUnitIdStatus422,
 	PatchApiRealmsByRealmIdUnitsByUnitIdStatus429,
 	PatchApiRealmsByRealmIdUnitsByUnitIdStatus500,
+	GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions,
+	GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200,
+	GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus403,
+	GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus404,
+	GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus422,
+	GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus500,
 	GetApiRealmsByRealmIdWikiNavigationOptions,
 	GetApiRealmsByRealmIdWikiNavigationStatus200,
 	GetApiRealmsByRealmIdWikiNavigationStatus401,
@@ -2616,8 +2622,9 @@ import {
 	putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote,
 	deleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote,
 	getApiRealmsByRealmIdUnits,
-	getApiRealmsByRealmIdUnitsByUnitIdHistory,
+	getApiRealmsByRealmIdUnitsByUnitId,
 	patchApiRealmsByRealmIdUnitsByUnitId,
+	getApiRealmsByRealmIdUnitsByUnitIdHistory,
 	getApiRealmsByRealmIdWikiNavigation,
 	postApiRealmsByRealmIdWikiNavigation,
 	getApiRealmsByRealmIdWikiNavigationByNavigationId,
@@ -34706,38 +34713,38 @@ export function useGetApiRealmsByRealmIdUnits<
 	return queryResult;
 }
 
-export const getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey = ({
+export const getApiRealmsByRealmIdUnitsByUnitIdQueryKey = ({
 	path,
 	query,
-}: Omit<GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions, "headers">) =>
+}: Omit<GetApiRealmsByRealmIdUnitsByUnitIdOptions, "headers">) =>
 	[
-		{ url: "/api/realms/:realmId/units/:unitId/history", params: path },
+		{ url: "/api/realms/:realmId/units/:unitId", params: path },
 		...(query ? [query] : []),
 	] as const;
 
-type GetApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey = ReturnType<
-	typeof getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey
+type GetApiRealmsByRealmIdUnitsByUnitIdQueryKey = ReturnType<
+	typeof getApiRealmsByRealmIdUnitsByUnitIdQueryKey
 >;
 
-export function getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryOptions(
-	{ path, query }: GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions,
+export function getApiRealmsByRealmIdUnitsByUnitIdQueryOptions(
+	{ path, query }: GetApiRealmsByRealmIdUnitsByUnitIdOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey({ path, query });
+	const queryKey = getApiRealmsByRealmIdUnitsByUnitIdQueryKey({ path, query });
 	return queryOptions<
-		GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200,
+		GetApiRealmsByRealmIdUnitsByUnitIdStatus200,
 		ResponseErrorConfig<
-			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus403
-			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus404
-			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus422
-			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus500
+			| GetApiRealmsByRealmIdUnitsByUnitIdStatus403
+			| GetApiRealmsByRealmIdUnitsByUnitIdStatus404
+			| GetApiRealmsByRealmIdUnitsByUnitIdStatus422
+			| GetApiRealmsByRealmIdUnitsByUnitIdStatus500
 		>,
-		GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200,
+		GetApiRealmsByRealmIdUnitsByUnitIdStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRealmsByRealmIdUnitsByUnitIdHistory({
+			const { data } = await getApiRealmsByRealmIdUnitsByUnitId({
 				...config,
 				path,
 				query,
@@ -34750,34 +34757,34 @@ export function getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryOptions(
 }
 
 /**
- * @summary Get Realm Unit moderation history
- * {@link /api/realms/:realmId/units/:unitId/history}
+ * @summary Get Realm Unit for moderation
+ * {@link /api/realms/:realmId/units/:unitId}
  */
-export function useGetApiRealmsByRealmIdUnitsByUnitIdHistory<
-	TData = GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200,
-	TQueryData = GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200,
-	TQueryKey extends QueryKey = GetApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey,
+export function useGetApiRealmsByRealmIdUnitsByUnitId<
+	TData = GetApiRealmsByRealmIdUnitsByUnitIdStatus200,
+	TQueryData = GetApiRealmsByRealmIdUnitsByUnitIdStatus200,
+	TQueryKey extends QueryKey = GetApiRealmsByRealmIdUnitsByUnitIdQueryKey,
 >(
 	{
 		path,
 		query,
 	}: {
 		path:
-			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions["path"]
-			| (() => GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions["path"]);
+			| GetApiRealmsByRealmIdUnitsByUnitIdOptions["path"]
+			| (() => GetApiRealmsByRealmIdUnitsByUnitIdOptions["path"]);
 		query?:
-			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions["query"]
-			| (() => GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions["query"]);
+			| GetApiRealmsByRealmIdUnitsByUnitIdOptions["query"]
+			| (() => GetApiRealmsByRealmIdUnitsByUnitIdOptions["query"]);
 	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200,
+				GetApiRealmsByRealmIdUnitsByUnitIdStatus200,
 				ResponseErrorConfig<
-					| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus403
-					| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus404
-					| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus422
-					| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus500
+					| GetApiRealmsByRealmIdUnitsByUnitIdStatus403
+					| GetApiRealmsByRealmIdUnitsByUnitIdStatus404
+					| GetApiRealmsByRealmIdUnitsByUnitIdStatus422
+					| GetApiRealmsByRealmIdUnitsByUnitIdStatus500
 				>,
 				TData,
 				TQueryData,
@@ -34794,12 +34801,11 @@ export function useGetApiRealmsByRealmIdUnitsByUnitIdHistory<
 		query: typeof query === "function" ? query() : query,
 	};
 	const queryKey =
-		resolvedOptions?.queryKey ??
-		getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey(resolvedParams);
+		resolvedOptions?.queryKey ?? getApiRealmsByRealmIdUnitsByUnitIdQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryOptions(resolvedParams, config),
+			...getApiRealmsByRealmIdUnitsByUnitIdQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -34807,10 +34813,10 @@ export function useGetApiRealmsByRealmIdUnitsByUnitIdHistory<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus403
-			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus404
-			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus422
-			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus500
+			| GetApiRealmsByRealmIdUnitsByUnitIdStatus403
+			| GetApiRealmsByRealmIdUnitsByUnitIdStatus404
+			| GetApiRealmsByRealmIdUnitsByUnitIdStatus422
+			| GetApiRealmsByRealmIdUnitsByUnitIdStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -34932,6 +34938,119 @@ export function usePatchApiRealmsByRealmIdUnitsByUnitId<TContext>(
 		PatchApiRealmsByRealmIdUnitsByUnitIdOptions,
 		TContext
 	>;
+}
+
+export const getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions, "headers">) =>
+	[
+		{ url: "/api/realms/:realmId/units/:unitId/history", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type GetApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey = ReturnType<
+	typeof getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey
+>;
+
+export function getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryOptions(
+	{ path, query }: GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey({ path, query });
+	return queryOptions<
+		GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus403
+			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus404
+			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus422
+			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus500
+		>,
+		GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiRealmsByRealmIdUnitsByUnitIdHistory({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get Realm Unit moderation history
+ * {@link /api/realms/:realmId/units/:unitId/history}
+ */
+export function useGetApiRealmsByRealmIdUnitsByUnitIdHistory<
+	TData = GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200,
+	TQueryData = GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200,
+	TQueryKey extends QueryKey = GetApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions["path"]
+			| (() => GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions["path"]);
+		query?:
+			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions["query"]
+			| (() => GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200,
+				ResponseErrorConfig<
+					| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus403
+					| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus404
+					| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus422
+					| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ??
+		getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus403
+			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus404
+			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus422
+			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
 }
 
 export const getApiRealmsByRealmIdWikiNavigationQueryKey = ({
