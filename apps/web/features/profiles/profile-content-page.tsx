@@ -65,7 +65,7 @@ export function ProfileContentPage() {
 					aria-label={t.profiles.contentTitle}
 					emptyBody={t.profiles.contentEmptyDescription}
 					emptyTitle={t.profiles.contentEmptyTitle}
-					infinite
+					pagination="infinite"
 					query={query}
 				/>
 			</div>

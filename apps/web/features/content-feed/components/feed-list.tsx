@@ -11,7 +11,9 @@ import {
 } from "@rezics/ui";
 import { Fragment, type ComponentProps, type Key, type ReactNode } from "react";
 
+import type { FeedContinuationState, FeedPaginationMode } from "../model/feed-continuation";
 import { FeedCard } from "./feed-card";
+import { FeedContinuation } from "./feed-continuation";
 
 export type FeedListState<Item> =
 	| Readonly<{ status: "pending" }>
@@ -36,6 +38,7 @@ export function FeedList<Item>({
 	emptyBody,
 	emptyTitle,
 	errorLabel,
+	continuation,
 	footer,
 	getItemKey,
 	renderItem,
@@ -49,6 +52,10 @@ export function FeedList<Item>({
 	readonly emptyBody: string;
 	readonly emptyTitle: string;
 	readonly errorLabel: string;
+	readonly continuation?: Readonly<{
+		readonly mode: Exclude<FeedPaginationMode, "none">;
+		readonly state: FeedContinuationState;
+	}>;
 	readonly footer?: ReactNode;
 	readonly getItemKey: (item: Item) => Key;
 	readonly renderItem: (item: Item, metadata: FeedListItemMetadata) => ReactNode;
@@ -78,11 +85,28 @@ export function FeedList<Item>({
 			</Alert>
 		);
 
-	if (state.items.length === 0) return <FeedEmptyState body={emptyBody} title={emptyTitle} />;
+	const continuationContent = continuation ? (
+		<FeedContinuation mode={continuation.mode} state={continuation.state} />
+	) : null;
+	if (state.items.length === 0)
+		return (
+			<>
+				<FeedEmptyState body={emptyBody} title={emptyTitle} />
+				{continuationContent}
+				{footer}
+			</>
+		);
+	const continuationBusy =
+		continuation?.state.status === "loading" || continuation?.state.status === "refreshing";
 
 	return (
 		<>
-			<FeedListItems aria-label={ariaLabel} className={className} semantic={semantic}>
+			<FeedListItems
+				aria-busy={continuationBusy}
+				aria-label={ariaLabel}
+				className={className}
+				semantic={semantic}
+			>
 				{state.items.map((item, index) => (
 					<Fragment key={getItemKey(item)}>
 						{renderItem(item, {
@@ -92,6 +116,7 @@ export function FeedList<Item>({
 					</Fragment>
 				))}
 			</FeedListItems>
+			{continuationContent}
 			{footer}
 		</>
 	);

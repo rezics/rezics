@@ -7,27 +7,24 @@ import { useId, useState } from "react";
 
 import {
 	SearchFeedResults,
+	type SearchFeedRequest,
 	useSearchFeedQuery,
+	withoutSearchFeedCursor,
 } from "@/features/content-feed/data/search-feed-list";
 import type { FeedDisplayContext } from "@/features/content-feed/model/feed-display-context";
+import type { FeedPaginationMode } from "@/features/content-feed/model/feed-continuation";
 import { SearchFeature, type SearchFeatureRequest } from "@/features/search/search-feature";
-
-type SearchFeatureFeedRequest = Readonly<{
-	contexts: Parameters<typeof useSearchFeedQuery>[0]["request"]["contexts"];
-	injections: SearchFeatureRequest["injections"];
-	state: SearchFeatureRequest["state"];
-}>;
 
 export function SearchFeatureFeed({
 	displayContext,
-	infinite = false,
 	initialRequest,
+	pagination = "load-more",
 	requestedRealmId,
 	template,
 }: {
 	readonly displayContext?: FeedDisplayContext;
-	readonly infinite?: boolean;
-	readonly initialRequest: SearchFeatureFeedRequest;
+	readonly initialRequest: SearchFeedRequest;
+	readonly pagination?: FeedPaginationMode;
 	readonly requestedRealmId?: string;
 	readonly template: EmbeddableSearchTemplateId;
 }) {
@@ -56,7 +53,7 @@ export function SearchFeatureFeed({
 		setActiveRequest({
 			contexts: initialRequest.contexts,
 			injections: nextRequest.injections,
-			state: nextRequest.state,
+			state: withoutSearchFeedCursor(nextRequest.state),
 		});
 
 	return (
@@ -74,7 +71,7 @@ export function SearchFeatureFeed({
 		>
 			<SearchFeedResults
 				displayContext={displayContext}
-				infinite={infinite}
+				pagination={pagination}
 				query={results}
 				requestedRealmId={requestedRealmId}
 			/>

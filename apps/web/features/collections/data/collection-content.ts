@@ -7,6 +7,7 @@ import {
 import { useInfiniteQuery, type QueryClient } from "@tanstack/react-query";
 import type { ContentLanguage } from "@rezics/i18n";
 
+import { collectUniqueFeedItems } from "@/features/content-feed/model/feed-items";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 
 export type CollectionContentItem = GetApiCollectionsByCollectionIdItemsStatus200["items"][number];
@@ -52,7 +53,7 @@ export function useCollectionContent(collectionId: string, enabled = true) {
 export function collectionContentItems(
 	query: ReturnType<typeof useCollectionContent>,
 ): CollectionContentItem[] {
-	return query.data?.pages.flatMap((page) => page.items) ?? [];
+	return collectUniqueFeedItems(query.data?.pages ?? [], (item) => item.membership.targetId);
 }
 
 export async function invalidateCollectionContent(queryClient: QueryClient, collectionId?: string) {

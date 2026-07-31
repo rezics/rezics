@@ -26,13 +26,13 @@ export function Home() {
 				<h1 className="sr-only">{t.feed.title}</h1>
 				<ApiFeedList
 					contentKinds={contentKinds}
-					infinite
 					languages={languages}
 					onContentKindsChange={(nextKinds) => void setContentKinds([...nextKinds])}
 					onLanguagesChange={(nextLanguages) => void setLanguages([...nextLanguages])}
 					onRealmIdsChange={(nextRealmIds) => void setRealmIds([...nextRealmIds])}
 					onSortChange={(nextSort) => void setSort(nextSort)}
 					onTagIdsChange={(nextTagIds) => void setTagIds([...nextTagIds])}
+					pagination="infinite"
 					realmIds={realmIds}
 					sort={sort}
 					tagIds={tagIds}

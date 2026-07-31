@@ -15,6 +15,7 @@ vi.mock("@/features/content-feed/data/api-feed-list", () => ({
 		<div
 			data-content-filter={String(Boolean(props.onContentKindsChange))}
 			data-language-filter={String(Boolean(props.onLanguagesChange))}
+			data-pagination={props.pagination}
 			data-realm-filter={String(Boolean(props.onRealmIdsChange))}
 			data-realm-ids={props.realmIds?.join(",")}
 			data-sort-filter={String(Boolean(props.onSortChange))}
@@ -38,6 +39,7 @@ describe("RealmFeed", () => {
 		expect(feed.getAttribute("data-realm-ids")).toBe("realm-1");
 		expect(feed.getAttribute("data-realm-filter")).toBe("false");
 		expect(feed.getAttribute("data-language-filter")).toBe("true");
+		expect(feed.getAttribute("data-pagination")).toBe("infinite");
 		expect(feed.getAttribute("data-tag-filter")).toBe("true");
 		expect(feed.getAttribute("data-sort-filter")).toBe("true");
 		expect(feed.getAttribute("data-content-filter")).toBe("true");

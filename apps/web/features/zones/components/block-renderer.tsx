@@ -27,7 +27,6 @@ import {
 	type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200,
 } from "@rezics/openapi-tanstack-query";
 import {
-	Button,
 	IdentityAvatar,
 	Menu,
 	MenuContent,
@@ -65,6 +64,7 @@ import {
 } from "@/features/content-language-display/chinese-content-display-context";
 import { FeedContentSelector } from "@/features/content-feed/components/feed-content-selector";
 import { FeedList } from "@/features/content-feed/components/feed-list";
+import type { FeedContinuationState } from "@/features/content-feed/model/feed-continuation";
 import { postHref } from "@/features/posts/url";
 import { SearchFeature, type SearchFeatureRequest } from "@/features/search/search-feature";
 import { zonePageHref } from "@/features/slugs/unit-route";
@@ -709,41 +709,6 @@ function withContentKindFilter(
 	};
 }
 
-function FeedPagination({
-	infinite,
-	onLoad,
-	pending,
-}: {
-	infinite: boolean;
-	onLoad: () => void;
-	pending: boolean;
-}) {
-	const { t } = useTranslation("actions");
-	const sentinel = useRef<HTMLDivElement>(null);
-	useEffect(() => {
-		const target = sentinel.current;
-		if (!infinite || !target || pending) return;
-		const observer = new IntersectionObserver((entries) => {
-			if (entries.some((entry) => entry.isIntersecting)) onLoad();
-		});
-		observer.observe(target);
-		return () => observer.disconnect();
-	}, [infinite, onLoad, pending]);
-	return infinite ? (
-		<div className="flex justify-center py-4" ref={sentinel}>
-			<Button isLoading={pending} onClick={onLoad} size="sm" type="button" variant="quiet">
-				{t.loadMore}
-			</Button>
-		</div>
-	) : (
-		<div className="flex justify-center py-4">
-			<Button isLoading={pending} onClick={onLoad} size="sm" type="button" variant="quiet">
-				{t.loadMore}
-			</Button>
-		</div>
-	);
-}
-
 function ZoneFeedBlock({
 	blockKey,
 	execute,
@@ -798,6 +763,16 @@ function ZoneFeedBlock({
 		if (!request) return;
 		run(requestWithoutCursor(request), nextContentKinds, false);
 	};
+	const canLoadMore = Boolean(
+		page?.nextCursor && (!maxResults || page.items.length < maxResults),
+	);
+	const continuationState: FeedContinuationState = !canLoadMore
+		? { status: "exhausted" }
+		: pending
+			? { status: "loading" }
+			: error
+				? { status: "error", retry: loadMore }
+				: { status: "ready", loadNext: loadMore };
 	return (
 		<>
 			<ZoneSearchFeature
@@ -826,18 +801,13 @@ function ZoneFeedBlock({
 			/>
 			<FeedList
 				aria-label={t.feed.title}
+				continuation={{
+					mode: presentation.pagination,
+					state: continuationState,
+				}}
 				emptyBody={t.feed.emptyBody}
 				emptyTitle={t.feed.emptyTitle}
 				errorLabel={t.state.error}
-				footer={
-					page?.nextCursor && (!maxResults || page.items.length < maxResults) ? (
-						<FeedPagination
-							infinite={presentation.pagination === "infinite"}
-							onLoad={loadMore}
-							pending={pending}
-						/>
-					) : null
-				}
 				getItemKey={(item) => item.id}
 				renderItem={(item, metadata) => (
 					<FeedItemCard

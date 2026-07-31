@@ -57,13 +57,13 @@ export function UnitExcerptFeed({ targetId }: { readonly targetId: string }) {
 			displayContext={{ kind: "unit", unitId: targetId }}
 			emptyBody={t.engagement.emptyExcerpts}
 			emptyTitle={t.engagement.emptyExcerpts}
-			infinite
 			languages={route.languages}
 			limit={ExcerptPageSize}
 			onLanguagesChange={(languages) => void setRoute({ languages: [...languages] })}
 			onRealmIdsChange={(realms) => void setRoute({ realms: [...realms] })}
 			onSortChange={(sort) => void setRoute({ sort })}
 			onTagIdsChange={(tags) => void setRoute({ tags: [...tags] })}
+			pagination="infinite"
 			realmIds={route.realms}
 			renderSummary={formatRange}
 			search={{

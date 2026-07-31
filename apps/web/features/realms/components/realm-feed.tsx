@@ -36,7 +36,6 @@ export function RealmFeed({
 		<ApiFeedList
 			additionalFilter={additionalFilter}
 			contentKinds={contentKinds ?? selectedContentKinds}
-			infinite
 			languages={languages}
 			onContentKindsChange={
 				showControls && !contentKinds
@@ -50,6 +49,7 @@ export function RealmFeed({
 			onTagIdsChange={
 				showControls ? (nextTagIds) => void setTagIds([...nextTagIds]) : undefined
 			}
+			pagination="infinite"
 			realmIds={[realmId]}
 			renderOverflowActions={(item) => (
 				<RealmFeedManagementActions

@@ -10,18 +10,19 @@ import { FeedPostCard } from "@/features/content-feed/components/feed-item-card"
 import { FeedListItems } from "@/features/content-feed/components/feed-list";
 import { SearchFeatureFeed } from "@/features/content-feed/components/search-feature-feed";
 import { SearchFeedList } from "@/features/content-feed/data/search-feed-list";
+import type { FeedPaginationMode } from "@/features/content-feed/model/feed-continuation";
 import type { FeedDisplayContext } from "@/features/content-feed/model/feed-display-context";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 
 export function PostList({
-	infinite = false,
+	pagination = "load-more",
 	realmId,
 	showFeedControls = false,
 	subjectId,
 }: {
-	infinite?: boolean;
+	pagination?: FeedPaginationMode;
 	realmId?: string;
 	showFeedControls?: boolean;
 	subjectId?: string;
@@ -82,16 +83,16 @@ export function PostList({
 	return showFeedControls ? (
 		<SearchFeatureFeed
 			displayContext={displayContext}
-			infinite={infinite}
 			initialRequest={request}
 			key={`${realmId ?? "global"}:${subjectId ?? "all"}`}
+			pagination={pagination}
 			requestedRealmId={requestedRealmId}
 			template="global"
 		/>
 	) : (
 		<SearchFeedList
 			displayContext={displayContext}
-			infinite={infinite}
+			pagination={pagination}
 			request={request}
 			requestedRealmId={requestedRealmId}
 			template="global"

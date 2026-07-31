@@ -1,14 +1,19 @@
 /** @vitest-environment jsdom */
 
-import { resources } from "@rezics/i18n/resources";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { FeedList, FeedListItems } from "./feed-list";
 
-vi.mock("@/i18n/client", async () => {
-	const { create: createReactI18n } = await import("native-i18n/react/client");
-	return createReactI18n(resources);
+vi.mock("@/i18n/client", () => {
+	return {
+		useTranslation: () => ({
+			t: {
+				actions: { loadMore: "Load more", retry: "Retry" },
+				state: { error: "Error" },
+			},
+		}),
+	};
 });
 
 afterEach(cleanup);
@@ -59,5 +64,66 @@ describe("FeedListItems", () => {
 			{ position: "1", setSize: "4727" },
 			{ position: "2", setSize: "4727" },
 		]);
+	});
+
+	it("marks the Feed busy while another page is appended", () => {
+		render(
+			<FeedList
+				aria-label="Test feed"
+				continuation={{ mode: "infinite", state: { status: "loading" } }}
+				emptyBody="Empty"
+				emptyTitle="Empty"
+				errorLabel="Error"
+				getItemKey={(item) => item}
+				renderItem={(item) => <article>{item}</article>}
+				retryLabel="Retry"
+				state={{ status: "ready", items: ["First card"] }}
+			/>,
+		);
+
+		expect(screen.getByRole("feed", { name: "Test feed" }).getAttribute("aria-busy")).toBe(
+			"true",
+		);
+	});
+
+	it("keeps continuation available when every currently loaded item is hidden", () => {
+		const loadNext = vi.fn();
+		render(
+			<FeedList
+				aria-label="Test feed"
+				continuation={{ mode: "load-more", state: { status: "ready", loadNext } }}
+				emptyBody="Empty"
+				emptyTitle="Empty"
+				errorLabel="Error"
+				getItemKey={(item) => item}
+				renderItem={(item) => <article>{item}</article>}
+				retryLabel="Retry"
+				state={{ status: "ready", items: [] }}
+			/>,
+		);
+
+		fireEvent.click(screen.getByRole("button", { name: "Load more" }));
+		expect(loadNext).toHaveBeenCalledOnce();
+	});
+
+	it("preserves loaded items when fetching the next page fails", () => {
+		const retry = vi.fn();
+		render(
+			<FeedList
+				aria-label="Test feed"
+				continuation={{ mode: "infinite", state: { status: "error", retry } }}
+				emptyBody="Empty"
+				emptyTitle="Empty"
+				errorLabel="Error"
+				getItemKey={(item) => item}
+				renderItem={(item) => <article>{item}</article>}
+				retryLabel="Retry"
+				state={{ status: "ready", items: ["Loaded card"] }}
+			/>,
+		);
+
+		expect(screen.getByRole("article").textContent).toBe("Loaded card");
+		fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+		expect(retry).toHaveBeenCalledOnce();
 	});
 });

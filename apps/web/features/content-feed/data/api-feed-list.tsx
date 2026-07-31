@@ -5,18 +5,9 @@ import { type SimpleFeedContentKind, type UnitPredicate } from "@rezics/filter";
 import { postApiFeedQuery, useGetApiRealms, useGetApiTags } from "@rezics/openapi-tanstack-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { ListFilterIcon, Search } from "lucide-react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
-import {
-	Alert,
-	AlertAction,
-	AlertDescription,
-	Badge,
-	Button,
-	ChoiceSelect,
-	Input,
-	type ChoiceOption,
-} from "@rezics/ui";
+import { Badge, Button, ChoiceSelect, Input, type ChoiceOption } from "@rezics/ui";
 import { usePresentationPreferences } from "@/features/preferences/data/use-presentation-preferences";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguageState } from "@/i18n/use-localization-languages";
@@ -27,7 +18,9 @@ import { FeedFiltersDialog } from "../components/feed-filters-dialog";
 import { FeedItemCard, type FeedItem } from "../components/feed-item-card";
 import { FeedList } from "../components/feed-list";
 import { createApiFeedFilter } from "../model/api-feed-filter";
+import { resolveFeedContinuationState, type FeedPaginationMode } from "../model/feed-continuation";
 import type { FeedDisplayContext } from "../model/feed-display-context";
+import { collectUniqueFeedItems } from "../model/feed-items";
 import { FeedSortValues, type FeedSort } from "../model/feed-sort";
 import { resolveFeedFilterLanguages } from "../model/feed-language-filter";
 import { FeedQueryKey } from "../query";
@@ -46,7 +39,6 @@ export interface ApiFeedListProps {
 	displayContext?: FeedDisplayContext;
 	emptyBody?: string;
 	emptyTitle?: string;
-	infinite?: boolean;
 	languages?: readonly ContentLanguage[];
 	limit?: number;
 	onContentKindsChange?: (contentKinds: readonly SimpleFeedContentKind[]) => void;
@@ -54,7 +46,7 @@ export interface ApiFeedListProps {
 	onRealmIdsChange?: (realmIds: readonly string[]) => void;
 	onSortChange?: (sort: FeedSort) => void;
 	onTagIdsChange?: (tagIds: readonly string[]) => void;
-	paginate?: boolean;
+	pagination?: FeedPaginationMode;
 	realmIds?: readonly string[];
 	renderOverflowActions?: (item: FeedItem) => ReactNode;
 	renderSummary?: (metadata: ApiFeedResultMetadata) => ReactNode;
@@ -78,7 +70,6 @@ export function ApiFeedList({
 	displayContext,
 	emptyBody,
 	emptyTitle,
-	infinite = false,
 	languages = [],
 	limit = 20,
 	onContentKindsChange,
@@ -86,7 +77,7 @@ export function ApiFeedList({
 	onRealmIdsChange,
 	onSortChange,
 	onTagIdsChange,
-	paginate = true,
+	pagination = "load-more",
 	realmIds = [],
 	renderOverflowActions,
 	renderSummary,
@@ -159,36 +150,18 @@ export function ApiFeedList({
 		initialPageParam: "",
 		getNextPageParam: (page) => page.nextCursor ?? undefined,
 	});
-	const loadMoreRef = useRef<HTMLDivElement>(null);
-	useEffect(() => {
-		const element = loadMoreRef.current;
-		if (
-			!infinite ||
-			!element ||
-			!query.hasNextPage ||
-			query.isFetchingNextPage ||
-			query.isFetchNextPageError ||
-			typeof IntersectionObserver === "undefined"
-		)
-			return;
-		const observer = new IntersectionObserver(
-			([entry]) => {
-				if (entry?.isIntersecting) void query.fetchNextPage();
-			},
-			{ rootMargin: "320px 0px" },
-		);
-		observer.observe(element);
-		return () => observer.disconnect();
-	}, [
-		infinite,
-		query.fetchNextPage,
-		query.hasNextPage,
-		query.isFetchingNextPage,
-		query.isFetchNextPageError,
-	]);
-	const items = query.data?.pages
-		.flatMap((page) => page.items)
-		.filter(({ id }) => !hidden.has(id));
+	const pageItems = useMemo(
+		() => collectUniqueFeedItems(query.data?.pages ?? [], (item) => item.id),
+		[query.data?.pages],
+	);
+	const items = pageItems.filter(({ id }) => !hidden.has(id));
+	const continuationState = resolveFeedContinuationState({
+		fetchNextPage: () => query.fetchNextPage({ cancelRefetch: false }),
+		hasNextPage: query.hasNextPage,
+		isFetchNextPageError: query.isFetchNextPageError,
+		isFetching: query.isFetching,
+		isFetchingNextPage: query.isFetchingNextPage,
+	});
 	const total = query.data?.pages[0]?.total;
 	const feedSetSize = total
 		? total.relation === "exact"
@@ -240,7 +213,7 @@ export function ApiFeedList({
 			{renderSummary && total ? (
 				<div aria-atomic="true" aria-live="polite">
 					{renderSummary({
-						displayedCount: items?.length ?? 0,
+						displayedCount: items.length,
 						total: {
 							relation: total.relation,
 							value: toNonNegativeApiInteger(total.value),
@@ -251,48 +224,14 @@ export function ApiFeedList({
 			<FeedList
 				aria-label={ariaLabel ?? t.feed.title}
 				className={showControls ? "mt-3 sm:mt-4" : undefined}
+				continuation={
+					pagination === "none"
+						? undefined
+						: { mode: pagination, state: continuationState }
+				}
 				emptyBody={emptyBody ?? t.feed.emptyBody}
 				emptyTitle={emptyTitle ?? t.feed.emptyTitle}
 				errorLabel={t.state.error}
-				footer={
-					query.isFetchNextPageError ? (
-						<Alert variant="destructive">
-							<AlertDescription>{t.state.error}</AlertDescription>
-							<AlertAction>
-								<Button
-									size="sm"
-									variant="quiet"
-									onClick={() => void query.fetchNextPage()}
-								>
-									{t.actions.retry}
-								</Button>
-							</AlertAction>
-						</Alert>
-					) : paginate && query.hasNextPage ? (
-						infinite ? (
-							<div
-								aria-live="polite"
-								className="grid min-h-10 place-items-center"
-								ref={loadMoreRef}
-							>
-								{query.isFetchingNextPage ? (
-									<span className="text-muted-foreground text-sm">
-										{t.actions.loadMore}
-									</span>
-								) : null}
-							</div>
-						) : (
-							<Button
-								className="mx-auto mt-2 w-fit"
-								isLoading={query.isFetchingNextPage}
-								variant="outline"
-								onClick={() => void query.fetchNextPage()}
-							>
-								{t.actions.loadMore}
-							</Button>
-						)
-					) : null
-				}
 				getItemKey={(item) => item.id}
 				renderItem={(item, metadata) => (
 					<FeedItemCard
@@ -315,7 +254,7 @@ export function ApiFeedList({
 							? { status: "pending" }
 							: query.isError && !query.data
 								? { status: "error", retry: () => void query.refetch() }
-								: { status: "ready", items: items ?? [] }
+								: { status: "ready", items }
 				}
 			/>
 		</div>

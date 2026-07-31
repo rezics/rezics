@@ -1,16 +1,17 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 
 import type { EmbeddableSearchTemplateId, SearchFeatureSurface } from "@rezics/filter";
-import { Alert, AlertAction, AlertDescription, Button } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { FeedItemCard } from "../components/feed-item-card";
 import { FeedList } from "../components/feed-list";
+import { resolveFeedContinuationState, type FeedPaginationMode } from "../model/feed-continuation";
 import { type FeedDisplayContext, UnscopedFeedDisplayContext } from "../model/feed-display-context";
+import { collectUniqueFeedItems } from "../model/feed-items";
 import {
 	fetchSearchFeedPage,
 	type SearchFeedRequest,
@@ -18,7 +19,11 @@ import {
 } from "./search-feed-query";
 import { SearchFeedQueryKey } from "./search-feed-query-key";
 
-export type { SearchFeedRequest, SearchFeedSource } from "./search-feed-query";
+export {
+	type SearchFeedRequest,
+	type SearchFeedSource,
+	withoutSearchFeedCursor,
+} from "./search-feed-query";
 
 export function useSearchFeedQuery({
 	enabled = true,
@@ -56,7 +61,7 @@ export function SearchFeedResults({
 	displayContext = UnscopedFeedDisplayContext,
 	emptyBody,
 	emptyTitle,
-	infinite = false,
+	pagination = "load-more",
 	query,
 	requestedRealmId,
 }: {
@@ -64,45 +69,25 @@ export function SearchFeedResults({
 	readonly displayContext?: FeedDisplayContext;
 	readonly emptyBody?: string;
 	readonly emptyTitle?: string;
-	readonly infinite?: boolean;
+	readonly pagination?: FeedPaginationMode;
 	readonly query: SearchFeedQuery;
 	readonly requestedRealmId?: string;
 }) {
 	const { t } = useTranslation(["actions", "feed", "state"]);
 	const { data: session } = useHydratedSession();
 	const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
-	const loadMoreRef = useRef<HTMLDivElement>(null);
-	useEffect(() => {
-		const element = loadMoreRef.current;
-		if (
-			!infinite ||
-			!element ||
-			!query.hasNextPage ||
-			query.isFetching ||
-			query.isFetchNextPageError ||
-			typeof IntersectionObserver === "undefined"
-		)
-			return;
-		const observer = new IntersectionObserver(
-			([entry]) => {
-				if (entry?.isIntersecting && !query.isFetching) void query.fetchNextPage();
-			},
-			{ rootMargin: "320px 0px" },
-		);
-		observer.observe(element);
-		return () => observer.disconnect();
-	}, [
-		infinite,
-		query.fetchNextPage,
-		query.hasNextPage,
-		query.isFetching,
-		query.isFetchNextPageError,
-	]);
-	const items = [
-		...new Map(
-			query.data?.pages.flatMap((page) => page.items).map((item) => [item.id, item]) ?? [],
-		).values(),
-	].filter(({ id }) => !hidden.has(id));
+	const pageItems = useMemo(
+		() => collectUniqueFeedItems(query.data?.pages ?? [], (item) => item.id),
+		[query.data?.pages],
+	);
+	const items = pageItems.filter(({ id }) => !hidden.has(id));
+	const continuationState = resolveFeedContinuationState({
+		fetchNextPage: () => query.fetchNextPage({ cancelRefetch: false }),
+		hasNextPage: query.hasNextPage,
+		isFetchNextPageError: query.isFetchNextPageError,
+		isFetching: query.isFetching,
+		isFetchingNextPage: query.isFetchingNextPage,
+	});
 	const setItemHidden = (id: string, value: boolean) =>
 		setHidden((current) => {
 			const next = new Set(current);
@@ -114,48 +99,12 @@ export function SearchFeedResults({
 	return (
 		<FeedList
 			aria-label={ariaLabel ?? t.feed.title}
+			continuation={
+				pagination === "none" ? undefined : { mode: pagination, state: continuationState }
+			}
 			emptyBody={emptyBody ?? t.feed.emptyBody}
 			emptyTitle={emptyTitle ?? t.feed.emptyTitle}
 			errorLabel={t.state.error}
-			footer={
-				query.isFetchNextPageError ? (
-					<Alert variant="destructive">
-						<AlertDescription>{t.state.error}</AlertDescription>
-						<AlertAction>
-							<Button
-								size="sm"
-								variant="quiet"
-								onClick={() => void query.fetchNextPage()}
-							>
-								{t.actions.retry}
-							</Button>
-						</AlertAction>
-					</Alert>
-				) : query.hasNextPage ? (
-					infinite ? (
-						<div
-							aria-live="polite"
-							className="grid min-h-10 place-items-center"
-							ref={loadMoreRef}
-						>
-							{query.isFetchingNextPage ? (
-								<span className="text-muted-foreground text-sm">
-									{t.actions.loadMore}
-								</span>
-							) : null}
-						</div>
-					) : (
-						<Button
-							className="mx-auto mt-2 w-fit"
-							isLoading={query.isFetchingNextPage}
-							variant="outline"
-							onClick={() => void query.fetchNextPage()}
-						>
-							{t.actions.loadMore}
-						</Button>
-					)
-				) : null
-			}
 			getItemKey={(item) => item.id}
 			renderItem={(item, metadata) => (
 				<FeedItemCard
@@ -182,14 +131,14 @@ export function SearchFeedResults({
 
 export function SearchFeedList({
 	displayContext = UnscopedFeedDisplayContext,
-	infinite = false,
+	pagination = "load-more",
 	request,
 	requestedRealmId,
 	source,
 	template,
 }: {
 	readonly displayContext?: FeedDisplayContext;
-	readonly infinite?: boolean;
+	readonly pagination?: FeedPaginationMode;
 	readonly request: SearchFeedRequest;
 	readonly requestedRealmId?: string;
 } & (
@@ -205,7 +154,7 @@ export function SearchFeedList({
 	return (
 		<SearchFeedResults
 			displayContext={displayContext}
-			infinite={infinite}
+			pagination={pagination}
 			query={query}
 			requestedRealmId={requestedRealmId}
 		/>

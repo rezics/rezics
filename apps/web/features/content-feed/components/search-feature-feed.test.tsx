@@ -31,6 +31,8 @@ vi.mock("@rezics/openapi-tanstack-query", () => ({
 vi.mock("@/features/content-feed/data/search-feed-list", () => ({
 	SearchFeedResults: () => <div data-testid="feed-results" />,
 	useSearchFeedQuery: mocks.useSearchFeedQuery,
+	withoutSearchFeedCursor: ({ cursor: _cursor, ...state }: { cursor?: string; sort?: string }) =>
+		state,
 }));
 
 vi.mock("@/features/search/search-feature", () => ({
@@ -42,12 +44,20 @@ vi.mock("@/features/search/search-feature", () => ({
 	}: {
 		appearance: string;
 		children: ReactNode;
-		onExecute: (request: { injections: []; state: { sort: "best" } }) => void;
+		onExecute: (request: {
+			injections: [];
+			state: { cursor: "s2_stale"; sort: "best" };
+		}) => void;
 		surface: string;
 	}) => (
 		<div data-appearance={appearance} data-surface={surface} data-testid="search-feature">
 			<button
-				onClick={() => onExecute({ injections: [], state: { sort: "best" } })}
+				onClick={() =>
+					onExecute({
+						injections: [],
+						state: { cursor: "s2_stale", sort: "best" },
+					})
+				}
 				type="button"
 			>
 				execute

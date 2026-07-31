@@ -1,4 +1,8 @@
-import type { EmbeddableSearchTemplateId, SearchFeatureSurface } from "@rezics/filter";
+import type {
+	EmbeddableSearchTemplateId,
+	SearchFeatureState,
+	SearchFeatureSurface,
+} from "@rezics/filter";
 import type { ContentLanguage } from "@rezics/i18n";
 import {
 	postApiSearchFeaturesByTemplateFeed,
@@ -6,14 +10,22 @@ import {
 	type PostApiSearchFeaturesByTemplateExecuteBody,
 } from "@rezics/openapi-tanstack-query";
 
-export type SearchFeedRequest = Pick<
-	PostApiSearchFeaturesByTemplateExecuteBody,
-	"contexts" | "injections" | "state"
+export type SearchFeedState = Omit<SearchFeatureState, "cursor"> & Readonly<{ cursor?: never }>;
+
+export type SearchFeedRequest = Readonly<
+	Pick<PostApiSearchFeaturesByTemplateExecuteBody, "contexts" | "injections"> & {
+		readonly state: SearchFeedState;
+	}
 >;
 
 export type SearchFeedSource =
 	| Readonly<{ kind: "template"; template: EmbeddableSearchTemplateId }>
 	| Readonly<{ kind: "zone"; zoneId: string }>;
+
+export function withoutSearchFeedCursor(state: SearchFeatureState): SearchFeedState {
+	const { cursor: _cursor, ...cursorFreeState } = state;
+	return cursorFreeState;
+}
 
 export async function fetchSearchFeedPage({
 	cursor,
@@ -40,7 +52,7 @@ export async function fetchSearchFeedPage({
 			body: { ...request, localizationLanguages: [...localizationLanguages], state, surface },
 			signal,
 		});
-		return data;
+		return { ...data, nextCursor: data.nextCursor ?? null };
 	}
 	const { data } = await postApiSearchZonesByZoneIdFeatureFeed({
 		path: { zoneId: source.zoneId },
@@ -52,5 +64,5 @@ export async function fetchSearchFeedPage({
 		},
 		signal,
 	});
-	return data;
+	return { ...data, nextCursor: data.nextCursor ?? null };
 }

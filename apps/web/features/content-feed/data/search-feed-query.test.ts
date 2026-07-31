@@ -7,7 +7,11 @@ const api = vi.hoisted(() => ({
 
 vi.mock("@rezics/openapi-tanstack-query", () => api);
 
-import { fetchSearchFeedPage, type SearchFeedRequest } from "./search-feed-query";
+import {
+	fetchSearchFeedPage,
+	type SearchFeedRequest,
+	withoutSearchFeedCursor,
+} from "./search-feed-query";
 
 const request = {
 	contexts: [{ kind: "realm", realmId: "00000000-0000-7000-8000-000000000001" }],
@@ -74,5 +78,26 @@ describe("Search Feed page requests", () => {
 			signal,
 		});
 		expect(api.postApiSearchFeaturesByTemplateFeed).not.toHaveBeenCalled();
+	});
+
+	it("normalizes an exhausted page to an explicit null cursor", async () => {
+		api.postApiSearchFeaturesByTemplateFeed.mockResolvedValue({
+			data: { items: [], total: 0 },
+		});
+
+		await expect(
+			fetchSearchFeedPage({
+				localizationLanguages: ["en"],
+				request,
+				source: { kind: "template", template: "global" },
+				surface: "search",
+			}),
+		).resolves.toMatchObject({ nextCursor: null });
+	});
+
+	it("removes transport cursors before a request becomes a stable Feed identity", () => {
+		expect(withoutSearchFeedCursor({ cursor: "s2_cursor", sort: "best" })).toEqual({
+			sort: "best",
+		});
 	});
 });

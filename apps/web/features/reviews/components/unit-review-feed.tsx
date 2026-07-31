@@ -134,14 +134,13 @@ export function UnitReviewFeed({
 				displayContext={{ kind: "unit", unitId: targetId }}
 				emptyBody={t.engagement.emptyFilteredReviews}
 				emptyTitle={t.engagement.emptyReviews}
-				infinite={mode === "page"}
 				languages={route.languages}
 				limit={pageSize}
 				onLanguagesChange={(languages) => void setRoute({ languages: [...languages] })}
 				onRealmIdsChange={(realms) => void setRoute({ realms: [...realms] })}
 				onSortChange={(sort) => void setRoute({ sort })}
 				onTagIdsChange={(tags) => void setRoute({ tags: [...tags] })}
-				paginate={mode === "page"}
+				pagination={mode === "page" ? "infinite" : "none"}
 				realmIds={route.realms}
 				renderSummary={formatRange}
 				search={{

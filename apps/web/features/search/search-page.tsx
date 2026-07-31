@@ -28,6 +28,7 @@ import {
 	type SearchFeedRequest,
 	type SearchFeedSource,
 	useSearchFeedQuery,
+	withoutSearchFeedCursor,
 } from "@/features/content-feed/data/search-feed-list";
 import { useTranslation } from "@/i18n/client";
 import { searchParamsParsers } from "@/lib/search-params";
@@ -89,7 +90,7 @@ export function SearchSurface({
 		? {
 				contexts: [...contexts],
 				injections: lastRequest.injections,
-				state: lastRequest.state,
+				state: withoutSearchFeedCursor(lastRequest.state),
 			}
 		: EmptySearchFeedRequest;
 	const results = useSearchFeedQuery({
@@ -181,6 +182,7 @@ export function SearchSurface({
 						aria-label={t.results}
 						emptyBody={t.emptyBody}
 						emptyTitle={t.empty}
+						pagination="infinite"
 						query={results}
 					/>
 				</section>
