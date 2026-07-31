@@ -78,8 +78,8 @@ export const zhHansTerminology = defineTerminology("zh-Hans", {
 	},
 	publicationLicense: {
 		status: "approved",
-		forms: { label: "作品许可条款", inline: "许可条款" },
-		forbidden: ["License", "作品 License", "授权 REZICS"],
+		forms: { label: "公开许可", inline: "公开许可" },
+		forbidden: ["License", "作品 License", "作品许可条款", "授权 REZICS"],
 	},
 	entity: {
 		status: "approved",

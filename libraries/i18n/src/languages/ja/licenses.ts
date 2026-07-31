@@ -39,6 +39,8 @@ export default {
 			"一度付与すると撤回できず、このコンテンツへの今後の貢献と所有権の移転にも引き続き適用されます。",
 		grantedNotice: "このコンテンツには、このコンテンツライセンスが恒久的に適用されています。",
 		contributionNotice: `このライセンスの適用中に提供するコンテンツは、同じ条件で ${verbatimTerms.rezics.value} にライセンスされます。個別にライセンスを選択する必要はありません。`,
+		cancelGrant: "キャンセル",
+		confirmGrant: "ライセンスを付与",
 		options: unitContentOptions,
 	},
 } satisfies typeof import("../zh-Hant/licenses").default;

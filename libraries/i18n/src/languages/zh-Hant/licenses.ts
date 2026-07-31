@@ -36,6 +36,8 @@ export default {
 		grantNotice: "授權後不可撤銷，並持續適用於這項內容的後續貢獻及所有權移轉。",
 		grantedNotice: "這項內容已永久採用此內容授權。",
 		contributionNotice: `你在此授權生效期間提交的內容，將依相同條款授權給 ${verbatimTerms.rezics.value}；不需要另行選擇授權。`,
+		cancelGrant: "取消",
+		confirmGrant: "確認授權",
 		options: unitContentOptions,
 	},
 };

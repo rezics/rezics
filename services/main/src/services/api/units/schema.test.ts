@@ -21,6 +21,18 @@ const publicMainUnit = {
 	version: { kind: "main" },
 	localization,
 } as const;
+const ownedMainUnit = {
+	ownershipMode: "profile_owned",
+	creditAttributions: [
+		{
+			entityId: "019b0000-0000-7000-8000-000000000001",
+			role: "publisher",
+		},
+	],
+	creditAttributionRequestConsent: "direct_only",
+	version: { kind: "main" },
+	localization,
+} as const;
 
 describe("Unit presentation localization", () => {
 	it("requires an ordered, non-empty localization priority", () => {
@@ -69,6 +81,14 @@ describe("Unit publication License inputs", () => {
 });
 
 describe("Unit content License inputs", () => {
+	it("accepts a creation grant only for a Profile-owned work", () => {
+		const contentLicense = {
+			referenceLicenseSlug: "rezics-unit-content-license-v1",
+		} as const;
+		expect(Check(CreateUnitBody, { ...ownedMainUnit, contentLicense })).toBe(true);
+		expect(Check(CreateUnitBody, { ...publicMainUnit, contentLicense })).toBe(false);
+	});
+
 	it("accepts the registered one-time grant and omission", () => {
 		expect(
 			Check(UpdateUnitBody, {

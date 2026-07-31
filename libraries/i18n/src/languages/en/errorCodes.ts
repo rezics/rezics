@@ -34,6 +34,7 @@ export default {
 	UnitNotFound: "This content could not be found.",
 	UnitPermissionForbidden: "You do not have the required permission for this content.",
 	UnitAccessRestricted: "Your access to this content scope is restricted.",
+	UnitContentLicenseGrantForbidden: `Only personally owned works can grant a license to ${verbatimTerms.rezics.value}.`,
 	UnitChanged: "This content changed. Refresh and try again.",
 	UnitRevisionConflict: "The revision base changed. Refresh and try again.",
 	ContentStructureRevisionConflict:

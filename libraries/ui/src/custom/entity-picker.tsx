@@ -44,6 +44,7 @@ export function EntityPicker({
 	onChange,
 	onClear,
 	search,
+	searchOnOpen = false,
 	renderNoResultsAction,
 }: {
 	ariaLabel: string;
@@ -57,6 +58,14 @@ export function EntityPicker({
 	onChange: (value: EntityPickerValue) => void;
 	onClear?: () => void;
 	search?: EntitySearch;
+	/**
+	 * Runs a search with an empty query when the combobox opens.
+	 *
+	 * @remarks
+	 * Use this only when the search owner supports a meaningful filtered list
+	 * without a text query.
+	 */
+	searchOnOpen?: boolean;
 	/**
 	 * Renders an owner-provided action after a successful search returns no matches.
 	 *
@@ -82,48 +91,55 @@ export function EntityPicker({
 	const [searchResolution, setSearchResolution] = useState<EntityPickerSearchResolution>({
 		status: "idle",
 	});
+	const [open, setOpen] = useState(false);
 	const allowedKinds = kinds ?? (kind ? [kind] : undefined);
 	const allowedKindsKey = allowedKinds?.join("\u0000");
 
 	useEffect(() => {
 		const query = inputValue.trim();
-		if (!query || !searchEntities) {
+		const shouldSearch =
+			Boolean(searchEntities) && (query.length > 0 || (searchOnOpen && open));
+		if (!shouldSearch || !searchEntities) {
 			set([]);
 			setSearchResolution({ status: "idle" });
 			return;
 		}
 		setSearchResolution({ status: "pending", query });
 		let controller: AbortController | undefined;
-		const timer = window.setTimeout(() => {
-			const request = new AbortController();
-			controller = request;
-			const requestedKinds = allowedKindsKey?.split("\u0000");
-			void searchEntities(index, query, request.signal, { kinds: requestedKinds }).then(
-				(nextHits) => {
-					if (request.signal.aborted) return;
-					const allowed = allowedKindsKey
-						? new Set(allowedKindsKey.split("\u0000"))
-						: undefined;
-					set(
-						nextHits.filter(
-							(hit) => !allowed || (hit.kind !== undefined && allowed.has(hit.kind)),
-						),
-					);
-					setSearchResolution({ status: "ready", query });
-				},
-				() => {
-					if (!request.signal.aborted) {
-						set([]);
-						setSearchResolution({ status: "error", query });
-					}
-				},
-			);
-		}, 250);
+		const timer = window.setTimeout(
+			() => {
+				const request = new AbortController();
+				controller = request;
+				const requestedKinds = allowedKindsKey?.split("\u0000");
+				void searchEntities(index, query, request.signal, { kinds: requestedKinds }).then(
+					(nextHits) => {
+						if (request.signal.aborted) return;
+						const allowed = allowedKindsKey
+							? new Set(allowedKindsKey.split("\u0000"))
+							: undefined;
+						set(
+							nextHits.filter(
+								(hit) =>
+									!allowed || (hit.kind !== undefined && allowed.has(hit.kind)),
+							),
+						);
+						setSearchResolution({ status: "ready", query });
+					},
+					() => {
+						if (!request.signal.aborted) {
+							set([]);
+							setSearchResolution({ status: "error", query });
+						}
+					},
+				);
+			},
+			query ? 250 : 0,
+		);
 		return () => {
 			window.clearTimeout(timer);
 			controller?.abort();
 		};
-	}, [allowedKindsKey, index, inputValue, searchEntities, set]);
+	}, [allowedKindsKey, index, inputValue, open, searchEntities, searchOnOpen, set]);
 
 	useEffect(() => {
 		setInputValue(value?.label ?? "");
@@ -134,8 +150,10 @@ export function EntityPicker({
 		searchResolution.status !== "idle" && searchResolution.query === query
 			? searchResolution
 			: ({ status: "idle" } as const);
-	const isPending = Boolean(query && searchEntities) && currentResolution.status === "idle";
+	const shouldSearch = Boolean(searchEntities) && (query.length > 0 || (searchOnOpen && open));
+	const isPending = shouldSearch && currentResolution.status === "idle";
 	const showNoResultsAction =
+		query.length > 0 &&
 		currentResolution.status === "ready" &&
 		collection.items.length === 0 &&
 		renderNoResultsAction;
@@ -149,6 +167,7 @@ export function EntityPicker({
 					setInputValue(nextInputValue);
 					filter(nextInputValue);
 				}}
+				onOpenChange={({ open: nextOpen }) => setOpen(nextOpen)}
 				onValueChange={({ value: selectedValues }) => {
 					const selected = collection.items.find((item) => item.id === selectedValues[0]);
 					if (!selected) {
@@ -195,7 +214,9 @@ export function EntityPicker({
 									</ComboboxItem>
 								))}
 							</ComboboxList>
-							{inputValue.trim() && <ComboboxEmpty>{messages.empty}</ComboboxEmpty>}
+							{(query || (searchOnOpen && open)) && (
+								<ComboboxEmpty>{messages.empty}</ComboboxEmpty>
+							)}
 						</>
 					)}
 				</ComboboxContent>

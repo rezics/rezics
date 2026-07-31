@@ -39,6 +39,8 @@ export default {
 		grantNotice: `Nach der Erteilung kann diese Lizenz nicht widerrufen werden und gilt weiterhin für künftige ${postTerms.pluralLabel} zu diesem Inhalt sowie bei Eigentumsübertragungen.`,
 		grantedNotice: "Für diesen Inhalt wurde diese Inhaltslizenz dauerhaft erteilt.",
 		contributionNotice: `Inhalte, die Sie während der Geltung dieser Lizenz beisteuern, werden ${verbatimTerms.rezics.value} zu denselben Bedingungen lizenziert; eine gesonderte Lizenzauswahl ist nicht erforderlich.`,
+		cancelGrant: "Abbrechen",
+		confirmGrant: "Lizenz erteilen",
 		options: unitContentOptions,
 	},
 } satisfies typeof import("../zh-Hant/licenses").default;

@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { validateCreditAttributionDrafts } from "./credit-attribution-draft";
+import {
+	createCreditAttributionDraft,
+	validateCreditAttributionDrafts,
+} from "./credit-attribution-draft";
 
 const publisher = {
 	key: "publisher",
@@ -9,6 +12,14 @@ const publisher = {
 } as const;
 
 describe("Unit creation credit attribution drafts", () => {
+	it.each([
+		["book", "author"],
+		["software", "developer"],
+		["media", "director"],
+	] as const)("defaults a new %s credit to its first role", (type, role) => {
+		expect(createCreditAttributionDraft(type)).toMatchObject({ role });
+	});
+
 	it.each([
 		["book", "author"],
 		["software", "developer"],

@@ -36,6 +36,8 @@ export default {
 		grantNotice: "授予后不可撤销，并继续适用于该内容的后续贡献和所有权转让。",
 		grantedNotice: "该内容已永久采用此内容许可。",
 		contributionNotice: `你在此许可生效期间提交的内容，将按照相同条款许可给 ${verbatimTerms.rezics.value}；无需另行选择许可。`,
+		cancelGrant: "取消",
+		confirmGrant: "确认授权",
 		options: unitContentOptions,
 	},
 } satisfies typeof import("../zh-Hant/licenses").default;

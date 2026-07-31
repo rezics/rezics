@@ -2,11 +2,9 @@
 
 import type { ContentLanguage } from "@rezics/i18n";
 import {
-	CurrentUnitContentLicenseSlug,
 	isPublicationLicenseId,
 	isUnitContentLicenseSlug,
 	PublicationLicenseIds,
-	type UnitContentLicenseSlug,
 } from "@rezics/license";
 
 import {
@@ -26,12 +24,10 @@ import { useDeferredValue, useState, type FormEvent } from "react";
 import { Badge, EntityPicker } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@rezics/ui";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@rezics/ui";
+import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
 import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
-import { CircleHelp } from "lucide-react";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
@@ -54,12 +50,11 @@ import {
 	isSubjectAssociationRole,
 	SubjectAssociationRoles,
 } from "./attribution-role";
-import { unitContentLicenseHref } from "./model/unit-content-license";
+import { UnitContentLicenseField } from "./components/unit-content-license-field";
 
 export type EditableUnit = GetApiUnitsByTypeByUnitIdStatus200;
 type Unit = EditableUnit;
 type SelectedEntity = { id: string; label: string };
-const NoUnitContentLicenseSelection = "none";
 
 function readPositiveInteger(form: FormData, name: string): number | null | undefined {
 	const raw = String(form.get(name) ?? "").trim();
@@ -116,7 +111,7 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 		const submittedContentLicense = form.get("contentLicense");
 		if (
 			submittedContentLicense !== null &&
-			submittedContentLicense !== NoUnitContentLicenseSelection &&
+			submittedContentLicense !== "none" &&
 			!isUnitContentLicenseSlug(submittedContentLicense)
 		)
 			return;
@@ -282,6 +277,16 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 							</Field>
 						) : null}
 						<UnitTypeSpecificFields unit={unit} />
+						{unit.ownershipMode === "profile_owned" &&
+						(unit.details.type === "book" ||
+							unit.details.type === "software" ||
+							unit.details.type === "media") ? (
+							<UnitContentLicenseField
+								defaultSlug={
+									unit.details.contentLicense?.referenceLicenseSlug ?? null
+								}
+							/>
+						) : null}
 						<Field>
 							<FieldLabel>{t.units.detail.license}</FieldLabel>
 							<NativeSelect defaultValue={unit.license ?? ""} name="license">
@@ -303,72 +308,6 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 				</form>
 			</CardContent>
 		</Card>
-	);
-}
-
-function ContentLicenseField({
-	defaultSlug,
-}: {
-	readonly defaultSlug: UnitContentLicenseSlug | null;
-}) {
-	const { t } = useTranslation(["licenses", "units"]);
-	const referenceSlug = defaultSlug ?? CurrentUnitContentLicenseSlug;
-	return (
-		<Field>
-			<div className="flex items-center gap-1">
-				<FieldLabel>{t.units.fields.contentLicense}</FieldLabel>
-				<HoverCard
-					closeDelay={160}
-					openDelay={240}
-					positioning={{ placement: "bottom-start" }}
-				>
-					<HoverCardTrigger asChild>
-						<Button
-							aria-label={t.licenses.unitContent.viewTerms}
-							size="icon-xs"
-							type="button"
-							variant="quiet"
-						>
-							<CircleHelp aria-hidden />
-						</Button>
-					</HoverCardTrigger>
-					<HoverCardContent className="grid w-[min(22rem,calc(100vw-2rem))] gap-3">
-						<p className="font-medium">
-							{t.licenses.unitContent.options[referenceSlug].label}
-						</p>
-						<FieldDescription>
-							{defaultSlug
-								? t.licenses.unitContent.grantedNotice
-								: t.licenses.unitContent.grantNotice}
-						</FieldDescription>
-						{defaultSlug ? (
-							<FieldDescription>
-								{t.licenses.unitContent.contributionNotice}
-							</FieldDescription>
-						) : null}
-						<a
-							className="w-fit text-link text-sm hover:text-link-hover hover:underline"
-							href={unitContentLicenseHref(referenceSlug)}
-							rel="noreferrer"
-						>
-							{t.licenses.unitContent.viewTerms}
-						</a>
-					</HoverCardContent>
-				</HoverCard>
-			</div>
-			<NativeSelect
-				defaultValue={defaultSlug ?? NoUnitContentLicenseSelection}
-				disabled={defaultSlug !== null}
-				name="contentLicense"
-			>
-				<NativeSelectOption value={NoUnitContentLicenseSelection}>
-					{t.licenses.unitContent.none}
-				</NativeSelectOption>
-				<NativeSelectOption value={CurrentUnitContentLicenseSlug}>
-					{t.licenses.unitContent.options[CurrentUnitContentLicenseSlug].label}
-				</NativeSelectOption>
-			</NativeSelect>
-		</Field>
 	);
 }
 
@@ -395,9 +334,6 @@ function UnitTypeSpecificFields({ unit }: { unit: Unit }) {
 					<FieldLabel>{t.units.fields.format}</FieldLabel>
 					<Input defaultValue={details.format ?? ""} name="format" />
 				</Field>
-				<ContentLicenseField
-					defaultSlug={details.contentLicense?.referenceLicenseSlug ?? null}
-				/>
 			</>
 		);
 	if (details.type === "software")
@@ -407,9 +343,6 @@ function UnitTypeSpecificFields({ unit }: { unit: Unit }) {
 					<FieldLabel>{t.units.fields.versionLabel}</FieldLabel>
 					<Input defaultValue={details.versionLabel ?? ""} name="versionLabel" />
 				</Field>
-				<ContentLicenseField
-					defaultSlug={details.contentLicense?.referenceLicenseSlug ?? null}
-				/>
 			</>
 		);
 	if (details.type === "media")
@@ -446,9 +379,6 @@ function UnitTypeSpecificFields({ unit }: { unit: Unit }) {
 						type="number"
 					/>
 				</Field>
-				<ContentLicenseField
-					defaultSlug={details.contentLicense?.referenceLicenseSlug ?? null}
-				/>
 			</>
 		);
 	if (details.type === "video" || details.type === "audio")

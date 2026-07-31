@@ -39,6 +39,8 @@ export default {
 			"Once granted, this license cannot be revoked and continues to cover later contributions and ownership transfers.",
 		grantedNotice: "This content license has been permanently granted for this content.",
 		contributionNotice: `Content you contribute while this license applies is licensed to ${verbatimTerms.rezics.value} under the same terms; no separate license selection is required.`,
+		cancelGrant: "Cancel",
+		confirmGrant: "Grant license",
 		options: unitContentOptions,
 	},
 } satisfies typeof import("../zh-Hant/licenses").default;

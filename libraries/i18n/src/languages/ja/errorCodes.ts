@@ -34,6 +34,7 @@ export default {
 	UnitNotFound: "このコンテンツは見つかりませんでした。",
 	UnitPermissionForbidden: "このコンテンツに対する必要な権限がありません。",
 	UnitAccessRestricted: "このコンテンツのスコープへのアクセスは制限されています。",
+	UnitContentLicenseGrantForbidden: `個人所有の作品だけが ${verbatimTerms.rezics.value} にライセンスを付与できます。`,
 	UnitChanged: "このコンテンツは変更されました。更新してもう一度試してください。",
 	UnitRevisionConflict: "リビジョンの基準が変更されました。更新してもう一度試してください。",
 	ContentStructureRevisionConflict:

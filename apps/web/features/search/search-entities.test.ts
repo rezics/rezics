@@ -123,4 +123,19 @@ describe("searchEntities", () => {
 			}),
 		);
 	});
+
+	it("omits the text query for an initial direct-credit list", async () => {
+		api.getApiEntities.mockResolvedValue({ data: { items: [] } });
+
+		await searchEntities("entities", "", new AbortController().signal, {
+			creditAttributionSearch: "direct",
+		});
+
+		const request = api.getApiEntities.mock.calls[0]?.[0];
+		expect(request?.query).toEqual({
+			creditAttributionSearch: "direct",
+			limit: 10,
+			localizationLanguages: ["zh", "en"],
+		});
+	});
 });

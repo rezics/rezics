@@ -10053,6 +10053,7 @@
 					"UnitNotFound",
 					"UnitPermissionForbidden",
 					"UnitAccessRestricted",
+					"UnitContentLicenseGrantForbidden",
 					"UnitChanged",
 					"UnitRealmPublicationNotFound",
 					"UnitRealmPublicationAlreadyExists",
@@ -69202,6 +69203,19 @@
 												"const": "profile_owned",
 												"type": "string"
 											},
+											"contentLicense": {
+												"additionalProperties": false,
+												"description": "One-time Unit content license grant. Omit this field when no new grant is being made.",
+												"type": "object",
+												"required": ["referenceLicenseSlug"],
+												"properties": {
+													"referenceLicenseSlug": {
+														"default": "rezics-unit-content-license-v1",
+														"type": "string",
+														"enum": ["rezics-unit-content-license-v1"]
+													}
+												}
+											},
 											"creditAttributions": {
 												"contains": {
 													"type": "object",
@@ -74899,7 +74913,7 @@
 											},
 											"contentLicense": {
 												"additionalProperties": false,
-												"description": "One-time Unit content license grant. Omit this field to leave an ungranted or existing grant unchanged.",
+												"description": "One-time Unit content license grant. Omit this field when no new grant is being made.",
 												"type": "object",
 												"required": ["referenceLicenseSlug"],
 												"properties": {
@@ -77068,7 +77082,8 @@
 														"ApiTokenPermissionRequired",
 														"EmailVerificationRequired",
 														"AccountRestricted",
-														"UnitPermissionForbidden"
+														"UnitPermissionForbidden",
+														"UnitContentLicenseGrantForbidden"
 													]
 												},
 												"message": { "type": "string" },

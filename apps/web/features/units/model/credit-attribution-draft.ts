@@ -18,6 +18,19 @@ export interface CreditAttributionDraftIssue {
 	readonly roleRequired: boolean;
 }
 
+const DefaultCreditAttributionRoleByUnitType = {
+	book: "author",
+	software: "developer",
+	media: "director",
+} as const satisfies Record<VariantUnitType, CreditAttributionRole>;
+
+export function createCreditAttributionDraft(type: VariantUnitType): CreditAttributionDraft {
+	return {
+		key: crypto.randomUUID(),
+		role: DefaultCreditAttributionRoleByUnitType[type],
+	};
+}
+
 export type CreditAttributionDraftValidation =
 	| {
 			readonly ok: true;

@@ -35,6 +35,7 @@ export default {
 	UnitNotFound: "Dieser Inhalt wurde nicht gefunden.",
 	UnitPermissionForbidden: "Dir fehlt die erforderliche Berechtigung für diesen Inhalt.",
 	UnitAccessRestricted: "Dein Zugriff auf diesen Inhaltsbereich ist eingeschränkt.",
+	UnitContentLicenseGrantForbidden: `Nur Werke in persönlichem Besitz können ${verbatimTerms.rezics.value} eine Lizenz erteilen.`,
 	UnitChanged: "Dieser Inhalt wurde geändert. Aktualisiere die Seite und versuche es erneut.",
 	UnitRevisionConflict:
 		"Die Ausgangsversion wurde geändert. Aktualisiere die Seite und versuche es erneut.",

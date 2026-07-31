@@ -102,6 +102,13 @@ const UnitMutationForbiddenResponse = toApiErrorResponse([
 	"AccountRestricted",
 	"UnitPermissionForbidden",
 ]);
+const UnitUpdateForbiddenResponse = toApiErrorResponse([
+	"ApiTokenPermissionRequired",
+	"EmailVerificationRequired",
+	"AccountRestricted",
+	"UnitPermissionForbidden",
+	"UnitContentLicenseGrantForbidden",
+]);
 const UnitAuthorizationForbiddenResponse = toApiErrorResponse([
 	"ApiTokenPermissionRequired",
 	"EmailVerificationRequired",
@@ -464,7 +471,7 @@ export default new Elysia({ prefix: "/units" })
 			response: {
 				[StatusCodes.OK]: UnitDetailResponse,
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
-				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+				[StatusCodes.FORBIDDEN]: UnitUpdateForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
 				[StatusCodes.CONFLICT]: UnitChangedResponse,
 			},

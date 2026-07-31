@@ -37,6 +37,7 @@ export default {
 	UnitNotFound: "No se ha encontrado este contenido.",
 	UnitPermissionForbidden: "No tienes el permiso necesario para este contenido.",
 	UnitAccessRestricted: "Tu acceso a este perímetro de contenido está restringido.",
+	UnitContentLicenseGrantForbidden: `Solo las obras de propiedad personal pueden conceder una licencia a ${verbatimTerms.rezics.value}.`,
 	UnitChanged: "Este contenido ha cambiado. Actualiza la página e inténtalo de nuevo.",
 	UnitRevisionConflict:
 		"La versión de referencia ha cambiado. Actualiza la página e inténtalo de nuevo.",

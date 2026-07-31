@@ -7,7 +7,9 @@ import {
 	EntityPicker,
 	Field,
 	FieldError,
+	FieldLegend,
 	FieldLabel,
+	FieldSet,
 	NativeSelect,
 	NativeSelectOption,
 	Tooltip,
@@ -26,13 +28,10 @@ import type {
 	CreditAttributionDraft,
 	CreditAttributionDraftValidation,
 } from "../model/credit-attribution-draft";
+import { createCreditAttributionDraft } from "../model/credit-attribution-draft";
 import type { VariantUnitType } from "../unit-types";
 
 export type CreditEntitySearchScope = "direct" | "public";
-
-function newCreditAttributionDraft(): CreditAttributionDraft {
-	return { key: crypto.randomUUID() };
-}
 
 export function UnitCreditAttributionEditor({
 	type,
@@ -59,7 +58,8 @@ export function UnitCreditAttributionEditor({
 	}, [searchEntities, searchScope]);
 
 	return (
-		<div className="grid gap-3">
+		<FieldSet className="gap-3">
+			<FieldLegend>{t.units.creation.creditAttributionsTitle}</FieldLegend>
 			<div className="grid gap-3">
 				{value.map((draft, index) => {
 					const number = index + 1;
@@ -95,11 +95,8 @@ export function UnitCreditAttributionEditor({
 											),
 										);
 									}}
-									value={draft.role ?? ""}
+									value={draft.role}
 								>
-									<NativeSelectOption value="">
-										{t.units.creation.selectCreditRole}
-									</NativeSelectOption>
 									{CreditAttributionRolesByUnitType[type].map((role) => (
 										<NativeSelectOption key={role} value={role}>
 											{t.units.attributionRoles[role]}
@@ -136,6 +133,7 @@ export function UnitCreditAttributionEditor({
 									}
 									placeholder={t.ui.pickerPlaceholders.entity}
 									search={scopedSearch}
+									searchOnOpen
 									value={draft.entity}
 								/>
 								{issue?.entityRequired ? (
@@ -157,7 +155,7 @@ export function UnitCreditAttributionEditor({
 											onChange(
 												remaining.length > 0
 													? remaining
-													: [newCreditAttributionDraft()],
+													: [createCreditAttributionDraft(type)],
 											);
 										}}
 										size="icon-md"
@@ -182,12 +180,12 @@ export function UnitCreditAttributionEditor({
 			) : null}
 			<Button
 				className="w-fit"
-				onClick={() => onChange([...value, newCreditAttributionDraft()])}
+				onClick={() => onChange([...value, createCreditAttributionDraft(type)])}
 				type="button"
 				variant="outline"
 			>
 				{t.units.creation.addCreditAttribution}
 			</Button>
-		</div>
+		</FieldSet>
 	);
 }

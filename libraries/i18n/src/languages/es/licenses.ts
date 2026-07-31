@@ -40,6 +40,8 @@ export default {
 		grantedNotice:
 			"Esta licencia de contenido se ha concedido de forma permanente para este contenido.",
 		contributionNotice: `El contenido que aportes mientras se aplique esta licencia se concede a ${verbatimTerms.rezics.value} bajo las mismas condiciones; no es necesario elegir otra licencia.`,
+		cancelGrant: "Cancelar",
+		confirmGrant: "Conceder licencia",
 		options: unitContentOptions,
 	},
 } satisfies typeof import("../zh-Hant/licenses").default;

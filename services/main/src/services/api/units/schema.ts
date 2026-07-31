@@ -157,6 +157,14 @@ export const UnitSeriesMembershipListResponse = t.Object({
 });
 
 const UnitLocalizationInput = LocalizationInput;
+const UnitContentLicenseGrantInput = t.Object(
+	{ referenceLicenseSlug: t.UnionEnum(UnitContentLicenseSlugs) },
+	{
+		additionalProperties: false,
+		description:
+			"One-time Unit content license grant. Omit this field when no new grant is being made.",
+	},
+);
 
 const CreateUnitFields = {
 	creditAttributionRequestConsent: t.Union([
@@ -175,6 +183,7 @@ export const CreateUnitBody = t.Union([
 	t.Object(
 		{
 			ownershipMode: t.Literal("profile_owned"),
+			contentLicense: t.Optional(UnitContentLicenseGrantInput),
 			creditAttributions: t.Array(CreateUnitCreditAttributionInput, {
 				contains: t.Object({ role: t.Literal("publisher") }),
 				minContains: 1,
@@ -205,16 +214,7 @@ const UnitDetailsInput = t.Object(
 		pageCount: t.Optional(t.Nullable(t.Integer({ minimum: 1 }))),
 		wordCount: t.Optional(t.Nullable(t.Integer({ minimum: 0 }))),
 		format: t.Optional(t.Nullable(t.String())),
-		contentLicense: t.Optional(
-			t.Object(
-				{ referenceLicenseSlug: t.UnionEnum(UnitContentLicenseSlugs) },
-				{
-					additionalProperties: false,
-					description:
-						"One-time Unit content license grant. Omit this field to leave an ungranted or existing grant unchanged.",
-				},
-			),
-		),
+		contentLicense: t.Optional(UnitContentLicenseGrantInput),
 		versionLabel: t.Optional(t.Nullable(t.String())),
 		kind: t.Optional(t.String({ minLength: 1 })),
 		runtimeMinutes: t.Optional(t.Nullable(t.Integer({ minimum: 1 }))),

@@ -17,6 +17,30 @@ vi.stubGlobal(
 afterEach(cleanup);
 
 describe("EntityPicker no-result actions", () => {
+	it("loads and renders an initial filtered list when opened", async () => {
+		const search = vi.fn(async () => [{ id: "entity-id", label: "Studio" }]);
+		render(
+			<UiProvider searchEntities={search}>
+				<EntityPicker
+					ariaLabel="Search entities"
+					index="entities"
+					onChange={vi.fn()}
+					placeholder="Enter an entity name"
+					searchOnOpen
+				/>
+			</UiProvider>,
+		);
+
+		fireEvent.click(screen.getByRole("combobox", { name: "Search entities" }));
+
+		await waitFor(() =>
+			expect(search).toHaveBeenCalledWith("entities", "", expect.any(AbortSignal), {
+				kinds: undefined,
+			}),
+		);
+		expect(await screen.findByText("Studio")).toBeTruthy();
+	});
+
 	it("clears a selected value when the user edits its label", async () => {
 		const onClear = vi.fn();
 		render(

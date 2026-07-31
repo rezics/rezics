@@ -32,6 +32,14 @@ export class UnitAccessRestricted extends Data.TaggedError("UnitAccessRestricted
 	readonly message = "Your access to this Unit scope is restricted";
 }
 
+export class UnitContentLicenseGrantForbidden extends Data.TaggedError(
+	"UnitContentLicenseGrantForbidden",
+) {
+	static readonly status = StatusCodes.FORBIDDEN as const;
+	readonly status = UnitContentLicenseGrantForbidden.status;
+	readonly message = "Only Profile-owned Units can grant a Unit content license";
+}
+
 export class UnitChanged extends Data.TaggedError("UnitChanged") {
 	static readonly status = StatusCodes.CONFLICT as const;
 	readonly status = UnitChanged.status;
@@ -280,6 +288,7 @@ export const UnitErrors = [
 	UnitNotFound,
 	UnitPermissionForbidden,
 	UnitAccessRestricted,
+	UnitContentLicenseGrantForbidden,
 	UnitChanged,
 	UnitRealmPublicationNotFound,
 	UnitRealmPublicationAlreadyExists,

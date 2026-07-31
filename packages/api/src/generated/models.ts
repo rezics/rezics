@@ -5297,6 +5297,7 @@ export const ApiErrorCode = {
 	UnitNotFound: "UnitNotFound",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitContentLicenseGrantForbidden: "UnitContentLicenseGrantForbidden",
 	UnitChanged: "UnitChanged",
 	UnitRealmPublicationNotFound: "UnitRealmPublicationNotFound",
 	UnitRealmPublicationAlreadyExists: "UnitRealmPublicationAlreadyExists",
@@ -55099,6 +55100,17 @@ export type PostApiUnitsByTypeBody =
 			 */
 			ownershipMode: "profile_owned";
 			/**
+			 * @description One-time Unit content license grant. Omit this field when no new grant is being made.
+			 * @type object | undefined
+			 */
+			contentLicense?: {
+				/**
+				 * @default 'rezics-unit-content-license-v1'
+				 * @type string
+				 */
+				referenceLicenseSlug: "rezics-unit-content-license-v1";
+			};
+			/**
 			 * @type array
 			 */
 			creditAttributions: {
@@ -58301,6 +58313,7 @@ export const PatchApiUnitsByTypeByUnitIdStatus403ErrorCodeEnum = {
 	EmailVerificationRequired: "EmailVerificationRequired",
 	AccountRestricted: "AccountRestricted",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitContentLicenseGrantForbidden: "UnitContentLicenseGrantForbidden",
 } as const;
 
 export type PatchApiUnitsByTypeByUnitIdStatus403ErrorCodeEnum =
@@ -58527,7 +58540,7 @@ export type PatchApiUnitsByTypeByUnitIdBody = {
 		wordCount?: ((string | number) | null) | null;
 		format?: (string | null) | null;
 		/**
-		 * @description One-time Unit content license grant. Omit this field to leave an ungranted or existing grant unchanged.
+		 * @description One-time Unit content license grant. Omit this field when no new grant is being made.
 		 * @type object | undefined
 		 */
 		contentLicense?: {

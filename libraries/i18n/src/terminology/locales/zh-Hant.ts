@@ -78,8 +78,8 @@ export const zhHantTerminology = defineTerminology("zh-Hant", {
 	},
 	publicationLicense: {
 		status: "approved",
-		forms: { label: "作品授權條款", inline: "授權條款" },
-		forbidden: ["License", "作品 License", "授權 REZICS"],
+		forms: { label: "公開授權", inline: "公開授權" },
+		forbidden: ["License", "作品 License", "作品授權條款", "授權 REZICS"],
 	},
 	entity: {
 		status: "approved",

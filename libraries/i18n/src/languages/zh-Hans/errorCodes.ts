@@ -34,6 +34,7 @@ export default {
 	UnitNotFound: "找不到这个内容。",
 	UnitPermissionForbidden: "你没有操作这个内容所需的权限。",
 	UnitAccessRestricted: "你对这个内容范围的访问受到限制。",
+	UnitContentLicenseGrantForbidden: `只有个人拥有的作品可以向 ${verbatimTerms.rezics.value} 授权。`,
 	UnitChanged: "内容已变更，请刷新后再试一次。",
 	UnitRevisionConflict: "修订基础已变更，请刷新后再试一次。",
 	ContentStructureRevisionConflict: "内容结构已在其他地方变更，请刷新后再试一次。",

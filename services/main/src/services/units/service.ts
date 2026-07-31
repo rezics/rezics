@@ -72,6 +72,7 @@ import { CreditAttributionRoleInvalid } from "../entities/errors";
 import { fractionalPositionBetween } from "../ordering/position";
 import {
 	UnitChanged,
+	UnitContentLicenseGrantForbidden,
 	UnitNotFound,
 	UnitVariantKindMismatch,
 	UnitVariantMainUnavailable,
@@ -110,6 +111,9 @@ const CreditAttributionRequestLifetimeMs = 30 * 24 * 60 * 60 * 1_000;
 type CreateUnitAccessInput =
 	| {
 			readonly ownershipMode: "profile_owned";
+			readonly contentLicense?: {
+				readonly referenceLicenseSlug: UnitContentLicenseSlug;
+			};
 			readonly creditAttributions: readonly {
 				readonly entityId: string;
 				readonly role: CreditAttributionRole;
@@ -282,6 +286,12 @@ export async function createUnit(
 				"unit.update",
 				"unit.status.update",
 			]);
+		if (input.ownershipMode === "profile_owned" && input.contentLicense)
+			await tx.insert(unitContentLicense).values({
+				unitId: created.id,
+				grantedByProfileId: ownerId,
+				referenceLicenseSlug: input.contentLicense.referenceLicenseSlug,
+			});
 		if (input.version.kind === "variant") {
 			const [main] = await tx
 				.select({
@@ -775,6 +785,15 @@ export async function updateUnit(
 		}
 		const details = body.details ?? {};
 		const common = body.unit ?? {};
+		if (details.contentLicense !== undefined) {
+			const [activeOwnership] = await tx
+				.select({ profileId: unitOwnership.profileId })
+				.from(unitOwnership)
+				.where(and(eq(unitOwnership.unitId, unitId), isNull(unitOwnership.revokedAt)))
+				.limit(1);
+			if (activeOwnership?.profileId === OfficialProfileIds.community)
+				throw new UnitContentLicenseGrantForbidden();
+		}
 		const releasedOn =
 			common.releasedOn === undefined
 				? undefined

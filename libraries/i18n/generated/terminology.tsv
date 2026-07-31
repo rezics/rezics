@@ -271,10 +271,10 @@ tagStructure	A community-immutable, community-voted ordered path of Tags; platfo
 tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	ko	approved	plural	태그 경로	Tag structure | Structure tag
 publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	en	approved	label	Publication license	-
 publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	en	approved	inline	publication license	-
-publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	zh-Hant	approved	label	作品授權條款	License | 作品 License | 授權 REZICS
-publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	zh-Hant	approved	inline	授權條款	License | 作品 License | 授權 REZICS
-publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	zh-Hans	approved	label	作品许可条款	License | 作品 License | 授权 REZICS
-publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	zh-Hans	approved	inline	许可条款	License | 作品 License | 授权 REZICS
+publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	zh-Hant	approved	label	公開授權	License | 作品 License | 作品授權條款 | 授權 REZICS
+publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	zh-Hant	approved	inline	公開授權	License | 作品 License | 作品授權條款 | 授權 REZICS
+publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	zh-Hans	approved	label	公开许可	License | 作品 License | 作品许可条款 | 授权 REZICS
+publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	zh-Hans	approved	inline	公开许可	License | 作品 License | 作品许可条款 | 授权 REZICS
 publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	de	approved	label	Veröffentlichungslizenz	-
 publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	de	approved	inline	Veröffentlichungslizenz	-
 publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	ja	approved	label	公開ライセンス	Publication license

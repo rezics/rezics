@@ -62,7 +62,7 @@ export function createEntitySearch(
 			const { data } = await getApiEntities({
 				query: {
 					creditAttributionSearch: options.creditAttributionSearch,
-					query,
+					...(query ? { query } : {}),
 					limit: 10,
 					localizationLanguages: [...localizationLanguages],
 				},

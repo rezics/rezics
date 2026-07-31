@@ -33,6 +33,7 @@ export default {
 	UnitNotFound: "이 콘텐츠를 찾을 수 없습니다.",
 	UnitPermissionForbidden: "이 콘텐츠에 대한 필요한 권한이 없습니다.",
 	UnitAccessRestricted: "이 콘텐츠 범위에 대한 접근이 제한되어 있습니다.",
+	UnitContentLicenseGrantForbidden: `개인 소유 작품만 ${verbatimTerms.rezics.value}에 라이선스를 부여할 수 있습니다.`,
 	UnitChanged: "이 콘텐츠가 변경되었습니다. 새로고침하고 다시 시도하세요.",
 	UnitRevisionConflict: "수정 기준이 변경되었습니다. 새로고침하고 다시 시도하세요.",
 	ContentStructureRevisionConflict:

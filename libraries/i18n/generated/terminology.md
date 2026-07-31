@@ -352,10 +352,10 @@ The terms under which a Unit's work is made available to the public; this is not
 | --- | --- | --- | --- | --- |
 | en | approved | label | Publication license |  |
 | en | approved | inline | publication license |  |
-| zh-Hant | approved | label | 作品授權條款 | License, 作品 License, 授權 REZICS |
-| zh-Hant | approved | inline | 授權條款 | License, 作品 License, 授權 REZICS |
-| zh-Hans | approved | label | 作品许可条款 | License, 作品 License, 授权 REZICS |
-| zh-Hans | approved | inline | 许可条款 | License, 作品 License, 授权 REZICS |
+| zh-Hant | approved | label | 公開授權 | License, 作品 License, 作品授權條款, 授權 REZICS |
+| zh-Hant | approved | inline | 公開授權 | License, 作品 License, 作品授權條款, 授權 REZICS |
+| zh-Hans | approved | label | 公开许可 | License, 作品 License, 作品许可条款, 授权 REZICS |
+| zh-Hans | approved | inline | 公开许可 | License, 作品 License, 作品许可条款, 授权 REZICS |
 | de | approved | label | Veröffentlichungslizenz |  |
 | de | approved | inline | Veröffentlichungslizenz |  |
 | ja | approved | label | 公開ライセンス | Publication license |

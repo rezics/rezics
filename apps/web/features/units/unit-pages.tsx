@@ -1,6 +1,10 @@
 "use client";
 
-import { isPublicationLicenseId, PublicationLicenseIds } from "@rezics/license";
+import {
+	isPublicationLicenseId,
+	isUnitContentLicenseSlug,
+	PublicationLicenseIds,
+} from "@rezics/license";
 
 import {
 	getApiUnitsByType,
@@ -45,13 +49,11 @@ import {
 } from "./components/unit-credit-attribution-editor";
 import {
 	type CreditAttributionDraft,
+	createCreditAttributionDraft,
 	validateCreditAttributionDrafts,
 } from "./model/credit-attribution-draft";
 import { CreditAttributionRequestConfirmationDialog } from "./components/credit-attribution-request-confirmation-dialog";
-
-function createCreditAttributionDraft(): CreditAttributionDraft {
-	return { key: crypto.randomUUID() };
-}
+import { UnitContentLicenseField } from "./components/unit-content-license-field";
 
 export function UnitBrowsePage({ type }: { type: WorkUnitType }) {
 	const { t } = useTranslation(["actions", "media", "ui", "units"]);
@@ -207,7 +209,7 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 		initialOwnershipMode,
 	);
 	const [creditAttributions, setCreditAttributions] = useState<readonly CreditAttributionDraft[]>(
-		() => [createCreditAttributionDraft()],
+		() => [createCreditAttributionDraft(type)],
 	);
 	const [creditValidationRequested, setCreditValidationRequested] = useState(false);
 	const [versionKind, setVersionKind] = useState<"main" | "variant">("main");
@@ -240,6 +242,7 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 		const submittedTitle = String(form.get("title") ?? "").trim();
 		const summary = String(form.get("summary") ?? "").trim();
 		const submittedLicense = form.get("license");
+		const submittedContentLicense = form.get("contentLicense");
 		const creditValidation = validateCreditAttributionDrafts(
 			type,
 			ownershipMode,
@@ -257,6 +260,12 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 			submittedLicense !== null &&
 			submittedLicense !== "" &&
 			!isPublicationLicenseId(submittedLicense)
+		)
+			return;
+		if (
+			submittedContentLicense !== null &&
+			submittedContentLicense !== "none" &&
+			!isUnitContentLicenseSlug(submittedContentLicense)
 		)
 			return;
 		const contentLanguage = await language.resolveLanguage(formElement);
@@ -302,12 +311,27 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 			};
 			request = {
 				path: { type },
-				body: {
-					ownershipMode,
-					creditAttributions: creditValidation.creditAttributions,
-					creditAttributionRequestConsent: "direct_only",
-					...common,
-				},
+				body:
+					ownershipMode === "profile_owned"
+						? {
+								ownershipMode,
+								creditAttributions: creditValidation.creditAttributions,
+								creditAttributionRequestConsent: "direct_only",
+								...(isUnitContentLicenseSlug(submittedContentLicense)
+									? {
+											contentLicense: {
+												referenceLicenseSlug: submittedContentLicense,
+											},
+										}
+									: {}),
+								...common,
+							}
+						: {
+								ownershipMode,
+								creditAttributions: creditValidation.creditAttributions,
+								creditAttributionRequestConsent: "direct_only",
+								...common,
+							},
 			};
 			await create.mutateAsync(request);
 		} catch (error) {
@@ -520,6 +544,9 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 								))}
 							</NativeSelect>
 						</Field>
+						{ownershipMode === "profile_owned" ? (
+							<UnitContentLicenseField defaultSlug={null} />
+						) : null}
 						<RequestFailure
 							error={
 								hasErrorCode(
