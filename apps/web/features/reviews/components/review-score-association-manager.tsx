@@ -387,7 +387,7 @@ function LoadedReviewScoreAssociationManager({
 								</span>
 							</div>
 						</Field>
-						<RealmScoreContextLink realmId={selected.realmId} showUnavailable />
+						<RealmScoreContextLink realmId={selected.realmId} />
 					</div>
 				) : (
 					<p className="text-muted-foreground text-sm">

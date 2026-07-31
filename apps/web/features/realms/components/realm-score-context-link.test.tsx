@@ -29,7 +29,7 @@ vi.mock("@/features/application-shell/components/app-link", () => ({
 	),
 }));
 
-const translation = await create(resources).getTranslation(["engagement", "realms"], ["zh-Hant"]);
+const translation = await create(resources).getTranslation(["engagement"], ["zh-Hant"]);
 
 beforeEach(() => {
 	state.contextPostId = null;
@@ -46,16 +46,6 @@ describe("RealmScoreContextLink", () => {
 		);
 
 		expect(screen.queryByRole("link")).toBeNull();
-	});
-
-	it("explains when the selected Realm has no scoring guidelines", () => {
-		render(
-			<TranslationProvider initial={translation.snapshot}>
-				<RealmScoreContextLink realmId="realm-id" showUnavailable />
-			</TranslationProvider>,
-		);
-
-		expect(screen.getByText("尚未設定評分準則文章。")).toBeTruthy();
 	});
 
 	it("links the configured guidelines through the Realm presentation context", () => {

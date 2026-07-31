@@ -163,14 +163,14 @@ export function ReviewComposer({
 					</Field>
 					<Field>
 						<FieldLabel>{t.engagement.scoreRealm}</FieldLabel>
-						<ScoreRealmPicker
-							onChange={(realm) => setSelectedScoreRealm(realm)}
-							options={scoreRealmOptions}
-							value={scoreRealm}
-						/>
-						{scoreRealm ? (
-							<RealmScoreContextLink realmId={scoreRealm.id} showUnavailable />
-						) : null}
+						<div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+							<ScoreRealmPicker
+								onChange={(realm) => setSelectedScoreRealm(realm)}
+								options={scoreRealmOptions}
+								value={scoreRealm}
+							/>
+							{scoreRealm ? <RealmScoreContextLink realmId={scoreRealm.id} /> : null}
+						</div>
 						<FieldDescription>{t.engagement.reviewScoreRealmHint}</FieldDescription>
 					</Field>
 					<Field>

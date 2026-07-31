@@ -95,7 +95,10 @@ describe("UnitReviewFeed", () => {
 	it("keeps the visible picker and guidelines entry on the resolved default Realm", () => {
 		render(<UnitReviewFeed mode="page" targetId="target-id" />);
 
-		expect(screen.getByTestId("score-realm-picker").textContent).toBe("Realm Score");
-		expect(screen.getByTestId("score-guidelines").textContent).toBe("default-score-realm");
+		const picker = screen.getByTestId("score-realm-picker");
+		const guidelines = screen.getByTestId("score-guidelines");
+		expect(picker.textContent).toBe("Realm Score");
+		expect(guidelines.textContent).toBe("default-score-realm");
+		expect(picker.parentElement).toBe(guidelines.parentElement);
 	});
 });

@@ -186,8 +186,10 @@ describe("ReviewComposer", () => {
 			/>,
 		);
 
-		expect(screen.getByRole("button", { name: "Realm Score" })).toBeTruthy();
-		expect(screen.getByTestId("score-guidelines").textContent).toBe("default-score-realm");
+		const picker = screen.getByRole("button", { name: "Realm Score" });
+		const guidelines = screen.getByTestId("score-guidelines");
+		expect(guidelines.textContent).toBe("default-score-realm");
+		expect(picker.parentElement).toBe(guidelines.parentElement);
 	});
 
 	it("keeps publication Realms separate from the scoring Realm", async () => {

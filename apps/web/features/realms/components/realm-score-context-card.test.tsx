@@ -42,18 +42,14 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("RealmScoreContextCard", () => {
-	it("shows the public empty state and manager settings entry", () => {
-		render(
+	it("stays absent when the Realm has no scoring guidelines", () => {
+		const view = render(
 			<TranslationProvider initial={translation.snapshot}>
 				<RealmScoreContextCard canManage realm={{ id: "realm/id" }} />
 			</TranslationProvider>,
 		);
 
-		expect(screen.getByRole("heading", { name: "評分準則" })).toBeTruthy();
-		expect(screen.getByText("尚未設定評分準則文章。")).toBeTruthy();
-		expect(screen.getByRole("link", { name: "領域設定" }).getAttribute("href")).toBe(
-			"/realm/realm%2Fid/settings/scoring",
-		);
+		expect(view.container.textContent).toBe("");
 	});
 
 	it("links configured guidelines without exposing manager controls to readers", () => {
@@ -69,5 +65,19 @@ describe("RealmScoreContextCard", () => {
 			"/posts/post%2Fid?realmId=realm%2Fid",
 		);
 		expect(screen.queryByRole("link", { name: "領域設定" })).toBeNull();
+	});
+
+	it("keeps the settings entry with configured guidelines for managers", () => {
+		state.contextPostId = "post/id";
+
+		render(
+			<TranslationProvider initial={translation.snapshot}>
+				<RealmScoreContextCard canManage realm={{ id: "realm/id" }} />
+			</TranslationProvider>,
+		);
+
+		expect(screen.getByRole("link", { name: "領域設定" }).getAttribute("href")).toBe(
+			"/realm/realm%2Fid/settings/scoring",
+		);
 	});
 });

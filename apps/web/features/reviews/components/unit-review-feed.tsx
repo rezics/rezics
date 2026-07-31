@@ -107,14 +107,14 @@ export function UnitReviewFeed({
 			<div className="grid gap-5">
 				<Field className="w-full max-w-sm">
 					<FieldLabel>{t.engagement.scoreRealm}</FieldLabel>
-					<ScoreRealmPicker
-						onChange={(selection) => void setRoute({ scoreRealm: selection })}
-						options={scoreRealmOptions}
-						value={scoreRealm}
-					/>
-					{scoreRealm ? (
-						<RealmScoreContextLink realmId={scoreRealm.id} showUnavailable />
-					) : null}
+					<div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+						<ScoreRealmPicker
+							onChange={(selection) => void setRoute({ scoreRealm: selection })}
+							options={scoreRealmOptions}
+							value={scoreRealm}
+						/>
+						{scoreRealm ? <RealmScoreContextLink realmId={scoreRealm.id} /> : null}
+					</div>
 				</Field>
 				<CommunityScoreOverview
 					realmId={scoreRealm?.id}

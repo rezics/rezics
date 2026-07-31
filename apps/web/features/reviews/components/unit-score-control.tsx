@@ -229,30 +229,29 @@ export function UnitScoreControl({
 					<DialogBody className="grid gap-5">
 						<Field>
 							<FieldLabel>{t.engagement.scoreRealm}</FieldLabel>
-							<ScoreRealmPicker
-								onChange={(realm) => {
-									setSelectedRealm(realm);
-									setDraftScore(realm.score);
-									setDraftVisibility(
-										realm.visibility ?? DefaultResourceVisibility,
-									);
-									mutation.reset();
-								}}
-								options={realmOptions}
-								value={selectedRealm}
-							/>
+							<div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+								<ScoreRealmPicker
+									onChange={(realm) => {
+										setSelectedRealm(realm);
+										setDraftScore(realm.score);
+										setDraftVisibility(
+											realm.visibility ?? DefaultResourceVisibility,
+										);
+										mutation.reset();
+									}}
+									options={realmOptions}
+									value={selectedRealm}
+								/>
+								{selectedRealm ? (
+									<RealmScoreContextLink realmId={selectedRealm.id} />
+								) : null}
+							</div>
 							{selectedRealm ? (
-								<div className="grid gap-1.5">
-									<p className="text-sm text-muted-foreground">
-										{t.engagement.scoreRealmHint({
-											realm: selectedRealm.label,
-										})}
-									</p>
-									<RealmScoreContextLink
-										realmId={selectedRealm.id}
-										showUnavailable
-									/>
-								</div>
+								<p className="text-sm text-muted-foreground">
+									{t.engagement.scoreRealmHint({
+										realm: selectedRealm.label,
+									})}
+								</p>
 							) : null}
 						</Field>
 						{selectedRealm?.score === undefined ? null : (
