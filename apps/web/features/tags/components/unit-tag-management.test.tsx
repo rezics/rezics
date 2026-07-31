@@ -1,8 +1,14 @@
 /** @vitest-environment jsdom */
 
 import { cleanup, render, screen } from "@testing-library/react";
+import type { EntitySearch } from "@rezics/ui";
 import type { ComponentProps, ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+
+const uiMocks = vi.hoisted(() => ({
+	searchEntities: vi.fn<EntitySearch>(async () => []),
+	tagSearch: undefined as EntitySearch | undefined,
+}));
 
 vi.mock("@/features/auth/auth-portal", () => ({
 	SignInButton: ({ children }: { readonly children: ReactNode }) => <button>{children}</button>,
@@ -52,18 +58,24 @@ vi.mock("@rezics/ui", () => ({
 		index,
 		renderNoResultsAction,
 		search,
+		searchOnOpen,
 	}: {
 		readonly index: string;
 		readonly renderNoResultsAction?: (query: string) => ReactNode;
-		readonly search?: unknown;
-	}) => (
-		<div
-			data-has-no-results-action={Boolean(renderNoResultsAction)}
-			data-has-scoped-search={Boolean(search)}
-			data-testid={`picker-${index}`}
-		/>
-	),
-	useEntitySearch: () => vi.fn(async () => []),
+		readonly search?: EntitySearch;
+		readonly searchOnOpen?: boolean;
+	}) => {
+		if (index === "tags") uiMocks.tagSearch = search;
+		return (
+			<div
+				data-has-no-results-action={Boolean(renderNoResultsAction)}
+				data-has-scoped-search={Boolean(search)}
+				data-search-on-open={Boolean(searchOnOpen)}
+				data-testid={`picker-${index}`}
+			/>
+		);
+	},
+	useEntitySearch: () => uiMocks.searchEntities,
 }));
 
 import { UnitTagManagement } from "./unit-tag-management";
@@ -84,7 +96,11 @@ const baseProps = {
 } satisfies Omit<ComponentProps<typeof UnitTagManagement>, "hasDevelopmentPreviewAccess">;
 
 describe("UnitTagManagement", () => {
-	afterEach(cleanup);
+	afterEach(() => {
+		cleanup();
+		uiMocks.searchEntities.mockClear();
+		uiMocks.tagSearch = undefined;
+	});
 
 	it("omits every Tag-path control outside development preview", () => {
 		render(<UnitTagManagement {...baseProps} hasDevelopmentPreviewAccess={false} />);
@@ -92,6 +108,7 @@ describe("UnitTagManagement", () => {
 		expect(screen.queryByText("Create a Tag path")).toBeNull();
 		expect(screen.queryByTestId("picker-tag-structures")).toBeNull();
 		expect(screen.getByTestId("picker-tags")).toBeTruthy();
+		expect(screen.getByTestId("picker-tags").dataset.searchOnOpen).toBe("false");
 	});
 
 	it("shows Tag-path controls with development preview access", () => {
@@ -101,7 +118,8 @@ describe("UnitTagManagement", () => {
 		expect(screen.getByTestId("picker-tag-structures")).toBeTruthy();
 	});
 
-	it("keeps Tag-path management out of Realm vote contexts", () => {
+	it("preloads only the selected Realm's available Tags", async () => {
+		const realmId = "00000000-0000-7000-8000-000000000002";
 		render(
 			<UnitTagManagement
 				{...baseProps}
@@ -110,7 +128,7 @@ describe("UnitTagManagement", () => {
 					...baseProps.tagCreateTarget,
 					context: {
 						kind: "realm",
-						realmId: "00000000-0000-7000-8000-000000000002",
+						realmId,
 					},
 				}}
 			/>,
@@ -119,7 +137,15 @@ describe("UnitTagManagement", () => {
 		expect(screen.queryByTestId("picker-tag-structures")).toBeNull();
 		expect(screen.getByText("Add a Realm Tag vote")).toBeTruthy();
 		expect(screen.getByTestId("picker-tags").dataset.hasScopedSearch).toBe("true");
+		expect(screen.getByTestId("picker-tags").dataset.searchOnOpen).toBe("true");
 		expect(screen.queryByRole("link", { name: "Create a Tag" })).toBeNull();
+		if (!uiMocks.tagSearch) throw new Error("Expected a Realm-scoped Tag search.");
+		const signal = new AbortController().signal;
+		await uiMocks.tagSearch("tags", "", signal, { kinds: ["tag"] });
+		expect(uiMocks.searchEntities).toHaveBeenCalledWith("tags", "", signal, {
+			kinds: ["tag"],
+			realmTagContextRealmId: realmId,
+		});
 	});
 
 	it("renders no add controls without vote permission", () => {

@@ -130,6 +130,7 @@ export function UnitTagManagement({
 						onChange={setSelectedTag}
 						placeholder={t.ui.pickerPlaceholders.tag}
 						search={tagSearch}
+						searchOnOpen={tagSearch !== undefined}
 						value={selectedTag}
 					/>
 					<Button

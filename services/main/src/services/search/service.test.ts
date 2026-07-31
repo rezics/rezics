@@ -216,6 +216,27 @@ describe("domain search SQL", () => {
 		}
 	});
 
+	it("binds Realm Tag context aliases to their physical tables", () => {
+		const query = dialect.sqlToQuery(
+			compilePostgresSearchExpression(
+				"tags",
+				{
+					field: "realm-tag-context",
+					operator: "equals",
+					value: "019b0000-0000-7000-8000-000000000001",
+				},
+				"019b0000-0000-7000-8000-000000000002",
+			),
+		).sql;
+
+		expect(query).toContain('inner join "realm" as "scoped_realm_tag_context_realm"');
+		expect(query).toContain('inner join "realm_unit" as "scoped_realm_tag_context_realm_unit"');
+		expect(query).toContain('inner join "unit" as "scoped_realm_tag_context_post_unit"');
+		expect(query).not.toContain('inner join "scoped_realm_tag_context_realm"');
+		expect(query).not.toContain('inner join "scoped_realm_tag_context_realm_unit"');
+		expect(query).not.toContain('inner join "scoped_realm_tag_context_post_unit"');
+	});
+
 	it("executes every category branch reachable from a Profile Search context", async () => {
 		const compiled = compileSearchFeatureInput(
 			{

@@ -178,6 +178,8 @@ export async function listGlobalUnitTags(input: {
 		score: toSafeInteger(row.score ?? 0n, "Unit Tag score"),
 		voteCount: toSafeInteger(row.voteCount ?? 0n, "Unit Tag vote count"),
 		viewerVote: presentTagVote(row.viewerVote),
+		createdAt: row.createdAt.toISOString(),
+		updatedAt: row.updatedAt.toISOString(),
 	}));
 }
 
@@ -364,8 +366,8 @@ type RealmVotedTag = {
 	readonly score: number;
 	readonly voteCount: number;
 	readonly viewerVote: TagVoteValue;
-	readonly createdAt: Date;
-	readonly updatedAt: Date;
+	readonly createdAt: string;
+	readonly updatedAt: string;
 };
 
 export async function listRealmVotedTags(input: {
@@ -445,7 +447,9 @@ export async function listRealmVotedTags(input: {
 			voteCount: rankedVoteStats.voteCount,
 			viewerVote: viewerRealmTagVote.value,
 			createdAt: realmTagContext.createdAt,
-			updatedAt: sql<Date>`greatest(${realmTagContext.updatedAt}, ${rankedVoteStats.updatedAt})`,
+			// Preserve each column's runtime Date decoder; sql<Date> does not map driver values.
+			contextUpdatedAt: realmTagContext.updatedAt,
+			voteUpdatedAt: rankedVoteStats.updatedAt,
 		})
 		.from(rankedVoteStats)
 		.innerJoin(realm, eq(realm.id, rankedVoteStats.realmId))
@@ -488,12 +492,17 @@ export async function listRealmVotedTags(input: {
 
 	const grouped = new Map<string, RealmVotedTag[]>();
 	for (const row of rows) {
-		const item = {
-			...row,
+		const { contextUpdatedAt, voteUpdatedAt, ...tag } = row;
+		const item: RealmVotedTag = {
+			...tag,
 			avatar: presentAvatar(row.avatar),
 			score: toSafeInteger(row.score ?? 0n, "Realm Tag score"),
 			voteCount: toSafeInteger(row.voteCount ?? 0n, "Realm Tag vote count"),
 			viewerVote: presentTagVote(row.viewerVote),
+			createdAt: row.createdAt.toISOString(),
+			updatedAt: new Date(
+				Math.max(contextUpdatedAt.getTime(), voteUpdatedAt.getTime()),
+			).toISOString(),
 		};
 		const items = grouped.get(row.realmId) ?? [];
 		items.push(item);

@@ -304,12 +304,12 @@ function compileFilter(
 		return sql`exists (
 			select 1
 			from ${realmTagContext}
-			inner join ${scopedRealmTagContextRealm}
+			inner join ${realm} as ${scopedRealmTagContextRealm}
 				on ${scopedRealmTagContextRealm.id} = ${realmTagContext.realmId}
-			inner join ${scopedRealmTagContextRealmUnit}
+			inner join ${realmUnit} as ${scopedRealmTagContextRealmUnit}
 				on ${scopedRealmTagContextRealmUnit.realmId} = ${realmTagContext.realmId}
 				and ${scopedRealmTagContextRealmUnit.unitId} = ${realmTagContext.contextPostId}
-			inner join ${scopedRealmTagContextPostUnit}
+			inner join ${unit} as ${scopedRealmTagContextPostUnit}
 				on ${scopedRealmTagContextPostUnit.id} = ${realmTagContext.contextPostId}
 			where ${realmTagContext.tagId} = ${unit.id}
 				and ${realmTagContext.realmId} = ${filter.value}::uuid

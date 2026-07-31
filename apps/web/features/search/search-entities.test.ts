@@ -138,4 +138,27 @@ describe("searchEntities", () => {
 			localizationLanguages: ["zh", "en"],
 		});
 	});
+
+	it("loads the selected Realm's available Tags without a text query", async () => {
+		api.postApiSearchByIndex.mockResolvedValue({ data: { hits: [] } });
+		const realmId = "019b0000-0000-7000-8000-000000000002";
+
+		await searchEntities("tags", "", new AbortController().signal, {
+			realmTagContextRealmId: realmId,
+		});
+
+		expect(api.postApiUnitsPresentations).not.toHaveBeenCalled();
+		expect(api.postApiSearchByIndex).toHaveBeenCalledWith(
+			expect.objectContaining({
+				path: { index: "tags" },
+				body: {
+					query: "",
+					kinds: undefined,
+					realmTagContextRealmId: realmId,
+					limit: 10,
+					localizationLanguages: ["zh", "en"],
+				},
+			}),
+		);
+	});
 });

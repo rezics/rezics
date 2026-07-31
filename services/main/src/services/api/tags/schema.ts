@@ -4,6 +4,7 @@ import {
 	ContentLanguage,
 	LocalizationLanguageQuery,
 	DateTime,
+	DateTimeString,
 	FractionalPosition,
 	Uuid,
 } from "../schema";
@@ -18,8 +19,8 @@ const LocalizedTagSummary = {
 	title: t.Nullable(t.String()),
 	summary: t.Nullable(t.String()),
 	avatar: AvatarResponse,
-	createdAt: DateTime,
-	updatedAt: DateTime,
+	createdAt: DateTimeString,
+	updatedAt: DateTimeString,
 } as const;
 
 export const UnitTagLandscapeParams = t.Object({

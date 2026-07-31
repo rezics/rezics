@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
 	CreateTagStructureBody,
 	RealmTagSubscriptionResponse,
+	RealmUnitTagVoteListResponse,
 	RealmUnitTagVoteListQuery,
 	UnitTagLandscapeQuery,
 	UnitTagLandscapeResponse,
@@ -82,5 +83,35 @@ describe("Tag API schemas", () => {
 				voteRealms: [],
 			}),
 		).toBe(false);
+	});
+
+	it("requires Realm-voted Tag timestamps in their wire representation", () => {
+		const tag = {
+			tagId: "018f2f3a-7ac0-7000-8000-000000000001",
+			language: "en" as const,
+			title: "Fiction",
+			summary: null,
+			avatar: null,
+			createdAt: "2026-07-30T00:00:00.000Z",
+			updatedAt: "2026-07-31T00:00:00.000Z",
+			realmId: "018f2f3a-7ac0-7000-8000-000000000002",
+			contextPostId: "018f2f3a-7ac0-7000-8000-000000000003",
+			score: 1,
+			voteCount: 1,
+			viewerVote: 1 as const,
+		} satisfies (typeof RealmUnitTagVoteListResponse.static)["tags"][number];
+		const response = {
+			realmId: tag.realmId,
+			tags: [tag],
+		} satisfies typeof RealmUnitTagVoteListResponse.static;
+
+		expect(Value.Check(RealmUnitTagVoteListResponse, response)).toBe(true);
+		for (const timestamp of ["createdAt", "updatedAt"] as const)
+			expect(
+				Value.Check(RealmUnitTagVoteListResponse, {
+					...response,
+					tags: [{ ...tag, [timestamp]: new Date(tag[timestamp]) }],
+				}),
+			).toBe(false);
 	});
 });
