@@ -28,10 +28,7 @@ vi.mock("@/i18n/client", () => ({
 					add: "Add vote",
 				},
 				create: {
-					noResults: ({ query }: { readonly query: string }) =>
-						`No Tag matches "${query}".`,
-					inStudio: ({ query }: { readonly query: string }) =>
-						`Create "${query}" in Studio`,
+					title: "Create a Tag",
 				},
 			},
 			ui: {
@@ -58,9 +55,10 @@ vi.mock("@rezics/ui", () => ({
 		readonly index: string;
 		readonly renderNoResultsAction?: (query: string) => ReactNode;
 	}) => (
-		<div data-testid={`picker-${index}`}>
-			{index === "tags" ? renderNoResultsAction?.("science") : null}
-		</div>
+		<div
+			data-has-no-results-action={Boolean(renderNoResultsAction)}
+			data-testid={`picker-${index}`}
+		/>
 	),
 }));
 
@@ -126,13 +124,14 @@ describe("UnitTagManagement", () => {
 		expect(screen.queryByTestId("picker-tag-structures")).toBeNull();
 	});
 
-	it("guides a zero-result global Tag search into the contextual Studio creator", () => {
+	it("shows the contextual Tag creator without waiting for a search", () => {
 		render(<UnitTagManagement {...baseProps} hasDevelopmentPreviewAccess={false} />);
 
-		const link = screen.getByRole("link", { name: 'Create "science" in Studio' });
+		const link = screen.getByRole("link", { name: "Create a Tag" });
 		const url = new URL(link.getAttribute("href") ?? "", "https://rezics.example");
+		expect(screen.getByTestId("picker-tags").dataset.hasNoResultsAction).toBe("false");
 		expect(url.pathname).toBe("/create/tag/new");
-		expect(url.searchParams.get("title")).toBe("science");
+		expect(url.searchParams.get("title")).toBeNull();
 		expect(url.searchParams.get("intent")).toBe("unit-tag-vote");
 		expect(url.searchParams.get("unitType")).toBe("book");
 		expect(url.searchParams.get("unitId")).toBe("00000000-0000-7000-8000-000000000001");
@@ -141,7 +140,7 @@ describe("UnitTagManagement", () => {
 		expect(url.searchParams.get("communityUnitSearch")).toBeNull();
 	});
 
-	it("keeps the active Realm in the Studio creation intent", () => {
+	it("keeps the active Realm in the always-visible creation intent", () => {
 		render(
 			<UnitTagManagement
 				{...baseProps}
@@ -156,8 +155,9 @@ describe("UnitTagManagement", () => {
 			/>,
 		);
 
-		const link = screen.getByRole("link", { name: 'Create "science" in Studio' });
+		const link = screen.getByRole("link", { name: "Create a Tag" });
 		const url = new URL(link.getAttribute("href") ?? "", "https://rezics.example");
+		expect(url.searchParams.get("title")).toBeNull();
 		expect(url.searchParams.get("context")).toBe("realm");
 		expect(url.searchParams.get("realmId")).toBe("00000000-0000-7000-8000-000000000002");
 	});

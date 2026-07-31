@@ -88,9 +88,17 @@ export function UnitTagManagement({
 						: "grid gap-3"
 				}
 			>
-				<div className="grid gap-1">
-					<h2 className="font-semibold">{addCopy.addTitle}</h2>
-					<p className="text-sm text-muted-foreground">{addCopy.addDescription}</p>
+				<div className="flex flex-wrap items-start justify-between gap-3">
+					<div className="grid gap-1">
+						<h2 className="font-semibold">{addCopy.addTitle}</h2>
+						<p className="text-sm text-muted-foreground">{addCopy.addDescription}</p>
+					</div>
+					<Button asChild variant="outline">
+						<Link href={unitTagVoteCreateHref("", tagCreateTarget)}>
+							<Plus aria-hidden className="size-4" />
+							{t.tags.create.title}
+						</Link>
+					</Button>
 				</div>
 				<div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
 					<EntityPicker
@@ -99,19 +107,6 @@ export function UnitTagManagement({
 						maxLength={500}
 						onChange={setSelectedTag}
 						placeholder={t.ui.pickerPlaceholders.tag}
-						renderNoResultsAction={(query) => (
-							<div className="grid justify-items-start gap-2 rounded-xl border border-border-weak bg-muted/30 p-3 text-sm">
-								<p className="text-muted-foreground">
-									{t.tags.create.noResults({ query })}
-								</p>
-								<Button asChild size="sm" variant="outline">
-									<Link href={unitTagVoteCreateHref(query, tagCreateTarget)}>
-										<Plus aria-hidden className="size-4" />
-										{t.tags.create.inStudio({ query })}
-									</Link>
-								</Button>
-							</div>
-						)}
 						value={selectedTag}
 					/>
 					<Button
