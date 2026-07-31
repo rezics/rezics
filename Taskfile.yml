@@ -147,7 +147,7 @@ tasks:
     infra:search:start:
         desc: Start the existing Sequin container without forcing a configuration redeploy.
         cmds:
-            - docker compose up -d --wait sequin
+            - docker compose start --wait sequin
 
     infra:search:apply:
         desc: Recreate Sequin to apply a reviewed configuration after migrations and index preparation.

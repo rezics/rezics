@@ -99,7 +99,8 @@ describe("current search generation deployment wiring", () => {
 		expect(run).not.toContain("search:index -- promote");
 
 		const searchStart = taskDefinition(rootTaskfile, "infra:search:start");
-		expect(searchStart).not.toContain("--force-recreate");
+		expect(searchStart).toContain("docker compose start --wait sequin");
+		expect(searchStart).not.toContain("docker compose up");
 		expect(taskDefinition(rootTaskfile, "infra:search:apply")).toContain("--force-recreate");
 		expect(taskDefinition(rootTaskfile, "local:search:rebuild")).toContain(
 			"rebuild-local --projection current",
