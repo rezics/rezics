@@ -29,6 +29,7 @@ import {
 	UserRound,
 	UsersRound,
 	Tags,
+	Vote,
 } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { lazy, Suspense, type ReactNode } from "react";
@@ -176,6 +177,13 @@ function RealmSettingsWorkspaceContent({
 			icon: Gauge,
 		},
 		{
+			id: "tag-voting",
+			href: realmSettingsSectionHref(baseHref, "tag-voting"),
+			label: labels.tagVoting.label,
+			description: labels.tagVoting.description,
+			icon: Vote,
+		},
+		{
 			id: "pins",
 			href: realmSettingsSectionHref(baseHref, "pins"),
 			label: labels.pins.label,
@@ -272,10 +280,7 @@ function RealmSettingsWorkspaceContent({
 					</RealmSettingsSection>
 				) : section === "tags" ? (
 					<RealmSettingsSection baseHref={baseHref} section="tags">
-						<div className="grid gap-8">
-							<RealmTagVotingSettings realm={realm.data} />
-							<RealmTaxonomySettings realmId={realmId} />
-						</div>
+						<RealmTaxonomySettings realmId={realmId} />
 					</RealmSettingsSection>
 				) : section === "members" ? (
 					<RealmMembersSection
@@ -288,6 +293,10 @@ function RealmSettingsWorkspaceContent({
 				) : section === "scoring" ? (
 					<RealmSettingsSection baseHref={baseHref} section="scoring">
 						<RealmScoreContextSettings realmId={realmId} />
+					</RealmSettingsSection>
+				) : section === "tag-voting" ? (
+					<RealmSettingsSection baseHref={baseHref} section="tag-voting">
+						<RealmTagVotingSettings realm={realm.data} />
 					</RealmSettingsSection>
 				) : section === "pins" ? (
 					<RealmPinsSection baseHref={baseHref} realmId={realmId} />
@@ -345,7 +354,9 @@ function RealmSettingsSection({
 	const copy =
 		section === "docks"
 			? { label: t.docks.title, description: t.docks.description }
-			: t.realms.settingsWorkspace.sections[section];
+			: section === "tag-voting"
+				? t.realms.settingsWorkspace.sections.tagVoting
+				: t.realms.settingsWorkspace.sections[section];
 	return (
 		<section>
 			<ManagementWorkspaceSectionHeader

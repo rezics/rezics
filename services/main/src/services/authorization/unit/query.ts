@@ -13,14 +13,9 @@ import {
 } from "drizzle-orm";
 
 import { database } from "../../database";
-import {
-	realmMember,
-	unit,
-	unitAccessGrant,
-	unitAccessRestriction,
-	unitOwnership,
-} from "../../database/schema";
+import { unit, unitAccessGrant, unitAccessRestriction, unitOwnership } from "../../database/schema";
 import { getPlatformCapabilityCondition } from "../platform/query";
+import { profileMatchesRealmAccessSubject } from "./realm-subject";
 import type { UnitScope } from "./scope";
 
 type UnitReadTarget = {
@@ -109,17 +104,11 @@ export function getUnitReadCondition(
 						isNull(unitAccessRestriction.expiresAt),
 						sql`${unitAccessRestriction.expiresAt} > now()`,
 					),
-					exists(
-						database
-							.select({ id: realmMember.profileId })
-							.from(realmMember)
-							.where(
-								and(
-									eq(realmMember.realmId, unitAccessRestriction.realmId),
-									eq(realmMember.profileId, profileId),
-									eq(realmMember.state, "active"),
-								),
-							),
+					profileMatchesRealmAccessSubject(
+						database,
+						unitAccessRestriction.realmId,
+						unitAccessRestriction.realmRelation,
+						profileId,
 					),
 				),
 			),
@@ -143,17 +132,11 @@ export function getUnitReadCondition(
 						),
 						and(
 							eq(unitAccessGrant.subjectKind, "realm"),
-							exists(
-								database
-									.select({ id: realmMember.profileId })
-									.from(realmMember)
-									.where(
-										and(
-											eq(realmMember.realmId, unitAccessGrant.realmId),
-											eq(realmMember.profileId, profileId),
-											eq(realmMember.state, "active"),
-										),
-									),
+							profileMatchesRealmAccessSubject(
+								database,
+								unitAccessGrant.realmId,
+								unitAccessGrant.realmRelation,
+								profileId,
 							),
 						),
 					),
@@ -228,17 +211,11 @@ export function getUnitPermissionCondition(
 					scopePrefixCondition(unitAccessRestriction.scope, scope),
 					eq(unitAccessRestriction.subjectKind, "realm"),
 					activeRestriction(),
-					exists(
-						database
-							.select({ id: realmMember.profileId })
-							.from(realmMember)
-							.where(
-								and(
-									eq(realmMember.realmId, unitAccessRestriction.realmId),
-									eq(realmMember.profileId, profileId),
-									eq(realmMember.state, "active"),
-								),
-							),
+					profileMatchesRealmAccessSubject(
+						database,
+						unitAccessRestriction.realmId,
+						unitAccessRestriction.realmRelation,
+						profileId,
 					),
 				),
 			),
@@ -261,17 +238,11 @@ export function getUnitPermissionCondition(
 						),
 						and(
 							eq(unitAccessGrant.subjectKind, "realm"),
-							exists(
-								database
-									.select({ id: realmMember.profileId })
-									.from(realmMember)
-									.where(
-										and(
-											eq(realmMember.realmId, unitAccessGrant.realmId),
-											eq(realmMember.profileId, profileId),
-											eq(realmMember.state, "active"),
-										),
-									),
+							profileMatchesRealmAccessSubject(
+								database,
+								unitAccessGrant.realmId,
+								unitAccessGrant.realmRelation,
+								profileId,
 							),
 						),
 					),

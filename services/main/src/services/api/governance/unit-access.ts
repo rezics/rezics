@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import {
 	AuthenticatedGrantableUnitPermissionValues,
 	isUnitPermissionDelegable,
+	type RealmAccessSubjectRelation,
 } from "@rezics/access";
 import { and, eq, exists, gt, inArray, isNull, ne, notExists, or, sql } from "drizzle-orm";
 import Elysia from "elysia";
@@ -59,7 +60,11 @@ import {
 
 type AccessSubject =
 	| { readonly kind: "profile"; readonly profileId: string }
-	| { readonly kind: "realm"; readonly realmId: string }
+	| {
+			readonly kind: "realm";
+			readonly realmId: string;
+			readonly relation: RealmAccessSubjectRelation;
+	  }
 	| { readonly kind: "authenticated" };
 
 const UnitGovernanceForbiddenResponse = toApiErrorResponse([
@@ -77,25 +82,50 @@ function parseExpiry(value: string | undefined): Date | null {
 
 function subjectKey(subject: AccessSubject): string {
 	if (subject.kind === "profile") return `profile:${subject.profileId}`;
-	if (subject.kind === "realm") return `realm:${subject.realmId}`;
+	if (subject.kind === "realm") return `realm:${subject.realmId}:${subject.relation}`;
 	return "authenticated";
 }
 
 function grantSubject(record: typeof unitAccessGrant.$inferSelect): AccessSubject {
-	if (record.subjectKind === "profile" && record.profileId && !record.realmId)
+	if (
+		record.subjectKind === "profile" &&
+		record.profileId &&
+		!record.realmId &&
+		!record.realmRelation
+	)
 		return { kind: "profile", profileId: record.profileId };
-	if (record.subjectKind === "realm" && record.realmId && !record.profileId)
-		return { kind: "realm", realmId: record.realmId };
-	if (record.subjectKind === "authenticated" && !record.profileId && !record.realmId)
+	if (
+		record.subjectKind === "realm" &&
+		record.realmId &&
+		record.realmRelation &&
+		!record.profileId
+	)
+		return { kind: "realm", realmId: record.realmId, relation: record.realmRelation };
+	if (
+		record.subjectKind === "authenticated" &&
+		!record.profileId &&
+		!record.realmId &&
+		!record.realmRelation
+	)
 		return { kind: "authenticated" };
 	throw new Error(`Invalid Unit access grant subject shape: ${record.id}`);
 }
 
 function restrictionSubject(record: typeof unitAccessRestriction.$inferSelect): AccessSubject {
-	if (record.subjectKind === "profile" && record.profileId && !record.realmId)
+	if (
+		record.subjectKind === "profile" &&
+		record.profileId &&
+		!record.realmId &&
+		!record.realmRelation
+	)
 		return { kind: "profile", profileId: record.profileId };
-	if (record.subjectKind === "realm" && record.realmId && !record.profileId)
-		return { kind: "realm", realmId: record.realmId };
+	if (
+		record.subjectKind === "realm" &&
+		record.realmId &&
+		record.realmRelation &&
+		!record.profileId
+	)
+		return { kind: "realm", realmId: record.realmId, relation: record.realmRelation };
 	throw new Error(`Invalid Unit access restriction subject shape: ${record.id}`);
 }
 
@@ -111,6 +141,7 @@ function subjectGrantCondition(subject: AccessSubject, scope: readonly string[])
 				? and(
 						eq(unitAccessGrant.subjectKind, "realm"),
 						eq(unitAccessGrant.realmId, subject.realmId),
+						eq(unitAccessGrant.realmRelation, subject.relation),
 					)
 				: eq(unitAccessGrant.subjectKind, "authenticated"),
 	);
@@ -130,6 +161,7 @@ function subjectRestrictionCondition(
 			: and(
 					eq(unitAccessRestriction.subjectKind, "realm"),
 					eq(unitAccessRestriction.realmId, subject.realmId),
+					eq(unitAccessRestriction.realmRelation, subject.relation),
 				),
 	);
 }
@@ -254,6 +286,8 @@ async function getAccessSnapshot(
 		return created;
 	};
 	ensureSubject({ kind: "authenticated" });
+	if (target.kind === "realm")
+		ensureSubject({ kind: "realm", realmId: unitId, relation: "member" });
 	if (ownership[0]) ensureSubject({ kind: "profile", profileId: ownership[0].profileId });
 	for (const grant of grants) {
 		const row = ensureSubject(grantSubject(grant));
@@ -337,6 +371,16 @@ async function getAccessSnapshot(
 				};
 			})
 			.sort((left, right) => {
+				const leftIsTargetMembers =
+					left.subject.kind === "realm" &&
+					left.subject.realmId === unitId &&
+					left.subject.relation === "member";
+				const rightIsTargetMembers =
+					right.subject.kind === "realm" &&
+					right.subject.realmId === unitId &&
+					right.subject.relation === "member";
+				if (leftIsTargetMembers) return -1;
+				if (rightIsTargetMembers) return 1;
 				if (left.subject.kind === "authenticated") return -1;
 				if (right.subject.kind === "authenticated") return 1;
 				return (left.label ?? subjectKey(left.subject)).localeCompare(
@@ -491,6 +535,12 @@ export default new Elysia({ prefix: "/unit" })
 						))
 				)
 					throw new UnitAccessConfigurationInvalid();
+				if (
+					body.subject.kind === "realm" &&
+					body.subject.relation === "access_manager" &&
+					target.kind === "realm"
+				)
+					throw new UnitAccessConfigurationInvalid();
 				const grantSet = new Set(requestedGrants);
 				if (requestedRestrictions.some((permission) => grantSet.has(permission)))
 					throw new UnitAccessConfigurationInvalid();
@@ -533,6 +583,8 @@ export default new Elysia({ prefix: "/unit" })
 							profileId:
 								body.subject.kind === "profile" ? body.subject.profileId : null,
 							realmId: body.subject.kind === "realm" ? body.subject.realmId : null,
+							realmRelation:
+								body.subject.kind === "realm" ? body.subject.relation : null,
 							permission,
 							scope: body.scope,
 							grantedByProfileId: profile.unitId,
@@ -565,6 +617,8 @@ export default new Elysia({ prefix: "/unit" })
 									body.subject.kind === "profile" ? body.subject.profileId : null,
 								realmId:
 									body.subject.kind === "realm" ? body.subject.realmId : null,
+								realmRelation:
+									body.subject.kind === "realm" ? body.subject.relation : null,
 								permission,
 								scope: body.scope,
 								reasonCode: body.reasonCode ?? "administrative",
@@ -638,7 +692,7 @@ export default new Elysia({ prefix: "/unit" })
 					subject:
 						query.kind === "profile"
 							? ({ kind: "profile", profileId: id } as const)
-							: ({ kind: "realm", realmId: id } as const),
+							: ({ kind: "realm", realmId: id, relation: "member" } as const),
 					label,
 				})),
 			};

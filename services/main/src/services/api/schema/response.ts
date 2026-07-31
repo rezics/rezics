@@ -1078,6 +1078,8 @@ export const RealmDetailResponse = t.Object({
 		canUpdateRules: t.Boolean(),
 		canManagePins: t.Boolean(),
 		canManageTags: t.Boolean(),
+		canUpdateTagVoting: t.Boolean(),
+		canManageTagContexts: t.Boolean(),
 		canModerateUnits: t.Boolean(),
 		canManageAccess: t.Boolean(),
 		canRestoreHistory: t.Boolean(),

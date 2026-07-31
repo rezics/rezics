@@ -2,6 +2,7 @@ import {
 	AuthenticatedGrantableUnitPermissionValues,
 	DelegableUnitPermissionValues,
 	PlatformCapabilityValues,
+	RealmAccessSubjectRelationValues,
 	UnitPermissionValues,
 } from "@rezics/access";
 import { PortableTextDocument } from "@rezics/block";
@@ -179,7 +180,14 @@ export const UnitEffectiveAccessQuery = t.Object(
 );
 const UnitAccessSubject = t.Union([
 	t.Object({ kind: t.Literal("profile"), profileId: Uuid }, { additionalProperties: false }),
-	t.Object({ kind: t.Literal("realm"), realmId: Uuid }, { additionalProperties: false }),
+	t.Object(
+		{
+			kind: t.Literal("realm"),
+			realmId: Uuid,
+			relation: t.UnionEnum(RealmAccessSubjectRelationValues),
+		},
+		{ additionalProperties: false },
+	),
 	t.Object({ kind: t.Literal("authenticated") }, { additionalProperties: false }),
 ]);
 const DelegableUnitPermission = t.UnionEnum(DelegableUnitPermissionValues);
@@ -291,7 +299,14 @@ export const PlatformUnitListResponse = t.Object({
 export const PlatformUnitLifecycleResponse = PlatformUnitLifecycleItem;
 export const UnitAccessRestrictionSubject = t.Union([
 	t.Object({ kind: t.Literal("profile"), profileId: Uuid }, { additionalProperties: false }),
-	t.Object({ kind: t.Literal("realm"), realmId: Uuid }, { additionalProperties: false }),
+	t.Object(
+		{
+			kind: t.Literal("realm"),
+			realmId: Uuid,
+			relation: t.UnionEnum(RealmAccessSubjectRelationValues),
+		},
+		{ additionalProperties: false },
+	),
 ]);
 export const ListUnitAccessCandidatesQuery = t.Object(
 	{

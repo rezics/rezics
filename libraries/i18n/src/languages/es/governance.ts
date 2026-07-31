@@ -82,6 +82,8 @@ export default {
 		"realm.rules.update": `Actualizar las reglas de los ${realmTerms.plural}`,
 		"realm.pins.manage": `Gestionar el contenido fijado de los ${realmTerms.plural}`,
 		"realm.tags.manage": `Gestionar las etiquetas de los ${realmTerms.plural}`,
+		"realm.tag-voting.update": `Actualizar la votación de etiquetas de los ${realmTerms.plural}`,
+		"realm.tag-contexts.manage": `Gestionar los vínculos de contexto de etiqueta de los ${realmTerms.plural}`,
 		"realm.units.moderate": `Moderar el contenido de los ${realmTerms.plural}`,
 	} satisfies Record<PlatformCapability, string>,
 	direction: {
@@ -107,6 +109,12 @@ export default {
 		publicTitle: "Permisos públicos",
 		publicDescription: `Permisos concedidos directamente a todos los usuarios que hayan iniciado sesión en ${verbatimTerms.rezics.value}. Esta base global se gestiona por separado de los sujetos individuales.`,
 		authenticatedLabel: "Todos los usuarios que hayan iniciado sesión",
+		currentRealmMembersLabel: `Todos los miembros activos de este ${realmTerms.inline}`,
+		realmMembersLabel: insert("Miembros activos de {{realm}}", { realm: String }),
+		realmAccessManagersLabel: insert("Administradores de acceso de {{realm}}", {
+			realm: String,
+		}),
+		builtInAudience: "Audiencia integrada",
 		subjectsTitle: "Sujetos de autorización",
 		subjectsDescription: `Gestiona concesiones y restricciones directas para perfiles y ${realmTerms.plural}. Las restricciones tienen prioridad.`,
 		addSubject: "Añadir sujeto de autorización",
@@ -160,6 +168,10 @@ export default {
 			realm: realmTerms.label,
 			authenticated: "Todos los usuarios que hayan iniciado sesión",
 		},
+		subjectRelations: {
+			member: `Miembros del ${realmTerms.inline}`,
+			access_manager: `Administradores de acceso del ${realmTerms.inline}`,
+		},
 		table: {
 			subject: "Sujeto de autorización",
 			kind: "Tipo",
@@ -206,6 +218,8 @@ export default {
 			"realm.rules.update": "Actualizar reglas",
 			"realm.pins.manage": "Gestionar elementos fijados",
 			"realm.tags.manage": `Gestionar etiquetas del ${realmTerms.inline}`,
+			"realm.tag-voting.update": "Actualizar la votación de etiquetas",
+			"realm.tag-contexts.manage": "Gestionar vínculos de contexto de etiqueta",
 			"realm.units.moderate": "Moderar contenido",
 			"entity.association.credit.request": "Solicitar asociación de crédito",
 			"entity.association.credit.direct": "Crear directamente una asociación de crédito",

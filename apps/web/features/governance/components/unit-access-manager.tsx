@@ -86,7 +86,7 @@ function subjectKey(subject: Subject) {
 		case "profile":
 			return `profile:${subject.profileId}`;
 		case "realm":
-			return `realm:${subject.realmId}`;
+			return `realm:${subject.realmId}:${subject.relation}`;
 		case "authenticated":
 			return "authenticated";
 	}
@@ -103,9 +103,28 @@ function accessValues(subject: Pick<AccessSubject, "grants" | "restrictions">) {
 	]);
 }
 
-function displayLabel(subject: AccessSubject, authenticatedLabel: string) {
-	if (subject.subject.kind === "authenticated") return authenticatedLabel;
-	return subject.label ?? subjectKey(subject.subject);
+function displayLabel(
+	subject: AccessSubject,
+	labels: {
+		readonly authenticated: string;
+		readonly currentRealmMembers: string;
+		readonly realmMembers: (input: { realm: string }) => string;
+		readonly realmAccessManagers: (input: { realm: string }) => string;
+	},
+	target?: { readonly unitId: string; readonly unitKind: string },
+) {
+	if (subject.subject.kind === "authenticated") return labels.authenticated;
+	if (subject.subject.kind === "profile") return subject.label ?? subjectKey(subject.subject);
+	if (
+		target?.unitKind === "realm" &&
+		target.unitId === subject.subject.realmId &&
+		subject.subject.relation === "member"
+	)
+		return labels.currentRealmMembers;
+	const realm = subject.label ?? subject.subject.realmId;
+	return subject.subject.relation === "member"
+		? labels.realmMembers({ realm })
+		: labels.realmAccessManagers({ realm });
 }
 
 export function UnitAccessManager({
@@ -220,6 +239,15 @@ function SubjectAccessTable({
 	const [transferOpen, setTransferOpen] = useState(false);
 	const [relinquishOpen, setRelinquishOpen] = useState(false);
 	const [selected, setSelected] = useState<AccessSubject | null>(null);
+	const subjectLabels = useMemo(
+		() => ({
+			authenticated: t.governance.access.authenticatedLabel,
+			currentRealmMembers: t.governance.access.currentRealmMembersLabel,
+			realmMembers: t.governance.access.realmMembersLabel,
+			realmAccessManagers: t.governance.access.realmAccessManagersLabel,
+		}),
+		[t],
+	);
 	const subjects = useMemo(() => {
 		const byKey = new Map(
 			snapshot.subjects.map((subject) => [subjectKey(subject.subject), subject]),
@@ -233,6 +261,17 @@ function SubjectAccessTable({
 			expiresAt: null,
 		};
 		byKey.delete("authenticated");
+		const targetMembersKey = `realm:${snapshot.unitId}:member`;
+		const targetMembers =
+			snapshot.unitKind === "realm" ? byKey.get(targetMembersKey) : undefined;
+		byKey.delete(targetMembersKey);
+		const targetMembersMatches =
+			Boolean(targetMembers) &&
+			(filter === "all" || filter === "realm") &&
+			(!deferredSearch ||
+				t.governance.access.currentRealmMembersLabel
+					.toLocaleLowerCase()
+					.includes(deferredSearch));
 		const authenticatedMatches =
 			filter === "all" &&
 			(!deferredSearch ||
@@ -240,16 +279,17 @@ function SubjectAccessTable({
 					.toLocaleLowerCase()
 					.includes(deferredSearch));
 		return [
+			...(targetMembersMatches && targetMembers ? [targetMembers] : []),
 			...(authenticatedMatches ? [authenticated] : []),
 			...[...byKey.values()].filter((subject) => {
 				if (filter !== "all" && subject.subject.kind !== filter) return false;
 				if (!deferredSearch) return true;
-				return displayLabel(subject, t.governance.access.authenticatedLabel)
+				return displayLabel(subject, subjectLabels, snapshot)
 					.toLocaleLowerCase()
 					.includes(deferredSearch);
 			}),
 		];
-	}, [deferredSearch, filter, snapshot.subjects, t]);
+	}, [deferredSearch, filter, snapshot, subjectLabels, t]);
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const virtualizer = useVirtualizer({
 		count: subjects.length,
@@ -350,10 +390,12 @@ function SubjectAccessTable({
 									const isOwner =
 										subject.subject.kind === "profile" &&
 										snapshot.owner?.profileId === subject.subject.profileId;
-									const label = displayLabel(
-										subject,
-										t.governance.access.authenticatedLabel,
-									);
+									const label = displayLabel(subject, subjectLabels, snapshot);
+									const isBuiltInAudience =
+										subject.subject.kind === "authenticated" ||
+										(subject.subject.kind === "realm" &&
+											subject.subject.realmId === snapshot.unitId &&
+											subject.subject.relation === "member");
 									return (
 										<button
 											className="absolute inset-x-0 grid grid-cols-[minmax(0,1fr)_7rem_7rem] items-center gap-3 border-b px-4 text-start transition-colors hover:bg-muted/48 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -386,16 +428,23 @@ function SubjectAccessTable({
 														{t.governance.access.owner}
 													</Badge>
 												) : null}
+												{isBuiltInAudience ? (
+													<Badge variant="outline">
+														{t.governance.access.builtInAudience}
+													</Badge>
+												) : null}
 											</span>
 											<span
 												className="text-muted-foreground text-sm"
 												role="cell"
 											>
-												{
-													t.governance.access.subjectKinds[
-														subject.subject.kind
-													]
-												}
+												{subject.subject.kind === "realm"
+													? t.governance.access.subjectRelations[
+															subject.subject.relation
+														]
+													: t.governance.access.subjectKinds[
+															subject.subject.kind
+														]}
 											</span>
 											<span
 												className="text-end text-muted-foreground text-sm"
@@ -458,6 +507,7 @@ function SubjectAccessTable({
 					authenticatedPermissions={snapshot.authenticatedGrantablePermissions}
 					scope={scope}
 					subject={selected}
+					target={{ unitId: snapshot.unitId, unitKind: snapshot.unitKind }}
 					unitId={unitId}
 				/>
 			) : null}
@@ -899,6 +949,7 @@ function SubjectAccessSheet({
 	authenticatedPermissions,
 	scope,
 	subject,
+	target,
 	onOpenChange,
 }: {
 	unitId: string;
@@ -906,6 +957,7 @@ function SubjectAccessSheet({
 	authenticatedPermissions: readonly Permission[];
 	scope: readonly string[];
 	subject: AccessSubject;
+	target: { readonly unitId: string; readonly unitKind: string };
 	onOpenChange: (open: boolean) => void;
 }) {
 	const { t } = useTranslation(["governance"]);
@@ -919,7 +971,16 @@ function SubjectAccessSheet({
 		new Set(subject.inherited),
 		isAuthenticated ? ["grant"] : ["grant", "restrict"],
 	);
-	const label = displayLabel(subject, t.governance.access.authenticatedLabel);
+	const label = displayLabel(
+		subject,
+		{
+			authenticated: t.governance.access.authenticatedLabel,
+			currentRealmMembers: t.governance.access.currentRealmMembersLabel,
+			realmMembers: t.governance.access.realmMembersLabel,
+			realmAccessManagers: t.governance.access.realmAccessManagersLabel,
+		},
+		target,
+	);
 
 	async function save() {
 		try {

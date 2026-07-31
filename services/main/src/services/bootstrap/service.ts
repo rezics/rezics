@@ -713,7 +713,11 @@ async function ensureBootstrapRealm(
 			})) || changed;
 	}
 	changed = (await ensureOwnership(tx, value.id, value.ownerProfileId)) || changed;
-	for (const permission of ["unit.read", "realm.contribute"] as const) {
+	for (const permission of [
+		"unit.read",
+		"realm.contribute",
+		...RealmUnitCreatePermissionValues,
+	] as const) {
 		const [stored] = await tx
 			.select({ id: unitAccessGrant.id })
 			.from(unitAccessGrant)
@@ -722,6 +726,7 @@ async function ensureBootstrapRealm(
 					eq(unitAccessGrant.unitId, value.id),
 					eq(unitAccessGrant.subjectKind, "realm"),
 					eq(unitAccessGrant.realmId, value.id),
+					eq(unitAccessGrant.realmRelation, "member"),
 					eq(unitAccessGrant.permission, permission),
 					isNull(unitAccessGrant.revokedAt),
 				),
@@ -732,6 +737,7 @@ async function ensureBootstrapRealm(
 				unitId: value.id,
 				subjectKind: "realm",
 				realmId: value.id,
+				realmRelation: "member",
 				permission,
 				scope: [],
 				grantedByProfileId: value.ownerProfileId,

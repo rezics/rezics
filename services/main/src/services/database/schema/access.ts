@@ -13,6 +13,8 @@ import { pgTable } from "./base";
 import {
 	DelegableUnitPermissionValues,
 	type DelegableUnitPermission,
+	RealmAccessSubjectRelationValues,
+	type RealmAccessSubjectRelation,
 	type UnitPermission,
 	UnitAccessInvitationResolutionValues,
 	UnitAccessRestrictionSubjectKindValues,
@@ -43,6 +45,10 @@ export const unitAccessRestrictionSubjectKind = pgEnum(
 	"unit_access_restriction_subject_kind",
 	toEnumValues(UnitAccessRestrictionSubjectKindValues),
 );
+export const realmAccessSubjectRelation = pgEnum(
+	"realm_access_subject_relation",
+	toEnumValues(RealmAccessSubjectRelationValues),
+);
 /*
  * PostgreSQL cannot remove enum labels in place. The retired label remains in
  * the physical enum, while checks on every consuming column make the narrower
@@ -68,6 +74,8 @@ const unitPermissionStorageValues = toEnumValues([
 	"realm.rules.update",
 	"realm.pins.manage",
 	"realm.tags.manage",
+	"realm.tag-voting.update",
+	"realm.tag-contexts.manage",
 	"realm.units.moderate",
 	"entity.association.credit.request",
 	"entity.association.credit.direct",
@@ -134,6 +142,7 @@ export const unitAccessGrant = pgTable(
 		subjectKind: unitAccessSubjectKind().notNull(),
 		profileId: uuid().references(() => profile.id, { onDelete: "cascade" }),
 		realmId: uuid().references(() => realm.id, { onDelete: "cascade" }),
+		realmRelation: realmAccessSubjectRelation().$type<RealmAccessSubjectRelation>(),
 		permission: unitPermission().$type<DelegableUnitPermission>().notNull(),
 		scope: text()
 			.array()
@@ -153,7 +162,7 @@ export const unitAccessGrant = pgTable(
 			.on(table.unitId, table.profileId, table.permission, table.scope)
 			.where(sql`${table.revokedAt} is null and ${table.subjectKind} = 'profile'`),
 		uniqueIndex("unit_access_grant_active_realm_scope_key")
-			.on(table.unitId, table.realmId, table.permission, table.scope)
+			.on(table.unitId, table.realmId, table.realmRelation, table.permission, table.scope)
 			.where(sql`${table.revokedAt} is null and ${table.subjectKind} = 'realm'`),
 		uniqueIndex("unit_access_grant_active_authenticated_scope_key")
 			.on(table.unitId, table.permission, table.scope)
@@ -176,11 +185,11 @@ export const unitAccessGrant = pgTable(
 		check(
 			"unit_access_grant_subject_shape_check",
 			sql`(
-				${table.subjectKind} = 'profile' and ${table.profileId} is not null and ${table.realmId} is null
+				${table.subjectKind} = 'profile' and ${table.profileId} is not null and ${table.realmId} is null and ${table.realmRelation} is null
 			) or (
-				${table.subjectKind} = 'realm' and ${table.profileId} is null and ${table.realmId} is not null
+				${table.subjectKind} = 'realm' and ${table.profileId} is null and ${table.realmId} is not null and ${table.realmRelation} is not null
 			) or (
-				${table.subjectKind} = 'authenticated' and ${table.profileId} is null and ${table.realmId} is null
+				${table.subjectKind} = 'authenticated' and ${table.profileId} is null and ${table.realmId} is null and ${table.realmRelation} is null
 			)`,
 		),
 		check("unit_access_grant_scope_check", scopeCheck(table.scope)),
@@ -282,6 +291,7 @@ export const unitAccessRestriction = pgTable(
 		subjectKind: unitAccessRestrictionSubjectKind().notNull(),
 		profileId: uuid().references(() => profile.id, { onDelete: "cascade" }),
 		realmId: uuid().references(() => realm.id, { onDelete: "cascade" }),
+		realmRelation: realmAccessSubjectRelation().$type<RealmAccessSubjectRelation>(),
 		permission: unitPermission().$type<DelegableUnitPermission>().notNull(),
 		scope: text()
 			.array()
@@ -302,7 +312,7 @@ export const unitAccessRestriction = pgTable(
 			.on(table.unitId, table.profileId, table.permission, table.scope)
 			.where(sql`${table.revokedAt} is null and ${table.subjectKind} = 'profile'`),
 		uniqueIndex("unit_access_restriction_active_realm_scope_key")
-			.on(table.unitId, table.realmId, table.permission, table.scope)
+			.on(table.unitId, table.realmId, table.realmRelation, table.permission, table.scope)
 			.where(sql`${table.revokedAt} is null and ${table.subjectKind} = 'realm'`),
 		index("unit_access_restriction_profile_active_idx")
 			.on(table.profileId, table.unitId, table.permission)
@@ -314,9 +324,9 @@ export const unitAccessRestriction = pgTable(
 		check(
 			"unit_access_restriction_subject_shape_check",
 			sql`(
-				${table.subjectKind} = 'profile' and ${table.profileId} is not null and ${table.realmId} is null
+				${table.subjectKind} = 'profile' and ${table.profileId} is not null and ${table.realmId} is null and ${table.realmRelation} is null
 			) or (
-				${table.subjectKind} = 'realm' and ${table.profileId} is null and ${table.realmId} is not null
+				${table.subjectKind} = 'realm' and ${table.profileId} is null and ${table.realmId} is not null and ${table.realmRelation} is not null
 			)`,
 		),
 		check("unit_access_restriction_scope_check", scopeCheck(table.scope)),

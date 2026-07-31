@@ -27,6 +27,10 @@ export function realmSettingsHref(realm: AddressableUnit): string {
 	return `${realmHref(realm)}/settings`;
 }
 
+export function realmContentCreateHref(realm: AddressableUnit): string {
+	return `${realmHref(realm)}/new`;
+}
+
 export type RealmPageId = "main" | "tags" | "wiki" | "info";
 
 export function realmPageHref(realm: AddressableUnit, page: RealmPageId): string {

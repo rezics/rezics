@@ -1,14 +1,7 @@
-import { and, eq, exists, isNull, or, sql } from "drizzle-orm";
-import type { AnyPgColumn } from "drizzle-orm/pg-core";
+import { and, eq, isNull, or, sql } from "drizzle-orm";
 
 import { database, type DatabaseExecutor, type DatabaseTransaction } from "../../database";
-import {
-	realmMember,
-	unit,
-	unitAccessGrant,
-	unitAccessRestriction,
-	unitOwnership,
-} from "../../database/schema";
+import { unit, unitAccessGrant, unitAccessRestriction, unitOwnership } from "../../database/schema";
 import { UnitAccessRestricted, UnitNotFound, UnitPermissionForbidden } from "../../units/errors";
 import type { PlatformAuthorization } from "../platform/authorization";
 import {
@@ -19,6 +12,7 @@ import {
 	type UnitPermission,
 } from "./policy";
 import { scopeCovers, scopeKey, type UnitScope } from "./scope";
+import { profileMatchesRealmAccessSubject } from "./realm-subject";
 
 export type UnitAccessDecision =
 	| { readonly allowed: true; readonly source: "public" | "platform" | "owner" }
@@ -50,25 +44,6 @@ function activeRestriction() {
 			isNull(unitAccessRestriction.expiresAt),
 			sql`${unitAccessRestriction.expiresAt} > now()`,
 		),
-	);
-}
-
-function profileBelongsToRealm(
-	executor: DatabaseExecutor,
-	realmId: AnyPgColumn,
-	profileId: string,
-) {
-	return exists(
-		executor
-			.select({ profileId: realmMember.profileId })
-			.from(realmMember)
-			.where(
-				and(
-					eq(realmMember.realmId, realmId),
-					eq(realmMember.profileId, profileId),
-					eq(realmMember.state, "active"),
-				),
-			),
 	);
 }
 
@@ -147,6 +122,7 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 				.select({
 					id: unitAccessRestriction.id,
 					subjectKind: unitAccessRestriction.subjectKind,
+					realmRelation: unitAccessRestriction.realmRelation,
 					scope: unitAccessRestriction.scope,
 				})
 				.from(unitAccessRestriction)
@@ -161,9 +137,10 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 							),
 							and(
 								eq(unitAccessRestriction.subjectKind, "realm"),
-								profileBelongsToRealm(
+								profileMatchesRealmAccessSubject(
 									executor,
 									unitAccessRestriction.realmId,
+									unitAccessRestriction.realmRelation,
 									this.profileId,
 								),
 							),
@@ -205,6 +182,7 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 			.select({
 				id: unitAccessGrant.id,
 				subjectKind: unitAccessGrant.subjectKind,
+				realmRelation: unitAccessGrant.realmRelation,
 				scope: unitAccessGrant.scope,
 			})
 			.from(unitAccessGrant)
@@ -220,9 +198,10 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 						),
 						and(
 							eq(unitAccessGrant.subjectKind, "realm"),
-							profileBelongsToRealm(
+							profileMatchesRealmAccessSubject(
 								executor,
 								unitAccessGrant.realmId,
+								unitAccessGrant.realmRelation,
 								this.profileId,
 							),
 						),
@@ -318,9 +297,10 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 						),
 						and(
 							eq(unitAccessGrant.subjectKind, "realm"),
-							profileBelongsToRealm(
+							profileMatchesRealmAccessSubject(
 								database,
 								unitAccessGrant.realmId,
+								unitAccessGrant.realmRelation,
 								this.profileId,
 							),
 						),
@@ -346,6 +326,7 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 				subjectKind: unitAccessGrant.subjectKind,
 				profileId: unitAccessGrant.profileId,
 				realmId: unitAccessGrant.realmId,
+				realmRelation: unitAccessGrant.realmRelation,
 				permission: unitAccessGrant.permission,
 			})
 			.from(unitAccessGrant)
@@ -360,19 +341,23 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 		if (!grant) return false;
 		if (grant.subjectKind === "authenticated") return true;
 		if (grant.subjectKind === "profile") return grant.profileId === this.profileId;
-		if (!grant.realmId) return false;
-		const [membership] = await database
-			.select({ id: realmMember.profileId })
-			.from(realmMember)
+		if (!grant.realmId || !grant.realmRelation) return false;
+		const [match] = await database
+			.select({ id: unit.id })
+			.from(unit)
 			.where(
 				and(
-					eq(realmMember.realmId, grant.realmId),
-					eq(realmMember.profileId, this.profileId),
-					eq(realmMember.state, "active"),
+					eq(unit.id, grant.realmId),
+					profileMatchesRealmAccessSubject(
+						database,
+						unit.id,
+						sql`${grant.realmRelation}`,
+						this.profileId,
+					),
 				),
 			)
 			.limit(1);
-		return Boolean(membership);
+		return Boolean(match);
 	}
 
 	async ensureCanUpdate(unitId: string, scopes: readonly UnitScope[]): Promise<void> {

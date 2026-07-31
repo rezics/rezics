@@ -11,6 +11,7 @@ describe("Realm settings paths", () => {
 		[["profile"], { section: "profile", comparison: false }],
 		[["wiki"], { section: "wiki", comparison: false }],
 		[["scoring"], { section: "scoring", comparison: false }],
+		[["tag-voting"], { section: "tag-voting", comparison: false }],
 		[["access"], { section: "access", comparison: false }],
 		[["docks"], { section: "docks", comparison: false }],
 		[["history", "compare"], { section: "history", comparison: true }],

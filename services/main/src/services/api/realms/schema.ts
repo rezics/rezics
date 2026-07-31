@@ -141,14 +141,24 @@ export const SaveRealmTaxonomyDraftBody = t.Object(
 );
 export type SaveRealmTaxonomyDraftBody = Static<typeof SaveRealmTaxonomyDraftBody>;
 
-export const UpdateRealmBody = t.Object({
-	joinPolicy: t.Optional(RealmJoinPolicy),
-	realmTagVotingEnabled: t.Optional(t.Boolean()),
-	visibility: t.Optional(RealmVisibility),
-	status: t.Optional(RealmStatus),
-	localization: t.Optional(LocalizationInput),
-});
+export const UpdateRealmBody = t.Object(
+	{
+		joinPolicy: t.Optional(RealmJoinPolicy),
+		visibility: t.Optional(RealmVisibility),
+		status: t.Optional(RealmStatus),
+		localization: t.Optional(LocalizationInput),
+	},
+	{ additionalProperties: false },
+);
 export type UpdateRealmBody = Static<typeof UpdateRealmBody>;
+
+export const UpdateRealmTagVotingBody = t.Object(
+	{ enabled: t.Boolean() },
+	{ additionalProperties: false },
+);
+export type UpdateRealmTagVotingBody = Static<typeof UpdateRealmTagVotingBody>;
+
+export const RealmTagVotingResponse = t.Object({ enabled: t.Boolean() });
 
 const RealmPages = t.Array(RealmPageKind, {
 	minItems: 1,
@@ -293,7 +303,11 @@ export type PutRealmTagContextBody = Static<typeof PutRealmTagContextBody>;
 export const CreateRealmTagContextBody = t.Object(
 	{
 		tagId: Uuid,
-		accessMode: t.Union([t.Literal("community_owned"), t.Literal("restricted")]),
+		accessMode: t.Optional(
+			t.Union([t.Literal("community_owned"), t.Literal("restricted")], {
+				default: "community_owned",
+			}),
+		),
 		title: t.String({ minLength: 1, maxLength: 500 }),
 		summary: t.String({ minLength: 1, maxLength: 2_000 }),
 		body: PortableTextDocument,
@@ -302,6 +316,22 @@ export const CreateRealmTagContextBody = t.Object(
 	{ additionalProperties: false },
 );
 export type CreateRealmTagContextBody = Static<typeof CreateRealmTagContextBody>;
+
+export const CreateRealmWikiBody = t.Object(
+	{
+		accessMode: t.Optional(
+			t.Union([t.Literal("community_owned"), t.Literal("restricted")], {
+				default: "community_owned",
+			}),
+		),
+		title: t.String({ minLength: 1, maxLength: 500 }),
+		body: PortableTextDocument,
+		language: ContentLanguage,
+		subjectId: t.Optional(Uuid),
+	},
+	{ additionalProperties: false },
+);
+export type CreateRealmWikiBody = Static<typeof CreateRealmWikiBody>;
 
 export const RealmTagVoteBody = t.Object(
 	{ value: t.Union([t.Literal(-1), t.Literal(1)]) },
@@ -332,6 +362,31 @@ export const RealmTagContextResponse = t.Object({
 	createdByProfileId: t.Nullable(Uuid),
 	createdAt: DateTime,
 	updatedAt: DateTime,
+});
+
+export const ListRealmTagContextsQuery = t.Object(
+	{
+		...LocalizationLanguageQuery,
+		cursor: t.Optional(t.String({ minLength: 1, maxLength: 1024 })),
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
+	},
+	{ additionalProperties: false },
+);
+export type ListRealmTagContextsQuery = Static<typeof ListRealmTagContextsQuery>;
+
+export const RealmTagContextListResponse = t.Object({
+	items: t.Array(
+		t.Object({
+			...RealmTagContextResponse.properties,
+			tagReadable: t.Boolean(),
+			tagLanguage: t.Nullable(ContentLanguage),
+			tagTitle: t.Nullable(t.String()),
+			contextReadable: t.Boolean(),
+			contextLanguage: t.Nullable(ContentLanguage),
+			contextTitle: t.Nullable(t.String()),
+		}),
+	),
+	nextCursor: t.Nullable(t.String()),
 });
 
 export const RealmTagVoteResponse = t.Object({

@@ -6,7 +6,7 @@ import {
 } from "@rezics/slug";
 import { describe, expect, it } from "vitest";
 
-import { realmHref, zoneHref, zonePageHref } from "./unit-route";
+import { realmContentCreateHref, realmHref, zoneHref, zonePageHref } from "./unit-route";
 
 describe("public Unit slug routes", () => {
 	it("keeps every enabled namespace and prefix unique", () => {
@@ -51,6 +51,7 @@ describe("public Unit slug routes", () => {
 			},
 		};
 		expect(realmHref(realm)).toBe("/r/art");
+		expect(realmContentCreateHref(realm)).toBe("/r/art/new");
 		expect(zoneHref(zone)).toBe("/z/summer");
 	});
 

@@ -89,6 +89,8 @@ const platformCapabilityStorageValues = toEnumValues([
 	"realm.rules.update",
 	"realm.pins.manage",
 	"realm.tags.manage",
+	"realm.tag-voting.update",
+	"realm.tag-contexts.manage",
 	"realm.units.moderate",
 ] as const satisfies readonly (PlatformCapability | "unit.ownership.transfer")[]) as [
 	PlatformCapability,

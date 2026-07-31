@@ -56,6 +56,11 @@ export default {
 				label: "Criterios de puntuación",
 				description: `Elige el artículo que explica la escala y los criterios de puntuación de este ${realmTerms.inline}.`,
 			},
+			tagVoting: {
+				label: "Votación de etiquetas",
+				description:
+					"Controla la votación y revisa todas las relaciones de contexto de etiqueta.",
+			},
 			pins: {
 				label: "Contenido fijado",
 				description:
@@ -98,6 +103,31 @@ export default {
 		description: `La administración del ${realmTerms.inline} debe activar expresamente esta función. Después, los miembros solo podrán votar etiquetas que este ${realmTerms.inline} explique formalmente.`,
 		enabled: "Activar la votación de etiquetas",
 		enabledDescription: `La búsqueda y la votación solo muestran etiquetas con una explicación actualmente visible en este ${realmTerms.inline}.`,
+		relationshipsTitle: "Relaciones de contexto de etiqueta",
+		relationshipsDescription: `Todas las relaciones entre etiquetas y artículos de la wiki de este ${realmTerms.inline}, al margen de la taxonomía.`,
+		relationshipsListLabel: "Relaciones de contexto de etiqueta",
+		relationshipsEmpty: `Este ${realmTerms.inline} no tiene relaciones de contexto de etiqueta.`,
+		unavailableTag: "Etiqueta no disponible",
+		unavailableContext: "Wiki no disponible",
+		removeRelationship: "Eliminar relación",
+		removeRelationshipLabel: insert("Eliminar la relación de contexto de {{tag}}", {
+			tag: String,
+		}),
+		removeRelationshipTitle: "¿Eliminar esta relación de contexto?",
+		removeRelationshipDescription: insert(
+			"{{tag}} dejará de usar este artículo wiki como contexto. No se eliminarán el artículo ni su configuración de acceso.",
+			{ tag: String },
+		),
+		cancelRemoval: "Conservar relación",
+	},
+	contentComposer: {
+		open: "Publicar",
+		title: `Publicar en este ${realmTerms.inline}`,
+		description: `Elige el tipo de contenido. Se publicará directamente en este ${realmTerms.inline}.`,
+		modeLabel: "Tipo de contenido",
+		modes: { post: postTerms.label, wiki: "Wiki", tagContext: "Contexto de etiqueta" },
+		communityEditableDescription: `Todos los usuarios que hayan iniciado sesión pueden editar este artículo wiki. Los administradores de acceso de este ${realmTerms.inline} pueden cambiar su acceso o bloquearlo.`,
+		restrictedDescription: `Solo las personas autorizadas expresamente pueden editar este artículo wiki. Los administradores de acceso de este ${realmTerms.inline} conservan la autoridad de gestión.`,
 	},
 	scoreContextSettings: {
 		title: "Criterios de puntuación",

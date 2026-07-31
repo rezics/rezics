@@ -54,6 +54,10 @@ export default {
 				label: "評価ガイドライン",
 				description: `この${realmTerms.label}の評価尺度と基準を説明する記事を選択します。`,
 			},
+			tagVoting: {
+				label: "タグ投票",
+				description: "タグ投票を制御し、すべてのタグコンテキスト関連付けを確認します。",
+			},
 			pins: {
 				label: "固定コンテンツ",
 				description: "固定およびハイライトされたコンテンツと表示順序を管理します。",
@@ -95,6 +99,31 @@ export default {
 		description: `この機能は${realmTerms.label}の管理者が明示的に有効にする必要があります。有効にすると、メンバーはこの${realmTerms.label}が正式に説明しているタグにのみ投票できます。`,
 		enabled: `${realmTerms.label}のタグ投票を有効にする`,
 		enabledDescription: `検索と投票には、この${realmTerms.label}で現在表示できる説明があるタグだけが表示されます。`,
+		relationshipsTitle: "タグコンテキスト関連付け",
+		relationshipsDescription: `タグ分類とは別に、この${realmTerms.label}にあるタグとウィキ記事の関連付けをすべて表示します。`,
+		relationshipsListLabel: "タグコンテキスト関連付け",
+		relationshipsEmpty: `この${realmTerms.label}にはタグコンテキスト関連付けがありません。`,
+		unavailableTag: "タグを表示できません",
+		unavailableContext: "ウィキを表示できません",
+		removeRelationship: "関連付けを解除",
+		removeRelationshipLabel: insert("{{tag}} のタグコンテキスト関連付けを解除", {
+			tag: String,
+		}),
+		removeRelationshipTitle: "このタグコンテキスト関連付けを解除しますか？",
+		removeRelationshipDescription: insert(
+			"{{tag}} はこの記事をコンテキストとして使用しなくなります。記事と記事固有のアクセス設定は削除されません。",
+			{ tag: String },
+		),
+		cancelRemoval: "関連付けを維持",
+	},
+	contentComposer: {
+		open: "公開する",
+		title: `この${realmTerms.label}で公開する`,
+		description: `作成するコンテンツの種類を選択します。コンテンツはこの${realmTerms.label}に直接公開されます。`,
+		modeLabel: "コンテンツの種類",
+		modes: { post: postTerms.label, wiki: "ウィキ", tagContext: "タグコンテキスト" },
+		communityEditableDescription: `サインインしているすべてのユーザーがこの記事を編集できます。この${realmTerms.label}のアクセス管理者は、アクセスの変更や記事のロックができます。`,
+		restrictedDescription: `明示的に許可されたユーザーだけがこの記事を編集できます。この${realmTerms.label}のアクセス管理者は管理権限を保持します。`,
 	},
 	scoreContextSettings: {
 		title: "評価ガイドライン",

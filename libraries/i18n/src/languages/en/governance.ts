@@ -81,6 +81,8 @@ export default {
 		"realm.rules.update": `Update ${realmTerms.label} rules`,
 		"realm.pins.manage": `Manage ${realmTerms.label} pinned content`,
 		"realm.tags.manage": `Manage ${realmTerms.label} Tags`,
+		"realm.tag-voting.update": `Update ${realmTerms.label} Tag voting`,
+		"realm.tag-contexts.manage": `Manage ${realmTerms.label} Tag Context links`,
 		"realm.units.moderate": `Moderate ${realmTerms.label} content`,
 	} satisfies Record<PlatformCapability, string>,
 	direction: {
@@ -107,6 +109,10 @@ export default {
 		publicDescription:
 			"Permissions granted directly to every signed-in Rezics user. This global baseline is managed separately from individual subjects.",
 		authenticatedLabel: "Every signed-in user",
+		currentRealmMembersLabel: `All active members of this ${realmTerms.inline}`,
+		realmMembersLabel: insert("Active members of {{realm}}", { realm: String }),
+		realmAccessManagersLabel: insert("Access managers of {{realm}}", { realm: String }),
+		builtInAudience: "Built-in audience",
 		subjectsTitle: "Authorization subjects",
 		subjectsDescription: `Manage direct grants and restrictions for Profiles and ${realmTerms.label}s. Restrictions take precedence.`,
 		addSubject: "Add authorization subject",
@@ -157,6 +163,10 @@ export default {
 			realm: realmTerms.label,
 			authenticated: "Every signed-in user",
 		},
+		subjectRelations: {
+			member: `${realmTerms.label} members`,
+			access_manager: `${realmTerms.label} access managers`,
+		},
 		table: {
 			subject: "Authorization subject",
 			kind: "Type",
@@ -203,6 +213,8 @@ export default {
 			"realm.rules.update": "Update rules",
 			"realm.pins.manage": "Manage pins",
 			"realm.tags.manage": `Manage ${realmTerms.label} Tags`,
+			"realm.tag-voting.update": "Update Tag voting",
+			"realm.tag-contexts.manage": "Manage Tag Context links",
 			"realm.units.moderate": "Moderate content",
 			"entity.association.credit.request": "Request credit association",
 			"entity.association.credit.direct": "Create credit association directly",

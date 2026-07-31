@@ -12,6 +12,8 @@ function hasRealmManagementCapability(capabilities: RealmCapabilities) {
 	return (
 		capabilities.canUpdateSettings ||
 		capabilities.canManageTags ||
+		capabilities.canUpdateTagVoting ||
+		capabilities.canManageTagContexts ||
 		capabilities.canReadMembers ||
 		capabilities.canManageMembers ||
 		capabilities.canUpdateRules ||
@@ -40,6 +42,8 @@ export function getRealmSettingsSectionIds(
 		if (sectionId === "members") return capabilities.canReadMembers;
 		if (sectionId === "rules") return capabilities.canUpdateRules;
 		if (sectionId === "scoring") return capabilities.canUpdateSettings;
+		if (sectionId === "tag-voting")
+			return capabilities.canUpdateTagVoting || capabilities.canManageTagContexts;
 		if (sectionId === "pins") return capabilities.canManagePins;
 		if (sectionId === "docks") return canManageDocks;
 		if (sectionId === "access") return capabilities.canManageAccess;

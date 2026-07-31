@@ -1984,6 +1984,14 @@ import type {
 	DeleteApiRealmsByRealmIdScoreContextStatus403,
 	DeleteApiRealmsByRealmIdScoreContextStatus422,
 	DeleteApiRealmsByRealmIdScoreContextStatus500,
+	PutApiRealmsByRealmIdTagVotingOptions,
+	PutApiRealmsByRealmIdTagVotingStatus200,
+	PutApiRealmsByRealmIdTagVotingStatus400,
+	PutApiRealmsByRealmIdTagVotingStatus403,
+	PutApiRealmsByRealmIdTagVotingStatus404,
+	PutApiRealmsByRealmIdTagVotingStatus422,
+	PutApiRealmsByRealmIdTagVotingStatus429,
+	PutApiRealmsByRealmIdTagVotingStatus500,
 	PutApiRealmsByRealmIdMembershipOptions,
 	PutApiRealmsByRealmIdMembershipStatus200,
 	PutApiRealmsByRealmIdMembershipStatus404,
@@ -2059,6 +2067,20 @@ import type {
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus422,
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus429,
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus500,
+	PostApiRealmsByRealmIdWikisOptions,
+	PostApiRealmsByRealmIdWikisStatus200,
+	PostApiRealmsByRealmIdWikisStatus400,
+	PostApiRealmsByRealmIdWikisStatus403,
+	PostApiRealmsByRealmIdWikisStatus404,
+	PostApiRealmsByRealmIdWikisStatus409,
+	PostApiRealmsByRealmIdWikisStatus422,
+	PostApiRealmsByRealmIdWikisStatus429,
+	PostApiRealmsByRealmIdWikisStatus500,
+	GetApiRealmsByRealmIdTagContextsOptions,
+	GetApiRealmsByRealmIdTagContextsStatus200,
+	GetApiRealmsByRealmIdTagContextsStatus403,
+	GetApiRealmsByRealmIdTagContextsStatus422,
+	GetApiRealmsByRealmIdTagContextsStatus500,
 	PostApiRealmsByRealmIdTagContextsOptions,
 	PostApiRealmsByRealmIdTagContextsStatus200,
 	PostApiRealmsByRealmIdTagContextsStatus400,
@@ -2081,6 +2103,13 @@ import type {
 	PutApiRealmsByRealmIdTagsByTagIdContextStatus409,
 	PutApiRealmsByRealmIdTagsByTagIdContextStatus422,
 	PutApiRealmsByRealmIdTagsByTagIdContextStatus500,
+	DeleteApiRealmsByRealmIdTagsByTagIdContextOptions,
+	DeleteApiRealmsByRealmIdTagsByTagIdContextStatus204,
+	DeleteApiRealmsByRealmIdTagsByTagIdContextStatus403,
+	DeleteApiRealmsByRealmIdTagsByTagIdContextStatus404,
+	DeleteApiRealmsByRealmIdTagsByTagIdContextStatus422,
+	DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429,
+	DeleteApiRealmsByRealmIdTagsByTagIdContextStatus500,
 	PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdOptions,
 	PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus200,
 	PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus400,
@@ -2642,6 +2671,7 @@ import {
 	getApiRealmsByRealmIdScoreContext,
 	putApiRealmsByRealmIdScoreContext,
 	deleteApiRealmsByRealmIdScoreContext,
+	putApiRealmsByRealmIdTagVoting,
 	putApiRealmsByRealmIdMembership,
 	deleteApiRealmsByRealmIdMembership,
 	getApiRealmsByRealmIdMembers,
@@ -2653,9 +2683,12 @@ import {
 	postApiRealmsByRealmIdPinsMove,
 	putApiRealmsByRealmIdPinsByUnitId,
 	deleteApiRealmsByRealmIdPinsByUnitId,
+	postApiRealmsByRealmIdWikis,
+	getApiRealmsByRealmIdTagContexts,
 	postApiRealmsByRealmIdTagContexts,
 	getApiRealmsByRealmIdTagsByTagIdContext,
 	putApiRealmsByRealmIdTagsByTagIdContext,
+	deleteApiRealmsByRealmIdTagsByTagIdContext,
 	putApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId,
 	deleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId,
 	getApiRealmsByRealmIdUnitsByUnitIdTags,
@@ -32981,6 +33014,113 @@ export function useDeleteApiRealmsByRealmIdScoreContext<TContext>(
 	>;
 }
 
+export const putApiRealmsByRealmIdTagVotingMutationKey = () =>
+	[{ url: "/api/realms/:realmId/tag-voting" }] as const;
+
+export function putApiRealmsByRealmIdTagVotingMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiRealmsByRealmIdTagVotingMutationKey();
+	return mutationOptions<
+		PutApiRealmsByRealmIdTagVotingStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdTagVotingStatus400
+			| PutApiRealmsByRealmIdTagVotingStatus403
+			| PutApiRealmsByRealmIdTagVotingStatus404
+			| PutApiRealmsByRealmIdTagVotingStatus422
+			| PutApiRealmsByRealmIdTagVotingStatus429
+			| PutApiRealmsByRealmIdTagVotingStatus500
+		>,
+		PutApiRealmsByRealmIdTagVotingOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiRealmsByRealmIdTagVoting({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Update Realm Tag voting policy
+ * {@link /api/realms/:realmId/tag-voting}
+ */
+export function usePutApiRealmsByRealmIdTagVoting<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiRealmsByRealmIdTagVotingStatus200,
+			ResponseErrorConfig<
+				| PutApiRealmsByRealmIdTagVotingStatus400
+				| PutApiRealmsByRealmIdTagVotingStatus403
+				| PutApiRealmsByRealmIdTagVotingStatus404
+				| PutApiRealmsByRealmIdTagVotingStatus422
+				| PutApiRealmsByRealmIdTagVotingStatus429
+				| PutApiRealmsByRealmIdTagVotingStatus500
+			>,
+			PutApiRealmsByRealmIdTagVotingOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? putApiRealmsByRealmIdTagVotingMutationKey();
+
+	const baseOptions = putApiRealmsByRealmIdTagVotingMutationOptions(config) as UseMutationOptions<
+		PutApiRealmsByRealmIdTagVotingStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdTagVotingStatus400
+			| PutApiRealmsByRealmIdTagVotingStatus403
+			| PutApiRealmsByRealmIdTagVotingStatus404
+			| PutApiRealmsByRealmIdTagVotingStatus422
+			| PutApiRealmsByRealmIdTagVotingStatus429
+			| PutApiRealmsByRealmIdTagVotingStatus500
+		>,
+		PutApiRealmsByRealmIdTagVotingOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiRealmsByRealmIdTagVotingStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdTagVotingStatus400
+			| PutApiRealmsByRealmIdTagVotingStatus403
+			| PutApiRealmsByRealmIdTagVotingStatus404
+			| PutApiRealmsByRealmIdTagVotingStatus422
+			| PutApiRealmsByRealmIdTagVotingStatus429
+			| PutApiRealmsByRealmIdTagVotingStatus500
+		>,
+		PutApiRealmsByRealmIdTagVotingOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiRealmsByRealmIdTagVotingStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdTagVotingStatus400
+			| PutApiRealmsByRealmIdTagVotingStatus403
+			| PutApiRealmsByRealmIdTagVotingStatus404
+			| PutApiRealmsByRealmIdTagVotingStatus422
+			| PutApiRealmsByRealmIdTagVotingStatus429
+			| PutApiRealmsByRealmIdTagVotingStatus500
+		>,
+		PutApiRealmsByRealmIdTagVotingOptions,
+		TContext
+	>;
+}
+
 export const putApiRealmsByRealmIdMembershipMutationKey = () =>
 	[{ url: "/api/realms/:realmId/membership" }] as const;
 
@@ -34142,6 +34282,227 @@ export function useDeleteApiRealmsByRealmIdPinsByUnitId<TContext>(
 	>;
 }
 
+export const postApiRealmsByRealmIdWikisMutationKey = () =>
+	[{ url: "/api/realms/:realmId/wikis" }] as const;
+
+export function postApiRealmsByRealmIdWikisMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiRealmsByRealmIdWikisMutationKey();
+	return mutationOptions<
+		PostApiRealmsByRealmIdWikisStatus200,
+		ResponseErrorConfig<
+			| PostApiRealmsByRealmIdWikisStatus400
+			| PostApiRealmsByRealmIdWikisStatus403
+			| PostApiRealmsByRealmIdWikisStatus404
+			| PostApiRealmsByRealmIdWikisStatus409
+			| PostApiRealmsByRealmIdWikisStatus422
+			| PostApiRealmsByRealmIdWikisStatus429
+			| PostApiRealmsByRealmIdWikisStatus500
+		>,
+		PostApiRealmsByRealmIdWikisOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiRealmsByRealmIdWikis({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Create Realm-governed Wiki
+ * {@link /api/realms/:realmId/wikis}
+ */
+export function usePostApiRealmsByRealmIdWikis<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiRealmsByRealmIdWikisStatus200,
+			ResponseErrorConfig<
+				| PostApiRealmsByRealmIdWikisStatus400
+				| PostApiRealmsByRealmIdWikisStatus403
+				| PostApiRealmsByRealmIdWikisStatus404
+				| PostApiRealmsByRealmIdWikisStatus409
+				| PostApiRealmsByRealmIdWikisStatus422
+				| PostApiRealmsByRealmIdWikisStatus429
+				| PostApiRealmsByRealmIdWikisStatus500
+			>,
+			PostApiRealmsByRealmIdWikisOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? postApiRealmsByRealmIdWikisMutationKey();
+
+	const baseOptions = postApiRealmsByRealmIdWikisMutationOptions(config) as UseMutationOptions<
+		PostApiRealmsByRealmIdWikisStatus200,
+		ResponseErrorConfig<
+			| PostApiRealmsByRealmIdWikisStatus400
+			| PostApiRealmsByRealmIdWikisStatus403
+			| PostApiRealmsByRealmIdWikisStatus404
+			| PostApiRealmsByRealmIdWikisStatus409
+			| PostApiRealmsByRealmIdWikisStatus422
+			| PostApiRealmsByRealmIdWikisStatus429
+			| PostApiRealmsByRealmIdWikisStatus500
+		>,
+		PostApiRealmsByRealmIdWikisOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiRealmsByRealmIdWikisStatus200,
+		ResponseErrorConfig<
+			| PostApiRealmsByRealmIdWikisStatus400
+			| PostApiRealmsByRealmIdWikisStatus403
+			| PostApiRealmsByRealmIdWikisStatus404
+			| PostApiRealmsByRealmIdWikisStatus409
+			| PostApiRealmsByRealmIdWikisStatus422
+			| PostApiRealmsByRealmIdWikisStatus429
+			| PostApiRealmsByRealmIdWikisStatus500
+		>,
+		PostApiRealmsByRealmIdWikisOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiRealmsByRealmIdWikisStatus200,
+		ResponseErrorConfig<
+			| PostApiRealmsByRealmIdWikisStatus400
+			| PostApiRealmsByRealmIdWikisStatus403
+			| PostApiRealmsByRealmIdWikisStatus404
+			| PostApiRealmsByRealmIdWikisStatus409
+			| PostApiRealmsByRealmIdWikisStatus422
+			| PostApiRealmsByRealmIdWikisStatus429
+			| PostApiRealmsByRealmIdWikisStatus500
+		>,
+		PostApiRealmsByRealmIdWikisOptions,
+		TContext
+	>;
+}
+
+export const getApiRealmsByRealmIdTagContextsQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiRealmsByRealmIdTagContextsOptions, "headers">) =>
+	[
+		{ url: "/api/realms/:realmId/tag-contexts", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type GetApiRealmsByRealmIdTagContextsQueryKey = ReturnType<
+	typeof getApiRealmsByRealmIdTagContextsQueryKey
+>;
+
+export function getApiRealmsByRealmIdTagContextsQueryOptions(
+	{ path, query }: GetApiRealmsByRealmIdTagContextsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiRealmsByRealmIdTagContextsQueryKey({ path, query });
+	return queryOptions<
+		GetApiRealmsByRealmIdTagContextsStatus200,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdTagContextsStatus403
+			| GetApiRealmsByRealmIdTagContextsStatus422
+			| GetApiRealmsByRealmIdTagContextsStatus500
+		>,
+		GetApiRealmsByRealmIdTagContextsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiRealmsByRealmIdTagContexts({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List Realm Tag Context relationships
+ * {@link /api/realms/:realmId/tag-contexts}
+ */
+export function useGetApiRealmsByRealmIdTagContexts<
+	TData = GetApiRealmsByRealmIdTagContextsStatus200,
+	TQueryData = GetApiRealmsByRealmIdTagContextsStatus200,
+	TQueryKey extends QueryKey = GetApiRealmsByRealmIdTagContextsQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiRealmsByRealmIdTagContextsOptions["path"]
+			| (() => GetApiRealmsByRealmIdTagContextsOptions["path"]);
+		query?:
+			| GetApiRealmsByRealmIdTagContextsOptions["query"]
+			| (() => GetApiRealmsByRealmIdTagContextsOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiRealmsByRealmIdTagContextsStatus200,
+				ResponseErrorConfig<
+					| GetApiRealmsByRealmIdTagContextsStatus403
+					| GetApiRealmsByRealmIdTagContextsStatus422
+					| GetApiRealmsByRealmIdTagContextsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiRealmsByRealmIdTagContextsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiRealmsByRealmIdTagContextsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdTagContextsStatus403
+			| GetApiRealmsByRealmIdTagContextsStatus422
+			| GetApiRealmsByRealmIdTagContextsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
 export const postApiRealmsByRealmIdTagContextsMutationKey = () =>
 	[{ url: "/api/realms/:realmId/tag-contexts" }] as const;
 
@@ -34461,6 +34822,110 @@ export function usePutApiRealmsByRealmIdTagsByTagIdContext<TContext>(
 			| PutApiRealmsByRealmIdTagsByTagIdContextStatus500
 		>,
 		PutApiRealmsByRealmIdTagsByTagIdContextOptions,
+		TContext
+	>;
+}
+
+export const deleteApiRealmsByRealmIdTagsByTagIdContextMutationKey = () =>
+	[{ url: "/api/realms/:realmId/tags/:tagId/context" }] as const;
+
+export function deleteApiRealmsByRealmIdTagsByTagIdContextMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = deleteApiRealmsByRealmIdTagsByTagIdContextMutationKey();
+	return mutationOptions<
+		DeleteApiRealmsByRealmIdTagsByTagIdContextStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus403
+			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus404
+			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus422
+			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429
+			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus500
+		>,
+		DeleteApiRealmsByRealmIdTagsByTagIdContextOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiRealmsByRealmIdTagsByTagIdContext({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Remove Realm Tag Context relationship
+ * {@link /api/realms/:realmId/tags/:tagId/context}
+ */
+export function useDeleteApiRealmsByRealmIdTagsByTagIdContext<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiRealmsByRealmIdTagsByTagIdContextStatus204,
+			ResponseErrorConfig<
+				| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus403
+				| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus404
+				| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus422
+				| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429
+				| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus500
+			>,
+			DeleteApiRealmsByRealmIdTagsByTagIdContextOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? deleteApiRealmsByRealmIdTagsByTagIdContextMutationKey();
+
+	const baseOptions = deleteApiRealmsByRealmIdTagsByTagIdContextMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiRealmsByRealmIdTagsByTagIdContextStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus403
+			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus404
+			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus422
+			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429
+			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus500
+		>,
+		DeleteApiRealmsByRealmIdTagsByTagIdContextOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiRealmsByRealmIdTagsByTagIdContextStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus403
+			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus404
+			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus422
+			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429
+			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus500
+		>,
+		DeleteApiRealmsByRealmIdTagsByTagIdContextOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiRealmsByRealmIdTagsByTagIdContextStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus403
+			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus404
+			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus422
+			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429
+			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus500
+		>,
+		DeleteApiRealmsByRealmIdTagsByTagIdContextOptions,
 		TContext
 	>;
 }

@@ -56,6 +56,11 @@ export default {
 				label: "Critères de notation",
 				description: `Choisissez l’article qui explique l’échelle et les critères de notation de ce ${realmTerms.inline}.`,
 			},
+			tagVoting: {
+				label: "Vote sur les étiquettes",
+				description:
+					"Contrôler le vote et consulter tous les liens de contexte d’étiquette.",
+			},
 			pins: {
 				label: "Contenu épinglé",
 				description:
@@ -99,6 +104,31 @@ export default {
 		description: `La gestion du ${realmTerms.inline} doit activer explicitement cette fonctionnalité. Les membres ne peuvent ensuite voter que pour les étiquettes officiellement expliquées par ce ${realmTerms.inline}.`,
 		enabled: "Activer le vote sur les étiquettes",
 		enabledDescription: `La recherche et le vote n’affichent que les étiquettes dont l’explication est actuellement visible dans ce ${realmTerms.inline}.`,
+		relationshipsTitle: "Liens de contexte d’étiquette",
+		relationshipsDescription: `Tous les liens entre étiquettes et articles wiki de ce ${realmTerms.inline}, indépendamment de la taxonomie.`,
+		relationshipsListLabel: "Liens de contexte d’étiquette",
+		relationshipsEmpty: `Ce ${realmTerms.inline} ne comporte aucun lien de contexte d’étiquette.`,
+		unavailableTag: "Étiquette indisponible",
+		unavailableContext: "Wiki indisponible",
+		removeRelationship: "Supprimer le lien",
+		removeRelationshipLabel: insert("Supprimer le lien de contexte de {{tag}}", {
+			tag: String,
+		}),
+		removeRelationshipTitle: "Supprimer ce lien de contexte ?",
+		removeRelationshipDescription: insert(
+			"{{tag}} n’utilisera plus cet article wiki comme contexte. L’article et ses propres réglages d’accès ne seront pas supprimés.",
+			{ tag: String },
+		),
+		cancelRemoval: "Conserver le lien",
+	},
+	contentComposer: {
+		open: "Publier",
+		title: `Publier dans ce ${realmTerms.inline}`,
+		description: `Choisissez le type de contenu. Il sera publié directement dans ce ${realmTerms.inline}.`,
+		modeLabel: "Type de contenu",
+		modes: { post: postTerms.label, wiki: "Wiki", tagContext: "Contexte d’étiquette" },
+		communityEditableDescription: `Tous les utilisateurs connectés peuvent modifier cet article wiki. Les gestionnaires d’accès de ce ${realmTerms.inline} peuvent modifier son accès ou le verrouiller.`,
+		restrictedDescription: `Seules les personnes explicitement autorisées peuvent modifier cet article wiki. Les gestionnaires d’accès de ce ${realmTerms.inline} conservent leurs droits de gestion.`,
 	},
 	scoreContextSettings: {
 		title: "Critères de notation",

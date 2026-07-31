@@ -5,6 +5,7 @@ import type { Authorization } from "../authorization";
 import {
 	createProfileOwnedUnitAccess,
 	createPublicEditableUnitAccess,
+	grantRealmAccessManagersUnitGovernance,
 } from "../authorization/unit/ownership";
 import { OfficialProfileIds } from "../bootstrap/manifest";
 import type { DatabaseTransaction } from "../database";
@@ -25,6 +26,7 @@ export type CreateWikiPostInput = {
 	readonly body: PortableTextDocument;
 	readonly language: ContentLanguage;
 	readonly publishRealmIds: readonly string[];
+	readonly governanceRealmId?: string;
 	readonly subjectId?: string;
 };
 
@@ -79,6 +81,12 @@ export async function createWikiPost(
 	if (input.accessMode === "community_owned")
 		await createPublicEditableUnitAccess(tx, created.id);
 	else await createProfileOwnedUnitAccess(tx, created.id, input.profileId);
+	if (input.governanceRealmId)
+		await grantRealmAccessManagersUnitGovernance(tx, {
+			unitId: created.id,
+			realmId: input.governanceRealmId,
+			grantedByProfileId: input.profileId,
+		});
 	await createProfilePublisherAttribution(tx, {
 		sourceUnitId: created.id,
 		profileId:

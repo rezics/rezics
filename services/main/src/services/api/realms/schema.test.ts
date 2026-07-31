@@ -5,6 +5,8 @@ import { describe, expect, it } from "vitest";
 import {
 	AcknowledgeRealmRulesBody,
 	CreateRealmPinBody,
+	CreateRealmTagContextBody,
+	CreateRealmWikiBody,
 	ListRealmMembersQuery,
 	ListRealmUnitsQuery,
 	ModerateRealmUnitBody,
@@ -16,6 +18,7 @@ import {
 	RealmUnitModerationActionResponse,
 	RealmUnitModerationQuery,
 	RealmUnitModerationResponse,
+	UpdateRealmTagVotingBody,
 	UpdateRealmBody,
 	UpdateRealmRulesBody,
 } from "./schema";
@@ -143,8 +146,34 @@ describe("Realm update API contract", () => {
 		expect(Check(UpdateRealmBody, { joinPolicy: "approval" })).toBe(true);
 	});
 
-	it("accepts an explicit Realm Tag voting feature flag", () => {
-		expect(Check(UpdateRealmBody, { realmTagVotingEnabled: true })).toBe(true);
+	it("keeps the Realm Tag voting feature flag on its own contract", () => {
+		expect(Check(UpdateRealmBody, { realmTagVotingEnabled: true })).toBe(false);
+		expect(Check(UpdateRealmTagVotingBody, { enabled: true })).toBe(true);
+	});
+});
+
+describe("Realm Wiki creation API contract", () => {
+	const body = createPortableTextDocument([], "0123456789ab");
+
+	it("defaults Realm-created Wikis and Tag Context Wikis to community editing", () => {
+		expect(
+			Check(CreateRealmWikiBody, {
+				title: "Shared knowledge",
+				body,
+				language: "en",
+			}),
+		).toBe(true);
+		expect(
+			Check(CreateRealmTagContextBody, {
+				tagId: "019f995d-7595-7c99-9183-250790bbfe2f",
+				title: "Context",
+				summary: "Shared context",
+				body,
+				language: "en",
+			}),
+		).toBe(true);
+		expect(CreateRealmWikiBody.properties.accessMode.default).toBe("community_owned");
+		expect(CreateRealmTagContextBody.properties.accessMode.default).toBe("community_owned");
 	});
 });
 

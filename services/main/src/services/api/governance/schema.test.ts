@@ -53,6 +53,30 @@ describe("adjacent governance API contracts", () => {
 	it("replaces grants and restrictions for one Unit authorization subject", () => {
 		expect(
 			Check(ReplaceUnitSubjectAccessBody, {
+				subject: { kind: "realm", realmId: profileId, relation: "member" },
+				grants: ["realm.tag-contexts.manage"],
+				restrictions: [],
+				scope: [],
+			}),
+		).toBe(true);
+		expect(
+			Check(ReplaceUnitSubjectAccessBody, {
+				subject: { kind: "realm", realmId: profileId, relation: "access_manager" },
+				grants: ["unit.access.manage"],
+				restrictions: [],
+				scope: [],
+			}),
+		).toBe(true);
+		expect(
+			Check(ReplaceUnitSubjectAccessBody, {
+				subject: { kind: "realm", realmId: profileId },
+				grants: ["unit.read"],
+				restrictions: [],
+				scope: [],
+			}),
+		).toBe(false);
+		expect(
+			Check(ReplaceUnitSubjectAccessBody, {
 				subject: { kind: "profile", profileId },
 				grants: ["unit.read"],
 				restrictions: ["unit.update"],

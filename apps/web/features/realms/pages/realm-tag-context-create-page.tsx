@@ -54,7 +54,7 @@ export function RealmTagContextCreatePage({ realmId }: { readonly realmId: strin
 	});
 	const create = usePostApiRealmsByRealmIdTagContexts();
 	const [tag, setTag] = useState<PickedTag>();
-	const [accessMode, setAccessMode] = useState<WikiAccessMode>("restricted");
+	const [accessMode, setAccessMode] = useState<WikiAccessMode>("community_owned");
 	const [body, setBody] = useState<PortableTextValue>([]);
 	const language = useFormDraftContentLanguage(
 		["title", "summary"],

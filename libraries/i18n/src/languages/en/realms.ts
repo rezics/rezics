@@ -55,6 +55,10 @@ export default {
 				label: "Scoring guidelines",
 				description: `Choose the article that explains how Scores in this ${realmTerms.inline} should be interpreted.`,
 			},
+			tagVoting: {
+				label: "Tag voting",
+				description: "Control Tag voting and review every Tag Context relationship.",
+			},
 			pins: {
 				label: "Pinned content",
 				description: "Manage pinned and highlighted content and display order.",
@@ -95,6 +99,31 @@ export default {
 		description: `A ${realmTerms.label} manager must explicitly enable this feature. Members can then vote only on Tags that this ${realmTerms.label} formally explains.`,
 		enabled: `Enable ${realmTerms.label} Tag voting`,
 		enabledDescription: `Search and voting show only Tags with a currently visible explanation from this ${realmTerms.label}.`,
+		relationshipsTitle: "Tag Context relationships",
+		relationshipsDescription: `All Tag-to-Wiki relationships in this ${realmTerms.inline}, independent of the Tag taxonomy.`,
+		relationshipsListLabel: "Tag Context relationships",
+		relationshipsEmpty: `This ${realmTerms.label} has no Tag Context relationships.`,
+		unavailableTag: "Tag unavailable",
+		unavailableContext: "Wiki unavailable",
+		removeRelationship: "Remove relationship",
+		removeRelationshipLabel: insert("Remove the Tag Context relationship for {{tag}}", {
+			tag: String,
+		}),
+		removeRelationshipTitle: "Remove this Tag Context relationship?",
+		removeRelationshipDescription: insert(
+			`{{tag}} will no longer use this Wiki as its ${realmTerms.label} context. The Wiki and its own access settings will not be deleted.`,
+			{ tag: String },
+		),
+		cancelRemoval: "Keep relationship",
+	},
+	contentComposer: {
+		open: "Publish",
+		title: `Publish in this ${realmTerms.inline}`,
+		description: `Choose the kind of content to create. It will be published directly in this ${realmTerms.inline}.`,
+		modeLabel: "Content kind",
+		modes: { post: postTerms.label, wiki: "Wiki", tagContext: "Tag Context" },
+		communityEditableDescription: `Every signed-in user can edit this Wiki. This ${realmTerms.label}'s access managers can change its access or lock it.`,
+		restrictedDescription: `Only explicitly authorized people can edit this Wiki. This ${realmTerms.label}'s access managers retain governance access.`,
 	},
 	scoreContextSettings: {
 		title: "Scoring guidelines",

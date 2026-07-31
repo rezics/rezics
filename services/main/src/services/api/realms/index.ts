@@ -20,6 +20,7 @@ import { ContentStructureSnapshotSchema } from "../../content-structure/contract
 import { createContentStructureHistory } from "../../content-structure/history";
 import { saveRealmTaxonomyDraft } from "../../content-structure/realm-taxonomy-draft";
 import { fractionalPositionBetween } from "../../ordering/position";
+import { decodeCursor, encodeCursor } from "../../pagination";
 import {
 	avatarReferenceFromColumns,
 	firstUnitLocalizationTitle,
@@ -106,7 +107,9 @@ import {
 	ApplyRealmPolicyTagBody,
 	CreateRealmBody,
 	CreateRealmTagContextBody,
+	CreateRealmWikiBody,
 	CreateRealmPinBody,
+	ListRealmTagContextsQuery,
 	ListRealmMembersQuery,
 	ListRealmUnitsQuery,
 	ListRealmsQuery,
@@ -119,6 +122,8 @@ import {
 	PutRealmTagContextBody,
 	RealmTagVoteBody,
 	RealmTagContextResponse,
+	RealmTagContextListResponse,
+	RealmTagVotingResponse,
 	RealmTagVoteResponse,
 	RealmPolicyTagResponse,
 	RealmUnitListResponse,
@@ -140,6 +145,7 @@ import {
 	RemoveRealmPinQuery,
 	RealmPagesResponse,
 	UpdateRealmBody,
+	UpdateRealmTagVotingBody,
 	UpdateRealmPagesBody,
 	UpdateRealmMemberBody,
 } from "./schema";
@@ -320,14 +326,7 @@ async function ensureRealmTagVoteEligibility(
 		readonly viewerProfileId: string;
 	},
 ) {
-	const [realmPolicy] = await tx
-		.select({ enabled: realm.realmTagVotingEnabled })
-		.from(realm)
-		.where(eq(realm.id, input.realmId))
-		.for("share")
-		.limit(1);
-	if (!realmPolicy) throw new RealmNotFound();
-	if (!realmPolicy.enabled) throw new RealmTagVotingDisabled();
+	await ensureRealmTagVotingEnabled(tx, input.realmId);
 
 	const [context] = await tx
 		.select({ tagId: realmTagContext.tagId })
@@ -352,6 +351,17 @@ async function ensureRealmTagVoteEligibility(
 		.for("share")
 		.limit(1);
 	if (!context) throw new RealmTagContextRequired();
+}
+
+async function ensureRealmTagVotingEnabled(tx: DatabaseTransaction, realmId: string) {
+	const [realmPolicy] = await tx
+		.select({ enabled: realm.realmTagVotingEnabled })
+		.from(realm)
+		.where(eq(realm.id, realmId))
+		.for("share")
+		.limit(1);
+	if (!realmPolicy) throw new RealmNotFound();
+	if (!realmPolicy.enabled) throw new RealmTagVotingDisabled();
 }
 
 async function getRealmTagContextSummary(realmId: string, tagId: string) {
@@ -667,25 +677,22 @@ export default new Elysia({ prefix: "/realms" })
 					profileId: profile.unitId,
 				});
 				await tx.insert(unitAccessGrant).values(
-					(["unit.read", "realm.contribute"] as const).map((permission) => ({
+					(
+						[
+							"unit.read",
+							"realm.contribute",
+							...RealmUnitCreatePermissionValues,
+						] as const
+					).map((permission) => ({
 						unitId: created.id,
 						subjectKind: "realm" as const,
 						realmId: created.id,
+						realmRelation: "member" as const,
 						permission,
 						scope: [],
 						grantedByProfileId: profile.unitId,
 					})),
 				);
-				if (body.visibility === "public")
-					await tx.insert(unitAccessGrant).values(
-						RealmUnitCreatePermissionValues.map((permission) => ({
-							unitId: created.id,
-							subjectKind: "authenticated" as const,
-							permission,
-							scope: [],
-							grantedByProfileId: profile.unitId,
-						})),
-					);
 				await tx.insert(unitFollow).values({
 					followerProfileId: profile.unitId,
 					unitId: created.id,
@@ -839,6 +846,8 @@ export default new Elysia({ prefix: "/realms" })
 					"realm.rules.update",
 					"realm.pins.manage",
 					"realm.tags.manage",
+					"realm.tag-voting.update",
+					"realm.tag-contexts.manage",
 					"realm.units.moderate",
 				]),
 				authorization.unit.decide(params.realmId, "unit.access.manage"),
@@ -910,6 +919,9 @@ export default new Elysia({ prefix: "/realms" })
 					canUpdateRules: realmCapabilities.get("realm.rules.update") ?? false,
 					canManagePins: realmCapabilities.get("realm.pins.manage") ?? false,
 					canManageTags: realmCapabilities.get("realm.tags.manage") ?? false,
+					canUpdateTagVoting: realmCapabilities.get("realm.tag-voting.update") ?? false,
+					canManageTagContexts:
+						realmCapabilities.get("realm.tag-contexts.manage") ?? false,
 					canModerateUnits: realmCapabilities.get("realm.units.moderate") ?? false,
 					canManageAccess: accessDecision.allowed,
 					canRestoreHistory: historyDecision.allowed,
@@ -1245,14 +1257,6 @@ export default new Elysia({ prefix: "/realms" })
 						.update(realm)
 						.set({ joinPolicy: body.joinPolicy, updatedAt: new Date() })
 						.where(eq(realm.id, params.realmId));
-				if (body.realmTagVotingEnabled !== undefined)
-					await tx
-						.update(realm)
-						.set({
-							realmTagVotingEnabled: body.realmTagVotingEnabled,
-							updatedAt: new Date(),
-						})
-						.where(eq(realm.id, params.realmId));
 				if (body.localization) {
 					const storedLocalization = toUnitLocalizationStorage(body.localization);
 					await tx
@@ -1293,6 +1297,44 @@ export default new Elysia({ prefix: "/realms" })
 				[StatusCodes.NOT_FOUND]: RealmMutationNotFoundResponse,
 			},
 			detail: { summary: "Update Realm", tags: ["Realms"] },
+		},
+	)
+	.put(
+		"/:realmId/tag-voting",
+		async ({ params, profile, authorization, body }) => {
+			await authorization.realm.ensureCapability(params.realmId, "realm.tag-voting.update");
+			await database.transaction(async (tx) => {
+				const updated = await tx
+					.update(realm)
+					.set({ realmTagVotingEnabled: body.enabled, updatedAt: new Date() })
+					.where(eq(realm.id, params.realmId))
+					.returning({ id: realm.id });
+				if (!updated.length) throw new RealmNotFound();
+				await recordUnitRevision(tx, {
+					unitId: params.realmId,
+					actorProfileId: profile.unitId,
+					event: "update",
+				});
+				await recordAuditEvent(
+					tx,
+					profile.unitId,
+					"realm.tag-voting.update",
+					params.realmId,
+					{ enabled: body.enabled },
+				);
+			});
+			return { enabled: body.enabled };
+		},
+		{
+			access: "write:realm:manage",
+			params: RealmParams,
+			body: UpdateRealmTagVotingBody,
+			response: {
+				[StatusCodes.OK]: RealmTagVotingResponse,
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
+			},
+			detail: { summary: "Update Realm Tag voting policy", tags: ["Realms"] },
 		},
 	)
 	.put(
@@ -1989,10 +2031,152 @@ export default new Elysia({ prefix: "/realms" })
 		},
 	)
 	.post(
+		"/:realmId/wikis",
+		async ({ params, profile, authorization, body }) => {
+			await authorization.realm.ensureUnitCreation([params.realmId], "realm.units.create");
+			if (body.subjectId) await authorization.unit.ensureCanRead(body.subjectId);
+			const id = await database.transaction(async (tx) => {
+				const created = await createWikiPost(tx, {
+					profileId: profile.unitId,
+					authorization,
+					accessMode: body.accessMode ?? "community_owned",
+					title: body.title,
+					body: body.body,
+					language: body.language,
+					publishRealmIds: [params.realmId],
+					governanceRealmId: params.realmId,
+					...(body.subjectId ? { subjectId: body.subjectId } : {}),
+				});
+				return created.id;
+			});
+			return { id };
+		},
+		{
+			access: "contribute:unit:create",
+			params: RealmParams,
+			body: CreateRealmWikiBody,
+			response: {
+				[StatusCodes.OK]: IdResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"RealmCapabilityRequired",
+					"EntityAssociationRestricted",
+				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"EntityEntryNotFound",
+				]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"RealmRulesAcceptanceRequired",
+					"PostTargetingLocked",
+				]),
+			},
+			detail: { summary: "Create Realm-governed Wiki", tags: ["Realms"] },
+		},
+	)
+	.get(
+		"/:realmId/tag-contexts",
+		async ({ params, query, profile, authorization }) => {
+			await authorization.realm.ensureCapability(params.realmId, "realm.tag-contexts.manage");
+			const localizationLanguages = query.localizationLanguages ?? [];
+			const limit = query.limit ?? 50;
+			const cursor = decodeCursor(query.cursor);
+			const rows = await database
+				.select({
+					realmId: realmTagContext.realmId,
+					tagId: realmTagContext.tagId,
+					contextPostId: realmTagContext.contextPostId,
+					createdByProfileId: realmTagContext.createdByProfileId,
+					createdAt: realmTagContext.createdAt,
+					updatedAt: realmTagContext.updatedAt,
+					tagLanguage: resolvedUnitLocalizationLanguage(
+						realmTagContext.tagId,
+						localizationLanguages,
+					),
+					tagTitle: resolvedUnitLocalizationTitle(
+						realmTagContext.tagId,
+						localizationLanguages,
+					),
+					contextLanguage: resolvedUnitLocalizationLanguage(
+						realmTagContext.contextPostId,
+						localizationLanguages,
+					),
+					contextTitle: resolvedUnitLocalizationTitle(
+						realmTagContext.contextPostId,
+						localizationLanguages,
+					),
+				})
+				.from(realmTagContext)
+				.where(
+					and(
+						eq(realmTagContext.realmId, params.realmId),
+						cursor
+							? or(
+									lt(realmTagContext.updatedAt, new Date(cursor[0])),
+									and(
+										eq(realmTagContext.updatedAt, new Date(cursor[0])),
+										lt(realmTagContext.tagId, cursor[1]),
+									),
+								)
+							: undefined,
+					),
+				)
+				.orderBy(desc(realmTagContext.updatedAt), desc(realmTagContext.tagId))
+				.limit(limit + 1);
+			const page = rows.slice(0, limit);
+			const referencedUnitIds = [
+				...new Set(page.flatMap((row) => [row.tagId, row.contextPostId])),
+			];
+			const readableUnitIds = referencedUnitIds.length
+				? new Set(
+						(
+							await database
+								.select({ id: unit.id })
+								.from(unit)
+								.where(
+									and(
+										inArray(unit.id, referencedUnitIds),
+										getUnitReadCondition(profile.unitId),
+									),
+								)
+						).map((row) => row.id),
+					)
+				: new Set<string>();
+			const items = page.map((row) => {
+				const tagReadable = readableUnitIds.has(row.tagId);
+				const contextReadable = readableUnitIds.has(row.contextPostId);
+				return {
+					...row,
+					tagReadable,
+					tagLanguage: tagReadable ? row.tagLanguage : null,
+					tagTitle: tagReadable ? row.tagTitle : null,
+					contextReadable,
+					contextLanguage: contextReadable ? row.contextLanguage : null,
+					contextTitle: contextReadable ? row.contextTitle : null,
+				};
+			});
+			const last = page.at(-1);
+			return {
+				items,
+				nextCursor:
+					rows.length > limit && last ? encodeCursor(last.updatedAt, last.tagId) : null,
+			};
+		},
+		{
+			access: "session-only",
+			params: RealmParams,
+			query: ListRealmTagContextsQuery,
+			response: {
+				[StatusCodes.OK]: RealmTagContextListResponse,
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+			},
+			detail: { summary: "List Realm Tag Context relationships", tags: ["Realms"] },
+		},
+	)
+	.post(
 		"/:realmId/tag-contexts",
 		async ({ params, body, profile, authorization }) => {
 			await Promise.all([
-				authorization.realm.ensureCapability(params.realmId, "realm.tags.manage"),
+				authorization.realm.ensureCapability(params.realmId, "realm.tag-contexts.manage"),
 				authorization.realm.ensureUnitCreation([params.realmId], "realm.units.create"),
 				authorization.unit.ensureCanRead(body.tagId),
 			]);
@@ -2000,6 +2184,7 @@ export default new Elysia({ prefix: "/realms" })
 				await tx.execute(
 					sql`select pg_advisory_xact_lock(hashtextextended(${`${params.realmId}:${body.tagId}:realm-tag-context`}::text, 0))`,
 				);
+				await ensureRealmTagVotingEnabled(tx, params.realmId);
 				const [existing] = await tx
 					.select({ contextPostId: realmTagContext.contextPostId })
 					.from(realmTagContext)
@@ -2020,12 +2205,13 @@ export default new Elysia({ prefix: "/realms" })
 				const created = await createWikiPost(tx, {
 					profileId: profile.unitId,
 					authorization,
-					accessMode: body.accessMode,
+					accessMode: body.accessMode ?? "community_owned",
 					title: body.title,
 					summary: body.summary,
 					body: body.body,
 					language: body.language,
 					publishRealmIds: [params.realmId],
+					governanceRealmId: params.realmId,
 				});
 				await tx.insert(realmTagContext).values({
 					realmId: params.realmId,
@@ -2036,7 +2222,7 @@ export default new Elysia({ prefix: "/realms" })
 				await recordAuditEvent(
 					tx,
 					profile.unitId,
-					"realm.tags.context.create",
+					"realm.tag-contexts.create",
 					body.tagId,
 					{
 						realmId: params.realmId,
@@ -2109,7 +2295,7 @@ export default new Elysia({ prefix: "/realms" })
 	.put(
 		"/:realmId/tags/:tagId/context",
 		async ({ params, body, profile, authorization }) => {
-			await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
+			await authorization.realm.ensureCapability(params.realmId, "realm.tag-contexts.manage");
 			await Promise.all([
 				authorization.unit.ensureCanRead(params.tagId),
 				authorization.unit.ensureCanRead(body.contextPostId, () => new PostNotFound()),
@@ -2173,7 +2359,7 @@ export default new Elysia({ prefix: "/realms" })
 				await recordAuditEvent(
 					tx,
 					profile.unitId,
-					"realm.tags.context.update",
+					"realm.tag-contexts.update",
 					params.tagId,
 					{
 						realmId: params.realmId,
@@ -2201,6 +2387,52 @@ export default new Elysia({ prefix: "/realms" })
 				]),
 			},
 			detail: { summary: "Set Realm Tag Context", tags: ["Realms"] },
+		},
+	)
+	.delete(
+		"/:realmId/tags/:tagId/context",
+		async ({ params, profile, authorization }) => {
+			await authorization.realm.ensureCapability(params.realmId, "realm.tag-contexts.manage");
+			await database.transaction(async (tx) => {
+				await tx.execute(
+					sql`select pg_advisory_xact_lock(hashtextextended(${`${params.realmId}:${params.tagId}:realm-tag-context`}::text, 0))`,
+				);
+				const [removed] = await tx
+					.delete(realmTagContext)
+					.where(
+						and(
+							eq(realmTagContext.realmId, params.realmId),
+							eq(realmTagContext.tagId, params.tagId),
+						),
+					)
+					.returning({ contextPostId: realmTagContext.contextPostId });
+				if (!removed) throw new RealmTagContextNotFound();
+				await recordAuditEvent(
+					tx,
+					profile.unitId,
+					"realm.tag-contexts.delete",
+					params.tagId,
+					{
+						realmId: params.realmId,
+						contextPostId: removed.contextPostId,
+					},
+				);
+			});
+			return new Response(null, { status: StatusCodes.NO_CONTENT });
+		},
+		{
+			access: "write:realm:manage",
+			params: RealmTagContextParams,
+			response: {
+				[StatusCodes.NO_CONTENT]: t.Void(),
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmTagContextNotFound"]),
+			},
+			detail: {
+				summary: "Remove Realm Tag Context relationship",
+				tags: ["Realms"],
+				responses: NoContentResponse,
+			},
 		},
 	)
 	.put(

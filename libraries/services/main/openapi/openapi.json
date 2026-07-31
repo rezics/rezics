@@ -39549,6 +39549,8 @@
 													"realm.rules.update",
 													"realm.pins.manage",
 													"realm.tags.manage",
+													"realm.tag-voting.update",
+													"realm.tag-contexts.manage",
 													"realm.units.moderate",
 													"entity.association.credit.request",
 													"entity.association.credit.direct",
@@ -39633,7 +39635,11 @@
 															{
 																"additionalProperties": false,
 																"type": "object",
-																"required": ["kind", "realmId"],
+																"required": [
+																	"kind",
+																	"realmId",
+																	"relation"
+																],
 																"properties": {
 																	"kind": {
 																		"const": "realm",
@@ -39642,6 +39648,14 @@
 																	"realmId": {
 																		"format": "uuid",
 																		"type": "string"
+																	},
+																	"relation": {
+																		"default": "member",
+																		"type": "string",
+																		"enum": [
+																			"member",
+																			"access_manager"
+																		]
 																	}
 																}
 															},
@@ -39688,6 +39702,8 @@
 																"realm.rules.update",
 																"realm.pins.manage",
 																"realm.tags.manage",
+																"realm.tag-voting.update",
+																"realm.tag-contexts.manage",
 																"realm.units.moderate",
 																"entity.association.credit.request",
 																"entity.association.credit.direct",
@@ -39719,6 +39735,8 @@
 																"realm.rules.update",
 																"realm.pins.manage",
 																"realm.tags.manage",
+																"realm.tag-voting.update",
+																"realm.tag-contexts.manage",
 																"realm.units.moderate",
 																"entity.association.credit.request",
 																"entity.association.credit.direct",
@@ -39750,6 +39768,8 @@
 																"realm.rules.update",
 																"realm.pins.manage",
 																"realm.tags.manage",
+																"realm.tag-voting.update",
+																"realm.tag-contexts.manage",
 																"realm.units.moderate",
 																"entity.association.credit.request",
 																"entity.association.credit.direct",
@@ -39896,12 +39916,17 @@
 											{
 												"additionalProperties": false,
 												"type": "object",
-												"required": ["kind", "realmId"],
+												"required": ["kind", "realmId", "relation"],
 												"properties": {
 													"kind": { "const": "realm", "type": "string" },
 													"realmId": {
 														"format": "uuid",
 														"type": "string"
+													},
+													"relation": {
+														"default": "member",
+														"type": "string",
+														"enum": ["member", "access_manager"]
 													}
 												}
 											},
@@ -39919,7 +39944,7 @@
 										]
 									},
 									"grants": {
-										"maxItems": 22,
+										"maxItems": 24,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -39943,6 +39968,8 @@
 												"realm.rules.update",
 												"realm.pins.manage",
 												"realm.tags.manage",
+												"realm.tag-voting.update",
+												"realm.tag-contexts.manage",
 												"realm.units.moderate",
 												"entity.association.credit.request",
 												"entity.association.credit.direct",
@@ -39952,7 +39979,7 @@
 										}
 									},
 									"restrictions": {
-										"maxItems": 22,
+										"maxItems": 24,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -39976,6 +40003,8 @@
 												"realm.rules.update",
 												"realm.pins.manage",
 												"realm.tags.manage",
+												"realm.tag-voting.update",
+												"realm.tag-contexts.manage",
 												"realm.units.moderate",
 												"entity.association.credit.request",
 												"entity.association.credit.direct",
@@ -40067,6 +40096,8 @@
 													"realm.rules.update",
 													"realm.pins.manage",
 													"realm.tags.manage",
+													"realm.tag-voting.update",
+													"realm.tag-contexts.manage",
 													"realm.units.moderate",
 													"entity.association.credit.request",
 													"entity.association.credit.direct",
@@ -40151,7 +40182,11 @@
 															{
 																"additionalProperties": false,
 																"type": "object",
-																"required": ["kind", "realmId"],
+																"required": [
+																	"kind",
+																	"realmId",
+																	"relation"
+																],
 																"properties": {
 																	"kind": {
 																		"const": "realm",
@@ -40160,6 +40195,14 @@
 																	"realmId": {
 																		"format": "uuid",
 																		"type": "string"
+																	},
+																	"relation": {
+																		"default": "member",
+																		"type": "string",
+																		"enum": [
+																			"member",
+																			"access_manager"
+																		]
 																	}
 																}
 															},
@@ -40206,6 +40249,8 @@
 																"realm.rules.update",
 																"realm.pins.manage",
 																"realm.tags.manage",
+																"realm.tag-voting.update",
+																"realm.tag-contexts.manage",
 																"realm.units.moderate",
 																"entity.association.credit.request",
 																"entity.association.credit.direct",
@@ -40237,6 +40282,8 @@
 																"realm.rules.update",
 																"realm.pins.manage",
 																"realm.tags.manage",
+																"realm.tag-voting.update",
+																"realm.tag-contexts.manage",
 																"realm.units.moderate",
 																"entity.association.credit.request",
 																"entity.association.credit.direct",
@@ -40268,6 +40315,8 @@
 																"realm.rules.update",
 																"realm.pins.manage",
 																"realm.tags.manage",
+																"realm.tag-voting.update",
+																"realm.tag-contexts.manage",
 																"realm.units.moderate",
 																"entity.association.credit.request",
 																"entity.association.credit.direct",
@@ -40515,7 +40564,11 @@
 															{
 																"additionalProperties": false,
 																"type": "object",
-																"required": ["kind", "realmId"],
+																"required": [
+																	"kind",
+																	"realmId",
+																	"relation"
+																],
 																"properties": {
 																	"kind": {
 																		"const": "realm",
@@ -40524,6 +40577,14 @@
 																	"realmId": {
 																		"format": "uuid",
 																		"type": "string"
+																	},
+																	"relation": {
+																		"default": "member",
+																		"type": "string",
+																		"enum": [
+																			"member",
+																			"access_manager"
+																		]
 																	}
 																}
 															},
@@ -40685,6 +40746,8 @@
 															"realm.rules.update",
 															"realm.pins.manage",
 															"realm.tags.manage",
+															"realm.tag-voting.update",
+															"realm.tag-contexts.manage",
 															"realm.units.moderate",
 															"entity.association.credit.request",
 															"entity.association.credit.direct",
@@ -41462,6 +41525,8 @@
 																"realm.rules.update",
 																"realm.pins.manage",
 																"realm.tags.manage",
+																"realm.tag-voting.update",
+																"realm.tag-contexts.manage",
 																"realm.units.moderate",
 																"entity.association.credit.request",
 																"entity.association.credit.direct",
@@ -41667,6 +41732,8 @@
 																"realm.rules.update",
 																"realm.pins.manage",
 																"realm.tags.manage",
+																"realm.tag-voting.update",
+																"realm.tag-contexts.manage",
 																"realm.units.moderate",
 																"entity.association.credit.request",
 																"entity.association.credit.direct",
@@ -41875,7 +41942,7 @@
 									"invitedProfileId": { "format": "uuid", "type": "string" },
 									"permissions": {
 										"minItems": 1,
-										"maxItems": 22,
+										"maxItems": 24,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -41899,6 +41966,8 @@
 												"realm.rules.update",
 												"realm.pins.manage",
 												"realm.tags.manage",
+												"realm.tag-voting.update",
+												"realm.tag-contexts.manage",
 												"realm.units.moderate",
 												"entity.association.credit.request",
 												"entity.association.credit.direct",
@@ -41978,6 +42047,8 @@
 													"realm.rules.update",
 													"realm.pins.manage",
 													"realm.tags.manage",
+													"realm.tag-voting.update",
+													"realm.tag-contexts.manage",
 													"realm.units.moderate",
 													"entity.association.credit.request",
 													"entity.association.credit.direct",
@@ -42278,6 +42349,8 @@
 													"realm.rules.update",
 													"realm.pins.manage",
 													"realm.tags.manage",
+													"realm.tag-voting.update",
+													"realm.tag-contexts.manage",
 													"realm.units.moderate",
 													"entity.association.credit.request",
 													"entity.association.credit.direct",
@@ -42521,6 +42594,8 @@
 													"realm.rules.update",
 													"realm.pins.manage",
 													"realm.tags.manage",
+													"realm.tag-voting.update",
+													"realm.tag-contexts.manage",
 													"realm.units.moderate",
 													"entity.association.credit.request",
 													"entity.association.credit.direct",
@@ -60580,6 +60655,8 @@
 															"realm.rules.update",
 															"realm.pins.manage",
 															"realm.tags.manage",
+															"realm.tag-voting.update",
+															"realm.tag-contexts.manage",
 															"realm.units.moderate"
 														]
 													}
@@ -66003,6 +66080,8 @@
 													"realm.rules.update",
 													"realm.pins.manage",
 													"realm.tags.manage",
+													"realm.tag-voting.update",
+													"realm.tag-contexts.manage",
 													"realm.units.moderate"
 												]
 											}
@@ -66171,6 +66250,8 @@
 																		"realm.rules.update",
 																		"realm.pins.manage",
 																		"realm.tags.manage",
+																		"realm.tag-voting.update",
+																		"realm.tag-contexts.manage",
 																		"realm.units.moderate"
 																	]
 																},
@@ -66343,6 +66424,8 @@
 															"realm.rules.update",
 															"realm.pins.manage",
 															"realm.tags.manage",
+															"realm.tag-voting.update",
+															"realm.tag-contexts.manage",
 															"realm.units.moderate"
 														]
 													},
@@ -66475,7 +66558,7 @@
 								"properties": {
 									"expectedRevision": { "minLength": 1, "type": "string" },
 									"grants": {
-										"maxItems": 34,
+										"maxItems": 36,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -66520,6 +66603,8 @@
 														"realm.rules.update",
 														"realm.pins.manage",
 														"realm.tags.manage",
+														"realm.tag-voting.update",
+														"realm.tag-contexts.manage",
 														"realm.units.moderate"
 													]
 												},
@@ -66611,6 +66696,8 @@
 															"realm.rules.update",
 															"realm.pins.manage",
 															"realm.tags.manage",
+															"realm.tag-voting.update",
+															"realm.tag-contexts.manage",
 															"realm.units.moderate"
 														]
 													},
@@ -140192,6 +140279,8 @@
 												"canUpdateRules",
 												"canManagePins",
 												"canManageTags",
+												"canUpdateTagVoting",
+												"canManageTagContexts",
 												"canModerateUnits",
 												"canManageAccess",
 												"canRestoreHistory"
@@ -140205,6 +140294,8 @@
 												"canUpdateRules": { "type": "boolean" },
 												"canManagePins": { "type": "boolean" },
 												"canManageTags": { "type": "boolean" },
+												"canUpdateTagVoting": { "type": "boolean" },
+												"canManageTagContexts": { "type": "boolean" },
 												"canModerateUnits": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canRestoreHistory": { "type": "boolean" }
@@ -140280,13 +140371,13 @@
 					"content": {
 						"application/json": {
 							"schema": {
+								"additionalProperties": false,
 								"type": "object",
 								"properties": {
 									"joinPolicy": {
 										"type": "string",
 										"enum": ["open", "approval"]
 									},
-									"realmTagVotingEnabled": { "type": "boolean" },
 									"visibility": {
 										"type": "string",
 										"enum": ["public", "unlisted", "private"]
@@ -142572,6 +142663,167 @@
 				],
 				"operationId": "deleteApiRealmsByRealmIdScore-context",
 				"x-rezics-quota-route-operation-id": "deleteApiRealmsByRealmIdScore-context",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/realms/{realmId}/tag-voting": {
+			"put": {
+				"summary": "Update Realm Tag voting policy",
+				"tags": ["Realms"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["enabled"],
+								"properties": { "enabled": { "type": "boolean" } }
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["enabled"],
+									"properties": { "enabled": { "type": "boolean" } }
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmCapabilityRequired",
+													"type": "string",
+													"enum": ["RealmCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmNotFound",
+													"type": "string",
+													"enum": ["RealmNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": [
+														"ApiQuotaExceeded",
+														"ApiTokenRateLimitExceeded"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiRealmsByRealmIdTag-voting",
+				"x-rezics-quota-route-operation-id": "putApiRealmsByRealmIdTag-voting",
 				"x-rezics-quota-operation-id": "*",
 				"x-rezics-quota-cost-units": 1
 			}
@@ -151226,7 +151478,656 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
+		"/api/realms/{realmId}/wikis": {
+			"post": {
+				"summary": "Create Realm-governed Wiki",
+				"tags": ["Realms"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["title", "body", "language"],
+								"properties": {
+									"accessMode": {
+										"type": "string",
+										"enum": ["community_owned", "restricted"]
+									},
+									"title": { "minLength": 1, "maxLength": 500, "type": "string" },
+									"body": {
+										"additionalProperties": false,
+										"$id": "PortableTextDocument",
+										"type": "object",
+										"required": ["_type", "_key", "content"],
+										"properties": {
+											"_type": { "const": "portable-text", "type": "string" },
+											"_key": {
+												"pattern": "^[0-9a-f]{12}$",
+												"$id": "BlockKey",
+												"type": "string"
+											},
+											"content": {
+												"$id": "PortableText",
+												"type": "array",
+												"items": {
+													"$id": "PortableTextBlock",
+													"anyOf": [
+														{
+															"additionalProperties": {
+																"$id": "#/components/schemas/JsonValue",
+																"anyOf": [
+																	{ "type": "null" },
+																	{ "type": "boolean" },
+																	{ "type": "number" },
+																	{ "type": "string" },
+																	{
+																		"type": "array",
+																		"items": {
+																			"$ref": "#/components/schemas/JsonValue"
+																		}
+																	},
+																	{
+																		"type": "object",
+																		"patternProperties": {
+																			"^(.*)$": {
+																				"$ref": "#/components/schemas/JsonValue"
+																			}
+																		}
+																	}
+																]
+															},
+															"$id": "PortableTextTextBlock",
+															"type": "object",
+															"required": [
+																"_key",
+																"_type",
+																"children"
+															],
+															"properties": {
+																"_key": { "type": "string" },
+																"_type": {
+																	"const": "block",
+																	"type": "string"
+																},
+																"children": {
+																	"type": "array",
+																	"items": {
+																		"$id": "PortableTextChild",
+																		"anyOf": [
+																			{
+																				"additionalProperties": false,
+																				"$id": "PortableTextSpan",
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type",
+																					"text"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"const": "span",
+																						"type": "string"
+																					},
+																					"text": {
+																						"type": "string"
+																					},
+																					"marks": {
+																						"type": "array",
+																						"items": {
+																							"type": "string"
+																						}
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"$id": "PortableTextUnitMention",
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type",
+																					"unitId"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"const": "unit-mention",
+																						"type": "string"
+																					},
+																					"unitId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		]
+																	}
+																},
+																"markDefs": {
+																	"type": "array",
+																	"items": {
+																		"additionalProperties": {
+																			"$id": "#/components/schemas/JsonValue",
+																			"anyOf": [
+																				{ "type": "null" },
+																				{
+																					"type": "boolean"
+																				},
+																				{
+																					"type": "number"
+																				},
+																				{
+																					"type": "string"
+																				},
+																				{
+																					"type": "array",
+																					"items": {
+																						"$ref": "#/components/schemas/JsonValue"
+																					}
+																				},
+																				{
+																					"type": "object",
+																					"patternProperties": {
+																						"^(.*)$": {
+																							"$ref": "#/components/schemas/JsonValue"
+																						}
+																					}
+																				}
+																			]
+																		},
+																		"$id": "PortableTextObject",
+																		"type": "object",
+																		"required": [
+																			"_key",
+																			"_type"
+																		],
+																		"properties": {
+																			"_key": {
+																				"type": "string"
+																			},
+																			"_type": {
+																				"type": "string"
+																			}
+																		}
+																	}
+																},
+																"listItem": { "type": "string" },
+																"style": { "type": "string" },
+																"level": {
+																	"minimum": 1,
+																	"type": "integer"
+																}
+															}
+														},
+														{
+															"additionalProperties": false,
+															"$id": "PortableTextImage",
+															"type": "object",
+															"required": [
+																"_key",
+																"_type",
+																"assetId"
+															],
+															"properties": {
+																"_key": { "type": "string" },
+																"_type": {
+																	"const": "image",
+																	"type": "string"
+																},
+																"assetId": {
+																	"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																	"type": "string"
+																},
+																"alt": { "type": "string" },
+																"caption": { "type": "string" }
+															}
+														},
+														{
+															"additionalProperties": {
+																"$id": "#/components/schemas/JsonValue",
+																"anyOf": [
+																	{ "type": "null" },
+																	{ "type": "boolean" },
+																	{ "type": "number" },
+																	{ "type": "string" },
+																	{
+																		"type": "array",
+																		"items": {
+																			"$ref": "#/components/schemas/JsonValue"
+																		}
+																	},
+																	{
+																		"type": "object",
+																		"patternProperties": {
+																			"^(.*)$": {
+																				"$ref": "#/components/schemas/JsonValue"
+																			}
+																		}
+																	}
+																]
+															},
+															"type": "object",
+															"required": ["_key", "_type"],
+															"properties": {
+																"_key": { "type": "string" },
+																"_type": {
+																	"pattern": "^(?!(?:block|image)$).+",
+																	"type": "string"
+																}
+															}
+														}
+													]
+												}
+											}
+										}
+									},
+									"language": {
+										"type": "string",
+										"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+									},
+									"subjectId": { "format": "uuid", "type": "string" }
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["id"],
+									"properties": { "id": { "format": "uuid", "type": "string" } }
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmCapabilityRequired",
+													"type": "string",
+													"enum": [
+														"RealmCapabilityRequired",
+														"EntityAssociationRestricted"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound", "EntityEntryNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmRulesAcceptanceRequired",
+													"type": "string",
+													"enum": [
+														"RealmRulesAcceptanceRequired",
+														"PostTargetingLocked"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": [
+														"ApiQuotaExceeded",
+														"ApiTokenRateLimitExceeded"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiRealmsByRealmIdWikis",
+				"x-rezics-quota-route-operation-id": "postApiRealmsByRealmIdWikis",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
 		"/api/realms/{realmId}/tag-contexts": {
+			"get": {
+				"summary": "List Realm Tag Context relationships",
+				"tags": ["Realms"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 7,
+							"uniqueItems": true,
+							"type": "array",
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
+						}
+					},
+					{
+						"name": "cursor",
+						"in": "query",
+						"required": false,
+						"schema": { "minLength": 1, "maxLength": 1024, "type": "string" }
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 100,
+							"default": 50,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 100, "default": 50, "type": "integer" }
+							]
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["items", "nextCursor"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"realmId",
+													"tagId",
+													"contextPostId",
+													"createdByProfileId",
+													"createdAt",
+													"updatedAt",
+													"tagReadable",
+													"tagLanguage",
+													"tagTitle",
+													"contextReadable",
+													"contextLanguage",
+													"contextTitle"
+												],
+												"properties": {
+													"realmId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"tagId": { "format": "uuid", "type": "string" },
+													"contextPostId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"createdByProfileId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"tagReadable": { "type": "boolean" },
+													"tagLanguage": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"tagTitle": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"contextReadable": { "type": "boolean" },
+													"contextLanguage": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"contextTitle": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													}
+												}
+											}
+										},
+										"nextCursor": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmCapabilityRequired",
+													"type": "string",
+													"enum": ["RealmCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiRealmsByRealmIdTag-contexts",
+				"x-rezics-quota-route-operation-id": "getApiRealmsByRealmIdTag-contexts",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			},
 			"post": {
 				"summary": "Create Realm Tag Context Wiki",
 				"tags": ["Realms"],
@@ -151245,14 +152146,7 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": [
-									"tagId",
-									"accessMode",
-									"title",
-									"summary",
-									"body",
-									"language"
-								],
+								"required": ["tagId", "title", "summary", "body", "language"],
 								"properties": {
 									"tagId": { "format": "uuid", "type": "string" },
 									"accessMode": {
@@ -152005,6 +152899,142 @@
 				},
 				"operationId": "putApiRealmsByRealmIdTagsByTagIdContext",
 				"x-rezics-quota-route-operation-id": "putApiRealmsByRealmIdTagsByTagIdContext",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			},
+			"delete": {
+				"summary": "Remove Realm Tag Context relationship",
+				"tags": ["Realms"],
+				"responses": {
+					"204": {
+						"description": "Response for status 204",
+						"content": { "type": "void" }
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmCapabilityRequired",
+													"type": "string",
+													"enum": ["RealmCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmTagContextNotFound",
+													"type": "string",
+													"enum": ["RealmTagContextNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": [
+														"ApiQuotaExceeded",
+														"ApiTokenRateLimitExceeded"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "tagId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"operationId": "deleteApiRealmsByRealmIdTagsByTagIdContext",
+				"x-rezics-quota-route-operation-id": "deleteApiRealmsByRealmIdTagsByTagIdContext",
 				"x-rezics-quota-operation-id": "*",
 				"x-rezics-quota-cost-units": 1
 			}

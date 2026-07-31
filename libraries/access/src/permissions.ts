@@ -1,6 +1,10 @@
 export const UnitAccessSubjectKindValues = ["profile", "realm", "authenticated"] as const;
 export type UnitAccessSubjectKind = (typeof UnitAccessSubjectKindValues)[number];
 
+/** The dynamic Realm audience represented by a Realm Unit access subject. */
+export const RealmAccessSubjectRelationValues = ["member", "access_manager"] as const;
+export type RealmAccessSubjectRelation = (typeof RealmAccessSubjectRelationValues)[number];
+
 export const UnitAccessRestrictionSubjectKindValues = ["profile", "realm"] as const;
 export type UnitAccessRestrictionSubjectKind =
 	(typeof UnitAccessRestrictionSubjectKindValues)[number];
@@ -23,6 +27,8 @@ export const RealmPermissionValues = [
 	"realm.rules.update",
 	"realm.pins.manage",
 	"realm.tags.manage",
+	"realm.tag-voting.update",
+	"realm.tag-contexts.manage",
 	"realm.units.moderate",
 ] as const;
 export type RealmPermission = (typeof RealmPermissionValues)[number];
@@ -344,7 +350,18 @@ export const PlatformCapabilityDefinitions = {
 		resource: "realm.tags",
 		action: "manage",
 		rationale:
-			"Provides recovery authority to administer Realm taxonomy, Tag contexts, and policy Tag assertions.",
+			"Provides recovery authority to administer Realm taxonomy and policy Tag assertions.",
+	},
+	"realm.tag-voting.update": {
+		resource: "realm.tag-voting",
+		action: "update",
+		rationale: "Provides recovery authority to change Realm Tag voting policy.",
+	},
+	"realm.tag-contexts.manage": {
+		resource: "realm.tag-contexts",
+		action: "manage",
+		rationale:
+			"Provides recovery authority to create, replace, and remove Realm Tag Context relationships without changing the related Wiki access policy.",
 	},
 	"realm.units.moderate": {
 		resource: "realm.units",
@@ -553,7 +570,21 @@ export const UnitPermissionDefinitions = {
 		resource: "realm.tags",
 		action: "manage",
 		rationale:
-			"Realm Tag governance independently controls Realm taxonomy, Tag explanations, and direct Realm policy Tag assertions without changing global Tags.",
+			"Realm Tag governance controls Realm taxonomy and direct Realm policy Tag assertions without changing global Tags or Tag Context relationships.",
+	},
+	"realm.tag-voting.update": {
+		kind: "standard",
+		target: "realm",
+		resource: "realm.tag-voting",
+		action: "update",
+	},
+	"realm.tag-contexts.manage": {
+		kind: "domain",
+		target: "realm",
+		resource: "realm.tag-contexts",
+		action: "manage",
+		rationale:
+			"The canonical Realm–Tag–Wiki relationship is independently governable from Realm taxonomy and from the related Wiki's content and access policy.",
 	},
 	"realm.units.moderate": {
 		kind: "domain",
@@ -626,6 +657,8 @@ export const UnitPermissionImplications: Partial<
 	"realm.rules.update": ["unit.read"],
 	"realm.pins.manage": ["unit.read"],
 	"realm.tags.manage": ["unit.read"],
+	"realm.tag-voting.update": ["unit.read"],
+	"realm.tag-contexts.manage": ["unit.read"],
 	"realm.units.moderate": ["unit.read"],
 	"entity.association.credit.request": ["unit.read"],
 	"entity.association.credit.direct": ["unit.read", "entity.association.credit.request"],

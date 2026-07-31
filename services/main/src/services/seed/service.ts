@@ -403,11 +403,17 @@ async function insertUnitDetails(
 				assignedByProfileId: value.ownerProfileId,
 			});
 			if (value.kind === "realm")
-				for (const permission of ["unit.read", "realm.contribute"] as const)
+				for (const permission of [
+					"unit.read",
+					"realm.contribute",
+					"realm.units.create",
+					"realm.post.replies.create",
+				] as const)
 					grantRows.push({
 						unitId: value.id,
 						subjectKind: "realm",
 						realmId: value.id,
+						realmRelation: "member",
 						permission,
 						scope: [],
 						grantedByProfileId: value.ownerProfileId,

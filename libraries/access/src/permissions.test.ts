@@ -78,6 +78,21 @@ describe("permission schema", () => {
 		]);
 	});
 
+	it("keeps Realm Tag taxonomy, voting policy, and Tag Context links independent", () => {
+		expect(expandUnitPermissions(["realm.tags.manage"])).toEqual([
+			"unit.read",
+			"realm.tags.manage",
+		]);
+		expect(expandUnitPermissions(["realm.tag-voting.update"])).toEqual([
+			"unit.read",
+			"realm.tag-voting.update",
+		]);
+		expect(expandUnitPermissions(["realm.tag-contexts.manage"])).toEqual([
+			"unit.read",
+			"realm.tag-contexts.manage",
+		]);
+	});
+
 	it("scopes Realm and Entity permissions to their logical targets", () => {
 		expect(isUnitPermissionApplicable("realm", "realm.members.manage")).toBe(true);
 		expect(isUnitPermissionApplicable("unit", "realm.members.manage")).toBe(false);
@@ -99,6 +114,8 @@ describe("permission schema", () => {
 		expect(isUnitPermissionGrantableToAuthenticated("realm.units.create")).toBe(true);
 		expect(isUnitPermissionGrantableToAuthenticated("realm.post.replies.create")).toBe(true);
 		expect(isUnitPermissionGrantableToAuthenticated("unit.access.manage")).toBe(false);
+		expect(isUnitPermissionGrantableToAuthenticated("realm.tag-voting.update")).toBe(false);
+		expect(isUnitPermissionGrantableToAuthenticated("realm.tag-contexts.manage")).toBe(false);
 		expect(isUnitPermissionGrantableToAuthenticated("unit.tag-curation.manage")).toBe(false);
 		expect(isUnitPermissionGrantableToAuthenticated("unit.realm-publication.manage")).toBe(
 			false,

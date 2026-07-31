@@ -37,6 +37,7 @@ import { UnitDockRenderer, useDockManagementAccess } from "@/features/docks";
 import { FollowButton } from "@/features/following/components/follow-button";
 import {
 	realmHref,
+	realmContentCreateHref,
 	realmPageHref,
 	realmSettingsHref,
 	type RealmPageId,
@@ -50,7 +51,7 @@ import {
 	type AvatarFieldValue,
 	avatarPresentationToInput,
 } from "@/features/media/components/avatar-field";
-import { postCreateHref, postHref } from "@/features/posts/url";
+import { postHref } from "@/features/posts/url";
 import { tagDetailHref } from "@/features/tags/routing/tag-links";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { selectLocalization } from "@/lib/localization";
@@ -678,7 +679,9 @@ function RealmActions({
 					)}
 					{canPost ? (
 						<Button variant="solid" asChild>
-							<Link href={postCreateHref(realm.id)}>{t.posts.create}</Link>
+							<Link href={realmContentCreateHref(realm)}>
+								{t.realms.contentComposer.open}
+							</Link>
 						</Button>
 					) : null}
 					{canManage && (

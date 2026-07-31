@@ -1,6 +1,10 @@
 import { getTableName, type SQL } from "drizzle-orm";
 import { getTableConfig, PgDialect } from "drizzle-orm/pg-core";
-import { PlatformCapabilityValues, UnitPermissionValues } from "@rezics/access";
+import {
+	PlatformCapabilityValues,
+	RealmAccessSubjectRelationValues,
+	UnitPermissionValues,
+} from "@rezics/access";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -60,6 +64,7 @@ import {
 	platformCapabilityGrant,
 	profilePreference,
 	unitAccessGrant,
+	realmAccessSubjectRelation,
 	unitAccessInvitation,
 	unitAccessRestriction,
 	unitFollow,
@@ -234,6 +239,9 @@ describe("database schema contracts", () => {
 			]),
 		);
 		expect(unitAccessRestriction.subjectKind.enumValues).toEqual(["profile", "realm"]);
+		expect(realmAccessSubjectRelation.enumValues).toEqual(RealmAccessSubjectRelationValues);
+		expect(grant.columns.map((column) => column.name)).toContain("realm_relation");
+		expect(restriction.columns.map((column) => column.name)).toContain("realm_relation");
 		expect(unitAccessGrant.subjectKind.enumValues).toEqual([
 			"profile",
 			"realm",
@@ -296,6 +304,8 @@ describe("database schema contracts", () => {
 				"realm.units.create",
 				"realm.post.replies.create",
 				"realm.rules.update",
+				"realm.tag-voting.update",
+				"realm.tag-contexts.manage",
 			]),
 		);
 	});

@@ -56,6 +56,10 @@ export default {
 				label: "Bewertungsrichtlinien",
 				description: `Wähle den Artikel, der die Bewertungsskala und Kriterien dieses ${realmTerms.inline}s erklärt.`,
 			},
+			tagVoting: {
+				label: "Tag-Abstimmung",
+				description: "Tag-Abstimmungen steuern und alle Tag-Kontext-Verknüpfungen prüfen.",
+			},
 			pins: {
 				label: "Fixierte Inhalte",
 				description:
@@ -99,6 +103,31 @@ export default {
 		description: `Diese Funktion muss von der Verwaltung des ${realmTerms.inline} ausdrücklich aktiviert werden. Danach können Mitglieder nur über Tags abstimmen, die in diesem ${realmTerms.inline} offiziell erklärt werden.`,
 		enabled: "Tag-Abstimmungen aktivieren",
 		enabledDescription: `Suche und Abstimmung zeigen nur Tags mit einer derzeit sichtbaren Erklärung aus diesem ${realmTerms.inline}.`,
+		relationshipsTitle: "Tag-Kontext-Verknüpfungen",
+		relationshipsDescription: `Alle Verknüpfungen zwischen Tags und Wiki-Artikeln in diesem ${realmTerms.inline}, unabhängig von der Tag-Taxonomie.`,
+		relationshipsListLabel: "Tag-Kontext-Verknüpfungen",
+		relationshipsEmpty: `Dieser ${realmTerms.inline} hat keine Tag-Kontext-Verknüpfungen.`,
+		unavailableTag: "Tag nicht verfügbar",
+		unavailableContext: "Wiki nicht verfügbar",
+		removeRelationship: "Verknüpfung entfernen",
+		removeRelationshipLabel: insert("Tag-Kontext-Verknüpfung für {{tag}} entfernen", {
+			tag: String,
+		}),
+		removeRelationshipTitle: "Diese Tag-Kontext-Verknüpfung entfernen?",
+		removeRelationshipDescription: insert(
+			"{{tag}} verwendet diesen Wiki-Artikel nicht mehr als Kontext. Der Wiki-Artikel und seine eigenen Zugriffsregeln werden nicht gelöscht.",
+			{ tag: String },
+		),
+		cancelRemoval: "Verknüpfung behalten",
+	},
+	contentComposer: {
+		open: "Veröffentlichen",
+		title: `In diesem ${realmTerms.inline} veröffentlichen`,
+		description: `Wähle die Art des Inhalts. Er wird direkt in diesem ${realmTerms.inline} veröffentlicht.`,
+		modeLabel: "Inhaltsart",
+		modes: { post: postTerms.label, wiki: "Wiki", tagContext: "Tag-Kontext" },
+		communityEditableDescription: `Alle angemeldeten Benutzer können diesen Wiki-Artikel bearbeiten. Die Zugriffsverwalter dieses ${realmTerms.inline} können den Zugriff ändern oder den Artikel sperren.`,
+		restrictedDescription: `Nur ausdrücklich berechtigte Personen können diesen Wiki-Artikel bearbeiten. Die Zugriffsverwalter dieses ${realmTerms.inline} behalten die Verwaltungsrechte.`,
 	},
 	scoreContextSettings: {
 		title: "Bewertungsrichtlinien",

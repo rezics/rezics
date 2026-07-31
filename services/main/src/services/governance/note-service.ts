@@ -106,6 +106,7 @@ export async function createGovernanceNotePost(
 			unitId: created.id,
 			subjectKind: "realm",
 			realmId: input.realmId,
+			realmRelation: "member",
 			permission: "unit.read",
 			scope: [],
 			grantedByProfileId: input.actorProfileId,

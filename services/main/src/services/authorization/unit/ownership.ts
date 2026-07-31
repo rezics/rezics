@@ -180,6 +180,45 @@ export async function createPublicEditableUnitAccess(
 }
 
 /**
+ * Delegates Wiki governance to the dynamic access-manager audience of one Realm.
+ *
+ * @remarks
+ * This grant does not include ordinary Realm members. The audience is resolved from
+ * current Realm ownership and effective `unit.access.manage` grants on the Realm, so
+ * Realm administration changes take effect without copying Profile grants to every Wiki.
+ *
+ * @internal
+ */
+export async function grantRealmAccessManagersUnitGovernance(
+	tx: DatabaseTransaction,
+	input: {
+		readonly unitId: string;
+		readonly realmId: string;
+		readonly grantedByProfileId: string;
+	},
+): Promise<void> {
+	const permissions = expandDelegableUnitPermissions([
+		"unit.update",
+		"unit.status.update",
+		"unit.access.manage",
+	]);
+	await tx
+		.insert(unitAccessGrant)
+		.values(
+			permissions.map((permission) => ({
+				unitId: input.unitId,
+				subjectKind: "realm" as const,
+				realmId: input.realmId,
+				realmRelation: "access_manager" as const,
+				permission,
+				scope: [],
+				grantedByProfileId: input.grantedByProfileId,
+			})),
+		)
+		.onConflictDoNothing();
+}
+
+/**
  * Community-owned Units are stewarded by the ordinary Rezics Community Profile,
  * while their submitter receives explicit editing permissions without ownership.
  */

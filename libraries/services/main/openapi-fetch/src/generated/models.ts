@@ -22892,6 +22892,8 @@ export const GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum = {
 	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.tags.manage": "realm.tags.manage",
+	"realm.tag-voting.update": "realm.tag-voting.update",
+	"realm.tag-contexts.manage": "realm.tag-contexts.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
 	"entity.association.credit.direct": "entity.association.credit.direct",
@@ -22917,6 +22919,14 @@ export const GetApiGovernanceUnitByUnitIdAccessStatus200AuthenticatedGrantablePe
 export type GetApiGovernanceUnitByUnitIdAccessStatus200AuthenticatedGrantablePermissionsEnum =
 	(typeof GetApiGovernanceUnitByUnitIdAccessStatus200AuthenticatedGrantablePermissionsEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessStatus200AuthenticatedGrantablePermissionsEnum];
 
+export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsSubjectRelationEnum = {
+	member: "member",
+	access_manager: "access_manager",
+} as const;
+
+export type GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsSubjectRelationEnum =
+	(typeof GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsSubjectRelationEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsSubjectRelationEnum];
+
 export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
@@ -22935,6 +22945,8 @@ export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum = {
 	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.tags.manage": "realm.tags.manage",
+	"realm.tag-voting.update": "realm.tag-voting.update",
+	"realm.tag-contexts.manage": "realm.tag-contexts.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
 	"entity.association.credit.direct": "entity.association.credit.direct",
@@ -22963,6 +22975,8 @@ export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum
 	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.tags.manage": "realm.tags.manage",
+	"realm.tag-voting.update": "realm.tag-voting.update",
+	"realm.tag-contexts.manage": "realm.tag-contexts.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
 	"entity.association.credit.direct": "entity.association.credit.direct",
@@ -22991,6 +23005,8 @@ export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsInheritedEnum = 
 	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.tags.manage": "realm.tags.manage",
+	"realm.tag-voting.update": "realm.tag-voting.update",
+	"realm.tag-contexts.manage": "realm.tag-contexts.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
 	"entity.association.credit.direct": "entity.association.credit.direct",
@@ -23071,6 +23087,11 @@ export type GetApiGovernanceUnitByUnitIdAccessStatus200 = {
 					 * @type string
 					 */
 					realmId: string;
+					/**
+					 * @default 'member'
+					 * @type string
+					 */
+					relation: GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsSubjectRelationEnum;
 			  }
 			| {
 					/**
@@ -23231,6 +23252,8 @@ export const PutApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum = {
 	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.tags.manage": "realm.tags.manage",
+	"realm.tag-voting.update": "realm.tag-voting.update",
+	"realm.tag-contexts.manage": "realm.tag-contexts.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
 	"entity.association.credit.direct": "entity.association.credit.direct",
@@ -23256,6 +23279,14 @@ export const PutApiGovernanceUnitByUnitIdAccessStatus200AuthenticatedGrantablePe
 export type PutApiGovernanceUnitByUnitIdAccessStatus200AuthenticatedGrantablePermissionsEnum =
 	(typeof PutApiGovernanceUnitByUnitIdAccessStatus200AuthenticatedGrantablePermissionsEnum)[keyof typeof PutApiGovernanceUnitByUnitIdAccessStatus200AuthenticatedGrantablePermissionsEnum];
 
+export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsSubjectRelationEnum = {
+	member: "member",
+	access_manager: "access_manager",
+} as const;
+
+export type PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsSubjectRelationEnum =
+	(typeof PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsSubjectRelationEnum)[keyof typeof PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsSubjectRelationEnum];
+
 export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
@@ -23274,6 +23305,8 @@ export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum = {
 	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.tags.manage": "realm.tags.manage",
+	"realm.tag-voting.update": "realm.tag-voting.update",
+	"realm.tag-contexts.manage": "realm.tag-contexts.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
 	"entity.association.credit.direct": "entity.association.credit.direct",
@@ -23302,6 +23335,8 @@ export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum
 	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.tags.manage": "realm.tags.manage",
+	"realm.tag-voting.update": "realm.tag-voting.update",
+	"realm.tag-contexts.manage": "realm.tag-contexts.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
 	"entity.association.credit.direct": "entity.association.credit.direct",
@@ -23330,6 +23365,8 @@ export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsInheritedEnum = 
 	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.tags.manage": "realm.tags.manage",
+	"realm.tag-voting.update": "realm.tag-voting.update",
+	"realm.tag-contexts.manage": "realm.tag-contexts.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
 	"entity.association.credit.direct": "entity.association.credit.direct",
@@ -23410,6 +23447,11 @@ export type PutApiGovernanceUnitByUnitIdAccessStatus200 = {
 					 * @type string
 					 */
 					realmId: string;
+					/**
+					 * @default 'member'
+					 * @type string
+					 */
+					relation: PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsSubjectRelationEnum;
 			  }
 			| {
 					/**
@@ -23581,6 +23623,14 @@ export type PutApiGovernanceUnitByUnitIdAccessStatus422 = ValidationError;
  */
 export type PutApiGovernanceUnitByUnitIdAccessStatus500 = InternalError;
 
+export const PutApiGovernanceUnitByUnitIdAccessRequestSubjectRelationEnum = {
+	member: "member",
+	access_manager: "access_manager",
+} as const;
+
+export type PutApiGovernanceUnitByUnitIdAccessRequestSubjectRelationEnum =
+	(typeof PutApiGovernanceUnitByUnitIdAccessRequestSubjectRelationEnum)[keyof typeof PutApiGovernanceUnitByUnitIdAccessRequestSubjectRelationEnum];
+
 export const PutApiGovernanceUnitByUnitIdAccessRequestGrantsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
@@ -23599,6 +23649,8 @@ export const PutApiGovernanceUnitByUnitIdAccessRequestGrantsEnum = {
 	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.tags.manage": "realm.tags.manage",
+	"realm.tag-voting.update": "realm.tag-voting.update",
+	"realm.tag-contexts.manage": "realm.tag-contexts.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
 	"entity.association.credit.direct": "entity.association.credit.direct",
@@ -23627,6 +23679,8 @@ export const PutApiGovernanceUnitByUnitIdAccessRequestRestrictionsEnum = {
 	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.tags.manage": "realm.tags.manage",
+	"realm.tag-voting.update": "realm.tag-voting.update",
+	"realm.tag-contexts.manage": "realm.tag-contexts.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
 	"entity.association.credit.direct": "entity.association.credit.direct",
@@ -23684,6 +23738,11 @@ export type PutApiGovernanceUnitByUnitIdAccessBody = {
 				 * @type string
 				 */
 				realmId: string;
+				/**
+				 * @default 'member'
+				 * @type string
+				 */
+				relation: PutApiGovernanceUnitByUnitIdAccessRequestSubjectRelationEnum;
 		  }
 		| {
 				/**
@@ -23789,6 +23848,14 @@ export type GetApiGovernanceUnitByUnitIdAccessCandidatesQuery = {
 	limit?: string | number;
 };
 
+export const GetApiGovernanceUnitByUnitIdAccessCandidatesStatus200ItemsSubjectRelationEnum = {
+	member: "member",
+	access_manager: "access_manager",
+} as const;
+
+export type GetApiGovernanceUnitByUnitIdAccessCandidatesStatus200ItemsSubjectRelationEnum =
+	(typeof GetApiGovernanceUnitByUnitIdAccessCandidatesStatus200ItemsSubjectRelationEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessCandidatesStatus200ItemsSubjectRelationEnum];
+
 /**
  * @type object
  */
@@ -23821,6 +23888,11 @@ export type GetApiGovernanceUnitByUnitIdAccessCandidatesStatus200 = {
 					 * @type string
 					 */
 					realmId: string;
+					/**
+					 * @default 'member'
+					 * @type string
+					 */
+					relation: GetApiGovernanceUnitByUnitIdAccessCandidatesStatus200ItemsSubjectRelationEnum;
 			  }
 			| {
 					/**
@@ -23949,6 +24021,8 @@ export const GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsPermis
 	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.tags.manage": "realm.tags.manage",
+	"realm.tag-voting.update": "realm.tag-voting.update",
+	"realm.tag-contexts.manage": "realm.tag-contexts.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
 	"entity.association.credit.direct": "entity.association.credit.direct",
@@ -24651,6 +24725,8 @@ export const GetApiGovernanceUnitAccessInvitationsStatus200ItemsPermissionsEnum 
 	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.tags.manage": "realm.tags.manage",
+	"realm.tag-voting.update": "realm.tag-voting.update",
+	"realm.tag-contexts.manage": "realm.tag-contexts.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
 	"entity.association.credit.direct": "entity.association.credit.direct",
@@ -24818,6 +24894,8 @@ export const GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsPermissi
 	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.tags.manage": "realm.tags.manage",
+	"realm.tag-voting.update": "realm.tag-voting.update",
+	"realm.tag-contexts.manage": "realm.tag-contexts.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
 	"entity.association.credit.direct": "entity.association.credit.direct",
@@ -25043,6 +25121,8 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200PermissionsE
 	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.tags.manage": "realm.tags.manage",
+	"realm.tag-voting.update": "realm.tag-voting.update",
+	"realm.tag-contexts.manage": "realm.tag-contexts.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
 	"entity.association.credit.direct": "entity.association.credit.direct",
@@ -25299,6 +25379,8 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsRequestPermissionsEnu
 	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.tags.manage": "realm.tags.manage",
+	"realm.tag-voting.update": "realm.tag-voting.update",
+	"realm.tag-contexts.manage": "realm.tag-contexts.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
 	"entity.association.credit.direct": "entity.association.credit.direct",
@@ -25413,6 +25495,8 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptS
 		"realm.rules.update": "realm.rules.update",
 		"realm.pins.manage": "realm.pins.manage",
 		"realm.tags.manage": "realm.tags.manage",
+		"realm.tag-voting.update": "realm.tag-voting.update",
+		"realm.tag-contexts.manage": "realm.tag-contexts.manage",
 		"realm.units.moderate": "realm.units.moderate",
 		"entity.association.credit.request": "entity.association.credit.request",
 		"entity.association.credit.direct": "entity.association.credit.direct",
@@ -25657,6 +25741,8 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecline
 		"realm.rules.update": "realm.rules.update",
 		"realm.pins.manage": "realm.pins.manage",
 		"realm.tags.manage": "realm.tags.manage",
+		"realm.tag-voting.update": "realm.tag-voting.update",
+		"realm.tag-contexts.manage": "realm.tag-contexts.manage",
 		"realm.units.moderate": "realm.units.moderate",
 		"entity.association.credit.request": "entity.association.credit.request",
 		"entity.association.credit.direct": "entity.association.credit.direct",
@@ -40770,6 +40856,8 @@ export const GetApiUsersMeStatus200PlatformCapabilitiesEnum = {
 	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.tags.manage": "realm.tags.manage",
+	"realm.tag-voting.update": "realm.tag-voting.update",
+	"realm.tag-contexts.manage": "realm.tag-contexts.manage",
 	"realm.units.moderate": "realm.units.moderate",
 } as const;
 
@@ -46537,6 +46625,8 @@ export const GetApiPlatformAccessPolicyStatus200CapabilitiesEnum = {
 	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.tags.manage": "realm.tags.manage",
+	"realm.tag-voting.update": "realm.tag-voting.update",
+	"realm.tag-contexts.manage": "realm.tag-contexts.manage",
 	"realm.units.moderate": "realm.units.moderate",
 } as const;
 
@@ -46663,6 +46753,8 @@ export const GetApiPlatformAccessProfilesStatus200ItemsGrantsCapabilityEnum = {
 	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.tags.manage": "realm.tags.manage",
+	"realm.tag-voting.update": "realm.tag-voting.update",
+	"realm.tag-contexts.manage": "realm.tag-contexts.manage",
 	"realm.units.moderate": "realm.units.moderate",
 } as const;
 
@@ -46846,6 +46938,8 @@ export const GetApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnu
 	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.tags.manage": "realm.tags.manage",
+	"realm.tag-voting.update": "realm.tag-voting.update",
+	"realm.tag-contexts.manage": "realm.tag-contexts.manage",
 	"realm.units.moderate": "realm.units.moderate",
 } as const;
 
@@ -47054,6 +47148,8 @@ export const PutApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnu
 	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.tags.manage": "realm.tags.manage",
+	"realm.tag-voting.update": "realm.tag-voting.update",
+	"realm.tag-contexts.manage": "realm.tag-contexts.manage",
 	"realm.units.moderate": "realm.units.moderate",
 } as const;
 
@@ -47298,6 +47394,8 @@ export const PutApiPlatformAccessProfilesByProfileIdRequestGrantsCapabilityEnum 
 	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.tags.manage": "realm.tags.manage",
+	"realm.tag-voting.update": "realm.tag-voting.update",
+	"realm.tag-contexts.manage": "realm.tag-contexts.manage",
 	"realm.units.moderate": "realm.units.moderate",
 } as const;
 
@@ -103175,6 +103273,14 @@ export type GetApiRealmsByRealmIdStatus200 = {
 		/**
 		 * @type boolean
 		 */
+		canUpdateTagVoting: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageTagContexts: boolean;
+		/**
+		 * @type boolean
+		 */
 		canModerateUnits: boolean;
 		/**
 		 * @type boolean
@@ -103444,10 +103550,6 @@ export type PatchApiRealmsByRealmIdBody = {
 	 * @type string | undefined
 	 */
 	joinPolicy?: PatchApiRealmsByRealmIdRequestJoinPolicyEnum;
-	/**
-	 * @type boolean | undefined
-	 */
-	realmTagVotingEnabled?: boolean;
 	/**
 	 * @type string | undefined
 	 */
@@ -105336,6 +105438,176 @@ export type DeleteApiRealmsByRealmIdScoreContextResponse =
 	| DeleteApiRealmsByRealmIdScoreContextStatus403
 	| DeleteApiRealmsByRealmIdScoreContextStatus422
 	| DeleteApiRealmsByRealmIdScoreContextStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagVotingPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagVotingStatus200 = {
+	/**
+	 * @type boolean
+	 */
+	enabled: boolean;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagVotingStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagVotingStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: "RealmCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagVotingStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmNotFound'
+		 * @type string
+		 */
+		code: "RealmNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagVotingStatus422 = ValidationError;
+
+export const PutApiRealmsByRealmIdTagVotingStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiRealmsByRealmIdTagVotingStatus429ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdTagVotingStatus429ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdTagVotingStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagVotingStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: PutApiRealmsByRealmIdTagVotingStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagVotingStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagVotingBody = {
+	/**
+	 * @type boolean
+	 */
+	enabled: boolean;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagVotingOptions = {
+	body: PutApiRealmsByRealmIdTagVotingBody;
+	path: PutApiRealmsByRealmIdTagVotingPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagVotingResponses = {
+	"200": PutApiRealmsByRealmIdTagVotingStatus200;
+	"400": PutApiRealmsByRealmIdTagVotingStatus400;
+	"403": PutApiRealmsByRealmIdTagVotingStatus403;
+	"404": PutApiRealmsByRealmIdTagVotingStatus404;
+	"422": PutApiRealmsByRealmIdTagVotingStatus422;
+	"429": PutApiRealmsByRealmIdTagVotingStatus429;
+	"500": PutApiRealmsByRealmIdTagVotingStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiRealmsByRealmIdTagVotingResponse =
+	| PutApiRealmsByRealmIdTagVotingStatus200
+	| PutApiRealmsByRealmIdTagVotingStatus400
+	| PutApiRealmsByRealmIdTagVotingStatus403
+	| PutApiRealmsByRealmIdTagVotingStatus404
+	| PutApiRealmsByRealmIdTagVotingStatus422
+	| PutApiRealmsByRealmIdTagVotingStatus429
+	| PutApiRealmsByRealmIdTagVotingStatus500;
 
 /**
  * @type object
@@ -110683,6 +110955,593 @@ export type DeleteApiRealmsByRealmIdPinsByUnitIdResponse =
 /**
  * @type object
  */
+export type PostApiRealmsByRealmIdWikisPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdWikisStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdWikisStatus400 = MalformedRequestBody;
+
+export const PostApiRealmsByRealmIdWikisStatus403ErrorCodeEnum = {
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+	EntityAssociationRestricted: "EntityAssociationRestricted",
+} as const;
+
+export type PostApiRealmsByRealmIdWikisStatus403ErrorCodeEnum =
+	(typeof PostApiRealmsByRealmIdWikisStatus403ErrorCodeEnum)[keyof typeof PostApiRealmsByRealmIdWikisStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdWikisStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: PostApiRealmsByRealmIdWikisStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiRealmsByRealmIdWikisStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	EntityEntryNotFound: "EntityEntryNotFound",
+} as const;
+
+export type PostApiRealmsByRealmIdWikisStatus404ErrorCodeEnum =
+	(typeof PostApiRealmsByRealmIdWikisStatus404ErrorCodeEnum)[keyof typeof PostApiRealmsByRealmIdWikisStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdWikisStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PostApiRealmsByRealmIdWikisStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiRealmsByRealmIdWikisStatus409ErrorCodeEnum = {
+	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
+	PostTargetingLocked: "PostTargetingLocked",
+} as const;
+
+export type PostApiRealmsByRealmIdWikisStatus409ErrorCodeEnum =
+	(typeof PostApiRealmsByRealmIdWikisStatus409ErrorCodeEnum)[keyof typeof PostApiRealmsByRealmIdWikisStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdWikisStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmRulesAcceptanceRequired'
+		 * @type string
+		 */
+		code: PostApiRealmsByRealmIdWikisStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdWikisStatus422 = ValidationError;
+
+export const PostApiRealmsByRealmIdWikisStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiRealmsByRealmIdWikisStatus429ErrorCodeEnum =
+	(typeof PostApiRealmsByRealmIdWikisStatus429ErrorCodeEnum)[keyof typeof PostApiRealmsByRealmIdWikisStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdWikisStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: PostApiRealmsByRealmIdWikisStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdWikisStatus500 = InternalError;
+
+export const PostApiRealmsByRealmIdWikisRequestAccessModeEnum = {
+	community_owned: "community_owned",
+	restricted: "restricted",
+} as const;
+
+export type PostApiRealmsByRealmIdWikisRequestAccessModeEnum =
+	(typeof PostApiRealmsByRealmIdWikisRequestAccessModeEnum)[keyof typeof PostApiRealmsByRealmIdWikisRequestAccessModeEnum];
+
+export const PostApiRealmsByRealmIdWikisRequestLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiRealmsByRealmIdWikisRequestLanguageEnum =
+	(typeof PostApiRealmsByRealmIdWikisRequestLanguageEnum)[keyof typeof PostApiRealmsByRealmIdWikisRequestLanguageEnum];
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdWikisBody = {
+	/**
+	 * @type string | undefined
+	 */
+	accessMode?: PostApiRealmsByRealmIdWikisRequestAccessModeEnum;
+	/**
+	 * @minLength 1
+	 * @maxLength 500
+	 * @type string
+	 */
+	title: string;
+	/**
+	 * @type object
+	 */
+	body: {
+		/**
+		 * @type string
+		 */
+		_type: "portable-text";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		content: (
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type string
+					 */
+					_type: "block";
+					/**
+					 * @type array
+					 */
+					children: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "span";
+								/**
+								 * @type string
+								 */
+								text: string;
+								/**
+								 * @type array | undefined
+								 */
+								marks?: string[];
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "unit-mention";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								unitId: string;
+						  }
+					)[];
+					/**
+					 * @type array | undefined
+					 */
+					markDefs?: {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+					}[];
+					/**
+					 * @type string | undefined
+					 */
+					listItem?: string;
+					/**
+					 * @type string | undefined
+					 */
+					style?: string;
+					/**
+					 * @minLength 1
+					 * @type integer | undefined
+					 */
+					level?: number;
+					[key: string]: unknown;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type string
+					 */
+					_type: "image";
+					/**
+					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+					 * @type string
+					 */
+					assetId: string;
+					/**
+					 * @type string | undefined
+					 */
+					alt?: string;
+					/**
+					 * @type string | undefined
+					 */
+					caption?: string;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @pattern ^(?!(?:block|image)$).+
+					 * @type string
+					 */
+					_type: string;
+					[key: string]: unknown;
+			  }
+		)[];
+	};
+	/**
+	 * @type string
+	 */
+	language: PostApiRealmsByRealmIdWikisRequestLanguageEnum;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	subjectId?: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdWikisOptions = {
+	body: PostApiRealmsByRealmIdWikisBody;
+	path: PostApiRealmsByRealmIdWikisPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdWikisResponses = {
+	"200": PostApiRealmsByRealmIdWikisStatus200;
+	"400": PostApiRealmsByRealmIdWikisStatus400;
+	"403": PostApiRealmsByRealmIdWikisStatus403;
+	"404": PostApiRealmsByRealmIdWikisStatus404;
+	"409": PostApiRealmsByRealmIdWikisStatus409;
+	"422": PostApiRealmsByRealmIdWikisStatus422;
+	"429": PostApiRealmsByRealmIdWikisStatus429;
+	"500": PostApiRealmsByRealmIdWikisStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiRealmsByRealmIdWikisResponse =
+	| PostApiRealmsByRealmIdWikisStatus200
+	| PostApiRealmsByRealmIdWikisStatus400
+	| PostApiRealmsByRealmIdWikisStatus403
+	| PostApiRealmsByRealmIdWikisStatus404
+	| PostApiRealmsByRealmIdWikisStatus409
+	| PostApiRealmsByRealmIdWikisStatus422
+	| PostApiRealmsByRealmIdWikisStatus429
+	| PostApiRealmsByRealmIdWikisStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTagContextsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+export const GetApiRealmsByRealmIdTagContextsLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiRealmsByRealmIdTagContextsLocalizationLanguagesEnum =
+	(typeof GetApiRealmsByRealmIdTagContextsLocalizationLanguagesEnum)[keyof typeof GetApiRealmsByRealmIdTagContextsLocalizationLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTagContextsQuery = {
+	/**
+	 * @type array | undefined
+	 */
+	localizationLanguages?: GetApiRealmsByRealmIdTagContextsLocalizationLanguagesEnum[];
+	/**
+	 * @minLength 1
+	 * @maxLength 1024
+	 * @type string | undefined
+	 */
+	cursor?: string;
+	/**
+	 * @default 50
+	 */
+	limit?: string | number;
+};
+
+export const GetApiRealmsByRealmIdTagContextsStatus200ItemsTagLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiRealmsByRealmIdTagContextsStatus200ItemsTagLanguage =
+	(typeof GetApiRealmsByRealmIdTagContextsStatus200ItemsTagLanguage)[keyof typeof GetApiRealmsByRealmIdTagContextsStatus200ItemsTagLanguage];
+
+export const GetApiRealmsByRealmIdTagContextsStatus200ItemsContextLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiRealmsByRealmIdTagContextsStatus200ItemsContextLanguage =
+	(typeof GetApiRealmsByRealmIdTagContextsStatus200ItemsContextLanguage)[keyof typeof GetApiRealmsByRealmIdTagContextsStatus200ItemsContextLanguage];
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTagContextsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		realmId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		tagId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		contextPostId: string;
+		createdByProfileId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+		/**
+		 * @type boolean
+		 */
+		tagReadable: boolean;
+		tagLanguage: (GetApiRealmsByRealmIdTagContextsStatus200ItemsTagLanguage | null) | null;
+		tagTitle: (string | null) | null;
+		/**
+		 * @type boolean
+		 */
+		contextReadable: boolean;
+		contextLanguage:
+			(GetApiRealmsByRealmIdTagContextsStatus200ItemsContextLanguage | null) | null;
+		contextTitle: (string | null) | null;
+	}[];
+	nextCursor: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTagContextsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: "RealmCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTagContextsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTagContextsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTagContextsOptions = {
+	body?: never;
+	path: GetApiRealmsByRealmIdTagContextsPath;
+	query?: GetApiRealmsByRealmIdTagContextsQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTagContextsResponses = {
+	"200": GetApiRealmsByRealmIdTagContextsStatus200;
+	"403": GetApiRealmsByRealmIdTagContextsStatus403;
+	"422": GetApiRealmsByRealmIdTagContextsStatus422;
+	"500": GetApiRealmsByRealmIdTagContextsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiRealmsByRealmIdTagContextsResponse =
+	| GetApiRealmsByRealmIdTagContextsStatus200
+	| GetApiRealmsByRealmIdTagContextsStatus403
+	| GetApiRealmsByRealmIdTagContextsStatus422
+	| GetApiRealmsByRealmIdTagContextsStatus500;
+
+/**
+ * @type object
+ */
 export type PostApiRealmsByRealmIdTagContextsPath = {
 	/**
 	 * @description
@@ -110910,9 +111769,9 @@ export type PostApiRealmsByRealmIdTagContextsBody = {
 	 */
 	tagId: string;
 	/**
-	 * @type string
+	 * @type string | undefined
 	 */
-	accessMode: PostApiRealmsByRealmIdTagContextsRequestAccessModeEnum;
+	accessMode?: PostApiRealmsByRealmIdTagContextsRequestAccessModeEnum;
 	/**
 	 * @minLength 1
 	 * @maxLength 500
@@ -111468,6 +112327,160 @@ export type PutApiRealmsByRealmIdTagsByTagIdContextResponse =
 	| PutApiRealmsByRealmIdTagsByTagIdContextStatus409
 	| PutApiRealmsByRealmIdTagsByTagIdContextStatus422
 	| PutApiRealmsByRealmIdTagsByTagIdContextStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdTagsByTagIdContextPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	tagId: string;
+};
+
+/**
+ * @type void
+ */
+export type DeleteApiRealmsByRealmIdTagsByTagIdContextStatus204 = void;
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdTagsByTagIdContextStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: "RealmCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdTagsByTagIdContextStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmTagContextNotFound'
+		 * @type string
+		 */
+		code: "RealmTagContextNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdTagsByTagIdContextStatus422 = ValidationError;
+
+export const DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429ErrorCodeEnum =
+	(typeof DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdTagsByTagIdContextStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdTagsByTagIdContextOptions = {
+	body?: never;
+	path: DeleteApiRealmsByRealmIdTagsByTagIdContextPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdTagsByTagIdContextResponses = {
+	"204": DeleteApiRealmsByRealmIdTagsByTagIdContextStatus204;
+	"403": DeleteApiRealmsByRealmIdTagsByTagIdContextStatus403;
+	"404": DeleteApiRealmsByRealmIdTagsByTagIdContextStatus404;
+	"422": DeleteApiRealmsByRealmIdTagsByTagIdContextStatus422;
+	"429": DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429;
+	"500": DeleteApiRealmsByRealmIdTagsByTagIdContextStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiRealmsByRealmIdTagsByTagIdContextResponse =
+	| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus204
+	| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus403
+	| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus404
+	| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus422
+	| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429
+	| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus500;
 
 /**
  * @type object
