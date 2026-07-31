@@ -16,6 +16,42 @@ export default {
 	backToHistory: "수정 기록으로 돌아가기",
 	backToEditor: "편집기로 돌아가기",
 	bytes: "바이트",
+	visibility: {
+		hiddenBadge: "숨김",
+		suppressedBadge: "엄격히 제한됨",
+		protectedSummary: "편집 요약이 보호됨",
+		manage: "공개 범위 관리",
+		title: "수정본 공개 범위 관리",
+		description:
+			"수정본 내용, 편집 요약 또는 편집자 정보에 대한 접근을 제한합니다. 모든 변경 사항은 감사 기록에 남습니다.",
+		copyrightPreset: "저작권 보호 적용",
+		copyrightPresetDescription:
+			"내용과 편집 요약을 숨겨 억제 권한이 있는 담당자만 볼 수 있도록 합니다.",
+		levelLabel: "보호 수준",
+		levels: {
+			visible: "공개",
+			hidden: "일반 독자에게 숨김",
+			suppressed: "억제 담당자만",
+		},
+		levelDescriptions: {
+			visible: "이 유닛을 읽을 수 있는 모든 사용자가 수정본을 볼 수 있습니다.",
+			hidden: "플랫폼 중재 권한이 있는 담당자만 선택한 정보를 볼 수 있습니다.",
+			suppressed: "억제 권한이 있는 담당자만 선택한 정보를 볼 수 있습니다.",
+		},
+		fieldsLabel: "보호할 정보",
+		fields: {
+			content: "수정본 내용",
+			summary: "편집 요약",
+			actor: "편집자 정보",
+		},
+		currentRevisionContent:
+			"현재 수정본의 내용은 숨길 수 없습니다. 문제가 없는 새 수정본을 먼저 게시한 뒤 이전 수정본을 보호하세요.",
+		reasonLabel: "사유",
+		selectReason: "사유 선택",
+		atLeastOneField: "보호할 항목을 하나 이상 선택하세요.",
+		cancel: "취소",
+		save: "공개 범위 저장",
+	},
 	structureKinds: {
 		create: "구조 생성됨",
 		update: "구조 업데이트됨",

@@ -5,7 +5,7 @@ import Elysia, { t, type Static } from "elysia";
 
 import { recordAuditEvent } from "../../audit";
 import session, { resolveIdentity } from "../../auth/session";
-import { database } from "../../database";
+import { database, type DatabaseExecutor } from "../../database";
 import { firstUnitLocalizationTitle } from "../../units/localization";
 import {
 	revisionContent,
@@ -19,8 +19,18 @@ import {
 import { parseJsonCursor } from "../../pagination";
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import {
+	canViewRestrictedRevisionFields,
+	canViewRevisionField,
+	createRevisionVisibility,
+	requiredRevisionVisibilityCapability,
+	revisionVisibilitiesEqual,
+	revisionVisibilityFromStorage,
+	revisionVisibilityToStorage,
+} from "../../history/visibility";
+import {
 	getUnitRevisionSlotContent,
 	getUnitRevisionDocuments,
+	lockUnitHistory,
 	parseUnitRevisionSlotIdentity,
 	restoreUnitRevision,
 	undoUnitRevision,
@@ -95,6 +105,8 @@ const summarySelection = {
 	minor: unitRevision.minor,
 	byteSize: unitRevision.byteSize,
 	sizeDelta: sql<number>`${unitRevision.byteSize} - coalesce(${parentRevision.byteSize}, 0)`,
+	parentContentHidden: parentRevision.contentHidden,
+	parentSuppressed: parentRevision.suppressed,
 	contentHidden: unitRevision.contentHidden,
 	summaryHidden: unitRevision.summaryHidden,
 	actorHidden: unitRevision.actorHidden,
@@ -106,8 +118,8 @@ const summarySelection = {
 
 type SummaryRow = Awaited<ReturnType<typeof selectSummaries>>[number];
 
-function selectSummaries() {
-	return database
+function selectSummaries(executor: DatabaseExecutor = database) {
+	return executor
 		.select(summarySelection)
 		.from(unitRevision)
 		.leftJoin(parentRevision, eq(parentRevision.id, unitRevision.parentRevisionId))
@@ -125,36 +137,33 @@ async function getVisibilityAccess(
 	return { moderate, suppress };
 }
 
-function canSeeHidden(row: SummaryRow, access: { moderate: boolean; suppress: boolean }) {
-	return row.suppressed ? access.suppress : access.moderate;
-}
-
 function presentSummary(row: SummaryRow, access: { moderate: boolean; suppress: boolean }) {
-	const canSee = canSeeHidden(row, access);
+	const visibility = revisionVisibilityFromStorage(row);
+	const canSeeRestrictedFields = canViewRestrictedRevisionFields(visibility, access);
 	return {
 		id: row.id,
 		unitId: row.unitId,
 		parentRevisionId: row.parentRevisionId,
-		actorProfileId: row.actorHidden && !canSee ? null : row.actorProfileId,
-		actorName: row.actorHidden && !canSee ? null : row.actorName,
-		editSummary: row.summaryHidden && !canSee ? null : row.editSummary,
+		actorProfileId: row.actorHidden && !canSeeRestrictedFields ? null : row.actorProfileId,
+		actorName: row.actorHidden && !canSeeRestrictedFields ? null : row.actorName,
+		editSummary: row.summaryHidden && !canSeeRestrictedFields ? null : row.editSummary,
 		minor: row.minor,
 		byteSize: row.byteSize,
 		sizeDelta: row.sizeDelta,
 		createdAt: row.createdAt,
 		tags: row.tags,
-		visibility: {
-			contentHidden: row.contentHidden,
-			summaryHidden: row.summaryHidden,
-			actorHidden: row.actorHidden,
-			suppressed: row.suppressed,
-		},
+		visibility,
+		contentAvailable: canViewRevisionField(visibility, "content", access),
+		parentContentAvailable:
+			row.parentRevisionId === null ||
+			!row.parentContentHidden ||
+			(row.parentSuppressed ? access.suppress : access.moderate),
 		isCurrent: row.currentRevisionId === row.id,
 	};
 }
 
-async function findSummary(revisionId: string) {
-	const [row] = await selectSummaries().where(eq(unitRevision.id, revisionId)).limit(1);
+async function findSummary(revisionId: string, executor: DatabaseExecutor = database) {
+	const [row] = await selectSummaries(executor).where(eq(unitRevision.id, revisionId)).limit(1);
 	if (!row) throw new UnitRevisionNotFound();
 	return row;
 }
@@ -234,7 +243,11 @@ export default new Elysia({ prefix: "/history" })
 			const last = items.at(-1);
 			return {
 				items: items.map((row) => presentSummary(row, access)),
-				capabilities: { canRestore },
+				capabilities: {
+					canRestore,
+					canModerate: access.moderate,
+					canSuppress: access.suppress,
+				},
 				nextCursor:
 					rows.length > limit && last
 						? encodeCursor(scope, last.createdAt, last.id)
@@ -259,7 +272,16 @@ export default new Elysia({ prefix: "/history" })
 			const row = await findSummary(params.revisionId);
 			await authorization.unit.ensureCanRead(row.unitId);
 			const access = await getVisibilityAccess(authorization);
-			const canSeeContent = !row.contentHidden || canSeeHidden(row, access);
+			const canSeeContent = canViewRevisionField(
+				revisionVisibilityFromStorage(row),
+				"content",
+				access,
+			);
+			if (!canSeeContent)
+				return {
+					...presentSummary(row, access),
+					slots: [],
+				} satisfies Static<typeof UnitRevisionResponse>;
 			const { slots, documents } = await database.transaction(async (tx) => ({
 				slots: await tx
 					.select({
@@ -272,17 +294,13 @@ export default new Elysia({ prefix: "/history" })
 					.innerJoin(revisionContent, eq(revisionContent.id, unitRevisionSlot.contentId))
 					.where(eq(unitRevisionSlot.revisionId, row.id))
 					.orderBy(unitRevisionSlot.role, unitRevisionSlot.slotKey),
-				documents: canSeeContent
-					? await getUnitRevisionDocuments(tx, row.id)
-					: { localizations: {} },
+				documents: await getUnitRevisionDocuments(tx, row.id),
 			}));
 			return {
 				...presentSummary(row, access),
 				slots: slots.map((slot) => {
 					const identity = parseUnitRevisionSlotIdentity(slot);
-					const content = canSeeContent
-						? getUnitRevisionSlotContent(documents, identity)
-						: null;
+					const content = getUnitRevisionSlotContent(documents, identity);
 					return identity.role === "localization"
 						? {
 								role: identity.role,
@@ -322,8 +340,8 @@ export default new Elysia({ prefix: "/history" })
 			if (from.unitId !== params.unitId || to.unitId !== params.unitId)
 				throw new UnitRevisionNotFound();
 			if (
-				(from.contentHidden && !canSeeHidden(from, access)) ||
-				(to.contentHidden && !canSeeHidden(to, access))
+				!canViewRevisionField(revisionVisibilityFromStorage(from), "content", access) ||
+				!canViewRevisionField(revisionVisibilityFromStorage(to), "content", access)
 			)
 				throw new UnitRevisionNotFound();
 			const [fromDocuments, toDocuments] = await database.transaction(async (tx) => [
@@ -359,7 +377,7 @@ export default new Elysia({ prefix: "/history" })
 			const source = await findSummary(params.revisionId);
 			if (source.unitId !== params.unitId) throw new UnitRevisionNotFound();
 			const access = await getVisibilityAccess(authorization);
-			if (source.contentHidden && !canSeeHidden(source, access))
+			if (!canViewRevisionField(revisionVisibilityFromStorage(source), "content", access))
 				throw new UnitRevisionNotFound();
 			const result = await database.transaction((tx) =>
 				restoreUnitRevision(tx, {
@@ -403,11 +421,11 @@ export default new Elysia({ prefix: "/history" })
 			const target = await findSummary(params.revisionId);
 			if (target.unitId !== params.unitId) throw new UnitRevisionNotFound();
 			const access = await getVisibilityAccess(authorization);
-			if (target.contentHidden && !canSeeHidden(target, access))
+			if (!canViewRevisionField(revisionVisibilityFromStorage(target), "content", access))
 				throw new UnitRevisionNotFound();
 			if (target.parentRevisionId) {
 				const parent = await findSummary(target.parentRevisionId);
-				if (parent.contentHidden && !canSeeHidden(parent, access))
+				if (!canViewRevisionField(revisionVisibilityFromStorage(parent), "content", access))
 					throw new UnitRevisionNotFound();
 			}
 			const result = await database.transaction((tx) =>
@@ -448,21 +466,26 @@ export default new Elysia({ prefix: "/history" })
 	.patch(
 		"/unit-revisions/:revisionId/visibility",
 		async ({ params, body, profile, authorization }) => {
-			const current = await findSummary(params.revisionId);
-			if (body.contentHidden && current.currentRevisionId === current.id)
-				throw new CurrentRevisionContentVisibilityForbidden();
-			if (current.suppressed || body.suppressed)
-				await authorization.platform.ensureCapability("platform.suppress");
-			else await authorization.platform.ensureCapability("platform.moderate");
+			const initial = await findSummary(params.revisionId);
+			const requestedVisibility = createRevisionVisibility(
+				body.visibility.kind,
+				body.visibility.kind === "visible" ? [] : body.visibility.hiddenFields,
+			);
 			await database.transaction(async (tx) => {
+				await lockUnitHistory(tx, initial.unitId);
+				const current = await findSummary(params.revisionId, tx);
+				const currentVisibility = revisionVisibilityFromStorage(current);
+				const storedVisibility = revisionVisibilityToStorage(requestedVisibility);
+				if (storedVisibility.contentHidden && current.currentRevisionId === current.id)
+					throw new CurrentRevisionContentVisibilityForbidden();
+				await authorization.platform.ensureCapability(
+					requiredRevisionVisibilityCapability(currentVisibility, requestedVisibility),
+					tx,
+				);
+				if (revisionVisibilitiesEqual(currentVisibility, requestedVisibility)) return;
 				await tx
 					.update(unitRevision)
-					.set({
-						contentHidden: body.contentHidden,
-						summaryHidden: body.summaryHidden,
-						actorHidden: body.actorHidden,
-						suppressed: body.suppressed,
-					})
+					.set(storedVisibility)
 					.where(eq(unitRevision.id, params.revisionId));
 				await recordAuditEvent(tx, {
 					category: "admin_activity",
@@ -473,10 +496,8 @@ export default new Elysia({ prefix: "/history" })
 					reasonCode: body.reasonCode,
 					target: { kind: "unit_revision", id: params.revisionId },
 					details: {
-						contentHidden: body.contentHidden,
-						summaryHidden: body.summaryHidden,
-						actorHidden: body.actorHidden,
-						suppressed: body.suppressed,
+						previousVisibility: currentVisibility,
+						nextVisibility: requestedVisibility,
 					},
 				});
 			});

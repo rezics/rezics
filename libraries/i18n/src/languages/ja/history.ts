@@ -16,6 +16,42 @@ export default {
 	backToHistory: "改訂履歴に戻る",
 	backToEditor: "編集画面に戻る",
 	bytes: "バイト",
+	visibility: {
+		hiddenBadge: "非表示",
+		suppressedBadge: "厳格に制限",
+		protectedSummary: "編集要約は保護されています",
+		manage: "表示範囲を管理",
+		title: "改訂の表示範囲を管理",
+		description:
+			"改訂内容、編集要約、または編集者情報へのアクセスを制限します。すべての変更は監査記録に残ります。",
+		copyrightPreset: "著作権保護を適用",
+		copyrightPresetDescription:
+			"内容と編集要約を非表示にし、抑制権限を持つ担当者だけが閲覧できるようにします。",
+		levelLabel: "保護レベル",
+		levels: {
+			visible: "表示",
+			hidden: "一般の読者には非表示",
+			suppressed: "抑制担当者のみ",
+		},
+		levelDescriptions: {
+			visible: "このユニットを閲覧できるすべての人が改訂を確認できます。",
+			hidden: "プラットフォームのモデレーション権限を持つ担当者だけが選択した情報を確認できます。",
+			suppressed: "抑制権限を持つ担当者だけが選択した情報を確認できます。",
+		},
+		fieldsLabel: "保護する情報",
+		fields: {
+			content: "改訂内容",
+			summary: "編集要約",
+			actor: "編集者情報",
+		},
+		currentRevisionContent:
+			"現在の改訂内容は非表示にできません。問題のない新しい改訂を先に公開してから、古い改訂を保護してください。",
+		reasonLabel: "理由",
+		selectReason: "理由を選択",
+		atLeastOneField: "保護する項目を1つ以上選択してください。",
+		cancel: "キャンセル",
+		save: "表示範囲を保存",
+	},
 	structureKinds: {
 		create: "構造作成済み",
 		update: "構造更新済み",

@@ -1,5 +1,6 @@
 import { type Static, t } from "elysia";
 import { GovernanceReasonCodeValues } from "../../database/schema/contract-values";
+import { RevisionHiddenFieldValues } from "../../history/visibility";
 import { UnitRevisionChangeTags } from "../../units/history";
 import { ContentLanguage, DateTime, Uuid } from "../schema";
 
@@ -32,23 +33,32 @@ export const RevisionActionBody = t.Object(
 	{ additionalProperties: false },
 );
 
+const RestrictedRevisionVisibility = (kind: "hidden" | "suppressed") =>
+	t.Object(
+		{
+			kind: t.Literal(kind),
+			hiddenFields: t.Array(t.UnionEnum(RevisionHiddenFieldValues), {
+				minItems: 1,
+				maxItems: RevisionHiddenFieldValues.length,
+				uniqueItems: true,
+			}),
+		},
+		{ additionalProperties: false },
+	);
+
+export const RevisionVisibility = t.Union([
+	t.Object({ kind: t.Literal("visible") }, { additionalProperties: false }),
+	RestrictedRevisionVisibility("hidden"),
+	RestrictedRevisionVisibility("suppressed"),
+]);
+
 export const RevisionVisibilityBody = t.Object(
 	{
-		contentHidden: t.Boolean(),
-		summaryHidden: t.Boolean(),
-		actorHidden: t.Boolean(),
-		suppressed: t.Boolean(),
+		visibility: RevisionVisibility,
 		reasonCode: t.UnionEnum(GovernanceReasonCodeValues, { default: undefined }),
 	},
 	{ additionalProperties: false },
 );
-
-export const RevisionVisibility = t.Object({
-	contentHidden: t.Boolean(),
-	summaryHidden: t.Boolean(),
-	actorHidden: t.Boolean(),
-	suppressed: t.Boolean(),
-});
 
 export const UnitRevisionSummaryResponse = t.Object({
 	id: Uuid,
@@ -63,6 +73,8 @@ export const UnitRevisionSummaryResponse = t.Object({
 	createdAt: DateTime,
 	tags: t.Array(t.String()),
 	visibility: RevisionVisibility,
+	contentAvailable: t.Boolean(),
+	parentContentAvailable: t.Boolean(),
 	isCurrent: t.Boolean(),
 });
 
@@ -73,7 +85,13 @@ export const UnitHistoryResponse = t.Object({
 
 export const UnitScopedHistoryResponse = t.Intersect([
 	UnitHistoryResponse,
-	t.Object({ capabilities: t.Object({ canRestore: t.Boolean() }) }),
+	t.Object({
+		capabilities: t.Object({
+			canRestore: t.Boolean(),
+			canModerate: t.Boolean(),
+			canSuppress: t.Boolean(),
+		}),
+	}),
 ]);
 
 const RevisionSlotContentResponse = {

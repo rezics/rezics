@@ -17,6 +17,43 @@ export default {
 	backToHistory: "Retour à l’historique des révisions",
 	backToEditor: "Retour à l’éditeur",
 	bytes: "octets",
+	visibility: {
+		hiddenBadge: "Masquée",
+		suppressedBadge: "Accès restreint",
+		protectedSummary: "Résumé de modification protégé",
+		manage: "Gérer la visibilité",
+		title: "Gérer la visibilité de la révision",
+		description:
+			"Restreignez l’accès au contenu, au résumé de modification ou à l’identité de l’éditeur. Chaque changement est audité.",
+		copyrightPreset: "Appliquer la protection du droit d’auteur",
+		copyrightPresetDescription:
+			"Masquez le contenu et le résumé afin que seules les personnes autorisées à supprimer puissent les consulter.",
+		levelLabel: "Niveau de protection",
+		levels: {
+			visible: "Visible",
+			hidden: "Masquée aux lecteurs",
+			suppressed: "Suppresseurs uniquement",
+		},
+		levelDescriptions: {
+			visible: "Toute personne pouvant lire cette Unit peut consulter la révision.",
+			hidden: "Seules les personnes autorisées à modérer la plateforme peuvent consulter les données sélectionnées.",
+			suppressed:
+				"Seules les personnes autorisées à supprimer peuvent consulter les données sélectionnées.",
+		},
+		fieldsLabel: "Données protégées",
+		fields: {
+			content: "Contenu de la révision",
+			summary: "Résumé de modification",
+			actor: "Identité de l’éditeur",
+		},
+		currentRevisionContent:
+			"Le contenu de la révision actuelle ne peut pas être masqué. Publiez d’abord une révision assainie, puis protégez l’ancienne.",
+		reasonLabel: "Motif",
+		selectReason: "Sélectionner un motif",
+		atLeastOneField: "Sélectionnez au moins un élément à protéger.",
+		cancel: "Annuler",
+		save: "Enregistrer la visibilité",
+	},
 	structureKinds: {
 		create: "Structure créée",
 		update: "Structure mise à jour",

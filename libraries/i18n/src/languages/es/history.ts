@@ -17,6 +17,43 @@ export default {
 	backToHistory: "Volver al historial de revisiones",
 	backToEditor: "Volver al editor",
 	bytes: "bytes",
+	visibility: {
+		hiddenBadge: "Oculta",
+		suppressedBadge: "Acceso restringido",
+		protectedSummary: "Resumen de la edición protegido",
+		manage: "Gestionar visibilidad",
+		title: "Gestionar la visibilidad de la revisión",
+		description:
+			"Restringe el acceso al contenido, al resumen de la edición o a la identidad del editor. Todos los cambios quedan auditados.",
+		copyrightPreset: "Aplicar protección de derechos de autor",
+		copyrightPresetDescription:
+			"Oculta el contenido y el resumen para que solo puedan verlos quienes tengan acceso de supresión.",
+		levelLabel: "Nivel de protección",
+		levels: {
+			visible: "Visible",
+			hidden: "Oculta a los lectores",
+			suppressed: "Solo supresores",
+		},
+		levelDescriptions: {
+			visible: "Cualquiera que pueda leer esta Unit puede ver la revisión.",
+			hidden: "Solo quienes tengan acceso de moderación de la plataforma pueden ver los datos seleccionados.",
+			suppressed:
+				"Solo quienes tengan acceso de supresión pueden ver los datos seleccionados.",
+		},
+		fieldsLabel: "Datos protegidos",
+		fields: {
+			content: "Contenido de la revisión",
+			summary: "Resumen de la edición",
+			actor: "Identidad del editor",
+		},
+		currentRevisionContent:
+			"No se puede ocultar el contenido de la revisión actual. Publica primero una revisión limpia y protege después la anterior.",
+		reasonLabel: "Motivo",
+		selectReason: "Selecciona un motivo",
+		atLeastOneField: "Selecciona al menos un dato que proteger.",
+		cancel: "Cancelar",
+		save: "Guardar visibilidad",
+	},
 	structureKinds: {
 		create: "Estructura creada",
 		update: "Estructura actualizada",

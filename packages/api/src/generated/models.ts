@@ -63484,6 +63484,15 @@ export type GetApiHistoryUnitsByUnitIdRevisionsQuery = {
 	limit?: string | number;
 };
 
+export const GetApiHistoryUnitsByUnitIdRevisionsStatus200ItemsVisibilityHiddenFieldsEnum = {
+	content: "content",
+	summary: "summary",
+	actor: "actor",
+} as const;
+
+export type GetApiHistoryUnitsByUnitIdRevisionsStatus200ItemsVisibilityHiddenFieldsEnum =
+	(typeof GetApiHistoryUnitsByUnitIdRevisionsStatus200ItemsVisibilityHiddenFieldsEnum)[keyof typeof GetApiHistoryUnitsByUnitIdRevisionsStatus200ItemsVisibilityHiddenFieldsEnum];
+
 export type GetApiHistoryUnitsByUnitIdRevisionsStatus200 = {
 	/**
 	 * @type array
@@ -63521,27 +63530,41 @@ export type GetApiHistoryUnitsByUnitIdRevisionsStatus200 = {
 		 * @type array
 		 */
 		tags: string[];
+		visibility:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "visible";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "hidden";
+					/**
+					 * @type array
+					 */
+					hiddenFields: GetApiHistoryUnitsByUnitIdRevisionsStatus200ItemsVisibilityHiddenFieldsEnum[];
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "suppressed";
+					/**
+					 * @type array
+					 */
+					hiddenFields: GetApiHistoryUnitsByUnitIdRevisionsStatus200ItemsVisibilityHiddenFieldsEnum[];
+			  };
 		/**
-		 * @type object
+		 * @type boolean
 		 */
-		visibility: {
-			/**
-			 * @type boolean
-			 */
-			contentHidden: boolean;
-			/**
-			 * @type boolean
-			 */
-			summaryHidden: boolean;
-			/**
-			 * @type boolean
-			 */
-			actorHidden: boolean;
-			/**
-			 * @type boolean
-			 */
-			suppressed: boolean;
-		};
+		contentAvailable: boolean;
+		/**
+		 * @type boolean
+		 */
+		parentContentAvailable: boolean;
 		/**
 		 * @type boolean
 		 */
@@ -63557,6 +63580,14 @@ export type GetApiHistoryUnitsByUnitIdRevisionsStatus200 = {
 		 * @type boolean
 		 */
 		canRestore: boolean;
+		/**
+		 * @type boolean
+		 */
+		canModerate: boolean;
+		/**
+		 * @type boolean
+		 */
+		canSuppress: boolean;
 	};
 };
 
@@ -63669,6 +63700,15 @@ export type GetApiHistoryUnitRevisionsByRevisionIdPath = {
 	revisionId: string;
 };
 
+export const GetApiHistoryUnitRevisionsByRevisionIdStatus200VisibilityHiddenFieldsEnum = {
+	content: "content",
+	summary: "summary",
+	actor: "actor",
+} as const;
+
+export type GetApiHistoryUnitRevisionsByRevisionIdStatus200VisibilityHiddenFieldsEnum =
+	(typeof GetApiHistoryUnitRevisionsByRevisionIdStatus200VisibilityHiddenFieldsEnum)[keyof typeof GetApiHistoryUnitRevisionsByRevisionIdStatus200VisibilityHiddenFieldsEnum];
+
 export const GetApiHistoryUnitRevisionsByRevisionIdStatus200SlotsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -63715,27 +63755,41 @@ export type GetApiHistoryUnitRevisionsByRevisionIdStatus200 = {
 	 * @type array
 	 */
 	tags: string[];
+	visibility:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "visible";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "hidden";
+				/**
+				 * @type array
+				 */
+				hiddenFields: GetApiHistoryUnitRevisionsByRevisionIdStatus200VisibilityHiddenFieldsEnum[];
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "suppressed";
+				/**
+				 * @type array
+				 */
+				hiddenFields: GetApiHistoryUnitRevisionsByRevisionIdStatus200VisibilityHiddenFieldsEnum[];
+		  };
 	/**
-	 * @type object
+	 * @type boolean
 	 */
-	visibility: {
-		/**
-		 * @type boolean
-		 */
-		contentHidden: boolean;
-		/**
-		 * @type boolean
-		 */
-		summaryHidden: boolean;
-		/**
-		 * @type boolean
-		 */
-		actorHidden: boolean;
-		/**
-		 * @type boolean
-		 */
-		suppressed: boolean;
-	};
+	contentAvailable: boolean;
+	/**
+	 * @type boolean
+	 */
+	parentContentAvailable: boolean;
 	/**
 	 * @type boolean
 	 */
@@ -64662,6 +64716,15 @@ export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus429 = {
  */
 export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus500 = InternalError;
 
+export const PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestVisibilityHiddenFieldsEnum = {
+	content: "content",
+	summary: "summary",
+	actor: "actor",
+} as const;
+
+export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestVisibilityHiddenFieldsEnum =
+	(typeof PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestVisibilityHiddenFieldsEnum)[keyof typeof PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestVisibilityHiddenFieldsEnum];
+
 export const PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestReasonCodeEnum = {
 	content_policy: "content_policy",
 	copyright: "copyright",
@@ -64685,22 +64748,33 @@ export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestReasonCodeE
  * @type object
  */
 export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityBody = {
-	/**
-	 * @type boolean
-	 */
-	contentHidden: boolean;
-	/**
-	 * @type boolean
-	 */
-	summaryHidden: boolean;
-	/**
-	 * @type boolean
-	 */
-	actorHidden: boolean;
-	/**
-	 * @type boolean
-	 */
-	suppressed: boolean;
+	visibility:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "visible";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "hidden";
+				/**
+				 * @type array
+				 */
+				hiddenFields: PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestVisibilityHiddenFieldsEnum[];
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "suppressed";
+				/**
+				 * @type array
+				 */
+				hiddenFields: PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestVisibilityHiddenFieldsEnum[];
+		  };
 	/**
 	 * @type string
 	 */
@@ -64772,6 +64846,15 @@ export type GetApiHistoryRecentChangesQuery = {
 	minor?: boolean | string;
 };
 
+export const GetApiHistoryRecentChangesStatus200ItemsVisibilityHiddenFieldsEnum = {
+	content: "content",
+	summary: "summary",
+	actor: "actor",
+} as const;
+
+export type GetApiHistoryRecentChangesStatus200ItemsVisibilityHiddenFieldsEnum =
+	(typeof GetApiHistoryRecentChangesStatus200ItemsVisibilityHiddenFieldsEnum)[keyof typeof GetApiHistoryRecentChangesStatus200ItemsVisibilityHiddenFieldsEnum];
+
 /**
  * @type object
  */
@@ -64812,27 +64895,41 @@ export type GetApiHistoryRecentChangesStatus200 = {
 		 * @type array
 		 */
 		tags: string[];
+		visibility:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "visible";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "hidden";
+					/**
+					 * @type array
+					 */
+					hiddenFields: GetApiHistoryRecentChangesStatus200ItemsVisibilityHiddenFieldsEnum[];
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "suppressed";
+					/**
+					 * @type array
+					 */
+					hiddenFields: GetApiHistoryRecentChangesStatus200ItemsVisibilityHiddenFieldsEnum[];
+			  };
 		/**
-		 * @type object
+		 * @type boolean
 		 */
-		visibility: {
-			/**
-			 * @type boolean
-			 */
-			contentHidden: boolean;
-			/**
-			 * @type boolean
-			 */
-			summaryHidden: boolean;
-			/**
-			 * @type boolean
-			 */
-			actorHidden: boolean;
-			/**
-			 * @type boolean
-			 */
-			suppressed: boolean;
-		};
+		contentAvailable: boolean;
+		/**
+		 * @type boolean
+		 */
+		parentContentAvailable: boolean;
 		/**
 		 * @type boolean
 		 */
@@ -64948,6 +65045,15 @@ export type GetApiHistoryContributionsByProfileIdQuery = {
 	minor?: boolean | string;
 };
 
+export const GetApiHistoryContributionsByProfileIdStatus200ItemsVisibilityHiddenFieldsEnum = {
+	content: "content",
+	summary: "summary",
+	actor: "actor",
+} as const;
+
+export type GetApiHistoryContributionsByProfileIdStatus200ItemsVisibilityHiddenFieldsEnum =
+	(typeof GetApiHistoryContributionsByProfileIdStatus200ItemsVisibilityHiddenFieldsEnum)[keyof typeof GetApiHistoryContributionsByProfileIdStatus200ItemsVisibilityHiddenFieldsEnum];
+
 /**
  * @type object
  */
@@ -64988,27 +65094,41 @@ export type GetApiHistoryContributionsByProfileIdStatus200 = {
 		 * @type array
 		 */
 		tags: string[];
+		visibility:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "visible";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "hidden";
+					/**
+					 * @type array
+					 */
+					hiddenFields: GetApiHistoryContributionsByProfileIdStatus200ItemsVisibilityHiddenFieldsEnum[];
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "suppressed";
+					/**
+					 * @type array
+					 */
+					hiddenFields: GetApiHistoryContributionsByProfileIdStatus200ItemsVisibilityHiddenFieldsEnum[];
+			  };
 		/**
-		 * @type object
+		 * @type boolean
 		 */
-		visibility: {
-			/**
-			 * @type boolean
-			 */
-			contentHidden: boolean;
-			/**
-			 * @type boolean
-			 */
-			summaryHidden: boolean;
-			/**
-			 * @type boolean
-			 */
-			actorHidden: boolean;
-			/**
-			 * @type boolean
-			 */
-			suppressed: boolean;
-		};
+		contentAvailable: boolean;
+		/**
+		 * @type boolean
+		 */
+		parentContentAvailable: boolean;
 		/**
 		 * @type boolean
 		 */

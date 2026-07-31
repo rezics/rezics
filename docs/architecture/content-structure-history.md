@@ -65,6 +65,30 @@ is a logical snapshot size, not the newly allocated physical bytes for the edit.
 zero for an already-known content hash and must not be inferred from adjacent revisions'
 `byte_size` values.
 
+### Unit revision visibility
+
+Unit revision visibility preserves the immutable revision and its audit trail while restricting
+selected historical data. The API exposes a discriminated state rather than independently writable
+booleans:
+
+- `visible` protects no revision fields;
+- `hidden` protects one or more of the content, edit summary, and actor fields from ordinary
+  readers, while `platform.moderate` can inspect them;
+- `suppressed` protects one or more of those fields from ordinary moderators, while only
+  `platform.suppress` can inspect them.
+
+A restricted state must name at least one protected field. Entering or leaving suppression requires
+`platform.suppress`; all other visibility changes require `platform.moderate`. The current revision
+content cannot be hidden because the live Unit would still publish the same content. An operator
+must first publish or restore a clean revision and then restrict the older revision.
+
+History lists retain a visible placeholder so chronology and parent relationships remain auditable.
+Unauthorized detail reads omit the protected content and its slot structure; compare, restore, and
+undo treat protected content as unavailable. Suppressed revisions are removed from the revision
+search index, and selectively hidden fields are excluded from otherwise indexable revision
+documents. Every visibility mutation uses the Unit history lock and appends its reason and before
+and after visibility states to the platform audit log in the same transaction.
+
 ## Localized content metrics
 
 Word and character counts are rebuildable projections of current localized Portable Text, not

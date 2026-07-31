@@ -84802,6 +84802,8 @@
 															"createdAt",
 															"tags",
 															"visibility",
+															"contentAvailable",
+															"parentContentAvailable",
 															"isCurrent"
 														],
 														"properties": {
@@ -84877,27 +84879,83 @@
 																"items": { "type": "string" }
 															},
 															"visibility": {
-																"type": "object",
-																"required": [
-																	"contentHidden",
-																	"summaryHidden",
-																	"actorHidden",
-																	"suppressed"
-																],
-																"properties": {
-																	"contentHidden": {
-																		"type": "boolean"
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["kind"],
+																		"properties": {
+																			"kind": {
+																				"const": "visible",
+																				"type": "string"
+																			}
+																		}
 																	},
-																	"summaryHidden": {
-																		"type": "boolean"
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"hiddenFields"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "hidden",
+																				"type": "string"
+																			},
+																			"hiddenFields": {
+																				"minItems": 1,
+																				"maxItems": 3,
+																				"uniqueItems": true,
+																				"type": "array",
+																				"items": {
+																					"default": "content",
+																					"type": "string",
+																					"enum": [
+																						"content",
+																						"summary",
+																						"actor"
+																					]
+																				}
+																			}
+																		}
 																	},
-																	"actorHidden": {
-																		"type": "boolean"
-																	},
-																	"suppressed": {
-																		"type": "boolean"
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"hiddenFields"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "suppressed",
+																				"type": "string"
+																			},
+																			"hiddenFields": {
+																				"minItems": 1,
+																				"maxItems": 3,
+																				"uniqueItems": true,
+																				"type": "array",
+																				"items": {
+																					"default": "content",
+																					"type": "string",
+																					"enum": [
+																						"content",
+																						"summary",
+																						"actor"
+																					]
+																				}
+																			}
+																		}
 																	}
-																}
+																]
+															},
+															"contentAvailable": {
+																"type": "boolean"
+															},
+															"parentContentAvailable": {
+																"type": "boolean"
 															},
 															"isCurrent": { "type": "boolean" }
 														}
@@ -84918,9 +84976,15 @@
 											"properties": {
 												"capabilities": {
 													"type": "object",
-													"required": ["canRestore"],
+													"required": [
+														"canRestore",
+														"canModerate",
+														"canSuppress"
+													],
 													"properties": {
-														"canRestore": { "type": "boolean" }
+														"canRestore": { "type": "boolean" },
+														"canModerate": { "type": "boolean" },
+														"canSuppress": { "type": "boolean" }
 													}
 												}
 											}
@@ -85040,6 +85104,8 @@
 												"createdAt",
 												"tags",
 												"visibility",
+												"contentAvailable",
+												"parentContentAvailable",
 												"isCurrent"
 											],
 											"properties": {
@@ -85103,20 +85169,74 @@
 													"items": { "type": "string" }
 												},
 												"visibility": {
-													"type": "object",
-													"required": [
-														"contentHidden",
-														"summaryHidden",
-														"actorHidden",
-														"suppressed"
-													],
-													"properties": {
-														"contentHidden": { "type": "boolean" },
-														"summaryHidden": { "type": "boolean" },
-														"actorHidden": { "type": "boolean" },
-														"suppressed": { "type": "boolean" }
-													}
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["kind"],
+															"properties": {
+																"kind": {
+																	"const": "visible",
+																	"type": "string"
+																}
+															}
+														},
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["kind", "hiddenFields"],
+															"properties": {
+																"kind": {
+																	"const": "hidden",
+																	"type": "string"
+																},
+																"hiddenFields": {
+																	"minItems": 1,
+																	"maxItems": 3,
+																	"uniqueItems": true,
+																	"type": "array",
+																	"items": {
+																		"default": "content",
+																		"type": "string",
+																		"enum": [
+																			"content",
+																			"summary",
+																			"actor"
+																		]
+																	}
+																}
+															}
+														},
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["kind", "hiddenFields"],
+															"properties": {
+																"kind": {
+																	"const": "suppressed",
+																	"type": "string"
+																},
+																"hiddenFields": {
+																	"minItems": 1,
+																	"maxItems": 3,
+																	"uniqueItems": true,
+																	"type": "array",
+																	"items": {
+																		"default": "content",
+																		"type": "string",
+																		"enum": [
+																			"content",
+																			"summary",
+																			"actor"
+																		]
+																	}
+																}
+															}
+														}
+													]
 												},
+												"contentAvailable": { "type": "boolean" },
+												"parentContentAvailable": { "type": "boolean" },
 												"isCurrent": { "type": "boolean" }
 											}
 										},
@@ -85846,18 +85966,61 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": [
-									"contentHidden",
-									"summaryHidden",
-									"actorHidden",
-									"suppressed",
-									"reasonCode"
-								],
+								"required": ["visibility", "reasonCode"],
 								"properties": {
-									"contentHidden": { "type": "boolean" },
-									"summaryHidden": { "type": "boolean" },
-									"actorHidden": { "type": "boolean" },
-									"suppressed": { "type": "boolean" },
+									"visibility": {
+										"anyOf": [
+											{
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["kind"],
+												"properties": {
+													"kind": { "const": "visible", "type": "string" }
+												}
+											},
+											{
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["kind", "hiddenFields"],
+												"properties": {
+													"kind": { "const": "hidden", "type": "string" },
+													"hiddenFields": {
+														"minItems": 1,
+														"maxItems": 3,
+														"uniqueItems": true,
+														"type": "array",
+														"items": {
+															"default": "content",
+															"type": "string",
+															"enum": ["content", "summary", "actor"]
+														}
+													}
+												}
+											},
+											{
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["kind", "hiddenFields"],
+												"properties": {
+													"kind": {
+														"const": "suppressed",
+														"type": "string"
+													},
+													"hiddenFields": {
+														"minItems": 1,
+														"maxItems": 3,
+														"uniqueItems": true,
+														"type": "array",
+														"items": {
+															"default": "content",
+															"type": "string",
+															"enum": ["content", "summary", "actor"]
+														}
+													}
+												}
+											}
+										]
+									},
 									"reasonCode": {
 										"type": "string",
 										"enum": [
@@ -86102,6 +86265,8 @@
 													"createdAt",
 													"tags",
 													"visibility",
+													"contentAvailable",
+													"parentContentAvailable",
 													"isCurrent"
 												],
 												"properties": {
@@ -86168,20 +86333,80 @@
 														"items": { "type": "string" }
 													},
 													"visibility": {
-														"type": "object",
-														"required": [
-															"contentHidden",
-															"summaryHidden",
-															"actorHidden",
-															"suppressed"
-														],
-														"properties": {
-															"contentHidden": { "type": "boolean" },
-															"summaryHidden": { "type": "boolean" },
-															"actorHidden": { "type": "boolean" },
-															"suppressed": { "type": "boolean" }
-														}
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["kind"],
+																"properties": {
+																	"kind": {
+																		"const": "visible",
+																		"type": "string"
+																	}
+																}
+															},
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"kind",
+																	"hiddenFields"
+																],
+																"properties": {
+																	"kind": {
+																		"const": "hidden",
+																		"type": "string"
+																	},
+																	"hiddenFields": {
+																		"minItems": 1,
+																		"maxItems": 3,
+																		"uniqueItems": true,
+																		"type": "array",
+																		"items": {
+																			"default": "content",
+																			"type": "string",
+																			"enum": [
+																				"content",
+																				"summary",
+																				"actor"
+																			]
+																		}
+																	}
+																}
+															},
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"kind",
+																	"hiddenFields"
+																],
+																"properties": {
+																	"kind": {
+																		"const": "suppressed",
+																		"type": "string"
+																	},
+																	"hiddenFields": {
+																		"minItems": 1,
+																		"maxItems": 3,
+																		"uniqueItems": true,
+																		"type": "array",
+																		"items": {
+																			"default": "content",
+																			"type": "string",
+																			"enum": [
+																				"content",
+																				"summary",
+																				"actor"
+																			]
+																		}
+																	}
+																}
+															}
+														]
 													},
+													"contentAvailable": { "type": "boolean" },
+													"parentContentAvailable": { "type": "boolean" },
 													"isCurrent": { "type": "boolean" }
 												}
 											}
@@ -86318,6 +86543,8 @@
 													"createdAt",
 													"tags",
 													"visibility",
+													"contentAvailable",
+													"parentContentAvailable",
 													"isCurrent"
 												],
 												"properties": {
@@ -86384,20 +86611,80 @@
 														"items": { "type": "string" }
 													},
 													"visibility": {
-														"type": "object",
-														"required": [
-															"contentHidden",
-															"summaryHidden",
-															"actorHidden",
-															"suppressed"
-														],
-														"properties": {
-															"contentHidden": { "type": "boolean" },
-															"summaryHidden": { "type": "boolean" },
-															"actorHidden": { "type": "boolean" },
-															"suppressed": { "type": "boolean" }
-														}
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["kind"],
+																"properties": {
+																	"kind": {
+																		"const": "visible",
+																		"type": "string"
+																	}
+																}
+															},
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"kind",
+																	"hiddenFields"
+																],
+																"properties": {
+																	"kind": {
+																		"const": "hidden",
+																		"type": "string"
+																	},
+																	"hiddenFields": {
+																		"minItems": 1,
+																		"maxItems": 3,
+																		"uniqueItems": true,
+																		"type": "array",
+																		"items": {
+																			"default": "content",
+																			"type": "string",
+																			"enum": [
+																				"content",
+																				"summary",
+																				"actor"
+																			]
+																		}
+																	}
+																}
+															},
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"kind",
+																	"hiddenFields"
+																],
+																"properties": {
+																	"kind": {
+																		"const": "suppressed",
+																		"type": "string"
+																	},
+																	"hiddenFields": {
+																		"minItems": 1,
+																		"maxItems": 3,
+																		"uniqueItems": true,
+																		"type": "array",
+																		"items": {
+																			"default": "content",
+																			"type": "string",
+																			"enum": [
+																				"content",
+																				"summary",
+																				"actor"
+																			]
+																		}
+																	}
+																}
+															}
+														]
 													},
+													"contentAvailable": { "type": "boolean" },
+													"parentContentAvailable": { "type": "boolean" },
 													"isCurrent": { "type": "boolean" }
 												}
 											}

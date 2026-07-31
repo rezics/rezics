@@ -17,6 +17,43 @@ export default {
 	backToHistory: "Zurück zum Versionsverlauf",
 	backToEditor: "Zurück zum Editor",
 	bytes: "Byte",
+	visibility: {
+		hiddenBadge: "Ausgeblendet",
+		suppressedBadge: "Streng beschränkt",
+		protectedSummary: "Änderungszusammenfassung geschützt",
+		manage: "Sichtbarkeit verwalten",
+		title: "Sichtbarkeit der Version verwalten",
+		description:
+			"Beschränke den Zugriff auf den Inhalt, die Änderungszusammenfassung oder die Identität der bearbeitenden Person. Jede Änderung wird protokolliert.",
+		copyrightPreset: "Urheberrechtsschutz anwenden",
+		copyrightPresetDescription:
+			"Inhalt und Änderungszusammenfassung ausblenden, sodass nur Personen mit Unterdrückungsberechtigung sie sehen können.",
+		levelLabel: "Schutzstufe",
+		levels: {
+			visible: "Sichtbar",
+			hidden: "Vor Lesenden verborgen",
+			suppressed: "Nur Unterdrückungsberechtigte",
+		},
+		levelDescriptions: {
+			visible: "Alle mit Lesezugriff auf diese Unit können die Version sehen.",
+			hidden: "Nur Personen mit Plattform-Moderationszugriff können die gewählten Daten sehen.",
+			suppressed:
+				"Nur Personen mit Unterdrückungsberechtigung können die gewählten Daten sehen.",
+		},
+		fieldsLabel: "Geschützte Daten",
+		fields: {
+			content: "Versionsinhalt",
+			summary: "Änderungszusammenfassung",
+			actor: "Identität der bearbeitenden Person",
+		},
+		currentRevisionContent:
+			"Der Inhalt der aktuellen Version kann nicht ausgeblendet werden. Veröffentliche zuerst eine bereinigte Version und schütze dann die ältere.",
+		reasonLabel: "Grund",
+		selectReason: "Grund auswählen",
+		atLeastOneField: "Wähle mindestens einen zu schützenden Eintrag aus.",
+		cancel: "Abbrechen",
+		save: "Sichtbarkeit speichern",
+	},
 	structureKinds: {
 		create: "Struktur erstellt",
 		update: "Struktur aktualisiert",

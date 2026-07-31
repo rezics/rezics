@@ -24,6 +24,8 @@ import { AppLink as Link } from "@/features/application-shell/components/app-lin
 import { profileHref } from "@/features/profiles/profile-route";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import { canViewRevisionField } from "../model/revision-visibility";
+import { UnitRevisionVisibilityDialog } from "./unit-revision-visibility-dialog";
 
 export interface UnitRevisionHistoryProps {
 	unitId: string;
@@ -46,7 +48,9 @@ export function UnitRevisionHistory({ unitId, compareHref, onChanged }: UnitRevi
 	if (!history.data) return <QueryPending />;
 
 	const currentRevision = history.data.items.find((revision) => revision.isCurrent);
-	const canRestore = history.data.capabilities.canRestore;
+	const capabilities = history.data.capabilities;
+	const canRestore = capabilities.canRestore;
+	const canManageVisibility = capabilities.canModerate || capabilities.canSuppress;
 	const pending = restore.isPending || undo.isPending;
 	const refresh = async () => {
 		await queryClient.invalidateQueries({
@@ -60,7 +64,15 @@ export function UnitRevisionHistory({ unitId, compareHref, onChanged }: UnitRevi
 			<RequestFailure error={restore.error ?? undo.error} />
 			{history.data.items.length ? (
 				history.data.items.map((revision) => {
-					const hidden = Object.values(revision.visibility).some(Boolean);
+					const summaryAvailable = canViewRevisionField(
+						revision.visibility,
+						"summary",
+						capabilities,
+					);
+					const canManageRevisionVisibility =
+						revision.visibility.kind === "suppressed"
+							? capabilities.canSuppress
+							: canManageVisibility;
 					return (
 						<Card appearance="outlined" key={revision.id}>
 							<CardHeader>
@@ -77,9 +89,11 @@ export function UnitRevisionHistory({ unitId, compareHref, onChanged }: UnitRevi
 									{revision.minor ? (
 										<Badge variant="secondary">{t.history.minorEdit}</Badge>
 									) : null}
-									{hidden ? (
+									{revision.visibility.kind !== "visible" ? (
 										<Badge variant="destructive">
-											{t.history.hiddenRevision}
+											{revision.visibility.kind === "suppressed"
+												? t.history.visibility.suppressedBadge
+												: t.history.visibility.hiddenBadge}
 										</Badge>
 									) : null}
 									{revision.tags.map((tag) => (
@@ -89,8 +103,10 @@ export function UnitRevisionHistory({ unitId, compareHref, onChanged }: UnitRevi
 									))}
 								</CardTitle>
 								<CardDescription>
-									{revision.editSummary ?? t.history.noEditSummary} ·{" "}
-									{formatDelta(revision.sizeDelta, t.history.bytes)}
+									{summaryAvailable
+										? (revision.editSummary ?? t.history.noEditSummary)
+										: t.history.visibility.protectedSummary}{" "}
+									· {formatDelta(revision.sizeDelta, t.history.bytes)}
 									{revision.actorProfileId ? (
 										<>
 											{" · "}
@@ -107,7 +123,9 @@ export function UnitRevisionHistory({ unitId, compareHref, onChanged }: UnitRevi
 								</CardDescription>
 							</CardHeader>
 							<CardContent className="flex flex-wrap gap-2">
-								{revision.parentRevisionId ? (
+								{revision.parentRevisionId &&
+								revision.contentAvailable &&
+								revision.parentContentAvailable ? (
 									<Button asChild size="sm" variant="outline">
 										<Link
 											href={compareHref(
@@ -119,7 +137,11 @@ export function UnitRevisionHistory({ unitId, compareHref, onChanged }: UnitRevi
 										</Link>
 									</Button>
 								) : null}
-								{canRestore && revision.parentRevisionId && currentRevision ? (
+								{canRestore &&
+								revision.parentRevisionId &&
+								revision.contentAvailable &&
+								revision.parentContentAvailable &&
+								currentRevision ? (
 									<Button
 										disabled={pending}
 										onClick={() =>
@@ -140,7 +162,10 @@ export function UnitRevisionHistory({ unitId, compareHref, onChanged }: UnitRevi
 										{t.history.undoRevision}
 									</Button>
 								) : null}
-								{canRestore && !revision.isCurrent && currentRevision ? (
+								{canRestore &&
+								!revision.isCurrent &&
+								revision.contentAvailable &&
+								currentRevision ? (
 									<Button
 										disabled={pending}
 										onClick={() =>
@@ -160,6 +185,13 @@ export function UnitRevisionHistory({ unitId, compareHref, onChanged }: UnitRevi
 										) : null}
 										{t.history.restoreRevision}
 									</Button>
+								) : null}
+								{canManageRevisionVisibility ? (
+									<UnitRevisionVisibilityDialog
+										capabilities={capabilities}
+										onChanged={refresh}
+										revision={revision}
+									/>
 								) : null}
 							</CardContent>
 						</Card>

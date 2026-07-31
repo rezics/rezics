@@ -16,6 +16,42 @@ export default {
 	backToHistory: "Back to revision history",
 	backToEditor: "Back to editor",
 	bytes: "bytes",
+	visibility: {
+		hiddenBadge: "Hidden",
+		suppressedBadge: "Restricted",
+		protectedSummary: "Edit summary protected",
+		manage: "Manage visibility",
+		title: "Manage revision visibility",
+		description:
+			"Restrict access to revision content, its edit summary, or editor identity. Every change is audited.",
+		copyrightPreset: "Apply copyright protection",
+		copyrightPresetDescription:
+			"Hide the content and edit summary so only people with suppression access can view them.",
+		levelLabel: "Protection level",
+		levels: {
+			visible: "Visible",
+			hidden: "Hidden from readers",
+			suppressed: "Suppressors only",
+		},
+		levelDescriptions: {
+			visible: "Anyone who can read this Unit can view the revision.",
+			hidden: "Only people with platform moderation access can view selected data.",
+			suppressed: "Only people with suppression access can view selected data.",
+		},
+		fieldsLabel: "Protected data",
+		fields: {
+			content: "Revision content",
+			summary: "Edit summary",
+			actor: "Editor identity",
+		},
+		currentRevisionContent:
+			"The current revision content cannot be hidden. Publish a clean revision first, then protect the older revision.",
+		reasonLabel: "Reason",
+		selectReason: "Select a reason",
+		atLeastOneField: "Select at least one item to protect.",
+		cancel: "Cancel",
+		save: "Save visibility",
+	},
 	structureKinds: {
 		create: "Structure created",
 		update: "Structure updated",
