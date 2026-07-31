@@ -365,6 +365,7 @@ describe("domain search SQL", () => {
 	it("keeps type applicability and correlated requirements authoritative in PostgreSQL", async () => {
 		await searchDomain("units", { contentLicenseActive: true });
 		expect(lastQuery()).toContain('from "unit_content_license"');
+		expect(lastQuery()).not.toContain('"unit_content_license"."revoked_at"');
 
 		await searchDomain("units", { contentLicenseActive: false });
 		expect(lastQuery()).toMatch(/exists \(select .* from "unit_content_license".*\) = \$/s);

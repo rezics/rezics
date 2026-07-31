@@ -11,12 +11,27 @@ Document date: 2026-07-31
 **Service** means the websites, applications, storage, delivery systems, and related
 infrastructure operated for REZICS.
 
-**Licensor** means the person or entity that grants this license through an authorized
-REZICS Profile.
+**Initial Licensor** means the person or entity that first grants this license for the Unit
+through an authorized REZICS Profile.
 
-**Unit** means the specific REZICS Unit identified when the Licensor grants this license.
+**Contributor** means a person or entity that, after the Service gives notice that this license
+applies to the Unit, submits, uploads, creates, designates, adds, or revises content through an
+authorized REZICS Profile as part of the Unit or a Content-Bearing Structure.
 
-**Monetization Terms** means the separate terms governing paid offerings that the Licensor
+**Contribution** means the content that a Contributor submits, uploads, creates, designates,
+adds, or revises in that capacity.
+
+**Licensor** means the Initial Licensor or a Contributor. Each Licensor grants rights only in
+content for which that Licensor has authority to grant this license.
+
+**Unit** means the specific REZICS Unit identified when the Initial Licensor first grants this
+license.
+
+**Unit Controller** means the REZICS Profile currently authorized through the Service to manage
+the Unit's availability, access, and offering settings. Unit control is an administrative role
+within the Service and is not a determination of copyright ownership.
+
+**Monetization Terms** means the separate terms governing paid offerings that the Unit Controller
 affirmatively accepts through the Service.
 
 **Content Structure** means a Service resource associated with a Unit that records the selection,
@@ -42,6 +57,11 @@ references.
 Content described in item 3 is Licensed Content even when the Service stores it as a separate
 Unit, and no separate license grant is required for that content Unit.
 
+The Initial Licensor grants this license once at the Unit level. Each later Contributor grants
+the same license for that Contributor's Contribution by making the Contribution after receiving
+notice that this license applies to the Unit. No separate Unit-level selection or grant is
+required for a Contribution or when the Unit Controller changes.
+
 Licensed Content does not include material that the Unit merely identifies, describes, links to,
 quotes under an applicable exception or limitation, or references without hosting. The inclusion
 of a content Unit in Licensed Content does not constitute a determination or verification by
@@ -52,17 +72,24 @@ REZICS that the Licensor owns that content or has authority to license it.
 The Licensor retains all ownership and other rights in the Licensed Content. This license
 does not transfer ownership to REZICS.
 
+Changing the Unit Controller does not transfer copyright in the Licensed Content, make the new
+Unit Controller a Licensor of content that it did not license, or constitute evidence that the
+new Unit Controller owns that content. A change in Unit control, or a transfer of ownership of
+any right in the Licensed Content, does not by itself terminate or narrow rights already granted
+to REZICS under this license, subject to any non-waivable applicable law.
+
 ## 3. License Grant
 
-The Licensor grants REZICS a non-exclusive, worldwide license, for the term described in
-Section 9, to:
+The Initial Licensor, when first granting this license for the Unit, and each Contributor, when
+making a Contribution after receiving notice that this license applies to the Unit, grants
+REZICS a non-exclusive, worldwide license, for the term described in Section 9, to:
 
 1. host, store, archive, cache, back up, reproduce, transmit, and distribute the Licensed
    Content;
 2. make the Licensed Content available, stream it, display it, and perform it through the
    Service in accordance with the Unit's visibility, access, and offering settings, including
-   through free, paid, subscription, or transactional offerings that the Licensor affirmatively
-   enables;
+   through free, paid, subscription, or transactional offerings that the Unit Controller
+   affirmatively enables;
 3. permit authorized users to access, stream, download, or use the Licensed Content only
    through functionality enabled by the Service and subject to applicable end-user terms;
 4. index, parse, and analyze the Licensed Content as necessary to provide search,
@@ -89,13 +116,13 @@ Terms.
 ## 4. Paid Offerings
 
 This license does not itself activate monetization or authorize REZICS to place the Licensed
-Content in a paid offering without the Licensor's affirmative instruction.
+Content in a paid offering without the Unit Controller's affirmative instruction.
 
-Before enabling a paid offering, the Licensor must accept the then-current Monetization Terms.
-Those terms govern pricing authority, payment processing, platform fees, revenue share, taxes,
-refunds, chargebacks, payouts, user access rights, and the consequences of removal or
-termination. They do not require a second license grant for Licensed Content already covered by
-this license.
+Before enabling a paid offering, the Unit Controller must accept the then-current Monetization
+Terms and represent that it has authority to enable the offering. Those terms govern pricing
+authority, payment processing, platform fees, revenue share, taxes, refunds, chargebacks,
+payouts, user access rights, and the consequences of removal or termination. They do not require
+a second license grant for Licensed Content already covered by this license.
 
 ## 5. Limits of the Grant
 
@@ -105,7 +132,7 @@ directly promoting, or facilitating an offering of the Unit through the Service.
 It does not permit REZICS to:
 
 1. sell, license, or otherwise exploit the Licensed Content outside the Service or outside an
-   offering affirmatively enabled by the Licensor;
+   offering affirmatively enabled by the Unit Controller;
 2. license the Licensed Content to third parties for purposes unrelated to the Service;
 3. use the Licensed Content to train a general-purpose artificial intelligence or machine
    learning model; or
@@ -116,9 +143,9 @@ Technical modifications under Section 3 do not constitute editorial adaptations.
 
 ## 6. Authority to Grant the License
 
-Each time the Licensor, acting through an authorized REZICS Profile, submits, uploads, creates,
-designates, or adds content to the Unit or a Content-Bearing Structure, the Licensor represents
-and warrants that:
+When the Initial Licensor first grants this license, and each time a Licensor acting through an
+authorized REZICS Profile submits, uploads, creates, designates, adds, or revises content in the
+Unit or a Content-Bearing Structure, that Licensor represents and warrants that:
 
 1. the Licensor owns that content or otherwise has sufficient authority to grant this
    license for it;
@@ -155,21 +182,29 @@ Any public license or rights-reservation status separately selected for the Unit
 independent of this license. If another license already grants REZICS all rights required
 here, this license does not restrict those existing rights.
 
-## 9. Term and Termination
+## 9. Term and Cessation of Active Use
 
-This license begins when the Licensor affirmatively grants it for the Unit. It continues
-until the grant is revoked or the Licensed Content is permanently removed from the Service.
-Licensed Content added to the Unit or a Content-Bearing Structure while this license is active
-is covered without a separate grant.
+This license begins for content covered by the Initial Licensor's grant when the Initial Licensor
+affirmatively grants it for the Unit. It begins for each Contribution when the Contributor makes
+that Contribution after receiving notice that this license applies to the Unit.
 
-After termination, REZICS will stop making new uses of the Licensed Content under this
-license, stop enabling new paid access under it, and remove active copies within a commercially
-reasonable period.
+To the maximum extent permitted by applicable law, and subject to any non-waivable statutory
+termination or similar right, each grant under this license is irrevocable and continues for the
+duration of the applicable rights in the Licensed Content. A Licensor cannot revoke a grant by
+changing Unit settings, ceasing to control the Unit, transferring rights in the Licensed Content,
+closing a Profile, removing content, or ceasing to use the Service.
 
-If the Licensor enabled a paid offering, REZICS may continue exercising the licensed rights
-only as reasonably necessary to fulfill access or download rights granted to authorized users
-before termination, for the duration of those rights, unless the rights are ended and any
-required refund or other remedy is provided under the applicable Monetization Terms and law.
+A Licensor may stop making future Contributions. The Unit Controller may request that REZICS
+unpublish or remove the Unit, stop new paid offerings, or otherwise cease active availability in
+accordance with the Service's rules and applicable Monetization Terms. Such action does not
+revoke this license or make past authorized uses unauthorized.
+
+After the Licensed Content is permanently removed from active availability, REZICS will stop
+making it newly available and stop enabling new paid access under this license within a
+commercially reasonable period. REZICS may continue exercising the licensed rights only as
+reasonably necessary to fulfill access or download rights granted to authorized users before
+removal, for the duration of those rights, unless the rights are ended and any required refund
+or other remedy is provided under the applicable Monetization Terms and law.
 
 REZICS may also retain copies:
 
@@ -179,7 +214,7 @@ REZICS may also retain copies:
    enforcement of applicable terms.
 
 Any retained copy remains subject to this license's use limitations and may not be restored
-to public availability except as necessary to fulfill the pre-termination user rights described
+to public availability except as necessary to fulfill the pre-removal user rights described
 above or where REZICS has another lawful basis to do so.
 
 ## 10. No Hosting Obligation
@@ -192,5 +227,7 @@ Content in accordance with applicable law and the rules governing the Service.
 
 The reference license slug identifies this exact version of the license. REZICS will not
 change the legal text identified by `rezics-unit-content-license-v1`. A materially changed
-license must use a new reference license slug and requires a new affirmative grant from the
-Licensor.
+license must use a new reference license slug. A new version does not amend this license or
+apply retroactively to the Unit or Licensed Content. Applying materially different terms to
+existing Licensed Content requires the affirmative agreement of each Licensor whose granted
+rights would be affected, or of a person or entity with authority to act for that Licensor.

@@ -1,4 +1,4 @@
-h1:Vto6m+aiUfpAQTXIEo8mWLqvfNKNtglSfG08UqO2dUs=
+h1:LhFgmN2TwCDQbty3fwq4K+F2yh/XA1l2u2W9b/v1lV4=
 20260718070400_current_baseline.sql h1:u9QkCNmNKf+J8LE4/Lz03NbMrJf4RTid39bT22xn5ew=
 20260718070401_history_invariants.sql h1:ZtbZeYtN6E3/SM2hzpdVuXS7pICASEq93v29wpj7dDs=
 20260718154924_unit_realm_restrictions.sql h1:87+KV38BAlkYD150B4fAMEe19exDPGV12bR3dfNuHjA=
@@ -100,3 +100,4 @@ h1:Vto6m+aiUfpAQTXIEo8mWLqvfNKNtglSfG08UqO2dUs=
 20260730140316_unit_ownership_claims.sql h1:jEbg2uUYtirvhg1pnQavPOpcu5+vxAKg2HLWL+dI9CY=
 20260731120000_remove_catalog_domain.sql h1:AE25p3cJwoVDIAmiCgUiHoqKR5306GSHLyUyqV86WSI=
 20260731130000_migrate_search_unit_contracts.sql h1:k7HYotB7Fxn9pxw8S5v2az7kS/4mNDKQnyhSxsyTdMY=
+20260731150000_unit_content_license_irrevocable.sql h1:m7EnSfJiQKZU8kr9IBgh4cedBsRuBqoUczXJfizf+T8=

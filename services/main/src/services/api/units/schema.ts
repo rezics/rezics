@@ -188,11 +188,13 @@ const UnitDetailsInput = t.Object(
 		wordCount: t.Optional(t.Nullable(t.Integer({ minimum: 0 }))),
 		format: t.Optional(t.Nullable(t.String())),
 		contentLicense: t.Optional(
-			t.Nullable(
-				t.Object(
-					{ referenceLicenseSlug: t.UnionEnum(UnitContentLicenseSlugs) },
-					{ additionalProperties: false },
-				),
+			t.Object(
+				{ referenceLicenseSlug: t.UnionEnum(UnitContentLicenseSlugs) },
+				{
+					additionalProperties: false,
+					description:
+						"One-time Unit content license grant. Omit this field to leave an ungranted or existing grant unchanged.",
+				},
 			),
 		),
 		versionLabel: t.Optional(t.Nullable(t.String())),

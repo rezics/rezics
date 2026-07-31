@@ -4,6 +4,7 @@ import type { ContentLanguage } from "@rezics/i18n";
 import {
 	CurrentUnitContentLicenseSlug,
 	isPublicationLicenseId,
+	isUnitContentLicenseSlug,
 	PublicationLicenseIds,
 	type UnitContentLicenseSlug,
 } from "@rezics/license";
@@ -25,10 +26,12 @@ import { useDeferredValue, useState, type FormEvent } from "react";
 import { Badge, EntityPicker } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
-import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@rezics/ui";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@rezics/ui";
 import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
+import { CircleHelp } from "lucide-react";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
@@ -56,6 +59,7 @@ import { unitContentLicenseHref } from "./model/unit-content-license";
 export type EditableUnit = GetApiUnitsByTypeByUnitIdStatus200;
 type Unit = EditableUnit;
 type SelectedEntity = { id: string; label: string };
+const NoUnitContentLicenseSelection = "none";
 
 function readPositiveInteger(form: FormData, name: string): number | null | undefined {
 	const raw = String(form.get(name) ?? "").trim();
@@ -109,10 +113,16 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 			submittedAiDisclosure === "machine_generated"
 				? submittedAiDisclosure
 				: "unknown";
-		const contentLicense = form.get("contentLicense") === "true";
-		const contentLicenseInput = contentLicense
-			? { referenceLicenseSlug: CurrentUnitContentLicenseSlug }
-			: null;
+		const submittedContentLicense = form.get("contentLicense");
+		if (
+			submittedContentLicense !== null &&
+			submittedContentLicense !== NoUnitContentLicenseSelection &&
+			!isUnitContentLicenseSlug(submittedContentLicense)
+		)
+			return;
+		const contentLicenseGrant = isUnitContentLicenseSlug(submittedContentLicense)
+			? { referenceLicenseSlug: submittedContentLicense }
+			: undefined;
 		const details = (() => {
 			if (unit.details.type === "book") {
 				const pageCount = readPositiveInteger(form, "pageCount");
@@ -122,13 +132,13 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 					publicationDate: releasedOn || null,
 					pageCount,
 					format: String(form.get("format") ?? "").trim() || null,
-					contentLicense: contentLicenseInput,
+					...(contentLicenseGrant ? { contentLicense: contentLicenseGrant } : {}),
 				};
 			}
 			if (unit.details.type === "software")
 				return {
 					versionLabel: String(form.get("versionLabel") ?? "").trim() || null,
-					contentLicense: contentLicenseInput,
+					...(contentLicenseGrant ? { contentLicense: contentLicenseGrant } : {}),
 				};
 			if (unit.details.type === "media") {
 				const runtimeMinutes = readPositiveInteger(form, "runtimeMinutes");
@@ -147,7 +157,7 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 					runtimeMinutes,
 					episodeCount,
 					seasonCount,
-					contentLicense: contentLicenseInput,
+					...(contentLicenseGrant ? { contentLicense: contentLicenseGrant } : {}),
 				};
 			}
 			if (unit.details.type === "video" || unit.details.type === "audio") {
@@ -301,20 +311,62 @@ function ContentLicenseField({
 }: {
 	readonly defaultSlug: UnitContentLicenseSlug | null;
 }) {
-	const { t } = useTranslation(["units"]);
+	const { t } = useTranslation(["licenses", "units"]);
+	const referenceSlug = defaultSlug ?? CurrentUnitContentLicenseSlug;
 	return (
 		<Field>
-			<FieldLabel>
-				<a
-					className="text-link hover:text-link-hover hover:underline"
-					href={unitContentLicenseHref(defaultSlug ?? CurrentUnitContentLicenseSlug)}
+			<div className="flex items-center gap-1">
+				<FieldLabel>{t.units.fields.contentLicense}</FieldLabel>
+				<HoverCard
+					closeDelay={160}
+					openDelay={240}
+					positioning={{ placement: "bottom-start" }}
 				>
-					{t.units.fields.contentLicense}
-				</a>
-			</FieldLabel>
-			<NativeSelect defaultValue={String(defaultSlug !== null)} name="contentLicense">
-				<NativeSelectOption value="false">{t.units.fields.no}</NativeSelectOption>
-				<NativeSelectOption value="true">{t.units.fields.yes}</NativeSelectOption>
+					<HoverCardTrigger asChild>
+						<Button
+							aria-label={t.licenses.unitContent.viewTerms}
+							size="icon-xs"
+							type="button"
+							variant="quiet"
+						>
+							<CircleHelp aria-hidden />
+						</Button>
+					</HoverCardTrigger>
+					<HoverCardContent className="grid w-[min(22rem,calc(100vw-2rem))] gap-3">
+						<p className="font-medium">
+							{t.licenses.unitContent.options[referenceSlug].label}
+						</p>
+						<FieldDescription>
+							{defaultSlug
+								? t.licenses.unitContent.grantedNotice
+								: t.licenses.unitContent.grantNotice}
+						</FieldDescription>
+						{defaultSlug ? (
+							<FieldDescription>
+								{t.licenses.unitContent.contributionNotice}
+							</FieldDescription>
+						) : null}
+						<a
+							className="w-fit text-link text-sm hover:text-link-hover hover:underline"
+							href={unitContentLicenseHref(referenceSlug)}
+							rel="noreferrer"
+						>
+							{t.licenses.unitContent.viewTerms}
+						</a>
+					</HoverCardContent>
+				</HoverCard>
+			</div>
+			<NativeSelect
+				defaultValue={defaultSlug ?? NoUnitContentLicenseSelection}
+				disabled={defaultSlug !== null}
+				name="contentLicense"
+			>
+				<NativeSelectOption value={NoUnitContentLicenseSelection}>
+					{t.licenses.unitContent.none}
+				</NativeSelectOption>
+				<NativeSelectOption value={CurrentUnitContentLicenseSlug}>
+					{t.licenses.unitContent.options[CurrentUnitContentLicenseSlug].label}
+				</NativeSelectOption>
 			</NativeSelect>
 		</Field>
 	);

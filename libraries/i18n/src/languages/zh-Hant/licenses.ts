@@ -1,4 +1,4 @@
-import type { PublicationLicenseId } from "@rezics/license";
+import type { PublicationLicenseId, UnitContentLicenseSlug } from "@rezics/license";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 
@@ -20,8 +20,22 @@ const options = {
 	"cc0-1.0": { label: `${verbatimTerms.cc.value}0 1.0 通用` },
 } satisfies Readonly<Record<PublicationLicenseId, LicenseOptionTranslation>>;
 
+const unitContentOptions = {
+	"rezics-unit-content-license-v1": {
+		label: verbatimTerms.rezicsUnitContentLicenseV1.value,
+	},
+} satisfies Readonly<Record<UnitContentLicenseSlug, LicenseOptionTranslation>>;
+
 export default {
 	unspecified: "未指定",
 	viewTerms: `查看${publicationLicenseTerms.inline}`,
 	options,
+	unitContent: {
+		none: "無",
+		viewTerms: `查看 ${verbatimTerms.rezicsUnitContentLicenseV1.value}`,
+		grantNotice: "授權後不可撤銷，並持續適用於這項內容的後續貢獻及所有權移轉。",
+		grantedNotice: "這項內容已永久採用此內容授權。",
+		contributionNotice: `你在此授權生效期間提交的內容，將依相同條款授權給 ${verbatimTerms.rezics.value}；不需要另行選擇授權。`,
+		options: unitContentOptions,
+	},
 };

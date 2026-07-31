@@ -204,6 +204,20 @@ function UnitManagementWorkspaceContent({
 	const requestedSection = allSections.find((section) => section.id === currentSectionId);
 	const sectionAllowed =
 		currentSectionId === undefined || visibleSectionIds.has(currentSectionId);
+	const content = sectionAllowed ? (
+		children
+	) : requestedSection ? (
+		<section>
+			<ManagementWorkspaceSectionHeader
+				backHref={unitManagementHref(type, unitId)}
+				backLabel={t.units.workspace.backToOverview}
+				description={requestedSection.description}
+				link={Link}
+				title={requestedSection.label}
+			/>
+			<p className="text-sm text-destructive">{t.errors.forbidden}</p>
+		</section>
+	) : null;
 	return (
 		<ContentLanguageEditorProvider
 			localizations={query.data.localizations}
@@ -239,20 +253,7 @@ function UnitManagementWorkspaceContent({
 						/>
 					}
 				>
-					{sectionAllowed ? (
-						children
-					) : requestedSection ? (
-						<section>
-							<ManagementWorkspaceSectionHeader
-								backHref={unitManagementHref(type, unitId)}
-								backLabel={t.units.workspace.backToOverview}
-								description={requestedSection.description}
-								link={Link}
-								title={requestedSection.label}
-							/>
-							<p className="text-sm text-destructive">{t.errors.forbidden}</p>
-						</section>
-					) : null}
+					{content}
 				</ManagementWorkspace>
 			</UnitManagementContext.Provider>
 		</ContentLanguageEditorProvider>

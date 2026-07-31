@@ -66,6 +66,46 @@ describe("Unit publication License inputs", () => {
 	});
 });
 
+describe("Unit content License inputs", () => {
+	it("accepts the registered one-time grant and omission", () => {
+		expect(
+			Check(UpdateUnitBody, {
+				updatedAt: "2026-07-31T00:00:00.000Z",
+				details: {
+					contentLicense: {
+						referenceLicenseSlug: "rezics-unit-content-license-v1",
+					},
+				},
+			}),
+		).toBe(true);
+		expect(
+			Check(UpdateUnitBody, {
+				updatedAt: "2026-07-31T00:00:00.000Z",
+				details: {},
+			}),
+		).toBe(true);
+	});
+
+	it("rejects revocation and unknown License versions", () => {
+		expect(
+			Check(UpdateUnitBody, {
+				updatedAt: "2026-07-31T00:00:00.000Z",
+				details: { contentLicense: null },
+			}),
+		).toBe(false);
+		expect(
+			Check(UpdateUnitBody, {
+				updatedAt: "2026-07-31T00:00:00.000Z",
+				details: {
+					contentLicense: {
+						referenceLicenseSlug: "rezics-unit-content-license-v2",
+					},
+				},
+			}),
+		).toBe(false);
+	});
+});
+
 describe("Unit creation semantics", () => {
 	it("requires a publisher Entity for owned works", () => {
 		expect(

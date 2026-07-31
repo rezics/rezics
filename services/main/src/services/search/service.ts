@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import { and, eq, exists, inArray, isNull, sql, type SQL } from "drizzle-orm";
+import { and, eq, exists, inArray, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import {
 	type SearchControlPredicate,
@@ -319,12 +319,7 @@ function compileFilter(category: SearchCategory, filter: SearchControlPredicate)
 					database
 						.select({ unitId: unitContentLicense.unitId })
 						.from(unitContentLicense)
-						.where(
-							and(
-								eq(unitContentLicense.unitId, unit.id),
-								isNull(unitContentLicense.revokedAt),
-							),
-						),
+						.where(eq(unitContentLicense.unitId, unit.id)),
 				),
 				filter,
 			),

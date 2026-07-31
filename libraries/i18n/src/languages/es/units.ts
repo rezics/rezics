@@ -189,7 +189,6 @@ export default {
 		pageCount: "Número de páginas",
 		format: "Encuadernación o formato",
 		contentLicense: "Licencia de contenido",
-		viewContentLicense: "Ver las condiciones de la licencia",
 		versionLabel: "Etiqueta de versión",
 		mediaKind: "Tipo de contenido multimedia",
 		releaseDate: "Fecha de lanzamiento",

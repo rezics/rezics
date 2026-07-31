@@ -189,7 +189,6 @@ export default {
 		pageCount: "Page count",
 		format: "Binding or format",
 		contentLicense: "Content license",
-		viewContentLicense: "View license terms",
 		versionLabel: "Version label",
 		mediaKind: "Media kind",
 		releaseDate: "Release date",

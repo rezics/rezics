@@ -185,7 +185,6 @@ export default {
 		pageCount: "페이지 수",
 		format: "제본 또는 형식",
 		contentLicense: "콘텐츠 라이선스",
-		viewContentLicense: "라이선스 약관 보기",
 		versionLabel: "버전 라벨",
 		mediaKind: "미디어 종류",
 		releaseDate: "출시일",

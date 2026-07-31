@@ -44,6 +44,14 @@ describe("search projection source registry", () => {
 		expect(sql).not.toContain("FROM public.unit_access_binding");
 	});
 
+	it("projects the immutable Unit content license without a revocation predicate", async () => {
+		const sql = await readFile(currentEnrichment, "utf8");
+		expect(sql).toContain(
+			"LEFT JOIN public.unit_content_license AS content_license_row ON content_license_row.unit_id = source.unit_id",
+		);
+		expect(sql).not.toContain("content_license_row.revoked_at");
+	});
+
 	it("invalidates works when an Entity publisher chain changes", async () => {
 		const sql = await readFile(currentEnrichment, "utf8");
 		expect(sql).toContain("AS publisher_data");

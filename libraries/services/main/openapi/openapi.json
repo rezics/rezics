@@ -74681,24 +74681,17 @@
 												"anyOf": [{ "type": "string" }, { "type": "null" }]
 											},
 											"contentLicense": {
-												"nullable": true,
-												"anyOf": [
-													{
-														"additionalProperties": false,
-														"type": "object",
-														"required": ["referenceLicenseSlug"],
-														"properties": {
-															"referenceLicenseSlug": {
-																"default": "rezics-unit-content-license-v1",
-																"type": "string",
-																"enum": [
-																	"rezics-unit-content-license-v1"
-																]
-															}
-														}
-													},
-													{ "type": "null" }
-												]
+												"additionalProperties": false,
+												"description": "One-time Unit content license grant. Omit this field to leave an ungranted or existing grant unchanged.",
+												"type": "object",
+												"required": ["referenceLicenseSlug"],
+												"properties": {
+													"referenceLicenseSlug": {
+														"default": "rezics-unit-content-license-v1",
+														"type": "string",
+														"enum": ["rezics-unit-content-license-v1"]
+													}
+												}
 											},
 											"versionLabel": {
 												"nullable": true,

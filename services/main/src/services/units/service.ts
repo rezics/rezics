@@ -141,7 +141,7 @@ export interface UpdateUnitInput {
 		format?: string | null;
 		contentLicense?: {
 			referenceLicenseSlug: UnitContentLicenseSlug;
-		} | null;
+		};
 		versionLabel?: string | null;
 		kind?: string;
 		runtimeMinutes?: number | null;
@@ -329,12 +329,7 @@ async function getUnitDetails(
 							grantedAt: unitContentLicense.grantedAt,
 						})
 						.from(unitContentLicense)
-						.where(
-							and(
-								eq(unitContentLicense.unitId, unitId),
-								isNull(unitContentLicense.revokedAt),
-							),
-						)
+						.where(eq(unitContentLicense.unitId, unitId))
 						.limit(1)
 				)[0] ?? null)
 			: null;
@@ -794,49 +789,15 @@ export async function updateUnit(
 		if (
 			(kind === "book" || kind === "software" || kind === "media") &&
 			details.contentLicense !== undefined
-		) {
-			const [activeLicense] = await tx
-				.select({
-					id: unitContentLicense.id,
-					referenceLicenseSlug: unitContentLicense.referenceLicenseSlug,
+		)
+			await tx
+				.insert(unitContentLicense)
+				.values({
+					unitId,
+					grantedByProfileId: authorization.profileId,
+					referenceLicenseSlug: details.contentLicense.referenceLicenseSlug,
 				})
-				.from(unitContentLicense)
-				.where(
-					and(
-						eq(unitContentLicense.unitId, unitId),
-						isNull(unitContentLicense.revokedAt),
-					),
-				)
-				.limit(1)
-				.for("update");
-			const requestedSlug = details.contentLicense?.referenceLicenseSlug ?? null;
-			if (activeLicense && activeLicense.referenceLicenseSlug !== requestedSlug)
-				await tx
-					.update(unitContentLicense)
-					.set({ revokedAt: new Date() })
-					.where(
-						and(
-							eq(unitContentLicense.id, activeLicense.id),
-							isNull(unitContentLicense.revokedAt),
-						),
-					);
-			if (!activeLicense && requestedSlug)
-				await tx.insert(unitContentLicense).values({
-					unitId,
-					grantedByProfileId: authorization.profileId,
-					referenceLicenseSlug: requestedSlug,
-				});
-			if (
-				activeLicense &&
-				requestedSlug &&
-				activeLicense.referenceLicenseSlug !== requestedSlug
-			)
-				await tx.insert(unitContentLicense).values({
-					unitId,
-					grantedByProfileId: authorization.profileId,
-					referenceLicenseSlug: requestedSlug,
-				});
-		}
+				.onConflictDoNothing({ target: unitContentLicense.unitId });
 		if (kind === "series" && details.kind !== undefined)
 			await tx.update(series).set({ kind: details.kind }).where(eq(series.id, unitId));
 		const revision = await recordUnitRevision(tx, {

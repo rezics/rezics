@@ -191,7 +191,6 @@ export default {
 		pageCount: "Nombre de pages",
 		format: "Reliure ou format",
 		contentLicense: "Licence de contenu",
-		viewContentLicense: "Voir les conditions de licence",
 		versionLabel: "Libellé de version",
 		mediaKind: "Type de média",
 		releaseDate: "Date de sortie",

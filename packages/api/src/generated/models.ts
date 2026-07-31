@@ -58462,15 +58462,17 @@ export type PatchApiUnitsByTypeByUnitIdBody = {
 		pageCount?: ((string | number) | null) | null;
 		wordCount?: ((string | number) | null) | null;
 		format?: (string | null) | null;
-		contentLicense?:
-			| ({
-					/**
-					 * @default 'rezics-unit-content-license-v1'
-					 * @type string
-					 */
-					referenceLicenseSlug: "rezics-unit-content-license-v1";
-			  } | null)
-			| null;
+		/**
+		 * @description One-time Unit content license grant. Omit this field to leave an ungranted or existing grant unchanged.
+		 * @type object | undefined
+		 */
+		contentLicense?: {
+			/**
+			 * @default 'rezics-unit-content-license-v1'
+			 * @type string
+			 */
+			referenceLicenseSlug: "rezics-unit-content-license-v1";
+		};
 		versionLabel?: (string | null) | null;
 		/**
 		 * @minLength 1

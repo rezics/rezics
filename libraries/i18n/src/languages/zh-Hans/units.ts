@@ -171,7 +171,6 @@ export default {
 		pageCount: "页数",
 		format: "装帧或格式",
 		contentLicense: "内容许可",
-		viewContentLicense: `查看${publicationLicenseTerms.inline}`,
 		versionLabel: "版本名称",
 		mediaKind: "媒体类型",
 		releaseDate: "发行日期",

@@ -49,15 +49,15 @@ function DetailSection({ children, title }: { children: ReactNode; title: string
 
 function presentContentLicense(
 	contentLicense: { readonly referenceLicenseSlug: UnitContentLicenseSlug } | null,
-	t: Pick<Translation, "units">,
+	t: Pick<Translation, "licenses">,
 ): ReactNode {
-	if (!contentLicense) return t.units.fields.no;
+	if (!contentLicense) return t.licenses.unitContent.none;
 	return (
 		<a
 			className="text-link hover:text-link-hover hover:underline"
 			href={unitContentLicenseHref(contentLicense.referenceLicenseSlug)}
 		>
-			{t.units.fields.viewContentLicense}
+			{t.licenses.unitContent.options[contentLicense.referenceLicenseSlug].label}
 		</a>
 	);
 }
@@ -216,7 +216,7 @@ export function UnitOverviewPage() {
 function getDomainFacts(
 	detail: ReturnType<typeof useUnitDetail>,
 	language: string,
-	t: Pick<Translation, "units">,
+	t: Pick<Translation, "licenses" | "units">,
 ): readonly (readonly [string, ReactNode])[] {
 	switch (detail.type) {
 		case "book":

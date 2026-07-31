@@ -194,7 +194,6 @@ export default {
 		pageCount: "Seitenzahl",
 		format: "Einband oder Format",
 		contentLicense: "Inhaltslizenz",
-		viewContentLicense: "Lizenzbedingungen ansehen",
 		versionLabel: "Versionsbezeichnung",
 		mediaKind: "Medienart",
 		releaseDate: "Erscheinungsdatum",

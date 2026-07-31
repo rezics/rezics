@@ -173,7 +173,7 @@ describe("database schema contracts", () => {
 		);
 	});
 
-	it("preserves versioned Unit content License grant and revocation history", () => {
+	it("keeps one immutable Unit content License grant per Unit", () => {
 		const grant = getTableConfig(unitContentLicense);
 		expect(getTableName(unitContentLicense)).toBe("unit_content_license");
 		expect(grant.columns.map((column) => column.name)).toEqual(
@@ -183,17 +183,19 @@ describe("database schema contracts", () => {
 				"granted_by_profile_id",
 				"reference_license_slug",
 				"granted_at",
-				"revoked_at",
 			]),
 		);
 		expect(grant.indexes.map((index) => index.config.name)).toContain(
-			"unit_content_license_active_unit_key",
+			"unit_content_license_unit_key",
 		);
-		expect(grant.checks.map((constraint) => constraint.name)).toEqual(
-			expect.arrayContaining([
-				"unit_content_license_reference_slug_check",
-				"unit_content_license_revocation_check",
-			]),
+		expect(
+			grant.foreignKeys.find(
+				(key) => key.getName() === "unit_content_license_unit_id_unit_id_fk",
+			)?.onDelete,
+		).toBe("restrict");
+		expect(grant.columns.map((column) => column.name)).not.toContain("revoked_at");
+		expect(grant.checks.map((constraint) => constraint.name)).toContain(
+			"unit_content_license_reference_slug_check",
 		);
 	});
 
