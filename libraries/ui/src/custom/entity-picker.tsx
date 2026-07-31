@@ -100,7 +100,9 @@ export function EntityPicker({
 		const shouldSearch =
 			Boolean(searchEntities) && (query.length > 0 || (searchOnOpen && open));
 		if (!shouldSearch || !searchEntities) {
-			set([]);
+			const shouldPreservePreloadedResults =
+				Boolean(searchEntities) && searchOnOpen && !open && query.length === 0;
+			if (!shouldPreservePreloadedResults) set([]);
 			setSearchResolution({ status: "idle" });
 			return;
 		}
@@ -168,8 +170,8 @@ export function EntityPicker({
 					filter(nextInputValue);
 				}}
 				onOpenChange={({ open: nextOpen }) => setOpen(nextOpen)}
-				onValueChange={({ value: selectedValues }) => {
-					const selected = collection.items.find((item) => item.id === selectedValues[0]);
+				onValueChange={({ items: selectedItems, value: selectedValues }) => {
+					const selected = selectedItems[0];
 					if (!selected) {
 						if (value && selectedValues.length === 0) onClear?.();
 						return;

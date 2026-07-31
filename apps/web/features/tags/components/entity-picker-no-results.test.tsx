@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { UiProvider } from "@rezics/ui";
+import { UiProvider, type EntityPickerValue } from "@rezics/ui";
 import { EntityPicker } from "@rezics/ui/custom/entity-picker";
+import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.stubGlobal(
@@ -15,6 +16,28 @@ vi.stubGlobal(
 );
 
 afterEach(cleanup);
+
+function ControlledPreloadedEntityPicker({
+	onChange,
+}: {
+	onChange: (value: EntityPickerValue) => void;
+}) {
+	const [value, setValue] = useState<EntityPickerValue>();
+
+	return (
+		<EntityPicker
+			ariaLabel="Search entities"
+			index="entities"
+			onChange={(nextValue) => {
+				onChange(nextValue);
+				setValue(nextValue);
+			}}
+			placeholder="Enter an entity name"
+			searchOnOpen
+			value={value}
+		/>
+	);
+}
 
 describe("EntityPicker no-result actions", () => {
 	it("loads and renders an initial filtered list when opened", async () => {
@@ -39,6 +62,26 @@ describe("EntityPicker no-result actions", () => {
 			}),
 		);
 		expect(await screen.findByText("Studio")).toBeTruthy();
+	});
+
+	it("commits a preloaded result on the first click", async () => {
+		const selected = { id: "entity-id", label: "Studio" };
+		const onChange = vi.fn();
+		render(
+			<UiProvider searchEntities={vi.fn(async () => [selected])}>
+				<ControlledPreloadedEntityPicker onChange={onChange} />
+			</UiProvider>,
+		);
+
+		const input = screen.getByRole("combobox", { name: "Search entities" });
+		fireEvent.click(input);
+		const option = (await screen.findByText("Studio")).closest('[role="option"]');
+		if (!option) throw new Error("Expected the preloaded Entity option to be rendered.");
+		fireEvent.click(option);
+
+		await waitFor(() => expect(input).toHaveProperty("value", "Studio"));
+		expect(onChange).toHaveBeenCalledOnce();
+		expect(onChange).toHaveBeenCalledWith(selected);
 	});
 
 	it("clears a selected value when the user edits its label", async () => {
