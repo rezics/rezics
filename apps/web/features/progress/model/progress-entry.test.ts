@@ -21,13 +21,14 @@ describe("progress entry draft", () => {
 
 	it("keeps unknown dates explicitly null", () => {
 		const draft = createProgressEntryDraft(undefined);
-		expect(
-			createProgressEntryWrite({
-				...draft,
-				datePrecision: "unknown",
-				dateValue: "",
-			}),
-		).toMatchObject({ occurredAt: null });
+		const write = createProgressEntryWrite({
+			...draft,
+			datePrecision: "unknown",
+			dateValue: "",
+		});
+
+		expect(write).toMatchObject({ occurredAt: null });
+		expect(write).not.toHaveProperty("affectsCurrent");
 	});
 
 	it("rejects invalid progress values", () => {

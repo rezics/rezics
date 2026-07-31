@@ -29,7 +29,6 @@ export function selectPostProgressEntry(postId: string, viewerProfileId?: string
 			contentStructureRevisionId: unitProgressEntry.contentStructureRevisionId,
 			occurredAt: unitProgressEntry.occurredAt,
 			datePrecision: unitProgressEntry.datePrecision,
-			affectsCurrent: unitProgressEntry.affectsCurrent,
 			createdAt: unitProgressEntry.createdAt,
 			updatedAt: unitProgressEntry.updatedAt,
 		})

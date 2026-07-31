@@ -11,7 +11,6 @@ export const ProgressDatePrecisions = ["instant", "day", "month", "year", "unkno
 export type ProgressDatePrecision = (typeof ProgressDatePrecisions)[number];
 
 export interface ProgressEntryDraft {
-	readonly affectsCurrent: boolean;
 	readonly datePrecision: ProgressDatePrecision;
 	readonly dateValue: string;
 	readonly entryKind: ProgressEntryKind;
@@ -22,7 +21,6 @@ export interface ProgressEntryDraft {
 }
 
 export interface ProgressEntryWrite {
-	readonly affectsCurrent: boolean;
 	readonly datePrecision: ProgressDatePrecision;
 	readonly entryKind: ProgressEntryKind;
 	readonly lastContentStructureNodeId: string | null;
@@ -38,7 +36,6 @@ export function createProgressEntryDraft(
 ): ProgressEntryDraft {
 	if (!entry)
 		return {
-			affectsCurrent: false,
 			datePrecision: "day",
 			dateValue: toDateInputValue(now, "day"),
 			entryKind: "update",
@@ -48,7 +45,6 @@ export function createProgressEntryDraft(
 			totalMinutes: "0",
 		};
 	return {
-		affectsCurrent: entry.affectsCurrent,
 		datePrecision: entry.datePrecision,
 		dateValue: entry.occurredAt
 			? toDateInputValue(new Date(entry.occurredAt), entry.datePrecision)
@@ -78,7 +74,6 @@ export function createProgressEntryWrite(
 	const occurredAt = parseDateInputValue(draft.dateValue, draft.datePrecision);
 	if (draft.datePrecision !== "unknown" && !occurredAt) return undefined;
 	return {
-		affectsCurrent: draft.affectsCurrent,
 		datePrecision: draft.datePrecision,
 		entryKind: draft.entryKind,
 		lastContentStructureNodeId: completion ? null : draft.lastNodeId || null,

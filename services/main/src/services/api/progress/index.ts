@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { FilterSchemaModels } from "@rezics/filter";
-import { and, asc, count, desc, eq, inArray, isNull, lt, or, sql } from "drizzle-orm";
-import Elysia, { t } from "elysia";
+import { and, asc, count, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
+import Elysia from "elysia";
 
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import session from "../../auth/session";
@@ -22,8 +22,6 @@ import {
 	unitProgressEntry,
 } from "../../database/schema";
 import { ContentStructureNodeNotFound } from "../content-structure/errors";
-import { parseJsonCursor } from "../../pagination";
-import { InvalidPaginationCursor } from "../../pagination/errors";
 import {
 	CompleteProgressBody,
 	CreateProgressEntryBody,
@@ -49,7 +47,6 @@ import {
 } from "../schema/response";
 import { NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
-import { Uuid } from "../schema";
 import {
 	createProgressEntry,
 	deleteProgressEntry,
@@ -57,8 +54,16 @@ import {
 	recordMediaNodeCompletion,
 	recordChapterReading,
 	replaceProgressEntry,
+	setCurrentProgressEntry,
 } from "./service";
 import { presentImageAsset } from "../../units/service";
+import {
+	decodeProgressEntryCursor,
+	encodeProgressEntryCursor,
+	progressEntryCursorCondition,
+	progressEntryOrderBy,
+	resolveProgressEntrySortAt,
+} from "./pagination";
 import { createProgressSearchCursor, resolveProgressSearchRequest } from "./search";
 
 function toProgressUnitType(value: string): "book" | "media" | "software" {
@@ -124,7 +129,7 @@ function toProgressResponse<
 
 function toProgressEntryResponse<
 	T extends {
-		affectsCurrent: boolean;
+		affectsCurrent?: boolean;
 		completionDelta: number;
 		contentStructureNodeId: string | null;
 		contentStructureRevisionId: string | null;
@@ -143,68 +148,18 @@ function toProgressEntryResponse<
 		updatedAt: Date;
 	},
 >(row: T) {
-	const { contentStructureNodeId, deletedAt: _deletedAt, ...rest } = row;
+	const {
+		affectsCurrent: _affectsCurrent,
+		contentStructureNodeId,
+		deletedAt: _deletedAt,
+		...rest
+	} = row;
 	return {
 		...rest,
 		lastContentStructureNodeId: contentStructureNodeId,
 		reviewId: row.reviewId ?? null,
 		totalTimeMs: Number(row.totalTimeMs),
 	};
-}
-
-const ProgressEntryCursor = t.Object(
-	{
-		v: t.Literal(1),
-		occurredAt: t.Nullable(t.String({ format: "date-time" })),
-		createdAt: t.String({ format: "date-time" }),
-		id: Uuid,
-	},
-	{ additionalProperties: false },
-);
-type ProgressEntryCursor = typeof ProgressEntryCursor.static;
-
-function decodeProgressEntryCursor(value?: string): ProgressEntryCursor | undefined {
-	if (!value) return undefined;
-	try {
-		return parseJsonCursor(value, ProgressEntryCursor);
-	} catch {
-		throw new InvalidPaginationCursor();
-	}
-}
-
-function encodeProgressEntryCursor(value: ProgressEntryCursor): string {
-	return Buffer.from(JSON.stringify(value)).toString("base64url");
-}
-
-function progressEntryCursorCondition(cursor: ProgressEntryCursor | undefined) {
-	if (!cursor) return undefined;
-	const createdAt = new Date(cursor.createdAt);
-	if (cursor.occurredAt === null)
-		return and(
-			isNull(unitProgressEntry.occurredAt),
-			or(
-				lt(unitProgressEntry.createdAt, createdAt),
-				and(
-					eq(unitProgressEntry.createdAt, createdAt),
-					lt(unitProgressEntry.id, cursor.id),
-				),
-			),
-		);
-	const occurredAt = new Date(cursor.occurredAt);
-	return or(
-		lt(unitProgressEntry.occurredAt, occurredAt),
-		and(
-			eq(unitProgressEntry.occurredAt, occurredAt),
-			or(
-				lt(unitProgressEntry.createdAt, createdAt),
-				and(
-					eq(unitProgressEntry.createdAt, createdAt),
-					lt(unitProgressEntry.id, cursor.id),
-				),
-			),
-		),
-		isNull(unitProgressEntry.occurredAt),
-	);
 }
 
 async function selectProgressSnapshot(profileId: string, unitId: string) {
@@ -434,7 +389,8 @@ export default new Elysia({ prefix: "/progress" })
 		"/:unitId/entries",
 		async ({ profile, authorization, params, query }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
-			const cursor = decodeProgressEntryCursor(query.cursor);
+			const cursorScope = { unitId: params.unitId, status: query.status };
+			const cursor = decodeProgressEntryCursor(query.cursor, cursorScope);
 			const limit = query.limit ?? 30;
 			const rows = await database
 				.select({
@@ -450,7 +406,6 @@ export default new Elysia({ prefix: "/progress" })
 					contentStructureRevisionId: unitProgressEntry.contentStructureRevisionId,
 					occurredAt: unitProgressEntry.occurredAt,
 					datePrecision: unitProgressEntry.datePrecision,
-					affectsCurrent: unitProgressEntry.affectsCurrent,
 					reviewId: postProgressEntry.postId,
 					createdAt: unitProgressEntry.createdAt,
 					updatedAt: unitProgressEntry.updatedAt,
@@ -469,11 +424,7 @@ export default new Elysia({ prefix: "/progress" })
 						progressEntryCursorCondition(cursor),
 					),
 				)
-				.orderBy(
-					sql`${unitProgressEntry.occurredAt} desc nulls last`,
-					desc(unitProgressEntry.createdAt),
-					desc(unitProgressEntry.id),
-				)
+				.orderBy(...progressEntryOrderBy)
 				.limit(limit + 1);
 			const page = rows.slice(0, limit);
 			const last = page.at(-1);
@@ -481,10 +432,9 @@ export default new Elysia({ prefix: "/progress" })
 				items: page.map(toProgressEntryResponse),
 				nextCursor:
 					rows.length > limit && last
-						? encodeProgressEntryCursor({
-								v: 1,
-								occurredAt: last.occurredAt?.toISOString() ?? null,
-								createdAt: last.createdAt.toISOString(),
+						? encodeProgressEntryCursor(cursorScope, {
+								sortAt: resolveProgressEntrySortAt(last),
+								createdAt: last.createdAt,
 								id: last.id,
 							})
 						: null,
@@ -516,7 +466,7 @@ export default new Elysia({ prefix: "/progress" })
 					lastContentStructureNodeId: body.lastContentStructureNodeId,
 					occurredAt: body.occurredAt,
 					datePrecision: body.datePrecision,
-					affectsCurrent: body.affectsCurrent ?? false,
+					affectsCurrent: false,
 				});
 			});
 			return toProgressEntryResponse({ ...entry, reviewId: null });
@@ -550,7 +500,6 @@ export default new Elysia({ prefix: "/progress" })
 					lastContentStructureNodeId: body.lastContentStructureNodeId,
 					occurredAt: body.occurredAt,
 					datePrecision: body.datePrecision,
-					affectsCurrent: body.affectsCurrent ?? false,
 				});
 			});
 			const [binding] = await database
@@ -577,6 +526,32 @@ export default new Elysia({ prefix: "/progress" })
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 			},
 			detail: { summary: "Replace a Progress journal entry", tags: ["Progress"] },
+		},
+	)
+	.put(
+		"/:unitId/entries/:entryId/current",
+		async ({ profile, authorization, params }) => {
+			await authorization.unit.ensureCanRead(params.unitId);
+			await database.transaction(async (tx) => {
+				await lockUnitProgress(tx, profile.unitId, params.unitId);
+				await setCurrentProgressEntry(tx, profile.unitId, params.unitId, params.entryId);
+			});
+			return new Response(null, { status: StatusCodes.NO_CONTENT });
+		},
+		{
+			access: "write:interaction:write",
+			params: ProgressEntryParams,
+			response: {
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"ProgressEntryNotFound",
+				]),
+			},
+			detail: {
+				summary: "Set a Progress journal entry as current",
+				tags: ["Progress"],
+				responses: NoContentResponse,
+			},
 		},
 	)
 	.delete(

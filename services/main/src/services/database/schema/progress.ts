@@ -87,7 +87,7 @@ export const unitProgressEntry = pgTable(
 		contentStructureRevisionId: uuid(),
 		occurredAt: createTimestampMsColumn(),
 		datePrecision: text().$type<ProgressDatePrecision>().notNull(),
-		affectsCurrent: boolean().default(true).notNull(),
+		affectsCurrent: boolean().default(false).notNull(),
 		deletedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
@@ -108,11 +108,21 @@ export const unitProgressEntry = pgTable(
 			foreignColumns: [contentStructureRevision.id],
 			name: "unit_progress_entry_content_structure_revision_fkey",
 		}).onDelete("restrict"),
-		index("unit_progress_entry_profile_unit_occurred_idx")
+		index("unit_progress_entry_profile_unit_sort_idx")
 			.on(
 				table.profileId,
 				table.unitId,
-				table.occurredAt.desc(),
+				sql`coalesce(${table.occurredAt}, ${table.createdAt}) desc`,
+				table.createdAt.desc(),
+				table.id.desc(),
+			)
+			.where(sql`${table.deletedAt} is null`),
+		index("unit_progress_entry_profile_unit_status_sort_idx")
+			.on(
+				table.profileId,
+				table.unitId,
+				table.status,
+				sql`coalesce(${table.occurredAt}, ${table.createdAt}) desc`,
 				table.createdAt.desc(),
 				table.id.desc(),
 			)

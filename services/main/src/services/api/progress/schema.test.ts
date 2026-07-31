@@ -1,6 +1,7 @@
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
+import { ProgressEntryResponse } from "../schema/response";
 import {
 	CompleteProgressBody,
 	CreateProgressEntryBody,
@@ -71,17 +72,18 @@ describe("progress API contract", () => {
 		);
 	});
 
-	it("keeps record provenance out of the journal contract", () => {
+	it("keeps current-snapshot selection and record provenance out of journal writes", () => {
 		const event = {
 			entryKind: "update",
 			status: "active",
 			progress: 0.4,
 			occurredAt: "2026-07-26T00:00:00.000Z",
 			datePrecision: "instant",
-			affectsCurrent: true,
 		};
 		expect(Check(CreateProgressEntryBody, event)).toBe(true);
 		expect(Check(ReplaceProgressEntryBody, event)).toBe(true);
+		expect(Check(CreateProgressEntryBody, { ...event, affectsCurrent: true })).toBe(false);
+		expect(Check(ReplaceProgressEntryBody, { ...event, affectsCurrent: true })).toBe(false);
 		expect(Check(CreateProgressEntryBody, { ...event, sourceKind: "manual" })).toBe(false);
 		expect(
 			Check(ReplaceProgressEntryBody, {
@@ -89,5 +91,28 @@ describe("progress API contract", () => {
 				sourceProvider: "Previous platform",
 			}),
 		).toBe(false);
+	});
+
+	it("keeps current-snapshot eligibility out of journal responses", () => {
+		const event = {
+			id: "00000000-0000-7000-8000-000000000001",
+			profileId: "00000000-0000-7000-8000-000000000002",
+			unitId: "00000000-0000-7000-8000-000000000003",
+			entryKind: "update",
+			status: "active",
+			progress: 0.4,
+			completionDelta: 0,
+			totalTimeMs: 3_600_000,
+			lastContentStructureNodeId: null,
+			contentStructureRevisionId: null,
+			occurredAt: "2026-07-26T00:00:00.000Z",
+			datePrecision: "instant",
+			reviewId: null,
+			createdAt: "2026-07-26T00:00:00.000Z",
+			updatedAt: "2026-07-26T00:00:00.000Z",
+		};
+
+		expect(Check(ProgressEntryResponse, event)).toBe(true);
+		expect(ProgressEntryResponse.properties).not.toHaveProperty("affectsCurrent");
 	});
 });

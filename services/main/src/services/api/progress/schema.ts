@@ -94,7 +94,6 @@ const ProgressEntryWriteFields = {
 	lastContentStructureNodeId: t.Optional(t.Nullable(Uuid)),
 	occurredAt: t.Nullable(DateTime),
 	datePrecision: ProgressDatePrecision,
-	affectsCurrent: t.Optional(t.Boolean({ default: false })),
 } as const;
 
 export const CreateProgressEntryBody = t.Object(ProgressEntryWriteFields, {

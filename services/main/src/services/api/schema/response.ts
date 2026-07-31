@@ -906,7 +906,6 @@ export const ProgressEntryResponse = t.Object({
 	contentStructureRevisionId: t.Nullable(Uuid),
 	occurredAt: t.Nullable(DateTime),
 	datePrecision: ProgressDatePrecisionResponse,
-	affectsCurrent: t.Boolean(),
 	reviewId: t.Nullable(Uuid),
 	createdAt: DateTime,
 	updatedAt: DateTime,

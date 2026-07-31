@@ -24,7 +24,7 @@ import { ContentStructureNodeNotFound } from "../content-structure/errors";
 import { ValidationError } from "../errors";
 import { ProgressEntryNotFound } from "./errors";
 
-export interface ProgressEntryWriteInput {
+export interface ProgressEntryContentInput {
 	readonly entryKind: ProgressEntryKind;
 	readonly status: ProgressStatus;
 	readonly progress?: number;
@@ -32,6 +32,9 @@ export interface ProgressEntryWriteInput {
 	readonly lastContentStructureNodeId?: string | null;
 	readonly occurredAt: Date | null;
 	readonly datePrecision: ProgressDatePrecision;
+}
+
+export interface ProgressEntryWriteInput extends ProgressEntryContentInput {
 	readonly affectsCurrent: boolean;
 }
 
@@ -300,7 +303,7 @@ function validateOccurredAt(occurredAt: Date | null, datePrecision: ProgressDate
 }
 
 function normalizeEntry(
-	input: ProgressEntryWriteInput,
+	input: ProgressEntryContentInput,
 	snapshot: ProgressSnapshot | undefined,
 ): {
 	readonly completionDelta: 0 | 1;
@@ -731,7 +734,7 @@ export async function replaceProgressEntry(
 	profileId: string,
 	unitId: string,
 	entryId: string,
-	input: ProgressEntryWriteInput,
+	input: ProgressEntryContentInput,
 ) {
 	validateOccurredAt(input.occurredAt, input.datePrecision);
 	const [existing] = await tx
@@ -766,7 +769,6 @@ export async function replaceProgressEntry(
 			contentStructureRevisionId,
 			occurredAt: input.occurredAt,
 			datePrecision: input.datePrecision,
-			affectsCurrent: input.affectsCurrent,
 			updatedAt: new Date(),
 		})
 		.where(
@@ -779,13 +781,30 @@ export async function replaceProgressEntry(
 		)
 		.returning();
 	if (!entry) throw new ProgressEntryNotFound();
-	await refreshProgressSnapshot(
-		tx,
-		profileId,
-		unitId,
-		input.affectsCurrent ? entry.id : undefined,
-	);
+	await refreshProgressSnapshot(tx, profileId, unitId);
 	return entry;
+}
+
+export async function setCurrentProgressEntry(
+	tx: DatabaseTransaction,
+	profileId: string,
+	unitId: string,
+	entryId: string,
+): Promise<void> {
+	const [entry] = await tx
+		.update(unitProgressEntry)
+		.set({ affectsCurrent: true })
+		.where(
+			and(
+				eq(unitProgressEntry.id, entryId),
+				eq(unitProgressEntry.profileId, profileId),
+				eq(unitProgressEntry.unitId, unitId),
+				isNull(unitProgressEntry.deletedAt),
+			),
+		)
+		.returning({ id: unitProgressEntry.id });
+	if (!entry) throw new ProgressEntryNotFound();
+	await refreshProgressSnapshot(tx, profileId, unitId, entry.id);
 }
 
 export async function deleteProgressEntry(

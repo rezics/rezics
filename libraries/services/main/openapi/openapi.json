@@ -110159,7 +110159,6 @@
 													"contentStructureRevisionId",
 													"occurredAt",
 													"datePrecision",
-													"affectsCurrent",
 													"reviewId",
 													"createdAt",
 													"updatedAt"
@@ -110257,7 +110256,6 @@
 															"unknown"
 														]
 													},
-													"affectsCurrent": { "type": "boolean" },
 													"reviewId": {
 														"nullable": true,
 														"anyOf": [
@@ -110464,8 +110462,7 @@
 										"default": "instant",
 										"type": "string",
 										"enum": ["instant", "day", "month", "year", "unknown"]
-									},
-									"affectsCurrent": { "default": false, "type": "boolean" }
+									}
 								}
 							}
 						}
@@ -110492,7 +110489,6 @@
 										"contentStructureRevisionId",
 										"occurredAt",
 										"datePrecision",
-										"affectsCurrent",
 										"reviewId",
 										"createdAt",
 										"updatedAt"
@@ -110571,7 +110567,6 @@
 											"type": "string",
 											"enum": ["instant", "day", "month", "year", "unknown"]
 										},
-										"affectsCurrent": { "type": "boolean" },
 										"reviewId": {
 											"nullable": true,
 											"anyOf": [
@@ -110781,8 +110776,7 @@
 										"default": "instant",
 										"type": "string",
 										"enum": ["instant", "day", "month", "year", "unknown"]
-									},
-									"affectsCurrent": { "default": false, "type": "boolean" }
+									}
 								}
 							}
 						}
@@ -110809,7 +110803,6 @@
 										"contentStructureRevisionId",
 										"occurredAt",
 										"datePrecision",
-										"affectsCurrent",
 										"reviewId",
 										"createdAt",
 										"updatedAt"
@@ -110888,7 +110881,6 @@
 											"type": "string",
 											"enum": ["instant", "day", "month", "year", "unknown"]
 										},
-										"affectsCurrent": { "type": "boolean" },
 										"reviewId": {
 											"nullable": true,
 											"anyOf": [
@@ -111130,6 +111122,116 @@
 				],
 				"operationId": "deleteApiProgressByUnitIdEntriesByEntryId",
 				"x-rezics-quota-route-operation-id": "deleteApiProgressByUnitIdEntriesByEntryId",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/progress/{unitId}/entries/{entryId}/current": {
+			"put": {
+				"summary": "Set a Progress journal entry as current",
+				"tags": ["Progress"],
+				"responses": {
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"ProgressEntryNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": [
+														"ApiQuotaExceeded",
+														"ApiTokenRateLimitExceeded"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "entryId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"operationId": "putApiProgressByUnitIdEntriesByEntryIdCurrent",
+				"x-rezics-quota-route-operation-id": "putApiProgressByUnitIdEntriesByEntryIdCurrent",
 				"x-rezics-quota-operation-id": "*",
 				"x-rezics-quota-cost-units": 1
 			}

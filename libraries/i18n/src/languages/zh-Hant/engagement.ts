@@ -330,7 +330,7 @@ export default {
 		noEntries: "還沒有進度足跡。",
 		loadMore: "載入更多",
 		unknownDate: "日期不詳",
-		affectsCurrentShort: "目前進度",
+		currentProgress: "目前進度",
 		entryDetails: "事件詳情",
 		entryKind: "事件類型",
 		kinds: {
@@ -349,8 +349,7 @@ export default {
 			year: "年份",
 			unknown: "日期不詳",
 		},
-		affectsCurrent: "將這筆事件設為目前進度",
-		affectsCurrentDescription: "開啟後，這筆事件會更新此作品現在顯示的狀態與進度。",
+		setCurrent: "將這筆事件設為目前進度",
 		saveEntry: "儲存事件",
 		editEntry: "編輯事件",
 		editDescription: "修正這次狀態變更的日期或進度。",

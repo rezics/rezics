@@ -9,7 +9,6 @@ import { useEffect, useState, type FormEvent } from "react";
 
 import {
 	Button,
-	Checkbox,
 	Dialog,
 	DialogBody,
 	DialogContent,
@@ -152,23 +151,6 @@ function ProgressEntryEditor({
 							</>
 						)}
 						<DateFields draft={draft} onChange={setDraft} />
-						<label className="flex items-start gap-3 rounded-lg border border-border-weak p-4">
-							<Checkbox
-								checked={draft.affectsCurrent}
-								onCheckedChange={({ checked }) =>
-									setDraft((current) => ({
-										...current,
-										affectsCurrent: checked === true,
-									}))
-								}
-							/>
-							<span className="grid gap-1">
-								<span className="font-medium text-sm">{copy.affectsCurrent}</span>
-								<span className="text-muted-foreground text-sm">
-									{copy.affectsCurrentDescription}
-								</span>
-							</span>
-						</label>
 						{invalid ? (
 							<p className="text-destructive text-sm" role="alert">
 								{t.errors.invalid}

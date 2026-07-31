@@ -334,7 +334,7 @@ export default {
 		noEntries: "No progress events yet.",
 		loadMore: "Load more",
 		unknownDate: "Unknown date",
-		affectsCurrentShort: "Current progress",
+		currentProgress: "Current progress",
 		entryDetails: "Event details",
 		entryKind: "Event type",
 		kinds: {
@@ -353,9 +353,7 @@ export default {
 			year: "Year",
 			unknown: "Unknown date",
 		},
-		affectsCurrent: "Use this event as current progress",
-		affectsCurrentDescription:
-			"When enabled, this event updates the status and progress currently shown for this work.",
+		setCurrent: "Set as current progress",
 		saveEntry: "Save event",
 		editEntry: "Edit event",
 		editDescription: "Correct the date or progress for this status change.",

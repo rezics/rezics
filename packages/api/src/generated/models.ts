@@ -80810,10 +80810,6 @@ export type GetApiProgressByUnitIdEntriesStatus200 = {
 		 * @type string
 		 */
 		datePrecision: GetApiProgressByUnitIdEntriesStatus200ItemsDatePrecisionEnum;
-		/**
-		 * @type boolean
-		 */
-		affectsCurrent: boolean;
 		reviewId: (string | null) | null;
 		/**
 		 * @description
@@ -81052,10 +81048,6 @@ export type PostApiProgressByUnitIdEntriesStatus200 = {
 	 * @type string
 	 */
 	datePrecision: PostApiProgressByUnitIdEntriesStatus200DatePrecisionEnum;
-	/**
-	 * @type boolean
-	 */
-	affectsCurrent: boolean;
 	reviewId: (string | null) | null;
 	/**
 	 * @description
@@ -81233,11 +81225,6 @@ export type PostApiProgressByUnitIdEntriesBody = {
 	 * @type string
 	 */
 	datePrecision: PostApiProgressByUnitIdEntriesRequestDatePrecisionEnum;
-	/**
-	 * @default false
-	 * @type boolean | undefined
-	 */
-	affectsCurrent?: boolean;
 };
 
 /**
@@ -81369,10 +81356,6 @@ export type PutApiProgressByUnitIdEntriesByEntryIdStatus200 = {
 	 * @type string
 	 */
 	datePrecision: PutApiProgressByUnitIdEntriesByEntryIdStatus200DatePrecisionEnum;
-	/**
-	 * @type boolean
-	 */
-	affectsCurrent: boolean;
 	reviewId: (string | null) | null;
 	/**
 	 * @description
@@ -81551,11 +81534,6 @@ export type PutApiProgressByUnitIdEntriesByEntryIdBody = {
 	 * @type string
 	 */
 	datePrecision: PutApiProgressByUnitIdEntriesByEntryIdRequestDatePrecisionEnum;
-	/**
-	 * @default false
-	 * @type boolean | undefined
-	 */
-	affectsCurrent?: boolean;
 };
 
 /**
@@ -81715,6 +81693,131 @@ export type DeleteApiProgressByUnitIdEntriesByEntryIdResponse =
 	| DeleteApiProgressByUnitIdEntriesByEntryIdStatus422
 	| DeleteApiProgressByUnitIdEntriesByEntryIdStatus429
 	| DeleteApiProgressByUnitIdEntriesByEntryIdStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiProgressByUnitIdEntriesByEntryIdCurrentPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	entryId: string;
+};
+
+export const PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ProgressEntryNotFound: "ProgressEntryNotFound",
+} as const;
+
+export type PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus404ErrorCodeEnum =
+	(typeof PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus404ErrorCodeEnum)[keyof typeof PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus422 = ValidationError;
+
+export const PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus429ErrorCodeEnum =
+	(typeof PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus429ErrorCodeEnum)[keyof typeof PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PutApiProgressByUnitIdEntriesByEntryIdCurrentOptions = {
+	body?: never;
+	path: PutApiProgressByUnitIdEntriesByEntryIdCurrentPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiProgressByUnitIdEntriesByEntryIdCurrentResponses = {
+	"404": PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus404;
+	"422": PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus422;
+	"429": PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus429;
+	"500": PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiProgressByUnitIdEntriesByEntryIdCurrentResponse =
+	| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus404
+	| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus422
+	| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus429
+	| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus500;
 
 /**
  * @type object

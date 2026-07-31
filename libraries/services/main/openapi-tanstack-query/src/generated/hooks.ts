@@ -1583,6 +1583,12 @@ import type {
 	DeleteApiProgressByUnitIdEntriesByEntryIdStatus422,
 	DeleteApiProgressByUnitIdEntriesByEntryIdStatus429,
 	DeleteApiProgressByUnitIdEntriesByEntryIdStatus500,
+	PutApiProgressByUnitIdEntriesByEntryIdCurrentOptions,
+	PutApiProgressByUnitIdEntriesByEntryIdCurrentResponse,
+	PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus404,
+	PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus422,
+	PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus429,
+	PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus500,
 	GetApiProgressByUnitIdNodesOptions,
 	GetApiProgressByUnitIdNodesStatus200,
 	GetApiProgressByUnitIdNodesStatus404,
@@ -2612,6 +2618,7 @@ import {
 	postApiProgressByUnitIdEntries,
 	putApiProgressByUnitIdEntriesByEntryId,
 	deleteApiProgressByUnitIdEntriesByEntryId,
+	putApiProgressByUnitIdEntriesByEntryIdCurrent,
 	getApiProgressByUnitIdNodes,
 	postApiProgressByUnitIdNodesByNodeIdRead,
 	postApiProgressByUnitIdComplete,
@@ -26912,6 +26919,105 @@ export function useDeleteApiProgressByUnitIdEntriesByEntryId<TContext>(
 			| DeleteApiProgressByUnitIdEntriesByEntryIdStatus500
 		>,
 		DeleteApiProgressByUnitIdEntriesByEntryIdOptions,
+		TContext
+	>;
+}
+
+export const putApiProgressByUnitIdEntriesByEntryIdCurrentMutationKey = () =>
+	[{ url: "/api/progress/:unitId/entries/:entryId/current" }] as const;
+
+export function putApiProgressByUnitIdEntriesByEntryIdCurrentMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiProgressByUnitIdEntriesByEntryIdCurrentMutationKey();
+	return mutationOptions<
+		PutApiProgressByUnitIdEntriesByEntryIdCurrentResponse,
+		ResponseErrorConfig<
+			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus404
+			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus422
+			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus429
+			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus500
+		>,
+		PutApiProgressByUnitIdEntriesByEntryIdCurrentOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await putApiProgressByUnitIdEntriesByEntryIdCurrent({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Set a Progress journal entry as current
+ * {@link /api/progress/:unitId/entries/:entryId/current}
+ */
+export function usePutApiProgressByUnitIdEntriesByEntryIdCurrent<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiProgressByUnitIdEntriesByEntryIdCurrentResponse,
+			ResponseErrorConfig<
+				| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus404
+				| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus422
+				| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus429
+				| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus500
+			>,
+			PutApiProgressByUnitIdEntriesByEntryIdCurrentOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiProgressByUnitIdEntriesByEntryIdCurrentMutationKey();
+
+	const baseOptions = putApiProgressByUnitIdEntriesByEntryIdCurrentMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiProgressByUnitIdEntriesByEntryIdCurrentResponse,
+		ResponseErrorConfig<
+			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus404
+			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus422
+			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus429
+			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus500
+		>,
+		PutApiProgressByUnitIdEntriesByEntryIdCurrentOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiProgressByUnitIdEntriesByEntryIdCurrentResponse,
+		ResponseErrorConfig<
+			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus404
+			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus422
+			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus429
+			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus500
+		>,
+		PutApiProgressByUnitIdEntriesByEntryIdCurrentOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiProgressByUnitIdEntriesByEntryIdCurrentResponse,
+		ResponseErrorConfig<
+			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus404
+			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus422
+			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus429
+			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus500
+		>,
+		PutApiProgressByUnitIdEntriesByEntryIdCurrentOptions,
 		TContext
 	>;
 }

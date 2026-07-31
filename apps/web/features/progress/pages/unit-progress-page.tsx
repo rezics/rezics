@@ -3,6 +3,7 @@
 import {
 	useDeleteApiProgressByUnitIdEntriesByEntryId,
 	useGetApiUnitsByTypeByUnitId,
+	usePutApiProgressByUnitIdEntriesByEntryIdCurrent,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, CheckCircle2, Clock3, History, Pencil, Plus, Star, Trash2 } from "lucide-react";
@@ -128,8 +129,21 @@ function ProgressJournal({ title }: { readonly title?: string }) {
 	const [editorOpen, setEditorOpen] = useState(false);
 	const [editingEntry, setEditingEntry] = useState<ProgressEntry>();
 	const [deletingEntry, setDeletingEntry] = useState<ProgressEntry>();
+	const setCurrent = usePutApiProgressByUnitIdEntriesByEntryIdCurrent();
+	const queryClient = useQueryClient();
 	const items = entries.data?.pages.flatMap((page) => page.items) ?? [];
 	const selectedEntry = items.find((item) => item.id === selectedId) ?? items[0];
+
+	async function setCurrentEntry(entryId: string) {
+		try {
+			await setCurrent.mutateAsync({
+				path: { unitId: progress.domain.unitId, entryId },
+			});
+			await invalidateProgressQueries(queryClient, progress.domain.unitId);
+		} catch {
+			// The typed mutation state supplies the visible API error.
+		}
+	}
 
 	return (
 		<main className="mx-auto flex w-full max-w-6xl flex-col gap-7 px-4 py-6 sm:px-6 sm:py-10">
@@ -182,6 +196,7 @@ function ProgressJournal({ title }: { readonly title?: string }) {
 						className="gap-2"
 						onValueChange={({ value }) => {
 							setSelectedId(undefined);
+							setCurrent.reset();
 							void setHistoryFilter(toProgressHistoryFilter(value));
 						}}
 						value={historyFilter}
@@ -215,7 +230,10 @@ function ProgressJournal({ title }: { readonly title?: string }) {
 									<div key={entry.id}>
 										<ProgressTimelineItem
 											entry={entry}
-											onSelect={() => setSelectedId(entry.id)}
+											onSelect={() => {
+												setCurrent.reset();
+												setSelectedId(entry.id);
+											}}
 											selected={selected}
 											type={progress.domain.type}
 										/>
@@ -223,11 +241,20 @@ function ProgressJournal({ title }: { readonly title?: string }) {
 											<div className="mt-3 lg:hidden">
 												<ProgressEntryDetails
 													entry={entry}
+													isSettingCurrent={
+														setCurrent.isPending &&
+														setCurrent.variables?.path.entryId ===
+															entry.id
+													}
 													onDelete={() => setDeletingEntry(entry)}
 													onEdit={() => {
 														setEditingEntry(entry);
 														setEditorOpen(true);
 													}}
+													onSetCurrent={() =>
+														void setCurrentEntry(entry.id)
+													}
+													setCurrentError={setCurrent.error}
 													type={progress.domain.type}
 												/>
 											</div>
@@ -250,11 +277,17 @@ function ProgressJournal({ title }: { readonly title?: string }) {
 							{selectedEntry ? (
 								<ProgressEntryDetails
 									entry={selectedEntry}
+									isSettingCurrent={
+										setCurrent.isPending &&
+										setCurrent.variables?.path.entryId === selectedEntry.id
+									}
 									onDelete={() => setDeletingEntry(selectedEntry)}
 									onEdit={() => {
 										setEditingEntry(selectedEntry);
 										setEditorOpen(true);
 									}}
+									onSetCurrent={() => void setCurrentEntry(selectedEntry.id)}
+									setCurrentError={setCurrent.error}
 									type={progress.domain.type}
 								/>
 							) : null}
@@ -402,7 +435,7 @@ function ProgressTimelineItem({
 				</Badge>
 				{entry.id === progress.currentEntryId ? (
 					<span className="text-muted-foreground text-xs">
-						{t.engagement.progressJournal.affectsCurrentShort}
+						{t.engagement.progressJournal.currentProgress}
 					</span>
 				) : null}
 			</span>
@@ -412,17 +445,23 @@ function ProgressTimelineItem({
 
 function ProgressEntryDetails({
 	entry,
+	isSettingCurrent,
 	onDelete,
 	onEdit,
+	onSetCurrent,
+	setCurrentError,
 	type,
 }: {
 	readonly entry: ProgressEntry;
+	readonly isSettingCurrent: boolean;
 	readonly onDelete: () => void;
 	readonly onEdit: () => void;
+	readonly onSetCurrent: () => void;
+	readonly setCurrentError: unknown;
 	readonly type: ProgressTrackableUnitType;
 }) {
 	const progress = useUnitProgress();
-	const { locale, t } = useTranslation(["engagement"]);
+	const { locale, t } = useTranslation(["engagement", "ui"]);
 	const copy = t.engagement.progressJournal;
 	const contentStructureNode =
 		type === "software"
@@ -443,6 +482,7 @@ function ProgressEntryDetails({
 		copy.unknownDate,
 	);
 	const minutes = Math.round((toFiniteApiNumber(entry.totalTimeMs) ?? 0) / 60_000);
+	const isCurrent = entry.id === progress.currentEntryId;
 	return (
 		<Card appearance="outlined">
 			<CardHeader>
@@ -504,6 +544,17 @@ function ProgressEntryDetails({
 							</Link>
 						</Button>
 					)}
+					{isCurrent ? null : (
+						<Button
+							isLoading={isSettingCurrent}
+							onClick={onSetCurrent}
+							size="sm"
+							variant="outline"
+						>
+							<CheckCircle2 aria-hidden />
+							{copy.setCurrent}
+						</Button>
+					)}
 					<Button onClick={onEdit} size="sm" variant="outline">
 						<Pencil aria-hidden />
 						{copy.editEntry}
@@ -518,6 +569,7 @@ function ProgressEntryDetails({
 						{copy.deleteEntry}
 					</Button>
 				</div>
+				<RequestFailure error={setCurrentError} fallback={t.ui.retryLater} />
 			</CardContent>
 		</Card>
 	);
