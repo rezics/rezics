@@ -9,6 +9,7 @@ const { forms: audioTerms } = zhHansTerminology.audio;
 const { forms: realmTerms } = zhHansTerminology.realm;
 const { forms: followTerms } = zhHansTerminology.follow;
 const { forms: metadataTerms } = zhHansTerminology.metadata;
+const { forms: entityTerms } = zhHansTerminology.entity;
 
 export default {
 	types: {
@@ -25,11 +26,19 @@ export default {
 		ownedWorkDescription: "由你的个人资料拥有并管理这项作品。",
 		communityUnit: "公共条目",
 		communityUnitDescription: "由社区拥有，所有已登录用户都能编辑；创建者不会获得特殊权限。",
-		publisherEntity: "出版者条目",
-		publisherOwnedDescription:
-			"我的作品必须选择出版者；若对方限制直接关联，系统会发送同意请求。",
-		publisherPublicDescription:
-			"公共条目可选填出版者；若需要同意，系统会发送请求，而不是邀请。",
+		creditEntityLabel: insert(`署名${entityTerms.label} {{number}}`, { number: Number }),
+		creditRoleLabel: insert("署名角色 {{number}}", { number: Number }),
+		selectCreditRole: "选择角色",
+		addCreditAttribution: "新增署名",
+		removeCreditAttribution: insert("移除第 {{number}} 笔署名", { number: Number }),
+		creditEntityRequired: `请选择${entityTerms.label}。`,
+		creditRoleRequired: "请选择角色。",
+		creditDuplicate: `这个${entityTerms.label}已经设置相同角色。`,
+		publisherAttributionRequired: "我的作品必须至少有一笔出版者署名。",
+		creditRequestConfirmationTitle: "确认署名邀请",
+		creditRequestConfirmationDescription: `部分所选${entityTerms.plural}需要取得同意后才能显示署名。确认后将创建此作品并发送署名邀请。`,
+		creditRequestConfirmationCancel: "取消",
+		creditRequestConfirmationConfirm: "创建并发送邀请",
 		versionRole: "版本类型",
 		mainVersion: "主要版本",
 		variantVersion: "变体版本",

@@ -1,0 +1,193 @@
+"use client";
+
+import { useMemo } from "react";
+import { Trash2 } from "lucide-react";
+import {
+	Button,
+	EntityPicker,
+	Field,
+	FieldError,
+	FieldLabel,
+	NativeSelect,
+	NativeSelectOption,
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+	type EntitySearch,
+	useEntitySearch,
+} from "@rezics/ui";
+
+import { useTranslation } from "@/i18n/client";
+import {
+	CreditAttributionRolesByUnitType,
+	isCreditAttributionRoleForUnitType,
+} from "../attribution-role";
+import type {
+	CreditAttributionDraft,
+	CreditAttributionDraftValidation,
+} from "../model/credit-attribution-draft";
+import type { VariantUnitType } from "../unit-types";
+
+export type CreditEntitySearchScope = "direct" | "public";
+
+function newCreditAttributionDraft(): CreditAttributionDraft {
+	return { key: crypto.randomUUID() };
+}
+
+export function UnitCreditAttributionEditor({
+	type,
+	value,
+	validation,
+	searchScope,
+	onChange,
+}: {
+	readonly type: VariantUnitType;
+	readonly value: readonly CreditAttributionDraft[];
+	readonly validation?: CreditAttributionDraftValidation;
+	readonly searchScope: CreditEntitySearchScope;
+	readonly onChange: (value: readonly CreditAttributionDraft[]) => void;
+}) {
+	const { t } = useTranslation(["ui", "units"]);
+	const searchEntities = useEntitySearch();
+	const scopedSearch = useMemo<EntitySearch | undefined>(() => {
+		if (!searchEntities) return undefined;
+		return (index, query, signal, options) =>
+			searchEntities(index, query, signal, {
+				...options,
+				creditAttributionSearch: searchScope,
+			});
+	}, [searchEntities, searchScope]);
+
+	return (
+		<div className="grid gap-3">
+			<div className="grid gap-3">
+				{value.map((draft, index) => {
+					const number = index + 1;
+					const issue = validation?.issues[draft.key];
+					const entityInvalid = Boolean(issue?.entityRequired || issue?.duplicate);
+					const roleInvalid = Boolean(issue?.roleRequired);
+					return (
+						<div
+							className="grid gap-2 sm:grid-cols-[12rem_minmax(0,1fr)_2.25rem] sm:items-start"
+							key={draft.key}
+						>
+							<Field invalid={roleInvalid} required>
+								<FieldLabel className="sr-only">
+									{t.units.creation.creditRoleLabel({ number })}
+								</FieldLabel>
+								<NativeSelect
+									invalid={roleInvalid}
+									onChange={(event) => {
+										const role = event.currentTarget.value;
+										onChange(
+											value.map((item) =>
+												item.key === draft.key
+													? {
+															...item,
+															role: isCreditAttributionRoleForUnitType(
+																type,
+																role,
+															)
+																? role
+																: undefined,
+														}
+													: item,
+											),
+										);
+									}}
+									value={draft.role ?? ""}
+								>
+									<NativeSelectOption value="">
+										{t.units.creation.selectCreditRole}
+									</NativeSelectOption>
+									{CreditAttributionRolesByUnitType[type].map((role) => (
+										<NativeSelectOption key={role} value={role}>
+											{t.units.attributionRoles[role]}
+										</NativeSelectOption>
+									))}
+								</NativeSelect>
+								{issue?.roleRequired ? (
+									<FieldError>{t.units.creation.creditRoleRequired}</FieldError>
+								) : null}
+							</Field>
+							<Field invalid={entityInvalid} required>
+								<FieldLabel className="sr-only">
+									{t.units.creation.creditEntityLabel({ number })}
+								</FieldLabel>
+								<EntityPicker
+									ariaLabel={t.units.creation.creditEntityLabel({ number })}
+									index="entities"
+									invalid={entityInvalid}
+									onChange={(entity) =>
+										onChange(
+											value.map((item) =>
+												item.key === draft.key ? { ...item, entity } : item,
+											),
+										)
+									}
+									onClear={() =>
+										onChange(
+											value.map((item) =>
+												item.key === draft.key
+													? { ...item, entity: undefined }
+													: item,
+											),
+										)
+									}
+									placeholder={t.ui.pickerPlaceholders.entity}
+									search={scopedSearch}
+									value={draft.entity}
+								/>
+								{issue?.entityRequired ? (
+									<FieldError>{t.units.creation.creditEntityRequired}</FieldError>
+								) : issue?.duplicate ? (
+									<FieldError>{t.units.creation.creditDuplicate}</FieldError>
+								) : null}
+							</Field>
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<Button
+										aria-label={t.units.creation.removeCreditAttribution({
+											number,
+										})}
+										onClick={() => {
+											const remaining = value.filter(
+												(item) => item.key !== draft.key,
+											);
+											onChange(
+												remaining.length > 0
+													? remaining
+													: [newCreditAttributionDraft()],
+											);
+										}}
+										size="icon-md"
+										type="button"
+										variant="quiet"
+									>
+										<Trash2 aria-hidden className="size-4" />
+									</Button>
+								</TooltipTrigger>
+								<TooltipContent>
+									{t.units.creation.removeCreditAttribution({ number })}
+								</TooltipContent>
+							</Tooltip>
+						</div>
+					);
+				})}
+			</div>
+			{validation?.publisherRequired ? (
+				<p className="text-destructive text-sm" role="alert">
+					{t.units.creation.publisherAttributionRequired}
+				</p>
+			) : null}
+			<Button
+				className="w-fit"
+				onClick={() => onChange([...value, newCreditAttributionDraft()])}
+				type="button"
+				variant="outline"
+			>
+				{t.units.creation.addCreditAttribution}
+			</Button>
+		</div>
+	);
+}

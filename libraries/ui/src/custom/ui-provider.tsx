@@ -61,6 +61,7 @@ export interface UnitMentionPresentation extends EntityPickerHit {
 
 export interface EntitySearchOptions {
 	readonly kinds?: readonly string[];
+	readonly creditAttributionSearch?: "direct" | "public";
 }
 
 export type EntitySearch = (

@@ -1233,7 +1233,9 @@ import type {
 	GetApiHistoryChangeTagsStatus500,
 	GetApiEntitiesOptions,
 	GetApiEntitiesStatus200,
+	GetApiEntitiesStatus401,
 	GetApiEntitiesStatus422,
+	GetApiEntitiesStatus429,
 	GetApiEntitiesStatus500,
 	PostApiEntitiesOptions,
 	PostApiEntitiesStatus200,
@@ -21564,7 +21566,12 @@ export function getApiEntitiesQueryOptions(
 	const queryKey = getApiEntitiesQueryKey({ query });
 	return queryOptions<
 		GetApiEntitiesStatus200,
-		ResponseErrorConfig<GetApiEntitiesStatus422 | GetApiEntitiesStatus500>,
+		ResponseErrorConfig<
+			| GetApiEntitiesStatus401
+			| GetApiEntitiesStatus422
+			| GetApiEntitiesStatus429
+			| GetApiEntitiesStatus500
+		>,
 		GetApiEntitiesStatus200,
 		typeof queryKey
 	>({
@@ -21597,7 +21604,12 @@ export function useGetApiEntities<
 		query?: Partial<
 			QueryObserverOptions<
 				GetApiEntitiesStatus200,
-				ResponseErrorConfig<GetApiEntitiesStatus422 | GetApiEntitiesStatus500>,
+				ResponseErrorConfig<
+					| GetApiEntitiesStatus401
+					| GetApiEntitiesStatus422
+					| GetApiEntitiesStatus429
+					| GetApiEntitiesStatus500
+				>,
 				TData,
 				TQueryData,
 				TQueryKey
@@ -21620,7 +21632,12 @@ export function useGetApiEntities<
 		queryClient,
 	) as UseQueryResult<
 		TData,
-		ResponseErrorConfig<GetApiEntitiesStatus422 | GetApiEntitiesStatus500>
+		ResponseErrorConfig<
+			| GetApiEntitiesStatus401
+			| GetApiEntitiesStatus422
+			| GetApiEntitiesStatus429
+			| GetApiEntitiesStatus500
+		>
 	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;

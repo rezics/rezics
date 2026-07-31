@@ -1,9 +1,30 @@
 import { Value } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { AddUnitLinkBody, UpdateUnitTagCurationBody } from "./schema";
+import { AddUnitLinkBody, ListEntityEntriesQuery, UpdateUnitTagCurationBody } from "./schema";
 
 describe("Unit resource API schemas", () => {
+	it("accepts only direct-permission or public credit Entity searches", () => {
+		expect(
+			Value.Check(ListEntityEntriesQuery, {
+				creditAttributionSearch: "direct",
+				query: "Studio",
+			}),
+		).toBe(true);
+		expect(
+			Value.Check(ListEntityEntriesQuery, {
+				creditAttributionSearch: "public",
+				query: "Studio",
+			}),
+		).toBe(true);
+		expect(
+			Value.Check(ListEntityEntriesQuery, {
+				creditAttributionSearch: "owner",
+				query: "Studio",
+			}),
+		).toBe(false);
+	});
+
 	it("accepts only structured source-link fields", () => {
 		const sourceLink = {
 			url: "https://example.test/units/book",

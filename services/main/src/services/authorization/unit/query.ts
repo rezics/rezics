@@ -1,15 +1,27 @@
 import type { DelegableUnitPermission } from "@rezics/access";
-import { and, eq, exists, inArray, isNull, not, or, sql, type SQLWrapper } from "drizzle-orm";
+import {
+	and,
+	eq,
+	exists,
+	inArray,
+	isNull,
+	not,
+	or,
+	sql,
+	type SQL,
+	type SQLWrapper,
+} from "drizzle-orm";
 
 import { database } from "../../database";
 import {
-	platformCapabilityGrant,
 	realmMember,
 	unit,
 	unitAccessGrant,
 	unitAccessRestriction,
 	unitOwnership,
 } from "../../database/schema";
+import { getPlatformCapabilityCondition } from "../platform/query";
+import type { UnitScope } from "./scope";
 
 type UnitReadTarget = {
 	readonly id: SQLWrapper;
@@ -112,22 +124,7 @@ export function getUnitReadCondition(
 				),
 			),
 	);
-	const platformSubject = exists(
-		database
-			.select({ id: platformCapabilityGrant.id })
-			.from(platformCapabilityGrant)
-			.where(
-				and(
-					eq(platformCapabilityGrant.profileId, profileId),
-					eq(platformCapabilityGrant.capability, "unit.edit"),
-					isNull(platformCapabilityGrant.revokedAt),
-					or(
-						isNull(platformCapabilityGrant.expiresAt),
-						sql`${platformCapabilityGrant.expiresAt} > now()`,
-					),
-				),
-			),
-	);
+	const platformSubject = getPlatformCapabilityCondition(profileId, "unit.edit");
 	const matchingGrant = exists(
 		database
 			.select({ id: unitAccessGrant.id })
@@ -175,10 +172,21 @@ export function getUnitReadCondition(
 	);
 }
 
-/** Return the SQL predicate equivalent of a root-scoped delegable Unit permission decision. */
-export function getUnitRootPermissionCondition(
+function scopePrefixCondition(
+	column: typeof unitAccessGrant.scope | typeof unitAccessRestriction.scope,
+	scope: UnitScope,
+): SQL {
+	const prefixes = Array.from({ length: scope.length + 1 }, (_, length) =>
+		eq(column, scope.slice(0, length)),
+	);
+	return or(...prefixes) ?? sql`false`;
+}
+
+/** Return the SQL predicate equivalent of a scoped delegable Unit permission decision. */
+export function getUnitPermissionCondition(
 	profileId: string,
 	permission: DelegableUnitPermission,
+	scope: UnitScope,
 	target: Pick<UnitReadTarget, "id" | "deletedAt"> = unit,
 ) {
 	const ownership = exists(
@@ -193,22 +201,7 @@ export function getUnitRootPermissionCondition(
 				),
 			),
 	);
-	const platformSubject = exists(
-		database
-			.select({ id: platformCapabilityGrant.id })
-			.from(platformCapabilityGrant)
-			.where(
-				and(
-					eq(platformCapabilityGrant.profileId, profileId),
-					eq(platformCapabilityGrant.capability, "unit.edit"),
-					isNull(platformCapabilityGrant.revokedAt),
-					or(
-						isNull(platformCapabilityGrant.expiresAt),
-						sql`${platformCapabilityGrant.expiresAt} > now()`,
-					),
-				),
-			),
-	);
+	const platformSubject = getPlatformCapabilityCondition(profileId, "unit.edit");
 	const profileRestriction = exists(
 		database
 			.select({ id: unitAccessRestriction.id })
@@ -217,7 +210,7 @@ export function getUnitRootPermissionCondition(
 				and(
 					eq(unitAccessRestriction.unitId, target.id),
 					eq(unitAccessRestriction.permission, permission),
-					sql`cardinality(${unitAccessRestriction.scope}) = 0`,
+					scopePrefixCondition(unitAccessRestriction.scope, scope),
 					eq(unitAccessRestriction.subjectKind, "profile"),
 					eq(unitAccessRestriction.profileId, profileId),
 					activeRestriction(),
@@ -232,7 +225,7 @@ export function getUnitRootPermissionCondition(
 				and(
 					eq(unitAccessRestriction.unitId, target.id),
 					eq(unitAccessRestriction.permission, permission),
-					sql`cardinality(${unitAccessRestriction.scope}) = 0`,
+					scopePrefixCondition(unitAccessRestriction.scope, scope),
 					eq(unitAccessRestriction.subjectKind, "realm"),
 					activeRestriction(),
 					exists(
@@ -258,7 +251,7 @@ export function getUnitRootPermissionCondition(
 				and(
 					eq(unitAccessGrant.unitId, target.id),
 					eq(unitAccessGrant.permission, permission),
-					sql`cardinality(${unitAccessGrant.scope}) = 0`,
+					scopePrefixCondition(unitAccessGrant.scope, scope),
 					activeGrant(),
 					or(
 						eq(unitAccessGrant.subjectKind, "authenticated"),
@@ -293,6 +286,15 @@ export function getUnitRootPermissionCondition(
 			and(not(profileRestriction), not(realmRestriction), matchingGrant),
 		),
 	);
+}
+
+/** Return the SQL predicate equivalent of a root-scoped delegable Unit permission decision. */
+export function getUnitRootPermissionCondition(
+	profileId: string,
+	permission: DelegableUnitPermission,
+	target: Pick<UnitReadTarget, "id" | "deletedAt"> = unit,
+) {
+	return getUnitPermissionCondition(profileId, permission, [], target);
 }
 
 /** Return the SQL predicate equivalent of a root-scoped `unit.update` decision. */

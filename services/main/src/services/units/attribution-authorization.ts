@@ -4,7 +4,11 @@ import type { Authorization } from "../authorization";
 import { associationTargetScope } from "../authorization/unit/scope";
 import type { DatabaseTransaction } from "../database";
 import { entity, unit } from "../database/schema";
-import { EntityAssociationRestricted, EntityEntryNotFound } from "../entities/errors";
+import {
+	CreditAttributionRequestConfirmationRequired,
+	EntityAssociationRestricted,
+	EntityEntryNotFound,
+} from "../entities/errors";
 import { UnitNotFound } from "./errors";
 
 async function isEntityTarget(tx: DatabaseTransaction, targetUnitId: string): Promise<boolean> {
@@ -81,19 +85,41 @@ export async function ensureCreditAttributionInvitationAllowed(
 	);
 }
 
-export type PublisherAttributionCreationMode = "direct" | "request";
+export type EntityCreditAttributionCreationMode = "direct" | "request";
+export type CreditAttributionRequestConsent = "direct_only" | "allow_requests";
 
 /**
- * Resolves the consent path for assigning an Entity as a new work's publisher.
+ * Requires explicit user consent before a creation plan may send attribution requests.
+ *
+ * The service calls this only after resolving every target under the same transaction
+ * that will create the Unit and its accepted associations.
+ */
+export function ensureCreditAttributionRequestsConfirmed(
+	consent: CreditAttributionRequestConsent,
+	attributions: readonly {
+		readonly entityId: string;
+		readonly creationMode: EntityCreditAttributionCreationMode;
+	}[],
+): void {
+	if (consent === "allow_requests") return;
+	const requestedEntityIds = attributions.flatMap((attribution) =>
+		attribution.creationMode === "request" ? [attribution.entityId] : [],
+	);
+	if (requestedEntityIds.length > 0)
+		throw new CreditAttributionRequestConfirmationRequired(requestedEntityIds);
+}
+
+/**
+ * Resolves the consent path for crediting an Entity on a newly created work.
  *
  * Direct association and a pending request are deliberately distinct outcomes;
  * a restricted Entity never becomes attributed until its controller accepts.
  */
-export async function resolvePublisherAttributionCreationMode(
+export async function resolveEntityCreditAttributionCreationMode(
 	authorization: Authorization<string>,
 	tx: DatabaseTransaction,
 	entityId: string,
-): Promise<PublisherAttributionCreationMode> {
+): Promise<EntityCreditAttributionCreationMode> {
 	await lockAttributionTarget(tx, entityId);
 	if (!(await isEntityTarget(tx, entityId))) throw new EntityEntryNotFound();
 	if (await authorization.entity.allowsAssociationCommand(tx, entityId, "credit", "direct"))

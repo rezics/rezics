@@ -162,6 +162,7 @@ export default {
 	CreditAttributionNotFound: "このクレジット付与は見つかりませんでした。",
 	CreditAttributionRoleInvalid:
 		"選択されたクレジットの役割はこの種類のユニットには適用されません。",
+	CreditAttributionRequestConfirmationRequired: "クレジット招待を送信する前に確認してください。",
 	SubjectAssociationNotFound: "この主題の関連付けは見つかりませんでした。",
 	AliasNotFound: "この別名は見つかりませんでした。",
 	TagApplicationNotFound: "このタグの適用は見つかりませんでした。",

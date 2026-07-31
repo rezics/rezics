@@ -1,4 +1,5 @@
 import {
+	getApiEntities,
 	PostApiSearchByIndexIndex,
 	postApiSearch,
 	postApiSearchByIndex,
@@ -57,6 +58,23 @@ export function createEntitySearch(
 	localizationLanguages: readonly ContentLanguage[],
 ): EntitySearch {
 	return async (index, query, signal, options) => {
+		if (index === "entities" && options?.creditAttributionSearch) {
+			const { data } = await getApiEntities({
+				query: {
+					creditAttributionSearch: options.creditAttributionSearch,
+					query,
+					limit: 10,
+					localizationLanguages: [...localizationLanguages],
+				},
+				signal,
+			});
+			return data.items.map((item) => ({
+				id: item.id,
+				label: item.title ?? item.id,
+				kind: item.kind,
+				avatar: item.avatar,
+			}));
+		}
 		const exact = await resolveExactUnit(
 			index,
 			query,

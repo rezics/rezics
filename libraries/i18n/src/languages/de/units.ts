@@ -27,11 +27,20 @@ export default {
 		communityUnit: "Öffentlicher Eintrag",
 		communityUnitDescription:
 			"Im Besitz der Community und für alle angemeldeten Personen bearbeitbar; die erstellende Person erhält keine Sonderrechte.",
-		publisherEntity: `Verlags-${entityTerms.label}`,
-		publisherOwnedDescription:
-			"Für dein Werk ist ein Verlag erforderlich. Bei eingeschränkter Direktzuordnung wird eine Zustimmungsanfrage gesendet.",
-		publisherPublicDescription:
-			"Ein Verlag ist optional. Ist Zustimmung nötig, sendet der öffentliche Eintrag eine Anfrage statt einer Einladung.",
+		creditEntityLabel: insert(`${entityTerms.label} {{number}}`, { number: Number }),
+		creditRoleLabel: insert("Rolle {{number}}", { number: Number }),
+		selectCreditRole: "Rolle auswählen",
+		addCreditAttribution: "Mitwirkung hinzufügen",
+		removeCreditAttribution: insert("Mitwirkung {{number}} entfernen", { number: Number }),
+		creditEntityRequired: `${entityTerms.label} auswählen.`,
+		creditRoleRequired: "Rolle auswählen.",
+		creditDuplicate: `Diese ${entityTerms.inline} ist bereits mit dieser Rolle eingetragen.`,
+		publisherAttributionRequired:
+			"Mein Werk muss mindestens eine Mitwirkung als Verlag enthalten.",
+		creditRequestConfirmationTitle: "Mitwirkendeneinladungen bestätigen",
+		creditRequestConfirmationDescription: `Einige ausgewählte ${entityTerms.plural} müssen zustimmen, bevor ihre Mitwirkung angezeigt werden kann. Bestätige, um das Werk zu erstellen und die Einladungen zu senden.`,
+		creditRequestConfirmationCancel: "Abbrechen",
+		creditRequestConfirmationConfirm: "Erstellen und Einladungen senden",
 		versionRole: "Versionsart",
 		mainVersion: "Hauptversion",
 		variantVersion: "Variantenversion",

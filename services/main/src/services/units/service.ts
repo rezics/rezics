@@ -22,6 +22,10 @@ import {
 } from "../authorization/unit/ownership";
 import { database } from "../database";
 import { toSafeInteger } from "../database/integer";
+import {
+	type CreditAttributionRole,
+	isCreditAttributionRoleForUnitKind,
+} from "../database/schema/contract-values";
 import { ContentStructureSnapshotSchema } from "../content-structure/contracts";
 import { createContentStructureHistory } from "../content-structure/history";
 import {
@@ -64,6 +68,8 @@ import {
 import { imageAssetPresentationContentUrl } from "../api/image-assets/presentation";
 import { ensureImageAssetsAttachable, imageAssetContentUrl } from "../api/image-assets/service";
 import { UnitDetailResponse } from "../api/schema/response";
+import { CreditAttributionRoleInvalid } from "../entities/errors";
+import { fractionalPositionBetween } from "../ordering/position";
 import {
 	UnitChanged,
 	UnitNotFound,
@@ -84,7 +90,12 @@ import { presentAvatar } from "./avatar";
 import { listPublishedBookContentMetrics } from "../content-metrics/service";
 import { getAssociationContextPostsByAssociationIds } from "./association-context";
 import { createAssociationRequestInTransaction } from "./association-proposals";
-import { resolvePublisherAttributionCreationMode } from "./attribution-authorization";
+import {
+	type CreditAttributionRequestConsent,
+	type EntityCreditAttributionCreationMode,
+	ensureCreditAttributionRequestsConfirmed,
+	resolveEntityCreditAttributionCreationMode,
+} from "./attribution-authorization";
 import { wilsonLowerBoundSql } from "../tags/ranking";
 import { getPendingUnitOwnershipClaim } from "../ownership-claims/service";
 
@@ -94,19 +105,26 @@ export type TimedMediaUnitKind = "video" | "audio";
 export type ManageableUnitKind = WorkUnitKind | TimedMediaUnitKind;
 export type UnitDetail = Static<typeof UnitDetailResponse>;
 type StoredUnitLocalization = typeof unitLocalization.$inferSelect;
-const PublisherRequestLifetimeMs = 30 * 24 * 60 * 60 * 1_000;
+const CreditAttributionRequestLifetimeMs = 30 * 24 * 60 * 60 * 1_000;
 
 type CreateUnitAccessInput =
 	| {
 			readonly ownershipMode: "profile_owned";
-			readonly publisher: { readonly entityId: string };
+			readonly creditAttributions: readonly {
+				readonly entityId: string;
+				readonly role: CreditAttributionRole;
+			}[];
 	  }
 	| {
 			readonly ownershipMode: "community_owned";
-			readonly publisher?: { readonly entityId: string };
+			readonly creditAttributions: readonly {
+				readonly entityId: string;
+				readonly role: CreditAttributionRole;
+			}[];
 	  };
 
 export type CreateUnitInput = CreateUnitAccessInput & {
+	creditAttributionRequestConsent: CreditAttributionRequestConsent;
 	version: { readonly kind: "main" } | { readonly kind: "variant"; readonly mainUnitId: string };
 	localization: {
 		language: ContentLanguage;
@@ -204,6 +222,27 @@ export async function createUnit(
 			ownerId,
 			unitLocalizationImageAssetReferences(input.localization),
 		);
+		const resolvedCreditAttributions: {
+			readonly entityId: string;
+			readonly role: CreditAttributionRole;
+			readonly creationMode: EntityCreditAttributionCreationMode;
+		}[] = [];
+		for (const attribution of input.creditAttributions) {
+			if (!isCreditAttributionRoleForUnitKind(kind, attribution.role))
+				throw new CreditAttributionRoleInvalid(kind, attribution.role);
+			resolvedCreditAttributions.push({
+				...attribution,
+				creationMode: await resolveEntityCreditAttributionCreationMode(
+					authorization,
+					tx,
+					attribution.entityId,
+				),
+			});
+		}
+		ensureCreditAttributionRequestsConfirmed(
+			input.creditAttributionRequestConsent,
+			resolvedCreditAttributions,
+		);
 		const created = await insertUnit(tx, {
 			kind,
 			visibility: input.visibility ?? "public",
@@ -271,25 +310,24 @@ export async function createUnit(
 				unitKind: kind,
 			});
 		}
-		if (input.publisher) {
-			const publisherMode = await resolvePublisherAttributionCreationMode(
-				authorization,
-				tx,
-				input.publisher.entityId,
-			);
-			if (publisherMode === "direct")
+		let lastCreditAttributionPosition: string | undefined;
+		for (const attribution of resolvedCreditAttributions) {
+			const position = fractionalPositionBetween(lastCreditAttributionPosition, null);
+			lastCreditAttributionPosition = position;
+			if (attribution.creationMode === "direct")
 				await tx.insert(creditAttribution).values({
 					sourceUnitId: created.id,
-					creditedUnitId: input.publisher.entityId,
-					role: "publisher",
+					creditedUnitId: attribution.entityId,
+					role: attribution.role,
+					position,
 				});
 			else
 				await createAssociationRequestInTransaction(tx, authorization, ownerId, {
 					sourceUnitId: created.id,
-					targetUnitId: input.publisher.entityId,
+					targetUnitId: attribution.entityId,
 					kind: "credit",
-					role: "publisher",
-					expiresAt: new Date(Date.now() + PublisherRequestLifetimeMs),
+					role: attribution.role,
+					expiresAt: new Date(Date.now() + CreditAttributionRequestLifetimeMs),
 				});
 		}
 		const structureSnapshot = createdStructure

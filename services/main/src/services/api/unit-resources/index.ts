@@ -1,12 +1,16 @@
 import { StatusCodes } from "http-status-codes";
 import { createHash } from "node:crypto";
 
-import { and, asc, desc, eq, ilike, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
+import { AuthenticationRequired } from "../../auth/errors";
+import { getPlatformCapabilityCondition } from "../../authorization/platform/query";
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
 import { unitOwnershipModeFromOwnerProfileId } from "../../authorization/unit/ownership";
+import { getUnitPermissionCondition } from "../../authorization/unit/query";
+import { associationTargetScope } from "../../authorization/unit/scope";
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
 import {
@@ -108,6 +112,7 @@ import { getPendingUnitOwnershipClaim } from "../../ownership-claims/service";
 
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
+const AuthenticationRequiredResponse = toApiErrorResponse(["AuthenticationRequired"]);
 const UnitResourceMutationNotFoundResponse = toApiErrorResponse([
 	"UnitNotFound",
 	"ImageAssetNotFound",
@@ -178,8 +183,42 @@ export default new Elysia()
 		app
 			.get(
 				"",
-				async ({ query }) => {
+				async ({ query, request }) => {
 					const localizationLanguages = query.localizationLanguages ?? [];
+					let entityCondition = publiclyReadableUnitCondition();
+					if (query.creditAttributionSearch === "direct") {
+						const identity = await resolveIdentity(request.headers, "unit:read");
+						if (!identity.profile) throw new AuthenticationRequired();
+						const target = {
+							id: unit.id,
+							deletedAt: unit.deletedAt,
+						};
+						const scope = associationTargetScope("credit");
+						entityCondition = and(
+							eq(unit.status, "published"),
+							inArray(unit.visibility, ["public", "unlisted"]),
+							eq(unit.moderationStatus, "approved"),
+							isNull(unit.deletedAt),
+							or(
+								getPlatformCapabilityCondition(
+									identity.profile.unitId,
+									"entity.associations.override",
+								),
+								getUnitPermissionCondition(
+									identity.profile.unitId,
+									"unit.association.manage",
+									scope,
+									target,
+								),
+								getUnitPermissionCondition(
+									identity.profile.unitId,
+									"entity.association.credit.direct",
+									scope,
+									target,
+								),
+							),
+						);
+					}
 					const items = await database
 						.select({
 							id: unit.id,
@@ -217,7 +256,7 @@ export default new Elysia()
 						)
 						.where(
 							and(
-								publiclyReadableUnitCondition(),
+								entityCondition,
 								query.kind ? eq(entity.kind, query.kind) : undefined,
 								query.query
 									? ilike(unitLocalization.title, `%${query.query}%`)
@@ -238,7 +277,10 @@ export default new Elysia()
 				},
 				{
 					query: ListEntityEntriesQuery,
-					response: { [StatusCodes.OK]: EntityListResponse },
+					response: {
+						[StatusCodes.OK]: EntityListResponse,
+						[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
+					},
 					detail: { summary: "List entity entries", tags: ["Entity"] },
 				},
 			)

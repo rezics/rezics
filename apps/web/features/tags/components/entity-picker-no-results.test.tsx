@@ -17,6 +17,28 @@ vi.stubGlobal(
 afterEach(cleanup);
 
 describe("EntityPicker no-result actions", () => {
+	it("clears a selected value when the user edits its label", async () => {
+		const onClear = vi.fn();
+		render(
+			<UiProvider searchEntities={vi.fn(async () => [])}>
+				<EntityPicker
+					ariaLabel="Search entities"
+					index="entity"
+					invalid
+					onChange={vi.fn()}
+					onClear={onClear}
+					placeholder="Enter an entity name"
+					value={{ id: "entity-id", label: "Selected entity" }}
+				/>
+			</UiProvider>,
+		);
+
+		const input = screen.getByRole("combobox", { name: "Search entities" });
+		expect(input.getAttribute("aria-invalid")).toBe("true");
+		fireEvent.change(input, { target: { value: "Another entity" } });
+		await waitFor(() => expect(onClear).toHaveBeenCalled());
+	});
+
 	it("renders the owner action only after a successful zero-result search", async () => {
 		const search = vi.fn(async () => []);
 		render(

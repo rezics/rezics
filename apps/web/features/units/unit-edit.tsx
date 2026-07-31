@@ -695,7 +695,7 @@ export function UnitRelationships({ type, unit }: { type: WorkUnitType; unit: Un
 				>
 					<EntityPicker
 						ariaLabel={t.units.editor.credit}
-						index="entity"
+						index="entities"
 						onChange={setCreditEntity}
 						placeholder={t.ui.pickerPlaceholders.entity}
 						value={creditEntity}
@@ -751,7 +751,7 @@ export function UnitRelationships({ type, unit }: { type: WorkUnitType; unit: Un
 				>
 					<EntityPicker
 						ariaLabel={t.units.editor.subjectAssociation}
-						index="entity"
+						index="entities"
 						onChange={setSubjectEntity}
 						placeholder={t.ui.pickerPlaceholders.entity}
 						value={subjectEntity}
@@ -823,7 +823,7 @@ export function UnitRelationships({ type, unit }: { type: WorkUnitType; unit: Un
 				>
 					<EntityPicker
 						ariaLabel={t.units.editor.link}
-						index="entity"
+						index="entities"
 						onChange={setLinkSource}
 						placeholder={t.ui.pickerPlaceholders.entity}
 						value={linkSource}

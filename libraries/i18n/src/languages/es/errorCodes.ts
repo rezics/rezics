@@ -177,6 +177,8 @@ export default {
 	CreditAttributionNotFound: "No se ha encontrado esta atribución de crédito.",
 	CreditAttributionRoleInvalid:
 		"La función de crédito seleccionada no corresponde a este tipo de Unit.",
+	CreditAttributionRequestConfirmationRequired:
+		"Confirma antes de enviar las invitaciones de crédito.",
 	SubjectAssociationNotFound: "No se ha encontrado esta asociación de tema.",
 	AliasNotFound: "No se ha encontrado este alias.",
 	TagApplicationNotFound: "No se ha encontrado esta aplicación de etiqueta.",

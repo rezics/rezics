@@ -40,6 +40,20 @@ export class CreditAttributionRoleInvalid extends Data.TaggedError("CreditAttrib
 	}
 }
 
+export class CreditAttributionRequestConfirmationRequired extends Data.TaggedError(
+	"CreditAttributionRequestConfirmationRequired",
+) {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = CreditAttributionRequestConfirmationRequired.status;
+	readonly message = "Credit attribution requests require confirmation";
+	readonly details: JsonValue;
+
+	constructor(entityIds: readonly string[]) {
+		super();
+		this.details = { entityIds: [...new Set(entityIds)] };
+	}
+}
+
 export class SubjectAssociationNotFound extends Data.TaggedError("SubjectAssociationNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
 	readonly status = SubjectAssociationNotFound.status;
@@ -51,5 +65,6 @@ export const EntityErrors = [
 	EntityAssociationRestricted,
 	CreditAttributionNotFound,
 	CreditAttributionRoleInvalid,
+	CreditAttributionRequestConfirmationRequired,
 	SubjectAssociationNotFound,
 ] as const;

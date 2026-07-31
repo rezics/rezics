@@ -10088,6 +10088,7 @@
 					"EntityAssociationRestricted",
 					"CreditAttributionNotFound",
 					"CreditAttributionRoleInvalid",
+					"CreditAttributionRequestConfirmationRequired",
 					"SubjectAssociationNotFound",
 					"UserSelfFollowForbidden",
 					"UserFollowBlocked",
@@ -69191,7 +69192,8 @@
 										"type": "object",
 										"required": [
 											"ownershipMode",
-											"publisher",
+											"creditAttributions",
+											"creditAttributionRequestConsent",
 											"version",
 											"localization"
 										],
@@ -69200,16 +69202,114 @@
 												"const": "profile_owned",
 												"type": "string"
 											},
-											"publisher": {
-												"additionalProperties": false,
-												"type": "object",
-												"required": ["entityId"],
-												"properties": {
-													"entityId": {
-														"format": "uuid",
-														"type": "string"
+											"creditAttributions": {
+												"contains": {
+													"type": "object",
+													"required": ["role"],
+													"properties": {
+														"role": {
+															"const": "publisher",
+															"type": "string"
+														}
+													}
+												},
+												"minContains": 1,
+												"minItems": 1,
+												"uniqueItems": true,
+												"type": "array",
+												"items": {
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["entityId", "role"],
+													"properties": {
+														"entityId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"role": {
+															"anyOf": [
+																{
+																	"const": "author",
+																	"type": "string"
+																},
+																{
+																	"const": "co-author",
+																	"type": "string"
+																},
+																{
+																	"const": "translator",
+																	"type": "string"
+																},
+																{
+																	"const": "illustrator",
+																	"type": "string"
+																},
+																{
+																	"const": "editor",
+																	"type": "string"
+																},
+																{
+																	"const": "publisher",
+																	"type": "string"
+																},
+																{
+																	"const": "letterer",
+																	"type": "string"
+																},
+																{
+																	"const": "colorist",
+																	"type": "string"
+																},
+																{
+																	"const": "developer",
+																	"type": "string"
+																},
+																{
+																	"const": "composer",
+																	"type": "string"
+																},
+																{
+																	"const": "designer",
+																	"type": "string"
+																},
+																{
+																	"const": "director",
+																	"type": "string"
+																},
+																{
+																	"const": "producer",
+																	"type": "string"
+																},
+																{
+																	"const": "writer",
+																	"type": "string"
+																},
+																{
+																	"const": "actor",
+																	"type": "string"
+																},
+																{
+																	"const": "narrator",
+																	"type": "string"
+																},
+																{
+																	"const": "studio",
+																	"type": "string"
+																},
+																{
+																	"const": "distributor",
+																	"type": "string"
+																}
+															]
+														}
 													}
 												}
+											},
+											"creditAttributionRequestConsent": {
+												"anyOf": [
+													{ "const": "direct_only", "type": "string" },
+													{ "const": "allow_requests", "type": "string" }
+												]
 											},
 											"version": {
 												"anyOf": [
@@ -69691,22 +69791,114 @@
 									{
 										"additionalProperties": false,
 										"type": "object",
-										"required": ["ownershipMode", "version", "localization"],
+										"required": [
+											"ownershipMode",
+											"creditAttributions",
+											"creditAttributionRequestConsent",
+											"version",
+											"localization"
+										],
 										"properties": {
 											"ownershipMode": {
 												"const": "community_owned",
 												"type": "string"
 											},
-											"publisher": {
-												"additionalProperties": false,
-												"type": "object",
-												"required": ["entityId"],
-												"properties": {
-													"entityId": {
-														"format": "uuid",
-														"type": "string"
+											"creditAttributions": {
+												"uniqueItems": true,
+												"type": "array",
+												"items": {
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["entityId", "role"],
+													"properties": {
+														"entityId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"role": {
+															"anyOf": [
+																{
+																	"const": "author",
+																	"type": "string"
+																},
+																{
+																	"const": "co-author",
+																	"type": "string"
+																},
+																{
+																	"const": "translator",
+																	"type": "string"
+																},
+																{
+																	"const": "illustrator",
+																	"type": "string"
+																},
+																{
+																	"const": "editor",
+																	"type": "string"
+																},
+																{
+																	"const": "publisher",
+																	"type": "string"
+																},
+																{
+																	"const": "letterer",
+																	"type": "string"
+																},
+																{
+																	"const": "colorist",
+																	"type": "string"
+																},
+																{
+																	"const": "developer",
+																	"type": "string"
+																},
+																{
+																	"const": "composer",
+																	"type": "string"
+																},
+																{
+																	"const": "designer",
+																	"type": "string"
+																},
+																{
+																	"const": "director",
+																	"type": "string"
+																},
+																{
+																	"const": "producer",
+																	"type": "string"
+																},
+																{
+																	"const": "writer",
+																	"type": "string"
+																},
+																{
+																	"const": "actor",
+																	"type": "string"
+																},
+																{
+																	"const": "narrator",
+																	"type": "string"
+																},
+																{
+																	"const": "studio",
+																	"type": "string"
+																},
+																{
+																	"const": "distributor",
+																	"type": "string"
+																}
+															]
+														}
 													}
 												}
+											},
+											"creditAttributionRequestConsent": {
+												"anyOf": [
+													{ "const": "direct_only", "type": "string" },
+													{ "const": "allow_requests", "type": "string" }
+												]
 											},
 											"version": {
 												"anyOf": [
@@ -72215,10 +72407,34 @@
 						}
 					},
 					"400": {
-						"description": "Request body could not be parsed",
+						"description": "Response for status 400",
 						"content": {
 							"application/json": {
-								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "CreditAttributionRoleInvalid",
+															"type": "string",
+															"enum": ["CreditAttributionRoleInvalid"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
+								}
 							}
 						}
 					},
@@ -72325,9 +72541,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitVariantKindMismatch",
+													"default": "CreditAttributionRequestConfirmationRequired",
 													"type": "string",
 													"enum": [
+														"CreditAttributionRequestConfirmationRequired",
 														"UnitVariantKindMismatch",
 														"UnitVariantTargetIsVariant",
 														"UnitVariantSourceHasVariants",
@@ -85799,6 +86016,12 @@
 				"tags": ["Entity"],
 				"parameters": [
 					{
+						"name": "creditAttributionSearch",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "string", "enum": ["direct", "public"] }
+					},
+					{
 						"name": "kind",
 						"in": "query",
 						"required": false,
@@ -86035,11 +86258,72 @@
 							}
 						}
 					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"type": "string",
+													"enum": ["AuthenticationRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"422": {
 						"description": "Request validation failed",
 						"content": {
 							"application/json": {
 								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
 							}
 						}
 					},
@@ -86053,6 +86337,7 @@
 					}
 				},
 				"operationId": "getApiEntities",
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"x-rezics-policy-operation-id": "getApiEntities"
 			},
 			"post": {

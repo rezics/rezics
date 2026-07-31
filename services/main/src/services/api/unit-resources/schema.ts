@@ -37,6 +37,7 @@ export type CreateEntityBody = Static<typeof CreateEntityBody>;
 
 export const ListEntityEntriesQuery = t.Object(
 	{
+		creditAttributionSearch: t.Optional(t.Union([t.Literal("direct"), t.Literal("public")])),
 		kind: t.Optional(t.String({ maxLength: 64 })),
 		query: t.Optional(t.String({ minLength: 1, maxLength: 200 })),
 		...LocalizationLanguageQuery,

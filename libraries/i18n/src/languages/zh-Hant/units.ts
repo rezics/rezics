@@ -9,6 +9,7 @@ const { forms: audioTerms } = zhHantTerminology.audio;
 const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: followTerms } = zhHantTerminology.follow;
 const { forms: metadataTerms } = zhHantTerminology.metadata;
+const { forms: entityTerms } = zhHantTerminology.entity;
 
 export default {
 	types: {
@@ -25,11 +26,19 @@ export default {
 		ownedWorkDescription: "由你的個人檔案擁有並管理這項作品。",
 		communityUnit: "公共條目",
 		communityUnitDescription: "由社群擁有，所有已登入使用者都能編輯；建立者不會取得特殊權限。",
-		publisherEntity: "出版者條目",
-		publisherOwnedDescription:
-			"我的作品必須選擇出版者；若對方限制直接關聯，系統會送出同意請求。",
-		publisherPublicDescription:
-			"公共條目可選填出版者；若需要同意，系統會送出請求，而不是邀請。",
+		creditEntityLabel: insert(`署名${entityTerms.label} {{number}}`, { number: Number }),
+		creditRoleLabel: insert("署名角色 {{number}}", { number: Number }),
+		selectCreditRole: "選擇角色",
+		addCreditAttribution: "新增署名",
+		removeCreditAttribution: insert("移除第 {{number}} 筆署名", { number: Number }),
+		creditEntityRequired: `請選擇${entityTerms.label}。`,
+		creditRoleRequired: "請選擇角色。",
+		creditDuplicate: `這個${entityTerms.label}已經設定相同角色。`,
+		publisherAttributionRequired: "我的作品必須至少有一筆出版者署名。",
+		creditRequestConfirmationTitle: "確認署名邀請",
+		creditRequestConfirmationDescription: `部分選取的${entityTerms.plural}需要取得同意後才能顯示署名。確認後將建立此作品並送出署名邀請。`,
+		creditRequestConfirmationCancel: "取消",
+		creditRequestConfirmationConfirm: "建立並送出邀請",
 		versionRole: "版本類型",
 		mainVersion: "主要版本",
 		variantVersion: "變體版本",

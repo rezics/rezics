@@ -148,6 +148,7 @@ export default {
 	AssociationProposalRoleInvalid: "所選的關聯角色不適用於這種關聯類型。",
 	CreditAttributionNotFound: "找不到這項署名歸屬。",
 	CreditAttributionRoleInvalid: "所選的署名角色不適用於這種類型的條目。",
+	CreditAttributionRequestConfirmationRequired: "送出署名邀請前需要確認。",
 	SubjectAssociationNotFound: "找不到這項主題關聯。",
 	AliasNotFound: "找不到這個別名。",
 	TagApplicationNotFound: "找不到這筆標籤套用記錄。",

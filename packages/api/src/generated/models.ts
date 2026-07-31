@@ -5332,6 +5332,7 @@ export const ApiErrorCode = {
 	EntityAssociationRestricted: "EntityAssociationRestricted",
 	CreditAttributionNotFound: "CreditAttributionNotFound",
 	CreditAttributionRoleInvalid: "CreditAttributionRoleInvalid",
+	CreditAttributionRequestConfirmationRequired: "CreditAttributionRequestConfirmationRequired",
 	SubjectAssociationNotFound: "SubjectAssociationNotFound",
 	UserSelfFollowForbidden: "UserSelfFollowForbidden",
 	UserFollowBlocked: "UserFollowBlocked",
@@ -54835,10 +54836,32 @@ export type PostApiUnitsByTypeStatus200 = {
 	};
 };
 
-/**
- * @type object
- */
-export type PostApiUnitsByTypeStatus400 = MalformedRequestBody;
+export type PostApiUnitsByTypeStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'CreditAttributionRoleInvalid'
+				 * @type string
+				 */
+				code: "CreditAttributionRoleInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -54944,6 +54967,7 @@ export type PostApiUnitsByTypeStatus404 = {
 };
 
 export const PostApiUnitsByTypeStatus409ErrorCodeEnum = {
+	CreditAttributionRequestConfirmationRequired: "CreditAttributionRequestConfirmationRequired",
 	UnitVariantKindMismatch: "UnitVariantKindMismatch",
 	UnitVariantTargetIsVariant: "UnitVariantTargetIsVariant",
 	UnitVariantSourceHasVariants: "UnitVariantSourceHasVariants",
@@ -54963,7 +54987,7 @@ export type PostApiUnitsByTypeStatus409 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitVariantKindMismatch'
+		 * @default 'CreditAttributionRequestConfirmationRequired'
 		 * @type string
 		 */
 		code: PostApiUnitsByTypeStatus409ErrorCodeEnum;
@@ -55075,16 +55099,36 @@ export type PostApiUnitsByTypeBody =
 			 */
 			ownershipMode: "profile_owned";
 			/**
-			 * @type object
+			 * @type array
 			 */
-			publisher: {
+			creditAttributions: {
 				/**
 				 * @description
 				 * Format: `uuid`
 				 * @type string
 				 */
 				entityId: string;
-			};
+				role:
+					| "author"
+					| "co-author"
+					| "translator"
+					| "illustrator"
+					| "editor"
+					| "publisher"
+					| "letterer"
+					| "colorist"
+					| "developer"
+					| "composer"
+					| "designer"
+					| "director"
+					| "producer"
+					| "writer"
+					| "actor"
+					| "narrator"
+					| "studio"
+					| "distributor";
+			}[];
+			creditAttributionRequestConsent: "direct_only" | "allow_requests";
 			version:
 				| {
 						/**
@@ -55336,16 +55380,36 @@ export type PostApiUnitsByTypeBody =
 			 */
 			ownershipMode: "community_owned";
 			/**
-			 * @type object | undefined
+			 * @type array
 			 */
-			publisher?: {
+			creditAttributions: {
 				/**
 				 * @description
 				 * Format: `uuid`
 				 * @type string
 				 */
 				entityId: string;
-			};
+				role:
+					| "author"
+					| "co-author"
+					| "translator"
+					| "illustrator"
+					| "editor"
+					| "publisher"
+					| "letterer"
+					| "colorist"
+					| "developer"
+					| "composer"
+					| "designer"
+					| "director"
+					| "producer"
+					| "writer"
+					| "actor"
+					| "narrator"
+					| "studio"
+					| "distributor";
+			}[];
+			creditAttributionRequestConsent: "direct_only" | "allow_requests";
 			version:
 				| {
 						/**
@@ -64817,6 +64881,14 @@ export type GetApiHistoryChangeTagsResponses = {
 export type GetApiHistoryChangeTagsResponse =
 	GetApiHistoryChangeTagsStatus200 | GetApiHistoryChangeTagsStatus500;
 
+export const GetApiEntitiesCreditAttributionSearch = {
+	direct: "direct",
+	public: "public",
+} as const;
+
+export type GetApiEntitiesCreditAttributionSearch =
+	(typeof GetApiEntitiesCreditAttributionSearch)[keyof typeof GetApiEntitiesCreditAttributionSearch];
+
 export const GetApiEntitiesLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
@@ -64834,6 +64906,10 @@ export type GetApiEntitiesLocalizationLanguagesEnum =
  * @type object
  */
 export type GetApiEntitiesQuery = {
+	/**
+	 * @type string | undefined
+	 */
+	creditAttributionSearch?: GetApiEntitiesCreditAttributionSearch;
 	/**
 	 * @maxLength 64
 	 * @type string | undefined
@@ -65002,7 +65078,59 @@ export type GetApiEntitiesStatus200 = {
 /**
  * @type object
  */
+export type GetApiEntitiesStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: "AuthenticationRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiEntitiesStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiEntitiesStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
@@ -65024,7 +65152,9 @@ export type GetApiEntitiesOptions = {
  */
 export type GetApiEntitiesResponses = {
 	"200": GetApiEntitiesStatus200;
+	"401": GetApiEntitiesStatus401;
 	"422": GetApiEntitiesStatus422;
+	"429": GetApiEntitiesStatus429;
 	"500": GetApiEntitiesStatus500;
 };
 
@@ -65032,7 +65162,11 @@ export type GetApiEntitiesResponses = {
  * @description Union of all possible responses
  */
 export type GetApiEntitiesResponse =
-	GetApiEntitiesStatus200 | GetApiEntitiesStatus422 | GetApiEntitiesStatus500;
+	| GetApiEntitiesStatus200
+	| GetApiEntitiesStatus401
+	| GetApiEntitiesStatus422
+	| GetApiEntitiesStatus429
+	| GetApiEntitiesStatus500;
 
 /**
  * @type object

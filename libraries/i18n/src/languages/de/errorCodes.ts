@@ -177,6 +177,8 @@ export default {
 	CreditAttributionNotFound: "Diese Mitwirkendenzuordnung wurde nicht gefunden.",
 	CreditAttributionRoleInvalid:
 		"Die ausgewählte Mitwirkendenrolle gilt nicht für diesen Unit-Typ.",
+	CreditAttributionRequestConfirmationRequired:
+		"Bestätige, bevor Mitwirkendeneinladungen gesendet werden.",
 	SubjectAssociationNotFound: "Diese Themenzuordnung wurde nicht gefunden.",
 	AliasNotFound: "Dieser Alias wurde nicht gefunden.",
 	TagApplicationNotFound: "Diese Tag-Verwendung wurde nicht gefunden.",

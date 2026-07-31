@@ -37,6 +37,7 @@ export function EntityPicker({
 	index,
 	kind,
 	kinds,
+	invalid,
 	maxLength,
 	placeholder,
 	value,
@@ -49,6 +50,7 @@ export function EntityPicker({
 	index: string;
 	kind?: string;
 	kinds?: readonly string[];
+	invalid?: boolean;
 	maxLength?: number;
 	placeholder: string;
 	value?: EntityPickerValue;
@@ -146,11 +148,13 @@ export function EntityPicker({
 				onInputValueChange={({ inputValue: nextInputValue }) => {
 					setInputValue(nextInputValue);
 					filter(nextInputValue);
-					if (!nextInputValue && value) onClear?.();
 				}}
 				onValueChange={({ value: selectedValues }) => {
 					const selected = collection.items.find((item) => item.id === selectedValues[0]);
-					if (!selected) return;
+					if (!selected) {
+						if (value && selectedValues.length === 0) onClear?.();
+						return;
+					}
 					onChange(selected);
 					setInputValue(selected.label);
 				}}
@@ -158,7 +162,11 @@ export function EntityPicker({
 			>
 				<ComboboxInput
 					aria-label={ariaLabel}
+					aria-invalid={invalid || undefined}
 					maxLength={maxLength}
+					onChange={(event) => {
+						if (value && event.currentTarget.value !== value.label) onClear?.();
+					}}
 					placeholder={placeholder}
 					type="search"
 				/>

@@ -76,6 +76,15 @@ const UnitCreateForbiddenResponse = toApiErrorResponse([
 	"AccountRestricted",
 	"EntityAssociationRestricted",
 ]);
+const UnitCreateBadRequestResponse = toApiErrorResponse(["CreditAttributionRoleInvalid"]);
+const UnitCreateConflictResponse = toApiErrorResponse([
+	"CreditAttributionRequestConfirmationRequired",
+	"UnitVariantKindMismatch",
+	"UnitVariantTargetIsVariant",
+	"UnitVariantSourceHasVariants",
+	"UnitVariantChanged",
+	"UnitVariantMainUnavailable",
+]);
 const UnitLocalizationOrderBadRequestResponse = toApiErrorResponse([
 	"UnitLocalizationOrderInvalid",
 ]);
@@ -414,10 +423,11 @@ export default new Elysia({ prefix: "/units" })
 			body: CreateUnitBody,
 			response: {
 				[StatusCodes.OK]: UnitDetailResponse,
+				[StatusCodes.BAD_REQUEST]: UnitCreateBadRequestResponse,
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.FORBIDDEN]: UnitCreateForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
-				[StatusCodes.CONFLICT]: UnitVariantConflictResponse,
+				[StatusCodes.CONFLICT]: UnitCreateConflictResponse,
 			},
 			detail: { summary: "Create unit", tags: ["Units"] },
 		},

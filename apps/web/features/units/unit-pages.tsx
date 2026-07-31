@@ -31,6 +31,7 @@ import { RequireSession } from "@/features/auth/require-session";
 import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
 import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/use-form-draft-content-language";
 import { useTranslation } from "@/i18n/client";
+import { hasErrorCode } from "@/i18n/errors";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import type { WorkUnitType, VariantUnitType } from "./unit-types";
@@ -38,6 +39,19 @@ import {
 	LocalizationImageUploadField,
 	type LocalizationImageAssetValue,
 } from "@/features/media/components/localization-image-upload-field";
+import {
+	type CreditEntitySearchScope,
+	UnitCreditAttributionEditor,
+} from "./components/unit-credit-attribution-editor";
+import {
+	type CreditAttributionDraft,
+	validateCreditAttributionDrafts,
+} from "./model/credit-attribution-draft";
+import { CreditAttributionRequestConfirmationDialog } from "./components/credit-attribution-request-confirmation-dialog";
+
+function createCreditAttributionDraft(): CreditAttributionDraft {
+	return { key: crypto.randomUUID() };
+}
 
 export function UnitBrowsePage({ type }: { type: WorkUnitType }) {
 	const { t } = useTranslation(["actions", "media", "ui", "units"]);
@@ -183,16 +197,23 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 	const searchParams = useSearchParams();
 	const searchSubject = unitCommunityUnitSearchSubject(type);
 	const searchConfirmation = searchParams.get(CommunityUnitSearchConfirmationParam);
+	const initialOwnershipMode =
+		searchParams.get("ownershipMode") === "community_owned"
+			? ("community_owned" as const)
+			: ("profile_owned" as const);
 	const [title, setTitle] = useState(() => searchParams.get("title") ?? "");
 	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(null);
-	const [ownershipMode, setOwnershipMode] = useState<"profile_owned" | "community_owned">(() =>
-		searchParams.get("ownershipMode") === "community_owned"
-			? "community_owned"
-			: "profile_owned",
+	const [ownershipMode, setOwnershipMode] = useState<"profile_owned" | "community_owned">(
+		initialOwnershipMode,
 	);
-	const [publisher, setPublisher] = useState<EntityPickerValue>();
+	const [creditAttributions, setCreditAttributions] = useState<readonly CreditAttributionDraft[]>(
+		() => [createCreditAttributionDraft()],
+	);
+	const [creditValidationRequested, setCreditValidationRequested] = useState(false);
 	const [versionKind, setVersionKind] = useState<"main" | "variant">("main");
 	const [mainVersion, setMainVersion] = useState<EntityPickerValue>();
+	const creditEntitySearchScope: CreditEntitySearchScope =
+		ownershipMode === "community_owned" ? "public" : "direct";
 	const language = useFormDraftContentLanguage(["title", "summary"]);
 	const create = usePostApiUnitsByType({
 		mutation: {
@@ -204,6 +225,9 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 			},
 		},
 	});
+	const [pendingCreditRequestSubmission, setPendingCreditRequestSubmission] = useState<
+		Parameters<typeof create.mutateAsync>[0] | null
+	>(null);
 	const searchConfirmed = isCommunityUnitSearchConfirmed(
 		searchSubject,
 		title,
@@ -216,7 +240,13 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 		const submittedTitle = String(form.get("title") ?? "").trim();
 		const summary = String(form.get("summary") ?? "").trim();
 		const submittedLicense = form.get("license");
-		if (ownershipMode === "profile_owned" && !publisher) return;
+		const creditValidation = validateCreditAttributionDrafts(
+			type,
+			ownershipMode,
+			creditAttributions,
+		);
+		setCreditValidationRequested(true);
+		if (!creditValidation.ok) return;
 		if (
 			ownershipMode === "community_owned" &&
 			!isCommunityUnitSearchConfirmed(searchSubject, submittedTitle, searchConfirmation)
@@ -230,6 +260,7 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 		)
 			return;
 		const contentLanguage = await language.resolveLanguage(formElement);
+		let request: Parameters<typeof create.mutateAsync>[0] | undefined;
 		try {
 			const version =
 				versionKind === "variant" && mainVersion
@@ -269,20 +300,31 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 									: ("unknown" as const),
 				license: isPublicationLicenseId(submittedLicense) ? submittedLicense : null,
 			};
-			await create.mutateAsync({
+			request = {
 				path: { type },
-				body:
-					ownershipMode === "profile_owned" && publisher
-						? {
-								ownershipMode,
-								publisher: { entityId: publisher.id },
-								...common,
-							}
-						: {
-								ownershipMode: "community_owned",
-								...(publisher ? { publisher: { entityId: publisher.id } } : {}),
-								...common,
-							},
+				body: {
+					ownershipMode,
+					creditAttributions: creditValidation.creditAttributions,
+					creditAttributionRequestConsent: "direct_only",
+					...common,
+				},
+			};
+			await create.mutateAsync(request);
+		} catch (error) {
+			if (request && hasErrorCode(error, "CreditAttributionRequestConfirmationRequired"))
+				setPendingCreditRequestSubmission(request);
+		}
+	}
+	async function confirmCreditRequests() {
+		const request = pendingCreditRequestSubmission;
+		if (!request) return;
+		try {
+			await create.mutateAsync({
+				...request,
+				body: {
+					...request.body,
+					creditAttributionRequestConsent: "allow_requests",
+				},
 			});
 		} catch {
 			// The typed mutation state supplies the visible API error.
@@ -308,13 +350,14 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 							<FieldLabel>{t.units.creation.modeLabel}</FieldLabel>
 							<NativeSelect
 								name="ownershipMode"
-								onChange={(event) =>
-									setOwnershipMode(
+								onChange={(event) => {
+									const nextOwnershipMode =
 										event.currentTarget.value === "community_owned"
 											? "community_owned"
-											: "profile_owned",
-									)
-								}
+											: "profile_owned";
+									setOwnershipMode(nextOwnershipMode);
+									setCreditValidationRequested(false);
+								}}
 								value={ownershipMode}
 							>
 								<NativeSelectOption value="profile_owned">
@@ -337,32 +380,24 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 								subject={searchSubject}
 							/>
 						) : null}
-						<Field required={ownershipMode === "profile_owned"}>
-							<FieldLabel>{t.units.creation.publisherEntity}</FieldLabel>
-							<EntityPicker
-								ariaLabel={t.units.creation.publisherEntity}
-								index="entity"
-								onChange={setPublisher}
-								onClear={() => setPublisher(undefined)}
-								placeholder={t.ui.pickerPlaceholders.entity}
-								value={publisher}
-							/>
-							<p className="text-muted-foreground text-sm">
-								{ownershipMode === "profile_owned"
-									? t.units.creation.publisherOwnedDescription
-									: t.units.creation.publisherPublicDescription}
-							</p>
-							{publisher ? (
-								<Button
-									onClick={() => setPublisher(undefined)}
-									size="xs"
-									type="button"
-									variant="quiet"
-								>
-									{t.ui.clear}
-								</Button>
-							) : null}
-						</Field>
+						<UnitCreditAttributionEditor
+							onChange={(value) => {
+								setCreditAttributions(value);
+								setCreditValidationRequested(false);
+							}}
+							searchScope={creditEntitySearchScope}
+							type={type}
+							validation={
+								creditValidationRequested
+									? validateCreditAttributionDrafts(
+											type,
+											ownershipMode,
+											creditAttributions,
+										)
+									: undefined
+							}
+							value={creditAttributions}
+						/>
 						<Field required>
 							<FieldLabel>{t.units.creation.versionRole}</FieldLabel>
 							<NativeSelect
@@ -485,10 +520,19 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 								))}
 							</NativeSelect>
 						</Field>
-						<RequestFailure error={create.error} fallback={t.ui.retryLater} />
+						<RequestFailure
+							error={
+								hasErrorCode(
+									create.error,
+									"CreditAttributionRequestConfirmationRequired",
+								)
+									? undefined
+									: create.error
+							}
+							fallback={t.ui.retryLater}
+						/>
 						<Button
 							disabled={
-								(ownershipMode === "profile_owned" && !publisher) ||
 								(ownershipMode === "community_owned" && !searchConfirmed) ||
 								(versionKind === "variant" && !mainVersion)
 							}
@@ -500,6 +544,12 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 						</Button>
 					</FieldGroup>
 				</form>
+				<CreditAttributionRequestConfirmationDialog
+					onCancel={() => setPendingCreditRequestSubmission(null)}
+					onConfirm={() => void confirmCreditRequests()}
+					open={pendingCreditRequestSubmission !== null}
+					pending={create.isPending}
+				/>
 			</main>
 		</RequireSession>
 	);

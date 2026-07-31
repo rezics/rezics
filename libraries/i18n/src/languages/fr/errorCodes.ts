@@ -179,6 +179,8 @@ export default {
 	CreditAttributionNotFound: "Cette attribution de crédit est introuvable.",
 	CreditAttributionRoleInvalid:
 		"Le rôle de crédit sélectionné ne s’applique pas à ce type de Unit.",
+	CreditAttributionRequestConfirmationRequired:
+		"Confirmez avant d’envoyer les invitations de crédit.",
 	SubjectAssociationNotFound: "Cette association de sujet est introuvable.",
 	AliasNotFound: "Cet alias est introuvable.",
 	TagApplicationNotFound: "Cette utilisation d’étiquette est introuvable.",

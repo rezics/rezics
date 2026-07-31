@@ -4311,9 +4311,15 @@ export function getApiEntities<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<GetApiEntitiesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/entities", ...config }) as Promise<
-		RequestResult<GetApiEntitiesResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/entities",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiEntitiesResponses, ThrowOnError>>;
 }
 
 /**

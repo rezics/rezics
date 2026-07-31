@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const api = vi.hoisted(() => ({
+	getApiEntities: vi.fn(),
 	postApiSearch: vi.fn(),
 	postApiSearchByIndex: vi.fn(),
 	postApiUnitsPresentations: vi.fn(),
@@ -30,6 +31,7 @@ beforeEach(() => {
 	api.postApiSearch.mockReset();
 	api.postApiSearchByIndex.mockReset();
 	api.postApiUnitsPresentations.mockReset();
+	api.getApiEntities.mockReset();
 });
 
 describe("searchEntities", () => {
@@ -101,5 +103,24 @@ describe("searchEntities", () => {
 				avatar: null,
 			},
 		]);
+	});
+
+	it("uses the permission-aware Entity endpoint for direct-credit searches", async () => {
+		api.getApiEntities.mockResolvedValue({ data: { items: [] } });
+
+		await searchEntities("entities", unitId, new AbortController().signal, {
+			creditAttributionSearch: "direct",
+		});
+
+		expect(api.postApiUnitsPresentations).not.toHaveBeenCalled();
+		expect(api.postApiSearchByIndex).not.toHaveBeenCalled();
+		expect(api.getApiEntities).toHaveBeenCalledWith(
+			expect.objectContaining({
+				query: expect.objectContaining({
+					creditAttributionSearch: "direct",
+					localizationLanguages: ["zh", "en"],
+				}),
+			}),
+		);
 	});
 });

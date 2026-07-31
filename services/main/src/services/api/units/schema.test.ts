@@ -16,6 +16,8 @@ import {
 const localization = { language: "en", title: "Example" };
 const publicMainUnit = {
 	ownershipMode: "community_owned",
+	creditAttributions: [],
+	creditAttributionRequestConsent: "direct_only",
 	version: { kind: "main" },
 	localization,
 } as const;
@@ -107,10 +109,12 @@ describe("Unit content License inputs", () => {
 });
 
 describe("Unit creation semantics", () => {
-	it("requires a publisher Entity for owned works", () => {
+	it("requires a publisher credit attribution for owned works", () => {
 		expect(
 			Check(CreateUnitBody, {
 				ownershipMode: "profile_owned",
+				creditAttributions: [],
+				creditAttributionRequestConsent: "direct_only",
 				version: { kind: "main" },
 				localization,
 			}),
@@ -118,11 +122,71 @@ describe("Unit creation semantics", () => {
 		expect(
 			Check(CreateUnitBody, {
 				ownershipMode: "profile_owned",
-				publisher: { entityId: "019b0000-0000-7000-8000-000000000001" },
+				creditAttributions: [
+					{
+						entityId: "019b0000-0000-7000-8000-000000000001",
+						role: "author",
+					},
+				],
+				creditAttributionRequestConsent: "direct_only",
+				version: { kind: "main" },
+				localization,
+			}),
+		).toBe(false);
+		expect(
+			Check(CreateUnitBody, {
+				ownershipMode: "profile_owned",
+				creditAttributions: [
+					{
+						entityId: "019b0000-0000-7000-8000-000000000001",
+						role: "publisher",
+					},
+					{
+						entityId: "019b0000-0000-7000-8000-000000000002",
+						role: "author",
+					},
+				],
+				creditAttributionRequestConsent: "direct_only",
 				version: { kind: "main" },
 				localization,
 			}),
 		).toBe(true);
+	});
+
+	it("requires an explicit credit-request consent mode", () => {
+		const { creditAttributionRequestConsent: _consent, ...withoutConsent } = publicMainUnit;
+		expect(Check(CreateUnitBody, withoutConsent)).toBe(false);
+		expect(
+			Check(CreateUnitBody, {
+				...publicMainUnit,
+				creditAttributionRequestConsent: "allow_requests",
+			}),
+		).toBe(true);
+		expect(
+			Check(CreateUnitBody, {
+				...publicMainUnit,
+				creditAttributionRequestConsent: "always_allow",
+			}),
+		).toBe(false);
+	});
+
+	it("accepts distinct Entity-role pairs and rejects exact duplicates", () => {
+		const credit = {
+			entityId: "019b0000-0000-7000-8000-000000000001",
+			role: "publisher",
+		} as const;
+		expect(
+			Check(CreateUnitBody, {
+				...publicMainUnit,
+				creditAttributions: [credit, { ...credit, role: "author" }],
+			}),
+		).toBe(true);
+		expect(
+			Check(CreateUnitBody, {
+				...publicMainUnit,
+				creditAttributions: [credit, credit],
+			}),
+		).toBe(false);
 	});
 
 	it("requires a Main Unit only for Variants", () => {

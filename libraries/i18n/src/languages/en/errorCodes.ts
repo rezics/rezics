@@ -161,6 +161,7 @@ export default {
 		"The selected association role does not match the association type.",
 	CreditAttributionNotFound: "This credit attribution could not be found.",
 	CreditAttributionRoleInvalid: "The selected credit role does not apply to this type of Unit.",
+	CreditAttributionRequestConfirmationRequired: "Confirm before sending credit invitations.",
 	SubjectAssociationNotFound: "This subject association could not be found.",
 	AliasNotFound: "This alias could not be found.",
 	TagApplicationNotFound: "This tag application could not be found.",

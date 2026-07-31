@@ -2,6 +2,7 @@ import { type Static, t } from "elysia";
 import { ContentLanguageValues } from "@rezics/i18n";
 import { UnitContentLicenseSlugs } from "@rezics/license";
 import {
+	CreditAttributionRoleValues,
 	UnitOwnershipModeValues,
 	GovernanceReasonCodeValues,
 	RealmUnitPublicationStateValues,
@@ -40,8 +41,14 @@ export const ManageableUnitTypeParams = t.Object({ type: ManageableUnitType });
 export const UnitOwnershipMode = t.Union(UnitOwnershipModeValues.map((value) => t.Literal(value)));
 export type UnitOwnershipMode = Static<typeof UnitOwnershipMode>;
 
-export const PublisherEntityInput = t.Object({ entityId: Uuid }, { additionalProperties: false });
-export type PublisherEntityInput = Static<typeof PublisherEntityInput>;
+export const CreateUnitCreditAttributionInput = t.Object(
+	{
+		entityId: Uuid,
+		role: t.Union(CreditAttributionRoleValues.map((role) => t.Literal(role))),
+	},
+	{ additionalProperties: false },
+);
+export type CreateUnitCreditAttributionInput = Static<typeof CreateUnitCreditAttributionInput>;
 
 export const UnitVersionInput = t.Union([
 	t.Object({ kind: t.Literal("main") }, { additionalProperties: false }),
@@ -152,6 +159,10 @@ export const UnitSeriesMembershipListResponse = t.Object({
 const UnitLocalizationInput = LocalizationInput;
 
 const CreateUnitFields = {
+	creditAttributionRequestConsent: t.Union([
+		t.Literal("direct_only"),
+		t.Literal("allow_requests"),
+	]),
 	version: UnitVersionInput,
 	localization: UnitLocalizationInput,
 	visibility: LifecycleInput.visibility,
@@ -164,7 +175,12 @@ export const CreateUnitBody = t.Union([
 	t.Object(
 		{
 			ownershipMode: t.Literal("profile_owned"),
-			publisher: PublisherEntityInput,
+			creditAttributions: t.Array(CreateUnitCreditAttributionInput, {
+				contains: t.Object({ role: t.Literal("publisher") }),
+				minContains: 1,
+				minItems: 1,
+				uniqueItems: true,
+			}),
 			...CreateUnitFields,
 		},
 		{ additionalProperties: false },
@@ -172,7 +188,9 @@ export const CreateUnitBody = t.Union([
 	t.Object(
 		{
 			ownershipMode: t.Literal("community_owned"),
-			publisher: t.Optional(PublisherEntityInput),
+			creditAttributions: t.Array(CreateUnitCreditAttributionInput, {
+				uniqueItems: true,
+			}),
 			...CreateUnitFields,
 		},
 		{ additionalProperties: false },

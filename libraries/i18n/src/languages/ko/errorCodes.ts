@@ -156,6 +156,7 @@ export default {
 	AssociationProposalRoleInvalid: "선택한 연계 역할이 연계 유형과 일치하지 않습니다.",
 	CreditAttributionNotFound: "이 크레딧 귀속을 찾을 수 없습니다.",
 	CreditAttributionRoleInvalid: "선택한 크레딧 역할은 이 유형의 유닛에 적용되지 않습니다.",
+	CreditAttributionRequestConfirmationRequired: "크레딧 초대를 보내기 전에 확인하세요.",
 	SubjectAssociationNotFound: "이 주제 연계를 찾을 수 없습니다.",
 	AliasNotFound: "이 별칭을 찾을 수 없습니다.",
 	TagApplicationNotFound: "이 태그 적용을 찾을 수 없습니다.",
