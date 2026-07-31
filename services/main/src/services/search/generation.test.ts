@@ -19,12 +19,12 @@ import { getSearchSettingsFingerprint } from "./settings";
 
 const currentGeneration = {
 	id: "019f8293-faf7-7521-98d5-9cd4ea6c77f5",
-	indexUid: "rezics_units_v11_20260731",
+	indexUid: "rezics_units_v1_20260801",
 	projectionVersion: CurrentSearchProjectionVersion,
 	settingsFingerprint: getSearchSettingsFingerprint("current"),
 } as const;
 
-describe("active search generation compatibility", () => {
+describe("active search generation contract validation", () => {
 	beforeEach(() => {
 		clearActiveSearchGenerationCache();
 		limit.mockReset();
@@ -39,8 +39,8 @@ describe("active search generation compatibility", () => {
 		});
 	});
 
-	it("rejects a stale projection version even when the settings fingerprint matches", async () => {
-		limit.mockResolvedValue([{ ...currentGeneration, projectionVersion: 1 }]);
+	it("rejects an unsupported projection version even when the settings fingerprint matches", async () => {
+		limit.mockResolvedValue([{ ...currentGeneration, projectionVersion: 2 }]);
 
 		const error = await getActiveSearchGeneration("current").catch((cause: unknown) => cause);
 		expect(error).toBeInstanceOf(SearchUnavailable);

@@ -160,7 +160,7 @@ export default new Elysia({ normalize: "typebox" })
 	})
 	.mount(auth.handler)
 	.use(imageAssetContent)
-	.group("/api", (api) =>
+	.group("/api/v1", (api) =>
 		api.guard({ parse: ["empty-body", "json"] }, (api) =>
 			api
 				.use(associationProposals)

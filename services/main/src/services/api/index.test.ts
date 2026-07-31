@@ -16,9 +16,9 @@ async function readErrorBody(response: Response) {
 
 describe("API root", () => {
 	it("serves health checks without dependencies", async () => {
-		const get = await api.handle(new Request("http://localhost/api/health"));
+		const get = await api.handle(new Request("http://localhost/api/v1/health"));
 		const head = await api.handle(
-			new Request("http://localhost/api/health", { method: "HEAD" }),
+			new Request("http://localhost/api/v1/health", { method: "HEAD" }),
 		);
 
 		expect(get.status).toBe(StatusCodes.OK);
@@ -33,10 +33,10 @@ describe("API root", () => {
 			"X-Request-Id": "caller-controlled",
 		};
 		const unauthorized = await api.handle(
-			new Request("http://localhost/api/users/me", { headers }),
+			new Request("http://localhost/api/v1/users/me", { headers }),
 		);
 		const validation = await api.handle(
-			new Request("http://localhost/api/units/book?limit=0", { headers }),
+			new Request("http://localhost/api/v1/units/book?limit=0", { headers }),
 		);
 
 		expect(unauthorized.status).toBe(StatusCodes.UNAUTHORIZED);
@@ -67,9 +67,9 @@ describe("API root", () => {
 	});
 
 	it.each([
-		["POST", "/api/polls/00000000-0000-7000-8000-000000000001/close"],
-		["PUT", "/api/users/me/following/00000000-0000-7000-8000-000000000001"],
-		["DELETE", "/api/users/me/following/00000000-0000-7000-8000-000000000001"],
+		["POST", "/api/v1/polls/00000000-0000-7000-8000-000000000001/close"],
+		["PUT", "/api/v1/users/me/following/00000000-0000-7000-8000-000000000001"],
+		["DELETE", "/api/v1/users/me/following/00000000-0000-7000-8000-000000000001"],
 	] as const)("does not parse a bodyless %s request as JSON", async (method, path) => {
 		const response = await api.handle(new Request(`http://localhost${path}`, { method }));
 
@@ -82,7 +82,7 @@ describe("API root", () => {
 
 	it("maps malformed request bodies to the public client-error contract", async () => {
 		const response = await api.handle(
-			new Request("http://localhost/api/users/me/preferences", {
+			new Request("http://localhost/api/v1/users/me/preferences", {
 				method: "PUT",
 				headers: { "Content-Type": "application/json" },
 				body: "{",
@@ -104,7 +104,7 @@ describe("API root", () => {
 
 	it("never accepts API tokens on the credential control-plane", async () => {
 		const response = await api.handle(
-			new Request("http://localhost/api/api-tokens", {
+			new Request("http://localhost/api/v1/api-tokens", {
 				headers: { Authorization: "Bearer rz_api_test_credential" },
 			}),
 		);
@@ -119,16 +119,18 @@ describe("API root", () => {
 	it("derives OpenAPI credential requirements from the access guard", () => {
 		const document = toOpenAPISchema(api);
 
-		expect(document.paths["/api/units/{type}"]?.post?.security).toEqual([
+		expect(document.paths["/api/v1/units/{type}"]?.post?.security).toEqual([
 			{ ApiToken: [] },
 			{ SessionCookie: [] },
 		]);
-		expect(document.paths["/api/api-tokens"]?.get?.security).toEqual([{ SessionCookie: [] }]);
-		expect(document.paths["/api/token"]?.get?.security).toEqual([{ ApiToken: [] }]);
-		expect(document.paths["/api/users/me/profile-slug"]?.put?.security).toEqual([
+		expect(document.paths["/api/v1/api-tokens"]?.get?.security).toEqual([
 			{ SessionCookie: [] },
 		]);
-		expect(document.paths["/api/slug-addresses/profile"]).toBeUndefined();
+		expect(document.paths["/api/v1/token"]?.get?.security).toEqual([{ ApiToken: [] }]);
+		expect(document.paths["/api/v1/users/me/profile-slug"]?.put?.security).toEqual([
+			{ SessionCookie: [] },
+		]);
+		expect(document.paths["/api/v1/slug-addresses/profile"]).toBeUndefined();
 	});
 
 	it("documents the development preview gate on unreleased Zone address writes", () => {
@@ -148,21 +150,21 @@ describe("API root", () => {
 		);
 
 		expect(previewProtectedZoneOperations.toSorted()).toEqual([
-			"POST /api/zones",
-			"POST /api/zones/{zoneId}/pages",
-			"PUT /api/zones/{zoneId}/pages/{pageId}",
-			"PUT /api/zones/{zoneId}/slug-address",
+			"POST /api/v1/zones",
+			"POST /api/v1/zones/{zoneId}/pages",
+			"PUT /api/v1/zones/{zoneId}/pages/{pageId}",
+			"PUT /api/v1/zones/{zoneId}/slug-address",
 		]);
 	});
 
 	it("documents the development preview gate on non-Profile slug control planes", () => {
 		const document = toOpenAPISchema(api);
 		const expected = [
-			["get", "/api/slug-addresses/units/{unitId}"],
-			["put", "/api/slug-addresses/units/{unitId}"],
-			["post", "/api/slug-addresses/namespaces"],
-			["delete", "/api/slug-addresses/redirects/{redirectAddressId}"],
-			["put", "/api/realms/{realmId}/slug-address"],
+			["get", "/api/v1/slug-addresses/units/{unitId}"],
+			["put", "/api/v1/slug-addresses/units/{unitId}"],
+			["post", "/api/v1/slug-addresses/namespaces"],
+			["delete", "/api/v1/slug-addresses/redirects/{redirectAddressId}"],
+			["put", "/api/v1/realms/{realmId}/slug-address"],
 		] as const;
 
 		for (const [method, path] of expected) {
@@ -173,7 +175,7 @@ describe("API root", () => {
 
 	it("rejects API tokens before the first-party Profile slug handler", async () => {
 		const response = await api.handle(
-			new Request("http://localhost/api/users/me/profile-slug", {
+			new Request("http://localhost/api/v1/users/me/profile-slug", {
 				method: "PUT",
 				headers: {
 					Authorization: "Bearer rz_api_test_credential",
@@ -192,7 +194,9 @@ describe("API root", () => {
 
 	it("requires authentication before checking the Tag hierarchy preview capability", async () => {
 		const response = await api.handle(
-			new Request("http://localhost/api/tags/00000000-0000-7000-8000-000000000001/hierarchy"),
+			new Request(
+				"http://localhost/api/v1/tags/00000000-0000-7000-8000-000000000001/hierarchy",
+			),
 		);
 
 		expect(response.status).toBe(StatusCodes.UNAUTHORIZED);
@@ -205,7 +209,7 @@ describe("API root", () => {
 	it("requires authentication before checking the Wiki navigation preview capability", async () => {
 		const response = await api.handle(
 			new Request(
-				"http://localhost/api/realms/00000000-0000-7000-8000-000000000001/wiki/navigation",
+				"http://localhost/api/v1/realms/00000000-0000-7000-8000-000000000001/wiki/navigation",
 			),
 		);
 
@@ -219,11 +223,11 @@ describe("API root", () => {
 	it("documents the development preview gate on every Wiki navigation operation", () => {
 		const document = toOpenAPISchema(api);
 		const expected = [
-			["get", "/api/realms/{realmId}/wiki/navigation"],
-			["post", "/api/realms/{realmId}/wiki/navigation"],
-			["get", "/api/realms/{realmId}/wiki/navigation/{navigationId}"],
-			["put", "/api/realms/{realmId}/wiki/navigation/{navigationId}"],
-			["delete", "/api/realms/{realmId}/wiki/navigation/{navigationId}"],
+			["get", "/api/v1/realms/{realmId}/wiki/navigation"],
+			["post", "/api/v1/realms/{realmId}/wiki/navigation"],
+			["get", "/api/v1/realms/{realmId}/wiki/navigation/{navigationId}"],
+			["put", "/api/v1/realms/{realmId}/wiki/navigation/{navigationId}"],
+			["delete", "/api/v1/realms/{realmId}/wiki/navigation/{navigationId}"],
 		] as const;
 
 		for (const [method, path] of expected) {
@@ -239,8 +243,8 @@ describe("API root", () => {
 		const document = toOpenAPISchema(api);
 		const methods = ["delete", "get", "post", "put"] as const;
 		const previewProtectedOperations = Object.entries(document.paths).flatMap(([path, item]) =>
-			path === "/api/tags/{tagId}/hierarchy" ||
-			path.startsWith("/api/tag-structures") ||
+			path === "/api/v1/tags/{tagId}/hierarchy" ||
+			path.startsWith("/api/v1/tag-structures") ||
 			path.includes("/tag-structures/")
 				? methods.flatMap((method) => {
 						const forbidden = item?.[method]?.responses?.[StatusCodes.FORBIDDEN];
@@ -253,22 +257,22 @@ describe("API root", () => {
 		);
 
 		expect(previewProtectedOperations).toEqual([
-			"GET /api/tags/{tagId}/hierarchy",
-			"POST /api/tag-structures",
-			"GET /api/tag-structures/{structureId}",
-			"PUT /api/tag-structures/{structureId}",
-			"DELETE /api/tag-structures/{structureId}/vote",
-			"PUT /api/tag-structures/{structureId}/vote",
-			"DELETE /api/units/{type}/{unitId}/tag-structures/{structureId}",
-			"PUT /api/units/{type}/{unitId}/tag-structures/{structureId}",
-			"DELETE /api/units/{type}/{unitId}/tag-structures/{structureId}/vote",
-			"PUT /api/units/{type}/{unitId}/tag-structures/{structureId}/vote",
+			"GET /api/v1/tags/{tagId}/hierarchy",
+			"POST /api/v1/tag-structures",
+			"GET /api/v1/tag-structures/{structureId}",
+			"PUT /api/v1/tag-structures/{structureId}",
+			"DELETE /api/v1/tag-structures/{structureId}/vote",
+			"PUT /api/v1/tag-structures/{structureId}/vote",
+			"DELETE /api/v1/units/{type}/{unitId}/tag-structures/{structureId}",
+			"PUT /api/v1/units/{type}/{unitId}/tag-structures/{structureId}",
+			"DELETE /api/v1/units/{type}/{unitId}/tag-structures/{structureId}/vote",
+			"PUT /api/v1/units/{type}/{unitId}/tag-structures/{structureId}/vote",
 		]);
 	});
 
 	it("requires authentication before checking the Tag-path search preview capability", async () => {
 		const response = await api.handle(
-			new Request("http://localhost/api/search/tag-structures", {
+			new Request("http://localhost/api/v1/search/tag-structures", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ localizationLanguages: ["en"] }),
@@ -281,7 +285,7 @@ describe("API root", () => {
 
 	it("documents untracked progress as a successful state", () => {
 		const document = toOpenAPISchema(api);
-		const responses = document.paths["/api/progress/{unitId}"]?.get?.responses;
+		const responses = document.paths["/api/v1/progress/{unitId}"]?.get?.responses;
 		if (!responses) throw new Error("Expected progress lookup responses");
 
 		const success = JSON.stringify(responses[StatusCodes.OK]);
@@ -297,9 +301,9 @@ describe("API root", () => {
 		const document = toOpenAPISchema(api);
 
 		expect(
-			document.paths["/api/users/me/following/{unitId}"]?.put?.requestBody,
+			document.paths["/api/v1/users/me/following/{unitId}"]?.put?.requestBody,
 		).toBeUndefined();
-		const preferencesBody = document.paths["/api/users/me/preferences"]?.put?.requestBody;
+		const preferencesBody = document.paths["/api/v1/users/me/preferences"]?.put?.requestBody;
 		if (!preferencesBody || "$ref" in preferencesBody)
 			throw new Error("Expected an inline preferences request body");
 		expect(Object.keys(preferencesBody.content)).toEqual(["application/json"]);

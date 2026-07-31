@@ -6,8 +6,8 @@ separate from the **Content Structure** product, which organizes Units and is pe
 
 The core block set is `portable-text`, `unit-ref`, `unit-list`, `search`, `menu`, `media`,
 `divider`, `group`, `callout`, and `tabs`. References target Units rather than domain-specific records, so there is one `unit-ref`
-instead of domain-specific reference variants. Documents do not carry schema versions: schema changes are product
-changes, not a compatibility protocol during development.
+instead of domain-specific reference variants. Documents do not carry schema versions. After v1,
+stored-document changes must remain valid for the existing shape or use a deliberate versioned migration.
 
 Every stored document is structurally checked by TypeBox and semantically checked by
 `assertBlockDocument`. Semantic validation enforces unique stable keys, host allow-lists, nesting

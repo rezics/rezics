@@ -4,7 +4,7 @@ import Elysia from "elysia";
 
 import session from "../../auth/session";
 import { database } from "../../database";
-import { auditEvent } from "../../database/schema";
+import { auditEvent, AuditEventSchemaVersion } from "../../database/schema";
 import { InvalidPaginationCursor } from "../../pagination/errors";
 import { firstUnitLocalizationTitle } from "../../units/localization";
 import { toApiErrorResponse } from "../schema/response";
@@ -66,11 +66,13 @@ export default new Elysia({ prefix: "/audit" }).use(session).get(
 			.limit(limit + 1);
 		const hasNext = rows.length > limit;
 		const page = rows.slice(0, limit);
+		if (page.some((row) => row.schemaVersion !== AuditEventSchemaVersion))
+			throw new Error("Unsupported audit event schema version");
 		const last = page.at(-1);
 		return {
 			items: page.map((row) => ({
 				id: row.id,
-				schemaVersion: row.schemaVersion,
+				schemaVersion: AuditEventSchemaVersion,
 				category: row.category,
 				outcome: row.outcome,
 				actor: {

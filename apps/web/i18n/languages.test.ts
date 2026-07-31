@@ -64,7 +64,7 @@ describe("language dictionaries", () => {
 		expect(traditionalChinese.locale.current).toBe("zh-Hant");
 		expect(traditionalChinese.t.locale.uiLocales["zh-Hant"]).toBe("繁體中文");
 		expect(traditionalChinese.t.settings.tokens.standardLimitsDescription).toContain(
-			"所有權杖共用帳戶額度",
+			"仍共用帳戶配額",
 		);
 		expect(
 			traditionalChinese.t.settings.tokens.limitRanges({

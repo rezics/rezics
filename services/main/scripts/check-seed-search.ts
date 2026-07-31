@@ -1,9 +1,11 @@
 import { initializeObservability } from "@rezics/observability";
 
+import { RezicsVersion } from "../src/version";
+
 const observability = initializeObservability({
 	service: {
 		name: "rezics-database-seed-search-check",
-		version: "0.1.0",
+		version: RezicsVersion,
 		environment: process.env.DEPLOYMENT_ENVIRONMENT ?? process.env.NODE_ENV ?? "development",
 	},
 });

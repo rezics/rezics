@@ -1,3 +1,8 @@
+import { afterAll } from "vitest";
+import { initializeObservability } from "@rezics/observability";
+
+import { RezicsVersion } from "./version";
+
 const environment: Readonly<Record<string, string>> = {
 	DATABASE_URL: "postgresql://test:test@localhost:5432/rezics",
 	BETTER_AUTH_SECRET: "test-secret-that-is-longer-than-thirty-two-characters",
@@ -19,11 +24,9 @@ for (const [name, value] of Object.entries(environment)) process.env[name] = val
 const observability = initializeObservability({
 	service: {
 		name: "rezics-main-test",
-		version: "0.1.0",
+		version: RezicsVersion,
 		environment: "test",
 	},
 });
 
 afterAll(() => observability.shutdown());
-import { afterAll } from "vitest";
-import { initializeObservability } from "@rezics/observability";

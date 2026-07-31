@@ -13,10 +13,11 @@ import {
 	apiRouteOperationId,
 	resolveApiQuotaOperation,
 } from "../src/services/auth/api-quota/operation";
+import { RezicsVersion } from "../src/version";
 
 const { initializeObservability } = await import("@rezics/observability");
 const observability = initializeObservability({
-	service: { name: "rezics-openapi-generator", version: "0.1.0", environment: "tooling" },
+	service: { name: "rezics-openapi-generator", version: RezicsVersion, environment: "tooling" },
 });
 const { default: api } = await import("../src/services/api");
 
@@ -24,7 +25,7 @@ const document = {
 	openapi: "3.2.0",
 	info: {
 		title: "REZICS API",
-		version: "0.1.0",
+		version: RezicsVersion,
 	},
 	...toOpenAPISchema(api),
 };
@@ -190,6 +191,11 @@ for (const [pathTemplate, path] of Object.entries(document.paths)) {
 			method,
 			pathTemplate.replaceAll(/\{([^}]+)\}/g, ":$1"),
 		);
+		const generatedOperationId = operation.operationId;
+		const publicOperationId =
+			generatedOperationId?.replace(/ApiV[1-9]\d*(?=[A-Z]|$)/, "Api") === routeOperationId
+				? routeOperationId
+				: (generatedOperationId ?? routeOperationId);
 		const quotaOperation = resolveApiQuotaOperation(routeOperationId);
 		if (!operation.security) {
 			const unauthorized = operation.responses[StatusCodes.UNAUTHORIZED];
@@ -203,6 +209,7 @@ for (const [pathTemplate, path] of Object.entries(document.paths)) {
 		if (operation.security?.some((requirement) => "ApiToken" in requirement))
 			operation.responses[StatusCodes.TOO_MANY_REQUESTS] ??= apiQuotaExceededResponse;
 		Object.assign(operation, {
+			operationId: publicOperationId,
 			"x-rezics-quota-route-operation-id": routeOperationId,
 			"x-rezics-quota-operation-id": quotaOperation.scope ?? "*",
 			"x-rezics-quota-cost-units": quotaOperation.costUnits,

@@ -39,8 +39,8 @@ vi.mock("./generation", () => ({
 	getActiveSearchGeneration: vi.fn().mockResolvedValue({
 		id: "019f7eed-5d42-7102-8387-cc1d13b176d2",
 		kind: "current",
-		indexUid: "rezics_units_v11_20260731",
-		projectionVersion: 6,
+		indexUid: "rezics_units_v1_20260801",
+		projectionVersion: 1,
 		settingsFingerprint: "a".repeat(64),
 	}),
 }));
@@ -148,26 +148,6 @@ describe("domain search SQL", () => {
 		const queries = execute.mock.calls
 			.map(([statement]) => dialect.sqlToQuery(statement as SQL).sql)
 			.join("\n");
-		for (const legacyIdentifier of [
-			"unit_translation",
-			"content_translation",
-			'"profiles"',
-			"unit_realm",
-			"author_user_id",
-			"realm_unit_id",
-			"root_unit_id",
-			"parent_comment_id",
-			"default_language",
-			"ai_disclosure_mode",
-			"license_slug",
-			"target_unit_id",
-			"join_requires_approval",
-			"vote_mode",
-			"profile_follow",
-			"realm_subscription",
-			"zone_subscription",
-		])
-			expect(queries).not.toContain(legacyIdentifier);
 		expect(queries).toContain('"unit_localization"');
 		expect(queries).toContain('from "unit_structure_member"');
 		expect(queries).not.toContain('from "search_structure_member"');

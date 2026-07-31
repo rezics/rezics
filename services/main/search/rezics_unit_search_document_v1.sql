@@ -13,7 +13,7 @@ SELECT
 		THEN NULL
 	ELSE jsonb_build_object(
 		'id', source.unit_id,
-		'projectionVersion', 11,
+		'projectionVersion', 1,
 		'revision', source.revision,
 		'category', category.value,
 		'unitType', unit_row.kind,

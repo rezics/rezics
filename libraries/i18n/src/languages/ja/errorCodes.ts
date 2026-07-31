@@ -176,7 +176,6 @@ export default {
 	UnitTagCurationChanged:
 		"このタグ選定は他の場所で変更されました。最新の順序を読み込みました。もう一度お試しください。",
 	TagNotFound: "このタグは見つかりませんでした。",
-	UnitVersionNotFound: "このユニットバージョンは見つかりませんでした。",
 	UnitSourceLinkNotFound: "この作品の出典リンクは見つかりませんでした。",
 	UnitVariantKindMismatch:
 		"バリアントとそのメインは同じサポートされているユニットタイプを使用する必要があります。",

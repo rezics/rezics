@@ -90,7 +90,7 @@ describe("backend proxy", () => {
 			throw new Error("unavailable");
 		});
 
-		const response = await proxyBackendRequest(new Request("https://app.example/api/feed"), {
+		const response = await proxyBackendRequest(new Request("https://app.example/api/v1/feed"), {
 			prefix: "api",
 			path: ["feed"],
 		});

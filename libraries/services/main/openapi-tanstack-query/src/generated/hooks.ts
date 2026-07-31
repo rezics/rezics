@@ -1450,14 +1450,6 @@ import type {
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus500,
-	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdOptions,
-	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus200,
-	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403,
-	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404,
-	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409,
-	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus422,
-	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429,
-	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus500,
 	GetApiUnitsByIdByUnitIdContentStructuresOptions,
 	GetApiUnitsByIdByUnitIdContentStructuresStatus200,
 	GetApiUnitsByIdByUnitIdContentStructuresStatus403,
@@ -2636,7 +2628,6 @@ import {
 	deleteApiUnitsByTypeByUnitIdTagsByTagId,
 	putApiUnitsByTypeByUnitIdTagsByTagIdVote,
 	deleteApiUnitsByTypeByUnitIdTagsByTagIdVote,
-	putApiUnitsByTypeByUnitIdVersionOfByCanonicalId,
 	getApiUnitsByIdByUnitIdContentStructures,
 	postApiUnitsByIdByUnitIdContentStructures,
 	getApiUnitsByIdByUnitIdContentStructuresByStructureId,
@@ -2974,7 +2965,7 @@ export const getApiUnitByUnitIdAssociationProposalsQueryKey = ({
 	query,
 }: Omit<GetApiUnitByUnitIdAssociationProposalsOptions, "headers">) =>
 	[
-		{ url: "/api/unit/:unitId/association-proposals", params: path },
+		{ url: "/api/v1/unit/:unitId/association-proposals", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -3014,7 +3005,7 @@ export function getApiUnitByUnitIdAssociationProposalsQueryOptions(
 
 /**
  * @summary List Unit association proposals
- * {@link /api/unit/:unitId/association-proposals}
+ * {@link /api/v1/unit/:unitId/association-proposals}
  */
 export function useGetApiUnitByUnitIdAssociationProposals<
 	TData = GetApiUnitByUnitIdAssociationProposalsStatus200,
@@ -3082,7 +3073,7 @@ export function useGetApiUnitByUnitIdAssociationProposals<
 }
 
 export const postApiUnitByUnitIdAssociationProposalsRequestsMutationKey = () =>
-	[{ url: "/api/unit/:unitId/association-proposals/requests" }] as const;
+	[{ url: "/api/v1/unit/:unitId/association-proposals/requests" }] as const;
 
 export function postApiUnitByUnitIdAssociationProposalsRequestsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -3116,7 +3107,7 @@ export function postApiUnitByUnitIdAssociationProposalsRequestsMutationOptions<T
 
 /**
  * @summary Request Unit association
- * {@link /api/unit/:unitId/association-proposals/requests}
+ * {@link /api/v1/unit/:unitId/association-proposals/requests}
  */
 export function usePostApiUnitByUnitIdAssociationProposalsRequests<TContext>(
 	options: {
@@ -3192,7 +3183,7 @@ export function usePostApiUnitByUnitIdAssociationProposalsRequests<TContext>(
 }
 
 export const postApiUnitByUnitIdAssociationProposalsInvitationsMutationKey = () =>
-	[{ url: "/api/unit/:unitId/association-proposals/invitations" }] as const;
+	[{ url: "/api/v1/unit/:unitId/association-proposals/invitations" }] as const;
 
 export function postApiUnitByUnitIdAssociationProposalsInvitationsMutationOptions<
 	TContext = unknown,
@@ -3226,7 +3217,7 @@ export function postApiUnitByUnitIdAssociationProposalsInvitationsMutationOption
 
 /**
  * @summary Invite Unit to association
- * {@link /api/unit/:unitId/association-proposals/invitations}
+ * {@link /api/v1/unit/:unitId/association-proposals/invitations}
  */
 export function usePostApiUnitByUnitIdAssociationProposalsInvitations<TContext>(
 	options: {
@@ -3303,7 +3294,7 @@ export function usePostApiUnitByUnitIdAssociationProposalsInvitations<TContext>(
 }
 
 export const postApiUnitByUnitIdAssociationProposalsByProposalIdAcceptMutationKey = () =>
-	[{ url: "/api/unit/:unitId/association-proposals/:proposalId/accept" }] as const;
+	[{ url: "/api/v1/unit/:unitId/association-proposals/:proposalId/accept" }] as const;
 
 export function postApiUnitByUnitIdAssociationProposalsByProposalIdAcceptMutationOptions<
 	TContext = unknown,
@@ -3337,7 +3328,7 @@ export function postApiUnitByUnitIdAssociationProposalsByProposalIdAcceptMutatio
 
 /**
  * @summary Accept Unit association proposal
- * {@link /api/unit/:unitId/association-proposals/:proposalId/accept}
+ * {@link /api/v1/unit/:unitId/association-proposals/:proposalId/accept}
  */
 export function usePostApiUnitByUnitIdAssociationProposalsByProposalIdAccept<TContext>(
 	options: {
@@ -3414,7 +3405,7 @@ export function usePostApiUnitByUnitIdAssociationProposalsByProposalIdAccept<TCo
 }
 
 export const postApiUnitByUnitIdAssociationProposalsByProposalIdDeclineMutationKey = () =>
-	[{ url: "/api/unit/:unitId/association-proposals/:proposalId/decline" }] as const;
+	[{ url: "/api/v1/unit/:unitId/association-proposals/:proposalId/decline" }] as const;
 
 export function postApiUnitByUnitIdAssociationProposalsByProposalIdDeclineMutationOptions<
 	TContext = unknown,
@@ -3448,7 +3439,7 @@ export function postApiUnitByUnitIdAssociationProposalsByProposalIdDeclineMutati
 
 /**
  * @summary Decline Unit association proposal
- * {@link /api/unit/:unitId/association-proposals/:proposalId/decline}
+ * {@link /api/v1/unit/:unitId/association-proposals/:proposalId/decline}
  */
 export function usePostApiUnitByUnitIdAssociationProposalsByProposalIdDecline<TContext>(
 	options: {
@@ -3525,7 +3516,7 @@ export function usePostApiUnitByUnitIdAssociationProposalsByProposalIdDecline<TC
 }
 
 export const deleteApiUnitByUnitIdAssociationProposalsByProposalIdMutationKey = () =>
-	[{ url: "/api/unit/:unitId/association-proposals/:proposalId" }] as const;
+	[{ url: "/api/v1/unit/:unitId/association-proposals/:proposalId" }] as const;
 
 export function deleteApiUnitByUnitIdAssociationProposalsByProposalIdMutationOptions<
 	TContext = unknown,
@@ -3557,7 +3548,7 @@ export function deleteApiUnitByUnitIdAssociationProposalsByProposalIdMutationOpt
 
 /**
  * @summary Cancel Unit association proposal
- * {@link /api/unit/:unitId/association-proposals/:proposalId}
+ * {@link /api/v1/unit/:unitId/association-proposals/:proposalId}
  */
 export function useDeleteApiUnitByUnitIdAssociationProposalsByProposalId<TContext>(
 	options: {
@@ -3629,7 +3620,7 @@ export function useDeleteApiUnitByUnitIdAssociationProposalsByProposalId<TContex
 	>;
 }
 
-export const getApiStartupQueryKey = () => [{ url: "/api/startup" }] as const;
+export const getApiStartupQueryKey = () => [{ url: "/api/v1/startup" }] as const;
 
 type GetApiStartupQueryKey = ReturnType<typeof getApiStartupQueryKey>;
 
@@ -3657,7 +3648,7 @@ export function getApiStartupQueryOptions(
 
 /**
  * @summary Process startup
- * {@link /api/startup}
+ * {@link /api/v1/startup}
  */
 export function useGetApiStartup<
 	TData = GetApiStartupStatus200,
@@ -3697,7 +3688,7 @@ export function useGetApiStartup<
 	return queryResult;
 }
 
-export const getApiHealthQueryKey = () => [{ url: "/api/health" }] as const;
+export const getApiHealthQueryKey = () => [{ url: "/api/v1/health" }] as const;
 
 type GetApiHealthQueryKey = ReturnType<typeof getApiHealthQueryKey>;
 
@@ -3725,7 +3716,7 @@ export function getApiHealthQueryOptions(
 
 /**
  * @summary Process health
- * {@link /api/health}
+ * {@link /api/v1/health}
  */
 export function useGetApiHealth<
 	TData = GetApiHealthStatus200,
@@ -3765,7 +3756,7 @@ export function useGetApiHealth<
 	return queryResult;
 }
 
-export const headApiHealthQueryKey = () => [{ url: "/api/health" }] as const;
+export const headApiHealthQueryKey = () => [{ url: "/api/v1/health" }] as const;
 
 type HeadApiHealthQueryKey = ReturnType<typeof headApiHealthQueryKey>;
 
@@ -3795,7 +3786,7 @@ export function headApiHealthQueryOptions(
 
 /**
  * @summary Process health without a response body
- * {@link /api/health}
+ * {@link /api/v1/health}
  */
 export function useHeadApiHealth<
 	TData = HeadApiHealthStatus204,
@@ -3840,7 +3831,7 @@ export function useHeadApiHealth<
 	return queryResult;
 }
 
-export const getApiReadyQueryKey = () => [{ url: "/api/ready" }] as const;
+export const getApiReadyQueryKey = () => [{ url: "/api/v1/ready" }] as const;
 
 type GetApiReadyQueryKey = ReturnType<typeof getApiReadyQueryKey>;
 
@@ -3868,7 +3859,7 @@ export function getApiReadyQueryOptions(
 
 /**
  * @summary Dependency readiness
- * {@link /api/ready}
+ * {@link /api/v1/ready}
  */
 export function useGetApiReady<
 	TData = GetApiReadyStatus200,
@@ -3911,7 +3902,7 @@ export function useGetApiReady<
 export const getApiNotificationsQueryKey = ({
 	query,
 }: Omit<GetApiNotificationsOptions, "headers"> = {}) =>
-	[{ url: "/api/notifications" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/notifications" }, ...(query ? [query] : [])] as const;
 
 type GetApiNotificationsQueryKey = ReturnType<typeof getApiNotificationsQueryKey>;
 
@@ -3946,7 +3937,7 @@ export function getApiNotificationsQueryOptions(
 
 /**
  * @summary Poll notifications with a cursor
- * {@link /api/notifications}
+ * {@link /api/v1/notifications}
  */
 export function useGetApiNotifications<
 	TData = GetApiNotificationsStatus200,
@@ -4004,7 +3995,7 @@ export function useGetApiNotifications<
 }
 
 export const getApiNotificationsUnreadCountQueryKey = () =>
-	[{ url: "/api/notifications/unread-count" }] as const;
+	[{ url: "/api/v1/notifications/unread-count" }] as const;
 
 type GetApiNotificationsUnreadCountQueryKey = ReturnType<
 	typeof getApiNotificationsUnreadCountQueryKey
@@ -4036,7 +4027,7 @@ export function getApiNotificationsUnreadCountQueryOptions(
 
 /**
  * @summary Get unread notification count
- * {@link /api/notifications/unread-count}
+ * {@link /api/v1/notifications/unread-count}
  */
 export function useGetApiNotificationsUnreadCount<
 	TData = GetApiNotificationsUnreadCountStatus200,
@@ -4083,7 +4074,7 @@ export function useGetApiNotificationsUnreadCount<
 }
 
 export const putApiNotificationsReadAllMutationKey = () =>
-	[{ url: "/api/notifications/read-all" }] as const;
+	[{ url: "/api/v1/notifications/read-all" }] as const;
 
 export function putApiNotificationsReadAllMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -4114,7 +4105,7 @@ export function putApiNotificationsReadAllMutationOptions<TContext = unknown>(
 
 /**
  * @summary Mark notifications read
- * {@link /api/notifications/read-all}
+ * {@link /api/v1/notifications/read-all}
  */
 export function usePutApiNotificationsReadAll<TContext>(
 	options: {
@@ -4179,7 +4170,7 @@ export function usePutApiNotificationsReadAll<TContext>(
 }
 
 export const putApiNotificationsByNotificationIdReadMutationKey = () =>
-	[{ url: "/api/notifications/:notificationId/read" }] as const;
+	[{ url: "/api/v1/notifications/:notificationId/read" }] as const;
 
 export function putApiNotificationsByNotificationIdReadMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -4210,7 +4201,7 @@ export function putApiNotificationsByNotificationIdReadMutationOptions<TContext 
 
 /**
  * @summary Mark one notification read
- * {@link /api/notifications/:notificationId/read}
+ * {@link /api/v1/notifications/:notificationId/read}
  */
 export function usePutApiNotificationsByNotificationIdRead<TContext>(
 	options: {
@@ -4278,7 +4269,7 @@ export function usePutApiNotificationsByNotificationIdRead<TContext>(
 }
 
 export const getApiNotificationsPreferencesQueryKey = () =>
-	[{ url: "/api/notifications/preferences" }] as const;
+	[{ url: "/api/v1/notifications/preferences" }] as const;
 
 type GetApiNotificationsPreferencesQueryKey = ReturnType<
 	typeof getApiNotificationsPreferencesQueryKey
@@ -4310,7 +4301,7 @@ export function getApiNotificationsPreferencesQueryOptions(
 
 /**
  * @summary Get notification preferences
- * {@link /api/notifications/preferences}
+ * {@link /api/v1/notifications/preferences}
  */
 export function useGetApiNotificationsPreferences<
 	TData = GetApiNotificationsPreferencesStatus200,
@@ -4357,7 +4348,7 @@ export function useGetApiNotificationsPreferences<
 }
 
 export const putApiNotificationsPreferencesMutationKey = () =>
-	[{ url: "/api/notifications/preferences" }] as const;
+	[{ url: "/api/v1/notifications/preferences" }] as const;
 
 export function putApiNotificationsPreferencesMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -4388,7 +4379,7 @@ export function putApiNotificationsPreferencesMutationOptions<TContext = unknown
 
 /**
  * @summary Update notification preferences
- * {@link /api/notifications/preferences}
+ * {@link /api/v1/notifications/preferences}
  */
 export function usePutApiNotificationsPreferences<TContext>(
 	options: {
@@ -4452,7 +4443,8 @@ export function usePutApiNotificationsPreferences<TContext>(
 	>;
 }
 
-export const postApiOwnershipClaimsMutationKey = () => [{ url: "/api/ownership-claims" }] as const;
+export const postApiOwnershipClaimsMutationKey = () =>
+	[{ url: "/api/v1/ownership-claims" }] as const;
 
 export function postApiOwnershipClaimsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -4480,7 +4472,7 @@ export function postApiOwnershipClaimsMutationOptions<TContext = unknown>(
 
 /**
  * @summary Claim ownership of a community-owned Unit
- * {@link /api/ownership-claims}
+ * {@link /api/v1/ownership-claims}
  */
 export function usePostApiOwnershipClaims<TContext>(
 	options: {
@@ -4549,7 +4541,7 @@ export function usePostApiOwnershipClaims<TContext>(
 }
 
 export const postApiOwnershipClaimsByClaimIdWithdrawMutationKey = () =>
-	[{ url: "/api/ownership-claims/:claimId/withdraw" }] as const;
+	[{ url: "/api/v1/ownership-claims/:claimId/withdraw" }] as const;
 
 export function postApiOwnershipClaimsByClaimIdWithdrawMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -4580,7 +4572,7 @@ export function postApiOwnershipClaimsByClaimIdWithdrawMutationOptions<TContext 
 
 /**
  * @summary Withdraw a pending Unit ownership claim
- * {@link /api/ownership-claims/:claimId/withdraw}
+ * {@link /api/v1/ownership-claims/:claimId/withdraw}
  */
 export function usePostApiOwnershipClaimsByClaimIdWithdraw<TContext>(
 	options: {
@@ -4650,7 +4642,7 @@ export function usePostApiOwnershipClaimsByClaimIdWithdraw<TContext>(
 export const getApiRecommendationsUnitsQueryKey = ({
 	query,
 }: Omit<GetApiRecommendationsUnitsOptions, "headers">) =>
-	[{ url: "/api/recommendations/units" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/recommendations/units" }, ...(query ? [query] : [])] as const;
 
 type GetApiRecommendationsUnitsQueryKey = ReturnType<typeof getApiRecommendationsUnitsQueryKey>;
 
@@ -4685,7 +4677,7 @@ export function getApiRecommendationsUnitsQueryOptions(
 
 /**
  * @summary Recommend Units
- * {@link /api/recommendations/units}
+ * {@link /api/v1/recommendations/units}
  */
 export function useGetApiRecommendationsUnits<
 	TData = GetApiRecommendationsUnitsStatus200,
@@ -4750,7 +4742,7 @@ export const getApiRecommendationsPostsByPostIdQueryKey = ({
 	query,
 }: Omit<GetApiRecommendationsPostsByPostIdOptions, "headers">) =>
 	[
-		{ url: "/api/recommendations/posts/:postId", params: path },
+		{ url: "/api/v1/recommendations/posts/:postId", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -4790,7 +4782,7 @@ export function getApiRecommendationsPostsByPostIdQueryOptions(
 
 /**
  * @summary Recommend related posts
- * {@link /api/recommendations/posts/:postId}
+ * {@link /api/v1/recommendations/posts/:postId}
  */
 export function useGetApiRecommendationsPostsByPostId<
 	TData = GetApiRecommendationsPostsByPostIdStatus200,
@@ -4858,7 +4850,7 @@ export function useGetApiRecommendationsPostsByPostId<
 }
 
 export const postApiRecommendationsEventsMutationKey = () =>
-	[{ url: "/api/recommendations/events" }] as const;
+	[{ url: "/api/v1/recommendations/events" }] as const;
 
 export function postApiRecommendationsEventsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -4889,7 +4881,7 @@ export function postApiRecommendationsEventsMutationOptions<TContext = unknown>(
 
 /**
  * @summary Record recommendation events
- * {@link /api/recommendations/events}
+ * {@link /api/v1/recommendations/events}
  */
 export function usePostApiRecommendationsEvents<TContext>(
 	options: {
@@ -4954,7 +4946,7 @@ export function usePostApiRecommendationsEvents<TContext>(
 }
 
 export const putApiRecommendationsExclusionsByUnitIdMutationKey = () =>
-	[{ url: "/api/recommendations/exclusions/:unitId" }] as const;
+	[{ url: "/api/v1/recommendations/exclusions/:unitId" }] as const;
 
 export function putApiRecommendationsExclusionsByUnitIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -4989,7 +4981,7 @@ export function putApiRecommendationsExclusionsByUnitIdMutationOptions<TContext 
 
 /**
  * @summary Exclude a recommendation
- * {@link /api/recommendations/exclusions/:unitId}
+ * {@link /api/v1/recommendations/exclusions/:unitId}
  */
 export function usePutApiRecommendationsExclusionsByUnitId<TContext>(
 	options: {
@@ -5069,7 +5061,7 @@ export function usePutApiRecommendationsExclusionsByUnitId<TContext>(
 }
 
 export const deleteApiRecommendationsExclusionsByUnitIdMutationKey = () =>
-	[{ url: "/api/recommendations/exclusions/:unitId" }] as const;
+	[{ url: "/api/v1/recommendations/exclusions/:unitId" }] as const;
 
 export function deleteApiRecommendationsExclusionsByUnitIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -5101,7 +5093,7 @@ export function deleteApiRecommendationsExclusionsByUnitIdMutationOptions<TConte
 
 /**
  * @summary Restore an excluded recommendation
- * {@link /api/recommendations/exclusions/:unitId}
+ * {@link /api/v1/recommendations/exclusions/:unitId}
  */
 export function useDeleteApiRecommendationsExclusionsByUnitId<TContext>(
 	options: {
@@ -5175,7 +5167,7 @@ export function useDeleteApiRecommendationsExclusionsByUnitId<TContext>(
 export const getApiMessagesConversationsQueryKey = ({
 	query,
 }: Omit<GetApiMessagesConversationsOptions, "headers"> = {}) =>
-	[{ url: "/api/messages/conversations" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/messages/conversations" }, ...(query ? [query] : [])] as const;
 
 type GetApiMessagesConversationsQueryKey = ReturnType<typeof getApiMessagesConversationsQueryKey>;
 
@@ -5210,7 +5202,7 @@ export function getApiMessagesConversationsQueryOptions(
 
 /**
  * @summary List direct-message conversations
- * {@link /api/messages/conversations}
+ * {@link /api/v1/messages/conversations}
  */
 export function useGetApiMessagesConversations<
 	TData = GetApiMessagesConversationsStatus200,
@@ -5271,7 +5263,7 @@ export function useGetApiMessagesConversations<
 }
 
 export const postApiMessagesConversationsMutationKey = () =>
-	[{ url: "/api/messages/conversations" }] as const;
+	[{ url: "/api/v1/messages/conversations" }] as const;
 
 export function postApiMessagesConversationsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -5305,7 +5297,7 @@ export function postApiMessagesConversationsMutationOptions<TContext = unknown>(
 
 /**
  * @summary Create or find a direct-message conversation
- * {@link /api/messages/conversations}
+ * {@link /api/v1/messages/conversations}
  */
 export function usePostApiMessagesConversations<TContext>(
 	options: {
@@ -5384,7 +5376,7 @@ export function usePostApiMessagesConversations<TContext>(
 export const getApiMessagesConversationsByConversationIdQueryKey = ({
 	path,
 }: Omit<GetApiMessagesConversationsByConversationIdOptions, "headers">) =>
-	[{ url: "/api/messages/conversations/:conversationId", params: path }] as const;
+	[{ url: "/api/v1/messages/conversations/:conversationId", params: path }] as const;
 
 type GetApiMessagesConversationsByConversationIdQueryKey = ReturnType<
 	typeof getApiMessagesConversationsByConversationIdQueryKey
@@ -5421,7 +5413,7 @@ export function getApiMessagesConversationsByConversationIdQueryOptions(
 
 /**
  * @summary Get direct-message conversation
- * {@link /api/messages/conversations/:conversationId}
+ * {@link /api/v1/messages/conversations/:conversationId}
  */
 export function useGetApiMessagesConversationsByConversationId<
 	TData = GetApiMessagesConversationsByConversationIdStatus200,
@@ -5487,7 +5479,7 @@ export const getApiMessagesConversationsByConversationIdMessagesQueryKey = ({
 	query,
 }: Omit<GetApiMessagesConversationsByConversationIdMessagesOptions, "headers">) =>
 	[
-		{ url: "/api/messages/conversations/:conversationId/messages", params: path },
+		{ url: "/api/v1/messages/conversations/:conversationId/messages", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -5528,7 +5520,7 @@ export function getApiMessagesConversationsByConversationIdMessagesQueryOptions(
 
 /**
  * @summary List direct messages
- * {@link /api/messages/conversations/:conversationId/messages}
+ * {@link /api/v1/messages/conversations/:conversationId/messages}
  */
 export function useGetApiMessagesConversationsByConversationIdMessages<
 	TData = GetApiMessagesConversationsByConversationIdMessagesStatus200,
@@ -5602,7 +5594,7 @@ export function useGetApiMessagesConversationsByConversationIdMessages<
 }
 
 export const postApiMessagesConversationsByConversationIdMessagesMutationKey = () =>
-	[{ url: "/api/messages/conversations/:conversationId/messages" }] as const;
+	[{ url: "/api/v1/messages/conversations/:conversationId/messages" }] as const;
 
 export function postApiMessagesConversationsByConversationIdMessagesMutationOptions<
 	TContext = unknown,
@@ -5636,7 +5628,7 @@ export function postApiMessagesConversationsByConversationIdMessagesMutationOpti
 
 /**
  * @summary Send direct message
- * {@link /api/messages/conversations/:conversationId/messages}
+ * {@link /api/v1/messages/conversations/:conversationId/messages}
  */
 export function usePostApiMessagesConversationsByConversationIdMessages<TContext>(
 	options: {
@@ -5713,7 +5705,7 @@ export function usePostApiMessagesConversationsByConversationIdMessages<TContext
 }
 
 export const putApiMessagesConversationsByConversationIdReadMutationKey = () =>
-	[{ url: "/api/messages/conversations/:conversationId/read" }] as const;
+	[{ url: "/api/v1/messages/conversations/:conversationId/read" }] as const;
 
 export function putApiMessagesConversationsByConversationIdReadMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -5746,7 +5738,7 @@ export function putApiMessagesConversationsByConversationIdReadMutationOptions<T
 
 /**
  * @summary Mark direct-message conversation read
- * {@link /api/messages/conversations/:conversationId/read}
+ * {@link /api/v1/messages/conversations/:conversationId/read}
  */
 export function usePutApiMessagesConversationsByConversationIdRead<TContext>(
 	options: {
@@ -5818,7 +5810,7 @@ export function usePutApiMessagesConversationsByConversationIdRead<TContext>(
 }
 
 export const deleteApiMessagesByMessageIdMutationKey = () =>
-	[{ url: "/api/messages/:messageId" }] as const;
+	[{ url: "/api/v1/messages/:messageId" }] as const;
 
 export function deleteApiMessagesByMessageIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -5849,7 +5841,7 @@ export function deleteApiMessagesByMessageIdMutationOptions<TContext = unknown>(
 
 /**
  * @summary Delete direct message
- * {@link /api/messages/:messageId}
+ * {@link /api/v1/messages/:messageId}
  */
 export function useDeleteApiMessagesByMessageId<TContext>(
 	options: {
@@ -5913,7 +5905,7 @@ export function useDeleteApiMessagesByMessageId<TContext>(
 	>;
 }
 
-export const getApiApiTokensQueryKey = () => [{ url: "/api/api-tokens" }] as const;
+export const getApiApiTokensQueryKey = () => [{ url: "/api/v1/api-tokens" }] as const;
 
 type GetApiApiTokensQueryKey = ReturnType<typeof getApiApiTokensQueryKey>;
 
@@ -5943,7 +5935,7 @@ export function getApiApiTokensQueryOptions(
 
 /**
  * @summary List API tokens
- * {@link /api/api-tokens}
+ * {@link /api/v1/api-tokens}
  */
 export function useGetApiApiTokens<
 	TData = GetApiApiTokensStatus200,
@@ -5988,7 +5980,7 @@ export function useGetApiApiTokens<
 	return queryResult;
 }
 
-export const postApiApiTokensMutationKey = () => [{ url: "/api/api-tokens" }] as const;
+export const postApiApiTokensMutationKey = () => [{ url: "/api/v1/api-tokens" }] as const;
 
 export function postApiApiTokensMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -6017,7 +6009,7 @@ export function postApiApiTokensMutationOptions<TContext = unknown>(
 
 /**
  * @summary Create API token (secret returned once)
- * {@link /api/api-tokens}
+ * {@link /api/v1/api-tokens}
  */
 export function usePostApiApiTokens<TContext>(
 	options: {
@@ -6090,7 +6082,7 @@ export function usePostApiApiTokens<TContext>(
 }
 
 export const patchApiApiTokensByTokenIdMutationKey = () =>
-	[{ url: "/api/api-tokens/:tokenId" }] as const;
+	[{ url: "/api/v1/api-tokens/:tokenId" }] as const;
 
 export function patchApiApiTokensByTokenIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -6125,7 +6117,7 @@ export function patchApiApiTokensByTokenIdMutationOptions<TContext = unknown>(
 
 /**
  * @summary Update API token
- * {@link /api/api-tokens/:tokenId}
+ * {@link /api/v1/api-tokens/:tokenId}
  */
 export function usePatchApiApiTokensByTokenId<TContext>(
 	options: {
@@ -6202,7 +6194,7 @@ export function usePatchApiApiTokensByTokenId<TContext>(
 }
 
 export const deleteApiApiTokensByTokenIdMutationKey = () =>
-	[{ url: "/api/api-tokens/:tokenId" }] as const;
+	[{ url: "/api/v1/api-tokens/:tokenId" }] as const;
 
 export function deleteApiApiTokensByTokenIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -6234,7 +6226,7 @@ export function deleteApiApiTokensByTokenIdMutationOptions<TContext = unknown>(
 
 /**
  * @summary Revoke API token
- * {@link /api/api-tokens/:tokenId}
+ * {@link /api/v1/api-tokens/:tokenId}
  */
 export function useDeleteApiApiTokensByTokenId<TContext>(
 	options: {
@@ -6303,7 +6295,7 @@ export function useDeleteApiApiTokensByTokenId<TContext>(
 }
 
 export const putApiApiTokensByTokenIdQuotaOverrideMutationKey = () =>
-	[{ url: "/api/api-tokens/:tokenId/quota-override" }] as const;
+	[{ url: "/api/v1/api-tokens/:tokenId/quota-override" }] as const;
 
 export function putApiApiTokensByTokenIdQuotaOverrideMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -6338,7 +6330,7 @@ export function putApiApiTokensByTokenIdQuotaOverrideMutationOptions<TContext = 
 
 /**
  * @summary Replace API token quota override
- * {@link /api/api-tokens/:tokenId/quota-override}
+ * {@link /api/v1/api-tokens/:tokenId/quota-override}
  */
 export function usePutApiApiTokensByTokenIdQuotaOverride<TContext>(
 	options: {
@@ -6418,7 +6410,7 @@ export function usePutApiApiTokensByTokenIdQuotaOverride<TContext>(
 }
 
 export const deleteApiApiTokensByTokenIdQuotaOverrideMutationKey = () =>
-	[{ url: "/api/api-tokens/:tokenId/quota-override" }] as const;
+	[{ url: "/api/v1/api-tokens/:tokenId/quota-override" }] as const;
 
 export function deleteApiApiTokensByTokenIdQuotaOverrideMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -6453,7 +6445,7 @@ export function deleteApiApiTokensByTokenIdQuotaOverrideMutationOptions<TContext
 
 /**
  * @summary Delete API token quota override
- * {@link /api/api-tokens/:tokenId/quota-override}
+ * {@link /api/v1/api-tokens/:tokenId/quota-override}
  */
 export function useDeleteApiApiTokensByTokenIdQuotaOverride<TContext>(
 	options: {
@@ -6532,7 +6524,7 @@ export function useDeleteApiApiTokensByTokenIdQuotaOverride<TContext>(
 	>;
 }
 
-export const getCurrentApiTokenQueryKey = () => [{ url: "/api/token" }] as const;
+export const getCurrentApiTokenQueryKey = () => [{ url: "/api/v1/token" }] as const;
 
 type GetCurrentApiTokenQueryKey = ReturnType<typeof getCurrentApiTokenQueryKey>;
 
@@ -6562,7 +6554,7 @@ export function getCurrentApiTokenQueryOptions(
 
 /**
  * @summary Inspect the current API token's safe capabilities
- * {@link /api/token}
+ * {@link /api/v1/token}
  */
 export function useGetCurrentApiToken<
 	TData = GetCurrentApiTokenStatus200,
@@ -6609,7 +6601,8 @@ export function useGetCurrentApiToken<
 	return queryResult;
 }
 
-export const getApiApiQuotaPoliciesQueryKey = () => [{ url: "/api/api-quota-policies" }] as const;
+export const getApiApiQuotaPoliciesQueryKey = () =>
+	[{ url: "/api/v1/api-quota-policies" }] as const;
 
 type GetApiApiQuotaPoliciesQueryKey = ReturnType<typeof getApiApiQuotaPoliciesQueryKey>;
 
@@ -6641,7 +6634,7 @@ export function getApiApiQuotaPoliciesQueryOptions(
 
 /**
  * @summary List API quota policies
- * {@link /api/api-quota-policies}
+ * {@link /api/v1/api-quota-policies}
  */
 export function useGetApiApiQuotaPolicies<
 	TData = GetApiApiQuotaPoliciesStatus200,
@@ -6691,7 +6684,7 @@ export function useGetApiApiQuotaPolicies<
 }
 
 export const putApiApiQuotaPoliciesByPolicyKeyMutationKey = () =>
-	[{ url: "/api/api-quota-policies/:policyKey" }] as const;
+	[{ url: "/api/v1/api-quota-policies/:policyKey" }] as const;
 
 export function putApiApiQuotaPoliciesByPolicyKeyMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -6726,7 +6719,7 @@ export function putApiApiQuotaPoliciesByPolicyKeyMutationOptions<TContext = unkn
 
 /**
  * @summary Publish an API quota policy revision
- * {@link /api/api-quota-policies/:policyKey}
+ * {@link /api/v1/api-quota-policies/:policyKey}
  */
 export function usePutApiApiQuotaPoliciesByPolicyKey<TContext>(
 	options: {
@@ -6808,7 +6801,7 @@ export function usePutApiApiQuotaPoliciesByPolicyKey<TContext>(
 export const getApiApiQuotaPoliciesAccountsByUserIdQueryKey = ({
 	path,
 }: Omit<GetApiApiQuotaPoliciesAccountsByUserIdOptions, "headers">) =>
-	[{ url: "/api/api-quota-policies/accounts/:userId", params: path }] as const;
+	[{ url: "/api/v1/api-quota-policies/accounts/:userId", params: path }] as const;
 
 type GetApiApiQuotaPoliciesAccountsByUserIdQueryKey = ReturnType<
 	typeof getApiApiQuotaPoliciesAccountsByUserIdQueryKey
@@ -6846,7 +6839,7 @@ export function getApiApiQuotaPoliciesAccountsByUserIdQueryOptions(
 
 /**
  * @summary Get a user's API quota
- * {@link /api/api-quota-policies/accounts/:userId}
+ * {@link /api/v1/api-quota-policies/accounts/:userId}
  */
 export function useGetApiApiQuotaPoliciesAccountsByUserId<
 	TData = GetApiApiQuotaPoliciesAccountsByUserIdStatus200,
@@ -6909,7 +6902,7 @@ export function useGetApiApiQuotaPoliciesAccountsByUserId<
 }
 
 export const putApiApiQuotaPoliciesAccountsByUserIdMutationKey = () =>
-	[{ url: "/api/api-quota-policies/accounts/:userId" }] as const;
+	[{ url: "/api/v1/api-quota-policies/accounts/:userId" }] as const;
 
 export function putApiApiQuotaPoliciesAccountsByUserIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -6944,7 +6937,7 @@ export function putApiApiQuotaPoliciesAccountsByUserIdMutationOptions<TContext =
 
 /**
  * @summary Assign a user's API quota policy
- * {@link /api/api-quota-policies/accounts/:userId}
+ * {@link /api/v1/api-quota-policies/accounts/:userId}
  */
 export function usePutApiApiQuotaPoliciesAccountsByUserId<TContext>(
 	options: {
@@ -7024,7 +7017,7 @@ export function usePutApiApiQuotaPoliciesAccountsByUserId<TContext>(
 }
 
 export const deleteApiApiQuotaPoliciesAccountsByUserIdMutationKey = () =>
-	[{ url: "/api/api-quota-policies/accounts/:userId" }] as const;
+	[{ url: "/api/v1/api-quota-policies/accounts/:userId" }] as const;
 
 export function deleteApiApiQuotaPoliciesAccountsByUserIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -7059,7 +7052,7 @@ export function deleteApiApiQuotaPoliciesAccountsByUserIdMutationOptions<TContex
 
 /**
  * @summary Reset a user's API quota policy
- * {@link /api/api-quota-policies/accounts/:userId}
+ * {@link /api/v1/api-quota-policies/accounts/:userId}
  */
 export function useDeleteApiApiQuotaPoliciesAccountsByUserId<TContext>(
 	options: {
@@ -7141,7 +7134,7 @@ export function useDeleteApiApiQuotaPoliciesAccountsByUserId<TContext>(
 export const getApiApiQuotaPoliciesAccountsByUserIdTokensQueryKey = ({
 	path,
 }: Omit<GetApiApiQuotaPoliciesAccountsByUserIdTokensOptions, "headers">) =>
-	[{ url: "/api/api-quota-policies/accounts/:userId/tokens", params: path }] as const;
+	[{ url: "/api/v1/api-quota-policies/accounts/:userId/tokens", params: path }] as const;
 
 type GetApiApiQuotaPoliciesAccountsByUserIdTokensQueryKey = ReturnType<
 	typeof getApiApiQuotaPoliciesAccountsByUserIdTokensQueryKey
@@ -7179,7 +7172,7 @@ export function getApiApiQuotaPoliciesAccountsByUserIdTokensQueryOptions(
 
 /**
  * @summary List a user's API token quotas
- * {@link /api/api-quota-policies/accounts/:userId/tokens}
+ * {@link /api/v1/api-quota-policies/accounts/:userId/tokens}
  */
 export function useGetApiApiQuotaPoliciesAccountsByUserIdTokens<
 	TData = GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus200,
@@ -7243,7 +7236,7 @@ export function useGetApiApiQuotaPoliciesAccountsByUserIdTokens<
 }
 
 export const putApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdMutationKey = () =>
-	[{ url: "/api/api-quota-policies/accounts/:userId/tokens/:tokenId" }] as const;
+	[{ url: "/api/v1/api-quota-policies/accounts/:userId/tokens/:tokenId" }] as const;
 
 export function putApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdMutationOptions<
 	TContext = unknown,
@@ -7278,7 +7271,7 @@ export function putApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdMutationOpt
 
 /**
  * @summary Assign an API token quota policy
- * {@link /api/api-quota-policies/accounts/:userId/tokens/:tokenId}
+ * {@link /api/v1/api-quota-policies/accounts/:userId/tokens/:tokenId}
  */
 export function usePutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId<TContext>(
 	options: {
@@ -7359,7 +7352,7 @@ export function usePutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId<TContex
 }
 
 export const deleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdMutationKey = () =>
-	[{ url: "/api/api-quota-policies/accounts/:userId/tokens/:tokenId" }] as const;
+	[{ url: "/api/v1/api-quota-policies/accounts/:userId/tokens/:tokenId" }] as const;
 
 export function deleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdMutationOptions<
 	TContext = unknown,
@@ -7394,7 +7387,7 @@ export function deleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdMutation
 
 /**
  * @summary Reset an API token quota policy
- * {@link /api/api-quota-policies/accounts/:userId/tokens/:tokenId}
+ * {@link /api/v1/api-quota-policies/accounts/:userId/tokens/:tokenId}
  */
 export function useDeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId<TContext>(
 	options: {
@@ -7474,7 +7467,7 @@ export function useDeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId<TCon
 	>;
 }
 
-export const postApiFeedQueryMutationKey = () => [{ url: "/api/feed/query" }] as const;
+export const postApiFeedQueryMutationKey = () => [{ url: "/api/v1/feed/query" }] as const;
 
 export function postApiFeedQueryMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -7501,7 +7494,7 @@ export function postApiFeedQueryMutationOptions<TContext = unknown>(
 
 /**
  * @summary Ranked realm feed
- * {@link /api/feed/query}
+ * {@link /api/v1/feed/query}
  */
 export function usePostApiFeedQuery<TContext>(
 	options: {
@@ -7566,7 +7559,7 @@ export function usePostApiFeedQuery<TContext>(
 }
 
 export const getApiReportsMeQueryKey = ({ query }: Omit<GetApiReportsMeOptions, "headers"> = {}) =>
-	[{ url: "/api/reports/me" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/reports/me" }, ...(query ? [query] : [])] as const;
 
 type GetApiReportsMeQueryKey = ReturnType<typeof getApiReportsMeQueryKey>;
 
@@ -7601,7 +7594,7 @@ export function getApiReportsMeQueryOptions(
 
 /**
  * @summary List current user's Unit reports
- * {@link /api/reports/me}
+ * {@link /api/v1/reports/me}
  */
 export function useGetApiReportsMe<
 	TData = GetApiReportsMeStatus200,
@@ -7661,7 +7654,7 @@ export const getApiReportsUnitsByUnitIdDestinationsQueryKey = ({
 	query,
 }: Omit<GetApiReportsUnitsByUnitIdDestinationsOptions, "headers">) =>
 	[
-		{ url: "/api/reports/units/:unitId/destinations", params: path },
+		{ url: "/api/v1/reports/units/:unitId/destinations", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -7701,7 +7694,7 @@ export function getApiReportsUnitsByUnitIdDestinationsQueryOptions(
 
 /**
  * @summary List rule Realms that can receive a Unit report
- * {@link /api/reports/units/:unitId/destinations}
+ * {@link /api/v1/reports/units/:unitId/destinations}
  */
 export function useGetApiReportsUnitsByUnitIdDestinations<
 	TData = GetApiReportsUnitsByUnitIdDestinationsStatus200,
@@ -7772,7 +7765,7 @@ export const getApiRealmsByRealmIdReportsQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiRealmsByRealmIdReportsOptions, "headers">) =>
-	[{ url: "/api/realms/:realmId/reports", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/realms/:realmId/reports", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiRealmsByRealmIdReportsQueryKey = ReturnType<typeof getApiRealmsByRealmIdReportsQueryKey>;
 
@@ -7807,7 +7800,7 @@ export function getApiRealmsByRealmIdReportsQueryOptions(
 
 /**
  * @summary List reports for a Realm
- * {@link /api/realms/:realmId/reports}
+ * {@link /api/v1/realms/:realmId/reports}
  */
 export function useGetApiRealmsByRealmIdReports<
 	TData = GetApiRealmsByRealmIdReportsStatus200,
@@ -7875,7 +7868,7 @@ export function useGetApiRealmsByRealmIdReports<
 export const getApiReportsPlatformCasesQueryKey = ({
 	query,
 }: Omit<GetApiReportsPlatformCasesOptions, "headers"> = {}) =>
-	[{ url: "/api/reports/platform/cases" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/reports/platform/cases" }, ...(query ? [query] : [])] as const;
 
 type GetApiReportsPlatformCasesQueryKey = ReturnType<typeof getApiReportsPlatformCasesQueryKey>;
 
@@ -7909,7 +7902,7 @@ export function getApiReportsPlatformCasesQueryOptions(
 
 /**
  * @summary List platform-governed Unit report cases
- * {@link /api/reports/platform/cases}
+ * {@link /api/v1/reports/platform/cases}
  */
 export function useGetApiReportsPlatformCases<
 	TData = GetApiReportsPlatformCasesStatus200,
@@ -7968,7 +7961,7 @@ export function useGetApiReportsPlatformCases<
 }
 
 export const postApiReportsUnitsByUnitIdMutationKey = () =>
-	[{ url: "/api/reports/units/:unitId" }] as const;
+	[{ url: "/api/v1/reports/units/:unitId" }] as const;
 
 export function postApiReportsUnitsByUnitIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -8003,7 +7996,7 @@ export function postApiReportsUnitsByUnitIdMutationOptions<TContext = unknown>(
 
 /**
  * @summary Report a Unit under a selected Realm rule
- * {@link /api/reports/units/:unitId}
+ * {@link /api/v1/reports/units/:unitId}
  */
 export function usePostApiReportsUnitsByUnitId<TContext>(
 	options: {
@@ -8080,7 +8073,7 @@ export const getApiGovernanceUnitByUnitIdAccessQueryKey = ({
 	query,
 }: Omit<GetApiGovernanceUnitByUnitIdAccessOptions, "headers">) =>
 	[
-		{ url: "/api/governance/unit/:unitId/access", params: path },
+		{ url: "/api/v1/governance/unit/:unitId/access", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -8120,7 +8113,7 @@ export function getApiGovernanceUnitByUnitIdAccessQueryOptions(
 
 /**
  * @summary Get Unit access configuration
- * {@link /api/governance/unit/:unitId/access}
+ * {@link /api/v1/governance/unit/:unitId/access}
  */
 export function useGetApiGovernanceUnitByUnitIdAccess<
 	TData = GetApiGovernanceUnitByUnitIdAccessStatus200,
@@ -8188,7 +8181,7 @@ export function useGetApiGovernanceUnitByUnitIdAccess<
 }
 
 export const putApiGovernanceUnitByUnitIdAccessMutationKey = () =>
-	[{ url: "/api/governance/unit/:unitId/access" }] as const;
+	[{ url: "/api/v1/governance/unit/:unitId/access" }] as const;
 
 export function putApiGovernanceUnitByUnitIdAccessMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -8222,7 +8215,7 @@ export function putApiGovernanceUnitByUnitIdAccessMutationOptions<TContext = unk
 
 /**
  * @summary Replace Unit subject access
- * {@link /api/governance/unit/:unitId/access}
+ * {@link /api/v1/governance/unit/:unitId/access}
  */
 export function usePutApiGovernanceUnitByUnitIdAccess<TContext>(
 	options: {
@@ -8302,7 +8295,7 @@ export const getApiGovernanceUnitByUnitIdAccessCandidatesQueryKey = ({
 	query,
 }: Omit<GetApiGovernanceUnitByUnitIdAccessCandidatesOptions, "headers">) =>
 	[
-		{ url: "/api/governance/unit/:unitId/access-candidates", params: path },
+		{ url: "/api/v1/governance/unit/:unitId/access-candidates", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -8341,7 +8334,7 @@ export function getApiGovernanceUnitByUnitIdAccessCandidatesQueryOptions(
 
 /**
  * @summary Search Unit access candidates
- * {@link /api/governance/unit/:unitId/access-candidates}
+ * {@link /api/v1/governance/unit/:unitId/access-candidates}
  */
 export function useGetApiGovernanceUnitByUnitIdAccessCandidates<
 	TData = GetApiGovernanceUnitByUnitIdAccessCandidatesStatus200,
@@ -8412,7 +8405,7 @@ export const getApiGovernanceUnitByUnitIdAccessEffectiveQueryKey = ({
 	query,
 }: Omit<GetApiGovernanceUnitByUnitIdAccessEffectiveOptions, "headers">) =>
 	[
-		{ url: "/api/governance/unit/:unitId/access/effective", params: path },
+		{ url: "/api/v1/governance/unit/:unitId/access/effective", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -8450,7 +8443,7 @@ export function getApiGovernanceUnitByUnitIdAccessEffectiveQueryOptions(
 
 /**
  * @summary Resolve effective Unit access for the current Profile
- * {@link /api/governance/unit/:unitId/access/effective}
+ * {@link /api/v1/governance/unit/:unitId/access/effective}
  */
 export function useGetApiGovernanceUnitByUnitIdAccessEffective<
 	TData = GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200,
@@ -8519,7 +8512,7 @@ export const getApiGovernanceUnitByUnitIdOwnershipCandidatesQueryKey = ({
 	query,
 }: Omit<GetApiGovernanceUnitByUnitIdOwnershipCandidatesOptions, "headers">) =>
 	[
-		{ url: "/api/governance/unit/:unitId/ownership/candidates", params: path },
+		{ url: "/api/v1/governance/unit/:unitId/ownership/candidates", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -8559,7 +8552,7 @@ export function getApiGovernanceUnitByUnitIdOwnershipCandidatesQueryOptions(
 
 /**
  * @summary Search eligible Unit ownership recipients
- * {@link /api/governance/unit/:unitId/ownership/candidates}
+ * {@link /api/v1/governance/unit/:unitId/ownership/candidates}
  */
 export function useGetApiGovernanceUnitByUnitIdOwnershipCandidates<
 	TData = GetApiGovernanceUnitByUnitIdOwnershipCandidatesStatus200,
@@ -8628,7 +8621,7 @@ export function useGetApiGovernanceUnitByUnitIdOwnershipCandidates<
 }
 
 export const putApiGovernanceUnitByUnitIdOwnershipMutationKey = () =>
-	[{ url: "/api/governance/unit/:unitId/ownership" }] as const;
+	[{ url: "/api/v1/governance/unit/:unitId/ownership" }] as const;
 
 export function putApiGovernanceUnitByUnitIdOwnershipMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -8662,7 +8655,7 @@ export function putApiGovernanceUnitByUnitIdOwnershipMutationOptions<TContext = 
 
 /**
  * @summary Transfer Unit ownership
- * {@link /api/governance/unit/:unitId/ownership}
+ * {@link /api/v1/governance/unit/:unitId/ownership}
  */
 export function usePutApiGovernanceUnitByUnitIdOwnership<TContext>(
 	options: {
@@ -8738,7 +8731,7 @@ export function usePutApiGovernanceUnitByUnitIdOwnership<TContext>(
 }
 
 export const postApiGovernanceUnitByUnitIdOwnershipRelinquishmentMutationKey = () =>
-	[{ url: "/api/governance/unit/:unitId/ownership/relinquishment" }] as const;
+	[{ url: "/api/v1/governance/unit/:unitId/ownership/relinquishment" }] as const;
 
 export function postApiGovernanceUnitByUnitIdOwnershipRelinquishmentMutationOptions<
 	TContext = unknown,
@@ -8772,7 +8765,7 @@ export function postApiGovernanceUnitByUnitIdOwnershipRelinquishmentMutationOpti
 
 /**
  * @summary Relinquish Unit ownership to Community
- * {@link /api/governance/unit/:unitId/ownership/relinquishment}
+ * {@link /api/v1/governance/unit/:unitId/ownership/relinquishment}
  */
 export function usePostApiGovernanceUnitByUnitIdOwnershipRelinquishment<TContext>(
 	options: {
@@ -8851,7 +8844,7 @@ export function usePostApiGovernanceUnitByUnitIdOwnershipRelinquishment<TContext
 export const getApiGovernanceUnitAccessInvitationsQueryKey = ({
 	query,
 }: Omit<GetApiGovernanceUnitAccessInvitationsOptions, "headers"> = {}) =>
-	[{ url: "/api/governance/unit/access-invitations" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/governance/unit/access-invitations" }, ...(query ? [query] : [])] as const;
 
 type GetApiGovernanceUnitAccessInvitationsQueryKey = ReturnType<
 	typeof getApiGovernanceUnitAccessInvitationsQueryKey
@@ -8886,7 +8879,7 @@ export function getApiGovernanceUnitAccessInvitationsQueryOptions(
 
 /**
  * @summary List received Unit access invitations
- * {@link /api/governance/unit/access-invitations}
+ * {@link /api/v1/governance/unit/access-invitations}
  */
 export function useGetApiGovernanceUnitAccessInvitations<
 	TData = GetApiGovernanceUnitAccessInvitationsStatus200,
@@ -8947,7 +8940,7 @@ export const getApiGovernanceUnitByUnitIdAccessInvitationsQueryKey = ({
 	query,
 }: Omit<GetApiGovernanceUnitByUnitIdAccessInvitationsOptions, "headers">) =>
 	[
-		{ url: "/api/governance/unit/:unitId/access-invitations", params: path },
+		{ url: "/api/v1/governance/unit/:unitId/access-invitations", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -8987,7 +8980,7 @@ export function getApiGovernanceUnitByUnitIdAccessInvitationsQueryOptions(
 
 /**
  * @summary List managed Unit access invitations
- * {@link /api/governance/unit/:unitId/access-invitations}
+ * {@link /api/v1/governance/unit/:unitId/access-invitations}
  */
 export function useGetApiGovernanceUnitByUnitIdAccessInvitations<
 	TData = GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200,
@@ -9056,7 +9049,7 @@ export function useGetApiGovernanceUnitByUnitIdAccessInvitations<
 }
 
 export const postApiGovernanceUnitByUnitIdAccessInvitationsMutationKey = () =>
-	[{ url: "/api/governance/unit/:unitId/access-invitations" }] as const;
+	[{ url: "/api/v1/governance/unit/:unitId/access-invitations" }] as const;
 
 export function postApiGovernanceUnitByUnitIdAccessInvitationsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -9090,7 +9083,7 @@ export function postApiGovernanceUnitByUnitIdAccessInvitationsMutationOptions<TC
 
 /**
  * @summary Create Unit access invitation
- * {@link /api/governance/unit/:unitId/access-invitations}
+ * {@link /api/v1/governance/unit/:unitId/access-invitations}
  */
 export function usePostApiGovernanceUnitByUnitIdAccessInvitations<TContext>(
 	options: {
@@ -9166,7 +9159,7 @@ export function usePostApiGovernanceUnitByUnitIdAccessInvitations<TContext>(
 }
 
 export const postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptMutationKey = () =>
-	[{ url: "/api/governance/unit/:unitId/access-invitations/:invitationId/accept" }] as const;
+	[{ url: "/api/v1/governance/unit/:unitId/access-invitations/:invitationId/accept" }] as const;
 
 export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptMutationOptions<
 	TContext = unknown,
@@ -9201,7 +9194,7 @@ export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcce
 
 /**
  * @summary Accept Unit access invitation
- * {@link /api/governance/unit/:unitId/access-invitations/:invitationId/accept}
+ * {@link /api/v1/governance/unit/:unitId/access-invitations/:invitationId/accept}
  */
 export function usePostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAccept<TContext>(
 	options: {
@@ -9275,7 +9268,7 @@ export function usePostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdA
 }
 
 export const postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineMutationKey = () =>
-	[{ url: "/api/governance/unit/:unitId/access-invitations/:invitationId/decline" }] as const;
+	[{ url: "/api/v1/governance/unit/:unitId/access-invitations/:invitationId/decline" }] as const;
 
 export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineMutationOptions<
 	TContext = unknown,
@@ -9310,7 +9303,7 @@ export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecl
 
 /**
  * @summary Decline Unit access invitation
- * {@link /api/governance/unit/:unitId/access-invitations/:invitationId/decline}
+ * {@link /api/v1/governance/unit/:unitId/access-invitations/:invitationId/decline}
  */
 export function usePostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecline<TContext>(
 	options: {
@@ -9384,7 +9377,7 @@ export function usePostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdD
 }
 
 export const deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdMutationKey = () =>
-	[{ url: "/api/governance/unit/:unitId/access-invitations/:invitationId" }] as const;
+	[{ url: "/api/v1/governance/unit/:unitId/access-invitations/:invitationId" }] as const;
 
 export function deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdMutationOptions<
 	TContext = unknown,
@@ -9416,7 +9409,7 @@ export function deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdMu
 
 /**
  * @summary Cancel Unit access invitation
- * {@link /api/governance/unit/:unitId/access-invitations/:invitationId}
+ * {@link /api/v1/governance/unit/:unitId/access-invitations/:invitationId}
  */
 export function useDeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationId<TContext>(
 	options: {
@@ -9492,7 +9485,7 @@ export function useDeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationI
 export const getApiGovernancePlatformUnitsQueryKey = ({
 	query,
 }: Omit<GetApiGovernancePlatformUnitsOptions, "headers"> = {}) =>
-	[{ url: "/api/governance/platform/units" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/governance/platform/units" }, ...(query ? [query] : [])] as const;
 
 type GetApiGovernancePlatformUnitsQueryKey = ReturnType<
 	typeof getApiGovernancePlatformUnitsQueryKey
@@ -9528,7 +9521,7 @@ export function getApiGovernancePlatformUnitsQueryOptions(
 
 /**
  * @summary List Units for platform lifecycle administration
- * {@link /api/governance/platform/units}
+ * {@link /api/v1/governance/platform/units}
  */
 export function useGetApiGovernancePlatformUnits<
 	TData = GetApiGovernancePlatformUnitsStatus200,
@@ -9591,7 +9584,7 @@ export const getApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesQueryKey = 
 	query,
 }: Omit<GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesOptions, "headers">) =>
 	[
-		{ url: "/api/governance/platform/units/:unitId/ownership-candidates", params: path },
+		{ url: "/api/v1/governance/platform/units/:unitId/ownership-candidates", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -9634,7 +9627,7 @@ export function getApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesQueryOpt
 
 /**
  * @summary Search platform Unit ownership override recipients
- * {@link /api/governance/platform/units/:unitId/ownership-candidates}
+ * {@link /api/v1/governance/platform/units/:unitId/ownership-candidates}
  */
 export function useGetApiGovernancePlatformUnitsByUnitIdOwnershipCandidates<
 	TData = GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesStatus200,
@@ -9706,7 +9699,7 @@ export function useGetApiGovernancePlatformUnitsByUnitIdOwnershipCandidates<
 }
 
 export const postApiGovernancePlatformUnitsByUnitIdOwnershipOverrideMutationKey = () =>
-	[{ url: "/api/governance/platform/units/:unitId/ownership-override" }] as const;
+	[{ url: "/api/v1/governance/platform/units/:unitId/ownership-override" }] as const;
 
 export function postApiGovernancePlatformUnitsByUnitIdOwnershipOverrideMutationOptions<
 	TContext = unknown,
@@ -9740,7 +9733,7 @@ export function postApiGovernancePlatformUnitsByUnitIdOwnershipOverrideMutationO
 
 /**
  * @summary Override Unit ownership through platform governance
- * {@link /api/governance/platform/units/:unitId/ownership-override}
+ * {@link /api/v1/governance/platform/units/:unitId/ownership-override}
  */
 export function usePostApiGovernancePlatformUnitsByUnitIdOwnershipOverride<TContext>(
 	options: {
@@ -9817,7 +9810,7 @@ export function usePostApiGovernancePlatformUnitsByUnitIdOwnershipOverride<TCont
 }
 
 export const postApiGovernancePlatformUnitsByUnitIdDeleteMutationKey = () =>
-	[{ url: "/api/governance/platform/units/:unitId/delete" }] as const;
+	[{ url: "/api/v1/governance/platform/units/:unitId/delete" }] as const;
 
 export function postApiGovernancePlatformUnitsByUnitIdDeleteMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -9851,7 +9844,7 @@ export function postApiGovernancePlatformUnitsByUnitIdDeleteMutationOptions<TCon
 
 /**
  * @summary Soft-delete a Unit from the platform Console
- * {@link /api/governance/platform/units/:unitId/delete}
+ * {@link /api/v1/governance/platform/units/:unitId/delete}
  */
 export function usePostApiGovernancePlatformUnitsByUnitIdDelete<TContext>(
 	options: {
@@ -9927,7 +9920,7 @@ export function usePostApiGovernancePlatformUnitsByUnitIdDelete<TContext>(
 }
 
 export const postApiGovernancePlatformUnitsByUnitIdRestoreMutationKey = () =>
-	[{ url: "/api/governance/platform/units/:unitId/restore" }] as const;
+	[{ url: "/api/v1/governance/platform/units/:unitId/restore" }] as const;
 
 export function postApiGovernancePlatformUnitsByUnitIdRestoreMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -9961,7 +9954,7 @@ export function postApiGovernancePlatformUnitsByUnitIdRestoreMutationOptions<TCo
 
 /**
  * @summary Restore a soft-deleted Unit from the platform Console
- * {@link /api/governance/platform/units/:unitId/restore}
+ * {@link /api/v1/governance/platform/units/:unitId/restore}
  */
 export function usePostApiGovernancePlatformUnitsByUnitIdRestore<TContext>(
 	options: {
@@ -10039,7 +10032,7 @@ export function usePostApiGovernancePlatformUnitsByUnitIdRestore<TContext>(
 export const getApiGovernancePlatformOwnershipClaimsQueryKey = ({
 	query,
 }: Omit<GetApiGovernancePlatformOwnershipClaimsOptions, "headers"> = {}) =>
-	[{ url: "/api/governance/platform/ownership-claims" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/governance/platform/ownership-claims" }, ...(query ? [query] : [])] as const;
 
 type GetApiGovernancePlatformOwnershipClaimsQueryKey = ReturnType<
 	typeof getApiGovernancePlatformOwnershipClaimsQueryKey
@@ -10075,7 +10068,7 @@ export function getApiGovernancePlatformOwnershipClaimsQueryOptions(
 
 /**
  * @summary List platform Unit ownership claims
- * {@link /api/governance/platform/ownership-claims}
+ * {@link /api/v1/governance/platform/ownership-claims}
  */
 export function useGetApiGovernancePlatformOwnershipClaims<
 	TData = GetApiGovernancePlatformOwnershipClaimsStatus200,
@@ -10135,7 +10128,7 @@ export function useGetApiGovernancePlatformOwnershipClaims<
 }
 
 export const postApiGovernancePlatformOwnershipClaimsByClaimIdDecisionMutationKey = () =>
-	[{ url: "/api/governance/platform/ownership-claims/:claimId/decision" }] as const;
+	[{ url: "/api/v1/governance/platform/ownership-claims/:claimId/decision" }] as const;
 
 export function postApiGovernancePlatformOwnershipClaimsByClaimIdDecisionMutationOptions<
 	TContext = unknown,
@@ -10169,7 +10162,7 @@ export function postApiGovernancePlatformOwnershipClaimsByClaimIdDecisionMutatio
 
 /**
  * @summary Resolve a Unit ownership claim
- * {@link /api/governance/platform/ownership-claims/:claimId/decision}
+ * {@link /api/v1/governance/platform/ownership-claims/:claimId/decision}
  */
 export function usePostApiGovernancePlatformOwnershipClaimsByClaimIdDecision<TContext>(
 	options: {
@@ -10248,7 +10241,7 @@ export function usePostApiGovernancePlatformOwnershipClaimsByClaimIdDecision<TCo
 export const getApiGovernanceNotesByPostIdQueryKey = ({
 	path,
 }: Omit<GetApiGovernanceNotesByPostIdOptions, "headers">) =>
-	[{ url: "/api/governance/notes/:postId", params: path }] as const;
+	[{ url: "/api/v1/governance/notes/:postId", params: path }] as const;
 
 type GetApiGovernanceNotesByPostIdQueryKey = ReturnType<
 	typeof getApiGovernanceNotesByPostIdQueryKey
@@ -10284,7 +10277,7 @@ export function getApiGovernanceNotesByPostIdQueryOptions(
 
 /**
  * @summary Get governance note
- * {@link /api/governance/notes/:postId}
+ * {@link /api/v1/governance/notes/:postId}
  */
 export function useGetApiGovernanceNotesByPostId<
 	TData = GetApiGovernanceNotesByPostIdStatus200,
@@ -10343,7 +10336,7 @@ export function useGetApiGovernanceNotesByPostId<
 }
 
 export const patchApiGovernanceNotesByPostIdMutationKey = () =>
-	[{ url: "/api/governance/notes/:postId" }] as const;
+	[{ url: "/api/v1/governance/notes/:postId" }] as const;
 
 export function patchApiGovernanceNotesByPostIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -10378,7 +10371,7 @@ export function patchApiGovernanceNotesByPostIdMutationOptions<TContext = unknow
 
 /**
  * @summary Update governance note
- * {@link /api/governance/notes/:postId}
+ * {@link /api/v1/governance/notes/:postId}
  */
 export function usePatchApiGovernanceNotesByPostId<TContext>(
 	options: {
@@ -10459,7 +10452,7 @@ export function usePatchApiGovernanceNotesByPostId<TContext>(
 export const getApiGovernanceModerationCasesQueryKey = ({
 	query,
 }: Omit<GetApiGovernanceModerationCasesOptions, "headers"> = {}) =>
-	[{ url: "/api/governance/moderation/cases" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/governance/moderation/cases" }, ...(query ? [query] : [])] as const;
 
 type GetApiGovernanceModerationCasesQueryKey = ReturnType<
 	typeof getApiGovernanceModerationCasesQueryKey
@@ -10495,7 +10488,7 @@ export function getApiGovernanceModerationCasesQueryOptions(
 
 /**
  * @summary List moderation cases
- * {@link /api/governance/moderation/cases}
+ * {@link /api/v1/governance/moderation/cases}
  */
 export function useGetApiGovernanceModerationCases<
 	TData = GetApiGovernanceModerationCasesStatus200,
@@ -10556,7 +10549,7 @@ export function useGetApiGovernanceModerationCases<
 export const getApiGovernanceModerationCasesByCaseIdQueryKey = ({
 	path,
 }: Omit<GetApiGovernanceModerationCasesByCaseIdOptions, "headers">) =>
-	[{ url: "/api/governance/moderation/cases/:caseId", params: path }] as const;
+	[{ url: "/api/v1/governance/moderation/cases/:caseId", params: path }] as const;
 
 type GetApiGovernanceModerationCasesByCaseIdQueryKey = ReturnType<
 	typeof getApiGovernanceModerationCasesByCaseIdQueryKey
@@ -10593,7 +10586,7 @@ export function getApiGovernanceModerationCasesByCaseIdQueryOptions(
 
 /**
  * @summary Get moderation case
- * {@link /api/governance/moderation/cases/:caseId}
+ * {@link /api/v1/governance/moderation/cases/:caseId}
  */
 export function useGetApiGovernanceModerationCasesByCaseId<
 	TData = GetApiGovernanceModerationCasesByCaseIdStatus200,
@@ -10655,7 +10648,7 @@ export function useGetApiGovernanceModerationCasesByCaseId<
 }
 
 export const patchApiGovernanceModerationCasesByCaseIdMutationKey = () =>
-	[{ url: "/api/governance/moderation/cases/:caseId" }] as const;
+	[{ url: "/api/v1/governance/moderation/cases/:caseId" }] as const;
 
 export function patchApiGovernanceModerationCasesByCaseIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -10688,7 +10681,7 @@ export function patchApiGovernanceModerationCasesByCaseIdMutationOptions<TContex
 
 /**
  * @summary Update moderation case
- * {@link /api/governance/moderation/cases/:caseId}
+ * {@link /api/v1/governance/moderation/cases/:caseId}
  */
 export function usePatchApiGovernanceModerationCasesByCaseId<TContext>(
 	options: {
@@ -10760,7 +10753,7 @@ export function usePatchApiGovernanceModerationCasesByCaseId<TContext>(
 }
 
 export const postApiGovernanceModerationActionsMutationKey = () =>
-	[{ url: "/api/governance/moderation/actions" }] as const;
+	[{ url: "/api/v1/governance/moderation/actions" }] as const;
 
 export function postApiGovernanceModerationActionsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -10793,7 +10786,7 @@ export function postApiGovernanceModerationActionsMutationOptions<TContext = unk
 
 /**
  * @summary Apply moderation action
- * {@link /api/governance/moderation/actions}
+ * {@link /api/v1/governance/moderation/actions}
  */
 export function usePostApiGovernanceModerationActions<TContext>(
 	options: {
@@ -10869,7 +10862,7 @@ export function usePostApiGovernanceModerationActions<TContext>(
 }
 
 export const postApiGovernanceModerationEnforcementsMutationKey = () =>
-	[{ url: "/api/governance/moderation/enforcements" }] as const;
+	[{ url: "/api/v1/governance/moderation/enforcements" }] as const;
 
 export function postApiGovernanceModerationEnforcementsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -10901,7 +10894,7 @@ export function postApiGovernanceModerationEnforcementsMutationOptions<TContext 
 
 /**
  * @summary Create account enforcement
- * {@link /api/governance/moderation/enforcements}
+ * {@link /api/v1/governance/moderation/enforcements}
  */
 export function usePostApiGovernanceModerationEnforcements<TContext>(
 	options: {
@@ -10973,7 +10966,7 @@ export function usePostApiGovernanceModerationEnforcements<TContext>(
 }
 
 export const postApiGovernanceModerationEnforcementsByEnforcementIdRevokeMutationKey = () =>
-	[{ url: "/api/governance/moderation/enforcements/:enforcementId/revoke" }] as const;
+	[{ url: "/api/v1/governance/moderation/enforcements/:enforcementId/revoke" }] as const;
 
 export function postApiGovernanceModerationEnforcementsByEnforcementIdRevokeMutationOptions<
 	TContext = unknown,
@@ -11007,7 +11000,7 @@ export function postApiGovernanceModerationEnforcementsByEnforcementIdRevokeMuta
 
 /**
  * @summary Revoke account enforcement
- * {@link /api/governance/moderation/enforcements/:enforcementId/revoke}
+ * {@link /api/v1/governance/moderation/enforcements/:enforcementId/revoke}
  */
 export function usePostApiGovernanceModerationEnforcementsByEnforcementIdRevoke<TContext>(
 	options: {
@@ -11086,7 +11079,7 @@ export function usePostApiGovernanceModerationEnforcementsByEnforcementIdRevoke<
 export const getApiAuditEventsQueryKey = ({
 	query,
 }: Omit<GetApiAuditEventsOptions, "headers"> = {}) =>
-	[{ url: "/api/audit/events" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/audit/events" }, ...(query ? [query] : [])] as const;
 
 type GetApiAuditEventsQueryKey = ReturnType<typeof getApiAuditEventsQueryKey>;
 
@@ -11121,7 +11114,7 @@ export function getApiAuditEventsQueryOptions(
 
 /**
  * @summary List global security audit events
- * {@link /api/audit/events}
+ * {@link /api/v1/audit/events}
  */
 export function useGetApiAuditEvents<
 	TData = GetApiAuditEventsStatus200,
@@ -11178,7 +11171,7 @@ export function useGetApiAuditEvents<
 	return queryResult;
 }
 
-export const postApiSeriesMutationKey = () => [{ url: "/api/series" }] as const;
+export const postApiSeriesMutationKey = () => [{ url: "/api/v1/series" }] as const;
 
 export function postApiSeriesMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -11206,7 +11199,7 @@ export function postApiSeriesMutationOptions<TContext = unknown>(
 
 /**
  * @summary Create Series
- * {@link /api/series}
+ * {@link /api/v1/series}
  */
 export function usePostApiSeries<TContext>(
 	options: {
@@ -11278,7 +11271,10 @@ export const getApiSeriesBySeriesIdReleasesQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiSeriesBySeriesIdReleasesOptions, "headers">) =>
-	[{ url: "/api/series/:seriesId/releases", params: path }, ...(query ? [query] : [])] as const;
+	[
+		{ url: "/api/v1/series/:seriesId/releases", params: path },
+		...(query ? [query] : []),
+	] as const;
 
 type GetApiSeriesBySeriesIdReleasesQueryKey = ReturnType<
 	typeof getApiSeriesBySeriesIdReleasesQueryKey
@@ -11315,7 +11311,7 @@ export function getApiSeriesBySeriesIdReleasesQueryOptions(
 
 /**
  * @summary List Series releases
- * {@link /api/series/:seriesId/releases}
+ * {@link /api/v1/series/:seriesId/releases}
  */
 export function useGetApiSeriesBySeriesIdReleases<
 	TData = GetApiSeriesBySeriesIdReleasesStatus200,
@@ -11381,7 +11377,7 @@ export function useGetApiSeriesBySeriesIdReleases<
 }
 
 export const replaceZoneSlugAddressMutationKey = () =>
-	[{ url: "/api/zones/:zoneId/slug-address" }] as const;
+	[{ url: "/api/v1/zones/:zoneId/slug-address" }] as const;
 
 export function replaceZoneSlugAddressMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -11417,7 +11413,7 @@ export function replaceZoneSlugAddressMutationOptions<TContext = unknown>(
 /**
  * @description Development preview. Assigns or renames a Zone's optional public slug in the permanent zones namespace. The former address is retained as a redirect.
  * @summary Replace a Zone slug address
- * {@link /api/zones/:zoneId/slug-address}
+ * {@link /api/v1/zones/:zoneId/slug-address}
  */
 export function useReplaceZoneSlugAddress<TContext>(
 	options: {
@@ -11497,7 +11493,7 @@ export const getApiZonesByZoneIdQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiZonesByZoneIdOptions, "headers">) =>
-	[{ url: "/api/zones/:zoneId", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/zones/:zoneId", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiZonesByZoneIdQueryKey = ReturnType<typeof getApiZonesByZoneIdQueryKey>;
 
@@ -11532,7 +11528,7 @@ export function getApiZonesByZoneIdQueryOptions(
 
 /**
  * @summary Get Zone configuration
- * {@link /api/zones/:zoneId}
+ * {@link /api/v1/zones/:zoneId}
  */
 export function useGetApiZonesByZoneId<
 	TData = GetApiZonesByZoneIdStatus200,
@@ -11592,7 +11588,7 @@ export function useGetApiZonesByZoneId<
 	return queryResult;
 }
 
-export const patchApiZonesByZoneIdMutationKey = () => [{ url: "/api/zones/:zoneId" }] as const;
+export const patchApiZonesByZoneIdMutationKey = () => [{ url: "/api/v1/zones/:zoneId" }] as const;
 
 export function patchApiZonesByZoneIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -11626,7 +11622,7 @@ export function patchApiZonesByZoneIdMutationOptions<TContext = unknown>(
 
 /**
  * @summary Update Zone configuration
- * {@link /api/zones/:zoneId}
+ * {@link /api/v1/zones/:zoneId}
  */
 export function usePatchApiZonesByZoneId<TContext>(
 	options: {
@@ -11702,7 +11698,7 @@ export const getZoneRenderProjectionQueryKey = ({
 	path,
 	query,
 }: Omit<GetZoneRenderProjectionOptions, "headers">) =>
-	[{ url: "/api/zones/:zoneId/render", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/zones/:zoneId/render", params: path }, ...(query ? [query] : [])] as const;
 
 type GetZoneRenderProjectionQueryKey = ReturnType<typeof getZoneRenderProjectionQueryKey>;
 
@@ -11737,7 +11733,7 @@ export function getZoneRenderProjectionQueryOptions(
 
 /**
  * @summary Get a Zone render projection
- * {@link /api/zones/:zoneId/render}
+ * {@link /api/v1/zones/:zoneId/render}
  */
 export function useGetZoneRenderProjection<
 	TData = GetZoneRenderProjectionStatus200,
@@ -11803,7 +11799,7 @@ export function useGetZoneRenderProjection<
 export const getApiZonesByZoneIdPagesQueryKey = ({
 	path,
 }: Omit<GetApiZonesByZoneIdPagesOptions, "headers">) =>
-	[{ url: "/api/zones/:zoneId/pages", params: path }] as const;
+	[{ url: "/api/v1/zones/:zoneId/pages", params: path }] as const;
 
 type GetApiZonesByZoneIdPagesQueryKey = ReturnType<typeof getApiZonesByZoneIdPagesQueryKey>;
 
@@ -11837,7 +11833,7 @@ export function getApiZonesByZoneIdPagesQueryOptions(
 
 /**
  * @summary List Zone pages
- * {@link /api/zones/:zoneId/pages}
+ * {@link /api/v1/zones/:zoneId/pages}
  */
 export function useGetApiZonesByZoneIdPages<
 	TData = GetApiZonesByZoneIdPagesStatus200,
@@ -11895,7 +11891,7 @@ export function useGetApiZonesByZoneIdPages<
 }
 
 export const postApiZonesByZoneIdPagesMutationKey = () =>
-	[{ url: "/api/zones/:zoneId/pages" }] as const;
+	[{ url: "/api/v1/zones/:zoneId/pages" }] as const;
 
 export function postApiZonesByZoneIdPagesMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -11930,7 +11926,7 @@ export function postApiZonesByZoneIdPagesMutationOptions<TContext = unknown>(
 
 /**
  * @summary Create Zone page in development preview
- * {@link /api/zones/:zoneId/pages}
+ * {@link /api/v1/zones/:zoneId/pages}
  */
 export function usePostApiZonesByZoneIdPages<TContext>(
 	options: {
@@ -12009,7 +12005,7 @@ export function usePostApiZonesByZoneIdPages<TContext>(
 export const getApiZonesByZoneIdPagesByPageIdQueryKey = ({
 	path,
 }: Omit<GetApiZonesByZoneIdPagesByPageIdOptions, "headers">) =>
-	[{ url: "/api/zones/:zoneId/pages/:pageId", params: path }] as const;
+	[{ url: "/api/v1/zones/:zoneId/pages/:pageId", params: path }] as const;
 
 type GetApiZonesByZoneIdPagesByPageIdQueryKey = ReturnType<
 	typeof getApiZonesByZoneIdPagesByPageIdQueryKey
@@ -12045,7 +12041,7 @@ export function getApiZonesByZoneIdPagesByPageIdQueryOptions(
 
 /**
  * @summary Get Zone page by Unit ID
- * {@link /api/zones/:zoneId/pages/:pageId}
+ * {@link /api/v1/zones/:zoneId/pages/:pageId}
  */
 export function useGetApiZonesByZoneIdPagesByPageId<
 	TData = GetApiZonesByZoneIdPagesByPageIdStatus200,
@@ -12104,7 +12100,7 @@ export function useGetApiZonesByZoneIdPagesByPageId<
 }
 
 export const putApiZonesByZoneIdPagesByPageIdMutationKey = () =>
-	[{ url: "/api/zones/:zoneId/pages/:pageId" }] as const;
+	[{ url: "/api/v1/zones/:zoneId/pages/:pageId" }] as const;
 
 export function putApiZonesByZoneIdPagesByPageIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -12139,7 +12135,7 @@ export function putApiZonesByZoneIdPagesByPageIdMutationOptions<TContext = unkno
 
 /**
  * @summary Replace Zone page in development preview
- * {@link /api/zones/:zoneId/pages/:pageId}
+ * {@link /api/v1/zones/:zoneId/pages/:pageId}
  */
 export function usePutApiZonesByZoneIdPagesByPageId<TContext>(
 	options: {
@@ -12219,7 +12215,7 @@ export function usePutApiZonesByZoneIdPagesByPageId<TContext>(
 }
 
 export const putApiZonesByZoneIdPagesByPageIdPlacementMutationKey = () =>
-	[{ url: "/api/zones/:zoneId/pages/:pageId/placement" }] as const;
+	[{ url: "/api/v1/zones/:zoneId/pages/:pageId/placement" }] as const;
 
 export function putApiZonesByZoneIdPagesByPageIdPlacementMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -12254,7 +12250,7 @@ export function putApiZonesByZoneIdPagesByPageIdPlacementMutationOptions<TContex
 
 /**
  * @summary Index Zone page in page-structure
- * {@link /api/zones/:zoneId/pages/:pageId/placement}
+ * {@link /api/v1/zones/:zoneId/pages/:pageId/placement}
  */
 export function usePutApiZonesByZoneIdPagesByPageIdPlacement<TContext>(
 	options: {
@@ -12334,7 +12330,7 @@ export function usePutApiZonesByZoneIdPagesByPageIdPlacement<TContext>(
 }
 
 export const deleteApiZonesByZoneIdPagesByPageIdPlacementMutationKey = () =>
-	[{ url: "/api/zones/:zoneId/pages/:pageId/placement" }] as const;
+	[{ url: "/api/v1/zones/:zoneId/pages/:pageId/placement" }] as const;
 
 export function deleteApiZonesByZoneIdPagesByPageIdPlacementMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -12369,7 +12365,7 @@ export function deleteApiZonesByZoneIdPagesByPageIdPlacementMutationOptions<TCon
 
 /**
  * @summary Remove Zone page from page-structure
- * {@link /api/zones/:zoneId/pages/:pageId/placement}
+ * {@link /api/v1/zones/:zoneId/pages/:pageId/placement}
  */
 export function useDeleteApiZonesByZoneIdPagesByPageIdPlacement<TContext>(
 	options: {
@@ -12451,7 +12447,7 @@ export function useDeleteApiZonesByZoneIdPagesByPageIdPlacement<TContext>(
 export const getApiZonesByZoneIdNavigationQueryKey = ({
 	path,
 }: Omit<GetApiZonesByZoneIdNavigationOptions, "headers">) =>
-	[{ url: "/api/zones/:zoneId/navigation", params: path }] as const;
+	[{ url: "/api/v1/zones/:zoneId/navigation", params: path }] as const;
 
 type GetApiZonesByZoneIdNavigationQueryKey = ReturnType<
 	typeof getApiZonesByZoneIdNavigationQueryKey
@@ -12487,7 +12483,7 @@ export function getApiZonesByZoneIdNavigationQueryOptions(
 
 /**
  * @summary List Zone navigation resources
- * {@link /api/zones/:zoneId/navigation}
+ * {@link /api/v1/zones/:zoneId/navigation}
  */
 export function useGetApiZonesByZoneIdNavigation<
 	TData = GetApiZonesByZoneIdNavigationStatus200,
@@ -12546,7 +12542,7 @@ export function useGetApiZonesByZoneIdNavigation<
 }
 
 export const postApiZonesByZoneIdNavigationMutationKey = () =>
-	[{ url: "/api/zones/:zoneId/navigation" }] as const;
+	[{ url: "/api/v1/zones/:zoneId/navigation" }] as const;
 
 export function postApiZonesByZoneIdNavigationMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -12580,7 +12576,7 @@ export function postApiZonesByZoneIdNavigationMutationOptions<TContext = unknown
 
 /**
  * @summary Create Zone navigation
- * {@link /api/zones/:zoneId/navigation}
+ * {@link /api/v1/zones/:zoneId/navigation}
  */
 export function usePostApiZonesByZoneIdNavigation<TContext>(
 	options: {
@@ -12655,7 +12651,7 @@ export function usePostApiZonesByZoneIdNavigation<TContext>(
 export const getApiZonesByZoneIdNavigationByNavigationIdQueryKey = ({
 	path,
 }: Omit<GetApiZonesByZoneIdNavigationByNavigationIdOptions, "headers">) =>
-	[{ url: "/api/zones/:zoneId/navigation/:navigationId", params: path }] as const;
+	[{ url: "/api/v1/zones/:zoneId/navigation/:navigationId", params: path }] as const;
 
 type GetApiZonesByZoneIdNavigationByNavigationIdQueryKey = ReturnType<
 	typeof getApiZonesByZoneIdNavigationByNavigationIdQueryKey
@@ -12691,7 +12687,7 @@ export function getApiZonesByZoneIdNavigationByNavigationIdQueryOptions(
 
 /**
  * @summary Get Zone navigation resource
- * {@link /api/zones/:zoneId/navigation/:navigationId}
+ * {@link /api/v1/zones/:zoneId/navigation/:navigationId}
  */
 export function useGetApiZonesByZoneIdNavigationByNavigationId<
 	TData = GetApiZonesByZoneIdNavigationByNavigationIdStatus200,
@@ -12751,7 +12747,7 @@ export function useGetApiZonesByZoneIdNavigationByNavigationId<
 }
 
 export const putApiZonesByZoneIdNavigationByNavigationIdMutationKey = () =>
-	[{ url: "/api/zones/:zoneId/navigation/:navigationId" }] as const;
+	[{ url: "/api/v1/zones/:zoneId/navigation/:navigationId" }] as const;
 
 export function putApiZonesByZoneIdNavigationByNavigationIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -12786,7 +12782,7 @@ export function putApiZonesByZoneIdNavigationByNavigationIdMutationOptions<TCont
 
 /**
  * @summary Replace Zone navigation
- * {@link /api/zones/:zoneId/navigation/:navigationId}
+ * {@link /api/v1/zones/:zoneId/navigation/:navigationId}
  */
 export function usePutApiZonesByZoneIdNavigationByNavigationId<TContext>(
 	options: {
@@ -12866,7 +12862,7 @@ export function usePutApiZonesByZoneIdNavigationByNavigationId<TContext>(
 }
 
 export const deleteApiZonesByZoneIdNavigationByNavigationIdMutationKey = () =>
-	[{ url: "/api/zones/:zoneId/navigation/:navigationId" }] as const;
+	[{ url: "/api/v1/zones/:zoneId/navigation/:navigationId" }] as const;
 
 export function deleteApiZonesByZoneIdNavigationByNavigationIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -12901,7 +12897,7 @@ export function deleteApiZonesByZoneIdNavigationByNavigationIdMutationOptions<TC
 
 /**
  * @summary Delete Zone navigation resource
- * {@link /api/zones/:zoneId/navigation/:navigationId}
+ * {@link /api/v1/zones/:zoneId/navigation/:navigationId}
  */
 export function useDeleteApiZonesByZoneIdNavigationByNavigationId<TContext>(
 	options: {
@@ -12981,7 +12977,7 @@ export function useDeleteApiZonesByZoneIdNavigationByNavigationId<TContext>(
 }
 
 export const putApiSeriesBySeriesIdReleasesByReleaseIdMutationKey = () =>
-	[{ url: "/api/series/:seriesId/releases/:releaseId" }] as const;
+	[{ url: "/api/v1/series/:seriesId/releases/:releaseId" }] as const;
 
 export function putApiSeriesBySeriesIdReleasesByReleaseIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -13015,7 +13011,7 @@ export function putApiSeriesBySeriesIdReleasesByReleaseIdMutationOptions<TContex
 
 /**
  * @summary Add or update Series release
- * {@link /api/series/:seriesId/releases/:releaseId}
+ * {@link /api/v1/series/:seriesId/releases/:releaseId}
  */
 export function usePutApiSeriesBySeriesIdReleasesByReleaseId<TContext>(
 	options: {
@@ -13091,7 +13087,7 @@ export function usePutApiSeriesBySeriesIdReleasesByReleaseId<TContext>(
 }
 
 export const deleteApiSeriesBySeriesIdReleasesByReleaseIdMutationKey = () =>
-	[{ url: "/api/series/:seriesId/releases/:releaseId" }] as const;
+	[{ url: "/api/v1/series/:seriesId/releases/:releaseId" }] as const;
 
 export function deleteApiSeriesBySeriesIdReleasesByReleaseIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -13123,7 +13119,7 @@ export function deleteApiSeriesBySeriesIdReleasesByReleaseIdMutationOptions<TCon
 
 /**
  * @summary Remove Series release
- * {@link /api/series/:seriesId/releases/:releaseId}
+ * {@link /api/v1/series/:seriesId/releases/:releaseId}
  */
 export function useDeleteApiSeriesBySeriesIdReleasesByReleaseId<TContext>(
 	options: {
@@ -13194,7 +13190,7 @@ export function useDeleteApiSeriesBySeriesIdReleasesByReleaseId<TContext>(
 	>;
 }
 
-export const postApiZonesMutationKey = () => [{ url: "/api/zones" }] as const;
+export const postApiZonesMutationKey = () => [{ url: "/api/v1/zones" }] as const;
 
 export function postApiZonesMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -13223,7 +13219,7 @@ export function postApiZonesMutationOptions<TContext = unknown>(
 
 /**
  * @summary Create Zone
- * {@link /api/zones}
+ * {@link /api/v1/zones}
  */
 export function usePostApiZones<TContext>(
 	options: {
@@ -13298,7 +13294,7 @@ export function usePostApiZones<TContext>(
 export const getApiSoftwareBySoftwareIdSystemRequirementsQueryKey = ({
 	path,
 }: Omit<GetApiSoftwareBySoftwareIdSystemRequirementsOptions, "headers">) =>
-	[{ url: "/api/software/:softwareId/system-requirements", params: path }] as const;
+	[{ url: "/api/v1/software/:softwareId/system-requirements", params: path }] as const;
 
 type GetApiSoftwareBySoftwareIdSystemRequirementsQueryKey = ReturnType<
 	typeof getApiSoftwareBySoftwareIdSystemRequirementsQueryKey
@@ -13334,7 +13330,7 @@ export function getApiSoftwareBySoftwareIdSystemRequirementsQueryOptions(
 
 /**
  * @summary List Software system requirements
- * {@link /api/software/:softwareId/system-requirements}
+ * {@link /api/v1/software/:softwareId/system-requirements}
  */
 export function useGetApiSoftwareBySoftwareIdSystemRequirements<
 	TData = GetApiSoftwareBySoftwareIdSystemRequirementsStatus200,
@@ -13394,7 +13390,7 @@ export function useGetApiSoftwareBySoftwareIdSystemRequirements<
 }
 
 export const postApiSoftwareBySoftwareIdSystemRequirementsMutationKey = () =>
-	[{ url: "/api/software/:softwareId/system-requirements" }] as const;
+	[{ url: "/api/v1/software/:softwareId/system-requirements" }] as const;
 
 export function postApiSoftwareBySoftwareIdSystemRequirementsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -13428,7 +13424,7 @@ export function postApiSoftwareBySoftwareIdSystemRequirementsMutationOptions<TCo
 
 /**
  * @summary Create Software system requirement
- * {@link /api/software/:softwareId/system-requirements}
+ * {@link /api/v1/software/:softwareId/system-requirements}
  */
 export function usePostApiSoftwareBySoftwareIdSystemRequirements<TContext>(
 	options: {
@@ -13504,7 +13500,7 @@ export function usePostApiSoftwareBySoftwareIdSystemRequirements<TContext>(
 }
 
 export const putApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdMutationKey = () =>
-	[{ url: "/api/software/:softwareId/system-requirements/:requirementId" }] as const;
+	[{ url: "/api/v1/software/:softwareId/system-requirements/:requirementId" }] as const;
 
 export function putApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdMutationOptions<
 	TContext = unknown,
@@ -13538,7 +13534,7 @@ export function putApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdMutat
 
 /**
  * @summary Replace Software system requirement
- * {@link /api/software/:softwareId/system-requirements/:requirementId}
+ * {@link /api/v1/software/:softwareId/system-requirements/:requirementId}
  */
 export function usePutApiSoftwareBySoftwareIdSystemRequirementsByRequirementId<TContext>(
 	options: {
@@ -13615,7 +13611,7 @@ export function usePutApiSoftwareBySoftwareIdSystemRequirementsByRequirementId<T
 }
 
 export const deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdMutationKey = () =>
-	[{ url: "/api/software/:softwareId/system-requirements/:requirementId" }] as const;
+	[{ url: "/api/v1/software/:softwareId/system-requirements/:requirementId" }] as const;
 
 export function deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdMutationOptions<
 	TContext = unknown,
@@ -13647,7 +13643,7 @@ export function deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdMu
 
 /**
  * @summary Delete Software system requirement
- * {@link /api/software/:softwareId/system-requirements/:requirementId}
+ * {@link /api/v1/software/:softwareId/system-requirements/:requirementId}
  */
 export function useDeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementId<TContext>(
 	options: {
@@ -13723,7 +13719,7 @@ export function useDeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementI
 export const getApiUnitsByIdByUnitIdDocksQueryKey = ({
 	path,
 }: Omit<GetApiUnitsByIdByUnitIdDocksOptions, "headers">) =>
-	[{ url: "/api/units/by-id/:unitId/docks", params: path }] as const;
+	[{ url: "/api/v1/units/by-id/:unitId/docks", params: path }] as const;
 
 type GetApiUnitsByIdByUnitIdDocksQueryKey = ReturnType<typeof getApiUnitsByIdByUnitIdDocksQueryKey>;
 
@@ -13758,7 +13754,7 @@ export function getApiUnitsByIdByUnitIdDocksQueryOptions(
 
 /**
  * @summary List configured Unit Docks
- * {@link /api/units/by-id/:unitId/docks}
+ * {@link /api/v1/units/by-id/:unitId/docks}
  */
 export function useGetApiUnitsByIdByUnitIdDocks<
 	TData = GetApiUnitsByIdByUnitIdDocksStatus200,
@@ -13821,7 +13817,7 @@ export function useGetApiUnitsByIdByUnitIdDocks<
 export const getApiUnitsByIdByUnitIdDocksByKindQueryKey = ({
 	path,
 }: Omit<GetApiUnitsByIdByUnitIdDocksByKindOptions, "headers">) =>
-	[{ url: "/api/units/by-id/:unitId/docks/:kind", params: path }] as const;
+	[{ url: "/api/v1/units/by-id/:unitId/docks/:kind", params: path }] as const;
 
 type GetApiUnitsByIdByUnitIdDocksByKindQueryKey = ReturnType<
 	typeof getApiUnitsByIdByUnitIdDocksByKindQueryKey
@@ -13858,7 +13854,7 @@ export function getApiUnitsByIdByUnitIdDocksByKindQueryOptions(
 
 /**
  * @summary Get a Unit Dock
- * {@link /api/units/by-id/:unitId/docks/:kind}
+ * {@link /api/v1/units/by-id/:unitId/docks/:kind}
  */
 export function useGetApiUnitsByIdByUnitIdDocksByKind<
 	TData = GetApiUnitsByIdByUnitIdDocksByKindStatus200,
@@ -13919,7 +13915,7 @@ export function useGetApiUnitsByIdByUnitIdDocksByKind<
 }
 
 export const putApiUnitsByIdByUnitIdDocksByKindMutationKey = () =>
-	[{ url: "/api/units/by-id/:unitId/docks/:kind" }] as const;
+	[{ url: "/api/v1/units/by-id/:unitId/docks/:kind" }] as const;
 
 export function putApiUnitsByIdByUnitIdDocksByKindMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -13954,7 +13950,7 @@ export function putApiUnitsByIdByUnitIdDocksByKindMutationOptions<TContext = unk
 
 /**
  * @summary Create or replace a Unit Dock
- * {@link /api/units/by-id/:unitId/docks/:kind}
+ * {@link /api/v1/units/by-id/:unitId/docks/:kind}
  */
 export function usePutApiUnitsByIdByUnitIdDocksByKind<TContext>(
 	options: {
@@ -14034,7 +14030,7 @@ export function usePutApiUnitsByIdByUnitIdDocksByKind<TContext>(
 }
 
 export const deleteApiUnitsByIdByUnitIdDocksByKindMutationKey = () =>
-	[{ url: "/api/units/by-id/:unitId/docks/:kind" }] as const;
+	[{ url: "/api/v1/units/by-id/:unitId/docks/:kind" }] as const;
 
 export function deleteApiUnitsByIdByUnitIdDocksByKindMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -14069,7 +14065,7 @@ export function deleteApiUnitsByIdByUnitIdDocksByKindMutationOptions<TContext = 
 
 /**
  * @summary Delete a Unit Dock
- * {@link /api/units/by-id/:unitId/docks/:kind}
+ * {@link /api/v1/units/by-id/:unitId/docks/:kind}
  */
 export function useDeleteApiUnitsByIdByUnitIdDocksByKind<TContext>(
 	options: {
@@ -14153,7 +14149,7 @@ export const getApiUnitsByIdByUnitIdDocksByKindRevisionsQueryKey = ({
 	query,
 }: Omit<GetApiUnitsByIdByUnitIdDocksByKindRevisionsOptions, "headers">) =>
 	[
-		{ url: "/api/units/by-id/:unitId/docks/:kind/revisions", params: path },
+		{ url: "/api/v1/units/by-id/:unitId/docks/:kind/revisions", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -14193,7 +14189,7 @@ export function getApiUnitsByIdByUnitIdDocksByKindRevisionsQueryOptions(
 
 /**
  * @summary List Dock revisions
- * {@link /api/units/by-id/:unitId/docks/:kind/revisions}
+ * {@link /api/v1/units/by-id/:unitId/docks/:kind/revisions}
  */
 export function useGetApiUnitsByIdByUnitIdDocksByKindRevisions<
 	TData = GetApiUnitsByIdByUnitIdDocksByKindRevisionsStatus200,
@@ -14262,7 +14258,7 @@ export function useGetApiUnitsByIdByUnitIdDocksByKindRevisions<
 }
 
 export const postApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreMutationKey = () =>
-	[{ url: "/api/units/by-id/:unitId/docks/:kind/revisions/:revisionId/restore" }] as const;
+	[{ url: "/api/v1/units/by-id/:unitId/docks/:kind/revisions/:revisionId/restore" }] as const;
 
 export function postApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreMutationOptions<
 	TContext = unknown,
@@ -14298,7 +14294,7 @@ export function postApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreM
 
 /**
  * @summary Restore a Dock revision
- * {@link /api/units/by-id/:unitId/docks/:kind/revisions/:revisionId/restore}
+ * {@link /api/v1/units/by-id/:unitId/docks/:kind/revisions/:revisionId/restore}
  */
 export function usePostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestore<TContext>(
 	options: {
@@ -14380,7 +14376,7 @@ export function usePostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdResto
 }
 
 export const getApiUsersMeQueryKey = ({ query }: Omit<GetApiUsersMeOptions, "headers"> = {}) =>
-	[{ url: "/api/users/me" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/users/me" }, ...(query ? [query] : [])] as const;
 
 type GetApiUsersMeQueryKey = ReturnType<typeof getApiUsersMeQueryKey>;
 
@@ -14415,7 +14411,7 @@ export function getApiUsersMeQueryOptions(
 
 /**
  * @summary Current user profile
- * {@link /api/users/me}
+ * {@link /api/v1/users/me}
  */
 export function useGetApiUsersMe<
 	TData = GetApiUsersMeStatus200,
@@ -14470,7 +14466,7 @@ export function useGetApiUsersMe<
 	return queryResult;
 }
 
-export const patchApiUsersMeMutationKey = () => [{ url: "/api/users/me" }] as const;
+export const patchApiUsersMeMutationKey = () => [{ url: "/api/v1/users/me" }] as const;
 
 export function patchApiUsersMeMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -14500,7 +14496,7 @@ export function patchApiUsersMeMutationOptions<TContext = unknown>(
 
 /**
  * @summary Update current profile
- * {@link /api/users/me}
+ * {@link /api/v1/users/me}
  */
 export function usePatchApiUsersMe<TContext>(
 	options: {
@@ -14577,7 +14573,7 @@ export function usePatchApiUsersMe<TContext>(
 }
 
 export const assignCurrentProfileSlugMutationKey = () =>
-	[{ url: "/api/users/me/profile-slug" }] as const;
+	[{ url: "/api/v1/users/me/profile-slug" }] as const;
 
 export function assignCurrentProfileSlugMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -14611,7 +14607,7 @@ export function assignCurrentProfileSlugMutationOptions<TContext = unknown>(
 /**
  * @description Temporary first-party endpoint. An interactive signed-in user may assign their own Profile slug once without an additional permission. Reserved labels are rejected, and only an idempotent repeat is accepted after assignment.
  * @summary Assign the current Profile slug once
- * {@link /api/users/me/profile-slug}
+ * {@link /api/v1/users/me/profile-slug}
  */
 export function useAssignCurrentProfileSlug<TContext>(
 	options: {
@@ -14686,7 +14682,7 @@ export function useAssignCurrentProfileSlug<TContext>(
 export const listCurrentUserStudioContentQueryKey = ({
 	query,
 }: Omit<ListCurrentUserStudioContentOptions, "headers">) =>
-	[{ url: "/api/users/me/studio" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/users/me/studio" }, ...(query ? [query] : [])] as const;
 
 type ListCurrentUserStudioContentQueryKey = ReturnType<typeof listCurrentUserStudioContentQueryKey>;
 
@@ -14722,7 +14718,7 @@ export function listCurrentUserStudioContentQueryOptions(
 
 /**
  * @summary List current user's Studio work resources
- * {@link /api/users/me/studio}
+ * {@link /api/v1/users/me/studio}
  */
 export function useListCurrentUserStudioContent<
 	TData = ListCurrentUserStudioContentStatus200,
@@ -14785,7 +14781,7 @@ export function useListCurrentUserStudioContent<
 }
 
 export const recordCurrentUserStudioVisitMutationKey = () =>
-	[{ url: "/api/users/me/studio/:unitId/visit" }] as const;
+	[{ url: "/api/v1/users/me/studio/:unitId/visit" }] as const;
 
 export function recordCurrentUserStudioVisitMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -14816,7 +14812,7 @@ export function recordCurrentUserStudioVisitMutationOptions<TContext = unknown>(
 
 /**
  * @summary Record a Studio resource visit
- * {@link /api/users/me/studio/:unitId/visit}
+ * {@link /api/v1/users/me/studio/:unitId/visit}
  */
 export function useRecordCurrentUserStudioVisit<TContext>(
 	options: {
@@ -14881,7 +14877,7 @@ export function useRecordCurrentUserStudioVisit<TContext>(
 }
 
 export const getApiUsersMePreferencesQueryKey = () =>
-	[{ url: "/api/users/me/preferences" }] as const;
+	[{ url: "/api/v1/users/me/preferences" }] as const;
 
 type GetApiUsersMePreferencesQueryKey = ReturnType<typeof getApiUsersMePreferencesQueryKey>;
 
@@ -14913,7 +14909,7 @@ export function getApiUsersMePreferencesQueryOptions(
 
 /**
  * @summary Current user preferences
- * {@link /api/users/me/preferences}
+ * {@link /api/v1/users/me/preferences}
  */
 export function useGetApiUsersMePreferences<
 	TData = GetApiUsersMePreferencesStatus200,
@@ -14963,7 +14959,7 @@ export function useGetApiUsersMePreferences<
 }
 
 export const patchApiUsersMePreferencesMutationKey = () =>
-	[{ url: "/api/users/me/preferences" }] as const;
+	[{ url: "/api/v1/users/me/preferences" }] as const;
 
 export function patchApiUsersMePreferencesMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -14995,7 +14991,7 @@ export function patchApiUsersMePreferencesMutationOptions<TContext = unknown>(
 
 /**
  * @summary Update current user display preferences
- * {@link /api/users/me/preferences}
+ * {@link /api/v1/users/me/preferences}
  */
 export function usePatchApiUsersMePreferences<TContext>(
 	options: {
@@ -15064,7 +15060,7 @@ export function usePatchApiUsersMePreferences<TContext>(
 }
 
 export const putApiUsersMePreferencesMutationKey = () =>
-	[{ url: "/api/users/me/preferences" }] as const;
+	[{ url: "/api/v1/users/me/preferences" }] as const;
 
 export function putApiUsersMePreferencesMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -15097,7 +15093,7 @@ export function putApiUsersMePreferencesMutationOptions<TContext = unknown>(
 
 /**
  * @summary Replace current user preferences
- * {@link /api/users/me/preferences}
+ * {@link /api/v1/users/me/preferences}
  */
 export function usePutApiUsersMePreferences<TContext>(
 	options: {
@@ -15170,7 +15166,7 @@ export function usePutApiUsersMePreferences<TContext>(
 }
 
 export const updateCurrentUserPrivacyMutationKey = () =>
-	[{ url: "/api/users/me/privacy" }] as const;
+	[{ url: "/api/v1/users/me/privacy" }] as const;
 
 export function updateCurrentUserPrivacyMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -15202,7 +15198,7 @@ export function updateCurrentUserPrivacyMutationOptions<TContext = unknown>(
 
 /**
  * @summary Update current user's Score and Progress privacy
- * {@link /api/users/me/privacy}
+ * {@link /api/v1/users/me/privacy}
  */
 export function useUpdateCurrentUserPrivacy<TContext>(
 	options: {
@@ -15273,7 +15269,7 @@ export function useUpdateCurrentUserPrivacy<TContext>(
 export const getApiUsersMeFollowingQueryKey = ({
 	query,
 }: Omit<GetApiUsersMeFollowingOptions, "headers"> = {}) =>
-	[{ url: "/api/users/me/following" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/users/me/following" }, ...(query ? [query] : [])] as const;
 
 type GetApiUsersMeFollowingQueryKey = ReturnType<typeof getApiUsersMeFollowingQueryKey>;
 
@@ -15308,7 +15304,7 @@ export function getApiUsersMeFollowingQueryOptions(
 
 /**
  * @summary List Units followed by the current user
- * {@link /api/users/me/following}
+ * {@link /api/v1/users/me/following}
  */
 export function useGetApiUsersMeFollowing<
 	TData = GetApiUsersMeFollowingStatus200,
@@ -15369,7 +15365,7 @@ export function useGetApiUsersMeFollowing<
 export const getApiUsersMeFollowingByUnitIdQueryKey = ({
 	path,
 }: Omit<GetApiUsersMeFollowingByUnitIdOptions, "headers">) =>
-	[{ url: "/api/users/me/following/:unitId", params: path }] as const;
+	[{ url: "/api/v1/users/me/following/:unitId", params: path }] as const;
 
 type GetApiUsersMeFollowingByUnitIdQueryKey = ReturnType<
 	typeof getApiUsersMeFollowingByUnitIdQueryKey
@@ -15406,7 +15402,7 @@ export function getApiUsersMeFollowingByUnitIdQueryOptions(
 
 /**
  * @summary Get current user's follow state for a Unit
- * {@link /api/users/me/following/:unitId}
+ * {@link /api/v1/users/me/following/:unitId}
  */
 export function useGetApiUsersMeFollowingByUnitId<
 	TData = GetApiUsersMeFollowingByUnitIdStatus200,
@@ -15467,7 +15463,7 @@ export function useGetApiUsersMeFollowingByUnitId<
 }
 
 export const putApiUsersMeFollowingByUnitIdMutationKey = () =>
-	[{ url: "/api/users/me/following/:unitId" }] as const;
+	[{ url: "/api/v1/users/me/following/:unitId" }] as const;
 
 export function putApiUsersMeFollowingByUnitIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -15499,7 +15495,7 @@ export function putApiUsersMeFollowingByUnitIdMutationOptions<TContext = unknown
 
 /**
  * @summary Follow a Unit
- * {@link /api/users/me/following/:unitId}
+ * {@link /api/v1/users/me/following/:unitId}
  */
 export function usePutApiUsersMeFollowingByUnitId<TContext>(
 	options: {
@@ -15568,7 +15564,7 @@ export function usePutApiUsersMeFollowingByUnitId<TContext>(
 }
 
 export const deleteApiUsersMeFollowingByUnitIdMutationKey = () =>
-	[{ url: "/api/users/me/following/:unitId" }] as const;
+	[{ url: "/api/v1/users/me/following/:unitId" }] as const;
 
 export function deleteApiUsersMeFollowingByUnitIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -15598,7 +15594,7 @@ export function deleteApiUsersMeFollowingByUnitIdMutationOptions<TContext = unkn
 
 /**
  * @summary Unfollow a Unit
- * {@link /api/users/me/following/:unitId}
+ * {@link /api/v1/users/me/following/:unitId}
  */
 export function useDeleteApiUsersMeFollowingByUnitId<TContext>(
 	options: {
@@ -15662,7 +15658,7 @@ export function useDeleteApiUsersMeFollowingByUnitId<TContext>(
 }
 
 export const patchApiUsersMeFollowingByUnitIdMutationKey = () =>
-	[{ url: "/api/users/me/following/:unitId" }] as const;
+	[{ url: "/api/v1/users/me/following/:unitId" }] as const;
 
 export function patchApiUsersMeFollowingByUnitIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -15695,7 +15691,7 @@ export function patchApiUsersMeFollowingByUnitIdMutationOptions<TContext = unkno
 
 /**
  * @summary Update followed Unit presentation
- * {@link /api/users/me/following/:unitId}
+ * {@link /api/v1/users/me/following/:unitId}
  */
 export function usePatchApiUsersMeFollowingByUnitId<TContext>(
 	options: {
@@ -15767,7 +15763,7 @@ export function usePatchApiUsersMeFollowingByUnitId<TContext>(
 }
 
 export const putApiUsersMeFollowingByUnitIdSettingsMutationKey = () =>
-	[{ url: "/api/users/me/following/:unitId/settings" }] as const;
+	[{ url: "/api/v1/users/me/following/:unitId/settings" }] as const;
 
 export function putApiUsersMeFollowingByUnitIdSettingsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -15801,7 +15797,7 @@ export function putApiUsersMeFollowingByUnitIdSettingsMutationOptions<TContext =
 
 /**
  * @summary Replace notification and personalization settings for a followed Unit
- * {@link /api/users/me/following/:unitId/settings}
+ * {@link /api/v1/users/me/following/:unitId/settings}
  */
 export function usePutApiUsersMeFollowingByUnitIdSettings<TContext>(
 	options: {
@@ -15880,7 +15876,7 @@ export const getUserProfileActivityQueryKey = ({
 	path,
 	query,
 }: Omit<GetUserProfileActivityOptions, "headers">) =>
-	[{ url: "/api/users/:id/activity", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/users/:id/activity", params: path }, ...(query ? [query] : [])] as const;
 
 type GetUserProfileActivityQueryKey = ReturnType<typeof getUserProfileActivityQueryKey>;
 
@@ -15915,7 +15911,7 @@ export function getUserProfileActivityQueryOptions(
 
 /**
  * @summary Get visible Score and Progress activity for a public Profile
- * {@link /api/users/:id/activity}
+ * {@link /api/v1/users/:id/activity}
  */
 export function useGetUserProfileActivity<
 	TData = GetUserProfileActivityStatus200,
@@ -15977,7 +15973,7 @@ export function useGetUserProfileActivity<
 }
 
 export const getApiUsersByIdQueryKey = ({ path, query }: Omit<GetApiUsersByIdOptions, "headers">) =>
-	[{ url: "/api/users/:id", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/users/:id", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiUsersByIdQueryKey = ReturnType<typeof getApiUsersByIdQueryKey>;
 
@@ -16010,7 +16006,7 @@ export function getApiUsersByIdQueryOptions(
 
 /**
  * @summary Public user profile
- * {@link /api/users/:id}
+ * {@link /api/v1/users/:id}
  */
 export function useGetApiUsersById<
 	TData = GetApiUsersByIdStatus200,
@@ -16066,7 +16062,7 @@ export function useGetApiUsersById<
 	return queryResult;
 }
 
-export const getApiUsersMeBlocksQueryKey = () => [{ url: "/api/users/me/blocks" }] as const;
+export const getApiUsersMeBlocksQueryKey = () => [{ url: "/api/v1/users/me/blocks" }] as const;
 
 type GetApiUsersMeBlocksQueryKey = ReturnType<typeof getApiUsersMeBlocksQueryKey>;
 
@@ -16094,7 +16090,7 @@ export function getApiUsersMeBlocksQueryOptions(
 
 /**
  * @summary List blocked users
- * {@link /api/users/me/blocks}
+ * {@link /api/v1/users/me/blocks}
  */
 export function useGetApiUsersMeBlocks<
 	TData = GetApiUsersMeBlocksStatus200,
@@ -16135,7 +16131,7 @@ export function useGetApiUsersMeBlocks<
 	return queryResult;
 }
 
-export const putApiUsersByIdBlockMutationKey = () => [{ url: "/api/users/:id/block" }] as const;
+export const putApiUsersByIdBlockMutationKey = () => [{ url: "/api/v1/users/:id/block" }] as const;
 
 export function putApiUsersByIdBlockMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -16163,7 +16159,7 @@ export function putApiUsersByIdBlockMutationOptions<TContext = unknown>(
 
 /**
  * @summary Block user
- * {@link /api/users/:id/block}
+ * {@link /api/v1/users/:id/block}
  */
 export function usePutApiUsersByIdBlock<TContext>(
 	options: {
@@ -16231,7 +16227,8 @@ export function usePutApiUsersByIdBlock<TContext>(
 	>;
 }
 
-export const deleteApiUsersByIdBlockMutationKey = () => [{ url: "/api/users/:id/block" }] as const;
+export const deleteApiUsersByIdBlockMutationKey = () =>
+	[{ url: "/api/v1/users/:id/block" }] as const;
 
 export function deleteApiUsersByIdBlockMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -16257,7 +16254,7 @@ export function deleteApiUsersByIdBlockMutationOptions<TContext = unknown>(
 
 /**
  * @summary Unblock user
- * {@link /api/users/:id/block}
+ * {@link /api/v1/users/:id/block}
  */
 export function useDeleteApiUsersByIdBlock<TContext>(
 	options: {
@@ -16318,7 +16315,7 @@ export function useDeleteApiUsersByIdBlock<TContext>(
 }
 
 export const getApiPlatformAccessPolicyQueryKey = () =>
-	[{ url: "/api/platform-access/policy" }] as const;
+	[{ url: "/api/v1/platform-access/policy" }] as const;
 
 type GetApiPlatformAccessPolicyQueryKey = ReturnType<typeof getApiPlatformAccessPolicyQueryKey>;
 
@@ -16348,7 +16345,7 @@ export function getApiPlatformAccessPolicyQueryOptions(
 
 /**
  * @summary Get the platform access policy
- * {@link /api/platform-access/policy}
+ * {@link /api/v1/platform-access/policy}
  */
 export function useGetApiPlatformAccessPolicy<
 	TData = GetApiPlatformAccessPolicyStatus200,
@@ -16396,7 +16393,7 @@ export function useGetApiPlatformAccessPolicy<
 export const getApiPlatformAccessProfilesQueryKey = ({
 	query,
 }: Omit<GetApiPlatformAccessProfilesOptions, "headers"> = {}) =>
-	[{ url: "/api/platform-access/profiles" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/platform-access/profiles" }, ...(query ? [query] : [])] as const;
 
 type GetApiPlatformAccessProfilesQueryKey = ReturnType<typeof getApiPlatformAccessProfilesQueryKey>;
 
@@ -16430,7 +16427,7 @@ export function getApiPlatformAccessProfilesQueryOptions(
 
 /**
  * @summary List or search Profiles and their platform access
- * {@link /api/platform-access/profiles}
+ * {@link /api/v1/platform-access/profiles}
  */
 export function useGetApiPlatformAccessProfiles<
 	TData = GetApiPlatformAccessProfilesStatus200,
@@ -16491,7 +16488,7 @@ export function useGetApiPlatformAccessProfiles<
 export const getApiPlatformAccessProfilesByProfileIdQueryKey = ({
 	path,
 }: Omit<GetApiPlatformAccessProfilesByProfileIdOptions, "headers">) =>
-	[{ url: "/api/platform-access/profiles/:profileId", params: path }] as const;
+	[{ url: "/api/v1/platform-access/profiles/:profileId", params: path }] as const;
 
 type GetApiPlatformAccessProfilesByProfileIdQueryKey = ReturnType<
 	typeof getApiPlatformAccessProfilesByProfileIdQueryKey
@@ -16528,7 +16525,7 @@ export function getApiPlatformAccessProfilesByProfileIdQueryOptions(
 
 /**
  * @summary Get one Profile's platform access
- * {@link /api/platform-access/profiles/:profileId}
+ * {@link /api/v1/platform-access/profiles/:profileId}
  */
 export function useGetApiPlatformAccessProfilesByProfileId<
 	TData = GetApiPlatformAccessProfilesByProfileIdStatus200,
@@ -16590,7 +16587,7 @@ export function useGetApiPlatformAccessProfilesByProfileId<
 }
 
 export const putApiPlatformAccessProfilesByProfileIdMutationKey = () =>
-	[{ url: "/api/platform-access/profiles/:profileId" }] as const;
+	[{ url: "/api/v1/platform-access/profiles/:profileId" }] as const;
 
 export function putApiPlatformAccessProfilesByProfileIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -16624,7 +16621,7 @@ export function putApiPlatformAccessProfilesByProfileIdMutationOptions<TContext 
 
 /**
  * @summary Replace one Profile's platform access
- * {@link /api/platform-access/profiles/:profileId}
+ * {@link /api/v1/platform-access/profiles/:profileId}
  */
 export function usePutApiPlatformAccessProfilesByProfileId<TContext>(
 	options: {
@@ -16702,7 +16699,7 @@ export function usePutApiPlatformAccessProfilesByProfileId<TContext>(
 export const getApiPlatformUsersQueryKey = ({
 	query,
 }: Omit<GetApiPlatformUsersOptions, "headers"> = {}) =>
-	[{ url: "/api/platform-users" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/platform-users" }, ...(query ? [query] : [])] as const;
 
 type GetApiPlatformUsersQueryKey = ReturnType<typeof getApiPlatformUsersQueryKey>;
 
@@ -16738,7 +16735,7 @@ export function getApiPlatformUsersQueryOptions(
 
 /**
  * @summary List platform users
- * {@link /api/platform-users}
+ * {@link /api/v1/platform-users}
  */
 export function useGetApiPlatformUsers<
 	TData = GetApiPlatformUsersStatus200,
@@ -16800,7 +16797,7 @@ export function useGetApiPlatformUsers<
 export const getApiPlatformUsersByUserIdQueryKey = ({
 	path,
 }: Omit<GetApiPlatformUsersByUserIdOptions, "headers">) =>
-	[{ url: "/api/platform-users/:userId", params: path }] as const;
+	[{ url: "/api/v1/platform-users/:userId", params: path }] as const;
 
 type GetApiPlatformUsersByUserIdQueryKey = ReturnType<typeof getApiPlatformUsersByUserIdQueryKey>;
 
@@ -16836,7 +16833,7 @@ export function getApiPlatformUsersByUserIdQueryOptions(
 
 /**
  * @summary Get one platform user
- * {@link /api/platform-users/:userId}
+ * {@link /api/v1/platform-users/:userId}
  */
 export function useGetApiPlatformUsersByUserId<
 	TData = GetApiPlatformUsersByUserIdStatus200,
@@ -16899,7 +16896,7 @@ export function useGetApiPlatformUsersByUserId<
 }
 
 export const putApiPlatformUsersByUserIdAccountStateMutationKey = () =>
-	[{ url: "/api/platform-users/:userId/account-state" }] as const;
+	[{ url: "/api/v1/platform-users/:userId/account-state" }] as const;
 
 export function putApiPlatformUsersByUserIdAccountStateMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -16934,7 +16931,7 @@ export function putApiPlatformUsersByUserIdAccountStateMutationOptions<TContext 
 
 /**
  * @summary Replace a platform user account state
- * {@link /api/platform-users/:userId/account-state}
+ * {@link /api/v1/platform-users/:userId/account-state}
  */
 export function usePutApiPlatformUsersByUserIdAccountState<TContext>(
 	options: {
@@ -17016,7 +17013,7 @@ export function usePutApiPlatformUsersByUserIdAccountState<TContext>(
 export const getApiPlatformUsersByUserIdSessionsQueryKey = ({
 	path,
 }: Omit<GetApiPlatformUsersByUserIdSessionsOptions, "headers">) =>
-	[{ url: "/api/platform-users/:userId/sessions", params: path }] as const;
+	[{ url: "/api/v1/platform-users/:userId/sessions", params: path }] as const;
 
 type GetApiPlatformUsersByUserIdSessionsQueryKey = ReturnType<
 	typeof getApiPlatformUsersByUserIdSessionsQueryKey
@@ -17054,7 +17051,7 @@ export function getApiPlatformUsersByUserIdSessionsQueryOptions(
 
 /**
  * @summary List a platform user's sessions
- * {@link /api/platform-users/:userId/sessions}
+ * {@link /api/v1/platform-users/:userId/sessions}
  */
 export function useGetApiPlatformUsersByUserIdSessions<
 	TData = GetApiPlatformUsersByUserIdSessionsStatus200,
@@ -17117,7 +17114,7 @@ export function useGetApiPlatformUsersByUserIdSessions<
 }
 
 export const deleteApiPlatformUsersByUserIdSessionsMutationKey = () =>
-	[{ url: "/api/platform-users/:userId/sessions" }] as const;
+	[{ url: "/api/v1/platform-users/:userId/sessions" }] as const;
 
 export function deleteApiPlatformUsersByUserIdSessionsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -17149,7 +17146,7 @@ export function deleteApiPlatformUsersByUserIdSessionsMutationOptions<TContext =
 
 /**
  * @summary Revoke all platform user sessions
- * {@link /api/platform-users/:userId/sessions}
+ * {@link /api/v1/platform-users/:userId/sessions}
  */
 export function useDeleteApiPlatformUsersByUserIdSessions<TContext>(
 	options: {
@@ -17221,7 +17218,7 @@ export function useDeleteApiPlatformUsersByUserIdSessions<TContext>(
 }
 
 export const deleteApiPlatformUsersByUserIdSessionsBySessionIdMutationKey = () =>
-	[{ url: "/api/platform-users/:userId/sessions/:sessionId" }] as const;
+	[{ url: "/api/v1/platform-users/:userId/sessions/:sessionId" }] as const;
 
 export function deleteApiPlatformUsersByUserIdSessionsBySessionIdMutationOptions<
 	TContext = unknown,
@@ -17253,7 +17250,7 @@ export function deleteApiPlatformUsersByUserIdSessionsBySessionIdMutationOptions
 
 /**
  * @summary Revoke a platform user session
- * {@link /api/platform-users/:userId/sessions/:sessionId}
+ * {@link /api/v1/platform-users/:userId/sessions/:sessionId}
  */
 export function useDeleteApiPlatformUsersByUserIdSessionsBySessionId<TContext>(
 	options: {
@@ -17329,7 +17326,7 @@ export const getApiTagsByTagIdHierarchyQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiTagsByTagIdHierarchyOptions, "headers">) =>
-	[{ url: "/api/tags/:tagId/hierarchy", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/tags/:tagId/hierarchy", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiTagsByTagIdHierarchyQueryKey = ReturnType<typeof getApiTagsByTagIdHierarchyQueryKey>;
 
@@ -17367,7 +17364,7 @@ export function getApiTagsByTagIdHierarchyQueryOptions(
 
 /**
  * @summary Get a Tag with direct children and grandchildren
- * {@link /api/tags/:tagId/hierarchy}
+ * {@link /api/v1/tags/:tagId/hierarchy}
  */
 export function useGetApiTagsByTagIdHierarchy<
 	TData = GetApiTagsByTagIdHierarchyStatus200,
@@ -17438,7 +17435,7 @@ export function useGetApiTagsByTagIdHierarchy<
 	return queryResult;
 }
 
-export const postApiTagStructuresMutationKey = () => [{ url: "/api/tag-structures" }] as const;
+export const postApiTagStructuresMutationKey = () => [{ url: "/api/v1/tag-structures" }] as const;
 
 export function postApiTagStructuresMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -17467,7 +17464,7 @@ export function postApiTagStructuresMutationOptions<TContext = unknown>(
 
 /**
  * @summary Create or find and upvote a community-immutable Tag structure
- * {@link /api/tag-structures}
+ * {@link /api/v1/tag-structures}
  */
 export function usePostApiTagStructures<TContext>(
 	options: {
@@ -17543,7 +17540,10 @@ export const getApiTagStructuresByStructureIdQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiTagStructuresByStructureIdOptions, "headers">) =>
-	[{ url: "/api/tag-structures/:structureId", params: path }, ...(query ? [query] : [])] as const;
+	[
+		{ url: "/api/v1/tag-structures/:structureId", params: path },
+		...(query ? [query] : []),
+	] as const;
 
 type GetApiTagStructuresByStructureIdQueryKey = ReturnType<
 	typeof getApiTagStructuresByStructureIdQueryKey
@@ -17583,7 +17583,7 @@ export function getApiTagStructuresByStructureIdQueryOptions(
 
 /**
  * @summary Get a Tag structure
- * {@link /api/tag-structures/:structureId}
+ * {@link /api/v1/tag-structures/:structureId}
  */
 export function useGetApiTagStructuresByStructureId<
 	TData = GetApiTagStructuresByStructureIdStatus200,
@@ -17655,7 +17655,7 @@ export function useGetApiTagStructuresByStructureId<
 }
 
 export const putApiTagStructuresByStructureIdMutationKey = () =>
-	[{ url: "/api/tag-structures/:structureId" }] as const;
+	[{ url: "/api/v1/tag-structures/:structureId" }] as const;
 
 export function putApiTagStructuresByStructureIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -17691,7 +17691,7 @@ export function putApiTagStructuresByStructureIdMutationOptions<TContext = unkno
 
 /**
  * @summary Administratively correct a Tag structure definition
- * {@link /api/tag-structures/:structureId}
+ * {@link /api/v1/tag-structures/:structureId}
  */
 export function usePutApiTagStructuresByStructureId<TContext>(
 	options: {
@@ -17771,7 +17771,7 @@ export function usePutApiTagStructuresByStructureId<TContext>(
 }
 
 export const putApiTagStructuresByStructureIdVoteMutationKey = () =>
-	[{ url: "/api/tag-structures/:structureId/vote" }] as const;
+	[{ url: "/api/v1/tag-structures/:structureId/vote" }] as const;
 
 export function putApiTagStructuresByStructureIdVoteMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -17805,7 +17805,7 @@ export function putApiTagStructuresByStructureIdVoteMutationOptions<TContext = u
 
 /**
  * @summary Vote on a Tag structure
- * {@link /api/tag-structures/:structureId/vote}
+ * {@link /api/v1/tag-structures/:structureId/vote}
  */
 export function usePutApiTagStructuresByStructureIdVote<TContext>(
 	options: {
@@ -17881,7 +17881,7 @@ export function usePutApiTagStructuresByStructureIdVote<TContext>(
 }
 
 export const deleteApiTagStructuresByStructureIdVoteMutationKey = () =>
-	[{ url: "/api/tag-structures/:structureId/vote" }] as const;
+	[{ url: "/api/v1/tag-structures/:structureId/vote" }] as const;
 
 export function deleteApiTagStructuresByStructureIdVoteMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -17913,7 +17913,7 @@ export function deleteApiTagStructuresByStructureIdVoteMutationOptions<TContext 
 
 /**
  * @summary Remove a Tag structure vote
- * {@link /api/tag-structures/:structureId/vote}
+ * {@link /api/v1/tag-structures/:structureId/vote}
  */
 export function useDeleteApiTagStructuresByStructureIdVote<TContext>(
 	options: {
@@ -17988,7 +17988,7 @@ export const getApiUnitsByTypeByUnitIdTagsQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiUnitsByTypeByUnitIdTagsOptions, "headers">) =>
-	[{ url: "/api/units/:type/:unitId/tags", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/units/:type/:unitId/tags", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiUnitsByTypeByUnitIdTagsQueryKey = ReturnType<
 	typeof getApiUnitsByTypeByUnitIdTagsQueryKey
@@ -18025,7 +18025,7 @@ export function getApiUnitsByTypeByUnitIdTagsQueryOptions(
 
 /**
  * @summary Get global and subscribed Realm Tag assertions for a Unit
- * {@link /api/units/:type/:unitId/tags}
+ * {@link /api/v1/units/:type/:unitId/tags}
  */
 export function useGetApiUnitsByTypeByUnitIdTags<
 	TData = GetApiUnitsByTypeByUnitIdTagsStatus200,
@@ -18091,7 +18091,7 @@ export function useGetApiUnitsByTypeByUnitIdTags<
 }
 
 export const putApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationKey = () =>
-	[{ url: "/api/units/:type/:unitId/tag-structures/:structureId" }] as const;
+	[{ url: "/api/v1/units/:type/:unitId/tag-structures/:structureId" }] as const;
 
 export function putApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationOptions<
 	TContext = unknown,
@@ -18123,7 +18123,7 @@ export function putApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationOptio
 
 /**
  * @summary Apply a Tag structure to a Unit
- * {@link /api/units/:type/:unitId/tag-structures/:structureId}
+ * {@link /api/v1/units/:type/:unitId/tag-structures/:structureId}
  */
 export function usePutApiUnitsByTypeByUnitIdTagStructuresByStructureId<TContext>(
 	options: {
@@ -18196,7 +18196,7 @@ export function usePutApiUnitsByTypeByUnitIdTagStructuresByStructureId<TContext>
 }
 
 export const deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationKey = () =>
-	[{ url: "/api/units/:type/:unitId/tag-structures/:structureId" }] as const;
+	[{ url: "/api/v1/units/:type/:unitId/tag-structures/:structureId" }] as const;
 
 export function deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationOptions<
 	TContext = unknown,
@@ -18228,7 +18228,7 @@ export function deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationOp
 
 /**
  * @summary Remove a Tag structure from a Unit
- * {@link /api/units/:type/:unitId/tag-structures/:structureId}
+ * {@link /api/v1/units/:type/:unitId/tag-structures/:structureId}
  */
 export function useDeleteApiUnitsByTypeByUnitIdTagStructuresByStructureId<TContext>(
 	options: {
@@ -18301,7 +18301,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagStructuresByStructureId<TConte
 }
 
 export const putApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteMutationKey = () =>
-	[{ url: "/api/units/:type/:unitId/tag-structures/:structureId/vote" }] as const;
+	[{ url: "/api/v1/units/:type/:unitId/tag-structures/:structureId/vote" }] as const;
 
 export function putApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteMutationOptions<
 	TContext = unknown,
@@ -18335,7 +18335,7 @@ export function putApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteMutationO
 
 /**
  * @summary Vote on a Unit Tag structure
- * {@link /api/units/:type/:unitId/tag-structures/:structureId/vote}
+ * {@link /api/v1/units/:type/:unitId/tag-structures/:structureId/vote}
  */
 export function usePutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<TContext>(
 	options: {
@@ -18412,7 +18412,7 @@ export function usePutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<TCont
 }
 
 export const deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteMutationKey = () =>
-	[{ url: "/api/units/:type/:unitId/tag-structures/:structureId/vote" }] as const;
+	[{ url: "/api/v1/units/:type/:unitId/tag-structures/:structureId/vote" }] as const;
 
 export function deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteMutationOptions<
 	TContext = unknown,
@@ -18444,7 +18444,7 @@ export function deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteMutati
 
 /**
  * @summary Remove a Unit Tag structure vote
- * {@link /api/units/:type/:unitId/tag-structures/:structureId/vote}
+ * {@link /api/v1/units/:type/:unitId/tag-structures/:structureId/vote}
  */
 export function useDeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<TContext>(
 	options: {
@@ -18519,7 +18519,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<TC
 export const getApiUsersMeTagRealmSubscriptionsQueryKey = ({
 	query,
 }: Omit<GetApiUsersMeTagRealmSubscriptionsOptions, "headers"> = {}) =>
-	[{ url: "/api/users/me/tag-realm-subscriptions" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/users/me/tag-realm-subscriptions" }, ...(query ? [query] : [])] as const;
 
 type GetApiUsersMeTagRealmSubscriptionsQueryKey = ReturnType<
 	typeof getApiUsersMeTagRealmSubscriptionsQueryKey
@@ -18555,7 +18555,7 @@ export function getApiUsersMeTagRealmSubscriptionsQueryOptions(
 
 /**
  * @summary List the current user's ordered Realm Tag sources
- * {@link /api/users/me/tag-realm-subscriptions}
+ * {@link /api/v1/users/me/tag-realm-subscriptions}
  */
 export function useGetApiUsersMeTagRealmSubscriptions<
 	TData = GetApiUsersMeTagRealmSubscriptionsStatus200,
@@ -18614,7 +18614,7 @@ export function useGetApiUsersMeTagRealmSubscriptions<
 }
 
 export const putApiUsersMeTagRealmSubscriptionsByRealmIdMutationKey = () =>
-	[{ url: "/api/users/me/tag-realm-subscriptions/:realmId" }] as const;
+	[{ url: "/api/v1/users/me/tag-realm-subscriptions/:realmId" }] as const;
 
 export function putApiUsersMeTagRealmSubscriptionsByRealmIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -18648,7 +18648,7 @@ export function putApiUsersMeTagRealmSubscriptionsByRealmIdMutationOptions<TCont
 
 /**
  * @summary Subscribe to or reorder a Realm Tag source
- * {@link /api/users/me/tag-realm-subscriptions/:realmId}
+ * {@link /api/v1/users/me/tag-realm-subscriptions/:realmId}
  */
 export function usePutApiUsersMeTagRealmSubscriptionsByRealmId<TContext>(
 	options: {
@@ -18720,7 +18720,7 @@ export function usePutApiUsersMeTagRealmSubscriptionsByRealmId<TContext>(
 }
 
 export const deleteApiUsersMeTagRealmSubscriptionsByRealmIdMutationKey = () =>
-	[{ url: "/api/users/me/tag-realm-subscriptions/:realmId" }] as const;
+	[{ url: "/api/v1/users/me/tag-realm-subscriptions/:realmId" }] as const;
 
 export function deleteApiUsersMeTagRealmSubscriptionsByRealmIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -18750,7 +18750,7 @@ export function deleteApiUsersMeTagRealmSubscriptionsByRealmIdMutationOptions<TC
 
 /**
  * @summary Unsubscribe from a Realm Tag source
- * {@link /api/users/me/tag-realm-subscriptions/:realmId}
+ * {@link /api/v1/users/me/tag-realm-subscriptions/:realmId}
  */
 export function useDeleteApiUsersMeTagRealmSubscriptionsByRealmId<TContext>(
 	options: {
@@ -18814,7 +18814,7 @@ export function useDeleteApiUsersMeTagRealmSubscriptionsByRealmId<TContext>(
 }
 
 export const resolveUnitSlugAddressMutationKey = () =>
-	[{ url: "/api/slug-addresses/resolve" }] as const;
+	[{ url: "/api/v1/slug-addresses/resolve" }] as const;
 
 export function resolveUnitSlugAddressMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -18843,7 +18843,7 @@ export function resolveUnitSlugAddressMutationOptions<TContext = unknown>(
 /**
  * @description Resolves one to three slug labels to a public Unit ID and reports its canonical path. Browser routes use the resolved ID for subsequent resource reads and cache identity.
  * @summary Resolve a complete public Unit slug path
- * {@link /api/slug-addresses/resolve}
+ * {@link /api/v1/slug-addresses/resolve}
  */
 export function useResolveUnitSlugAddress<TContext>(
 	options: {
@@ -18914,7 +18914,7 @@ export function useResolveUnitSlugAddress<TContext>(
 export const getPublicUnitSlugAddressQueryKey = ({
 	path,
 }: Omit<GetPublicUnitSlugAddressOptions, "headers">) =>
-	[{ url: "/api/slug-addresses/public-units/:unitId", params: path }] as const;
+	[{ url: "/api/v1/slug-addresses/public-units/:unitId", params: path }] as const;
 
 type GetPublicUnitSlugAddressQueryKey = ReturnType<typeof getPublicUnitSlugAddressQueryKey>;
 
@@ -18949,7 +18949,7 @@ export function getPublicUnitSlugAddressQueryOptions(
 /**
  * @description Returns a public Unit's optional canonical slug address for ID-route canonicalization. Missing, private, moderated, deleted, or unaddressed Units all return not found.
  * @summary Get a Unit public canonical slug address
- * {@link /api/slug-addresses/public-units/:unitId}
+ * {@link /api/v1/slug-addresses/public-units/:unitId}
  */
 export function useGetPublicUnitSlugAddress<
 	TData = GetPublicUnitSlugAddressStatus200,
@@ -19011,7 +19011,7 @@ export const resolveScopedUnitSlugAddressQueryKey = ({
 	query,
 }: Omit<ResolveScopedUnitSlugAddressOptions, "headers">) =>
 	[
-		{ url: "/api/slug-addresses/scopes/:scopeUnitId/:slug", params: path },
+		{ url: "/api/v1/slug-addresses/scopes/:scopeUnitId/:slug", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -19050,7 +19050,7 @@ export function resolveScopedUnitSlugAddressQueryOptions(
 /**
  * @description Resolves a direct scope Unit ID and slug label to a public Unit ID. An optional expected kind prevents cross-resource matches. The response includes the complete canonical path so callers can redirect former addresses.
  * @summary Resolve a Unit slug in its direct scope
- * {@link /api/slug-addresses/scopes/:scopeUnitId/:slug}
+ * {@link /api/v1/slug-addresses/scopes/:scopeUnitId/:slug}
  */
 export function useResolveScopedUnitSlugAddress<
 	TData = ResolveScopedUnitSlugAddressStatus200,
@@ -19120,7 +19120,7 @@ export function useResolveScopedUnitSlugAddress<
 export const getUnitSlugAddressWithPlatformAccessQueryKey = ({
 	path,
 }: Omit<GetUnitSlugAddressWithPlatformAccessOptions, "headers">) =>
-	[{ url: "/api/slug-addresses/units/:unitId", params: path }] as const;
+	[{ url: "/api/v1/slug-addresses/units/:unitId", params: path }] as const;
 
 type GetUnitSlugAddressWithPlatformAccessQueryKey = ReturnType<
 	typeof getUnitSlugAddressWithPlatformAccessQueryKey
@@ -19159,7 +19159,7 @@ export function getUnitSlugAddressWithPlatformAccessQueryOptions(
 /**
  * @description Development-preview control plane. Returns canonical address registry details for authorized platform workflows, including the administrative address ID. Ordinary resource responses expose only the nullable public slugAddress projection.
  * @summary Get a Unit canonical slug address with platform access
- * {@link /api/slug-addresses/units/:unitId}
+ * {@link /api/v1/slug-addresses/units/:unitId}
  */
 export function useGetUnitSlugAddressWithPlatformAccess<
 	TData = GetUnitSlugAddressWithPlatformAccessStatus200,
@@ -19222,7 +19222,7 @@ export function useGetUnitSlugAddressWithPlatformAccess<
 }
 
 export const replaceUnitSlugAddressWithPlatformAccessMutationKey = () =>
-	[{ url: "/api/slug-addresses/units/:unitId" }] as const;
+	[{ url: "/api/v1/slug-addresses/units/:unitId" }] as const;
 
 export function replaceUnitSlugAddressWithPlatformAccessMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -19258,7 +19258,7 @@ export function replaceUnitSlugAddressWithPlatformAccessMutationOptions<TContext
 /**
  * @description Development-preview control plane. Assigns or replaces a canonical address independently of Unit creation and update. It retains the former address as a redirect and succeeds idempotently when the requested address is already canonical.
  * @summary Replace any Unit slug address with platform access
- * {@link /api/slug-addresses/units/:unitId}
+ * {@link /api/v1/slug-addresses/units/:unitId}
  */
 export function useReplaceUnitSlugAddressWithPlatformAccess<TContext>(
 	options: {
@@ -19338,7 +19338,7 @@ export function useReplaceUnitSlugAddressWithPlatformAccess<TContext>(
 }
 
 export const createSlugNamespaceWithPlatformAccessMutationKey = () =>
-	[{ url: "/api/slug-addresses/namespaces" }] as const;
+	[{ url: "/api/v1/slug-addresses/namespaces" }] as const;
 
 export function createSlugNamespaceWithPlatformAccessMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -19373,7 +19373,7 @@ export function createSlugNamespaceWithPlatformAccessMutationOptions<TContext = 
 /**
  * @description Development-preview control plane. Creates a namespace Unit and its canonical address atomically. A null scope creates a top-level namespace under the virtual root; a Unit ID creates a nested namespace.
  * @summary Create an explicitly addressed namespace with platform access
- * {@link /api/slug-addresses/namespaces}
+ * {@link /api/v1/slug-addresses/namespaces}
  */
 export function useCreateSlugNamespaceWithPlatformAccess<TContext>(
 	options: {
@@ -19453,7 +19453,7 @@ export function useCreateSlugNamespaceWithPlatformAccess<TContext>(
 }
 
 export const releaseSlugRedirectWithPlatformAccessMutationKey = () =>
-	[{ url: "/api/slug-addresses/redirects/:redirectAddressId" }] as const;
+	[{ url: "/api/v1/slug-addresses/redirects/:redirectAddressId" }] as const;
 
 export function releaseSlugRedirectWithPlatformAccessMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -19488,7 +19488,7 @@ export function releaseSlugRedirectWithPlatformAccessMutationOptions<TContext = 
 /**
  * @description Development-preview control plane. Deletes one temporary Redirect record so its scoped label may be reused. This is an audited platform action; retention and quarantine policy determines when a redirect is eligible for release.
  * @summary Release a retained slug redirect with platform access
- * {@link /api/slug-addresses/redirects/:redirectAddressId}
+ * {@link /api/v1/slug-addresses/redirects/:redirectAddressId}
  */
 export function useReleaseSlugRedirectWithPlatformAccess<TContext>(
 	options: {
@@ -19564,7 +19564,7 @@ export function useReleaseSlugRedirectWithPlatformAccess<TContext>(
 }
 
 export const postApiUnitsPresentationsMutationKey = () =>
-	[{ url: "/api/units/presentations" }] as const;
+	[{ url: "/api/v1/units/presentations" }] as const;
 
 export function postApiUnitsPresentationsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -19594,7 +19594,7 @@ export function postApiUnitsPresentationsMutationOptions<TContext = unknown>(
 
 /**
  * @summary Resolve readable Unit presentations
- * {@link /api/units/presentations}
+ * {@link /api/v1/units/presentations}
  */
 export function usePostApiUnitsPresentations<TContext>(
 	options: {
@@ -19659,7 +19659,7 @@ export const getApiUnitsByIdByUnitIdRealmPublicationsQueryKey = ({
 	query,
 }: Omit<GetApiUnitsByIdByUnitIdRealmPublicationsOptions, "headers">) =>
 	[
-		{ url: "/api/units/by-id/:unitId/realm-publications", params: path },
+		{ url: "/api/v1/units/by-id/:unitId/realm-publications", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -19701,7 +19701,7 @@ export function getApiUnitsByIdByUnitIdRealmPublicationsQueryOptions(
 
 /**
  * @summary List a Unit's Realm publications
- * {@link /api/units/by-id/:unitId/realm-publications}
+ * {@link /api/v1/units/by-id/:unitId/realm-publications}
  */
 export function useGetApiUnitsByIdByUnitIdRealmPublications<
 	TData = GetApiUnitsByIdByUnitIdRealmPublicationsStatus200,
@@ -19774,7 +19774,7 @@ export function useGetApiUnitsByIdByUnitIdRealmPublications<
 }
 
 export const postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdMutationKey = () =>
-	[{ url: "/api/units/by-id/:unitId/realm-publications/:realmId" }] as const;
+	[{ url: "/api/v1/units/by-id/:unitId/realm-publications/:realmId" }] as const;
 
 export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdMutationOptions<
 	TContext = unknown,
@@ -19807,7 +19807,7 @@ export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdMutationOption
 
 /**
  * @summary Publish a Unit to one Realm
- * {@link /api/units/by-id/:unitId/realm-publications/:realmId}
+ * {@link /api/v1/units/by-id/:unitId/realm-publications/:realmId}
  */
 export function usePostApiUnitsByIdByUnitIdRealmPublicationsByRealmId<TContext>(
 	options: {
@@ -19884,7 +19884,7 @@ export function usePostApiUnitsByIdByUnitIdRealmPublicationsByRealmId<TContext>(
 }
 
 export const postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawMutationKey = () =>
-	[{ url: "/api/units/by-id/:unitId/realm-publications/:realmId/withdraw" }] as const;
+	[{ url: "/api/v1/units/by-id/:unitId/realm-publications/:realmId/withdraw" }] as const;
 
 export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawMutationOptions<
 	TContext = unknown,
@@ -19917,7 +19917,7 @@ export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawMutati
 
 /**
  * @summary Withdraw a Unit from one Realm
- * {@link /api/units/by-id/:unitId/realm-publications/:realmId/withdraw}
+ * {@link /api/v1/units/by-id/:unitId/realm-publications/:realmId/withdraw}
  */
 export function usePostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdraw<TContext>(
 	options: {
@@ -19994,7 +19994,7 @@ export function usePostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdraw<TC
 }
 
 export const postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishMutationKey = () =>
-	[{ url: "/api/units/by-id/:unitId/realm-publications/:realmId/republish" }] as const;
+	[{ url: "/api/v1/units/by-id/:unitId/realm-publications/:realmId/republish" }] as const;
 
 export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishMutationOptions<
 	TContext = unknown,
@@ -20027,7 +20027,7 @@ export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishMutat
 
 /**
  * @summary Republish a Unit to one Realm
- * {@link /api/units/by-id/:unitId/realm-publications/:realmId/republish}
+ * {@link /api/v1/units/by-id/:unitId/realm-publications/:realmId/republish}
  */
 export function usePostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublish<TContext>(
 	options: {
@@ -20108,7 +20108,7 @@ export const getApiUnitsByIdByUnitIdSeriesMembershipsQueryKey = ({
 	query,
 }: Omit<GetApiUnitsByIdByUnitIdSeriesMembershipsOptions, "headers">) =>
 	[
-		{ url: "/api/units/by-id/:unitId/series-memberships", params: path },
+		{ url: "/api/v1/units/by-id/:unitId/series-memberships", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -20147,7 +20147,7 @@ export function getApiUnitsByIdByUnitIdSeriesMembershipsQueryOptions(
 
 /**
  * @summary List Unit Series memberships
- * {@link /api/units/by-id/:unitId/series-memberships}
+ * {@link /api/v1/units/by-id/:unitId/series-memberships}
  */
 export function useGetApiUnitsByIdByUnitIdSeriesMemberships<
 	TData = GetApiUnitsByIdByUnitIdSeriesMembershipsStatus200,
@@ -20218,7 +20218,7 @@ export const getApiUnitsByIdByUnitIdStatusEventsQueryKey = ({
 	query,
 }: Omit<GetApiUnitsByIdByUnitIdStatusEventsOptions, "headers">) =>
 	[
-		{ url: "/api/units/by-id/:unitId/status-events", params: path },
+		{ url: "/api/v1/units/by-id/:unitId/status-events", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -20258,7 +20258,7 @@ export function getApiUnitsByIdByUnitIdStatusEventsQueryOptions(
 
 /**
  * @summary List Unit status events
- * {@link /api/units/by-id/:unitId/status-events}
+ * {@link /api/v1/units/by-id/:unitId/status-events}
  */
 export function useGetApiUnitsByIdByUnitIdStatusEvents<
 	TData = GetApiUnitsByIdByUnitIdStatusEventsStatus200,
@@ -20328,7 +20328,7 @@ export function useGetApiUnitsByIdByUnitIdStatusEvents<
 export const getApiUnitsByIdByUnitIdLocalizationOrderQueryKey = ({
 	path,
 }: Omit<GetApiUnitsByIdByUnitIdLocalizationOrderOptions, "headers">) =>
-	[{ url: "/api/units/by-id/:unitId/localization-order", params: path }] as const;
+	[{ url: "/api/v1/units/by-id/:unitId/localization-order", params: path }] as const;
 
 type GetApiUnitsByIdByUnitIdLocalizationOrderQueryKey = ReturnType<
 	typeof getApiUnitsByIdByUnitIdLocalizationOrderQueryKey
@@ -20364,7 +20364,7 @@ export function getApiUnitsByIdByUnitIdLocalizationOrderQueryOptions(
 
 /**
  * @summary Get Unit content language order
- * {@link /api/units/by-id/:unitId/localization-order}
+ * {@link /api/v1/units/by-id/:unitId/localization-order}
  */
 export function useGetApiUnitsByIdByUnitIdLocalizationOrder<
 	TData = GetApiUnitsByIdByUnitIdLocalizationOrderStatus200,
@@ -20424,7 +20424,7 @@ export function useGetApiUnitsByIdByUnitIdLocalizationOrder<
 }
 
 export const putApiUnitsByIdByUnitIdLocalizationOrderMutationKey = () =>
-	[{ url: "/api/units/by-id/:unitId/localization-order" }] as const;
+	[{ url: "/api/v1/units/by-id/:unitId/localization-order" }] as const;
 
 export function putApiUnitsByIdByUnitIdLocalizationOrderMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -20459,7 +20459,7 @@ export function putApiUnitsByIdByUnitIdLocalizationOrderMutationOptions<TContext
 
 /**
  * @summary Reorder Unit content languages
- * {@link /api/units/by-id/:unitId/localization-order}
+ * {@link /api/v1/units/by-id/:unitId/localization-order}
  */
 export function usePutApiUnitsByIdByUnitIdLocalizationOrder<TContext>(
 	options: {
@@ -20539,7 +20539,7 @@ export function usePutApiUnitsByIdByUnitIdLocalizationOrder<TContext>(
 }
 
 export const deleteApiUnitsByIdByUnitIdLocalizationsByLanguageMutationKey = () =>
-	[{ url: "/api/units/by-id/:unitId/localizations/:language" }] as const;
+	[{ url: "/api/v1/units/by-id/:unitId/localizations/:language" }] as const;
 
 export function deleteApiUnitsByIdByUnitIdLocalizationsByLanguageMutationOptions<
 	TContext = unknown,
@@ -20575,7 +20575,7 @@ export function deleteApiUnitsByIdByUnitIdLocalizationsByLanguageMutationOptions
 
 /**
  * @summary Remove a Unit content language
- * {@link /api/units/by-id/:unitId/localizations/:language}
+ * {@link /api/v1/units/by-id/:unitId/localizations/:language}
  */
 export function useDeleteApiUnitsByIdByUnitIdLocalizationsByLanguage<TContext>(
 	options: {
@@ -20663,7 +20663,7 @@ export const getApiUnitsByTypeQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiUnitsByTypeOptions, "headers">) =>
-	[{ url: "/api/units/:type", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/units/:type", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiUnitsByTypeQueryKey = ReturnType<typeof getApiUnitsByTypeQueryKey>;
 
@@ -20696,7 +20696,7 @@ export function getApiUnitsByTypeQueryOptions(
 
 /**
  * @summary List published units
- * {@link /api/units/:type}
+ * {@link /api/v1/units/:type}
  */
 export function useGetApiUnitsByType<
 	TData = GetApiUnitsByTypeStatus200,
@@ -20754,7 +20754,7 @@ export function useGetApiUnitsByType<
 	return queryResult;
 }
 
-export const postApiUnitsByTypeMutationKey = () => [{ url: "/api/units/:type" }] as const;
+export const postApiUnitsByTypeMutationKey = () => [{ url: "/api/v1/units/:type" }] as const;
 
 export function postApiUnitsByTypeMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -20790,7 +20790,7 @@ export function postApiUnitsByTypeMutationOptions<TContext = unknown>(
 
 /**
  * @summary Create unit
- * {@link /api/units/:type}
+ * {@link /api/v1/units/:type}
  */
 export function usePostApiUnitsByType<TContext>(
 	options: {
@@ -20874,7 +20874,7 @@ export const getApiUnitsByTypeByUnitIdQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiUnitsByTypeByUnitIdOptions, "headers">) =>
-	[{ url: "/api/units/:type/:unitId", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/units/:type/:unitId", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiUnitsByTypeByUnitIdQueryKey = ReturnType<typeof getApiUnitsByTypeByUnitIdQueryKey>;
 
@@ -20909,7 +20909,7 @@ export function getApiUnitsByTypeByUnitIdQueryOptions(
 
 /**
  * @summary Get unit
- * {@link /api/units/:type/:unitId}
+ * {@link /api/v1/units/:type/:unitId}
  */
 export function useGetApiUnitsByTypeByUnitId<
 	TData = GetApiUnitsByTypeByUnitIdStatus200,
@@ -20974,7 +20974,7 @@ export function useGetApiUnitsByTypeByUnitId<
 }
 
 export const patchApiUnitsByTypeByUnitIdMutationKey = () =>
-	[{ url: "/api/units/:type/:unitId" }] as const;
+	[{ url: "/api/v1/units/:type/:unitId" }] as const;
 
 export function patchApiUnitsByTypeByUnitIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -21010,7 +21010,7 @@ export function patchApiUnitsByTypeByUnitIdMutationOptions<TContext = unknown>(
 
 /**
  * @summary Update unit
- * {@link /api/units/:type/:unitId}
+ * {@link /api/v1/units/:type/:unitId}
  */
 export function usePatchApiUnitsByTypeByUnitId<TContext>(
 	options: {
@@ -21091,7 +21091,7 @@ export function usePatchApiUnitsByTypeByUnitId<TContext>(
 }
 
 export const patchApiUnitsByTypeByUnitIdVariantContextMutationKey = () =>
-	[{ url: "/api/units/:type/:unitId/variant-context" }] as const;
+	[{ url: "/api/v1/units/:type/:unitId/variant-context" }] as const;
 
 export function patchApiUnitsByTypeByUnitIdVariantContextMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -21127,7 +21127,7 @@ export function patchApiUnitsByTypeByUnitIdVariantContextMutationOptions<TContex
 
 /**
  * @summary Update Unit Main relationship
- * {@link /api/units/:type/:unitId/variant-context}
+ * {@link /api/v1/units/:type/:unitId/variant-context}
  */
 export function usePatchApiUnitsByTypeByUnitIdVariantContext<TContext>(
 	options: {
@@ -21211,7 +21211,7 @@ export function usePatchApiUnitsByTypeByUnitIdVariantContext<TContext>(
 }
 
 export const postApiUnitsByTypeByUnitIdVariantContextPromoteMutationKey = () =>
-	[{ url: "/api/units/:type/:unitId/variant-context/promote" }] as const;
+	[{ url: "/api/v1/units/:type/:unitId/variant-context/promote" }] as const;
 
 export function postApiUnitsByTypeByUnitIdVariantContextPromoteMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -21247,7 +21247,7 @@ export function postApiUnitsByTypeByUnitIdVariantContextPromoteMutationOptions<T
 
 /**
  * @summary Promote Unit Variant to Main
- * {@link /api/units/:type/:unitId/variant-context/promote}
+ * {@link /api/v1/units/:type/:unitId/variant-context/promote}
  */
 export function usePostApiUnitsByTypeByUnitIdVariantContextPromote<TContext>(
 	options: {
@@ -21331,7 +21331,7 @@ export function usePostApiUnitsByTypeByUnitIdVariantContextPromote<TContext>(
 }
 
 export const putApiUnitsByTypeByUnitIdLocalizationsByLanguageMutationKey = () =>
-	[{ url: "/api/units/:type/:unitId/localizations/:language" }] as const;
+	[{ url: "/api/v1/units/:type/:unitId/localizations/:language" }] as const;
 
 export function putApiUnitsByTypeByUnitIdLocalizationsByLanguageMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -21366,7 +21366,7 @@ export function putApiUnitsByTypeByUnitIdLocalizationsByLanguageMutationOptions<
 
 /**
  * @summary Create or replace unit localization
- * {@link /api/units/:type/:unitId/localizations/:language}
+ * {@link /api/v1/units/:type/:unitId/localizations/:language}
  */
 export function usePutApiUnitsByTypeByUnitIdLocalizationsByLanguage<TContext>(
 	options: {
@@ -21451,7 +21451,7 @@ export const getApiHistoryUnitsByUnitIdRevisionsQueryKey = ({
 	query,
 }: Omit<GetApiHistoryUnitsByUnitIdRevisionsOptions, "headers">) =>
 	[
-		{ url: "/api/history/units/:unitId/revisions", params: path },
+		{ url: "/api/v1/history/units/:unitId/revisions", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -21491,7 +21491,7 @@ export function getApiHistoryUnitsByUnitIdRevisionsQueryOptions(
 
 /**
  * @summary List Unit revisions
- * {@link /api/history/units/:unitId/revisions}
+ * {@link /api/v1/history/units/:unitId/revisions}
  */
 export function useGetApiHistoryUnitsByUnitIdRevisions<
 	TData = GetApiHistoryUnitsByUnitIdRevisionsStatus200,
@@ -21561,7 +21561,7 @@ export function useGetApiHistoryUnitsByUnitIdRevisions<
 export const getApiHistoryUnitRevisionsByRevisionIdQueryKey = ({
 	path,
 }: Omit<GetApiHistoryUnitRevisionsByRevisionIdOptions, "headers">) =>
-	[{ url: "/api/history/unit-revisions/:revisionId", params: path }] as const;
+	[{ url: "/api/v1/history/unit-revisions/:revisionId", params: path }] as const;
 
 type GetApiHistoryUnitRevisionsByRevisionIdQueryKey = ReturnType<
 	typeof getApiHistoryUnitRevisionsByRevisionIdQueryKey
@@ -21597,7 +21597,7 @@ export function getApiHistoryUnitRevisionsByRevisionIdQueryOptions(
 
 /**
  * @summary Get Unit revision
- * {@link /api/history/unit-revisions/:revisionId}
+ * {@link /api/v1/history/unit-revisions/:revisionId}
  */
 export function useGetApiHistoryUnitRevisionsByRevisionId<
 	TData = GetApiHistoryUnitRevisionsByRevisionIdStatus200,
@@ -21660,7 +21660,7 @@ export const getApiHistoryUnitsByUnitIdCompareQueryKey = ({
 	query,
 }: Omit<GetApiHistoryUnitsByUnitIdCompareOptions, "headers">) =>
 	[
-		{ url: "/api/history/units/:unitId/compare", params: path },
+		{ url: "/api/v1/history/units/:unitId/compare", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -21699,7 +21699,7 @@ export function getApiHistoryUnitsByUnitIdCompareQueryOptions(
 
 /**
  * @summary Compare Unit revisions
- * {@link /api/history/units/:unitId/compare}
+ * {@link /api/v1/history/units/:unitId/compare}
  */
 export function useGetApiHistoryUnitsByUnitIdCompare<
 	TData = GetApiHistoryUnitsByUnitIdCompareStatus200,
@@ -21765,7 +21765,7 @@ export function useGetApiHistoryUnitsByUnitIdCompare<
 }
 
 export const postApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreMutationKey = () =>
-	[{ url: "/api/history/units/:unitId/revisions/:revisionId/restore" }] as const;
+	[{ url: "/api/v1/history/units/:unitId/revisions/:revisionId/restore" }] as const;
 
 export function postApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreMutationOptions<
 	TContext = unknown,
@@ -21800,7 +21800,7 @@ export function postApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreMutationO
 
 /**
  * @summary Restore Unit revision
- * {@link /api/history/units/:unitId/revisions/:revisionId/restore}
+ * {@link /api/v1/history/units/:unitId/revisions/:revisionId/restore}
  */
 export function usePostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestore<TContext>(
 	options: {
@@ -21881,7 +21881,7 @@ export function usePostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestore<TCont
 }
 
 export const postApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoMutationKey = () =>
-	[{ url: "/api/history/units/:unitId/revisions/:revisionId/undo" }] as const;
+	[{ url: "/api/v1/history/units/:unitId/revisions/:revisionId/undo" }] as const;
 
 export function postApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoMutationOptions<
 	TContext = unknown,
@@ -21916,7 +21916,7 @@ export function postApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoMutationOpti
 
 /**
  * @summary Undo Unit revision
- * {@link /api/history/units/:unitId/revisions/:revisionId/undo}
+ * {@link /api/v1/history/units/:unitId/revisions/:revisionId/undo}
  */
 export function usePostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndo<TContext>(
 	options: {
@@ -21997,7 +21997,7 @@ export function usePostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndo<TContext
 }
 
 export const patchApiHistoryUnitRevisionsByRevisionIdVisibilityMutationKey = () =>
-	[{ url: "/api/history/unit-revisions/:revisionId/visibility" }] as const;
+	[{ url: "/api/v1/history/unit-revisions/:revisionId/visibility" }] as const;
 
 export function patchApiHistoryUnitRevisionsByRevisionIdVisibilityMutationOptions<
 	TContext = unknown,
@@ -22032,7 +22032,7 @@ export function patchApiHistoryUnitRevisionsByRevisionIdVisibilityMutationOption
 
 /**
  * @summary Update revision visibility
- * {@link /api/history/unit-revisions/:revisionId/visibility}
+ * {@link /api/v1/history/unit-revisions/:revisionId/visibility}
  */
 export function usePatchApiHistoryUnitRevisionsByRevisionIdVisibility<TContext>(
 	options: {
@@ -22115,7 +22115,7 @@ export function usePatchApiHistoryUnitRevisionsByRevisionIdVisibility<TContext>(
 export const getApiHistoryRecentChangesQueryKey = ({
 	query,
 }: Omit<GetApiHistoryRecentChangesOptions, "headers"> = {}) =>
-	[{ url: "/api/history/recent-changes" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/history/recent-changes" }, ...(query ? [query] : [])] as const;
 
 type GetApiHistoryRecentChangesQueryKey = ReturnType<typeof getApiHistoryRecentChangesQueryKey>;
 
@@ -22149,7 +22149,7 @@ export function getApiHistoryRecentChangesQueryOptions(
 
 /**
  * @summary List recent changes
- * {@link /api/history/recent-changes}
+ * {@link /api/v1/history/recent-changes}
  */
 export function useGetApiHistoryRecentChanges<
 	TData = GetApiHistoryRecentChangesStatus200,
@@ -22212,7 +22212,7 @@ export const getApiHistoryContributionsByProfileIdQueryKey = ({
 	query,
 }: Omit<GetApiHistoryContributionsByProfileIdOptions, "headers">) =>
 	[
-		{ url: "/api/history/contributions/:profileId", params: path },
+		{ url: "/api/v1/history/contributions/:profileId", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -22251,7 +22251,7 @@ export function getApiHistoryContributionsByProfileIdQueryOptions(
 
 /**
  * @summary List profile contributions
- * {@link /api/history/contributions/:profileId}
+ * {@link /api/v1/history/contributions/:profileId}
  */
 export function useGetApiHistoryContributionsByProfileId<
 	TData = GetApiHistoryContributionsByProfileIdStatus200,
@@ -22316,7 +22316,8 @@ export function useGetApiHistoryContributionsByProfileId<
 	return queryResult;
 }
 
-export const getApiHistoryChangeTagsQueryKey = () => [{ url: "/api/history/change-tags" }] as const;
+export const getApiHistoryChangeTagsQueryKey = () =>
+	[{ url: "/api/v1/history/change-tags" }] as const;
 
 type GetApiHistoryChangeTagsQueryKey = ReturnType<typeof getApiHistoryChangeTagsQueryKey>;
 
@@ -22344,7 +22345,7 @@ export function getApiHistoryChangeTagsQueryOptions(
 
 /**
  * @summary List revision change tags
- * {@link /api/history/change-tags}
+ * {@link /api/v1/history/change-tags}
  */
 export function useGetApiHistoryChangeTags<
 	TData = GetApiHistoryChangeTagsStatus200,
@@ -22385,7 +22386,7 @@ export function useGetApiHistoryChangeTags<
 }
 
 export const getApiEntitiesQueryKey = ({ query }: Omit<GetApiEntitiesOptions, "headers"> = {}) =>
-	[{ url: "/api/entities" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/entities" }, ...(query ? [query] : [])] as const;
 
 type GetApiEntitiesQueryKey = ReturnType<typeof getApiEntitiesQueryKey>;
 
@@ -22420,7 +22421,7 @@ export function getApiEntitiesQueryOptions(
 
 /**
  * @summary List entity entries
- * {@link /api/entities}
+ * {@link /api/v1/entities}
  */
 export function useGetApiEntities<
 	TData = GetApiEntitiesStatus200,
@@ -22475,7 +22476,7 @@ export function useGetApiEntities<
 	return queryResult;
 }
 
-export const postApiEntitiesMutationKey = () => [{ url: "/api/entities" }] as const;
+export const postApiEntitiesMutationKey = () => [{ url: "/api/v1/entities" }] as const;
 
 export function postApiEntitiesMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -22503,7 +22504,7 @@ export function postApiEntitiesMutationOptions<TContext = unknown>(
 
 /**
  * @summary Create entity entry
- * {@link /api/entities}
+ * {@link /api/v1/entities}
  */
 export function usePostApiEntities<TContext>(
 	options: {
@@ -22575,7 +22576,7 @@ export const getApiEntitiesByUnitIdQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiEntitiesByUnitIdOptions, "headers">) =>
-	[{ url: "/api/entities/:unitId", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/entities/:unitId", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiEntitiesByUnitIdQueryKey = ReturnType<typeof getApiEntitiesByUnitIdQueryKey>;
 
@@ -22610,7 +22611,7 @@ export function getApiEntitiesByUnitIdQueryOptions(
 
 /**
  * @summary Get entity entry
- * {@link /api/entities/:unitId}
+ * {@link /api/v1/entities/:unitId}
  */
 export function useGetApiEntitiesByUnitId<
 	TData = GetApiEntitiesByUnitIdStatus200,
@@ -22672,7 +22673,7 @@ export function useGetApiEntitiesByUnitId<
 }
 
 export const putApiEntitiesByUnitIdLocalizationsByLanguageMutationKey = () =>
-	[{ url: "/api/entities/:unitId/localizations/:language" }] as const;
+	[{ url: "/api/v1/entities/:unitId/localizations/:language" }] as const;
 
 export function putApiEntitiesByUnitIdLocalizationsByLanguageMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -22706,7 +22707,7 @@ export function putApiEntitiesByUnitIdLocalizationsByLanguageMutationOptions<TCo
 
 /**
  * @summary Create or replace entity localization
- * {@link /api/entities/:unitId/localizations/:language}
+ * {@link /api/v1/entities/:unitId/localizations/:language}
  */
 export function usePutApiEntitiesByUnitIdLocalizationsByLanguage<TContext>(
 	options: {
@@ -22782,7 +22783,7 @@ export function usePutApiEntitiesByUnitIdLocalizationsByLanguage<TContext>(
 }
 
 export const getApiTagsQueryKey = ({ query }: Omit<GetApiTagsOptions, "headers"> = {}) =>
-	[{ url: "/api/tags" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/tags" }, ...(query ? [query] : [])] as const;
 
 type GetApiTagsQueryKey = ReturnType<typeof getApiTagsQueryKey>;
 
@@ -22812,7 +22813,7 @@ export function getApiTagsQueryOptions(
 
 /**
  * @summary List tags
- * {@link /api/tags}
+ * {@link /api/v1/tags}
  */
 export function useGetApiTags<
 	TData = GetApiTagsStatus200,
@@ -22854,7 +22855,7 @@ export function useGetApiTags<
 	return queryResult;
 }
 
-export const postApiTagsMutationKey = () => [{ url: "/api/tags" }] as const;
+export const postApiTagsMutationKey = () => [{ url: "/api/v1/tags" }] as const;
 
 export function postApiTagsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -22881,7 +22882,7 @@ export function postApiTagsMutationOptions<TContext = unknown>(
 
 /**
  * @summary Create tag
- * {@link /api/tags}
+ * {@link /api/v1/tags}
  */
 export function usePostApiTags<TContext>(
 	options: {
@@ -22949,7 +22950,7 @@ export const getApiTagsByTagIdQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiTagsByTagIdOptions, "headers">) =>
-	[{ url: "/api/tags/:tagId", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/tags/:tagId", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiTagsByTagIdQueryKey = ReturnType<typeof getApiTagsByTagIdQueryKey>;
 
@@ -22982,7 +22983,7 @@ export function getApiTagsByTagIdQueryOptions(
 
 /**
  * @summary Get tag detail
- * {@link /api/tags/:tagId}
+ * {@link /api/v1/tags/:tagId}
  */
 export function useGetApiTagsByTagId<
 	TData = GetApiTagsByTagIdStatus200,
@@ -23041,7 +23042,7 @@ export function useGetApiTagsByTagId<
 }
 
 export const putApiTagsByTagIdLocalizationsByLanguageMutationKey = () =>
-	[{ url: "/api/tags/:tagId/localizations/:language" }] as const;
+	[{ url: "/api/v1/tags/:tagId/localizations/:language" }] as const;
 
 export function putApiTagsByTagIdLocalizationsByLanguageMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -23075,7 +23076,7 @@ export function putApiTagsByTagIdLocalizationsByLanguageMutationOptions<TContext
 
 /**
  * @summary Create or replace tag localization
- * {@link /api/tags/:tagId/localizations/:language}
+ * {@link /api/v1/tags/:tagId/localizations/:language}
  */
 export function usePutApiTagsByTagIdLocalizationsByLanguage<TContext>(
 	options: {
@@ -23153,7 +23154,7 @@ export function usePutApiTagsByTagIdLocalizationsByLanguage<TContext>(
 export const getApiUnitsByTypeByUnitIdAliasesQueryKey = ({
 	path,
 }: Omit<GetApiUnitsByTypeByUnitIdAliasesOptions, "headers">) =>
-	[{ url: "/api/units/:type/:unitId/aliases", params: path }] as const;
+	[{ url: "/api/v1/units/:type/:unitId/aliases", params: path }] as const;
 
 type GetApiUnitsByTypeByUnitIdAliasesQueryKey = ReturnType<
 	typeof getApiUnitsByTypeByUnitIdAliasesQueryKey
@@ -23189,7 +23190,7 @@ export function getApiUnitsByTypeByUnitIdAliasesQueryOptions(
 
 /**
  * @summary List Unit aliases
- * {@link /api/units/:type/:unitId/aliases}
+ * {@link /api/v1/units/:type/:unitId/aliases}
  */
 export function useGetApiUnitsByTypeByUnitIdAliases<
 	TData = GetApiUnitsByTypeByUnitIdAliasesStatus200,
@@ -23248,7 +23249,7 @@ export function useGetApiUnitsByTypeByUnitIdAliases<
 }
 
 export const postApiUnitsByTypeByUnitIdAliasesMutationKey = () =>
-	[{ url: "/api/units/:type/:unitId/aliases" }] as const;
+	[{ url: "/api/v1/units/:type/:unitId/aliases" }] as const;
 
 export function postApiUnitsByTypeByUnitIdAliasesMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -23282,7 +23283,7 @@ export function postApiUnitsByTypeByUnitIdAliasesMutationOptions<TContext = unkn
 
 /**
  * @summary Add Unit alias
- * {@link /api/units/:type/:unitId/aliases}
+ * {@link /api/v1/units/:type/:unitId/aliases}
  */
 export function usePostApiUnitsByTypeByUnitIdAliases<TContext>(
 	options: {
@@ -23358,7 +23359,7 @@ export function usePostApiUnitsByTypeByUnitIdAliases<TContext>(
 }
 
 export const deleteApiUnitsByTypeByUnitIdAliasesByAliasIdMutationKey = () =>
-	[{ url: "/api/units/:type/:unitId/aliases/:aliasId" }] as const;
+	[{ url: "/api/v1/units/:type/:unitId/aliases/:aliasId" }] as const;
 
 export function deleteApiUnitsByTypeByUnitIdAliasesByAliasIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -23390,7 +23391,7 @@ export function deleteApiUnitsByTypeByUnitIdAliasesByAliasIdMutationOptions<TCon
 
 /**
  * @summary Delete Unit alias
- * {@link /api/units/:type/:unitId/aliases/:aliasId}
+ * {@link /api/v1/units/:type/:unitId/aliases/:aliasId}
  */
 export function useDeleteApiUnitsByTypeByUnitIdAliasesByAliasId<TContext>(
 	options: {
@@ -23462,7 +23463,7 @@ export function useDeleteApiUnitsByTypeByUnitIdAliasesByAliasId<TContext>(
 }
 
 export const putApiUnitsByTypeByUnitIdAliasesByAliasIdVoteMutationKey = () =>
-	[{ url: "/api/units/:type/:unitId/aliases/:aliasId/vote" }] as const;
+	[{ url: "/api/v1/units/:type/:unitId/aliases/:aliasId/vote" }] as const;
 
 export function putApiUnitsByTypeByUnitIdAliasesByAliasIdVoteMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -23495,7 +23496,7 @@ export function putApiUnitsByTypeByUnitIdAliasesByAliasIdVoteMutationOptions<TCo
 
 /**
  * @summary Vote on Unit alias
- * {@link /api/units/:type/:unitId/aliases/:aliasId/vote}
+ * {@link /api/v1/units/:type/:unitId/aliases/:aliasId/vote}
  */
 export function usePutApiUnitsByTypeByUnitIdAliasesByAliasIdVote<TContext>(
 	options: {
@@ -23567,7 +23568,7 @@ export function usePutApiUnitsByTypeByUnitIdAliasesByAliasIdVote<TContext>(
 }
 
 export const deleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteMutationKey = () =>
-	[{ url: "/api/units/:type/:unitId/aliases/:aliasId/vote" }] as const;
+	[{ url: "/api/v1/units/:type/:unitId/aliases/:aliasId/vote" }] as const;
 
 export function deleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -23598,7 +23599,7 @@ export function deleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteMutationOptions<
 
 /**
  * @summary Remove Unit alias vote
- * {@link /api/units/:type/:unitId/aliases/:aliasId/vote}
+ * {@link /api/v1/units/:type/:unitId/aliases/:aliasId/vote}
  */
 export function useDeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote<TContext>(
 	options: {
@@ -23667,7 +23668,7 @@ export function useDeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote<TContext>(
 }
 
 export const postApiUnitsByTypeByUnitIdCreditAttributionsMutationKey = () =>
-	[{ url: "/api/units/:type/:unitId/credit-attributions" }] as const;
+	[{ url: "/api/v1/units/:type/:unitId/credit-attributions" }] as const;
 
 export function postApiUnitsByTypeByUnitIdCreditAttributionsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -23701,7 +23702,7 @@ export function postApiUnitsByTypeByUnitIdCreditAttributionsMutationOptions<TCon
 
 /**
  * @summary Add Unit credit attribution
- * {@link /api/units/:type/:unitId/credit-attributions}
+ * {@link /api/v1/units/:type/:unitId/credit-attributions}
  */
 export function usePostApiUnitsByTypeByUnitIdCreditAttributions<TContext>(
 	options: {
@@ -23777,7 +23778,7 @@ export function usePostApiUnitsByTypeByUnitIdCreditAttributions<TContext>(
 }
 
 export const deleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdMutationKey = () =>
-	[{ url: "/api/units/:type/:unitId/credit-attributions/:associationId" }] as const;
+	[{ url: "/api/v1/units/:type/:unitId/credit-attributions/:associationId" }] as const;
 
 export function deleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdMutationOptions<
 	TContext = unknown,
@@ -23809,7 +23810,7 @@ export function deleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdMut
 
 /**
  * @summary Remove Unit credit attribution
- * {@link /api/units/:type/:unitId/credit-attributions/:associationId}
+ * {@link /api/v1/units/:type/:unitId/credit-attributions/:associationId}
  */
 export function useDeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId<TContext>(
 	options: {
@@ -23883,7 +23884,7 @@ export function useDeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId
 }
 
 export const postApiUnitsByTypeByUnitIdSubjectAssociationsMutationKey = () =>
-	[{ url: "/api/units/:type/:unitId/subject-associations" }] as const;
+	[{ url: "/api/v1/units/:type/:unitId/subject-associations" }] as const;
 
 export function postApiUnitsByTypeByUnitIdSubjectAssociationsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -23917,7 +23918,7 @@ export function postApiUnitsByTypeByUnitIdSubjectAssociationsMutationOptions<TCo
 
 /**
  * @summary Add Unit subject association
- * {@link /api/units/:type/:unitId/subject-associations}
+ * {@link /api/v1/units/:type/:unitId/subject-associations}
  */
 export function usePostApiUnitsByTypeByUnitIdSubjectAssociations<TContext>(
 	options: {
@@ -23993,7 +23994,7 @@ export function usePostApiUnitsByTypeByUnitIdSubjectAssociations<TContext>(
 }
 
 export const deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdMutationKey = () =>
-	[{ url: "/api/units/:type/:unitId/subject-associations/:associationId" }] as const;
+	[{ url: "/api/v1/units/:type/:unitId/subject-associations/:associationId" }] as const;
 
 export function deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdMutationOptions<
 	TContext = unknown,
@@ -24025,7 +24026,7 @@ export function deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdMu
 
 /**
  * @summary Remove Unit subject association
- * {@link /api/units/:type/:unitId/subject-associations/:associationId}
+ * {@link /api/v1/units/:type/:unitId/subject-associations/:associationId}
  */
 export function useDeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationId<TContext>(
 	options: {
@@ -24099,7 +24100,7 @@ export function useDeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationI
 }
 
 export const postApiUnitsByTypeByUnitIdLinksMutationKey = () =>
-	[{ url: "/api/units/:type/:unitId/links" }] as const;
+	[{ url: "/api/v1/units/:type/:unitId/links" }] as const;
 
 export function postApiUnitsByTypeByUnitIdLinksMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -24133,7 +24134,7 @@ export function postApiUnitsByTypeByUnitIdLinksMutationOptions<TContext = unknow
 
 /**
  * @summary Add unit source link
- * {@link /api/units/:type/:unitId/links}
+ * {@link /api/v1/units/:type/:unitId/links}
  */
 export function usePostApiUnitsByTypeByUnitIdLinks<TContext>(
 	options: {
@@ -24208,7 +24209,7 @@ export function usePostApiUnitsByTypeByUnitIdLinks<TContext>(
 }
 
 export const deleteApiUnitsByTypeByUnitIdLinksByLinkIdMutationKey = () =>
-	[{ url: "/api/units/:type/:unitId/links/:linkId" }] as const;
+	[{ url: "/api/v1/units/:type/:unitId/links/:linkId" }] as const;
 
 export function deleteApiUnitsByTypeByUnitIdLinksByLinkIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -24240,7 +24241,7 @@ export function deleteApiUnitsByTypeByUnitIdLinksByLinkIdMutationOptions<TContex
 
 /**
  * @summary Remove unit source link
- * {@link /api/units/:type/:unitId/links/:linkId}
+ * {@link /api/v1/units/:type/:unitId/links/:linkId}
  */
 export function useDeleteApiUnitsByTypeByUnitIdLinksByLinkId<TContext>(
 	options: {
@@ -24312,7 +24313,7 @@ export function useDeleteApiUnitsByTypeByUnitIdLinksByLinkId<TContext>(
 }
 
 export const putApiUnitsByTypeByUnitIdTagsByTagIdMutationKey = () =>
-	[{ url: "/api/units/:type/:unitId/tags/:tagId" }] as const;
+	[{ url: "/api/v1/units/:type/:unitId/tags/:tagId" }] as const;
 
 export function putApiUnitsByTypeByUnitIdTagsByTagIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -24346,7 +24347,7 @@ export function putApiUnitsByTypeByUnitIdTagsByTagIdMutationOptions<TContext = u
 
 /**
  * @summary Tag unit
- * {@link /api/units/:type/:unitId/tags/:tagId}
+ * {@link /api/v1/units/:type/:unitId/tags/:tagId}
  */
 export function usePutApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 	options: {
@@ -24422,7 +24423,7 @@ export function usePutApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 }
 
 export const patchApiUnitsByTypeByUnitIdTagsByTagIdMutationKey = () =>
-	[{ url: "/api/units/:type/:unitId/tags/:tagId" }] as const;
+	[{ url: "/api/v1/units/:type/:unitId/tags/:tagId" }] as const;
 
 export function patchApiUnitsByTypeByUnitIdTagsByTagIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -24457,7 +24458,7 @@ export function patchApiUnitsByTypeByUnitIdTagsByTagIdMutationOptions<TContext =
 
 /**
  * @summary Update Unit tag curation
- * {@link /api/units/:type/:unitId/tags/:tagId}
+ * {@link /api/v1/units/:type/:unitId/tags/:tagId}
  */
 export function usePatchApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 	options: {
@@ -24537,7 +24538,7 @@ export function usePatchApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 }
 
 export const deleteApiUnitsByTypeByUnitIdTagsByTagIdMutationKey = () =>
-	[{ url: "/api/units/:type/:unitId/tags/:tagId" }] as const;
+	[{ url: "/api/v1/units/:type/:unitId/tags/:tagId" }] as const;
 
 export function deleteApiUnitsByTypeByUnitIdTagsByTagIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -24569,7 +24570,7 @@ export function deleteApiUnitsByTypeByUnitIdTagsByTagIdMutationOptions<TContext 
 
 /**
  * @summary Remove Unit tag
- * {@link /api/units/:type/:unitId/tags/:tagId}
+ * {@link /api/v1/units/:type/:unitId/tags/:tagId}
  */
 export function useDeleteApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 	options: {
@@ -24641,7 +24642,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 }
 
 export const putApiUnitsByTypeByUnitIdTagsByTagIdVoteMutationKey = () =>
-	[{ url: "/api/units/:type/:unitId/tags/:tagId/vote" }] as const;
+	[{ url: "/api/v1/units/:type/:unitId/tags/:tagId/vote" }] as const;
 
 export function putApiUnitsByTypeByUnitIdTagsByTagIdVoteMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -24675,7 +24676,7 @@ export function putApiUnitsByTypeByUnitIdTagsByTagIdVoteMutationOptions<TContext
 
 /**
  * @summary Vote on Unit tag
- * {@link /api/units/:type/:unitId/tags/:tagId/vote}
+ * {@link /api/v1/units/:type/:unitId/tags/:tagId/vote}
  */
 export function usePutApiUnitsByTypeByUnitIdTagsByTagIdVote<TContext>(
 	options: {
@@ -24751,7 +24752,7 @@ export function usePutApiUnitsByTypeByUnitIdTagsByTagIdVote<TContext>(
 }
 
 export const deleteApiUnitsByTypeByUnitIdTagsByTagIdVoteMutationKey = () =>
-	[{ url: "/api/units/:type/:unitId/tags/:tagId/vote" }] as const;
+	[{ url: "/api/v1/units/:type/:unitId/tags/:tagId/vote" }] as const;
 
 export function deleteApiUnitsByTypeByUnitIdTagsByTagIdVoteMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -24783,7 +24784,7 @@ export function deleteApiUnitsByTypeByUnitIdTagsByTagIdVoteMutationOptions<TCont
 
 /**
  * @summary Remove Unit tag vote
- * {@link /api/units/:type/:unitId/tags/:tagId/vote}
+ * {@link /api/v1/units/:type/:unitId/tags/:tagId/vote}
  */
 export function useDeleteApiUnitsByTypeByUnitIdTagsByTagIdVote<TContext>(
 	options: {
@@ -24854,120 +24855,10 @@ export function useDeleteApiUnitsByTypeByUnitIdTagsByTagIdVote<TContext>(
 	>;
 }
 
-export const putApiUnitsByTypeByUnitIdVersionOfByCanonicalIdMutationKey = () =>
-	[{ url: "/api/units/:type/:unitId/version-of/:canonicalId" }] as const;
-
-export function putApiUnitsByTypeByUnitIdVersionOfByCanonicalIdMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = putApiUnitsByTypeByUnitIdVersionOfByCanonicalIdMutationKey();
-	return mutationOptions<
-		PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus200,
-		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403
-			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404
-			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409
-			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus422
-			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429
-			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus500
-		>,
-		PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path }) => {
-			const { data } = await putApiUnitsByTypeByUnitIdVersionOfByCanonicalId({
-				...config,
-				path,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Attach unit version (legacy)
- * @deprecated
- * {@link /api/units/:type/:unitId/version-of/:canonicalId}
- */
-export function usePutApiUnitsByTypeByUnitIdVersionOfByCanonicalId<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus200,
-			ResponseErrorConfig<
-				| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403
-				| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404
-				| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409
-				| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus422
-				| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429
-				| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus500
-			>,
-			PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? putApiUnitsByTypeByUnitIdVersionOfByCanonicalIdMutationKey();
-
-	const baseOptions = putApiUnitsByTypeByUnitIdVersionOfByCanonicalIdMutationOptions(
-		config,
-	) as UseMutationOptions<
-		PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus200,
-		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403
-			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404
-			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409
-			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus422
-			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429
-			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus500
-		>,
-		PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus200,
-		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403
-			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404
-			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409
-			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus422
-			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429
-			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus500
-		>,
-		PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus200,
-		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403
-			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404
-			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409
-			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus422
-			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429
-			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus500
-		>,
-		PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdOptions,
-		TContext
-	>;
-}
-
 export const getApiUnitsByIdByUnitIdContentStructuresQueryKey = ({
 	path,
 }: Omit<GetApiUnitsByIdByUnitIdContentStructuresOptions, "headers">) =>
-	[{ url: "/api/units/by-id/:unitId/content-structures", params: path }] as const;
+	[{ url: "/api/v1/units/by-id/:unitId/content-structures", params: path }] as const;
 
 type GetApiUnitsByIdByUnitIdContentStructuresQueryKey = ReturnType<
 	typeof getApiUnitsByIdByUnitIdContentStructuresQueryKey
@@ -25004,7 +24895,7 @@ export function getApiUnitsByIdByUnitIdContentStructuresQueryOptions(
 
 /**
  * @summary List Unit Content Structures
- * {@link /api/units/by-id/:unitId/content-structures}
+ * {@link /api/v1/units/by-id/:unitId/content-structures}
  */
 export function useGetApiUnitsByIdByUnitIdContentStructures<
 	TData = GetApiUnitsByIdByUnitIdContentStructuresStatus200,
@@ -25066,7 +24957,7 @@ export function useGetApiUnitsByIdByUnitIdContentStructures<
 }
 
 export const postApiUnitsByIdByUnitIdContentStructuresMutationKey = () =>
-	[{ url: "/api/units/by-id/:unitId/content-structures" }] as const;
+	[{ url: "/api/v1/units/by-id/:unitId/content-structures" }] as const;
 
 export function postApiUnitsByIdByUnitIdContentStructuresMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -25099,7 +24990,7 @@ export function postApiUnitsByIdByUnitIdContentStructuresMutationOptions<TContex
 
 /**
  * @summary Create Content Structure
- * {@link /api/units/by-id/:unitId/content-structures}
+ * {@link /api/v1/units/by-id/:unitId/content-structures}
  */
 export function usePostApiUnitsByIdByUnitIdContentStructures<TContext>(
 	options: {
@@ -25173,7 +25064,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructures<TContext>(
 export const getApiUnitsByIdByUnitIdContentStructuresByStructureIdQueryKey = ({
 	path,
 }: Omit<GetApiUnitsByIdByUnitIdContentStructuresByStructureIdOptions, "headers">) =>
-	[{ url: "/api/units/by-id/:unitId/content-structures/:structureId", params: path }] as const;
+	[{ url: "/api/v1/units/by-id/:unitId/content-structures/:structureId", params: path }] as const;
 
 type GetApiUnitsByIdByUnitIdContentStructuresByStructureIdQueryKey = ReturnType<
 	typeof getApiUnitsByIdByUnitIdContentStructuresByStructureIdQueryKey
@@ -25210,7 +25101,7 @@ export function getApiUnitsByIdByUnitIdContentStructuresByStructureIdQueryOption
 
 /**
  * @summary Get Content Structure
- * {@link /api/units/by-id/:unitId/content-structures/:structureId}
+ * {@link /api/v1/units/by-id/:unitId/content-structures/:structureId}
  */
 export function useGetApiUnitsByIdByUnitIdContentStructuresByStructureId<
 	TData = GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus200,
@@ -25275,7 +25166,7 @@ export function useGetApiUnitsByIdByUnitIdContentStructuresByStructureId<
 }
 
 export const deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdMutationKey = () =>
-	[{ url: "/api/units/by-id/:unitId/content-structures/:structureId" }] as const;
+	[{ url: "/api/v1/units/by-id/:unitId/content-structures/:structureId" }] as const;
 
 export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdMutationOptions<
 	TContext = unknown,
@@ -25309,7 +25200,7 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdMutation
 
 /**
  * @summary Delete Content Structure
- * {@link /api/units/by-id/:unitId/content-structures/:structureId}
+ * {@link /api/v1/units/by-id/:unitId/content-structures/:structureId}
  */
 export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureId<TContext>(
 	options: {
@@ -25390,7 +25281,10 @@ export const getApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsQuery
 	query,
 }: Omit<GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsOptions, "headers">) =>
 	[
-		{ url: "/api/units/by-id/:unitId/content-structures/:structureId/revisions", params: path },
+		{
+			url: "/api/v1/units/by-id/:unitId/content-structures/:structureId/revisions",
+			params: path,
+		},
 		...(query ? [query] : []),
 	] as const;
 
@@ -25433,7 +25327,7 @@ export function getApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsQu
 
 /**
  * @summary List Content Structure revisions
- * {@link /api/units/by-id/:unitId/content-structures/:structureId/revisions}
+ * {@link /api/v1/units/by-id/:unitId/content-structures/:structureId/revisions}
  */
 export function useGetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisions<
 	TData = GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus200,
@@ -25509,7 +25403,7 @@ export const postApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRe
 	() =>
 		[
 			{
-				url: "/api/units/by-id/:unitId/content-structures/:structureId/revisions/:revisionId/restore",
+				url: "/api/v1/units/by-id/:unitId/content-structures/:structureId/revisions/:revisionId/restore",
 			},
 		] as const;
 
@@ -25544,7 +25438,7 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsB
 
 /**
  * @summary Restore a Content Structure revision
- * {@link /api/units/by-id/:unitId/content-structures/:structureId/revisions/:revisionId/restore}
+ * {@link /api/v1/units/by-id/:unitId/content-structures/:structureId/revisions/:revisionId/restore}
  */
 export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestore<
 	TContext,
@@ -25624,7 +25518,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisio
 }
 
 export const postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesMutationKey = () =>
-	[{ url: "/api/units/by-id/:unitId/content-structures/:structureId/nodes" }] as const;
+	[{ url: "/api/v1/units/by-id/:unitId/content-structures/:structureId/nodes" }] as const;
 
 export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesMutationOptions<
 	TContext = unknown,
@@ -25658,7 +25552,7 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesMutat
 
 /**
  * @summary Insert Content Structure node
- * {@link /api/units/by-id/:unitId/content-structures/:structureId/nodes}
+ * {@link /api/v1/units/by-id/:unitId/content-structures/:structureId/nodes}
  */
 export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes<TContext>(
 	options: {
@@ -25735,7 +25629,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes<T
 }
 
 export const patchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdMutationKey = () =>
-	[{ url: "/api/units/by-id/:unitId/content-structures/:structureId/nodes/:nodeId" }] as const;
+	[{ url: "/api/v1/units/by-id/:unitId/content-structures/:structureId/nodes/:nodeId" }] as const;
 
 export function patchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdMutationOptions<
 	TContext = unknown,
@@ -25771,7 +25665,7 @@ export function patchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNo
 
 /**
  * @summary Update Content Structure node
- * {@link /api/units/by-id/:unitId/content-structures/:structureId/nodes/:nodeId}
+ * {@link /api/v1/units/by-id/:unitId/content-structures/:structureId/nodes/:nodeId}
  */
 export function usePatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId<TContext>(
 	options: {
@@ -25851,7 +25745,7 @@ export function usePatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesB
 export const deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdMutationKey =
 	() =>
 		[
-			{ url: "/api/units/by-id/:unitId/content-structures/:structureId/nodes/:nodeId" },
+			{ url: "/api/v1/units/by-id/:unitId/content-structures/:structureId/nodes/:nodeId" },
 		] as const;
 
 export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdMutationOptions<
@@ -25888,7 +25782,7 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByN
 
 /**
  * @summary Delete Content Structure node subtree
- * {@link /api/units/by-id/:unitId/content-structures/:structureId/nodes/:nodeId}
+ * {@link /api/v1/units/by-id/:unitId/content-structures/:structureId/nodes/:nodeId}
  */
 export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId<TContext>(
 	options: {
@@ -25970,7 +25864,7 @@ export const getApiUnitsBookByUnitIdContentStructureNodesQueryKey = ({
 	query,
 }: Omit<GetApiUnitsBookByUnitIdContentStructureNodesOptions, "headers">) =>
 	[
-		{ url: "/api/units/book/:unitId/content-structure/nodes", params: path },
+		{ url: "/api/v1/units/book/:unitId/content-structure/nodes", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -26009,7 +25903,7 @@ export function getApiUnitsBookByUnitIdContentStructureNodesQueryOptions(
 
 /**
  * @summary List book Content Structure nodes
- * {@link /api/units/book/:unitId/content-structure/nodes}
+ * {@link /api/v1/units/book/:unitId/content-structure/nodes}
  */
 export function useGetApiUnitsBookByUnitIdContentStructureNodes<
 	TData = GetApiUnitsBookByUnitIdContentStructureNodesStatus200,
@@ -26076,7 +25970,7 @@ export function useGetApiUnitsBookByUnitIdContentStructureNodes<
 }
 
 export const putApiUnitsBookByUnitIdContentStructureMutationKey = () =>
-	[{ url: "/api/units/book/:unitId/content-structure" }] as const;
+	[{ url: "/api/v1/units/book/:unitId/content-structure" }] as const;
 
 export function putApiUnitsBookByUnitIdContentStructureMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -26111,7 +26005,7 @@ export function putApiUnitsBookByUnitIdContentStructureMutationOptions<TContext 
 
 /**
  * @summary Save a complete Book Content Structure draft
- * {@link /api/units/book/:unitId/content-structure}
+ * {@link /api/v1/units/book/:unitId/content-structure}
  */
 export function usePutApiUnitsBookByUnitIdContentStructure<TContext>(
 	options: {
@@ -26195,7 +26089,7 @@ export const getApiUnitsMediaByUnitIdContentStructureNodesQueryKey = ({
 	query,
 }: Omit<GetApiUnitsMediaByUnitIdContentStructureNodesOptions, "headers">) =>
 	[
-		{ url: "/api/units/media/:unitId/content-structure/nodes", params: path },
+		{ url: "/api/v1/units/media/:unitId/content-structure/nodes", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -26234,7 +26128,7 @@ export function getApiUnitsMediaByUnitIdContentStructureNodesQueryOptions(
 
 /**
  * @summary List Media Content Structure nodes
- * {@link /api/units/media/:unitId/content-structure/nodes}
+ * {@link /api/v1/units/media/:unitId/content-structure/nodes}
  */
 export function useGetApiUnitsMediaByUnitIdContentStructureNodes<
 	TData = GetApiUnitsMediaByUnitIdContentStructureNodesStatus200,
@@ -26301,7 +26195,7 @@ export function useGetApiUnitsMediaByUnitIdContentStructureNodes<
 }
 
 export const putApiUnitsMediaByUnitIdContentStructureMutationKey = () =>
-	[{ url: "/api/units/media/:unitId/content-structure" }] as const;
+	[{ url: "/api/v1/units/media/:unitId/content-structure" }] as const;
 
 export function putApiUnitsMediaByUnitIdContentStructureMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -26336,7 +26230,7 @@ export function putApiUnitsMediaByUnitIdContentStructureMutationOptions<TContext
 
 /**
  * @summary Save a complete Media Content Structure draft
- * {@link /api/units/media/:unitId/content-structure}
+ * {@link /api/v1/units/media/:unitId/content-structure}
  */
 export function usePutApiUnitsMediaByUnitIdContentStructure<TContext>(
 	options: {
@@ -26419,7 +26313,7 @@ export const getApiChaptersByChapterIdQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiChaptersByChapterIdOptions, "headers">) =>
-	[{ url: "/api/chapters/:chapterId", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/chapters/:chapterId", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiChaptersByChapterIdQueryKey = ReturnType<typeof getApiChaptersByChapterIdQueryKey>;
 
@@ -26454,7 +26348,7 @@ export function getApiChaptersByChapterIdQueryOptions(
 
 /**
  * @summary Read chapter
- * {@link /api/chapters/:chapterId}
+ * {@link /api/v1/chapters/:chapterId}
  */
 export function useGetApiChaptersByChapterId<
 	TData = GetApiChaptersByChapterIdStatus200,
@@ -26519,7 +26413,7 @@ export function useGetApiChaptersByChapterId<
 }
 
 export const putApiChaptersByChapterIdLocalizationsByLanguageContentMutationKey = () =>
-	[{ url: "/api/chapters/:chapterId/localizations/:language/content" }] as const;
+	[{ url: "/api/v1/chapters/:chapterId/localizations/:language/content" }] as const;
 
 export function putApiChaptersByChapterIdLocalizationsByLanguageContentMutationOptions<
 	TContext = unknown,
@@ -26554,7 +26448,7 @@ export function putApiChaptersByChapterIdLocalizationsByLanguageContentMutationO
 
 /**
  * @summary Create or replace chapter content
- * {@link /api/chapters/:chapterId/localizations/:language/content}
+ * {@link /api/v1/chapters/:chapterId/localizations/:language/content}
  */
 export function usePutApiChaptersByChapterIdLocalizationsByLanguageContent<TContext>(
 	options: {
@@ -26635,7 +26529,7 @@ export function usePutApiChaptersByChapterIdLocalizationsByLanguageContent<TCont
 }
 
 export const getApiProgressQueryKey = ({ query }: Omit<GetApiProgressOptions, "headers"> = {}) =>
-	[{ url: "/api/progress" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/progress" }, ...(query ? [query] : [])] as const;
 
 type GetApiProgressQueryKey = ReturnType<typeof getApiProgressQueryKey>;
 
@@ -26667,7 +26561,7 @@ export function getApiProgressQueryOptions(
 
 /**
  * @summary List current profile progress
- * {@link /api/progress}
+ * {@link /api/v1/progress}
  */
 export function useGetApiProgress<
 	TData = GetApiProgressStatus200,
@@ -26716,7 +26610,7 @@ export function useGetApiProgress<
 	return queryResult;
 }
 
-export const postApiProgressSearchMutationKey = () => [{ url: "/api/progress/search" }] as const;
+export const postApiProgressSearchMutationKey = () => [{ url: "/api/v1/progress/search" }] as const;
 
 export function postApiProgressSearchMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -26743,7 +26637,7 @@ export function postApiProgressSearchMutationOptions<TContext = unknown>(
 
 /**
  * @summary Search current profile progress with a Search Feature state
- * {@link /api/progress/search}
+ * {@link /api/v1/progress/search}
  */
 export function usePostApiProgressSearch<TContext>(
 	options: {
@@ -26810,7 +26704,7 @@ export function usePostApiProgressSearch<TContext>(
 export const getApiProgressByUnitIdQueryKey = ({
 	path,
 }: Omit<GetApiProgressByUnitIdOptions, "headers">) =>
-	[{ url: "/api/progress/:unitId", params: path }] as const;
+	[{ url: "/api/v1/progress/:unitId", params: path }] as const;
 
 type GetApiProgressByUnitIdQueryKey = ReturnType<typeof getApiProgressByUnitIdQueryKey>;
 
@@ -26845,7 +26739,7 @@ export function getApiProgressByUnitIdQueryOptions(
 
 /**
  * @summary Get progress state
- * {@link /api/progress/:unitId}
+ * {@link /api/v1/progress/:unitId}
  */
 export function useGetApiProgressByUnitId<
 	TData = GetApiProgressByUnitIdStatus200,
@@ -26902,7 +26796,8 @@ export function useGetApiProgressByUnitId<
 	return queryResult;
 }
 
-export const putApiProgressByUnitIdMutationKey = () => [{ url: "/api/progress/:unitId" }] as const;
+export const putApiProgressByUnitIdMutationKey = () =>
+	[{ url: "/api/v1/progress/:unitId" }] as const;
 
 export function putApiProgressByUnitIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -26935,7 +26830,7 @@ export function putApiProgressByUnitIdMutationOptions<TContext = unknown>(
 
 /**
  * @summary Create or replace progress
- * {@link /api/progress/:unitId}
+ * {@link /api/v1/progress/:unitId}
  */
 export function usePutApiProgressByUnitId<TContext>(
 	options: {
@@ -27004,7 +26899,7 @@ export function usePutApiProgressByUnitId<TContext>(
 }
 
 export const deleteApiProgressByUnitIdMutationKey = () =>
-	[{ url: "/api/progress/:unitId" }] as const;
+	[{ url: "/api/v1/progress/:unitId" }] as const;
 
 export function deleteApiProgressByUnitIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -27034,7 +26929,7 @@ export function deleteApiProgressByUnitIdMutationOptions<TContext = unknown>(
 
 /**
  * @summary Delete progress
- * {@link /api/progress/:unitId}
+ * {@link /api/v1/progress/:unitId}
  */
 export function useDeleteApiProgressByUnitId<TContext>(
 	options: {
@@ -27098,7 +26993,7 @@ export const getApiProgressByUnitIdEntriesQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiProgressByUnitIdEntriesOptions, "headers">) =>
-	[{ url: "/api/progress/:unitId/entries", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/progress/:unitId/entries", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiProgressByUnitIdEntriesQueryKey = ReturnType<
 	typeof getApiProgressByUnitIdEntriesQueryKey
@@ -27137,7 +27032,7 @@ export function getApiProgressByUnitIdEntriesQueryOptions(
 
 /**
  * @summary List Progress journal entries
- * {@link /api/progress/:unitId/entries}
+ * {@link /api/v1/progress/:unitId/entries}
  */
 export function useGetApiProgressByUnitIdEntries<
 	TData = GetApiProgressByUnitIdEntriesStatus200,
@@ -27207,7 +27102,7 @@ export function useGetApiProgressByUnitIdEntries<
 }
 
 export const postApiProgressByUnitIdEntriesMutationKey = () =>
-	[{ url: "/api/progress/:unitId/entries" }] as const;
+	[{ url: "/api/v1/progress/:unitId/entries" }] as const;
 
 export function postApiProgressByUnitIdEntriesMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -27240,7 +27135,7 @@ export function postApiProgressByUnitIdEntriesMutationOptions<TContext = unknown
 
 /**
  * @summary Create a Progress journal entry
- * {@link /api/progress/:unitId/entries}
+ * {@link /api/v1/progress/:unitId/entries}
  */
 export function usePostApiProgressByUnitIdEntries<TContext>(
 	options: {
@@ -27309,7 +27204,7 @@ export function usePostApiProgressByUnitIdEntries<TContext>(
 }
 
 export const putApiProgressByUnitIdEntriesByEntryIdMutationKey = () =>
-	[{ url: "/api/progress/:unitId/entries/:entryId" }] as const;
+	[{ url: "/api/v1/progress/:unitId/entries/:entryId" }] as const;
 
 export function putApiProgressByUnitIdEntriesByEntryIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -27342,7 +27237,7 @@ export function putApiProgressByUnitIdEntriesByEntryIdMutationOptions<TContext =
 
 /**
  * @summary Replace a Progress journal entry
- * {@link /api/progress/:unitId/entries/:entryId}
+ * {@link /api/v1/progress/:unitId/entries/:entryId}
  */
 export function usePutApiProgressByUnitIdEntriesByEntryId<TContext>(
 	options: {
@@ -27414,7 +27309,7 @@ export function usePutApiProgressByUnitIdEntriesByEntryId<TContext>(
 }
 
 export const deleteApiProgressByUnitIdEntriesByEntryIdMutationKey = () =>
-	[{ url: "/api/progress/:unitId/entries/:entryId" }] as const;
+	[{ url: "/api/v1/progress/:unitId/entries/:entryId" }] as const;
 
 export function deleteApiProgressByUnitIdEntriesByEntryIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -27445,7 +27340,7 @@ export function deleteApiProgressByUnitIdEntriesByEntryIdMutationOptions<TContex
 
 /**
  * @summary Delete a Progress journal entry
- * {@link /api/progress/:unitId/entries/:entryId}
+ * {@link /api/v1/progress/:unitId/entries/:entryId}
  */
 export function useDeleteApiProgressByUnitIdEntriesByEntryId<TContext>(
 	options: {
@@ -27513,7 +27408,7 @@ export function useDeleteApiProgressByUnitIdEntriesByEntryId<TContext>(
 }
 
 export const putApiProgressByUnitIdEntriesByEntryIdCurrentMutationKey = () =>
-	[{ url: "/api/progress/:unitId/entries/:entryId/current" }] as const;
+	[{ url: "/api/v1/progress/:unitId/entries/:entryId/current" }] as const;
 
 export function putApiProgressByUnitIdEntriesByEntryIdCurrentMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -27544,7 +27439,7 @@ export function putApiProgressByUnitIdEntriesByEntryIdCurrentMutationOptions<TCo
 
 /**
  * @summary Set a Progress journal entry as current
- * {@link /api/progress/:unitId/entries/:entryId/current}
+ * {@link /api/v1/progress/:unitId/entries/:entryId/current}
  */
 export function usePutApiProgressByUnitIdEntriesByEntryIdCurrent<TContext>(
 	options: {
@@ -27614,7 +27509,7 @@ export function usePutApiProgressByUnitIdEntriesByEntryIdCurrent<TContext>(
 export const getApiProgressByUnitIdNodesQueryKey = ({
 	path,
 }: Omit<GetApiProgressByUnitIdNodesOptions, "headers">) =>
-	[{ url: "/api/progress/:unitId/nodes", params: path }] as const;
+	[{ url: "/api/v1/progress/:unitId/nodes", params: path }] as const;
 
 type GetApiProgressByUnitIdNodesQueryKey = ReturnType<typeof getApiProgressByUnitIdNodesQueryKey>;
 
@@ -27649,7 +27544,7 @@ export function getApiProgressByUnitIdNodesQueryOptions(
 
 /**
  * @summary List completed Content Structure nodes
- * {@link /api/progress/:unitId/nodes}
+ * {@link /api/v1/progress/:unitId/nodes}
  */
 export function useGetApiProgressByUnitIdNodes<
 	TData = GetApiProgressByUnitIdNodesStatus200,
@@ -27710,7 +27605,7 @@ export function useGetApiProgressByUnitIdNodes<
 }
 
 export const postApiProgressByUnitIdNodesByNodeIdReadMutationKey = () =>
-	[{ url: "/api/progress/:unitId/nodes/:nodeId/read" }] as const;
+	[{ url: "/api/v1/progress/:unitId/nodes/:nodeId/read" }] as const;
 
 export function postApiProgressByUnitIdNodesByNodeIdReadMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -27741,7 +27636,7 @@ export function postApiProgressByUnitIdNodesByNodeIdReadMutationOptions<TContext
 
 /**
  * @summary Record a Book chapter read
- * {@link /api/progress/:unitId/nodes/:nodeId/read}
+ * {@link /api/v1/progress/:unitId/nodes/:nodeId/read}
  */
 export function usePostApiProgressByUnitIdNodesByNodeIdRead<TContext>(
 	options: {
@@ -27809,7 +27704,7 @@ export function usePostApiProgressByUnitIdNodesByNodeIdRead<TContext>(
 }
 
 export const postApiProgressByUnitIdCompleteMutationKey = () =>
-	[{ url: "/api/progress/:unitId/complete" }] as const;
+	[{ url: "/api/v1/progress/:unitId/complete" }] as const;
 
 export function postApiProgressByUnitIdCompleteMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -27842,7 +27737,7 @@ export function postApiProgressByUnitIdCompleteMutationOptions<TContext = unknow
 
 /**
  * @summary Complete current progress
- * {@link /api/progress/:unitId/complete}
+ * {@link /api/v1/progress/:unitId/complete}
  */
 export function usePostApiProgressByUnitIdComplete<TContext>(
 	options: {
@@ -27913,7 +27808,7 @@ export function usePostApiProgressByUnitIdComplete<TContext>(
 }
 
 export const putApiProgressByUnitIdNodesByNodeIdMutationKey = () =>
-	[{ url: "/api/progress/:unitId/nodes/:nodeId" }] as const;
+	[{ url: "/api/v1/progress/:unitId/nodes/:nodeId" }] as const;
 
 export function putApiProgressByUnitIdNodesByNodeIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -27944,7 +27839,7 @@ export function putApiProgressByUnitIdNodesByNodeIdMutationOptions<TContext = un
 
 /**
  * @summary Complete Content Structure node
- * {@link /api/progress/:unitId/nodes/:nodeId}
+ * {@link /api/v1/progress/:unitId/nodes/:nodeId}
  */
 export function usePutApiProgressByUnitIdNodesByNodeId<TContext>(
 	options: {
@@ -28012,7 +27907,7 @@ export function usePutApiProgressByUnitIdNodesByNodeId<TContext>(
 }
 
 export const deleteApiProgressByUnitIdNodesByNodeIdMutationKey = () =>
-	[{ url: "/api/progress/:unitId/nodes/:nodeId" }] as const;
+	[{ url: "/api/v1/progress/:unitId/nodes/:nodeId" }] as const;
 
 export function deleteApiProgressByUnitIdNodesByNodeIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -28043,7 +27938,7 @@ export function deleteApiProgressByUnitIdNodesByNodeIdMutationOptions<TContext =
 
 /**
  * @summary Uncomplete Content Structure node
- * {@link /api/progress/:unitId/nodes/:nodeId}
+ * {@link /api/v1/progress/:unitId/nodes/:nodeId}
  */
 export function useDeleteApiProgressByUnitIdNodesByNodeId<TContext>(
 	options: {
@@ -28113,7 +28008,7 @@ export function useDeleteApiProgressByUnitIdNodesByNodeId<TContext>(
 export const getApiCollectionsQueryKey = ({
 	query,
 }: Omit<GetApiCollectionsOptions, "headers"> = {}) =>
-	[{ url: "/api/collections" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/collections" }, ...(query ? [query] : [])] as const;
 
 type GetApiCollectionsQueryKey = ReturnType<typeof getApiCollectionsQueryKey>;
 
@@ -28145,7 +28040,7 @@ export function getApiCollectionsQueryOptions(
 
 /**
  * @summary List collections
- * {@link /api/collections}
+ * {@link /api/v1/collections}
  */
 export function useGetApiCollections<
 	TData = GetApiCollectionsStatus200,
@@ -28198,7 +28093,7 @@ export function useGetApiCollections<
 	return queryResult;
 }
 
-export const postApiCollectionsMutationKey = () => [{ url: "/api/collections" }] as const;
+export const postApiCollectionsMutationKey = () => [{ url: "/api/v1/collections" }] as const;
 
 export function postApiCollectionsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -28226,7 +28121,7 @@ export function postApiCollectionsMutationOptions<TContext = unknown>(
 
 /**
  * @summary Create collection
- * {@link /api/collections}
+ * {@link /api/v1/collections}
  */
 export function usePostApiCollections<TContext>(
 	options: {
@@ -28297,7 +28192,7 @@ export function usePostApiCollections<TContext>(
 export const getApiCollectionsFavoritesQueryKey = ({
 	query,
 }: Omit<GetApiCollectionsFavoritesOptions, "headers"> = {}) =>
-	[{ url: "/api/collections/favorites" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/collections/favorites" }, ...(query ? [query] : [])] as const;
 
 type GetApiCollectionsFavoritesQueryKey = ReturnType<typeof getApiCollectionsFavoritesQueryKey>;
 
@@ -28332,7 +28227,7 @@ export function getApiCollectionsFavoritesQueryOptions(
 
 /**
  * @summary Get Favorites collection
- * {@link /api/collections/favorites}
+ * {@link /api/v1/collections/favorites}
  */
 export function useGetApiCollectionsFavorites<
 	TData = GetApiCollectionsFavoritesStatus200,
@@ -28397,7 +28292,7 @@ export const getApiCollectionsByCollectionIdItemsQueryKey = ({
 	query,
 }: Omit<GetApiCollectionsByCollectionIdItemsOptions, "headers">) =>
 	[
-		{ url: "/api/collections/:collectionId/items", params: path },
+		{ url: "/api/v1/collections/:collectionId/items", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -28437,7 +28332,7 @@ export function getApiCollectionsByCollectionIdItemsQueryOptions(
 
 /**
  * @summary List hydrated collection content
- * {@link /api/collections/:collectionId/items}
+ * {@link /api/v1/collections/:collectionId/items}
  */
 export function useGetApiCollectionsByCollectionIdItems<
 	TData = GetApiCollectionsByCollectionIdItemsStatus200,
@@ -28508,7 +28403,10 @@ export const getApiCollectionsByCollectionIdQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiCollectionsByCollectionIdOptions, "headers">) =>
-	[{ url: "/api/collections/:collectionId", params: path }, ...(query ? [query] : [])] as const;
+	[
+		{ url: "/api/v1/collections/:collectionId", params: path },
+		...(query ? [query] : []),
+	] as const;
 
 type GetApiCollectionsByCollectionIdQueryKey = ReturnType<
 	typeof getApiCollectionsByCollectionIdQueryKey
@@ -28545,7 +28443,7 @@ export function getApiCollectionsByCollectionIdQueryOptions(
 
 /**
  * @summary Get collection
- * {@link /api/collections/:collectionId}
+ * {@link /api/v1/collections/:collectionId}
  */
 export function useGetApiCollectionsByCollectionId<
 	TData = GetApiCollectionsByCollectionIdStatus200,
@@ -28611,7 +28509,7 @@ export function useGetApiCollectionsByCollectionId<
 }
 
 export const patchApiCollectionsByCollectionIdMutationKey = () =>
-	[{ url: "/api/collections/:collectionId" }] as const;
+	[{ url: "/api/v1/collections/:collectionId" }] as const;
 
 export function patchApiCollectionsByCollectionIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -28646,7 +28544,7 @@ export function patchApiCollectionsByCollectionIdMutationOptions<TContext = unkn
 
 /**
  * @summary Update collection
- * {@link /api/collections/:collectionId}
+ * {@link /api/v1/collections/:collectionId}
  */
 export function usePatchApiCollectionsByCollectionId<TContext>(
 	options: {
@@ -28726,7 +28624,7 @@ export function usePatchApiCollectionsByCollectionId<TContext>(
 }
 
 export const postApiCollectionsByCollectionIdItemsBatchMutationKey = () =>
-	[{ url: "/api/collections/:collectionId/items/batch" }] as const;
+	[{ url: "/api/v1/collections/:collectionId/items/batch" }] as const;
 
 export function postApiCollectionsByCollectionIdItemsBatchMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -28761,7 +28659,7 @@ export function postApiCollectionsByCollectionIdItemsBatchMutationOptions<TConte
 
 /**
  * @summary Add collection items atomically
- * {@link /api/collections/:collectionId/items/batch}
+ * {@link /api/v1/collections/:collectionId/items/batch}
  */
 export function usePostApiCollectionsByCollectionIdItemsBatch<TContext>(
 	options: {
@@ -28841,7 +28739,7 @@ export function usePostApiCollectionsByCollectionIdItemsBatch<TContext>(
 }
 
 export const postApiCollectionsByCollectionIdItemsMoveMutationKey = () =>
-	[{ url: "/api/collections/:collectionId/items/move" }] as const;
+	[{ url: "/api/v1/collections/:collectionId/items/move" }] as const;
 
 export function postApiCollectionsByCollectionIdItemsMoveMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -28876,7 +28774,7 @@ export function postApiCollectionsByCollectionIdItemsMoveMutationOptions<TContex
 
 /**
  * @summary Move collection items atomically
- * {@link /api/collections/:collectionId/items/move}
+ * {@link /api/v1/collections/:collectionId/items/move}
  */
 export function usePostApiCollectionsByCollectionIdItemsMove<TContext>(
 	options: {
@@ -28956,7 +28854,7 @@ export function usePostApiCollectionsByCollectionIdItemsMove<TContext>(
 }
 
 export const putApiCollectionsByCollectionIdItemsByTargetIdMutationKey = () =>
-	[{ url: "/api/collections/:collectionId/items/:targetId" }] as const;
+	[{ url: "/api/v1/collections/:collectionId/items/:targetId" }] as const;
 
 export function putApiCollectionsByCollectionIdItemsByTargetIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -28991,7 +28889,7 @@ export function putApiCollectionsByCollectionIdItemsByTargetIdMutationOptions<TC
 
 /**
  * @summary Save collection item
- * {@link /api/collections/:collectionId/items/:targetId}
+ * {@link /api/v1/collections/:collectionId/items/:targetId}
  */
 export function usePutApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 	options: {
@@ -29071,7 +28969,7 @@ export function usePutApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 }
 
 export const deleteApiCollectionsByCollectionIdItemsByTargetIdMutationKey = () =>
-	[{ url: "/api/collections/:collectionId/items/:targetId" }] as const;
+	[{ url: "/api/v1/collections/:collectionId/items/:targetId" }] as const;
 
 export function deleteApiCollectionsByCollectionIdItemsByTargetIdMutationOptions<
 	TContext = unknown,
@@ -29105,7 +29003,7 @@ export function deleteApiCollectionsByCollectionIdItemsByTargetIdMutationOptions
 
 /**
  * @summary Remove collection item
- * {@link /api/collections/:collectionId/items/:targetId}
+ * {@link /api/v1/collections/:collectionId/items/:targetId}
  */
 export function useDeleteApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 	options: {
@@ -29186,7 +29084,7 @@ export const getApiCollectionsByCollectionIdItemRevisionsQueryKey = ({
 	query,
 }: Omit<GetApiCollectionsByCollectionIdItemRevisionsOptions, "headers">) =>
 	[
-		{ url: "/api/collections/:collectionId/item-revisions", params: path },
+		{ url: "/api/v1/collections/:collectionId/item-revisions", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -29225,7 +29123,7 @@ export function getApiCollectionsByCollectionIdItemRevisionsQueryOptions(
 
 /**
  * @summary List Collection item revisions
- * {@link /api/collections/:collectionId/item-revisions}
+ * {@link /api/v1/collections/:collectionId/item-revisions}
  */
 export function useGetApiCollectionsByCollectionIdItemRevisions<
 	TData = GetApiCollectionsByCollectionIdItemRevisionsStatus200,
@@ -29296,7 +29194,7 @@ export const getApiCollectionsByCollectionIdItemRevisionsCompareQueryKey = ({
 	query,
 }: Omit<GetApiCollectionsByCollectionIdItemRevisionsCompareOptions, "headers">) =>
 	[
-		{ url: "/api/collections/:collectionId/item-revisions/compare", params: path },
+		{ url: "/api/v1/collections/:collectionId/item-revisions/compare", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -29336,7 +29234,7 @@ export function getApiCollectionsByCollectionIdItemRevisionsCompareQueryOptions(
 
 /**
  * @summary Compare Collection item revisions
- * {@link /api/collections/:collectionId/item-revisions/compare}
+ * {@link /api/v1/collections/:collectionId/item-revisions/compare}
  */
 export function useGetApiCollectionsByCollectionIdItemRevisionsCompare<
 	TData = GetApiCollectionsByCollectionIdItemRevisionsCompareStatus200,
@@ -29408,7 +29306,7 @@ export function useGetApiCollectionsByCollectionIdItemRevisionsCompare<
 }
 
 export const postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreMutationKey = () =>
-	[{ url: "/api/collections/:collectionId/item-revisions/:revisionId/restore" }] as const;
+	[{ url: "/api/v1/collections/:collectionId/item-revisions/:revisionId/restore" }] as const;
 
 export function postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreMutationOptions<
 	TContext = unknown,
@@ -29440,7 +29338,7 @@ export function postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestore
 
 /**
  * @summary Restore a Collection item revision
- * {@link /api/collections/:collectionId/item-revisions/:revisionId/restore}
+ * {@link /api/v1/collections/:collectionId/item-revisions/:revisionId/restore}
  */
 export function usePostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestore<TContext>(
 	options: {
@@ -29518,7 +29416,7 @@ export function usePostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRest
 }
 
 export const putApiCollectionsFavoritesItemsByTargetIdMutationKey = () =>
-	[{ url: "/api/collections/favorites/items/:targetId" }] as const;
+	[{ url: "/api/v1/collections/favorites/items/:targetId" }] as const;
 
 export function putApiCollectionsFavoritesItemsByTargetIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -29552,7 +29450,7 @@ export function putApiCollectionsFavoritesItemsByTargetIdMutationOptions<TContex
 
 /**
  * @summary Favorite unit
- * {@link /api/collections/favorites/items/:targetId}
+ * {@link /api/v1/collections/favorites/items/:targetId}
  */
 export function usePutApiCollectionsFavoritesItemsByTargetId<TContext>(
 	options: {
@@ -29628,7 +29526,7 @@ export function usePutApiCollectionsFavoritesItemsByTargetId<TContext>(
 }
 
 export const deleteApiCollectionsFavoritesItemsByTargetIdMutationKey = () =>
-	[{ url: "/api/collections/favorites/items/:targetId" }] as const;
+	[{ url: "/api/v1/collections/favorites/items/:targetId" }] as const;
 
 export function deleteApiCollectionsFavoritesItemsByTargetIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -29661,7 +29559,7 @@ export function deleteApiCollectionsFavoritesItemsByTargetIdMutationOptions<TCon
 
 /**
  * @summary Remove favorite unit
- * {@link /api/collections/favorites/items/:targetId}
+ * {@link /api/v1/collections/favorites/items/:targetId}
  */
 export function useDeleteApiCollectionsFavoritesItemsByTargetId<TContext>(
 	options: {
@@ -29733,7 +29631,7 @@ export function useDeleteApiCollectionsFavoritesItemsByTargetId<TContext>(
 }
 
 export const getApiReviewsQueryKey = ({ query }: Omit<GetApiReviewsOptions, "headers"> = {}) =>
-	[{ url: "/api/reviews" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/reviews" }, ...(query ? [query] : [])] as const;
 
 type GetApiReviewsQueryKey = ReturnType<typeof getApiReviewsQueryKey>;
 
@@ -29765,7 +29663,7 @@ export function getApiReviewsQueryOptions(
 
 /**
  * @summary List reviews
- * {@link /api/reviews}
+ * {@link /api/v1/reviews}
  */
 export function useGetApiReviews<
 	TData = GetApiReviewsStatus200,
@@ -29814,7 +29712,7 @@ export function useGetApiReviews<
 	return queryResult;
 }
 
-export const postApiReviewsMutationKey = () => [{ url: "/api/reviews" }] as const;
+export const postApiReviewsMutationKey = () => [{ url: "/api/v1/reviews" }] as const;
 
 export function postApiReviewsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -29844,7 +29742,7 @@ export function postApiReviewsMutationOptions<TContext = unknown>(
 
 /**
  * @summary Create review
- * {@link /api/reviews}
+ * {@link /api/v1/reviews}
  */
 export function usePostApiReviews<TContext>(
 	options: {
@@ -29924,7 +29822,7 @@ export const getApiReviewsByReviewIdQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiReviewsByReviewIdOptions, "headers">) =>
-	[{ url: "/api/reviews/:reviewId", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/reviews/:reviewId", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiReviewsByReviewIdQueryKey = ReturnType<typeof getApiReviewsByReviewIdQueryKey>;
 
@@ -29959,7 +29857,7 @@ export function getApiReviewsByReviewIdQueryOptions(
 
 /**
  * @summary Get review
- * {@link /api/reviews/:reviewId}
+ * {@link /api/v1/reviews/:reviewId}
  */
 export function useGetApiReviewsByReviewId<
 	TData = GetApiReviewsByReviewIdStatus200,
@@ -30023,7 +29921,7 @@ export function useGetApiReviewsByReviewId<
 }
 
 export const patchApiReviewsByReviewIdMutationKey = () =>
-	[{ url: "/api/reviews/:reviewId" }] as const;
+	[{ url: "/api/v1/reviews/:reviewId" }] as const;
 
 export function patchApiReviewsByReviewIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -30058,7 +29956,7 @@ export function patchApiReviewsByReviewIdMutationOptions<TContext = unknown>(
 
 /**
  * @summary Update review
- * {@link /api/reviews/:reviewId}
+ * {@link /api/v1/reviews/:reviewId}
  */
 export function usePatchApiReviewsByReviewId<TContext>(
 	options: {
@@ -30134,7 +30032,8 @@ export function usePatchApiReviewsByReviewId<TContext>(
 	>;
 }
 
-export const putApiScoresByTargetIdMutationKey = () => [{ url: "/api/scores/:targetId" }] as const;
+export const putApiScoresByTargetIdMutationKey = () =>
+	[{ url: "/api/v1/scores/:targetId" }] as const;
 
 export function putApiScoresByTargetIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -30168,7 +30067,7 @@ export function putApiScoresByTargetIdMutationOptions<TContext = unknown>(
 
 /**
  * @summary Score unit
- * {@link /api/scores/:targetId}
+ * {@link /api/v1/scores/:targetId}
  */
 export function usePutApiScoresByTargetId<TContext>(
 	options: {
@@ -30244,7 +30143,7 @@ export const getApiScoresByTargetIdQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiScoresByTargetIdOptions, "headers">) =>
-	[{ url: "/api/scores/:targetId", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/scores/:targetId", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiScoresByTargetIdQueryKey = ReturnType<typeof getApiScoresByTargetIdQueryKey>;
 
@@ -30279,7 +30178,7 @@ export function getApiScoresByTargetIdQueryOptions(
 
 /**
  * @summary Get score aggregate
- * {@link /api/scores/:targetId}
+ * {@link /api/v1/scores/:targetId}
  */
 export function useGetApiScoresByTargetId<
 	TData = GetApiScoresByTargetIdStatus200,
@@ -30344,7 +30243,7 @@ export const getApiScoresByTargetIdViewerQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiScoresByTargetIdViewerOptions, "headers">) =>
-	[{ url: "/api/scores/:targetId/viewer", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/scores/:targetId/viewer", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiScoresByTargetIdViewerQueryKey = ReturnType<typeof getApiScoresByTargetIdViewerQueryKey>;
 
@@ -30380,7 +30279,7 @@ export function getApiScoresByTargetIdViewerQueryOptions(
 
 /**
  * @summary List current user's Scores for a Unit
- * {@link /api/scores/:targetId/viewer}
+ * {@link /api/v1/scores/:targetId/viewer}
  */
 export function useGetApiScoresByTargetIdViewer<
 	TData = GetApiScoresByTargetIdViewerStatus200,
@@ -30451,7 +30350,7 @@ export const getApiReactionsUnitsByUnitIdQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiReactionsUnitsByUnitIdOptions, "headers">) =>
-	[{ url: "/api/reactions/units/:unitId", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/reactions/units/:unitId", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiReactionsUnitsByUnitIdQueryKey = ReturnType<typeof getApiReactionsUnitsByUnitIdQueryKey>;
 
@@ -30486,7 +30385,7 @@ export function getApiReactionsUnitsByUnitIdQueryOptions(
 
 /**
  * @summary Get Unit reaction summary
- * {@link /api/reactions/units/:unitId}
+ * {@link /api/v1/reactions/units/:unitId}
  */
 export function useGetApiReactionsUnitsByUnitId<
 	TData = GetApiReactionsUnitsByUnitIdStatus200,
@@ -30552,7 +30451,7 @@ export function useGetApiReactionsUnitsByUnitId<
 }
 
 export const putApiReactionsUnitsByUnitIdMutationKey = () =>
-	[{ url: "/api/reactions/units/:unitId" }] as const;
+	[{ url: "/api/v1/reactions/units/:unitId" }] as const;
 
 export function putApiReactionsUnitsByUnitIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -30585,7 +30484,7 @@ export function putApiReactionsUnitsByUnitIdMutationOptions<TContext = unknown>(
 
 /**
  * @summary Set Unit reaction
- * {@link /api/reactions/units/:unitId}
+ * {@link /api/v1/reactions/units/:unitId}
  */
 export function usePutApiReactionsUnitsByUnitId<TContext>(
 	options: {
@@ -30654,7 +30553,7 @@ export function usePutApiReactionsUnitsByUnitId<TContext>(
 }
 
 export const deleteApiReactionsUnitsByUnitIdMutationKey = () =>
-	[{ url: "/api/reactions/units/:unitId" }] as const;
+	[{ url: "/api/v1/reactions/units/:unitId" }] as const;
 
 export function deleteApiReactionsUnitsByUnitIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -30686,7 +30585,7 @@ export function deleteApiReactionsUnitsByUnitIdMutationOptions<TContext = unknow
 
 /**
  * @summary Remove Unit reaction
- * {@link /api/reactions/units/:unitId}
+ * {@link /api/v1/reactions/units/:unitId}
  */
 export function useDeleteApiReactionsUnitsByUnitId<TContext>(
 	options: {
@@ -30753,7 +30652,7 @@ export function useDeleteApiReactionsUnitsByUnitId<TContext>(
 }
 
 export const putApiReactionsSharesByUnitIdMutationKey = () =>
-	[{ url: "/api/reactions/shares/:unitId" }] as const;
+	[{ url: "/api/v1/reactions/shares/:unitId" }] as const;
 
 export function putApiReactionsSharesByUnitIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -30784,7 +30683,7 @@ export function putApiReactionsSharesByUnitIdMutationOptions<TContext = unknown>
 
 /**
  * @summary Record Unit share
- * {@link /api/reactions/shares/:unitId}
+ * {@link /api/v1/reactions/shares/:unitId}
  */
 export function usePutApiReactionsSharesByUnitId<TContext>(
 	options: {
@@ -30849,7 +30748,7 @@ export function usePutApiReactionsSharesByUnitId<TContext>(
 }
 
 export const deleteApiReactionsSharesByUnitIdMutationKey = () =>
-	[{ url: "/api/reactions/shares/:unitId" }] as const;
+	[{ url: "/api/v1/reactions/shares/:unitId" }] as const;
 
 export function deleteApiReactionsSharesByUnitIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -30879,7 +30778,7 @@ export function deleteApiReactionsSharesByUnitIdMutationOptions<TContext = unkno
 
 /**
  * @summary Remove Unit share
- * {@link /api/reactions/shares/:unitId}
+ * {@link /api/v1/reactions/shares/:unitId}
  */
 export function useDeleteApiReactionsSharesByUnitId<TContext>(
 	options: {
@@ -30942,7 +30841,7 @@ export function useDeleteApiReactionsSharesByUnitId<TContext>(
 	>;
 }
 
-export const postApiPollsMutationKey = () => [{ url: "/api/polls" }] as const;
+export const postApiPollsMutationKey = () => [{ url: "/api/v1/polls" }] as const;
 
 export function postApiPollsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -30970,7 +30869,7 @@ export function postApiPollsMutationOptions<TContext = unknown>(
 
 /**
  * @summary Create poll
- * {@link /api/polls}
+ * {@link /api/v1/polls}
  */
 export function usePostApiPolls<TContext>(
 	options: {
@@ -31042,7 +30941,7 @@ export const getApiPollsByPollIdQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiPollsByPollIdOptions, "headers">) =>
-	[{ url: "/api/polls/:pollId", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/polls/:pollId", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiPollsByPollIdQueryKey = ReturnType<typeof getApiPollsByPollIdQueryKey>;
 
@@ -31077,7 +30976,7 @@ export function getApiPollsByPollIdQueryOptions(
 
 /**
  * @summary Get poll
- * {@link /api/polls/:pollId}
+ * {@link /api/v1/polls/:pollId}
  */
 export function useGetApiPollsByPollId<
 	TData = GetApiPollsByPollIdStatus200,
@@ -31138,7 +31037,7 @@ export function useGetApiPollsByPollId<
 }
 
 export const putApiPollsByPollIdVoteMutationKey = () =>
-	[{ url: "/api/polls/:pollId/vote" }] as const;
+	[{ url: "/api/v1/polls/:pollId/vote" }] as const;
 
 export function putApiPollsByPollIdVoteMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -31172,7 +31071,7 @@ export function putApiPollsByPollIdVoteMutationOptions<TContext = unknown>(
 
 /**
  * @summary Replace poll vote
- * {@link /api/polls/:pollId/vote}
+ * {@link /api/v1/polls/:pollId/vote}
  */
 export function usePutApiPollsByPollIdVote<TContext>(
 	options: {
@@ -31245,7 +31144,7 @@ export function usePutApiPollsByPollIdVote<TContext>(
 }
 
 export const deleteApiPollsByPollIdVoteMutationKey = () =>
-	[{ url: "/api/polls/:pollId/vote" }] as const;
+	[{ url: "/api/v1/polls/:pollId/vote" }] as const;
 
 export function deleteApiPollsByPollIdVoteMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -31277,7 +31176,7 @@ export function deleteApiPollsByPollIdVoteMutationOptions<TContext = unknown>(
 
 /**
  * @summary Withdraw poll vote
- * {@link /api/polls/:pollId/vote}
+ * {@link /api/v1/polls/:pollId/vote}
  */
 export function useDeleteApiPollsByPollIdVote<TContext>(
 	options: {
@@ -31346,7 +31245,7 @@ export function useDeleteApiPollsByPollIdVote<TContext>(
 }
 
 export const postApiPollsByPollIdCloseMutationKey = () =>
-	[{ url: "/api/polls/:pollId/close" }] as const;
+	[{ url: "/api/v1/polls/:pollId/close" }] as const;
 
 export function postApiPollsByPollIdCloseMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -31379,7 +31278,7 @@ export function postApiPollsByPollIdCloseMutationOptions<TContext = unknown>(
 
 /**
  * @summary Close poll
- * {@link /api/polls/:pollId/close}
+ * {@link /api/v1/polls/:pollId/close}
  */
 export function usePostApiPollsByPollIdClose<TContext>(
 	options: {
@@ -31454,7 +31353,7 @@ export function usePostApiPollsByPollIdClose<TContext>(
 export const getApiPostsByPostIdScoresQueryKey = ({
 	path,
 }: Omit<GetApiPostsByPostIdScoresOptions, "headers">) =>
-	[{ url: "/api/posts/:postId/scores", params: path }] as const;
+	[{ url: "/api/v1/posts/:postId/scores", params: path }] as const;
 
 type GetApiPostsByPostIdScoresQueryKey = ReturnType<typeof getApiPostsByPostIdScoresQueryKey>;
 
@@ -31488,7 +31387,7 @@ export function getApiPostsByPostIdScoresQueryOptions(
 
 /**
  * @summary List Post Scores
- * {@link /api/posts/:postId/scores}
+ * {@link /api/v1/posts/:postId/scores}
  */
 export function useGetApiPostsByPostIdScores<
 	TData = GetApiPostsByPostIdScoresStatus200,
@@ -31546,7 +31445,7 @@ export function useGetApiPostsByPostIdScores<
 }
 
 export const putApiPostsByPostIdScoresMutationKey = () =>
-	[{ url: "/api/posts/:postId/scores" }] as const;
+	[{ url: "/api/v1/posts/:postId/scores" }] as const;
 
 export function putApiPostsByPostIdScoresMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -31580,7 +31479,7 @@ export function putApiPostsByPostIdScoresMutationOptions<TContext = unknown>(
 
 /**
  * @summary Replace Post Scores
- * {@link /api/posts/:postId/scores}
+ * {@link /api/v1/posts/:postId/scores}
  */
 export function usePutApiPostsByPostIdScores<TContext>(
 	options: {
@@ -31653,7 +31552,7 @@ export function usePutApiPostsByPostIdScores<TContext>(
 }
 
 export const getApiPostsQueryKey = ({ query }: Omit<GetApiPostsOptions, "headers"> = {}) =>
-	[{ url: "/api/posts" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/posts" }, ...(query ? [query] : [])] as const;
 
 type GetApiPostsQueryKey = ReturnType<typeof getApiPostsQueryKey>;
 
@@ -31683,7 +31582,7 @@ export function getApiPostsQueryOptions(
 
 /**
  * @summary List posts
- * {@link /api/posts}
+ * {@link /api/v1/posts}
  */
 export function useGetApiPosts<
 	TData = GetApiPostsStatus200,
@@ -31725,7 +31624,7 @@ export function useGetApiPosts<
 	return queryResult;
 }
 
-export const postApiPostsMutationKey = () => [{ url: "/api/posts" }] as const;
+export const postApiPostsMutationKey = () => [{ url: "/api/v1/posts" }] as const;
 
 export function postApiPostsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -31755,7 +31654,7 @@ export function postApiPostsMutationOptions<TContext = unknown>(
 
 /**
  * @summary Create post or excerpt
- * {@link /api/posts}
+ * {@link /api/v1/posts}
  */
 export function usePostApiPosts<TContext>(
 	options: {
@@ -31831,7 +31730,7 @@ export function usePostApiPosts<TContext>(
 	>;
 }
 
-export const postApiPostsWikiMutationKey = () => [{ url: "/api/posts/wiki" }] as const;
+export const postApiPostsWikiMutationKey = () => [{ url: "/api/v1/posts/wiki" }] as const;
 
 export function postApiPostsWikiMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -31861,7 +31760,7 @@ export function postApiPostsWikiMutationOptions<TContext = unknown>(
 
 /**
  * @summary Create Wiki
- * {@link /api/posts/wiki}
+ * {@link /api/v1/posts/wiki}
  */
 export function usePostApiPostsWiki<TContext>(
 	options: {
@@ -31941,7 +31840,7 @@ export const getApiPostsByPostIdQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiPostsByPostIdOptions, "headers">) =>
-	[{ url: "/api/posts/:postId", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/posts/:postId", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiPostsByPostIdQueryKey = ReturnType<typeof getApiPostsByPostIdQueryKey>;
 
@@ -31976,7 +31875,7 @@ export function getApiPostsByPostIdQueryOptions(
 
 /**
  * @summary Get post
- * {@link /api/posts/:postId}
+ * {@link /api/v1/posts/:postId}
  */
 export function useGetApiPostsByPostId<
 	TData = GetApiPostsByPostIdStatus200,
@@ -32036,7 +31935,7 @@ export function useGetApiPostsByPostId<
 	return queryResult;
 }
 
-export const patchApiPostsByPostIdMutationKey = () => [{ url: "/api/posts/:postId" }] as const;
+export const patchApiPostsByPostIdMutationKey = () => [{ url: "/api/v1/posts/:postId" }] as const;
 
 export function patchApiPostsByPostIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -32071,7 +31970,7 @@ export function patchApiPostsByPostIdMutationOptions<TContext = unknown>(
 
 /**
  * @summary Update post
- * {@link /api/posts/:postId}
+ * {@link /api/v1/posts/:postId}
  */
 export function usePatchApiPostsByPostId<TContext>(
 	options: {
@@ -32151,7 +32050,7 @@ export const getApiPostsByPostIdRepliesQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiPostsByPostIdRepliesOptions, "headers">) =>
-	[{ url: "/api/posts/:postId/replies", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/posts/:postId/replies", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiPostsByPostIdRepliesQueryKey = ReturnType<typeof getApiPostsByPostIdRepliesQueryKey>;
 
@@ -32187,7 +32086,7 @@ export function getApiPostsByPostIdRepliesQueryOptions(
 
 /**
  * @summary List a bounded reply-post tree
- * {@link /api/posts/:postId/replies}
+ * {@link /api/v1/posts/:postId/replies}
  */
 export function useGetApiPostsByPostIdReplies<
 	TData = GetApiPostsByPostIdRepliesStatus200,
@@ -32255,7 +32154,7 @@ export function useGetApiPostsByPostIdReplies<
 }
 
 export const postApiPostsByPostIdRepliesMutationKey = () =>
-	[{ url: "/api/posts/:postId/replies" }] as const;
+	[{ url: "/api/v1/posts/:postId/replies" }] as const;
 
 export function postApiPostsByPostIdRepliesMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -32290,7 +32189,7 @@ export function postApiPostsByPostIdRepliesMutationOptions<TContext = unknown>(
 
 /**
  * @summary Create reply post
- * {@link /api/posts/:postId/replies}
+ * {@link /api/v1/posts/:postId/replies}
  */
 export function usePostApiPostsByPostIdReplies<TContext>(
 	options: {
@@ -32367,7 +32266,7 @@ export function usePostApiPostsByPostIdReplies<TContext>(
 }
 
 export const patchApiPostsByPostIdRepliesByReplyPostIdMutationKey = () =>
-	[{ url: "/api/posts/:postId/replies/:replyPostId" }] as const;
+	[{ url: "/api/v1/posts/:postId/replies/:replyPostId" }] as const;
 
 export function patchApiPostsByPostIdRepliesByReplyPostIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -32402,7 +32301,7 @@ export function patchApiPostsByPostIdRepliesByReplyPostIdMutationOptions<TContex
 
 /**
  * @summary Update reply post
- * {@link /api/posts/:postId/replies/:replyPostId}
+ * {@link /api/v1/posts/:postId/replies/:replyPostId}
  */
 export function usePatchApiPostsByPostIdRepliesByReplyPostId<TContext>(
 	options: {
@@ -32482,7 +32381,7 @@ export function usePatchApiPostsByPostIdRepliesByReplyPostId<TContext>(
 }
 
 export const getApiRealmsQueryKey = ({ query }: Omit<GetApiRealmsOptions, "headers"> = {}) =>
-	[{ url: "/api/realms" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/realms" }, ...(query ? [query] : [])] as const;
 
 type GetApiRealmsQueryKey = ReturnType<typeof getApiRealmsQueryKey>;
 
@@ -32512,7 +32411,7 @@ export function getApiRealmsQueryOptions(
 
 /**
  * @summary List Realms
- * {@link /api/realms}
+ * {@link /api/v1/realms}
  */
 export function useGetApiRealms<
 	TData = GetApiRealmsStatus200,
@@ -32555,7 +32454,7 @@ export function useGetApiRealms<
 	return queryResult;
 }
 
-export const postApiRealmsMutationKey = () => [{ url: "/api/realms" }] as const;
+export const postApiRealmsMutationKey = () => [{ url: "/api/v1/realms" }] as const;
 
 export function postApiRealmsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -32583,7 +32482,7 @@ export function postApiRealmsMutationOptions<TContext = unknown>(
 
 /**
  * @summary Create Realm
- * {@link /api/realms}
+ * {@link /api/v1/realms}
  */
 export function usePostApiRealms<TContext>(
 	options: {
@@ -32652,7 +32551,7 @@ export function usePostApiRealms<TContext>(
 }
 
 export const replaceRealmSlugAddressMutationKey = () =>
-	[{ url: "/api/realms/:realmId/slug-address" }] as const;
+	[{ url: "/api/v1/realms/:realmId/slug-address" }] as const;
 
 export function replaceRealmSlugAddressMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -32688,7 +32587,7 @@ export function replaceRealmSlugAddressMutationOptions<TContext = unknown>(
 /**
  * @description Development preview. Assigns or renames a Realm's optional public slug in the permanent realms namespace. The former address is retained as a redirect.
  * @summary Replace a Realm slug address
- * {@link /api/realms/:realmId/slug-address}
+ * {@link /api/v1/realms/:realmId/slug-address}
  */
 export function useReplaceRealmSlugAddress<TContext>(
 	options: {
@@ -32768,7 +32667,7 @@ export const getApiRealmsByRealmIdQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiRealmsByRealmIdOptions, "headers">) =>
-	[{ url: "/api/realms/:realmId", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/realms/:realmId", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiRealmsByRealmIdQueryKey = ReturnType<typeof getApiRealmsByRealmIdQueryKey>;
 
@@ -32803,7 +32702,7 @@ export function getApiRealmsByRealmIdQueryOptions(
 
 /**
  * @summary Get Realm
- * {@link /api/realms/:realmId}
+ * {@link /api/v1/realms/:realmId}
  */
 export function useGetApiRealmsByRealmId<
 	TData = GetApiRealmsByRealmIdStatus200,
@@ -32864,7 +32763,8 @@ export function useGetApiRealmsByRealmId<
 	return queryResult;
 }
 
-export const patchApiRealmsByRealmIdMutationKey = () => [{ url: "/api/realms/:realmId" }] as const;
+export const patchApiRealmsByRealmIdMutationKey = () =>
+	[{ url: "/api/v1/realms/:realmId" }] as const;
 
 export function patchApiRealmsByRealmIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -32898,7 +32798,7 @@ export function patchApiRealmsByRealmIdMutationOptions<TContext = unknown>(
 
 /**
  * @summary Update Realm
- * {@link /api/realms/:realmId}
+ * {@link /api/v1/realms/:realmId}
  */
 export function usePatchApiRealmsByRealmId<TContext>(
 	options: {
@@ -32971,7 +32871,7 @@ export function usePatchApiRealmsByRealmId<TContext>(
 }
 
 export const putApiRealmsByRealmIdPagesMutationKey = () =>
-	[{ url: "/api/realms/:realmId/pages" }] as const;
+	[{ url: "/api/v1/realms/:realmId/pages" }] as const;
 
 export function putApiRealmsByRealmIdPagesMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -33005,7 +32905,7 @@ export function putApiRealmsByRealmIdPagesMutationOptions<TContext = unknown>(
 
 /**
  * @summary Replace enabled Realm pages
- * {@link /api/realms/:realmId/pages}
+ * {@link /api/v1/realms/:realmId/pages}
  */
 export function usePutApiRealmsByRealmIdPages<TContext>(
 	options: {
@@ -33081,7 +32981,7 @@ export const getApiRealmsByRealmIdTaxonomyQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiRealmsByRealmIdTaxonomyOptions, "headers">) =>
-	[{ url: "/api/realms/:realmId/taxonomy", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/realms/:realmId/taxonomy", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiRealmsByRealmIdTaxonomyQueryKey = ReturnType<
 	typeof getApiRealmsByRealmIdTaxonomyQueryKey
@@ -33118,7 +33018,7 @@ export function getApiRealmsByRealmIdTaxonomyQueryOptions(
 
 /**
  * @summary Get Realm taxonomy
- * {@link /api/realms/:realmId/taxonomy}
+ * {@link /api/v1/realms/:realmId/taxonomy}
  */
 export function useGetApiRealmsByRealmIdTaxonomy<
 	TData = GetApiRealmsByRealmIdTaxonomyStatus200,
@@ -33188,7 +33088,7 @@ export const getApiRealmsByRealmIdTaxonomyDraftQueryKey = ({
 	query,
 }: Omit<GetApiRealmsByRealmIdTaxonomyDraftOptions, "headers">) =>
 	[
-		{ url: "/api/realms/:realmId/taxonomy/draft", params: path },
+		{ url: "/api/v1/realms/:realmId/taxonomy/draft", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -33229,7 +33129,7 @@ export function getApiRealmsByRealmIdTaxonomyDraftQueryOptions(
 
 /**
  * @summary Get complete Realm taxonomy draft
- * {@link /api/realms/:realmId/taxonomy/draft}
+ * {@link /api/v1/realms/:realmId/taxonomy/draft}
  */
 export function useGetApiRealmsByRealmIdTaxonomyDraft<
 	TData = GetApiRealmsByRealmIdTaxonomyDraftStatus200,
@@ -33299,7 +33199,7 @@ export function useGetApiRealmsByRealmIdTaxonomyDraft<
 }
 
 export const putApiRealmsByRealmIdTaxonomyDraftMutationKey = () =>
-	[{ url: "/api/realms/:realmId/taxonomy/draft" }] as const;
+	[{ url: "/api/v1/realms/:realmId/taxonomy/draft" }] as const;
 
 export function putApiRealmsByRealmIdTaxonomyDraftMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -33334,7 +33234,7 @@ export function putApiRealmsByRealmIdTaxonomyDraftMutationOptions<TContext = unk
 
 /**
  * @summary Save complete Realm taxonomy draft
- * {@link /api/realms/:realmId/taxonomy/draft}
+ * {@link /api/v1/realms/:realmId/taxonomy/draft}
  */
 export function usePutApiRealmsByRealmIdTaxonomyDraft<TContext>(
 	options: {
@@ -33416,7 +33316,7 @@ export function usePutApiRealmsByRealmIdTaxonomyDraft<TContext>(
 export const getApiRealmsByRealmIdScoreContextQueryKey = ({
 	path,
 }: Omit<GetApiRealmsByRealmIdScoreContextOptions, "headers">) =>
-	[{ url: "/api/realms/:realmId/score-context", params: path }] as const;
+	[{ url: "/api/v1/realms/:realmId/score-context", params: path }] as const;
 
 type GetApiRealmsByRealmIdScoreContextQueryKey = ReturnType<
 	typeof getApiRealmsByRealmIdScoreContextQueryKey
@@ -33452,7 +33352,7 @@ export function getApiRealmsByRealmIdScoreContextQueryOptions(
 
 /**
  * @summary Get Realm Score context
- * {@link /api/realms/:realmId/score-context}
+ * {@link /api/v1/realms/:realmId/score-context}
  */
 export function useGetApiRealmsByRealmIdScoreContext<
 	TData = GetApiRealmsByRealmIdScoreContextStatus200,
@@ -33511,7 +33411,7 @@ export function useGetApiRealmsByRealmIdScoreContext<
 }
 
 export const putApiRealmsByRealmIdScoreContextMutationKey = () =>
-	[{ url: "/api/realms/:realmId/score-context" }] as const;
+	[{ url: "/api/v1/realms/:realmId/score-context" }] as const;
 
 export function putApiRealmsByRealmIdScoreContextMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -33544,7 +33444,7 @@ export function putApiRealmsByRealmIdScoreContextMutationOptions<TContext = unkn
 
 /**
  * @summary Set Realm Score context
- * {@link /api/realms/:realmId/score-context}
+ * {@link /api/v1/realms/:realmId/score-context}
  */
 export function usePutApiRealmsByRealmIdScoreContext<TContext>(
 	options: {
@@ -33616,7 +33516,7 @@ export function usePutApiRealmsByRealmIdScoreContext<TContext>(
 }
 
 export const deleteApiRealmsByRealmIdScoreContextMutationKey = () =>
-	[{ url: "/api/realms/:realmId/score-context" }] as const;
+	[{ url: "/api/v1/realms/:realmId/score-context" }] as const;
 
 export function deleteApiRealmsByRealmIdScoreContextMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -33646,7 +33546,7 @@ export function deleteApiRealmsByRealmIdScoreContextMutationOptions<TContext = u
 
 /**
  * @summary Clear Realm Score context
- * {@link /api/realms/:realmId/score-context}
+ * {@link /api/v1/realms/:realmId/score-context}
  */
 export function useDeleteApiRealmsByRealmIdScoreContext<TContext>(
 	options: {
@@ -33710,7 +33610,7 @@ export function useDeleteApiRealmsByRealmIdScoreContext<TContext>(
 }
 
 export const putApiRealmsByRealmIdTagVotingMutationKey = () =>
-	[{ url: "/api/realms/:realmId/tag-voting" }] as const;
+	[{ url: "/api/v1/realms/:realmId/tag-voting" }] as const;
 
 export function putApiRealmsByRealmIdTagVotingMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -33744,7 +33644,7 @@ export function putApiRealmsByRealmIdTagVotingMutationOptions<TContext = unknown
 
 /**
  * @summary Update Realm Tag voting policy
- * {@link /api/realms/:realmId/tag-voting}
+ * {@link /api/v1/realms/:realmId/tag-voting}
  */
 export function usePutApiRealmsByRealmIdTagVoting<TContext>(
 	options: {
@@ -33817,7 +33717,7 @@ export function usePutApiRealmsByRealmIdTagVoting<TContext>(
 }
 
 export const putApiRealmsByRealmIdMembershipMutationKey = () =>
-	[{ url: "/api/realms/:realmId/membership" }] as const;
+	[{ url: "/api/v1/realms/:realmId/membership" }] as const;
 
 export function putApiRealmsByRealmIdMembershipMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -33849,7 +33749,7 @@ export function putApiRealmsByRealmIdMembershipMutationOptions<TContext = unknow
 
 /**
  * @summary Join Realm
- * {@link /api/realms/:realmId/membership}
+ * {@link /api/v1/realms/:realmId/membership}
  */
 export function usePutApiRealmsByRealmIdMembership<TContext>(
 	options: {
@@ -33920,7 +33820,7 @@ export function usePutApiRealmsByRealmIdMembership<TContext>(
 }
 
 export const deleteApiRealmsByRealmIdMembershipMutationKey = () =>
-	[{ url: "/api/realms/:realmId/membership" }] as const;
+	[{ url: "/api/v1/realms/:realmId/membership" }] as const;
 
 export function deleteApiRealmsByRealmIdMembershipMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -33952,7 +33852,7 @@ export function deleteApiRealmsByRealmIdMembershipMutationOptions<TContext = unk
 
 /**
  * @summary Leave Realm
- * {@link /api/realms/:realmId/membership}
+ * {@link /api/v1/realms/:realmId/membership}
  */
 export function useDeleteApiRealmsByRealmIdMembership<TContext>(
 	options: {
@@ -34027,7 +33927,7 @@ export const getApiRealmsByRealmIdMembersQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiRealmsByRealmIdMembersOptions, "headers">) =>
-	[{ url: "/api/realms/:realmId/members", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/realms/:realmId/members", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiRealmsByRealmIdMembersQueryKey = ReturnType<typeof getApiRealmsByRealmIdMembersQueryKey>;
 
@@ -34063,7 +33963,7 @@ export function getApiRealmsByRealmIdMembersQueryOptions(
 
 /**
  * @summary List Realm members
- * {@link /api/realms/:realmId/members}
+ * {@link /api/v1/realms/:realmId/members}
  */
 export function useGetApiRealmsByRealmIdMembers<
 	TData = GetApiRealmsByRealmIdMembersStatus200,
@@ -34131,7 +34031,7 @@ export function useGetApiRealmsByRealmIdMembers<
 }
 
 export const patchApiRealmsByRealmIdMembersByProfileIdMutationKey = () =>
-	[{ url: "/api/realms/:realmId/members/:profileId" }] as const;
+	[{ url: "/api/v1/realms/:realmId/members/:profileId" }] as const;
 
 export function patchApiRealmsByRealmIdMembersByProfileIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -34166,7 +34066,7 @@ export function patchApiRealmsByRealmIdMembersByProfileIdMutationOptions<TContex
 
 /**
  * @summary Update Realm member
- * {@link /api/realms/:realmId/members/:profileId}
+ * {@link /api/v1/realms/:realmId/members/:profileId}
  */
 export function usePatchApiRealmsByRealmIdMembersByProfileId<TContext>(
 	options: {
@@ -34246,7 +34146,7 @@ export function usePatchApiRealmsByRealmIdMembersByProfileId<TContext>(
 }
 
 export const putApiRealmsByRealmIdRulesMutationKey = () =>
-	[{ url: "/api/realms/:realmId/rules" }] as const;
+	[{ url: "/api/v1/realms/:realmId/rules" }] as const;
 
 export function putApiRealmsByRealmIdRulesMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -34279,7 +34179,7 @@ export function putApiRealmsByRealmIdRulesMutationOptions<TContext = unknown>(
 
 /**
  * @summary Update Realm rules
- * {@link /api/realms/:realmId/rules}
+ * {@link /api/v1/realms/:realmId/rules}
  */
 export function usePutApiRealmsByRealmIdRules<TContext>(
 	options: {
@@ -34351,7 +34251,7 @@ export const getApiRealmsByRealmIdRulesQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiRealmsByRealmIdRulesOptions, "headers">) =>
-	[{ url: "/api/realms/:realmId/rules", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/realms/:realmId/rules", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiRealmsByRealmIdRulesQueryKey = ReturnType<typeof getApiRealmsByRealmIdRulesQueryKey>;
 
@@ -34386,7 +34286,7 @@ export function getApiRealmsByRealmIdRulesQueryOptions(
 
 /**
  * @summary Get current Realm rules
- * {@link /api/realms/:realmId/rules}
+ * {@link /api/v1/realms/:realmId/rules}
  */
 export function useGetApiRealmsByRealmIdRules<
 	TData = GetApiRealmsByRealmIdRulesStatus200,
@@ -34452,7 +34352,7 @@ export function useGetApiRealmsByRealmIdRules<
 }
 
 export const putApiRealmsByRealmIdRulesByRevisionIdAcknowledgementMutationKey = () =>
-	[{ url: "/api/realms/:realmId/rules/:revisionId/acknowledgement" }] as const;
+	[{ url: "/api/v1/realms/:realmId/rules/:revisionId/acknowledgement" }] as const;
 
 export function putApiRealmsByRealmIdRulesByRevisionIdAcknowledgementMutationOptions<
 	TContext = unknown,
@@ -34486,7 +34386,7 @@ export function putApiRealmsByRealmIdRulesByRevisionIdAcknowledgementMutationOpt
 
 /**
  * @summary Acknowledge current Realm rules
- * {@link /api/realms/:realmId/rules/:revisionId/acknowledgement}
+ * {@link /api/v1/realms/:realmId/rules/:revisionId/acknowledgement}
  */
 export function usePutApiRealmsByRealmIdRulesByRevisionIdAcknowledgement<TContext>(
 	options: {
@@ -34566,7 +34466,7 @@ export const getApiRealmsByRealmIdPinsQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiRealmsByRealmIdPinsOptions, "headers">) =>
-	[{ url: "/api/realms/:realmId/pins", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/realms/:realmId/pins", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiRealmsByRealmIdPinsQueryKey = ReturnType<typeof getApiRealmsByRealmIdPinsQueryKey>;
 
@@ -34601,7 +34501,7 @@ export function getApiRealmsByRealmIdPinsQueryOptions(
 
 /**
  * @summary List Realm pins
- * {@link /api/realms/:realmId/pins}
+ * {@link /api/v1/realms/:realmId/pins}
  */
 export function useGetApiRealmsByRealmIdPins<
 	TData = GetApiRealmsByRealmIdPinsStatus200,
@@ -34666,7 +34566,7 @@ export function useGetApiRealmsByRealmIdPins<
 }
 
 export const postApiRealmsByRealmIdPinsMoveMutationKey = () =>
-	[{ url: "/api/realms/:realmId/pins/move" }] as const;
+	[{ url: "/api/v1/realms/:realmId/pins/move" }] as const;
 
 export function postApiRealmsByRealmIdPinsMoveMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -34699,7 +34599,7 @@ export function postApiRealmsByRealmIdPinsMoveMutationOptions<TContext = unknown
 
 /**
  * @summary Move Realm pins
- * {@link /api/realms/:realmId/pins/move}
+ * {@link /api/v1/realms/:realmId/pins/move}
  */
 export function usePostApiRealmsByRealmIdPinsMove<TContext>(
 	options: {
@@ -34768,7 +34668,7 @@ export function usePostApiRealmsByRealmIdPinsMove<TContext>(
 }
 
 export const putApiRealmsByRealmIdPinsByUnitIdMutationKey = () =>
-	[{ url: "/api/realms/:realmId/pins/:unitId" }] as const;
+	[{ url: "/api/v1/realms/:realmId/pins/:unitId" }] as const;
 
 export function putApiRealmsByRealmIdPinsByUnitIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -34802,7 +34702,7 @@ export function putApiRealmsByRealmIdPinsByUnitIdMutationOptions<TContext = unkn
 
 /**
  * @summary Pin Realm unit
- * {@link /api/realms/:realmId/pins/:unitId}
+ * {@link /api/v1/realms/:realmId/pins/:unitId}
  */
 export function usePutApiRealmsByRealmIdPinsByUnitId<TContext>(
 	options: {
@@ -34878,7 +34778,7 @@ export function usePutApiRealmsByRealmIdPinsByUnitId<TContext>(
 }
 
 export const deleteApiRealmsByRealmIdPinsByUnitIdMutationKey = () =>
-	[{ url: "/api/realms/:realmId/pins/:unitId" }] as const;
+	[{ url: "/api/v1/realms/:realmId/pins/:unitId" }] as const;
 
 export function deleteApiRealmsByRealmIdPinsByUnitIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -34910,7 +34810,7 @@ export function deleteApiRealmsByRealmIdPinsByUnitIdMutationOptions<TContext = u
 
 /**
  * @summary Remove Realm pin
- * {@link /api/realms/:realmId/pins/:unitId}
+ * {@link /api/v1/realms/:realmId/pins/:unitId}
  */
 export function useDeleteApiRealmsByRealmIdPinsByUnitId<TContext>(
 	options: {
@@ -34978,7 +34878,7 @@ export function useDeleteApiRealmsByRealmIdPinsByUnitId<TContext>(
 }
 
 export const postApiRealmsByRealmIdWikisMutationKey = () =>
-	[{ url: "/api/realms/:realmId/wikis" }] as const;
+	[{ url: "/api/v1/realms/:realmId/wikis" }] as const;
 
 export function postApiRealmsByRealmIdWikisMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -35013,7 +34913,7 @@ export function postApiRealmsByRealmIdWikisMutationOptions<TContext = unknown>(
 
 /**
  * @summary Create Realm-governed Wiki
- * {@link /api/realms/:realmId/wikis}
+ * {@link /api/v1/realms/:realmId/wikis}
  */
 export function usePostApiRealmsByRealmIdWikis<TContext>(
 	options: {
@@ -35094,7 +34994,7 @@ export const getApiRealmsByRealmIdTagContextsQueryKey = ({
 	query,
 }: Omit<GetApiRealmsByRealmIdTagContextsOptions, "headers">) =>
 	[
-		{ url: "/api/realms/:realmId/tag-contexts", params: path },
+		{ url: "/api/v1/realms/:realmId/tag-contexts", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -35133,7 +35033,7 @@ export function getApiRealmsByRealmIdTagContextsQueryOptions(
 
 /**
  * @summary List Realm Tag Context relationships
- * {@link /api/realms/:realmId/tag-contexts}
+ * {@link /api/v1/realms/:realmId/tag-contexts}
  */
 export function useGetApiRealmsByRealmIdTagContexts<
 	TData = GetApiRealmsByRealmIdTagContextsStatus200,
@@ -35199,7 +35099,7 @@ export function useGetApiRealmsByRealmIdTagContexts<
 }
 
 export const postApiRealmsByRealmIdTagContextsMutationKey = () =>
-	[{ url: "/api/realms/:realmId/tag-contexts" }] as const;
+	[{ url: "/api/v1/realms/:realmId/tag-contexts" }] as const;
 
 export function postApiRealmsByRealmIdTagContextsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -35234,7 +35134,7 @@ export function postApiRealmsByRealmIdTagContextsMutationOptions<TContext = unkn
 
 /**
  * @summary Create Realm Tag Context Wiki
- * {@link /api/realms/:realmId/tag-contexts}
+ * {@link /api/v1/realms/:realmId/tag-contexts}
  */
 export function usePostApiRealmsByRealmIdTagContexts<TContext>(
 	options: {
@@ -35316,7 +35216,7 @@ export function usePostApiRealmsByRealmIdTagContexts<TContext>(
 export const getApiRealmsByRealmIdTagsByTagIdContextQueryKey = ({
 	path,
 }: Omit<GetApiRealmsByRealmIdTagsByTagIdContextOptions, "headers">) =>
-	[{ url: "/api/realms/:realmId/tags/:tagId/context", params: path }] as const;
+	[{ url: "/api/v1/realms/:realmId/tags/:tagId/context", params: path }] as const;
 
 type GetApiRealmsByRealmIdTagsByTagIdContextQueryKey = ReturnType<
 	typeof getApiRealmsByRealmIdTagsByTagIdContextQueryKey
@@ -35352,7 +35252,7 @@ export function getApiRealmsByRealmIdTagsByTagIdContextQueryOptions(
 
 /**
  * @summary Get Realm Tag Context
- * {@link /api/realms/:realmId/tags/:tagId/context}
+ * {@link /api/v1/realms/:realmId/tags/:tagId/context}
  */
 export function useGetApiRealmsByRealmIdTagsByTagIdContext<
 	TData = GetApiRealmsByRealmIdTagsByTagIdContextStatus200,
@@ -35412,7 +35312,7 @@ export function useGetApiRealmsByRealmIdTagsByTagIdContext<
 }
 
 export const putApiRealmsByRealmIdTagsByTagIdContextMutationKey = () =>
-	[{ url: "/api/realms/:realmId/tags/:tagId/context" }] as const;
+	[{ url: "/api/v1/realms/:realmId/tags/:tagId/context" }] as const;
 
 export function putApiRealmsByRealmIdTagsByTagIdContextMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -35446,7 +35346,7 @@ export function putApiRealmsByRealmIdTagsByTagIdContextMutationOptions<TContext 
 
 /**
  * @summary Set Realm Tag Context
- * {@link /api/realms/:realmId/tags/:tagId/context}
+ * {@link /api/v1/realms/:realmId/tags/:tagId/context}
  */
 export function usePutApiRealmsByRealmIdTagsByTagIdContext<TContext>(
 	options: {
@@ -35522,7 +35422,7 @@ export function usePutApiRealmsByRealmIdTagsByTagIdContext<TContext>(
 }
 
 export const deleteApiRealmsByRealmIdTagsByTagIdContextMutationKey = () =>
-	[{ url: "/api/realms/:realmId/tags/:tagId/context" }] as const;
+	[{ url: "/api/v1/realms/:realmId/tags/:tagId/context" }] as const;
 
 export function deleteApiRealmsByRealmIdTagsByTagIdContextMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -35554,7 +35454,7 @@ export function deleteApiRealmsByRealmIdTagsByTagIdContextMutationOptions<TConte
 
 /**
  * @summary Remove Realm Tag Context relationship
- * {@link /api/realms/:realmId/tags/:tagId/context}
+ * {@link /api/v1/realms/:realmId/tags/:tagId/context}
  */
 export function useDeleteApiRealmsByRealmIdTagsByTagIdContext<TContext>(
 	options: {
@@ -35626,7 +35526,7 @@ export function useDeleteApiRealmsByRealmIdTagsByTagIdContext<TContext>(
 }
 
 export const putApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdMutationKey = () =>
-	[{ url: "/api/realms/:realmId/units/:unitId/policy-tags/:tagId" }] as const;
+	[{ url: "/api/v1/realms/:realmId/units/:unitId/policy-tags/:tagId" }] as const;
 
 export function putApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdMutationOptions<
 	TContext = unknown,
@@ -35659,7 +35559,7 @@ export function putApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdMutationOptio
 
 /**
  * @summary Apply Realm Policy Tag
- * {@link /api/realms/:realmId/units/:unitId/policy-tags/:tagId}
+ * {@link /api/v1/realms/:realmId/units/:unitId/policy-tags/:tagId}
  */
 export function usePutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId<TContext>(
 	options: {
@@ -35732,7 +35632,7 @@ export function usePutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId<TContext>
 }
 
 export const deleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdMutationKey = () =>
-	[{ url: "/api/realms/:realmId/units/:unitId/policy-tags/:tagId" }] as const;
+	[{ url: "/api/v1/realms/:realmId/units/:unitId/policy-tags/:tagId" }] as const;
 
 export function deleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdMutationOptions<
 	TContext = unknown,
@@ -35762,7 +35662,7 @@ export function deleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdMutationOp
 
 /**
  * @summary Remove Realm Policy Tag
- * {@link /api/realms/:realmId/units/:unitId/policy-tags/:tagId}
+ * {@link /api/v1/realms/:realmId/units/:unitId/policy-tags/:tagId}
  */
 export function useDeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId<TContext>(
 	options: {
@@ -35831,7 +35731,7 @@ export const getApiRealmsByRealmIdUnitsByUnitIdTagsQueryKey = ({
 	query,
 }: Omit<GetApiRealmsByRealmIdUnitsByUnitIdTagsOptions, "headers">) =>
 	[
-		{ url: "/api/realms/:realmId/units/:unitId/tags", params: path },
+		{ url: "/api/v1/realms/:realmId/units/:unitId/tags", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -35872,7 +35772,7 @@ export function getApiRealmsByRealmIdUnitsByUnitIdTagsQueryOptions(
 
 /**
  * @summary List Realm-scoped Unit Tag votes
- * {@link /api/realms/:realmId/units/:unitId/tags}
+ * {@link /api/v1/realms/:realmId/units/:unitId/tags}
  */
 export function useGetApiRealmsByRealmIdUnitsByUnitIdTags<
 	TData = GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200,
@@ -35942,7 +35842,7 @@ export function useGetApiRealmsByRealmIdUnitsByUnitIdTags<
 }
 
 export const putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteMutationKey = () =>
-	[{ url: "/api/realms/:realmId/units/:unitId/tags/:tagId/vote" }] as const;
+	[{ url: "/api/v1/realms/:realmId/units/:unitId/tags/:tagId/vote" }] as const;
 
 export function putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteMutationOptions<
 	TContext = unknown,
@@ -35977,7 +35877,7 @@ export function putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteMutationOptions
 
 /**
  * @summary Vote on a Realm-scoped Unit Tag
- * {@link /api/realms/:realmId/units/:unitId/tags/:tagId/vote}
+ * {@link /api/v1/realms/:realmId/units/:unitId/tags/:tagId/vote}
  */
 export function usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote<TContext>(
 	options: {
@@ -36058,7 +35958,7 @@ export function usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote<TContext>(
 }
 
 export const deleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteMutationKey = () =>
-	[{ url: "/api/realms/:realmId/units/:unitId/tags/:tagId/vote" }] as const;
+	[{ url: "/api/v1/realms/:realmId/units/:unitId/tags/:tagId/vote" }] as const;
 
 export function deleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteMutationOptions<
 	TContext = unknown,
@@ -36090,7 +35990,7 @@ export function deleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteMutationOpti
 
 /**
  * @summary Remove a Realm-scoped Unit Tag vote
- * {@link /api/realms/:realmId/units/:unitId/tags/:tagId/vote}
+ * {@link /api/v1/realms/:realmId/units/:unitId/tags/:tagId/vote}
  */
 export function useDeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote<TContext>(
 	options: {
@@ -36166,7 +36066,7 @@ export const getApiRealmsByRealmIdUnitsQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiRealmsByRealmIdUnitsOptions, "headers">) =>
-	[{ url: "/api/realms/:realmId/units", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/realms/:realmId/units", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiRealmsByRealmIdUnitsQueryKey = ReturnType<typeof getApiRealmsByRealmIdUnitsQueryKey>;
 
@@ -36202,7 +36102,7 @@ export function getApiRealmsByRealmIdUnitsQueryOptions(
 
 /**
  * @summary List Realm Units for moderation
- * {@link /api/realms/:realmId/units}
+ * {@link /api/v1/realms/:realmId/units}
  */
 export function useGetApiRealmsByRealmIdUnits<
 	TData = GetApiRealmsByRealmIdUnitsStatus200,
@@ -36274,7 +36174,7 @@ export const getApiRealmsByRealmIdUnitsByUnitIdQueryKey = ({
 	query,
 }: Omit<GetApiRealmsByRealmIdUnitsByUnitIdOptions, "headers">) =>
 	[
-		{ url: "/api/realms/:realmId/units/:unitId", params: path },
+		{ url: "/api/v1/realms/:realmId/units/:unitId", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -36314,7 +36214,7 @@ export function getApiRealmsByRealmIdUnitsByUnitIdQueryOptions(
 
 /**
  * @summary Get Realm Unit for moderation
- * {@link /api/realms/:realmId/units/:unitId}
+ * {@link /api/v1/realms/:realmId/units/:unitId}
  */
 export function useGetApiRealmsByRealmIdUnitsByUnitId<
 	TData = GetApiRealmsByRealmIdUnitsByUnitIdStatus200,
@@ -36382,7 +36282,7 @@ export function useGetApiRealmsByRealmIdUnitsByUnitId<
 }
 
 export const patchApiRealmsByRealmIdUnitsByUnitIdMutationKey = () =>
-	[{ url: "/api/realms/:realmId/units/:unitId" }] as const;
+	[{ url: "/api/v1/realms/:realmId/units/:unitId" }] as const;
 
 export function patchApiRealmsByRealmIdUnitsByUnitIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -36417,7 +36317,7 @@ export function patchApiRealmsByRealmIdUnitsByUnitIdMutationOptions<TContext = u
 
 /**
  * @summary Apply Realm Unit moderation command
- * {@link /api/realms/:realmId/units/:unitId}
+ * {@link /api/v1/realms/:realmId/units/:unitId}
  */
 export function usePatchApiRealmsByRealmIdUnitsByUnitId<TContext>(
 	options: {
@@ -36501,7 +36401,7 @@ export const getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey = ({
 	query,
 }: Omit<GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions, "headers">) =>
 	[
-		{ url: "/api/realms/:realmId/units/:unitId/history", params: path },
+		{ url: "/api/v1/realms/:realmId/units/:unitId/history", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -36541,7 +36441,7 @@ export function getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryOptions(
 
 /**
  * @summary Get Realm Unit moderation history
- * {@link /api/realms/:realmId/units/:unitId/history}
+ * {@link /api/v1/realms/:realmId/units/:unitId/history}
  */
 export function useGetApiRealmsByRealmIdUnitsByUnitIdHistory<
 	TData = GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200,
@@ -36612,7 +36512,7 @@ export function useGetApiRealmsByRealmIdUnitsByUnitIdHistory<
 export const getApiRealmsByRealmIdWikiNavigationQueryKey = ({
 	path,
 }: Omit<GetApiRealmsByRealmIdWikiNavigationOptions, "headers">) =>
-	[{ url: "/api/realms/:realmId/wiki/navigation", params: path }] as const;
+	[{ url: "/api/v1/realms/:realmId/wiki/navigation", params: path }] as const;
 
 type GetApiRealmsByRealmIdWikiNavigationQueryKey = ReturnType<
 	typeof getApiRealmsByRealmIdWikiNavigationQueryKey
@@ -36652,7 +36552,7 @@ export function getApiRealmsByRealmIdWikiNavigationQueryOptions(
 /**
  * @description Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.
  * @summary List Realm Wiki navigation resources
- * {@link /api/realms/:realmId/wiki/navigation}
+ * {@link /api/v1/realms/:realmId/wiki/navigation}
  */
 export function useGetApiRealmsByRealmIdWikiNavigation<
 	TData = GetApiRealmsByRealmIdWikiNavigationStatus200,
@@ -36717,7 +36617,7 @@ export function useGetApiRealmsByRealmIdWikiNavigation<
 }
 
 export const postApiRealmsByRealmIdWikiNavigationMutationKey = () =>
-	[{ url: "/api/realms/:realmId/wiki/navigation" }] as const;
+	[{ url: "/api/v1/realms/:realmId/wiki/navigation" }] as const;
 
 export function postApiRealmsByRealmIdWikiNavigationMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -36752,7 +36652,7 @@ export function postApiRealmsByRealmIdWikiNavigationMutationOptions<TContext = u
 /**
  * @description Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.
  * @summary Create Realm Wiki navigation
- * {@link /api/realms/:realmId/wiki/navigation}
+ * {@link /api/v1/realms/:realmId/wiki/navigation}
  */
 export function usePostApiRealmsByRealmIdWikiNavigation<TContext>(
 	options: {
@@ -36830,7 +36730,7 @@ export function usePostApiRealmsByRealmIdWikiNavigation<TContext>(
 export const getApiRealmsByRealmIdWikiNavigationByNavigationIdQueryKey = ({
 	path,
 }: Omit<GetApiRealmsByRealmIdWikiNavigationByNavigationIdOptions, "headers">) =>
-	[{ url: "/api/realms/:realmId/wiki/navigation/:navigationId", params: path }] as const;
+	[{ url: "/api/v1/realms/:realmId/wiki/navigation/:navigationId", params: path }] as const;
 
 type GetApiRealmsByRealmIdWikiNavigationByNavigationIdQueryKey = ReturnType<
 	typeof getApiRealmsByRealmIdWikiNavigationByNavigationIdQueryKey
@@ -36870,7 +36770,7 @@ export function getApiRealmsByRealmIdWikiNavigationByNavigationIdQueryOptions(
 /**
  * @description Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.
  * @summary Get Realm Wiki navigation
- * {@link /api/realms/:realmId/wiki/navigation/:navigationId}
+ * {@link /api/v1/realms/:realmId/wiki/navigation/:navigationId}
  */
 export function useGetApiRealmsByRealmIdWikiNavigationByNavigationId<
 	TData = GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200,
@@ -36939,7 +36839,7 @@ export function useGetApiRealmsByRealmIdWikiNavigationByNavigationId<
 }
 
 export const putApiRealmsByRealmIdWikiNavigationByNavigationIdMutationKey = () =>
-	[{ url: "/api/realms/:realmId/wiki/navigation/:navigationId" }] as const;
+	[{ url: "/api/v1/realms/:realmId/wiki/navigation/:navigationId" }] as const;
 
 export function putApiRealmsByRealmIdWikiNavigationByNavigationIdMutationOptions<
 	TContext = unknown,
@@ -36975,7 +36875,7 @@ export function putApiRealmsByRealmIdWikiNavigationByNavigationIdMutationOptions
 /**
  * @description Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.
  * @summary Replace Realm Wiki navigation
- * {@link /api/realms/:realmId/wiki/navigation/:navigationId}
+ * {@link /api/v1/realms/:realmId/wiki/navigation/:navigationId}
  */
 export function usePutApiRealmsByRealmIdWikiNavigationByNavigationId<TContext>(
 	options: {
@@ -37056,7 +36956,7 @@ export function usePutApiRealmsByRealmIdWikiNavigationByNavigationId<TContext>(
 }
 
 export const deleteApiRealmsByRealmIdWikiNavigationByNavigationIdMutationKey = () =>
-	[{ url: "/api/realms/:realmId/wiki/navigation/:navigationId" }] as const;
+	[{ url: "/api/v1/realms/:realmId/wiki/navigation/:navigationId" }] as const;
 
 export function deleteApiRealmsByRealmIdWikiNavigationByNavigationIdMutationOptions<
 	TContext = unknown,
@@ -37092,7 +36992,7 @@ export function deleteApiRealmsByRealmIdWikiNavigationByNavigationIdMutationOpti
 /**
  * @description Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.
  * @summary Delete Realm Wiki navigation
- * {@link /api/realms/:realmId/wiki/navigation/:navigationId}
+ * {@link /api/v1/realms/:realmId/wiki/navigation/:navigationId}
  */
 export function useDeleteApiRealmsByRealmIdWikiNavigationByNavigationId<TContext>(
 	options: {
@@ -37175,7 +37075,7 @@ export function useDeleteApiRealmsByRealmIdWikiNavigationByNavigationId<TContext
 export const getApiSearchFeaturesByTemplateQueryKey = ({
 	path,
 }: Omit<GetApiSearchFeaturesByTemplateOptions, "headers">) =>
-	[{ url: "/api/search/features/:template", params: path }] as const;
+	[{ url: "/api/v1/search/features/:template", params: path }] as const;
 
 type GetApiSearchFeaturesByTemplateQueryKey = ReturnType<
 	typeof getApiSearchFeaturesByTemplateQueryKey
@@ -37209,7 +37109,7 @@ export function getApiSearchFeaturesByTemplateQueryOptions(
 
 /**
  * @summary Get a system Search Feature template
- * {@link /api/search/features/:template}
+ * {@link /api/v1/search/features/:template}
  */
 export function useGetApiSearchFeaturesByTemplate<
 	TData = GetApiSearchFeaturesByTemplateStatus200,
@@ -37265,7 +37165,7 @@ export function useGetApiSearchFeaturesByTemplate<
 }
 
 export const postApiSearchFeaturesByTemplateExecuteMutationKey = () =>
-	[{ url: "/api/search/features/:template/execute" }] as const;
+	[{ url: "/api/v1/search/features/:template/execute" }] as const;
 
 export function postApiSearchFeaturesByTemplateExecuteMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -37298,7 +37198,7 @@ export function postApiSearchFeaturesByTemplateExecuteMutationOptions<TContext =
 
 /**
  * @summary Execute a system Search Feature template
- * {@link /api/search/features/:template/execute}
+ * {@link /api/v1/search/features/:template/execute}
  */
 export function usePostApiSearchFeaturesByTemplateExecute<TContext>(
 	options: {
@@ -37370,7 +37270,7 @@ export function usePostApiSearchFeaturesByTemplateExecute<TContext>(
 }
 
 export const postApiSearchFeaturesByTemplateFeedMutationKey = () =>
-	[{ url: "/api/search/features/:template/feed" }] as const;
+	[{ url: "/api/v1/search/features/:template/feed" }] as const;
 
 export function postApiSearchFeaturesByTemplateFeedMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -37403,7 +37303,7 @@ export function postApiSearchFeaturesByTemplateFeedMutationOptions<TContext = un
 
 /**
  * @summary Present a system Search Feature as a Feed
- * {@link /api/search/features/:template/feed}
+ * {@link /api/v1/search/features/:template/feed}
  */
 export function usePostApiSearchFeaturesByTemplateFeed<TContext>(
 	options: {
@@ -37477,7 +37377,7 @@ export function usePostApiSearchFeaturesByTemplateFeed<TContext>(
 export const getApiSearchZonesByZoneIdFeatureQueryKey = ({
 	path,
 }: Omit<GetApiSearchZonesByZoneIdFeatureOptions, "headers">) =>
-	[{ url: "/api/search/zones/:zoneId/feature", params: path }] as const;
+	[{ url: "/api/v1/search/zones/:zoneId/feature", params: path }] as const;
 
 type GetApiSearchZonesByZoneIdFeatureQueryKey = ReturnType<
 	typeof getApiSearchZonesByZoneIdFeatureQueryKey
@@ -37514,7 +37414,7 @@ export function getApiSearchZonesByZoneIdFeatureQueryOptions(
 
 /**
  * @summary Get a Zone Search Feature
- * {@link /api/search/zones/:zoneId/feature}
+ * {@link /api/v1/search/zones/:zoneId/feature}
  */
 export function useGetApiSearchZonesByZoneIdFeature<
 	TData = GetApiSearchZonesByZoneIdFeatureStatus200,
@@ -37575,7 +37475,7 @@ export function useGetApiSearchZonesByZoneIdFeature<
 }
 
 export const putApiSearchZonesByZoneIdFeatureMutationKey = () =>
-	[{ url: "/api/search/zones/:zoneId/feature" }] as const;
+	[{ url: "/api/v1/search/zones/:zoneId/feature" }] as const;
 
 export function putApiSearchZonesByZoneIdFeatureMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -37609,7 +37509,7 @@ export function putApiSearchZonesByZoneIdFeatureMutationOptions<TContext = unkno
 
 /**
  * @summary Configure a Zone Search Feature
- * {@link /api/search/zones/:zoneId/feature}
+ * {@link /api/v1/search/zones/:zoneId/feature}
  */
 export function usePutApiSearchZonesByZoneIdFeature<TContext>(
 	options: {
@@ -37685,7 +37585,7 @@ export function usePutApiSearchZonesByZoneIdFeature<TContext>(
 }
 
 export const postApiSearchZonesByZoneIdFeatureExecuteMutationKey = () =>
-	[{ url: "/api/search/zones/:zoneId/feature/execute" }] as const;
+	[{ url: "/api/v1/search/zones/:zoneId/feature/execute" }] as const;
 
 export function postApiSearchZonesByZoneIdFeatureExecuteMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -37719,7 +37619,7 @@ export function postApiSearchZonesByZoneIdFeatureExecuteMutationOptions<TContext
 
 /**
  * @summary Execute a Zone Search Feature
- * {@link /api/search/zones/:zoneId/feature/execute}
+ * {@link /api/v1/search/zones/:zoneId/feature/execute}
  */
 export function usePostApiSearchZonesByZoneIdFeatureExecute<TContext>(
 	options: {
@@ -37795,7 +37695,7 @@ export function usePostApiSearchZonesByZoneIdFeatureExecute<TContext>(
 }
 
 export const postApiSearchZonesByZoneIdFeatureFeedMutationKey = () =>
-	[{ url: "/api/search/zones/:zoneId/feature/feed" }] as const;
+	[{ url: "/api/v1/search/zones/:zoneId/feature/feed" }] as const;
 
 export function postApiSearchZonesByZoneIdFeatureFeedMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -37829,7 +37729,7 @@ export function postApiSearchZonesByZoneIdFeatureFeedMutationOptions<TContext = 
 
 /**
  * @summary Present a Zone Search Feature as a Feed
- * {@link /api/search/zones/:zoneId/feature/feed}
+ * {@link /api/v1/search/zones/:zoneId/feature/feed}
  */
 export function usePostApiSearchZonesByZoneIdFeatureFeed<TContext>(
 	options: {
@@ -37907,7 +37807,7 @@ export function usePostApiSearchZonesByZoneIdFeatureFeed<TContext>(
 export const getApiSearchZonesByZoneIdFeatureRevisionsQueryKey = ({
 	path,
 }: Omit<GetApiSearchZonesByZoneIdFeatureRevisionsOptions, "headers">) =>
-	[{ url: "/api/search/zones/:zoneId/feature/revisions", params: path }] as const;
+	[{ url: "/api/v1/search/zones/:zoneId/feature/revisions", params: path }] as const;
 
 type GetApiSearchZonesByZoneIdFeatureRevisionsQueryKey = ReturnType<
 	typeof getApiSearchZonesByZoneIdFeatureRevisionsQueryKey
@@ -37944,7 +37844,7 @@ export function getApiSearchZonesByZoneIdFeatureRevisionsQueryOptions(
 
 /**
  * @summary List Zone Search Feature revisions
- * {@link /api/search/zones/:zoneId/feature/revisions}
+ * {@link /api/v1/search/zones/:zoneId/feature/revisions}
  */
 export function useGetApiSearchZonesByZoneIdFeatureRevisions<
 	TData = GetApiSearchZonesByZoneIdFeatureRevisionsStatus200,
@@ -38006,7 +37906,7 @@ export function useGetApiSearchZonesByZoneIdFeatureRevisions<
 }
 
 export const postApiSearchZonesByZoneIdFeatureRestoreMutationKey = () =>
-	[{ url: "/api/search/zones/:zoneId/feature/restore" }] as const;
+	[{ url: "/api/v1/search/zones/:zoneId/feature/restore" }] as const;
 
 export function postApiSearchZonesByZoneIdFeatureRestoreMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -38040,7 +37940,7 @@ export function postApiSearchZonesByZoneIdFeatureRestoreMutationOptions<TContext
 
 /**
  * @summary Restore a Zone Search Feature revision
- * {@link /api/search/zones/:zoneId/feature/restore}
+ * {@link /api/v1/search/zones/:zoneId/feature/restore}
  */
 export function usePostApiSearchZonesByZoneIdFeatureRestore<TContext>(
 	options: {
@@ -38116,7 +38016,7 @@ export function usePostApiSearchZonesByZoneIdFeatureRestore<TContext>(
 }
 
 export const postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteMutationKey = () =>
-	[{ url: "/api/search/zones/:zoneId/dock/blocks/:blockKey/execute" }] as const;
+	[{ url: "/api/v1/search/zones/:zoneId/dock/blocks/:blockKey/execute" }] as const;
 
 export function postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteMutationOptions<
 	TContext = unknown,
@@ -38150,7 +38050,7 @@ export function postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteMutationOpt
 
 /**
  * @summary Execute a trusted Zone Dock Search Block
- * {@link /api/search/zones/:zoneId/dock/blocks/:blockKey/execute}
+ * {@link /api/v1/search/zones/:zoneId/dock/blocks/:blockKey/execute}
  */
 export function usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute<TContext>(
 	options: {
@@ -38227,7 +38127,7 @@ export function usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute<TContex
 }
 
 export const postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteMutationKey = () =>
-	[{ url: "/api/search/zones/:zoneId/pages/:pageId/blocks/:blockKey/execute" }] as const;
+	[{ url: "/api/v1/search/zones/:zoneId/pages/:pageId/blocks/:blockKey/execute" }] as const;
 
 export function postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteMutationOptions<
 	TContext = unknown,
@@ -38261,7 +38161,7 @@ export function postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteMu
 
 /**
  * @summary Execute a trusted Zone Page Search Block
- * {@link /api/search/zones/:zoneId/pages/:pageId/blocks/:blockKey/execute}
+ * {@link /api/v1/search/zones/:zoneId/pages/:pageId/blocks/:blockKey/execute}
  */
 export function usePostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecute<TContext>(
 	options: {
@@ -38339,7 +38239,7 @@ export function usePostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecut
 }
 
 export const postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteMutationKey = () =>
-	[{ url: "/api/search/zones/:zoneId/feed-blocks/:blockKey/execute" }] as const;
+	[{ url: "/api/v1/search/zones/:zoneId/feed-blocks/:blockKey/execute" }] as const;
 
 export function postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteMutationOptions<
 	TContext = unknown,
@@ -38373,7 +38273,7 @@ export function postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteMutationOpt
 
 /**
  * @summary Execute a trusted Zone Feed Block
- * {@link /api/search/zones/:zoneId/feed-blocks/:blockKey/execute}
+ * {@link /api/v1/search/zones/:zoneId/feed-blocks/:blockKey/execute}
  */
 export function usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute<TContext>(
 	options: {
@@ -38449,7 +38349,7 @@ export function usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute<TContex
 	>;
 }
 
-export const postApiSearchMutationKey = () => [{ url: "/api/search" }] as const;
+export const postApiSearchMutationKey = () => [{ url: "/api/v1/search" }] as const;
 
 export function postApiSearchMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -38477,7 +38377,7 @@ export function postApiSearchMutationOptions<TContext = unknown>(
 
 /**
  * @summary Search across public categories
- * {@link /api/search}
+ * {@link /api/v1/search}
  */
 export function usePostApiSearch<TContext>(
 	options: {
@@ -38546,7 +38446,7 @@ export function usePostApiSearch<TContext>(
 }
 
 export const postApiSearchSharedQueriesMutationKey = () =>
-	[{ url: "/api/search/shared-queries" }] as const;
+	[{ url: "/api/v1/search/shared-queries" }] as const;
 
 export function postApiSearchSharedQueriesMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -38578,7 +38478,7 @@ export function postApiSearchSharedQueriesMutationOptions<TContext = unknown>(
 
 /**
  * @summary Create an immutable shared Search query
- * {@link /api/search/shared-queries}
+ * {@link /api/v1/search/shared-queries}
  */
 export function usePostApiSearchSharedQueries<TContext>(
 	options: {
@@ -38649,7 +38549,7 @@ export function usePostApiSearchSharedQueries<TContext>(
 export const getApiSearchSharedQueriesByIdQueryKey = ({
 	path,
 }: Omit<GetApiSearchSharedQueriesByIdOptions, "headers">) =>
-	[{ url: "/api/search/shared-queries/:id", params: path }] as const;
+	[{ url: "/api/v1/search/shared-queries/:id", params: path }] as const;
 
 type GetApiSearchSharedQueriesByIdQueryKey = ReturnType<
 	typeof getApiSearchSharedQueriesByIdQueryKey
@@ -38685,7 +38585,7 @@ export function getApiSearchSharedQueriesByIdQueryOptions(
 
 /**
  * @summary Get a shared Search query
- * {@link /api/search/shared-queries/:id}
+ * {@link /api/v1/search/shared-queries/:id}
  */
 export function useGetApiSearchSharedQueriesById<
 	TData = GetApiSearchSharedQueriesByIdStatus200,
@@ -38743,7 +38643,7 @@ export function useGetApiSearchSharedQueriesById<
 	return queryResult;
 }
 
-export const postApiSearchByIndexMutationKey = () => [{ url: "/api/search/:index" }] as const;
+export const postApiSearchByIndexMutationKey = () => [{ url: "/api/v1/search/:index" }] as const;
 
 export function postApiSearchByIndexMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -38778,7 +38678,7 @@ export function postApiSearchByIndexMutationOptions<TContext = unknown>(
 
 /**
  * @summary Search one public category
- * {@link /api/search/:index}
+ * {@link /api/v1/search/:index}
  */
 export function usePostApiSearchByIndex<TContext>(
 	options: {
@@ -38854,7 +38754,7 @@ export function usePostApiSearchByIndex<TContext>(
 	>;
 }
 
-export const postApiImageAssetsMutationKey = () => [{ url: "/api/image-assets" }] as const;
+export const postApiImageAssetsMutationKey = () => [{ url: "/api/v1/image-assets" }] as const;
 
 export function postApiImageAssetsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -38883,7 +38783,7 @@ export function postApiImageAssetsMutationOptions<TContext = unknown>(
 
 /**
  * @summary Create image asset upload
- * {@link /api/image-assets}
+ * {@link /api/v1/image-assets}
  */
 export function usePostApiImageAssets<TContext>(
 	options: {
@@ -38956,7 +38856,7 @@ export function usePostApiImageAssets<TContext>(
 }
 
 export const postApiImageAssetsByIdCompleteMutationKey = () =>
-	[{ url: "/api/image-assets/:id/complete" }] as const;
+	[{ url: "/api/v1/image-assets/:id/complete" }] as const;
 
 export function postApiImageAssetsByIdCompleteMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -38991,7 +38891,7 @@ export function postApiImageAssetsByIdCompleteMutationOptions<TContext = unknown
 
 /**
  * @summary Complete image asset upload
- * {@link /api/image-assets/:id/complete}
+ * {@link /api/v1/image-assets/:id/complete}
  */
 export function usePostApiImageAssetsByIdComplete<TContext>(
 	options: {
@@ -39068,7 +38968,7 @@ export function usePostApiImageAssetsByIdComplete<TContext>(
 }
 
 export const putApiImageAssetsByIdPresentationsByRoleMutationKey = () =>
-	[{ url: "/api/image-assets/:id/presentations/:role" }] as const;
+	[{ url: "/api/v1/image-assets/:id/presentations/:role" }] as const;
 
 export function putApiImageAssetsByIdPresentationsByRoleMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -39103,7 +39003,7 @@ export function putApiImageAssetsByIdPresentationsByRoleMutationOptions<TContext
 
 /**
  * @summary Update image asset presentation
- * {@link /api/image-assets/:id/presentations/:role}
+ * {@link /api/v1/image-assets/:id/presentations/:role}
  */
 export function usePutApiImageAssetsByIdPresentationsByRole<TContext>(
 	options: {
@@ -39185,7 +39085,7 @@ export function usePutApiImageAssetsByIdPresentationsByRole<TContext>(
 export const getApiImageAssetsByIdQueryKey = ({
 	path,
 }: Omit<GetApiImageAssetsByIdOptions, "headers">) =>
-	[{ url: "/api/image-assets/:id", params: path }] as const;
+	[{ url: "/api/v1/image-assets/:id", params: path }] as const;
 
 type GetApiImageAssetsByIdQueryKey = ReturnType<typeof getApiImageAssetsByIdQueryKey>;
 
@@ -39221,7 +39121,7 @@ export function getApiImageAssetsByIdQueryOptions(
 
 /**
  * @summary Get image asset
- * {@link /api/image-assets/:id}
+ * {@link /api/v1/image-assets/:id}
  */
 export function useGetApiImageAssetsById<
 	TData = GetApiImageAssetsByIdStatus200,
@@ -39281,7 +39181,7 @@ export function useGetApiImageAssetsById<
 }
 
 export const deleteApiImageAssetsByIdMutationKey = () =>
-	[{ url: "/api/image-assets/:id" }] as const;
+	[{ url: "/api/v1/image-assets/:id" }] as const;
 
 export function deleteApiImageAssetsByIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -39314,7 +39214,7 @@ export function deleteApiImageAssetsByIdMutationOptions<TContext = unknown>(
 
 /**
  * @summary Delete incomplete image asset
- * {@link /api/image-assets/:id}
+ * {@link /api/v1/image-assets/:id}
  */
 export function useDeleteApiImageAssetsById<TContext>(
 	options: {

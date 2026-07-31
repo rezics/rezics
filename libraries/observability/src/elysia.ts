@@ -43,7 +43,7 @@ export function createElysiaObservability(options: ElysiaObservabilityOptions = 
 	const observability = getActiveObservability();
 	const requests = new WeakMap<Request, RequestTelemetry>();
 	const excludedPaths = new Set(
-		options.excludedPaths ?? ["/api/startup", "/api/health", "/api/ready"],
+		options.excludedPaths ?? ["/api/v1/startup", "/api/v1/health", "/api/v1/ready"],
 	);
 
 	function finish(request: Request, statusCode: number | undefined): void {

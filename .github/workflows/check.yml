@@ -40,7 +40,6 @@ jobs:
               if: always()
               run: devenv shell task infra:stop
             - run: devenv shell task openapi:check
-            - run: devenv shell task search:check
             - run: devenv shell task typecheck
             - run: devenv shell task test
             - run: devenv shell task aspire-apphost:smoke

@@ -5475,7 +5475,6 @@ export const ApiErrorCode = {
 	AliasNotFound: "AliasNotFound",
 	TagApplicationNotFound: "TagApplicationNotFound",
 	UnitTagCurationChanged: "UnitTagCurationChanged",
-	UnitVersionNotFound: "UnitVersionNotFound",
 	UnitSourceLinkNotFound: "UnitSourceLinkNotFound",
 	InvalidMessageCursor: "InvalidMessageCursor",
 	ConversationNotFound: "ConversationNotFound",
@@ -33816,7 +33815,10 @@ export type GetApiAuditEventsStatus200 = {
 		 * @type string
 		 */
 		id: string;
-		schemaVersion: string | number;
+		/**
+		 * @type number
+		 */
+		schemaVersion: 1;
 		/**
 		 * @default 'admin_activity'
 		 * @type string
@@ -77463,256 +77465,6 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteResponse =
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus500;
 
-export const PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdType = {
-	book: "book",
-	software: "software",
-	media: "media",
-} as const;
-
-export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdType =
-	(typeof PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdType)[keyof typeof PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdType];
-
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdPath = {
-	/**
-	 * @type string
-	 */
-	type: PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdType;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	canonicalId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	canonicalUnitId: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
-};
-
-export const PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitAccessRestricted: "UnitAccessRestricted",
-} as const;
-
-export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403ErrorCodeEnum =
-	(typeof PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitPermissionForbidden'
-		 * @type string
-		 */
-		code: PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	UnitVersionNotFound: "UnitVersionNotFound",
-} as const;
-
-export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404ErrorCodeEnum =
-	(typeof PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409ErrorCodeEnum = {
-	UnitVariantKindMismatch: "UnitVariantKindMismatch",
-	UnitVariantTargetIsVariant: "UnitVariantTargetIsVariant",
-	UnitVariantSourceHasVariants: "UnitVariantSourceHasVariants",
-	UnitVariantChanged: "UnitVariantChanged",
-	UnitVariantMainUnavailable: "UnitVariantMainUnavailable",
-} as const;
-
-export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409ErrorCodeEnum =
-	(typeof PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitVariantKindMismatch'
-		 * @type string
-		 */
-		code: PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus422 = ValidationError;
-
-export const PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429ErrorCodeEnum = {
-	ApiQuotaExceeded: "ApiQuotaExceeded",
-	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
-} as const;
-
-export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429ErrorCodeEnum =
-	(typeof PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus500 = InternalError;
-
-/**
- * @deprecated
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdOptions = {
-	body?: never;
-	path: PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdResponses = {
-	"200": PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus200;
-	"403": PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403;
-	"404": PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404;
-	"409": PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409;
-	"422": PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus422;
-	"429": PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429;
-	"500": PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdResponse =
-	| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus200
-	| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403
-	| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404
-	| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409
-	| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus422
-	| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429
-	| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus500;
-
 /**
  * @type object
  */
@@ -82515,7 +82267,7 @@ export type PostApiProgressSearchStatus200 = {
 	}[];
 	/**
 	 * @maxLength 4096
-	 * @pattern ^s2_[A-Za-z0-9_-]+$
+	 * @pattern ^s1_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
@@ -83045,7 +82797,7 @@ export type PostApiProgressSearchBody = {
 		pageSize?: number;
 		/**
 		 * @maxLength 4096
-		 * @pattern ^s2_[A-Za-z0-9_-]+$
+		 * @pattern ^s1_[A-Za-z0-9_-]+$
 		 * @type string | undefined
 		 */
 		cursor?: string;
@@ -119822,7 +119574,7 @@ export type PostApiSearchFeaturesByTemplateExecuteStatus200 = {
 	query: string;
 	/**
 	 * @maxLength 4096
-	 * @pattern ^s2_[A-Za-z0-9_-]+$
+	 * @pattern ^s1_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
@@ -120663,7 +120415,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 		pageSize?: number;
 		/**
 		 * @maxLength 4096
-		 * @pattern ^s2_[A-Za-z0-9_-]+$
+		 * @pattern ^s1_[A-Za-z0-9_-]+$
 		 * @type string | undefined
 		 */
 		cursor?: string;
@@ -124053,7 +123805,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 	)[];
 	/**
 	 * @maxLength 4096
-	 * @pattern ^s2_[A-Za-z0-9_-]+$
+	 * @pattern ^s1_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
@@ -124706,7 +124458,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 		pageSize?: number;
 		/**
 		 * @maxLength 4096
-		 * @pattern ^s2_[A-Za-z0-9_-]+$
+		 * @pattern ^s1_[A-Za-z0-9_-]+$
 		 * @type string | undefined
 		 */
 		cursor?: string;
@@ -125628,7 +125380,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteStatus200 = {
 	query: string;
 	/**
 	 * @maxLength 4096
-	 * @pattern ^s2_[A-Za-z0-9_-]+$
+	 * @pattern ^s1_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
@@ -126451,7 +126203,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 		pageSize?: number;
 		/**
 		 * @maxLength 4096
-		 * @pattern ^s2_[A-Za-z0-9_-]+$
+		 * @pattern ^s1_[A-Za-z0-9_-]+$
 		 * @type string | undefined
 		 */
 		cursor?: string;
@@ -129834,7 +129586,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 	)[];
 	/**
 	 * @maxLength 4096
-	 * @pattern ^s2_[A-Za-z0-9_-]+$
+	 * @pattern ^s1_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
@@ -130469,7 +130221,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 		pageSize?: number;
 		/**
 		 * @maxLength 4096
-		 * @pattern ^s2_[A-Za-z0-9_-]+$
+		 * @pattern ^s1_[A-Za-z0-9_-]+$
 		 * @type string | undefined
 		 */
 		cursor?: string;
@@ -131412,7 +131164,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200 = {
 	query: string;
 	/**
 	 * @maxLength 4096
-	 * @pattern ^s2_[A-Za-z0-9_-]+$
+	 * @pattern ^s1_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
@@ -132237,7 +131989,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 		pageSize?: number;
 		/**
 		 * @maxLength 4096
-		 * @pattern ^s2_[A-Za-z0-9_-]+$
+		 * @pattern ^s1_[A-Za-z0-9_-]+$
 		 * @type string | undefined
 		 */
 		cursor?: string;
@@ -132780,7 +132532,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus
 	query: string;
 	/**
 	 * @maxLength 4096
-	 * @pattern ^s2_[A-Za-z0-9_-]+$
+	 * @pattern ^s1_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
@@ -133609,7 +133361,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 		pageSize?: number;
 		/**
 		 * @maxLength 4096
-		 * @pattern ^s2_[A-Za-z0-9_-]+$
+		 * @pattern ^s1_[A-Za-z0-9_-]+$
 		 * @type string | undefined
 		 */
 		cursor?: string;
@@ -137010,7 +136762,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 	)[];
 	/**
 	 * @maxLength 4096
-	 * @pattern ^s2_[A-Za-z0-9_-]+$
+	 * @pattern ^s1_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
@@ -137640,7 +137392,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 		pageSize?: number;
 		/**
 		 * @maxLength 4096
-		 * @pattern ^s2_[A-Za-z0-9_-]+$
+		 * @pattern ^s1_[A-Za-z0-9_-]+$
 		 * @type string | undefined
 		 */
 		cursor?: string;
@@ -138172,7 +137924,7 @@ export type PostApiSearchStatus200 = {
 	query: string;
 	/**
 	 * @maxLength 4096
-	 * @pattern ^s2_[A-Za-z0-9_-]+$
+	 * @pattern ^s1_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
@@ -140735,7 +140487,7 @@ export type PostApiSearchByIndexStatus200 = {
 	};
 	/**
 	 * @maxLength 4096
-	 * @pattern ^s2_[A-Za-z0-9_-]+$
+	 * @pattern ^s1_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
@@ -140973,7 +140725,7 @@ export type PostApiSearchByIndexBody = {
 	query?: string;
 	/**
 	 * @maxLength 4096
-	 * @pattern ^s2_[A-Za-z0-9_-]+$
+	 * @pattern ^s1_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	cursor?: string;

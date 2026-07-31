@@ -448,7 +448,7 @@ export const SearchExactness = t.Object({
 });
 export const SearchResponse = t.Object({
 	query: t.String(),
-	nextCursor: t.Optional(t.String({ maxLength: 4096, pattern: "^s2_[A-Za-z0-9_-]+$" })),
+	nextCursor: t.Optional(t.String({ maxLength: 4096, pattern: "^s1_[A-Za-z0-9_-]+$" })),
 	facets: t.Optional(
 		t.Array(
 			t.Object({
@@ -471,7 +471,7 @@ export const SearchResponse = t.Object({
 export const DomainSearchResponse = t.Object({
 	hits: t.Array(SearchHit),
 	total: SearchExactness,
-	nextCursor: t.Optional(t.String({ maxLength: 4096, pattern: "^s2_[A-Za-z0-9_-]+$" })),
+	nextCursor: t.Optional(t.String({ maxLength: 4096, pattern: "^s1_[A-Za-z0-9_-]+$" })),
 	limit: t.Integer(),
 	processingTimeMs: t.Number(),
 });
@@ -880,7 +880,7 @@ export const ProgressSearchResponse = t.Object({
 			cover: ImageAssetResponse,
 		}),
 	),
-	nextCursor: t.Optional(t.String({ maxLength: 4096, pattern: "^s2_[A-Za-z0-9_-]+$" })),
+	nextCursor: t.Optional(t.String({ maxLength: 4096, pattern: "^s1_[A-Za-z0-9_-]+$" })),
 	total: t.Integer({ minimum: 0 }),
 });
 export const ProgressResponse = t.Object({
@@ -1426,10 +1426,4 @@ export const VoteResponse = t.Object({
 	value: t.Nullable(t.Integer()),
 	score: t.Integer(),
 	voteCount: t.Integer(),
-});
-export const UnitVersionResponse = t.Object({
-	unitId: Uuid,
-	canonicalUnitId: Uuid,
-	createdAt: DateTime,
-	updatedAt: DateTime,
 });

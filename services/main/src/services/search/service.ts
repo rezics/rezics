@@ -1090,7 +1090,7 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 			nextOffset === undefined
 				? undefined
 				: createSearchCursor({
-						version: 2,
+						version: 1,
 						generationId: generation.id,
 						requestHash,
 						pageSize: limit,

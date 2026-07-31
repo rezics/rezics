@@ -38,7 +38,7 @@ const PollSearch = { query: "", limit: 50, sort: "createdAt:desc" as const };
 export function PollsPage() {
 	const localizationLanguages = useLocalizationLanguages();
 	const query = useQuery({
-		queryKey: [{ url: "/api/search/polls" }, { ...PollSearch, localizationLanguages }],
+		queryKey: [{ url: "/api/v1/search/polls" }, { ...PollSearch, localizationLanguages }],
 		queryFn: async ({ signal }) => {
 			const { data } = await postApiSearchByIndex({
 				path: { index: "polls" },
@@ -131,7 +131,7 @@ export function PollCreate() {
 						: {}),
 				},
 			});
-			await queryClient.invalidateQueries({ queryKey: [{ url: "/api/search/polls" }] });
+			await queryClient.invalidateQueries({ queryKey: [{ url: "/api/v1/search/polls" }] });
 			router.push(`/polls/${result.id}`);
 		} catch {
 			// The typed mutation state supplies the visible API error.

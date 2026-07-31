@@ -68,8 +68,7 @@ const pinnedTag = {
 } satisfies TagPresentation;
 
 const realmTag = {
-	itemKey:
-		"realm:019f995d-74b4-7b8a-93fe-5147949611df:019f995d-731c-71dd-b8cd-2bc781fb07e7",
+	itemKey: "realm:019f995d-74b4-7b8a-93fe-5147949611df:019f995d-731c-71dd-b8cd-2bc781fb07e7",
 	identity: pinnedTag.identity,
 	context: {
 		kind: "realm",

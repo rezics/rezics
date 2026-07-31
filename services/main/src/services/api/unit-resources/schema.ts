@@ -14,7 +14,7 @@ import {
 	LocalizationInput,
 	Uuid,
 } from "../schema";
-import { UnitOwnershipMode, WorkUnitType, VariantUnitType } from "../units/schema";
+import { UnitOwnershipMode, WorkUnitType } from "../units/schema";
 
 export const CreateUnitResourceBody = t.Object(
 	{
@@ -192,10 +192,3 @@ export const VoteBody = t.Object(
 	{ additionalProperties: false },
 );
 export type VoteBody = Static<typeof VoteBody>;
-
-export const UnitVersionParams = t.Object({
-	type: VariantUnitType,
-	unitId: Uuid,
-	canonicalId: Uuid,
-});
-export type UnitVersionParams = Static<typeof UnitVersionParams>;

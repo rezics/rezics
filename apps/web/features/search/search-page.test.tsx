@@ -68,7 +68,7 @@ vi.mock("@/features/search/search-feature", () => ({
 				onClick={() =>
 					onExecute({
 						injections: [],
-						state: { cursor: "s2_stale", sort: "best" },
+						state: { cursor: "s1_stale", sort: "best" },
 					})
 				}
 				type="button"

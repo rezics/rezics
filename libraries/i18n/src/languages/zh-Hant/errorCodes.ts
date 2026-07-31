@@ -161,7 +161,6 @@ export default {
 	TagApplicationNotFound: "找不到這筆標籤套用記錄。",
 	UnitTagCurationChanged: "這筆標籤精選已在其他地方變更；已載入最新順序，請再試一次。",
 	TagNotFound: "找不到這個標籤。",
-	UnitVersionNotFound: "找不到這個條目版本。",
 	UnitSourceLinkNotFound: "找不到這個作品的來源連結。",
 	UnitVariantKindMismatch: "變體與主版本必須使用相同且受支援的條目類型。",
 	UnitVariantTargetIsVariant: "變體必須直接指向主版本。",

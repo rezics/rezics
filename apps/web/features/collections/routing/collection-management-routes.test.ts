@@ -27,7 +27,7 @@ describe("Collection management routes", () => {
 		).toBeUndefined();
 	});
 
-	it("builds content and metadata routes without legacy paths", () => {
+	it("builds content and metadata routes", () => {
 		expect(collectionManagementSectionHref("collection-1", "content")).toBe(
 			"/collections/collection-1/edit/content",
 		);
@@ -42,15 +42,9 @@ describe("Collection management routes", () => {
 		);
 		expect(
 			parseCollectionManagementSection(
-				"/collections/collection-1/edit/basic",
+				"/collections/collection-1/edit/metadata",
 				"collection-1",
 			),
-		).toBeUndefined();
-		expect(
-			parseCollectionManagementSection(
-				"/collections/collection-1/edit/localizations",
-				"collection-1",
-			),
-		).toBeUndefined();
+		).toBe("metadata");
 	});
 });

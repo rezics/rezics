@@ -41,7 +41,7 @@ function isProgressSearchSort(value: string): value is ProgressSearchSort {
 }
 
 function decodeProgressSearchCursor(value: string): ProgressSearchCursor {
-	if (!value.startsWith("s2_")) throw new InvalidSearch("Invalid progress Search cursor");
+	if (!value.startsWith("s1_")) throw new InvalidSearch("Invalid progress Search cursor");
 	let parsed: unknown;
 	try {
 		parsed = JSON.parse(Buffer.from(value.slice(3), "base64url").toString("utf8"));
@@ -81,7 +81,7 @@ export function createProgressSearchCursor(
 		pageSize: request.pageSize,
 		requestHash: request.requestHash,
 	};
-	return `s2_${Buffer.from(JSON.stringify(cursor)).toString("base64url")}`;
+	return `s1_${Buffer.from(JSON.stringify(cursor)).toString("base64url")}`;
 }
 
 export function resolveProgressSearchRequest(value: unknown): ResolvedProgressSearchRequest {

@@ -38,7 +38,6 @@ import {
 	unitTag,
 	unitTagVoteStat,
 	unitLocalization,
-	unitVariant,
 } from "../../database/schema";
 import { isCreditAttributionRoleForUnitKind } from "../../database/schema/contract-values";
 import { AliasSearchScoreThreshold } from "../../database/schema/contract-values";
@@ -66,7 +65,6 @@ import {
 	UnitSourceLinkParams,
 	UnitUnitParams,
 	UnitTagParams,
-	UnitVersionParams,
 	VoteBody,
 } from "./schema";
 import { checkUnitType, createUnitResource } from "./service";
@@ -77,7 +75,6 @@ import {
 	ensureWikiAssociationContextPost,
 	getAssociationContextPostsByAssociationIds,
 } from "../../units/association-context";
-import { updateUnitVariantContext } from "../../units/variants";
 import {
 	getAttributionSummariesByUnitIds,
 	getPublicUnitSummariesByIds,
@@ -100,15 +97,9 @@ import {
 	TagListResponse,
 	toPortableTextResponse,
 	UnitSourceLinkResponse,
-	UnitVersionResponse,
 	VoteResponse,
 } from "../schema/response";
-import {
-	AliasNotFound,
-	TagApplicationNotFound,
-	UnitSourceLinkNotFound,
-	UnitVersionNotFound,
-} from "./errors";
+import { AliasNotFound, TagApplicationNotFound, UnitSourceLinkNotFound } from "./errors";
 import { TagNotFound } from "../tags/errors";
 import {
 	CreditAttributionNotFound,
@@ -135,14 +126,6 @@ const UnitInteractionForbiddenResponse = toApiErrorResponse([
 	"UnitAccessRestricted",
 	"UnitPermissionForbidden",
 ]);
-const UnitVariantConflictResponse = toApiErrorResponse([
-	"UnitVariantKindMismatch",
-	"UnitVariantTargetIsVariant",
-	"UnitVariantSourceHasVariants",
-	"UnitVariantChanged",
-	"UnitVariantMainUnavailable",
-]);
-
 const publiclyReadableUnitCondition = () =>
 	and(
 		eq(unit.status, "published"),
@@ -1458,56 +1441,6 @@ export default new Elysia()
 						]),
 					},
 					detail: { summary: "Remove Unit tag vote", tags: ["Units"] },
-				},
-			)
-			.put(
-				"/version-of/:canonicalId",
-				async ({ params, authorization }) => {
-					await checkUnitType(params.unitId, params.type);
-					await checkUnitType(params.canonicalId, params.type);
-					const [current] = await database
-						.select({ mainUnitId: unitVariant.mainUnitId })
-						.from(unitVariant)
-						.where(eq(unitVariant.variantUnitId, params.unitId))
-						.limit(1);
-					await updateUnitVariantContext({
-						kind: params.type,
-						variantUnitId: params.unitId,
-						mainUnitId: params.canonicalId,
-						expectedMainUnitId: current?.mainUnitId ?? null,
-						actorProfileId: authorization.profileId,
-						authorization: authorization.unit,
-					});
-					const [relationship] = await database
-						.select()
-						.from(unitVariant)
-						.where(eq(unitVariant.variantUnitId, params.unitId))
-						.limit(1);
-					if (!relationship) throw new UnitVersionNotFound();
-					return {
-						unitId: relationship.variantUnitId,
-						canonicalUnitId: relationship.mainUnitId,
-						createdAt: relationship.createdAt,
-						updatedAt: relationship.updatedAt,
-					};
-				},
-				{
-					access: "contribute:unit:update",
-					params: UnitVersionParams,
-					response: {
-						[StatusCodes.OK]: UnitVersionResponse,
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"UnitVersionNotFound",
-						]),
-						[StatusCodes.CONFLICT]: UnitVariantConflictResponse,
-					},
-					detail: {
-						summary: "Attach unit version (legacy)",
-						tags: ["Units"],
-						deprecated: true,
-					},
 				},
 			),
 	);

@@ -23,10 +23,10 @@ describe("scheduler health contract", () => {
 	});
 
 	it("gates API traffic on readiness while keeping worker health scheduler-only", () => {
-		expect(apiSchedulerHealthContract.startup.path).toBe("/api/startup");
-		expect(apiSchedulerHealthContract.liveness.path).toBe("/api/health");
+		expect(apiSchedulerHealthContract.startup.path).toBe("/api/v1/startup");
+		expect(apiSchedulerHealthContract.liveness.path).toBe("/api/v1/health");
 		expect(apiSchedulerHealthContract.readiness).toMatchObject({
-			path: "/api/ready",
+			path: "/api/v1/ready",
 			gatesTraffic: true,
 		});
 		expect(workerSchedulerHealthContract.startup.path).toBe("/startup");

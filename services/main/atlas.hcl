@@ -8,7 +8,7 @@ data "external_schema" "drizzle" {
 }
 
 env "main" {
-	dev = "postgres://postgres:postgres@localhost:5433/rezics_atlas?search_path=public&sslmode=disable"
+	dev = "postgres://postgres:postgres@localhost:5433/rezics_atlas_dev?search_path=public&sslmode=disable"
 
 	schema {
 		src = data.external_schema.drizzle.url
@@ -19,11 +19,8 @@ env "main" {
 		exec_order       = LINEAR
 		revisions_schema = "public"
 
-		// These objects remain owned by explicit SQL migrations rather than
-		// Drizzle's schema export. The legacy ledger is ignored during cutover.
-		exclude = [
-			"__drizzle_migrations",
-			"*[type=extension|function|trigger]",
-		]
+		// Drizzle does not export these durable objects, so explicit SQL
+		// migrations own them and Atlas must not infer their removal.
+		exclude = ["*[type=extension|function|trigger]"]
 	}
 }

@@ -72,7 +72,7 @@ async function resolvePublicSlugUncached(
 	if (!isSlugLabel(slug)) return null;
 	const scopeUnitId = NamespaceByKind[kind];
 	const url = new URL(
-		`/api/slug-addresses/scopes/${scopeUnitId}/${encodeURIComponent(slug)}`,
+		`/api/v1/slug-addresses/scopes/${scopeUnitId}/${encodeURIComponent(slug)}`,
 		apiOrigin(),
 	);
 	url.searchParams.set("kind", kind);
@@ -117,7 +117,7 @@ export async function getZonePageAddressById(
 	if (!UuidPattern.test(zoneId) || !UuidPattern.test(pageId)) return null;
 	const response = await fetch(
 		new URL(
-			`/api/zones/${encodeURIComponent(zoneId)}/pages/${encodeURIComponent(pageId)}`,
+			`/api/v1/zones/${encodeURIComponent(zoneId)}/pages/${encodeURIComponent(pageId)}`,
 			apiOrigin(),
 		),
 		{ cache: "no-store" },
@@ -144,7 +144,7 @@ export async function getPublicSlugHrefByUnitId(
 ): Promise<string | null> {
 	if (!UuidPattern.test(unitId)) return null;
 	const response = await fetch(
-		new URL(`/api/slug-addresses/public-units/${unitId}`, apiOrigin()),
+		new URL(`/api/v1/slug-addresses/public-units/${unitId}`, apiOrigin()),
 		{ cache: "no-store" },
 	);
 	if (response.status === 404) return null;

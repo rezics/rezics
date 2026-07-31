@@ -429,8 +429,6 @@ import type {
 	PutApiUnitsByTypeByUnitIdTagsByTagIdVoteResponses,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteResponses,
-	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdOptions,
-	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdResponses,
 	GetApiUnitsByIdByUnitIdContentStructuresOptions,
 	GetApiUnitsByIdByUnitIdContentStructuresResponses,
 	PostApiUnitsByIdByUnitIdContentStructuresOptions,
@@ -742,7 +740,7 @@ export function getImageAssetsByIdContent<ThrowOnError extends boolean = true>(
 
 /**
  * @summary List Unit association proposals
- * {@link /api/unit/:unitId/association-proposals}
+ * {@link /api/v1/unit/:unitId/association-proposals}
  */
 export function getApiUnitByUnitIdAssociationProposals<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitByUnitIdAssociationProposalsOptions, ThrowOnError>,
@@ -751,7 +749,7 @@ export function getApiUnitByUnitIdAssociationProposals<ThrowOnError extends bool
 
 	return request({
 		method: "GET",
-		url: "/api/unit/{unitId}/association-proposals",
+		url: "/api/v1/unit/{unitId}/association-proposals",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiUnitByUnitIdAssociationProposalsResponses, ThrowOnError>>;
@@ -759,7 +757,7 @@ export function getApiUnitByUnitIdAssociationProposals<ThrowOnError extends bool
 
 /**
  * @summary Request Unit association
- * {@link /api/unit/:unitId/association-proposals/requests}
+ * {@link /api/v1/unit/:unitId/association-proposals/requests}
  */
 export function postApiUnitByUnitIdAssociationProposalsRequests<
 	ThrowOnError extends boolean = true,
@@ -770,7 +768,7 @@ export function postApiUnitByUnitIdAssociationProposalsRequests<
 
 	return request({
 		method: "POST",
-		url: "/api/unit/{unitId}/association-proposals/requests",
+		url: "/api/v1/unit/{unitId}/association-proposals/requests",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -780,7 +778,7 @@ export function postApiUnitByUnitIdAssociationProposalsRequests<
 
 /**
  * @summary Invite Unit to association
- * {@link /api/unit/:unitId/association-proposals/invitations}
+ * {@link /api/v1/unit/:unitId/association-proposals/invitations}
  */
 export function postApiUnitByUnitIdAssociationProposalsInvitations<
 	ThrowOnError extends boolean = true,
@@ -793,7 +791,7 @@ export function postApiUnitByUnitIdAssociationProposalsInvitations<
 
 	return request({
 		method: "POST",
-		url: "/api/unit/{unitId}/association-proposals/invitations",
+		url: "/api/v1/unit/{unitId}/association-proposals/invitations",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -803,7 +801,7 @@ export function postApiUnitByUnitIdAssociationProposalsInvitations<
 
 /**
  * @summary Accept Unit association proposal
- * {@link /api/unit/:unitId/association-proposals/:proposalId/accept}
+ * {@link /api/v1/unit/:unitId/association-proposals/:proposalId/accept}
  */
 export function postApiUnitByUnitIdAssociationProposalsByProposalIdAccept<
 	ThrowOnError extends boolean = true,
@@ -819,7 +817,7 @@ export function postApiUnitByUnitIdAssociationProposalsByProposalIdAccept<
 
 	return request({
 		method: "POST",
-		url: "/api/unit/{unitId}/association-proposals/{proposalId}/accept",
+		url: "/api/v1/unit/{unitId}/association-proposals/{proposalId}/accept",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -832,7 +830,7 @@ export function postApiUnitByUnitIdAssociationProposalsByProposalIdAccept<
 
 /**
  * @summary Decline Unit association proposal
- * {@link /api/unit/:unitId/association-proposals/:proposalId/decline}
+ * {@link /api/v1/unit/:unitId/association-proposals/:proposalId/decline}
  */
 export function postApiUnitByUnitIdAssociationProposalsByProposalIdDecline<
 	ThrowOnError extends boolean = true,
@@ -848,7 +846,7 @@ export function postApiUnitByUnitIdAssociationProposalsByProposalIdDecline<
 
 	return request({
 		method: "POST",
-		url: "/api/unit/{unitId}/association-proposals/{proposalId}/decline",
+		url: "/api/v1/unit/{unitId}/association-proposals/{proposalId}/decline",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -861,7 +859,7 @@ export function postApiUnitByUnitIdAssociationProposalsByProposalIdDecline<
 
 /**
  * @summary Cancel Unit association proposal
- * {@link /api/unit/:unitId/association-proposals/:proposalId}
+ * {@link /api/v1/unit/:unitId/association-proposals/:proposalId}
  */
 export function deleteApiUnitByUnitIdAssociationProposalsByProposalId<
 	ThrowOnError extends boolean = true,
@@ -874,7 +872,7 @@ export function deleteApiUnitByUnitIdAssociationProposalsByProposalId<
 
 	return request({
 		method: "DELETE",
-		url: "/api/unit/{unitId}/association-proposals/{proposalId}",
+		url: "/api/v1/unit/{unitId}/association-proposals/{proposalId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -884,63 +882,63 @@ export function deleteApiUnitByUnitIdAssociationProposalsByProposalId<
 
 /**
  * @summary Process startup
- * {@link /api/startup}
+ * {@link /api/v1/startup}
  */
 export function getApiStartup<ThrowOnError extends boolean = true>(
 	options: Options<GetApiStartupOptions, ThrowOnError> = {},
 ): Promise<RequestResult<GetApiStartupResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/startup", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/startup", ...config }) as Promise<
 		RequestResult<GetApiStartupResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Process health
- * {@link /api/health}
+ * {@link /api/v1/health}
  */
 export function getApiHealth<ThrowOnError extends boolean = true>(
 	options: Options<GetApiHealthOptions, ThrowOnError> = {},
 ): Promise<RequestResult<GetApiHealthResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/health", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/health", ...config }) as Promise<
 		RequestResult<GetApiHealthResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Process health without a response body
- * {@link /api/health}
+ * {@link /api/v1/health}
  */
 export function headApiHealth<ThrowOnError extends boolean = true>(
 	options: Options<HeadApiHealthOptions, ThrowOnError> = {},
 ): Promise<RequestResult<HeadApiHealthResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "HEAD", url: "/api/health", ...config }) as Promise<
+	return request({ method: "HEAD", url: "/api/v1/health", ...config }) as Promise<
 		RequestResult<HeadApiHealthResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Dependency readiness
- * {@link /api/ready}
+ * {@link /api/v1/ready}
  */
 export function getApiReady<ThrowOnError extends boolean = true>(
 	options: Options<GetApiReadyOptions, ThrowOnError> = {},
 ): Promise<RequestResult<GetApiReadyResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/ready", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/ready", ...config }) as Promise<
 		RequestResult<GetApiReadyResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Poll notifications with a cursor
- * {@link /api/notifications}
+ * {@link /api/v1/notifications}
  */
 export function getApiNotifications<ThrowOnError extends boolean = true>(
 	options: Options<GetApiNotificationsOptions, ThrowOnError> = {},
@@ -949,7 +947,7 @@ export function getApiNotifications<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "GET",
-		url: "/api/notifications",
+		url: "/api/v1/notifications",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -960,7 +958,7 @@ export function getApiNotifications<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Get unread notification count
- * {@link /api/notifications/unread-count}
+ * {@link /api/v1/notifications/unread-count}
  */
 export function getApiNotificationsUnreadCount<ThrowOnError extends boolean = true>(
 	options: Options<GetApiNotificationsUnreadCountOptions, ThrowOnError> = {},
@@ -969,7 +967,7 @@ export function getApiNotificationsUnreadCount<ThrowOnError extends boolean = tr
 
 	return request({
 		method: "GET",
-		url: "/api/notifications/unread-count",
+		url: "/api/v1/notifications/unread-count",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -980,7 +978,7 @@ export function getApiNotificationsUnreadCount<ThrowOnError extends boolean = tr
 
 /**
  * @summary Mark notifications read
- * {@link /api/notifications/read-all}
+ * {@link /api/v1/notifications/read-all}
  */
 export function putApiNotificationsReadAll<ThrowOnError extends boolean = true>(
 	options: Options<PutApiNotificationsReadAllOptions, ThrowOnError>,
@@ -989,7 +987,7 @@ export function putApiNotificationsReadAll<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "PUT",
-		url: "/api/notifications/read-all",
+		url: "/api/v1/notifications/read-all",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -1000,7 +998,7 @@ export function putApiNotificationsReadAll<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Mark one notification read
- * {@link /api/notifications/:notificationId/read}
+ * {@link /api/v1/notifications/:notificationId/read}
  */
 export function putApiNotificationsByNotificationIdRead<ThrowOnError extends boolean = true>(
 	options: Options<PutApiNotificationsByNotificationIdReadOptions, ThrowOnError>,
@@ -1009,7 +1007,7 @@ export function putApiNotificationsByNotificationIdRead<ThrowOnError extends boo
 
 	return request({
 		method: "PUT",
-		url: "/api/notifications/{notificationId}/read",
+		url: "/api/v1/notifications/{notificationId}/read",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -1020,7 +1018,7 @@ export function putApiNotificationsByNotificationIdRead<ThrowOnError extends boo
 
 /**
  * @summary Get notification preferences
- * {@link /api/notifications/preferences}
+ * {@link /api/v1/notifications/preferences}
  */
 export function getApiNotificationsPreferences<ThrowOnError extends boolean = true>(
 	options: Options<GetApiNotificationsPreferencesOptions, ThrowOnError> = {},
@@ -1029,7 +1027,7 @@ export function getApiNotificationsPreferences<ThrowOnError extends boolean = tr
 
 	return request({
 		method: "GET",
-		url: "/api/notifications/preferences",
+		url: "/api/v1/notifications/preferences",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -1040,7 +1038,7 @@ export function getApiNotificationsPreferences<ThrowOnError extends boolean = tr
 
 /**
  * @summary Update notification preferences
- * {@link /api/notifications/preferences}
+ * {@link /api/v1/notifications/preferences}
  */
 export function putApiNotificationsPreferences<ThrowOnError extends boolean = true>(
 	options: Options<PutApiNotificationsPreferencesOptions, ThrowOnError>,
@@ -1049,7 +1047,7 @@ export function putApiNotificationsPreferences<ThrowOnError extends boolean = tr
 
 	return request({
 		method: "PUT",
-		url: "/api/notifications/preferences",
+		url: "/api/v1/notifications/preferences",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -1060,7 +1058,7 @@ export function putApiNotificationsPreferences<ThrowOnError extends boolean = tr
 
 /**
  * @summary Claim ownership of a community-owned Unit
- * {@link /api/ownership-claims}
+ * {@link /api/v1/ownership-claims}
  */
 export function postApiOwnershipClaims<ThrowOnError extends boolean = true>(
 	options: Options<PostApiOwnershipClaimsOptions, ThrowOnError>,
@@ -1069,7 +1067,7 @@ export function postApiOwnershipClaims<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "POST",
-		url: "/api/ownership-claims",
+		url: "/api/v1/ownership-claims",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PostApiOwnershipClaimsResponses, ThrowOnError>>;
@@ -1077,7 +1075,7 @@ export function postApiOwnershipClaims<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Withdraw a pending Unit ownership claim
- * {@link /api/ownership-claims/:claimId/withdraw}
+ * {@link /api/v1/ownership-claims/:claimId/withdraw}
  */
 export function postApiOwnershipClaimsByClaimIdWithdraw<ThrowOnError extends boolean = true>(
 	options: Options<PostApiOwnershipClaimsByClaimIdWithdrawOptions, ThrowOnError>,
@@ -1086,7 +1084,7 @@ export function postApiOwnershipClaimsByClaimIdWithdraw<ThrowOnError extends boo
 
 	return request({
 		method: "POST",
-		url: "/api/ownership-claims/{claimId}/withdraw",
+		url: "/api/v1/ownership-claims/{claimId}/withdraw",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PostApiOwnershipClaimsByClaimIdWithdrawResponses, ThrowOnError>>;
@@ -1094,21 +1092,21 @@ export function postApiOwnershipClaimsByClaimIdWithdraw<ThrowOnError extends boo
 
 /**
  * @summary Recommend Units
- * {@link /api/recommendations/units}
+ * {@link /api/v1/recommendations/units}
  */
 export function getApiRecommendationsUnits<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRecommendationsUnitsOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiRecommendationsUnitsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/recommendations/units", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/recommendations/units", ...config }) as Promise<
 		RequestResult<GetApiRecommendationsUnitsResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Recommend related posts
- * {@link /api/recommendations/posts/:postId}
+ * {@link /api/v1/recommendations/posts/:postId}
  */
 export function getApiRecommendationsPostsByPostId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRecommendationsPostsByPostIdOptions, ThrowOnError>,
@@ -1117,28 +1115,28 @@ export function getApiRecommendationsPostsByPostId<ThrowOnError extends boolean 
 
 	return request({
 		method: "GET",
-		url: "/api/recommendations/posts/{postId}",
+		url: "/api/v1/recommendations/posts/{postId}",
 		...config,
 	}) as Promise<RequestResult<GetApiRecommendationsPostsByPostIdResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Record recommendation events
- * {@link /api/recommendations/events}
+ * {@link /api/v1/recommendations/events}
  */
 export function postApiRecommendationsEvents<ThrowOnError extends boolean = true>(
 	options: Options<PostApiRecommendationsEventsOptions, ThrowOnError>,
 ): Promise<RequestResult<PostApiRecommendationsEventsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/recommendations/events", ...config }) as Promise<
+	return request({ method: "POST", url: "/api/v1/recommendations/events", ...config }) as Promise<
 		RequestResult<PostApiRecommendationsEventsResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Exclude a recommendation
- * {@link /api/recommendations/exclusions/:unitId}
+ * {@link /api/v1/recommendations/exclusions/:unitId}
  */
 export function putApiRecommendationsExclusionsByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiRecommendationsExclusionsByUnitIdOptions, ThrowOnError>,
@@ -1147,7 +1145,7 @@ export function putApiRecommendationsExclusionsByUnitId<ThrowOnError extends boo
 
 	return request({
 		method: "PUT",
-		url: "/api/recommendations/exclusions/{unitId}",
+		url: "/api/v1/recommendations/exclusions/{unitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -1158,7 +1156,7 @@ export function putApiRecommendationsExclusionsByUnitId<ThrowOnError extends boo
 
 /**
  * @summary Restore an excluded recommendation
- * {@link /api/recommendations/exclusions/:unitId}
+ * {@link /api/v1/recommendations/exclusions/:unitId}
  */
 export function deleteApiRecommendationsExclusionsByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiRecommendationsExclusionsByUnitIdOptions, ThrowOnError>,
@@ -1167,7 +1165,7 @@ export function deleteApiRecommendationsExclusionsByUnitId<ThrowOnError extends 
 
 	return request({
 		method: "DELETE",
-		url: "/api/recommendations/exclusions/{unitId}",
+		url: "/api/v1/recommendations/exclusions/{unitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -1178,7 +1176,7 @@ export function deleteApiRecommendationsExclusionsByUnitId<ThrowOnError extends 
 
 /**
  * @summary List direct-message conversations
- * {@link /api/messages/conversations}
+ * {@link /api/v1/messages/conversations}
  */
 export function getApiMessagesConversations<ThrowOnError extends boolean = true>(
 	options: Options<GetApiMessagesConversationsOptions, ThrowOnError> = {},
@@ -1187,7 +1185,7 @@ export function getApiMessagesConversations<ThrowOnError extends boolean = true>
 
 	return request({
 		method: "GET",
-		url: "/api/messages/conversations",
+		url: "/api/v1/messages/conversations",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -1198,7 +1196,7 @@ export function getApiMessagesConversations<ThrowOnError extends boolean = true>
 
 /**
  * @summary Create or find a direct-message conversation
- * {@link /api/messages/conversations}
+ * {@link /api/v1/messages/conversations}
  */
 export function postApiMessagesConversations<ThrowOnError extends boolean = true>(
 	options: Options<PostApiMessagesConversationsOptions, ThrowOnError>,
@@ -1207,7 +1205,7 @@ export function postApiMessagesConversations<ThrowOnError extends boolean = true
 
 	return request({
 		method: "POST",
-		url: "/api/messages/conversations",
+		url: "/api/v1/messages/conversations",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -1218,7 +1216,7 @@ export function postApiMessagesConversations<ThrowOnError extends boolean = true
 
 /**
  * @summary Get direct-message conversation
- * {@link /api/messages/conversations/:conversationId}
+ * {@link /api/v1/messages/conversations/:conversationId}
  */
 export function getApiMessagesConversationsByConversationId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiMessagesConversationsByConversationIdOptions, ThrowOnError>,
@@ -1227,7 +1225,7 @@ export function getApiMessagesConversationsByConversationId<ThrowOnError extends
 
 	return request({
 		method: "GET",
-		url: "/api/messages/conversations/{conversationId}",
+		url: "/api/v1/messages/conversations/{conversationId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -1240,7 +1238,7 @@ export function getApiMessagesConversationsByConversationId<ThrowOnError extends
 
 /**
  * @summary List direct messages
- * {@link /api/messages/conversations/:conversationId/messages}
+ * {@link /api/v1/messages/conversations/:conversationId/messages}
  */
 export function getApiMessagesConversationsByConversationIdMessages<
 	ThrowOnError extends boolean = true,
@@ -1253,7 +1251,7 @@ export function getApiMessagesConversationsByConversationIdMessages<
 
 	return request({
 		method: "GET",
-		url: "/api/messages/conversations/{conversationId}/messages",
+		url: "/api/v1/messages/conversations/{conversationId}/messages",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -1266,7 +1264,7 @@ export function getApiMessagesConversationsByConversationIdMessages<
 
 /**
  * @summary Send direct message
- * {@link /api/messages/conversations/:conversationId/messages}
+ * {@link /api/v1/messages/conversations/:conversationId/messages}
  */
 export function postApiMessagesConversationsByConversationIdMessages<
 	ThrowOnError extends boolean = true,
@@ -1279,7 +1277,7 @@ export function postApiMessagesConversationsByConversationIdMessages<
 
 	return request({
 		method: "POST",
-		url: "/api/messages/conversations/{conversationId}/messages",
+		url: "/api/v1/messages/conversations/{conversationId}/messages",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -1292,7 +1290,7 @@ export function postApiMessagesConversationsByConversationIdMessages<
 
 /**
  * @summary Mark direct-message conversation read
- * {@link /api/messages/conversations/:conversationId/read}
+ * {@link /api/v1/messages/conversations/:conversationId/read}
  */
 export function putApiMessagesConversationsByConversationIdRead<
 	ThrowOnError extends boolean = true,
@@ -1303,7 +1301,7 @@ export function putApiMessagesConversationsByConversationIdRead<
 
 	return request({
 		method: "PUT",
-		url: "/api/messages/conversations/{conversationId}/read",
+		url: "/api/v1/messages/conversations/{conversationId}/read",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -1316,7 +1314,7 @@ export function putApiMessagesConversationsByConversationIdRead<
 
 /**
  * @summary Delete direct message
- * {@link /api/messages/:messageId}
+ * {@link /api/v1/messages/:messageId}
  */
 export function deleteApiMessagesByMessageId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiMessagesByMessageIdOptions, ThrowOnError>,
@@ -1325,7 +1323,7 @@ export function deleteApiMessagesByMessageId<ThrowOnError extends boolean = true
 
 	return request({
 		method: "DELETE",
-		url: "/api/messages/{messageId}",
+		url: "/api/v1/messages/{messageId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -1336,7 +1334,7 @@ export function deleteApiMessagesByMessageId<ThrowOnError extends boolean = true
 
 /**
  * @summary List API tokens
- * {@link /api/api-tokens}
+ * {@link /api/v1/api-tokens}
  */
 export function getApiApiTokens<ThrowOnError extends boolean = true>(
 	options: Options<GetApiApiTokensOptions, ThrowOnError> = {},
@@ -1345,7 +1343,7 @@ export function getApiApiTokens<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "GET",
-		url: "/api/api-tokens",
+		url: "/api/v1/api-tokens",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiApiTokensResponses, ThrowOnError>>;
@@ -1353,7 +1351,7 @@ export function getApiApiTokens<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Create API token (secret returned once)
- * {@link /api/api-tokens}
+ * {@link /api/v1/api-tokens}
  */
 export function postApiApiTokens<ThrowOnError extends boolean = true>(
 	options: Options<PostApiApiTokensOptions, ThrowOnError>,
@@ -1362,7 +1360,7 @@ export function postApiApiTokens<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "POST",
-		url: "/api/api-tokens",
+		url: "/api/v1/api-tokens",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PostApiApiTokensResponses, ThrowOnError>>;
@@ -1370,7 +1368,7 @@ export function postApiApiTokens<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Update API token
- * {@link /api/api-tokens/:tokenId}
+ * {@link /api/v1/api-tokens/:tokenId}
  */
 export function patchApiApiTokensByTokenId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiApiTokensByTokenIdOptions, ThrowOnError>,
@@ -1379,7 +1377,7 @@ export function patchApiApiTokensByTokenId<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "PATCH",
-		url: "/api/api-tokens/{tokenId}",
+		url: "/api/v1/api-tokens/{tokenId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PatchApiApiTokensByTokenIdResponses, ThrowOnError>>;
@@ -1387,7 +1385,7 @@ export function patchApiApiTokensByTokenId<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Revoke API token
- * {@link /api/api-tokens/:tokenId}
+ * {@link /api/v1/api-tokens/:tokenId}
  */
 export function deleteApiApiTokensByTokenId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiApiTokensByTokenIdOptions, ThrowOnError>,
@@ -1396,7 +1394,7 @@ export function deleteApiApiTokensByTokenId<ThrowOnError extends boolean = true>
 
 	return request({
 		method: "DELETE",
-		url: "/api/api-tokens/{tokenId}",
+		url: "/api/v1/api-tokens/{tokenId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<DeleteApiApiTokensByTokenIdResponses, ThrowOnError>>;
@@ -1404,7 +1402,7 @@ export function deleteApiApiTokensByTokenId<ThrowOnError extends boolean = true>
 
 /**
  * @summary Replace API token quota override
- * {@link /api/api-tokens/:tokenId/quota-override}
+ * {@link /api/v1/api-tokens/:tokenId/quota-override}
  */
 export function putApiApiTokensByTokenIdQuotaOverride<ThrowOnError extends boolean = true>(
 	options: Options<PutApiApiTokensByTokenIdQuotaOverrideOptions, ThrowOnError>,
@@ -1413,7 +1411,7 @@ export function putApiApiTokensByTokenIdQuotaOverride<ThrowOnError extends boole
 
 	return request({
 		method: "PUT",
-		url: "/api/api-tokens/{tokenId}/quota-override",
+		url: "/api/v1/api-tokens/{tokenId}/quota-override",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PutApiApiTokensByTokenIdQuotaOverrideResponses, ThrowOnError>>;
@@ -1421,7 +1419,7 @@ export function putApiApiTokensByTokenIdQuotaOverride<ThrowOnError extends boole
 
 /**
  * @summary Delete API token quota override
- * {@link /api/api-tokens/:tokenId/quota-override}
+ * {@link /api/v1/api-tokens/:tokenId/quota-override}
  */
 export function deleteApiApiTokensByTokenIdQuotaOverride<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiApiTokensByTokenIdQuotaOverrideOptions, ThrowOnError>,
@@ -1430,7 +1428,7 @@ export function deleteApiApiTokensByTokenIdQuotaOverride<ThrowOnError extends bo
 
 	return request({
 		method: "DELETE",
-		url: "/api/api-tokens/{tokenId}/quota-override",
+		url: "/api/v1/api-tokens/{tokenId}/quota-override",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<DeleteApiApiTokensByTokenIdQuotaOverrideResponses, ThrowOnError>>;
@@ -1438,7 +1436,7 @@ export function deleteApiApiTokensByTokenIdQuotaOverride<ThrowOnError extends bo
 
 /**
  * @summary Inspect the current API token's safe capabilities
- * {@link /api/token}
+ * {@link /api/v1/token}
  */
 export function getCurrentApiToken<ThrowOnError extends boolean = true>(
 	options: Options<GetCurrentApiTokenOptions, ThrowOnError> = {},
@@ -1447,7 +1445,7 @@ export function getCurrentApiToken<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "GET",
-		url: "/api/token",
+		url: "/api/v1/token",
 		security: [{ type: "http", scheme: "bearer" }],
 		...config,
 	}) as Promise<RequestResult<GetCurrentApiTokenResponses, ThrowOnError>>;
@@ -1455,7 +1453,7 @@ export function getCurrentApiToken<ThrowOnError extends boolean = true>(
 
 /**
  * @summary List API quota policies
- * {@link /api/api-quota-policies}
+ * {@link /api/v1/api-quota-policies}
  */
 export function getApiApiQuotaPolicies<ThrowOnError extends boolean = true>(
 	options: Options<GetApiApiQuotaPoliciesOptions, ThrowOnError> = {},
@@ -1464,7 +1462,7 @@ export function getApiApiQuotaPolicies<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "GET",
-		url: "/api/api-quota-policies",
+		url: "/api/v1/api-quota-policies",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiApiQuotaPoliciesResponses, ThrowOnError>>;
@@ -1472,7 +1470,7 @@ export function getApiApiQuotaPolicies<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Publish an API quota policy revision
- * {@link /api/api-quota-policies/:policyKey}
+ * {@link /api/v1/api-quota-policies/:policyKey}
  */
 export function putApiApiQuotaPoliciesByPolicyKey<ThrowOnError extends boolean = true>(
 	options: Options<PutApiApiQuotaPoliciesByPolicyKeyOptions, ThrowOnError>,
@@ -1481,7 +1479,7 @@ export function putApiApiQuotaPoliciesByPolicyKey<ThrowOnError extends boolean =
 
 	return request({
 		method: "PUT",
-		url: "/api/api-quota-policies/{policyKey}",
+		url: "/api/v1/api-quota-policies/{policyKey}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PutApiApiQuotaPoliciesByPolicyKeyResponses, ThrowOnError>>;
@@ -1489,7 +1487,7 @@ export function putApiApiQuotaPoliciesByPolicyKey<ThrowOnError extends boolean =
 
 /**
  * @summary Get a user's API quota
- * {@link /api/api-quota-policies/accounts/:userId}
+ * {@link /api/v1/api-quota-policies/accounts/:userId}
  */
 export function getApiApiQuotaPoliciesAccountsByUserId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiApiQuotaPoliciesAccountsByUserIdOptions, ThrowOnError>,
@@ -1498,7 +1496,7 @@ export function getApiApiQuotaPoliciesAccountsByUserId<ThrowOnError extends bool
 
 	return request({
 		method: "GET",
-		url: "/api/api-quota-policies/accounts/{userId}",
+		url: "/api/v1/api-quota-policies/accounts/{userId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiApiQuotaPoliciesAccountsByUserIdResponses, ThrowOnError>>;
@@ -1506,7 +1504,7 @@ export function getApiApiQuotaPoliciesAccountsByUserId<ThrowOnError extends bool
 
 /**
  * @summary Assign a user's API quota policy
- * {@link /api/api-quota-policies/accounts/:userId}
+ * {@link /api/v1/api-quota-policies/accounts/:userId}
  */
 export function putApiApiQuotaPoliciesAccountsByUserId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiApiQuotaPoliciesAccountsByUserIdOptions, ThrowOnError>,
@@ -1515,7 +1513,7 @@ export function putApiApiQuotaPoliciesAccountsByUserId<ThrowOnError extends bool
 
 	return request({
 		method: "PUT",
-		url: "/api/api-quota-policies/accounts/{userId}",
+		url: "/api/v1/api-quota-policies/accounts/{userId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PutApiApiQuotaPoliciesAccountsByUserIdResponses, ThrowOnError>>;
@@ -1523,7 +1521,7 @@ export function putApiApiQuotaPoliciesAccountsByUserId<ThrowOnError extends bool
 
 /**
  * @summary Reset a user's API quota policy
- * {@link /api/api-quota-policies/accounts/:userId}
+ * {@link /api/v1/api-quota-policies/accounts/:userId}
  */
 export function deleteApiApiQuotaPoliciesAccountsByUserId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiApiQuotaPoliciesAccountsByUserIdOptions, ThrowOnError>,
@@ -1532,7 +1530,7 @@ export function deleteApiApiQuotaPoliciesAccountsByUserId<ThrowOnError extends b
 
 	return request({
 		method: "DELETE",
-		url: "/api/api-quota-policies/accounts/{userId}",
+		url: "/api/v1/api-quota-policies/accounts/{userId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<DeleteApiApiQuotaPoliciesAccountsByUserIdResponses, ThrowOnError>>;
@@ -1540,7 +1538,7 @@ export function deleteApiApiQuotaPoliciesAccountsByUserId<ThrowOnError extends b
 
 /**
  * @summary List a user's API token quotas
- * {@link /api/api-quota-policies/accounts/:userId/tokens}
+ * {@link /api/v1/api-quota-policies/accounts/:userId/tokens}
  */
 export function getApiApiQuotaPoliciesAccountsByUserIdTokens<ThrowOnError extends boolean = true>(
 	options: Options<GetApiApiQuotaPoliciesAccountsByUserIdTokensOptions, ThrowOnError>,
@@ -1549,7 +1547,7 @@ export function getApiApiQuotaPoliciesAccountsByUserIdTokens<ThrowOnError extend
 
 	return request({
 		method: "GET",
-		url: "/api/api-quota-policies/accounts/{userId}/tokens",
+		url: "/api/v1/api-quota-policies/accounts/{userId}/tokens",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -1559,7 +1557,7 @@ export function getApiApiQuotaPoliciesAccountsByUserIdTokens<ThrowOnError extend
 
 /**
  * @summary Assign an API token quota policy
- * {@link /api/api-quota-policies/accounts/:userId/tokens/:tokenId}
+ * {@link /api/v1/api-quota-policies/accounts/:userId/tokens/:tokenId}
  */
 export function putApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId<
 	ThrowOnError extends boolean = true,
@@ -1572,7 +1570,7 @@ export function putApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId<
 
 	return request({
 		method: "PUT",
-		url: "/api/api-quota-policies/accounts/{userId}/tokens/{tokenId}",
+		url: "/api/v1/api-quota-policies/accounts/{userId}/tokens/{tokenId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -1582,7 +1580,7 @@ export function putApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId<
 
 /**
  * @summary Reset an API token quota policy
- * {@link /api/api-quota-policies/accounts/:userId/tokens/:tokenId}
+ * {@link /api/v1/api-quota-policies/accounts/:userId/tokens/:tokenId}
  */
 export function deleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId<
 	ThrowOnError extends boolean = true,
@@ -1595,7 +1593,7 @@ export function deleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId<
 
 	return request({
 		method: "DELETE",
-		url: "/api/api-quota-policies/accounts/{userId}/tokens/{tokenId}",
+		url: "/api/v1/api-quota-policies/accounts/{userId}/tokens/{tokenId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -1608,21 +1606,21 @@ export function deleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId<
 
 /**
  * @summary Ranked realm feed
- * {@link /api/feed/query}
+ * {@link /api/v1/feed/query}
  */
 export function postApiFeedQuery<ThrowOnError extends boolean = true>(
 	options: Options<PostApiFeedQueryOptions, ThrowOnError>,
 ): Promise<RequestResult<PostApiFeedQueryResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/feed/query", ...config }) as Promise<
+	return request({ method: "POST", url: "/api/v1/feed/query", ...config }) as Promise<
 		RequestResult<PostApiFeedQueryResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary List current user's Unit reports
- * {@link /api/reports/me}
+ * {@link /api/v1/reports/me}
  */
 export function getApiReportsMe<ThrowOnError extends boolean = true>(
 	options: Options<GetApiReportsMeOptions, ThrowOnError> = {},
@@ -1631,7 +1629,7 @@ export function getApiReportsMe<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "GET",
-		url: "/api/reports/me",
+		url: "/api/v1/reports/me",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -1642,7 +1640,7 @@ export function getApiReportsMe<ThrowOnError extends boolean = true>(
 
 /**
  * @summary List rule Realms that can receive a Unit report
- * {@link /api/reports/units/:unitId/destinations}
+ * {@link /api/v1/reports/units/:unitId/destinations}
  */
 export function getApiReportsUnitsByUnitIdDestinations<ThrowOnError extends boolean = true>(
 	options: Options<GetApiReportsUnitsByUnitIdDestinationsOptions, ThrowOnError>,
@@ -1651,7 +1649,7 @@ export function getApiReportsUnitsByUnitIdDestinations<ThrowOnError extends bool
 
 	return request({
 		method: "GET",
-		url: "/api/reports/units/{unitId}/destinations",
+		url: "/api/v1/reports/units/{unitId}/destinations",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -1662,7 +1660,7 @@ export function getApiReportsUnitsByUnitIdDestinations<ThrowOnError extends bool
 
 /**
  * @summary List reports for a Realm
- * {@link /api/realms/:realmId/reports}
+ * {@link /api/v1/realms/:realmId/reports}
  */
 export function getApiRealmsByRealmIdReports<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdReportsOptions, ThrowOnError>,
@@ -1671,7 +1669,7 @@ export function getApiRealmsByRealmIdReports<ThrowOnError extends boolean = true
 
 	return request({
 		method: "GET",
-		url: "/api/realms/{realmId}/reports",
+		url: "/api/v1/realms/{realmId}/reports",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiRealmsByRealmIdReportsResponses, ThrowOnError>>;
@@ -1679,7 +1677,7 @@ export function getApiRealmsByRealmIdReports<ThrowOnError extends boolean = true
 
 /**
  * @summary List platform-governed Unit report cases
- * {@link /api/reports/platform/cases}
+ * {@link /api/v1/reports/platform/cases}
  */
 export function getApiReportsPlatformCases<ThrowOnError extends boolean = true>(
 	options: Options<GetApiReportsPlatformCasesOptions, ThrowOnError> = {},
@@ -1688,7 +1686,7 @@ export function getApiReportsPlatformCases<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "GET",
-		url: "/api/reports/platform/cases",
+		url: "/api/v1/reports/platform/cases",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiReportsPlatformCasesResponses, ThrowOnError>>;
@@ -1696,7 +1694,7 @@ export function getApiReportsPlatformCases<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Report a Unit under a selected Realm rule
- * {@link /api/reports/units/:unitId}
+ * {@link /api/v1/reports/units/:unitId}
  */
 export function postApiReportsUnitsByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<PostApiReportsUnitsByUnitIdOptions, ThrowOnError>,
@@ -1705,7 +1703,7 @@ export function postApiReportsUnitsByUnitId<ThrowOnError extends boolean = true>
 
 	return request({
 		method: "POST",
-		url: "/api/reports/units/{unitId}",
+		url: "/api/v1/reports/units/{unitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -1716,7 +1714,7 @@ export function postApiReportsUnitsByUnitId<ThrowOnError extends boolean = true>
 
 /**
  * @summary Get Unit access configuration
- * {@link /api/governance/unit/:unitId/access}
+ * {@link /api/v1/governance/unit/:unitId/access}
  */
 export function getApiGovernanceUnitByUnitIdAccess<ThrowOnError extends boolean = true>(
 	options: Options<GetApiGovernanceUnitByUnitIdAccessOptions, ThrowOnError>,
@@ -1725,7 +1723,7 @@ export function getApiGovernanceUnitByUnitIdAccess<ThrowOnError extends boolean 
 
 	return request({
 		method: "GET",
-		url: "/api/governance/unit/{unitId}/access",
+		url: "/api/v1/governance/unit/{unitId}/access",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiGovernanceUnitByUnitIdAccessResponses, ThrowOnError>>;
@@ -1733,7 +1731,7 @@ export function getApiGovernanceUnitByUnitIdAccess<ThrowOnError extends boolean 
 
 /**
  * @summary Replace Unit subject access
- * {@link /api/governance/unit/:unitId/access}
+ * {@link /api/v1/governance/unit/:unitId/access}
  */
 export function putApiGovernanceUnitByUnitIdAccess<ThrowOnError extends boolean = true>(
 	options: Options<PutApiGovernanceUnitByUnitIdAccessOptions, ThrowOnError>,
@@ -1742,7 +1740,7 @@ export function putApiGovernanceUnitByUnitIdAccess<ThrowOnError extends boolean 
 
 	return request({
 		method: "PUT",
-		url: "/api/governance/unit/{unitId}/access",
+		url: "/api/v1/governance/unit/{unitId}/access",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PutApiGovernanceUnitByUnitIdAccessResponses, ThrowOnError>>;
@@ -1750,7 +1748,7 @@ export function putApiGovernanceUnitByUnitIdAccess<ThrowOnError extends boolean 
 
 /**
  * @summary Search Unit access candidates
- * {@link /api/governance/unit/:unitId/access-candidates}
+ * {@link /api/v1/governance/unit/:unitId/access-candidates}
  */
 export function getApiGovernanceUnitByUnitIdAccessCandidates<ThrowOnError extends boolean = true>(
 	options: Options<GetApiGovernanceUnitByUnitIdAccessCandidatesOptions, ThrowOnError>,
@@ -1759,7 +1757,7 @@ export function getApiGovernanceUnitByUnitIdAccessCandidates<ThrowOnError extend
 
 	return request({
 		method: "GET",
-		url: "/api/governance/unit/{unitId}/access-candidates",
+		url: "/api/v1/governance/unit/{unitId}/access-candidates",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -1769,7 +1767,7 @@ export function getApiGovernanceUnitByUnitIdAccessCandidates<ThrowOnError extend
 
 /**
  * @summary Resolve effective Unit access for the current Profile
- * {@link /api/governance/unit/:unitId/access/effective}
+ * {@link /api/v1/governance/unit/:unitId/access/effective}
  */
 export function getApiGovernanceUnitByUnitIdAccessEffective<ThrowOnError extends boolean = true>(
 	options: Options<GetApiGovernanceUnitByUnitIdAccessEffectiveOptions, ThrowOnError>,
@@ -1778,7 +1776,7 @@ export function getApiGovernanceUnitByUnitIdAccessEffective<ThrowOnError extends
 
 	return request({
 		method: "GET",
-		url: "/api/governance/unit/{unitId}/access/effective",
+		url: "/api/v1/governance/unit/{unitId}/access/effective",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -1788,7 +1786,7 @@ export function getApiGovernanceUnitByUnitIdAccessEffective<ThrowOnError extends
 
 /**
  * @summary Search eligible Unit ownership recipients
- * {@link /api/governance/unit/:unitId/ownership/candidates}
+ * {@link /api/v1/governance/unit/:unitId/ownership/candidates}
  */
 export function getApiGovernanceUnitByUnitIdOwnershipCandidates<
 	ThrowOnError extends boolean = true,
@@ -1799,7 +1797,7 @@ export function getApiGovernanceUnitByUnitIdOwnershipCandidates<
 
 	return request({
 		method: "GET",
-		url: "/api/governance/unit/{unitId}/ownership/candidates",
+		url: "/api/v1/governance/unit/{unitId}/ownership/candidates",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -1809,7 +1807,7 @@ export function getApiGovernanceUnitByUnitIdOwnershipCandidates<
 
 /**
  * @summary Transfer Unit ownership
- * {@link /api/governance/unit/:unitId/ownership}
+ * {@link /api/v1/governance/unit/:unitId/ownership}
  */
 export function putApiGovernanceUnitByUnitIdOwnership<ThrowOnError extends boolean = true>(
 	options: Options<PutApiGovernanceUnitByUnitIdOwnershipOptions, ThrowOnError>,
@@ -1818,7 +1816,7 @@ export function putApiGovernanceUnitByUnitIdOwnership<ThrowOnError extends boole
 
 	return request({
 		method: "PUT",
-		url: "/api/governance/unit/{unitId}/ownership",
+		url: "/api/v1/governance/unit/{unitId}/ownership",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PutApiGovernanceUnitByUnitIdOwnershipResponses, ThrowOnError>>;
@@ -1826,7 +1824,7 @@ export function putApiGovernanceUnitByUnitIdOwnership<ThrowOnError extends boole
 
 /**
  * @summary Relinquish Unit ownership to Community
- * {@link /api/governance/unit/:unitId/ownership/relinquishment}
+ * {@link /api/v1/governance/unit/:unitId/ownership/relinquishment}
  */
 export function postApiGovernanceUnitByUnitIdOwnershipRelinquishment<
 	ThrowOnError extends boolean = true,
@@ -1839,7 +1837,7 @@ export function postApiGovernanceUnitByUnitIdOwnershipRelinquishment<
 
 	return request({
 		method: "POST",
-		url: "/api/governance/unit/{unitId}/ownership/relinquishment",
+		url: "/api/v1/governance/unit/{unitId}/ownership/relinquishment",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -1849,7 +1847,7 @@ export function postApiGovernanceUnitByUnitIdOwnershipRelinquishment<
 
 /**
  * @summary List received Unit access invitations
- * {@link /api/governance/unit/access-invitations}
+ * {@link /api/v1/governance/unit/access-invitations}
  */
 export function getApiGovernanceUnitAccessInvitations<ThrowOnError extends boolean = true>(
 	options: Options<GetApiGovernanceUnitAccessInvitationsOptions, ThrowOnError> = {},
@@ -1858,7 +1856,7 @@ export function getApiGovernanceUnitAccessInvitations<ThrowOnError extends boole
 
 	return request({
 		method: "GET",
-		url: "/api/governance/unit/access-invitations",
+		url: "/api/v1/governance/unit/access-invitations",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiGovernanceUnitAccessInvitationsResponses, ThrowOnError>>;
@@ -1866,7 +1864,7 @@ export function getApiGovernanceUnitAccessInvitations<ThrowOnError extends boole
 
 /**
  * @summary List managed Unit access invitations
- * {@link /api/governance/unit/:unitId/access-invitations}
+ * {@link /api/v1/governance/unit/:unitId/access-invitations}
  */
 export function getApiGovernanceUnitByUnitIdAccessInvitations<ThrowOnError extends boolean = true>(
 	options: Options<GetApiGovernanceUnitByUnitIdAccessInvitationsOptions, ThrowOnError>,
@@ -1875,7 +1873,7 @@ export function getApiGovernanceUnitByUnitIdAccessInvitations<ThrowOnError exten
 
 	return request({
 		method: "GET",
-		url: "/api/governance/unit/{unitId}/access-invitations",
+		url: "/api/v1/governance/unit/{unitId}/access-invitations",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -1885,7 +1883,7 @@ export function getApiGovernanceUnitByUnitIdAccessInvitations<ThrowOnError exten
 
 /**
  * @summary Create Unit access invitation
- * {@link /api/governance/unit/:unitId/access-invitations}
+ * {@link /api/v1/governance/unit/:unitId/access-invitations}
  */
 export function postApiGovernanceUnitByUnitIdAccessInvitations<ThrowOnError extends boolean = true>(
 	options: Options<PostApiGovernanceUnitByUnitIdAccessInvitationsOptions, ThrowOnError>,
@@ -1894,7 +1892,7 @@ export function postApiGovernanceUnitByUnitIdAccessInvitations<ThrowOnError exte
 
 	return request({
 		method: "POST",
-		url: "/api/governance/unit/{unitId}/access-invitations",
+		url: "/api/v1/governance/unit/{unitId}/access-invitations",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -1904,7 +1902,7 @@ export function postApiGovernanceUnitByUnitIdAccessInvitations<ThrowOnError exte
 
 /**
  * @summary Accept Unit access invitation
- * {@link /api/governance/unit/:unitId/access-invitations/:invitationId/accept}
+ * {@link /api/v1/governance/unit/:unitId/access-invitations/:invitationId/accept}
  */
 export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAccept<
 	ThrowOnError extends boolean = true,
@@ -1923,7 +1921,7 @@ export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcce
 
 	return request({
 		method: "POST",
-		url: "/api/governance/unit/{unitId}/access-invitations/{invitationId}/accept",
+		url: "/api/v1/governance/unit/{unitId}/access-invitations/{invitationId}/accept",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -1936,7 +1934,7 @@ export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcce
 
 /**
  * @summary Decline Unit access invitation
- * {@link /api/governance/unit/:unitId/access-invitations/:invitationId/decline}
+ * {@link /api/v1/governance/unit/:unitId/access-invitations/:invitationId/decline}
  */
 export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecline<
 	ThrowOnError extends boolean = true,
@@ -1955,7 +1953,7 @@ export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecl
 
 	return request({
 		method: "POST",
-		url: "/api/governance/unit/{unitId}/access-invitations/{invitationId}/decline",
+		url: "/api/v1/governance/unit/{unitId}/access-invitations/{invitationId}/decline",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -1968,7 +1966,7 @@ export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecl
 
 /**
  * @summary Cancel Unit access invitation
- * {@link /api/governance/unit/:unitId/access-invitations/:invitationId}
+ * {@link /api/v1/governance/unit/:unitId/access-invitations/:invitationId}
  */
 export function deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationId<
 	ThrowOnError extends boolean = true,
@@ -1987,7 +1985,7 @@ export function deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationId<
 
 	return request({
 		method: "DELETE",
-		url: "/api/governance/unit/{unitId}/access-invitations/{invitationId}",
+		url: "/api/v1/governance/unit/{unitId}/access-invitations/{invitationId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -2000,7 +1998,7 @@ export function deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationId<
 
 /**
  * @summary List Units for platform lifecycle administration
- * {@link /api/governance/platform/units}
+ * {@link /api/v1/governance/platform/units}
  */
 export function getApiGovernancePlatformUnits<ThrowOnError extends boolean = true>(
 	options: Options<GetApiGovernancePlatformUnitsOptions, ThrowOnError> = {},
@@ -2009,7 +2007,7 @@ export function getApiGovernancePlatformUnits<ThrowOnError extends boolean = tru
 
 	return request({
 		method: "GET",
-		url: "/api/governance/platform/units",
+		url: "/api/v1/governance/platform/units",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiGovernancePlatformUnitsResponses, ThrowOnError>>;
@@ -2017,7 +2015,7 @@ export function getApiGovernancePlatformUnits<ThrowOnError extends boolean = tru
 
 /**
  * @summary Search platform Unit ownership override recipients
- * {@link /api/governance/platform/units/:unitId/ownership-candidates}
+ * {@link /api/v1/governance/platform/units/:unitId/ownership-candidates}
  */
 export function getApiGovernancePlatformUnitsByUnitIdOwnershipCandidates<
 	ThrowOnError extends boolean = true,
@@ -2030,7 +2028,7 @@ export function getApiGovernancePlatformUnitsByUnitIdOwnershipCandidates<
 
 	return request({
 		method: "GET",
-		url: "/api/governance/platform/units/{unitId}/ownership-candidates",
+		url: "/api/v1/governance/platform/units/{unitId}/ownership-candidates",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -2043,7 +2041,7 @@ export function getApiGovernancePlatformUnitsByUnitIdOwnershipCandidates<
 
 /**
  * @summary Override Unit ownership through platform governance
- * {@link /api/governance/platform/units/:unitId/ownership-override}
+ * {@link /api/v1/governance/platform/units/:unitId/ownership-override}
  */
 export function postApiGovernancePlatformUnitsByUnitIdOwnershipOverride<
 	ThrowOnError extends boolean = true,
@@ -2056,7 +2054,7 @@ export function postApiGovernancePlatformUnitsByUnitIdOwnershipOverride<
 
 	return request({
 		method: "POST",
-		url: "/api/governance/platform/units/{unitId}/ownership-override",
+		url: "/api/v1/governance/platform/units/{unitId}/ownership-override",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -2069,7 +2067,7 @@ export function postApiGovernancePlatformUnitsByUnitIdOwnershipOverride<
 
 /**
  * @summary Soft-delete a Unit from the platform Console
- * {@link /api/governance/platform/units/:unitId/delete}
+ * {@link /api/v1/governance/platform/units/:unitId/delete}
  */
 export function postApiGovernancePlatformUnitsByUnitIdDelete<ThrowOnError extends boolean = true>(
 	options: Options<PostApiGovernancePlatformUnitsByUnitIdDeleteOptions, ThrowOnError>,
@@ -2078,7 +2076,7 @@ export function postApiGovernancePlatformUnitsByUnitIdDelete<ThrowOnError extend
 
 	return request({
 		method: "POST",
-		url: "/api/governance/platform/units/{unitId}/delete",
+		url: "/api/v1/governance/platform/units/{unitId}/delete",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -2088,7 +2086,7 @@ export function postApiGovernancePlatformUnitsByUnitIdDelete<ThrowOnError extend
 
 /**
  * @summary Restore a soft-deleted Unit from the platform Console
- * {@link /api/governance/platform/units/:unitId/restore}
+ * {@link /api/v1/governance/platform/units/:unitId/restore}
  */
 export function postApiGovernancePlatformUnitsByUnitIdRestore<ThrowOnError extends boolean = true>(
 	options: Options<PostApiGovernancePlatformUnitsByUnitIdRestoreOptions, ThrowOnError>,
@@ -2097,7 +2095,7 @@ export function postApiGovernancePlatformUnitsByUnitIdRestore<ThrowOnError exten
 
 	return request({
 		method: "POST",
-		url: "/api/governance/platform/units/{unitId}/restore",
+		url: "/api/v1/governance/platform/units/{unitId}/restore",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -2107,7 +2105,7 @@ export function postApiGovernancePlatformUnitsByUnitIdRestore<ThrowOnError exten
 
 /**
  * @summary List platform Unit ownership claims
- * {@link /api/governance/platform/ownership-claims}
+ * {@link /api/v1/governance/platform/ownership-claims}
  */
 export function getApiGovernancePlatformOwnershipClaims<ThrowOnError extends boolean = true>(
 	options: Options<GetApiGovernancePlatformOwnershipClaimsOptions, ThrowOnError> = {},
@@ -2116,7 +2114,7 @@ export function getApiGovernancePlatformOwnershipClaims<ThrowOnError extends boo
 
 	return request({
 		method: "GET",
-		url: "/api/governance/platform/ownership-claims",
+		url: "/api/v1/governance/platform/ownership-claims",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiGovernancePlatformOwnershipClaimsResponses, ThrowOnError>>;
@@ -2124,7 +2122,7 @@ export function getApiGovernancePlatformOwnershipClaims<ThrowOnError extends boo
 
 /**
  * @summary Resolve a Unit ownership claim
- * {@link /api/governance/platform/ownership-claims/:claimId/decision}
+ * {@link /api/v1/governance/platform/ownership-claims/:claimId/decision}
  */
 export function postApiGovernancePlatformOwnershipClaimsByClaimIdDecision<
 	ThrowOnError extends boolean = true,
@@ -2140,7 +2138,7 @@ export function postApiGovernancePlatformOwnershipClaimsByClaimIdDecision<
 
 	return request({
 		method: "POST",
-		url: "/api/governance/platform/ownership-claims/{claimId}/decision",
+		url: "/api/v1/governance/platform/ownership-claims/{claimId}/decision",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -2153,7 +2151,7 @@ export function postApiGovernancePlatformOwnershipClaimsByClaimIdDecision<
 
 /**
  * @summary Get governance note
- * {@link /api/governance/notes/:postId}
+ * {@link /api/v1/governance/notes/:postId}
  */
 export function getApiGovernanceNotesByPostId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiGovernanceNotesByPostIdOptions, ThrowOnError>,
@@ -2162,7 +2160,7 @@ export function getApiGovernanceNotesByPostId<ThrowOnError extends boolean = tru
 
 	return request({
 		method: "GET",
-		url: "/api/governance/notes/{postId}",
+		url: "/api/v1/governance/notes/{postId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiGovernanceNotesByPostIdResponses, ThrowOnError>>;
@@ -2170,7 +2168,7 @@ export function getApiGovernanceNotesByPostId<ThrowOnError extends boolean = tru
 
 /**
  * @summary Update governance note
- * {@link /api/governance/notes/:postId}
+ * {@link /api/v1/governance/notes/:postId}
  */
 export function patchApiGovernanceNotesByPostId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiGovernanceNotesByPostIdOptions, ThrowOnError>,
@@ -2179,7 +2177,7 @@ export function patchApiGovernanceNotesByPostId<ThrowOnError extends boolean = t
 
 	return request({
 		method: "PATCH",
-		url: "/api/governance/notes/{postId}",
+		url: "/api/v1/governance/notes/{postId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -2190,7 +2188,7 @@ export function patchApiGovernanceNotesByPostId<ThrowOnError extends boolean = t
 
 /**
  * @summary List moderation cases
- * {@link /api/governance/moderation/cases}
+ * {@link /api/v1/governance/moderation/cases}
  */
 export function getApiGovernanceModerationCases<ThrowOnError extends boolean = true>(
 	options: Options<GetApiGovernanceModerationCasesOptions, ThrowOnError> = {},
@@ -2199,7 +2197,7 @@ export function getApiGovernanceModerationCases<ThrowOnError extends boolean = t
 
 	return request({
 		method: "GET",
-		url: "/api/governance/moderation/cases",
+		url: "/api/v1/governance/moderation/cases",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiGovernanceModerationCasesResponses, ThrowOnError>>;
@@ -2207,7 +2205,7 @@ export function getApiGovernanceModerationCases<ThrowOnError extends boolean = t
 
 /**
  * @summary Get moderation case
- * {@link /api/governance/moderation/cases/:caseId}
+ * {@link /api/v1/governance/moderation/cases/:caseId}
  */
 export function getApiGovernanceModerationCasesByCaseId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiGovernanceModerationCasesByCaseIdOptions, ThrowOnError>,
@@ -2216,7 +2214,7 @@ export function getApiGovernanceModerationCasesByCaseId<ThrowOnError extends boo
 
 	return request({
 		method: "GET",
-		url: "/api/governance/moderation/cases/{caseId}",
+		url: "/api/v1/governance/moderation/cases/{caseId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiGovernanceModerationCasesByCaseIdResponses, ThrowOnError>>;
@@ -2224,7 +2222,7 @@ export function getApiGovernanceModerationCasesByCaseId<ThrowOnError extends boo
 
 /**
  * @summary Update moderation case
- * {@link /api/governance/moderation/cases/:caseId}
+ * {@link /api/v1/governance/moderation/cases/:caseId}
  */
 export function patchApiGovernanceModerationCasesByCaseId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiGovernanceModerationCasesByCaseIdOptions, ThrowOnError>,
@@ -2233,7 +2231,7 @@ export function patchApiGovernanceModerationCasesByCaseId<ThrowOnError extends b
 
 	return request({
 		method: "PATCH",
-		url: "/api/governance/moderation/cases/{caseId}",
+		url: "/api/v1/governance/moderation/cases/{caseId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PatchApiGovernanceModerationCasesByCaseIdResponses, ThrowOnError>>;
@@ -2241,7 +2239,7 @@ export function patchApiGovernanceModerationCasesByCaseId<ThrowOnError extends b
 
 /**
  * @summary Apply moderation action
- * {@link /api/governance/moderation/actions}
+ * {@link /api/v1/governance/moderation/actions}
  */
 export function postApiGovernanceModerationActions<ThrowOnError extends boolean = true>(
 	options: Options<PostApiGovernanceModerationActionsOptions, ThrowOnError>,
@@ -2250,7 +2248,7 @@ export function postApiGovernanceModerationActions<ThrowOnError extends boolean 
 
 	return request({
 		method: "POST",
-		url: "/api/governance/moderation/actions",
+		url: "/api/v1/governance/moderation/actions",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PostApiGovernanceModerationActionsResponses, ThrowOnError>>;
@@ -2258,7 +2256,7 @@ export function postApiGovernanceModerationActions<ThrowOnError extends boolean 
 
 /**
  * @summary Create account enforcement
- * {@link /api/governance/moderation/enforcements}
+ * {@link /api/v1/governance/moderation/enforcements}
  */
 export function postApiGovernanceModerationEnforcements<ThrowOnError extends boolean = true>(
 	options: Options<PostApiGovernanceModerationEnforcementsOptions, ThrowOnError>,
@@ -2267,7 +2265,7 @@ export function postApiGovernanceModerationEnforcements<ThrowOnError extends boo
 
 	return request({
 		method: "POST",
-		url: "/api/governance/moderation/enforcements",
+		url: "/api/v1/governance/moderation/enforcements",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PostApiGovernanceModerationEnforcementsResponses, ThrowOnError>>;
@@ -2275,7 +2273,7 @@ export function postApiGovernanceModerationEnforcements<ThrowOnError extends boo
 
 /**
  * @summary Revoke account enforcement
- * {@link /api/governance/moderation/enforcements/:enforcementId/revoke}
+ * {@link /api/v1/governance/moderation/enforcements/:enforcementId/revoke}
  */
 export function postApiGovernanceModerationEnforcementsByEnforcementIdRevoke<
 	ThrowOnError extends boolean = true,
@@ -2294,7 +2292,7 @@ export function postApiGovernanceModerationEnforcementsByEnforcementIdRevoke<
 
 	return request({
 		method: "POST",
-		url: "/api/governance/moderation/enforcements/{enforcementId}/revoke",
+		url: "/api/v1/governance/moderation/enforcements/{enforcementId}/revoke",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -2307,7 +2305,7 @@ export function postApiGovernanceModerationEnforcementsByEnforcementIdRevoke<
 
 /**
  * @summary List global security audit events
- * {@link /api/audit/events}
+ * {@link /api/v1/audit/events}
  */
 export function getApiAuditEvents<ThrowOnError extends boolean = true>(
 	options: Options<GetApiAuditEventsOptions, ThrowOnError> = {},
@@ -2316,7 +2314,7 @@ export function getApiAuditEvents<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "GET",
-		url: "/api/audit/events",
+		url: "/api/v1/audit/events",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiAuditEventsResponses, ThrowOnError>>;
@@ -2324,7 +2322,7 @@ export function getApiAuditEvents<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Create Series
- * {@link /api/series}
+ * {@link /api/v1/series}
  */
 export function postApiSeries<ThrowOnError extends boolean = true>(
 	options: Options<PostApiSeriesOptions, ThrowOnError>,
@@ -2333,7 +2331,7 @@ export function postApiSeries<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "POST",
-		url: "/api/series",
+		url: "/api/v1/series",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -2344,22 +2342,24 @@ export function postApiSeries<ThrowOnError extends boolean = true>(
 
 /**
  * @summary List Series releases
- * {@link /api/series/:seriesId/releases}
+ * {@link /api/v1/series/:seriesId/releases}
  */
 export function getApiSeriesBySeriesIdReleases<ThrowOnError extends boolean = true>(
 	options: Options<GetApiSeriesBySeriesIdReleasesOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiSeriesBySeriesIdReleasesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/series/{seriesId}/releases", ...config }) as Promise<
-		RequestResult<GetApiSeriesBySeriesIdReleasesResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/v1/series/{seriesId}/releases",
+		...config,
+	}) as Promise<RequestResult<GetApiSeriesBySeriesIdReleasesResponses, ThrowOnError>>;
 }
 
 /**
  * @description Development preview. Assigns or renames a Zone's optional public slug in the permanent zones namespace. The former address is retained as a redirect.
  * @summary Replace a Zone slug address
- * {@link /api/zones/:zoneId/slug-address}
+ * {@link /api/v1/zones/:zoneId/slug-address}
  */
 export function replaceZoneSlugAddress<ThrowOnError extends boolean = true>(
 	options: Options<ReplaceZoneSlugAddressOptions, ThrowOnError>,
@@ -2368,7 +2368,7 @@ export function replaceZoneSlugAddress<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "PUT",
-		url: "/api/zones/{zoneId}/slug-address",
+		url: "/api/v1/zones/{zoneId}/slug-address",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -2379,21 +2379,21 @@ export function replaceZoneSlugAddress<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Get Zone configuration
- * {@link /api/zones/:zoneId}
+ * {@link /api/v1/zones/:zoneId}
  */
 export function getApiZonesByZoneId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiZonesByZoneIdOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiZonesByZoneIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/zones/{zoneId}", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/zones/{zoneId}", ...config }) as Promise<
 		RequestResult<GetApiZonesByZoneIdResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Update Zone configuration
- * {@link /api/zones/:zoneId}
+ * {@link /api/v1/zones/:zoneId}
  */
 export function patchApiZonesByZoneId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiZonesByZoneIdOptions, ThrowOnError>,
@@ -2402,7 +2402,7 @@ export function patchApiZonesByZoneId<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "PATCH",
-		url: "/api/zones/{zoneId}",
+		url: "/api/v1/zones/{zoneId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -2413,35 +2413,35 @@ export function patchApiZonesByZoneId<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Get a Zone render projection
- * {@link /api/zones/:zoneId/render}
+ * {@link /api/v1/zones/:zoneId/render}
  */
 export function getZoneRenderProjection<ThrowOnError extends boolean = true>(
 	options: Options<GetZoneRenderProjectionOptions, ThrowOnError>,
 ): Promise<RequestResult<GetZoneRenderProjectionResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/zones/{zoneId}/render", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/zones/{zoneId}/render", ...config }) as Promise<
 		RequestResult<GetZoneRenderProjectionResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary List Zone pages
- * {@link /api/zones/:zoneId/pages}
+ * {@link /api/v1/zones/:zoneId/pages}
  */
 export function getApiZonesByZoneIdPages<ThrowOnError extends boolean = true>(
 	options: Options<GetApiZonesByZoneIdPagesOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiZonesByZoneIdPagesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/zones/{zoneId}/pages", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/zones/{zoneId}/pages", ...config }) as Promise<
 		RequestResult<GetApiZonesByZoneIdPagesResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Create Zone page in development preview
- * {@link /api/zones/:zoneId/pages}
+ * {@link /api/v1/zones/:zoneId/pages}
  */
 export function postApiZonesByZoneIdPages<ThrowOnError extends boolean = true>(
 	options: Options<PostApiZonesByZoneIdPagesOptions, ThrowOnError>,
@@ -2450,7 +2450,7 @@ export function postApiZonesByZoneIdPages<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "POST",
-		url: "/api/zones/{zoneId}/pages",
+		url: "/api/v1/zones/{zoneId}/pages",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -2461,7 +2461,7 @@ export function postApiZonesByZoneIdPages<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Get Zone page by Unit ID
- * {@link /api/zones/:zoneId/pages/:pageId}
+ * {@link /api/v1/zones/:zoneId/pages/:pageId}
  */
 export function getApiZonesByZoneIdPagesByPageId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiZonesByZoneIdPagesByPageIdOptions, ThrowOnError>,
@@ -2470,14 +2470,14 @@ export function getApiZonesByZoneIdPagesByPageId<ThrowOnError extends boolean = 
 
 	return request({
 		method: "GET",
-		url: "/api/zones/{zoneId}/pages/{pageId}",
+		url: "/api/v1/zones/{zoneId}/pages/{pageId}",
 		...config,
 	}) as Promise<RequestResult<GetApiZonesByZoneIdPagesByPageIdResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Replace Zone page in development preview
- * {@link /api/zones/:zoneId/pages/:pageId}
+ * {@link /api/v1/zones/:zoneId/pages/:pageId}
  */
 export function putApiZonesByZoneIdPagesByPageId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiZonesByZoneIdPagesByPageIdOptions, ThrowOnError>,
@@ -2486,7 +2486,7 @@ export function putApiZonesByZoneIdPagesByPageId<ThrowOnError extends boolean = 
 
 	return request({
 		method: "PUT",
-		url: "/api/zones/{zoneId}/pages/{pageId}",
+		url: "/api/v1/zones/{zoneId}/pages/{pageId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -2497,7 +2497,7 @@ export function putApiZonesByZoneIdPagesByPageId<ThrowOnError extends boolean = 
 
 /**
  * @summary Index Zone page in page-structure
- * {@link /api/zones/:zoneId/pages/:pageId/placement}
+ * {@link /api/v1/zones/:zoneId/pages/:pageId/placement}
  */
 export function putApiZonesByZoneIdPagesByPageIdPlacement<ThrowOnError extends boolean = true>(
 	options: Options<PutApiZonesByZoneIdPagesByPageIdPlacementOptions, ThrowOnError>,
@@ -2506,7 +2506,7 @@ export function putApiZonesByZoneIdPagesByPageIdPlacement<ThrowOnError extends b
 
 	return request({
 		method: "PUT",
-		url: "/api/zones/{zoneId}/pages/{pageId}/placement",
+		url: "/api/v1/zones/{zoneId}/pages/{pageId}/placement",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -2517,7 +2517,7 @@ export function putApiZonesByZoneIdPagesByPageIdPlacement<ThrowOnError extends b
 
 /**
  * @summary Remove Zone page from page-structure
- * {@link /api/zones/:zoneId/pages/:pageId/placement}
+ * {@link /api/v1/zones/:zoneId/pages/:pageId/placement}
  */
 export function deleteApiZonesByZoneIdPagesByPageIdPlacement<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiZonesByZoneIdPagesByPageIdPlacementOptions, ThrowOnError>,
@@ -2526,7 +2526,7 @@ export function deleteApiZonesByZoneIdPagesByPageIdPlacement<ThrowOnError extend
 
 	return request({
 		method: "DELETE",
-		url: "/api/zones/{zoneId}/pages/{pageId}/placement",
+		url: "/api/v1/zones/{zoneId}/pages/{pageId}/placement",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -2539,21 +2539,23 @@ export function deleteApiZonesByZoneIdPagesByPageIdPlacement<ThrowOnError extend
 
 /**
  * @summary List Zone navigation resources
- * {@link /api/zones/:zoneId/navigation}
+ * {@link /api/v1/zones/:zoneId/navigation}
  */
 export function getApiZonesByZoneIdNavigation<ThrowOnError extends boolean = true>(
 	options: Options<GetApiZonesByZoneIdNavigationOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiZonesByZoneIdNavigationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/zones/{zoneId}/navigation", ...config }) as Promise<
-		RequestResult<GetApiZonesByZoneIdNavigationResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/v1/zones/{zoneId}/navigation",
+		...config,
+	}) as Promise<RequestResult<GetApiZonesByZoneIdNavigationResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Create Zone navigation
- * {@link /api/zones/:zoneId/navigation}
+ * {@link /api/v1/zones/:zoneId/navigation}
  */
 export function postApiZonesByZoneIdNavigation<ThrowOnError extends boolean = true>(
 	options: Options<PostApiZonesByZoneIdNavigationOptions, ThrowOnError>,
@@ -2562,7 +2564,7 @@ export function postApiZonesByZoneIdNavigation<ThrowOnError extends boolean = tr
 
 	return request({
 		method: "POST",
-		url: "/api/zones/{zoneId}/navigation",
+		url: "/api/v1/zones/{zoneId}/navigation",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -2573,7 +2575,7 @@ export function postApiZonesByZoneIdNavigation<ThrowOnError extends boolean = tr
 
 /**
  * @summary Get Zone navigation resource
- * {@link /api/zones/:zoneId/navigation/:navigationId}
+ * {@link /api/v1/zones/:zoneId/navigation/:navigationId}
  */
 export function getApiZonesByZoneIdNavigationByNavigationId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiZonesByZoneIdNavigationByNavigationIdOptions, ThrowOnError>,
@@ -2582,7 +2584,7 @@ export function getApiZonesByZoneIdNavigationByNavigationId<ThrowOnError extends
 
 	return request({
 		method: "GET",
-		url: "/api/zones/{zoneId}/navigation/{navigationId}",
+		url: "/api/v1/zones/{zoneId}/navigation/{navigationId}",
 		...config,
 	}) as Promise<
 		RequestResult<GetApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>
@@ -2591,7 +2593,7 @@ export function getApiZonesByZoneIdNavigationByNavigationId<ThrowOnError extends
 
 /**
  * @summary Replace Zone navigation
- * {@link /api/zones/:zoneId/navigation/:navigationId}
+ * {@link /api/v1/zones/:zoneId/navigation/:navigationId}
  */
 export function putApiZonesByZoneIdNavigationByNavigationId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiZonesByZoneIdNavigationByNavigationIdOptions, ThrowOnError>,
@@ -2600,7 +2602,7 @@ export function putApiZonesByZoneIdNavigationByNavigationId<ThrowOnError extends
 
 	return request({
 		method: "PUT",
-		url: "/api/zones/{zoneId}/navigation/{navigationId}",
+		url: "/api/v1/zones/{zoneId}/navigation/{navigationId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -2613,7 +2615,7 @@ export function putApiZonesByZoneIdNavigationByNavigationId<ThrowOnError extends
 
 /**
  * @summary Delete Zone navigation resource
- * {@link /api/zones/:zoneId/navigation/:navigationId}
+ * {@link /api/v1/zones/:zoneId/navigation/:navigationId}
  */
 export function deleteApiZonesByZoneIdNavigationByNavigationId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiZonesByZoneIdNavigationByNavigationIdOptions, ThrowOnError>,
@@ -2622,7 +2624,7 @@ export function deleteApiZonesByZoneIdNavigationByNavigationId<ThrowOnError exte
 
 	return request({
 		method: "DELETE",
-		url: "/api/zones/{zoneId}/navigation/{navigationId}",
+		url: "/api/v1/zones/{zoneId}/navigation/{navigationId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -2635,7 +2637,7 @@ export function deleteApiZonesByZoneIdNavigationByNavigationId<ThrowOnError exte
 
 /**
  * @summary Add or update Series release
- * {@link /api/series/:seriesId/releases/:releaseId}
+ * {@link /api/v1/series/:seriesId/releases/:releaseId}
  */
 export function putApiSeriesBySeriesIdReleasesByReleaseId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiSeriesBySeriesIdReleasesByReleaseIdOptions, ThrowOnError>,
@@ -2644,7 +2646,7 @@ export function putApiSeriesBySeriesIdReleasesByReleaseId<ThrowOnError extends b
 
 	return request({
 		method: "PUT",
-		url: "/api/series/{seriesId}/releases/{releaseId}",
+		url: "/api/v1/series/{seriesId}/releases/{releaseId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -2655,7 +2657,7 @@ export function putApiSeriesBySeriesIdReleasesByReleaseId<ThrowOnError extends b
 
 /**
  * @summary Remove Series release
- * {@link /api/series/:seriesId/releases/:releaseId}
+ * {@link /api/v1/series/:seriesId/releases/:releaseId}
  */
 export function deleteApiSeriesBySeriesIdReleasesByReleaseId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiSeriesBySeriesIdReleasesByReleaseIdOptions, ThrowOnError>,
@@ -2664,7 +2666,7 @@ export function deleteApiSeriesBySeriesIdReleasesByReleaseId<ThrowOnError extend
 
 	return request({
 		method: "DELETE",
-		url: "/api/series/{seriesId}/releases/{releaseId}",
+		url: "/api/v1/series/{seriesId}/releases/{releaseId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -2677,7 +2679,7 @@ export function deleteApiSeriesBySeriesIdReleasesByReleaseId<ThrowOnError extend
 
 /**
  * @summary Create Zone
- * {@link /api/zones}
+ * {@link /api/v1/zones}
  */
 export function postApiZones<ThrowOnError extends boolean = true>(
 	options: Options<PostApiZonesOptions, ThrowOnError>,
@@ -2686,7 +2688,7 @@ export function postApiZones<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "POST",
-		url: "/api/zones",
+		url: "/api/v1/zones",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -2697,7 +2699,7 @@ export function postApiZones<ThrowOnError extends boolean = true>(
 
 /**
  * @summary List Software system requirements
- * {@link /api/software/:softwareId/system-requirements}
+ * {@link /api/v1/software/:softwareId/system-requirements}
  */
 export function getApiSoftwareBySoftwareIdSystemRequirements<ThrowOnError extends boolean = true>(
 	options: Options<GetApiSoftwareBySoftwareIdSystemRequirementsOptions, ThrowOnError>,
@@ -2706,7 +2708,7 @@ export function getApiSoftwareBySoftwareIdSystemRequirements<ThrowOnError extend
 
 	return request({
 		method: "GET",
-		url: "/api/software/{softwareId}/system-requirements",
+		url: "/api/v1/software/{softwareId}/system-requirements",
 		...config,
 	}) as Promise<
 		RequestResult<GetApiSoftwareBySoftwareIdSystemRequirementsResponses, ThrowOnError>
@@ -2715,7 +2717,7 @@ export function getApiSoftwareBySoftwareIdSystemRequirements<ThrowOnError extend
 
 /**
  * @summary Create Software system requirement
- * {@link /api/software/:softwareId/system-requirements}
+ * {@link /api/v1/software/:softwareId/system-requirements}
  */
 export function postApiSoftwareBySoftwareIdSystemRequirements<ThrowOnError extends boolean = true>(
 	options: Options<PostApiSoftwareBySoftwareIdSystemRequirementsOptions, ThrowOnError>,
@@ -2724,7 +2726,7 @@ export function postApiSoftwareBySoftwareIdSystemRequirements<ThrowOnError exten
 
 	return request({
 		method: "POST",
-		url: "/api/software/{softwareId}/system-requirements",
+		url: "/api/v1/software/{softwareId}/system-requirements",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -2737,7 +2739,7 @@ export function postApiSoftwareBySoftwareIdSystemRequirements<ThrowOnError exten
 
 /**
  * @summary Replace Software system requirement
- * {@link /api/software/:softwareId/system-requirements/:requirementId}
+ * {@link /api/v1/software/:softwareId/system-requirements/:requirementId}
  */
 export function putApiSoftwareBySoftwareIdSystemRequirementsByRequirementId<
 	ThrowOnError extends boolean = true,
@@ -2756,7 +2758,7 @@ export function putApiSoftwareBySoftwareIdSystemRequirementsByRequirementId<
 
 	return request({
 		method: "PUT",
-		url: "/api/software/{softwareId}/system-requirements/{requirementId}",
+		url: "/api/v1/software/{softwareId}/system-requirements/{requirementId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -2772,7 +2774,7 @@ export function putApiSoftwareBySoftwareIdSystemRequirementsByRequirementId<
 
 /**
  * @summary Delete Software system requirement
- * {@link /api/software/:softwareId/system-requirements/:requirementId}
+ * {@link /api/v1/software/:softwareId/system-requirements/:requirementId}
  */
 export function deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementId<
 	ThrowOnError extends boolean = true,
@@ -2791,7 +2793,7 @@ export function deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementId<
 
 	return request({
 		method: "DELETE",
-		url: "/api/software/{softwareId}/system-requirements/{requirementId}",
+		url: "/api/v1/software/{softwareId}/system-requirements/{requirementId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -2807,21 +2809,23 @@ export function deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementId<
 
 /**
  * @summary List configured Unit Docks
- * {@link /api/units/by-id/:unitId/docks}
+ * {@link /api/v1/units/by-id/:unitId/docks}
  */
 export function getApiUnitsByIdByUnitIdDocks<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByIdByUnitIdDocksOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiUnitsByIdByUnitIdDocksResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/units/by-id/{unitId}/docks", ...config }) as Promise<
-		RequestResult<GetApiUnitsByIdByUnitIdDocksResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/v1/units/by-id/{unitId}/docks",
+		...config,
+	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdDocksResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Get a Unit Dock
- * {@link /api/units/by-id/:unitId/docks/:kind}
+ * {@link /api/v1/units/by-id/:unitId/docks/:kind}
  */
 export function getApiUnitsByIdByUnitIdDocksByKind<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByIdByUnitIdDocksByKindOptions, ThrowOnError>,
@@ -2830,14 +2834,14 @@ export function getApiUnitsByIdByUnitIdDocksByKind<ThrowOnError extends boolean 
 
 	return request({
 		method: "GET",
-		url: "/api/units/by-id/{unitId}/docks/{kind}",
+		url: "/api/v1/units/by-id/{unitId}/docks/{kind}",
 		...config,
 	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdDocksByKindResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Create or replace a Unit Dock
- * {@link /api/units/by-id/:unitId/docks/:kind}
+ * {@link /api/v1/units/by-id/:unitId/docks/:kind}
  */
 export function putApiUnitsByIdByUnitIdDocksByKind<ThrowOnError extends boolean = true>(
 	options: Options<PutApiUnitsByIdByUnitIdDocksByKindOptions, ThrowOnError>,
@@ -2846,7 +2850,7 @@ export function putApiUnitsByIdByUnitIdDocksByKind<ThrowOnError extends boolean 
 
 	return request({
 		method: "PUT",
-		url: "/api/units/by-id/{unitId}/docks/{kind}",
+		url: "/api/v1/units/by-id/{unitId}/docks/{kind}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -2857,7 +2861,7 @@ export function putApiUnitsByIdByUnitIdDocksByKind<ThrowOnError extends boolean 
 
 /**
  * @summary Delete a Unit Dock
- * {@link /api/units/by-id/:unitId/docks/:kind}
+ * {@link /api/v1/units/by-id/:unitId/docks/:kind}
  */
 export function deleteApiUnitsByIdByUnitIdDocksByKind<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiUnitsByIdByUnitIdDocksByKindOptions, ThrowOnError>,
@@ -2866,7 +2870,7 @@ export function deleteApiUnitsByIdByUnitIdDocksByKind<ThrowOnError extends boole
 
 	return request({
 		method: "DELETE",
-		url: "/api/units/by-id/{unitId}/docks/{kind}",
+		url: "/api/v1/units/by-id/{unitId}/docks/{kind}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -2877,7 +2881,7 @@ export function deleteApiUnitsByIdByUnitIdDocksByKind<ThrowOnError extends boole
 
 /**
  * @summary List Dock revisions
- * {@link /api/units/by-id/:unitId/docks/:kind/revisions}
+ * {@link /api/v1/units/by-id/:unitId/docks/:kind/revisions}
  */
 export function getApiUnitsByIdByUnitIdDocksByKindRevisions<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByIdByUnitIdDocksByKindRevisionsOptions, ThrowOnError>,
@@ -2886,7 +2890,7 @@ export function getApiUnitsByIdByUnitIdDocksByKindRevisions<ThrowOnError extends
 
 	return request({
 		method: "GET",
-		url: "/api/units/by-id/{unitId}/docks/{kind}/revisions",
+		url: "/api/v1/units/by-id/{unitId}/docks/{kind}/revisions",
 		...config,
 	}) as Promise<
 		RequestResult<GetApiUnitsByIdByUnitIdDocksByKindRevisionsResponses, ThrowOnError>
@@ -2895,7 +2899,7 @@ export function getApiUnitsByIdByUnitIdDocksByKindRevisions<ThrowOnError extends
 
 /**
  * @summary Restore a Dock revision
- * {@link /api/units/by-id/:unitId/docks/:kind/revisions/:revisionId/restore}
+ * {@link /api/v1/units/by-id/:unitId/docks/:kind/revisions/:revisionId/restore}
  */
 export function postApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestore<
 	ThrowOnError extends boolean = true,
@@ -2914,7 +2918,7 @@ export function postApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestore<
 
 	return request({
 		method: "POST",
-		url: "/api/units/by-id/{unitId}/docks/{kind}/revisions/{revisionId}/restore",
+		url: "/api/v1/units/by-id/{unitId}/docks/{kind}/revisions/{revisionId}/restore",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -2930,7 +2934,7 @@ export function postApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestore<
 
 /**
  * @summary Current user profile
- * {@link /api/users/me}
+ * {@link /api/v1/users/me}
  */
 export function getApiUsersMe<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUsersMeOptions, ThrowOnError> = {},
@@ -2939,7 +2943,7 @@ export function getApiUsersMe<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "GET",
-		url: "/api/users/me",
+		url: "/api/v1/users/me",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -2950,7 +2954,7 @@ export function getApiUsersMe<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Update current profile
- * {@link /api/users/me}
+ * {@link /api/v1/users/me}
  */
 export function patchApiUsersMe<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiUsersMeOptions, ThrowOnError>,
@@ -2959,7 +2963,7 @@ export function patchApiUsersMe<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "PATCH",
-		url: "/api/users/me",
+		url: "/api/v1/users/me",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -2970,7 +2974,7 @@ export function patchApiUsersMe<ThrowOnError extends boolean = true>(
 
 /**
  * @summary List current user's Studio work resources
- * {@link /api/users/me/studio}
+ * {@link /api/v1/users/me/studio}
  */
 export function listCurrentUserStudioContent<ThrowOnError extends boolean = true>(
 	options: Options<ListCurrentUserStudioContentOptions, ThrowOnError>,
@@ -2979,7 +2983,7 @@ export function listCurrentUserStudioContent<ThrowOnError extends boolean = true
 
 	return request({
 		method: "GET",
-		url: "/api/users/me/studio",
+		url: "/api/v1/users/me/studio",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -2990,7 +2994,7 @@ export function listCurrentUserStudioContent<ThrowOnError extends boolean = true
 
 /**
  * @summary Record a Studio resource visit
- * {@link /api/users/me/studio/:unitId/visit}
+ * {@link /api/v1/users/me/studio/:unitId/visit}
  */
 export function recordCurrentUserStudioVisit<ThrowOnError extends boolean = true>(
 	options: Options<RecordCurrentUserStudioVisitOptions, ThrowOnError>,
@@ -2999,7 +3003,7 @@ export function recordCurrentUserStudioVisit<ThrowOnError extends boolean = true
 
 	return request({
 		method: "PUT",
-		url: "/api/users/me/studio/{unitId}/visit",
+		url: "/api/v1/users/me/studio/{unitId}/visit",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3010,7 +3014,7 @@ export function recordCurrentUserStudioVisit<ThrowOnError extends boolean = true
 
 /**
  * @summary Current user preferences
- * {@link /api/users/me/preferences}
+ * {@link /api/v1/users/me/preferences}
  */
 export function getApiUsersMePreferences<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUsersMePreferencesOptions, ThrowOnError> = {},
@@ -3019,7 +3023,7 @@ export function getApiUsersMePreferences<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "GET",
-		url: "/api/users/me/preferences",
+		url: "/api/v1/users/me/preferences",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3030,7 +3034,7 @@ export function getApiUsersMePreferences<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Update current user display preferences
- * {@link /api/users/me/preferences}
+ * {@link /api/v1/users/me/preferences}
  */
 export function patchApiUsersMePreferences<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiUsersMePreferencesOptions, ThrowOnError>,
@@ -3039,7 +3043,7 @@ export function patchApiUsersMePreferences<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "PATCH",
-		url: "/api/users/me/preferences",
+		url: "/api/v1/users/me/preferences",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3050,7 +3054,7 @@ export function patchApiUsersMePreferences<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Replace current user preferences
- * {@link /api/users/me/preferences}
+ * {@link /api/v1/users/me/preferences}
  */
 export function putApiUsersMePreferences<ThrowOnError extends boolean = true>(
 	options: Options<PutApiUsersMePreferencesOptions, ThrowOnError>,
@@ -3059,7 +3063,7 @@ export function putApiUsersMePreferences<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "PUT",
-		url: "/api/users/me/preferences",
+		url: "/api/v1/users/me/preferences",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3070,7 +3074,7 @@ export function putApiUsersMePreferences<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Update current user's Score and Progress privacy
- * {@link /api/users/me/privacy}
+ * {@link /api/v1/users/me/privacy}
  */
 export function updateCurrentUserPrivacy<ThrowOnError extends boolean = true>(
 	options: Options<UpdateCurrentUserPrivacyOptions, ThrowOnError>,
@@ -3079,7 +3083,7 @@ export function updateCurrentUserPrivacy<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "PATCH",
-		url: "/api/users/me/privacy",
+		url: "/api/v1/users/me/privacy",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<UpdateCurrentUserPrivacyResponses, ThrowOnError>>;
@@ -3087,7 +3091,7 @@ export function updateCurrentUserPrivacy<ThrowOnError extends boolean = true>(
 
 /**
  * @summary List Units followed by the current user
- * {@link /api/users/me/following}
+ * {@link /api/v1/users/me/following}
  */
 export function getApiUsersMeFollowing<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUsersMeFollowingOptions, ThrowOnError> = {},
@@ -3096,7 +3100,7 @@ export function getApiUsersMeFollowing<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "GET",
-		url: "/api/users/me/following",
+		url: "/api/v1/users/me/following",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3107,7 +3111,7 @@ export function getApiUsersMeFollowing<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Get current user's follow state for a Unit
- * {@link /api/users/me/following/:unitId}
+ * {@link /api/v1/users/me/following/:unitId}
  */
 export function getApiUsersMeFollowingByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUsersMeFollowingByUnitIdOptions, ThrowOnError>,
@@ -3116,7 +3120,7 @@ export function getApiUsersMeFollowingByUnitId<ThrowOnError extends boolean = tr
 
 	return request({
 		method: "GET",
-		url: "/api/users/me/following/{unitId}",
+		url: "/api/v1/users/me/following/{unitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3127,7 +3131,7 @@ export function getApiUsersMeFollowingByUnitId<ThrowOnError extends boolean = tr
 
 /**
  * @summary Follow a Unit
- * {@link /api/users/me/following/:unitId}
+ * {@link /api/v1/users/me/following/:unitId}
  */
 export function putApiUsersMeFollowingByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiUsersMeFollowingByUnitIdOptions, ThrowOnError>,
@@ -3136,7 +3140,7 @@ export function putApiUsersMeFollowingByUnitId<ThrowOnError extends boolean = tr
 
 	return request({
 		method: "PUT",
-		url: "/api/users/me/following/{unitId}",
+		url: "/api/v1/users/me/following/{unitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3147,7 +3151,7 @@ export function putApiUsersMeFollowingByUnitId<ThrowOnError extends boolean = tr
 
 /**
  * @summary Unfollow a Unit
- * {@link /api/users/me/following/:unitId}
+ * {@link /api/v1/users/me/following/:unitId}
  */
 export function deleteApiUsersMeFollowingByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiUsersMeFollowingByUnitIdOptions, ThrowOnError>,
@@ -3156,7 +3160,7 @@ export function deleteApiUsersMeFollowingByUnitId<ThrowOnError extends boolean =
 
 	return request({
 		method: "DELETE",
-		url: "/api/users/me/following/{unitId}",
+		url: "/api/v1/users/me/following/{unitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3167,7 +3171,7 @@ export function deleteApiUsersMeFollowingByUnitId<ThrowOnError extends boolean =
 
 /**
  * @summary Update followed Unit presentation
- * {@link /api/users/me/following/:unitId}
+ * {@link /api/v1/users/me/following/:unitId}
  */
 export function patchApiUsersMeFollowingByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiUsersMeFollowingByUnitIdOptions, ThrowOnError>,
@@ -3176,7 +3180,7 @@ export function patchApiUsersMeFollowingByUnitId<ThrowOnError extends boolean = 
 
 	return request({
 		method: "PATCH",
-		url: "/api/users/me/following/{unitId}",
+		url: "/api/v1/users/me/following/{unitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3187,7 +3191,7 @@ export function patchApiUsersMeFollowingByUnitId<ThrowOnError extends boolean = 
 
 /**
  * @summary Replace notification and personalization settings for a followed Unit
- * {@link /api/users/me/following/:unitId/settings}
+ * {@link /api/v1/users/me/following/:unitId/settings}
  */
 export function putApiUsersMeFollowingByUnitIdSettings<ThrowOnError extends boolean = true>(
 	options: Options<PutApiUsersMeFollowingByUnitIdSettingsOptions, ThrowOnError>,
@@ -3196,7 +3200,7 @@ export function putApiUsersMeFollowingByUnitIdSettings<ThrowOnError extends bool
 
 	return request({
 		method: "PUT",
-		url: "/api/users/me/following/{unitId}/settings",
+		url: "/api/v1/users/me/following/{unitId}/settings",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3207,35 +3211,35 @@ export function putApiUsersMeFollowingByUnitIdSettings<ThrowOnError extends bool
 
 /**
  * @summary Get visible Score and Progress activity for a public Profile
- * {@link /api/users/:id/activity}
+ * {@link /api/v1/users/:id/activity}
  */
 export function getUserProfileActivity<ThrowOnError extends boolean = true>(
 	options: Options<GetUserProfileActivityOptions, ThrowOnError>,
 ): Promise<RequestResult<GetUserProfileActivityResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/users/{id}/activity", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/users/{id}/activity", ...config }) as Promise<
 		RequestResult<GetUserProfileActivityResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Public user profile
- * {@link /api/users/:id}
+ * {@link /api/v1/users/:id}
  */
 export function getApiUsersById<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUsersByIdOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiUsersByIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/users/{id}", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/users/{id}", ...config }) as Promise<
 		RequestResult<GetApiUsersByIdResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary List blocked users
- * {@link /api/users/me/blocks}
+ * {@link /api/v1/users/me/blocks}
  */
 export function getApiUsersMeBlocks<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUsersMeBlocksOptions, ThrowOnError> = {},
@@ -3244,7 +3248,7 @@ export function getApiUsersMeBlocks<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "GET",
-		url: "/api/users/me/blocks",
+		url: "/api/v1/users/me/blocks",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3255,7 +3259,7 @@ export function getApiUsersMeBlocks<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Block user
- * {@link /api/users/:id/block}
+ * {@link /api/v1/users/:id/block}
  */
 export function putApiUsersByIdBlock<ThrowOnError extends boolean = true>(
 	options: Options<PutApiUsersByIdBlockOptions, ThrowOnError>,
@@ -3264,7 +3268,7 @@ export function putApiUsersByIdBlock<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "PUT",
-		url: "/api/users/{id}/block",
+		url: "/api/v1/users/{id}/block",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3275,7 +3279,7 @@ export function putApiUsersByIdBlock<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Unblock user
- * {@link /api/users/:id/block}
+ * {@link /api/v1/users/:id/block}
  */
 export function deleteApiUsersByIdBlock<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiUsersByIdBlockOptions, ThrowOnError>,
@@ -3284,7 +3288,7 @@ export function deleteApiUsersByIdBlock<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "DELETE",
-		url: "/api/users/{id}/block",
+		url: "/api/v1/users/{id}/block",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3295,7 +3299,7 @@ export function deleteApiUsersByIdBlock<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Get the platform access policy
- * {@link /api/platform-access/policy}
+ * {@link /api/v1/platform-access/policy}
  */
 export function getApiPlatformAccessPolicy<ThrowOnError extends boolean = true>(
 	options: Options<GetApiPlatformAccessPolicyOptions, ThrowOnError> = {},
@@ -3304,7 +3308,7 @@ export function getApiPlatformAccessPolicy<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "GET",
-		url: "/api/platform-access/policy",
+		url: "/api/v1/platform-access/policy",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiPlatformAccessPolicyResponses, ThrowOnError>>;
@@ -3312,7 +3316,7 @@ export function getApiPlatformAccessPolicy<ThrowOnError extends boolean = true>(
 
 /**
  * @summary List or search Profiles and their platform access
- * {@link /api/platform-access/profiles}
+ * {@link /api/v1/platform-access/profiles}
  */
 export function getApiPlatformAccessProfiles<ThrowOnError extends boolean = true>(
 	options: Options<GetApiPlatformAccessProfilesOptions, ThrowOnError> = {},
@@ -3321,7 +3325,7 @@ export function getApiPlatformAccessProfiles<ThrowOnError extends boolean = true
 
 	return request({
 		method: "GET",
-		url: "/api/platform-access/profiles",
+		url: "/api/v1/platform-access/profiles",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiPlatformAccessProfilesResponses, ThrowOnError>>;
@@ -3329,7 +3333,7 @@ export function getApiPlatformAccessProfiles<ThrowOnError extends boolean = true
 
 /**
  * @summary Get one Profile's platform access
- * {@link /api/platform-access/profiles/:profileId}
+ * {@link /api/v1/platform-access/profiles/:profileId}
  */
 export function getApiPlatformAccessProfilesByProfileId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiPlatformAccessProfilesByProfileIdOptions, ThrowOnError>,
@@ -3338,7 +3342,7 @@ export function getApiPlatformAccessProfilesByProfileId<ThrowOnError extends boo
 
 	return request({
 		method: "GET",
-		url: "/api/platform-access/profiles/{profileId}",
+		url: "/api/v1/platform-access/profiles/{profileId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiPlatformAccessProfilesByProfileIdResponses, ThrowOnError>>;
@@ -3346,7 +3350,7 @@ export function getApiPlatformAccessProfilesByProfileId<ThrowOnError extends boo
 
 /**
  * @summary Replace one Profile's platform access
- * {@link /api/platform-access/profiles/:profileId}
+ * {@link /api/v1/platform-access/profiles/:profileId}
  */
 export function putApiPlatformAccessProfilesByProfileId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiPlatformAccessProfilesByProfileIdOptions, ThrowOnError>,
@@ -3355,7 +3359,7 @@ export function putApiPlatformAccessProfilesByProfileId<ThrowOnError extends boo
 
 	return request({
 		method: "PUT",
-		url: "/api/platform-access/profiles/{profileId}",
+		url: "/api/v1/platform-access/profiles/{profileId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PutApiPlatformAccessProfilesByProfileIdResponses, ThrowOnError>>;
@@ -3363,7 +3367,7 @@ export function putApiPlatformAccessProfilesByProfileId<ThrowOnError extends boo
 
 /**
  * @summary List platform users
- * {@link /api/platform-users}
+ * {@link /api/v1/platform-users}
  */
 export function getApiPlatformUsers<ThrowOnError extends boolean = true>(
 	options: Options<GetApiPlatformUsersOptions, ThrowOnError> = {},
@@ -3372,7 +3376,7 @@ export function getApiPlatformUsers<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "GET",
-		url: "/api/platform-users",
+		url: "/api/v1/platform-users",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiPlatformUsersResponses, ThrowOnError>>;
@@ -3380,7 +3384,7 @@ export function getApiPlatformUsers<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Get one platform user
- * {@link /api/platform-users/:userId}
+ * {@link /api/v1/platform-users/:userId}
  */
 export function getApiPlatformUsersByUserId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiPlatformUsersByUserIdOptions, ThrowOnError>,
@@ -3389,7 +3393,7 @@ export function getApiPlatformUsersByUserId<ThrowOnError extends boolean = true>
 
 	return request({
 		method: "GET",
-		url: "/api/platform-users/{userId}",
+		url: "/api/v1/platform-users/{userId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiPlatformUsersByUserIdResponses, ThrowOnError>>;
@@ -3397,7 +3401,7 @@ export function getApiPlatformUsersByUserId<ThrowOnError extends boolean = true>
 
 /**
  * @summary Replace a platform user account state
- * {@link /api/platform-users/:userId/account-state}
+ * {@link /api/v1/platform-users/:userId/account-state}
  */
 export function putApiPlatformUsersByUserIdAccountState<ThrowOnError extends boolean = true>(
 	options: Options<PutApiPlatformUsersByUserIdAccountStateOptions, ThrowOnError>,
@@ -3406,7 +3410,7 @@ export function putApiPlatformUsersByUserIdAccountState<ThrowOnError extends boo
 
 	return request({
 		method: "PUT",
-		url: "/api/platform-users/{userId}/account-state",
+		url: "/api/v1/platform-users/{userId}/account-state",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PutApiPlatformUsersByUserIdAccountStateResponses, ThrowOnError>>;
@@ -3414,7 +3418,7 @@ export function putApiPlatformUsersByUserIdAccountState<ThrowOnError extends boo
 
 /**
  * @summary List a platform user's sessions
- * {@link /api/platform-users/:userId/sessions}
+ * {@link /api/v1/platform-users/:userId/sessions}
  */
 export function getApiPlatformUsersByUserIdSessions<ThrowOnError extends boolean = true>(
 	options: Options<GetApiPlatformUsersByUserIdSessionsOptions, ThrowOnError>,
@@ -3423,7 +3427,7 @@ export function getApiPlatformUsersByUserIdSessions<ThrowOnError extends boolean
 
 	return request({
 		method: "GET",
-		url: "/api/platform-users/{userId}/sessions",
+		url: "/api/v1/platform-users/{userId}/sessions",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiPlatformUsersByUserIdSessionsResponses, ThrowOnError>>;
@@ -3431,7 +3435,7 @@ export function getApiPlatformUsersByUserIdSessions<ThrowOnError extends boolean
 
 /**
  * @summary Revoke all platform user sessions
- * {@link /api/platform-users/:userId/sessions}
+ * {@link /api/v1/platform-users/:userId/sessions}
  */
 export function deleteApiPlatformUsersByUserIdSessions<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiPlatformUsersByUserIdSessionsOptions, ThrowOnError>,
@@ -3440,7 +3444,7 @@ export function deleteApiPlatformUsersByUserIdSessions<ThrowOnError extends bool
 
 	return request({
 		method: "DELETE",
-		url: "/api/platform-users/{userId}/sessions",
+		url: "/api/v1/platform-users/{userId}/sessions",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<DeleteApiPlatformUsersByUserIdSessionsResponses, ThrowOnError>>;
@@ -3448,7 +3452,7 @@ export function deleteApiPlatformUsersByUserIdSessions<ThrowOnError extends bool
 
 /**
  * @summary Revoke a platform user session
- * {@link /api/platform-users/:userId/sessions/:sessionId}
+ * {@link /api/v1/platform-users/:userId/sessions/:sessionId}
  */
 export function deleteApiPlatformUsersByUserIdSessionsBySessionId<
 	ThrowOnError extends boolean = true,
@@ -3461,7 +3465,7 @@ export function deleteApiPlatformUsersByUserIdSessionsBySessionId<
 
 	return request({
 		method: "DELETE",
-		url: "/api/platform-users/{userId}/sessions/{sessionId}",
+		url: "/api/v1/platform-users/{userId}/sessions/{sessionId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -3471,7 +3475,7 @@ export function deleteApiPlatformUsersByUserIdSessionsBySessionId<
 
 /**
  * @summary Get a Tag with direct children and grandchildren
- * {@link /api/tags/:tagId/hierarchy}
+ * {@link /api/v1/tags/:tagId/hierarchy}
  */
 export function getApiTagsByTagIdHierarchy<ThrowOnError extends boolean = true>(
 	options: Options<GetApiTagsByTagIdHierarchyOptions, ThrowOnError>,
@@ -3480,7 +3484,7 @@ export function getApiTagsByTagIdHierarchy<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "GET",
-		url: "/api/tags/{tagId}/hierarchy",
+		url: "/api/v1/tags/{tagId}/hierarchy",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3491,7 +3495,7 @@ export function getApiTagsByTagIdHierarchy<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Create or find and upvote a community-immutable Tag structure
- * {@link /api/tag-structures}
+ * {@link /api/v1/tag-structures}
  */
 export function postApiTagStructures<ThrowOnError extends boolean = true>(
 	options: Options<PostApiTagStructuresOptions, ThrowOnError>,
@@ -3500,7 +3504,7 @@ export function postApiTagStructures<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "POST",
-		url: "/api/tag-structures",
+		url: "/api/v1/tag-structures",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3511,7 +3515,7 @@ export function postApiTagStructures<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Get a Tag structure
- * {@link /api/tag-structures/:structureId}
+ * {@link /api/v1/tag-structures/:structureId}
  */
 export function getApiTagStructuresByStructureId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiTagStructuresByStructureIdOptions, ThrowOnError>,
@@ -3520,7 +3524,7 @@ export function getApiTagStructuresByStructureId<ThrowOnError extends boolean = 
 
 	return request({
 		method: "GET",
-		url: "/api/tag-structures/{structureId}",
+		url: "/api/v1/tag-structures/{structureId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3531,7 +3535,7 @@ export function getApiTagStructuresByStructureId<ThrowOnError extends boolean = 
 
 /**
  * @summary Administratively correct a Tag structure definition
- * {@link /api/tag-structures/:structureId}
+ * {@link /api/v1/tag-structures/:structureId}
  */
 export function putApiTagStructuresByStructureId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiTagStructuresByStructureIdOptions, ThrowOnError>,
@@ -3540,7 +3544,7 @@ export function putApiTagStructuresByStructureId<ThrowOnError extends boolean = 
 
 	return request({
 		method: "PUT",
-		url: "/api/tag-structures/{structureId}",
+		url: "/api/v1/tag-structures/{structureId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3551,7 +3555,7 @@ export function putApiTagStructuresByStructureId<ThrowOnError extends boolean = 
 
 /**
  * @summary Vote on a Tag structure
- * {@link /api/tag-structures/:structureId/vote}
+ * {@link /api/v1/tag-structures/:structureId/vote}
  */
 export function putApiTagStructuresByStructureIdVote<ThrowOnError extends boolean = true>(
 	options: Options<PutApiTagStructuresByStructureIdVoteOptions, ThrowOnError>,
@@ -3560,7 +3564,7 @@ export function putApiTagStructuresByStructureIdVote<ThrowOnError extends boolea
 
 	return request({
 		method: "PUT",
-		url: "/api/tag-structures/{structureId}/vote",
+		url: "/api/v1/tag-structures/{structureId}/vote",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3571,7 +3575,7 @@ export function putApiTagStructuresByStructureIdVote<ThrowOnError extends boolea
 
 /**
  * @summary Remove a Tag structure vote
- * {@link /api/tag-structures/:structureId/vote}
+ * {@link /api/v1/tag-structures/:structureId/vote}
  */
 export function deleteApiTagStructuresByStructureIdVote<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiTagStructuresByStructureIdVoteOptions, ThrowOnError>,
@@ -3580,7 +3584,7 @@ export function deleteApiTagStructuresByStructureIdVote<ThrowOnError extends boo
 
 	return request({
 		method: "DELETE",
-		url: "/api/tag-structures/{structureId}/vote",
+		url: "/api/v1/tag-structures/{structureId}/vote",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3591,21 +3595,23 @@ export function deleteApiTagStructuresByStructureIdVote<ThrowOnError extends boo
 
 /**
  * @summary Get global and subscribed Realm Tag assertions for a Unit
- * {@link /api/units/:type/:unitId/tags}
+ * {@link /api/v1/units/:type/:unitId/tags}
  */
 export function getApiUnitsByTypeByUnitIdTags<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByTypeByUnitIdTagsOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiUnitsByTypeByUnitIdTagsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/units/{type}/{unitId}/tags", ...config }) as Promise<
-		RequestResult<GetApiUnitsByTypeByUnitIdTagsResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/v1/units/{type}/{unitId}/tags",
+		...config,
+	}) as Promise<RequestResult<GetApiUnitsByTypeByUnitIdTagsResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Apply a Tag structure to a Unit
- * {@link /api/units/:type/:unitId/tag-structures/:structureId}
+ * {@link /api/v1/units/:type/:unitId/tag-structures/:structureId}
  */
 export function putApiUnitsByTypeByUnitIdTagStructuresByStructureId<
 	ThrowOnError extends boolean = true,
@@ -3618,7 +3624,7 @@ export function putApiUnitsByTypeByUnitIdTagStructuresByStructureId<
 
 	return request({
 		method: "PUT",
-		url: "/api/units/{type}/{unitId}/tag-structures/{structureId}",
+		url: "/api/v1/units/{type}/{unitId}/tag-structures/{structureId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3631,7 +3637,7 @@ export function putApiUnitsByTypeByUnitIdTagStructuresByStructureId<
 
 /**
  * @summary Remove a Tag structure from a Unit
- * {@link /api/units/:type/:unitId/tag-structures/:structureId}
+ * {@link /api/v1/units/:type/:unitId/tag-structures/:structureId}
  */
 export function deleteApiUnitsByTypeByUnitIdTagStructuresByStructureId<
 	ThrowOnError extends boolean = true,
@@ -3644,7 +3650,7 @@ export function deleteApiUnitsByTypeByUnitIdTagStructuresByStructureId<
 
 	return request({
 		method: "DELETE",
-		url: "/api/units/{type}/{unitId}/tag-structures/{structureId}",
+		url: "/api/v1/units/{type}/{unitId}/tag-structures/{structureId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3657,7 +3663,7 @@ export function deleteApiUnitsByTypeByUnitIdTagStructuresByStructureId<
 
 /**
  * @summary Vote on a Unit Tag structure
- * {@link /api/units/:type/:unitId/tag-structures/:structureId/vote}
+ * {@link /api/v1/units/:type/:unitId/tag-structures/:structureId/vote}
  */
 export function putApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<
 	ThrowOnError extends boolean = true,
@@ -3670,7 +3676,7 @@ export function putApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<
 
 	return request({
 		method: "PUT",
-		url: "/api/units/{type}/{unitId}/tag-structures/{structureId}/vote",
+		url: "/api/v1/units/{type}/{unitId}/tag-structures/{structureId}/vote",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3686,7 +3692,7 @@ export function putApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<
 
 /**
  * @summary Remove a Unit Tag structure vote
- * {@link /api/units/:type/:unitId/tag-structures/:structureId/vote}
+ * {@link /api/v1/units/:type/:unitId/tag-structures/:structureId/vote}
  */
 export function deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<
 	ThrowOnError extends boolean = true,
@@ -3702,7 +3708,7 @@ export function deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<
 
 	return request({
 		method: "DELETE",
-		url: "/api/units/{type}/{unitId}/tag-structures/{structureId}/vote",
+		url: "/api/v1/units/{type}/{unitId}/tag-structures/{structureId}/vote",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3718,7 +3724,7 @@ export function deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<
 
 /**
  * @summary List the current user's ordered Realm Tag sources
- * {@link /api/users/me/tag-realm-subscriptions}
+ * {@link /api/v1/users/me/tag-realm-subscriptions}
  */
 export function getApiUsersMeTagRealmSubscriptions<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUsersMeTagRealmSubscriptionsOptions, ThrowOnError> = {},
@@ -3727,7 +3733,7 @@ export function getApiUsersMeTagRealmSubscriptions<ThrowOnError extends boolean 
 
 	return request({
 		method: "GET",
-		url: "/api/users/me/tag-realm-subscriptions",
+		url: "/api/v1/users/me/tag-realm-subscriptions",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3738,7 +3744,7 @@ export function getApiUsersMeTagRealmSubscriptions<ThrowOnError extends boolean 
 
 /**
  * @summary Subscribe to or reorder a Realm Tag source
- * {@link /api/users/me/tag-realm-subscriptions/:realmId}
+ * {@link /api/v1/users/me/tag-realm-subscriptions/:realmId}
  */
 export function putApiUsersMeTagRealmSubscriptionsByRealmId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiUsersMeTagRealmSubscriptionsByRealmIdOptions, ThrowOnError>,
@@ -3747,7 +3753,7 @@ export function putApiUsersMeTagRealmSubscriptionsByRealmId<ThrowOnError extends
 
 	return request({
 		method: "PUT",
-		url: "/api/users/me/tag-realm-subscriptions/{realmId}",
+		url: "/api/v1/users/me/tag-realm-subscriptions/{realmId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3760,7 +3766,7 @@ export function putApiUsersMeTagRealmSubscriptionsByRealmId<ThrowOnError extends
 
 /**
  * @summary Unsubscribe from a Realm Tag source
- * {@link /api/users/me/tag-realm-subscriptions/:realmId}
+ * {@link /api/v1/users/me/tag-realm-subscriptions/:realmId}
  */
 export function deleteApiUsersMeTagRealmSubscriptionsByRealmId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiUsersMeTagRealmSubscriptionsByRealmIdOptions, ThrowOnError>,
@@ -3769,7 +3775,7 @@ export function deleteApiUsersMeTagRealmSubscriptionsByRealmId<ThrowOnError exte
 
 	return request({
 		method: "DELETE",
-		url: "/api/users/me/tag-realm-subscriptions/{realmId}",
+		url: "/api/v1/users/me/tag-realm-subscriptions/{realmId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3783,14 +3789,14 @@ export function deleteApiUsersMeTagRealmSubscriptionsByRealmId<ThrowOnError exte
 /**
  * @description Resolves one to three slug labels to a public Unit ID and reports its canonical path. Browser routes use the resolved ID for subsequent resource reads and cache identity.
  * @summary Resolve a complete public Unit slug path
- * {@link /api/slug-addresses/resolve}
+ * {@link /api/v1/slug-addresses/resolve}
  */
 export function resolveUnitSlugAddress<ThrowOnError extends boolean = true>(
 	options: Options<ResolveUnitSlugAddressOptions, ThrowOnError>,
 ): Promise<RequestResult<ResolveUnitSlugAddressResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/slug-addresses/resolve", ...config }) as Promise<
+	return request({ method: "POST", url: "/api/v1/slug-addresses/resolve", ...config }) as Promise<
 		RequestResult<ResolveUnitSlugAddressResponses, ThrowOnError>
 	>;
 }
@@ -3798,7 +3804,7 @@ export function resolveUnitSlugAddress<ThrowOnError extends boolean = true>(
 /**
  * @description Returns a public Unit's optional canonical slug address for ID-route canonicalization. Missing, private, moderated, deleted, or unaddressed Units all return not found.
  * @summary Get a Unit public canonical slug address
- * {@link /api/slug-addresses/public-units/:unitId}
+ * {@link /api/v1/slug-addresses/public-units/:unitId}
  */
 export function getPublicUnitSlugAddress<ThrowOnError extends boolean = true>(
 	options: Options<GetPublicUnitSlugAddressOptions, ThrowOnError>,
@@ -3807,7 +3813,7 @@ export function getPublicUnitSlugAddress<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "GET",
-		url: "/api/slug-addresses/public-units/{unitId}",
+		url: "/api/v1/slug-addresses/public-units/{unitId}",
 		...config,
 	}) as Promise<RequestResult<GetPublicUnitSlugAddressResponses, ThrowOnError>>;
 }
@@ -3815,7 +3821,7 @@ export function getPublicUnitSlugAddress<ThrowOnError extends boolean = true>(
 /**
  * @description Resolves a direct scope Unit ID and slug label to a public Unit ID. An optional expected kind prevents cross-resource matches. The response includes the complete canonical path so callers can redirect former addresses.
  * @summary Resolve a Unit slug in its direct scope
- * {@link /api/slug-addresses/scopes/:scopeUnitId/:slug}
+ * {@link /api/v1/slug-addresses/scopes/:scopeUnitId/:slug}
  */
 export function resolveScopedUnitSlugAddress<ThrowOnError extends boolean = true>(
 	options: Options<ResolveScopedUnitSlugAddressOptions, ThrowOnError>,
@@ -3824,7 +3830,7 @@ export function resolveScopedUnitSlugAddress<ThrowOnError extends boolean = true
 
 	return request({
 		method: "GET",
-		url: "/api/slug-addresses/scopes/{scopeUnitId}/{slug}",
+		url: "/api/v1/slug-addresses/scopes/{scopeUnitId}/{slug}",
 		...config,
 	}) as Promise<RequestResult<ResolveScopedUnitSlugAddressResponses, ThrowOnError>>;
 }
@@ -3832,7 +3838,7 @@ export function resolveScopedUnitSlugAddress<ThrowOnError extends boolean = true
 /**
  * @description Development-preview control plane. Returns canonical address registry details for authorized platform workflows, including the administrative address ID. Ordinary resource responses expose only the nullable public slugAddress projection.
  * @summary Get a Unit canonical slug address with platform access
- * {@link /api/slug-addresses/units/:unitId}
+ * {@link /api/v1/slug-addresses/units/:unitId}
  */
 export function getUnitSlugAddressWithPlatformAccess<ThrowOnError extends boolean = true>(
 	options: Options<GetUnitSlugAddressWithPlatformAccessOptions, ThrowOnError>,
@@ -3841,7 +3847,7 @@ export function getUnitSlugAddressWithPlatformAccess<ThrowOnError extends boolea
 
 	return request({
 		method: "GET",
-		url: "/api/slug-addresses/units/{unitId}",
+		url: "/api/v1/slug-addresses/units/{unitId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetUnitSlugAddressWithPlatformAccessResponses, ThrowOnError>>;
@@ -3850,7 +3856,7 @@ export function getUnitSlugAddressWithPlatformAccess<ThrowOnError extends boolea
 /**
  * @description Development-preview control plane. Assigns or replaces a canonical address independently of Unit creation and update. It retains the former address as a redirect and succeeds idempotently when the requested address is already canonical.
  * @summary Replace any Unit slug address with platform access
- * {@link /api/slug-addresses/units/:unitId}
+ * {@link /api/v1/slug-addresses/units/:unitId}
  */
 export function replaceUnitSlugAddressWithPlatformAccess<ThrowOnError extends boolean = true>(
 	options: Options<ReplaceUnitSlugAddressWithPlatformAccessOptions, ThrowOnError>,
@@ -3859,7 +3865,7 @@ export function replaceUnitSlugAddressWithPlatformAccess<ThrowOnError extends bo
 
 	return request({
 		method: "PUT",
-		url: "/api/slug-addresses/units/{unitId}",
+		url: "/api/v1/slug-addresses/units/{unitId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<ReplaceUnitSlugAddressWithPlatformAccessResponses, ThrowOnError>>;
@@ -3868,7 +3874,7 @@ export function replaceUnitSlugAddressWithPlatformAccess<ThrowOnError extends bo
 /**
  * @description Development-preview control plane. Creates a namespace Unit and its canonical address atomically. A null scope creates a top-level namespace under the virtual root; a Unit ID creates a nested namespace.
  * @summary Create an explicitly addressed namespace with platform access
- * {@link /api/slug-addresses/namespaces}
+ * {@link /api/v1/slug-addresses/namespaces}
  */
 export function createSlugNamespaceWithPlatformAccess<ThrowOnError extends boolean = true>(
 	options: Options<CreateSlugNamespaceWithPlatformAccessOptions, ThrowOnError>,
@@ -3877,7 +3883,7 @@ export function createSlugNamespaceWithPlatformAccess<ThrowOnError extends boole
 
 	return request({
 		method: "POST",
-		url: "/api/slug-addresses/namespaces",
+		url: "/api/v1/slug-addresses/namespaces",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<CreateSlugNamespaceWithPlatformAccessResponses, ThrowOnError>>;
@@ -3886,7 +3892,7 @@ export function createSlugNamespaceWithPlatformAccess<ThrowOnError extends boole
 /**
  * @description Development-preview control plane. Deletes one temporary Redirect record so its scoped label may be reused. This is an audited platform action; retention and quarantine policy determines when a redirect is eligible for release.
  * @summary Release a retained slug redirect with platform access
- * {@link /api/slug-addresses/redirects/:redirectAddressId}
+ * {@link /api/v1/slug-addresses/redirects/:redirectAddressId}
  */
 export function releaseSlugRedirectWithPlatformAccess<ThrowOnError extends boolean = true>(
 	options: Options<ReleaseSlugRedirectWithPlatformAccessOptions, ThrowOnError>,
@@ -3895,7 +3901,7 @@ export function releaseSlugRedirectWithPlatformAccess<ThrowOnError extends boole
 
 	return request({
 		method: "DELETE",
-		url: "/api/slug-addresses/redirects/{redirectAddressId}",
+		url: "/api/v1/slug-addresses/redirects/{redirectAddressId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<ReleaseSlugRedirectWithPlatformAccessResponses, ThrowOnError>>;
@@ -3903,21 +3909,21 @@ export function releaseSlugRedirectWithPlatformAccess<ThrowOnError extends boole
 
 /**
  * @summary Resolve readable Unit presentations
- * {@link /api/units/presentations}
+ * {@link /api/v1/units/presentations}
  */
 export function postApiUnitsPresentations<ThrowOnError extends boolean = true>(
 	options: Options<PostApiUnitsPresentationsOptions, ThrowOnError>,
 ): Promise<RequestResult<PostApiUnitsPresentationsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/units/presentations", ...config }) as Promise<
+	return request({ method: "POST", url: "/api/v1/units/presentations", ...config }) as Promise<
 		RequestResult<PostApiUnitsPresentationsResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary List a Unit's Realm publications
- * {@link /api/units/by-id/:unitId/realm-publications}
+ * {@link /api/v1/units/by-id/:unitId/realm-publications}
  */
 export function getApiUnitsByIdByUnitIdRealmPublications<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByIdByUnitIdRealmPublicationsOptions, ThrowOnError>,
@@ -3926,7 +3932,7 @@ export function getApiUnitsByIdByUnitIdRealmPublications<ThrowOnError extends bo
 
 	return request({
 		method: "GET",
-		url: "/api/units/by-id/{unitId}/realm-publications",
+		url: "/api/v1/units/by-id/{unitId}/realm-publications",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3937,7 +3943,7 @@ export function getApiUnitsByIdByUnitIdRealmPublications<ThrowOnError extends bo
 
 /**
  * @summary Publish a Unit to one Realm
- * {@link /api/units/by-id/:unitId/realm-publications/:realmId}
+ * {@link /api/v1/units/by-id/:unitId/realm-publications/:realmId}
  */
 export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmId<
 	ThrowOnError extends boolean = true,
@@ -3950,7 +3956,7 @@ export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmId<
 
 	return request({
 		method: "POST",
-		url: "/api/units/by-id/{unitId}/realm-publications/{realmId}",
+		url: "/api/v1/units/by-id/{unitId}/realm-publications/{realmId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3963,7 +3969,7 @@ export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmId<
 
 /**
  * @summary Withdraw a Unit from one Realm
- * {@link /api/units/by-id/:unitId/realm-publications/:realmId/withdraw}
+ * {@link /api/v1/units/by-id/:unitId/realm-publications/:realmId/withdraw}
  */
 export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdraw<
 	ThrowOnError extends boolean = true,
@@ -3979,7 +3985,7 @@ export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdraw<
 
 	return request({
 		method: "POST",
-		url: "/api/units/by-id/{unitId}/realm-publications/{realmId}/withdraw",
+		url: "/api/v1/units/by-id/{unitId}/realm-publications/{realmId}/withdraw",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3995,7 +4001,7 @@ export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdraw<
 
 /**
  * @summary Republish a Unit to one Realm
- * {@link /api/units/by-id/:unitId/realm-publications/:realmId/republish}
+ * {@link /api/v1/units/by-id/:unitId/realm-publications/:realmId/republish}
  */
 export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublish<
 	ThrowOnError extends boolean = true,
@@ -4014,7 +4020,7 @@ export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublish<
 
 	return request({
 		method: "POST",
-		url: "/api/units/by-id/{unitId}/realm-publications/{realmId}/republish",
+		url: "/api/v1/units/by-id/{unitId}/realm-publications/{realmId}/republish",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4030,7 +4036,7 @@ export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublish<
 
 /**
  * @summary List Unit Series memberships
- * {@link /api/units/by-id/:unitId/series-memberships}
+ * {@link /api/v1/units/by-id/:unitId/series-memberships}
  */
 export function getApiUnitsByIdByUnitIdSeriesMemberships<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByIdByUnitIdSeriesMembershipsOptions, ThrowOnError>,
@@ -4039,14 +4045,14 @@ export function getApiUnitsByIdByUnitIdSeriesMemberships<ThrowOnError extends bo
 
 	return request({
 		method: "GET",
-		url: "/api/units/by-id/{unitId}/series-memberships",
+		url: "/api/v1/units/by-id/{unitId}/series-memberships",
 		...config,
 	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdSeriesMembershipsResponses, ThrowOnError>>;
 }
 
 /**
  * @summary List Unit status events
- * {@link /api/units/by-id/:unitId/status-events}
+ * {@link /api/v1/units/by-id/:unitId/status-events}
  */
 export function getApiUnitsByIdByUnitIdStatusEvents<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByIdByUnitIdStatusEventsOptions, ThrowOnError>,
@@ -4055,14 +4061,14 @@ export function getApiUnitsByIdByUnitIdStatusEvents<ThrowOnError extends boolean
 
 	return request({
 		method: "GET",
-		url: "/api/units/by-id/{unitId}/status-events",
+		url: "/api/v1/units/by-id/{unitId}/status-events",
 		...config,
 	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdStatusEventsResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Get Unit content language order
- * {@link /api/units/by-id/:unitId/localization-order}
+ * {@link /api/v1/units/by-id/:unitId/localization-order}
  */
 export function getApiUnitsByIdByUnitIdLocalizationOrder<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByIdByUnitIdLocalizationOrderOptions, ThrowOnError>,
@@ -4071,14 +4077,14 @@ export function getApiUnitsByIdByUnitIdLocalizationOrder<ThrowOnError extends bo
 
 	return request({
 		method: "GET",
-		url: "/api/units/by-id/{unitId}/localization-order",
+		url: "/api/v1/units/by-id/{unitId}/localization-order",
 		...config,
 	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdLocalizationOrderResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Reorder Unit content languages
- * {@link /api/units/by-id/:unitId/localization-order}
+ * {@link /api/v1/units/by-id/:unitId/localization-order}
  */
 export function putApiUnitsByIdByUnitIdLocalizationOrder<ThrowOnError extends boolean = true>(
 	options: Options<PutApiUnitsByIdByUnitIdLocalizationOrderOptions, ThrowOnError>,
@@ -4087,7 +4093,7 @@ export function putApiUnitsByIdByUnitIdLocalizationOrder<ThrowOnError extends bo
 
 	return request({
 		method: "PUT",
-		url: "/api/units/by-id/{unitId}/localization-order",
+		url: "/api/v1/units/by-id/{unitId}/localization-order",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4098,7 +4104,7 @@ export function putApiUnitsByIdByUnitIdLocalizationOrder<ThrowOnError extends bo
 
 /**
  * @summary Remove a Unit content language
- * {@link /api/units/by-id/:unitId/localizations/:language}
+ * {@link /api/v1/units/by-id/:unitId/localizations/:language}
  */
 export function deleteApiUnitsByIdByUnitIdLocalizationsByLanguage<
 	ThrowOnError extends boolean = true,
@@ -4111,7 +4117,7 @@ export function deleteApiUnitsByIdByUnitIdLocalizationsByLanguage<
 
 	return request({
 		method: "DELETE",
-		url: "/api/units/by-id/{unitId}/localizations/{language}",
+		url: "/api/v1/units/by-id/{unitId}/localizations/{language}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4124,21 +4130,21 @@ export function deleteApiUnitsByIdByUnitIdLocalizationsByLanguage<
 
 /**
  * @summary List published units
- * {@link /api/units/:type}
+ * {@link /api/v1/units/:type}
  */
 export function getApiUnitsByType<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByTypeOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiUnitsByTypeResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/units/{type}", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/units/{type}", ...config }) as Promise<
 		RequestResult<GetApiUnitsByTypeResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Create unit
- * {@link /api/units/:type}
+ * {@link /api/v1/units/:type}
  */
 export function postApiUnitsByType<ThrowOnError extends boolean = true>(
 	options: Options<PostApiUnitsByTypeOptions, ThrowOnError>,
@@ -4147,7 +4153,7 @@ export function postApiUnitsByType<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "POST",
-		url: "/api/units/{type}",
+		url: "/api/v1/units/{type}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4158,21 +4164,21 @@ export function postApiUnitsByType<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Get unit
- * {@link /api/units/:type/:unitId}
+ * {@link /api/v1/units/:type/:unitId}
  */
 export function getApiUnitsByTypeByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByTypeByUnitIdOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiUnitsByTypeByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/units/{type}/{unitId}", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/units/{type}/{unitId}", ...config }) as Promise<
 		RequestResult<GetApiUnitsByTypeByUnitIdResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Update unit
- * {@link /api/units/:type/:unitId}
+ * {@link /api/v1/units/:type/:unitId}
  */
 export function patchApiUnitsByTypeByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiUnitsByTypeByUnitIdOptions, ThrowOnError>,
@@ -4181,7 +4187,7 @@ export function patchApiUnitsByTypeByUnitId<ThrowOnError extends boolean = true>
 
 	return request({
 		method: "PATCH",
-		url: "/api/units/{type}/{unitId}",
+		url: "/api/v1/units/{type}/{unitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4192,7 +4198,7 @@ export function patchApiUnitsByTypeByUnitId<ThrowOnError extends boolean = true>
 
 /**
  * @summary Update Unit Main relationship
- * {@link /api/units/:type/:unitId/variant-context}
+ * {@link /api/v1/units/:type/:unitId/variant-context}
  */
 export function patchApiUnitsByTypeByUnitIdVariantContext<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiUnitsByTypeByUnitIdVariantContextOptions, ThrowOnError>,
@@ -4201,7 +4207,7 @@ export function patchApiUnitsByTypeByUnitIdVariantContext<ThrowOnError extends b
 
 	return request({
 		method: "PATCH",
-		url: "/api/units/{type}/{unitId}/variant-context",
+		url: "/api/v1/units/{type}/{unitId}/variant-context",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4212,7 +4218,7 @@ export function patchApiUnitsByTypeByUnitIdVariantContext<ThrowOnError extends b
 
 /**
  * @summary Promote Unit Variant to Main
- * {@link /api/units/:type/:unitId/variant-context/promote}
+ * {@link /api/v1/units/:type/:unitId/variant-context/promote}
  */
 export function postApiUnitsByTypeByUnitIdVariantContextPromote<
 	ThrowOnError extends boolean = true,
@@ -4223,7 +4229,7 @@ export function postApiUnitsByTypeByUnitIdVariantContextPromote<
 
 	return request({
 		method: "POST",
-		url: "/api/units/{type}/{unitId}/variant-context/promote",
+		url: "/api/v1/units/{type}/{unitId}/variant-context/promote",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4236,7 +4242,7 @@ export function postApiUnitsByTypeByUnitIdVariantContextPromote<
 
 /**
  * @summary Create or replace unit localization
- * {@link /api/units/:type/:unitId/localizations/:language}
+ * {@link /api/v1/units/:type/:unitId/localizations/:language}
  */
 export function putApiUnitsByTypeByUnitIdLocalizationsByLanguage<
 	ThrowOnError extends boolean = true,
@@ -4247,7 +4253,7 @@ export function putApiUnitsByTypeByUnitIdLocalizationsByLanguage<
 
 	return request({
 		method: "PUT",
-		url: "/api/units/{type}/{unitId}/localizations/{language}",
+		url: "/api/v1/units/{type}/{unitId}/localizations/{language}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4260,7 +4266,7 @@ export function putApiUnitsByTypeByUnitIdLocalizationsByLanguage<
 
 /**
  * @summary List Unit revisions
- * {@link /api/history/units/:unitId/revisions}
+ * {@link /api/v1/history/units/:unitId/revisions}
  */
 export function getApiHistoryUnitsByUnitIdRevisions<ThrowOnError extends boolean = true>(
 	options: Options<GetApiHistoryUnitsByUnitIdRevisionsOptions, ThrowOnError>,
@@ -4269,14 +4275,14 @@ export function getApiHistoryUnitsByUnitIdRevisions<ThrowOnError extends boolean
 
 	return request({
 		method: "GET",
-		url: "/api/history/units/{unitId}/revisions",
+		url: "/api/v1/history/units/{unitId}/revisions",
 		...config,
 	}) as Promise<RequestResult<GetApiHistoryUnitsByUnitIdRevisionsResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Get Unit revision
- * {@link /api/history/unit-revisions/:revisionId}
+ * {@link /api/v1/history/unit-revisions/:revisionId}
  */
 export function getApiHistoryUnitRevisionsByRevisionId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiHistoryUnitRevisionsByRevisionIdOptions, ThrowOnError>,
@@ -4285,14 +4291,14 @@ export function getApiHistoryUnitRevisionsByRevisionId<ThrowOnError extends bool
 
 	return request({
 		method: "GET",
-		url: "/api/history/unit-revisions/{revisionId}",
+		url: "/api/v1/history/unit-revisions/{revisionId}",
 		...config,
 	}) as Promise<RequestResult<GetApiHistoryUnitRevisionsByRevisionIdResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Compare Unit revisions
- * {@link /api/history/units/:unitId/compare}
+ * {@link /api/v1/history/units/:unitId/compare}
  */
 export function getApiHistoryUnitsByUnitIdCompare<ThrowOnError extends boolean = true>(
 	options: Options<GetApiHistoryUnitsByUnitIdCompareOptions, ThrowOnError>,
@@ -4301,14 +4307,14 @@ export function getApiHistoryUnitsByUnitIdCompare<ThrowOnError extends boolean =
 
 	return request({
 		method: "GET",
-		url: "/api/history/units/{unitId}/compare",
+		url: "/api/v1/history/units/{unitId}/compare",
 		...config,
 	}) as Promise<RequestResult<GetApiHistoryUnitsByUnitIdCompareResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Restore Unit revision
- * {@link /api/history/units/:unitId/revisions/:revisionId/restore}
+ * {@link /api/v1/history/units/:unitId/revisions/:revisionId/restore}
  */
 export function postApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestore<
 	ThrowOnError extends boolean = true,
@@ -4321,7 +4327,7 @@ export function postApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestore<
 
 	return request({
 		method: "POST",
-		url: "/api/history/units/{unitId}/revisions/{revisionId}/restore",
+		url: "/api/v1/history/units/{unitId}/revisions/{revisionId}/restore",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4337,7 +4343,7 @@ export function postApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestore<
 
 /**
  * @summary Undo Unit revision
- * {@link /api/history/units/:unitId/revisions/:revisionId/undo}
+ * {@link /api/v1/history/units/:unitId/revisions/:revisionId/undo}
  */
 export function postApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndo<
 	ThrowOnError extends boolean = true,
@@ -4350,7 +4356,7 @@ export function postApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndo<
 
 	return request({
 		method: "POST",
-		url: "/api/history/units/{unitId}/revisions/{revisionId}/undo",
+		url: "/api/v1/history/units/{unitId}/revisions/{revisionId}/undo",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4363,7 +4369,7 @@ export function postApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndo<
 
 /**
  * @summary Update revision visibility
- * {@link /api/history/unit-revisions/:revisionId/visibility}
+ * {@link /api/v1/history/unit-revisions/:revisionId/visibility}
  */
 export function patchApiHistoryUnitRevisionsByRevisionIdVisibility<
 	ThrowOnError extends boolean = true,
@@ -4376,7 +4382,7 @@ export function patchApiHistoryUnitRevisionsByRevisionIdVisibility<
 
 	return request({
 		method: "PATCH",
-		url: "/api/history/unit-revisions/{revisionId}/visibility",
+		url: "/api/v1/history/unit-revisions/{revisionId}/visibility",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4389,21 +4395,21 @@ export function patchApiHistoryUnitRevisionsByRevisionIdVisibility<
 
 /**
  * @summary List recent changes
- * {@link /api/history/recent-changes}
+ * {@link /api/v1/history/recent-changes}
  */
 export function getApiHistoryRecentChanges<ThrowOnError extends boolean = true>(
 	options: Options<GetApiHistoryRecentChangesOptions, ThrowOnError> = {},
 ): Promise<RequestResult<GetApiHistoryRecentChangesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/history/recent-changes", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/history/recent-changes", ...config }) as Promise<
 		RequestResult<GetApiHistoryRecentChangesResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary List profile contributions
- * {@link /api/history/contributions/:profileId}
+ * {@link /api/v1/history/contributions/:profileId}
  */
 export function getApiHistoryContributionsByProfileId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiHistoryContributionsByProfileIdOptions, ThrowOnError>,
@@ -4412,28 +4418,28 @@ export function getApiHistoryContributionsByProfileId<ThrowOnError extends boole
 
 	return request({
 		method: "GET",
-		url: "/api/history/contributions/{profileId}",
+		url: "/api/v1/history/contributions/{profileId}",
 		...config,
 	}) as Promise<RequestResult<GetApiHistoryContributionsByProfileIdResponses, ThrowOnError>>;
 }
 
 /**
  * @summary List revision change tags
- * {@link /api/history/change-tags}
+ * {@link /api/v1/history/change-tags}
  */
 export function getApiHistoryChangeTags<ThrowOnError extends boolean = true>(
 	options: Options<GetApiHistoryChangeTagsOptions, ThrowOnError> = {},
 ): Promise<RequestResult<GetApiHistoryChangeTagsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/history/change-tags", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/history/change-tags", ...config }) as Promise<
 		RequestResult<GetApiHistoryChangeTagsResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary List entity entries
- * {@link /api/entities}
+ * {@link /api/v1/entities}
  */
 export function getApiEntities<ThrowOnError extends boolean = true>(
 	options: Options<GetApiEntitiesOptions, ThrowOnError> = {},
@@ -4442,7 +4448,7 @@ export function getApiEntities<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "GET",
-		url: "/api/entities",
+		url: "/api/v1/entities",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4453,7 +4459,7 @@ export function getApiEntities<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Create entity entry
- * {@link /api/entities}
+ * {@link /api/v1/entities}
  */
 export function postApiEntities<ThrowOnError extends boolean = true>(
 	options: Options<PostApiEntitiesOptions, ThrowOnError>,
@@ -4462,7 +4468,7 @@ export function postApiEntities<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "POST",
-		url: "/api/entities",
+		url: "/api/v1/entities",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4473,21 +4479,21 @@ export function postApiEntities<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Get entity entry
- * {@link /api/entities/:unitId}
+ * {@link /api/v1/entities/:unitId}
  */
 export function getApiEntitiesByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiEntitiesByUnitIdOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiEntitiesByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/entities/{unitId}", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/entities/{unitId}", ...config }) as Promise<
 		RequestResult<GetApiEntitiesByUnitIdResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Create or replace entity localization
- * {@link /api/entities/:unitId/localizations/:language}
+ * {@link /api/v1/entities/:unitId/localizations/:language}
  */
 export function putApiEntitiesByUnitIdLocalizationsByLanguage<ThrowOnError extends boolean = true>(
 	options: Options<PutApiEntitiesByUnitIdLocalizationsByLanguageOptions, ThrowOnError>,
@@ -4496,7 +4502,7 @@ export function putApiEntitiesByUnitIdLocalizationsByLanguage<ThrowOnError exten
 
 	return request({
 		method: "PUT",
-		url: "/api/entities/{unitId}/localizations/{language}",
+		url: "/api/v1/entities/{unitId}/localizations/{language}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4509,21 +4515,21 @@ export function putApiEntitiesByUnitIdLocalizationsByLanguage<ThrowOnError exten
 
 /**
  * @summary List tags
- * {@link /api/tags}
+ * {@link /api/v1/tags}
  */
 export function getApiTags<ThrowOnError extends boolean = true>(
 	options: Options<GetApiTagsOptions, ThrowOnError> = {},
 ): Promise<RequestResult<GetApiTagsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/tags", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/tags", ...config }) as Promise<
 		RequestResult<GetApiTagsResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Create tag
- * {@link /api/tags}
+ * {@link /api/v1/tags}
  */
 export function postApiTags<ThrowOnError extends boolean = true>(
 	options: Options<PostApiTagsOptions, ThrowOnError>,
@@ -4532,7 +4538,7 @@ export function postApiTags<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "POST",
-		url: "/api/tags",
+		url: "/api/v1/tags",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4543,21 +4549,21 @@ export function postApiTags<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Get tag detail
- * {@link /api/tags/:tagId}
+ * {@link /api/v1/tags/:tagId}
  */
 export function getApiTagsByTagId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiTagsByTagIdOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiTagsByTagIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/tags/{tagId}", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/tags/{tagId}", ...config }) as Promise<
 		RequestResult<GetApiTagsByTagIdResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Create or replace tag localization
- * {@link /api/tags/:tagId/localizations/:language}
+ * {@link /api/v1/tags/:tagId/localizations/:language}
  */
 export function putApiTagsByTagIdLocalizationsByLanguage<ThrowOnError extends boolean = true>(
 	options: Options<PutApiTagsByTagIdLocalizationsByLanguageOptions, ThrowOnError>,
@@ -4566,7 +4572,7 @@ export function putApiTagsByTagIdLocalizationsByLanguage<ThrowOnError extends bo
 
 	return request({
 		method: "PUT",
-		url: "/api/tags/{tagId}/localizations/{language}",
+		url: "/api/v1/tags/{tagId}/localizations/{language}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4577,7 +4583,7 @@ export function putApiTagsByTagIdLocalizationsByLanguage<ThrowOnError extends bo
 
 /**
  * @summary List Unit aliases
- * {@link /api/units/:type/:unitId/aliases}
+ * {@link /api/v1/units/:type/:unitId/aliases}
  */
 export function getApiUnitsByTypeByUnitIdAliases<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByTypeByUnitIdAliasesOptions, ThrowOnError>,
@@ -4586,7 +4592,7 @@ export function getApiUnitsByTypeByUnitIdAliases<ThrowOnError extends boolean = 
 
 	return request({
 		method: "GET",
-		url: "/api/units/{type}/{unitId}/aliases",
+		url: "/api/v1/units/{type}/{unitId}/aliases",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4597,7 +4603,7 @@ export function getApiUnitsByTypeByUnitIdAliases<ThrowOnError extends boolean = 
 
 /**
  * @summary Add Unit alias
- * {@link /api/units/:type/:unitId/aliases}
+ * {@link /api/v1/units/:type/:unitId/aliases}
  */
 export function postApiUnitsByTypeByUnitIdAliases<ThrowOnError extends boolean = true>(
 	options: Options<PostApiUnitsByTypeByUnitIdAliasesOptions, ThrowOnError>,
@@ -4606,7 +4612,7 @@ export function postApiUnitsByTypeByUnitIdAliases<ThrowOnError extends boolean =
 
 	return request({
 		method: "POST",
-		url: "/api/units/{type}/{unitId}/aliases",
+		url: "/api/v1/units/{type}/{unitId}/aliases",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4617,7 +4623,7 @@ export function postApiUnitsByTypeByUnitIdAliases<ThrowOnError extends boolean =
 
 /**
  * @summary Delete Unit alias
- * {@link /api/units/:type/:unitId/aliases/:aliasId}
+ * {@link /api/v1/units/:type/:unitId/aliases/:aliasId}
  */
 export function deleteApiUnitsByTypeByUnitIdAliasesByAliasId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdOptions, ThrowOnError>,
@@ -4626,7 +4632,7 @@ export function deleteApiUnitsByTypeByUnitIdAliasesByAliasId<ThrowOnError extend
 
 	return request({
 		method: "DELETE",
-		url: "/api/units/{type}/{unitId}/aliases/{aliasId}",
+		url: "/api/v1/units/{type}/{unitId}/aliases/{aliasId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4639,7 +4645,7 @@ export function deleteApiUnitsByTypeByUnitIdAliasesByAliasId<ThrowOnError extend
 
 /**
  * @summary Vote on Unit alias
- * {@link /api/units/:type/:unitId/aliases/:aliasId/vote}
+ * {@link /api/v1/units/:type/:unitId/aliases/:aliasId/vote}
  */
 export function putApiUnitsByTypeByUnitIdAliasesByAliasIdVote<ThrowOnError extends boolean = true>(
 	options: Options<PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions, ThrowOnError>,
@@ -4648,7 +4654,7 @@ export function putApiUnitsByTypeByUnitIdAliasesByAliasIdVote<ThrowOnError exten
 
 	return request({
 		method: "PUT",
-		url: "/api/units/{type}/{unitId}/aliases/{aliasId}/vote",
+		url: "/api/v1/units/{type}/{unitId}/aliases/{aliasId}/vote",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4661,7 +4667,7 @@ export function putApiUnitsByTypeByUnitIdAliasesByAliasIdVote<ThrowOnError exten
 
 /**
  * @summary Remove Unit alias vote
- * {@link /api/units/:type/:unitId/aliases/:aliasId/vote}
+ * {@link /api/v1/units/:type/:unitId/aliases/:aliasId/vote}
  */
 export function deleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote<
 	ThrowOnError extends boolean = true,
@@ -4672,7 +4678,7 @@ export function deleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote<
 
 	return request({
 		method: "DELETE",
-		url: "/api/units/{type}/{unitId}/aliases/{aliasId}/vote",
+		url: "/api/v1/units/{type}/{unitId}/aliases/{aliasId}/vote",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4685,7 +4691,7 @@ export function deleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote<
 
 /**
  * @summary Add Unit credit attribution
- * {@link /api/units/:type/:unitId/credit-attributions}
+ * {@link /api/v1/units/:type/:unitId/credit-attributions}
  */
 export function postApiUnitsByTypeByUnitIdCreditAttributions<ThrowOnError extends boolean = true>(
 	options: Options<PostApiUnitsByTypeByUnitIdCreditAttributionsOptions, ThrowOnError>,
@@ -4694,7 +4700,7 @@ export function postApiUnitsByTypeByUnitIdCreditAttributions<ThrowOnError extend
 
 	return request({
 		method: "POST",
-		url: "/api/units/{type}/{unitId}/credit-attributions",
+		url: "/api/v1/units/{type}/{unitId}/credit-attributions",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4707,7 +4713,7 @@ export function postApiUnitsByTypeByUnitIdCreditAttributions<ThrowOnError extend
 
 /**
  * @summary Remove Unit credit attribution
- * {@link /api/units/:type/:unitId/credit-attributions/:associationId}
+ * {@link /api/v1/units/:type/:unitId/credit-attributions/:associationId}
  */
 export function deleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId<
 	ThrowOnError extends boolean = true,
@@ -4726,7 +4732,7 @@ export function deleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId<
 
 	return request({
 		method: "DELETE",
-		url: "/api/units/{type}/{unitId}/credit-attributions/{associationId}",
+		url: "/api/v1/units/{type}/{unitId}/credit-attributions/{associationId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4742,7 +4748,7 @@ export function deleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId<
 
 /**
  * @summary Add Unit subject association
- * {@link /api/units/:type/:unitId/subject-associations}
+ * {@link /api/v1/units/:type/:unitId/subject-associations}
  */
 export function postApiUnitsByTypeByUnitIdSubjectAssociations<ThrowOnError extends boolean = true>(
 	options: Options<PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions, ThrowOnError>,
@@ -4751,7 +4757,7 @@ export function postApiUnitsByTypeByUnitIdSubjectAssociations<ThrowOnError exten
 
 	return request({
 		method: "POST",
-		url: "/api/units/{type}/{unitId}/subject-associations",
+		url: "/api/v1/units/{type}/{unitId}/subject-associations",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4764,7 +4770,7 @@ export function postApiUnitsByTypeByUnitIdSubjectAssociations<ThrowOnError exten
 
 /**
  * @summary Remove Unit subject association
- * {@link /api/units/:type/:unitId/subject-associations/:associationId}
+ * {@link /api/v1/units/:type/:unitId/subject-associations/:associationId}
  */
 export function deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationId<
 	ThrowOnError extends boolean = true,
@@ -4783,7 +4789,7 @@ export function deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationId<
 
 	return request({
 		method: "DELETE",
-		url: "/api/units/{type}/{unitId}/subject-associations/{associationId}",
+		url: "/api/v1/units/{type}/{unitId}/subject-associations/{associationId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4799,7 +4805,7 @@ export function deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationId<
 
 /**
  * @summary Add unit source link
- * {@link /api/units/:type/:unitId/links}
+ * {@link /api/v1/units/:type/:unitId/links}
  */
 export function postApiUnitsByTypeByUnitIdLinks<ThrowOnError extends boolean = true>(
 	options: Options<PostApiUnitsByTypeByUnitIdLinksOptions, ThrowOnError>,
@@ -4808,7 +4814,7 @@ export function postApiUnitsByTypeByUnitIdLinks<ThrowOnError extends boolean = t
 
 	return request({
 		method: "POST",
-		url: "/api/units/{type}/{unitId}/links",
+		url: "/api/v1/units/{type}/{unitId}/links",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4819,7 +4825,7 @@ export function postApiUnitsByTypeByUnitIdLinks<ThrowOnError extends boolean = t
 
 /**
  * @summary Remove unit source link
- * {@link /api/units/:type/:unitId/links/:linkId}
+ * {@link /api/v1/units/:type/:unitId/links/:linkId}
  */
 export function deleteApiUnitsByTypeByUnitIdLinksByLinkId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiUnitsByTypeByUnitIdLinksByLinkIdOptions, ThrowOnError>,
@@ -4828,7 +4834,7 @@ export function deleteApiUnitsByTypeByUnitIdLinksByLinkId<ThrowOnError extends b
 
 	return request({
 		method: "DELETE",
-		url: "/api/units/{type}/{unitId}/links/{linkId}",
+		url: "/api/v1/units/{type}/{unitId}/links/{linkId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4839,7 +4845,7 @@ export function deleteApiUnitsByTypeByUnitIdLinksByLinkId<ThrowOnError extends b
 
 /**
  * @summary Tag unit
- * {@link /api/units/:type/:unitId/tags/:tagId}
+ * {@link /api/v1/units/:type/:unitId/tags/:tagId}
  */
 export function putApiUnitsByTypeByUnitIdTagsByTagId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiUnitsByTypeByUnitIdTagsByTagIdOptions, ThrowOnError>,
@@ -4848,7 +4854,7 @@ export function putApiUnitsByTypeByUnitIdTagsByTagId<ThrowOnError extends boolea
 
 	return request({
 		method: "PUT",
-		url: "/api/units/{type}/{unitId}/tags/{tagId}",
+		url: "/api/v1/units/{type}/{unitId}/tags/{tagId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4859,7 +4865,7 @@ export function putApiUnitsByTypeByUnitIdTagsByTagId<ThrowOnError extends boolea
 
 /**
  * @summary Update Unit tag curation
- * {@link /api/units/:type/:unitId/tags/:tagId}
+ * {@link /api/v1/units/:type/:unitId/tags/:tagId}
  */
 export function patchApiUnitsByTypeByUnitIdTagsByTagId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiUnitsByTypeByUnitIdTagsByTagIdOptions, ThrowOnError>,
@@ -4868,7 +4874,7 @@ export function patchApiUnitsByTypeByUnitIdTagsByTagId<ThrowOnError extends bool
 
 	return request({
 		method: "PATCH",
-		url: "/api/units/{type}/{unitId}/tags/{tagId}",
+		url: "/api/v1/units/{type}/{unitId}/tags/{tagId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4879,7 +4885,7 @@ export function patchApiUnitsByTypeByUnitIdTagsByTagId<ThrowOnError extends bool
 
 /**
  * @summary Remove Unit tag
- * {@link /api/units/:type/:unitId/tags/:tagId}
+ * {@link /api/v1/units/:type/:unitId/tags/:tagId}
  */
 export function deleteApiUnitsByTypeByUnitIdTagsByTagId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiUnitsByTypeByUnitIdTagsByTagIdOptions, ThrowOnError>,
@@ -4888,7 +4894,7 @@ export function deleteApiUnitsByTypeByUnitIdTagsByTagId<ThrowOnError extends boo
 
 	return request({
 		method: "DELETE",
-		url: "/api/units/{type}/{unitId}/tags/{tagId}",
+		url: "/api/v1/units/{type}/{unitId}/tags/{tagId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4899,7 +4905,7 @@ export function deleteApiUnitsByTypeByUnitIdTagsByTagId<ThrowOnError extends boo
 
 /**
  * @summary Vote on Unit tag
- * {@link /api/units/:type/:unitId/tags/:tagId/vote}
+ * {@link /api/v1/units/:type/:unitId/tags/:tagId/vote}
  */
 export function putApiUnitsByTypeByUnitIdTagsByTagIdVote<ThrowOnError extends boolean = true>(
 	options: Options<PutApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions, ThrowOnError>,
@@ -4908,7 +4914,7 @@ export function putApiUnitsByTypeByUnitIdTagsByTagIdVote<ThrowOnError extends bo
 
 	return request({
 		method: "PUT",
-		url: "/api/units/{type}/{unitId}/tags/{tagId}/vote",
+		url: "/api/v1/units/{type}/{unitId}/tags/{tagId}/vote",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4919,7 +4925,7 @@ export function putApiUnitsByTypeByUnitIdTagsByTagIdVote<ThrowOnError extends bo
 
 /**
  * @summary Remove Unit tag vote
- * {@link /api/units/:type/:unitId/tags/:tagId/vote}
+ * {@link /api/v1/units/:type/:unitId/tags/:tagId/vote}
  */
 export function deleteApiUnitsByTypeByUnitIdTagsByTagIdVote<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions, ThrowOnError>,
@@ -4928,7 +4934,7 @@ export function deleteApiUnitsByTypeByUnitIdTagsByTagIdVote<ThrowOnError extends
 
 	return request({
 		method: "DELETE",
-		url: "/api/units/{type}/{unitId}/tags/{tagId}/vote",
+		url: "/api/v1/units/{type}/{unitId}/tags/{tagId}/vote",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -4940,33 +4946,8 @@ export function deleteApiUnitsByTypeByUnitIdTagsByTagIdVote<ThrowOnError extends
 }
 
 /**
- * @summary Attach unit version (legacy)
- * {@link /api/units/:type/:unitId/version-of/:canonicalId}
- * @deprecated
- */
-export function putApiUnitsByTypeByUnitIdVersionOfByCanonicalId<
-	ThrowOnError extends boolean = true,
->(
-	options: Options<PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "PUT",
-		url: "/api/units/{type}/{unitId}/version-of/{canonicalId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdResponses, ThrowOnError>
-	>;
-}
-
-/**
  * @summary List Unit Content Structures
- * {@link /api/units/by-id/:unitId/content-structures}
+ * {@link /api/v1/units/by-id/:unitId/content-structures}
  */
 export function getApiUnitsByIdByUnitIdContentStructures<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByIdByUnitIdContentStructuresOptions, ThrowOnError>,
@@ -4975,14 +4956,14 @@ export function getApiUnitsByIdByUnitIdContentStructures<ThrowOnError extends bo
 
 	return request({
 		method: "GET",
-		url: "/api/units/by-id/{unitId}/content-structures",
+		url: "/api/v1/units/by-id/{unitId}/content-structures",
 		...config,
 	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdContentStructuresResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Create Content Structure
- * {@link /api/units/by-id/:unitId/content-structures}
+ * {@link /api/v1/units/by-id/:unitId/content-structures}
  */
 export function postApiUnitsByIdByUnitIdContentStructures<ThrowOnError extends boolean = true>(
 	options: Options<PostApiUnitsByIdByUnitIdContentStructuresOptions, ThrowOnError>,
@@ -4991,7 +4972,7 @@ export function postApiUnitsByIdByUnitIdContentStructures<ThrowOnError extends b
 
 	return request({
 		method: "POST",
-		url: "/api/units/by-id/{unitId}/content-structures",
+		url: "/api/v1/units/by-id/{unitId}/content-structures",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PostApiUnitsByIdByUnitIdContentStructuresResponses, ThrowOnError>>;
@@ -4999,7 +4980,7 @@ export function postApiUnitsByIdByUnitIdContentStructures<ThrowOnError extends b
 
 /**
  * @summary Get Content Structure
- * {@link /api/units/by-id/:unitId/content-structures/:structureId}
+ * {@link /api/v1/units/by-id/:unitId/content-structures/:structureId}
  */
 export function getApiUnitsByIdByUnitIdContentStructuresByStructureId<
 	ThrowOnError extends boolean = true,
@@ -5012,7 +4993,7 @@ export function getApiUnitsByIdByUnitIdContentStructuresByStructureId<
 
 	return request({
 		method: "GET",
-		url: "/api/units/by-id/{unitId}/content-structures/{structureId}",
+		url: "/api/v1/units/by-id/{unitId}/content-structures/{structureId}",
 		...config,
 	}) as Promise<
 		RequestResult<GetApiUnitsByIdByUnitIdContentStructuresByStructureIdResponses, ThrowOnError>
@@ -5021,7 +5002,7 @@ export function getApiUnitsByIdByUnitIdContentStructuresByStructureId<
 
 /**
  * @summary Delete Content Structure
- * {@link /api/units/by-id/:unitId/content-structures/:structureId}
+ * {@link /api/v1/units/by-id/:unitId/content-structures/:structureId}
  */
 export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureId<
 	ThrowOnError extends boolean = true,
@@ -5034,7 +5015,7 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureId<
 
 	return request({
 		method: "DELETE",
-		url: "/api/units/by-id/{unitId}/content-structures/{structureId}",
+		url: "/api/v1/units/by-id/{unitId}/content-structures/{structureId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -5047,7 +5028,7 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureId<
 
 /**
  * @summary List Content Structure revisions
- * {@link /api/units/by-id/:unitId/content-structures/:structureId/revisions}
+ * {@link /api/v1/units/by-id/:unitId/content-structures/:structureId/revisions}
  */
 export function getApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisions<
 	ThrowOnError extends boolean = true,
@@ -5066,7 +5047,7 @@ export function getApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisions<
 
 	return request({
 		method: "GET",
-		url: "/api/units/by-id/{unitId}/content-structures/{structureId}/revisions",
+		url: "/api/v1/units/by-id/{unitId}/content-structures/{structureId}/revisions",
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -5078,7 +5059,7 @@ export function getApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisions<
 
 /**
  * @summary Restore a Content Structure revision
- * {@link /api/units/by-id/:unitId/content-structures/:structureId/revisions/:revisionId/restore}
+ * {@link /api/v1/units/by-id/:unitId/content-structures/:structureId/revisions/:revisionId/restore}
  */
 export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestore<
 	ThrowOnError extends boolean = true,
@@ -5097,7 +5078,7 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsB
 
 	return request({
 		method: "POST",
-		url: "/api/units/by-id/{unitId}/content-structures/{structureId}/revisions/{revisionId}/restore",
+		url: "/api/v1/units/by-id/{unitId}/content-structures/{structureId}/revisions/{revisionId}/restore",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -5110,7 +5091,7 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsB
 
 /**
  * @summary Insert Content Structure node
- * {@link /api/units/by-id/:unitId/content-structures/:structureId/nodes}
+ * {@link /api/v1/units/by-id/:unitId/content-structures/:structureId/nodes}
  */
 export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes<
 	ThrowOnError extends boolean = true,
@@ -5129,7 +5110,7 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes<
 
 	return request({
 		method: "POST",
-		url: "/api/units/by-id/{unitId}/content-structures/{structureId}/nodes",
+		url: "/api/v1/units/by-id/{unitId}/content-structures/{structureId}/nodes",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -5142,7 +5123,7 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes<
 
 /**
  * @summary Update Content Structure node
- * {@link /api/units/by-id/:unitId/content-structures/:structureId/nodes/:nodeId}
+ * {@link /api/v1/units/by-id/:unitId/content-structures/:structureId/nodes/:nodeId}
  */
 export function patchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId<
 	ThrowOnError extends boolean = true,
@@ -5161,7 +5142,7 @@ export function patchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNo
 
 	return request({
 		method: "PATCH",
-		url: "/api/units/by-id/{unitId}/content-structures/{structureId}/nodes/{nodeId}",
+		url: "/api/v1/units/by-id/{unitId}/content-structures/{structureId}/nodes/{nodeId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -5174,7 +5155,7 @@ export function patchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNo
 
 /**
  * @summary Delete Content Structure node subtree
- * {@link /api/units/by-id/:unitId/content-structures/:structureId/nodes/:nodeId}
+ * {@link /api/v1/units/by-id/:unitId/content-structures/:structureId/nodes/:nodeId}
  */
 export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId<
 	ThrowOnError extends boolean = true,
@@ -5193,7 +5174,7 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByN
 
 	return request({
 		method: "DELETE",
-		url: "/api/units/by-id/{unitId}/content-structures/{structureId}/nodes/{nodeId}",
+		url: "/api/v1/units/by-id/{unitId}/content-structures/{structureId}/nodes/{nodeId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -5206,7 +5187,7 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByN
 
 /**
  * @summary List book Content Structure nodes
- * {@link /api/units/book/:unitId/content-structure/nodes}
+ * {@link /api/v1/units/book/:unitId/content-structure/nodes}
  */
 export function getApiUnitsBookByUnitIdContentStructureNodes<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsBookByUnitIdContentStructureNodesOptions, ThrowOnError>,
@@ -5215,7 +5196,7 @@ export function getApiUnitsBookByUnitIdContentStructureNodes<ThrowOnError extend
 
 	return request({
 		method: "GET",
-		url: "/api/units/book/{unitId}/content-structure/nodes",
+		url: "/api/v1/units/book/{unitId}/content-structure/nodes",
 		...config,
 	}) as Promise<
 		RequestResult<GetApiUnitsBookByUnitIdContentStructureNodesResponses, ThrowOnError>
@@ -5224,7 +5205,7 @@ export function getApiUnitsBookByUnitIdContentStructureNodes<ThrowOnError extend
 
 /**
  * @summary Save a complete Book Content Structure draft
- * {@link /api/units/book/:unitId/content-structure}
+ * {@link /api/v1/units/book/:unitId/content-structure}
  */
 export function putApiUnitsBookByUnitIdContentStructure<ThrowOnError extends boolean = true>(
 	options: Options<PutApiUnitsBookByUnitIdContentStructureOptions, ThrowOnError>,
@@ -5233,7 +5214,7 @@ export function putApiUnitsBookByUnitIdContentStructure<ThrowOnError extends boo
 
 	return request({
 		method: "PUT",
-		url: "/api/units/book/{unitId}/content-structure",
+		url: "/api/v1/units/book/{unitId}/content-structure",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5244,7 +5225,7 @@ export function putApiUnitsBookByUnitIdContentStructure<ThrowOnError extends boo
 
 /**
  * @summary List Media Content Structure nodes
- * {@link /api/units/media/:unitId/content-structure/nodes}
+ * {@link /api/v1/units/media/:unitId/content-structure/nodes}
  */
 export function getApiUnitsMediaByUnitIdContentStructureNodes<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsMediaByUnitIdContentStructureNodesOptions, ThrowOnError>,
@@ -5253,7 +5234,7 @@ export function getApiUnitsMediaByUnitIdContentStructureNodes<ThrowOnError exten
 
 	return request({
 		method: "GET",
-		url: "/api/units/media/{unitId}/content-structure/nodes",
+		url: "/api/v1/units/media/{unitId}/content-structure/nodes",
 		...config,
 	}) as Promise<
 		RequestResult<GetApiUnitsMediaByUnitIdContentStructureNodesResponses, ThrowOnError>
@@ -5262,7 +5243,7 @@ export function getApiUnitsMediaByUnitIdContentStructureNodes<ThrowOnError exten
 
 /**
  * @summary Save a complete Media Content Structure draft
- * {@link /api/units/media/:unitId/content-structure}
+ * {@link /api/v1/units/media/:unitId/content-structure}
  */
 export function putApiUnitsMediaByUnitIdContentStructure<ThrowOnError extends boolean = true>(
 	options: Options<PutApiUnitsMediaByUnitIdContentStructureOptions, ThrowOnError>,
@@ -5271,7 +5252,7 @@ export function putApiUnitsMediaByUnitIdContentStructure<ThrowOnError extends bo
 
 	return request({
 		method: "PUT",
-		url: "/api/units/media/{unitId}/content-structure",
+		url: "/api/v1/units/media/{unitId}/content-structure",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5282,21 +5263,21 @@ export function putApiUnitsMediaByUnitIdContentStructure<ThrowOnError extends bo
 
 /**
  * @summary Read chapter
- * {@link /api/chapters/:chapterId}
+ * {@link /api/v1/chapters/:chapterId}
  */
 export function getApiChaptersByChapterId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiChaptersByChapterIdOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiChaptersByChapterIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/chapters/{chapterId}", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/chapters/{chapterId}", ...config }) as Promise<
 		RequestResult<GetApiChaptersByChapterIdResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Create or replace chapter content
- * {@link /api/chapters/:chapterId/localizations/:language/content}
+ * {@link /api/v1/chapters/:chapterId/localizations/:language/content}
  */
 export function putApiChaptersByChapterIdLocalizationsByLanguageContent<
 	ThrowOnError extends boolean = true,
@@ -5309,7 +5290,7 @@ export function putApiChaptersByChapterIdLocalizationsByLanguageContent<
 
 	return request({
 		method: "PUT",
-		url: "/api/chapters/{chapterId}/localizations/{language}/content",
+		url: "/api/v1/chapters/{chapterId}/localizations/{language}/content",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5325,7 +5306,7 @@ export function putApiChaptersByChapterIdLocalizationsByLanguageContent<
 
 /**
  * @summary List current profile progress
- * {@link /api/progress}
+ * {@link /api/v1/progress}
  */
 export function getApiProgress<ThrowOnError extends boolean = true>(
 	options: Options<GetApiProgressOptions, ThrowOnError> = {},
@@ -5334,7 +5315,7 @@ export function getApiProgress<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "GET",
-		url: "/api/progress",
+		url: "/api/v1/progress",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5345,7 +5326,7 @@ export function getApiProgress<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Search current profile progress with a Search Feature state
- * {@link /api/progress/search}
+ * {@link /api/v1/progress/search}
  */
 export function postApiProgressSearch<ThrowOnError extends boolean = true>(
 	options: Options<PostApiProgressSearchOptions, ThrowOnError>,
@@ -5354,7 +5335,7 @@ export function postApiProgressSearch<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "POST",
-		url: "/api/progress/search",
+		url: "/api/v1/progress/search",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5365,7 +5346,7 @@ export function postApiProgressSearch<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Get progress state
- * {@link /api/progress/:unitId}
+ * {@link /api/v1/progress/:unitId}
  */
 export function getApiProgressByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiProgressByUnitIdOptions, ThrowOnError>,
@@ -5374,7 +5355,7 @@ export function getApiProgressByUnitId<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "GET",
-		url: "/api/progress/{unitId}",
+		url: "/api/v1/progress/{unitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5385,7 +5366,7 @@ export function getApiProgressByUnitId<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Create or replace progress
- * {@link /api/progress/:unitId}
+ * {@link /api/v1/progress/:unitId}
  */
 export function putApiProgressByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiProgressByUnitIdOptions, ThrowOnError>,
@@ -5394,7 +5375,7 @@ export function putApiProgressByUnitId<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "PUT",
-		url: "/api/progress/{unitId}",
+		url: "/api/v1/progress/{unitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5405,7 +5386,7 @@ export function putApiProgressByUnitId<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Delete progress
- * {@link /api/progress/:unitId}
+ * {@link /api/v1/progress/:unitId}
  */
 export function deleteApiProgressByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiProgressByUnitIdOptions, ThrowOnError>,
@@ -5414,7 +5395,7 @@ export function deleteApiProgressByUnitId<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "DELETE",
-		url: "/api/progress/{unitId}",
+		url: "/api/v1/progress/{unitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5425,7 +5406,7 @@ export function deleteApiProgressByUnitId<ThrowOnError extends boolean = true>(
 
 /**
  * @summary List Progress journal entries
- * {@link /api/progress/:unitId/entries}
+ * {@link /api/v1/progress/:unitId/entries}
  */
 export function getApiProgressByUnitIdEntries<ThrowOnError extends boolean = true>(
 	options: Options<GetApiProgressByUnitIdEntriesOptions, ThrowOnError>,
@@ -5434,7 +5415,7 @@ export function getApiProgressByUnitIdEntries<ThrowOnError extends boolean = tru
 
 	return request({
 		method: "GET",
-		url: "/api/progress/{unitId}/entries",
+		url: "/api/v1/progress/{unitId}/entries",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5445,7 +5426,7 @@ export function getApiProgressByUnitIdEntries<ThrowOnError extends boolean = tru
 
 /**
  * @summary Create a Progress journal entry
- * {@link /api/progress/:unitId/entries}
+ * {@link /api/v1/progress/:unitId/entries}
  */
 export function postApiProgressByUnitIdEntries<ThrowOnError extends boolean = true>(
 	options: Options<PostApiProgressByUnitIdEntriesOptions, ThrowOnError>,
@@ -5454,7 +5435,7 @@ export function postApiProgressByUnitIdEntries<ThrowOnError extends boolean = tr
 
 	return request({
 		method: "POST",
-		url: "/api/progress/{unitId}/entries",
+		url: "/api/v1/progress/{unitId}/entries",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5465,7 +5446,7 @@ export function postApiProgressByUnitIdEntries<ThrowOnError extends boolean = tr
 
 /**
  * @summary Replace a Progress journal entry
- * {@link /api/progress/:unitId/entries/:entryId}
+ * {@link /api/v1/progress/:unitId/entries/:entryId}
  */
 export function putApiProgressByUnitIdEntriesByEntryId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiProgressByUnitIdEntriesByEntryIdOptions, ThrowOnError>,
@@ -5474,7 +5455,7 @@ export function putApiProgressByUnitIdEntriesByEntryId<ThrowOnError extends bool
 
 	return request({
 		method: "PUT",
-		url: "/api/progress/{unitId}/entries/{entryId}",
+		url: "/api/v1/progress/{unitId}/entries/{entryId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5485,7 +5466,7 @@ export function putApiProgressByUnitIdEntriesByEntryId<ThrowOnError extends bool
 
 /**
  * @summary Delete a Progress journal entry
- * {@link /api/progress/:unitId/entries/:entryId}
+ * {@link /api/v1/progress/:unitId/entries/:entryId}
  */
 export function deleteApiProgressByUnitIdEntriesByEntryId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiProgressByUnitIdEntriesByEntryIdOptions, ThrowOnError>,
@@ -5494,7 +5475,7 @@ export function deleteApiProgressByUnitIdEntriesByEntryId<ThrowOnError extends b
 
 	return request({
 		method: "DELETE",
-		url: "/api/progress/{unitId}/entries/{entryId}",
+		url: "/api/v1/progress/{unitId}/entries/{entryId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5505,7 +5486,7 @@ export function deleteApiProgressByUnitIdEntriesByEntryId<ThrowOnError extends b
 
 /**
  * @summary Set a Progress journal entry as current
- * {@link /api/progress/:unitId/entries/:entryId/current}
+ * {@link /api/v1/progress/:unitId/entries/:entryId/current}
  */
 export function putApiProgressByUnitIdEntriesByEntryIdCurrent<ThrowOnError extends boolean = true>(
 	options: Options<PutApiProgressByUnitIdEntriesByEntryIdCurrentOptions, ThrowOnError>,
@@ -5514,7 +5495,7 @@ export function putApiProgressByUnitIdEntriesByEntryIdCurrent<ThrowOnError exten
 
 	return request({
 		method: "PUT",
-		url: "/api/progress/{unitId}/entries/{entryId}/current",
+		url: "/api/v1/progress/{unitId}/entries/{entryId}/current",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5527,7 +5508,7 @@ export function putApiProgressByUnitIdEntriesByEntryIdCurrent<ThrowOnError exten
 
 /**
  * @summary List completed Content Structure nodes
- * {@link /api/progress/:unitId/nodes}
+ * {@link /api/v1/progress/:unitId/nodes}
  */
 export function getApiProgressByUnitIdNodes<ThrowOnError extends boolean = true>(
 	options: Options<GetApiProgressByUnitIdNodesOptions, ThrowOnError>,
@@ -5536,7 +5517,7 @@ export function getApiProgressByUnitIdNodes<ThrowOnError extends boolean = true>
 
 	return request({
 		method: "GET",
-		url: "/api/progress/{unitId}/nodes",
+		url: "/api/v1/progress/{unitId}/nodes",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5547,7 +5528,7 @@ export function getApiProgressByUnitIdNodes<ThrowOnError extends boolean = true>
 
 /**
  * @summary Record a Book chapter read
- * {@link /api/progress/:unitId/nodes/:nodeId/read}
+ * {@link /api/v1/progress/:unitId/nodes/:nodeId/read}
  */
 export function postApiProgressByUnitIdNodesByNodeIdRead<ThrowOnError extends boolean = true>(
 	options: Options<PostApiProgressByUnitIdNodesByNodeIdReadOptions, ThrowOnError>,
@@ -5556,7 +5537,7 @@ export function postApiProgressByUnitIdNodesByNodeIdRead<ThrowOnError extends bo
 
 	return request({
 		method: "POST",
-		url: "/api/progress/{unitId}/nodes/{nodeId}/read",
+		url: "/api/v1/progress/{unitId}/nodes/{nodeId}/read",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5567,7 +5548,7 @@ export function postApiProgressByUnitIdNodesByNodeIdRead<ThrowOnError extends bo
 
 /**
  * @summary Complete current progress
- * {@link /api/progress/:unitId/complete}
+ * {@link /api/v1/progress/:unitId/complete}
  */
 export function postApiProgressByUnitIdComplete<ThrowOnError extends boolean = true>(
 	options: Options<PostApiProgressByUnitIdCompleteOptions, ThrowOnError>,
@@ -5576,7 +5557,7 @@ export function postApiProgressByUnitIdComplete<ThrowOnError extends boolean = t
 
 	return request({
 		method: "POST",
-		url: "/api/progress/{unitId}/complete",
+		url: "/api/v1/progress/{unitId}/complete",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5587,7 +5568,7 @@ export function postApiProgressByUnitIdComplete<ThrowOnError extends boolean = t
 
 /**
  * @summary Complete Content Structure node
- * {@link /api/progress/:unitId/nodes/:nodeId}
+ * {@link /api/v1/progress/:unitId/nodes/:nodeId}
  */
 export function putApiProgressByUnitIdNodesByNodeId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiProgressByUnitIdNodesByNodeIdOptions, ThrowOnError>,
@@ -5596,7 +5577,7 @@ export function putApiProgressByUnitIdNodesByNodeId<ThrowOnError extends boolean
 
 	return request({
 		method: "PUT",
-		url: "/api/progress/{unitId}/nodes/{nodeId}",
+		url: "/api/v1/progress/{unitId}/nodes/{nodeId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5607,7 +5588,7 @@ export function putApiProgressByUnitIdNodesByNodeId<ThrowOnError extends boolean
 
 /**
  * @summary Uncomplete Content Structure node
- * {@link /api/progress/:unitId/nodes/:nodeId}
+ * {@link /api/v1/progress/:unitId/nodes/:nodeId}
  */
 export function deleteApiProgressByUnitIdNodesByNodeId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiProgressByUnitIdNodesByNodeIdOptions, ThrowOnError>,
@@ -5616,7 +5597,7 @@ export function deleteApiProgressByUnitIdNodesByNodeId<ThrowOnError extends bool
 
 	return request({
 		method: "DELETE",
-		url: "/api/progress/{unitId}/nodes/{nodeId}",
+		url: "/api/v1/progress/{unitId}/nodes/{nodeId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5627,21 +5608,21 @@ export function deleteApiProgressByUnitIdNodesByNodeId<ThrowOnError extends bool
 
 /**
  * @summary List collections
- * {@link /api/collections}
+ * {@link /api/v1/collections}
  */
 export function getApiCollections<ThrowOnError extends boolean = true>(
 	options: Options<GetApiCollectionsOptions, ThrowOnError> = {},
 ): Promise<RequestResult<GetApiCollectionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/collections", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/collections", ...config }) as Promise<
 		RequestResult<GetApiCollectionsResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Create collection
- * {@link /api/collections}
+ * {@link /api/v1/collections}
  */
 export function postApiCollections<ThrowOnError extends boolean = true>(
 	options: Options<PostApiCollectionsOptions, ThrowOnError>,
@@ -5650,7 +5631,7 @@ export function postApiCollections<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "POST",
-		url: "/api/collections",
+		url: "/api/v1/collections",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5661,7 +5642,7 @@ export function postApiCollections<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Get Favorites collection
- * {@link /api/collections/favorites}
+ * {@link /api/v1/collections/favorites}
  */
 export function getApiCollectionsFavorites<ThrowOnError extends boolean = true>(
 	options: Options<GetApiCollectionsFavoritesOptions, ThrowOnError> = {},
@@ -5670,7 +5651,7 @@ export function getApiCollectionsFavorites<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "GET",
-		url: "/api/collections/favorites",
+		url: "/api/v1/collections/favorites",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5681,7 +5662,7 @@ export function getApiCollectionsFavorites<ThrowOnError extends boolean = true>(
 
 /**
  * @summary List hydrated collection content
- * {@link /api/collections/:collectionId/items}
+ * {@link /api/v1/collections/:collectionId/items}
  */
 export function getApiCollectionsByCollectionIdItems<ThrowOnError extends boolean = true>(
 	options: Options<GetApiCollectionsByCollectionIdItemsOptions, ThrowOnError>,
@@ -5690,28 +5671,30 @@ export function getApiCollectionsByCollectionIdItems<ThrowOnError extends boolea
 
 	return request({
 		method: "GET",
-		url: "/api/collections/{collectionId}/items",
+		url: "/api/v1/collections/{collectionId}/items",
 		...config,
 	}) as Promise<RequestResult<GetApiCollectionsByCollectionIdItemsResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Get collection
- * {@link /api/collections/:collectionId}
+ * {@link /api/v1/collections/:collectionId}
  */
 export function getApiCollectionsByCollectionId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiCollectionsByCollectionIdOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiCollectionsByCollectionIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/collections/{collectionId}", ...config }) as Promise<
-		RequestResult<GetApiCollectionsByCollectionIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/v1/collections/{collectionId}",
+		...config,
+	}) as Promise<RequestResult<GetApiCollectionsByCollectionIdResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Update collection
- * {@link /api/collections/:collectionId}
+ * {@link /api/v1/collections/:collectionId}
  */
 export function patchApiCollectionsByCollectionId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiCollectionsByCollectionIdOptions, ThrowOnError>,
@@ -5720,7 +5703,7 @@ export function patchApiCollectionsByCollectionId<ThrowOnError extends boolean =
 
 	return request({
 		method: "PATCH",
-		url: "/api/collections/{collectionId}",
+		url: "/api/v1/collections/{collectionId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5731,7 +5714,7 @@ export function patchApiCollectionsByCollectionId<ThrowOnError extends boolean =
 
 /**
  * @summary Add collection items atomically
- * {@link /api/collections/:collectionId/items/batch}
+ * {@link /api/v1/collections/:collectionId/items/batch}
  */
 export function postApiCollectionsByCollectionIdItemsBatch<ThrowOnError extends boolean = true>(
 	options: Options<PostApiCollectionsByCollectionIdItemsBatchOptions, ThrowOnError>,
@@ -5740,7 +5723,7 @@ export function postApiCollectionsByCollectionIdItemsBatch<ThrowOnError extends 
 
 	return request({
 		method: "POST",
-		url: "/api/collections/{collectionId}/items/batch",
+		url: "/api/v1/collections/{collectionId}/items/batch",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5751,7 +5734,7 @@ export function postApiCollectionsByCollectionIdItemsBatch<ThrowOnError extends 
 
 /**
  * @summary Move collection items atomically
- * {@link /api/collections/:collectionId/items/move}
+ * {@link /api/v1/collections/:collectionId/items/move}
  */
 export function postApiCollectionsByCollectionIdItemsMove<ThrowOnError extends boolean = true>(
 	options: Options<PostApiCollectionsByCollectionIdItemsMoveOptions, ThrowOnError>,
@@ -5760,7 +5743,7 @@ export function postApiCollectionsByCollectionIdItemsMove<ThrowOnError extends b
 
 	return request({
 		method: "POST",
-		url: "/api/collections/{collectionId}/items/move",
+		url: "/api/v1/collections/{collectionId}/items/move",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5771,7 +5754,7 @@ export function postApiCollectionsByCollectionIdItemsMove<ThrowOnError extends b
 
 /**
  * @summary Save collection item
- * {@link /api/collections/:collectionId/items/:targetId}
+ * {@link /api/v1/collections/:collectionId/items/:targetId}
  */
 export function putApiCollectionsByCollectionIdItemsByTargetId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiCollectionsByCollectionIdItemsByTargetIdOptions, ThrowOnError>,
@@ -5780,7 +5763,7 @@ export function putApiCollectionsByCollectionIdItemsByTargetId<ThrowOnError exte
 
 	return request({
 		method: "PUT",
-		url: "/api/collections/{collectionId}/items/{targetId}",
+		url: "/api/v1/collections/{collectionId}/items/{targetId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5793,7 +5776,7 @@ export function putApiCollectionsByCollectionIdItemsByTargetId<ThrowOnError exte
 
 /**
  * @summary Remove collection item
- * {@link /api/collections/:collectionId/items/:targetId}
+ * {@link /api/v1/collections/:collectionId/items/:targetId}
  */
 export function deleteApiCollectionsByCollectionIdItemsByTargetId<
 	ThrowOnError extends boolean = true,
@@ -5806,7 +5789,7 @@ export function deleteApiCollectionsByCollectionIdItemsByTargetId<
 
 	return request({
 		method: "DELETE",
-		url: "/api/collections/{collectionId}/items/{targetId}",
+		url: "/api/v1/collections/{collectionId}/items/{targetId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5819,7 +5802,7 @@ export function deleteApiCollectionsByCollectionIdItemsByTargetId<
 
 /**
  * @summary List Collection item revisions
- * {@link /api/collections/:collectionId/item-revisions}
+ * {@link /api/v1/collections/:collectionId/item-revisions}
  */
 export function getApiCollectionsByCollectionIdItemRevisions<ThrowOnError extends boolean = true>(
 	options: Options<GetApiCollectionsByCollectionIdItemRevisionsOptions, ThrowOnError>,
@@ -5828,7 +5811,7 @@ export function getApiCollectionsByCollectionIdItemRevisions<ThrowOnError extend
 
 	return request({
 		method: "GET",
-		url: "/api/collections/{collectionId}/item-revisions",
+		url: "/api/v1/collections/{collectionId}/item-revisions",
 		...config,
 	}) as Promise<
 		RequestResult<GetApiCollectionsByCollectionIdItemRevisionsResponses, ThrowOnError>
@@ -5837,7 +5820,7 @@ export function getApiCollectionsByCollectionIdItemRevisions<ThrowOnError extend
 
 /**
  * @summary Compare Collection item revisions
- * {@link /api/collections/:collectionId/item-revisions/compare}
+ * {@link /api/v1/collections/:collectionId/item-revisions/compare}
  */
 export function getApiCollectionsByCollectionIdItemRevisionsCompare<
 	ThrowOnError extends boolean = true,
@@ -5850,7 +5833,7 @@ export function getApiCollectionsByCollectionIdItemRevisionsCompare<
 
 	return request({
 		method: "GET",
-		url: "/api/collections/{collectionId}/item-revisions/compare",
+		url: "/api/v1/collections/{collectionId}/item-revisions/compare",
 		...config,
 	}) as Promise<
 		RequestResult<GetApiCollectionsByCollectionIdItemRevisionsCompareResponses, ThrowOnError>
@@ -5859,7 +5842,7 @@ export function getApiCollectionsByCollectionIdItemRevisionsCompare<
 
 /**
  * @summary Restore a Collection item revision
- * {@link /api/collections/:collectionId/item-revisions/:revisionId/restore}
+ * {@link /api/v1/collections/:collectionId/item-revisions/:revisionId/restore}
  */
 export function postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestore<
 	ThrowOnError extends boolean = true,
@@ -5878,7 +5861,7 @@ export function postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestore
 
 	return request({
 		method: "POST",
-		url: "/api/collections/{collectionId}/item-revisions/{revisionId}/restore",
+		url: "/api/v1/collections/{collectionId}/item-revisions/{revisionId}/restore",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -5891,7 +5874,7 @@ export function postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestore
 
 /**
  * @summary Favorite unit
- * {@link /api/collections/favorites/items/:targetId}
+ * {@link /api/v1/collections/favorites/items/:targetId}
  */
 export function putApiCollectionsFavoritesItemsByTargetId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiCollectionsFavoritesItemsByTargetIdOptions, ThrowOnError>,
@@ -5900,7 +5883,7 @@ export function putApiCollectionsFavoritesItemsByTargetId<ThrowOnError extends b
 
 	return request({
 		method: "PUT",
-		url: "/api/collections/favorites/items/{targetId}",
+		url: "/api/v1/collections/favorites/items/{targetId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5911,7 +5894,7 @@ export function putApiCollectionsFavoritesItemsByTargetId<ThrowOnError extends b
 
 /**
  * @summary Remove favorite unit
- * {@link /api/collections/favorites/items/:targetId}
+ * {@link /api/v1/collections/favorites/items/:targetId}
  */
 export function deleteApiCollectionsFavoritesItemsByTargetId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiCollectionsFavoritesItemsByTargetIdOptions, ThrowOnError>,
@@ -5920,7 +5903,7 @@ export function deleteApiCollectionsFavoritesItemsByTargetId<ThrowOnError extend
 
 	return request({
 		method: "DELETE",
-		url: "/api/collections/favorites/items/{targetId}",
+		url: "/api/v1/collections/favorites/items/{targetId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5933,21 +5916,21 @@ export function deleteApiCollectionsFavoritesItemsByTargetId<ThrowOnError extend
 
 /**
  * @summary List reviews
- * {@link /api/reviews}
+ * {@link /api/v1/reviews}
  */
 export function getApiReviews<ThrowOnError extends boolean = true>(
 	options: Options<GetApiReviewsOptions, ThrowOnError> = {},
 ): Promise<RequestResult<GetApiReviewsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/reviews", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/reviews", ...config }) as Promise<
 		RequestResult<GetApiReviewsResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Create review
- * {@link /api/reviews}
+ * {@link /api/v1/reviews}
  */
 export function postApiReviews<ThrowOnError extends boolean = true>(
 	options: Options<PostApiReviewsOptions, ThrowOnError>,
@@ -5956,7 +5939,7 @@ export function postApiReviews<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "POST",
-		url: "/api/reviews",
+		url: "/api/v1/reviews",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5967,21 +5950,21 @@ export function postApiReviews<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Get review
- * {@link /api/reviews/:reviewId}
+ * {@link /api/v1/reviews/:reviewId}
  */
 export function getApiReviewsByReviewId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiReviewsByReviewIdOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiReviewsByReviewIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/reviews/{reviewId}", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/reviews/{reviewId}", ...config }) as Promise<
 		RequestResult<GetApiReviewsByReviewIdResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Update review
- * {@link /api/reviews/:reviewId}
+ * {@link /api/v1/reviews/:reviewId}
  */
 export function patchApiReviewsByReviewId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiReviewsByReviewIdOptions, ThrowOnError>,
@@ -5990,7 +5973,7 @@ export function patchApiReviewsByReviewId<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "PATCH",
-		url: "/api/reviews/{reviewId}",
+		url: "/api/v1/reviews/{reviewId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6001,7 +5984,7 @@ export function patchApiReviewsByReviewId<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Score unit
- * {@link /api/scores/:targetId}
+ * {@link /api/v1/scores/:targetId}
  */
 export function putApiScoresByTargetId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiScoresByTargetIdOptions, ThrowOnError>,
@@ -6010,7 +5993,7 @@ export function putApiScoresByTargetId<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "PUT",
-		url: "/api/scores/{targetId}",
+		url: "/api/v1/scores/{targetId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6021,21 +6004,21 @@ export function putApiScoresByTargetId<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Get score aggregate
- * {@link /api/scores/:targetId}
+ * {@link /api/v1/scores/:targetId}
  */
 export function getApiScoresByTargetId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiScoresByTargetIdOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiScoresByTargetIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/scores/{targetId}", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/scores/{targetId}", ...config }) as Promise<
 		RequestResult<GetApiScoresByTargetIdResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary List current user's Scores for a Unit
- * {@link /api/scores/:targetId/viewer}
+ * {@link /api/v1/scores/:targetId/viewer}
  */
 export function getApiScoresByTargetIdViewer<ThrowOnError extends boolean = true>(
 	options: Options<GetApiScoresByTargetIdViewerOptions, ThrowOnError>,
@@ -6044,7 +6027,7 @@ export function getApiScoresByTargetIdViewer<ThrowOnError extends boolean = true
 
 	return request({
 		method: "GET",
-		url: "/api/scores/{targetId}/viewer",
+		url: "/api/v1/scores/{targetId}/viewer",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6055,21 +6038,23 @@ export function getApiScoresByTargetIdViewer<ThrowOnError extends boolean = true
 
 /**
  * @summary Get Unit reaction summary
- * {@link /api/reactions/units/:unitId}
+ * {@link /api/v1/reactions/units/:unitId}
  */
 export function getApiReactionsUnitsByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiReactionsUnitsByUnitIdOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiReactionsUnitsByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/reactions/units/{unitId}", ...config }) as Promise<
-		RequestResult<GetApiReactionsUnitsByUnitIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/v1/reactions/units/{unitId}",
+		...config,
+	}) as Promise<RequestResult<GetApiReactionsUnitsByUnitIdResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Set Unit reaction
- * {@link /api/reactions/units/:unitId}
+ * {@link /api/v1/reactions/units/:unitId}
  */
 export function putApiReactionsUnitsByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiReactionsUnitsByUnitIdOptions, ThrowOnError>,
@@ -6078,7 +6063,7 @@ export function putApiReactionsUnitsByUnitId<ThrowOnError extends boolean = true
 
 	return request({
 		method: "PUT",
-		url: "/api/reactions/units/{unitId}",
+		url: "/api/v1/reactions/units/{unitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6089,7 +6074,7 @@ export function putApiReactionsUnitsByUnitId<ThrowOnError extends boolean = true
 
 /**
  * @summary Remove Unit reaction
- * {@link /api/reactions/units/:unitId}
+ * {@link /api/v1/reactions/units/:unitId}
  */
 export function deleteApiReactionsUnitsByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiReactionsUnitsByUnitIdOptions, ThrowOnError>,
@@ -6098,7 +6083,7 @@ export function deleteApiReactionsUnitsByUnitId<ThrowOnError extends boolean = t
 
 	return request({
 		method: "DELETE",
-		url: "/api/reactions/units/{unitId}",
+		url: "/api/v1/reactions/units/{unitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6109,7 +6094,7 @@ export function deleteApiReactionsUnitsByUnitId<ThrowOnError extends boolean = t
 
 /**
  * @summary Record Unit share
- * {@link /api/reactions/shares/:unitId}
+ * {@link /api/v1/reactions/shares/:unitId}
  */
 export function putApiReactionsSharesByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiReactionsSharesByUnitIdOptions, ThrowOnError>,
@@ -6118,7 +6103,7 @@ export function putApiReactionsSharesByUnitId<ThrowOnError extends boolean = tru
 
 	return request({
 		method: "PUT",
-		url: "/api/reactions/shares/{unitId}",
+		url: "/api/v1/reactions/shares/{unitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6129,7 +6114,7 @@ export function putApiReactionsSharesByUnitId<ThrowOnError extends boolean = tru
 
 /**
  * @summary Remove Unit share
- * {@link /api/reactions/shares/:unitId}
+ * {@link /api/v1/reactions/shares/:unitId}
  */
 export function deleteApiReactionsSharesByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiReactionsSharesByUnitIdOptions, ThrowOnError>,
@@ -6138,7 +6123,7 @@ export function deleteApiReactionsSharesByUnitId<ThrowOnError extends boolean = 
 
 	return request({
 		method: "DELETE",
-		url: "/api/reactions/shares/{unitId}",
+		url: "/api/v1/reactions/shares/{unitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6149,7 +6134,7 @@ export function deleteApiReactionsSharesByUnitId<ThrowOnError extends boolean = 
 
 /**
  * @summary Create poll
- * {@link /api/polls}
+ * {@link /api/v1/polls}
  */
 export function postApiPolls<ThrowOnError extends boolean = true>(
 	options: Options<PostApiPollsOptions, ThrowOnError>,
@@ -6158,7 +6143,7 @@ export function postApiPolls<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "POST",
-		url: "/api/polls",
+		url: "/api/v1/polls",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6169,21 +6154,21 @@ export function postApiPolls<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Get poll
- * {@link /api/polls/:pollId}
+ * {@link /api/v1/polls/:pollId}
  */
 export function getApiPollsByPollId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiPollsByPollIdOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiPollsByPollIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/polls/{pollId}", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/polls/{pollId}", ...config }) as Promise<
 		RequestResult<GetApiPollsByPollIdResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Replace poll vote
- * {@link /api/polls/:pollId/vote}
+ * {@link /api/v1/polls/:pollId/vote}
  */
 export function putApiPollsByPollIdVote<ThrowOnError extends boolean = true>(
 	options: Options<PutApiPollsByPollIdVoteOptions, ThrowOnError>,
@@ -6192,7 +6177,7 @@ export function putApiPollsByPollIdVote<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "PUT",
-		url: "/api/polls/{pollId}/vote",
+		url: "/api/v1/polls/{pollId}/vote",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6203,7 +6188,7 @@ export function putApiPollsByPollIdVote<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Withdraw poll vote
- * {@link /api/polls/:pollId/vote}
+ * {@link /api/v1/polls/:pollId/vote}
  */
 export function deleteApiPollsByPollIdVote<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiPollsByPollIdVoteOptions, ThrowOnError>,
@@ -6212,7 +6197,7 @@ export function deleteApiPollsByPollIdVote<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "DELETE",
-		url: "/api/polls/{pollId}/vote",
+		url: "/api/v1/polls/{pollId}/vote",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6223,7 +6208,7 @@ export function deleteApiPollsByPollIdVote<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Close poll
- * {@link /api/polls/:pollId/close}
+ * {@link /api/v1/polls/:pollId/close}
  */
 export function postApiPollsByPollIdClose<ThrowOnError extends boolean = true>(
 	options: Options<PostApiPollsByPollIdCloseOptions, ThrowOnError>,
@@ -6232,7 +6217,7 @@ export function postApiPollsByPollIdClose<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "POST",
-		url: "/api/polls/{pollId}/close",
+		url: "/api/v1/polls/{pollId}/close",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6243,21 +6228,21 @@ export function postApiPollsByPollIdClose<ThrowOnError extends boolean = true>(
 
 /**
  * @summary List Post Scores
- * {@link /api/posts/:postId/scores}
+ * {@link /api/v1/posts/:postId/scores}
  */
 export function getApiPostsByPostIdScores<ThrowOnError extends boolean = true>(
 	options: Options<GetApiPostsByPostIdScoresOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiPostsByPostIdScoresResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/posts/{postId}/scores", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/posts/{postId}/scores", ...config }) as Promise<
 		RequestResult<GetApiPostsByPostIdScoresResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Replace Post Scores
- * {@link /api/posts/:postId/scores}
+ * {@link /api/v1/posts/:postId/scores}
  */
 export function putApiPostsByPostIdScores<ThrowOnError extends boolean = true>(
 	options: Options<PutApiPostsByPostIdScoresOptions, ThrowOnError>,
@@ -6266,7 +6251,7 @@ export function putApiPostsByPostIdScores<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "PUT",
-		url: "/api/posts/{postId}/scores",
+		url: "/api/v1/posts/{postId}/scores",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6277,21 +6262,21 @@ export function putApiPostsByPostIdScores<ThrowOnError extends boolean = true>(
 
 /**
  * @summary List posts
- * {@link /api/posts}
+ * {@link /api/v1/posts}
  */
 export function getApiPosts<ThrowOnError extends boolean = true>(
 	options: Options<GetApiPostsOptions, ThrowOnError> = {},
 ): Promise<RequestResult<GetApiPostsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/posts", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/posts", ...config }) as Promise<
 		RequestResult<GetApiPostsResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Create post or excerpt
- * {@link /api/posts}
+ * {@link /api/v1/posts}
  */
 export function postApiPosts<ThrowOnError extends boolean = true>(
 	options: Options<PostApiPostsOptions, ThrowOnError>,
@@ -6300,7 +6285,7 @@ export function postApiPosts<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "POST",
-		url: "/api/posts",
+		url: "/api/v1/posts",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6311,7 +6296,7 @@ export function postApiPosts<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Create Wiki
- * {@link /api/posts/wiki}
+ * {@link /api/v1/posts/wiki}
  */
 export function postApiPostsWiki<ThrowOnError extends boolean = true>(
 	options: Options<PostApiPostsWikiOptions, ThrowOnError>,
@@ -6320,7 +6305,7 @@ export function postApiPostsWiki<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "POST",
-		url: "/api/posts/wiki",
+		url: "/api/v1/posts/wiki",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6331,21 +6316,21 @@ export function postApiPostsWiki<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Get post
- * {@link /api/posts/:postId}
+ * {@link /api/v1/posts/:postId}
  */
 export function getApiPostsByPostId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiPostsByPostIdOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiPostsByPostIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/posts/{postId}", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/posts/{postId}", ...config }) as Promise<
 		RequestResult<GetApiPostsByPostIdResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Update post
- * {@link /api/posts/:postId}
+ * {@link /api/v1/posts/:postId}
  */
 export function patchApiPostsByPostId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiPostsByPostIdOptions, ThrowOnError>,
@@ -6354,7 +6339,7 @@ export function patchApiPostsByPostId<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "PATCH",
-		url: "/api/posts/{postId}",
+		url: "/api/v1/posts/{postId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6365,21 +6350,21 @@ export function patchApiPostsByPostId<ThrowOnError extends boolean = true>(
 
 /**
  * @summary List a bounded reply-post tree
- * {@link /api/posts/:postId/replies}
+ * {@link /api/v1/posts/:postId/replies}
  */
 export function getApiPostsByPostIdReplies<ThrowOnError extends boolean = true>(
 	options: Options<GetApiPostsByPostIdRepliesOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiPostsByPostIdRepliesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/posts/{postId}/replies", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/posts/{postId}/replies", ...config }) as Promise<
 		RequestResult<GetApiPostsByPostIdRepliesResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Create reply post
- * {@link /api/posts/:postId/replies}
+ * {@link /api/v1/posts/:postId/replies}
  */
 export function postApiPostsByPostIdReplies<ThrowOnError extends boolean = true>(
 	options: Options<PostApiPostsByPostIdRepliesOptions, ThrowOnError>,
@@ -6388,7 +6373,7 @@ export function postApiPostsByPostIdReplies<ThrowOnError extends boolean = true>
 
 	return request({
 		method: "POST",
-		url: "/api/posts/{postId}/replies",
+		url: "/api/v1/posts/{postId}/replies",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6399,7 +6384,7 @@ export function postApiPostsByPostIdReplies<ThrowOnError extends boolean = true>
 
 /**
  * @summary Update reply post
- * {@link /api/posts/:postId/replies/:replyPostId}
+ * {@link /api/v1/posts/:postId/replies/:replyPostId}
  */
 export function patchApiPostsByPostIdRepliesByReplyPostId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiPostsByPostIdRepliesByReplyPostIdOptions, ThrowOnError>,
@@ -6408,7 +6393,7 @@ export function patchApiPostsByPostIdRepliesByReplyPostId<ThrowOnError extends b
 
 	return request({
 		method: "PATCH",
-		url: "/api/posts/{postId}/replies/{replyPostId}",
+		url: "/api/v1/posts/{postId}/replies/{replyPostId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6419,21 +6404,21 @@ export function patchApiPostsByPostIdRepliesByReplyPostId<ThrowOnError extends b
 
 /**
  * @summary List Realms
- * {@link /api/realms}
+ * {@link /api/v1/realms}
  */
 export function getApiRealms<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsOptions, ThrowOnError> = {},
 ): Promise<RequestResult<GetApiRealmsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/realms", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/realms", ...config }) as Promise<
 		RequestResult<GetApiRealmsResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Create Realm
- * {@link /api/realms}
+ * {@link /api/v1/realms}
  */
 export function postApiRealms<ThrowOnError extends boolean = true>(
 	options: Options<PostApiRealmsOptions, ThrowOnError>,
@@ -6442,7 +6427,7 @@ export function postApiRealms<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "POST",
-		url: "/api/realms",
+		url: "/api/v1/realms",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6454,7 +6439,7 @@ export function postApiRealms<ThrowOnError extends boolean = true>(
 /**
  * @description Development preview. Assigns or renames a Realm's optional public slug in the permanent realms namespace. The former address is retained as a redirect.
  * @summary Replace a Realm slug address
- * {@link /api/realms/:realmId/slug-address}
+ * {@link /api/v1/realms/:realmId/slug-address}
  */
 export function replaceRealmSlugAddress<ThrowOnError extends boolean = true>(
 	options: Options<ReplaceRealmSlugAddressOptions, ThrowOnError>,
@@ -6463,7 +6448,7 @@ export function replaceRealmSlugAddress<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "PUT",
-		url: "/api/realms/{realmId}/slug-address",
+		url: "/api/v1/realms/{realmId}/slug-address",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6474,21 +6459,21 @@ export function replaceRealmSlugAddress<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Get Realm
- * {@link /api/realms/:realmId}
+ * {@link /api/v1/realms/:realmId}
  */
 export function getApiRealmsByRealmId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiRealmsByRealmIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/realms/{realmId}", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/realms/{realmId}", ...config }) as Promise<
 		RequestResult<GetApiRealmsByRealmIdResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Update Realm
- * {@link /api/realms/:realmId}
+ * {@link /api/v1/realms/:realmId}
  */
 export function patchApiRealmsByRealmId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiRealmsByRealmIdOptions, ThrowOnError>,
@@ -6497,7 +6482,7 @@ export function patchApiRealmsByRealmId<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "PATCH",
-		url: "/api/realms/{realmId}",
+		url: "/api/v1/realms/{realmId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6508,7 +6493,7 @@ export function patchApiRealmsByRealmId<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Replace enabled Realm pages
- * {@link /api/realms/:realmId/pages}
+ * {@link /api/v1/realms/:realmId/pages}
  */
 export function putApiRealmsByRealmIdPages<ThrowOnError extends boolean = true>(
 	options: Options<PutApiRealmsByRealmIdPagesOptions, ThrowOnError>,
@@ -6517,7 +6502,7 @@ export function putApiRealmsByRealmIdPages<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "PUT",
-		url: "/api/realms/{realmId}/pages",
+		url: "/api/v1/realms/{realmId}/pages",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PutApiRealmsByRealmIdPagesResponses, ThrowOnError>>;
@@ -6525,21 +6510,23 @@ export function putApiRealmsByRealmIdPages<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Get Realm taxonomy
- * {@link /api/realms/:realmId/taxonomy}
+ * {@link /api/v1/realms/:realmId/taxonomy}
  */
 export function getApiRealmsByRealmIdTaxonomy<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdTaxonomyOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiRealmsByRealmIdTaxonomyResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/realms/{realmId}/taxonomy", ...config }) as Promise<
-		RequestResult<GetApiRealmsByRealmIdTaxonomyResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/v1/realms/{realmId}/taxonomy",
+		...config,
+	}) as Promise<RequestResult<GetApiRealmsByRealmIdTaxonomyResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Get complete Realm taxonomy draft
- * {@link /api/realms/:realmId/taxonomy/draft}
+ * {@link /api/v1/realms/:realmId/taxonomy/draft}
  */
 export function getApiRealmsByRealmIdTaxonomyDraft<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdTaxonomyDraftOptions, ThrowOnError>,
@@ -6548,7 +6535,7 @@ export function getApiRealmsByRealmIdTaxonomyDraft<ThrowOnError extends boolean 
 
 	return request({
 		method: "GET",
-		url: "/api/realms/{realmId}/taxonomy/draft",
+		url: "/api/v1/realms/{realmId}/taxonomy/draft",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6559,7 +6546,7 @@ export function getApiRealmsByRealmIdTaxonomyDraft<ThrowOnError extends boolean 
 
 /**
  * @summary Save complete Realm taxonomy draft
- * {@link /api/realms/:realmId/taxonomy/draft}
+ * {@link /api/v1/realms/:realmId/taxonomy/draft}
  */
 export function putApiRealmsByRealmIdTaxonomyDraft<ThrowOnError extends boolean = true>(
 	options: Options<PutApiRealmsByRealmIdTaxonomyDraftOptions, ThrowOnError>,
@@ -6568,7 +6555,7 @@ export function putApiRealmsByRealmIdTaxonomyDraft<ThrowOnError extends boolean 
 
 	return request({
 		method: "PUT",
-		url: "/api/realms/{realmId}/taxonomy/draft",
+		url: "/api/v1/realms/{realmId}/taxonomy/draft",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6579,7 +6566,7 @@ export function putApiRealmsByRealmIdTaxonomyDraft<ThrowOnError extends boolean 
 
 /**
  * @summary Get Realm Score context
- * {@link /api/realms/:realmId/score-context}
+ * {@link /api/v1/realms/:realmId/score-context}
  */
 export function getApiRealmsByRealmIdScoreContext<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdScoreContextOptions, ThrowOnError>,
@@ -6588,14 +6575,14 @@ export function getApiRealmsByRealmIdScoreContext<ThrowOnError extends boolean =
 
 	return request({
 		method: "GET",
-		url: "/api/realms/{realmId}/score-context",
+		url: "/api/v1/realms/{realmId}/score-context",
 		...config,
 	}) as Promise<RequestResult<GetApiRealmsByRealmIdScoreContextResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Set Realm Score context
- * {@link /api/realms/:realmId/score-context}
+ * {@link /api/v1/realms/:realmId/score-context}
  */
 export function putApiRealmsByRealmIdScoreContext<ThrowOnError extends boolean = true>(
 	options: Options<PutApiRealmsByRealmIdScoreContextOptions, ThrowOnError>,
@@ -6604,7 +6591,7 @@ export function putApiRealmsByRealmIdScoreContext<ThrowOnError extends boolean =
 
 	return request({
 		method: "PUT",
-		url: "/api/realms/{realmId}/score-context",
+		url: "/api/v1/realms/{realmId}/score-context",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PutApiRealmsByRealmIdScoreContextResponses, ThrowOnError>>;
@@ -6612,7 +6599,7 @@ export function putApiRealmsByRealmIdScoreContext<ThrowOnError extends boolean =
 
 /**
  * @summary Clear Realm Score context
- * {@link /api/realms/:realmId/score-context}
+ * {@link /api/v1/realms/:realmId/score-context}
  */
 export function deleteApiRealmsByRealmIdScoreContext<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiRealmsByRealmIdScoreContextOptions, ThrowOnError>,
@@ -6621,7 +6608,7 @@ export function deleteApiRealmsByRealmIdScoreContext<ThrowOnError extends boolea
 
 	return request({
 		method: "DELETE",
-		url: "/api/realms/{realmId}/score-context",
+		url: "/api/v1/realms/{realmId}/score-context",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<DeleteApiRealmsByRealmIdScoreContextResponses, ThrowOnError>>;
@@ -6629,7 +6616,7 @@ export function deleteApiRealmsByRealmIdScoreContext<ThrowOnError extends boolea
 
 /**
  * @summary Update Realm Tag voting policy
- * {@link /api/realms/:realmId/tag-voting}
+ * {@link /api/v1/realms/:realmId/tag-voting}
  */
 export function putApiRealmsByRealmIdTagVoting<ThrowOnError extends boolean = true>(
 	options: Options<PutApiRealmsByRealmIdTagVotingOptions, ThrowOnError>,
@@ -6638,7 +6625,7 @@ export function putApiRealmsByRealmIdTagVoting<ThrowOnError extends boolean = tr
 
 	return request({
 		method: "PUT",
-		url: "/api/realms/{realmId}/tag-voting",
+		url: "/api/v1/realms/{realmId}/tag-voting",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6649,7 +6636,7 @@ export function putApiRealmsByRealmIdTagVoting<ThrowOnError extends boolean = tr
 
 /**
  * @summary Join Realm
- * {@link /api/realms/:realmId/membership}
+ * {@link /api/v1/realms/:realmId/membership}
  */
 export function putApiRealmsByRealmIdMembership<ThrowOnError extends boolean = true>(
 	options: Options<PutApiRealmsByRealmIdMembershipOptions, ThrowOnError>,
@@ -6658,7 +6645,7 @@ export function putApiRealmsByRealmIdMembership<ThrowOnError extends boolean = t
 
 	return request({
 		method: "PUT",
-		url: "/api/realms/{realmId}/membership",
+		url: "/api/v1/realms/{realmId}/membership",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6669,7 +6656,7 @@ export function putApiRealmsByRealmIdMembership<ThrowOnError extends boolean = t
 
 /**
  * @summary Leave Realm
- * {@link /api/realms/:realmId/membership}
+ * {@link /api/v1/realms/:realmId/membership}
  */
 export function deleteApiRealmsByRealmIdMembership<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiRealmsByRealmIdMembershipOptions, ThrowOnError>,
@@ -6678,7 +6665,7 @@ export function deleteApiRealmsByRealmIdMembership<ThrowOnError extends boolean 
 
 	return request({
 		method: "DELETE",
-		url: "/api/realms/{realmId}/membership",
+		url: "/api/v1/realms/{realmId}/membership",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6689,7 +6676,7 @@ export function deleteApiRealmsByRealmIdMembership<ThrowOnError extends boolean 
 
 /**
  * @summary List Realm members
- * {@link /api/realms/:realmId/members}
+ * {@link /api/v1/realms/:realmId/members}
  */
 export function getApiRealmsByRealmIdMembers<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdMembersOptions, ThrowOnError>,
@@ -6698,7 +6685,7 @@ export function getApiRealmsByRealmIdMembers<ThrowOnError extends boolean = true
 
 	return request({
 		method: "GET",
-		url: "/api/realms/{realmId}/members",
+		url: "/api/v1/realms/{realmId}/members",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6709,7 +6696,7 @@ export function getApiRealmsByRealmIdMembers<ThrowOnError extends boolean = true
 
 /**
  * @summary Update Realm member
- * {@link /api/realms/:realmId/members/:profileId}
+ * {@link /api/v1/realms/:realmId/members/:profileId}
  */
 export function patchApiRealmsByRealmIdMembersByProfileId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiRealmsByRealmIdMembersByProfileIdOptions, ThrowOnError>,
@@ -6718,7 +6705,7 @@ export function patchApiRealmsByRealmIdMembersByProfileId<ThrowOnError extends b
 
 	return request({
 		method: "PATCH",
-		url: "/api/realms/{realmId}/members/{profileId}",
+		url: "/api/v1/realms/{realmId}/members/{profileId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6729,7 +6716,7 @@ export function patchApiRealmsByRealmIdMembersByProfileId<ThrowOnError extends b
 
 /**
  * @summary Update Realm rules
- * {@link /api/realms/:realmId/rules}
+ * {@link /api/v1/realms/:realmId/rules}
  */
 export function putApiRealmsByRealmIdRules<ThrowOnError extends boolean = true>(
 	options: Options<PutApiRealmsByRealmIdRulesOptions, ThrowOnError>,
@@ -6738,7 +6725,7 @@ export function putApiRealmsByRealmIdRules<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "PUT",
-		url: "/api/realms/{realmId}/rules",
+		url: "/api/v1/realms/{realmId}/rules",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6749,21 +6736,21 @@ export function putApiRealmsByRealmIdRules<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Get current Realm rules
- * {@link /api/realms/:realmId/rules}
+ * {@link /api/v1/realms/:realmId/rules}
  */
 export function getApiRealmsByRealmIdRules<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdRulesOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiRealmsByRealmIdRulesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/realms/{realmId}/rules", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/realms/{realmId}/rules", ...config }) as Promise<
 		RequestResult<GetApiRealmsByRealmIdRulesResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Acknowledge current Realm rules
- * {@link /api/realms/:realmId/rules/:revisionId/acknowledgement}
+ * {@link /api/v1/realms/:realmId/rules/:revisionId/acknowledgement}
  */
 export function putApiRealmsByRealmIdRulesByRevisionIdAcknowledgement<
 	ThrowOnError extends boolean = true,
@@ -6776,7 +6763,7 @@ export function putApiRealmsByRealmIdRulesByRevisionIdAcknowledgement<
 
 	return request({
 		method: "PUT",
-		url: "/api/realms/{realmId}/rules/{revisionId}/acknowledgement",
+		url: "/api/v1/realms/{realmId}/rules/{revisionId}/acknowledgement",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6789,21 +6776,21 @@ export function putApiRealmsByRealmIdRulesByRevisionIdAcknowledgement<
 
 /**
  * @summary List Realm pins
- * {@link /api/realms/:realmId/pins}
+ * {@link /api/v1/realms/:realmId/pins}
  */
 export function getApiRealmsByRealmIdPins<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdPinsOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiRealmsByRealmIdPinsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/realms/{realmId}/pins", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/realms/{realmId}/pins", ...config }) as Promise<
 		RequestResult<GetApiRealmsByRealmIdPinsResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Move Realm pins
- * {@link /api/realms/:realmId/pins/move}
+ * {@link /api/v1/realms/:realmId/pins/move}
  */
 export function postApiRealmsByRealmIdPinsMove<ThrowOnError extends boolean = true>(
 	options: Options<PostApiRealmsByRealmIdPinsMoveOptions, ThrowOnError>,
@@ -6812,7 +6799,7 @@ export function postApiRealmsByRealmIdPinsMove<ThrowOnError extends boolean = tr
 
 	return request({
 		method: "POST",
-		url: "/api/realms/{realmId}/pins/move",
+		url: "/api/v1/realms/{realmId}/pins/move",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6823,7 +6810,7 @@ export function postApiRealmsByRealmIdPinsMove<ThrowOnError extends boolean = tr
 
 /**
  * @summary Pin Realm unit
- * {@link /api/realms/:realmId/pins/:unitId}
+ * {@link /api/v1/realms/:realmId/pins/:unitId}
  */
 export function putApiRealmsByRealmIdPinsByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiRealmsByRealmIdPinsByUnitIdOptions, ThrowOnError>,
@@ -6832,7 +6819,7 @@ export function putApiRealmsByRealmIdPinsByUnitId<ThrowOnError extends boolean =
 
 	return request({
 		method: "PUT",
-		url: "/api/realms/{realmId}/pins/{unitId}",
+		url: "/api/v1/realms/{realmId}/pins/{unitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6843,7 +6830,7 @@ export function putApiRealmsByRealmIdPinsByUnitId<ThrowOnError extends boolean =
 
 /**
  * @summary Remove Realm pin
- * {@link /api/realms/:realmId/pins/:unitId}
+ * {@link /api/v1/realms/:realmId/pins/:unitId}
  */
 export function deleteApiRealmsByRealmIdPinsByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiRealmsByRealmIdPinsByUnitIdOptions, ThrowOnError>,
@@ -6852,7 +6839,7 @@ export function deleteApiRealmsByRealmIdPinsByUnitId<ThrowOnError extends boolea
 
 	return request({
 		method: "DELETE",
-		url: "/api/realms/{realmId}/pins/{unitId}",
+		url: "/api/v1/realms/{realmId}/pins/{unitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6863,7 +6850,7 @@ export function deleteApiRealmsByRealmIdPinsByUnitId<ThrowOnError extends boolea
 
 /**
  * @summary Create Realm-governed Wiki
- * {@link /api/realms/:realmId/wikis}
+ * {@link /api/v1/realms/:realmId/wikis}
  */
 export function postApiRealmsByRealmIdWikis<ThrowOnError extends boolean = true>(
 	options: Options<PostApiRealmsByRealmIdWikisOptions, ThrowOnError>,
@@ -6872,7 +6859,7 @@ export function postApiRealmsByRealmIdWikis<ThrowOnError extends boolean = true>
 
 	return request({
 		method: "POST",
-		url: "/api/realms/{realmId}/wikis",
+		url: "/api/v1/realms/{realmId}/wikis",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6883,7 +6870,7 @@ export function postApiRealmsByRealmIdWikis<ThrowOnError extends boolean = true>
 
 /**
  * @summary List Realm Tag Context relationships
- * {@link /api/realms/:realmId/tag-contexts}
+ * {@link /api/v1/realms/:realmId/tag-contexts}
  */
 export function getApiRealmsByRealmIdTagContexts<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdTagContextsOptions, ThrowOnError>,
@@ -6892,7 +6879,7 @@ export function getApiRealmsByRealmIdTagContexts<ThrowOnError extends boolean = 
 
 	return request({
 		method: "GET",
-		url: "/api/realms/{realmId}/tag-contexts",
+		url: "/api/v1/realms/{realmId}/tag-contexts",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiRealmsByRealmIdTagContextsResponses, ThrowOnError>>;
@@ -6900,7 +6887,7 @@ export function getApiRealmsByRealmIdTagContexts<ThrowOnError extends boolean = 
 
 /**
  * @summary Create Realm Tag Context Wiki
- * {@link /api/realms/:realmId/tag-contexts}
+ * {@link /api/v1/realms/:realmId/tag-contexts}
  */
 export function postApiRealmsByRealmIdTagContexts<ThrowOnError extends boolean = true>(
 	options: Options<PostApiRealmsByRealmIdTagContextsOptions, ThrowOnError>,
@@ -6909,7 +6896,7 @@ export function postApiRealmsByRealmIdTagContexts<ThrowOnError extends boolean =
 
 	return request({
 		method: "POST",
-		url: "/api/realms/{realmId}/tag-contexts",
+		url: "/api/v1/realms/{realmId}/tag-contexts",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6920,7 +6907,7 @@ export function postApiRealmsByRealmIdTagContexts<ThrowOnError extends boolean =
 
 /**
  * @summary Get Realm Tag Context
- * {@link /api/realms/:realmId/tags/:tagId/context}
+ * {@link /api/v1/realms/:realmId/tags/:tagId/context}
  */
 export function getApiRealmsByRealmIdTagsByTagIdContext<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdTagsByTagIdContextOptions, ThrowOnError>,
@@ -6929,14 +6916,14 @@ export function getApiRealmsByRealmIdTagsByTagIdContext<ThrowOnError extends boo
 
 	return request({
 		method: "GET",
-		url: "/api/realms/{realmId}/tags/{tagId}/context",
+		url: "/api/v1/realms/{realmId}/tags/{tagId}/context",
 		...config,
 	}) as Promise<RequestResult<GetApiRealmsByRealmIdTagsByTagIdContextResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Set Realm Tag Context
- * {@link /api/realms/:realmId/tags/:tagId/context}
+ * {@link /api/v1/realms/:realmId/tags/:tagId/context}
  */
 export function putApiRealmsByRealmIdTagsByTagIdContext<ThrowOnError extends boolean = true>(
 	options: Options<PutApiRealmsByRealmIdTagsByTagIdContextOptions, ThrowOnError>,
@@ -6945,7 +6932,7 @@ export function putApiRealmsByRealmIdTagsByTagIdContext<ThrowOnError extends boo
 
 	return request({
 		method: "PUT",
-		url: "/api/realms/{realmId}/tags/{tagId}/context",
+		url: "/api/v1/realms/{realmId}/tags/{tagId}/context",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PutApiRealmsByRealmIdTagsByTagIdContextResponses, ThrowOnError>>;
@@ -6953,7 +6940,7 @@ export function putApiRealmsByRealmIdTagsByTagIdContext<ThrowOnError extends boo
 
 /**
  * @summary Remove Realm Tag Context relationship
- * {@link /api/realms/:realmId/tags/:tagId/context}
+ * {@link /api/v1/realms/:realmId/tags/:tagId/context}
  */
 export function deleteApiRealmsByRealmIdTagsByTagIdContext<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiRealmsByRealmIdTagsByTagIdContextOptions, ThrowOnError>,
@@ -6962,7 +6949,7 @@ export function deleteApiRealmsByRealmIdTagsByTagIdContext<ThrowOnError extends 
 
 	return request({
 		method: "DELETE",
-		url: "/api/realms/{realmId}/tags/{tagId}/context",
+		url: "/api/v1/realms/{realmId}/tags/{tagId}/context",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6973,7 +6960,7 @@ export function deleteApiRealmsByRealmIdTagsByTagIdContext<ThrowOnError extends 
 
 /**
  * @summary Apply Realm Policy Tag
- * {@link /api/realms/:realmId/units/:unitId/policy-tags/:tagId}
+ * {@link /api/v1/realms/:realmId/units/:unitId/policy-tags/:tagId}
  */
 export function putApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId<
 	ThrowOnError extends boolean = true,
@@ -6986,7 +6973,7 @@ export function putApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId<
 
 	return request({
 		method: "PUT",
-		url: "/api/realms/{realmId}/units/{unitId}/policy-tags/{tagId}",
+		url: "/api/v1/realms/{realmId}/units/{unitId}/policy-tags/{tagId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -6996,7 +6983,7 @@ export function putApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId<
 
 /**
  * @summary Remove Realm Policy Tag
- * {@link /api/realms/:realmId/units/:unitId/policy-tags/:tagId}
+ * {@link /api/v1/realms/:realmId/units/:unitId/policy-tags/:tagId}
  */
 export function deleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId<
 	ThrowOnError extends boolean = true,
@@ -7009,7 +6996,7 @@ export function deleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId<
 
 	return request({
 		method: "DELETE",
-		url: "/api/realms/{realmId}/units/{unitId}/policy-tags/{tagId}",
+		url: "/api/v1/realms/{realmId}/units/{unitId}/policy-tags/{tagId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
@@ -7019,7 +7006,7 @@ export function deleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId<
 
 /**
  * @summary List Realm-scoped Unit Tag votes
- * {@link /api/realms/:realmId/units/:unitId/tags}
+ * {@link /api/v1/realms/:realmId/units/:unitId/tags}
  */
 export function getApiRealmsByRealmIdUnitsByUnitIdTags<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdUnitsByUnitIdTagsOptions, ThrowOnError>,
@@ -7028,7 +7015,7 @@ export function getApiRealmsByRealmIdUnitsByUnitIdTags<ThrowOnError extends bool
 
 	return request({
 		method: "GET",
-		url: "/api/realms/{realmId}/units/{unitId}/tags",
+		url: "/api/v1/realms/{realmId}/units/{unitId}/tags",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -7039,7 +7026,7 @@ export function getApiRealmsByRealmIdUnitsByUnitIdTags<ThrowOnError extends bool
 
 /**
  * @summary Vote on a Realm-scoped Unit Tag
- * {@link /api/realms/:realmId/units/:unitId/tags/:tagId/vote}
+ * {@link /api/v1/realms/:realmId/units/:unitId/tags/:tagId/vote}
  */
 export function putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote<
 	ThrowOnError extends boolean = true,
@@ -7052,7 +7039,7 @@ export function putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote<
 
 	return request({
 		method: "PUT",
-		url: "/api/realms/{realmId}/units/{unitId}/tags/{tagId}/vote",
+		url: "/api/v1/realms/{realmId}/units/{unitId}/tags/{tagId}/vote",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -7065,7 +7052,7 @@ export function putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote<
 
 /**
  * @summary Remove a Realm-scoped Unit Tag vote
- * {@link /api/realms/:realmId/units/:unitId/tags/:tagId/vote}
+ * {@link /api/v1/realms/:realmId/units/:unitId/tags/:tagId/vote}
  */
 export function deleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote<
 	ThrowOnError extends boolean = true,
@@ -7078,7 +7065,7 @@ export function deleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote<
 
 	return request({
 		method: "DELETE",
-		url: "/api/realms/{realmId}/units/{unitId}/tags/{tagId}/vote",
+		url: "/api/v1/realms/{realmId}/units/{unitId}/tags/{tagId}/vote",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -7091,7 +7078,7 @@ export function deleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote<
 
 /**
  * @summary List Realm Units for moderation
- * {@link /api/realms/:realmId/units}
+ * {@link /api/v1/realms/:realmId/units}
  */
 export function getApiRealmsByRealmIdUnits<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdUnitsOptions, ThrowOnError>,
@@ -7100,7 +7087,7 @@ export function getApiRealmsByRealmIdUnits<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "GET",
-		url: "/api/realms/{realmId}/units",
+		url: "/api/v1/realms/{realmId}/units",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiRealmsByRealmIdUnitsResponses, ThrowOnError>>;
@@ -7108,7 +7095,7 @@ export function getApiRealmsByRealmIdUnits<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Get Realm Unit for moderation
- * {@link /api/realms/:realmId/units/:unitId}
+ * {@link /api/v1/realms/:realmId/units/:unitId}
  */
 export function getApiRealmsByRealmIdUnitsByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdUnitsByUnitIdOptions, ThrowOnError>,
@@ -7117,7 +7104,7 @@ export function getApiRealmsByRealmIdUnitsByUnitId<ThrowOnError extends boolean 
 
 	return request({
 		method: "GET",
-		url: "/api/realms/{realmId}/units/{unitId}",
+		url: "/api/v1/realms/{realmId}/units/{unitId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdResponses, ThrowOnError>>;
@@ -7125,7 +7112,7 @@ export function getApiRealmsByRealmIdUnitsByUnitId<ThrowOnError extends boolean 
 
 /**
  * @summary Apply Realm Unit moderation command
- * {@link /api/realms/:realmId/units/:unitId}
+ * {@link /api/v1/realms/:realmId/units/:unitId}
  */
 export function patchApiRealmsByRealmIdUnitsByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiRealmsByRealmIdUnitsByUnitIdOptions, ThrowOnError>,
@@ -7134,7 +7121,7 @@ export function patchApiRealmsByRealmIdUnitsByUnitId<ThrowOnError extends boolea
 
 	return request({
 		method: "PATCH",
-		url: "/api/realms/{realmId}/units/{unitId}",
+		url: "/api/v1/realms/{realmId}/units/{unitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -7145,7 +7132,7 @@ export function patchApiRealmsByRealmIdUnitsByUnitId<ThrowOnError extends boolea
 
 /**
  * @summary Get Realm Unit moderation history
- * {@link /api/realms/:realmId/units/:unitId/history}
+ * {@link /api/v1/realms/:realmId/units/:unitId/history}
  */
 export function getApiRealmsByRealmIdUnitsByUnitIdHistory<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions, ThrowOnError>,
@@ -7154,7 +7141,7 @@ export function getApiRealmsByRealmIdUnitsByUnitIdHistory<ThrowOnError extends b
 
 	return request({
 		method: "GET",
-		url: "/api/realms/{realmId}/units/{unitId}/history",
+		url: "/api/v1/realms/{realmId}/units/{unitId}/history",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdHistoryResponses, ThrowOnError>>;
@@ -7163,7 +7150,7 @@ export function getApiRealmsByRealmIdUnitsByUnitIdHistory<ThrowOnError extends b
 /**
  * @description Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.
  * @summary List Realm Wiki navigation resources
- * {@link /api/realms/:realmId/wiki/navigation}
+ * {@link /api/v1/realms/:realmId/wiki/navigation}
  */
 export function getApiRealmsByRealmIdWikiNavigation<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdWikiNavigationOptions, ThrowOnError>,
@@ -7172,7 +7159,7 @@ export function getApiRealmsByRealmIdWikiNavigation<ThrowOnError extends boolean
 
 	return request({
 		method: "GET",
-		url: "/api/realms/{realmId}/wiki/navigation",
+		url: "/api/v1/realms/{realmId}/wiki/navigation",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -7184,7 +7171,7 @@ export function getApiRealmsByRealmIdWikiNavigation<ThrowOnError extends boolean
 /**
  * @description Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.
  * @summary Create Realm Wiki navigation
- * {@link /api/realms/:realmId/wiki/navigation}
+ * {@link /api/v1/realms/:realmId/wiki/navigation}
  */
 export function postApiRealmsByRealmIdWikiNavigation<ThrowOnError extends boolean = true>(
 	options: Options<PostApiRealmsByRealmIdWikiNavigationOptions, ThrowOnError>,
@@ -7193,7 +7180,7 @@ export function postApiRealmsByRealmIdWikiNavigation<ThrowOnError extends boolea
 
 	return request({
 		method: "POST",
-		url: "/api/realms/{realmId}/wiki/navigation",
+		url: "/api/v1/realms/{realmId}/wiki/navigation",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -7205,7 +7192,7 @@ export function postApiRealmsByRealmIdWikiNavigation<ThrowOnError extends boolea
 /**
  * @description Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.
  * @summary Get Realm Wiki navigation
- * {@link /api/realms/:realmId/wiki/navigation/:navigationId}
+ * {@link /api/v1/realms/:realmId/wiki/navigation/:navigationId}
  */
 export function getApiRealmsByRealmIdWikiNavigationByNavigationId<
 	ThrowOnError extends boolean = true,
@@ -7218,7 +7205,7 @@ export function getApiRealmsByRealmIdWikiNavigationByNavigationId<
 
 	return request({
 		method: "GET",
-		url: "/api/realms/{realmId}/wiki/navigation/{navigationId}",
+		url: "/api/v1/realms/{realmId}/wiki/navigation/{navigationId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -7232,7 +7219,7 @@ export function getApiRealmsByRealmIdWikiNavigationByNavigationId<
 /**
  * @description Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.
  * @summary Replace Realm Wiki navigation
- * {@link /api/realms/:realmId/wiki/navigation/:navigationId}
+ * {@link /api/v1/realms/:realmId/wiki/navigation/:navigationId}
  */
 export function putApiRealmsByRealmIdWikiNavigationByNavigationId<
 	ThrowOnError extends boolean = true,
@@ -7245,7 +7232,7 @@ export function putApiRealmsByRealmIdWikiNavigationByNavigationId<
 
 	return request({
 		method: "PUT",
-		url: "/api/realms/{realmId}/wiki/navigation/{navigationId}",
+		url: "/api/v1/realms/{realmId}/wiki/navigation/{navigationId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -7259,7 +7246,7 @@ export function putApiRealmsByRealmIdWikiNavigationByNavigationId<
 /**
  * @description Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.
  * @summary Delete Realm Wiki navigation
- * {@link /api/realms/:realmId/wiki/navigation/:navigationId}
+ * {@link /api/v1/realms/:realmId/wiki/navigation/:navigationId}
  */
 export function deleteApiRealmsByRealmIdWikiNavigationByNavigationId<
 	ThrowOnError extends boolean = true,
@@ -7272,7 +7259,7 @@ export function deleteApiRealmsByRealmIdWikiNavigationByNavigationId<
 
 	return request({
 		method: "DELETE",
-		url: "/api/realms/{realmId}/wiki/navigation/{navigationId}",
+		url: "/api/v1/realms/{realmId}/wiki/navigation/{navigationId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -7285,21 +7272,23 @@ export function deleteApiRealmsByRealmIdWikiNavigationByNavigationId<
 
 /**
  * @summary Get a system Search Feature template
- * {@link /api/search/features/:template}
+ * {@link /api/v1/search/features/:template}
  */
 export function getApiSearchFeaturesByTemplate<ThrowOnError extends boolean = true>(
 	options: Options<GetApiSearchFeaturesByTemplateOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiSearchFeaturesByTemplateResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/search/features/{template}", ...config }) as Promise<
-		RequestResult<GetApiSearchFeaturesByTemplateResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/v1/search/features/{template}",
+		...config,
+	}) as Promise<RequestResult<GetApiSearchFeaturesByTemplateResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Execute a system Search Feature template
- * {@link /api/search/features/:template/execute}
+ * {@link /api/v1/search/features/:template/execute}
  */
 export function postApiSearchFeaturesByTemplateExecute<ThrowOnError extends boolean = true>(
 	options: Options<PostApiSearchFeaturesByTemplateExecuteOptions, ThrowOnError>,
@@ -7308,7 +7297,7 @@ export function postApiSearchFeaturesByTemplateExecute<ThrowOnError extends bool
 
 	return request({
 		method: "POST",
-		url: "/api/search/features/{template}/execute",
+		url: "/api/v1/search/features/{template}/execute",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -7319,7 +7308,7 @@ export function postApiSearchFeaturesByTemplateExecute<ThrowOnError extends bool
 
 /**
  * @summary Present a system Search Feature as a Feed
- * {@link /api/search/features/:template/feed}
+ * {@link /api/v1/search/features/:template/feed}
  */
 export function postApiSearchFeaturesByTemplateFeed<ThrowOnError extends boolean = true>(
 	options: Options<PostApiSearchFeaturesByTemplateFeedOptions, ThrowOnError>,
@@ -7328,7 +7317,7 @@ export function postApiSearchFeaturesByTemplateFeed<ThrowOnError extends boolean
 
 	return request({
 		method: "POST",
-		url: "/api/search/features/{template}/feed",
+		url: "/api/v1/search/features/{template}/feed",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -7339,7 +7328,7 @@ export function postApiSearchFeaturesByTemplateFeed<ThrowOnError extends boolean
 
 /**
  * @summary Get a Zone Search Feature
- * {@link /api/search/zones/:zoneId/feature}
+ * {@link /api/v1/search/zones/:zoneId/feature}
  */
 export function getApiSearchZonesByZoneIdFeature<ThrowOnError extends boolean = true>(
 	options: Options<GetApiSearchZonesByZoneIdFeatureOptions, ThrowOnError>,
@@ -7348,14 +7337,14 @@ export function getApiSearchZonesByZoneIdFeature<ThrowOnError extends boolean = 
 
 	return request({
 		method: "GET",
-		url: "/api/search/zones/{zoneId}/feature",
+		url: "/api/v1/search/zones/{zoneId}/feature",
 		...config,
 	}) as Promise<RequestResult<GetApiSearchZonesByZoneIdFeatureResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Configure a Zone Search Feature
- * {@link /api/search/zones/:zoneId/feature}
+ * {@link /api/v1/search/zones/:zoneId/feature}
  */
 export function putApiSearchZonesByZoneIdFeature<ThrowOnError extends boolean = true>(
 	options: Options<PutApiSearchZonesByZoneIdFeatureOptions, ThrowOnError>,
@@ -7364,14 +7353,14 @@ export function putApiSearchZonesByZoneIdFeature<ThrowOnError extends boolean = 
 
 	return request({
 		method: "PUT",
-		url: "/api/search/zones/{zoneId}/feature",
+		url: "/api/v1/search/zones/{zoneId}/feature",
 		...config,
 	}) as Promise<RequestResult<PutApiSearchZonesByZoneIdFeatureResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Execute a Zone Search Feature
- * {@link /api/search/zones/:zoneId/feature/execute}
+ * {@link /api/v1/search/zones/:zoneId/feature/execute}
  */
 export function postApiSearchZonesByZoneIdFeatureExecute<ThrowOnError extends boolean = true>(
 	options: Options<PostApiSearchZonesByZoneIdFeatureExecuteOptions, ThrowOnError>,
@@ -7380,7 +7369,7 @@ export function postApiSearchZonesByZoneIdFeatureExecute<ThrowOnError extends bo
 
 	return request({
 		method: "POST",
-		url: "/api/search/zones/{zoneId}/feature/execute",
+		url: "/api/v1/search/zones/{zoneId}/feature/execute",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -7391,7 +7380,7 @@ export function postApiSearchZonesByZoneIdFeatureExecute<ThrowOnError extends bo
 
 /**
  * @summary Present a Zone Search Feature as a Feed
- * {@link /api/search/zones/:zoneId/feature/feed}
+ * {@link /api/v1/search/zones/:zoneId/feature/feed}
  */
 export function postApiSearchZonesByZoneIdFeatureFeed<ThrowOnError extends boolean = true>(
 	options: Options<PostApiSearchZonesByZoneIdFeatureFeedOptions, ThrowOnError>,
@@ -7400,7 +7389,7 @@ export function postApiSearchZonesByZoneIdFeatureFeed<ThrowOnError extends boole
 
 	return request({
 		method: "POST",
-		url: "/api/search/zones/{zoneId}/feature/feed",
+		url: "/api/v1/search/zones/{zoneId}/feature/feed",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -7411,7 +7400,7 @@ export function postApiSearchZonesByZoneIdFeatureFeed<ThrowOnError extends boole
 
 /**
  * @summary List Zone Search Feature revisions
- * {@link /api/search/zones/:zoneId/feature/revisions}
+ * {@link /api/v1/search/zones/:zoneId/feature/revisions}
  */
 export function getApiSearchZonesByZoneIdFeatureRevisions<ThrowOnError extends boolean = true>(
 	options: Options<GetApiSearchZonesByZoneIdFeatureRevisionsOptions, ThrowOnError>,
@@ -7420,14 +7409,14 @@ export function getApiSearchZonesByZoneIdFeatureRevisions<ThrowOnError extends b
 
 	return request({
 		method: "GET",
-		url: "/api/search/zones/{zoneId}/feature/revisions",
+		url: "/api/v1/search/zones/{zoneId}/feature/revisions",
 		...config,
 	}) as Promise<RequestResult<GetApiSearchZonesByZoneIdFeatureRevisionsResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Restore a Zone Search Feature revision
- * {@link /api/search/zones/:zoneId/feature/restore}
+ * {@link /api/v1/search/zones/:zoneId/feature/restore}
  */
 export function postApiSearchZonesByZoneIdFeatureRestore<ThrowOnError extends boolean = true>(
 	options: Options<PostApiSearchZonesByZoneIdFeatureRestoreOptions, ThrowOnError>,
@@ -7436,14 +7425,14 @@ export function postApiSearchZonesByZoneIdFeatureRestore<ThrowOnError extends bo
 
 	return request({
 		method: "POST",
-		url: "/api/search/zones/{zoneId}/feature/restore",
+		url: "/api/v1/search/zones/{zoneId}/feature/restore",
 		...config,
 	}) as Promise<RequestResult<PostApiSearchZonesByZoneIdFeatureRestoreResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Execute a trusted Zone Dock Search Block
- * {@link /api/search/zones/:zoneId/dock/blocks/:blockKey/execute}
+ * {@link /api/v1/search/zones/:zoneId/dock/blocks/:blockKey/execute}
  */
 export function postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute<
 	ThrowOnError extends boolean = true,
@@ -7456,7 +7445,7 @@ export function postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute<
 
 	return request({
 		method: "POST",
-		url: "/api/search/zones/{zoneId}/dock/blocks/{blockKey}/execute",
+		url: "/api/v1/search/zones/{zoneId}/dock/blocks/{blockKey}/execute",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -7469,7 +7458,7 @@ export function postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute<
 
 /**
  * @summary Execute a trusted Zone Page Search Block
- * {@link /api/search/zones/:zoneId/pages/:pageId/blocks/:blockKey/execute}
+ * {@link /api/v1/search/zones/:zoneId/pages/:pageId/blocks/:blockKey/execute}
  */
 export function postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecute<
 	ThrowOnError extends boolean = true,
@@ -7488,7 +7477,7 @@ export function postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecute<
 
 	return request({
 		method: "POST",
-		url: "/api/search/zones/{zoneId}/pages/{pageId}/blocks/{blockKey}/execute",
+		url: "/api/v1/search/zones/{zoneId}/pages/{pageId}/blocks/{blockKey}/execute",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -7504,7 +7493,7 @@ export function postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecute<
 
 /**
  * @summary Execute a trusted Zone Feed Block
- * {@link /api/search/zones/:zoneId/feed-blocks/:blockKey/execute}
+ * {@link /api/v1/search/zones/:zoneId/feed-blocks/:blockKey/execute}
  */
 export function postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute<
 	ThrowOnError extends boolean = true,
@@ -7517,7 +7506,7 @@ export function postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute<
 
 	return request({
 		method: "POST",
-		url: "/api/search/zones/{zoneId}/feed-blocks/{blockKey}/execute",
+		url: "/api/v1/search/zones/{zoneId}/feed-blocks/{blockKey}/execute",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -7530,7 +7519,7 @@ export function postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute<
 
 /**
  * @summary Search across public categories
- * {@link /api/search}
+ * {@link /api/v1/search}
  */
 export function postApiSearch<ThrowOnError extends boolean = true>(
 	options: Options<PostApiSearchOptions, ThrowOnError>,
@@ -7539,7 +7528,7 @@ export function postApiSearch<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "POST",
-		url: "/api/search",
+		url: "/api/v1/search",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -7550,7 +7539,7 @@ export function postApiSearch<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Create an immutable shared Search query
- * {@link /api/search/shared-queries}
+ * {@link /api/v1/search/shared-queries}
  */
 export function postApiSearchSharedQueries<ThrowOnError extends boolean = true>(
 	options: Options<PostApiSearchSharedQueriesOptions, ThrowOnError>,
@@ -7559,7 +7548,7 @@ export function postApiSearchSharedQueries<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "POST",
-		url: "/api/search/shared-queries",
+		url: "/api/v1/search/shared-queries",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -7570,21 +7559,23 @@ export function postApiSearchSharedQueries<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Get a shared Search query
- * {@link /api/search/shared-queries/:id}
+ * {@link /api/v1/search/shared-queries/:id}
  */
 export function getApiSearchSharedQueriesById<ThrowOnError extends boolean = true>(
 	options: Options<GetApiSearchSharedQueriesByIdOptions, ThrowOnError>,
 ): Promise<RequestResult<GetApiSearchSharedQueriesByIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/search/shared-queries/{id}", ...config }) as Promise<
-		RequestResult<GetApiSearchSharedQueriesByIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/v1/search/shared-queries/{id}",
+		...config,
+	}) as Promise<RequestResult<GetApiSearchSharedQueriesByIdResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Search one public category
- * {@link /api/search/:index}
+ * {@link /api/v1/search/:index}
  */
 export function postApiSearchByIndex<ThrowOnError extends boolean = true>(
 	options: Options<PostApiSearchByIndexOptions, ThrowOnError>,
@@ -7593,7 +7584,7 @@ export function postApiSearchByIndex<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "POST",
-		url: "/api/search/{index}",
+		url: "/api/v1/search/{index}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -7604,7 +7595,7 @@ export function postApiSearchByIndex<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Create image asset upload
- * {@link /api/image-assets}
+ * {@link /api/v1/image-assets}
  */
 export function postApiImageAssets<ThrowOnError extends boolean = true>(
 	options: Options<PostApiImageAssetsOptions, ThrowOnError>,
@@ -7613,7 +7604,7 @@ export function postApiImageAssets<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "POST",
-		url: "/api/image-assets",
+		url: "/api/v1/image-assets",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -7624,7 +7615,7 @@ export function postApiImageAssets<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Complete image asset upload
- * {@link /api/image-assets/:id/complete}
+ * {@link /api/v1/image-assets/:id/complete}
  */
 export function postApiImageAssetsByIdComplete<ThrowOnError extends boolean = true>(
 	options: Options<PostApiImageAssetsByIdCompleteOptions, ThrowOnError>,
@@ -7633,7 +7624,7 @@ export function postApiImageAssetsByIdComplete<ThrowOnError extends boolean = tr
 
 	return request({
 		method: "POST",
-		url: "/api/image-assets/{id}/complete",
+		url: "/api/v1/image-assets/{id}/complete",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -7644,7 +7635,7 @@ export function postApiImageAssetsByIdComplete<ThrowOnError extends boolean = tr
 
 /**
  * @summary Update image asset presentation
- * {@link /api/image-assets/:id/presentations/:role}
+ * {@link /api/v1/image-assets/:id/presentations/:role}
  */
 export function putApiImageAssetsByIdPresentationsByRole<ThrowOnError extends boolean = true>(
 	options: Options<PutApiImageAssetsByIdPresentationsByRoleOptions, ThrowOnError>,
@@ -7653,7 +7644,7 @@ export function putApiImageAssetsByIdPresentationsByRole<ThrowOnError extends bo
 
 	return request({
 		method: "PUT",
-		url: "/api/image-assets/{id}/presentations/{role}",
+		url: "/api/v1/image-assets/{id}/presentations/{role}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -7664,7 +7655,7 @@ export function putApiImageAssetsByIdPresentationsByRole<ThrowOnError extends bo
 
 /**
  * @summary Get image asset
- * {@link /api/image-assets/:id}
+ * {@link /api/v1/image-assets/:id}
  */
 export function getApiImageAssetsById<ThrowOnError extends boolean = true>(
 	options: Options<GetApiImageAssetsByIdOptions, ThrowOnError>,
@@ -7673,7 +7664,7 @@ export function getApiImageAssetsById<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "GET",
-		url: "/api/image-assets/{id}",
+		url: "/api/v1/image-assets/{id}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -7684,7 +7675,7 @@ export function getApiImageAssetsById<ThrowOnError extends boolean = true>(
 
 /**
  * @summary Delete incomplete image asset
- * {@link /api/image-assets/:id}
+ * {@link /api/v1/image-assets/:id}
  */
 export function deleteApiImageAssetsById<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiImageAssetsByIdOptions, ThrowOnError>,
@@ -7693,7 +7684,7 @@ export function deleteApiImageAssetsById<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "DELETE",
-		url: "/api/image-assets/{id}",
+		url: "/api/v1/image-assets/{id}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },

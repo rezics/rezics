@@ -141,7 +141,7 @@ task services-main:db:generate -- add_example
 # Recompute atlas.sum after an intentional manual SQL edit.
 task services-main:db:hash
 
-# Replay the full history and verify it matches the Drizzle schema.
+# Replay the v1 baseline plus later migrations and verify the result.
 task db:check
 
 # Inspect or apply pending migrations with the owner connection.
@@ -156,14 +156,17 @@ task services-main:db:bootstrap
 task services-main:db:bootstrap:credentials:overwrite
 ```
 
-Functions, triggers, extensions, and data backfills remain explicit SQL
-migrations. Atlas excludes functions, triggers, and extensions from automatic
-Drizzle diff ownership so it does not delete those manually managed objects.
+The machine-generated v1 baseline is the first migration. Its durable
+functions and triggers live in that same file after their table dependencies,
+with triggers created after their functions. Later functions, triggers,
+extensions, and data backfills remain explicit SQL migrations. Atlas excludes
+functions, triggers, and extensions from automatic Drizzle diff ownership so
+it does not delete those manually managed objects.
 The isolated migration database is vanilla PostgreSQL 18 with logical replication enabled.
 Every manual migration edit must be followed by `db:hash`.
 
 `task db:check` owns the correctness workflow: it validates the migration
-checksum, replays the full history in an isolated vanilla PostgreSQL 18
+checksum, replays the v1 baseline and every later migration in an isolated vanilla PostgreSQL 18
 database, and verifies that the result matches the Drizzle schema. CI runs this
 check for every pull request and main-branch push. It is intentionally separate
 from `dev` and from the target-database `db:migrate` operation.
@@ -203,15 +206,6 @@ also coordinates the external search projection. CI runs `task seed:contract`
 against fresh infrastructure, including a full external-index rebuild and
 zone-scoped lookup of each official workspace fixture.
 
-Existing databases created by the previous Drizzle migrator need a one-time
-baseline before their first Atlas-managed deployment. After taking a backup,
-run
-`ATLAS_BASELINE_VERSION=20260718154924 task services-main:db:adopt-atlas`;
-it records the last migration known to have committed under Drizzle and then
-applies the remaining migrations. Requiring the exact version makes this
-one-time path safe to automate without silently baselining the wrong state.
-Fresh databases must use the normal `db:migrate` task and must not be baselined.
-
 Production deployments must run the same validation and migration commands as
 a single pre-deploy job before rolling out API or worker replicas. Only that job
 receives `DATABASE_ADMIN_URL`; runtime services receive the narrower
@@ -227,4 +221,4 @@ Atlas workflow references: [versioned migration diff][atlas-diff],
 [atlas-import]: https://atlasgo.io/versioned/import
 
 The about site is deployed independently to Cloudflare Pages from the
-`about-v*` tag or a manual workflow dispatch.
+`v*` release tag or a manual workflow dispatch.

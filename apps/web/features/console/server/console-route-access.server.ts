@@ -38,7 +38,7 @@ export async function getConsoleRouteAccess(
 	const cookie = requestHeaders.get("cookie");
 	if (!cookie) return { kind: "unauthenticated" };
 
-	const response = await fetcher(new URL("/api/users/me", getBackendOrigin()), {
+	const response = await fetcher(new URL("/api/v1/users/me", getBackendOrigin()), {
 		cache: "no-store",
 		headers: { cookie },
 		signal: AbortSignal.timeout(ConsoleAccessTimeoutMs),

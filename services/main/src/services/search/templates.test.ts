@@ -96,7 +96,7 @@ describe("Search Feature v1", () => {
 		).toThrow("Invalid Search Feature input v1");
 	});
 
-	it("reports the failing path for a legacy persisted sort contract", () => {
+	it("reports the failing path for a malformed persisted sort contract", () => {
 		const current = createDefaultSearchDocument("global");
 		expect(() =>
 			resolveSearchDocument(
@@ -411,7 +411,7 @@ describe("Search Feature v1", () => {
 		const first = compileSearchFeatureInput(input);
 		const next = compileSearchFeatureInput({
 			...input,
-			state: { ...input.state, cursor: "s2_abc" },
+			state: { ...input.state, cursor: "s1_abc" },
 		});
 		expect(next.inputIdentity).toBe(first.inputIdentity);
 	});

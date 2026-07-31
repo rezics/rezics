@@ -149,20 +149,15 @@ describe("API token quota policy resolution", () => {
 			policyId: tokenStandardPolicy.id,
 			configuration: DefaultApiQuotaPolicies.tokenStandard.configuration,
 		};
-		const resolved = await resolveApiTokenQuotaPolicy(
-			"01983000-0000-7000-8000-000000000031",
-			{
-				executor: queuedSelectExecutor(
-					[],
-					[{ policy: tokenStandardPolicy, revision: tokenStandardRevision }],
-				),
-				now,
-			},
-		);
+		const resolved = await resolveApiTokenQuotaPolicy("01983000-0000-7000-8000-000000000031", {
+			executor: queuedSelectExecutor(
+				[],
+				[{ policy: tokenStandardPolicy, revision: tokenStandardRevision }],
+			),
+			now,
+		});
 
 		expect(resolved.source).toBe("standard_default");
-		expect(resolved.configuration).toEqual(
-			DefaultApiQuotaPolicies.tokenStandard.configuration,
-		);
+		expect(resolved.configuration).toEqual(DefaultApiQuotaPolicies.tokenStandard.configuration);
 	});
 });

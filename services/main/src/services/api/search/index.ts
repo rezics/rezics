@@ -936,7 +936,7 @@ export default new Elysia({ prefix: "/search" })
 				document: body,
 				createdByProfileId,
 			});
-			set.headers.location = `/api/search/shared-queries/${created.id}`;
+			set.headers.location = `/api/v1/search/shared-queries/${created.id}`;
 			return status(StatusCodes.CREATED, presentSharedSearchQuery(created));
 		},
 		{

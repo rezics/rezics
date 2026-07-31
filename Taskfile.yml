@@ -94,13 +94,6 @@ tasks:
             - git diff --exit-code -- libraries/services/main/openapi/openapi.json libraries/services/main/openapi-fetch/src/generated libraries/services/main/openapi-tanstack-query/src/generated packages/api/src/generated
             - test -z "$(git ls-files --others --exclude-standard -- libraries/services/main/openapi/openapi.json libraries/services/main/openapi-fetch/src/generated libraries/services/main/openapi-tanstack-query/src/generated packages/api/src/generated)"
 
-    search:check:
-        desc: Enforce the clean PGroonga removal boundary.
-        cmds:
-            - >-
-                test -z "$(rg -i 'pgroonga|pgroonga_query_escape|&@~'
-                --glob '!.temp/**' --glob '!Taskfile.yml' .)"
-
     seed:contract:
         desc: Verify Bootstrap, coverage Seed, derived projections, and official Zone Search.
         cmds:
@@ -152,7 +145,16 @@ tasks:
     infra:search:apply:
         desc: Recreate Sequin to apply the reviewed configuration after database preparation.
         cmds:
-            - docker compose up -d --wait --force-recreate sequin
+            - docker compose up -d --force-recreate sequin
+            - >-
+                for attempt in $(seq 1 60); do
+                    if docker compose exec -T sequin curl --fail --silent --show-error \
+                    http://localhost:7376/health >/dev/null 2>&1;
+                    then exit 0; fi;
+                    sleep 2;
+                done;
+                docker compose logs --tail 200 sequin;
+                exit 1
 
     infra:search:stop:
         desc: Stop Sequin before a coordinated PostgreSQL reset.

@@ -28,8 +28,9 @@ function capitalize(value: string): string {
 /** Mirrors Elysia OpenAPI's deterministic operation ID for the matched route template. */
 export function apiRouteOperationId(method: string, route: string): string {
 	let operationId = method.toLowerCase();
-	if (!route || route === "/") return `${operationId}Index`;
-	for (const pathPart of route.split("/")) {
+	const operationRoute = route.replace(/^\/api\/v[1-9]\d*(?=\/|$)/, "/api");
+	if (!operationRoute || operationRoute === "/") return `${operationId}Index`;
+	for (const pathPart of operationRoute.split("/")) {
 		operationId += pathPart.includes(":")
 			? `By${capitalize(pathPart.replace(":", ""))}`
 			: capitalize(pathPart);

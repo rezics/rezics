@@ -46,7 +46,7 @@ vi.mock("@/features/search/search-feature", () => ({
 		children: ReactNode;
 		onExecute: (request: {
 			injections: [];
-			state: { cursor: "s2_stale"; sort: "best" };
+			state: { cursor: "s1_stale"; sort: "best" };
 		}) => void;
 		surface: string;
 	}) => (
@@ -55,7 +55,7 @@ vi.mock("@/features/search/search-feature", () => ({
 				onClick={() =>
 					onExecute({
 						injections: [],
-						state: { cursor: "s2_stale", sort: "best" },
+						state: { cursor: "s1_stale", sort: "best" },
 					})
 				}
 				type="button"

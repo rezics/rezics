@@ -7,13 +7,10 @@ import { CurrentProjectionSources, HistoryProjectionSources } from "./projection
 
 const migrationDirectory = fileURLToPath(new URL("../database/migrations", import.meta.url));
 const currentEnrichment = fileURLToPath(
-	new URL("../../../search/rezics_unit_search_document_v11.sql", import.meta.url),
+	new URL("../../../search/rezics_unit_search_document_v1.sql", import.meta.url),
 );
-const contentLicenseGovernanceMigration = fileURLToPath(
-	new URL(
-		"../database/migrations/20260731160001_unit_content_license_governance.sql",
-		import.meta.url,
-	),
+const baselineMigration = fileURLToPath(
+	new URL("../database/migrations/20260801000000_v1_baseline.sql", import.meta.url),
 );
 
 describe("search projection source registry", () => {
@@ -34,20 +31,20 @@ describe("search projection source registry", () => {
 				`missing current source ${table}`,
 			).toBe(true);
 		for (const table of Object.keys(HistoryProjectionSources))
-			expect(sql, `missing history source ${table}`).toContain(`'${table}'`);
+			expect(sql, `missing history source ${table}`).toContain(
+				`search_revision_projection_touch_${table}_insert`,
+			);
 		expect(sql).not.toContain("FOR EACH ROW EXECUTE FUNCTION search_touch");
 	});
 
-	it("projects root read grants and current ownership from the access v2 tables", async () => {
+	it("projects root read grants and current ownership", async () => {
 		const sql = await readFile(currentEnrichment, "utf8");
 		expect(CurrentProjectionSources).toHaveProperty("unit_access_grant");
 		expect(CurrentProjectionSources).toHaveProperty("unit_ownership");
-		expect(CurrentProjectionSources).not.toHaveProperty("unit_access_binding");
 		expect(sql).toContain("FROM public.unit_access_grant");
 		expect(sql).toContain("permission = 'unit.read'");
 		expect(sql).toContain("scope = array[]::text[]");
 		expect(sql).toContain("FROM public.unit_ownership");
-		expect(sql).not.toContain("FROM public.unit_access_binding");
 	});
 
 	it("projects Series Units into the works category", async () => {
@@ -61,16 +58,16 @@ describe("search projection source registry", () => {
 	it("projects only the active immutable Unit content license grant", async () => {
 		const [sql, migration] = await Promise.all([
 			readFile(currentEnrichment, "utf8"),
-			readFile(contentLicenseGovernanceMigration, "utf8"),
+			readFile(baselineMigration, "utf8"),
 		]);
 		expect(sql).toContain(
 			"ON content_license_row.unit_id = source.unit_id\n\tAND content_license_row.status = 'active'",
 		);
 		expect(sql).not.toContain("content_license_row.revoked_at");
 		expect(migration).toContain(
-			'CREATE TRIGGER "search_projection_touch_unit_content_license_update"',
+			"CREATE TRIGGER search_projection_touch_unit_content_license_update",
 		);
-		expect(migration).toContain('CREATE TRIGGER "unit_content_license_guard_mutation"');
+		expect(migration).toContain("CREATE TRIGGER unit_content_license_guard_mutation");
 	});
 
 	it("projects and invalidates direct or one-Entity-hop Profile credits", async () => {

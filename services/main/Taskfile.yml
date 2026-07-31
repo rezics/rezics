@@ -129,11 +129,17 @@ tasks:
         cmds:
             - task: db:validate
             - defer: { task: db:replay:down }
-            - task: db:replay:up
-            - yarn exec atlas migrate validate --env main
             - task: db:replay:reset
-            - yarn exec atlas migrate diff --env main ci_schema_sync
-            - test -z "$(find src/services/database/migrations -maxdepth 1 -type f -name '*_ci_schema_sync.sql' -print -quit)"
+            - >-
+                yarn exec atlas migrate apply --env main
+                --url 'postgres://postgres:postgres@localhost:5433/rezics_atlas?search_path=public&sslmode=disable'
+            - >-
+                yarn exec atlas schema diff --env main
+                --from 'postgres://postgres:postgres@localhost:5433/rezics_atlas?search_path=public&sslmode=disable'
+                --to env://schema.src
+                --exclude atlas_schema_revisions
+                --exclude '*[type=extension|function|trigger]'
+                | grep -q '^Schemas are synced, no changes to be made\.$'
 
     db:migrate:dry-run:
         desc: Print pending Atlas migrations without applying them.
@@ -171,14 +177,6 @@ tasks:
             - task: db:bootstrap
             - task: content-metrics:rebuild
             - task: studio:rebuild
-
-    db:adopt-atlas:
-        desc: One-time adoption of an existing Drizzle-managed database at the known baseline.
-        cmds:
-            - test -n "${DATABASE_ADMIN_URL:-}"
-            - test "${ATLAS_BASELINE_VERSION:-}" = "20260718154924"
-            - yarn exec atlas migrate apply --env main --url "${DATABASE_ADMIN_URL}" --baseline "${ATLAS_BASELINE_VERSION}"
-            - yarn exec tsx scripts/ensure-database-privileges.ts
 
     db:status:
         desc: Show Atlas migration status.

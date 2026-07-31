@@ -17,10 +17,10 @@ describe("recommendation cache invalidation", () => {
 			queryKey: FeedQueryKey,
 		});
 		expect(invalidateQueries).toHaveBeenNthCalledWith(2, {
-			queryKey: [{ url: "/api/recommendations/units" }],
+			queryKey: [{ url: "/api/v1/recommendations/units" }],
 		});
 		expect(invalidateQueries).toHaveBeenNthCalledWith(3, {
-			queryKey: [{ url: "/api/recommendations/posts/:postId" }],
+			queryKey: [{ url: "/api/v1/recommendations/posts/:postId" }],
 		});
 	});
 });

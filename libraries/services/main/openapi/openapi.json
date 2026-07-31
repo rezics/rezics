@@ -1,6 +1,6 @@
 {
 	"openapi": "3.2.0",
-	"info": { "title": "REZICS API", "version": "0.1.0" },
+	"info": { "title": "REZICS API", "version": "1.0.0" },
 	"components": {
 		"schemas": {
 			"JsonValue": {
@@ -10249,7 +10249,6 @@
 					"AliasNotFound",
 					"TagApplicationNotFound",
 					"UnitTagCurationChanged",
-					"UnitVersionNotFound",
 					"UnitSourceLinkNotFound",
 					"InvalidMessageCursor",
 					"ConversationNotFound",
@@ -10492,7 +10491,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/unit/{unitId}/association-proposals": {
+		"/api/v1/unit/{unitId}/association-proposals": {
 			"get": {
 				"summary": "List Unit association proposals",
 				"tags": ["Unit"],
@@ -10773,7 +10772,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/unit/{unitId}/association-proposals/requests": {
+		"/api/v1/unit/{unitId}/association-proposals/requests": {
 			"post": {
 				"summary": "Request Unit association",
 				"tags": ["Unit"],
@@ -11158,7 +11157,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/unit/{unitId}/association-proposals/invitations": {
+		"/api/v1/unit/{unitId}/association-proposals/invitations": {
 			"post": {
 				"summary": "Invite Unit to association",
 				"tags": ["Unit"],
@@ -11543,7 +11542,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/unit/{unitId}/association-proposals/{proposalId}/accept": {
+		"/api/v1/unit/{unitId}/association-proposals/{proposalId}/accept": {
 			"post": {
 				"summary": "Accept Unit association proposal",
 				"tags": ["Unit"],
@@ -11822,7 +11821,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/unit/{unitId}/association-proposals/{proposalId}/decline": {
+		"/api/v1/unit/{unitId}/association-proposals/{proposalId}/decline": {
 			"post": {
 				"summary": "Decline Unit association proposal",
 				"tags": ["Unit"],
@@ -12101,7 +12100,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/unit/{unitId}/association-proposals/{proposalId}": {
+		"/api/v1/unit/{unitId}/association-proposals/{proposalId}": {
 			"delete": {
 				"summary": "Cancel Unit association proposal",
 				"tags": ["Unit"],
@@ -12240,7 +12239,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/startup": {
+		"/api/v1/startup": {
 			"get": {
 				"summary": "Process startup",
 				"tags": ["System"],
@@ -12272,7 +12271,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/health": {
+		"/api/v1/health": {
 			"get": {
 				"summary": "Process health",
 				"tags": ["System"],
@@ -12368,7 +12367,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/ready": {
+		"/api/v1/ready": {
 			"get": {
 				"summary": "Dependency readiness",
 				"tags": ["System"],
@@ -12652,7 +12651,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/notifications": {
+		"/api/v1/notifications": {
 			"get": {
 				"summary": "Poll notifications with a cursor",
 				"tags": ["Notifications"],
@@ -13450,7 +13449,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/notifications/unread-count": {
+		"/api/v1/notifications/unread-count": {
 			"get": {
 				"summary": "Get unread notification count",
 				"tags": ["Notifications"],
@@ -13531,7 +13530,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/notifications/read-all": {
+		"/api/v1/notifications/read-all": {
 			"put": {
 				"summary": "Mark notifications read",
 				"tags": ["Notifications"],
@@ -13652,7 +13651,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/notifications/{notificationId}/read": {
+		"/api/v1/notifications/{notificationId}/read": {
 			"put": {
 				"summary": "Mark one notification read",
 				"tags": ["Notifications"],
@@ -13765,7 +13764,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/notifications/preferences": {
+		"/api/v1/notifications/preferences": {
 			"get": {
 				"summary": "Get notification preferences",
 				"tags": ["Notifications"],
@@ -13982,7 +13981,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/ownership-claims": {
+		"/api/v1/ownership-claims": {
 			"post": {
 				"summary": "Claim ownership of a community-owned Unit",
 				"tags": ["Governance"],
@@ -14115,7 +14114,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/ownership-claims/{claimId}/withdraw": {
+		"/api/v1/ownership-claims/{claimId}/withdraw": {
 			"post": {
 				"summary": "Withdraw a pending Unit ownership claim",
 				"tags": ["Governance"],
@@ -14218,7 +14217,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/recommendations/units": {
+		"/api/v1/recommendations/units": {
 			"get": {
 				"summary": "Recommend Units",
 				"tags": ["Recommendations"],
@@ -14543,7 +14542,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/recommendations/posts/{postId}": {
+		"/api/v1/recommendations/posts/{postId}": {
 			"get": {
 				"summary": "Recommend related posts",
 				"tags": ["Recommendations"],
@@ -19595,7 +19594,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/recommendations/events": {
+		"/api/v1/recommendations/events": {
 			"post": {
 				"summary": "Record recommendation events",
 				"tags": ["Recommendations"],
@@ -19772,7 +19771,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/recommendations/exclusions/{unitId}": {
+		"/api/v1/recommendations/exclusions/{unitId}": {
 			"put": {
 				"summary": "Exclude a recommendation",
 				"tags": ["Recommendations"],
@@ -20150,7 +20149,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/messages/conversations": {
+		"/api/v1/messages/conversations": {
 			"get": {
 				"summary": "List direct-message conversations",
 				"tags": ["Messages"],
@@ -20526,7 +20525,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/messages/conversations/{conversationId}": {
+		"/api/v1/messages/conversations/{conversationId}": {
 			"get": {
 				"summary": "Get direct-message conversation",
 				"tags": ["Messages"],
@@ -20678,7 +20677,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/messages/conversations/{conversationId}/messages": {
+		"/api/v1/messages/conversations/{conversationId}/messages": {
 			"get": {
 				"summary": "List direct messages",
 				"tags": ["Messages"],
@@ -21084,7 +21083,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/messages/conversations/{conversationId}/read": {
+		"/api/v1/messages/conversations/{conversationId}/read": {
 			"put": {
 				"summary": "Mark direct-message conversation read",
 				"tags": ["Messages"],
@@ -21226,7 +21225,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/messages/{messageId}": {
+		"/api/v1/messages/{messageId}": {
 			"delete": {
 				"summary": "Delete direct message",
 				"tags": ["Messages"],
@@ -21331,7 +21330,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/api-tokens": {
+		"/api/v1/api-tokens": {
 			"get": {
 				"summary": "List API tokens",
 				"tags": ["API Tokens"],
@@ -24827,7 +24826,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/api-tokens/{tokenId}": {
+		"/api/v1/api-tokens/{tokenId}": {
 			"patch": {
 				"summary": "Update API token",
 				"tags": ["API Tokens"],
@@ -26747,7 +26746,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/api-tokens/{tokenId}/quota-override": {
+		"/api/v1/api-tokens/{tokenId}/quota-override": {
 			"put": {
 				"summary": "Replace API token quota override",
 				"tags": ["API Tokens"],
@@ -28974,7 +28973,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/token": {
+		"/api/v1/token": {
 			"get": {
 				"operationId": "getCurrentApiToken",
 				"summary": "Inspect the current API token's safe capabilities",
@@ -30636,7 +30635,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/api-quota-policies": {
+		"/api/v1/api-quota-policies": {
 			"get": {
 				"summary": "List API quota policies",
 				"tags": ["API Quota Policies"],
@@ -31332,7 +31331,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/api-quota-policies/{policyKey}": {
+		"/api/v1/api-quota-policies/{policyKey}": {
 			"put": {
 				"summary": "Publish an API quota policy revision",
 				"tags": ["API Quota Policies"],
@@ -32685,7 +32684,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/api-quota-policies/accounts/{userId}": {
+		"/api/v1/api-quota-policies/accounts/{userId}": {
 			"get": {
 				"summary": "Get a user's API quota",
 				"tags": ["API Quota Policies"],
@@ -35343,7 +35342,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/api-quota-policies/accounts/{userId}/tokens": {
+		"/api/v1/api-quota-policies/accounts/{userId}/tokens": {
 			"get": {
 				"summary": "List a user's API token quotas",
 				"tags": ["API Quota Policies"],
@@ -36134,7 +36133,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/api-quota-policies/accounts/{userId}/tokens/{tokenId}": {
+		"/api/v1/api-quota-policies/accounts/{userId}/tokens/{tokenId}": {
 			"put": {
 				"summary": "Assign an API token quota policy",
 				"tags": ["API Quota Policies"],
@@ -37987,7 +37986,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/feed/query": {
+		"/api/v1/feed/query": {
 			"post": {
 				"summary": "Ranked realm feed",
 				"tags": ["Feed"],
@@ -44265,7 +44264,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/reports/me": {
+		"/api/v1/reports/me": {
 			"get": {
 				"summary": "List current user's Unit reports",
 				"tags": ["Reports"],
@@ -44622,7 +44621,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/reports/units/{unitId}/destinations": {
+		"/api/v1/reports/units/{unitId}/destinations": {
 			"get": {
 				"summary": "List rule Realms that can receive a Unit report",
 				"tags": ["Reports"],
@@ -44848,7 +44847,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/reports": {
+		"/api/v1/realms/{realmId}/reports": {
 			"get": {
 				"summary": "List reports for a Realm",
 				"tags": ["Reports"],
@@ -45182,7 +45181,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/reports/platform/cases": {
+		"/api/v1/reports/platform/cases": {
 			"get": {
 				"summary": "List platform-governed Unit report cases",
 				"tags": ["Reports"],
@@ -45565,7 +45564,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/reports/units/{unitId}": {
+		"/api/v1/reports/units/{unitId}": {
 			"post": {
 				"summary": "Report a Unit under a selected Realm rule",
 				"tags": ["Reports"],
@@ -45946,7 +45945,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/governance/unit/{unitId}/access": {
+		"/api/v1/governance/unit/{unitId}/access": {
 			"get": {
 				"summary": "Get Unit access configuration",
 				"tags": ["Governance"],
@@ -46963,7 +46962,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/governance/unit/{unitId}/access-candidates": {
+		"/api/v1/governance/unit/{unitId}/access-candidates": {
 			"get": {
 				"summary": "Search Unit access candidates",
 				"tags": ["Governance"],
@@ -47143,7 +47142,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/governance/unit/{unitId}/access/effective": {
+		"/api/v1/governance/unit/{unitId}/access/effective": {
 			"get": {
 				"summary": "Resolve effective Unit access for the current Profile",
 				"tags": ["Governance"],
@@ -47407,7 +47406,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/governance/unit/{unitId}/ownership/candidates": {
+		"/api/v1/governance/unit/{unitId}/ownership/candidates": {
 			"get": {
 				"summary": "Search eligible Unit ownership recipients",
 				"tags": ["Governance"],
@@ -47571,7 +47570,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/governance/unit/{unitId}/ownership": {
+		"/api/v1/governance/unit/{unitId}/ownership": {
 			"put": {
 				"summary": "Transfer Unit ownership",
 				"tags": ["Governance"],
@@ -47749,7 +47748,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/governance/unit/{unitId}/ownership/relinquishment": {
+		"/api/v1/governance/unit/{unitId}/ownership/relinquishment": {
 			"post": {
 				"summary": "Relinquish Unit ownership to Community",
 				"tags": ["Governance"],
@@ -47923,7 +47922,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/governance/unit/access-invitations": {
+		"/api/v1/governance/unit/access-invitations": {
 			"get": {
 				"summary": "List received Unit access invitations",
 				"tags": ["Governance"],
@@ -48124,7 +48123,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/governance/unit/{unitId}/access-invitations": {
+		"/api/v1/governance/unit/{unitId}/access-invitations": {
 			"get": {
 				"summary": "List managed Unit access invitations",
 				"tags": ["Governance"],
@@ -48741,7 +48740,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/governance/unit/{unitId}/access-invitations/{invitationId}/accept": {
+		"/api/v1/governance/unit/{unitId}/access-invitations/{invitationId}/accept": {
 			"post": {
 				"summary": "Accept Unit access invitation",
 				"tags": ["Governance"],
@@ -48986,7 +48985,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/governance/unit/{unitId}/access-invitations/{invitationId}/decline": {
+		"/api/v1/governance/unit/{unitId}/access-invitations/{invitationId}/decline": {
 			"post": {
 				"summary": "Decline Unit access invitation",
 				"tags": ["Governance"],
@@ -49231,7 +49230,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/governance/unit/{unitId}/access-invitations/{invitationId}": {
+		"/api/v1/governance/unit/{unitId}/access-invitations/{invitationId}": {
 			"delete": {
 				"summary": "Cancel Unit access invitation",
 				"tags": ["Governance"],
@@ -49368,7 +49367,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/governance/platform/units": {
+		"/api/v1/governance/platform/units": {
 			"get": {
 				"summary": "List Units for platform lifecycle administration",
 				"tags": ["Governance"],
@@ -49573,7 +49572,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/governance/platform/units/{unitId}/ownership-candidates": {
+		"/api/v1/governance/platform/units/{unitId}/ownership-candidates": {
 			"get": {
 				"summary": "Search platform Unit ownership override recipients",
 				"tags": ["Governance"],
@@ -49737,7 +49736,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/governance/platform/units/{unitId}/ownership-override": {
+		"/api/v1/governance/platform/units/{unitId}/ownership-override": {
 			"post": {
 				"summary": "Override Unit ownership through platform governance",
 				"tags": ["Governance"],
@@ -49969,7 +49968,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/governance/platform/units/{unitId}/delete": {
+		"/api/v1/governance/platform/units/{unitId}/delete": {
 			"post": {
 				"summary": "Soft-delete a Unit from the platform Console",
 				"tags": ["Governance"],
@@ -50261,7 +50260,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/governance/platform/units/{unitId}/restore": {
+		"/api/v1/governance/platform/units/{unitId}/restore": {
 			"post": {
 				"summary": "Restore a soft-deleted Unit from the platform Console",
 				"tags": ["Governance"],
@@ -50553,7 +50552,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/governance/platform/ownership-claims": {
+		"/api/v1/governance/platform/ownership-claims": {
 			"get": {
 				"summary": "List platform Unit ownership claims",
 				"tags": ["Governance"],
@@ -50828,7 +50827,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/governance/platform/ownership-claims/{claimId}/decision": {
+		"/api/v1/governance/platform/ownership-claims/{claimId}/decision": {
 			"post": {
 				"summary": "Resolve a Unit ownership claim",
 				"tags": ["Governance"],
@@ -51060,7 +51059,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/governance/notes/{postId}": {
+		"/api/v1/governance/notes/{postId}": {
 			"get": {
 				"summary": "Get governance note",
 				"tags": ["Governance"],
@@ -52097,7 +52096,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/governance/moderation/cases": {
+		"/api/v1/governance/moderation/cases": {
 			"get": {
 				"summary": "List moderation cases",
 				"tags": ["Governance"],
@@ -52609,7 +52608,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/governance/moderation/cases/{caseId}": {
+		"/api/v1/governance/moderation/cases/{caseId}": {
 			"get": {
 				"summary": "Get moderation case",
 				"tags": ["Governance"],
@@ -53873,7 +53872,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/governance/moderation/actions": {
+		"/api/v1/governance/moderation/actions": {
 			"post": {
 				"summary": "Apply moderation action",
 				"tags": ["Governance"],
@@ -55569,7 +55568,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/governance/moderation/enforcements": {
+		"/api/v1/governance/moderation/enforcements": {
 			"post": {
 				"summary": "Create account enforcement",
 				"tags": ["Governance"],
@@ -56074,7 +56073,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/governance/moderation/enforcements/{enforcementId}/revoke": {
+		"/api/v1/governance/moderation/enforcements/{enforcementId}/revoke": {
 			"post": {
 				"summary": "Revoke account enforcement",
 				"tags": ["Governance"],
@@ -56601,7 +56600,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/audit/events": {
+		"/api/v1/audit/events": {
 			"get": {
 				"summary": "List global security audit events",
 				"tags": ["Audit"],
@@ -56713,14 +56712,8 @@
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
 													"schemaVersion": {
-														"anyOf": [
-															{
-																"format": "integer",
-																"default": 0,
-																"type": "string"
-															},
-															{ "type": "integer" }
-														]
+														"const": 1,
+														"type": "number"
 													},
 													"category": {
 														"default": "admin_activity",
@@ -56981,7 +56974,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/series": {
+		"/api/v1/series": {
 			"post": {
 				"summary": "Create Series",
 				"tags": ["Series"],
@@ -57474,7 +57467,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/series/{seriesId}/releases": {
+		"/api/v1/series/{seriesId}/releases": {
 			"get": {
 				"summary": "List Series releases",
 				"tags": ["Series"],
@@ -57694,7 +57687,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/zones/{zoneId}/slug-address": {
+		"/api/v1/zones/{zoneId}/slug-address": {
 			"put": {
 				"operationId": "replaceZoneSlugAddress",
 				"summary": "Replace a Zone slug address",
@@ -57986,7 +57979,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/zones/{zoneId}": {
+		"/api/v1/zones/{zoneId}": {
 			"get": {
 				"summary": "Get Zone configuration",
 				"tags": ["Zones"],
@@ -59430,7 +59423,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/zones/{zoneId}/render": {
+		"/api/v1/zones/{zoneId}/render": {
 			"get": {
 				"operationId": "getZoneRenderProjection",
 				"summary": "Get a Zone render projection",
@@ -60603,7 +60596,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/zones/{zoneId}/pages": {
+		"/api/v1/zones/{zoneId}/pages": {
 			"get": {
 				"summary": "List Zone pages",
 				"tags": ["Zones"],
@@ -61212,7 +61205,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/zones/{zoneId}/pages/{pageId}": {
+		"/api/v1/zones/{zoneId}/pages/{pageId}": {
 			"get": {
 				"summary": "Get Zone page by Unit ID",
 				"tags": ["Zones"],
@@ -61780,7 +61773,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/zones/{zoneId}/pages/{pageId}/placement": {
+		"/api/v1/zones/{zoneId}/pages/{pageId}/placement": {
 			"put": {
 				"summary": "Index Zone page in page-structure",
 				"tags": ["Zones"],
@@ -62323,7 +62316,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/zones/{zoneId}/navigation": {
+		"/api/v1/zones/{zoneId}/navigation": {
 			"get": {
 				"summary": "List Zone navigation resources",
 				"tags": ["Zones"],
@@ -62638,7 +62631,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/zones/{zoneId}/navigation/{navigationId}": {
+		"/api/v1/zones/{zoneId}/navigation/{navigationId}": {
 			"get": {
 				"summary": "Get Zone navigation resource",
 				"tags": ["Zones"],
@@ -63170,7 +63163,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/series/{seriesId}/releases/{releaseId}": {
+		"/api/v1/series/{seriesId}/releases/{releaseId}": {
 			"put": {
 				"summary": "Add or update Series release",
 				"tags": ["Series"],
@@ -63512,7 +63505,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/zones": {
+		"/api/v1/zones": {
 			"post": {
 				"summary": "Create Zone",
 				"tags": ["Zones"],
@@ -64078,7 +64071,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/software/{softwareId}/system-requirements": {
+		"/api/v1/software/{softwareId}/system-requirements": {
 			"get": {
 				"summary": "List Software system requirements",
 				"tags": ["Software"],
@@ -64514,7 +64507,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/software/{softwareId}/system-requirements/{requirementId}": {
+		"/api/v1/software/{softwareId}/system-requirements/{requirementId}": {
 			"put": {
 				"summary": "Replace Software system requirement",
 				"tags": ["Software"],
@@ -64950,7 +64943,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/by-id/{unitId}/docks": {
+		"/api/v1/units/by-id/{unitId}/docks": {
 			"get": {
 				"summary": "List configured Unit Docks",
 				"tags": ["Docks"],
@@ -65094,7 +65087,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/by-id/{unitId}/docks/{kind}": {
+		"/api/v1/units/by-id/{unitId}/docks/{kind}": {
 			"get": {
 				"summary": "Get a Unit Dock",
 				"tags": ["Docks"],
@@ -65666,7 +65659,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/by-id/{unitId}/docks/{kind}/revisions": {
+		"/api/v1/units/by-id/{unitId}/docks/{kind}/revisions": {
 			"get": {
 				"summary": "List Dock revisions",
 				"tags": ["Docks"],
@@ -65849,7 +65842,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/by-id/{unitId}/docks/{kind}/revisions/{revisionId}/restore": {
+		"/api/v1/units/by-id/{unitId}/docks/{kind}/revisions/{revisionId}/restore": {
 			"post": {
 				"summary": "Restore a Dock revision",
 				"tags": ["Docks"],
@@ -66081,7 +66074,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/users/me": {
+		"/api/v1/users/me": {
 			"get": {
 				"summary": "Current user profile",
 				"tags": ["Users"],
@@ -68181,7 +68174,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/users/me/profile-slug": {
+		"/api/v1/users/me/profile-slug": {
 			"put": {
 				"operationId": "assignCurrentProfileSlug",
 				"summary": "Assign the current Profile slug once",
@@ -68406,7 +68399,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/users/me/studio": {
+		"/api/v1/users/me/studio": {
 			"get": {
 				"operationId": "listCurrentUserStudioContent",
 				"summary": "List current user's Studio work resources",
@@ -68893,7 +68886,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/users/me/studio/{unitId}/visit": {
+		"/api/v1/users/me/studio/{unitId}/visit": {
 			"put": {
 				"operationId": "recordCurrentUserStudioVisit",
 				"summary": "Record a Studio resource visit",
@@ -69009,7 +69002,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/users/me/preferences": {
+		"/api/v1/users/me/preferences": {
 			"get": {
 				"summary": "Current user preferences",
 				"tags": ["Users"],
@@ -69812,7 +69805,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/users/me/privacy": {
+		"/api/v1/users/me/privacy": {
 			"patch": {
 				"operationId": "updateCurrentUserPrivacy",
 				"summary": "Update current user's Score and Progress privacy",
@@ -69946,7 +69939,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/users/me/following": {
+		"/api/v1/users/me/following": {
 			"get": {
 				"summary": "List Units followed by the current user",
 				"tags": ["Users"],
@@ -70364,7 +70357,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/users/me/following/{unitId}": {
+		"/api/v1/users/me/following/{unitId}": {
 			"get": {
 				"summary": "Get current user's follow state for a Unit",
 				"tags": ["Users"],
@@ -70982,7 +70975,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/users/me/following/{unitId}/settings": {
+		"/api/v1/users/me/following/{unitId}/settings": {
 			"put": {
 				"summary": "Replace notification and personalization settings for a followed Unit",
 				"tags": ["Users"],
@@ -71323,7 +71316,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/users/{id}/activity": {
+		"/api/v1/users/{id}/activity": {
 			"get": {
 				"operationId": "getUserProfileActivity",
 				"summary": "Get visible Score and Progress activity for a public Profile",
@@ -71651,7 +71644,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/users/{id}": {
+		"/api/v1/users/{id}": {
 			"get": {
 				"summary": "Public user profile",
 				"tags": ["Users"],
@@ -72182,7 +72175,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/users/me/blocks": {
+		"/api/v1/users/me/blocks": {
 			"get": {
 				"summary": "List blocked users",
 				"tags": ["Users"],
@@ -72277,7 +72270,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/users/{id}/block": {
+		"/api/v1/users/{id}/block": {
 			"put": {
 				"summary": "Block user",
 				"tags": ["Users"],
@@ -72501,7 +72494,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/platform-access/policy": {
+		"/api/v1/platform-access/policy": {
 			"get": {
 				"summary": "Get the platform access policy",
 				"tags": ["Platform access"],
@@ -72610,7 +72603,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/platform-access/profiles": {
+		"/api/v1/platform-access/profiles": {
 			"get": {
 				"summary": "List or search Profiles and their platform access",
 				"tags": ["Platform access"],
@@ -72818,7 +72811,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/platform-access/profiles/{profileId}": {
+		"/api/v1/platform-access/profiles/{profileId}": {
 			"get": {
 				"summary": "Get one Profile's platform access",
 				"tags": ["Platform access"],
@@ -73362,7 +73355,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/platform-users": {
+		"/api/v1/platform-users": {
 			"get": {
 				"summary": "List platform users",
 				"tags": ["Platform Users"],
@@ -73684,7 +73677,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/platform-users/{userId}": {
+		"/api/v1/platform-users/{userId}": {
 			"get": {
 				"summary": "Get one platform user",
 				"tags": ["Platform Users"],
@@ -73932,7 +73925,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/platform-users/{userId}/account-state": {
+		"/api/v1/platform-users/{userId}/account-state": {
 			"put": {
 				"summary": "Replace a platform user account state",
 				"tags": ["Platform Users"],
@@ -74306,7 +74299,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/platform-users/{userId}/sessions": {
+		"/api/v1/platform-users/{userId}/sessions": {
 			"get": {
 				"summary": "List a platform user's sessions",
 				"tags": ["Platform Users"],
@@ -74637,7 +74630,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/platform-users/{userId}/sessions/{sessionId}": {
+		"/api/v1/platform-users/{userId}/sessions/{sessionId}": {
 			"delete": {
 				"summary": "Revoke a platform user session",
 				"tags": ["Platform Users"],
@@ -74793,7 +74786,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/tags/{tagId}/hierarchy": {
+		"/api/v1/tags/{tagId}/hierarchy": {
 			"get": {
 				"summary": "Get a Tag with direct children and grandchildren",
 				"tags": ["Tags"],
@@ -75184,7 +75177,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/tag-structures": {
+		"/api/v1/tag-structures": {
 			"post": {
 				"summary": "Create or find and upvote a community-immutable Tag structure",
 				"tags": ["Tags"],
@@ -75372,7 +75365,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/tag-structures/{structureId}": {
+		"/api/v1/tag-structures/{structureId}": {
 			"get": {
 				"summary": "Get a Tag structure",
 				"tags": ["Tags"],
@@ -76220,7 +76213,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/tag-structures/{structureId}/vote": {
+		"/api/v1/tag-structures/{structureId}/vote": {
 			"put": {
 				"summary": "Vote on a Tag structure",
 				"tags": ["Tags"],
@@ -76587,7 +76580,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/{type}/{unitId}/tags": {
+		"/api/v1/units/{type}/{unitId}/tags": {
 			"get": {
 				"summary": "Get global and subscribed Realm Tag assertions for a Unit",
 				"tags": ["Tags"],
@@ -77767,7 +77760,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/{type}/{unitId}/tag-structures/{structureId}": {
+		"/api/v1/units/{type}/{unitId}/tag-structures/{structureId}": {
 			"put": {
 				"summary": "Apply a Tag structure to a Unit",
 				"tags": ["Tags"],
@@ -78156,7 +78149,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/{type}/{unitId}/tag-structures/{structureId}/vote": {
+		"/api/v1/units/{type}/{unitId}/tag-structures/{structureId}/vote": {
 			"put": {
 				"summary": "Vote on a Unit Tag structure",
 				"tags": ["Tags"],
@@ -78615,7 +78608,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/users/me/tag-realm-subscriptions": {
+		"/api/v1/users/me/tag-realm-subscriptions": {
 			"get": {
 				"summary": "List the current user's ordered Realm Tag sources",
 				"tags": ["Tags"],
@@ -78878,7 +78871,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/users/me/tag-realm-subscriptions/{realmId}": {
+		"/api/v1/users/me/tag-realm-subscriptions/{realmId}": {
 			"put": {
 				"summary": "Subscribe to or reorder a Realm Tag source",
 				"tags": ["Tags"],
@@ -79247,7 +79240,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/slug-addresses/resolve": {
+		"/api/v1/slug-addresses/resolve": {
 			"post": {
 				"operationId": "resolveUnitSlugAddress",
 				"summary": "Resolve a complete public Unit slug path",
@@ -79479,7 +79472,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/slug-addresses/public-units/{unitId}": {
+		"/api/v1/slug-addresses/public-units/{unitId}": {
 			"get": {
 				"operationId": "getPublicUnitSlugAddress",
 				"summary": "Get a Unit public canonical slug address",
@@ -79575,7 +79568,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/slug-addresses/scopes/{scopeUnitId}/{slug}": {
+		"/api/v1/slug-addresses/scopes/{scopeUnitId}/{slug}": {
 			"get": {
 				"operationId": "resolveScopedUnitSlugAddress",
 				"summary": "Resolve a Unit slug in its direct scope",
@@ -79775,7 +79768,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/slug-addresses/units/{unitId}": {
+		"/api/v1/slug-addresses/units/{unitId}": {
 			"get": {
 				"operationId": "getUnitSlugAddressWithPlatformAccess",
 				"summary": "Get a Unit canonical slug address with platform access",
@@ -80230,7 +80223,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/slug-addresses/namespaces": {
+		"/api/v1/slug-addresses/namespaces": {
 			"post": {
 				"operationId": "createSlugNamespaceWithPlatformAccess",
 				"summary": "Create an explicitly addressed namespace with platform access",
@@ -80529,7 +80522,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/slug-addresses/redirects/{redirectAddressId}": {
+		"/api/v1/slug-addresses/redirects/{redirectAddressId}": {
 			"delete": {
 				"operationId": "releaseSlugRedirectWithPlatformAccess",
 				"summary": "Release a retained slug redirect with platform access",
@@ -80695,7 +80688,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/presentations": {
+		"/api/v1/units/presentations": {
 			"post": {
 				"summary": "Resolve readable Unit presentations",
 				"tags": ["Units"],
@@ -80943,7 +80936,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/by-id/{unitId}/realm-publications": {
+		"/api/v1/units/by-id/{unitId}/realm-publications": {
 			"get": {
 				"summary": "List a Unit's Realm publications",
 				"tags": ["Units", "Realms"],
@@ -81291,7 +81284,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/by-id/{unitId}/realm-publications/{realmId}": {
+		"/api/v1/units/by-id/{unitId}/realm-publications/{realmId}": {
 			"post": {
 				"summary": "Publish a Unit to one Realm",
 				"tags": ["Units", "Realms"],
@@ -81467,7 +81460,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/by-id/{unitId}/realm-publications/{realmId}/withdraw": {
+		"/api/v1/units/by-id/{unitId}/realm-publications/{realmId}/withdraw": {
 			"post": {
 				"summary": "Withdraw a Unit from one Realm",
 				"tags": ["Units", "Realms"],
@@ -81646,7 +81639,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/by-id/{unitId}/realm-publications/{realmId}/republish": {
+		"/api/v1/units/by-id/{unitId}/realm-publications/{realmId}/republish": {
 			"post": {
 				"summary": "Republish a Unit to one Realm",
 				"tags": ["Units", "Realms"],
@@ -81825,7 +81818,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/by-id/{unitId}/series-memberships": {
+		"/api/v1/units/by-id/{unitId}/series-memberships": {
 			"get": {
 				"summary": "List Unit Series memberships",
 				"tags": ["Units", "Series"],
@@ -82006,7 +81999,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/by-id/{unitId}/status-events": {
+		"/api/v1/units/by-id/{unitId}/status-events": {
 			"get": {
 				"summary": "List Unit status events",
 				"tags": ["Units"],
@@ -82245,7 +82238,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/by-id/{unitId}/localization-order": {
+		"/api/v1/units/by-id/{unitId}/localization-order": {
 			"get": {
 				"summary": "Get Unit content language order",
 				"tags": ["Units"],
@@ -82581,7 +82574,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/by-id/{unitId}/localizations/{language}": {
+		"/api/v1/units/by-id/{unitId}/localizations/{language}": {
 			"delete": {
 				"summary": "Remove a Unit content language",
 				"tags": ["Units"],
@@ -82838,7 +82831,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/{type}": {
+		"/api/v1/units/{type}": {
 			"get": {
 				"summary": "List published units",
 				"tags": ["Units"],
@@ -87032,7 +87025,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/{type}/{unitId}": {
+		"/api/v1/units/{type}/{unitId}": {
 			"get": {
 				"summary": "Get unit",
 				"tags": ["Units"],
@@ -91666,7 +91659,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/{type}/{unitId}/variant-context": {
+		"/api/v1/units/{type}/{unitId}/variant-context": {
 			"patch": {
 				"summary": "Update Unit Main relationship",
 				"tags": ["Units"],
@@ -93943,7 +93936,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/{type}/{unitId}/variant-context/promote": {
+		"/api/v1/units/{type}/{unitId}/variant-context/promote": {
 			"post": {
 				"summary": "Promote Unit Variant to Main",
 				"tags": ["Units"],
@@ -96207,7 +96200,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/{type}/{unitId}/localizations/{language}": {
+		"/api/v1/units/{type}/{unitId}/localizations/{language}": {
 			"put": {
 				"summary": "Create or replace unit localization",
 				"tags": ["Units"],
@@ -98801,7 +98794,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/history/units/{unitId}/revisions": {
+		"/api/v1/history/units/{unitId}/revisions": {
 			"get": {
 				"summary": "List Unit revisions",
 				"tags": ["History"],
@@ -99131,7 +99124,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/history/unit-revisions/{revisionId}": {
+		"/api/v1/history/unit-revisions/{revisionId}": {
 			"get": {
 				"summary": "Get Unit revision",
 				"tags": ["History"],
@@ -99453,7 +99446,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/history/units/{unitId}/compare": {
+		"/api/v1/history/units/{unitId}/compare": {
 			"get": {
 				"summary": "Compare Unit revisions",
 				"tags": ["History"],
@@ -99555,7 +99548,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/history/units/{unitId}/revisions/{revisionId}/restore": {
+		"/api/v1/history/units/{unitId}/revisions/{revisionId}/restore": {
 			"post": {
 				"summary": "Restore Unit revision",
 				"tags": ["History"],
@@ -99789,7 +99782,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/history/units/{unitId}/revisions/{revisionId}/undo": {
+		"/api/v1/history/units/{unitId}/revisions/{revisionId}/undo": {
 			"post": {
 				"summary": "Undo Unit revision",
 				"tags": ["History"],
@@ -100023,7 +100016,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/history/unit-revisions/{revisionId}/visibility": {
+		"/api/v1/history/unit-revisions/{revisionId}/visibility": {
 			"patch": {
 				"summary": "Update revision visibility",
 				"tags": ["History"],
@@ -100277,7 +100270,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/history/recent-changes": {
+		"/api/v1/history/recent-changes": {
 			"get": {
 				"summary": "List recent changes",
 				"tags": ["History"],
@@ -100551,7 +100544,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/history/contributions/{profileId}": {
+		"/api/v1/history/contributions/{profileId}": {
 			"get": {
 				"summary": "List profile contributions",
 				"tags": ["History"],
@@ -100831,7 +100824,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/history/change-tags": {
+		"/api/v1/history/change-tags": {
 			"get": {
 				"summary": "List revision change tags",
 				"tags": ["History"],
@@ -100872,7 +100865,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/entities": {
+		"/api/v1/entities": {
 			"get": {
 				"summary": "List entity entries",
 				"tags": ["Entity"],
@@ -101703,7 +101696,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/entities/{unitId}": {
+		"/api/v1/entities/{unitId}": {
 			"get": {
 				"summary": "Get entity entry",
 				"tags": ["Entity"],
@@ -103114,7 +103107,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/entities/{unitId}/localizations/{language}": {
+		"/api/v1/entities/{unitId}/localizations/{language}": {
 			"put": {
 				"summary": "Create or replace entity localization",
 				"tags": ["Entity"],
@@ -103618,7 +103611,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/tags": {
+		"/api/v1/tags": {
 			"get": {
 				"summary": "List tags",
 				"tags": ["Tags"],
@@ -104190,7 +104183,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/tags/{tagId}": {
+		"/api/v1/tags/{tagId}": {
 			"get": {
 				"summary": "Get tag detail",
 				"tags": ["Tags"],
@@ -104862,7 +104855,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/tags/{tagId}/localizations/{language}": {
+		"/api/v1/tags/{tagId}/localizations/{language}": {
 			"put": {
 				"summary": "Create or replace tag localization",
 				"tags": ["Tags"],
@@ -105366,7 +105359,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/{type}/{unitId}/aliases": {
+		"/api/v1/units/{type}/{unitId}/aliases": {
 			"get": {
 				"summary": "List Unit aliases",
 				"tags": ["Units"],
@@ -105819,7 +105812,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/{type}/{unitId}/aliases/{aliasId}": {
+		"/api/v1/units/{type}/{unitId}/aliases/{aliasId}": {
 			"delete": {
 				"summary": "Delete Unit alias",
 				"tags": ["Units"],
@@ -105990,7 +105983,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/{type}/{unitId}/aliases/{aliasId}/vote": {
+		"/api/v1/units/{type}/{unitId}/aliases/{aliasId}/vote": {
 			"put": {
 				"summary": "Vote on Unit alias",
 				"tags": ["Units"],
@@ -106381,7 +106374,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/{type}/{unitId}/credit-attributions": {
+		"/api/v1/units/{type}/{unitId}/credit-attributions": {
 			"post": {
 				"summary": "Add Unit credit attribution",
 				"tags": ["Units"],
@@ -106849,7 +106842,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/{type}/{unitId}/credit-attributions/{associationId}": {
+		"/api/v1/units/{type}/{unitId}/credit-attributions/{associationId}": {
 			"delete": {
 				"summary": "Remove Unit credit attribution",
 				"tags": ["Units"],
@@ -107015,7 +107008,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/{type}/{unitId}/subject-associations": {
+		"/api/v1/units/{type}/{unitId}/subject-associations": {
 			"post": {
 				"summary": "Add Unit subject association",
 				"tags": ["Units"],
@@ -107287,7 +107280,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/{type}/{unitId}/subject-associations/{associationId}": {
+		"/api/v1/units/{type}/{unitId}/subject-associations/{associationId}": {
 			"delete": {
 				"summary": "Remove Unit subject association",
 				"tags": ["Units"],
@@ -107448,7 +107441,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/{type}/{unitId}/links": {
+		"/api/v1/units/{type}/{unitId}/links": {
 			"post": {
 				"summary": "Add unit source link",
 				"tags": ["Units"],
@@ -107664,7 +107657,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/{type}/{unitId}/links/{linkId}": {
+		"/api/v1/units/{type}/{unitId}/links/{linkId}": {
 			"delete": {
 				"summary": "Remove unit source link",
 				"tags": ["Units"],
@@ -107825,7 +107818,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/{type}/{unitId}/tags/{tagId}": {
+		"/api/v1/units/{type}/{unitId}/tags/{tagId}": {
 			"put": {
 				"summary": "Tag unit",
 				"tags": ["Units"],
@@ -108546,7 +108539,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/{type}/{unitId}/tags/{tagId}/vote": {
+		"/api/v1/units/{type}/{unitId}/tags/{tagId}/vote": {
 			"put": {
 				"summary": "Vote on Unit tag",
 				"tags": ["Units"],
@@ -109001,206 +108994,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/{type}/{unitId}/version-of/{canonicalId}": {
-			"put": {
-				"summary": "Attach unit version (legacy)",
-				"tags": ["Units"],
-				"deprecated": true,
-				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
-				"parameters": [
-					{
-						"name": "type",
-						"in": "path",
-						"required": true,
-						"schema": { "type": "string", "enum": ["book", "software", "media"] }
-					},
-					{
-						"name": "unitId",
-						"in": "path",
-						"required": true,
-						"schema": { "format": "uuid", "type": "string" }
-					},
-					{
-						"name": "canonicalId",
-						"in": "path",
-						"required": true,
-						"schema": { "format": "uuid", "type": "string" }
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Response for status 200",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": [
-										"unitId",
-										"canonicalUnitId",
-										"createdAt",
-										"updatedAt"
-									],
-									"properties": {
-										"unitId": { "format": "uuid", "type": "string" },
-										"canonicalUnitId": { "format": "uuid", "type": "string" },
-										"createdAt": { "format": "date-time", "type": "string" },
-										"updatedAt": { "format": "date-time", "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "UnitPermissionForbidden",
-													"type": "string",
-													"enum": [
-														"UnitPermissionForbidden",
-														"UnitAccessRestricted"
-													]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Response for status 404",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "UnitNotFound",
-													"type": "string",
-													"enum": ["UnitNotFound", "UnitVersionNotFound"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"409": {
-						"description": "Response for status 409",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "UnitVariantKindMismatch",
-													"type": "string",
-													"enum": [
-														"UnitVariantKindMismatch",
-														"UnitVariantTargetIsVariant",
-														"UnitVariantSourceHasVariants",
-														"UnitVariantChanged",
-														"UnitVariantMainUnavailable"
-													]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
-							}
-						}
-					},
-					"429": {
-						"description": "API quota exceeded",
-						"headers": {
-							"Retry-After": {
-								"description": "Seconds until the limiting window or concurrency lease can be retried",
-								"schema": { "type": "integer", "minimum": 1 }
-							}
-						},
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"type": "string",
-													"enum": [
-														"ApiQuotaExceeded",
-														"ApiTokenRateLimitExceeded"
-													]
-												},
-												"message": { "type": "string" },
-												"details": {
-													"$ref": "#/components/schemas/JsonValue"
-												}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"operationId": "putApiUnitsByTypeByUnitIdVersion-ofByCanonicalId",
-				"x-rezics-quota-route-operation-id": "putApiUnitsByTypeByUnitIdVersion-ofByCanonicalId",
-				"x-rezics-quota-operation-id": "*",
-				"x-rezics-quota-cost-units": 1
-			}
-		},
-		"/api/units/by-id/{unitId}/content-structures": {
+		"/api/v1/units/by-id/{unitId}/content-structures": {
 			"get": {
 				"summary": "List Unit Content Structures",
 				"tags": ["Content Structure"],
@@ -109580,7 +109374,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/by-id/{unitId}/content-structures/{structureId}": {
+		"/api/v1/units/by-id/{unitId}/content-structures/{structureId}": {
 			"get": {
 				"summary": "Get Content Structure",
 				"tags": ["Content Structure"],
@@ -110105,7 +109899,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/by-id/{unitId}/content-structures/{structureId}/revisions": {
+		"/api/v1/units/by-id/{unitId}/content-structures/{structureId}/revisions": {
 			"get": {
 				"summary": "List Content Structure revisions",
 				"tags": ["Content Structure"],
@@ -110321,7 +110115,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/by-id/{unitId}/content-structures/{structureId}/revisions/{revisionId}/restore": {
+		"/api/v1/units/by-id/{unitId}/content-structures/{structureId}/revisions/{revisionId}/restore": {
 			"post": {
 				"summary": "Restore a Content Structure revision",
 				"tags": ["Content Structure"],
@@ -110499,7 +110293,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/by-id/{unitId}/content-structures/{structureId}/nodes": {
+		"/api/v1/units/by-id/{unitId}/content-structures/{structureId}/nodes": {
 			"post": {
 				"summary": "Insert Content Structure node",
 				"tags": ["Content Structure"],
@@ -110945,7 +110739,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/by-id/{unitId}/content-structures/{structureId}/nodes/{nodeId}": {
+		"/api/v1/units/by-id/{unitId}/content-structures/{structureId}/nodes/{nodeId}": {
 			"patch": {
 				"summary": "Update Content Structure node",
 				"tags": ["Content Structure"],
@@ -111550,7 +111344,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/book/{unitId}/content-structure/nodes": {
+		"/api/v1/units/book/{unitId}/content-structure/nodes": {
 			"get": {
 				"summary": "List book Content Structure nodes",
 				"tags": ["Content Structure"],
@@ -111743,7 +111537,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/book/{unitId}/content-structure": {
+		"/api/v1/units/book/{unitId}/content-structure": {
 			"put": {
 				"summary": "Save a complete Book Content Structure draft",
 				"tags": ["Content Structure"],
@@ -112577,7 +112371,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/media/{unitId}/content-structure/nodes": {
+		"/api/v1/units/media/{unitId}/content-structure/nodes": {
 			"get": {
 				"summary": "List Media Content Structure nodes",
 				"tags": ["Content Structure"],
@@ -112786,7 +112580,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/units/media/{unitId}/content-structure": {
+		"/api/v1/units/media/{unitId}/content-structure": {
 			"put": {
 				"summary": "Save a complete Media Content Structure draft",
 				"tags": ["Content Structure"],
@@ -113281,7 +113075,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/chapters/{chapterId}": {
+		"/api/v1/chapters/{chapterId}": {
 			"get": {
 				"summary": "Read chapter",
 				"tags": ["Books"],
@@ -113751,7 +113545,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/chapters/{chapterId}/localizations/{language}/content": {
+		"/api/v1/chapters/{chapterId}/localizations/{language}/content": {
 			"put": {
 				"summary": "Create or replace chapter content",
 				"tags": ["Books"],
@@ -114185,7 +113979,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/progress": {
+		"/api/v1/progress": {
 			"get": {
 				"summary": "List current profile progress",
 				"tags": ["Progress"],
@@ -114406,7 +114200,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/progress/search": {
+		"/api/v1/progress/search": {
 			"post": {
 				"summary": "Search current profile progress with a Search Feature state",
 				"tags": ["Progress", "Search"],
@@ -115795,7 +115589,7 @@
 											},
 											"cursor": {
 												"maxLength": 4096,
-												"pattern": "^s2_[A-Za-z0-9_-]+$",
+												"pattern": "^s1_[A-Za-z0-9_-]+$",
 												"type": "string"
 											},
 											"expression": {
@@ -117334,7 +117128,7 @@
 										},
 										"nextCursor": {
 											"maxLength": 4096,
-											"pattern": "^s2_[A-Za-z0-9_-]+$",
+											"pattern": "^s1_[A-Za-z0-9_-]+$",
 											"type": "string"
 										},
 										"total": {
@@ -117445,7 +117239,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/progress/{unitId}": {
+		"/api/v1/progress/{unitId}": {
 			"get": {
 				"summary": "Get progress state",
 				"tags": ["Progress"],
@@ -118005,7 +117799,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/progress/{unitId}/entries": {
+		"/api/v1/progress/{unitId}/entries": {
 			"get": {
 				"summary": "List Progress journal entries",
 				"tags": ["Progress"],
@@ -118617,7 +118411,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/progress/{unitId}/entries/{entryId}": {
+		"/api/v1/progress/{unitId}/entries/{entryId}": {
 			"put": {
 				"summary": "Replace a Progress journal entry",
 				"tags": ["Progress"],
@@ -119040,7 +118834,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/progress/{unitId}/entries/{entryId}/current": {
+		"/api/v1/progress/{unitId}/entries/{entryId}/current": {
 			"put": {
 				"summary": "Set a Progress journal entry as current",
 				"tags": ["Progress"],
@@ -119150,7 +118944,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/progress/{unitId}/nodes": {
+		"/api/v1/progress/{unitId}/nodes": {
 			"get": {
 				"summary": "List completed Content Structure nodes",
 				"tags": ["Progress"],
@@ -119281,7 +119075,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/progress/{unitId}/nodes/{nodeId}/read": {
+		"/api/v1/progress/{unitId}/nodes/{nodeId}/read": {
 			"post": {
 				"summary": "Record a Book chapter read",
 				"tags": ["Progress"],
@@ -119501,7 +119295,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/progress/{unitId}/complete": {
+		"/api/v1/progress/{unitId}/complete": {
 			"post": {
 				"summary": "Complete current progress",
 				"tags": ["Progress"],
@@ -119729,7 +119523,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/progress/{unitId}/nodes/{nodeId}": {
+		"/api/v1/progress/{unitId}/nodes/{nodeId}": {
 			"put": {
 				"summary": "Complete Content Structure node",
 				"tags": ["Progress"],
@@ -119971,7 +119765,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/collections": {
+		"/api/v1/collections": {
 			"get": {
 				"summary": "List collections",
 				"tags": ["Collections"],
@@ -121479,7 +121273,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/collections/favorites": {
+		"/api/v1/collections/favorites": {
 			"get": {
 				"summary": "Get Favorites collection",
 				"tags": ["Collections"],
@@ -122113,7 +121907,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/collections/{collectionId}/items": {
+		"/api/v1/collections/{collectionId}/items": {
 			"get": {
 				"summary": "List hydrated collection content",
 				"tags": ["Collections"],
@@ -128502,7 +128296,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/collections/{collectionId}": {
+		"/api/v1/collections/{collectionId}": {
 			"get": {
 				"summary": "Get collection",
 				"tags": ["Collections"],
@@ -130207,7 +130001,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/collections/{collectionId}/items/batch": {
+		"/api/v1/collections/{collectionId}/items/batch": {
 			"post": {
 				"summary": "Add collection items atomically",
 				"tags": ["Collections"],
@@ -130487,7 +130281,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/collections/{collectionId}/items/move": {
+		"/api/v1/collections/{collectionId}/items/move": {
 			"post": {
 				"summary": "Move collection items atomically",
 				"tags": ["Collections"],
@@ -130771,7 +130565,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/collections/{collectionId}/items/{targetId}": {
+		"/api/v1/collections/{collectionId}/items/{targetId}": {
 			"put": {
 				"summary": "Save collection item",
 				"tags": ["Collections"],
@@ -131228,7 +131022,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/collections/{collectionId}/item-revisions": {
+		"/api/v1/collections/{collectionId}/item-revisions": {
 			"get": {
 				"summary": "List Collection item revisions",
 				"tags": ["Collections"],
@@ -131399,7 +131193,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/collections/{collectionId}/item-revisions/compare": {
+		"/api/v1/collections/{collectionId}/item-revisions/compare": {
 			"get": {
 				"summary": "Compare Collection item revisions",
 				"tags": ["Collections"],
@@ -131528,7 +131322,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/collections/{collectionId}/item-revisions/{revisionId}/restore": {
+		"/api/v1/collections/{collectionId}/item-revisions/{revisionId}/restore": {
 			"post": {
 				"summary": "Restore a Collection item revision",
 				"tags": ["Collections"],
@@ -131729,7 +131523,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/collections/favorites/items/{targetId}": {
+		"/api/v1/collections/favorites/items/{targetId}": {
 			"put": {
 				"summary": "Favorite unit",
 				"tags": ["Collections"],
@@ -132048,7 +131842,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/reviews": {
+		"/api/v1/reviews": {
 			"get": {
 				"summary": "List reviews",
 				"tags": ["Reviews"],
@@ -134303,7 +134097,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/reviews/{reviewId}": {
+		"/api/v1/reviews/{reviewId}": {
 			"get": {
 				"summary": "Get review",
 				"tags": ["Reviews"],
@@ -135633,7 +135427,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/scores/{targetId}": {
+		"/api/v1/scores/{targetId}": {
 			"put": {
 				"summary": "Score unit",
 				"tags": ["Reviews"],
@@ -135938,7 +135732,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/scores/{targetId}/viewer": {
+		"/api/v1/scores/{targetId}/viewer": {
 			"get": {
 				"summary": "List current user's Scores for a Unit",
 				"tags": ["Reviews"],
@@ -136122,7 +135916,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/reactions/units/{unitId}": {
+		"/api/v1/reactions/units/{unitId}": {
 			"get": {
 				"summary": "Get Unit reaction summary",
 				"tags": ["Reactions"],
@@ -136485,7 +136279,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/reactions/shares/{unitId}": {
+		"/api/v1/reactions/shares/{unitId}": {
 			"put": {
 				"summary": "Record Unit share",
 				"tags": ["Reactions"],
@@ -136682,7 +136476,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/polls": {
+		"/api/v1/polls": {
 			"post": {
 				"summary": "Create poll",
 				"tags": ["Polls"],
@@ -136906,7 +136700,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/polls/{pollId}": {
+		"/api/v1/polls/{pollId}": {
 			"get": {
 				"summary": "Get poll",
 				"tags": ["Polls"],
@@ -137147,7 +136941,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/polls/{pollId}/vote": {
+		"/api/v1/polls/{pollId}/vote": {
 			"put": {
 				"summary": "Replace poll vote",
 				"tags": ["Polls"],
@@ -137493,7 +137287,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/polls/{pollId}/close": {
+		"/api/v1/polls/{pollId}/close": {
 			"post": {
 				"summary": "Close poll",
 				"tags": ["Polls"],
@@ -137660,7 +137454,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/posts/{postId}/scores": {
+		"/api/v1/posts/{postId}/scores": {
 			"get": {
 				"summary": "List Post Scores",
 				"tags": ["Posts"],
@@ -138074,7 +137868,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/posts": {
+		"/api/v1/posts": {
 			"get": {
 				"summary": "List posts",
 				"tags": ["Posts"],
@@ -139545,7 +139339,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/posts/wiki": {
+		"/api/v1/posts/wiki": {
 			"post": {
 				"summary": "Create Wiki",
 				"tags": ["Posts"],
@@ -139986,7 +139780,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/posts/{postId}": {
+		"/api/v1/posts/{postId}": {
 			"get": {
 				"summary": "Get post",
 				"tags": ["Posts"],
@@ -144516,7 +144310,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/posts/{postId}/replies": {
+		"/api/v1/posts/{postId}/replies": {
 			"get": {
 				"summary": "List a bounded reply-post tree",
 				"tags": ["Posts"],
@@ -146309,7 +146103,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/posts/{postId}/replies/{replyPostId}": {
+		"/api/v1/posts/{postId}/replies/{replyPostId}": {
 			"patch": {
 				"summary": "Update reply post",
 				"tags": ["Posts"],
@@ -146745,7 +146539,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms": {
+		"/api/v1/realms": {
 			"get": {
 				"summary": "List Realms",
 				"tags": ["Realms"],
@@ -147551,7 +147345,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/slug-address": {
+		"/api/v1/realms/{realmId}/slug-address": {
 			"put": {
 				"operationId": "replaceRealmSlugAddress",
 				"summary": "Replace a Realm slug address",
@@ -147843,7 +147637,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}": {
+		"/api/v1/realms/{realmId}": {
 			"get": {
 				"summary": "Get Realm",
 				"tags": ["Realms"],
@@ -148908,7 +148702,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/pages": {
+		"/api/v1/realms/{realmId}/pages": {
 			"put": {
 				"summary": "Replace enabled Realm pages",
 				"tags": ["Realms"],
@@ -149088,7 +148882,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/taxonomy": {
+		"/api/v1/realms/{realmId}/taxonomy": {
 			"get": {
 				"summary": "Get Realm taxonomy",
 				"tags": ["Realms"],
@@ -149380,7 +149174,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/taxonomy/draft": {
+		"/api/v1/realms/{realmId}/taxonomy/draft": {
 			"get": {
 				"summary": "Get complete Realm taxonomy draft",
 				"tags": ["Realms"],
@@ -150375,7 +150169,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/score-context": {
+		"/api/v1/realms/{realmId}/score-context": {
 			"get": {
 				"summary": "Get Realm Score context",
 				"tags": ["Realms"],
@@ -150683,7 +150477,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/tag-voting": {
+		"/api/v1/realms/{realmId}/tag-voting": {
 			"put": {
 				"summary": "Update Realm Tag voting policy",
 				"tags": ["Realms"],
@@ -150844,7 +150638,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/membership": {
+		"/api/v1/realms/{realmId}/membership": {
 			"put": {
 				"summary": "Join Realm",
 				"tags": ["Realms"],
@@ -151114,7 +150908,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/members": {
+		"/api/v1/realms/{realmId}/members": {
 			"get": {
 				"summary": "List Realm members",
 				"tags": ["Realms"],
@@ -151466,7 +151260,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/members/{profileId}": {
+		"/api/v1/realms/{realmId}/members/{profileId}": {
 			"patch": {
 				"summary": "Update Realm member",
 				"tags": ["Realms"],
@@ -151689,7 +151483,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/rules": {
+		"/api/v1/realms/{realmId}/rules": {
 			"put": {
 				"summary": "Update Realm rules",
 				"tags": ["Realms"],
@@ -152578,7 +152372,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/rules/{revisionId}/acknowledgement": {
+		"/api/v1/realms/{realmId}/rules/{revisionId}/acknowledgement": {
 			"put": {
 				"summary": "Acknowledge current Realm rules",
 				"tags": ["Realms"],
@@ -152742,7 +152536,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/pins": {
+		"/api/v1/realms/{realmId}/pins": {
 			"get": {
 				"summary": "List Realm pins",
 				"tags": ["Realms"],
@@ -158957,7 +158751,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/pins/move": {
+		"/api/v1/realms/{realmId}/pins/move": {
 			"post": {
 				"summary": "Move Realm pins",
 				"tags": ["Realms"],
@@ -159156,7 +158950,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/pins/{unitId}": {
+		"/api/v1/realms/{realmId}/pins/{unitId}": {
 			"put": {
 				"summary": "Pin Realm unit",
 				"tags": ["Realms"],
@@ -159494,7 +159288,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/wikis": {
+		"/api/v1/realms/{realmId}/wikis": {
 			"post": {
 				"summary": "Create Realm-governed Wiki",
 				"tags": ["Realms"],
@@ -159931,7 +159725,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/tag-contexts": {
+		"/api/v1/realms/{realmId}/tag-contexts": {
 			"get": {
 				"summary": "List Realm Tag Context relationships",
 				"tags": ["Realms"],
@@ -160607,7 +160401,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/tags/{tagId}/context": {
+		"/api/v1/realms/{realmId}/tags/{tagId}/context": {
 			"get": {
 				"summary": "Get Realm Tag Context",
 				"tags": ["Realms"],
@@ -161055,7 +160849,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/units/{unitId}/policy-tags/{tagId}": {
+		"/api/v1/realms/{realmId}/units/{unitId}/policy-tags/{tagId}": {
 			"put": {
 				"summary": "Apply Realm Policy Tag",
 				"tags": ["Realms"],
@@ -161325,7 +161119,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/units/{unitId}/tags": {
+		"/api/v1/realms/{realmId}/units/{unitId}/tags": {
 			"get": {
 				"summary": "List Realm-scoped Unit Tag votes",
 				"tags": ["Realms"],
@@ -161712,7 +161506,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/units/{unitId}/tags/{tagId}/vote": {
+		"/api/v1/realms/{realmId}/units/{unitId}/tags/{tagId}/vote": {
 			"put": {
 				"summary": "Vote on a Realm-scoped Unit Tag",
 				"tags": ["Realms"],
@@ -162183,7 +161977,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/units": {
+		"/api/v1/realms/{realmId}/units": {
 			"get": {
 				"summary": "List Realm Units for moderation",
 				"tags": ["Realms"],
@@ -162456,7 +162250,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/units/{unitId}": {
+		"/api/v1/realms/{realmId}/units/{unitId}": {
 			"get": {
 				"summary": "Get Realm Unit for moderation",
 				"tags": ["Realms"],
@@ -163714,7 +163508,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/units/{unitId}/history": {
+		"/api/v1/realms/{realmId}/units/{unitId}/history": {
 			"get": {
 				"summary": "Get Realm Unit moderation history",
 				"tags": ["Realms"],
@@ -164312,7 +164106,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/wiki/navigation": {
+		"/api/v1/realms/{realmId}/wiki/navigation": {
 			"get": {
 				"summary": "List Realm Wiki navigation resources",
 				"description": "Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.",
@@ -164726,7 +164520,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/realms/{realmId}/wiki/navigation/{navigationId}": {
+		"/api/v1/realms/{realmId}/wiki/navigation/{navigationId}": {
 			"get": {
 				"summary": "Get Realm Wiki navigation",
 				"description": "Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.",
@@ -165361,7 +165155,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/search/features/{template}": {
+		"/api/v1/search/features/{template}": {
 			"get": {
 				"summary": "Get a system Search Feature template",
 				"tags": ["Search"],
@@ -165418,7 +165212,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/search/features/{template}/execute": {
+		"/api/v1/search/features/{template}/execute": {
 			"post": {
 				"summary": "Execute a system Search Feature template",
 				"tags": ["Search"],
@@ -166899,7 +166693,7 @@
 											},
 											"cursor": {
 												"maxLength": 4096,
-												"pattern": "^s2_[A-Za-z0-9_-]+$",
+												"pattern": "^s1_[A-Za-z0-9_-]+$",
 												"type": "string"
 											},
 											"expression": {
@@ -168301,7 +168095,7 @@
 										"query": { "type": "string" },
 										"nextCursor": {
 											"maxLength": 4096,
-											"pattern": "^s2_[A-Za-z0-9_-]+$",
+											"pattern": "^s1_[A-Za-z0-9_-]+$",
 											"type": "string"
 										},
 										"facets": {
@@ -168845,7 +168639,7 @@
 				"x-rezics-quota-cost-units": 5
 			}
 		},
-		"/api/search/features/{template}/feed": {
+		"/api/v1/search/features/{template}/feed": {
 			"post": {
 				"summary": "Present a system Search Feature as a Feed",
 				"tags": ["Search"],
@@ -170327,7 +170121,7 @@
 											},
 											"cursor": {
 												"maxLength": 4096,
-												"pattern": "^s2_[A-Za-z0-9_-]+$",
+												"pattern": "^s1_[A-Za-z0-9_-]+$",
 												"type": "string"
 											},
 											"expression": {
@@ -177810,7 +177604,7 @@
 										},
 										"nextCursor": {
 											"maxLength": 4096,
-											"pattern": "^s2_[A-Za-z0-9_-]+$",
+											"pattern": "^s1_[A-Za-z0-9_-]+$",
 											"type": "string"
 										},
 										"facets": {
@@ -178001,7 +177795,7 @@
 				"x-rezics-quota-cost-units": 5
 			}
 		},
-		"/api/search/zones/{zoneId}/feature": {
+		"/api/v1/search/zones/{zoneId}/feature": {
 			"get": {
 				"summary": "Get a Zone Search Feature",
 				"tags": ["Search", "Zones"],
@@ -178318,7 +178112,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/search/zones/{zoneId}/feature/execute": {
+		"/api/v1/search/zones/{zoneId}/feature/execute": {
 			"post": {
 				"summary": "Execute a Zone Search Feature",
 				"tags": ["Search", "Zones"],
@@ -179714,7 +179508,7 @@
 											},
 											"cursor": {
 												"maxLength": 4096,
-												"pattern": "^s2_[A-Za-z0-9_-]+$",
+												"pattern": "^s1_[A-Za-z0-9_-]+$",
 												"type": "string"
 											},
 											"expression": {
@@ -181116,7 +180910,7 @@
 										"query": { "type": "string" },
 										"nextCursor": {
 											"maxLength": 4096,
-											"pattern": "^s2_[A-Za-z0-9_-]+$",
+											"pattern": "^s1_[A-Za-z0-9_-]+$",
 											"type": "string"
 										},
 										"facets": {
@@ -181690,7 +181484,7 @@
 				"x-rezics-quota-cost-units": 5
 			}
 		},
-		"/api/search/zones/{zoneId}/feature/feed": {
+		"/api/v1/search/zones/{zoneId}/feature/feed": {
 			"post": {
 				"summary": "Present a Zone Search Feature as a Feed",
 				"tags": ["Search", "Zones"],
@@ -183091,7 +182885,7 @@
 											},
 											"cursor": {
 												"maxLength": 4096,
-												"pattern": "^s2_[A-Za-z0-9_-]+$",
+												"pattern": "^s1_[A-Za-z0-9_-]+$",
 												"type": "string"
 											},
 											"expression": {
@@ -190574,7 +190368,7 @@
 										},
 										"nextCursor": {
 											"maxLength": 4096,
-											"pattern": "^s2_[A-Za-z0-9_-]+$",
+											"pattern": "^s1_[A-Za-z0-9_-]+$",
 											"type": "string"
 										},
 										"facets": {
@@ -190795,7 +190589,7 @@
 				"x-rezics-quota-cost-units": 5
 			}
 		},
-		"/api/search/zones/{zoneId}/feature/revisions": {
+		"/api/v1/search/zones/{zoneId}/feature/revisions": {
 			"get": {
 				"summary": "List Zone Search Feature revisions",
 				"tags": ["Search", "Zones"],
@@ -190961,7 +190755,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/search/zones/{zoneId}/feature/restore": {
+		"/api/v1/search/zones/{zoneId}/feature/restore": {
 			"post": {
 				"summary": "Restore a Zone Search Feature revision",
 				"tags": ["Search", "Zones"],
@@ -191160,7 +190954,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/search/zones/{zoneId}/dock/blocks/{blockKey}/execute": {
+		"/api/v1/search/zones/{zoneId}/dock/blocks/{blockKey}/execute": {
 			"post": {
 				"summary": "Execute a trusted Zone Dock Search Block",
 				"tags": ["Search"],
@@ -192566,7 +192360,7 @@
 											},
 											"cursor": {
 												"maxLength": 4096,
-												"pattern": "^s2_[A-Za-z0-9_-]+$",
+												"pattern": "^s1_[A-Za-z0-9_-]+$",
 												"type": "string"
 											},
 											"expression": {
@@ -193968,7 +193762,7 @@
 										"query": { "type": "string" },
 										"nextCursor": {
 											"maxLength": 4096,
-											"pattern": "^s2_[A-Za-z0-9_-]+$",
+											"pattern": "^s1_[A-Za-z0-9_-]+$",
 											"type": "string"
 										},
 										"facets": {
@@ -194543,7 +194337,7 @@
 				"x-rezics-quota-cost-units": 5
 			}
 		},
-		"/api/search/zones/{zoneId}/pages/{pageId}/blocks/{blockKey}/execute": {
+		"/api/v1/search/zones/{zoneId}/pages/{pageId}/blocks/{blockKey}/execute": {
 			"post": {
 				"summary": "Execute a trusted Zone Page Search Block",
 				"tags": ["Search"],
@@ -195955,7 +195749,7 @@
 											},
 											"cursor": {
 												"maxLength": 4096,
-												"pattern": "^s2_[A-Za-z0-9_-]+$",
+												"pattern": "^s1_[A-Za-z0-9_-]+$",
 												"type": "string"
 											},
 											"expression": {
@@ -197357,7 +197151,7 @@
 										"query": { "type": "string" },
 										"nextCursor": {
 											"maxLength": 4096,
-											"pattern": "^s2_[A-Za-z0-9_-]+$",
+											"pattern": "^s1_[A-Za-z0-9_-]+$",
 											"type": "string"
 										},
 										"facets": {
@@ -197932,7 +197726,7 @@
 				"x-rezics-quota-cost-units": 5
 			}
 		},
-		"/api/search/zones/{zoneId}/feed-blocks/{blockKey}/execute": {
+		"/api/v1/search/zones/{zoneId}/feed-blocks/{blockKey}/execute": {
 			"post": {
 				"summary": "Execute a trusted Zone Feed Block",
 				"tags": ["Feed"],
@@ -199343,7 +199137,7 @@
 											},
 											"cursor": {
 												"maxLength": 4096,
-												"pattern": "^s2_[A-Za-z0-9_-]+$",
+												"pattern": "^s1_[A-Za-z0-9_-]+$",
 												"type": "string"
 											},
 											"expression": {
@@ -206846,7 +206640,7 @@
 										},
 										"nextCursor": {
 											"maxLength": 4096,
-											"pattern": "^s2_[A-Za-z0-9_-]+$",
+											"pattern": "^s1_[A-Za-z0-9_-]+$",
 											"type": "string"
 										},
 										"facets": {
@@ -207069,7 +206863,7 @@
 				"x-rezics-quota-cost-units": 5
 			}
 		},
-		"/api/search": {
+		"/api/v1/search": {
 			"post": {
 				"summary": "Search across public categories",
 				"tags": ["Search"],
@@ -207152,7 +206946,7 @@
 										"query": { "type": "string" },
 										"nextCursor": {
 											"maxLength": 4096,
-											"pattern": "^s2_[A-Za-z0-9_-]+$",
+											"pattern": "^s1_[A-Za-z0-9_-]+$",
 											"type": "string"
 										},
 										"facets": {
@@ -207696,7 +207490,7 @@
 				"x-rezics-quota-cost-units": 5
 			}
 		},
-		"/api/search/shared-queries": {
+		"/api/v1/search/shared-queries": {
 			"post": {
 				"summary": "Create an immutable shared Search query",
 				"tags": ["Search"],
@@ -210860,7 +210654,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/search/shared-queries/{id}": {
+		"/api/v1/search/shared-queries/{id}": {
 			"get": {
 				"summary": "Get a shared Search query",
 				"tags": ["Search"],
@@ -212481,7 +212275,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/search/{index}": {
+		"/api/v1/search/{index}": {
 			"post": {
 				"summary": "Search one public category",
 				"tags": ["Search"],
@@ -212518,7 +212312,7 @@
 									"query": { "maxLength": 500, "default": "", "type": "string" },
 									"cursor": {
 										"maxLength": 4096,
-										"pattern": "^s2_[A-Za-z0-9_-]+$",
+										"pattern": "^s1_[A-Za-z0-9_-]+$",
 										"type": "string"
 									},
 									"limit": {
@@ -212972,7 +212766,7 @@
 										},
 										"nextCursor": {
 											"maxLength": 4096,
-											"pattern": "^s2_[A-Za-z0-9_-]+$",
+											"pattern": "^s1_[A-Za-z0-9_-]+$",
 											"type": "string"
 										},
 										"limit": {
@@ -213165,7 +212959,7 @@
 				"x-rezics-quota-cost-units": 5
 			}
 		},
-		"/api/image-assets": {
+		"/api/v1/image-assets": {
 			"post": {
 				"summary": "Create image asset upload",
 				"tags": ["Image Assets"],
@@ -213555,7 +213349,7 @@
 				"x-rezics-quota-cost-units": 10
 			}
 		},
-		"/api/image-assets/{id}/complete": {
+		"/api/v1/image-assets/{id}/complete": {
 			"post": {
 				"summary": "Complete image asset upload",
 				"tags": ["Image Assets"],
@@ -213947,7 +213741,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/image-assets/{id}/presentations/{role}": {
+		"/api/v1/image-assets/{id}/presentations/{role}": {
 			"put": {
 				"summary": "Update image asset presentation",
 				"tags": ["Image Assets"],
@@ -214264,7 +214058,7 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/image-assets/{id}": {
+		"/api/v1/image-assets/{id}": {
 			"get": {
 				"summary": "Get image asset",
 				"tags": ["Image Assets"],

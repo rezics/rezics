@@ -1,7 +1,7 @@
 import { getActiveTraceContext } from "@rezics/observability";
 
 import type { DatabaseExecutor } from "../database";
-import { auditEvent } from "../database/schema";
+import { auditEvent, AuditEventSchemaVersion } from "../database/schema";
 import type { AuditRecord } from "./contracts";
 import { getAuditRequestContext } from "./context";
 
@@ -19,7 +19,7 @@ export async function recordAuditEvent(
 	const requestContext = getAuditRequestContext();
 	const traceContext = getActiveTraceContext();
 	await executor.insert(auditEvent).values({
-		schemaVersion: 2,
+		schemaVersion: AuditEventSchemaVersion,
 		category: record.category,
 		outcome: record.outcome,
 		actorKind: record.actor.kind,

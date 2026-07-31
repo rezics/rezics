@@ -194,7 +194,6 @@ export default {
 	UnitTagCurationChanged:
 		"Cette sélection d’étiquettes a été modifiée ailleurs. Le dernier ordre a été chargé ; réessayez.",
 	TagNotFound: "Cette étiquette est introuvable.",
-	UnitVersionNotFound: "Cette version de la Unit est introuvable.",
 	UnitSourceLinkNotFound: "Ce lien source de l’œuvre est introuvable.",
 	UnitVariantKindMismatch:
 		"Une variante et son élément principal doivent utiliser le même type de Unit pris en charge.",

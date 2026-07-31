@@ -1,7 +1,7 @@
 import { getApiUsersMeTagRealmSubscriptionsQueryKey } from "@rezics/openapi-tanstack-query";
 import type { QueryClient } from "@tanstack/react-query";
 
-const UnitTagsUrl = "/api/units/:type/:unitId/tags";
+const UnitTagsUrl = "/api/v1/units/:type/:unitId/tags";
 
 export async function invalidatePersonalizedTagQueries(queryClient: QueryClient) {
 	await Promise.all([

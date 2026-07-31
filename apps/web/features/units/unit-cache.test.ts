@@ -24,7 +24,7 @@ describe("unit cache invalidation", () => {
 		expect(invalidateQueries).toHaveBeenCalledTimes(1);
 		expect(invalidateQueries).toHaveBeenCalledWith({
 			queryKey: [
-				{ url: "/api/units/:type/:unitId", params: { type: "book", unitId: "unit-1" } },
+				{ url: "/api/v1/units/:type/:unitId", params: { type: "book", unitId: "unit-1" } },
 			],
 		});
 	});
@@ -36,11 +36,11 @@ describe("unit cache invalidation", () => {
 
 		expect(invalidateQueries).toHaveBeenNthCalledWith(1, {
 			queryKey: [
-				{ url: "/api/units/:type/:unitId", params: { type: "book", unitId: "unit-1" } },
+				{ url: "/api/v1/units/:type/:unitId", params: { type: "book", unitId: "unit-1" } },
 			],
 		});
 		expect(invalidateQueries).toHaveBeenNthCalledWith(2, {
-			queryKey: [{ url: "/api/units/:type", params: { type: "book" } }],
+			queryKey: [{ url: "/api/v1/units/:type", params: { type: "book" } }],
 		});
 	});
 
@@ -53,13 +53,13 @@ describe("unit cache invalidation", () => {
 		expect(invalidateQueries).toHaveBeenNthCalledWith(1, {
 			queryKey: [
 				{
-					url: "/api/units/book/:unitId/content-structure/nodes",
+					url: "/api/v1/units/book/:unitId/content-structure/nodes",
 					params: { unitId: "book-1" },
 				},
 			],
 		});
 		expect(invalidateQueries).toHaveBeenNthCalledWith(2, {
-			queryKey: [{ url: "/api/chapters/:chapterId", params: { chapterId: "chapter-1" } }],
+			queryKey: [{ url: "/api/v1/chapters/:chapterId", params: { chapterId: "chapter-1" } }],
 		});
 	});
 });

@@ -257,7 +257,7 @@ export async function executeCompiledSearch(
 		facets,
 		nextCursor: hasNext
 			? createSearchCursor({
-					version: 2,
+					version: 1,
 					generationId: generation.id,
 					requestHash,
 					pageSize: compiled.pageSize,

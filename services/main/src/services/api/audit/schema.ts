@@ -7,6 +7,7 @@ import {
 import { t } from "elysia";
 
 import { DateTime, Uuid } from "../schema";
+import { AuditEventSchemaVersion } from "../../database/schema";
 
 export const AuditEventsQuery = t.Object(
 	{
@@ -25,7 +26,7 @@ export const AuditEventsQuery = t.Object(
 
 export const AuditEventResponse = t.Object({
 	id: Uuid,
-	schemaVersion: t.Integer(),
+	schemaVersion: t.Literal(AuditEventSchemaVersion),
 	category: t.UnionEnum(AuditEventCategoryValues),
 	outcome: t.UnionEnum(AuditEventOutcomeValues),
 	actor: t.Object({

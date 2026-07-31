@@ -86,6 +86,7 @@ export const auditCredentialKind = pgEnum("audit_credential_kind", [
 	"system",
 ]);
 export const auditAuthorityKind = pgEnum("audit_authority_kind", ["platform", "realm", "unit"]);
+export const AuditEventSchemaVersion = 1 as const;
 
 export const moderationCase = pgTable(
 	"moderation_case",
@@ -535,7 +536,7 @@ export const auditEvent = pgTable(
 	"audit_event",
 	{
 		id: createUuidv7PrimaryKey(),
-		schemaVersion: integer().default(2).notNull(),
+		schemaVersion: integer().default(AuditEventSchemaVersion).notNull(),
 		category: auditEventCategory().notNull(),
 		outcome: auditEventOutcome().notNull(),
 		actorKind: auditActorKind().notNull(),
@@ -578,7 +579,10 @@ export const auditEvent = pgTable(
 		index("audit_event_target_idx").on(table.targetKind, table.targetId),
 		index("audit_event_request_idx").on(table.requestId),
 		index("audit_event_trace_idx").on(table.traceId),
-		check("audit_event_schema_version_check", sql`${table.schemaVersion} > 0`),
+		check(
+			"audit_event_schema_version_check",
+			sql`${table.schemaVersion} = ${AuditEventSchemaVersion}`,
+		),
 		check("audit_event_action_check", sql`btrim(${table.action}) <> ''`),
 		check(
 			"audit_event_actor_check",

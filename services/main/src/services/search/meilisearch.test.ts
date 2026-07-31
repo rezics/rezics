@@ -90,7 +90,7 @@ describe("Meilisearch expression compiler", () => {
 		);
 		vi.stubGlobal("fetch", fetchMock);
 		const common = {
-			indexUid: "rezics_units_v11_20260731",
+			indexUid: "rezics_units_v1_20260801",
 			query: "book",
 			offset: 0,
 			limit: 20,
@@ -120,7 +120,7 @@ describe("Meilisearch expression compiler", () => {
 
 		await searchCandidates([
 			{
-				indexUid: "rezics_units_v11_20260731",
+				indexUid: "rezics_units_v1_20260801",
 				category: "units",
 				query: "book",
 				offset: 0,
@@ -156,7 +156,7 @@ describe("Meilisearch expression compiler", () => {
 
 		await searchCandidates([
 			{
-				indexUid: "rezics_units_v11_20260731",
+				indexUid: "rezics_units_v1_20260801",
 				category: "units",
 				query: "the complete title",
 				offset: 0,

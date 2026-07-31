@@ -45,7 +45,7 @@ export async function getInitialPresentationPreferences(
 	if (!cookie) return { status: "unavailable" };
 
 	try {
-		const response = await fetch(new URL("/api/users/me/preferences", getBackendOrigin()), {
+		const response = await fetch(new URL("/api/v1/users/me/preferences", getBackendOrigin()), {
 			cache: "no-store",
 			headers: { accept: "application/json", cookie },
 			signal: AbortSignal.timeout(PresentationPreferencesBootstrapTimeoutMs),

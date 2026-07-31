@@ -33,6 +33,7 @@ import {
 	combineSearchExpressions,
 	createSearchCursor,
 	parseSearchCursor,
+	SearchCursorVersion,
 } from "../../search/query";
 import { describe, expect, test } from "vitest";
 
@@ -437,7 +438,7 @@ describe("Search execution primitives", () => {
 
 	test("round-trips opaque cursors", () => {
 		const state = {
-			version: 2 as const,
+			version: SearchCursorVersion,
 			generationId: "019f7eed-5d42-7102-8387-cc1d13b176d2",
 			requestHash: "a".repeat(64),
 			pageSize: 20,

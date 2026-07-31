@@ -100,7 +100,7 @@ describe("initial presentation preferences", () => {
 			data: payload,
 		});
 		expect(request).toEqual({
-			url: "https://api.internal.example/api/users/me/preferences",
+			url: "https://api.internal.example/api/v1/users/me/preferences",
 			cookie: "better-auth.session_token=opaque",
 			authorization: null,
 			cache: "no-store",

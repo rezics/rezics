@@ -1,5 +1,6 @@
 {
 	"name": "rezics",
+	"version": "1.0.0",
 	"private": true,
 	"type": "module",
 	"packageManager": "yarn@4.17.1",

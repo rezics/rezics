@@ -27,7 +27,7 @@ describe("localized errors", () => {
 			},
 			status: StatusCodes.CONFLICT,
 			statusText: "Conflict",
-			request: new Request("http://localhost/api/units/book/unit-1"),
+			request: new Request("http://localhost/api/v1/units/book/unit-1"),
 			response: new Response(null, { status: StatusCodes.CONFLICT }),
 		});
 

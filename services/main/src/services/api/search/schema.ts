@@ -15,7 +15,7 @@ const SearchLicenseList = t.Array(t.UnionEnum(PublicationLicenseIds), { maxItems
 export const DomainSearchBody = t.Object(
 	{
 		query: t.Optional(t.String({ maxLength: 500, default: "" })),
-		cursor: t.Optional(t.String({ maxLength: 4096, pattern: "^s2_[A-Za-z0-9_-]+$" })),
+		cursor: t.Optional(t.String({ maxLength: 4096, pattern: "^s1_[A-Za-z0-9_-]+$" })),
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
 		localizationLanguages: LocalizationLanguagePriority,
 		Languages: t.Optional(SearchLanguageList),

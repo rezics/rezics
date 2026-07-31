@@ -32,7 +32,7 @@ describe("Search Feed page requests", () => {
 		const signal = new AbortController().signal;
 
 		await fetchSearchFeedPage({
-			cursor: "s2_cursor",
+			cursor: "s1_cursor",
 			localizationLanguages: ["zh", "en"],
 			request,
 			signal,
@@ -45,7 +45,7 @@ describe("Search Feed page requests", () => {
 			body: {
 				...request,
 				localizationLanguages: ["zh", "en"],
-				state: { sort: "best", cursor: "s2_cursor" },
+				state: { sort: "best", cursor: "s1_cursor" },
 				surface: "search",
 			},
 			signal,
@@ -96,7 +96,7 @@ describe("Search Feed page requests", () => {
 	});
 
 	it("removes transport cursors before a request becomes a stable Feed identity", () => {
-		expect(withoutSearchFeedCursor({ cursor: "s2_cursor", sort: "best" })).toEqual({
+		expect(withoutSearchFeedCursor({ cursor: "s1_cursor", sort: "best" })).toEqual({
 			sort: "best",
 		});
 	});

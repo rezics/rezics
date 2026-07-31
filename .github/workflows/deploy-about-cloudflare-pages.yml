@@ -3,7 +3,7 @@ name: Deploy About to Cloudflare Pages
 on:
     push:
         tags:
-            - "about-v*"
+            - "v*"
     workflow_dispatch:
         inputs:
             cloudflare_branch:

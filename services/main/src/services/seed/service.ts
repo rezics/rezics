@@ -114,6 +114,7 @@ import {
 	unitVariant,
 	users,
 	WorkReleaseStatusValues,
+	AuditEventSchemaVersion,
 	zone,
 	zonePage,
 } from "../database/schema";
@@ -2672,7 +2673,7 @@ async function seedGovernance(
 	const actions = [...normalActions, ...reverseActions, ...enforcementActions];
 	await writeBatches(
 		Array.from({ length: SeedPlan.auditEvents }, (_, index) => ({
-			schemaVersion: 2,
+			schemaVersion: AuditEventSchemaVersion,
 			category: index % 13 === 0 ? ("policy_denied" as const) : ("admin_activity" as const),
 			outcome: index % 13 === 0 ? ("denied" as const) : ("succeeded" as const),
 			actorKind: index % 10 === 0 ? ("system" as const) : ("profile" as const),

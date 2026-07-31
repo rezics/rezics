@@ -59,7 +59,7 @@ describe("console route access", () => {
 		});
 		expect(fetcher).toHaveBeenCalledOnce();
 		const [url, init] = fetcher.mock.calls[0] ?? [];
-		expect(String(url)).toBe("https://api.internal.example/api/users/me");
+		expect(String(url)).toBe("https://api.internal.example/api/v1/users/me");
 		expect(new Headers(init?.headers)).toEqual(
 			new Headers({ cookie: "better-auth.session_token=opaque" }),
 		);

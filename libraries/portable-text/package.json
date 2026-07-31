@@ -1,5 +1,6 @@
 {
 	"name": "@rezics/portable-text",
+	"version": "1.0.0",
 	"private": true,
 	"type": "module",
 	"sideEffects": false,

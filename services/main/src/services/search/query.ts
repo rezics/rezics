@@ -178,8 +178,10 @@ export interface CompiledSearchRequest {
 	readonly facets: readonly SearchField[];
 }
 
+export const SearchCursorVersion = 1 as const;
+
 export interface SearchCursorState {
-	readonly version: 2;
+	readonly version: typeof SearchCursorVersion;
 	readonly generationId: string;
 	readonly requestHash: string;
 	readonly pageSize: number;
@@ -226,11 +228,11 @@ function decodeBase64Url(value: string): string {
 /** The cursor is opaque to callers but fully validated before server-side use. */
 export function createSearchCursor(state: SearchCursorState): string {
 	assertSearchCursorState(state);
-	return `s2_${encodeBase64Url(JSON.stringify(state))}`;
+	return `s1_${encodeBase64Url(JSON.stringify(state))}`;
 }
 
 export function parseSearchCursor(value: string): SearchCursorState {
-	if (!value.startsWith("s2_")) throw new TypeError("Invalid Search cursor");
+	if (!value.startsWith("s1_")) throw new TypeError("Invalid Search cursor");
 	let decoded: unknown;
 	try {
 		decoded = JSON.parse(decodeBase64Url(value.slice(3)));
@@ -245,7 +247,7 @@ function assertSearchCursorState(value: unknown): asserts value is SearchCursorS
 	if (!value || typeof value !== "object") throw new TypeError("Invalid Search cursor");
 	const candidate = value as Record<string, unknown>;
 	if (
-		candidate.version !== 2 ||
+		candidate.version !== SearchCursorVersion ||
 		typeof candidate.generationId !== "string" ||
 		!/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(
 			candidate.generationId,

@@ -110,6 +110,14 @@ const UnitLocalizationContentSchema = z.union([
 const ZoneBoundaryDocumentSchema = createDocumentSchema(ZoneBoundaryDocument);
 const ZoneThemeDocumentSchema = createDocumentSchema(ZoneThemeDocument);
 const FractionalPositionSchema = z.string().refine(isFractionalPosition);
+export const UnitRevisionSchemaVersion = 1 as const;
+export const UnitRevisionSlotSchemaVersions = {
+	main: 1,
+	localization: 1,
+	relations: 1,
+	structure: 1,
+	rules: 1,
+} as const satisfies Record<(typeof UnitRevisionSlotRoleValues)[number], number>;
 const RuleSnapshotSchema = z.object({
 	acknowledgementMode: z.enum(RealmRuleAcknowledgementModeValues),
 	requireOnJoin: z.boolean(),
@@ -124,7 +132,7 @@ const RuleSnapshotSchema = z.object({
 	),
 });
 const UnitSnapshotSchema = z.object({
-	version: z.literal(7),
+	version: z.literal(UnitRevisionSchemaVersion),
 	kind: z.enum(UnitKindValues),
 	unit: SnapshotRowSchema,
 	localizations: z.array(SnapshotRowSchema),
@@ -176,7 +184,7 @@ const unitLocalizationStateSchema = schemaFactory
 	})
 	.omit({ unitId: true, createdAt: true, updatedAt: true });
 const UnitLocalizationRevisionDocumentSchema = z.object({
-	version: z.literal(1),
+	version: z.literal(UnitRevisionSlotSchemaVersions.localization),
 	localization: unitLocalizationStateSchema,
 });
 type UnitLocalizationState = z.infer<typeof unitLocalizationStateSchema>;
@@ -499,7 +507,7 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 		realmRules: record.kind === "realm" ? await snapshotRealmRules(tx, unitId) : null,
 	};
 	return {
-		version: 7,
+		version: UnitRevisionSchemaVersion,
 		kind: record.kind,
 		unit: unitStateSchema.parse(record),
 		localizations: localizations.map((localization) =>
@@ -865,11 +873,11 @@ export type UnitRevisionCommitResult = {
 };
 
 const SlotModels = {
-	main: "rezics.unit.main.v1",
-	localization: "rezics.unit.localization.v1",
-	relations: "rezics.unit.relations.v3",
-	structure: "rezics.unit.structure.v6",
-	rules: "rezics.unit.rules.v1",
+	main: `rezics.unit.main.v${UnitRevisionSlotSchemaVersions.main}`,
+	localization: `rezics.unit.localization.v${UnitRevisionSlotSchemaVersions.localization}`,
+	relations: `rezics.unit.relations.v${UnitRevisionSlotSchemaVersions.relations}`,
+	structure: `rezics.unit.structure.v${UnitRevisionSlotSchemaVersions.structure}`,
+	rules: `rezics.unit.rules.v${UnitRevisionSlotSchemaVersions.rules}`,
 } as const satisfies Record<(typeof UnitRevisionSlotRoleValues)[number], string>;
 
 function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
@@ -877,7 +885,7 @@ function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 		main: {
 			model: SlotModels.main,
 			payload: {
-				version: 1,
+				version: UnitRevisionSlotSchemaVersions.main,
 				kind: snapshot.kind,
 				unit: snapshot.unit,
 				extension: snapshot.extension,
@@ -887,7 +895,7 @@ function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 		relations: {
 			model: SlotModels.relations,
 			payload: {
-				version: 3,
+				version: UnitRevisionSlotSchemaVersions.relations,
 				aliases: snapshot.owned.aliases,
 				credits: snapshot.owned.credits,
 				subjectAssociations: snapshot.owned.subjectAssociations,
@@ -900,7 +908,7 @@ function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 		structure: {
 			model: SlotModels.structure,
 			payload: {
-				version: 6,
+				version: UnitRevisionSlotSchemaVersions.structure,
 				seriesReleases: snapshot.owned.seriesReleases,
 				softwareRequirements: snapshot.owned.softwareRequirements,
 				pollOptions: snapshot.owned.pollOptions,
@@ -915,7 +923,7 @@ function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 		documents.localizations[localization.language] = {
 			model: SlotModels.localization,
 			payload: {
-				version: 1,
+				version: UnitRevisionSlotSchemaVersions.localization,
 				localization,
 			} satisfies z.infer<typeof UnitLocalizationRevisionDocumentSchema>,
 		};
@@ -923,7 +931,10 @@ function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 	if (snapshot.owned.realmRules)
 		documents.rules = {
 			model: SlotModels.rules,
-			payload: { version: 1, ...snapshot.owned.realmRules },
+			payload: {
+				version: UnitRevisionSlotSchemaVersions.rules,
+				...snapshot.owned.realmRules,
+			},
 		};
 	return documents;
 }
@@ -980,7 +991,7 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 	const structure = fixedSlotPayload(documents, "structure");
 	const rules = documents.rules ? fixedSlotPayload(documents, "rules") : null;
 	return UnitSnapshotSchema.parse({
-		version: 7,
+		version: UnitRevisionSchemaVersion,
 		kind: main.kind,
 		unit: main.unit,
 		localizations: orderedLocalizationStates(documents),

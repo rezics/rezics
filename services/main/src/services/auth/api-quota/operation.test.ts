@@ -9,8 +9,8 @@ import {
 
 describe("API quota operation identity", () => {
 	it("derives the route operation ID used to select a stable quota scope", () => {
-		expect(apiRouteOperationId("GET", "/api/units/:unitId")).toBe("getApiUnitsByUnitId");
-		expect(apiRouteOperationId("PATCH", "/api/units/:unitId?")).toBe(
+		expect(apiRouteOperationId("GET", "/api/v1/units/:unitId")).toBe("getApiUnitsByUnitId");
+		expect(apiRouteOperationId("PATCH", "/api/v1/units/:unitId?")).toBe(
 			"patchApiUnitsByUnitIdOptional",
 		);
 	});

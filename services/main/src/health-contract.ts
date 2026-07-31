@@ -19,7 +19,7 @@ export type SchedulerHealthContract = {
 
 export const apiSchedulerHealthContract = {
 	startup: {
-		path: "/api/startup",
+		path: "/api/v1/startup",
 		intervalMs: 2_000,
 		timeoutMs: 1_000,
 		initialGraceMs: 2_000,
@@ -27,7 +27,7 @@ export const apiSchedulerHealthContract = {
 		deadlineMs: 180_000,
 	},
 	liveness: {
-		path: "/api/health",
+		path: "/api/v1/health",
 		intervalMs: 10_000,
 		timeoutMs: 1_000,
 		initialGraceMs: 10_000,
@@ -35,7 +35,7 @@ export const apiSchedulerHealthContract = {
 		restartsProcess: true,
 	},
 	readiness: {
-		path: "/api/ready",
+		path: "/api/v1/ready",
 		intervalMs: 5_000,
 		timeoutMs: 3_000,
 		initialGraceMs: 5_000,

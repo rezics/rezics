@@ -282,7 +282,7 @@ const SearchExecutionBase = {
 export const SearchFeatureState = Type.Object(
 	{
 		...SearchExecutionBase,
-		cursor: Type.Optional(Type.String({ maxLength: 4096, pattern: "^s2_[A-Za-z0-9_-]+$" })),
+		cursor: Type.Optional(Type.String({ maxLength: 4096, pattern: "^s1_[A-Za-z0-9_-]+$" })),
 		expression: Type.Optional(SearchControlExpression),
 	},
 	{ additionalProperties: false, $id: "SearchFeatureState" },

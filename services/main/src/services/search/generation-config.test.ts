@@ -6,18 +6,15 @@ import { TimedMediaUnitKindValues } from "../database/schema";
 import { CurrentSearchProjectionVersion, CurrentSearchUnitKindsByCategory } from "./contracts";
 import { getSearchSettingsFingerprint, SearchProjectionSettings } from "./settings";
 
-const currentSettingsGenerationDates = new Map([
-	["bd2f6511f881cd25ea9919b272143ea8e5433fe62da5e9cf809ef0a456781176", "20260726"],
-	["801c99608f68b41d09c7fbd65bac885f16866b686794ce6b74c937e2fa5504d1", "20260729"],
-	["7efde91e87ed031507dda6c1af721dc54ce4f76fbe30f5b31793826f726c6226", "20260731"],
-]);
+const CurrentSearchSettingsFingerprint =
+	"7efde91e87ed031507dda6c1af721dc54ce4f76fbe30f5b31793826f726c6226";
+const CurrentSearchGenerationDate = "20260801";
 const currentSettingsFingerprint = getSearchSettingsFingerprint("current");
-const generationDate = currentSettingsGenerationDates.get(currentSettingsFingerprint);
-if (!generationDate)
+if (currentSettingsFingerprint !== CurrentSearchSettingsFingerprint)
 	throw new Error(
-		`Current search settings fingerprint ${currentSettingsFingerprint} has no dated generation`,
+		`Current search settings fingerprint ${currentSettingsFingerprint} does not match the v1 generation`,
 	);
-const currentIndexUid = `rezics_units_v${CurrentSearchProjectionVersion}_${generationDate}`;
+const currentIndexUid = `rezics_units_v${CurrentSearchProjectionVersion}_${CurrentSearchGenerationDate}`;
 const currentSinkName = currentIndexUid.replaceAll("_", "-");
 
 async function readRepositoryFile(path: string): Promise<string> {

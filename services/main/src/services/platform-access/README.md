@@ -17,6 +17,6 @@ prevents duplicate current grants. A replacement command:
 4. revokes changed rows and inserts new rows in one transaction;
 5. appends the audit event in that transaction.
 
-The `/api/platform-access` endpoints expose policy, Profile discovery, current grants, provenance,
+The `/api/v1/platform-access` endpoints expose policy, Profile discovery, current grants, provenance,
 and optimistic replacement. UI access to `/console` is derived from the same capabilities; the
 route name does not grant authority.
