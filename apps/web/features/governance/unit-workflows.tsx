@@ -150,9 +150,11 @@ export function AccessInvitationManager({ unitId }: { unitId: string }) {
 						<Field required>
 							<FieldLabel>{t.governance.invitedProfile}</FieldLabel>
 							<UnitPicker
+								ariaLabel={t.governance.invitedProfile}
 								index="users"
 								kinds={["profile"]}
 								onValueChange={setInvitedProfileId}
+								placeholder={t.ui.pickerPlaceholders.user}
 								value={invitedProfileId}
 							/>
 						</Field>
@@ -485,6 +487,12 @@ function AssociationProposalManager({
 
 	const title =
 		kind === "credit" ? t.governance.creditAssociations : t.governance.subjectAssociations;
+	const relatedUnitLabel =
+		side === "source"
+			? kind === "credit"
+				? t.governance.targetUnit
+				: t.governance.targetEntity
+			: t.governance.sourceUnit;
 	return (
 		<Card>
 			<CardHeader>
@@ -495,14 +503,9 @@ function AssociationProposalManager({
 				<form onSubmit={submit}>
 					<FieldGroup>
 						<Field required>
-							<FieldLabel>
-								{side === "source"
-									? kind === "credit"
-										? t.governance.targetUnit
-										: t.governance.targetEntity
-									: t.governance.sourceUnit}
-							</FieldLabel>
+							<FieldLabel>{relatedUnitLabel}</FieldLabel>
 							<UnitPicker
+								ariaLabel={relatedUnitLabel}
 								index={entityPublisherOnly ? "users" : undefined}
 								kinds={
 									entityPublisherOnly
@@ -512,6 +515,13 @@ function AssociationProposalManager({
 											: undefined
 								}
 								onValueChange={setRelatedUnitId}
+								placeholder={
+									entityPublisherOnly
+										? t.ui.pickerPlaceholders.user
+										: kind === "subject" && side === "source"
+											? t.ui.pickerPlaceholders.entity
+											: t.ui.pickerPlaceholders.unit
+								}
 								value={relatedUnitId}
 							/>
 						</Field>
@@ -550,9 +560,11 @@ function AssociationProposalManager({
 								<FieldLabel>{t.governance.contextWikiPost}</FieldLabel>
 								<div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
 									<EntityPicker
+										ariaLabel={t.governance.contextWikiPost}
 										index="posts"
 										kind="wiki"
 										onChange={setContextPost}
+										placeholder={t.ui.pickerPlaceholders.post}
 										value={contextPost}
 									/>
 									{contextPost ? (
@@ -761,9 +773,11 @@ function EntityPublisherManager({ entity }: { entity: GetApiEntitiesByUnitIdStat
 						<Field required>
 							<FieldLabel>{t.governance.publisherProfile}</FieldLabel>
 							<UnitPicker
+								ariaLabel={t.governance.publisherProfile}
 								index="users"
 								kinds={["profile"]}
 								onValueChange={setPublisherProfileId}
+								placeholder={t.ui.pickerPlaceholders.user}
 								value={publisherProfileId}
 							/>
 						</Field>

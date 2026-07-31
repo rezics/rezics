@@ -34,7 +34,6 @@ export function TranslatedUiProvider({
 		"editor",
 		"errorCodes",
 		"errors",
-		"search",
 		"state",
 		"ui",
 	]);
@@ -56,7 +55,6 @@ export function TranslatedUiProvider({
 				empty: t.state.empty,
 				unnamed: t.ui.unnamed,
 				retry: t.actions.retry,
-				searchPlaceholder: t.search.placeholder,
 				editor: {
 					paragraph: t.editor.paragraph,
 					heading2: t.editor.heading2,

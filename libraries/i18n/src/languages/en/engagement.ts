@@ -83,6 +83,7 @@ export default {
 	allReviewRealms: `All ${realmTerms.pluralLabel}`,
 	filterReviewRealm: `Filter by ${realmTerms.label}`,
 	searchReviews: "Search review text",
+	searchReviewsPlaceholder: "Enter a review keyword",
 	reviewFilters: "Filters",
 	reviewFiltersDescription: `Filter reviews by language, score, and ${realmTerms.label}. Multiple languages and Scores may be selected.`,
 	applyReviewFilters: "Apply filters",
@@ -115,6 +116,8 @@ export default {
 		{ start: String, end: String, total: String },
 	),
 	excerpts: "Excerpts",
+	searchExcerpts: "Search excerpt text",
+	searchExcerptsPlaceholder: "Enter an excerpt keyword",
 	excerptPageDescription: "Browse passages shared from this work.",
 	excerptResultRange: insert("Displaying {{start}}–{{end}} of {{total}} excerpts", {
 		start: String,

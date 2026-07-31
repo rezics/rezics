@@ -46,6 +46,7 @@ export function RealmFeedManagementActions({
 		"errors",
 		"realms",
 		"state",
+		"ui",
 	]);
 	const queryClient = useQueryClient();
 	const localizationLanguages = useLocalizationLanguages();
@@ -123,7 +124,13 @@ export function RealmFeedManagementActions({
 						title={t.realms.feedManagement.addPolicyTag}
 					/>
 					<DialogBody className="grid gap-3">
-						<EntityPicker index="tags" onChange={setSelectedTag} value={selectedTag} />
+						<EntityPicker
+							ariaLabel={t.realms.feedManagement.addPolicyTag}
+							index="tags"
+							onChange={setSelectedTag}
+							placeholder={t.ui.pickerPlaceholders.tag}
+							value={selectedTag}
+						/>
 						<RequestFailure error={addPolicyTag.error} />
 					</DialogBody>
 					<DialogFooter>

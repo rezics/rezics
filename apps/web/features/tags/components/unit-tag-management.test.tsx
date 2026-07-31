@@ -34,7 +34,13 @@ vi.mock("@/i18n/client", () => ({
 						`Create "${query}" in Studio`,
 				},
 			},
-			ui: { retryLater: "Try again later" },
+			ui: {
+				pickerPlaceholders: {
+					tag: "Enter a tag name",
+					tagStructure: "Enter a Tag path name",
+				},
+				retryLater: "Try again later",
+			},
 		},
 	}),
 }));

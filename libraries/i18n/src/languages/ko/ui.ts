@@ -4,6 +4,8 @@ const { forms: followTerms } = koTerminology.follow;
 const { forms: postTerms } = koTerminology.post;
 const { forms: realmTerms } = koTerminology.realm;
 const { forms: zoneTerms } = koTerminology.zone;
+const { forms: tagStructureTerms } = koTerminology.tagStructure;
+const { forms: entityTerms } = koTerminology.entity;
 
 export default {
 	loading: "로딩 중…",
@@ -14,6 +16,15 @@ export default {
 	edit: "편집",
 	clear: "지우기",
 	search: "검색",
+	pickerPlaceholders: {
+		unit: "이름 또는 제목 입력",
+		entity: `${entityTerms.label} 이름 입력`,
+		tag: "태그 이름 입력",
+		tagStructure: `${tagStructureTerms.label} 이름 입력`,
+		post: `${postTerms.label} 제목 또는 키워드 입력`,
+		realm: `${realmTerms.label} 이름 입력`,
+		user: "사용자 이름 입력",
+	},
 	title: "제목",
 	summary: "요약",
 	description: "설명",

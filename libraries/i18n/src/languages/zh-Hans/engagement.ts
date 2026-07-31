@@ -83,6 +83,7 @@ export default {
 	allReviewRealms: `所有${realmTerms.pluralLabel}`,
 	filterReviewRealm: `依${realmTerms.label}筛选`,
 	searchReviews: "搜索评论内容",
+	searchReviewsPlaceholder: "输入评论中的关键词",
 	reviewFilters: "筛选",
 	reviewFiltersDescription: `依语言、评分与${realmTerms.label}筛选评论；语言与评分皆可复选。`,
 	applyReviewFilters: "应用筛选",
@@ -116,6 +117,8 @@ export default {
 		total: String,
 	}),
 	excerpts: "摘录",
+	searchExcerpts: "搜索摘录内容",
+	searchExcerptsPlaceholder: "输入摘录中的关键词",
 	excerptPageDescription: "浏览读者从这部作品分享的段落。",
 	excerptResultRange: insert("显示第 {{start}}–{{end}} 条，共 {{total}} 条摘录", {
 		start: String,

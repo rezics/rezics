@@ -18,7 +18,7 @@ export function TagStructureMemberEditor({
 	readonly members: readonly EditableTagStructureMember[];
 	readonly onChange: (members: EditableTagStructureMember[]) => void;
 }) {
-	const { t } = useTranslation(["tags"]);
+	const { t } = useTranslation(["tags", "ui"]);
 	const [picked, setPicked] = useState<EditableTagStructureMember>();
 	const add = () => {
 		if (!picked || members.some(({ id }) => id === picked.id) || members.length >= 16) return;
@@ -40,7 +40,13 @@ export function TagStructureMemberEditor({
 			<div className="grid gap-2">
 				<h2 className="font-semibold">{t.tags.createStructure.pick}</h2>
 				<div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
-					<EntityPicker index="tags" onChange={setPicked} value={picked} />
+					<EntityPicker
+						ariaLabel={t.tags.createStructure.pick}
+						index="tags"
+						onChange={setPicked}
+						placeholder={t.ui.pickerPlaceholders.tag}
+						value={picked}
+					/>
 					<Button
 						disabled={
 							!picked ||

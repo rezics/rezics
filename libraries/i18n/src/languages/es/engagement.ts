@@ -83,6 +83,7 @@ export default {
 	allReviewRealms: `Todos los ${realmTerms.plural}`,
 	filterReviewRealm: `Filtrar por ${realmTerms.inline}`,
 	searchReviews: "Buscar en el texto de las reseñas",
+	searchReviewsPlaceholder: "Introduce una palabra clave de la reseña",
 	reviewFilters: "Filtros",
 	reviewFiltersDescription: `Filtra las reseñas por idioma, puntuación y ${realmTerms.inline}. Puedes seleccionar varios idiomas y puntuaciones.`,
 	applyReviewFilters: "Aplicar filtros",
@@ -115,6 +116,8 @@ export default {
 		{ start: String, end: String, total: String },
 	),
 	excerpts: "Fragmentos",
+	searchExcerpts: "Buscar en el texto de los fragmentos",
+	searchExcerptsPlaceholder: "Introduce una palabra clave del fragmento",
 	excerptPageDescription: "Consulta los pasajes compartidos de esta obra.",
 	excerptResultRange: insert("Se muestran los fragmentos {{start}}–{{end}} de {{total}}", {
 		start: String,

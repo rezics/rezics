@@ -137,7 +137,13 @@ export function RealmTagContextCreatePage({ realmId }: { readonly realmId: strin
 							</Field>
 							<Field required>
 								<FieldLabel>{t.realms.tagContext.tag}</FieldLabel>
-								<EntityPicker index="tags" onChange={setTag} value={tag} />
+								<EntityPicker
+									ariaLabel={t.realms.tagContext.tag}
+									index="tags"
+									onChange={setTag}
+									placeholder={t.ui.pickerPlaceholders.tag}
+									value={tag}
+								/>
 							</Field>
 							<Field required>
 								<FieldLabel>{t.posts.wikiAccessMode}</FieldLabel>

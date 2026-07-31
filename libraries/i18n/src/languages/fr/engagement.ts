@@ -84,6 +84,7 @@ export default {
 	allReviewRealms: `Tous les ${realmTerms.plural}`,
 	filterReviewRealm: `Filtrer par ${realmTerms.inline}`,
 	searchReviews: "Rechercher dans le texte des avis",
+	searchReviewsPlaceholder: "Saisir un mot-clé de l’avis",
 	reviewFilters: "Filtres",
 	reviewFiltersDescription: `Filtrez les avis par langue, note et ${realmTerms.inline}. Plusieurs langues et notes peuvent être sélectionnées.`,
 	applyReviewFilters: "Appliquer les filtres",
@@ -116,6 +117,8 @@ export default {
 		{ start: String, end: String, total: String },
 	),
 	excerpts: "Extraits",
+	searchExcerpts: "Rechercher dans le texte des extraits",
+	searchExcerptsPlaceholder: "Saisir un mot-clé de l’extrait",
 	excerptPageDescription: "Parcourez les passages partagés à partir de cette œuvre.",
 	excerptResultRange: insert("Affichage des extraits {{start}} à {{end}} sur {{total}}", {
 		start: String,

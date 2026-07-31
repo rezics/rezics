@@ -38,17 +38,19 @@ export function EntityPicker({
 	kind,
 	kinds,
 	maxLength,
+	placeholder,
 	value,
 	onChange,
 	onClear,
 	search,
 	renderNoResultsAction,
 }: {
-	ariaLabel?: string;
+	ariaLabel: string;
 	index: string;
 	kind?: string;
 	kinds?: readonly string[];
 	maxLength?: number;
+	placeholder: string;
 	value?: EntityPickerValue;
 	onChange: (value: EntityPickerValue) => void;
 	onClear?: () => void;
@@ -155,9 +157,9 @@ export function EntityPicker({
 				value={value ? [value.id] : []}
 			>
 				<ComboboxInput
-					aria-label={ariaLabel ?? messages.searchPlaceholder}
+					aria-label={ariaLabel}
 					maxLength={maxLength}
-					placeholder={messages.searchPlaceholder}
+					placeholder={placeholder}
 					type="search"
 				/>
 				<ComboboxContent>

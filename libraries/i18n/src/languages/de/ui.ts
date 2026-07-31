@@ -4,6 +4,8 @@ const { forms: followTerms } = deTerminology.follow;
 const { forms: postTerms } = deTerminology.post;
 const { forms: realmTerms } = deTerminology.realm;
 const { forms: zoneTerms } = deTerminology.zone;
+const { forms: tagStructureTerms } = deTerminology.tagStructure;
+const { forms: entityTerms } = deTerminology.entity;
 
 export default {
 	loading: "Wird geladen…",
@@ -14,6 +16,15 @@ export default {
 	edit: "Bearbeiten",
 	clear: "Leeren",
 	search: "Suchen",
+	pickerPlaceholders: {
+		unit: "Name oder Titel eingeben",
+		entity: `Namen der ${entityTerms.inline} eingeben`,
+		tag: "Tag-Namen eingeben",
+		tagStructure: `Namen des ${tagStructureTerms.inline}es eingeben`,
+		post: `Titel oder Suchbegriff des ${postTerms.inline}s eingeben`,
+		realm: `Namen des ${realmTerms.inline}s eingeben`,
+		user: "Benutzernamen eingeben",
+	},
 	title: "Titel",
 	summary: "Zusammenfassung",
 	description: "Beschreibung",

@@ -33,7 +33,7 @@ export function ReviewFiltersDialog({
 	readonly onApply: (filters: ReviewFilterModel) => void;
 	readonly onClose: () => void;
 }) {
-	const { t } = useTranslation(["engagement", "locale", "search"]);
+	const { t } = useTranslation(["engagement", "locale", "ui"]);
 	const [draft, setDraft] = useState(initialFilters);
 
 	return (
@@ -101,8 +101,10 @@ export function ReviewFiltersDialog({
 					<Field>
 						<FieldLabel>{t.engagement.filterReviewRealm}</FieldLabel>
 						<EntityPicker
+							ariaLabel={t.engagement.filterReviewRealm}
 							index="realms"
 							onChange={(realm) => setDraft((current) => ({ ...current, realm }))}
+							placeholder={t.ui.pickerPlaceholders.realm}
 							value={draft.realm}
 						/>
 						{draft.realm ? (

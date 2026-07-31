@@ -9,7 +9,6 @@ export interface UiMessages {
 	empty: ReactNode;
 	unnamed: ReactNode;
 	retry: ReactNode;
-	searchPlaceholder: string;
 	editor: {
 		paragraph: string;
 		heading2: string;
@@ -88,7 +87,6 @@ const DefaultMessages = {
 	empty: "No results.",
 	unnamed: "Unnamed",
 	retry: "Retry",
-	searchPlaceholder: "Search…",
 	editor: {
 		paragraph: "Paragraph",
 		heading2: "Heading 2",

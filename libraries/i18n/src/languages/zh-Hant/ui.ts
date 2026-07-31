@@ -4,6 +4,8 @@ const { forms: followTerms } = zhHantTerminology.follow;
 const { forms: postTerms } = zhHantTerminology.post;
 const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: zoneTerms } = zhHantTerminology.zone;
+const { forms: tagStructureTerms } = zhHantTerminology.tagStructure;
+const { forms: entityTerms } = zhHantTerminology.entity;
 
 export default {
 	loading: "正在載入…",
@@ -14,6 +16,15 @@ export default {
 	edit: "編輯",
 	clear: "清除",
 	search: "搜尋",
+	pickerPlaceholders: {
+		unit: "輸入名稱或標題",
+		entity: `輸入${entityTerms.label}名稱`,
+		tag: "輸入標籤名稱",
+		tagStructure: `輸入${tagStructureTerms.label}名稱`,
+		post: `輸入${postTerms.label}標題或關鍵字`,
+		realm: `輸入${realmTerms.label}名稱`,
+		user: "輸入使用者名稱",
+	},
 	title: "標題",
 	summary: "摘要",
 	description: "說明",

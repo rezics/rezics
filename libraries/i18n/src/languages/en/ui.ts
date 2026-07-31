@@ -4,6 +4,8 @@ const { forms: followTerms } = enTerminology.follow;
 const { forms: postTerms } = enTerminology.post;
 const { forms: realmTerms } = enTerminology.realm;
 const { forms: zoneTerms } = enTerminology.zone;
+const { forms: tagStructureTerms } = enTerminology.tagStructure;
+const { forms: entityTerms } = enTerminology.entity;
 
 export default {
 	loading: "Loading…",
@@ -14,6 +16,15 @@ export default {
 	edit: "Edit",
 	clear: "Clear",
 	search: "Search",
+	pickerPlaceholders: {
+		unit: "Enter a name or title",
+		entity: `Enter an ${entityTerms.inline} name`,
+		tag: "Enter a tag name",
+		tagStructure: `Enter a ${tagStructureTerms.inline} name`,
+		post: `Enter a ${postTerms.inline} title or keyword`,
+		realm: `Enter a ${realmTerms.inline} name`,
+		user: "Enter a user name",
+	},
 	title: "Title",
 	summary: "Summary",
 	description: "Description",

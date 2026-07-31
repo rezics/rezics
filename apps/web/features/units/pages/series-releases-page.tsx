@@ -197,9 +197,11 @@ export function SeriesReleasesPage() {
 								<Field required>
 									<FieldLabel>{t.units.series.releaseUnit}</FieldLabel>
 									<EntityPicker
+										ariaLabel={t.units.series.releaseUnit}
 										index="units"
 										kinds={["book", "media", "software"]}
 										onChange={setSelectedUnit}
+										placeholder={t.ui.pickerPlaceholders.unit}
 										value={selectedUnit}
 									/>
 								</Field>

@@ -106,7 +106,15 @@ vi.mock("@/i18n/client", () => ({
 				summaryOptional: "Summary (optional)",
 				titleOptional: "Title (optional)",
 			},
-			ui: { body: "Body", create: "Create", retryLater: "Retry later" },
+			ui: {
+				body: "Body",
+				create: "Create",
+				pickerPlaceholders: {
+					realm: "Enter a Realm name",
+					unit: "Enter a name or title",
+				},
+				retryLater: "Retry later",
+			},
 		},
 	}),
 }));

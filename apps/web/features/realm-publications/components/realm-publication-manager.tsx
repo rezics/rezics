@@ -56,7 +56,7 @@ function isGovernanceStateFilter(value: string): value is RealmGovernanceStateFi
 }
 
 export function RealmPublicationManager({ unitId }: { readonly unitId: string }) {
-	const { t } = useTranslation(["realms", "state", "units"]);
+	const { t } = useTranslation(["realms", "state", "ui", "units"]);
 	const copy = t.units.realmPublications;
 	const [publicationState, setPublicationState] = useState<RealmPublicationStateFilter>("active");
 	const [realmStatus, setRealmStatus] = useState<RealmGovernanceStateFilter>("current");
@@ -95,6 +95,7 @@ export function RealmPublicationManager({ unitId }: { readonly unitId: string })
 							index="realms"
 							kinds={["realm"]}
 							onValueChange={setRealmId}
+							placeholder={t.ui.pickerPlaceholders.realm}
 							value={realmId}
 						/>
 					</Field>

@@ -139,13 +139,17 @@ export function UnitReviewFeed({
 				limit={pageSize}
 				onLanguagesChange={(languages) => void setRoute({ languages: [...languages] })}
 				onRealmIdsChange={(realms) => void setRoute({ realms: [...realms] })}
-				onSearchQueryChange={(q) => void setRoute({ q })}
 				onSortChange={(sort) => void setRoute({ sort })}
 				onTagIdsChange={(tags) => void setRoute({ tags: [...tags] })}
 				paginate={mode === "page"}
 				realmIds={route.realms}
 				renderSummary={formatRange}
-				searchQuery={route.q}
+				search={{
+					label: t.engagement.searchReviews,
+					onQueryChange: (q) => void setRoute({ q }),
+					placeholder: t.engagement.searchReviewsPlaceholder,
+					query: route.q,
+				}}
 				sort={route.sort}
 				tagIds={route.tags}
 			/>

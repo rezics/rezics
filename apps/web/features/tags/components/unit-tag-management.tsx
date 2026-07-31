@@ -60,8 +60,10 @@ export function UnitTagManagement({
 						</div>
 						<div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
 							<EntityPicker
+								ariaLabel={t.tags.structures.addTitle}
 								index="tag-structures"
 								onChange={setSelectedStructure}
+								placeholder={t.ui.pickerPlaceholders.tagStructure}
 								value={selectedStructure}
 							/>
 							<Button
@@ -93,9 +95,11 @@ export function UnitTagManagement({
 					</div>
 					<div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
 						<EntityPicker
+							ariaLabel={addCopy.addTitle}
 							index="tags"
 							maxLength={500}
 							onChange={setSelectedTag}
+							placeholder={t.ui.pickerPlaceholders.tag}
 							renderNoResultsAction={(query) => (
 								<div className="grid justify-items-start gap-2 rounded-xl border border-border-weak bg-muted/30 p-3 text-sm">
 									<p className="text-muted-foreground">

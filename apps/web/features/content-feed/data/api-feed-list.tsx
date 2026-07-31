@@ -32,6 +32,13 @@ import { FeedSortValues, type FeedSort } from "../model/feed-sort";
 import { resolveFeedFilterLanguages } from "../model/feed-language-filter";
 import { FeedQueryKey } from "../query";
 
+export interface ApiFeedSearchControl {
+	readonly label: string;
+	readonly onQueryChange: (query: string) => void;
+	readonly placeholder: string;
+	readonly query: string;
+}
+
 export interface ApiFeedListProps {
 	"aria-label"?: string;
 	additionalFilter?: UnitPredicate;
@@ -45,14 +52,13 @@ export interface ApiFeedListProps {
 	onContentKindsChange?: (contentKinds: readonly SimpleFeedContentKind[]) => void;
 	onLanguagesChange?: (languages: readonly ContentLanguage[]) => void;
 	onRealmIdsChange?: (realmIds: readonly string[]) => void;
-	onSearchQueryChange?: (query: string) => void;
 	onSortChange?: (sort: FeedSort) => void;
 	onTagIdsChange?: (tagIds: readonly string[]) => void;
 	paginate?: boolean;
 	realmIds?: readonly string[];
 	renderOverflowActions?: (item: FeedItem) => ReactNode;
 	renderSummary?: (metadata: ApiFeedResultMetadata) => ReactNode;
-	searchQuery?: string;
+	search?: ApiFeedSearchControl;
 	sort?: FeedSort;
 	tagIds?: readonly string[];
 }
@@ -78,18 +84,18 @@ export function ApiFeedList({
 	onContentKindsChange,
 	onLanguagesChange,
 	onRealmIdsChange,
-	onSearchQueryChange,
 	onSortChange,
 	onTagIdsChange,
 	paginate = true,
 	realmIds = [],
 	renderOverflowActions,
 	renderSummary,
-	searchQuery = "",
+	search,
 	sort = "best",
 	tagIds = [],
 }: ApiFeedListProps) {
 	const { t } = useTranslation(["actions", "feed", "locale", "state"]);
+	const searchQuery = search?.query ?? "";
 	const session = useHydratedSession();
 	const preferences = usePresentationPreferences();
 	const localizationState = useLocalizationLanguageState();
@@ -201,7 +207,7 @@ export function ApiFeedList({
 		onContentKindsChange ||
 		onLanguagesChange ||
 		onRealmIdsChange ||
-		onSearchQueryChange ||
+		search ||
 		onTagIdsChange,
 	);
 	const requestedRealmId = realmIds.length === 1 ? realmIds[0] : undefined;
@@ -223,11 +229,10 @@ export function ApiFeedList({
 					onContentKindsChange={onContentKindsChange}
 					onLanguagesChange={onLanguagesChange}
 					onRealmIdsChange={onRealmIdsChange}
-					onSearchQueryChange={onSearchQueryChange}
 					onSortChange={onSortChange}
 					onTagIdsChange={onTagIdsChange}
 					realmIds={realmIds}
-					searchQuery={searchQuery}
+					search={search}
 					sort={sort}
 					tagIds={tagIds}
 				/>
@@ -323,11 +328,10 @@ export function FeedListControls({
 	onContentKindsChange,
 	onLanguagesChange,
 	onRealmIdsChange,
-	onSearchQueryChange,
 	onSortChange,
 	onTagIdsChange,
 	realmIds = [],
-	searchQuery = "",
+	search,
 	sort,
 	tagIds = [],
 }: Pick<
@@ -337,16 +341,16 @@ export function FeedListControls({
 	| "onContentKindsChange"
 	| "onLanguagesChange"
 	| "onRealmIdsChange"
-	| "onSearchQueryChange"
 	| "onSortChange"
 	| "onTagIdsChange"
 	| "realmIds"
-	| "searchQuery"
+	| "search"
 	| "sort"
 	| "tagIds"
 >) {
 	const { t } = useTranslation(["feed", "locale", "search"]);
 	const localizationState = useLocalizationLanguageState();
+	const searchQuery = search?.query ?? "";
 	const localizationLanguages =
 		localizationState.status === "ready" ? localizationState.languages : [];
 	const [filtersOpen, setFiltersOpen] = useState(false);
@@ -405,12 +409,12 @@ export function FeedListControls({
 				className="flex flex-wrap items-center justify-start gap-1 border-b border-border-weak pb-5"
 				role="group"
 			>
-				{onSearchQueryChange ? (
+				{search ? (
 					<form
 						className="flex min-w-64 flex-1 items-stretch gap-2"
 						onSubmit={(event) => {
 							event.preventDefault();
-							onSearchQueryChange(queryDraft.trim());
+							search.onQueryChange(queryDraft.trim());
 						}}
 						role="search"
 					>
@@ -420,11 +424,11 @@ export function FeedListControls({
 								className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
 							/>
 							<Input
-								aria-label={t.search.query}
+								aria-label={search.label}
 								className="h-12 ps-10"
 								maxLength={500}
 								onChange={(event) => setQueryDraft(event.currentTarget.value)}
-								placeholder={t.search.placeholder}
+								placeholder={search.placeholder}
 								type="search"
 								value={queryDraft}
 							/>

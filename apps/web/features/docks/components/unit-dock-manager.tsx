@@ -219,6 +219,10 @@ function UnitDockEditor({
 						setDirty(true);
 						setInvalid(false);
 					}}
+					pickerPlaceholders={{
+						post: t.ui.pickerPlaceholders.post,
+						unit: t.ui.pickerPlaceholders.unit,
+					}}
 				/>
 				{invalid ? (
 					<p className="text-destructive text-sm" role="alert">

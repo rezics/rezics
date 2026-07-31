@@ -11,7 +11,10 @@ const { forms: followTerms } = enTerminology.follow;
 
 export default {
 	title: "Search",
-	placeholder: `Search units, ${entityTerms.plural}, tags, ${postTerms.plural}, ${realmTerms.plural}, or users`,
+	site: {
+		label: `Search ${verbatimTerms.rezics.value}`,
+		placeholder: "Enter a name, title, or keyword",
+	},
 	withinLabel: insert("Search within {{name}}", { name: String }),
 	withinPlaceholder: insert("Search {{name}}", { name: String }),
 	advancedFilters: "Advanced filters",

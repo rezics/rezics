@@ -11,7 +11,10 @@ const { forms: followTerms } = esTerminology.follow;
 
 export default {
 	title: "Buscar",
-	placeholder: `Buscar obras, ${entityTerms.plural}, etiquetas, ${postTerms.plural}, ${realmTerms.plural} o usuarios`,
+	site: {
+		label: `Buscar en ${verbatimTerms.rezics.value}`,
+		placeholder: "Introduce un nombre, título o palabra clave",
+	},
 	withinLabel: insert("Buscar en {{name}}", { name: String }),
 	withinPlaceholder: insert("Buscar en {{name}}", { name: String }),
 	advancedFilters: "Filtros avanzados",

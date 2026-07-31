@@ -301,7 +301,7 @@ function WikiNavigationTreeEditor({
 	readonly onSaved: (navigationId: string) => void;
 	readonly realmId: string;
 }) {
-	const { t } = useTranslation(["realms"]);
+	const { t } = useTranslation(["realms", "ui"]);
 	const queryClient = useQueryClient();
 	const [document, setDocument] = useState<NavigationEditorDocument>(() =>
 		createEditorDocument(navigation),
@@ -829,6 +829,7 @@ function WikiNavigationTreeEditor({
 											{t.realms.wikiNavigationSettings.label}
 										</label>
 										<UnitPicker
+											ariaLabel={t.realms.wikiNavigationSettings.label}
 											index="units"
 											kinds={["label"]}
 											onValueChange={(value) =>
@@ -840,6 +841,7 @@ function WikiNavigationTreeEditor({
 													),
 												)
 											}
+											placeholder={t.ui.pickerPlaceholders.unit}
 											value={selectedNode.labelUnitId || undefined}
 										/>
 										<p className="text-muted-foreground text-xs">
@@ -852,6 +854,7 @@ function WikiNavigationTreeEditor({
 												{t.realms.wikiNavigationSettings.target}
 											</label>
 											<UnitPicker
+												ariaLabel={t.realms.wikiNavigationSettings.target}
 												index="posts"
 												kinds={["post"]}
 												onValueChange={(value) =>
@@ -863,6 +866,7 @@ function WikiNavigationTreeEditor({
 														),
 													)
 												}
+												placeholder={t.ui.pickerPlaceholders.post}
 												value={selectedNode.targetUnitId || undefined}
 											/>
 											<p className="text-muted-foreground text-xs">

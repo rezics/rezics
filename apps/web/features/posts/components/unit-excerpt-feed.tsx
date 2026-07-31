@@ -62,12 +62,16 @@ export function UnitExcerptFeed({ targetId }: { readonly targetId: string }) {
 			limit={ExcerptPageSize}
 			onLanguagesChange={(languages) => void setRoute({ languages: [...languages] })}
 			onRealmIdsChange={(realms) => void setRoute({ realms: [...realms] })}
-			onSearchQueryChange={(q) => void setRoute({ q })}
 			onSortChange={(sort) => void setRoute({ sort })}
 			onTagIdsChange={(tags) => void setRoute({ tags: [...tags] })}
 			realmIds={route.realms}
 			renderSummary={formatRange}
-			searchQuery={route.q}
+			search={{
+				label: t.engagement.searchExcerpts,
+				onQueryChange: (q) => void setRoute({ q }),
+				placeholder: t.engagement.searchExcerptsPlaceholder,
+				query: route.q,
+			}}
 			sort={route.sort}
 			tagIds={route.tags}
 		/>

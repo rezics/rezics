@@ -121,6 +121,7 @@ function RealmScoreContextSettingsForm({
 								save.reset();
 								remove.reset();
 							}}
+							placeholder={t.ui.pickerPlaceholders.post}
 							search={search}
 							value={contextPostId}
 						/>

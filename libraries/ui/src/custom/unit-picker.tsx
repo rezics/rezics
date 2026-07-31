@@ -55,14 +55,16 @@ export function UnitPicker({
 	kinds,
 	name,
 	onValueChange,
+	placeholder,
 	search,
 	value,
 }: {
-	readonly ariaLabel?: string;
+	readonly ariaLabel: string;
 	readonly index?: string;
 	readonly kinds?: readonly string[];
 	readonly name?: string;
 	readonly onValueChange: (value: string | undefined) => void;
+	readonly placeholder: string;
 	readonly search?: EntitySearch;
 	readonly value: string | undefined;
 }) {
@@ -88,6 +90,7 @@ export function UnitPicker({
 					setSelected(undefined);
 					onValueChange(undefined);
 				}}
+				placeholder={placeholder}
 				search={search}
 				value={presentation}
 			/>
@@ -109,15 +112,17 @@ export function UnitMultiPicker({
 	maxValues,
 	name,
 	onValuesChange,
+	placeholder,
 	removeLabel,
 	values,
 }: {
-	readonly ariaLabel?: string;
+	readonly ariaLabel: string;
 	readonly index?: string;
 	readonly kinds?: readonly string[];
 	readonly maxValues?: number;
 	readonly name?: string;
 	readonly onValuesChange: (values: readonly string[]) => void;
+	readonly placeholder: string;
 	readonly removeLabel: string;
 	readonly values: readonly string[];
 }) {
@@ -169,6 +174,7 @@ export function UnitMultiPicker({
 					onChange={(next) => {
 						if (!values.includes(next.id)) onValuesChange([...values, next.id]);
 					}}
+					placeholder={placeholder}
 				/>
 			) : null}
 		</div>

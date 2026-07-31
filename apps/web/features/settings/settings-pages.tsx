@@ -597,8 +597,10 @@ export function PreferenceSettings() {
 					<Field>
 						<FieldLabel>{t.settings.defaultScoreRealm}</FieldLabel>
 						<EntityPicker
+							ariaLabel={t.settings.defaultScoreRealm}
 							index="realms"
 							onChange={setSelectedDefaultScoreRealm}
+							placeholder={t.ui.pickerPlaceholders.realm}
 							value={defaultScoreRealm}
 						/>
 						<p className="text-sm text-muted-foreground">

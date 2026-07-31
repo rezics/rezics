@@ -356,6 +356,7 @@ function SearchDocumentEditor({
 												{t.zones.management.search.labelUnitId}
 											</FieldLabel>
 											<UnitPicker
+												ariaLabel={t.zones.management.search.labelUnitId}
 												onValueChange={(labelUnitId) => {
 													setDraft({
 														...document,
@@ -375,6 +376,7 @@ function SearchDocumentEditor({
 														),
 													});
 												}}
+												placeholder={t.ui.pickerPlaceholders.unit}
 												value={control.labelUnitId ?? ""}
 											/>
 										</Field>
@@ -384,6 +386,9 @@ function SearchDocumentEditor({
 													{t.zones.management.search.allowedTagIds}
 												</FieldLabel>
 												<UnitMultiPicker
+													ariaLabel={
+														t.zones.management.search.allowedTagIds
+													}
 													index="tags"
 													kinds={["tag"]}
 													onValuesChange={(values) => {
@@ -413,6 +418,7 @@ function SearchDocumentEditor({
 													removeLabel={
 														t.zones.management.search.removeAllowedTag
 													}
+													placeholder={t.ui.pickerPlaceholders.tag}
 													values={
 														control.optionPolicy?.kind === "include"
 															? control.optionPolicy.values.filter(

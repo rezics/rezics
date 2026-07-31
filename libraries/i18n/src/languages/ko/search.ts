@@ -11,7 +11,10 @@ const { forms: followTerms } = koTerminology.follow;
 
 export default {
 	title: "검색",
-	placeholder: `작품, ${entityTerms.label}, 태그, ${postTerms.plural}, ${realmTerms.plural} 또는 사용자를 검색`,
+	site: {
+		label: `${verbatimTerms.rezics.value} 검색`,
+		placeholder: "이름, 제목 또는 키워드 입력",
+	},
 	withinLabel: insert("{{name}} 내에서 검색", { name: String }),
 	withinPlaceholder: insert("{{name}} 검색", { name: String }),
 	advancedFilters: "고급 필터",

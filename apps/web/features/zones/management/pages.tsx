@@ -592,6 +592,10 @@ function PageEditor({
 							setDocument(parseDocument(UnitReferencedBlockDocument, next));
 							setDirty(true);
 						}}
+						pickerPlaceholders={{
+							post: t.ui.pickerPlaceholders.post,
+							unit: t.ui.pickerPlaceholders.unit,
+						}}
 					/>
 					<div className="flex flex-wrap gap-3">
 						<Button isLoading={pending} type="submit">

@@ -87,6 +87,7 @@ export default {
 	allReviewRealms: `Alle ${realmTerms.pluralLabel}`,
 	filterReviewRealm: `Nach ${realmTerms.inline} filtern`,
 	searchReviews: "Rezensionstext durchsuchen",
+	searchReviewsPlaceholder: "Suchbegriff aus der Rezension eingeben",
 	reviewFilters: "Filter",
 	reviewFiltersDescription: `Filtere Rezensionen nach Sprache, Bewertung und ${realmTerms.inline}. Mehrere Sprachen und Bewertungen können ausgewählt werden.`,
 	applyReviewFilters: "Filter anwenden",
@@ -119,6 +120,8 @@ export default {
 		{ start: String, end: String, total: String },
 	),
 	excerpts: "Auszüge",
+	searchExcerpts: "Auszugstext durchsuchen",
+	searchExcerptsPlaceholder: "Suchbegriff aus dem Auszug eingeben",
 	excerptPageDescription: "Hier findest du geteilte Passagen aus diesem Werk.",
 	excerptResultRange: insert("{{start}}–{{end}} von {{total}} Auszügen werden angezeigt", {
 		start: String,

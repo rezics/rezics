@@ -39,7 +39,7 @@ export function ReviewScoreRealmMultiPicker({
 	readonly options: readonly ReviewScoreRealmOption[];
 	readonly selected: readonly ReviewScoreRealmOption[];
 }) {
-	const { t } = useTranslation(["engagement", "search", "state"]);
+	const { t } = useTranslation(["engagement", "state", "ui"]);
 	const searchEntities = useEntitySearch();
 	const availableOptions = useMemo(
 		() => options.filter(({ realmId }) => !excludedRealmIds.has(realmId)),
@@ -131,7 +131,7 @@ export function ReviewScoreRealmMultiPicker({
 			<ComboboxInput
 				aria-label={t.engagement.selectScoreRealms}
 				className="h-auto min-h-10 [&_[data-slot=input-group-input]]:min-w-28 [&_[data-slot=input-group-input]]:flex-1"
-				placeholder={selected.length ? "" : t.search.placeholder}
+				placeholder={selected.length ? "" : t.ui.pickerPlaceholders.realm}
 				type="search"
 			>
 				{selected.map((option) => (

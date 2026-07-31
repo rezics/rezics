@@ -247,6 +247,7 @@ export function MediaContentNodeDialog({
 														})}
 												onChange={setUnit}
 												onClear={() => setUnit(undefined)}
+												placeholder={t.ui.pickerPlaceholders.unit}
 												value={unit}
 											/>
 										</fieldset>

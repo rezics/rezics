@@ -4,6 +4,8 @@ const { forms: followTerms } = esTerminology.follow;
 const { forms: postTerms } = esTerminology.post;
 const { forms: realmTerms } = esTerminology.realm;
 const { forms: zoneTerms } = esTerminology.zone;
+const { forms: tagStructureTerms } = esTerminology.tagStructure;
+const { forms: entityTerms } = esTerminology.entity;
 
 export default {
 	loading: "Cargando…",
@@ -14,6 +16,15 @@ export default {
 	edit: "Editar",
 	clear: "Borrar",
 	search: "Buscar",
+	pickerPlaceholders: {
+		unit: "Introduce un nombre o título",
+		entity: `Introduce el nombre de una ${entityTerms.inline}`,
+		tag: "Introduce el nombre de una etiqueta",
+		tagStructure: `Introduce el nombre de una ${tagStructureTerms.inline}`,
+		post: `Introduce el título o una palabra clave de una ${postTerms.inline}`,
+		realm: `Introduce el nombre de un ${realmTerms.inline}`,
+		user: "Introduce un nombre de usuario",
+	},
 	title: "Título",
 	summary: "Resumen",
 	description: "Descripción",

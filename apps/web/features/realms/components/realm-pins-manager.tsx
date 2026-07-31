@@ -217,9 +217,11 @@ export function RealmPinsManager({
 					<Field required>
 						<FieldLabel>{t.realms.pinTarget}</FieldLabel>
 						<EntityPicker
+							ariaLabel={t.realms.pinTarget}
 							index="units"
 							onChange={setTarget}
 							onClear={() => setTarget(undefined)}
+							placeholder={t.ui.pickerPlaceholders.unit}
 							value={target}
 						/>
 					</Field>

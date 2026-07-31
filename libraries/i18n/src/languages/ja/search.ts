@@ -11,7 +11,10 @@ const { forms: followTerms } = jaTerminology.follow;
 
 export default {
 	title: "検索",
-	placeholder: `作品、${entityTerms.label}、タグ、${postTerms.plural}、${realmTerms.plural}、またはユーザーを検索`,
+	site: {
+		label: `${verbatimTerms.rezics.value}を検索`,
+		placeholder: "名前、タイトル、またはキーワードを入力",
+	},
 	withinLabel: insert("{{name}}内を検索", { name: String }),
 	withinPlaceholder: insert("{{name}}を検索", { name: String }),
 	advancedFilters: "高度なフィルター",

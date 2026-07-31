@@ -83,6 +83,7 @@ export default {
 	allReviewRealms: `所有${realmTerms.pluralLabel}`,
 	filterReviewRealm: `依${realmTerms.label}篩選`,
 	searchReviews: "搜尋評論內容",
+	searchReviewsPlaceholder: "輸入評論中的關鍵字",
 	reviewFilters: "篩選",
 	reviewFiltersDescription: `依語言、評分與${realmTerms.label}篩選評論；語言與評分皆可複選。`,
 	applyReviewFilters: "套用篩選",
@@ -116,6 +117,8 @@ export default {
 		total: String,
 	}),
 	excerpts: "摘錄",
+	searchExcerpts: "搜尋摘錄內容",
+	searchExcerptsPlaceholder: "輸入摘錄中的關鍵字",
 	excerptPageDescription: "瀏覽讀者從這部作品分享的段落。",
 	excerptResultRange: insert("顯示第 {{start}}–{{end}} 則，共 {{total}} 則摘錄", {
 		start: String,

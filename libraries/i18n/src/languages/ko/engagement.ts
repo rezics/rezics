@@ -86,6 +86,7 @@ export default {
 	allReviewRealms: `모든 ${realmTerms.pluralLabel}`,
 	filterReviewRealm: `${realmTerms.label}로 필터링`,
 	searchReviews: "리뷰 텍스트 검색",
+	searchReviewsPlaceholder: "리뷰 키워드 입력",
 	reviewFilters: "필터",
 	reviewFiltersDescription: `언어, 점수 및 ${realmTerms.label}에 따라 리뷰를 필터링합니다. 여러 언어와 점수를 선택할 수 있습니다.`,
 	applyReviewFilters: "필터 적용",
@@ -119,6 +120,8 @@ export default {
 		total: String,
 	}),
 	excerpts: "발췌",
+	searchExcerpts: "발췌 내용 검색",
+	searchExcerptsPlaceholder: "발췌 키워드 입력",
 	excerptPageDescription: "이 작품에서 공유된 구절을 살펴보세요.",
 	excerptResultRange: insert("발췌 {{total}}개 중 {{start}}–{{end}}개 표시", {
 		start: String,

@@ -10,7 +10,10 @@ const { forms: entityTerms } = frTerminology.entity;
 
 export default {
 	title: "Recherche",
-	placeholder: `Rechercher des œuvres, ${entityTerms.plural}, étiquettes, ${postTerms.plural}, ${realmTerms.plural} ou utilisateurs`,
+	site: {
+		label: `Rechercher dans ${verbatimTerms.rezics.value}`,
+		placeholder: "Saisir un nom, un titre ou un mot-clé",
+	},
 	withinLabel: insert("Rechercher dans {{name}}", { name: String }),
 	withinPlaceholder: insert("Rechercher dans {{name}}", { name: String }),
 	advancedFilters: "Filtres avancés",

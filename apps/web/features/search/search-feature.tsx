@@ -631,7 +631,7 @@ export function SearchFeature({
 							id={`${id}-query`}
 							maxLength={500}
 							onChange={(event) => setQuery(event.currentTarget.value)}
-							placeholder={queryPlaceholder ?? t.placeholder}
+							placeholder={queryPlaceholder ?? t.site.placeholder}
 							required={document.query.required}
 							type="search"
 							value={query}

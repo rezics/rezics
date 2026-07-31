@@ -166,8 +166,10 @@ export function CollectionItemsPage() {
 					<Field required>
 						<FieldLabel>{t.collections.items.target}</FieldLabel>
 						<EntityPicker
+							ariaLabel={t.collections.items.target}
 							index="units"
 							onChange={setSelectedUnit}
+							placeholder={t.ui.pickerPlaceholders.unit}
 							value={selectedUnit}
 						/>
 					</Field>

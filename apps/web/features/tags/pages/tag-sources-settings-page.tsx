@@ -116,8 +116,10 @@ export function TagSourcesSettingsPage() {
 						</div>
 						<div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
 							<EntityPicker
+								ariaLabel={t.tags.sources.addTitle}
 								index="realms"
 								onChange={setSelectedRealm}
+								placeholder={t.ui.pickerPlaceholders.realm}
 								value={selectedRealm}
 							/>
 							<Button

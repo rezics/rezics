@@ -641,7 +641,13 @@ export function UnitRelationships({ type, unit }: { type: WorkUnitType; unit: Un
 						}
 					}}
 				>
-					<EntityPicker index="entity" onChange={setCreditEntity} value={creditEntity} />
+					<EntityPicker
+						ariaLabel={t.units.editor.credit}
+						index="entity"
+						onChange={setCreditEntity}
+						placeholder={t.ui.pickerPlaceholders.entity}
+						value={creditEntity}
+					/>
 					<Field required>
 						<FieldLabel>{t.units.editor.creditRole}</FieldLabel>
 						<NativeSelect name="role" required>
@@ -692,17 +698,21 @@ export function UnitRelationships({ type, unit }: { type: WorkUnitType; unit: Un
 					}}
 				>
 					<EntityPicker
+						ariaLabel={t.units.editor.subjectAssociation}
 						index="entity"
 						onChange={setSubjectEntity}
+						placeholder={t.ui.pickerPlaceholders.entity}
 						value={subjectEntity}
 					/>
 					<Field>
 						<FieldLabel>{t.units.editor.contextWikiPost}</FieldLabel>
 						<div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
 							<EntityPicker
+								ariaLabel={t.units.editor.contextWikiPost}
 								index="posts"
 								kind="wiki"
 								onChange={setSubjectContextPost}
+								placeholder={t.ui.pickerPlaceholders.post}
 								value={subjectContextPost}
 							/>
 							{subjectContextPost ? (
@@ -759,7 +769,13 @@ export function UnitRelationships({ type, unit }: { type: WorkUnitType; unit: Un
 						}
 					}}
 				>
-					<EntityPicker index="entity" onChange={setLinkSource} value={linkSource} />
+					<EntityPicker
+						ariaLabel={t.units.editor.link}
+						index="entity"
+						onChange={setLinkSource}
+						placeholder={t.ui.pickerPlaceholders.entity}
+						value={linkSource}
+					/>
 					<Field required>
 						<FieldLabel>{t.units.editor.linkUrl}</FieldLabel>
 						<Input name="url" required type="url" />
@@ -787,8 +803,10 @@ export function UnitRelationships({ type, unit }: { type: WorkUnitType; unit: Un
 						<Field>
 							<FieldLabel>{t.units.editor.canonicalUnit}</FieldLabel>
 							<EntityPicker
+								ariaLabel={t.units.editor.canonicalUnit}
 								index="units"
 								onChange={setCanonicalUnit}
+								placeholder={t.ui.pickerPlaceholders.unit}
 								value={canonicalUnit}
 							/>
 						</Field>

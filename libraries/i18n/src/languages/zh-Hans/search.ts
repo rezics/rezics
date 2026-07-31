@@ -11,7 +11,10 @@ const { forms: followTerms } = zhHansTerminology.follow;
 
 export default {
 	title: "搜索",
-	placeholder: `搜索作品、${entityTerms.plural}、标签、${postTerms.plural}、${realmTerms.plural}或用户`,
+	site: {
+		label: `搜索 ${verbatimTerms.rezics.value}`,
+		placeholder: "输入名称、标题或关键词",
+	},
 	withinLabel: insert("在「{{name}}」中搜索", { name: String }),
 	withinPlaceholder: insert("搜索「{{name}}」", { name: String }),
 	advancedFilters: "高级筛选",

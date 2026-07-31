@@ -206,6 +206,11 @@ export function BookContentNodeDialog({
 														attach: {},
 													}))
 												}
+												placeholder={
+													contentKind === "chapter"
+														? t.ui.pickerPlaceholders.post
+														: t.ui.pickerPlaceholders.unit
+												}
 												value={input.attach.unit}
 											/>
 										</fieldset>

@@ -22,14 +22,17 @@ describe("EntityPicker no-result actions", () => {
 		render(
 			<UiProvider searchEntities={search}>
 				<EntityPicker
+					ariaLabel="Search tags"
 					index="tags"
 					onChange={vi.fn()}
+					placeholder="Enter a tag name"
 					renderNoResultsAction={(query) => <a href="/create">{`Create ${query}`}</a>}
 				/>
 			</UiProvider>,
 		);
 
-		const input = screen.getByRole("combobox");
+		const input = screen.getByRole("combobox", { name: "Search tags" });
+		expect(input.getAttribute("placeholder")).toBe("Enter a tag name");
 		fireEvent.focus(input);
 		fireEvent.change(input, { target: { value: "science" } });
 		expect(screen.queryByRole("link", { name: "Create science" })).toBeNull();
@@ -46,8 +49,10 @@ describe("EntityPicker no-result actions", () => {
 		const { rerender } = render(
 			<UiProvider searchEntities={search}>
 				<EntityPicker
+					ariaLabel="Search tags"
 					index="tags"
 					onChange={vi.fn()}
+					placeholder="Enter a tag name"
 					renderNoResultsAction={(query) => <a href="/create">{`Create ${query}`}</a>}
 				/>
 			</UiProvider>,
@@ -62,8 +67,10 @@ describe("EntityPicker no-result actions", () => {
 		rerender(
 			<UiProvider searchEntities={search}>
 				<EntityPicker
+					ariaLabel="Search tags"
 					index="tags"
 					onChange={vi.fn()}
+					placeholder="Enter a tag name"
 					renderNoResultsAction={(query) => <a href="/create">{`Create ${query}`}</a>}
 				/>
 			</UiProvider>,

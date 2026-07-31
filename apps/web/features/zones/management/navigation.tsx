@@ -405,6 +405,7 @@ function NavigationItemFields({
 	readonly onRemove: () => void;
 }) {
 	const { t } = useTranslation("zones");
+	const { t: ui } = useTranslation("ui");
 	return (
 		<div
 			className="grid w-full gap-3 py-2 sm:grid-cols-2"
@@ -413,7 +414,9 @@ function NavigationItemFields({
 			<Field required>
 				<FieldLabel>{t.management.navigationEditor.labelUnitId}</FieldLabel>
 				<UnitPicker
+					ariaLabel={t.management.navigationEditor.labelUnitId}
 					onValueChange={(value) => onChange({ ...item, labelUnitId: value ?? "" })}
+					placeholder={ui.pickerPlaceholders.unit}
 					value={item.labelUnitId}
 				/>
 			</Field>
@@ -477,12 +480,14 @@ function NavigationItemFields({
 						</FieldLabel>
 						{item.target.kind === "unit" ? (
 							<UnitPicker
+								ariaLabel={t.management.navigationEditor.targetUnitId}
 								onValueChange={(value) =>
 									onChange({
 										...item,
 										target: { kind: "unit", unitId: value ?? "" },
 									})
 								}
+								placeholder={ui.pickerPlaceholders.unit}
 								value={item.target.unitId}
 							/>
 						) : (

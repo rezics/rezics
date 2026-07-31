@@ -103,7 +103,11 @@ vi.mock("@/i18n/client", () => ({
 				summaryOptional: "Summary (optional)",
 				titleOptional: "Title (optional)",
 			},
-			ui: { body: "Body", retryLater: "Retry later" },
+			ui: {
+				body: "Body",
+				pickerPlaceholders: { realm: "Enter a Realm name" },
+				retryLater: "Retry later",
+			},
 		},
 	}),
 }));

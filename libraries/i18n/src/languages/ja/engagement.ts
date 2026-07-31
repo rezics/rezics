@@ -83,6 +83,7 @@ export default {
 	allReviewRealms: `すべての ${realmTerms.pluralLabel}`,
 	filterReviewRealm: `${realmTerms.label} でフィルタ`,
 	searchReviews: "レビュー文を検索",
+	searchReviewsPlaceholder: "レビュー文のキーワードを入力",
 	reviewFilters: "フィルター",
 	reviewFiltersDescription: `言語、スコア、${realmTerms.label} でレビューをフィルタリングできます。複数の言語やスコアを選択可能です。`,
 	applyReviewFilters: "フィルターを適用",
@@ -115,6 +116,8 @@ export default {
 		{ start: String, end: String, total: String },
 	),
 	excerpts: "抜粋",
+	searchExcerpts: "抜粋を検索",
+	searchExcerptsPlaceholder: "抜粋のキーワードを入力",
 	excerptPageDescription: "この作品から共有された一節を閲覧できます。",
 	excerptResultRange: insert("{{total}}件の抜粋のうち{{start}}～{{end}}件を表示", {
 		start: String,

@@ -340,9 +340,11 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 						<Field required={ownershipMode === "profile_owned"}>
 							<FieldLabel>{t.units.creation.publisherEntity}</FieldLabel>
 							<EntityPicker
+								ariaLabel={t.units.creation.publisherEntity}
 								index="entity"
 								onChange={setPublisher}
 								onClear={() => setPublisher(undefined)}
+								placeholder={t.ui.pickerPlaceholders.entity}
 								value={publisher}
 							/>
 							<p className="text-muted-foreground text-sm">
@@ -386,10 +388,12 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 							<Field required>
 								<FieldLabel>{t.units.creation.mainVersionEntity}</FieldLabel>
 								<EntityPicker
+									ariaLabel={t.units.creation.mainVersionEntity}
 									index="units"
 									kind={type}
 									onChange={setMainVersion}
 									onClear={() => setMainVersion(undefined)}
+									placeholder={t.ui.pickerPlaceholders.unit}
 									value={mainVersion}
 								/>
 								{mainVersion ? (

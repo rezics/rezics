@@ -40,7 +40,7 @@ export function ScoreRealmPicker({
 	readonly options: readonly ScoreRealmOption[];
 	readonly value?: ScoreRealmOption;
 }) {
-	const { t } = useTranslation(["engagement", "search", "state"]);
+	const { t } = useTranslation(["engagement", "state", "ui"]);
 	const searchEntities = useEntitySearch();
 	const baseOptions = useMemo(() => includeSelected(options, value), [options, value]);
 	const { collection, set } = useListCollection<ScoreRealmOption>({
@@ -121,7 +121,7 @@ export function ScoreRealmPicker({
 		>
 			<ComboboxInput
 				aria-label={t.engagement.scoreRealm}
-				placeholder={t.search.placeholder}
+				placeholder={t.ui.pickerPlaceholders.realm}
 				type="search"
 			/>
 			<ComboboxContent>

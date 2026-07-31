@@ -262,8 +262,8 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 				}}
 				search={{
 					href: headerSearch?.href ?? "/search",
-					label: headerSearch?.label ?? t.actions.search,
-					placeholder: headerSearch?.placeholder ?? t.search.placeholder,
+					label: headerSearch?.label ?? t.search.site.label,
+					placeholder: headerSearch?.placeholder ?? t.search.site.placeholder,
 					avatar: headerSearch?.avatar,
 					avatarFallback: headerSearch?.avatarFallback,
 					defaultValue: searchParams.get("q") ?? "",

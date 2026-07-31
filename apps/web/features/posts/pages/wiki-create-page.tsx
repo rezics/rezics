@@ -131,6 +131,7 @@ export function WikiCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 								index="realms"
 								maxValues={MaximumPostPublishRealmCount}
 								onValuesChange={setPublishRealmIds}
+								placeholder={t.ui.pickerPlaceholders.realm}
 								removeLabel={t.posts.removePublishRealm}
 								values={publishRealmIds}
 							/>
@@ -140,7 +141,13 @@ export function WikiCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 						</Field>
 						<Field>
 							<FieldLabel>{t.posts.subject}</FieldLabel>
-							<EntityPicker index="units" onChange={setSubject} value={subject} />
+							<EntityPicker
+								ariaLabel={t.posts.subject}
+								index="units"
+								onChange={setSubject}
+								placeholder={t.ui.pickerPlaceholders.unit}
+								value={subject}
+							/>
 							{subject ? (
 								<Button
 									onClick={() => setSubject(undefined)}

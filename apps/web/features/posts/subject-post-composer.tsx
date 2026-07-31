@@ -134,6 +134,7 @@ export function SubjectPostComposer({
 								index="realms"
 								maxValues={MaximumPostPublishRealmCount}
 								onValuesChange={setPublishRealmIds}
+								placeholder={t.ui.pickerPlaceholders.realm}
 								removeLabel={t.posts.removePublishRealm}
 								values={publishRealmIds}
 							/>

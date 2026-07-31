@@ -754,7 +754,7 @@ function AddTaxonomyNodeDialog({
 	readonly onAdd: (value: string | EntityPickerValue) => void;
 	readonly onClose: () => void;
 }) {
-	const { t } = useTranslation(["realms"]);
+	const { t } = useTranslation(["realms", "ui"]);
 	const [title, setTitle] = useState("");
 	const [picked, setPicked] = useState<EntityPickerValue>();
 	const label = t.realms.taxonomySettings.addKinds[kind];
@@ -780,8 +780,14 @@ function AddTaxonomyNodeDialog({
 							/>
 						) : (
 							<EntityPicker
+								ariaLabel={label}
 								index={kind === "tag" ? "tags" : "posts"}
 								onChange={setPicked}
+								placeholder={
+									kind === "tag"
+										? t.ui.pickerPlaceholders.tag
+										: t.ui.pickerPlaceholders.post
+								}
 								value={picked}
 							/>
 						)}

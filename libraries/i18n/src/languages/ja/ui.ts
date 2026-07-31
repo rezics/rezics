@@ -4,6 +4,8 @@ const { forms: followTerms } = jaTerminology.follow;
 const { forms: postTerms } = jaTerminology.post;
 const { forms: realmTerms } = jaTerminology.realm;
 const { forms: zoneTerms } = jaTerminology.zone;
+const { forms: tagStructureTerms } = jaTerminology.tagStructure;
+const { forms: entityTerms } = jaTerminology.entity;
 
 export default {
 	loading: "読み込み中…",
@@ -14,6 +16,15 @@ export default {
 	edit: "編集",
 	clear: "クリア",
 	search: "検索",
+	pickerPlaceholders: {
+		unit: "名前またはタイトルを入力",
+		entity: `${entityTerms.label}名を入力`,
+		tag: "タグ名を入力",
+		tagStructure: `${tagStructureTerms.label}名を入力`,
+		post: `${postTerms.label}のタイトルまたはキーワードを入力`,
+		realm: `${realmTerms.label}名を入力`,
+		user: "ユーザー名を入力",
+	},
 	title: "タイトル",
 	summary: "サマリー",
 	description: "説明",

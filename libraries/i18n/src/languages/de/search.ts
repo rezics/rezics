@@ -11,7 +11,10 @@ const { forms: followTerms } = deTerminology.follow;
 
 export default {
 	title: "Suche",
-	placeholder: `Werke, ${entityTerms.pluralLabel}, Tags, ${postTerms.plural}, ${realmTerms.plural} oder Benutzer suchen`,
+	site: {
+		label: `${verbatimTerms.rezics.value} durchsuchen`,
+		placeholder: "Name, Titel oder Suchbegriff eingeben",
+	},
 	withinLabel: insert("In {{name}} suchen", { name: String }),
 	withinPlaceholder: insert("{{name}} durchsuchen", { name: String }),
 	advancedFilters: "Erweiterte Filter",

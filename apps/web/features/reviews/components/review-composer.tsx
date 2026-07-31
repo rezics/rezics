@@ -128,7 +128,13 @@ export function ReviewComposer({
 					{fixedTarget ? null : (
 						<Field required>
 							<FieldLabel>{t.engagement.reviewTarget}</FieldLabel>
-							<EntityPicker index="units" onChange={setTarget} value={target} />
+							<EntityPicker
+								ariaLabel={t.engagement.reviewTarget}
+								index="units"
+								onChange={setTarget}
+								placeholder={t.ui.pickerPlaceholders.unit}
+								value={target}
+							/>
 						</Field>
 					)}
 					<Field>
@@ -138,6 +144,7 @@ export function ReviewComposer({
 							index="realms"
 							maxValues={MaximumPostPublishRealmCount}
 							onValuesChange={setPublishRealmIds}
+							placeholder={t.ui.pickerPlaceholders.realm}
 							removeLabel={t.posts.removePublishRealm}
 							values={publishRealmIds}
 						/>
@@ -148,8 +155,10 @@ export function ReviewComposer({
 					<Field>
 						<FieldLabel>{t.engagement.scoreRealm}</FieldLabel>
 						<EntityPicker
+							ariaLabel={t.engagement.scoreRealm}
 							index="realms"
 							onChange={setSelectedScoreRealm}
+							placeholder={t.ui.pickerPlaceholders.realm}
 							value={selectedScoreRealm}
 						/>
 						<FieldDescription>{t.engagement.reviewScoreRealmHint}</FieldDescription>

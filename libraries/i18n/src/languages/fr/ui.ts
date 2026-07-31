@@ -4,6 +4,8 @@ const { forms: followTerms } = frTerminology.follow;
 const { forms: postTerms } = frTerminology.post;
 const { forms: realmTerms } = frTerminology.realm;
 const { forms: zoneTerms } = frTerminology.zone;
+const { forms: tagStructureTerms } = frTerminology.tagStructure;
+const { forms: entityTerms } = frTerminology.entity;
 
 export default {
 	loading: "Chargement…",
@@ -14,6 +16,15 @@ export default {
 	edit: "Modifier",
 	clear: "Effacer",
 	search: "Rechercher",
+	pickerPlaceholders: {
+		unit: "Saisir un nom ou un titre",
+		entity: `Saisir le nom d’une ${entityTerms.inline}`,
+		tag: "Saisir le nom d’une étiquette",
+		tagStructure: `Saisir le nom d’un ${tagStructureTerms.inline}`,
+		post: `Saisir le titre ou un mot-clé d’une ${postTerms.inline}`,
+		realm: `Saisir le nom d’un ${realmTerms.inline}`,
+		user: "Saisir un nom d’utilisateur",
+	},
 	title: "Titre",
 	summary: "Résumé",
 	description: "Description",

@@ -49,6 +49,11 @@ export interface BlockEditorLabels {
 	readonly types: Record<string, string>;
 }
 
+export interface BlockEditorPickerPlaceholders {
+	readonly post: string;
+	readonly unit: string;
+}
+
 export type BlockEditorDocument = UnitReferencedBlockDocument | DockDocument;
 export interface BlockEditorNavigationOption {
 	readonly id: string;
@@ -137,6 +142,7 @@ export function BlockDocumentEditor({
 	labels,
 	navigationOptions,
 	onChange,
+	pickerPlaceholders,
 }: {
 	readonly addableTypes?: readonly BlockEditorAddableType[];
 	readonly allowZoneSearchSource?: boolean;
@@ -144,6 +150,7 @@ export function BlockDocumentEditor({
 	readonly labels: BlockEditorLabels;
 	readonly navigationOptions?: readonly BlockEditorNavigationOption[];
 	readonly onChange: (document: BlockEditorDocument) => void;
+	readonly pickerPlaceholders: BlockEditorPickerPlaceholders;
 }) {
 	const firstAddableType = addableTypes[0];
 	const [selectedType, setSelectedType] = useState<BlockEditorAddableType | undefined>(
@@ -226,6 +233,7 @@ export function BlockDocumentEditor({
 								labels={labels}
 								navigationOptions={navigationOptions}
 								onChange={(next) => replace(index, next)}
+								pickerPlaceholders={pickerPlaceholders}
 								relatedKind={relatedKind}
 							/>
 						</CardContent>
@@ -280,6 +288,7 @@ function BlockFields({
 	labels,
 	navigationOptions,
 	onChange,
+	pickerPlaceholders,
 	relatedKind,
 }: {
 	readonly allowZoneSearchSource: boolean;
@@ -287,6 +296,7 @@ function BlockFields({
 	readonly labels: BlockEditorLabels;
 	readonly navigationOptions?: readonly BlockEditorNavigationOption[];
 	readonly onChange: (block: UnitReferencedBlock) => void;
+	readonly pickerPlaceholders: BlockEditorPickerPlaceholders;
 	readonly relatedKind?: RelatedUnitKind;
 }) {
 	if (block._type === "post-full-view" || block._type === "unit-ref") {
@@ -295,6 +305,7 @@ function BlockFields({
 				<Field required>
 					<FieldLabel>{labels.identifier}</FieldLabel>
 					<UnitPicker
+						ariaLabel={labels.identifier}
 						index={block._type === "post-full-view" ? "posts" : "units"}
 						kinds={
 							block._type === "post-full-view"
@@ -309,6 +320,11 @@ function BlockFields({
 									? { ...block, postId: value ?? "" }
 									: { ...block, unitId: value ?? "" },
 							)
+						}
+						placeholder={
+							block._type === "post-full-view"
+								? pickerPlaceholders.post
+								: pickerPlaceholders.unit
 						}
 						value={block._type === "post-full-view" ? block.postId : block.unitId}
 					/>
