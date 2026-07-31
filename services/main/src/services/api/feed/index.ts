@@ -1613,7 +1613,7 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 			} catch {
 				throw new InvalidFeedFilter();
 			}
-		const identity = await resolveIdentity(request.headers, "unit:read");
+		const identity = await resolveIdentity(request, "unit:read");
 		const viewer = await resolveRecommendationViewer(identity.profile?.unitId);
 		const cursor = decodeCursor(body.cursor);
 		const simpleSelection = body.filter?.where

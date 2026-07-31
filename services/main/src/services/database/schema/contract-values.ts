@@ -468,8 +468,7 @@ export type AssociationKind = (typeof AssociationKindValues)[number];
 export const AssociationProposalDirectionValues = ["request", "invitation"] as const;
 export const AssociationProposalResolutionValues = ["accepted", "declined", "cancelled"] as const;
 
-export const ApiTokenPolicyKindValues = ["standard", "privileged"] as const;
-export const ApiTokenUsageBucketKindValues = ["minute_requests", "daily_cost"] as const;
+export const ApiQuotaPolicyClassValues = ["standard", "privileged"] as const;
 
 export function toEnumValues<T extends string>(values: readonly [T, ...T[]]): [T, ...T[]] {
 	return [...values];

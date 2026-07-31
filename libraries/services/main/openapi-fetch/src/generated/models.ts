@@ -5289,6 +5289,7 @@ export const ApiErrorCode = {
 	AuthenticationRequired: "AuthenticationRequired",
 	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+	ApiQuotaExceeded: "ApiQuotaExceeded",
 	InteractiveSessionRequired: "InteractiveSessionRequired",
 	FreshSessionRequired: "FreshSessionRequired",
 	EmailVerificationRequired: "EmailVerificationRequired",
@@ -5355,9 +5356,13 @@ export const ApiErrorCode = {
 	ImageAssetInvalidPresentation: "ImageAssetInvalidPresentation",
 	ImageAssetInUse: "ImageAssetInUse",
 	ApiTokenNotFound: "ApiTokenNotFound",
-	ApiTokenPolicyInvalid: "ApiTokenPolicyInvalid",
-	ApiTokenPolicyRevisionConflict: "ApiTokenPolicyRevisionConflict",
-	ApiTokenPolicyNotFound: "ApiTokenPolicyNotFound",
+	ApiTokenLimitReached: "ApiTokenLimitReached",
+	ApiTokenQuotaOverrideInvalid: "ApiTokenQuotaOverrideInvalid",
+	ApiTokenQuotaOverrideRevisionConflict: "ApiTokenQuotaOverrideRevisionConflict",
+	ApiQuotaPolicyNotFound: "ApiQuotaPolicyNotFound",
+	ApiQuotaPolicyInvalid: "ApiQuotaPolicyInvalid",
+	ApiQuotaPolicyRevisionConflict: "ApiQuotaPolicyRevisionConflict",
+	ApiAccountQuotaRevisionConflict: "ApiAccountQuotaRevisionConflict",
 	TagNotFound: "TagNotFound",
 	TagStructureNotFound: "TagStructureNotFound",
 	TagStructureApplicationNotFound: "TagStructureApplicationNotFound",
@@ -7779,6 +7784,14 @@ export type HeadApiHealthStatus204 = void;
  */
 export type HeadApiHealthStatus422 = ValidationError;
 
+export const HeadApiHealthStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type HeadApiHealthStatus429ErrorCodeEnum =
+	(typeof HeadApiHealthStatus429ErrorCodeEnum)[keyof typeof HeadApiHealthStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -7790,7 +7803,7 @@ export type HeadApiHealthStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: HeadApiHealthStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -8496,6 +8509,14 @@ export type GetApiNotificationsStatus400 = {
  */
 export type GetApiNotificationsStatus422 = ValidationError;
 
+export const GetApiNotificationsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiNotificationsStatus429ErrorCodeEnum =
+	(typeof GetApiNotificationsStatus429ErrorCodeEnum)[keyof typeof GetApiNotificationsStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -8507,7 +8528,7 @@ export type GetApiNotificationsStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiNotificationsStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -8563,6 +8584,14 @@ export type GetApiNotificationsUnreadCountStatus200 = {
 	count: string | number;
 };
 
+export const GetApiNotificationsUnreadCountStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiNotificationsUnreadCountStatus429ErrorCodeEnum =
+	(typeof GetApiNotificationsUnreadCountStatus429ErrorCodeEnum)[keyof typeof GetApiNotificationsUnreadCountStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -8574,7 +8603,7 @@ export type GetApiNotificationsUnreadCountStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiNotificationsUnreadCountStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -8661,6 +8690,14 @@ export type PutApiNotificationsReadAllStatus400 =
  */
 export type PutApiNotificationsReadAllStatus422 = ValidationError;
 
+export const PutApiNotificationsReadAllStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiNotificationsReadAllStatus429ErrorCodeEnum =
+	(typeof PutApiNotificationsReadAllStatus429ErrorCodeEnum)[keyof typeof PutApiNotificationsReadAllStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -8672,7 +8709,7 @@ export type PutApiNotificationsReadAllStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiNotificationsReadAllStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -8787,6 +8824,14 @@ export type PutApiNotificationsByNotificationIdReadStatus404 = {
  */
 export type PutApiNotificationsByNotificationIdReadStatus422 = ValidationError;
 
+export const PutApiNotificationsByNotificationIdReadStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiNotificationsByNotificationIdReadStatus429ErrorCodeEnum =
+	(typeof PutApiNotificationsByNotificationIdReadStatus429ErrorCodeEnum)[keyof typeof PutApiNotificationsByNotificationIdReadStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -8798,7 +8843,7 @@ export type PutApiNotificationsByNotificationIdReadStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiNotificationsByNotificationIdReadStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -8870,6 +8915,14 @@ export type GetApiNotificationsPreferencesStatus200 = {
 	}[];
 };
 
+export const GetApiNotificationsPreferencesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiNotificationsPreferencesStatus429ErrorCodeEnum =
+	(typeof GetApiNotificationsPreferencesStatus429ErrorCodeEnum)[keyof typeof GetApiNotificationsPreferencesStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -8881,7 +8934,7 @@ export type GetApiNotificationsPreferencesStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiNotificationsPreferencesStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -8959,6 +9012,14 @@ export type PutApiNotificationsPreferencesStatus400 = MalformedRequestBody;
  */
 export type PutApiNotificationsPreferencesStatus422 = ValidationError;
 
+export const PutApiNotificationsPreferencesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiNotificationsPreferencesStatus429ErrorCodeEnum =
+	(typeof PutApiNotificationsPreferencesStatus429ErrorCodeEnum)[keyof typeof PutApiNotificationsPreferencesStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -8970,7 +9031,7 @@ export type PutApiNotificationsPreferencesStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiNotificationsPreferencesStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -12443,6 +12504,14 @@ export type PutApiRecommendationsExclusionsByUnitIdStatus404 = {
  */
 export type PutApiRecommendationsExclusionsByUnitIdStatus422 = ValidationError;
 
+export const PutApiRecommendationsExclusionsByUnitIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiRecommendationsExclusionsByUnitIdStatus429ErrorCodeEnum =
+	(typeof PutApiRecommendationsExclusionsByUnitIdStatus429ErrorCodeEnum)[keyof typeof PutApiRecommendationsExclusionsByUnitIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -12454,7 +12523,7 @@ export type PutApiRecommendationsExclusionsByUnitIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiRecommendationsExclusionsByUnitIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -12657,6 +12726,14 @@ export type DeleteApiRecommendationsExclusionsByUnitIdStatus403 = {
  */
 export type DeleteApiRecommendationsExclusionsByUnitIdStatus422 = ValidationError;
 
+export const DeleteApiRecommendationsExclusionsByUnitIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiRecommendationsExclusionsByUnitIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiRecommendationsExclusionsByUnitIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiRecommendationsExclusionsByUnitIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -12668,7 +12745,7 @@ export type DeleteApiRecommendationsExclusionsByUnitIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiRecommendationsExclusionsByUnitIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -12807,6 +12884,14 @@ export type GetApiMessagesConversationsStatus400 = {
  */
 export type GetApiMessagesConversationsStatus422 = ValidationError;
 
+export const GetApiMessagesConversationsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiMessagesConversationsStatus429ErrorCodeEnum =
+	(typeof GetApiMessagesConversationsStatus429ErrorCodeEnum)[keyof typeof GetApiMessagesConversationsStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -12818,7 +12903,7 @@ export type GetApiMessagesConversationsStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiMessagesConversationsStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -12973,6 +13058,14 @@ export type PostApiMessagesConversationsStatus409 = {
  */
 export type PostApiMessagesConversationsStatus422 = ValidationError;
 
+export const PostApiMessagesConversationsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiMessagesConversationsStatus429ErrorCodeEnum =
+	(typeof PostApiMessagesConversationsStatus429ErrorCodeEnum)[keyof typeof PostApiMessagesConversationsStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -12984,7 +13077,7 @@ export type PostApiMessagesConversationsStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiMessagesConversationsStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -13130,6 +13223,14 @@ export type GetApiMessagesConversationsByConversationIdStatus404 = {
  */
 export type GetApiMessagesConversationsByConversationIdStatus422 = ValidationError;
 
+export const GetApiMessagesConversationsByConversationIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiMessagesConversationsByConversationIdStatus429ErrorCodeEnum =
+	(typeof GetApiMessagesConversationsByConversationIdStatus429ErrorCodeEnum)[keyof typeof GetApiMessagesConversationsByConversationIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -13141,7 +13242,7 @@ export type GetApiMessagesConversationsByConversationIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiMessagesConversationsByConversationIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -13322,6 +13423,14 @@ export type GetApiMessagesConversationsByConversationIdMessagesStatus404 = {
  */
 export type GetApiMessagesConversationsByConversationIdMessagesStatus422 = ValidationError;
 
+export const GetApiMessagesConversationsByConversationIdMessagesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiMessagesConversationsByConversationIdMessagesStatus429ErrorCodeEnum =
+	(typeof GetApiMessagesConversationsByConversationIdMessagesStatus429ErrorCodeEnum)[keyof typeof GetApiMessagesConversationsByConversationIdMessagesStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -13333,7 +13442,7 @@ export type GetApiMessagesConversationsByConversationIdMessagesStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiMessagesConversationsByConversationIdMessagesStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -13500,6 +13609,14 @@ export type PostApiMessagesConversationsByConversationIdMessagesStatus404 = {
  */
 export type PostApiMessagesConversationsByConversationIdMessagesStatus422 = ValidationError;
 
+export const PostApiMessagesConversationsByConversationIdMessagesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiMessagesConversationsByConversationIdMessagesStatus429ErrorCodeEnum =
+	(typeof PostApiMessagesConversationsByConversationIdMessagesStatus429ErrorCodeEnum)[keyof typeof PostApiMessagesConversationsByConversationIdMessagesStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -13511,7 +13628,7 @@ export type PostApiMessagesConversationsByConversationIdMessagesStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiMessagesConversationsByConversationIdMessagesStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -13659,6 +13776,14 @@ export type PutApiMessagesConversationsByConversationIdReadStatus404 = {
  */
 export type PutApiMessagesConversationsByConversationIdReadStatus422 = ValidationError;
 
+export const PutApiMessagesConversationsByConversationIdReadStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiMessagesConversationsByConversationIdReadStatus429ErrorCodeEnum =
+	(typeof PutApiMessagesConversationsByConversationIdReadStatus429ErrorCodeEnum)[keyof typeof PutApiMessagesConversationsByConversationIdReadStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -13670,7 +13795,7 @@ export type PutApiMessagesConversationsByConversationIdReadStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiMessagesConversationsByConversationIdReadStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -13783,6 +13908,14 @@ export type DeleteApiMessagesByMessageIdStatus404 = {
  */
 export type DeleteApiMessagesByMessageIdStatus422 = ValidationError;
 
+export const DeleteApiMessagesByMessageIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiMessagesByMessageIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiMessagesByMessageIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiMessagesByMessageIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -13794,7 +13927,7 @@ export type DeleteApiMessagesByMessageIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiMessagesByMessageIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -13867,27 +14000,28 @@ export const GetApiApiTokensStatus200ItemsPermissionsEnum = {
 export type GetApiApiTokensStatus200ItemsPermissionsEnum =
 	(typeof GetApiApiTokensStatus200ItemsPermissionsEnum)[keyof typeof GetApiApiTokensStatus200ItemsPermissionsEnum];
 
-export const GetApiApiTokensStatus200ItemsPolicyKindEnum = {
+export const GetApiApiTokensStatus200ItemsQuotaAccountClassEnum = {
 	standard: "standard",
 	privileged: "privileged",
 } as const;
 
-export type GetApiApiTokensStatus200ItemsPolicyKindEnum =
-	(typeof GetApiApiTokensStatus200ItemsPolicyKindEnum)[keyof typeof GetApiApiTokensStatus200ItemsPolicyKindEnum];
+export type GetApiApiTokensStatus200ItemsQuotaAccountClassEnum =
+	(typeof GetApiApiTokensStatus200ItemsQuotaAccountClassEnum)[keyof typeof GetApiApiTokensStatus200ItemsQuotaAccountClassEnum];
 
-export const GetApiApiTokensStatus200ItemsPolicySourceEnum = {
+export const GetApiApiTokensStatus200ItemsQuotaAccountSourceEnum = {
 	assigned: "assigned",
 	standard_default: "standard_default",
-	trusted_fallback: "trusted_fallback",
+	privileged_fallback: "privileged_fallback",
 } as const;
 
-export type GetApiApiTokensStatus200ItemsPolicySourceEnum =
-	(typeof GetApiApiTokensStatus200ItemsPolicySourceEnum)[keyof typeof GetApiApiTokensStatus200ItemsPolicySourceEnum];
+export type GetApiApiTokensStatus200ItemsQuotaAccountSourceEnum =
+	(typeof GetApiApiTokensStatus200ItemsQuotaAccountSourceEnum)[keyof typeof GetApiApiTokensStatus200ItemsQuotaAccountSourceEnum];
 
 /**
  * @type object
  */
 export type GetApiApiTokensStatus200 = {
+	itemLimit: string | number;
 	/**
 	 * @type array
 	 */
@@ -13931,43 +14065,195 @@ export type GetApiApiTokensStatus200 = {
 		/**
 		 * @type object
 		 */
-		policy: {
-			/**
-			 * @type string
-			 */
-			key: string;
-			/**
-			 * @default 'standard'
-			 * @type string
-			 */
-			kind: GetApiApiTokensStatus200ItemsPolicyKindEnum;
-			/**
-			 * @default 'assigned'
-			 * @type string
-			 */
-			source: GetApiApiTokensStatus200ItemsPolicySourceEnum;
-			schemaVersion: string | number;
-			policyRevision: string | number;
-			bindingRevision: ((string | number) | null) | null;
-			validUntil: (string | null) | null;
+		quota: {
 			/**
 			 * @type object
 			 */
-			limits: {
-				requestsPerMinute: string | number;
-				maxConcurrentRequests: string | number;
-				dailyCostUnits: string | number;
-			};
-			/**
-			 * @type object
-			 */
-			operations: {
-				[key: string]: {
-					requestsPerMinute?: string | number;
-					maxConcurrentRequests?: string | number;
-					dailyCostUnits?: string | number;
+			account: {
+				/**
+				 * @type string
+				 */
+				key: string;
+				/**
+				 * @default 'standard'
+				 * @type string
+				 */
+				class: GetApiApiTokensStatus200ItemsQuotaAccountClassEnum;
+				/**
+				 * @default 'assigned'
+				 * @type string
+				 */
+				source: GetApiApiTokensStatus200ItemsQuotaAccountSourceEnum;
+				schemaVersion: string | number;
+				policyRevision: string | number;
+				bindingRevision: ((string | number) | null) | null;
+				validUntil: (string | null) | null;
+				assignmentReason: (string | null) | null;
+				/**
+				 * @type object
+				 */
+				configurationOverride: {
+					/**
+					 * @type object | undefined
+					 */
+					limits?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+					maxActiveTokens?: string | number;
+					/**
+					 * @type object | undefined
+					 */
+					operations?: {
+						/**
+						 * @type object | undefined
+						 */
+						"search.execute"?: {
+							/**
+							 * @type object | undefined
+							 */
+							requestRate?: {
+								requestsPerMinute: string | number;
+								burstCapacity: string | number;
+							};
+							maxConcurrentRequests?: string | number;
+							dailyCostUnits?: string | number;
+						};
+						/**
+						 * @type object | undefined
+						 */
+						"image.upload"?: {
+							/**
+							 * @type object | undefined
+							 */
+							requestRate?: {
+								requestsPerMinute: string | number;
+								burstCapacity: string | number;
+							};
+							maxConcurrentRequests?: string | number;
+							dailyCostUnits?: string | number;
+						};
+					};
+				};
+				/**
+				 * @type object
+				 */
+				limits: {
+					/**
+					 * @type object
+					 */
+					requestRate: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests: string | number;
+					dailyCostUnits: string | number;
+				};
+				maxActiveTokens: string | number;
+				/**
+				 * @type object
+				 */
+				operations: {
+					/**
+					 * @type object | undefined
+					 */
+					"search.execute"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+					/**
+					 * @type object | undefined
+					 */
+					"image.upload"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
 				};
 			};
+			tokenOverride:
+				| ({
+						/**
+						 * @type object
+						 */
+						configurationOverride: {
+							/**
+							 * @type object | undefined
+							 */
+							limits?: {
+								/**
+								 * @type object | undefined
+								 */
+								requestRate?: {
+									requestsPerMinute: string | number;
+									burstCapacity: string | number;
+								};
+								maxConcurrentRequests?: string | number;
+								dailyCostUnits?: string | number;
+							};
+							/**
+							 * @type object | undefined
+							 */
+							operations?: {
+								/**
+								 * @type object | undefined
+								 */
+								"search.execute"?: {
+									/**
+									 * @type object | undefined
+									 */
+									requestRate?: {
+										requestsPerMinute: string | number;
+										burstCapacity: string | number;
+									};
+									maxConcurrentRequests?: string | number;
+									dailyCostUnits?: string | number;
+								};
+								/**
+								 * @type object | undefined
+								 */
+								"image.upload"?: {
+									/**
+									 * @type object | undefined
+									 */
+									requestRate?: {
+										requestsPerMinute: string | number;
+										burstCapacity: string | number;
+									};
+									maxConcurrentRequests?: string | number;
+									dailyCostUnits?: string | number;
+								};
+							};
+						};
+						revision: string | number;
+						/**
+						 * @description
+						 * Format: `date-time`
+						 * @type string
+						 */
+						updatedAt: string;
+				  } | null)
+				| null;
 		};
 	}[];
 };
@@ -14086,22 +14372,22 @@ export const PostApiApiTokensStatus200PermissionsEnum = {
 export type PostApiApiTokensStatus200PermissionsEnum =
 	(typeof PostApiApiTokensStatus200PermissionsEnum)[keyof typeof PostApiApiTokensStatus200PermissionsEnum];
 
-export const PostApiApiTokensStatus200PolicyKindEnum = {
+export const PostApiApiTokensStatus200QuotaAccountClassEnum = {
 	standard: "standard",
 	privileged: "privileged",
 } as const;
 
-export type PostApiApiTokensStatus200PolicyKindEnum =
-	(typeof PostApiApiTokensStatus200PolicyKindEnum)[keyof typeof PostApiApiTokensStatus200PolicyKindEnum];
+export type PostApiApiTokensStatus200QuotaAccountClassEnum =
+	(typeof PostApiApiTokensStatus200QuotaAccountClassEnum)[keyof typeof PostApiApiTokensStatus200QuotaAccountClassEnum];
 
-export const PostApiApiTokensStatus200PolicySourceEnum = {
+export const PostApiApiTokensStatus200QuotaAccountSourceEnum = {
 	assigned: "assigned",
 	standard_default: "standard_default",
-	trusted_fallback: "trusted_fallback",
+	privileged_fallback: "privileged_fallback",
 } as const;
 
-export type PostApiApiTokensStatus200PolicySourceEnum =
-	(typeof PostApiApiTokensStatus200PolicySourceEnum)[keyof typeof PostApiApiTokensStatus200PolicySourceEnum];
+export type PostApiApiTokensStatus200QuotaAccountSourceEnum =
+	(typeof PostApiApiTokensStatus200QuotaAccountSourceEnum)[keyof typeof PostApiApiTokensStatus200QuotaAccountSourceEnum];
 
 /**
  * @type object
@@ -14146,43 +14432,195 @@ export type PostApiApiTokensStatus200 = {
 	/**
 	 * @type object
 	 */
-	policy: {
-		/**
-		 * @type string
-		 */
-		key: string;
-		/**
-		 * @default 'standard'
-		 * @type string
-		 */
-		kind: PostApiApiTokensStatus200PolicyKindEnum;
-		/**
-		 * @default 'assigned'
-		 * @type string
-		 */
-		source: PostApiApiTokensStatus200PolicySourceEnum;
-		schemaVersion: string | number;
-		policyRevision: string | number;
-		bindingRevision: ((string | number) | null) | null;
-		validUntil: (string | null) | null;
+	quota: {
 		/**
 		 * @type object
 		 */
-		limits: {
-			requestsPerMinute: string | number;
-			maxConcurrentRequests: string | number;
-			dailyCostUnits: string | number;
-		};
-		/**
-		 * @type object
-		 */
-		operations: {
-			[key: string]: {
-				requestsPerMinute?: string | number;
-				maxConcurrentRequests?: string | number;
-				dailyCostUnits?: string | number;
+		account: {
+			/**
+			 * @type string
+			 */
+			key: string;
+			/**
+			 * @default 'standard'
+			 * @type string
+			 */
+			class: PostApiApiTokensStatus200QuotaAccountClassEnum;
+			/**
+			 * @default 'assigned'
+			 * @type string
+			 */
+			source: PostApiApiTokensStatus200QuotaAccountSourceEnum;
+			schemaVersion: string | number;
+			policyRevision: string | number;
+			bindingRevision: ((string | number) | null) | null;
+			validUntil: (string | null) | null;
+			assignmentReason: (string | null) | null;
+			/**
+			 * @type object
+			 */
+			configurationOverride: {
+				/**
+				 * @type object | undefined
+				 */
+				limits?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+				maxActiveTokens?: string | number;
+				/**
+				 * @type object | undefined
+				 */
+				operations?: {
+					/**
+					 * @type object | undefined
+					 */
+					"search.execute"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+					/**
+					 * @type object | undefined
+					 */
+					"image.upload"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+				};
+			};
+			/**
+			 * @type object
+			 */
+			limits: {
+				/**
+				 * @type object
+				 */
+				requestRate: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests: string | number;
+				dailyCostUnits: string | number;
+			};
+			maxActiveTokens: string | number;
+			/**
+			 * @type object
+			 */
+			operations: {
+				/**
+				 * @type object | undefined
+				 */
+				"search.execute"?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+				/**
+				 * @type object | undefined
+				 */
+				"image.upload"?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
 			};
 		};
+		tokenOverride:
+			| ({
+					/**
+					 * @type object
+					 */
+					configurationOverride: {
+						/**
+						 * @type object | undefined
+						 */
+						limits?: {
+							/**
+							 * @type object | undefined
+							 */
+							requestRate?: {
+								requestsPerMinute: string | number;
+								burstCapacity: string | number;
+							};
+							maxConcurrentRequests?: string | number;
+							dailyCostUnits?: string | number;
+						};
+						/**
+						 * @type object | undefined
+						 */
+						operations?: {
+							/**
+							 * @type object | undefined
+							 */
+							"search.execute"?: {
+								/**
+								 * @type object | undefined
+								 */
+								requestRate?: {
+									requestsPerMinute: string | number;
+									burstCapacity: string | number;
+								};
+								maxConcurrentRequests?: string | number;
+								dailyCostUnits?: string | number;
+							};
+							/**
+							 * @type object | undefined
+							 */
+							"image.upload"?: {
+								/**
+								 * @type object | undefined
+								 */
+								requestRate?: {
+									requestsPerMinute: string | number;
+									burstCapacity: string | number;
+								};
+								maxConcurrentRequests?: string | number;
+								dailyCostUnits?: string | number;
+							};
+						};
+					};
+					revision: string | number;
+					/**
+					 * @description
+					 * Format: `date-time`
+					 * @type string
+					 */
+					updatedAt: string;
+			  } | null)
+			| null;
 	};
 	/**
 	 * @type string
@@ -14251,32 +14689,38 @@ export type PostApiApiTokensStatus403 = {
 	requestId: string;
 };
 
-export type PostApiApiTokensStatus422 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'ApiTokenPolicyInvalid'
-				 * @type string
-				 */
-				code: "ApiTokenPolicyInvalid";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| ValidationError;
+/**
+ * @type object
+ */
+export type PostApiApiTokensStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiTokenLimitReached'
+		 * @type string
+		 */
+		code: "ApiTokenLimitReached";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiApiTokensStatus422 = ValidationError;
 
 /**
  * @type object
@@ -14325,29 +14769,6 @@ export type PostApiApiTokensBody = {
 	 * @default 90
 	 */
 	expiresInDays?: string | number;
-	/**
-	 * @type object | undefined
-	 */
-	policyOverride?: {
-		/**
-		 * @type object | undefined
-		 */
-		limits?: {
-			requestsPerMinute?: string | number;
-			maxConcurrentRequests?: string | number;
-			dailyCostUnits?: string | number;
-		};
-		/**
-		 * @type object | undefined
-		 */
-		operations?: {
-			[key: string]: {
-				requestsPerMinute?: string | number;
-				maxConcurrentRequests?: string | number;
-				dailyCostUnits?: string | number;
-			};
-		};
-	};
 };
 
 /**
@@ -14368,6 +14789,7 @@ export type PostApiApiTokensResponses = {
 	"400": PostApiApiTokensStatus400;
 	"401": PostApiApiTokensStatus401;
 	"403": PostApiApiTokensStatus403;
+	"409": PostApiApiTokensStatus409;
 	"422": PostApiApiTokensStatus422;
 	"500": PostApiApiTokensStatus500;
 };
@@ -14380,6 +14802,7 @@ export type PostApiApiTokensResponse =
 	| PostApiApiTokensStatus400
 	| PostApiApiTokensStatus401
 	| PostApiApiTokensStatus403
+	| PostApiApiTokensStatus409
 	| PostApiApiTokensStatus422
 	| PostApiApiTokensStatus500;
 
@@ -14419,22 +14842,22 @@ export const PatchApiApiTokensByTokenIdStatus200PermissionsEnum = {
 export type PatchApiApiTokensByTokenIdStatus200PermissionsEnum =
 	(typeof PatchApiApiTokensByTokenIdStatus200PermissionsEnum)[keyof typeof PatchApiApiTokensByTokenIdStatus200PermissionsEnum];
 
-export const PatchApiApiTokensByTokenIdStatus200PolicyKindEnum = {
+export const PatchApiApiTokensByTokenIdStatus200QuotaAccountClassEnum = {
 	standard: "standard",
 	privileged: "privileged",
 } as const;
 
-export type PatchApiApiTokensByTokenIdStatus200PolicyKindEnum =
-	(typeof PatchApiApiTokensByTokenIdStatus200PolicyKindEnum)[keyof typeof PatchApiApiTokensByTokenIdStatus200PolicyKindEnum];
+export type PatchApiApiTokensByTokenIdStatus200QuotaAccountClassEnum =
+	(typeof PatchApiApiTokensByTokenIdStatus200QuotaAccountClassEnum)[keyof typeof PatchApiApiTokensByTokenIdStatus200QuotaAccountClassEnum];
 
-export const PatchApiApiTokensByTokenIdStatus200PolicySourceEnum = {
+export const PatchApiApiTokensByTokenIdStatus200QuotaAccountSourceEnum = {
 	assigned: "assigned",
 	standard_default: "standard_default",
-	trusted_fallback: "trusted_fallback",
+	privileged_fallback: "privileged_fallback",
 } as const;
 
-export type PatchApiApiTokensByTokenIdStatus200PolicySourceEnum =
-	(typeof PatchApiApiTokensByTokenIdStatus200PolicySourceEnum)[keyof typeof PatchApiApiTokensByTokenIdStatus200PolicySourceEnum];
+export type PatchApiApiTokensByTokenIdStatus200QuotaAccountSourceEnum =
+	(typeof PatchApiApiTokensByTokenIdStatus200QuotaAccountSourceEnum)[keyof typeof PatchApiApiTokensByTokenIdStatus200QuotaAccountSourceEnum];
 
 /**
  * @type object
@@ -14479,43 +14902,195 @@ export type PatchApiApiTokensByTokenIdStatus200 = {
 	/**
 	 * @type object
 	 */
-	policy: {
-		/**
-		 * @type string
-		 */
-		key: string;
-		/**
-		 * @default 'standard'
-		 * @type string
-		 */
-		kind: PatchApiApiTokensByTokenIdStatus200PolicyKindEnum;
-		/**
-		 * @default 'assigned'
-		 * @type string
-		 */
-		source: PatchApiApiTokensByTokenIdStatus200PolicySourceEnum;
-		schemaVersion: string | number;
-		policyRevision: string | number;
-		bindingRevision: ((string | number) | null) | null;
-		validUntil: (string | null) | null;
+	quota: {
 		/**
 		 * @type object
 		 */
-		limits: {
-			requestsPerMinute: string | number;
-			maxConcurrentRequests: string | number;
-			dailyCostUnits: string | number;
-		};
-		/**
-		 * @type object
-		 */
-		operations: {
-			[key: string]: {
-				requestsPerMinute?: string | number;
-				maxConcurrentRequests?: string | number;
-				dailyCostUnits?: string | number;
+		account: {
+			/**
+			 * @type string
+			 */
+			key: string;
+			/**
+			 * @default 'standard'
+			 * @type string
+			 */
+			class: PatchApiApiTokensByTokenIdStatus200QuotaAccountClassEnum;
+			/**
+			 * @default 'assigned'
+			 * @type string
+			 */
+			source: PatchApiApiTokensByTokenIdStatus200QuotaAccountSourceEnum;
+			schemaVersion: string | number;
+			policyRevision: string | number;
+			bindingRevision: ((string | number) | null) | null;
+			validUntil: (string | null) | null;
+			assignmentReason: (string | null) | null;
+			/**
+			 * @type object
+			 */
+			configurationOverride: {
+				/**
+				 * @type object | undefined
+				 */
+				limits?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+				maxActiveTokens?: string | number;
+				/**
+				 * @type object | undefined
+				 */
+				operations?: {
+					/**
+					 * @type object | undefined
+					 */
+					"search.execute"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+					/**
+					 * @type object | undefined
+					 */
+					"image.upload"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+				};
+			};
+			/**
+			 * @type object
+			 */
+			limits: {
+				/**
+				 * @type object
+				 */
+				requestRate: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests: string | number;
+				dailyCostUnits: string | number;
+			};
+			maxActiveTokens: string | number;
+			/**
+			 * @type object
+			 */
+			operations: {
+				/**
+				 * @type object | undefined
+				 */
+				"search.execute"?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+				/**
+				 * @type object | undefined
+				 */
+				"image.upload"?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
 			};
 		};
+		tokenOverride:
+			| ({
+					/**
+					 * @type object
+					 */
+					configurationOverride: {
+						/**
+						 * @type object | undefined
+						 */
+						limits?: {
+							/**
+							 * @type object | undefined
+							 */
+							requestRate?: {
+								requestsPerMinute: string | number;
+								burstCapacity: string | number;
+							};
+							maxConcurrentRequests?: string | number;
+							dailyCostUnits?: string | number;
+						};
+						/**
+						 * @type object | undefined
+						 */
+						operations?: {
+							/**
+							 * @type object | undefined
+							 */
+							"search.execute"?: {
+								/**
+								 * @type object | undefined
+								 */
+								requestRate?: {
+									requestsPerMinute: string | number;
+									burstCapacity: string | number;
+								};
+								maxConcurrentRequests?: string | number;
+								dailyCostUnits?: string | number;
+							};
+							/**
+							 * @type object | undefined
+							 */
+							"image.upload"?: {
+								/**
+								 * @type object | undefined
+								 */
+								requestRate?: {
+									requestsPerMinute: string | number;
+									burstCapacity: string | number;
+								};
+								maxConcurrentRequests?: string | number;
+								dailyCostUnits?: string | number;
+							};
+						};
+					};
+					revision: string | number;
+					/**
+					 * @description
+					 * Format: `date-time`
+					 * @type string
+					 */
+					updatedAt: string;
+			  } | null)
+			| null;
 	};
 };
 
@@ -14611,6 +15186,34 @@ export type PatchApiApiTokensByTokenIdStatus404 = {
 /**
  * @type object
  */
+export type PatchApiApiTokensByTokenIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiTokenLimitReached'
+		 * @type string
+		 */
+		code: "ApiTokenLimitReached";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PatchApiApiTokensByTokenIdStatus422 = ValidationError;
 
 /**
@@ -14682,6 +15285,7 @@ export type PatchApiApiTokensByTokenIdResponses = {
 	"401": PatchApiApiTokensByTokenIdStatus401;
 	"403": PatchApiApiTokensByTokenIdStatus403;
 	"404": PatchApiApiTokensByTokenIdStatus404;
+	"409": PatchApiApiTokensByTokenIdStatus409;
 	"422": PatchApiApiTokensByTokenIdStatus422;
 	"500": PatchApiApiTokensByTokenIdStatus500;
 };
@@ -14695,6 +15299,7 @@ export type PatchApiApiTokensByTokenIdResponse =
 	| PatchApiApiTokensByTokenIdStatus401
 	| PatchApiApiTokensByTokenIdStatus403
 	| PatchApiApiTokensByTokenIdStatus404
+	| PatchApiApiTokensByTokenIdStatus409
 	| PatchApiApiTokensByTokenIdStatus422
 	| PatchApiApiTokensByTokenIdStatus500;
 
@@ -14845,7 +15450,7 @@ export type DeleteApiApiTokensByTokenIdResponse =
 /**
  * @type object
  */
-export type PutApiApiTokensByTokenIdPolicyPath = {
+export type PutApiApiTokensByTokenIdQuotaOverridePath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -14854,7 +15459,7 @@ export type PutApiApiTokensByTokenIdPolicyPath = {
 	tokenId: string;
 };
 
-export const PutApiApiTokensByTokenIdPolicyStatus200PermissionsEnum = {
+export const PutApiApiTokensByTokenIdQuotaOverrideStatus200PermissionsEnum = {
 	"unit:read": "unit:read",
 	"unit:create": "unit:create",
 	"unit:update": "unit:update",
@@ -14875,30 +15480,30 @@ export const PutApiApiTokensByTokenIdPolicyStatus200PermissionsEnum = {
 	"report:write": "report:write",
 } as const;
 
-export type PutApiApiTokensByTokenIdPolicyStatus200PermissionsEnum =
-	(typeof PutApiApiTokensByTokenIdPolicyStatus200PermissionsEnum)[keyof typeof PutApiApiTokensByTokenIdPolicyStatus200PermissionsEnum];
+export type PutApiApiTokensByTokenIdQuotaOverrideStatus200PermissionsEnum =
+	(typeof PutApiApiTokensByTokenIdQuotaOverrideStatus200PermissionsEnum)[keyof typeof PutApiApiTokensByTokenIdQuotaOverrideStatus200PermissionsEnum];
 
-export const PutApiApiTokensByTokenIdPolicyStatus200PolicyKindEnum = {
+export const PutApiApiTokensByTokenIdQuotaOverrideStatus200QuotaAccountClassEnum = {
 	standard: "standard",
 	privileged: "privileged",
 } as const;
 
-export type PutApiApiTokensByTokenIdPolicyStatus200PolicyKindEnum =
-	(typeof PutApiApiTokensByTokenIdPolicyStatus200PolicyKindEnum)[keyof typeof PutApiApiTokensByTokenIdPolicyStatus200PolicyKindEnum];
+export type PutApiApiTokensByTokenIdQuotaOverrideStatus200QuotaAccountClassEnum =
+	(typeof PutApiApiTokensByTokenIdQuotaOverrideStatus200QuotaAccountClassEnum)[keyof typeof PutApiApiTokensByTokenIdQuotaOverrideStatus200QuotaAccountClassEnum];
 
-export const PutApiApiTokensByTokenIdPolicyStatus200PolicySourceEnum = {
+export const PutApiApiTokensByTokenIdQuotaOverrideStatus200QuotaAccountSourceEnum = {
 	assigned: "assigned",
 	standard_default: "standard_default",
-	trusted_fallback: "trusted_fallback",
+	privileged_fallback: "privileged_fallback",
 } as const;
 
-export type PutApiApiTokensByTokenIdPolicyStatus200PolicySourceEnum =
-	(typeof PutApiApiTokensByTokenIdPolicyStatus200PolicySourceEnum)[keyof typeof PutApiApiTokensByTokenIdPolicyStatus200PolicySourceEnum];
+export type PutApiApiTokensByTokenIdQuotaOverrideStatus200QuotaAccountSourceEnum =
+	(typeof PutApiApiTokensByTokenIdQuotaOverrideStatus200QuotaAccountSourceEnum)[keyof typeof PutApiApiTokensByTokenIdQuotaOverrideStatus200QuotaAccountSourceEnum];
 
 /**
  * @type object
  */
-export type PutApiApiTokensByTokenIdPolicyStatus200 = {
+export type PutApiApiTokensByTokenIdQuotaOverrideStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -14916,7 +15521,7 @@ export type PutApiApiTokensByTokenIdPolicyStatus200 = {
 	/**
 	 * @type array
 	 */
-	permissions: PutApiApiTokensByTokenIdPolicyStatus200PermissionsEnum[];
+	permissions: PutApiApiTokensByTokenIdQuotaOverrideStatus200PermissionsEnum[];
 	/**
 	 * @type boolean
 	 */
@@ -14938,55 +15543,207 @@ export type PutApiApiTokensByTokenIdPolicyStatus200 = {
 	/**
 	 * @type object
 	 */
-	policy: {
-		/**
-		 * @type string
-		 */
-		key: string;
-		/**
-		 * @default 'standard'
-		 * @type string
-		 */
-		kind: PutApiApiTokensByTokenIdPolicyStatus200PolicyKindEnum;
-		/**
-		 * @default 'assigned'
-		 * @type string
-		 */
-		source: PutApiApiTokensByTokenIdPolicyStatus200PolicySourceEnum;
-		schemaVersion: string | number;
-		policyRevision: string | number;
-		bindingRevision: ((string | number) | null) | null;
-		validUntil: (string | null) | null;
+	quota: {
 		/**
 		 * @type object
 		 */
-		limits: {
-			requestsPerMinute: string | number;
-			maxConcurrentRequests: string | number;
-			dailyCostUnits: string | number;
-		};
-		/**
-		 * @type object
-		 */
-		operations: {
-			[key: string]: {
-				requestsPerMinute?: string | number;
-				maxConcurrentRequests?: string | number;
-				dailyCostUnits?: string | number;
+		account: {
+			/**
+			 * @type string
+			 */
+			key: string;
+			/**
+			 * @default 'standard'
+			 * @type string
+			 */
+			class: PutApiApiTokensByTokenIdQuotaOverrideStatus200QuotaAccountClassEnum;
+			/**
+			 * @default 'assigned'
+			 * @type string
+			 */
+			source: PutApiApiTokensByTokenIdQuotaOverrideStatus200QuotaAccountSourceEnum;
+			schemaVersion: string | number;
+			policyRevision: string | number;
+			bindingRevision: ((string | number) | null) | null;
+			validUntil: (string | null) | null;
+			assignmentReason: (string | null) | null;
+			/**
+			 * @type object
+			 */
+			configurationOverride: {
+				/**
+				 * @type object | undefined
+				 */
+				limits?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+				maxActiveTokens?: string | number;
+				/**
+				 * @type object | undefined
+				 */
+				operations?: {
+					/**
+					 * @type object | undefined
+					 */
+					"search.execute"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+					/**
+					 * @type object | undefined
+					 */
+					"image.upload"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+				};
+			};
+			/**
+			 * @type object
+			 */
+			limits: {
+				/**
+				 * @type object
+				 */
+				requestRate: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests: string | number;
+				dailyCostUnits: string | number;
+			};
+			maxActiveTokens: string | number;
+			/**
+			 * @type object
+			 */
+			operations: {
+				/**
+				 * @type object | undefined
+				 */
+				"search.execute"?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+				/**
+				 * @type object | undefined
+				 */
+				"image.upload"?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
 			};
 		};
+		tokenOverride:
+			| ({
+					/**
+					 * @type object
+					 */
+					configurationOverride: {
+						/**
+						 * @type object | undefined
+						 */
+						limits?: {
+							/**
+							 * @type object | undefined
+							 */
+							requestRate?: {
+								requestsPerMinute: string | number;
+								burstCapacity: string | number;
+							};
+							maxConcurrentRequests?: string | number;
+							dailyCostUnits?: string | number;
+						};
+						/**
+						 * @type object | undefined
+						 */
+						operations?: {
+							/**
+							 * @type object | undefined
+							 */
+							"search.execute"?: {
+								/**
+								 * @type object | undefined
+								 */
+								requestRate?: {
+									requestsPerMinute: string | number;
+									burstCapacity: string | number;
+								};
+								maxConcurrentRequests?: string | number;
+								dailyCostUnits?: string | number;
+							};
+							/**
+							 * @type object | undefined
+							 */
+							"image.upload"?: {
+								/**
+								 * @type object | undefined
+								 */
+								requestRate?: {
+									requestsPerMinute: string | number;
+									burstCapacity: string | number;
+								};
+								maxConcurrentRequests?: string | number;
+								dailyCostUnits?: string | number;
+							};
+						};
+					};
+					revision: string | number;
+					/**
+					 * @description
+					 * Format: `date-time`
+					 * @type string
+					 */
+					updatedAt: string;
+			  } | null)
+			| null;
 	};
 };
 
 /**
  * @type object
  */
-export type PutApiApiTokensByTokenIdPolicyStatus400 = MalformedRequestBody;
+export type PutApiApiTokensByTokenIdQuotaOverrideStatus400 = MalformedRequestBody;
 
 /**
  * @type object
  */
-export type PutApiApiTokensByTokenIdPolicyStatus401 = {
+export type PutApiApiTokensByTokenIdQuotaOverrideStatus401 = {
 	/**
 	 * @type object
 	 */
@@ -15014,7 +15771,7 @@ export type PutApiApiTokensByTokenIdPolicyStatus401 = {
 /**
  * @type object
  */
-export type PutApiApiTokensByTokenIdPolicyStatus403 = {
+export type PutApiApiTokensByTokenIdQuotaOverrideStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -15042,7 +15799,7 @@ export type PutApiApiTokensByTokenIdPolicyStatus403 = {
 /**
  * @type object
  */
-export type PutApiApiTokensByTokenIdPolicyStatus404 = {
+export type PutApiApiTokensByTokenIdQuotaOverrideStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -15070,16 +15827,16 @@ export type PutApiApiTokensByTokenIdPolicyStatus404 = {
 /**
  * @type object
  */
-export type PutApiApiTokensByTokenIdPolicyStatus409 = {
+export type PutApiApiTokensByTokenIdQuotaOverrideStatus409 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'ApiTokenPolicyRevisionConflict'
+		 * @default 'ApiTokenQuotaOverrideRevisionConflict'
 		 * @type string
 		 */
-		code: "ApiTokenPolicyRevisionConflict";
+		code: "ApiTokenQuotaOverrideRevisionConflict";
 		/**
 		 * @type string
 		 */
@@ -15095,17 +15852,17 @@ export type PutApiApiTokensByTokenIdPolicyStatus409 = {
 	requestId: string;
 };
 
-export type PutApiApiTokensByTokenIdPolicyStatus422 =
+export type PutApiApiTokensByTokenIdQuotaOverrideStatus422 =
 	| {
 			/**
 			 * @type object
 			 */
 			error: {
 				/**
-				 * @default 'ApiTokenPolicyInvalid'
+				 * @default 'ApiTokenQuotaOverrideInvalid'
 				 * @type string
 				 */
-				code: "ApiTokenPolicyInvalid";
+				code: "ApiTokenQuotaOverrideInvalid";
 				/**
 				 * @type string
 				 */
@@ -15125,12 +15882,12 @@ export type PutApiApiTokensByTokenIdPolicyStatus422 =
 /**
  * @type object
  */
-export type PutApiApiTokensByTokenIdPolicyStatus500 = InternalError;
+export type PutApiApiTokensByTokenIdQuotaOverrideStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type PutApiApiTokensByTokenIdPolicyBody = {
+export type PutApiApiTokensByTokenIdQuotaOverrideBody = {
 	expectedRevision: string | number;
 	/**
 	 * @type object
@@ -15140,7 +15897,13 @@ export type PutApiApiTokensByTokenIdPolicyBody = {
 		 * @type object | undefined
 		 */
 		limits?: {
-			requestsPerMinute?: string | number;
+			/**
+			 * @type object | undefined
+			 */
+			requestRate?: {
+				requestsPerMinute: string | number;
+				burstCapacity: string | number;
+			};
 			maxConcurrentRequests?: string | number;
 			dailyCostUnits?: string | number;
 		};
@@ -15148,8 +15911,31 @@ export type PutApiApiTokensByTokenIdPolicyBody = {
 		 * @type object | undefined
 		 */
 		operations?: {
-			[key: string]: {
-				requestsPerMinute?: string | number;
+			/**
+			 * @type object | undefined
+			 */
+			"search.execute"?: {
+				/**
+				 * @type object | undefined
+				 */
+				requestRate?: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+			/**
+			 * @type object | undefined
+			 */
+			"image.upload"?: {
+				/**
+				 * @type object | undefined
+				 */
+				requestRate?: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
 				maxConcurrentRequests?: string | number;
 				dailyCostUnits?: string | number;
 			};
@@ -15160,9 +15946,9 @@ export type PutApiApiTokensByTokenIdPolicyBody = {
 /**
  * @type object
  */
-export type PutApiApiTokensByTokenIdPolicyOptions = {
-	body: PutApiApiTokensByTokenIdPolicyBody;
-	path: PutApiApiTokensByTokenIdPolicyPath;
+export type PutApiApiTokensByTokenIdQuotaOverrideOptions = {
+	body: PutApiApiTokensByTokenIdQuotaOverrideBody;
+	path: PutApiApiTokensByTokenIdQuotaOverridePath;
 	query?: never;
 	headers?: never;
 };
@@ -15170,29 +15956,217 @@ export type PutApiApiTokensByTokenIdPolicyOptions = {
 /**
  * @type object
  */
-export type PutApiApiTokensByTokenIdPolicyResponses = {
-	"200": PutApiApiTokensByTokenIdPolicyStatus200;
-	"400": PutApiApiTokensByTokenIdPolicyStatus400;
-	"401": PutApiApiTokensByTokenIdPolicyStatus401;
-	"403": PutApiApiTokensByTokenIdPolicyStatus403;
-	"404": PutApiApiTokensByTokenIdPolicyStatus404;
-	"409": PutApiApiTokensByTokenIdPolicyStatus409;
-	"422": PutApiApiTokensByTokenIdPolicyStatus422;
-	"500": PutApiApiTokensByTokenIdPolicyStatus500;
+export type PutApiApiTokensByTokenIdQuotaOverrideResponses = {
+	"200": PutApiApiTokensByTokenIdQuotaOverrideStatus200;
+	"400": PutApiApiTokensByTokenIdQuotaOverrideStatus400;
+	"401": PutApiApiTokensByTokenIdQuotaOverrideStatus401;
+	"403": PutApiApiTokensByTokenIdQuotaOverrideStatus403;
+	"404": PutApiApiTokensByTokenIdQuotaOverrideStatus404;
+	"409": PutApiApiTokensByTokenIdQuotaOverrideStatus409;
+	"422": PutApiApiTokensByTokenIdQuotaOverrideStatus422;
+	"500": PutApiApiTokensByTokenIdQuotaOverrideStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PutApiApiTokensByTokenIdPolicyResponse =
-	| PutApiApiTokensByTokenIdPolicyStatus200
-	| PutApiApiTokensByTokenIdPolicyStatus400
-	| PutApiApiTokensByTokenIdPolicyStatus401
-	| PutApiApiTokensByTokenIdPolicyStatus403
-	| PutApiApiTokensByTokenIdPolicyStatus404
-	| PutApiApiTokensByTokenIdPolicyStatus409
-	| PutApiApiTokensByTokenIdPolicyStatus422
-	| PutApiApiTokensByTokenIdPolicyStatus500;
+export type PutApiApiTokensByTokenIdQuotaOverrideResponse =
+	| PutApiApiTokensByTokenIdQuotaOverrideStatus200
+	| PutApiApiTokensByTokenIdQuotaOverrideStatus400
+	| PutApiApiTokensByTokenIdQuotaOverrideStatus401
+	| PutApiApiTokensByTokenIdQuotaOverrideStatus403
+	| PutApiApiTokensByTokenIdQuotaOverrideStatus404
+	| PutApiApiTokensByTokenIdQuotaOverrideStatus409
+	| PutApiApiTokensByTokenIdQuotaOverrideStatus422
+	| PutApiApiTokensByTokenIdQuotaOverrideStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiApiTokensByTokenIdQuotaOverridePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	tokenId: string;
+};
+
+/**
+ * @type void
+ */
+export type DeleteApiApiTokensByTokenIdQuotaOverrideStatus204 = void;
+
+/**
+ * @type object
+ */
+export type DeleteApiApiTokensByTokenIdQuotaOverrideStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type DeleteApiApiTokensByTokenIdQuotaOverrideStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InteractiveSessionRequired'
+		 * @type string
+		 */
+		code: "InteractiveSessionRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiApiTokensByTokenIdQuotaOverrideStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'FreshSessionRequired'
+		 * @type string
+		 */
+		code: "FreshSessionRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiApiTokensByTokenIdQuotaOverrideStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiTokenNotFound'
+		 * @type string
+		 */
+		code: "ApiTokenNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiApiTokensByTokenIdQuotaOverrideStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiTokenQuotaOverrideRevisionConflict'
+		 * @type string
+		 */
+		code: "ApiTokenQuotaOverrideRevisionConflict";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiApiTokensByTokenIdQuotaOverrideStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiApiTokensByTokenIdQuotaOverrideStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiApiTokensByTokenIdQuotaOverrideBody = {
+	expectedRevision: string | number;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiApiTokensByTokenIdQuotaOverrideOptions = {
+	body: DeleteApiApiTokensByTokenIdQuotaOverrideBody;
+	path: DeleteApiApiTokensByTokenIdQuotaOverridePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiApiTokensByTokenIdQuotaOverrideResponses = {
+	"204": DeleteApiApiTokensByTokenIdQuotaOverrideStatus204;
+	"400": DeleteApiApiTokensByTokenIdQuotaOverrideStatus400;
+	"401": DeleteApiApiTokensByTokenIdQuotaOverrideStatus401;
+	"403": DeleteApiApiTokensByTokenIdQuotaOverrideStatus403;
+	"404": DeleteApiApiTokensByTokenIdQuotaOverrideStatus404;
+	"409": DeleteApiApiTokensByTokenIdQuotaOverrideStatus409;
+	"422": DeleteApiApiTokensByTokenIdQuotaOverrideStatus422;
+	"500": DeleteApiApiTokensByTokenIdQuotaOverrideStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiApiTokensByTokenIdQuotaOverrideResponse =
+	| DeleteApiApiTokensByTokenIdQuotaOverrideStatus204
+	| DeleteApiApiTokensByTokenIdQuotaOverrideStatus400
+	| DeleteApiApiTokensByTokenIdQuotaOverrideStatus401
+	| DeleteApiApiTokensByTokenIdQuotaOverrideStatus403
+	| DeleteApiApiTokensByTokenIdQuotaOverrideStatus404
+	| DeleteApiApiTokensByTokenIdQuotaOverrideStatus409
+	| DeleteApiApiTokensByTokenIdQuotaOverrideStatus422
+	| DeleteApiApiTokensByTokenIdQuotaOverrideStatus500;
 
 export const GetCurrentApiTokenStatus200PermissionsEnum = {
 	"unit:read": "unit:read",
@@ -15218,22 +16192,22 @@ export const GetCurrentApiTokenStatus200PermissionsEnum = {
 export type GetCurrentApiTokenStatus200PermissionsEnum =
 	(typeof GetCurrentApiTokenStatus200PermissionsEnum)[keyof typeof GetCurrentApiTokenStatus200PermissionsEnum];
 
-export const GetCurrentApiTokenStatus200PolicyKindEnum = {
+export const GetCurrentApiTokenStatus200QuotaAccountClassEnum = {
 	standard: "standard",
 	privileged: "privileged",
 } as const;
 
-export type GetCurrentApiTokenStatus200PolicyKindEnum =
-	(typeof GetCurrentApiTokenStatus200PolicyKindEnum)[keyof typeof GetCurrentApiTokenStatus200PolicyKindEnum];
+export type GetCurrentApiTokenStatus200QuotaAccountClassEnum =
+	(typeof GetCurrentApiTokenStatus200QuotaAccountClassEnum)[keyof typeof GetCurrentApiTokenStatus200QuotaAccountClassEnum];
 
-export const GetCurrentApiTokenStatus200PolicySourceEnum = {
+export const GetCurrentApiTokenStatus200QuotaAccountSourceEnum = {
 	assigned: "assigned",
 	standard_default: "standard_default",
-	trusted_fallback: "trusted_fallback",
+	privileged_fallback: "privileged_fallback",
 } as const;
 
-export type GetCurrentApiTokenStatus200PolicySourceEnum =
-	(typeof GetCurrentApiTokenStatus200PolicySourceEnum)[keyof typeof GetCurrentApiTokenStatus200PolicySourceEnum];
+export type GetCurrentApiTokenStatus200QuotaAccountSourceEnum =
+	(typeof GetCurrentApiTokenStatus200QuotaAccountSourceEnum)[keyof typeof GetCurrentApiTokenStatus200QuotaAccountSourceEnum];
 
 /**
  * @type object
@@ -15271,43 +16245,195 @@ export type GetCurrentApiTokenStatus200 = {
 	/**
 	 * @type object
 	 */
-	policy: {
-		/**
-		 * @type string
-		 */
-		key: string;
-		/**
-		 * @default 'standard'
-		 * @type string
-		 */
-		kind: GetCurrentApiTokenStatus200PolicyKindEnum;
-		/**
-		 * @default 'assigned'
-		 * @type string
-		 */
-		source: GetCurrentApiTokenStatus200PolicySourceEnum;
-		schemaVersion: string | number;
-		policyRevision: string | number;
-		bindingRevision: ((string | number) | null) | null;
-		validUntil: (string | null) | null;
+	quota: {
 		/**
 		 * @type object
 		 */
-		limits: {
-			requestsPerMinute: string | number;
-			maxConcurrentRequests: string | number;
-			dailyCostUnits: string | number;
-		};
-		/**
-		 * @type object
-		 */
-		operations: {
-			[key: string]: {
-				requestsPerMinute?: string | number;
-				maxConcurrentRequests?: string | number;
-				dailyCostUnits?: string | number;
+		account: {
+			/**
+			 * @type string
+			 */
+			key: string;
+			/**
+			 * @default 'standard'
+			 * @type string
+			 */
+			class: GetCurrentApiTokenStatus200QuotaAccountClassEnum;
+			/**
+			 * @default 'assigned'
+			 * @type string
+			 */
+			source: GetCurrentApiTokenStatus200QuotaAccountSourceEnum;
+			schemaVersion: string | number;
+			policyRevision: string | number;
+			bindingRevision: ((string | number) | null) | null;
+			validUntil: (string | null) | null;
+			assignmentReason: (string | null) | null;
+			/**
+			 * @type object
+			 */
+			configurationOverride: {
+				/**
+				 * @type object | undefined
+				 */
+				limits?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+				maxActiveTokens?: string | number;
+				/**
+				 * @type object | undefined
+				 */
+				operations?: {
+					/**
+					 * @type object | undefined
+					 */
+					"search.execute"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+					/**
+					 * @type object | undefined
+					 */
+					"image.upload"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+				};
+			};
+			/**
+			 * @type object
+			 */
+			limits: {
+				/**
+				 * @type object
+				 */
+				requestRate: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests: string | number;
+				dailyCostUnits: string | number;
+			};
+			maxActiveTokens: string | number;
+			/**
+			 * @type object
+			 */
+			operations: {
+				/**
+				 * @type object | undefined
+				 */
+				"search.execute"?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+				/**
+				 * @type object | undefined
+				 */
+				"image.upload"?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
 			};
 		};
+		tokenOverride:
+			| ({
+					/**
+					 * @type object
+					 */
+					configurationOverride: {
+						/**
+						 * @type object | undefined
+						 */
+						limits?: {
+							/**
+							 * @type object | undefined
+							 */
+							requestRate?: {
+								requestsPerMinute: string | number;
+								burstCapacity: string | number;
+							};
+							maxConcurrentRequests?: string | number;
+							dailyCostUnits?: string | number;
+						};
+						/**
+						 * @type object | undefined
+						 */
+						operations?: {
+							/**
+							 * @type object | undefined
+							 */
+							"search.execute"?: {
+								/**
+								 * @type object | undefined
+								 */
+								requestRate?: {
+									requestsPerMinute: string | number;
+									burstCapacity: string | number;
+								};
+								maxConcurrentRequests?: string | number;
+								dailyCostUnits?: string | number;
+							};
+							/**
+							 * @type object | undefined
+							 */
+							"image.upload"?: {
+								/**
+								 * @type object | undefined
+								 */
+								requestRate?: {
+									requestsPerMinute: string | number;
+									burstCapacity: string | number;
+								};
+								maxConcurrentRequests?: string | number;
+								dailyCostUnits?: string | number;
+							};
+						};
+					};
+					revision: string | number;
+					/**
+					 * @description
+					 * Format: `date-time`
+					 * @type string
+					 */
+					updatedAt: string;
+			  } | null)
+			| null;
 	};
 };
 
@@ -15339,6 +16465,14 @@ export type GetCurrentApiTokenStatus401 = {
 	requestId: string;
 };
 
+export const GetCurrentApiTokenStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetCurrentApiTokenStatus429ErrorCodeEnum =
+	(typeof GetCurrentApiTokenStatus429ErrorCodeEnum)[keyof typeof GetCurrentApiTokenStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -15348,10 +16482,10 @@ export type GetCurrentApiTokenStatus429 = {
 	 */
 	error: {
 		/**
-		 * @default 'ApiTokenRateLimitExceeded'
+		 * @default 'ApiQuotaExceeded'
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetCurrentApiTokenStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -15401,18 +16535,18 @@ export type GetCurrentApiTokenResponse =
 	| GetCurrentApiTokenStatus429
 	| GetCurrentApiTokenStatus500;
 
-export const GetApiApiTokenPoliciesStatus200ItemsKindEnum = {
+export const GetApiApiQuotaPoliciesStatus200ItemsClassEnum = {
 	standard: "standard",
 	privileged: "privileged",
 } as const;
 
-export type GetApiApiTokenPoliciesStatus200ItemsKindEnum =
-	(typeof GetApiApiTokenPoliciesStatus200ItemsKindEnum)[keyof typeof GetApiApiTokenPoliciesStatus200ItemsKindEnum];
+export type GetApiApiQuotaPoliciesStatus200ItemsClassEnum =
+	(typeof GetApiApiQuotaPoliciesStatus200ItemsClassEnum)[keyof typeof GetApiApiQuotaPoliciesStatus200ItemsClassEnum];
 
 /**
  * @type object
  */
-export type GetApiApiTokenPoliciesStatus200 = {
+export type GetApiApiQuotaPoliciesStatus200 = {
 	/**
 	 * @type array
 	 */
@@ -15431,7 +16565,7 @@ export type GetApiApiTokenPoliciesStatus200 = {
 		 * @default 'standard'
 		 * @type string
 		 */
-		kind: GetApiApiTokenPoliciesStatus200ItemsKindEnum;
+		class: GetApiApiQuotaPoliciesStatus200ItemsClassEnum;
 		schemaVersion: string | number;
 		/**
 		 * @type object
@@ -15441,16 +16575,46 @@ export type GetApiApiTokenPoliciesStatus200 = {
 			 * @type object
 			 */
 			limits: {
-				requestsPerMinute: string | number;
+				/**
+				 * @type object
+				 */
+				requestRate: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
 				maxConcurrentRequests: string | number;
 				dailyCostUnits: string | number;
 			};
+			maxActiveTokens: string | number;
 			/**
 			 * @type object
 			 */
 			operations: {
-				[key: string]: {
-					requestsPerMinute?: string | number;
+				/**
+				 * @type object | undefined
+				 */
+				"search.execute"?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+				/**
+				 * @type object | undefined
+				 */
+				"image.upload"?: {
+					/**
+					 * @type object | undefined
+					 */
+					requestRate?: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
 					maxConcurrentRequests?: string | number;
 					dailyCostUnits?: string | number;
 				};
@@ -15473,7 +16637,7 @@ export type GetApiApiTokenPoliciesStatus200 = {
 /**
  * @type object
  */
-export type GetApiApiTokenPoliciesStatus401 = {
+export type GetApiApiQuotaPoliciesStatus401 = {
 	/**
 	 * @type object
 	 */
@@ -15498,18 +16662,18 @@ export type GetApiApiTokenPoliciesStatus401 = {
 	requestId: string;
 };
 
-export const GetApiApiTokenPoliciesStatus403ErrorCodeEnum = {
+export const GetApiApiQuotaPoliciesStatus403ErrorCodeEnum = {
 	FreshSessionRequired: "FreshSessionRequired",
 	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 } as const;
 
-export type GetApiApiTokenPoliciesStatus403ErrorCodeEnum =
-	(typeof GetApiApiTokenPoliciesStatus403ErrorCodeEnum)[keyof typeof GetApiApiTokenPoliciesStatus403ErrorCodeEnum];
+export type GetApiApiQuotaPoliciesStatus403ErrorCodeEnum =
+	(typeof GetApiApiQuotaPoliciesStatus403ErrorCodeEnum)[keyof typeof GetApiApiQuotaPoliciesStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type GetApiApiTokenPoliciesStatus403 = {
+export type GetApiApiQuotaPoliciesStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -15518,7 +16682,7 @@ export type GetApiApiTokenPoliciesStatus403 = {
 		 * @default 'FreshSessionRequired'
 		 * @type string
 		 */
-		code: GetApiApiTokenPoliciesStatus403ErrorCodeEnum;
+		code: GetApiApiQuotaPoliciesStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -15537,12 +16701,12 @@ export type GetApiApiTokenPoliciesStatus403 = {
 /**
  * @type object
  */
-export type GetApiApiTokenPoliciesStatus500 = InternalError;
+export type GetApiApiQuotaPoliciesStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type GetApiApiTokenPoliciesOptions = {
+export type GetApiApiQuotaPoliciesOptions = {
 	body?: never;
 	path?: never;
 	query?: never;
@@ -15552,45 +16716,46 @@ export type GetApiApiTokenPoliciesOptions = {
 /**
  * @type object
  */
-export type GetApiApiTokenPoliciesResponses = {
-	"200": GetApiApiTokenPoliciesStatus200;
-	"401": GetApiApiTokenPoliciesStatus401;
-	"403": GetApiApiTokenPoliciesStatus403;
-	"500": GetApiApiTokenPoliciesStatus500;
+export type GetApiApiQuotaPoliciesResponses = {
+	"200": GetApiApiQuotaPoliciesStatus200;
+	"401": GetApiApiQuotaPoliciesStatus401;
+	"403": GetApiApiQuotaPoliciesStatus403;
+	"500": GetApiApiQuotaPoliciesStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type GetApiApiTokenPoliciesResponse =
-	| GetApiApiTokenPoliciesStatus200
-	| GetApiApiTokenPoliciesStatus401
-	| GetApiApiTokenPoliciesStatus403
-	| GetApiApiTokenPoliciesStatus500;
+export type GetApiApiQuotaPoliciesResponse =
+	| GetApiApiQuotaPoliciesStatus200
+	| GetApiApiQuotaPoliciesStatus401
+	| GetApiApiQuotaPoliciesStatus403
+	| GetApiApiQuotaPoliciesStatus500;
 
 /**
  * @type object
  */
-export type PatchApiApiTokenPoliciesByPolicyKeyPath = {
+export type PutApiApiQuotaPoliciesByPolicyKeyPath = {
 	/**
 	 * @minLength 1
+	 * @maxLength 64
 	 * @type string
 	 */
 	policyKey: string;
 };
 
-export const PatchApiApiTokenPoliciesByPolicyKeyStatus200KindEnum = {
+export const PutApiApiQuotaPoliciesByPolicyKeyStatus200ClassEnum = {
 	standard: "standard",
 	privileged: "privileged",
 } as const;
 
-export type PatchApiApiTokenPoliciesByPolicyKeyStatus200KindEnum =
-	(typeof PatchApiApiTokenPoliciesByPolicyKeyStatus200KindEnum)[keyof typeof PatchApiApiTokenPoliciesByPolicyKeyStatus200KindEnum];
+export type PutApiApiQuotaPoliciesByPolicyKeyStatus200ClassEnum =
+	(typeof PutApiApiQuotaPoliciesByPolicyKeyStatus200ClassEnum)[keyof typeof PutApiApiQuotaPoliciesByPolicyKeyStatus200ClassEnum];
 
 /**
  * @type object
  */
-export type PatchApiApiTokenPoliciesByPolicyKeyStatus200 = {
+export type PutApiApiQuotaPoliciesByPolicyKeyStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -15605,7 +16770,7 @@ export type PatchApiApiTokenPoliciesByPolicyKeyStatus200 = {
 	 * @default 'standard'
 	 * @type string
 	 */
-	kind: PatchApiApiTokenPoliciesByPolicyKeyStatus200KindEnum;
+	class: PutApiApiQuotaPoliciesByPolicyKeyStatus200ClassEnum;
 	schemaVersion: string | number;
 	/**
 	 * @type object
@@ -15615,16 +16780,46 @@ export type PatchApiApiTokenPoliciesByPolicyKeyStatus200 = {
 		 * @type object
 		 */
 		limits: {
-			requestsPerMinute: string | number;
+			/**
+			 * @type object
+			 */
+			requestRate: {
+				requestsPerMinute: string | number;
+				burstCapacity: string | number;
+			};
 			maxConcurrentRequests: string | number;
 			dailyCostUnits: string | number;
 		};
+		maxActiveTokens: string | number;
 		/**
 		 * @type object
 		 */
 		operations: {
-			[key: string]: {
-				requestsPerMinute?: string | number;
+			/**
+			 * @type object | undefined
+			 */
+			"search.execute"?: {
+				/**
+				 * @type object | undefined
+				 */
+				requestRate?: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+			/**
+			 * @type object | undefined
+			 */
+			"image.upload"?: {
+				/**
+				 * @type object | undefined
+				 */
+				requestRate?: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
 				maxConcurrentRequests?: string | number;
 				dailyCostUnits?: string | number;
 			};
@@ -15646,12 +16841,12 @@ export type PatchApiApiTokenPoliciesByPolicyKeyStatus200 = {
 /**
  * @type object
  */
-export type PatchApiApiTokenPoliciesByPolicyKeyStatus400 = MalformedRequestBody;
+export type PutApiApiQuotaPoliciesByPolicyKeyStatus400 = MalformedRequestBody;
 
 /**
  * @type object
  */
-export type PatchApiApiTokenPoliciesByPolicyKeyStatus401 = {
+export type PutApiApiQuotaPoliciesByPolicyKeyStatus401 = {
 	/**
 	 * @type object
 	 */
@@ -15676,18 +16871,18 @@ export type PatchApiApiTokenPoliciesByPolicyKeyStatus401 = {
 	requestId: string;
 };
 
-export const PatchApiApiTokenPoliciesByPolicyKeyStatus403ErrorCodeEnum = {
+export const PutApiApiQuotaPoliciesByPolicyKeyStatus403ErrorCodeEnum = {
 	FreshSessionRequired: "FreshSessionRequired",
 	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 } as const;
 
-export type PatchApiApiTokenPoliciesByPolicyKeyStatus403ErrorCodeEnum =
-	(typeof PatchApiApiTokenPoliciesByPolicyKeyStatus403ErrorCodeEnum)[keyof typeof PatchApiApiTokenPoliciesByPolicyKeyStatus403ErrorCodeEnum];
+export type PutApiApiQuotaPoliciesByPolicyKeyStatus403ErrorCodeEnum =
+	(typeof PutApiApiQuotaPoliciesByPolicyKeyStatus403ErrorCodeEnum)[keyof typeof PutApiApiQuotaPoliciesByPolicyKeyStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PatchApiApiTokenPoliciesByPolicyKeyStatus403 = {
+export type PutApiApiQuotaPoliciesByPolicyKeyStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -15696,7 +16891,7 @@ export type PatchApiApiTokenPoliciesByPolicyKeyStatus403 = {
 		 * @default 'FreshSessionRequired'
 		 * @type string
 		 */
-		code: PatchApiApiTokenPoliciesByPolicyKeyStatus403ErrorCodeEnum;
+		code: PutApiApiQuotaPoliciesByPolicyKeyStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -15715,16 +16910,16 @@ export type PatchApiApiTokenPoliciesByPolicyKeyStatus403 = {
 /**
  * @type object
  */
-export type PatchApiApiTokenPoliciesByPolicyKeyStatus404 = {
+export type PutApiApiQuotaPoliciesByPolicyKeyStatus404 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'ApiTokenPolicyNotFound'
+		 * @default 'ApiQuotaPolicyNotFound'
 		 * @type string
 		 */
-		code: "ApiTokenPolicyNotFound";
+		code: "ApiQuotaPolicyNotFound";
 		/**
 		 * @type string
 		 */
@@ -15743,16 +16938,16 @@ export type PatchApiApiTokenPoliciesByPolicyKeyStatus404 = {
 /**
  * @type object
  */
-export type PatchApiApiTokenPoliciesByPolicyKeyStatus409 = {
+export type PutApiApiQuotaPoliciesByPolicyKeyStatus409 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'ApiTokenPolicyRevisionConflict'
+		 * @default 'ApiQuotaPolicyRevisionConflict'
 		 * @type string
 		 */
-		code: "ApiTokenPolicyRevisionConflict";
+		code: "ApiQuotaPolicyRevisionConflict";
 		/**
 		 * @type string
 		 */
@@ -15768,17 +16963,17 @@ export type PatchApiApiTokenPoliciesByPolicyKeyStatus409 = {
 	requestId: string;
 };
 
-export type PatchApiApiTokenPoliciesByPolicyKeyStatus422 =
+export type PutApiApiQuotaPoliciesByPolicyKeyStatus422 =
 	| {
 			/**
 			 * @type object
 			 */
 			error: {
 				/**
-				 * @default 'ApiTokenPolicyInvalid'
+				 * @default 'ApiQuotaPolicyInvalid'
 				 * @type string
 				 */
-				code: "ApiTokenPolicyInvalid";
+				code: "ApiQuotaPolicyInvalid";
 				/**
 				 * @type string
 				 */
@@ -15798,12 +16993,12 @@ export type PatchApiApiTokenPoliciesByPolicyKeyStatus422 =
 /**
  * @type object
  */
-export type PatchApiApiTokenPoliciesByPolicyKeyStatus500 = InternalError;
+export type PutApiApiQuotaPoliciesByPolicyKeyStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type PatchApiApiTokenPoliciesByPolicyKeyBody = {
+export type PutApiApiQuotaPoliciesByPolicyKeyBody = {
 	expectedRevision: string | number;
 	/**
 	 * @type object
@@ -15813,29 +17008,65 @@ export type PatchApiApiTokenPoliciesByPolicyKeyBody = {
 		 * @type object
 		 */
 		limits: {
-			requestsPerMinute: string | number;
+			/**
+			 * @type object
+			 */
+			requestRate: {
+				requestsPerMinute: string | number;
+				burstCapacity: string | number;
+			};
 			maxConcurrentRequests: string | number;
 			dailyCostUnits: string | number;
 		};
+		maxActiveTokens: string | number;
 		/**
 		 * @type object
 		 */
 		operations: {
-			[key: string]: {
-				requestsPerMinute?: string | number;
+			/**
+			 * @type object | undefined
+			 */
+			"search.execute"?: {
+				/**
+				 * @type object | undefined
+				 */
+				requestRate?: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+			/**
+			 * @type object | undefined
+			 */
+			"image.upload"?: {
+				/**
+				 * @type object | undefined
+				 */
+				requestRate?: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
 				maxConcurrentRequests?: string | number;
 				dailyCostUnits?: string | number;
 			};
 		};
 	};
+	/**
+	 * @minLength 1
+	 * @maxLength 1000
+	 * @type string
+	 */
+	reason: string;
 };
 
 /**
  * @type object
  */
-export type PatchApiApiTokenPoliciesByPolicyKeyOptions = {
-	body: PatchApiApiTokenPoliciesByPolicyKeyBody;
-	path: PatchApiApiTokenPoliciesByPolicyKeyPath;
+export type PutApiApiQuotaPoliciesByPolicyKeyOptions = {
+	body: PutApiApiQuotaPoliciesByPolicyKeyBody;
+	path: PutApiApiQuotaPoliciesByPolicyKeyPath;
 	query?: never;
 	headers?: never;
 };
@@ -15843,63 +17074,63 @@ export type PatchApiApiTokenPoliciesByPolicyKeyOptions = {
 /**
  * @type object
  */
-export type PatchApiApiTokenPoliciesByPolicyKeyResponses = {
-	"200": PatchApiApiTokenPoliciesByPolicyKeyStatus200;
-	"400": PatchApiApiTokenPoliciesByPolicyKeyStatus400;
-	"401": PatchApiApiTokenPoliciesByPolicyKeyStatus401;
-	"403": PatchApiApiTokenPoliciesByPolicyKeyStatus403;
-	"404": PatchApiApiTokenPoliciesByPolicyKeyStatus404;
-	"409": PatchApiApiTokenPoliciesByPolicyKeyStatus409;
-	"422": PatchApiApiTokenPoliciesByPolicyKeyStatus422;
-	"500": PatchApiApiTokenPoliciesByPolicyKeyStatus500;
+export type PutApiApiQuotaPoliciesByPolicyKeyResponses = {
+	"200": PutApiApiQuotaPoliciesByPolicyKeyStatus200;
+	"400": PutApiApiQuotaPoliciesByPolicyKeyStatus400;
+	"401": PutApiApiQuotaPoliciesByPolicyKeyStatus401;
+	"403": PutApiApiQuotaPoliciesByPolicyKeyStatus403;
+	"404": PutApiApiQuotaPoliciesByPolicyKeyStatus404;
+	"409": PutApiApiQuotaPoliciesByPolicyKeyStatus409;
+	"422": PutApiApiQuotaPoliciesByPolicyKeyStatus422;
+	"500": PutApiApiQuotaPoliciesByPolicyKeyStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PatchApiApiTokenPoliciesByPolicyKeyResponse =
-	| PatchApiApiTokenPoliciesByPolicyKeyStatus200
-	| PatchApiApiTokenPoliciesByPolicyKeyStatus400
-	| PatchApiApiTokenPoliciesByPolicyKeyStatus401
-	| PatchApiApiTokenPoliciesByPolicyKeyStatus403
-	| PatchApiApiTokenPoliciesByPolicyKeyStatus404
-	| PatchApiApiTokenPoliciesByPolicyKeyStatus409
-	| PatchApiApiTokenPoliciesByPolicyKeyStatus422
-	| PatchApiApiTokenPoliciesByPolicyKeyStatus500;
+export type PutApiApiQuotaPoliciesByPolicyKeyResponse =
+	| PutApiApiQuotaPoliciesByPolicyKeyStatus200
+	| PutApiApiQuotaPoliciesByPolicyKeyStatus400
+	| PutApiApiQuotaPoliciesByPolicyKeyStatus401
+	| PutApiApiQuotaPoliciesByPolicyKeyStatus403
+	| PutApiApiQuotaPoliciesByPolicyKeyStatus404
+	| PutApiApiQuotaPoliciesByPolicyKeyStatus409
+	| PutApiApiQuotaPoliciesByPolicyKeyStatus422
+	| PutApiApiQuotaPoliciesByPolicyKeyStatus500;
 
 /**
  * @type object
  */
-export type PutApiApiTokenPoliciesBindingsByTokenIdPath = {
+export type GetApiApiQuotaPoliciesAccountsByUserIdPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
-	tokenId: string;
+	userId: string;
 };
 
-export const PutApiApiTokenPoliciesBindingsByTokenIdStatus200KindEnum = {
+export const GetApiApiQuotaPoliciesAccountsByUserIdStatus200ClassEnum = {
 	standard: "standard",
 	privileged: "privileged",
 } as const;
 
-export type PutApiApiTokenPoliciesBindingsByTokenIdStatus200KindEnum =
-	(typeof PutApiApiTokenPoliciesBindingsByTokenIdStatus200KindEnum)[keyof typeof PutApiApiTokenPoliciesBindingsByTokenIdStatus200KindEnum];
+export type GetApiApiQuotaPoliciesAccountsByUserIdStatus200ClassEnum =
+	(typeof GetApiApiQuotaPoliciesAccountsByUserIdStatus200ClassEnum)[keyof typeof GetApiApiQuotaPoliciesAccountsByUserIdStatus200ClassEnum];
 
-export const PutApiApiTokenPoliciesBindingsByTokenIdStatus200SourceEnum = {
+export const GetApiApiQuotaPoliciesAccountsByUserIdStatus200SourceEnum = {
 	assigned: "assigned",
 	standard_default: "standard_default",
-	trusted_fallback: "trusted_fallback",
+	privileged_fallback: "privileged_fallback",
 } as const;
 
-export type PutApiApiTokenPoliciesBindingsByTokenIdStatus200SourceEnum =
-	(typeof PutApiApiTokenPoliciesBindingsByTokenIdStatus200SourceEnum)[keyof typeof PutApiApiTokenPoliciesBindingsByTokenIdStatus200SourceEnum];
+export type GetApiApiQuotaPoliciesAccountsByUserIdStatus200SourceEnum =
+	(typeof GetApiApiQuotaPoliciesAccountsByUserIdStatus200SourceEnum)[keyof typeof GetApiApiQuotaPoliciesAccountsByUserIdStatus200SourceEnum];
 
 /**
  * @type object
  */
-export type PutApiApiTokenPoliciesBindingsByTokenIdStatus200 = {
+export type GetApiApiQuotaPoliciesAccountsByUserIdStatus200 = {
 	/**
 	 * @type string
 	 */
@@ -15908,30 +17139,114 @@ export type PutApiApiTokenPoliciesBindingsByTokenIdStatus200 = {
 	 * @default 'standard'
 	 * @type string
 	 */
-	kind: PutApiApiTokenPoliciesBindingsByTokenIdStatus200KindEnum;
+	class: GetApiApiQuotaPoliciesAccountsByUserIdStatus200ClassEnum;
 	/**
 	 * @default 'assigned'
 	 * @type string
 	 */
-	source: PutApiApiTokenPoliciesBindingsByTokenIdStatus200SourceEnum;
+	source: GetApiApiQuotaPoliciesAccountsByUserIdStatus200SourceEnum;
 	schemaVersion: string | number;
 	policyRevision: string | number;
 	bindingRevision: ((string | number) | null) | null;
 	validUntil: (string | null) | null;
+	assignmentReason: (string | null) | null;
 	/**
 	 * @type object
 	 */
-	limits: {
-		requestsPerMinute: string | number;
-		maxConcurrentRequests: string | number;
-		dailyCostUnits: string | number;
+	configurationOverride: {
+		/**
+		 * @type object | undefined
+		 */
+		limits?: {
+			/**
+			 * @type object | undefined
+			 */
+			requestRate?: {
+				requestsPerMinute: string | number;
+				burstCapacity: string | number;
+			};
+			maxConcurrentRequests?: string | number;
+			dailyCostUnits?: string | number;
+		};
+		maxActiveTokens?: string | number;
+		/**
+		 * @type object | undefined
+		 */
+		operations?: {
+			/**
+			 * @type object | undefined
+			 */
+			"search.execute"?: {
+				/**
+				 * @type object | undefined
+				 */
+				requestRate?: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+			/**
+			 * @type object | undefined
+			 */
+			"image.upload"?: {
+				/**
+				 * @type object | undefined
+				 */
+				requestRate?: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+		};
 	};
 	/**
 	 * @type object
 	 */
+	limits: {
+		/**
+		 * @type object
+		 */
+		requestRate: {
+			requestsPerMinute: string | number;
+			burstCapacity: string | number;
+		};
+		maxConcurrentRequests: string | number;
+		dailyCostUnits: string | number;
+	};
+	maxActiveTokens: string | number;
+	/**
+	 * @type object
+	 */
 	operations: {
-		[key: string]: {
-			requestsPerMinute?: string | number;
+		/**
+		 * @type object | undefined
+		 */
+		"search.execute"?: {
+			/**
+			 * @type object | undefined
+			 */
+			requestRate?: {
+				requestsPerMinute: string | number;
+				burstCapacity: string | number;
+			};
+			maxConcurrentRequests?: string | number;
+			dailyCostUnits?: string | number;
+		};
+		/**
+		 * @type object | undefined
+		 */
+		"image.upload"?: {
+			/**
+			 * @type object | undefined
+			 */
+			requestRate?: {
+				requestsPerMinute: string | number;
+				burstCapacity: string | number;
+			};
 			maxConcurrentRequests?: string | number;
 			dailyCostUnits?: string | number;
 		};
@@ -15941,12 +17256,7 @@ export type PutApiApiTokenPoliciesBindingsByTokenIdStatus200 = {
 /**
  * @type object
  */
-export type PutApiApiTokenPoliciesBindingsByTokenIdStatus400 = MalformedRequestBody;
-
-/**
- * @type object
- */
-export type PutApiApiTokenPoliciesBindingsByTokenIdStatus401 = {
+export type GetApiApiQuotaPoliciesAccountsByUserIdStatus401 = {
 	/**
 	 * @type object
 	 */
@@ -15971,18 +17281,18 @@ export type PutApiApiTokenPoliciesBindingsByTokenIdStatus401 = {
 	requestId: string;
 };
 
-export const PutApiApiTokenPoliciesBindingsByTokenIdStatus403ErrorCodeEnum = {
+export const GetApiApiQuotaPoliciesAccountsByUserIdStatus403ErrorCodeEnum = {
 	FreshSessionRequired: "FreshSessionRequired",
 	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 } as const;
 
-export type PutApiApiTokenPoliciesBindingsByTokenIdStatus403ErrorCodeEnum =
-	(typeof PutApiApiTokenPoliciesBindingsByTokenIdStatus403ErrorCodeEnum)[keyof typeof PutApiApiTokenPoliciesBindingsByTokenIdStatus403ErrorCodeEnum];
+export type GetApiApiQuotaPoliciesAccountsByUserIdStatus403ErrorCodeEnum =
+	(typeof GetApiApiQuotaPoliciesAccountsByUserIdStatus403ErrorCodeEnum)[keyof typeof GetApiApiQuotaPoliciesAccountsByUserIdStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PutApiApiTokenPoliciesBindingsByTokenIdStatus403 = {
+export type GetApiApiQuotaPoliciesAccountsByUserIdStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -15991,7 +17301,7 @@ export type PutApiApiTokenPoliciesBindingsByTokenIdStatus403 = {
 		 * @default 'FreshSessionRequired'
 		 * @type string
 		 */
-		code: PutApiApiTokenPoliciesBindingsByTokenIdStatus403ErrorCodeEnum;
+		code: GetApiApiQuotaPoliciesAccountsByUserIdStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -16007,27 +17317,19 @@ export type PutApiApiTokenPoliciesBindingsByTokenIdStatus403 = {
 	requestId: string;
 };
 
-export const PutApiApiTokenPoliciesBindingsByTokenIdStatus404ErrorCodeEnum = {
-	ApiTokenNotFound: "ApiTokenNotFound",
-	ApiTokenPolicyNotFound: "ApiTokenPolicyNotFound",
-} as const;
-
-export type PutApiApiTokenPoliciesBindingsByTokenIdStatus404ErrorCodeEnum =
-	(typeof PutApiApiTokenPoliciesBindingsByTokenIdStatus404ErrorCodeEnum)[keyof typeof PutApiApiTokenPoliciesBindingsByTokenIdStatus404ErrorCodeEnum];
-
 /**
  * @type object
  */
-export type PutApiApiTokenPoliciesBindingsByTokenIdStatus404 = {
+export type GetApiApiQuotaPoliciesAccountsByUserIdStatus404 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'ApiTokenNotFound'
+		 * @default 'UserNotFound'
 		 * @type string
 		 */
-		code: PutApiApiTokenPoliciesBindingsByTokenIdStatus404ErrorCodeEnum;
+		code: "UserNotFound";
 		/**
 		 * @type string
 		 */
@@ -16043,17 +17345,348 @@ export type PutApiApiTokenPoliciesBindingsByTokenIdStatus404 = {
 	requestId: string;
 };
 
-export type PutApiApiTokenPoliciesBindingsByTokenIdStatus422 =
+/**
+ * @type object
+ */
+export type GetApiApiQuotaPoliciesAccountsByUserIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiApiQuotaPoliciesAccountsByUserIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiApiQuotaPoliciesAccountsByUserIdOptions = {
+	body?: never;
+	path: GetApiApiQuotaPoliciesAccountsByUserIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiApiQuotaPoliciesAccountsByUserIdResponses = {
+	"200": GetApiApiQuotaPoliciesAccountsByUserIdStatus200;
+	"401": GetApiApiQuotaPoliciesAccountsByUserIdStatus401;
+	"403": GetApiApiQuotaPoliciesAccountsByUserIdStatus403;
+	"404": GetApiApiQuotaPoliciesAccountsByUserIdStatus404;
+	"422": GetApiApiQuotaPoliciesAccountsByUserIdStatus422;
+	"500": GetApiApiQuotaPoliciesAccountsByUserIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiApiQuotaPoliciesAccountsByUserIdResponse =
+	| GetApiApiQuotaPoliciesAccountsByUserIdStatus200
+	| GetApiApiQuotaPoliciesAccountsByUserIdStatus401
+	| GetApiApiQuotaPoliciesAccountsByUserIdStatus403
+	| GetApiApiQuotaPoliciesAccountsByUserIdStatus404
+	| GetApiApiQuotaPoliciesAccountsByUserIdStatus422
+	| GetApiApiQuotaPoliciesAccountsByUserIdStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiApiQuotaPoliciesAccountsByUserIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	userId: string;
+};
+
+export const PutApiApiQuotaPoliciesAccountsByUserIdStatus200ClassEnum = {
+	standard: "standard",
+	privileged: "privileged",
+} as const;
+
+export type PutApiApiQuotaPoliciesAccountsByUserIdStatus200ClassEnum =
+	(typeof PutApiApiQuotaPoliciesAccountsByUserIdStatus200ClassEnum)[keyof typeof PutApiApiQuotaPoliciesAccountsByUserIdStatus200ClassEnum];
+
+export const PutApiApiQuotaPoliciesAccountsByUserIdStatus200SourceEnum = {
+	assigned: "assigned",
+	standard_default: "standard_default",
+	privileged_fallback: "privileged_fallback",
+} as const;
+
+export type PutApiApiQuotaPoliciesAccountsByUserIdStatus200SourceEnum =
+	(typeof PutApiApiQuotaPoliciesAccountsByUserIdStatus200SourceEnum)[keyof typeof PutApiApiQuotaPoliciesAccountsByUserIdStatus200SourceEnum];
+
+/**
+ * @type object
+ */
+export type PutApiApiQuotaPoliciesAccountsByUserIdStatus200 = {
+	/**
+	 * @type string
+	 */
+	key: string;
+	/**
+	 * @default 'standard'
+	 * @type string
+	 */
+	class: PutApiApiQuotaPoliciesAccountsByUserIdStatus200ClassEnum;
+	/**
+	 * @default 'assigned'
+	 * @type string
+	 */
+	source: PutApiApiQuotaPoliciesAccountsByUserIdStatus200SourceEnum;
+	schemaVersion: string | number;
+	policyRevision: string | number;
+	bindingRevision: ((string | number) | null) | null;
+	validUntil: (string | null) | null;
+	assignmentReason: (string | null) | null;
+	/**
+	 * @type object
+	 */
+	configurationOverride: {
+		/**
+		 * @type object | undefined
+		 */
+		limits?: {
+			/**
+			 * @type object | undefined
+			 */
+			requestRate?: {
+				requestsPerMinute: string | number;
+				burstCapacity: string | number;
+			};
+			maxConcurrentRequests?: string | number;
+			dailyCostUnits?: string | number;
+		};
+		maxActiveTokens?: string | number;
+		/**
+		 * @type object | undefined
+		 */
+		operations?: {
+			/**
+			 * @type object | undefined
+			 */
+			"search.execute"?: {
+				/**
+				 * @type object | undefined
+				 */
+				requestRate?: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+			/**
+			 * @type object | undefined
+			 */
+			"image.upload"?: {
+				/**
+				 * @type object | undefined
+				 */
+				requestRate?: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+		};
+	};
+	/**
+	 * @type object
+	 */
+	limits: {
+		/**
+		 * @type object
+		 */
+		requestRate: {
+			requestsPerMinute: string | number;
+			burstCapacity: string | number;
+		};
+		maxConcurrentRequests: string | number;
+		dailyCostUnits: string | number;
+	};
+	maxActiveTokens: string | number;
+	/**
+	 * @type object
+	 */
+	operations: {
+		/**
+		 * @type object | undefined
+		 */
+		"search.execute"?: {
+			/**
+			 * @type object | undefined
+			 */
+			requestRate?: {
+				requestsPerMinute: string | number;
+				burstCapacity: string | number;
+			};
+			maxConcurrentRequests?: string | number;
+			dailyCostUnits?: string | number;
+		};
+		/**
+		 * @type object | undefined
+		 */
+		"image.upload"?: {
+			/**
+			 * @type object | undefined
+			 */
+			requestRate?: {
+				requestsPerMinute: string | number;
+				burstCapacity: string | number;
+			};
+			maxConcurrentRequests?: string | number;
+			dailyCostUnits?: string | number;
+		};
+	};
+};
+
+/**
+ * @type object
+ */
+export type PutApiApiQuotaPoliciesAccountsByUserIdStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PutApiApiQuotaPoliciesAccountsByUserIdStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InteractiveSessionRequired'
+		 * @type string
+		 */
+		code: "InteractiveSessionRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiApiQuotaPoliciesAccountsByUserIdStatus403ErrorCodeEnum = {
+	FreshSessionRequired: "FreshSessionRequired",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type PutApiApiQuotaPoliciesAccountsByUserIdStatus403ErrorCodeEnum =
+	(typeof PutApiApiQuotaPoliciesAccountsByUserIdStatus403ErrorCodeEnum)[keyof typeof PutApiApiQuotaPoliciesAccountsByUserIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiApiQuotaPoliciesAccountsByUserIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'FreshSessionRequired'
+		 * @type string
+		 */
+		code: PutApiApiQuotaPoliciesAccountsByUserIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiApiQuotaPoliciesAccountsByUserIdStatus404ErrorCodeEnum = {
+	UserNotFound: "UserNotFound",
+	ApiQuotaPolicyNotFound: "ApiQuotaPolicyNotFound",
+} as const;
+
+export type PutApiApiQuotaPoliciesAccountsByUserIdStatus404ErrorCodeEnum =
+	(typeof PutApiApiQuotaPoliciesAccountsByUserIdStatus404ErrorCodeEnum)[keyof typeof PutApiApiQuotaPoliciesAccountsByUserIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiApiQuotaPoliciesAccountsByUserIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UserNotFound'
+		 * @type string
+		 */
+		code: PutApiApiQuotaPoliciesAccountsByUserIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiApiQuotaPoliciesAccountsByUserIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiAccountQuotaRevisionConflict'
+		 * @type string
+		 */
+		code: "ApiAccountQuotaRevisionConflict";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PutApiApiQuotaPoliciesAccountsByUserIdStatus422 =
 	| {
 			/**
 			 * @type object
 			 */
 			error: {
 				/**
-				 * @default 'ApiTokenPolicyInvalid'
+				 * @default 'ApiQuotaPolicyInvalid'
 				 * @type string
 				 */
-				code: "ApiTokenPolicyInvalid";
+				code: "ApiQuotaPolicyInvalid";
 				/**
 				 * @type string
 				 */
@@ -16073,12 +17706,13 @@ export type PutApiApiTokenPoliciesBindingsByTokenIdStatus422 =
 /**
  * @type object
  */
-export type PutApiApiTokenPoliciesBindingsByTokenIdStatus500 = InternalError;
+export type PutApiApiQuotaPoliciesAccountsByUserIdStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type PutApiApiTokenPoliciesBindingsByTokenIdBody = {
+export type PutApiApiQuotaPoliciesAccountsByUserIdBody = {
+	expectedRevision: string | number;
 	/**
 	 * @minLength 1
 	 * @maxLength 64
@@ -16093,7 +17727,7 @@ export type PutApiApiTokenPoliciesBindingsByTokenIdBody = {
 	validUntil?: string;
 	/**
 	 * @minLength 1
-	 * @maxLength 500
+	 * @maxLength 1000
 	 * @type string
 	 */
 	reason: string;
@@ -16105,16 +17739,46 @@ export type PutApiApiTokenPoliciesBindingsByTokenIdBody = {
 		 * @type object | undefined
 		 */
 		limits?: {
-			requestsPerMinute?: string | number;
+			/**
+			 * @type object | undefined
+			 */
+			requestRate?: {
+				requestsPerMinute: string | number;
+				burstCapacity: string | number;
+			};
 			maxConcurrentRequests?: string | number;
 			dailyCostUnits?: string | number;
 		};
+		maxActiveTokens?: string | number;
 		/**
 		 * @type object | undefined
 		 */
 		operations?: {
-			[key: string]: {
-				requestsPerMinute?: string | number;
+			/**
+			 * @type object | undefined
+			 */
+			"search.execute"?: {
+				/**
+				 * @type object | undefined
+				 */
+				requestRate?: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+			/**
+			 * @type object | undefined
+			 */
+			"image.upload"?: {
+				/**
+				 * @type object | undefined
+				 */
+				requestRate?: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
 				maxConcurrentRequests?: string | number;
 				dailyCostUnits?: string | number;
 			};
@@ -16125,9 +17789,9 @@ export type PutApiApiTokenPoliciesBindingsByTokenIdBody = {
 /**
  * @type object
  */
-export type PutApiApiTokenPoliciesBindingsByTokenIdOptions = {
-	body: PutApiApiTokenPoliciesBindingsByTokenIdBody;
-	path: PutApiApiTokenPoliciesBindingsByTokenIdPath;
+export type PutApiApiQuotaPoliciesAccountsByUserIdOptions = {
+	body: PutApiApiQuotaPoliciesAccountsByUserIdBody;
+	path: PutApiApiQuotaPoliciesAccountsByUserIdPath;
 	query?: never;
 	headers?: never;
 };
@@ -16135,27 +17799,363 @@ export type PutApiApiTokenPoliciesBindingsByTokenIdOptions = {
 /**
  * @type object
  */
-export type PutApiApiTokenPoliciesBindingsByTokenIdResponses = {
-	"200": PutApiApiTokenPoliciesBindingsByTokenIdStatus200;
-	"400": PutApiApiTokenPoliciesBindingsByTokenIdStatus400;
-	"401": PutApiApiTokenPoliciesBindingsByTokenIdStatus401;
-	"403": PutApiApiTokenPoliciesBindingsByTokenIdStatus403;
-	"404": PutApiApiTokenPoliciesBindingsByTokenIdStatus404;
-	"422": PutApiApiTokenPoliciesBindingsByTokenIdStatus422;
-	"500": PutApiApiTokenPoliciesBindingsByTokenIdStatus500;
+export type PutApiApiQuotaPoliciesAccountsByUserIdResponses = {
+	"200": PutApiApiQuotaPoliciesAccountsByUserIdStatus200;
+	"400": PutApiApiQuotaPoliciesAccountsByUserIdStatus400;
+	"401": PutApiApiQuotaPoliciesAccountsByUserIdStatus401;
+	"403": PutApiApiQuotaPoliciesAccountsByUserIdStatus403;
+	"404": PutApiApiQuotaPoliciesAccountsByUserIdStatus404;
+	"409": PutApiApiQuotaPoliciesAccountsByUserIdStatus409;
+	"422": PutApiApiQuotaPoliciesAccountsByUserIdStatus422;
+	"500": PutApiApiQuotaPoliciesAccountsByUserIdStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PutApiApiTokenPoliciesBindingsByTokenIdResponse =
-	| PutApiApiTokenPoliciesBindingsByTokenIdStatus200
-	| PutApiApiTokenPoliciesBindingsByTokenIdStatus400
-	| PutApiApiTokenPoliciesBindingsByTokenIdStatus401
-	| PutApiApiTokenPoliciesBindingsByTokenIdStatus403
-	| PutApiApiTokenPoliciesBindingsByTokenIdStatus404
-	| PutApiApiTokenPoliciesBindingsByTokenIdStatus422
-	| PutApiApiTokenPoliciesBindingsByTokenIdStatus500;
+export type PutApiApiQuotaPoliciesAccountsByUserIdResponse =
+	| PutApiApiQuotaPoliciesAccountsByUserIdStatus200
+	| PutApiApiQuotaPoliciesAccountsByUserIdStatus400
+	| PutApiApiQuotaPoliciesAccountsByUserIdStatus401
+	| PutApiApiQuotaPoliciesAccountsByUserIdStatus403
+	| PutApiApiQuotaPoliciesAccountsByUserIdStatus404
+	| PutApiApiQuotaPoliciesAccountsByUserIdStatus409
+	| PutApiApiQuotaPoliciesAccountsByUserIdStatus422
+	| PutApiApiQuotaPoliciesAccountsByUserIdStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	userId: string;
+};
+
+export const DeleteApiApiQuotaPoliciesAccountsByUserIdStatus200ClassEnum = {
+	standard: "standard",
+	privileged: "privileged",
+} as const;
+
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdStatus200ClassEnum =
+	(typeof DeleteApiApiQuotaPoliciesAccountsByUserIdStatus200ClassEnum)[keyof typeof DeleteApiApiQuotaPoliciesAccountsByUserIdStatus200ClassEnum];
+
+export const DeleteApiApiQuotaPoliciesAccountsByUserIdStatus200SourceEnum = {
+	assigned: "assigned",
+	standard_default: "standard_default",
+	privileged_fallback: "privileged_fallback",
+} as const;
+
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdStatus200SourceEnum =
+	(typeof DeleteApiApiQuotaPoliciesAccountsByUserIdStatus200SourceEnum)[keyof typeof DeleteApiApiQuotaPoliciesAccountsByUserIdStatus200SourceEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdStatus200 = {
+	/**
+	 * @type string
+	 */
+	key: string;
+	/**
+	 * @default 'standard'
+	 * @type string
+	 */
+	class: DeleteApiApiQuotaPoliciesAccountsByUserIdStatus200ClassEnum;
+	/**
+	 * @default 'assigned'
+	 * @type string
+	 */
+	source: DeleteApiApiQuotaPoliciesAccountsByUserIdStatus200SourceEnum;
+	schemaVersion: string | number;
+	policyRevision: string | number;
+	bindingRevision: ((string | number) | null) | null;
+	validUntil: (string | null) | null;
+	assignmentReason: (string | null) | null;
+	/**
+	 * @type object
+	 */
+	configurationOverride: {
+		/**
+		 * @type object | undefined
+		 */
+		limits?: {
+			/**
+			 * @type object | undefined
+			 */
+			requestRate?: {
+				requestsPerMinute: string | number;
+				burstCapacity: string | number;
+			};
+			maxConcurrentRequests?: string | number;
+			dailyCostUnits?: string | number;
+		};
+		maxActiveTokens?: string | number;
+		/**
+		 * @type object | undefined
+		 */
+		operations?: {
+			/**
+			 * @type object | undefined
+			 */
+			"search.execute"?: {
+				/**
+				 * @type object | undefined
+				 */
+				requestRate?: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+			/**
+			 * @type object | undefined
+			 */
+			"image.upload"?: {
+				/**
+				 * @type object | undefined
+				 */
+				requestRate?: {
+					requestsPerMinute: string | number;
+					burstCapacity: string | number;
+				};
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+		};
+	};
+	/**
+	 * @type object
+	 */
+	limits: {
+		/**
+		 * @type object
+		 */
+		requestRate: {
+			requestsPerMinute: string | number;
+			burstCapacity: string | number;
+		};
+		maxConcurrentRequests: string | number;
+		dailyCostUnits: string | number;
+	};
+	maxActiveTokens: string | number;
+	/**
+	 * @type object
+	 */
+	operations: {
+		/**
+		 * @type object | undefined
+		 */
+		"search.execute"?: {
+			/**
+			 * @type object | undefined
+			 */
+			requestRate?: {
+				requestsPerMinute: string | number;
+				burstCapacity: string | number;
+			};
+			maxConcurrentRequests?: string | number;
+			dailyCostUnits?: string | number;
+		};
+		/**
+		 * @type object | undefined
+		 */
+		"image.upload"?: {
+			/**
+			 * @type object | undefined
+			 */
+			requestRate?: {
+				requestsPerMinute: string | number;
+				burstCapacity: string | number;
+			};
+			maxConcurrentRequests?: string | number;
+			dailyCostUnits?: string | number;
+		};
+	};
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InteractiveSessionRequired'
+		 * @type string
+		 */
+		code: "InteractiveSessionRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiApiQuotaPoliciesAccountsByUserIdStatus403ErrorCodeEnum = {
+	FreshSessionRequired: "FreshSessionRequired",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiApiQuotaPoliciesAccountsByUserIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiApiQuotaPoliciesAccountsByUserIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'FreshSessionRequired'
+		 * @type string
+		 */
+		code: DeleteApiApiQuotaPoliciesAccountsByUserIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UserNotFound'
+		 * @type string
+		 */
+		code: "UserNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiAccountQuotaRevisionConflict'
+		 * @type string
+		 */
+		code: "ApiAccountQuotaRevisionConflict";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdBody = {
+	expectedRevision: string | number;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdOptions = {
+	body: DeleteApiApiQuotaPoliciesAccountsByUserIdBody;
+	path: DeleteApiApiQuotaPoliciesAccountsByUserIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdResponses = {
+	"200": DeleteApiApiQuotaPoliciesAccountsByUserIdStatus200;
+	"400": DeleteApiApiQuotaPoliciesAccountsByUserIdStatus400;
+	"401": DeleteApiApiQuotaPoliciesAccountsByUserIdStatus401;
+	"403": DeleteApiApiQuotaPoliciesAccountsByUserIdStatus403;
+	"404": DeleteApiApiQuotaPoliciesAccountsByUserIdStatus404;
+	"409": DeleteApiApiQuotaPoliciesAccountsByUserIdStatus409;
+	"422": DeleteApiApiQuotaPoliciesAccountsByUserIdStatus422;
+	"500": DeleteApiApiQuotaPoliciesAccountsByUserIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiApiQuotaPoliciesAccountsByUserIdResponse =
+	| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus200
+	| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus400
+	| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus401
+	| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus403
+	| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus404
+	| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus409
+	| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus422
+	| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus500;
 
 export const PostApiFeedQueryStatus200ItemsLanguage = {
 	zh: "zh",
@@ -19503,6 +21503,14 @@ export type GetApiReportsMeStatus400 = {
  */
 export type GetApiReportsMeStatus422 = ValidationError;
 
+export const GetApiReportsMeStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiReportsMeStatus429ErrorCodeEnum =
+	(typeof GetApiReportsMeStatus429ErrorCodeEnum)[keyof typeof GetApiReportsMeStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -19514,7 +21522,7 @@ export type GetApiReportsMeStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiReportsMeStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -19693,6 +21701,14 @@ export type GetApiReportsUnitsByUnitIdDestinationsStatus404 = {
  */
 export type GetApiReportsUnitsByUnitIdDestinationsStatus422 = ValidationError;
 
+export const GetApiReportsUnitsByUnitIdDestinationsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiReportsUnitsByUnitIdDestinationsStatus429ErrorCodeEnum =
+	(typeof GetApiReportsUnitsByUnitIdDestinationsStatus429ErrorCodeEnum)[keyof typeof GetApiReportsUnitsByUnitIdDestinationsStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -19704,7 +21720,7 @@ export type GetApiReportsUnitsByUnitIdDestinationsStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiReportsUnitsByUnitIdDestinationsStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -20740,6 +22756,14 @@ export type PostApiReportsUnitsByUnitIdStatus409 = {
  */
 export type PostApiReportsUnitsByUnitIdStatus422 = ValidationError;
 
+export const PostApiReportsUnitsByUnitIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiReportsUnitsByUnitIdStatus429ErrorCodeEnum =
+	(typeof PostApiReportsUnitsByUnitIdStatus429ErrorCodeEnum)[keyof typeof PostApiReportsUnitsByUnitIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -20751,7 +22775,7 @@ export type PostApiReportsUnitsByUnitIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiReportsUnitsByUnitIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -26310,6 +28334,14 @@ export type PatchApiGovernanceNotesByPostIdStatus409 = {
  */
 export type PatchApiGovernanceNotesByPostIdStatus422 = ValidationError;
 
+export const PatchApiGovernanceNotesByPostIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PatchApiGovernanceNotesByPostIdStatus429ErrorCodeEnum =
+	(typeof PatchApiGovernanceNotesByPostIdStatus429ErrorCodeEnum)[keyof typeof PatchApiGovernanceNotesByPostIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -26321,7 +28353,7 @@ export type PatchApiGovernanceNotesByPostIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PatchApiGovernanceNotesByPostIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -29943,6 +31975,14 @@ export type PostApiSeriesStatus404 = {
  */
 export type PostApiSeriesStatus422 = ValidationError;
 
+export const PostApiSeriesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiSeriesStatus429ErrorCodeEnum =
+	(typeof PostApiSeriesStatus429ErrorCodeEnum)[keyof typeof PostApiSeriesStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -29954,7 +31994,7 @@ export type PostApiSeriesStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiSeriesStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -30641,6 +32681,14 @@ export type ReplaceZoneSlugAddressStatus422 =
 	  }
 	| ValidationError;
 
+export const ReplaceZoneSlugAddressStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ReplaceZoneSlugAddressStatus429ErrorCodeEnum =
+	(typeof ReplaceZoneSlugAddressStatus429ErrorCodeEnum)[keyof typeof ReplaceZoneSlugAddressStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -30652,7 +32700,7 @@ export type ReplaceZoneSlugAddressStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: ReplaceZoneSlugAddressStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -31542,6 +33590,14 @@ export type PatchApiZonesByZoneIdStatus404 = {
  */
 export type PatchApiZonesByZoneIdStatus422 = ValidationError;
 
+export const PatchApiZonesByZoneIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PatchApiZonesByZoneIdStatus429ErrorCodeEnum =
+	(typeof PatchApiZonesByZoneIdStatus429ErrorCodeEnum)[keyof typeof PatchApiZonesByZoneIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -31553,7 +33609,7 @@ export type PatchApiZonesByZoneIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PatchApiZonesByZoneIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -33319,6 +35375,14 @@ export type PostApiZonesByZoneIdPagesStatus409 = {
  */
 export type PostApiZonesByZoneIdPagesStatus422 = ValidationError;
 
+export const PostApiZonesByZoneIdPagesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiZonesByZoneIdPagesStatus429ErrorCodeEnum =
+	(typeof PostApiZonesByZoneIdPagesStatus429ErrorCodeEnum)[keyof typeof PostApiZonesByZoneIdPagesStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -33330,7 +35394,7 @@ export type PostApiZonesByZoneIdPagesStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiZonesByZoneIdPagesStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -33971,6 +36035,14 @@ export type PutApiZonesByZoneIdPagesByPageIdStatus409 = {
  */
 export type PutApiZonesByZoneIdPagesByPageIdStatus422 = ValidationError;
 
+export const PutApiZonesByZoneIdPagesByPageIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiZonesByZoneIdPagesByPageIdStatus429ErrorCodeEnum =
+	(typeof PutApiZonesByZoneIdPagesByPageIdStatus429ErrorCodeEnum)[keyof typeof PutApiZonesByZoneIdPagesByPageIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -33982,7 +36054,7 @@ export type PutApiZonesByZoneIdPagesByPageIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiZonesByZoneIdPagesByPageIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -34365,6 +36437,14 @@ export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus422 =
 	  }
 	| ValidationError;
 
+export const PutApiZonesByZoneIdPagesByPageIdPlacementStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus429ErrorCodeEnum =
+	(typeof PutApiZonesByZoneIdPagesByPageIdPlacementStatus429ErrorCodeEnum)[keyof typeof PutApiZonesByZoneIdPagesByPageIdPlacementStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -34376,7 +36456,7 @@ export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiZonesByZoneIdPagesByPageIdPlacementStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -34585,6 +36665,14 @@ export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus409 = {
  */
 export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus422 = ValidationError;
 
+export const DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus429ErrorCodeEnum =
+	(typeof DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus429ErrorCodeEnum)[keyof typeof DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -34596,7 +36684,7 @@ export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -34927,6 +37015,14 @@ export type PostApiZonesByZoneIdNavigationStatus404 = {
  */
 export type PostApiZonesByZoneIdNavigationStatus422 = ValidationError;
 
+export const PostApiZonesByZoneIdNavigationStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiZonesByZoneIdNavigationStatus429ErrorCodeEnum =
+	(typeof PostApiZonesByZoneIdNavigationStatus429ErrorCodeEnum)[keyof typeof PostApiZonesByZoneIdNavigationStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -34938,7 +37034,7 @@ export type PostApiZonesByZoneIdNavigationStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiZonesByZoneIdNavigationStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -35316,6 +37412,14 @@ export type PutApiZonesByZoneIdNavigationByNavigationIdStatus409 = {
  */
 export type PutApiZonesByZoneIdNavigationByNavigationIdStatus422 = ValidationError;
 
+export const PutApiZonesByZoneIdNavigationByNavigationIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiZonesByZoneIdNavigationByNavigationIdStatus429ErrorCodeEnum =
+	(typeof PutApiZonesByZoneIdNavigationByNavigationIdStatus429ErrorCodeEnum)[keyof typeof PutApiZonesByZoneIdNavigationByNavigationIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -35327,7 +37431,7 @@ export type PutApiZonesByZoneIdNavigationByNavigationIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiZonesByZoneIdNavigationByNavigationIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -35531,6 +37635,14 @@ export type DeleteApiZonesByZoneIdNavigationByNavigationIdStatus409 = {
  */
 export type DeleteApiZonesByZoneIdNavigationByNavigationIdStatus422 = ValidationError;
 
+export const DeleteApiZonesByZoneIdNavigationByNavigationIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiZonesByZoneIdNavigationByNavigationIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiZonesByZoneIdNavigationByNavigationIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiZonesByZoneIdNavigationByNavigationIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -35542,7 +37654,7 @@ export type DeleteApiZonesByZoneIdNavigationByNavigationIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiZonesByZoneIdNavigationByNavigationIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -35732,6 +37844,14 @@ export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus404 = {
  */
 export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus422 = ValidationError;
 
+export const PutApiSeriesBySeriesIdReleasesByReleaseIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus429ErrorCodeEnum =
+	(typeof PutApiSeriesBySeriesIdReleasesByReleaseIdStatus429ErrorCodeEnum)[keyof typeof PutApiSeriesBySeriesIdReleasesByReleaseIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -35743,7 +37863,7 @@ export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiSeriesBySeriesIdReleasesByReleaseIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -35903,6 +38023,14 @@ export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus404 = {
  */
 export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus422 = ValidationError;
 
+export const DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -35914,7 +38042,7 @@ export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -36073,6 +38201,14 @@ export type PostApiZonesStatus404 = {
  */
 export type PostApiZonesStatus422 = ValidationError;
 
+export const PostApiZonesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiZonesStatus429ErrorCodeEnum =
+	(typeof PostApiZonesStatus429ErrorCodeEnum)[keyof typeof PostApiZonesStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -36084,7 +38220,7 @@ export type PostApiZonesStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiZonesStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -36680,6 +38816,14 @@ export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus404 = {
  */
 export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus422 = ValidationError;
 
+export const PostApiSoftwareBySoftwareIdSystemRequirementsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus429ErrorCodeEnum =
+	(typeof PostApiSoftwareBySoftwareIdSystemRequirementsStatus429ErrorCodeEnum)[keyof typeof PostApiSoftwareBySoftwareIdSystemRequirementsStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -36691,7 +38835,7 @@ export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiSoftwareBySoftwareIdSystemRequirementsStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -36936,6 +39080,14 @@ export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
  */
 export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422 = ValidationError;
 
+export const PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429ErrorCodeEnum =
+	(typeof PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429ErrorCodeEnum)[keyof typeof PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -36947,7 +39099,7 @@ export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -37122,6 +39274,15 @@ export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus
 export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422 =
 	ValidationError;
 
+export const DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429ErrorCodeEnum =
+	{
+		ApiQuotaExceeded: "ApiQuotaExceeded",
+		ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+	} as const;
+
+export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -37133,7 +39294,7 @@ export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -37731,6 +39892,14 @@ export type PutApiUnitsByIdByUnitIdDocksByKindStatus409 = {
  */
 export type PutApiUnitsByIdByUnitIdDocksByKindStatus422 = ValidationError;
 
+export const PutApiUnitsByIdByUnitIdDocksByKindStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiUnitsByIdByUnitIdDocksByKindStatus429ErrorCodeEnum =
+	(typeof PutApiUnitsByIdByUnitIdDocksByKindStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsByIdByUnitIdDocksByKindStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -37742,7 +39911,7 @@ export type PutApiUnitsByIdByUnitIdDocksByKindStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiUnitsByIdByUnitIdDocksByKindStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -37966,6 +40135,14 @@ export type DeleteApiUnitsByIdByUnitIdDocksByKindStatus409 = {
  */
 export type DeleteApiUnitsByIdByUnitIdDocksByKindStatus422 = ValidationError;
 
+export const DeleteApiUnitsByIdByUnitIdDocksByKindStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiUnitsByIdByUnitIdDocksByKindStatus429ErrorCodeEnum =
+	(typeof DeleteApiUnitsByIdByUnitIdDocksByKindStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByIdByUnitIdDocksByKindStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -37977,7 +40154,7 @@ export type DeleteApiUnitsByIdByUnitIdDocksByKindStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiUnitsByIdByUnitIdDocksByKindStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -38406,6 +40583,15 @@ export type PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatu
 export type PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus422 =
 	ValidationError;
 
+export const PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus429ErrorCodeEnum =
+	{
+		ApiQuotaExceeded: "ApiQuotaExceeded",
+		ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+	} as const;
+
+export type PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus429ErrorCodeEnum =
+	(typeof PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus429ErrorCodeEnum)[keyof typeof PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -38417,7 +40603,7 @@ export type PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatu
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -38569,7 +40755,10 @@ export const GetApiUsersMeStatus200PlatformCapabilitiesEnum = {
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
 	"unit.slug.redirect.release": "unit.slug.redirect.release",
-	"platform.api_token_policy.manage": "platform.api_token_policy.manage",
+	"platform.api_quota_policy.read": "platform.api_quota_policy.read",
+	"platform.api_quota_policy.update": "platform.api_quota_policy.update",
+	"platform.user.api_quota.read": "platform.user.api_quota.read",
+	"platform.user.api_quota.update": "platform.user.api_quota.update",
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
 	"realm.contribute": "realm.contribute",
@@ -39162,6 +41351,14 @@ export type GetApiUsersMeStatus404 = {
  */
 export type GetApiUsersMeStatus422 = ValidationError;
 
+export const GetApiUsersMeStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiUsersMeStatus429ErrorCodeEnum =
+	(typeof GetApiUsersMeStatus429ErrorCodeEnum)[keyof typeof GetApiUsersMeStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -39173,7 +41370,7 @@ export type GetApiUsersMeStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiUsersMeStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -39615,6 +41812,14 @@ export type PatchApiUsersMeStatus409 = {
  */
 export type PatchApiUsersMeStatus422 = ValidationError;
 
+export const PatchApiUsersMeStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PatchApiUsersMeStatus429ErrorCodeEnum =
+	(typeof PatchApiUsersMeStatus429ErrorCodeEnum)[keyof typeof PatchApiUsersMeStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -39626,7 +41831,7 @@ export type PatchApiUsersMeStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PatchApiUsersMeStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -40548,6 +42753,14 @@ export type ListCurrentUserStudioContentStatus403 = {
  */
 export type ListCurrentUserStudioContentStatus422 = ValidationError;
 
+export const ListCurrentUserStudioContentStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ListCurrentUserStudioContentStatus429ErrorCodeEnum =
+	(typeof ListCurrentUserStudioContentStatus429ErrorCodeEnum)[keyof typeof ListCurrentUserStudioContentStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -40559,7 +42772,7 @@ export type ListCurrentUserStudioContentStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: ListCurrentUserStudioContentStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -40673,6 +42886,14 @@ export type RecordCurrentUserStudioVisitStatus404 = {
  */
 export type RecordCurrentUserStudioVisitStatus422 = ValidationError;
 
+export const RecordCurrentUserStudioVisitStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type RecordCurrentUserStudioVisitStatus429ErrorCodeEnum =
+	(typeof RecordCurrentUserStudioVisitStatus429ErrorCodeEnum)[keyof typeof RecordCurrentUserStudioVisitStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -40684,7 +42905,7 @@ export type RecordCurrentUserStudioVisitStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: RecordCurrentUserStudioVisitStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -40917,6 +43138,14 @@ export type GetApiUsersMePreferencesStatus404 = {
 	requestId: string;
 };
 
+export const GetApiUsersMePreferencesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiUsersMePreferencesStatus429ErrorCodeEnum =
+	(typeof GetApiUsersMePreferencesStatus429ErrorCodeEnum)[keyof typeof GetApiUsersMePreferencesStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -40928,7 +43157,7 @@ export type GetApiUsersMePreferencesStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiUsersMePreferencesStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -41169,6 +43398,14 @@ export type PatchApiUsersMePreferencesStatus404 = {
  */
 export type PatchApiUsersMePreferencesStatus422 = ValidationError;
 
+export const PatchApiUsersMePreferencesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PatchApiUsersMePreferencesStatus429ErrorCodeEnum =
+	(typeof PatchApiUsersMePreferencesStatus429ErrorCodeEnum)[keyof typeof PatchApiUsersMePreferencesStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -41180,7 +43417,7 @@ export type PatchApiUsersMePreferencesStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PatchApiUsersMePreferencesStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -41498,6 +43735,14 @@ export type PutApiUsersMePreferencesStatus404 = {
  */
 export type PutApiUsersMePreferencesStatus422 = ValidationError;
 
+export const PutApiUsersMePreferencesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiUsersMePreferencesStatus429ErrorCodeEnum =
+	(typeof PutApiUsersMePreferencesStatus429ErrorCodeEnum)[keyof typeof PutApiUsersMePreferencesStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -41509,7 +43754,7 @@ export type PutApiUsersMePreferencesStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiUsersMePreferencesStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -42146,6 +44391,14 @@ export type GetApiUsersMeFollowingStatus400 = {
  */
 export type GetApiUsersMeFollowingStatus422 = ValidationError;
 
+export const GetApiUsersMeFollowingStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiUsersMeFollowingStatus429ErrorCodeEnum =
+	(typeof GetApiUsersMeFollowingStatus429ErrorCodeEnum)[keyof typeof GetApiUsersMeFollowingStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -42157,7 +44410,7 @@ export type GetApiUsersMeFollowingStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiUsersMeFollowingStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -42390,6 +44643,14 @@ export type GetApiUsersMeFollowingByUnitIdStatus404 = {
  */
 export type GetApiUsersMeFollowingByUnitIdStatus422 = ValidationError;
 
+export const GetApiUsersMeFollowingByUnitIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiUsersMeFollowingByUnitIdStatus429ErrorCodeEnum =
+	(typeof GetApiUsersMeFollowingByUnitIdStatus429ErrorCodeEnum)[keyof typeof GetApiUsersMeFollowingByUnitIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -42401,7 +44662,7 @@ export type GetApiUsersMeFollowingByUnitIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiUsersMeFollowingByUnitIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -42541,6 +44802,14 @@ export type PutApiUsersMeFollowingByUnitIdStatus409 = {
  */
 export type PutApiUsersMeFollowingByUnitIdStatus422 = ValidationError;
 
+export const PutApiUsersMeFollowingByUnitIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiUsersMeFollowingByUnitIdStatus429ErrorCodeEnum =
+	(typeof PutApiUsersMeFollowingByUnitIdStatus429ErrorCodeEnum)[keyof typeof PutApiUsersMeFollowingByUnitIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -42552,7 +44821,7 @@ export type PutApiUsersMeFollowingByUnitIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiUsersMeFollowingByUnitIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -42630,6 +44899,14 @@ export type DeleteApiUsersMeFollowingByUnitIdStatus200 = {
  */
 export type DeleteApiUsersMeFollowingByUnitIdStatus422 = ValidationError;
 
+export const DeleteApiUsersMeFollowingByUnitIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiUsersMeFollowingByUnitIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiUsersMeFollowingByUnitIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiUsersMeFollowingByUnitIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -42641,7 +44918,7 @@ export type DeleteApiUsersMeFollowingByUnitIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiUsersMeFollowingByUnitIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -42768,6 +45045,14 @@ export type PatchApiUsersMeFollowingByUnitIdStatus404 = {
  */
 export type PatchApiUsersMeFollowingByUnitIdStatus422 = ValidationError;
 
+export const PatchApiUsersMeFollowingByUnitIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PatchApiUsersMeFollowingByUnitIdStatus429ErrorCodeEnum =
+	(typeof PatchApiUsersMeFollowingByUnitIdStatus429ErrorCodeEnum)[keyof typeof PatchApiUsersMeFollowingByUnitIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -42779,7 +45064,7 @@ export type PatchApiUsersMeFollowingByUnitIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PatchApiUsersMeFollowingByUnitIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -43065,6 +45350,14 @@ export type PutApiUsersMeFollowingByUnitIdSettingsStatus409 = {
  */
 export type PutApiUsersMeFollowingByUnitIdSettingsStatus422 = ValidationError;
 
+export const PutApiUsersMeFollowingByUnitIdSettingsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiUsersMeFollowingByUnitIdSettingsStatus429ErrorCodeEnum =
+	(typeof PutApiUsersMeFollowingByUnitIdSettingsStatus429ErrorCodeEnum)[keyof typeof PutApiUsersMeFollowingByUnitIdSettingsStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -43076,7 +45369,7 @@ export type PutApiUsersMeFollowingByUnitIdSettingsStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiUsersMeFollowingByUnitIdSettingsStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -43902,6 +46195,14 @@ export type GetApiUsersMeBlocksStatus200 = {
 	}[];
 };
 
+export const GetApiUsersMeBlocksStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiUsersMeBlocksStatus429ErrorCodeEnum =
+	(typeof GetApiUsersMeBlocksStatus429ErrorCodeEnum)[keyof typeof GetApiUsersMeBlocksStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -43913,7 +46214,7 @@ export type GetApiUsersMeBlocksStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiUsersMeBlocksStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -44039,6 +46340,14 @@ export type PutApiUsersByIdBlockStatus409 = {
  */
 export type PutApiUsersByIdBlockStatus422 = ValidationError;
 
+export const PutApiUsersByIdBlockStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiUsersByIdBlockStatus429ErrorCodeEnum =
+	(typeof PutApiUsersByIdBlockStatus429ErrorCodeEnum)[keyof typeof PutApiUsersByIdBlockStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -44050,7 +46359,7 @@ export type PutApiUsersByIdBlockStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiUsersByIdBlockStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -44128,6 +46437,14 @@ export type DeleteApiUsersByIdBlockStatus200 = {
  */
 export type DeleteApiUsersByIdBlockStatus422 = ValidationError;
 
+export const DeleteApiUsersByIdBlockStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiUsersByIdBlockStatus429ErrorCodeEnum =
+	(typeof DeleteApiUsersByIdBlockStatus429ErrorCodeEnum)[keyof typeof DeleteApiUsersByIdBlockStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -44139,7 +46456,7 @@ export type DeleteApiUsersByIdBlockStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiUsersByIdBlockStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -44205,7 +46522,10 @@ export const GetApiPlatformAccessPolicyStatus200CapabilitiesEnum = {
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
 	"unit.slug.redirect.release": "unit.slug.redirect.release",
-	"platform.api_token_policy.manage": "platform.api_token_policy.manage",
+	"platform.api_quota_policy.read": "platform.api_quota_policy.read",
+	"platform.api_quota_policy.update": "platform.api_quota_policy.update",
+	"platform.user.api_quota.read": "platform.user.api_quota.read",
+	"platform.user.api_quota.update": "platform.user.api_quota.update",
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
 	"realm.contribute": "realm.contribute",
@@ -44328,7 +46648,10 @@ export const GetApiPlatformAccessProfilesStatus200ItemsGrantsCapabilityEnum = {
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
 	"unit.slug.redirect.release": "unit.slug.redirect.release",
-	"platform.api_token_policy.manage": "platform.api_token_policy.manage",
+	"platform.api_quota_policy.read": "platform.api_quota_policy.read",
+	"platform.api_quota_policy.update": "platform.api_quota_policy.update",
+	"platform.user.api_quota.read": "platform.user.api_quota.read",
+	"platform.user.api_quota.update": "platform.user.api_quota.update",
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
 	"realm.contribute": "realm.contribute",
@@ -44508,7 +46831,10 @@ export const GetApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnu
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
 	"unit.slug.redirect.release": "unit.slug.redirect.release",
-	"platform.api_token_policy.manage": "platform.api_token_policy.manage",
+	"platform.api_quota_policy.read": "platform.api_quota_policy.read",
+	"platform.api_quota_policy.update": "platform.api_quota_policy.update",
+	"platform.user.api_quota.read": "platform.user.api_quota.read",
+	"platform.user.api_quota.update": "platform.user.api_quota.update",
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
 	"realm.contribute": "realm.contribute",
@@ -44713,7 +47039,10 @@ export const PutApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnu
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
 	"unit.slug.redirect.release": "unit.slug.redirect.release",
-	"platform.api_token_policy.manage": "platform.api_token_policy.manage",
+	"platform.api_quota_policy.read": "platform.api_quota_policy.read",
+	"platform.api_quota_policy.update": "platform.api_quota_policy.update",
+	"platform.user.api_quota.read": "platform.user.api_quota.read",
+	"platform.user.api_quota.update": "platform.user.api_quota.update",
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
 	"realm.contribute": "realm.contribute",
@@ -44954,7 +47283,10 @@ export const PutApiPlatformAccessProfilesByProfileIdRequestGrantsCapabilityEnum 
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
 	"unit.slug.redirect.release": "unit.slug.redirect.release",
-	"platform.api_token_policy.manage": "platform.api_token_policy.manage",
+	"platform.api_quota_policy.read": "platform.api_quota_policy.read",
+	"platform.api_quota_policy.update": "platform.api_quota_policy.update",
+	"platform.user.api_quota.read": "platform.user.api_quota.read",
+	"platform.user.api_quota.update": "platform.user.api_quota.update",
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
 	"realm.contribute": "realm.contribute",
@@ -46600,6 +48932,14 @@ export type GetApiTagsByTagIdStatus404 = {
  */
 export type GetApiTagsByTagIdStatus422 = ValidationError;
 
+export const GetApiTagsByTagIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiTagsByTagIdStatus429ErrorCodeEnum =
+	(typeof GetApiTagsByTagIdStatus429ErrorCodeEnum)[keyof typeof GetApiTagsByTagIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -46611,7 +48951,7 @@ export type GetApiTagsByTagIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiTagsByTagIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -46768,6 +49108,14 @@ export type PostApiTagStructuresStatus422 =
 	  }
 	| ValidationError;
 
+export const PostApiTagStructuresStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiTagStructuresStatus429ErrorCodeEnum =
+	(typeof PostApiTagStructuresStatus429ErrorCodeEnum)[keyof typeof PostApiTagStructuresStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -46779,7 +49127,7 @@ export type PostApiTagStructuresStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiTagStructuresStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -47107,6 +49455,14 @@ export type GetApiTagStructuresByStructureIdStatus404 = {
  */
 export type GetApiTagStructuresByStructureIdStatus422 = ValidationError;
 
+export const GetApiTagStructuresByStructureIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiTagStructuresByStructureIdStatus429ErrorCodeEnum =
+	(typeof GetApiTagStructuresByStructureIdStatus429ErrorCodeEnum)[keyof typeof GetApiTagStructuresByStructureIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -47118,7 +49474,7 @@ export type GetApiTagStructuresByStructureIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiTagStructuresByStructureIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -47479,6 +49835,14 @@ export type PutApiTagStructuresByStructureIdStatus422 =
 	  }
 	| ValidationError;
 
+export const PutApiTagStructuresByStructureIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiTagStructuresByStructureIdStatus429ErrorCodeEnum =
+	(typeof PutApiTagStructuresByStructureIdStatus429ErrorCodeEnum)[keyof typeof PutApiTagStructuresByStructureIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -47490,7 +49854,7 @@ export type PutApiTagStructuresByStructureIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiTagStructuresByStructureIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -47654,6 +50018,14 @@ export type PutApiTagStructuresByStructureIdVoteStatus404 = {
  */
 export type PutApiTagStructuresByStructureIdVoteStatus422 = ValidationError;
 
+export const PutApiTagStructuresByStructureIdVoteStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiTagStructuresByStructureIdVoteStatus429ErrorCodeEnum =
+	(typeof PutApiTagStructuresByStructureIdVoteStatus429ErrorCodeEnum)[keyof typeof PutApiTagStructuresByStructureIdVoteStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -47665,7 +50037,7 @@ export type PutApiTagStructuresByStructureIdVoteStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiTagStructuresByStructureIdVoteStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -47818,6 +50190,14 @@ export type DeleteApiTagStructuresByStructureIdVoteStatus404 = {
  */
 export type DeleteApiTagStructuresByStructureIdVoteStatus422 = ValidationError;
 
+export const DeleteApiTagStructuresByStructureIdVoteStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiTagStructuresByStructureIdVoteStatus429ErrorCodeEnum =
+	(typeof DeleteApiTagStructuresByStructureIdVoteStatus429ErrorCodeEnum)[keyof typeof DeleteApiTagStructuresByStructureIdVoteStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -47829,7 +50209,7 @@ export type DeleteApiTagStructuresByStructureIdVoteStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiTagStructuresByStructureIdVoteStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -48737,6 +51117,14 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422 =
 	  }
 	| ValidationError;
 
+export const PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -48748,7 +51136,7 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -48901,6 +51289,14 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404 = {
  */
 export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422 = ValidationError;
 
+export const DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -48912,7 +51308,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -49099,6 +51495,14 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422 =
 	  }
 	| ValidationError;
 
+export const PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -49110,7 +51514,7 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -49290,6 +51694,14 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404 
  */
 export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422 = ValidationError;
 
+export const DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -49301,7 +51713,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429 
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -49505,6 +51917,14 @@ export type GetApiUsersMeTagRealmSubscriptionsStatus200 = {
  */
 export type GetApiUsersMeTagRealmSubscriptionsStatus422 = ValidationError;
 
+export const GetApiUsersMeTagRealmSubscriptionsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiUsersMeTagRealmSubscriptionsStatus429ErrorCodeEnum =
+	(typeof GetApiUsersMeTagRealmSubscriptionsStatus429ErrorCodeEnum)[keyof typeof GetApiUsersMeTagRealmSubscriptionsStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -49516,7 +51936,7 @@ export type GetApiUsersMeTagRealmSubscriptionsStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiUsersMeTagRealmSubscriptionsStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -49756,6 +52176,14 @@ export type PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus404 = {
  */
 export type PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus422 = ValidationError;
 
+export const PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus429ErrorCodeEnum =
+	(typeof PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus429ErrorCodeEnum)[keyof typeof PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -49767,7 +52195,7 @@ export type PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -49865,6 +52293,14 @@ export type DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus200 = {
  */
 export type DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus422 = ValidationError;
 
+export const DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -49876,7 +52312,7 @@ export type DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -51930,6 +54366,14 @@ export type GetApiUnitsByIdByUnitIdRealmPublicationsStatus404 = {
  */
 export type GetApiUnitsByIdByUnitIdRealmPublicationsStatus422 = ValidationError;
 
+export const GetApiUnitsByIdByUnitIdRealmPublicationsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiUnitsByIdByUnitIdRealmPublicationsStatus429ErrorCodeEnum =
+	(typeof GetApiUnitsByIdByUnitIdRealmPublicationsStatus429ErrorCodeEnum)[keyof typeof GetApiUnitsByIdByUnitIdRealmPublicationsStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -51941,7 +54385,7 @@ export type GetApiUnitsByIdByUnitIdRealmPublicationsStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiUnitsByIdByUnitIdRealmPublicationsStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -52127,6 +54571,14 @@ export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus409 = {
  */
 export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus422 = ValidationError;
 
+export const PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus429ErrorCodeEnum =
+	(typeof PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus429ErrorCodeEnum)[keyof typeof PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -52138,7 +54590,7 @@ export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -52332,6 +54784,14 @@ export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus409 
  */
 export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus422 = ValidationError;
 
+export const PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus429ErrorCodeEnum =
+	(typeof PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus429ErrorCodeEnum)[keyof typeof PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -52343,7 +54803,7 @@ export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus429 
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -52537,6 +54997,14 @@ export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus409
  */
 export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus422 = ValidationError;
 
+export const PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus429ErrorCodeEnum =
+	(typeof PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus429ErrorCodeEnum)[keyof typeof PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -52548,7 +55016,7 @@ export type PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus429
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -53266,6 +55734,14 @@ export type PutApiUnitsByIdByUnitIdLocalizationOrderStatus409 = {
  */
 export type PutApiUnitsByIdByUnitIdLocalizationOrderStatus422 = ValidationError;
 
+export const PutApiUnitsByIdByUnitIdLocalizationOrderStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiUnitsByIdByUnitIdLocalizationOrderStatus429ErrorCodeEnum =
+	(typeof PutApiUnitsByIdByUnitIdLocalizationOrderStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsByIdByUnitIdLocalizationOrderStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -53277,7 +55753,7 @@ export type PutApiUnitsByIdByUnitIdLocalizationOrderStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiUnitsByIdByUnitIdLocalizationOrderStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -53572,6 +56048,14 @@ export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus409 = {
  */
 export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus422 = ValidationError;
 
+export const DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus429ErrorCodeEnum =
+	(typeof DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -53583,7 +56067,7 @@ export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -55544,6 +58028,14 @@ export type PostApiUnitsByTypeStatus409 = {
  */
 export type PostApiUnitsByTypeStatus422 = ValidationError;
 
+export const PostApiUnitsByTypeStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiUnitsByTypeStatus429ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeStatus429ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -55555,7 +58047,7 @@ export type PostApiUnitsByTypeStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiUnitsByTypeStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -58949,6 +61441,14 @@ export type PatchApiUnitsByTypeByUnitIdStatus409 = {
  */
 export type PatchApiUnitsByTypeByUnitIdStatus422 = ValidationError;
 
+export const PatchApiUnitsByTypeByUnitIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus429ErrorCodeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus429ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -58960,7 +61460,7 @@ export type PatchApiUnitsByTypeByUnitIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PatchApiUnitsByTypeByUnitIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -60533,6 +63033,14 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus409 = {
  */
 export type PatchApiUnitsByTypeByUnitIdVariantContextStatus422 = ValidationError;
 
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus429ErrorCodeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus429ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -60544,7 +63052,7 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PatchApiUnitsByTypeByUnitIdVariantContextStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -62012,6 +64520,14 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus409 = {
  */
 export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus422 = ValidationError;
 
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus429ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus429ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -62023,7 +64539,7 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -63471,6 +65987,14 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus404 = {
  */
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus422 = ValidationError;
 
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus429ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -63482,7 +66006,7 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -64525,6 +67049,14 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus422 =
 	  }
 	| ValidationError;
 
+export const PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus429ErrorCodeEnum =
+	(typeof PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus429ErrorCodeEnum)[keyof typeof PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -64536,7 +67068,7 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -64787,6 +67319,14 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus422 =
 	  }
 	| ValidationError;
 
+export const PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus429ErrorCodeEnum =
+	(typeof PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus429ErrorCodeEnum)[keyof typeof PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -64798,7 +67338,7 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -64986,6 +67526,14 @@ export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus409 = {
  */
 export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus422 = ValidationError;
 
+export const PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus429ErrorCodeEnum =
+	(typeof PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus429ErrorCodeEnum)[keyof typeof PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -64997,7 +67545,7 @@ export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -65774,6 +68322,14 @@ export type GetApiEntitiesStatus401 = {
  */
 export type GetApiEntitiesStatus422 = ValidationError;
 
+export const GetApiEntitiesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiEntitiesStatus429ErrorCodeEnum =
+	(typeof GetApiEntitiesStatus429ErrorCodeEnum)[keyof typeof GetApiEntitiesStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -65785,7 +68341,7 @@ export type GetApiEntitiesStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiEntitiesStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -65884,6 +68440,14 @@ export type PostApiEntitiesStatus404 = {
  */
 export type PostApiEntitiesStatus422 = ValidationError;
 
+export const PostApiEntitiesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiEntitiesStatus429ErrorCodeEnum =
+	(typeof PostApiEntitiesStatus429ErrorCodeEnum)[keyof typeof PostApiEntitiesStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -65895,7 +68459,7 @@ export type PostApiEntitiesStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiEntitiesStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -67384,6 +69948,14 @@ export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404 = {
  */
 export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422 = ValidationError;
 
+export const PutApiEntitiesByUnitIdLocalizationsByLanguageStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus429ErrorCodeEnum =
+	(typeof PutApiEntitiesByUnitIdLocalizationsByLanguageStatus429ErrorCodeEnum)[keyof typeof PutApiEntitiesByUnitIdLocalizationsByLanguageStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -67395,7 +69967,7 @@ export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiEntitiesByUnitIdLocalizationsByLanguageStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -67786,6 +70358,14 @@ export type PostApiTagsStatus400 = MalformedRequestBody;
  */
 export type PostApiTagsStatus422 = ValidationError;
 
+export const PostApiTagsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiTagsStatus429ErrorCodeEnum =
+	(typeof PostApiTagsStatus429ErrorCodeEnum)[keyof typeof PostApiTagsStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -67797,7 +70377,7 @@ export type PostApiTagsStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiTagsStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -68195,6 +70775,14 @@ export type GetApiUnitsByTypeByUnitIdAliasesStatus200 = {
  */
 export type GetApiUnitsByTypeByUnitIdAliasesStatus422 = ValidationError;
 
+export const GetApiUnitsByTypeByUnitIdAliasesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdAliasesStatus429ErrorCodeEnum =
+	(typeof GetApiUnitsByTypeByUnitIdAliasesStatus429ErrorCodeEnum)[keyof typeof GetApiUnitsByTypeByUnitIdAliasesStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -68206,7 +70794,7 @@ export type GetApiUnitsByTypeByUnitIdAliasesStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiUnitsByTypeByUnitIdAliasesStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -68419,6 +71007,14 @@ export type PostApiUnitsByTypeByUnitIdAliasesStatus404 = {
  */
 export type PostApiUnitsByTypeByUnitIdAliasesStatus422 = ValidationError;
 
+export const PostApiUnitsByTypeByUnitIdAliasesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdAliasesStatus429ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdAliasesStatus429ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdAliasesStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -68430,7 +71026,7 @@ export type PostApiUnitsByTypeByUnitIdAliasesStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiUnitsByTypeByUnitIdAliasesStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -68659,6 +71255,14 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404 = {
  */
 export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus422 = ValidationError;
 
+export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -68670,7 +71274,7 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -68824,6 +71428,14 @@ export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404 = {
  */
 export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422 = ValidationError;
 
+export const PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -68835,7 +71447,7 @@ export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -69002,6 +71614,14 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404 = {
  */
 export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422 = ValidationError;
 
+export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -69013,7 +71633,7 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -69383,6 +72003,14 @@ export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus404 = {
  */
 export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus422 = ValidationError;
 
+export const PostApiUnitsByTypeByUnitIdCreditAttributionsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus429ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdCreditAttributionsStatus429ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdCreditAttributionsStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -69394,7 +72022,7 @@ export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiUnitsByTypeByUnitIdCreditAttributionsStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -69598,6 +72226,14 @@ export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus4
 export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus422 =
 	ValidationError;
 
+export const DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -69609,7 +72245,7 @@ export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus4
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -69841,6 +72477,14 @@ export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404 = {
  */
 export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422 = ValidationError;
 
+export const PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -69852,7 +72496,7 @@ export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -70054,6 +72698,15 @@ export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus
 export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus422 =
 	ValidationError;
 
+export const DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus429ErrorCodeEnum =
+	{
+		ApiQuotaExceeded: "ApiQuotaExceeded",
+		ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+	} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -70065,7 +72718,7 @@ export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -70259,6 +72912,14 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus404 = {
  */
 export type PostApiUnitsByTypeByUnitIdLinksStatus422 = ValidationError;
 
+export const PostApiUnitsByTypeByUnitIdLinksStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdLinksStatus429ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdLinksStatus429ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdLinksStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -70270,7 +72931,7 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiUnitsByTypeByUnitIdLinksStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -70450,6 +73111,14 @@ export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404 = {
  */
 export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus422 = ValidationError;
 
+export const DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -70461,7 +73130,7 @@ export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -70652,6 +73321,14 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus404 = {
  */
 export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422 = ValidationError;
 
+export const PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -70663,7 +73340,7 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -70888,6 +73565,14 @@ export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus409 = {
  */
 export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus422 = ValidationError;
 
+export const PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -70899,7 +73584,7 @@ export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -71101,6 +73786,14 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404 = {
  */
 export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422 = ValidationError;
 
+export const DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -71112,7 +73805,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -71295,6 +73988,14 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422 =
 	  }
 	| ValidationError;
 
+export const PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -71306,7 +74007,7 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -71482,6 +74183,14 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404 = {
  */
 export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422 = ValidationError;
 
+export const DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -71493,7 +74202,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -71721,6 +74430,14 @@ export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409 = {
  */
 export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus422 = ValidationError;
 
+export const PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -71732,7 +74449,7 @@ export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -74625,6 +77342,14 @@ export type PutApiUnitsBookByUnitIdContentStructureStatus422 =
 	  }
 	| ValidationError;
 
+export const PutApiUnitsBookByUnitIdContentStructureStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiUnitsBookByUnitIdContentStructureStatus429ErrorCodeEnum =
+	(typeof PutApiUnitsBookByUnitIdContentStructureStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsBookByUnitIdContentStructureStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -74636,7 +77361,7 @@ export type PutApiUnitsBookByUnitIdContentStructureStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiUnitsBookByUnitIdContentStructureStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -75358,6 +78083,14 @@ export type PutApiUnitsMediaByUnitIdContentStructureStatus422 =
 	  }
 	| ValidationError;
 
+export const PutApiUnitsMediaByUnitIdContentStructureStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiUnitsMediaByUnitIdContentStructureStatus429ErrorCodeEnum =
+	(typeof PutApiUnitsMediaByUnitIdContentStructureStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsMediaByUnitIdContentStructureStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -75369,7 +78102,7 @@ export type PutApiUnitsMediaByUnitIdContentStructureStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiUnitsMediaByUnitIdContentStructureStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -76028,6 +78761,14 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus409 = {
  */
 export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422 = ValidationError;
 
+export const PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429ErrorCodeEnum =
+	(typeof PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429ErrorCodeEnum)[keyof typeof PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -76039,7 +78780,7 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -76383,6 +79124,14 @@ export type GetApiProgressStatus200 = {
  */
 export type GetApiProgressStatus422 = ValidationError;
 
+export const GetApiProgressStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiProgressStatus429ErrorCodeEnum =
+	(typeof GetApiProgressStatus429ErrorCodeEnum)[keyof typeof GetApiProgressStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -76394,7 +79143,7 @@ export type GetApiProgressStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiProgressStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -76595,6 +79344,14 @@ export type PostApiProgressSearchStatus422 =
 	  }
 	| ValidationError;
 
+export const PostApiProgressSearchStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiProgressSearchStatus429ErrorCodeEnum =
+	(typeof PostApiProgressSearchStatus429ErrorCodeEnum)[keyof typeof PostApiProgressSearchStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -76606,7 +79363,7 @@ export type PostApiProgressSearchStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiProgressSearchStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -77651,6 +80408,14 @@ export type GetApiProgressByUnitIdStatus404 = {
  */
 export type GetApiProgressByUnitIdStatus422 = ValidationError;
 
+export const GetApiProgressByUnitIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiProgressByUnitIdStatus429ErrorCodeEnum =
+	(typeof GetApiProgressByUnitIdStatus429ErrorCodeEnum)[keyof typeof GetApiProgressByUnitIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -77662,7 +80427,7 @@ export type GetApiProgressByUnitIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiProgressByUnitIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -77853,6 +80618,14 @@ export type PutApiProgressByUnitIdStatus404 = {
  */
 export type PutApiProgressByUnitIdStatus422 = ValidationError;
 
+export const PutApiProgressByUnitIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiProgressByUnitIdStatus429ErrorCodeEnum =
+	(typeof PutApiProgressByUnitIdStatus429ErrorCodeEnum)[keyof typeof PutApiProgressByUnitIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -77864,7 +80637,7 @@ export type PutApiProgressByUnitIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiProgressByUnitIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -77979,6 +80752,14 @@ export type DeleteApiProgressByUnitIdStatus204 = void;
  */
 export type DeleteApiProgressByUnitIdStatus422 = ValidationError;
 
+export const DeleteApiProgressByUnitIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiProgressByUnitIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiProgressByUnitIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiProgressByUnitIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -77990,7 +80771,7 @@ export type DeleteApiProgressByUnitIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiProgressByUnitIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -78243,6 +81024,14 @@ export type GetApiProgressByUnitIdEntriesStatus404 = {
  */
 export type GetApiProgressByUnitIdEntriesStatus422 = ValidationError;
 
+export const GetApiProgressByUnitIdEntriesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiProgressByUnitIdEntriesStatus429ErrorCodeEnum =
+	(typeof GetApiProgressByUnitIdEntriesStatus429ErrorCodeEnum)[keyof typeof GetApiProgressByUnitIdEntriesStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -78254,7 +81043,7 @@ export type GetApiProgressByUnitIdEntriesStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiProgressByUnitIdEntriesStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -78482,6 +81271,14 @@ export type PostApiProgressByUnitIdEntriesStatus422 =
 	  }
 	| ValidationError;
 
+export const PostApiProgressByUnitIdEntriesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiProgressByUnitIdEntriesStatus429ErrorCodeEnum =
+	(typeof PostApiProgressByUnitIdEntriesStatus429ErrorCodeEnum)[keyof typeof PostApiProgressByUnitIdEntriesStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -78493,7 +81290,7 @@ export type PostApiProgressByUnitIdEntriesStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiProgressByUnitIdEntriesStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -78792,6 +81589,14 @@ export type PutApiProgressByUnitIdEntriesByEntryIdStatus422 =
 	  }
 	| ValidationError;
 
+export const PutApiProgressByUnitIdEntriesByEntryIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiProgressByUnitIdEntriesByEntryIdStatus429ErrorCodeEnum =
+	(typeof PutApiProgressByUnitIdEntriesByEntryIdStatus429ErrorCodeEnum)[keyof typeof PutApiProgressByUnitIdEntriesByEntryIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -78803,7 +81608,7 @@ export type PutApiProgressByUnitIdEntriesByEntryIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiProgressByUnitIdEntriesByEntryIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -78977,6 +81782,14 @@ export type DeleteApiProgressByUnitIdEntriesByEntryIdStatus404 = {
  */
 export type DeleteApiProgressByUnitIdEntriesByEntryIdStatus422 = ValidationError;
 
+export const DeleteApiProgressByUnitIdEntriesByEntryIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiProgressByUnitIdEntriesByEntryIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiProgressByUnitIdEntriesByEntryIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiProgressByUnitIdEntriesByEntryIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -78988,7 +81801,7 @@ export type DeleteApiProgressByUnitIdEntriesByEntryIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiProgressByUnitIdEntriesByEntryIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -79103,6 +81916,14 @@ export type GetApiProgressByUnitIdNodesStatus404 = {
  */
 export type GetApiProgressByUnitIdNodesStatus422 = ValidationError;
 
+export const GetApiProgressByUnitIdNodesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiProgressByUnitIdNodesStatus429ErrorCodeEnum =
+	(typeof GetApiProgressByUnitIdNodesStatus429ErrorCodeEnum)[keyof typeof GetApiProgressByUnitIdNodesStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -79114,7 +81935,7 @@ export type GetApiProgressByUnitIdNodesStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiProgressByUnitIdNodesStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -79319,6 +82140,14 @@ export type PostApiProgressByUnitIdNodesByNodeIdReadStatus404 = {
  */
 export type PostApiProgressByUnitIdNodesByNodeIdReadStatus422 = ValidationError;
 
+export const PostApiProgressByUnitIdNodesByNodeIdReadStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiProgressByUnitIdNodesByNodeIdReadStatus429ErrorCodeEnum =
+	(typeof PostApiProgressByUnitIdNodesByNodeIdReadStatus429ErrorCodeEnum)[keyof typeof PostApiProgressByUnitIdNodesByNodeIdReadStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -79330,7 +82159,7 @@ export type PostApiProgressByUnitIdNodesByNodeIdReadStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiProgressByUnitIdNodesByNodeIdReadStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -79513,6 +82342,14 @@ export type PostApiProgressByUnitIdCompleteStatus404 = {
  */
 export type PostApiProgressByUnitIdCompleteStatus422 = ValidationError;
 
+export const PostApiProgressByUnitIdCompleteStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiProgressByUnitIdCompleteStatus429ErrorCodeEnum =
+	(typeof PostApiProgressByUnitIdCompleteStatus429ErrorCodeEnum)[keyof typeof PostApiProgressByUnitIdCompleteStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -79524,7 +82361,7 @@ export type PostApiProgressByUnitIdCompleteStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiProgressByUnitIdCompleteStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -79664,6 +82501,14 @@ export type PutApiProgressByUnitIdNodesByNodeIdStatus404 = {
  */
 export type PutApiProgressByUnitIdNodesByNodeIdStatus422 = ValidationError;
 
+export const PutApiProgressByUnitIdNodesByNodeIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiProgressByUnitIdNodesByNodeIdStatus429ErrorCodeEnum =
+	(typeof PutApiProgressByUnitIdNodesByNodeIdStatus429ErrorCodeEnum)[keyof typeof PutApiProgressByUnitIdNodesByNodeIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -79675,7 +82520,7 @@ export type PutApiProgressByUnitIdNodesByNodeIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiProgressByUnitIdNodesByNodeIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -79793,6 +82638,14 @@ export type DeleteApiProgressByUnitIdNodesByNodeIdStatus404 = {
  */
 export type DeleteApiProgressByUnitIdNodesByNodeIdStatus422 = ValidationError;
 
+export const DeleteApiProgressByUnitIdNodesByNodeIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiProgressByUnitIdNodesByNodeIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiProgressByUnitIdNodesByNodeIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiProgressByUnitIdNodesByNodeIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -79804,7 +82657,7 @@ export type DeleteApiProgressByUnitIdNodesByNodeIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiProgressByUnitIdNodesByNodeIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -80775,6 +83628,14 @@ export type PostApiCollectionsStatus404 = {
  */
 export type PostApiCollectionsStatus422 = ValidationError;
 
+export const PostApiCollectionsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiCollectionsStatus429ErrorCodeEnum =
+	(typeof PostApiCollectionsStatus429ErrorCodeEnum)[keyof typeof PostApiCollectionsStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -80786,7 +83647,7 @@ export type PostApiCollectionsStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiCollectionsStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -81599,6 +84460,14 @@ export type GetApiCollectionsFavoritesStatus404 = {
  */
 export type GetApiCollectionsFavoritesStatus422 = ValidationError;
 
+export const GetApiCollectionsFavoritesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiCollectionsFavoritesStatus429ErrorCodeEnum =
+	(typeof GetApiCollectionsFavoritesStatus429ErrorCodeEnum)[keyof typeof GetApiCollectionsFavoritesStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -81610,7 +84479,7 @@ export type GetApiCollectionsFavoritesStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiCollectionsFavoritesStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -85912,6 +88781,14 @@ export type PatchApiCollectionsByCollectionIdStatus409 =
  */
 export type PatchApiCollectionsByCollectionIdStatus422 = ValidationError;
 
+export const PatchApiCollectionsByCollectionIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PatchApiCollectionsByCollectionIdStatus429ErrorCodeEnum =
+	(typeof PatchApiCollectionsByCollectionIdStatus429ErrorCodeEnum)[keyof typeof PatchApiCollectionsByCollectionIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -85923,7 +88800,7 @@ export type PatchApiCollectionsByCollectionIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PatchApiCollectionsByCollectionIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -86445,6 +89322,14 @@ export type PostApiCollectionsByCollectionIdItemsBatchStatus422 =
 	  }
 	| ValidationError;
 
+export const PostApiCollectionsByCollectionIdItemsBatchStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiCollectionsByCollectionIdItemsBatchStatus429ErrorCodeEnum =
+	(typeof PostApiCollectionsByCollectionIdItemsBatchStatus429ErrorCodeEnum)[keyof typeof PostApiCollectionsByCollectionIdItemsBatchStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -86456,7 +89341,7 @@ export type PostApiCollectionsByCollectionIdItemsBatchStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiCollectionsByCollectionIdItemsBatchStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -86708,6 +89593,14 @@ export type PostApiCollectionsByCollectionIdItemsMoveStatus422 =
 	  }
 	| ValidationError;
 
+export const PostApiCollectionsByCollectionIdItemsMoveStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiCollectionsByCollectionIdItemsMoveStatus429ErrorCodeEnum =
+	(typeof PostApiCollectionsByCollectionIdItemsMoveStatus429ErrorCodeEnum)[keyof typeof PostApiCollectionsByCollectionIdItemsMoveStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -86719,7 +89612,7 @@ export type PostApiCollectionsByCollectionIdItemsMoveStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiCollectionsByCollectionIdItemsMoveStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -86998,6 +89891,14 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus422 =
 	  }
 	| ValidationError;
 
+export const PutApiCollectionsByCollectionIdItemsByTargetIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus429ErrorCodeEnum =
+	(typeof PutApiCollectionsByCollectionIdItemsByTargetIdStatus429ErrorCodeEnum)[keyof typeof PutApiCollectionsByCollectionIdItemsByTargetIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -87009,7 +89910,7 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiCollectionsByCollectionIdItemsByTargetIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -87206,6 +90107,14 @@ export type DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus409 =
  */
 export type DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422 = ValidationError;
 
+export const DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -87217,7 +90126,7 @@ export type DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -87908,6 +90817,14 @@ export type PutApiCollectionsFavoritesItemsByTargetIdStatus409 = {
  */
 export type PutApiCollectionsFavoritesItemsByTargetIdStatus422 = ValidationError;
 
+export const PutApiCollectionsFavoritesItemsByTargetIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiCollectionsFavoritesItemsByTargetIdStatus429ErrorCodeEnum =
+	(typeof PutApiCollectionsFavoritesItemsByTargetIdStatus429ErrorCodeEnum)[keyof typeof PutApiCollectionsFavoritesItemsByTargetIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -87919,7 +90836,7 @@ export type PutApiCollectionsFavoritesItemsByTargetIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiCollectionsFavoritesItemsByTargetIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -88056,6 +90973,14 @@ export type DeleteApiCollectionsFavoritesItemsByTargetIdStatus409 = {
  */
 export type DeleteApiCollectionsFavoritesItemsByTargetIdStatus422 = ValidationError;
 
+export const DeleteApiCollectionsFavoritesItemsByTargetIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiCollectionsFavoritesItemsByTargetIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiCollectionsFavoritesItemsByTargetIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiCollectionsFavoritesItemsByTargetIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -88067,7 +90992,7 @@ export type DeleteApiCollectionsFavoritesItemsByTargetIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiCollectionsFavoritesItemsByTargetIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -89382,6 +92307,14 @@ export type PostApiReviewsStatus422 =
 	  }
 	| ValidationError;
 
+export const PostApiReviewsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiReviewsStatus429ErrorCodeEnum =
+	(typeof PostApiReviewsStatus429ErrorCodeEnum)[keyof typeof PostApiReviewsStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -89393,7 +92326,7 @@ export type PostApiReviewsStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiReviewsStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -90436,6 +93369,14 @@ export type PatchApiReviewsByReviewIdStatus409 = {
  */
 export type PatchApiReviewsByReviewIdStatus422 = ValidationError;
 
+export const PatchApiReviewsByReviewIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PatchApiReviewsByReviewIdStatus429ErrorCodeEnum =
+	(typeof PatchApiReviewsByReviewIdStatus429ErrorCodeEnum)[keyof typeof PatchApiReviewsByReviewIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -90447,7 +93388,7 @@ export type PatchApiReviewsByReviewIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PatchApiReviewsByReviewIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -90761,6 +93702,14 @@ export type PutApiScoresByTargetIdStatus404 = {
  */
 export type PutApiScoresByTargetIdStatus422 = ValidationError;
 
+export const PutApiScoresByTargetIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiScoresByTargetIdStatus429ErrorCodeEnum =
+	(typeof PutApiScoresByTargetIdStatus429ErrorCodeEnum)[keyof typeof PutApiScoresByTargetIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -90772,7 +93721,7 @@ export type PutApiScoresByTargetIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiScoresByTargetIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -91068,6 +94017,14 @@ export type GetApiScoresByTargetIdViewerStatus404 = {
  */
 export type GetApiScoresByTargetIdViewerStatus422 = ValidationError;
 
+export const GetApiScoresByTargetIdViewerStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiScoresByTargetIdViewerStatus429ErrorCodeEnum =
+	(typeof GetApiScoresByTargetIdViewerStatus429ErrorCodeEnum)[keyof typeof GetApiScoresByTargetIdViewerStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -91079,7 +94036,7 @@ export type GetApiScoresByTargetIdViewerStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiScoresByTargetIdViewerStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -91293,6 +94250,14 @@ export type PutApiReactionsUnitsByUnitIdStatus404 = {
  */
 export type PutApiReactionsUnitsByUnitIdStatus422 = ValidationError;
 
+export const PutApiReactionsUnitsByUnitIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiReactionsUnitsByUnitIdStatus429ErrorCodeEnum =
+	(typeof PutApiReactionsUnitsByUnitIdStatus429ErrorCodeEnum)[keyof typeof PutApiReactionsUnitsByUnitIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -91304,7 +94269,7 @@ export type PutApiReactionsUnitsByUnitIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiReactionsUnitsByUnitIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -91408,6 +94373,14 @@ export type DeleteApiReactionsUnitsByUnitIdStatus400 = MalformedRequestBody;
  */
 export type DeleteApiReactionsUnitsByUnitIdStatus422 = ValidationError;
 
+export const DeleteApiReactionsUnitsByUnitIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiReactionsUnitsByUnitIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiReactionsUnitsByUnitIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiReactionsUnitsByUnitIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -91419,7 +94392,7 @@ export type DeleteApiReactionsUnitsByUnitIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiReactionsUnitsByUnitIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -91547,6 +94520,14 @@ export type PutApiReactionsSharesByUnitIdStatus404 = {
  */
 export type PutApiReactionsSharesByUnitIdStatus422 = ValidationError;
 
+export const PutApiReactionsSharesByUnitIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiReactionsSharesByUnitIdStatus429ErrorCodeEnum =
+	(typeof PutApiReactionsSharesByUnitIdStatus429ErrorCodeEnum)[keyof typeof PutApiReactionsSharesByUnitIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -91558,7 +94539,7 @@ export type PutApiReactionsSharesByUnitIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiReactionsSharesByUnitIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -91634,6 +94615,14 @@ export type DeleteApiReactionsSharesByUnitIdStatus200 = {
  */
 export type DeleteApiReactionsSharesByUnitIdStatus422 = ValidationError;
 
+export const DeleteApiReactionsSharesByUnitIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiReactionsSharesByUnitIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiReactionsSharesByUnitIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiReactionsSharesByUnitIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -91645,7 +94634,7 @@ export type DeleteApiReactionsSharesByUnitIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiReactionsSharesByUnitIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -91764,6 +94753,14 @@ export type PostApiPollsStatus404 = {
  */
 export type PostApiPollsStatus422 = ValidationError;
 
+export const PostApiPollsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiPollsStatus429ErrorCodeEnum =
+	(typeof PostApiPollsStatus429ErrorCodeEnum)[keyof typeof PostApiPollsStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -91775,7 +94772,7 @@ export type PostApiPollsStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiPollsStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -92280,6 +95277,14 @@ export type PutApiPollsByPollIdVoteStatus404 = {
  */
 export type PutApiPollsByPollIdVoteStatus422 = ValidationError;
 
+export const PutApiPollsByPollIdVoteStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiPollsByPollIdVoteStatus429ErrorCodeEnum =
+	(typeof PutApiPollsByPollIdVoteStatus429ErrorCodeEnum)[keyof typeof PutApiPollsByPollIdVoteStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -92291,7 +95296,7 @@ export type PutApiPollsByPollIdVoteStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiPollsByPollIdVoteStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -92451,6 +95456,14 @@ export type DeleteApiPollsByPollIdVoteStatus404 = {
  */
 export type DeleteApiPollsByPollIdVoteStatus422 = ValidationError;
 
+export const DeleteApiPollsByPollIdVoteStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiPollsByPollIdVoteStatus429ErrorCodeEnum =
+	(typeof DeleteApiPollsByPollIdVoteStatus429ErrorCodeEnum)[keyof typeof DeleteApiPollsByPollIdVoteStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -92462,7 +95475,7 @@ export type DeleteApiPollsByPollIdVoteStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiPollsByPollIdVoteStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -92626,6 +95639,14 @@ export type PostApiPollsByPollIdCloseStatus409 = {
  */
 export type PostApiPollsByPollIdCloseStatus422 = ValidationError;
 
+export const PostApiPollsByPollIdCloseStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiPollsByPollIdCloseStatus429ErrorCodeEnum =
+	(typeof PostApiPollsByPollIdCloseStatus429ErrorCodeEnum)[keyof typeof PostApiPollsByPollIdCloseStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -92637,7 +95658,7 @@ export type PostApiPollsByPollIdCloseStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiPollsByPollIdCloseStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -93006,6 +96027,14 @@ export type PutApiPostsByPostIdScoresStatus422 =
 	  }
 	| ValidationError;
 
+export const PutApiPostsByPostIdScoresStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiPostsByPostIdScoresStatus429ErrorCodeEnum =
+	(typeof PutApiPostsByPostIdScoresStatus429ErrorCodeEnum)[keyof typeof PutApiPostsByPostIdScoresStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -93017,7 +96046,7 @@ export type PutApiPostsByPostIdScoresStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiPostsByPostIdScoresStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -93684,6 +96713,14 @@ export type PostApiPostsStatus409 = {
  */
 export type PostApiPostsStatus422 = ValidationError;
 
+export const PostApiPostsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiPostsStatus429ErrorCodeEnum =
+	(typeof PostApiPostsStatus429ErrorCodeEnum)[keyof typeof PostApiPostsStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -93695,7 +96732,7 @@ export type PostApiPostsStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiPostsStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -94219,6 +97256,14 @@ export type PostApiPostsWikiStatus409 = {
  */
 export type PostApiPostsWikiStatus422 = ValidationError;
 
+export const PostApiPostsWikiStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiPostsWikiStatus429ErrorCodeEnum =
+	(typeof PostApiPostsWikiStatus429ErrorCodeEnum)[keyof typeof PostApiPostsWikiStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -94230,7 +97275,7 @@ export type PostApiPostsWikiStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiPostsWikiStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -96793,6 +99838,14 @@ export type PatchApiPostsByPostIdStatus409 = {
  */
 export type PatchApiPostsByPostIdStatus422 = ValidationError;
 
+export const PatchApiPostsByPostIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PatchApiPostsByPostIdStatus429ErrorCodeEnum =
+	(typeof PatchApiPostsByPostIdStatus429ErrorCodeEnum)[keyof typeof PatchApiPostsByPostIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -96804,7 +99857,7 @@ export type PatchApiPostsByPostIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PatchApiPostsByPostIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -98178,6 +101231,14 @@ export type PostApiPostsByPostIdRepliesStatus409 = {
  */
 export type PostApiPostsByPostIdRepliesStatus422 = ValidationError;
 
+export const PostApiPostsByPostIdRepliesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiPostsByPostIdRepliesStatus429ErrorCodeEnum =
+	(typeof PostApiPostsByPostIdRepliesStatus429ErrorCodeEnum)[keyof typeof PostApiPostsByPostIdRepliesStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -98189,7 +101250,7 @@ export type PostApiPostsByPostIdRepliesStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiPostsByPostIdRepliesStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -98549,6 +101610,14 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus409 = {
  */
 export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus422 = ValidationError;
 
+export const PatchApiPostsByPostIdRepliesByReplyPostIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus429ErrorCodeEnum =
+	(typeof PatchApiPostsByPostIdRepliesByReplyPostIdStatus429ErrorCodeEnum)[keyof typeof PatchApiPostsByPostIdRepliesByReplyPostIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -98560,7 +101629,7 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PatchApiPostsByPostIdRepliesByReplyPostIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -99069,6 +102138,14 @@ export type PostApiRealmsStatus404 = {
  */
 export type PostApiRealmsStatus422 = ValidationError;
 
+export const PostApiRealmsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiRealmsStatus429ErrorCodeEnum =
+	(typeof PostApiRealmsStatus429ErrorCodeEnum)[keyof typeof PostApiRealmsStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -99080,7 +102157,7 @@ export type PostApiRealmsStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiRealmsStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -99603,6 +102680,14 @@ export type ReplaceRealmSlugAddressStatus422 =
 	  }
 	| ValidationError;
 
+export const ReplaceRealmSlugAddressStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ReplaceRealmSlugAddressStatus429ErrorCodeEnum =
+	(typeof ReplaceRealmSlugAddressStatus429ErrorCodeEnum)[keyof typeof ReplaceRealmSlugAddressStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -99614,7 +102699,7 @@ export type ReplaceRealmSlugAddressStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: ReplaceRealmSlugAddressStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -100267,6 +103352,14 @@ export type PatchApiRealmsByRealmIdStatus404 = {
  */
 export type PatchApiRealmsByRealmIdStatus422 = ValidationError;
 
+export const PatchApiRealmsByRealmIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PatchApiRealmsByRealmIdStatus429ErrorCodeEnum =
+	(typeof PatchApiRealmsByRealmIdStatus429ErrorCodeEnum)[keyof typeof PatchApiRealmsByRealmIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -100278,7 +103371,7 @@ export type PatchApiRealmsByRealmIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PatchApiRealmsByRealmIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -101331,6 +104424,14 @@ export type GetApiRealmsByRealmIdTaxonomyDraftStatus404 = {
  */
 export type GetApiRealmsByRealmIdTaxonomyDraftStatus422 = ValidationError;
 
+export const GetApiRealmsByRealmIdTaxonomyDraftStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiRealmsByRealmIdTaxonomyDraftStatus429ErrorCodeEnum =
+	(typeof GetApiRealmsByRealmIdTaxonomyDraftStatus429ErrorCodeEnum)[keyof typeof GetApiRealmsByRealmIdTaxonomyDraftStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -101342,7 +104443,7 @@ export type GetApiRealmsByRealmIdTaxonomyDraftStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiRealmsByRealmIdTaxonomyDraftStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -101696,6 +104797,14 @@ export type PutApiRealmsByRealmIdTaxonomyDraftStatus422 =
 	  }
 	| ValidationError;
 
+export const PutApiRealmsByRealmIdTaxonomyDraftStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiRealmsByRealmIdTaxonomyDraftStatus429ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdTaxonomyDraftStatus429ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdTaxonomyDraftStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -101707,7 +104816,7 @@ export type PutApiRealmsByRealmIdTaxonomyDraftStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiRealmsByRealmIdTaxonomyDraftStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -102311,6 +105420,14 @@ export type PutApiRealmsByRealmIdMembershipStatus409 = {
  */
 export type PutApiRealmsByRealmIdMembershipStatus422 = ValidationError;
 
+export const PutApiRealmsByRealmIdMembershipStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiRealmsByRealmIdMembershipStatus429ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdMembershipStatus429ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdMembershipStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -102322,7 +105439,7 @@ export type PutApiRealmsByRealmIdMembershipStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiRealmsByRealmIdMembershipStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -102451,6 +105568,14 @@ export type DeleteApiRealmsByRealmIdMembershipStatus409 = {
  */
 export type DeleteApiRealmsByRealmIdMembershipStatus422 = ValidationError;
 
+export const DeleteApiRealmsByRealmIdMembershipStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiRealmsByRealmIdMembershipStatus429ErrorCodeEnum =
+	(typeof DeleteApiRealmsByRealmIdMembershipStatus429ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdMembershipStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -102462,7 +105587,7 @@ export type DeleteApiRealmsByRealmIdMembershipStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiRealmsByRealmIdMembershipStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -102760,6 +105885,14 @@ export type GetApiRealmsByRealmIdMembersStatus403 = {
  */
 export type GetApiRealmsByRealmIdMembersStatus422 = ValidationError;
 
+export const GetApiRealmsByRealmIdMembersStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiRealmsByRealmIdMembersStatus429ErrorCodeEnum =
+	(typeof GetApiRealmsByRealmIdMembersStatus429ErrorCodeEnum)[keyof typeof GetApiRealmsByRealmIdMembersStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -102771,7 +105904,7 @@ export type GetApiRealmsByRealmIdMembersStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiRealmsByRealmIdMembersStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -102982,6 +106115,14 @@ export type PatchApiRealmsByRealmIdMembersByProfileIdStatus409 = {
  */
 export type PatchApiRealmsByRealmIdMembersByProfileIdStatus422 = ValidationError;
 
+export const PatchApiRealmsByRealmIdMembersByProfileIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PatchApiRealmsByRealmIdMembersByProfileIdStatus429ErrorCodeEnum =
+	(typeof PatchApiRealmsByRealmIdMembersByProfileIdStatus429ErrorCodeEnum)[keyof typeof PatchApiRealmsByRealmIdMembersByProfileIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -102993,7 +106134,7 @@ export type PatchApiRealmsByRealmIdMembersByProfileIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PatchApiRealmsByRealmIdMembersByProfileIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -103132,6 +106273,14 @@ export type PutApiRealmsByRealmIdRulesStatus403 = {
  */
 export type PutApiRealmsByRealmIdRulesStatus422 = ValidationError;
 
+export const PutApiRealmsByRealmIdRulesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiRealmsByRealmIdRulesStatus429ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdRulesStatus429ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdRulesStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -103143,7 +106292,7 @@ export type PutApiRealmsByRealmIdRulesStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiRealmsByRealmIdRulesStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -103762,6 +106911,14 @@ export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus409 = {
  */
 export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus422 = ValidationError;
 
+export const PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -103773,7 +106930,7 @@ export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -107011,6 +110168,14 @@ export type PostApiRealmsByRealmIdPinsMoveStatus422 =
 	  }
 	| ValidationError;
 
+export const PostApiRealmsByRealmIdPinsMoveStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiRealmsByRealmIdPinsMoveStatus429ErrorCodeEnum =
+	(typeof PostApiRealmsByRealmIdPinsMoveStatus429ErrorCodeEnum)[keyof typeof PostApiRealmsByRealmIdPinsMoveStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -107022,7 +110187,7 @@ export type PostApiRealmsByRealmIdPinsMoveStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiRealmsByRealmIdPinsMoveStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -107281,6 +110446,14 @@ export type PutApiRealmsByRealmIdPinsByUnitIdStatus422 =
 	  }
 	| ValidationError;
 
+export const PutApiRealmsByRealmIdPinsByUnitIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiRealmsByRealmIdPinsByUnitIdStatus429ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdPinsByUnitIdStatus429ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdPinsByUnitIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -107292,7 +110465,7 @@ export type PutApiRealmsByRealmIdPinsByUnitIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiRealmsByRealmIdPinsByUnitIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -107439,6 +110612,14 @@ export type DeleteApiRealmsByRealmIdPinsByUnitIdStatus403 = {
  */
 export type DeleteApiRealmsByRealmIdPinsByUnitIdStatus422 = ValidationError;
 
+export const DeleteApiRealmsByRealmIdPinsByUnitIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiRealmsByRealmIdPinsByUnitIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiRealmsByRealmIdPinsByUnitIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdPinsByUnitIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -107450,7 +110631,7 @@ export type DeleteApiRealmsByRealmIdPinsByUnitIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiRealmsByRealmIdPinsByUnitIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -107660,6 +110841,14 @@ export type PostApiRealmsByRealmIdTagContextsStatus409 = {
  */
 export type PostApiRealmsByRealmIdTagContextsStatus422 = ValidationError;
 
+export const PostApiRealmsByRealmIdTagContextsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiRealmsByRealmIdTagContextsStatus429ErrorCodeEnum =
+	(typeof PostApiRealmsByRealmIdTagContextsStatus429ErrorCodeEnum)[keyof typeof PostApiRealmsByRealmIdTagContextsStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -107671,7 +110860,7 @@ export type PostApiRealmsByRealmIdTagContextsStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiRealmsByRealmIdTagContextsStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -108851,6 +112040,14 @@ export type GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus404 = {
  */
 export type GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus422 = ValidationError;
 
+export const GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus429ErrorCodeEnum =
+	(typeof GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus429ErrorCodeEnum)[keyof typeof GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -108862,7 +112059,7 @@ export type GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -109097,6 +112294,14 @@ export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422 =
 	  }
 	| ValidationError;
 
+export const PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -109108,7 +112313,7 @@ export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -109302,6 +112507,14 @@ export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404 = {
  */
 export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422 = ValidationError;
 
+export const DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum =
+	(typeof DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -109313,7 +112526,7 @@ export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -110173,6 +113386,14 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus409 = {
  */
 export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus422 = ValidationError;
 
+export const PatchApiRealmsByRealmIdUnitsByUnitIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus429ErrorCodeEnum =
+	(typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus429ErrorCodeEnum)[keyof typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -110184,7 +113405,7 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PatchApiRealmsByRealmIdUnitsByUnitIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -111171,6 +114392,14 @@ export type GetApiRealmsByRealmIdWikiNavigationStatus404 = {
  */
 export type GetApiRealmsByRealmIdWikiNavigationStatus422 = ValidationError;
 
+export const GetApiRealmsByRealmIdWikiNavigationStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiRealmsByRealmIdWikiNavigationStatus429ErrorCodeEnum =
+	(typeof GetApiRealmsByRealmIdWikiNavigationStatus429ErrorCodeEnum)[keyof typeof GetApiRealmsByRealmIdWikiNavigationStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -111182,7 +114411,7 @@ export type GetApiRealmsByRealmIdWikiNavigationStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiRealmsByRealmIdWikiNavigationStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -111383,6 +114612,14 @@ export type PostApiRealmsByRealmIdWikiNavigationStatus404 = {
  */
 export type PostApiRealmsByRealmIdWikiNavigationStatus422 = ValidationError;
 
+export const PostApiRealmsByRealmIdWikiNavigationStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiRealmsByRealmIdWikiNavigationStatus429ErrorCodeEnum =
+	(typeof PostApiRealmsByRealmIdWikiNavigationStatus429ErrorCodeEnum)[keyof typeof PostApiRealmsByRealmIdWikiNavigationStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -111394,7 +114631,7 @@ export type PostApiRealmsByRealmIdWikiNavigationStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiRealmsByRealmIdWikiNavigationStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -111612,6 +114849,14 @@ export type GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404 = {
  */
 export type GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422 = ValidationError;
 
+export const GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429ErrorCodeEnum =
+	(typeof GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429ErrorCodeEnum)[keyof typeof GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -111623,7 +114868,7 @@ export type GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -111866,6 +115111,14 @@ export type PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409 = {
  */
 export type PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422 = ValidationError;
 
+export const PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -111877,7 +115130,7 @@ export type PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -112089,6 +115342,14 @@ export type DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409 = {
  */
 export type DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422 = ValidationError;
 
+export const DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -112100,7 +115361,7 @@ export type DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -112600,6 +115861,38 @@ export type PostApiSearchFeaturesByTemplateExecuteStatus422 =
 			requestId: string;
 	  }
 	| ValidationError;
+
+export const PostApiSearchFeaturesByTemplateExecuteStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiSearchFeaturesByTemplateExecuteStatus429ErrorCodeEnum =
+	(typeof PostApiSearchFeaturesByTemplateExecuteStatus429ErrorCodeEnum)[keyof typeof PostApiSearchFeaturesByTemplateExecuteStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiSearchFeaturesByTemplateExecuteStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: PostApiSearchFeaturesByTemplateExecuteStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
@@ -113559,6 +116852,7 @@ export type PostApiSearchFeaturesByTemplateExecuteResponses = {
 	"200": PostApiSearchFeaturesByTemplateExecuteStatus200;
 	"400": PostApiSearchFeaturesByTemplateExecuteStatus400;
 	"422": PostApiSearchFeaturesByTemplateExecuteStatus422;
+	"429": PostApiSearchFeaturesByTemplateExecuteStatus429;
 	"500": PostApiSearchFeaturesByTemplateExecuteStatus500;
 	"503": PostApiSearchFeaturesByTemplateExecuteStatus503;
 };
@@ -113570,6 +116864,7 @@ export type PostApiSearchFeaturesByTemplateExecuteResponse =
 	| PostApiSearchFeaturesByTemplateExecuteStatus200
 	| PostApiSearchFeaturesByTemplateExecuteStatus400
 	| PostApiSearchFeaturesByTemplateExecuteStatus422
+	| PostApiSearchFeaturesByTemplateExecuteStatus429
 	| PostApiSearchFeaturesByTemplateExecuteStatus500
 	| PostApiSearchFeaturesByTemplateExecuteStatus503;
 
@@ -116602,6 +119897,38 @@ export type PostApiSearchFeaturesByTemplateFeedStatus422 =
 	  }
 	| ValidationError;
 
+export const PostApiSearchFeaturesByTemplateFeedStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiSearchFeaturesByTemplateFeedStatus429ErrorCodeEnum =
+	(typeof PostApiSearchFeaturesByTemplateFeedStatus429ErrorCodeEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiSearchFeaturesByTemplateFeedStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: PostApiSearchFeaturesByTemplateFeedStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
 /**
  * @type object
  */
@@ -117572,6 +120899,7 @@ export type PostApiSearchFeaturesByTemplateFeedResponses = {
 	"200": PostApiSearchFeaturesByTemplateFeedStatus200;
 	"400": PostApiSearchFeaturesByTemplateFeedStatus400;
 	"422": PostApiSearchFeaturesByTemplateFeedStatus422;
+	"429": PostApiSearchFeaturesByTemplateFeedStatus429;
 	"500": PostApiSearchFeaturesByTemplateFeedStatus500;
 	"503": PostApiSearchFeaturesByTemplateFeedStatus503;
 };
@@ -117583,6 +120911,7 @@ export type PostApiSearchFeaturesByTemplateFeedResponse =
 	| PostApiSearchFeaturesByTemplateFeedStatus200
 	| PostApiSearchFeaturesByTemplateFeedStatus400
 	| PostApiSearchFeaturesByTemplateFeedStatus422
+	| PostApiSearchFeaturesByTemplateFeedStatus429
 	| PostApiSearchFeaturesByTemplateFeedStatus500
 	| PostApiSearchFeaturesByTemplateFeedStatus503;
 
@@ -118374,6 +121703,38 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteStatus422 =
 			requestId: string;
 	  }
 	| ValidationError;
+
+export const PostApiSearchZonesByZoneIdFeatureExecuteStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureExecuteStatus429ErrorCodeEnum =
+	(typeof PostApiSearchZonesByZoneIdFeatureExecuteStatus429ErrorCodeEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureExecuteStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFeatureExecuteStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: PostApiSearchZonesByZoneIdFeatureExecuteStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
@@ -119280,6 +122641,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteResponses = {
 	"400": PostApiSearchZonesByZoneIdFeatureExecuteStatus400;
 	"404": PostApiSearchZonesByZoneIdFeatureExecuteStatus404;
 	"422": PostApiSearchZonesByZoneIdFeatureExecuteStatus422;
+	"429": PostApiSearchZonesByZoneIdFeatureExecuteStatus429;
 	"500": PostApiSearchZonesByZoneIdFeatureExecuteStatus500;
 	"503": PostApiSearchZonesByZoneIdFeatureExecuteStatus503;
 };
@@ -119292,6 +122654,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteResponse =
 	| PostApiSearchZonesByZoneIdFeatureExecuteStatus400
 	| PostApiSearchZonesByZoneIdFeatureExecuteStatus404
 	| PostApiSearchZonesByZoneIdFeatureExecuteStatus422
+	| PostApiSearchZonesByZoneIdFeatureExecuteStatus429
 	| PostApiSearchZonesByZoneIdFeatureExecuteStatus500
 	| PostApiSearchZonesByZoneIdFeatureExecuteStatus503;
 
@@ -122351,6 +125714,38 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus422 =
 	  }
 	| ValidationError;
 
+export const PostApiSearchZonesByZoneIdFeatureFeedStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus429ErrorCodeEnum =
+	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus429ErrorCodeEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: PostApiSearchZonesByZoneIdFeatureFeedStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
 /**
  * @type object
  */
@@ -123268,6 +126663,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedResponses = {
 	"400": PostApiSearchZonesByZoneIdFeatureFeedStatus400;
 	"404": PostApiSearchZonesByZoneIdFeatureFeedStatus404;
 	"422": PostApiSearchZonesByZoneIdFeatureFeedStatus422;
+	"429": PostApiSearchZonesByZoneIdFeatureFeedStatus429;
 	"500": PostApiSearchZonesByZoneIdFeatureFeedStatus500;
 	"503": PostApiSearchZonesByZoneIdFeatureFeedStatus503;
 };
@@ -123280,6 +126676,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedResponse =
 	| PostApiSearchZonesByZoneIdFeatureFeedStatus400
 	| PostApiSearchZonesByZoneIdFeatureFeedStatus404
 	| PostApiSearchZonesByZoneIdFeatureFeedStatus422
+	| PostApiSearchZonesByZoneIdFeatureFeedStatus429
 	| PostApiSearchZonesByZoneIdFeatureFeedStatus500
 	| PostApiSearchZonesByZoneIdFeatureFeedStatus503;
 
@@ -124091,6 +127488,38 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422 =
 			requestId: string;
 	  }
 	| ValidationError;
+
+export const PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus429ErrorCodeEnum =
+	(typeof PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus429ErrorCodeEnum)[keyof typeof PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
@@ -124998,6 +128427,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteResponses = {
 	"400": PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400;
 	"404": PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404;
 	"422": PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422;
+	"429": PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus429;
 	"500": PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500;
 	"503": PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus503;
 };
@@ -125010,6 +128440,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteResponse =
 	| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400
 	| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404
 	| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422
+	| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus429
 	| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500
 	| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus503;
 
@@ -125427,6 +128858,39 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus
 			requestId: string;
 	  }
 	| ValidationError;
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus429ErrorCodeEnum =
+	{
+		ApiQuotaExceeded: "ApiQuotaExceeded",
+		ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus429ErrorCodeEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus429ErrorCodeEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
@@ -126335,6 +129799,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteRespon
 	"400": PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400;
 	"404": PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404;
 	"422": PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422;
+	"429": PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus429;
 	"500": PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500;
 	"503": PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus503;
 };
@@ -126347,6 +129812,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteRespon
 	| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400
 	| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404
 	| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422
+	| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus429
 	| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500
 	| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus503;
 
@@ -129426,6 +132892,38 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422 =
 	  }
 	| ValidationError;
 
+export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus429ErrorCodeEnum =
+	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus429ErrorCodeEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
 /**
  * @type object
  */
@@ -130351,6 +133849,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteResponses = {
 	"400": PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400;
 	"404": PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404;
 	"422": PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422;
+	"429": PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus429;
 	"500": PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500;
 	"503": PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus503;
 };
@@ -130363,6 +133862,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteResponse =
 	| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400
 	| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404
 	| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422
+	| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus429
 	| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500
 	| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus503;
 
@@ -130712,6 +134212,38 @@ export type PostApiSearchStatus422 =
 	  }
 	| ValidationError;
 
+export const PostApiSearchStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiSearchStatus429ErrorCodeEnum =
+	(typeof PostApiSearchStatus429ErrorCodeEnum)[keyof typeof PostApiSearchStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiSearchStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: PostApiSearchStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
 /**
  * @type object
  */
@@ -130832,6 +134364,7 @@ export type PostApiSearchResponses = {
 	"200": PostApiSearchStatus200;
 	"400": PostApiSearchStatus400;
 	"422": PostApiSearchStatus422;
+	"429": PostApiSearchStatus429;
 	"500": PostApiSearchStatus500;
 	"503": PostApiSearchStatus503;
 };
@@ -130843,6 +134376,7 @@ export type PostApiSearchResponse =
 	| PostApiSearchStatus200
 	| PostApiSearchStatus400
 	| PostApiSearchStatus422
+	| PostApiSearchStatus429
 	| PostApiSearchStatus500
 	| PostApiSearchStatus503;
 
@@ -131452,6 +134986,14 @@ export type PostApiSearchSharedQueriesStatus422 =
 	  }
 	| ValidationError;
 
+export const PostApiSearchSharedQueriesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiSearchSharedQueriesStatus429ErrorCodeEnum =
+	(typeof PostApiSearchSharedQueriesStatus429ErrorCodeEnum)[keyof typeof PostApiSearchSharedQueriesStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -131463,7 +135005,7 @@ export type PostApiSearchSharedQueriesStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiSearchSharedQueriesStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -133064,6 +136606,14 @@ export type PostApiSearchByIndexStatus422 =
 	  }
 	| ValidationError;
 
+export const PostApiSearchByIndexStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiSearchByIndexStatus429ErrorCodeEnum =
+	(typeof PostApiSearchByIndexStatus429ErrorCodeEnum)[keyof typeof PostApiSearchByIndexStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -133075,7 +136625,7 @@ export type PostApiSearchByIndexStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiSearchByIndexStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -133499,6 +137049,14 @@ export type PostApiImageAssetsStatus415 = {
  */
 export type PostApiImageAssetsStatus422 = ValidationError;
 
+export const PostApiImageAssetsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiImageAssetsStatus429ErrorCodeEnum =
+	(typeof PostApiImageAssetsStatus429ErrorCodeEnum)[keyof typeof PostApiImageAssetsStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -133510,7 +137068,7 @@ export type PostApiImageAssetsStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiImageAssetsStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -133842,6 +137400,14 @@ export type PostApiImageAssetsByIdCompleteStatus422 =
 	  }
 	| ValidationError;
 
+export const PostApiImageAssetsByIdCompleteStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiImageAssetsByIdCompleteStatus429ErrorCodeEnum =
+	(typeof PostApiImageAssetsByIdCompleteStatus429ErrorCodeEnum)[keyof typeof PostApiImageAssetsByIdCompleteStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -133853,7 +137419,7 @@ export type PostApiImageAssetsByIdCompleteStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PostApiImageAssetsByIdCompleteStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -134133,6 +137699,14 @@ export type PutApiImageAssetsByIdPresentationsByRoleStatus422 =
 	  }
 	| ValidationError;
 
+export const PutApiImageAssetsByIdPresentationsByRoleStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiImageAssetsByIdPresentationsByRoleStatus429ErrorCodeEnum =
+	(typeof PutApiImageAssetsByIdPresentationsByRoleStatus429ErrorCodeEnum)[keyof typeof PutApiImageAssetsByIdPresentationsByRoleStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -134144,7 +137718,7 @@ export type PutApiImageAssetsByIdPresentationsByRoleStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: PutApiImageAssetsByIdPresentationsByRoleStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -134423,6 +137997,14 @@ export type GetApiImageAssetsByIdStatus404 = {
  */
 export type GetApiImageAssetsByIdStatus422 = ValidationError;
 
+export const GetApiImageAssetsByIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiImageAssetsByIdStatus429ErrorCodeEnum =
+	(typeof GetApiImageAssetsByIdStatus429ErrorCodeEnum)[keyof typeof GetApiImageAssetsByIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -134434,7 +138016,7 @@ export type GetApiImageAssetsByIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: GetApiImageAssetsByIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -134591,6 +138173,14 @@ export type DeleteApiImageAssetsByIdStatus409 = {
  */
 export type DeleteApiImageAssetsByIdStatus422 = ValidationError;
 
+export const DeleteApiImageAssetsByIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiImageAssetsByIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiImageAssetsByIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiImageAssetsByIdStatus429ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -134602,7 +138192,7 @@ export type DeleteApiImageAssetsByIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: "ApiTokenRateLimitExceeded";
+		code: DeleteApiImageAssetsByIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */

@@ -145,7 +145,7 @@ export default new Elysia()
 			.get(
 				"/:postId/scores",
 				async ({ params, request }) => {
-					const identity = await resolveIdentity(request.headers, "unit:read");
+					const identity = await resolveIdentity(request, "unit:read");
 					const { authorization } = identity;
 					await authorization.unit.ensureCanRead(params.postId, () => new PostNotFound());
 					const [record] = await database
@@ -463,7 +463,7 @@ export default new Elysia()
 			.get(
 				"/:postId",
 				async ({ params, query, request }) => {
-					const identity = await resolveIdentity(request.headers, "unit:read");
+					const identity = await resolveIdentity(request, "unit:read");
 					const { authorization } = identity;
 					const viewerProfileId = identity.profile?.unitId;
 					const localizationLanguages = query.localizationLanguages ?? [];
@@ -750,7 +750,7 @@ export default new Elysia()
 			.get(
 				"",
 				async ({ params, query, request }) => {
-					const authorization = (await resolveIdentity(request.headers, "unit:read"))
+					const authorization = (await resolveIdentity(request, "unit:read"))
 						.authorization;
 					await authorization.unit.ensureCanRead(
 						params.postId,

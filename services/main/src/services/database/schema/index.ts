@@ -1,6 +1,6 @@
 export * from "./auth";
 export * from "./account-control";
-export * from "./api-token";
+export * from "./api-quota";
 export * from "./access";
 export * from "./aggregate";
 export * from "./base";

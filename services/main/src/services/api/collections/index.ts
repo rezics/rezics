@@ -261,7 +261,7 @@ export default new Elysia({ prefix: "/collections" })
 		async ({ query, request }) => {
 			const localizationLanguages = query.localizationLanguages ?? [];
 			const identity = query.editableOnly
-				? await resolveIdentity(request.headers, "unit:read")
+				? await resolveIdentity(request, "unit:read")
 				: undefined;
 			const viewerId = identity?.profile?.unitId;
 			if (query.editableOnly && !viewerId) return { items: [], nextCursor: null };
@@ -486,7 +486,7 @@ export default new Elysia({ prefix: "/collections" })
 	.get(
 		"/:collectionId/items",
 		async ({ params, query, request }) => {
-			const identity = await resolveIdentity(request.headers, "unit:read");
+			const identity = await resolveIdentity(request, "unit:read");
 			return getCollectionContent(params.collectionId, identity.authorization, {
 				localizationLanguages: query.localizationLanguages,
 				cursor: query.cursor,
@@ -507,7 +507,7 @@ export default new Elysia({ prefix: "/collections" })
 	.get(
 		"/:collectionId",
 		async ({ params, query, request }) => {
-			const identity = await resolveIdentity(request.headers, "unit:read");
+			const identity = await resolveIdentity(request, "unit:read");
 			return getCollection(
 				params.collectionId,
 				identity.authorization,
@@ -907,7 +907,7 @@ export default new Elysia({ prefix: "/collections" })
 	.get(
 		"/:collectionId/item-revisions",
 		async ({ params, query, request }) => {
-			const { authorization } = await resolveIdentity(request.headers, "unit:read");
+			const { authorization } = await resolveIdentity(request, "unit:read");
 			await authorization.unit.ensureCanRead(params.collectionId);
 			return database.transaction(async (tx) => ({
 				items: await listCollectionStructureRevisions(
@@ -930,7 +930,7 @@ export default new Elysia({ prefix: "/collections" })
 	.get(
 		"/:collectionId/item-revisions/compare",
 		async ({ params, query, request }) => {
-			const { authorization } = await resolveIdentity(request.headers, "unit:read");
+			const { authorization } = await resolveIdentity(request, "unit:read");
 			await authorization.unit.ensureCanRead(params.collectionId);
 			return database.transaction(async (tx) => {
 				const [before, after] = await Promise.all([

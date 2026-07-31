@@ -134,7 +134,7 @@ import { recordUnitRevision, restoreUnitRevision } from "../units/history";
 import { recordInitialRealmUnitPublicationEvents } from "../units/realm-publication";
 import { replaceZonePageSlugAddress } from "../units/slug-address";
 import { ensureOfficialZoneFollows } from "../bootstrap/official-zone-follows";
-import { bindStandardPolicyToToken } from "../auth/api-token/policy-service";
+import { replaceApiTokenQuotaOverride } from "../auth/api-quota/policy-service";
 import { createSharedSearchQuery } from "../search/shared-queries";
 import { createTagStructureInTransaction } from "../tag-structures/service";
 import {
@@ -2816,12 +2816,17 @@ async function seedCoverageContracts(
 		.where(eq(apikeys.referenceId, actor.authUserId))
 		.limit(1);
 	if (!demoToken) throw new Error("Coverage scenario requires the demo API token");
-	await bindStandardPolicyToToken(tx, {
+	await replaceApiTokenQuotaOverride(tx, {
 		tokenId: demoToken.id,
 		actorProfileId: actor.id,
+		expectedRevision: 0,
 		override: {
-			limits: { requestsPerMinute: 120 },
-			operations: { getApiUnits: { requestsPerMinute: 90 } },
+			limits: { requestRate: { requestsPerMinute: 120, burstCapacity: 20 } },
+			operations: {
+				"search.execute": {
+					requestRate: { requestsPerMinute: 90, burstCapacity: 15 },
+				},
+			},
 		},
 	});
 

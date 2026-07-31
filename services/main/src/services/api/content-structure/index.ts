@@ -418,7 +418,7 @@ export default new Elysia()
 	.get(
 		"/units/by-id/:unitId/content-structures",
 		async ({ params, request }) => {
-			const { authorization } = await resolveIdentity(request.headers, "unit:read");
+			const { authorization } = await resolveIdentity(request, "unit:read");
 			await authorization.unit.ensureCanRead(params.unitId);
 			return database.transaction(async (tx) => {
 				await ensureReleasedContentStructureApi(tx, params.unitId, authorization);
@@ -481,7 +481,7 @@ export default new Elysia()
 	.get(
 		"/units/by-id/:unitId/content-structures/:structureId",
 		async ({ params, request }) => {
-			const { authorization } = await resolveIdentity(request.headers, "unit:read");
+			const { authorization } = await resolveIdentity(request, "unit:read");
 			await authorization.unit.ensureCanRead(params.unitId);
 			return database.transaction(async (tx) => {
 				await ensureReleasedContentStructureApi(tx, params.unitId, authorization);
@@ -518,7 +518,7 @@ export default new Elysia()
 	.get(
 		"/units/by-id/:unitId/content-structures/:structureId/revisions",
 		async ({ params, query, request }) => {
-			const { authorization } = await resolveIdentity(request.headers, "unit:read");
+			const { authorization } = await resolveIdentity(request, "unit:read");
 			await authorization.unit.ensureCanRead(params.unitId);
 			return database.transaction(async (tx) => {
 				await ensureReleasedContentStructureApi(tx, params.unitId, authorization);
@@ -803,7 +803,7 @@ export default new Elysia()
 	.get(
 		"/units/book/:unitId/content-structure/nodes",
 		async ({ params, query, request }) => {
-			const { authorization } = await resolveIdentity(request.headers, "unit:read");
+			const { authorization } = await resolveIdentity(request, "unit:read");
 			if (!(await authorization.unit.canRead(params.unitId))) throw new BookNotFound();
 			const canEditBook = await authorization.unit.canUpdate(params.unitId);
 			return database.transaction((tx) =>
@@ -882,7 +882,7 @@ export default new Elysia()
 	.get(
 		"/units/media/:unitId/content-structure/nodes",
 		async ({ params, query, request }) => {
-			const { authorization } = await resolveIdentity(request.headers, "unit:read");
+			const { authorization } = await resolveIdentity(request, "unit:read");
 			if (!(await authorization.unit.canRead(params.unitId))) throw new MediaNotFound();
 			const canEditMedia = await authorization.unit.canUpdate(params.unitId);
 			return database.transaction((tx) =>
@@ -956,8 +956,7 @@ export default new Elysia()
 	.get(
 		"/chapters/:chapterId",
 		async ({ params, query, request }) => {
-			const authorization = (await resolveIdentity(request.headers, "unit:read"))
-				.authorization;
+			const authorization = (await resolveIdentity(request, "unit:read")).authorization;
 			const [node] = await database
 				.select({
 					nodeId: contentStructureNode.id,

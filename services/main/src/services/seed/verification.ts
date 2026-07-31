@@ -6,7 +6,7 @@ import { database } from "../database";
 import {
 	moderationCase,
 	notification,
-	apiTokenPolicyBinding,
+	apiTokenQuotaOverride,
 	platformCapabilityGrant,
 	postScore,
 	profile,
@@ -61,8 +61,8 @@ export async function verifySeedDatabase(
 			query: database.select({ value: count() }).from(sharedSearchQuery),
 		},
 		{
-			name: "API token policy binding",
-			query: database.select({ value: count() }).from(apiTokenPolicyBinding),
+			name: "API token quota override",
+			query: database.select({ value: count() }).from(apiTokenQuotaOverride),
 		},
 		{
 			name: "Unit access invitation",

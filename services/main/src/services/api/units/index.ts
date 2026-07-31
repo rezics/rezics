@@ -145,7 +145,7 @@ export default new Elysia({ prefix: "/units" })
 	.post(
 		"/presentations",
 		async ({ body, request }) => {
-			const identity = await resolveIdentity(request.headers, "unit:read");
+			const identity = await resolveIdentity(request, "unit:read");
 			const presentations = await getReadableUnitPresentationsByIds({
 				unitIds: body.ids,
 				localizationLanguages: body.localizationLanguages,
@@ -283,8 +283,7 @@ export default new Elysia({ prefix: "/units" })
 	.get(
 		"/by-id/:unitId/series-memberships",
 		async ({ params, query, request }) => {
-			const authorization = (await resolveIdentity(request.headers, "unit:read"))
-				.authorization;
+			const authorization = (await resolveIdentity(request, "unit:read")).authorization;
 			await authorization.unit.ensureCanRead(params.unitId);
 			return {
 				items: await getUnitSeriesMemberships(
@@ -307,8 +306,7 @@ export default new Elysia({ prefix: "/units" })
 	.get(
 		"/by-id/:unitId/status-events",
 		async ({ params, query, request }) => {
-			const authorization = (await resolveIdentity(request.headers, "unit:read"))
-				.authorization;
+			const authorization = (await resolveIdentity(request, "unit:read")).authorization;
 			await authorization.unit.ensureCanRead(params.unitId);
 			const limit = query.limit ?? 50;
 			const rows = await listUnitStatusEvents({
@@ -340,7 +338,7 @@ export default new Elysia({ prefix: "/units" })
 		async ({ params, request }) => ({
 			languages: await getUnitLocalizationOrder(
 				params.unitId,
-				(await resolveIdentity(request.headers, "unit:read")).authorization,
+				(await resolveIdentity(request, "unit:read")).authorization,
 			),
 		}),
 		{
@@ -445,7 +443,7 @@ export default new Elysia({ prefix: "/units" })
 			return getUnit(
 				params.type,
 				params.unitId,
-				(await resolveIdentity(request.headers, "unit:read")).authorization,
+				(await resolveIdentity(request, "unit:read")).authorization,
 				query.localizationLanguages,
 			);
 		},

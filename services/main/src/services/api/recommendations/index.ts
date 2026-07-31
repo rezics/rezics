@@ -125,8 +125,8 @@ const RecommendationWriteForbiddenResponse = toApiErrorResponse([
 	"AccountRestricted",
 ]);
 
-async function getEventProfileId(headers: Headers) {
-	const identity = await resolveIdentity(headers, "recommendation:read");
+async function getEventProfileId(request: Request) {
+	const identity = await resolveIdentity(request, "recommendation:read");
 	const profileId = identity.profile?.unitId;
 	if (!profileId) return { identity, profileId: undefined };
 	const [preference] = await database
@@ -142,7 +142,7 @@ export default new Elysia({ prefix: "/recommendations" })
 	.get(
 		"/units",
 		async ({ query, request }) => {
-			const identity = await resolveIdentity(request.headers, "recommendation:read");
+			const identity = await resolveIdentity(request, "recommendation:read");
 			const viewer = await resolveRecommendationViewer(
 				identity.profile?.unitId,
 				query.personalized,
@@ -234,7 +234,7 @@ export default new Elysia({ prefix: "/recommendations" })
 	.get(
 		"/posts/:postId",
 		async ({ params, query, request }) => {
-			const identity = await resolveIdentity(request.headers, "recommendation:read");
+			const identity = await resolveIdentity(request, "recommendation:read");
 			const viewer = await resolveRecommendationViewer(
 				identity.profile?.unitId,
 				query.personalized,
@@ -322,7 +322,7 @@ export default new Elysia({ prefix: "/recommendations" })
 				ensureEventTime(event.occurredAt, now);
 				ensureRecommendationTracking(event.targetUnitId, event);
 			}
-			const { identity, profileId } = await getEventProfileId(request.headers);
+			const { identity, profileId } = await getEventProfileId(request);
 			const targetIds = [...new Set(body.events.map(({ targetUnitId }) => targetUnitId))];
 			const readable = await database
 				.select({ id: unit.id })

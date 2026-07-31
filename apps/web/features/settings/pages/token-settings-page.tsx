@@ -8,7 +8,9 @@ import {
 	useGetApiApiTokens,
 	usePatchApiApiTokensByTokenId,
 	usePostApiApiTokens,
-	usePutApiApiTokensByTokenIdPolicy,
+	usePutApiApiTokensByTokenIdQuotaOverride,
+	useDeleteApiApiTokensByTokenIdQuotaOverride,
+	type PutApiApiTokensByTokenIdQuotaOverrideBody,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { ExternalLink, KeyRound, Plus, ShieldAlert, Trash2, XIcon } from "lucide-react";
@@ -63,15 +65,14 @@ import {
 import { RequestFailure } from "@/i18n/request-failure";
 import { useTranslation } from "@/i18n/client";
 import {
-	getTokenPolicyLimitRanges,
-	parseTokenPolicyLimit,
-	parseTokenPolicyLimits,
-	StandardTokenPolicyLimitRanges,
-	type TokenPolicyLimitName,
-	type TokenPolicyLimitRanges,
-	type TokenPolicyLimitValues,
-	type ValidTokenPolicyLimits,
-} from "../model/token-policy-limits";
+	getTokenQuotaLimitRanges,
+	parseTokenQuotaLimit,
+	parseTokenQuotaLimits,
+	type TokenQuotaLimitName,
+	type TokenQuotaLimitRanges,
+	type TokenQuotaLimitValues,
+	type ValidTokenQuotaLimits,
+} from "../model/token-quota-limits";
 import { SettingsOverviewHref } from "../routing/settings-routes";
 
 type TokenRecord = GetApiApiTokensStatus200["items"][number];
@@ -281,7 +282,7 @@ function PermissionFields({
 	);
 }
 
-function LimitRangeDescription({ ranges }: { ranges: TokenPolicyLimitRanges }) {
+function LimitRangeDescription({ ranges }: { ranges: TokenQuotaLimitRanges }) {
 	const { t, locale } = useTranslation(["settings"]);
 	const format = (value: number) => value.toLocaleString(locale.current);
 	return (
@@ -289,6 +290,8 @@ function LimitRangeDescription({ ranges }: { ranges: TokenPolicyLimitRanges }) {
 			{t.settings.tokens.limitRanges({
 				requestsMinimum: format(ranges.requestsPerMinute.minimum),
 				requestsMaximum: format(ranges.requestsPerMinute.maximum),
+				burstMinimum: format(ranges.burstCapacity.minimum),
+				burstMaximum: format(ranges.burstCapacity.maximum),
 				concurrentMinimum: format(ranges.maxConcurrentRequests.minimum),
 				concurrentMaximum: format(ranges.maxConcurrentRequests.maximum),
 				dailyMinimum: format(ranges.dailyCostUnits.minimum),
@@ -298,7 +301,7 @@ function LimitRangeDescription({ ranges }: { ranges: TokenPolicyLimitRanges }) {
 	);
 }
 
-export function PolicyLimitField({
+export function QuotaLimitField({
 	label,
 	name,
 	onChange,
@@ -306,13 +309,13 @@ export function PolicyLimitField({
 	value,
 }: {
 	label: string;
-	name: TokenPolicyLimitName;
+	name: TokenQuotaLimitName;
 	onChange: (value: string) => void;
-	range: TokenPolicyLimitRanges[TokenPolicyLimitName];
+	range: TokenQuotaLimitRanges[TokenQuotaLimitName];
 	value: string;
 }) {
 	const { t, locale } = useTranslation(["settings"]);
-	const parsed = parseTokenPolicyLimit(value, range);
+	const parsed = parseTokenQuotaLimit(value, range);
 	const invalid = parsed.kind === "invalid";
 	const minimum = range.minimum.toLocaleString(locale.current);
 	const maximum = range.maximum.toLocaleString(locale.current);
@@ -345,33 +348,40 @@ export function PolicyLimitField({
 	);
 }
 
-function PolicyLimitFields({
+function QuotaLimitFields({
 	onChange,
 	ranges,
 	values,
 }: {
-	onChange: (name: TokenPolicyLimitName, value: string) => void;
-	ranges: TokenPolicyLimitRanges;
-	values: TokenPolicyLimitValues;
+	onChange: (name: TokenQuotaLimitName, value: string) => void;
+	ranges: TokenQuotaLimitRanges;
+	values: TokenQuotaLimitValues;
 }) {
 	const { t } = useTranslation(["settings"]);
 	return (
-		<div className="grid gap-4 sm:grid-cols-3">
-			<PolicyLimitField
+		<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+			<QuotaLimitField
 				label={t.settings.tokens.requestsPerMinute}
 				name="requestsPerMinute"
 				onChange={(value) => onChange("requestsPerMinute", value)}
 				range={ranges.requestsPerMinute}
 				value={values.requestsPerMinute}
 			/>
-			<PolicyLimitField
+			<QuotaLimitField
+				label={t.settings.tokens.burstCapacity}
+				name="burstCapacity"
+				onChange={(value) => onChange("burstCapacity", value)}
+				range={ranges.burstCapacity}
+				value={values.burstCapacity}
+			/>
+			<QuotaLimitField
 				label={t.settings.tokens.maxConcurrentRequests}
 				name="maxConcurrentRequests"
 				onChange={(value) => onChange("maxConcurrentRequests", value)}
 				range={ranges.maxConcurrentRequests}
 				value={values.maxConcurrentRequests}
 			/>
-			<PolicyLimitField
+			<QuotaLimitField
 				label={t.settings.tokens.dailyCostUnits}
 				name="dailyCostUnits"
 				onChange={(value) => onChange("dailyCostUnits", value)}
@@ -387,11 +397,6 @@ function CreateTokenCard({ refresh }: { refresh: () => Promise<unknown> }) {
 	const [permissions, setPermissions] = useState<ApiTokenPermission[]>([
 		...ContentAgentPermissions,
 	]);
-	const [limitValues, setLimitValues] = useState<TokenPolicyLimitValues>({
-		requestsPerMinute: "60",
-		maxConcurrentRequests: "2",
-		dailyCostUnits: "2000",
-	});
 	const [permissionsInvalid, setPermissionsInvalid] = useState(false);
 	const [secret, setSecret] = useState<string>();
 	const create = usePostApiApiTokens<unknown>({
@@ -406,17 +411,13 @@ function CreateTokenCard({ refresh }: { refresh: () => Promise<unknown> }) {
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		setPermissionsInvalid(permissions.length === 0);
-		const limits = parseTokenPolicyLimits(limitValues, StandardTokenPolicyLimitRanges);
-		if (permissions.length === 0 || !limits.valid) return;
+		if (permissions.length === 0) return;
 		const form = new FormData(event.currentTarget);
 		await create.mutateAsync({
 			body: {
 				name: String(form.get("name") ?? "").trim(),
 				expiresInDays: Number(form.get("expiresInDays")),
 				permissions,
-				policyOverride: {
-					limits: limits.values,
-				},
 			},
 		});
 	}
@@ -499,20 +500,6 @@ function CreateTokenCard({ refresh }: { refresh: () => Promise<unknown> }) {
 								</p>
 							) : null}
 						</FieldSet>
-						<FieldSet>
-							<FieldLegend variant="label">{t.settings.tokens.limits}</FieldLegend>
-							<FieldDescription>
-								{t.settings.tokens.standardLimitsDescription}
-							</FieldDescription>
-							<LimitRangeDescription ranges={StandardTokenPolicyLimitRanges} />
-							<PolicyLimitFields
-								onChange={(name, value) =>
-									setLimitValues((current) => ({ ...current, [name]: value }))
-								}
-								ranges={StandardTokenPolicyLimitRanges}
-								values={limitValues}
-							/>
-						</FieldSet>
 						<RequestFailure error={create.error} fallback={t.ui.retryLater} />
 						<Button isLoading={create.isPending} type="submit" variant="solid">
 							{t.settings.tokens.create}
@@ -574,12 +561,44 @@ function TokenAccessEditor({
 	);
 }
 
-type OperationLimitRow = TokenPolicyLimitValues & {
+type QuotaOverride = PutApiApiTokensByTokenIdQuotaOverrideBody["configurationOverride"];
+type CompleteQuotaLimits = {
+	requestRate: { requestsPerMinute: number; burstCapacity: number };
+	maxConcurrentRequests: number;
+	dailyCostUnits: number;
+};
+type QuotaOperationId = keyof NonNullable<QuotaOverride["operations"]>;
+type OperationLimitRow = TokenQuotaLimitValues & {
 	key: string;
-	operationId: string;
+	operationId: QuotaOperationId;
 };
 
-function TokenPolicyEditor({
+const QuotaOperationIds = [
+	"search.execute",
+	"image.upload",
+] as const satisfies readonly QuotaOperationId[];
+
+function quotaLimitValues(limits: CompleteQuotaLimits): TokenQuotaLimitValues {
+	return {
+		requestsPerMinute: String(limits.requestRate.requestsPerMinute),
+		burstCapacity: String(limits.requestRate.burstCapacity),
+		maxConcurrentRequests: String(limits.maxConcurrentRequests),
+		dailyCostUnits: String(limits.dailyCostUnits),
+	};
+}
+
+function quotaLimits(values: ValidTokenQuotaLimits): CompleteQuotaLimits {
+	return {
+		requestRate: {
+			requestsPerMinute: values.requestsPerMinute,
+			burstCapacity: values.burstCapacity,
+		},
+		maxConcurrentRequests: values.maxConcurrentRequests,
+		dailyCostUnits: values.dailyCostUnits,
+	};
+}
+
+function TokenQuotaEditor({
 	token,
 	refresh,
 }: {
@@ -587,25 +606,64 @@ function TokenPolicyEditor({
 	refresh: () => Promise<unknown>;
 }) {
 	const { t } = useTranslation(["settings", "ui"]);
-	const ranges = getTokenPolicyLimitRanges(token.policy.kind);
-	const [limitValues, setLimitValues] = useState<TokenPolicyLimitValues>(() => ({
-		requestsPerMinute: String(token.policy.limits.requestsPerMinute),
-		maxConcurrentRequests: String(token.policy.limits.maxConcurrentRequests),
-		dailyCostUnits: String(token.policy.limits.dailyCostUnits),
-	}));
-	const [operations, setOperations] = useState<OperationLimitRow[]>(() =>
-		Object.entries(token.policy.operations).map(([operationId, limits], index) => ({
-			key: `stored-${index}-${operationId}`,
-			operationId,
-			requestsPerMinute: String(limits.requestsPerMinute ?? limitValues.requestsPerMinute),
-			maxConcurrentRequests: String(
-				limits.maxConcurrentRequests ?? limitValues.maxConcurrentRequests,
+	const ranges = getTokenQuotaLimitRanges("privileged");
+	const accountLimits = token.quota.account.limits;
+	const storedOverride = token.quota.tokenOverride?.configurationOverride;
+	const effectiveOverrideLimits: CompleteQuotaLimits = {
+		requestRate: {
+			requestsPerMinute: Number(
+				storedOverride?.limits?.requestRate?.requestsPerMinute ??
+					accountLimits.requestRate.requestsPerMinute,
 			),
-			dailyCostUnits: String(limits.dailyCostUnits ?? limitValues.dailyCostUnits),
-		})),
+			burstCapacity: Number(
+				storedOverride?.limits?.requestRate?.burstCapacity ??
+					accountLimits.requestRate.burstCapacity,
+			),
+		},
+		maxConcurrentRequests: Number(
+			storedOverride?.limits?.maxConcurrentRequests ?? accountLimits.maxConcurrentRequests,
+		),
+		dailyCostUnits: Number(
+			storedOverride?.limits?.dailyCostUnits ?? accountLimits.dailyCostUnits,
+		),
+	};
+	const [limitValues, setLimitValues] = useState<TokenQuotaLimitValues>(() =>
+		quotaLimitValues(effectiveOverrideLimits),
+	);
+	const [operations, setOperations] = useState<OperationLimitRow[]>(() =>
+		QuotaOperationIds.flatMap((operationId) => {
+			const limits = storedOverride?.operations?.[operationId];
+			if (!limits) return [];
+			const merged: CompleteQuotaLimits = {
+				requestRate: limits.requestRate
+					? {
+							requestsPerMinute: Number(limits.requestRate.requestsPerMinute),
+							burstCapacity: Number(limits.requestRate.burstCapacity),
+						}
+					: effectiveOverrideLimits.requestRate,
+				maxConcurrentRequests:
+					limits.maxConcurrentRequests === undefined
+						? effectiveOverrideLimits.maxConcurrentRequests
+						: Number(limits.maxConcurrentRequests),
+				dailyCostUnits:
+					limits.dailyCostUnits === undefined
+						? effectiveOverrideLimits.dailyCostUnits
+						: Number(limits.dailyCostUnits),
+			};
+			return [
+				{
+					key: `stored-${operationId}`,
+					operationId,
+					...quotaLimitValues(merged),
+				},
+			];
+		}),
 	);
 	const [invalid, setInvalid] = useState(false);
-	const replace = usePutApiApiTokensByTokenIdPolicy<unknown>({
+	const replace = usePutApiApiTokensByTokenIdQuotaOverride<unknown>({
+		mutation: { onSuccess: refresh },
+	});
+	const reset = useDeleteApiApiTokensByTokenIdQuotaOverride<unknown>({
 		mutation: { onSuccess: refresh },
 	});
 
@@ -619,30 +677,28 @@ function TokenPolicyEditor({
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		const limits = parseTokenPolicyLimits(limitValues, ranges);
-		const configurationOperations: Record<string, ValidTokenPolicyLimits> = {};
+		const limits = parseTokenQuotaLimits(limitValues, ranges);
+		const configurationOperations: NonNullable<QuotaOverride["operations"]> = {};
 		let operationsValid = true;
 		for (const operation of operations) {
-			const operationId = operation.operationId.trim();
-			const operationLimits = parseTokenPolicyLimits(operation, ranges);
+			const operationLimits = parseTokenQuotaLimits(operation, ranges);
 			if (
-				!/^[A-Za-z][A-Za-z0-9_-]*$/.test(operationId) ||
-				Object.hasOwn(configurationOperations, operationId) ||
+				Object.hasOwn(configurationOperations, operation.operationId) ||
 				!operationLimits.valid
 			) {
 				operationsValid = false;
 				continue;
 			}
-			configurationOperations[operationId] = operationLimits.values;
+			configurationOperations[operation.operationId] = quotaLimits(operationLimits.values);
 		}
 		setInvalid(!limits.valid || !operationsValid);
 		if (!limits.valid || !operationsValid) return;
 		await replace.mutateAsync({
 			path: { tokenId: token.id },
 			body: {
-				expectedRevision: Number(token.policy.bindingRevision ?? 1),
+				expectedRevision: Number(token.quota.tokenOverride?.revision ?? 0),
 				configurationOverride: {
-					limits: limits.values,
+					limits: quotaLimits(limits.values),
 					operations: configurationOperations,
 				},
 			},
@@ -655,7 +711,7 @@ function TokenPolicyEditor({
 				<FieldLegend variant="label">{t.settings.tokens.limits}</FieldLegend>
 				<FieldDescription>{t.settings.tokens.limitsDescription}</FieldDescription>
 				<LimitRangeDescription ranges={ranges} />
-				<PolicyLimitFields
+				<QuotaLimitFields
 					onChange={(name, value) =>
 						setLimitValues((current) => ({ ...current, [name]: value }))
 					}
@@ -671,23 +727,37 @@ function TokenPolicyEditor({
 				<div className="grid gap-3">
 					{operations.map((operation) => (
 						<div
-							className="grid gap-3 rounded-lg bg-muted/35 p-3 lg:grid-cols-[minmax(12rem,2fr)_repeat(3,minmax(7rem,1fr))_auto]"
+							className="grid gap-3 rounded-lg bg-muted/35 p-3 lg:grid-cols-[minmax(12rem,2fr)_repeat(4,minmax(7rem,1fr))_auto]"
 							key={operation.key}
 						>
 							<Field required>
 								<FieldLabel>{t.settings.tokens.operationId}</FieldLabel>
-								<Input
+								<NativeSelect
 									onChange={(event) =>
 										updateOperation(operation.key, {
-											operationId: event.currentTarget.value,
+											operationId: event.currentTarget
+												.value as QuotaOperationId,
 										})
 									}
-									placeholder={t.settings.tokens.operationIdPlaceholder}
-									required
 									value={operation.operationId}
-								/>
+								>
+									{QuotaOperationIds.map((operationId) => (
+										<NativeSelectOption key={operationId} value={operationId}>
+											{t.settings.tokens.operations[operationId]}
+										</NativeSelectOption>
+									))}
+								</NativeSelect>
 							</Field>
-							<PolicyLimitField
+							<QuotaLimitField
+								label={t.settings.tokens.burstCapacity}
+								name="burstCapacity"
+								onChange={(value) =>
+									updateOperation(operation.key, { burstCapacity: value })
+								}
+								range={ranges.burstCapacity}
+								value={operation.burstCapacity}
+							/>
+							<QuotaLimitField
 								label={t.settings.tokens.requestsPerMinute}
 								name="requestsPerMinute"
 								onChange={(value) =>
@@ -696,7 +766,7 @@ function TokenPolicyEditor({
 								range={ranges.requestsPerMinute}
 								value={operation.requestsPerMinute}
 							/>
-							<PolicyLimitField
+							<QuotaLimitField
 								label={t.settings.tokens.maxConcurrentRequests}
 								name="maxConcurrentRequests"
 								onChange={(value) =>
@@ -705,7 +775,7 @@ function TokenPolicyEditor({
 								range={ranges.maxConcurrentRequests}
 								value={operation.maxConcurrentRequests}
 							/>
-							<PolicyLimitField
+							<QuotaLimitField
 								label={t.settings.tokens.dailyCostUnits}
 								name="dailyCostUnits"
 								onChange={(value) =>
@@ -734,11 +804,11 @@ function TokenPolicyEditor({
 				</div>
 				<Button
 					onClick={() => {
-						const requestsPerMinute = parseTokenPolicyLimit(
+						const requestsPerMinute = parseTokenQuotaLimit(
 							limitValues.requestsPerMinute,
 							ranges.requestsPerMinute,
 						);
-						const dailyCostUnits = parseTokenPolicyLimit(
+						const dailyCostUnits = parseTokenQuotaLimit(
 							limitValues.dailyCostUnits,
 							ranges.dailyCostUnits,
 						);
@@ -746,13 +816,20 @@ function TokenPolicyEditor({
 							...current,
 							{
 								key: `new-${crypto.randomUUID()}`,
-								operationId: "",
+								operationId:
+									QuotaOperationIds.find(
+										(operationId) =>
+											!current.some(
+												(item) => item.operationId === operationId,
+											),
+									) ?? "search.execute",
 								requestsPerMinute: String(
 									requestsPerMinute.kind === "valid"
 										? Math.min(requestsPerMinute.value, 30)
 										: 30,
 								),
 								maxConcurrentRequests: "1",
+								burstCapacity: "5",
 								dailyCostUnits: String(
 									dailyCostUnits.kind === "valid"
 										? Math.min(dailyCostUnits.value, 1_000)
@@ -774,10 +851,29 @@ function TokenPolicyEditor({
 					{t.settings.tokens.invalidLimits}
 				</p>
 			) : null}
-			<RequestFailure error={replace.error} fallback={t.ui.retryLater} />
-			<Button isLoading={replace.isPending} type="submit" variant="solid">
-				{t.settings.tokens.saveLimits}
-			</Button>
+			<RequestFailure error={replace.error ?? reset.error} fallback={t.ui.retryLater} />
+			<div className="flex flex-wrap gap-2">
+				<Button isLoading={replace.isPending} type="submit" variant="solid">
+					{t.settings.tokens.saveLimits}
+				</Button>
+				{token.quota.tokenOverride ? (
+					<Button
+						isLoading={reset.isPending}
+						onClick={() =>
+							reset.mutate({
+								path: { tokenId: token.id },
+								body: {
+									expectedRevision: token.quota.tokenOverride?.revision ?? 0,
+								},
+							})
+						}
+						type="button"
+						variant="outline"
+					>
+						{t.settings.tokens.resetLimits}
+					</Button>
+				) : null}
+			</div>
 		</form>
 	);
 }
@@ -792,7 +888,7 @@ function TokenCard({
 	locale: string;
 }) {
 	const { t } = useTranslation(["settings", "ui"]);
-	const [editor, setEditor] = useState<"access" | "policy">();
+	const [editor, setEditor] = useState<"access" | "quota">();
 	const update = usePatchApiApiTokensByTokenId<unknown>({
 		mutation: { onSuccess: refresh },
 	});
@@ -800,9 +896,9 @@ function TokenCard({
 		mutation: { onSuccess: refresh },
 	});
 	const policyLabel =
-		token.policy.source === "trusted_fallback"
+		token.quota.account.source === "privileged_fallback"
 			? t.settings.tokens.trustedFallback
-			: token.policy.kind === "privileged"
+			: token.quota.account.class === "privileged"
 				? t.settings.tokens.privilegedPolicy
 				: t.settings.tokens.standardPolicy;
 
@@ -820,7 +916,11 @@ function TokenCard({
 						<Badge variant={token.enabled ? "success" : "secondary"}>
 							{token.enabled ? t.settings.tokens.enabled : t.settings.tokens.disabled}
 						</Badge>
-						<Badge variant={token.policy.kind === "privileged" ? "warning" : "outline"}>
+						<Badge
+							variant={
+								token.quota.account.class === "privileged" ? "warning" : "outline"
+							}
+						>
 							{policyLabel}
 						</Badge>
 					</div>
@@ -845,7 +945,9 @@ function TokenCard({
 							{t.settings.tokens.requestsPerMinute}
 						</dt>
 						<dd>
-							{Number(token.policy.limits.requestsPerMinute).toLocaleString(locale)}
+							{Number(
+								token.quota.account.limits.requestRate.requestsPerMinute,
+							).toLocaleString(locale)}
 						</dd>
 					</div>
 					<div>
@@ -853,16 +955,16 @@ function TokenCard({
 							{t.settings.tokens.maxConcurrentRequests}
 						</dt>
 						<dd>
-							{Number(token.policy.limits.maxConcurrentRequests).toLocaleString(
-								locale,
-							)}
+							{Number(
+								token.quota.account.limits.maxConcurrentRequests,
+							).toLocaleString(locale)}
 						</dd>
 					</div>
 				</dl>
-				{token.policy.kind === "privileged" && token.policy.validUntil ? (
+				{token.quota.account.class === "privileged" && token.quota.account.validUntil ? (
 					<p className="text-sm text-warning">
 						{t.settings.tokens.trustedUntil}:{" "}
-						{formatDate(token.policy.validUntil, locale)}
+						{formatDate(token.quota.account.validUntil, locale)}
 					</p>
 				) : null}
 				<div className="flex flex-wrap gap-2">
@@ -880,13 +982,13 @@ function TokenCard({
 					</Button>
 					<Button
 						onClick={() =>
-							setEditor((current) => (current === "policy" ? undefined : "policy"))
+							setEditor((current) => (current === "quota" ? undefined : "quota"))
 						}
 						size="sm"
 						type="button"
 						variant="outline"
 					>
-						{editor === "policy"
+						{editor === "quota"
 							? t.settings.tokens.hideEditor
 							: t.settings.tokens.configureLimits}
 					</Button>
@@ -937,9 +1039,9 @@ function TokenCard({
 				{editor === "access" ? (
 					<TokenAccessEditor key={token.updatedAt} token={token} refresh={refresh} />
 				) : null}
-				{editor === "policy" ? (
-					<TokenPolicyEditor
-						key={`${token.policy.policyRevision}:${token.policy.bindingRevision}`}
+				{editor === "quota" ? (
+					<TokenQuotaEditor
+						key={`${token.quota.account.policyRevision}:${token.quota.tokenOverride?.revision ?? 0}`}
 						token={token}
 						refresh={refresh}
 					/>

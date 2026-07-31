@@ -343,7 +343,7 @@ export default new Elysia({ prefix: "/search" })
 	.get(
 		"/features/:template",
 		async ({ params, request }) => {
-			const identity = await resolveIdentity(request.headers, "unit:read");
+			const identity = await resolveIdentity(request, "unit:read");
 			const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
 				DevelopmentPreviewCapability,
 			);
@@ -362,7 +362,7 @@ export default new Elysia({ prefix: "/search" })
 		"/features/:template/execute",
 		async ({ params, body, request }) => {
 			try {
-				const identity = await resolveIdentity(request.headers, "unit:read");
+				const identity = await resolveIdentity(request, "unit:read", "search.execute");
 				const hasDevelopmentPreviewAccess =
 					await identity.authorization.platform.hasCapability(
 						DevelopmentPreviewCapability,
@@ -400,7 +400,7 @@ export default new Elysia({ prefix: "/search" })
 		"/features/:template/feed",
 		async ({ params, body, request }) => {
 			try {
-				const identity = await resolveIdentity(request.headers, "unit:read");
+				const identity = await resolveIdentity(request, "unit:read", "search.execute");
 				const hasDevelopmentPreviewAccess =
 					await identity.authorization.platform.hasCapability(
 						DevelopmentPreviewCapability,
@@ -448,7 +448,7 @@ export default new Elysia({ prefix: "/search" })
 	.get(
 		"/zones/:zoneId/feature",
 		async ({ params, request }) => {
-			const identity = await resolveIdentity(request.headers, "unit:read");
+			const identity = await resolveIdentity(request, "unit:read");
 			await identity.authorization.unit.ensureCanRead(
 				params.zoneId,
 				() => new UnitNotFound("Zone"),
@@ -478,7 +478,7 @@ export default new Elysia({ prefix: "/search" })
 	.put(
 		"/zones/:zoneId/feature",
 		async ({ params, body, request }) => {
-			const identity = await resolveIdentity(request.headers, "unit:update");
+			const identity = await resolveIdentity(request, "unit:update");
 			await identity.authorization.unit.ensureCanUpdate(params.zoneId, [["zone", "search"]]);
 			const actorProfileId = identity.authorization.profileId;
 			if (!actorProfileId) throw new UnitNotFound("Profile");
@@ -513,7 +513,7 @@ export default new Elysia({ prefix: "/search" })
 	.post(
 		"/zones/:zoneId/feature/execute",
 		async ({ params, body, request }) => {
-			const identity = await resolveIdentity(request.headers, "unit:read");
+			const identity = await resolveIdentity(request, "unit:read", "search.execute");
 			await identity.authorization.unit.ensureCanRead(
 				params.zoneId,
 				() => new UnitNotFound("Zone"),
@@ -557,7 +557,7 @@ export default new Elysia({ prefix: "/search" })
 		"/zones/:zoneId/feature/feed",
 		async ({ params, body, request }) => {
 			try {
-				const identity = await resolveIdentity(request.headers, "unit:read");
+				const identity = await resolveIdentity(request, "unit:read", "search.execute");
 				await identity.authorization.unit.ensureCanRead(
 					params.zoneId,
 					() => new UnitNotFound("Zone"),
@@ -625,7 +625,7 @@ export default new Elysia({ prefix: "/search" })
 	.get(
 		"/zones/:zoneId/feature/revisions",
 		async ({ params, request }) => {
-			const identity = await resolveIdentity(request.headers, "unit:update");
+			const identity = await resolveIdentity(request, "unit:update");
 			await identity.authorization.unit.ensureCanUpdate(params.zoneId, [["zone", "search"]]);
 			const revisions = await database.transaction((tx) =>
 				listZoneSearchFeatureRevisions(tx, params.zoneId),
@@ -649,7 +649,7 @@ export default new Elysia({ prefix: "/search" })
 	.post(
 		"/zones/:zoneId/feature/restore",
 		async ({ params, body, request }) => {
-			const identity = await resolveIdentity(request.headers, "unit:update");
+			const identity = await resolveIdentity(request, "unit:update");
 			await identity.authorization.unit.ensureCanUpdate(params.zoneId, [["zone", "search"]]);
 			const actorProfileId = identity.authorization.profileId;
 			if (!actorProfileId) throw new UnitNotFound("Profile");
@@ -689,7 +689,7 @@ export default new Elysia({ prefix: "/search" })
 	.post(
 		"/zones/:zoneId/dock/blocks/:blockKey/execute",
 		async ({ params, body, request }) => {
-			const identity = await resolveIdentity(request.headers, "unit:read");
+			const identity = await resolveIdentity(request, "unit:read", "search.execute");
 			await identity.authorization.unit.ensureCanRead(
 				params.zoneId,
 				() => new UnitNotFound("Zone"),
@@ -755,7 +755,7 @@ export default new Elysia({ prefix: "/search" })
 	.post(
 		"/zones/:zoneId/pages/:pageId/blocks/:blockKey/execute",
 		async ({ params, body, request }) => {
-			const identity = await resolveIdentity(request.headers, "unit:read");
+			const identity = await resolveIdentity(request, "unit:read", "search.execute");
 			await identity.authorization.unit.ensureCanRead(
 				params.zoneId,
 				() => new UnitNotFound("Zone"),
@@ -813,7 +813,7 @@ export default new Elysia({ prefix: "/search" })
 	.post(
 		"/zones/:zoneId/feed-blocks/:blockKey/execute",
 		async ({ params, body, request }) => {
-			const identity = await resolveIdentity(request.headers, "unit:read");
+			const identity = await resolveIdentity(request, "unit:read", "search.execute");
 			await identity.authorization.unit.ensureCanRead(
 				params.zoneId,
 				() => new UnitNotFound("Zone"),
@@ -896,7 +896,7 @@ export default new Elysia({ prefix: "/search" })
 		"",
 		async ({ body, request }) => {
 			try {
-				const identity = await resolveIdentity(request.headers, "unit:read");
+				const identity = await resolveIdentity(request, "unit:read", "search.execute");
 				const hasDevelopmentPreviewAccess =
 					await identity.authorization.platform.hasCapability(
 						DevelopmentPreviewCapability,
@@ -929,7 +929,7 @@ export default new Elysia({ prefix: "/search" })
 	.post(
 		"/shared-queries",
 		async ({ body, request, set, status }) => {
-			const identity = await resolveIdentity(request.headers, "unit:read");
+			const identity = await resolveIdentity(request, "unit:read");
 			const createdByProfileId = identity.authorization.profileId;
 			if (!createdByProfileId) throw new AuthenticationRequired();
 			const created = await createSharedSearchQuery(database, {
@@ -969,7 +969,7 @@ export default new Elysia({ prefix: "/search" })
 	.post(
 		"/:index",
 		async ({ params, body, request }) => {
-			const identity = await resolveIdentity(request.headers, "unit:read");
+			const identity = await resolveIdentity(request, "unit:read", "search.execute");
 			if (params.index === "tag-structures") {
 				if (!identity.profile) throw new AuthenticationRequired();
 				await identity.authorization.platform.ensureCapability(

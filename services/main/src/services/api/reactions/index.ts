@@ -28,10 +28,7 @@ export default new Elysia({ prefix: "/reactions" })
 	.get(
 		"/units/:unitId",
 		async ({ params, query, request }) => {
-			const { authorization, profile } = await resolveIdentity(
-				request.headers,
-				"interaction:read",
-			);
+			const { authorization, profile } = await resolveIdentity(request, "interaction:read");
 			await authorization.unit.ensureCanRead(params.unitId);
 			if (query.realmId) {
 				await authorization.unit.ensureCanRead(query.realmId);

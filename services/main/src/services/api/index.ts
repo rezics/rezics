@@ -37,7 +37,7 @@ import platformUsers from "./platform-users";
 import tags from "./tags";
 import tokens from "./tokens";
 import tokenInfo from "./token-info";
-import tokenPolicies from "./token-policies";
+import quotaPolicies from "./quota-policies";
 import users from "./users";
 import units from "./units";
 import { auth } from "../auth";
@@ -85,7 +85,7 @@ export default new Elysia({ normalize: "typebox" })
 			credentials: true,
 			methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 			allowedHeaders: ["Content-Type", "Authorization", "Accept-Language"],
-			exposeHeaders: ["X-Request-Id"],
+			exposeHeaders: ["X-Request-Id", "Retry-After"],
 		}),
 	)
 	.onRequest(({ set }) => {
@@ -96,7 +96,7 @@ export default new Elysia({ normalize: "typebox" })
 	.onError(({ error, code, request, route, set, status }) => {
 		const requestId = getAuditRequestContext()?.requestId ?? crypto.randomUUID();
 		if (isApiError(error)) {
-			if (error._tag === "ApiTokenRateLimitExceeded")
+			if (error._tag === "ApiTokenRateLimitExceeded" || error._tag === "ApiQuotaExceeded")
 				set.headers["Retry-After"] = String(error.retryAfterSeconds);
 			return status(error.status, toApiErrorBody(error, requestId));
 		}
@@ -171,7 +171,7 @@ export default new Elysia({ normalize: "typebox" })
 				.use(messages)
 				.use(tokens)
 				.use(tokenInfo)
-				.use(tokenPolicies)
+				.use(quotaPolicies)
 				.use(feed)
 				.use(reports)
 				.use(governance)

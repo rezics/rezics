@@ -40,10 +40,10 @@ export const verbatimTerms = {
 		category: "product",
 		rationale: "User-confirmed name for the REZICS authoring workspace.",
 	},
-	privilegedTokenPolicy: {
+	privilegedApiQuotaClass: {
 		value: "Privileged",
 		category: "product",
-		rationale: "Canonical name of the elevated API token policy class.",
+		rationale: "Canonical name of the elevated account API quota class.",
 	},
 	github: {
 		value: "GitHub",

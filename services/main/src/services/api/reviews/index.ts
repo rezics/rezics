@@ -162,7 +162,7 @@ export default new Elysia()
 			.get(
 				"",
 				async ({ query, request }) => {
-					const identity = await resolveIdentity(request.headers, "unit:read");
+					const identity = await resolveIdentity(request, "unit:read");
 					const viewer = await resolveRecommendationViewer(identity.profile?.unitId);
 					const rankingViewer = { ...viewer, personalized: false };
 					const scoreFilter = resolveReviewScoreFilter(query);
@@ -464,7 +464,7 @@ export default new Elysia()
 			.get(
 				"/:reviewId",
 				async ({ params, query, request }) => {
-					const identity = await resolveIdentity(request.headers, "unit:read");
+					const identity = await resolveIdentity(request, "unit:read");
 					const { authorization } = identity;
 					const viewerProfileId = identity.profile?.unitId;
 					await authorization.unit.ensureCanRead(
@@ -749,7 +749,7 @@ export default new Elysia()
 			.get(
 				"/:targetId",
 				async ({ params, query, request }) => {
-					const authorization = (await resolveIdentity(request.headers, "unit:read"))
+					const authorization = (await resolveIdentity(request, "unit:read"))
 						.authorization;
 					await authorization.unit.ensureCanRead(params.targetId);
 					await authorization.unit.ensureCanRead(query.realmId);

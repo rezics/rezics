@@ -272,7 +272,7 @@ async function ensureRealmFieldsAuthorized(
 	await authorization.realm.ensureCapability(realmId, capability);
 }
 
-async function ensureRealmVisible(realmId: string, headers: Headers) {
+async function ensureRealmVisible(realmId: string, request: Request) {
 	const [record] = await database
 		.select({ status: unit.status, visibility: unit.visibility })
 		.from(realm)
@@ -280,7 +280,7 @@ async function ensureRealmVisible(realmId: string, headers: Headers) {
 		.where(eq(realm.id, realmId))
 		.limit(1);
 	if (!record) throw new RealmNotFound();
-	const identity = await resolveIdentity(headers, "realm:read");
+	const identity = await resolveIdentity(request, "realm:read");
 	const { profile } = identity;
 	const membership = profile ? await findRealmMembership(realmId, profile.unitId) : undefined;
 	if (!isRealmVisible(record.status, record.visibility, membership?.state))
@@ -760,7 +760,7 @@ export default new Elysia({ prefix: "/realms" })
 			const localizationLanguages = query.localizationLanguages ?? [];
 			const { profile: viewer, authorization } = await ensureRealmVisible(
 				params.realmId,
-				request.headers,
+				request,
 			);
 			const [record] = await database
 				.select({
@@ -972,7 +972,7 @@ export default new Elysia({ prefix: "/realms" })
 	.get(
 		"/:realmId/taxonomy",
 		async ({ params, query, request }) => {
-			const { authorization } = await ensureRealmVisible(params.realmId, request.headers);
+			const { authorization } = await ensureRealmVisible(params.realmId, request);
 			return database.transaction((tx) =>
 				readRealmTaxonomy(tx, params.realmId, query.localizationLanguages ?? [], (unitId) =>
 					authorization.unit.canRead(unitId),
@@ -1056,8 +1056,7 @@ export default new Elysia({ prefix: "/realms" })
 	.get(
 		"/:realmId/score-context",
 		async ({ params, request }) => {
-			const authorization = (await resolveIdentity(request.headers, "unit:read"))
-				.authorization;
+			const authorization = (await resolveIdentity(request, "unit:read")).authorization;
 			await authorization.unit.ensureCanRead(params.realmId, () => new RealmNotFound());
 			const [context] = await database
 				.select({ contextPostId: realmScoreContext.contextPostId })
@@ -1652,7 +1651,7 @@ export default new Elysia({ prefix: "/realms" })
 	.get(
 		"/:realmId/rules",
 		async ({ params, query, request }) => {
-			await ensureRealmVisible(params.realmId, request.headers);
+			await ensureRealmVisible(params.realmId, request);
 			const current = await getCurrentRealmRules(params.realmId);
 			if (!current)
 				return {
@@ -1713,7 +1712,7 @@ export default new Elysia({ prefix: "/realms" })
 	.put(
 		"/:realmId/rules/:revisionId/acknowledgement",
 		async ({ params, profile, body, request }) => {
-			await ensureRealmVisible(params.realmId, request.headers);
+			await ensureRealmVisible(params.realmId, request);
 			await database.transaction(async (tx) => {
 				await tx.execute(
 					sql`select pg_advisory_xact_lock(hashtextextended(${params.realmId}::text, 0))`,
@@ -1758,8 +1757,8 @@ export default new Elysia({ prefix: "/realms" })
 	.get(
 		"/:realmId/pins",
 		async ({ params, query, request }) => {
-			await ensureRealmVisible(params.realmId, request.headers);
-			const identity = await resolveIdentity(request.headers, "unit:read");
+			await ensureRealmVisible(params.realmId, request);
+			const identity = await resolveIdentity(request, "unit:read");
 			const items = await database
 				.select({
 					realmId: realmPin.realmId,
@@ -2075,7 +2074,7 @@ export default new Elysia({ prefix: "/realms" })
 	.get(
 		"/:realmId/tags/:tagId/context",
 		async ({ params, request }) => {
-			const { authorization } = await ensureRealmVisible(params.realmId, request.headers);
+			const { authorization } = await ensureRealmVisible(params.realmId, request);
 			await authorization.unit.ensureCanRead(params.tagId);
 			const record = await getRealmTagContextSummary(params.realmId, params.tagId);
 			const [mounted] = await database

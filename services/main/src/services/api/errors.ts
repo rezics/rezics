@@ -29,6 +29,7 @@ import { RealmErrors } from "./realms/errors";
 import { ReviewErrors } from "./reviews/errors";
 import { TagErrors } from "./tags/errors";
 import { TokenErrors } from "./tokens/errors";
+import { ApiQuotaPolicyErrors } from "./quota-policies/errors";
 import { UserErrors } from "./users/errors";
 
 export class MalformedRequestBody extends Data.TaggedError("MalformedRequestBody") {
@@ -68,6 +69,7 @@ export const ApiErrors = [
 	...FollowingErrors,
 	...ImageAssetErrors,
 	...TokenErrors,
+	...ApiQuotaPolicyErrors,
 	...TagErrors,
 	...SearchErrors,
 	...PaginationErrors,

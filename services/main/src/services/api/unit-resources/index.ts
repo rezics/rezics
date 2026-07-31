@@ -193,7 +193,7 @@ export default new Elysia()
 					const localizationLanguages = query.localizationLanguages ?? [];
 					let entityCondition = publiclyReadableUnitCondition();
 					if (query.creditAttributionSearch === "direct") {
-						const identity = await resolveIdentity(request.headers, "unit:read");
+						const identity = await resolveIdentity(request, "unit:read");
 						if (!identity.profile) throw new AuthenticationRequired();
 						const target = {
 							id: unit.id,
@@ -308,7 +308,7 @@ export default new Elysia()
 			.get(
 				"/:unitId",
 				async ({ params, query, request }) => {
-					const identity = await resolveIdentity(request.headers, "unit:read");
+					const identity = await resolveIdentity(request, "unit:read");
 					const localizationLanguages = query.localizationLanguages ?? [];
 					const [entry] = await database
 						.select({

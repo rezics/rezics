@@ -547,7 +547,7 @@ export default new Elysia({ prefix: "/users" })
 	.get(
 		"/:id/activity",
 		async ({ params, query, request }) => {
-			const identity = await resolveIdentity(request.headers, "unit:read");
+			const identity = await resolveIdentity(request, "unit:read");
 			const viewerProfileId = identity.profile?.unitId;
 			const referencedUnitReadOptions = {
 				discoverableOnly: viewerProfileId !== params.id,
@@ -716,7 +716,7 @@ export default new Elysia({ prefix: "/users" })
 				)
 				.limit(1);
 			if (!result) throw new UserNotFound();
-			const viewer = (await resolveIdentity(request.headers, "unit:read")).profile;
+			const viewer = (await resolveIdentity(request, "unit:read")).profile;
 			const following = viewer
 				? Boolean(
 						(

@@ -85,6 +85,7 @@ export const env = createEnv({
 			.max(86_400_000)
 			.default(300_000),
 		IMAGE_ASSET_CLEANUP_BATCH_SIZE: z.coerce.number().int().min(1).max(500).default(100),
+		API_QUOTA_CLEANUP_INTERVAL_MS: z.coerce.number().int().min(60_000).default(3_600_000),
 		MEILISEARCH_URL: origin.optional(),
 		MEILISEARCH_QUERY_KEY: z.string().min(16).optional(),
 		MEILISEARCH_RECONCILER_KEY: z.string().min(16).optional(),

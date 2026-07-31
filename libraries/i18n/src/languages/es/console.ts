@@ -46,9 +46,9 @@ export default {
 			label: "Auditoría de seguridad",
 			description: `Revisa los eventos administrativos importantes y las decisiones de seguridad de la plataforma, los ${realmTerms.plural} y las Units.`,
 		},
-		tokenPolicies: {
-			label: `Políticas de tokens de ${verbatimTerms.api.value}`,
-			description: `Gestiona los límites globales de frecuencia, concurrencia y coste de los tokens de ${verbatimTerms.api.value}.`,
+		apiQuotas: {
+			label: `Cuotas de ${verbatimTerms.api.value}`,
+			description: `Gestiona los límites por cuenta de frecuencia, concurrencia, coste y cantidad de tokens de ${verbatimTerms.api.value}.`,
 		},
 	},
 	units: {
@@ -189,8 +189,34 @@ export default {
 		tabs: {
 			overview: "Resumen",
 			access: "Acceso a la plataforma",
+			apiQuota: `Cuota de ${verbatimTerms.api.value}`,
 			sessions: "Sesiones",
 			activity: "Actividad",
+		},
+		quotaUnavailable: `No tienes acceso a la cuota de ${verbatimTerms.api.value} de esta cuenta.`,
+		accountQuota: {
+			title: `Cuota de ${verbatimTerms.api.value} de la cuenta`,
+			description:
+				"Los límites efectivos de la cuenta se aplican a todos los tokens, por lo que crear más no multiplica la capacidad.",
+			policy: "Política de cuotas",
+			validUntil: "Caducidad del acceso privilegiado",
+			customize: "Sobrescribir la política para esta cuenta",
+			customizeDescription:
+				"La sobrescritura queda limitada por la clase elegida y se guarda separada de las revisiones inmutables.",
+			reason: "Motivo de la asignación",
+			reasonPlaceholder:
+				"Registra la justificación operativa; se guardará en el registro de seguridad.",
+			invalid:
+				"Revisa los límites, las sobrescrituras por operación y la caducidad privilegiada.",
+			updateFailed: "No se pudo actualizar la cuota. Recarga la página e inténtalo de nuevo.",
+			reset: "Restablecer al estándar",
+			save: "Guardar cuota de la cuenta",
+			readOnly: "Puedes consultar la cuota de esta cuenta, pero no modificarla.",
+			sources: {
+				assigned: "Asignada",
+				standard_default: "Valor estándar",
+				privileged_fallback: "Reserva privilegiada",
+			},
 		},
 		identityTitle: "Identidad de inicio de sesión",
 		identityDescription:
@@ -232,22 +258,28 @@ export default {
 			"Eventos administrativos importantes sobre el estado de la cuenta y las sesiones.",
 		noActivity: "No hay eventos de seguridad asociados directamente con este usuario.",
 	},
-	tokenPolicies: {
+	apiQuotas: {
 		policyList: "Políticas",
 		revision: insert("Revisión {{revision}}", { revision: Number }),
 		enabled: "Habilitada",
 		disabled: "Deshabilitada",
 		empty: `No hay políticas de tokens de ${verbatimTerms.api.value} disponibles.`,
-		kind: "Tipo de política",
-		kinds: { standard: "Estándar", privileged: "Privilegiada" },
+		policyClass: "Clase de política",
+		classes: { standard: "Estándar", privileged: "Privilegiada" },
 		schemaVersion: insert("Esquema {{version}}", { version: Number }),
 		requestsPerMinute: "Solicitudes por minuto",
+		burstCapacity: "Capacidad de ráfaga",
 		maxConcurrentRequests: "Máximo de solicitudes simultáneas",
 		dailyCostUnits: "Unidades de coste diarias",
+		maxActiveTokens: "Límite de tokens activos",
 		operationOverrides: "Excepciones por operación",
 		operationOverridesDescription: `Usa un objeto ${verbatimTerms.json.value} que asocie identificadores de operación con límites específicos; un objeto vacío aplica los límites globales.`,
 		invalidOperations: `Introduce un ${verbatimTerms.json.value} válido. Cada límite debe ser un número entero positivo.`,
-		updateFailed: "No se pudo actualizar la política de tokens. Recarga e inténtalo de nuevo.",
+		changeReason: "Motivo de la revisión",
+		changeReasonPlaceholder:
+			"Registra el motivo de la revisión inmutable y del registro de seguridad.",
+		updateFailed: "No se pudo actualizar la política de cuotas. Recarga e inténtalo de nuevo.",
+		readOnly: "Puedes ver las políticas de cuotas, pero no publicar una revisión nueva.",
 		save: "Guardar política",
 	},
 	dashboard: {

@@ -501,7 +501,7 @@ export default new Elysia()
 				"/:seriesId/releases",
 				async ({ params, query, request }) => {
 					const localizationLanguages = query.localizationLanguages ?? [];
-					const identity = await resolveIdentity(request.headers, "unit:read");
+					const identity = await resolveIdentity(request, "unit:read");
 					const { authorization } = identity;
 					await authorization.unit.ensureCanRead(
 						params.seriesId,
@@ -619,7 +619,7 @@ export default new Elysia()
 			.get(
 				"/:zoneId",
 				async ({ params, query, request }) => {
-					const authorization = (await resolveIdentity(request.headers, "unit:read"))
+					const authorization = (await resolveIdentity(request, "unit:read"))
 						.authorization;
 					await authorization.unit.ensureCanRead(
 						params.zoneId,
@@ -644,7 +644,7 @@ export default new Elysia()
 			.get(
 				"/:zoneId/render",
 				async ({ params, query, request }) => {
-					const identity = await resolveIdentity(request.headers, "unit:read");
+					const identity = await resolveIdentity(request, "unit:read");
 					await identity.authorization.unit.ensureCanRead(
 						params.zoneId,
 						() => new UnitNotFound("Zone"),
@@ -952,7 +952,7 @@ export default new Elysia()
 			.get(
 				"/:zoneId/pages",
 				async ({ params, request }) => {
-					const authorization = (await resolveIdentity(request.headers, "unit:read"))
+					const authorization = (await resolveIdentity(request, "unit:read"))
 						.authorization;
 					await authorization.unit.ensureCanRead(
 						params.zoneId,
@@ -1027,7 +1027,7 @@ export default new Elysia()
 			.get(
 				"/:zoneId/pages/:pageId",
 				async ({ params, request }) => {
-					const authorization = (await resolveIdentity(request.headers, "unit:read"))
+					const authorization = (await resolveIdentity(request, "unit:read"))
 						.authorization;
 					await authorization.unit.ensureCanRead(
 						params.zoneId,
@@ -1181,7 +1181,7 @@ export default new Elysia()
 			.get(
 				"/:zoneId/navigation",
 				async ({ params, request }) => {
-					const authorization = (await resolveIdentity(request.headers, "unit:read"))
+					const authorization = (await resolveIdentity(request, "unit:read"))
 						.authorization;
 					await authorization.unit.ensureCanRead(
 						params.zoneId,
@@ -1263,7 +1263,7 @@ export default new Elysia()
 			.get(
 				"/:zoneId/navigation/:navigationId",
 				async ({ params, request }) => {
-					const authorization = (await resolveIdentity(request.headers, "unit:read"))
+					const authorization = (await resolveIdentity(request, "unit:read"))
 						.authorization;
 					await authorization.unit.ensureCanRead(
 						params.zoneId,
@@ -1608,7 +1608,7 @@ export default new Elysia()
 			.get(
 				"/:softwareId/system-requirements",
 				async ({ params, request }) => {
-					const authorization = (await resolveIdentity(request.headers, "unit:read"))
+					const authorization = (await resolveIdentity(request, "unit:read"))
 						.authorization;
 					await authorization.unit.ensureCanRead(
 						params.softwareId,

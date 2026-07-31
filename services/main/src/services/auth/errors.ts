@@ -28,6 +28,26 @@ export class ApiTokenRateLimitExceeded extends Data.TaggedError("ApiTokenRateLim
 	}
 }
 
+export type ApiQuotaExceededDetails = {
+	dimension: "request_rate" | "concurrency" | "daily_cost";
+	subject: "account" | "token";
+	scope: string;
+	limit: number;
+};
+
+export class ApiQuotaExceeded extends Data.TaggedError("ApiQuotaExceeded") {
+	static readonly status = StatusCodes.TOO_MANY_REQUESTS as const;
+	readonly status = ApiQuotaExceeded.status;
+	readonly message = "API quota exceeded";
+
+	constructor(
+		readonly retryAfterSeconds: number,
+		readonly details: ApiQuotaExceededDetails,
+	) {
+		super();
+	}
+}
+
 export class InteractiveSessionRequired extends Data.TaggedError("InteractiveSessionRequired") {
 	static readonly status = StatusCodes.UNAUTHORIZED as const;
 	readonly status = InteractiveSessionRequired.status;
@@ -66,6 +86,7 @@ export const AuthErrors = [
 	AuthenticationRequired,
 	ApiTokenPermissionRequired,
 	ApiTokenRateLimitExceeded,
+	ApiQuotaExceeded,
 	InteractiveSessionRequired,
 	FreshSessionRequired,
 	EmailVerificationRequired,

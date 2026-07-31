@@ -7,6 +7,7 @@ import { Authorization } from "../authorization";
 import { database } from "../database";
 import { users } from "../database/schema";
 import type { ApiPermission } from "./api-permissions";
+import type { ApiQuotaOperationId } from "./api-quota/operation";
 import { ensureAccountAuthenticationAllowed } from "./account-state";
 import { fromApiKeyPermissions, isApiPermission } from "./api-permissions";
 import {
@@ -19,9 +20,18 @@ import {
 } from "./errors";
 import { auth, CredentialControlFreshAgeSeconds } from "./index";
 import { ensureProfile, type SessionProfile } from "./profile";
-import { enforceApiTokenLimits, type ApiTokenLimitLease } from "./api-token/limit-store";
-import { apiTokenOperationId } from "./api-token/operation";
-import { resolveApiTokenPolicy, type ResolvedApiTokenPolicy } from "./api-token/policy-service";
+import { enforceApiQuota, type ApiQuotaLease } from "./api-quota/limit-store";
+import {
+	apiRouteOperationId,
+	resolveApiQuotaOperation,
+	resolveApiQuotaOperationById,
+} from "./api-quota/operation";
+import {
+	getApiTokenQuotaOverride,
+	resolveApiAccountQuotaPolicy,
+	type ApiTokenQuotaOverrideSummary,
+	type ResolvedApiAccountQuotaPolicy,
+} from "./api-quota/policy-service";
 
 type BaseIdentity = {
 	user: User;
@@ -43,8 +53,9 @@ export type ApiKeyIdentity = BaseIdentity & {
 		id: string;
 		permissions: readonly ApiPermission[];
 		operationId: string;
-		policy: ResolvedApiTokenPolicy;
-		limitLease: ApiTokenLimitLease;
+		quotaPolicy: ResolvedApiAccountQuotaPolicy;
+		tokenQuotaOverride: ApiTokenQuotaOverrideSummary | undefined;
+		quotaLease: ApiQuotaLease;
 	};
 	session: undefined;
 };
@@ -80,7 +91,7 @@ export type AccessRequirement =
 	| "fresh-session-only"
 	| "api-key-only";
 
-const requestLimitLeases = new WeakMap<Request, ApiTokenLimitLease>();
+const requestQuotaLeases = new WeakMap<Request, ApiQuotaLease[]>();
 
 type OpenApiSecurity = NonNullable<DocumentDecoration["security"]>;
 
@@ -89,10 +100,16 @@ const ApiTokenOnlySecurity: OpenApiSecurity = [{ ApiToken: [] }];
 const SessionOnlySecurity: OpenApiSecurity = [{ SessionCookie: [] }];
 
 async function releaseRequestLimitLease(request: Request) {
-	const lease = requestLimitLeases.get(request);
-	if (!lease) return;
-	requestLimitLeases.delete(request);
-	await lease.release();
+	const leases = requestQuotaLeases.get(request);
+	if (!leases) return;
+	requestQuotaLeases.delete(request);
+	await Promise.all(leases.map((lease) => lease.release()));
+}
+
+function trackRequestLimitLease(request: Request, lease: ApiQuotaLease) {
+	const leases = requestQuotaLeases.get(request);
+	if (leases) leases.push(lease);
+	else requestQuotaLeases.set(request, [lease]);
 }
 
 function accessPolicy(requirement: AccessRequirement): AccessPolicy {
@@ -154,6 +171,8 @@ async function resolveApiKey(
 	key: string,
 	requiredPermission: ApiPermission | undefined,
 	operationId: string,
+	operation = resolveApiQuotaOperation(operationId),
+	accountAccess?: "authenticated" | "write" | "contribute",
 ): Promise<ApiKeyIdentity> {
 	const verified = await auth.api.verifyApiKey({
 		body: { key },
@@ -166,38 +185,50 @@ async function resolveApiKey(
 	const permissions = fromApiKeyPermissions(verified.key.permissions);
 	if (requiredPermission && !permissions.includes(requiredPermission))
 		throw new ApiTokenPermissionRequired(requiredPermission);
-	const policy = await resolveApiTokenPolicy(verified.key.id);
-	const limitLease = await enforceApiTokenLimits({
+	const [user] = await database
+		.select()
+		.from(users)
+		.where(eq(users.id, verified.key.referenceId))
+		.limit(1);
+	if (!user) throw new AuthenticationRequired();
+	await ensureAccountAuthenticationAllowed(user.id);
+	const profile = await ensureProfile(user);
+	const authorization = new Authorization(profile.unitId);
+	if (accountAccess === "write" || accountAccess === "contribute") {
+		if (!user.emailVerified) throw new EmailVerificationRequired();
+		if (accountAccess === "write") await authorization.account.ensureCanWrite();
+		else await authorization.account.ensureCanContribute();
+	}
+	const [quotaPolicy, tokenQuotaRecord] = await Promise.all([
+		resolveApiAccountQuotaPolicy(user.id),
+		getApiTokenQuotaOverride(verified.key.id),
+	]);
+	const quotaLease = await enforceApiQuota({
+		accountUserId: user.id,
 		tokenId: verified.key.id,
-		operationId,
-		policy,
+		operation,
+		accountPolicy: quotaPolicy,
+		tokenOverride: tokenQuotaRecord?.configurationOverride,
 	});
 
 	try {
-		const [user] = await database
-			.select()
-			.from(users)
-			.where(eq(users.id, verified.key.referenceId))
-			.limit(1);
-		if (!user) throw new AuthenticationRequired();
-		await ensureAccountAuthenticationAllowed(user.id);
-		const profile = await ensureProfile(user);
 		return {
 			user,
 			session: undefined,
 			profile,
-			authorization: new Authorization(profile.unitId),
+			authorization,
 			credential: {
 				kind: "apiKey",
 				id: verified.key.id,
 				permissions,
 				operationId,
-				policy,
-				limitLease,
+				quotaPolicy,
+				tokenQuotaOverride: tokenQuotaRecord,
+				quotaLease,
 			},
 		};
 	} catch (error) {
-		await limitLease.release();
+		await quotaLease.release();
 		throw error;
 	}
 }
@@ -226,10 +257,19 @@ async function requireAccess(
 	}
 
 	const identity = token
-		? await resolveApiKey(token, policy.permission, operationId)
+		? await resolveApiKey(
+				token,
+				policy.permission,
+				operationId,
+				resolveApiQuotaOperation(operationId),
+				policy.account,
+			)
 		: await resolveInteractiveSession(headers);
 	if (!identity) throw new AuthenticationRequired();
-	if (policy.account === "write" || policy.account === "contribute") {
+	if (
+		identity.credential.kind === "session" &&
+		(policy.account === "write" || policy.account === "contribute")
+	) {
 		if (!identity.user.emailVerified) throw new EmailVerificationRequired();
 		if (policy.account === "write") await identity.authorization.account.ensureCanWrite();
 		else await identity.authorization.account.ensureCanContribute();
@@ -238,44 +278,52 @@ async function requireAccess(
 }
 
 export async function resolveIdentity(
-	headers: Headers,
+	request: Request,
 	permission?: ApiPermission,
+	quotaOperationId?: ApiQuotaOperationId,
 ): Promise<ResolvedIdentity> {
-	const token = bearerToken(headers);
+	const token = bearerToken(request.headers);
 	let identity: AuthenticatedIdentity | undefined;
 	if (token) {
 		if (!permission) throw new ApiTokenPermissionRequired("an explicit route permission");
-		identity = await resolveApiKey(token, permission, "resolveIdentity");
+		identity = await resolveApiKey(
+			token,
+			permission,
+			quotaOperationId ?? "unscopedPublicRoute",
+			quotaOperationId
+				? resolveApiQuotaOperationById(quotaOperationId)
+				: resolveApiQuotaOperation("unscopedPublicRoute"),
+		);
 	} else {
-		identity = await resolveInteractiveSession(headers);
+		identity = await resolveInteractiveSession(request.headers);
 	}
 	if (!identity) return { profile: undefined, authorization: new Authorization(undefined) };
-	if (identity.credential.kind === "apiKey") await identity.credential.limitLease.release();
+	if (identity.credential.kind === "apiKey")
+		trackRequestLimitLease(request, identity.credential.quotaLease);
 	return { profile: identity.profile, authorization: identity.authorization };
 }
 
-export default new Elysia({ name: "session-context" }).macro({
-	access: (requirement: AccessRequirement) => ({
-		detail: { security: accessSecurity(requirement) },
-		async resolve({ request, route }) {
-			const identity = await requireAccess(
-				request.headers,
-				accessPolicy(requirement),
-				apiTokenOperationId(request.method, route),
-			);
-			if (identity.credential.kind === "apiKey")
-				requestLimitLeases.set(request, identity.credential.limitLease);
-			setAuditCredentialContext({
-				credentialKind: identity.credential.kind === "apiKey" ? "api_token" : "session",
-				credentialId:
-					identity.credential.kind === "apiKey"
-						? identity.credential.id
-						: identity.credential.session.id,
-			});
-			return identity;
-		},
-		async afterResponse({ request }) {
-			await releaseRequestLimitLease(request);
-		},
-	}),
-});
+export default new Elysia({ name: "session-context" })
+	.onAfterResponse(({ request }) => releaseRequestLimitLease(request))
+	.macro({
+		access: (requirement: AccessRequirement) => ({
+			detail: { security: accessSecurity(requirement) },
+			async resolve({ request, route }) {
+				const identity = await requireAccess(
+					request.headers,
+					accessPolicy(requirement),
+					apiRouteOperationId(request.method, route),
+				);
+				if (identity.credential.kind === "apiKey")
+					trackRequestLimitLease(request, identity.credential.quotaLease);
+				setAuditCredentialContext({
+					credentialKind: identity.credential.kind === "apiKey" ? "api_token" : "session",
+					credentialId:
+						identity.credential.kind === "apiKey"
+							? identity.credential.id
+							: identity.credential.session.id,
+				});
+				return identity;
+			},
+		}),
+	});

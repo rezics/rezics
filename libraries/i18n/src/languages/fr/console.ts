@@ -46,9 +46,9 @@ export default {
 			label: "Audit de sécurité",
 			description: `Consultez les événements administratifs importants et les décisions de sécurité pour la plateforme, les ${realmTerms.plural} et les Units.`,
 		},
-		tokenPolicies: {
-			label: `Règles des jetons ${verbatimTerms.api.value}`,
-			description: `Gérez les limites globales de débit, de concurrence et de coût des jetons ${verbatimTerms.api.value}.`,
+		apiQuotas: {
+			label: `Quotas ${verbatimTerms.api.value}`,
+			description: `Gérez par compte les limites de débit, de concurrence, de coût et de nombre de jetons ${verbatimTerms.api.value}.`,
 		},
 	},
 	units: {
@@ -191,8 +191,34 @@ export default {
 		tabs: {
 			overview: "Vue d’ensemble",
 			access: "Accès à la plateforme",
+			apiQuota: `Quota ${verbatimTerms.api.value}`,
 			sessions: "Sessions",
 			activity: "Activité",
+		},
+		quotaUnavailable: `Vous n’avez pas accès au quota ${verbatimTerms.api.value} de ce compte.`,
+		accountQuota: {
+			title: `Quota ${verbatimTerms.api.value} du compte`,
+			description:
+				"Les limites effectives du compte s’appliquent à tous les jetons ; en créer davantage ne multiplie donc pas la capacité.",
+			policy: "Politique de quota",
+			validUntil: "Expiration de l’accès privilégié",
+			customize: "Remplacer la politique pour ce compte",
+			customizeDescription:
+				"Les valeurs propres au compte restent bornées par la classe choisie et sont conservées séparément des révisions immuables.",
+			reason: "Motif de l’attribution",
+			reasonPlaceholder:
+				"Consignez la justification opérationnelle ; elle sera enregistrée dans le journal de sécurité.",
+			invalid: "Vérifiez les limites, les valeurs par opération et l’expiration privilégiée.",
+			updateFailed:
+				"Le quota du compte n’a pas pu être mis à jour. Rechargez la page et réessayez.",
+			reset: "Rétablir la valeur standard",
+			save: "Enregistrer le quota du compte",
+			readOnly: "Vous pouvez consulter le quota de ce compte, mais pas le modifier.",
+			sources: {
+				assigned: "Attribué",
+				standard_default: "Valeur standard",
+				privileged_fallback: "Repli privilégié",
+			},
 		},
 		identityTitle: "Identité de connexion",
 		identityDescription:
@@ -234,22 +260,30 @@ export default {
 			"Événements administratifs importants liés à l’état du compte et aux sessions.",
 		noActivity: "Aucun événement de sécurité n’est directement associé à cet utilisateur.",
 	},
-	tokenPolicies: {
+	apiQuotas: {
 		policyList: "Règles",
 		revision: insert("Révision {{revision}}", { revision: Number }),
 		enabled: "Activée",
 		disabled: "Désactivée",
 		empty: `Aucune règle de jeton ${verbatimTerms.api.value} n’est disponible.`,
-		kind: "Type de règle",
-		kinds: { standard: "Standard", privileged: "Privilégiée" },
+		policyClass: "Classe de politique",
+		classes: { standard: "Standard", privileged: "Privilégiée" },
 		schemaVersion: insert("Schéma {{version}}", { version: Number }),
 		requestsPerMinute: "Requêtes par minute",
+		burstCapacity: "Capacité de pointe",
 		maxConcurrentRequests: "Nombre maximal de requêtes simultanées",
 		dailyCostUnits: "Unités de coût quotidiennes",
+		maxActiveTokens: "Limite de jetons actifs",
 		operationOverrides: "Dérogations par opération",
 		operationOverridesDescription: `Utilisez un objet ${verbatimTerms.json.value} associant les identifiants d’opération aux limites dérogatoires ; un objet vide applique les limites globales partout.`,
 		invalidOperations: `Saisissez un ${verbatimTerms.json.value} valide. Chaque limite doit être un entier strictement positif.`,
-		updateFailed: "Impossible de mettre à jour la règle de jeton. Rechargez puis réessayez.",
+		changeReason: "Motif de la révision",
+		changeReasonPlaceholder:
+			"Consignez le motif de la révision immuable et du journal de sécurité.",
+		updateFailed:
+			"Impossible de mettre à jour la politique de quota. Rechargez puis réessayez.",
+		readOnly:
+			"Vous pouvez consulter les politiques de quota, mais pas publier de nouvelle révision.",
 		save: "Enregistrer la règle",
 	},
 	dashboard: {

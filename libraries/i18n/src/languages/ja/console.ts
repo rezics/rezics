@@ -45,9 +45,9 @@ export default {
 			label: "セキュリティ監査",
 			description: `プラットフォーム、${realmTerms.pluralLabel}、およびユニット全体での影響の大きい管理イベントとセキュリティに関する決定を確認します。`,
 		},
-		tokenPolicies: {
-			label: `${verbatimTerms.api.value} トークンポリシー`,
-			description: `${verbatimTerms.api.value} トークンの全体的なレート、同時実行数、コスト制限を管理します。`,
+		apiQuotas: {
+			label: `${verbatimTerms.api.value} クォータ`,
+			description: `アカウント単位の ${verbatimTerms.api.value} レート、同時実行数、コスト、トークン数制限を管理します。`,
 		},
 	},
 	units: {
@@ -184,8 +184,34 @@ export default {
 		tabs: {
 			overview: "概要",
 			access: "プラットフォームアクセス",
+			apiQuota: `${verbatimTerms.api.value} クォータ`,
 			sessions: "セッション",
 			activity: "活動",
+		},
+		quotaUnavailable: `このアカウントの ${verbatimTerms.api.value} クォータを表示する権限がありません。`,
+		accountQuota: {
+			title: `アカウントの ${verbatimTerms.api.value} クォータ`,
+			description:
+				"有効なアカウント単位の制限はすべてのトークンに適用されるため、トークンを増やしても容量は増えません。",
+			policy: "クォータポリシー",
+			validUntil: "特権アクセスの有効期限",
+			customize: "このアカウント用にポリシーを上書きする",
+			customizeDescription:
+				"アカウント固有値は選択したポリシークラスの上限内に制限され、不変の改訂履歴とは別に保存されます。",
+			reason: "割り当て理由",
+			reasonPlaceholder:
+				"運用上の根拠を記録します。内容はセキュリティ監査ログに保存されます。",
+			invalid: "クォータ制限、操作別の上書き、特権アクセスの有効期限を確認してください。",
+			updateFailed:
+				"アカウントのクォータを更新できませんでした。再読み込みしてもう一度お試しください。",
+			reset: "標準設定に戻す",
+			save: "アカウントクォータを保存",
+			readOnly: "このアカウントのクォータを表示できますが、変更はできません。",
+			sources: {
+				assigned: "割り当て済み",
+				standard_default: "標準の既定値",
+				privileged_fallback: "特権設定からのフォールバック",
+			},
 		},
 		identityTitle: "ログイン識別情報",
 		identityDescription: "アカウント識別子、メール確認、現在有効なセッションです。",
@@ -223,22 +249,27 @@ export default {
 		activityDescription: "アカウント状態とセッションに関する重要な管理イベントです。",
 		noActivity: "この利用者に直接関連するセキュリティイベントはありません。",
 	},
-	tokenPolicies: {
+	apiQuotas: {
 		policyList: "ポリシー",
 		revision: insert("リビジョン {{revision}}", { revision: Number }),
 		enabled: "有効",
 		disabled: "無効",
 		empty: `管理可能な ${verbatimTerms.api.value} トークンポリシーはありません。`,
-		kind: "ポリシー種別",
-		kinds: { standard: "標準", privileged: "特権" },
+		policyClass: "ポリシークラス",
+		classes: { standard: "標準", privileged: "特権" },
 		schemaVersion: insert("スキーマ {{version}}", { version: Number }),
 		requestsPerMinute: "1分あたりのリクエスト数",
+		burstCapacity: "バースト容量",
 		maxConcurrentRequests: "最大同時リクエスト数",
 		dailyCostUnits: "1日あたりのコスト単位",
+		maxActiveTokens: "有効なトークン数の上限",
 		operationOverrides: "操作別の上書き",
 		operationOverridesDescription: `${verbatimTerms.json.value} オブジェクトで操作識別子を上書き制限に対応付けます。空のオブジェクトでは全操作に全体制限を使用します。`,
 		invalidOperations: `有効な操作上書き ${verbatimTerms.json.value} を入力してください。各制限は正の整数である必要があります。`,
-		updateFailed: "トークンポリシーを更新できませんでした。再読み込みしてお試しください。",
+		changeReason: "改訂理由",
+		changeReasonPlaceholder: "不変の改訂履歴とセキュリティ監査に残す理由を記録します。",
+		updateFailed: "クォータポリシーを更新できませんでした。再読み込みしてお試しください。",
+		readOnly: "クォータポリシーを表示できますが、新しい改訂は公開できません。",
 		save: "ポリシーを保存",
 	},
 	dashboard: {

@@ -9,7 +9,7 @@ describe("console routes", () => {
 		expect(consoleSectionHref("ownership-claims")).toBe("/console/ownership-claims");
 		expect(consoleSectionHref("moderation")).toBe("/console/moderation");
 		expect(consoleSectionHref("audit")).toBe("/console/audit");
-		expect(consoleSectionHref("token-policies")).toBe("/console/token-policies");
+		expect(consoleSectionHref("api-quotas")).toBe("/console/api-quotas");
 	});
 
 	it.each([
@@ -19,7 +19,7 @@ describe("console routes", () => {
 		["/console/ownership-claims", "ownership-claims"],
 		["/console/moderation", "moderation"],
 		["/console/audit/", "audit"],
-		["/console/token-policies", "token-policies"],
+		["/console/api-quotas", "api-quotas"],
 		["/console", undefined],
 		["/console/unknown", undefined],
 	] as const)("parses %s", (pathname, expected) => {

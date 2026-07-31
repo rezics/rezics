@@ -113,7 +113,7 @@ export default new Elysia({ prefix: "/units/by-id" })
 	.get(
 		"/:unitId/docks",
 		async ({ params, request }) => {
-			const identity = await resolveIdentity(request.headers, "unit:read");
+			const identity = await resolveIdentity(request, "unit:read");
 			await identity.authorization.unit.ensureCanRead(
 				params.unitId,
 				() => new UnitNotFound(),
@@ -148,7 +148,7 @@ export default new Elysia({ prefix: "/units/by-id" })
 	.get(
 		"/:unitId/docks/:kind",
 		async ({ params, request }) => {
-			const identity = await resolveIdentity(request.headers, "unit:read");
+			const identity = await resolveIdentity(request, "unit:read");
 			await identity.authorization.unit.ensureCanRead(
 				params.unitId,
 				() => new UnitNotFound(),
@@ -260,7 +260,7 @@ export default new Elysia({ prefix: "/units/by-id" })
 	.get(
 		"/:unitId/docks/:kind/revisions",
 		async ({ params, query, request }) => {
-			const identity = await resolveIdentity(request.headers, "unit:read");
+			const identity = await resolveIdentity(request, "unit:read");
 			await identity.authorization.unit.ensureCanRead(
 				params.unitId,
 				() => new UnitNotFound(),

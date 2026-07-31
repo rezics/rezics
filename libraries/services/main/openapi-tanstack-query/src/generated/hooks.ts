@@ -13,6 +13,15 @@ import type {
 	AssignCurrentProfileSlugStatus409,
 	AssignCurrentProfileSlugStatus422,
 	AssignCurrentProfileSlugStatus500,
+	DeleteApiApiQuotaPoliciesAccountsByUserIdOptions,
+	DeleteApiApiQuotaPoliciesAccountsByUserIdStatus200,
+	DeleteApiApiQuotaPoliciesAccountsByUserIdStatus400,
+	DeleteApiApiQuotaPoliciesAccountsByUserIdStatus401,
+	DeleteApiApiQuotaPoliciesAccountsByUserIdStatus403,
+	DeleteApiApiQuotaPoliciesAccountsByUserIdStatus404,
+	DeleteApiApiQuotaPoliciesAccountsByUserIdStatus409,
+	DeleteApiApiQuotaPoliciesAccountsByUserIdStatus422,
+	DeleteApiApiQuotaPoliciesAccountsByUserIdStatus500,
 	DeleteApiApiTokensByTokenIdOptions,
 	DeleteApiApiTokensByTokenIdStatus204,
 	DeleteApiApiTokensByTokenIdStatus401,
@@ -221,6 +230,7 @@ import type {
 	PostApiApiTokensStatus400,
 	PostApiApiTokensStatus401,
 	PostApiApiTokensStatus403,
+	PostApiApiTokensStatus409,
 	PostApiApiTokensStatus422,
 	PostApiApiTokensStatus500,
 	PatchApiApiTokensByTokenIdOptions,
@@ -229,42 +239,60 @@ import type {
 	PatchApiApiTokensByTokenIdStatus401,
 	PatchApiApiTokensByTokenIdStatus403,
 	PatchApiApiTokensByTokenIdStatus404,
+	PatchApiApiTokensByTokenIdStatus409,
 	PatchApiApiTokensByTokenIdStatus422,
 	PatchApiApiTokensByTokenIdStatus500,
-	PutApiApiTokensByTokenIdPolicyOptions,
-	PutApiApiTokensByTokenIdPolicyStatus200,
-	PutApiApiTokensByTokenIdPolicyStatus400,
-	PutApiApiTokensByTokenIdPolicyStatus401,
-	PutApiApiTokensByTokenIdPolicyStatus403,
-	PutApiApiTokensByTokenIdPolicyStatus404,
-	PutApiApiTokensByTokenIdPolicyStatus409,
-	PutApiApiTokensByTokenIdPolicyStatus422,
-	PutApiApiTokensByTokenIdPolicyStatus500,
+	PutApiApiTokensByTokenIdQuotaOverrideOptions,
+	PutApiApiTokensByTokenIdQuotaOverrideStatus200,
+	PutApiApiTokensByTokenIdQuotaOverrideStatus400,
+	PutApiApiTokensByTokenIdQuotaOverrideStatus401,
+	PutApiApiTokensByTokenIdQuotaOverrideStatus403,
+	PutApiApiTokensByTokenIdQuotaOverrideStatus404,
+	PutApiApiTokensByTokenIdQuotaOverrideStatus409,
+	PutApiApiTokensByTokenIdQuotaOverrideStatus422,
+	PutApiApiTokensByTokenIdQuotaOverrideStatus500,
+	DeleteApiApiTokensByTokenIdQuotaOverrideOptions,
+	DeleteApiApiTokensByTokenIdQuotaOverrideStatus204,
+	DeleteApiApiTokensByTokenIdQuotaOverrideStatus400,
+	DeleteApiApiTokensByTokenIdQuotaOverrideStatus401,
+	DeleteApiApiTokensByTokenIdQuotaOverrideStatus403,
+	DeleteApiApiTokensByTokenIdQuotaOverrideStatus404,
+	DeleteApiApiTokensByTokenIdQuotaOverrideStatus409,
+	DeleteApiApiTokensByTokenIdQuotaOverrideStatus422,
+	DeleteApiApiTokensByTokenIdQuotaOverrideStatus500,
 	GetCurrentApiTokenStatus200,
 	GetCurrentApiTokenStatus401,
 	GetCurrentApiTokenStatus429,
 	GetCurrentApiTokenStatus500,
-	GetApiApiTokenPoliciesStatus200,
-	GetApiApiTokenPoliciesStatus401,
-	GetApiApiTokenPoliciesStatus403,
-	GetApiApiTokenPoliciesStatus500,
-	PatchApiApiTokenPoliciesByPolicyKeyOptions,
-	PatchApiApiTokenPoliciesByPolicyKeyStatus200,
-	PatchApiApiTokenPoliciesByPolicyKeyStatus400,
-	PatchApiApiTokenPoliciesByPolicyKeyStatus401,
-	PatchApiApiTokenPoliciesByPolicyKeyStatus403,
-	PatchApiApiTokenPoliciesByPolicyKeyStatus404,
-	PatchApiApiTokenPoliciesByPolicyKeyStatus409,
-	PatchApiApiTokenPoliciesByPolicyKeyStatus422,
-	PatchApiApiTokenPoliciesByPolicyKeyStatus500,
-	PutApiApiTokenPoliciesBindingsByTokenIdOptions,
-	PutApiApiTokenPoliciesBindingsByTokenIdStatus200,
-	PutApiApiTokenPoliciesBindingsByTokenIdStatus400,
-	PutApiApiTokenPoliciesBindingsByTokenIdStatus401,
-	PutApiApiTokenPoliciesBindingsByTokenIdStatus403,
-	PutApiApiTokenPoliciesBindingsByTokenIdStatus404,
-	PutApiApiTokenPoliciesBindingsByTokenIdStatus422,
-	PutApiApiTokenPoliciesBindingsByTokenIdStatus500,
+	GetApiApiQuotaPoliciesStatus200,
+	GetApiApiQuotaPoliciesStatus401,
+	GetApiApiQuotaPoliciesStatus403,
+	GetApiApiQuotaPoliciesStatus500,
+	PutApiApiQuotaPoliciesByPolicyKeyOptions,
+	PutApiApiQuotaPoliciesByPolicyKeyStatus200,
+	PutApiApiQuotaPoliciesByPolicyKeyStatus400,
+	PutApiApiQuotaPoliciesByPolicyKeyStatus401,
+	PutApiApiQuotaPoliciesByPolicyKeyStatus403,
+	PutApiApiQuotaPoliciesByPolicyKeyStatus404,
+	PutApiApiQuotaPoliciesByPolicyKeyStatus409,
+	PutApiApiQuotaPoliciesByPolicyKeyStatus422,
+	PutApiApiQuotaPoliciesByPolicyKeyStatus500,
+	GetApiApiQuotaPoliciesAccountsByUserIdOptions,
+	GetApiApiQuotaPoliciesAccountsByUserIdStatus200,
+	GetApiApiQuotaPoliciesAccountsByUserIdStatus401,
+	GetApiApiQuotaPoliciesAccountsByUserIdStatus403,
+	GetApiApiQuotaPoliciesAccountsByUserIdStatus404,
+	GetApiApiQuotaPoliciesAccountsByUserIdStatus422,
+	GetApiApiQuotaPoliciesAccountsByUserIdStatus500,
+	PutApiApiQuotaPoliciesAccountsByUserIdOptions,
+	PutApiApiQuotaPoliciesAccountsByUserIdStatus200,
+	PutApiApiQuotaPoliciesAccountsByUserIdStatus400,
+	PutApiApiQuotaPoliciesAccountsByUserIdStatus401,
+	PutApiApiQuotaPoliciesAccountsByUserIdStatus403,
+	PutApiApiQuotaPoliciesAccountsByUserIdStatus404,
+	PutApiApiQuotaPoliciesAccountsByUserIdStatus409,
+	PutApiApiQuotaPoliciesAccountsByUserIdStatus422,
+	PutApiApiQuotaPoliciesAccountsByUserIdStatus500,
 	PostApiFeedQueryOptions,
 	PostApiFeedQueryStatus200,
 	PostApiFeedQueryStatus400,
@@ -2165,12 +2193,14 @@ import type {
 	PostApiSearchFeaturesByTemplateExecuteStatus200,
 	PostApiSearchFeaturesByTemplateExecuteStatus400,
 	PostApiSearchFeaturesByTemplateExecuteStatus422,
+	PostApiSearchFeaturesByTemplateExecuteStatus429,
 	PostApiSearchFeaturesByTemplateExecuteStatus500,
 	PostApiSearchFeaturesByTemplateExecuteStatus503,
 	PostApiSearchFeaturesByTemplateFeedOptions,
 	PostApiSearchFeaturesByTemplateFeedStatus200,
 	PostApiSearchFeaturesByTemplateFeedStatus400,
 	PostApiSearchFeaturesByTemplateFeedStatus422,
+	PostApiSearchFeaturesByTemplateFeedStatus429,
 	PostApiSearchFeaturesByTemplateFeedStatus500,
 	PostApiSearchFeaturesByTemplateFeedStatus503,
 	GetApiSearchZonesByZoneIdFeatureOptions,
@@ -2192,6 +2222,7 @@ import type {
 	PostApiSearchZonesByZoneIdFeatureExecuteStatus400,
 	PostApiSearchZonesByZoneIdFeatureExecuteStatus404,
 	PostApiSearchZonesByZoneIdFeatureExecuteStatus422,
+	PostApiSearchZonesByZoneIdFeatureExecuteStatus429,
 	PostApiSearchZonesByZoneIdFeatureExecuteStatus500,
 	PostApiSearchZonesByZoneIdFeatureExecuteStatus503,
 	PostApiSearchZonesByZoneIdFeatureFeedOptions,
@@ -2199,6 +2230,7 @@ import type {
 	PostApiSearchZonesByZoneIdFeatureFeedStatus400,
 	PostApiSearchZonesByZoneIdFeatureFeedStatus404,
 	PostApiSearchZonesByZoneIdFeatureFeedStatus422,
+	PostApiSearchZonesByZoneIdFeatureFeedStatus429,
 	PostApiSearchZonesByZoneIdFeatureFeedStatus500,
 	PostApiSearchZonesByZoneIdFeatureFeedStatus503,
 	GetApiSearchZonesByZoneIdFeatureRevisionsOptions,
@@ -2220,6 +2252,7 @@ import type {
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422,
+	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus429,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus503,
 	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteOptions,
@@ -2227,6 +2260,7 @@ import type {
 	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400,
 	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404,
 	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422,
+	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus429,
 	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500,
 	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus503,
 	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteOptions,
@@ -2234,12 +2268,14 @@ import type {
 	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400,
 	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404,
 	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422,
+	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus429,
 	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500,
 	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus503,
 	PostApiSearchOptions,
 	PostApiSearchStatus200,
 	PostApiSearchStatus400,
 	PostApiSearchStatus422,
+	PostApiSearchStatus429,
 	PostApiSearchStatus500,
 	PostApiSearchStatus503,
 	PostApiSearchSharedQueriesOptions,
@@ -2315,6 +2351,7 @@ import type {
 } from "@tanstack/react-query";
 import {
 	assignCurrentProfileSlug,
+	deleteApiApiQuotaPoliciesAccountsByUserId,
 	deleteApiApiTokensByTokenId,
 	deleteApiMessagesByMessageId,
 	deleteApiRecommendationsExclusionsByUnitId,
@@ -2351,11 +2388,13 @@ import {
 	getApiApiTokens,
 	postApiApiTokens,
 	patchApiApiTokensByTokenId,
-	putApiApiTokensByTokenIdPolicy,
+	putApiApiTokensByTokenIdQuotaOverride,
+	deleteApiApiTokensByTokenIdQuotaOverride,
 	getCurrentApiToken,
-	getApiApiTokenPolicies,
-	patchApiApiTokenPoliciesByPolicyKey,
-	putApiApiTokenPoliciesBindingsByTokenId,
+	getApiApiQuotaPolicies,
+	putApiApiQuotaPoliciesByPolicyKey,
+	getApiApiQuotaPoliciesAccountsByUserId,
+	putApiApiQuotaPoliciesAccountsByUserId,
 	postApiFeedQuery,
 	getApiReportsMe,
 	getApiReportsUnitsByUnitIdDestinations,
@@ -5878,6 +5917,7 @@ export function postApiApiTokensMutationOptions<TContext = unknown>(
 			| PostApiApiTokensStatus400
 			| PostApiApiTokensStatus401
 			| PostApiApiTokensStatus403
+			| PostApiApiTokensStatus409
 			| PostApiApiTokensStatus422
 			| PostApiApiTokensStatus500
 		>,
@@ -5904,6 +5944,7 @@ export function usePostApiApiTokens<TContext>(
 				| PostApiApiTokensStatus400
 				| PostApiApiTokensStatus401
 				| PostApiApiTokensStatus403
+				| PostApiApiTokensStatus409
 				| PostApiApiTokensStatus422
 				| PostApiApiTokensStatus500
 			>,
@@ -5923,6 +5964,7 @@ export function usePostApiApiTokens<TContext>(
 			| PostApiApiTokensStatus400
 			| PostApiApiTokensStatus401
 			| PostApiApiTokensStatus403
+			| PostApiApiTokensStatus409
 			| PostApiApiTokensStatus422
 			| PostApiApiTokensStatus500
 		>,
@@ -5936,6 +5978,7 @@ export function usePostApiApiTokens<TContext>(
 			| PostApiApiTokensStatus400
 			| PostApiApiTokensStatus401
 			| PostApiApiTokensStatus403
+			| PostApiApiTokensStatus409
 			| PostApiApiTokensStatus422
 			| PostApiApiTokensStatus500
 		>,
@@ -5954,6 +5997,7 @@ export function usePostApiApiTokens<TContext>(
 			| PostApiApiTokensStatus400
 			| PostApiApiTokensStatus401
 			| PostApiApiTokensStatus403
+			| PostApiApiTokensStatus409
 			| PostApiApiTokensStatus422
 			| PostApiApiTokensStatus500
 		>,
@@ -5976,6 +6020,7 @@ export function patchApiApiTokensByTokenIdMutationOptions<TContext = unknown>(
 			| PatchApiApiTokensByTokenIdStatus401
 			| PatchApiApiTokensByTokenIdStatus403
 			| PatchApiApiTokensByTokenIdStatus404
+			| PatchApiApiTokensByTokenIdStatus409
 			| PatchApiApiTokensByTokenIdStatus422
 			| PatchApiApiTokensByTokenIdStatus500
 		>,
@@ -6008,6 +6053,7 @@ export function usePatchApiApiTokensByTokenId<TContext>(
 				| PatchApiApiTokensByTokenIdStatus401
 				| PatchApiApiTokensByTokenIdStatus403
 				| PatchApiApiTokensByTokenIdStatus404
+				| PatchApiApiTokensByTokenIdStatus409
 				| PatchApiApiTokensByTokenIdStatus422
 				| PatchApiApiTokensByTokenIdStatus500
 			>,
@@ -6028,6 +6074,7 @@ export function usePatchApiApiTokensByTokenId<TContext>(
 			| PatchApiApiTokensByTokenIdStatus401
 			| PatchApiApiTokensByTokenIdStatus403
 			| PatchApiApiTokensByTokenIdStatus404
+			| PatchApiApiTokensByTokenIdStatus409
 			| PatchApiApiTokensByTokenIdStatus422
 			| PatchApiApiTokensByTokenIdStatus500
 		>,
@@ -6042,6 +6089,7 @@ export function usePatchApiApiTokensByTokenId<TContext>(
 			| PatchApiApiTokensByTokenIdStatus401
 			| PatchApiApiTokensByTokenIdStatus403
 			| PatchApiApiTokensByTokenIdStatus404
+			| PatchApiApiTokensByTokenIdStatus409
 			| PatchApiApiTokensByTokenIdStatus422
 			| PatchApiApiTokensByTokenIdStatus500
 		>,
@@ -6061,6 +6109,7 @@ export function usePatchApiApiTokensByTokenId<TContext>(
 			| PatchApiApiTokensByTokenIdStatus401
 			| PatchApiApiTokensByTokenIdStatus403
 			| PatchApiApiTokensByTokenIdStatus404
+			| PatchApiApiTokensByTokenIdStatus409
 			| PatchApiApiTokensByTokenIdStatus422
 			| PatchApiApiTokensByTokenIdStatus500
 		>,
@@ -6170,30 +6219,30 @@ export function useDeleteApiApiTokensByTokenId<TContext>(
 	>;
 }
 
-export const putApiApiTokensByTokenIdPolicyMutationKey = () =>
-	[{ url: "/api/api-tokens/:tokenId/policy" }] as const;
+export const putApiApiTokensByTokenIdQuotaOverrideMutationKey = () =>
+	[{ url: "/api/api-tokens/:tokenId/quota-override" }] as const;
 
-export function putApiApiTokensByTokenIdPolicyMutationOptions<TContext = unknown>(
+export function putApiApiTokensByTokenIdQuotaOverrideMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = putApiApiTokensByTokenIdPolicyMutationKey();
+	const mutationKey = putApiApiTokensByTokenIdQuotaOverrideMutationKey();
 	return mutationOptions<
-		PutApiApiTokensByTokenIdPolicyStatus200,
+		PutApiApiTokensByTokenIdQuotaOverrideStatus200,
 		ResponseErrorConfig<
-			| PutApiApiTokensByTokenIdPolicyStatus400
-			| PutApiApiTokensByTokenIdPolicyStatus401
-			| PutApiApiTokensByTokenIdPolicyStatus403
-			| PutApiApiTokensByTokenIdPolicyStatus404
-			| PutApiApiTokensByTokenIdPolicyStatus409
-			| PutApiApiTokensByTokenIdPolicyStatus422
-			| PutApiApiTokensByTokenIdPolicyStatus500
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus400
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus401
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus403
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus404
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus409
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus422
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus500
 		>,
-		PutApiApiTokensByTokenIdPolicyOptions,
+		PutApiApiTokensByTokenIdQuotaOverrideOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiApiTokensByTokenIdPolicy({
+			const { data } = await putApiApiTokensByTokenIdQuotaOverride({
 				...config,
 				path,
 				body,
@@ -6205,23 +6254,23 @@ export function putApiApiTokensByTokenIdPolicyMutationOptions<TContext = unknown
 }
 
 /**
- * @summary Replace API token policy override
- * {@link /api/api-tokens/:tokenId/policy}
+ * @summary Replace API token quota override
+ * {@link /api/api-tokens/:tokenId/quota-override}
  */
-export function usePutApiApiTokensByTokenIdPolicy<TContext>(
+export function usePutApiApiTokensByTokenIdQuotaOverride<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PutApiApiTokensByTokenIdPolicyStatus200,
+			PutApiApiTokensByTokenIdQuotaOverrideStatus200,
 			ResponseErrorConfig<
-				| PutApiApiTokensByTokenIdPolicyStatus400
-				| PutApiApiTokensByTokenIdPolicyStatus401
-				| PutApiApiTokensByTokenIdPolicyStatus403
-				| PutApiApiTokensByTokenIdPolicyStatus404
-				| PutApiApiTokensByTokenIdPolicyStatus409
-				| PutApiApiTokensByTokenIdPolicyStatus422
-				| PutApiApiTokensByTokenIdPolicyStatus500
+				| PutApiApiTokensByTokenIdQuotaOverrideStatus400
+				| PutApiApiTokensByTokenIdQuotaOverrideStatus401
+				| PutApiApiTokensByTokenIdQuotaOverrideStatus403
+				| PutApiApiTokensByTokenIdQuotaOverrideStatus404
+				| PutApiApiTokensByTokenIdQuotaOverrideStatus409
+				| PutApiApiTokensByTokenIdQuotaOverrideStatus422
+				| PutApiApiTokensByTokenIdQuotaOverrideStatus500
 			>,
-			PutApiApiTokensByTokenIdPolicyOptions,
+			PutApiApiTokensByTokenIdQuotaOverrideOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -6229,35 +6278,38 @@ export function usePutApiApiTokensByTokenIdPolicy<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? putApiApiTokensByTokenIdPolicyMutationKey();
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiApiTokensByTokenIdQuotaOverrideMutationKey();
 
-	const baseOptions = putApiApiTokensByTokenIdPolicyMutationOptions(config) as UseMutationOptions<
-		PutApiApiTokensByTokenIdPolicyStatus200,
+	const baseOptions = putApiApiTokensByTokenIdQuotaOverrideMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiApiTokensByTokenIdQuotaOverrideStatus200,
 		ResponseErrorConfig<
-			| PutApiApiTokensByTokenIdPolicyStatus400
-			| PutApiApiTokensByTokenIdPolicyStatus401
-			| PutApiApiTokensByTokenIdPolicyStatus403
-			| PutApiApiTokensByTokenIdPolicyStatus404
-			| PutApiApiTokensByTokenIdPolicyStatus409
-			| PutApiApiTokensByTokenIdPolicyStatus422
-			| PutApiApiTokensByTokenIdPolicyStatus500
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus400
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus401
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus403
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus404
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus409
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus422
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus500
 		>,
-		PutApiApiTokensByTokenIdPolicyOptions,
+		PutApiApiTokensByTokenIdQuotaOverrideOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PutApiApiTokensByTokenIdPolicyStatus200,
+		PutApiApiTokensByTokenIdQuotaOverrideStatus200,
 		ResponseErrorConfig<
-			| PutApiApiTokensByTokenIdPolicyStatus400
-			| PutApiApiTokensByTokenIdPolicyStatus401
-			| PutApiApiTokensByTokenIdPolicyStatus403
-			| PutApiApiTokensByTokenIdPolicyStatus404
-			| PutApiApiTokensByTokenIdPolicyStatus409
-			| PutApiApiTokensByTokenIdPolicyStatus422
-			| PutApiApiTokensByTokenIdPolicyStatus500
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus400
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus401
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus403
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus404
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus409
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus422
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus500
 		>,
-		PutApiApiTokensByTokenIdPolicyOptions,
+		PutApiApiTokensByTokenIdQuotaOverrideOptions,
 		TContext
 	>(
 		{
@@ -6267,17 +6319,132 @@ export function usePutApiApiTokensByTokenIdPolicy<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PutApiApiTokensByTokenIdPolicyStatus200,
+		PutApiApiTokensByTokenIdQuotaOverrideStatus200,
 		ResponseErrorConfig<
-			| PutApiApiTokensByTokenIdPolicyStatus400
-			| PutApiApiTokensByTokenIdPolicyStatus401
-			| PutApiApiTokensByTokenIdPolicyStatus403
-			| PutApiApiTokensByTokenIdPolicyStatus404
-			| PutApiApiTokensByTokenIdPolicyStatus409
-			| PutApiApiTokensByTokenIdPolicyStatus422
-			| PutApiApiTokensByTokenIdPolicyStatus500
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus400
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus401
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus403
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus404
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus409
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus422
+			| PutApiApiTokensByTokenIdQuotaOverrideStatus500
 		>,
-		PutApiApiTokensByTokenIdPolicyOptions,
+		PutApiApiTokensByTokenIdQuotaOverrideOptions,
+		TContext
+	>;
+}
+
+export const deleteApiApiTokensByTokenIdQuotaOverrideMutationKey = () =>
+	[{ url: "/api/api-tokens/:tokenId/quota-override" }] as const;
+
+export function deleteApiApiTokensByTokenIdQuotaOverrideMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = deleteApiApiTokensByTokenIdQuotaOverrideMutationKey();
+	return mutationOptions<
+		DeleteApiApiTokensByTokenIdQuotaOverrideStatus204,
+		ResponseErrorConfig<
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus400
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus401
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus403
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus404
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus409
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus422
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus500
+		>,
+		DeleteApiApiTokensByTokenIdQuotaOverrideOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await deleteApiApiTokensByTokenIdQuotaOverride({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Delete API token quota override
+ * {@link /api/api-tokens/:tokenId/quota-override}
+ */
+export function useDeleteApiApiTokensByTokenIdQuotaOverride<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiApiTokensByTokenIdQuotaOverrideStatus204,
+			ResponseErrorConfig<
+				| DeleteApiApiTokensByTokenIdQuotaOverrideStatus400
+				| DeleteApiApiTokensByTokenIdQuotaOverrideStatus401
+				| DeleteApiApiTokensByTokenIdQuotaOverrideStatus403
+				| DeleteApiApiTokensByTokenIdQuotaOverrideStatus404
+				| DeleteApiApiTokensByTokenIdQuotaOverrideStatus409
+				| DeleteApiApiTokensByTokenIdQuotaOverrideStatus422
+				| DeleteApiApiTokensByTokenIdQuotaOverrideStatus500
+			>,
+			DeleteApiApiTokensByTokenIdQuotaOverrideOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? deleteApiApiTokensByTokenIdQuotaOverrideMutationKey();
+
+	const baseOptions = deleteApiApiTokensByTokenIdQuotaOverrideMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiApiTokensByTokenIdQuotaOverrideStatus204,
+		ResponseErrorConfig<
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus400
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus401
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus403
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus404
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus409
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus422
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus500
+		>,
+		DeleteApiApiTokensByTokenIdQuotaOverrideOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiApiTokensByTokenIdQuotaOverrideStatus204,
+		ResponseErrorConfig<
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus400
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus401
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus403
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus404
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus409
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus422
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus500
+		>,
+		DeleteApiApiTokensByTokenIdQuotaOverrideOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiApiTokensByTokenIdQuotaOverrideStatus204,
+		ResponseErrorConfig<
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus400
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus401
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus403
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus404
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus409
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus422
+			| DeleteApiApiTokensByTokenIdQuotaOverrideStatus500
+		>,
+		DeleteApiApiTokensByTokenIdQuotaOverrideOptions,
 		TContext
 	>;
 }
@@ -6359,27 +6526,27 @@ export function useGetCurrentApiToken<
 	return queryResult;
 }
 
-export const getApiApiTokenPoliciesQueryKey = () => [{ url: "/api/api-token-policies" }] as const;
+export const getApiApiQuotaPoliciesQueryKey = () => [{ url: "/api/api-quota-policies" }] as const;
 
-type GetApiApiTokenPoliciesQueryKey = ReturnType<typeof getApiApiTokenPoliciesQueryKey>;
+type GetApiApiQuotaPoliciesQueryKey = ReturnType<typeof getApiApiQuotaPoliciesQueryKey>;
 
-export function getApiApiTokenPoliciesQueryOptions(
+export function getApiApiQuotaPoliciesQueryOptions(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiApiTokenPoliciesQueryKey();
+	const queryKey = getApiApiQuotaPoliciesQueryKey();
 	return queryOptions<
-		GetApiApiTokenPoliciesStatus200,
+		GetApiApiQuotaPoliciesStatus200,
 		ResponseErrorConfig<
-			| GetApiApiTokenPoliciesStatus401
-			| GetApiApiTokenPoliciesStatus403
-			| GetApiApiTokenPoliciesStatus500
+			| GetApiApiQuotaPoliciesStatus401
+			| GetApiApiQuotaPoliciesStatus403
+			| GetApiApiQuotaPoliciesStatus500
 		>,
-		GetApiApiTokenPoliciesStatus200,
+		GetApiApiQuotaPoliciesStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiApiTokenPolicies({
+			const { data } = await getApiApiQuotaPolicies({
 				...config,
 				signal: config.signal ?? signal,
 				throwOnError: true,
@@ -6390,22 +6557,22 @@ export function getApiApiTokenPoliciesQueryOptions(
 }
 
 /**
- * @summary List API token policies with platform access
- * {@link /api/api-token-policies}
+ * @summary List API quota policies
+ * {@link /api/api-quota-policies}
  */
-export function useGetApiApiTokenPolicies<
-	TData = GetApiApiTokenPoliciesStatus200,
-	TQueryData = GetApiApiTokenPoliciesStatus200,
-	TQueryKey extends QueryKey = GetApiApiTokenPoliciesQueryKey,
+export function useGetApiApiQuotaPolicies<
+	TData = GetApiApiQuotaPoliciesStatus200,
+	TQueryData = GetApiApiQuotaPoliciesStatus200,
+	TQueryKey extends QueryKey = GetApiApiQuotaPoliciesQueryKey,
 >(
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiApiTokenPoliciesStatus200,
+				GetApiApiQuotaPoliciesStatus200,
 				ResponseErrorConfig<
-					| GetApiApiTokenPoliciesStatus401
-					| GetApiApiTokenPoliciesStatus403
-					| GetApiApiTokenPoliciesStatus500
+					| GetApiApiQuotaPoliciesStatus401
+					| GetApiApiQuotaPoliciesStatus403
+					| GetApiApiQuotaPoliciesStatus500
 				>,
 				TData,
 				TQueryData,
@@ -6417,11 +6584,11 @@ export function useGetApiApiTokenPolicies<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const queryKey = resolvedOptions?.queryKey ?? getApiApiTokenPoliciesQueryKey();
+	const queryKey = resolvedOptions?.queryKey ?? getApiApiQuotaPoliciesQueryKey();
 
 	const queryResult = useQuery(
 		{
-			...getApiApiTokenPoliciesQueryOptions(config),
+			...getApiApiQuotaPoliciesQueryOptions(config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -6429,9 +6596,9 @@ export function useGetApiApiTokenPolicies<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiApiTokenPoliciesStatus401
-			| GetApiApiTokenPoliciesStatus403
-			| GetApiApiTokenPoliciesStatus500
+			| GetApiApiQuotaPoliciesStatus401
+			| GetApiApiQuotaPoliciesStatus403
+			| GetApiApiQuotaPoliciesStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -6440,30 +6607,30 @@ export function useGetApiApiTokenPolicies<
 	return queryResult;
 }
 
-export const patchApiApiTokenPoliciesByPolicyKeyMutationKey = () =>
-	[{ url: "/api/api-token-policies/:policyKey" }] as const;
+export const putApiApiQuotaPoliciesByPolicyKeyMutationKey = () =>
+	[{ url: "/api/api-quota-policies/:policyKey" }] as const;
 
-export function patchApiApiTokenPoliciesByPolicyKeyMutationOptions<TContext = unknown>(
+export function putApiApiQuotaPoliciesByPolicyKeyMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = patchApiApiTokenPoliciesByPolicyKeyMutationKey();
+	const mutationKey = putApiApiQuotaPoliciesByPolicyKeyMutationKey();
 	return mutationOptions<
-		PatchApiApiTokenPoliciesByPolicyKeyStatus200,
+		PutApiApiQuotaPoliciesByPolicyKeyStatus200,
 		ResponseErrorConfig<
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus400
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus401
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus403
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus404
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus409
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus422
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus500
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus400
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus401
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus403
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus404
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus409
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus422
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus500
 		>,
-		PatchApiApiTokenPoliciesByPolicyKeyOptions,
+		PutApiApiQuotaPoliciesByPolicyKeyOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiApiTokenPoliciesByPolicyKey({
+			const { data } = await putApiApiQuotaPoliciesByPolicyKey({
 				...config,
 				path,
 				body,
@@ -6475,23 +6642,23 @@ export function patchApiApiTokenPoliciesByPolicyKeyMutationOptions<TContext = un
 }
 
 /**
- * @summary Replace an API token policy with platform access
- * {@link /api/api-token-policies/:policyKey}
+ * @summary Publish an API quota policy revision
+ * {@link /api/api-quota-policies/:policyKey}
  */
-export function usePatchApiApiTokenPoliciesByPolicyKey<TContext>(
+export function usePutApiApiQuotaPoliciesByPolicyKey<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PatchApiApiTokenPoliciesByPolicyKeyStatus200,
+			PutApiApiQuotaPoliciesByPolicyKeyStatus200,
 			ResponseErrorConfig<
-				| PatchApiApiTokenPoliciesByPolicyKeyStatus400
-				| PatchApiApiTokenPoliciesByPolicyKeyStatus401
-				| PatchApiApiTokenPoliciesByPolicyKeyStatus403
-				| PatchApiApiTokenPoliciesByPolicyKeyStatus404
-				| PatchApiApiTokenPoliciesByPolicyKeyStatus409
-				| PatchApiApiTokenPoliciesByPolicyKeyStatus422
-				| PatchApiApiTokenPoliciesByPolicyKeyStatus500
+				| PutApiApiQuotaPoliciesByPolicyKeyStatus400
+				| PutApiApiQuotaPoliciesByPolicyKeyStatus401
+				| PutApiApiQuotaPoliciesByPolicyKeyStatus403
+				| PutApiApiQuotaPoliciesByPolicyKeyStatus404
+				| PutApiApiQuotaPoliciesByPolicyKeyStatus409
+				| PutApiApiQuotaPoliciesByPolicyKeyStatus422
+				| PutApiApiQuotaPoliciesByPolicyKeyStatus500
 			>,
-			PatchApiApiTokenPoliciesByPolicyKeyOptions,
+			PutApiApiQuotaPoliciesByPolicyKeyOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -6500,37 +6667,37 @@ export function usePatchApiApiTokenPoliciesByPolicyKey<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ?? patchApiApiTokenPoliciesByPolicyKeyMutationKey();
+		mutationOptions.mutationKey ?? putApiApiQuotaPoliciesByPolicyKeyMutationKey();
 
-	const baseOptions = patchApiApiTokenPoliciesByPolicyKeyMutationOptions(
+	const baseOptions = putApiApiQuotaPoliciesByPolicyKeyMutationOptions(
 		config,
 	) as UseMutationOptions<
-		PatchApiApiTokenPoliciesByPolicyKeyStatus200,
+		PutApiApiQuotaPoliciesByPolicyKeyStatus200,
 		ResponseErrorConfig<
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus400
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus401
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus403
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus404
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus409
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus422
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus500
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus400
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus401
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus403
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus404
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus409
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus422
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus500
 		>,
-		PatchApiApiTokenPoliciesByPolicyKeyOptions,
+		PutApiApiQuotaPoliciesByPolicyKeyOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PatchApiApiTokenPoliciesByPolicyKeyStatus200,
+		PutApiApiQuotaPoliciesByPolicyKeyStatus200,
 		ResponseErrorConfig<
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus400
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus401
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus403
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus404
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus409
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus422
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus500
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus400
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus401
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus403
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus404
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus409
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus422
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus500
 		>,
-		PatchApiApiTokenPoliciesByPolicyKeyOptions,
+		PutApiApiQuotaPoliciesByPolicyKeyOptions,
 		TContext
 	>(
 		{
@@ -6540,44 +6707,148 @@ export function usePatchApiApiTokenPoliciesByPolicyKey<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PatchApiApiTokenPoliciesByPolicyKeyStatus200,
+		PutApiApiQuotaPoliciesByPolicyKeyStatus200,
 		ResponseErrorConfig<
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus400
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus401
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus403
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus404
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus409
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus422
-			| PatchApiApiTokenPoliciesByPolicyKeyStatus500
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus400
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus401
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus403
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus404
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus409
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus422
+			| PutApiApiQuotaPoliciesByPolicyKeyStatus500
 		>,
-		PatchApiApiTokenPoliciesByPolicyKeyOptions,
+		PutApiApiQuotaPoliciesByPolicyKeyOptions,
 		TContext
 	>;
 }
 
-export const putApiApiTokenPoliciesBindingsByTokenIdMutationKey = () =>
-	[{ url: "/api/api-token-policies/bindings/:tokenId" }] as const;
+export const getApiApiQuotaPoliciesAccountsByUserIdQueryKey = ({
+	path,
+}: Omit<GetApiApiQuotaPoliciesAccountsByUserIdOptions, "headers">) =>
+	[{ url: "/api/api-quota-policies/accounts/:userId", params: path }] as const;
 
-export function putApiApiTokenPoliciesBindingsByTokenIdMutationOptions<TContext = unknown>(
+type GetApiApiQuotaPoliciesAccountsByUserIdQueryKey = ReturnType<
+	typeof getApiApiQuotaPoliciesAccountsByUserIdQueryKey
+>;
+
+export function getApiApiQuotaPoliciesAccountsByUserIdQueryOptions(
+	{ path }: GetApiApiQuotaPoliciesAccountsByUserIdOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = putApiApiTokenPoliciesBindingsByTokenIdMutationKey();
-	return mutationOptions<
-		PutApiApiTokenPoliciesBindingsByTokenIdStatus200,
+	const queryKey = getApiApiQuotaPoliciesAccountsByUserIdQueryKey({ path });
+	return queryOptions<
+		GetApiApiQuotaPoliciesAccountsByUserIdStatus200,
 		ResponseErrorConfig<
-			| PutApiApiTokenPoliciesBindingsByTokenIdStatus400
-			| PutApiApiTokenPoliciesBindingsByTokenIdStatus401
-			| PutApiApiTokenPoliciesBindingsByTokenIdStatus403
-			| PutApiApiTokenPoliciesBindingsByTokenIdStatus404
-			| PutApiApiTokenPoliciesBindingsByTokenIdStatus422
-			| PutApiApiTokenPoliciesBindingsByTokenIdStatus500
+			| GetApiApiQuotaPoliciesAccountsByUserIdStatus401
+			| GetApiApiQuotaPoliciesAccountsByUserIdStatus403
+			| GetApiApiQuotaPoliciesAccountsByUserIdStatus404
+			| GetApiApiQuotaPoliciesAccountsByUserIdStatus422
+			| GetApiApiQuotaPoliciesAccountsByUserIdStatus500
 		>,
-		PutApiApiTokenPoliciesBindingsByTokenIdOptions,
+		GetApiApiQuotaPoliciesAccountsByUserIdStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiApiQuotaPoliciesAccountsByUserId({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get a user's API quota
+ * {@link /api/api-quota-policies/accounts/:userId}
+ */
+export function useGetApiApiQuotaPoliciesAccountsByUserId<
+	TData = GetApiApiQuotaPoliciesAccountsByUserIdStatus200,
+	TQueryData = GetApiApiQuotaPoliciesAccountsByUserIdStatus200,
+	TQueryKey extends QueryKey = GetApiApiQuotaPoliciesAccountsByUserIdQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiApiQuotaPoliciesAccountsByUserIdOptions["path"]
+			| (() => GetApiApiQuotaPoliciesAccountsByUserIdOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiApiQuotaPoliciesAccountsByUserIdStatus200,
+				ResponseErrorConfig<
+					| GetApiApiQuotaPoliciesAccountsByUserIdStatus401
+					| GetApiApiQuotaPoliciesAccountsByUserIdStatus403
+					| GetApiApiQuotaPoliciesAccountsByUserIdStatus404
+					| GetApiApiQuotaPoliciesAccountsByUserIdStatus422
+					| GetApiApiQuotaPoliciesAccountsByUserIdStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiApiQuotaPoliciesAccountsByUserIdQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiApiQuotaPoliciesAccountsByUserIdQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiApiQuotaPoliciesAccountsByUserIdStatus401
+			| GetApiApiQuotaPoliciesAccountsByUserIdStatus403
+			| GetApiApiQuotaPoliciesAccountsByUserIdStatus404
+			| GetApiApiQuotaPoliciesAccountsByUserIdStatus422
+			| GetApiApiQuotaPoliciesAccountsByUserIdStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiApiQuotaPoliciesAccountsByUserIdMutationKey = () =>
+	[{ url: "/api/api-quota-policies/accounts/:userId" }] as const;
+
+export function putApiApiQuotaPoliciesAccountsByUserIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiApiQuotaPoliciesAccountsByUserIdMutationKey();
+	return mutationOptions<
+		PutApiApiQuotaPoliciesAccountsByUserIdStatus200,
+		ResponseErrorConfig<
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus400
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus401
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus403
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus404
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus409
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus422
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus500
+		>,
+		PutApiApiQuotaPoliciesAccountsByUserIdOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiApiTokenPoliciesBindingsByTokenId({
+			const { data } = await putApiApiQuotaPoliciesAccountsByUserId({
 				...config,
 				path,
 				body,
@@ -6589,22 +6860,23 @@ export function putApiApiTokenPoliciesBindingsByTokenIdMutationOptions<TContext 
 }
 
 /**
- * @summary Assign an API token policy with platform access
- * {@link /api/api-token-policies/bindings/:tokenId}
+ * @summary Assign a user's API quota policy
+ * {@link /api/api-quota-policies/accounts/:userId}
  */
-export function usePutApiApiTokenPoliciesBindingsByTokenId<TContext>(
+export function usePutApiApiQuotaPoliciesAccountsByUserId<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PutApiApiTokenPoliciesBindingsByTokenIdStatus200,
+			PutApiApiQuotaPoliciesAccountsByUserIdStatus200,
 			ResponseErrorConfig<
-				| PutApiApiTokenPoliciesBindingsByTokenIdStatus400
-				| PutApiApiTokenPoliciesBindingsByTokenIdStatus401
-				| PutApiApiTokenPoliciesBindingsByTokenIdStatus403
-				| PutApiApiTokenPoliciesBindingsByTokenIdStatus404
-				| PutApiApiTokenPoliciesBindingsByTokenIdStatus422
-				| PutApiApiTokenPoliciesBindingsByTokenIdStatus500
+				| PutApiApiQuotaPoliciesAccountsByUserIdStatus400
+				| PutApiApiQuotaPoliciesAccountsByUserIdStatus401
+				| PutApiApiQuotaPoliciesAccountsByUserIdStatus403
+				| PutApiApiQuotaPoliciesAccountsByUserIdStatus404
+				| PutApiApiQuotaPoliciesAccountsByUserIdStatus409
+				| PutApiApiQuotaPoliciesAccountsByUserIdStatus422
+				| PutApiApiQuotaPoliciesAccountsByUserIdStatus500
 			>,
-			PutApiApiTokenPoliciesBindingsByTokenIdOptions,
+			PutApiApiQuotaPoliciesAccountsByUserIdOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -6613,35 +6885,37 @@ export function usePutApiApiTokenPoliciesBindingsByTokenId<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ?? putApiApiTokenPoliciesBindingsByTokenIdMutationKey();
+		mutationOptions.mutationKey ?? putApiApiQuotaPoliciesAccountsByUserIdMutationKey();
 
-	const baseOptions = putApiApiTokenPoliciesBindingsByTokenIdMutationOptions(
+	const baseOptions = putApiApiQuotaPoliciesAccountsByUserIdMutationOptions(
 		config,
 	) as UseMutationOptions<
-		PutApiApiTokenPoliciesBindingsByTokenIdStatus200,
+		PutApiApiQuotaPoliciesAccountsByUserIdStatus200,
 		ResponseErrorConfig<
-			| PutApiApiTokenPoliciesBindingsByTokenIdStatus400
-			| PutApiApiTokenPoliciesBindingsByTokenIdStatus401
-			| PutApiApiTokenPoliciesBindingsByTokenIdStatus403
-			| PutApiApiTokenPoliciesBindingsByTokenIdStatus404
-			| PutApiApiTokenPoliciesBindingsByTokenIdStatus422
-			| PutApiApiTokenPoliciesBindingsByTokenIdStatus500
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus400
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus401
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus403
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus404
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus409
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus422
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus500
 		>,
-		PutApiApiTokenPoliciesBindingsByTokenIdOptions,
+		PutApiApiQuotaPoliciesAccountsByUserIdOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PutApiApiTokenPoliciesBindingsByTokenIdStatus200,
+		PutApiApiQuotaPoliciesAccountsByUserIdStatus200,
 		ResponseErrorConfig<
-			| PutApiApiTokenPoliciesBindingsByTokenIdStatus400
-			| PutApiApiTokenPoliciesBindingsByTokenIdStatus401
-			| PutApiApiTokenPoliciesBindingsByTokenIdStatus403
-			| PutApiApiTokenPoliciesBindingsByTokenIdStatus404
-			| PutApiApiTokenPoliciesBindingsByTokenIdStatus422
-			| PutApiApiTokenPoliciesBindingsByTokenIdStatus500
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus400
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus401
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus403
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus404
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus409
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus422
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus500
 		>,
-		PutApiApiTokenPoliciesBindingsByTokenIdOptions,
+		PutApiApiQuotaPoliciesAccountsByUserIdOptions,
 		TContext
 	>(
 		{
@@ -6651,16 +6925,132 @@ export function usePutApiApiTokenPoliciesBindingsByTokenId<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PutApiApiTokenPoliciesBindingsByTokenIdStatus200,
+		PutApiApiQuotaPoliciesAccountsByUserIdStatus200,
 		ResponseErrorConfig<
-			| PutApiApiTokenPoliciesBindingsByTokenIdStatus400
-			| PutApiApiTokenPoliciesBindingsByTokenIdStatus401
-			| PutApiApiTokenPoliciesBindingsByTokenIdStatus403
-			| PutApiApiTokenPoliciesBindingsByTokenIdStatus404
-			| PutApiApiTokenPoliciesBindingsByTokenIdStatus422
-			| PutApiApiTokenPoliciesBindingsByTokenIdStatus500
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus400
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus401
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus403
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus404
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus409
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus422
+			| PutApiApiQuotaPoliciesAccountsByUserIdStatus500
 		>,
-		PutApiApiTokenPoliciesBindingsByTokenIdOptions,
+		PutApiApiQuotaPoliciesAccountsByUserIdOptions,
+		TContext
+	>;
+}
+
+export const deleteApiApiQuotaPoliciesAccountsByUserIdMutationKey = () =>
+	[{ url: "/api/api-quota-policies/accounts/:userId" }] as const;
+
+export function deleteApiApiQuotaPoliciesAccountsByUserIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = deleteApiApiQuotaPoliciesAccountsByUserIdMutationKey();
+	return mutationOptions<
+		DeleteApiApiQuotaPoliciesAccountsByUserIdStatus200,
+		ResponseErrorConfig<
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus400
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus401
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus403
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus404
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus409
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus422
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus500
+		>,
+		DeleteApiApiQuotaPoliciesAccountsByUserIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await deleteApiApiQuotaPoliciesAccountsByUserId({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Reset a user's API quota policy
+ * {@link /api/api-quota-policies/accounts/:userId}
+ */
+export function useDeleteApiApiQuotaPoliciesAccountsByUserId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiApiQuotaPoliciesAccountsByUserIdStatus200,
+			ResponseErrorConfig<
+				| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus400
+				| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus401
+				| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus403
+				| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus404
+				| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus409
+				| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus422
+				| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus500
+			>,
+			DeleteApiApiQuotaPoliciesAccountsByUserIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? deleteApiApiQuotaPoliciesAccountsByUserIdMutationKey();
+
+	const baseOptions = deleteApiApiQuotaPoliciesAccountsByUserIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiApiQuotaPoliciesAccountsByUserIdStatus200,
+		ResponseErrorConfig<
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus400
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus401
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus403
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus404
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus409
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus422
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus500
+		>,
+		DeleteApiApiQuotaPoliciesAccountsByUserIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiApiQuotaPoliciesAccountsByUserIdStatus200,
+		ResponseErrorConfig<
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus400
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus401
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus403
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus404
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus409
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus422
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus500
+		>,
+		DeleteApiApiQuotaPoliciesAccountsByUserIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiApiQuotaPoliciesAccountsByUserIdStatus200,
+		ResponseErrorConfig<
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus400
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus401
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus403
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus404
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus409
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus422
+			| DeleteApiApiQuotaPoliciesAccountsByUserIdStatus500
+		>,
+		DeleteApiApiQuotaPoliciesAccountsByUserIdOptions,
 		TContext
 	>;
 }
@@ -35726,6 +36116,7 @@ export function postApiSearchFeaturesByTemplateExecuteMutationOptions<TContext =
 		ResponseErrorConfig<
 			| PostApiSearchFeaturesByTemplateExecuteStatus400
 			| PostApiSearchFeaturesByTemplateExecuteStatus422
+			| PostApiSearchFeaturesByTemplateExecuteStatus429
 			| PostApiSearchFeaturesByTemplateExecuteStatus500
 			| PostApiSearchFeaturesByTemplateExecuteStatus503
 		>,
@@ -35756,6 +36147,7 @@ export function usePostApiSearchFeaturesByTemplateExecute<TContext>(
 			ResponseErrorConfig<
 				| PostApiSearchFeaturesByTemplateExecuteStatus400
 				| PostApiSearchFeaturesByTemplateExecuteStatus422
+				| PostApiSearchFeaturesByTemplateExecuteStatus429
 				| PostApiSearchFeaturesByTemplateExecuteStatus500
 				| PostApiSearchFeaturesByTemplateExecuteStatus503
 			>,
@@ -35777,6 +36169,7 @@ export function usePostApiSearchFeaturesByTemplateExecute<TContext>(
 		ResponseErrorConfig<
 			| PostApiSearchFeaturesByTemplateExecuteStatus400
 			| PostApiSearchFeaturesByTemplateExecuteStatus422
+			| PostApiSearchFeaturesByTemplateExecuteStatus429
 			| PostApiSearchFeaturesByTemplateExecuteStatus500
 			| PostApiSearchFeaturesByTemplateExecuteStatus503
 		>,
@@ -35789,6 +36182,7 @@ export function usePostApiSearchFeaturesByTemplateExecute<TContext>(
 		ResponseErrorConfig<
 			| PostApiSearchFeaturesByTemplateExecuteStatus400
 			| PostApiSearchFeaturesByTemplateExecuteStatus422
+			| PostApiSearchFeaturesByTemplateExecuteStatus429
 			| PostApiSearchFeaturesByTemplateExecuteStatus500
 			| PostApiSearchFeaturesByTemplateExecuteStatus503
 		>,
@@ -35806,6 +36200,7 @@ export function usePostApiSearchFeaturesByTemplateExecute<TContext>(
 		ResponseErrorConfig<
 			| PostApiSearchFeaturesByTemplateExecuteStatus400
 			| PostApiSearchFeaturesByTemplateExecuteStatus422
+			| PostApiSearchFeaturesByTemplateExecuteStatus429
 			| PostApiSearchFeaturesByTemplateExecuteStatus500
 			| PostApiSearchFeaturesByTemplateExecuteStatus503
 		>,
@@ -35826,6 +36221,7 @@ export function postApiSearchFeaturesByTemplateFeedMutationOptions<TContext = un
 		ResponseErrorConfig<
 			| PostApiSearchFeaturesByTemplateFeedStatus400
 			| PostApiSearchFeaturesByTemplateFeedStatus422
+			| PostApiSearchFeaturesByTemplateFeedStatus429
 			| PostApiSearchFeaturesByTemplateFeedStatus500
 			| PostApiSearchFeaturesByTemplateFeedStatus503
 		>,
@@ -35856,6 +36252,7 @@ export function usePostApiSearchFeaturesByTemplateFeed<TContext>(
 			ResponseErrorConfig<
 				| PostApiSearchFeaturesByTemplateFeedStatus400
 				| PostApiSearchFeaturesByTemplateFeedStatus422
+				| PostApiSearchFeaturesByTemplateFeedStatus429
 				| PostApiSearchFeaturesByTemplateFeedStatus500
 				| PostApiSearchFeaturesByTemplateFeedStatus503
 			>,
@@ -35877,6 +36274,7 @@ export function usePostApiSearchFeaturesByTemplateFeed<TContext>(
 		ResponseErrorConfig<
 			| PostApiSearchFeaturesByTemplateFeedStatus400
 			| PostApiSearchFeaturesByTemplateFeedStatus422
+			| PostApiSearchFeaturesByTemplateFeedStatus429
 			| PostApiSearchFeaturesByTemplateFeedStatus500
 			| PostApiSearchFeaturesByTemplateFeedStatus503
 		>,
@@ -35889,6 +36287,7 @@ export function usePostApiSearchFeaturesByTemplateFeed<TContext>(
 		ResponseErrorConfig<
 			| PostApiSearchFeaturesByTemplateFeedStatus400
 			| PostApiSearchFeaturesByTemplateFeedStatus422
+			| PostApiSearchFeaturesByTemplateFeedStatus429
 			| PostApiSearchFeaturesByTemplateFeedStatus500
 			| PostApiSearchFeaturesByTemplateFeedStatus503
 		>,
@@ -35906,6 +36305,7 @@ export function usePostApiSearchFeaturesByTemplateFeed<TContext>(
 		ResponseErrorConfig<
 			| PostApiSearchFeaturesByTemplateFeedStatus400
 			| PostApiSearchFeaturesByTemplateFeedStatus422
+			| PostApiSearchFeaturesByTemplateFeedStatus429
 			| PostApiSearchFeaturesByTemplateFeedStatus500
 			| PostApiSearchFeaturesByTemplateFeedStatus503
 		>,
@@ -36137,6 +36537,7 @@ export function postApiSearchZonesByZoneIdFeatureExecuteMutationOptions<TContext
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus400
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus404
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus422
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus429
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus500
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus503
 		>,
@@ -36168,6 +36569,7 @@ export function usePostApiSearchZonesByZoneIdFeatureExecute<TContext>(
 				| PostApiSearchZonesByZoneIdFeatureExecuteStatus400
 				| PostApiSearchZonesByZoneIdFeatureExecuteStatus404
 				| PostApiSearchZonesByZoneIdFeatureExecuteStatus422
+				| PostApiSearchZonesByZoneIdFeatureExecuteStatus429
 				| PostApiSearchZonesByZoneIdFeatureExecuteStatus500
 				| PostApiSearchZonesByZoneIdFeatureExecuteStatus503
 			>,
@@ -36190,6 +36592,7 @@ export function usePostApiSearchZonesByZoneIdFeatureExecute<TContext>(
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus400
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus404
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus422
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus429
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus500
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus503
 		>,
@@ -36203,6 +36606,7 @@ export function usePostApiSearchZonesByZoneIdFeatureExecute<TContext>(
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus400
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus404
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus422
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus429
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus500
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus503
 		>,
@@ -36221,6 +36625,7 @@ export function usePostApiSearchZonesByZoneIdFeatureExecute<TContext>(
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus400
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus404
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus422
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus429
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus500
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus503
 		>,
@@ -36242,6 +36647,7 @@ export function postApiSearchZonesByZoneIdFeatureFeedMutationOptions<TContext = 
 			| PostApiSearchZonesByZoneIdFeatureFeedStatus400
 			| PostApiSearchZonesByZoneIdFeatureFeedStatus404
 			| PostApiSearchZonesByZoneIdFeatureFeedStatus422
+			| PostApiSearchZonesByZoneIdFeatureFeedStatus429
 			| PostApiSearchZonesByZoneIdFeatureFeedStatus500
 			| PostApiSearchZonesByZoneIdFeatureFeedStatus503
 		>,
@@ -36273,6 +36679,7 @@ export function usePostApiSearchZonesByZoneIdFeatureFeed<TContext>(
 				| PostApiSearchZonesByZoneIdFeatureFeedStatus400
 				| PostApiSearchZonesByZoneIdFeatureFeedStatus404
 				| PostApiSearchZonesByZoneIdFeatureFeedStatus422
+				| PostApiSearchZonesByZoneIdFeatureFeedStatus429
 				| PostApiSearchZonesByZoneIdFeatureFeedStatus500
 				| PostApiSearchZonesByZoneIdFeatureFeedStatus503
 			>,
@@ -36295,6 +36702,7 @@ export function usePostApiSearchZonesByZoneIdFeatureFeed<TContext>(
 			| PostApiSearchZonesByZoneIdFeatureFeedStatus400
 			| PostApiSearchZonesByZoneIdFeatureFeedStatus404
 			| PostApiSearchZonesByZoneIdFeatureFeedStatus422
+			| PostApiSearchZonesByZoneIdFeatureFeedStatus429
 			| PostApiSearchZonesByZoneIdFeatureFeedStatus500
 			| PostApiSearchZonesByZoneIdFeatureFeedStatus503
 		>,
@@ -36308,6 +36716,7 @@ export function usePostApiSearchZonesByZoneIdFeatureFeed<TContext>(
 			| PostApiSearchZonesByZoneIdFeatureFeedStatus400
 			| PostApiSearchZonesByZoneIdFeatureFeedStatus404
 			| PostApiSearchZonesByZoneIdFeatureFeedStatus422
+			| PostApiSearchZonesByZoneIdFeatureFeedStatus429
 			| PostApiSearchZonesByZoneIdFeatureFeedStatus500
 			| PostApiSearchZonesByZoneIdFeatureFeedStatus503
 		>,
@@ -36326,6 +36735,7 @@ export function usePostApiSearchZonesByZoneIdFeatureFeed<TContext>(
 			| PostApiSearchZonesByZoneIdFeatureFeedStatus400
 			| PostApiSearchZonesByZoneIdFeatureFeedStatus404
 			| PostApiSearchZonesByZoneIdFeatureFeedStatus422
+			| PostApiSearchZonesByZoneIdFeatureFeedStatus429
 			| PostApiSearchZonesByZoneIdFeatureFeedStatus500
 			| PostApiSearchZonesByZoneIdFeatureFeedStatus503
 		>,
@@ -36558,6 +36968,7 @@ export function postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteMutationOpt
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422
+			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus429
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus503
 		>,
@@ -36589,6 +37000,7 @@ export function usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute<TContex
 				| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400
 				| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404
 				| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422
+				| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus429
 				| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500
 				| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus503
 			>,
@@ -36612,6 +37024,7 @@ export function usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute<TContex
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422
+			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus429
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus503
 		>,
@@ -36625,6 +37038,7 @@ export function usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute<TContex
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422
+			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus429
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus503
 		>,
@@ -36643,6 +37057,7 @@ export function usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute<TContex
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422
+			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus429
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus503
 		>,
@@ -36664,6 +37079,7 @@ export function postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteMu
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus429
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus503
 		>,
@@ -36695,6 +37111,7 @@ export function usePostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecut
 				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400
 				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404
 				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422
+				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus429
 				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500
 				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus503
 			>,
@@ -36719,6 +37136,7 @@ export function usePostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecut
 				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400
 				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404
 				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422
+				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus429
 				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500
 				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus503
 			>,
@@ -36732,6 +37150,7 @@ export function usePostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecut
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus429
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus503
 		>,
@@ -36750,6 +37169,7 @@ export function usePostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecut
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus429
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus503
 		>,
@@ -36771,6 +37191,7 @@ export function postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteMutationOpt
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus429
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus503
 		>,
@@ -36802,6 +37223,7 @@ export function usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute<TContex
 				| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400
 				| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404
 				| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422
+				| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus429
 				| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500
 				| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus503
 			>,
@@ -36825,6 +37247,7 @@ export function usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute<TContex
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus429
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus503
 		>,
@@ -36838,6 +37261,7 @@ export function usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute<TContex
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus429
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus503
 		>,
@@ -36856,6 +37280,7 @@ export function usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute<TContex
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus429
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus503
 		>,
@@ -36875,6 +37300,7 @@ export function postApiSearchMutationOptions<TContext = unknown>(
 		ResponseErrorConfig<
 			| PostApiSearchStatus400
 			| PostApiSearchStatus422
+			| PostApiSearchStatus429
 			| PostApiSearchStatus500
 			| PostApiSearchStatus503
 		>,
@@ -36900,6 +37326,7 @@ export function usePostApiSearch<TContext>(
 			ResponseErrorConfig<
 				| PostApiSearchStatus400
 				| PostApiSearchStatus422
+				| PostApiSearchStatus429
 				| PostApiSearchStatus500
 				| PostApiSearchStatus503
 			>,
@@ -36918,6 +37345,7 @@ export function usePostApiSearch<TContext>(
 		ResponseErrorConfig<
 			| PostApiSearchStatus400
 			| PostApiSearchStatus422
+			| PostApiSearchStatus429
 			| PostApiSearchStatus500
 			| PostApiSearchStatus503
 		>,
@@ -36930,6 +37358,7 @@ export function usePostApiSearch<TContext>(
 		ResponseErrorConfig<
 			| PostApiSearchStatus400
 			| PostApiSearchStatus422
+			| PostApiSearchStatus429
 			| PostApiSearchStatus500
 			| PostApiSearchStatus503
 		>,
@@ -36947,6 +37376,7 @@ export function usePostApiSearch<TContext>(
 		ResponseErrorConfig<
 			| PostApiSearchStatus400
 			| PostApiSearchStatus422
+			| PostApiSearchStatus429
 			| PostApiSearchStatus500
 			| PostApiSearchStatus503
 		>,

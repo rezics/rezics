@@ -15,6 +15,7 @@ const [
 	recommendationWorker,
 	emailDispatcher,
 	imageAssetCleanup,
+	apiQuotaCleanup,
 	workerHealth,
 ] = await Promise.all([
 	import("srvx"),
@@ -23,12 +24,14 @@ const [
 	import("./services/recommendations/worker"),
 	import("./services/email/dispatcher"),
 	import("./services/image-assets/cleanup"),
+	import("./services/auth/api-quota/cleanup"),
 	import("./services/health/worker-health"),
 ]);
 const { aggregateRecommendationMetrics, purgeRecommendationData, refreshRecommendationSnapshot } =
 	recommendationWorker;
 const { dispatchEmailBatch } = emailDispatcher;
 const { cleanupExpiredPendingImageAssets } = imageAssetCleanup;
+const { cleanupApiQuotaState } = apiQuotaCleanup;
 const { logger } = observability;
 const healthState = new workerHealth.WorkerHealthState();
 const evaluateReadiness = workerHealth.createWorkerReadinessEvaluator(healthState);
@@ -74,6 +77,7 @@ function wait(duration: number) {
 async function run() {
 	let nextRecommendationAt = 0;
 	let nextImageAssetCleanupAt = 0;
+	let nextApiQuotaCleanupAt = 0;
 	while (!stopping) {
 		healthState.startJob();
 		observability.metrics.workerHeartbeat(healthState.activeJobStartedAt());
@@ -104,6 +108,17 @@ async function run() {
 					if (cleaned > 0)
 						logger.info("Expired image assets cleaned", {
 							eventName: "image_asset.cleanup.completed",
+							attributes: { cleaned },
+						});
+				});
+			}
+			if (Date.now() >= nextApiQuotaCleanupAt) {
+				nextApiQuotaCleanupAt = Date.now() + env.API_QUOTA_CLEANUP_INTERVAL_MS;
+				await runWorkerJob({ name: "api_quota.cleanup", retryCount: 0 }, async () => {
+					const cleaned = await cleanupApiQuotaState();
+					if (cleaned > 0)
+						logger.info("Expired API quota state cleaned", {
+							eventName: "api_quota.cleanup.completed",
 							attributes: { cleaned },
 						});
 				});

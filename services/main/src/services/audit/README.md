@@ -10,7 +10,8 @@ Record these events:
 
 - platform capability grants, expiry changes, and revocations;
 - ownership, access grants, restrictions, and invitation resolutions;
-- API-token creation, policy assignment, credential changes, and revocation;
+- API-token creation, account-quota assignment, token safeguards, credential
+  changes, and revocation;
 - moderation, account enforcement, suppression, and sensitive policy denials;
 - Realm settings, membership, rules, pins, and Realm moderation;
 - destructive or high-impact Unit lifecycle, address, structure, and Variant changes;

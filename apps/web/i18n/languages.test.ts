@@ -64,19 +64,21 @@ describe("language dictionaries", () => {
 		expect(traditionalChinese.locale.current).toBe("zh-Hant");
 		expect(traditionalChinese.t.locale.uiLocales["zh-Hant"]).toBe("繁體中文");
 		expect(traditionalChinese.t.settings.tokens.standardLimitsDescription).toContain(
-			"一律使用標準策略",
+			"所有權杖共用帳戶額度",
 		);
 		expect(
 			traditionalChinese.t.settings.tokens.limitRanges({
 				requestsMinimum: "1",
 				requestsMaximum: "300",
+				burstMinimum: "1",
+				burstMaximum: "300",
 				concurrentMinimum: "1",
 				concurrentMaximum: "4",
 				dailyMinimum: "1",
 				dailyMaximum: "10,000",
 			}),
 		).toBe(
-			"允許範圍：每分鐘要求數 1 至 300；同時執行要求數 1 至 4；每日成本單位 1 至 10,000。",
+			"允許範圍：每分鐘要求數 1 至 300；突發容量 1 至 300；同時執行要求數 1 至 4；每日成本單位 1 至 10,000。",
 		);
 	});
 });

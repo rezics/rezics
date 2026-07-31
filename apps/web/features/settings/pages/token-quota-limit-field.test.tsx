@@ -7,8 +7,8 @@ import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { TranslationProvider } from "@/i18n/client";
-import { StandardTokenPolicyLimitRanges } from "../model/token-policy-limits";
-import { PolicyLimitField } from "./token-settings-page";
+import { StandardTokenQuotaLimitRanges } from "../model/token-quota-limits";
+import { QuotaLimitField } from "./token-settings-page";
 
 vi.mock("@/i18n/client", async () => {
 	const { create: createReactI18n } = await import("native-i18n/react/client");
@@ -21,18 +21,18 @@ function LimitFieldProbe() {
 	const [value, setValue] = useState("");
 	return (
 		<TranslationProvider initial={translation.snapshot}>
-			<PolicyLimitField
+			<QuotaLimitField
 				label="每分鐘要求數"
 				name="requestsPerMinute"
 				onChange={setValue}
-				range={StandardTokenPolicyLimitRanges.requestsPerMinute}
+				range={StandardTokenQuotaLimitRanges.requestsPerMinute}
 				value={value}
 			/>
 		</TranslationProvider>
 	);
 }
 
-describe("PolicyLimitField", () => {
+describe("QuotaLimitField", () => {
 	it("shows the range as the empty placeholder and gives immediate range feedback", () => {
 		const { container } = render(<LimitFieldProbe />);
 		const input = screen.getByRole("spinbutton", { name: "每分鐘要求數" });

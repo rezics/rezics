@@ -150,10 +150,7 @@ export default new Elysia({ prefix: "/polls" })
 			const labelByOptionId = new Map(
 				content.options.map((option) => [option.optionId, option.label]),
 			);
-			const { profile: viewer, authorization } = await resolveIdentity(
-				request.headers,
-				"unit:read",
-			);
+			const { profile: viewer, authorization } = await resolveIdentity(request, "unit:read");
 			await authorization.unit.ensureCanRead(params.pollId, () => new UnitNotFound("Poll"));
 			const viewerVotes = viewer
 				? await database

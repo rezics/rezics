@@ -24,8 +24,10 @@ Routes declare one `access` requirement. Examples:
   the last ten minutes.
 
 Public routes that optionally personalize a response call
-`resolveIdentity(headers, permission)`. The explicit permission is mandatory
-when a bearer credential is present.
+`resolveIdentity(request, permission)`. The explicit permission is mandatory
+when a bearer credential is present. Expensive public operations also pass a
+stable quota operation ID. API-token concurrency leases remain attached to the
+request until `afterResponse`, including error responses.
 
 ## API-key capability boundary
 
@@ -41,10 +43,27 @@ and restrictions, active Realm membership, bans, and visibility all remain
 domain authorization decisions. Those checks are identical for session and
 API-key identities.
 
-API keys use the `rz_api_` prefix, are SHA-256 hashed by Better Auth, expire
-after 90 days by default (maximum 365 days), and are limited to 300 requests per
-60-second window with database-backed counters. The full secret is returned
-once at creation.
+API keys use the `rz_api_` prefix, are SHA-256 hashed by Better Auth, and expire
+after 90 days by default (maximum 365 days). Better Auth retains its
+credential-verification abuse limiter. Product capacity is enforced separately
+by the account quota system described in
+[`docs/architecture/api-quotas.md`](../../../../../docs/architecture/api-quotas.md).
+The full secret is returned once at creation.
+
+## API quotas
+
+The authenticated Better Auth user ID is the hard quota principal. Every token
+for that account consumes the same account-global and operation-specific rate,
+concurrency, and UTC daily-cost constraints. Creating another token therefore
+does not create capacity. A token may have an additional owner-managed
+safeguard, but it is evaluated alongside the account constraints and can only
+make that token more restrictive.
+
+Quota admission is one PostgreSQL transaction protected by sorted advisory
+locks. A denial rolls back every tentative counter and lease. Accepted daily
+cost is not refunded after handler entry; concurrency leases are released after
+the response and have a bounded expiry for crash recovery. The worker removes
+expired leases, reservations, and bounded historical state.
 
 ## Credential control-plane
 
@@ -54,6 +73,6 @@ session. Better Auth's direct API-key HTTP management paths are disabled, and
 API-key session emulation remains disabled.
 
 Authentication failures are `401`; an authenticated actor denied an operation
-receives `403`; API-key throttling returns `429` with `Retry-After`. Visibility
+receives `403`; API-key quota denial returns `429` with `Retry-After`. Visibility
 checks use `404` when revealing target existence would leak information. The
 domain rules are documented in `authorization/README.md`.

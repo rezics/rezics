@@ -2,13 +2,12 @@ import { t } from "elysia";
 
 import { ApiPermissionValues } from "../../auth/api-permissions";
 import {
-	ApiTokenOperationId,
-	ApiTokenPolicyOverrideInput,
-	PrivilegedTokenOperationLimits,
-	PrivilegedTokenPolicyLimits,
-	StandardTokenPolicyOverride,
-} from "../../auth/api-token/policy-schema";
-import { ApiTokenPolicyKindValues } from "../../database/schema";
+	PrivilegedApiAccountQuotaOverride,
+	ApiTokenQuotaOverrideInput,
+	PrivilegedApiQuotaLimits,
+	PrivilegedApiQuotaOperations,
+} from "../../auth/api-quota/policy-schema";
+import { ApiQuotaPolicyClassValues } from "../../database/schema";
 import { DateTime, Uuid } from "../schema";
 
 const ApiPermission = t.UnionEnum(ApiPermissionValues);
@@ -21,7 +20,6 @@ export const CreateApiTokenBody = t.Object({
 		uniqueItems: true,
 	}),
 	expiresInDays: t.Optional(t.Integer({ minimum: 1, maximum: 365, default: 90 })),
-	policyOverride: t.Optional(StandardTokenPolicyOverride),
 });
 
 export const UpdateApiTokenBody = t.Object(
@@ -42,23 +40,44 @@ export const UpdateApiTokenBody = t.Object(
 
 export const ApiTokenParams = t.Object({ tokenId: Uuid });
 
-export const ApiTokenPolicy = t.Object({
+export const ApiAccountQuotaPolicyResponse = t.Object({
 	key: t.String(),
-	kind: t.UnionEnum(ApiTokenPolicyKindValues),
-	source: t.UnionEnum(["assigned", "standard_default", "trusted_fallback"]),
+	class: t.UnionEnum(ApiQuotaPolicyClassValues),
+	source: t.UnionEnum(["assigned", "standard_default", "privileged_fallback"]),
 	schemaVersion: t.Integer({ minimum: 1 }),
 	policyRevision: t.Integer({ minimum: 1 }),
 	bindingRevision: t.Nullable(t.Integer({ minimum: 1 })),
 	validUntil: t.Nullable(DateTime),
-	limits: PrivilegedTokenPolicyLimits,
-	operations: t.Record(ApiTokenOperationId, PrivilegedTokenOperationLimits),
+	assignmentReason: t.Nullable(t.String()),
+	configurationOverride: PrivilegedApiAccountQuotaOverride,
+	limits: PrivilegedApiQuotaLimits,
+	maxActiveTokens: t.Integer({ minimum: 1 }),
+	operations: PrivilegedApiQuotaOperations,
 });
 
-export const ReplaceApiTokenPolicyBody = t.Object(
+export const ApiTokenQuotaOverrideResponse = t.Nullable(
+	t.Object({
+		configurationOverride: ApiTokenQuotaOverrideInput,
+		revision: t.Integer({ minimum: 1 }),
+		updatedAt: DateTime,
+	}),
+);
+
+export const ApiTokenQuotaResponse = t.Object({
+	account: ApiAccountQuotaPolicyResponse,
+	tokenOverride: ApiTokenQuotaOverrideResponse,
+});
+
+export const ReplaceApiTokenQuotaOverrideBody = t.Object(
 	{
-		expectedRevision: t.Integer({ minimum: 1 }),
-		configurationOverride: ApiTokenPolicyOverrideInput,
+		expectedRevision: t.Integer({ minimum: 0 }),
+		configurationOverride: ApiTokenQuotaOverrideInput,
 	},
+	{ additionalProperties: false },
+);
+
+export const DeleteApiTokenQuotaOverrideBody = t.Object(
+	{ expectedRevision: t.Integer({ minimum: 1 }) },
 	{ additionalProperties: false },
 );
 
@@ -72,10 +91,13 @@ export const ApiTokenSummary = t.Object({
 	lastUsedAt: t.Nullable(DateTime),
 	createdAt: DateTime,
 	updatedAt: DateTime,
-	policy: ApiTokenPolicy,
+	quota: ApiTokenQuotaResponse,
 });
 
-export const ApiTokenListResponse = t.Object({ items: t.Array(ApiTokenSummary) });
+export const ApiTokenListResponse = t.Object({
+	itemLimit: t.Integer({ minimum: 1 }),
+	items: t.Array(ApiTokenSummary),
+});
 
 export const CreatedApiTokenResponse = t.Composite([
 	ApiTokenSummary,

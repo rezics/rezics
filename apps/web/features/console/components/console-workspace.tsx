@@ -60,7 +60,10 @@ interface ConsoleWorkspaceModel {
 	readonly canManageAccess: boolean;
 	readonly canModerate: boolean;
 	readonly canReadAudit: boolean;
-	readonly canManageTokenPolicies: boolean;
+	readonly canReadApiQuotaPolicies: boolean;
+	readonly canUpdateApiQuotaPolicies: boolean;
+	readonly canReadAccountApiQuotas: boolean;
+	readonly canUpdateAccountApiQuotas: boolean;
 	readonly canReadUnits: boolean;
 	readonly canReadOwnershipClaims: boolean;
 	readonly canDecideOwnershipClaims: boolean;
@@ -157,7 +160,10 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 	const canManageAccess = capabilities.has("platform.access.manage");
 	const canModerate = accessibleSectionIds.has("moderation");
 	const canReadAudit = accessibleSectionIds.has("audit");
-	const canManageTokenPolicies = accessibleSectionIds.has("token-policies");
+	const canReadApiQuotaPolicies = accessibleSectionIds.has("api-quotas");
+	const canUpdateApiQuotaPolicies = capabilities.has("platform.api_quota_policy.update");
+	const canReadAccountApiQuotas = capabilities.has("platform.user.api_quota.read");
+	const canUpdateAccountApiQuotas = capabilities.has("platform.user.api_quota.update");
 	const labels = t.console.sections;
 	const sections = [
 		...(canReadUsers
@@ -215,13 +221,13 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 					},
 				]
 			: []),
-		...(canManageTokenPolicies
+		...(canReadApiQuotaPolicies
 			? [
 					{
-						id: "token-policies" as const,
-						href: consoleSectionHref("token-policies"),
-						label: labels.tokenPolicies.label,
-						description: labels.tokenPolicies.description,
+						id: "api-quotas" as const,
+						href: consoleSectionHref("api-quotas"),
+						label: labels.apiQuotas.label,
+						description: labels.apiQuotas.description,
 						icon: KeyRound,
 					},
 				]
@@ -242,7 +248,10 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 		canManageAccess,
 		canModerate,
 		canReadAudit,
-		canManageTokenPolicies,
+		canReadApiQuotaPolicies,
+		canUpdateApiQuotaPolicies,
+		canReadAccountApiQuotas,
+		canUpdateAccountApiQuotas,
 		canReadUnits,
 		canReadOwnershipClaims,
 		canDecideOwnershipClaims,

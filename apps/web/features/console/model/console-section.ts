@@ -4,7 +4,7 @@ export const ConsoleSectionIds = [
 	"ownership-claims",
 	"moderation",
 	"audit",
-	"token-policies",
+	"api-quotas",
 ] as const;
 export type ConsoleSectionId = (typeof ConsoleSectionIds)[number];
 

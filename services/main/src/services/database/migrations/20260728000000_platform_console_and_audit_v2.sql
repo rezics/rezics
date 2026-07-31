@@ -70,7 +70,10 @@ CREATE TYPE "platform_capability" AS ENUM (
 	'unit.slug.manage',
 	'unit.slug.namespace.manage',
 	'unit.slug.redirect.release',
-	'platform.api_token_policy.manage',
+	'platform.api_quota_policy.read',
+	'platform.api_quota_policy.update',
+	'platform.user.api_quota.read',
+	'platform.user.api_quota.update',
 	'platform.moderate',
 	'platform.suppress',
 	'realm.contribute',
@@ -211,9 +214,3 @@ CREATE INDEX "audit_event_trace_idx" ON "audit_event" ("trace_id");
 CREATE TRIGGER "audit_event_append_only"
 	BEFORE UPDATE OR DELETE ON "audit_event"
 	FOR EACH ROW EXECUTE FUNCTION "reject_immutable_history_mutation"();
-
-ALTER TABLE "api_access_policy" DROP CONSTRAINT "api_access_policy_kind_check";
-UPDATE "api_access_policy" SET "kind" = 'privileged' WHERE "kind" = 'staff_trusted';
-ALTER TABLE "api_access_policy"
-	ADD CONSTRAINT "api_access_policy_kind_check"
-	CHECK ("kind" IN ('standard', 'privileged'));

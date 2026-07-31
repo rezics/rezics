@@ -45,9 +45,9 @@ export default {
 			label: "Security audit",
 			description: `Review high-impact administrative events and security decisions across the platform, ${realmTerms.pluralLabel}, and Units.`,
 		},
-		tokenPolicies: {
-			label: `${verbatimTerms.api.value} token policies`,
-			description: `Manage global rate, concurrency, and cost limits for ${verbatimTerms.api.value} tokens.`,
+		apiQuotas: {
+			label: `${verbatimTerms.api.value} quotas`,
+			description: `Manage account-wide ${verbatimTerms.api.value} rate, concurrency, cost, and token-count policies.`,
 		},
 	},
 	units: {
@@ -191,8 +191,33 @@ export default {
 		tabs: {
 			overview: "Overview",
 			access: "Platform access",
+			apiQuota: `${verbatimTerms.api.value} quota`,
 			sessions: "Sessions",
 			activity: "Activity",
+		},
+		quotaUnavailable: `You do not have access to this account’s ${verbatimTerms.api.value} quota.`,
+		accountQuota: {
+			title: `Account ${verbatimTerms.api.value} quota`,
+			description:
+				"The effective account-wide constraints apply across every token, so creating more tokens cannot multiply capacity.",
+			policy: "Quota policy",
+			validUntil: `${verbatimTerms.privilegedApiQuotaClass.value} access expires`,
+			customize: "Override this policy for the account",
+			customizeDescription:
+				"Account overrides remain bounded by the selected policy class and are kept separately from immutable policy revisions.",
+			reason: "Assignment reason",
+			reasonPlaceholder:
+				"Record the operational justification; it is stored in the security audit log.",
+			invalid: `Check the quota limits, operation overrides, and ${verbatimTerms.privilegedApiQuotaClass.value} expiry.`,
+			updateFailed: "The account quota could not be updated. Reload and try again.",
+			reset: "Reset to Standard",
+			save: "Save account quota",
+			readOnly: "You can inspect this account quota but cannot change it.",
+			sources: {
+				assigned: "Assigned",
+				standard_default: "Standard default",
+				privileged_fallback: `${verbatimTerms.privilegedApiQuotaClass.value} fallback`,
+			},
 		},
 		identityTitle: "Sign-in identity",
 		identityDescription: "Account identifiers, email verification, and active sessions.",
@@ -232,25 +257,31 @@ export default {
 		activityDescription: "High-impact account-state and session administration events.",
 		noActivity: "There are no security events directly associated with this user.",
 	},
-	tokenPolicies: {
+	apiQuotas: {
 		policyList: "Policies",
 		revision: insert("Revision {{revision}}", { revision: Number }),
 		enabled: "Enabled",
 		disabled: "Disabled",
-		empty: `There are no ${verbatimTerms.api.value} token policies to manage.`,
-		kind: "Policy kind",
-		kinds: {
+		empty: `There are no ${verbatimTerms.api.value} quota policies to manage.`,
+		policyClass: "Policy class",
+		classes: {
 			standard: "Standard",
-			privileged: verbatimTerms.privilegedTokenPolicy.value,
+			privileged: verbatimTerms.privilegedApiQuotaClass.value,
 		},
 		schemaVersion: insert("Schema {{version}}", { version: Number }),
 		requestsPerMinute: "Requests per minute",
+		burstCapacity: "Burst capacity",
 		maxConcurrentRequests: "Maximum concurrent requests",
 		dailyCostUnits: "Daily cost units",
+		maxActiveTokens: "Active token limit",
 		operationOverrides: "Operation overrides",
 		operationOverridesDescription: `Use a ${verbatimTerms.json.value} object that maps operation identifiers to overridden limits; an empty object uses global limits everywhere.`,
 		invalidOperations: `Enter valid operation override ${verbatimTerms.json.value}. Every limit must be a positive integer.`,
-		updateFailed: "The token policy could not be updated. Reload and try again.",
+		changeReason: "Revision reason",
+		changeReasonPlaceholder:
+			"Record the rationale; it is stored in the immutable revision and security audit log.",
+		updateFailed: "The quota policy could not be updated. Reload and try again.",
+		readOnly: "You can view quota policies but cannot publish a new revision.",
 		save: "Save policy",
 	},
 	dashboard: {

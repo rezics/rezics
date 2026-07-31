@@ -7,29 +7,33 @@ export class ApiTokenNotFound extends Data.TaggedError("ApiTokenNotFound") {
 	readonly message = "Active API token not found";
 }
 
-export class ApiTokenPolicyInvalid extends Data.TaggedError("ApiTokenPolicyInvalid") {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = ApiTokenPolicyInvalid.status;
-	readonly message = "API token policy configuration is invalid";
+export class ApiTokenLimitReached extends Data.TaggedError("ApiTokenLimitReached") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = ApiTokenLimitReached.status;
+	readonly message = "The account has reached its active API token limit";
+
+	constructor(readonly details: { maxActiveTokens: number }) {
+		super();
+	}
 }
 
-export class ApiTokenPolicyRevisionConflict extends Data.TaggedError(
-	"ApiTokenPolicyRevisionConflict",
+export class ApiTokenQuotaOverrideInvalid extends Data.TaggedError("ApiTokenQuotaOverrideInvalid") {
+	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
+	readonly status = ApiTokenQuotaOverrideInvalid.status;
+	readonly message = "API token quota override is invalid";
+}
+
+export class ApiTokenQuotaOverrideRevisionConflict extends Data.TaggedError(
+	"ApiTokenQuotaOverrideRevisionConflict",
 ) {
 	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = ApiTokenPolicyRevisionConflict.status;
-	readonly message = "API token policy changed; reload before saving";
-}
-
-export class ApiTokenPolicyNotFound extends Data.TaggedError("ApiTokenPolicyNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = ApiTokenPolicyNotFound.status;
-	readonly message = "API token policy not found";
+	readonly status = ApiTokenQuotaOverrideRevisionConflict.status;
+	readonly message = "API token quota override changed; reload before saving";
 }
 
 export const TokenErrors = [
 	ApiTokenNotFound,
-	ApiTokenPolicyInvalid,
-	ApiTokenPolicyRevisionConflict,
-	ApiTokenPolicyNotFound,
+	ApiTokenLimitReached,
+	ApiTokenQuotaOverrideInvalid,
+	ApiTokenQuotaOverrideRevisionConflict,
 ] as const;

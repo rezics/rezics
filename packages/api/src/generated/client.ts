@@ -7,6 +7,8 @@ import type { Options, RequestResult } from "./.kubb/client";
 import type {
 	CreateSlugNamespaceWithPlatformAccessOptions,
 	CreateSlugNamespaceWithPlatformAccessResponses,
+	DeleteApiApiQuotaPoliciesAccountsByUserIdOptions,
+	DeleteApiApiQuotaPoliciesAccountsByUserIdResponses,
 	DeleteApiApiTokensByTokenIdOptions,
 	DeleteApiApiTokensByTokenIdResponses,
 	DeleteApiMessagesByMessageIdOptions,
@@ -79,16 +81,20 @@ import type {
 	PostApiApiTokensResponses,
 	PatchApiApiTokensByTokenIdOptions,
 	PatchApiApiTokensByTokenIdResponses,
-	PutApiApiTokensByTokenIdPolicyOptions,
-	PutApiApiTokensByTokenIdPolicyResponses,
+	PutApiApiTokensByTokenIdQuotaOverrideOptions,
+	PutApiApiTokensByTokenIdQuotaOverrideResponses,
+	DeleteApiApiTokensByTokenIdQuotaOverrideOptions,
+	DeleteApiApiTokensByTokenIdQuotaOverrideResponses,
 	GetCurrentApiTokenOptions,
 	GetCurrentApiTokenResponses,
-	GetApiApiTokenPoliciesOptions,
-	GetApiApiTokenPoliciesResponses,
-	PatchApiApiTokenPoliciesByPolicyKeyOptions,
-	PatchApiApiTokenPoliciesByPolicyKeyResponses,
-	PutApiApiTokenPoliciesBindingsByTokenIdOptions,
-	PutApiApiTokenPoliciesBindingsByTokenIdResponses,
+	GetApiApiQuotaPoliciesOptions,
+	GetApiApiQuotaPoliciesResponses,
+	PutApiApiQuotaPoliciesByPolicyKeyOptions,
+	PutApiApiQuotaPoliciesByPolicyKeyResponses,
+	GetApiApiQuotaPoliciesAccountsByUserIdOptions,
+	GetApiApiQuotaPoliciesAccountsByUserIdResponses,
+	PutApiApiQuotaPoliciesAccountsByUserIdOptions,
+	PutApiApiQuotaPoliciesAccountsByUserIdResponses,
 	PostApiFeedQueryOptions,
 	PostApiFeedQueryResponses,
 	GetApiReportsMeOptions,
@@ -1377,20 +1383,37 @@ export function deleteApiApiTokensByTokenId<ThrowOnError extends boolean = true>
 }
 
 /**
- * @summary Replace API token policy override
- * {@link /api/api-tokens/:tokenId/policy}
+ * @summary Replace API token quota override
+ * {@link /api/api-tokens/:tokenId/quota-override}
  */
-export function putApiApiTokensByTokenIdPolicy<ThrowOnError extends boolean = true>(
-	options: Options<PutApiApiTokensByTokenIdPolicyOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiApiTokensByTokenIdPolicyResponses, ThrowOnError>> {
+export function putApiApiTokensByTokenIdQuotaOverride<ThrowOnError extends boolean = true>(
+	options: Options<PutApiApiTokensByTokenIdQuotaOverrideOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiApiTokensByTokenIdQuotaOverrideResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/api-tokens/{tokenId}/policy",
+		url: "/api/api-tokens/{tokenId}/quota-override",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<PutApiApiTokensByTokenIdPolicyResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PutApiApiTokensByTokenIdQuotaOverrideResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Delete API token quota override
+ * {@link /api/api-tokens/:tokenId/quota-override}
+ */
+export function deleteApiApiTokensByTokenIdQuotaOverride<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiApiTokensByTokenIdQuotaOverrideOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiApiTokensByTokenIdQuotaOverrideResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/api-tokens/{tokenId}/quota-override",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<DeleteApiApiTokensByTokenIdQuotaOverrideResponses, ThrowOnError>>;
 }
 
 /**
@@ -1411,54 +1434,88 @@ export function getCurrentApiToken<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary List API token policies with platform access
- * {@link /api/api-token-policies}
+ * @summary List API quota policies
+ * {@link /api/api-quota-policies}
  */
-export function getApiApiTokenPolicies<ThrowOnError extends boolean = true>(
-	options: Options<GetApiApiTokenPoliciesOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiApiTokenPoliciesResponses, ThrowOnError>> {
+export function getApiApiQuotaPolicies<ThrowOnError extends boolean = true>(
+	options: Options<GetApiApiQuotaPoliciesOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiApiQuotaPoliciesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/api-token-policies",
+		url: "/api/api-quota-policies",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<GetApiApiTokenPoliciesResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiApiQuotaPoliciesResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Replace an API token policy with platform access
- * {@link /api/api-token-policies/:policyKey}
+ * @summary Publish an API quota policy revision
+ * {@link /api/api-quota-policies/:policyKey}
  */
-export function patchApiApiTokenPoliciesByPolicyKey<ThrowOnError extends boolean = true>(
-	options: Options<PatchApiApiTokenPoliciesByPolicyKeyOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiApiTokenPoliciesByPolicyKeyResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "PATCH",
-		url: "/api/api-token-policies/{policyKey}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PatchApiApiTokenPoliciesByPolicyKeyResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Assign an API token policy with platform access
- * {@link /api/api-token-policies/bindings/:tokenId}
- */
-export function putApiApiTokenPoliciesBindingsByTokenId<ThrowOnError extends boolean = true>(
-	options: Options<PutApiApiTokenPoliciesBindingsByTokenIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiApiTokenPoliciesBindingsByTokenIdResponses, ThrowOnError>> {
+export function putApiApiQuotaPoliciesByPolicyKey<ThrowOnError extends boolean = true>(
+	options: Options<PutApiApiQuotaPoliciesByPolicyKeyOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiApiQuotaPoliciesByPolicyKeyResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/api-token-policies/bindings/{tokenId}",
+		url: "/api/api-quota-policies/{policyKey}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<PutApiApiTokenPoliciesBindingsByTokenIdResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PutApiApiQuotaPoliciesByPolicyKeyResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Get a user's API quota
+ * {@link /api/api-quota-policies/accounts/:userId}
+ */
+export function getApiApiQuotaPoliciesAccountsByUserId<ThrowOnError extends boolean = true>(
+	options: Options<GetApiApiQuotaPoliciesAccountsByUserIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiApiQuotaPoliciesAccountsByUserIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/api-quota-policies/accounts/{userId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiApiQuotaPoliciesAccountsByUserIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Assign a user's API quota policy
+ * {@link /api/api-quota-policies/accounts/:userId}
+ */
+export function putApiApiQuotaPoliciesAccountsByUserId<ThrowOnError extends boolean = true>(
+	options: Options<PutApiApiQuotaPoliciesAccountsByUserIdOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiApiQuotaPoliciesAccountsByUserIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/api-quota-policies/accounts/{userId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<PutApiApiQuotaPoliciesAccountsByUserIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Reset a user's API quota policy
+ * {@link /api/api-quota-policies/accounts/:userId}
+ */
+export function deleteApiApiQuotaPoliciesAccountsByUserId<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiApiQuotaPoliciesAccountsByUserIdOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiApiQuotaPoliciesAccountsByUserIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/api-quota-policies/accounts/{userId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<DeleteApiApiQuotaPoliciesAccountsByUserIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -7031,6 +7088,10 @@ export function postApiSearchFeaturesByTemplateExecute<ThrowOnError extends bool
 	return request({
 		method: "POST",
 		url: "/api/search/features/{template}/execute",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PostApiSearchFeaturesByTemplateExecuteResponses, ThrowOnError>>;
 }
@@ -7047,6 +7108,10 @@ export function postApiSearchFeaturesByTemplateFeed<ThrowOnError extends boolean
 	return request({
 		method: "POST",
 		url: "/api/search/features/{template}/feed",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PostApiSearchFeaturesByTemplateFeedResponses, ThrowOnError>>;
 }
@@ -7095,6 +7160,10 @@ export function postApiSearchZonesByZoneIdFeatureExecute<ThrowOnError extends bo
 	return request({
 		method: "POST",
 		url: "/api/search/zones/{zoneId}/feature/execute",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PostApiSearchZonesByZoneIdFeatureExecuteResponses, ThrowOnError>>;
 }
@@ -7111,6 +7180,10 @@ export function postApiSearchZonesByZoneIdFeatureFeed<ThrowOnError extends boole
 	return request({
 		method: "POST",
 		url: "/api/search/zones/{zoneId}/feature/feed",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PostApiSearchZonesByZoneIdFeatureFeedResponses, ThrowOnError>>;
 }
@@ -7163,6 +7236,10 @@ export function postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute<
 	return request({
 		method: "POST",
 		url: "/api/search/zones/{zoneId}/dock/blocks/{blockKey}/execute",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteResponses, ThrowOnError>
@@ -7191,6 +7268,10 @@ export function postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecute<
 	return request({
 		method: "POST",
 		url: "/api/search/zones/{zoneId}/pages/{pageId}/blocks/{blockKey}/execute",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -7216,6 +7297,10 @@ export function postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute<
 	return request({
 		method: "POST",
 		url: "/api/search/zones/{zoneId}/feed-blocks/{blockKey}/execute",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteResponses, ThrowOnError>
@@ -7231,9 +7316,15 @@ export function postApiSearch<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PostApiSearchResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/search", ...config }) as Promise<
-		RequestResult<PostApiSearchResponses, ThrowOnError>
-	>;
+	return request({
+		method: "POST",
+		url: "/api/search",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiSearchResponses, ThrowOnError>>;
 }
 
 /**

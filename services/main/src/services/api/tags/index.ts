@@ -60,7 +60,7 @@ export default new Elysia()
 		app.get(
 			"/:tagId",
 			async ({ params, query, request }) => {
-				const identity = await resolveIdentity(request.headers, "unit:read");
+				const identity = await resolveIdentity(request, "unit:read");
 				if (!identity.profile) throw new AuthenticationRequired();
 				await identity.authorization.platform.ensureCapability(
 					DevelopmentPreviewCapability,
@@ -120,7 +120,7 @@ export default new Elysia()
 			.get(
 				"/:structureId",
 				async ({ params, query, request }) => {
-					const identity = await resolveIdentity(request.headers, "unit:read");
+					const identity = await resolveIdentity(request, "unit:read");
 					if (!identity.profile) throw new AuthenticationRequired();
 					await identity.authorization.platform.ensureCapability(
 						DevelopmentPreviewCapability,
@@ -236,7 +236,7 @@ export default new Elysia()
 				"/:type/:unitId/tags",
 				async ({ params, query, request }) => {
 					await checkUnitType(params.unitId, params.type);
-					const identity = await resolveIdentity(request.headers, "unit:read");
+					const identity = await resolveIdentity(request, "unit:read");
 					await identity.authorization.unit.ensureCanRead(
 						params.unitId,
 						() => new UnitNotFound(),

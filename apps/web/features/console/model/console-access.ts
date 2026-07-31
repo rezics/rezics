@@ -8,7 +8,7 @@ export const ConsoleSectionRequiredCapability = {
 	"ownership-claims": "unit.governance.read",
 	moderation: "platform.moderate",
 	audit: "platform.audit.read",
-	"token-policies": "platform.api_token_policy.manage",
+	"api-quotas": "platform.api_quota_policy.read",
 } as const satisfies Record<ConsoleSectionId, PlatformCapability>;
 
 export function getAccessibleConsoleSectionIds(

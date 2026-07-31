@@ -46,9 +46,9 @@ export default {
 			label: "Sicherheitsprotokoll",
 			description: `Prüfe wichtige administrative Ereignisse und Sicherheitsentscheidungen für die Plattform, ${realmTerms.pluralLabel} und Units.`,
 		},
-		tokenPolicies: {
-			label: `${verbatimTerms.api.value}-Token-Richtlinien`,
-			description: `Globale Raten-, Parallelitäts- und Kostenlimits für ${verbatimTerms.api.value}-Token verwalten.`,
+		apiQuotas: {
+			label: `${verbatimTerms.api.value}-Kontingente`,
+			description: `Kontoweite Raten-, Parallelitäts-, Kosten- und Tokenlimits für ${verbatimTerms.api.value} verwalten.`,
 		},
 	},
 	units: {
@@ -189,8 +189,34 @@ export default {
 		tabs: {
 			overview: "Übersicht",
 			access: "Plattformzugriff",
+			apiQuota: `${verbatimTerms.api.value}-Kontingent`,
 			sessions: "Sitzungen",
 			activity: "Aktivität",
+		},
+		quotaUnavailable: `Du hast keinen Zugriff auf das ${verbatimTerms.api.value}-Kontingent dieses Kontos.`,
+		accountQuota: {
+			title: `${verbatimTerms.api.value}-Kontingent des Kontos`,
+			description:
+				"Die wirksamen Kontolimits gelten für alle Token. Zusätzliche Token vervielfachen die verfügbare Kapazität daher nicht.",
+			policy: "Kontingentrichtlinie",
+			validUntil: "Ablauf des privilegierten Zugriffs",
+			customize: "Richtlinie für dieses Konto überschreiben",
+			customizeDescription:
+				"Kontoüberschreibungen bleiben auf die gewählte Richtlinienklasse begrenzt und werden getrennt von unveränderlichen Revisionen gespeichert.",
+			reason: "Zuweisungsgrund",
+			reasonPlaceholder:
+				"Dokumentiere die betriebliche Begründung; sie wird im Sicherheitsprotokoll gespeichert.",
+			invalid: "Prüfe Kontingentlimits, Vorgangsüberschreibungen und Ablaufdatum.",
+			updateFailed:
+				"Das Kontingent konnte nicht aktualisiert werden. Lade die Seite neu und versuche es erneut.",
+			reset: "Auf Standard zurücksetzen",
+			save: "Kontokontingent speichern",
+			readOnly: "Du kannst dieses Kontokontingent prüfen, aber nicht ändern.",
+			sources: {
+				assigned: "Zugewiesen",
+				standard_default: "Standardvorgabe",
+				privileged_fallback: "Privilegierter Rückfall",
+			},
 		},
 		identityTitle: "Anmeldeidentität",
 		identityDescription: "Kontokennungen, E-Mail-Bestätigung und aktive Sitzungen.",
@@ -231,22 +257,29 @@ export default {
 		activityDescription: "Wichtige Verwaltungsereignisse zu Kontostatus und Sitzungen.",
 		noActivity: "Diesem Benutzer sind keine Sicherheitsereignisse direkt zugeordnet.",
 	},
-	tokenPolicies: {
+	apiQuotas: {
 		policyList: "Richtlinien",
 		revision: insert("Revision {{revision}}", { revision: Number }),
 		enabled: "Aktiviert",
 		disabled: "Deaktiviert",
 		empty: `Es sind keine ${verbatimTerms.api.value}-Token-Richtlinien verfügbar.`,
-		kind: "Richtlinientyp",
-		kinds: { standard: "Standard", privileged: "Privilegiert" },
+		policyClass: "Richtlinienklasse",
+		classes: { standard: "Standard", privileged: "Privilegiert" },
 		schemaVersion: insert("Schema {{version}}", { version: Number }),
 		requestsPerMinute: "Anfragen pro Minute",
+		burstCapacity: "Spitzenkapazität",
 		maxConcurrentRequests: "Maximale parallele Anfragen",
 		dailyCostUnits: "Tägliche Kosteneinheiten",
+		maxActiveTokens: "Limit aktiver Token",
 		operationOverrides: "Vorgangsspezifische Überschreibungen",
 		operationOverridesDescription: `Ein ${verbatimTerms.json.value}-Objekt ordnet Vorgangskennungen abweichenden Limits zu; ein leeres Objekt verwendet überall die globalen Limits.`,
 		invalidOperations: `Gib gültiges ${verbatimTerms.json.value} ein. Jedes Limit muss eine positive ganze Zahl sein.`,
-		updateFailed: "Die Token-Richtlinie konnte nicht aktualisiert werden. Bitte neu laden.",
+		changeReason: "Grund der Revision",
+		changeReasonPlaceholder:
+			"Begründung für die unveränderliche Revision und das Sicherheitsprotokoll.",
+		updateFailed: "Die Kontingentrichtlinie konnte nicht aktualisiert werden. Bitte neu laden.",
+		readOnly:
+			"Du kannst Kontingentrichtlinien anzeigen, aber keine neue Revision veröffentlichen.",
 		save: "Richtlinie speichern",
 	},
 	dashboard: {

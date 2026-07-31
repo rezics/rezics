@@ -10,7 +10,8 @@ import { fileURLToPath } from "node:url";
 import { database, type DatabaseTransaction } from "../database";
 import {
 	accounts,
-	apiAccessPolicy,
+	apiQuotaPolicy,
+	apiQuotaPolicyRevision,
 	profileFavoritesCollection,
 	platformCapabilityGrant,
 	contentStructure,
@@ -37,9 +38,9 @@ import {
 	zonePage,
 } from "../database/schema";
 import {
-	ApiTokenPolicySchemaVersion,
-	DefaultApiTokenPolicies,
-} from "../auth/api-token/policy-schema";
+	ApiQuotaPolicySchemaVersion,
+	DefaultApiQuotaPolicies,
+} from "../auth/api-quota/policy-schema";
 import {
 	createNavigationStructure,
 	presentNavigationStructure,
@@ -1502,18 +1503,40 @@ async function areAllZoneExperiencesReady(): Promise<boolean> {
 	});
 }
 
-async function ensureDefaultApiTokenPolicies(tx: DatabaseTransaction): Promise<void> {
-	for (const definition of Object.values(DefaultApiTokenPolicies))
+async function ensureDefaultApiQuotaPolicies(tx: DatabaseTransaction): Promise<void> {
+	for (const definition of Object.values(DefaultApiQuotaPolicies)) {
 		await tx
-			.insert(apiAccessPolicy)
+			.insert(apiQuotaPolicy)
 			.values({
-				...definition,
-				revision: 1,
+				key: definition.key,
+				class: definition.class,
+				currentRevision: 1,
 				enabled: true,
 				createdAt: bootstrapEpoch(),
 				updatedAt: bootstrapEpoch(),
 			})
-			.onConflictDoNothing({ target: apiAccessPolicy.key });
+			.onConflictDoNothing({ target: apiQuotaPolicy.key });
+		const [policy] = await tx
+			.select({ id: apiQuotaPolicy.id })
+			.from(apiQuotaPolicy)
+			.where(eq(apiQuotaPolicy.key, definition.key))
+			.limit(1);
+		if (!policy) throw new Error(`Failed to bootstrap API quota policy: ${definition.key}`);
+		await tx
+			.insert(apiQuotaPolicyRevision)
+			.values({
+				policyId: policy.id,
+				revision: 1,
+				schemaVersion: definition.schemaVersion,
+				configuration: definition.configuration,
+				changeReason: "Bootstrap default",
+				createdByProfileId: null,
+				createdAt: bootstrapEpoch(),
+			})
+			.onConflictDoNothing({
+				target: [apiQuotaPolicyRevision.policyId, apiQuotaPolicyRevision.revision],
+			});
+	}
 }
 
 async function isBootstrapReady(): Promise<boolean> {
@@ -1640,7 +1663,7 @@ async function isBootstrapReady(): Promise<boolean> {
 		profilePreferences,
 		profileFollows,
 		localizations,
-		defaultApiTokenPolicies,
+		defaultApiQuotaPolicies,
 		allZoneExperiencesReady,
 	] = await Promise.all([
 		database
@@ -1871,31 +1894,38 @@ async function isBootstrapReady(): Promise<boolean> {
 			),
 		database
 			.select({
-				key: apiAccessPolicy.key,
-				kind: apiAccessPolicy.kind,
-				schemaVersion: apiAccessPolicy.schemaVersion,
-				enabled: apiAccessPolicy.enabled,
+				key: apiQuotaPolicy.key,
+				class: apiQuotaPolicy.class,
+				schemaVersion: apiQuotaPolicyRevision.schemaVersion,
+				enabled: apiQuotaPolicy.enabled,
 			})
-			.from(apiAccessPolicy)
+			.from(apiQuotaPolicy)
+			.innerJoin(
+				apiQuotaPolicyRevision,
+				and(
+					eq(apiQuotaPolicyRevision.policyId, apiQuotaPolicy.id),
+					eq(apiQuotaPolicyRevision.revision, apiQuotaPolicy.currentRevision),
+				),
+			)
 			.where(
 				inArray(
-					apiAccessPolicy.key,
-					Object.values(DefaultApiTokenPolicies).map((value) => value.key),
+					apiQuotaPolicy.key,
+					Object.values(DefaultApiQuotaPolicies).map((value) => value.key),
 				),
 			),
 		areAllZoneExperiencesReady(),
 	]);
 	return (
 		unitCount[0]?.value === BootstrapUnitIds.length &&
-		defaultApiTokenPolicies.length === Object.keys(DefaultApiTokenPolicies).length &&
+		defaultApiQuotaPolicies.length === Object.keys(DefaultApiQuotaPolicies).length &&
 		allZoneExperiencesReady &&
-		Object.values(DefaultApiTokenPolicies).every((expected) =>
-			defaultApiTokenPolicies.some(
+		Object.values(DefaultApiQuotaPolicies).every((expected) =>
+			defaultApiQuotaPolicies.some(
 				(actual) =>
 					actual.key === expected.key &&
-					actual.kind === expected.kind &&
-					actual.schemaVersion === ApiTokenPolicySchemaVersion &&
-					(actual.kind !== "standard" || actual.enabled),
+					actual.class === expected.class &&
+					actual.schemaVersion === ApiQuotaPolicySchemaVersion &&
+					(actual.class !== "standard" || actual.enabled),
 			),
 		) &&
 		addresses.length === expectedAddresses.length &&
@@ -2101,7 +2131,7 @@ async function bootstrapDatabase(
 		const credentials = await ensureBootstrapProfiles(tx, options.credentialMode);
 		await ensureProfileFavorites(tx);
 		await ensureBootstrapPlatformAccess(tx);
-		await ensureDefaultApiTokenPolicies(tx);
+		await ensureDefaultApiQuotaPolicies(tx);
 		for (const realm of BootstrapRealmManifest) await ensureBootstrapRealm(tx, realm);
 		await ensureScoreRealmProfileDefaults(tx);
 		await ensureOfficialZoneAvatar(tx);

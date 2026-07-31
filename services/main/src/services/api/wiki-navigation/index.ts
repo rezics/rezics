@@ -119,7 +119,7 @@ export default new Elysia({ prefix: "/realms" })
 	.get(
 		"/:realmId/wiki/navigation",
 		async ({ params, request }) => {
-			const identity = await resolveIdentity(request.headers, "unit:read");
+			const identity = await resolveIdentity(request, "unit:read");
 			if (!identity.profile) throw new AuthenticationRequired();
 			await identity.authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 			await identity.authorization.unit.ensureCanRead(
@@ -207,7 +207,7 @@ export default new Elysia({ prefix: "/realms" })
 	.get(
 		"/:realmId/wiki/navigation/:navigationId",
 		async ({ params, request }) => {
-			const identity = await resolveIdentity(request.headers, "unit:read");
+			const identity = await resolveIdentity(request, "unit:read");
 			if (!identity.profile) throw new AuthenticationRequired();
 			await identity.authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 			await identity.authorization.unit.ensureCanRead(

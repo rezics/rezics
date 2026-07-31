@@ -9,7 +9,7 @@ import { database } from "../../database";
 import { apikeys } from "../../database/schema";
 import { DateTime, Uuid } from "../schema";
 import { toApiErrorResponse } from "../schema/response";
-import { ApiTokenPolicy } from "../tokens/schema";
+import { ApiTokenQuotaResponse } from "../tokens/schema";
 
 const ApiPermission = t.UnionEnum(ApiPermissionValues);
 const TokenInformationResponse = t.Object({
@@ -20,7 +20,7 @@ const TokenInformationResponse = t.Object({
 	enabled: t.Boolean(),
 	expiresAt: t.Nullable(DateTime),
 	createdAt: DateTime,
-	policy: ApiTokenPolicy,
+	quota: ApiTokenQuotaResponse,
 });
 
 export default new Elysia({ prefix: "/token" }).use(session).get(
@@ -28,7 +28,6 @@ export default new Elysia({ prefix: "/token" }).use(session).get(
 	async ({ credential }) => {
 		if (credential.kind !== "apiKey")
 			throw new Error("API token introspection requires an API-key credential");
-		const apiCredential = credential;
 		const [key] = await database
 			.select({
 				id: apikeys.id,
@@ -40,28 +39,41 @@ export default new Elysia({ prefix: "/token" }).use(session).get(
 				createdAt: apikeys.createdAt,
 			})
 			.from(apikeys)
-			.where(eq(apikeys.id, apiCredential.id))
+			.where(eq(apikeys.id, credential.id))
 			.limit(1);
 		if (!key) throw new Error("Verified API token record is unavailable");
-		const policy = apiCredential.policy;
+		const account = credential.quotaPolicy;
+		const tokenOverride = credential.tokenQuotaOverride;
 		return {
 			id: key.id,
 			name: key.name ?? "",
 			tokenPrefix: key.start ?? key.prefix ?? "",
-			permissions: [...apiCredential.permissions],
+			permissions: [...credential.permissions],
 			enabled: key.enabled ?? false,
 			expiresAt: key.expiresAt,
 			createdAt: key.createdAt,
-			policy: {
-				key: policy.key,
-				kind: policy.kind,
-				source: policy.source,
-				schemaVersion: policy.schemaVersion,
-				policyRevision: policy.policyRevision,
-				bindingRevision: policy.bindingRevision,
-				validUntil: policy.validUntil,
-				limits: policy.configuration.limits,
-				operations: policy.configuration.operations,
+			quota: {
+				account: {
+					key: account.key,
+					class: account.class,
+					source: account.source,
+					schemaVersion: account.schemaVersion,
+					policyRevision: account.policyRevision,
+					bindingRevision: account.bindingRevision,
+					validUntil: account.validUntil,
+					assignmentReason: account.assignmentReason,
+					configurationOverride: account.configurationOverride,
+					limits: account.configuration.limits,
+					maxActiveTokens: account.configuration.maxActiveTokens,
+					operations: account.configuration.operations,
+				},
+				tokenOverride: tokenOverride
+					? {
+							configurationOverride: tokenOverride.configurationOverride,
+							revision: tokenOverride.revision,
+							updatedAt: tokenOverride.updatedAt,
+						}
+					: null,
 			},
 		};
 	},
@@ -70,7 +82,10 @@ export default new Elysia({ prefix: "/token" }).use(session).get(
 		response: {
 			[StatusCodes.OK]: TokenInformationResponse,
 			[StatusCodes.UNAUTHORIZED]: toApiErrorResponse(["AuthenticationRequired"]),
-			[StatusCodes.TOO_MANY_REQUESTS]: toApiErrorResponse(["ApiTokenRateLimitExceeded"]),
+			[StatusCodes.TOO_MANY_REQUESTS]: toApiErrorResponse([
+				"ApiQuotaExceeded",
+				"ApiTokenRateLimitExceeded",
+			]),
 		},
 		detail: {
 			operationId: "getCurrentApiToken",

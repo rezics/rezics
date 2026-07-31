@@ -749,7 +749,10 @@ describe("database schema contracts", () => {
 				"unit.delete",
 				"unit.restore",
 				"platform.development_preview.access",
-				"platform.api_token_policy.manage",
+				"platform.api_quota_policy.read",
+				"platform.api_quota_policy.update",
+				"platform.user.api_quota.read",
+				"platform.user.api_quota.update",
 			]),
 		);
 		expect(PlatformCapabilityValues).not.toContain("unit.ownership.transfer");

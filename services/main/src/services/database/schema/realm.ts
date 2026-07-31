@@ -51,8 +51,8 @@ export const realmUnitPublicationState = pgEnum(
 	toEnumValues(RealmUnitPublicationStateValues),
 );
 /*
- * PostgreSQL cannot remove enum labels in place. The retired label remains in
- * the physical enum, while the grant check proves the narrower application type.
+ * The storage enum retains the retired Unit ownership-transfer label; the
+ * grant check proves the narrower application type.
  */
 const platformCapabilityStorageValues = toEnumValues([
 	"platform.access.read",
@@ -74,7 +74,10 @@ const platformCapabilityStorageValues = toEnumValues([
 	"unit.slug.manage",
 	"unit.slug.namespace.manage",
 	"unit.slug.redirect.release",
-	"platform.api_token_policy.manage",
+	"platform.api_quota_policy.read",
+	"platform.api_quota_policy.update",
+	"platform.user.api_quota.read",
+	"platform.user.api_quota.update",
 	"platform.moderate",
 	"platform.suppress",
 	"realm.contribute",

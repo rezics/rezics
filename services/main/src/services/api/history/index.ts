@@ -217,7 +217,7 @@ export default new Elysia({ prefix: "/history" })
 	.get(
 		"/units/:unitId/revisions",
 		async ({ params, query, request }) => {
-			const { authorization } = await resolveIdentity(request.headers, "unit:read");
+			const { authorization } = await resolveIdentity(request, "unit:read");
 			await authorization.unit.ensureCanRead(params.unitId);
 			const [access, restoreDecision, [targetUnit]] = await Promise.all([
 				getVisibilityAccess(authorization),
@@ -268,7 +268,7 @@ export default new Elysia({ prefix: "/history" })
 	.get(
 		"/unit-revisions/:revisionId",
 		async ({ params, request }) => {
-			const { authorization } = await resolveIdentity(request.headers, "unit:read");
+			const { authorization } = await resolveIdentity(request, "unit:read");
 			const row = await findSummary(params.revisionId);
 			await authorization.unit.ensureCanRead(row.unitId);
 			const access = await getVisibilityAccess(authorization);
@@ -333,7 +333,7 @@ export default new Elysia({ prefix: "/history" })
 	.get(
 		"/units/:unitId/compare",
 		async ({ params, query, request }) => {
-			const { authorization } = await resolveIdentity(request.headers, "unit:read");
+			const { authorization } = await resolveIdentity(request, "unit:read");
 			await authorization.unit.ensureCanRead(params.unitId);
 			const access = await getVisibilityAccess(authorization);
 			const [from, to] = await Promise.all([findSummary(query.from), findSummary(query.to)]);
@@ -521,7 +521,7 @@ export default new Elysia({ prefix: "/history" })
 	.get(
 		"/recent-changes",
 		async ({ query, request }) => {
-			const { profile, authorization } = await resolveIdentity(request.headers, "unit:read");
+			const { profile, authorization } = await resolveIdentity(request, "unit:read");
 			const access = await getVisibilityAccess(authorization);
 			const scope = `recent:${query.tag ?? ""}:${query.minor ?? ""}`;
 			const cursor = decodeCursor(query.cursor, scope);
@@ -560,7 +560,7 @@ export default new Elysia({ prefix: "/history" })
 	.get(
 		"/contributions/:profileId",
 		async ({ params, query, request }) => {
-			const { profile, authorization } = await resolveIdentity(request.headers, "unit:read");
+			const { profile, authorization } = await resolveIdentity(request, "unit:read");
 			const access = await getVisibilityAccess(authorization);
 			const scope = `contributions:${params.profileId}:${query.tag ?? ""}:${query.minor ?? ""}`;
 			const cursor = decodeCursor(query.cursor, scope);

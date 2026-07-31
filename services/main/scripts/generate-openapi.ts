@@ -9,7 +9,10 @@ import type { OpenAPIV3 } from "openapi-types";
 import { format, resolveConfig } from "prettier";
 
 import { ApiErrorCodes } from "../src/services/api/errors";
-import { apiTokenOperationId } from "../src/services/auth/api-token/operation";
+import {
+	apiRouteOperationId,
+	resolveApiQuotaOperation,
+} from "../src/services/auth/api-quota/operation";
 
 const { initializeObservability } = await import("@rezics/observability");
 const observability = initializeObservability({
@@ -45,8 +48,8 @@ const internalErrorResponse = {
 		"application/json": { schema: { $ref: "#/components/schemas/InternalError" } },
 	},
 };
-const apiTokenRateLimitResponse = {
-	description: "API token resource limit exceeded",
+const apiQuotaExceededResponse = {
+	description: "API quota exceeded",
 	headers: {
 		"Retry-After": {
 			description: "Seconds until the limiting window or concurrency lease can be retried",
@@ -63,7 +66,10 @@ const apiTokenRateLimitResponse = {
 						type: "object",
 						required: ["code", "message"],
 						properties: {
-							code: { type: "string", enum: ["ApiTokenRateLimitExceeded"] },
+							code: {
+								type: "string",
+								enum: ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"],
+							},
 							message: { type: "string" },
 							details: { $ref: "#/components/schemas/JsonValue" },
 						},
@@ -180,6 +186,11 @@ for (const [pathTemplate, path] of Object.entries(document.paths)) {
 	for (const method of methods) {
 		const operation = path[method];
 		if (!operation) continue;
+		const routeOperationId = apiRouteOperationId(
+			method,
+			pathTemplate.replaceAll(/\{([^}]+)\}/g, ":$1"),
+		);
+		const quotaOperation = resolveApiQuotaOperation(routeOperationId);
 		if (!operation.security) {
 			const unauthorized = operation.responses[StatusCodes.UNAUTHORIZED];
 			if (containsJsonValue(unauthorized, "InteractiveSessionRequired"))
@@ -187,13 +198,14 @@ for (const [pathTemplate, path] of Object.entries(document.paths)) {
 			else if (containsJsonValue(unauthorized, "AuthenticationRequired"))
 				operation.security = [{ ApiToken: [] }, { SessionCookie: [] }];
 		}
+		if (quotaOperation.scope && !operation.security)
+			operation.security = [{}, { ApiToken: [] }, { SessionCookie: [] }];
 		if (operation.security?.some((requirement) => "ApiToken" in requirement))
-			operation.responses[StatusCodes.TOO_MANY_REQUESTS] ??= apiTokenRateLimitResponse;
+			operation.responses[StatusCodes.TOO_MANY_REQUESTS] ??= apiQuotaExceededResponse;
 		Object.assign(operation, {
-			"x-rezics-policy-operation-id": apiTokenOperationId(
-				method,
-				pathTemplate.replaceAll(/\{([^}]+)\}/g, ":$1"),
-			),
+			"x-rezics-quota-route-operation-id": routeOperationId,
+			"x-rezics-quota-operation-id": quotaOperation.scope ?? "*",
+			"x-rezics-quota-cost-units": quotaOperation.costUnits,
 		});
 		const badRequest = operation.responses[StatusCodes.BAD_REQUEST];
 		const badRequestResponse = isResponseObject(badRequest) ? badRequest : undefined;
