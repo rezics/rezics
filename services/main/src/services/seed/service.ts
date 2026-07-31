@@ -2941,6 +2941,10 @@ async function seedCoverageContracts(
 		createdAt,
 		updatedAt: createdAt,
 	});
+	await tx
+		.update(realm)
+		.set({ realmTagVotingEnabled: true, updatedAt: createdAt })
+		.where(eq(realm.id, targetRealm.id));
 	await tx.insert(realmTagVote).values([
 		{
 			realmId: targetRealm.id,

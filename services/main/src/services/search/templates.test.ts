@@ -32,6 +32,15 @@ describe("Search Feature v1", () => {
 		else expect(resolved.controls.length).toBeGreaterThan(0);
 	});
 
+	it("offers Realm Tag context only when the template can return Tags", () => {
+		expect(createDefaultSearchDocument("global").controls).toContainEqual(
+			expect.objectContaining({ field: "realm-tag-context" }),
+		);
+		expect(createDefaultSearchDocument("book").controls).not.toContainEqual(
+			expect.objectContaining({ field: "realm-tag-context" }),
+		);
+	});
+
 	it("removes the Tag-path category and control option outside development preview", () => {
 		const resolved = resolveSearchDocument(createDefaultSearchDocument("global"), false);
 		const categoryControl = resolved.controls.find((control) => control.field === "category");

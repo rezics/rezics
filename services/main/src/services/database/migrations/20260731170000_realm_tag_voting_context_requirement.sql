@@ -8,6 +8,39 @@ CREATE INDEX "realm_tag_context_tag_realm_idx"
   ON "realm_tag_context" ("tag_id", "realm_id");
 --> statement-breakpoint
 
+-- Votes whose canonical context was removed by the preceding context
+-- normalization cannot satisfy the new ownership invariant. Their aggregate
+-- rows are maintained by the existing vote trigger; the explicit stat cleanup
+-- also removes any pre-existing aggregate drift before adding the foreign keys.
+DELETE FROM "realm_tag_vote" AS vote
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM "realm_tag_context" AS context
+  WHERE context."realm_id" = vote."realm_id"
+    AND context."tag_id" = vote."tag_id"
+);
+--> statement-breakpoint
+
+DELETE FROM "realm_tag_vote_stat" AS stat
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM "realm_tag_context" AS context
+  WHERE context."realm_id" = stat."realm_id"
+    AND context."tag_id" = stat."tag_id"
+);
+--> statement-breakpoint
+
+-- Existing context-owned votes prove that the Realm was already using this
+-- capability before its policy became explicit.
+UPDATE "realm" AS target_realm
+SET "realm_tag_voting_enabled" = true
+WHERE EXISTS (
+  SELECT 1
+  FROM "realm_tag_vote" AS vote
+  WHERE vote."realm_id" = target_realm."id"
+);
+--> statement-breakpoint
+
 ALTER TABLE "realm_tag_vote"
   ADD CONSTRAINT "realm_tag_vote_context_fkey"
   FOREIGN KEY ("realm_id", "tag_id")
