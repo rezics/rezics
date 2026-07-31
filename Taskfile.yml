@@ -150,7 +150,7 @@ tasks:
             - docker compose start --wait sequin
 
     infra:search:apply:
-        desc: Recreate Sequin to apply a reviewed configuration after migrations and index preparation.
+        desc: Recreate Sequin to apply the reviewed configuration after database preparation.
         cmds:
             - docker compose up -d --wait --force-recreate sequin
 

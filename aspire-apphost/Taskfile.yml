@@ -28,7 +28,7 @@ tasks:
             - task: doctor
             - task infra:up
             - task services-main:db:prepare
-            - task infra:search:start
+            - task infra:search:apply
             - task services-main:search:index -- check --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
             - yarn exec aspire run --apphost aspire-apphost/apphost.mts
 
