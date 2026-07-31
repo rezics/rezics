@@ -7,7 +7,7 @@ import {
 import { Button, MenuItem } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { KeyRound } from "lucide-react";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import { useAuthPortal } from "@/features/auth/auth-portal-context";
 import { UnitReportOverflowMenu } from "@/features/reports/components/unit-report-dialog";
@@ -35,11 +35,13 @@ function useOwnershipClaimRequest() {
 }
 
 export function UnitUnitOverflowMenu({
+	additionalItems,
 	ownershipMode,
 	pendingClaim,
 	type,
 	unitId,
 }: {
+	readonly additionalItems?: ReactNode;
 	readonly ownershipMode: string;
 	readonly pendingClaim: PendingUnitOwnershipClaim | null;
 	readonly type: "book" | "media" | "software" | "series";
@@ -54,14 +56,17 @@ export function UnitUnitOverflowMenu({
 		<>
 			<UnitReportOverflowMenu
 				additionalItems={
-					placement === "overflow" ? (
-						<MenuItem onSelect={claimRequest.request} value="claim-unit-ownership">
-							<KeyRound aria-hidden />
-							{pendingClaim
-								? t.units.ownershipClaim.pendingAction
-								: t.units.ownershipClaim.action}
-						</MenuItem>
-					) : null
+					<>
+						{additionalItems}
+						{placement === "overflow" ? (
+							<MenuItem onSelect={claimRequest.request} value="claim-unit-ownership">
+								<KeyRound aria-hidden />
+								{pendingClaim
+									? t.units.ownershipClaim.pendingAction
+									: t.units.ownershipClaim.action}
+							</MenuItem>
+						) : null}
+					</>
 				}
 				unitId={unitId}
 			/>

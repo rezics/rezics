@@ -58,6 +58,7 @@ export default {
 	introduction: "紹介",
 	language: "インターフェース言語",
 	preferredLanguageUnavailable: "このコンテンツは、まだあなたの希望する言語では利用できません",
+	requestedLanguageUnavailable: "選択した言語版は利用できません。自動選択に戻しました。",
 	timezone: "時間帯",
 	contentRating: "コンテンツ評価",
 	profileVisibility: "プロフィールの公開範囲",

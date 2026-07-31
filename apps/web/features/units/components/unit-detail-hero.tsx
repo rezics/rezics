@@ -12,6 +12,7 @@ import { BookOpen, Gamepad2, LibraryBig, Pencil, PlaySquare } from "lucide-react
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { CollectionPickerButton } from "@/features/collections/components/collection-picker-button";
+import { ContentLanguageVersionMenu } from "@/features/content-languages/components/content-language-version-menu";
 import { FollowButton } from "@/features/following/components/follow-button";
 import { UnitProgressAction } from "@/features/progress/components/unit-progress-action";
 import { UnitProgressStatistics } from "@/features/progress/components/unit-progress-statistics";
@@ -96,6 +97,14 @@ export function UnitDetailHero<Type extends UnitDetailUnitType>({
 						) : null}
 						<UnitShareAction unitId={unit.id} />
 						<UnitUnitOverflowMenu
+							additionalItems={
+								<ContentLanguageVersionMenu
+									availableLanguages={unit.localizations.map(
+										({ language }) => language,
+									)}
+									currentLanguage={unit.language}
+								/>
+							}
 							ownershipMode={unit.ownershipMode}
 							pendingClaim={unit.ownershipClaim}
 							type={type}

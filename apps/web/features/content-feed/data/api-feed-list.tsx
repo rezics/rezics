@@ -240,6 +240,7 @@ export function ApiFeedList({
 						item={item}
 						onHiddenChange={(value) => setItemHidden(item.id, value)}
 						position={metadata.position}
+						preserveDisplayedLanguage={filterLanguages.length > 0}
 						requestedRealmId={requestedRealmId}
 						overflowActions={renderOverflowActions?.(item)}
 						setSize={metadata.setSize}

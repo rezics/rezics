@@ -42,14 +42,14 @@ describe("selectReaderChapterLocalization", () => {
 		).toBe("zh");
 	});
 
-	it("does not silently substitute another explicitly requested language", () => {
+	it("falls back when an explicitly requested language version does not exist", () => {
 		expect(
 			selectReaderChapterLocalization(rows.slice(0, 1), {
 				canEditBook: false,
 				exactLanguage: "en",
 				localizationLanguages: ["zh"],
-			}),
-		).toBeUndefined();
+			})?.language,
+		).toBe("zh");
 	});
 
 	it("lets an editor read a draft body", () => {

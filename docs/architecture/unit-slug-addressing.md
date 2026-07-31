@@ -149,6 +149,26 @@ canonical addresses per target in distinct scopes. That future lookup must not
 change the globally unique Post ID used by relationships, APIs, mutations, or
 cache keys.
 
+### Content-language variants
+
+A content-language version is a presentation of the same Unit identity, not a
+different route or slug. Detail routes use an optional singular
+`?language={contentLanguage}` override. Omitting `language` means automatic
+selection from the viewer's ordered preferences followed by Unit order.
+Switching versions replaces only this parameter and preserves route context,
+such as `realmId`, suffixes, and fragments.
+
+List-wide language selection uses the plural `?languages=ja,ko` parameter and
+forms the hard display boundary documented in _Filter, Feed, Search, and Zone
+experience_. A list card that came from such a boundary links to its displayed
+version with singular `language`; its overflow menu may link directly to any
+value returned by `availableLanguages`. A stale explicit language override may
+fall back for rendering only long enough to notify the user and restore the
+automatic URL. Language parameters never participate in Unit identity,
+canonical slug lookup, authorization, or mutation targets. Presentation query
+keys and cursors must include the effective language decision so differently
+localized responses cannot share cached data.
+
 Candidates such as Collection `/collection` and `/c`, Entity `/entity` and
 `/e`, Tag `/tag` and `/t`, Post slug aliases `/post` and `/p`, Poll `/poll` and
 `/q`, Book `/book` and `/b`, Software `/software` and `/s`, Media `/media` and

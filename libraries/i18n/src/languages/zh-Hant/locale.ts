@@ -21,6 +21,10 @@ export default {
 		fr: "法文",
 		es: "西班牙文",
 	},
+	contentVersions: {
+		action: "語言版本",
+		automatic: "自動選擇",
+	},
 	draftContentLanguage: {
 		label: "內容語言",
 		useAutomatic: "改用自動偵測",

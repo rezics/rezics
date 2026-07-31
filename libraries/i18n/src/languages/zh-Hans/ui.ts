@@ -58,6 +58,7 @@ export default {
 	introduction: "简介",
 	language: "接口语言",
 	preferredLanguageUnavailable: "这项内容暂不支持你的偏好语言。",
+	requestedLanguageUnavailable: "所选的语言版本不可用，已恢复自动选择。",
 	timezone: "时区",
 	contentRating: "内容分级",
 	profileVisibility: "数据可见性",

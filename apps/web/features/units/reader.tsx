@@ -53,6 +53,11 @@ import { ReplyPostThread } from "@/features/posts/reply-thread";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
+import {
+	useContentLanguageNavigation,
+	useRequestedContentLanguage,
+} from "@/features/content-languages/hooks/use-content-language-navigation";
+import { withContentLanguage } from "@/features/content-languages/routing/content-language-route";
 import { RequestFailure } from "@/i18n/request-failure";
 import { hasErrorCode } from "@/i18n/errors";
 import { readPortableText, writePortableText } from "@/lib/block";
@@ -76,12 +81,14 @@ function ContentReadTree({
 	label,
 	nodes,
 	currentChapterId,
+	language,
 	className,
 }: {
 	bookId: string;
 	label: string;
 	nodes: readonly ContentStructureTreeNode[];
 	currentChapterId?: string;
+	language?: ContentLanguage;
 	className?: string;
 }) {
 	const scrollRef = useRef<HTMLDivElement>(null);
@@ -217,7 +224,10 @@ function ContentReadTree({
 								<Link
 									aria-current={current ? "page" : undefined}
 									className={rowClassName}
-									href={`/units/book/${bookId}/read/${node.contentUnitId}`}
+									href={withContentLanguage(
+										`/units/book/${bookId}/read/${node.contentUnitId}`,
+										language,
+									)}
 									style={rowStyle}
 								>
 									<span className="truncate">
@@ -305,12 +315,8 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 		const storedFontSize = loadReaderFontSize();
 		if (storedFontSize) setFontSize(storedFontSize);
 	}, []);
-	const [languageSelection, setLanguageSelection] = useState<{
-		readonly chapterId: string;
-		readonly language: ContentLanguage;
-	} | null>(null);
-	const selectedLanguage =
-		languageSelection?.chapterId === chapterId ? languageSelection.language : undefined;
+	const selectedLanguage = useRequestedContentLanguage();
+	const { replaceCurrentLanguage } = useContentLanguageNavigation();
 	const query = useGetApiChaptersByChapterId({
 		path: { chapterId },
 		query: {
@@ -319,7 +325,7 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 		},
 	});
 	useLocalizationFallbackToast({
-		actualLanguage: selectedLanguage ? null : (query.data?.language ?? null),
+		actualLanguage: query.data?.language ?? null,
 		localizationLanguages,
 		unitId: chapterId,
 	});
@@ -380,6 +386,7 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 								bookId={bookId}
 								className="h-[calc(100svh-7.75rem)] border-0"
 								currentChapterId={chapterId}
+								language={selectedLanguage}
 								outline={outline}
 								tree={tree}
 							/>
@@ -434,12 +441,10 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 								<MenuRadioGroup
 									heading={t.units.reader.chapterLanguage}
 									onValueChange={({ value }) => {
-										if (value === "automatic") setLanguageSelection(null);
+										if (value === "automatic")
+											replaceCurrentLanguage(undefined);
 										else if (isContentLanguage(value))
-											setLanguageSelection({
-												chapterId,
-												language: value,
-											});
+											replaceCurrentLanguage(value);
 									}}
 									value={selectedLanguage ?? "automatic"}
 								>
@@ -471,6 +476,7 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 						bookId={bookId}
 						className="min-h-0 flex-1 border-0 bg-transparent"
 						currentChapterId={chapterId}
+						language={selectedLanguage}
 						outline={outline}
 						tree={tree}
 					/>
@@ -506,7 +512,10 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 							{query.data.previousChapterId ? (
 								<Button asChild className="min-h-11 sm:min-h-8" variant="outline">
 									<Link
-										href={`/units/book/${bookId}/read/${query.data.previousChapterId}`}
+										href={withContentLanguage(
+											`/units/book/${bookId}/read/${query.data.previousChapterId}`,
+											selectedLanguage,
+										)}
 									>
 										{t.ui.previousChapter}
 									</Link>
@@ -517,7 +526,10 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 							{query.data.nextChapterId ? (
 								<Button variant="solid" asChild className="min-h-11 sm:min-h-8">
 									<Link
-										href={`/units/book/${bookId}/read/${query.data.nextChapterId}`}
+										href={withContentLanguage(
+											`/units/book/${bookId}/read/${query.data.nextChapterId}`,
+											selectedLanguage,
+										)}
 									>
 										{t.ui.nextChapter}
 									</Link>
@@ -530,7 +542,10 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 							<ReplyPostThread
 								canReply={query.data.capabilities.canReply}
 								rootPostId={chapterId}
-								signInDestination={`/units/book/${bookId}/read/${chapterId}#replies`}
+								signInDestination={withContentLanguage(
+									`/units/book/${bookId}/read/${chapterId}#replies`,
+									selectedLanguage,
+								)}
 							/>
 						</div>
 					</div>
@@ -544,12 +559,14 @@ function ReaderOutline({
 	bookId,
 	className,
 	currentChapterId,
+	language,
 	outline,
 	tree,
 }: {
 	bookId: string;
 	className?: string;
 	currentChapterId: string;
+	language?: ContentLanguage;
 	outline: ReturnType<typeof useGetApiUnitsBookByUnitIdContentStructureNodes>;
 	tree: readonly ContentStructureTreeNode[];
 }) {
@@ -571,6 +588,7 @@ function ReaderOutline({
 			bookId={bookId}
 			className={className}
 			currentChapterId={currentChapterId}
+			language={language}
 			label={t.units.content.title}
 			nodes={tree}
 		/>

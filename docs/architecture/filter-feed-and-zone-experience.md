@@ -28,6 +28,27 @@ introducing a Review-only filtering language. Feed sorts are recommendation
 objectives (`best`, `hot`, `new`, `top`, and `rising`); Feed never exposes
 relevance.
 
+Language selection has two independent inputs. `localizationLanguages` is the
+ordered presentation preference and may fall back through the Unit's own
+localization order. A positive language predicate in the list Filter is an
+eligibility and presentation boundary. For available Unit languages `A`,
+ordered preferences `P`, and a selected language set `F`:
+
+- automatic presentation chooses the first member of `P ∩ A`, then the first
+  member of `A` in Unit order;
+- filtered presentation chooses the first member of `P ∩ F ∩ A`, then the
+  first member of `F ∩ A` in Unit order;
+- filtered presentation never hydrates the item or its localized media from a
+  language outside `F`.
+
+The Feed keeps one result per Unit; selecting multiple languages never creates
+one card per localization. Each canonical Feed item returns its actual
+`language` and its ordered `availableLanguages`. Search Feature Feed applies
+the same boundary when its positive expression proves that every matching
+branch is language-constrained. Negative language predicates or an
+unconstrained `any` branch remain eligibility-only because they cannot define a
+safe positive display set.
+
 Search is a presentation and execution feature over the same `UnitFilter`. It
 combines:
 
@@ -135,7 +156,11 @@ and deterministic Bootstrap identity.
 The Filter schema is closed and runtime-validated at every untrusted JSON
 boundary. Depth, node count, set uniqueness, UUIDs, enum values, and numeric
 ranges are bounded. Feed cursors include a cryptographic hash of canonical
-Filter JSON so a cursor cannot be reused with a different Filter.
+Filter JSON and bind both the selected and preferred language sequences, so a
+cursor cannot be reused with a different Filter or presentation decision.
+Search cursor request hashes likewise bind the ordered presentation languages;
+changing preferences or an explicit language override starts a new result
+window.
 
 Feed compiles `UnitPredicate` to parameterized SQL. When `UnitFilter.search` is
 present, the Search Service supplies matching candidate identities and applies

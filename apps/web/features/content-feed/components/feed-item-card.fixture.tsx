@@ -33,6 +33,7 @@ const realmContext = {
 type FeedUnitCommon = Pick<
 	FeedUnit,
 	| "attributions"
+	| "availableLanguages"
 	| "collection"
 	| "createdAt"
 	| "itemType"
@@ -49,6 +50,7 @@ type FeedUnitCommon = Pick<
 
 const common = {
 	language: "zh",
+	availableLanguages: ["zh"],
 	itemType: "unit",
 	postKind: null,
 	attributions: [attribution],
@@ -156,6 +158,7 @@ const zoneWithoutAvatar = {
 const contextualReview = {
 	id: "019f9d16-1000-7000-8000-000000000060",
 	language: "zh",
+	availableLanguages: ["zh"],
 	itemType: "post",
 	unitKind: "post",
 	postKind: "review",

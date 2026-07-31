@@ -11,6 +11,8 @@ import type { ReactNode } from "react";
 import { CardContent, cn, IdentityAvatar } from "@rezics/ui";
 import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
+import { ContentLanguageVersionMenu } from "@/features/content-languages/components/content-language-version-menu";
+import { withContentLanguage } from "@/features/content-languages/routing/content-language-route";
 import { resolvePostPresentationTitle } from "@/features/posts/model/post-presentation-title";
 import { postHref, type PostInteractionContext } from "@/features/posts/url";
 import { apiValueToUnitScore } from "@/features/reviews/model/score-value";
@@ -58,6 +60,7 @@ export function FeedItemCard({
 	overflowActions,
 	postContext,
 	position,
+	preserveDisplayedLanguage = false,
 	requestedRealmId,
 	setSize,
 }: {
@@ -68,6 +71,7 @@ export function FeedItemCard({
 	overflowActions?: ReactNode;
 	postContext?: PostInteractionContext;
 	position?: number;
+	preserveDisplayedLanguage?: boolean;
 	requestedRealmId?: string;
 	setSize?: number;
 }) {
@@ -80,6 +84,7 @@ export function FeedItemCard({
 			post={item}
 			postContext={postContext}
 			position={position}
+			preserveDisplayedLanguage={preserveDisplayedLanguage}
 			requestedRealmId={requestedRealmId}
 			setSize={setSize}
 		/>
@@ -89,6 +94,7 @@ export function FeedItemCard({
 			onHiddenChange={onHiddenChange}
 			overflowActions={overflowActions}
 			position={position}
+			preserveDisplayedLanguage={preserveDisplayedLanguage}
 			setSize={setSize}
 			unit={item}
 		/>
@@ -104,6 +110,7 @@ export function FeedPostCard({
 	overflowActions,
 	postContext,
 	position,
+	preserveDisplayedLanguage = false,
 	setSize,
 }: {
 	post: FeedPost;
@@ -114,6 +121,7 @@ export function FeedPostCard({
 	overflowActions?: ReactNode;
 	postContext?: PostInteractionContext;
 	position?: number;
+	preserveDisplayedLanguage?: boolean;
 	setSize?: number;
 }) {
 	const { t, locale } = useTranslation(["actions", "feed", "posts", "state", "ui"]);
@@ -121,7 +129,11 @@ export function FeedPostCard({
 	const reason = recommendationReasonLabel(post.recommendationReason, t.feed);
 	const realmId = requestedRealmId ?? post.realmId ?? undefined;
 	const context = postContext ?? (realmId ? { kind: "realm" as const, realmId } : undefined);
-	const href = postHref(post.id, context);
+	const baseHref = postHref(post.id, context);
+	const href =
+		preserveDisplayedLanguage && post.language
+			? withContentLanguage(baseHref, post.language)
+			: baseHref;
 	const subjectHref = post.subject ? unitHref(post.subject.type, post.subject.id) : undefined;
 	const subjectTitle = useChineseContentText(
 		post.subject?.title ?? t.actions.view,
@@ -286,6 +298,7 @@ export function FeedPostCard({
 					onOpen={trackOpen}
 					overflowMenu={
 						<FeedItemOverflowMenu
+							contentHref={baseHref}
 							canExclude={canExclude}
 							item={post}
 							onHiddenChange={onHiddenChange}
@@ -305,6 +318,7 @@ export function FeedUnitCard({
 	onHiddenChange,
 	overflowActions,
 	position,
+	preserveDisplayedLanguage = false,
 	setSize,
 }: {
 	unit: FeedUnit;
@@ -312,6 +326,7 @@ export function FeedUnitCard({
 	onHiddenChange?: (hidden: boolean) => void;
 	overflowActions?: ReactNode;
 	position?: number;
+	preserveDisplayedLanguage?: boolean;
 	setSize?: number;
 }) {
 	const { t, locale } = useTranslation(["feed", "posts", "realms", "ui"]);
@@ -332,12 +347,15 @@ export function FeedUnitCard({
 			: undefined;
 	const identityPresentation = unit.presentation.kind === "identity" ? unit.presentation : null;
 	const realmTagContext = unit.unitKind === "tag" ? identityPresentation?.realmTagContext : null;
+	const unitBaseHref = unitHref(unit.unitKind, unit.id);
 	const href = realmTagContext
 		? postHref(realmTagContext.contextPostId, {
 				kind: "realm",
 				realmId: realmTagContext.realmId,
 			})
-		: unitHref(unit.unitKind, unit.id);
+		: preserveDisplayedLanguage && unit.language && unitBaseHref
+			? withContentLanguage(unitBaseHref, unit.language)
+			: unitBaseHref;
 	const displayedSummary = useChineseContentText(
 		realmTagContext?.summary ?? unit.summary ?? "",
 		realmTagContext?.language ?? unit.language,
@@ -425,6 +443,7 @@ export function FeedUnitCard({
 					onOpen={trackOpen}
 					overflowMenu={
 						<FeedItemOverflowMenu
+							contentHref={realmTagContext ? undefined : unitBaseHref}
 							canExclude={canExclude}
 							item={unit}
 							onHiddenChange={onHiddenChange}
@@ -459,12 +478,14 @@ function toFeedTargetScore(
 function FeedItemOverflowMenu({
 	actions,
 	canExclude,
+	contentHref,
 	item,
 	onHiddenChange,
 	realmId,
 }: {
 	actions?: ReactNode;
 	canExclude: boolean;
+	contentHref?: string;
 	item: FeedItem;
 	onHiddenChange?: (hidden: boolean) => void;
 	realmId?: string;
@@ -500,6 +521,13 @@ function FeedItemOverflowMenu({
 			onNotInterested={markNotInterested}
 			reportTarget={{ unitId: item.id, realmId }}
 		>
+			{contentHref && item.availableLanguages.length > 1 ? (
+				<ContentLanguageVersionMenu
+					availableLanguages={item.availableLanguages}
+					baseHref={contentHref}
+					currentLanguage={item.language}
+				/>
+			) : null}
 			{actions}
 		</FeedOverflowMenu>
 	);

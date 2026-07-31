@@ -41,6 +41,7 @@ import { DraftContentLanguageField } from "@/features/content-languages/componen
 import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/use-form-draft-content-language";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
+import { ContentLanguageVersionMenu } from "@/features/content-languages/components/content-language-version-menu";
 import { ContentLanguageEditorProvider } from "@/features/content-languages/hooks/use-content-language-editor";
 import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
 import { StudioTagCreateHref } from "@/features/create/model/studio-section";
@@ -293,7 +294,17 @@ export function EntityDetailPage({ id }: { id: string }) {
 								</Link>
 							</Button>
 						) : null}
-						<UnitReportOverflowMenu unitId={query.data.id} />
+						<UnitReportOverflowMenu
+							additionalItems={
+								<ContentLanguageVersionMenu
+									availableLanguages={query.data.localizations.map(
+										({ language }) => language,
+									)}
+									currentLanguage={query.data.language}
+								/>
+							}
+							unitId={query.data.id}
+						/>
 					</div>
 				</CardContent>
 			</Card>

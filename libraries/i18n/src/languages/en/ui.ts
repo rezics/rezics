@@ -58,6 +58,8 @@ export default {
 	introduction: "Introduction",
 	language: "Interface language",
 	preferredLanguageUnavailable: "This content is not yet available in your preferred languages.",
+	requestedLanguageUnavailable:
+		"The selected language version is unavailable. Automatic selection has been restored.",
 	timezone: "Timezone",
 	contentRating: "Content rating",
 	profileVisibility: "Profile visibility",

@@ -59,6 +59,8 @@ export default {
 	language: "Oberflächensprache",
 	preferredLanguageUnavailable:
 		"Dieser Inhalt ist noch nicht in deinen bevorzugten Sprachen verfügbar.",
+	requestedLanguageUnavailable:
+		"Die ausgewählte Sprachversion ist nicht verfügbar. Die automatische Auswahl wurde wiederhergestellt.",
 	timezone: "Zeitzone",
 	contentRating: "Inhaltseinstufung",
 	profileVisibility: "Profilsichtbarkeit",

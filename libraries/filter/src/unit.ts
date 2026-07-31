@@ -657,6 +657,82 @@ export interface SimpleFeedFilterSelection {
 	readonly tagIds: readonly string[];
 }
 
+function intersectLanguageBoundaries(
+	boundaries: readonly (readonly FilterContentLanguage[])[],
+): FilterContentLanguage[] | undefined {
+	const [first, ...rest] = boundaries;
+	if (!first) return undefined;
+	let intersection: FilterContentLanguage[] = [...first];
+	for (const boundary of rest)
+		intersection = intersection.filter((language) => boundary.includes(language));
+	return intersection;
+}
+
+function unionLanguageBoundaries(
+	boundaries: readonly (readonly FilterContentLanguage[])[],
+): FilterContentLanguage[] | undefined {
+	if (!boundaries.length) return undefined;
+	return [...new Set(boundaries.flat())];
+}
+
+function readLocalizationLanguageBoundary(
+	predicate: LocalizationFilter | undefined,
+): readonly FilterContentLanguage[] | undefined {
+	if (!predicate) return undefined;
+	const boundaries: (readonly FilterContentLanguage[])[] = [];
+	if (predicate.language?.in.length) boundaries.push(predicate.language.in);
+	if (predicate.all) {
+		const allBoundary = intersectLanguageBoundaries(
+			predicate.all
+				.map(readLocalizationLanguageBoundary)
+				.filter(
+					(boundary): boundary is readonly FilterContentLanguage[] =>
+						boundary !== undefined,
+				),
+		);
+		if (allBoundary) boundaries.push(allBoundary);
+	}
+	if (predicate.any) {
+		const anyBoundaries = predicate.any.map(readLocalizationLanguageBoundary);
+		if (anyBoundaries.every((boundary) => boundary !== undefined))
+			boundaries.push([...new Set(anyBoundaries.flatMap((boundary) => boundary ?? []))]);
+	}
+	return intersectLanguageBoundaries(boundaries);
+}
+
+/**
+ * Conservatively derives the positive languages referenced by localization
+ * existence requirements in every matching branch of a Unit predicate. Unit
+ * conjunctions union independent `some` requirements because different
+ * localization rows may satisfy them. An unconstrained `any` branch prevents a
+ * safe boundary; negative localization predicates are never treated as one.
+ */
+export function readUnitLanguageBoundary(
+	predicate: UnitPredicate | undefined,
+): readonly FilterContentLanguage[] | undefined {
+	if (!predicate) return undefined;
+	const boundaries: (readonly FilterContentLanguage[])[] = [];
+	if (predicate.localizations && "some" in predicate.localizations) {
+		const localizationBoundary = readLocalizationLanguageBoundary(predicate.localizations.some);
+		if (localizationBoundary) boundaries.push(localizationBoundary);
+	}
+	if (predicate.all) {
+		const allBoundaries = predicate.all
+			.map(readUnitLanguageBoundary)
+			.filter(
+				(boundary): boundary is readonly FilterContentLanguage[] => boundary !== undefined,
+			);
+		const allBoundary = unionLanguageBoundaries(allBoundaries);
+		if (allBoundary) boundaries.push(allBoundary);
+	}
+	if (predicate.any) {
+		const anyBoundaries = predicate.any.map(readUnitLanguageBoundary);
+		if (anyBoundaries.every((boundary) => boundary !== undefined))
+			boundaries.push([...new Set(anyBoundaries.flatMap((boundary) => boundary ?? []))]);
+	}
+	return unionLanguageBoundaries(boundaries);
+}
+
 type SimpleFeedContentBranch =
 	| Readonly<{
 			group: "unit";

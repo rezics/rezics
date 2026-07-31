@@ -21,6 +21,10 @@ export default {
 		fr: "French",
 		es: "Spanish",
 	},
+	contentVersions: {
+		action: "Language version",
+		automatic: "Automatic",
+	},
 	draftContentLanguage: {
 		label: "Content language",
 		useAutomatic: "Detect automatically",

@@ -58,6 +58,7 @@ export default {
 	introduction: "소개",
 	language: "인터페이스 언어",
 	preferredLanguageUnavailable: "이 콘텐츠는 아직 원하는 언어로 제공되지 않습니다.",
+	requestedLanguageUnavailable: "선택한 언어 버전을 사용할 수 없어 자동 선택으로 되돌렸습니다.",
 	timezone: "시간대",
 	contentRating: "콘텐츠 등급",
 	profileVisibility: "프로필 공개 여부",

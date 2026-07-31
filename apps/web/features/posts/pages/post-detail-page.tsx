@@ -5,6 +5,8 @@ import {
 	useGetApiPostsByPostId,
 } from "@rezics/openapi-tanstack-query";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
+import { useRequestedContentLanguage } from "@/features/content-languages/hooks/use-content-language-navigation";
+import { withContentLanguage } from "@/features/content-languages/routing/content-language-route";
 import { useEffect, type ReactNode } from "react";
 import { ArrowLeft } from "lucide-react";
 
@@ -52,6 +54,7 @@ export function PostDetailPage({
 }) {
 	const { t } = useTranslation(["posts", "ui", "units"]);
 	const localizationLanguages = useLocalizationLanguages();
+	const requestedLanguage = useRequestedContentLanguage();
 	const router = useApplicationRouter();
 	const requestedRealmId = context?.kind === "realm" ? context.realmId : undefined;
 	const query = useGetApiPostsByPostId({
@@ -78,7 +81,12 @@ export function PostDetailPage({
 			: undefined;
 	useEffect(() => {
 		if (wikiZone && context?.kind !== "zone") {
-			router.replace(postHref(id, { kind: "zone", zone: { id: wikiZone.id } }));
+			router.replace(
+				withContentLanguage(
+					postHref(id, { kind: "zone", zone: { id: wikiZone.id } }),
+					requestedLanguage,
+				),
+			);
 			return;
 		}
 		if (
@@ -86,8 +94,18 @@ export function PostDetailPage({
 			contextQuery.data !== undefined &&
 			realmContext.kind === "global"
 		)
-			router.replace(postHref(id), { scroll: false });
-	}, [context?.kind, contextQuery.data, id, realmContext.kind, router, wikiZone]);
+			router.replace(withContentLanguage(postHref(id), requestedLanguage), {
+				scroll: false,
+			});
+	}, [
+		context?.kind,
+		contextQuery.data,
+		id,
+		realmContext.kind,
+		requestedLanguage,
+		router,
+		wikiZone,
+	]);
 
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
@@ -110,9 +128,12 @@ export function PostDetailPage({
 		)
 			return;
 		router.replace(
-			nextContext.kind === "global"
-				? postHref(post.id)
-				: postHref(post.id, { kind: "realm", realmId: nextContext.realm.id }),
+			withContentLanguage(
+				nextContext.kind === "global"
+					? postHref(post.id)
+					: postHref(post.id, { kind: "realm", realmId: nextContext.realm.id }),
+				requestedLanguage,
+			),
 			{
 				scroll: false,
 			},
@@ -224,6 +245,8 @@ export function PostDetailPage({
 						}
 						engagementOverflow={
 							<PostOverflowMenu
+								availableLanguages={post.availableLanguages}
+								currentLanguage={post.language}
 								editAction={
 									managementSectionId
 										? {

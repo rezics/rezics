@@ -14,13 +14,18 @@ import {
 	SearchDocument,
 	EmbeddableSearchTemplateId,
 	SearchFeatureSurface,
+	readSearchLanguageBoundary,
+	readUnitLanguageBoundary,
+	SearchControlExpression,
 	SharedSearchQueryDocument,
+	type SearchFeatureState,
 	SearchTemplateId,
 } from "@rezics/filter";
 import { FilterSchemaModels } from "@rezics/filter";
-import type { ContentLanguage } from "@rezics/i18n";
+import { isContentLanguage, type ContentLanguage } from "@rezics/i18n";
 import { getActiveObservability } from "@rezics/observability";
 import { type Static, Type } from "@sinclair/typebox";
+import { Check } from "@sinclair/typebox/value";
 import { and, eq, isNull } from "drizzle-orm";
 import { t } from "elysia";
 
@@ -277,12 +282,21 @@ async function executeZoneFeedBlock(input: {
 		execution: { sortProfile: "feed", pageBudget: "shared" },
 	});
 	const request = input.body as typeof ZoneFeedBlockExecutionBody.static;
-	return presentSearchResultAsFeed(result, request.localizationLanguages, input.profileId);
+	return presentSearchResultAsFeed(
+		result,
+		request.localizationLanguages,
+		request.state,
+		input.profileId,
+	);
 }
 
 async function presentSearchResultAsFeed(
 	result: Awaited<ReturnType<typeof executeSearchFeatureInput>>,
 	localizationLanguages: readonly ContentLanguage[],
+	state: Readonly<{
+		filter?: SearchFeatureState["filter"];
+		expression?: unknown;
+	}>,
 	profileId?: string,
 ) {
 	const candidates = mixSearchGroupHits(result.groups).map(({ id }) => ({
@@ -290,10 +304,25 @@ async function presentSearchResultAsFeed(
 		realmId: null,
 	}));
 	const viewer = await resolveRecommendationViewer(profileId, false);
+	const expression = state.expression;
+	if (expression !== undefined && !Check(SearchControlExpression, expression))
+		throw new InvalidSearch("Invalid Search language expression");
+	const allowedLanguages = [
+		...new Set(
+			[
+				...(readSearchLanguageBoundary(expression) ?? []),
+				...(readUnitLanguageBoundary(state.filter?.where) ?? []),
+			].filter(isContentLanguage),
+		),
+	];
 	const items = await hydrateFeedItems(
 		candidates,
 		viewer,
-		{ content: FeedContentKindValues, localizationLanguages },
+		{
+			content: FeedContentKindValues,
+			localizationLanguages,
+			...(allowedLanguages.length ? { languages: allowedLanguages } : {}),
+		},
 		new Date(),
 		{ kind: "contextual" },
 	);
@@ -391,6 +420,7 @@ export default new Elysia({ prefix: "/search" })
 				return presentSearchResultAsFeed(
 					result,
 					body.localizationLanguages,
+					body.state,
 					identity.authorization.profileId,
 				);
 			} catch (cause) {
@@ -555,6 +585,7 @@ export default new Elysia({ prefix: "/search" })
 				return presentSearchResultAsFeed(
 					result,
 					body.localizationLanguages,
+					body.state,
 					identity.authorization.profileId,
 				);
 			} catch (cause) {

@@ -30,6 +30,7 @@ import {
 	useSearchFeedQuery,
 	withoutSearchFeedCursor,
 } from "@/features/content-feed/data/search-feed-list";
+import { hasSearchLanguagePresentationBoundary } from "@/features/content-feed/model/search-language-boundary";
 import { useTranslation } from "@/i18n/client";
 import { searchParamsParsers } from "@/lib/search-params";
 import {
@@ -183,6 +184,9 @@ export function SearchSurface({
 						emptyBody={t.emptyBody}
 						emptyTitle={t.empty}
 						pagination="infinite"
+						preserveDisplayedLanguage={hasSearchLanguagePresentationBoundary(
+							lastRequest.state,
+						)}
 						query={results}
 					/>
 				</section>

@@ -101,12 +101,17 @@ function toReplyResponse<
 		createdAt: Date;
 		updatedAt: Date;
 	},
->(row: T, attributions: readonly UnitAttributionSummary[]) {
+>(
+	row: T,
+	attributions: readonly UnitAttributionSummary[],
+	availableLanguages: readonly ContentLanguage[] = [row.language],
+) {
 	const body = toPortableTextResponse(row.body);
 	return {
 		id: row.id,
 		postKind: "reply" as const,
 		language: row.language,
+		availableLanguages: [...availableLanguages],
 		attributions: [...attributions],
 		rootPostId: row.rootPostId,
 		parentPostId: row.parentPostId,
@@ -528,6 +533,7 @@ export default new Elysia()
 								)
 						: Promise.resolve(null);
 					const [
+						availableLanguageRows,
 						attributionMap,
 						scores,
 						progressEntries,
@@ -540,6 +546,11 @@ export default new Elysia()
 						targetingLock,
 						canManageScores,
 					] = await Promise.all([
+						database
+							.select({ language: unitLocalization.language })
+							.from(unitLocalization)
+							.where(eq(unitLocalization.unitId, row.id))
+							.orderBy(unitLocalization.position, unitLocalization.language),
 						getAttributionSummariesByUnitIds([row.id], localizationLanguages),
 						selectPostScores(row.id, viewerProfileId, localizationLanguages).then(
 							(items) =>
@@ -580,6 +591,7 @@ export default new Elysia()
 					const common = {
 						id: row.id,
 						language,
+						availableLanguages: availableLanguageRows.map(({ language }) => language),
 						realmId: query.realmId ?? null,
 						attributions: attributionMap.get(row.id) ?? [],
 						title: row.title,
@@ -780,10 +792,28 @@ export default new Elysia()
 								selection.items.map(({ postId }) => postId),
 							),
 						);
-					const attributions = await getAttributionSummariesByUnitIds(
-						rows.map(({ id }) => id),
-						localizationLanguages,
-					);
+					const rowIds = rows.map(({ id }) => id);
+					const [attributions, availableLanguageRows] = await Promise.all([
+						getAttributionSummariesByUnitIds(rowIds, localizationLanguages),
+						database
+							.select({
+								unitId: unitLocalization.unitId,
+								language: unitLocalization.language,
+							})
+							.from(unitLocalization)
+							.where(inArray(unitLocalization.unitId, rowIds))
+							.orderBy(
+								unitLocalization.unitId,
+								unitLocalization.position,
+								unitLocalization.language,
+							),
+					]);
+					const availableLanguagesByUnitId = new Map<string, ContentLanguage[]>();
+					for (const { unitId, language } of availableLanguageRows) {
+						const languages = availableLanguagesByUnitId.get(unitId) ?? [];
+						languages.push(language);
+						availableLanguagesByUnitId.set(unitId, languages);
+					}
 					const lockedTargetIds = await getPostTargetingLockedUnitIds(database, {
 						targetUnitIds: [params.postId, ...rows.map(({ id }) => id)],
 						...(query.realmId ? { realmId: query.realmId } : {}),
@@ -806,7 +836,11 @@ export default new Elysia()
 										`Selected reply ${selected.postId} was not hydrated`,
 									);
 								return {
-									...toReplyResponse(row, attributions.get(row.id) ?? []),
+									...toReplyResponse(
+										row,
+										attributions.get(row.id) ?? [],
+										availableLanguagesByUnitId.get(row.id),
+									),
 									hasMoreChildren: selected.hasMoreChildren,
 									childEndCursor: selected.childEndCursor,
 									capabilities: {

@@ -560,6 +560,7 @@ export const PostListResponse = t.Object({
 const FeedItemBaseResponse = {
 	id: Uuid,
 	language: t.Nullable(ContentLanguage),
+	availableLanguages: t.Array(ContentLanguage, { uniqueItems: true }),
 	attributions: t.Array(UnitAttributionSummaryResponse),
 	realmId: t.Nullable(Uuid),
 	realms: t.Array(
@@ -1108,6 +1109,7 @@ export const SaveRealmTaxonomyDraftResponse = t.Object({
 });
 const PostThreadDetailFields = {
 	id: Uuid,
+	availableLanguages: t.Array(ContentLanguage, { uniqueItems: true }),
 	attributions: t.Array(UnitAttributionSummaryResponse),
 	realmId: t.Nullable(Uuid),
 	subjectId: t.Nullable(Uuid),
@@ -1149,6 +1151,7 @@ export const WikiPostDetailResponse = t.Object({
 });
 export const ReviewDetailResponse = t.Object({
 	id: Uuid,
+	availableLanguages: t.Array(ContentLanguage, { uniqueItems: true }),
 	postKind: t.Literal("review"),
 	attributions: t.Array(UnitAttributionSummaryResponse),
 	targetId: Uuid,
@@ -1335,6 +1338,7 @@ export const ReplyResponse = t.Object({
 	id: Uuid,
 	postKind: t.Literal("reply"),
 	language: ContentLanguage,
+	availableLanguages: t.Array(ContentLanguage, { uniqueItems: true }),
 	attributions: t.Array(UnitAttributionSummaryResponse),
 	rootPostId: Uuid,
 	parentPostId: t.Nullable(Uuid),

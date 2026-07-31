@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { and, eq, exists, inArray, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import {
+	readUnitLanguageBoundary,
 	type SearchControlPredicate,
 	type SearchField,
 	SearchFieldValues,
@@ -11,7 +12,7 @@ import {
 } from "@rezics/filter";
 import { canonicalUnitPredicate } from "@rezics/filter";
 import { FontAwesomeProvider } from "@rezics/avatar";
-import type { ContentLanguage } from "@rezics/i18n";
+import { isContentLanguage, type ContentLanguage } from "@rezics/i18n";
 import { getActiveObservability } from "@rezics/observability";
 
 import { getUnitReadCondition } from "../authorization/unit/query";
@@ -72,6 +73,7 @@ import {
 	combineSearchExpressions,
 	createSearchCursor,
 	parseSearchCursor,
+	readSearchExpressionLanguageBoundary,
 	type SearchExpression,
 } from "./query";
 import {
@@ -784,6 +786,14 @@ function buildEffectiveSearchExpression(
 export async function searchDomain(category: SearchCategory, request: DomainSearchRequest) {
 	const startedAt = performance.now();
 	const searchExpression = buildEffectiveSearchExpression(request);
+	const presentationLanguages = [
+		...new Set(
+			[
+				...(readSearchExpressionLanguageBoundary(searchExpression) ?? []),
+				...(readUnitLanguageBoundary(request.domainFilter) ?? []),
+			].filter(isContentLanguage),
+		),
+	];
 	const conditions = buildSearchConditions(category, request, searchExpression);
 	const sort = request.sort ?? (request.query?.trim() ? "relevance" : "best");
 	const generation = await getActiveSearchGeneration("current");
@@ -795,6 +805,7 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 				query: request.query?.trim() ?? "",
 				limit,
 				sort,
+				localizationLanguages: request.localizationLanguages,
 				expression: searchExpression,
 				domainFilter: request.domainFilter
 					? canonicalUnitPredicate(request.domainFilter)
@@ -888,19 +899,35 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 				'id', ${unit.id},
 				'category', ${category}::text,
 				'kind', ${hitType},
-				'language', ${resolvedUnitLocalizationLanguage(unit.id, request.localizationLanguages)},
+				'language', ${resolvedUnitLocalizationLanguage(
+					unit.id,
+					request.localizationLanguages,
+					presentationLanguages,
+				)},
 				'title', case when ${category}::text = 'tag-structures' then (
 					select string_agg(
 						coalesce(
-							${resolvedUnitLocalizationTitle(unitStructureMember.memberUnitId, request.localizationLanguages)},
+							${resolvedUnitLocalizationTitle(
+								unitStructureMember.memberUnitId,
+								request.localizationLanguages,
+								presentationLanguages,
+							)},
 							${unitStructureMember.memberUnitId}::text
 						),
 						' › ' order by ${unitStructureMember.ordinal}
 					)
 					from ${unitStructureMember}
 					where ${unitStructureMember.structureId} = ${unit.id}
-				) else ${resolvedUnitLocalizationTitle(unit.id, request.localizationLanguages)} end,
-				'summary', ${resolvedUnitLocalizationSummary(unit.id, request.localizationLanguages)},
+				) else ${resolvedUnitLocalizationTitle(
+					unit.id,
+					request.localizationLanguages,
+					presentationLanguages,
+				)} end,
+				'summary', ${resolvedUnitLocalizationSummary(
+					unit.id,
+					request.localizationLanguages,
+					presentationLanguages,
+				)},
 				'titles', case when ${category}::text = 'tag-structures' then coalesce((
 					select jsonb_build_array(string_agg(
 						coalesce(${firstUnitLocalizationTitle(unitStructureMember.memberUnitId)},
@@ -946,6 +973,11 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 					FROM ${unitLocalization}
 					WHERE ${unitLocalization.unitId} = ${unit.id}
 						AND ${unitLocalization.avatarType} IS NOT NULL
+						AND ${
+							presentationLanguages.length
+								? inArray(unitLocalization.language, presentationLanguages)
+								: sql`true`
+						}
 					ORDER BY
 						${localizationLanguageOrder(unitLocalization.language, request.localizationLanguages)},
 						${unitLocalization.position},

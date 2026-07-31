@@ -4,6 +4,7 @@ import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
+	requestedLanguage: undefined as "ja" | undefined,
 	session: {
 		status: "anonymous",
 		data: null as { user: { id: string } } | null,
@@ -26,6 +27,10 @@ const mocks = vi.hoisted(() => ({
 	},
 }));
 
+vi.mock("@/features/content-languages/hooks/use-content-language-navigation", () => ({
+	useRequestedContentLanguage: () => mocks.requestedLanguage,
+}));
+
 vi.mock("@/lib/use-hydrated-session", () => ({
 	useHydratedSession: () => mocks.session,
 }));
@@ -38,9 +43,13 @@ vi.mock("./client", () => ({
 	useTranslation: () => ({ locale: { target: "zh-Hant" } }),
 }));
 
-import { useLocalizationLanguageState } from "./use-localization-languages";
+import {
+	useLocalizationLanguages,
+	useLocalizationLanguageState,
+} from "./use-localization-languages";
 
 beforeEach(() => {
+	mocks.requestedLanguage = undefined;
 	mocks.session.status = "anonymous";
 	mocks.session.data = null;
 	mocks.session.error = null;
@@ -60,6 +69,13 @@ describe("localization language state", () => {
 			languages: ["zh"],
 			source: "anonymous",
 		});
+	});
+
+	it("prepends an explicit content-language override without duplicating preferences", () => {
+		mocks.requestedLanguage = "ja";
+		const { result } = renderHook(useLocalizationLanguages);
+
+		expect(result.current).toEqual(["ja", "zh"]);
 	});
 
 	it("preserves the authenticated preference order before the interface fallback", () => {

@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import type { SearchExpression } from "./query";
-import { specializeSearchExpressionForCategory } from "./query";
+import {
+	readSearchExpressionLanguageBoundary,
+	specializeSearchExpressionForCategory,
+} from "./query";
 
 const ProfileId = "019b0000-0000-7000-8000-000000000004";
 const ProfileContentExpression = {
@@ -85,5 +88,28 @@ describe("category Search expression specialization", () => {
 			state: "expression",
 			expression: { field: "language", operator: "equals", value: "zh-Hant" },
 		});
+	});
+});
+
+describe("Search language presentation boundary", () => {
+	it("unions positive conjunctions and rejects an unconstrained disjunction", () => {
+		expect(
+			readSearchExpressionLanguageBoundary({
+				operator: "all",
+				clauses: [
+					{ field: "language", operator: "equals", value: "ja" },
+					{ field: "language", operator: "equals", value: "ko" },
+				],
+			}),
+		).toEqual(["ja", "ko"]);
+		expect(
+			readSearchExpressionLanguageBoundary({
+				operator: "any",
+				clauses: [
+					{ field: "language", operator: "equals", value: "ja" },
+					{ field: "category", operator: "equals", value: "books" },
+				],
+			}),
+		).toBeUndefined();
 	});
 });

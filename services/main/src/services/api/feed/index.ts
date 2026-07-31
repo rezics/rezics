@@ -23,6 +23,7 @@ import {
 	FilterSchemaModels,
 	readSimpleFeedContentKinds,
 	readSimpleFeedFilter,
+	readUnitLanguageBoundary,
 	type SearchCategory,
 	type UnitPredicate,
 } from "@rezics/filter";
@@ -388,7 +389,7 @@ export function resolveFeedLocalizationLanguages(
 
 const FeedCursor = t.Object(
 	{
-		v: t.Literal(8),
+		v: t.Literal(9),
 		sort: FeedSortSchema,
 		filterHash: t.Nullable(t.String({ pattern: "^[0-9a-f]{64}$" })),
 		filterLanguages: t.Array(t.UnionEnum(ContentLanguageValues), { uniqueItems: true }),
@@ -960,6 +961,7 @@ export async function hydrateFeedItems(
 	const pageIds = page.map(({ id }) => id);
 	if (!pageIds.length) return [];
 	const displayLanguages = resolveFeedLocalizationLanguages(scope.localizationLanguages, viewer);
+	const allowedLanguages = scope.languages ?? [];
 	const rows = await database
 		.select({
 			id: unit.id,
@@ -968,13 +970,17 @@ export async function hydrateFeedItems(
 			subjectId: post.subjectUnitId,
 			rootPostId: postReply.rootPostId,
 			parentPostId: postReply.parentPostId,
-			language: resolvedUnitLocalizationLanguage(unit.id, displayLanguages),
+			language: resolvedUnitLocalizationLanguage(unit.id, displayLanguages, allowedLanguages),
 			body: unitLocalization.content,
 			title: sql<string | null>`case
 				when ${unit.kind} = 'structure' then (
 					select string_agg(
 						coalesce(
-							${resolvedUnitLocalizationTitle(unitStructureMember.memberUnitId, displayLanguages)},
+							${resolvedUnitLocalizationTitle(
+								unitStructureMember.memberUnitId,
+								displayLanguages,
+								allowedLanguages,
+							)},
 							${unitStructureMember.memberUnitId}::text
 						),
 						' › ' order by ${unitStructureMember.ordinal}
@@ -985,12 +991,18 @@ export async function hydrateFeedItems(
 				else ${unitLocalization.title}
 			end`,
 			summary: unitLocalization.summary,
-			coverAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "cover", displayLanguages),
-			avatar: resolvedUnitLocalizationAvatar(unit.id, displayLanguages),
+			coverAssetId: resolvedUnitLocalizationImageAssetId(
+				unit.id,
+				"cover",
+				displayLanguages,
+				allowedLanguages,
+			),
+			avatar: resolvedUnitLocalizationAvatar(unit.id, displayLanguages, allowedLanguages),
 			bannerAssetId: resolvedUnitLocalizationImageAssetId(
 				unit.id,
 				"banner",
 				displayLanguages,
+				allowedLanguages,
 			),
 			latestRevisionId: unitRevisionHead.revisionId,
 			createdAt: unit.createdAt,
@@ -1006,7 +1018,7 @@ export async function hydrateFeedItems(
 				eq(unitLocalization.unitId, unit.id),
 				eq(
 					unitLocalization.language,
-					resolvedUnitLocalizationLanguage(unit.id, displayLanguages),
+					resolvedUnitLocalizationLanguage(unit.id, displayLanguages, allowedLanguages),
 				),
 			),
 		)
@@ -1041,6 +1053,7 @@ export async function hydrateFeedItems(
 		...new Set(rows.flatMap(({ rootPostId }) => (rootPostId ? [rootPostId] : []))),
 	];
 	const [
+		availableLanguageRows,
 		rootReplyCounts,
 		childReplyCounts,
 		reactions,
@@ -1055,6 +1068,18 @@ export async function hydrateFeedItems(
 		realmTagUnitContextRows,
 		reviewScores,
 	] = await Promise.all([
+		database
+			.select({
+				unitId: unitLocalization.unitId,
+				language: unitLocalization.language,
+			})
+			.from(unitLocalization)
+			.where(inArray(unitLocalization.unitId, validIds))
+			.orderBy(
+				asc(unitLocalization.unitId),
+				asc(unitLocalization.position),
+				asc(unitLocalization.language),
+			),
 		rootPostIds.length
 			? database
 					.select({
@@ -1345,6 +1370,12 @@ export async function hydrateFeedItems(
 		}),
 	);
 	const rowMap = new Map(rows.map((row) => [row.id, row]));
+	const availableLanguagesByUnitId = new Map<string, ContentLanguage[]>();
+	for (const { unitId, language } of availableLanguageRows) {
+		const languages = availableLanguagesByUnitId.get(unitId) ?? [];
+		languages.push(language);
+		availableLanguagesByUnitId.set(unitId, languages);
+	}
 	const pageMap = new Map(page.map((item) => [item.id, item]));
 	const rootContext = new Map(
 		rootRows.map((row) => [
@@ -1450,6 +1481,7 @@ export async function hydrateFeedItems(
 		const common = {
 			id: row.id,
 			language: row.language,
+			availableLanguages: availableLanguagesByUnitId.get(row.id) ?? [],
 			attributions: attributions.get(row.id) ?? [],
 			realmId: ranked.realmId,
 			realms: prioritizeFeedRealmContexts(realmContexts.get(row.id) ?? [], ranked.realmId),
@@ -1590,7 +1622,9 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 		const contentKinds = body.filter?.where
 			? readSimpleFeedContentKinds(body.filter.where)
 			: undefined;
-		const filterLanguages = simpleSelection?.languages ?? [];
+		const filterLanguages = body.filter?.where
+			? (readUnitLanguageBoundary(body.filter.where) ?? [])
+			: [];
 		const localizationLanguages = resolveFeedLocalizationLanguages(
 			body.localizationLanguages,
 			viewer,
@@ -1685,7 +1719,7 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 				start + page.length < ranked.length && last
 					? Buffer.from(
 							JSON.stringify({
-								v: 8,
+								v: 9,
 								sort,
 								filterHash: body.filter
 									? createHash("sha256")

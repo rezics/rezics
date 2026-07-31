@@ -1,12 +1,9 @@
 "use client";
 
 import { type GetApiPostsByPostIdStatus200 } from "@rezics/openapi-tanstack-query";
-import { PencilIcon } from "lucide-react";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
-
-import { Card, CardContent, CardHeader, CardTitle, MenuItem } from "@rezics/ui";
-import { FeedOverflowMenu } from "@/features/content-feed/components/feed-card-actions";
+import { Card, CardContent, CardHeader, CardTitle } from "@rezics/ui";
 import { PostDetailArticle } from "@/features/posts/components/post-detail-article";
+import { PostOverflowMenu } from "@/features/posts/components/post-overflow-menu";
 import { resolvePostPresentationTitle } from "@/features/posts/model/post-presentation-title";
 import { ProgressEventDescription } from "@/features/progress/components/progress-event-description";
 import { isProgressTrackableUnitType } from "@/features/progress/model/progress-record";
@@ -53,23 +50,13 @@ export function ReviewPostDetail({ review }: { readonly review: ReviewPost }) {
 			<PostDetailArticle
 				commentsHref="#replies"
 				engagementOverflow={
-					<FeedOverflowMenu
-						canExclude={false}
-						itemId={review.id}
-						reportTarget={{
-							unitId: review.id,
-							realmId: review.realmId ?? undefined,
-						}}
-					>
-						{editHref ? (
-							<MenuItem asChild value="edit-review">
-								<Link href={editHref}>
-									<PencilIcon aria-hidden />
-									{t.ui.edit}
-								</Link>
-							</MenuItem>
-						) : null}
-					</FeedOverflowMenu>
+					<PostOverflowMenu
+						availableLanguages={review.availableLanguages}
+						currentLanguage={review.language}
+						editAction={editHref ? { kind: "link", href: editHref } : undefined}
+						postId={review.id}
+						realmId={review.realmId ?? undefined}
+					/>
 				}
 				post={{
 					id: review.id,

@@ -50,6 +50,13 @@ describe("resolveUnitLocalizationFromOrdered", () => {
 		expect(resolveUnitLocalizationFromOrdered([localizations[0]], ["zh"])?.language).toBe("en");
 		expect(resolveUnitLocalizationFromOrdered(localizations, [])?.language).toBe("en");
 	});
+
+	it("never falls back outside an explicit allowed-language boundary", () => {
+		expect(resolveUnitLocalizationFromOrdered(localizations, ["en"], ["zh"])?.language).toBe(
+			"zh",
+		);
+		expect(resolveUnitLocalizationFromOrdered(localizations, ["en"], ["ja"])).toBeUndefined();
+	});
 });
 
 describe("resolveUnitLocalizationAvatarFromOrdered", () => {
@@ -150,6 +157,12 @@ describe("resolveUnitLocalizationImageAssetIdFromOrdered", () => {
 				localizations.map((localization) => ({ ...localization, coverAssetId: null })),
 				"cover",
 			),
+		).toBeNull();
+	});
+
+	it("does not inherit an asset from outside an explicit language boundary", () => {
+		expect(
+			resolveUnitLocalizationImageAssetIdFromOrdered(localizations, "banner", ["en"], ["zh"]),
 		).toBeNull();
 	});
 });

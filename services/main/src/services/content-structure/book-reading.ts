@@ -22,8 +22,12 @@ export function selectReaderChapterLocalization<Localization extends ChapterLoca
 		readonly localizationLanguages: readonly ContentLanguage[];
 	},
 ): Localization | undefined {
-	if (input.exactLanguage)
-		return localizations.find((localization) => localization.language === input.exactLanguage);
+	if (input.exactLanguage) {
+		const exactLocalization = localizations.find(
+			(localization) => localization.language === input.exactLanguage,
+		);
+		if (exactLocalization) return exactLocalization;
+	}
 	const readableContent = localizations.filter(
 		(localization) =>
 			localization.content !== null &&

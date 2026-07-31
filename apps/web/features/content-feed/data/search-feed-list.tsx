@@ -12,6 +12,7 @@ import { FeedList } from "../components/feed-list";
 import { resolveFeedContinuationState, type FeedPaginationMode } from "../model/feed-continuation";
 import { type FeedDisplayContext, UnscopedFeedDisplayContext } from "../model/feed-display-context";
 import { collectUniqueFeedItems } from "../model/feed-items";
+import { hasSearchLanguagePresentationBoundary } from "../model/search-language-boundary";
 import {
 	fetchSearchFeedPage,
 	type SearchFeedRequest,
@@ -62,6 +63,7 @@ export function SearchFeedResults({
 	emptyBody,
 	emptyTitle,
 	pagination = "load-more",
+	preserveDisplayedLanguage = false,
 	query,
 	requestedRealmId,
 }: {
@@ -70,6 +72,7 @@ export function SearchFeedResults({
 	readonly emptyBody?: string;
 	readonly emptyTitle?: string;
 	readonly pagination?: FeedPaginationMode;
+	readonly preserveDisplayedLanguage?: boolean;
 	readonly query: SearchFeedQuery;
 	readonly requestedRealmId?: string;
 }) {
@@ -113,6 +116,7 @@ export function SearchFeedResults({
 					item={item}
 					onHiddenChange={(value) => setItemHidden(item.id, value)}
 					position={metadata.position}
+					preserveDisplayedLanguage={preserveDisplayedLanguage}
 					requestedRealmId={requestedRealmId}
 					setSize={metadata.setSize}
 				/>
@@ -155,6 +159,7 @@ export function SearchFeedList({
 		<SearchFeedResults
 			displayContext={displayContext}
 			pagination={pagination}
+			preserveDisplayedLanguage={hasSearchLanguagePresentationBoundary(request.state)}
 			query={query}
 			requestedRealmId={requestedRealmId}
 		/>

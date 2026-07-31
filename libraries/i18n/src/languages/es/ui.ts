@@ -59,6 +59,8 @@ export default {
 	language: "Idioma de la interfaz",
 	preferredLanguageUnavailable:
 		"Este contenido aún no está disponible en tus idiomas preferidos.",
+	requestedLanguageUnavailable:
+		"La versión de idioma seleccionada no está disponible. Se ha restablecido la selección automática.",
 	timezone: "Huso horario",
 	contentRating: "Clasificación del contenido",
 	profileVisibility: "Visibilidad del perfil",

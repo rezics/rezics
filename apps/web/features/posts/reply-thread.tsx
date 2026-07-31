@@ -275,6 +275,7 @@ function ReplyPostNode({
 	const [body, setBody] = useState<PortableTextValue>([]);
 	const canEdit =
 		reply.capabilities.canEdit && reply.status !== "deleted" && Boolean(reply.latestRevisionId);
+	const replyHref = postHref(reply.id, realmId ? { kind: "realm", realmId } : undefined);
 	const primaryAttribution =
 		reply.attributions.find((attribution) => attribution.role === "publisher") ??
 		reply.attributions[0];
@@ -449,13 +450,13 @@ function ReplyPostNode({
 										</Button>
 									) : null
 								}
-								href={postHref(
-									reply.id,
-									realmId ? { kind: "realm", realmId } : undefined,
-								)}
+								href={replyHref}
 								itemId={reply.id}
 								overflowMenu={
 									<PostOverflowMenu
+										availableLanguages={reply.availableLanguages}
+										contentHref={replyHref}
+										currentLanguage={reply.language}
 										editAction={
 											canEdit
 												? {

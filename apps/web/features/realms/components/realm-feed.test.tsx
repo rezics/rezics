@@ -10,6 +10,7 @@ import { RealmFeed } from "./realm-feed";
 const feedItem = {
 	id: "019fa3ab-72a9-7792-b2e3-43aa8a9c755e",
 	language: "zh",
+	availableLanguages: ["zh"],
 	itemType: "unit",
 	unitKind: "book",
 	postKind: null,

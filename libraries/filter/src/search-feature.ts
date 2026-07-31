@@ -107,6 +107,44 @@ export const SearchControlExpression = Type.Recursive(
 );
 export type SearchControlExpression = Static<typeof SearchControlExpression>;
 
+/** Returns the positive languages referenced by one Search predicate. */
+export function readSearchPredicateLanguageBoundary(
+	filter: SearchControlPredicate,
+): readonly string[] | undefined {
+	if (filter.field !== "language") return undefined;
+	if (filter.operator === "equals")
+		return typeof filter.value === "string" ? [filter.value] : undefined;
+	if (filter.operator === "any-of" || filter.operator === "all-of")
+		return filter.values.filter((value): value is string => typeof value === "string");
+	return undefined;
+}
+
+/**
+ * Returns the positive language set that every matching branch must satisfy.
+ * Negative predicates and unconstrained `any` branches cannot form a safe
+ * presentation boundary and therefore return `undefined`.
+ */
+export function readSearchLanguageBoundary(
+	expression: SearchControlExpression | undefined,
+): readonly string[] | undefined {
+	if (!expression) return undefined;
+	if ("controlKey" in expression) {
+		return readSearchPredicateLanguageBoundary(expression.filter);
+	}
+	if (expression.operator === "not") return undefined;
+	const boundaries = expression.clauses.map(readSearchLanguageBoundary);
+	if (expression.operator === "any") {
+		if (boundaries.some((boundary) => boundary === undefined)) return undefined;
+		return [...new Set(boundaries.flatMap((boundary) => boundary ?? []))];
+	}
+	const constrained = boundaries.filter(
+		(boundary): boundary is readonly string[] => boundary !== undefined,
+	);
+	return constrained.length
+		? [...new Set(constrained.flatMap((boundary) => boundary))]
+		: undefined;
+}
+
 export const SearchDocumentControl = Type.Object(
 	{
 		key: SearchControlKey,

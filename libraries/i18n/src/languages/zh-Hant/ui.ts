@@ -58,6 +58,7 @@ export default {
 	introduction: "簡介",
 	language: "介面語言",
 	preferredLanguageUnavailable: "這項內容暫不支援你的偏好語言。",
+	requestedLanguageUnavailable: "所選的語言版本無法使用，已恢復自動選擇。",
 	timezone: "時區",
 	contentRating: "內容分級",
 	profileVisibility: "資料可見性",

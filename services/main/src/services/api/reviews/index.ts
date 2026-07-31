@@ -520,6 +520,7 @@ export default new Elysia()
 								: null,
 						);
 					const [
+						availableLanguageRows,
 						attributionMap,
 						scores,
 						progressEntries,
@@ -532,6 +533,11 @@ export default new Elysia()
 						replyCreationDecision,
 						targetingLock,
 					] = await Promise.all([
+						database
+							.select({ language: unitLocalization.language })
+							.from(unitLocalization)
+							.where(eq(unitLocalization.unitId, review.id))
+							.orderBy(unitLocalization.position, unitLocalization.language),
 						getAttributionSummariesByUnitIds([review.id], localizationLanguages),
 						selectPostScores(review.id, viewerProfileId, localizationLanguages).then(
 							(items) =>
@@ -559,6 +565,7 @@ export default new Elysia()
 					]);
 					return {
 						...review,
+						availableLanguages: availableLanguageRows.map(({ language }) => language),
 						postKind: "review" as const,
 						realmId: query.realmId ?? null,
 						attributions: attributionMap.get(review.id) ?? [],

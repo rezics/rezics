@@ -110,6 +110,7 @@ export async function executeCompiledSearch(
 				categories: scope.categories,
 				query: compiled.query.trim(),
 				sort: compiled.sort,
+				localizationLanguages,
 				maxResultWindow: compiled.maxResultWindow,
 				searchExpression,
 				domainFilter: domainFilter ? canonicalUnitPredicate(domainFilter) : undefined,

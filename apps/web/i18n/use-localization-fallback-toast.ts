@@ -4,6 +4,10 @@ import type { ContentLanguage } from "@rezics/i18n";
 import { toast } from "@rezics/ui";
 import { useEffect, useRef } from "react";
 
+import {
+	useContentLanguageNavigation,
+	useRequestedContentLanguage,
+} from "@/features/content-languages/hooks/use-content-language-navigation";
 import { useTranslation } from "./client";
 import { useLocalizationLanguageState } from "./use-localization-languages";
 
@@ -14,12 +18,16 @@ export function useLocalizationFallbackToast(input: {
 }) {
 	const { t } = useTranslation(["ui"]);
 	const localizationState = useLocalizationLanguageState();
+	const requestedLanguage = useRequestedContentLanguage();
+	const { replaceCurrentLanguage } = useContentLanguageNavigation();
 	const preferencesReady = localizationState.status === "ready";
 	const shownKey = useRef<string | undefined>(undefined);
 	const localizationLanguageKey = input.localizationLanguages.join(",");
 	const fallback =
 		input.actualLanguage !== null &&
-		!input.localizationLanguages.includes(input.actualLanguage);
+		(requestedLanguage
+			? input.actualLanguage !== requestedLanguage
+			: !input.localizationLanguages.includes(input.actualLanguage));
 
 	useEffect(() => {
 		if (!preferencesReady || !fallback || !input.actualLanguage) return;
@@ -29,9 +37,12 @@ export function useLocalizationFallbackToast(input: {
 			if (cancelled || shownKey.current === key) return;
 			shownKey.current = key;
 			toast.create({
-				title: t.ui.preferredLanguageUnavailable,
+				title: requestedLanguage
+					? t.ui.requestedLanguageUnavailable
+					: t.ui.preferredLanguageUnavailable,
 				type: "info",
 			});
+			if (requestedLanguage) replaceCurrentLanguage(undefined);
 		});
 		return () => {
 			cancelled = true;
@@ -42,6 +53,9 @@ export function useLocalizationFallbackToast(input: {
 		input.unitId,
 		localizationLanguageKey,
 		preferencesReady,
+		replaceCurrentLanguage,
+		requestedLanguage,
 		t.ui.preferredLanguageUnavailable,
+		t.ui.requestedLanguageUnavailable,
 	]);
 }

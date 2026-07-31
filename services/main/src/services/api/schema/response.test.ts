@@ -40,6 +40,7 @@ describe("API response values", () => {
 		const base = {
 			id: "00000000-0000-4000-8000-000000000001",
 			language: "en" as const,
+			availableLanguages: ["en" as const],
 			attributions: [],
 			realmId: null,
 			realms: [],

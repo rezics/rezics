@@ -3,6 +3,7 @@
 import { toContentLanguage, type ContentLanguage } from "@rezics/i18n";
 import { useMemo } from "react";
 
+import { useRequestedContentLanguage } from "@/features/content-languages/hooks/use-content-language-navigation";
 import { usePresentationPreferences } from "@/features/preferences/data/use-presentation-preferences";
 import { buildLocalizationLanguages } from "@/lib/localization";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
@@ -64,9 +65,12 @@ export function useLocalizationLanguages() {
 	const { locale } = useTranslation(["ui"]);
 	const state = useLocalizationLanguageState();
 	const interfaceLanguage = toContentLanguage(locale.target);
+	const requestedLanguage = useRequestedContentLanguage();
 
-	return useMemo(
-		() => (state.status === "ready" ? state.languages : [interfaceLanguage]),
-		[interfaceLanguage, state],
-	);
+	return useMemo(() => {
+		const languages = state.status === "ready" ? state.languages : [interfaceLanguage];
+		return requestedLanguage
+			? [requestedLanguage, ...languages.filter((language) => language !== requestedLanguage)]
+			: languages;
+	}, [interfaceLanguage, requestedLanguage, state]);
 }

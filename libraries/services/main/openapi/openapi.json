@@ -14545,6 +14545,7 @@
 														"required": [
 															"id",
 															"language",
+															"availableLanguages",
 															"attributions",
 															"realmId",
 															"realms",
@@ -14591,6 +14592,22 @@
 																	},
 																	{ "type": "null" }
 																]
+															},
+															"availableLanguages": {
+																"uniqueItems": true,
+																"type": "array",
+																"items": {
+																	"type": "string",
+																	"enum": [
+																		"zh",
+																		"en",
+																		"ja",
+																		"ko",
+																		"de",
+																		"fr",
+																		"es"
+																	]
+																}
 															},
 															"attributions": {
 																"type": "array",
@@ -16096,6 +16113,7 @@
 														"required": [
 															"id",
 															"language",
+															"availableLanguages",
 															"attributions",
 															"realmId",
 															"realms",
@@ -16143,6 +16161,22 @@
 																	},
 																	{ "type": "null" }
 																]
+															},
+															"availableLanguages": {
+																"uniqueItems": true,
+																"type": "array",
+																"items": {
+																	"type": "string",
+																	"enum": [
+																		"zh",
+																		"en",
+																		"ja",
+																		"ko",
+																		"de",
+																		"fr",
+																		"es"
+																	]
+																}
 															},
 															"attributions": {
 																"type": "array",
@@ -17688,6 +17722,7 @@
 														"required": [
 															"id",
 															"language",
+															"availableLanguages",
 															"attributions",
 															"realmId",
 															"realms",
@@ -17735,6 +17770,22 @@
 																	},
 																	{ "type": "null" }
 																]
+															},
+															"availableLanguages": {
+																"uniqueItems": true,
+																"type": "array",
+																"items": {
+																	"type": "string",
+																	"enum": [
+																		"zh",
+																		"en",
+																		"ja",
+																		"ko",
+																		"de",
+																		"fr",
+																		"es"
+																	]
+																}
 															},
 															"attributions": {
 																"type": "array",
@@ -24908,6 +24959,7 @@
 														"required": [
 															"id",
 															"language",
+															"availableLanguages",
 															"attributions",
 															"realmId",
 															"realms",
@@ -24948,6 +25000,22 @@
 																	},
 																	{ "type": "null" }
 																]
+															},
+															"availableLanguages": {
+																"uniqueItems": true,
+																"type": "array",
+																"items": {
+																	"type": "string",
+																	"enum": [
+																		"zh",
+																		"en",
+																		"ja",
+																		"ko",
+																		"de",
+																		"fr",
+																		"es"
+																	]
+																}
 															},
 															"attributions": {
 																"type": "array",
@@ -26010,6 +26078,7 @@
 																"required": [
 																	"id",
 																	"language",
+																	"availableLanguages",
 																	"attributions",
 																	"realmId",
 																	"realms",
@@ -26056,6 +26125,22 @@
 																			},
 																			{ "type": "null" }
 																		]
+																	},
+																	"availableLanguages": {
+																		"uniqueItems": true,
+																		"type": "array",
+																		"items": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
+																			]
+																		}
 																	},
 																	"attributions": {
 																		"type": "array",
@@ -27579,6 +27664,7 @@
 																"required": [
 																	"id",
 																	"language",
+																	"availableLanguages",
 																	"attributions",
 																	"realmId",
 																	"realms",
@@ -27626,6 +27712,22 @@
 																			},
 																			{ "type": "null" }
 																		]
+																	},
+																	"availableLanguages": {
+																		"uniqueItems": true,
+																		"type": "array",
+																		"items": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
+																			]
+																		}
 																	},
 																	"attributions": {
 																		"type": "array",
@@ -29191,6 +29293,7 @@
 																"required": [
 																	"id",
 																	"language",
+																	"availableLanguages",
 																	"attributions",
 																	"realmId",
 																	"realms",
@@ -29238,6 +29341,22 @@
 																			},
 																			{ "type": "null" }
 																		]
+																	},
+																	"availableLanguages": {
+																		"uniqueItems": true,
+																		"type": "array",
+																		"items": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
+																			]
+																		}
 																	},
 																	"attributions": {
 																		"type": "array",
@@ -106633,6 +106752,7 @@
 																"required": [
 																	"id",
 																	"language",
+																	"availableLanguages",
 																	"attributions",
 																	"realmId",
 																	"realms",
@@ -106673,6 +106793,22 @@
 																			},
 																			{ "type": "null" }
 																		]
+																	},
+																	"availableLanguages": {
+																		"uniqueItems": true,
+																		"type": "array",
+																		"items": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
+																			]
+																		}
 																	},
 																	"attributions": {
 																		"type": "array",
@@ -107755,6 +107891,7 @@
 																		"required": [
 																			"id",
 																			"language",
+																			"availableLanguages",
 																			"attributions",
 																			"realmId",
 																			"realms",
@@ -107803,6 +107940,22 @@
 																						"type": "null"
 																					}
 																				]
+																			},
+																			"availableLanguages": {
+																				"uniqueItems": true,
+																				"type": "array",
+																				"items": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
+																					]
+																				}
 																			},
 																			"attributions": {
 																				"type": "array",
@@ -109362,6 +109515,7 @@
 																		"required": [
 																			"id",
 																			"language",
+																			"availableLanguages",
 																			"attributions",
 																			"realmId",
 																			"realms",
@@ -109411,6 +109565,22 @@
 																						"type": "null"
 																					}
 																				]
+																			},
+																			"availableLanguages": {
+																				"uniqueItems": true,
+																				"type": "array",
+																				"items": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
+																					]
+																				}
 																			},
 																			"attributions": {
 																				"type": "array",
@@ -111012,6 +111182,7 @@
 																		"required": [
 																			"id",
 																			"language",
+																			"availableLanguages",
 																			"attributions",
 																			"realmId",
 																			"realms",
@@ -111061,6 +111232,22 @@
 																						"type": "null"
 																					}
 																				]
+																			},
+																			"availableLanguages": {
+																				"uniqueItems": true,
+																				"type": "array",
+																				"items": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
+																					]
+																				}
 																			},
 																			"attributions": {
 																				"type": "array",
@@ -116498,6 +116685,7 @@
 												"required": [
 													"id",
 													"language",
+													"availableLanguages",
 													"attributions",
 													"realmId",
 													"realms",
@@ -116543,6 +116731,22 @@
 															},
 															{ "type": "null" }
 														]
+													},
+													"availableLanguages": {
+														"uniqueItems": true,
+														"type": "array",
+														"items": {
+															"type": "string",
+															"enum": [
+																"zh",
+																"en",
+																"ja",
+																"ko",
+																"de",
+																"fr",
+																"es"
+															]
+														}
 													},
 													"attributions": {
 														"type": "array",
@@ -118635,6 +118839,7 @@
 									"type": "object",
 									"required": [
 										"id",
+										"availableLanguages",
 										"postKind",
 										"attributions",
 										"targetId",
@@ -118653,6 +118858,14 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
+										"availableLanguages": {
+											"uniqueItems": true,
+											"type": "array",
+											"items": {
+												"type": "string",
+												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+											}
+										},
 										"postKind": { "const": "review", "type": "string" },
 										"attributions": {
 											"type": "array",
@@ -124229,6 +124442,7 @@
 											"type": "object",
 											"required": [
 												"id",
+												"availableLanguages",
 												"attributions",
 												"realmId",
 												"subjectId",
@@ -124249,6 +124463,22 @@
 											],
 											"properties": {
 												"id": { "format": "uuid", "type": "string" },
+												"availableLanguages": {
+													"uniqueItems": true,
+													"type": "array",
+													"items": {
+														"type": "string",
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
+													}
+												},
 												"attributions": {
 													"type": "array",
 													"items": {
@@ -124994,6 +125224,7 @@
 											"type": "object",
 											"required": [
 												"id",
+												"availableLanguages",
 												"attributions",
 												"realmId",
 												"subjectId",
@@ -125014,6 +125245,22 @@
 											],
 											"properties": {
 												"id": { "format": "uuid", "type": "string" },
+												"availableLanguages": {
+													"uniqueItems": true,
+													"type": "array",
+													"items": {
+														"type": "string",
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
+													}
+												},
 												"attributions": {
 													"type": "array",
 													"items": {
@@ -125759,6 +126006,7 @@
 											"type": "object",
 											"required": [
 												"id",
+												"availableLanguages",
 												"attributions",
 												"realmId",
 												"subjectId",
@@ -125779,6 +126027,22 @@
 											],
 											"properties": {
 												"id": { "format": "uuid", "type": "string" },
+												"availableLanguages": {
+													"uniqueItems": true,
+													"type": "array",
+													"items": {
+														"type": "string",
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
+													}
+												},
 												"attributions": {
 													"type": "array",
 													"items": {
@@ -126524,6 +126788,7 @@
 											"type": "object",
 											"required": [
 												"id",
+												"availableLanguages",
 												"postKind",
 												"attributions",
 												"targetId",
@@ -126542,6 +126807,22 @@
 											],
 											"properties": {
 												"id": { "format": "uuid", "type": "string" },
+												"availableLanguages": {
+													"uniqueItems": true,
+													"type": "array",
+													"items": {
+														"type": "string",
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
+													}
+												},
 												"postKind": { "const": "review", "type": "string" },
 												"attributions": {
 													"type": "array",
@@ -127358,6 +127639,7 @@
 											"type": "object",
 											"required": [
 												"id",
+												"availableLanguages",
 												"attributions",
 												"realmId",
 												"subjectId",
@@ -127378,6 +127660,22 @@
 											],
 											"properties": {
 												"id": { "format": "uuid", "type": "string" },
+												"availableLanguages": {
+													"uniqueItems": true,
+													"type": "array",
+													"items": {
+														"type": "string",
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
+													}
+												},
 												"attributions": {
 													"type": "array",
 													"items": {
@@ -128699,6 +128997,7 @@
 													"id",
 													"postKind",
 													"language",
+													"availableLanguages",
 													"attributions",
 													"rootPostId",
 													"parentPostId",
@@ -128729,6 +129028,22 @@
 															"fr",
 															"es"
 														]
+													},
+													"availableLanguages": {
+														"uniqueItems": true,
+														"type": "array",
+														"items": {
+															"type": "string",
+															"enum": [
+																"zh",
+																"en",
+																"ja",
+																"ko",
+																"de",
+																"fr",
+																"es"
+															]
+														}
 													},
 													"attributions": {
 														"type": "array",
@@ -129672,6 +129987,7 @@
 										"id",
 										"postKind",
 										"language",
+										"availableLanguages",
 										"attributions",
 										"rootPostId",
 										"parentPostId",
@@ -129691,6 +130007,14 @@
 										"language": {
 											"type": "string",
 											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										},
+										"availableLanguages": {
+											"uniqueItems": true,
+											"type": "array",
+											"items": {
+												"type": "string",
+												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+											}
 										},
 										"attributions": {
 											"type": "array",
@@ -136663,6 +136987,7 @@
 														"required": [
 															"id",
 															"language",
+															"availableLanguages",
 															"attributions",
 															"realmId",
 															"realms",
@@ -136703,6 +137028,22 @@
 																	},
 																	{ "type": "null" }
 																]
+															},
+															"availableLanguages": {
+																"uniqueItems": true,
+																"type": "array",
+																"items": {
+																	"type": "string",
+																	"enum": [
+																		"zh",
+																		"en",
+																		"ja",
+																		"ko",
+																		"de",
+																		"fr",
+																		"es"
+																	]
+																}
 															},
 															"attributions": {
 																"type": "array",
@@ -137765,6 +138106,7 @@
 																"required": [
 																	"id",
 																	"language",
+																	"availableLanguages",
 																	"attributions",
 																	"realmId",
 																	"realms",
@@ -137811,6 +138153,22 @@
 																			},
 																			{ "type": "null" }
 																		]
+																	},
+																	"availableLanguages": {
+																		"uniqueItems": true,
+																		"type": "array",
+																		"items": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
+																			]
+																		}
 																	},
 																	"attributions": {
 																		"type": "array",
@@ -139334,6 +139692,7 @@
 																"required": [
 																	"id",
 																	"language",
+																	"availableLanguages",
 																	"attributions",
 																	"realmId",
 																	"realms",
@@ -139381,6 +139740,22 @@
 																			},
 																			{ "type": "null" }
 																		]
+																	},
+																	"availableLanguages": {
+																		"uniqueItems": true,
+																		"type": "array",
+																		"items": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
+																			]
+																		}
 																	},
 																	"attributions": {
 																		"type": "array",
@@ -140946,6 +141321,7 @@
 																"required": [
 																	"id",
 																	"language",
+																	"availableLanguages",
 																	"attributions",
 																	"realmId",
 																	"realms",
@@ -140993,6 +141369,22 @@
 																			},
 																			{ "type": "null" }
 																		]
+																	},
+																	"availableLanguages": {
+																		"uniqueItems": true,
+																		"type": "array",
+																		"items": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
+																			]
+																		}
 																	},
 																	"attributions": {
 																		"type": "array",
@@ -154600,6 +154992,7 @@
 														"required": [
 															"id",
 															"language",
+															"availableLanguages",
 															"attributions",
 															"realmId",
 															"realms",
@@ -154640,6 +155033,22 @@
 																	},
 																	{ "type": "null" }
 																]
+															},
+															"availableLanguages": {
+																"uniqueItems": true,
+																"type": "array",
+																"items": {
+																	"type": "string",
+																	"enum": [
+																		"zh",
+																		"en",
+																		"ja",
+																		"ko",
+																		"de",
+																		"fr",
+																		"es"
+																	]
+																}
 															},
 															"attributions": {
 																"type": "array",
@@ -155702,6 +156111,7 @@
 																"required": [
 																	"id",
 																	"language",
+																	"availableLanguages",
 																	"attributions",
 																	"realmId",
 																	"realms",
@@ -155748,6 +156158,22 @@
 																			},
 																			{ "type": "null" }
 																		]
+																	},
+																	"availableLanguages": {
+																		"uniqueItems": true,
+																		"type": "array",
+																		"items": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
+																			]
+																		}
 																	},
 																	"attributions": {
 																		"type": "array",
@@ -157271,6 +157697,7 @@
 																"required": [
 																	"id",
 																	"language",
+																	"availableLanguages",
 																	"attributions",
 																	"realmId",
 																	"realms",
@@ -157318,6 +157745,22 @@
 																			},
 																			{ "type": "null" }
 																		]
+																	},
+																	"availableLanguages": {
+																		"uniqueItems": true,
+																		"type": "array",
+																		"items": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
+																			]
+																		}
 																	},
 																	"attributions": {
 																		"type": "array",
@@ -158883,6 +159326,7 @@
 																"required": [
 																	"id",
 																	"language",
+																	"availableLanguages",
 																	"attributions",
 																	"realmId",
 																	"realms",
@@ -158930,6 +159374,22 @@
 																			},
 																			{ "type": "null" }
 																		]
+																	},
+																	"availableLanguages": {
+																		"uniqueItems": true,
+																		"type": "array",
+																		"items": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
+																			]
+																		}
 																	},
 																	"attributions": {
 																		"type": "array",
@@ -167212,6 +167672,7 @@
 														"required": [
 															"id",
 															"language",
+															"availableLanguages",
 															"attributions",
 															"realmId",
 															"realms",
@@ -167252,6 +167713,22 @@
 																	},
 																	{ "type": "null" }
 																]
+															},
+															"availableLanguages": {
+																"uniqueItems": true,
+																"type": "array",
+																"items": {
+																	"type": "string",
+																	"enum": [
+																		"zh",
+																		"en",
+																		"ja",
+																		"ko",
+																		"de",
+																		"fr",
+																		"es"
+																	]
+																}
 															},
 															"attributions": {
 																"type": "array",
@@ -168314,6 +168791,7 @@
 																"required": [
 																	"id",
 																	"language",
+																	"availableLanguages",
 																	"attributions",
 																	"realmId",
 																	"realms",
@@ -168360,6 +168838,22 @@
 																			},
 																			{ "type": "null" }
 																		]
+																	},
+																	"availableLanguages": {
+																		"uniqueItems": true,
+																		"type": "array",
+																		"items": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
+																			]
+																		}
 																	},
 																	"attributions": {
 																		"type": "array",
@@ -169883,6 +170377,7 @@
 																"required": [
 																	"id",
 																	"language",
+																	"availableLanguages",
 																	"attributions",
 																	"realmId",
 																	"realms",
@@ -169930,6 +170425,22 @@
 																			},
 																			{ "type": "null" }
 																		]
+																	},
+																	"availableLanguages": {
+																		"uniqueItems": true,
+																		"type": "array",
+																		"items": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
+																			]
+																		}
 																	},
 																	"attributions": {
 																		"type": "array",
@@ -171495,6 +172006,7 @@
 																"required": [
 																	"id",
 																	"language",
+																	"availableLanguages",
 																	"attributions",
 																	"realmId",
 																	"realms",
@@ -171542,6 +172054,22 @@
 																			},
 																			{ "type": "null" }
 																		]
+																	},
+																	"availableLanguages": {
+																		"uniqueItems": true,
+																		"type": "array",
+																		"items": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
+																			]
+																		}
 																	},
 																	"attributions": {
 																		"type": "array",
@@ -183292,6 +183820,7 @@
 														"required": [
 															"id",
 															"language",
+															"availableLanguages",
 															"attributions",
 															"realmId",
 															"realms",
@@ -183332,6 +183861,22 @@
 																	},
 																	{ "type": "null" }
 																]
+															},
+															"availableLanguages": {
+																"uniqueItems": true,
+																"type": "array",
+																"items": {
+																	"type": "string",
+																	"enum": [
+																		"zh",
+																		"en",
+																		"ja",
+																		"ko",
+																		"de",
+																		"fr",
+																		"es"
+																	]
+																}
 															},
 															"attributions": {
 																"type": "array",
@@ -184394,6 +184939,7 @@
 																"required": [
 																	"id",
 																	"language",
+																	"availableLanguages",
 																	"attributions",
 																	"realmId",
 																	"realms",
@@ -184440,6 +184986,22 @@
 																			},
 																			{ "type": "null" }
 																		]
+																	},
+																	"availableLanguages": {
+																		"uniqueItems": true,
+																		"type": "array",
+																		"items": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
+																			]
+																		}
 																	},
 																	"attributions": {
 																		"type": "array",
@@ -185963,6 +186525,7 @@
 																"required": [
 																	"id",
 																	"language",
+																	"availableLanguages",
 																	"attributions",
 																	"realmId",
 																	"realms",
@@ -186010,6 +186573,22 @@
 																			},
 																			{ "type": "null" }
 																		]
+																	},
+																	"availableLanguages": {
+																		"uniqueItems": true,
+																		"type": "array",
+																		"items": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
+																			]
+																		}
 																	},
 																	"attributions": {
 																		"type": "array",
@@ -187575,6 +188154,7 @@
 																"required": [
 																	"id",
 																	"language",
+																	"availableLanguages",
 																	"attributions",
 																	"realmId",
 																	"realms",
@@ -187622,6 +188202,22 @@
 																			},
 																			{ "type": "null" }
 																		]
+																	},
+																	"availableLanguages": {
+																		"uniqueItems": true,
+																		"type": "array",
+																		"items": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
+																			]
+																		}
 																	},
 																	"attributions": {
 																		"type": "array",

@@ -6,6 +6,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
 	createToast: vi.fn(),
+	replaceCurrentLanguage: vi.fn(),
+	requestedLanguage: undefined as "ja" | undefined,
 }));
 
 vi.mock("@rezics/ui", () => ({
@@ -20,9 +22,21 @@ vi.mock("./use-localization-languages", () => ({
 	}),
 }));
 
+vi.mock("@/features/content-languages/hooks/use-content-language-navigation", () => ({
+	useContentLanguageNavigation: () => ({
+		replaceCurrentLanguage: mocks.replaceCurrentLanguage,
+	}),
+	useRequestedContentLanguage: () => mocks.requestedLanguage,
+}));
+
 vi.mock("./client", () => ({
 	useTranslation: () => ({
-		t: { ui: { preferredLanguageUnavailable: "Preferred language unavailable" } },
+		t: {
+			ui: {
+				preferredLanguageUnavailable: "Preferred language unavailable",
+				requestedLanguageUnavailable: "Requested language unavailable",
+			},
+		},
 	}),
 }));
 
@@ -40,6 +54,8 @@ const Input = {
 
 beforeEach(() => {
 	mocks.createToast.mockReset();
+	mocks.replaceCurrentLanguage.mockReset();
+	mocks.requestedLanguage = undefined;
 });
 
 describe("localization fallback toast", () => {
@@ -63,5 +79,23 @@ describe("localization fallback toast", () => {
 		await act(async () => {});
 
 		expect(mocks.createToast).not.toHaveBeenCalled();
+	});
+
+	it("reports and clears an unavailable explicit language override", async () => {
+		mocks.requestedLanguage = "ja";
+		renderHook(() =>
+			useLocalizationFallbackToast({
+				...Input,
+				localizationLanguages: ["ja", "zh"],
+			}),
+		);
+
+		await act(async () => {});
+
+		expect(mocks.createToast).toHaveBeenCalledWith({
+			title: "Requested language unavailable",
+			type: "info",
+		});
+		expect(mocks.replaceCurrentLanguage).toHaveBeenCalledWith(undefined);
 	});
 });

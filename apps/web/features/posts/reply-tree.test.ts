@@ -11,6 +11,7 @@ function createReplyPost(id: string, parentPostId: string | null = null): ApiRep
 		id,
 		postKind: "reply",
 		language: "en",
+		availableLanguages: ["en"],
 		attributions: [
 			{
 				id: "019b1234-1234-7000-8000-000000000002",

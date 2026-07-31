@@ -8,6 +8,7 @@ import {
 	type SearchField as SearchFieldValue,
 	type SearchScope as SearchScopeValue,
 	type SearchSort as SearchSortValue,
+	readSearchPredicateLanguageBoundary,
 } from "@rezics/filter";
 
 type SearchCategory = SearchCategoryValue;
@@ -34,6 +35,24 @@ export const SearchExpression = Type.Recursive(
 	{ $id: "SearchExpression" },
 );
 export type SearchExpression = Static<typeof SearchExpression>;
+
+/** Conservatively derives a positive language presentation boundary. */
+export function readSearchExpressionLanguageBoundary(
+	expression: SearchExpression | undefined,
+): readonly string[] | undefined {
+	if (!expression) return undefined;
+	if ("field" in expression) return readSearchPredicateLanguageBoundary(expression);
+	if (expression.operator === "not") return undefined;
+	const boundaries = expression.clauses.map(readSearchExpressionLanguageBoundary);
+	if (expression.operator === "any" && boundaries.some((boundary) => boundary === undefined))
+		return undefined;
+	const constrained = boundaries.filter(
+		(boundary): boundary is readonly string[] => boundary !== undefined,
+	);
+	return constrained.length
+		? [...new Set(constrained.flatMap((boundary) => boundary))]
+		: undefined;
+}
 
 export interface SearchExpressionValidationLimits {
 	readonly maxDepth: number;
