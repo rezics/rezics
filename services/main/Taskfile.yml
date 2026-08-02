@@ -132,10 +132,10 @@ tasks:
             - task: db:replay:reset
             - >-
                 yarn exec atlas migrate apply --env main
-                --url 'postgres://postgres:postgres@localhost:5433/rezics_atlas?search_path=public&sslmode=disable'
+                --url "postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?search_path=public&sslmode=disable"
             - >-
                 yarn exec atlas schema diff --env main
-                --from 'postgres://postgres:postgres@localhost:5433/rezics_atlas?search_path=public&sslmode=disable'
+                --from "postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?search_path=public&sslmode=disable"
                 --to env://schema.src
                 --exclude atlas_schema_revisions
                 --exclude '*[type=extension|function|trigger]'
@@ -151,32 +151,62 @@ tasks:
         desc: Apply pending Atlas migrations and reconcile application privileges.
         cmds:
             - test -n "${DATABASE_ADMIN_URL:-}"
-            - yarn exec atlas migrate apply --env main --url "${DATABASE_ADMIN_URL}"
+            - >-
+                PGOPTIONS='-c lock_timeout=5s -c statement_timeout=5min -c idle_in_transaction_session_timeout=60s'
+                yarn exec atlas migrate apply --env main --url "${DATABASE_ADMIN_URL}"
+                --lock-timeout 5s
             - yarn exec tsx scripts/ensure-database-privileges.ts
 
-    db:bootstrap:
-        desc: Fill missing bootstrap records without changing existing credentials.
+    db:preflight:
+        desc: Read-only validation of migration history and permanent platform identities.
         cmds:
-            - yarn exec tsx scripts/bootstrap.ts
+            - task: db:validate
+            - task: db:status
+            - task: platform:verify
 
-    db:bootstrap:check:
-        desc: Verify that the database has all required bootstrap records.
+    db:project:
+        desc: Rebuild derived database projections after application promotion.
         cmds:
-            - yarn exec tsx scripts/check-bootstrap.ts
-
-    db:bootstrap:credentials:overwrite:
-        desc: Replace every bootstrap Profile password and print the new credentials.
-        prompt: This replaces all bootstrap Profile passwords. Continue?
-        cmds:
-            - yarn exec tsx scripts/bootstrap.ts --overwrite-credentials --yes
-
-    db:prepare:
-        desc: Migrate and bootstrap a database for application traffic.
-        cmds:
-            - task: db:migrate
-            - task: db:bootstrap
             - task: content-metrics:rebuild
             - task: studio:rebuild
+
+    platform:install:
+        desc: Install the factory platform graph exactly once on an empty database.
+        cmds:
+            - yarn exec tsx scripts/install-platform.ts {{.CLI_ARGS}}
+
+    platform:installation:check:
+        desc: Verify a fresh installation against the complete factory bundle.
+        cmds:
+            - yarn exec tsx scripts/check-platform-installation.ts
+
+    platform:verify:
+        desc: Read-only verification of permanent platform identities.
+        cmds:
+            - yarn exec tsx scripts/verify-platform-core.ts
+
+    platform:credentials:rotate:
+        desc: Rotate every platform Profile password and print the new credentials.
+        prompt: This rotates all platform Profile passwords. Continue?
+        cmds:
+            - yarn exec tsx scripts/rotate-platform-credentials.ts --yes
+
+    db:install:
+        desc: Migrate and install a database before its first application deployment.
+        cmds:
+            - task: db:migrate
+            - task: platform:install
+              vars:
+                  CLI_ARGS: "{{.CLI_ARGS}}"
+            - task: platform:verify
+            - task: db:project
+
+    db:prepare:
+        desc: Preflight, migrate, and verify an installed database for application traffic.
+        cmds:
+            - task: db:preflight
+            - task: db:migrate
+            - task: platform:verify
 
     db:status:
         desc: Show Atlas migration status.
@@ -188,7 +218,7 @@ tasks:
         desc: Run the independent Seed service and rebuild every derived database projection.
         cmds:
             - yarn exec tsx scripts/seed.ts {{.CLI_ARGS}}
-            - task: db:bootstrap
+            - task: platform:verify
             - task: content-metrics:rebuild
             - task: studio:rebuild
             - task: recommendations:refresh
@@ -212,5 +242,7 @@ tasks:
         internal: true
         cmds:
             - yarn exec tsx scripts/reset-database.ts {{.CLI_ARGS}}
-            - task: db:prepare
+            - task: db:install
+              vars:
+                  CLI_ARGS: --yes
             - task: db:seed

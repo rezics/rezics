@@ -26,7 +26,7 @@ import {
 	OfficialZoneAvatarAsset,
 	TopLevelSlugNamespaceUnitIds,
 } from "../bootstrap/manifest";
-import { databaseBootstrapService } from "../bootstrap/service";
+import { assertPlatformCoreReady, inspectPlatformCore } from "../bootstrap/core";
 import { ApiPermissionValues, toApiKeyPermissions } from "../auth/api-permissions";
 import { database, type DatabaseTransaction } from "../database";
 import { isFirstUnitLocalization } from "../units/localization";
@@ -3157,8 +3157,8 @@ const RequiredSeedScenarios = [
 ] as const;
 
 /**
- * Installs disposable development and test scenarios after Bootstrap has
- * established the production-safe system graph.
+ * Installs disposable development and test scenarios after the one-time
+ * platform installation has established its fixed identities.
  */
 export class DatabaseSeedService {
 	async run(options: SeedRunOptions = createSeedRunOptions()): Promise<SeedResult> {
@@ -3166,11 +3166,7 @@ export class DatabaseSeedService {
 		for (const scenario of RequiredSeedScenarios)
 			if (!includesSeedScenario(options, scenario))
 				throw new TypeError(`Seed profile ${options.profile} is missing ${scenario}`);
-		if (!(await databaseBootstrapService.isReady())) {
-			throw new Error(
-				"Seed requires an independently bootstrapped database; run `task services-main:db:bootstrap` first",
-			);
-		}
+		assertPlatformCoreReady(await inspectPlatformCore());
 		const data = createSeedData(options.referenceTime);
 		const demoPasswordHash = await hashPassword(DemoCredentials.password);
 		await database.transaction(

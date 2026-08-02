@@ -1,6 +1,6 @@
 import { and, count, eq, inArray, isNotNull, isNull, notInArray, sql } from "drizzle-orm";
 
-import { databaseBootstrapService } from "../bootstrap/service";
+import { assertPlatformCoreReady, inspectPlatformCore } from "../bootstrap/core";
 import { BootstrapUnitIds, OfficialZoneManifest } from "../bootstrap/manifest";
 import { database } from "../database";
 import {
@@ -53,8 +53,7 @@ function requirePositive(value: number, message: string): void {
 export async function verifySeedDatabase(
 	options: Pick<SeedRunOptions, "profile" | "scenarios">,
 ): Promise<SeedVerificationResult> {
-	if (!(await databaseBootstrapService.isReady()))
-		throw new Error("Seed verification requires a ready independent Bootstrap service");
+	assertPlatformCoreReady(await inspectPlatformCore());
 	const coverageContractQueries = [
 		{
 			name: "Shared Search query",

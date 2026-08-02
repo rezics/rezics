@@ -33,6 +33,10 @@ storybook-static/
 .tanstack/
 .cache/
 .aspire/
+.terraform/
+*.tfstate
+*.tfstate.*
+backend.hcl
 
 .wrangler/
 .vercel/

@@ -1,0 +1,105 @@
+{
+	"schemaVersion": 1,
+	"components": {
+		"database": {
+			"order": 10,
+			"inputs": [
+				"Dockerfile",
+				"package.json",
+				"yarn.lock",
+				".yarnrc.yml",
+				".yarn/releases/yarn-4.17.1.cjs",
+				"services/main/package.json",
+				"services/main/atlas.hcl",
+				"services/main/src/services/database/**",
+				"services/main/src/services/bootstrap/**",
+				"services/main/scripts/ensure-database-privileges.ts",
+				"services/main/scripts/verify-platform-core.ts",
+				"deploy/scripts/database-operation.sh"
+			]
+		},
+		"api": {
+			"order": 20,
+			"inputs": [
+				"Dockerfile",
+				"package.json",
+				"yarn.lock",
+				".yarnrc.yml",
+				".yarn/releases/yarn-4.17.1.cjs",
+				"services/main/**",
+				":(exclude)services/main/src/worker.ts",
+				":(exclude,glob)services/main/src/services/database/migrations/**",
+				"libraries/access/**",
+				"libraries/avatar/**",
+				"libraries/block/**",
+				"libraries/email/**",
+				"libraries/filter/**",
+				"libraries/i18n/**",
+				"libraries/license/**",
+				"libraries/observability/**",
+				"libraries/portable-text/**",
+				"libraries/slug/**",
+				"packages/brand/**"
+			]
+		},
+		"worker": {
+			"order": 30,
+			"inputs": [
+				"Dockerfile",
+				"package.json",
+				"yarn.lock",
+				".yarnrc.yml",
+				".yarn/releases/yarn-4.17.1.cjs",
+				"services/main/**",
+				":(exclude)services/main/src/index.ts",
+				":(exclude,glob)services/main/src/services/database/migrations/**",
+				"libraries/access/**",
+				"libraries/avatar/**",
+				"libraries/block/**",
+				"libraries/email/**",
+				"libraries/filter/**",
+				"libraries/i18n/**",
+				"libraries/license/**",
+				"libraries/observability/**",
+				"libraries/portable-text/**",
+				"libraries/slug/**",
+				"packages/brand/**"
+			]
+		},
+		"projection": {
+			"order": 40,
+			"inputs": [
+				"services/main/scripts/rebuild-content-metrics.ts",
+				"services/main/scripts/rebuild-studio.ts",
+				"services/main/src/services/content-metrics/**",
+				"services/main/src/services/studio/**",
+				"deploy/scripts/database-operation.sh"
+			]
+		},
+		"web": {
+			"order": 50,
+			"inputs": [
+				"package.json",
+				"yarn.lock",
+				".yarnrc.yml",
+				".yarn/releases/yarn-4.17.1.cjs",
+				"devenv.nix",
+				"devenv.yaml",
+				"apps/web/**",
+				"libraries/avatar/**",
+				"libraries/block/**",
+				"libraries/filter/**",
+				"libraries/fixture-client/**",
+				"libraries/fixture-data/**",
+				"libraries/i18n/**",
+				"libraries/license/**",
+				"libraries/portable-text/**",
+				"libraries/services/main/openapi-tanstack-query/**",
+				"libraries/slug/**",
+				"libraries/ui/**",
+				"packages/brand/**",
+				"deploy/scripts/deploy-cloudflare-worker.sh"
+			]
+		}
+	}
+}

@@ -55,10 +55,11 @@ task dev
 
 `local:setup` is the explicit first-run/configuration workflow. It starts the
 persistent Compose infrastructure, initializes RustFS, applies migrations,
-prepares the current index generation, reapplies the reviewed Sequin
-configuration, verifies its backfill, promotes the generation, and fills
-missing bootstrap records. It is safe to rerun for a healthy unchanged
-generation after pulling migrations or bootstrap-manifest changes. Named
+installs the factory platform bundle when no installation exists, prepares the
+current index generation, reapplies the reviewed Sequin configuration, verifies
+its backfill, and promotes the generation. On an installed database it verifies
+only permanent platform identities and never reconciles product-owned content.
+It is safe to rerun for a healthy unchanged generation. Named
 volumes preserve PostgreSQL, RustFS, Meilisearch, Sequin PostgreSQL, and Valkey
 data independently from the Aspire AppHost.
 
@@ -81,14 +82,14 @@ plane and does not generate or replace the production Nomad deployment.
 for machine-readable application state. The static `apps/about` site remains
 independent from the AppHost.
 
-The API exposes startup at `GET /api/startup`, dependency-free liveness at
-`GET/HEAD /api/health`, and traffic readiness at `GET /api/ready`. PostgreSQL is
+The API exposes startup at `GET /api/v1/startup`, dependency-free liveness at
+`GET/HEAD /api/v1/health`, and traffic readiness at `GET /api/v1/ready`. PostgreSQL is
 readiness-required; storage and recommendation freshness are reported as
 degraded without taking the core API out of service. The recommendation worker
 owns a scheduler-only health listener with `/startup`, `/health`, and `/ready`;
 it is not a public service endpoint. Aspire and CI consume the paths and timing policy from
-`services/main/src/health-contract.ts`. Production Nomad jobs consume that
-machine-checkable contract when Plan 6 introduces the deployment artifacts.
+`services/main/src/health-contract.ts`. The production Nomad jobs mirror that
+contract for rollout gating and process restarts.
 
 Local email defaults to non-delivering `log` mode. Account verification and
 password recovery are the only enabled outbound email purposes; activity and
@@ -149,11 +150,14 @@ task services-main:db:migrate:dry-run
 task services-main:db:migrate
 task services-main:db:status
 
-# Fill missing required records without changing existing credentials.
-task services-main:db:bootstrap
+# Explicit one-time installation for an empty target database.
+task services-main:db:install -- --yes
 
-# Explicitly replace all bootstrap Profile passwords and print the replacements.
-task services-main:db:bootstrap:credentials:overwrite
+# Read-only verification used by recurring deployments.
+task services-main:platform:verify
+
+# Explicitly rotate all platform Profile passwords and print the replacements.
+task services-main:platform:credentials:rotate
 ```
 
 The machine-generated v1 baseline is the first migration. Its durable
@@ -171,19 +175,26 @@ database, and verifies that the result matches the Drizzle schema. CI runs this
 check for every pull request and main-branch push. It is intentionally separate
 from `dev` and from the target-database `db:migrate` operation.
 
-`db:prepare` is the reusable one-off administration workflow for a target
+`db:install` is the explicit first-installation workflow for an empty target
 database. It applies pending migrations, reconciles application-role
-privileges, and fills missing bootstrap records. Normal bootstrap never changes
-an existing bootstrap Profile password. Credential replacement is available
-only through the separately confirmed
-`db:bootstrap:credentials:overwrite` task.
+privileges, installs the Git-versioned factory bundle, and issues the initial
+platform Profile credentials. It refuses an already installed or occupied
+database unless local setup deliberately supplies `--if-needed`.
 
-Bootstrap and Seed are separate database services with different safety
-contracts. Bootstrap owns production-safe, idempotent system invariants:
-fixed identities and namespaces, official Realms and Zones, official Zone
-search documents, default API-token policies, navigation, and required media.
-It may run repeatedly against an existing database. Seed owns disposable
-development scenarios and refuses to run when non-Bootstrap data already
+`db:prepare` is the recurring pre-deploy administration workflow. It applies
+pending migrations, reconciles application-role privileges, and then performs
+a read-only verification of permanent platform Unit, Auth User, and Account
+identities. It never compares or rewrites live localization, theme, Search,
+navigation, Dock, access-policy, or other product-owned state. Core verification
+failure stops deployment for explicit operator repair. Credential rotation is
+available only through the separately confirmed
+`platform:credentials:rotate` task.
+
+Platform Installation and Seed are separate database services with different
+safety contracts. Installation copies the factory Profiles, Realms, Zones,
+content, policies, navigation, and required media exactly once; those records
+become ordinary platform-owned product data afterward. Seed owns disposable
+development scenarios and refuses to run when non-installation data already
 exists.
 
 ```sh
@@ -206,11 +217,13 @@ also coordinates the external search projection. CI runs `task seed:contract`
 against fresh infrastructure, including a full external-index rebuild and
 zone-scoped lookup of each official workspace fixture.
 
-Production deployments must run the same validation and migration commands as
-a single pre-deploy job before rolling out API or worker replicas. Only that job
-receives `DATABASE_ADMIN_URL`; runtime services receive the narrower
-`DATABASE_URL`. Do not run migrations independently in every application
-replica.
+Production environments require one private, operator-confirmed `db:install`
+before their first application rollout. A stable application tag runs the
+database release job only when database inputs changed; that job completes
+preflight, migration, privilege reconciliation, and verification before API or
+worker rollout. Only database and projection jobs receive
+`DATABASE_ADMIN_URL`; runtime services receive the narrower `DATABASE_URL`.
+Do not run migrations independently in every application replica.
 
 Atlas workflow references: [versioned migration diff][atlas-diff],
 [migration apply and transaction behavior][atlas-apply], and
@@ -221,4 +234,10 @@ Atlas workflow references: [versioned migration diff][atlas-diff],
 [atlas-import]: https://atlasgo.io/versioned/import
 
 The about site is deployed independently to Cloudflare Pages from the
-`v*` release tag or a manual workflow dispatch.
+`about/v*` release tag or a manual workflow dispatch. Its deployment uses the
+shared `production` GitHub environment, while its workflow and release trigger
+remain separate; platform `v*` tags never deploy About.
+The main Vinext site deploys to Cloudflare Workers; the API, background worker,
+PostgreSQL, Meilisearch, and Sequin run on Nomad; production object storage is
+Cloudflare R2. See [Production deployment](./docs/operations/production-deployment.md)
+for first installation, release, secret, and rollback procedures.

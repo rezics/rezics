@@ -1,30 +1,18 @@
 import { randomBytes } from "node:crypto";
+import { hashPassword } from "better-auth/crypto";
 
 const BootstrapPasswordBytes = 32;
 const BootstrapPasswordComplexityPrefix = "Rz1_";
-const OverwriteCredentialsFlag = "--overwrite-credentials";
-const ConfirmOverwriteFlag = "--yes";
+export interface IssuedPlatformCredential {
+	readonly action: "created" | "rotated";
+	readonly name: string;
+	readonly email: string;
+	readonly password: string;
+}
 
-export type BootstrapCredentialMode = "fill" | "overwrite";
-
-export function parseBootstrapCredentialMode(args: readonly string[]): BootstrapCredentialMode {
-	if (args.length === 0) return "fill";
-
-	const uniqueArgs = new Set(args);
-	if (
-		args.length === 2 &&
-		uniqueArgs.size === 2 &&
-		uniqueArgs.has(OverwriteCredentialsFlag) &&
-		uniqueArgs.has(ConfirmOverwriteFlag)
-	)
-		return "overwrite";
-
-	if (uniqueArgs.has(OverwriteCredentialsFlag) && !uniqueArgs.has(ConfirmOverwriteFlag)) {
-		throw new Error(
-			`Refusing to overwrite bootstrap credentials without ${ConfirmOverwriteFlag}`,
-		);
-	}
-	throw new Error(`Usage: bootstrap.ts [${OverwriteCredentialsFlag} ${ConfirmOverwriteFlag}]`);
+export interface PreparedPlatformCredential {
+	readonly password: string;
+	readonly passwordHash: string;
 }
 
 /** Generate a URL-safe credential with 256 random bits and explicit complexity classes. */
@@ -33,4 +21,9 @@ export function generateBootstrapPassword(): string {
 		BootstrapPasswordComplexityPrefix +
 		randomBytes(BootstrapPasswordBytes).toString("base64url")
 	);
+}
+
+export async function preparePlatformCredential(): Promise<PreparedPlatformCredential> {
+	const password = generateBootstrapPassword();
+	return { password, passwordHash: await hashPassword(password) };
 }

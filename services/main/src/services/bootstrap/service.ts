@@ -1,5 +1,4 @@
 import { RealmUnitCreatePermissionValues } from "@rezics/access";
-import { hashPassword } from "better-auth/crypto";
 import type { AvatarReference } from "@rezics/avatar";
 import { walkBlockTree } from "@rezics/block";
 import { and, count, eq, inArray, isNull, sql } from "drizzle-orm";
@@ -83,7 +82,13 @@ import {
 	type ZoneSearchFeatureProjection,
 } from "../search/documents";
 import { createDefaultSearchDocument } from "../search/templates";
-import { type BootstrapCredentialMode, generateBootstrapPassword } from "./credentials";
+import {
+	assertPlatformCoreReady,
+	describePlatformCoreState,
+	inspectPlatformCore,
+	PlatformInstallationLockName,
+} from "./core";
+import { preparePlatformCredential, type IssuedPlatformCredential } from "./credentials";
 import { ensureOfficialZoneFollows } from "./official-zone-follows";
 import {
 	assertBootstrapManifest,
@@ -105,29 +110,19 @@ import {
 	TopLevelSlugNamespaceUnitIds,
 } from "./manifest";
 
-const BootstrapLockName = "rezics-bootstrap";
-
-export interface IssuedBootstrapCredential {
-	readonly action: "created" | "overwritten";
-	readonly name: string;
-	readonly email: string;
-	readonly password: string;
+export interface PlatformInstallationOptions {
+	readonly whenInstalled: "fail" | "skip";
 }
 
-export interface BootstrapResult {
-	readonly issuedCredentials: readonly IssuedBootstrapCredential[];
-}
-
-export interface BootstrapOptions {
-	readonly credentialMode: BootstrapCredentialMode;
-}
-
-interface PreparedCredential {
-	readonly password: string;
-	readonly passwordHash: string;
-}
-
-const FillBootstrapOptions: BootstrapOptions = { credentialMode: "fill" };
+export type PlatformInstallationResult =
+	| {
+			readonly status: "installed";
+			readonly issuedCredentials: readonly IssuedPlatformCredential[];
+	  }
+	| {
+			readonly status: "already_installed";
+			readonly issuedCredentials: readonly [];
+	  };
 
 function bootstrapEpoch(): Date {
 	return new Date(BootstrapEpochIso);
@@ -409,10 +404,9 @@ async function ensureLocalization(
 
 async function ensureBootstrapProfiles(
 	tx: DatabaseTransaction,
-	credentialMode: BootstrapCredentialMode,
-): Promise<IssuedBootstrapCredential[]> {
+): Promise<IssuedPlatformCredential[]> {
 	const createdAt = bootstrapEpoch();
-	const issuedCredentials: IssuedBootstrapCredential[] = [];
+	const issuedCredentials: IssuedPlatformCredential[] = [];
 	for (const value of BootstrapProfileManifest) {
 		await tx
 			.insert(users)
@@ -466,32 +460,19 @@ async function ensureBootstrapProfiles(
 			});
 		}
 
-		if (!storedAccount || credentialMode === "overwrite") {
-			const prepared = await prepareCredential();
-			const action = storedAccount ? "overwritten" : "created";
-			if (storedAccount) {
-				const updated = await tx
-					.update(accounts)
-					.set({ password: prepared.passwordHash, updatedAt: new Date() })
-					.where(eq(accounts.id, storedAccount.id))
-					.returning({ id: accounts.id });
-				if (updated.length !== 1 || updated[0]?.id !== storedAccount.id)
-					throw new Error(
-						`Bootstrap credential account ${value.key} was not overwritten`,
-					);
-			} else {
-				await tx.insert(accounts).values({
-					id: value.accountId,
-					accountId: value.authUserId,
-					providerId: "credential",
-					userId: value.authUserId,
-					password: prepared.passwordHash,
-					createdAt,
-					updatedAt: createdAt,
-				});
-			}
+		if (!storedAccount) {
+			const prepared = await preparePlatformCredential();
+			await tx.insert(accounts).values({
+				id: value.accountId,
+				accountId: value.authUserId,
+				providerId: "credential",
+				userId: value.authUserId,
+				password: prepared.passwordHash,
+				createdAt,
+				updatedAt: createdAt,
+			});
 			issuedCredentials.push({
-				action,
+				action: "created",
 				name: value.name,
 				email: value.email,
 				password: prepared.password,
@@ -632,11 +613,6 @@ async function ensureBootstrapPlatformAccess(tx: DatabaseTransaction): Promise<v
 				createdAt,
 			});
 		}
-}
-
-async function prepareCredential(): Promise<PreparedCredential> {
-	const password = generateBootstrapPassword();
-	return { password, passwordHash: await hashPassword(password) };
 }
 
 async function ensureOwnership(
@@ -1546,7 +1522,7 @@ async function ensureDefaultApiQuotaPolicies(tx: DatabaseTransaction): Promise<v
 	}
 }
 
-async function isBootstrapReady(): Promise<boolean> {
+async function isInitialInstallationBundleReady(): Promise<boolean> {
 	const expectedAddresses = [
 		...SlugNamespaceManifest.map((namespace) => ({
 			targetUnitId: namespace.id,
@@ -2128,16 +2104,26 @@ async function isBootstrapReady(): Promise<boolean> {
 	);
 }
 
-async function bootstrapDatabase(
-	options: BootstrapOptions = FillBootstrapOptions,
-): Promise<BootstrapResult> {
+async function installPlatform(
+	options: PlatformInstallationOptions,
+): Promise<PlatformInstallationResult> {
 	assertBootstrapManifest();
-	const issuedCredentials = await database.transaction(async (tx) => {
+	return database.transaction(async (tx): Promise<PlatformInstallationResult> => {
 		await tx.execute(
-			sql`select pg_advisory_xact_lock(hashtextextended(${BootstrapLockName}, 0))`,
+			sql`select pg_advisory_xact_lock(hashtextextended(${PlatformInstallationLockName}, 0))`,
 		);
+		const initialState = await inspectPlatformCore(tx);
+		if (initialState.status === "ready") {
+			if (options.whenInstalled === "skip")
+				return { status: "already_installed", issuedCredentials: [] };
+			throw new Error("Platform installation is already complete");
+		}
+		if (initialState.status !== "uninstalled")
+			throw new Error(
+				`Platform installation requires an empty database; ${describePlatformCoreState(initialState)}`,
+			);
 		await ensureSlugNamespaces(tx);
-		const credentials = await ensureBootstrapProfiles(tx, options.credentialMode);
+		const issuedCredentials = await ensureBootstrapProfiles(tx);
 		await ensureProfileFavorites(tx);
 		await ensureBootstrapPlatformAccess(tx);
 		await ensureDefaultApiQuotaPolicies(tx);
@@ -2147,23 +2133,23 @@ async function bootstrapDatabase(
 		await ensureOfficialZones(tx);
 		await ensureAllZoneExperiences(tx);
 		await ensureOfficialZoneFollows(tx);
-		return credentials;
+		assertPlatformCoreReady(await inspectPlatformCore(tx));
+		return { status: "installed", issuedCredentials };
 	});
-	return { issuedCredentials };
 }
 
 /**
- * Owns the production-safe, idempotent Bootstrap lifecycle. Seed scenarios are
- * intentionally not reachable through this service.
+ * Installs the versioned factory bundle exactly once. Product-owned fields are
+ * handed to the platform after this operation and are never reconciled here.
  */
-export class DatabaseBootstrapService {
-	isReady(): Promise<boolean> {
-		return isBootstrapReady();
+export class PlatformInstallationService {
+	isInitialBundleReady(): Promise<boolean> {
+		return isInitialInstallationBundleReady();
 	}
 
-	run(options: BootstrapOptions = FillBootstrapOptions): Promise<BootstrapResult> {
-		return bootstrapDatabase(options);
+	install(options: PlatformInstallationOptions): Promise<PlatformInstallationResult> {
+		return installPlatform(options);
 	}
 }
 
-export const databaseBootstrapService = new DatabaseBootstrapService();
+export const platformInstallationService = new PlatformInstallationService();

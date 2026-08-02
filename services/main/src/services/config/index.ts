@@ -14,6 +14,11 @@ const origin = z.url().refine((value) => new URL(value).origin === value, {
 	message: "must not include a path, query, or fragment",
 });
 
+const release = z.union([
+	z.literal("development"),
+	z.string().regex(/^v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/),
+]);
+
 const hostname = z
 	.string()
 	.trim()
@@ -31,6 +36,7 @@ export const env = createEnv({
 	server: {
 		HOST: z.string().min(1).default("0.0.0.0"),
 		PORT: z.coerce.number().int().min(1).max(65_535).default(3001),
+		REZICS_RELEASE: release.default("development"),
 		DATABASE_URL: z.url(),
 		BETTER_AUTH_SECRET: z.string().min(32),
 		BETTER_AUTH_URL: origin,

@@ -95,10 +95,12 @@ tasks:
             - test -z "$(git ls-files --others --exclude-standard -- libraries/services/main/openapi/openapi.json libraries/services/main/openapi-fetch/src/generated libraries/services/main/openapi-tanstack-query/src/generated packages/api/src/generated)"
 
     seed:contract:
-        desc: Verify Bootstrap, coverage Seed, derived projections, and official Zone Search.
+        desc: Verify fresh platform installation, coverage Seed, derived projections, and official Zone Search.
         cmds:
-            - task: services-main:db:prepare
-            - task: services-main:db:bootstrap:check
+            - task: services-main:db:install
+              vars:
+                  CLI_ARGS: --yes
+            - task: services-main:platform:installation:check
             - task: services-main:db:seed
               vars:
                   CLI_ARGS: --profile coverage
@@ -190,7 +192,9 @@ tasks:
         cmds:
             - docker compose --profile migration-test down --timeout 30 --remove-orphans --volumes
             - task: infra:up
-            - task: services-main:db:prepare
+            - task: services-main:db:install
+              vars:
+                  CLI_ARGS: --yes
             - task: services-main:search:index
               vars:
                   CLI_ARGS: >-
@@ -216,10 +220,12 @@ tasks:
             - docker compose logs --follow postgres rustfs meilisearch sequin sequin-postgres sequin-redis
 
     local:setup:
-        desc: Start persistent local infrastructure and prepare the development database.
+        desc: Start infrastructure and install or prepare the local development database.
         cmds:
             - task: infra:up
-            - task: services-main:db:prepare
+            - task: services-main:db:install
+              vars:
+                  CLI_ARGS: --yes --if-needed
             - task: services-main:search:index
               vars:
                   CLI_ARGS: >-

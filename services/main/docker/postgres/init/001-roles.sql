@@ -1,7 +1,0 @@
-DO $roles$
-BEGIN
-	IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'rezics_app') THEN
-		CREATE ROLE rezics_app LOGIN PASSWORD 'rezics_app' NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT;
-	END IF;
-END
-$roles$;

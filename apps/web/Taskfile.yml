@@ -10,7 +10,23 @@ tasks:
         desc: Create the frontend production build.
         cmds:
             - yarn run generate:offline
-            - yarn exec vinext build
+            - yarn run build
+
+    cloudflare:typegen:
+        desc: Regenerate Cloudflare Worker environment types from wrangler.jsonc.
+        cmds:
+            - yarn run typegen:cloudflare
+
+    cloudflare:typegen:check:
+        desc: Verify the committed Cloudflare Worker types match wrangler.jsonc.
+        cmds:
+            - yarn run typegen:cloudflare:check
+
+    cloudflare:deploy:
+        desc: Build and deploy the production Vinext Worker.
+        cmds:
+            - yarn run generate:offline
+            - yarn run deploy:cloudflare
 
     offline:check:
         desc: Verify the committed offline page matches its formatted generated output.
@@ -20,7 +36,7 @@ tasks:
     typecheck:
         desc: Type-check the frontend.
         cmds:
-            - yarn exec tsc --noEmit -p tsconfig.json
+            - yarn run typecheck
 
     test:
         desc: Run frontend behavior tests.

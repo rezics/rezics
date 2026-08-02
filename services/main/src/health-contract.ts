@@ -82,7 +82,7 @@ export const apiReadinessPolicy = {
 	cacheTtlMs: 1_000,
 	checks: {
 		database: { criticality: "required", timeoutMs: 1_000 },
-		// Storage remains optional until the RustFS/R2 contract suite in Plan 5 is accepted.
+		// Object storage degradation does not remove read-only core API traffic.
 		storage: { criticality: "optional", timeoutMs: 1_500 },
 		recommendations: { criticality: "optional", timeoutMs: 1_500 },
 		search: { criticality: "optional", timeoutMs: 1_500 },

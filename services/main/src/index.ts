@@ -18,7 +18,16 @@ const [{ serve }, { default: api }, { env }, { database }] = await Promise.all([
 ]);
 
 const server = serve({
-	fetch: api.fetch,
+	async fetch(request) {
+		const response = await api.fetch(request);
+		const headers = new Headers(response.headers);
+		headers.set("X-Rezics-Release", env.REZICS_RELEASE);
+		return new Response(response.body, {
+			headers,
+			status: response.status,
+			statusText: response.statusText,
+		});
+	},
 	gracefulShutdown: false,
 	hostname: env.HOST,
 	port: env.PORT,

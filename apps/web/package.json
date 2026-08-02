@@ -4,11 +4,16 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
+		"build": "vinext build",
 		"cosmos": "cosmos",
 		"cosmos-export": "cosmos-export",
+		"deploy:cloudflare": "vinext-cloudflare deploy --env production",
 		"dev": "vinext dev",
 		"generate:offline": "node scripts/generate-offline-page.ts",
-		"generate:offline:check": "node scripts/generate-offline-page.ts --check"
+		"generate:offline:check": "node scripts/generate-offline-page.ts --check",
+		"typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p worker/tsconfig.json",
+		"typegen:cloudflare": "wrangler types --env production",
+		"typegen:cloudflare:check": "wrangler types --env production --check"
 	},
 	"dependencies": {
 		"@dnd-kit/core": "^6.3.1",
@@ -40,10 +45,11 @@
 		"react": "19.2",
 		"react-dom": "19.2",
 		"react-server-dom-webpack": "19.2.7",
-		"vinext": "^1.0.0-beta.2"
+		"vinext": "1.0.0-beta.4"
 	},
 	"devDependencies": {
 		"@babel/parser": "^7.29.7",
+		"@cloudflare/vite-plugin": "1.49.0",
 		"@rezics/fixture-client": "workspace:*",
 		"@rezics/fixture-data": "workspace:*",
 		"@tailwindcss/vite": "^4.3.2",
@@ -51,6 +57,7 @@
 		"@testing-library/react": "16.3.2",
 		"@types/react": "19",
 		"@types/react-dom": "19",
+		"@vinext/cloudflare": "1.0.0-beta.4",
 		"@vitejs/plugin-react": "^6.0.3",
 		"@vitejs/plugin-rsc": "^0.5.27",
 		"jsdom": "26.1.0",
@@ -62,6 +69,7 @@
 		"typescript": "7",
 		"vite": "^8.1.3",
 		"vite-plugin-pwa": "^1.3.0",
-		"webpack": "^5.103.0"
+		"webpack": "^5.103.0",
+		"wrangler": "4.116.0"
 	}
 }

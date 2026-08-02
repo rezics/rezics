@@ -5,44 +5,29 @@ on:
     push:
         branches: [main]
 
+concurrency:
+    group: check-${{ github.event.pull_request.number || github.ref }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+
 jobs:
     check:
+        name: Advisory repository check
         runs-on: ubuntu-latest
+        timeout-minutes: 120
         steps:
-            - uses: actions/checkout@v5
-            - uses: cachix/install-nix-action@v31
-            - uses: cachix/cachix-action@v16
+            - name: Checkout
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Install Nix
+              uses: cachix/install-nix-action@630ae543ea3a38a9a4166f03376c02c50f408342 # v31
               with:
-                  name: devenv
-            - name: Cache Nix store
-              uses: nix-community/cache-nix-action@v7
-              with:
-                  primary-key: nix-${{ runner.os }}-${{ hashFiles('devenv.lock', 'devenv.nix', 'devenv.yaml') }}
-                  restore-prefixes-first-match: nix-${{ runner.os }}-
-                  gc-max-store-size-linux: 1G
-            - name: Install Devenv
-              run: nix profile add nixpkgs#devenv
-            - name: Cache Yarn packages
-              uses: actions/cache@v6
-              with:
-                  path: ~/.yarn/berry/cache
-                  key: yarn-${{ runner.os }}-${{ hashFiles('yarn.lock', '.yarnrc.yml', '.yarn/releases/*.cjs') }}
-                  restore-keys: yarn-${{ runner.os }}-
-            - run: devenv shell yarn install --immutable
-            - run: devenv shell task apps-web:offline:check
-            - run: devenv shell task format:check
-            - run: devenv shell task db:check
-            - name: Start Seed contract infrastructure
-              run: devenv shell task infra:up
-            - name: Verify Bootstrap and coverage Seed services
-              run: devenv shell task seed:contract
-            - name: Stop Seed contract infrastructure
-              if: always()
-              run: devenv shell task infra:stop
-            - run: devenv shell task openapi:check
-            - run: devenv shell task typecheck
-            - run: devenv shell task test
-            - run: devenv shell task aspire-apphost:smoke
-            - run: devenv shell task apps-web:build
-            - run: devenv shell task apps-about:build
-            - run: devenv shell task apps-about:test:dist
+                  github_access_token: ${{ github.token }}
+
+            - name: Install pinned devenv
+              run: nix profile install github:cachix/devenv/55d2bb4a3cc710ba82cc8644f4419db3a802e1a4
+
+            - name: Run advisory checks
+              run: devenv shell bash deploy/scripts/run-github-check.sh

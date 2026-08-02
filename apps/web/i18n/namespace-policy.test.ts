@@ -14,6 +14,7 @@ type AstNode = {
 const WebRoot = fileURLToPath(new URL("..", import.meta.url));
 const ResourceRegistryPath = resolve(WebRoot, "../../libraries/i18n/src/resources.ts");
 const IgnoredDirectories = new Set([".next", ".vinext", "dist", "node_modules"]);
+const IgnoredFiles = new Set(["worker-configuration.d.ts"]);
 const SourceExtensions = new Set([".ts", ".tsx"]);
 const SeededClientEntries = new Set(["native-i18n/next/seeded", "native-i18n/react/seeded"]);
 
@@ -156,6 +157,7 @@ async function collectSourceFiles(directory: string): Promise<string[]> {
 			const entryPath = resolve(directory, entry.name);
 			if (entry.isDirectory())
 				return IgnoredDirectories.has(entry.name) ? [] : collectSourceFiles(entryPath);
+			if (IgnoredFiles.has(entry.name)) return [];
 			return SourceExtensions.has(extname(entry.name)) ? [entryPath] : [];
 		}),
 	);

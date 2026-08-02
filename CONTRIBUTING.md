@@ -6,6 +6,14 @@
 - Run the nearest relevant checks first, then broader checks affected by the change. Preserve unrelated worktree changes.
 - Maintainer-facing repository language is English. Keep localization content, test fixtures, and native-language names in their target language.
 
+## Advisory GitHub checks
+
+The GitHub `Check` workflow is advisory. Its result does not block merging,
+tagging, release dispatch, or production deployment. Failures remain visible
+and should be fixed when practical, but release workflows must never depend on
+the workflow's completion or conclusion. Do not configure `Check` as a required
+status check.
+
 ## Existing conventions
 
 - Abstractions must compress meaning, not merely shorten syntax: they should capture invariants, protocols, lifecycles, or genuinely reusable complete semantics. Delete one-use wrappers that only forward, rename, or pass arguments when the inline form is equally clear. Framework entry points, public package entry points, generated code, and upstream mirrors are external-contract boundaries and are not judged by call count; within a boundary, still express intent directly.

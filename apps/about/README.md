@@ -78,3 +78,20 @@ task apps-about:preview
 
 Cloudflare Pages uses `apps/about/dist/client` as its build output. Deployment does not depend
 on `dist/server`.
+
+## Deployment
+
+About has an independent release boundary. A reviewed `about/v*` tag or a manual
+dispatch starts `.github/workflows/deploy-about-cloudflare-pages.yml`; platform
+`v*` tags do not deploy this site. Deployments are serialized through the
+About-specific `about-production` concurrency group while using the shared
+`production` GitHub environment and these deployment settings:
+
+- `CLOUDFLARE_ACCOUNT_ID`;
+- `CLOUDFLARE_API_TOKEN`, which may be shared with the platform deployment and
+  must include account-level Cloudflare Pages Edit;
+- optional `CLOUDFLARE_PAGES_PROJECT_NAME`, defaulting to `rezics-about`.
+
+The release trigger, workflow, and concurrency lock are independent. The
+production approval policy and Cloudflare API credential are intentionally
+shared with the platform deployment.

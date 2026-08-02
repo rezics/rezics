@@ -1,0 +1,72 @@
+name: Release
+
+on:
+    push:
+        tags:
+            - "v*.*.*"
+
+concurrency:
+    group: production
+    cancel-in-progress: false
+
+permissions:
+    contents: write
+    id-token: write
+
+jobs:
+    release:
+        name: Dispatch server release
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        steps:
+            - name: Dispatch immutable tag
+              shell: bash
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  GH_REPO: ${{ github.repository }}
+                  GATEWAY_URL: https://deploy.rezics.com/v1/releases/dispatch
+                  OIDC_AUDIENCE: rezics-nomad-release
+              run: |
+                  set -euo pipefail
+                  umask 077
+
+                  oidc_response="$(
+                      curl --fail --silent --show-error \
+                          --header "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+                          "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}"
+                  )"
+                  oidc_token="$(jq -er '.value' <<<"${oidc_response}")"
+                  unset oidc_response
+
+                  dispatch_response="${RUNNER_TEMP}/rezics-release-dispatch.json"
+                  http_status="$(curl --silent --show-error \
+                      --connect-timeout 15 \
+                      --max-time 60 \
+                      --request POST \
+                      --header "Authorization: Bearer ${oidc_token}" \
+                      --header "Accept: application/json" \
+                      --output "${dispatch_response}" \
+                      --write-out '%{http_code}' \
+                      "${GATEWAY_URL}")"
+                  unset oidc_token
+
+                  if [[ "${http_status}" != 202 ]]; then
+                      printf 'Release gateway returned HTTP %s: ' "${http_status}" >&2
+                      jq -r '.error // "unstructured response"' "${dispatch_response}" >&2 || true
+                      exit 1
+                  fi
+                  jq -e \
+                      --arg ref "${GITHUB_REF}" \
+                      --arg sha "${GITHUB_SHA}" \
+                      '.status == "accepted" and .ref == $ref and .sha == $sha and
+                       (.job_id | type == "string" and length > 0) and
+                       (.eval_id | type == "string" and length > 0)' \
+                      "${dispatch_response}" >/dev/null
+                  jq '{status, job_id, eval_id, ref, sha}' "${dispatch_response}"
+
+                  if ! gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+                      gh release create "${GITHUB_REF_NAME}" \
+                          --verify-tag \
+                          --title "REZICS ${GITHUB_REF_NAME}" \
+                          --generate-notes
+                  fi

@@ -3,7 +3,7 @@ name: Deploy About to Cloudflare Pages
 on:
     push:
         tags:
-            - "v*"
+            - "about/v*"
     workflow_dispatch:
         inputs:
             cloudflare_branch:
@@ -13,37 +13,52 @@ on:
                 type: string
 
 concurrency:
-    group: cloudflare-pages-about-${{ github.ref }}
+    group: about-production
     cancel-in-progress: false
 
 env:
-    CLOUDFLARE_PAGES_PROJECT_NAME: ${{ vars.CLOUDFLARE_PAGES_PROJECT_NAME || 'rezics-about' }}
     CLOUDFLARE_PAGES_BRANCH: ${{ github.event_name == 'workflow_dispatch' && inputs.cloudflare_branch || 'main' }}
 
 jobs:
     deploy:
         name: Build and deploy
         runs-on: ubuntu-latest
+        environment: production
+        env:
+            CLOUDFLARE_PAGES_PROJECT_NAME: ${{ vars.CLOUDFLARE_PAGES_PROJECT_NAME || 'rezics-about' }}
         permissions:
             contents: read
             deployments: write
         steps:
             - name: Checkout
-              uses: actions/checkout@v6
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
             - name: Setup Node
-              uses: actions/setup-node@v6
+              uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
               with:
                   node-version: 26
 
-            - name: Enable Corepack
-              run: corepack enable
+            - name: Install Corepack
+              run: npm install --global corepack@0.35.0 && corepack enable
 
             - name: Install Task
-              uses: go-task/setup-task@v2
+              uses: go-task/setup-task@01a4adf9db2d14c1de7a560f09170b6e0df736aa # v2
 
             - name: Install dependencies
               run: yarn install --immutable
+
+            - name: Validate Cloudflare Pages credentials
+              shell: bash
+              env:
+                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+              run: |
+                  test -n "${CLOUDFLARE_ACCOUNT_ID}"
+                  test -n "${CLOUDFLARE_API_TOKEN}"
+                  curl --fail --silent --show-error \
+                      --header "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+                      "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${CLOUDFLARE_PAGES_PROJECT_NAME}" \
+                      | jq -e '.success == true' >/dev/null
 
             - name: Test
               run: task apps-about:test
@@ -55,7 +70,7 @@ jobs:
               run: task apps-about:test:dist
 
             - name: Deploy to Cloudflare Pages
-              uses: cloudflare/wrangler-action@v3
+              uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3
               with:
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

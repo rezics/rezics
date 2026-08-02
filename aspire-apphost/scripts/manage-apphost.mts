@@ -10,6 +10,7 @@ const appHostPath = fileURLToPath(new URL("../apphost.mts", import.meta.url));
 const appHostArgument = "aspire-apphost/apphost.mts";
 const startupTimeoutMs = 5 * 60 * 1000;
 const requestTimeoutMs = 60 * 1000;
+const smokeResourceNames = ["main-api", "recommendation-worker", "web"] as const;
 const forbiddenRuntimeDiagnostics = [
 	"TelemetryExporterUnhealthy",
 	"OTLPExporterError",
@@ -157,10 +158,31 @@ function summarize(resources: ResourceDescription[]) {
 		}));
 }
 
+function printResourceLogs() {
+	for (const resourceName of smokeResourceNames) {
+		const result = runAspire([
+			"logs",
+			resourceName,
+			"--apphost",
+			appHostArgument,
+			"--tail",
+			"200",
+			"--format",
+			"Table",
+			"--non-interactive",
+			"--nologo",
+		]);
+		const output = [result.stdout, result.stderr]
+			.map((value) => value.trim())
+			.filter(Boolean)
+			.join("\n");
+		if (output) console.error(`Aspire ${resourceName} logs:\n${output}`);
+	}
+}
+
 async function waitForReady(child: ManagedChildProcess) {
 	const deadline = Date.now() + startupTimeoutMs;
 	let lastResources: ResourceDescription[] = [];
-	const expectedResources = ["main-api", "recommendation-worker", "web"];
 	while (Date.now() < deadline) {
 		if (child.exitCode !== null)
 			throw new Error(`Aspire exited before resources became ready (code ${child.exitCode})`);
@@ -171,7 +193,7 @@ async function waitForReady(child: ManagedChildProcess) {
 			continue;
 		}
 		lastResources = describeResources();
-		const missing = expectedResources.filter(
+		const missing = smokeResourceNames.filter(
 			(name) => !lastResources.some((resource) => resource.displayName === name),
 		);
 		if (missing.length > 0) {
@@ -306,6 +328,11 @@ async function main() {
 	} catch (error) {
 		const output = getOutput();
 		if (output) console.error(`Aspire output:\n${output}`);
+		try {
+			if (listMatchingAppHosts().length > 0) printResourceLogs();
+		} catch (diagnosticError) {
+			console.error("Could not collect Aspire resource logs", diagnosticError);
+		}
 		throw error;
 	} finally {
 		await stopAppHost(child);

@@ -1,5 +1,6 @@
 import { fileURLToPath, URL } from "node:url";
 
+import { cloudflare } from "@cloudflare/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import vinext from "vinext";
 import { defineConfig } from "vite";
@@ -51,24 +52,35 @@ for (const plugin of pwaPlugins) {
 }
 
 export default defineConfig({
-	plugins: [vinext({}), ...pwaPlugins, tailwindcss()],
+	plugins: [
+		vinext({}),
+		cloudflare({
+			viteEnvironment: { name: "rsc", childEnvironments: ["ssr"] },
+		}),
+		...pwaPlugins,
+		tailwindcss(),
+	],
 	// RSC resolves React Query's "use client" modules by file path, so keep its
 	// package entry and internal modules on the same unoptimized module graph.
 	optimizeDeps: {
 		exclude: ["@tanstack/react-query"],
 	},
-	build: {
-		rolldownOptions: {
-			output: {
-				codeSplitting: {
-					groups: [
-						{
-							name: "portable-text-editor",
-							test: /node_modules\/@portabletext\/editor/,
-							maxSize: 350_000,
-							includeDependenciesRecursively: false,
+	environments: {
+		client: {
+			build: {
+				rolldownOptions: {
+					output: {
+						codeSplitting: {
+							groups: [
+								{
+									name: "portable-text-editor",
+									test: /node_modules\/@portabletext\/editor/,
+									maxSize: 350_000,
+									includeDependenciesRecursively: false,
+								},
+							],
 						},
-					],
+					},
 				},
 			},
 		},
