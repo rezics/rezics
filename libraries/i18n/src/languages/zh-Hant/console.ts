@@ -192,7 +192,7 @@ export default {
 			validUntil: "特權額度到期時間",
 			customize: "為此帳戶覆寫策略",
 			customizeDescription:
-				"帳戶覆寫仍受所選策略類別的上限約束，並與不可變策略修訂分開保存。",
+				"帳戶覆寫會與不可變政策修訂分開保存；指派特權政策時仍須設定到期時間。",
 			reason: "指派原因",
 			reasonPlaceholder: "記錄作業依據；內容會寫入安全稽核紀錄。",
 			invalid: "請檢查額度限制、操作覆寫與特權額度到期時間。",
@@ -243,6 +243,14 @@ export default {
 	},
 	apiQuotas: {
 		policyList: "政策",
+		newPolicy: "新增",
+		createPolicy: "建立政策",
+		createPolicyDescription: `建立可供帳戶或 ${verbatimTerms.api.value} 權杖指派的新配額政策；識別碼、套用對象與類別建立後不可變更。`,
+		policyKey: "政策識別碼",
+		policyKeyPlaceholder: "輸入唯一識別碼",
+		subjectKind: "套用對象",
+		createFailed: "無法建立配額政策，請檢查識別碼是否重複後再試。",
+		cancelCreation: "取消",
 		assignments: "指派",
 		revision: insert("修訂版 {{revision}}", { revision: Number }),
 		enabled: "已啟用",

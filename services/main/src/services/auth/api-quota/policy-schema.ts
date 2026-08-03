@@ -5,39 +5,32 @@ import type { ApiQuotaPolicyClass, ApiQuotaPolicySubjectKind } from "../../datab
 import { ApiQuotaOperationIds, type ApiQuotaOperationId } from "./operation";
 
 export const ApiQuotaPolicySchemaVersion = 1 as const;
+const ApiQuotaMaximumSafeInteger = Number.MAX_SAFE_INTEGER;
 
 export const ApiQuotaOperationIdSchema = t.UnionEnum(ApiQuotaOperationIds);
 
-const StandardRequestRate = t.Object(
+const ApiQuotaRequestRate = t.Object(
 	{
-		requestsPerMinute: t.Integer({ minimum: 1, maximum: 300 }),
-		burstCapacity: t.Integer({ minimum: 1, maximum: 300 }),
-	},
-	{ additionalProperties: false },
-);
-
-const PrivilegedRequestRate = t.Object(
-	{
-		requestsPerMinute: t.Integer({ minimum: 1, maximum: 5_000 }),
-		burstCapacity: t.Integer({ minimum: 1, maximum: 5_000 }),
+		requestsPerMinute: t.Integer({ minimum: 1, maximum: ApiQuotaMaximumSafeInteger }),
+		burstCapacity: t.Integer({ minimum: 1, maximum: ApiQuotaMaximumSafeInteger }),
 	},
 	{ additionalProperties: false },
 );
 
 export const StandardApiQuotaLimits = t.Object(
 	{
-		requestRate: StandardRequestRate,
-		maxConcurrentRequests: t.Integer({ minimum: 1, maximum: 4 }),
-		dailyCostUnits: t.Integer({ minimum: 1, maximum: 10_000 }),
+		requestRate: ApiQuotaRequestRate,
+		maxConcurrentRequests: t.Integer({ minimum: 1, maximum: ApiQuotaMaximumSafeInteger }),
+		dailyCostUnits: t.Integer({ minimum: 1, maximum: ApiQuotaMaximumSafeInteger }),
 	},
 	{ additionalProperties: false },
 );
 
 export const PrivilegedApiQuotaLimits = t.Object(
 	{
-		requestRate: PrivilegedRequestRate,
-		maxConcurrentRequests: t.Integer({ minimum: 1, maximum: 64 }),
-		dailyCostUnits: t.Integer({ minimum: 1, maximum: 1_000_000 }),
+		requestRate: ApiQuotaRequestRate,
+		maxConcurrentRequests: t.Integer({ minimum: 1, maximum: ApiQuotaMaximumSafeInteger }),
+		dailyCostUnits: t.Integer({ minimum: 1, maximum: ApiQuotaMaximumSafeInteger }),
 	},
 	{ additionalProperties: false },
 );
@@ -86,7 +79,7 @@ export const PrivilegedApiTokenQuotaPolicyConfiguration = t.Object(
 export const StandardApiAccountQuotaPolicyConfiguration = t.Object(
 	{
 		limits: StandardApiQuotaLimits,
-		maxActiveTokens: t.Integer({ minimum: 1, maximum: 20 }),
+		maxActiveTokens: t.Integer({ minimum: 1, maximum: ApiQuotaMaximumSafeInteger }),
 		operations: StandardApiQuotaOperations,
 	},
 	{ additionalProperties: false },
@@ -95,7 +88,7 @@ export const StandardApiAccountQuotaPolicyConfiguration = t.Object(
 export const PrivilegedApiAccountQuotaPolicyConfiguration = t.Object(
 	{
 		limits: PrivilegedApiQuotaLimits,
-		maxActiveTokens: t.Integer({ minimum: 1, maximum: 50 }),
+		maxActiveTokens: t.Integer({ minimum: 1, maximum: ApiQuotaMaximumSafeInteger }),
 		operations: PrivilegedApiQuotaOperations,
 	},
 	{ additionalProperties: false },
@@ -104,7 +97,7 @@ export const PrivilegedApiAccountQuotaPolicyConfiguration = t.Object(
 export const StandardApiAccountQuotaOverride = t.Object(
 	{
 		limits: t.Optional(StandardApiQuotaLimitOverride),
-		maxActiveTokens: t.Optional(t.Integer({ minimum: 1, maximum: 20 })),
+		maxActiveTokens: t.Optional(t.Integer({ minimum: 1, maximum: ApiQuotaMaximumSafeInteger })),
 		operations: t.Optional(StandardApiQuotaOperations),
 	},
 	{ additionalProperties: false },
@@ -113,7 +106,7 @@ export const StandardApiAccountQuotaOverride = t.Object(
 export const PrivilegedApiAccountQuotaOverride = t.Object(
 	{
 		limits: t.Optional(PrivilegedApiQuotaLimitOverride),
-		maxActiveTokens: t.Optional(t.Integer({ minimum: 1, maximum: 50 })),
+		maxActiveTokens: t.Optional(t.Integer({ minimum: 1, maximum: ApiQuotaMaximumSafeInteger })),
 		operations: t.Optional(PrivilegedApiQuotaOperations),
 	},
 	{ additionalProperties: false },

@@ -39,10 +39,20 @@ describe("API quota policy documents", () => {
 		).toThrow(ApiQuotaPolicyDocumentInvalid);
 	});
 
-	it("rejects account overrides outside the assigned policy class", () => {
+	it("accepts policy-managed account limits without a hard-coded class ceiling", () => {
+		expect(
+			decodeApiAccountQuotaOverride("standard", 1, {
+				limits: { requestRate: { requestsPerMinute: 25_000, burstCapacity: 2_500 } },
+			}),
+		).toEqual({
+			limits: { requestRate: { requestsPerMinute: 25_000, burstCapacity: 2_500 } },
+		});
+	});
+
+	it("still rejects non-positive account limits", () => {
 		expect(() =>
 			decodeApiAccountQuotaOverride("standard", 1, {
-				limits: { requestRate: { requestsPerMinute: 301, burstCapacity: 10 } },
+				limits: { requestRate: { requestsPerMinute: 0, burstCapacity: 10 } },
 			}),
 		).toThrow(ApiQuotaPolicyDocumentInvalid);
 	});

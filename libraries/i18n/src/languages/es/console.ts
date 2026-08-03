@@ -202,7 +202,7 @@ export default {
 			validUntil: "Caducidad del acceso privilegiado",
 			customize: "Sobrescribir la política para esta cuenta",
 			customizeDescription:
-				"La sobrescritura queda limitada por la clase elegida y se guarda separada de las revisiones inmutables.",
+				"La sobrescritura de la cuenta se guarda separada de las revisiones inmutables. Las asignaciones privilegiadas siguen necesitando una caducidad.",
 			reason: "Motivo de la asignación",
 			reasonPlaceholder:
 				"Registra la justificación operativa; se guardará en el registro de seguridad.",
@@ -260,6 +260,15 @@ export default {
 	},
 	apiQuotas: {
 		policyList: "Políticas",
+		newPolicy: "Nueva",
+		createPolicy: "Crear política",
+		createPolicyDescription: `Crea una política de cuotas para cuentas o tokens de ${verbatimTerms.api.value}. La clave, el tipo de destino y la clase no se pueden cambiar después.`,
+		policyKey: "Clave de la política",
+		policyKeyPlaceholder: "Por ejemplo, partner-standard",
+		subjectKind: "Tipo de destino",
+		createFailed:
+			"No se pudo crear la política de cuotas. Comprueba si la clave ya está en uso e inténtalo de nuevo.",
+		cancelCreation: "Cancelar",
 		assignments: "Asignaciones",
 		revision: insert("Revisión {{revision}}", { revision: Number }),
 		enabled: "Habilitada",

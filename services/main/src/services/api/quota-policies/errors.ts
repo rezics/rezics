@@ -13,6 +13,12 @@ export class ApiQuotaPolicyInvalid extends Data.TaggedError("ApiQuotaPolicyInval
 	readonly message = "API quota policy configuration is invalid";
 }
 
+export class ApiQuotaPolicyKeyConflict extends Data.TaggedError("ApiQuotaPolicyKeyConflict") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = ApiQuotaPolicyKeyConflict.status;
+	readonly message = "An API quota policy with this key already exists";
+}
+
 export class ApiQuotaPolicyRevisionConflict extends Data.TaggedError(
 	"ApiQuotaPolicyRevisionConflict",
 ) {
@@ -40,6 +46,7 @@ export class ApiTokenQuotaRevisionConflict extends Data.TaggedError(
 export const ApiQuotaPolicyErrors = [
 	ApiQuotaPolicyNotFound,
 	ApiQuotaPolicyInvalid,
+	ApiQuotaPolicyKeyConflict,
 	ApiQuotaPolicyRevisionConflict,
 	ApiAccountQuotaRevisionConflict,
 	ApiTokenQuotaRevisionConflict,

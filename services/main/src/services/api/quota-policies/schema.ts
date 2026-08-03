@@ -29,9 +29,29 @@ export const ApiQuotaPolicyListResponse = t.Object({
 	items: t.Array(ApiQuotaPolicySummary),
 });
 
-export const ApiQuotaPolicyParams = t.Object({
-	policyKey: t.String({ minLength: 1, maxLength: 64 }),
+const ApiQuotaPolicyKey = t.String({
+	minLength: 1,
+	maxLength: 64,
+	pattern: "^[a-z][a-z0-9_-]{0,63}$",
 });
+
+export const ApiQuotaPolicyParams = t.Object({
+	policyKey: ApiQuotaPolicyKey,
+});
+
+export const CreateApiQuotaPolicyBody = t.Object(
+	{
+		key: ApiQuotaPolicyKey,
+		subjectKind: t.UnionEnum(ApiQuotaPolicySubjectKindValues),
+		class: t.UnionEnum(ApiQuotaPolicyClassValues),
+		configuration: t.Union([
+			PrivilegedApiAccountQuotaPolicyConfiguration,
+			PrivilegedApiTokenQuotaPolicyConfiguration,
+		]),
+		reason: t.String({ minLength: 1, maxLength: 1_000 }),
+	},
+	{ additionalProperties: false },
+);
 
 export const ReviseApiQuotaPolicyBody = t.Object(
 	{

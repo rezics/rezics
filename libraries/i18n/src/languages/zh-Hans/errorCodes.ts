@@ -19,6 +19,7 @@ export default {
 	ApiTokenRateLimitExceeded: `这个 ${verbatimTerms.api.value} 令牌的请求太频繁，请稍后再试。`,
 	ApiQuotaExceeded: `${verbatimTerms.api.value} 配额已用尽，请在可重试时间后再试。`,
 	ApiQuotaPolicyNotFound: `找不到指定的 ${verbatimTerms.api.value} 配额策略。`,
+	ApiQuotaPolicyKeyConflict: `已有 ${verbatimTerms.api.value} 配额策略使用此标识符。`,
 	ApiQuotaPolicyInvalid: `${verbatimTerms.api.value} 配额策略配置无效。`,
 	ApiQuotaPolicyRevisionConflict: `${verbatimTerms.api.value} 配额策略已更改，请重新加载后再保存。`,
 	ApiAccountQuotaRevisionConflict: `账户 ${verbatimTerms.api.value} 配额已更改，请重新加载后再保存。`,

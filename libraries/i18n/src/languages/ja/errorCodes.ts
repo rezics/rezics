@@ -19,6 +19,7 @@ export default {
 	ApiTokenRateLimitExceeded: `この${verbatimTerms.api.value}トークンはリクエストを送信しすぎています。少し時間を置いて再試行してください。`,
 	ApiQuotaExceeded: `${verbatimTerms.api.value} クォータを使い切りました。指定された時刻以降に再試行してください。`,
 	ApiQuotaPolicyNotFound: `指定された ${verbatimTerms.api.value} クォータポリシーが見つかりません。`,
+	ApiQuotaPolicyKeyConflict: `このキーは別の ${verbatimTerms.api.value} クォータポリシーで使用されています。`,
 	ApiQuotaPolicyInvalid: `${verbatimTerms.api.value} クォータポリシーの設定が無効です。`,
 	ApiQuotaPolicyRevisionConflict: `${verbatimTerms.api.value} クォータポリシーが変更されました。再読み込みしてから保存してください。`,
 	ApiAccountQuotaRevisionConflict: `アカウントの ${verbatimTerms.api.value} クォータが変更されました。再読み込みしてから保存してください。`,

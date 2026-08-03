@@ -607,37 +607,12 @@ function TokenQuotaEditor({
 }) {
 	const { t } = useTranslation(["settings", "ui"]);
 	const policyLimits = token.quota.token.limits;
-	const classRanges = getTokenQuotaLimitRanges(token.quota.token.class);
-	const ranges: TokenQuotaLimitRanges = {
-		requestsPerMinute: {
-			minimum: classRanges.requestsPerMinute.minimum,
-			maximum: Math.min(
-				classRanges.requestsPerMinute.maximum,
-				Number(policyLimits.requestRate.requestsPerMinute),
-			),
-		},
-		burstCapacity: {
-			minimum: classRanges.burstCapacity.minimum,
-			maximum: Math.min(
-				classRanges.burstCapacity.maximum,
-				Number(policyLimits.requestRate.burstCapacity),
-			),
-		},
-		maxConcurrentRequests: {
-			minimum: classRanges.maxConcurrentRequests.minimum,
-			maximum: Math.min(
-				classRanges.maxConcurrentRequests.maximum,
-				Number(policyLimits.maxConcurrentRequests),
-			),
-		},
-		dailyCostUnits: {
-			minimum: classRanges.dailyCostUnits.minimum,
-			maximum: Math.min(
-				classRanges.dailyCostUnits.maximum,
-				Number(policyLimits.dailyCostUnits),
-			),
-		},
-	};
+	const ranges = getTokenQuotaLimitRanges({
+		requestsPerMinute: Number(policyLimits.requestRate.requestsPerMinute),
+		burstCapacity: Number(policyLimits.requestRate.burstCapacity),
+		maxConcurrentRequests: Number(policyLimits.maxConcurrentRequests),
+		dailyCostUnits: Number(policyLimits.dailyCostUnits),
+	});
 	const storedOverride = token.quota.tokenOverride?.configurationOverride;
 	const effectiveOverrideLimits: CompleteQuotaLimits = {
 		requestRate: {

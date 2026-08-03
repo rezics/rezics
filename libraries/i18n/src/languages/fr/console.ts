@@ -204,7 +204,7 @@ export default {
 			validUntil: "Expiration de l’accès privilégié",
 			customize: "Remplacer la politique pour ce compte",
 			customizeDescription:
-				"Les valeurs propres au compte restent bornées par la classe choisie et sont conservées séparément des révisions immuables.",
+				"Les valeurs propres au compte sont conservées séparément des révisions immuables. Une attribution privilégiée exige toujours une date d’expiration.",
 			reason: "Motif de l’attribution",
 			reasonPlaceholder:
 				"Consignez la justification opérationnelle ; elle sera enregistrée dans le journal de sécurité.",
@@ -262,6 +262,15 @@ export default {
 	},
 	apiQuotas: {
 		policyList: "Règles",
+		newPolicy: "Nouvelle",
+		createPolicy: "Créer la règle",
+		createPolicyDescription: `Créez une règle de quota pour les comptes ou les jetons ${verbatimTerms.api.value}. Sa clé, son type de cible et sa classe ne pourront plus être modifiés.`,
+		policyKey: "Clé de la règle",
+		policyKeyPlaceholder: "Par exemple, partner-standard",
+		subjectKind: "Type de cible",
+		createFailed:
+			"La règle de quota n’a pas pu être créée. Vérifiez si la clé est déjà utilisée, puis réessayez.",
+		cancelCreation: "Annuler",
 		assignments: "Attributions",
 		revision: insert("Révision {{revision}}", { revision: Number }),
 		enabled: "Activée",

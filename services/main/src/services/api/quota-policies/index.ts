@@ -8,6 +8,7 @@ import {
 	ApiQuotaAssignmentInvalid,
 	assignApiTokenQuotaPolicy,
 	assignApiAccountQuotaPolicy,
+	createApiQuotaPolicy,
 	listApiQuotaPolicies,
 	resetApiTokenQuotaPolicy,
 	resetApiAccountQuotaPolicy,
@@ -24,6 +25,7 @@ import { toApiErrorResponse } from "../schema/response";
 import {
 	ApiAccountQuotaRevisionConflict,
 	ApiQuotaPolicyInvalid,
+	ApiQuotaPolicyKeyConflict,
 	ApiQuotaPolicyNotFound,
 	ApiQuotaPolicyRevisionConflict,
 	ApiTokenQuotaRevisionConflict,
@@ -42,6 +44,7 @@ import {
 	ResetApiAccountQuotaBody,
 	ReviseApiQuotaPolicyBody,
 	ApiTokenQuotaPolicyResponse,
+	CreateApiQuotaPolicyBody,
 } from "./schema";
 
 const AuthenticationResponse = toApiErrorResponse(["InteractiveSessionRequired"]);
@@ -51,6 +54,7 @@ const PlatformAccessResponse = toApiErrorResponse([
 ]);
 const PolicyNotFoundResponse = toApiErrorResponse(["ApiQuotaPolicyNotFound"]);
 const PolicyInvalidResponse = toApiErrorResponse(["ApiQuotaPolicyInvalid"]);
+const PolicyKeyConflictResponse = toApiErrorResponse(["ApiQuotaPolicyKeyConflict"]);
 const PolicyRevisionConflictResponse = toApiErrorResponse(["ApiQuotaPolicyRevisionConflict"]);
 const AccountQuotaRevisionConflictResponse = toApiErrorResponse([
 	"ApiAccountQuotaRevisionConflict",
@@ -148,6 +152,59 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 				[StatusCodes.FORBIDDEN]: PlatformAccessResponse,
 			},
 			detail: { summary: "List API quota policies", tags: ["API Quota Policies"] },
+		},
+	)
+	.post(
+		"",
+		async ({ authorization, profile, body }) => {
+			await authorization.platform.ensureCapability("platform.api_quota_policy.update");
+			try {
+				return await database.transaction(async (tx) => {
+					const created = await createApiQuotaPolicy(tx, {
+						key: body.key,
+						subjectKind: body.subjectKind,
+						class: body.class,
+						configuration: body.configuration,
+						reason: body.reason,
+						actorProfileId: profile.unitId,
+					});
+					if (!created) throw new ApiQuotaPolicyKeyConflict();
+					await recordAuditEvent(tx, {
+						category: "admin_activity",
+						outcome: "succeeded",
+						actor: { kind: "profile", profileId: profile.unitId },
+						authority: { kind: "platform" },
+						action: "api_quota.policy.create",
+						target: { kind: "api_quota_policy", id: created.id },
+						details: {
+							key: created.key,
+							subjectKind: created.subjectKind,
+							class: created.class,
+							reason: body.reason,
+						},
+					});
+					return created;
+				});
+			} catch (error) {
+				if (
+					error instanceof ApiQuotaPolicyDocumentInvalid ||
+					error instanceof ApiQuotaAssignmentInvalid
+				)
+					throw new ApiQuotaPolicyInvalid();
+				throw error;
+			}
+		},
+		{
+			access: "fresh-session-only",
+			body: CreateApiQuotaPolicyBody,
+			response: {
+				[StatusCodes.OK]: ApiQuotaPolicySummary,
+				[StatusCodes.UNAUTHORIZED]: AuthenticationResponse,
+				[StatusCodes.FORBIDDEN]: PlatformAccessResponse,
+				[StatusCodes.CONFLICT]: PolicyKeyConflictResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: PolicyInvalidResponse,
+			},
+			detail: { summary: "Create an API quota policy", tags: ["API Quota Policies"] },
 		},
 	)
 	.put(

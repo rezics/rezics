@@ -286,6 +286,52 @@ export async function listApiQuotaPolicies(
 	return records.map(presentPolicy);
 }
 
+export async function createApiQuotaPolicy(
+	tx: DatabaseTransaction,
+	input: {
+		key: string;
+		subjectKind: ApiQuotaPolicySubjectKind;
+		class: ApiQuotaPolicyClass;
+		configuration: unknown;
+		reason: string;
+		actorProfileId: string;
+	},
+): Promise<ApiQuotaPolicySummary | undefined> {
+	const reason = input.reason.trim();
+	if (reason === "") throw new ApiQuotaAssignmentInvalid();
+	const configuration = decodeApiQuotaPolicyConfiguration(
+		input.subjectKind,
+		input.class,
+		ApiQuotaPolicySchemaVersion,
+		input.configuration,
+	);
+	const [policy] = await tx
+		.insert(apiQuotaPolicy)
+		.values({
+			key: input.key,
+			subjectKind: input.subjectKind,
+			class: input.class,
+			currentRevision: 1,
+			enabled: true,
+		})
+		.onConflictDoNothing({ target: apiQuotaPolicy.key })
+		.returning();
+	if (!policy) return undefined;
+	const [revision] = await tx
+		.insert(apiQuotaPolicyRevision)
+		.values({
+			policyId: policy.id,
+			revision: 1,
+			schemaVersion: ApiQuotaPolicySchemaVersion,
+			configuration,
+			changeReason: reason,
+			createdByProfileId: input.actorProfileId,
+		})
+		.returning();
+	if (!revision) throw new Error("API quota policy initial revision was not created");
+	return presentPolicy({ policy, revision });
+}
+
 export async function reviseApiQuotaPolicy(
 	tx: DatabaseTransaction,
 	input: {

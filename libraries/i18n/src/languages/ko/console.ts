@@ -195,7 +195,7 @@ export default {
 			validUntil: "권한 있는 접근 만료 시각",
 			customize: "이 계정에 맞게 정책 재정의",
 			customizeDescription:
-				"계정 재정의는 선택한 정책 등급의 상한을 따르며 불변 정책 개정과 별도로 저장됩니다.",
+				"계정 재정의는 불변 정책 개정과 별도로 저장됩니다. 특권 정책 할당에는 여전히 만료 시각이 필요합니다.",
 			reason: "할당 사유",
 			reasonPlaceholder: "운영상의 근거를 기록하세요. 보안 감사 기록에 저장됩니다.",
 			invalid: "할당량 제한, 작업별 재정의 및 권한 있는 접근 만료 시각을 확인하세요.",
@@ -248,6 +248,15 @@ export default {
 	},
 	apiQuotas: {
 		policyList: "정책",
+		newPolicy: "새로 만들기",
+		createPolicy: "정책 만들기",
+		createPolicyDescription: `계정 또는 ${verbatimTerms.api.value} 토큰에 할당할 할당량 정책을 만듭니다. 키, 대상 유형, 등급은 만든 뒤 변경할 수 없습니다.`,
+		policyKey: "정책 키",
+		policyKeyPlaceholder: "고유 식별자 입력",
+		subjectKind: "대상 유형",
+		createFailed:
+			"할당량 정책을 만들 수 없습니다. 키가 이미 사용 중인지 확인한 후 다시 시도하세요.",
+		cancelCreation: "취소",
 		assignments: "할당",
 		revision: insert("개정 {{revision}}", { revision: Number }),
 		enabled: "활성",

@@ -18,6 +18,7 @@ export default {
 	ApiTokenRateLimitExceeded: `이 ${verbatimTerms.api.value} 토큰이 너무 빨리 요청을 보내고 있습니다. 잠시 후 다시 시도하세요.`,
 	ApiQuotaExceeded: `${verbatimTerms.api.value} 할당량을 모두 사용했습니다. 안내된 시간 이후에 다시 시도하세요.`,
 	ApiQuotaPolicyNotFound: `요청한 ${verbatimTerms.api.value} 할당량 정책을 찾을 수 없습니다.`,
+	ApiQuotaPolicyKeyConflict: `다른 ${verbatimTerms.api.value} 할당량 정책이 이미 이 키를 사용하고 있습니다.`,
 	ApiQuotaPolicyInvalid: `${verbatimTerms.api.value} 할당량 정책 설정이 올바르지 않습니다.`,
 	ApiQuotaPolicyRevisionConflict: `${verbatimTerms.api.value} 할당량 정책이 변경되었습니다. 새로고침한 후 저장하세요.`,
 	ApiAccountQuotaRevisionConflict: `계정 ${verbatimTerms.api.value} 할당량이 변경되었습니다. 새로고침한 후 저장하세요.`,

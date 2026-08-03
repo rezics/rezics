@@ -4,37 +4,31 @@ import {
 	getTokenQuotaLimitRanges,
 	parseTokenQuotaLimit,
 	parseTokenQuotaLimits,
-	PrivilegedTokenQuotaLimitRanges,
-	StandardTokenQuotaLimitRanges,
 } from "./token-quota-limits";
 
 describe("token policy limit ranges", () => {
-	it("keeps the self-service Standard ranges explicit", () => {
-		expect(StandardTokenQuotaLimitRanges).toEqual({
-			requestsPerMinute: { minimum: 1, maximum: 300 },
-			burstCapacity: { minimum: 1, maximum: 300 },
-			maxConcurrentRequests: { minimum: 1, maximum: 4 },
-			dailyCostUnits: { minimum: 1, maximum: 10_000 },
-		});
-		expect(getTokenQuotaLimitRanges("standard")).toBe(StandardTokenQuotaLimitRanges);
+	const policyRanges = getTokenQuotaLimitRanges({
+		requestsPerMinute: 720,
+		burstCapacity: 90,
+		maxConcurrentRequests: 12,
+		dailyCostUnits: 75_000,
 	});
 
-	it("selects the elevated ranges only for Privileged policies", () => {
-		expect(PrivilegedTokenQuotaLimitRanges).toEqual({
-			requestsPerMinute: { minimum: 1, maximum: 5_000 },
-			burstCapacity: { minimum: 1, maximum: 5_000 },
-			maxConcurrentRequests: { minimum: 1, maximum: 64 },
-			dailyCostUnits: { minimum: 1, maximum: 1_000_000 },
+	it("derives self-service ceilings from the assigned policy", () => {
+		expect(policyRanges).toEqual({
+			requestsPerMinute: { minimum: 1, maximum: 720 },
+			burstCapacity: { minimum: 1, maximum: 90 },
+			maxConcurrentRequests: { minimum: 1, maximum: 12 },
+			dailyCostUnits: { minimum: 1, maximum: 75_000 },
 		});
-		expect(getTokenQuotaLimitRanges("privileged")).toBe(PrivilegedTokenQuotaLimitRanges);
 	});
 
 	it("keeps empty, invalid, and valid field states distinct", () => {
-		const range = StandardTokenQuotaLimitRanges.requestsPerMinute;
+		const range = policyRanges.requestsPerMinute;
 		expect(parseTokenQuotaLimit("", range)).toEqual({ kind: "empty" });
-		expect(parseTokenQuotaLimit("301", range)).toEqual({ kind: "invalid" });
+		expect(parseTokenQuotaLimit("721", range)).toEqual({ kind: "invalid" });
 		expect(parseTokenQuotaLimit("1.5", range)).toEqual({ kind: "invalid" });
-		expect(parseTokenQuotaLimit("300", range)).toEqual({ kind: "valid", value: 300 });
+		expect(parseTokenQuotaLimit("720", range)).toEqual({ kind: "valid", value: 720 });
 	});
 
 	it("proves every value before producing API-ready numbers", () => {
@@ -46,7 +40,7 @@ describe("token policy limit ranges", () => {
 					maxConcurrentRequests: "2",
 					dailyCostUnits: "2000",
 				},
-				StandardTokenQuotaLimitRanges,
+				policyRanges,
 			),
 		).toEqual({
 			valid: true,
@@ -65,7 +59,7 @@ describe("token policy limit ranges", () => {
 					maxConcurrentRequests: "2",
 					dailyCostUnits: "2000",
 				},
-				StandardTokenQuotaLimitRanges,
+				policyRanges,
 			),
 		).toEqual({ valid: false });
 	});

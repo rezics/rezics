@@ -19,6 +19,7 @@ export default {
 	ApiTokenRateLimitExceeded: `這個 ${verbatimTerms.api.value} 權杖的請求太頻繁，請稍後再試。`,
 	ApiQuotaExceeded: `${verbatimTerms.api.value} 配額已用盡，請在可重試時間後再試。`,
 	ApiQuotaPolicyNotFound: `找不到指定的 ${verbatimTerms.api.value} 配額政策。`,
+	ApiQuotaPolicyKeyConflict: `已有 ${verbatimTerms.api.value} 配額政策使用這個識別碼。`,
 	ApiQuotaPolicyInvalid: `${verbatimTerms.api.value} 配額政策設定無效。`,
 	ApiQuotaPolicyRevisionConflict: `${verbatimTerms.api.value} 配額政策已變更，請重新載入後再儲存。`,
 	ApiAccountQuotaRevisionConflict: `帳戶 ${verbatimTerms.api.value} 配額已變更，請重新載入後再儲存。`,

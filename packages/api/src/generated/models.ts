@@ -5361,6 +5361,7 @@ export const ApiErrorCode = {
 	ApiTokenQuotaOverrideRevisionConflict: "ApiTokenQuotaOverrideRevisionConflict",
 	ApiQuotaPolicyNotFound: "ApiQuotaPolicyNotFound",
 	ApiQuotaPolicyInvalid: "ApiQuotaPolicyInvalid",
+	ApiQuotaPolicyKeyConflict: "ApiQuotaPolicyKeyConflict",
 	ApiQuotaPolicyRevisionConflict: "ApiQuotaPolicyRevisionConflict",
 	ApiAccountQuotaRevisionConflict: "ApiAccountQuotaRevisionConflict",
 	ApiTokenQuotaRevisionConflict: "ApiTokenQuotaRevisionConflict",
@@ -17492,6 +17493,469 @@ export type GetApiApiQuotaPoliciesResponse =
 	| GetApiApiQuotaPoliciesStatus403
 	| GetApiApiQuotaPoliciesStatus500;
 
+export const PostApiApiQuotaPoliciesStatus200SubjectKindEnum = {
+	account: "account",
+	token: "token",
+} as const;
+
+export type PostApiApiQuotaPoliciesStatus200SubjectKindEnum =
+	(typeof PostApiApiQuotaPoliciesStatus200SubjectKindEnum)[keyof typeof PostApiApiQuotaPoliciesStatus200SubjectKindEnum];
+
+export const PostApiApiQuotaPoliciesStatus200ClassEnum = {
+	standard: "standard",
+	privileged: "privileged",
+} as const;
+
+export type PostApiApiQuotaPoliciesStatus200ClassEnum =
+	(typeof PostApiApiQuotaPoliciesStatus200ClassEnum)[keyof typeof PostApiApiQuotaPoliciesStatus200ClassEnum];
+
+/**
+ * @type object
+ */
+export type PostApiApiQuotaPoliciesStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @type string
+	 */
+	key: string;
+	/**
+	 * @default 'account'
+	 * @type string
+	 */
+	subjectKind: PostApiApiQuotaPoliciesStatus200SubjectKindEnum;
+	/**
+	 * @default 'standard'
+	 * @type string
+	 */
+	class: PostApiApiQuotaPoliciesStatus200ClassEnum;
+	schemaVersion: string | number;
+	configuration:
+		| {
+				/**
+				 * @type object
+				 */
+				limits: {
+					/**
+					 * @type object
+					 */
+					requestRate: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests: string | number;
+					dailyCostUnits: string | number;
+				};
+				maxActiveTokens: string | number;
+				/**
+				 * @type object
+				 */
+				operations: {
+					/**
+					 * @type object | undefined
+					 */
+					"search.execute"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+					/**
+					 * @type object | undefined
+					 */
+					"image.upload"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+				};
+		  }
+		| {
+				/**
+				 * @type object
+				 */
+				limits: {
+					/**
+					 * @type object
+					 */
+					requestRate: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests: string | number;
+					dailyCostUnits: string | number;
+				};
+				/**
+				 * @type object
+				 */
+				operations: {
+					/**
+					 * @type object | undefined
+					 */
+					"search.execute"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+					/**
+					 * @type object | undefined
+					 */
+					"image.upload"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+				};
+		  };
+	revision: string | number;
+	/**
+	 * @type boolean
+	 */
+	enabled: boolean;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiApiQuotaPoliciesStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PostApiApiQuotaPoliciesStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InteractiveSessionRequired'
+		 * @type string
+		 */
+		code: "InteractiveSessionRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiApiQuotaPoliciesStatus403ErrorCodeEnum = {
+	FreshSessionRequired: "FreshSessionRequired",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type PostApiApiQuotaPoliciesStatus403ErrorCodeEnum =
+	(typeof PostApiApiQuotaPoliciesStatus403ErrorCodeEnum)[keyof typeof PostApiApiQuotaPoliciesStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiApiQuotaPoliciesStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'FreshSessionRequired'
+		 * @type string
+		 */
+		code: PostApiApiQuotaPoliciesStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiApiQuotaPoliciesStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiQuotaPolicyKeyConflict'
+		 * @type string
+		 */
+		code: "ApiQuotaPolicyKeyConflict";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiApiQuotaPoliciesStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ApiQuotaPolicyInvalid'
+				 * @type string
+				 */
+				code: "ApiQuotaPolicyInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiApiQuotaPoliciesStatus500 = InternalError;
+
+export const PostApiApiQuotaPoliciesRequestSubjectKindEnum = {
+	account: "account",
+	token: "token",
+} as const;
+
+export type PostApiApiQuotaPoliciesRequestSubjectKindEnum =
+	(typeof PostApiApiQuotaPoliciesRequestSubjectKindEnum)[keyof typeof PostApiApiQuotaPoliciesRequestSubjectKindEnum];
+
+export const PostApiApiQuotaPoliciesRequestClassEnum = {
+	standard: "standard",
+	privileged: "privileged",
+} as const;
+
+export type PostApiApiQuotaPoliciesRequestClassEnum =
+	(typeof PostApiApiQuotaPoliciesRequestClassEnum)[keyof typeof PostApiApiQuotaPoliciesRequestClassEnum];
+
+/**
+ * @type object
+ */
+export type PostApiApiQuotaPoliciesBody = {
+	/**
+	 * @minLength 1
+	 * @maxLength 64
+	 * @pattern ^[a-z][a-z0-9_-]{0,63}$
+	 * @type string
+	 */
+	key: string;
+	/**
+	 * @default 'account'
+	 * @type string
+	 */
+	subjectKind: PostApiApiQuotaPoliciesRequestSubjectKindEnum;
+	/**
+	 * @default 'standard'
+	 * @type string
+	 */
+	class: PostApiApiQuotaPoliciesRequestClassEnum;
+	configuration:
+		| {
+				/**
+				 * @type object
+				 */
+				limits: {
+					/**
+					 * @type object
+					 */
+					requestRate: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests: string | number;
+					dailyCostUnits: string | number;
+				};
+				maxActiveTokens: string | number;
+				/**
+				 * @type object
+				 */
+				operations: {
+					/**
+					 * @type object | undefined
+					 */
+					"search.execute"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+					/**
+					 * @type object | undefined
+					 */
+					"image.upload"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+				};
+		  }
+		| {
+				/**
+				 * @type object
+				 */
+				limits: {
+					/**
+					 * @type object
+					 */
+					requestRate: {
+						requestsPerMinute: string | number;
+						burstCapacity: string | number;
+					};
+					maxConcurrentRequests: string | number;
+					dailyCostUnits: string | number;
+				};
+				/**
+				 * @type object
+				 */
+				operations: {
+					/**
+					 * @type object | undefined
+					 */
+					"search.execute"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+					/**
+					 * @type object | undefined
+					 */
+					"image.upload"?: {
+						/**
+						 * @type object | undefined
+						 */
+						requestRate?: {
+							requestsPerMinute: string | number;
+							burstCapacity: string | number;
+						};
+						maxConcurrentRequests?: string | number;
+						dailyCostUnits?: string | number;
+					};
+				};
+		  };
+	/**
+	 * @minLength 1
+	 * @maxLength 1000
+	 * @type string
+	 */
+	reason: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiApiQuotaPoliciesOptions = {
+	body: PostApiApiQuotaPoliciesBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiApiQuotaPoliciesResponses = {
+	"200": PostApiApiQuotaPoliciesStatus200;
+	"400": PostApiApiQuotaPoliciesStatus400;
+	"401": PostApiApiQuotaPoliciesStatus401;
+	"403": PostApiApiQuotaPoliciesStatus403;
+	"409": PostApiApiQuotaPoliciesStatus409;
+	"422": PostApiApiQuotaPoliciesStatus422;
+	"500": PostApiApiQuotaPoliciesStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiApiQuotaPoliciesResponse =
+	| PostApiApiQuotaPoliciesStatus200
+	| PostApiApiQuotaPoliciesStatus400
+	| PostApiApiQuotaPoliciesStatus401
+	| PostApiApiQuotaPoliciesStatus403
+	| PostApiApiQuotaPoliciesStatus409
+	| PostApiApiQuotaPoliciesStatus422
+	| PostApiApiQuotaPoliciesStatus500;
+
 /**
  * @type object
  */
@@ -17499,6 +17963,7 @@ export type PutApiApiQuotaPoliciesByPolicyKeyPath = {
 	/**
 	 * @minLength 1
 	 * @maxLength 64
+	 * @pattern ^[a-z][a-z0-9_-]{0,63}$
 	 * @type string
 	 */
 	policyKey: string;

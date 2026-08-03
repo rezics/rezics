@@ -268,6 +268,14 @@ import type {
 	GetApiApiQuotaPoliciesStatus401,
 	GetApiApiQuotaPoliciesStatus403,
 	GetApiApiQuotaPoliciesStatus500,
+	PostApiApiQuotaPoliciesOptions,
+	PostApiApiQuotaPoliciesStatus200,
+	PostApiApiQuotaPoliciesStatus400,
+	PostApiApiQuotaPoliciesStatus401,
+	PostApiApiQuotaPoliciesStatus403,
+	PostApiApiQuotaPoliciesStatus409,
+	PostApiApiQuotaPoliciesStatus422,
+	PostApiApiQuotaPoliciesStatus500,
 	PutApiApiQuotaPoliciesByPolicyKeyOptions,
 	PutApiApiQuotaPoliciesByPolicyKeyStatus200,
 	PutApiApiQuotaPoliciesByPolicyKeyStatus400,
@@ -2457,6 +2465,7 @@ import {
 	deleteApiApiTokensByTokenIdQuotaOverride,
 	getCurrentApiToken,
 	getApiApiQuotaPolicies,
+	postApiApiQuotaPolicies,
 	putApiApiQuotaPoliciesByPolicyKey,
 	getApiApiQuotaPoliciesAccountsByUserId,
 	putApiApiQuotaPoliciesAccountsByUserId,
@@ -6681,6 +6690,108 @@ export function useGetApiApiQuotaPolicies<
 	queryResult.queryKey = queryKey as TQueryKey;
 
 	return queryResult;
+}
+
+export const postApiApiQuotaPoliciesMutationKey = () =>
+	[{ url: "/api/v1/api-quota-policies" }] as const;
+
+export function postApiApiQuotaPoliciesMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiApiQuotaPoliciesMutationKey();
+	return mutationOptions<
+		PostApiApiQuotaPoliciesStatus200,
+		ResponseErrorConfig<
+			| PostApiApiQuotaPoliciesStatus400
+			| PostApiApiQuotaPoliciesStatus401
+			| PostApiApiQuotaPoliciesStatus403
+			| PostApiApiQuotaPoliciesStatus409
+			| PostApiApiQuotaPoliciesStatus422
+			| PostApiApiQuotaPoliciesStatus500
+		>,
+		PostApiApiQuotaPoliciesOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await postApiApiQuotaPolicies({ ...config, body, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Create an API quota policy
+ * {@link /api/v1/api-quota-policies}
+ */
+export function usePostApiApiQuotaPolicies<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiApiQuotaPoliciesStatus200,
+			ResponseErrorConfig<
+				| PostApiApiQuotaPoliciesStatus400
+				| PostApiApiQuotaPoliciesStatus401
+				| PostApiApiQuotaPoliciesStatus403
+				| PostApiApiQuotaPoliciesStatus409
+				| PostApiApiQuotaPoliciesStatus422
+				| PostApiApiQuotaPoliciesStatus500
+			>,
+			PostApiApiQuotaPoliciesOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? postApiApiQuotaPoliciesMutationKey();
+
+	const baseOptions = postApiApiQuotaPoliciesMutationOptions(config) as UseMutationOptions<
+		PostApiApiQuotaPoliciesStatus200,
+		ResponseErrorConfig<
+			| PostApiApiQuotaPoliciesStatus400
+			| PostApiApiQuotaPoliciesStatus401
+			| PostApiApiQuotaPoliciesStatus403
+			| PostApiApiQuotaPoliciesStatus409
+			| PostApiApiQuotaPoliciesStatus422
+			| PostApiApiQuotaPoliciesStatus500
+		>,
+		PostApiApiQuotaPoliciesOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiApiQuotaPoliciesStatus200,
+		ResponseErrorConfig<
+			| PostApiApiQuotaPoliciesStatus400
+			| PostApiApiQuotaPoliciesStatus401
+			| PostApiApiQuotaPoliciesStatus403
+			| PostApiApiQuotaPoliciesStatus409
+			| PostApiApiQuotaPoliciesStatus422
+			| PostApiApiQuotaPoliciesStatus500
+		>,
+		PostApiApiQuotaPoliciesOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiApiQuotaPoliciesStatus200,
+		ResponseErrorConfig<
+			| PostApiApiQuotaPoliciesStatus400
+			| PostApiApiQuotaPoliciesStatus401
+			| PostApiApiQuotaPoliciesStatus403
+			| PostApiApiQuotaPoliciesStatus409
+			| PostApiApiQuotaPoliciesStatus422
+			| PostApiApiQuotaPoliciesStatus500
+		>,
+		PostApiApiQuotaPoliciesOptions,
+		TContext
+	>;
 }
 
 export const putApiApiQuotaPoliciesByPolicyKeyMutationKey = () =>

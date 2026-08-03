@@ -197,7 +197,7 @@ export default {
 			validUntil: "特権アクセスの有効期限",
 			customize: "このアカウント用にポリシーを上書きする",
 			customizeDescription:
-				"アカウント固有値は選択したポリシークラスの上限内に制限され、不変の改訂履歴とは別に保存されます。",
+				"アカウント固有値は不変の改訂履歴とは別に保存されます。特権ポリシーの割り当てには引き続き有効期限が必要です。",
 			reason: "割り当て理由",
 			reasonPlaceholder:
 				"運用上の根拠を記録します。内容はセキュリティ監査ログに保存されます。",
@@ -251,6 +251,15 @@ export default {
 	},
 	apiQuotas: {
 		policyList: "ポリシー",
+		newPolicy: "新規",
+		createPolicy: "ポリシーを作成",
+		createPolicyDescription: `アカウントまたは ${verbatimTerms.api.value} トークンに割り当てるクォータポリシーを作成します。キー、対象種別、クラスは作成後に変更できません。`,
+		policyKey: "ポリシーキー",
+		policyKeyPlaceholder: "一意の識別子を入力",
+		subjectKind: "対象種別",
+		createFailed:
+			"クォータポリシーを作成できませんでした。キーが使用済みでないか確認して、もう一度お試しください。",
+		cancelCreation: "キャンセル",
 		assignments: "割り当て",
 		revision: insert("リビジョン {{revision}}", { revision: Number }),
 		enabled: "有効",

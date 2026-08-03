@@ -188,7 +188,7 @@ export default {
 			validUntil: "特权配额到期时间",
 			customize: "为此账户覆盖策略",
 			customizeDescription:
-				"账户覆盖仍受所选策略类别的上限约束，并与不可变策略修订分开保存。",
+				"账户覆盖会与不可变策略修订分开保存；分配特权策略时仍须设置到期时间。",
 			reason: "分配原因",
 			reasonPlaceholder: "记录操作依据；内容会写入安全审计记录。",
 			invalid: "请检查配额限制、操作覆盖和特权配额到期时间。",
@@ -239,6 +239,14 @@ export default {
 	},
 	apiQuotas: {
 		policyList: "策略",
+		newPolicy: "新建",
+		createPolicy: "创建策略",
+		createPolicyDescription: `创建可分配给账户或 ${verbatimTerms.api.value} 令牌的新配额策略；标识符、适用对象和类别创建后不可更改。`,
+		policyKey: "策略标识符",
+		policyKeyPlaceholder: "输入唯一标识符",
+		subjectKind: "适用对象",
+		createFailed: "无法创建配额策略，请检查标识符是否重复后再试。",
+		cancelCreation: "取消",
 		assignments: "分配",
 		revision: insert("修订版 {{revision}}", { revision: Number }),
 		enabled: "已启用",

@@ -19,6 +19,7 @@ export default {
 	ApiTokenRateLimitExceeded: `This ${verbatimTerms.api.value} token is sending requests too quickly. Try again shortly.`,
 	ApiQuotaExceeded: `The ${verbatimTerms.api.value} quota is exhausted. Try again after the indicated time.`,
 	ApiQuotaPolicyNotFound: `The requested ${verbatimTerms.api.value} quota policy was not found.`,
+	ApiQuotaPolicyKeyConflict: `An ${verbatimTerms.api.value} quota policy already uses this key.`,
 	ApiQuotaPolicyInvalid: `The ${verbatimTerms.api.value} quota policy configuration is invalid.`,
 	ApiQuotaPolicyRevisionConflict: `The ${verbatimTerms.api.value} quota policy changed. Reload before saving.`,
 	ApiAccountQuotaRevisionConflict: `The account ${verbatimTerms.api.value} quota changed. Reload before saving.`,

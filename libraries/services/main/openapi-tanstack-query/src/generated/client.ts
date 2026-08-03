@@ -89,6 +89,8 @@ import type {
 	GetCurrentApiTokenResponses,
 	GetApiApiQuotaPoliciesOptions,
 	GetApiApiQuotaPoliciesResponses,
+	PostApiApiQuotaPoliciesOptions,
+	PostApiApiQuotaPoliciesResponses,
 	PutApiApiQuotaPoliciesByPolicyKeyOptions,
 	PutApiApiQuotaPoliciesByPolicyKeyResponses,
 	GetApiApiQuotaPoliciesAccountsByUserIdOptions,
@@ -1468,6 +1470,23 @@ export function getApiApiQuotaPolicies<ThrowOnError extends boolean = true>(
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiApiQuotaPoliciesResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Create an API quota policy
+ * {@link /api/v1/api-quota-policies}
+ */
+export function postApiApiQuotaPolicies<ThrowOnError extends boolean = true>(
+	options: Options<PostApiApiQuotaPoliciesOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiApiQuotaPoliciesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/api-quota-policies",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<PostApiApiQuotaPoliciesResponses, ThrowOnError>>;
 }
 
 /**

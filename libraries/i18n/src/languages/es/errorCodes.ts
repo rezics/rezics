@@ -19,6 +19,7 @@ export default {
 	ApiTokenRateLimitExceeded: `Este token de ${verbatimTerms.api.value} está enviando solicitudes demasiado rápido. Vuelve a intentarlo en unos instantes.`,
 	ApiQuotaExceeded: `Se agotó la cuota de ${verbatimTerms.api.value}. Vuelve a intentarlo después del tiempo indicado.`,
 	ApiQuotaPolicyNotFound: `No se encontró la política de cuotas de ${verbatimTerms.api.value} solicitada.`,
+	ApiQuotaPolicyKeyConflict: `Ya existe una política de cuotas de ${verbatimTerms.api.value} con esta clave.`,
 	ApiQuotaPolicyInvalid: `La configuración de la política de cuotas de ${verbatimTerms.api.value} no es válida.`,
 	ApiQuotaPolicyRevisionConflict: `La política de cuotas de ${verbatimTerms.api.value} cambió. Vuelve a cargarla antes de guardar.`,
 	ApiAccountQuotaRevisionConflict: `La cuota de ${verbatimTerms.api.value} de la cuenta cambió. Vuelve a cargarla antes de guardar.`,

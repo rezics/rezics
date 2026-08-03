@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import type { DatabaseExecutor } from "../../database";
+import type { DatabaseExecutor, DatabaseTransaction } from "../../database";
 import { DefaultApiQuotaPolicies } from "./policy-schema";
-import { resolveApiAccountQuotaPolicy, resolveApiTokenQuotaPolicy } from "./policy-service";
+import {
+	createApiQuotaPolicy,
+	resolveApiAccountQuotaPolicy,
+	resolveApiTokenQuotaPolicy,
+} from "./policy-service";
 
 const now = new Date("2026-07-31T10:00:00.000Z");
 
@@ -75,6 +79,110 @@ function queuedSelectExecutor(...responses: unknown[][]): DatabaseExecutor {
 		},
 	} as unknown as DatabaseExecutor;
 }
+
+function createPolicyTransaction(options: { readonly conflict?: boolean } = {}) {
+	const insertedValues: unknown[] = [];
+	let insertIndex = 0;
+	const policy = {
+		id: "01983000-0000-7000-8000-000000000040",
+		key: "partner-account",
+		subjectKind: "account" as const,
+		class: "standard" as const,
+		currentRevision: 1,
+		enabled: true,
+		createdAt: now,
+		updatedAt: now,
+	};
+	const revision = {
+		policyId: policy.id,
+		revision: 1,
+		schemaVersion: 1,
+		configuration: {
+			limits: {
+				requestRate: { requestsPerMinute: 25_000, burstCapacity: 2_500 },
+				maxConcurrentRequests: 128,
+				dailyCostUnits: 5_000_000,
+			},
+			maxActiveTokens: 100,
+			operations: {},
+		},
+		changeReason: "Partner workload",
+		createdByProfileId: "01983000-0000-7000-8000-000000000020",
+		createdAt: now,
+	};
+	const transaction = {
+		insert() {
+			const currentIndex = insertIndex++;
+			return {
+				values(values: unknown) {
+					insertedValues.push(values);
+					if (currentIndex === 0)
+						return {
+							onConflictDoNothing() {
+								return {
+									returning: async () => (options.conflict ? [] : [policy]),
+								};
+							},
+						};
+					return { returning: async () => [revision] };
+				},
+			};
+		},
+	} as unknown as DatabaseTransaction;
+	return { insertedValues, transaction };
+}
+
+describe("API quota policy creation", () => {
+	it("creates an account policy and immutable initial revision atomically", async () => {
+		const { insertedValues, transaction } = createPolicyTransaction();
+		const created = await createApiQuotaPolicy(transaction, {
+			key: "partner-account",
+			subjectKind: "account",
+			class: "standard",
+			configuration: {
+				limits: {
+					requestRate: { requestsPerMinute: 25_000, burstCapacity: 2_500 },
+					maxConcurrentRequests: 128,
+					dailyCostUnits: 5_000_000,
+				},
+				maxActiveTokens: 100,
+				operations: {},
+			},
+			reason: " Partner workload ",
+			actorProfileId: "01983000-0000-7000-8000-000000000020",
+		});
+
+		expect(created).toMatchObject({
+			key: "partner-account",
+			subjectKind: "account",
+			class: "standard",
+			revision: 1,
+			configuration: {
+				limits: { requestRate: { requestsPerMinute: 25_000 } },
+			},
+		});
+		expect(insertedValues).toHaveLength(2);
+		expect(insertedValues[1]).toMatchObject({
+			revision: 1,
+			changeReason: "Partner workload",
+		});
+	});
+
+	it("reports a duplicate key without creating an orphan revision", async () => {
+		const { insertedValues, transaction } = createPolicyTransaction({ conflict: true });
+		expect(
+			await createApiQuotaPolicy(transaction, {
+				key: "partner-account",
+				subjectKind: "account",
+				class: "standard",
+				configuration: DefaultApiQuotaPolicies.accountStandard.configuration,
+				reason: "Duplicate",
+				actorProfileId: "01983000-0000-7000-8000-000000000020",
+			}),
+		).toBeUndefined();
+		expect(insertedValues).toHaveLength(1);
+	});
+});
 
 describe("API account quota policy resolution", () => {
 	it("uses the Standard policy when an account has no binding", async () => {

@@ -202,7 +202,7 @@ export default {
 			validUntil: "Ablauf des privilegierten Zugriffs",
 			customize: "Richtlinie für dieses Konto überschreiben",
 			customizeDescription:
-				"Kontoüberschreibungen bleiben auf die gewählte Richtlinienklasse begrenzt und werden getrennt von unveränderlichen Revisionen gespeichert.",
+				"Kontoüberschreibungen werden getrennt von unveränderlichen Revisionen gespeichert. Privilegierte Zuweisungen benötigen weiterhin ein Ablaufdatum.",
 			reason: "Zuweisungsgrund",
 			reasonPlaceholder:
 				"Dokumentiere die betriebliche Begründung; sie wird im Sicherheitsprotokoll gespeichert.",
@@ -259,6 +259,15 @@ export default {
 	},
 	apiQuotas: {
 		policyList: "Richtlinien",
+		newPolicy: "Neu",
+		createPolicy: "Richtlinie erstellen",
+		createPolicyDescription: `Erstelle eine Kontingentrichtlinie für Konten oder ${verbatimTerms.api.value}-Token. Schlüssel, Zieltyp und Klasse können danach nicht geändert werden.`,
+		policyKey: "Richtlinienschlüssel",
+		policyKeyPlaceholder: "Zum Beispiel partner-standard",
+		subjectKind: "Zieltyp",
+		createFailed:
+			"Die Kontingentrichtlinie konnte nicht erstellt werden. Prüfe, ob der Schlüssel bereits verwendet wird, und versuche es erneut.",
+		cancelCreation: "Abbrechen",
 		assignments: "Zuweisungen",
 		revision: insert("Revision {{revision}}", { revision: Number }),
 		enabled: "Aktiviert",

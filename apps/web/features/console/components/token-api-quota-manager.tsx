@@ -34,7 +34,6 @@ import { useState, type FormEvent } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
-import { getTokenQuotaLimitRanges } from "@/features/settings/model/token-quota-limits";
 import { useConsoleWorkspace } from "./console-workspace";
 
 type ManagedToken = GetApiApiQuotaPoliciesAccountsByUserIdTokensStatus200["items"][number];
@@ -59,26 +58,16 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function parseIntegerInRange(
-	value: unknown,
-	range: Readonly<{ minimum: number; maximum: number }>,
-): number | undefined {
-	return typeof value === "number" &&
-		Number.isInteger(value) &&
-		value >= range.minimum &&
-		value <= range.maximum
+function parsePositiveInteger(value: unknown): number | undefined {
+	return typeof value === "number" && Number.isSafeInteger(value) && value > 0
 		? value
 		: undefined;
 }
 
-function parseOperationLimits(
-	value: unknown,
-	policyClass: Policy["class"],
-): OperationLimits | undefined {
+function parseOperationLimits(value: unknown): OperationLimits | undefined {
 	if (!isRecord(value) || Object.keys(value).length === 0) return undefined;
 	if (Object.keys(value).some((key) => !OperationLimitKeys.some((allowed) => allowed === key)))
 		return undefined;
-	const ranges = getTokenQuotaLimitRanges(policyClass);
 	const result: OperationLimits = {};
 	if (value.requestRate !== undefined) {
 		if (
@@ -88,41 +77,32 @@ function parseOperationLimits(
 			)
 		)
 			return undefined;
-		const requestsPerMinute = parseIntegerInRange(
-			value.requestRate.requestsPerMinute,
-			ranges.requestsPerMinute,
-		);
-		const burstCapacity = parseIntegerInRange(
-			value.requestRate.burstCapacity,
-			ranges.burstCapacity,
-		);
+		const requestsPerMinute = parsePositiveInteger(value.requestRate.requestsPerMinute);
+		const burstCapacity = parsePositiveInteger(value.requestRate.burstCapacity);
 		if (requestsPerMinute === undefined || burstCapacity === undefined) return undefined;
 		result.requestRate = { requestsPerMinute, burstCapacity };
 	}
 	if (value.maxConcurrentRequests !== undefined) {
-		const parsed = parseIntegerInRange(
-			value.maxConcurrentRequests,
-			ranges.maxConcurrentRequests,
-		);
+		const parsed = parsePositiveInteger(value.maxConcurrentRequests);
 		if (parsed === undefined) return undefined;
 		result.maxConcurrentRequests = parsed;
 	}
 	if (value.dailyCostUnits !== undefined) {
-		const parsed = parseIntegerInRange(value.dailyCostUnits, ranges.dailyCostUnits);
+		const parsed = parsePositiveInteger(value.dailyCostUnits);
 		if (parsed === undefined) return undefined;
 		result.dailyCostUnits = parsed;
 	}
 	return result;
 }
 
-function parseOperations(value: string, policyClass: Policy["class"]): Operations | undefined {
+function parseOperations(value: string): Operations | undefined {
 	try {
 		const parsed: unknown = JSON.parse(value);
 		if (!isRecord(parsed)) return undefined;
 		const result: Operations = {};
 		for (const operationId of OperationIds) {
 			if (!(operationId in parsed)) continue;
-			const limits = parseOperationLimits(parsed[operationId], policyClass);
+			const limits = parseOperationLimits(parsed[operationId]);
 			if (!limits) return undefined;
 			result[operationId] = limits;
 		}
@@ -224,7 +204,6 @@ function TokenQuotaCard({
 	const queryClient = useQueryClient();
 	const [policyKey, setPolicyKey] = useState(token.quota.key);
 	const selectedPolicy = policies.find((policy) => policy.key === policyKey) ?? policies[0];
-	const selectedClass = selectedPolicy?.class ?? token.quota.class;
 	const [customize, setCustomize] = useState(hasOverride(token));
 	const [limits, setLimits] = useState<LimitValues>(() => initialLimits(token));
 	const [operationsText, setOperationsText] = useState(() =>
@@ -233,7 +212,7 @@ function TokenQuotaCard({
 	const [validUntil, setValidUntil] = useState(() => localDateTime(token.quota.validUntil));
 	const [reason, setReason] = useState("");
 	const [invalid, setInvalid] = useState(false);
-	const operations = parseOperations(operationsText, selectedClass);
+	const operations = parseOperations(operationsText);
 	const queryKey = getApiApiQuotaPoliciesAccountsByUserIdTokensQueryKey({
 		path: { userId },
 	});
@@ -262,23 +241,10 @@ function TokenQuotaCard({
 
 	function configurationOverride(): TokenOverride | undefined {
 		if (!customize) return {};
-		const ranges = getTokenQuotaLimitRanges(selectedClass);
-		const requestsPerMinute = parseIntegerInRange(
-			Number(limits.requestsPerMinute),
-			ranges.requestsPerMinute,
-		);
-		const burstCapacity = parseIntegerInRange(
-			Number(limits.burstCapacity),
-			ranges.burstCapacity,
-		);
-		const maxConcurrentRequests = parseIntegerInRange(
-			Number(limits.maxConcurrentRequests),
-			ranges.maxConcurrentRequests,
-		);
-		const dailyCostUnits = parseIntegerInRange(
-			Number(limits.dailyCostUnits),
-			ranges.dailyCostUnits,
-		);
+		const requestsPerMinute = parsePositiveInteger(Number(limits.requestsPerMinute));
+		const burstCapacity = parsePositiveInteger(Number(limits.burstCapacity));
+		const maxConcurrentRequests = parsePositiveInteger(Number(limits.maxConcurrentRequests));
+		const dailyCostUnits = parsePositiveInteger(Number(limits.dailyCostUnits));
 		if (
 			requestsPerMinute === undefined ||
 			burstCapacity === undefined ||
@@ -331,7 +297,6 @@ function TokenQuotaCard({
 		});
 	}
 
-	const ranges = getTokenQuotaLimitRanges(selectedClass);
 	const formatter = new Intl.DateTimeFormat(locale.current, {
 		dateStyle: "medium",
 		timeStyle: "short",
@@ -455,14 +420,15 @@ function TokenQuotaCard({
 										<Field key={name} required>
 											<FieldLabel>{label}</FieldLabel>
 											<Input
-												max={ranges[name].maximum}
-												min={ranges[name].minimum}
-												onChange={(event) =>
+												max={Number.MAX_SAFE_INTEGER}
+												min={1}
+												onChange={(event) => {
+													const value = event.currentTarget.value;
 													setLimits((current) => ({
 														...current,
-														[name]: event.currentTarget.value,
-													}))
-												}
+														[name]: value,
+													}));
+												}}
 												required
 												type="number"
 												value={limits[name]}

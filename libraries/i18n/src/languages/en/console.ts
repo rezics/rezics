@@ -204,7 +204,7 @@ export default {
 			validUntil: `${verbatimTerms.privilegedApiQuotaClass.value} access expires`,
 			customize: "Override this policy for the account",
 			customizeDescription:
-				"Account overrides remain bounded by the selected policy class and are kept separately from immutable policy revisions.",
+				`Account overrides are stored separately from immutable policy revisions. ${verbatimTerms.privilegedApiQuotaClass.value} assignments still require an expiry.`,
 			reason: "Assignment reason",
 			reasonPlaceholder:
 				"Record the operational justification; it is stored in the security audit log.",
@@ -259,6 +259,15 @@ export default {
 	},
 	apiQuotas: {
 		policyList: "Policies",
+		newPolicy: "New",
+		createPolicy: "Create policy",
+		createPolicyDescription: `Create a quota policy for accounts or ${verbatimTerms.api.value} tokens. Its key, subject, and class cannot be changed after creation.`,
+		policyKey: "Policy key",
+		policyKeyPlaceholder: "For example, partner-standard",
+		subjectKind: "Subject",
+		createFailed:
+			"The quota policy could not be created. Check whether its key is already in use and try again.",
+		cancelCreation: "Cancel",
 		assignments: "Assignments",
 		revision: insert("Revision {{revision}}", { revision: Number }),
 		enabled: "Enabled",

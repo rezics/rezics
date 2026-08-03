@@ -47,7 +47,6 @@ type AccountOverride = NonNullable<
 >;
 type Operations = NonNullable<AccountOverride["operations"]>;
 type OperationLimits = NonNullable<Operations[keyof Operations]>;
-type PolicyClass = Policy["class"];
 
 const OperationIds = [
 	"search.execute",
@@ -59,50 +58,28 @@ function isAccountPolicy(policy: Policy): policy is AccountPolicy {
 	return policy.subjectKind === "account" && "maxActiveTokens" in policy.configuration;
 }
 
-const LimitRanges = {
-	standard: {
-		requestsPerMinute: { minimum: 1, maximum: 300 },
-		burstCapacity: { minimum: 1, maximum: 300 },
-		maxConcurrentRequests: { minimum: 1, maximum: 4 },
-		dailyCostUnits: { minimum: 1, maximum: 10_000 },
-		maxActiveTokens: { minimum: 1, maximum: 20 },
-	},
-	privileged: {
-		requestsPerMinute: { minimum: 1, maximum: 5_000 },
-		burstCapacity: { minimum: 1, maximum: 5_000 },
-		maxConcurrentRequests: { minimum: 1, maximum: 64 },
-		dailyCostUnits: { minimum: 1, maximum: 1_000_000 },
-		maxActiveTokens: { minimum: 1, maximum: 50 },
-	},
-} as const;
-
-type LimitName = keyof (typeof LimitRanges)["standard"];
+type LimitName =
+	| "requestsPerMinute"
+	| "burstCapacity"
+	| "maxConcurrentRequests"
+	| "dailyCostUnits"
+	| "maxActiveTokens";
 type LimitValues = Record<LimitName, string>;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function parseIntegerInRange(
-	value: unknown,
-	range: Readonly<{ minimum: number; maximum: number }>,
-): number | undefined {
-	return typeof value === "number" &&
-		Number.isInteger(value) &&
-		value >= range.minimum &&
-		value <= range.maximum
+function parsePositiveInteger(value: unknown): number | undefined {
+	return typeof value === "number" && Number.isSafeInteger(value) && value > 0
 		? value
 		: undefined;
 }
 
-function parseOperationLimits(
-	value: unknown,
-	policyClass: PolicyClass,
-): OperationLimits | undefined {
+function parseOperationLimits(value: unknown): OperationLimits | undefined {
 	if (!isRecord(value) || Object.keys(value).length === 0) return undefined;
 	if (Object.keys(value).some((key) => !OperationLimitKeys.some((allowed) => allowed === key)))
 		return undefined;
-	const ranges = LimitRanges[policyClass];
 	const result: OperationLimits = {};
 	if (value.requestRate !== undefined) {
 		if (
@@ -112,41 +89,32 @@ function parseOperationLimits(
 			)
 		)
 			return undefined;
-		const requestsPerMinute = parseIntegerInRange(
-			value.requestRate.requestsPerMinute,
-			ranges.requestsPerMinute,
-		);
-		const burstCapacity = parseIntegerInRange(
-			value.requestRate.burstCapacity,
-			ranges.burstCapacity,
-		);
+		const requestsPerMinute = parsePositiveInteger(value.requestRate.requestsPerMinute);
+		const burstCapacity = parsePositiveInteger(value.requestRate.burstCapacity);
 		if (requestsPerMinute === undefined || burstCapacity === undefined) return undefined;
 		result.requestRate = { requestsPerMinute, burstCapacity };
 	}
 	if (value.maxConcurrentRequests !== undefined) {
-		const maxConcurrentRequests = parseIntegerInRange(
-			value.maxConcurrentRequests,
-			ranges.maxConcurrentRequests,
-		);
+		const maxConcurrentRequests = parsePositiveInteger(value.maxConcurrentRequests);
 		if (maxConcurrentRequests === undefined) return undefined;
 		result.maxConcurrentRequests = maxConcurrentRequests;
 	}
 	if (value.dailyCostUnits !== undefined) {
-		const dailyCostUnits = parseIntegerInRange(value.dailyCostUnits, ranges.dailyCostUnits);
+		const dailyCostUnits = parsePositiveInteger(value.dailyCostUnits);
 		if (dailyCostUnits === undefined) return undefined;
 		result.dailyCostUnits = dailyCostUnits;
 	}
 	return result;
 }
 
-function parseOperations(value: string, policyClass: PolicyClass): Operations | undefined {
+function parseOperations(value: string): Operations | undefined {
 	try {
 		const parsed: unknown = JSON.parse(value);
 		if (!isRecord(parsed)) return undefined;
 		const result: Operations = {};
 		for (const operationId of OperationIds) {
 			if (!(operationId in parsed)) continue;
-			const limits = parseOperationLimits(parsed[operationId], policyClass);
+			const limits = parseOperationLimits(parsed[operationId]);
 			if (!limits) return undefined;
 			result[operationId] = limits;
 		}
@@ -235,7 +203,6 @@ function AccountApiQuotaForm({
 	const [policyKey, setPolicyKey] = useState(quota.key);
 	const selectedPolicy =
 		enabledPolicies.find((policy) => policy.key === policyKey) ?? enabledPolicies[0];
-	const selectedClass = selectedPolicy?.class ?? quota.class;
 	const [customize, setCustomize] = useState(hasConfigurationOverride(quota));
 	const [limits, setLimits] = useState<LimitValues>(() => initialLimitValues(quota));
 	const [operationsText, setOperationsText] = useState(() =>
@@ -244,7 +211,7 @@ function AccountApiQuotaForm({
 	const [validUntil, setValidUntil] = useState(() => localDateTime(quota.validUntil));
 	const [reason, setReason] = useState("");
 	const [invalid, setInvalid] = useState(false);
-	const operations = parseOperations(operationsText, selectedClass);
+	const operations = parseOperations(operationsText);
 	const queryKey = getApiApiQuotaPoliciesAccountsByUserIdQueryKey({ path: { userId } });
 	const refresh = async () => {
 		await queryClient.invalidateQueries({ queryKey });
@@ -276,27 +243,11 @@ function AccountApiQuotaForm({
 
 	function parsedLimits(): AccountOverride | undefined {
 		if (!customize) return {};
-		const ranges = LimitRanges[selectedClass];
-		const requestsPerMinute = parseIntegerInRange(
-			Number(limits.requestsPerMinute),
-			ranges.requestsPerMinute,
-		);
-		const burstCapacity = parseIntegerInRange(
-			Number(limits.burstCapacity),
-			ranges.burstCapacity,
-		);
-		const maxConcurrentRequests = parseIntegerInRange(
-			Number(limits.maxConcurrentRequests),
-			ranges.maxConcurrentRequests,
-		);
-		const dailyCostUnits = parseIntegerInRange(
-			Number(limits.dailyCostUnits),
-			ranges.dailyCostUnits,
-		);
-		const maxActiveTokens = parseIntegerInRange(
-			Number(limits.maxActiveTokens),
-			ranges.maxActiveTokens,
-		);
+		const requestsPerMinute = parsePositiveInteger(Number(limits.requestsPerMinute));
+		const burstCapacity = parsePositiveInteger(Number(limits.burstCapacity));
+		const maxConcurrentRequests = parsePositiveInteger(Number(limits.maxConcurrentRequests));
+		const dailyCostUnits = parsePositiveInteger(Number(limits.dailyCostUnits));
+		const maxActiveTokens = parsePositiveInteger(Number(limits.maxActiveTokens));
 		if (
 			requestsPerMinute === undefined ||
 			burstCapacity === undefined ||
@@ -351,7 +302,6 @@ function AccountApiQuotaForm({
 		});
 	}
 
-	const ranges = LimitRanges[selectedClass];
 	const sourceLabel = t.console.users.accountQuota.sources[quota.source];
 	return (
 		<Card appearance="outlined">
@@ -470,14 +420,15 @@ function AccountApiQuotaForm({
 										<Field key={name} required>
 											<FieldLabel>{label}</FieldLabel>
 											<Input
-												max={ranges[name].maximum}
-												min={ranges[name].minimum}
-												onChange={(event) =>
+												max={Number.MAX_SAFE_INTEGER}
+												min={1}
+												onChange={(event) => {
+													const value = event.currentTarget.value;
 													setLimits((current) => ({
 														...current,
-														[name]: event.currentTarget.value,
-													}))
-												}
+														[name]: value,
+													}));
+												}}
 												required
 												type="number"
 												value={limits[name]}
@@ -537,7 +488,7 @@ function AccountApiQuotaForm({
 								</Button>
 							) : null}
 							<Button
-								disabled={reset.isPending || !reason.trim()}
+								disabled={reset.isPending}
 								isLoading={assign.isPending}
 								type="submit"
 								variant="solid"

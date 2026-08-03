@@ -17,22 +17,15 @@ export type ValidTokenQuotaLimits = Record<TokenQuotaLimitName, number>;
 export type ParsedTokenQuotaLimit =
 	{ kind: "empty" } | { kind: "invalid" } | { kind: "valid"; value: number };
 
-export const StandardTokenQuotaLimitRanges = {
-	requestsPerMinute: { minimum: 1, maximum: 300 },
-	burstCapacity: { minimum: 1, maximum: 300 },
-	maxConcurrentRequests: { minimum: 1, maximum: 4 },
-	dailyCostUnits: { minimum: 1, maximum: 10_000 },
-} as const satisfies TokenQuotaLimitRanges;
-
-export const PrivilegedTokenQuotaLimitRanges = {
-	requestsPerMinute: { minimum: 1, maximum: 5_000 },
-	burstCapacity: { minimum: 1, maximum: 5_000 },
-	maxConcurrentRequests: { minimum: 1, maximum: 64 },
-	dailyCostUnits: { minimum: 1, maximum: 1_000_000 },
-} as const satisfies TokenQuotaLimitRanges;
-
-export function getTokenQuotaLimitRanges(kind: "standard" | "privileged"): TokenQuotaLimitRanges {
-	return kind === "privileged" ? PrivilegedTokenQuotaLimitRanges : StandardTokenQuotaLimitRanges;
+export function getTokenQuotaLimitRanges(
+	policyLimits: ValidTokenQuotaLimits,
+): TokenQuotaLimitRanges {
+	return {
+		requestsPerMinute: { minimum: 1, maximum: policyLimits.requestsPerMinute },
+		burstCapacity: { minimum: 1, maximum: policyLimits.burstCapacity },
+		maxConcurrentRequests: { minimum: 1, maximum: policyLimits.maxConcurrentRequests },
+		dailyCostUnits: { minimum: 1, maximum: policyLimits.dailyCostUnits },
+	};
 }
 
 export function parseTokenQuotaLimit(
@@ -41,7 +34,7 @@ export function parseTokenQuotaLimit(
 ): ParsedTokenQuotaLimit {
 	if (input.trim() === "") return { kind: "empty" };
 	const value = Number(input);
-	return Number.isInteger(value) && value >= range.minimum && value <= range.maximum
+	return Number.isSafeInteger(value) && value >= range.minimum && value <= range.maximum
 		? { kind: "valid", value }
 		: { kind: "invalid" };
 }

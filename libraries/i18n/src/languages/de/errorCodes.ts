@@ -19,6 +19,7 @@ export default {
 	ApiTokenRateLimitExceeded: `Dieses ${verbatimTerms.api.value}-Token sendet Anfragen zu schnell. Versuche es gleich noch einmal.`,
 	ApiQuotaExceeded: `Das ${verbatimTerms.api.value}-Kontingent ist aufgebraucht. Versuche es nach der angegebenen Zeit erneut.`,
 	ApiQuotaPolicyNotFound: `Die angeforderte ${verbatimTerms.api.value}-Kontingentrichtlinie wurde nicht gefunden.`,
+	ApiQuotaPolicyKeyConflict: `Eine ${verbatimTerms.api.value}-Kontingentrichtlinie verwendet diesen Schlüssel bereits.`,
 	ApiQuotaPolicyInvalid: `Die Konfiguration der ${verbatimTerms.api.value}-Kontingentrichtlinie ist ungültig.`,
 	ApiQuotaPolicyRevisionConflict: `Die ${verbatimTerms.api.value}-Kontingentrichtlinie wurde geändert. Lade sie vor dem Speichern neu.`,
 	ApiAccountQuotaRevisionConflict: `Das ${verbatimTerms.api.value}-Kontingent des Kontos wurde geändert. Lade es vor dem Speichern neu.`,
