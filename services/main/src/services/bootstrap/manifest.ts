@@ -499,7 +499,7 @@ function createOfficialZoneContent(input: {
 						_key: feedKey,
 						feature: { kind: "zone" },
 						presentation: {
-							pagination: "load-more",
+							pagination: "infinite",
 							showResultCount: true,
 						},
 					},

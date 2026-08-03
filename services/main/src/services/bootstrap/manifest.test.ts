@@ -166,7 +166,7 @@ describe("database bootstrap manifest", () => {
 				expect.objectContaining({
 					_type: "feed",
 					feature: { kind: "zone" },
-					presentation: expect.objectContaining({ pagination: "load-more" }),
+					presentation: expect.objectContaining({ pagination: "infinite" }),
 				}),
 			]);
 			expect(value.mainDockDocument.blocks).toEqual([
