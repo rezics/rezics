@@ -20,6 +20,7 @@ import {
 } from "./errors";
 import { auth, CredentialControlFreshAgeSeconds } from "./index";
 import { ensureProfile, type SessionProfile } from "./profile";
+import { resolveRequestUiLocale } from "./request-interface-locale";
 import { enforceApiQuota, type ApiQuotaLease } from "./api-quota/limit-store";
 import {
 	apiRouteOperationId,
@@ -151,7 +152,7 @@ async function resolveInteractiveSession(headers: Headers): Promise<SessionIdent
 	const session = await auth.api.getSession({ headers });
 	if (!session) return undefined;
 	await ensureAccountAuthenticationAllowed(session.user.id);
-	const profile = await ensureProfile(session.user);
+	const profile = await ensureProfile(session.user, resolveRequestUiLocale(headers));
 	return {
 		user: session.user,
 		session: session.session,

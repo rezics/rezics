@@ -1,5 +1,6 @@
 import type { User } from "better-auth";
 import { and, eq } from "drizzle-orm";
+import { DefaultStoredUiLocale, type UiLocale } from "@rezics/i18n";
 import { OfficialRealmUnitIds } from "@rezics/slug";
 
 import { ensureOfficialZoneFollows } from "../bootstrap/official-zone-follows";
@@ -64,7 +65,10 @@ async function findProfile(authUserId: string): Promise<StoredSessionProfile | u
 	return record;
 }
 
-export async function ensureProfile(authUser: Pick<User, "id" | "email" | "name" | "image">) {
+export async function ensureProfile(
+	authUser: Pick<User, "id" | "email" | "name" | "image">,
+	initialInterfaceLocale: UiLocale = DefaultStoredUiLocale,
+) {
 	const existing = await findProfile(authUser.id);
 	if (existing) {
 		if (!existing.favoritesId) await ensureFavorites(existing.unitId);
@@ -97,6 +101,7 @@ export async function ensureProfile(authUser: Pick<User, "id" | "email" | "name"
 			});
 			await tx.insert(profilePreference).values({
 				profileId: profileUnit.id,
+				interfaceLocale: initialInterfaceLocale,
 				defaultScoreRealmId: OfficialRealmUnitIds.score,
 				contentRatings: [...DefaultContentRatingValues],
 				preferredLanguages: [preferredLanguage],

@@ -43,11 +43,14 @@ export async function getInitialPresentationPreferences(
 ): Promise<InitialPresentationPreferences> {
 	const cookie = requestHeaders.get("cookie");
 	if (!cookie) return { status: "unavailable" };
+	const headers = new Headers({ accept: "application/json", cookie });
+	const acceptLanguage = requestHeaders.get("accept-language");
+	if (acceptLanguage) headers.set("accept-language", acceptLanguage);
 
 	try {
 		const response = await fetch(new URL("/api/v1/users/me/preferences", getBackendOrigin()), {
 			cache: "no-store",
-			headers: { accept: "application/json", cookie },
+			headers,
 			signal: AbortSignal.timeout(PresentationPreferencesBootstrapTimeoutMs),
 		});
 		if (!response.ok) return { status: "unavailable" };

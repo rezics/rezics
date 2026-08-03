@@ -202,6 +202,7 @@ describe("Profile registration defaults", () => {
 
 		expect(valuesByTable.get(profilePreference)).toEqual({
 			profileId: ProfileId,
+			interfaceLocale: "zh-Hant",
 			defaultScoreRealmId: OfficialRealmUnitIds.score,
 			contentRatings: ["general", "r15"],
 			preferredLanguages: ["en"],
@@ -213,22 +214,28 @@ describe("Profile registration defaults", () => {
 		});
 	});
 
-	it("uses the registration language when the frontend supplies one", async () => {
-		registrationLanguageLimit.mockResolvedValue([{ contentLanguage: "ja" }]);
+	it("keeps registration content language separate from the initial interface locale", async () => {
+		registrationLanguageLimit.mockResolvedValue([{ contentLanguage: "zh" }]);
 
-		await ensureProfile({
-			id: "019f82aa-db8f-7962-9924-7369b17f5501",
-			email: "reader@example.com",
-			name: "Reader",
-			image: null,
-		});
+		await ensureProfile(
+			{
+				id: "019f82aa-db8f-7962-9924-7369b17f5501",
+				email: "reader@example.com",
+				name: "Reader",
+				image: null,
+			},
+			"zh-Hans",
+		);
 
 		expect(valuesByTable.get(profilePreference)).toEqual(
-			expect.objectContaining({ preferredLanguages: ["ja"] }),
+			expect.objectContaining({
+				interfaceLocale: "zh-Hans",
+				preferredLanguages: ["zh"],
+			}),
 		);
 		expect(valuesByTable.get(unitLocalization)).toEqual({
 			unitId: ProfileId,
-			language: "ja",
+			language: "zh",
 			title: "Reader",
 		});
 	});
