@@ -1,7 +1,5 @@
 export type FeedPaginationMode = "none" | "load-more" | "infinite";
 
-export type FeedInfiniteScrollMode = "page" | "contained";
-
 export type FeedContinuationState =
 	| Readonly<{ status: "exhausted" }>
 	| Readonly<{ status: "ready"; loadNext: () => void | Promise<unknown> }>

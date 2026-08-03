@@ -9,16 +9,9 @@ import {
 	Skeleton,
 	cn,
 } from "@rezics/ui";
-import {
-	Fragment,
-	type ComponentProps,
-	type Key,
-	type ReactNode,
-	type RefObject,
-	useRef,
-} from "react";
+import { Fragment, type ComponentProps, type Key, type ReactNode } from "react";
 
-import type { FeedContinuationState, FeedInfiniteScrollMode } from "../model/feed-continuation";
+import type { FeedContinuationState, FeedPaginationMode } from "../model/feed-continuation";
 import { FeedCard } from "./feed-card";
 import { FeedContinuation } from "./feed-continuation";
 
@@ -32,16 +25,10 @@ export interface FeedListItemMetadata {
 	readonly setSize: number;
 }
 
-type FeedListContinuation =
-	| Readonly<{
-			mode: "load-more";
-			state: FeedContinuationState;
-	  }>
-	| Readonly<{
-			mode: "infinite";
-			scrollMode: FeedInfiniteScrollMode;
-			state: FeedContinuationState;
-	  }>;
+type FeedListContinuation = Readonly<{
+	mode: Exclude<FeedPaginationMode, "none">;
+	state: FeedContinuationState;
+}>;
 
 interface FeedListProps<Item> {
 	readonly "aria-label": string;
@@ -66,32 +53,7 @@ interface FeedListProps<Item> {
  * product requirements. Until then every FeedList uses the canonical card
  * presentation so feature owners cannot create local list variants.
  */
-export function FeedList<Item>(props: FeedListProps<Item>) {
-	const { "aria-label": ariaLabel, continuation } = props;
-	const scrollRootRef = useRef<HTMLDivElement>(null);
-	const containedInfiniteScroll =
-		continuation?.mode === "infinite" && continuation.scrollMode === "contained";
-	const content = (
-		<FeedListContent {...props} {...(containedInfiniteScroll ? { scrollRootRef } : {})} />
-	);
-
-	if (!containedInfiniteScroll) return content;
-
-	return (
-		<div
-			aria-label={ariaLabel}
-			className="min-h-0 flex-1 overflow-y-auto overscroll-contain outline-none focus-visible:ring-[3px] focus-visible:ring-ring/32 focus-visible:ring-inset"
-			data-slot="feed-scroll-viewport"
-			ref={scrollRootRef}
-			role="region"
-			tabIndex={0}
-		>
-			{content}
-		</div>
-	);
-}
-
-function FeedListContent<Item>({
+export function FeedList<Item>({
 	"aria-label": ariaLabel,
 	className,
 	emptyBody,
@@ -102,11 +64,10 @@ function FeedListContent<Item>({
 	getItemKey,
 	renderItem,
 	retryLabel,
-	scrollRootRef,
 	semantic = "feed",
 	setSize,
 	state,
-}: FeedListProps<Item> & { readonly scrollRootRef?: RefObject<Element | null> }) {
+}: FeedListProps<Item>) {
 	if (state.status === "pending")
 		return (
 			<div aria-busy="true" aria-label={ariaLabel} className="grid gap-2 p-3 sm:p-4">
@@ -129,11 +90,7 @@ function FeedListContent<Item>({
 		);
 
 	const continuationContent = continuation ? (
-		<FeedContinuation
-			mode={continuation.mode}
-			{...(scrollRootRef ? { scrollRootRef } : {})}
-			state={continuation.state}
-		/>
+		<FeedContinuation mode={continuation.mode} state={continuation.state} />
 	) : null;
 	if (state.items.length === 0)
 		return (

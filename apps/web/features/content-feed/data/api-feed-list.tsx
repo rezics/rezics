@@ -7,7 +7,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { ListFilterIcon, Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
-import { Badge, Button, ChoiceSelect, Input, cn, type ChoiceOption } from "@rezics/ui";
+import { Badge, Button, ChoiceSelect, Input, type ChoiceOption } from "@rezics/ui";
 import { usePresentationPreferences } from "@/features/preferences/data/use-presentation-preferences";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguageState } from "@/i18n/use-localization-languages";
@@ -18,11 +18,7 @@ import { FeedFiltersDialog } from "../components/feed-filters-dialog";
 import { FeedItemCard, type FeedItem } from "../components/feed-item-card";
 import { FeedList } from "../components/feed-list";
 import { createApiFeedFilter } from "../model/api-feed-filter";
-import {
-	resolveFeedContinuationState,
-	type FeedInfiniteScrollMode,
-	type FeedPaginationMode,
-} from "../model/feed-continuation";
+import { resolveFeedContinuationState, type FeedPaginationMode } from "../model/feed-continuation";
 import type { FeedDisplayContext } from "../model/feed-display-context";
 import { collectUniqueFeedItems } from "../model/feed-items";
 import { FeedSortValues, type FeedSort } from "../model/feed-sort";
@@ -58,17 +54,9 @@ interface ApiFeedListBaseProps {
 	tagIds?: readonly string[];
 }
 
-export type ApiFeedListProps = ApiFeedListBaseProps &
-	(
-		| Readonly<{
-				infiniteScrollMode?: never;
-				pagination?: Exclude<FeedPaginationMode, "infinite">;
-		  }>
-		| Readonly<{
-				infiniteScrollMode?: FeedInfiniteScrollMode;
-				pagination: "infinite";
-		  }>
-	);
+export interface ApiFeedListProps extends ApiFeedListBaseProps {
+	pagination?: FeedPaginationMode;
+}
 
 export interface ApiFeedResultMetadata {
 	readonly displayedCount: number;
@@ -85,7 +73,6 @@ export function ApiFeedList({
 	displayContext,
 	emptyBody,
 	emptyTitle,
-	infiniteScrollMode = "page",
 	languages = [],
 	limit = 20,
 	onContentKindsChange,
@@ -200,11 +187,9 @@ export function ApiFeedList({
 		onTagIdsChange,
 	);
 	const requestedRealmId = realmIds.length === 1 ? realmIds[0] : undefined;
-	const containedInfiniteScroll = pagination === "infinite" && infiniteScrollMode === "contained";
-
 	return (
 		<div
-			className={cn("min-w-0", containedInfiniteScroll && "flex min-h-0 flex-1 flex-col")}
+			className="min-w-0"
 			data-content={contentKinds.join(",")}
 			data-languages={languages.join(",")}
 			data-realms={realmIds.join(",")}
@@ -244,13 +229,7 @@ export function ApiFeedList({
 				continuation={
 					pagination === "none"
 						? undefined
-						: pagination === "infinite"
-							? {
-									mode: pagination,
-									scrollMode: infiniteScrollMode,
-									state: continuationState,
-								}
-							: { mode: pagination, state: continuationState }
+						: { mode: pagination, state: continuationState }
 				}
 				emptyBody={emptyBody ?? t.feed.emptyBody}
 				emptyTitle={emptyTitle ?? t.feed.emptyTitle}

@@ -21,8 +21,8 @@ export function Home() {
 	const [tagIds, setTagIds] = useQueryState("tags", feedTagIdsParser);
 
 	return (
-		<main className="flex h-[calc(100svh-7rem)] w-full px-4 py-6 sm:h-[calc(100svh-3.5rem)] sm:px-7 sm:py-8 lg:px-12">
-			<div className="mx-auto flex min-h-0 w-full max-w-[58rem] flex-col">
+		<main className="w-full px-4 py-6 sm:px-7 sm:py-8 lg:px-12">
+			<div className="mx-auto w-full max-w-[58rem]">
 				<h1 className="sr-only">{t.feed.title}</h1>
 				<ApiFeedList
 					contentKinds={contentKinds}
@@ -32,7 +32,6 @@ export function Home() {
 					onRealmIdsChange={(nextRealmIds) => void setRealmIds([...nextRealmIds])}
 					onSortChange={(nextSort) => void setSort(nextSort)}
 					onTagIdsChange={(nextTagIds) => void setTagIds([...nextTagIds])}
-					infiniteScrollMode="contained"
 					pagination="infinite"
 					realmIds={realmIds}
 					sort={sort}
