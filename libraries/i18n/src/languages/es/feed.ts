@@ -39,6 +39,13 @@ export default {
 		},
 	},
 	contentFilterLabel: "Filtro de contenido",
+	pagination: {
+		label: "Carga de más contenido",
+		modes: {
+			"load-more": "Mostrar el botón «Cargar más»",
+			infinite: "Cargar automáticamente al desplazarse",
+		},
+	},
 	content: {
 		clear: "Borrar todo",
 		allSelected: "Todo el contenido",

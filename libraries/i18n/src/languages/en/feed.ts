@@ -39,6 +39,13 @@ export default {
 		},
 	},
 	contentFilterLabel: "Content filter",
+	pagination: {
+		label: "More-content loading",
+		modes: {
+			"load-more": "Show Load more button",
+			infinite: "Load automatically while scrolling",
+		},
+	},
 	content: {
 		clear: "Clear all",
 		allSelected: "All content",

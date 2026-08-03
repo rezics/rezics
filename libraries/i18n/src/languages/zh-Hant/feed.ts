@@ -39,6 +39,13 @@ export default {
 		},
 	},
 	contentFilterLabel: "內容篩選",
+	pagination: {
+		label: "後續內容載入方式",
+		modes: {
+			"load-more": "顯示「載入更多」按鈕",
+			infinite: "捲動時自動載入",
+		},
+	},
 	content: {
 		clear: "全部清除",
 		allSelected: "全部內容",

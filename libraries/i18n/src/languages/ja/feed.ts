@@ -39,6 +39,13 @@ export default {
 		},
 	},
 	contentFilterLabel: "コンテンツフィルター",
+	pagination: {
+		label: "続きの読み込み方法",
+		modes: {
+			"load-more": "「さらに読み込む」ボタンを表示",
+			infinite: "スクロール時に自動で読み込む",
+		},
+	},
 	content: {
 		clear: "すべてクリア",
 		allSelected: "すべてのコンテンツ",

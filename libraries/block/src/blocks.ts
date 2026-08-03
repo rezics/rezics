@@ -84,6 +84,9 @@ export const UnitListBlock = Type.Object(
 );
 export type UnitListBlock = Static<typeof UnitListBlock>;
 
+export const FeedPaginationModeValues = ["load-more", "infinite"] as const;
+export type FeedPaginationMode = (typeof FeedPaginationModeValues)[number];
+
 /** A continuously paged result stream driven by the same trusted Search schema. */
 export const FeedBlock = Type.Object(
 	{
@@ -92,7 +95,10 @@ export const FeedBlock = Type.Object(
 		feature: SearchFeatureSource,
 		presentation: Type.Object(
 			{
-				pagination: Type.Union([Type.Literal("load-more"), Type.Literal("infinite")]),
+				pagination: Type.Union([
+					Type.Literal(FeedPaginationModeValues[0]),
+					Type.Literal(FeedPaginationModeValues[1]),
+				]),
 				showResultCount: Type.Boolean(),
 			},
 			{ additionalProperties: false },

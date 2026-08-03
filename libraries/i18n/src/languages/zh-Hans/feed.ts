@@ -39,6 +39,13 @@ export default {
 		},
 	},
 	contentFilterLabel: "内容筛选",
+	pagination: {
+		label: "后续内容加载方式",
+		modes: {
+			"load-more": "显示“加载更多”按钮",
+			infinite: "滚动时自动加载",
+		},
+	},
 	content: {
 		clear: "全部清除",
 		allSelected: "全部内容",

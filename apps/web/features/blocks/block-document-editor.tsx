@@ -3,6 +3,8 @@
 import {
 	createBlockKey,
 	type DockDocument,
+	FeedPaginationModeValues,
+	type FeedPaginationMode,
 	type UnitReferencedBlock,
 	type UnitReferencedBlockDocument,
 } from "@rezics/block";
@@ -22,6 +24,8 @@ import {
 } from "@rezics/ui";
 import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+
+import { useTranslation } from "@/i18n/client";
 
 export interface BlockEditorLabels {
 	readonly add: string;
@@ -80,6 +84,10 @@ function isAddableBlockType(value: string): value is BlockEditorAddableType {
 
 function isSearchTemplateId(value: string): value is EmbeddableSearchTemplateId {
 	return EmbeddableSearchTemplateIdValues.some((template) => template === value);
+}
+
+function isFeedPaginationMode(value: string): value is FeedPaginationMode {
+	return FeedPaginationModeValues.some((mode) => mode === value);
 }
 
 function isUnitRefAppearance(value: string): value is (typeof UnitRefAppearances)[number] {
@@ -152,6 +160,7 @@ export function BlockDocumentEditor({
 	readonly onChange: (document: BlockEditorDocument) => void;
 	readonly pickerPlaceholders: BlockEditorPickerPlaceholders;
 }) {
+	const { t: feed } = useTranslation("feed");
 	const firstAddableType = addableTypes[0];
 	const [selectedType, setSelectedType] = useState<BlockEditorAddableType | undefined>(
 		firstAddableType,
@@ -233,6 +242,7 @@ export function BlockDocumentEditor({
 								labels={labels}
 								navigationOptions={navigationOptions}
 								onChange={(next) => replace(index, next)}
+								paginationLabels={feed.pagination}
 								pickerPlaceholders={pickerPlaceholders}
 								relatedKind={relatedKind}
 							/>
@@ -288,6 +298,7 @@ function BlockFields({
 	labels,
 	navigationOptions,
 	onChange,
+	paginationLabels,
 	pickerPlaceholders,
 	relatedKind,
 }: {
@@ -296,6 +307,10 @@ function BlockFields({
 	readonly labels: BlockEditorLabels;
 	readonly navigationOptions?: readonly BlockEditorNavigationOption[];
 	readonly onChange: (block: UnitReferencedBlock) => void;
+	readonly paginationLabels: Readonly<{
+		readonly label: string;
+		readonly modes: Readonly<Record<FeedPaginationMode, string>>;
+	}>;
 	readonly pickerPlaceholders: BlockEditorPickerPlaceholders;
 	readonly relatedKind?: RelatedUnitKind;
 }) {
@@ -354,6 +369,26 @@ function BlockFields({
 	if (block._type === "feed")
 		return (
 			<FieldGroup className="grid gap-4">
+				<Field>
+					<FieldLabel>{paginationLabels.label}</FieldLabel>
+					<NativeSelect
+						onChange={(event) => {
+							const value = event.currentTarget.value;
+							if (isFeedPaginationMode(value))
+								onChange({
+									...block,
+									presentation: { ...block.presentation, pagination: value },
+								});
+						}}
+						value={block.presentation.pagination}
+					>
+						{FeedPaginationModeValues.map((value) => (
+							<NativeSelectOption key={value} value={value}>
+								{paginationLabels.modes[value]}
+							</NativeSelectOption>
+						))}
+					</NativeSelect>
+				</Field>
 				<Field>
 					<FieldLabel>{labels.searchSource}</FieldLabel>
 					<NativeSelect

@@ -39,6 +39,13 @@ export default {
 		},
 	},
 	contentFilterLabel: "콘텐츠 필터",
+	pagination: {
+		label: "추가 콘텐츠 불러오기 방식",
+		modes: {
+			"load-more": "‘더 불러오기’ 버튼 표시",
+			infinite: "스크롤할 때 자동으로 불러오기",
+		},
+	},
 	content: {
 		clear: "전체 삭제",
 		allSelected: "모든 콘텐츠",

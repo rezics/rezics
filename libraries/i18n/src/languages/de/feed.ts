@@ -39,6 +39,13 @@ export default {
 		},
 	},
 	contentFilterLabel: "Inhaltsfilter",
+	pagination: {
+		label: "Laden weiterer Inhalte",
+		modes: {
+			"load-more": "Schaltfläche „Mehr laden“ anzeigen",
+			infinite: "Beim Scrollen automatisch laden",
+		},
+	},
 	content: {
 		clear: "Alle zurücksetzen",
 		allSelected: "Alle Inhalte",
