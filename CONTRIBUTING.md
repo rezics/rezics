@@ -14,6 +14,40 @@ and should be fixed when practical, but release workflows must never depend on
 the workflow's completion or conclusion. Do not configure `Check` as a required
 status check.
 
+```progress
+id: governance.repository-license
+status: open
+goal: Publish the repository license and contribution-rights agreements needed for public collaboration.
+depends: []
+accept:
+  - The repository has an approved Apache-2.0 license file and any required notices.
+  - Core-team intellectual-property assignment and external-contributor license terms name the actual legal entity and have qualified legal review.
+  - EasyCLA or an approved equivalent checks the correct agreement for each contributor class without blocking exempt automation.
+  - This contributing guide explains the agreement flow and links to the authoritative terms.
+verify:
+  - Ask qualified counsel to approve the license, assignment, and contributor agreement for the operating entity.
+  - Open a test contribution from each contributor class and confirm that the configured agreement check reaches the expected result.
+  - Run `task progress:check`.
+```
+
+## Progress Protocol workflow
+
+Progress Items are machine-validated outcome contracts, not a second copy of the product backlog.
+Before adding one from rezics-outline or another planning source, compare it with the current
+implementation and history. Do not add work that is already complete, superseded, purely
+aspirational, or missing an observable result.
+
+- Put each Item beside the source, test, architecture document, legal draft, or runbook that owns
+  the result. Do not recreate `TODO.md` or another central task database.
+- Give the Item a stable domain-prefixed ID, one outcome-oriented goal, direct dependencies, and
+  acceptance and verification steps that a maintainer can actually observe.
+- Keep cross-domain prerequisites explicit with `depends`; do not encode priority or ownership as
+  fake dependencies.
+- Set `status: done` only after every acceptance statement is true and every verification step has
+  been performed. Outline status or implementation intent alone is not completion evidence.
+- Reconcile affected Items whenever their owning contract changes, then run `task progress:check`
+  before handoff.
+
 ## Existing conventions
 
 - Abstractions must compress meaning, not merely shorten syntax: they should capture invariants, protocols, lifecycles, or genuinely reusable complete semantics. Delete one-use wrappers that only forward, rename, or pass arguments when the inline form is equally clear. Framework entry points, public package entry points, generated code, and upstream mirrors are external-contract boundaries and are not judged by call count; within a boundary, still express intent directly.

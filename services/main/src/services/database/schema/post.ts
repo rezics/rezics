@@ -8,6 +8,22 @@ import { unit } from "./unit";
 
 export const postKind = pgEnum("post_kind", toEnumValues(PostKindValues));
 
+// ```progress
+// id: posts.issue-workflow
+// status: open
+// goal: Provide a searchable Issue workflow that can target any readable Unit.
+// depends:
+//   - posts.targeting-kind-policy
+// accept:
+//   - Issue is an explicit supported Post kind or an approved equivalent with one documented target and authorization contract.
+//   - An Issue targets any readable Unit and exposes an open, resolved, or archived lifecycle without rewriting discussion history.
+//   - Readers can search Issues for one target and search the complete Issue discussion including replies.
+//   - Create, transition, reply, visibility, moderation, and target-lock behavior are enforced by the API.
+// verify:
+//   - Exercise Issue creation and every allowed and denied lifecycle transition.
+//   - Search one target and all Issue replies, including restricted, deleted, and inaccessible records.
+//   - Run the database, Posts, Search, API, and Issue-surface tests.
+// ```
 export const post = pgTable(
 	"post",
 	{

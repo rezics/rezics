@@ -268,7 +268,21 @@ export const ContentStructureKindPolicies = {
 		ownerKinds: ["realm"],
 		targets: ["content"],
 		progress: "none",
-		/** TODO(wiki): project wiki Post bodies as long-form taxonomy descriptions. */
+		// ```progress
+		// id: wiki.taxonomy-descriptions
+		// status: open
+		// goal: Project readable wiki bodies as the long-form descriptions of Realm taxonomy entries.
+		// depends: []
+		// accept:
+		//   - A taxonomy entry has one authoritative description source instead of duplicated wiki and taxonomy content.
+		//   - Projection respects wiki lifecycle, content language, Realm mounting, and reader access.
+		//   - Missing, unpublished, deleted, and restricted wiki bodies produce an explicit safe result.
+		//   - History and search identify the source revision used by the projection.
+		// verify:
+		//   - Exercise localized readable, missing, unpublished, deleted, restricted, and stale-projection cases.
+		//   - Verify taxonomy reads and search after wiki publish, restore, unmount, and access changes.
+		//   - Run the Content Structure, Wiki, history, and Search tests.
+		// ```
 		acceptsContent: (kind, postKind) =>
 			kind === "label" || kind === "tag" || (kind === "post" && postKind === "wiki"),
 	},

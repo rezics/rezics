@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ inputs, pkgs, ... }:
 
 {
   packages = [
@@ -10,6 +10,7 @@
     pkgs.fontconfig
     pkgs.bun
     (pkgs.corepack.override { nodejs-slim = pkgs.nodejs-slim_26; })
+    inputs.progress.packages.${pkgs.stdenv.system}.default
   ];
 
   env.FONTCONFIG_FILE = pkgs.makeFontsConf {
@@ -27,5 +28,11 @@
   languages.javascript = {
     enable = true;
     package = pkgs.nodejs-slim_26;
+  };
+
+  tasks."progress:check" = {
+    description = "Validate every repository Progress Protocol Item and dependency";
+    before = [ "devenv:enterTest" ];
+    exec = "progress check .";
   };
 }

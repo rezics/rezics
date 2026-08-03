@@ -135,6 +135,21 @@ function compareCollectionStructureStates(
 	return changes;
 }
 
+// ```progress
+// id: collections.favorites-metadata
+// status: open
+// goal: Let a Profile rename its Favorites collection and change its visibility without changing its reserved purpose.
+// depends: []
+// accept:
+//   - Every Profile still has exactly one non-deletable collection whose purpose remains Favorites.
+//   - Favorites defaults to private, while its owner can edit localized title metadata and supported visibility.
+//   - Favorites cannot be converted to an ordinary collection, transferred, or deleted through metadata routes.
+//   - API capabilities and frontend controls distinguish editable metadata from protected purpose and lifecycle.
+// verify:
+//   - Exercise authorized title and visibility edits plus unauthorized, delete, transfer, and purpose-conversion attempts.
+//   - Verify creation defaults, history, API capabilities, OpenAPI output, and collection settings behavior.
+//   - Run the Collections service, API, and frontend tests.
+// ```
 async function ensureEditableCollection(tx: DatabaseTransaction, collectionId: string) {
 	const [record] = await tx
 		.select({

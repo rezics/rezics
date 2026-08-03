@@ -2,6 +2,23 @@
 
 Status: accepted.
 
+```progress
+id: history.revision-discussions
+status: open
+goal: Let readers find and start discussions that are explicitly attached to a historical revision.
+depends:
+  - posts.targeting-kind-policy
+accept:
+  - A readable revision exposes its attached Posts and a person can select that exact revision when starting a discussion.
+  - The target preserves immutable revision identity even after newer revisions, restore, or undo.
+  - Hidden, suppressed, deleted, and inaccessible revisions do not leak protected content through discussions or search.
+  - API, Search, and frontend navigation distinguish current-Unit discussions from revision-specific discussions.
+verify:
+  - Exercise list, create, reply, search, restore, and navigation across current and historical revisions.
+  - Exercise deleted, hidden, suppressed, inaccessible, and concurrently superseded revision cases.
+  - Run Unit History, Posts, Search, API, and revision-discussion frontend tests.
+```
+
 ## Aggregate boundary
 
 History follows aggregate lifecycle, concurrency, and restore boundaries. Ownership alone does not

@@ -112,6 +112,7 @@ restricted to loopback service endpoints.
 The main checks are:
 
 ```sh
+task progress:check
 task format:check
 task openapi:check
 task typecheck
@@ -125,6 +126,42 @@ OpenAPI documents and generated clients are updated through
 `task openapi:generate` and should not be edited by hand.
 `libraries/ui` contains both local components and the tracked SharkUI mirror;
 preserve that upstream boundary.
+
+### Progress Protocol
+
+The pinned devenv environment includes
+[Progress Protocol CLI](https://github.com/nmnmcc/progress). Progress Items live
+beside the source, tests, or documents that own their result; they are not
+maintained in a separate backlog file.
+
+```sh
+# Validate the complete dependency graph and show the current open queue.
+task progress:check
+task progress
+
+# Inspect ready work or one result.
+progress list --readiness ready .
+progress show <item-id> .
+```
+
+Change an Item to `done` only after every `accept` condition is true and its
+`verify` procedures have been completed. The CLI validates and queries Items;
+it does not execute verification procedures or change status.
+
+```progress
+id: tooling.progress-protocol
+status: done
+goal: Make the pinned Progress Protocol workflow available locally and in the advisory repository check.
+depends: []
+accept:
+  - The devenv shell exposes the repository-pinned Progress CLI.
+  - Maintainers can summarize and validate the complete Item graph through root Taskfile commands.
+  - The advisory GitHub check rejects an invalid Progress graph before running expensive checks.
+verify:
+  - Run `devenv shell progress --version`.
+  - Run `task progress:check`.
+  - Run `task progress` and confirm that it reports the repository queue.
+```
 
 ### Database migrations
 

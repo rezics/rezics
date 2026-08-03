@@ -12,6 +12,22 @@ import {
 import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
 import { pgTable } from "./base";
 
+// ```progress
+// id: auth.third-party-oauth
+// status: open
+// goal: Let third-party applications request revocable scoped access through a secure OAuth authorization flow.
+// depends: []
+// accept:
+//   - An OAuth application has an accountable Unit identity, verified redirect targets, lifecycle state, and auditable ownership.
+//   - Consent displays the exact requested authorization tree and cannot grant more than the signed-in Profile may grant.
+//   - Authorization codes, access tokens, refresh tokens, rotation, expiry, replay protection, and revocation follow the approved security profile.
+//   - Existing API-key permissions and OAuth grants share one authorization meaning without sharing incompatible credentials.
+//   - People can inspect and revoke application access, and operators can contain a compromised client.
+// verify:
+//   - Run protocol conformance and security tests for valid, denied, expired, replayed, redirected, rotated, and revoked flows.
+//   - Exercise least-privilege consent and every authorization boundary through API integration tests.
+//   - Complete security review and threat-model approval before enabling third-party clients.
+// ```
 export const users = pgTable(
 	"users",
 	{

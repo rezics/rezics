@@ -25,6 +25,16 @@ includes:
         dir: ./packages/api
 
 tasks:
+    progress:
+        desc: Show the open Progress Protocol work queue.
+        cmds:
+            - progress summary .
+
+    progress:check:
+        desc: Validate every Progress Protocol Item and dependency.
+        cmds:
+            - progress check .
+
     format:
         desc: Format source files with Prettier.
         cmds:

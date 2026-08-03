@@ -35,6 +35,21 @@ import { unit } from "./unit";
 
 export const contentStatus = pgEnum("content_status", toEnumValues(ContentStatusValues));
 
+// ```progress
+// id: content.capability-languages
+// status: open
+// goal: Model content-supported languages separately from localized Unit metadata.
+// depends: []
+// accept:
+//   - Localized titles and descriptions do not imply that a work or release supports the same language in its content.
+//   - The owning work and release contracts state how supported languages are authored, inherited, aggregated, and overridden.
+//   - API filters and search facets use content capability when users ask what they can read, watch, play, or use.
+//   - Migration and compatibility behavior preserve existing localization data without manufacturing unsupported capabilities.
+// verify:
+//   - Exercise metadata-only, content-only, inherited, overridden, multilingual, and unknown-language records.
+//   - Verify API and Search results for work-level and release-level language filters.
+//   - Run schema, service, Search, OpenAPI, and content-language frontend tests.
+// ```
 export const unitLocalization = pgTable(
 	"unit_localization",
 	{

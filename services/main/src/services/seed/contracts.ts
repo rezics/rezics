@@ -1,3 +1,18 @@
+// ```progress
+// id: seed.separate-scenario-programs
+// status: open
+// goal: Separate professional demonstration data from destructive coverage and stress scenarios.
+// depends: []
+// accept:
+//   - Maintainers can run a deterministic professional-data program without creating intentionally malformed, chaotic, or load-oriented records.
+//   - Coverage and stress programs are independently selectable and retain the boundary cases needed by automated checks.
+//   - Every program is idempotent for its documented target and refuses unsafe production configuration.
+//   - Shared builders preserve one contract without coupling the scenario lifecycles.
+// verify:
+//   - Run the professional program twice against an isolated database and compare the resulting fixture identities and relationships.
+//   - Run each coverage and stress program independently and exercise its owning service tests.
+//   - Verify that every program rejects a production-like target.
+// ```
 export const SeedProfileValues = ["demo", "coverage"] as const;
 export type SeedProfile = (typeof SeedProfileValues)[number];
 

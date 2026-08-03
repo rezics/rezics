@@ -53,10 +53,45 @@
         "type": "github"
       }
     },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 1785067121,
+        "narHash": "sha256-rdJdWxAcg5fnntU4DjPivPdVEN4F+VJavw+UWpEMeUI=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "329c3d2af6d1b618705150ea39f72c15eb4e613e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-26.05-darwin",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "progress": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_2"
+      },
+      "locked": {
+        "lastModified": 1785765646,
+        "narHash": "sha256-63zRGEzj0Wt6VgxN+Kk73pvXpBwBbqzajcKdojsSEwQ=",
+        "owner": "nmnmcc",
+        "repo": "progress",
+        "rev": "dada71f1a7c4186c04ba48a4592c92704f332369",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nmnmcc",
+        "repo": "progress",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "devenv": "devenv",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "progress": "progress"
       }
     }
   },

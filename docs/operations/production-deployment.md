@@ -16,6 +16,22 @@ The sibling `../nixos` repository owns the host, Cloudflare Tunnel origins,
 Nomad ACLs, release gateway, fixed production jobspecs, and release parent jobs.
 Cloudflare Tunnel is the only public ingress to host services.
 
+```progress
+id: operations.mainland-china-edge-policy
+status: open
+goal: Enforce the approved Mainland China availability policy at the Cloudflare edge for every public Rezics origin.
+depends: []
+accept:
+  - A dedicated Cloudflare zone-security Terraform stack owns hostname-scoped WAF rules instead of application code.
+  - The policy covers the approved website, API, About, and Font Awesome hosts without blocking operator-only services.
+  - Alternate Pages, Workers, R2, and origin paths cannot bypass the approved policy.
+  - Website and API denials return the approved status and response for the active Cloudflare plan.
+verify:
+  - Review the Terraform plan and Cloudflare ruleset order before applying it.
+  - Probe every public origin from Mainland China and a permitted region, including alternate provider hostnames.
+  - Confirm denied API requests and browser requests return the approved response without invoking application origins.
+```
+
 ## GitHub boundary
 
 `Check` runs on GitHub-hosted runners for pull requests and `main`. It is an
@@ -68,6 +84,37 @@ Nomad's canary, auto-promotion, and automatic-revert behavior follows the
 [Nomad update specification](https://developer.hashicorp.com/nomad/docs/job-specification/update).
 Cloudflare pre-traffic verification uses
 [Worker version overrides](https://developers.cloudflare.com/workers/versions-and-deployments/version-overrides/).
+
+```progress
+id: release.component-planning
+status: done
+goal: Release only components whose versioned inputs changed while preserving deployment dependencies.
+depends: []
+accept:
+  - The component manifest is the single source for release inputs and ordering.
+  - Re-dispatching the same tag retries incomplete work without repeating completed components.
+  - Database changes conservatively include every dependent runtime and projection component.
+verify:
+  - Run `bash deploy/scripts/check-release-component-plan.sh`.
+  - Run `task progress:check`.
+```
+
+```progress
+id: release.manual-component-dispatch
+status: open
+goal: Provide an authenticated manual recovery entry point for retrying or safely forcing one release component.
+depends:
+  - release.component-planning
+accept:
+  - A workflow-dispatch entry accepts a stable tag, an allowed component, and retry or force mode.
+  - The release gateway verifies a dedicated OIDC audience, workflow identity, operator, tag, commit, and component allowlist.
+  - The Nomad release controller recalculates dependencies and rejects unsafe force requests, including ordinary forced database releases.
+  - Web retries reuse the server-owned release job without exposing Cloudflare or Nomad credentials to GitHub.
+verify:
+  - Run the release contract checks and inspect the manual workflow permissions.
+  - Exercise retry and force against a non-production release environment and confirm unsafe component selections are rejected.
+  - Confirm GitHub receives only the bounded dispatch receipt and no infrastructure credential.
+```
 
 ## Privilege boundaries
 
@@ -153,3 +200,20 @@ stateful services have no application-managed backup or point-in-time recovery
 workflow. Outline data preservation means leaving its existing allocation,
 database, volumes, and object storage untouched; it does not authorize deleting
 or recreating them.
+
+```progress
+id: operations.backup-recovery
+status: open
+goal: Establish encrypted, off-host backup and tested recovery for every production state owner.
+depends: []
+accept:
+  - PostgreSQL has scheduled base backups and continuous recovery data with documented retention and encryption.
+  - R2 or object-storage data, Meilisearch rebuild inputs, Sequin state, Nomad Variables, and required host configuration each have an explicit backup or reproducible-rebuild contract.
+  - Outline remains outside Rezics automation and has an independently approved preservation and recovery procedure.
+  - The runbook defines restore order, credentials, recovery-point and recovery-time objectives, failure handling, and destructive-action safeguards.
+  - A clean recovery rehearsal restores a consistent application state and records actionable evidence without secrets.
+verify:
+  - Perform the documented recovery rehearsal in an isolated environment from off-host backup material.
+  - Verify database consistency, object availability, search reconstruction, application readiness, and Outline independence.
+  - Review backup age, failed-job alerting, restore credentials, and retention with the production operator.
+```

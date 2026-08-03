@@ -11,6 +11,21 @@ import { useTranslation } from "@/i18n/client";
 import { getErrorText } from "@/i18n/errors";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 
+// ```progress
+// id: feedback.toast-audit
+// status: open
+// goal: Apply one accessible localized feedback policy to user-triggered mutations across the web application.
+// depends: []
+// accept:
+//   - A maintained action inventory identifies when inline state, a toast, or no additional message is the appropriate success and failure feedback.
+//   - Create, publish, save, remove, moderation, and destructive actions follow the inventory without duplicate or contradictory messages.
+//   - Toast timing, focus behavior, live-region semantics, dismissal, and overlapping mutations are accessible.
+//   - Every visible message is owned by typed localization resources and uses shared UI infrastructure.
+// verify:
+//   - Exercise representative success, failure, retry, cancellation, navigation, and overlapping-mutation cases in non-rendering component tests.
+//   - Run the web localization policy check, typecheck, and affected feature tests.
+//   - Have a maintainer perform frontend acceptance for the representative actions.
+// ```
 export function ApplicationUiProvider({ children }: Readonly<{ children: ReactNode }>) {
 	const localizationLanguages = useLocalizationLanguages();
 

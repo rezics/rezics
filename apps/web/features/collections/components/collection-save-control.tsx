@@ -28,6 +28,21 @@ import {
 } from "../data/collection-list";
 import { CollectionDestinationList } from "./collection-destination-list";
 
+// ```progress
+// id: collections.favorite-removal-feedback
+// status: open
+// goal: Give immediate localized confirmation when a person removes an item from Favorites.
+// depends: []
+// accept:
+//   - Successful Favorites removal produces an accessible localized confirmation after the server accepts the mutation.
+//   - The confirmation remains understandable when the destination dialog or current model disappears after cache invalidation.
+//   - Failed and superseded mutations never produce a false success message.
+//   - Add, remove, retry, keyboard, and screen-reader behavior remain consistent with shared feedback conventions.
+// verify:
+//   - Exercise successful, failed, retried, and overlapping Favorites mutations in the component tests.
+//   - Verify every new visible and accessibility string through the typed localization policy check.
+//   - Run the Collections frontend typecheck and tests.
+// ```
 export function CollectionSaveControl({
 	onOpenChange,
 	open: controlledOpen,

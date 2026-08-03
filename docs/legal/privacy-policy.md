@@ -31,6 +31,72 @@ Draft date: 2026-08-01
 - Choose the effective date and material-change notice period only after the published product
   behavior matches this document.
 
+```progress
+id: privacy.controller-identity
+status: open
+goal: Replace every privacy-policy identity and contact placeholder with approved operator details and working request channels.
+depends: []
+accept:
+  - The policy names the actual data controller and contains verified postal, privacy, appeal, security, request, and representative contacts.
+  - Every published channel reaches an owner with a documented response process.
+  - The draft contains no unresolved operator or contact placeholder.
+verify:
+  - Ask qualified counsel and the operator to approve every identity and contact field.
+  - Submit a test request through every published channel and confirm routing and ownership.
+  - Search this document for bracketed publication placeholders.
+```
+
+```progress
+id: privacy.retention-and-deletion
+status: open
+goal: Adopt enforceable retention periods and implement the matching deletion or review jobs.
+depends: []
+accept:
+  - Every retained personal-data category has an approved period, trigger, exception, and accountable owner.
+  - Scheduled jobs enforce deletion or review without removing legally preserved or security-required records.
+  - Backups, logs, derived projections, and external processors follow documented retention and expiry behavior.
+  - Operators can observe job success and recover safely from partial failure.
+verify:
+  - Run retention jobs against isolated boundary fixtures and verify kept, expired, exempt, and retry cases.
+  - Review production schedules, alerts, processor contracts, and backup expiry with the privacy owner.
+  - Ask qualified counsel to approve the documented periods and exceptions.
+```
+
+```progress
+id: privacy.user-rights
+status: open
+goal: Provide working access, correction, export, deletion, objection, and appeal request paths.
+depends: []
+accept:
+  - A person can submit each supported request and receive identity verification, status, completion, and appeal information.
+  - Export and deletion cover every in-scope data owner while preserving required public, legal, security, and third-party boundaries.
+  - Legally binding opt-out preference signals are recognized before the policy promises support.
+  - Requests, operator actions, failures, deadlines, and reversals are auditable without exposing unnecessary personal data.
+verify:
+  - Exercise every request type end to end with an isolated account and representative data.
+  - Verify refusal, partial fulfillment, appeal, timeout, retry, and legally preserved data cases.
+  - Ask qualified counsel and the privacy operator to approve the workflow and user-facing explanations.
+```
+
+```progress
+id: privacy.publish-policy
+status: open
+goal: Publish a jurisdiction-appropriate privacy policy only after the documented product behavior and operating controls are true.
+depends:
+  - privacy.controller-identity
+  - privacy.retention-and-deletion
+  - privacy.user-rights
+accept:
+  - Hosting countries, processors, transfer safeguards, minimum age, and youth handling are approved and match production.
+  - Required regional notices cover every launch jurisdiction.
+  - The effective date and material-change notice process are approved.
+  - Qualified counsel approves the final policy and the production acceptance flow links only to that effective version.
+verify:
+  - Compare the final policy against production data flows, processor records, user controls, and retention evidence.
+  - Obtain qualified legal approval for every launch jurisdiction.
+  - Confirm the published URL, effective date, version handling, and acceptance flow in the release candidate.
+```
+
 ## 1. Introduction
 
 This Privacy Policy explains how `[OPERATOR LEGAL NAME]`, the operator of REZICS ("REZICS," "we,"

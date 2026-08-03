@@ -4,6 +4,21 @@ Reference license slug: `rezics-unit-content-license-v1`
 
 Document date: 2026-07-31
 
+```progress
+id: legal.unit-content-license
+status: done
+goal: Establish the version 1 Unit content license as the only supported hosted-content grant.
+depends: []
+accept:
+  - The legal text defines the Unit-level grant and the contribution notice model.
+  - Persisted grants use the stable `rezics-unit-content-license-v1` reference slug.
+  - The database keeps grant facts immutable and supports governed invalidation and restoration.
+verify:
+  - Run `task services-main:test`.
+  - Run `task db:check`.
+  - Confirm this document's reference slug matches the database constraint and application contract.
+```
+
 ## 1. Definitions
 
 **REZICS** means the person or entity operating the REZICS service.

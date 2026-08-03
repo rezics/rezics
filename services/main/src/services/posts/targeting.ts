@@ -53,12 +53,23 @@ async function lockPostTargetingSource(
 	);
 }
 
-/**
- * Post Targeting Lock currently applies to every Post kind.
- *
- * TODO: Revisit whether structural or governance Post kinds need distinct
- * targeting-lock behavior once those governance semantics are designed.
- */
+// Post Targeting Lock currently applies to every Post kind.
+//
+// ```progress
+// id: posts.targeting-kind-policy
+// status: open
+// goal: Define and enforce targeting-lock behavior for every supported Post kind.
+// depends: []
+// accept:
+//   - The Post-kind contract states which targeting relations each kind may create and which global or Realm locks apply.
+//   - Structural and governance Post kinds cannot bypass a lock or inherit ordinary discussion behavior accidentally.
+//   - API errors and authorization checks preserve the same policy for create, retarget, and restore paths.
+//   - Existing ordinary Posts keep their supported targeting behavior.
+// verify:
+//   - Exercise allowed and denied targeting for every Post kind at global and Realm scope.
+//   - Exercise create, retarget, restore, concurrent mutation, and unauthorized caller cases.
+//   - Run the Posts service and API tests.
+// ```
 async function ensurePostTargetingAllowed(
 	tx: DatabaseTransaction,
 	input: {
