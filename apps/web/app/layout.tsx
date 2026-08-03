@@ -21,6 +21,8 @@ import "@/styles/global.css";
 const frontendOrigin =
 	process.env.FRONTEND_URL ??
 	process.env.BETTER_AUTH_TRUSTED_ORIGINS?.split(",").find((origin) => origin.trim());
+const notoSansTcStylesheet =
+	"https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap";
 
 function fontAwesomeKitCssUrl(): URL | undefined {
 	const value = process.env.FONT_AWESOME_KIT_CSS_URL?.trim();
@@ -101,6 +103,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 	const dehydratedState = dehydrate(queryClient);
 	const fontAwesomeCss = fontAwesomeKitCssUrl();
 	const fontAwesomeLicense = fontAwesomeKitLicense();
+	const usesTraditionalChineseFont = locale.current === "zh-Hant";
 	return (
 		<html
 			data-font-awesome={fontAwesomeCss ? "configured" : "unconfigured"}
@@ -110,6 +113,17 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 			suppressHydrationWarning
 		>
 			<head>
+				{usesTraditionalChineseFont ? (
+					<>
+						<link href="https://fonts.googleapis.com" rel="preconnect" />
+						<link
+							crossOrigin="anonymous"
+							href="https://fonts.gstatic.com"
+							rel="preconnect"
+						/>
+						<link href={notoSansTcStylesheet} rel="stylesheet" />
+					</>
+				) : null}
 				{fontAwesomeCss ? (
 					<>
 						<link

@@ -33,8 +33,8 @@
 	--contrast-foreground: #ffffff;
 	--contrast-muted: #b6b6b6;
 	--rezics-font-sans:
-		Inter, "Noto Sans CJK TC", "Source Han Sans TC", "Microsoft JhengHei", ui-sans-serif,
-		system-ui, sans-serif;
+		Inter, "Noto Sans TC", "Noto Sans CJK TC", "Source Han Sans TC", "Microsoft JhengHei",
+		ui-sans-serif, system-ui, sans-serif;
 	--rezics-font-heading: var(--rezics-font-sans);
 }
 

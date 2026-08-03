@@ -13,6 +13,8 @@ import "@rezics/ui/styles.css";
 import "../src/styles/site.css";
 
 const initialThemeScript = `(function(){try{var saved=localStorage.getItem("rezics-theme");var dark=saved==="dark"||(saved!=="light"&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",dark);}catch{}})();`;
+const notoSansTcStylesheet =
+	"https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap";
 
 export default function Layout({ children }: { readonly children: ReactNode }) {
 	const data = useData<AboutPageData>();
@@ -31,6 +33,9 @@ export default function Layout({ children }: { readonly children: ReactNode }) {
 	return (
 		<>
 			<Head>
+				<link href="https://fonts.googleapis.com" rel="preconnect" />
+				<link crossOrigin="anonymous" href="https://fonts.gstatic.com" rel="preconnect" />
+				<link href={notoSansTcStylesheet} rel="stylesheet" />
 				<meta name="color-scheme" content="light dark" />
 				<script dangerouslySetInnerHTML={{ __html: initialThemeScript }} />
 				<link rel="canonical" href={canonical} />
