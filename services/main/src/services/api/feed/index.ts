@@ -1,19 +1,6 @@
 import { createHash } from "node:crypto";
 import { StatusCodes } from "http-status-codes";
-import {
-	and,
-	asc,
-	count,
-	desc,
-	eq,
-	exists,
-	inArray,
-	isNull,
-	lte,
-	or,
-	sql,
-	type SQL,
-} from "drizzle-orm";
+import { and, asc, desc, eq, exists, inArray, isNull, lte, or, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
 import type { PresentedAvatar } from "@rezics/avatar";
@@ -321,6 +308,9 @@ interface FeedSearchSelection {
 	readonly relation: "exact" | "lower-bound";
 }
 
+type FeedTotalRelation = FeedSearchSelection["relation"];
+type FeedCandidateCoverage = "bounded" | "exhaustive";
+
 async function resolveFeedSearchSelection(input: {
 	readonly content?: readonly FeedContentKind[];
 	readonly filter: UnitPredicate | undefined;
@@ -566,26 +556,42 @@ export function getFeedEligibilityCondition(
 	)!;
 }
 
-async function countFeedItems(
-	viewer: Pick<
-		RecommendationViewer,
-		"contentRatings" | "personalized" | "preferredLanguages" | "profileId"
-	>,
-	scope: FeedEligibilityScope,
-	asOf: Date,
-): Promise<number> {
-	const [row] = await database
-		.select({ value: count() })
-		.from(unit)
-		.leftJoin(post, eq(post.id, unit.id))
-		.where(getFeedEligibilityCondition(viewer, scope, asOf));
-	return toSafeInteger(row?.value ?? 0, "feed total");
-}
-
 export interface CandidateSources {
 	ids: string[];
 	relevance: Map<string, number>;
 	reason: Map<string, RecommendationReason>;
+}
+
+interface FeedCandidateSourceWindow extends CandidateSources {
+	readonly coverage: FeedCandidateCoverage;
+}
+
+/** @internal Resolves rows returned by a `limit + 1` exhaustion probe. */
+export function resolveFeedCandidateWindow<T>(
+	rows: readonly T[],
+	limit: number,
+): Readonly<{ rows: readonly T[]; coverage: FeedCandidateCoverage }> {
+	if (!Number.isSafeInteger(limit) || limit < 1)
+		throw new RangeError("Feed candidate limit must be a positive safe integer");
+	return {
+		rows: rows.slice(0, limit),
+		coverage: rows.length > limit ? "bounded" : "exhaustive",
+	};
+}
+
+/** @internal Creates a Feed total from candidates whose eligibility has already been verified. */
+export function createFeedTotal(input: {
+	readonly candidates: readonly unknown[];
+	readonly coverage: FeedCandidateCoverage;
+	readonly searchRelation: FeedTotalRelation;
+}): Readonly<{ value: number; relation: FeedTotalRelation }> {
+	return {
+		value: input.candidates.length,
+		relation:
+			input.coverage === "exhaustive" && input.searchRelation === "exact"
+				? "exact"
+				: "lower-bound",
+	};
 }
 
 type CandidateReason =
@@ -598,7 +604,7 @@ async function getCandidateSources(input: {
 	snapshotId: string | null;
 	asOf: Date;
 	anchorId?: string;
-}): Promise<CandidateSources> {
+}): Promise<FeedCandidateSourceWindow> {
 	const condition = getFeedEligibilityCondition(
 		input.viewer,
 		input.query,
@@ -627,7 +633,7 @@ async function getCandidateSources(input: {
 		.leftJoin(recommendationUnitStat, snapshotJoin)
 		.where(condition)
 		.orderBy(desc(objective), desc(unit.createdAt), desc(unit.id))
-		.limit(objectiveLimit);
+		.limit(objectiveLimit + 1);
 	const recentPromise = database
 		.select({ id: unit.id })
 		.from(unit)
@@ -717,13 +723,15 @@ async function getCandidateSources(input: {
 					.limit(RecommendationPolicy.maxFollowCandidates)
 			: Promise.resolve([]);
 
-	const [objectiveRows, recentRows, graphRows, followedRows, realmRows] = await Promise.all([
+	const [objectiveProbeRows, recentRows, graphRows, followedRows, realmRows] = await Promise.all([
 		objectivePromise,
 		recentPromise,
 		graphPromise,
 		followedPromise,
 		realmPromise,
 	]);
+	const objectiveWindow = resolveFeedCandidateWindow(objectiveProbeRows, objectiveLimit);
+	const objectiveRows = objectiveWindow.rows;
 	const relevance = new Map<string, number>();
 	const reason = new Map<string, CandidateReason>();
 	const addRanked = (
@@ -767,6 +775,7 @@ async function getCandidateSources(input: {
 				...recentRows.map(({ id }) => id),
 			]),
 		].slice(0, RecommendationPolicy.maxCandidates),
+		coverage: objectiveWindow.coverage,
 		relevance,
 		reason,
 	};
@@ -1666,17 +1675,14 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 			throw new InvalidFeedCursor();
 		const sort = body.sort ?? "best";
 		const asOf = cursor ? new Date(cursor.asOf) : new Date();
-		const [sources, total] = await Promise.all([
-			getCandidateSources({
-				viewer,
-				query: scope,
-				sort,
-				snapshotId: snapshotContext.id,
-				asOf,
-				...(cursor ? { anchorId: cursor.lastId } : {}),
-			}),
-			countFeedItems(viewer, scope, asOf),
-		]);
+		const sources = await getCandidateSources({
+			viewer,
+			query: scope,
+			sort,
+			snapshotId: snapshotContext.id,
+			asOf,
+			...(cursor ? { anchorId: cursor.lastId } : {}),
+		});
 		const candidates = await getFeedRankingCandidates({
 			ids: sources.ids,
 			sources,
@@ -1711,10 +1717,11 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 		const last = page.at(-1);
 		return {
 			items,
-			total: {
-				value: total,
-				relation: searchSelection?.relation ?? ("exact" as const),
-			},
+			total: createFeedTotal({
+				candidates: ranked,
+				coverage: sources.coverage,
+				searchRelation: searchSelection?.relation ?? "exact",
+			}),
 			nextCursor:
 				start + page.length < ranked.length && last
 					? Buffer.from(

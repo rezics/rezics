@@ -2,16 +2,67 @@ import { PgDialect } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
 
 import {
+	createFeedTotal,
 	createFeedScoreCandidates,
 	getFeedCandidateRealmIdExpression,
 	getFeedEligibilityCondition,
 	prioritizeFeedRealmContexts,
+	resolveFeedCandidateWindow,
 	resolveFeedContentSelection,
 	resolveFeedLocalizationLanguages,
 	resolveFeedSearchCategories,
 } from "./index";
 
 const dialect = new PgDialect();
+
+describe("feed candidate totals", () => {
+	it("keeps only the configured candidate window and marks a sentinel row as bounded", () => {
+		const window = resolveFeedCandidateWindow(["first", "second", "sentinel"], 2);
+
+		expect(window).toEqual({
+			rows: ["first", "second"],
+			coverage: "bounded",
+		});
+	});
+
+	it("proves exhaustive coverage when the sentinel query returns no extra row", () => {
+		expect(resolveFeedCandidateWindow(["first", "second"], 2)).toEqual({
+			rows: ["first", "second"],
+			coverage: "exhaustive",
+		});
+	});
+
+	it("rejects a candidate limit that cannot establish the sentinel invariant", () => {
+		expect(() => resolveFeedCandidateWindow([], 0)).toThrow(RangeError);
+	});
+
+	it.each([
+		{
+			name: "bounded candidate window",
+			coverage: "bounded" as const,
+			searchRelation: "exact" as const,
+		},
+		{
+			name: "lower-bound Search selection",
+			coverage: "exhaustive" as const,
+			searchRelation: "lower-bound" as const,
+		},
+	])("returns a verified lower bound for a $name", ({ coverage, searchRelation }) => {
+		expect(
+			createFeedTotal({ candidates: ["first", "second"], coverage, searchRelation }),
+		).toEqual({ value: 2, relation: "lower-bound" });
+	});
+
+	it("returns an exact total only when both candidate and Search inputs are exhaustive", () => {
+		expect(
+			createFeedTotal({
+				candidates: ["first", "second"],
+				coverage: "exhaustive",
+				searchRelation: "exact",
+			}),
+		).toEqual({ value: 2, relation: "exact" });
+	});
+});
 
 describe("feed Search categories", () => {
 	it("maps a fixed Review feed to the dedicated Search index", () => {
