@@ -608,7 +608,15 @@ export interface CompiledSearchFeature {
  */
 export interface SearchExecutionPolicy {
 	readonly sortProfile: SearchFeatureSurface;
-	readonly pageBudget: "per-category" | "shared";
+	readonly pageBudget: "per-category" | "global";
+}
+
+export interface GroupedSearchExecutionPolicy extends SearchExecutionPolicy {
+	readonly pageBudget: "per-category";
+}
+
+export interface GlobalSearchExecutionPolicy extends SearchExecutionPolicy {
+	readonly pageBudget: "global";
 }
 
 export function compileSearchFeatureInput(
@@ -694,13 +702,9 @@ export function compileSearchFeatureInput(
 			)
 		: input.document.categories;
 	if (!categories.length) throw new InvalidSearch("Search filters exclude every category");
-	// Search executes one authorized cursor per effective category. A category
-	// filter must narrow this divisor, otherwise an Entities-only page of 20
-	// becomes 2 merely because the document originally declared ten categories.
-	const pageSize =
-		execution.pageBudget === "shared"
-			? Math.max(1, Math.floor(requestedPageSize / categories.length))
-			: requestedPageSize;
+	// Per-category Search gives every result group this budget. A Search Feed
+	// applies it once to its single globally ordered candidate stream.
+	const pageSize = requestedPageSize;
 	const facets = input.document.results.facets.map((controlKey) => {
 		const control = controls.get(controlKey);
 		if (!control) throw new InvalidSearch(`Facet control ${controlKey} is unavailable`);
@@ -761,7 +765,7 @@ export function mapSearchFeatureFacets(
 
 export async function executeSearchFeatureInput(
 	input: unknown,
-	execution: SearchExecutionPolicy,
+	execution: GroupedSearchExecutionPolicy,
 	localizationLanguages: readonly ContentLanguage[],
 	profileId: string | undefined,
 	hasDevelopmentPreviewAccess: boolean,
@@ -784,7 +788,7 @@ export async function executeSearchFeatureInput(
 /** @internal Executes a Search Feature for a Feed presenter that only consumes Unit identities. */
 export async function executeSearchFeatureFeedInput(
 	input: unknown,
-	execution: SearchExecutionPolicy,
+	execution: GlobalSearchExecutionPolicy,
 	localizationLanguages: readonly ContentLanguage[],
 	profileId: string | undefined,
 	hasDevelopmentPreviewAccess: boolean,

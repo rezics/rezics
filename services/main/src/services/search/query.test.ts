@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import type { SearchExpression } from "./query";
 import {
+	createGlobalSearchCursor,
+	parseGlobalSearchCursor,
+	parseSearchCursor,
 	readSearchExpressionLanguageBoundary,
 	specializeSearchExpressionForCategory,
 } from "./query";
@@ -111,5 +114,34 @@ describe("Search language presentation boundary", () => {
 				],
 			}),
 		).toBeUndefined();
+	});
+});
+
+describe("global Search cursor", () => {
+	it("round-trips one global offset without accepting a grouped cursor shape", () => {
+		const state = {
+			version: 2,
+			generationId: "019f7eed-5d42-7102-8387-cc1d13b176d2",
+			requestHash: "a".repeat(64),
+			pageSize: 20,
+			offset: 37,
+		} as const;
+		const cursor = createGlobalSearchCursor(state);
+
+		expect(cursor.startsWith("s2_")).toBe(true);
+		expect(parseGlobalSearchCursor(cursor)).toEqual(state);
+		expect(() => parseSearchCursor(cursor)).toThrow("Invalid Search cursor");
+	});
+
+	it("rejects a negative global offset before encoding", () => {
+		expect(() =>
+			createGlobalSearchCursor({
+				version: 2,
+				generationId: "019f7eed-5d42-7102-8387-cc1d13b176d2",
+				requestHash: "a".repeat(64),
+				pageSize: 20,
+				offset: -1,
+			}),
+		).toThrow("Invalid Search cursor");
 	});
 });

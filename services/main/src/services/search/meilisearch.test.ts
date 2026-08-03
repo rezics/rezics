@@ -143,6 +143,66 @@ describe("Meilisearch expression compiler", () => {
 		});
 	});
 
+	it("queries one globally sorted stream across category-specific branches", async () => {
+		const fetchMock = vi.fn().mockResolvedValue(
+			new Response(
+				JSON.stringify({
+					results: [
+						{
+							hits: [
+								{
+									id: "019f7eed-5d42-7102-8387-cc1d13b176d2",
+									revision: 1,
+									category: "posts",
+									unitType: "post",
+								},
+							],
+							estimatedTotalHits: 1,
+							processingTimeMs: 1,
+						},
+					],
+				}),
+				{ status: 200, headers: { "Content-Type": "application/json" } },
+			),
+		);
+		vi.stubGlobal("fetch", fetchMock);
+
+		const [result] = await searchCandidates([
+			{
+				indexUid: "rezics_units_v1_20260801",
+				branches: [
+					{
+						category: "units",
+						expression: {
+							field: "language",
+							operator: "equals",
+							value: "zh-Hant",
+						},
+					},
+					{ category: "posts" },
+				],
+				query: "",
+				offset: 0,
+				limit: 20,
+				sort: "createdAt:desc",
+			},
+		]);
+
+		expect(result?.hits.map(({ category }) => category)).toEqual(["posts"]);
+		const request = fetchMock.mock.calls[0]?.[1];
+		if (!request || typeof request.body !== "string")
+			throw new TypeError("Expected a JSON multi-search request body");
+		const body = JSON.parse(request.body);
+		expect(body.queries).toHaveLength(1);
+		expect(body.queries[0]).toMatchObject({
+			filter: [
+				'((category = "units" AND (languages = "zh-Hant")) OR (category = "posts"))',
+				"access.publicDiscoverable = true",
+			],
+			sort: ["ranking.createdAt:desc", "id:asc"],
+		});
+	});
+
 	it("keeps relevance free of business sorting and relaxes common terms first", async () => {
 		const fetchMock = vi.fn().mockResolvedValue(
 			new Response(

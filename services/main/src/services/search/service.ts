@@ -67,7 +67,7 @@ import {
 	supportsCurrentSearchField,
 } from "./field-registry";
 import { getActiveSearchGeneration } from "./generation";
-import { searchCandidates } from "./meilisearch";
+import { searchCandidates, type CandidateQueryBranch } from "./meilisearch";
 import {
 	assertSearchExpression,
 	combineSearchExpressions,
@@ -779,6 +779,15 @@ function buildEffectiveSearchExpression(
 	return expression;
 }
 
+/** @internal Proves that one category-specific request can reach both search engines. */
+export function validateSearchDomainRequest(
+	category: SearchCategory,
+	request: DomainSearchRequest,
+): void {
+	const expression = buildEffectiveSearchExpression(request);
+	buildSearchConditions(category, request, expression);
+}
+
 interface SearchIdentifier {
 	readonly id: string;
 }
@@ -1176,6 +1185,193 @@ export function searchDomainIdentifiers(
 	request: DomainSearchRequest,
 ): Promise<SearchDomainScanResult<SearchIdentifier>> {
 	return searchDomainScan(category, request, "identifiers");
+}
+
+export interface GlobalSearchBranch {
+	readonly category: SearchCategory;
+	readonly searchExpression?: SearchExpression;
+}
+
+export interface GlobalSearchIdentifiersRequest extends Omit<
+	DomainSearchRequest,
+	"cursor" | "searchExpression"
+> {
+	readonly branches: readonly GlobalSearchBranch[];
+	readonly cursor?: never;
+}
+
+/**
+ * Executes one globally sorted candidate stream across mutually exclusive categories.
+ *
+ * Meilisearch establishes the total order. PostgreSQL only removes candidates
+ * that fail authoritative access or residual predicates and preserves the
+ * engine ordinality of every surviving Unit.
+ *
+ * @internal
+ */
+export async function searchGlobalIdentifiers(
+	request: GlobalSearchIdentifiersRequest,
+): Promise<SearchDomainScanResult<SearchIdentifier>> {
+	const startedAt = performance.now();
+	if (!request.branches.length) throw new InvalidSearch("Search requires at least one category");
+	if (new Set(request.branches.map(({ category }) => category)).size !== request.branches.length)
+		throw new InvalidSearch("Search categories must be unique");
+
+	const { branches, ...commonRequest } = request;
+	const preparedBranches = branches.map((branch) => {
+		const domainRequest = {
+			...commonRequest,
+			...(branch.searchExpression ? { searchExpression: branch.searchExpression } : {}),
+		} satisfies DomainSearchRequest;
+		const searchExpression = buildEffectiveSearchExpression(domainRequest);
+		return {
+			category: branch.category,
+			conditions: buildSearchConditions(branch.category, domainRequest, searchExpression),
+			...(searchExpression ? { searchExpression } : {}),
+		};
+	});
+	const candidateBranches: CandidateQueryBranch[] = preparedBranches.map(
+		({ category, searchExpression }) => ({
+			category,
+			...(searchExpression ? { expression: searchExpression } : {}),
+		}),
+	);
+	const branchConditions = preparedBranches.map(
+		({ category, conditions }) =>
+			sql`(search_candidate.category = ${category} and ${sql.join(conditions, sql` and `)})`,
+	);
+	const sort = request.sort ?? (request.query?.trim() ? "relevance" : "best");
+	const generation = await getActiveSearchGeneration("current");
+	const limit = request.limit ?? 20;
+	const initialOffset = request.offset ?? 0;
+	const identifiers: SearchIdentifier[] = [];
+	const seen = new Set<string>();
+	let authorizedCount = 0;
+	let scanOffset = initialOffset;
+	let exhausted = false;
+	let rounds = 0;
+	let pageBoundaryOffset: number | undefined;
+	const authorizationTarget = limit + 1;
+
+	while (
+		!exhausted &&
+		authorizedCount < authorizationTarget &&
+		scanOffset - initialOffset < env.SEARCH_CANDIDATE_SCAN_LIMIT
+	) {
+		rounds += 1;
+		const batchLimit = Math.min(
+			env.SEARCH_CANDIDATE_BATCH_SIZE,
+			env.SEARCH_CANDIDATE_SCAN_LIMIT - (scanOffset - initialOffset),
+		);
+		const [candidateResult] = await searchCandidates([
+			{
+				indexUid: generation.indexUid,
+				branches: candidateBranches,
+				query: request.query?.trim() ?? "",
+				offset: scanOffset,
+				limit: batchLimit,
+				profileId: request.profileId,
+				sort,
+			},
+		]);
+		if (!candidateResult) throw new Error("Meilisearch omitted a candidate result");
+		const candidateEntries = candidateResult.hits.flatMap((candidate, index) => {
+			if (seen.has(candidate.id)) return [];
+			seen.add(candidate.id);
+			return [
+				{
+					id: candidate.id,
+					position: index + 1,
+					revision: candidate.revision,
+					category: candidate.category,
+				},
+			];
+		});
+		const batchOffset = scanOffset;
+		const remainingAuthorizationTarget = authorizationTarget - authorizedCount;
+		const result = candidateEntries.length
+			? await database.execute<{
+					id: string;
+					ordinality: number | string;
+				}>(sql`
+		WITH search_candidate(unit_id, ordinality, revision, category) AS (
+			SELECT * FROM unnest(
+				${toUuidArray(candidateEntries.map(({ id }) => id))},
+				${toIntegerArray(candidateEntries.map(({ position }) => position))},
+				${toBigIntArray(candidateEntries.map(({ revision }) => revision))},
+				${toTextArray(candidateEntries.map(({ category }) => category))}
+			)
+		)
+		SELECT ${unit.id}::text AS id, search_candidate.ordinality
+		FROM search_candidate
+		JOIN ${searchUnitProjectionSource}
+			ON ${searchUnitProjectionSource.unitId} = search_candidate.unit_id
+			AND ${searchUnitProjectionSource.revision} = search_candidate.revision
+		JOIN ${unit} ON ${unit.id} = search_candidate.unit_id
+		LEFT JOIN ${profile} ON ${profile.id} = ${unit.id}
+		LEFT JOIN ${entity} ON ${entity.id} = ${unit.id}
+		LEFT JOIN ${post} ON ${post.id} = ${unit.id}
+		LEFT JOIN ${postReply} ON ${postReply.postId} = ${unit.id}
+		LEFT JOIN ${postReplyStat} ON ${postReplyStat.postId} = ${unit.id}
+		LEFT JOIN ${unitFollowStat} ON ${unitFollowStat.unitId} = ${unit.id}
+		LEFT JOIN ${unit} AS ${subjectUnit} ON ${subjectUnit.id} = ${post.subjectUnitId}
+		LEFT JOIN ${realm} ON ${realm.id} = ${unit.id}
+		LEFT JOIN ${collection} ON ${collection.id} = ${unit.id}
+		LEFT JOIN ${poll} ON ${poll.id} = ${unit.id}
+		LEFT JOIN ${book} ON ${book.id} = ${unit.id}
+		LEFT JOIN ${media} ON ${media.id} = ${unit.id}
+		LEFT JOIN ${software} ON ${software.id} = ${unit.id}
+		WHERE (${sql.join(branchConditions, sql` or `)})
+		ORDER BY search_candidate.ordinality
+		LIMIT ${remainingAuthorizationTarget}
+	`)
+			: { rows: [] };
+		const authorizationMayBeTruncated =
+			result.rows.length === remainingAuthorizationTarget &&
+			candidateEntries.length > remainingAuthorizationTarget;
+		authorizedCount += result.rows.length;
+		for (const row of result.rows)
+			if (identifiers.length < limit) {
+				identifiers.push({ id: row.id });
+				if (identifiers.length === limit) {
+					const ordinality = Number(row.ordinality);
+					if (!Number.isSafeInteger(ordinality) || ordinality < 1)
+						throw new TypeError("PostgreSQL returned invalid candidate ordinality");
+					pageBoundaryOffset = batchOffset + ordinality;
+				}
+			}
+		scanOffset += candidateResult.hits.length;
+		exhausted =
+			!authorizationMayBeTruncated &&
+			(candidateResult.hits.length < batchLimit ||
+				scanOffset >= candidateResult.estimatedTotalHits);
+		if (candidateResult.hits.length === 0) exhausted = true;
+	}
+	const scanLimitHit =
+		!exhausted && scanOffset - initialOffset >= env.SEARCH_CANDIDATE_SCAN_LIMIT;
+	const nextOffset =
+		identifiers.length === limit && (authorizedCount > identifiers.length || !exhausted)
+			? pageBoundaryOffset
+			: identifiers.length < limit && !exhausted
+				? scanOffset
+				: undefined;
+	metrics.searchCandidateScan(
+		"current",
+		seen.size,
+		authorizedCount,
+		rounds,
+		scanLimitHit,
+		!exhausted,
+	);
+	return {
+		hits: identifiers,
+		total: { value: authorizedCount, relation: exhausted ? "exact" : "lower-bound" },
+		offset: initialOffset,
+		nextOffset: nextOffset ?? scanOffset,
+		exhausted: nextOffset === undefined,
+		limit,
+		processingTimeMs: Math.round((performance.now() - startedAt) * 1000) / 1000,
+	};
 }
 
 export interface SearchFacet {

@@ -15,8 +15,8 @@ const GroupedSearchPolicy = {
 	sortProfile: "search",
 	pageBudget: "per-category",
 } as const;
-const SharedSearchPolicy = { sortProfile: "search", pageBudget: "shared" } as const;
-const SharedFeedPolicy = { sortProfile: "feed", pageBudget: "shared" } as const;
+const GlobalSearchPolicy = { sortProfile: "search", pageBudget: "global" } as const;
+const GlobalFeedPolicy = { sortProfile: "feed", pageBudget: "global" } as const;
 
 function compileSearchFeatureInput(input: unknown) {
 	return compileSearchFeatureInputForPolicy(input, GroupedSearchPolicy);
@@ -58,16 +58,12 @@ describe("Search Feature v1", () => {
 		const document = createDefaultSearchDocument("global");
 		const compiled = compileSearchFeatureInputForPolicy(
 			{ document, contexts: [], injections: [], state: { pageSize: 19 } },
-			SharedFeedPolicy,
+			GlobalFeedPolicy,
 			false,
 		);
 
 		expect(compiled.request.categories).not.toContain("tag-structures");
-		expect(compiled.request.pageSize).toBe(
-			Math.floor(
-				19 / document.categories.filter((category) => category !== "tag-structures").length,
-			),
-		);
+		expect(compiled.request.pageSize).toBe(19);
 	});
 
 	it("rejects a Tag-path-only Search document outside development preview", () => {
@@ -191,22 +187,22 @@ describe("Search Feature v1", () => {
 				.request.sort,
 		).toBe("relevance");
 		expect(
-			compileSearchFeatureInputForPolicy({ ...input, state: textState }, SharedSearchPolicy)
+			compileSearchFeatureInputForPolicy({ ...input, state: textState }, GlobalSearchPolicy)
 				.request.sort,
 		).toBe("relevance");
 		expect(
-			compileSearchFeatureInputForPolicy({ ...input, state: textState }, SharedFeedPolicy)
+			compileSearchFeatureInputForPolicy({ ...input, state: textState }, GlobalFeedPolicy)
 				.request.sort,
 		).toBe("best");
 		expect(() =>
 			compileSearchFeatureInputForPolicy(
 				{ ...input, state: { ...textState, sort: "relevance" } },
-				SharedFeedPolicy,
+				GlobalFeedPolicy,
 			),
 		).toThrow("Search sort relevance is unavailable");
 	});
 
-	it("distributes a shared page budget independently from the sort profile", () => {
+	it("keeps the configured page budget for grouped and global execution", () => {
 		const globalDocument = createDefaultSearchDocument("global");
 		const globalInput = {
 			document: globalDocument,
@@ -216,18 +212,14 @@ describe("Search Feature v1", () => {
 		};
 
 		const grouped = compileSearchFeatureInputForPolicy(globalInput, GroupedSearchPolicy);
-		const sharedSearch = compileSearchFeatureInputForPolicy(globalInput, SharedSearchPolicy);
-		const sharedFeed = compileSearchFeatureInputForPolicy(globalInput, SharedFeedPolicy);
-		const expectedSharedPageSize = Math.max(
-			1,
-			Math.floor(globalDocument.results.pageSize / globalDocument.categories.length),
-		);
+		const globalSearch = compileSearchFeatureInputForPolicy(globalInput, GlobalSearchPolicy);
+		const globalFeed = compileSearchFeatureInputForPolicy(globalInput, GlobalFeedPolicy);
 
 		expect(grouped.request.pageSize).toBe(globalDocument.results.pageSize);
-		expect(sharedSearch.request.pageSize).toBe(expectedSharedPageSize);
-		expect(sharedFeed.request.pageSize).toBe(expectedSharedPageSize);
-		expect(sharedSearch.inputIdentity).not.toBe(grouped.inputIdentity);
-		expect(sharedSearch.inputIdentity).not.toBe(sharedFeed.inputIdentity);
+		expect(globalSearch.request.pageSize).toBe(globalDocument.results.pageSize);
+		expect(globalFeed.request.pageSize).toBe(globalDocument.results.pageSize);
+		expect(globalSearch.inputIdentity).not.toBe(grouped.inputIdentity);
+		expect(globalSearch.inputIdentity).not.toBe(globalFeed.inputIdentity);
 
 		const entitiesOnly = compileSearchFeatureInputForPolicy(
 			{
@@ -244,7 +236,7 @@ describe("Search Feature v1", () => {
 					},
 				},
 			},
-			SharedSearchPolicy,
+			GlobalSearchPolicy,
 		);
 		expect(entitiesOnly.request.categories).toEqual(["entities"]);
 		expect(entitiesOnly.request.pageSize).toBe(20);
@@ -258,7 +250,7 @@ describe("Search Feature v1", () => {
 					injections: [],
 					state: {},
 				},
-				SharedSearchPolicy,
+				GlobalSearchPolicy,
 			).request.pageSize,
 		).toBe(realmDocument.results.pageSize);
 	});

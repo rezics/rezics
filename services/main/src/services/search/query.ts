@@ -190,6 +190,22 @@ export interface SearchCursorState {
 	>;
 }
 
+export const GlobalSearchCursorVersion = 2 as const;
+
+/**
+ * Cursor for one globally ranked candidate stream shared by every selected category.
+ *
+ * This is deliberately distinct from the v1 per-category cursor: a category
+ * offset cannot be interpreted as a position in the global ordering.
+ */
+export interface GlobalSearchCursorState {
+	readonly version: typeof GlobalSearchCursorVersion;
+	readonly generationId: string;
+	readonly requestHash: string;
+	readonly pageSize: number;
+	readonly offset: number;
+}
+
 const Base64UrlAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
 function encodeBase64Url(value: string): string {
@@ -243,20 +259,57 @@ export function parseSearchCursor(value: string): SearchCursorState {
 	return decoded;
 }
 
+/** Creates an opaque cursor for a globally ranked Search Feed. */
+export function createGlobalSearchCursor(state: GlobalSearchCursorState): string {
+	assertGlobalSearchCursorState(state);
+	return `s2_${encodeBase64Url(JSON.stringify(state))}`;
+}
+
+/** Parses only globally ranked Search Feed cursors. */
+export function parseGlobalSearchCursor(value: string): GlobalSearchCursorState {
+	if (!value.startsWith("s2_")) throw new TypeError("Invalid Search cursor");
+	let decoded: unknown;
+	try {
+		decoded = JSON.parse(decodeBase64Url(value.slice(3)));
+	} catch {
+		throw new TypeError("Invalid Search cursor");
+	}
+	assertGlobalSearchCursorState(decoded);
+	return decoded;
+}
+
+function hasValidSearchCursorIdentity(candidate: Record<string, unknown>): boolean {
+	return (
+		typeof candidate.generationId === "string" &&
+		/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(
+			candidate.generationId,
+		) &&
+		typeof candidate.requestHash === "string" &&
+		/^[0-9a-f]{64}$/.test(candidate.requestHash) &&
+		Number.isSafeInteger(candidate.pageSize) &&
+		(candidate.pageSize as number) >= 1 &&
+		(candidate.pageSize as number) <= 100
+	);
+}
+
+function assertGlobalSearchCursorState(value: unknown): asserts value is GlobalSearchCursorState {
+	if (!value || typeof value !== "object") throw new TypeError("Invalid Search cursor");
+	const candidate = value as Record<string, unknown>;
+	if (
+		candidate.version !== GlobalSearchCursorVersion ||
+		!hasValidSearchCursorIdentity(candidate) ||
+		!Number.isSafeInteger(candidate.offset) ||
+		(candidate.offset as number) < 0
+	)
+		throw new TypeError("Invalid Search cursor");
+}
+
 function assertSearchCursorState(value: unknown): asserts value is SearchCursorState {
 	if (!value || typeof value !== "object") throw new TypeError("Invalid Search cursor");
 	const candidate = value as Record<string, unknown>;
 	if (
 		candidate.version !== SearchCursorVersion ||
-		typeof candidate.generationId !== "string" ||
-		!/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(
-			candidate.generationId,
-		) ||
-		typeof candidate.requestHash !== "string" ||
-		!/^[0-9a-f]{64}$/.test(candidate.requestHash) ||
-		!Number.isSafeInteger(candidate.pageSize) ||
-		(candidate.pageSize as number) < 1 ||
-		(candidate.pageSize as number) > 100 ||
+		!hasValidSearchCursorIdentity(candidate) ||
 		!candidate.categories ||
 		typeof candidate.categories !== "object" ||
 		Array.isArray(candidate.categories)

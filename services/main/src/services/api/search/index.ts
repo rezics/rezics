@@ -45,7 +45,7 @@ import {
 	executeSearchFeatureFeedInput,
 	executeSearchFeatureInput,
 	resolveSearchDocument,
-	type SearchExecutionPolicy,
+	type GroupedSearchExecutionPolicy,
 } from "../../search/templates";
 import {
 	createSharedSearchQuery,
@@ -69,7 +69,6 @@ import { hydrateFeedItems } from "../feed";
 import { FeedContentKindValues } from "../feed/schema";
 import { DateTime, LocalizationLanguagePriority, Uuid } from "../schema";
 import { findFeedBlock, findSearchFeatureSource } from "./block-source";
-import { combineSearchExactness, mixSearchGroupHits } from "./mixed-feed";
 import { DomainSearchBody, DomainSearchParams, GroupedSearchBody } from "./schema";
 import {
 	toApiErrorResponse,
@@ -268,7 +267,7 @@ async function resolveZoneBlockExecution(input: ZoneBlockExecutionInput) {
 
 async function executeZoneBlock(
 	input: ZoneBlockExecutionInput & {
-		execution: SearchExecutionPolicy;
+		execution: GroupedSearchExecutionPolicy;
 	},
 ) {
 	const resolved = await resolveZoneBlockExecution(input);
@@ -296,7 +295,7 @@ async function executeZoneFeedBlock(input: {
 	});
 	const result = await executeSearchFeatureFeedInput(
 		resolved.featureInput,
-		{ sortProfile: "feed", pageBudget: "shared" },
+		{ sortProfile: "feed", pageBudget: "global" },
 		resolved.request.localizationLanguages,
 		input.profileId,
 		input.hasDevelopmentPreviewAccess,
@@ -318,7 +317,7 @@ async function presentSearchResultAsFeed(
 	}>,
 	profileId?: string,
 ) {
-	const candidates = mixSearchGroupHits(result.groups).map(({ id }) => ({
+	const candidates = result.hits.map(({ id }) => ({
 		id,
 		realmId: null,
 	}));
@@ -349,7 +348,7 @@ async function presentSearchResultAsFeed(
 		items,
 		nextCursor: result.nextCursor,
 		facets: result.facets,
-		total: combineSearchExactness(result.groups.map((group) => group.total)),
+		total: result.total,
 	};
 }
 
@@ -431,7 +430,7 @@ export default new Elysia({ prefix: "/search" })
 						injections: body.injections,
 						state: body.state,
 					},
-					{ sortProfile: body.surface, pageBudget: "shared" },
+					{ sortProfile: body.surface, pageBudget: "global" },
 					body.localizationLanguages,
 					identity.authorization.profileId,
 					hasDevelopmentPreviewAccess,
@@ -596,7 +595,7 @@ export default new Elysia({ prefix: "/search" })
 						injections: body.injections,
 						state: body.state,
 					},
-					{ sortProfile: body.surface, pageBudget: "shared" },
+					{ sortProfile: body.surface, pageBudget: "global" },
 					body.localizationLanguages,
 					identity.authorization.profileId,
 					hasDevelopmentPreviewAccess,

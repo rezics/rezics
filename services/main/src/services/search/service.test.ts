@@ -54,6 +54,7 @@ import {
 	searchDomain,
 	searchDomainFacets,
 	searchDomainIdentifiers,
+	searchGlobalIdentifiers,
 } from "./service";
 import { compileSearchFeatureInput, createDefaultSearchDocument } from "./templates";
 
@@ -191,6 +192,75 @@ describe("domain search SQL", () => {
 		expect(select).not.toHaveBeenCalled();
 	});
 
+	it("preserves one global category order through authorization and pagination", async () => {
+		const rejected = "019f7eed-5d42-7102-8387-cc1d13b176d1";
+		const first = "019f7eed-5d42-7102-8387-cc1d13b176d2";
+		const second = "019f7eed-5d42-7102-8387-cc1d13b176d3";
+		const third = "019f7eed-5d42-7102-8387-cc1d13b176d4";
+		searchCandidates.mockResolvedValueOnce([
+			{
+				hits: [
+					{ id: rejected, revision: 1, category: "posts", unitType: "post" },
+					{ id: first, revision: 1, category: "units", unitType: "book" },
+					{ id: second, revision: 1, category: "posts", unitType: "post" },
+					{ id: third, revision: 1, category: "units", unitType: "book" },
+				],
+				estimatedTotalHits: 4,
+				processingTimeMs: 1,
+			},
+		]);
+		execute.mockResolvedValueOnce({
+			rows: [
+				{ id: first, ordinality: "2" },
+				{ id: second, ordinality: "3" },
+				{ id: third, ordinality: "4" },
+			],
+		});
+
+		const firstPage = await searchGlobalIdentifiers({
+			branches: [{ category: "units" }, { category: "posts" }],
+			limit: 2,
+			sort: "createdAt:desc",
+		});
+
+		expect(firstPage.hits).toEqual([{ id: first }, { id: second }]);
+		expect(firstPage.total).toEqual({ value: 3, relation: "lower-bound" });
+		expect(firstPage.nextOffset).toBe(3);
+		expect(firstPage.exhausted).toBe(false);
+		expect(searchCandidates).toHaveBeenLastCalledWith([
+			expect.objectContaining({
+				branches: [{ category: "units" }, { category: "posts" }],
+				offset: 0,
+				limit: 100,
+				sort: "createdAt:desc",
+			}),
+		]);
+		const query = lastQuery();
+		expect(query).toContain("WITH search_candidate(unit_id, ordinality, revision, category)");
+		expect(query).toContain("search_candidate.category");
+		expect(query).toContain('LEFT JOIN "unit" AS "subject_unit"');
+		expect(query).toMatch(/ORDER BY search_candidate\.ordinality\s+LIMIT \$\d+/);
+
+		searchCandidates.mockResolvedValueOnce([
+			{
+				hits: [{ id: third, revision: 1, category: "units", unitType: "book" }],
+				estimatedTotalHits: 4,
+				processingTimeMs: 1,
+			},
+		]);
+		execute.mockResolvedValueOnce({ rows: [{ id: third, ordinality: "1" }] });
+		const secondPage = await searchGlobalIdentifiers({
+			branches: [{ category: "units" }, { category: "posts" }],
+			offset: firstPage.nextOffset,
+			limit: 2,
+			sort: "createdAt:desc",
+		});
+
+		expect(secondPage.hits).toEqual([{ id: third }]);
+		expect(secondPage.exhausted).toBe(true);
+		expect(searchCandidates).toHaveBeenLastCalledWith([expect.objectContaining({ offset: 3 })]);
+	});
+
 	it("keeps timed media in the Units category authorization query", async () => {
 		await searchDomain("units", {});
 
@@ -265,7 +335,7 @@ describe("domain search SQL", () => {
 				injections: [],
 				state: {},
 			},
-			{ sortProfile: "feed", pageBudget: "shared" },
+			{ sortProfile: "feed", pageBudget: "global" },
 		);
 		const expression = compiled.request.searchExpression;
 		if (!expression) throw new TypeError("Profile Search context omitted its expression");

@@ -12,27 +12,44 @@ import {
 	type SearchFieldDefinition,
 } from "./field-registry";
 import type { SearchExpression } from "./query";
-import type { SearchCategory, SearchSort } from "./schema";
+import { SearchCategories, type SearchCategory, type SearchSort } from "./schema";
 
 const { metrics } = getActiveObservability();
 
 export interface MeilisearchCandidate {
 	readonly id: string;
 	readonly revision: number;
-	readonly category: string;
+	readonly category: SearchCategory;
 	readonly unitType: string;
 }
 
-export interface CandidateQuery {
-	readonly indexUid: string;
+export interface CandidateQueryBranch {
 	readonly category: SearchCategory;
+	readonly expression?: SearchExpression;
+}
+
+interface CandidateQueryBase {
+	readonly indexUid: string;
 	readonly query: string;
 	readonly offset: number;
 	readonly limit: number;
 	readonly profileId?: string;
-	readonly expression?: SearchExpression;
 	readonly sort: SearchSort;
 }
+
+export type CandidateQuery = CandidateQueryBase &
+	(
+		| Readonly<{
+				category: SearchCategory;
+				expression?: SearchExpression;
+				branches?: never;
+		  }>
+		| Readonly<{
+				branches: readonly CandidateQueryBranch[];
+				category?: never;
+				expression?: never;
+		  }>
+	);
 
 export interface CandidateResult {
 	readonly hits: readonly MeilisearchCandidate[];
@@ -132,12 +149,49 @@ async function coarseAccessFilter(profileId: string | undefined): Promise<string
 	return `(${terms.join(" OR ")})`;
 }
 
-function meilisearchSort(
-	category: SearchCategory,
+function candidateQueryBranches(query: CandidateQuery): readonly CandidateQueryBranch[] {
+	const branches = query.branches ?? [
+		{
+			category: query.category,
+			...(query.expression ? { expression: query.expression } : {}),
+		},
+	];
+	if (!branches.length) throw new InvalidSearch("Search requires at least one category");
+	if (new Set(branches.map(({ category }) => category)).size !== branches.length)
+		throw new InvalidSearch("Search categories must be unique");
+	return branches;
+}
+
+function candidateScopeFilter(branches: readonly CandidateQueryBranch[]): string {
+	const filters = branches.map((branch) => {
+		const expression = branch.expression
+			? compileMeilisearchExpression(branch.category, branch.expression)
+			: undefined;
+		const category = `category = ${JSON.stringify(branch.category)}`;
+		return expression ? `(${category} AND ${expression})` : `(${category})`;
+	});
+	return filters.length === 1 ? filters[0]! : `(${filters.join(" OR ")})`;
+}
+
+function candidateSort(
+	branches: readonly CandidateQueryBranch[],
 	sort: SearchSort,
 	query: string,
 ): readonly string[] {
-	return resolveCurrentSearchSortDefinition(category, sort, query).meilisearch;
+	const definitions = branches.map(
+		({ category }) => resolveCurrentSearchSortDefinition(category, sort, query).meilisearch,
+	);
+	const first = definitions[0];
+	if (!first) throw new InvalidSearch("Search requires at least one category");
+	if (
+		definitions.some(
+			(definition) =>
+				definition.length !== first.length ||
+				definition.some((value, index) => value !== first[index]),
+		)
+	)
+		throw new InvalidSearch(`Search sort ${sort} has no common category ordering`);
+	return first;
 }
 
 function meilisearchMatchingStrategy(sort: SearchSort): "frequency" | "last" {
@@ -150,7 +204,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 	return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
-function parseCandidateResult(value: unknown): CandidateResult {
+function isSearchCategory(value: string): value is SearchCategory {
+	return SearchCategories.some((category) => category === value);
+}
+
+function parseCandidateResult(
+	value: unknown,
+	allowedCategories: ReadonlySet<SearchCategory>,
+): CandidateResult {
 	if (!isRecord(value) || !Array.isArray(value.hits))
 		throw new SearchUnavailable(new TypeError("Invalid Meilisearch response"));
 	const hits = value.hits.map((hit): MeilisearchCandidate => {
@@ -161,6 +222,8 @@ function parseCandidateResult(value: unknown): CandidateResult {
 			!Number.isSafeInteger(hit.revision) ||
 			hit.revision < 1 ||
 			typeof hit.category !== "string" ||
+			!isSearchCategory(hit.category) ||
+			!allowedCategories.has(hit.category) ||
 			typeof hit.unitType !== "string"
 		)
 			throw new SearchUnavailable(new TypeError("Invalid Meilisearch candidate"));
@@ -189,6 +252,7 @@ async function executeCandidateSearch(
 	const accessByProfile = new Map<string, Promise<string | undefined>>();
 	const requests = await Promise.all(
 		queries.map(async (query) => {
+			const branches = candidateQueryBranches(query);
 			const accessKey = query.profileId ?? "anonymous";
 			let accessPromise = accessByProfile.get(accessKey);
 			if (!accessPromise) {
@@ -196,18 +260,14 @@ async function executeCandidateSearch(
 				accessByProfile.set(accessKey, accessPromise);
 			}
 			const access = await accessPromise;
-			const filters = [
-				`category = ${JSON.stringify(query.category)}`,
-				access,
-				query.expression
-					? compileMeilisearchExpression(query.category, query.expression)
-					: undefined,
-			].filter((value): value is string => value !== undefined);
+			const filters = [candidateScopeFilter(branches), access].filter(
+				(value): value is string => value !== undefined,
+			);
 			return {
 				indexUid: query.indexUid,
 				q: query.query,
 				filter: filters,
-				sort: meilisearchSort(query.category, query.sort, query.query),
+				sort: candidateSort(branches, query.sort, query.query),
 				matchingStrategy: meilisearchMatchingStrategy(query.sort),
 				offset: query.offset,
 				limit: query.limit,
@@ -247,7 +307,15 @@ async function executeCandidateSearch(
 	const body: unknown = await response.json();
 	if (!isRecord(body) || !Array.isArray(body.results) || body.results.length !== queries.length)
 		throw new SearchUnavailable(new TypeError("Invalid Meilisearch multi-search response"));
-	return body.results.map(parseCandidateResult);
+	return body.results.map((result, index) => {
+		const query = queries[index];
+		if (!query)
+			throw new SearchUnavailable(new TypeError("Meilisearch returned an extra result"));
+		return parseCandidateResult(
+			result,
+			new Set(candidateQueryBranches(query).map(({ category }) => category)),
+		);
+	});
 }
 
 interface PendingCandidateSearch {

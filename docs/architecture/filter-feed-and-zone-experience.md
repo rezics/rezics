@@ -177,6 +177,14 @@ whose ranking rule precedes text-ranking rules. Text may still select the
 candidate set for a Feed, but it cannot silently turn that Feed into a
 relevance-ranked Search result.
 
+A Search Feature Feed executes all selected categories as one globally ordered
+candidate stream. Category is a filtering dimension, not a balancing rule:
+results are never round-robin interleaved after ranking. PostgreSQL may remove
+stale, unauthorized, or residual-filter candidates, but preserves the remaining
+engine order. Its opaque cursor records one global candidate offset, so page
+boundaries cannot reorder surviving items or skip eligible items that follow
+rejected candidates.
+
 For `relevance`, matching relaxes frequent query words before distinctive
 words. The remaining candidates follow the engine's words, typo, proximity,
 searchable-attribute, and exactness rules. Every localized title occupies the
