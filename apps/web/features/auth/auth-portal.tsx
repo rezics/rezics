@@ -649,7 +649,7 @@ function ResetPasswordForm({
 }
 
 function VerifyEmailForm({
-	email: initialEmail,
+	email,
 	onModeChange,
 }: {
 	email: string;
@@ -663,7 +663,6 @@ function VerifyEmailForm({
 		"errors",
 		"ui",
 	]);
-	const [email, setEmail] = useState(initialEmail);
 	const [error, setError] = useState<string>();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isSent, setIsSent] = useState(false);
@@ -694,7 +693,7 @@ function VerifyEmailForm({
 						autoComplete="email"
 						label={t.auth.email}
 						name="email"
-						onChange={(event) => setEmail(event.currentTarget.value)}
+						readOnly
 						type="email"
 						value={email}
 					/>
