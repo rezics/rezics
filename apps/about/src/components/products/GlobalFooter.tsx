@@ -10,7 +10,7 @@ import {
 	getProductsPath,
 } from "../../i18n/productPaths";
 
-const githubUrl = "https://github.com/rezics";
+const repositoryUrl = "https://github.com/rezics/rezics";
 const outlineUrl = "https://outline.rezics.com/collection/rezics-ud1QiRBQYV/recent";
 const mainSiteUrl = "https://www.rezics.com";
 
@@ -58,7 +58,7 @@ export function GlobalFooter({ locale }: { readonly locale: AboutLocale }) {
 					<a href={outlineUrl} target="_blank" rel="noreferrer">
 						{copy.footer.links.docs}
 					</a>
-					<a href={githubUrl} target="_blank" rel="noreferrer">
+					<a href={repositoryUrl} target="_blank" rel="noreferrer">
 						{copy.footer.links.source}
 					</a>
 					<a href={mainSiteUrl} target="_blank" rel="noreferrer">

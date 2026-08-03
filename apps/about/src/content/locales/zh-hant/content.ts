@@ -4,6 +4,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import type { ProductFamilyId } from "../../productTypes";
 
 const rezics = verbatimTerms.rezics.value;
+const rezicsInc = verbatimTerms.rezicsInc.value;
 const github = verbatimTerms.github.value;
 const outline = verbatimTerms.outline.value;
 const react = verbatimTerms.react.value;
@@ -253,7 +254,7 @@ export const zhHantContent = {
 	},
 	footer: {
 		statement: "讓每個故事，都能被認出、被理解，也能繼續被帶往下一段旅程。",
-		copyright: `© ${rezics}`,
+		copyright: `© 2026 ${rezicsInc}`,
 		groups: {
 			products: "產品",
 			platform: "平台",

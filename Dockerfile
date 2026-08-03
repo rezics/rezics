@@ -20,7 +20,7 @@ FROM node-tooling AS backend-dependency-manifests
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 WORKDIR /workspace
 
-COPY package.json yarn.lock .yarnrc.yml ./
+COPY LICENSE THIRD_PARTY_NOTICES.md package.json yarn.lock .yarnrc.yml ./
 COPY .yarn/releases/yarn-4.17.1.cjs .yarn/releases/yarn-4.17.1.cjs
 COPY libraries/access/package.json libraries/access/package.json
 COPY libraries/avatar/package.json libraries/avatar/package.json

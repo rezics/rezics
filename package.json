@@ -3,6 +3,7 @@
 	"version": "1.3.0",
 	"private": true,
 	"type": "module",
+	"license": "AGPL-3.0-only",
 	"packageManager": "yarn@4.17.1",
 	"workspaces": [
 		"aspire-apphost",

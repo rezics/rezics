@@ -30,6 +30,11 @@ export const verbatimTerms = {
 		category: "brand",
 		rationale: "Project brand spelling.",
 	},
+	rezicsInc: {
+		value: "Rezics Inc.",
+		category: "brand",
+		rationale: "Legal name of the copyright holder supplied by the maintainer.",
+	},
 	rezicsUnitContentLicenseV1: {
 		value: "REZICS Unit Content License 1.0",
 		category: "product",

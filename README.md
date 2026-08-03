@@ -241,3 +241,14 @@ The main Vinext site deploys to Cloudflare Workers; the API, background worker,
 PostgreSQL, Meilisearch, and Sequin run on Nomad; production object storage is
 Cloudflare R2. See [Production deployment](./docs/operations/production-deployment.md)
 for first installation, release, secret, and rollback procedures.
+
+## License
+
+Except where otherwise noted, REZICS is licensed under the
+[GNU Affero General Public License v3.0 only](./LICENSE) (`AGPL-3.0-only`).
+Copyright © 2026 Rezics Inc.
+
+Third-party components remain under their respective terms; see
+[Third-party notices](./THIRD_PARTY_NOTICES.md). The AGPL grants copyright
+permissions only and does not grant trademark rights in the REZICS name,
+logos, or other brand identifiers.

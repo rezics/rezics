@@ -150,7 +150,9 @@ describe("brand site shell", () => {
 		expect(footer).toContain('id="footer-platform"');
 		expect(footer).toContain('id="footer-open"');
 		expect(footer).toContain('href="/zh-hant/contact-us/"');
+		expect(footer).toContain('href="https://github.com/rezics/rezics"');
 		expect(footer).toContain("AGPL-3.0");
+		expect(footer).toContain("© 2026 Rezics Inc.");
 		expect(home).toContain('href="/zh-hant/contact-us/"');
 		expect(home).not.toContain("mailto:");
 	});

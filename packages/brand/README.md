@@ -22,3 +22,11 @@ Brand assets for REZICS. SVG is preferred; use PNG only where a platform does no
 
 Run `yarn workspace @rezics/brand generate` to rebuild `dist` from `src`. The generator derives dark and monochrome variants from the base assets; duplicate shape source files are not maintained.
 `app-icon-180.png`, `app-icon-192.png`, and `app-icon-512.png` are generated from `app-icon.svg` for platforms that require those sizes.
+
+## License
+
+`@rezics/brand` is licensed under the [GNU Affero General Public License v3.0
+only](./LICENSE) (`AGPL-3.0-only`). Copyright © 2026 Rezics Inc.
+
+The license grants copyright permissions only. It does not grant trademark
+rights in the REZICS name, logos, or other brand identifiers.
