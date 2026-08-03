@@ -437,19 +437,19 @@ export function RealmRules({
 											required
 											maxLength={500}
 											value={rule.title}
-											onChange={(event) =>
+											onChange={(event) => {
+												const title = event.currentTarget.value;
 												setDrafts((current) =>
 													current?.map((item, itemIndex) =>
 														itemIndex === index
 															? {
 																	...item,
-																	title: event.currentTarget
-																		.value,
+																	title,
 																}
 															: item,
 													),
-												)
-											}
+												);
+											}}
 										/>
 									</Field>
 									<Button

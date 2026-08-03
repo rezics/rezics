@@ -45,7 +45,9 @@ yarn workspace @rezics/frontend cosmos
 
 Cosmos opens on `http://localhost:5000`. Add colocated `*.fixture.tsx` files for
 the component states you want to develop or debug. The workspace loads the app's
-global Tailwind styles and resolves the same `@/` imports as the frontend.
+global Tailwind styles and resolves the same `@/` imports as the frontend. Its
+Vite renderer is rooted at the monorepo level so its HTML entry cannot shadow
+the Vinext application inside `apps/web`.
 
 Keep each product component and its fixture together under the owning feature,
 for example `features/content-feed/feed-card.tsx` and

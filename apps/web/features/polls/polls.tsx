@@ -160,19 +160,19 @@ export function PollCreate() {
 										<Input
 											aria-label={`${t.engagement.pollOptions} ${index + 1}`}
 											maxLength={500}
-											onChange={(event) =>
+											onChange={(event) => {
+												const label = event.currentTarget.value;
 												setOptions((current) =>
 													current.map((candidate) =>
 														candidate.key === option.key
 															? {
 																	...candidate,
-																	label: event.currentTarget
-																		.value,
+																	label,
 																}
 															: candidate,
 													),
-												)
-											}
+												);
+											}}
 											value={option.label}
 										/>
 										<Button

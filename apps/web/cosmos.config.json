@@ -1,9 +1,10 @@
 {
 	"$schema": "./node_modules/react-cosmos/config.schema.json",
+	"rootDir": "../..",
 	"plugins": ["react-cosmos-plugin-vite"],
-	"exportPath": "../../.temp/cosmos-export",
-	"globalImports": ["./styles/global.css"],
-	"staticPath": "public",
+	"exportPath": ".temp/cosmos-export",
+	"globalImports": ["./apps/web/styles/global.css"],
+	"staticPath": "apps/web/public",
 	"ui": {
 		"responsivePreview": {
 			"devices": [
@@ -14,6 +15,6 @@
 		}
 	},
 	"vite": {
-		"configPath": "./cosmos.vite.config.ts"
+		"configPath": "./apps/web/cosmos.vite.config.ts"
 	}
 }

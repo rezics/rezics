@@ -9,7 +9,7 @@ import { resources } from "@rezics/i18n/resources";
 import { UiProvider } from "@rezics/ui";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { create } from "native-i18n";
-import type { ComponentProps, ReactNode } from "react";
+import { StrictMode, type ComponentProps, type ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { TranslationProvider } from "@/i18n/client";
@@ -199,11 +199,13 @@ const initialWithChapter = {
 
 function renderEditor(value = initial) {
 	return render(
-		<TranslationProvider initial={translation.snapshot}>
-			<UiProvider searchEntities={() => Promise.resolve([])}>
-				<BookContentStructureEditor bookId={ids.book} initial={value} />
-			</UiProvider>
-		</TranslationProvider>,
+		<StrictMode>
+			<TranslationProvider initial={translation.snapshot}>
+				<UiProvider searchEntities={() => Promise.resolve([])}>
+					<BookContentStructureEditor bookId={ids.book} initial={value} />
+				</UiProvider>
+			</TranslationProvider>
+		</StrictMode>,
 	);
 }
 

@@ -165,12 +165,13 @@ export function BookContentNodeDialog({
 											autoFocus
 											disabled={pending}
 											maxLength={500}
-											onChange={(event) =>
+											onChange={(event) => {
+												const title = event.currentTarget.value;
 												setInput((current) => ({
 													...current,
-													create: { title: event.currentTarget.value },
-												}))
-											}
+													create: { title },
+												}));
+											}}
 											required
 											value={input.create.title}
 										/>
