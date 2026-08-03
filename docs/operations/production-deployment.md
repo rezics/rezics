@@ -123,9 +123,11 @@ of these operations.
 
 The web job installs the repository-pinned Yarn version, verifies generated
 offline and Cloudflare binding artifacts, builds the Worker, and uploads a new
-version. When production already exists, it stages the new version at 0%, sends
-one version-override probe, promotes it to 100%, waits a fixed Cloudflare settle
-interval, and sends one production probe. The probe also verifies the
+version. When production already exists, it stages the new version at 0%, waits
+for a bounded series of version-override probes to pass, promotes it to 100%,
+and waits for a bounded series of production probes to pass. These retries
+allow the new deployment to become globally available without weakening the
+verification or exposing unverified traffic. The probes also verify the
 Font Awesome marker and
 `https://fa.rezics.com/fontawesome/7.2.0/css/rezics.min.css` reference. A failed
 probe restores the previously recorded 100% version.

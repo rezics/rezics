@@ -23,7 +23,20 @@ readonly wrangler_config="${web_root}/dist/server/wrangler.json"
 readonly worker_name="rezics-web"
 readonly worker_url="https://www.rezics.com/"
 readonly settle_seconds="${CLOUDFLARE_VERSION_SETTLE_SECONDS:-5}"
+readonly probe_attempts="${CLOUDFLARE_VERSION_PROBE_ATTEMPTS:-12}"
+readonly probe_interval_seconds="${CLOUDFLARE_VERSION_PROBE_INTERVAL_SECONDS:-5}"
 readonly result_file="${REZICS_DEPLOY_RESULT_FILE:-}"
+
+if [[ ! "${probe_attempts}" =~ ^[1-9][0-9]*$ ]]; then
+	printf 'Cloudflare version probe attempts must be a positive integer: %s\n' \
+		"${probe_attempts}" >&2
+	exit 64
+fi
+if [[ ! "${probe_interval_seconds}" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+	printf 'Cloudflare version probe interval must be a non-negative number: %s\n' \
+		"${probe_interval_seconds}" >&2
+	exit 64
+fi
 
 if [[ ! -f "${worker_secrets_file}" ]]; then
 	printf 'Worker secrets file does not exist: %s\n' "${worker_secrets_file}" >&2
@@ -108,6 +121,29 @@ probe_override_version() {
 	return 1
 }
 
+wait_for_version_probe() {
+	local description="$1"
+	local probe_function="$2"
+	local expected_version="$3"
+	local attempt
+	for ((attempt = 1; attempt <= probe_attempts; attempt += 1)); do
+		if "${probe_function}" "${expected_version}"; then
+			printf '%s passed on attempt %d/%d\n' \
+				"${description}" "${attempt}" "${probe_attempts}"
+			return 0
+		fi
+		if ((attempt == probe_attempts)); then
+			printf '%s did not pass after %d attempts\n' \
+				"${description}" "${probe_attempts}" >&2
+			return 1
+		fi
+		printf '%s is not ready; retrying in %s seconds (%d/%d)\n' \
+			"${description}" "${probe_interval_seconds}" \
+			"${attempt}" "${probe_attempts}" >&2
+		sleep "${probe_interval_seconds}"
+	done
+}
+
 record_result() {
 	local worker_version="$1"
 	local result_directory
@@ -175,7 +211,9 @@ if ! deployment_status="$({
 		' <<<"${deployment_status}"
 	})"
 	sleep "${settle_seconds}"
-	if ! probe_production_version "${new_version}"; then
+	if ! wait_for_version_probe \
+		"Initial Worker production probe" \
+		probe_production_version "${new_version}"; then
 		printf 'Initial Worker version %s did not pass the production probe\n' \
 			"${new_version}" >&2
 		exit 1
@@ -228,7 +266,9 @@ yarn workspace @rezics/frontend exec wrangler triggers deploy \
 	--config "${wrangler_config}"
 
 sleep "${settle_seconds}"
-if ! probe_override_version "${new_version}"; then
+if ! wait_for_version_probe \
+	"Worker version-override probe" \
+	probe_override_version "${new_version}"; then
 	exit 1
 fi
 
@@ -237,7 +277,9 @@ yarn workspace @rezics/frontend exec wrangler versions deploy \
 	--message "Promote verified ${release}"
 
 sleep "${settle_seconds}"
-if ! probe_production_version "${new_version}"; then
+if ! wait_for_version_probe \
+	"Promoted Worker production probe" \
+	probe_production_version "${new_version}"; then
 	printf 'Promoted Worker version %s did not pass the production probe\n' \
 		"${new_version}" >&2
 	exit 1
