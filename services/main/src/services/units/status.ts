@@ -13,6 +13,7 @@ import {
 import { recordStudioWorkRelation } from "../studio/projection";
 import { firstUnitLocalizationTitle } from "./localization";
 import { UnitChanged, UnitNotFound, UnitPermissionForbidden } from "./errors";
+import { nextUnitUpdatedAt } from "./update-values";
 import { ensureUnitVariantLifecycle } from "./variant-policy";
 
 export type UnitStatus = (typeof UnitStatusValues)[number];
@@ -203,6 +204,7 @@ export async function transitionUnitStatus(
 		.update(unit)
 		.set({
 			status: input.toStatus,
+			updatedAt: nextUnitUpdatedAt(current.updatedAt),
 			...(input.toStatus === "published" ? { publishedAt: occurredAt } : {}),
 		})
 		.where(eq(unit.id, input.unitId));

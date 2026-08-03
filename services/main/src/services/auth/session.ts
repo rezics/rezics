@@ -109,7 +109,8 @@ async function releaseRequestLimitLease(request: Request) {
 	await Promise.all(leases.map((lease) => lease.release()));
 }
 
-function trackRequestLimitLease(request: Request, lease: ApiQuotaLease) {
+/** Attaches an admitted quota lease to the response lifecycle that owns it. @internal */
+export function trackRequestLimitLease(request: Request, lease: ApiQuotaLease) {
 	const leases = requestQuotaLeases.get(request);
 	if (leases) leases.push(lease);
 	else requestQuotaLeases.set(request, [lease]);
@@ -310,7 +311,7 @@ export async function resolveIdentity(
 }
 
 export default new Elysia({ name: "session-context" })
-	.onAfterResponse(({ request }) => releaseRequestLimitLease(request))
+	.onAfterResponse({ as: "scoped" }, ({ request }) => releaseRequestLimitLease(request))
 	.macro({
 		access: (requirement: AccessRequirement) => ({
 			detail: { security: accessSecurity(requirement) },

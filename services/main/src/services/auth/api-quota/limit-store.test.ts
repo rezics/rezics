@@ -1,10 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { getActiveObservability } from "@rezics/observability";
 
+import { database } from "../../database";
 import { resolveApiQuotaOperation } from "./operation";
 import { DefaultApiQuotaPolicies } from "./policy-schema";
 import {
+	ApiQuotaRequestLeaseDurationMilliseconds,
 	ApiQuotaRateUnitScale,
 	buildApiQuotaConstraints,
+	enforceApiQuota,
 	refillApiQuotaRateState,
 } from "./limit-store";
 
@@ -84,5 +88,44 @@ describe("API quota admission model", () => {
 			new Date(startedAt.getTime() + 1_000),
 		);
 		expect(refilled.availableRateUnits).toBe(initial.availableRateUnits);
+	});
+
+	it("keeps a two-minute crash-recovery expiry", () => {
+		expect(ApiQuotaRequestLeaseDurationMilliseconds).toBe(120_000);
+	});
+
+	it("logs a failed release once and leaves expiry as the fallback", async () => {
+		const failure = new Error("database unavailable");
+		const transaction = vi.spyOn(database, "transaction").mockResolvedValue(undefined);
+		const where = vi.fn(async () => {
+			throw failure;
+		});
+		// The release path consumes only `where`; the test double deliberately exposes no other query powers.
+		const deleteLease = vi.spyOn(database, "delete").mockReturnValue({ where } as never);
+		const logError = vi
+			.spyOn(getActiveObservability().logger, "error")
+			.mockImplementation(() => undefined);
+		const lease = await enforceApiQuota({
+			accountUserId: accountPolicy.userId,
+			tokenId: tokenPolicy.tokenId,
+			operation: resolveApiQuotaOperation("getApiUnits"),
+			accountPolicy,
+			tokenPolicy,
+		});
+
+		await lease.release();
+		await lease.release();
+
+		expect(transaction).toHaveBeenCalledOnce();
+		expect(deleteLease).toHaveBeenCalledOnce();
+		expect(where).toHaveBeenCalledOnce();
+		expect(logError).toHaveBeenCalledWith(
+			"Failed to release API quota concurrency leases",
+			expect.objectContaining({
+				eventName: "api_quota.lease.release_failed",
+				errorCode: "ApiQuotaLeaseReleaseFailed",
+				error: failure,
+			}),
+		);
 	});
 });

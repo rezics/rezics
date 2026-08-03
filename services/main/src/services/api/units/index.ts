@@ -466,7 +466,11 @@ export default new Elysia({ prefix: "/units" })
 	.patch(
 		"/:type/:unitId",
 		async ({ params, authorization, body }) => {
-			return updateUnit(params.type, params.unitId, authorization, body);
+			const { updatedAt, ...update } = body;
+			return updateUnit(params.type, params.unitId, authorization, {
+				...update,
+				expectedUpdatedAt: new Date(updatedAt),
+			});
 		},
 		{
 			access: "contribute:unit:update",

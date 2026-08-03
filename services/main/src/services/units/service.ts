@@ -20,7 +20,7 @@ import {
 	createProfileOwnedUnitAccess,
 	createPublicEditableUnitAccess,
 } from "../authorization/unit/ownership";
-import { database } from "../database";
+import { database, type DatabaseTransaction } from "../database";
 import { toSafeInteger } from "../database/integer";
 import {
 	type CreditAttributionRole,
@@ -82,6 +82,15 @@ import {
 import { recordUnitRevision } from "./history";
 import { insertUnit } from "./create";
 import { transitionUnitStatus } from "./status";
+import {
+	nextUnitUpdatedAt,
+	toBookUpdateValues,
+	toMediaUpdateValues,
+	toSeriesUpdateValues,
+	toSoftwareUpdateValues,
+	toTimedMediaUpdateValues,
+	type UpdateUnitInput,
+} from "./update-values";
 import {
 	getAttributionSummariesByUnitIds,
 	getAttributionSummariesWithStatisticsByUnitIds,
@@ -149,35 +158,6 @@ export type CreateUnitInput = CreateUnitAccessInput & {
 		| { readonly type: "software" }
 		| { readonly type: "media"; readonly releaseStatus: WorkReleaseStatus };
 };
-
-export interface UpdateUnitInput {
-	updatedAt: string;
-	status?: "draft" | "published" | "archived";
-	visibility?: "public" | "unlisted" | "private";
-	contentRating?: "general" | "r15" | "r18" | "r18g";
-	aiDisclosure?: "unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
-	license?: PublicationLicenseId | null;
-	unit?: {
-		releasedOn?: string | null;
-	};
-	details?: {
-		isbn13?: string | null;
-		publicationDate?: string | null;
-		pageCount?: number | null;
-		wordCount?: number | null;
-		format?: string | null;
-		contentLicense?: {
-			referenceLicenseSlug: UnitContentLicenseSlug;
-		};
-		versionLabel?: string | null;
-		kind?: string;
-		runtimeMinutes?: number | null;
-		episodeCount?: number | null;
-		seasonCount?: number | null;
-		durationSeconds?: number | null;
-		releaseStatus?: WorkReleaseStatus;
-	};
-}
 
 export function presentImageAsset(assetId: string | null, role?: "avatar" | "banner" | "cover") {
 	return assetId
@@ -766,6 +746,100 @@ export async function listUnits(
 	);
 }
 
+/** Executes one authorized Unit aggregate update inside its owning transaction. @internal */
+export async function updateUnitInTransaction(
+	tx: DatabaseTransaction,
+	kind: ManageableUnitKind,
+	unitId: string,
+	actorProfileId: string,
+	statusUpdateAllowed: boolean,
+	body: UpdateUnitInput,
+): Promise<void> {
+	const updatedAt = nextUnitUpdatedAt(body.expectedUpdatedAt);
+	const [updated] = await tx
+		.update(unit)
+		.set({
+			updatedAt,
+			visibility: body.visibility,
+			contentRating: body.contentRating,
+			aiDisclosure: body.aiDisclosure,
+			...(Object.hasOwn(body, "license") ? { license: body.license } : {}),
+		})
+		.where(
+			and(
+				eq(unit.id, unitId),
+				eq(unit.kind, kind),
+				eq(unit.updatedAt, body.expectedUpdatedAt),
+			),
+		)
+		.returning({ id: unit.id, status: unit.status });
+	if (!updated) {
+		const [current] = await tx
+			.select({ updatedAt: unit.updatedAt })
+			.from(unit)
+			.where(eq(unit.id, unitId))
+			.limit(1);
+		if (!current) throw new UnitNotFound(kind);
+		throw new UnitChanged(current.updatedAt);
+	}
+	const details = body.details ?? {};
+	if (details.contentLicense !== undefined) {
+		const [activeOwnership] = await tx
+			.select({ profileId: unitOwnership.profileId })
+			.from(unitOwnership)
+			.where(and(eq(unitOwnership.unitId, unitId), isNull(unitOwnership.revokedAt)))
+			.limit(1);
+		if (activeOwnership?.profileId === OfficialProfileIds.community)
+			throw new UnitContentLicenseGrantForbidden();
+	}
+	const bookUpdate = kind === "book" ? toBookUpdateValues(body) : undefined;
+	if (bookUpdate) await tx.update(book).set(bookUpdate).where(eq(book.id, unitId));
+	const softwareUpdate = kind === "software" ? toSoftwareUpdateValues(body) : undefined;
+	if (softwareUpdate)
+		await tx.update(software).set(softwareUpdate).where(eq(software.id, unitId));
+	const mediaUpdate = kind === "media" ? toMediaUpdateValues(body) : undefined;
+	if (mediaUpdate) await tx.update(media).set(mediaUpdate).where(eq(media.id, unitId));
+	const timedMediaUpdate =
+		kind === "video" || kind === "audio" ? toTimedMediaUpdateValues(body) : undefined;
+	if (kind === "video" && timedMediaUpdate)
+		await tx.update(video).set(timedMediaUpdate).where(eq(video.id, unitId));
+	if (kind === "audio" && timedMediaUpdate)
+		await tx.update(audio).set(timedMediaUpdate).where(eq(audio.id, unitId));
+	if (
+		(kind === "book" || kind === "software" || kind === "media") &&
+		details.contentLicense !== undefined
+	)
+		await tx
+			.insert(unitContentLicense)
+			.values({
+				unitId,
+				grantedByProfileId: actorProfileId,
+				referenceLicenseSlug: details.contentLicense.referenceLicenseSlug,
+			})
+			.onConflictDoNothing();
+	const seriesUpdate = kind === "series" ? toSeriesUpdateValues(body) : undefined;
+	if (seriesUpdate) await tx.update(series).set(seriesUpdate).where(eq(series.id, unitId));
+	const revision = await recordUnitRevision(tx, {
+		unitId,
+		actorProfileId,
+		event: "update",
+	});
+	if (body.status) {
+		await transitionUnitStatus(tx, {
+			unitId,
+			toStatus: body.status,
+			actor: { kind: "profile", profileId: actorProfileId },
+			authorization: {
+				kind: "interactive",
+				statusUpdateAllowed,
+			},
+			revisionId: revision.revisionId,
+		});
+	}
+	if (kind === "book" || kind === "software" || kind === "media")
+		await ensureUnitVariantLifecycle(tx, unitId);
+}
+
 export async function updateUnit(
 	kind: ManageableUnitKind,
 	unitId: string,
@@ -776,128 +850,16 @@ export async function updateUnit(
 	const statusUpdateDecision = body.status
 		? await authorization.unit.decide(unitId, "unit.status.update", ["unit"])
 		: undefined;
-	await database.transaction(async (tx) => {
-		const [updated] = await tx
-			.update(unit)
-			.set({
-				visibility: body.visibility,
-				contentRating: body.contentRating,
-				aiDisclosure: body.aiDisclosure,
-				...(Object.hasOwn(body, "license") ? { license: body.license } : {}),
-			})
-			.where(
-				and(
-					eq(unit.id, unitId),
-					eq(unit.kind, kind),
-					eq(unit.updatedAt, new Date(body.updatedAt)),
-				),
-			)
-			.returning({ id: unit.id, status: unit.status });
-		if (!updated) {
-			const [current] = await tx
-				.select({ updatedAt: unit.updatedAt })
-				.from(unit)
-				.where(eq(unit.id, unitId))
-				.limit(1);
-			if (!current) throw new UnitNotFound(kind);
-			throw new UnitChanged(current.updatedAt);
-		}
-		const details = body.details ?? {};
-		const common = body.unit ?? {};
-		if (details.contentLicense !== undefined) {
-			const [activeOwnership] = await tx
-				.select({ profileId: unitOwnership.profileId })
-				.from(unitOwnership)
-				.where(and(eq(unitOwnership.unitId, unitId), isNull(unitOwnership.revokedAt)))
-				.limit(1);
-			if (activeOwnership?.profileId === OfficialProfileIds.community)
-				throw new UnitContentLicenseGrantForbidden();
-		}
-		const releasedOn =
-			common.releasedOn === undefined
-				? undefined
-				: common.releasedOn === null
-					? null
-					: common.releasedOn;
-		if (kind === "book")
-			await tx
-				.update(book)
-				.set({
-					releaseStatus: details.releaseStatus,
-					isbn13: details.isbn13,
-					publicationDate:
-						details.publicationDate === undefined
-							? releasedOn
-							: details.publicationDate,
-					pageCount: details.pageCount,
-					wordCount: details.wordCount,
-					format: details.format,
-				})
-				.where(eq(book.id, unitId));
-		if (kind === "software")
-			await tx
-				.update(software)
-				.set({
-					releaseDate: releasedOn,
-					versionLabel: details.versionLabel,
-				})
-				.where(eq(software.id, unitId));
-		if (kind === "media")
-			await tx
-				.update(media)
-				.set({
-					releaseStatus: details.releaseStatus,
-					releaseDate: releasedOn,
-					kind: details.kind,
-					runtimeMinutes: details.runtimeMinutes,
-					episodeCount: details.episodeCount,
-					seasonCount: details.seasonCount,
-				})
-				.where(eq(media.id, unitId));
-		if (kind === "video")
-			await tx
-				.update(video)
-				.set({ durationSeconds: details.durationSeconds })
-				.where(eq(video.id, unitId));
-		if (kind === "audio")
-			await tx
-				.update(audio)
-				.set({ durationSeconds: details.durationSeconds })
-				.where(eq(audio.id, unitId));
-		if (
-			(kind === "book" || kind === "software" || kind === "media") &&
-			details.contentLicense !== undefined
-		)
-			await tx
-				.insert(unitContentLicense)
-				.values({
-					unitId,
-					grantedByProfileId: authorization.profileId,
-					referenceLicenseSlug: details.contentLicense.referenceLicenseSlug,
-				})
-				.onConflictDoNothing();
-		if (kind === "series" && details.kind !== undefined)
-			await tx.update(series).set({ kind: details.kind }).where(eq(series.id, unitId));
-		const revision = await recordUnitRevision(tx, {
+	await database.transaction((tx) =>
+		updateUnitInTransaction(
+			tx,
+			kind,
 			unitId,
-			actorProfileId: authorization.profileId,
-			event: "update",
-		});
-		if (body.status) {
-			await transitionUnitStatus(tx, {
-				unitId,
-				toStatus: body.status,
-				actor: { kind: "profile", profileId: authorization.profileId },
-				authorization: {
-					kind: "interactive",
-					statusUpdateAllowed: statusUpdateDecision?.allowed ?? false,
-				},
-				revisionId: revision.revisionId,
-			});
-		}
-		if (kind === "book" || kind === "software" || kind === "media")
-			await ensureUnitVariantLifecycle(tx, unitId);
-	});
+			authorization.profileId,
+			statusUpdateDecision?.allowed ?? false,
+			body,
+		),
+	);
 	return getUnit(kind, unitId, authorization);
 }
 

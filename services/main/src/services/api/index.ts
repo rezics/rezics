@@ -41,6 +41,7 @@ import quotaPolicies from "./quota-policies";
 import users from "./users";
 import units from "./units";
 import { auth } from "../auth";
+import session from "../auth/session";
 import { env } from "../config";
 import {
 	ApiErrorRegistry,
@@ -159,6 +160,7 @@ export default new Elysia({ normalize: "typebox" })
 		return status(internalError.status, toApiErrorBody(internalError, requestId));
 	})
 	.mount(auth.handler)
+	.use(session)
 	.use(imageAssetContent)
 	.group("/api/v1", (api) =>
 		api.guard({ parse: ["empty-body", "json"] }, (api) =>

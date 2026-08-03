@@ -275,6 +275,22 @@ describe("Book and Media release status inputs", () => {
 	});
 });
 
+describe("Unit partial update shapes", () => {
+	const updatedAt = "2026-08-03T00:00:00.000Z";
+
+	it.each([
+		["status-only", { updatedAt, status: "published" }],
+		["visibility-only", { updatedAt, visibility: "unlisted" }],
+		["details-only", { updatedAt, details: { releaseStatus: "ongoing" } }],
+	] as const)("accepts a %s patch", (_name, body) => {
+		expect(Check(UpdateUnitBody, body)).toBe(true);
+	});
+
+	it("rejects an invalid optimistic-concurrency timestamp", () => {
+		expect(Check(UpdateUnitBody, { updatedAt: "not-a-date", status: "published" })).toBe(false);
+	});
+});
+
 describe("Work Unit route types", () => {
 	it("accepts Series on generic read and update routes", () => {
 		expect(Check(WorkUnitTypeParams, { type: "series" })).toBe(true);
