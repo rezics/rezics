@@ -10,6 +10,7 @@ const appHostPath = fileURLToPath(new URL("../apphost.mts", import.meta.url));
 const appHostArgument = "aspire-apphost/apphost.mts";
 const startupTimeoutMs = 5 * 60 * 1000;
 const requestTimeoutMs = 60 * 1000;
+const smokeFontAwesomeCssUrl = "https://example.invalid/font-awesome-smoke.css";
 const smokeResourceNames = ["main-api", "recommendation-worker", "web"] as const;
 const forbiddenRuntimeDiagnostics = [
 	"TelemetryExporterUnhealthy",
@@ -221,6 +222,16 @@ async function requestOk(label: string, url: URL) {
 	});
 	if (!response.ok) throw new Error(`${label} returned HTTP ${response.status}`);
 	console.info(`${label}: ${response.status}`);
+	return response;
+}
+
+async function verifyFontAwesomeConfiguration(response: Response) {
+	const html = await response.text();
+	if (!html.includes('data-font-awesome="configured"'))
+		throw new Error("Web did not expose the configured Font Awesome state");
+	if (!html.includes(`href="${smokeFontAwesomeCssUrl}"`))
+		throw new Error("Web did not render the configured Font Awesome stylesheet URL");
+	console.info("Web Font Awesome configuration: configured");
 }
 
 async function verifySmoke(resources: ResourceDescription[]) {
@@ -239,7 +250,7 @@ async function verifySmoke(resources: ResourceDescription[]) {
 	if (!apiOrigin || !webOrigin)
 		throw new Error("Aspire did not discover API and web HTTP endpoints");
 	await requestOk("API readiness", new URL(apiSchedulerHealthContract.readiness.path, apiOrigin));
-	await requestOk("Web root", new URL("/", webOrigin));
+	await verifyFontAwesomeConfiguration(await requestOk("Web root", new URL("/", webOrigin)));
 	await requestOk(
 		"Web proxy readiness",
 		new URL(apiSchedulerHealthContract.readiness.path, webOrigin),
@@ -315,7 +326,13 @@ async function main() {
 		{
 			cwd: repositoryRoot,
 			detached: process.platform !== "win32",
-			env: { ...process.env, NO_COLOR: "1", REZICS_ASPIRE_MODE: mode },
+			env: {
+				...process.env,
+				FONT_AWESOME_KIT_CSS_URL: smokeFontAwesomeCssUrl,
+				FONT_AWESOME_KIT_LICENSE: "free",
+				NO_COLOR: "1",
+				REZICS_ASPIRE_MODE: mode,
+			},
 			stdio: ["ignore", "pipe", "pipe"],
 		},
 	);

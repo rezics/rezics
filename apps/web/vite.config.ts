@@ -7,6 +7,7 @@ import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
 import { pwaManifest } from "./pwa";
+import { fontAwesomeWorkerVariables } from "./vite-worker-environment";
 
 function resolveApiProxyTarget(value: string | undefined) {
 	const target = new URL(value ?? "http://localhost:3001");
@@ -51,11 +52,21 @@ for (const plugin of pwaPlugins) {
 	}
 }
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
 	plugins: [
 		vinext({}),
 		cloudflare({
 			viteEnvironment: { name: "rsc", childEnvironments: ["ssr"] },
+			...(command === "serve"
+				? {
+						config: (workerConfig) => ({
+							vars: {
+								...workerConfig.vars,
+								...fontAwesomeWorkerVariables(process.env),
+							},
+						}),
+					}
+				: {}),
 		}),
 		...pwaPlugins,
 		tailwindcss(),
@@ -97,4 +108,4 @@ export default defineConfig({
 			"@": fileURLToPath(new URL("./", import.meta.url)),
 		},
 	},
-});
+}));
