@@ -36,6 +36,8 @@ import {
 	assertSearchExpression,
 	combineSearchExpressions,
 	specializeSearchExpressionForCategory,
+	type CompiledGlobalSearchRequest,
+	type CompiledGroupedSearchRequest,
 	type CompiledSearchRequest,
 	type SearchExpression,
 } from "./query";
@@ -589,8 +591,10 @@ function withoutCursor(input: SearchFeatureInput): SearchFeatureInput {
 	return { ...input, state } as SearchFeatureInput;
 }
 
-export interface CompiledSearchFeature {
-	readonly request: CompiledSearchRequest;
+export interface CompiledSearchFeature<
+	Request extends CompiledSearchRequest = CompiledSearchRequest,
+> {
+	readonly request: Request;
 	readonly enforcedZoneId?: string;
 	readonly inputIdentity: string;
 	readonly facetBindings: readonly {
@@ -619,6 +623,16 @@ export interface GlobalSearchExecutionPolicy extends SearchExecutionPolicy {
 	readonly pageBudget: "global";
 }
 
+export function compileSearchFeatureInput(
+	inputValue: unknown,
+	execution: GroupedSearchExecutionPolicy,
+	hasDevelopmentPreviewAccess?: boolean,
+): CompiledSearchFeature<CompiledGroupedSearchRequest>;
+export function compileSearchFeatureInput(
+	inputValue: unknown,
+	execution: GlobalSearchExecutionPolicy,
+	hasDevelopmentPreviewAccess?: boolean,
+): CompiledSearchFeature<CompiledGlobalSearchRequest>;
 export function compileSearchFeatureInput(
 	inputValue: unknown,
 	execution: SearchExecutionPolicy,
@@ -719,6 +733,7 @@ export function compileSearchFeatureInput(
 	const domainFilter = combineUnitPredicates([input.document.filter, input.state.filter?.where]);
 	return {
 		request: {
+			pageBudget: execution.pageBudget,
 			scope: context.scope,
 			categories,
 			query,

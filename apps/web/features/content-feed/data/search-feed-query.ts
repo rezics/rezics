@@ -9,6 +9,7 @@ import {
 	postApiSearchZonesByZoneIdFeatureFeed,
 	type PostApiSearchFeaturesByTemplateExecuteBody,
 } from "@rezics/openapi-tanstack-query";
+import type { SearchFeedContinuationToken } from "../model/search-feed-continuation-token";
 
 export type SearchFeedState = Omit<SearchFeatureState, "cursor"> & Readonly<{ cursor?: never }>;
 
@@ -35,7 +36,7 @@ export async function fetchSearchFeedPage({
 	source,
 	surface,
 }: {
-	readonly cursor?: string;
+	readonly cursor?: SearchFeedContinuationToken;
 	readonly localizationLanguages: readonly ContentLanguage[];
 	readonly request: SearchFeedRequest;
 	readonly signal?: AbortSignal;
@@ -52,7 +53,11 @@ export async function fetchSearchFeedPage({
 			body: { ...request, localizationLanguages: [...localizationLanguages], state, surface },
 			signal,
 		});
-		return { ...data, nextCursor: data.nextCursor ?? null };
+		return {
+			...data,
+			// The successful Feed endpoint response is the proof for this route-specific brand.
+			nextCursor: (data.nextCursor as SearchFeedContinuationToken | undefined) ?? null,
+		};
 	}
 	const { data } = await postApiSearchZonesByZoneIdFeatureFeed({
 		path: { zoneId: source.zoneId },
@@ -64,5 +69,9 @@ export async function fetchSearchFeedPage({
 		},
 		signal,
 	});
-	return { ...data, nextCursor: data.nextCursor ?? null };
+	return {
+		...data,
+		// The successful Feed endpoint response is the proof for this route-specific brand.
+		nextCursor: (data.nextCursor as SearchFeedContinuationToken | undefined) ?? null,
+	};
 }

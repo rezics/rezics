@@ -66,6 +66,7 @@ import {
 import { FeedContentSelector } from "@/features/content-feed/components/feed-content-selector";
 import { FeedList } from "@/features/content-feed/components/feed-list";
 import type { FeedContinuationState } from "@/features/content-feed/model/feed-continuation";
+import type { SearchFeedContinuationToken } from "@/features/content-feed/model/search-feed-continuation-token";
 import { postHref } from "@/features/posts/url";
 import { SearchFeature, type SearchFeatureRequest } from "@/features/search/search-feature";
 import { zonePageHref } from "@/features/slugs/unit-route";
@@ -115,7 +116,7 @@ type ZoneFeedRequest = SearchFeatureRequest;
 type ZoneFeedPage = {
 	readonly facets?: readonly SearchFacet[];
 	readonly items: readonly FeedItem[];
-	readonly nextCursor?: string;
+	readonly nextCursor?: SearchFeedContinuationToken;
 	readonly total: SearchExactness;
 };
 
@@ -685,7 +686,8 @@ function toZoneFeedPage(value: ZoneFeedExecutionResponse): ZoneFeedPage {
 	return {
 		facets: value.facets,
 		items: value.items,
-		nextCursor: value.nextCursor,
+		// The successful Feed endpoint response is the proof for this route-specific brand.
+		nextCursor: value.nextCursor as SearchFeedContinuationToken | undefined,
 		total: {
 			value: Number(value.total.value),
 			relation: value.total.relation,
@@ -705,7 +707,10 @@ function appendZoneFeedPage(current: ZoneFeedPage | undefined, next: ZoneFeedPag
 	};
 }
 
-function requestWithCursor(request: ZoneFeedRequest, cursor: string): ZoneFeedRequest {
+function requestWithCursor(
+	request: ZoneFeedRequest,
+	cursor: SearchFeedContinuationToken,
+): ZoneFeedRequest {
 	return { ...request, state: { ...request.state, cursor } };
 }
 

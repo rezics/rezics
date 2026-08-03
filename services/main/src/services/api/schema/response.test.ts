@@ -16,6 +16,8 @@ import {
 	OrdinaryPostDetailResponse,
 	PostDetailResponse,
 	ReviewDetailResponse,
+	SearchFeedResponse,
+	SearchResponse,
 	UnitDetailAttributionSummaryResponse,
 	UnitProgressStatisticsResponse,
 	UnitVariantContextResponse,
@@ -24,6 +26,32 @@ import {
 import { ReactionSummaryResponse } from "./action-response";
 
 describe("API response values", () => {
+	it("treats Search continuation tokens as opaque response values", () => {
+		expect(
+			Check(SearchResponse, {
+				query: "",
+				groups: [],
+				facets: [],
+				nextCursor: "s1_grouped-token",
+			}),
+		).toBe(true);
+		expect(
+			Check(SearchFeedResponse, {
+				items: [],
+				facets: [],
+				total: { value: 21, relation: "lower-bound" },
+				nextCursor: "s2_global-token",
+			}),
+		).toBe(true);
+		expect(
+			Check(SearchFeedResponse, {
+				items: [],
+				total: { value: 0, relation: "exact" },
+				nextCursor: "",
+			}),
+		).toBe(false);
+	});
+
 	it("keeps Date values in code and ISO timestamps on the wire", () => {
 		const value = "2026-07-14T08:00:00.000Z";
 		const decoded = Decode(DateTime, value);

@@ -10,6 +10,7 @@ import {
 	parseDocument,
 	type PortableTextDocument as PortableTextDocumentValue,
 } from "@rezics/block";
+import { SearchContinuationToken } from "@rezics/filter";
 import { UnitContentLicenseSlugs } from "@rezics/license";
 import {
 	ChineseContentDisplay,
@@ -448,7 +449,7 @@ export const SearchExactness = t.Object({
 });
 export const SearchResponse = t.Object({
 	query: t.String(),
-	nextCursor: t.Optional(t.String({ maxLength: 4096, pattern: "^s1_[A-Za-z0-9_-]+$" })),
+	nextCursor: t.Optional(SearchContinuationToken),
 	facets: t.Optional(
 		t.Array(
 			t.Object({
@@ -471,7 +472,7 @@ export const SearchResponse = t.Object({
 export const DomainSearchResponse = t.Object({
 	hits: t.Array(SearchHit),
 	total: SearchExactness,
-	nextCursor: t.Optional(t.String({ maxLength: 4096, pattern: "^s1_[A-Za-z0-9_-]+$" })),
+	nextCursor: t.Optional(SearchContinuationToken),
 	limit: t.Integer(),
 	processingTimeMs: t.Number(),
 });
@@ -740,7 +741,7 @@ export const FeedResponse = t.Object({
 
 export const SearchFeedResponse = t.Object({
 	items: t.Array(t.Union([FeedUnitItemResponse, FeedPostItemResponse])),
-	nextCursor: SearchResponse.properties.nextCursor,
+	nextCursor: t.Optional(SearchContinuationToken),
 	facets: SearchResponse.properties.facets,
 	total: SearchExactness,
 });
@@ -880,7 +881,7 @@ export const ProgressSearchResponse = t.Object({
 			cover: ImageAssetResponse,
 		}),
 	),
-	nextCursor: t.Optional(t.String({ maxLength: 4096, pattern: "^s1_[A-Za-z0-9_-]+$" })),
+	nextCursor: t.Optional(SearchContinuationToken),
 	total: t.Integer({ minimum: 0 }),
 });
 export const ProgressResponse = t.Object({

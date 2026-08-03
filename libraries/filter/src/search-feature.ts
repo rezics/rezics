@@ -279,10 +279,25 @@ const SearchExecutionBase = {
 	pageSize: Type.Optional(Type.Integer({ minimum: 1, maximum: 100 })),
 };
 
+/**
+ * Opaque continuation token issued by a Search endpoint.
+ *
+ * Clients may retain and return this value only to the endpoint and request
+ * state that produced it. Its encoding and pagination strategy are
+ * intentionally server-owned.
+ */
+export const SearchContinuationToken = Type.String({
+	minLength: 1,
+	maxLength: 4096,
+	description:
+		"Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.",
+});
+export type SearchContinuationToken = Static<typeof SearchContinuationToken>;
+
 export const SearchFeatureState = Type.Object(
 	{
 		...SearchExecutionBase,
-		cursor: Type.Optional(Type.String({ maxLength: 4096, pattern: "^s1_[A-Za-z0-9_-]+$" })),
+		cursor: Type.Optional(SearchContinuationToken),
 		expression: Type.Optional(SearchControlExpression),
 	},
 	{ additionalProperties: false, $id: "SearchFeatureState" },

@@ -36,15 +36,26 @@ describe("globally ranked Search Feed execution", () => {
 	it("uses the full page budget once and carries one global offset in its cursor", async () => {
 		const first = "019f7eed-5d42-7102-8387-cc1d13b176d3";
 		const second = "019f7eed-5d42-7102-8387-cc1d13b176d4";
-		searchGlobalIdentifiers.mockResolvedValue({
-			hits: [{ id: first }, { id: second }],
-			total: { value: 4, relation: "lower-bound" },
-			offset: 0,
-			nextOffset: 3,
-			exhausted: false,
-			limit: 3,
-			processingTimeMs: 1,
-		});
+		const third = "019f7eed-5d42-7102-8387-cc1d13b176d5";
+		searchGlobalIdentifiers
+			.mockResolvedValueOnce({
+				hits: [{ id: first }, { id: second }],
+				total: { value: 4, relation: "lower-bound" },
+				offset: 0,
+				nextOffset: 3,
+				exhausted: false,
+				limit: 3,
+				processingTimeMs: 1,
+			})
+			.mockResolvedValueOnce({
+				hits: [{ id: third }],
+				total: { value: 4, relation: "exact" },
+				offset: 3,
+				nextOffset: 4,
+				exhausted: true,
+				limit: 3,
+				processingTimeMs: 1,
+			});
 		const compiled = compileSearchFeatureInput(
 			{
 				document: createDefaultSearchDocument("global"),
@@ -76,5 +87,34 @@ describe("globally ranked Search Feed execution", () => {
 		);
 		const cursor = parseGlobalSearchCursor(result.nextCursor ?? "");
 		expect(cursor).toMatchObject({ version: 2, pageSize: 3, offset: 3 });
+
+		const nextCompiled = compileSearchFeatureInput(
+			{
+				document: createDefaultSearchDocument("global"),
+				contexts: [],
+				injections: [],
+				state: {
+					pageSize: 3,
+					sort: "createdAt:desc",
+					cursor: result.nextCursor,
+				},
+			},
+			{ sortProfile: "feed", pageBudget: "global" },
+		);
+		const nextResult = await executeCompiledSearchIdentifiers(
+			nextCompiled.request,
+			["zh", "en"],
+			undefined,
+			nextCompiled.enforcedZoneId,
+			nextCompiled.inputIdentity,
+		);
+
+		expect(nextResult.hits).toEqual([{ id: third }]);
+		expect(nextResult.nextCursor).toBeUndefined();
+		expect(searchGlobalIdentifiers).toHaveBeenCalledTimes(2);
+		expect(searchGlobalIdentifiers).toHaveBeenNthCalledWith(
+			2,
+			expect.objectContaining({ offset: 3, limit: 3, sort: "createdAt:desc" }),
+		);
 	});
 });

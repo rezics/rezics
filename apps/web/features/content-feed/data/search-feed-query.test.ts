@@ -26,13 +26,23 @@ beforeEach(() => {
 
 describe("Search Feed page requests", () => {
 	it("retains contexts for a template Feed and adds the continuation cursor", async () => {
-		api.postApiSearchFeaturesByTemplateFeed.mockResolvedValue({
-			data: { items: [], total: 0 },
-		});
+		api.postApiSearchFeaturesByTemplateFeed
+			.mockResolvedValueOnce({
+				data: { items: [], total: 1, nextCursor: "s2_server-issued" },
+			})
+			.mockResolvedValueOnce({ data: { items: [], total: 1 } });
 		const signal = new AbortController().signal;
 
+		const firstPage = await fetchSearchFeedPage({
+			localizationLanguages: ["zh", "en"],
+			request,
+			signal,
+			source: { kind: "template", template: "global" },
+			surface: "search",
+		});
+		if (!firstPage.nextCursor) throw new Error("Expected a continuation token");
 		await fetchSearchFeedPage({
-			cursor: "s1_cursor",
+			cursor: firstPage.nextCursor,
 			localizationLanguages: ["zh", "en"],
 			request,
 			signal,
@@ -40,12 +50,12 @@ describe("Search Feed page requests", () => {
 			surface: "search",
 		});
 
-		expect(api.postApiSearchFeaturesByTemplateFeed).toHaveBeenCalledWith({
+		expect(api.postApiSearchFeaturesByTemplateFeed).toHaveBeenNthCalledWith(2, {
 			path: { template: "global" },
 			body: {
 				...request,
 				localizationLanguages: ["zh", "en"],
-				state: { sort: "best", cursor: "s1_cursor" },
+				state: { sort: "best", cursor: "s2_server-issued" },
 				surface: "search",
 			},
 			signal,

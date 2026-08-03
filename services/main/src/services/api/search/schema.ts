@@ -1,4 +1,5 @@
 import { type Static, t } from "elysia";
+import { SearchContinuationToken } from "@rezics/filter";
 import { PublicationLicenseIds } from "@rezics/license";
 
 import { SearchCategories, SearchSorts } from "../../search/schema";
@@ -15,7 +16,7 @@ const SearchLicenseList = t.Array(t.UnionEnum(PublicationLicenseIds), { maxItems
 export const DomainSearchBody = t.Object(
 	{
 		query: t.Optional(t.String({ maxLength: 500, default: "" })),
-		cursor: t.Optional(t.String({ maxLength: 4096, pattern: "^s1_[A-Za-z0-9_-]+$" })),
+		cursor: t.Optional(SearchContinuationToken),
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
 		localizationLanguages: LocalizationLanguagePriority,
 		Languages: t.Optional(SearchLanguageList),

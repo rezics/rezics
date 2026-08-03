@@ -13,12 +13,15 @@ import { resolveFeedContinuationState, type FeedPaginationMode } from "../model/
 import { type FeedDisplayContext, UnscopedFeedDisplayContext } from "../model/feed-display-context";
 import { collectUniqueFeedItems } from "../model/feed-items";
 import { hasSearchLanguagePresentationBoundary } from "../model/search-language-boundary";
+import type { SearchFeedContinuationToken } from "../model/search-feed-continuation-token";
 import {
 	fetchSearchFeedPage,
 	type SearchFeedRequest,
 	type SearchFeedSource,
 } from "./search-feed-query";
 import { SearchFeedQueryKey } from "./search-feed-query-key";
+
+const InitialSearchFeedContinuationToken: SearchFeedContinuationToken | null = null;
 
 export {
 	type SearchFeedRequest,
@@ -50,8 +53,8 @@ export function useSearchFeedQuery({
 				source,
 				surface,
 			}),
-		initialPageParam: "",
-		getNextPageParam: (page) => page.nextCursor ?? undefined,
+		initialPageParam: InitialSearchFeedContinuationToken,
+		getNextPageParam: (page) => page.nextCursor,
 	});
 }
 

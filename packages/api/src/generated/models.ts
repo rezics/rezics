@@ -82501,8 +82501,9 @@ export type PostApiProgressSearchStatus200 = {
 			| null;
 	}[];
 	/**
+	 * @description Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.
+	 * @minLength 1
 	 * @maxLength 4096
-	 * @pattern ^s1_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
@@ -83031,8 +83032,9 @@ export type PostApiProgressSearchBody = {
 		 */
 		pageSize?: number;
 		/**
+		 * @description Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.
+		 * @minLength 1
 		 * @maxLength 4096
-		 * @pattern ^s1_[A-Za-z0-9_-]+$
 		 * @type string | undefined
 		 */
 		cursor?: string;
@@ -119808,8 +119810,9 @@ export type PostApiSearchFeaturesByTemplateExecuteStatus200 = {
 	 */
 	query: string;
 	/**
+	 * @description Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.
+	 * @minLength 1
 	 * @maxLength 4096
-	 * @pattern ^s1_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
@@ -120649,8 +120652,9 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 		 */
 		pageSize?: number;
 		/**
+		 * @description Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.
+		 * @minLength 1
 		 * @maxLength 4096
-		 * @pattern ^s1_[A-Za-z0-9_-]+$
 		 * @type string | undefined
 		 */
 		cursor?: string;
@@ -124047,8 +124051,9 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 		  )
 	)[];
 	/**
+	 * @description Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.
+	 * @minLength 1
 	 * @maxLength 4096
-	 * @pattern ^s1_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
@@ -124710,8 +124715,9 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 		 */
 		pageSize?: number;
 		/**
+		 * @description Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.
+		 * @minLength 1
 		 * @maxLength 4096
-		 * @pattern ^s1_[A-Za-z0-9_-]+$
 		 * @type string | undefined
 		 */
 		cursor?: string;
@@ -125632,8 +125638,9 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteStatus200 = {
 	 */
 	query: string;
 	/**
+	 * @description Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.
+	 * @minLength 1
 	 * @maxLength 4096
-	 * @pattern ^s1_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
@@ -126455,8 +126462,9 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 		 */
 		pageSize?: number;
 		/**
+		 * @description Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.
+		 * @minLength 1
 		 * @maxLength 4096
-		 * @pattern ^s1_[A-Za-z0-9_-]+$
 		 * @type string | undefined
 		 */
 		cursor?: string;
@@ -129846,8 +129854,9 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 		  )
 	)[];
 	/**
+	 * @description Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.
+	 * @minLength 1
 	 * @maxLength 4096
-	 * @pattern ^s1_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
@@ -130491,8 +130500,9 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 		 */
 		pageSize?: number;
 		/**
+		 * @description Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.
+		 * @minLength 1
 		 * @maxLength 4096
-		 * @pattern ^s1_[A-Za-z0-9_-]+$
 		 * @type string | undefined
 		 */
 		cursor?: string;
@@ -131434,8 +131444,9 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200 = {
 	 */
 	query: string;
 	/**
+	 * @description Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.
+	 * @minLength 1
 	 * @maxLength 4096
-	 * @pattern ^s1_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
@@ -132259,8 +132270,9 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 		 */
 		pageSize?: number;
 		/**
+		 * @description Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.
+		 * @minLength 1
 		 * @maxLength 4096
-		 * @pattern ^s1_[A-Za-z0-9_-]+$
 		 * @type string | undefined
 		 */
 		cursor?: string;
@@ -132802,8 +132814,9 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus
 	 */
 	query: string;
 	/**
+	 * @description Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.
+	 * @minLength 1
 	 * @maxLength 4096
-	 * @pattern ^s1_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
@@ -133631,8 +133644,9 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 		 */
 		pageSize?: number;
 		/**
+		 * @description Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.
+		 * @minLength 1
 		 * @maxLength 4096
-		 * @pattern ^s1_[A-Za-z0-9_-]+$
 		 * @type string | undefined
 		 */
 		cursor?: string;
@@ -137040,8 +137054,9 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 		  )
 	)[];
 	/**
+	 * @description Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.
+	 * @minLength 1
 	 * @maxLength 4096
-	 * @pattern ^s1_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
@@ -137680,8 +137695,9 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 		 */
 		pageSize?: number;
 		/**
+		 * @description Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.
+		 * @minLength 1
 		 * @maxLength 4096
-		 * @pattern ^s1_[A-Za-z0-9_-]+$
 		 * @type string | undefined
 		 */
 		cursor?: string;
@@ -138212,8 +138228,9 @@ export type PostApiSearchStatus200 = {
 	 */
 	query: string;
 	/**
+	 * @description Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.
+	 * @minLength 1
 	 * @maxLength 4096
-	 * @pattern ^s1_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
@@ -140775,8 +140792,9 @@ export type PostApiSearchByIndexStatus200 = {
 		relation: PostApiSearchByIndexStatus200TotalRelationEnum;
 	};
 	/**
+	 * @description Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.
+	 * @minLength 1
 	 * @maxLength 4096
-	 * @pattern ^s1_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
@@ -141013,8 +141031,9 @@ export type PostApiSearchByIndexBody = {
 	 */
 	query?: string;
 	/**
+	 * @description Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.
+	 * @minLength 1
 	 * @maxLength 4096
-	 * @pattern ^s1_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	cursor?: string;

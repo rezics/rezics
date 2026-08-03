@@ -1,7 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, expectTypeOf, it } from "vitest";
 
-import type { SearchExpression } from "./query";
+import type { GlobalSearchCursorToken, GroupedSearchCursorToken, SearchExpression } from "./query";
 import {
+	createSearchCursor,
 	createGlobalSearchCursor,
 	parseGlobalSearchCursor,
 	parseSearchCursor,
@@ -127,10 +128,21 @@ describe("global Search cursor", () => {
 			offset: 37,
 		} as const;
 		const cursor = createGlobalSearchCursor(state);
+		const groupedCursor = createSearchCursor({
+			version: 1,
+			generationId: state.generationId,
+			requestHash: state.requestHash,
+			pageSize: state.pageSize,
+			categories: { units: { offset: 37, exhausted: false } },
+		});
 
+		expectTypeOf(cursor).toEqualTypeOf<GlobalSearchCursorToken>();
+		expectTypeOf(groupedCursor).toEqualTypeOf<GroupedSearchCursorToken>();
+		expectTypeOf(cursor).not.toEqualTypeOf<GroupedSearchCursorToken>();
 		expect(cursor.startsWith("s2_")).toBe(true);
 		expect(parseGlobalSearchCursor(cursor)).toEqual(state);
 		expect(() => parseSearchCursor(cursor)).toThrow("Invalid Search cursor");
+		expect(() => parseGlobalSearchCursor(groupedCursor)).toThrow("Invalid Search cursor");
 	});
 
 	it("rejects a negative global offset before encoding", () => {

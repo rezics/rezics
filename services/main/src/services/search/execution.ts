@@ -25,7 +25,10 @@ import {
 	parseGlobalSearchCursor,
 	parseSearchCursor,
 	specializeSearchExpressionForCategory,
+	type CompiledGlobalSearchRequest,
+	type CompiledGroupedSearchRequest,
 	type CompiledSearchRequest,
+	type GroupedSearchCursorToken,
 } from "./query";
 import type { SearchCategory } from "./schema";
 import {
@@ -51,7 +54,7 @@ interface RankedSearchGroup<Hit extends RankedSearchHit> {
 	readonly offset: number;
 	readonly nextOffset: number;
 	readonly exhausted: boolean;
-	readonly nextCursor?: string;
+	readonly nextCursor?: GroupedSearchCursorToken;
 	readonly limit: number;
 	readonly processingTimeMs: number;
 }
@@ -199,7 +202,7 @@ function mergeSearchFacets(
 }
 
 async function executeCompiledSearchWithPresentation<Hit extends RankedSearchHit>(
-	compiled: CompiledSearchRequest,
+	compiled: CompiledGroupedSearchRequest,
 	localizationLanguages: readonly ContentLanguage[],
 	domainSearch: DomainSearchExecutor<Hit>,
 	profileId?: string,
@@ -329,7 +332,7 @@ async function executeCompiledSearchWithPresentation<Hit extends RankedSearchHit
 
 /** Executes an already proven, engine-independent Filter request. */
 export function executeCompiledSearch(
-	compiled: CompiledSearchRequest,
+	compiled: CompiledGroupedSearchRequest,
 	localizationLanguages: readonly ContentLanguage[],
 	profileId?: string,
 	enforcedZoneId?: string,
@@ -347,7 +350,7 @@ export function executeCompiledSearch(
 
 /** @internal Executes one globally ranked Search Feed stream of Unit identities. */
 export async function executeCompiledSearchIdentifiers(
-	compiled: CompiledSearchRequest,
+	compiled: CompiledGlobalSearchRequest,
 	localizationLanguages: readonly ContentLanguage[],
 	profileId?: string,
 	enforcedZoneId?: string,

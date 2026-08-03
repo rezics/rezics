@@ -116925,8 +116925,9 @@
 												"type": "integer"
 											},
 											"cursor": {
+												"minLength": 1,
 												"maxLength": 4096,
-												"pattern": "^s1_[A-Za-z0-9_-]+$",
+												"description": "Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.",
 												"type": "string"
 											},
 											"expression": {
@@ -118464,8 +118465,9 @@
 											}
 										},
 										"nextCursor": {
+											"minLength": 1,
 											"maxLength": 4096,
-											"pattern": "^s1_[A-Za-z0-9_-]+$",
+											"description": "Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.",
 											"type": "string"
 										},
 										"total": {
@@ -168029,8 +168031,9 @@
 												"type": "integer"
 											},
 											"cursor": {
+												"minLength": 1,
 												"maxLength": 4096,
-												"pattern": "^s1_[A-Za-z0-9_-]+$",
+												"description": "Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.",
 												"type": "string"
 											},
 											"expression": {
@@ -169431,8 +169434,9 @@
 									"properties": {
 										"query": { "type": "string" },
 										"nextCursor": {
+											"minLength": 1,
 											"maxLength": 4096,
-											"pattern": "^s1_[A-Za-z0-9_-]+$",
+											"description": "Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.",
 											"type": "string"
 										},
 										"facets": {
@@ -171457,8 +171461,9 @@
 												"type": "integer"
 											},
 											"cursor": {
+												"minLength": 1,
 												"maxLength": 4096,
-												"pattern": "^s1_[A-Za-z0-9_-]+$",
+												"description": "Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.",
 												"type": "string"
 											},
 											"expression": {
@@ -178940,8 +178945,9 @@
 											}
 										},
 										"nextCursor": {
+											"minLength": 1,
 											"maxLength": 4096,
-											"pattern": "^s1_[A-Za-z0-9_-]+$",
+											"description": "Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.",
 											"type": "string"
 										},
 										"facets": {
@@ -180855,8 +180861,9 @@
 												"type": "integer"
 											},
 											"cursor": {
+												"minLength": 1,
 												"maxLength": 4096,
-												"pattern": "^s1_[A-Za-z0-9_-]+$",
+												"description": "Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.",
 												"type": "string"
 											},
 											"expression": {
@@ -182257,8 +182264,9 @@
 									"properties": {
 										"query": { "type": "string" },
 										"nextCursor": {
+											"minLength": 1,
 											"maxLength": 4096,
-											"pattern": "^s1_[A-Za-z0-9_-]+$",
+											"description": "Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.",
 											"type": "string"
 										},
 										"facets": {
@@ -184232,8 +184240,9 @@
 												"type": "integer"
 											},
 											"cursor": {
+												"minLength": 1,
 												"maxLength": 4096,
-												"pattern": "^s1_[A-Za-z0-9_-]+$",
+												"description": "Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.",
 												"type": "string"
 											},
 											"expression": {
@@ -191715,8 +191724,9 @@
 											}
 										},
 										"nextCursor": {
+											"minLength": 1,
 											"maxLength": 4096,
-											"pattern": "^s1_[A-Za-z0-9_-]+$",
+											"description": "Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.",
 											"type": "string"
 										},
 										"facets": {
@@ -193718,8 +193728,9 @@
 												"type": "integer"
 											},
 											"cursor": {
+												"minLength": 1,
 												"maxLength": 4096,
-												"pattern": "^s1_[A-Za-z0-9_-]+$",
+												"description": "Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.",
 												"type": "string"
 											},
 											"expression": {
@@ -195120,8 +195131,9 @@
 									"properties": {
 										"query": { "type": "string" },
 										"nextCursor": {
+											"minLength": 1,
 											"maxLength": 4096,
-											"pattern": "^s1_[A-Za-z0-9_-]+$",
+											"description": "Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.",
 											"type": "string"
 										},
 										"facets": {
@@ -197107,8 +197119,9 @@
 												"type": "integer"
 											},
 											"cursor": {
+												"minLength": 1,
 												"maxLength": 4096,
-												"pattern": "^s1_[A-Za-z0-9_-]+$",
+												"description": "Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.",
 												"type": "string"
 											},
 											"expression": {
@@ -198509,8 +198522,9 @@
 									"properties": {
 										"query": { "type": "string" },
 										"nextCursor": {
+											"minLength": 1,
 											"maxLength": 4096,
-											"pattern": "^s1_[A-Za-z0-9_-]+$",
+											"description": "Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.",
 											"type": "string"
 										},
 										"facets": {
@@ -200495,8 +200509,9 @@
 												"type": "integer"
 											},
 											"cursor": {
+												"minLength": 1,
 												"maxLength": 4096,
-												"pattern": "^s1_[A-Za-z0-9_-]+$",
+												"description": "Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.",
 												"type": "string"
 											},
 											"expression": {
@@ -207998,8 +208013,9 @@
 											}
 										},
 										"nextCursor": {
+											"minLength": 1,
 											"maxLength": 4096,
-											"pattern": "^s1_[A-Za-z0-9_-]+$",
+											"description": "Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.",
 											"type": "string"
 										},
 										"facets": {
@@ -208315,8 +208331,9 @@
 									"properties": {
 										"query": { "type": "string" },
 										"nextCursor": {
+											"minLength": 1,
 											"maxLength": 4096,
-											"pattern": "^s1_[A-Za-z0-9_-]+$",
+											"description": "Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.",
 											"type": "string"
 										},
 										"facets": {
@@ -213681,8 +213698,9 @@
 								"properties": {
 									"query": { "maxLength": 500, "default": "", "type": "string" },
 									"cursor": {
+										"minLength": 1,
 										"maxLength": 4096,
-										"pattern": "^s1_[A-Za-z0-9_-]+$",
+										"description": "Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.",
 										"type": "string"
 									},
 									"limit": {
@@ -214135,8 +214153,9 @@
 											}
 										},
 										"nextCursor": {
+											"minLength": 1,
 											"maxLength": 4096,
-											"pattern": "^s1_[A-Za-z0-9_-]+$",
+											"description": "Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.",
 											"type": "string"
 										},
 										"limit": {

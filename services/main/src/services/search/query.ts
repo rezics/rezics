@@ -164,7 +164,7 @@ export function specializeSearchExpressionForCategory(
 	return combined ? { state: "expression", expression: combined } : identity;
 }
 
-export interface CompiledSearchRequest {
+interface CompiledSearchRequestBase {
 	readonly scope: SearchScope;
 	readonly categories: readonly SearchCategory[];
 	readonly query: string;
@@ -177,6 +177,16 @@ export interface CompiledSearchRequest {
 	readonly cursor?: string;
 	readonly facets: readonly SearchField[];
 }
+
+export interface CompiledGroupedSearchRequest extends CompiledSearchRequestBase {
+	readonly pageBudget: "per-category";
+}
+
+export interface CompiledGlobalSearchRequest extends CompiledSearchRequestBase {
+	readonly pageBudget: "global";
+}
+
+export type CompiledSearchRequest = CompiledGroupedSearchRequest | CompiledGlobalSearchRequest;
 
 export const SearchCursorVersion = 1 as const;
 
@@ -205,6 +215,19 @@ export interface GlobalSearchCursorState {
 	readonly pageSize: number;
 	readonly offset: number;
 }
+
+declare const GroupedSearchCursorTokenBrand: unique symbol;
+declare const GlobalSearchCursorTokenBrand: unique symbol;
+
+/** A cursor created and validated for per-category Search pagination. */
+export type GroupedSearchCursorToken = string & {
+	readonly [GroupedSearchCursorTokenBrand]: true;
+};
+
+/** A cursor created and validated for one globally ranked Search Feed stream. */
+export type GlobalSearchCursorToken = string & {
+	readonly [GlobalSearchCursorTokenBrand]: true;
+};
 
 const Base64UrlAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
@@ -242,9 +265,9 @@ function decodeBase64Url(value: string): string {
 }
 
 /** The cursor is opaque to callers but fully validated before server-side use. */
-export function createSearchCursor(state: SearchCursorState): string {
+export function createSearchCursor(state: SearchCursorState): GroupedSearchCursorToken {
 	assertSearchCursorState(state);
-	return `s1_${encodeBase64Url(JSON.stringify(state))}`;
+	return `s1_${encodeBase64Url(JSON.stringify(state))}` as GroupedSearchCursorToken;
 }
 
 export function parseSearchCursor(value: string): SearchCursorState {
@@ -260,9 +283,9 @@ export function parseSearchCursor(value: string): SearchCursorState {
 }
 
 /** Creates an opaque cursor for a globally ranked Search Feed. */
-export function createGlobalSearchCursor(state: GlobalSearchCursorState): string {
+export function createGlobalSearchCursor(state: GlobalSearchCursorState): GlobalSearchCursorToken {
 	assertGlobalSearchCursorState(state);
-	return `s2_${encodeBase64Url(JSON.stringify(state))}`;
+	return `s2_${encodeBase64Url(JSON.stringify(state))}` as GlobalSearchCursorToken;
 }
 
 /** Parses only globally ranked Search Feed cursors. */

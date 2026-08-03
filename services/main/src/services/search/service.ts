@@ -74,6 +74,7 @@ import {
 	createSearchCursor,
 	parseSearchCursor,
 	readSearchExpressionLanguageBoundary,
+	type GroupedSearchCursorToken,
 	type SearchExpression,
 } from "./query";
 import {
@@ -801,7 +802,7 @@ interface SearchDomainScanResult<Hit extends SearchIdentifier> {
 	readonly offset: number;
 	readonly nextOffset: number;
 	readonly exhausted: boolean;
-	readonly nextCursor?: string;
+	readonly nextCursor?: GroupedSearchCursorToken;
 	readonly limit: number;
 	readonly processingTimeMs: number;
 }

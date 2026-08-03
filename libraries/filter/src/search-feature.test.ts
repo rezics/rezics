@@ -1,10 +1,25 @@
+import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { readSearchLanguageBoundary, type SearchControlExpression } from "./search-feature";
+import {
+	readSearchLanguageBoundary,
+	SearchContinuationToken,
+	type SearchControlExpression,
+} from "./search-feature";
 
 const language = (values: readonly string[]): SearchControlExpression => ({
 	controlKey: "language",
 	filter: { field: "language", operator: "any-of", values: [...values] },
+});
+
+describe("Search continuation token", () => {
+	it("keeps the wire contract opaque across server-owned cursor formats", () => {
+		expect(Check(SearchContinuationToken, "s1_grouped-token")).toBe(true);
+		expect(Check(SearchContinuationToken, "s2_global-token")).toBe(true);
+		expect(Check(SearchContinuationToken, "future-format")).toBe(true);
+		expect(Check(SearchContinuationToken, "")).toBe(false);
+		expect(Check(SearchContinuationToken, "x".repeat(4097))).toBe(false);
+	});
 });
 
 describe("readSearchLanguageBoundary", () => {
