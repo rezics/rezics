@@ -826,10 +826,15 @@ function ZoneFeedBlock({
 			/>
 			<FeedList
 				aria-label={t.feed.title}
-				continuation={{
-					mode: presentation.pagination,
-					state: continuationState,
-				}}
+				continuation={
+					presentation.pagination === "infinite"
+						? {
+								mode: presentation.pagination,
+								scrollMode: "page",
+								state: continuationState,
+							}
+						: { mode: presentation.pagination, state: continuationState }
+				}
 				emptyBody={t.feed.emptyBody}
 				emptyTitle={t.feed.emptyTitle}
 				errorLabel={t.state.error}

@@ -70,7 +70,11 @@ describe("FeedListItems", () => {
 		render(
 			<FeedList
 				aria-label="Test feed"
-				continuation={{ mode: "infinite", state: { status: "loading" } }}
+				continuation={{
+					mode: "infinite",
+					scrollMode: "page",
+					state: { status: "loading" },
+				}}
 				emptyBody="Empty"
 				emptyTitle="Empty"
 				errorLabel="Error"
@@ -84,6 +88,31 @@ describe("FeedListItems", () => {
 		expect(screen.getByRole("feed", { name: "Test feed" }).getAttribute("aria-busy")).toBe(
 			"true",
 		);
+	});
+
+	it("owns a keyboard-accessible scroll root for a contained infinite feed", () => {
+		render(
+			<FeedList
+				aria-label="Test feed"
+				continuation={{
+					mode: "infinite",
+					scrollMode: "contained",
+					state: { status: "loading" },
+				}}
+				emptyBody="Empty"
+				emptyTitle="Empty"
+				errorLabel="Error"
+				getItemKey={(item) => item}
+				renderItem={(item) => <article>{item}</article>}
+				retryLabel="Retry"
+				state={{ status: "ready", items: ["First card"] }}
+			/>,
+		);
+
+		const viewport = screen.getByRole("region", { name: "Test feed" });
+		expect(viewport.getAttribute("data-slot")).toBe("feed-scroll-viewport");
+		expect(viewport.getAttribute("tabindex")).toBe("0");
+		expect(viewport.contains(screen.getByRole("feed", { name: "Test feed" }))).toBe(true);
 	});
 
 	it("keeps continuation available when every currently loaded item is hidden", () => {
@@ -111,7 +140,11 @@ describe("FeedListItems", () => {
 		render(
 			<FeedList
 				aria-label="Test feed"
-				continuation={{ mode: "infinite", state: { status: "error", retry } }}
+				continuation={{
+					mode: "infinite",
+					scrollMode: "page",
+					state: { status: "error", retry },
+				}}
 				emptyBody="Empty"
 				emptyTitle="Empty"
 				errorLabel="Error"

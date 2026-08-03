@@ -103,7 +103,11 @@ export function SearchFeedResults({
 		<FeedList
 			aria-label={ariaLabel ?? t.feed.title}
 			continuation={
-				pagination === "none" ? undefined : { mode: pagination, state: continuationState }
+				pagination === "none"
+					? undefined
+					: pagination === "infinite"
+						? { mode: pagination, scrollMode: "page", state: continuationState }
+						: { mode: pagination, state: continuationState }
 			}
 			emptyBody={emptyBody ?? t.feed.emptyBody}
 			emptyTitle={emptyTitle ?? t.feed.emptyTitle}

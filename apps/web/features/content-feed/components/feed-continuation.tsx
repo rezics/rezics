@@ -1,18 +1,20 @@
 "use client";
 
 import { Alert, AlertAction, AlertDescription, Button } from "@rezics/ui";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, type RefObject } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import type { FeedContinuationState, FeedPaginationMode } from "../model/feed-continuation";
 
-const InfiniteFeedRootMargin = "320px 0px";
+const InfiniteFeedRootMargin = "0px 0px 320px 0px";
 
 export function FeedContinuation({
 	mode,
+	scrollRootRef,
 	state,
 }: {
 	readonly mode: Exclude<FeedPaginationMode, "none">;
+	readonly scrollRootRef?: RefObject<Element | null>;
 	readonly state: FeedContinuationState;
 }) {
 	const { t } = useTranslation(["actions", "state"]);
@@ -35,10 +37,12 @@ export function FeedContinuation({
 
 	useEffect(() => {
 		const sentinel = sentinelRef.current;
+		const scrollRoot = scrollRootRef?.current;
 		if (
 			mode !== "infinite" ||
 			state.status !== "ready" ||
 			!sentinel ||
+			(scrollRootRef && (!scrollRoot || !scrollRoot.contains(sentinel))) ||
 			typeof IntersectionObserver === "undefined"
 		)
 			return;
@@ -46,11 +50,11 @@ export function FeedContinuation({
 			(entries) => {
 				if (entries.some((entry) => entry.isIntersecting)) requestLoad();
 			},
-			{ rootMargin: InfiniteFeedRootMargin },
+			{ root: scrollRoot ?? null, rootMargin: InfiniteFeedRootMargin },
 		);
 		observer.observe(sentinel);
 		return () => observer.disconnect();
-	}, [mode, requestLoad, state.status]);
+	}, [mode, requestLoad, scrollRootRef, state.status]);
 
 	if (state.status === "exhausted") return null;
 	if (state.status === "error")
