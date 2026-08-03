@@ -203,8 +203,7 @@ export default {
 			policy: "Quota policy",
 			validUntil: `${verbatimTerms.privilegedApiQuotaClass.value} access expires`,
 			customize: "Override this policy for the account",
-			customizeDescription:
-				`Account overrides are stored separately from immutable policy revisions. ${verbatimTerms.privilegedApiQuotaClass.value} assignments still require an expiry.`,
+			customizeDescription: `Account overrides are stored separately from immutable policy revisions. ${verbatimTerms.privilegedApiQuotaClass.value} assignments still require an expiry.`,
 			reason: "Assignment reason",
 			reasonPlaceholder:
 				"Record the operational justification; it is stored in the security audit log.",
