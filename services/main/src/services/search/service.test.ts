@@ -49,7 +49,12 @@ vi.mock("./meilisearch", () => ({ searchCandidates }));
 import { InvalidSearch } from "./errors";
 import { CurrentSearchFieldRegistry, type SearchFieldDefinition } from "./field-registry";
 import { SearchCategories } from "./schema";
-import { compilePostgresSearchExpression, searchDomain, searchDomainFacets } from "./service";
+import {
+	compilePostgresSearchExpression,
+	searchDomain,
+	searchDomainFacets,
+	searchDomainIdentifiers,
+} from "./service";
 import { compileSearchFeatureInput, createDefaultSearchDocument } from "./templates";
 
 const dialect = new PgDialect();
@@ -171,6 +176,19 @@ describe("domain search SQL", () => {
 		expect(query.sql).toContain("'language'");
 		expect(query.sql).toContain("'title'");
 		expect(query.sql).toContain("'summary'");
+	});
+
+	it("returns authoritative identifiers without building Search presentation JSON", async () => {
+		const id = "019f7eed-5d42-7102-8387-cc1d13b176d2";
+		execute.mockResolvedValueOnce({ rows: [{ id, ordinality: "1" }] });
+
+		const result = await searchDomainIdentifiers("units", { limit: 5 });
+
+		expect(result.hits).toEqual([{ id }]);
+		const query = lastQuery();
+		expect(query).toContain('SELECT "unit"."id"::text AS id');
+		expect(query).not.toContain("jsonb_build_object");
+		expect(select).not.toHaveBeenCalled();
 	});
 
 	it("keeps timed media in the Units category authorization query", async () => {
@@ -492,7 +510,40 @@ describe("domain search SQL", () => {
 		expect(exactQuery).toContain('"unit_variant"."variant_unit_id" = "unit"."id"');
 	});
 
-	it("keeps the page cursor at the last returned authorized hit while scanning totals", async () => {
+	it("stops after proving a next page and marks the bounded total as a lower bound", async () => {
+		const first = "019f7eed-5d42-7102-8387-cc1d13b176d2";
+		const second = "019f7eed-5d42-7102-8387-cc1d13b176d3";
+		const third = "019f7eed-5d42-7102-8387-cc1d13b176d4";
+		searchCandidates.mockResolvedValueOnce([
+			{
+				hits: [
+					{ id: first, revision: 1, category: "units", unitType: "book" },
+					{ id: second, revision: 1, category: "units", unitType: "book" },
+					{ id: third, revision: 1, category: "units", unitType: "book" },
+				],
+				estimatedTotalHits: 3,
+				processingTimeMs: 1,
+			},
+		]);
+		execute.mockResolvedValueOnce({
+			rows: [
+				{ hit: { id: first }, ordinality: "1" },
+				{ hit: { id: second }, ordinality: "2" },
+			],
+		});
+		const result = await searchDomain("units", { query: "book", limit: 1 });
+		expect(result.hits).toEqual([{ id: first, slugAddress: null }]);
+		expect(result.total).toEqual({ value: 2, relation: "lower-bound" });
+		expect(result.nextCursor).toBeDefined();
+		expect(parseSearchCursor(result.nextCursor ?? "").categories.units?.offset).toBe(1);
+		const statement = execute.mock.calls.at(-1)?.[0] as SQL | undefined;
+		if (!statement) throw new Error("Search did not execute a query");
+		const query = dialect.sqlToQuery(statement);
+		expect(query.sql).toMatch(/ORDER BY search_candidate\.ordinality\s+LIMIT \$\d+/);
+		expect(query.params.at(-1)).toBe(2);
+	});
+
+	it("retains an exact total when the bounded authorization query covers every candidate", async () => {
 		const first = "019f7eed-5d42-7102-8387-cc1d13b176d2";
 		const second = "019f7eed-5d42-7102-8387-cc1d13b176d3";
 		searchCandidates.mockResolvedValueOnce([
@@ -511,11 +562,10 @@ describe("domain search SQL", () => {
 				{ hit: { id: second }, ordinality: "2" },
 			],
 		});
+
 		const result = await searchDomain("units", { query: "book", limit: 1 });
-		expect(result.hits).toEqual([{ id: first, slugAddress: null }]);
+
 		expect(result.total).toEqual({ value: 2, relation: "exact" });
-		expect(result.nextCursor).toBeDefined();
-		expect(parseSearchCursor(result.nextCursor ?? "").categories.units?.offset).toBe(1);
 	});
 
 	it("batches bounded facet counts and omits unsupported category facets", async () => {
@@ -555,6 +605,9 @@ describe("domain search SQL", () => {
 		expect(query).toContain('join "credit_attribution" as "facet_credit_attribution"');
 		expect(query).toContain('join "unit_ownership" as "facet_ownership"');
 		expect(query.match(/limit 100/g)).toHaveLength(6);
+		expect(searchCandidates).toHaveBeenLastCalledWith([
+			expect.objectContaining({ offset: 0, limit: 1_000 }),
+		]);
 
 		execute.mockClear();
 		await expect(searchDomainFacets("users", {}, ["kind"])).resolves.toEqual([]);

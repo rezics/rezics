@@ -780,3 +780,26 @@ export async function executeSearchFeatureInput(
 		facets: mapSearchFeatureFacets(result.facets, compiled.facetBindings),
 	};
 }
+
+/** @internal Executes a Search Feature for a Feed presenter that only consumes Unit identities. */
+export async function executeSearchFeatureFeedInput(
+	input: unknown,
+	execution: SearchExecutionPolicy,
+	localizationLanguages: readonly ContentLanguage[],
+	profileId: string | undefined,
+	hasDevelopmentPreviewAccess: boolean,
+) {
+	const compiled = compileSearchFeatureInput(input, execution, hasDevelopmentPreviewAccess);
+	const { executeCompiledSearchIdentifiers } = await import("./execution");
+	const result = await executeCompiledSearchIdentifiers(
+		compiled.request,
+		localizationLanguages,
+		profileId,
+		compiled.enforcedZoneId,
+		compiled.inputIdentity,
+	);
+	return {
+		...result,
+		facets: mapSearchFeatureFacets(result.facets, compiled.facetBindings),
+	};
+}

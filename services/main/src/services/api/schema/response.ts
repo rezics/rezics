@@ -742,7 +742,7 @@ export const SearchFeedResponse = t.Object({
 	items: t.Array(t.Union([FeedUnitItemResponse, FeedPostItemResponse])),
 	nextCursor: SearchResponse.properties.nextCursor,
 	facets: SearchResponse.properties.facets,
-	total: t.Integer({ minimum: 0 }),
+	total: SearchExactness,
 });
 
 export const PostFeedResponse = t.Object({

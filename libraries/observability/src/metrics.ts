@@ -269,7 +269,7 @@ export class ObservabilityMetrics {
 		] as const)
 			if (!Number.isSafeInteger(value) || value < 0)
 				throw new Error(`${name} must be a non-negative safe integer`);
-		const attributes = { "search.projection": projection };
+		const attributes = { "search.projection": projection, "search.scan.purpose": "page" };
 		this.#searchCandidates.record(candidateCount, attributes);
 		this.#searchOverfetchRounds.record(rounds, attributes);
 		this.#searchAuthoritativeRejections.record(
@@ -278,5 +278,26 @@ export class ObservabilityMetrics {
 		);
 		if (scanLimitHit) this.#searchScanLimitHits.add(1, attributes);
 		if (lowerBound) this.#searchLowerBoundTotals.add(1, attributes);
+	}
+
+	searchFacetScan(
+		projection: "current" | "history",
+		candidateCount: number,
+		rounds: number,
+		scanLimitHit: boolean,
+	): void {
+		for (const [name, value] of [
+			["candidateCount", candidateCount],
+			["rounds", rounds],
+		] as const)
+			if (!Number.isSafeInteger(value) || value < 0)
+				throw new Error(`${name} must be a non-negative safe integer`);
+		const attributes = { "search.projection": projection, "search.scan.purpose": "facet" };
+		this.#searchCandidates.record(candidateCount, attributes);
+		this.#searchOverfetchRounds.record(rounds, attributes);
+		if (scanLimitHit) {
+			this.#searchScanLimitHits.add(1, attributes);
+			this.#searchLowerBoundTotals.add(1, attributes);
+		}
 	}
 }

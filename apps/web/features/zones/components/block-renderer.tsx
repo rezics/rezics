@@ -18,14 +18,15 @@ import {
 	type SimpleFeedContentKind,
 } from "@rezics/filter";
 import {
+	postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute,
 	useGetApiCollectionsByCollectionIdItems,
 	useGetApiSearchFeaturesByTemplate,
 	useGetApiSearchZonesByZoneIdFeature,
 	usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute,
-	usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute,
 	usePostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecute,
 	type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200,
 } from "@rezics/openapi-tanstack-query";
+import { useMutation } from "@tanstack/react-query";
 import {
 	IdentityAvatar,
 	Menu,
@@ -98,11 +99,16 @@ type SearchFacet = {
 	readonly field: string;
 	readonly options: readonly { readonly value: string }[];
 };
+type SearchExactness = {
+	readonly value: number;
+	readonly relation: "exact" | "lower-bound";
+};
+const ExactZeroSearchTotal: SearchExactness = { value: 0, relation: "exact" };
 type SearchPage = {
 	readonly facets?: readonly SearchFacet[];
 	readonly results: readonly SearchResult[];
 	readonly nextCursor?: string;
-	readonly total: number;
+	readonly total: SearchExactness;
 };
 type ZoneFeedExecutionResponse = PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200;
 type ZoneFeedRequest = SearchFeatureRequest;
@@ -110,7 +116,7 @@ type ZoneFeedPage = {
 	readonly facets?: readonly SearchFacet[];
 	readonly items: readonly FeedItem[];
 	readonly nextCursor?: string;
-	readonly total: number;
+	readonly total: SearchExactness;
 };
 
 interface ZoneBlockContextValue {
@@ -488,7 +494,7 @@ function SearchResults({
 }: {
 	results: readonly SearchResult[];
 	presentation: Pick<SearchPresentation, "results" | "showResultCount">;
-	total: number;
+	total: SearchExactness;
 	unitListLayout?: UnitListLayout;
 }) {
 	const context = useZoneBlocks();
@@ -500,7 +506,9 @@ function SearchResults({
 		<div className="mt-4 grid gap-3">
 			{presentation.showResultCount ? (
 				<p className="text-muted-foreground text-sm">
-					{search.resultCount({ count: total })}
+					{total.relation === "exact"
+						? search.resultCount({ count: total.value })
+						: search.atLeastResultCount({ count: total.value })}
 				</p>
 			) : null}
 			<ul
@@ -551,7 +559,7 @@ function ZoneSearchFeature({
 	facets,
 	results,
 	presentation,
-	total = 0,
+	total = ExactZeroSearchTotal,
 	autoExecute = false,
 	unitListLayout,
 	initialPageSize,
@@ -568,7 +576,7 @@ function ZoneSearchFeature({
 	facets?: readonly SearchFacet[];
 	results?: readonly SearchResult[];
 	presentation: Pick<SearchPresentation, "results" | "showResultCount">;
-	total?: number;
+	total?: SearchExactness;
 	autoExecute?: boolean;
 	unitListLayout?: UnitListLayout;
 	initialPageSize?: number;
@@ -651,16 +659,25 @@ interface SearchExecutionResponse {
 	readonly facets?: readonly SearchFacet[];
 	readonly groups: readonly {
 		readonly hits: readonly SearchResult[];
-		readonly total: { readonly value: string | number };
+		readonly total: {
+			readonly value: string | number;
+			readonly relation: "exact" | "lower-bound";
+		};
 	}[];
 }
 
 function toSearchPage(value: SearchExecutionResponse): SearchPage {
+	const totals = value.groups.map((group) => group.total);
 	return {
 		facets: value.facets,
 		results: value.groups.flatMap((group) => group.hits),
 		nextCursor: value.nextCursor,
-		total: value.groups.reduce((total, group) => total + Number(group.total.value), 0),
+		total: {
+			value: totals.reduce((total, current) => total + Number(current.value), 0),
+			relation: totals.some((total) => total.relation === "lower-bound")
+				? "lower-bound"
+				: "exact",
+		},
 	};
 }
 
@@ -669,7 +686,10 @@ function toZoneFeedPage(value: ZoneFeedExecutionResponse): ZoneFeedPage {
 		facets: value.facets,
 		items: value.items,
 		nextCursor: value.nextCursor,
-		total: Number(value.total),
+		total: {
+			value: Number(value.total.value),
+			relation: value.total.relation,
+		},
 	};
 }
 
@@ -678,10 +698,10 @@ function appendZoneFeedPage(current: ZoneFeedPage | undefined, next: ZoneFeedPag
 	const items = new Map(current.items.map((item) => [item.id, item]));
 	for (const item of next.items) items.set(item.id, item);
 	return {
-		facets: next.facets ?? current.facets,
+		facets: next.facets?.length ? next.facets : current.facets,
 		items: [...items.values()],
 		nextCursor: next.nextCursor,
-		total: Math.max(current.total, next.total),
+		total: current.total,
 	};
 }
 
@@ -719,7 +739,7 @@ function ZoneFeedBlock({
 	maxResults,
 }: {
 	blockKey: string;
-	execute: (request: ZoneFeedRequest) => Promise<ZoneFeedExecutionResponse>;
+	execute: (request: ZoneFeedRequest, signal: AbortSignal) => Promise<ZoneFeedExecutionResponse>;
 	feature: SearchFeatureSource;
 	pending: boolean;
 	error: boolean;
@@ -732,17 +752,22 @@ function ZoneFeedBlock({
 	const [contentKinds, setContentKinds] = useState<readonly SimpleFeedContentKind[]>([]);
 	const [page, setPage] = useState<ZoneFeedPage>();
 	const executionSequence = useRef(0);
+	const executionController = useRef<AbortController | undefined>(undefined);
+	useEffect(() => () => executionController.current?.abort(), []);
 	const run = (
 		nextRequest: ZoneFeedRequest,
 		nextContentKinds: readonly SimpleFeedContentKind[],
 		append: boolean,
 	) => {
 		const sequence = ++executionSequence.current;
+		executionController.current?.abort();
+		const controller = new AbortController();
+		executionController.current = controller;
 		if (!append) {
 			setRequest(nextRequest);
 			setPage(undefined);
 		}
-		void execute(withContentKindFilter(nextRequest, nextContentKinds)).then(
+		void execute(withContentKindFilter(nextRequest, nextContentKinds), controller.signal).then(
 			(result) => {
 				if (sequence !== executionSequence.current) return;
 				setPage((current) =>
@@ -838,6 +863,27 @@ function ZoneFeedBlock({
 	);
 }
 
+function useZoneFeedBlockExecution(blockKey: string, surface: ZoneBlockSurface) {
+	const context = useZoneBlocks();
+	const localizationLanguages = useLocalizationLanguages();
+	return useMutation({
+		mutationFn: async ({
+			request,
+			signal,
+		}: {
+			request: ZoneFeedRequest;
+			signal: AbortSignal;
+		}) => {
+			const { data } = await postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute({
+				body: { ...request, localizationLanguages, surface },
+				path: { blockKey, zoneId: context.projection.zone.id },
+				signal,
+			});
+			return data;
+		},
+	});
+}
+
 function DockFeedBlock({
 	blockKey,
 	feature,
@@ -847,23 +893,12 @@ function DockFeedBlock({
 	feature: SearchFeatureSource;
 	presentation: FeedPresentation;
 }) {
-	const context = useZoneBlocks();
-	const localizationLanguages = useLocalizationLanguages();
-	const mutation = usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute();
+	const mutation = useZoneFeedBlockExecution(blockKey, { kind: "dock" });
 	return (
 		<ZoneFeedBlock
 			blockKey={blockKey}
 			error={mutation.isError}
-			execute={(body) =>
-				mutation.mutateAsync({
-					body: {
-						...body,
-						localizationLanguages,
-						surface: { kind: "dock" },
-					},
-					path: { blockKey, zoneId: context.projection.zone.id },
-				})
-			}
+			execute={(request, signal) => mutation.mutateAsync({ request, signal })}
 			feature={feature}
 			pending={mutation.isPending}
 			presentation={presentation}
@@ -882,23 +917,12 @@ function PageFeedBlock({
 	pageId: string;
 	presentation: FeedPresentation;
 }) {
-	const context = useZoneBlocks();
-	const localizationLanguages = useLocalizationLanguages();
-	const mutation = usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute();
+	const mutation = useZoneFeedBlockExecution(blockKey, { kind: "page", pageId });
 	return (
 		<ZoneFeedBlock
 			blockKey={blockKey}
 			error={mutation.isError}
-			execute={(body) =>
-				mutation.mutateAsync({
-					body: {
-						...body,
-						localizationLanguages,
-						surface: { kind: "page", pageId },
-					},
-					path: { blockKey, zoneId: context.projection.zone.id },
-				})
-			}
+			execute={(request, signal) => mutation.mutateAsync({ request, signal })}
 			feature={feature}
 			pending={mutation.isPending}
 			presentation={presentation}

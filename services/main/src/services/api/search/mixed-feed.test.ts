@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { mixSearchGroupHits } from "./mixed-feed";
+import { combineSearchExactness, mixSearchGroupHits } from "./mixed-feed";
 
 describe("mixed Search Feed ordering", () => {
 	it("interleaves category ranks while preserving each category order", () => {
@@ -20,5 +20,16 @@ describe("mixed Search Feed ordering", () => {
 				{ hits: [{ id: "post-1" }, { id: "shared" }] },
 			]).map(({ id }) => id),
 		).toEqual(["shared", "post-1", "unit-2"]);
+	});
+});
+
+describe("combined Search exactness", () => {
+	it("sums values and preserves a lower-bound relation", () => {
+		expect(
+			combineSearchExactness([
+				{ value: 5, relation: "exact" },
+				{ value: 6, relation: "lower-bound" },
+			]),
+		).toEqual({ value: 11, relation: "lower-bound" });
 	});
 });

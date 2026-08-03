@@ -121418,6 +121418,14 @@ export const PostApiSearchFeaturesByTemplateFeedStatus200FacetsOptionsCountRelat
 export type PostApiSearchFeaturesByTemplateFeedStatus200FacetsOptionsCountRelationEnum =
 	(typeof PostApiSearchFeaturesByTemplateFeedStatus200FacetsOptionsCountRelationEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200FacetsOptionsCountRelationEnum];
 
+export const PostApiSearchFeaturesByTemplateFeedStatus200TotalRelationEnum = {
+	exact: "exact",
+	"lower-bound": "lower-bound",
+} as const;
+
+export type PostApiSearchFeaturesByTemplateFeedStatus200TotalRelationEnum =
+	(typeof PostApiSearchFeaturesByTemplateFeedStatus200TotalRelationEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200TotalRelationEnum];
+
 /**
  * @type object
  */
@@ -124077,7 +124085,17 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 			};
 		}[];
 	}[];
-	total: string | number;
+	/**
+	 * @type object
+	 */
+	total: {
+		value: string | number;
+		/**
+		 * @default 'exact'
+		 * @type string
+		 */
+		relation: PostApiSearchFeaturesByTemplateFeedStatus200TotalRelationEnum;
+	};
 };
 
 /**
@@ -127198,6 +127216,14 @@ export const PostApiSearchZonesByZoneIdFeatureFeedStatus200FacetsOptionsCountRel
 export type PostApiSearchZonesByZoneIdFeatureFeedStatus200FacetsOptionsCountRelationEnum =
 	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200FacetsOptionsCountRelationEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200FacetsOptionsCountRelationEnum];
 
+export const PostApiSearchZonesByZoneIdFeatureFeedStatus200TotalRelationEnum = {
+	exact: "exact",
+	"lower-bound": "lower-bound",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus200TotalRelationEnum =
+	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200TotalRelationEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200TotalRelationEnum];
+
 /**
  * @type object
  */
@@ -129858,7 +129884,17 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 			};
 		}[];
 	}[];
-	total: string | number;
+	/**
+	 * @type object
+	 */
+	total: {
+		value: string | number;
+		/**
+		 * @default 'exact'
+		 * @type string
+		 */
+		relation: PostApiSearchZonesByZoneIdFeatureFeedStatus200TotalRelationEnum;
+	};
 };
 
 /**
@@ -134373,6 +134409,14 @@ export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200Facet
 export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum =
 	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum];
 
+export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200TotalRelationEnum = {
+	exact: "exact",
+	"lower-bound": "lower-bound",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200TotalRelationEnum =
+	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200TotalRelationEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200TotalRelationEnum];
+
 /**
  * @type object
  */
@@ -137034,7 +137078,17 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 			};
 		}[];
 	}[];
-	total: string | number;
+	/**
+	 * @type object
+	 */
+	total: {
+		value: string | number;
+		/**
+		 * @default 'exact'
+		 * @type string
+		 */
+		relation: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200TotalRelationEnum;
+	};
 };
 
 /**

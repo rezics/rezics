@@ -24,9 +24,32 @@ import {
 	type CompiledSearchRequest,
 } from "./query";
 import type { SearchCategory } from "./schema";
-import { searchDomain, searchDomainFacets } from "./service";
+import { searchDomain, searchDomainFacets, searchDomainIdentifiers } from "./service";
 
 const { logger } = getActiveObservability();
+
+interface RankedSearchHit {
+	readonly id: string;
+}
+
+interface RankedSearchGroup<Hit extends RankedSearchHit> {
+	readonly hits: Hit[];
+	readonly total: {
+		readonly value: number;
+		readonly relation: "exact" | "lower-bound";
+	};
+	readonly offset: number;
+	readonly nextOffset: number;
+	readonly exhausted: boolean;
+	readonly nextCursor?: string;
+	readonly limit: number;
+	readonly processingTimeMs: number;
+}
+
+type DomainSearchExecutor<Hit extends RankedSearchHit> = (
+	category: SearchCategory,
+	request: Parameters<typeof searchDomain>[1],
+) => Promise<RankedSearchGroup<Hit>>;
 
 async function resolveScope(compiled: CompiledSearchRequest): Promise<{
 	categories: SearchCategory[];
@@ -66,10 +89,10 @@ async function resolveScope(compiled: CompiledSearchRequest): Promise<{
 	};
 }
 
-/** Executes an already proven, engine-independent Filter request. */
-export async function executeCompiledSearch(
+async function executeCompiledSearchWithPresentation<Hit extends RankedSearchHit>(
 	compiled: CompiledSearchRequest,
 	localizationLanguages: readonly ContentLanguage[],
+	domainSearch: DomainSearchExecutor<Hit>,
 	profileId?: string,
 	enforcedZoneId?: string,
 	inputIdentity?: string,
@@ -142,6 +165,7 @@ export async function executeCompiledSearch(
 		)
 	)
 		throw new InvalidSearch("Search cursor exceeds the configured result window");
+	const facetFields = cursor ? [] : compiled.facets;
 	const outcomes = await Promise.all(
 		scope.categories.map(async (category) => {
 			try {
@@ -165,8 +189,8 @@ export async function executeCompiledSearch(
 					includeScopeDescendants: scope.includeScopeDescendants,
 				};
 				const [group, facets] = await Promise.all([
-					searchDomain(category, domainRequest),
-					searchDomainFacets(category, domainRequest, compiled.facets),
+					domainSearch(category, domainRequest),
+					searchDomainFacets(category, domainRequest, facetFields),
 				]);
 				return {
 					state: "result",
@@ -265,4 +289,40 @@ export async function executeCompiledSearch(
 				})
 			: undefined,
 	};
+}
+
+/** Executes an already proven, engine-independent Filter request. */
+export function executeCompiledSearch(
+	compiled: CompiledSearchRequest,
+	localizationLanguages: readonly ContentLanguage[],
+	profileId?: string,
+	enforcedZoneId?: string,
+	inputIdentity?: string,
+) {
+	return executeCompiledSearchWithPresentation(
+		compiled,
+		localizationLanguages,
+		searchDomain,
+		profileId,
+		enforcedZoneId,
+		inputIdentity,
+	);
+}
+
+/** @internal Executes Search for a downstream presenter that only needs ranked Unit identities. */
+export function executeCompiledSearchIdentifiers(
+	compiled: CompiledSearchRequest,
+	localizationLanguages: readonly ContentLanguage[],
+	profileId?: string,
+	enforcedZoneId?: string,
+	inputIdentity?: string,
+) {
+	return executeCompiledSearchWithPresentation(
+		compiled,
+		localizationLanguages,
+		searchDomainIdentifiers,
+		profileId,
+		enforcedZoneId,
+		inputIdentity,
+	);
 }

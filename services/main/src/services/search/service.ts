@@ -779,7 +779,41 @@ function buildEffectiveSearchExpression(
 	return expression;
 }
 
-export async function searchDomain(category: SearchCategory, request: DomainSearchRequest) {
+interface SearchIdentifier {
+	readonly id: string;
+}
+
+interface SearchDomainScanResult<Hit extends SearchIdentifier> {
+	readonly hits: Hit[];
+	readonly total: {
+		readonly value: number;
+		readonly relation: "exact" | "lower-bound";
+	};
+	readonly offset: number;
+	readonly nextOffset: number;
+	readonly exhausted: boolean;
+	readonly nextCursor?: string;
+	readonly limit: number;
+	readonly processingTimeMs: number;
+}
+
+function searchDomainScan(
+	category: SearchCategory,
+	request: DomainSearchRequest,
+	presentation: "hits",
+): Promise<SearchDomainScanResult<SearchHitWithoutSlugAddress>>;
+function searchDomainScan(
+	category: SearchCategory,
+	request: DomainSearchRequest,
+	presentation: "identifiers",
+): Promise<SearchDomainScanResult<SearchIdentifier>>;
+async function searchDomainScan(
+	category: SearchCategory,
+	request: DomainSearchRequest,
+	presentation: "hits" | "identifiers",
+): Promise<
+	SearchDomainScanResult<SearchHitWithoutSlugAddress> | SearchDomainScanResult<SearchIdentifier>
+> {
 	const startedAt = performance.now();
 	const searchExpression = buildEffectiveSearchExpression(request);
 	const presentationLanguages = [
@@ -842,14 +876,20 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 		request.localizationLanguages,
 	);
 	const hits: SearchHitWithoutSlugAddress[] = [];
+	const identifiers: SearchIdentifier[] = [];
 	const seen = new Set<string>();
 	let authorizedCount = 0;
 	let scanOffset = initialOffset;
 	let exhausted = false;
 	let rounds = 0;
 	let pageBoundaryOffset: number | undefined;
+	const authorizationTarget = limit + 1;
 
-	while (!exhausted && scanOffset - initialOffset < env.SEARCH_CANDIDATE_SCAN_LIMIT) {
+	while (
+		!exhausted &&
+		authorizedCount < authorizationTarget &&
+		scanOffset - initialOffset < env.SEARCH_CANDIDATE_SCAN_LIMIT
+	) {
 		rounds += 1;
 		const batchLimit = Math.min(
 			env.SEARCH_CANDIDATE_BATCH_SIZE,
@@ -878,19 +918,10 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 		const candidatePositions = candidateEntries.map((candidate) => candidate.position);
 		const candidateRevisions = candidateEntries.map((candidate) => candidate.revision);
 		const batchOffset = scanOffset;
-		const result = candidateIds.length
-			? await database.execute<{
-					hit: SearchHitWithoutSlugAddress;
-					ordinality: number | string;
-				}>(sql`
-		WITH search_candidate(unit_id, ordinality, revision) AS (
-			SELECT * FROM unnest(
-				${toUuidArray(candidateIds)},
-				${toIntegerArray(candidatePositions)},
-				${toBigIntArray(candidateRevisions)}
-			)
-		)
-		SELECT (
+		const remainingAuthorizationTarget = authorizationTarget - authorizedCount;
+		const selectedProjection =
+			presentation === "hits"
+				? sql`(
 			jsonb_build_object(
 				'id', ${unit.id},
 				'category', ${category}::text,
@@ -1015,7 +1046,22 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 				)
 				else '{}'::jsonb
 			end
-		) AS hit,
+		) AS hit`
+				: sql`${unit.id}::text AS id`;
+		const result = candidateIds.length
+			? await database.execute<{
+					hit?: SearchHitWithoutSlugAddress;
+					id?: string;
+					ordinality: number | string;
+				}>(sql`
+		WITH search_candidate(unit_id, ordinality, revision) AS (
+			SELECT * FROM unnest(
+				${toUuidArray(candidateIds)},
+				${toIntegerArray(candidatePositions)},
+				${toBigIntArray(candidateRevisions)}
+			)
+		)
+		SELECT ${selectedProjection},
 		search_candidate.ordinality
 		FROM search_candidate
 		JOIN ${searchUnitProjectionSource}
@@ -1041,13 +1087,24 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 		LEFT JOIN ${software} ON ${software.id} = ${unit.id}
 		WHERE ${sql.join(conditions, sql` AND `)}
 		ORDER BY search_candidate.ordinality
+		LIMIT ${remainingAuthorizationTarget}
 	`)
 			: { rows: [] };
+		const authorizationMayBeTruncated =
+			result.rows.length === remainingAuthorizationTarget &&
+			candidateIds.length > remainingAuthorizationTarget;
 		authorizedCount += result.rows.length;
 		for (const row of result.rows)
-			if (hits.length < limit) {
-				hits.push(row.hit);
-				if (hits.length === limit) {
+			if (hits.length + identifiers.length < limit) {
+				if (presentation === "hits") {
+					if (!row.hit) throw new TypeError("PostgreSQL omitted a Search hit projection");
+					hits.push(row.hit);
+				} else {
+					if (!row.id)
+						throw new TypeError("PostgreSQL omitted a Search identifier projection");
+					identifiers.push({ id: row.id });
+				}
+				if (hits.length + identifiers.length === limit) {
 					const ordinality = Number(row.ordinality);
 					if (!Number.isSafeInteger(ordinality) || ordinality < 1)
 						throw new TypeError("PostgreSQL returned invalid candidate ordinality");
@@ -1056,16 +1113,18 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 			}
 		scanOffset += candidateResult.hits.length;
 		exhausted =
-			candidateResult.hits.length < batchLimit ||
-			scanOffset >= candidateResult.estimatedTotalHits;
+			!authorizationMayBeTruncated &&
+			(candidateResult.hits.length < batchLimit ||
+				scanOffset >= candidateResult.estimatedTotalHits);
 		if (candidateResult.hits.length === 0) exhausted = true;
 	}
 	const scanLimitHit =
 		!exhausted && scanOffset - initialOffset >= env.SEARCH_CANDIDATE_SCAN_LIMIT;
 	const nextOffset =
-		hits.length === limit && (authorizedCount > hits.length || !exhausted)
+		hits.length + identifiers.length === limit &&
+		(authorizedCount > hits.length + identifiers.length || !exhausted)
 			? pageBoundaryOffset
-			: hits.length < limit && !exhausted
+			: hits.length + identifiers.length < limit && !exhausted
 				? scanOffset
 				: undefined;
 	metrics.searchCandidateScan(
@@ -1076,12 +1135,7 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 		scanLimitHit,
 		!exhausted,
 	);
-	const slugAddresses = await getPublicCanonicalUnitSlugAddresses(hits.map((hit) => hit.id));
-	return {
-		hits: hits.map((hit) => ({
-			...hit,
-			slugAddress: slugAddresses.get(hit.id) ?? null,
-		})),
+	const common = {
 		total: { value: authorizedCount, relation: exhausted ? "exact" : "lower-bound" } as const,
 		offset: initialOffset,
 		nextOffset: nextOffset ?? scanOffset,
@@ -1099,6 +1153,29 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 		limit,
 		processingTimeMs: Math.round((performance.now() - startedAt) * 1000) / 1000,
 	};
+	return presentation === "hits" ? { ...common, hits } : { ...common, hits: identifiers };
+}
+
+export async function searchDomain(category: SearchCategory, request: DomainSearchRequest) {
+	const result = await searchDomainScan(category, request, "hits");
+	const slugAddresses = await getPublicCanonicalUnitSlugAddresses(
+		result.hits.map((hit) => hit.id),
+	);
+	return {
+		...result,
+		hits: result.hits.map((hit) => ({
+			...hit,
+			slugAddress: slugAddresses.get(hit.id) ?? null,
+		})),
+	};
+}
+
+/** @internal Authoritative ranking and pagination without Search presentation hydration. */
+export function searchDomainIdentifiers(
+	category: SearchCategory,
+	request: DomainSearchRequest,
+): Promise<SearchDomainScanResult<SearchIdentifier>> {
+	return searchDomainScan(category, request, "identifiers");
 }
 
 export interface SearchFacet {
@@ -1202,35 +1279,32 @@ export async function searchDomainFacets(
 	const searchExpression = buildEffectiveSearchExpression(request);
 	const conditions = buildSearchConditions(category, request, searchExpression);
 	const generation = await getActiveSearchGeneration("current");
+	const candidateLimit = env.SEARCH_FACET_CANDIDATE_SCAN_LIMIT;
+	const [candidateResult] = await searchCandidates([
+		{
+			indexUid: generation.indexUid,
+			category,
+			query: request.query?.trim() ?? "",
+			offset: 0,
+			limit: candidateLimit,
+			profileId: request.profileId,
+			expression: searchExpression,
+			sort: request.sort ?? (request.query?.trim() ? "relevance" : "best"),
+		},
+	]);
+	if (!candidateResult) throw new Error("Meilisearch omitted a facet candidate result");
 	const candidates = new Map<string, number>();
-	let candidateOffset = 0;
-	let exhausted = false;
-	while (!exhausted && candidateOffset < env.SEARCH_CANDIDATE_SCAN_LIMIT) {
-		const batchLimit = Math.min(
-			env.SEARCH_CANDIDATE_BATCH_SIZE,
-			env.SEARCH_CANDIDATE_SCAN_LIMIT - candidateOffset,
-		);
-		const [candidateResult] = await searchCandidates([
-			{
-				indexUid: generation.indexUid,
-				category,
-				query: request.query?.trim() ?? "",
-				offset: candidateOffset,
-				limit: batchLimit,
-				profileId: request.profileId,
-				expression: searchExpression,
-				sort: request.sort ?? (request.query?.trim() ? "relevance" : "best"),
-			},
-		]);
-		if (!candidateResult) throw new Error("Meilisearch omitted a facet candidate result");
-		for (const candidate of candidateResult.hits)
-			if (!candidates.has(candidate.id)) candidates.set(candidate.id, candidate.revision);
-		candidateOffset += candidateResult.hits.length;
-		exhausted =
-			candidateResult.hits.length < batchLimit ||
-			candidateOffset >= candidateResult.estimatedTotalHits;
-		if (candidateResult.hits.length === 0) exhausted = true;
-	}
+	for (const candidate of candidateResult.hits)
+		if (!candidates.has(candidate.id)) candidates.set(candidate.id, candidate.revision);
+	const exhausted =
+		candidateResult.hits.length < candidateLimit ||
+		candidateResult.hits.length >= candidateResult.estimatedTotalHits;
+	metrics.searchFacetScan(
+		"current",
+		candidates.size,
+		candidateResult.hits.length ? 1 : 0,
+		!exhausted,
+	);
 	if (!candidates.size) return [];
 	const candidateIds = [...candidates.keys()];
 	const candidateRevisions = [...candidates.values()];

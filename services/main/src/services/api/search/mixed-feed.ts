@@ -6,6 +6,22 @@ interface SearchGroup<Hit extends SearchGroupHit> {
 	readonly hits: readonly Hit[];
 }
 
+export interface SearchExactnessValue {
+	readonly value: number;
+	readonly relation: "exact" | "lower-bound";
+}
+
+export function combineSearchExactness(
+	values: readonly SearchExactnessValue[],
+): SearchExactnessValue {
+	return {
+		value: values.reduce((total, value) => total + value.value, 0),
+		relation: values.some((value) => value.relation === "lower-bound")
+			? "lower-bound"
+			: "exact",
+	};
+}
+
 /**
  * Interleave category-ranked hits into one stable Feed order.
  *

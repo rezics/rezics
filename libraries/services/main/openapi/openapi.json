@@ -178997,15 +178997,26 @@
 											}
 										},
 										"total": {
-											"minimum": 0,
-											"anyOf": [
-												{
-													"format": "integer",
-													"default": 0,
-													"type": "string"
+											"type": "object",
+											"required": ["value", "relation"],
+											"properties": {
+												"value": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
 												},
-												{ "minimum": 0, "type": "integer" }
-											]
+												"relation": {
+													"default": "exact",
+													"type": "string",
+													"enum": ["exact", "lower-bound"]
+												}
+											}
 										}
 									}
 								}
@@ -191761,15 +191772,26 @@
 											}
 										},
 										"total": {
-											"minimum": 0,
-											"anyOf": [
-												{
-													"format": "integer",
-													"default": 0,
-													"type": "string"
+											"type": "object",
+											"required": ["value", "relation"],
+											"properties": {
+												"value": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
 												},
-												{ "minimum": 0, "type": "integer" }
-											]
+												"relation": {
+													"default": "exact",
+													"type": "string",
+													"enum": ["exact", "lower-bound"]
+												}
+											}
 										}
 									}
 								}
@@ -208033,15 +208055,26 @@
 											}
 										},
 										"total": {
-											"minimum": 0,
-											"anyOf": [
-												{
-													"format": "integer",
-													"default": 0,
-													"type": "string"
+											"type": "object",
+											"required": ["value", "relation"],
+											"properties": {
+												"value": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
 												},
-												{ "minimum": 0, "type": "integer" }
-											]
+												"relation": {
+													"default": "exact",
+													"type": "string",
+													"enum": ["exact", "lower-bound"]
+												}
+											}
 										}
 									}
 								}

@@ -42,6 +42,7 @@ import { SearchCategories } from "../../search/schema";
 import { searchDomain, searchGrouped } from "../../search/service";
 import {
 	createDefaultSearchDocument,
+	executeSearchFeatureFeedInput,
 	executeSearchFeatureInput,
 	resolveSearchDocument,
 	type SearchExecutionPolicy,
@@ -68,7 +69,7 @@ import { hydrateFeedItems } from "../feed";
 import { FeedContentKindValues } from "../feed/schema";
 import { DateTime, LocalizationLanguagePriority, Uuid } from "../schema";
 import { findFeedBlock, findSearchFeatureSource } from "./block-source";
-import { mixSearchGroupHits } from "./mixed-feed";
+import { combineSearchExactness, mixSearchGroupHits } from "./mixed-feed";
 import { DomainSearchBody, DomainSearchParams, GroupedSearchBody } from "./schema";
 import {
 	toApiErrorResponse,
@@ -233,16 +234,17 @@ function presentZoneSearchFeature(
 	} satisfies typeof ZoneSearchFeatureResponse.static;
 }
 
-async function executeZoneBlock(input: {
+interface ZoneBlockExecutionInput {
 	zoneId: string;
 	blockKey: string;
 	document: { readonly blocks: readonly Block[] };
 	body: unknown;
-	execution: SearchExecutionPolicy;
 	profileId?: string;
 	hasDevelopmentPreviewAccess: boolean;
 	source?: SearchFeatureSource;
-}) {
+}
+
+async function resolveZoneBlockExecution(input: ZoneBlockExecutionInput) {
 	const source = input.source ?? findSearchFeatureSource(input.document, input.blockKey);
 	const baseDocument =
 		source.kind === "template"
@@ -253,15 +255,27 @@ async function executeZoneBlock(input: {
 					return feature.document;
 				});
 	const request = input.body as typeof ZoneSearchFeatureExecutionBody.static;
-	return executeSearchFeatureInput(
-		{
+	return {
+		featureInput: {
 			document: baseDocument,
 			contexts: [{ kind: "zone", zoneId: input.zoneId }],
 			injections: request.injections,
 			state: request.state,
 		},
+		request,
+	};
+}
+
+async function executeZoneBlock(
+	input: ZoneBlockExecutionInput & {
+		execution: SearchExecutionPolicy;
+	},
+) {
+	const resolved = await resolveZoneBlockExecution(input);
+	return executeSearchFeatureInput(
+		resolved.featureInput,
 		input.execution,
-		request.localizationLanguages,
+		resolved.request.localizationLanguages,
 		input.profileId,
 		input.hasDevelopmentPreviewAccess,
 	);
@@ -276,22 +290,27 @@ async function executeZoneFeedBlock(input: {
 	hasDevelopmentPreviewAccess: boolean;
 }) {
 	const block = findFeedBlock(input.document, input.blockKey);
-	const result = await executeZoneBlock({
+	const resolved = await resolveZoneBlockExecution({
 		...input,
 		source: block.feature,
-		execution: { sortProfile: "feed", pageBudget: "shared" },
 	});
-	const request = input.body as typeof ZoneFeedBlockExecutionBody.static;
+	const result = await executeSearchFeatureFeedInput(
+		resolved.featureInput,
+		{ sortProfile: "feed", pageBudget: "shared" },
+		resolved.request.localizationLanguages,
+		input.profileId,
+		input.hasDevelopmentPreviewAccess,
+	);
 	return presentSearchResultAsFeed(
 		result,
-		request.localizationLanguages,
-		request.state,
+		resolved.request.localizationLanguages,
+		resolved.request.state,
 		input.profileId,
 	);
 }
 
 async function presentSearchResultAsFeed(
-	result: Awaited<ReturnType<typeof executeSearchFeatureInput>>,
+	result: Awaited<ReturnType<typeof executeSearchFeatureFeedInput>>,
 	localizationLanguages: readonly ContentLanguage[],
 	state: Readonly<{
 		filter?: SearchFeatureState["filter"];
@@ -330,7 +349,7 @@ async function presentSearchResultAsFeed(
 		items,
 		nextCursor: result.nextCursor,
 		facets: result.facets,
-		total: result.groups.reduce((total, group) => total + Number(group.total.value), 0),
+		total: combineSearchExactness(result.groups.map((group) => group.total)),
 	};
 }
 
@@ -405,7 +424,7 @@ export default new Elysia({ prefix: "/search" })
 					await identity.authorization.platform.hasCapability(
 						DevelopmentPreviewCapability,
 					);
-				const result = await executeSearchFeatureInput(
+				const result = await executeSearchFeatureFeedInput(
 					{
 						document: createDefaultSearchDocument(params.template),
 						contexts: body.contexts,
@@ -570,7 +589,7 @@ export default new Elysia({ prefix: "/search" })
 					await identity.authorization.platform.hasCapability(
 						DevelopmentPreviewCapability,
 					);
-				const result = await executeSearchFeatureInput(
+				const result = await executeSearchFeatureFeedInput(
 					{
 						document: feature.document,
 						contexts: [{ kind: "zone", zoneId: params.zoneId }],
