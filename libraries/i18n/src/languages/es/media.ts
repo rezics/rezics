@@ -13,6 +13,12 @@ export default {
 	current: "Sustitución para el idioma actual",
 	displayPreview: "Área mostrada",
 	editPresentation: "Ajustar el área mostrada",
+	upload: {
+		preparing: "Preparando la subida de la imagen…",
+		uploading: "Subiendo la imagen…",
+		progress: insert("Subiendo la imagen… {{percentage}} %", { percentage: Number }),
+		processing: "Subida completada. Procesando la imagen…",
+	},
 	localizationFallback: {
 		notice: "Cada recurso de imagen aplica la sustitución de idioma de forma independiente.",
 		title: "Sustitución de idioma para imágenes",

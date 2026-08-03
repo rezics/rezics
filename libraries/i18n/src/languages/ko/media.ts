@@ -13,6 +13,12 @@ export default {
 	current: "현재 언어 재정의",
 	displayPreview: "표시 범위",
 	editPresentation: "표시 범위 조정",
+	upload: {
+		preparing: "이미지 업로드 준비 중…",
+		uploading: "이미지 업로드 중…",
+		progress: insert("이미지 업로드 중… {{percentage}}%", { percentage: Number }),
+		processing: "업로드가 완료되었습니다. 이미지 처리 중…",
+	},
 	localizationFallback: {
 		notice: "모든 이미지 자산은 언어 대체 규칙을 각각 독립적으로 적용합니다.",
 		title: "이미지 언어 대체 규칙",

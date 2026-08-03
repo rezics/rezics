@@ -13,6 +13,12 @@ export default {
 	current: "現在の言語上書き",
 	displayPreview: "表示範囲",
 	editPresentation: "表示範囲を調整",
+	upload: {
+		preparing: "画像のアップロードを準備中…",
+		uploading: "画像をアップロード中…",
+		progress: insert("画像をアップロード中… {{percentage}}%", { percentage: Number }),
+		processing: "アップロードが完了しました。画像を処理中…",
+	},
 	localizationFallback: {
 		notice: "すべての画像アセットには、言語フォールバックが個別に適用されます。",
 		title: "画像の言語フォールバック",

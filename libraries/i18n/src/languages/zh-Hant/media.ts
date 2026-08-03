@@ -13,6 +13,12 @@ export default {
 	current: "目前語言的覆蓋圖片",
 	displayPreview: "實際顯示範圍",
 	editPresentation: "調整顯示範圍",
+	upload: {
+		preparing: "正在準備上傳圖片……",
+		uploading: "正在上傳圖片……",
+		progress: insert("正在上傳圖片……{{percentage}}%", { percentage: Number }),
+		processing: "上傳完成，正在處理圖片……",
+	},
 	localizationFallback: {
 		notice: "所有圖片資產都會獨立套用語言遞補規則。",
 		title: "圖片語言遞補規則",

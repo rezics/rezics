@@ -17,6 +17,7 @@ const CosmosTranslationNamespaces = [
 	"cover",
 	"engagement",
 	"feed",
+	"media",
 	"posts",
 ] as const;
 

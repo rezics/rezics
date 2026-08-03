@@ -13,6 +13,12 @@ export default {
 	current: "Current language override",
 	displayPreview: "Displayed area",
 	editPresentation: "Adjust displayed area",
+	upload: {
+		preparing: "Preparing image upload…",
+		uploading: "Uploading image…",
+		progress: insert("Uploading image… {{percentage}}%", { percentage: Number }),
+		processing: "Upload complete. Processing image…",
+	},
 	localizationFallback: {
 		notice: "Every image asset follows language fallback independently.",
 		title: "Image language fallback",

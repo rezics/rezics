@@ -13,6 +13,12 @@ export default {
 	current: "Überschreibung für die aktuelle Sprache",
 	displayPreview: "Angezeigter Bereich",
 	editPresentation: "Angezeigten Bereich anpassen",
+	upload: {
+		preparing: "Bild-Upload wird vorbereitet …",
+		uploading: "Bild wird hochgeladen …",
+		progress: insert("Bild wird hochgeladen … {{percentage}} %", { percentage: Number }),
+		processing: "Upload abgeschlossen. Bild wird verarbeitet …",
+	},
 	localizationFallback: {
 		notice: "Für jedes Bild gilt die Sprachersatzregel unabhängig.",
 		title: "Sprachersatz für Bilder",

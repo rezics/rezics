@@ -22,8 +22,6 @@ import {
 	FileUploadTrigger,
 	NativeSelect,
 	NativeSelectOption,
-	Progress,
-	ProgressValue,
 	cn,
 } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
@@ -34,6 +32,7 @@ import {
 	MaximumImageUploadBytes,
 	validateImageUploadCandidate,
 } from "../model/image-upload";
+import { ImageUploadProgress, type ImageUploadStatus } from "./image-upload-progress";
 
 const ImageAssetPresentationEditor = lazy(() =>
 	import("./image-asset-presentation-editor").then(({ ImageAssetPresentationEditor }) => ({
@@ -79,7 +78,7 @@ export function LocalizationImageUploadField({
 	const xhr = useRef<XMLHttpRequest | null>(null);
 	const [files, setFiles] = useState<File[]>([]);
 	const [preview, setPreview] = useState<string>();
-	const [progress, setProgress] = useState(0);
+	const [uploadStatus, setUploadStatus] = useState<ImageUploadStatus>({ phase: "idle" });
 	const [error, setError] = useState<string>();
 	const [editorAssetId, setEditorAssetId] = useState<string>();
 	const [editorOpen, setEditorOpen] = useState(false);
@@ -103,6 +102,7 @@ export function LocalizationImageUploadField({
 		}
 		if (preview) URL.revokeObjectURL(preview);
 		setPreview(URL.createObjectURL(file));
+		setUploadStatus({ phase: "preparing" });
 		let assetId: string | undefined;
 		try {
 			const asset = await requestUpload.mutateAsync({
@@ -113,7 +113,15 @@ export function LocalizationImageUploadField({
 				},
 			});
 			assetId = asset.id;
-			await uploadFile(asset.upload.url, asset.upload.headers, file, setProgress, xhr);
+			setUploadStatus({ phase: "uploading", progress: null });
+			await uploadFile(
+				asset.upload.url,
+				asset.upload.headers,
+				file,
+				(progress) => setUploadStatus({ phase: "uploading", progress }),
+				xhr,
+			);
+			setUploadStatus({ phase: "processing" });
 			const completed = await completeUpload.mutateAsync({
 				path: { id: asset.id },
 				body: { role },
@@ -136,8 +144,8 @@ export function LocalizationImageUploadField({
 					? t.media.invalid
 					: copy.failed,
 			);
-			setProgress(0);
 		} finally {
+			setUploadStatus({ phase: "idle" });
 			setFiles([]);
 		}
 	}
@@ -145,20 +153,20 @@ export function LocalizationImageUploadField({
 	function remove() {
 		xhr.current?.abort();
 		onChange(null);
-		setProgress(0);
+		setUploadStatus({ phase: "idle" });
 		setFiles([]);
 		if (preview) URL.revokeObjectURL(preview);
 		setPreview(undefined);
 		setError(undefined);
 	}
 
-	const busy =
-		requestUpload.isPending || completeUpload.isPending || (progress > 0 && progress < 100);
+	const busy = uploadStatus.phase !== "idle";
 	const valueIsReusableOption = options.some((option) => option.id === value?.id);
 	return (
 		<FileUpload
 			accept={ImageUploadContentTypes.join(",")}
 			acceptedFiles={files}
+			aria-busy={busy}
 			className="grid gap-2"
 			disabled={busy}
 			maxFileSize={MaximumImageUploadBytes}
@@ -224,13 +232,7 @@ export function LocalizationImageUploadField({
 						<FileUploadHelper>{t.media.hint}</FileUploadHelper>
 					</>
 				)}
-				{busy && (
-					<div className="bg-background/80 absolute inset-x-0 bottom-0 p-2 backdrop-blur">
-						<Progress value={progress}>
-							<ProgressValue className="text-xs" />
-						</Progress>
-					</div>
-				)}
+				<ImageUploadProgress status={uploadStatus} />
 			</FileUploadDropzone>
 			{displayed && role === "banner" ? (
 				<p className="max-w-2xl text-muted-foreground text-xs leading-5">
@@ -307,7 +309,7 @@ function uploadFile(
 	url: string,
 	headers: Record<string, string>,
 	file: File,
-	progress: (value: number) => void,
+	progress: (value: number | null) => void,
 	reference: React.MutableRefObject<XMLHttpRequest | null>,
 ) {
 	return new Promise<void>((resolve, reject) => {
@@ -315,8 +317,13 @@ function uploadFile(
 		reference.current = request;
 		request.open("PUT", url);
 		for (const [name, value] of Object.entries(headers)) request.setRequestHeader(name, value);
-		request.upload.onprogress = (event) =>
-			event.lengthComputable && progress(Math.round((event.loaded / event.total) * 100));
+		request.upload.onprogress = (event) => {
+			if (!event.lengthComputable || event.total <= 0) {
+				progress(null);
+				return;
+			}
+			progress(Math.min(100, Math.max(0, Math.round((event.loaded / event.total) * 100))));
+		};
 		request.onload = () =>
 			request.status >= StatusCodes.OK && request.status < StatusCodes.MULTIPLE_CHOICES
 				? resolve()

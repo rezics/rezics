@@ -13,6 +13,12 @@ export default {
 	current: "Remplacement pour la langue actuelle",
 	displayPreview: "Aire affichée",
 	editPresentation: "Ajuster la zone affichée",
+	upload: {
+		preparing: "Préparation du téléversement de l’image…",
+		uploading: "Téléversement de l’image…",
+		progress: insert("Téléversement de l’image… {{percentage}} %", { percentage: Number }),
+		processing: "Téléversement terminé. Traitement de l’image…",
+	},
 	localizationFallback: {
 		notice: "Chaque ressource d’image applique indépendamment le repli linguistique.",
 		title: "Repli linguistique des images",

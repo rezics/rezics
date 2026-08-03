@@ -13,6 +13,12 @@ export default {
 	current: "当前语言的封面图片",
 	displayPreview: "实际显示范围",
 	editPresentation: "调整显示范围",
+	upload: {
+		preparing: "正在准备上传图片……",
+		uploading: "正在上传图片……",
+		progress: insert("正在上传图片……{{percentage}}%", { percentage: Number }),
+		processing: "上传完成，正在处理图片……",
+	},
 	localizationFallback: {
 		notice: "所有图片资源都会独立应用语言递补规则。",
 		title: "图片语言递补规则",
