@@ -159,6 +159,26 @@ describe("localization terminology policy", () => {
 		);
 	});
 
+	it("checks visible YAML frontmatter without treating identifiers as prose", () => {
+		const errors = checkMarkdownSource({
+			path: "apps/about/src/content/locales/zh-hant/products/example.mdx",
+			source: `---
+productId: zone
+locale: zh-hant
+title: "專區"
+summary: "歡迎來到專區。"
+description: "技術識別法位於程式碼中。"
+---
+
+## 詳細內容`,
+			verbatimDefinitions,
+			terminologyDefinitions,
+			rejectUnapprovedTokens: true,
+		});
+
+		expect(errors).toEqual([]);
+	});
+
 	it("rejects empty and self-forbidden registry values", () => {
 		const errors = checkTerminologyRegistry({
 			"zh-Hant": {

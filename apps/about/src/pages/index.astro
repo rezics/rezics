@@ -1,0 +1,56 @@
+---
+import {
+  ABOUT_LOCALES,
+  ABOUT_LOCALE_META,
+  DEFAULT_LOCALE,
+} from "../i18n/locales";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import {
+  getCanonicalForPath,
+  getHomePath,
+} from "../i18n/productPaths";
+
+const defaultPath = getHomePath(DEFAULT_LOCALE);
+const brand = verbatimTerms.rezics.value;
+const htmlLang = ABOUT_LOCALE_META[DEFAULT_LOCALE].htmlLang;
+const localizedPaths = Object.fromEntries(
+  ABOUT_LOCALES.map((locale) => [locale, getHomePath(locale)]),
+);
+---
+
+<!doctype html>
+<html lang={htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href={getCanonicalForPath(defaultPath)} />
+    <script is:inline define:vars={{ defaultPath, localizedPaths }}>
+      const normalize = (value) => value.trim().toLowerCase().replaceAll("_", "-");
+      const match = (value) => {
+        const tag = normalize(value);
+        if (localizedPaths[tag]) return tag;
+        if (tag === "zh" || tag.startsWith("zh-")) {
+          if (
+            tag.startsWith("zh-hant") ||
+            ["zh-tw", "zh-hk", "zh-mo"].some((prefix) => tag.startsWith(prefix))
+          ) return "zh-hant";
+          if (
+            tag.startsWith("zh-hans") ||
+            ["zh-cn", "zh-sg"].some((prefix) => tag.startsWith(prefix))
+          ) return "zh-hans";
+          return "zh-hant";
+        }
+        const base = tag.split("-")[0];
+        return localizedPaths[base] ? base : undefined;
+      };
+      const languages = navigator.languages?.length
+        ? navigator.languages
+        : [navigator.language];
+      const locale = languages.map(match).find(Boolean);
+      window.location.replace(locale ? localizedPaths[locale] : defaultPath);
+    </script>
+    <noscript><meta http-equiv="refresh" content={`0; url=${defaultPath}`} /></noscript>
+    <title>{brand}</title>
+  </head>
+  <body><a href={defaultPath}>{brand}</a></body>
+</html>

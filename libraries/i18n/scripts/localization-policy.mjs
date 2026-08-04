@@ -238,12 +238,39 @@ function checkTerminologyValue(path, source, value, offset, terminologyDefinitio
 	return errors;
 }
 
+function maskMdxFrontmatter(source) {
+	if (!source.startsWith("---\n") && !source.startsWith("---\r\n")) return source;
+	const closingMatch = /\r?\n---(?:\r?\n|$)/.exec(source.slice(3));
+	if (!closingMatch || typeof closingMatch.index !== "number") return source;
+	const end = 3 + closingMatch.index + closingMatch[0].length;
+	const frontmatter = source.slice(0, end);
+	const output = source.split("");
+
+	for (let index = 0; index < end; index += 1) {
+		if (source[index] !== "\n" && source[index] !== "\r") output[index] = " ";
+	}
+
+	const visibleScalar =
+		/^(?:title|summary|description):\s*(?:"([^"\n]*)"|'([^'\n]*)'|([^\n]+))\s*$/gm;
+	for (const match of frontmatter.matchAll(visibleScalar)) {
+		const value = match[1] ?? match[2] ?? match[3];
+		if (!value || typeof match.index !== "number") continue;
+		const valueOffset = match.index + match[0].indexOf(value);
+		for (let index = valueOffset; index < valueOffset + value.length; index += 1) {
+			output[index] = source[index];
+		}
+	}
+
+	return output.join("");
+}
+
 function maskMdxEsm(path, source) {
 	if (extname(path) !== ".mdx") return { value: source, errors: [] };
+	const frontmatterMaskedSource = maskMdxFrontmatter(source);
 
 	let sourceFile;
 	try {
-		sourceFile = mdxProcessor.parse(source);
+		sourceFile = mdxProcessor.parse(frontmatterMaskedSource);
 	} catch (error) {
 		return {
 			value: source,
@@ -251,7 +278,7 @@ function maskMdxEsm(path, source) {
 		};
 	}
 
-	const output = source.split("");
+	const output = frontmatterMaskedSource.split("");
 	for (const node of sourceFile.children) {
 		if (node.type !== "mdxjsEsm") continue;
 		const start = node.position?.start.offset;

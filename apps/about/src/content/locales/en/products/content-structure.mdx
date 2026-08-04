@@ -1,0 +1,37 @@
+---
+productId: content-structure
+locale: en
+title: "Content Structure"
+summary: "Manages placement, order, reuse, and optional game structure across content carriers."
+description: "Manages placement, order, reuse, and optional game structure across content carriers."
+---
+
+## What it makes possible
+
+Content Structure turns the underlying model into something readers can understand and communities can maintain. Manages placement, order, reuse, and optional game structure across content carriers.
+
+## Who uses it
+
+Authors and editors use it to compose and publish change; readers receive a coherent and traceable result.
+
+## A concrete journey
+
+- ContentStructure uses an ordered tree for placement, order, and reuse.
+- GameContentStructure adds Entrance, Passage, Ending, Choice, retirement, layout, and DAG validation.
+- The first public adapter is the confirmed Book integration.
+
+## How it works
+
+1. Create occurrences in Tree mode; a Node is not the same thing as a Post.
+2. Switch to Game mode when branching is needed, still layered over the ordinary structure.
+3. Validate the resulting Book directory or GameBook reader experience.
+
+## How it connects
+
+Content Structure does not stand alone. It shares identity, context, or workflow with Book · GameBook · Post · Editor · History.
+
+## Clear boundaries
+
+- Content Structure has no carrier parent and is not GameBook’s parent.
+- Editor, History, and API have distinct responsibilities.
+- Media and Series adapters are not advertised until their current documents confirm them.

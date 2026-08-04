@@ -1,0 +1,30 @@
+---
+import { buttonVariants } from "@rezics/ui";
+
+import { getSiteCopy } from "../content/locales";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import { DEFAULT_LOCALE } from "../i18n/locales";
+import { getHomePath } from "../i18n/productPaths";
+import SiteLayout from "../layouts/SiteLayout.astro";
+
+const copy = getSiteCopy(DEFAULT_LOCALE);
+const meta = {
+  title: `${copy.notFound.title} — ${verbatimTerms.rezics.value}`,
+  description: copy.notFound.body,
+};
+---
+
+<SiteLayout locale={DEFAULT_LOCALE} active="home" pageKind="home" meta={meta}>
+  <section class="page-hero">
+    <div class="shell page-hero__inner">
+      <p class="eyebrow">404</p>
+      <h1>{copy.notFound.title}</h1>
+      <p class="hero-lead">{copy.notFound.body}</p>
+      <div class="hero-actions">
+        <a class={buttonVariants({ variant: "brand", size: "xl" })} href={getHomePath(DEFAULT_LOCALE)}>
+          {copy.notFound.back}
+        </a>
+      </div>
+    </div>
+  </section>
+</SiteLayout>

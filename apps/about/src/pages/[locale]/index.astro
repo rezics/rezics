@@ -1,0 +1,112 @@
+---
+import { buttonVariants } from "@rezics/ui";
+
+import { getSiteCopy } from "../../content/locales";
+import { ABOUT_LOCALES, getAppEntryUrl, requireAboutLocale } from "../../i18n/locales";
+import { getHowItWorksPath, getUsesPath } from "../../i18n/productPaths";
+import SiteLayout from "../../layouts/SiteLayout.astro";
+
+export function getStaticPaths() {
+  return ABOUT_LOCALES.map((locale) => ({ params: { locale } }));
+}
+
+const locale = requireAboutLocale(Astro.params.locale);
+const copy = getSiteCopy(locale);
+---
+
+<SiteLayout locale={locale} active="home" pageKind="home" meta={copy.meta.home}>
+  <section class="home-hero">
+    <div class="shell home-hero__inner">
+      <p class="eyebrow">{copy.home.eyebrow}</p>
+      <h1>{copy.home.title}</h1>
+      <p class="hero-lead">{copy.home.lead}</p>
+      <div class="hero-actions">
+        <a class={buttonVariants({ variant: "brand", size: "xl" })} href={getUsesPath(locale)}>
+          {copy.home.explore}
+        </a>
+        <a class={buttonVariants({ variant: "outline", size: "xl" })} href={getHowItWorksPath(locale)}>
+          {copy.home.understand}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="shell split-statement">
+      <h2>{copy.home.problem.title}</h2>
+      <div><p>{copy.home.problem.body}</p></div>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="shell">
+      <div class="section-heading">
+        <h2>{copy.home.promise.title}</h2>
+        <p>{copy.home.promise.body}</p>
+      </div>
+      <div class="principle-grid">
+        {copy.home.principles.map((principle) => (
+          <article class="principle-card">
+            <h3>{principle.title}</h3>
+            <p>{principle.body}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="shell">
+      <div class="section-heading">
+        <h2>{copy.home.model.title}</h2>
+        <p>{copy.home.model.body}</p>
+      </div>
+      <ol class="model-flow">
+        {copy.home.model.steps.map((step) => (
+          <li>
+            <h3>{step.title}</h3>
+            <p>{step.body}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="shell">
+      <div class="section-heading">
+        <h2>{copy.home.outcomes.title}</h2>
+        <p>{copy.home.outcomes.body}</p>
+      </div>
+      <div class="outcome-grid">
+        {copy.home.outcomes.cards.map((card) => (
+          <article class="outcome-card">
+            <h3>{card.title}</h3>
+            <p>{card.body}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="shell split-statement">
+      <h2>{copy.home.open.title}</h2>
+      <div><p>{copy.home.open.body}</p></div>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="shell">
+      <div class="section-heading">
+        <h2>{copy.home.closing.title}</h2>
+        <p>{copy.home.closing.body}</p>
+        <div>
+          <a class={buttonVariants({ variant: "brand", size: "xl" })} href={getAppEntryUrl()}>
+            {copy.home.closing.action}
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</SiteLayout>

@@ -1,67 +1,44 @@
 # @rezics/about
 
-The static brand and product site for `about.rezics.com`, built with React 19, Vike,
-`vike-react`, SharkUI, and Tailwind CSS.
+The static brand and product site for `about.rezics.com`, built with Astro,
+React islands, SharkUI, and Tailwind CSS.
 
-## Current publication scope
+## Publication scope
 
-The site currently publishes region-neutral Traditional Chinese only:
+The site publishes six locale-prefixed editions:
 
 ```text
-/zh-hant/
-/zh-hant/contact-us/
-/zh-hant/products/
-/zh-hant/products/[slug]/
+/{locale}/
+/{locale}/how-it-works/
+/{locale}/uses/
+/{locale}/products/
+/{locale}/products/[slug]/
 ```
 
-The root and unlocalized product routes redirect to `zh-hant`. Additional locales should only
-be added after their complete, typed content resource is ready.
+The supported locales are `zh-hant`, `zh-hans`, `en`, `ja`, `de`, and `ko`.
+The v1 `/zh-hant/contact-us/` route remains supported. Missing non-default
+product translations and contact editions redirect to the default `zh-hant`
+content. Cloudflare Pages middleware negotiates `Accept-Language` only for
+supported routes without a locale prefix.
 
 ## Architecture
 
-- `src/content/locales/zh-hant/content.ts`: shared shell, directory, contact, and interactive
-  component copy for the published locale.
-- `src/content/locales/zh-hant/products/*.mdx`: one editorial document for each product. Each
-  document owns its name, summary, introduction, and freely structured explanation.
-- `src/content/productMetadataPlugin.ts` and `productDocumentMetadata.ts`: expose metadata-only
-  build modules, validate their unknown exports, and prove that every registered product has
-  exactly one document in every published locale.
-- `src/content/productDocuments.client.ts` and `productDocuments.server.ts`: resolve through one
-  environment-aware virtual module, so prerendering receives complete HTML while the browser
-  lazily loads only the selected product body.
-- `src/content/productRegistry.ts`: the 26 product identities, four guided paths, relations,
-  and the three products with meaningful interactive demonstrations.
-- `src/components/products/`: the site shell, real homepage, guided Products directory,
-  product explanations, and focused demonstrations.
-- `src/components/contact/`: the dedicated Contact Us experience.
-- `pages/`: Vike file-based routes with SSR, client-side routing, trailing slashes, and full
-  prerendering.
-- `functions/_middleware.ts`: default-locale redirects for unlocalized public routes.
+- `src/content/locales/contract.ts` owns the typed About copy contract.
+- `src/content/locales/{locale}/content.ts` owns each locale's complete site copy.
+- `src/content/locales/{locale}/products/*.mdx` owns localized product documents.
+- `src/content/productRegistry.ts` owns stable product identities and relations.
+- `src/content/productDocuments.ts` validates document path, locale, uniqueness,
+  default-locale completeness, and localized availability.
+- `src/pages/[locale]` contains canonical Astro routes.
+- `functions/_middleware.ts` handles request-time locale negotiation for
+  unprefixed public routes.
+- `public/_routes.json` limits Functions invocations to those unprefixed routes;
+  localized pages and assets remain static requests.
 
-The homepage owns the brand narrative and Contact Us invitation, while `/contact-us/` owns the
-actual contact channels. The Products directory starts from visitor intent rather than exposing
-the registry as an undifferentiated feature list.
-
-## Product documents
-
-The filename must match a registered product slug. Each document exports literal metadata and
-starts its editorial body below the page-owned product heading:
-
-```mdx
-export const metadata = {
-	name: "書籍",
-	summary: "把一本書的作品身分、版本與內容放在同一個產品表面。",
-	introduction: "書籍先是一個可辨認的作品，再有版本、目錄與貢獻關係。",
-};
-
-## First document-owned section
-
-The rest of the structure belongs to this product.
-```
-
-The build rejects missing documents, unknown slugs, duplicate documents, incomplete metadata,
-and executable metadata values. Shared navigation and interactive component states remain in the
-typed locale content contract.
+Astro's i18n configuration owns locale-prefixed routing. Because automatic
+fallback generation targets physical locale directories, dynamic `[locale]`
+routes explicitly emit static fallback redirects when localized content is
+unavailable.
 
 ## Commands
 
@@ -76,22 +53,11 @@ task apps-about:test:dist
 task apps-about:preview
 ```
 
-Cloudflare Pages uses `apps/about/dist/client` as its build output. Deployment does not depend
-on `dist/server`.
+Cloudflare Pages deploys `apps/about/dist`.
 
 ## Deployment
 
 About has an independent release boundary. A reviewed `about/v*` tag or a manual
 dispatch starts `.github/workflows/deploy-about-cloudflare-pages.yml`; platform
-`v*` tags do not deploy this site. Deployments are serialized through the
-About-specific `about-production` concurrency group while using the shared
-`production` GitHub environment and these deployment settings:
-
-- `CLOUDFLARE_ACCOUNT_ID`;
-- `CLOUDFLARE_API_TOKEN`, which may be shared with the platform deployment and
-  must include account-level Cloudflare Pages Edit;
-- optional `CLOUDFLARE_PAGES_PROJECT_NAME`, defaulting to `rezics-about`.
-
-The release trigger, workflow, and concurrency lock are independent. The
-production approval policy and Cloudflare API credential are intentionally
-shared with the platform deployment.
+`v*` tags do not deploy this site. Deployments use the About-specific
+`about-production` concurrency group and the shared `production` environment.

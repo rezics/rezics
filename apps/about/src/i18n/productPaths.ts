@@ -1,9 +1,22 @@
-import { ABOUT_LOCALES, ABOUT_SITE_ORIGIN, type AboutLocale } from "./locales";
+import { ABOUT_LOCALES, ABOUT_SITE_ORIGIN, DEFAULT_LOCALE, type AboutLocale } from "./locales";
 
-export type PublicPageKind = "home" | "products" | "product" | "contact";
+export type PublicPageKind = "home" | "how-it-works" | "uses" | "products" | "product" | "contact";
+
+export type AlternatePath = {
+	readonly locale: AboutLocale;
+	readonly path: string;
+};
 
 export function getHomePath(locale: AboutLocale): string {
 	return `/${locale}/`;
+}
+
+export function getHowItWorksPath(locale: AboutLocale): string {
+	return `/${locale}/how-it-works/`;
+}
+
+export function getUsesPath(locale: AboutLocale): string {
+	return `/${locale}/uses/`;
 }
 
 export function getProductsPath(locale: AboutLocale): string {
@@ -14,27 +27,36 @@ export function getProductPath(locale: AboutLocale, slug: string): string {
 	return `/${locale}/products/${slug}/`;
 }
 
-export function getContactPath(locale: AboutLocale): string {
+export function getContactPath(locale: AboutLocale = DEFAULT_LOCALE): string {
 	return `/${locale}/contact-us/`;
 }
 
 export function getLocalizedPath(locale: AboutLocale, kind: PublicPageKind, slug?: string): string {
-	if (kind === "home") return getHomePath(locale);
-	if (kind === "products") return getProductsPath(locale);
-	if (kind === "contact") return getContactPath(locale);
-	if (!slug) throw new Error("A product slug is required for a product page.");
-	return getProductPath(locale, slug);
+	switch (kind) {
+		case "home":
+			return getHomePath(locale);
+		case "how-it-works":
+			return getHowItWorksPath(locale);
+		case "uses":
+			return getUsesPath(locale);
+		case "products":
+			return getProductsPath(locale);
+		case "product":
+			if (!slug) throw new Error("A product slug is required.");
+			return getProductPath(locale, slug);
+		case "contact":
+			return getContactPath(locale);
+	}
 }
 
 export function getCanonicalForPath(path: string): string {
 	return new URL(path, ABOUT_SITE_ORIGIN).toString();
 }
 
-export function getAlternatePaths(
-	kind: PublicPageKind,
-	slug?: string,
-): Record<AboutLocale, string> {
-	return Object.fromEntries(
-		ABOUT_LOCALES.map((locale) => [locale, getLocalizedPath(locale, kind, slug)]),
-	) as Record<AboutLocale, string>;
+export function getAlternatePaths(kind: PublicPageKind, slug?: string): readonly AlternatePath[] {
+	const locales = kind === "contact" ? [DEFAULT_LOCALE] : ABOUT_LOCALES;
+	return locales.map((locale) => ({
+		locale,
+		path: getLocalizedPath(locale, kind, slug),
+	}));
 }

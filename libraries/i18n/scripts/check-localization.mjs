@@ -28,7 +28,9 @@ const sourceRoots = [
 	...["de", "en", "es", "fr", "ja", "ko", "zh-Hant"].map((locale) =>
 		resolve(repositoryRoot, `libraries/fixture-data/src/languages/${locale}`),
 	),
-	resolve(repositoryRoot, "apps/about/src/content/locales/zh-hant"),
+	...["de", "en", "ja", "ko", "zh-hans", "zh-hant"].map((locale) =>
+		resolve(repositoryRoot, `apps/about/src/content/locales/${locale}`),
+	),
 ];
 const sourceExtensions = new Set([".ts", ".tsx", ".md", ".mdx"]);
 const terminologyByLocale = {

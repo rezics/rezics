@@ -1,0 +1,61 @@
+---
+import { getSiteCopy } from "../../../content/locales";
+import { ABOUT_LOCALES, requireAboutLocale } from "../../../i18n/locales";
+import SiteLayout from "../../../layouts/SiteLayout.astro";
+
+export function getStaticPaths() {
+  return ABOUT_LOCALES.map((locale) => ({ params: { locale } }));
+}
+
+const locale = requireAboutLocale(Astro.params.locale);
+const copy = getSiteCopy(locale);
+---
+
+<SiteLayout locale={locale} active="how" pageKind="how-it-works" meta={copy.meta.how}>
+  <section class="page-hero">
+    <div class="shell page-hero__inner">
+      <p class="eyebrow">{copy.how.eyebrow}</p>
+      <h1>{copy.how.title}</h1>
+      <p class="hero-lead">{copy.how.lead}</p>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="shell stage-grid">
+      {copy.how.stages.map((stage) => (
+        <article class="stage-card">
+          <h2>{stage.title}</h2>
+          <p>{stage.body}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="shell split-statement">
+      <h2>{copy.how.integrity.title}</h2>
+      <div><p>{copy.how.integrity.body}</p></div>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="shell">
+      <div class="section-heading">
+        <h2>{copy.how.interfaceTitle}</h2>
+        <p>{copy.how.interfaceBody}</p>
+      </div>
+      <figure class="interface-figure">
+        <div class="interface-frame">
+          <img
+            src="/images/rezics-official-realm.webp"
+            alt={copy.how.screenshotAlt}
+            width="1440"
+            height="900"
+            loading="lazy"
+          />
+        </div>
+        <figcaption>{copy.how.screenshotCaption}</figcaption>
+      </figure>
+    </div>
+  </section>
+</SiteLayout>

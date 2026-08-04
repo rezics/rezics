@@ -1,0 +1,82 @@
+---
+import { buttonVariants } from "@rezics/ui";
+
+import { zhHantContactCopy as copy } from "../../../content/locales/zh-hant/contact";
+import { ABOUT_LOCALES, DEFAULT_LOCALE, requireAboutLocale } from "../../../i18n/locales";
+import SiteLayout from "../../../layouts/SiteLayout.astro";
+
+const maintainerAvatarUrl = "https://avatars.githubusercontent.com/u/68896486?v=4";
+const maintainerGithubUrl = "https://github.com/Edge-coordinates";
+
+export function getStaticPaths() {
+  return ABOUT_LOCALES.map((locale) => ({ params: { locale } }));
+}
+
+const locale = requireAboutLocale(Astro.params.locale);
+if (locale !== DEFAULT_LOCALE) {
+  return Astro.redirect(`/${DEFAULT_LOCALE}/contact-us/`);
+}
+---
+
+<SiteLayout locale={locale} active="contact" pageKind="contact" meta={copy.meta}>
+  <section class="page-hero contact-hero">
+    <div class="shell page-hero__inner">
+      <h1>{copy.hero.title}</h1>
+      <p class="hero-lead">{copy.hero.description}</p>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="shell">
+      <div class="section-heading"><h2>{copy.topicsTitle}</h2></div>
+      <div class="contact-topic-list">
+        {copy.topics.map((topic) => (
+          <article>
+            <h3>{topic.title}</h3>
+            <p>{topic.body}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="shell contact-maintainer">
+      <div class="section-heading">
+        <h2>{copy.maintainer.title}</h2>
+        <p>{copy.maintainer.description}</p>
+      </div>
+      <article class="contact-profile">
+        <div class="contact-profile__identity">
+          <img
+            alt={copy.maintainer.name}
+            height="128"
+            referrerpolicy="no-referrer"
+            src={maintainerAvatarUrl}
+            width="128"
+          />
+          <div>
+            <h3>{copy.maintainer.name}</h3>
+            <p>{copy.maintainer.role}</p>
+          </div>
+        </div>
+        <dl>
+          <div>
+            <dt>{copy.maintainer.emailLabel}</dt>
+            <dd><a href={`mailto:${copy.maintainer.email}`}>{copy.maintainer.email}</a></dd>
+          </div>
+          <div>
+            <dt>{copy.maintainer.githubLabel}</dt>
+            <dd><a href={maintainerGithubUrl}>{copy.maintainer.name}</a></dd>
+          </div>
+        </dl>
+        <a
+          class={buttonVariants({ variant: "brand", size: "xl" })}
+          href={`mailto:${copy.maintainer.email}`}
+        >
+          {copy.maintainer.sendEmail}
+        </a>
+      </article>
+    </div>
+  </section>
+</SiteLayout>

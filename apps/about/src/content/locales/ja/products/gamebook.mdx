@@ -1,0 +1,37 @@
+---
+productId: gamebook
+locale: ja
+title: "ゲームブック"
+summary: "Book が GameContentStructure を利用して形成される分岐読書形態です。"
+description: "Book が GameContentStructure を利用して形成される分岐読書形態です。"
+---
+
+## 可能になること
+
+ゲームブックは、基盤モデルを読者が理解でき、コミュニティが維持できる形にします。Book が GameContentStructure を利用して形成される分岐読書形態です。
+
+## 利用する人
+
+読者、作者、コミュニティ編集者が、具体的な内容を読み、整理し、話し合うために使います。
+
+## 具体的な体験
+
+- Entrance から Passage、Choice、Ending へ読み進めます。
+- 安定 ID、退役、DAG を編集画面で検証します。
+- Journey と JourneyStep が経路を保持します。
+
+## 仕組み
+
+1. Book に GameContentStructure を追加します。
+2. 分岐を設定して無環検証を行います。
+3. 選択を JourneyStep に記録します。
+
+## つながり
+
+ゲームブックは単独ではなく、書籍 · コンテンツ構造 · 進捗 · 履歴と識別、文脈、作業の流れを共有します。
+
+## 明確な境界
+
+- 親は常に Book です。
+- 変数、スクリプト、戦闘、ループは含みません。
+- Progress は Journey を保存しません。

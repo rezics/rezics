@@ -1,0 +1,49 @@
+---
+import { ProductDirectory } from "../../../components/ProductDirectory";
+import { getProductDocuments } from "../../../content/productDocuments";
+import { getSiteCopy } from "../../../content/locales";
+import { PRODUCT_LAYER_IDS } from "../../../content/productTypes";
+import { ABOUT_LOCALES, requireAboutLocale } from "../../../i18n/locales";
+import { getProductPath } from "../../../i18n/productPaths";
+import SiteLayout from "../../../layouts/SiteLayout.astro";
+
+export function getStaticPaths() {
+  return ABOUT_LOCALES.map((locale) => ({ params: { locale } }));
+}
+
+const locale = requireAboutLocale(Astro.params.locale);
+const copy = getSiteCopy(locale);
+const products = await getProductDocuments(locale);
+const items = products.map(({ definition, document }) => ({
+  id: definition.id,
+  layer: definition.layer,
+  title: document.data.title,
+  summary: document.data.summary,
+  href: getProductPath(locale, definition.slug),
+}));
+const layers = PRODUCT_LAYER_IDS.map((id) => ({ id, ...copy.products.layers[id] }));
+---
+
+<SiteLayout locale={locale} active="products" pageKind="products" meta={copy.meta.products}>
+  <section class="page-hero">
+    <div class="shell page-hero__inner">
+      <p class="eyebrow">{copy.products.eyebrow}</p>
+      <h1>{copy.products.title}</h1>
+      <p class="hero-lead">{copy.products.lead}</p>
+    </div>
+  </section>
+  <div class="shell">
+    <ProductDirectory
+      client:visible
+      items={items}
+      layers={layers}
+      labels={{
+        search: copy.products.searchLabel,
+        placeholder: copy.products.searchPlaceholder,
+        all: copy.products.allLayers,
+        empty: copy.products.empty,
+        open: copy.products.openProduct,
+      }}
+    />
+  </div>
+</SiteLayout>

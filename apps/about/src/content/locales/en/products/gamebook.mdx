@@ -1,0 +1,37 @@
+---
+productId: gamebook
+locale: en
+title: "GameBook"
+summary: "A branching reading manifestation formed when Book uses GameContentStructure."
+description: "A branching reading manifestation formed when Book uses GameContentStructure."
+---
+
+## What it makes possible
+
+GameBook turns the underlying model into something readers can understand and communities can maintain. A branching reading manifestation formed when Book uses GameContentStructure.
+
+## Who uses it
+
+Readers, creators, and community editors use this surface to read, organize, and discuss concrete content.
+
+## A concrete journey
+
+- Readers move from Entrance through Passage and Choice to branches, merges, or Ending.
+- Authors validate entry points, stable IDs, retired nodes, and a directed acyclic structure.
+- Journey and JourneyStep retain the path while Progress exposes only a general summary.
+
+## How it works
+
+1. Create a Book, then enable GameContentStructure.
+2. Configure Entrance, Passage, Choice, Ending, and layout, then pass DAG validation.
+3. Write choices to JourneyStep while retired content keeps existing paths explainable.
+
+## How it connects
+
+GameBook does not stand alone. It shares identity, context, or workflow with Book · Content Structure · Progress · History.
+
+## Clear boundaries
+
+- The parent is always Book; GameContentStructure is an optional capability mode.
+- There are no variables, conditions, scripts, combat, loops, or visual-novel runtime.
+- Progress does not store Journey.

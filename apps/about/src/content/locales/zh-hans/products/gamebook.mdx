@@ -1,0 +1,37 @@
+---
+productId: gamebook
+locale: zh-hans
+title: "游戏书"
+summary: "由 Book 使用 GameContentStructure 形成的分支阅读产品形态。"
+description: "由 Book 使用 GameContentStructure 形成的分支阅读产品形态。"
+---
+
+## 它带来什么
+
+游戏书，把底层模型转成读者能理解、社区能长期维护的能力。由 Book 使用 GameContentStructure 形成的分支阅读产品形态。
+
+## 谁会使用
+
+读者、创作者与社区编辑者在这里阅读、组织并讨论具体内容。
+
+## 一段具体旅程
+
+- 读者从 Entrance 进入 Passage，经 Choice 到达分支、汇合或 Ending。
+- 作者验证入口、稳定 ID、退役节点和 DAG。
+- Journey 与 JourneyStep 保存路径；Progress 只提供通用摘要。
+
+## 如何运作
+
+1. 先建立 Book，再启用 GameContentStructure。
+2. 配置 Entrance、Passage、Choice、Ending 并通过无环验证。
+3. 读者选择写入 JourneyStep，退役内容保留历史可解释性。
+
+## 如何连接
+
+游戏书并不孤立；它与 书籍 · 内容结构 · 进度 · 历史 共享身份、语境或工作流程。
+
+## 清楚的边界
+
+- 父产品始终是 Book；GameContentStructure 只是能力模式。
+- 不包含变量、条件、脚本、战斗、环或视觉小说运行时。
+- Progress 不保存 Journey。

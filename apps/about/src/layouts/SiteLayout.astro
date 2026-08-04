@@ -1,0 +1,96 @@
+---
+import { getSiteCopy, type PageId } from "../content/locales";
+import type { AboutPageMeta } from "../content/productTypes";
+import { SiteHeader } from "../components/SiteHeader";
+import SiteFooter from "../components/SiteFooter.astro";
+import {
+  ABOUT_LOCALE_META,
+  DEFAULT_LOCALE,
+  getAppEntryUrl,
+  type AboutLocale,
+} from "../i18n/locales";
+import {
+  getAlternatePaths,
+  getCanonicalForPath,
+  getHomePath,
+  getHowItWorksPath,
+  getLocalizedPath,
+  getProductsPath,
+  getUsesPath,
+  type PublicPageKind,
+} from "../i18n/productPaths";
+import "../styles/site.css";
+
+type Props = {
+  locale: AboutLocale;
+  active: PageId;
+  pageKind: PublicPageKind;
+  meta: AboutPageMeta;
+  productSlug?: string;
+  alternateLocales?: readonly AboutLocale[];
+};
+
+const { locale, active, pageKind, meta, productSlug, alternateLocales } = Astro.props;
+const copy = getSiteCopy(locale);
+const alternatePaths = getAlternatePaths(pageKind, productSlug).filter(
+  ({ locale: alternateLocale }) => !alternateLocales || alternateLocales.includes(alternateLocale),
+);
+const canonicalPath = getLocalizedPath(locale, pageKind, productSlug);
+const defaultPath = getLocalizedPath(DEFAULT_LOCALE, pageKind, productSlug);
+const links = [
+  { id: "home", label: copy.nav.home, href: getHomePath(locale) },
+  { id: "how", label: copy.nav.how, href: getHowItWorksPath(locale) },
+  { id: "uses", label: copy.nav.uses, href: getUsesPath(locale) },
+  { id: "products", label: copy.nav.products, href: getProductsPath(locale) },
+] as const;
+---
+
+<!doctype html>
+<html lang={ABOUT_LOCALE_META[locale].htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="theme-color" content="#ef4444" />
+    <meta name="description" content={meta.description} />
+    <link rel="canonical" href={getCanonicalForPath(canonicalPath)} />
+    {
+      alternatePaths.map(({ locale: alternateLocale, path }) => (
+        <link
+          rel="alternate"
+          hreflang={ABOUT_LOCALE_META[alternateLocale].htmlLang}
+          href={getCanonicalForPath(path)}
+        />
+      ))
+    }
+    <link
+      rel="alternate"
+      hreflang="x-default"
+      href={getCanonicalForPath(defaultPath)}
+    />
+    <script is:inline>
+      try {
+        const savedTheme = localStorage.getItem("rezics-theme");
+        const dark = savedTheme
+          ? savedTheme === "dark"
+          : window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.classList.toggle("dark", dark);
+      } catch {}
+    </script>
+    <title>{meta.title}</title>
+  </head>
+  <body>
+    <SiteHeader
+      client:load
+      locale={locale}
+      active={active}
+      copy={{ nav: copy.nav, theme: copy.theme, a11y: copy.a11y }}
+      links={links}
+      alternatePaths={alternatePaths}
+      appUrl={getAppEntryUrl()}
+    />
+    <main id="main-content" tabindex="-1">
+      <slot />
+    </main>
+    <SiteFooter locale={locale} copy={copy} />
+  </body>
+</html>

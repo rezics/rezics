@@ -1,0 +1,54 @@
+---
+import { buttonVariants } from "@rezics/ui";
+
+import { getSiteCopy } from "../../../content/locales";
+import { ABOUT_LOCALES, requireAboutLocale } from "../../../i18n/locales";
+import { getProductsPath } from "../../../i18n/productPaths";
+import SiteLayout from "../../../layouts/SiteLayout.astro";
+
+export function getStaticPaths() {
+  return ABOUT_LOCALES.map((locale) => ({ params: { locale } }));
+}
+
+const locale = requireAboutLocale(Astro.params.locale);
+const copy = getSiteCopy(locale);
+---
+
+<SiteLayout locale={locale} active="uses" pageKind="uses" meta={copy.meta.uses}>
+  <section class="page-hero">
+    <div class="shell page-hero__inner">
+      <p class="eyebrow">{copy.uses.eyebrow}</p>
+      <h1>{copy.uses.title}</h1>
+      <p class="hero-lead">{copy.uses.lead}</p>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="shell journey-grid">
+      {copy.uses.journeys.map((journey) => (
+        <article class="journey-card">
+          <h2>{journey.title}</h2>
+          <p>{journey.body}</p>
+          <p class="journey-result">
+            <span>{copy.uses.resultLabel}</span>
+            {journey.result}
+          </p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="shell">
+      <div class="section-heading">
+        <h2>{copy.uses.closing.title}</h2>
+        <p>{copy.uses.closing.body}</p>
+        <div>
+          <a class={buttonVariants({ variant: "brand", size: "xl" })} href={getProductsPath(locale)}>
+            {copy.uses.closing.action}
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</SiteLayout>

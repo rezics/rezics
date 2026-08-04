@@ -1,274 +1,239 @@
 import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
-import type { ProductFamilyId } from "../../productTypes";
+import type { SiteCopy } from "../contract";
 
-const rezics = verbatimTerms.rezics.value;
-const rezicsInc = verbatimTerms.rezicsInc.value;
-const github = verbatimTerms.github.value;
-const outline = verbatimTerms.outline.value;
-const react = verbatimTerms.react.value;
-const vike = verbatimTerms.vike.value;
-const agpl30 = verbatimTerms.agpl30.value;
-const edgeCoordinates = verbatimTerms.edgeCoordinates.value;
-const edgeCoordinatesEmail = verbatimTerms.edgeCoordinatesEmail.value;
-const api = verbatimTerms.api.value;
-const oauth = verbatimTerms.oauth.value;
-const post = zhHantTerminology.post.forms.label;
-const realm = zhHantTerminology.realm.forms.label;
-const zone = zhHantTerminology.zone.forms.label;
-
-const productFamilies = {
-	discover: {
-		index: "01",
-		title: "認識作品與版本",
-		prompt: "我想先弄清楚：這是什麼作品，它有哪些版本，又和哪些故事相連。",
-		description:
-			"從作品的穩定身分出發，整理書籍、媒體、軟體、系列與發行之間的關係，也保留人物、組織與主題的脈絡。",
-	},
-	create: {
-		index: "02",
-		title: "創作與整理內容",
-		prompt: "我想寫下內容、安排結構，或為一部作品補上評論與知識。",
-		description: `用${post}及其不同形態承載內容，讓編輯、內容結構、留言與評分各自負責清楚的工作。`,
-	},
-	continue: {
-		index: "03",
-		title: "收藏並繼續",
-		prompt: "我想保存喜歡的故事，知道自己看到哪裡，並跟上新的內容。",
-		description: `以收藏、書庫、${realm}與${zone}組織長期收藏，再由動態與進度把下一次回來的位置接上。`,
-	},
-	open: {
-		index: "04",
-		title: "連結開放平台",
-		prompt: `我想理解版本歷史，或讓其他工具安全地連接 ${rezics}。`,
-		description: `歷史保留已發布內容的變化；${api}、${oauth} 與權杖則讓外部工具在明確權限下連接產品能力。`,
-	},
-} as const satisfies Record<
-	ProductFamilyId,
-	{
-		readonly index: string;
-		readonly title: string;
-		readonly prompt: string;
-		readonly description: string;
-	}
->;
+const BRAND = verbatimTerms.rezics.value;
+const API = verbatimTerms.api.value;
+const OAUTH = verbatimTerms.oauth.value;
+const GITHUB = verbatimTerms.github.value;
+const REZICS_INC = verbatimTerms.rezicsInc.value;
+const AGPL30 = verbatimTerms.agpl30.value;
 
 export const zhHantContent = {
-	common: {
-		siteName: rezics,
-		nav: {
-			home: "首頁",
-			products: "產品",
-			github,
-			language: "語言",
+	nav: {
+		home: "首頁",
+		how: "運作原理",
+		uses: "用途",
+		products: "能力參考",
+		enter: `進入 ${BRAND}`,
+		language: "語言",
+		theme: "顯示模式",
+		openMenu: "開啟選單",
+		closeMenu: "關閉選單",
+	},
+	theme: { light: "淺色", dark: "深色", toggle: "切換顯示模式" },
+	a11y: {
+		skipContent: "跳到主要內容",
+		primaryNavigation: "主要導覽",
+		utilityNavigation: "實用工具",
+		home: `${BRAND} 首頁`,
+	},
+	meta: {
+		home: {
+			title: `${BRAND} — 與所愛的故事相遇`,
+			description: "以統一作品身份連接版本、內容、社群與跨語言知識。",
 		},
-		theme: {
-			toggle: "切換明暗主題",
-			light: "淺色主題",
-			dark: "深色主題",
+		how: {
+			title: `運作原理 — ${BRAND}`,
+			description: `從作品身份開始，理解 ${BRAND} 如何連接內容、歷史與社群。`,
 		},
-		a11y: {
-			skipContent: "跳到主要內容",
-			primaryNavigation: "主要導覽",
-			home: `${rezics} 首頁`,
-			breadcrumb: "麵包屑",
-			utilityNavigation: "網站工具",
+		uses: {
+			title: `用途 — ${BRAND}`,
+			description: "探索讀者、社群、創作者與開發者如何使用同一套作品網路。",
 		},
-		actions: {
-			exploreProducts: "探索產品",
-			learnAbout: `了解 ${rezics}`,
-			viewAllProducts: "查看所有產品",
-			viewProduct: "了解這項產品",
-			backHome: "回到首頁",
-			contact: "聯繫我們",
-			sendEmail: "寄送電子郵件",
-			visitGithub: `前往 ${github}`,
-		},
-		notFound: {
-			title: "找不到這個頁面",
-			body: "這個連結可能不存在，或尚未成為公開產品頁。",
+		products: {
+			title: `能力參考 — ${BRAND}`,
+			description: `完整瀏覽 ${BRAND} 的作品、內容、社群與開放能力。`,
 		},
 	},
 	home: {
-		meta: {
-			title: `${rezics}: 與所愛的故事相遇`,
-			description: `${rezics} 讓作品、內容與閱讀歷史保持可辨認、可理解，也能繼續被帶往下一段旅程。`,
+		eyebrow: "繼承 · 創作 · 傳播",
+		title: "與所愛的故事相遇。",
+		lead: `${BRAND} 是以作品為中心的跨語言知識網路。它讓一部作品的身份、版本、內容、討論與社群記憶彼此相連，而不是散落在互不相識的平台與條目裡。`,
+		explore: "探索用途",
+		understand: "理解運作原理",
+		problem: {
+			title: "我們愛的是同一部作品，找到的卻常是碎片。",
+			body: "不同語言名稱、版本、媒體形態與社群平台各自建立條目。讀者要重複辨認，創作者的歸屬容易遺失，社群累積的知識也難以延續。",
 		},
-		hero: {
-			title: `${rezics}: 與所愛的故事相遇`,
-			description:
-				"讓每一部作品保有名字，讓內容之間的關係被理解，\n也讓你與故事共同走過的時間可以繼續。",
+		promise: {
+			title: "先辨認作品，再讓知識生長。",
+			body: `${BRAND} 以穩定作品身份作為共同起點。名稱可以翻譯，內容可以演進，社群可以從不同角度組織，但它們仍指向同一個可理解、可追溯的對象。`,
 		},
-		origin: {
-			title: "故事不該因為離開一個平台，就失去名字。",
-			body: "我們想做的不是另一個封閉的內容平台，而是一套能陪故事走得更遠的開放產品。作品可以被辨認，內容可以被重新組織，已發布的改變也能留下歷史。",
-			imageAlt: `一本紅色的 ${rezics} 書籍放在地圖、手稿、照片與鋼筆之間。`,
-			principles: [
+		principles: [
+			{ title: "繼承", body: "接住作品已經擁有的歷史、語言、版本與社群記憶。" },
+			{ title: "創作", body: "讓人們撰寫內容、建立結構、補充歸屬並形成新的理解。" },
+			{ title: "傳播", body: "透過社群、開放協議與跨語言連結，讓知識繼續流動。" },
+		],
+		model: {
+			title: "一個身份，逐層形成完整語境。",
+			body: "底層模型把不該混淆的概念分開，再讓它們透過明確關係合作。",
+			steps: [
+				{ title: "作品身份", body: "作品擁有不隨語言與版面改變的穩定核心。" },
 				{
-					title: "身分",
-					body: "先知道這是誰、是哪一部作品，再談版本、內容與關係。",
+					title: "版本與關係",
+					body: `發行、系列、${zhHantTerminology.entity.forms.label}、標籤和歸屬把作品放回真實脈絡。`,
 				},
+				{ title: "內容與歷史", body: "內容結構、編輯與歷史保留順序、變更與可重用性。" },
 				{
-					title: "結構",
-					body: "讓同一份內容能被安排、重用與連結，而不必反覆複製。",
-				},
-				{
-					title: "歷史",
-					body: "記住正式發布的改變，讓今天仍能理解故事如何走到這裡。",
+					title: "個人與社群",
+					body: `收藏、${zhHantTerminology.realm.forms.label}、${zhHantTerminology.zone.forms.label}與動態把模型變成日常體驗。`,
 				},
 			],
 		},
-		products: {
-			title: "從你關心的故事開始。",
-			description:
-				"不需要先記住二十六個產品。告訴我們你想做什麼，再沿著最接近你的入口往下走。",
+		outcomes: {
+			title: "為讀者，也為一起守護作品的人。",
+			body: "同一套基礎同時降低尋找成本、保留創作歸屬，並讓社群知識能被下一位讀者接住。",
+			cards: [
+				{ title: "找到", body: "跨語言辨認作品、版本與相關創作者，不再從零拼湊。" },
+				{ title: "理解", body: "沿著結構、評論、維基、歷史與關係看見作品的完整脈絡。" },
+				{
+					title: "延續",
+					body: "收藏進度、加入社群、補充知識，讓個人體驗成為共同記憶的一部分。",
+				},
+			],
 		},
 		open: {
-			title: "開放，才能讓熱愛走得長久。",
-			body: `資料可以帶走，歷史可以理解，連接方式可以被檢查。${rezics} 在公開文件與原始碼中持續成長，也歡迎不同故事、社群與工具加入。`,
+			title: "開放不是附加功能，而是記憶得以延續的條件。",
+			body: `${BRAND} 以開放原始碼、可攜內容、${zhHantTerminology.publicationLicense.forms.label}與權限化 ${API} 連接外部工具。社群不必把共同知識鎖在單一介面裡。`,
 		},
-		contact: {
-			title: "有想一起完成的事嗎？",
-			introduction: "如果你正在想這些事情，歡迎先告訴我們你的想法。",
-			reasons: [
-				`想討論產品合作，或把某種故事形式帶進 ${rezics}。`,
-				"想參與開源開發、文件整理或社群建設。",
-				"對內容身分、結構、歷史或資料可攜有問題。",
-			],
+		closing: {
+			title: "從一部你在意的作品開始。",
+			body: `進入主站，探索作品、${zhHantTerminology.realm.forms.label}與正在形成的共同知識。`,
+			action: `進入 ${BRAND}`,
 		},
 	},
-	contact: {
-		meta: {
-			title: `聯繫我們 — ${rezics}`,
-			description: `與 ${rezics} 專案維護者討論產品合作、開源參與、內容模型與其他建議。`,
-		},
-		hero: {
-			title: "聯繫我們",
-			description:
-				"無論你想帶來一種新的故事形式、參與開源建設，或只是發現某件值得被做得更好的事，我們都願意聽你說。",
-		},
-		topicsTitle: "我們可以從這些事情開始",
-		topics: [
+	how: {
+		eyebrow: "從底層開始",
+		title: "不是更大的目錄，而是一套讓作品保持連結的方法。",
+		lead: `${BRAND} 從身份、呈現、關係、內容、信任到探索逐層建立。每一層只承擔自己的意義，因此能在語言、媒體與社群之間延伸。`,
+		stages: [
 			{
-				title: "產品與內容合作",
-				body: `討論如何讓出版社、創作者、社群或內容工具連接 ${rezics} 的作品、結構與歷史能力。`,
+				title: "1. 作品身份",
+				body: `穩定 ${verbatimTerms.id.value} 辨認作品本身；本地化名稱與類型${zhHantTerminology.metadata.forms.label}可以演進，卻不會製造另一部作品。`,
 			},
 			{
-				title: "參與開源建設",
-				body: "一起改善程式、文件、設計、研究與社群，讓開放的內容基礎設施真正能被使用。",
+				title: "2. 呈現與類型",
+				body: "書籍、媒體、軟體等類型保留各自需要的欄位與體驗，同時共享身份與關係層。",
 			},
 			{
-				title: "問題與建議",
-				body: "回報問題，或告訴我們哪些產品邊界、資料關係與使用流程仍然不夠清楚。",
+				title: "3. 關係與歸屬",
+				body: `系列、發行、${zhHantTerminology.entity.forms.label}、標籤、創作歸屬與主題關聯，把作品放進可理解的網路。`,
+			},
+			{
+				title: "4. 內容區塊與內容結構",
+				body: "內容區塊表達可呈現內容；內容結構管理出現位置、順序、重用與分支，兩者不互相冒充。",
+			},
+			{
+				title: "5. 歷史、授權與治理",
+				body: `發佈邊界形成可追溯版本；${zhHantTerminology.publicationLicense.forms.label}、存取規則與社群治理說明誰能做什麼，以及知識如何被信任。`,
+			},
+			{
+				title: "6. 探索表面",
+				body: `搜尋、動態、${zhHantTerminology.realm.forms.label}與${zhHantTerminology.zone.forms.label}把底層網路轉成尋找、閱讀、參與和返回的日常路徑。`,
 			},
 		],
-		maintainer: {
-			title: "直接聯繫專案維護者",
-			description: "來信請簡單說明你的背景、想討論的事情，以及希望我們如何回覆。",
-			name: edgeCoordinates,
-			role: "專案維護者",
-			emailLabel: "電子郵件",
-			email: edgeCoordinatesEmail,
-			githubLabel: github,
+		integrity: {
+			title: "分開保存意義，連起來形成價值。",
+			body: "身份不是名稱，發行不是系列，內容區塊不是目錄節點，社群空間也不擁有它所引用的作品。清楚邊界讓每一條連結都能被解釋。",
+		},
+		interfaceTitle: "同一套模型，落在真實產品介面中。",
+		interfaceBody: `公開的 ${BRAND} ${zhHantTerminology.realm.forms.label}頁把搜尋、社群語境、內容流與作品入口組合在一起。畫面來自主站公開頁面，不含個人帳號資料。`,
+		screenshotAlt: `${BRAND} 公開${zhHantTerminology.realm.forms.label}頁，包含導覽、搜尋、${zhHantTerminology.realm.forms.label}標題與官方內容卡片。`,
+		screenshotCaption: `公開介面實況 · ${BRAND} 官方${zhHantTerminology.realm.forms.label}`,
+	},
+	uses: {
+		eyebrow: "從需要出發",
+		title: "一套作品網路，多條真實旅程。",
+		lead: `讀者不需要先理解資料模型。他們從尋找一本書、${zhHantTerminology.follow.forms.actionLabel}一個系列、加入一個社群或保存閱讀進度開始；底層連結在需要時自然出現。`,
+		resultLabel: "得到",
+		journeys: [
+			{
+				title: "跨語言找到同一部作品",
+				body: "從熟悉的譯名、原名、作者、版本或媒體形態進入，逐步辨認它們的關係。",
+				result: "少一次重複搜尋，多一個可信入口。",
+			},
+			{
+				title: "理解版本與創作脈絡",
+				body: `查看系列、發行、${zhHantTerminology.entity.forms.label}、角色、創作者與出版關係，不把所有差異壓成一條平面記錄。`,
+				result: "知道自己正在看什麼，以及它從哪裡來。",
+			},
+			{
+				title: "閱讀並貢獻內容",
+				body: `沿著書籍結構閱讀，查看${zhHantTerminology.post.forms.label}、維基、圖片、評論與評分，也能補充自己的理解。`,
+				result: "內容與作品身份保持相連。",
+			},
+			{
+				title: "加入共同興趣的社群",
+				body: `在${zhHantTerminology.realm.forms.label}裡形成共同規則，在${zhHantTerminology.zone.forms.label}裡策展特定視角，透過動態延續討論。`,
+				result: "社群知識不再只是快速流逝的訊息。",
+			},
+			{
+				title: "收藏、返回與繼續",
+				body: "以收藏和書庫整理作品，以進度保存閱讀位置，下一次回來仍能接上原本脈絡。",
+				result: "個人旅程與共同知識互相支援。",
+			},
+			{
+				title: "出版、歸屬與授權",
+				body: `創作者和組織建立內容結構、標示貢獻關係、選擇${zhHantTerminology.publicationLicense.forms.label}並保留發佈歷史。`,
+				result: "作品能被理解、引用，也能保留應有歸屬。",
+			},
+			{
+				title: "建立工具與新的入口",
+				body: `開發者透過 ${API}、${OAUTH} 與權杖取得明確範圍，把搜尋、編輯或社群工作流接到同一套身份。`,
+				result: "整合擴充網路，而不是製造新的資料孤島。",
+			},
+		],
+		closing: {
+			title: "想看每一項能力如何配合？",
+			body: "能力參考從作品身份一路列到開放介面，並說明各自的價值、流程、關係與邊界。",
+			action: "瀏覽完整能力",
 		},
 	},
 	products: {
-		meta: {
-			title: `產品 — ${rezics}`,
-			description: `從閱讀、創作、收藏與開放連接的目的出發，找到適合的 ${rezics} 產品。`,
-		},
-		hero: {
-			title: "先選擇你想前往的方向。",
-			description: `${rezics} 的產品不是一張要背下來的功能清單。\n從你的目的開始，每一條路都會帶你找到正確的產品。`,
-		},
-		familiesTitle: "四條開始的路",
-		allTitle: "完整產品總覽",
-		families: productFamilies,
-		common: {
-			labels: {
-				related: "接著可以認識",
-				parent: "建立在這項產品上",
-				demo: "直接試試看",
-				loading: "載入產品內容⋯⋯",
+		eyebrow: "完整參考",
+		title: "從作品身份到開放生態。",
+		lead: "26 項能力按照它們在整體模型中的位置排列。這不是互不相干的功能清單，而是一條從辨認作品到延續共同知識的路徑。",
+		searchLabel: "搜尋能力",
+		searchPlaceholder: "輸入名稱或用途",
+		allLayers: "全部",
+		empty: "沒有符合條件的能力。",
+		openProduct: "查看能力",
+		layers: {
+			identity: {
+				title: "身份與關係",
+				body: `辨認作品，連接版本、系列、${zhHantTerminology.entity.forms.label}與分類。`,
 			},
+			form: { title: "內容形態", body: "承載閱讀、觀看、創作、評論與回應。" },
+			structure: { title: "結構與記憶", body: "組合內容，保留發佈、差異與演進脈絡。" },
+			community: {
+				title: "個人與社群",
+				body: `收藏、策展、討論、${zhHantTerminology.follow.forms.actionLabel}並返回。`,
+			},
+			open: { title: "開放生態", body: "以清楚權限連接工具、服務與新的入口。" },
 		},
-		demos: {
-			gamebook: {
-				title: "霧港檔案",
-				description: "你在關閉的檔案館門前找到兩條路。",
-				choices: [
-					{
-						label: "沿著燈光進入側門",
-						result: "你找到仍在工作的管理員，並取得下一段路徑。",
-					},
-					{
-						label: "先回到車站查閱地圖",
-						result: "你保留這次旅程，準備從新的線索再次出發。",
-					},
-				],
-				resultLabel: "這次選擇",
-			},
-			structure: {
-				title: "同一份內容，不同的出現位置",
-				description: "選擇一個出現位置，看看它在內容結構中負責什麼。",
-				nodes: [
-					{
-						label: "序章",
-						detail: `閱讀入口；內容來自一篇${post}，並保留自己的穩定位置。`,
-					},
-					{
-						label: "第一部",
-						detail: "容納三個章節的群組；調整順序不會複製章節內容。",
-					},
-					{
-						label: "補遺",
-						detail: "同一份內容也能在另一個位置再次出現，並保有新的脈絡。",
-					},
-				],
-				detailLabel: "出現位置說明",
-			},
-			history: {
-				title: "只記錄正式發布的改變",
-				description: "選擇一個版本，查看這次發布真正改變了什麼。",
-				versions: [
-					{
-						label: "版本 3",
-						meta: "目前版本",
-						detail: "書名欄位已更新，章節目錄沒有改變。",
-					},
-					{
-						label: "版本 2",
-						meta: "上一次發布",
-						detail: "新增補遺，並將第二章移到第一部之下。",
-					},
-					{
-						label: "版本 1",
-						meta: "首次發布",
-						detail: "建立書籍基本資料與最初的三章目錄。",
-					},
-				],
-				detailLabel: "發布差異",
-			},
-		},
+	},
+	product: {
+		breadcrumbHome: "首頁",
+		breadcrumbProducts: "能力參考",
+		layerLabel: "所屬層次",
+		related: "相關能力",
+		readNext: "繼續理解",
+		enter: `進入 ${BRAND}`,
 	},
 	footer: {
-		statement: "讓每個故事，都能被認出、被理解，也能繼續被帶往下一段旅程。",
-		copyright: `© 2026 ${rezicsInc}`,
-		groups: {
-			products: "產品",
-			platform: "平台",
-			open: "開放",
-		},
-		links: {
-			allProducts: "全部產品",
-			docs: `${outline} 文件`,
-			source: "原始碼",
-			mainSite: "主要網站",
-			contact: "聯繫我們",
-		},
-		implementation: `${agpl30} · 使用 ${vike} 與 ${react} 建置的靜態網站`,
+		statement: "與所愛的故事相遇，讓共同知識得以繼承、創造與傳播。",
+		explore: "探索",
+		project: "專案",
+		source: `${GITHUB} 原始碼`,
+		mainSite: "主要網站",
+		copyright: `© 2026 ${REZICS_INC}`,
+		license: AGPL30,
 	},
-} as const;
-
-export type LocaleContent = typeof zhHantContent;
+	notFound: {
+		title: "找不到這個頁面",
+		body: "網址可能已經變更，或這項內容尚未存在。",
+		back: "回到首頁",
+	},
+} satisfies SiteCopy;

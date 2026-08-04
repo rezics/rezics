@@ -1,0 +1,127 @@
+---
+import { render } from "astro:content";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import { buttonVariants } from "@rezics/ui";
+
+import {
+  getProductDocument,
+  getProductDocumentLocales,
+  getProductDocuments,
+  requireCompleteProductLocale,
+} from "../../../content/productDocuments";
+import {
+  PRODUCT_DEFINITIONS,
+  getProductById,
+  getProductBySlug,
+  isProductSlug,
+} from "../../../content/productRegistry";
+import { getSiteCopy } from "../../../content/locales";
+import {
+  ABOUT_LOCALES,
+  DEFAULT_LOCALE,
+  getAboutLocaleFallback,
+  getAppEntryUrl,
+  requireAboutLocale,
+} from "../../../i18n/locales";
+import { getHomePath, getProductPath, getProductsPath } from "../../../i18n/productPaths";
+import SiteLayout from "../../../layouts/SiteLayout.astro";
+
+export async function getStaticPaths() {
+  await requireCompleteProductLocale(DEFAULT_LOCALE);
+  return ABOUT_LOCALES.flatMap((locale) =>
+    PRODUCT_DEFINITIONS.map((product) => ({
+      params: { locale, slug: product.slug },
+    })),
+  );
+}
+
+const locale = requireAboutLocale(Astro.params.locale);
+const slug = Astro.params.slug;
+if (!slug || !isProductSlug(slug)) throw new Error(`Unknown product slug: ${slug ?? "missing"}`);
+const product = getProductBySlug(slug);
+const copy = getSiteCopy(locale);
+const document = await getProductDocument(locale, product.id);
+if (!document) {
+  const fallbackLocale = getAboutLocaleFallback(locale);
+  if (!fallbackLocale) throw new Error(`Missing default product document: ${product.id}`);
+  return Astro.redirect(getProductPath(fallbackLocale, product.slug));
+}
+const { Content } = await render(document);
+const alternateLocales = await getProductDocumentLocales(product.id);
+const allDocuments = await getProductDocuments(locale);
+const documentsById = new Map(
+  allDocuments.map((entry) => [entry.definition.id, entry.document]),
+);
+const related = product.relatedProductIds.map((id) => ({
+  definition: getProductById(id),
+  document: documentsById.get(id),
+}));
+const layer = copy.products.layers[product.layer];
+const meta = {
+  title: `${document.data.title} — ${verbatimTerms.rezics.value}`,
+  description: document.data.description,
+};
+---
+
+<SiteLayout
+  locale={locale}
+  active="products"
+  pageKind="product"
+  productSlug={product.slug}
+  alternateLocales={alternateLocales}
+  meta={meta}
+>
+  <section class="product-hero">
+    <div class="shell">
+      <nav class="breadcrumbs" aria-label={copy.product.breadcrumbProducts}>
+        <a href={getHomePath(locale)}>{copy.product.breadcrumbHome}</a>
+        <span aria-hidden="true">/</span>
+        <a href={getProductsPath(locale)}>{copy.product.breadcrumbProducts}</a>
+      </nav>
+      <h1>{document.data.title}</h1>
+      <p class="product-hero__summary">{document.data.summary}</p>
+      <div class="product-meta">
+        <span>{copy.product.layerLabel}: {layer.title}</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="shell product-body">
+    <article class="prose">
+      <Content />
+    </article>
+    <aside class="product-aside">
+      <h2>{copy.product.related}</h2>
+      <nav>
+        {related.map(({ definition, document: relatedDocument }) => (
+          relatedDocument && (
+            <a href={getProductPath(locale, definition.slug)}>
+              {relatedDocument.data.title}
+            </a>
+          )
+        ))}
+      </nav>
+    </aside>
+  </div>
+
+  <section class="product-related">
+    <div class="shell">
+      <h2>{copy.product.readNext}</h2>
+      <div class="related-grid">
+        {related.slice(0, 3).map(({ definition, document: relatedDocument }) => (
+          relatedDocument && (
+            <a class="related-card" href={getProductPath(locale, definition.slug)}>
+              <strong>{relatedDocument.data.title}</strong>
+              <span>{relatedDocument.data.summary}</span>
+            </a>
+          )
+        ))}
+      </div>
+      <div class="hero-actions">
+        <a class={buttonVariants({ variant: "brand", size: "xl" })} href={getAppEntryUrl()}>
+          {copy.product.enter}
+        </a>
+      </div>
+    </div>
+  </section>
+</SiteLayout>

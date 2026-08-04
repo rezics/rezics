@@ -1,0 +1,37 @@
+---
+productId: gamebook
+locale: ko
+title: "게임북"
+summary: "Book이 GameContentStructure를 사용할 때 만들어지는 분기 읽기 형태입니다."
+description: "Book이 GameContentStructure를 사용할 때 만들어지는 분기 읽기 형태입니다."
+---
+
+## 가능하게 하는 것
+
+게임북: 기반 모델을 독자가 이해하고 커뮤니티가 오래 관리할 수 있는 기능으로 바꿉니다. Book이 GameContentStructure를 사용할 때 만들어지는 분기 읽기 형태입니다.
+
+## 사용하는 사람
+
+독자, 창작자, 커뮤니티 편집자가 구체적인 콘텐츠를 읽고 정리하고 토론합니다.
+
+## 구체적인 여정
+
+- Entrance에서 Passage와 Choice를 거쳐 Ending으로 읽습니다.
+- 안정 ID, 폐기, DAG를 편집기에서 검사합니다.
+- Journey와 JourneyStep이 경로를 보존합니다.
+
+## 작동 방식
+
+1. Book에 GameContentStructure를 켭니다.
+2. 분기를 설정하고 무순환 검사를 합니다.
+3. 선택을 JourneyStep에 기록합니다.
+
+## 연결 방식
+
+게임북: 도서 · 콘텐츠 구조 · 진행도 · 기록 등과 함께 정체성, 맥락, 작업 흐름을 연결합니다.
+
+## 분명한 경계
+
+- 상위 제품은 항상 Book입니다.
+- 변수, 스크립트, 전투, 반복은 포함하지 않습니다.
+- Progress는 Journey를 저장하지 않습니다.

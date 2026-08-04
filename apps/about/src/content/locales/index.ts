@@ -1,12 +1,23 @@
 import type { AboutLocale } from "../../i18n/locales";
-import { zhHantContent, type LocaleContent } from "./zh-hant/content";
+import { deContent } from "./de/content";
+import { enContent } from "./en/content";
+import { jaContent } from "./ja/content";
+import { koContent } from "./ko/content";
+import type { SiteCopy } from "./contract";
+import { zhHansContent } from "./zh-hans/content";
+import { zhHantContent } from "./zh-hant/content";
 
-export type { LocaleContent } from "./zh-hant/content";
+export type { ContactCopy, MainPageId, PageId, SiteCopy } from "./contract";
 
 const contentByLocale = {
 	"zh-hant": zhHantContent,
-} as const satisfies Record<AboutLocale, LocaleContent>;
+	"zh-hans": zhHansContent,
+	en: enContent,
+	ja: jaContent,
+	de: deContent,
+	ko: koContent,
+} satisfies Record<AboutLocale, SiteCopy>;
 
-export function getLocaleContent(locale: AboutLocale): LocaleContent {
+export function getSiteCopy(locale: AboutLocale): SiteCopy {
 	return contentByLocale[locale];
 }

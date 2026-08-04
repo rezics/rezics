@@ -1,0 +1,37 @@
+---
+productId: history
+locale: en
+title: "History"
+summary: "Published-version history, diffs, and locks scoped to fields or blocks."
+description: "Published-version history, diffs, and locks scoped to fields or blocks."
+---
+
+## What it makes possible
+
+History turns the underlying model into something readers can understand and communities can maintain. Published-version history, diffs, and locks scoped to fields or blocks.
+
+## Who uses it
+
+Authors and editors use it to compose and publish change; readers receive a coherent and traceable result.
+
+## A concrete journey
+
+- Choose a Book field, Post block, or Zone configuration to inspect its own history scope.
+- Compare field- or block-level differences between published versions.
+- Inspect lock state and scope before returning to the consuming product.
+
+## How it works
+
+1. A product adapter defines the field or block scope.
+2. Only publication creates a formal version; draft operations remain outside formal History.
+3. Versions, diffs, and locks appear within Book, Post, and Zone interfaces.
+
+## How it connects
+
+History does not stand alone. It shares identity, context, or workflow with Book · Post · Zone · Content Structure · Editor.
+
+## Clear boundaries
+
+- History is an independent core capability, not part of Editor.
+- Products are not forced into a universal whole-object snapshot.
+- This page does not claim automatic merge, fixed lock expiry, forced takeover, or arbitrary restore.

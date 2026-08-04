@@ -1,0 +1,15 @@
+{
+	"version": 1,
+	"include": [
+		"/",
+		"/how-it-works",
+		"/how-it-works/",
+		"/uses",
+		"/uses/",
+		"/products",
+		"/products/*",
+		"/contact-us",
+		"/contact-us/"
+	],
+	"exclude": []
+}

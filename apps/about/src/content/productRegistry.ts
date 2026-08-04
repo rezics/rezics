@@ -1,283 +1,273 @@
-import type { ProductDefinition, ProductFamilyId } from "./productTypes";
+import type { ProductDefinition, ProductLayerId } from "./productTypes";
 
-const defineProduct = <const T extends ProductDefinition>(definition: T): T => definition;
+export const PRODUCT_IDS = [
+	"unit",
+	"entity",
+	"tag",
+	"series",
+	"release",
+	"book",
+	"gamebook",
+	"media",
+	"software",
+	"post",
+	"wiki",
+	"picture",
+	"review",
+	"comment",
+	"score",
+	"content-structure",
+	"editor",
+	"history",
+	"collection",
+	"library",
+	"realm",
+	"zone",
+	"feed",
+	"progress",
+	"api-oauth",
+	"token",
+] as const;
+
+export type ProductId = (typeof PRODUCT_IDS)[number];
+
+const defineProduct = (definition: ProductDefinition<ProductId>): ProductDefinition<ProductId> =>
+	definition;
 
 export const PRODUCT_DEFINITIONS = [
 	defineProduct({
 		id: "unit",
 		slug: "unit",
-		family: "discover",
-		pageClass: "surface",
-		implementationStatus: "documented",
+		layer: "identity",
 		relatedProductIds: ["book", "media", "software", "series", "release", "entity", "tag"],
+	}),
+	defineProduct({
+		id: "entity",
+		slug: "entity",
+		layer: "identity",
+		relatedProductIds: ["unit", "book", "post", "history"],
+	}),
+	defineProduct({
+		id: "tag",
+		slug: "tag",
+		layer: "identity",
+		relatedProductIds: ["unit", "post", "collection", "realm", "zone"],
+	}),
+	defineProduct({
+		id: "series",
+		slug: "series",
+		layer: "identity",
+		relatedProductIds: ["unit", "book", "media", "release"],
+	}),
+	defineProduct({
+		id: "release",
+		slug: "release",
+		layer: "identity",
+		relatedProductIds: ["unit", "book", "media", "software", "series"],
 	}),
 	defineProduct({
 		id: "book",
 		slug: "book",
-		family: "discover",
-		pageClass: "surface",
-		implementationStatus: "documented",
+		layer: "form",
 		relatedProductIds: ["unit", "gamebook", "release", "content-structure", "entity"],
 	}),
 	defineProduct({
 		id: "gamebook",
 		slug: "gamebook",
-		family: "discover",
-		pageClass: "manifestation",
-		implementationStatus: "documented",
+		layer: "form",
 		canonicalParentId: "book",
-		demoKind: "gamebook",
 		relatedProductIds: ["book", "content-structure", "progress", "history"],
 	}),
 	defineProduct({
 		id: "media",
 		slug: "media",
-		family: "discover",
-		pageClass: "surface",
-		implementationStatus: "documented",
+		layer: "form",
 		relatedProductIds: ["unit", "series", "release", "entity", "tag"],
 	}),
 	defineProduct({
 		id: "software",
 		slug: "software",
-		family: "discover",
-		pageClass: "surface",
-		implementationStatus: "documented",
+		layer: "form",
 		relatedProductIds: ["unit", "release", "series", "entity", "tag"],
-	}),
-	defineProduct({
-		id: "series",
-		slug: "series",
-		family: "discover",
-		pageClass: "surface",
-		implementationStatus: "documented",
-		relatedProductIds: ["unit", "book", "media", "software", "release"],
-	}),
-	defineProduct({
-		id: "release",
-		slug: "release",
-		family: "discover",
-		pageClass: "surface",
-		implementationStatus: "documented",
-		relatedProductIds: ["unit", "book", "media", "software", "series"],
-	}),
-	defineProduct({
-		id: "entity",
-		slug: "entity",
-		family: "discover",
-		pageClass: "surface",
-		implementationStatus: "implemented",
-		relatedProductIds: ["book", "post", "media", "software", "history"],
-	}),
-	defineProduct({
-		id: "tag",
-		slug: "tag",
-		family: "discover",
-		pageClass: "surface",
-		implementationStatus: "implemented",
-		relatedProductIds: ["unit", "post", "collection", "realm", "zone"],
 	}),
 	defineProduct({
 		id: "post",
 		slug: "post",
-		family: "create",
-		pageClass: "surface",
-		implementationStatus: "documented",
+		layer: "form",
 		relatedProductIds: ["wiki", "picture", "review", "editor", "history", "entity"],
 	}),
 	defineProduct({
 		id: "wiki",
 		slug: "wiki",
-		family: "create",
-		pageClass: "manifestation",
-		implementationStatus: "documented",
+		layer: "form",
 		canonicalParentId: "post",
 		relatedProductIds: ["post", "picture", "review", "editor", "history"],
 	}),
 	defineProduct({
 		id: "picture",
 		slug: "picture",
-		family: "create",
-		pageClass: "manifestation",
-		implementationStatus: "documented",
+		layer: "form",
 		canonicalParentId: "post",
 		relatedProductIds: ["post", "wiki", "review", "entity", "tag"],
 	}),
 	defineProduct({
 		id: "review",
 		slug: "review",
-		family: "create",
-		pageClass: "manifestation",
-		implementationStatus: "documented",
+		layer: "form",
 		canonicalParentId: "post",
 		relatedProductIds: ["post", "score", "comment", "entity", "feed"],
 	}),
 	defineProduct({
 		id: "comment",
 		slug: "comment",
-		family: "create",
-		pageClass: "surface",
-		implementationStatus: "documented",
+		layer: "form",
 		relatedProductIds: ["post", "review", "feed", "history"],
 	}),
 	defineProduct({
 		id: "score",
 		slug: "score",
-		family: "create",
-		pageClass: "surface",
-		implementationStatus: "documented",
+		layer: "form",
 		relatedProductIds: ["review", "unit", "feed", "history"],
 	}),
 	defineProduct({
 		id: "content-structure",
 		slug: "content-structure",
-		family: "create",
-		pageClass: "surface",
-		implementationStatus: "implemented",
-		demoKind: "structure",
+		layer: "structure",
 		relatedProductIds: ["book", "gamebook", "post", "editor", "history"],
 	}),
 	defineProduct({
 		id: "editor",
 		slug: "editor",
-		family: "create",
-		pageClass: "capability",
-		implementationStatus: "documented",
+		layer: "structure",
 		relatedProductIds: ["post", "book", "content-structure", "history", "api-oauth"],
+	}),
+	defineProduct({
+		id: "history",
+		slug: "history",
+		layer: "structure",
+		relatedProductIds: ["book", "post", "zone", "content-structure", "editor"],
 	}),
 	defineProduct({
 		id: "collection",
 		slug: "collection",
-		family: "continue",
-		pageClass: "surface",
-		implementationStatus: "implemented",
+		layer: "community",
 		relatedProductIds: ["library", "unit", "progress", "realm", "tag"],
 	}),
 	defineProduct({
 		id: "library",
 		slug: "library",
-		family: "continue",
-		pageClass: "manifestation",
-		implementationStatus: "planned",
+		layer: "community",
 		canonicalParentId: "collection",
 		relatedProductIds: ["collection", "book", "unit", "progress"],
 	}),
 	defineProduct({
 		id: "realm",
 		slug: "realm",
-		family: "continue",
-		pageClass: "surface",
-		implementationStatus: "implemented",
+		layer: "community",
 		relatedProductIds: ["zone", "feed", "collection", "unit", "tag"],
 	}),
 	defineProduct({
 		id: "zone",
 		slug: "zone",
-		family: "continue",
-		pageClass: "surface",
-		implementationStatus: "implemented",
+		layer: "community",
 		relatedProductIds: ["realm", "feed", "collection", "tag", "history"],
 	}),
 	defineProduct({
 		id: "feed",
 		slug: "feed",
-		family: "continue",
-		pageClass: "capability",
-		implementationStatus: "documented",
+		layer: "community",
 		relatedProductIds: ["realm", "zone", "post", "comment", "tag"],
 	}),
 	defineProduct({
 		id: "progress",
 		slug: "progress",
-		family: "continue",
-		pageClass: "capability",
-		implementationStatus: "planned",
+		layer: "community",
 		relatedProductIds: ["book", "gamebook", "library", "history"],
-	}),
-	defineProduct({
-		id: "history",
-		slug: "history",
-		family: "open",
-		pageClass: "capability",
-		implementationStatus: "documented",
-		demoKind: "history",
-		relatedProductIds: ["book", "post", "zone", "content-structure", "editor"],
 	}),
 	defineProduct({
 		id: "api-oauth",
 		slug: "api-oauth",
-		family: "open",
-		pageClass: "capability",
-		implementationStatus: "documented",
+		layer: "open",
 		relatedProductIds: ["token", "content-structure", "editor", "feed", "entity"],
 	}),
 	defineProduct({
 		id: "token",
 		slug: "token",
-		family: "open",
-		pageClass: "capability",
-		implementationStatus: "implemented",
+		layer: "open",
 		relatedProductIds: ["api-oauth", "content-structure", "editor", "unit"],
 	}),
 ] as const;
 
-export type ProductId = (typeof PRODUCT_DEFINITIONS)[number]["id"];
-export type ProductSlug = (typeof PRODUCT_DEFINITIONS)[number]["slug"];
-export type RegisteredProduct = ProductDefinition & {
-	readonly id: ProductId;
-	readonly slug: ProductSlug;
-};
+export type RegisteredProduct = (typeof PRODUCT_DEFINITIONS)[number];
+export type ProductSlug = RegisteredProduct["slug"];
 
-const productById = new Map<ProductId, RegisteredProduct>(
+const productsById = new Map<ProductId, RegisteredProduct>(
 	PRODUCT_DEFINITIONS.map((product) => [product.id, product]),
 );
-
-const productBySlug = new Map<ProductSlug, RegisteredProduct>(
+const productsBySlug = new Map<ProductSlug, RegisteredProduct>(
 	PRODUCT_DEFINITIONS.map((product) => [product.slug, product]),
 );
+const productIds: ReadonlySet<string> = new Set(PRODUCT_IDS);
+const productSlugs: ReadonlySet<string> = new Set(PRODUCT_DEFINITIONS.map(({ slug }) => slug));
 
-export const PRODUCT_FAMILIES = {
-	discover: PRODUCT_DEFINITIONS.filter((product) => product.family === "discover"),
-	create: PRODUCT_DEFINITIONS.filter((product) => product.family === "create"),
-	continue: PRODUCT_DEFINITIONS.filter((product) => product.family === "continue"),
-	open: PRODUCT_DEFINITIONS.filter((product) => product.family === "open"),
-} as const satisfies Record<ProductFamilyId, readonly ProductDefinition[]>;
-
-const productIdSet: ReadonlySet<string> = new Set(productById.keys());
-const productSlugSet: ReadonlySet<string> = new Set(productBySlug.keys());
+export const PRODUCTS_BY_LAYER = {
+	identity: PRODUCT_DEFINITIONS.filter((product) => product.layer === "identity"),
+	form: PRODUCT_DEFINITIONS.filter((product) => product.layer === "form"),
+	structure: PRODUCT_DEFINITIONS.filter((product) => product.layer === "structure"),
+	community: PRODUCT_DEFINITIONS.filter((product) => product.layer === "community"),
+	open: PRODUCT_DEFINITIONS.filter((product) => product.layer === "open"),
+} as const satisfies Record<ProductLayerId, readonly RegisteredProduct[]>;
 
 export function isProductId(value: string): value is ProductId {
-	return productIdSet.has(value);
+	return productIds.has(value);
 }
 
 export function isProductSlug(value: string): value is ProductSlug {
-	return productSlugSet.has(value);
+	return productSlugs.has(value);
 }
 
 export function getProductById(id: ProductId): RegisteredProduct {
-	const product = productById.get(id);
-	if (!product) throw new Error(`Registered product is missing: ${id}`);
+	const product = productsById.get(id);
+	if (!product) throw new Error(`Missing registered product: ${id}`);
 	return product;
 }
 
 export function getProductBySlug(slug: ProductSlug): RegisteredProduct {
-	const product = productBySlug.get(slug);
-	if (!product) throw new Error(`Registered product slug is missing: ${slug}`);
+	const product = productsBySlug.get(slug);
+	if (!product) throw new Error(`Missing registered product slug: ${slug}`);
 	return product;
 }
 
-export function getProductsByFamily(familyId: ProductFamilyId): readonly RegisteredProduct[] {
-	return PRODUCT_FAMILIES[familyId];
+export function getProductsByLayer(layer: ProductLayerId): readonly RegisteredProduct[] {
+	return PRODUCTS_BY_LAYER[layer];
 }
 
-export function getRelatedProducts(product: ProductDefinition): RegisteredProduct[] {
-	return product.relatedProductIds.flatMap((id) => {
-		if (!isProductId(id)) return [];
-		return [getProductById(id)];
-	});
-}
+export function validateProductRegistry(): readonly string[] {
+	const errors: string[] = [];
+	const ids = new Set<string>();
+	const slugs = new Set<string>();
 
-export function getParentProduct(product: ProductDefinition): RegisteredProduct | undefined {
-	const parentId = product.canonicalParentId;
-	return parentId && isProductId(parentId) ? getProductById(parentId) : undefined;
+	for (const product of PRODUCT_DEFINITIONS) {
+		if (ids.has(product.id)) errors.push(`Duplicate product id: ${product.id}`);
+		if (slugs.has(product.slug)) errors.push(`Duplicate product slug: ${product.slug}`);
+		ids.add(product.id);
+		slugs.add(product.slug);
+	}
+
+	for (const id of PRODUCT_IDS) {
+		if (!ids.has(id)) errors.push(`Missing product definition: ${id}`);
+	}
+
+	for (const product of PRODUCT_DEFINITIONS) {
+		for (const relatedId of product.relatedProductIds) {
+			if (!ids.has(relatedId)) {
+				errors.push(`${product.id} references unknown product ${relatedId}`);
+			}
+		}
+		if (product.canonicalParentId && !ids.has(product.canonicalParentId)) {
+			errors.push(`${product.id} has unknown parent ${product.canonicalParentId}`);
+		}
+	}
+
+	return errors;
 }

@@ -1,0 +1,39 @@
+---
+import { Logo } from "@rezics/ui";
+
+import type { SiteCopy } from "../content/locales";
+import type { AboutLocale } from "../i18n/locales";
+import {
+  getHomePath,
+  getHowItWorksPath,
+  getProductsPath,
+  getUsesPath,
+} from "../i18n/productPaths";
+
+type Props = { locale: AboutLocale; copy: SiteCopy };
+const { locale, copy } = Astro.props;
+---
+
+<footer class="site-footer">
+  <div class="shell footer-grid">
+    <div class="footer-brand">
+      <a href={getHomePath(locale)} aria-label={copy.a11y.home}><Logo alt="" aria-hidden="true" /></a>
+      <p>{copy.footer.statement}</p>
+    </div>
+    <nav aria-label={copy.footer.explore}>
+      <h2>{copy.footer.explore}</h2>
+      <a href={getHowItWorksPath(locale)}>{copy.nav.how}</a>
+      <a href={getUsesPath(locale)}>{copy.nav.uses}</a>
+      <a href={getProductsPath(locale)}>{copy.nav.products}</a>
+    </nav>
+    <nav aria-label={copy.footer.project}>
+      <h2>{copy.footer.project}</h2>
+      <a href="https://github.com/rezics/rezics">{copy.footer.source}</a>
+      <a href="https://www.rezics.com/">{copy.footer.mainSite}</a>
+    </nav>
+  </div>
+  <div class="shell footer-meta">
+    <span>{copy.footer.copyright}</span>
+    <span>{copy.footer.license}</span>
+  </div>
+</footer>

@@ -1,22 +1,13 @@
-export const PRODUCT_FAMILY_IDS = ["discover", "create", "continue", "open"] as const;
+export const PRODUCT_LAYER_IDS = ["identity", "form", "structure", "community", "open"] as const;
 
-export type ProductFamilyId = (typeof PRODUCT_FAMILY_IDS)[number];
+export type ProductLayerId = (typeof PRODUCT_LAYER_IDS)[number];
 
-export type ProductClass = "surface" | "capability" | "manifestation";
-
-export type ImplementationStatus = "implemented" | "documented" | "planned" | "research";
-
-export type ProductDemoKind = "gamebook" | "structure" | "history";
-
-export type ProductDefinition = {
-	readonly id: string;
+export type ProductDefinition<ProductId extends string = string> = {
+	readonly id: ProductId;
 	readonly slug: string;
-	readonly family: ProductFamilyId;
-	readonly pageClass: ProductClass;
-	readonly implementationStatus: ImplementationStatus;
-	readonly relatedProductIds: readonly string[];
-	readonly canonicalParentId?: string;
-	readonly demoKind?: ProductDemoKind;
+	readonly layer: ProductLayerId;
+	readonly relatedProductIds: readonly ProductId[];
+	readonly canonicalParentId?: ProductId;
 };
 
 export type AboutPageMeta = {

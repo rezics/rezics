@@ -1,0 +1,37 @@
+---
+productId: content-structure
+locale: zh-hans
+title: "内容结构"
+summary: "在多个载体中管理内容位置、顺序、复用和可选游戏结构。"
+description: "在多个载体中管理内容位置、顺序、复用和可选游戏结构。"
+---
+
+## 它带来什么
+
+内容结构，把底层模型转成读者能理解、社区能长期维护的能力。在多个载体中管理内容位置、顺序、复用和可选游戏结构。
+
+## 谁会使用
+
+作者和编辑者用它组合内容、发布变更，读者则得到连贯且可追溯的结果。
+
+## 一段具体旅程
+
+- ContentStructure 用有序树管理位置、排序和复用。
+- GameContentStructure 叠加入口、Passage、Ending、Choice、退役和 DAG 校验。
+- 首批只公开已确认的 Book 适配。
+
+## 如何运作
+
+1. Tree 模式建立 occurrence；Node 不等于 帖子。
+2. Game 模式仍建立在普通结构之上。
+3. 在 Book 与 GameBook 读者结果中验证结构。
+
+## 如何连接
+
+内容结构并不孤立；它与 书籍 · 游戏书 · 帖子 · 编辑器 · 历史 共享身份、语境或工作流程。
+
+## 清楚的边界
+
+- 内容结构 没有载体父产品，也不是 GameBook 父产品。
+- Editor、History、API 各有不同职责。
+- Media、Series 等适配未经文档确认前不公开声称支持。

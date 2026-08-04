@@ -77,5 +77,5 @@ jobs:
                   packageManager: yarn
                   wranglerVersion: "4"
                   workingDirectory: apps/about
-                  command: pages deploy dist/client --project-name=${{ env.CLOUDFLARE_PAGES_PROJECT_NAME }} --branch=${{ env.CLOUDFLARE_PAGES_BRANCH }}
+                  command: pages deploy dist --project-name=${{ env.CLOUDFLARE_PAGES_PROJECT_NAME }} --branch=${{ env.CLOUDFLARE_PAGES_BRANCH }}
                   gitHubToken: ${{ secrets.GITHUB_TOKEN }}
