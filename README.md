@@ -139,14 +139,21 @@ maintained in a separate backlog file.
 task progress:check
 task progress
 
-# Inspect ready work or one result.
-progress list --readiness ready .
-progress show <item-id> .
+# Inspect ready work, the full graph, or one result.
+task progress:ready
+task progress:graph
+task progress:show ITEM=<item-id>
 ```
 
 Change an Item to `done` only after every `accept` condition is true and its
 `verify` procedures have been completed. The CLI validates and queries Items;
 it does not execute verification procedures or change status.
+
+Start with the
+[product capability map](./docs/architecture/product-capability-map.md) for the
+complete repository and Outline reconciliation. Detailed Items are owned by
+the linked platform, catalog, publishing, community, discovery, legal, and
+operations documents or by the nearest source contract.
 
 ```progress
 id: tooling.progress-protocol

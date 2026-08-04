@@ -30,6 +30,24 @@ tasks:
         cmds:
             - progress summary .
 
+    progress:ready:
+        desc: List open Progress outcomes whose dependencies are complete.
+        cmds:
+            - progress list --readiness ready .
+
+    progress:graph:
+        desc: Render the complete Progress dependency graph as a tree.
+        cmds:
+            - progress graph --format tree .
+
+    progress:show:
+        desc: Show one Progress outcome and its direct relationships.
+        requires:
+            vars:
+                - ITEM
+        cmds:
+            - progress show "{{.ITEM}}" .
+
     progress:check:
         desc: Validate every Progress Protocol Item and dependency.
         cmds:

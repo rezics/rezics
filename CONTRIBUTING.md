@@ -36,6 +36,8 @@ Progress Items are machine-validated outcome contracts, not a second copy of the
 Before adding one from rezics-outline or another planning source, compare it with the current
 implementation and history. Do not add work that is already complete, superseded, purely
 aspirational, or missing an observable result.
+Use the [product capability map](./docs/architecture/product-capability-map.md) to find the owning
+outcome chain and to keep repository and Outline coverage complete.
 
 - Put each Item beside the source, test, architecture document, legal draft, or runbook that owns
   the result. Do not recreate `TODO.md` or another central task database.
