@@ -55,13 +55,15 @@ import {
 } from "./reply-tree";
 import { PostOverflowMenu } from "./components/post-overflow-menu";
 import { invalidatePostQueries } from "./query";
-import { AttributionLinks } from "./attribution-list";
+import { ReplyAttributionLinks } from "./attribution-list";
 import { postHref } from "./url";
 
 const ReplyEngagementPolicy = {
 	discussion: "none",
 	primary: "none",
 } as const satisfies FeedActionPolicy;
+
+const EmptyPostPublisherUnitIds: ReadonlySet<string> = new Set();
 
 const editorPreloadIntentHandlers = {
 	onFocus: preloadPortableTextEditor,
@@ -74,12 +76,14 @@ export function ReplyPostThread({
 	parentPostId,
 	realmId,
 	canReply,
+	postPublisherUnitIds = EmptyPostPublisherUnitIds,
 	signInDestination,
 }: {
 	rootPostId: string;
 	parentPostId?: string;
 	realmId?: string;
 	canReply: boolean;
+	postPublisherUnitIds?: ReadonlySet<string>;
 	signInDestination?: string;
 }) {
 	const { t } = useTranslation(["actions", "posts", "ui"]);
@@ -184,6 +188,7 @@ export function ReplyPostThread({
 							createdReplies={createdReplies}
 							localizationLanguages={localizationLanguages}
 							onReplyCreated={addCreatedReply}
+							postPublisherUnitIds={postPublisherUnitIds}
 						/>
 					))}
 					{replies.isFetchNextPageError ? (
@@ -225,6 +230,7 @@ function ReplyPostNode({
 	createdReplies,
 	localizationLanguages,
 	onReplyCreated,
+	postPublisherUnitIds,
 }: {
 	reply: ReplyPostTreeNode;
 	rootPostId: string;
@@ -234,6 +240,7 @@ function ReplyPostNode({
 	createdReplies: readonly ReplyPost[];
 	localizationLanguages: ReturnType<typeof useLocalizationLanguages>;
 	onReplyCreated: (reply: ReplyPost) => void;
+	postPublisherUnitIds: ReadonlySet<string>;
 }) {
 	const { locale, t } = useTranslation(["actions", "posts", "ui"]);
 	const queryClient = useQueryClient();
@@ -338,6 +345,7 @@ function ReplyPostNode({
 											createdReplies={createdReplies}
 											localizationLanguages={localizationLanguages}
 											onReplyCreated={onReplyCreated}
+											postPublisherUnitIds={postPublisherUnitIds}
 										/>
 									))}
 									{childReplies.isError ? (
@@ -494,10 +502,11 @@ function ReplyPostNode({
 				}
 				header={
 					<div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-sm">
-						<AttributionLinks
+						<ReplyAttributionLinks
 							attributions={reply.attributions}
 							className="font-semibold hover:underline"
 							emptyLabel={t.posts.unknownAttribution}
+							postPublisherUnitIds={postPublisherUnitIds}
 							publisherLabel={t.posts.publisher}
 						/>
 						<Link

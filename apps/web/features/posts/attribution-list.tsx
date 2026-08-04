@@ -20,34 +20,56 @@ export type AttributionSummary = {
 	};
 };
 
+/**
+ * Resolves the immutable Unit identities credited as publishers on a Post.
+ *
+ * @internal
+ */
+export function getPublisherUnitIds(
+	attributions: readonly AttributionSummary[],
+): ReadonlySet<string> {
+	const publisherUnitIds = new Set<string>();
+	for (const attribution of attributions) {
+		if (attribution.role === "publisher") publisherUnitIds.add(attribution.creditedUnit.id);
+	}
+	return publisherUnitIds;
+}
+
 export function AttributionLinks({
 	attributions,
 	emptyLabel,
 	className,
 	publisherLabel,
+	resolveRoleLabel,
 }: {
 	readonly attributions: readonly AttributionSummary[];
 	readonly emptyLabel: string;
 	readonly className?: string;
 	readonly publisherLabel?: string;
+	readonly resolveRoleLabel?: (attribution: AttributionSummary) => string | null;
 }) {
 	const { t } = useTranslation(["units"]);
 	if (!attributions.length) return <span className={className}>{emptyLabel}</span>;
 	return attributions.map((attribution, index) => {
 		const href = publicUnitHref(attribution.creditedUnit.kind, attribution.creditedUnit);
 		const label = attribution.creditedUnit.title ?? emptyLabel;
+		const roleLabel =
+			resolveRoleLabel === undefined
+				? attribution.role === "publisher" && publisherLabel
+					? publisherLabel
+					: isKnownAttributionRole(attribution.role)
+						? t.units.attributionRoles[attribution.role]
+						: attribution.role
+				: resolveRoleLabel(attribution);
 		const content = (
 			<>
-				{label}{" "}
-				<span className="text-muted-foreground">
-					(
-					{attribution.role === "publisher" && publisherLabel
-						? publisherLabel
-						: isKnownAttributionRole(attribution.role)
-							? t.units.attributionRoles[attribution.role]
-							: attribution.role}
-					)
-				</span>
+				{label}
+				{roleLabel === null ? null : (
+					<>
+						{" "}
+						<span className="text-muted-foreground">({roleLabel})</span>
+					</>
+				)}
 			</>
 		);
 		return (
@@ -63,6 +85,37 @@ export function AttributionLinks({
 			</span>
 		);
 	});
+}
+
+/**
+ * Renders reply credits while labeling only identities credited as publishers on the
+ * displayed Post.
+ *
+ * @internal
+ */
+export function ReplyAttributionLinks({
+	attributions,
+	emptyLabel,
+	postPublisherUnitIds,
+	publisherLabel,
+	className,
+}: {
+	readonly attributions: readonly AttributionSummary[];
+	readonly emptyLabel: string;
+	readonly postPublisherUnitIds: ReadonlySet<string>;
+	readonly publisherLabel: string;
+	readonly className?: string;
+}) {
+	return (
+		<AttributionLinks
+			attributions={attributions}
+			className={className}
+			emptyLabel={emptyLabel}
+			resolveRoleLabel={(attribution) =>
+				postPublisherUnitIds.has(attribution.creditedUnit.id) ? publisherLabel : null
+			}
+		/>
+	);
 }
 
 export function PublisherAttributionLinks({

@@ -18,6 +18,7 @@ import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { PostDetailArticle } from "../components/post-detail-article";
+import { getPublisherUnitIds } from "../attribution-list";
 import { PostOverflowMenu } from "../components/post-overflow-menu";
 import {
 	PostRealmContextBar,
@@ -116,6 +117,7 @@ export function PostDetailPage({
 	if (!query.data || (hasRealmContext && contextQuery.data === undefined))
 		return <QueryPending />;
 	const post = query.data;
+	const postPublisherUnitIds = getPublisherUnitIds(post.attributions);
 	const discussionHref =
 		returnToDiscussion && post.subject && isUnitDetailUnitType(post.subject.type)
 			? unitDetailHref(post.subject.type, post.subject.id, "discussion")
@@ -198,6 +200,7 @@ export function PostDetailPage({
 						{mobileRealmContext}
 						<ReplyPostThread
 							canReply={post.capabilities.canReply}
+							postPublisherUnitIds={postPublisherUnitIds}
 							realmId={realmId}
 							rootPostId={post.id}
 						/>
@@ -282,6 +285,7 @@ export function PostDetailPage({
 					<ReplyPostThread
 						canReply={post.capabilities.canReply}
 						parentPostId={post.postKind === "reply" ? post.id : undefined}
+						postPublisherUnitIds={postPublisherUnitIds}
 						realmId={realmId}
 						rootPostId={post.rootPostId ?? post.id}
 					/>
