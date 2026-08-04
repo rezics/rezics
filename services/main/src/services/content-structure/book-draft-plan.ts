@@ -1,7 +1,7 @@
 import type { ContentLanguage } from "@rezics/i18n";
 
-import { compareBytewisePositions, fractionalPositionAt } from "../ordering/position";
 import { ContentStructureInvalid } from "./errors";
+import { planDraftSiblingPositions } from "./draft-batch";
 
 export type ExistingBookDraftNode = {
 	readonly state: "existing";
@@ -57,6 +57,7 @@ export type PlannedBookDraftNode = BookDraftNode & {
 
 export type BookDraftPlan = {
 	readonly nodes: readonly PlannedBookDraftNode[];
+	readonly deletedNodeIds: ReadonlySet<string>;
 	readonly hasChanges: boolean;
 	readonly hasStructuralChanges: boolean;
 	readonly renamedExistingNodeIds: ReadonlySet<string>;
@@ -72,6 +73,7 @@ export type ContentStructureDraftNodeBase = {
 
 export type ContentStructureDraftPlan<Node extends ContentStructureDraftNodeBase> = {
 	readonly nodes: readonly (Node & { readonly position: string })[];
+	readonly deletedNodeIds: ReadonlySet<string>;
 	readonly hasChanges: boolean;
 	readonly hasStructuralChanges: boolean;
 	readonly renamedExistingNodeIds: ReadonlySet<string>;
@@ -79,15 +81,6 @@ export type ContentStructureDraftPlan<Node extends ContentStructureDraftNodeBase
 
 function invalid(message: string): never {
 	throw new ContentStructureInvalid(message);
-}
-
-function compareCurrentNodes(left: CurrentBookDraftNode, right: CurrentBookDraftNode): number {
-	const position = compareBytewisePositions(left.position, right.position);
-	return position || left.id.localeCompare(right.id);
-}
-
-function sameIds(left: readonly string[], right: readonly string[]): boolean {
-	return left.length === right.length && left.every((id, index) => id === right[index]);
 }
 
 /**
@@ -115,12 +108,6 @@ export function planContentStructureDraft<Node extends ContentStructureDraftNode
 		if (draft.state !== "existing" && currentById.has(draft.id))
 			invalid(`New draft node ${draft.id} already exists`);
 		draftById.set(draft.id, { ...draft, title });
-	}
-
-	for (const current of currentNodes) {
-		const draft = draftById.get(current.id);
-		if (!draft || draft.state !== "existing")
-			invalid(`Draft is missing existing node ${current.id}`);
 	}
 
 	const visitState = new Map<string, "visiting" | "visited">();
@@ -161,22 +148,14 @@ export function planContentStructureDraft<Node extends ContentStructureDraftNode
 			invalid(`Draft siblings under ${parentId ?? "root"} must use contiguous orders`);
 	}
 
-	const currentSiblingIds = new Map<string | null, string[]>();
-	for (const current of currentNodes.toSorted(compareCurrentNodes)) {
-		currentSiblingIds.set(current.parentId, [
-			...(currentSiblingIds.get(current.parentId) ?? []),
-			current.id,
-		]);
-	}
-
-	const changedParents = new Set<string | null>();
-	for (const [parentId, desiredIds] of draftSiblingIds) {
-		if (!sameIds(currentSiblingIds.get(parentId) ?? [], desiredIds))
-			changedParents.add(parentId);
-	}
-	for (const parentId of currentSiblingIds.keys()) {
-		if (!draftSiblingIds.has(parentId)) changedParents.add(parentId);
-	}
+	const retainedIds = new Set(draftById.keys());
+	const deletedNodeIds = new Set(
+		currentNodes.filter(({ id }) => !retainedIds.has(id)).map(({ id }) => id),
+	);
+	const positionById = planDraftSiblingPositions({
+		currentNodes,
+		desiredNodes: [...draftById.values()],
+	});
 
 	const renamedExistingNodeIds = new Set<string>();
 	const nodes = [...draftById.values()]
@@ -189,18 +168,25 @@ export function planContentStructureDraft<Node extends ContentStructureDraftNode
 			const current = currentById.get(node.id);
 			if (node.state === "existing" && current && current.title !== node.title)
 				renamedExistingNodeIds.add(node.id);
+			const position = positionById.get(node.id);
+			if (!position) throw new Error("Draft node has no planned position");
 			return {
 				...node,
-				position:
-					current && !changedParents.has(node.parentId)
-						? current.position
-						: fractionalPositionAt(node.order),
+				position,
 			};
 		});
 	const hasStructuralChanges =
-		nodes.some((node) => node.state !== "existing") || changedParents.size > 0;
+		nodes.some((node) => node.state !== "existing") ||
+		deletedNodeIds.size > 0 ||
+		nodes.some((node) => {
+			const current = currentById.get(node.id);
+			return current
+				? current.parentId !== node.parentId || current.position !== node.position
+				: false;
+		});
 	return {
 		nodes,
+		deletedNodeIds,
 		hasChanges: hasStructuralChanges || renamedExistingNodeIds.size > 0,
 		hasStructuralChanges,
 		renamedExistingNodeIds,

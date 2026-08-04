@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import {
 	assertNavigationDocument,
 	type NavigationDocument,
@@ -9,14 +9,13 @@ import {
 import type { DatabaseTransaction } from "../database";
 import { contentStructure, contentStructureNode } from "../database/schema";
 import { fractionalPositionAt } from "../ordering/position";
-import {
-	diffContentStructureSnapshots,
-	type ContentStructureNodeState,
-	type ContentStructureTarget,
-} from "./contracts";
+import { type ContentStructureNodeState, type ContentStructureTarget } from "./contracts";
 import { ContentStructureInvalid, ContentStructureNotFound } from "./errors";
-import { createContentStructureHistory, mutateContentStructureWithHistory } from "./history";
+import { createContentStructureHistory } from "./history";
 import { deleteContentStructure } from "./service";
+import { applyContentStructureBatch } from "./batch";
+import type { ContentStructureBatchCommand } from "./batch-plan";
+import { assertContentStructureDraftCommandLimit } from "./draft-batch";
 import {
 	contentStructureTargetColumns,
 	ensureContentStructureNodeAllowed,
@@ -142,6 +141,11 @@ export async function createNavigationStructure(
 		input.kind,
 		input.document,
 	);
+	assertContentStructureDraftCommandLimit({
+		currentNodes: [],
+		deletedNodeIds: new Set(),
+		changedDesiredNodeCount: desired.length,
+	});
 	const [structure] = await tx
 		.insert(contentStructure)
 		.values({
@@ -168,26 +172,6 @@ export async function createNavigationStructure(
 	return { structure, ...revision };
 }
 
-function nodeShapeEquals(
-	current: ContentStructureNodeState,
-	desired: {
-		readonly parentId: string | null;
-		readonly contentUnitId: string;
-		readonly target: ContentStructureTarget;
-		readonly position: string;
-	},
-): boolean {
-	const columns = contentStructureTargetColumns(desired.target);
-	return (
-		current.parentId === desired.parentId &&
-		current.contentUnitId === desired.contentUnitId &&
-		current.position === desired.position &&
-		current.targetKind === columns.targetKind &&
-		current.targetUnitId === columns.targetUnitId &&
-		current.targetUrl === columns.targetUrl
-	);
-}
-
 export async function replaceNavigationStructure(
 	tx: DatabaseTransaction,
 	input: {
@@ -199,19 +183,13 @@ export async function replaceNavigationStructure(
 		readonly baseRevisionId: string;
 	},
 ) {
-	return mutateContentStructureWithHistory(
-		tx,
-		{
-			structureId: input.structureId,
-			baseRevisionId: input.baseRevisionId,
-			actorProfileId: input.actorProfileId,
-		},
-		async () => {
-			validateNavigationDocument(input.document);
-			const before = await loadContentStructureSnapshot(tx, {
-				structureId: input.structureId,
-				ownerUnitId: input.ownerUnitId,
-			});
+	validateNavigationDocument(input.document);
+	const result = await applyContentStructureBatch(tx, {
+		ownerUnitId: input.ownerUnitId,
+		structureId: input.structureId,
+		baseRevisionId: input.baseRevisionId,
+		actorProfileId: input.actorProfileId,
+		commands: async (before) => {
 			if (before.structure.kind !== input.kind) throw new ContentStructureNotFound();
 			const desired = await flattenNavigationDocument(
 				tx,
@@ -223,80 +201,97 @@ export async function replaceNavigationStructure(
 				before.nodes.map((node) => {
 					if (!node.documentKey)
 						throw new ContentStructureInvalid("Navigation node has no document key");
-					return [node.documentKey, node];
+					return [node.documentKey, node] as const;
 				}),
 			);
-			let changed = before.structure.documentKey !== input.document._key;
+			const newNodeCount = desired.filter(
+				(node) => !currentByKey.has(node.documentKey),
+			).length;
+			type GeneratedIdRow = { readonly id: string };
+			const generatedIds = newNodeCount
+				? (
+						await tx.execute<GeneratedIdRow>(
+							sql`select uuidv7() as id from generate_series(1, ${newNodeCount})`,
+						)
+					).rows.map(({ id }) => id)
+				: [];
+			let generatedIdIndex = 0;
 			const nodeIdByDocumentKey = new Map<string, string>();
 			for (const node of desired) {
+				const current = currentByKey.get(node.documentKey);
+				const id = current?.id ?? generatedIds[generatedIdIndex++];
+				if (!id) throw new Error("Navigation node ID generation returned too few values");
+				nodeIdByDocumentKey.set(node.documentKey, id);
+			}
+			const commands: ContentStructureBatchCommand[] = [];
+			if (before.structure.documentKey !== input.document._key)
+				commands.push({
+					opId: "structure",
+					type: "structure.update",
+					documentKey: input.document._key,
+				});
+			for (const node of desired) {
+				const nodeId = nodeIdByDocumentKey.get(node.documentKey);
 				const parentId = node.parentDocumentKey
-					? (nodeIdByDocumentKey.get(node.parentDocumentKey) ?? null)
+					? nodeIdByDocumentKey.get(node.parentDocumentKey)
 					: null;
-				if (node.parentDocumentKey && !parentId)
+				if (!nodeId || parentId === undefined)
 					throw new ContentStructureInvalid("Navigation parent order is invalid");
 				const current = currentByKey.get(node.documentKey);
-				if (current) {
-					if (!nodeShapeEquals(current, { ...node, parentId })) {
-						changed = true;
-						await tx
-							.update(contentStructureNode)
-							.set({
-								parentId,
-								contentUnitId: node.contentUnitId,
-								...contentStructureTargetColumns(node.target),
-								position: node.position,
-							})
-							.where(eq(contentStructureNode.id, current.id));
-					}
-					nodeIdByDocumentKey.set(node.documentKey, current.id);
-					currentByKey.delete(node.documentKey);
-					continue;
-				}
-				const [created] = await tx
-					.insert(contentStructureNode)
-					.values({
-						structureId: input.structureId,
-						ownerUnitId: input.ownerUnitId,
+				if (!current) {
+					commands.push({
+						opId: `create:${node.documentKey}`,
+						type: "node.create",
+						nodeId,
 						parentId,
 						contentUnitId: node.contentUnitId,
 						documentKey: node.documentKey,
-						...contentStructureTargetColumns(node.target),
+						target: node.target,
 						position: node.position,
-					})
-					.returning({ id: contentStructureNode.id });
-				if (!created) throw new Error("Navigation node insertion returned no row");
-				changed = true;
-				nodeIdByDocumentKey.set(node.documentKey, created.id);
+					});
+					continue;
+				}
+				const target = contentStructureTargetColumns(node.target);
+				if (
+					current.contentUnitId !== node.contentUnitId ||
+					current.targetKind !== target.targetKind ||
+					current.targetUnitId !== target.targetUnitId ||
+					current.targetUrl !== target.targetUrl
+				)
+					commands.push({
+						opId: `update:${node.documentKey}`,
+						type: "node.update",
+						nodeId,
+						contentUnitId: node.contentUnitId,
+						target: node.target,
+					});
+				if (current.parentId !== parentId || current.position !== node.position)
+					commands.push({
+						opId: `move:${node.documentKey}`,
+						type: "node.move",
+						nodeId,
+						parentId,
+						position: node.position,
+					});
+				currentByKey.delete(node.documentKey);
 			}
-			if (currentByKey.size) {
-				changed = true;
-				await tx
-					.update(contentStructureNode)
-					.set({ deletedAt: new Date() })
-					.where(
-						inArray(
-							contentStructureNode.id,
-							[...currentByKey.values()].map((node) => node.id),
-						),
-					);
-			}
-			if (changed)
-				await tx
-					.update(contentStructure)
-					.set({ documentKey: input.document._key, updatedAt: new Date() })
-					.where(eq(contentStructure.id, input.structureId));
-			const after = await loadContentStructureSnapshot(tx, {
-				structureId: input.structureId,
-			});
-			const delta = diffContentStructureSnapshots(before, after);
-			return {
-				result: { structure: after.structure },
-				change: delta
-					? { kind: "delta" as const, delta, checkpoint: async () => after }
-					: undefined,
-			};
+			const deletedIds = new Set([...currentByKey.values()].map(({ id }) => id));
+			for (const node of currentByKey.values())
+				if (node.parentId === null || !deletedIds.has(node.parentId))
+					commands.push({
+						opId: `delete:${node.documentKey}`,
+						type: "node.deleteSubtree",
+						nodeId: node.id,
+					});
+			return commands;
 		},
-	);
+		binding: "navigation",
+	});
+	return {
+		structure: result.afterSnapshot.structure,
+		revisionId: result.revisionId,
+		revisionCreated: result.revisionCreated,
+	};
 }
 
 export async function deleteNavigationStructure(

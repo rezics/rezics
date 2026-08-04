@@ -79,7 +79,7 @@ export const NavigationItem = Type.Recursive(
 				{
 					_key: BlockKey,
 					labelUnitId: Uuid,
-					children: Type.Array(This, { minItems: 1, maxItems: 20 }),
+					children: Type.Array(This, { minItems: 1 }),
 				},
 				{ additionalProperties: false },
 			),
@@ -93,7 +93,7 @@ export const NavigationDocument = Type.Object(
 	{
 		_type: Type.Literal("navigation-document"),
 		_key: BlockKey,
-		items: Type.Array(NavigationItem, { minItems: 1, maxItems: 100 }),
+		items: Type.Array(NavigationItem, { minItems: 1 }),
 	},
 	{ additionalProperties: false, $id: "NavigationDocument" },
 );

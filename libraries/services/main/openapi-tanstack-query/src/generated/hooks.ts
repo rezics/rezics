@@ -1505,6 +1505,14 @@ import type {
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus409,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus422,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus500,
+	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchOptions,
+	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus200,
+	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus400,
+	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus403,
+	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus404,
+	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus409,
+	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus422,
+	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus500,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesOptions,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus200,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus400,
@@ -1702,6 +1710,15 @@ import type {
 	PatchApiCollectionsByCollectionIdStatus422,
 	PatchApiCollectionsByCollectionIdStatus429,
 	PatchApiCollectionsByCollectionIdStatus500,
+	PostApiCollectionsByCollectionIdItemsBatchUpdateOptions,
+	PostApiCollectionsByCollectionIdItemsBatchUpdateStatus200,
+	PostApiCollectionsByCollectionIdItemsBatchUpdateStatus400,
+	PostApiCollectionsByCollectionIdItemsBatchUpdateStatus403,
+	PostApiCollectionsByCollectionIdItemsBatchUpdateStatus404,
+	PostApiCollectionsByCollectionIdItemsBatchUpdateStatus409,
+	PostApiCollectionsByCollectionIdItemsBatchUpdateStatus422,
+	PostApiCollectionsByCollectionIdItemsBatchUpdateStatus429,
+	PostApiCollectionsByCollectionIdItemsBatchUpdateStatus500,
 	PostApiCollectionsByCollectionIdItemsBatchOptions,
 	PostApiCollectionsByCollectionIdItemsBatchStatus200,
 	PostApiCollectionsByCollectionIdItemsBatchStatus400,
@@ -2650,6 +2667,7 @@ import {
 	deleteApiUnitsByIdByUnitIdContentStructuresByStructureId,
 	getApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisions,
 	postApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestore,
+	postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatch,
 	postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes,
 	patchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId,
 	deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId,
@@ -2680,6 +2698,7 @@ import {
 	getApiCollectionsByCollectionIdItems,
 	getApiCollectionsByCollectionId,
 	patchApiCollectionsByCollectionId,
+	postApiCollectionsByCollectionIdItemsBatchUpdate,
 	postApiCollectionsByCollectionIdItemsBatch,
 	postApiCollectionsByCollectionIdItemsMove,
 	putApiCollectionsByCollectionIdItemsByTargetId,
@@ -25735,6 +25754,116 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisio
 	>;
 }
 
+export const postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchMutationKey = () =>
+	[{ url: "/api/v1/units/by-id/:unitId/content-structures/:structureId/nodes/batch" }] as const;
+
+export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey =
+		postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchMutationKey();
+	return mutationOptions<
+		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus400
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus403
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus404
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus409
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus422
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus500
+		>,
+		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatch(
+				{ ...config, path, body, throwOnError: true },
+			);
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Apply an atomic Content Structure node command batch
+ * {@link /api/v1/units/by-id/:unitId/content-structures/:structureId/nodes/batch}
+ */
+export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatch<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus200,
+			ResponseErrorConfig<
+				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus400
+				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus403
+				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus404
+				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus409
+				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus422
+				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus500
+			>,
+			PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchMutationKey();
+
+	const baseOptions =
+		postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchMutationOptions(
+			config,
+		) as UseMutationOptions<
+			PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus200,
+			ResponseErrorConfig<
+				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus400
+				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus403
+				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus404
+				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus409
+				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus422
+				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus500
+			>,
+			PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchOptions,
+			TContext
+		>;
+
+	return useMutation<
+		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus400
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus403
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus404
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus409
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus422
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus500
+		>,
+		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus400
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus403
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus404
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus409
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus422
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus500
+		>,
+		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchOptions,
+		TContext
+	>;
+}
+
 export const postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesMutationKey = () =>
 	[{ url: "/api/v1/units/by-id/:unitId/content-structures/:structureId/nodes" }] as const;
 
@@ -28837,6 +28966,122 @@ export function usePatchApiCollectionsByCollectionId<TContext>(
 			| PatchApiCollectionsByCollectionIdStatus500
 		>,
 		PatchApiCollectionsByCollectionIdOptions,
+		TContext
+	>;
+}
+
+export const postApiCollectionsByCollectionIdItemsBatchUpdateMutationKey = () =>
+	[{ url: "/api/v1/collections/:collectionId/items/batch-update" }] as const;
+
+export function postApiCollectionsByCollectionIdItemsBatchUpdateMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiCollectionsByCollectionIdItemsBatchUpdateMutationKey();
+	return mutationOptions<
+		PostApiCollectionsByCollectionIdItemsBatchUpdateStatus200,
+		ResponseErrorConfig<
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus400
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus403
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus404
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus409
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus422
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus429
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus500
+		>,
+		PostApiCollectionsByCollectionIdItemsBatchUpdateOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiCollectionsByCollectionIdItemsBatchUpdate({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Apply an atomic mixed Collection item command batch
+ * {@link /api/v1/collections/:collectionId/items/batch-update}
+ */
+export function usePostApiCollectionsByCollectionIdItemsBatchUpdate<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiCollectionsByCollectionIdItemsBatchUpdateStatus200,
+			ResponseErrorConfig<
+				| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus400
+				| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus403
+				| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus404
+				| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus409
+				| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus422
+				| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus429
+				| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus500
+			>,
+			PostApiCollectionsByCollectionIdItemsBatchUpdateOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		postApiCollectionsByCollectionIdItemsBatchUpdateMutationKey();
+
+	const baseOptions = postApiCollectionsByCollectionIdItemsBatchUpdateMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiCollectionsByCollectionIdItemsBatchUpdateStatus200,
+		ResponseErrorConfig<
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus400
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus403
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus404
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus409
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus422
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus429
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus500
+		>,
+		PostApiCollectionsByCollectionIdItemsBatchUpdateOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiCollectionsByCollectionIdItemsBatchUpdateStatus200,
+		ResponseErrorConfig<
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus400
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus403
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus404
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus409
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus422
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus429
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus500
+		>,
+		PostApiCollectionsByCollectionIdItemsBatchUpdateOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiCollectionsByCollectionIdItemsBatchUpdateStatus200,
+		ResponseErrorConfig<
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus400
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus403
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus404
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus409
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus422
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus429
+			| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus500
+		>,
+		PostApiCollectionsByCollectionIdItemsBatchUpdateOptions,
 		TContext
 	>;
 }

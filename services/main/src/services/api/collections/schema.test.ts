@@ -2,15 +2,18 @@ import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
 import {
+	AddCollectionItemsBatchBody,
 	CollectionDetailQuery,
 	CollectionItemsQuery,
 	ListCollectionsQuery,
 	MoveCollectionItemsBody,
 	SaveCollectionItemBody,
+	UpdateCollectionItemsBatchBody,
 	UpdateCollectionBody,
 } from "./schema";
 
 const targetId = "019b76da-a800-7300-8000-000000000001";
+const uuid = (index: number) => `019b76da-a800-7300-8000-${index.toString(16).padStart(12, "0")}`;
 
 describe("collection list schema", () => {
 	it("accepts an optional direct-membership target", () => {
@@ -77,6 +80,48 @@ describe("collection item mutation schema", () => {
 				baseItemsRevisionId: targetId,
 				targetIds: [targetId, targetId],
 				placement: { kind: "after", targetId },
+			}),
+		).toBe(false);
+	});
+
+	it("does not count the members referenced by one move as batch commands", () => {
+		const targetIds = Array.from({ length: 10_001 }, (_, index) => uuid(index + 2));
+		expect(
+			Check(MoveCollectionItemsBody, {
+				baseItemsRevisionId: targetId,
+				targetIds,
+				placement: { kind: "end" },
+			}),
+		).toBe(true);
+		expect(
+			Check(UpdateCollectionItemsBatchBody, {
+				baseItemsRevisionId: targetId,
+				changes: [
+					{
+						opId: "move-all",
+						type: "items.move",
+						targetIds,
+						placement: { kind: "end" },
+					},
+				],
+			}),
+		).toBe(true);
+	});
+
+	it("gives the legacy add adapter the shared 10,000-command limit", () => {
+		const items = Array.from({ length: 10_001 }, (_, index) => ({
+			targetId: uuid(index + 2),
+		}));
+		expect(
+			Check(AddCollectionItemsBatchBody, {
+				baseItemsRevisionId: targetId,
+				items: items.slice(0, 10_000),
+			}),
+		).toBe(true);
+		expect(
+			Check(AddCollectionItemsBatchBody, {
+				baseItemsRevisionId: targetId,
+				items,
 			}),
 		).toBe(false);
 	});

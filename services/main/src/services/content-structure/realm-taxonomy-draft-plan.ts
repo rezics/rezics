@@ -1,6 +1,6 @@
 import type { RealmTagQueryStrategy } from "../database/schema/contract-values";
-import { compareBytewisePositions, fractionalPositionAt } from "../ordering/position";
 import { ContentStructureInvalid } from "./errors";
+import { planDraftSiblingPositions } from "./draft-batch";
 
 export type RealmTaxonomyContentKind = "label" | "tag" | "wiki";
 
@@ -38,18 +38,6 @@ function invalid(message: string): never {
 	throw new ContentStructureInvalid(message);
 }
 
-function compareCurrent(
-	left: CurrentRealmTaxonomyDraftNode,
-	right: CurrentRealmTaxonomyDraftNode,
-): number {
-	const position = compareBytewisePositions(left.position, right.position);
-	return position || left.id.localeCompare(right.id);
-}
-
-function sameIds(left: readonly string[], right: readonly string[]): boolean {
-	return left.length === right.length && left.every((id, index) => id === right[index]);
-}
-
 /**
  * Proves that a complete Realm taxonomy draft is a closed, acyclic forest and
  * derives the minimal persisted position changes.
@@ -58,7 +46,6 @@ export function planRealmTaxonomyDraft(
 	currentNodes: readonly CurrentRealmTaxonomyDraftNode[],
 	draftNodes: readonly ResolvedRealmTaxonomyDraftNode[],
 ): RealmTaxonomyDraftPlan {
-	if (draftNodes.length > 10_000) invalid("Realm taxonomy draft exceeds 10,000 nodes");
 	const currentById = new Map(currentNodes.map((node) => [node.id, node]));
 	const draftById = new Map<string, ResolvedRealmTaxonomyDraftNode>();
 	const tagUnitIds = new Set<string>();
@@ -146,22 +133,10 @@ export function planRealmTaxonomyDraft(
 	const deletedNodeIds = new Set(
 		currentNodes.filter(({ id }) => !retainedIds.has(id)).map(({ id }) => id),
 	);
-	const currentSiblingIds = new Map<string | null, string[]>();
-	for (const current of currentNodes
-		.filter(({ id }) => retainedIds.has(id))
-		.toSorted(compareCurrent))
-		currentSiblingIds.set(current.parentId, [
-			...(currentSiblingIds.get(current.parentId) ?? []),
-			current.id,
-		]);
-
-	const changedParents = new Set<string | null>();
-	for (const [parentId, desiredIds] of draftSiblingIds) {
-		if (!sameIds(currentSiblingIds.get(parentId) ?? [], desiredIds))
-			changedParents.add(parentId);
-	}
-	for (const parentId of currentSiblingIds.keys())
-		if (!draftSiblingIds.has(parentId)) changedParents.add(parentId);
+	const positionById = planDraftSiblingPositions({
+		currentNodes,
+		desiredNodes: [...draftById.values()],
+	});
 
 	const nodes = [...draftById.values()]
 		.toSorted((left, right) => {
@@ -170,13 +145,11 @@ export function planRealmTaxonomyDraft(
 			return left.order - right.order || left.id.localeCompare(right.id);
 		})
 		.map((node): PlannedRealmTaxonomyDraftNode => {
-			const current = currentById.get(node.id);
+			const position = positionById.get(node.id);
+			if (!position) throw new Error("Realm taxonomy node has no planned position");
 			return {
 				...node,
-				position:
-					current && !changedParents.has(node.parentId)
-						? current.position
-						: fractionalPositionAt(node.order),
+				position,
 			};
 		});
 	const strategyChanged = nodes.some((node) => {
@@ -186,7 +159,12 @@ export function planRealmTaxonomyDraft(
 	const hasStructuralChanges =
 		nodes.some(({ state }) => state === "new") ||
 		deletedNodeIds.size > 0 ||
-		changedParents.size > 0;
+		nodes.some((node) => {
+			const current = currentById.get(node.id);
+			return current
+				? current.parentId !== node.parentId || current.position !== node.position
+				: false;
+		});
 	return {
 		nodes,
 		deletedNodeIds,

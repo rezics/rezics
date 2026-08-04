@@ -447,6 +447,8 @@ import type {
 	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsResponses,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreOptions,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreResponses,
+	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchOptions,
+	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchResponses,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesOptions,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesResponses,
 	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
@@ -507,6 +509,8 @@ import type {
 	GetApiCollectionsByCollectionIdResponses,
 	PatchApiCollectionsByCollectionIdOptions,
 	PatchApiCollectionsByCollectionIdResponses,
+	PostApiCollectionsByCollectionIdItemsBatchUpdateOptions,
+	PostApiCollectionsByCollectionIdItemsBatchUpdateResponses,
 	PostApiCollectionsByCollectionIdItemsBatchOptions,
 	PostApiCollectionsByCollectionIdItemsBatchResponses,
 	PostApiCollectionsByCollectionIdItemsMoveOptions,
@@ -5151,6 +5155,38 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsB
 }
 
 /**
+ * @summary Apply an atomic Content Structure node command batch
+ * {@link /api/v1/units/by-id/:unitId/content-structures/:structureId/nodes/batch}
+ */
+export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatch<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchResponses,
+		ThrowOnError
+	>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/units/by-id/{unitId}/content-structures/{structureId}/nodes/batch",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<
+			PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
  * @summary Insert Content Structure node
  * {@link /api/v1/units/by-id/:unitId/content-structures/:structureId/nodes}
  */
@@ -5771,6 +5807,30 @@ export function patchApiCollectionsByCollectionId<ThrowOnError extends boolean =
 		],
 		...config,
 	}) as Promise<RequestResult<PatchApiCollectionsByCollectionIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Apply an atomic mixed Collection item command batch
+ * {@link /api/v1/collections/:collectionId/items/batch-update}
+ */
+export function postApiCollectionsByCollectionIdItemsBatchUpdate<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PostApiCollectionsByCollectionIdItemsBatchUpdateOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiCollectionsByCollectionIdItemsBatchUpdateResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/collections/{collectionId}/items/batch-update",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<PostApiCollectionsByCollectionIdItemsBatchUpdateResponses, ThrowOnError>
+	>;
 }
 
 /**

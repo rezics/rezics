@@ -16,6 +16,7 @@ import { ensureSubjectPostTargetingAllowed } from "../posts/targeting";
 import { applyNewPostTagMentionVotes } from "../posts/tag-mentions";
 import { createProfilePublisherAttribution } from "../units/attribution";
 import { recordUnitRevision } from "../units/history";
+import { revisionedBatchChunks } from "../history/revisioned-batch";
 import { diffContentStructureSnapshots } from "./contracts";
 import { ContentStructureInvalid, ContentStructureNotFound } from "./errors";
 import { mutateContentStructureWithHistory } from "./history";
@@ -27,6 +28,7 @@ import {
 	type ExistingBookDraftNode,
 	type NewBookDraftNode,
 } from "./book-draft-plan";
+import { assertContentStructureDraftCommandLimit } from "./draft-batch";
 
 type AttachedBookDraftNodeInput = Omit<AttachedBookDraftNode, "title">;
 
@@ -187,8 +189,10 @@ export async function saveBookContentStructureDraft(
 					),
 				),
 			];
-			const attachedContentRows = attachedContentUnitIds.length
-				? await tx
+			const attachedContentRows = [];
+			for (const attachedIds of revisionedBatchChunks(attachedContentUnitIds))
+				attachedContentRows.push(
+					...(await tx
 						.select({
 							id: unit.id,
 							title: unitLocalization.title,
@@ -206,10 +210,8 @@ export async function saveBookContentStructureDraft(
 								isFirstUnitLocalization(unitLocalization.unitId),
 							),
 						)
-						.where(
-							and(inArray(unit.id, attachedContentUnitIds), isNull(unit.deletedAt)),
-						)
-				: [];
+						.where(and(inArray(unit.id, attachedIds), isNull(unit.deletedAt)))),
+				);
 			const attachedContentByUnitId = new Map(
 				attachedContentRows.map((row) => [row.id, row] as const),
 			);
@@ -238,6 +240,19 @@ export async function saveBookContentStructureDraft(
 			if (!plan.hasChanges) return { result: {} };
 
 			const currentById = new Map(currentRows.map((row) => [row.id, row]));
+			assertContentStructureDraftCommandLimit({
+				currentNodes: current,
+				deletedNodeIds: plan.deletedNodeIds,
+				changedDesiredNodeCount: plan.nodes.filter((node) => {
+					const previous = currentById.get(node.id);
+					return (
+						!previous ||
+						previous.parentId !== node.parentId ||
+						previous.position !== node.position ||
+						previous.title !== node.title
+					);
+				}).length,
+			});
 			const contentUnitIds = new Map(currentRows.map((row) => [row.id, row.contentUnitId]));
 			const newNodeIds = plan.nodes
 				.filter((node) => node.state !== "existing")
@@ -251,6 +266,32 @@ export async function saveBookContentStructureDraft(
 				: [];
 			if (collidingNewNodes.length)
 				throw new ContentStructureInvalid("New Book draft node ID already exists");
+			const movedExistingIds = plan.nodes.flatMap((node) => {
+				const previous = currentById.get(node.id);
+				return previous && previous.parentId !== node.parentId ? [node.id] : [];
+			});
+			if (movedExistingIds.length)
+				await tx
+					.update(contentStructureNode)
+					.set({ parentId: null })
+					.where(
+						and(
+							eq(contentStructureNode.structureId, structure.id),
+							inArray(contentStructureNode.id, movedExistingIds),
+							isNull(contentStructureNode.deletedAt),
+						),
+					);
+			for (const deletedIds of revisionedBatchChunks([...plan.deletedNodeIds]))
+				await tx
+					.update(contentStructureNode)
+					.set({ deletedAt: new Date() })
+					.where(
+						and(
+							eq(contentStructureNode.structureId, structure.id),
+							inArray(contentStructureNode.id, deletedIds),
+							isNull(contentStructureNode.deletedAt),
+						),
+					);
 			for (const node of plan.nodes) {
 				if (node.state === "existing") continue;
 				const contentUnitId =

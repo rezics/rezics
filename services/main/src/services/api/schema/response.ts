@@ -1297,6 +1297,13 @@ export const ContentStructureNodeMutationResponse = t.Object({
 	latestRevisionId: Uuid,
 	revisionCreated: t.Boolean(),
 });
+export const ContentStructureBatchMutationResponse = t.Object({
+	results: t.Array(
+		t.Object({ opId: t.String(), applied: t.Literal(true) }, { additionalProperties: false }),
+	),
+	latestRevisionId: Uuid,
+	revisionCreated: t.Boolean(),
+});
 export const ContentStructureDeleteResponse = t.Object({
 	updated: t.Literal(true),
 	latestRevisionId: Uuid,

@@ -7517,7 +7517,6 @@
 					"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
 					"items": {
 						"minItems": 1,
-						"maxItems": 100,
 						"type": "array",
 						"items": {
 							"$id": "NavigationItem",
@@ -7590,7 +7589,6 @@
 										},
 										"children": {
 											"minItems": 1,
-											"maxItems": 20,
 											"type": "array",
 											"items": { "$ref": "NavigationItem" }
 										}
@@ -111849,6 +111847,631 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
+		"/api/v1/units/by-id/{unitId}/content-structures/{structureId}/nodes/batch": {
+			"post": {
+				"summary": "Apply an atomic Content Structure node command batch",
+				"tags": ["Content Structure"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "structureId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["baseRevisionId", "changes"],
+								"properties": {
+									"baseRevisionId": { "format": "uuid", "type": "string" },
+									"changes": {
+										"minItems": 1,
+										"maxItems": 10000,
+										"type": "array",
+										"items": {
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"opId",
+														"type",
+														"nodeId",
+														"parentId",
+														"contentUnitId"
+													],
+													"properties": {
+														"opId": {
+															"minLength": 1,
+															"maxLength": 100,
+															"type": "string"
+														},
+														"type": {
+															"const": "node.create",
+															"type": "string"
+														},
+														"nodeId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"parentId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"contentUnitId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"documentKey": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"pattern": "^[0-9a-f]{12}$",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"target": {
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind"],
+																	"properties": {
+																		"kind": {
+																			"const": "content",
+																			"type": "string"
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind"],
+																	"properties": {
+																		"kind": {
+																			"const": "none",
+																			"type": "string"
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "unitId"],
+																	"properties": {
+																		"kind": {
+																			"const": "unit",
+																			"type": "string"
+																		},
+																		"unitId": {
+																			"format": "uuid",
+																			"type": "string"
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "url"],
+																	"properties": {
+																		"kind": {
+																			"const": "external",
+																			"type": "string"
+																		},
+																		"url": {
+																			"minLength": 1,
+																			"maxLength": 2000,
+																			"pattern": "^https://",
+																			"type": "string"
+																		}
+																	}
+																}
+															]
+														},
+														"placement": {
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind"],
+																	"properties": {
+																		"kind": {
+																			"default": "start",
+																			"type": "string",
+																			"enum": ["start", "end"]
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "nodeId"],
+																	"properties": {
+																		"kind": {
+																			"default": "before",
+																			"type": "string",
+																			"enum": [
+																				"before",
+																				"after"
+																			]
+																		},
+																		"nodeId": {
+																			"format": "uuid",
+																			"type": "string"
+																		}
+																	}
+																}
+															]
+														},
+														"contentRating": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"default": "general",
+																	"type": "string",
+																	"enum": [
+																		"general",
+																		"r15",
+																		"r18",
+																		"r18g"
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"realmTagQueryStrategy": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"default": "global_effective",
+																	"type": "string",
+																	"enum": [
+																		"global_effective",
+																		"realm_community",
+																		"realm_policy"
+																	]
+																},
+																{ "type": "null" }
+															]
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["opId", "type", "nodeId"],
+													"properties": {
+														"opId": {
+															"minLength": 1,
+															"maxLength": 100,
+															"type": "string"
+														},
+														"type": {
+															"const": "node.update",
+															"type": "string"
+														},
+														"nodeId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"contentUnitId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"documentKey": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"pattern": "^[0-9a-f]{12}$",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"target": {
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind"],
+																	"properties": {
+																		"kind": {
+																			"const": "content",
+																			"type": "string"
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind"],
+																	"properties": {
+																		"kind": {
+																			"const": "none",
+																			"type": "string"
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "unitId"],
+																	"properties": {
+																		"kind": {
+																			"const": "unit",
+																			"type": "string"
+																		},
+																		"unitId": {
+																			"format": "uuid",
+																			"type": "string"
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "url"],
+																	"properties": {
+																		"kind": {
+																			"const": "external",
+																			"type": "string"
+																		},
+																		"url": {
+																			"minLength": 1,
+																			"maxLength": 2000,
+																			"pattern": "^https://",
+																			"type": "string"
+																		}
+																	}
+																}
+															]
+														},
+														"contentRating": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"default": "general",
+																	"type": "string",
+																	"enum": [
+																		"general",
+																		"r15",
+																		"r18",
+																		"r18g"
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"realmTagQueryStrategy": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"default": "global_effective",
+																	"type": "string",
+																	"enum": [
+																		"global_effective",
+																		"realm_community",
+																		"realm_policy"
+																	]
+																},
+																{ "type": "null" }
+															]
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["opId", "type", "nodeId"],
+													"properties": {
+														"opId": {
+															"minLength": 1,
+															"maxLength": 100,
+															"type": "string"
+														},
+														"type": {
+															"const": "node.move",
+															"type": "string"
+														},
+														"nodeId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"parentId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"placement": {
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind"],
+																	"properties": {
+																		"kind": {
+																			"default": "start",
+																			"type": "string",
+																			"enum": ["start", "end"]
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "nodeId"],
+																	"properties": {
+																		"kind": {
+																			"default": "before",
+																			"type": "string",
+																			"enum": [
+																				"before",
+																				"after"
+																			]
+																		},
+																		"nodeId": {
+																			"format": "uuid",
+																			"type": "string"
+																		}
+																	}
+																}
+															]
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"opId",
+														"type",
+														"leftNodeId",
+														"rightNodeId"
+													],
+													"properties": {
+														"opId": {
+															"minLength": 1,
+															"maxLength": 100,
+															"type": "string"
+														},
+														"type": {
+															"const": "nodes.swap",
+															"type": "string"
+														},
+														"leftNodeId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"rightNodeId": {
+															"format": "uuid",
+															"type": "string"
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["opId", "type", "nodeId"],
+													"properties": {
+														"opId": {
+															"minLength": 1,
+															"maxLength": 100,
+															"type": "string"
+														},
+														"type": {
+															"const": "node.deleteSubtree",
+															"type": "string"
+														},
+														"nodeId": {
+															"format": "uuid",
+															"type": "string"
+														}
+													}
+												}
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["results", "latestRevisionId", "revisionCreated"],
+									"properties": {
+										"results": {
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["opId", "applied"],
+												"properties": {
+													"opId": { "type": "string" },
+													"applied": { "const": true, "type": "boolean" }
+												}
+											}
+										},
+										"latestRevisionId": { "format": "uuid", "type": "string" },
+										"revisionCreated": { "type": "boolean" }
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmCapabilityRequired",
+													"type": "string",
+													"enum": [
+														"RealmCapabilityRequired",
+														"UnitPermissionForbidden",
+														"PlatformCapabilityRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"ContentStructureNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ContentStructureRevisionConflict",
+													"type": "string",
+													"enum": ["ContentStructureRevisionConflict"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ContentStructureInvalid",
+															"type": "string",
+															"enum": ["ContentStructureInvalid"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiUnitsBy-idByUnitIdContent-structuresByStructureIdNodesBatch",
+				"x-rezics-quota-route-operation-id": "postApiUnitsBy-idByUnitIdContent-structuresByStructureIdNodesBatch",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
 		"/api/v1/units/by-id/{unitId}/content-structures/{structureId}/nodes": {
 			"post": {
 				"summary": "Insert Content Structure node",
@@ -113116,7 +113739,6 @@
 								"properties": {
 									"baseRevisionId": { "format": "uuid", "type": "string" },
 									"nodes": {
-										"maxItems": 10000,
 										"type": "array",
 										"items": {
 											"anyOf": [
@@ -114188,7 +114810,6 @@
 										]
 									},
 									"nodes": {
-										"maxItems": 10000,
 										"type": "array",
 										"items": {
 											"anyOf": [
@@ -131559,6 +132180,423 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
+		"/api/v1/collections/{collectionId}/items/batch-update": {
+			"post": {
+				"summary": "Apply an atomic mixed Collection item command batch",
+				"tags": ["Collections"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "collectionId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["baseItemsRevisionId", "changes"],
+								"properties": {
+									"baseItemsRevisionId": { "format": "uuid", "type": "string" },
+									"changes": {
+										"minItems": 1,
+										"maxItems": 10000,
+										"type": "array",
+										"items": {
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["opId", "type", "targetId"],
+													"properties": {
+														"opId": {
+															"minLength": 1,
+															"maxLength": 100,
+															"type": "string"
+														},
+														"type": {
+															"const": "item.add",
+															"type": "string"
+														},
+														"targetId": {
+															"format": "uuid",
+															"type": "string"
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["opId", "type", "targetId"],
+													"properties": {
+														"opId": {
+															"minLength": 1,
+															"maxLength": 100,
+															"type": "string"
+														},
+														"type": {
+															"const": "item.remove",
+															"type": "string"
+														},
+														"targetId": {
+															"format": "uuid",
+															"type": "string"
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"opId",
+														"type",
+														"targetIds",
+														"placement"
+													],
+													"properties": {
+														"opId": {
+															"minLength": 1,
+															"maxLength": 100,
+															"type": "string"
+														},
+														"type": {
+															"const": "items.move",
+															"type": "string"
+														},
+														"targetIds": {
+															"minItems": 1,
+															"uniqueItems": true,
+															"type": "array",
+															"items": {
+																"format": "uuid",
+																"type": "string"
+															}
+														},
+														"placement": {
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind"],
+																	"properties": {
+																		"kind": {
+																			"default": "start",
+																			"type": "string",
+																			"enum": ["start", "end"]
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"kind",
+																		"targetId"
+																	],
+																	"properties": {
+																		"kind": {
+																			"default": "before",
+																			"type": "string",
+																			"enum": [
+																				"before",
+																				"after"
+																			]
+																		},
+																		"targetId": {
+																			"format": "uuid",
+																			"type": "string"
+																		}
+																	}
+																}
+															]
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"opId",
+														"type",
+														"leftTargetId",
+														"rightTargetId"
+													],
+													"properties": {
+														"opId": {
+															"minLength": 1,
+															"maxLength": 100,
+															"type": "string"
+														},
+														"type": {
+															"const": "items.swap",
+															"type": "string"
+														},
+														"leftTargetId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"rightTargetId": {
+															"format": "uuid",
+															"type": "string"
+														}
+													}
+												}
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"additionalProperties": false,
+									"type": "object",
+									"required": [
+										"results",
+										"latestItemsRevisionId",
+										"revisionCreated"
+									],
+									"properties": {
+										"results": {
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["opId", "applied"],
+												"properties": {
+													"opId": { "type": "string" },
+													"applied": { "const": true, "type": "boolean" },
+													"itemState": {
+														"default": "created",
+														"type": "string",
+														"enum": ["created", "existing"]
+													}
+												}
+											}
+										},
+										"latestItemsRevisionId": {
+											"format": "uuid",
+											"type": "string"
+										},
+										"revisionCreated": { "type": "boolean" }
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "FavoritesEditForbidden",
+															"type": "string",
+															"enum": ["FavoritesEditForbidden"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "CollectionStructureRevisionConflict",
+															"type": "string",
+															"enum": [
+																"CollectionStructureRevisionConflict"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										}
+									]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ValidationError",
+															"type": "string",
+															"enum": ["ValidationError"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": [
+														"ApiQuotaExceeded",
+														"ApiTokenRateLimitExceeded"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiCollectionsByCollectionIdItemsBatch-update",
+				"x-rezics-quota-route-operation-id": "postApiCollectionsByCollectionIdItemsBatch-update",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
 		"/api/v1/collections/{collectionId}/items/batch": {
 			"post": {
 				"summary": "Add collection items atomically",
@@ -131583,7 +132621,7 @@
 									"baseItemsRevisionId": { "format": "uuid", "type": "string" },
 									"items": {
 										"minItems": 1,
-										"maxItems": 20,
+										"maxItems": 10000,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -131863,7 +132901,6 @@
 									"baseItemsRevisionId": { "format": "uuid", "type": "string" },
 									"targetIds": {
 										"minItems": 1,
-										"maxItems": 100,
 										"uniqueItems": true,
 										"type": "array",
 										"items": { "format": "uuid", "type": "string" }
@@ -151110,7 +152147,6 @@
 								"properties": {
 									"baseRevisionId": { "format": "uuid", "type": "string" },
 									"nodes": {
-										"maxItems": 10000,
 										"type": "array",
 										"items": {
 											"anyOf": [

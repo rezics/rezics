@@ -79541,6 +79541,519 @@ export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRev
 /**
  * @type object
  */
+export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	structureId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus200 = {
+	/**
+	 * @type array
+	 */
+	results: {
+		/**
+		 * @type string
+		 */
+		opId: string;
+		/**
+		 * @type boolean
+		 */
+		applied: true;
+	}[];
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	latestRevisionId: string;
+	/**
+	 * @type boolean
+	 */
+	revisionCreated: boolean;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus400 =
+	MalformedRequestBody;
+
+export const PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus403ErrorCodeEnum =
+	{
+		RealmCapabilityRequired: "RealmCapabilityRequired",
+		UnitPermissionForbidden: "UnitPermissionForbidden",
+		PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	} as const;
+
+export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus403ErrorCodeEnum =
+	(typeof PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus403ErrorCodeEnum)[keyof typeof PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus404ErrorCodeEnum =
+	{
+		UnitNotFound: "UnitNotFound",
+		ContentStructureNotFound: "ContentStructureNotFound",
+	} as const;
+
+export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus404ErrorCodeEnum =
+	(typeof PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus404ErrorCodeEnum)[keyof typeof PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ContentStructureRevisionConflict'
+		 * @type string
+		 */
+		code: "ContentStructureRevisionConflict";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ContentStructureInvalid'
+				 * @type string
+				 */
+				code: "ContentStructureInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus500 =
+	InternalError;
+
+export const PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchRequestChangesPlacementKindEnum =
+	{
+		before: "before",
+		after: "after",
+	} as const;
+
+export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchRequestChangesPlacementKindEnum =
+	(typeof PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchRequestChangesPlacementKindEnum)[keyof typeof PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchRequestChangesPlacementKindEnum];
+
+export const PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchRequestChangesContentRating =
+	{
+		general: "general",
+		r15: "r15",
+		r18: "r18",
+		r18g: "r18g",
+	} as const;
+
+export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchRequestChangesContentRating =
+	(typeof PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchRequestChangesContentRating)[keyof typeof PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchRequestChangesContentRating];
+
+export const PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchRequestChangesRealmTagQueryStrategy =
+	{
+		global_effective: "global_effective",
+		realm_community: "realm_community",
+		realm_policy: "realm_policy",
+	} as const;
+
+export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchRequestChangesRealmTagQueryStrategy =
+	(typeof PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchRequestChangesRealmTagQueryStrategy)[keyof typeof PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchRequestChangesRealmTagQueryStrategy];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	baseRevisionId: string;
+	/**
+	 * @type array
+	 */
+	changes: (
+		| {
+				/**
+				 * @minLength 1
+				 * @maxLength 100
+				 * @type string
+				 */
+				opId: string;
+				/**
+				 * @type string
+				 */
+				type: "node.create";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				nodeId: string;
+				parentId: (string | null) | null;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				contentUnitId: string;
+				documentKey?: (string | null) | null;
+				target?:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "content";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "none";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "unit";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							unitId: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "external";
+							/**
+							 * @minLength 1
+							 * @maxLength 2000
+							 * @pattern ^https://
+							 * @type string
+							 */
+							url: string;
+					  };
+				placement?:
+					| {
+							/**
+							 * @default 'start'
+							 * @type string
+							 */
+							kind: PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchRequestChangesPlacementKindEnum;
+					  }
+					| {
+							/**
+							 * @default 'before'
+							 * @type string
+							 */
+							kind: PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchRequestChangesPlacementKindEnum;
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							nodeId: string;
+					  };
+				contentRating?:
+					| (PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchRequestChangesContentRating | null)
+					| null;
+				realmTagQueryStrategy?:
+					| (PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchRequestChangesRealmTagQueryStrategy | null)
+					| null;
+		  }
+		| {
+				/**
+				 * @minLength 1
+				 * @maxLength 100
+				 * @type string
+				 */
+				opId: string;
+				/**
+				 * @type string
+				 */
+				type: "node.update";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				nodeId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string | undefined
+				 */
+				contentUnitId?: string;
+				documentKey?: (string | null) | null;
+				target?:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "content";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "none";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "unit";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							unitId: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "external";
+							/**
+							 * @minLength 1
+							 * @maxLength 2000
+							 * @pattern ^https://
+							 * @type string
+							 */
+							url: string;
+					  };
+				contentRating?:
+					| (PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchRequestChangesContentRating | null)
+					| null;
+				realmTagQueryStrategy?:
+					| (PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchRequestChangesRealmTagQueryStrategy | null)
+					| null;
+		  }
+		| {
+				/**
+				 * @minLength 1
+				 * @maxLength 100
+				 * @type string
+				 */
+				opId: string;
+				/**
+				 * @type string
+				 */
+				type: "node.move";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				nodeId: string;
+				parentId?: (string | null) | null;
+				placement?:
+					| {
+							/**
+							 * @default 'start'
+							 * @type string
+							 */
+							kind: PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchRequestChangesPlacementKindEnum;
+					  }
+					| {
+							/**
+							 * @default 'before'
+							 * @type string
+							 */
+							kind: PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchRequestChangesPlacementKindEnum;
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							nodeId: string;
+					  };
+		  }
+		| {
+				/**
+				 * @minLength 1
+				 * @maxLength 100
+				 * @type string
+				 */
+				opId: string;
+				/**
+				 * @type string
+				 */
+				type: "nodes.swap";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				leftNodeId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				rightNodeId: string;
+		  }
+		| {
+				/**
+				 * @minLength 1
+				 * @maxLength 100
+				 * @type string
+				 */
+				opId: string;
+				/**
+				 * @type string
+				 */
+				type: "node.deleteSubtree";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				nodeId: string;
+		  }
+	)[];
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchOptions = {
+	body: PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchBody;
+	path: PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchResponses = {
+	"200": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus200;
+	"400": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus400;
+	"403": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus403;
+	"404": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus404;
+	"409": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus409;
+	"422": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus422;
+	"500": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchResponse =
+	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus200
+	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus400
+	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus403
+	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus404
+	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus409
+	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus422
+	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus500;
+
+/**
+ * @type object
+ */
 export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesPath = {
 	/**
 	 * @description
@@ -92929,6 +93442,402 @@ export type PatchApiCollectionsByCollectionIdResponse =
 	| PatchApiCollectionsByCollectionIdStatus422
 	| PatchApiCollectionsByCollectionIdStatus429
 	| PatchApiCollectionsByCollectionIdStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemsBatchUpdatePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	collectionId: string;
+};
+
+export const PostApiCollectionsByCollectionIdItemsBatchUpdateStatus200ResultsItemStateEnum = {
+	created: "created",
+	existing: "existing",
+} as const;
+
+export type PostApiCollectionsByCollectionIdItemsBatchUpdateStatus200ResultsItemStateEnum =
+	(typeof PostApiCollectionsByCollectionIdItemsBatchUpdateStatus200ResultsItemStateEnum)[keyof typeof PostApiCollectionsByCollectionIdItemsBatchUpdateStatus200ResultsItemStateEnum];
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemsBatchUpdateStatus200 = {
+	/**
+	 * @type array
+	 */
+	results: {
+		/**
+		 * @type string
+		 */
+		opId: string;
+		/**
+		 * @type boolean
+		 */
+		applied: true;
+		/**
+		 * @default 'created'
+		 * @type string | undefined
+		 */
+		itemState?: PostApiCollectionsByCollectionIdItemsBatchUpdateStatus200ResultsItemStateEnum;
+	}[];
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	latestItemsRevisionId: string;
+	/**
+	 * @type boolean
+	 */
+	revisionCreated: boolean;
+};
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemsBatchUpdateStatus400 = MalformedRequestBody;
+
+export const PostApiCollectionsByCollectionIdItemsBatchUpdateStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+} as const;
+
+export type PostApiCollectionsByCollectionIdItemsBatchUpdateStatus403ErrorCodeEnum =
+	(typeof PostApiCollectionsByCollectionIdItemsBatchUpdateStatus403ErrorCodeEnum)[keyof typeof PostApiCollectionsByCollectionIdItemsBatchUpdateStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemsBatchUpdateStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: PostApiCollectionsByCollectionIdItemsBatchUpdateStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemsBatchUpdateStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiCollectionsByCollectionIdItemsBatchUpdateStatus409 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'FavoritesEditForbidden'
+				 * @type string
+				 */
+				code: "FavoritesEditForbidden";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'CollectionStructureRevisionConflict'
+				 * @type string
+				 */
+				code: "CollectionStructureRevisionConflict";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
+
+export type PostApiCollectionsByCollectionIdItemsBatchUpdateStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ValidationError'
+				 * @type string
+				 */
+				code: "ValidationError";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+export const PostApiCollectionsByCollectionIdItemsBatchUpdateStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiCollectionsByCollectionIdItemsBatchUpdateStatus429ErrorCodeEnum =
+	(typeof PostApiCollectionsByCollectionIdItemsBatchUpdateStatus429ErrorCodeEnum)[keyof typeof PostApiCollectionsByCollectionIdItemsBatchUpdateStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemsBatchUpdateStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: PostApiCollectionsByCollectionIdItemsBatchUpdateStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemsBatchUpdateStatus500 = InternalError;
+
+export const PostApiCollectionsByCollectionIdItemsBatchUpdateRequestChangesPlacementKindEnum = {
+	before: "before",
+	after: "after",
+} as const;
+
+export type PostApiCollectionsByCollectionIdItemsBatchUpdateRequestChangesPlacementKindEnum =
+	(typeof PostApiCollectionsByCollectionIdItemsBatchUpdateRequestChangesPlacementKindEnum)[keyof typeof PostApiCollectionsByCollectionIdItemsBatchUpdateRequestChangesPlacementKindEnum];
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemsBatchUpdateBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	baseItemsRevisionId: string;
+	/**
+	 * @type array
+	 */
+	changes: (
+		| {
+				/**
+				 * @minLength 1
+				 * @maxLength 100
+				 * @type string
+				 */
+				opId: string;
+				/**
+				 * @type string
+				 */
+				type: "item.add";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				targetId: string;
+		  }
+		| {
+				/**
+				 * @minLength 1
+				 * @maxLength 100
+				 * @type string
+				 */
+				opId: string;
+				/**
+				 * @type string
+				 */
+				type: "item.remove";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				targetId: string;
+		  }
+		| {
+				/**
+				 * @minLength 1
+				 * @maxLength 100
+				 * @type string
+				 */
+				opId: string;
+				/**
+				 * @type string
+				 */
+				type: "items.move";
+				/**
+				 * @type array
+				 */
+				targetIds: string[];
+				placement:
+					| {
+							/**
+							 * @default 'start'
+							 * @type string
+							 */
+							kind: PostApiCollectionsByCollectionIdItemsBatchUpdateRequestChangesPlacementKindEnum;
+					  }
+					| {
+							/**
+							 * @default 'before'
+							 * @type string
+							 */
+							kind: PostApiCollectionsByCollectionIdItemsBatchUpdateRequestChangesPlacementKindEnum;
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							targetId: string;
+					  };
+		  }
+		| {
+				/**
+				 * @minLength 1
+				 * @maxLength 100
+				 * @type string
+				 */
+				opId: string;
+				/**
+				 * @type string
+				 */
+				type: "items.swap";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				leftTargetId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				rightTargetId: string;
+		  }
+	)[];
+};
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemsBatchUpdateOptions = {
+	body: PostApiCollectionsByCollectionIdItemsBatchUpdateBody;
+	path: PostApiCollectionsByCollectionIdItemsBatchUpdatePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemsBatchUpdateResponses = {
+	"200": PostApiCollectionsByCollectionIdItemsBatchUpdateStatus200;
+	"400": PostApiCollectionsByCollectionIdItemsBatchUpdateStatus400;
+	"403": PostApiCollectionsByCollectionIdItemsBatchUpdateStatus403;
+	"404": PostApiCollectionsByCollectionIdItemsBatchUpdateStatus404;
+	"409": PostApiCollectionsByCollectionIdItemsBatchUpdateStatus409;
+	"422": PostApiCollectionsByCollectionIdItemsBatchUpdateStatus422;
+	"429": PostApiCollectionsByCollectionIdItemsBatchUpdateStatus429;
+	"500": PostApiCollectionsByCollectionIdItemsBatchUpdateStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiCollectionsByCollectionIdItemsBatchUpdateResponse =
+	| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus200
+	| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus400
+	| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus403
+	| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus404
+	| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus409
+	| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus422
+	| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus429
+	| PostApiCollectionsByCollectionIdItemsBatchUpdateStatus500;
 
 /**
  * @type object

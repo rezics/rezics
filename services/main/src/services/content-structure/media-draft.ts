@@ -14,9 +14,11 @@ import {
 } from "../database/schema";
 import { insertUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
+import { revisionedBatchChunks } from "../history/revisioned-batch";
 import { isFirstUnitLocalization } from "../units/localization";
 import { planContentStructureDraft, type ContentStructureDraftNodeBase } from "./book-draft-plan";
 import { diffContentStructureSnapshots } from "./contracts";
+import { assertContentStructureDraftCommandLimit } from "./draft-batch";
 import { ContentStructureInvalid, ContentStructureRevisionConflict } from "./errors";
 import {
 	createContentStructureHistory,
@@ -193,8 +195,10 @@ export async function saveMediaContentStructureDraft(
 				),
 			),
 		];
-		const attachedContentRows = attachedContentUnitIds.length
-			? await tx
+		const attachedContentRows = [];
+		for (const attachedIds of revisionedBatchChunks(attachedContentUnitIds))
+			attachedContentRows.push(
+				...(await tx
 					.select({
 						id: unit.id,
 						title: unitLocalization.title,
@@ -214,8 +218,8 @@ export async function saveMediaContentStructureDraft(
 							isFirstUnitLocalization(unitLocalization.unitId),
 						),
 					)
-					.where(and(inArray(unit.id, attachedContentUnitIds), isNull(unit.deletedAt)))
-			: [];
+					.where(and(inArray(unit.id, attachedIds), isNull(unit.deletedAt)))),
+			);
 		const attachedContentByUnitId = new Map(
 			attachedContentRows.map((row) => [row.id, row] as const),
 		);
@@ -238,6 +242,19 @@ export async function saveMediaContentStructureDraft(
 		if (!plan.hasChanges) return { result: {} };
 
 		const currentById = new Map(currentRows.map((row) => [row.id, row]));
+		assertContentStructureDraftCommandLimit({
+			currentNodes: current,
+			deletedNodeIds: plan.deletedNodeIds,
+			changedDesiredNodeCount: plan.nodes.filter((node) => {
+				const previous = currentById.get(node.id);
+				return (
+					!previous ||
+					previous.parentId !== node.parentId ||
+					previous.position !== node.position ||
+					previous.title !== node.title
+				);
+			}).length,
+		});
 		const contentUnitIds = new Map(currentRows.map((row) => [row.id, row.contentUnitId]));
 		const newNodeIds = plan.nodes
 			.filter((node) => node.state !== "existing")
@@ -251,6 +268,32 @@ export async function saveMediaContentStructureDraft(
 			: [];
 		if (collidingNewNodes.length)
 			throw new ContentStructureInvalid("New Media draft node ID already exists");
+		const movedExistingIds = plan.nodes.flatMap((node) => {
+			const previous = currentById.get(node.id);
+			return previous && previous.parentId !== node.parentId ? [node.id] : [];
+		});
+		if (movedExistingIds.length)
+			await tx
+				.update(contentStructureNode)
+				.set({ parentId: null })
+				.where(
+					and(
+						eq(contentStructureNode.structureId, targetStructure.id),
+						inArray(contentStructureNode.id, movedExistingIds),
+						isNull(contentStructureNode.deletedAt),
+					),
+				);
+		for (const deletedIds of revisionedBatchChunks([...plan.deletedNodeIds]))
+			await tx
+				.update(contentStructureNode)
+				.set({ deletedAt: new Date() })
+				.where(
+					and(
+						eq(contentStructureNode.structureId, targetStructure.id),
+						inArray(contentStructureNode.id, deletedIds),
+						isNull(contentStructureNode.deletedAt),
+					),
+				);
 
 		for (const node of plan.nodes) {
 			if (node.state === "existing") continue;

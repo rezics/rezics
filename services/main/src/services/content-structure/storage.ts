@@ -172,6 +172,16 @@ export async function ensureContentStructureNodeAllowed(
 	}
 }
 
+/**
+ * Loads the complete tree required by editors, replacement adapters, and
+ * revision checkpoints.
+ *
+ * @remarks
+ * TODO(content-structure-pagination): When consumers support lazy tree
+ * hydration, add revision-bound child pagination keyed by
+ * `(structureId, parentId, position, id)`. Do not expose a flat global cursor
+ * as tree pagination because a page would not prove parent/child completeness.
+ */
 export async function loadContentStructureSnapshot(
 	tx: DatabaseTransaction,
 	input: { readonly structureId: string; readonly ownerUnitId?: string },

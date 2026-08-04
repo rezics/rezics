@@ -435,10 +435,7 @@ export function assertNavigationDocument(
 ): asserts value is NavigationDocumentValue {
 	assertDocument(NavigationDocument, value);
 	const keys = new Set<string>([value._key]);
-	let count = 0;
 	const visit = (item: NavigationItem, depth: number): void => {
-		count += 1;
-		if (count > 200) throw new TypeError("Navigation document exceeds item limit");
 		if (depth > 3) throw new TypeError("Navigation document exceeds depth limit");
 		if (keys.has(item._key)) throw new TypeError(`Duplicate Block key ${item._key}`);
 		keys.add(item._key);

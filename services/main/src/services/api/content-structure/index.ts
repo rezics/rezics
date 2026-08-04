@@ -25,6 +25,7 @@ import {
 } from "../../database/schema";
 import { findPostTargetingLock } from "../../posts/targeting";
 import { recordUnitRevision } from "../../units/history";
+import { applyContentStructureBatch } from "../../content-structure/batch";
 import {
 	createContentStructure,
 	deleteContentStructure,
@@ -59,6 +60,7 @@ import {
 	GenericContentStructureNodeParams,
 	UnitContentStructuresParams,
 	UpdateGenericContentStructureNodeBody,
+	UpdateContentStructureNodesBatchBody,
 	ContentStructureRevisionParams,
 	ContentStructureRevisionListQuery,
 	RestoreContentStructureRevisionBody,
@@ -77,6 +79,7 @@ import {
 	ContentStructureListResponse,
 	ContentStructureMutationResponse,
 	ContentStructureNodeMutationResponse,
+	ContentStructureBatchMutationResponse,
 	ContentStructureDeleteResponse,
 	ContentStructureRevisionListResponse,
 } from "../schema/response";
@@ -586,6 +589,61 @@ export default new Elysia()
 			},
 			detail: {
 				summary: "Restore a Content Structure revision",
+				tags: ["Content Structure"],
+			},
+		},
+	)
+	.post(
+		"/units/by-id/:unitId/content-structures/:structureId/nodes/batch",
+		async ({ params, body, profile, authorization }) => {
+			await ensureCanMutateContentStructure(authorization, {
+				ownerUnitId: params.unitId,
+				structureId: params.structureId,
+			});
+			const referencedUnitIds = new Set<string>();
+			for (const change of body.changes) {
+				if (change.type === "node.create") referencedUnitIds.add(change.contentUnitId);
+				else if (change.type === "node.update" && change.contentUnitId !== undefined)
+					referencedUnitIds.add(change.contentUnitId);
+				if (
+					(change.type === "node.create" || change.type === "node.update") &&
+					change.target?.kind === "unit"
+				)
+					referencedUnitIds.add(change.target.unitId);
+			}
+			for (const unitId of referencedUnitIds) await authorization.unit.ensureCanRead(unitId);
+			const result = await database.transaction(async (tx) => {
+				await ensureReleasedContentStructureApi(tx, params.unitId, authorization);
+				return applyContentStructureBatch(tx, {
+					ownerUnitId: params.unitId,
+					structureId: params.structureId,
+					baseRevisionId: body.baseRevisionId,
+					actorProfileId: profile.unitId,
+					commands: body.changes,
+				});
+			});
+			return {
+				results: [...result.results],
+				latestRevisionId: result.revisionId,
+				revisionCreated: result.revisionCreated,
+			};
+		},
+		{
+			access: "session-only",
+			params: ContentStructureParams,
+			body: UpdateContentStructureNodesBatchBody,
+			response: {
+				[StatusCodes.OK]: ContentStructureBatchMutationResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
+				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"ContentStructureNotFound",
+				]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
+			},
+			detail: {
+				summary: "Apply an atomic Content Structure node command batch",
 				tags: ["Content Structure"],
 			},
 		},

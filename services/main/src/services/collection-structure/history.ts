@@ -12,6 +12,7 @@ import {
 	revisionPayloadByteSize,
 	type StoredRevisionContent,
 } from "../history/content";
+import { runRevisionedAggregateMutation } from "../history/revisioned-batch";
 import { recordStudioWorkRelation } from "../studio/projection";
 import {
 	CollectionStructureCheckpointDepth,
@@ -215,27 +216,46 @@ export async function mutateCollectionStructureWithHistory<Result extends object
 	},
 	mutate: () => Promise<Result>,
 ): Promise<Result & CollectionStructureRevisionCommitResult> {
-	await lockCollectionStructureHistory(tx, input.collectionId);
-	const head = await loadHead(tx, input.collectionId);
-	if ((head?.revisionId ?? null) !== input.baseRevisionId)
-		throw new CollectionStructureRevisionConflict(head?.revisionId ?? null);
-	const before = await loadCollectionStructureSnapshot(tx, input.collectionId);
-	const result = await mutate();
-	const after = await loadCollectionStructureSnapshot(tx, input.collectionId);
-	const delta = diffCollectionStructureSnapshots(before, after);
-	if (!delta)
+	return mutateCollectionStructureWithPlannedHistory(tx, input, async () => {
+		const before = await loadCollectionStructureSnapshot(tx, input.collectionId);
+		const result = await mutate();
+		const after = await loadCollectionStructureSnapshot(tx, input.collectionId);
 		return {
-			...result,
-			revisionId: input.baseRevisionId,
-			revisionCreated: false,
+			result,
+			change: diffCollectionStructureSnapshots(before, after) ?? undefined,
 		};
-	const revision = await commitCollectionStructureRevision(tx, {
-		...input,
-		revisionKind: "update",
-		expectedRevisionId: input.baseRevisionId,
-		delta,
 	});
-	return { ...result, ...revision };
+}
+
+/** Commits a Collection mutation whose semantic delta was produced by its planner. */
+export async function mutateCollectionStructureWithPlannedHistory<Result extends object>(
+	tx: DatabaseTransaction,
+	input: CollectionStructureRevisionActor & {
+		readonly collectionId: string;
+		readonly baseRevisionId: string;
+	},
+	mutate: () => Promise<{
+		readonly result: Result;
+		readonly change?: CollectionStructureDelta;
+	}>,
+): Promise<Result & CollectionStructureRevisionCommitResult> {
+	return runRevisionedAggregateMutation({
+		expectedRevisionId: input.baseRevisionId,
+		lock: () => lockCollectionStructureHistory(tx, input.collectionId),
+		loadHeadRevisionId: async () =>
+			(await loadHead(tx, input.collectionId))?.revisionId ?? null,
+		revisionConflict: (latestRevisionId) =>
+			new CollectionStructureRevisionConflict(latestRevisionId),
+		mutate,
+		commit: (delta) =>
+			commitCollectionStructureRevision(tx, {
+				...input,
+				revisionKind: "update",
+				expectedRevisionId: input.baseRevisionId,
+				delta,
+			}),
+		unchanged: (revisionId) => ({ revisionId, revisionCreated: false }),
+	});
 }
 
 export async function getCollectionStructureHeadRevision(

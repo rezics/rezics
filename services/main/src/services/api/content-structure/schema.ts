@@ -6,6 +6,7 @@ import {
 	ContentRatingValues,
 	RealmTagQueryStrategyValues,
 } from "../../database/schema/contract-values";
+import { RevisionedBatchCommandLimit } from "../../history/revisioned-batch";
 
 export const UnitContentStructuresParams = t.Object({ unitId: Uuid });
 export const ContentStructureParams = t.Object({ unitId: Uuid, structureId: Uuid });
@@ -89,6 +90,90 @@ export const UpdateGenericContentStructureNodeBody = t.Object(
 	{ additionalProperties: false, minProperties: 2 },
 );
 
+const ContentStructureBatchOperationId = t.String({ minLength: 1, maxLength: 100 });
+const ContentStructureBatchPlacement = t.Union([
+	t.Object({ kind: t.UnionEnum(["start", "end"]) }, { additionalProperties: false }),
+	t.Object(
+		{ kind: t.UnionEnum(["before", "after"]), nodeId: Uuid },
+		{ additionalProperties: false },
+	),
+]);
+const CreateContentStructureNodeCommand = t.Object(
+	{
+		opId: ContentStructureBatchOperationId,
+		type: t.Literal("node.create"),
+		nodeId: Uuid,
+		parentId: t.Nullable(Uuid),
+		contentUnitId: Uuid,
+		documentKey: t.Optional(t.Nullable(t.String({ pattern: "^[0-9a-f]{12}$" }))),
+		target: t.Optional(ContentStructureTarget),
+		placement: t.Optional(ContentStructureBatchPlacement),
+		contentRating: t.Optional(t.Nullable(t.UnionEnum(ContentRatingValues))),
+		realmTagQueryStrategy: t.Optional(t.Nullable(t.UnionEnum(RealmTagQueryStrategyValues))),
+	},
+	{ additionalProperties: false },
+);
+const UpdateContentStructureNodeCommand = t.Object(
+	{
+		opId: ContentStructureBatchOperationId,
+		type: t.Literal("node.update"),
+		nodeId: Uuid,
+		contentUnitId: t.Optional(Uuid),
+		documentKey: t.Optional(t.Nullable(t.String({ pattern: "^[0-9a-f]{12}$" }))),
+		target: t.Optional(ContentStructureTarget),
+		contentRating: t.Optional(t.Nullable(t.UnionEnum(ContentRatingValues))),
+		realmTagQueryStrategy: t.Optional(t.Nullable(t.UnionEnum(RealmTagQueryStrategyValues))),
+	},
+	{ additionalProperties: false },
+);
+const MoveContentStructureNodeCommand = t.Object(
+	{
+		opId: ContentStructureBatchOperationId,
+		type: t.Literal("node.move"),
+		nodeId: Uuid,
+		parentId: t.Optional(t.Nullable(Uuid)),
+		placement: t.Optional(ContentStructureBatchPlacement),
+	},
+	{ additionalProperties: false },
+);
+const SwapContentStructureNodesCommand = t.Object(
+	{
+		opId: ContentStructureBatchOperationId,
+		type: t.Literal("nodes.swap"),
+		leftNodeId: Uuid,
+		rightNodeId: Uuid,
+	},
+	{ additionalProperties: false },
+);
+const DeleteContentStructureSubtreeCommand = t.Object(
+	{
+		opId: ContentStructureBatchOperationId,
+		type: t.Literal("node.deleteSubtree"),
+		nodeId: Uuid,
+	},
+	{ additionalProperties: false },
+);
+
+export const UpdateContentStructureNodesBatchBody = t.Object(
+	{
+		baseRevisionId: Uuid,
+		changes: t.Array(
+			t.Union([
+				CreateContentStructureNodeCommand,
+				UpdateContentStructureNodeCommand,
+				MoveContentStructureNodeCommand,
+				SwapContentStructureNodesCommand,
+				DeleteContentStructureSubtreeCommand,
+			]),
+			{ minItems: 1, maxItems: RevisionedBatchCommandLimit },
+		),
+	},
+	{ additionalProperties: false },
+);
+export type UpdateContentStructureNodesBatchBody = Static<
+	typeof UpdateContentStructureNodesBatchBody
+>;
+
 export const ContentStructureRevisionBody = t.Object(
 	{ baseRevisionId: Uuid },
 	{ additionalProperties: false },
@@ -167,7 +252,6 @@ export const SaveBookContentStructureDraftBody = t.Object(
 				NewBookContentStructureChapterDraftNode,
 				AttachedBookContentStructureDraftNode,
 			]),
-			{ maxItems: 10_000 },
 		),
 	},
 	{ additionalProperties: false },
@@ -224,7 +308,6 @@ export const SaveMediaContentStructureDraftBody = t.Object(
 				NewMediaContentStructureDraftNode,
 				AttachedMediaContentStructureDraftNode,
 			]),
-			{ maxItems: 10_000 },
 		),
 	},
 	{ additionalProperties: false },

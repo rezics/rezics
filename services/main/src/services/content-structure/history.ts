@@ -12,6 +12,7 @@ import {
 	revisionPayloadByteSize,
 	type StoredRevisionContent,
 } from "../history/content";
+import { runRevisionedAggregateMutation } from "../history/revisioned-batch";
 import { recordStudioWorkRelation } from "../studio/projection";
 import {
 	ContentStructureCheckpointDepth,
@@ -229,24 +230,22 @@ export async function mutateContentStructureWithHistory<Result extends object>(
 		readonly change?: ContentStructureHistoryChange;
 	}>,
 ): Promise<Result & ContentStructureRevisionCommitResult> {
-	await lockContentStructureHistory(tx, input.structureId);
-	const head = await loadHead(tx, input.structureId);
-	if ((head?.revisionId ?? null) !== input.baseRevisionId)
-		throw new ContentStructureRevisionConflict(head?.revisionId ?? null);
-	const outcome = await mutate();
-	if (!outcome.change)
-		return {
-			...outcome.result,
-			revisionId: input.baseRevisionId,
-			revisionCreated: false,
-		};
-	const revision = await commitContentStructureRevision(tx, {
-		...input,
-		revisionKind: input.revisionKind ?? "update",
+	return runRevisionedAggregateMutation({
 		expectedRevisionId: input.baseRevisionId,
-		change: outcome.change,
+		lock: () => lockContentStructureHistory(tx, input.structureId),
+		loadHeadRevisionId: async () => (await loadHead(tx, input.structureId))?.revisionId ?? null,
+		revisionConflict: (latestRevisionId) =>
+			new ContentStructureRevisionConflict(latestRevisionId),
+		mutate,
+		commit: (change) =>
+			commitContentStructureRevision(tx, {
+				...input,
+				revisionKind: input.revisionKind ?? "update",
+				expectedRevisionId: input.baseRevisionId,
+				change,
+			}),
+		unchanged: (revisionId) => ({ revisionId, revisionCreated: false }),
 	});
-	return { ...outcome.result, ...revision };
 }
 
 export async function getContentStructureHeadRevision(

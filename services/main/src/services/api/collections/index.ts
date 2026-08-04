@@ -1,10 +1,10 @@
 import { StatusCodes } from "http-status-codes";
-import { and, asc, desc, eq, inArray, isNull, lt, or, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database, type DatabaseTransaction } from "../../database";
-import { fractionalPositionBetween, fractionalPositionsBetween } from "../../ordering/position";
+import { fractionalPositionBetween } from "../../ordering/position";
 import {
 	resolvedUnitLocalizationImageAssetId,
 	resolvedUnitLocalizationLanguage,
@@ -16,7 +16,6 @@ import {
 	collectionItem,
 	collectionStructureRevisionHead,
 	creditAttribution,
-	post,
 	profileFavoritesCollection,
 	unit,
 	unitOwnership,
@@ -50,10 +49,11 @@ import {
 	RestoreCollectionStructureRevisionBody,
 	RestoreCollectionStructureRevisionResponse,
 	UpdateCollectionBody,
+	UpdateCollectionItemsBatchBody,
+	UpdateCollectionItemsBatchResponse,
 } from "./schema";
 import { ensureFavorites } from "../../collections/favorites";
 import { getCollection, getCollectionContent } from "./service";
-import { planCollectionItemInsertions } from "./save";
 import { FavoriteResponse, SavedCollectionItemsResponse } from "../schema/action-response";
 import {
 	toApiErrorResponse,
@@ -68,6 +68,7 @@ import { ValidationError } from "../errors";
 import { createProfilePublisherAttribution } from "../../units/attribution";
 import { getAttributionSummariesByUnitIds } from "../../units/attribution";
 import { getUnitUpdateCondition } from "../../authorization/unit/query";
+import { applyCollectionBatch } from "../../collection-structure/batch";
 import {
 	createCollectionStructureHistory,
 	getCollectionStructureRevisionState,
@@ -92,6 +93,10 @@ const CollectionStructureRevisionConflictResponse = toApiErrorResponse([
 	"CollectionStructureRevisionConflict",
 ]);
 const InvalidPaginationCursorResponse = toApiErrorResponse(["InvalidPaginationCursor"]);
+const CollectionBatchErrors = {
+	invalid: (message: string) => new ValidationError({ changes: message }),
+	favoritesEditForbidden: () => new FavoritesEditForbidden(),
+};
 
 function escapeRevisionPathSegment(value: string): string {
 	return value.replaceAll("~", "~0").replaceAll("/", "~1");
@@ -161,97 +166,6 @@ async function nextCollectionItemPosition(tx: DatabaseTransaction, collectionId:
 		.orderBy(desc(collectionItem.position), desc(collectionItem.unitId))
 		.limit(1);
 	return fractionalPositionBetween(last?.position, null);
-}
-
-async function reviewSubjectsForTargets(tx: DatabaseTransaction, targetIds: readonly string[]) {
-	const rows = await tx
-		.select({
-			id: post.id,
-			kind: post.kind,
-			subjectUnitId: post.subjectUnitId,
-		})
-		.from(post)
-		.where(inArray(post.id, targetIds));
-	const subjects = new Map<string, string>();
-	for (const row of rows) {
-		if (row.kind !== "review") continue;
-		if (!row.subjectUnitId) throw new Error("A Review must have an authoritative subject Unit");
-		subjects.set(row.id, row.subjectUnitId);
-	}
-	return subjects;
-}
-
-async function planAndInsertCollectionItems(
-	tx: DatabaseTransaction,
-	input: {
-		readonly collectionId: string;
-		readonly requestedTargetIds: readonly string[];
-		readonly addedByProfileId: string;
-		readonly reviewSubjectByTargetId: ReadonlyMap<string, string>;
-	},
-) {
-	if (!input.requestedTargetIds.length)
-		throw new TypeError("At least one Collection target ID must be requested");
-	const relevantTargetIds = [
-		...new Set([...input.requestedTargetIds, ...input.reviewSubjectByTargetId.values()]),
-	];
-	const existingMemberships = await tx
-		.select({
-			targetId: collectionItem.unitId,
-			position: collectionItem.position,
-		})
-		.from(collectionItem)
-		.where(
-			and(
-				eq(collectionItem.collectionId, input.collectionId),
-				inArray(collectionItem.unitId, relevantTargetIds),
-			),
-		);
-	const existingPositionByTargetId = new Map(
-		existingMemberships.map(({ targetId, position }) => [targetId, position]),
-	);
-	const [last] = await tx
-		.select({ position: collectionItem.position })
-		.from(collectionItem)
-		.where(eq(collectionItem.collectionId, input.collectionId))
-		.orderBy(desc(collectionItem.position), desc(collectionItem.unitId))
-		.limit(1);
-	const positionBeforeReviewByTargetId = new Map<string, string | null>();
-	for (const targetId of input.requestedTargetIds) {
-		const subjectId = input.reviewSubjectByTargetId.get(targetId);
-		const reviewPosition = existingPositionByTargetId.get(targetId);
-		if (!subjectId || reviewPosition === undefined || existingPositionByTargetId.has(subjectId))
-			continue;
-		const [previous] = await tx
-			.select({ position: collectionItem.position })
-			.from(collectionItem)
-			.where(
-				and(
-					eq(collectionItem.collectionId, input.collectionId),
-					lt(collectionItem.position, reviewPosition),
-				),
-			)
-			.orderBy(desc(collectionItem.position), desc(collectionItem.unitId))
-			.limit(1);
-		positionBeforeReviewByTargetId.set(targetId, previous?.position ?? null);
-	}
-	const planned = planCollectionItemInsertions({
-		requestedTargetIds: input.requestedTargetIds,
-		existingPositionByTargetId,
-		lastPosition: last?.position,
-		positionBeforeReviewByTargetId,
-		reviewSubjectByTargetId: input.reviewSubjectByTargetId,
-	});
-	if (planned.insertions.length)
-		await tx.insert(collectionItem).values(
-			planned.insertions.map(({ targetId, position }) => ({
-				collectionId: input.collectionId,
-				unitId: targetId,
-				position,
-				addedByProfileId: input.addedByProfileId,
-			})),
-		);
-	return planned;
 }
 
 export default new Elysia({ prefix: "/collections" })
@@ -603,6 +517,53 @@ export default new Elysia({ prefix: "/collections" })
 		},
 	)
 	.post(
+		"/:collectionId/items/batch-update",
+		async ({ params, profile, authorization, body }) => {
+			await authorization.unit.ensure(params.collectionId, "unit.update");
+			const result = await database.transaction((tx) =>
+				applyCollectionBatch(tx, {
+					collectionId: params.collectionId,
+					actorProfileId: profile.unitId,
+					baseRevisionId: body.baseItemsRevisionId,
+					commands: body.changes,
+					errors: CollectionBatchErrors,
+					ensureTargetReadable: async (targetId) => {
+						const decision = await authorization.unit.decideInTransaction(
+							tx,
+							targetId,
+							"unit.read",
+						);
+						if (!decision.allowed) throw new UnitNotFound();
+					},
+				}),
+			);
+			return {
+				results: [...result.results],
+				latestItemsRevisionId: result.revisionId,
+				revisionCreated: result.revisionCreated,
+			};
+		},
+		{
+			access: "write:unit:update",
+			params: CollectionParams,
+			body: UpdateCollectionItemsBatchBody,
+			response: {
+				[StatusCodes.OK]: UpdateCollectionItemsBatchResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
+				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+				[StatusCodes.CONFLICT]: t.Union([
+					FavoritesEditResponse,
+					CollectionStructureRevisionConflictResponse,
+				]),
+			},
+			detail: {
+				summary: "Apply an atomic mixed Collection item command batch",
+				tags: ["Collections"],
+			},
+		},
+	)
+	.post(
 		"/:collectionId/items/batch",
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensure(params.collectionId, "unit.update");
@@ -611,47 +572,32 @@ export default new Elysia({ prefix: "/collections" })
 			if (body.items.some(({ targetId }) => targetId === params.collectionId))
 				throw new ValidationError({ items: "a Collection cannot contain itself" });
 			return database.transaction(async (tx) => {
-				const result = await mutateCollectionStructureWithHistory(
-					tx,
-					{
-						collectionId: params.collectionId,
-						actorProfileId: profile.unitId,
-						baseRevisionId: body.baseItemsRevisionId,
-					},
-					async () => {
-						await ensureEditableCollection(tx, params.collectionId);
-						const targetIds = body.items.map(({ targetId }) => targetId);
-						const reviewSubjectByTargetId = await reviewSubjectsForTargets(
+				const result = await applyCollectionBatch(tx, {
+					collectionId: params.collectionId,
+					actorProfileId: profile.unitId,
+					baseRevisionId: body.baseItemsRevisionId,
+					commands: body.items.map(({ targetId }, index) => ({
+						opId: String(index),
+						type: "item.add" as const,
+						targetId,
+					})),
+					errors: CollectionBatchErrors,
+					ensureTargetReadable: async (targetId) => {
+						const decision = await authorization.unit.decideInTransaction(
 							tx,
-							targetIds,
+							targetId,
+							"unit.read",
 						);
-						const authorizedTargetIds = new Set([
-							...targetIds,
-							...reviewSubjectByTargetId.values(),
-						]);
-						if (authorizedTargetIds.has(params.collectionId))
-							throw new ValidationError({
-								items: "a Collection cannot contain itself",
-							});
-						for (const targetId of authorizedTargetIds) {
-							const decision = await authorization.unit.decideInTransaction(
-								tx,
-								targetId,
-								"unit.read",
-							);
-							if (!decision.allowed) throw new UnitNotFound();
-						}
-						const planned = await planAndInsertCollectionItems(tx, {
-							collectionId: params.collectionId,
-							requestedTargetIds: targetIds,
-							addedByProfileId: profile.unitId,
-							reviewSubjectByTargetId,
-						});
-						return { items: planned.requestedItems };
+						if (!decision.allowed) throw new UnitNotFound();
 					},
-				);
+				});
 				return {
-					items: [...result.items],
+					items: body.items.map(({ targetId }, index) => {
+						const itemState = result.results[index]?.itemState;
+						if (!itemState)
+							throw new Error("Collection add batch result is incomplete");
+						return { targetId, state: itemState };
+					}),
 					latestItemsRevisionId: result.revisionId,
 				};
 			});
@@ -677,110 +623,24 @@ export default new Elysia({ prefix: "/collections" })
 		"/:collectionId/items/move",
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensure(params.collectionId, "unit.update");
-			const result = await database.transaction(async (tx) =>
-				mutateCollectionStructureWithHistory(
-					tx,
-					{
-						collectionId: params.collectionId,
-						actorProfileId: profile.unitId,
-						baseRevisionId: body.baseItemsRevisionId,
-					},
-					async () => {
-						await ensureEditableCollection(tx, params.collectionId);
-						const memberships = await tx
-							.select({
-								unitId: collectionItem.unitId,
-								position: collectionItem.position,
-							})
-							.from(collectionItem)
-							.where(eq(collectionItem.collectionId, params.collectionId))
-							.orderBy(asc(collectionItem.position), asc(collectionItem.unitId));
-						const membershipById = new Map(
-							memberships.map((membership) => [membership.unitId, membership]),
-						);
-						const selectedIds = new Set(body.targetIds);
-						if (selectedIds.size !== body.targetIds.length)
-							throw new ValidationError({
-								targetIds: "targetId values must be unique",
-							});
-						if (body.targetIds.some((targetId) => !membershipById.has(targetId)))
-							throw new ValidationError({
-								targetIds: "every moved item must belong to this Collection",
-							});
-						const movingIds = memberships
-							.filter(({ unitId }) => selectedIds.has(unitId))
-							.map(({ unitId }) => unitId);
-						const remaining = memberships.filter(
-							({ unitId }) => !selectedIds.has(unitId),
-						);
-
-						let beforePosition: string | null;
-						let afterPosition: string | null;
-						if (body.placement.kind === "after") {
-							const anchor = membershipById.get(body.placement.targetId);
-							if (!anchor)
-								throw new ValidationError({
-									placement:
-										"the destination item must belong to this Collection",
-								});
-							if (selectedIds.has(anchor.unitId))
-								throw new ValidationError({
-									placement: "the destination cannot be a moved item",
-								});
-							const anchorIndex = remaining.findIndex(
-								(membership) => membership.unitId === anchor.unitId,
-							);
-							if (anchorIndex < 0)
-								throw new ValidationError({
-									placement: "the destination is invalid",
-								});
-							beforePosition = anchor.position;
-							afterPosition = remaining[anchorIndex + 1]?.position ?? null;
-						} else {
-							if (body.placement.kind === "start") {
-								beforePosition = null;
-								afterPosition = remaining[0]?.position ?? null;
-							} else {
-								beforePosition = remaining.at(-1)?.position ?? null;
-								afterPosition = null;
-							}
-						}
-						const positions = fractionalPositionsBetween(
-							beforePosition,
-							afterPosition,
-							movingIds.length,
-						);
-						for (const unitId of movingIds)
-							await tx
-								.update(collectionItem)
-								.set({ position: `~moving-${unitId}` })
-								.where(
-									and(
-										eq(collectionItem.collectionId, params.collectionId),
-										eq(collectionItem.unitId, unitId),
-									),
-								);
-						for (const [index, unitId] of movingIds.entries()) {
-							const position = positions[index];
-							if (!position)
-								throw new Error(
-									"Fractional position generation returned too few values",
-								);
-							await tx
-								.update(collectionItem)
-								.set({ position })
-								.where(
-									and(
-										eq(collectionItem.collectionId, params.collectionId),
-										eq(collectionItem.unitId, unitId),
-									),
-								);
-						}
-						return { saved: true };
-					},
-				),
+			const result = await database.transaction((tx) =>
+				applyCollectionBatch(tx, {
+					collectionId: params.collectionId,
+					actorProfileId: profile.unitId,
+					baseRevisionId: body.baseItemsRevisionId,
+					commands: [
+						{
+							opId: "move",
+							type: "items.move",
+							targetIds: body.targetIds,
+							placement: body.placement,
+						},
+					],
+					errors: CollectionBatchErrors,
+					ensureTargetReadable: async () => {},
+				}),
 			);
-			return { saved: result.saved, latestItemsRevisionId: result.revisionId };
+			return { saved: true, latestItemsRevisionId: result.revisionId };
 		},
 		{
 			access: "write:unit:update",
@@ -806,43 +666,24 @@ export default new Elysia({ prefix: "/collections" })
 			if (params.targetId === params.collectionId)
 				throw new ValidationError({ targetId: "a Collection cannot contain itself" });
 			await authorization.unit.ensureCanRead(params.targetId);
-			const result = await database.transaction(async (tx) =>
-				mutateCollectionStructureWithHistory(
-					tx,
-					{
-						collectionId: params.collectionId,
-						actorProfileId: profile.unitId,
-						baseRevisionId: body.baseItemsRevisionId,
+			const result = await database.transaction((tx) =>
+				applyCollectionBatch(tx, {
+					collectionId: params.collectionId,
+					actorProfileId: profile.unitId,
+					baseRevisionId: body.baseItemsRevisionId,
+					commands: [{ opId: "add", type: "item.add", targetId: params.targetId }],
+					errors: CollectionBatchErrors,
+					ensureTargetReadable: async (targetId) => {
+						const decision = await authorization.unit.decideInTransaction(
+							tx,
+							targetId,
+							"unit.read",
+						);
+						if (!decision.allowed) throw new UnitNotFound();
 					},
-					async () => {
-						await ensureEditableCollection(tx, params.collectionId);
-						const reviewSubjectByTargetId = await reviewSubjectsForTargets(tx, [
-							params.targetId,
-						]);
-						const subjectId = reviewSubjectByTargetId.get(params.targetId);
-						if (subjectId === params.collectionId)
-							throw new ValidationError({
-								targetId: "a Collection cannot contain itself as a Review subject",
-							});
-						if (subjectId) {
-							const decision = await authorization.unit.decideInTransaction(
-								tx,
-								subjectId,
-								"unit.read",
-							);
-							if (!decision.allowed) throw new UnitNotFound();
-						}
-						await planAndInsertCollectionItems(tx, {
-							collectionId: params.collectionId,
-							requestedTargetIds: [params.targetId],
-							addedByProfileId: profile.unitId,
-							reviewSubjectByTargetId,
-						});
-						return { saved: true };
-					},
-				),
+				}),
 			);
-			return { saved: result.saved, latestItemsRevisionId: result.revisionId };
+			return { saved: true, latestItemsRevisionId: result.revisionId };
 		},
 		{
 			access: "write:unit:update",
@@ -865,29 +706,17 @@ export default new Elysia({ prefix: "/collections" })
 		"/:collectionId/items/:targetId",
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensure(params.collectionId, "unit.update");
-			const result = await database.transaction(async (tx) =>
-				mutateCollectionStructureWithHistory(
-					tx,
-					{
-						collectionId: params.collectionId,
-						actorProfileId: profile.unitId,
-						baseRevisionId: body.baseItemsRevisionId,
-					},
-					async () => {
-						await ensureEditableCollection(tx, params.collectionId);
-						await tx
-							.delete(collectionItem)
-							.where(
-								and(
-									eq(collectionItem.collectionId, params.collectionId),
-									eq(collectionItem.unitId, params.targetId),
-								),
-							);
-						return { saved: false };
-					},
-				),
+			const result = await database.transaction((tx) =>
+				applyCollectionBatch(tx, {
+					collectionId: params.collectionId,
+					actorProfileId: profile.unitId,
+					baseRevisionId: body.baseItemsRevisionId,
+					commands: [{ opId: "remove", type: "item.remove", targetId: params.targetId }],
+					errors: CollectionBatchErrors,
+					ensureTargetReadable: async () => {},
+				}),
 			);
-			return { saved: result.saved, latestItemsRevisionId: result.revisionId };
+			return { saved: false, latestItemsRevisionId: result.revisionId };
 		},
 		{
 			access: "write:unit:update",

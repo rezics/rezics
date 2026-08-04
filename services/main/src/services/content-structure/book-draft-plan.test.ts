@@ -80,11 +80,21 @@ describe("Book Content Structure draft planning", () => {
 		});
 	});
 
-	it("rejects missing nodes, gaps, and cycles", () => {
+	it("treats omitted existing nodes as deletions", () => {
+		const result = planBookContentStructureDraft(current, [
+			{ state: "existing", id: "a", parentId: null, order: 0, title: "A" },
+		]);
+
+		expect(result.deletedNodeIds).toEqual(new Set(["b", "c"]));
+		expect(result.hasStructuralChanges).toBe(true);
+	});
+
+	it("rejects gaps and cycles", () => {
 		expect(() =>
 			planBookContentStructureDraft(current, [
 				{ state: "existing", id: "a", parentId: null, order: 0, title: "A" },
 				{ state: "existing", id: "b", parentId: null, order: 2, title: "B" },
+				{ state: "existing", id: "c", parentId: "a", order: 0, title: "C" },
 			]),
 		).toThrow();
 		expect(() =>

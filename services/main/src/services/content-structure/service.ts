@@ -1,35 +1,27 @@
-import { and, asc, desc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
+import { and, asc, eq, isNull, sql } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
 import {
 	contentStructure,
 	contentStructureNode,
-	tag,
 	type ContentStructureKind,
 	type RealmTagQueryStrategy,
 } from "../database/schema";
-import { fractionalPositionBetween } from "../ordering/position";
 import {
-	ContentStructureNodeStateSchema,
 	ContentStructureSnapshotSchema,
 	diffContentStructureSnapshots,
 	type ContentStructureNodeState,
 	type ContentStructureTarget,
 } from "./contracts";
+import { applyContentStructureBatch } from "./batch";
+import type { ContentStructureBatchCommand } from "./batch-plan";
 import { ContentStructureInvalid, ContentStructureNotFound } from "./errors";
 import {
 	createContentStructureHistory,
 	getContentStructureHeadRevision,
 	mutateContentStructureWithHistory,
 } from "./history";
-import {
-	assertContentStructureParent,
-	contentStructureTargetColumns,
-	contentStructureTargetFromRow,
-	ensureContentStructureNodeAllowed,
-	ensureContentStructureKindOwner,
-	loadContentStructureSnapshot,
-} from "./storage";
+import { ensureContentStructureKindOwner, loadContentStructureSnapshot } from "./storage";
 
 type MutationActor = {
 	readonly actorProfileId: string;
@@ -67,61 +59,6 @@ export async function lockContentStructureOwnerKind(
 	await tx.execute(
 		sql`select pg_advisory_xact_lock(hashtextextended(${"content-structure-owner:" + ownerUnitId + ":" + kind}::text, 0))`,
 	);
-}
-
-async function resolveRealmTagQueryStrategy(
-	tx: DatabaseTransaction,
-	input: {
-		readonly structureKind: ContentStructureKind;
-		readonly contentUnitId: string;
-		readonly requested?: RealmTagQueryStrategy;
-		readonly current?: RealmTagQueryStrategy | null;
-	},
-): Promise<RealmTagQueryStrategy | null> {
-	if (input.structureKind !== "realm.taxonomy") {
-		if (input.requested !== undefined)
-			throw new ContentStructureInvalid(
-				"Realm Tag query strategies are only valid in a Realm taxonomy",
-			);
-		return null;
-	}
-	const [tagContent] = await tx
-		.select({ id: tag.id })
-		.from(tag)
-		.where(eq(tag.id, input.contentUnitId))
-		.limit(1);
-	if (!tagContent) {
-		if (input.requested !== undefined)
-			throw new ContentStructureInvalid(
-				"Realm Tag query strategies are only valid on Tag nodes",
-			);
-		return null;
-	}
-	return input.requested ?? input.current ?? "global_effective";
-}
-
-async function ensureRealmTaxonomyTagOccurrenceUnique(
-	tx: DatabaseTransaction,
-	input: {
-		readonly structureId: string;
-		readonly contentUnitId: string;
-		readonly nodeId?: string;
-	},
-): Promise<void> {
-	const [duplicate] = await tx
-		.select({ id: contentStructureNode.id })
-		.from(contentStructureNode)
-		.where(
-			and(
-				eq(contentStructureNode.structureId, input.structureId),
-				eq(contentStructureNode.contentUnitId, input.contentUnitId),
-				input.nodeId ? ne(contentStructureNode.id, input.nodeId) : undefined,
-				isNull(contentStructureNode.deletedAt),
-			),
-		)
-		.limit(1);
-	if (duplicate)
-		throw new ContentStructureInvalid("A Realm taxonomy can contain a Tag only once");
 }
 
 export async function getContentStructureRevision(
@@ -220,34 +157,12 @@ export async function createContentStructure(
 	return { structure: created, ...revision };
 }
 
-async function loadStructureRecord(
-	tx: DatabaseTransaction,
-	ownerUnitId: string,
-	structureId: string,
-) {
-	const [structure] = await tx
-		.select()
-		.from(contentStructure)
-		.where(
-			and(
-				eq(contentStructure.id, structureId),
-				eq(contentStructure.ownerUnitId, ownerUnitId),
-				isNull(contentStructure.deletedAt),
-			),
-		)
-		.limit(1);
-	if (!structure) throw new ContentStructureNotFound();
-	return structure;
-}
-
-async function touchStructure(tx: DatabaseTransaction, structureId: string) {
-	const [structure] = await tx
-		.update(contentStructure)
-		.set({ updatedAt: new Date() })
-		.where(and(eq(contentStructure.id, structureId), isNull(contentStructure.deletedAt)))
-		.returning();
-	if (!structure) throw new ContentStructureNotFound();
-	return structure;
+async function generateUuidv7(tx: DatabaseTransaction): Promise<string> {
+	type GeneratedUuidRow = { readonly id: string };
+	const generated = await tx.execute<GeneratedUuidRow>(sql`select uuidv7() as id`);
+	const id = generated.rows[0]?.id;
+	if (!id) throw new Error("UUIDv7 generation returned no id");
+	return id;
 }
 
 export async function insertContentStructureNode(
@@ -262,107 +177,34 @@ export async function insertContentStructureNode(
 		readonly realmTagQueryStrategy?: RealmTagQueryStrategy;
 	},
 ) {
-	return mutateContentStructureWithHistory(
-		tx,
-		{
-			structureId: input.structureId,
-			baseRevisionId: input.baseRevisionId,
-			actorProfileId: input.actorProfileId,
-			message: input.message,
-			minor: input.minor,
-		},
-		async () => {
-			const structure = await loadStructureRecord(tx, input.ownerUnitId, input.structureId);
-			ensureDirectContentStructureEditing(structure.kind);
-			const target = input.target ?? { kind: "content" };
-			await ensureContentStructureNodeAllowed(tx, {
-				kind: structure.kind,
-				structureId: structure.id,
-				ownerUnitId: structure.ownerUnitId,
-				contentUnitId: input.contentUnitId,
-				target,
-			});
-			const parentId = input.parentId ?? null;
-			if (parentId !== null) {
-				const [parent] = await tx
-					.select({ id: contentStructureNode.id })
-					.from(contentStructureNode)
-					.where(
-						and(
-							eq(contentStructureNode.id, parentId),
-							eq(contentStructureNode.structureId, structure.id),
-							isNull(contentStructureNode.deletedAt),
-						),
-					)
-					.limit(1);
-				if (!parent) throw new ContentStructureInvalid("Parent node does not exist");
-			}
-			const [last] = input.position
-				? []
-				: await tx
-						.select({ position: contentStructureNode.position })
-						.from(contentStructureNode)
-						.where(
-							and(
-								eq(contentStructureNode.structureId, structure.id),
-								parentId === null
-									? isNull(contentStructureNode.parentId)
-									: eq(contentStructureNode.parentId, parentId),
-								isNull(contentStructureNode.deletedAt),
-							),
-						)
-						.orderBy(desc(contentStructureNode.position), desc(contentStructureNode.id))
-						.limit(1);
-			const realmTagQueryStrategy = await resolveRealmTagQueryStrategy(tx, {
-				structureKind: structure.kind,
-				contentUnitId: input.contentUnitId,
-				requested: input.realmTagQueryStrategy,
-			});
-			if (realmTagQueryStrategy)
-				await ensureRealmTaxonomyTagOccurrenceUnique(tx, {
-					structureId: structure.id,
+	const nodeId = await generateUuidv7(tx);
+	const result = await applyContentStructureBatch(tx, {
+		ownerUnitId: input.ownerUnitId,
+		structureId: input.structureId,
+		baseRevisionId: input.baseRevisionId,
+		actorProfileId: input.actorProfileId,
+		message: input.message,
+		minor: input.minor,
+		commands: () => {
+			return [
+				{
+					opId: "insert",
+					type: "node.create",
+					nodeId,
+					parentId: input.parentId ?? null,
 					contentUnitId: input.contentUnitId,
-				});
-			const [created] = await tx
-				.insert(contentStructureNode)
-				.values({
-					structureId: structure.id,
-					ownerUnitId: structure.ownerUnitId,
-					parentId,
-					contentUnitId: input.contentUnitId,
-					documentKey: input.documentKey ?? null,
-					...contentStructureTargetColumns(target),
-					position: input.position ?? fractionalPositionBetween(last?.position, null),
-					contentRating: input.contentRating ?? null,
-					realmTagQueryStrategy,
-				})
-				.returning();
-			if (!created) throw new Error("Content Structure node insertion returned no row");
-			const updatedStructure = await touchStructure(tx, structure.id);
-			const after = ContentStructureNodeStateSchema.parse(created);
-			const delta = {
-				version: 1,
-				structureId: structure.id,
-				operations: [
-					{ kind: "node.insert", after },
-					{
-						kind: "structure.update",
-						before: structure,
-						after: updatedStructure,
-					},
-				],
-			} as const;
-			return {
-				result: { node: created },
-				change: {
-					kind: "delta",
-					delta,
-					checkpoint: () =>
-						loadContentStructureSnapshot(tx, { structureId: structure.id }),
+					documentKey: input.documentKey,
+					target: input.target,
+					position: input.position,
+					contentRating: input.contentRating,
+					realmTagQueryStrategy: input.realmTagQueryStrategy,
 				},
-			};
+			];
 		},
-	);
+	});
+	const node = result.afterSnapshot.nodes.find(({ id }) => id === nodeId);
+	if (!node) throw new Error("Content Structure batch did not create its planned node");
+	return { node, revisionId: result.revisionId, revisionCreated: result.revisionCreated };
 }
 
 export async function updateContentStructureNode(
@@ -378,174 +220,71 @@ export async function updateContentStructureNode(
 		readonly realmTagQueryStrategy?: RealmTagQueryStrategy;
 	},
 ) {
-	return mutateContentStructureWithHistory(
-		tx,
-		{
-			structureId: input.structureId,
-			baseRevisionId: input.baseRevisionId,
-			actorProfileId: input.actorProfileId,
-			message: input.message,
-			minor: input.minor,
-		},
-		async () => {
-			const structure = await loadStructureRecord(tx, input.ownerUnitId, input.structureId);
-			ensureDirectContentStructureEditing(structure.kind);
-			const [current] = await tx
-				.select()
-				.from(contentStructureNode)
-				.where(
-					and(
-						eq(contentStructureNode.id, input.nodeId),
-						eq(contentStructureNode.structureId, structure.id),
-						isNull(contentStructureNode.deletedAt),
-					),
-				)
-				.limit(1);
+	const result = await applyContentStructureBatch(tx, {
+		ownerUnitId: input.ownerUnitId,
+		structureId: input.structureId,
+		baseRevisionId: input.baseRevisionId,
+		actorProfileId: input.actorProfileId,
+		message: input.message,
+		minor: input.minor,
+		commands: (snapshot) => {
+			const current = snapshot.nodes.find(({ id }) => id === input.nodeId);
 			if (!current) throw new ContentStructureNotFound();
-			if (input.parentId !== undefined) {
-				await assertContentStructureParent(tx, structure.id, current.id, input.parentId);
-			}
-			const target = input.target ?? contentStructureTargetFromRow(current);
-			const contentUnitId = input.contentUnitId ?? current.contentUnitId;
-			const realmTagQueryStrategy = await resolveRealmTagQueryStrategy(tx, {
-				structureKind: structure.kind,
-				contentUnitId,
-				requested: input.realmTagQueryStrategy,
-				current: input.contentUnitId === undefined ? current.realmTagQueryStrategy : null,
-			});
-			if (realmTagQueryStrategy)
-				await ensureRealmTaxonomyTagOccurrenceUnique(tx, {
-					structureId: structure.id,
-					contentUnitId,
-					nodeId: current.id,
-				});
-			await ensureContentStructureNodeAllowed(tx, {
-				kind: structure.kind,
-				structureId: structure.id,
-				nodeId: current.id,
-				ownerUnitId: structure.ownerUnitId,
-				contentUnitId,
-				target,
-			});
-			const [updated] = await tx
-				.update(contentStructureNode)
-				.set({
-					parentId: input.parentId,
+			const changes: ContentStructureBatchCommand[] = [];
+			const dataRequested =
+				input.contentUnitId !== undefined ||
+				input.documentKey !== undefined ||
+				input.target !== undefined ||
+				input.contentRating !== undefined ||
+				input.realmTagQueryStrategy !== undefined;
+			if (dataRequested) {
+				changes.push({
+					opId: "update",
+					type: "node.update",
+					nodeId: input.nodeId,
 					contentUnitId: input.contentUnitId,
 					documentKey: input.documentKey,
-					...(input.target ? contentStructureTargetColumns(input.target) : {}),
-					position: input.position,
+					target: input.target,
 					contentRating: input.contentRating,
-					realmTagQueryStrategy,
-				})
-				.where(eq(contentStructureNode.id, current.id))
-				.returning();
-			if (!updated) throw new Error("Content Structure node update returned no row");
-			const updatedStructure = await touchStructure(tx, structure.id);
-			const before = ContentStructureNodeStateSchema.parse(current);
-			const after = ContentStructureNodeStateSchema.parse(updated);
-			const delta = {
-				version: 1,
-				structureId: structure.id,
-				operations: [
-					{ kind: "node.update", before, after },
-					{
-						kind: "structure.update",
-						before: structure,
-						after: updatedStructure,
-					},
-				],
-			} as const;
-			return {
-				result: { node: updated },
-				change: {
-					kind: "delta",
-					delta,
-					checkpoint: () =>
-						loadContentStructureSnapshot(tx, { structureId: structure.id }),
-				},
-			};
+					realmTagQueryStrategy: input.realmTagQueryStrategy,
+				});
+			}
+			if (input.parentId !== undefined || input.position !== undefined)
+				changes.push({
+					opId: "move",
+					type: "node.move",
+					nodeId: input.nodeId,
+					parentId: input.parentId,
+					position: input.position,
+				});
+			if (!changes.length)
+				changes.push({ opId: "update", type: "node.update", nodeId: input.nodeId });
+			return changes;
 		},
-	);
-}
-
-function descendantsOf(
-	nodes: readonly ContentStructureNodeState[],
-	rootId: string,
-): ContentStructureNodeState[] {
-	const children = new Map<string, ContentStructureNodeState[]>();
-	for (const node of nodes) {
-		if (node.parentId === null) continue;
-		const siblings = children.get(node.parentId) ?? [];
-		siblings.push(node);
-		children.set(node.parentId, siblings);
-	}
-	const root = nodes.find((node) => node.id === rootId);
-	if (!root) throw new ContentStructureNotFound();
-	const result: ContentStructureNodeState[] = [];
-	const visit = (node: ContentStructureNodeState) => {
-		for (const child of children.get(node.id) ?? []) visit(child);
-		result.push(node);
-	};
-	visit(root);
-	return result;
+	});
+	const node = result.afterSnapshot.nodes.find(({ id }) => id === input.nodeId);
+	if (!node) throw new Error("Content Structure batch lost its updated node");
+	return { node, revisionId: result.revisionId, revisionCreated: result.revisionCreated };
 }
 
 export async function deleteContentStructureNode(
 	tx: DatabaseTransaction,
 	input: ExistingStructureMutation & { readonly nodeId: string },
 ) {
-	return mutateContentStructureWithHistory(
-		tx,
-		{
-			structureId: input.structureId,
-			baseRevisionId: input.baseRevisionId,
-			actorProfileId: input.actorProfileId,
-			message: input.message,
-			minor: input.minor,
-		},
-		async () => {
-			const snapshot = await loadContentStructureSnapshot(tx, {
-				structureId: input.structureId,
-				ownerUnitId: input.ownerUnitId,
-			});
-			ensureDirectContentStructureEditing(snapshot.structure.kind);
-			const deleted = descendantsOf(snapshot.nodes, input.nodeId);
-			await tx
-				.update(contentStructureNode)
-				.set({ deletedAt: new Date() })
-				.where(
-					inArray(
-						contentStructureNode.id,
-						deleted.map((node) => node.id),
-					),
-				);
-			const updatedStructure = await touchStructure(tx, snapshot.structure.id);
-			const delta = {
-				version: 1,
-				structureId: snapshot.structure.id,
-				operations: [
-					...deleted.map((before) => ({ kind: "node.delete" as const, before })),
-					{
-						kind: "structure.update" as const,
-						before: snapshot.structure,
-						after: updatedStructure,
-					},
-				],
-			};
-			return {
-				result: { deletedNodeIds: deleted.map((node) => node.id) },
-				change: {
-					kind: "delta",
-					delta,
-					checkpoint: () =>
-						loadContentStructureSnapshot(tx, {
-							structureId: snapshot.structure.id,
-						}),
-				},
-			};
-		},
-	);
+	const result = await applyContentStructureBatch(tx, {
+		ownerUnitId: input.ownerUnitId,
+		structureId: input.structureId,
+		baseRevisionId: input.baseRevisionId,
+		actorProfileId: input.actorProfileId,
+		message: input.message,
+		minor: input.minor,
+		commands: [{ opId: "delete", type: "node.deleteSubtree", nodeId: input.nodeId }],
+	});
+	return {
+		deletedNodeIds: result.deletedNodeIds,
+		revisionId: result.revisionId,
+		revisionCreated: result.revisionCreated,
+	};
 }
 
 export async function deleteContentStructure(

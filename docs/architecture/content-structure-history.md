@@ -152,6 +152,28 @@ compares `baseRevisionId` with `content_structure_revision_head` before committi
 history atomically. Create, update, delete, and restore are explicit revision kinds. Restore creates
 a new checkpoint revision with a `sourceRevisionId`; immutable past revisions are never rewritten.
 
+Content Structure edits use an ordered, atomic command batch as the primary mutation model. A
+batch contains at most 10,000 logical entries in `changes`; this limit does not constrain the total
+tree size, the number of nodes referenced by a command, or the number of rows changed when applying
+it. For example, a swap is one command and deleting a subtree is one command regardless of the
+number of descendants. The planner applies the commands to the current snapshot in memory and
+validates the complete resulting tree—including parent existence, sibling placement, and cycles—
+before any live row is written. Invalid batches have no partial effects and a successful batch
+creates at most one revision.
+
+The single-node endpoints and Navigation document replacement are compatibility adapters over that
+planner. Complete Book, Media, and Realm taxonomy drafts compile their semantic differences into
+the same logical-command accounting: one changed desired member per command plus one command per
+omitted subtree root. Consequently, a complete representation may contain more than 10,000 nodes
+when its compiled change set remains within the batch limit. There is no independent aggregate-size
+cap.
+
+Collection Structure membership follows the same revision lock, base-revision check, plan-first,
+and single-commit lifecycle with its own add, remove, move, and swap commands. Collection reads use
+revision-bound cursor pagination. Content Structure reads currently return a complete tree because
+flat pagination would not prove parent/child completeness; a future lazy-tree API must use
+revision-bound child pagination keyed by `(structureId, parentId, position, id)`.
+
 Current relational rows are authoritative. History stores semantic operations keyed by stable IDs:
 
 - node insert, update, and delete;

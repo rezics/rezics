@@ -16,7 +16,9 @@ import {
 import type { RealmTagQueryStrategy } from "../database/schema/contract-values";
 import { insertUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
+import { revisionedBatchChunks } from "../history/revisioned-batch";
 import { diffContentStructureSnapshots } from "./contracts";
+import { assertContentStructureDraftCommandLimit } from "./draft-batch";
 import { ContentStructureInvalid, ContentStructureNotFound } from "./errors";
 import { mutateContentStructureWithHistory } from "./history";
 import {
@@ -184,8 +186,10 @@ export async function saveRealmTaxonomyDraft(
 			const newUnitIds = input.nodes.flatMap((node) =>
 				node.state === "new" && node.content.kind === "unit" ? [node.content.unitId] : [],
 			);
-			const newUnitRows = newUnitIds.length
-				? await tx
+			const newUnitRows = [];
+			for (const newIds of revisionedBatchChunks(newUnitIds))
+				newUnitRows.push(
+					...(await tx
 						.select({
 							id: unit.id,
 							unitKind: unit.kind,
@@ -197,8 +201,8 @@ export async function saveRealmTaxonomyDraft(
 						.leftJoin(post, eq(post.id, unit.id))
 						.leftJoin(tag, eq(tag.id, unit.id))
 						.leftJoin(label, eq(label.id, unit.id))
-						.where(and(inArray(unit.id, newUnitIds), isNull(unit.deletedAt)))
-				: [];
+						.where(and(inArray(unit.id, newIds), isNull(unit.deletedAt)))),
+				);
 			const newUnitById = new Map(
 				newUnitRows.map((row) => [
 					row.id,
@@ -209,18 +213,21 @@ export async function saveRealmTaxonomyDraft(
 				.filter((row) => row.unitKind === "post" && row.postKind === "wiki")
 				.map(({ id }) => id);
 			if (wikiUnitIds.length) {
-				const mounted = await tx
-					.select({ unitId: realmUnit.unitId })
-					.from(realmUnit)
-					.where(
-						and(
-							eq(realmUnit.realmId, input.ownerUnitId),
-							inArray(realmUnit.unitId, wikiUnitIds),
-							eq(realmUnit.status, "visible"),
-							eq(realmUnit.publicationState, "active"),
-						),
-					);
-				const mountedIds = new Set(mounted.map(({ unitId }) => unitId));
+				const mountedIds = new Set<string>();
+				for (const wikiIds of revisionedBatchChunks(wikiUnitIds)) {
+					const mounted = await tx
+						.select({ unitId: realmUnit.unitId })
+						.from(realmUnit)
+						.where(
+							and(
+								eq(realmUnit.realmId, input.ownerUnitId),
+								inArray(realmUnit.unitId, wikiIds),
+								eq(realmUnit.status, "visible"),
+								eq(realmUnit.publicationState, "active"),
+							),
+						);
+					for (const { unitId } of mounted) mountedIds.add(unitId);
+				}
 				if (wikiUnitIds.some((id) => !mountedIds.has(id)))
 					throw new ContentStructureInvalid(
 						"Realm taxonomy can only attach Wiki Posts mounted in this Realm",
@@ -258,6 +265,19 @@ export async function saveRealmTaxonomyDraft(
 			});
 			const plan = planRealmTaxonomyDraft(current, resolved);
 			if (!plan.hasChanges) return { result: {} };
+			assertContentStructureDraftCommandLimit({
+				currentNodes: current,
+				deletedNodeIds: plan.deletedNodeIds,
+				changedDesiredNodeCount: plan.nodes.filter((node) => {
+					const previous = currentById.get(node.id);
+					return (
+						!previous ||
+						previous.parentId !== node.parentId ||
+						previous.position !== node.position ||
+						previous.queryStrategy !== node.queryStrategy
+					);
+				}).length,
+			});
 
 			const movedExistingIds = plan.nodes
 				.filter((node) => {
@@ -276,14 +296,14 @@ export async function saveRealmTaxonomyDraft(
 							isNull(contentStructureNode.deletedAt),
 						),
 					);
-			if (plan.deletedNodeIds.size)
+			for (const deletedIds of revisionedBatchChunks([...plan.deletedNodeIds]))
 				await tx
 					.update(contentStructureNode)
 					.set({ deletedAt: new Date() })
 					.where(
 						and(
 							eq(contentStructureNode.structureId, structure.id),
-							inArray(contentStructureNode.id, [...plan.deletedNodeIds]),
+							inArray(contentStructureNode.id, deletedIds),
 							isNull(contentStructureNode.deletedAt),
 						),
 					);

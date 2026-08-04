@@ -6,6 +6,7 @@ import {
 	LocalizationLanguageQuery,
 	Uuid,
 } from "../schema";
+import { RevisionedBatchCommandLimit } from "../../history/revisioned-batch";
 
 export const ListCollectionsQuery = t.Object(
 	{
@@ -76,7 +77,7 @@ export const AddCollectionItemsBatchBody = t.Object(
 				},
 				{ additionalProperties: false },
 			),
-			{ minItems: 1, maxItems: 20, uniqueItems: true },
+			{ minItems: 1, maxItems: RevisionedBatchCommandLimit, uniqueItems: true },
 		),
 	},
 	{ additionalProperties: false },
@@ -98,12 +99,90 @@ export type CollectionItemPlacement = Static<typeof CollectionItemPlacement>;
 export const MoveCollectionItemsBody = t.Object(
 	{
 		baseItemsRevisionId: Uuid,
-		targetIds: t.Array(Uuid, { minItems: 1, maxItems: 100, uniqueItems: true }),
+		targetIds: t.Array(Uuid, { minItems: 1, uniqueItems: true }),
 		placement: CollectionItemPlacement,
 	},
 	{ additionalProperties: false },
 );
 export type MoveCollectionItemsBody = Static<typeof MoveCollectionItemsBody>;
+
+const CollectionBatchOperationId = t.String({ minLength: 1, maxLength: 100 });
+const CollectionBatchPlacement = t.Union([
+	t.Object({ kind: t.UnionEnum(["start", "end"]) }, { additionalProperties: false }),
+	t.Object(
+		{ kind: t.UnionEnum(["before", "after"]), targetId: Uuid },
+		{ additionalProperties: false },
+	),
+]);
+const AddCollectionItemCommand = t.Object(
+	{
+		opId: CollectionBatchOperationId,
+		type: t.Literal("item.add"),
+		targetId: Uuid,
+	},
+	{ additionalProperties: false },
+);
+const RemoveCollectionItemCommand = t.Object(
+	{
+		opId: CollectionBatchOperationId,
+		type: t.Literal("item.remove"),
+		targetId: Uuid,
+	},
+	{ additionalProperties: false },
+);
+const MoveCollectionItemsCommand = t.Object(
+	{
+		opId: CollectionBatchOperationId,
+		type: t.Literal("items.move"),
+		targetIds: t.Array(Uuid, { minItems: 1, uniqueItems: true }),
+		placement: CollectionBatchPlacement,
+	},
+	{ additionalProperties: false },
+);
+const SwapCollectionItemsCommand = t.Object(
+	{
+		opId: CollectionBatchOperationId,
+		type: t.Literal("items.swap"),
+		leftTargetId: Uuid,
+		rightTargetId: Uuid,
+	},
+	{ additionalProperties: false },
+);
+
+export const UpdateCollectionItemsBatchBody = t.Object(
+	{
+		baseItemsRevisionId: Uuid,
+		changes: t.Array(
+			t.Union([
+				AddCollectionItemCommand,
+				RemoveCollectionItemCommand,
+				MoveCollectionItemsCommand,
+				SwapCollectionItemsCommand,
+			]),
+			{ minItems: 1, maxItems: RevisionedBatchCommandLimit },
+		),
+	},
+	{ additionalProperties: false },
+);
+export type UpdateCollectionItemsBatchBody = Static<typeof UpdateCollectionItemsBatchBody>;
+
+export const UpdateCollectionItemsBatchResponse = t.Object(
+	{
+		results: t.Array(
+			t.Object(
+				{
+					opId: t.String(),
+					applied: t.Literal(true),
+					itemState: t.Optional(t.UnionEnum(["created", "existing"])),
+				},
+				{ additionalProperties: false },
+			),
+		),
+		latestItemsRevisionId: Uuid,
+		revisionCreated: t.Boolean(),
+	},
+	{ additionalProperties: false },
+);
 
 export const CollectionRevisionBody = t.Object(
 	{ baseRevisionId: Uuid },

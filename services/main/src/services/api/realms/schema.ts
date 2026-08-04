@@ -134,7 +134,6 @@ export const SaveRealmTaxonomyDraftBody = t.Object(
 				NewRealmTaxonomyLabelDraftNode,
 				NewRealmTaxonomyUnitDraftNode,
 			]),
-			{ maxItems: 10_000 },
 		),
 	},
 	{ additionalProperties: false },
