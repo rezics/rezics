@@ -25,20 +25,22 @@ they are found, but do not couple deployment availability to Check.
 
 A stable `vMAJOR.MINOR.PATCH` tag starts `release.yml`. The workflow:
 
-1. obtains a short-lived GitHub OIDC JWT for audience
+1. passes the protected `production` GitHub environment before the job starts;
+2. obtains a short-lived GitHub OIDC JWT for audience
    `rezics-nomad-release`;
-2. sends one empty authenticated POST to
+3. sends one empty authenticated POST to
    `https://deploy.rezics.com/v1/releases/dispatch`;
-3. requires a matching `202 Accepted` receipt containing the tag ref, commit,
+4. requires a matching `202 Accepted` receipt containing the tag ref, commit,
    dispatched job ID, and evaluation ID;
-4. creates the GitHub Release if it does not already exist;
-5. exits without polling, streaming logs, or deciding deployment success.
+5. creates the GitHub Release if it does not already exist;
+6. exits without polling, streaming logs, or deciding deployment success.
 
 The gateway validates the immutable repository and owner IDs, workflow ref,
-GitHub-hosted runner, stable tag, commit, issuer, and audience. Nomad grants the
-workflow a five-minute token with only `dispatch-job` in `rezics-release`.
-GitHub receives no server login, SSH credential, Nomad token, database secret,
-Cloudflare token, or registry credential.
+GitHub-hosted runner, `production` environment, stable tag, commit, issuer, and
+audience. Nomad independently requires the mapped `production` environment
+claim before granting the workflow a five-minute token with only `dispatch-job`
+in `rezics-release`. GitHub receives no server login, SSH credential, Nomad
+token, database secret, Cloudflare token, or registry credential.
 
 ## Server release graph
 

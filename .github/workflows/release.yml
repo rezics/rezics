@@ -17,6 +17,7 @@ jobs:
     release:
         name: Dispatch server release
         runs-on: ubuntu-latest
+        environment: production
         timeout-minutes: 10
         steps:
             - name: Dispatch immutable tag
