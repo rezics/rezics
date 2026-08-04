@@ -24,7 +24,7 @@ const alternatePaths = [
 afterEach(() => {
 	document.documentElement.classList.remove("dark");
 	document.body.className = "";
-	localStorage.clear();
+	window.localStorage.clear();
 });
 
 describe("SiteHeader", () => {
@@ -110,6 +110,6 @@ describe("SiteHeader", () => {
 		fireEvent.click(screen.getByRole("button", { name: copy.theme.toggle }));
 
 		expect(document.documentElement).toHaveClass("dark");
-		expect(localStorage.getItem("rezics-theme")).toBe("dark");
+		expect(window.localStorage.getItem("rezics-theme")).toBe("dark");
 	});
 });

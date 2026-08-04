@@ -67,7 +67,7 @@ export function SiteHeader({ locale, active, copy, links, alternatePaths, appUrl
 	const toggleTheme = () => {
 		const nextTheme = getTheme() === "dark" ? "light" : "dark";
 		document.documentElement.classList.toggle("dark", nextTheme === "dark");
-		localStorage.setItem("rezics-theme", nextTheme);
+		window.localStorage.setItem("rezics-theme", nextTheme);
 		setTheme(nextTheme);
 	};
 
