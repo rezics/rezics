@@ -108779,8 +108779,8 @@
 			}
 		},
 		"/api/v1/units/{type}/{unitId}/links": {
-			"post": {
-				"summary": "Add unit source link",
+			"get": {
+				"summary": "List Unit external links",
 				"tags": ["Units"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
@@ -108789,15 +108789,217 @@
 						"in": "path",
 						"required": true,
 						"schema": {
-							"anyOf": [
-								{
-									"anyOf": [
-										{ "const": "book", "type": "string" },
-										{ "const": "software", "type": "string" },
-										{ "const": "media", "type": "string" }
-									]
-								},
-								{ "const": "series", "type": "string" }
+							"type": "string",
+							"enum": [
+								"slug_namespace",
+								"profile",
+								"book",
+								"software",
+								"media",
+								"video",
+								"audio",
+								"release",
+								"entity",
+								"label",
+								"tag",
+								"structure",
+								"series",
+								"zone",
+								"zone_page",
+								"collection",
+								"post",
+								"poll",
+								"realm",
+								"realm_rule"
+							]
+						}
+					},
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"additionalProperties": false,
+									"type": "object",
+									"required": ["items"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": [
+													"id",
+													"unitId",
+													"sourceEntityId",
+													"url",
+													"normalizedUrl",
+													"normalizedUrlHash",
+													"position",
+													"createdAt",
+													"updatedAt"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"unitId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"sourceEntityId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"url": { "type": "string" },
+													"normalizedUrl": { "type": "string" },
+													"normalizedUrlHash": { "type": "string" },
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": [
+														"ApiQuotaExceeded",
+														"ApiTokenRateLimitExceeded"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiUnitsByTypeByUnitIdLinks",
+				"x-rezics-quota-route-operation-id": "getApiUnitsByTypeByUnitIdLinks",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			},
+			"post": {
+				"summary": "Add Unit external link",
+				"tags": ["Units"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "type",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"slug_namespace",
+								"profile",
+								"book",
+								"software",
+								"media",
+								"video",
+								"audio",
+								"release",
+								"entity",
+								"label",
+								"tag",
+								"structure",
+								"series",
+								"zone",
+								"zone_page",
+								"collection",
+								"post",
+								"poll",
+								"realm",
+								"realm_rule"
 							]
 						}
 					},
@@ -108816,7 +109018,12 @@
 								"type": "object",
 								"required": ["url", "sourceEntityUnitId"],
 								"properties": {
-									"url": { "format": "uri", "type": "string" },
+									"url": {
+										"format": "uri",
+										"maxLength": 2000,
+										"pattern": "^https?://",
+										"type": "string"
+									},
 									"sourceEntityUnitId": { "format": "uuid", "type": "string" },
 									"position": {
 										"format": "fractional-position",
@@ -108922,7 +109129,7 @@
 												"code": {
 													"default": "UnitNotFound",
 													"type": "string",
-													"enum": ["UnitNotFound"]
+													"enum": ["UnitNotFound", "EntityEntryNotFound"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -108996,7 +109203,7 @@
 		},
 		"/api/v1/units/{type}/{unitId}/links/{linkId}": {
 			"delete": {
-				"summary": "Remove unit source link",
+				"summary": "Remove Unit external link",
 				"tags": ["Units"],
 				"responses": {
 					"204": {
@@ -109124,15 +109331,28 @@
 						"in": "path",
 						"required": true,
 						"schema": {
-							"anyOf": [
-								{
-									"anyOf": [
-										{ "const": "book", "type": "string" },
-										{ "const": "software", "type": "string" },
-										{ "const": "media", "type": "string" }
-									]
-								},
-								{ "const": "series", "type": "string" }
+							"type": "string",
+							"enum": [
+								"slug_namespace",
+								"profile",
+								"book",
+								"software",
+								"media",
+								"video",
+								"audio",
+								"release",
+								"entity",
+								"label",
+								"tag",
+								"structure",
+								"series",
+								"zone",
+								"zone_page",
+								"collection",
+								"post",
+								"poll",
+								"realm",
+								"realm_rule"
 							]
 						}
 					},

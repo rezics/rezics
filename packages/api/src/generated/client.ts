@@ -417,6 +417,8 @@ import type {
 	PostApiUnitsByTypeByUnitIdSubjectAssociationsResponses,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdOptions,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdResponses,
+	GetApiUnitsByTypeByUnitIdLinksOptions,
+	GetApiUnitsByTypeByUnitIdLinksResponses,
 	PostApiUnitsByTypeByUnitIdLinksOptions,
 	PostApiUnitsByTypeByUnitIdLinksResponses,
 	DeleteApiUnitsByTypeByUnitIdLinksByLinkIdOptions,
@@ -4823,7 +4825,27 @@ export function deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationId<
 }
 
 /**
- * @summary Add unit source link
+ * @summary List Unit external links
+ * {@link /api/v1/units/:type/:unitId/links}
+ */
+export function getApiUnitsByTypeByUnitIdLinks<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUnitsByTypeByUnitIdLinksOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiUnitsByTypeByUnitIdLinksResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/units/{type}/{unitId}/links",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiUnitsByTypeByUnitIdLinksResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Add Unit external link
  * {@link /api/v1/units/:type/:unitId/links}
  */
 export function postApiUnitsByTypeByUnitIdLinks<ThrowOnError extends boolean = true>(
@@ -4843,7 +4865,7 @@ export function postApiUnitsByTypeByUnitIdLinks<ThrowOnError extends boolean = t
 }
 
 /**
- * @summary Remove unit source link
+ * @summary Remove Unit external link
  * {@link /api/v1/units/:type/:unitId/links/:linkId}
  */
 export function deleteApiUnitsByTypeByUnitIdLinksByLinkId<ThrowOnError extends boolean = true>(

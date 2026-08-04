@@ -1,10 +1,12 @@
 import { Value } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
+import { UnitKindValues } from "../../database/schema/contract-values";
 import {
 	AddUnitLinkBody,
 	ListEntityEntriesQuery,
 	UnitSourceLinkParams,
+	UnitSourceLinkUnitParams,
 	UpdateUnitTagCurationBody,
 } from "./schema";
 
@@ -42,19 +44,45 @@ describe("Unit resource API schemas", () => {
 			false,
 		);
 		expect(Value.Check(AddUnitLinkBody, { ...sourceLink, label: "Official page" })).toBe(false);
+		expect(
+			Value.Check(AddUnitLinkBody, { ...sourceLink, url: "ftp://example.test/book" }),
+		).toBe(false);
+		expect(
+			Value.Check(AddUnitLinkBody, {
+				...sourceLink,
+				url: `https://example.test/${"a".repeat(2_000)}`,
+			}),
+		).toBe(false);
+	});
+
+	it("accepts every registered Unit kind as a source-link owner", () => {
+		for (const type of UnitKindValues)
+			expect(
+				Value.Check(UnitSourceLinkUnitParams, {
+					type,
+					unitId: "018ff2b7-7c00-7000-8000-000000000001",
+				}),
+			).toBe(true);
+		expect(
+			Value.Check(UnitSourceLinkUnitParams, {
+				type: "unknown",
+				unitId: "018ff2b7-7c00-7000-8000-000000000001",
+			}),
+		).toBe(false);
 	});
 
 	it("requires a Unit-scoped link identifier for source-link removal", () => {
+		for (const type of UnitKindValues)
+			expect(
+				Value.Check(UnitSourceLinkParams, {
+					type,
+					unitId: "018ff2b7-7c00-7000-8000-000000000001",
+					linkId: "018ff2b7-7c00-7000-8000-000000000002",
+				}),
+			).toBe(true);
 		expect(
 			Value.Check(UnitSourceLinkParams, {
-				type: "software",
-				unitId: "018ff2b7-7c00-7000-8000-000000000001",
-				linkId: "018ff2b7-7c00-7000-8000-000000000002",
-			}),
-		).toBe(true);
-		expect(
-			Value.Check(UnitSourceLinkParams, {
-				type: "software",
+				type: "profile",
 				unitId: "018ff2b7-7c00-7000-8000-000000000001",
 				linkId: "not-a-unit-link-id",
 			}),

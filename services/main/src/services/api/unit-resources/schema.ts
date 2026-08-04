@@ -95,7 +95,7 @@ export type AddUnitSubjectAssociationBody = Static<typeof AddUnitSubjectAssociat
 
 export const AddUnitLinkBody = t.Object(
 	{
-		url: t.String({ format: "uri" }),
+		url: t.String({ format: "uri", maxLength: 2_000, pattern: "^https?://" }),
 		sourceEntityUnitId: Uuid,
 		position: t.Optional(FractionalPosition),
 	},
@@ -129,9 +129,14 @@ export const UnitAssociationParams = t.Object({
 });
 export type UnitAssociationParams = Static<typeof UnitAssociationParams>;
 
-export const UnitSourceLinkParams = t.Object({
-	type: WorkUnitType,
+export const UnitSourceLinkUnitParams = t.Object({
+	type: t.Union(UnitKindValues.map((value) => t.Literal(value))),
 	unitId: Uuid,
+});
+export type UnitSourceLinkUnitParams = Static<typeof UnitSourceLinkUnitParams>;
+
+export const UnitSourceLinkParams = t.Object({
+	...UnitSourceLinkUnitParams.properties,
 	linkId: Uuid,
 });
 export type UnitSourceLinkParams = Static<typeof UnitSourceLinkParams>;

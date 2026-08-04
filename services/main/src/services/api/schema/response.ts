@@ -1397,6 +1397,10 @@ export const UnitSourceLinkResponse = t.Object(
 	},
 	{ additionalProperties: false },
 );
+export const UnitSourceLinkListResponse = t.Object(
+	{ items: t.Array(UnitSourceLinkResponse) },
+	{ additionalProperties: false },
+);
 export const TagApplicationResponse = t.Object({
 	unitId: Uuid,
 	tagId: Uuid,

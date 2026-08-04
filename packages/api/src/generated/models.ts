@@ -76216,11 +76216,244 @@ export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdRespon
 	| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus429
 	| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus500;
 
+export const GetApiUnitsByTypeByUnitIdLinksType = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdLinksType =
+	(typeof GetApiUnitsByTypeByUnitIdLinksType)[keyof typeof GetApiUnitsByTypeByUnitIdLinksType];
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdLinksPath = {
+	/**
+	 * @type string
+	 */
+	type: GetApiUnitsByTypeByUnitIdLinksType;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdLinksStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		sourceEntityId: string;
+		/**
+		 * @type string
+		 */
+		url: string;
+		/**
+		 * @type string
+		 */
+		normalizedUrl: string;
+		/**
+		 * @type string
+		 */
+		normalizedUrlHash: string;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdLinksStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdLinksStatus422 = ValidationError;
+
+export const GetApiUnitsByTypeByUnitIdLinksStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdLinksStatus429ErrorCodeEnum =
+	(typeof GetApiUnitsByTypeByUnitIdLinksStatus429ErrorCodeEnum)[keyof typeof GetApiUnitsByTypeByUnitIdLinksStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdLinksStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: GetApiUnitsByTypeByUnitIdLinksStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdLinksStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdLinksOptions = {
+	body?: never;
+	path: GetApiUnitsByTypeByUnitIdLinksPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdLinksResponses = {
+	"200": GetApiUnitsByTypeByUnitIdLinksStatus200;
+	"404": GetApiUnitsByTypeByUnitIdLinksStatus404;
+	"422": GetApiUnitsByTypeByUnitIdLinksStatus422;
+	"429": GetApiUnitsByTypeByUnitIdLinksStatus429;
+	"500": GetApiUnitsByTypeByUnitIdLinksStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiUnitsByTypeByUnitIdLinksResponse =
+	| GetApiUnitsByTypeByUnitIdLinksStatus200
+	| GetApiUnitsByTypeByUnitIdLinksStatus404
+	| GetApiUnitsByTypeByUnitIdLinksStatus422
+	| GetApiUnitsByTypeByUnitIdLinksStatus429
+	| GetApiUnitsByTypeByUnitIdLinksStatus500;
+
+export const PostApiUnitsByTypeByUnitIdLinksType = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdLinksType =
+	(typeof PostApiUnitsByTypeByUnitIdLinksType)[keyof typeof PostApiUnitsByTypeByUnitIdLinksType];
+
 /**
  * @type object
  */
 export type PostApiUnitsByTypeByUnitIdLinksPath = {
-	type: ("book" | "software" | "media") | "series";
+	/**
+	 * @type string
+	 */
+	type: PostApiUnitsByTypeByUnitIdLinksType;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -76326,6 +76559,14 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus403 = {
 	requestId: string;
 };
 
+export const PostApiUnitsByTypeByUnitIdLinksStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	EntityEntryNotFound: "EntityEntryNotFound",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdLinksStatus404ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdLinksStatus404ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdLinksStatus404ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -76338,7 +76579,7 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: "UnitNotFound";
+		code: PostApiUnitsByTypeByUnitIdLinksStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -76403,6 +76644,7 @@ export type PostApiUnitsByTypeByUnitIdLinksBody = {
 	/**
 	 * @description
 	 * Format: `uri`
+	 * @maxLength 2000
 	 * @type string
 	 */
 	url: string;
@@ -76457,11 +76699,40 @@ export type PostApiUnitsByTypeByUnitIdLinksResponse =
 	| PostApiUnitsByTypeByUnitIdLinksStatus429
 	| PostApiUnitsByTypeByUnitIdLinksStatus500;
 
+export const DeleteApiUnitsByTypeByUnitIdLinksByLinkIdType = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdType =
+	(typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdType)[keyof typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdType];
+
 /**
  * @type object
  */
 export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdPath = {
-	type: ("book" | "software" | "media") | "series";
+	/**
+	 * @type string
+	 */
+	type: DeleteApiUnitsByTypeByUnitIdLinksByLinkIdType;
 	/**
 	 * @description
 	 * Format: `uuid`

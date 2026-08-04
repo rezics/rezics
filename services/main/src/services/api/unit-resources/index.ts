@@ -63,6 +63,7 @@ import {
 	UnitAliasParams,
 	UnitAliasUnitParams,
 	UnitSourceLinkParams,
+	UnitSourceLinkUnitParams,
 	UnitUnitParams,
 	UnitTagParams,
 	VoteBody,
@@ -96,6 +97,7 @@ import {
 	TagDetailResponse,
 	TagListResponse,
 	toPortableTextResponse,
+	UnitSourceLinkListResponse,
 	UnitSourceLinkResponse,
 	VoteResponse,
 } from "../schema/response";
@@ -140,6 +142,19 @@ async function ensureUnitMutationAuthorized(
 	scope: readonly string[],
 ): Promise<void> {
 	await authorization.ensureCanUpdate(unitId, [scope]);
+}
+
+async function ensureReadableSourceEntity(
+	authorization: UnitAuthorization<string>,
+	sourceEntityUnitId: string,
+): Promise<void> {
+	await authorization.ensureCanRead(sourceEntityUnitId, () => new EntityEntryNotFound());
+	const [sourceEntity] = await database
+		.select({ id: entity.id })
+		.from(entity)
+		.where(eq(entity.id, sourceEntityUnitId))
+		.limit(1);
+	if (!sourceEntity) throw new EntityEntryNotFound();
 }
 
 async function getAliasVoteSummary(aliasId: string, value: number | null) {
@@ -1108,6 +1123,29 @@ export default new Elysia()
 					},
 				},
 			)
+			.get(
+				"/links",
+				async ({ params, authorization }) => {
+					await checkUnitType(params.unitId, params.type);
+					await authorization.unit.ensureCanRead(params.unitId);
+					return {
+						items: await database
+							.select()
+							.from(unitSourceLink)
+							.where(eq(unitSourceLink.unitId, params.unitId))
+							.orderBy(unitSourceLink.position, unitSourceLink.id),
+					};
+				},
+				{
+					access: "unit:read",
+					params: UnitSourceLinkUnitParams,
+					response: {
+						[StatusCodes.OK]: UnitSourceLinkListResponse,
+						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+					},
+					detail: { summary: "List Unit external links", tags: ["Units"] },
+				},
+			)
 			.post(
 				"/links",
 				async ({ params, authorization, body }) => {
@@ -1115,12 +1153,16 @@ export default new Elysia()
 					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
 						"external-links",
 					]);
-					// A source link records evidence provenance, not credit or “is about” semantics.
+					await ensureReadableSourceEntity(authorization.unit, body.sourceEntityUnitId);
+					// An external link is Unit metadata, not credit or an “is about” relationship.
 					// It intentionally does not consume either Entity association capability.
 					const normalized = new URL(body.url);
 					normalized.hash = "";
 					normalized.searchParams.sort();
 					const normalizedUrl = normalized.toString();
+					const normalizedUrlHash = createHash("sha256")
+						.update(normalizedUrl)
+						.digest("hex");
 					const link = await database.transaction(async (tx) => {
 						await tx.execute(
 							sql`select pg_advisory_xact_lock(hashtextextended(${params.unitId}::text, 0))`,
@@ -1141,31 +1183,57 @@ export default new Elysia()
 									body.position ??
 									fractionalPositionBetween(last?.position, null),
 								normalizedUrl,
-								normalizedUrlHash: createHash("sha256")
-									.update(normalizedUrl)
-									.digest("hex"),
+								normalizedUrlHash,
+							})
+							.onConflictDoNothing({
+								target: [
+									unitSourceLink.unitId,
+									unitSourceLink.sourceEntityId,
+									unitSourceLink.normalizedUrlHash,
+								],
 							})
 							.returning();
-						await recordUnitRevision(tx, {
-							unitId: params.unitId,
-							actorProfileId: authorization.profileId,
-							event: "update",
-						});
-						return created;
+						if (created) {
+							await recordUnitRevision(tx, {
+								unitId: params.unitId,
+								actorProfileId: authorization.profileId,
+								event: "update",
+							});
+							return created;
+						}
+						const [existing] = await tx
+							.select()
+							.from(unitSourceLink)
+							.where(
+								and(
+									eq(unitSourceLink.unitId, params.unitId),
+									eq(unitSourceLink.sourceEntityId, body.sourceEntityUnitId),
+									eq(unitSourceLink.normalizedUrlHash, normalizedUrlHash),
+								),
+							)
+							.limit(1);
+						if (!existing)
+							throw new Error("Conflicting external link could not be resolved");
+						if (existing.normalizedUrl !== normalizedUrl)
+							throw new Error("External link URL normalization hash collision");
+						return existing;
 					});
 					if (!link) throw new Error("External link insertion did not return a row");
 					return link;
 				},
 				{
 					access: "contribute:unit:update",
-					params: UnitUnitParams,
+					params: UnitSourceLinkUnitParams,
 					body: AddUnitLinkBody,
 					response: {
 						[StatusCodes.OK]: UnitSourceLinkResponse,
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"EntityEntryNotFound",
+						]),
 					},
-					detail: { summary: "Add unit source link", tags: ["Units"] },
+					detail: { summary: "Add Unit external link", tags: ["Units"] },
 				},
 			)
 			.delete(
@@ -1206,7 +1274,7 @@ export default new Elysia()
 						]),
 					},
 					detail: {
-						summary: "Remove unit source link",
+						summary: "Remove Unit external link",
 						tags: ["Units"],
 						responses: NoContentResponse,
 					},

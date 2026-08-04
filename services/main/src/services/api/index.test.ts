@@ -3,6 +3,7 @@ import { toOpenAPISchema } from "@elysiajs/openapi";
 import { z } from "zod";
 import { describe, expect, it } from "vitest";
 
+import { UnitKindValues } from "../database/schema/contract-values";
 import api from ".";
 
 const ErrorBody = z.object({
@@ -131,6 +132,34 @@ describe("API root", () => {
 			{ SessionCookie: [] },
 		]);
 		expect(document.paths["/api/v1/slug-addresses/profile"]).toBeUndefined();
+	});
+
+	it("documents external links as a resource of every registered Unit kind", () => {
+		const document = toOpenAPISchema(api);
+		const operations = [
+			document.paths["/api/v1/units/{type}/{unitId}/links"]?.get,
+			document.paths["/api/v1/units/{type}/{unitId}/links"]?.post,
+			document.paths["/api/v1/units/{type}/{unitId}/links/{linkId}"]?.delete,
+		];
+
+		for (const operation of operations) {
+			if (!operation) throw new Error("Expected a Unit external-link operation");
+			const typeParameter = operation.parameters?.find(
+				(parameter) =>
+					!("$ref" in parameter) && parameter.in === "path" && parameter.name === "type",
+			);
+			if (!typeParameter || "$ref" in typeParameter || !typeParameter.schema)
+				throw new Error("Expected an inline Unit type path parameter");
+			if ("$ref" in typeParameter.schema)
+				throw new Error("Expected an inline Unit type schema");
+			expect(typeParameter.schema.enum).toEqual(UnitKindValues);
+		}
+
+		const postResponses =
+			document.paths["/api/v1/units/{type}/{unitId}/links"]?.post?.responses;
+		expect(JSON.stringify(postResponses?.[StatusCodes.NOT_FOUND])).toContain(
+			"EntityEntryNotFound",
+		);
 	});
 
 	it("documents the development preview gate on unreleased Zone address writes", () => {

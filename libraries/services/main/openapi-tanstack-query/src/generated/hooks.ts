@@ -1404,6 +1404,12 @@ import type {
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus422,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus429,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus500,
+	GetApiUnitsByTypeByUnitIdLinksOptions,
+	GetApiUnitsByTypeByUnitIdLinksStatus200,
+	GetApiUnitsByTypeByUnitIdLinksStatus404,
+	GetApiUnitsByTypeByUnitIdLinksStatus422,
+	GetApiUnitsByTypeByUnitIdLinksStatus429,
+	GetApiUnitsByTypeByUnitIdLinksStatus500,
 	PostApiUnitsByTypeByUnitIdLinksOptions,
 	PostApiUnitsByTypeByUnitIdLinksStatus200,
 	PostApiUnitsByTypeByUnitIdLinksStatus400,
@@ -2630,6 +2636,7 @@ import {
 	deleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId,
 	postApiUnitsByTypeByUnitIdSubjectAssociations,
 	deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationId,
+	getApiUnitsByTypeByUnitIdLinks,
 	postApiUnitsByTypeByUnitIdLinks,
 	deleteApiUnitsByTypeByUnitIdLinksByLinkId,
 	putApiUnitsByTypeByUnitIdTagsByTagId,
@@ -24210,6 +24217,106 @@ export function useDeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationI
 	>;
 }
 
+export const getApiUnitsByTypeByUnitIdLinksQueryKey = ({
+	path,
+}: Omit<GetApiUnitsByTypeByUnitIdLinksOptions, "headers">) =>
+	[{ url: "/api/v1/units/:type/:unitId/links", params: path }] as const;
+
+type GetApiUnitsByTypeByUnitIdLinksQueryKey = ReturnType<
+	typeof getApiUnitsByTypeByUnitIdLinksQueryKey
+>;
+
+export function getApiUnitsByTypeByUnitIdLinksQueryOptions(
+	{ path }: GetApiUnitsByTypeByUnitIdLinksOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiUnitsByTypeByUnitIdLinksQueryKey({ path });
+	return queryOptions<
+		GetApiUnitsByTypeByUnitIdLinksStatus200,
+		ResponseErrorConfig<
+			| GetApiUnitsByTypeByUnitIdLinksStatus404
+			| GetApiUnitsByTypeByUnitIdLinksStatus422
+			| GetApiUnitsByTypeByUnitIdLinksStatus429
+			| GetApiUnitsByTypeByUnitIdLinksStatus500
+		>,
+		GetApiUnitsByTypeByUnitIdLinksStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiUnitsByTypeByUnitIdLinks({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List Unit external links
+ * {@link /api/v1/units/:type/:unitId/links}
+ */
+export function useGetApiUnitsByTypeByUnitIdLinks<
+	TData = GetApiUnitsByTypeByUnitIdLinksStatus200,
+	TQueryData = GetApiUnitsByTypeByUnitIdLinksStatus200,
+	TQueryKey extends QueryKey = GetApiUnitsByTypeByUnitIdLinksQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiUnitsByTypeByUnitIdLinksOptions["path"]
+			| (() => GetApiUnitsByTypeByUnitIdLinksOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiUnitsByTypeByUnitIdLinksStatus200,
+				ResponseErrorConfig<
+					| GetApiUnitsByTypeByUnitIdLinksStatus404
+					| GetApiUnitsByTypeByUnitIdLinksStatus422
+					| GetApiUnitsByTypeByUnitIdLinksStatus429
+					| GetApiUnitsByTypeByUnitIdLinksStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiUnitsByTypeByUnitIdLinksQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiUnitsByTypeByUnitIdLinksQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiUnitsByTypeByUnitIdLinksStatus404
+			| GetApiUnitsByTypeByUnitIdLinksStatus422
+			| GetApiUnitsByTypeByUnitIdLinksStatus429
+			| GetApiUnitsByTypeByUnitIdLinksStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
 export const postApiUnitsByTypeByUnitIdLinksMutationKey = () =>
 	[{ url: "/api/v1/units/:type/:unitId/links" }] as const;
 
@@ -24244,7 +24351,7 @@ export function postApiUnitsByTypeByUnitIdLinksMutationOptions<TContext = unknow
 }
 
 /**
- * @summary Add unit source link
+ * @summary Add Unit external link
  * {@link /api/v1/units/:type/:unitId/links}
  */
 export function usePostApiUnitsByTypeByUnitIdLinks<TContext>(
@@ -24351,7 +24458,7 @@ export function deleteApiUnitsByTypeByUnitIdLinksByLinkIdMutationOptions<TContex
 }
 
 /**
- * @summary Remove unit source link
+ * @summary Remove Unit external link
  * {@link /api/v1/units/:type/:unitId/links/:linkId}
  */
 export function useDeleteApiUnitsByTypeByUnitIdLinksByLinkId<TContext>(
