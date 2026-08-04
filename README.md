@@ -152,8 +152,9 @@ it does not execute verification procedures or change status.
 Start with the
 [product capability map](./docs/architecture/product-capability-map.md) for the
 complete repository and Outline reconciliation. Detailed Items are owned by
-the linked platform, catalog, publishing, community, discovery, legal, and
-operations documents or by the nearest source contract.
+the linked service, feature, library, package, deploy directory, or nearest
+source contract. Only genuinely cross-cutting decisions and outcomes without a
+current code owner stay under `docs/`.
 
 ```progress
 id: tooling.progress-protocol

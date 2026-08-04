@@ -1,4 +1,4 @@
-# Platform capabilities
+# Main service platform Progress
 
 This document owns the cross-cutting product outcomes that every Rezics
 capability builds on. It joins the account, access, localization, media,

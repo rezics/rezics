@@ -1,4 +1,4 @@
-# Catalog capabilities
+# Unit catalog Progress
 
 Rezics uses Unit as shared identity and adds subtype data only when a product
 needs distinct fields or behavior. This document owns the complete catalog

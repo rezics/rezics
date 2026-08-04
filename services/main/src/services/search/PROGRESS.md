@@ -1,4 +1,4 @@
-# Discovery capabilities
+# Discovery Progress
 
 This document owns query, filter, search, metrics, home discovery, pagination,
 and indexing outcomes. PostgreSQL remains canonical; Meilisearch and any

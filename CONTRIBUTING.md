@@ -40,7 +40,9 @@ Use the [product capability map](./docs/architecture/product-capability-map.md) 
 outcome chain and to keep repository and Outline coverage complete.
 
 - Put each Item beside the source, test, architecture document, legal draft, or runbook that owns
-  the result. Do not recreate `TODO.md` or another central task database.
+  the result. Prefer a local `PROGRESS.md` in the owning code directory when no existing source or
+  README is a better carrier. Use `docs/` only for genuinely cross-cutting decisions or outcomes
+  without a current code owner. Do not recreate `TODO.md` or another central task database.
 - Give the Item a stable domain-prefixed ID, one outcome-oriented goal, direct dependencies, and
   acceptance and verification steps that a maintainer can actually observe.
 - Keep cross-domain prerequisites explicit with `depends`; do not encode priority or ownership as

@@ -1,4 +1,4 @@
-# Publishing capabilities
+# Publishing Progress
 
 This document owns the author-to-reader outcomes for Posts, discussions,
 Portable Text, Block documents, polls, structured content, revision history,

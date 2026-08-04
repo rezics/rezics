@@ -3,7 +3,8 @@
 This is the human entry point to the complete Progress graph. It maps current
 repository owners and active Outline product decisions to outcome Items; it
 does not duplicate their acceptance criteria. Follow the Item ID to its owning
-architecture document, source contract, legal draft, or runbook.
+code-area Progress file, source contract, architecture decision, legal draft,
+or runbook.
 
 A directory, route, schema, or mockup proves that work exists, not that the
 product outcome is done. Items stay `open` until every acceptance condition is
@@ -11,15 +12,15 @@ true and every verification procedure has actually been completed.
 
 ## Product outcome chains
 
-| Chain                         | Owning document                                         | Milestone                  |
-| ----------------------------- | ------------------------------------------------------- | -------------------------- |
-| Shared platform               | [Platform capabilities](./platform-capabilities.md)     | `platform.v1-foundation`   |
-| Unit catalog                  | [Catalog capabilities](./catalog-capabilities.md)       | `catalog.v1-experience`    |
-| Authoring and publishing      | [Publishing capabilities](./publishing-capabilities.md) | `publishing.v1-experience` |
-| Communities and participation | [Community capabilities](./community-capabilities.md)   | `community.v1-experience`  |
-| Search and discovery          | [Discovery capabilities](./discovery-capabilities.md)   | `discovery.v1-experience`  |
-| Delivery and recovery         | [Platform delivery](../operations/platform-delivery.md) | `operations.v1-delivery`   |
-| Approved future outcomes      | [Future capabilities](./future-capabilities.md)         | Not a v1 dependency        |
+| Chain                         | Owner                                                                        | Milestone                  |
+| ----------------------------- | ---------------------------------------------------------------------------- | -------------------------- |
+| Shared platform               | [Main service platform](../../services/main/src/services/PROGRESS.md)        | `platform.v1-foundation`   |
+| Unit catalog                  | [Unit service](../../services/main/src/services/units/PROGRESS.md)           | `catalog.v1-experience`    |
+| Authoring and publishing      | [Post service](../../services/main/src/services/posts/PROGRESS.md)           | `publishing.v1-experience` |
+| Communities and participation | [Realm service](../../services/main/src/services/realms/PROGRESS.md)         | `community.v1-experience`  |
+| Search and discovery          | [Search service](../../services/main/src/services/search/PROGRESS.md)        | `discovery.v1-experience`  |
+| Delivery and recovery         | [Deployment](../../deploy/PROGRESS.md)                                       | `operations.v1-delivery`   |
+| Approved future outcomes      | [Future capabilities without a current code owner](./future-capabilities.md) | Not a v1 dependency        |
 
 The graph flows from shared identity and Unit contracts into publishing,
 community, discovery, and production delivery. Cross-chain dependencies name

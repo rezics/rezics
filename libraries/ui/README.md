@@ -70,3 +70,24 @@ hand-written native interactive controls, composite ARIA controls, feature-level
 overrides, native `option` elements, physical-direction utilities, `space-x/space-y` utilities,
 and non-semantic Tailwind palette classes in application features and `src/custom`. Use the
 corresponding SharkUI components and primitives instead, such as `NativeSelectOption`.
+
+## Public package Progress
+
+Planning context:
+
+- [Outline: UI package](https://outline.rezics.com/doc/ui-gPNy8nuVN0)
+
+```progress
+id: developer.public-ui-package
+status: open
+goal: Publish a supported public Rezics UI package only after its SharkUI, styling, localization, and compatibility contracts are stable.
+depends:
+  - experience.shared-design-system
+accept:
+  - The public package exposes a deliberately small framework contract, peer dependencies, styles, configuration, accessibility guarantees, and tree-shakable entry points.
+  - Private applications, services, generated code, and internal-only UI do not leak into the public dependency graph.
+  - Versioning, changelog, migration, provenance, package signing, deprecation, examples, and consumer support follow the v1 compatibility baseline.
+verify:
+  - Run package boundary, API report, type, build, tree-shaking, style, accessibility, provenance, and representative external-consumer tests.
+  - Install the packed artifact into clean supported consumers and verify setup, rendering, localization, upgrade, and removal.
+```

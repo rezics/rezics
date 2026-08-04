@@ -1,4 +1,4 @@
-# Community capabilities
+# Community Progress
 
 This document owns the social organization of catalog and published content:
 Feeds, reactions, follows, collections, Realms, Zones, Docks, tags, reviews,
