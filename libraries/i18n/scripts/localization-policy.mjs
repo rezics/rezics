@@ -79,6 +79,19 @@ function removeNonProse(value, verbatimDefinitions) {
 	return removeCodeAndLinks(withoutTerms);
 }
 
+function isAboutReferenceDocument(path) {
+	return /(?:^|\/)apps\/about\/src\/content\/locales\/[^/]+\/(?:docs|legal)\//.test(
+		path.replaceAll("\\", "/"),
+	);
+}
+
+function shouldCheckMarkdownTerminology(path, definition) {
+	// `slug` remains the precise internal/API identifier. Public product copy uses
+	// the localized termbase wording, while developer and legal references must be
+	// able to name the field without weakening the rule for ordinary UI content.
+	return !(isAboutReferenceDocument(path) && definition.concept === "unitSlug");
+}
+
 function checkUnapprovedTokens(path, source, value, offset, verbatimDefinitions) {
 	const prose = removeNonProse(value, verbatimDefinitions);
 	const errors = [];
@@ -407,6 +420,7 @@ export function checkMarkdownSource({
 	if (errors.length > 0) return errors;
 	const prose = removeCodeAndLinks(mdxSource.value);
 	for (const definition of terminologyDefinitions.forbidden) {
+		if (!shouldCheckMarkdownTerminology(path, definition)) continue;
 		let searchFrom = 0;
 		while (searchFrom < prose.length) {
 			const termOffset = findTermOffset(prose.slice(searchFrom), definition.value);
@@ -425,9 +439,7 @@ export function checkMarkdownSource({
 	for (const definition of verbatimDefinitions) {
 		const canonical = definition.value;
 		const lowerCanonical = canonical.toLocaleLowerCase("en-US");
-		for (const match of mdxSource.value.matchAll(
-			/[A-Za-z][A-Za-z0-9]*(?:[-_.][A-Za-z0-9]+)*/g,
-		)) {
+		for (const match of prose.matchAll(/[A-Za-z][A-Za-z0-9]*(?:[-_.][A-Za-z0-9]+)*/g)) {
 			const token = match[0];
 			if (token === canonical || token.toLocaleLowerCase("en-US") !== lowerCanonical)
 				continue;

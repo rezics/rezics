@@ -1,0 +1,126 @@
+---
+title: "Use API tokens with the REZICS npm client"
+description: "Create a REZICS API token and use it safely with the official type-safe npm client."
+---
+
+# Use API tokens with `@rezics/api`
+
+The `@rezics/api` package is the type-safe client for the public REZICS API. This guide shows how to create a token, keep it outside your source code, create a client, and make an authenticated request.
+
+## Requirements
+
+- Node.js 20.6 or later
+- A REZICS account
+- A server-side Node.js project
+
+API tokens are credentials. Do not expose them in browser code, commit them to source control, include them in URLs, or paste them into an AI conversation.
+
+## 1. Create an API token
+
+Open [API token settings](https://www.rezics.com/settings/tokens), create a token, and grant only the permissions your application needs. Prefer an expiration date and the smallest practical usage limits.
+
+Copy the token when it is shown. You will not be able to view the full value again.
+
+## 2. Install the client
+
+```sh
+npm install @rezics/api
+```
+
+## 3. Store the token in an environment variable
+
+Create a local `.env` file:
+
+```dotenv
+REZICS_API_TOKEN=
+```
+
+Add the file to `.gitignore` before entering the token:
+
+```gitignore
+.env
+```
+
+Then enter the token yourself. Do not pass it as a command-line argument because command histories and process listings may expose it.
+
+## 4. Create a client and inspect the token
+
+Create `app.mjs`:
+
+```js
+import { apiTokenFromEnv, createRezicsClient, getCurrentApiToken } from "@rezics/api";
+
+const client = createRezicsClient({
+	baseUrl: "https://api.rezics.com",
+	token: () => apiTokenFromEnv(process.env.REZICS_API_TOKEN),
+});
+
+const result = await getCurrentApiToken({ client });
+
+console.log({
+	name: result.data.name,
+	enabled: result.data.enabled,
+	expiresAt: result.data.expiresAt,
+	permissions: result.data.permissions,
+	quota: result.data.quota,
+});
+```
+
+Run it with Node.js:
+
+```sh
+node --env-file=.env app.mjs
+```
+
+`apiTokenFromEnv` rejects missing tokens and values containing whitespace without including the token in its error message. `createRezicsClient` sends the token as Bearer authentication, omits browser cookies, and requires a secure connection except for loopback development hosts.
+
+## 5. Call other API operations
+
+The package exports generated functions and their TypeScript models. Pass the same isolated client to each operation:
+
+```js
+import { getApiUsersMe } from "@rezics/api";
+
+const profile = await getApiUsersMe({ client });
+console.log(profile.data);
+```
+
+The token must include the permission required by the operation. TypeScript checks request parameters and response data against the public API contract.
+
+## Handle API errors
+
+By default, unsuccessful responses throw `ResponseError`:
+
+```js
+import { ResponseError } from "@rezics/api";
+
+try {
+	const result = await getCurrentApiToken({ client });
+	console.log(result.data.permissions);
+} catch (error) {
+	if (error instanceof ResponseError) {
+		console.error(`REZICS API request failed with status ${error.status}`);
+	} else {
+		throw error;
+	}
+}
+```
+
+If you prefer to handle documented response statuses directly, disable throwing for that call:
+
+```js
+const result = await getCurrentApiToken({
+	client,
+	throwOnError: false,
+});
+
+if (result.status === 200) {
+	console.log(result.data.permissions);
+} else {
+	console.error(`REZICS API request failed with status ${result.status}`);
+}
+```
+
+## Rotate or revoke a token
+
+If a token may have been exposed, revoke it immediately in [API token settings](https://www.rezics.com/settings/tokens), create a replacement, update the environment variable, and restart the application. Revoke tokens that are no longer needed.

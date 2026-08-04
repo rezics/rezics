@@ -121,13 +121,59 @@ describe("localization terminology policy", () => {
 	it("ignores technical identifiers in Markdown code", () => {
 		const errors = checkMarkdownSource({
 			path: "apps/about/src/content/locales/zh-hant/example.md",
-			source: "技術識別法為 `Zone`。",
+			source: "技術識別法為 `Zone`，套件為 `@rezics/api`。",
 			verbatimDefinitions,
 			terminologyDefinitions,
 			rejectUnapprovedTokens: true,
 		});
 
 		expect(errors).toEqual([]);
+	});
+
+	it("still enforces canonical spelling in visible Markdown prose", () => {
+		const errors = checkMarkdownSource({
+			path: "apps/about/src/content/locales/en/example.md",
+			source: "Connect to Rezics.",
+			verbatimDefinitions,
+			terminologyDefinitions,
+			rejectUnapprovedTokens: false,
+		});
+
+		expect(errors).toEqual([
+			expect.stringContaining('use canonical spelling "REZICS" instead of "Rezics"'),
+		]);
+	});
+
+	it("allows internal field terminology in about developer and legal references", () => {
+		const docsErrors = checkMarkdownSource({
+			path: "apps/about/src/content/locales/en/docs/api/example.mdx",
+			source: "Use the Unit slug returned by the API.",
+			verbatimDefinitions,
+			terminologyDefinitions: flattenTerminology({
+				unitSlug: {
+					forms: { label: "Path identifier" },
+					forbidden: ["slug"],
+				},
+			}),
+			rejectUnapprovedTokens: false,
+		});
+		const productErrors = checkMarkdownSource({
+			path: "apps/about/src/content/locales/en/products/example.mdx",
+			source: "Use the Unit slug returned by the API.",
+			verbatimDefinitions,
+			terminologyDefinitions: flattenTerminology({
+				unitSlug: {
+					forms: { label: "Path identifier" },
+					forbidden: ["slug"],
+				},
+			}),
+			rejectUnapprovedTokens: false,
+		});
+
+		expect(docsErrors).toEqual([]);
+		expect(productErrors).toEqual([
+			expect.stringContaining('forbidden unitSlug terminology "slug"'),
+		]);
 	});
 
 	it("checks MDX metadata prose without treating module syntax as visible copy", () => {
