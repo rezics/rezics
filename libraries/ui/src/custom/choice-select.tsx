@@ -20,6 +20,17 @@ export interface ChoiceOption<Value extends string> {
  */
 export type ChoiceSelectAppearance = "field" | "quiet";
 export type ChoiceSelectSize = NonNullable<ComponentProps<typeof SelectTrigger>["size"]>;
+export type ChoiceSelectPositioning = ComponentProps<typeof Select>["positioning"];
+
+type ChoiceSelectTriggerPresentation =
+	| {
+			triggerIcon?: ReactNode;
+			triggerPresentation?: "value";
+	  }
+	| {
+			triggerIcon: ReactNode;
+			triggerPresentation: "icon-only";
+	  };
 
 const choiceSelectAppearanceClassNames = {
 	field: "border-input bg-background shadow-sm/5",
@@ -46,8 +57,10 @@ export function ChoiceSelect<Value extends string>({
 	onValueChange,
 	options,
 	placeholder,
+	positioning,
 	size = "md",
 	triggerIcon,
+	triggerPresentation = "value",
 	value,
 }: {
 	appearance?: ChoiceSelectAppearance;
@@ -59,10 +72,10 @@ export function ChoiceSelect<Value extends string>({
 	onValueChange: (value: readonly Value[]) => void;
 	options: readonly ChoiceOption<Value>[];
 	placeholder: string;
+	positioning?: ChoiceSelectPositioning;
 	size?: ChoiceSelectSize;
-	triggerIcon?: ReactNode;
 	value: readonly Value[];
-}) {
+} & ChoiceSelectTriggerPresentation) {
 	const { collection, set } = useListCollection<ChoiceOption<Value>>({
 		initialItems: [...options],
 		itemToString: (item) => item.label,
@@ -85,22 +98,31 @@ export function ChoiceSelect<Value extends string>({
 			onValueChange={({ value: nextValue }) => {
 				onValueChange(nextValue.filter((candidate) => isChoiceValue(options, candidate)));
 			}}
+			positioning={positioning}
 			value={[...value]}
 		>
 			<SelectTrigger
 				aria-label={ariaLabel}
-				className={cn("min-w-32", choiceSelectAppearanceClassNames[appearance], className)}
+				className={cn(
+					triggerPresentation === "icon-only"
+						? "min-w-0 justify-center gap-0! px-2.5 [&_[data-slot=select-indicator]]:hidden"
+						: "min-w-32",
+					choiceSelectAppearanceClassNames[appearance],
+					className,
+				)}
 				size={size}
 			>
 				{triggerIcon}
-				<span
-					className={cn(
-						"min-w-0 truncate",
-						!selectedLabels.length && "text-muted-foreground",
-					)}
-				>
-					{selectedLabels.length ? selectedLabels.join(", ") : placeholder}
-				</span>
+				{triggerPresentation === "value" ? (
+					<span
+						className={cn(
+							"min-w-0 truncate",
+							!selectedLabels.length && "text-muted-foreground",
+						)}
+					>
+						{selectedLabels.length ? selectedLabels.join(", ") : placeholder}
+					</span>
+				) : null}
 			</SelectTrigger>
 			<SelectContent className={cn("min-w-64 border-transparent p-1.5", contentClassName)}>
 				{options.map((option) => (

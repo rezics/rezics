@@ -34,7 +34,7 @@ const neutralButtonClassName = [
 	"dark:hover:from-white dark:hover:to-white",
 ].join(" ");
 
-const brandButtonClassName = "border-transparent bg-primary text-white hover:bg-primary/90";
+const brandButtonClassName = "border-transparent bg-primary text-white! hover:bg-primary/90";
 
 function resolveButtonPolicy(variant: ButtonVariant): {
 	className?: string;

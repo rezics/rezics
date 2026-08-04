@@ -1,13 +1,14 @@
 import {
 	Button,
+	ChoiceSelect,
 	Logo,
-	NativeSelect,
-	NativeSelectOption,
 	SkipNavLink,
 	buttonVariants,
+	type ChoiceOption,
+	type ChoiceSelectPositioning,
 } from "@rezics/ui";
 import { Languages, Menu, Moon, Sun, X } from "lucide-react";
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useState } from "react";
 
 import type { PageId, SiteCopy } from "../content/locales";
 import { ABOUT_LOCALE_META, type AboutLocale } from "../i18n/locales";
@@ -30,6 +31,10 @@ type Props = {
 
 type Theme = "light" | "dark";
 
+const CENTERED_LANGUAGE_SELECT_POSITIONING = {
+	placement: "bottom",
+} as const satisfies ChoiceSelectPositioning;
+
 function getTheme(): Theme {
 	return document.documentElement.classList.contains("dark") ? "dark" : "light";
 }
@@ -37,6 +42,12 @@ function getTheme(): Theme {
 export function SiteHeader({ locale, active, copy, links, alternatePaths, appUrl }: Props) {
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [theme, setTheme] = useState<Theme | null>(null);
+	const languageOptions: readonly ChoiceOption<AboutLocale>[] = alternatePaths.map(
+		({ locale: alternateLocale }) => ({
+			label: ABOUT_LOCALE_META[alternateLocale].nativeName,
+			value: alternateLocale,
+		}),
+	);
 
 	useEffect(() => setTheme(getTheme()), []);
 
@@ -45,9 +56,10 @@ export function SiteHeader({ locale, active, copy, links, alternatePaths, appUrl
 		return () => document.body.classList.remove("menu-open");
 	}, [menuOpen]);
 
-	const changeLanguage = (event: ChangeEvent<HTMLSelectElement>) => {
+	const changeLanguage = (nextLocale: AboutLocale | undefined) => {
+		if (!nextLocale) return;
 		const selected = alternatePaths.find(
-			({ locale: alternateLocale }) => alternateLocale === event.currentTarget.value,
+			({ locale: alternateLocale }) => alternateLocale === nextLocale,
 		);
 		if (selected) window.location.assign(selected.path);
 	};
@@ -82,24 +94,17 @@ export function SiteHeader({ locale, active, copy, links, alternatePaths, appUrl
 
 					<div className="header-actions" aria-label={copy.a11y.utilityNavigation}>
 						<div className="desktop-tools">
-							<label className="language-control">
-								<Languages aria-hidden="true" />
-								<span className="sr-only">{copy.nav.language}</span>
-								<NativeSelect
-									aria-label={copy.nav.language}
-									value={locale}
-									onChange={changeLanguage}
-								>
-									{alternatePaths.map(({ locale: alternateLocale }) => (
-										<NativeSelectOption
-											key={alternateLocale}
-											value={alternateLocale}
-										>
-											{ABOUT_LOCALE_META[alternateLocale].nativeName}
-										</NativeSelectOption>
-									))}
-								</NativeSelect>
-							</label>
+							<ChoiceSelect
+								ariaLabel={copy.nav.language}
+								onValueChange={([nextLocale]) => changeLanguage(nextLocale)}
+								options={languageOptions}
+								placeholder={copy.nav.language}
+								positioning={CENTERED_LANGUAGE_SELECT_POSITIONING}
+								size="lg"
+								triggerIcon={<Languages aria-hidden="true" />}
+								triggerPresentation="icon-only"
+								value={[locale]}
+							/>
 							<Button
 								aria-label={copy.theme.toggle}
 								aria-pressed={theme === "dark"}
@@ -153,20 +158,18 @@ export function SiteHeader({ locale, active, copy, links, alternatePaths, appUrl
 							</a>
 						))}
 						<div className="mobile-navigation__tools">
-							<NativeSelect
-								aria-label={copy.nav.language}
-								value={locale}
-								onChange={changeLanguage}
-							>
-								{alternatePaths.map(({ locale: alternateLocale }) => (
-									<NativeSelectOption
-										key={alternateLocale}
-										value={alternateLocale}
-									>
-										{ABOUT_LOCALE_META[alternateLocale].nativeName}
-									</NativeSelectOption>
-								))}
-							</NativeSelect>
+							<div className="mobile-language-select">
+								<ChoiceSelect
+									appearance="field"
+									ariaLabel={copy.nav.language}
+									className="w-full"
+									onValueChange={([nextLocale]) => changeLanguage(nextLocale)}
+									options={languageOptions}
+									placeholder={copy.nav.language}
+									size="lg"
+									value={[locale]}
+								/>
+							</div>
 							<Button onClick={toggleTheme} variant="outline">
 								{theme === "dark" ? copy.theme.dark : copy.theme.light}
 							</Button>
