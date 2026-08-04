@@ -16,6 +16,7 @@ import { database } from "../database";
 import { zone } from "../database/schema";
 import { InvalidSearch } from "./errors";
 import { getActiveSearchGeneration } from "./generation";
+import { createCandidateSearchContext, type CandidateSearchContext } from "./meilisearch";
 import {
 	assertSearchExpression,
 	combineSearchExpressions,
@@ -62,6 +63,7 @@ interface RankedSearchGroup<Hit extends RankedSearchHit> {
 type DomainSearchExecutor<Hit extends RankedSearchHit> = (
 	category: SearchCategory,
 	request: Parameters<typeof searchDomain>[1],
+	candidateContext: CandidateSearchContext,
 ) => Promise<RankedSearchGroup<Hit>>;
 
 async function resolveScope(compiled: CompiledSearchRequest): Promise<{
@@ -216,6 +218,7 @@ async function executeCompiledSearchWithPresentation<Hit extends RankedSearchHit
 			enforcedZoneId,
 			inputIdentity,
 		);
+	const candidateContext = await createCandidateSearchContext(generation, profileId);
 	let cursor: ReturnType<typeof parseSearchCursor> | undefined;
 	if (compiled.cursor)
 		try {
@@ -263,8 +266,8 @@ async function executeCompiledSearchWithPresentation<Hit extends RankedSearchHit
 					includeScopeDescendants: scope.includeScopeDescendants,
 				};
 				const [group, facets] = await Promise.all([
-					domainSearch(category, domainRequest),
-					searchDomainFacets(category, domainRequest, facetFields),
+					domainSearch(category, domainRequest, candidateContext),
+					searchDomainFacets(category, domainRequest, facetFields, candidateContext),
 				]);
 				return {
 					state: "result",
@@ -363,6 +366,7 @@ export async function executeCompiledSearchIdentifiers(
 			enforcedZoneId,
 			inputIdentity,
 		);
+	const candidateContext = await createCandidateSearchContext(generation, profileId);
 	let cursor: ReturnType<typeof parseGlobalSearchCursor> | undefined;
 	if (compiled.cursor)
 		try {
@@ -442,26 +446,29 @@ export async function executeCompiledSearchIdentifiers(
 		};
 
 	const [page, facetGroups] = await Promise.all([
-		searchGlobalIdentifiers({
-			profileId,
-			localizationLanguages,
-			query: compiled.query,
-			offset: cursor?.offset ?? 0,
-			limit: compiled.pageSize,
-			sort: compiled.sort,
-			domainFilter,
-			scopeUnitId: scope.scopeUnitId,
-			includeScopeDescendants: scope.includeScopeDescendants,
-			branches: results.map((result) => ({
-				category: result.category,
-				...(result.request.searchExpression
-					? { searchExpression: result.request.searchExpression }
-					: {}),
-			})),
-		}),
+		searchGlobalIdentifiers(
+			{
+				profileId,
+				localizationLanguages,
+				query: compiled.query,
+				offset: cursor?.offset ?? 0,
+				limit: compiled.pageSize,
+				sort: compiled.sort,
+				domainFilter,
+				scopeUnitId: scope.scopeUnitId,
+				includeScopeDescendants: scope.includeScopeDescendants,
+				branches: results.map((result) => ({
+					category: result.category,
+					...(result.request.searchExpression
+						? { searchExpression: result.request.searchExpression }
+						: {}),
+				})),
+			},
+			candidateContext,
+		),
 		Promise.all(
 			results.map((result) =>
-				searchDomainFacets(result.category, result.request, facetFields),
+				searchDomainFacets(result.category, result.request, facetFields, candidateContext),
 			),
 		),
 	]);

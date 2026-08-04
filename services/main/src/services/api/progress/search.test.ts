@@ -29,7 +29,7 @@ describe("progress Search Feature execution boundary", () => {
 			}),
 		).toEqual(
 			expect.objectContaining({
-				offset: 0,
+				consumed: 0,
 				pageSize: 25,
 				query: "Dune",
 				sort: "progressLastSeenAt:desc",
@@ -42,14 +42,24 @@ describe("progress Search Feature execution boundary", () => {
 			injections: [],
 			state: { sort: "title:asc", pageSize: 20 },
 		});
-		const cursor = createProgressSearchCursor(first, 20);
+		const cursor = createProgressSearchCursor(first, {
+			boundary: {
+				sortValue: "dune",
+				unitId: "0198e6bd-18ff-7760-b9cc-4f74f8bb29bf",
+			},
+			consumed: 20,
+			total: 25,
+		});
 
 		expect(
 			resolveProgressSearchRequest({
 				injections: [],
 				state: { sort: "title:asc", pageSize: 20, cursor },
-			}).offset,
-		).toBe(20);
+			}).boundary,
+		).toEqual({
+			sortValue: "dune",
+			unitId: "0198e6bd-18ff-7760-b9cc-4f74f8bb29bf",
+		});
 		expect(() =>
 			resolveProgressSearchRequest({
 				injections: [],

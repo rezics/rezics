@@ -89,6 +89,7 @@ const CommonFields = [
 const ContentLicenseFields = ["content-license"] as const satisfies readonly SearchField[];
 const WorkZoneCategories = ["units", "posts", "reviews", "collections"] as const;
 const CreditedProfileCategories = getCurrentSearchFieldDefinition("credited-profile").categories;
+export const SearchMaxResultWindow = 200;
 
 const TemplateDefinitions = {
 	global: {
@@ -111,7 +112,7 @@ const TemplateDefinitions = {
 		defaultFacets: ["category", "kind", "language", "content-rating", "tag"],
 		sorts: CommonSorts,
 		maxPageSize: 50,
-		maxResultWindow: 10_000,
+		maxResultWindow: SearchMaxResultWindow,
 	},
 	book: {
 		id: "book",
@@ -130,7 +131,7 @@ const TemplateDefinitions = {
 		defaultFacets: ["language", "tag", "book-format"],
 		sorts: CommonSorts,
 		maxPageSize: 50,
-		maxResultWindow: 10_000,
+		maxResultWindow: SearchMaxResultWindow,
 	},
 	media: {
 		id: "media",
@@ -155,7 +156,7 @@ const TemplateDefinitions = {
 		defaultFacets: ["language", "tag", "media-kind"],
 		sorts: CommonSorts,
 		maxPageSize: 50,
-		maxResultWindow: 10_000,
+		maxResultWindow: SearchMaxResultWindow,
 	},
 	software: {
 		id: "software",
@@ -178,7 +179,7 @@ const TemplateDefinitions = {
 		defaultFacets: ["language", "tag", "software-platform", "software-requirement-tier"],
 		sorts: CommonSorts,
 		maxPageSize: 50,
-		maxResultWindow: 10_000,
+		maxResultWindow: SearchMaxResultWindow,
 	},
 	progress: {
 		id: "progress",
@@ -189,7 +190,7 @@ const TemplateDefinitions = {
 		defaultFacets: [],
 		sorts: ProgressSearchSorts,
 		maxPageSize: 50,
-		maxResultWindow: 10_000,
+		maxResultWindow: SearchMaxResultWindow,
 	},
 	realm: {
 		id: "realm",
@@ -200,7 +201,7 @@ const TemplateDefinitions = {
 		defaultFacets: ["language", "tag"],
 		sorts: CommonSorts,
 		maxPageSize: 50,
-		maxResultWindow: 10_000,
+		maxResultWindow: SearchMaxResultWindow,
 	},
 	zone: {
 		id: "zone",
@@ -211,7 +212,7 @@ const TemplateDefinitions = {
 		defaultFacets: ["language", "tag"],
 		sorts: CommonSorts,
 		maxPageSize: 50,
-		maxResultWindow: 10_000,
+		maxResultWindow: SearchMaxResultWindow,
 	},
 } as const satisfies Record<SearchTemplateId, SearchTemplateDefinition>;
 

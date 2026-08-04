@@ -12,12 +12,37 @@
 	"filterableAttributes": [
 		{
 			"attributePatterns": [
+				"id",
 				"category",
 				"unitType",
 				"searchKind",
 				"languages",
-				"filters.*",
-				"access.*",
+				"filters.contentRating",
+				"filters.aiDisclosure",
+				"filters.license",
+				"filters.postExists",
+				"filters.collectionExists",
+				"filters.postKind",
+				"filters.subjectUnitKind",
+				"filters.collectionItemUnitKinds",
+				"filters.tagIds",
+				"filters.realmIds",
+				"filters.realmTagContextRealmIds",
+				"filters.realmTagVoteKeys",
+				"filters.creditedUnitIds",
+				"filters.creditedProfileIds",
+				"filters.subjectId",
+				"filters.rootId",
+				"filters.parentId",
+				"filters.ownerProfileIds",
+				"filters.joinPolicy",
+				"filters.pollMode",
+				"filters.resultsVisibility",
+				"filters.scopeOwnerIds",
+				"access.publicDiscoverable",
+				"access.authenticated",
+				"access.profileIds",
+				"access.realmIds",
 				"contentLicense.active",
 				"book.isbn13",
 				"book.format",
@@ -40,7 +65,14 @@
 				"media.episodeCount",
 				"media.seasonCount",
 				"software.releaseAt",
-				"ranking.*"
+				"filters.closesAt",
+				"ranking.createdAt",
+				"ranking.updatedAt",
+				"ranking.publishedAt",
+				"ranking.followerCount",
+				"ranking.replyCount",
+				"ranking.recommendationBest",
+				"ranking.engagement24h"
 			],
 			"features": { "facetSearch": false, "filter": { "equality": true, "comparison": true } }
 		}
@@ -73,6 +105,6 @@
 		"ranking.updatedAt:desc"
 	],
 	"typoTolerance": { "enabled": true, "disableOnAttributes": ["book.isbn13"] },
-	"faceting": { "maxValuesPerFacet": 100 },
-	"pagination": { "maxTotalHits": 10000 }
+	"faceting": { "maxValuesPerFacet": 50 },
+	"pagination": { "maxTotalHits": 1000 }
 }

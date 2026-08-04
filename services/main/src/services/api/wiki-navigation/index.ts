@@ -133,17 +133,9 @@ export default new Elysia({ prefix: "/realms" })
 					params.realmId,
 					"wiki.navigation",
 				);
-				const items = [];
-				for (const record of records) {
-					const revisionId = await getContentStructureRevision(
-						tx,
-						params.realmId,
-						record.id,
-					);
-					if (!revisionId) throw new WikiNavigationNotFound();
-					items.push(present(record, revisionId));
-				}
-				return { items };
+				return {
+					items: records.map((record) => present(record, record.latestRevisionId)),
+				};
 			});
 		},
 		{

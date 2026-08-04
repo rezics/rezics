@@ -7,8 +7,8 @@ import { CurrentSearchProjectionVersion, CurrentSearchUnitKindsByCategory } from
 import { getSearchSettingsFingerprint, SearchProjectionSettings } from "./settings";
 
 const CurrentSearchSettingsFingerprint =
-	"7efde91e87ed031507dda6c1af721dc54ce4f76fbe30f5b31793826f726c6226";
-const CurrentSearchGenerationDate = "20260801";
+	"b6524a6a17d5546166d9c7f3e876d6c55ddcb96a06bebb67e4ca858308dde062";
+const CurrentSearchGenerationDate = "20260804";
 const currentSettingsFingerprint = getSearchSettingsFingerprint("current");
 if (currentSettingsFingerprint !== CurrentSearchSettingsFingerprint)
 	throw new Error(
@@ -40,6 +40,23 @@ describe("current search generation deployment wiring", () => {
 			"search.titles",
 			"search.primaryTitles",
 		]);
+	});
+
+	it("uses bounded pagination and explicit filterable attributes", () => {
+		expect(SearchProjectionSettings.current.pagination.maxTotalHits).toBe(1_000);
+		const patterns = SearchProjectionSettings.current.filterableAttributes.flatMap(
+			(attribute) => attribute.attributePatterns,
+		);
+		expect(patterns).not.toContain("filters.*");
+		expect(patterns).not.toContain("access.*");
+		expect(patterns).toEqual(
+			expect.arrayContaining([
+				"filters.postExists",
+				"filters.subjectUnitKind",
+				"filters.collectionExists",
+				"filters.collectionItemUnitKinds",
+			]),
+		);
 	});
 
 	it("keeps the versioned index, sink, settings, and enrichment configuration aligned", async () => {

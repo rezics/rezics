@@ -1,4 +1,4 @@
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, getTableColumns, inArray, isNull, sql } from "drizzle-orm";
 import {
 	assertNavigationDocument,
 	type NavigationDocument,
@@ -7,9 +7,18 @@ import {
 } from "@rezics/block";
 
 import type { DatabaseTransaction } from "../database";
-import { contentStructure, contentStructureNode } from "../database/schema";
+import {
+	contentStructure,
+	contentStructureNode,
+	contentStructureRevisionHead,
+} from "../database/schema";
 import { fractionalPositionAt } from "../ordering/position";
-import { type ContentStructureNodeState, type ContentStructureTarget } from "./contracts";
+import {
+	ContentStructureSnapshotSchema,
+	type ContentStructureNodeState,
+	type ContentStructureSnapshot,
+	type ContentStructureTarget,
+} from "./contracts";
 import { ContentStructureInvalid, ContentStructureNotFound } from "./errors";
 import { createContentStructureHistory } from "./history";
 import { deleteContentStructure } from "./service";
@@ -325,7 +334,20 @@ export async function presentNavigationStructure(
 		structureId: input.structureId,
 		ownerUnitId: input.ownerUnitId,
 	});
-	if (snapshot.structure.kind !== input.kind) throw new ContentStructureNotFound();
+	return presentNavigationSnapshot(snapshot, input.kind);
+}
+
+function presentNavigationSnapshot(
+	snapshot: ContentStructureSnapshot,
+	kind: NavigationKind,
+): {
+	readonly id: string;
+	readonly ownerUnitId: string;
+	readonly document: NavigationDocument;
+	readonly createdAt: Date;
+	readonly updatedAt: Date;
+} {
+	if (snapshot.structure.kind !== kind) throw new ContentStructureNotFound();
 	if (!snapshot.structure.documentKey)
 		throw new ContentStructureInvalid("Navigation structure does not match its API");
 	const children = new Map<string | null, ContentStructureNodeState[]>();
@@ -389,8 +411,15 @@ export async function listNavigationStructures(
 	kind: NavigationKind,
 ) {
 	const structures = await tx
-		.select({ id: contentStructure.id })
+		.select({
+			...getTableColumns(contentStructure),
+			latestRevisionId: contentStructureRevisionHead.revisionId,
+		})
 		.from(contentStructure)
+		.innerJoin(
+			contentStructureRevisionHead,
+			eq(contentStructureRevisionHead.structureId, contentStructure.id),
+		)
 		.where(
 			and(
 				eq(contentStructure.ownerUnitId, ownerUnitId),
@@ -398,16 +427,40 @@ export async function listNavigationStructures(
 				isNull(contentStructure.deletedAt),
 			),
 		)
-		.orderBy(contentStructure.createdAt, contentStructure.id);
-	const records = [];
-	for (const structure of structures) {
-		records.push(
-			await presentNavigationStructure(tx, {
-				ownerUnitId,
-				structureId: structure.id,
-				kind,
-			}),
+		.orderBy(asc(contentStructure.createdAt), asc(contentStructure.id));
+	if (!structures.length) return [];
+	const nodes = await tx
+		.select()
+		.from(contentStructureNode)
+		.where(
+			and(
+				inArray(
+					contentStructureNode.structureId,
+					structures.map(({ id }) => id),
+				),
+				isNull(contentStructureNode.deletedAt),
+			),
+		)
+		.orderBy(
+			asc(contentStructureNode.structureId),
+			asc(contentStructureNode.position),
+			asc(contentStructureNode.id),
 		);
+	const nodesByStructure = new Map<string, typeof nodes>();
+	for (const node of nodes) {
+		const structureNodes = nodesByStructure.get(node.structureId) ?? [];
+		structureNodes.push(node);
+		nodesByStructure.set(node.structureId, structureNodes);
 	}
-	return records;
+	return structures.map(({ latestRevisionId, ...structure }) => ({
+		...presentNavigationSnapshot(
+			ContentStructureSnapshotSchema.parse({
+				version: 1,
+				structure,
+				nodes: nodesByStructure.get(structure.id) ?? [],
+			}),
+			kind,
+		),
+		latestRevisionId,
+	}));
 }

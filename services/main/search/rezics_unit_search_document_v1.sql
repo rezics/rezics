@@ -52,6 +52,11 @@ SELECT
 			'contentRating', unit_row.content_rating,
 			'aiDisclosure', unit_row.ai_disclosure,
 			'license', unit_row.license,
+			'postExists', post_row.id IS NOT NULL,
+			'collectionExists', collection_row.id IS NOT NULL,
+			'postKind', post_row.kind,
+			'subjectUnitKind', subject_unit_row.kind,
+			'collectionItemUnitKinds', coalesce(collection_item_data.unit_kinds, '[]'::jsonb),
 			'tagIds', coalesce(tag_data.tag_ids, '[]'::jsonb),
 			'realmIds', coalesce(realm_data.realm_ids, '[]'::jsonb),
 			'realmTagContextRealmIds', coalesce(realm_tag_context_data.realm_ids, '[]'::jsonb),
@@ -115,6 +120,7 @@ FROM public.search_unit_projection_source AS source
 LEFT JOIN public.unit AS unit_row ON unit_row.id = source.unit_id
 LEFT JOIN public.entity AS entity_row ON entity_row.id = source.unit_id
 LEFT JOIN public.post AS post_row ON post_row.id = source.unit_id
+LEFT JOIN public.collection AS collection_row ON collection_row.id = source.unit_id
 LEFT JOIN public.unit AS subject_unit_row ON subject_unit_row.id = post_row.subject_unit_id
 LEFT JOIN public.post_reply AS reply_row ON reply_row.post_id = source.unit_id
 LEFT JOIN public.post_reply_stat AS reply_stat ON reply_stat.post_id = source.unit_id
@@ -323,6 +329,12 @@ LEFT JOIN LATERAL (
 	WHERE unit_id = source.unit_id
 		AND revoked_at IS NULL
 ) AS owner_data ON true
+LEFT JOIN LATERAL (
+	SELECT jsonb_agg(DISTINCT item_unit.kind ORDER BY item_unit.kind) AS unit_kinds
+	FROM public.collection_item AS item
+	JOIN public.unit AS item_unit ON item_unit.id = item.unit_id
+	WHERE item.collection_id = source.unit_id
+) AS collection_item_data ON true
 LEFT JOIN LATERAL (
 	SELECT jsonb_agg(DISTINCT platform_entity_id ORDER BY platform_entity_id) FILTER (WHERE platform_entity_id IS NOT NULL) AS platform_ids,
 		jsonb_agg(DISTINCT tier ORDER BY tier) AS tiers

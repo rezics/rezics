@@ -50,7 +50,7 @@ functions:
       file: "history-routing.exs"
 
 sinks:
-    - name: "${MEILISEARCH_CURRENT_SINK_NAME:-rezics-units-v1-20260801}"
+    - name: "${MEILISEARCH_CURRENT_SINK_NAME:-rezics-units-v1-20260804}"
       database: "rezics-authoritative"
       source:
           include_tables:
@@ -66,7 +66,7 @@ sinks:
       transform: "rezics-unit-search-transform-v1"
       routing: "rezics-unit-search-routing-v1"
       annotations:
-          routing_index_name: &current_index_name "${MEILISEARCH_CURRENT_INDEX_UID:-rezics_units_v1_20260801}"
+          routing_index_name: &current_index_name "${MEILISEARCH_CURRENT_INDEX_UID:-rezics_units_v1_20260804}"
       load_shedding_policy: "pause_on_full"
       destination:
           type: "meilisearch"
@@ -76,7 +76,7 @@ sinks:
           api_key: "${MEILISEARCH_CURRENT_SINK_KEY}"
           batch_size: 100
           timeout_seconds: 30
-    - name: "${MEILISEARCH_HISTORY_SINK_NAME:-rezics-revisions-v1-20260801}"
+    - name: "${MEILISEARCH_HISTORY_SINK_NAME:-rezics-revisions-v1-20260804}"
       database: "rezics-authoritative"
       source:
           include_tables:
@@ -92,7 +92,7 @@ sinks:
       transform: "rezics-revision-search-transform-v1"
       routing: "rezics-revision-search-routing-v1"
       annotations:
-          routing_index_name: &history_index_name "${MEILISEARCH_HISTORY_INDEX_UID:-rezics_revisions_v1_20260801}"
+          routing_index_name: &history_index_name "${MEILISEARCH_HISTORY_INDEX_UID:-rezics_revisions_v1_20260804}"
       load_shedding_policy: "pause_on_full"
       destination:
           type: "meilisearch"

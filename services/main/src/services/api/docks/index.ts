@@ -6,7 +6,7 @@ import {
 	assertResolvedBlockReferences,
 	parseDocument,
 } from "@rezics/block";
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -15,7 +15,13 @@ import {
 	unitBlockGraphLockName,
 } from "../../blocks/reference-resolver";
 import { database, type DatabaseTransaction } from "../../database";
-import { isDockOwnerUnitKind, isDockKindSupported, unit, unitDock } from "../../database/schema";
+import {
+	dockRevisionHead,
+	isDockOwnerUnitKind,
+	isDockKindSupported,
+	unit,
+	unitDock,
+} from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
 import { NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
@@ -121,16 +127,19 @@ export default new Elysia({ prefix: "/units/by-id" })
 			const owner = await getDockOwner(params.unitId);
 			return database.transaction(async (tx) => {
 				const records = await tx
-					.select()
+					.select({
+						...getTableColumns(unitDock),
+						latestRevisionId: dockRevisionHead.revisionId,
+					})
 					.from(unitDock)
+					.leftJoin(dockRevisionHead, eq(dockRevisionHead.dockId, unitDock.id))
 					.where(and(eq(unitDock.unitId, params.unitId), isNull(unitDock.deletedAt)))
 					.orderBy(unitDock.kind);
 				const items = [];
 				for (const dock of records) {
 					if (!isDockKindSupported(owner.kind, dock.kind)) continue;
-					const revisionId = await getDockRevisionId(tx, dock.id);
-					if (!revisionId) throw new DockNotFound();
-					items.push(presentDock(dock, revisionId));
+					if (!dock.latestRevisionId) throw new DockNotFound();
+					items.push(presentDock(dock, dock.latestRevisionId));
 				}
 				return { items };
 			});

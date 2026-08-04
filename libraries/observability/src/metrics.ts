@@ -10,6 +10,12 @@ export type ReadinessCheckState = "ready" | "degraded" | "unavailable";
 export type ReadinessFailureCategory =
 	"configuration" | "dependency" | "not_ready" | "timeout" | "overall_timeout";
 
+export interface DatabasePoolState {
+	readonly total: number;
+	readonly idle: number;
+	readonly waiting: number;
+}
+
 const StableName = /^[a-z][a-z0-9_.-]{0,63}$/;
 
 export function normalizeRequestMethod(method: string): RequestMethod {
@@ -83,10 +89,11 @@ export class ObservabilityMetrics {
 	readonly #searchCandidates: Histogram;
 	readonly #searchOverfetchRounds: Histogram;
 	readonly #searchAuthoritativeRejections: Histogram;
-	readonly #searchScanLimitHits: Counter;
+	readonly #searchBudgetHits: Counter;
 	readonly #searchLowerBoundTotals: Counter;
 	#workerHeartbeatAt: number | undefined;
 	#activeWorkerJobStartedAt: number | undefined;
+	#databasePoolState: (() => DatabasePoolState) | undefined;
 
 	constructor(meter: Meter) {
 		this.#requestCount = meter.createCounter("rezics.http.server.request.count");
@@ -133,7 +140,7 @@ export class ObservabilityMetrics {
 			"rezics.search.authoritative_rejections",
 			{ unit: "{candidate}" },
 		);
-		this.#searchScanLimitHits = meter.createCounter("rezics.search.scan_limit_hits", {
+		this.#searchBudgetHits = meter.createCounter("rezics.search.budget_hits", {
 			unit: "{query}",
 		});
 		this.#searchLowerBoundTotals = meter.createCounter("rezics.search.lower_bound_totals", {
@@ -149,6 +156,15 @@ export class ObservabilityMetrics {
 		meter
 			.createObservableGauge("rezics.runtime.uptime", { unit: "s" })
 			.addCallback((result) => result.observe(process.uptime()));
+		for (const [name, read] of [
+			["rezics.database.pool.connections", (state: DatabasePoolState) => state.total],
+			["rezics.database.pool.idle", (state: DatabasePoolState) => state.idle],
+			["rezics.database.pool.waiting", (state: DatabasePoolState) => state.waiting],
+		] as const)
+			meter.createObservableGauge(name, { unit: "{connection}" }).addCallback((result) => {
+				const state = this.#databasePoolState?.();
+				if (state) result.observe(read(state));
+			});
 		meter
 			.createObservableGauge("rezics.worker.heartbeat.age", { unit: "s" })
 			.addCallback((result) => {
@@ -163,6 +179,12 @@ export class ObservabilityMetrics {
 						Math.max(0, Date.now() - this.#activeWorkerJobStartedAt) / 1_000,
 					);
 			});
+	}
+
+	registerDatabasePool(read: () => DatabasePoolState): void {
+		if (this.#databasePoolState)
+			throw new Error("A PostgreSQL pool is already registered for this process");
+		this.#databasePoolState = read;
 	}
 
 	requestStarted(): void {
@@ -259,7 +281,7 @@ export class ObservabilityMetrics {
 		candidateCount: number,
 		authorizedCount: number,
 		rounds: number,
-		scanLimitHit: boolean,
+		budgetHit: boolean,
 		lowerBound: boolean,
 	): void {
 		for (const [name, value] of [
@@ -276,7 +298,7 @@ export class ObservabilityMetrics {
 			Math.max(0, candidateCount - authorizedCount),
 			attributes,
 		);
-		if (scanLimitHit) this.#searchScanLimitHits.add(1, attributes);
+		if (budgetHit) this.#searchBudgetHits.add(1, attributes);
 		if (lowerBound) this.#searchLowerBoundTotals.add(1, attributes);
 	}
 
@@ -284,7 +306,7 @@ export class ObservabilityMetrics {
 		projection: "current" | "history",
 		candidateCount: number,
 		rounds: number,
-		scanLimitHit: boolean,
+		budgetHit: boolean,
 	): void {
 		for (const [name, value] of [
 			["candidateCount", candidateCount],
@@ -295,8 +317,8 @@ export class ObservabilityMetrics {
 		const attributes = { "search.projection": projection, "search.scan.purpose": "facet" };
 		this.#searchCandidates.record(candidateCount, attributes);
 		this.#searchOverfetchRounds.record(rounds, attributes);
-		if (scanLimitHit) {
-			this.#searchScanLimitHits.add(1, attributes);
+		if (budgetHit) {
+			this.#searchBudgetHits.add(1, attributes);
 			this.#searchLowerBoundTotals.add(1, attributes);
 		}
 	}

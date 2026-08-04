@@ -1,5 +1,5 @@
 -- REZICS v1.0.0 database baseline.
--- Machine-generated from the validated final PostgreSQL schema on 2026-08-01.
+-- Machine-generated from the validated final PostgreSQL schema on 2026-08-04.
 -- Object order: types, tables, functions, constraints/indexes, foreign keys/publications, triggers.
 
 --
@@ -22,6 +22,8 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
+
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements WITH SCHEMA public;
 
 --
 -- Name: ai_disclosure; Type: TYPE; Schema: public; Owner: -
@@ -5958,6 +5960,41 @@ BEGIN
   WHERE member_unit_id = ANY(coalesce(member_ids, ARRAY[]::uuid[]));
   PERFORM touch_search_unit_projection(coalesce(structure_ids, ARRAY[]::uuid[]));
   RETURN NULL;
+END
+$$;
+
+
+--
+-- Name: search_touch_unit_relation_dependents_statement(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.search_touch_unit_relation_dependents_statement() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+	changed_unit_ids uuid[];
+	dependent_unit_ids uuid[];
+BEGIN
+	SELECT coalesce(array_agg(new_row.id), ARRAY[]::uuid[])
+	INTO changed_unit_ids
+	FROM new_rows AS new_row
+	JOIN old_rows AS old_row USING (id)
+	WHERE new_row.kind IS DISTINCT FROM old_row.kind;
+
+	SELECT coalesce(array_agg(DISTINCT dependent_id), ARRAY[]::uuid[])
+	INTO dependent_unit_ids
+	FROM (
+		SELECT post_row.id AS dependent_id
+		FROM public.post AS post_row
+		WHERE post_row.subject_unit_id = ANY(changed_unit_ids)
+		UNION
+		SELECT item.collection_id AS dependent_id
+		FROM public.collection_item AS item
+		WHERE item.unit_id = ANY(changed_unit_ids)
+	) AS dependents;
+
+	PERFORM touch_search_unit_projection(dependent_unit_ids);
+	RETURN NULL;
 END
 $$;
 
@@ -12790,6 +12827,48 @@ CREATE TRIGGER search_projection_touch_book_update AFTER UPDATE ON public.book R
 
 
 --
+-- Name: collection search_projection_touch_collection_delete; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER search_projection_touch_collection_delete AFTER DELETE ON public.collection REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
+
+
+--
+-- Name: collection search_projection_touch_collection_insert; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER search_projection_touch_collection_insert AFTER INSERT ON public.collection REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
+
+
+--
+-- Name: collection search_projection_touch_collection_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER search_projection_touch_collection_update AFTER UPDATE ON public.collection REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
+
+
+--
+-- Name: collection_item search_projection_touch_collection_item_delete; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER search_projection_touch_collection_item_delete AFTER DELETE ON public.collection_item REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('collection_id');
+
+
+--
+-- Name: collection_item search_projection_touch_collection_item_insert; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER search_projection_touch_collection_item_insert AFTER INSERT ON public.collection_item REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('collection_id');
+
+
+--
+-- Name: collection_item search_projection_touch_collection_item_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER search_projection_touch_collection_item_update AFTER UPDATE ON public.collection_item REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('collection_id');
+
+
+--
 -- Name: content_structure_node search_projection_touch_content_structure_node_delete; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -13494,6 +13573,13 @@ CREATE TRIGGER search_projection_touch_unit_tag_update AFTER UPDATE ON public.un
 --
 
 CREATE TRIGGER search_projection_touch_unit_update AFTER UPDATE ON public.unit REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
+
+
+--
+-- Name: unit search_projection_touch_unit_relation_dependents_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER search_projection_touch_unit_relation_dependents_update AFTER UPDATE ON public.unit REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_unit_relation_dependents_statement();
 
 
 --

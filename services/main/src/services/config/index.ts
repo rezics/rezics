@@ -38,6 +38,26 @@ export const env = createEnv({
 		PORT: z.coerce.number().int().min(1).max(65_535).default(3001),
 		REZICS_RELEASE: release.default("development"),
 		DATABASE_URL: z.url(),
+		DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(50).default(10),
+		DATABASE_POOL_CONNECTION_TIMEOUT_MS: z.coerce
+			.number()
+			.int()
+			.min(100)
+			.max(30_000)
+			.default(2_000),
+		DATABASE_POOL_IDLE_TIMEOUT_MS: z.coerce
+			.number()
+			.int()
+			.min(1_000)
+			.max(300_000)
+			.default(30_000),
+		DATABASE_POOL_MAX_LIFETIME_SECONDS: z.coerce
+			.number()
+			.int()
+			.min(60)
+			.max(86_400)
+			.default(1_800),
+		DATABASE_STATEMENT_TIMEOUT_MS: z.coerce.number().int().min(100).max(60_000).default(10_000),
 		BETTER_AUTH_SECRET: z.string().min(32),
 		BETTER_AUTH_URL: origin,
 		TURNSTILE_SECRET_KEY: z.string().min(1).optional(),
@@ -98,7 +118,14 @@ export const env = createEnv({
 		SEQUIN_URL: origin.optional(),
 		SEQUIN_API_TOKEN: z.string().min(16).optional(),
 		SEARCH_CANDIDATE_BATCH_SIZE: z.coerce.number().int().min(20).max(1000).default(100),
-		SEARCH_CANDIDATE_SCAN_LIMIT: z.coerce.number().int().min(100).max(100_000).default(10_000),
+		SEARCH_CANDIDATE_SCAN_LIMIT: z.coerce.number().int().min(100).max(10_000).default(1_000),
+		SEARCH_CANDIDATE_MAX_ROUNDS: z.coerce.number().int().min(1).max(10).default(4),
+		SEARCH_CANDIDATE_TIME_BUDGET_MS: z.coerce
+			.number()
+			.int()
+			.min(100)
+			.max(10_000)
+			.default(1_500),
 		SEARCH_FACET_CANDIDATE_SCAN_LIMIT: z.coerce
 			.number()
 			.int()

@@ -15,8 +15,8 @@ fi
 
 readonly nomad_operator="${NOMAD_OPERATOR_BIN:-rezics-nomad-operator}"
 readonly meilisearch_url="http://127.0.0.1:7700"
-readonly current_index="rezics_units_v1_20260801"
-readonly history_index="rezics_revisions_v1_20260801"
+readonly current_index="rezics_units_v1_20260804"
+readonly history_index="rezics_revisions_v1_20260804"
 readonly runtime_directory="${REZICS_BOOTSTRAP_RUNTIME_DIRECTORY:-/run}"
 
 for command in curl jq "${nomad_operator}"; do

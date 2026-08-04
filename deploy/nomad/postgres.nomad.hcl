@@ -55,7 +55,12 @@ job "rezics-postgres" {
           "-c", "wal_level=logical",
           "-c", "max_replication_slots=10",
           "-c", "max_wal_senders=10",
-          "-c", "max_slot_wal_keep_size=4GB",
+          "-c", "max_slot_wal_keep_size=32GB",
+          "-c", "shared_preload_libraries=pg_stat_statements",
+          "-c", "compute_query_id=on",
+          "-c", "pg_stat_statements.track=all",
+          "-c", "track_io_timing=on",
+          "-c", "track_wal_io_timing=on",
           "-c", "password_encryption=scram-sha-256",
         ]
       }

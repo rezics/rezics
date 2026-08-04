@@ -121,6 +121,29 @@ If database work fails, API, worker, projection, and web promotion do not run.
 Outline uses its existing independent database configuration and is never part
 of these operations.
 
+### v1.0.0 baseline installation
+
+The `20260801000000_v1_baseline.sql` migration is the first supported database
+contract and is intentionally install-only. Databases created during the
+pre-release test period are not upgrade sources: archive any evidence that must
+be retained, stop application and Sequin writers, and recreate the REZICS
+database before installing v1.0.0. Do not dispatch the routine rolling release
+graph against a database that recorded an earlier checksum for this baseline.
+
+For the v1.0.0 cutover, apply the stateful PostgreSQL jobspec first and wait for
+PostgreSQL readiness, then use `bootstrap-production.sh --confirm-empty-database`.
+The bootstrap installs the database, verifies its runtime settings, creates and
+promotes the dated v1 search generation, applies Sequin, and only then starts
+API and worker traffic. The production verification job fails closed unless
+`max_slot_wal_keep_size` is at least 32GB, `pg_stat_statements` is preloaded and
+installed, and every logical replication slot has a recoverable WAL status.
+
+The 32GB setting is a retention ceiling per replication slot, not reserved disk
+space and not a substitute for capacity planning. Alert on
+`pg_replication_slots.wal_status`, shrinking `safe_wal_size`, filesystem free
+space, and Sequin lag. A slot that reaches `unreserved` or `lost` must be
+repaired and its projection reconciled before application promotion.
+
 ## Cloudflare Worker release
 
 The web job installs the repository-pinned Yarn version, verifies generated

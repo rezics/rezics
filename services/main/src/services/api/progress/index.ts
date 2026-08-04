@@ -245,13 +245,36 @@ export default new Elysia({ prefix: "/progress" })
 						);
 					})()
 				: undefined;
-			const condition = and(
+			const baseCondition = and(
 				eq(unitProgress.profileId, profile.unitId),
 				isNull(unitProgress.deletedAt),
 				getUnitReadCondition(profile.unitId),
 				inArray(unit.kind, ["book", "media", "software"]),
 				textCondition,
 			);
+			const sortExpression = request.sort.startsWith("title:")
+				? sql`lower(${unitLocalization.title})`
+				: sql`${unitProgress.lastSeenAt}`;
+			const boundaryCondition = request.boundary
+				? (() => {
+						const value = request.sort.startsWith("title:")
+							? request.boundary.sortValue
+							: new Date(request.boundary.sortValue!);
+						if (value === null)
+							return sql`(${sortExpression} is null and ${unitProgress.unitId} > ${request.boundary.unitId}::uuid)`;
+						const comparison = request.sort.endsWith(":asc")
+							? sql`${sortExpression} > ${value}`
+							: sql`${sortExpression} < ${value}`;
+						return sql`(
+							(${sortExpression} is not null and (
+								${comparison}
+								or (${sortExpression} = ${value} and ${unitProgress.unitId} > ${request.boundary.unitId}::uuid)
+							))
+							or ${sortExpression} is null
+						)`;
+					})()
+				: undefined;
+			const condition = and(baseCondition, boundaryCondition);
 			const orderBy =
 				request.sort === "title:asc"
 					? [
@@ -280,6 +303,7 @@ export default new Elysia({ prefix: "/progress" })
 					type: unit.kind,
 					language: unitLocalization.language,
 					title: unitLocalization.title,
+					sortTitle: sql<string | null>`lower(${unitLocalization.title})`,
 					summary: unitLocalization.summary,
 					coverAssetId: resolvedUnitLocalizationImageAssetId(
 						unit.id,
@@ -314,29 +338,36 @@ export default new Elysia({ prefix: "/progress" })
 						),
 					),
 				)
-				.where(condition);
+				.where(baseCondition);
 			const [rows, [countRow]] = await Promise.all([
-				baseQuery
-					.orderBy(...orderBy)
-					.offset(request.offset)
-					.limit(request.pageSize + 1),
-				countQuery,
+				baseQuery.orderBy(...orderBy).limit(request.pageSize + 1),
+				request.total === undefined ? countQuery : Promise.resolve([]),
 			]);
-			const total = countRow?.value ?? 0;
-			const items = rows.slice(0, request.pageSize).map(({ coverAssetId, ...row }) => ({
+			const total = request.total ?? countRow?.value ?? 0;
+			const pageRows = rows.slice(0, request.pageSize);
+			const items = pageRows.map(({ coverAssetId, sortTitle: _sortTitle, ...row }) => ({
 				...row,
 				type: toProgressUnitType(row.type),
 				totalTimeMs: Number(row.totalTimeMs),
 				lastReadAnchor: null,
 				cover: presentImageAsset(coverAssetId, "cover"),
 			}));
-			const nextOffset = request.offset + items.length;
+			const lastRow = pageRows.at(-1);
 			return {
 				items,
 				total,
-				...(rows.length > request.pageSize
+				...(rows.length > request.pageSize && lastRow
 					? {
-							nextCursor: createProgressSearchCursor(request, nextOffset),
+							nextCursor: createProgressSearchCursor(request, {
+								boundary: {
+									sortValue: request.sort.startsWith("title:")
+										? lastRow.sortTitle
+										: lastRow.lastSeenAt.toISOString(),
+									unitId: lastRow.unitId,
+								},
+								consumed: request.consumed + items.length,
+								total,
+							}),
 						}
 					: {}),
 			};

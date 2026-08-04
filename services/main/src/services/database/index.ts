@@ -1,10 +1,23 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { instrumentPostgresClient } from "@rezics/observability";
+import { instrumentPostgresClient, peekActiveObservability } from "@rezics/observability";
 
 import { env } from "../config";
 
-const databaseClient = instrumentPostgresClient(new Pool({ connectionString: env.DATABASE_URL }));
+const pool = new Pool({
+	connectionString: env.DATABASE_URL,
+	max: env.DATABASE_POOL_MAX,
+	connectionTimeoutMillis: env.DATABASE_POOL_CONNECTION_TIMEOUT_MS,
+	idleTimeoutMillis: env.DATABASE_POOL_IDLE_TIMEOUT_MS,
+	maxLifetimeSeconds: env.DATABASE_POOL_MAX_LIFETIME_SECONDS,
+	statement_timeout: env.DATABASE_STATEMENT_TIMEOUT_MS,
+});
+peekActiveObservability()?.metrics.registerDatabasePool(() => ({
+	total: pool.totalCount,
+	idle: pool.idleCount,
+	waiting: pool.waitingCount,
+}));
+const databaseClient = instrumentPostgresClient(pool);
 
 export const database = drizzle({ client: databaseClient });
 

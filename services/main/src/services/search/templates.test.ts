@@ -591,7 +591,7 @@ describe("Search Feature v1", () => {
 			resolveSearchDocument(
 				{
 					...original,
-					results: { ...original.results, maxResultWindow: 10_001 },
+					results: { ...original.results, maxResultWindow: 201 },
 				},
 				true,
 			),
@@ -605,7 +605,7 @@ describe("Search Feature v1", () => {
 			injections: [],
 			state: {},
 		});
-		expect(compiled.request.maxResultWindow).toBe(10_000);
+		expect(compiled.request.maxResultWindow).toBe(200);
 	});
 
 	it("accepts a cursor-free shared query and rejects duplicate display hints", () => {

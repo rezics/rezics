@@ -39,12 +39,20 @@ vi.mock("./generation", () => ({
 	getActiveSearchGeneration: vi.fn().mockResolvedValue({
 		id: "019f7eed-5d42-7102-8387-cc1d13b176d2",
 		kind: "current",
-		indexUid: "rezics_units_v1_20260801",
+		indexUid: "rezics_units_v1_20260804",
 		projectionVersion: 1,
 		settingsFingerprint: "a".repeat(64),
 	}),
 }));
-vi.mock("./meilisearch", () => ({ searchCandidates }));
+vi.mock("./meilisearch", () => ({
+	searchCandidates,
+	createCandidateSearchContext: vi.fn((generation: { id: string; indexUid: string }) =>
+		Promise.resolve({
+			generationId: generation.id,
+			indexUid: generation.indexUid,
+		}),
+	),
+}));
 
 import { InvalidSearch } from "./errors";
 import { CurrentSearchFieldRegistry, type SearchFieldDefinition } from "./field-registry";

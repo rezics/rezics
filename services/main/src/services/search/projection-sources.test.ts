@@ -70,6 +70,26 @@ describe("search projection source registry", () => {
 		expect(migration).toContain("CREATE TRIGGER unit_content_license_guard_mutation");
 	});
 
+	it("projects collection item and Post subject kinds with dependent invalidation", async () => {
+		const [sql, migration] = await Promise.all([
+			readFile(currentEnrichment, "utf8"),
+			readFile(baselineMigration, "utf8"),
+		]);
+		expect(CurrentProjectionSources).toHaveProperty("collection_item");
+		expect(CurrentProjectionSources).toHaveProperty("collection");
+		expect(sql).toContain("'postExists', post_row.id IS NOT NULL");
+		expect(sql).toContain("'collectionExists', collection_row.id IS NOT NULL");
+		expect(sql).toContain("'postKind', post_row.kind");
+		expect(sql).toContain("'subjectUnitKind', subject_unit_row.kind");
+		expect(sql).toContain("'collectionItemUnitKinds'");
+		expect(sql).toContain("FROM public.collection_item AS item");
+		expect(migration).toContain("search_projection_touch_collection_item_update");
+		expect(migration).toContain("search_projection_touch_collection_update");
+		expect(migration).toContain("search_touch_unit_relation_dependents_statement");
+		expect(migration).toContain("post_row.subject_unit_id = ANY(changed_unit_ids)");
+		expect(migration).toContain("item.unit_id = ANY(changed_unit_ids)");
+	});
+
 	it("projects and invalidates direct or one-Entity-hop Profile credits", async () => {
 		const sql = await readFile(currentEnrichment, "utf8");
 		expect(sql).toContain("'creditedProfileIds'");

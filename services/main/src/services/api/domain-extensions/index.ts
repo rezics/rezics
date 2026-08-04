@@ -684,17 +684,9 @@ export default new Elysia()
 							params.zoneId,
 							"zone.navigation",
 						);
-						const items = [];
-						for (const record of records) {
-							const revisionId = await getContentStructureRevision(
-								tx,
-								params.zoneId,
-								record.id,
-							);
-							if (!revisionId) throw new ZoneNavigationNotFound();
-							items.push(toZoneNavigationResponse(record, revisionId));
-						}
-						return items;
+						return records.map((record) =>
+							toZoneNavigationResponse(record, record.latestRevisionId),
+						);
 					});
 					const page = pageRecord ? toZonePageResponse(pageRecord) : null;
 					const dock = dockRecord
@@ -1194,17 +1186,11 @@ export default new Elysia()
 							params.zoneId,
 							"zone.navigation",
 						);
-						const items = [];
-						for (const record of records) {
-							const revisionId = await getContentStructureRevision(
-								tx,
-								params.zoneId,
-								record.id,
-							);
-							if (!revisionId) throw new ZoneNavigationNotFound();
-							items.push(toZoneNavigationResponse(record, revisionId));
-						}
-						return { items };
+						return {
+							items: records.map((record) =>
+								toZoneNavigationResponse(record, record.latestRevisionId),
+							),
+						};
 					});
 				},
 				{

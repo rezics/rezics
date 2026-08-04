@@ -426,16 +426,11 @@ export default new Elysia()
 			return database.transaction(async (tx) => {
 				await ensureReleasedContentStructureApi(tx, params.unitId, authorization);
 				const structures = await listContentStructures(tx, params.unitId);
-				const items = [];
-				for (const structure of structures) {
-					items.push(
-						presentContentStructure(
-							structure,
-							await getContentStructureRevision(tx, params.unitId, structure.id),
-						),
-					);
-				}
-				return { items };
+				return {
+					items: structures.map((structure) =>
+						presentContentStructure(structure, structure.latestRevisionId),
+					),
+				};
 			});
 		},
 		{

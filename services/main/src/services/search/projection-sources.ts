@@ -14,6 +14,8 @@ export const CurrentProjectionSources = {
 	realm_unit_tag: ["unit_id"],
 	realm_unit: ["unit_id"],
 	credit_attribution: ["source_unit_id"],
+	collection: ["id"],
+	collection_item: ["collection_id"],
 	content_structure_node: ["owner_unit_id", "content_unit_id"],
 	unit_variant: ["variant_unit_id", "main_unit_id"],
 	entity: ["id"],

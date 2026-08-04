@@ -58,6 +58,7 @@ import {
 	resolvedUnitLocalizationTitle,
 } from "../units/localization";
 import { InvalidSearch } from "./errors";
+import { compileCandidateDomainFilter } from "./candidate-domain";
 import { CurrentSearchUnitKindsByCategory } from "./contracts";
 import {
 	getCurrentSearchFieldDefinition,
@@ -67,7 +68,12 @@ import {
 	supportsCurrentSearchField,
 } from "./field-registry";
 import { getActiveSearchGeneration } from "./generation";
-import { searchCandidates, type CandidateQueryBranch } from "./meilisearch";
+import {
+	createCandidateSearchContext,
+	searchCandidates,
+	type CandidateQueryBranch,
+	type CandidateSearchContext,
+} from "./meilisearch";
 import {
 	assertSearchExpression,
 	combineSearchExpressions,
@@ -807,20 +813,32 @@ interface SearchDomainScanResult<Hit extends SearchIdentifier> {
 	readonly processingTimeMs: number;
 }
 
+async function resolveCandidateContext(
+	profileId: string | undefined,
+	context: CandidateSearchContext | undefined,
+): Promise<CandidateSearchContext> {
+	if (context) return context;
+	const generation = await getActiveSearchGeneration("current");
+	return createCandidateSearchContext(generation, profileId);
+}
+
 function searchDomainScan(
 	category: SearchCategory,
 	request: DomainSearchRequest,
 	presentation: "hits",
+	candidateContext?: CandidateSearchContext,
 ): Promise<SearchDomainScanResult<SearchHitWithoutSlugAddress>>;
 function searchDomainScan(
 	category: SearchCategory,
 	request: DomainSearchRequest,
 	presentation: "identifiers",
+	candidateContext?: CandidateSearchContext,
 ): Promise<SearchDomainScanResult<SearchIdentifier>>;
 async function searchDomainScan(
 	category: SearchCategory,
 	request: DomainSearchRequest,
 	presentation: "hits" | "identifiers",
+	providedCandidateContext?: CandidateSearchContext,
 ): Promise<
 	SearchDomainScanResult<SearchHitWithoutSlugAddress> | SearchDomainScanResult<SearchIdentifier>
 > {
@@ -836,7 +854,11 @@ async function searchDomainScan(
 	];
 	const conditions = buildSearchConditions(category, request, searchExpression);
 	const sort = request.sort ?? (request.query?.trim() ? "relevance" : "best");
-	const generation = await getActiveSearchGeneration("current");
+	const candidateContext = await resolveCandidateContext(
+		request.profileId,
+		providedCandidateContext,
+	);
+	const domainCandidateFilter = compileCandidateDomainFilter(request.domainFilter);
 	const limit = request.limit ?? 20;
 	const requestHash = createHash("sha256")
 		.update(
@@ -866,7 +888,7 @@ async function searchDomainScan(
 			);
 		}
 		if (
-			cursor.generationId !== generation.id ||
+			cursor.generationId !== candidateContext.generationId ||
 			cursor.requestHash !== requestHash ||
 			cursor.pageSize !== limit
 		)
@@ -894,25 +916,30 @@ async function searchDomainScan(
 	let rounds = 0;
 	let pageBoundaryOffset: number | undefined;
 	const authorizationTarget = limit + 1;
+	const maxCandidateRounds = env.SEARCH_CANDIDATE_MAX_ROUNDS ?? 4;
+	const candidateDeadline = performance.now() + (env.SEARCH_CANDIDATE_TIME_BUDGET_MS ?? 1_500);
 
 	while (
 		!exhausted &&
 		authorizedCount < authorizationTarget &&
-		scanOffset - initialOffset < env.SEARCH_CANDIDATE_SCAN_LIMIT
+		scanOffset - initialOffset < env.SEARCH_CANDIDATE_SCAN_LIMIT &&
+		rounds < maxCandidateRounds &&
+		performance.now() < candidateDeadline
 	) {
-		rounds += 1;
 		const batchLimit = Math.min(
-			env.SEARCH_CANDIDATE_BATCH_SIZE,
+			env.SEARCH_CANDIDATE_BATCH_SIZE * 2 ** rounds,
 			env.SEARCH_CANDIDATE_SCAN_LIMIT - (scanOffset - initialOffset),
 		);
+		rounds += 1;
 		const [candidateResult] = await searchCandidates([
 			{
-				indexUid: generation.indexUid,
+				indexUid: candidateContext.indexUid,
+				accessFilter: candidateContext.accessFilter,
+				domainFilter: domainCandidateFilter,
 				category,
 				query: request.query?.trim() ?? "",
 				offset: scanOffset,
 				limit: batchLimit,
-				profileId: request.profileId,
 				expression: searchExpression,
 				sort,
 			},
@@ -1128,8 +1155,11 @@ async function searchDomainScan(
 				scanOffset >= candidateResult.estimatedTotalHits);
 		if (candidateResult.hits.length === 0) exhausted = true;
 	}
-	const scanLimitHit =
-		!exhausted && scanOffset - initialOffset >= env.SEARCH_CANDIDATE_SCAN_LIMIT;
+	const budgetHit =
+		!exhausted &&
+		(scanOffset - initialOffset >= env.SEARCH_CANDIDATE_SCAN_LIMIT ||
+			rounds >= maxCandidateRounds ||
+			performance.now() >= candidateDeadline);
 	const nextOffset =
 		hits.length + identifiers.length === limit &&
 		(authorizedCount > hits.length + identifiers.length || !exhausted)
@@ -1142,7 +1172,7 @@ async function searchDomainScan(
 		seen.size,
 		authorizedCount,
 		rounds,
-		scanLimitHit,
+		budgetHit,
 		!exhausted,
 	);
 	const common = {
@@ -1155,7 +1185,7 @@ async function searchDomainScan(
 				? undefined
 				: createSearchCursor({
 						version: 1,
-						generationId: generation.id,
+						generationId: candidateContext.generationId,
 						requestHash,
 						pageSize: limit,
 						categories: { [category]: { offset: nextOffset, exhausted: false } },
@@ -1166,8 +1196,12 @@ async function searchDomainScan(
 	return presentation === "hits" ? { ...common, hits } : { ...common, hits: identifiers };
 }
 
-export async function searchDomain(category: SearchCategory, request: DomainSearchRequest) {
-	const result = await searchDomainScan(category, request, "hits");
+export async function searchDomain(
+	category: SearchCategory,
+	request: DomainSearchRequest,
+	candidateContext?: CandidateSearchContext,
+) {
+	const result = await searchDomainScan(category, request, "hits", candidateContext);
 	const slugAddresses = await getPublicCanonicalUnitSlugAddresses(
 		result.hits.map((hit) => hit.id),
 	);
@@ -1184,8 +1218,9 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 export function searchDomainIdentifiers(
 	category: SearchCategory,
 	request: DomainSearchRequest,
+	candidateContext?: CandidateSearchContext,
 ): Promise<SearchDomainScanResult<SearchIdentifier>> {
-	return searchDomainScan(category, request, "identifiers");
+	return searchDomainScan(category, request, "identifiers", candidateContext);
 }
 
 export interface GlobalSearchBranch {
@@ -1212,6 +1247,7 @@ export interface GlobalSearchIdentifiersRequest extends Omit<
  */
 export async function searchGlobalIdentifiers(
 	request: GlobalSearchIdentifiersRequest,
+	providedCandidateContext?: CandidateSearchContext,
 ): Promise<SearchDomainScanResult<SearchIdentifier>> {
 	const startedAt = performance.now();
 	if (!request.branches.length) throw new InvalidSearch("Search requires at least one category");
@@ -1242,7 +1278,11 @@ export async function searchGlobalIdentifiers(
 			sql`(search_candidate.category = ${category} and ${sql.join(conditions, sql` and `)})`,
 	);
 	const sort = request.sort ?? (request.query?.trim() ? "relevance" : "best");
-	const generation = await getActiveSearchGeneration("current");
+	const candidateContext = await resolveCandidateContext(
+		request.profileId,
+		providedCandidateContext,
+	);
+	const domainCandidateFilter = compileCandidateDomainFilter(request.domainFilter);
 	const limit = request.limit ?? 20;
 	const initialOffset = request.offset ?? 0;
 	const identifiers: SearchIdentifier[] = [];
@@ -1253,25 +1293,30 @@ export async function searchGlobalIdentifiers(
 	let rounds = 0;
 	let pageBoundaryOffset: number | undefined;
 	const authorizationTarget = limit + 1;
+	const maxCandidateRounds = env.SEARCH_CANDIDATE_MAX_ROUNDS ?? 4;
+	const candidateDeadline = performance.now() + (env.SEARCH_CANDIDATE_TIME_BUDGET_MS ?? 1_500);
 
 	while (
 		!exhausted &&
 		authorizedCount < authorizationTarget &&
-		scanOffset - initialOffset < env.SEARCH_CANDIDATE_SCAN_LIMIT
+		scanOffset - initialOffset < env.SEARCH_CANDIDATE_SCAN_LIMIT &&
+		rounds < maxCandidateRounds &&
+		performance.now() < candidateDeadline
 	) {
-		rounds += 1;
 		const batchLimit = Math.min(
-			env.SEARCH_CANDIDATE_BATCH_SIZE,
+			env.SEARCH_CANDIDATE_BATCH_SIZE * 2 ** rounds,
 			env.SEARCH_CANDIDATE_SCAN_LIMIT - (scanOffset - initialOffset),
 		);
+		rounds += 1;
 		const [candidateResult] = await searchCandidates([
 			{
-				indexUid: generation.indexUid,
+				indexUid: candidateContext.indexUid,
+				accessFilter: candidateContext.accessFilter,
+				domainFilter: domainCandidateFilter,
 				branches: candidateBranches,
 				query: request.query?.trim() ?? "",
 				offset: scanOffset,
 				limit: batchLimit,
-				profileId: request.profileId,
 				sort,
 			},
 		]);
@@ -1348,8 +1393,11 @@ export async function searchGlobalIdentifiers(
 				scanOffset >= candidateResult.estimatedTotalHits);
 		if (candidateResult.hits.length === 0) exhausted = true;
 	}
-	const scanLimitHit =
-		!exhausted && scanOffset - initialOffset >= env.SEARCH_CANDIDATE_SCAN_LIMIT;
+	const budgetHit =
+		!exhausted &&
+		(scanOffset - initialOffset >= env.SEARCH_CANDIDATE_SCAN_LIMIT ||
+			rounds >= maxCandidateRounds ||
+			performance.now() >= candidateDeadline);
 	const nextOffset =
 		identifiers.length === limit && (authorizedCount > identifiers.length || !exhausted)
 			? pageBoundaryOffset
@@ -1361,7 +1409,7 @@ export async function searchGlobalIdentifiers(
 		seen.size,
 		authorizedCount,
 		rounds,
-		scanLimitHit,
+		budgetHit,
 		!exhausted,
 	);
 	return {
@@ -1466,6 +1514,7 @@ export async function searchDomainFacets(
 	category: SearchCategory,
 	request: DomainSearchRequest,
 	fields: readonly string[],
+	providedCandidateContext?: CandidateSearchContext,
 ): Promise<SearchFacet[]> {
 	if (!fields.length) return [];
 	const requestedFacets = fields.flatMap((field) => {
@@ -1475,16 +1524,21 @@ export async function searchDomainFacets(
 	if (!requestedFacets.length) return [];
 	const searchExpression = buildEffectiveSearchExpression(request);
 	const conditions = buildSearchConditions(category, request, searchExpression);
-	const generation = await getActiveSearchGeneration("current");
+	const candidateContext = await resolveCandidateContext(
+		request.profileId,
+		providedCandidateContext,
+	);
+	const domainCandidateFilter = compileCandidateDomainFilter(request.domainFilter);
 	const candidateLimit = env.SEARCH_FACET_CANDIDATE_SCAN_LIMIT;
 	const [candidateResult] = await searchCandidates([
 		{
-			indexUid: generation.indexUid,
+			indexUid: candidateContext.indexUid,
+			accessFilter: candidateContext.accessFilter,
+			domainFilter: domainCandidateFilter,
 			category,
 			query: request.query?.trim() ?? "",
 			offset: 0,
 			limit: candidateLimit,
-			profileId: request.profileId,
 			expression: searchExpression,
 			sort: request.sort ?? (request.query?.trim() ? "relevance" : "best"),
 		},

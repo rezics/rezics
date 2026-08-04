@@ -164,6 +164,11 @@ tasks:
             - task: db:status
             - task: platform:verify
 
+    db:runtime:verify:
+        desc: Verify PostgreSQL WAL retention, statistics, and logical-slot health.
+        cmds:
+            - yarn exec tsx scripts/verify-postgres-runtime.ts
+
     db:project:
         desc: Rebuild derived database projections after application promotion.
         cmds:
@@ -199,6 +204,7 @@ tasks:
               vars:
                   CLI_ARGS: "{{.CLI_ARGS}}"
             - task: platform:verify
+            - task: db:runtime:verify
             - task: db:project
 
     db:prepare:
@@ -206,6 +212,7 @@ tasks:
         cmds:
             - task: db:preflight
             - task: db:migrate
+            - task: db:runtime:verify
             - task: platform:verify
 
     db:status:

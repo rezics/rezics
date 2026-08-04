@@ -34,4 +34,4 @@ export {
 } from "./operations";
 export { redact, redactString, type SafeJsonValue } from "./redaction";
 export { initializeObservability, type ObservabilityHandle } from "./runtime";
-export { getActiveObservability } from "./state";
+export { getActiveObservability, peekActiveObservability } from "./state";

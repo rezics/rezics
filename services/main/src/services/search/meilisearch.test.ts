@@ -4,10 +4,15 @@ vi.mock("../config", () => ({
 	env: {
 		MEILISEARCH_URL: "http://meilisearch.test",
 		MEILISEARCH_QUERY_KEY: "test-query-key-at-least-16-characters",
+		SEARCH_CANDIDATE_TIME_BUDGET_MS: 1_500,
 	},
 }));
 
-import { compileMeilisearchExpression, searchCandidates } from "./meilisearch";
+import {
+	compileMeilisearchExpression,
+	createCandidateSearchContext,
+	searchCandidates,
+} from "./meilisearch";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -90,7 +95,7 @@ describe("Meilisearch expression compiler", () => {
 		);
 		vi.stubGlobal("fetch", fetchMock);
 		const common = {
-			indexUid: "rezics_units_v1_20260801",
+			indexUid: "rezics_units_v1_20260804",
 			query: "book",
 			offset: 0,
 			limit: 20,
@@ -120,7 +125,7 @@ describe("Meilisearch expression compiler", () => {
 
 		await searchCandidates([
 			{
-				indexUid: "rezics_units_v1_20260801",
+				indexUid: "rezics_units_v1_20260804",
 				category: "units",
 				query: "book",
 				offset: 0,
@@ -166,10 +171,18 @@ describe("Meilisearch expression compiler", () => {
 			),
 		);
 		vi.stubGlobal("fetch", fetchMock);
+		const context = await createCandidateSearchContext(
+			{
+				id: "019f7eed-5d42-7102-8387-cc1d13b176d1",
+				indexUid: "rezics_units_v1_20260804",
+			},
+			undefined,
+		);
 
 		const [result] = await searchCandidates([
 			{
-				indexUid: "rezics_units_v1_20260801",
+				indexUid: context.indexUid,
+				accessFilter: context.accessFilter,
 				branches: [
 					{
 						category: "units",
@@ -216,7 +229,7 @@ describe("Meilisearch expression compiler", () => {
 
 		await searchCandidates([
 			{
-				indexUid: "rezics_units_v1_20260801",
+				indexUid: "rezics_units_v1_20260804",
 				category: "units",
 				query: "the complete title",
 				offset: 0,

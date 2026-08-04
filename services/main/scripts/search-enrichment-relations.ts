@@ -1,5 +1,7 @@
 export const sequinSearchEnrichmentRelations = [
 	"book",
+	"collection",
+	"collection_item",
 	"content_structure",
 	"content_structure_node",
 	"credit_attribution",

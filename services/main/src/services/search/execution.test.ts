@@ -9,7 +9,7 @@ vi.mock("./generation", () => ({
 	getActiveSearchGeneration: vi.fn().mockResolvedValue({
 		id: "019f7eed-5d42-7102-8387-cc1d13b176d2",
 		kind: "current",
-		indexUid: "rezics_units_v1_20260801",
+		indexUid: "rezics_units_v1_20260804",
 		projectionVersion: 1,
 		settingsFingerprint: "a".repeat(64),
 	}),
@@ -19,6 +19,14 @@ vi.mock("./service", () => ({
 	searchDomainFacets,
 	searchGlobalIdentifiers,
 	validateSearchDomainRequest,
+}));
+vi.mock("./meilisearch", () => ({
+	createCandidateSearchContext: vi.fn((generation: { id: string; indexUid: string }) =>
+		Promise.resolve({
+			generationId: generation.id,
+			indexUid: generation.indexUid,
+		}),
+	),
 }));
 
 import { executeCompiledSearchIdentifiers } from "./execution";
@@ -84,6 +92,7 @@ describe("globally ranked Search Feed execution", () => {
 				sort: "createdAt:desc",
 				branches: compiled.request.categories.map((category) => ({ category })),
 			}),
+			expect.objectContaining({ indexUid: "rezics_units_v1_20260804" }),
 		);
 		const cursor = parseGlobalSearchCursor(result.nextCursor ?? "");
 		expect(cursor).toMatchObject({ version: 2, pageSize: 3, offset: 3 });
@@ -115,6 +124,7 @@ describe("globally ranked Search Feed execution", () => {
 		expect(searchGlobalIdentifiers).toHaveBeenNthCalledWith(
 			2,
 			expect.objectContaining({ offset: 3, limit: 3, sort: "createdAt:desc" }),
+			expect.objectContaining({ indexUid: "rezics_units_v1_20260804" }),
 		);
 	});
 });

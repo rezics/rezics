@@ -19,17 +19,26 @@ const ProgressSearchSortSet: ReadonlySet<string> = new Set(ProgressSearchSorts);
 
 interface ProgressSearchCursor {
 	readonly version: 1;
-	readonly offset: number;
+	readonly boundary: ProgressSearchBoundary;
+	readonly consumed: number;
 	readonly pageSize: number;
 	readonly requestHash: string;
+	readonly total: number;
+}
+
+export interface ProgressSearchBoundary {
+	readonly sortValue: string | null;
+	readonly unitId: string;
 }
 
 export interface ResolvedProgressSearchRequest {
-	readonly offset: number;
+	readonly boundary?: ProgressSearchBoundary;
+	readonly consumed: number;
 	readonly pageSize: number;
 	readonly query: string;
 	readonly requestHash: string;
 	readonly sort: ProgressSearchSort;
+	readonly total?: number;
 }
 
 export function getProgressSearchDefinition() {
@@ -51,35 +60,56 @@ function decodeProgressSearchCursor(value: string): ProgressSearchCursor {
 	if (!parsed || typeof parsed !== "object")
 		throw new InvalidSearch("Invalid progress Search cursor");
 	const cursor = parsed as Record<string, unknown>;
+	const boundary = cursor.boundary;
 	if (
 		cursor.version !== 1 ||
-		typeof cursor.offset !== "number" ||
-		!Number.isSafeInteger(cursor.offset) ||
-		cursor.offset < 0 ||
+		!boundary ||
+		typeof boundary !== "object" ||
+		!("sortValue" in boundary) ||
+		!("unitId" in boundary) ||
+		(boundary.sortValue !== null && typeof boundary.sortValue !== "string") ||
+		typeof boundary.unitId !== "string" ||
+		!/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(
+			boundary.unitId,
+		) ||
+		typeof cursor.consumed !== "number" ||
+		!Number.isSafeInteger(cursor.consumed) ||
+		cursor.consumed < 1 ||
 		typeof cursor.pageSize !== "number" ||
 		!Number.isSafeInteger(cursor.pageSize) ||
 		cursor.pageSize < 1 ||
 		typeof cursor.requestHash !== "string" ||
-		!/^[0-9a-f]{64}$/.test(cursor.requestHash)
+		!/^[0-9a-f]{64}$/.test(cursor.requestHash) ||
+		typeof cursor.total !== "number" ||
+		!Number.isSafeInteger(cursor.total) ||
+		cursor.total < cursor.consumed
 	)
 		throw new InvalidSearch("Invalid progress Search cursor");
 	return {
 		version: 1,
-		offset: cursor.offset,
+		boundary: { sortValue: boundary.sortValue, unitId: boundary.unitId },
+		consumed: cursor.consumed,
 		pageSize: cursor.pageSize,
 		requestHash: cursor.requestHash,
+		total: cursor.total,
 	};
 }
 
 export function createProgressSearchCursor(
 	request: Pick<ResolvedProgressSearchRequest, "pageSize" | "requestHash">,
-	offset: number,
+	input: {
+		readonly boundary: ProgressSearchBoundary;
+		readonly consumed: number;
+		readonly total: number;
+	},
 ): string {
 	const cursor: ProgressSearchCursor = {
 		version: 1,
-		offset,
+		boundary: input.boundary,
+		consumed: input.consumed,
 		pageSize: request.pageSize,
 		requestHash: request.requestHash,
+		total: input.total,
 	};
 	return `s1_${Buffer.from(JSON.stringify(cursor)).toString("base64url")}`;
 }
@@ -121,7 +151,10 @@ export function resolveProgressSearchRequest(value: unknown): ResolvedProgressSe
 		cursor &&
 		(cursor.requestHash !== requestHash ||
 			cursor.pageSize !== pageSize ||
-			cursor.offset + pageSize > ProgressSearchDocument.results.maxResultWindow)
+			cursor.consumed + pageSize > ProgressSearchDocument.results.maxResultWindow ||
+			(sort.startsWith("progressLastSeenAt:") &&
+				(cursor.boundary.sortValue === null ||
+					!Number.isFinite(Date.parse(cursor.boundary.sortValue)))))
 	)
 		throw new InvalidSearch("Progress Search cursor does not match this request");
 
@@ -129,7 +162,8 @@ export function resolveProgressSearchRequest(value: unknown): ResolvedProgressSe
 		query,
 		sort,
 		pageSize,
-		offset: cursor?.offset ?? 0,
+		consumed: cursor?.consumed ?? 0,
+		...(cursor ? { boundary: cursor.boundary, total: cursor.total } : {}),
 		requestHash,
 	};
 }

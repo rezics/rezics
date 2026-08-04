@@ -28,6 +28,17 @@ if ((production_socket_count != 1)); then
 	exit 1
 fi
 
+if ! grep -Fq '"-c", "max_slot_wal_keep_size=32GB"' deploy/nomad/postgres.nomad.hcl; then
+	printf '%s\n' 'Production PostgreSQL must retain 32GB per logical replication slot' >&2
+	exit 1
+fi
+
+if ! grep -Fq '"-c", "shared_preload_libraries=pg_stat_statements"' \
+	deploy/nomad/postgres.nomad.hcl; then
+	printf '%s\n' 'Production PostgreSQL must preload pg_stat_statements' >&2
+	exit 1
+fi
+
 if grep -Fq 'unix_socket_directories' deploy/nomad/sequin-postgres.nomad.hcl; then
 	printf '%s\n' 'Sequin PostgreSQL must retain the entrypoint initialization socket' >&2
 	exit 1

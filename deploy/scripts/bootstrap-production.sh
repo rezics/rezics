@@ -17,7 +17,7 @@ readonly sequin_image="$7"
 repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 readonly repository_root
 readonly jobs_directory="${repository_root}/deploy/nomad"
-readonly current_search_index="rezics_units_v1_20260801"
+readonly current_search_index="rezics_units_v1_20260804"
 
 for image in "${api_image}" "${worker_image}" "${database_image}" "${postgres_image}" "${sequin_image}"; do
 	if [[ ! "${image}" =~ @sha256:[0-9a-f]{64}$ ]]; then

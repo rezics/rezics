@@ -1,9 +1,10 @@
-import { and, asc, eq, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, getTableColumns, isNull, sql } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
 import {
 	contentStructure,
 	contentStructureNode,
+	contentStructureRevisionHead,
 	type ContentStructureKind,
 	type RealmTagQueryStrategy,
 } from "../database/schema";
@@ -16,11 +17,7 @@ import {
 import { applyContentStructureBatch } from "./batch";
 import type { ContentStructureBatchCommand } from "./batch-plan";
 import { ContentStructureInvalid, ContentStructureNotFound } from "./errors";
-import {
-	createContentStructureHistory,
-	getContentStructureHeadRevision,
-	mutateContentStructureWithHistory,
-} from "./history";
+import { createContentStructureHistory, mutateContentStructureWithHistory } from "./history";
 import { ensureContentStructureKindOwner, loadContentStructureSnapshot } from "./storage";
 
 type MutationActor = {
@@ -67,8 +64,12 @@ export async function getContentStructureRevision(
 	structureId: string,
 ): Promise<string | null> {
 	const [owned] = await tx
-		.select({ id: contentStructure.id })
+		.select({ revisionId: contentStructureRevisionHead.revisionId })
 		.from(contentStructure)
+		.innerJoin(
+			contentStructureRevisionHead,
+			eq(contentStructureRevisionHead.structureId, contentStructure.id),
+		)
 		.where(
 			and(
 				eq(contentStructure.id, structureId),
@@ -77,8 +78,7 @@ export async function getContentStructureRevision(
 			),
 		)
 		.limit(1);
-	if (!owned) return null;
-	return getContentStructureHeadRevision(tx, structureId);
+	return owned?.revisionId ?? null;
 }
 
 export async function listContentStructures(
@@ -87,8 +87,15 @@ export async function listContentStructures(
 	kind?: ContentStructureKind,
 ) {
 	return tx
-		.select()
+		.select({
+			...getTableColumns(contentStructure),
+			latestRevisionId: contentStructureRevisionHead.revisionId,
+		})
 		.from(contentStructure)
+		.innerJoin(
+			contentStructureRevisionHead,
+			eq(contentStructureRevisionHead.structureId, contentStructure.id),
+		)
 		.where(
 			and(
 				eq(contentStructure.ownerUnitId, ownerUnitId),

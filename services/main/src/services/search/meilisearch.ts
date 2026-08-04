@@ -1,10 +1,11 @@
 import type { SearchControlPredicate, SearchScalar } from "@rezics/filter";
-import { getActiveObservability } from "@rezics/observability";
+import { observedFetch } from "@rezics/observability";
 import { sql } from "drizzle-orm";
 
 import { env } from "../config";
 import { database } from "../database";
 import { InvalidSearch, SearchUnavailable } from "./errors";
+import { CandidateFilterClause } from "./candidate-filter";
 import {
 	resolveCurrentSearchFilterDefinition,
 	resolveCurrentSearchSortDefinition,
@@ -13,8 +14,6 @@ import {
 } from "./field-registry";
 import type { SearchExpression } from "./query";
 import { SearchCategories, type SearchCategory, type SearchSort } from "./schema";
-
-const { metrics } = getActiveObservability();
 
 export interface MeilisearchCandidate {
 	readonly id: string;
@@ -30,11 +29,18 @@ export interface CandidateQueryBranch {
 
 interface CandidateQueryBase {
 	readonly indexUid: string;
+	readonly accessFilter?: CandidateFilterClause;
+	readonly domainFilter?: CandidateFilterClause;
 	readonly query: string;
 	readonly offset: number;
 	readonly limit: number;
-	readonly profileId?: string;
 	readonly sort: SearchSort;
+}
+
+export interface CandidateSearchContext {
+	readonly generationId: string;
+	readonly indexUid: string;
+	readonly accessFilter?: CandidateFilterClause;
 }
 
 export type CandidateQuery = CandidateQueryBase &
@@ -131,8 +137,11 @@ export function compileMeilisearchExpression(
 	return `(${clauses.join(operator)})`;
 }
 
-async function coarseAccessFilter(profileId: string | undefined): Promise<string | undefined> {
-	if (!profileId) return "access.publicDiscoverable = true";
+async function coarseAccessFilter(
+	profileId: string | undefined,
+): Promise<CandidateFilterClause | undefined> {
+	if (!profileId)
+		return CandidateFilterClause.fromAccessPolicy("access.publicDiscoverable = true");
 	const context = await database.execute<{ realm_ids: string[]; platform_editor: boolean }>(
 		sql`select coalesce(array_agg(distinct realm_id) filter (where realm_id is not null), array[]::uuid[])::text[] as realm_ids,
 				exists(select 1 from platform_capability_grant where profile_id = ${profileId}::uuid and capability = 'unit.edit' and revoked_at is null and (expires_at is null or expires_at > now())) as platform_editor
@@ -146,7 +155,20 @@ async function coarseAccessFilter(profileId: string | undefined): Promise<string
 		`access.profileIds = ${JSON.stringify(profileId)}`,
 		...(row?.realm_ids ?? []).map((realmId) => `access.realmIds = ${JSON.stringify(realmId)}`),
 	];
-	return `(${terms.join(" OR ")})`;
+	return CandidateFilterClause.fromAccessPolicy(`(${terms.join(" OR ")})`);
+}
+
+/** Resolves authorization once for a complete page/facet candidate execution. */
+export async function createCandidateSearchContext(
+	generation: Readonly<{ id: string; indexUid: string }>,
+	profileId: string | undefined,
+): Promise<CandidateSearchContext> {
+	const accessFilter = await coarseAccessFilter(profileId);
+	return {
+		generationId: generation.id,
+		indexUid: generation.indexUid,
+		...(accessFilter ? { accessFilter } : {}),
+	};
 }
 
 function candidateQueryBranches(query: CandidateQuery): readonly CandidateQueryBranch[] {
@@ -249,59 +271,42 @@ async function executeCandidateSearch(
 		throw new SearchUnavailable(new Error("Meilisearch query configuration is missing"));
 	const meilisearchUrl = env.MEILISEARCH_URL;
 	const queryKey = env.MEILISEARCH_QUERY_KEY;
-	const accessByProfile = new Map<string, Promise<string | undefined>>();
-	const requests = await Promise.all(
-		queries.map(async (query) => {
-			const branches = candidateQueryBranches(query);
-			const accessKey = query.profileId ?? "anonymous";
-			let accessPromise = accessByProfile.get(accessKey);
-			if (!accessPromise) {
-				accessPromise = coarseAccessFilter(query.profileId);
-				accessByProfile.set(accessKey, accessPromise);
-			}
-			const access = await accessPromise;
-			const filters = [candidateScopeFilter(branches), access].filter(
-				(value): value is string => value !== undefined,
-			);
-			return {
-				indexUid: query.indexUid,
-				q: query.query,
-				filter: filters,
-				sort: candidateSort(branches, query.sort, query.query),
-				matchingStrategy: meilisearchMatchingStrategy(query.sort),
-				offset: query.offset,
-				limit: query.limit,
-				attributesToRetrieve: ["id", "revision", "category", "unitType"],
-			};
-		}),
-	);
+	const requests = queries.map((query) => {
+		const branches = candidateQueryBranches(query);
+		const filters = [
+			candidateScopeFilter(branches),
+			query.domainFilter?.value,
+			query.accessFilter?.value,
+		].filter((value): value is string => value !== undefined);
+		return {
+			indexUid: query.indexUid,
+			q: query.query,
+			filter: filters,
+			sort: candidateSort(branches, query.sort, query.query),
+			matchingStrategy: meilisearchMatchingStrategy(query.sort),
+			offset: query.offset,
+			limit: query.limit,
+			attributesToRetrieve: ["id", "revision", "category", "unitType"],
+		};
+	});
 	let response: Response;
-	const startedAt = performance.now();
 	try {
-		response = await fetch(`${meilisearchUrl}/multi-search`, {
-			method: "POST",
-			headers: {
-				Authorization: `Bearer ${queryKey}`,
-				"Content-Type": "application/json",
+		response = await observedFetch(
+			{ dependency: "meilisearch", operation: "multi_search" },
+			`${meilisearchUrl}/multi-search`,
+			{
+				method: "POST",
+				headers: {
+					Authorization: `Bearer ${queryKey}`,
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ queries: requests }),
+				signal: AbortSignal.timeout(env.SEARCH_CANDIDATE_TIME_BUDGET_MS ?? 1_500),
 			},
-			body: JSON.stringify({ queries: requests }),
-			signal: AbortSignal.timeout(5_000),
-		});
-	} catch (cause) {
-		metrics.dependencyFinished(
-			"meilisearch",
-			"multi_search",
-			performance.now() - startedAt,
-			true,
 		);
+	} catch (cause) {
 		throw new SearchUnavailable(cause);
 	}
-	metrics.dependencyFinished(
-		"meilisearch",
-		"multi_search",
-		performance.now() - startedAt,
-		!response.ok,
-	);
 	if (!response.ok)
 		throw new SearchUnavailable(new Error(`Meilisearch returned HTTP ${response.status}`));
 	const body: unknown = await response.json();

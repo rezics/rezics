@@ -29,8 +29,8 @@ describe("search index lifecycle support", () => {
 	});
 
 	it("proves versioned index UIDs before lifecycle use", () => {
-		expect(parseSearchIndexUid("current", "rezics_units_v1_20260801")).toBe(
-			"rezics_units_v1_20260801",
+		expect(parseSearchIndexUid("current", "rezics_units_v1_20260804")).toBe(
+			"rezics_units_v1_20260804",
 		);
 		expect(parseSearchIndexUid("current", "rezics_units_v2_20260721")).toBe(
 			"rezics_units_v2_20260721",
@@ -58,7 +58,7 @@ describe("search index lifecycle support", () => {
 			parseSequinSinks({
 				data: [
 					{
-						name: "rezics-revisions-v1-20260801",
+						name: "rezics-revisions-v1-20260804",
 						status: "disabled",
 						health: { status: "paused" },
 						source: { include_tables: ["public.search_revision_projection_source"] },
@@ -75,7 +75,7 @@ describe("search index lifecycle support", () => {
 			}),
 		).toEqual([
 			{
-				name: "rezics-revisions-v1-20260801",
+				name: "rezics-revisions-v1-20260804",
 				status: "disabled",
 				healthStatus: "paused",
 				sourceTables: ["public.search_revision_projection_source"],
@@ -139,7 +139,7 @@ describe("search index lifecycle support", () => {
 		let time = 0;
 		await expect(
 			waitForProjectionReady({
-				indexUid: parseSearchIndexUid("history", "rezics_revisions_v1_20260801"),
+				indexUid: parseSearchIndexUid("history", "rezics_revisions_v1_20260804"),
 				probe: async () => ({ status: "pending", reason: "sink is unhealthy" }),
 				timeoutMs: 2_000,
 				integrityGraceMs: 1_000,

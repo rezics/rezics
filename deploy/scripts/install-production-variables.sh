@@ -248,10 +248,10 @@ jq -n \
 					SEQUIN_API_TOKEN: $sequinApiToken,
 					SEQUIN_SOURCE_USERNAME: $sequinSourceUsername,
 					SEQUIN_SOURCE_PASSWORD: $sequinSourcePassword,
-					MEILISEARCH_CURRENT_INDEX_UID: "rezics_units_v1_20260801",
-					MEILISEARCH_CURRENT_SINK_NAME: "rezics-units-v1-20260801",
-					MEILISEARCH_HISTORY_INDEX_UID: "rezics_revisions_v1_20260801",
-					MEILISEARCH_HISTORY_SINK_NAME: "rezics-revisions-v1-20260801"
+					MEILISEARCH_CURRENT_INDEX_UID: "rezics_units_v1_20260804",
+					MEILISEARCH_CURRENT_SINK_NAME: "rezics-units-v1-20260804",
+					MEILISEARCH_HISTORY_INDEX_UID: "rezics_revisions_v1_20260804",
+					MEILISEARCH_HISTORY_SINK_NAME: "rezics-revisions-v1-20260804"
 				}
 			}
 		]

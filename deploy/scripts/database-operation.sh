@@ -51,6 +51,7 @@ migrate() {
 }
 
 verify() {
+	yarn exec tsx scripts/verify-postgres-runtime.ts
 	yarn exec tsx scripts/verify-platform-core.ts
 }
 
