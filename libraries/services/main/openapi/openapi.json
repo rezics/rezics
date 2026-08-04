@@ -109020,8 +109020,7 @@
 								"properties": {
 									"url": {
 										"format": "uri",
-										"maxLength": 2000,
-										"pattern": "^https?://",
+										"pattern": "^[Hh][Tt][Tt][Pp][Ss]?://",
 										"type": "string"
 									},
 									"sourceEntityUnitId": { "format": "uuid", "type": "string" },

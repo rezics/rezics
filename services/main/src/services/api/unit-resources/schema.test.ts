@@ -50,9 +50,15 @@ describe("Unit resource API schemas", () => {
 		expect(
 			Value.Check(AddUnitLinkBody, {
 				...sourceLink,
+				url: "HTTPS://EXAMPLE.TEST/units/book",
+			}),
+		).toBe(true);
+		expect(
+			Value.Check(AddUnitLinkBody, {
+				...sourceLink,
 				url: `https://example.test/${"a".repeat(2_000)}`,
 			}),
-		).toBe(false);
+		).toBe(true);
 	});
 
 	it("accepts every registered Unit kind as a source-link owner", () => {

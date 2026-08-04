@@ -95,7 +95,10 @@ export type AddUnitSubjectAssociationBody = Static<typeof AddUnitSubjectAssociat
 
 export const AddUnitLinkBody = t.Object(
 	{
-		url: t.String({ format: "uri", maxLength: 2_000, pattern: "^https?://" }),
+		url: t.String({
+			format: "uri",
+			pattern: "^[Hh][Tt][Tt][Pp][Ss]?://",
+		}),
 		sourceEntityUnitId: Uuid,
 		position: t.Optional(FractionalPosition),
 	},

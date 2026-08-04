@@ -76644,7 +76644,6 @@ export type PostApiUnitsByTypeByUnitIdLinksBody = {
 	/**
 	 * @description
 	 * Format: `uri`
-	 * @maxLength 2000
 	 * @type string
 	 */
 	url: string;

@@ -112,6 +112,7 @@ import {
 import { AssociationContextPostInvalid } from "../../units/errors";
 import { updateDirectUnitTagCuration } from "../../tags/curation";
 import { getPendingUnitOwnershipClaim } from "../../ownership-claims/service";
+import { normalizeExternalWebUrl } from "./external-web-url";
 
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
@@ -1156,10 +1157,7 @@ export default new Elysia()
 					await ensureReadableSourceEntity(authorization.unit, body.sourceEntityUnitId);
 					// An external link is Unit metadata, not credit or an “is about” relationship.
 					// It intentionally does not consume either Entity association capability.
-					const normalized = new URL(body.url);
-					normalized.hash = "";
-					normalized.searchParams.sort();
-					const normalizedUrl = normalized.toString();
+					const { url, normalizedUrl } = normalizeExternalWebUrl(body.url);
 					const normalizedUrlHash = createHash("sha256")
 						.update(normalizedUrl)
 						.digest("hex");
@@ -1178,7 +1176,7 @@ export default new Elysia()
 							.values({
 								unitId: params.unitId,
 								sourceEntityId: body.sourceEntityUnitId,
-								url: body.url,
+								url,
 								position:
 									body.position ??
 									fractionalPositionBetween(last?.position, null),
