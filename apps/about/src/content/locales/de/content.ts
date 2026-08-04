@@ -54,7 +54,7 @@ export const deContent = {
 	home: {
 		eyebrow: "Erben · Schaffen · Weitertragen",
 		title: "Geschichten wiederbegegnen.",
-		lead: `${BRAND} ist ein sprachübergreifendes Wissensnetz rund um Werke. Identität, Veröffentlichungen, Inhalte, Diskussionen und Community-Gedächtnis bleiben verbunden, statt auf fremde Plattformen und Einträge verteilt zu werden.`,
+		lead: `${BRAND} ist eine von Grund auf mehrsprachige Plattform für die Organisation und Veröffentlichung von Inhalten sowie die Zusammenarbeit in Communities. Werke, ${deTerminology.metadata.forms.inline}, ${deTerminology.post.forms.plural}, Sammlungen, Kategorien und Community-Räume erhalten jeweils eine beständige Identität und lassen sich im selben System verknüpfen, erstellen, verwalten, entdecken, diskutieren und gemeinschaftlich regeln.`,
 		explore: "Anwendungen entdecken",
 		understand: "Das Modell verstehen",
 		problem: {
@@ -68,7 +68,7 @@ export const deContent = {
 		principles: [
 			{
 				title: "Erben",
-				body: "Geschichte, Sprachen, Ausgaben und Community-Erinnerungen eines Werks aufnehmen.",
+				body: "Geschichte, Sprachen, Ausgaben und Community-Erinnerungen, die ein Werk bereits mitbringt.",
 			},
 			{
 				title: "Schaffen",
@@ -102,8 +102,8 @@ export const deContent = {
 			],
 		},
 		outcomes: {
-			title: "Für Lesende und alle, die Werke weitertragen.",
-			body: "Dieselbe Grundlage erleichtert das Finden, schützt kreative Zuordnung und reicht Wissen an die nächsten Lesenden weiter.",
+			title: "Für Lesende und für die Werke selbst.",
+			body: "Dieselbe Grundlage erleichtert das Finden, schützt kreative Zuordnung und bringt Werke mit den passenden Lesenden zusammen.",
 			cards: [
 				{
 					title: "Finden",
@@ -127,6 +127,11 @@ export const deContent = {
 			title: "Mit einem Werk beginnen, das wichtig ist.",
 			body: "Werke, Communities und wachsendes Wissen im Hauptangebot entdecken.",
 			action: `${BRAND} öffnen`,
+		},
+		contact: {
+			title: "Eine Idee, die wir gemeinsam verwirklichen können?",
+			body: "Ob Produktkooperation, Mitarbeit am Open-Source-Projekt, Fragen zum Inhaltsmodell oder Vorschläge für Verbesserungen – wir freuen uns auf den Austausch.",
+			action: "Kontakt aufnehmen",
 		},
 	},
 	how: {

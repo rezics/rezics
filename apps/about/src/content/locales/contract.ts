@@ -2,6 +2,7 @@ import type { AboutPageMeta, ProductLayerId } from "../productTypes";
 
 type CardCopy = { readonly title: string; readonly body: string };
 type JourneyCopy = CardCopy & { readonly result: string };
+type ActionCardCopy = CardCopy & { readonly action: string };
 
 export type MainPageId = "home" | "how" | "uses" | "products";
 export type PageId = MainPageId | "contact";
@@ -42,7 +43,8 @@ export type SiteCopy = {
 		readonly model: CardCopy & { readonly steps: readonly CardCopy[] };
 		readonly outcomes: CardCopy & { readonly cards: readonly CardCopy[] };
 		readonly open: CardCopy;
-		readonly closing: CardCopy & { readonly action: string };
+		readonly closing: ActionCardCopy;
+		readonly contact: ActionCardCopy;
 	};
 	readonly how: {
 		readonly eyebrow: string;
@@ -61,7 +63,7 @@ export type SiteCopy = {
 		readonly lead: string;
 		readonly resultLabel: string;
 		readonly journeys: readonly JourneyCopy[];
-		readonly closing: CardCopy & { readonly action: string };
+		readonly closing: ActionCardCopy;
 	};
 	readonly products: {
 		readonly eyebrow: string;

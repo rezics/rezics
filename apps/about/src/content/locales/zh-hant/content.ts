@@ -50,7 +50,7 @@ export const zhHantContent = {
 	home: {
 		eyebrow: "傳承 · 創作 · 傳播",
 		title: "與所愛的故事相遇。",
-		lead: `${BRAND} 是以作品為中心的跨語言知識網路。它讓一部作品的身份、版本、內容、討論與社群記憶彼此相連，而不是散落在互不相識的平台與條目裡。`,
+		lead: `${BRAND} 是一個原生支援多語言的內容組織、發布與社群協作平台。它讓作品、${zhHantTerminology.metadata.forms.inline}、${zhHantTerminology.post.forms.plural}、收藏、分類與社群空間擁有各自穩定的身分，並能在同一套系統中被連結、創作、管理、探索、討論與治理。`,
 		explore: "探索用途",
 		understand: "理解運作原理",
 		problem: {
@@ -62,7 +62,7 @@ export const zhHantContent = {
 			body: `${BRAND} 以穩定作品身份作為共同起點。名稱可以翻譯，內容可以演進，社群可以從不同角度組織，但它們仍指向同一個可理解、可追溯的對象。`,
 		},
 		principles: [
-			{ title: "傳承", body: "接住作品已經擁有的歷史、語言、版本與社群記憶。" },
+			{ title: "傳承", body: "作品已經擁有的歷史、語言、版本與社群記憶。" },
 			{ title: "創作", body: "讓人們撰寫內容、建立結構、補充歸屬並形成新的理解。" },
 			{ title: "傳播", body: "透過社群、開放協議與跨語言連結，讓知識繼續流動。" },
 		],
@@ -83,8 +83,8 @@ export const zhHantContent = {
 			],
 		},
 		outcomes: {
-			title: "為讀者，也為一起守護作品的人。",
-			body: "同一套基礎同時降低尋找成本、保留創作歸屬，並讓社群知識能被下一位讀者接住。",
+			title: "為讀者，也為作品本身。",
+			body: "同一套基礎同時降低尋找成本、保留創作歸屬，讓作品遇上適合的讀者。",
 			cards: [
 				{ title: "找到", body: "跨語言辨認作品、版本與相關創作者，不再從零拼湊。" },
 				{ title: "理解", body: "沿著結構、評論、維基、歷史與關係看見作品的完整脈絡。" },
@@ -102,6 +102,11 @@ export const zhHantContent = {
 			title: "從一部你在意的作品開始。",
 			body: `進入主站，探索作品、${zhHantTerminology.realm.forms.label}與正在形成的共同知識。`,
 			action: `進入 ${BRAND}`,
+		},
+		contact: {
+			title: "有想法想和我們一起實現嗎？",
+			body: "無論是產品合作、參與開源、內容模型，或任何值得被做得更好的建議，都歡迎與我們聊聊。",
+			action: "聯繫我們",
 		},
 	},
 	how: {

@@ -50,7 +50,7 @@ export const zhHansContent = {
 	home: {
 		eyebrow: "继承 · 创作 · 传播",
 		title: "与所爱的故事相遇。",
-		lead: `${BRAND} 是以作品为中心的跨语言知识网络。它让一部作品的身份、版本、内容、讨论与社区记忆彼此连接，而不是散落在互不相识的平台和条目里。`,
+		lead: `${BRAND} 是一个原生支持多语言的内容组织、发布与社区协作平台。它让作品、${zhHansTerminology.metadata.forms.inline}、${zhHansTerminology.post.forms.plural}、收藏、分类和社区空间拥有各自稳定的身份，并能在同一套系统中被连接、创作、管理、探索、讨论与治理。`,
 		explore: "探索用途",
 		understand: "理解运作原理",
 		problem: {
@@ -62,7 +62,7 @@ export const zhHansContent = {
 			body: `${BRAND} 以稳定作品身份作为共同起点。名称可以翻译，内容可以演进，社区可以从不同角度组织，但它们仍指向同一个可理解、可追溯的对象。`,
 		},
 		principles: [
-			{ title: "继承", body: "接住作品已经拥有的历史、语言、版本与社区记忆。" },
+			{ title: "继承", body: "作品已经拥有的历史、语言、版本与社区记忆。" },
 			{ title: "创作", body: "让人们撰写内容、建立结构、补充归属并形成新的理解。" },
 			{ title: "传播", body: "通过社区、开放协议与跨语言连接，让知识继续流动。" },
 		],
@@ -83,8 +83,8 @@ export const zhHansContent = {
 			],
 		},
 		outcomes: {
-			title: "为读者，也为共同守护作品的人。",
-			body: "同一套基础同时降低寻找成本、保留创作归属，让社区知识能被下一位读者接住。",
+			title: "为读者，也为作品本身。",
+			body: "同一套基础同时降低寻找成本、保留创作归属，让作品遇上适合的读者。",
 			cards: [
 				{ title: "找到", body: "跨语言辨认作品、版本与相关创作者，不再从零拼凑。" },
 				{ title: "理解", body: "沿着结构、评论、维基、历史和关系看见作品的完整上下文。" },
@@ -102,6 +102,11 @@ export const zhHansContent = {
 			title: "从一部你在意的作品开始。",
 			body: `进入主站，探索作品、${zhHansTerminology.realm.forms.label}与正在形成的共同知识。`,
 			action: `进入 ${BRAND}`,
+		},
+		contact: {
+			title: "有想法想和我们一起实现吗？",
+			body: "无论是产品合作、参与开源、内容模型，还是任何值得做得更好的建议，都欢迎与我们聊聊。",
+			action: "联系我们",
 		},
 	},
 	how: {

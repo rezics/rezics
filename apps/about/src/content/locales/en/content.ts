@@ -52,7 +52,7 @@ export const enContent = {
 	home: {
 		eyebrow: "inherited · create · spread",
 		title: "Meet the stories you love.",
-		lead: `${BRAND} is a cross-language knowledge network centered on works. It keeps a work’s identity, releases, content, discussion, and community memory connected instead of scattering them across unrelated platforms and entries.`,
+		lead: `${BRAND} is a content organization, publishing, and community collaboration platform built for multilingual use from the ground up. It gives works, ${enTerminology.metadata.forms.inline}, ${enTerminology.post.forms.plural}, collections, classifications, and community spaces their own stable identities, so they can be connected, created, managed, discovered, discussed, and governed in one system.`,
 		explore: "Explore uses",
 		understand: "Understand the model",
 		problem: {
@@ -66,7 +66,7 @@ export const enContent = {
 		principles: [
 			{
 				title: "Inherited",
-				body: "Receive the history, languages, releases, and community memory a work already carries.",
+				body: "The history, languages, releases, and community memory a work already carries.",
 			},
 			{
 				title: "Create",
@@ -100,8 +100,8 @@ export const enContent = {
 			],
 		},
 		outcomes: {
-			title: "For readers—and for everyone who helps a work endure.",
-			body: "The same foundation lowers discovery cost, preserves creative attribution, and lets community knowledge reach the next reader.",
+			title: "For readers—and for the works themselves.",
+			body: "The same foundation lowers discovery costs, preserves creative attribution, and helps works find the right readers.",
 			cards: [
 				{
 					title: "Find",
@@ -125,6 +125,11 @@ export const enContent = {
 			title: "Begin with one work that matters to you.",
 			body: "Enter the main experience and explore works, communities, and knowledge taking shape.",
 			action: `Enter ${BRAND}`,
+		},
+		contact: {
+			title: "Have an idea worth building together?",
+			body: "Whether it’s a product collaboration, an open-source contribution, a content-model question, or something that could work better, we’d like to hear from you.",
+			action: "Contact us",
 		},
 	},
 	how: {

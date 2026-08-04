@@ -3,7 +3,7 @@ import { buttonVariants } from "@rezics/ui";
 
 import { getSiteCopy } from "../../content/locales";
 import { ABOUT_LOCALES, getAppEntryUrl, requireAboutLocale } from "../../i18n/locales";
-import { getHowItWorksPath, getUsesPath } from "../../i18n/productPaths";
+import { getContactPath, getHowItWorksPath, getUsesPath } from "../../i18n/productPaths";
 import SiteLayout from "../../layouts/SiteLayout.astro";
 
 export function getStaticPaths() {
@@ -104,6 +104,20 @@ const copy = getSiteCopy(locale);
         <div>
           <a class={buttonVariants({ variant: "brand", size: "xl" })} href={getAppEntryUrl()}>
             {copy.home.closing.action}
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section home-contact">
+    <div class="shell">
+      <div class="section-heading">
+        <h2>{copy.home.contact.title}</h2>
+        <p>{copy.home.contact.body}</p>
+        <div>
+          <a class={buttonVariants({ variant: "outline", size: "xl" })} href={getContactPath()}>
+            {copy.home.contact.action}
           </a>
         </div>
       </div>

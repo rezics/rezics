@@ -108,8 +108,17 @@ if (
 }
 
 for (const locale of ABOUT_LOCALES) {
+	const homePath = getHomePath(locale);
+	const home = await readOutput(homePath);
+	if (
+		!home.includes('class="page-section home-contact"') ||
+		!home.includes(`href="${getContactPath()}"`)
+	) {
+		throw new Error(`Missing the contact call to action in ${homePath}`);
+	}
+
 	const canonicalPaths = [
-		getHomePath(locale),
+		homePath,
 		getHowItWorksPath(locale),
 		getUsesPath(locale),
 		getProductsPath(locale),
