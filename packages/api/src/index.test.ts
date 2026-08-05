@@ -24,6 +24,21 @@ describe("public API client", () => {
 		expect(await resolveAuth({ type: "apiKey", name: "session", in: "cookie" })).toBe(
 			undefined,
 		);
+		const publicRequest = await client.interceptors.request.run({
+			url: "http://localhost:3000/api/v1/health",
+			method: "GET",
+			headers: {},
+		});
+		expect(new Headers(publicRequest.headers).get("Authorization")).toBe(
+			`Bearer ${token}`,
+		);
+		await expect(
+			client.interceptors.request.run({
+				url: "https://example.com/api/v1/health",
+				method: "GET",
+				headers: {},
+			}),
+		).rejects.toThrow("refused to send credentials to another origin");
 	});
 
 	test("rejects credentials in URLs and insecure remote origins", () => {

@@ -52,15 +52,25 @@ function normalizeBaseUrl(value: string | URL): string {
 export function createRezicsClient(options: CreateRezicsClientOptions): ClientInstance {
 	const token = options.token;
 	const provideToken: RezicsApiTokenProvider = typeof token === "function" ? token : () => token;
+	const baseUrl = normalizeBaseUrl(options.baseUrl);
+	const baseOrigin = new URL(baseUrl).origin;
 
-	return createClient({
-		baseURL: normalizeBaseUrl(options.baseUrl),
+	const client = createClient({
+		baseURL: baseUrl,
 		credentials: "omit",
 		auth: async (scheme) => {
 			if (scheme.type !== "http" || scheme.scheme !== "bearer") return undefined;
 			return provideToken();
 		},
 	});
+	client.interceptors.request.use(async (request) => {
+		if (new URL(request.url).origin !== baseOrigin)
+			throw new Error("REZICS API client refused to send credentials to another origin");
+		const headers = new Headers(request.headers);
+		headers.set("Authorization", `Bearer ${await provideToken()}`);
+		return { ...request, headers: Object.fromEntries(headers.entries()) };
+	});
+	return client;
 }
 
 export * from "./generated/.kubb/client";
