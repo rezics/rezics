@@ -14,7 +14,8 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { ExternalLink, KeyRound, Plus, ShieldAlert, Trash2, XIcon } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
-import { useState, type FormEvent } from "react";
+import { useAuthPortal } from "@/features/auth/auth-portal-context";
+import { useState, useCallback, type FormEvent } from "react";
 
 import {
 	Alert,
@@ -61,6 +62,7 @@ import {
 	QueryFailure,
 	QueryPending,
 } from "@rezics/ui";
+import { hasErrorCode } from "@/i18n/errors";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useTranslation } from "@/i18n/client";
 import {
@@ -177,6 +179,32 @@ function formatDate(value: string, locale: string) {
 		dateStyle: "medium",
 		timeStyle: "short",
 	}).format(new Date(value));
+}
+
+type FreshSessionAction = () => Promise<unknown>;
+
+function useFreshSessionAction() {
+	const { openAuthPortal } = useAuthPortal();
+	return useCallback(
+		async (action: FreshSessionAction): Promise<void> => {
+			try {
+				await action();
+			} catch (error) {
+				if (!hasErrorCode(error, "FreshSessionRequired")) return;
+				openAuthPortal("login", {
+					navigateAfterAuthentication: false,
+					onAuthenticated: async () => {
+						try {
+							await action();
+						} catch {
+							// The mutation hook retains the failed retry for localized feedback.
+						}
+					},
+				});
+			}
+		},
+		[openAuthPortal],
+	);
 }
 
 function PermissionFields({
@@ -376,6 +404,7 @@ function QuotaLimitFields({
 
 function CreateTokenCard({ refresh }: { refresh: () => Promise<unknown> }) {
 	const { t } = useTranslation(["settings", "ui"]);
+	const runFreshSessionAction = useFreshSessionAction();
 	const [permissions, setPermissions] = useState<ApiTokenPermission[]>([
 		...ContentAgentPermissions,
 	]);
@@ -395,13 +424,15 @@ function CreateTokenCard({ refresh }: { refresh: () => Promise<unknown> }) {
 		setPermissionsInvalid(permissions.length === 0);
 		if (permissions.length === 0) return;
 		const form = new FormData(event.currentTarget);
-		await create.mutateAsync({
-			body: {
-				name: String(form.get("name") ?? "").trim(),
-				expiresInDays: Number(form.get("expiresInDays")),
-				permissions,
-			},
-		});
+		await runFreshSessionAction(() =>
+			create.mutateAsync({
+				body: {
+					name: String(form.get("name") ?? "").trim(),
+					expiresInDays: Number(form.get("expiresInDays")),
+					permissions,
+				},
+			}),
+		);
 	}
 
 	return (
@@ -501,6 +532,7 @@ function TokenAccessEditor({
 	refresh: () => Promise<unknown>;
 }) {
 	const { t } = useTranslation(["settings", "ui"]);
+	const runFreshSessionAction = useFreshSessionAction();
 	const [permissions, setPermissions] = useState<ApiTokenPermission[]>([
 		...(token.permissions as ApiTokenPermission[]),
 	]);
@@ -514,10 +546,12 @@ function TokenAccessEditor({
 		setInvalid(permissions.length === 0);
 		if (permissions.length === 0) return;
 		const form = new FormData(event.currentTarget);
-		await update.mutateAsync({
-			path: { tokenId: token.id },
-			body: { name: String(form.get("name") ?? "").trim(), permissions },
-		});
+		await runFreshSessionAction(() =>
+			update.mutateAsync({
+				path: { tokenId: token.id },
+				body: { name: String(form.get("name") ?? "").trim(), permissions },
+			}),
+		);
 	}
 
 	return (
@@ -588,6 +622,7 @@ function TokenQuotaEditor({
 	refresh: () => Promise<unknown>;
 }) {
 	const { t } = useTranslation(["settings", "ui"]);
+	const runFreshSessionAction = useFreshSessionAction();
 	const policyLimits = token.quota.token.limits;
 	const ranges = getTokenQuotaLimitRanges({
 		requestsPerMinute: Number(policyLimits.requestRate.requestsPerMinute),
@@ -680,16 +715,18 @@ function TokenQuotaEditor({
 		}
 		setInvalid(!limits.valid || !operationsValid);
 		if (!limits.valid || !operationsValid) return;
-		await replace.mutateAsync({
-			path: { tokenId: token.id },
-			body: {
-				expectedRevision: Number(token.quota.tokenOverride?.revision ?? 0),
-				configurationOverride: {
-					limits: quotaLimits(limits.values),
-					operations: configurationOperations,
+		await runFreshSessionAction(() =>
+			replace.mutateAsync({
+				path: { tokenId: token.id },
+				body: {
+					expectedRevision: Number(token.quota.tokenOverride?.revision ?? 0),
+					configurationOverride: {
+						limits: quotaLimits(limits.values),
+						operations: configurationOperations,
+					},
 				},
-			},
-		});
+			}),
+		);
 	}
 
 	return (
@@ -847,12 +884,14 @@ function TokenQuotaEditor({
 					<Button
 						isLoading={reset.isPending}
 						onClick={() =>
-							reset.mutate({
-								path: { tokenId: token.id },
-								body: {
-									expectedRevision: token.quota.tokenOverride?.revision ?? 0,
-								},
-							})
+							void runFreshSessionAction(() =>
+								reset.mutateAsync({
+									path: { tokenId: token.id },
+									body: {
+										expectedRevision: token.quota.tokenOverride?.revision ?? 0,
+									},
+								}),
+							)
 						}
 						type="button"
 						variant="outline"
@@ -875,6 +914,7 @@ function TokenCard({
 	locale: string;
 }) {
 	const { t } = useTranslation(["settings", "ui"]);
+	const runFreshSessionAction = useFreshSessionAction();
 	const [editor, setEditor] = useState<"access" | "quota">();
 	const update = usePatchApiApiTokensByTokenId<unknown>({
 		mutation: { onSuccess: refresh },
@@ -982,10 +1022,12 @@ function TokenCard({
 					<Button
 						isLoading={update.isPending}
 						onClick={() =>
-							void update.mutateAsync({
-								path: { tokenId: token.id },
-								body: { enabled: !token.enabled },
-							})
+							void runFreshSessionAction(() =>
+								update.mutateAsync({
+									path: { tokenId: token.id },
+									body: { enabled: !token.enabled },
+								}),
+							)
 						}
 						size="sm"
 						type="button"
@@ -1012,7 +1054,9 @@ function TokenCard({
 								<AlertDialogCancel>{t.settings.tokens.cancel}</AlertDialogCancel>
 								<AlertDialogAction
 									onClick={() =>
-										void revoke.mutateAsync({ path: { tokenId: token.id } })
+										void runFreshSessionAction(() =>
+											revoke.mutateAsync({ path: { tokenId: token.id } }),
+										)
 									}
 									variant="destructive"
 								>

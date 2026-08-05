@@ -223,7 +223,6 @@ import type {
 	PutApiMessagesConversationsByConversationIdReadStatus500,
 	GetApiApiTokensStatus200,
 	GetApiApiTokensStatus401,
-	GetApiApiTokensStatus403,
 	GetApiApiTokensStatus500,
 	PostApiApiTokensOptions,
 	PostApiApiTokensStatus200,
@@ -5973,9 +5972,7 @@ export function getApiApiTokensQueryOptions(
 	const queryKey = getApiApiTokensQueryKey();
 	return queryOptions<
 		GetApiApiTokensStatus200,
-		ResponseErrorConfig<
-			GetApiApiTokensStatus401 | GetApiApiTokensStatus403 | GetApiApiTokensStatus500
-		>,
+		ResponseErrorConfig<GetApiApiTokensStatus401 | GetApiApiTokensStatus500>,
 		GetApiApiTokensStatus200,
 		typeof queryKey
 	>({
@@ -6004,9 +6001,7 @@ export function useGetApiApiTokens<
 		query?: Partial<
 			QueryObserverOptions<
 				GetApiApiTokensStatus200,
-				ResponseErrorConfig<
-					GetApiApiTokensStatus401 | GetApiApiTokensStatus403 | GetApiApiTokensStatus500
-				>,
+				ResponseErrorConfig<GetApiApiTokensStatus401 | GetApiApiTokensStatus500>,
 				TData,
 				TQueryData,
 				TQueryKey
@@ -6028,9 +6023,7 @@ export function useGetApiApiTokens<
 		queryClient,
 	) as UseQueryResult<
 		TData,
-		ResponseErrorConfig<
-			GetApiApiTokensStatus401 | GetApiApiTokensStatus403 | GetApiApiTokensStatus500
-		>
+		ResponseErrorConfig<GetApiApiTokensStatus401 | GetApiApiTokensStatus500>
 	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;

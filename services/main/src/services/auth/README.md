@@ -69,9 +69,10 @@ expired leases, reservations, and bounded historical state.
 ## Credential control-plane
 
 The application API at `/api/v1/api-tokens` is the only API-key management
-surface. Listing, creating, and revoking keys require a fresh interactive
-session. Better Auth's direct API-key HTTP management paths are disabled, and
-API-key session emulation remains disabled.
+surface. Listing keys requires an interactive session; creating, updating, and
+revoking keys require a fresh interactive session. Better Auth's direct API-key
+HTTP management paths are disabled, and API-key session emulation remains
+disabled.
 
 Authentication failures are `401`; an authenticated actor denied an operation
 receives `403`; API-key quota denial returns `429` with `Retry-After`. Visibility

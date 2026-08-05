@@ -23014,33 +23014,6 @@
 							}
 						}
 					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "FreshSessionRequired",
-													"type": "string",
-													"enum": ["FreshSessionRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
 					"500": {
 						"description": "Unexpected internal failure",
 						"content": {

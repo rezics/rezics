@@ -87,7 +87,7 @@ export const auth = betterAuth({
 		},
 	},
 	session: {
-		// Credential control-plane routes use this as their re-authentication window.
+		// Credential control-plane mutation routes use this as their re-authentication window.
 		freshAge: CredentialControlFreshAgeSeconds,
 	},
 	advanced: {

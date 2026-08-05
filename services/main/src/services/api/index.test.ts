@@ -127,6 +127,12 @@ describe("API root", () => {
 		expect(document.paths["/api/v1/api-tokens"]?.get?.security).toEqual([
 			{ SessionCookie: [] },
 		]);
+		expect(
+			document.paths["/api/v1/api-tokens"]?.get?.responses?.[StatusCodes.FORBIDDEN],
+		).toBeUndefined();
+		expect(
+			document.paths["/api/v1/api-tokens"]?.post?.responses?.[StatusCodes.FORBIDDEN],
+		).toBeDefined();
 		expect(document.paths["/api/v1/token"]?.get?.security).toEqual([{ ApiToken: [] }]);
 		expect(document.paths["/api/v1/users/me/profile-slug"]?.put?.security).toEqual([
 			{ SessionCookie: [] },

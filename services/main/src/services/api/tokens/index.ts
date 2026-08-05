@@ -199,7 +199,8 @@ export default new Elysia({ prefix: "/api-tokens" })
 	.use(session)
 	.get(
 		"",
-		async ({ user, request }) => {
+		async ({ user, request, set }) => {
+			set.headers["Cache-Control"] = "no-store";
 			const [result, accountQuota] = await Promise.all([
 				auth.api.listApiKeys({
 					headers: request.headers,
@@ -223,11 +224,10 @@ export default new Elysia({ prefix: "/api-tokens" })
 			};
 		},
 		{
-			access: "fresh-session-only",
+			access: "session-only",
 			response: {
 				[StatusCodes.OK]: ApiTokenListResponse,
 				[StatusCodes.UNAUTHORIZED]: InteractiveSessionRequiredResponse,
-				[StatusCodes.FORBIDDEN]: FreshSessionRequiredResponse,
 			},
 			detail: { summary: "List API tokens", tags: ["API Tokens"] },
 		},

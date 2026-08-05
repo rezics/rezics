@@ -14431,34 +14431,6 @@ export type GetApiApiTokensStatus401 = {
 /**
  * @type object
  */
-export type GetApiApiTokensStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'FreshSessionRequired'
-		 * @type string
-		 */
-		code: "FreshSessionRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
 export type GetApiApiTokensStatus500 = InternalError;
 
 /**
@@ -14477,7 +14449,6 @@ export type GetApiApiTokensOptions = {
 export type GetApiApiTokensResponses = {
 	"200": GetApiApiTokensStatus200;
 	"401": GetApiApiTokensStatus401;
-	"403": GetApiApiTokensStatus403;
 	"500": GetApiApiTokensStatus500;
 };
 
@@ -14485,10 +14456,7 @@ export type GetApiApiTokensResponses = {
  * @description Union of all possible responses
  */
 export type GetApiApiTokensResponse =
-	| GetApiApiTokensStatus200
-	| GetApiApiTokensStatus401
-	| GetApiApiTokensStatus403
-	| GetApiApiTokensStatus500;
+	GetApiApiTokensStatus200 | GetApiApiTokensStatus401 | GetApiApiTokensStatus500;
 
 export const PostApiApiTokensStatus200PermissionsEnum = {
 	"unit:read": "unit:read",

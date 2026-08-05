@@ -49,10 +49,14 @@ type AuthPortalState = {
 	email: string;
 	id: number;
 	mode: AuthPortalMode;
+	onAuthenticated?: () => void | Promise<void>;
 	onClose?: () => void;
+	navigateAfterAuthentication: boolean;
 	resetError: string | null;
 	token: string | null;
 };
+
+type AuthCompletion = (destination: string) => void | Promise<void>;
 
 export function SignInButton({
 	destination,
@@ -102,7 +106,9 @@ export function AuthPortalProvider({
 				email: options?.email ?? "",
 				id: (current?.id ?? 0) + 1,
 				mode,
+				onAuthenticated: options?.onAuthenticated,
 				onClose: options?.onClose,
+				navigateAfterAuthentication: options?.navigateAfterAuthentication ?? true,
 				resetError: options?.resetError ?? null,
 				token: options?.token ?? null,
 			}));
@@ -133,6 +139,9 @@ export function AuthPortalProvider({
 					? {}
 					: { destination: getSafeAuthDestination(options.destination) }),
 				...(options?.email === undefined ? {} : { email: options.email }),
+				...(options?.onAuthenticated === undefined
+					? {}
+					: { onAuthenticated: options.onAuthenticated }),
 				...(options?.resetError === undefined ? {} : { resetError: options.resetError }),
 				...(options?.token === undefined ? {} : { token: options.token }),
 				id: current.id + 1,
@@ -142,15 +151,21 @@ export function AuthPortalProvider({
 	}, []);
 
 	const completeAuthentication = useCallback(
-		(nextDestination: string) => {
+		async (nextDestination: string) => {
+			const onAuthenticated = state?.onAuthenticated;
+			const navigateAfterAuthentication = state?.navigateAfterAuthentication ?? true;
 			setState(null);
 			void setAuthQuery(
 				{ auth: null, email: null, error: null, next: null, token: null },
 				{ history: "replace" },
 			);
-			router.replace(nextDestination);
+			try {
+				await onAuthenticated?.();
+			} finally {
+				if (navigateAfterAuthentication) router.replace(nextDestination);
+			}
 		},
-		[router, setAuthQuery],
+		[router, setAuthQuery, state?.navigateAfterAuthentication, state?.onAuthenticated],
 	);
 	const context = useMemo(() => ({ openAuthPortal }), [openAuthPortal]);
 
@@ -187,7 +202,7 @@ function AuthPortalDialog({
 	turnstileSiteKey,
 }: {
 	onClose: () => void;
-	onComplete: (destination: string) => void;
+	onComplete: AuthCompletion;
 	onModeChange: (mode: AuthPortalMode, options?: AuthPortalOptions) => void;
 	state: AuthPortalState | null;
 	turnstileSiteKey: string;
@@ -247,7 +262,7 @@ function AuthPortalForm({
 	onModeChange,
 	turnstileSiteKey,
 }: {
-	onComplete: (destination: string) => void;
+	onComplete: AuthCompletion;
 	onModeChange: (mode: AuthPortalMode, options?: AuthPortalOptions) => void;
 	state: AuthPortalState;
 	turnstileSiteKey: string;
@@ -284,7 +299,7 @@ function LoginForm({
 	onModeChange,
 }: {
 	destination: string;
-	onComplete: (destination: string) => void;
+	onComplete: AuthCompletion;
 	onModeChange: (mode: AuthPortalMode, options?: AuthPortalOptions) => void;
 }) {
 	const { t } = useTranslation([
@@ -312,7 +327,7 @@ function LoginForm({
 				password: String(formData.get("password")),
 			});
 			if (result.error) setError(getErrorText(t, result.error, t.auth.loginFailed));
-			else onComplete(destination);
+			else await onComplete(destination);
 		} catch (cause) {
 			setError(getErrorText(t, cause, t.auth.loginFailed));
 		} finally {
