@@ -21590,7 +21590,7 @@
 																					},
 																					"maxConcurrentRequests": {
 																						"minimum": 1,
-																						"maximum": 9007199254740991,
+																						"maximum": 1000,
 																						"anyOf": [
 																							{
 																								"format": "integer",
@@ -21599,7 +21599,7 @@
 																							},
 																							{
 																								"minimum": 1,
-																								"maximum": 9007199254740991,
+																								"maximum": 1000,
 																								"type": "integer"
 																							}
 																						]
@@ -21625,7 +21625,7 @@
 																			},
 																			"maxActiveTokens": {
 																				"minimum": 1,
-																				"maximum": 9007199254740991,
+																				"maximum": 1000,
 																				"anyOf": [
 																					{
 																						"format": "integer",
@@ -21634,7 +21634,7 @@
 																					},
 																					{
 																						"minimum": 1,
-																						"maximum": 9007199254740991,
+																						"maximum": 1000,
 																						"type": "integer"
 																					}
 																				]
@@ -21690,7 +21690,7 @@
 																							},
 																							"maxConcurrentRequests": {
 																								"minimum": 1,
-																								"maximum": 9007199254740991,
+																								"maximum": 1000,
 																								"anyOf": [
 																									{
 																										"format": "integer",
@@ -21699,7 +21699,7 @@
 																									},
 																									{
 																										"minimum": 1,
-																										"maximum": 9007199254740991,
+																										"maximum": 1000,
 																										"type": "integer"
 																									}
 																								]
@@ -21771,7 +21771,7 @@
 																							},
 																							"maxConcurrentRequests": {
 																								"minimum": 1,
-																								"maximum": 9007199254740991,
+																								"maximum": 1000,
 																								"anyOf": [
 																									{
 																										"format": "integer",
@@ -21780,7 +21780,7 @@
 																									},
 																									{
 																										"minimum": 1,
-																										"maximum": 9007199254740991,
+																										"maximum": 1000,
 																										"type": "integer"
 																									}
 																								]
@@ -21862,7 +21862,7 @@
 																			},
 																			"maxConcurrentRequests": {
 																				"minimum": 1,
-																				"maximum": 9007199254740991,
+																				"maximum": 1000,
 																				"anyOf": [
 																					{
 																						"format": "integer",
@@ -21871,7 +21871,7 @@
 																					},
 																					{
 																						"minimum": 1,
-																						"maximum": 9007199254740991,
+																						"maximum": 1000,
 																						"type": "integer"
 																					}
 																				]
@@ -21959,7 +21959,7 @@
 																					},
 																					"maxConcurrentRequests": {
 																						"minimum": 1,
-																						"maximum": 9007199254740991,
+																						"maximum": 1000,
 																						"anyOf": [
 																							{
 																								"format": "integer",
@@ -21968,7 +21968,7 @@
 																							},
 																							{
 																								"minimum": 1,
-																								"maximum": 9007199254740991,
+																								"maximum": 1000,
 																								"type": "integer"
 																							}
 																						]
@@ -22040,7 +22040,7 @@
 																					},
 																					"maxConcurrentRequests": {
 																						"minimum": 1,
-																						"maximum": 9007199254740991,
+																						"maximum": 1000,
 																						"anyOf": [
 																							{
 																								"format": "integer",
@@ -22049,7 +22049,7 @@
 																							},
 																							{
 																								"minimum": 1,
-																								"maximum": 9007199254740991,
+																								"maximum": 1000,
 																								"type": "integer"
 																							}
 																						]
@@ -22229,7 +22229,7 @@
 																					},
 																					"maxConcurrentRequests": {
 																						"minimum": 1,
-																						"maximum": 9007199254740991,
+																						"maximum": 1000,
 																						"anyOf": [
 																							{
 																								"format": "integer",
@@ -22238,7 +22238,7 @@
 																							},
 																							{
 																								"minimum": 1,
-																								"maximum": 9007199254740991,
+																								"maximum": 1000,
 																								"type": "integer"
 																							}
 																						]
@@ -22313,7 +22313,7 @@
 																							},
 																							"maxConcurrentRequests": {
 																								"minimum": 1,
-																								"maximum": 9007199254740991,
+																								"maximum": 1000,
 																								"anyOf": [
 																									{
 																										"format": "integer",
@@ -22322,7 +22322,7 @@
 																									},
 																									{
 																										"minimum": 1,
-																										"maximum": 9007199254740991,
+																										"maximum": 1000,
 																										"type": "integer"
 																									}
 																								]
@@ -22394,7 +22394,7 @@
 																							},
 																							"maxConcurrentRequests": {
 																								"minimum": 1,
-																								"maximum": 9007199254740991,
+																								"maximum": 1000,
 																								"anyOf": [
 																									{
 																										"format": "integer",
@@ -22403,7 +22403,7 @@
 																									},
 																									{
 																										"minimum": 1,
-																										"maximum": 9007199254740991,
+																										"maximum": 1000,
 																										"type": "integer"
 																									}
 																								]
@@ -22485,7 +22485,7 @@
 																			},
 																			"maxConcurrentRequests": {
 																				"minimum": 1,
-																				"maximum": 9007199254740991,
+																				"maximum": 1000,
 																				"anyOf": [
 																					{
 																						"format": "integer",
@@ -22494,7 +22494,7 @@
 																					},
 																					{
 																						"minimum": 1,
-																						"maximum": 9007199254740991,
+																						"maximum": 1000,
 																						"type": "integer"
 																					}
 																				]
@@ -22568,7 +22568,7 @@
 																					},
 																					"maxConcurrentRequests": {
 																						"minimum": 1,
-																						"maximum": 9007199254740991,
+																						"maximum": 1000,
 																						"anyOf": [
 																							{
 																								"format": "integer",
@@ -22577,7 +22577,7 @@
 																							},
 																							{
 																								"minimum": 1,
-																								"maximum": 9007199254740991,
+																								"maximum": 1000,
 																								"type": "integer"
 																							}
 																						]
@@ -22649,7 +22649,7 @@
 																					},
 																					"maxConcurrentRequests": {
 																						"minimum": 1,
-																						"maximum": 9007199254740991,
+																						"maximum": 1000,
 																						"anyOf": [
 																							{
 																								"format": "integer",
@@ -22658,7 +22658,7 @@
 																							},
 																							{
 																								"minimum": 1,
-																								"maximum": 9007199254740991,
+																								"maximum": 1000,
 																								"type": "integer"
 																							}
 																						]
@@ -22750,7 +22750,7 @@
 																							},
 																							"maxConcurrentRequests": {
 																								"minimum": 1,
-																								"maximum": 9007199254740991,
+																								"maximum": 1000,
 																								"anyOf": [
 																									{
 																										"format": "integer",
@@ -22759,7 +22759,7 @@
 																									},
 																									{
 																										"minimum": 1,
-																										"maximum": 9007199254740991,
+																										"maximum": 1000,
 																										"type": "integer"
 																									}
 																								]
@@ -22834,7 +22834,7 @@
 																									},
 																									"maxConcurrentRequests": {
 																										"minimum": 1,
-																										"maximum": 9007199254740991,
+																										"maximum": 1000,
 																										"anyOf": [
 																											{
 																												"format": "integer",
@@ -22843,7 +22843,7 @@
 																											},
 																											{
 																												"minimum": 1,
-																												"maximum": 9007199254740991,
+																												"maximum": 1000,
 																												"type": "integer"
 																											}
 																										]
@@ -22915,7 +22915,7 @@
 																									},
 																									"maxConcurrentRequests": {
 																										"minimum": 1,
-																										"maximum": 9007199254740991,
+																										"maximum": 1000,
 																										"anyOf": [
 																											{
 																												"format": "integer",
@@ -22924,7 +22924,7 @@
 																											},
 																											{
 																												"minimum": 1,
-																												"maximum": 9007199254740991,
+																												"maximum": 1000,
 																												"type": "integer"
 																											}
 																										]
@@ -23331,7 +23331,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -23340,7 +23340,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -23366,7 +23366,7 @@
 																},
 																"maxActiveTokens": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -23375,7 +23375,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -23431,7 +23431,7 @@
 																				},
 																				"maxConcurrentRequests": {
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"anyOf": [
 																						{
 																							"format": "integer",
@@ -23440,7 +23440,7 @@
 																						},
 																						{
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"type": "integer"
 																						}
 																					]
@@ -23512,7 +23512,7 @@
 																				},
 																				"maxConcurrentRequests": {
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"anyOf": [
 																						{
 																							"format": "integer",
@@ -23521,7 +23521,7 @@
 																						},
 																						{
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"type": "integer"
 																						}
 																					]
@@ -23603,7 +23603,7 @@
 																},
 																"maxConcurrentRequests": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -23612,7 +23612,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -23697,7 +23697,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -23706,7 +23706,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -23778,7 +23778,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -23787,7 +23787,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -23958,7 +23958,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -23967,7 +23967,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -24042,7 +24042,7 @@
 																				},
 																				"maxConcurrentRequests": {
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"anyOf": [
 																						{
 																							"format": "integer",
@@ -24051,7 +24051,7 @@
 																						},
 																						{
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"type": "integer"
 																						}
 																					]
@@ -24123,7 +24123,7 @@
 																				},
 																				"maxConcurrentRequests": {
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"anyOf": [
 																						{
 																							"format": "integer",
@@ -24132,7 +24132,7 @@
 																						},
 																						{
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"type": "integer"
 																						}
 																					]
@@ -24214,7 +24214,7 @@
 																},
 																"maxConcurrentRequests": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -24223,7 +24223,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -24297,7 +24297,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -24306,7 +24306,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -24378,7 +24378,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -24387,7 +24387,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -24479,7 +24479,7 @@
 																				},
 																				"maxConcurrentRequests": {
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"anyOf": [
 																						{
 																							"format": "integer",
@@ -24488,7 +24488,7 @@
 																						},
 																						{
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"type": "integer"
 																						}
 																					]
@@ -24563,7 +24563,7 @@
 																						},
 																						"maxConcurrentRequests": {
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"anyOf": [
 																								{
 																									"format": "integer",
@@ -24572,7 +24572,7 @@
 																								},
 																								{
 																									"minimum": 1,
-																									"maximum": 9007199254740991,
+																									"maximum": 1000,
 																									"type": "integer"
 																								}
 																							]
@@ -24644,7 +24644,7 @@
 																						},
 																						"maxConcurrentRequests": {
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"anyOf": [
 																								{
 																									"format": "integer",
@@ -24653,7 +24653,7 @@
 																								},
 																								{
 																									"minimum": 1,
-																									"maximum": 9007199254740991,
+																									"maximum": 1000,
 																									"type": "integer"
 																								}
 																							]
@@ -25105,7 +25105,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -25114,7 +25114,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -25140,7 +25140,7 @@
 																},
 																"maxActiveTokens": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -25149,7 +25149,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -25205,7 +25205,7 @@
 																				},
 																				"maxConcurrentRequests": {
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"anyOf": [
 																						{
 																							"format": "integer",
@@ -25214,7 +25214,7 @@
 																						},
 																						{
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"type": "integer"
 																						}
 																					]
@@ -25286,7 +25286,7 @@
 																				},
 																				"maxConcurrentRequests": {
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"anyOf": [
 																						{
 																							"format": "integer",
@@ -25295,7 +25295,7 @@
 																						},
 																						{
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"type": "integer"
 																						}
 																					]
@@ -25377,7 +25377,7 @@
 																},
 																"maxConcurrentRequests": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -25386,7 +25386,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -25471,7 +25471,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -25480,7 +25480,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -25552,7 +25552,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -25561,7 +25561,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -25732,7 +25732,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -25741,7 +25741,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -25816,7 +25816,7 @@
 																				},
 																				"maxConcurrentRequests": {
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"anyOf": [
 																						{
 																							"format": "integer",
@@ -25825,7 +25825,7 @@
 																						},
 																						{
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"type": "integer"
 																						}
 																					]
@@ -25897,7 +25897,7 @@
 																				},
 																				"maxConcurrentRequests": {
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"anyOf": [
 																						{
 																							"format": "integer",
@@ -25906,7 +25906,7 @@
 																						},
 																						{
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"type": "integer"
 																						}
 																					]
@@ -25988,7 +25988,7 @@
 																},
 																"maxConcurrentRequests": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -25997,7 +25997,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -26071,7 +26071,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -26080,7 +26080,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -26152,7 +26152,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -26161,7 +26161,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -26253,7 +26253,7 @@
 																				},
 																				"maxConcurrentRequests": {
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"anyOf": [
 																						{
 																							"format": "integer",
@@ -26262,7 +26262,7 @@
 																						},
 																						{
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"type": "integer"
 																						}
 																					]
@@ -26337,7 +26337,7 @@
 																						},
 																						"maxConcurrentRequests": {
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"anyOf": [
 																								{
 																									"format": "integer",
@@ -26346,7 +26346,7 @@
 																								},
 																								{
 																									"minimum": 1,
-																									"maximum": 9007199254740991,
+																									"maximum": 1000,
 																									"type": "integer"
 																								}
 																							]
@@ -26418,7 +26418,7 @@
 																						},
 																						"maxConcurrentRequests": {
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"anyOf": [
 																								{
 																									"format": "integer",
@@ -26427,7 +26427,7 @@
 																								},
 																								{
 																									"minimum": 1,
-																									"maximum": 9007199254740991,
+																									"maximum": 1000,
 																									"type": "integer"
 																								}
 																							]
@@ -26825,7 +26825,7 @@
 													},
 													"maxConcurrentRequests": {
 														"minimum": 1,
-														"maximum": 9007199254740991,
+														"maximum": 1000,
 														"anyOf": [
 															{
 																"format": "integer",
@@ -26834,7 +26834,7 @@
 															},
 															{
 																"minimum": 1,
-																"maximum": 9007199254740991,
+																"maximum": 1000,
 																"type": "integer"
 															}
 														]
@@ -26909,7 +26909,7 @@
 															},
 															"maxConcurrentRequests": {
 																"minimum": 1,
-																"maximum": 9007199254740991,
+																"maximum": 1000,
 																"anyOf": [
 																	{
 																		"format": "integer",
@@ -26918,7 +26918,7 @@
 																	},
 																	{
 																		"minimum": 1,
-																		"maximum": 9007199254740991,
+																		"maximum": 1000,
 																		"type": "integer"
 																	}
 																]
@@ -26990,7 +26990,7 @@
 															},
 															"maxConcurrentRequests": {
 																"minimum": 1,
-																"maximum": 9007199254740991,
+																"maximum": 1000,
 																"anyOf": [
 																	{
 																		"format": "integer",
@@ -26999,7 +26999,7 @@
 																	},
 																	{
 																		"minimum": 1,
-																		"maximum": 9007199254740991,
+																		"maximum": 1000,
 																		"type": "integer"
 																	}
 																]
@@ -27248,7 +27248,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -27257,7 +27257,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -27283,7 +27283,7 @@
 																},
 																"maxActiveTokens": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -27292,7 +27292,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -27348,7 +27348,7 @@
 																				},
 																				"maxConcurrentRequests": {
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"anyOf": [
 																						{
 																							"format": "integer",
@@ -27357,7 +27357,7 @@
 																						},
 																						{
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"type": "integer"
 																						}
 																					]
@@ -27429,7 +27429,7 @@
 																				},
 																				"maxConcurrentRequests": {
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"anyOf": [
 																						{
 																							"format": "integer",
@@ -27438,7 +27438,7 @@
 																						},
 																						{
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"type": "integer"
 																						}
 																					]
@@ -27520,7 +27520,7 @@
 																},
 																"maxConcurrentRequests": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -27529,7 +27529,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -27614,7 +27614,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -27623,7 +27623,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -27695,7 +27695,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -27704,7 +27704,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -27875,7 +27875,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -27884,7 +27884,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -27959,7 +27959,7 @@
 																				},
 																				"maxConcurrentRequests": {
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"anyOf": [
 																						{
 																							"format": "integer",
@@ -27968,7 +27968,7 @@
 																						},
 																						{
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"type": "integer"
 																						}
 																					]
@@ -28040,7 +28040,7 @@
 																				},
 																				"maxConcurrentRequests": {
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"anyOf": [
 																						{
 																							"format": "integer",
@@ -28049,7 +28049,7 @@
 																						},
 																						{
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"type": "integer"
 																						}
 																					]
@@ -28131,7 +28131,7 @@
 																},
 																"maxConcurrentRequests": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -28140,7 +28140,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -28214,7 +28214,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -28223,7 +28223,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -28295,7 +28295,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -28304,7 +28304,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -28396,7 +28396,7 @@
 																				},
 																				"maxConcurrentRequests": {
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"anyOf": [
 																						{
 																							"format": "integer",
@@ -28405,7 +28405,7 @@
 																						},
 																						{
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"type": "integer"
 																						}
 																					]
@@ -28480,7 +28480,7 @@
 																						},
 																						"maxConcurrentRequests": {
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"anyOf": [
 																								{
 																									"format": "integer",
@@ -28489,7 +28489,7 @@
 																								},
 																								{
 																									"minimum": 1,
-																									"maximum": 9007199254740991,
+																									"maximum": 1000,
 																									"type": "integer"
 																								}
 																							]
@@ -28561,7 +28561,7 @@
 																						},
 																						"maxConcurrentRequests": {
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"anyOf": [
 																								{
 																									"format": "integer",
@@ -28570,7 +28570,7 @@
 																								},
 																								{
 																									"minimum": 1,
-																									"maximum": 9007199254740991,
+																									"maximum": 1000,
 																									"type": "integer"
 																								}
 																							]
@@ -29182,7 +29182,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -29191,7 +29191,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -29217,7 +29217,7 @@
 																},
 																"maxActiveTokens": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -29226,7 +29226,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -29282,7 +29282,7 @@
 																				},
 																				"maxConcurrentRequests": {
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"anyOf": [
 																						{
 																							"format": "integer",
@@ -29291,7 +29291,7 @@
 																						},
 																						{
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"type": "integer"
 																						}
 																					]
@@ -29363,7 +29363,7 @@
 																				},
 																				"maxConcurrentRequests": {
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"anyOf": [
 																						{
 																							"format": "integer",
@@ -29372,7 +29372,7 @@
 																						},
 																						{
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"type": "integer"
 																						}
 																					]
@@ -29454,7 +29454,7 @@
 																},
 																"maxConcurrentRequests": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -29463,7 +29463,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -29548,7 +29548,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -29557,7 +29557,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -29629,7 +29629,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -29638,7 +29638,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -29809,7 +29809,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -29818,7 +29818,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -29893,7 +29893,7 @@
 																				},
 																				"maxConcurrentRequests": {
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"anyOf": [
 																						{
 																							"format": "integer",
@@ -29902,7 +29902,7 @@
 																						},
 																						{
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"type": "integer"
 																						}
 																					]
@@ -29974,7 +29974,7 @@
 																				},
 																				"maxConcurrentRequests": {
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"anyOf": [
 																						{
 																							"format": "integer",
@@ -29983,7 +29983,7 @@
 																						},
 																						{
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"type": "integer"
 																						}
 																					]
@@ -30065,7 +30065,7 @@
 																},
 																"maxConcurrentRequests": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -30074,7 +30074,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -30148,7 +30148,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -30157,7 +30157,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -30229,7 +30229,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -30238,7 +30238,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -30330,7 +30330,7 @@
 																				},
 																				"maxConcurrentRequests": {
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"anyOf": [
 																						{
 																							"format": "integer",
@@ -30339,7 +30339,7 @@
 																						},
 																						{
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"type": "integer"
 																						}
 																					]
@@ -30414,7 +30414,7 @@
 																						},
 																						"maxConcurrentRequests": {
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"anyOf": [
 																								{
 																									"format": "integer",
@@ -30423,7 +30423,7 @@
 																								},
 																								{
 																									"minimum": 1,
-																									"maximum": 9007199254740991,
+																									"maximum": 1000,
 																									"type": "integer"
 																								}
 																							]
@@ -30495,7 +30495,7 @@
 																						},
 																						"maxConcurrentRequests": {
 																							"minimum": 1,
-																							"maximum": 9007199254740991,
+																							"maximum": 1000,
 																							"anyOf": [
 																								{
 																									"format": "integer",
@@ -30504,7 +30504,7 @@
 																								},
 																								{
 																									"minimum": 1,
-																									"maximum": 9007199254740991,
+																									"maximum": 1000,
 																									"type": "integer"
 																								}
 																							]
@@ -30751,7 +30751,7 @@
 																			},
 																			"maxConcurrentRequests": {
 																				"minimum": 1,
-																				"maximum": 9007199254740991,
+																				"maximum": 1000,
 																				"anyOf": [
 																					{
 																						"format": "integer",
@@ -30760,7 +30760,7 @@
 																					},
 																					{
 																						"minimum": 1,
-																						"maximum": 9007199254740991,
+																						"maximum": 1000,
 																						"type": "integer"
 																					}
 																				]
@@ -30785,7 +30785,7 @@
 																	},
 																	"maxActiveTokens": {
 																		"minimum": 1,
-																		"maximum": 9007199254740991,
+																		"maximum": 1000,
 																		"anyOf": [
 																			{
 																				"format": "integer",
@@ -30794,7 +30794,7 @@
 																			},
 																			{
 																				"minimum": 1,
-																				"maximum": 9007199254740991,
+																				"maximum": 1000,
 																				"type": "integer"
 																			}
 																		]
@@ -30850,7 +30850,7 @@
 																					},
 																					"maxConcurrentRequests": {
 																						"minimum": 1,
-																						"maximum": 9007199254740991,
+																						"maximum": 1000,
 																						"anyOf": [
 																							{
 																								"format": "integer",
@@ -30859,7 +30859,7 @@
 																							},
 																							{
 																								"minimum": 1,
-																								"maximum": 9007199254740991,
+																								"maximum": 1000,
 																								"type": "integer"
 																							}
 																						]
@@ -30931,7 +30931,7 @@
 																					},
 																					"maxConcurrentRequests": {
 																						"minimum": 1,
-																						"maximum": 9007199254740991,
+																						"maximum": 1000,
 																						"anyOf": [
 																							{
 																								"format": "integer",
@@ -30940,7 +30940,7 @@
 																							},
 																							{
 																								"minimum": 1,
-																								"maximum": 9007199254740991,
+																								"maximum": 1000,
 																								"type": "integer"
 																							}
 																						]
@@ -31030,7 +31030,7 @@
 																			},
 																			"maxConcurrentRequests": {
 																				"minimum": 1,
-																				"maximum": 9007199254740991,
+																				"maximum": 1000,
 																				"anyOf": [
 																					{
 																						"format": "integer",
@@ -31039,7 +31039,7 @@
 																					},
 																					{
 																						"minimum": 1,
-																						"maximum": 9007199254740991,
+																						"maximum": 1000,
 																						"type": "integer"
 																					}
 																				]
@@ -31113,7 +31113,7 @@
 																					},
 																					"maxConcurrentRequests": {
 																						"minimum": 1,
-																						"maximum": 9007199254740991,
+																						"maximum": 1000,
 																						"anyOf": [
 																							{
 																								"format": "integer",
@@ -31122,7 +31122,7 @@
 																							},
 																							{
 																								"minimum": 1,
-																								"maximum": 9007199254740991,
+																								"maximum": 1000,
 																								"type": "integer"
 																							}
 																						]
@@ -31194,7 +31194,7 @@
 																					},
 																					"maxConcurrentRequests": {
 																						"minimum": 1,
-																						"maximum": 9007199254740991,
+																						"maximum": 1000,
 																						"anyOf": [
 																							{
 																								"format": "integer",
@@ -31203,7 +31203,7 @@
 																							},
 																							{
 																								"minimum": 1,
-																								"maximum": 9007199254740991,
+																								"maximum": 1000,
 																								"type": "integer"
 																							}
 																						]
@@ -31427,7 +31427,7 @@
 															},
 															"maxConcurrentRequests": {
 																"minimum": 1,
-																"maximum": 9007199254740991,
+																"maximum": 1000,
 																"anyOf": [
 																	{
 																		"format": "integer",
@@ -31436,7 +31436,7 @@
 																	},
 																	{
 																		"minimum": 1,
-																		"maximum": 9007199254740991,
+																		"maximum": 1000,
 																		"type": "integer"
 																	}
 																]
@@ -31461,7 +31461,7 @@
 													},
 													"maxActiveTokens": {
 														"minimum": 1,
-														"maximum": 9007199254740991,
+														"maximum": 1000,
 														"anyOf": [
 															{
 																"format": "integer",
@@ -31470,7 +31470,7 @@
 															},
 															{
 																"minimum": 1,
-																"maximum": 9007199254740991,
+																"maximum": 1000,
 																"type": "integer"
 															}
 														]
@@ -31526,7 +31526,7 @@
 																	},
 																	"maxConcurrentRequests": {
 																		"minimum": 1,
-																		"maximum": 9007199254740991,
+																		"maximum": 1000,
 																		"anyOf": [
 																			{
 																				"format": "integer",
@@ -31535,7 +31535,7 @@
 																			},
 																			{
 																				"minimum": 1,
-																				"maximum": 9007199254740991,
+																				"maximum": 1000,
 																				"type": "integer"
 																			}
 																		]
@@ -31607,7 +31607,7 @@
 																	},
 																	"maxConcurrentRequests": {
 																		"minimum": 1,
-																		"maximum": 9007199254740991,
+																		"maximum": 1000,
 																		"anyOf": [
 																			{
 																				"format": "integer",
@@ -31616,7 +31616,7 @@
 																			},
 																			{
 																				"minimum": 1,
-																				"maximum": 9007199254740991,
+																				"maximum": 1000,
 																				"type": "integer"
 																			}
 																		]
@@ -31703,7 +31703,7 @@
 															},
 															"maxConcurrentRequests": {
 																"minimum": 1,
-																"maximum": 9007199254740991,
+																"maximum": 1000,
 																"anyOf": [
 																	{
 																		"format": "integer",
@@ -31712,7 +31712,7 @@
 																	},
 																	{
 																		"minimum": 1,
-																		"maximum": 9007199254740991,
+																		"maximum": 1000,
 																		"type": "integer"
 																	}
 																]
@@ -31786,7 +31786,7 @@
 																	},
 																	"maxConcurrentRequests": {
 																		"minimum": 1,
-																		"maximum": 9007199254740991,
+																		"maximum": 1000,
 																		"anyOf": [
 																			{
 																				"format": "integer",
@@ -31795,7 +31795,7 @@
 																			},
 																			{
 																				"minimum": 1,
-																				"maximum": 9007199254740991,
+																				"maximum": 1000,
 																				"type": "integer"
 																			}
 																		]
@@ -31867,7 +31867,7 @@
 																	},
 																	"maxConcurrentRequests": {
 																		"minimum": 1,
-																		"maximum": 9007199254740991,
+																		"maximum": 1000,
 																		"anyOf": [
 																			{
 																				"format": "integer",
@@ -31876,7 +31876,7 @@
 																			},
 																			{
 																				"minimum": 1,
-																				"maximum": 9007199254740991,
+																				"maximum": 1000,
 																				"type": "integer"
 																			}
 																		]
@@ -32024,7 +32024,7 @@
 																},
 																"maxConcurrentRequests": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -32033,7 +32033,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -32058,7 +32058,7 @@
 														},
 														"maxActiveTokens": {
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"anyOf": [
 																{
 																	"format": "integer",
@@ -32067,7 +32067,7 @@
 																},
 																{
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"type": "integer"
 																}
 															]
@@ -32123,7 +32123,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -32132,7 +32132,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -32204,7 +32204,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -32213,7 +32213,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -32300,7 +32300,7 @@
 																},
 																"maxConcurrentRequests": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -32309,7 +32309,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -32383,7 +32383,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -32392,7 +32392,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -32464,7 +32464,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -32473,7 +32473,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -32758,7 +32758,7 @@
 															},
 															"maxConcurrentRequests": {
 																"minimum": 1,
-																"maximum": 9007199254740991,
+																"maximum": 1000,
 																"anyOf": [
 																	{
 																		"format": "integer",
@@ -32767,7 +32767,7 @@
 																	},
 																	{
 																		"minimum": 1,
-																		"maximum": 9007199254740991,
+																		"maximum": 1000,
 																		"type": "integer"
 																	}
 																]
@@ -32792,7 +32792,7 @@
 													},
 													"maxActiveTokens": {
 														"minimum": 1,
-														"maximum": 9007199254740991,
+														"maximum": 1000,
 														"anyOf": [
 															{
 																"format": "integer",
@@ -32801,7 +32801,7 @@
 															},
 															{
 																"minimum": 1,
-																"maximum": 9007199254740991,
+																"maximum": 1000,
 																"type": "integer"
 															}
 														]
@@ -32857,7 +32857,7 @@
 																	},
 																	"maxConcurrentRequests": {
 																		"minimum": 1,
-																		"maximum": 9007199254740991,
+																		"maximum": 1000,
 																		"anyOf": [
 																			{
 																				"format": "integer",
@@ -32866,7 +32866,7 @@
 																			},
 																			{
 																				"minimum": 1,
-																				"maximum": 9007199254740991,
+																				"maximum": 1000,
 																				"type": "integer"
 																			}
 																		]
@@ -32938,7 +32938,7 @@
 																	},
 																	"maxConcurrentRequests": {
 																		"minimum": 1,
-																		"maximum": 9007199254740991,
+																		"maximum": 1000,
 																		"anyOf": [
 																			{
 																				"format": "integer",
@@ -32947,7 +32947,7 @@
 																			},
 																			{
 																				"minimum": 1,
-																				"maximum": 9007199254740991,
+																				"maximum": 1000,
 																				"type": "integer"
 																			}
 																		]
@@ -33034,7 +33034,7 @@
 															},
 															"maxConcurrentRequests": {
 																"minimum": 1,
-																"maximum": 9007199254740991,
+																"maximum": 1000,
 																"anyOf": [
 																	{
 																		"format": "integer",
@@ -33043,7 +33043,7 @@
 																	},
 																	{
 																		"minimum": 1,
-																		"maximum": 9007199254740991,
+																		"maximum": 1000,
 																		"type": "integer"
 																	}
 																]
@@ -33117,7 +33117,7 @@
 																	},
 																	"maxConcurrentRequests": {
 																		"minimum": 1,
-																		"maximum": 9007199254740991,
+																		"maximum": 1000,
 																		"anyOf": [
 																			{
 																				"format": "integer",
@@ -33126,7 +33126,7 @@
 																			},
 																			{
 																				"minimum": 1,
-																				"maximum": 9007199254740991,
+																				"maximum": 1000,
 																				"type": "integer"
 																			}
 																		]
@@ -33198,7 +33198,7 @@
 																	},
 																	"maxConcurrentRequests": {
 																		"minimum": 1,
-																		"maximum": 9007199254740991,
+																		"maximum": 1000,
 																		"anyOf": [
 																			{
 																				"format": "integer",
@@ -33207,7 +33207,7 @@
 																			},
 																			{
 																				"minimum": 1,
-																				"maximum": 9007199254740991,
+																				"maximum": 1000,
 																				"type": "integer"
 																			}
 																		]
@@ -33355,7 +33355,7 @@
 																},
 																"maxConcurrentRequests": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -33364,7 +33364,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -33389,7 +33389,7 @@
 														},
 														"maxActiveTokens": {
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"anyOf": [
 																{
 																	"format": "integer",
@@ -33398,7 +33398,7 @@
 																},
 																{
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"type": "integer"
 																}
 															]
@@ -33454,7 +33454,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -33463,7 +33463,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -33535,7 +33535,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -33544,7 +33544,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -33631,7 +33631,7 @@
 																},
 																"maxConcurrentRequests": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -33640,7 +33640,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -33714,7 +33714,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -33723,7 +33723,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -33795,7 +33795,7 @@
 																		},
 																		"maxConcurrentRequests": {
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"anyOf": [
 																				{
 																					"format": "integer",
@@ -33804,7 +33804,7 @@
 																				},
 																				{
 																					"minimum": 1,
-																					"maximum": 9007199254740991,
+																					"maximum": 1000,
 																					"type": "integer"
 																				}
 																			]
@@ -34171,7 +34171,7 @@
 														},
 														"maxConcurrentRequests": {
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"anyOf": [
 																{
 																	"format": "integer",
@@ -34180,7 +34180,7 @@
 																},
 																{
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"type": "integer"
 																}
 															]
@@ -34206,7 +34206,7 @@
 												},
 												"maxActiveTokens": {
 													"minimum": 1,
-													"maximum": 9007199254740991,
+													"maximum": 1000,
 													"anyOf": [
 														{
 															"format": "integer",
@@ -34215,7 +34215,7 @@
 														},
 														{
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"type": "integer"
 														}
 													]
@@ -34271,7 +34271,7 @@
 																},
 																"maxConcurrentRequests": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -34280,7 +34280,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -34352,7 +34352,7 @@
 																},
 																"maxConcurrentRequests": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -34361,7 +34361,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -34443,7 +34443,7 @@
 												},
 												"maxConcurrentRequests": {
 													"minimum": 1,
-													"maximum": 9007199254740991,
+													"maximum": 1000,
 													"anyOf": [
 														{
 															"format": "integer",
@@ -34452,7 +34452,7 @@
 														},
 														{
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"type": "integer"
 														}
 													]
@@ -34537,7 +34537,7 @@
 														},
 														"maxConcurrentRequests": {
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"anyOf": [
 																{
 																	"format": "integer",
@@ -34546,7 +34546,7 @@
 																},
 																{
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"type": "integer"
 																}
 															]
@@ -34618,7 +34618,7 @@
 														},
 														"maxConcurrentRequests": {
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"anyOf": [
 																{
 																	"format": "integer",
@@ -34627,7 +34627,7 @@
 																},
 																{
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"type": "integer"
 																}
 															]
@@ -34855,7 +34855,7 @@
 													},
 													"maxConcurrentRequests": {
 														"minimum": 1,
-														"maximum": 9007199254740991,
+														"maximum": 1000,
 														"anyOf": [
 															{
 																"format": "integer",
@@ -34864,7 +34864,7 @@
 															},
 															{
 																"minimum": 1,
-																"maximum": 9007199254740991,
+																"maximum": 1000,
 																"type": "integer"
 															}
 														]
@@ -34890,7 +34890,7 @@
 											},
 											"maxActiveTokens": {
 												"minimum": 1,
-												"maximum": 9007199254740991,
+												"maximum": 1000,
 												"anyOf": [
 													{
 														"format": "integer",
@@ -34899,7 +34899,7 @@
 													},
 													{
 														"minimum": 1,
-														"maximum": 9007199254740991,
+														"maximum": 1000,
 														"type": "integer"
 													}
 												]
@@ -34955,7 +34955,7 @@
 															},
 															"maxConcurrentRequests": {
 																"minimum": 1,
-																"maximum": 9007199254740991,
+																"maximum": 1000,
 																"anyOf": [
 																	{
 																		"format": "integer",
@@ -34964,7 +34964,7 @@
 																	},
 																	{
 																		"minimum": 1,
-																		"maximum": 9007199254740991,
+																		"maximum": 1000,
 																		"type": "integer"
 																	}
 																]
@@ -35036,7 +35036,7 @@
 															},
 															"maxConcurrentRequests": {
 																"minimum": 1,
-																"maximum": 9007199254740991,
+																"maximum": 1000,
 																"anyOf": [
 																	{
 																		"format": "integer",
@@ -35045,7 +35045,7 @@
 																	},
 																	{
 																		"minimum": 1,
-																		"maximum": 9007199254740991,
+																		"maximum": 1000,
 																		"type": "integer"
 																	}
 																]
@@ -35219,7 +35219,7 @@
 														},
 														"maxConcurrentRequests": {
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"anyOf": [
 																{
 																	"format": "integer",
@@ -35228,7 +35228,7 @@
 																},
 																{
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"type": "integer"
 																}
 															]
@@ -35254,7 +35254,7 @@
 												},
 												"maxActiveTokens": {
 													"minimum": 1,
-													"maximum": 9007199254740991,
+													"maximum": 1000,
 													"anyOf": [
 														{
 															"format": "integer",
@@ -35263,7 +35263,7 @@
 														},
 														{
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"type": "integer"
 														}
 													]
@@ -35319,7 +35319,7 @@
 																},
 																"maxConcurrentRequests": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -35328,7 +35328,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -35400,7 +35400,7 @@
 																},
 																"maxConcurrentRequests": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -35409,7 +35409,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -35491,7 +35491,7 @@
 												},
 												"maxConcurrentRequests": {
 													"minimum": 1,
-													"maximum": 9007199254740991,
+													"maximum": 1000,
 													"anyOf": [
 														{
 															"format": "integer",
@@ -35500,7 +35500,7 @@
 														},
 														{
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"type": "integer"
 														}
 													]
@@ -35585,7 +35585,7 @@
 														},
 														"maxConcurrentRequests": {
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"anyOf": [
 																{
 																	"format": "integer",
@@ -35594,7 +35594,7 @@
 																},
 																{
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"type": "integer"
 																}
 															]
@@ -35666,7 +35666,7 @@
 														},
 														"maxConcurrentRequests": {
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"anyOf": [
 																{
 																	"format": "integer",
@@ -35675,7 +35675,7 @@
 																},
 																{
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"type": "integer"
 																}
 															]
@@ -36047,7 +36047,7 @@
 														},
 														"maxConcurrentRequests": {
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"anyOf": [
 																{
 																	"format": "integer",
@@ -36056,7 +36056,7 @@
 																},
 																{
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"type": "integer"
 																}
 															]
@@ -36082,7 +36082,7 @@
 												},
 												"maxActiveTokens": {
 													"minimum": 1,
-													"maximum": 9007199254740991,
+													"maximum": 1000,
 													"anyOf": [
 														{
 															"format": "integer",
@@ -36091,7 +36091,7 @@
 														},
 														{
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"type": "integer"
 														}
 													]
@@ -36147,7 +36147,7 @@
 																},
 																"maxConcurrentRequests": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -36156,7 +36156,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -36228,7 +36228,7 @@
 																},
 																"maxConcurrentRequests": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -36237,7 +36237,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -36319,7 +36319,7 @@
 												},
 												"maxConcurrentRequests": {
 													"minimum": 1,
-													"maximum": 9007199254740991,
+													"maximum": 1000,
 													"anyOf": [
 														{
 															"format": "integer",
@@ -36328,7 +36328,7 @@
 														},
 														{
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"type": "integer"
 														}
 													]
@@ -36413,7 +36413,7 @@
 														},
 														"maxConcurrentRequests": {
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"anyOf": [
 																{
 																	"format": "integer",
@@ -36422,7 +36422,7 @@
 																},
 																{
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"type": "integer"
 																}
 															]
@@ -36494,7 +36494,7 @@
 														},
 														"maxConcurrentRequests": {
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"anyOf": [
 																{
 																	"format": "integer",
@@ -36503,7 +36503,7 @@
 																},
 																{
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"type": "integer"
 																}
 															]
@@ -36895,7 +36895,7 @@
 																			},
 																			"maxConcurrentRequests": {
 																				"minimum": 1,
-																				"maximum": 9007199254740991,
+																				"maximum": 1000,
 																				"anyOf": [
 																					{
 																						"format": "integer",
@@ -36904,7 +36904,7 @@
 																					},
 																					{
 																						"minimum": 1,
-																						"maximum": 9007199254740991,
+																						"maximum": 1000,
 																						"type": "integer"
 																					}
 																				]
@@ -36979,7 +36979,7 @@
 																					},
 																					"maxConcurrentRequests": {
 																						"minimum": 1,
-																						"maximum": 9007199254740991,
+																						"maximum": 1000,
 																						"anyOf": [
 																							{
 																								"format": "integer",
@@ -36988,7 +36988,7 @@
 																							},
 																							{
 																								"minimum": 1,
-																								"maximum": 9007199254740991,
+																								"maximum": 1000,
 																								"type": "integer"
 																							}
 																						]
@@ -37060,7 +37060,7 @@
 																					},
 																					"maxConcurrentRequests": {
 																						"minimum": 1,
-																						"maximum": 9007199254740991,
+																						"maximum": 1000,
 																						"anyOf": [
 																							{
 																								"format": "integer",
@@ -37069,7 +37069,7 @@
 																							},
 																							{
 																								"minimum": 1,
-																								"maximum": 9007199254740991,
+																								"maximum": 1000,
 																								"type": "integer"
 																							}
 																						]
@@ -37151,7 +37151,7 @@
 																	},
 																	"maxConcurrentRequests": {
 																		"minimum": 1,
-																		"maximum": 9007199254740991,
+																		"maximum": 1000,
 																		"anyOf": [
 																			{
 																				"format": "integer",
@@ -37160,7 +37160,7 @@
 																			},
 																			{
 																				"minimum": 1,
-																				"maximum": 9007199254740991,
+																				"maximum": 1000,
 																				"type": "integer"
 																			}
 																		]
@@ -37234,7 +37234,7 @@
 																			},
 																			"maxConcurrentRequests": {
 																				"minimum": 1,
-																				"maximum": 9007199254740991,
+																				"maximum": 1000,
 																				"anyOf": [
 																					{
 																						"format": "integer",
@@ -37243,7 +37243,7 @@
 																					},
 																					{
 																						"minimum": 1,
-																						"maximum": 9007199254740991,
+																						"maximum": 1000,
 																						"type": "integer"
 																					}
 																				]
@@ -37315,7 +37315,7 @@
 																			},
 																			"maxConcurrentRequests": {
 																				"minimum": 1,
-																				"maximum": 9007199254740991,
+																				"maximum": 1000,
 																				"anyOf": [
 																					{
 																						"format": "integer",
@@ -37324,7 +37324,7 @@
 																					},
 																					{
 																						"minimum": 1,
-																						"maximum": 9007199254740991,
+																						"maximum": 1000,
 																						"type": "integer"
 																					}
 																				]
@@ -37565,7 +37565,7 @@
 													},
 													"maxConcurrentRequests": {
 														"minimum": 1,
-														"maximum": 9007199254740991,
+														"maximum": 1000,
 														"anyOf": [
 															{
 																"format": "integer",
@@ -37574,7 +37574,7 @@
 															},
 															{
 																"minimum": 1,
-																"maximum": 9007199254740991,
+																"maximum": 1000,
 																"type": "integer"
 															}
 														]
@@ -37649,7 +37649,7 @@
 															},
 															"maxConcurrentRequests": {
 																"minimum": 1,
-																"maximum": 9007199254740991,
+																"maximum": 1000,
 																"anyOf": [
 																	{
 																		"format": "integer",
@@ -37658,7 +37658,7 @@
 																	},
 																	{
 																		"minimum": 1,
-																		"maximum": 9007199254740991,
+																		"maximum": 1000,
 																		"type": "integer"
 																	}
 																]
@@ -37730,7 +37730,7 @@
 															},
 															"maxConcurrentRequests": {
 																"minimum": 1,
-																"maximum": 9007199254740991,
+																"maximum": 1000,
 																"anyOf": [
 																	{
 																		"format": "integer",
@@ -37739,7 +37739,7 @@
 																	},
 																	{
 																		"minimum": 1,
-																		"maximum": 9007199254740991,
+																		"maximum": 1000,
 																		"type": "integer"
 																	}
 																]
@@ -37912,7 +37912,7 @@
 														},
 														"maxConcurrentRequests": {
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"anyOf": [
 																{
 																	"format": "integer",
@@ -37921,7 +37921,7 @@
 																},
 																{
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"type": "integer"
 																}
 															]
@@ -37996,7 +37996,7 @@
 																},
 																"maxConcurrentRequests": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -38005,7 +38005,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -38077,7 +38077,7 @@
 																},
 																"maxConcurrentRequests": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -38086,7 +38086,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -38168,7 +38168,7 @@
 												},
 												"maxConcurrentRequests": {
 													"minimum": 1,
-													"maximum": 9007199254740991,
+													"maximum": 1000,
 													"anyOf": [
 														{
 															"format": "integer",
@@ -38177,7 +38177,7 @@
 														},
 														{
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"type": "integer"
 														}
 													]
@@ -38251,7 +38251,7 @@
 														},
 														"maxConcurrentRequests": {
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"anyOf": [
 																{
 																	"format": "integer",
@@ -38260,7 +38260,7 @@
 																},
 																{
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"type": "integer"
 																}
 															]
@@ -38332,7 +38332,7 @@
 														},
 														"maxConcurrentRequests": {
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"anyOf": [
 																{
 																	"format": "integer",
@@ -38341,7 +38341,7 @@
 																},
 																{
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"type": "integer"
 																}
 															]
@@ -38718,7 +38718,7 @@
 														},
 														"maxConcurrentRequests": {
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"anyOf": [
 																{
 																	"format": "integer",
@@ -38727,7 +38727,7 @@
 																},
 																{
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"type": "integer"
 																}
 															]
@@ -38802,7 +38802,7 @@
 																},
 																"maxConcurrentRequests": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -38811,7 +38811,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -38883,7 +38883,7 @@
 																},
 																"maxConcurrentRequests": {
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"anyOf": [
 																		{
 																			"format": "integer",
@@ -38892,7 +38892,7 @@
 																		},
 																		{
 																			"minimum": 1,
-																			"maximum": 9007199254740991,
+																			"maximum": 1000,
 																			"type": "integer"
 																		}
 																	]
@@ -38974,7 +38974,7 @@
 												},
 												"maxConcurrentRequests": {
 													"minimum": 1,
-													"maximum": 9007199254740991,
+													"maximum": 1000,
 													"anyOf": [
 														{
 															"format": "integer",
@@ -38983,7 +38983,7 @@
 														},
 														{
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"type": "integer"
 														}
 													]
@@ -39057,7 +39057,7 @@
 														},
 														"maxConcurrentRequests": {
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"anyOf": [
 																{
 																	"format": "integer",
@@ -39066,7 +39066,7 @@
 																},
 																{
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"type": "integer"
 																}
 															]
@@ -39138,7 +39138,7 @@
 														},
 														"maxConcurrentRequests": {
 															"minimum": 1,
-															"maximum": 9007199254740991,
+															"maximum": 1000,
 															"anyOf": [
 																{
 																	"format": "integer",
@@ -39147,7 +39147,7 @@
 																},
 																{
 																	"minimum": 1,
-																	"maximum": 9007199254740991,
+																	"maximum": 1000,
 																	"type": "integer"
 																}
 															]
@@ -74878,14 +74878,69 @@
 														}
 													},
 													"activeSessionCount": {
-														"minimum": 0,
+														"$id": "CountResult",
 														"anyOf": [
 															{
-																"format": "integer",
-																"default": 0,
-																"type": "string"
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["kind", "value"],
+																"properties": {
+																	"kind": {
+																		"const": "exact",
+																		"type": "string"
+																	},
+																	"value": {
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																}
 															},
-															{ "minimum": 0, "type": "integer" }
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"kind",
+																	"value",
+																	"asOf"
+																],
+																"properties": {
+																	"kind": {
+																		"const": "estimate",
+																		"type": "string"
+																	},
+																	"value": {
+																		"minimum": 0,
+																		"type": "integer"
+																	},
+																	"asOf": {
+																		"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+																		"type": "string"
+																	},
+																	"modifiedSinceAnalyze": {
+																		"minimum": 0,
+																		"type": "integer"
+																	},
+																	"relativeError": {
+																		"minimum": 0,
+																		"type": "number"
+																	}
+																}
+															},
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["kind", "value"],
+																"properties": {
+																	"kind": {
+																		"const": "lower-bound",
+																		"type": "string"
+																	},
+																	"value": {
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																}
+															}
 														]
 													},
 													"createdAt": {
@@ -75139,14 +75194,59 @@
 											}
 										},
 										"activeSessionCount": {
-											"minimum": 0,
+											"$id": "CountResult",
 											"anyOf": [
 												{
-													"format": "integer",
-													"default": 0,
-													"type": "string"
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value"],
+													"properties": {
+														"kind": {
+															"const": "exact",
+															"type": "string"
+														},
+														"value": { "minimum": 0, "type": "integer" }
+													}
 												},
-												{ "minimum": 0, "type": "integer" }
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value", "asOf"],
+													"properties": {
+														"kind": {
+															"const": "estimate",
+															"type": "string"
+														},
+														"value": {
+															"minimum": 0,
+															"type": "integer"
+														},
+														"asOf": {
+															"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+															"type": "string"
+														},
+														"modifiedSinceAnalyze": {
+															"minimum": 0,
+															"type": "integer"
+														},
+														"relativeError": {
+															"minimum": 0,
+															"type": "number"
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value"],
+													"properties": {
+														"kind": {
+															"const": "lower-bound",
+															"type": "string"
+														},
+														"value": { "minimum": 0, "type": "integer" }
+													}
+												}
 											]
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
@@ -86431,16 +86531,74 @@
 																]
 															},
 															"creditedBookCount": {
-																"minimum": 0,
+																"$id": "CountResult",
 																"anyOf": [
 																	{
-																		"format": "integer",
-																		"default": 0,
-																		"type": "string"
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"value"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "exact",
+																				"type": "string"
+																			},
+																			"value": {
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		}
 																	},
 																	{
-																		"minimum": 0,
-																		"type": "integer"
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"value",
+																			"asOf"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "estimate",
+																				"type": "string"
+																			},
+																			"value": {
+																				"minimum": 0,
+																				"type": "integer"
+																			},
+																			"asOf": {
+																				"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+																				"type": "string"
+																			},
+																			"modifiedSinceAnalyze": {
+																				"minimum": 0,
+																				"type": "integer"
+																			},
+																			"relativeError": {
+																				"minimum": 0,
+																				"type": "number"
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"value"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "lower-bound",
+																				"type": "string"
+																			},
+																			"value": {
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		}
 																	}
 																]
 															},
@@ -87809,25 +87967,135 @@
 													"required": ["active", "backlog"],
 													"properties": {
 														"active": {
-															"minimum": 0,
+															"$id": "CountResult",
 															"anyOf": [
 																{
-																	"format": "integer",
-																	"default": 0,
-																	"type": "string"
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "value"],
+																	"properties": {
+																		"kind": {
+																			"const": "exact",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	}
 																},
-																{ "minimum": 0, "type": "integer" }
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"kind",
+																		"value",
+																		"asOf"
+																	],
+																	"properties": {
+																		"kind": {
+																			"const": "estimate",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		},
+																		"asOf": {
+																			"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+																			"type": "string"
+																		},
+																		"modifiedSinceAnalyze": {
+																			"minimum": 0,
+																			"type": "integer"
+																		},
+																		"relativeError": {
+																			"minimum": 0,
+																			"type": "number"
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "value"],
+																	"properties": {
+																		"kind": {
+																			"const": "lower-bound",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	}
+																}
 															]
 														},
 														"backlog": {
-															"minimum": 0,
+															"$id": "CountResult",
 															"anyOf": [
 																{
-																	"format": "integer",
-																	"default": 0,
-																	"type": "string"
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "value"],
+																	"properties": {
+																		"kind": {
+																			"const": "exact",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	}
 																},
-																{ "minimum": 0, "type": "integer" }
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"kind",
+																		"value",
+																		"asOf"
+																	],
+																	"properties": {
+																		"kind": {
+																			"const": "estimate",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		},
+																		"asOf": {
+																			"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+																			"type": "string"
+																		},
+																		"modifiedSinceAnalyze": {
+																			"minimum": 0,
+																			"type": "integer"
+																		},
+																		"relativeError": {
+																			"minimum": 0,
+																			"type": "number"
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "value"],
+																	"properties": {
+																		"kind": {
+																			"const": "lower-bound",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	}
+																}
 															]
 														}
 													}
@@ -88768,16 +89036,74 @@
 																]
 															},
 															"creditedBookCount": {
-																"minimum": 0,
+																"$id": "CountResult",
 																"anyOf": [
 																	{
-																		"format": "integer",
-																		"default": 0,
-																		"type": "string"
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"value"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "exact",
+																				"type": "string"
+																			},
+																			"value": {
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		}
 																	},
 																	{
-																		"minimum": 0,
-																		"type": "integer"
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"value",
+																			"asOf"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "estimate",
+																				"type": "string"
+																			},
+																			"value": {
+																				"minimum": 0,
+																				"type": "integer"
+																			},
+																			"asOf": {
+																				"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+																				"type": "string"
+																			},
+																			"modifiedSinceAnalyze": {
+																				"minimum": 0,
+																				"type": "integer"
+																			},
+																			"relativeError": {
+																				"minimum": 0,
+																				"type": "number"
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"value"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "lower-bound",
+																				"type": "string"
+																			},
+																			"value": {
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		}
 																	}
 																]
 															},
@@ -90146,25 +90472,135 @@
 													"required": ["active", "backlog"],
 													"properties": {
 														"active": {
-															"minimum": 0,
+															"$id": "CountResult",
 															"anyOf": [
 																{
-																	"format": "integer",
-																	"default": 0,
-																	"type": "string"
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "value"],
+																	"properties": {
+																		"kind": {
+																			"const": "exact",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	}
 																},
-																{ "minimum": 0, "type": "integer" }
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"kind",
+																		"value",
+																		"asOf"
+																	],
+																	"properties": {
+																		"kind": {
+																			"const": "estimate",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		},
+																		"asOf": {
+																			"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+																			"type": "string"
+																		},
+																		"modifiedSinceAnalyze": {
+																			"minimum": 0,
+																			"type": "integer"
+																		},
+																		"relativeError": {
+																			"minimum": 0,
+																			"type": "number"
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "value"],
+																	"properties": {
+																		"kind": {
+																			"const": "lower-bound",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	}
+																}
 															]
 														},
 														"backlog": {
-															"minimum": 0,
+															"$id": "CountResult",
 															"anyOf": [
 																{
-																	"format": "integer",
-																	"default": 0,
-																	"type": "string"
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "value"],
+																	"properties": {
+																		"kind": {
+																			"const": "exact",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	}
 																},
-																{ "minimum": 0, "type": "integer" }
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"kind",
+																		"value",
+																		"asOf"
+																	],
+																	"properties": {
+																		"kind": {
+																			"const": "estimate",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		},
+																		"asOf": {
+																			"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+																			"type": "string"
+																		},
+																		"modifiedSinceAnalyze": {
+																			"minimum": 0,
+																			"type": "integer"
+																		},
+																		"relativeError": {
+																			"minimum": 0,
+																			"type": "number"
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "value"],
+																	"properties": {
+																		"kind": {
+																			"const": "lower-bound",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	}
+																}
 															]
 														}
 													}
@@ -91119,16 +91555,74 @@
 																]
 															},
 															"creditedBookCount": {
-																"minimum": 0,
+																"$id": "CountResult",
 																"anyOf": [
 																	{
-																		"format": "integer",
-																		"default": 0,
-																		"type": "string"
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"value"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "exact",
+																				"type": "string"
+																			},
+																			"value": {
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		}
 																	},
 																	{
-																		"minimum": 0,
-																		"type": "integer"
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"value",
+																			"asOf"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "estimate",
+																				"type": "string"
+																			},
+																			"value": {
+																				"minimum": 0,
+																				"type": "integer"
+																			},
+																			"asOf": {
+																				"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+																				"type": "string"
+																			},
+																			"modifiedSinceAnalyze": {
+																				"minimum": 0,
+																				"type": "integer"
+																			},
+																			"relativeError": {
+																				"minimum": 0,
+																				"type": "number"
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"value"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "lower-bound",
+																				"type": "string"
+																			},
+																			"value": {
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		}
 																	}
 																]
 															},
@@ -92497,25 +92991,135 @@
 													"required": ["active", "backlog"],
 													"properties": {
 														"active": {
-															"minimum": 0,
+															"$id": "CountResult",
 															"anyOf": [
 																{
-																	"format": "integer",
-																	"default": 0,
-																	"type": "string"
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "value"],
+																	"properties": {
+																		"kind": {
+																			"const": "exact",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	}
 																},
-																{ "minimum": 0, "type": "integer" }
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"kind",
+																		"value",
+																		"asOf"
+																	],
+																	"properties": {
+																		"kind": {
+																			"const": "estimate",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		},
+																		"asOf": {
+																			"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+																			"type": "string"
+																		},
+																		"modifiedSinceAnalyze": {
+																			"minimum": 0,
+																			"type": "integer"
+																		},
+																		"relativeError": {
+																			"minimum": 0,
+																			"type": "number"
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "value"],
+																	"properties": {
+																		"kind": {
+																			"const": "lower-bound",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	}
+																}
 															]
 														},
 														"backlog": {
-															"minimum": 0,
+															"$id": "CountResult",
 															"anyOf": [
 																{
-																	"format": "integer",
-																	"default": 0,
-																	"type": "string"
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "value"],
+																	"properties": {
+																		"kind": {
+																			"const": "exact",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	}
 																},
-																{ "minimum": 0, "type": "integer" }
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"kind",
+																		"value",
+																		"asOf"
+																	],
+																	"properties": {
+																		"kind": {
+																			"const": "estimate",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		},
+																		"asOf": {
+																			"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+																			"type": "string"
+																		},
+																		"modifiedSinceAnalyze": {
+																			"minimum": 0,
+																			"type": "integer"
+																		},
+																		"relativeError": {
+																			"minimum": 0,
+																			"type": "number"
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "value"],
+																	"properties": {
+																		"kind": {
+																			"const": "lower-bound",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	}
+																}
 															]
 														}
 													}
@@ -93395,16 +93999,74 @@
 																]
 															},
 															"creditedBookCount": {
-																"minimum": 0,
+																"$id": "CountResult",
 																"anyOf": [
 																	{
-																		"format": "integer",
-																		"default": 0,
-																		"type": "string"
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"value"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "exact",
+																				"type": "string"
+																			},
+																			"value": {
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		}
 																	},
 																	{
-																		"minimum": 0,
-																		"type": "integer"
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"value",
+																			"asOf"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "estimate",
+																				"type": "string"
+																			},
+																			"value": {
+																				"minimum": 0,
+																				"type": "integer"
+																			},
+																			"asOf": {
+																				"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+																				"type": "string"
+																			},
+																			"modifiedSinceAnalyze": {
+																				"minimum": 0,
+																				"type": "integer"
+																			},
+																			"relativeError": {
+																				"minimum": 0,
+																				"type": "number"
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"value"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "lower-bound",
+																				"type": "string"
+																			},
+																			"value": {
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		}
 																	}
 																]
 															},
@@ -94773,25 +95435,135 @@
 													"required": ["active", "backlog"],
 													"properties": {
 														"active": {
-															"minimum": 0,
+															"$id": "CountResult",
 															"anyOf": [
 																{
-																	"format": "integer",
-																	"default": 0,
-																	"type": "string"
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "value"],
+																	"properties": {
+																		"kind": {
+																			"const": "exact",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	}
 																},
-																{ "minimum": 0, "type": "integer" }
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"kind",
+																		"value",
+																		"asOf"
+																	],
+																	"properties": {
+																		"kind": {
+																			"const": "estimate",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		},
+																		"asOf": {
+																			"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+																			"type": "string"
+																		},
+																		"modifiedSinceAnalyze": {
+																			"minimum": 0,
+																			"type": "integer"
+																		},
+																		"relativeError": {
+																			"minimum": 0,
+																			"type": "number"
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "value"],
+																	"properties": {
+																		"kind": {
+																			"const": "lower-bound",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	}
+																}
 															]
 														},
 														"backlog": {
-															"minimum": 0,
+															"$id": "CountResult",
 															"anyOf": [
 																{
-																	"format": "integer",
-																	"default": 0,
-																	"type": "string"
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "value"],
+																	"properties": {
+																		"kind": {
+																			"const": "exact",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	}
 																},
-																{ "minimum": 0, "type": "integer" }
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"kind",
+																		"value",
+																		"asOf"
+																	],
+																	"properties": {
+																		"kind": {
+																			"const": "estimate",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		},
+																		"asOf": {
+																			"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+																			"type": "string"
+																		},
+																		"modifiedSinceAnalyze": {
+																			"minimum": 0,
+																			"type": "integer"
+																		},
+																		"relativeError": {
+																			"minimum": 0,
+																			"type": "number"
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "value"],
+																	"properties": {
+																		"kind": {
+																			"const": "lower-bound",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	}
+																}
 															]
 														}
 													}
@@ -95659,16 +96431,74 @@
 																]
 															},
 															"creditedBookCount": {
-																"minimum": 0,
+																"$id": "CountResult",
 																"anyOf": [
 																	{
-																		"format": "integer",
-																		"default": 0,
-																		"type": "string"
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"value"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "exact",
+																				"type": "string"
+																			},
+																			"value": {
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		}
 																	},
 																	{
-																		"minimum": 0,
-																		"type": "integer"
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"value",
+																			"asOf"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "estimate",
+																				"type": "string"
+																			},
+																			"value": {
+																				"minimum": 0,
+																				"type": "integer"
+																			},
+																			"asOf": {
+																				"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+																				"type": "string"
+																			},
+																			"modifiedSinceAnalyze": {
+																				"minimum": 0,
+																				"type": "integer"
+																			},
+																			"relativeError": {
+																				"minimum": 0,
+																				"type": "number"
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"value"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "lower-bound",
+																				"type": "string"
+																			},
+																			"value": {
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		}
 																	}
 																]
 															},
@@ -97037,25 +97867,135 @@
 													"required": ["active", "backlog"],
 													"properties": {
 														"active": {
-															"minimum": 0,
+															"$id": "CountResult",
 															"anyOf": [
 																{
-																	"format": "integer",
-																	"default": 0,
-																	"type": "string"
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "value"],
+																	"properties": {
+																		"kind": {
+																			"const": "exact",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	}
 																},
-																{ "minimum": 0, "type": "integer" }
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"kind",
+																		"value",
+																		"asOf"
+																	],
+																	"properties": {
+																		"kind": {
+																			"const": "estimate",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		},
+																		"asOf": {
+																			"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+																			"type": "string"
+																		},
+																		"modifiedSinceAnalyze": {
+																			"minimum": 0,
+																			"type": "integer"
+																		},
+																		"relativeError": {
+																			"minimum": 0,
+																			"type": "number"
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "value"],
+																	"properties": {
+																		"kind": {
+																			"const": "lower-bound",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	}
+																}
 															]
 														},
 														"backlog": {
-															"minimum": 0,
+															"$id": "CountResult",
 															"anyOf": [
 																{
-																	"format": "integer",
-																	"default": 0,
-																	"type": "string"
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "value"],
+																	"properties": {
+																		"kind": {
+																			"const": "exact",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	}
 																},
-																{ "minimum": 0, "type": "integer" }
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"kind",
+																		"value",
+																		"asOf"
+																	],
+																	"properties": {
+																		"kind": {
+																			"const": "estimate",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		},
+																		"asOf": {
+																			"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+																			"type": "string"
+																		},
+																		"modifiedSinceAnalyze": {
+																			"minimum": 0,
+																			"type": "integer"
+																		},
+																		"relativeError": {
+																			"minimum": 0,
+																			"type": "number"
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "value"],
+																	"properties": {
+																		"kind": {
+																			"const": "lower-bound",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	}
+																}
 															]
 														}
 													}
@@ -98282,16 +99222,74 @@
 																]
 															},
 															"creditedBookCount": {
-																"minimum": 0,
+																"$id": "CountResult",
 																"anyOf": [
 																	{
-																		"format": "integer",
-																		"default": 0,
-																		"type": "string"
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"value"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "exact",
+																				"type": "string"
+																			},
+																			"value": {
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		}
 																	},
 																	{
-																		"minimum": 0,
-																		"type": "integer"
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"value",
+																			"asOf"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "estimate",
+																				"type": "string"
+																			},
+																			"value": {
+																				"minimum": 0,
+																				"type": "integer"
+																			},
+																			"asOf": {
+																				"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+																				"type": "string"
+																			},
+																			"modifiedSinceAnalyze": {
+																				"minimum": 0,
+																				"type": "integer"
+																			},
+																			"relativeError": {
+																				"minimum": 0,
+																				"type": "number"
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"value"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "lower-bound",
+																				"type": "string"
+																			},
+																			"value": {
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		}
 																	}
 																]
 															},
@@ -99660,25 +100658,135 @@
 													"required": ["active", "backlog"],
 													"properties": {
 														"active": {
-															"minimum": 0,
+															"$id": "CountResult",
 															"anyOf": [
 																{
-																	"format": "integer",
-																	"default": 0,
-																	"type": "string"
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "value"],
+																	"properties": {
+																		"kind": {
+																			"const": "exact",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	}
 																},
-																{ "minimum": 0, "type": "integer" }
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"kind",
+																		"value",
+																		"asOf"
+																	],
+																	"properties": {
+																		"kind": {
+																			"const": "estimate",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		},
+																		"asOf": {
+																			"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+																			"type": "string"
+																		},
+																		"modifiedSinceAnalyze": {
+																			"minimum": 0,
+																			"type": "integer"
+																		},
+																		"relativeError": {
+																			"minimum": 0,
+																			"type": "number"
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "value"],
+																	"properties": {
+																		"kind": {
+																			"const": "lower-bound",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	}
+																}
 															]
 														},
 														"backlog": {
-															"minimum": 0,
+															"$id": "CountResult",
 															"anyOf": [
 																{
-																	"format": "integer",
-																	"default": 0,
-																	"type": "string"
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "value"],
+																	"properties": {
+																		"kind": {
+																			"const": "exact",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	}
 																},
-																{ "minimum": 0, "type": "integer" }
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"kind",
+																		"value",
+																		"asOf"
+																	],
+																	"properties": {
+																		"kind": {
+																			"const": "estimate",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		},
+																		"asOf": {
+																			"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+																			"type": "string"
+																		},
+																		"modifiedSinceAnalyze": {
+																			"minimum": 0,
+																			"type": "integer"
+																		},
+																		"relativeError": {
+																			"minimum": 0,
+																			"type": "number"
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["kind", "value"],
+																	"properties": {
+																		"kind": {
+																			"const": "lower-bound",
+																			"type": "string"
+																		},
+																		"value": {
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	}
+																}
 															]
 														}
 													}
@@ -119318,14 +120426,32 @@
 											"type": "string"
 										},
 										"total": {
-											"minimum": 0,
+											"$id": "SearchCountResult",
 											"anyOf": [
 												{
-													"format": "integer",
-													"default": 0,
-													"type": "string"
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value"],
+													"properties": {
+														"kind": {
+															"const": "exact",
+															"type": "string"
+														},
+														"value": { "minimum": 0, "type": "integer" }
+													}
 												},
-												{ "minimum": 0, "type": "integer" }
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value"],
+													"properties": {
+														"kind": {
+															"const": "lower-bound",
+															"type": "string"
+														},
+														"value": { "minimum": 0, "type": "integer" }
+													}
+												}
 											]
 										}
 									}
@@ -134559,14 +135685,32 @@
 									"required": ["totalCount", "nextCursor", "items"],
 									"properties": {
 										"totalCount": {
-											"minimum": 0,
+											"$id": "SearchCountResult",
 											"anyOf": [
 												{
-													"format": "integer",
-													"default": 0,
-													"type": "string"
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value"],
+													"properties": {
+														"kind": {
+															"const": "exact",
+															"type": "string"
+														},
+														"value": { "minimum": 0, "type": "integer" }
+													}
 												},
-												{ "minimum": 0, "type": "integer" }
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value"],
+													"properties": {
+														"kind": {
+															"const": "lower-bound",
+															"type": "string"
+														},
+														"value": { "minimum": 0, "type": "integer" }
+													}
+												}
 											]
 										},
 										"nextCursor": {

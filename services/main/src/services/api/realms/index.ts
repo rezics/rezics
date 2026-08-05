@@ -44,7 +44,9 @@ import {
 	post,
 	profile as profileTable,
 	realm,
+	realmStat,
 	realmUnit,
+	realmUnitModerationStat,
 	realmMember,
 	realmPin,
 	realmRule,
@@ -231,15 +233,12 @@ function realmUnitModerationSelection(
 		status: realmUnit.status,
 		publicationState: realmUnit.publicationState,
 		postTargetingLocked: realmUnit.postTargetingLocked,
-		openReportCount: sql<number>`(
-			select count(*)::int
-			from ${realmUnitReport}
-			inner join ${moderationCase}
-				on ${moderationCase.id} = ${realmUnitReport.caseId}
-			where ${realmUnitReport.realmId} = ${realmUnit.realmId}
-				and ${realmUnitReport.unitId} = ${realmUnit.unitId}
-				and ${inArray(moderationCase.state, ActiveReportCaseStateValues)}
-		)`,
+		openReportCount: sql<number>`coalesce((
+			select ${realmUnitModerationStat.openReportCount}::int
+			from ${realmUnitModerationStat}
+			where ${realmUnitModerationStat.realmId} = ${realmUnit.realmId}
+				and ${realmUnitModerationStat.unitId} = ${realmUnit.unitId}
+		), 0)`,
 		moderationStatus: unit.moderationStatus,
 		createdAt: realmUnit.createdAt,
 		updatedAt: realmUnit.updatedAt,
@@ -584,12 +583,7 @@ export default new Elysia({ prefix: "/realms" })
 				.select({
 					id: realm.id,
 					joinPolicy: realm.joinPolicy,
-					memberCount: sql<number>`(
-						select count(*)::int
-						from ${realmMember}
-						where ${realmMember.realmId} = ${realm.id}
-							and ${realmMember.state} = 'active'
-					)`,
+					memberCount: realmStat.activeMemberCount,
 					language: unitLocalization.language,
 					title: unitLocalization.title,
 					summary: unitLocalization.summary,
@@ -609,6 +603,7 @@ export default new Elysia({ prefix: "/realms" })
 				})
 				.from(realm)
 				.innerJoin(unit, eq(unit.id, realm.id))
+				.leftJoin(realmStat, eq(realmStat.realmId, realm.id))
 				.innerJoin(
 					unitLocalization,
 					and(
@@ -628,6 +623,7 @@ export default new Elysia({ prefix: "/realms" })
 			return {
 				items: items.map(({ avatar, bannerAssetId, coverAssetId, ...item }) => ({
 					...item,
+					memberCount: toSafeInteger(item.memberCount ?? 0n, "Realm active member count"),
 					slugAddress: slugAddresses.get(item.id) ?? null,
 					avatar: presentAvatar(avatar),
 					banner: presentImageAsset(bannerAssetId, "banner"),
@@ -778,18 +774,14 @@ export default new Elysia({ prefix: "/realms" })
 					realmTagVotingEnabled: realm.realmTagVotingEnabled,
 					pages: realm.enabledPages,
 					latestRevisionId: unitRevisionHead.revisionId,
-					memberCount: sql<number>`(
-						select count(*)::int
-						from ${realmMember}
-						where ${realmMember.realmId} = ${realm.id}
-							and ${realmMember.state} = 'active'
-					)`,
+					memberCount: realmStat.activeMemberCount,
 					createdAt: unit.createdAt,
 					updatedAt: unit.updatedAt,
 				})
 				.from(realm)
 				.innerJoin(unit, eq(unit.id, realm.id))
 				.innerJoin(unitRevisionHead, eq(unitRevisionHead.unitId, realm.id))
+				.leftJoin(realmStat, eq(realmStat.realmId, realm.id))
 				.where(eq(realm.id, params.realmId))
 				.limit(1);
 			if (!record) throw new RealmNotFound();
@@ -853,7 +845,10 @@ export default new Elysia({ prefix: "/realms" })
 				authorization.unit.decide(params.realmId, "unit.access.manage"),
 				authorization.unit.decide(params.realmId, "unit.history.restore"),
 			]);
-			const realmRecord = record;
+			const realmRecord = {
+				...record,
+				memberCount: toSafeInteger(record.memberCount ?? 0n, "Realm active member count"),
+			};
 			return {
 				...realmRecord,
 				slugAddress: await getPublicCanonicalUnitSlugAddress(record.id),
@@ -3034,15 +3029,12 @@ export default new Elysia({ prefix: "/realms" })
 						status: realmUnit.status,
 						publicationState: realmUnit.publicationState,
 						postTargetingLocked: realmUnit.postTargetingLocked,
-						openReportCount: sql<number>`(
-							select count(*)::int
-							from ${realmUnitReport}
-							inner join ${moderationCase}
-								on ${moderationCase.id} = ${realmUnitReport.caseId}
-							where ${realmUnitReport.realmId} = ${realmUnit.realmId}
-								and ${realmUnitReport.unitId} = ${realmUnit.unitId}
-								and ${inArray(moderationCase.state, ActiveReportCaseStateValues)}
-						)`,
+						openReportCount: sql<number>`coalesce((
+							select ${realmUnitModerationStat.openReportCount}::int
+							from ${realmUnitModerationStat}
+							where ${realmUnitModerationStat.realmId} = ${realmUnit.realmId}
+								and ${realmUnitModerationStat.unitId} = ${realmUnit.unitId}
+						), 0)`,
 						updatedAt: realmUnit.updatedAt,
 					})
 					.from(realmUnit)

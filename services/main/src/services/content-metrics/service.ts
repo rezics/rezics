@@ -1,16 +1,13 @@
 import { createHash } from "node:crypto";
 
-import { and, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { isPortableTextDocument, type PortableTextDocument } from "@rezics/block";
 import type { ContentLanguage } from "@rezics/i18n";
 import { measurePortableText, PortableTextMetricAlgorithmVersion } from "@rezics/portable-text";
 
 import type { DatabaseExecutor, DatabaseTransaction } from "../database";
 import {
-	contentStructure,
-	contentStructureNode,
-	post,
-	unit,
+	bookLocalizedContentMetricStat,
 	unitLocalization,
 	unitLocalizationContentMetric,
 } from "../database/schema";
@@ -159,47 +156,14 @@ export async function listPublishedBookContentMetrics(
 ): Promise<(LocalizedContentMetric & { readonly chapterCount: number })[]> {
 	const rows = await executor
 		.select({
-			language: unitLocalizationContentMetric.language,
-			chapterCount: sql<unknown>`count(*)`,
-			wordCount: sql<unknown>`sum(${unitLocalizationContentMetric.wordCount})`,
-			characterCount: sql<unknown>`sum(${unitLocalizationContentMetric.characterCount})`,
+			language: bookLocalizedContentMetricStat.language,
+			chapterCount: bookLocalizedContentMetricStat.chapterCount,
+			wordCount: bookLocalizedContentMetricStat.wordCount,
+			characterCount: bookLocalizedContentMetricStat.characterCount,
 		})
-		.from(contentStructureNode)
-		.innerJoin(
-			contentStructure,
-			and(
-				eq(contentStructure.id, contentStructureNode.structureId),
-				eq(contentStructure.ownerUnitId, contentStructureNode.ownerUnitId),
-			),
-		)
-		.innerJoin(post, eq(post.id, contentStructureNode.contentUnitId))
-		.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
-		.innerJoin(
-			unitLocalization,
-			eq(unitLocalization.unitId, contentStructureNode.contentUnitId),
-		)
-		.innerJoin(
-			unitLocalizationContentMetric,
-			and(
-				eq(unitLocalizationContentMetric.unitId, contentStructureNode.contentUnitId),
-				eq(unitLocalizationContentMetric.language, unitLocalization.language),
-			),
-		)
-		.where(
-			and(
-				eq(contentStructure.ownerUnitId, bookId),
-				eq(contentStructure.kind, "book.contents"),
-				isNull(contentStructure.deletedAt),
-				isNull(contentStructureNode.deletedAt),
-				eq(post.kind, "chapter"),
-				isNull(unit.deletedAt),
-				eq(unit.status, "published"),
-				inArray(unit.visibility, ["public", "unlisted"]),
-				eq(unitLocalization.contentStatus, "published"),
-			),
-		)
-		.groupBy(unitLocalizationContentMetric.language)
-		.orderBy(unitLocalizationContentMetric.language);
+		.from(bookLocalizedContentMetricStat)
+		.where(eq(bookLocalizedContentMetricStat.bookUnitId, bookId))
+		.orderBy(bookLocalizedContentMetricStat.language);
 	return rows.map((row) => ({
 		language: row.language,
 		chapterCount: toSafeInteger(row.chapterCount, `${row.language} chapter metric count`),

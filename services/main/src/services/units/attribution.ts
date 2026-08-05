@@ -19,6 +19,8 @@ import {
 import { presentAvatar } from "./avatar";
 import type { PresentedAvatar } from "@rezics/avatar";
 import { getUnitReadCondition } from "../authorization/unit/query";
+import { exactCount, lowerBoundCount, type CountResult } from "../counts/contract";
+import { WorkPolicy } from "../performance/policy";
 
 export const PublisherAttributionRole = "publisher" as const;
 
@@ -46,7 +48,7 @@ export type UnitPresentation = Pick<
 
 export type UnitAttributionSummaryWithStatistics = Omit<UnitAttributionSummary, "creditedUnit"> & {
 	readonly creditedUnit: UnitSummary & {
-		readonly creditedBookCount: number;
+		readonly creditedBookCount: CountResult;
 		readonly followerCount: number;
 	};
 };
@@ -134,8 +136,15 @@ export async function getReadableUnitPresentationsByIds(input: {
 
 async function getAttributionStatisticsByUnitIds(
 	unitIds: readonly string[],
-): Promise<Map<string, { readonly creditedBookCount: number; readonly followerCount: number }>> {
+): Promise<
+	Map<string, { readonly creditedBookCount: CountResult; readonly followerCount: number }>
+> {
 	if (!unitIds.length) return new Map();
+	type CreditedBookRow = { readonly creditedUnitId: string; readonly sourceUnitId: string };
+	const creditedUnitArray = sql`array[${sql.join(
+		[...new Set(unitIds)].map((unitId) => sql`${unitId}::uuid`),
+		sql`, `,
+	)}]::uuid[]`;
 	const [followerRows, creditedBookRows] = await Promise.all([
 		database
 			.select({
@@ -144,25 +153,25 @@ async function getAttributionStatisticsByUnitIds(
 			})
 			.from(unitFollowStat)
 			.where(inArray(unitFollowStat.unitId, [...unitIds])),
-		database
-			.select({
-				creditedUnitId: creditAttribution.creditedUnitId,
-				creditedBookCount: sql<unknown>`count(distinct ${creditAttribution.sourceUnitId})`,
-			})
-			.from(creditAttribution)
-			.innerJoin(unit, eq(unit.id, creditAttribution.sourceUnitId))
-			.where(
-				and(
-					inArray(creditAttribution.creditedUnitId, [...unitIds]),
-					inArray(creditAttribution.role, ["author", "co-author"]),
-					eq(unit.kind, "book"),
-					eq(unit.status, "published"),
-					ne(unit.visibility, "private"),
-					eq(unit.moderationStatus, "approved"),
-					isNull(unit.deletedAt),
-				),
-			)
-			.groupBy(creditAttribution.creditedUnitId),
+		database.execute<CreditedBookRow>(sql`
+			select requested.credited_unit_id as "creditedUnitId",
+				bounded.source_unit_id as "sourceUnitId"
+			from unnest(${creditedUnitArray}) as requested(credited_unit_id)
+			cross join lateral (
+				select distinct attribution.source_unit_id
+				from ${creditAttribution} as attribution
+				inner join ${unit} as source_unit on source_unit.id = attribution.source_unit_id
+				where attribution.credited_unit_id = requested.credited_unit_id
+					and attribution.role in ('author', 'co-author')
+					and source_unit.kind = 'book'
+					and source_unit.status = 'published'
+					and source_unit.visibility <> 'private'
+					and source_unit.moderation_status = 'approved'
+					and source_unit.deleted_at is null
+				order by attribution.source_unit_id
+				limit ${WorkPolicy.count.maxCreditedBookCountScan}
+			) as bounded
+		`),
 	]);
 	const followerCounts = new Map(
 		followerRows.map(({ unitId, followerCount }) => [
@@ -170,17 +179,20 @@ async function getAttributionStatisticsByUnitIds(
 			toSafeInteger(followerCount, "Unit follower count"),
 		]),
 	);
-	const creditedBookCounts = new Map(
-		creditedBookRows.map(({ creditedUnitId, creditedBookCount }) => [
-			creditedUnitId,
-			toSafeInteger(creditedBookCount, "credited Book count"),
-		]),
-	);
+	const creditedBookValues = new Map<string, number>();
+	for (const { creditedUnitId } of creditedBookRows.rows)
+		creditedBookValues.set(creditedUnitId, (creditedBookValues.get(creditedUnitId) ?? 0) + 1);
+	const creditedBookCount = (unitId: string): CountResult => {
+		const value = creditedBookValues.get(unitId) ?? 0;
+		return value < WorkPolicy.count.maxCreditedBookCountScan
+			? exactCount(value)
+			: lowerBoundCount(value);
+	};
 	return new Map(
 		unitIds.map((unitId) => [
 			unitId,
 			{
-				creditedBookCount: creditedBookCounts.get(unitId) ?? 0,
+				creditedBookCount: creditedBookCount(unitId),
 				followerCount: followerCounts.get(unitId) ?? 0,
 			},
 		]),
@@ -263,7 +275,7 @@ export async function getAttributionSummariesWithStatisticsByUnitIds(
 				creditedUnit: {
 					...item.creditedUnit,
 					...(statistics.get(item.creditedUnit.id) ?? {
-						creditedBookCount: 0,
+						creditedBookCount: exactCount(0),
 						followerCount: 0,
 					}),
 				},

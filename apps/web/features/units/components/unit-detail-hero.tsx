@@ -20,7 +20,6 @@ import { isProgressTrackableUnitType } from "@/features/progress/model/progress-
 import { UnitScoreControl } from "@/features/reviews/components/unit-score-control";
 import { UnitUnitOverflowMenu } from "@/features/ownership-claims/components/unit-ownership-claim-actions";
 import { useTranslation } from "@/i18n/client";
-import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { readPortableText } from "@/lib/block";
 import { selectLocalization } from "@/lib/localization";
 import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
@@ -135,8 +134,8 @@ export function UnitDetailHero<Type extends UnitDetailUnitType>({
 
 				{isProgressTrackableUnitType(type) && unit.progressStatistics ? (
 					<UnitProgressStatistics
-						active={toNonNegativeApiInteger(unit.progressStatistics.active)}
-						backlog={toNonNegativeApiInteger(unit.progressStatistics.backlog)}
+						active={unit.progressStatistics.active}
+						backlog={unit.progressStatistics.backlog}
 						type={type}
 					/>
 				) : null}

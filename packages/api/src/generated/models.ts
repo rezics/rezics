@@ -49791,7 +49791,55 @@ export type GetApiPlatformUsersStatus200 = {
 			updatedAt: (string | null) | null;
 			updatedByProfileId: (string | null) | null;
 		};
-		activeSessionCount: string | number;
+		activeSessionCount:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "exact";
+					/**
+					 * @minLength 0
+					 * @type integer
+					 */
+					value: number;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "estimate";
+					/**
+					 * @minLength 0
+					 * @type integer
+					 */
+					value: number;
+					/**
+					 * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$
+					 * @type string
+					 */
+					asOf: string;
+					/**
+					 * @minLength 0
+					 * @type integer | undefined
+					 */
+					modifiedSinceAnalyze?: number;
+					/**
+					 * @minLength 0
+					 * @type number | undefined
+					 */
+					relativeError?: number;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "lower-bound";
+					/**
+					 * @minLength 0
+					 * @type integer
+					 */
+					value: number;
+			  };
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -50024,7 +50072,55 @@ export type GetApiPlatformUsersByUserIdStatus200 = {
 		updatedAt: (string | null) | null;
 		updatedByProfileId: (string | null) | null;
 	};
-	activeSessionCount: string | number;
+	activeSessionCount:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "exact";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "estimate";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+				/**
+				 * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$
+				 * @type string
+				 */
+				asOf: string;
+				/**
+				 * @minLength 0
+				 * @type integer | undefined
+				 */
+				modifiedSinceAnalyze?: number;
+				/**
+				 * @minLength 0
+				 * @type number | undefined
+				 */
+				relativeError?: number;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "lower-bound";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+		  };
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -59345,7 +59441,55 @@ export type PostApiUnitsByTypeStatus200 = {
 						| null
 				  )
 				| null;
-			creditedBookCount: string | number;
+			creditedBookCount:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "exact";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "estimate";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+						/**
+						 * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$
+						 * @type string
+						 */
+						asOf: string;
+						/**
+						 * @minLength 0
+						 * @type integer | undefined
+						 */
+						modifiedSinceAnalyze?: number;
+						/**
+						 * @minLength 0
+						 * @type number | undefined
+						 */
+						relativeError?: number;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "lower-bound";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  };
 			followerCount: string | number;
 		};
 	}[];
@@ -60009,8 +60153,104 @@ export type PostApiUnitsByTypeStatus200 = {
 	}[];
 	progressStatistics:
 		| ({
-				active: string | number;
-				backlog: string | number;
+				active:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "exact";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "estimate";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+							/**
+							 * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$
+							 * @type string
+							 */
+							asOf: string;
+							/**
+							 * @minLength 0
+							 * @type integer | undefined
+							 */
+							modifiedSinceAnalyze?: number;
+							/**
+							 * @minLength 0
+							 * @type number | undefined
+							 */
+							relativeError?: number;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "lower-bound";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+					  };
+				backlog:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "exact";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "estimate";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+							/**
+							 * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$
+							 * @type string
+							 */
+							asOf: string;
+							/**
+							 * @minLength 0
+							 * @type integer | undefined
+							 */
+							modifiedSinceAnalyze?: number;
+							/**
+							 * @minLength 0
+							 * @type number | undefined
+							 */
+							relativeError?: number;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "lower-bound";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+					  };
 		  } | null)
 		| null;
 	/**
@@ -61589,7 +61829,55 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 						| null
 				  )
 				| null;
-			creditedBookCount: string | number;
+			creditedBookCount:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "exact";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "estimate";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+						/**
+						 * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$
+						 * @type string
+						 */
+						asOf: string;
+						/**
+						 * @minLength 0
+						 * @type integer | undefined
+						 */
+						modifiedSinceAnalyze?: number;
+						/**
+						 * @minLength 0
+						 * @type number | undefined
+						 */
+						relativeError?: number;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "lower-bound";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  };
 			followerCount: string | number;
 		};
 	}[];
@@ -62253,8 +62541,104 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 	}[];
 	progressStatistics:
 		| ({
-				active: string | number;
-				backlog: string | number;
+				active:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "exact";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "estimate";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+							/**
+							 * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$
+							 * @type string
+							 */
+							asOf: string;
+							/**
+							 * @minLength 0
+							 * @type integer | undefined
+							 */
+							modifiedSinceAnalyze?: number;
+							/**
+							 * @minLength 0
+							 * @type number | undefined
+							 */
+							relativeError?: number;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "lower-bound";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+					  };
+				backlog:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "exact";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "estimate";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+							/**
+							 * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$
+							 * @type string
+							 */
+							asOf: string;
+							/**
+							 * @minLength 0
+							 * @type integer | undefined
+							 */
+							modifiedSinceAnalyze?: number;
+							/**
+							 * @minLength 0
+							 * @type number | undefined
+							 */
+							relativeError?: number;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "lower-bound";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+					  };
 		  } | null)
 		| null;
 	/**
@@ -62913,7 +63297,55 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 						| null
 				  )
 				| null;
-			creditedBookCount: string | number;
+			creditedBookCount:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "exact";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "estimate";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+						/**
+						 * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$
+						 * @type string
+						 */
+						asOf: string;
+						/**
+						 * @minLength 0
+						 * @type integer | undefined
+						 */
+						modifiedSinceAnalyze?: number;
+						/**
+						 * @minLength 0
+						 * @type number | undefined
+						 */
+						relativeError?: number;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "lower-bound";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  };
 			followerCount: string | number;
 		};
 	}[];
@@ -63577,8 +64009,104 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 	}[];
 	progressStatistics:
 		| ({
-				active: string | number;
-				backlog: string | number;
+				active:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "exact";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "estimate";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+							/**
+							 * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$
+							 * @type string
+							 */
+							asOf: string;
+							/**
+							 * @minLength 0
+							 * @type integer | undefined
+							 */
+							modifiedSinceAnalyze?: number;
+							/**
+							 * @minLength 0
+							 * @type number | undefined
+							 */
+							relativeError?: number;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "lower-bound";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+					  };
+				backlog:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "exact";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "estimate";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+							/**
+							 * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$
+							 * @type string
+							 */
+							asOf: string;
+							/**
+							 * @minLength 0
+							 * @type integer | undefined
+							 */
+							modifiedSinceAnalyze?: number;
+							/**
+							 * @minLength 0
+							 * @type number | undefined
+							 */
+							relativeError?: number;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "lower-bound";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+					  };
 		  } | null)
 		| null;
 	/**
@@ -64536,7 +65064,55 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 						| null
 				  )
 				| null;
-			creditedBookCount: string | number;
+			creditedBookCount:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "exact";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "estimate";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+						/**
+						 * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$
+						 * @type string
+						 */
+						asOf: string;
+						/**
+						 * @minLength 0
+						 * @type integer | undefined
+						 */
+						modifiedSinceAnalyze?: number;
+						/**
+						 * @minLength 0
+						 * @type number | undefined
+						 */
+						relativeError?: number;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "lower-bound";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  };
 			followerCount: string | number;
 		};
 	}[];
@@ -65200,8 +65776,104 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 	}[];
 	progressStatistics:
 		| ({
-				active: string | number;
-				backlog: string | number;
+				active:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "exact";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "estimate";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+							/**
+							 * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$
+							 * @type string
+							 */
+							asOf: string;
+							/**
+							 * @minLength 0
+							 * @type integer | undefined
+							 */
+							modifiedSinceAnalyze?: number;
+							/**
+							 * @minLength 0
+							 * @type number | undefined
+							 */
+							relativeError?: number;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "lower-bound";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+					  };
+				backlog:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "exact";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "estimate";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+							/**
+							 * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$
+							 * @type string
+							 */
+							asOf: string;
+							/**
+							 * @minLength 0
+							 * @type integer | undefined
+							 */
+							modifiedSinceAnalyze?: number;
+							/**
+							 * @minLength 0
+							 * @type number | undefined
+							 */
+							relativeError?: number;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "lower-bound";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+					  };
 		  } | null)
 		| null;
 	/**
@@ -66041,7 +66713,55 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 						| null
 				  )
 				| null;
-			creditedBookCount: string | number;
+			creditedBookCount:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "exact";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "estimate";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+						/**
+						 * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$
+						 * @type string
+						 */
+						asOf: string;
+						/**
+						 * @minLength 0
+						 * @type integer | undefined
+						 */
+						modifiedSinceAnalyze?: number;
+						/**
+						 * @minLength 0
+						 * @type number | undefined
+						 */
+						relativeError?: number;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "lower-bound";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  };
 			followerCount: string | number;
 		};
 	}[];
@@ -66705,8 +67425,104 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 	}[];
 	progressStatistics:
 		| ({
-				active: string | number;
-				backlog: string | number;
+				active:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "exact";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "estimate";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+							/**
+							 * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$
+							 * @type string
+							 */
+							asOf: string;
+							/**
+							 * @minLength 0
+							 * @type integer | undefined
+							 */
+							modifiedSinceAnalyze?: number;
+							/**
+							 * @minLength 0
+							 * @type number | undefined
+							 */
+							relativeError?: number;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "lower-bound";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+					  };
+				backlog:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "exact";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "estimate";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+							/**
+							 * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$
+							 * @type string
+							 */
+							asOf: string;
+							/**
+							 * @minLength 0
+							 * @type integer | undefined
+							 */
+							modifiedSinceAnalyze?: number;
+							/**
+							 * @minLength 0
+							 * @type number | undefined
+							 */
+							relativeError?: number;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "lower-bound";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+					  };
 		  } | null)
 		| null;
 	/**
@@ -67556,7 +68372,55 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 						| null
 				  )
 				| null;
-			creditedBookCount: string | number;
+			creditedBookCount:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "exact";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "estimate";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+						/**
+						 * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$
+						 * @type string
+						 */
+						asOf: string;
+						/**
+						 * @minLength 0
+						 * @type integer | undefined
+						 */
+						modifiedSinceAnalyze?: number;
+						/**
+						 * @minLength 0
+						 * @type number | undefined
+						 */
+						relativeError?: number;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "lower-bound";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  };
 			followerCount: string | number;
 		};
 	}[];
@@ -68220,8 +69084,104 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 	}[];
 	progressStatistics:
 		| ({
-				active: string | number;
-				backlog: string | number;
+				active:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "exact";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "estimate";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+							/**
+							 * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$
+							 * @type string
+							 */
+							asOf: string;
+							/**
+							 * @minLength 0
+							 * @type integer | undefined
+							 */
+							modifiedSinceAnalyze?: number;
+							/**
+							 * @minLength 0
+							 * @type number | undefined
+							 */
+							relativeError?: number;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "lower-bound";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+					  };
+				backlog:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "exact";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "estimate";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+							/**
+							 * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$
+							 * @type string
+							 */
+							asOf: string;
+							/**
+							 * @minLength 0
+							 * @type integer | undefined
+							 */
+							modifiedSinceAnalyze?: number;
+							/**
+							 * @minLength 0
+							 * @type number | undefined
+							 */
+							relativeError?: number;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "lower-bound";
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							value: number;
+					  };
 		  } | null)
 		| null;
 	/**
@@ -83294,7 +84254,29 @@ export type PostApiProgressSearchStatus200 = {
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
-	total: string | number;
+	total:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "exact";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "lower-bound";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+		  };
 };
 
 /**
@@ -95851,7 +96833,29 @@ export type GetApiReviewsStatus200ItemsSubjectLanguageEnum =
  * @type object
  */
 export type GetApiReviewsStatus200 = {
-	totalCount: string | number;
+	totalCount:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "exact";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "lower-bound";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+		  };
 	nextCursor: (string | null) | null;
 	/**
 	 * @type array

@@ -43,18 +43,6 @@ export type AttachedBookDraftNode = {
 
 export type BookDraftNode = ExistingBookDraftNode | NewBookDraftNode | AttachedBookDraftNode;
 
-const newBookDraftUnitVisibilityByKind = {
-	chapter: "unlisted",
-	label: "unlisted",
-} as const satisfies Record<NewBookDraftNode["contentKind"], "unlisted">;
-
-/** New Chapters and Labels remain unlisted until their author explicitly lists them. */
-export function newBookDraftUnitVisibility(
-	contentKind: NewBookDraftNode["contentKind"],
-): "unlisted" {
-	return newBookDraftUnitVisibilityByKind[contentKind];
-}
-
 export type CurrentBookDraftNode = {
 	readonly id: string;
 	readonly parentId: string | null;

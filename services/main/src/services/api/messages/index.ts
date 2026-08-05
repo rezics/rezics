@@ -408,7 +408,10 @@ export default new Elysia({ prefix: "/messages" })
 		async ({ profile, params, body }) => {
 			const now = await database.transaction(async (tx) => {
 				const [participant] = await tx
-					.select({ conversationId: conversationParticipantStat.conversationId })
+					.select({
+						conversationId: conversationParticipantStat.conversationId,
+						lastMessageId: conversationParticipantStat.lastMessageId,
+					})
 					.from(conversationParticipantStat)
 					.where(
 						and(
@@ -419,6 +422,11 @@ export default new Elysia({ prefix: "/messages" })
 					.for("update")
 					.limit(1);
 				if (!participant) throw new ConversationNotFound();
+				// Marking a conversation read is intentionally a latest-message operation. The
+				// participant row is locked, so the unread counter can be reset in O(1) while
+				// concurrent sends wait and subsequently apply their own +1 delta.
+				if (participant.lastMessageId !== body.lastReadMessageId)
+					throw new MessageNotFound(true);
 				const [lastMessage] = await tx
 					.select({ id: message.id })
 					.from(message)
@@ -443,6 +451,15 @@ export default new Elysia({ prefix: "/messages" })
 						target: [conversationRead.conversationId, conversationRead.profileId],
 						set: { lastReadMessageId: body.lastReadMessageId, readAt },
 					});
+				await tx
+					.update(conversationParticipantStat)
+					.set({ unreadCount: 0n, updatedAt: readAt })
+					.where(
+						and(
+							eq(conversationParticipantStat.conversationId, params.conversationId),
+							eq(conversationParticipantStat.profileId, profile.unitId),
+						),
+					);
 				return readAt;
 			});
 			return {

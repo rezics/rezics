@@ -46,7 +46,7 @@ import {
 import { HealthCheckStateValues } from "../../health/model";
 import { CollectionConfigV1 } from "../users/schema";
 import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
-import { SearchCountResultSchema } from "../../counts/contract";
+import { CountResultSchema, SearchCountResultSchema } from "../../counts/contract";
 export { toApiErrorResponse } from "./error-response";
 
 const NullableText = t.Nullable(t.String());
@@ -176,7 +176,7 @@ export const UnitDetailAttributionSummaryResponse = t.Object({
 	...UnitAttributionSummaryFields,
 	creditedUnit: t.Object({
 		...UnitSummaryFields,
-		creditedBookCount: t.Integer({ minimum: 0 }),
+		creditedBookCount: CountResultSchema,
 		followerCount: t.Integer({ minimum: 0 }),
 	}),
 });
@@ -311,8 +311,8 @@ const UnitDetailsResponse = t.Union([
 ]);
 
 export const UnitProgressStatisticsResponse = t.Object({
-	active: t.Integer({ minimum: 0 }),
-	backlog: t.Integer({ minimum: 0 }),
+	active: CountResultSchema,
+	backlog: CountResultSchema,
 });
 
 export const AssociationContextPostResponse = t.Object({
@@ -748,7 +748,7 @@ export const PostFeedResponse = t.Object({
 	nextCursor: NullableText,
 });
 export const ReviewListResponse = t.Object({
-	totalCount: t.Integer({ minimum: 0 }),
+	totalCount: SearchCountResultSchema,
 	nextCursor: NullableText,
 	items: t.Array(
 		t.Object({
@@ -879,7 +879,7 @@ export const ProgressSearchResponse = t.Object({
 		}),
 	),
 	nextCursor: t.Optional(SearchContinuationToken),
-	total: t.Integer({ minimum: 0 }),
+	total: SearchCountResultSchema,
 });
 export const ProgressResponse = t.Object({
 	profileId: Uuid,

@@ -3,8 +3,9 @@
 ARG NODE_IMAGE=node:26-bookworm-slim@sha256:9e6f9357d371591e32ab6f2d8a26d63bdd0d17c29eee3f4f3e7e454d9634bf73
 ARG BUN_IMAGE=oven/bun:1.3.11-slim@sha256:478281fdd196871c7e51ba6a820b7803a8ae97042ec86cdbc2e1c6b6626442d9
 ARG POSTGRES_IMAGE=postgres:18.4-trixie@sha256:3a82e1f56c8f0f5616a11103ac3d47e632c3938698946a7ad26da0df1334744a
-ARG SEQUIN_IMAGE=sequin/sequin:v0.14.6@sha256:336759c1c632ebdc87939bcea70b26b46df6593e666088e1bf29058209437d3e
 ARG COREPACK_VERSION=0.35.0
+ARG PGROONGA_VERSION=4.0.8-1
+ARG APPROX_COUNT_COMMIT=341dfa19f73e60d22a8869ccb03bd252d888cec7
 
 FROM ${NODE_IMAGE} AS node-tooling
 
@@ -98,8 +99,34 @@ ENTRYPOINT ["bash", "/workspace/deploy/scripts/database-operation.sh"]
 
 FROM ${POSTGRES_IMAGE} AS postgres
 
+ARG PGROONGA_VERSION
+ARG APPROX_COUNT_COMMIT
+
+ADD --checksum=sha256:3406de4b8965c44a0e793090efbb0996a1802930159e7aa3f31c97dbef127c34 \
+    https://packages.groonga.org/debian/groonga-apt-source-latest-trixie.deb \
+    /tmp/groonga-apt-source.deb
+
+RUN apt-get update \
+	&& apt-get install --yes --no-install-recommends ca-certificates git make postgresql-server-dev-18 /tmp/groonga-apt-source.deb \
+	&& apt-get update \
+	&& apt-get install --yes --no-install-recommends "postgresql-18-pgdg-pgroonga=${PGROONGA_VERSION}" \
+	&& git clone --filter=blob:none --no-checkout https://github.com/jmealo/pg_approx_count.git /tmp/pg_approx_count \
+	&& git -C /tmp/pg_approx_count checkout "${APPROX_COUNT_COMMIT}" \
+	&& test "$(git -C /tmp/pg_approx_count rev-parse HEAD)" = "${APPROX_COUNT_COMMIT}" \
+	&& make -C /tmp/pg_approx_count install \
+	&& apt-get purge --yes --auto-remove git make postgresql-server-dev-18 \
+	&& rm -rf /tmp/groonga-apt-source.deb /tmp/pg_approx_count /var/lib/apt/lists/*
+
 COPY --chmod=0755 services/main/docker/postgres/init /docker-entrypoint-initdb.d
 
-FROM ${SEQUIN_IMAGE} AS sequin
+FROM postgres AS postgres-backup
 
-COPY services/main/search /config
+RUN apt-get update \
+	&& apt-get install --yes --no-install-recommends awscli jq \
+	&& rm -rf /var/lib/apt/lists/*
+
+COPY --chmod=0755 deploy/scripts/postgres-logical-backup.sh /usr/local/bin/postgres-logical-backup
+COPY --chmod=0755 deploy/scripts/postgres-restore-drill.sh /usr/local/bin/postgres-restore-drill
+COPY services/main/search/pgroonga-indexes.sql /opt/rezics/pgroonga-indexes.sql
+
+ENTRYPOINT []

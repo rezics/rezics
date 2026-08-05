@@ -13,6 +13,7 @@ import {
 	resolveSearchDocument,
 	type ProgressSearchSort,
 } from "../../search/templates";
+import type { SearchCountResult } from "../../counts/contract";
 
 const ProgressSearchDocument = createDefaultSearchDocument("progress");
 const ProgressSearchSortSet: ReadonlySet<string> = new Set(ProgressSearchSorts);
@@ -23,7 +24,7 @@ interface ProgressSearchCursor {
 	readonly consumed: number;
 	readonly pageSize: number;
 	readonly requestHash: string;
-	readonly total: number;
+	readonly total: SearchCountResult;
 }
 
 export interface ProgressSearchBoundary {
@@ -38,7 +39,7 @@ export interface ResolvedProgressSearchRequest {
 	readonly query: string;
 	readonly requestHash: string;
 	readonly sort: ProgressSearchSort;
-	readonly total?: number;
+	readonly total?: SearchCountResult;
 }
 
 export function getProgressSearchDefinition() {
@@ -80,9 +81,16 @@ function decodeProgressSearchCursor(value: string): ProgressSearchCursor {
 		cursor.pageSize < 1 ||
 		typeof cursor.requestHash !== "string" ||
 		!/^[0-9a-f]{64}$/.test(cursor.requestHash) ||
-		typeof cursor.total !== "number" ||
-		!Number.isSafeInteger(cursor.total) ||
-		cursor.total < cursor.consumed
+		!cursor.total ||
+		typeof cursor.total !== "object" ||
+		!Object.hasOwn(cursor.total, "kind") ||
+		!Object.hasOwn(cursor.total, "value") ||
+		!(["exact", "lower-bound"] as const).some(
+			(kind) => (cursor.total as Record<string, unknown>).kind === kind,
+		) ||
+		typeof (cursor.total as Record<string, unknown>).value !== "number" ||
+		!Number.isSafeInteger((cursor.total as Record<string, unknown>).value) ||
+		((cursor.total as Record<string, unknown>).value as number) < cursor.consumed
 	)
 		throw new InvalidSearch("Invalid progress Search cursor");
 	return {
@@ -91,7 +99,7 @@ function decodeProgressSearchCursor(value: string): ProgressSearchCursor {
 		consumed: cursor.consumed,
 		pageSize: cursor.pageSize,
 		requestHash: cursor.requestHash,
-		total: cursor.total,
+		total: cursor.total as SearchCountResult,
 	};
 }
 
@@ -100,7 +108,7 @@ export function createProgressSearchCursor(
 	input: {
 		readonly boundary: ProgressSearchBoundary;
 		readonly consumed: number;
-		readonly total: number;
+		readonly total: SearchCountResult;
 	},
 ): string {
 	const cursor: ProgressSearchCursor = {

@@ -1,4 +1,4 @@
-import { drizzle } from "drizzle-orm/node-postgres";
+import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { instrumentPostgresClient, peekActiveObservability } from "@rezics/observability";
 
@@ -20,6 +20,19 @@ peekActiveObservability()?.metrics.registerDatabasePool(() => ({
 const databaseClient = instrumentPostgresClient(pool);
 
 export const database = drizzle({ client: databaseClient });
+export type DatabaseSession = NodePgDatabase;
+
+/** Runs work on one PostgreSQL session, preserving session-scoped locks across transactions. */
+export async function withDatabaseSession<T>(
+	work: (session: DatabaseSession) => Promise<T>,
+): Promise<T> {
+	const client = await pool.connect();
+	try {
+		return await work(drizzle({ client: instrumentPostgresClient(client) }));
+	} finally {
+		client.release();
+	}
+}
 
 /**
  * A transaction owns one PostgreSQL client. Await every database operation on

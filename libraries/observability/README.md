@@ -57,7 +57,7 @@ Do not add request/response bodies, raw paths, object keys, exception messages, 
 
 The OTLP metric reader limits every instrument to 128 time series and exports at most 128 metrics per batch. Trace batching defaults to a 512-span queue and 128-span export batches; all bounds are validated and capped.
 
-Runtime gauges use Bun-supported `process.memoryUsage()`, `process.uptime()`, and a label-free active-request counter. Meilisearch outbox depth/age APIs are available for Plan 4 integration without business-ID labels.
+Runtime gauges use Bun-supported `process.memoryUsage()`, `process.uptime()`, and a label-free active-request counter. PostgreSQL search latency and failures use the existing bounded dependency dimensions without business-ID labels.
 
 ## Verification
 

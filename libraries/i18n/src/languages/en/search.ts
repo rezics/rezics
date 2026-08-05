@@ -39,6 +39,7 @@ export default {
 	clearAdvancedFilters: "Clear advanced filters",
 	results: "Search results",
 	resultCount: insert("{{count}} items", { count: Number }),
+	resultCountLowerBound: insert("At least {{count}} items", { count: Number }),
 	atLeastResultCount: insert("At least {{count}} items", { count: Number }),
 	resultGroups: {
 		units: "Works",

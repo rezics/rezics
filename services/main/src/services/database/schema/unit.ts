@@ -49,6 +49,11 @@ export const unit = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
+		index("unit_public_discoverable_idx")
+			.on(table.id)
+			.where(
+				sql`${table.status} = 'published'::unit_status and ${table.visibility} = 'public'::resource_visibility and ${table.moderationStatus} = 'approved'::moderation_status and ${table.deletedAt} is null`,
+			),
 		index("unit_kind_status_created_at_idx")
 			.on(table.kind, table.status, table.createdAt.desc(), table.id.desc())
 			.where(sql`${table.deletedAt} is null`),

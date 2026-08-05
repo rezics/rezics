@@ -1,9 +1,10 @@
-import { and, asc, eq, gt, or, sql } from "drizzle-orm";
+import { and, asc, eq, gt, or } from "drizzle-orm";
 import { t, type UnwrapSchema } from "elysia";
 import type { ContentLanguage } from "@rezics/i18n";
 
 import type { Authorization } from "../../authorization";
 import { database } from "../../database";
+import { toSafeInteger } from "../../database/integer";
 import {
 	avatarReferenceFromColumns,
 	resolveUnitLocalizationFromOrdered,
@@ -12,6 +13,7 @@ import {
 import {
 	collection as collectionTable,
 	collectionItem,
+	collectionStat,
 	collectionStructureRevisionHead,
 	profileFavoritesCollection,
 	unit,
@@ -84,7 +86,7 @@ export async function getCollection(
 			status: unit.status,
 			visibility: unit.visibility,
 			favoritesProfileId: profileFavoritesCollection.profileId,
-			itemCount: sql<number>`(select count(*) from ${collectionItem} where ${collectionItem.collectionId} = ${collectionTable.id})::int`,
+			itemCount: collectionStat.itemCount,
 			latestRevisionId: unitRevisionHead.revisionId,
 			latestItemsRevisionId: collectionStructureRevisionHead.revisionId,
 			createdAt: unit.createdAt,
@@ -92,6 +94,7 @@ export async function getCollection(
 		})
 		.from(collectionTable)
 		.innerJoin(unit, eq(unit.id, collectionTable.id))
+		.innerJoin(collectionStat, eq(collectionStat.collectionId, collectionTable.id))
 		.innerJoin(unitRevisionHead, eq(unitRevisionHead.unitId, unit.id))
 		.innerJoin(
 			collectionStructureRevisionHead,
@@ -143,6 +146,7 @@ export async function getCollection(
 	const { favoritesProfileId, ...detail } = record;
 	return {
 		...detail,
+		itemCount: toSafeInteger(detail.itemCount, "Collection item count"),
 		purpose: favoritesProfileId ? "favorites" : "collection",
 		language: selectedLocalization.language,
 		cover: presentImageAsset(

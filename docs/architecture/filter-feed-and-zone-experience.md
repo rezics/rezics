@@ -162,35 +162,26 @@ Search cursor request hashes likewise bind the ordered presentation languages;
 changing preferences or an explicit language override starts a new result
 window.
 
-Feed compiles `UnitPredicate` to parameterized SQL. When `UnitFilter.search` is
-present, the Search Service supplies matching candidate identities and applies
-query ranking only when the selected Search profile requests it. The
-authoritative domain predicate is still composed separately. Engine
-pushdown fails closed for unsupported predicates; it never silently broadens
-results. Viewer-relative predicates,
+Feed compiles `UnitPredicate` to parameterized SQL. When `UnitFilter.search` is present, the
+Search Service compiles text and authoritative domain predicates into bounded PostgreSQL SQL and
+applies ranking only when the selected Search profile requests it. Compilation fails closed for
+unsupported predicates; it never silently broadens results. Viewer-relative predicates,
 including private Tags and viewer-authored Scores, require an authenticated
 Profile and evaluate to no match when one is unavailable.
 
-Meilisearch treats an explicit ordering strategy as authoritative. `relevance`
-therefore emits no explicit sort, while `best` and field orders emit a sort
-whose ranking rule precedes text-ranking rules. Text may still select the
-candidate set for a Feed, but it cannot silently turn that Feed into a
-relevance-ranked Search result.
+PGroonga supplies text relevance only for the `relevance` profile. `best` and field orders remain
+explicit PostgreSQL sorts, so text matching cannot silently turn a Feed into a relevance-ranked
+Search result.
 
-A Search Feature Feed executes all selected categories as one globally ordered
-candidate stream. Category is a filtering dimension, not a balancing rule:
-results are never round-robin interleaved after ranking. PostgreSQL may remove
-stale, unauthorized, or residual-filter candidates, but preserves the remaining
-engine order. Its opaque cursor records one global candidate offset, so page
-boundaries cannot reorder surviving items or skip eligible items that follow
-rejected candidates.
+A Search Feature Feed executes all selected categories as one globally ordered result stream.
+Category is a filtering dimension, not a balancing rule: results are never round-robin interleaved
+after ranking. Its opaque keyset cursor binds the request hash, stable sort values, and Unit ID so
+page boundaries cannot reorder results.
 
-For `relevance`, matching relaxes frequent query words before distinctive
-words. The remaining candidates follow the engine's words, typo, proximity,
-searchable-attribute, and exactness rules. Every localized title occupies the
-highest searchable-attribute tier; the Unit's display fallback order does not
-make one language more relevant than another. Composed fallback-path titles,
-aliases, summaries, descriptions, and published content follow in that order.
+For `relevance`, matching relaxes frequent query words before distinctive words. Every localized
+title occupies the highest search tier; the Unit's display fallback order does not make one
+language more relevant than another. Summaries, semantic descriptions, and published content
+follow in that order.
 Recommendation score, recent update time, and Unit ID act only as deterministic
 tie-breaks after text relevance.
 

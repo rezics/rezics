@@ -242,7 +242,7 @@ async function verifySmoke(resources: ResourceDescription[]) {
 		throw new Error(
 			`API and worker must run under Bun; got ${api.source} and ${worker.source}`,
 		);
-	for (const excluded of ["about", "auth", "meilisearch"])
+	for (const excluded of ["about", "auth"])
 		if (resources.some((resource) => resource.displayName === excluded))
 			throw new Error(`${excluded} must not be part of the default Aspire topology`);
 	const apiOrigin = api.urls.find((url) => url.name === "http")?.url;

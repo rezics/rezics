@@ -39,6 +39,7 @@ export default {
 	clearAdvancedFilters: "Borrar filtros avanzados",
 	results: "Resultados de búsqueda",
 	resultCount: insert("{{count}} elementos", { count: Number }),
+	resultCountLowerBound: insert("Al menos {{count}} elementos", { count: Number }),
 	atLeastResultCount: insert("Al menos {{count}} elementos", { count: Number }),
 	resultGroups: {
 		units: "Obras",

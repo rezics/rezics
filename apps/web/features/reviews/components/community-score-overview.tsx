@@ -8,6 +8,11 @@ import { RequestFailure } from "@/i18n/request-failure";
 import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
 import { UnitScoreValues, type UnitScore } from "../model/score-value";
 
+type CountResult = {
+	readonly kind: "exact" | "lower-bound";
+	readonly value: string | number;
+};
+
 export function CommunityScoreOverview({
 	realmId,
 	onScoreFilterToggle,
@@ -17,7 +22,7 @@ export function CommunityScoreOverview({
 }: {
 	readonly onScoreFilterToggle: (score: UnitScore) => void;
 	readonly realmId?: string;
-	readonly reviewCount: number;
+	readonly reviewCount: CountResult;
 	readonly selectedScores: readonly UnitScore[];
 	readonly targetId: string;
 }) {
@@ -62,7 +67,7 @@ function LoadedCommunityScoreOverview({
 }: {
 	readonly onScoreFilterToggle: (score: UnitScore) => void;
 	readonly realmId: string;
-	readonly reviewCount: number;
+	readonly reviewCount: CountResult;
 	readonly selectedScores: readonly UnitScore[];
 	readonly targetId: string;
 }) {
@@ -117,11 +122,16 @@ function CommunityScoreOverviewContent({
 	readonly counts: Readonly<Record<UnitScore, number>>;
 	readonly onScoreFilterToggle?: (score: UnitScore) => void;
 	readonly ratingCount: number;
-	readonly reviewCount: number;
+	readonly reviewCount: CountResult;
 	readonly selectedScores: readonly UnitScore[];
 }) {
 	const { locale, t } = useTranslation(["engagement"]);
 	const numberFormat = new Intl.NumberFormat(locale.current);
+	const reviewCountValue = toNonNegativeApiInteger(reviewCount.value);
+	const reviewCountLabel =
+		reviewCount.kind === "exact"
+			? numberFormat.format(reviewCountValue)
+			: t.engagement.atLeastCount({ count: numberFormat.format(reviewCountValue) });
 	const maximumCount = UnitScoreValues.reduce(
 		(maximum, score) => Math.max(maximum, counts[score]),
 		0,
@@ -142,7 +152,7 @@ function CommunityScoreOverviewContent({
 				<span className="text-sm text-muted-foreground">
 					{t.engagement.reviewCounts({
 						ratings: numberFormat.format(ratingCount),
-						reviews: numberFormat.format(reviewCount),
+						reviews: reviewCountLabel,
 					})}
 				</span>
 			</div>

@@ -13,8 +13,7 @@ export const EstimateCountSchema = Type.Object(
 		kind: Type.Literal("estimate"),
 		value: CountValue,
 		asOf: Type.String({
-			pattern:
-				"^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+			pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
 		}),
 		modifiedSinceAnalyze: Type.Optional(CountValue),
 		relativeError: Type.Optional(Type.Number({ minimum: 0 })),
@@ -32,10 +31,9 @@ export const CountResultSchema = Type.Union(
 export type CountResult = Static<typeof CountResultSchema>;
 
 /** Search/facet counts can be exact only after exhaustion; they are never estimates. */
-export const SearchCountResultSchema = Type.Union(
-	[ExactCountSchema, LowerBoundCountSchema],
-	{ $id: "SearchCountResult" },
-);
+export const SearchCountResultSchema = Type.Union([ExactCountSchema, LowerBoundCountSchema], {
+	$id: "SearchCountResult",
+});
 export type SearchCountResult = Static<typeof SearchCountResultSchema>;
 
 export function exactCount(value: number): CountResult {

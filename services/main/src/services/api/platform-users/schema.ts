@@ -1,6 +1,7 @@
 import { t } from "elysia";
 
 import { UserAccountStateReasonValues, UserAccountStateValues } from "../../database/schema";
+import { CountResultSchema } from "../../counts/contract";
 import { DateTime, Uuid } from "../schema";
 
 export const PlatformUsersQuery = t.Object(
@@ -34,7 +35,7 @@ export const PlatformUserResponse = t.Object({
 	email: t.String(),
 	emailVerified: t.Boolean(),
 	accountState: PlatformUserAccountStateResponse,
-	activeSessionCount: t.Integer({ minimum: 0 }),
+	activeSessionCount: CountResultSchema,
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });

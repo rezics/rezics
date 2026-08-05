@@ -39,6 +39,7 @@ export default {
 	clearAdvancedFilters: "清除高级条件",
 	results: "搜索结果",
 	resultCount: insert("{{count}} 项", { count: Number }),
+	resultCountLowerBound: insert("至少 {{count}} 项", { count: Number }),
 	atLeastResultCount: insert("至少 {{count}} 项", { count: Number }),
 	resultGroups: {
 		units: "作品",

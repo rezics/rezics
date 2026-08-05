@@ -22,6 +22,8 @@ import {
 } from "../authorization/unit/ownership";
 import { database, type DatabaseTransaction } from "../database";
 import { toSafeInteger } from "../database/integer";
+import { exactCount, lowerBoundCount } from "../counts/contract";
+import { WorkPolicy } from "../performance/policy";
 import {
 	type CreditAttributionRole,
 	isCreditAttributionRoleForUnitKind,
@@ -518,12 +520,8 @@ export async function getUnit(
 			desc(unitTagVoteStat.voteCount),
 			unitTag.tagId,
 		);
-	const [progressCounts] = await database
-		.select({
-			total: sql<unknown>`count(*)`,
-			active: sql<unknown>`count(*) filter (where ${unitProgress.status} = 'active')`,
-			backlog: sql<unknown>`count(*) filter (where ${unitProgress.status} = 'backlog')`,
-		})
+	const visibleProgressRows = await database
+		.select({ status: unitProgress.status })
 		.from(unitProgress)
 		.innerJoin(profilePreference, eq(profilePreference.profileId, unitProgress.profileId))
 		.where(
@@ -533,11 +531,15 @@ export async function getUnit(
 				eq(profilePreference.progressVisibility, "public"),
 				eq(unitProgress.visibility, "public"),
 			),
-		);
-	const visibleProgressCount = toSafeInteger(
-		progressCounts?.total ?? 0,
-		"visible progress count",
-	);
+		)
+		.orderBy(unitProgress.profileId)
+		.limit(WorkPolicy.count.maxPublicProgressCountScan);
+	const progressCountIsExact =
+		visibleProgressRows.length < WorkPolicy.count.maxPublicProgressCountScan;
+	const progressCount = (status: "active" | "backlog") => {
+		const value = visibleProgressRows.filter((row) => row.status === status).length;
+		return progressCountIsExact ? exactCount(value) : lowerBoundCount(value);
+	};
 	const variantContext: UnitDetail["variantContext"] =
 		kind === "series" || kind === "video" || kind === "audio"
 			? { role: "standalone" }
@@ -618,14 +620,11 @@ export async function getUnit(
 			voteCount: toSafeInteger(tag.voteCount ?? 0n, "tag vote count"),
 		})),
 		progressStatistics:
-			visibleProgressCount < 5
+			visibleProgressRows.length < 5
 				? null
 				: {
-						active: toSafeInteger(progressCounts?.active ?? 0, "active progress count"),
-						backlog: toSafeInteger(
-							progressCounts?.backlog ?? 0,
-							"backlog progress count",
-						),
+						active: progressCount("active"),
+						backlog: progressCount("backlog"),
 					},
 		versions:
 			kind === "series" || kind === "video" || kind === "audio"

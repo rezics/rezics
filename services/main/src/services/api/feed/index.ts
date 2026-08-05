@@ -38,9 +38,9 @@ import {
 	profilePreference,
 	score,
 	scoreStat,
-	collectionItem,
+	collectionStat,
 	unitFollow,
-	realmMember,
+	realmStat,
 	realmTagContext,
 	realmUnit,
 	recommendationProfileInterest,
@@ -1216,27 +1216,20 @@ export async function hydrateFeedItems(
 		collectionIds.length
 			? database
 					.select({
-						collectionId: collectionItem.collectionId,
-						count: sql<number>`count(*)::int`,
+						collectionId: collectionStat.collectionId,
+						count: collectionStat.itemCount,
 					})
-					.from(collectionItem)
-					.where(inArray(collectionItem.collectionId, collectionIds))
-					.groupBy(collectionItem.collectionId)
+					.from(collectionStat)
+					.where(inArray(collectionStat.collectionId, collectionIds))
 			: [],
 		realmIds.length
 			? database
 					.select({
-						realmId: realmMember.realmId,
-						count: sql<number>`count(*)::int`,
+						realmId: realmStat.realmId,
+						count: realmStat.activeMemberCount,
 					})
-					.from(realmMember)
-					.where(
-						and(
-							inArray(realmMember.realmId, realmIds),
-							eq(realmMember.state, "active"),
-						),
-					)
-					.groupBy(realmMember.realmId)
+					.from(realmStat)
+					.where(inArray(realmStat.realmId, realmIds))
 			: [],
 		wikiIds.length
 			? database
@@ -1398,9 +1391,17 @@ export async function hydrateFeedItems(
 		childReplyCounts.map((row) => [row.id, toSafeInteger(row.count, "reply count")]),
 	);
 	const collectionDirectItemCount = new Map(
-		collectionCounts.map((row) => [row.collectionId, row.count]),
+		collectionCounts.map((row) => [
+			row.collectionId,
+			toSafeInteger(row.count, "collection item count"),
+		]),
 	);
-	const realmMemberCount = new Map(realmMemberCounts.map((row) => [row.realmId, row.count]));
+	const realmMemberCount = new Map(
+		realmMemberCounts.map((row) => [
+			row.realmId,
+			toSafeInteger(row.count, "Realm active member count"),
+		]),
+	);
 	const realmTagContextByPostId = new Map(
 		realmTagContextRows.flatMap(({ contextPostId, avatar, ...context }) =>
 			context.language

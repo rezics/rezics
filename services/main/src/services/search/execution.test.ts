@@ -5,65 +5,37 @@ const searchGlobalIdentifiers = vi.hoisted(() => vi.fn());
 const validateSearchDomainRequest = vi.hoisted(() => vi.fn());
 
 vi.mock("../database", () => ({ database: {} }));
-vi.mock("./generation", () => ({
-	getActiveSearchGeneration: vi.fn().mockResolvedValue({
-		id: "019f7eed-5d42-7102-8387-cc1d13b176d2",
-		kind: "current",
-		indexUid: "rezics_units_v1_20260804",
-		projectionVersion: 1,
-		settingsFingerprint: "a".repeat(64),
-	}),
-}));
 vi.mock("./service", () => ({
 	searchDomain: vi.fn(),
 	searchDomainFacets,
 	searchGlobalIdentifiers,
 	validateSearchDomainRequest,
 }));
-vi.mock("./meilisearch", () => ({
-	createCandidateSearchContext: vi.fn((generation: { id: string; indexUid: string }) =>
-		Promise.resolve({
-			generationId: generation.id,
-			indexUid: generation.indexUid,
-		}),
-	),
-}));
 
 import { executeCompiledSearchIdentifiers } from "./execution";
 import { parseGlobalSearchCursor } from "./query";
 import { compileSearchFeatureInput, createDefaultSearchDocument } from "./templates";
 
-describe("globally ranked Search Feed execution", () => {
+describe("globally ranked PostgreSQL Search execution", () => {
 	beforeEach(() => {
-		searchDomainFacets.mockReset();
-		searchDomainFacets.mockResolvedValue([]);
+		searchDomainFacets.mockReset().mockResolvedValue([]);
 		searchGlobalIdentifiers.mockReset();
 		validateSearchDomainRequest.mockReset();
 	});
 
-	it("uses the full page budget once and carries one global offset in its cursor", async () => {
+	it("uses one global page budget and carries the authoritative keyset", async () => {
 		const first = "019f7eed-5d42-7102-8387-cc1d13b176d3";
-		const second = "019f7eed-5d42-7102-8387-cc1d13b176d4";
-		const third = "019f7eed-5d42-7102-8387-cc1d13b176d5";
-		searchGlobalIdentifiers
-			.mockResolvedValueOnce({
-				hits: [{ id: first }, { id: second }],
-				total: { kind: "lower-bound", value: 4 },
-				offset: 0,
-				nextOffset: 3,
-				exhausted: false,
-				limit: 3,
-				processingTimeMs: 1,
-			})
-			.mockResolvedValueOnce({
-				hits: [{ id: third }],
-				total: { kind: "exact", value: 4 },
-				offset: 3,
-				nextOffset: 4,
-				exhausted: true,
-				limit: 3,
-				processingTimeMs: 1,
-			});
+		const position = { primary: "1720000000", secondary: "0", unitId: first } as const;
+		searchGlobalIdentifiers.mockResolvedValueOnce({
+			hits: [{ id: first }],
+			total: { kind: "lower-bound", value: 2 },
+			offset: 0,
+			nextOffset: 1,
+			exhausted: false,
+			nextPosition: position,
+			limit: 3,
+			processingTimeMs: 1,
+		});
 		const compiled = compileSearchFeatureInput(
 			{
 				document: createDefaultSearchDocument("global"),
@@ -82,9 +54,6 @@ describe("globally ranked Search Feed execution", () => {
 			compiled.inputIdentity,
 		);
 
-		expect(result.hits).toEqual([{ id: first }, { id: second }]);
-		expect(result).not.toHaveProperty("groups");
-		expect(searchGlobalIdentifiers).toHaveBeenCalledTimes(1);
 		expect(searchGlobalIdentifiers).toHaveBeenCalledWith(
 			expect.objectContaining({
 				limit: 3,
@@ -92,39 +61,32 @@ describe("globally ranked Search Feed execution", () => {
 				sort: "createdAt:desc",
 				branches: compiled.request.categories.map((category) => ({ category })),
 			}),
-			expect.objectContaining({ indexUid: "rezics_units_v1_20260804" }),
 		);
 		const cursor = parseGlobalSearchCursor(result.nextCursor ?? "");
-		expect(cursor).toMatchObject({ version: 2, pageSize: 3, offset: 3 });
+		expect(cursor).toMatchObject({ version: 2, pageSize: 3, seen: 1, position });
+	});
 
-		const nextCompiled = compileSearchFeatureInput(
+	it("does not produce a cursor for an exhausted result", async () => {
+		searchGlobalIdentifiers.mockResolvedValueOnce({
+			hits: [],
+			total: { kind: "exact", value: 0 },
+			offset: 0,
+			nextOffset: 0,
+			exhausted: true,
+			limit: 3,
+			processingTimeMs: 1,
+		});
+		const compiled = compileSearchFeatureInput(
 			{
 				document: createDefaultSearchDocument("global"),
 				contexts: [],
 				injections: [],
-				state: {
-					pageSize: 3,
-					sort: "createdAt:desc",
-					cursor: result.nextCursor,
-				},
+				state: { pageSize: 3, sort: "createdAt:desc" },
 			},
 			{ sortProfile: "feed", pageBudget: "global" },
 		);
-		const nextResult = await executeCompiledSearchIdentifiers(
-			nextCompiled.plan,
-			["zh", "en"],
-			undefined,
-			nextCompiled.enforcedZoneId,
-			nextCompiled.inputIdentity,
-		);
-
-		expect(nextResult.hits).toEqual([{ id: third }]);
-		expect(nextResult.nextCursor).toBeUndefined();
-		expect(searchGlobalIdentifiers).toHaveBeenCalledTimes(2);
-		expect(searchGlobalIdentifiers).toHaveBeenNthCalledWith(
-			2,
-			expect.objectContaining({ offset: 3, limit: 3, sort: "createdAt:desc" }),
-			expect.objectContaining({ indexUid: "rezics_units_v1_20260804" }),
-		);
+		const result = await executeCompiledSearchIdentifiers(compiled.plan, ["en"]);
+		expect(result.nextCursor).toBeUndefined();
+		expect(result.total).toEqual({ kind: "exact", value: 0 });
 	});
 });

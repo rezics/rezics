@@ -5,9 +5,11 @@ import Elysia from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
+import { toSafeInteger } from "../../database/integer";
 import { resolvedUnitLocalizationLanguage } from "../../units/localization";
 import {
 	pollOption,
+	pollOptionVoteStat,
 	poll,
 	pollVote,
 	unitOwnership,
@@ -176,9 +178,10 @@ export default new Elysia({ prefix: "/polls" })
 					sourceKind: pollOption.sourceKind,
 					targetUnitId: pollOption.targetUnitId,
 					position: pollOption.position,
-					voteCount: sql<number>`(select count(*) from ${pollVote} where ${pollVote.optionId} = ${pollOption.id})::int`,
+					voteCount: pollOptionVoteStat.voteCount,
 				})
 				.from(pollOption)
+				.innerJoin(pollOptionVoteStat, eq(pollOptionVoteStat.optionId, pollOption.id))
 				.where(eq(pollOption.pollId, params.pollId))
 				.orderBy(pollOption.position);
 			return {
@@ -193,7 +196,9 @@ export default new Elysia({ prefix: "/polls" })
 					const presentation = {
 						...fields,
 						label: labelByOptionId.get(option.id) ?? "",
-						voteCount: showResults ? option.voteCount : null,
+						voteCount: showResults
+							? toSafeInteger(option.voteCount, "Poll option vote count")
+							: null,
 					};
 					if (sourceKind === "literal") {
 						if (targetUnitId !== null)

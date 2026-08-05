@@ -12,6 +12,7 @@ import type { PublicationLicenseId } from "@rezics/license";
 import type { PublicSlugAddressValue } from "@rezics/slug";
 
 import type { SearchExpression } from "./query";
+import type { SearchKeysetPosition } from "./query";
 
 export const SearchCategories = SearchCategoryValues;
 export type { SearchCategory };
@@ -75,6 +76,10 @@ export interface DomainSearchRequest {
 	includeScopeDescendants?: boolean;
 	searchExpression?: SearchExpression;
 	domainFilter?: UnitPredicate;
+	/** Server-owned keyset state; never accepted directly from an API body. */
+	searchPosition?: SearchKeysetPosition;
+	/** Server-owned number of prior results represented by the keyset. */
+	searchSeen?: number;
 }
 
 export const SearchFieldByDomainRequestFilter = {

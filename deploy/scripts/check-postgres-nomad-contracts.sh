@@ -6,9 +6,7 @@ readonly volume_destination='destination = "/var/lib/postgresql"'
 readonly production_socket_argument='"-c", "unix_socket_directories=/var/lib/postgresql/18/docker"'
 readonly production_init_copy='COPY --chmod=0755 services/main/docker/postgres/init /docker-entrypoint-initdb.d'
 
-for jobspec in \
-	deploy/nomad/postgres.nomad.hcl \
-	deploy/nomad/sequin-postgres.nomad.hcl; do
+for jobspec in deploy/nomad/postgres.nomad.hcl; do
 	pgdata_count="$(grep -E -c \
 		'^[[:space:]]*PGDATA[[:space:]]*=[[:space:]]*"/var/lib/postgresql/18/docker"' \
 		"${jobspec}" || true)"
@@ -28,21 +26,35 @@ if ((production_socket_count != 1)); then
 	exit 1
 fi
 
-if ! grep -Fq '"-c", "max_slot_wal_keep_size=32GB"' deploy/nomad/postgres.nomad.hcl; then
-	printf '%s\n' 'Production PostgreSQL must retain 32GB per logical replication slot' >&2
-	exit 1
-fi
+for setting in \
+	'"-c", "wal_level=replica"' \
+	'"-c", "max_replication_slots=0"' \
+	'"-c", "max_wal_size=8GB"' \
+	'"-c", "min_wal_size=2GB"'; do
+	if ! grep -Fq "${setting}" deploy/nomad/postgres.nomad.hcl; then
+		printf 'Production PostgreSQL is missing the no-logical-CDC contract: %s\n' "${setting}" >&2
+		exit 1
+	fi
+done
 
-if ! grep -Fq '"-c", "shared_preload_libraries=pg_stat_statements"' \
+if ! grep -Fq '"-c", "shared_preload_libraries=pg_stat_statements,pgroonga_wal_resource_manager,pgroonga_crash_safer"' \
 	deploy/nomad/postgres.nomad.hcl; then
-	printf '%s\n' 'Production PostgreSQL must preload pg_stat_statements' >&2
+	printf '%s\n' 'Production PostgreSQL must preload statistics and PGroonga WAL/crash modules' >&2
 	exit 1
 fi
 
-if grep -Fq 'unix_socket_directories' deploy/nomad/sequin-postgres.nomad.hcl; then
-	printf '%s\n' 'Sequin PostgreSQL must retain the entrypoint initialization socket' >&2
-	exit 1
-fi
+for setting in \
+	'"-c", "pgroonga.enable_wal_resource_manager=on"' \
+	'"-c", "pgroonga.enable_crash_safe=on"' \
+	'"-c", "compute_query_id=on"' \
+	'"-c", "pg_stat_statements.track=all"' \
+	'"-c", "track_io_timing=on"' \
+	'"-c", "track_wal_io_timing=on"'; do
+	if ! grep -Fq "${setting}" deploy/nomad/postgres.nomad.hcl; then
+		printf 'Production PostgreSQL is missing required setting: %s\n' "${setting}" >&2
+		exit 1
+	fi
+done
 
 if ! grep -Fxq "${production_init_copy}" Dockerfile; then
 	printf '%s\n' 'Production PostgreSQL init scripts must have checkout-independent executable modes' >&2
@@ -51,12 +63,6 @@ fi
 
 if grep -Fq 'POSTGRES_USER = "postgres"' deploy/nomad/postgres.nomad.hcl; then
 	printf '%s\n' 'Production PostgreSQL superuser must come from its Nomad Variable' >&2
-	exit 1
-fi
-
-if grep -Fq 'SEQUIN_SOURCE_USERNAME         = "rezics_sequin"' \
-	deploy/nomad/sequin.nomad.hcl; then
-	printf '%s\n' 'Sequin source username must come from its Nomad Variable' >&2
 	exit 1
 fi
 

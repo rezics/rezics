@@ -7,6 +7,8 @@ import {
 	contentStructureNode,
 	contentStructureNodeProgress,
 	contentStructureRevisionHead,
+	bookChapterProgressStat,
+	bookChapterStat,
 	DefaultResourceVisibility,
 	audio,
 	type ProgressCurrentBasis,
@@ -579,35 +581,25 @@ export async function recordChapterReading(
 
 	const [chapterCounts] = await tx
 		.select({
-			completed: sql<number>`count(${contentStructureNodeProgress.nodeId})::int`,
-			total: sql<number>`count(*)::int`,
+			completed: input.canReadUnpublished
+				? bookChapterProgressStat.allCompletedCount
+				: bookChapterProgressStat.publicCompletedCount,
+			total: input.canReadUnpublished
+				? bookChapterStat.allCount
+				: bookChapterStat.publicCount,
 		})
-		.from(contentStructureNode)
-		.innerJoin(contentStructure, eq(contentStructure.id, contentStructureNode.structureId))
-		.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
-		.innerJoin(post, eq(post.id, contentStructureNode.contentUnitId))
+		.from(bookChapterStat)
 		.leftJoin(
-			contentStructureNodeProgress,
+			bookChapterProgressStat,
 			and(
-				eq(contentStructureNodeProgress.profileId, input.profileId),
-				eq(contentStructureNodeProgress.nodeId, contentStructureNode.id),
+				eq(bookChapterProgressStat.profileId, input.profileId),
+				eq(bookChapterProgressStat.bookUnitId, bookChapterStat.bookUnitId),
 			),
 		)
-		.where(
-			and(
-				eq(contentStructureNode.ownerUnitId, input.unitId),
-				eq(contentStructure.kind, "book.contents"),
-				eq(unit.kind, "post"),
-				eq(post.kind, "chapter"),
-				isNull(contentStructureNode.deletedAt),
-				isNull(contentStructure.deletedAt),
-				isNull(unit.deletedAt),
-				readableUnitCondition,
-			),
-		);
+		.where(eq(bookChapterStat.bookUnitId, input.unitId));
 	if (!chapterCounts) throw new Error("Book chapter progress aggregation returned no row");
 	const completedChapterCount = toSafeInteger(
-		chapterCounts.completed,
+		chapterCounts.completed ?? 0n,
 		"completed Book chapter count",
 	);
 	const totalChapterCount = toSafeInteger(chapterCounts.total, "Book chapter count");

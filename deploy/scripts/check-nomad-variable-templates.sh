@@ -5,7 +5,6 @@ set -euo pipefail
 readonly tuple_range='{{- range .Tuples }}'
 readonly tuple_render='{{ .K }}={{ .V | toJSON }}'
 readonly legacy_render='.V.Value'
-readonly sequin_redis_url="REDIS_URL: (\"redis://default:\" + \$valkeyPassword + \"@127.0.0.1:6379\"),"
 checked_templates=0
 
 for jobspec in deploy/nomad/*.nomad.hcl; do
@@ -24,13 +23,6 @@ done
 
 if ((checked_templates == 0)); then
 	printf '%s\n' "No Nomad Variable tuple templates were checked" >&2
-	exit 1
-fi
-
-if ! grep -Fq "${sequin_redis_url}" \
-	deploy/scripts/install-production-variables.sh; then
-	printf '%s\n' \
-		"Sequin REDIS_URL must authenticate as the Valkey default user" >&2
 	exit 1
 fi
 

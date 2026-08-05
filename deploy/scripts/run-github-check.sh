@@ -24,6 +24,7 @@ yarn install --immutable
 task apps-web:offline:check
 task apps-web:cloudflare:typegen:check
 task format:check
+task counts:check
 bash deploy/scripts/check-release-component-plan.sh
 bash deploy/scripts/check-docker-build-context-contracts.sh
 bash deploy/scripts/check-nomad-job-apply-contracts.sh

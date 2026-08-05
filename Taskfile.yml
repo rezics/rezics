@@ -35,6 +35,11 @@ tasks:
         cmds:
             - yarn exec prettier . --check
 
+    counts:check:
+        desc: Verify the online exact-count policy.
+        cmds:
+            - task: services-main:counts:check
+
     scc:
         desc: Count source code without generated outputs.
         cmds:
@@ -95,7 +100,7 @@ tasks:
             - test -z "$(git ls-files --others --exclude-standard -- libraries/services/main/openapi/openapi.json libraries/services/main/openapi-fetch/src/generated libraries/services/main/openapi-tanstack-query/src/generated packages/api/src/generated)"
 
     seed:contract:
-        desc: Verify fresh platform installation, coverage Seed, derived projections, and official Zone Search.
+        desc: Verify fresh platform installation, coverage Seed, derived data, and authoritative Search.
         cmds:
             - task: services-main:db:install
               vars:
@@ -106,27 +111,13 @@ tasks:
                   CLI_ARGS: --profile coverage
             - task: services-main:search:index
               vars:
-                  CLI_ARGS: >-
-                      prepare --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
-            - task: infra:search:apply
-            - task: services-main:search:index
-              vars:
-                  CLI_ARGS: >-
-                      rebuild-local --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}} --yes
-            - task: services-main:search:index
-              vars:
-                  CLI_ARGS: >-
-                      reconcile --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
-            - task: services-main:search:index
-              vars:
-                  CLI_ARGS: >-
-                      promote --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
+                  CLI_ARGS: check
             - task: services-main:db:seed:search:check
 
     infra:start:
-        desc: Start persistent databases, object storage, Meilisearch, and Sequin state services.
+        desc: Start persistent PostgreSQL and object storage.
         cmds:
-            - docker compose up -d --wait postgres rustfs meilisearch sequin-postgres sequin-redis
+            - docker compose up -d --wait postgres rustfs
 
     infra:up:
         desc: Start persistent infrastructure and idempotently initialize object storage.
@@ -134,52 +125,10 @@ tasks:
             - task: infra:start
             - task: services-main:storage:prepare
 
-    infra:up:search:
-        desc: Alias for the default search-capable infrastructure graph.
-        cmds:
-            - task: infra:up
-
-    infra:search:start:
-        desc: Start the existing Sequin container without forcing a configuration redeploy.
-        cmds:
-            - docker compose start --wait sequin
-
-    infra:search:apply:
-        desc: Recreate Sequin to apply the reviewed configuration after database preparation.
-        cmds:
-            - docker compose up -d --force-recreate sequin
-            - >-
-                for attempt in $(seq 1 60); do
-                    if docker compose exec -T sequin curl --fail --silent --show-error \
-                    http://localhost:7376/health >/dev/null 2>&1;
-                    then exit 0; fi;
-                    sleep 2;
-                done;
-                docker compose logs --tail 200 sequin;
-                exit 1
-
-    infra:search:stop:
-        desc: Stop Sequin before a coordinated PostgreSQL reset.
-        cmds:
-            - docker compose stop --timeout 30 sequin
-
-    infra:search:state:reset:
-        desc: Remove local Sequin metadata whose PostgreSQL object identities become stale after a database reset.
-        internal: true
-        cmds:
-            - >-
-                docker compose exec -T sequin-postgres
-                psql --username sequin --dbname sequin --set ON_ERROR_STOP=1
-                --command 'drop schema if exists sequin_streams cascade;
-                drop schema if exists sequin_config cascade;
-                drop schema if exists public cascade;
-                create schema public;'
-            - docker compose exec -T sequin-redis valkey-cli FLUSHALL
-
     infra:stop:
         desc: Stop persistent development infrastructure without removing it.
         cmds:
-            - docker compose stop --timeout 30 postgres rustfs meilisearch sequin sequin-postgres sequin-redis
+            - docker compose stop --timeout 30 postgres rustfs
 
     infra:down:
         desc: Remove development infrastructure containers and networks while preserving data.
@@ -188,7 +137,7 @@ tasks:
 
     infra:reset:
         desc: Destructively remove and recreate all persistent development infrastructure data.
-        prompt: This deletes the local PostgreSQL, RustFS, and Meilisearch data. Continue?
+        prompt: This deletes the local PostgreSQL and RustFS data. Continue?
         cmds:
             - docker compose --profile migration-test down --timeout 30 --remove-orphans --volumes
             - task: infra:up
@@ -197,17 +146,7 @@ tasks:
                   CLI_ARGS: --yes
             - task: services-main:search:index
               vars:
-                  CLI_ARGS: >-
-                      prepare --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
-            - task: infra:search:apply
-            - task: services-main:search:index
-              vars:
-                  CLI_ARGS: >-
-                      reconcile --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
-            - task: services-main:search:index
-              vars:
-                  CLI_ARGS: >-
-                      promote --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
+                  CLI_ARGS: check
 
     infra:status:
         desc: Show persistent development infrastructure status.
@@ -217,7 +156,7 @@ tasks:
     infra:logs:
         desc: Follow persistent development infrastructure logs.
         cmds:
-            - docker compose logs --follow postgres rustfs meilisearch sequin sequin-postgres sequin-redis
+            - docker compose logs --follow postgres rustfs
 
     local:setup:
         desc: Start infrastructure and install or prepare the local development database.
@@ -228,72 +167,35 @@ tasks:
                   CLI_ARGS: --yes --if-needed
             - task: services-main:search:index
               vars:
-                  CLI_ARGS: >-
-                      prepare --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
-            - task: infra:search:apply
-            - task: services-main:search:index
-              vars:
-                  CLI_ARGS: >-
-                      reconcile --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
-            - task: services-main:search:index
-              vars:
-                  CLI_ARGS: >-
-                      promote --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
+                  CLI_ARGS: check
 
     local:search:rebuild:
-        desc: Repair the local current search generation from PostgreSQL with an explicit full backfill.
-        prompt: This deletes and fully rebuilds the local current Meilisearch index. Continue?
+        desc: Rebuild the canonical local PGroonga indexes from authoritative rows.
+        prompt: This locks the indexed tables while rebuilding both local PGroonga indexes. Continue?
         cmds:
             - task: infra:start
             - task: services-main:db:prepare
-            - task: infra:search:apply
             - task: services-main:search:index
               vars:
-                  CLI_ARGS: >-
-                      rebuild-local --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}} --yes
-            - task: services-main:search:index
-              vars:
-                  CLI_ARGS: >-
-                      reconcile --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
-            - task: services-main:search:index
-              vars:
-                  CLI_ARGS: >-
-                      promote --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
+                  CLI_ARGS: reindex --yes
 
     local:reset:
-        desc: Coordinately reset, seed, and rebuild the local database and search state.
-        prompt: This deletes the local application database and Sequin state, then fully rebuilds its search index. Continue?
+        desc: Reset and seed the local database; its PGroonga indexes are maintained in-database.
+        prompt: This deletes and recreates the local application database. Continue?
         cmds:
             - task: infra:start
-            - task: infra:search:stop
-            - task: infra:search:state:reset
             - task: services-main:db:reset
               vars:
                   CLI_ARGS: --yes
-            - task: infra:search:apply
             - task: services-main:search:index
               vars:
-                  CLI_ARGS: >-
-                      rebuild-local --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}} --yes
-            - task: services-main:search:index
-              vars:
-                  CLI_ARGS: >-
-                      reconcile --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
-            - task: services-main:search:index
-              vars:
-                  CLI_ARGS: >-
-                      promote --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
+                  CLI_ARGS: check
             - task: services-main:db:seed:search:check
 
     dev:
         desc: Run Aspire-managed applications against persistent Compose infrastructure.
         cmds:
             - task: aspire-apphost:run
-
-    dev:search:
-        desc: Alias for the default search-capable Aspire topology.
-        cmds:
-            - task: aspire-apphost:run:search
 
     dev:stop:
         desc: Stop the Aspire-managed application processes; keep Compose infrastructure running.

@@ -114,41 +114,24 @@ export const env = createEnv({
 			.default(300_000),
 		IMAGE_ASSET_CLEANUP_BATCH_SIZE: z.coerce.number().int().min(1).max(500).default(100),
 		API_QUOTA_CLEANUP_INTERVAL_MS: z.coerce.number().int().min(60_000).default(3_600_000),
-		MEILISEARCH_URL: origin.optional(),
-		MEILISEARCH_QUERY_KEY: z.string().min(16).optional(),
-		MEILISEARCH_RECONCILER_KEY: z.string().min(16).optional(),
-		SEQUIN_URL: origin.optional(),
-		SEQUIN_API_TOKEN: z.string().min(16).optional(),
-		SEARCH_CANDIDATE_BATCH_SIZE: z.coerce
+		SEARCH_STATEMENT_TIMEOUT_MS: z.coerce
 			.number()
 			.int()
-			.min(20)
-			.max(WorkPolicy.search.maxCandidateBatchSize)
-			.default(WorkPolicy.search.candidateBatchSize),
+			.min(100)
+			.max(WorkPolicy.search.statementTimeoutCeilingMs)
+			.default(WorkPolicy.search.statementTimeoutMs),
 		SEARCH_CANDIDATE_SCAN_LIMIT: z.coerce
 			.number()
 			.int()
-			.min(100)
+			.min(WorkPolicy.search.maxPageSize + 1)
 			.max(WorkPolicy.search.maxCandidateScanCeiling)
 			.default(WorkPolicy.search.maxCandidateScan),
-		SEARCH_CANDIDATE_MAX_ROUNDS: z.coerce
-			.number()
-			.int()
-			.min(1)
-			.max(WorkPolicy.search.maxCandidateRoundsCeiling)
-			.default(WorkPolicy.search.maxCandidateRounds),
-		SEARCH_CANDIDATE_TIME_BUDGET_MS: z.coerce
+		SEARCH_FACET_SCAN_LIMIT: z.coerce
 			.number()
 			.int()
 			.min(100)
-			.max(WorkPolicy.search.candidateDeadlineCeilingMs)
-			.default(WorkPolicy.search.candidateDeadlineMs),
-		SEARCH_FACET_CANDIDATE_SCAN_LIMIT: z.coerce
-			.number()
-			.int()
-			.min(100)
-			.max(WorkPolicy.search.maxFacetCandidateScanCeiling)
-			.default(WorkPolicy.search.maxFacetCandidateScan),
+			.max(WorkPolicy.search.maxFacetScanCeiling)
+			.default(WorkPolicy.search.maxFacetScan),
 		RECOMMENDATION_REFRESH_INTERVAL_MS: z.coerce.number().int().min(60_000).default(300_000),
 		WORKER_HEALTH_HOST: z.string().min(1).default("127.0.0.1"),
 		WORKER_HEALTH_PORT: z.coerce.number().int().min(1).max(65_535).default(3002),

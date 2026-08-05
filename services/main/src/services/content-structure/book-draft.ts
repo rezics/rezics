@@ -22,7 +22,6 @@ import { ContentStructureInvalid, ContentStructureNotFound } from "./errors";
 import { mutateContentStructureWithHistory } from "./history";
 import { loadContentStructureSnapshot } from "./storage";
 import {
-	newBookDraftUnitVisibility,
 	planBookContentStructureDraft,
 	type AttachedBookDraftNode,
 	type BookDraftNode,
@@ -55,7 +54,7 @@ async function createBookDraftContentUnit(
 	const created = await insertUnit(tx, {
 		kind: isChapter ? "post" : "label",
 		status: published ? "published" : "draft",
-		visibility: newBookDraftUnitVisibility(input.node.contentKind),
+		visibility: "public",
 		publishedAt: published ? new Date() : null,
 		statusActor: { kind: "profile", profileId: input.actorProfileId },
 	});

@@ -7,3 +7,8 @@ output "s3_endpoint" {
   description = "Value for the backend S3_ENDPOINT environment variable."
   value       = "https://${var.cloudflare_account_id}.r2.cloudflarestorage.com"
 }
+
+output "backup_bucket_name" {
+  description = "Dedicated private PostgreSQL backup bucket for scoped uploader/reader tokens."
+  value       = cloudflare_r2_bucket.postgres_backups.name
+}

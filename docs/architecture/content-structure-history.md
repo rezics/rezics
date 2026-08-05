@@ -241,25 +241,13 @@ ranking, use snapshot-bound cursors, and return every Score attached to each sel
 Review Feed items carry `scores`; other Post item variants do not expose an always-empty Score
 field.
 
-## Meilisearch plus PostgreSQL
+## PostgreSQL and PGroonga
 
-Meilisearch is the ranked full-text candidate generator. PostgreSQL is the authority for access,
-relationships, current lifecycle state, and residual predicates:
-
-1. compile safe push-down filters into Meilisearch so candidates remain a superset;
-2. request bounded batches containing candidate UUID, rank, and projection revision;
-3. join candidates to `search_unit_projection_source` and require the PostgreSQL revision to equal
-   the indexed candidate revision;
-4. apply authorization and relationship predicates in PostgreSQL;
-5. preserve Meilisearch order with candidate ordinality;
-6. use the same revision-checked candidate relation when PostgreSQL computes authorized facets;
-7. continue bounded over-fetch rounds until the page fills, the index exhausts, or the scan budget
-   is reached;
-8. encode generation, request hash, page size, and per-category offsets in an opaque cursor.
-
-Never send a large candidate list to PostgreSQL with an unordered `IN` clause, and never trust an
-index hit as authorization. Meilisearch documents filter syntax and filterable attributes here:
-[Meilisearch filters](https://www.meilisearch.com/docs/learn/filtering_and_sorting/filter_expression_reference).
+Current localization text is indexed in its authoritative PostgreSQL table. A validated Search
+and Filter AST compiles to one bounded SQL query that combines PGroonga text predicates with
+lifecycle, relationship, and viewer-authorization conditions. Stable sort values plus Unit ID
+form the keyset boundary, and one deterministic localization card is selected per Unit. The index
+contains all current localizations; an index hit is never an authorization grant.
 
 ## Tree and storage invariants
 

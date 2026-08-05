@@ -6,8 +6,8 @@ Production has independent release boundaries:
 - `apps/about` keeps its independent Cloudflare Pages release path;
 - the API is a two-allocation Nomad service;
 - the background worker is a separate one-allocation Nomad service;
-- database migration and projection are separate batch operations;
-- stateful PostgreSQL, Meilisearch, Sequin, and Valkey jobs are outside the
+- database migration and derived-data maintenance are separate batch operations;
+- stateful PostgreSQL and its scheduled logical-backup/restore-drill jobs are outside the
   application release graph;
 - Outline is an unrelated team service and must not be stopped, migrated,
   reconfigured, or purged by REZICS delivery.
@@ -58,7 +58,7 @@ The dependency order is:
    immutable digest references;
 3. database preflight, migration, privilege reconciliation, and verification;
 4. independent API and worker rollouts;
-5. explicit derived-data projection;
+5. explicit derived-data maintenance and PGroonga index health verification;
 6. web build, Cloudflare version-override verification, and promotion.
 
 Unchanged components are skipped. A database change conservatively invalidates
@@ -88,12 +88,14 @@ in an application or build container.
 Nomad Variables are encrypted in Nomad state. Workload-associated policies
 expose only:
 
-| Namespace        | Path                  | Consumer                          |
-| ---------------- | --------------------- | --------------------------------- |
-| `rezics`         | `application/runtime` | API and worker runtime tasks      |
-| `rezics`         | `database/operations` | root/operator installation source |
-| `rezics-release` | `release/database`    | database and projection tasks     |
-| `rezics-release` | `release/config`      | web release task                  |
+| Namespace               | Path                       | Consumer                          |
+| ----------------------- | -------------------------- | --------------------------------- |
+| `rezics`                | `application/runtime`      | API and worker runtime tasks      |
+| `rezics`                | `database/operations`      | root/operator installation source |
+| `rezics-release`        | `release/database`         | database and maintenance tasks    |
+| `rezics-release`        | `release/config`           | web release task                  |
+| `rezics-infrastructure` | `database/backup-uploader` | scheduled logical backup only     |
+| `rezics-infrastructure` | `database/backup-reader`   | isolated restore drill only       |
 
 The reconciler copies the existing `database/operations` items into
 `release/database` without printing them. API and worker receive
@@ -101,7 +103,8 @@ The reconciler copies the existing `database/operations` items into
 receive the administrative connection. Only the web task receives the scoped
 Cloudflare Worker token and public Turnstile site key. The temporary full-access
 Cloudflare token must never be installed in NixOS, Nomad, GitHub, or runtime
-configuration.
+configuration. Backup credentials belong to a dedicated private R2 bucket and are never copied
+into an application or release Variable.
 
 See the [Nomad Variables access model](https://developer.hashicorp.com/nomad/docs/concepts/variables)
 and [workload identity model](https://developer.hashicorp.com/nomad/docs/concepts/workload-identity).
@@ -116,8 +119,8 @@ structures first; destructive cleanup belongs in a later release after the old
 application version can no longer run. Database migrations are forward
 operations and are not automatically reversed.
 
-Projection is a distinct job so it is independently observable and resumable.
-If database work fails, API, worker, projection, and web promotion do not run.
+Derived-data maintenance is a distinct job so it is independently observable and resumable.
+If database work fails, API, worker, maintenance, and web promotion do not run.
 Outline uses its existing independent database configuration and is never part
 of these operations.
 
@@ -126,23 +129,17 @@ of these operations.
 The `20260801000000_v1_baseline.sql` migration is the first supported database
 contract and is intentionally install-only. Databases created during the
 pre-release test period are not upgrade sources: archive any evidence that must
-be retained, stop application and Sequin writers, and recreate the REZICS
+be retained, stop application writers, and recreate the REZICS
 database before installing v1.0.0. Do not dispatch the routine rolling release
 graph against a database that recorded an earlier checksum for this baseline.
 
 For the v1.0.0 cutover, apply the stateful PostgreSQL jobspec first and wait for
 PostgreSQL readiness, then use `bootstrap-production.sh --confirm-empty-database`.
-The bootstrap installs the database, verifies its runtime settings, creates and
-promotes the dated v1 search generation, applies Sequin, and only then starts
-API and worker traffic. The production verification job fails closed unless
-`max_slot_wal_keep_size` is at least 32GB, `pg_stat_statements` is preloaded and
-installed, and every logical replication slot has a recoverable WAL status.
-
-The 32GB setting is a retention ceiling per replication slot, not reserved disk
-space and not a substitute for capacity planning. Alert on
-`pg_replication_slots.wal_status`, shrinking `safe_wal_size`, filesystem free
-space, and Sequin lag. A slot that reaches `unreserved` or `lost` must be
-repaired and its projection reconciled before application promotion.
+The bootstrap installs the database, verifies PostgreSQL 18.4, PGroonga 4.0.8,
+`approx_count` 1.0, the required preload settings and canonical indexes, and only then starts API
+and worker traffic. No v1 workload owns a logical CDC slot. The dedicated backup and isolated
+restore jobs are installed with the stateful topology but do not run until their independently
+scoped R2 Variables exist.
 
 ## Cloudflare Worker release
 
@@ -173,8 +170,9 @@ Cloudflare Worker version. Never reverse a successful database migration merely
 to roll back application code. If a migration fails, repair forward before
 restarting release.
 
-The current installation is a single host and is not highly available. Its
-stateful services have no application-managed backup or point-in-time recovery
-workflow. Outline data preservation means leaving its existing allocation,
+The current installation is a single host and is not highly available. PostgreSQL has a daily
+complete logical-backup job and weekly complete isolated restore drill documented in
+[PostgreSQL backup and recovery](./postgresql-backup-recovery.md); v1 deliberately makes no PITR
+claim. Outline data preservation means leaving its existing allocation,
 database, volumes, and object storage untouched; it does not authorize deleting
 or recreating them.

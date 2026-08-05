@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { and, asc, count, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -108,6 +108,7 @@ const ReviewListCursor = t.Object(
 		lastRankValue: t.Number(),
 		lastCreatedAt: t.String({ format: "date-time" }),
 		lastId: Uuid,
+		consumed: t.Integer({ minimum: 1 }),
 	},
 	{ additionalProperties: false },
 );
@@ -227,36 +228,34 @@ export default new Elysia()
 									),
 								)
 							: undefined;
-					const [ranked, [total]] = await Promise.all([
-						database
-							.select({
-								id: unit.id,
-								subjectId: post.subjectUnitId,
-								realmId: getFeedCandidateRealmIdExpression(
-									rankingViewer,
-									scope.realmIds,
-								),
-								rankValue,
-								createdAt: unit.createdAt,
-							})
-							.from(unit)
-							.leftJoin(post, eq(post.id, unit.id))
-							.leftJoin(recommendationUnitStat, snapshotJoin)
-							.where(
-								and(
-									getFeedEligibilityCondition(rankingViewer, scope, asOf),
-									cursorCondition,
-								),
-							)
-							.orderBy(desc(rankValue), desc(unit.createdAt), desc(unit.id))
-							.limit(limit + 1),
-						database
-							.select({ value: count() })
-							.from(unit)
-							.leftJoin(post, eq(post.id, unit.id))
-							.where(getFeedEligibilityCondition(rankingViewer, scope, asOf)),
-					]);
+					const ranked = await database
+						.select({
+							id: unit.id,
+							subjectId: post.subjectUnitId,
+							realmId: getFeedCandidateRealmIdExpression(
+								rankingViewer,
+								scope.realmIds,
+							),
+							rankValue,
+							createdAt: unit.createdAt,
+						})
+						.from(unit)
+						.leftJoin(post, eq(post.id, unit.id))
+						.leftJoin(recommendationUnitStat, snapshotJoin)
+						.where(
+							and(
+								getFeedEligibilityCondition(rankingViewer, scope, asOf),
+								cursorCondition,
+							),
+						)
+						.orderBy(desc(rankValue), desc(unit.createdAt), desc(unit.id))
+						.limit(limit + 1);
 					const page = ranked.slice(0, limit);
+					const consumed = (cursor?.consumed ?? 0) + page.length;
+					const totalCount =
+						ranked.length <= limit
+							? ({ kind: "exact", value: consumed } as const)
+							: ({ kind: "lower-bound", value: consumed + 1 } as const);
 					const hydrated = await hydrateFeedItems(page, rankingViewer, scope, asOf, {
 						kind: "contextual",
 					});
@@ -279,7 +278,7 @@ export default new Elysia()
 						scoreFilter.status === "present" ? scoreFilter.realmId : null;
 					const scores = scoreFilter.status === "present" ? scoreFilter.values : [];
 					return {
-						totalCount: toSafeInteger(total?.value ?? 0, "review count"),
+						totalCount,
 						nextCursor:
 							ranked.length > limit && last
 								? encodeReviewListCursor({
@@ -298,6 +297,7 @@ export default new Elysia()
 										lastRankValue: last.rankValue,
 										lastCreatedAt: last.createdAt.toISOString(),
 										lastId: last.id,
+										consumed,
 									})
 								: null,
 						items: hydrated.flatMap((item) => {

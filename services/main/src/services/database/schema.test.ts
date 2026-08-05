@@ -89,10 +89,7 @@ import {
 	unitStructureMember,
 	unitStructureVote,
 	UnitStructureKindValues,
-	searchIndexGeneration,
 	sharedSearchQuery,
-	searchRevisionProjectionSource,
-	searchUnitProjectionSource,
 	unitSlugAddress,
 	unitRevisionSlot,
 	unitStatusEvent,
@@ -202,22 +199,6 @@ describe("database schema contracts", () => {
 		);
 		expect(table.foreignKeys.map((key) => key.getName())).toContain(
 			"shared_search_query_created_by_profile_id_profile_id_fk",
-		);
-	});
-
-	it("owns independent current/history projection ledgers and generation pointers", () => {
-		expect(getTableConfig(searchUnitProjectionSource).name).toBe(
-			"search_unit_projection_source",
-		);
-		expect(getTableConfig(searchRevisionProjectionSource).name).toBe(
-			"search_revision_projection_source",
-		);
-		const generation = getTableConfig(searchIndexGeneration);
-		expect(generation.indexes.map((index) => index.config.name)).toEqual(
-			expect.arrayContaining([
-				"search_index_generation_active_projection_key",
-				"search_index_generation_index_uid_key",
-			]),
 		);
 	});
 

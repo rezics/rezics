@@ -11,7 +11,6 @@ import {
 	type SearchScalar,
 } from "@rezics/filter";
 import { canonicalUnitPredicate } from "@rezics/filter";
-import { FontAwesomeProvider } from "@rezics/avatar";
 import { isContentLanguage, type ContentLanguage } from "@rezics/i18n";
 import { getActiveObservability } from "@rezics/observability";
 
@@ -38,7 +37,8 @@ import {
 	realmUnit,
 	software,
 	softwareRequirement,
-	searchUnitProjectionSource,
+	recommendationSnapshot,
+	recommendationUnitStat,
 	unit,
 	unitOwnership,
 	unitLocalization,
@@ -51,15 +51,11 @@ import {
 import { env } from "../config";
 import type { SearchCountResult } from "../counts/contract";
 import {
-	firstUnitLocalizationTitle,
-	localizationLanguageOrder,
-	resolvedUnitLocalizationImageAssetId,
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationSummary,
 	resolvedUnitLocalizationTitle,
 } from "../units/localization";
 import { InvalidSearch } from "./errors";
-import { compileCandidateDomainFilter } from "./candidate-domain";
 import { CurrentSearchUnitKindsByCategory } from "./contracts";
 import {
 	getCurrentSearchFieldDefinition,
@@ -68,13 +64,6 @@ import {
 	searchFilterValues,
 	supportsCurrentSearchField,
 } from "./field-registry";
-import { getActiveSearchGeneration } from "./generation";
-import {
-	createCandidateSearchContext,
-	searchCandidates,
-	type CandidateQueryBranch,
-	type CandidateSearchContext,
-} from "./meilisearch";
 import {
 	assertSearchExpression,
 	combineSearchExpressions,
@@ -82,6 +71,7 @@ import {
 	parseSearchCursor,
 	readSearchExpressionLanguageBoundary,
 	type GroupedSearchCursorToken,
+	type SearchKeysetPosition,
 	type SearchExpression,
 } from "./query";
 import {
@@ -89,13 +79,13 @@ import {
 	type DomainSearchRequest,
 	type SearchCategory,
 	type SearchHit,
+	type SearchSort,
 } from "./schema";
 import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
 import { compileUnitPredicateSql } from "../filter/sql";
 
 const subjectUnit = alias(unit, "subject_unit");
-const searchVariantRelationship = alias(unitVariant, "search_variant_relationship");
-const searchMainUnit = alias(unit, "search_main_unit");
+const searchLocalization = alias(unitLocalization, "search_localization");
 const facetLocalization = alias(unitLocalization, "facet_unit_localization");
 const facetUnitTag = alias(unitEffectiveTag, "facet_unit_tag");
 const facetRealmUnit = alias(realmUnit, "facet_realm_unit");
@@ -128,24 +118,6 @@ function toUuidArray(values: readonly string[]): SQL {
 		values.map((value) => sql`${value}::uuid`),
 		sql`, `,
 	)}]::uuid[]`;
-}
-
-function toIntegerArray(values: readonly number[]): SQL {
-	if (values.some((value) => !Number.isSafeInteger(value) || value < 1))
-		throw new TypeError("Search candidate positions must be positive integers");
-	return sql`ARRAY[${sql.join(
-		values.map((value) => sql`${value}`),
-		sql`, `,
-	)}]::integer[]`;
-}
-
-function toBigIntArray(values: readonly number[]): SQL {
-	if (values.some((value) => !Number.isSafeInteger(value) || value < 1))
-		throw new TypeError("Search candidate revisions must be positive safe integers");
-	return sql`ARRAY[${sql.join(
-		values.map((value) => sql`${value}::bigint`),
-		sql`, `,
-	)}]::bigint[]`;
 }
 
 function validateRequest(category: SearchCategory, request: DomainSearchRequest): void {
@@ -807,36 +779,310 @@ interface SearchDomainScanResult<Hit extends SearchIdentifier> {
 	readonly nextOffset: number;
 	readonly exhausted: boolean;
 	readonly nextCursor?: GroupedSearchCursorToken;
+	readonly nextPosition?: SearchKeysetPosition;
 	readonly limit: number;
 	readonly processingTimeMs: number;
 }
 
-async function resolveCandidateContext(
-	profileId: string | undefined,
-	context: CandidateSearchContext | undefined,
-): Promise<CandidateSearchContext> {
-	if (context) return context;
-	const generation = await getActiveSearchGeneration("current");
-	return createCandidateSearchContext(generation, profileId);
+interface SearchCandidateRow extends Record<string, unknown> {
+	readonly id: string;
+	readonly primaryValue: string;
+	readonly secondaryValue: string;
+}
+
+interface SearchCandidatePage {
+	readonly rows: readonly SearchCandidateRow[];
+	readonly hasMore: boolean;
+	readonly scanTruncated: boolean;
+}
+
+interface SearchCandidateDatabaseRow extends Record<string, unknown> {
+	readonly id: string | null;
+	readonly primaryValue: string | null;
+	readonly secondaryValue: string | null;
+	readonly scanTruncated: boolean;
+}
+
+function readSearchCandidateRows(
+	rows: readonly SearchCandidateDatabaseRow[],
+): readonly SearchCandidateRow[] {
+	const candidates: SearchCandidateRow[] = [];
+	for (const row of rows) {
+		if (row.id === null && row.primaryValue === null && row.secondaryValue === null) continue;
+		if (
+			typeof row.id !== "string" ||
+			typeof row.primaryValue !== "string" ||
+			typeof row.secondaryValue !== "string"
+		)
+			throw new Error("PostgreSQL returned an invalid Search candidate row");
+		candidates.push({
+			id: row.id,
+			primaryValue: row.primaryValue,
+			secondaryValue: row.secondaryValue,
+		});
+	}
+	return candidates;
+}
+
+interface PreparedSearchBranch {
+	readonly category: SearchCategory;
+	readonly conditions: readonly SQL[];
+}
+
+interface SearchSortSql {
+	readonly primary: SQL;
+	readonly secondary: SQL;
+	readonly direction: "asc" | "desc";
+}
+
+function currentSearchTextCondition(query: string): SQL {
+	if (!query) return sql`true`;
+	return sql`(
+		public.current_search_metadata_v1(
+			${searchLocalization.title},
+			${searchLocalization.summary},
+			${searchLocalization.description}
+		) &@~ ${query}
+		or (
+			${searchLocalization.contentStatus} = 'published'::content_status
+			and public.current_search_text_v1(${searchLocalization.content}) &@~ ${query}
+		)
+	)`;
+}
+
+function currentSearchSort(sort: SearchSort, query: string): SearchSortSql {
+	if (sort === "relevance") {
+		if (!query) throw new InvalidSearch("relevance requires a text query");
+		return {
+			primary: sql`pgroonga_score(search_localization.tableoid, search_localization.ctid)::numeric`,
+			secondary: sql`extract(epoch from ${unit.updatedAt})::numeric`,
+			direction: "desc",
+		};
+	}
+	if (sort === "best")
+		return {
+			primary: sql`coalesce((
+				select ${recommendationUnitStat.engagement24h}
+				from ${recommendationUnitStat}
+				inner join ${recommendationSnapshot}
+					on ${recommendationSnapshot.id} = ${recommendationUnitStat.snapshotId}
+					and ${recommendationSnapshot.active} = true
+				where ${recommendationUnitStat.unitId} = ${unit.id}
+					and ${recommendationUnitStat.contextRealmId} is null
+				limit 1
+			), 0)::numeric`,
+			secondary: sql`extract(epoch from ${unit.updatedAt})::numeric`,
+			direction: "desc",
+		};
+	const timestampSorts: Partial<Record<SearchSort, SQL>> = {
+		"createdAt:asc": sql`extract(epoch from ${unit.createdAt})::numeric`,
+		"createdAt:desc": sql`extract(epoch from ${unit.createdAt})::numeric`,
+		"updatedAt:asc": sql`extract(epoch from ${unit.updatedAt})::numeric`,
+		"updatedAt:desc": sql`extract(epoch from ${unit.updatedAt})::numeric`,
+		"publishedAt:asc": sql`coalesce(extract(epoch from ${unit.publishedAt})::numeric, 1e100::numeric)`,
+		"publishedAt:desc": sql`coalesce(extract(epoch from ${unit.publishedAt})::numeric, -1e100::numeric)`,
+		"closesAt:asc": sql`coalesce(extract(epoch from ${poll.closesAt})::numeric, 1e100::numeric)`,
+		"closesAt:desc": sql`coalesce(extract(epoch from ${poll.closesAt})::numeric, -1e100::numeric)`,
+	};
+	const timestamp = timestampSorts[sort];
+	if (timestamp)
+		return {
+			primary: timestamp,
+			secondary: sql`0::numeric`,
+			direction: sort.endsWith(":asc") ? "asc" : "desc",
+		};
+	if (sort === "followerCount:asc" || sort === "followerCount:desc")
+		return {
+			primary: sql`coalesce(${unitFollowStat.followerCount}, 0)::numeric`,
+			secondary: sql`0::numeric`,
+			direction: sort.endsWith(":asc") ? "asc" : "desc",
+		};
+	if (sort === "replyCount:asc" || sort === "replyCount:desc")
+		return {
+			primary: sql`coalesce(case when ${post.kind} = 'reply' then ${postReplyStat.undeletedDirectCount} else ${postReplyStat.undeletedDescendantCount} end, 0)::numeric`,
+			secondary: sql`0::numeric`,
+			direction: sort.endsWith(":asc") ? "asc" : "desc",
+		};
+	throw new InvalidSearch(`${sort} has no PostgreSQL search ordering`);
+}
+
+function keysetCondition(sort: SearchSortSql, position: SearchKeysetPosition | undefined): SQL {
+	if (!position) return sql`true`;
+	if (position.primary === null || position.secondary === null)
+		throw new InvalidSearch("Search cursor is missing a sort value");
+	const primary = sql`${position.primary}::numeric`;
+	const secondary = sql`${position.secondary}::numeric`;
+	return sort.direction === "asc"
+		? sql`(
+			primary_order > ${primary}
+			or (primary_order = ${primary} and secondary_order > ${secondary})
+			or (primary_order = ${primary} and secondary_order = ${secondary} and unit_id > ${position.unitId}::uuid)
+		)`
+		: sql`(
+			primary_order < ${primary}
+			or (primary_order = ${primary} and secondary_order < ${secondary})
+			or (primary_order = ${primary} and secondary_order = ${secondary} and unit_id > ${position.unitId}::uuid)
+		)`;
+}
+
+async function searchCandidatePage(input: {
+	readonly branches: readonly PreparedSearchBranch[];
+	readonly query: string;
+	readonly sort: SearchSort;
+	readonly position?: SearchKeysetPosition;
+	readonly limit: number;
+	readonly languageBoundary: readonly ContentLanguage[];
+}): Promise<SearchCandidatePage> {
+	if (!input.branches.length) return { rows: [], hasMore: false, scanTruncated: false };
+	const sort = currentSearchSort(input.sort, input.query);
+	const branchConditions = input.branches.map(
+		(branch) => sql`(${sql.join([...branch.conditions], sql` and `)})`,
+	);
+	const languageCondition = input.languageBoundary.length
+		? inArray(searchLocalization.language, input.languageBoundary)
+		: sql`true`;
+	const orderDirection = sort.direction === "asc" ? sql`asc` : sql`desc`;
+	const result = await database.transaction(async (tx) => {
+		await tx.execute(
+			sql`select set_config('statement_timeout', ${String(env.SEARCH_STATEMENT_TIMEOUT_MS)}, true)`,
+		);
+		return tx.execute<SearchCandidateDatabaseRow>(sql`
+			with candidate_localizations as materialized (
+				select ${searchLocalization}.tableoid as tableoid,
+					${searchLocalization}.ctid as ctid,
+					${searchLocalization}.*
+				from ${unitLocalization} as ${searchLocalization}
+				where ${currentSearchTextCondition(input.query)}
+					and ${languageCondition}
+				limit ${env.SEARCH_CANDIDATE_SCAN_LIMIT + 1}
+			), bounded_candidate_localizations as materialized (
+				select * from candidate_localizations
+				limit ${env.SEARCH_CANDIDATE_SCAN_LIMIT}
+			), candidate_status as (
+				select exists (
+					select 1 from candidate_localizations
+					offset ${env.SEARCH_CANDIDATE_SCAN_LIMIT}
+				) as scan_truncated
+			), matched_localizations as (
+				select distinct on (${unit.id})
+					${unit.id} as unit_id,
+					${sort.primary} as primary_order,
+					${sort.secondary} as secondary_order
+				from bounded_candidate_localizations as ${searchLocalization}
+				inner join lateral (
+					select candidate_unit.*
+					from ${unit} candidate_unit
+					where candidate_unit.id = ${searchLocalization.unitId}
+					offset 0
+				) as ${unit} on true
+				left join ${profile} on ${profile.id} = ${unit.id}
+				left join ${entity} on ${entity.id} = ${unit.id}
+				left join ${post} on ${post.id} = ${unit.id}
+				left join ${postReply} on ${postReply.postId} = ${unit.id}
+				left join ${postReplyStat} on ${postReplyStat.postId} = ${unit.id}
+				left join ${unitFollowStat} on ${unitFollowStat.unitId} = ${unit.id}
+				left join ${unit} as ${subjectUnit} on ${subjectUnit.id} = ${post.subjectUnitId}
+				left join ${realm} on ${realm.id} = ${unit.id}
+				left join ${collection} on ${collection.id} = ${unit.id}
+				left join ${poll} on ${poll.id} = ${unit.id}
+				left join ${book} on ${book.id} = ${unit.id}
+				left join ${media} on ${media.id} = ${unit.id}
+				left join ${software} on ${software.id} = ${unit.id}
+				where (${sql.join(branchConditions, sql` or `)})
+				order by ${unit.id}, ${sort.primary} desc,
+					${searchLocalization.position}, ${searchLocalization.language}
+			), page as (
+				select unit_id, primary_order, secondary_order
+				from matched_localizations
+				where ${keysetCondition(sort, input.position)}
+				order by primary_order ${orderDirection}, secondary_order ${orderDirection}, unit_id asc
+				limit ${input.limit + 1}
+			)
+			select page.unit_id::text as id,
+				page.primary_order::text as "primaryValue",
+				page.secondary_order::text as "secondaryValue",
+				candidate_status.scan_truncated as "scanTruncated"
+			from candidate_status
+			left join page on true
+			order by page.primary_order ${orderDirection} nulls last,
+				page.secondary_order ${orderDirection} nulls last,
+				page.unit_id asc nulls last
+		`);
+	});
+	const candidates = readSearchCandidateRows(result.rows);
+	return {
+		rows: candidates.slice(0, input.limit),
+		hasMore: candidates.length > input.limit,
+		scanTruncated: result.rows[0]?.scanTruncated ?? false,
+	};
+}
+
+async function hydrateSearchHits(
+	category: SearchCategory,
+	unitIds: readonly string[],
+	request: DomainSearchRequest,
+	presentationLanguages: readonly ContentLanguage[],
+): Promise<SearchHitWithoutSlugAddress[]> {
+	if (!unitIds.length) return [];
+	const hitType = category === "posts" ? sql`${post.kind}::text` : sql`${unit.kind}::text`;
+	const result = await database.execute<{ hit: SearchHitWithoutSlugAddress }>(sql`
+		select jsonb_build_object(
+			'id', ${unit.id},
+			'category', ${category}::text,
+			'kind', ${hitType},
+			'language', ${resolvedUnitLocalizationLanguage(
+				unit.id,
+				request.localizationLanguages,
+				presentationLanguages,
+			)},
+			'title', ${resolvedUnitLocalizationTitle(
+				unit.id,
+				request.localizationLanguages,
+				presentationLanguages,
+			)},
+			'summary', ${resolvedUnitLocalizationSummary(
+				unit.id,
+				request.localizationLanguages,
+				presentationLanguages,
+			)},
+			'titles', coalesce((
+				select jsonb_agg(localization.title order by localization.position, localization.language)
+					filter (where localization.title is not null)
+				from ${unitLocalization} localization
+				where localization.unit_id = ${unit.id}
+			), '[]'::jsonb),
+			'summaries', coalesce((
+				select jsonb_agg(localization.summary order by localization.position, localization.language)
+					filter (where localization.summary is not null)
+				from ${unitLocalization} localization
+				where localization.unit_id = ${unit.id}
+			), '[]'::jsonb)
+		) as hit
+		from ${unit}
+		left join ${post} on ${post.id} = ${unit.id}
+		where ${unit.id} = any(${toUuidArray(unitIds)})
+	`);
+	const byId = new Map(result.rows.map(({ hit }) => [hit.id, hit]));
+	return unitIds.flatMap((id) => {
+		const hit = byId.get(id);
+		return hit ? [hit] : [];
+	});
 }
 
 function searchDomainScan(
 	category: SearchCategory,
 	request: DomainSearchRequest,
 	presentation: "hits",
-	candidateContext?: CandidateSearchContext,
 ): Promise<SearchDomainScanResult<SearchHitWithoutSlugAddress>>;
 function searchDomainScan(
 	category: SearchCategory,
 	request: DomainSearchRequest,
 	presentation: "identifiers",
-	candidateContext?: CandidateSearchContext,
 ): Promise<SearchDomainScanResult<SearchIdentifier>>;
 async function searchDomainScan(
 	category: SearchCategory,
 	request: DomainSearchRequest,
 	presentation: "hits" | "identifiers",
-	providedCandidateContext?: CandidateSearchContext,
 ): Promise<
 	SearchDomainScanResult<SearchHitWithoutSlugAddress> | SearchDomainScanResult<SearchIdentifier>
 > {
@@ -852,11 +1098,6 @@ async function searchDomainScan(
 	];
 	const conditions = buildSearchConditions(category, request, searchExpression);
 	const sort = request.sort ?? (request.query?.trim() ? "relevance" : "best");
-	const candidateContext = await resolveCandidateContext(
-		request.profileId,
-		providedCandidateContext,
-	);
-	const domainCandidateFilter = compileCandidateDomainFilter(request.domainFilter);
 	const limit = request.limit ?? 20;
 	const requestHash = createHash("sha256")
 		.update(
@@ -875,7 +1116,10 @@ async function searchDomainScan(
 			}),
 		)
 		.digest("hex");
-	let cursorOffset: number | undefined;
+	let cursorSeen = request.searchSeen ?? request.offset ?? 0;
+	let cursorPosition: SearchKeysetPosition | undefined = request.searchPosition;
+	if (request.offset && !request.cursor)
+		throw new InvalidSearch("Offset pagination is not supported; use the Search cursor");
 	if (request.cursor) {
 		let cursor: ReturnType<typeof parseSearchCursor>;
 		try {
@@ -885,321 +1129,92 @@ async function searchDomainScan(
 				cause instanceof Error ? cause.message : "Invalid Search cursor",
 			);
 		}
-		if (
-			cursor.generationId !== candidateContext.generationId ||
-			cursor.requestHash !== requestHash ||
-			cursor.pageSize !== limit
-		)
-			throw new InvalidSearch("Search cursor does not match this generation or request");
-		cursorOffset = cursor.categories[category]?.offset;
+		if (cursor.requestHash !== requestHash || cursor.pageSize !== limit)
+			throw new InvalidSearch("Search cursor does not match this request");
+		const categoryState = cursor.categories[category];
+		cursorSeen = categoryState?.seen ?? 0;
+		cursorPosition = categoryState?.position;
 	}
-	const initialOffset = request.offset ?? cursorOffset ?? 0;
-	const hitType = category === "posts" ? sql`${post.kind}::text` : sql`${unit.kind}::text`;
-	const readableSearchMain = getUnitReadCondition(
-		request.profileId,
-		{ discoverableOnly: true },
-		searchMainUnit,
-	);
-	const localizedSearchMainCoverAssetId = resolvedUnitLocalizationImageAssetId(
-		searchMainUnit.id,
-		"cover",
-		request.localizationLanguages,
-	);
-	const hits: SearchHitWithoutSlugAddress[] = [];
-	const identifiers: SearchIdentifier[] = [];
-	const seen = new Set<string>();
-	let authorizedCount = 0;
-	let scanOffset = initialOffset;
-	let exhausted = false;
-	let rounds = 0;
-	let pageBoundaryOffset: number | undefined;
-	const authorizationTarget = limit + 1;
-	const maxCandidateRounds = env.SEARCH_CANDIDATE_MAX_ROUNDS ?? 4;
-	const candidateDeadline = performance.now() + (env.SEARCH_CANDIDATE_TIME_BUDGET_MS ?? 1_500);
-
-	while (
-		!exhausted &&
-		authorizedCount < authorizationTarget &&
-		scanOffset - initialOffset < env.SEARCH_CANDIDATE_SCAN_LIMIT &&
-		rounds < maxCandidateRounds &&
-		performance.now() < candidateDeadline
-	) {
-		const batchLimit = Math.min(
-			env.SEARCH_CANDIDATE_BATCH_SIZE * 2 ** rounds,
-			env.SEARCH_CANDIDATE_SCAN_LIMIT - (scanOffset - initialOffset),
-		);
-		rounds += 1;
-		const [candidateResult] = await searchCandidates([
-			{
-				indexUid: candidateContext.indexUid,
-				accessFilter: candidateContext.accessFilter,
-				domainFilter: domainCandidateFilter,
-				category,
-				query: request.query?.trim() ?? "",
-				offset: scanOffset,
-				limit: batchLimit,
-				expression: searchExpression,
-				sort,
-			},
-		]);
-		if (!candidateResult) throw new Error("Meilisearch omitted a candidate result");
-		const candidateEntries = candidateResult.hits.flatMap((candidate, index) => {
-			const id = candidate.id;
-			if (seen.has(id)) return [];
-			seen.add(id);
-			return [{ id, position: index + 1, revision: candidate.revision }];
-		});
-		const candidateIds = candidateEntries.map((candidate) => candidate.id);
-		const candidatePositions = candidateEntries.map((candidate) => candidate.position);
-		const candidateRevisions = candidateEntries.map((candidate) => candidate.revision);
-		const batchOffset = scanOffset;
-		const remainingAuthorizationTarget = authorizationTarget - authorizedCount;
-		const selectedProjection =
-			presentation === "hits"
-				? sql`(
-			jsonb_build_object(
-				'id', ${unit.id},
-				'category', ${category}::text,
-				'kind', ${hitType},
-				'language', ${resolvedUnitLocalizationLanguage(
-					unit.id,
-					request.localizationLanguages,
+	const page = await searchCandidatePage({
+		branches: [{ category, conditions }],
+		query: request.query?.trim() ?? "",
+		sort,
+		position: cursorPosition,
+		limit,
+		languageBoundary: presentationLanguages,
+	});
+	const identifiers = page.rows.map(({ id }) => ({ id }));
+	const hits =
+		presentation === "hits"
+			? await hydrateSearchHits(
+					category,
+					page.rows.map(({ id }) => id),
+					request,
 					presentationLanguages,
-				)},
-				'title', case when ${category}::text = 'tag-structures' then (
-					select string_agg(
-						coalesce(
-							${resolvedUnitLocalizationTitle(
-								unitStructureMember.memberUnitId,
-								request.localizationLanguages,
-								presentationLanguages,
-							)},
-							${unitStructureMember.memberUnitId}::text
-						),
-						' › ' order by ${unitStructureMember.ordinal}
-					)
-					from ${unitStructureMember}
-					where ${unitStructureMember.structureId} = ${unit.id}
-				) else ${resolvedUnitLocalizationTitle(
-					unit.id,
-					request.localizationLanguages,
-					presentationLanguages,
-				)} end,
-				'summary', ${resolvedUnitLocalizationSummary(
-					unit.id,
-					request.localizationLanguages,
-					presentationLanguages,
-				)},
-				'titles', case when ${category}::text = 'tag-structures' then coalesce((
-					select jsonb_build_array(string_agg(
-						coalesce(${firstUnitLocalizationTitle(unitStructureMember.memberUnitId)},
-							${unitStructureMember.memberUnitId}::text),
-						' › ' order by ${unitStructureMember.ordinal}
-					))
-					from ${unitStructureMember}
-					where ${unitStructureMember.structureId} = ${unit.id}
-				), '[]'::jsonb) else coalesce((
-					SELECT jsonb_agg(${unitLocalization.title} ORDER BY ${unitLocalization.position}, ${unitLocalization.language})
-						FILTER (WHERE ${unitLocalization.title} IS NOT NULL)
-					FROM ${unitLocalization}
-					WHERE ${unitLocalization.unitId} = ${unit.id}
-				), '[]'::jsonb) end,
-				'summaries', coalesce((
-					SELECT jsonb_agg(${unitLocalization.summary} ORDER BY ${unitLocalization.position}, ${unitLocalization.language})
-						FILTER (WHERE ${unitLocalization.summary} IS NOT NULL)
-					FROM ${unitLocalization}
-					WHERE ${unitLocalization.unitId} = ${unit.id}
-				), '[]'::jsonb),
-				'avatar', (
-					SELECT case ${unitLocalization.avatarType}
-						when 'image' then jsonb_build_object(
-							'type', 'image',
-							'image', jsonb_build_object(
-								'id', ${unitLocalization.avatarAssetId},
-								'url', '/image-assets/' || ${unitLocalization.avatarAssetId} || '/presentations/avatar/content'
-							)
-						)
-						when 'emoji' then jsonb_build_object(
-							'type', 'emoji',
-							'emoji', ${unitLocalization.avatarEmoji}
-						)
-						when 'icon' then jsonb_build_object(
-							'type', 'icon',
-							'icon', jsonb_build_object(
-								'provider', ${FontAwesomeProvider}::text,
-								'prefix', ${unitLocalization.avatarIconPrefix},
-								'name', ${unitLocalization.avatarIconName}
-							)
-						)
-					end
-					FROM ${unitLocalization}
-					WHERE ${unitLocalization.unitId} = ${unit.id}
-						AND ${unitLocalization.avatarType} IS NOT NULL
-						AND ${
-							presentationLanguages.length
-								? inArray(unitLocalization.language, presentationLanguages)
-								: sql`true`
-						}
-					ORDER BY
-						${localizationLanguageOrder(unitLocalization.language, request.localizationLanguages)},
-						${unitLocalization.position},
-						${unitLocalization.language}
-					LIMIT 1
 				)
-			)
-			|| case when ${category}::text = 'units' then jsonb_build_object(
-				'variantRole', case
-					when exists (
-						select 1 from ${unitVariant}
-						where ${unitVariant.variantUnitId} = ${unit.id}
-					) then 'variant'
-					when exists (
-						select 1 from ${unitVariant}
-						where ${unitVariant.mainUnitId} = ${unit.id}
-					) then 'main'
-					else 'standalone'
-				end
-			) else '{}'::jsonb end
-			|| case
-				when ${category}::text = 'units'
-					and ${searchVariantRelationship.variantUnitId} is not null
-				then jsonb_build_object(
-					'variantMain', case when ${readableSearchMain} then jsonb_build_object(
-						'state', 'available',
-						'unit', jsonb_build_object(
-							'id', ${searchMainUnit.id},
-							'type', ${searchMainUnit.kind},
-							'language', ${resolvedUnitLocalizationLanguage(searchMainUnit.id, request.localizationLanguages)},
-							'title', ${resolvedUnitLocalizationTitle(searchMainUnit.id, request.localizationLanguages)},
-							'cover', case when ${localizedSearchMainCoverAssetId} is null then null
-								else jsonb_build_object(
-									'id', ${localizedSearchMainCoverAssetId},
-									'url', '/image-assets/' || ${localizedSearchMainCoverAssetId} || '/presentations/cover/content'
-								) end
-						)
-					) else jsonb_build_object('state', 'unavailable') end
-				)
-				else '{}'::jsonb
-			end
-		) AS hit`
-				: sql`${unit.id}::text AS id`;
-		const result = candidateIds.length
-			? await database.execute<{
-					hit?: SearchHitWithoutSlugAddress;
-					id?: string;
-					ordinality: number | string;
-				}>(sql`
-		WITH search_candidate(unit_id, ordinality, revision) AS (
-			SELECT * FROM unnest(
-				${toUuidArray(candidateIds)},
-				${toIntegerArray(candidatePositions)},
-				${toBigIntArray(candidateRevisions)}
-			)
-		)
-		SELECT ${selectedProjection},
-		search_candidate.ordinality
-		FROM search_candidate
-		JOIN ${searchUnitProjectionSource}
-			ON ${searchUnitProjectionSource.unitId} = search_candidate.unit_id
-			AND ${searchUnitProjectionSource.revision} = search_candidate.revision
-		JOIN ${unit} ON ${unit.id} = search_candidate.unit_id
-		LEFT JOIN ${profile} ON ${profile.id} = ${unit.id}
-		LEFT JOIN ${entity} ON ${entity.id} = ${unit.id}
-		LEFT JOIN ${post} ON ${post.id} = ${unit.id}
-		LEFT JOIN ${postReply} ON ${postReply.postId} = ${unit.id}
-		LEFT JOIN ${postReplyStat} ON ${postReplyStat.postId} = ${unit.id}
-		LEFT JOIN ${unitFollowStat} ON ${unitFollowStat.unitId} = ${unit.id}
-		LEFT JOIN ${unit} AS ${subjectUnit} ON ${subjectUnit.id} = ${post.subjectUnitId}
-		LEFT JOIN ${unitVariant} AS ${searchVariantRelationship}
-			ON ${searchVariantRelationship.variantUnitId} = ${unit.id}
-		LEFT JOIN ${unit} AS ${searchMainUnit}
-			ON ${searchMainUnit.id} = ${searchVariantRelationship.mainUnitId}
-		LEFT JOIN ${realm} ON ${realm.id} = ${unit.id}
-		LEFT JOIN ${collection} ON ${collection.id} = ${unit.id}
-		LEFT JOIN ${poll} ON ${poll.id} = ${unit.id}
-		LEFT JOIN ${book} ON ${book.id} = ${unit.id}
-		LEFT JOIN ${media} ON ${media.id} = ${unit.id}
-		LEFT JOIN ${software} ON ${software.id} = ${unit.id}
-		WHERE ${sql.join(conditions, sql` AND `)}
-		ORDER BY search_candidate.ordinality
-		LIMIT ${remainingAuthorizationTarget}
-	`)
-			: { rows: [] };
-		const authorizationMayBeTruncated =
-			result.rows.length === remainingAuthorizationTarget &&
-			candidateIds.length > remainingAuthorizationTarget;
-		authorizedCount += result.rows.length;
-		for (const row of result.rows)
-			if (hits.length + identifiers.length < limit) {
-				if (presentation === "hits") {
-					if (!row.hit) throw new TypeError("PostgreSQL omitted a Search hit projection");
-					hits.push(row.hit);
-				} else {
-					if (!row.id)
-						throw new TypeError("PostgreSQL omitted a Search identifier projection");
-					identifiers.push({ id: row.id });
-				}
-				if (hits.length + identifiers.length === limit) {
-					const ordinality = Number(row.ordinality);
-					if (!Number.isSafeInteger(ordinality) || ordinality < 1)
-						throw new TypeError("PostgreSQL returned invalid candidate ordinality");
-					pageBoundaryOffset = batchOffset + ordinality;
-				}
-			}
-		scanOffset += candidateResult.hits.length;
-		exhausted =
-			!authorizationMayBeTruncated &&
-			(candidateResult.hits.length < batchLimit ||
-				scanOffset >= candidateResult.estimatedTotalHits);
-		if (candidateResult.hits.length === 0) exhausted = true;
-	}
-	const budgetHit =
-		!exhausted &&
-		(scanOffset - initialOffset >= env.SEARCH_CANDIDATE_SCAN_LIMIT ||
-			rounds >= maxCandidateRounds ||
-			performance.now() >= candidateDeadline);
-	const nextOffset =
-		hits.length + identifiers.length === limit &&
-		(authorizedCount > hits.length + identifiers.length || !exhausted)
-			? pageBoundaryOffset
-			: hits.length + identifiers.length < limit && !exhausted
-				? scanOffset
-				: undefined;
+			: [];
+	const seen = cursorSeen + page.rows.length;
+	const last = page.rows.at(-1);
+	const nextPosition =
+		page.hasMore && last
+			? ({
+					primary: last.primaryValue,
+					secondary: last.secondaryValue,
+					unitId: last.id,
+				} satisfies SearchKeysetPosition)
+			: undefined;
+	const lowerBound = page.hasMore || page.scanTruncated;
 	metrics.searchCandidateScan(
 		"current",
-		seen.size,
-		authorizedCount,
-		rounds,
-		budgetHit,
-		!exhausted,
+		page.rows.length,
+		page.rows.length,
+		1,
+		page.scanTruncated,
+		lowerBound,
 	);
 	const common = {
-		total: { kind: exhausted ? "exact" : "lower-bound", value: authorizedCount } as const,
-		offset: initialOffset,
-		nextOffset: nextOffset ?? scanOffset,
-		exhausted: nextOffset === undefined,
-		nextCursor:
-			nextOffset === undefined
-				? undefined
-				: createSearchCursor({
-						version: 1,
-						generationId: candidateContext.generationId,
-						requestHash,
-						pageSize: limit,
-						categories: { [category]: { offset: nextOffset, exhausted: false } },
-					}),
+		total: {
+			kind: lowerBound ? "lower-bound" : "exact",
+			value: seen + (page.hasMore ? 1 : 0),
+		} as const,
+		offset: cursorSeen,
+		nextOffset: seen,
+		exhausted: !page.hasMore,
+		nextPosition,
+		nextCursor: !nextPosition
+			? undefined
+			: createSearchCursor({
+					version: 1,
+					requestHash,
+					pageSize: limit,
+					categories: {
+						[category]: {
+							seen,
+							exhausted: false,
+							position: nextPosition,
+						},
+					},
+				}),
 		limit,
 		processingTimeMs: Math.round((performance.now() - startedAt) * 1000) / 1000,
 	};
 	return presentation === "hits" ? { ...common, hits } : { ...common, hits: identifiers };
 }
 
-export async function searchDomain(
-	category: SearchCategory,
-	request: DomainSearchRequest,
-	candidateContext?: CandidateSearchContext,
-) {
-	const result = await searchDomainScan(category, request, "hits", candidateContext);
+/**
+ * Executes current-state Unit search.
+ *
+ * @remarks
+ * REZICS v1 intentionally searches only current Unit localizations. Unit-local revision history
+ * remains available through its authoritative history APIs.
+ *
+ * @todo
+ * Add global revision full-text search after its authorization, lifecycle, ranking,
+ * deduplication, cursor, retention, capacity, backup, restore, and PGroonga reindex contracts are
+ * specified and measured.
+ */
+export async function searchDomain(category: SearchCategory, request: DomainSearchRequest) {
+	const result = await searchDomainScan(category, request, "hits");
 	const slugAddresses = await getPublicCanonicalUnitSlugAddresses(
 		result.hits.map((hit) => hit.id),
 	);
@@ -1216,9 +1231,8 @@ export async function searchDomain(
 export function searchDomainIdentifiers(
 	category: SearchCategory,
 	request: DomainSearchRequest,
-	candidateContext?: CandidateSearchContext,
 ): Promise<SearchDomainScanResult<SearchIdentifier>> {
-	return searchDomainScan(category, request, "identifiers", candidateContext);
+	return searchDomainScan(category, request, "identifiers");
 }
 
 export interface GlobalSearchBranch {
@@ -1232,20 +1246,16 @@ export interface GlobalSearchIdentifiersRequest extends Omit<
 > {
 	readonly branches: readonly GlobalSearchBranch[];
 	readonly cursor?: never;
+	readonly position?: SearchKeysetPosition;
 }
 
 /**
- * Executes one globally sorted candidate stream across mutually exclusive categories.
- *
- * Meilisearch establishes the total order. PostgreSQL only removes candidates
- * that fail authoritative access or residual predicates and preserves the
- * engine ordinality of every surviving Unit.
+ * Executes one globally sorted authoritative stream across mutually exclusive categories.
  *
  * @internal
  */
 export async function searchGlobalIdentifiers(
 	request: GlobalSearchIdentifiersRequest,
-	providedCandidateContext?: CandidateSearchContext,
 ): Promise<SearchDomainScanResult<SearchIdentifier>> {
 	const startedAt = performance.now();
 	if (!request.branches.length) throw new InvalidSearch("Search requires at least one category");
@@ -1265,157 +1275,58 @@ export async function searchGlobalIdentifiers(
 			...(searchExpression ? { searchExpression } : {}),
 		};
 	});
-	const candidateBranches: CandidateQueryBranch[] = preparedBranches.map(
-		({ category, searchExpression }) => ({
-			category,
-			...(searchExpression ? { expression: searchExpression } : {}),
-		}),
-	);
-	const branchConditions = preparedBranches.map(
-		({ category, conditions }) =>
-			sql`(search_candidate.category = ${category} and ${sql.join(conditions, sql` and `)})`,
-	);
 	const sort = request.sort ?? (request.query?.trim() ? "relevance" : "best");
-	const candidateContext = await resolveCandidateContext(
-		request.profileId,
-		providedCandidateContext,
-	);
-	const domainCandidateFilter = compileCandidateDomainFilter(request.domainFilter);
 	const limit = request.limit ?? 20;
 	const initialOffset = request.offset ?? 0;
-	const identifiers: SearchIdentifier[] = [];
-	const seen = new Set<string>();
-	let authorizedCount = 0;
-	let scanOffset = initialOffset;
-	let exhausted = false;
-	let rounds = 0;
-	let pageBoundaryOffset: number | undefined;
-	const authorizationTarget = limit + 1;
-	const maxCandidateRounds = env.SEARCH_CANDIDATE_MAX_ROUNDS ?? 4;
-	const candidateDeadline = performance.now() + (env.SEARCH_CANDIDATE_TIME_BUDGET_MS ?? 1_500);
-
-	while (
-		!exhausted &&
-		authorizedCount < authorizationTarget &&
-		scanOffset - initialOffset < env.SEARCH_CANDIDATE_SCAN_LIMIT &&
-		rounds < maxCandidateRounds &&
-		performance.now() < candidateDeadline
-	) {
-		const batchLimit = Math.min(
-			env.SEARCH_CANDIDATE_BATCH_SIZE * 2 ** rounds,
-			env.SEARCH_CANDIDATE_SCAN_LIMIT - (scanOffset - initialOffset),
-		);
-		rounds += 1;
-		const [candidateResult] = await searchCandidates([
-			{
-				indexUid: candidateContext.indexUid,
-				accessFilter: candidateContext.accessFilter,
-				domainFilter: domainCandidateFilter,
-				branches: candidateBranches,
-				query: request.query?.trim() ?? "",
-				offset: scanOffset,
-				limit: batchLimit,
-				sort,
-			},
-		]);
-		if (!candidateResult) throw new Error("Meilisearch omitted a candidate result");
-		const candidateEntries = candidateResult.hits.flatMap((candidate, index) => {
-			if (seen.has(candidate.id)) return [];
-			seen.add(candidate.id);
-			return [
-				{
-					id: candidate.id,
-					position: index + 1,
-					revision: candidate.revision,
-					category: candidate.category,
-				},
-			];
-		});
-		const batchOffset = scanOffset;
-		const remainingAuthorizationTarget = authorizationTarget - authorizedCount;
-		const result = candidateEntries.length
-			? await database.execute<{
-					id: string;
-					ordinality: number | string;
-				}>(sql`
-		WITH search_candidate(unit_id, ordinality, revision, category) AS (
-			SELECT * FROM unnest(
-				${toUuidArray(candidateEntries.map(({ id }) => id))},
-				${toIntegerArray(candidateEntries.map(({ position }) => position))},
-				${toBigIntArray(candidateEntries.map(({ revision }) => revision))},
-				${toTextArray(candidateEntries.map(({ category }) => category))}
-			)
-		)
-		SELECT ${unit.id}::text AS id, search_candidate.ordinality
-		FROM search_candidate
-		JOIN ${searchUnitProjectionSource}
-			ON ${searchUnitProjectionSource.unitId} = search_candidate.unit_id
-			AND ${searchUnitProjectionSource.revision} = search_candidate.revision
-		JOIN ${unit} ON ${unit.id} = search_candidate.unit_id
-		LEFT JOIN ${profile} ON ${profile.id} = ${unit.id}
-		LEFT JOIN ${entity} ON ${entity.id} = ${unit.id}
-		LEFT JOIN ${post} ON ${post.id} = ${unit.id}
-		LEFT JOIN ${postReply} ON ${postReply.postId} = ${unit.id}
-		LEFT JOIN ${postReplyStat} ON ${postReplyStat.postId} = ${unit.id}
-		LEFT JOIN ${unitFollowStat} ON ${unitFollowStat.unitId} = ${unit.id}
-		LEFT JOIN ${unit} AS ${subjectUnit} ON ${subjectUnit.id} = ${post.subjectUnitId}
-		LEFT JOIN ${realm} ON ${realm.id} = ${unit.id}
-		LEFT JOIN ${collection} ON ${collection.id} = ${unit.id}
-		LEFT JOIN ${poll} ON ${poll.id} = ${unit.id}
-		LEFT JOIN ${book} ON ${book.id} = ${unit.id}
-		LEFT JOIN ${media} ON ${media.id} = ${unit.id}
-		LEFT JOIN ${software} ON ${software.id} = ${unit.id}
-		WHERE (${sql.join(branchConditions, sql` or `)})
-		ORDER BY search_candidate.ordinality
-		LIMIT ${remainingAuthorizationTarget}
-	`)
-			: { rows: [] };
-		const authorizationMayBeTruncated =
-			result.rows.length === remainingAuthorizationTarget &&
-			candidateEntries.length > remainingAuthorizationTarget;
-		authorizedCount += result.rows.length;
-		for (const row of result.rows)
-			if (identifiers.length < limit) {
-				identifiers.push({ id: row.id });
-				if (identifiers.length === limit) {
-					const ordinality = Number(row.ordinality);
-					if (!Number.isSafeInteger(ordinality) || ordinality < 1)
-						throw new TypeError("PostgreSQL returned invalid candidate ordinality");
-					pageBoundaryOffset = batchOffset + ordinality;
-				}
-			}
-		scanOffset += candidateResult.hits.length;
-		exhausted =
-			!authorizationMayBeTruncated &&
-			(candidateResult.hits.length < batchLimit ||
-				scanOffset >= candidateResult.estimatedTotalHits);
-		if (candidateResult.hits.length === 0) exhausted = true;
-	}
-	const budgetHit =
-		!exhausted &&
-		(scanOffset - initialOffset >= env.SEARCH_CANDIDATE_SCAN_LIMIT ||
-			rounds >= maxCandidateRounds ||
-			performance.now() >= candidateDeadline);
-	const nextOffset =
-		identifiers.length === limit && (authorizedCount > identifiers.length || !exhausted)
-			? pageBoundaryOffset
-			: identifiers.length < limit && !exhausted
-				? scanOffset
-				: undefined;
+	const languageBoundary = [
+		...new Set(
+			[
+				...preparedBranches.flatMap(
+					({ searchExpression }) =>
+						readSearchExpressionLanguageBoundary(searchExpression) ?? [],
+				),
+				...(readUnitLanguageBoundary(request.domainFilter) ?? []),
+			].filter(isContentLanguage),
+		),
+	];
+	const page = await searchCandidatePage({
+		branches: preparedBranches,
+		query: request.query?.trim() ?? "",
+		sort,
+		position: request.position,
+		limit,
+		languageBoundary,
+	});
+	const identifiers = page.rows.map(({ id }) => ({ id }));
+	const nextOffset = initialOffset + identifiers.length;
+	const last = page.rows.at(-1);
+	const nextPosition =
+		page.hasMore && last
+			? ({
+					primary: last.primaryValue,
+					secondary: last.secondaryValue,
+					unitId: last.id,
+				} satisfies SearchKeysetPosition)
+			: undefined;
 	metrics.searchCandidateScan(
 		"current",
-		seen.size,
-		authorizedCount,
-		rounds,
-		budgetHit,
-		!exhausted,
+		identifiers.length,
+		identifiers.length,
+		1,
+		page.scanTruncated,
+		page.hasMore || page.scanTruncated,
 	);
+	const lowerBound = page.hasMore || page.scanTruncated;
 	return {
 		hits: identifiers,
-		total: { kind: exhausted ? "exact" : "lower-bound", value: authorizedCount },
+		total: {
+			kind: lowerBound ? "lower-bound" : "exact",
+			value: nextOffset + (page.hasMore ? 1 : 0),
+		},
 		offset: initialOffset,
-		nextOffset: nextOffset ?? scanOffset,
-		exhausted: nextOffset === undefined,
+		nextOffset,
+		exhausted: !page.hasMore,
+		nextPosition,
 		limit,
 		processingTimeMs: Math.round((performance.now() - startedAt) * 1000) / 1000,
 	};
@@ -1512,7 +1423,6 @@ export async function searchDomainFacets(
 	category: SearchCategory,
 	request: DomainSearchRequest,
 	fields: readonly string[],
-	providedCandidateContext?: CandidateSearchContext,
 ): Promise<SearchFacet[]> {
 	if (!fields.length) return [];
 	const requestedFacets = fields.flatMap((field) => {
@@ -1522,50 +1432,32 @@ export async function searchDomainFacets(
 	if (!requestedFacets.length) return [];
 	const searchExpression = buildEffectiveSearchExpression(request);
 	const conditions = buildSearchConditions(category, request, searchExpression);
-	const candidateContext = await resolveCandidateContext(
-		request.profileId,
-		providedCandidateContext,
-	);
-	const domainCandidateFilter = compileCandidateDomainFilter(request.domainFilter);
-	const candidateLimit = env.SEARCH_FACET_CANDIDATE_SCAN_LIMIT;
-	const [candidateResult] = await searchCandidates([
-		{
-			indexUid: candidateContext.indexUid,
-			accessFilter: candidateContext.accessFilter,
-			domainFilter: domainCandidateFilter,
-			category,
-			query: request.query?.trim() ?? "",
-			offset: 0,
-			limit: candidateLimit,
-			expression: searchExpression,
-			sort: request.sort ?? (request.query?.trim() ? "relevance" : "best"),
-		},
-	]);
-	if (!candidateResult) throw new Error("Meilisearch omitted a facet candidate result");
-	const candidates = new Map<string, number>();
-	for (const candidate of candidateResult.hits)
-		if (!candidates.has(candidate.id)) candidates.set(candidate.id, candidate.revision);
-	const exhausted =
-		candidateResult.hits.length < candidateLimit ||
-		candidateResult.hits.length >= candidateResult.estimatedTotalHits;
-	metrics.searchFacetScan(
-		"current",
-		candidates.size,
-		candidateResult.hits.length ? 1 : 0,
-		!exhausted,
-	);
-	if (!candidates.size) return [];
-	const candidateIds = [...candidates.keys()];
-	const candidateRevisions = [...candidates.values()];
+	const candidateLimit = env.SEARCH_FACET_SCAN_LIMIT;
+	const languageBoundary = [
+		...new Set(
+			[
+				...(readSearchExpressionLanguageBoundary(searchExpression) ?? []),
+				...(readUnitLanguageBoundary(request.domainFilter) ?? []),
+			].filter(isContentLanguage),
+		),
+	];
+	const candidates = await searchCandidatePage({
+		branches: [{ category, conditions }],
+		query: request.query?.trim() ?? "",
+		sort: request.sort ?? (request.query?.trim() ? "relevance" : "best"),
+		limit: candidateLimit,
+		languageBoundary,
+	});
+	const exhausted = !candidates.hasMore;
+	metrics.searchFacetScan("current", candidates.rows.length, 1, !exhausted);
+	if (!candidates.rows.length) return [];
+	const candidateIds = candidates.rows.map(({ id }) => id);
 	const queries = requestedFacets.map(
 		({ field, spec }) =>
 			sql`(
 				select ${field}::text as field, (${spec.value})::text as value,
 				count(distinct ${unit.id})::text as count
 			from search_candidate
-			join ${searchUnitProjectionSource}
-				on ${searchUnitProjectionSource.unitId} = search_candidate.unit_id
-				and ${searchUnitProjectionSource.revision} = search_candidate.revision
 			join ${unit} on ${unit.id} = search_candidate.unit_id
 			left join ${profile} on ${profile.id} = ${unit.id}
 			left join ${entity} on ${entity.id} = ${unit.id}
@@ -1586,11 +1478,8 @@ export async function searchDomainFacets(
 			)`,
 	);
 	const result = await database.execute<{ field: string; value: string; count: string }>(
-		sql`with search_candidate(unit_id, revision) as (
-			select * from unnest(
-				${toUuidArray(candidateIds)},
-				${toBigIntArray(candidateRevisions)}
-			)
+		sql`with search_candidate(unit_id) as (
+			select * from unnest(${toUuidArray(candidateIds)})
 		)
 		${sql.join(queries, sql` union all `)}`,
 	);
@@ -1617,7 +1506,6 @@ export async function searchGrouped(request: {
 	Languages?: ContentLanguage[];
 	limitPerIndex?: number;
 }) {
-	await getActiveSearchGeneration("current");
 	const groups = await Promise.all(
 		request.indexes.map(async (category) => {
 			const result = await searchDomain(category, {

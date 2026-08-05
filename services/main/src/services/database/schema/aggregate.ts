@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import {
 	bigint,
 	check,
@@ -7,17 +7,21 @@ import {
 	index,
 	pgEnum,
 	primaryKey,
+	text,
 	unique,
 	uuid,
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
+import { collection } from "./collection";
 import { unitAlias } from "./unit-alias";
 import { createTimestampMsColumn, createUpdatedAtColumn, createUuidv7PrimaryKey } from "./columns";
 import { conversation, message } from "./communication";
+import { pollOption } from "./poll";
 import { profile } from "./profile";
 import { unit } from "./unit";
 import { post } from "./post";
+import { type ContentLanguage, ContentLanguageValues } from "./contract-values";
 import { reactionKind } from "./reaction";
 import { realm } from "./realm";
 import { unitEffectiveTag, unitStructure, unitStructureApplication } from "./structure";
@@ -255,6 +259,140 @@ export const postReplyStat = pgTable(
 			sql`${table.undeletedDirectCount} >= 0 and ${table.undeletedDescendantCount} >= 0 and ${table.visibleDirectCount} >= 0 and ${table.visibleDescendantCount} >= 0`,
 		),
 	],
+);
+
+export const collectionStat = pgTable(
+	"collection_stat",
+	{
+		collectionId: uuid()
+			.primaryKey()
+			.references(() => collection.id, { onDelete: "cascade" }),
+		itemCount: aggregateCount(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [check("collection_stat_count_check", sql`${table.itemCount} >= 0`)],
+);
+
+export const realmStat = pgTable(
+	"realm_stat",
+	{
+		realmId: uuid()
+			.primaryKey()
+			.references(() => realm.id, { onDelete: "cascade" }),
+		activeMemberCount: aggregateCount(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [check("realm_stat_count_check", sql`${table.activeMemberCount} >= 0`)],
+);
+
+export const realmUnitModerationStat = pgTable(
+	"realm_unit_moderation_stat",
+	{
+		realmId: uuid()
+			.notNull()
+			.references(() => realm.id, { onDelete: "cascade" }),
+		unitId: uuid()
+			.notNull()
+			.references(() => unit.id, { onDelete: "cascade" }),
+		openReportCount: aggregateCount(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.realmId, table.unitId] }),
+		check("realm_unit_moderation_stat_count_check", sql`${table.openReportCount} >= 0`),
+	],
+);
+
+export const notificationRecipientStat = pgTable(
+	"notification_recipient_stat",
+	{
+		profileId: uuid()
+			.primaryKey()
+			.references(() => profile.id, { onDelete: "cascade" }),
+		unreadCount: aggregateCount(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [check("notification_recipient_stat_count_check", sql`${table.unreadCount} >= 0`)],
+);
+
+/** Exact Chapter totals used to derive Book reading progress without an online scan. */
+export const bookChapterStat = pgTable(
+	"book_chapter_stat",
+	{
+		bookUnitId: uuid("book_unit_id")
+			.primaryKey()
+			.references(() => unit.id, { onDelete: "cascade" }),
+		allCount: aggregateCount(),
+		publicCount: aggregateCount(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		check(
+			"book_chapter_stat_count_check",
+			sql`${table.allCount} >= 0 and ${table.publicCount} >= 0 and ${table.publicCount} <= ${table.allCount}`,
+		),
+	],
+);
+
+/** Exact per-Profile Chapter completions used to derive Book reading progress. */
+export const bookChapterProgressStat = pgTable(
+	"book_chapter_progress_stat",
+	{
+		profileId: uuid()
+			.notNull()
+			.references(() => profile.id, { onDelete: "cascade" }),
+		bookUnitId: uuid("book_unit_id")
+			.notNull()
+			.references(() => unit.id, { onDelete: "cascade" }),
+		allCompletedCount: aggregateCount(),
+		publicCompletedCount: aggregateCount(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.profileId, table.bookUnitId] }),
+		check(
+			"book_chapter_progress_stat_count_check",
+			sql`${table.allCompletedCount} >= 0 and ${table.publicCompletedCount} >= 0 and ${table.publicCompletedCount} <= ${table.allCompletedCount}`,
+		),
+	],
+);
+
+/** Rebuildable exact public Chapter metrics, grouped by Book and content language. */
+export const bookLocalizedContentMetricStat = pgTable(
+	"book_localized_content_metric_stat",
+	{
+		bookUnitId: uuid("book_unit_id")
+			.notNull()
+			.references(() => unit.id, { onDelete: "cascade" }),
+		language: text().$type<ContentLanguage>().notNull(),
+		chapterCount: aggregateCount(),
+		wordCount: aggregateCount(),
+		characterCount: aggregateCount(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.bookUnitId, table.language] }),
+		check(
+			"book_localized_content_metric_stat_language_check",
+			inArray(table.language, ContentLanguageValues),
+		),
+		check(
+			"book_localized_content_metric_stat_count_check",
+			sql`${table.chapterCount} >= 0 and ${table.wordCount} >= 0 and ${table.characterCount} >= 0`,
+		),
+	],
+);
+
+export const pollOptionVoteStat = pgTable(
+	"poll_option_vote_stat",
+	{
+		optionId: uuid()
+			.primaryKey()
+			.references(() => pollOption.id, { onDelete: "cascade" }),
+		voteCount: aggregateCount(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [check("poll_option_vote_stat_count_check", sql`${table.voteCount} >= 0`)],
 );
 
 export const conversationStat = pgTable(

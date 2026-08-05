@@ -24,9 +24,6 @@ for image in "${api_image}" "${worker_image}" "${database_image}"; do
 done
 
 "${repository_root}/deploy/scripts/wait-loopback-service.sh" 127.0.0.1 5432
-"${repository_root}/deploy/scripts/wait-loopback-service.sh" \
-	127.0.0.1 7700 http://127.0.0.1:7700/health
-
 "${repository_root}/deploy/scripts/run-database-operation.sh" \
 	preflight "${release}" "${database_image}"
 "${repository_root}/deploy/scripts/run-database-operation.sh" \
@@ -47,6 +44,8 @@ done
 
 "${repository_root}/deploy/scripts/run-database-operation.sh" \
 	project "${release}" "${database_image}"
+"${repository_root}/deploy/scripts/run-search-index-operation.sh" \
+	check "${release}" "${database_image}"
 
 if "${nomad_command}" job inspect -json rezics-main >/dev/null 2>&1; then
 	printf '%s\n' "Stopping the superseded combined application job"

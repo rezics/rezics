@@ -23,7 +23,7 @@ export interface SearchFieldDefinition {
 	readonly facet: SearchFacetPolicy;
 	readonly sort: SearchSortPolicy;
 	readonly documentPath: string;
-	readonly meilisearch: readonly ("equality" | "comparison")[];
+	readonly postgres: readonly ("equality" | "comparison")[];
 	readonly residual: boolean;
 	readonly applicabilityPath?: string;
 }
@@ -31,7 +31,7 @@ export interface SearchFieldDefinition {
 export interface SearchSortDefinition {
 	readonly categories: readonly SearchCategory[];
 	readonly requiresQuery: boolean;
-	readonly meilisearch: readonly string[];
+	readonly postgres: readonly string[];
 }
 
 const allCategories: readonly SearchCategory[] = [
@@ -56,7 +56,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "meili-low-cardinality",
 		sort: "none",
 		documentPath: "category",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: false,
 	},
 	kind: {
@@ -66,7 +66,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "meili-low-cardinality",
 		sort: "none",
 		documentPath: "searchKind",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: false,
 	},
 	language: {
@@ -76,7 +76,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "meili-low-cardinality",
 		sort: "none",
 		documentPath: "languages",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: false,
 	},
 	"content-rating": {
@@ -86,7 +86,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "meili-low-cardinality",
 		sort: "none",
 		documentPath: "filters.contentRating",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: false,
 	},
 	"ai-disclosure": {
@@ -96,7 +96,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "meili-low-cardinality",
 		sort: "none",
 		documentPath: "filters.aiDisclosure",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: false,
 	},
 	license: {
@@ -106,7 +106,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "postgres-authorized",
 		sort: "none",
 		documentPath: "filters.license",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: false,
 	},
 	tag: {
@@ -116,7 +116,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "postgres-authorized",
 		sort: "none",
 		documentPath: "filters.tagIds",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: false,
 	},
 	credit: {
@@ -126,7 +126,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "postgres-authorized",
 		sort: "none",
 		documentPath: "filters.creditedUnitIds",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: false,
 	},
 	"credited-profile": {
@@ -136,7 +136,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "none",
 		sort: "none",
 		documentPath: "filters.creditedProfileIds",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: true,
 	},
 	realm: {
@@ -146,7 +146,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "postgres-authorized",
 		sort: "none",
 		documentPath: "filters.realmIds",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: false,
 	},
 	"realm-tag-context": {
@@ -156,7 +156,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "none",
 		sort: "none",
 		documentPath: "filters.realmTagContextRealmIds",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: true,
 	},
 	"realm-tag-vote": {
@@ -166,7 +166,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "none",
 		sort: "none",
 		documentPath: "filters.realmTagVoteKeys",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: true,
 	},
 	zone: {
@@ -176,7 +176,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "postgres-authorized",
 		sort: "none",
 		documentPath: "filters.scopeOwnerIds",
-		meilisearch: [],
+		postgres: [],
 		residual: true,
 	},
 	subject: {
@@ -186,7 +186,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "postgres-authorized",
 		sort: "none",
 		documentPath: "filters.subjectId",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: false,
 	},
 	target: {
@@ -196,7 +196,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "postgres-authorized",
 		sort: "none",
 		documentPath: "filters.subjectId",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: false,
 	},
 	root: {
@@ -206,7 +206,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "postgres-authorized",
 		sort: "none",
 		documentPath: "filters.rootId",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: false,
 	},
 	parent: {
@@ -216,7 +216,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "postgres-authorized",
 		sort: "none",
 		documentPath: "filters.parentId",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: false,
 	},
 	owner: {
@@ -226,7 +226,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "postgres-authorized",
 		sort: "none",
 		documentPath: "filters.ownerProfileIds",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: false,
 	},
 	"join-policy": {
@@ -236,7 +236,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "meili-low-cardinality",
 		sort: "none",
 		documentPath: "filters.joinPolicy",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: false,
 	},
 	multiple: {
@@ -246,7 +246,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "meili-low-cardinality",
 		sort: "none",
 		documentPath: "filters.pollMode",
-		meilisearch: [],
+		postgres: [],
 		residual: true,
 	},
 	"results-visibility": {
@@ -256,7 +256,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "meili-low-cardinality",
 		sort: "none",
 		documentPath: "filters.resultsVisibility",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: false,
 	},
 	closed: {
@@ -266,7 +266,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "meili-low-cardinality",
 		sort: "none",
 		documentPath: "filters.closesAt",
-		meilisearch: [],
+		postgres: [],
 		residual: true,
 	},
 	"created-at": {
@@ -276,7 +276,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "none",
 		sort: "meili",
 		documentPath: "ranking.createdAt",
-		meilisearch: ["comparison"],
+		postgres: ["comparison"],
 		residual: false,
 	},
 	"updated-at": {
@@ -286,7 +286,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "none",
 		sort: "meili",
 		documentPath: "ranking.updatedAt",
-		meilisearch: ["comparison"],
+		postgres: ["comparison"],
 		residual: false,
 	},
 	"published-at": {
@@ -296,7 +296,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "none",
 		sort: "meili",
 		documentPath: "ranking.publishedAt",
-		meilisearch: ["comparison"],
+		postgres: ["comparison"],
 		residual: false,
 	},
 	"closes-at": {
@@ -306,7 +306,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "none",
 		sort: "meili",
 		documentPath: "filters.closesAt",
-		meilisearch: ["comparison"],
+		postgres: ["comparison"],
 		residual: false,
 	},
 	"content-license": {
@@ -317,7 +317,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "meili-low-cardinality",
 		sort: "none",
 		documentPath: "contentLicense.active",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: false,
 		applicabilityPath: "unitType",
 	},
@@ -329,7 +329,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "none",
 		sort: "none",
 		documentPath: "book.isbn13",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: false,
 		applicabilityPath: "unitType",
 	},
@@ -341,7 +341,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "none",
 		sort: "meili",
 		documentPath: "book.publicationAt",
-		meilisearch: ["comparison"],
+		postgres: ["comparison"],
 		residual: false,
 		applicabilityPath: "unitType",
 	},
@@ -353,7 +353,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "none",
 		sort: "meili",
 		documentPath: "book.pageCount",
-		meilisearch: ["comparison"],
+		postgres: ["comparison"],
 		residual: false,
 		applicabilityPath: "unitType",
 	},
@@ -365,7 +365,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "none",
 		sort: "none",
 		documentPath: "book.wordCount",
-		meilisearch: [],
+		postgres: [],
 		residual: true,
 		applicabilityPath: "unitType",
 	},
@@ -377,7 +377,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "meili-low-cardinality",
 		sort: "none",
 		documentPath: "book.format",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: false,
 		applicabilityPath: "unitType",
 	},
@@ -389,7 +389,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "meili-low-cardinality",
 		sort: "none",
 		documentPath: "media.kind",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: false,
 		applicabilityPath: "unitType",
 	},
@@ -401,7 +401,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "none",
 		sort: "meili",
 		documentPath: "media.releaseAt",
-		meilisearch: ["comparison"],
+		postgres: ["comparison"],
 		residual: false,
 		applicabilityPath: "unitType",
 	},
@@ -413,7 +413,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "none",
 		sort: "meili",
 		documentPath: "media.runtimeMinutes",
-		meilisearch: ["comparison"],
+		postgres: ["comparison"],
 		residual: false,
 		applicabilityPath: "unitType",
 	},
@@ -425,7 +425,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "none",
 		sort: "none",
 		documentPath: "media.episodeCount",
-		meilisearch: ["comparison"],
+		postgres: ["comparison"],
 		residual: false,
 		applicabilityPath: "unitType",
 	},
@@ -437,7 +437,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "none",
 		sort: "none",
 		documentPath: "media.seasonCount",
-		meilisearch: ["comparison"],
+		postgres: ["comparison"],
 		residual: false,
 		applicabilityPath: "unitType",
 	},
@@ -449,7 +449,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "none",
 		sort: "meili",
 		documentPath: "software.releaseAt",
-		meilisearch: ["comparison"],
+		postgres: ["comparison"],
 		residual: false,
 		applicabilityPath: "unitType",
 	},
@@ -461,7 +461,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "none",
 		sort: "none",
 		documentPath: "software.versionLabel",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: false,
 		applicabilityPath: "unitType",
 	},
@@ -473,7 +473,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "postgres-authorized",
 		sort: "none",
 		documentPath: "software.platformIds",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: false,
 		applicabilityPath: "unitType",
 	},
@@ -485,7 +485,7 @@ export const CurrentSearchFieldRegistry = {
 		facet: "meili-low-cardinality",
 		sort: "none",
 		documentPath: "software.requirementTiers",
-		meilisearch: ["equality"],
+		postgres: ["equality"],
 		residual: true,
 		applicabilityPath: "unitType",
 	},
@@ -495,92 +495,92 @@ export const CurrentSearchSortRegistry = {
 	best: {
 		categories: SearchCategoryValues,
 		requiresQuery: false,
-		meilisearch: ["ranking.recommendationBest:desc", "ranking.updatedAt:desc", "id:asc"],
+		postgres: ["ranking.recommendationBest:desc", "ranking.updatedAt:desc", "id:asc"],
 	},
 	relevance: {
 		categories: SearchCategoryValues,
 		requiresQuery: true,
-		meilisearch: [],
+		postgres: [],
 	},
 	"createdAt:asc": {
 		categories: SearchCategoryValues,
 		requiresQuery: false,
-		meilisearch: ["ranking.createdAt:asc", "id:asc"],
+		postgres: ["ranking.createdAt:asc", "id:asc"],
 	},
 	"createdAt:desc": {
 		categories: SearchCategoryValues,
 		requiresQuery: false,
-		meilisearch: ["ranking.createdAt:desc", "id:asc"],
+		postgres: ["ranking.createdAt:desc", "id:asc"],
 	},
 	"updatedAt:asc": {
 		categories: SearchCategoryValues,
 		requiresQuery: false,
-		meilisearch: ["ranking.updatedAt:asc", "id:asc"],
+		postgres: ["ranking.updatedAt:asc", "id:asc"],
 	},
 	"updatedAt:desc": {
 		categories: SearchCategoryValues,
 		requiresQuery: false,
-		meilisearch: ["ranking.updatedAt:desc", "id:asc"],
+		postgres: ["ranking.updatedAt:desc", "id:asc"],
 	},
 	"publishedAt:asc": {
 		categories: ["units"],
 		requiresQuery: false,
-		meilisearch: ["ranking.publishedAt:asc", "id:asc"],
+		postgres: ["ranking.publishedAt:asc", "id:asc"],
 	},
 	"publishedAt:desc": {
 		categories: ["units"],
 		requiresQuery: false,
-		meilisearch: ["ranking.publishedAt:desc", "id:asc"],
+		postgres: ["ranking.publishedAt:desc", "id:asc"],
 	},
 	"followerCount:asc": {
 		categories: ["users", "realms"],
 		requiresQuery: false,
-		meilisearch: ["ranking.followerCount:asc", "id:asc"],
+		postgres: ["ranking.followerCount:asc", "id:asc"],
 	},
 	"followerCount:desc": {
 		categories: ["users", "realms"],
 		requiresQuery: false,
-		meilisearch: ["ranking.followerCount:desc", "id:asc"],
+		postgres: ["ranking.followerCount:desc", "id:asc"],
 	},
 	"replyCount:asc": {
 		categories: ["posts"],
 		requiresQuery: false,
-		meilisearch: ["ranking.replyCount:asc", "id:asc"],
+		postgres: ["ranking.replyCount:asc", "id:asc"],
 	},
 	"replyCount:desc": {
 		categories: ["posts"],
 		requiresQuery: false,
-		meilisearch: ["ranking.replyCount:desc", "id:asc"],
+		postgres: ["ranking.replyCount:desc", "id:asc"],
 	},
 	"closesAt:asc": {
 		categories: ["polls"],
 		requiresQuery: false,
-		meilisearch: ["filters.closesAt:asc", "id:asc"],
+		postgres: ["filters.closesAt:asc", "id:asc"],
 	},
 	"closesAt:desc": {
 		categories: ["polls"],
 		requiresQuery: false,
-		meilisearch: ["filters.closesAt:desc", "id:asc"],
+		postgres: ["filters.closesAt:desc", "id:asc"],
 	},
 	"title:asc": {
 		categories: [],
 		requiresQuery: false,
-		meilisearch: [],
+		postgres: [],
 	},
 	"title:desc": {
 		categories: [],
 		requiresQuery: false,
-		meilisearch: [],
+		postgres: [],
 	},
 	"progressLastSeenAt:asc": {
 		categories: [],
 		requiresQuery: false,
-		meilisearch: [],
+		postgres: [],
 	},
 	"progressLastSeenAt:desc": {
 		categories: [],
 		requiresQuery: false,
-		meilisearch: [],
+		postgres: [],
 	},
 } as const satisfies Readonly<Record<SearchSort, SearchSortDefinition>>;
 

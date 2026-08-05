@@ -1,7 +1,6 @@
 import type { Attributes, Counter, Histogram, Meter, UpDownCounter } from "@opentelemetry/api";
 
-export type DependencyName =
-	"postgresql" | "s3" | "meilisearch" | "cloudflare-email" | "outbound-http";
+export type DependencyName = "postgresql" | "s3" | "cloudflare-email" | "outbound-http";
 export type RequestMethod =
 	"GET" | "HEAD" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS" | "OTHER";
 export type StatusClass = "1xx" | "2xx" | "3xx" | "4xx" | "5xx" | "unknown";
@@ -84,8 +83,6 @@ export class ObservabilityMetrics {
 	readonly #readinessTransitions: Counter;
 	readonly #readinessCheckDuration: Histogram;
 	readonly #readinessCheckFailures: Counter;
-	readonly #searchOutboxDepth: ReturnType<Meter["createUpDownCounter"]>;
-	readonly #searchOutboxAge: Histogram;
 	readonly #searchCandidates: Histogram;
 	readonly #searchOverfetchRounds: Histogram;
 	readonly #searchAuthoritativeRejections: Histogram;
@@ -123,12 +120,6 @@ export class ObservabilityMetrics {
 		});
 		this.#readinessCheckFailures = meter.createCounter("rezics.readiness.check.failures", {
 			unit: "{failure}",
-		});
-		this.#searchOutboxDepth = meter.createUpDownCounter("rezics.search.outbox.depth", {
-			unit: "{item}",
-		});
-		this.#searchOutboxAge = meter.createHistogram("rezics.search.outbox.oldest_age", {
-			unit: "s",
 		});
 		this.#searchCandidates = meter.createHistogram("rezics.search.candidates", {
 			unit: "{candidate}",
@@ -262,18 +253,6 @@ export class ObservabilityMetrics {
 				...attributes,
 				"readiness.failure.category": failureCategory,
 			});
-	}
-
-	searchOutboxState(previousDepth: number, depth: number, oldestAgeSeconds: number): void {
-		if (
-			!Number.isSafeInteger(previousDepth) ||
-			!Number.isSafeInteger(depth) ||
-			previousDepth < 0 ||
-			depth < 0
-		)
-			throw new Error("Search outbox depth must be a non-negative safe integer");
-		this.#searchOutboxDepth.add(depth - previousDepth);
-		this.#searchOutboxAge.record(Math.max(0, oldestAgeSeconds));
 	}
 
 	searchCandidateScan(

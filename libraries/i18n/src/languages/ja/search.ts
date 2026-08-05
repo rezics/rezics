@@ -39,6 +39,7 @@ export default {
 	clearAdvancedFilters: "高度なフィルターをクリア",
 	results: "検索結果",
 	resultCount: insert("{{count}} アイテム", { count: Number }),
+	resultCountLowerBound: insert("少なくとも{{count}}件", { count: Number }),
 	atLeastResultCount: insert("少なくとも {{count}} 個のアイテム", { count: Number }),
 	resultGroups: {
 		units: "作品",

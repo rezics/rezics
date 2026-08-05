@@ -119,21 +119,24 @@ describe("Search language presentation boundary", () => {
 });
 
 describe("global Search cursor", () => {
-	it("round-trips one global offset without accepting a grouped cursor shape", () => {
+	it("round-trips one global keyset without accepting a grouped cursor shape", () => {
 		const state = {
 			version: 2,
-			generationId: "019f7eed-5d42-7102-8387-cc1d13b176d2",
 			requestHash: "a".repeat(64),
 			pageSize: 20,
-			offset: 37,
+			seen: 37,
+			position: {
+				primary: "12.5",
+				secondary: "1720000000",
+				unitId: "019f7eed-5d42-7102-8387-cc1d13b176d2",
+			},
 		} as const;
 		const cursor = createGlobalSearchCursor(state);
 		const groupedCursor = createSearchCursor({
 			version: 1,
-			generationId: state.generationId,
 			requestHash: state.requestHash,
 			pageSize: state.pageSize,
-			categories: { units: { offset: 37, exhausted: false } },
+			categories: { units: { seen: 37, exhausted: false, position: state.position } },
 		});
 
 		expectTypeOf(cursor).toEqualTypeOf<GlobalSearchCursorToken>();
@@ -145,14 +148,18 @@ describe("global Search cursor", () => {
 		expect(() => parseGlobalSearchCursor(groupedCursor)).toThrow("Invalid Search cursor");
 	});
 
-	it("rejects a negative global offset before encoding", () => {
+	it("rejects a negative global seen count before encoding", () => {
 		expect(() =>
 			createGlobalSearchCursor({
 				version: 2,
-				generationId: "019f7eed-5d42-7102-8387-cc1d13b176d2",
 				requestHash: "a".repeat(64),
 				pageSize: 20,
-				offset: -1,
+				seen: -1,
+				position: {
+					primary: "1",
+					secondary: "0",
+					unitId: "019f7eed-5d42-7102-8387-cc1d13b176d2",
+				},
 			}),
 		).toThrow("Invalid Search cursor");
 	});

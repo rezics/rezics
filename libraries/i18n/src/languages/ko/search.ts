@@ -39,6 +39,7 @@ export default {
 	clearAdvancedFilters: "고급 필터 초기화",
 	results: "검색 결과",
 	resultCount: insert("{{count}} 항목", { count: Number }),
+	resultCountLowerBound: insert("최소 {{count}}개 항목", { count: Number }),
 	atLeastResultCount: insert("최소 {{count}}개 항목", { count: Number }),
 	resultGroups: {
 		units: "작품",

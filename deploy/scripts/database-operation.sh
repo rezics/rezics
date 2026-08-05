@@ -61,14 +61,19 @@ project() {
 }
 
 search_index() {
-	if (($# != 3)); then
+	if (($# != 1)); then
 		printf '%s\n' \
-			"Usage: database-operation.sh search-index <prepare|reconcile|promote|check> <current|history> <index-uid>" >&2
+			"Usage: database-operation.sh search-index <check|reindex-concurrently>" >&2
 		exit 64
 	fi
-	yarn exec tsx scripts/search-index.ts "$1" \
-		--projection "$2" \
-		--index "$3"
+	if [[ "$1" == "check" ]]; then
+		yarn exec tsx scripts/search-index.ts check
+	elif [[ "$1" == "reindex-concurrently" ]]; then
+		yarn exec tsx scripts/search-index.ts reindex-concurrently --yes
+	else
+		printf 'Unsupported search index action: %s\n' "$1" >&2
+		exit 64
+	fi
 }
 
 case "${operation}" in

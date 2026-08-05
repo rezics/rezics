@@ -196,11 +196,18 @@ describe("API response values", () => {
 	});
 
 	it("accepts only non-negative integer Unit progress statistics", () => {
-		expect(Check(UnitProgressStatisticsResponse, { active: 2_540, backlog: 90_307 })).toBe(
-			true,
-		);
-		expect(Check(UnitProgressStatisticsResponse, { active: -1, backlog: 0 })).toBe(false);
-		expect(Check(UnitProgressStatisticsResponse, { active: 1.5, backlog: 0 })).toBe(false);
+		expect(
+			Check(UnitProgressStatisticsResponse, {
+				active: { kind: "exact", value: 2_540 },
+				backlog: { kind: "lower-bound", value: 90_307 },
+			}),
+		).toBe(true);
+		expect(
+			Check(UnitProgressStatisticsResponse, {
+				active: { kind: "exact", value: -1 },
+				backlog: { kind: "exact", value: 0 },
+			}),
+		).toBe(false);
 	});
 
 	it("keeps word and character content metrics distinct and non-negative", () => {
@@ -317,7 +324,7 @@ describe("API response values", () => {
 				title: "Author",
 				summary: null,
 				avatar: null,
-				creditedBookCount: 1,
+				creditedBookCount: { kind: "exact", value: 1 },
 				followerCount: 746,
 			},
 		};
@@ -326,7 +333,10 @@ describe("API response values", () => {
 		expect(
 			Check(UnitDetailAttributionSummaryResponse, {
 				...attribution,
-				creditedUnit: { ...attribution.creditedUnit, creditedBookCount: -1 },
+				creditedUnit: {
+					...attribution.creditedUnit,
+					creditedBookCount: { kind: "exact", value: -1 },
+				},
 			}),
 		).toBe(false);
 		expect(

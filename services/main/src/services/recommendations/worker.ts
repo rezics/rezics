@@ -1,7 +1,8 @@
-import { and, desc, eq, lt, ne, sql } from "drizzle-orm";
+import { and, desc, eq, gt, lt, ne, sql } from "drizzle-orm";
 
-import { database, type DatabaseTransaction } from "../database";
-import { recommendationSnapshot } from "../database/schema";
+import { database, type DatabaseTransaction, withDatabaseSession } from "../database";
+import { recommendationSnapshot, unit } from "../database/schema";
+import { WorkPolicy } from "../performance/policy";
 import { RecommendationPolicy, RecommendationPolicyVersion } from "./policy";
 
 async function buildUnitStats(tx: DatabaseTransaction, snapshotId: string) {
@@ -106,183 +107,117 @@ async function buildProfileInterests(tx: DatabaseTransaction, snapshotId: string
 	`);
 }
 
-async function buildUnitEdges(tx: DatabaseTransaction, snapshotId: string) {
+async function buildUnitEdges(
+	tx: DatabaseTransaction,
+	snapshotId: string,
+	sourceUnitIds: readonly string[],
+) {
+	if (
+		sourceUnitIds.length < 1 ||
+		sourceUnitIds.length > WorkPolicy.recommendation.maxRefreshBatchUnits
+	)
+		throw new RangeError("Recommendation edge batch exceeds the server-owned limit");
+	const sourceUnitIdList = sql.join(
+		sourceUnitIds.map((id) => sql`${id}::uuid`),
+		sql`, `,
+	);
 	await tx.execute(sql`
-		CREATE TEMP TABLE recommendation_base_edge ON COMMIT DROP AS
-		WITH tag_degree AS (
-			SELECT tag_id, count(*)::double precision AS degree FROM unit_tag GROUP BY tag_id
-		), tag_pair AS (
-			SELECT a.unit_id AS left_id, b.unit_id AS right_id,
-				sum(1 / ln(1 + d.degree)) AS score
-			FROM unit_tag a
-			JOIN unit_tag b ON b.tag_id = a.tag_id AND a.unit_id < b.unit_id
-			JOIN tag_degree d
-				ON d.tag_id = a.tag_id AND d.degree <= ${RecommendationPolicy.maxStructuralDegree}
-			GROUP BY a.unit_id, b.unit_id
-		), credit_degree AS (
-			SELECT credited_unit_id, count(*)::double precision AS degree
+		WITH structural_signal AS (
+			SELECT unit_id AS source_id, 'tag'::text AS kind, tag_id AS signal_id, 1.0 AS weight
+			FROM unit_tag
+			WHERE unit_id IN (${sourceUnitIdList})
+			UNION ALL
+			SELECT source_unit_id, 'credit', credited_unit_id, 1.25
 			FROM credit_attribution
-			GROUP BY credited_unit_id
-		), credit_pair AS (
-			SELECT a.source_unit_id AS left_id, b.source_unit_id AS right_id,
-				sum(1 / ln(1 + d.degree)) AS score
-			FROM credit_attribution a
-			JOIN credit_attribution b
-				ON b.credited_unit_id = a.credited_unit_id
-				AND a.source_unit_id < b.source_unit_id
-			JOIN credit_degree d
-				ON d.credited_unit_id = a.credited_unit_id
-				AND d.degree <= ${RecommendationPolicy.maxStructuralDegree}
-			GROUP BY a.source_unit_id, b.source_unit_id
-		), subject_degree AS (
-			SELECT entity_id, count(*)::double precision AS degree
+			WHERE source_unit_id IN (${sourceUnitIdList})
+			UNION ALL
+			SELECT unit_id, 'subject', entity_id, 1.25
 			FROM subject_association
-			GROUP BY entity_id
-		), subject_pair AS (
-			SELECT a.unit_id AS left_id, b.unit_id AS right_id,
-				sum(1 / ln(1 + d.degree)) AS score
-			FROM subject_association a
-			JOIN subject_association b ON b.entity_id = a.entity_id AND a.unit_id < b.unit_id
-			JOIN subject_degree d
-				ON d.entity_id = a.entity_id AND d.degree <= ${RecommendationPolicy.maxStructuralDegree}
-			GROUP BY a.unit_id, b.unit_id
-		), structural_direct AS (
-			SELECT left_id, right_id, score FROM tag_pair
-			UNION ALL SELECT left_id, right_id, score FROM credit_pair
-			UNION ALL SELECT left_id, right_id, score FROM subject_pair
+			WHERE unit_id IN (${sourceUnitIdList})
 			UNION ALL
-			SELECT a.release_unit_id, b.release_unit_id, 2::double precision
-			FROM series_release a
-			JOIN series_release b ON b.series_id = a.series_id AND a.release_unit_id < b.release_unit_id
-			JOIN (
-				SELECT series_id, count(*) AS degree FROM series_release GROUP BY series_id
-			) series_degree
-				ON series_degree.series_id = a.series_id
-				AND series_degree.degree <= ${RecommendationPolicy.maxStructuralDegree}
+			SELECT release_unit_id, 'series', series_id, 2.0
+			FROM series_release
+			WHERE release_unit_id IN (${sourceUnitIdList})
 			UNION ALL
-			SELECT least(id, subject_unit_id), greatest(id, subject_unit_id), 2::double precision
-			FROM post WHERE subject_unit_id IS NOT NULL
-		), structural_pair AS (
-			SELECT left_id, right_id, sum(score) AS score
-			FROM structural_direct WHERE left_id <> right_id GROUP BY left_id, right_id
-		), structural AS (
-			SELECT left_id AS source_id, right_id AS target_id, score FROM structural_pair
-			UNION ALL SELECT right_id, left_id, score FROM structural_pair
-		), interaction_source AS (
-			SELECT profile_id, unit_id, weight, bucket_start AS occurred_at
-			FROM recommendation_profile_signal_hourly
-			WHERE kind IN (
-				'upvote', 'favorite', 'share', 'score_high', 'score_medium',
-				'progress_active', 'progress_completed', 'open', 'dwell_30s'
-			) AND weight > 0
-		), interaction AS (
-			SELECT interaction_source.profile_id, interaction_source.unit_id,
-				least(sum(interaction_source.weight), 10) AS weight,
-				max(interaction_source.occurred_at) AS occurred_at
-			FROM interaction_source
-			JOIN profile_preference preference
-				ON preference.profile_id = interaction_source.profile_id
-				AND preference.personalized_feed
-			WHERE interaction_source.occurred_at >= now() - ${RecommendationPolicy.interestMaxAgeDays} * interval '1 day'
-			GROUP BY interaction_source.profile_id, interaction_source.unit_id
-		), limited_interaction AS (
-			SELECT profile_id, unit_id, weight
+			SELECT id, 'post-subject', subject_unit_id, 2.0
+			FROM post
+			WHERE id IN (${sourceUnitIdList}) AND subject_unit_id IS NOT NULL
+		), bounded_signal AS (
+			SELECT source_id, kind, signal_id, weight
 			FROM (
-				SELECT interaction.*,
-					row_number() OVER (PARTITION BY profile_id ORDER BY occurred_at DESC, unit_id) AS rank
-				FROM interaction
-			) ranked WHERE rank <= ${RecommendationPolicy.maxInteractionsPerProfile}
-		), user_degree AS (
-			SELECT profile_id, count(*)::double precision AS degree
-			FROM limited_interaction GROUP BY profile_id
-		), behavioral_pair AS (
-			SELECT a.unit_id AS left_id, b.unit_id AS right_id,
-				sum(a.weight * b.weight / ln(2 + d.degree)) AS score
-			FROM limited_interaction a
-			JOIN limited_interaction b ON b.profile_id = a.profile_id AND a.unit_id < b.unit_id
-			JOIN user_degree d ON d.profile_id = a.profile_id
-			GROUP BY a.unit_id, b.unit_id
-		), behavioral AS (
-			SELECT left_id AS source_id, right_id AS target_id, score FROM behavioral_pair
-			UNION ALL SELECT right_id, left_id, score FROM behavioral_pair
-		), combined_raw AS (
-			SELECT coalesce(s.source_id, b.source_id) AS source_id,
-				coalesce(s.target_id, b.target_id) AS target_id,
-				coalesce(s.score, 0) AS structural,
-				coalesce(b.score, 0) AS behavioral
-			FROM structural s FULL JOIN behavioral b
-				ON b.source_id = s.source_id AND b.target_id = s.target_id
-		), resolved_combined AS (
-			SELECT combined_raw.source_id,
-				coalesce(target_relationship.main_unit_id, combined_raw.target_id) AS target_id,
-				sum(combined_raw.structural) AS structural,
-				sum(combined_raw.behavioral) AS behavioral
-			FROM combined_raw
-			LEFT JOIN unit_variant target_relationship
-				ON target_relationship.variant_unit_id = combined_raw.target_id
-			LEFT JOIN unit_variant source_relationship
-				ON source_relationship.variant_unit_id = combined_raw.source_id
-			WHERE coalesce(target_relationship.main_unit_id, combined_raw.target_id)
-				<> coalesce(source_relationship.main_unit_id, combined_raw.source_id)
-			GROUP BY combined_raw.source_id,
-				coalesce(target_relationship.main_unit_id, combined_raw.target_id)
-		), normalized AS (
-			SELECT source_id, target_id,
-				CASE WHEN max(structural) OVER (PARTITION BY source_id) > 0
-					THEN structural / max(structural) OVER (PARTITION BY source_id) ELSE 0 END AS structural,
-				CASE WHEN max(behavioral) OVER (PARTITION BY source_id) > 0
-					THEN behavioral / max(behavioral) OVER (PARTITION BY source_id) ELSE 0 END AS behavioral
-			FROM resolved_combined
-			JOIN unit eligible_source ON eligible_source.id = resolved_combined.source_id
-			JOIN unit eligible_target ON eligible_target.id = resolved_combined.target_id
-			WHERE eligible_source.status = 'published'
-				AND eligible_source.visibility = 'public'
-				AND eligible_source.moderation_status = 'approved'
-				AND eligible_source.deleted_at IS NULL
-				AND eligible_target.status = 'published'
-				AND eligible_target.visibility = 'public'
-				AND eligible_target.moderation_status = 'approved'
-				AND eligible_target.deleted_at IS NULL
-		)
-		SELECT source_id, target_id, structural, behavioral,
-			CASE
-				WHEN structural > 0 AND behavioral > 0 THEN structural * 0.45 + behavioral * 0.55
-				WHEN behavioral > 0 THEN behavioral
-				ELSE structural
-			END AS score
-		FROM normalized
-		WHERE structural > 0 OR behavioral > 0
-	`);
-
-	await tx.execute(sql`
-		WITH probability AS (
-			SELECT *, score / sum(score) OVER (PARTITION BY source_id) AS probability
-			FROM recommendation_base_edge WHERE score > 0
-		), walk AS (
-			SELECT source_id, target_id, probability * 0.8 AS contribution FROM probability
-			UNION ALL
-			SELECT first.source_id, second.target_id,
-				first.probability * second.probability * 0.64 AS contribution
-			FROM probability first
-			JOIN probability second ON second.source_id = first.target_id
-			WHERE first.source_id <> second.target_id
+				SELECT structural_signal.*,
+					row_number() OVER (
+						PARTITION BY source_id
+						ORDER BY weight DESC, kind, signal_id
+					) AS signal_rank
+				FROM structural_signal
+			) ranked_signal
+			WHERE signal_rank <= ${RecommendationPolicy.maxStructuralSignals}
+		), bounded_peer AS (
+			SELECT signal.source_id, peer.target_id, signal.weight,
+				peer.peer_count
+			FROM bounded_signal signal
+			CROSS JOIN LATERAL (
+				SELECT target_id, count(*) OVER () AS peer_count
+				FROM (
+					SELECT candidate.target_id
+					FROM (
+					SELECT candidate.unit_id AS target_id
+					FROM unit_tag candidate
+					WHERE signal.kind = 'tag' AND candidate.tag_id = signal.signal_id
+					UNION ALL
+					SELECT candidate.source_unit_id
+					FROM credit_attribution candidate
+					WHERE signal.kind = 'credit'
+						AND candidate.credited_unit_id = signal.signal_id
+					UNION ALL
+					SELECT candidate.unit_id
+					FROM subject_association candidate
+					WHERE signal.kind = 'subject' AND candidate.entity_id = signal.signal_id
+					UNION ALL
+					SELECT candidate.release_unit_id
+					FROM series_release candidate
+					WHERE signal.kind = 'series' AND candidate.series_id = signal.signal_id
+					UNION ALL
+					SELECT signal.signal_id
+					WHERE signal.kind = 'post-subject'
+					) candidate
+					WHERE candidate.target_id <> signal.source_id
+					ORDER BY candidate.target_id
+					LIMIT ${RecommendationPolicy.maxStructuralDegree + 1}
+				) capped_candidate
+			) peer
 		), aggregated AS (
-			SELECT source_id, target_id, sum(contribution) AS score
-			FROM walk WHERE source_id <> target_id GROUP BY source_id, target_id
+			SELECT source_id, target_id,
+				sum(weight / ln(2 + peer_count))::double precision AS score
+			FROM bounded_peer
+			WHERE peer_count <= ${RecommendationPolicy.maxStructuralDegree}
+			GROUP BY source_id, target_id
+		), resolved AS (
+			SELECT aggregated.source_id,
+				coalesce(target_variant.main_unit_id, aggregated.target_id) AS target_id,
+				sum(aggregated.score)::double precision AS score
+			FROM aggregated
+			LEFT JOIN unit_variant target_variant
+				ON target_variant.variant_unit_id = aggregated.target_id
+			LEFT JOIN unit_variant source_variant
+				ON source_variant.variant_unit_id = aggregated.source_id
+			WHERE coalesce(target_variant.main_unit_id, aggregated.target_id)
+				<> coalesce(source_variant.main_unit_id, aggregated.source_id)
+			GROUP BY aggregated.source_id,
+				coalesce(target_variant.main_unit_id, aggregated.target_id)
 		), ranked AS (
-			SELECT aggregated.*,
+			SELECT resolved.*,
 				row_number() OVER (PARTITION BY source_id ORDER BY score DESC, target_id) AS rank
-			FROM aggregated WHERE score > 0
+			FROM resolved
 		)
 		INSERT INTO recommendation_unit_edge (
 			snapshot_id, source_unit_id, target_unit_id,
 			structural_score, behavioral_score, score, rank
 		)
 		SELECT ${snapshotId}::uuid, ranked.source_id, ranked.target_id,
-			coalesce(base.structural, 0), coalesce(base.behavioral, 0), ranked.score, ranked.rank::int
+			ranked.score, 0, ranked.score, ranked.rank::int
 		FROM ranked
-		LEFT JOIN recommendation_base_edge base
-			ON base.source_id = ranked.source_id AND base.target_id = ranked.target_id
 		JOIN unit source_unit ON source_unit.id = ranked.source_id
 		JOIN unit target_unit ON target_unit.id = ranked.target_id
 		WHERE ranked.rank <= ${RecommendationPolicy.maxEdgesPerUnit}
@@ -294,24 +229,54 @@ async function buildUnitEdges(tx: DatabaseTransaction, snapshotId: string) {
 }
 
 export async function refreshRecommendationSnapshot(): Promise<string | null> {
-	try {
-		return await database.transaction(
-			async (tx) => {
-				const lock = await tx.execute<{ acquired: boolean }>(
-					sql`select pg_try_advisory_xact_lock(hashtextextended('recommendation-refresh', 0)) AS acquired`,
+	return withDatabaseSession(async (session) => {
+		const lock = await session.execute<{ acquired: boolean }>(
+			sql`select pg_try_advisory_lock(hashtextextended('recommendation-refresh', 0)) AS acquired`,
+		);
+		if (!lock.rows[0]?.acquired) return null;
+		let snapshotId: string | null = null;
+		try {
+			const [snapshot] = await session
+				.insert(recommendationSnapshot)
+				.values({
+					policyVersion: RecommendationPolicyVersion,
+					sourceWatermark: new Date(),
+				})
+				.returning({ id: recommendationSnapshot.id });
+			if (!snapshot) throw new Error("Recommendation snapshot insertion returned no row");
+			snapshotId = snapshot.id;
+			await session.transaction((tx) => buildUnitStats(tx, snapshot.id));
+			await session.transaction((tx) => buildProfileInterests(tx, snapshot.id));
+
+			let afterId: string | undefined;
+			for (;;) {
+				const sourceRows = await session
+					.select({ id: unit.id })
+					.from(unit)
+					.where(
+						and(
+							eq(unit.status, "published"),
+							eq(unit.visibility, "public"),
+							eq(unit.moderationStatus, "approved"),
+							sql`${unit.deletedAt} is null`,
+							afterId ? gt(unit.id, afterId) : undefined,
+						),
+					)
+					.orderBy(unit.id)
+					.limit(WorkPolicy.recommendation.maxRefreshBatchUnits);
+				if (!sourceRows.length) break;
+				await session.transaction((tx) =>
+					buildUnitEdges(
+						tx,
+						snapshot.id,
+						sourceRows.map(({ id }) => id),
+					),
 				);
-				if (!lock.rows[0]?.acquired) return null;
-				const [snapshot] = await tx
-					.insert(recommendationSnapshot)
-					.values({
-						policyVersion: RecommendationPolicyVersion,
-						sourceWatermark: new Date(),
-					})
-					.returning({ id: recommendationSnapshot.id });
-				if (!snapshot) throw new Error("Recommendation snapshot insertion returned no row");
-				await buildUnitStats(tx, snapshot.id);
-				await buildProfileInterests(tx, snapshot.id);
-				await buildUnitEdges(tx, snapshot.id);
+				afterId = sourceRows.at(-1)?.id;
+				if (sourceRows.length < WorkPolicy.recommendation.maxRefreshBatchUnits) break;
+			}
+
+			await session.transaction(async (tx) => {
 				const completedAt = new Date();
 				await tx
 					.update(recommendationSnapshot)
@@ -321,26 +286,29 @@ export async function refreshRecommendationSnapshot(): Promise<string | null> {
 					.update(recommendationSnapshot)
 					.set({ state: "ready", active: true, completedAt, error: null })
 					.where(eq(recommendationSnapshot.id, snapshot.id));
-				await tx.execute(sql`
-					SELECT touch_search_unit_projection(array_agg(distinct unit_id))
-					FROM recommendation_unit_stat
-					WHERE snapshot_id = ${snapshot.id}::uuid
-				`);
-				return snapshot.id;
-			},
-			{ isolationLevel: "repeatable read" },
-		);
-	} catch (error) {
-		const completedAt = new Date();
-		await database.insert(recommendationSnapshot).values({
-			policyVersion: RecommendationPolicyVersion,
-			state: "failed",
-			active: false,
-			completedAt,
-			error: error instanceof Error ? error.message.slice(0, 2_000) : "Unknown refresh error",
-		});
-		throw error;
-	}
+			});
+			return snapshot.id;
+		} catch (error) {
+			if (snapshotId)
+				await session
+					.update(recommendationSnapshot)
+					.set({
+						state: "failed",
+						active: false,
+						completedAt: new Date(),
+						error:
+							error instanceof Error
+								? error.message.slice(0, 2_000)
+								: "Unknown refresh error",
+					})
+					.where(eq(recommendationSnapshot.id, snapshotId));
+			throw error;
+		} finally {
+			await session.execute(
+				sql`select pg_advisory_unlock(hashtextextended('recommendation-refresh', 0))`,
+			);
+		}
+	});
 }
 
 export async function aggregateRecommendationMetrics() {

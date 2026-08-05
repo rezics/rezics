@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { FilterSchemaModels } from "@rezics/filter";
-import { and, asc, count, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import Elysia from "elysia";
 
 import { getUnitReadCondition } from "../../authorization/unit/query";
@@ -324,27 +324,16 @@ export default new Elysia({ prefix: "/progress" })
 					),
 				)
 				.where(condition);
-			const countQuery = database
-				.select({ value: count() })
-				.from(unitProgress)
-				.innerJoin(unit, eq(unit.id, unitProgress.unitId))
-				.innerJoin(
-					unitLocalization,
-					and(
-						eq(unitLocalization.unitId, unit.id),
-						eq(
-							unitLocalization.language,
-							resolvedUnitLocalizationLanguage(unit.id, body.localizationLanguages),
-						),
-					),
-				)
-				.where(baseCondition);
-			const [rows, [countRow]] = await Promise.all([
-				baseQuery.orderBy(...orderBy).limit(request.pageSize + 1),
-				request.total === undefined ? countQuery : Promise.resolve([]),
-			]);
-			const total = request.total ?? countRow?.value ?? 0;
+			const rows = await baseQuery.orderBy(...orderBy).limit(request.pageSize + 1);
 			const pageRows = rows.slice(0, request.pageSize);
+			const consumed = request.consumed + pageRows.length;
+			const total =
+				rows.length <= request.pageSize
+					? ({ kind: "exact", value: consumed } as const)
+					: ({
+							kind: "lower-bound",
+							value: Math.max(request.total?.value ?? 0, consumed + 1),
+						} as const);
 			const items = pageRows.map(({ coverAssetId, sortTitle: _sortTitle, ...row }) => ({
 				...row,
 				type: toProgressUnitType(row.type),
@@ -365,7 +354,7 @@ export default new Elysia({ prefix: "/progress" })
 										: lastRow.lastSeenAt.toISOString(),
 									unitId: lastRow.unitId,
 								},
-								consumed: request.consumed + items.length,
+								consumed,
 								total,
 							}),
 						}

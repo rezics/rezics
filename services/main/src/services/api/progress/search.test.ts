@@ -48,7 +48,7 @@ describe("progress Search Feature execution boundary", () => {
 				unitId: "0198e6bd-18ff-7760-b9cc-4f74f8bb29bf",
 			},
 			consumed: 20,
-			total: 25,
+			total: { kind: "lower-bound", value: 21 },
 		});
 
 		expect(

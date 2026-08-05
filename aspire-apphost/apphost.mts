@@ -5,7 +5,7 @@ import {
 	workerSchedulerHealthContract,
 } from "../services/main/src/health-contract.ts";
 
-type AppHostMode = "development" | "search" | "smoke";
+type AppHostMode = "development" | "smoke";
 type EmailMode = "cloudflare" | "log";
 
 function resolveAppHostMode(value: string | undefined): AppHostMode {
@@ -13,13 +13,10 @@ function resolveAppHostMode(value: string | undefined): AppHostMode {
 		case undefined:
 		case "development":
 			return "development";
-		case "search":
 		case "smoke":
 			return value;
 		default:
-			throw new Error(
-				`REZICS_ASPIRE_MODE must be development, search, or smoke; received ${value}`,
-			);
+			throw new Error(`REZICS_ASPIRE_MODE must be development or smoke; received ${value}`);
 	}
 }
 
@@ -78,7 +75,6 @@ function seconds(milliseconds: number): number {
 
 const appHostMode = resolveAppHostMode(process.env.REZICS_ASPIRE_MODE);
 const isolatedSmoke = appHostMode === "smoke";
-const searchEnabled = !isolatedSmoke;
 
 const builder = await createBuilder();
 
@@ -127,20 +123,6 @@ if (emailMode === "cloudflare") {
 	});
 	cloudflareEmailApiToken = await builder.addParameter("cloudflare-email-api-token", {
 		value: requireEnvironmentVariable("CLOUDFLARE_EMAIL_API_TOKEN"),
-		secret: true,
-	});
-}
-
-let meilisearch: Awaited<ReturnType<typeof builder.addExternalService>> | undefined;
-let meilisearchQueryKey: Awaited<ReturnType<typeof builder.addParameter>> | undefined;
-
-if (searchEnabled) {
-	const meilisearchUrl = await builder.addParameter("meilisearch-url", {
-		value: requireHttpOrigin("MEILISEARCH_URL"),
-	});
-	meilisearch = await builder.addExternalService("meilisearch", meilisearchUrl);
-	meilisearchQueryKey = await builder.addParameter("meilisearch-query-key", {
-		value: requireEnvironmentVariable("MEILISEARCH_QUERY_KEY"),
 		secret: true,
 	});
 }
@@ -203,13 +185,6 @@ if (cloudflareAccountId && cloudflareEmailApiToken)
 	api = api
 		.withEnvironment("CLOUDFLARE_ACCOUNT_ID", cloudflareAccountId)
 		.withEnvironment("CLOUDFLARE_EMAIL_API_TOKEN", cloudflareEmailApiToken);
-
-if (meilisearch && meilisearchQueryKey) {
-	api = api
-		.withEnvironment("MEILISEARCH_URL", meilisearch)
-		.withEnvironment("MEILISEARCH_QUERY_KEY", meilisearchQueryKey)
-		.withReference(meilisearch);
-}
 
 const apiEndpoint = await api.getEndpoint("http");
 

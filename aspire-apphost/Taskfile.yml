@@ -28,18 +28,8 @@ tasks:
             - task: doctor
             - task infra:up
             - task services-main:db:prepare
-            - task infra:search:apply
-            - task services-main:search:index -- check --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
+            - task services-main:search:index -- check
             - yarn exec aspire run --apphost aspire-apphost/apphost.mts
-
-    run:search:
-        desc: Alias for the default search-capable REZICS topology.
-        dir: ..
-        env:
-            REZICS_ASPIRE_MODE: search
-        cmds:
-            - task: doctor
-            - task: run
 
     stop:
         desc: Stop the REZICS AppHost selected by the rooted Aspire configuration.

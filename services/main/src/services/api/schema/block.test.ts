@@ -439,10 +439,19 @@ describe("Search execution primitives", () => {
 	test("round-trips opaque cursors", () => {
 		const state = {
 			version: SearchCursorVersion,
-			generationId: "019f7eed-5d42-7102-8387-cc1d13b176d2",
 			requestHash: "a".repeat(64),
 			pageSize: 20,
-			categories: { units: { offset: 720, exhausted: false } },
+			categories: {
+				units: {
+					seen: 20,
+					exhausted: false,
+					position: {
+						primary: "12.5",
+						secondary: "1720000000",
+						unitId: "019f7eed-5d42-7102-8387-cc1d13b176d2",
+					},
+				},
+			},
 		};
 		const cursor = createSearchCursor(state);
 		expect(parseSearchCursor(cursor)).toEqual(state);

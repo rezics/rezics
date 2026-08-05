@@ -187,6 +187,172 @@ const checks: readonly { name: string; query: SQL }[] = [
 		`,
 	},
 	{
+		name: "collection_stat",
+		query: sql`
+			with expected as (
+				select collection.id as collection_id, count(collection_item.unit_id) as item_count
+				from collection
+				left join collection_item on collection_item.collection_id = collection.id
+				group by collection.id
+			)
+			select count(*)::text as drift_count from expected
+			full join collection_stat using (collection_id)
+			where expected.collection_id is null or collection_stat.collection_id is null
+				or expected.item_count is distinct from collection_stat.item_count
+		`,
+	},
+	{
+		name: "poll_option_vote_stat",
+		query: sql`
+			with expected as (
+				select poll_option.id as option_id, count(poll_vote.option_id) as vote_count
+				from poll_option
+				left join poll_vote on poll_vote.option_id = poll_option.id
+				group by poll_option.id
+			)
+			select count(*)::text as drift_count from expected
+			full join poll_option_vote_stat using (option_id)
+			where expected.option_id is null or poll_option_vote_stat.option_id is null
+				or expected.vote_count is distinct from poll_option_vote_stat.vote_count
+		`,
+	},
+	{
+		name: "realm_stat",
+		query: sql`
+			with expected as (
+				select realm.id as realm_id,
+					count(realm_member.profile_id) filter (where realm_member.state = 'active')
+						as active_member_count
+				from realm left join realm_member on realm_member.realm_id = realm.id
+				group by realm.id
+			)
+			select count(*)::text as drift_count from expected
+			full join realm_stat using (realm_id)
+			where expected.realm_id is null or realm_stat.realm_id is null
+				or expected.active_member_count is distinct from realm_stat.active_member_count
+		`,
+	},
+	{
+		name: "notification_recipient_stat",
+		query: sql`
+			with expected as (
+				select profile.id as profile_id,
+					count(notification.id) filter (
+						where notification.in_app_visible and notification.read_at is null
+					) as unread_count
+				from profile left join notification on notification.recipient_profile_id = profile.id
+				group by profile.id
+			)
+			select count(*)::text as drift_count from expected
+			full join notification_recipient_stat using (profile_id)
+			where expected.profile_id is null or notification_recipient_stat.profile_id is null
+				or expected.unread_count is distinct from notification_recipient_stat.unread_count
+		`,
+	},
+	{
+		name: "realm_unit_moderation_stat",
+		query: sql`
+			with expected as (
+				select realm_unit.realm_id, realm_unit.unit_id,
+					count(realm_unit_report.id) filter (
+						where moderation_case.state in (
+							'new', 'triaged', 'assigned', 'escalated', 'reviewing'
+						)
+					) as open_report_count
+				from realm_unit
+				left join realm_unit_report
+					on realm_unit_report.realm_id = realm_unit.realm_id
+					and realm_unit_report.unit_id = realm_unit.unit_id
+				left join moderation_case on moderation_case.id = realm_unit_report.case_id
+				group by realm_unit.realm_id, realm_unit.unit_id
+			)
+			select count(*)::text as drift_count from expected
+			full join realm_unit_moderation_stat using (realm_id, unit_id)
+			where expected.realm_id is null or realm_unit_moderation_stat.realm_id is null
+				or expected.open_report_count is distinct from
+					realm_unit_moderation_stat.open_report_count
+		`,
+	},
+	{
+		name: "book_chapter_stats",
+		query: sql`
+			with eligible as (
+				select node.id as node_id, structure.owner_unit_id as book_unit_id,
+					content_unit.status = 'published'
+						and content_unit.visibility in ('public', 'unlisted') as public_eligible
+				from content_structure_node node
+				join content_structure structure on structure.id = node.structure_id
+				join unit content_unit on content_unit.id = node.content_unit_id
+				join post content_post on content_post.id = content_unit.id
+				where structure.kind = 'book.contents' and structure.deleted_at is null
+					and node.deleted_at is null and content_unit.kind = 'post'
+					and content_unit.deleted_at is null and content_post.kind = 'chapter'
+			), expected_book as (
+				select book_unit_id, count(*) as all_count,
+					count(*) filter (where public_eligible) as public_count
+				from eligible group by book_unit_id
+			), book_drift as (
+				select 1 from expected_book
+				full join book_chapter_stat using (book_unit_id)
+				where coalesce(expected_book.all_count, 0) is distinct from
+					coalesce(book_chapter_stat.all_count, 0)
+					or coalesce(expected_book.public_count, 0) is distinct from
+						coalesce(book_chapter_stat.public_count, 0)
+			), expected_progress as (
+				select progress.profile_id, eligible.book_unit_id,
+					count(*) as all_completed_count,
+					count(*) filter (where eligible.public_eligible) as public_completed_count
+				from eligible
+				join content_structure_node_progress progress on progress.node_id = eligible.node_id
+				group by progress.profile_id, eligible.book_unit_id
+			), progress_drift as (
+				select 1 from expected_progress
+				full join book_chapter_progress_stat using (profile_id, book_unit_id)
+				where coalesce(expected_progress.all_completed_count, 0) is distinct from
+					coalesce(book_chapter_progress_stat.all_completed_count, 0)
+					or coalesce(expected_progress.public_completed_count, 0) is distinct from
+						coalesce(book_chapter_progress_stat.public_completed_count, 0)
+			)
+			select ((select count(*) from book_drift) +
+				(select count(*) from progress_drift))::text as drift_count
+		`,
+	},
+	{
+		name: "book_localized_content_metric_stat",
+		query: sql`
+			with expected as (
+				select structure.owner_unit_id as book_unit_id, metric.language,
+					count(*) as chapter_count, sum(metric.word_count) as word_count,
+					sum(metric.character_count) as character_count
+				from content_structure_node node
+				join content_structure structure on structure.id = node.structure_id
+					and structure.owner_unit_id = node.owner_unit_id
+				join post content_post on content_post.id = node.content_unit_id
+				join unit content_unit on content_unit.id = node.content_unit_id
+				join unit_localization localization on localization.unit_id = node.content_unit_id
+				join unit_localization_content_metric metric
+					on metric.unit_id = node.content_unit_id
+					and metric.language = localization.language
+				where structure.kind = 'book.contents' and structure.deleted_at is null
+					and node.deleted_at is null and content_post.kind = 'chapter'
+					and content_unit.deleted_at is null and content_unit.status = 'published'
+					and content_unit.visibility in ('public', 'unlisted')
+					and localization.content_status = 'published'
+				group by structure.owner_unit_id, metric.language
+			)
+			select count(*)::text as drift_count from expected
+			full join book_localized_content_metric_stat using (book_unit_id, language)
+			where expected.book_unit_id is null
+				or book_localized_content_metric_stat.book_unit_id is null
+				or row(expected.chapter_count, expected.word_count, expected.character_count)
+					is distinct from row(
+						book_localized_content_metric_stat.chapter_count,
+						book_localized_content_metric_stat.word_count,
+						book_localized_content_metric_stat.character_count
+					)
+		`,
+	},
+	{
 		name: "unit_engagement_stat",
 		query: sql`
 			with change as (
@@ -310,9 +476,12 @@ const checks: readonly { name: string; query: SQL }[] = [
 try {
 	let drifted = false;
 	for (const check of checks) {
+		const startedAt = performance.now();
 		const result = await database.execute<{ drift_count: string }>(check.query);
 		const driftCount = toSafeInteger(result.rows[0]?.drift_count ?? "0", check.name);
-		console.info(`${check.name}: ${driftCount} drifted rows`);
+		console.info(
+			`${check.name}: ${driftCount} drifted rows (${Math.round(performance.now() - startedAt)} ms)`,
+		);
 		drifted ||= driftCount > 0;
 	}
 	if (drifted) throw new Error("Aggregate reconciliation found drift");

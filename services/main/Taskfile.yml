@@ -47,20 +47,19 @@ tasks:
             - yarn exec tsx scripts/rebuild-studio.ts
 
     search:index:
-        desc: Check or explicitly manage one versioned Meilisearch projection generation.
+        desc: Check or explicitly reindex the canonical authoritative PGroonga indexes.
         cmds:
             - yarn exec tsx scripts/search-index.ts {{.CLI_ARGS}}
+
+    search:capacity:
+        desc: Run the destructive PGroonga capacity fixture only on disposable rezics_atlas.
+        cmds:
+            - yarn exec tsx scripts/benchmark-search-capacity.ts {{.CLI_ARGS}}
 
     storage:prepare:
         desc: Idempotently prepare the loopback object-storage bucket used by local development.
         cmds:
             - yarn exec tsx scripts/ensure-local-storage-bucket.ts
-
-    search:config:check:
-        desc: Interpolate and plan the canonical Sequin search configuration.
-        cmds:
-            - sequin config interpolate search/sequin.yaml --output ../../.temp/sequin.interpolated.yaml
-            - sequin config plan ../../.temp/sequin.interpolated.yaml
 
     build:
         desc: Build the backend.
@@ -71,6 +70,11 @@ tasks:
         desc: Type-check the backend.
         cmds:
             - yarn exec tsc --noEmit -p tsconfig.typecheck.json
+
+    counts:check:
+        desc: Reject online exact count scans outside the reviewed bounded allowlist.
+        cmds:
+            - yarn exec tsx scripts/check-online-counts.ts
 
     test:
         desc: Run backend behavior tests.
@@ -134,10 +138,15 @@ tasks:
                 yarn exec atlas migrate apply --env main
                 --url "postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?search_path=public&sslmode=disable"
             - >-
+                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
+                yarn exec tsx scripts/search-index.ts check
+            - >-
                 yarn exec atlas schema diff --env main
                 --from "postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?search_path=public&sslmode=disable"
                 --to env://schema.src
                 --exclude atlas_schema_revisions
+                --exclude 'unit_localization.unit_localization_pgroonga_metadata_idx[type=index]'
+                --exclude 'unit_localization.unit_localization_pgroonga_content_idx[type=index]'
                 --exclude '*[type=extension|function|trigger]'
                 | grep -q '^Schemas are synced, no changes to be made\.$'
 
@@ -165,7 +174,7 @@ tasks:
             - task: platform:verify
 
     db:runtime:verify:
-        desc: Verify PostgreSQL WAL retention, statistics, and logical-slot health.
+        desc: Verify PostgreSQL runtime settings, statistics, and extension health.
         cmds:
             - yarn exec tsx scripts/verify-postgres-runtime.ts
 
@@ -240,12 +249,12 @@ tasks:
             - yarn exec tsx scripts/check-seed.ts {{.CLI_ARGS}}
 
     db:seed:search:check:
-        desc: Verify official Zone fixtures against the promoted external Search projection.
+        desc: Verify official Zone fixtures against authoritative PostgreSQL Search.
         cmds:
             - yarn exec tsx scripts/check-seed-search.ts
 
     db:reset:
-        desc: Internal database-only reset; use the root local:reset task to keep search consistent.
+        desc: Internal database-only reset; PGroonga indexes are maintained by PostgreSQL.
         internal: true
         cmds:
             - yarn exec tsx scripts/reset-database.ts {{.CLI_ARGS}}

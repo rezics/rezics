@@ -31,10 +31,9 @@ export interface SearchPlanComplexity {
 	readonly contexts: number;
 	readonly injections: number;
 	readonly pageSize: number;
-	readonly candidateBatchSize: number;
+	readonly statementTimeoutMs: number;
 	readonly candidateScanLimit: number;
-	readonly candidateRounds: number;
-	readonly candidateDeadlineMs: number;
+	readonly facetScanLimit: number;
 	readonly viewerRelative: boolean;
 	readonly countSemantics: "exact-when-exhausted-otherwise-lower-bound";
 }
@@ -194,9 +193,8 @@ export class ValidatedSearchPlan<Request extends CompiledSearchRequest> {
 		});
 		const pushdownPredicates = executedPredicates.filter(({ category, predicate }) => {
 			try {
-				return (
-					resolveCurrentSearchFilterDefinition(category, predicate).meilisearch.length > 0
-				);
+				resolveCurrentSearchFilterDefinition(category, predicate);
+				return true;
 			} catch {
 				return false;
 			}
@@ -217,10 +215,9 @@ export class ValidatedSearchPlan<Request extends CompiledSearchRequest> {
 			contexts: input.contexts,
 			injections: input.injections,
 			pageSize: request.pageSize,
-			candidateBatchSize: env.SEARCH_CANDIDATE_BATCH_SIZE,
+			statementTimeoutMs: env.SEARCH_STATEMENT_TIMEOUT_MS,
 			candidateScanLimit: env.SEARCH_CANDIDATE_SCAN_LIMIT,
-			candidateRounds: env.SEARCH_CANDIDATE_MAX_ROUNDS,
-			candidateDeadlineMs: env.SEARCH_CANDIDATE_TIME_BUDGET_MS,
+			facetScanLimit: env.SEARCH_FACET_SCAN_LIMIT,
 			viewerRelative: viewerRelative(request.domainFilter),
 			countSemantics: "exact-when-exhausted-otherwise-lower-bound",
 		});

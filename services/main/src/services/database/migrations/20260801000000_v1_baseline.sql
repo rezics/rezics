@@ -1,5 +1,5 @@
 -- REZICS v1.0.0 database baseline.
--- Machine-generated from the validated final PostgreSQL schema on 2026-08-04.
+-- Machine-generated from the validated final PostgreSQL schema on 2026-08-05.
 -- Object order: types, tables, functions, constraints/indexes, foreign keys/publications, triggers.
 
 --
@@ -24,6 +24,44 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 CREATE EXTENSION IF NOT EXISTS pg_stat_statements WITH SCHEMA public;
+CREATE EXTENSION IF NOT EXISTS pgroonga WITH SCHEMA public;
+CREATE EXTENSION IF NOT EXISTS approx_count;
+CREATE EXTENSION IF NOT EXISTS amcheck WITH SCHEMA public;
+CREATE EXTENSION IF NOT EXISTS pgstattuple WITH SCHEMA public;
+
+-- Only semantic Portable Text span values enter the PGroonga expression indexes.
+CREATE FUNCTION public.current_search_text_v1(document jsonb) RETURNS jsonb
+    LANGUAGE sql IMMUTABLE PARALLEL SAFE
+    AS $$
+    SELECT coalesce(
+        jsonb_agg(child -> 'text' ORDER BY block.ordinality, child_row.ordinality),
+        '[]'::jsonb
+    )
+    FROM jsonb_array_elements(
+        CASE
+            WHEN jsonb_typeof(document) = 'object' AND document ->> '_type' = 'portable-text'
+                THEN coalesce(document -> 'content', '[]'::jsonb)
+            WHEN jsonb_typeof(document) = 'array' THEN document
+            ELSE '[]'::jsonb
+        END
+    ) WITH ORDINALITY AS block(value, ordinality)
+    CROSS JOIN LATERAL jsonb_array_elements(
+        CASE
+            WHEN block.value ->> '_type' = 'block'
+                THEN coalesce(block.value -> 'children', '[]'::jsonb)
+            ELSE '[]'::jsonb
+        END
+    ) WITH ORDINALITY AS child_row(child, ordinality)
+    WHERE child ->> '_type' = 'span' AND jsonb_typeof(child -> 'text') = 'string'
+$$;
+
+-- One JSONB expression keeps PGroonga's JSONB index single-column while preserving field text.
+CREATE FUNCTION public.current_search_metadata_v1(title text, summary text, description jsonb)
+RETURNS jsonb
+    LANGUAGE sql IMMUTABLE PARALLEL SAFE
+    AS $$
+    SELECT jsonb_build_array(title, summary) || public.current_search_text_v1(description)
+$$;
 
 --
 -- Name: ai_disclosure; Type: TYPE; Schema: public; Owner: -
@@ -679,31 +717,6 @@ CREATE TYPE public.resource_visibility AS ENUM (
 
 
 --
--- Name: search_index_generation_state; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.search_index_generation_state AS ENUM (
-    'declared',
-    'building',
-    'catching_up',
-    'verified',
-    'active',
-    'retired',
-    'failed'
-);
-
-
---
--- Name: search_projection_kind; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.search_projection_kind AS ENUM (
-    'current',
-    'history'
-);
-
-
---
 -- Name: unit_access_invitation_resolution; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -1179,6 +1192,18 @@ CREATE TABLE public.collection_item (
     created_at timestamp(3) with time zone DEFAULT now() NOT NULL,
     updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
     CONSTRAINT collection_item_not_self_check CHECK ((collection_id <> unit_id))
+);
+
+
+--
+-- Name: collection_stat; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.collection_stat (
+    collection_id uuid NOT NULL,
+    item_count bigint DEFAULT 0 NOT NULL,
+    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT collection_stat_count_check CHECK ((item_count >= 0))
 );
 
 
@@ -1742,6 +1767,18 @@ CREATE TABLE public.poll_option (
     target_unit_id uuid,
     CONSTRAINT poll_option_deleted_at_check CHECK (((deleted_at IS NULL) OR (deleted_at >= created_at))),
     CONSTRAINT poll_option_source_check CHECK ((((source_kind = 'literal'::public.poll_option_source_kind) AND (target_unit_id IS NULL)) OR ((source_kind = 'unit'::public.poll_option_source_kind) AND (target_unit_id IS NOT NULL))))
+);
+
+
+--
+-- Name: poll_option_vote_stat; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.poll_option_vote_stat (
+    option_id uuid NOT NULL,
+    vote_count bigint DEFAULT 0 NOT NULL,
+    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT poll_option_vote_stat_count_check CHECK ((vote_count >= 0))
 );
 
 
@@ -2444,55 +2481,6 @@ CREATE TABLE public.search_document_revision (
 CREATE TABLE public.search_document_revision_head (
     search_document_id uuid NOT NULL,
     revision_id uuid NOT NULL
-);
-
-
---
--- Name: search_index_generation; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.search_index_generation (
-    id uuid DEFAULT uuidv7() NOT NULL,
-    projection_kind public.search_projection_kind NOT NULL,
-    index_uid text NOT NULL,
-    projection_version integer NOT NULL,
-    settings_fingerprint text NOT NULL,
-    sequin_sink_name text NOT NULL,
-    state public.search_index_generation_state DEFAULT 'declared'::public.search_index_generation_state NOT NULL,
-    source_watermark_lsn pg_lsn,
-    source_watermark_at timestamp(3) with time zone,
-    last_verified_lsn pg_lsn,
-    verified_at timestamp(3) with time zone,
-    activated_at timestamp(3) with time zone,
-    failure text,
-    CONSTRAINT search_index_generation_index_uid_check CHECK ((index_uid ~ '^rezics_(units|revisions)_v[1-9][0-9]*_[0-9]{8}(_[0-9]{6})?$'::text)),
-    CONSTRAINT search_index_generation_projection_version_check CHECK ((projection_version > 0)),
-    CONSTRAINT search_index_generation_settings_fingerprint_check CHECK ((settings_fingerprint ~ '^[0-9a-f]{64}$'::text)),
-    CONSTRAINT search_index_generation_state_metadata_check CHECK ((((state <> ALL (ARRAY['verified'::public.search_index_generation_state, 'active'::public.search_index_generation_state])) OR ((verified_at IS NOT NULL) AND (last_verified_lsn IS NOT NULL))) AND ((state <> 'active'::public.search_index_generation_state) OR (activated_at IS NOT NULL)) AND ((state <> 'failed'::public.search_index_generation_state) OR (failure IS NOT NULL))))
-);
-
-
---
--- Name: search_revision_projection_source; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.search_revision_projection_source (
-    revision_id uuid NOT NULL,
-    revision bigint DEFAULT 1 NOT NULL,
-    touched_at timestamp(3) with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT search_revision_projection_source_revision_check CHECK ((revision > 0))
-);
-
-
---
--- Name: search_unit_projection_source; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.search_unit_projection_source (
-    unit_id uuid NOT NULL,
-    revision bigint DEFAULT 1 NOT NULL,
-    touched_at timestamp(3) with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT search_unit_projection_source_revision_check CHECK ((revision > 0))
 );
 
 
@@ -3802,6 +3790,47 @@ $$;
 
 
 --
+-- Name: apply_post_reply_stat_delta(uuid, uuid, bigint, bigint); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.apply_post_reply_stat_delta(p_root_post_id uuid, p_parent_post_id uuid, p_undeleted_delta bigint, p_visible_delta bigint) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF p_undeleted_delta = 0 AND p_visible_delta = 0 THEN
+    RETURN;
+  END IF;
+
+  UPDATE post_reply_stat SET
+    undeleted_direct_count = undeleted_direct_count
+      + CASE WHEN p_parent_post_id = p_root_post_id THEN p_undeleted_delta ELSE 0 END,
+    undeleted_descendant_count = undeleted_descendant_count + p_undeleted_delta,
+    visible_direct_count = visible_direct_count
+      + CASE WHEN p_parent_post_id = p_root_post_id THEN p_visible_delta ELSE 0 END,
+    visible_descendant_count = visible_descendant_count + p_visible_delta,
+    updated_at = now()
+  WHERE post_id = p_root_post_id;
+  IF NOT FOUND AND EXISTS (SELECT 1 FROM post WHERE id = p_root_post_id) THEN
+    RAISE EXCEPTION 'missing post_reply_stat row for root %', p_root_post_id
+      USING ERRCODE = '23514';
+  END IF;
+
+  IF p_parent_post_id IS NOT NULL AND p_parent_post_id <> p_root_post_id THEN
+    UPDATE post_reply_stat SET
+      undeleted_direct_count = undeleted_direct_count + p_undeleted_delta,
+      visible_direct_count = visible_direct_count + p_visible_delta,
+      updated_at = now()
+    WHERE post_id = p_parent_post_id;
+    IF NOT FOUND AND EXISTS (SELECT 1 FROM post WHERE id = p_parent_post_id) THEN
+      RAISE EXCEPTION 'missing post_reply_stat row for parent %', p_parent_post_id
+        USING ERRCODE = '23514';
+    END IF;
+  END IF;
+END;
+$$;
+
+
+--
 -- Name: assert_post_targeting_allowed(uuid, jsonb, uuid); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -4308,29 +4337,28 @@ $$;
 
 
 --
--- Name: maintain_conversation_read_stat(); Type: FUNCTION; Schema: public; Owner: -
+-- Name: initialize_collection_stat(); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION public.maintain_conversation_read_stat() RETURNS trigger
+CREATE FUNCTION public.initialize_collection_stat() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-DECLARE marker_created_at timestamptz;
-marker_id uuid;
-row_data conversation_read%ROWTYPE;
 BEGIN
-  row_data := CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
-  IF TG_OP <> 'DELETE' THEN
-    SELECT created_at, id INTO marker_created_at, marker_id FROM message
-    WHERE id = row_data.last_read_message_id AND conversation_id = row_data.conversation_id;
-  END IF;
-  UPDATE conversation_participant_stat target SET unread_count = (
-    SELECT count(*) FROM message candidate
-    WHERE candidate.conversation_id = row_data.conversation_id
-      AND candidate.sender_profile_id <> row_data.profile_id
-      AND candidate.deleted_at IS NULL
-      AND (marker_id IS NULL OR (candidate.created_at, candidate.id) > (marker_created_at, marker_id))
-  ), updated_at = now()
-  WHERE target.conversation_id = row_data.conversation_id AND target.profile_id = row_data.profile_id;
+  INSERT INTO collection_stat (collection_id) VALUES (NEW.id);
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: initialize_poll_option_vote_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.initialize_poll_option_vote_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO poll_option_vote_stat (option_id) VALUES (NEW.id);
   RETURN NULL;
 END;
 $$;
@@ -4436,6 +4464,35 @@ $$;
 
 
 --
+-- Name: maintain_collection_item_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_collection_item_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE changed record;
+BEGIN
+  FOR changed IN
+    SELECT OLD.collection_id AS collection_id, -1::bigint AS direction
+      WHERE TG_OP IN ('UPDATE', 'DELETE')
+    UNION ALL
+    SELECT NEW.collection_id AS collection_id, 1::bigint AS direction
+      WHERE TG_OP IN ('UPDATE', 'INSERT')
+  LOOP
+    UPDATE collection_stat
+    SET item_count = item_count + changed.direction, updated_at = now()
+    WHERE collection_id = changed.collection_id;
+    IF NOT FOUND AND EXISTS (SELECT 1 FROM collection WHERE id = changed.collection_id) THEN
+      RAISE EXCEPTION 'missing collection_stat row for %', changed.collection_id
+        USING ERRCODE = '23514';
+    END IF;
+  END LOOP;
+  RETURN NULL;
+END;
+$$;
+
+
+--
 -- Name: maintain_message_stats(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -4500,47 +4557,82 @@ $$;
 CREATE FUNCTION public.maintain_post_reply_stats() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
+DECLARE reply_unit unit%ROWTYPE;
 BEGIN
-  IF TG_OP IN ('UPDATE', 'DELETE') THEN
-    IF TG_OP = 'DELETE' AND EXISTS (SELECT 1 FROM unit WHERE id = OLD.post_id) THEN
-      IF EXISTS (SELECT 1 FROM unit WHERE id = OLD.post_id AND deleted_at IS NULL) THEN
-        PERFORM apply_unit_engagement_stat(OLD.root_post_id, p_replies => -1);
-        IF OLD.parent_post_id IS NOT NULL THEN
-          PERFORM apply_unit_engagement_stat(OLD.parent_post_id, p_replies => -1);
-        END IF;
-      END IF;
-      PERFORM apply_recommendation_unit_signal(OLD.root_post_id, OLD.created_at, 'reply', -1, -4);
-      IF OLD.parent_post_id IS NOT NULL THEN
-        PERFORM apply_recommendation_unit_signal(
-          OLD.parent_post_id, OLD.created_at, 'reply', -1, -4
-        );
-      END IF;
-    END IF;
-    PERFORM refresh_post_reply_stat(OLD.root_post_id);
-    IF OLD.parent_post_id IS NOT NULL THEN PERFORM refresh_post_reply_stat(OLD.parent_post_id); END IF;
-  END IF;
-  IF TG_OP IN ('UPDATE', 'INSERT') THEN
-    IF TG_OP = 'INSERT' AND EXISTS (
-      SELECT 1 FROM unit WHERE id = NEW.post_id AND deleted_at IS NULL
-    ) THEN
+  IF TG_OP = 'INSERT' THEN
+    SELECT * INTO STRICT reply_unit FROM unit WHERE id = NEW.post_id;
+    PERFORM apply_post_reply_stat_delta(
+      NEW.root_post_id,
+      NEW.parent_post_id,
+      (reply_unit.deleted_at IS NULL)::int,
+      (reply_unit.deleted_at IS NULL AND reply_unit.status = 'published'
+        AND reply_unit.visibility = 'public'
+        AND reply_unit.moderation_status = 'approved')::int
+    );
+    IF reply_unit.deleted_at IS NULL THEN
       PERFORM apply_unit_engagement_stat(NEW.root_post_id, p_replies => 1);
       IF NEW.parent_post_id IS NOT NULL THEN
         PERFORM apply_unit_engagement_stat(NEW.parent_post_id, p_replies => 1);
       END IF;
     END IF;
-    IF TG_OP = 'INSERT' THEN
+    PERFORM apply_recommendation_unit_signal(NEW.root_post_id, NEW.created_at, 'reply', 1, 4);
+    IF NEW.parent_post_id IS NOT NULL THEN
       PERFORM apply_recommendation_unit_signal(
-        NEW.root_post_id, NEW.created_at, 'reply', 1, 4
+        NEW.parent_post_id, NEW.created_at, 'reply', 1, 4
       );
-      IF NEW.parent_post_id IS NOT NULL THEN
-        PERFORM apply_recommendation_unit_signal(
-          NEW.parent_post_id, NEW.created_at, 'reply', 1, 4
-        );
+    END IF;
+  ELSIF TG_OP = 'DELETE' AND EXISTS (SELECT 1 FROM unit WHERE id = OLD.post_id) THEN
+    SELECT * INTO STRICT reply_unit FROM unit WHERE id = OLD.post_id;
+    PERFORM apply_post_reply_stat_delta(
+      OLD.root_post_id,
+      OLD.parent_post_id,
+      -(reply_unit.deleted_at IS NULL)::int,
+      -(reply_unit.deleted_at IS NULL AND reply_unit.status = 'published'
+        AND reply_unit.visibility = 'public'
+        AND reply_unit.moderation_status = 'approved')::int
+    );
+    IF reply_unit.deleted_at IS NULL THEN
+      PERFORM apply_unit_engagement_stat(OLD.root_post_id, p_replies => -1);
+      IF OLD.parent_post_id IS NOT NULL THEN
+        PERFORM apply_unit_engagement_stat(OLD.parent_post_id, p_replies => -1);
       END IF;
     END IF;
-    PERFORM refresh_post_reply_stat(NEW.root_post_id);
-    IF NEW.parent_post_id IS NOT NULL THEN PERFORM refresh_post_reply_stat(NEW.parent_post_id); END IF;
+    PERFORM apply_recommendation_unit_signal(OLD.root_post_id, OLD.created_at, 'reply', -1, -4);
+    IF OLD.parent_post_id IS NOT NULL THEN
+      PERFORM apply_recommendation_unit_signal(
+        OLD.parent_post_id, OLD.created_at, 'reply', -1, -4
+      );
+    END IF;
   END IF;
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: maintain_poll_option_vote_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_poll_option_vote_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE changed record;
+BEGIN
+  FOR changed IN
+    SELECT OLD.option_id AS option_id, -1::bigint AS direction
+      WHERE TG_OP IN ('UPDATE', 'DELETE')
+    UNION ALL
+    SELECT NEW.option_id AS option_id, 1::bigint AS direction
+      WHERE TG_OP IN ('UPDATE', 'INSERT')
+  LOOP
+    UPDATE poll_option_vote_stat
+    SET vote_count = vote_count + changed.direction, updated_at = now()
+    WHERE option_id = changed.option_id;
+    IF NOT FOUND AND EXISTS (SELECT 1 FROM poll_option WHERE id = changed.option_id) THEN
+      RAISE EXCEPTION 'missing poll_option_vote_stat row for %', changed.option_id
+        USING ERRCODE = '23514';
+    END IF;
+  END LOOP;
   RETURN NULL;
 END;
 $$;
@@ -4653,11 +4745,17 @@ CREATE FUNCTION public.maintain_reply_unit_state() RETURNS trigger
 DECLARE relation post_reply%ROWTYPE;
 old_counted boolean;
 new_counted boolean;
+old_visible boolean;
+new_visible boolean;
 BEGIN
   SELECT * INTO relation FROM post_reply WHERE post_id = OLD.id;
   IF NOT FOUND THEN RETURN NULL; END IF;
   old_counted := OLD.deleted_at IS NULL;
   new_counted := NEW.deleted_at IS NULL;
+  old_visible := old_counted AND OLD.status = 'published' AND OLD.visibility = 'public'
+    AND OLD.moderation_status = 'approved';
+  new_visible := new_counted AND NEW.status = 'published' AND NEW.visibility = 'public'
+    AND NEW.moderation_status = 'approved';
   IF old_counted IS DISTINCT FROM new_counted THEN
     PERFORM apply_unit_engagement_stat(
       relation.root_post_id, p_replies => CASE WHEN new_counted THEN 1 ELSE -1 END
@@ -4668,10 +4766,12 @@ BEGIN
       );
     END IF;
   END IF;
-  PERFORM refresh_post_reply_stat(relation.root_post_id);
-  IF relation.parent_post_id IS NOT NULL THEN
-    PERFORM refresh_post_reply_stat(relation.parent_post_id);
-  END IF;
+  PERFORM apply_post_reply_stat_delta(
+    relation.root_post_id,
+    relation.parent_post_id,
+    new_counted::int - old_counted::int,
+    new_visible::int - old_visible::int
+  );
   RETURN NULL;
 END;
 $$;
@@ -5407,44 +5507,6 @@ $$;
 
 
 --
--- Name: refresh_post_reply_stat(uuid); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.refresh_post_reply_stat(p_post_id uuid) RETURNS void
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM post WHERE id = p_post_id) THEN RETURN; END IF;
-  INSERT INTO post_reply_stat (
-    post_id, undeleted_direct_count, undeleted_descendant_count,
-    visible_direct_count, visible_descendant_count
-  ) SELECT p_post_id,
-    count(*) FILTER (WHERE reply.parent_post_id = p_post_id AND reply_unit.deleted_at IS NULL),
-    count(*) FILTER (WHERE reply.root_post_id = p_post_id AND reply_unit.deleted_at IS NULL),
-    count(*) FILTER (
-      WHERE reply.parent_post_id = p_post_id AND reply_unit.deleted_at IS NULL
-        AND reply_unit.status = 'published' AND reply_unit.visibility = 'public'
-        AND reply_unit.moderation_status = 'approved'
-    ),
-    count(*) FILTER (
-      WHERE reply.root_post_id = p_post_id AND reply_unit.deleted_at IS NULL
-        AND reply_unit.status = 'published' AND reply_unit.visibility = 'public'
-        AND reply_unit.moderation_status = 'approved'
-    )
-  FROM post_reply reply
-  JOIN unit reply_unit ON reply_unit.id = reply.post_id
-  WHERE reply.parent_post_id = p_post_id OR reply.root_post_id = p_post_id
-  ON CONFLICT (post_id) DO UPDATE SET
-    undeleted_direct_count = excluded.undeleted_direct_count,
-    undeleted_descendant_count = excluded.undeleted_descendant_count,
-    visible_direct_count = excluded.visible_direct_count,
-    visible_descendant_count = excluded.visible_descendant_count,
-    updated_at = now();
-END;
-$$;
-
-
---
 -- Name: refresh_unit_effective_tag(uuid, uuid); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -5701,6 +5763,13 @@ DECLARE relation post_reply%ROWTYPE;
 BEGIN
   SELECT * INTO relation FROM post_reply WHERE post_id = OLD.id;
   IF NOT FOUND THEN RETURN OLD; END IF;
+  PERFORM apply_post_reply_stat_delta(
+    relation.root_post_id,
+    relation.parent_post_id,
+    -(OLD.deleted_at IS NULL)::int,
+    -(OLD.deleted_at IS NULL AND OLD.status = 'published' AND OLD.visibility = 'public'
+      AND OLD.moderation_status = 'approved')::int
+  );
   IF OLD.deleted_at IS NULL THEN
     PERFORM apply_unit_engagement_stat(relation.root_post_id, p_replies => -1);
     IF relation.parent_post_id IS NOT NULL THEN
@@ -5719,344 +5788,6 @@ BEGIN
 END;
 $$;
 
-
---
--- Name: search_document_text_v1(jsonb); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.search_document_text_v1(document jsonb) RETURNS text
-    LANGUAGE sql IMMUTABLE PARALLEL SAFE
-    AS $$
-	SELECT btrim(regexp_replace(coalesce(string_agg(child ->> 'text', ' ' ORDER BY block.ordinality, child_row.ordinality), ''), '\s+', ' ', 'g'))
-	FROM jsonb_array_elements(
-		CASE
-			WHEN jsonb_typeof(document) = 'object' AND document ->> '_type' = 'portable-text'
-				THEN coalesce(document -> 'content', '[]'::jsonb)
-			WHEN jsonb_typeof(document) = 'array' THEN document
-			ELSE '[]'::jsonb
-		END
-	) WITH ORDINALITY AS block(value, ordinality)
-	CROSS JOIN LATERAL jsonb_array_elements(
-		CASE WHEN block.value ->> '_type' = 'block' THEN coalesce(block.value -> 'children', '[]'::jsonb) ELSE '[]'::jsonb END
-	) WITH ORDINALITY AS child_row(child, ordinality)
-	WHERE child ->> '_type' = 'span' AND jsonb_typeof(child -> 'text') = 'string'
-$$;
-
-
---
--- Name: search_touch_alias_owner_statement(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.search_touch_alias_owner_statement() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-	alias_ids uuid[];
-	unit_ids uuid[];
-BEGIN
-	IF TG_OP = 'INSERT' THEN
-		SELECT array_agg(alias_id) INTO alias_ids FROM new_rows;
-	ELSIF TG_OP = 'DELETE' THEN
-		SELECT array_agg(alias_id) INTO alias_ids FROM old_rows;
-	ELSE
-		SELECT array_agg(alias_id) INTO alias_ids FROM (
-			SELECT alias_id FROM old_rows UNION SELECT alias_id FROM new_rows
-		) AS changed_aliases;
-	END IF;
-	SELECT array_agg(DISTINCT unit_id) INTO unit_ids
-	FROM public.unit_alias WHERE id = ANY(coalesce(alias_ids, ARRAY[]::uuid[]));
-	PERFORM touch_search_unit_projection(coalesce(unit_ids, ARRAY[]::uuid[]));
-	RETURN NULL;
-END
-$$;
-
-
---
--- Name: search_touch_credited_profile_chain_statement(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.search_touch_credited_profile_chain_statement() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-	changed_rows jsonb[];
-	changed_ids uuid[];
-	first_sources uuid[];
-	dependent_sources uuid[];
-BEGIN
-	IF TG_OP = 'INSERT' THEN
-		SELECT array_agg(to_jsonb(row_value)) INTO changed_rows FROM new_rows AS row_value;
-	ELSIF TG_OP = 'DELETE' THEN
-		SELECT array_agg(to_jsonb(row_value)) INTO changed_rows FROM old_rows AS row_value;
-	ELSE
-		SELECT array_agg(row_data) INTO changed_rows FROM (
-			SELECT to_jsonb(row_value) AS row_data FROM old_rows AS row_value
-			UNION ALL
-			SELECT to_jsonb(row_value) AS row_data FROM new_rows AS row_value
-		) AS combined;
-	END IF;
-
-	IF TG_TABLE_NAME = 'credit_attribution' THEN
-		changed_ids := search_transition_keys(
-			coalesce(changed_rows, ARRAY[]::jsonb[]),
-			ARRAY['source_unit_id']
-		);
-		SELECT coalesce(array_agg(DISTINCT source_credit.source_unit_id), ARRAY[]::uuid[])
-		INTO dependent_sources
-		FROM public.credit_attribution AS source_credit
-		JOIN public.unit AS credited_entity
-			ON credited_entity.id = source_credit.credited_unit_id
-			AND credited_entity.kind = 'entity'
-		WHERE credited_entity.id = ANY(changed_ids);
-		PERFORM touch_search_unit_projection(dependent_sources);
-		RETURN NULL;
-	END IF;
-
-	changed_ids := search_transition_keys(
-		coalesce(changed_rows, ARRAY[]::jsonb[]),
-		ARRAY['id']
-	);
-	SELECT coalesce(array_agg(DISTINCT direct_credit.source_unit_id), ARRAY[]::uuid[])
-	INTO first_sources
-	FROM public.credit_attribution AS direct_credit
-	WHERE direct_credit.credited_unit_id = ANY(changed_ids);
-
-	SELECT coalesce(array_agg(DISTINCT source_credit.source_unit_id), ARRAY[]::uuid[])
-	INTO dependent_sources
-	FROM public.credit_attribution AS source_credit
-	JOIN public.unit AS credited_entity
-		ON credited_entity.id = source_credit.credited_unit_id
-		AND credited_entity.kind = 'entity'
-	WHERE credited_entity.id = ANY(first_sources);
-
-	PERFORM touch_search_unit_projection(first_sources || dependent_sources);
-	RETURN NULL;
-END
-$$;
-
-
---
--- Name: search_touch_current_statement(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.search_touch_current_statement() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-	keys uuid[];
-	changed_rows jsonb[];
-BEGIN
-	IF TG_OP = 'INSERT' THEN
-		SELECT array_agg(to_jsonb(row_value)) INTO changed_rows FROM new_rows AS row_value;
-	ELSIF TG_OP = 'DELETE' THEN
-		SELECT array_agg(to_jsonb(row_value)) INTO changed_rows FROM old_rows AS row_value;
-	ELSE
-		SELECT array_agg(row_data) INTO changed_rows FROM (
-			SELECT to_jsonb(row_value) AS row_data FROM old_rows AS row_value
-			UNION ALL SELECT to_jsonb(row_value) AS row_data FROM new_rows AS row_value
-		) AS combined;
-	END IF;
-	keys := search_transition_keys(coalesce(changed_rows, ARRAY[]::jsonb[]), TG_ARGV);
-	PERFORM touch_search_unit_projection(keys);
-	RETURN NULL;
-END
-$$;
-
-
---
--- Name: search_touch_revision_statement(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.search_touch_revision_statement() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-	keys uuid[];
-	changed_rows jsonb[];
-BEGIN
-	IF TG_OP = 'INSERT' THEN
-		SELECT array_agg(to_jsonb(row_value)) INTO changed_rows FROM new_rows AS row_value;
-	ELSIF TG_OP = 'DELETE' THEN
-		SELECT array_agg(to_jsonb(row_value)) INTO changed_rows FROM old_rows AS row_value;
-	ELSE
-		SELECT array_agg(row_data) INTO changed_rows FROM (
-			SELECT to_jsonb(row_value) AS row_data FROM old_rows AS row_value
-			UNION ALL SELECT to_jsonb(row_value) AS row_data FROM new_rows AS row_value
-		) AS combined;
-	END IF;
-	keys := search_transition_keys(coalesce(changed_rows, ARRAY[]::jsonb[]), TG_ARGV);
-	PERFORM touch_search_revision_projection(keys);
-	RETURN NULL;
-END
-$$;
-
-
---
--- Name: search_touch_structure_alias_dependents_statement(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.search_touch_structure_alias_dependents_statement() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-  changed_rows jsonb[];
-  alias_ids uuid[];
-  structure_ids uuid[];
-BEGIN
-  IF TG_OP = 'INSERT' THEN
-    SELECT array_agg(to_jsonb(row_value)) INTO changed_rows FROM new_rows AS row_value;
-  ELSIF TG_OP = 'DELETE' THEN
-    SELECT array_agg(to_jsonb(row_value)) INTO changed_rows FROM old_rows AS row_value;
-  ELSE
-    SELECT array_agg(row_data) INTO changed_rows FROM (
-      SELECT to_jsonb(row_value) AS row_data FROM old_rows AS row_value
-      UNION ALL
-      SELECT to_jsonb(row_value) AS row_data FROM new_rows AS row_value
-    ) AS combined;
-  END IF;
-  alias_ids := search_transition_keys(
-    coalesce(changed_rows, ARRAY[]::jsonb[]),
-    ARRAY['alias_id']
-  );
-  SELECT array_agg(DISTINCT member.structure_id) INTO structure_ids
-  FROM unit_alias alias_row
-  JOIN unit_structure_member member ON member.member_unit_id = alias_row.unit_id
-  WHERE alias_row.id = ANY(coalesce(alias_ids, ARRAY[]::uuid[]));
-  PERFORM touch_search_unit_projection(coalesce(structure_ids, ARRAY[]::uuid[]));
-  RETURN NULL;
-END
-$$;
-
-
---
--- Name: search_touch_structure_member_dependents_statement(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.search_touch_structure_member_dependents_statement() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-  changed_rows jsonb[];
-  member_ids uuid[];
-  structure_ids uuid[];
-BEGIN
-  IF TG_OP = 'INSERT' THEN
-    SELECT array_agg(to_jsonb(row_value)) INTO changed_rows FROM new_rows AS row_value;
-  ELSIF TG_OP = 'DELETE' THEN
-    SELECT array_agg(to_jsonb(row_value)) INTO changed_rows FROM old_rows AS row_value;
-  ELSE
-    SELECT array_agg(row_data) INTO changed_rows FROM (
-      SELECT to_jsonb(row_value) AS row_data FROM old_rows AS row_value
-      UNION ALL
-      SELECT to_jsonb(row_value) AS row_data FROM new_rows AS row_value
-    ) AS combined;
-  END IF;
-  member_ids := search_transition_keys(
-    coalesce(changed_rows, ARRAY[]::jsonb[]),
-    TG_ARGV
-  );
-  SELECT array_agg(DISTINCT structure_id) INTO structure_ids
-  FROM unit_structure_member
-  WHERE member_unit_id = ANY(coalesce(member_ids, ARRAY[]::uuid[]));
-  PERFORM touch_search_unit_projection(coalesce(structure_ids, ARRAY[]::uuid[]));
-  RETURN NULL;
-END
-$$;
-
-
---
--- Name: search_touch_unit_relation_dependents_statement(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.search_touch_unit_relation_dependents_statement() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-	changed_unit_ids uuid[];
-	dependent_unit_ids uuid[];
-BEGIN
-	SELECT coalesce(array_agg(new_row.id), ARRAY[]::uuid[])
-	INTO changed_unit_ids
-	FROM new_rows AS new_row
-	JOIN old_rows AS old_row USING (id)
-	WHERE new_row.kind IS DISTINCT FROM old_row.kind;
-
-	SELECT coalesce(array_agg(DISTINCT dependent_id), ARRAY[]::uuid[])
-	INTO dependent_unit_ids
-	FROM (
-		SELECT post_row.id AS dependent_id
-		FROM public.post AS post_row
-		WHERE post_row.subject_unit_id = ANY(changed_unit_ids)
-		UNION
-		SELECT item.collection_id AS dependent_id
-		FROM public.collection_item AS item
-		WHERE item.unit_id = ANY(changed_unit_ids)
-	) AS dependents;
-
-	PERFORM touch_search_unit_projection(dependent_unit_ids);
-	RETURN NULL;
-END
-$$;
-
-
---
--- Name: search_transition_keys(jsonb[], text[]); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.search_transition_keys(changed_rows jsonb[], key_names text[]) RETURNS uuid[]
-    LANGUAGE plpgsql
-    AS $_$
-DECLARE
-	keys uuid[];
-BEGIN
-	EXECUTE $query$
-		SELECT coalesce(array_agg(DISTINCT (row_data ->> key_name)::uuid), ARRAY[]::uuid[])
-		FROM unnest($1) AS changed_row(row_data)
-		CROSS JOIN unnest($2) AS requested_key(key_name)
-		WHERE nullif(row_data ->> key_name, '') IS NOT NULL
-	$query$ INTO keys USING changed_rows, key_names;
-	RETURN keys;
-END
-$_$;
-
-
---
--- Name: touch_search_revision_projection(uuid[]); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.touch_search_revision_projection(revision_ids uuid[]) RETURNS void
-    LANGUAGE sql
-    AS $$
-	INSERT INTO public.search_revision_projection_source (revision_id, revision, touched_at)
-	SELECT DISTINCT revision_id, 1, clock_timestamp()
-	FROM unnest(revision_ids) AS source(revision_id)
-	WHERE revision_id IS NOT NULL
-	ON CONFLICT (revision_id) DO UPDATE
-	SET revision = search_revision_projection_source.revision + 1,
-		touched_at = excluded.touched_at
-$$;
-
-
---
--- Name: touch_search_unit_projection(uuid[]); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.touch_search_unit_projection(unit_ids uuid[]) RETURNS void
-    LANGUAGE sql
-    AS $$
-	INSERT INTO public.search_unit_projection_source (unit_id, revision, touched_at)
-	SELECT DISTINCT unit_id, 1, clock_timestamp()
-	FROM unnest(unit_ids) AS source(unit_id)
-	WHERE unit_id IS NOT NULL
-	ON CONFLICT (unit_id) DO UPDATE
-	SET revision = search_unit_projection_source.revision + 1,
-		touched_at = excluded.touched_at
-$$;
-
-
-SET default_tablespace = '';
-
-SET default_table_access_method = heap;
 
 --
 -- Name: account_enforcement account_enforcement_decision_action_key; Type: CONSTRAINT; Schema: public; Owner: -
@@ -6216,6 +5947,14 @@ ALTER TABLE ONLY public.collection_item
 
 ALTER TABLE ONLY public.collection
     ADD CONSTRAINT collection_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: collection_stat collection_stat_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.collection_stat
+    ADD CONSTRAINT collection_stat_pkey PRIMARY KEY (collection_id);
 
 
 --
@@ -6576,6 +6315,14 @@ ALTER TABLE ONLY public.poll_option
 
 ALTER TABLE ONLY public.poll_option
     ADD CONSTRAINT poll_option_poll_id_key UNIQUE (poll_id, id);
+
+
+--
+-- Name: poll_option_vote_stat poll_option_vote_stat_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.poll_option_vote_stat
+    ADD CONSTRAINT poll_option_vote_stat_pkey PRIMARY KEY (option_id);
 
 
 --
@@ -7072,30 +6819,6 @@ ALTER TABLE ONLY public.search_document_revision
 
 ALTER TABLE ONLY public.search_document_revision
     ADD CONSTRAINT search_document_revision_pkey PRIMARY KEY (id);
-
-
---
--- Name: search_index_generation search_index_generation_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.search_index_generation
-    ADD CONSTRAINT search_index_generation_pkey PRIMARY KEY (id);
-
-
---
--- Name: search_revision_projection_source search_revision_projection_source_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.search_revision_projection_source
-    ADD CONSTRAINT search_revision_projection_source_pkey PRIMARY KEY (revision_id);
-
-
---
--- Name: search_unit_projection_source search_unit_projection_source_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.search_unit_projection_source
-    ADD CONSTRAINT search_unit_projection_source_pkey PRIMARY KEY (unit_id);
 
 
 --
@@ -8964,48 +8687,6 @@ CREATE INDEX search_document_revision_document_created_at_idx ON public.search_d
 
 
 --
--- Name: search_index_generation_active_projection_key; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX search_index_generation_active_projection_key ON public.search_index_generation USING btree (projection_kind) WHERE (state = 'active'::public.search_index_generation_state);
-
-
---
--- Name: search_index_generation_index_uid_key; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX search_index_generation_index_uid_key ON public.search_index_generation USING btree (index_uid);
-
-
---
--- Name: search_index_generation_projection_state_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX search_index_generation_projection_state_idx ON public.search_index_generation USING btree (projection_kind, state);
-
-
---
--- Name: search_index_generation_sequin_sink_name_key; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX search_index_generation_sequin_sink_name_key ON public.search_index_generation USING btree (sequin_sink_name);
-
-
---
--- Name: search_revision_projection_source_touched_at_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX search_revision_projection_source_touched_at_idx ON public.search_revision_projection_source USING btree (touched_at, revision_id);
-
-
---
--- Name: search_unit_projection_source_touched_at_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX search_unit_projection_source_touched_at_idx ON public.search_unit_projection_source USING btree (touched_at, unit_id);
-
-
---
 -- Name: series_kind_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -9353,6 +9034,47 @@ CREATE INDEX unit_follow_unit_created_at_idx ON public.unit_follow USING btree (
 --
 
 CREATE INDEX unit_kind_status_created_at_idx ON public.unit USING btree (kind, status, created_at DESC NULLS LAST, id DESC NULLS LAST) WHERE (deleted_at IS NULL);
+
+
+--
+-- Name: unit_localization_pgroonga_metadata_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX unit_localization_pgroonga_metadata_idx
+    ON public.unit_localization
+    USING pgroonga (
+        (public.current_search_metadata_v1(title, summary, description)) public.pgroonga_jsonb_full_text_search_ops_v2
+    )
+    WITH (
+        lexicon_flags_mapping = '{"current_search_metadata_v1":["LARGE"]}',
+        index_flags_mapping = '{"current_search_metadata_v1":["LARGE"]}'
+    );
+
+
+--
+-- Name: unit_localization_pgroonga_content_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX unit_localization_pgroonga_content_idx
+    ON public.unit_localization
+    USING pgroonga (
+        (public.current_search_text_v1(content)) public.pgroonga_jsonb_full_text_search_ops_v2
+    )
+    WITH (
+        lexicon_flags_mapping = '{"current_search_text_v1":["LARGE"]}',
+        index_flags_mapping = '{"current_search_text_v1":["LARGE"]}'
+    );
+
+
+--
+-- Name: unit_public_discoverable_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX unit_public_discoverable_idx ON public.unit USING btree (id)
+    WHERE status = 'published'::public.unit_status
+        AND visibility = 'public'::public.resource_visibility
+        AND moderation_status = 'approved'::public.moderation_status
+        AND deleted_at IS NULL;
 
 
 --
@@ -10043,6 +9765,14 @@ ALTER TABLE ONLY public.collection_item
 
 
 --
+-- Name: collection_stat collection_stat_collection_id_collection_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.collection_stat
+    ADD CONSTRAINT collection_stat_collection_id_collection_id_fkey FOREIGN KEY (collection_id) REFERENCES public.collection(id) ON DELETE CASCADE;
+
+
+--
 -- Name: collection_structure_revision collection_structure_revision_FRTr4YXDyec2_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -10648,6 +10378,14 @@ ALTER TABLE ONLY public.poll_option
 
 ALTER TABLE ONLY public.poll_option
     ADD CONSTRAINT poll_option_target_unit_id_unit_id_fkey FOREIGN KEY (target_unit_id) REFERENCES public.unit(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: poll_option_vote_stat poll_option_vote_stat_option_id_poll_option_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.poll_option_vote_stat
+    ADD CONSTRAINT poll_option_vote_stat_option_id_poll_option_id_fkey FOREIGN KEY (option_id) REFERENCES public.poll_option(id) ON DELETE CASCADE;
 
 
 --
@@ -12603,27 +12341,6 @@ ALTER TABLE ONLY public.zone_search_feature
 
 
 --
--- Name: rezics_search_projection_publication; Type: PUBLICATION; Schema: -; Owner: -
---
-
-CREATE PUBLICATION rezics_search_projection_publication WITH (publish = 'insert, update, delete, truncate');
-
-
---
--- Name: rezics_search_projection_publication search_revision_projection_source; Type: PUBLICATION TABLE; Schema: public; Owner: -
---
-
-ALTER PUBLICATION rezics_search_projection_publication ADD TABLE ONLY public.search_revision_projection_source;
-
-
---
--- Name: rezics_search_projection_publication search_unit_projection_source; Type: PUBLICATION TABLE; Schema: public; Owner: -
---
-
-ALTER PUBLICATION rezics_search_projection_publication ADD TABLE ONLY public.search_unit_projection_source;
-
-
---
 -- Name: audit_event audit_event_append_only; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -12659,17 +12376,24 @@ CREATE TRIGGER conversation_read_identity_protect BEFORE UPDATE ON public.conver
 
 
 --
--- Name: conversation_read conversation_read_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER conversation_read_stat_maintain AFTER INSERT OR DELETE OR UPDATE OF last_read_message_id ON public.conversation_read FOR EACH ROW EXECUTE FUNCTION public.maintain_conversation_read_stat();
-
-
---
 -- Name: conversation conversation_stats_initialize; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER conversation_stats_initialize AFTER INSERT ON public.conversation FOR EACH ROW EXECUTE FUNCTION public.initialize_conversation_stats();
+
+
+--
+-- Name: collection collection_stat_initialize; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER collection_stat_initialize AFTER INSERT ON public.collection FOR EACH ROW EXECUTE FUNCTION public.initialize_collection_stat();
+
+
+--
+-- Name: collection_item collection_item_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER collection_item_stat_maintain AFTER INSERT OR DELETE OR UPDATE OF collection_id ON public.collection_item FOR EACH ROW EXECUTE FUNCTION public.maintain_collection_item_stat();
 
 
 --
@@ -12743,6 +12467,20 @@ CREATE TRIGGER post_reply_targeting_enforce AFTER INSERT OR UPDATE OF root_post_
 
 
 --
+-- Name: poll_option poll_option_vote_stat_initialize; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER poll_option_vote_stat_initialize AFTER INSERT ON public.poll_option FOR EACH ROW EXECUTE FUNCTION public.initialize_poll_option_vote_stat();
+
+
+--
+-- Name: poll_vote poll_option_vote_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER poll_option_vote_stat_maintain AFTER INSERT OR DELETE OR UPDATE OF option_id ON public.poll_vote FOR EACH ROW EXECUTE FUNCTION public.maintain_poll_option_vote_stat();
+
+
+--
 -- Name: post post_subject_targeting_enforce; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -12803,972 +12541,6 @@ CREATE TRIGGER revision_content_immutable BEFORE DELETE OR UPDATE ON public.revi
 --
 
 CREATE TRIGGER score_stat_maintain AFTER INSERT OR DELETE OR UPDATE ON public.score FOR EACH ROW EXECUTE FUNCTION public.maintain_score_stat();
-
-
---
--- Name: book search_projection_touch_book_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_book_delete AFTER DELETE ON public.book REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: book search_projection_touch_book_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_book_insert AFTER INSERT ON public.book REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: book search_projection_touch_book_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_book_update AFTER UPDATE ON public.book REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: collection search_projection_touch_collection_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_collection_delete AFTER DELETE ON public.collection REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: collection search_projection_touch_collection_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_collection_insert AFTER INSERT ON public.collection REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: collection search_projection_touch_collection_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_collection_update AFTER UPDATE ON public.collection REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: collection_item search_projection_touch_collection_item_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_collection_item_delete AFTER DELETE ON public.collection_item REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('collection_id');
-
-
---
--- Name: collection_item search_projection_touch_collection_item_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_collection_item_insert AFTER INSERT ON public.collection_item REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('collection_id');
-
-
---
--- Name: collection_item search_projection_touch_collection_item_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_collection_item_update AFTER UPDATE ON public.collection_item REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('collection_id');
-
-
---
--- Name: content_structure_node search_projection_touch_content_structure_node_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_content_structure_node_delete AFTER DELETE ON public.content_structure_node REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('owner_unit_id', 'content_unit_id');
-
-
---
--- Name: content_structure_node search_projection_touch_content_structure_node_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_content_structure_node_insert AFTER INSERT ON public.content_structure_node REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('owner_unit_id', 'content_unit_id');
-
-
---
--- Name: content_structure_node search_projection_touch_content_structure_node_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_content_structure_node_update AFTER UPDATE ON public.content_structure_node REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('owner_unit_id', 'content_unit_id');
-
-
---
--- Name: credit_attribution search_projection_touch_credit_attribution_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_credit_attribution_delete AFTER DELETE ON public.credit_attribution REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('source_unit_id');
-
-
---
--- Name: credit_attribution search_projection_touch_credit_attribution_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_credit_attribution_insert AFTER INSERT ON public.credit_attribution REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('source_unit_id');
-
-
---
--- Name: credit_attribution search_projection_touch_credit_attribution_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_credit_attribution_update AFTER UPDATE ON public.credit_attribution REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('source_unit_id');
-
-
---
--- Name: credit_attribution search_projection_touch_credited_profile_chain_credit_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_credited_profile_chain_credit_delete AFTER DELETE ON public.credit_attribution REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_credited_profile_chain_statement();
-
-
---
--- Name: credit_attribution search_projection_touch_credited_profile_chain_credit_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_credited_profile_chain_credit_insert AFTER INSERT ON public.credit_attribution REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_credited_profile_chain_statement();
-
-
---
--- Name: credit_attribution search_projection_touch_credited_profile_chain_credit_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_credited_profile_chain_credit_update AFTER UPDATE ON public.credit_attribution REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_credited_profile_chain_statement();
-
-
---
--- Name: unit search_projection_touch_credited_profile_chain_unit_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_credited_profile_chain_unit_delete AFTER DELETE ON public.unit REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_credited_profile_chain_statement();
-
-
---
--- Name: unit search_projection_touch_credited_profile_chain_unit_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_credited_profile_chain_unit_insert AFTER INSERT ON public.unit REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_credited_profile_chain_statement();
-
-
---
--- Name: unit search_projection_touch_credited_profile_chain_unit_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_credited_profile_chain_unit_update AFTER UPDATE ON public.unit REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_credited_profile_chain_statement();
-
-
---
--- Name: entity search_projection_touch_entity_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_entity_delete AFTER DELETE ON public.entity REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: entity search_projection_touch_entity_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_entity_insert AFTER INSERT ON public.entity REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: entity search_projection_touch_entity_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_entity_update AFTER UPDATE ON public.entity REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: media search_projection_touch_media_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_media_delete AFTER DELETE ON public.media REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: media search_projection_touch_media_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_media_insert AFTER INSERT ON public.media REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: media search_projection_touch_media_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_media_update AFTER UPDATE ON public.media REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: poll search_projection_touch_poll_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_poll_delete AFTER DELETE ON public.poll REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: poll search_projection_touch_poll_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_poll_insert AFTER INSERT ON public.poll REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: poll search_projection_touch_poll_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_poll_update AFTER UPDATE ON public.poll REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: post search_projection_touch_post_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_post_delete AFTER DELETE ON public.post REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: post search_projection_touch_post_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_post_insert AFTER INSERT ON public.post REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: post_reply search_projection_touch_post_reply_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_post_reply_delete AFTER DELETE ON public.post_reply REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('post_id');
-
-
---
--- Name: post_reply search_projection_touch_post_reply_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_post_reply_insert AFTER INSERT ON public.post_reply REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('post_id');
-
-
---
--- Name: post_reply_stat search_projection_touch_post_reply_stat_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_post_reply_stat_delete AFTER DELETE ON public.post_reply_stat REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('post_id');
-
-
---
--- Name: post_reply_stat search_projection_touch_post_reply_stat_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_post_reply_stat_insert AFTER INSERT ON public.post_reply_stat REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('post_id');
-
-
---
--- Name: post_reply_stat search_projection_touch_post_reply_stat_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_post_reply_stat_update AFTER UPDATE ON public.post_reply_stat REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('post_id');
-
-
---
--- Name: post_reply search_projection_touch_post_reply_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_post_reply_update AFTER UPDATE ON public.post_reply REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('post_id');
-
-
---
--- Name: post search_projection_touch_post_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_post_update AFTER UPDATE ON public.post REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: realm search_projection_touch_realm_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_realm_delete AFTER DELETE ON public.realm REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: realm search_projection_touch_realm_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_realm_insert AFTER INSERT ON public.realm REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: realm_tag_context search_projection_touch_realm_tag_context_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_realm_tag_context_delete AFTER DELETE ON public.realm_tag_context REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('realm_id', 'tag_id');
-
-
---
--- Name: realm_tag_context search_projection_touch_realm_tag_context_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_realm_tag_context_insert AFTER INSERT ON public.realm_tag_context REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('realm_id', 'tag_id');
-
-
---
--- Name: realm_tag_context search_projection_touch_realm_tag_context_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_realm_tag_context_update AFTER UPDATE ON public.realm_tag_context REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('realm_id', 'tag_id');
-
-
---
--- Name: realm_tag_vote search_projection_touch_realm_tag_vote_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_realm_tag_vote_delete AFTER DELETE ON public.realm_tag_vote REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: realm_tag_vote search_projection_touch_realm_tag_vote_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_realm_tag_vote_insert AFTER INSERT ON public.realm_tag_vote REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: realm_tag_vote search_projection_touch_realm_tag_vote_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_realm_tag_vote_update AFTER UPDATE ON public.realm_tag_vote REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: realm_unit search_projection_touch_realm_unit_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_realm_unit_delete AFTER DELETE ON public.realm_unit REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: realm_unit search_projection_touch_realm_unit_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_realm_unit_insert AFTER INSERT ON public.realm_unit REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: realm_unit_tag search_projection_touch_realm_unit_tag_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_realm_unit_tag_delete AFTER DELETE ON public.realm_unit_tag REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: realm_unit_tag search_projection_touch_realm_unit_tag_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_realm_unit_tag_insert AFTER INSERT ON public.realm_unit_tag REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: realm_unit_tag search_projection_touch_realm_unit_tag_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_realm_unit_tag_update AFTER UPDATE ON public.realm_unit_tag REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: realm_unit search_projection_touch_realm_unit_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_realm_unit_update AFTER UPDATE ON public.realm_unit REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: realm search_projection_touch_realm_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_realm_update AFTER UPDATE ON public.realm REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: release search_projection_touch_release_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_release_delete AFTER DELETE ON public.release REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: release search_projection_touch_release_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_release_insert AFTER INSERT ON public.release REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: release search_projection_touch_release_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_release_update AFTER UPDATE ON public.release REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: series search_projection_touch_series_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_series_delete AFTER DELETE ON public.series REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: series search_projection_touch_series_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_series_insert AFTER INSERT ON public.series REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: series_release search_projection_touch_series_release_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_series_release_delete AFTER DELETE ON public.series_release REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('series_id', 'release_unit_id');
-
-
---
--- Name: series_release search_projection_touch_series_release_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_series_release_insert AFTER INSERT ON public.series_release REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('series_id', 'release_unit_id');
-
-
---
--- Name: series_release search_projection_touch_series_release_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_series_release_update AFTER UPDATE ON public.series_release REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('series_id', 'release_unit_id');
-
-
---
--- Name: series search_projection_touch_series_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_series_update AFTER UPDATE ON public.series REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: software search_projection_touch_software_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_software_delete AFTER DELETE ON public.software REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: software search_projection_touch_software_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_software_insert AFTER INSERT ON public.software REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: software_requirement search_projection_touch_software_requirement_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_software_requirement_delete AFTER DELETE ON public.software_requirement REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('software_id');
-
-
---
--- Name: software_requirement search_projection_touch_software_requirement_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_software_requirement_insert AFTER INSERT ON public.software_requirement REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('software_id');
-
-
---
--- Name: software_requirement search_projection_touch_software_requirement_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_software_requirement_update AFTER UPDATE ON public.software_requirement REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('software_id');
-
-
---
--- Name: software search_projection_touch_software_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_software_update AFTER UPDATE ON public.software REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: unit_access_grant search_projection_touch_unit_access_grant_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_access_grant_delete AFTER DELETE ON public.unit_access_grant REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit_access_grant search_projection_touch_unit_access_grant_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_access_grant_insert AFTER INSERT ON public.unit_access_grant REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit_access_grant search_projection_touch_unit_access_grant_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_access_grant_update AFTER UPDATE ON public.unit_access_grant REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit_access_restriction search_projection_touch_unit_access_restriction_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_access_restriction_delete AFTER DELETE ON public.unit_access_restriction REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit_access_restriction search_projection_touch_unit_access_restriction_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_access_restriction_insert AFTER INSERT ON public.unit_access_restriction REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit_access_restriction search_projection_touch_unit_access_restriction_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_access_restriction_update AFTER UPDATE ON public.unit_access_restriction REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit_alias search_projection_touch_unit_alias_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_alias_delete AFTER DELETE ON public.unit_alias REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit_alias search_projection_touch_unit_alias_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_alias_insert AFTER INSERT ON public.unit_alias REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit_alias search_projection_touch_unit_alias_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_alias_update AFTER UPDATE ON public.unit_alias REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit_alias_vote search_projection_touch_unit_alias_vote_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_alias_vote_delete AFTER DELETE ON public.unit_alias_vote REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_alias_owner_statement();
-
-
---
--- Name: unit_alias_vote search_projection_touch_unit_alias_vote_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_alias_vote_insert AFTER INSERT ON public.unit_alias_vote REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_alias_owner_statement();
-
-
---
--- Name: unit_alias_vote_stat search_projection_touch_unit_alias_vote_stat_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_alias_vote_stat_delete AFTER DELETE ON public.unit_alias_vote_stat REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_alias_owner_statement();
-
-
---
--- Name: unit_alias_vote_stat search_projection_touch_unit_alias_vote_stat_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_alias_vote_stat_insert AFTER INSERT ON public.unit_alias_vote_stat REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_alias_owner_statement();
-
-
---
--- Name: unit_alias_vote_stat search_projection_touch_unit_alias_vote_stat_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_alias_vote_stat_update AFTER UPDATE ON public.unit_alias_vote_stat REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_alias_owner_statement();
-
-
---
--- Name: unit_alias_vote search_projection_touch_unit_alias_vote_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_alias_vote_update AFTER UPDATE ON public.unit_alias_vote REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_alias_owner_statement();
-
-
---
--- Name: unit_content_license search_projection_touch_unit_content_license_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_content_license_insert AFTER INSERT ON public.unit_content_license REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit_content_license search_projection_touch_unit_content_license_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_content_license_update AFTER UPDATE ON public.unit_content_license REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit search_projection_touch_unit_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_delete AFTER DELETE ON public.unit REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: unit_effective_tag search_projection_touch_unit_effective_tag_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_effective_tag_delete AFTER DELETE ON public.unit_effective_tag REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit_effective_tag search_projection_touch_unit_effective_tag_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_effective_tag_insert AFTER INSERT ON public.unit_effective_tag REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit_effective_tag search_projection_touch_unit_effective_tag_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_effective_tag_update AFTER UPDATE ON public.unit_effective_tag REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit_follow_stat search_projection_touch_unit_follow_stat_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_follow_stat_delete AFTER DELETE ON public.unit_follow_stat REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit_follow_stat search_projection_touch_unit_follow_stat_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_follow_stat_insert AFTER INSERT ON public.unit_follow_stat REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit_follow_stat search_projection_touch_unit_follow_stat_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_follow_stat_update AFTER UPDATE ON public.unit_follow_stat REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit search_projection_touch_unit_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_insert AFTER INSERT ON public.unit REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: unit_localization search_projection_touch_unit_localization_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_localization_delete AFTER DELETE ON public.unit_localization REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit_localization search_projection_touch_unit_localization_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_localization_insert AFTER INSERT ON public.unit_localization REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit_localization search_projection_touch_unit_localization_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_localization_update AFTER UPDATE ON public.unit_localization REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit_ownership search_projection_touch_unit_ownership_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_ownership_delete AFTER DELETE ON public.unit_ownership REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit_ownership search_projection_touch_unit_ownership_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_ownership_insert AFTER INSERT ON public.unit_ownership REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit_ownership search_projection_touch_unit_ownership_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_ownership_update AFTER UPDATE ON public.unit_ownership REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit_structure_member search_projection_touch_unit_structure_member_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_structure_member_delete AFTER DELETE ON public.unit_structure_member REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('structure_id', 'member_unit_id');
-
-
---
--- Name: unit_structure_member search_projection_touch_unit_structure_member_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_structure_member_insert AFTER INSERT ON public.unit_structure_member REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('structure_id', 'member_unit_id');
-
-
---
--- Name: unit_structure_member search_projection_touch_unit_structure_member_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_structure_member_update AFTER UPDATE ON public.unit_structure_member REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('structure_id', 'member_unit_id');
-
-
---
--- Name: unit_structure_vote_stat search_projection_touch_unit_structure_vote_stat_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_structure_vote_stat_delete AFTER DELETE ON public.unit_structure_vote_stat REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('structure_id');
-
-
---
--- Name: unit_structure_vote_stat search_projection_touch_unit_structure_vote_stat_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_structure_vote_stat_insert AFTER INSERT ON public.unit_structure_vote_stat REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('structure_id');
-
-
---
--- Name: unit_structure_vote_stat search_projection_touch_unit_structure_vote_stat_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_structure_vote_stat_update AFTER UPDATE ON public.unit_structure_vote_stat REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('structure_id');
-
-
---
--- Name: unit_tag search_projection_touch_unit_tag_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_tag_delete AFTER DELETE ON public.unit_tag REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit_tag search_projection_touch_unit_tag_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_tag_insert AFTER INSERT ON public.unit_tag REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit_tag search_projection_touch_unit_tag_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_tag_update AFTER UPDATE ON public.unit_tag REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('unit_id');
-
-
---
--- Name: unit search_projection_touch_unit_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_update AFTER UPDATE ON public.unit REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('id');
-
-
---
--- Name: unit search_projection_touch_unit_relation_dependents_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_relation_dependents_update AFTER UPDATE ON public.unit REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_unit_relation_dependents_statement();
-
-
---
--- Name: unit_variant search_projection_touch_unit_variant_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_variant_delete AFTER DELETE ON public.unit_variant REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('variant_unit_id', 'main_unit_id');
-
-
---
--- Name: unit_variant search_projection_touch_unit_variant_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_variant_insert AFTER INSERT ON public.unit_variant REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('variant_unit_id', 'main_unit_id');
-
-
---
--- Name: unit_variant search_projection_touch_unit_variant_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_projection_touch_unit_variant_update AFTER UPDATE ON public.unit_variant REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_current_statement('variant_unit_id', 'main_unit_id');
-
-
---
--- Name: unit_revision search_revision_projection_touch_unit_revision_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_revision_projection_touch_unit_revision_delete AFTER DELETE ON public.unit_revision REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_revision_statement('id');
-
-
---
--- Name: unit_revision search_revision_projection_touch_unit_revision_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_revision_projection_touch_unit_revision_insert AFTER INSERT ON public.unit_revision REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_revision_statement('id');
-
-
---
--- Name: unit_revision_slot search_revision_projection_touch_unit_revision_slot_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_revision_projection_touch_unit_revision_slot_delete AFTER DELETE ON public.unit_revision_slot REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_revision_statement('revision_id');
-
-
---
--- Name: unit_revision_slot search_revision_projection_touch_unit_revision_slot_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_revision_projection_touch_unit_revision_slot_insert AFTER INSERT ON public.unit_revision_slot REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_revision_statement('revision_id');
-
-
---
--- Name: unit_revision_slot search_revision_projection_touch_unit_revision_slot_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_revision_projection_touch_unit_revision_slot_update AFTER UPDATE ON public.unit_revision_slot REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_revision_statement('revision_id');
-
-
---
--- Name: unit_revision_tag search_revision_projection_touch_unit_revision_tag_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_revision_projection_touch_unit_revision_tag_delete AFTER DELETE ON public.unit_revision_tag REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_revision_statement('revision_id');
-
-
---
--- Name: unit_revision_tag search_revision_projection_touch_unit_revision_tag_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_revision_projection_touch_unit_revision_tag_insert AFTER INSERT ON public.unit_revision_tag REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_revision_statement('revision_id');
-
-
---
--- Name: unit_revision_tag search_revision_projection_touch_unit_revision_tag_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_revision_projection_touch_unit_revision_tag_update AFTER UPDATE ON public.unit_revision_tag REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_revision_statement('revision_id');
-
-
---
--- Name: unit_revision search_revision_projection_touch_unit_revision_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_revision_projection_touch_unit_revision_update AFTER UPDATE ON public.unit_revision REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_revision_statement('id');
-
-
---
--- Name: unit_alias_vote search_structure_alias_dependents_unit_alias_vote_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_structure_alias_dependents_unit_alias_vote_delete AFTER DELETE ON public.unit_alias_vote REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_structure_alias_dependents_statement();
-
-
---
--- Name: unit_alias_vote search_structure_alias_dependents_unit_alias_vote_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_structure_alias_dependents_unit_alias_vote_insert AFTER INSERT ON public.unit_alias_vote REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_structure_alias_dependents_statement();
-
-
---
--- Name: unit_alias_vote_stat search_structure_alias_dependents_unit_alias_vote_stat_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_structure_alias_dependents_unit_alias_vote_stat_delete AFTER DELETE ON public.unit_alias_vote_stat REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_structure_alias_dependents_statement();
-
-
---
--- Name: unit_alias_vote_stat search_structure_alias_dependents_unit_alias_vote_stat_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_structure_alias_dependents_unit_alias_vote_stat_insert AFTER INSERT ON public.unit_alias_vote_stat REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_structure_alias_dependents_statement();
-
-
---
--- Name: unit_alias_vote_stat search_structure_alias_dependents_unit_alias_vote_stat_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_structure_alias_dependents_unit_alias_vote_stat_update AFTER UPDATE ON public.unit_alias_vote_stat REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_structure_alias_dependents_statement();
-
-
---
--- Name: unit_alias_vote search_structure_alias_dependents_unit_alias_vote_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_structure_alias_dependents_unit_alias_vote_update AFTER UPDATE ON public.unit_alias_vote REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_structure_alias_dependents_statement();
-
-
---
--- Name: unit_alias search_structure_dependents_unit_alias_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_structure_dependents_unit_alias_delete AFTER DELETE ON public.unit_alias REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_structure_member_dependents_statement('unit_id');
-
-
---
--- Name: unit_alias search_structure_dependents_unit_alias_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_structure_dependents_unit_alias_insert AFTER INSERT ON public.unit_alias REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_structure_member_dependents_statement('unit_id');
-
-
---
--- Name: unit_alias search_structure_dependents_unit_alias_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_structure_dependents_unit_alias_update AFTER UPDATE ON public.unit_alias REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_structure_member_dependents_statement('unit_id');
-
-
---
--- Name: unit search_structure_dependents_unit_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_structure_dependents_unit_delete AFTER DELETE ON public.unit REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_structure_member_dependents_statement('id');
-
-
---
--- Name: unit search_structure_dependents_unit_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_structure_dependents_unit_insert AFTER INSERT ON public.unit REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_structure_member_dependents_statement('id');
-
-
---
--- Name: unit_localization search_structure_dependents_unit_localization_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_structure_dependents_unit_localization_delete AFTER DELETE ON public.unit_localization REFERENCING OLD TABLE AS old_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_structure_member_dependents_statement('unit_id');
-
-
---
--- Name: unit_localization search_structure_dependents_unit_localization_insert; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_structure_dependents_unit_localization_insert AFTER INSERT ON public.unit_localization REFERENCING NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_structure_member_dependents_statement('unit_id');
-
-
---
--- Name: unit_localization search_structure_dependents_unit_localization_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_structure_dependents_unit_localization_update AFTER UPDATE ON public.unit_localization REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_structure_member_dependents_statement('unit_id');
-
-
---
--- Name: unit search_structure_dependents_unit_update; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER search_structure_dependents_unit_update AFTER UPDATE ON public.unit REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows FOR EACH STATEMENT EXECUTE FUNCTION public.search_touch_structure_member_dependents_statement('id');
 
 
 --
@@ -13951,6 +12723,780 @@ CREATE TRIGGER unit_tag_vote_structure_conflict BEFORE INSERT OR UPDATE ON publi
 --
 
 CREATE TRIGGER unit_variant_star_enforce BEFORE INSERT OR UPDATE OF variant_unit_id, main_unit_id ON public.unit_variant FOR EACH ROW EXECUTE FUNCTION public.enforce_unit_variant_star();
+
+
+--
+-- Name: realm_stat; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.realm_stat (
+    realm_id uuid NOT NULL,
+    active_member_count bigint DEFAULT 0 NOT NULL,
+    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT realm_stat_pkey PRIMARY KEY (realm_id),
+    CONSTRAINT realm_stat_count_check CHECK (active_member_count >= 0),
+    CONSTRAINT realm_stat_realm_id_realm_id_fkey FOREIGN KEY (realm_id)
+        REFERENCES public.realm(id) ON DELETE CASCADE
+);
+
+
+--
+-- Name: realm_unit_moderation_stat; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.realm_unit_moderation_stat (
+    realm_id uuid NOT NULL,
+    unit_id uuid NOT NULL,
+    open_report_count bigint DEFAULT 0 NOT NULL,
+    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT realm_unit_moderation_stat_pkey PRIMARY KEY (realm_id, unit_id),
+    CONSTRAINT realm_unit_moderation_stat_count_check CHECK (open_report_count >= 0),
+    CONSTRAINT realm_unit_moderation_stat_realm_id_realm_id_fkey FOREIGN KEY (realm_id)
+        REFERENCES public.realm(id) ON DELETE CASCADE,
+    CONSTRAINT realm_unit_moderation_stat_unit_id_unit_id_fkey FOREIGN KEY (unit_id)
+        REFERENCES public.unit(id) ON DELETE CASCADE
+);
+
+
+--
+-- Name: notification_recipient_stat; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.notification_recipient_stat (
+    profile_id uuid NOT NULL,
+    unread_count bigint DEFAULT 0 NOT NULL,
+    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT notification_recipient_stat_pkey PRIMARY KEY (profile_id),
+    CONSTRAINT notification_recipient_stat_count_check CHECK (unread_count >= 0),
+    CONSTRAINT notification_recipient_stat_profile_id_profile_id_fkey FOREIGN KEY (profile_id)
+        REFERENCES public.profile(id) ON DELETE CASCADE
+);
+
+
+--
+-- Name: book_chapter_stat; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.book_chapter_stat (
+    book_unit_id uuid NOT NULL,
+    all_count bigint DEFAULT 0 NOT NULL,
+    public_count bigint DEFAULT 0 NOT NULL,
+    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT book_chapter_stat_pkey PRIMARY KEY (book_unit_id),
+    CONSTRAINT book_chapter_stat_count_check CHECK (
+        all_count >= 0 AND public_count >= 0 AND public_count <= all_count
+    ),
+    CONSTRAINT book_chapter_stat_book_unit_id_unit_id_fkey FOREIGN KEY (book_unit_id)
+        REFERENCES public.unit(id) ON DELETE CASCADE
+);
+
+
+--
+-- Name: book_chapter_progress_stat; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.book_chapter_progress_stat (
+    profile_id uuid NOT NULL,
+    book_unit_id uuid NOT NULL,
+    all_completed_count bigint DEFAULT 0 NOT NULL,
+    public_completed_count bigint DEFAULT 0 NOT NULL,
+    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT book_chapter_progress_stat_pkey PRIMARY KEY (profile_id, book_unit_id),
+    CONSTRAINT book_chapter_progress_stat_count_check CHECK (
+        all_completed_count >= 0
+        AND public_completed_count >= 0
+        AND public_completed_count <= all_completed_count
+    ),
+    CONSTRAINT book_chapter_progress_stat_profile_id_profile_id_fkey FOREIGN KEY (profile_id)
+        REFERENCES public.profile(id) ON DELETE CASCADE,
+    CONSTRAINT book_chapter_progress_stat_book_unit_id_unit_id_fkey FOREIGN KEY (book_unit_id)
+        REFERENCES public.unit(id) ON DELETE CASCADE
+);
+
+
+--
+-- Name: book_localized_content_metric_stat; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.book_localized_content_metric_stat (
+    book_unit_id uuid NOT NULL,
+    language text NOT NULL,
+    chapter_count bigint DEFAULT 0 NOT NULL,
+    word_count bigint DEFAULT 0 NOT NULL,
+    character_count bigint DEFAULT 0 NOT NULL,
+    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT book_localized_content_metric_stat_pkey PRIMARY KEY (book_unit_id, language),
+    CONSTRAINT book_localized_content_metric_stat_language_check CHECK (
+        language = ANY (ARRAY['zh'::text, 'en'::text, 'ja'::text, 'ko'::text,
+            'de'::text, 'fr'::text, 'es'::text])
+    ),
+    CONSTRAINT book_localized_content_metric_stat_count_check CHECK (
+        chapter_count >= 0 AND word_count >= 0 AND character_count >= 0
+    ),
+    CONSTRAINT book_localized_content_metric_stat_book_unit_id_unit_id_fkey
+        FOREIGN KEY (book_unit_id) REFERENCES public.unit(id) ON DELETE CASCADE
+);
+
+
+-- Rebuild one Book's public localized metrics on the same transaction as source changes.
+CREATE FUNCTION public.refresh_book_localized_content_metric_stat(p_book_unit_id uuid)
+RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    DELETE FROM public.book_localized_content_metric_stat
+    WHERE book_unit_id = p_book_unit_id;
+
+    INSERT INTO public.book_localized_content_metric_stat (
+        book_unit_id, language, chapter_count, word_count, character_count
+    )
+    SELECT p_book_unit_id, metric.language, count(*), sum(metric.word_count),
+        sum(metric.character_count)
+    FROM public.content_structure_node AS node
+    JOIN public.content_structure AS structure
+        ON structure.id = node.structure_id
+        AND structure.owner_unit_id = node.owner_unit_id
+    JOIN public.post AS content_post ON content_post.id = node.content_unit_id
+    JOIN public.unit AS content_unit ON content_unit.id = node.content_unit_id
+    JOIN public.unit_localization AS localization ON localization.unit_id = node.content_unit_id
+    JOIN public.unit_localization_content_metric AS metric
+        ON metric.unit_id = node.content_unit_id
+        AND metric.language = localization.language
+    WHERE structure.owner_unit_id = p_book_unit_id
+      AND structure.kind = 'book.contents'
+      AND structure.deleted_at IS NULL
+      AND node.deleted_at IS NULL
+      AND content_post.kind = 'chapter'
+      AND content_unit.deleted_at IS NULL
+      AND content_unit.status = 'published'
+      AND content_unit.visibility IN ('public', 'unlisted')
+      AND localization.content_status = 'published'
+    GROUP BY metric.language;
+END
+$$;
+
+
+CREATE FUNCTION public.refresh_book_metric_from_node() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    IF TG_OP <> 'INSERT' THEN
+        PERFORM public.refresh_book_localized_content_metric_stat(OLD.owner_unit_id);
+    END IF;
+    IF TG_OP <> 'DELETE' AND (
+        TG_OP = 'INSERT' OR NEW.owner_unit_id IS DISTINCT FROM OLD.owner_unit_id
+    ) THEN
+        PERFORM public.refresh_book_localized_content_metric_stat(NEW.owner_unit_id);
+    END IF;
+    RETURN NULL;
+END
+$$;
+
+
+CREATE FUNCTION public.refresh_book_metric_from_structure() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    IF TG_OP <> 'INSERT' THEN
+        PERFORM public.refresh_book_localized_content_metric_stat(OLD.owner_unit_id);
+    END IF;
+    IF TG_OP <> 'DELETE' AND (
+        TG_OP = 'INSERT' OR NEW.owner_unit_id IS DISTINCT FROM OLD.owner_unit_id
+    ) THEN
+        PERFORM public.refresh_book_localized_content_metric_stat(NEW.owner_unit_id);
+    END IF;
+    RETURN NULL;
+END
+$$;
+
+
+CREATE FUNCTION public.refresh_book_metric_from_content_unit() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    book_id uuid;
+BEGIN
+    FOR book_id IN
+        SELECT DISTINCT node.owner_unit_id
+        FROM public.content_structure_node AS node
+        JOIN public.content_structure AS structure ON structure.id = node.structure_id
+        WHERE node.content_unit_id = coalesce(NEW.id, OLD.id)
+          AND structure.kind = 'book.contents'
+    LOOP
+        PERFORM public.refresh_book_localized_content_metric_stat(book_id);
+    END LOOP;
+    RETURN NULL;
+END
+$$;
+
+
+CREATE FUNCTION public.refresh_book_metric_from_localization() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    book_id uuid;
+    p_content_unit_id uuid := coalesce(NEW.unit_id, OLD.unit_id);
+BEGIN
+    FOR book_id IN
+        SELECT DISTINCT node.owner_unit_id
+        FROM public.content_structure_node AS node
+        JOIN public.content_structure AS structure ON structure.id = node.structure_id
+        WHERE node.content_unit_id = p_content_unit_id
+          AND structure.kind = 'book.contents'
+    LOOP
+        PERFORM public.refresh_book_localized_content_metric_stat(book_id);
+    END LOOP;
+    RETURN NULL;
+END
+$$;
+
+
+-- Return the Book and eligibility represented by one prospective Chapter node state.
+CREATE FUNCTION public.book_chapter_node_scope(
+    p_structure_id uuid,
+    p_content_unit_id uuid,
+    p_node_deleted_at timestamp with time zone
+) RETURNS TABLE (book_unit_id uuid, all_eligible boolean, public_eligible boolean)
+    LANGUAGE sql STABLE
+    AS $$
+SELECT
+    structure.owner_unit_id,
+    structure.kind = 'book.contents'
+        AND structure.deleted_at IS NULL
+        AND p_node_deleted_at IS NULL
+        AND content_unit.kind = 'post'
+        AND content_unit.deleted_at IS NULL
+        AND content_post.kind = 'chapter' AS all_eligible,
+    structure.kind = 'book.contents'
+        AND structure.deleted_at IS NULL
+        AND p_node_deleted_at IS NULL
+        AND content_unit.kind = 'post'
+        AND content_unit.deleted_at IS NULL
+        AND content_post.kind = 'chapter'
+        AND content_unit.status = 'published'
+        AND content_unit.visibility IN ('public', 'unlisted') AS public_eligible
+FROM public.content_structure AS structure
+JOIN public.unit AS content_unit ON content_unit.id = p_content_unit_id
+LEFT JOIN public.post AS content_post ON content_post.id = content_unit.id
+WHERE structure.id = p_structure_id
+$$;
+
+
+-- Apply one exact Chapter-membership delta, including every completed Profile.
+CREATE FUNCTION public.apply_book_chapter_delta(
+    p_book_unit_id uuid,
+    p_node_id uuid,
+    p_all_delta bigint,
+    p_public_delta bigint
+) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    IF p_all_delta = 0 AND p_public_delta = 0 THEN
+        RETURN;
+    END IF;
+
+    IF p_all_delta < 0 OR p_public_delta < 0 THEN
+        UPDATE public.book_chapter_stat SET
+            all_count = all_count + p_all_delta,
+            public_count = public_count + p_public_delta,
+            updated_at = now()
+        WHERE book_unit_id = p_book_unit_id;
+
+        UPDATE public.book_chapter_progress_stat AS stat SET
+            all_completed_count = stat.all_completed_count + p_all_delta,
+            public_completed_count = stat.public_completed_count + p_public_delta,
+            updated_at = now()
+        FROM public.content_structure_node_progress AS progress
+        WHERE progress.node_id = p_node_id
+          AND stat.profile_id = progress.profile_id
+          AND stat.book_unit_id = p_book_unit_id;
+    ELSE
+        UPDATE public.book_chapter_stat SET
+            all_count = all_count + p_all_delta,
+            public_count = public_count + p_public_delta,
+            updated_at = now()
+        WHERE book_unit_id = p_book_unit_id;
+        IF NOT FOUND THEN
+            INSERT INTO public.book_chapter_stat (book_unit_id, all_count, public_count)
+            VALUES (p_book_unit_id, p_all_delta, p_public_delta);
+        END IF;
+
+        UPDATE public.book_chapter_progress_stat AS stat SET
+            all_completed_count = stat.all_completed_count + p_all_delta,
+            public_completed_count = stat.public_completed_count + p_public_delta,
+            updated_at = now()
+        FROM public.content_structure_node_progress AS progress
+        WHERE progress.node_id = p_node_id
+          AND stat.profile_id = progress.profile_id
+          AND stat.book_unit_id = p_book_unit_id;
+
+        INSERT INTO public.book_chapter_progress_stat (
+            profile_id, book_unit_id, all_completed_count, public_completed_count
+        )
+        SELECT progress.profile_id, p_book_unit_id, p_all_delta, p_public_delta
+        FROM public.content_structure_node_progress AS progress
+        WHERE progress.node_id = p_node_id
+          AND NOT EXISTS (
+              SELECT 1 FROM public.book_chapter_progress_stat AS existing
+              WHERE existing.profile_id = progress.profile_id
+                AND existing.book_unit_id = p_book_unit_id
+          );
+    END IF;
+END
+$$;
+
+
+CREATE FUNCTION public.maintain_book_chapter_from_node() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    old_scope record;
+    new_scope record;
+BEGIN
+    IF TG_OP <> 'INSERT' THEN
+        SELECT * INTO old_scope FROM public.book_chapter_node_scope(
+            OLD.structure_id, OLD.content_unit_id, OLD.deleted_at
+        );
+        IF old_scope.all_eligible THEN
+            PERFORM public.apply_book_chapter_delta(
+                old_scope.book_unit_id,
+                OLD.id,
+                -1,
+                CASE WHEN old_scope.public_eligible THEN -1 ELSE 0 END
+            );
+        END IF;
+    END IF;
+    IF TG_OP <> 'DELETE' THEN
+        SELECT * INTO new_scope FROM public.book_chapter_node_scope(
+            NEW.structure_id, NEW.content_unit_id, NEW.deleted_at
+        );
+        IF new_scope.all_eligible THEN
+            PERFORM public.apply_book_chapter_delta(
+                new_scope.book_unit_id,
+                NEW.id,
+                1,
+                CASE WHEN new_scope.public_eligible THEN 1 ELSE 0 END
+            );
+        END IF;
+    END IF;
+    RETURN NULL;
+END
+$$;
+
+
+CREATE FUNCTION public.maintain_book_chapter_from_progress() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    scope record;
+BEGIN
+    IF TG_OP <> 'INSERT' THEN
+        SELECT chapter_scope.* INTO scope
+        FROM public.content_structure_node AS node
+        CROSS JOIN LATERAL public.book_chapter_node_scope(
+            node.structure_id, node.content_unit_id, node.deleted_at
+        ) AS chapter_scope
+        WHERE node.id = OLD.node_id;
+        IF scope.all_eligible THEN
+            UPDATE public.book_chapter_progress_stat SET
+                all_completed_count = all_completed_count - 1,
+                public_completed_count = public_completed_count
+                    - CASE WHEN scope.public_eligible THEN 1 ELSE 0 END,
+                updated_at = now()
+            WHERE profile_id = OLD.profile_id AND book_unit_id = scope.book_unit_id;
+        END IF;
+    END IF;
+    IF TG_OP <> 'DELETE' THEN
+        SELECT chapter_scope.* INTO scope
+        FROM public.content_structure_node AS node
+        CROSS JOIN LATERAL public.book_chapter_node_scope(
+            node.structure_id, node.content_unit_id, node.deleted_at
+        ) AS chapter_scope
+        WHERE node.id = NEW.node_id;
+        IF scope.all_eligible THEN
+            INSERT INTO public.book_chapter_progress_stat (
+                profile_id, book_unit_id, all_completed_count, public_completed_count
+            ) VALUES (
+                NEW.profile_id,
+                scope.book_unit_id,
+                1,
+                CASE WHEN scope.public_eligible THEN 1 ELSE 0 END
+            )
+            ON CONFLICT (profile_id, book_unit_id) DO UPDATE SET
+                all_completed_count = public.book_chapter_progress_stat.all_completed_count + 1,
+                public_completed_count = public.book_chapter_progress_stat.public_completed_count
+                    + EXCLUDED.public_completed_count,
+                updated_at = now();
+        END IF;
+    END IF;
+    RETURN NULL;
+END
+$$;
+
+
+-- Re-evaluate all occurrences when a Chapter Unit changes lifecycle or visibility.
+CREATE FUNCTION public.maintain_book_chapter_from_unit() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    occurrence record;
+    is_chapter boolean;
+    old_all boolean;
+    old_public boolean;
+    new_all boolean;
+    new_public boolean;
+BEGIN
+    SELECT kind = 'chapter' INTO is_chapter FROM public.post WHERE id = NEW.id;
+    IF NOT coalesce(is_chapter, false) THEN
+        RETURN NULL;
+    END IF;
+    FOR occurrence IN
+        SELECT node.id, node.deleted_at, structure.owner_unit_id,
+               structure.kind, structure.deleted_at AS structure_deleted_at
+        FROM public.content_structure_node AS node
+        JOIN public.content_structure AS structure ON structure.id = node.structure_id
+        WHERE node.content_unit_id = NEW.id
+    LOOP
+        old_all := occurrence.kind = 'book.contents'
+            AND occurrence.structure_deleted_at IS NULL
+            AND occurrence.deleted_at IS NULL
+            AND OLD.kind = 'post' AND OLD.deleted_at IS NULL;
+        new_all := occurrence.kind = 'book.contents'
+            AND occurrence.structure_deleted_at IS NULL
+            AND occurrence.deleted_at IS NULL
+            AND NEW.kind = 'post' AND NEW.deleted_at IS NULL;
+        old_public := old_all AND OLD.status = 'published'
+            AND OLD.visibility IN ('public', 'unlisted');
+        new_public := new_all AND NEW.status = 'published'
+            AND NEW.visibility IN ('public', 'unlisted');
+        PERFORM public.apply_book_chapter_delta(
+            occurrence.owner_unit_id,
+            occurrence.id,
+            (CASE WHEN new_all THEN 1 ELSE 0 END) - (CASE WHEN old_all THEN 1 ELSE 0 END),
+            (CASE WHEN new_public THEN 1 ELSE 0 END)
+                - (CASE WHEN old_public THEN 1 ELSE 0 END)
+        );
+    END LOOP;
+    RETURN NULL;
+END
+$$;
+
+
+-- Re-evaluate all occurrences when a Post enters or leaves the Chapter kind.
+CREATE FUNCTION public.maintain_book_chapter_from_post() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    occurrence record;
+    content_unit public.unit%ROWTYPE;
+    old_chapter boolean := TG_OP <> 'INSERT' AND OLD.kind = 'chapter';
+    new_chapter boolean := TG_OP <> 'DELETE' AND NEW.kind = 'chapter';
+    common_active boolean;
+BEGIN
+    SELECT * INTO content_unit FROM public.unit WHERE id = coalesce(NEW.id, OLD.id);
+    FOR occurrence IN
+        SELECT node.id, node.deleted_at, structure.owner_unit_id,
+               structure.kind, structure.deleted_at AS structure_deleted_at
+        FROM public.content_structure_node AS node
+        JOIN public.content_structure AS structure ON structure.id = node.structure_id
+        WHERE node.content_unit_id = coalesce(NEW.id, OLD.id)
+    LOOP
+        common_active := occurrence.kind = 'book.contents'
+            AND occurrence.structure_deleted_at IS NULL
+            AND occurrence.deleted_at IS NULL
+            AND content_unit.kind = 'post'
+            AND content_unit.deleted_at IS NULL;
+        PERFORM public.apply_book_chapter_delta(
+            occurrence.owner_unit_id,
+            occurrence.id,
+            (CASE WHEN common_active AND new_chapter THEN 1 ELSE 0 END)
+                - (CASE WHEN common_active AND old_chapter THEN 1 ELSE 0 END),
+            (CASE WHEN common_active AND new_chapter AND content_unit.status = 'published'
+                    AND content_unit.visibility IN ('public', 'unlisted') THEN 1 ELSE 0 END)
+                - (CASE WHEN common_active AND old_chapter AND content_unit.status = 'published'
+                    AND content_unit.visibility IN ('public', 'unlisted') THEN 1 ELSE 0 END)
+        );
+    END LOOP;
+    RETURN NULL;
+END
+$$;
+
+
+-- Re-evaluate a structure's nodes when it enters or leaves the active Book contents scope.
+CREATE FUNCTION public.maintain_book_chapter_from_structure() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    occurrence record;
+    old_active boolean := TG_OP <> 'INSERT'
+        AND OLD.kind = 'book.contents' AND OLD.deleted_at IS NULL;
+    new_active boolean := TG_OP <> 'DELETE'
+        AND NEW.kind = 'book.contents' AND NEW.deleted_at IS NULL;
+BEGIN
+    IF old_active = new_active THEN
+        RETURN NULL;
+    END IF;
+    FOR occurrence IN
+        SELECT node.id, node.owner_unit_id, content_unit.status, content_unit.visibility
+        FROM public.content_structure_node AS node
+        JOIN public.unit AS content_unit ON content_unit.id = node.content_unit_id
+        JOIN public.post AS content_post ON content_post.id = content_unit.id
+        WHERE node.structure_id = coalesce(NEW.id, OLD.id)
+          AND node.deleted_at IS NULL
+          AND content_unit.kind = 'post'
+          AND content_unit.deleted_at IS NULL
+          AND content_post.kind = 'chapter'
+    LOOP
+        PERFORM public.apply_book_chapter_delta(
+            occurrence.owner_unit_id,
+            occurrence.id,
+            (CASE WHEN new_active THEN 1 ELSE 0 END)
+                - (CASE WHEN old_active THEN 1 ELSE 0 END),
+            (CASE WHEN new_active AND occurrence.status = 'published'
+                    AND occurrence.visibility IN ('public', 'unlisted') THEN 1 ELSE 0 END)
+                - (CASE WHEN old_active AND occurrence.status = 'published'
+                    AND occurrence.visibility IN ('public', 'unlisted') THEN 1 ELSE 0 END)
+        );
+    END LOOP;
+    RETURN NULL;
+END
+$$;
+
+
+--
+-- Name: maintain_realm_member_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_realm_member_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    old_delta bigint := CASE WHEN TG_OP <> 'INSERT' AND OLD.state = 'active' THEN -1 ELSE 0 END;
+    new_delta bigint := CASE WHEN TG_OP <> 'DELETE' AND NEW.state = 'active' THEN 1 ELSE 0 END;
+BEGIN
+    IF TG_OP <> 'INSERT' AND old_delta <> 0 THEN
+        INSERT INTO public.realm_stat (realm_id, active_member_count)
+        VALUES (OLD.realm_id, old_delta)
+        ON CONFLICT (realm_id) DO UPDATE SET
+            active_member_count = public.realm_stat.active_member_count + EXCLUDED.active_member_count,
+            updated_at = now();
+    END IF;
+    IF TG_OP <> 'DELETE' AND new_delta <> 0 THEN
+        INSERT INTO public.realm_stat (realm_id, active_member_count)
+        VALUES (NEW.realm_id, new_delta)
+        ON CONFLICT (realm_id) DO UPDATE SET
+            active_member_count = public.realm_stat.active_member_count + EXCLUDED.active_member_count,
+            updated_at = now();
+    END IF;
+    RETURN coalesce(NEW, OLD);
+END
+$$;
+
+
+--
+-- Name: maintain_notification_recipient_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_notification_recipient_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    old_delta bigint := CASE
+        WHEN TG_OP <> 'INSERT' AND OLD.in_app_visible AND OLD.read_at IS NULL THEN -1 ELSE 0 END;
+    new_delta bigint := CASE
+        WHEN TG_OP <> 'DELETE' AND NEW.in_app_visible AND NEW.read_at IS NULL THEN 1 ELSE 0 END;
+BEGIN
+    IF TG_OP <> 'INSERT' AND old_delta <> 0 THEN
+        INSERT INTO public.notification_recipient_stat (profile_id, unread_count)
+        VALUES (OLD.recipient_profile_id, old_delta)
+        ON CONFLICT (profile_id) DO UPDATE SET
+            unread_count = public.notification_recipient_stat.unread_count + EXCLUDED.unread_count,
+            updated_at = now();
+    END IF;
+    IF TG_OP <> 'DELETE' AND new_delta <> 0 THEN
+        INSERT INTO public.notification_recipient_stat (profile_id, unread_count)
+        VALUES (NEW.recipient_profile_id, new_delta)
+        ON CONFLICT (profile_id) DO UPDATE SET
+            unread_count = public.notification_recipient_stat.unread_count + EXCLUDED.unread_count,
+            updated_at = now();
+    END IF;
+    RETURN coalesce(NEW, OLD);
+END
+$$;
+
+
+CREATE FUNCTION public.maintain_realm_unit_report_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    old_delta bigint := 0;
+    new_delta bigint := 0;
+BEGIN
+    IF TG_OP <> 'INSERT' THEN
+        SELECT CASE WHEN state IN ('new', 'triaged', 'assigned', 'escalated', 'reviewing')
+            THEN -1 ELSE 0 END INTO old_delta
+        FROM public.moderation_case WHERE id = OLD.case_id;
+    END IF;
+    IF TG_OP <> 'DELETE' THEN
+        SELECT CASE WHEN state IN ('new', 'triaged', 'assigned', 'escalated', 'reviewing')
+            THEN 1 ELSE 0 END INTO new_delta
+        FROM public.moderation_case WHERE id = NEW.case_id;
+    END IF;
+    IF TG_OP <> 'INSERT' AND old_delta <> 0 THEN
+        UPDATE public.realm_unit_moderation_stat SET
+            open_report_count = open_report_count + old_delta,
+            updated_at = now()
+        WHERE realm_id = OLD.realm_id AND unit_id = OLD.unit_id;
+    END IF;
+    IF TG_OP <> 'DELETE' AND new_delta <> 0 THEN
+        INSERT INTO public.realm_unit_moderation_stat (realm_id, unit_id, open_report_count)
+        VALUES (NEW.realm_id, NEW.unit_id, new_delta)
+        ON CONFLICT (realm_id, unit_id) DO UPDATE SET
+            open_report_count = public.realm_unit_moderation_stat.open_report_count
+                + EXCLUDED.open_report_count,
+            updated_at = now();
+    END IF;
+    RETURN coalesce(NEW, OLD);
+END
+$$;
+
+CREATE FUNCTION public.maintain_realm_unit_report_case_state() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    delta bigint :=
+        CASE WHEN NEW.state IN ('new', 'triaged', 'assigned', 'escalated', 'reviewing')
+            THEN 1 ELSE 0 END
+        - CASE WHEN OLD.state IN ('new', 'triaged', 'assigned', 'escalated', 'reviewing')
+            THEN 1 ELSE 0 END;
+BEGIN
+    IF delta <> 0 THEN
+        INSERT INTO public.realm_unit_moderation_stat (
+            realm_id, unit_id, open_report_count
+        )
+        SELECT realm_id, unit_id, count(*) * delta
+        FROM public.realm_unit_report
+        WHERE case_id = NEW.id
+        GROUP BY realm_id, unit_id
+        ON CONFLICT (realm_id, unit_id) DO UPDATE SET
+            open_report_count = public.realm_unit_moderation_stat.open_report_count
+                + EXCLUDED.open_report_count,
+            updated_at = now();
+    END IF;
+    RETURN NEW;
+END
+$$;
+
+
+CREATE FUNCTION public.initialize_realm_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    INSERT INTO public.realm_stat (realm_id) VALUES (NEW.id) ON CONFLICT DO NOTHING;
+    RETURN NEW;
+END
+$$;
+
+CREATE FUNCTION public.initialize_realm_unit_moderation_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    INSERT INTO public.realm_unit_moderation_stat (realm_id, unit_id)
+    VALUES (NEW.realm_id, NEW.unit_id) ON CONFLICT DO NOTHING;
+    RETURN NEW;
+END
+$$;
+
+CREATE FUNCTION public.initialize_notification_recipient_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    INSERT INTO public.notification_recipient_stat (profile_id)
+    VALUES (NEW.id) ON CONFLICT DO NOTHING;
+    RETURN NEW;
+END
+$$;
+
+
+CREATE TRIGGER realm_stat_initialize
+AFTER INSERT ON public.realm
+FOR EACH ROW EXECUTE FUNCTION public.initialize_realm_stat();
+
+CREATE TRIGGER realm_unit_moderation_stat_initialize
+AFTER INSERT ON public.realm_unit
+FOR EACH ROW EXECUTE FUNCTION public.initialize_realm_unit_moderation_stat();
+
+CREATE TRIGGER notification_recipient_stat_initialize
+AFTER INSERT ON public.profile
+FOR EACH ROW EXECUTE FUNCTION public.initialize_notification_recipient_stat();
+
+
+CREATE TRIGGER realm_member_stat_maintain
+AFTER INSERT OR DELETE OR UPDATE OF realm_id, state ON public.realm_member
+FOR EACH ROW EXECUTE FUNCTION public.maintain_realm_member_stat();
+
+CREATE TRIGGER notification_recipient_stat_maintain
+AFTER INSERT OR DELETE OR UPDATE OF recipient_profile_id, in_app_visible, read_at ON public.notification
+FOR EACH ROW EXECUTE FUNCTION public.maintain_notification_recipient_stat();
+
+CREATE TRIGGER realm_unit_report_stat_maintain
+AFTER INSERT OR DELETE OR UPDATE OF case_id, realm_id, unit_id ON public.realm_unit_report
+FOR EACH ROW EXECUTE FUNCTION public.maintain_realm_unit_report_stat();
+
+CREATE TRIGGER realm_unit_report_case_state_maintain
+AFTER UPDATE OF state ON public.moderation_case
+FOR EACH ROW EXECUTE FUNCTION public.maintain_realm_unit_report_case_state();
+
+CREATE TRIGGER book_chapter_node_stat_maintain
+AFTER INSERT OR DELETE OR UPDATE OF structure_id, content_unit_id, deleted_at
+ON public.content_structure_node
+FOR EACH ROW EXECUTE FUNCTION public.maintain_book_chapter_from_node();
+
+CREATE TRIGGER book_chapter_progress_stat_maintain
+AFTER INSERT OR DELETE OR UPDATE OF profile_id, node_id
+ON public.content_structure_node_progress
+FOR EACH ROW EXECUTE FUNCTION public.maintain_book_chapter_from_progress();
+
+CREATE TRIGGER book_chapter_unit_stat_maintain
+AFTER UPDATE OF kind, status, visibility, deleted_at ON public.unit
+FOR EACH ROW EXECUTE FUNCTION public.maintain_book_chapter_from_unit();
+
+CREATE TRIGGER book_chapter_post_stat_maintain
+AFTER INSERT OR DELETE OR UPDATE OF kind ON public.post
+FOR EACH ROW EXECUTE FUNCTION public.maintain_book_chapter_from_post();
+
+CREATE TRIGGER book_chapter_structure_stat_maintain
+AFTER INSERT OR DELETE OR UPDATE OF kind, deleted_at ON public.content_structure
+FOR EACH ROW EXECUTE FUNCTION public.maintain_book_chapter_from_structure();
+
+CREATE TRIGGER book_localized_metric_node_refresh
+AFTER INSERT OR DELETE OR UPDATE OF structure_id, owner_unit_id, content_unit_id, deleted_at
+ON public.content_structure_node
+FOR EACH ROW EXECUTE FUNCTION public.refresh_book_metric_from_node();
+
+CREATE TRIGGER book_localized_metric_structure_refresh
+AFTER INSERT OR DELETE OR UPDATE OF owner_unit_id, kind, deleted_at
+ON public.content_structure
+FOR EACH ROW EXECUTE FUNCTION public.refresh_book_metric_from_structure();
+
+CREATE TRIGGER book_localized_metric_unit_refresh
+AFTER UPDATE OF kind, status, visibility, deleted_at ON public.unit
+FOR EACH ROW EXECUTE FUNCTION public.refresh_book_metric_from_content_unit();
+
+CREATE TRIGGER book_localized_metric_post_refresh
+AFTER INSERT OR DELETE OR UPDATE OF kind ON public.post
+FOR EACH ROW EXECUTE FUNCTION public.refresh_book_metric_from_content_unit();
+
+CREATE TRIGGER book_localized_metric_localization_refresh
+AFTER INSERT OR DELETE OR UPDATE OF unit_id, language, content_status
+ON public.unit_localization
+FOR EACH ROW EXECUTE FUNCTION public.refresh_book_metric_from_localization();
+
+CREATE TRIGGER book_localized_metric_content_refresh
+AFTER INSERT OR DELETE OR UPDATE OF unit_id, language, word_count, character_count
+ON public.unit_localization_content_metric
+FOR EACH ROW EXECUTE FUNCTION public.refresh_book_metric_from_localization();
 
 
 --

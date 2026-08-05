@@ -190,13 +190,27 @@ export type CompiledSearchRequest = CompiledGroupedSearchRequest | CompiledGloba
 
 export const SearchCursorVersion = 1 as const;
 
+export interface SearchKeysetPosition {
+	/** PostgreSQL-rendered primary sort value; parsed only through a server-owned cast. */
+	readonly primary: string | null;
+	/** PostgreSQL-rendered secondary sort value when the sort contract has one. */
+	readonly secondary: string | null;
+	readonly unitId: string;
+}
+
 export interface SearchCursorState {
 	readonly version: typeof SearchCursorVersion;
-	readonly generationId: string;
 	readonly requestHash: string;
 	readonly pageSize: number;
 	readonly categories: Readonly<
-		Record<string, { readonly offset: number; readonly exhausted: boolean }>
+		Record<
+			string,
+			{
+				readonly seen: number;
+				readonly exhausted: boolean;
+				readonly position?: SearchKeysetPosition;
+			}
+		>
 	>;
 }
 
@@ -210,10 +224,10 @@ export const GlobalSearchCursorVersion = 2 as const;
  */
 export interface GlobalSearchCursorState {
 	readonly version: typeof GlobalSearchCursorVersion;
-	readonly generationId: string;
 	readonly requestHash: string;
 	readonly pageSize: number;
-	readonly offset: number;
+	readonly seen: number;
+	readonly position: SearchKeysetPosition;
 }
 
 declare const GroupedSearchCursorTokenBrand: unique symbol;
@@ -303,15 +317,24 @@ export function parseGlobalSearchCursor(value: string): GlobalSearchCursorState 
 
 function hasValidSearchCursorIdentity(candidate: Record<string, unknown>): boolean {
 	return (
-		typeof candidate.generationId === "string" &&
-		/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(
-			candidate.generationId,
-		) &&
 		typeof candidate.requestHash === "string" &&
 		/^[0-9a-f]{64}$/.test(candidate.requestHash) &&
 		Number.isSafeInteger(candidate.pageSize) &&
 		(candidate.pageSize as number) >= 1 &&
 		(candidate.pageSize as number) <= 100
+	);
+}
+
+function isSearchKeysetPosition(value: unknown): value is SearchKeysetPosition {
+	if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+	const candidate = value as Record<string, unknown>;
+	return (
+		(candidate.primary === null || typeof candidate.primary === "string") &&
+		(candidate.secondary === null || typeof candidate.secondary === "string") &&
+		typeof candidate.unitId === "string" &&
+		/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(
+			candidate.unitId,
+		)
 	);
 }
 
@@ -321,8 +344,9 @@ function assertGlobalSearchCursorState(value: unknown): asserts value is GlobalS
 	if (
 		candidate.version !== GlobalSearchCursorVersion ||
 		!hasValidSearchCursorIdentity(candidate) ||
-		!Number.isSafeInteger(candidate.offset) ||
-		(candidate.offset as number) < 0
+		!Number.isSafeInteger(candidate.seen) ||
+		(candidate.seen as number) < 1 ||
+		!isSearchKeysetPosition(candidate.position)
 	)
 		throw new TypeError("Invalid Search cursor");
 }
@@ -347,9 +371,11 @@ function assertSearchCursorState(value: unknown): asserts value is SearchCursorS
 			throw new TypeError("Invalid Search cursor");
 		const position = state as Record<string, unknown>;
 		if (
-			!Number.isSafeInteger(position.offset) ||
-			(position.offset as number) < 0 ||
-			typeof position.exhausted !== "boolean"
+			!Number.isSafeInteger(position.seen) ||
+			(position.seen as number) < 0 ||
+			typeof position.exhausted !== "boolean" ||
+			(position.position !== undefined && !isSearchKeysetPosition(position.position)) ||
+			(position.exhausted === false && !isSearchKeysetPosition(position.position))
 		)
 			throw new TypeError("Invalid Search cursor");
 	}

@@ -151,14 +151,19 @@ export function DetailedCreditAttributionGroups({
 export function PrimaryBookAuthorSection({ attribution }: { attribution: CreditAttribution }) {
 	const { locale, t } = useTranslation(["ui", "units"]);
 	const name = attribution.creditedUnit.title ?? t.ui.unnamed;
-	const creditedBookCount = toNonNegativeApiInteger(attribution.creditedUnit.creditedBookCount);
+	const creditedBookCount = toNonNegativeApiInteger(
+		attribution.creditedUnit.creditedBookCount.value,
+	);
+	const creditedBookCountIsExact = attribution.creditedUnit.creditedBookCount.kind === "exact";
 	const followerCount = toNonNegativeApiInteger(attribution.creditedUnit.followerCount);
 	const numberFormat = new Intl.NumberFormat(locale.target);
 	const statistics = t.units.detail.authorStatistics;
 	const bookCountLabel =
-		creditedBookCount === 1
+		creditedBookCountIsExact && creditedBookCount === 1
 			? statistics.bookOne
-			: statistics.books({ count: numberFormat.format(creditedBookCount) });
+			: statistics.books({
+					count: `${creditedBookCountIsExact ? "" : "≥"}${numberFormat.format(creditedBookCount)}`,
+				});
 	const followerCountLabel =
 		followerCount === 1
 			? statistics.followerOne

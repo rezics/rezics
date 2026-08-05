@@ -4,6 +4,8 @@ import { grantingPlatformCapabilities } from "../authorization/platform/policy";
 import { effectiveAccountState, type AccountStateRecord } from "../auth/account-state";
 import { recordAuditEvent } from "../audit";
 import { database, type DatabaseExecutor, type DatabaseTransaction } from "../database";
+import { exactCount, lowerBoundCount } from "../counts/contract";
+import { WorkPolicy } from "../performance/policy";
 import {
 	platformCapabilityGrant,
 	profile,
@@ -80,9 +82,12 @@ const userSelection = {
 	updatedByProfileId: userAccountState.updatedByProfileId,
 	activeSessionCount: sql<number>`(
 		select count(*)::integer
-		from ${sessions}
-		where ${sessions.userId} = ${users.id}
-			and ${sessions.expiresAt} > now()
+		from (
+			select 1 from ${sessions}
+			where ${sessions.userId} = ${users.id}
+				and ${sessions.expiresAt} > now()
+			limit ${WorkPolicy.account.maxActiveSessionCountScan}
+		) bounded_active_session
 	)`,
 	createdAt: users.createdAt,
 	updatedAt: users.updatedAt,
@@ -127,7 +132,10 @@ function presentUser(row: SelectedUser) {
 		email: row.email,
 		emailVerified: row.emailVerified,
 		accountState,
-		activeSessionCount: row.activeSessionCount,
+		activeSessionCount:
+			row.activeSessionCount < WorkPolicy.account.maxActiveSessionCountScan
+				? exactCount(row.activeSessionCount)
+				: lowerBoundCount(row.activeSessionCount),
 		createdAt: row.createdAt,
 		updatedAt: row.updatedAt,
 	};

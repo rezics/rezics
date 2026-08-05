@@ -16,8 +16,6 @@ import { database } from "../database";
 import { zone } from "../database/schema";
 import type { SearchCountResult } from "../counts/contract";
 import { InvalidSearch } from "./errors";
-import { getActiveSearchGeneration } from "./generation";
-import { createCandidateSearchContext, type CandidateSearchContext } from "./meilisearch";
 import {
 	assertSearchExpression,
 	combineSearchExpressions,
@@ -31,6 +29,7 @@ import {
 	type CompiledGroupedSearchRequest,
 	type CompiledSearchRequest,
 	type GroupedSearchCursorToken,
+	type SearchKeysetPosition,
 } from "./query";
 import type { ValidatedSearchPlan } from "./validated-plan";
 import type { SearchCategory } from "./schema";
@@ -55,6 +54,7 @@ interface RankedSearchGroup<Hit extends RankedSearchHit> {
 	readonly nextOffset: number;
 	readonly exhausted: boolean;
 	readonly nextCursor?: GroupedSearchCursorToken;
+	readonly nextPosition?: SearchKeysetPosition;
 	readonly limit: number;
 	readonly processingTimeMs: number;
 }
@@ -62,7 +62,6 @@ interface RankedSearchGroup<Hit extends RankedSearchHit> {
 type DomainSearchExecutor<Hit extends RankedSearchHit> = (
 	category: SearchCategory,
 	request: Parameters<typeof searchDomain>[1],
-	candidateContext: CandidateSearchContext,
 ) => Promise<RankedSearchGroup<Hit>>;
 
 async function resolveScope(compiled: CompiledSearchRequest): Promise<{
@@ -137,7 +136,6 @@ async function resolveCompiledExecution(
 		configuredScope.domainFilter,
 		hostScope?.domainFilter,
 	]);
-	const generation = await getActiveSearchGeneration("current");
 	const requestHash = createHash("sha256")
 		.update(
 			JSON.stringify({
@@ -154,7 +152,7 @@ async function resolveCompiledExecution(
 			}),
 		)
 		.digest("hex");
-	return { scope, searchExpression, domainFilter, generation, requestHash };
+	return { scope, searchExpression, domainFilter, requestHash };
 }
 
 function mergeSearchFacets(
@@ -164,8 +162,7 @@ function mergeSearchFacets(
 	const facetCounts = new Map<string, Map<string, SearchCountResult>>();
 	for (const facets of groups)
 		for (const facet of facets) {
-			const options =
-				facetCounts.get(facet.field) ?? new Map<string, SearchCountResult>();
+			const options = facetCounts.get(facet.field) ?? new Map<string, SearchCountResult>();
 			for (const option of facet.options) {
 				const existing = options.get(option.value);
 				options.set(option.value, {
@@ -205,14 +202,12 @@ async function executeCompiledSearchWithPresentation<Hit extends RankedSearchHit
 	enforcedZoneId?: string,
 	inputIdentity?: string,
 ) {
-	const { scope, searchExpression, domainFilter, generation, requestHash } =
-		await resolveCompiledExecution(
-			compiled,
-			localizationLanguages,
-			enforcedZoneId,
-			inputIdentity,
-		);
-	const candidateContext = await createCandidateSearchContext(generation, profileId);
+	const { scope, searchExpression, domainFilter, requestHash } = await resolveCompiledExecution(
+		compiled,
+		localizationLanguages,
+		enforcedZoneId,
+		inputIdentity,
+	);
 	let cursor: ReturnType<typeof parseSearchCursor> | undefined;
 	if (compiled.cursor)
 		try {
@@ -222,17 +217,12 @@ async function executeCompiledSearchWithPresentation<Hit extends RankedSearchHit
 				cause instanceof Error ? cause.message : "Invalid Search cursor",
 			);
 		}
-	if (
-		cursor &&
-		(cursor.generationId !== generation.id ||
-			cursor.requestHash !== requestHash ||
-			cursor.pageSize !== compiled.pageSize)
-	)
-		throw new InvalidSearch("Search cursor does not match this generation or request");
+	if (cursor && (cursor.requestHash !== requestHash || cursor.pageSize !== compiled.pageSize))
+		throw new InvalidSearch("Search cursor does not match this request");
 	if (
 		cursor &&
 		Object.values(cursor.categories).some(
-			(category) => category.offset >= compiled.maxResultWindow,
+			(category) => category.seen >= compiled.maxResultWindow,
 		)
 	)
 		throw new InvalidSearch("Search cursor exceeds the configured result window");
@@ -249,7 +239,6 @@ async function executeCompiledSearchWithPresentation<Hit extends RankedSearchHit
 					profileId,
 					localizationLanguages,
 					query: compiled.query,
-					offset: cursor?.categories[category]?.offset ?? 0,
 					limit: compiled.pageSize,
 					sort: compiled.sort,
 					...(specializedExpression?.state === "expression"
@@ -258,10 +247,12 @@ async function executeCompiledSearchWithPresentation<Hit extends RankedSearchHit
 					domainFilter,
 					scopeUnitId: scope.scopeUnitId,
 					includeScopeDescendants: scope.includeScopeDescendants,
+					searchSeen: cursor?.categories[category]?.seen ?? 0,
+					searchPosition: cursor?.categories[category]?.position,
 				};
 				const [group, facets] = await Promise.all([
-					domainSearch(category, domainRequest, candidateContext),
-					searchDomainFacets(category, domainRequest, facetFields, candidateContext),
+					domainSearch(category, domainRequest),
+					searchDomainFacets(category, domainRequest, facetFields),
 				]);
 				return {
 					state: "result",
@@ -308,7 +299,11 @@ async function executeCompiledSearchWithPresentation<Hit extends RankedSearchHit
 	const categories = Object.fromEntries(
 		groups.map((group) => [
 			group.index,
-			{ offset: group.nextOffset, exhausted: group.exhausted },
+			{
+				seen: group.nextOffset,
+				exhausted: group.exhausted,
+				...(group.nextPosition ? { position: group.nextPosition } : {}),
+			},
 		]),
 	);
 	return {
@@ -318,7 +313,6 @@ async function executeCompiledSearchWithPresentation<Hit extends RankedSearchHit
 		nextCursor: hasNext
 			? createSearchCursor({
 					version: 1,
-					generationId: generation.id,
 					requestHash,
 					pageSize: compiled.pageSize,
 					categories,
@@ -355,14 +349,12 @@ export async function executeCompiledSearchIdentifiers(
 	inputIdentity?: string,
 ) {
 	const { request: compiled } = plan;
-	const { scope, searchExpression, domainFilter, generation, requestHash } =
-		await resolveCompiledExecution(
-			compiled,
-			localizationLanguages,
-			enforcedZoneId,
-			inputIdentity,
-		);
-	const candidateContext = await createCandidateSearchContext(generation, profileId);
+	const { scope, searchExpression, domainFilter, requestHash } = await resolveCompiledExecution(
+		compiled,
+		localizationLanguages,
+		enforcedZoneId,
+		inputIdentity,
+	);
 	let cursor: ReturnType<typeof parseGlobalSearchCursor> | undefined;
 	if (compiled.cursor)
 		try {
@@ -372,14 +364,9 @@ export async function executeCompiledSearchIdentifiers(
 				cause instanceof Error ? cause.message : "Invalid Search cursor",
 			);
 		}
-	if (
-		cursor &&
-		(cursor.generationId !== generation.id ||
-			cursor.requestHash !== requestHash ||
-			cursor.pageSize !== compiled.pageSize)
-	)
-		throw new InvalidSearch("Search cursor does not match this generation or request");
-	if (cursor && cursor.offset >= compiled.maxResultWindow)
+	if (cursor && (cursor.requestHash !== requestHash || cursor.pageSize !== compiled.pageSize))
+		throw new InvalidSearch("Search cursor does not match this request");
+	if (cursor && cursor.seen >= compiled.maxResultWindow)
 		throw new InvalidSearch("Search cursor exceeds the configured result window");
 
 	const facetFields = cursor ? [] : compiled.facets;
@@ -442,33 +429,35 @@ export async function executeCompiledSearchIdentifiers(
 		};
 
 	const [page, facetGroups] = await Promise.all([
-		searchGlobalIdentifiers(
-			{
-				profileId,
-				localizationLanguages,
-				query: compiled.query,
-				offset: cursor?.offset ?? 0,
-				limit: compiled.pageSize,
-				sort: compiled.sort,
-				domainFilter,
-				scopeUnitId: scope.scopeUnitId,
-				includeScopeDescendants: scope.includeScopeDescendants,
-				branches: results.map((result) => ({
-					category: result.category,
-					...(result.request.searchExpression
-						? { searchExpression: result.request.searchExpression }
-						: {}),
-				})),
-			},
-			candidateContext,
-		),
+		searchGlobalIdentifiers({
+			profileId,
+			localizationLanguages,
+			query: compiled.query,
+			offset: cursor?.seen ?? 0,
+			position: cursor?.position,
+			limit: compiled.pageSize,
+			sort: compiled.sort,
+			domainFilter,
+			scopeUnitId: scope.scopeUnitId,
+			includeScopeDescendants: scope.includeScopeDescendants,
+			branches: results.map((result) => ({
+				category: result.category,
+				...(result.request.searchExpression
+					? { searchExpression: result.request.searchExpression }
+					: {}),
+			})),
+		}),
 		Promise.all(
 			results.map((result) =>
-				searchDomainFacets(result.category, result.request, facetFields, candidateContext),
+				searchDomainFacets(result.category, result.request, facetFields),
 			),
 		),
 	]);
 	const hasNext = !page.exhausted && page.nextOffset < compiled.maxResultWindow;
+	const last = page.hits.at(-1);
+	const nextPosition = page.nextPosition;
+	if (hasNext && (!last || !nextPosition))
+		throw new TypeError("PostgreSQL Search page omitted its keyset position");
 	return {
 		query: compiled.query,
 		hits: page.hits,
@@ -477,10 +466,10 @@ export async function executeCompiledSearchIdentifiers(
 		nextCursor: hasNext
 			? createGlobalSearchCursor({
 					version: GlobalSearchCursorVersion,
-					generationId: generation.id,
 					requestHash,
 					pageSize: compiled.pageSize,
-					offset: page.nextOffset,
+					seen: page.nextOffset,
+					position: nextPosition!,
 				})
 			: undefined,
 	};

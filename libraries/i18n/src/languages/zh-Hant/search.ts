@@ -39,6 +39,7 @@ export default {
 	clearAdvancedFilters: "清除進階條件",
 	results: "搜尋結果",
 	resultCount: insert("{{count}} 項", { count: Number }),
+	resultCountLowerBound: insert("至少 {{count}} 項", { count: Number }),
 	atLeastResultCount: insert("至少 {{count}} 項", { count: Number }),
 	resultGroups: {
 		units: "作品",

@@ -127,7 +127,8 @@ function ProgressList() {
 
 	const definition: SearchFeatureDefinition = parseSearchFeatureDefinition(definitionQuery.data);
 	const activeQuery = unitFilterSearchQuery(lastRequest?.state.filter);
-	const total = toNonNegativeApiInteger(result?.total ?? 0);
+	const total = result?.total;
+	const totalValue = toNonNegativeApiInteger(total?.value ?? 0);
 
 	return (
 		<main className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-10 sm:px-6">
@@ -148,7 +149,9 @@ function ProgressList() {
 				{result ? (
 					<section aria-live="polite" className="grid gap-4">
 						<p className="text-muted-foreground text-sm">
-							{t.search.resultCount({ count: total })}
+							{total?.kind === "lower-bound"
+								? t.search.resultCountLowerBound({ count: totalValue })
+								: t.search.resultCount({ count: totalValue })}
 						</p>
 						{result.items.length > 0 ? (
 							<div className="grid gap-3">

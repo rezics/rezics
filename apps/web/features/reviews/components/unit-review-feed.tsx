@@ -16,7 +16,6 @@ import { createSubjectFeedPredicate } from "@/features/content-feed/model/subjec
 import { RealmScoreContextLink } from "@/features/realms/components/realm-score-context-link";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
-import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { useDefaultScoreRealm } from "../data/default-score-realm";
 import { createReviewScorePredicate } from "../model/unit-review-feed-filter";
 import type { UnitScore } from "../model/score-value";
@@ -119,7 +118,7 @@ export function UnitReviewFeed({
 				<CommunityScoreOverview
 					realmId={scoreRealm?.id}
 					onScoreFilterToggle={toggleScore}
-					reviewCount={toNonNegativeApiInteger(reviewCountQuery.data?.totalCount)}
+					reviewCount={reviewCountQuery.data?.totalCount ?? { kind: "exact", value: 0 }}
 					selectedScores={route.scores}
 					targetId={targetId}
 				/>

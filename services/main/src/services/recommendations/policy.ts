@@ -1,7 +1,7 @@
 import type { FeedSortValues } from "../database/schema/contract-values";
 import { WorkPolicy } from "../performance/policy";
 
-export const RecommendationPolicyVersion = "hybrid_v1";
+export const RecommendationPolicyVersion = "bounded_structural_v1";
 
 export type RecommendationSort = (typeof FeedSortValues)[number];
 

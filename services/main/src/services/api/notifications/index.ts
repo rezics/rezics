@@ -1,15 +1,17 @@
 import { StatusCodes } from "http-status-codes";
 import { Check } from "@sinclair/typebox/value";
-import { and, asc, count, desc, eq, gt, isNull, lt, or } from "drizzle-orm";
+import { and, asc, desc, eq, gt, isNull, lt, or } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
 import { toUiLocale } from "@rezics/i18n";
 
 import session from "../../auth/session";
 import { database } from "../../database";
+import { toSafeInteger } from "../../database/integer";
 import { firstUnitLocalizationTitle } from "../../units/localization";
 import {
 	notification,
+	notificationRecipientStat,
 	profile as profileTable,
 	notificationPreference,
 	profilePreference,
@@ -181,15 +183,10 @@ export default new Elysia({ prefix: "/notifications" })
 				};
 			});
 			const [unread] = await database
-				.select({ value: count() })
-				.from(notification)
-				.where(
-					and(
-						eq(notification.recipientProfileId, profile.unitId),
-						eq(notification.inAppVisible, true),
-						isNull(notification.readAt),
-					),
-				);
+				.select({ value: notificationRecipientStat.unreadCount })
+				.from(notificationRecipientStat)
+				.where(eq(notificationRecipientStat.profileId, profile.unitId))
+				.limit(1);
 			const newest = direction === "after" ? items.at(-1) : items[0];
 			const last = items.at(-1);
 			return {
@@ -211,7 +208,7 @@ export default new Elysia({ prefix: "/notifications" })
 							unreadOnly,
 						})
 					: (query.cursor ?? null),
-				unreadCount: unread?.value ?? 0,
+				unreadCount: toSafeInteger(unread?.value ?? 0n, "notification unread count"),
 			};
 		},
 		{
@@ -228,16 +225,13 @@ export default new Elysia({ prefix: "/notifications" })
 		"/unread-count",
 		async ({ profile }) => {
 			const [row] = await database
-				.select({ value: count() })
-				.from(notification)
-				.where(
-					and(
-						eq(notification.recipientProfileId, profile.unitId),
-						eq(notification.inAppVisible, true),
-						isNull(notification.readAt),
-					),
-				);
-			return { count: row?.value ?? 0 };
+				.select({ value: notificationRecipientStat.unreadCount })
+				.from(notificationRecipientStat)
+				.where(eq(notificationRecipientStat.profileId, profile.unitId))
+				.limit(1);
+			return {
+				count: toSafeInteger(row?.value ?? 0n, "notification unread count"),
+			};
 		},
 		{
 			access: "notification:read",

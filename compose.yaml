@@ -2,27 +2,34 @@ name: ${COMPOSE_PROJECT_NAME:-rezics-dev}
 
 services:
     postgres:
-        image: postgres:18.4-trixie@sha256:3a82e1f56c8f0f5616a11103ac3d47e632c3938698946a7ad26da0df1334744a
+        image: rezics-postgres:18.4-pgroonga-4.0.8
+        build:
+            context: .
+            target: postgres
         command:
             - postgres
             - -c
-            - wal_level=logical
-            - -c
-            - max_replication_slots=10
-            - -c
-            - max_wal_senders=10
-            - -c
-            - max_slot_wal_keep_size=32GB
-            - -c
-            - shared_preload_libraries=pg_stat_statements
+            - shared_preload_libraries=pg_stat_statements,pgroonga_wal_resource_manager,pgroonga_crash_safer
             - -c
             - compute_query_id=on
             - -c
             - pg_stat_statements.track=all
             - -c
+            - wal_level=replica
+            - -c
+            - max_replication_slots=0
+            - -c
+            - max_wal_size=8GB
+            - -c
+            - min_wal_size=2GB
+            - -c
             - track_io_timing=on
             - -c
             - track_wal_io_timing=on
+            - -c
+            - pgroonga.enable_wal_resource_manager=on
+            - -c
+            - pgroonga.enable_crash_safe=on
         restart: unless-stopped
         environment:
             POSTGRES_DB: rezics
@@ -30,8 +37,6 @@ services:
             POSTGRES_USER: postgres
             REZICS_DATABASE_PASSWORD: rezics_app
             REZICS_DATABASE_USERNAME: rezics_app
-            SEQUIN_SOURCE_PASSWORD: rezics_sequin
-            SEQUIN_SOURCE_USERNAME: rezics_sequin
         ports:
             - "${COMPOSE_BIND_ADDRESS:-127.0.0.1}:${POSTGRES_HOST_PORT:-5432}:5432"
         volumes:
@@ -63,102 +68,12 @@ services:
             timeout: 5s
             retries: 15
             start_period: 10s
-
-    meilisearch:
-        image: getmeili/meilisearch:v1.51.0@sha256:a9eb29ee09ab4943db3b4c68620bd6f3382e6b2b0ac4431c0e607b48dbcd4c14
-        restart: unless-stopped
-        environment:
-            MEILI_ENV: development
-            MEILI_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-rezics-development-meilisearch-key}
-            MEILI_NO_ANALYTICS: "true"
-        ports:
-            - "${COMPOSE_BIND_ADDRESS:-127.0.0.1}:${MEILISEARCH_HOST_PORT:-7700}:7700"
-        volumes:
-            - meilisearch-data:/meili_data
-        healthcheck:
-            test: ["CMD", "curl", "--fail", "http://localhost:7700/health"]
-            interval: 2s
-            timeout: 5s
-            retries: 15
-            start_period: 10s
-
-    sequin-postgres:
-        image: postgres:18.4-trixie@sha256:3a82e1f56c8f0f5616a11103ac3d47e632c3938698946a7ad26da0df1334744a
-        restart: unless-stopped
-        environment:
-            POSTGRES_DB: sequin
-            POSTGRES_PASSWORD: ${SEQUIN_STATE_POSTGRES_PASSWORD:-sequin}
-            POSTGRES_USER: sequin
-        volumes:
-            - sequin-postgres-data:/var/lib/postgresql
-        healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U sequin -d sequin"]
-            interval: 2s
-            timeout: 5s
-            retries: 15
-            start_period: 10s
-
-    sequin-redis:
-        image: valkey/valkey:8.1.9-alpine3.24@sha256:a038175878d66b9d274fbf8be73c0305e93798b83917647f167e18cef3c71eec
-        restart: unless-stopped
-        command: ["valkey-server", "--appendonly", "yes"]
-        volumes:
-            - sequin-redis-data:/data
-        healthcheck:
-            test: ["CMD", "valkey-cli", "ping"]
-            interval: 2s
-            timeout: 5s
-            retries: 15
-            start_period: 5s
-
-    sequin:
-        image: sequin/sequin:v0.14.6@sha256:336759c1c632ebdc87939bcea70b26b46df6593e666088e1bf29058209437d3e
-        restart: unless-stopped
-        depends_on:
-            postgres:
-                condition: service_healthy
-            meilisearch:
-                condition: service_healthy
-            sequin-postgres:
-                condition: service_healthy
-            sequin-redis:
-                condition: service_healthy
-        environment:
-            PG_HOSTNAME: sequin-postgres
-            PG_DATABASE: sequin
-            PG_PORT: 5432
-            PG_USERNAME: sequin
-            PG_PASSWORD: ${SEQUIN_STATE_POSTGRES_PASSWORD:-sequin}
-            PG_POOL_SIZE: 20
-            SECRET_KEY_BASE: ${SEQUIN_SECRET_KEY_BASE:-wDPLYus0pvD6qJhKJICO4dauYPXfO/Yl782Zjtpew5qRBDp7CZvbWtQmY0eB13If}
-            VAULT_KEY: ${SEQUIN_VAULT_KEY:-2Sig69bIpuSm2kv0VQfDekET2qy8qUZGI8v3/h3ASiY=}
-            REDIS_URL: redis://sequin-redis:6379
-            CONFIG_FILE_PATH: /config/sequin.yaml
-            TELEMETRY_ENABLED: "false"
-            SEQUIN_ADMIN_PASSWORD: ${SEQUIN_ADMIN_PASSWORD:-rezics-development-sequin-admin}
-            SEQUIN_API_TOKEN: ${SEQUIN_API_TOKEN:-rezics-development-sequin-api-token}
-            SEQUIN_SOURCE_PASSWORD: ${SEQUIN_SOURCE_PASSWORD:-rezics_sequin}
-            SEQUIN_SOURCE_USERNAME: ${SEQUIN_SOURCE_USERNAME:-rezics_sequin}
-            MEILISEARCH_CURRENT_SINK_KEY: ${MEILISEARCH_MASTER_KEY:-rezics-development-meilisearch-key}
-            MEILISEARCH_HISTORY_SINK_KEY: ${MEILISEARCH_MASTER_KEY:-rezics-development-meilisearch-key}
-            MEILISEARCH_CURRENT_INDEX_UID: ${MEILISEARCH_CURRENT_INDEX_UID:-rezics_units_v1_20260804}
-            MEILISEARCH_CURRENT_SINK_NAME: ${MEILISEARCH_CURRENT_SINK_NAME:-rezics-units-v1-20260804}
-            MEILISEARCH_HISTORY_INDEX_UID: ${MEILISEARCH_HISTORY_INDEX_UID:-rezics_revisions_v1_20260804}
-        ports:
-            - "${COMPOSE_BIND_ADDRESS:-127.0.0.1}:${SEQUIN_API_HOST_PORT:-7376}:7376"
-            - "${COMPOSE_BIND_ADDRESS:-127.0.0.1}:${SEQUIN_TUNNEL_HOST_PORT:-8376}:8376"
-        volumes:
-            - ./services/main/search:/config:ro
-        healthcheck:
-            test: ["CMD", "curl", "--fail", "http://localhost:7376/health"]
-            interval: 5s
-            timeout: 5s
-            retries: 24
-            start_period: 15s
-
     postgres-migration-test:
         profiles: ["migration-test"]
-        image: postgres:18.4-trixie@sha256:3a82e1f56c8f0f5616a11103ac3d47e632c3938698946a7ad26da0df1334744a
+        image: rezics-postgres:18.4-pgroonga-4.0.8
+        build:
+            context: .
+            target: postgres
         environment:
             POSTGRES_DB: rezics_atlas
             POSTGRES_PASSWORD: postgres
@@ -169,13 +84,27 @@ services:
             [
                 "postgres",
                 "-c",
-                "wal_level=logical",
+                "shared_preload_libraries=pg_stat_statements,pgroonga_wal_resource_manager,pgroonga_crash_safer",
                 "-c",
-                "max_replication_slots=4",
+                "compute_query_id=on",
                 "-c",
-                "max_wal_senders=4",
+                "pg_stat_statements.track=all",
                 "-c",
-                "shared_preload_libraries=pg_stat_statements",
+                "wal_level=replica",
+                "-c",
+                "max_replication_slots=0",
+                "-c",
+                "max_wal_size=8GB",
+                "-c",
+                "min_wal_size=2GB",
+                "-c",
+                "track_io_timing=on",
+                "-c",
+                "track_wal_io_timing=on",
+                "-c",
+                "pgroonga.enable_wal_resource_manager=on",
+                "-c",
+                "pgroonga.enable_crash_safe=on",
             ]
         volumes:
             - ./services/main/docker/postgres/migration-test-init:/docker-entrypoint-initdb.d:ro
@@ -191,9 +120,3 @@ volumes:
         name: ${COMPOSE_VOLUME_PREFIX:-rezics}-postgres-18-data
     rustfs-data:
         name: ${COMPOSE_VOLUME_PREFIX:-rezics}-rustfs-data
-    meilisearch-data:
-        name: ${COMPOSE_VOLUME_PREFIX:-rezics}-meilisearch-data
-    sequin-postgres-data:
-        name: ${COMPOSE_VOLUME_PREFIX:-rezics}-sequin-postgres-data
-    sequin-redis-data:
-        name: ${COMPOSE_VOLUME_PREFIX:-rezics}-sequin-redis-data

@@ -41,8 +41,8 @@ must not depend on private libraries, applications, or services.
 ## Development
 
 The root workspace uses Node.js 26, Yarn 4, Bun, Go Task 3, Docker Compose, and
-Aspire 13.4.6. Compose owns persistent vanilla PostgreSQL 18, RustFS, Meilisearch,
-and Sequin PostgreSQL/Valkey resources. Aspire owns the API, recommendation worker,
+Aspire 13.4.6. Compose owns persistent PostgreSQL 18.4 with PGroonga and RustFS.
+Aspire owns the API, recommendation worker,
 web development server, and Dashboard. Use the repository's pinned
 devenv/direnv environment or provide Aspire 13.4.6, Yarn 4.17.1, Go Task 3, and
 Bun 1.3.11 or newer locally.
@@ -55,29 +55,23 @@ task dev
 
 `local:setup` is the explicit first-run/configuration workflow. It starts the
 persistent Compose infrastructure, initializes RustFS, applies migrations,
-installs the factory platform bundle when no installation exists, prepares the
-current index generation, reapplies the reviewed Sequin configuration, verifies
-its backfill, and promotes the generation. On an installed database it verifies
+installs the factory platform bundle when no installation exists, and verifies the
+authoritative PGroonga indexes. On an installed database it verifies
 only permanent platform identities and never reconciles product-owned content.
-It is safe to rerun for a healthy unchanged generation. Named
-volumes preserve PostgreSQL, RustFS, Meilisearch, Sequin PostgreSQL, and Valkey
-data independently from the Aspire AppHost.
+It is safe to rerun for a healthy unchanged database. Named volumes preserve PostgreSQL and
+RustFS data independently from the Aspire AppHost.
 
-`dev` ensures Compose infrastructure is healthy, prepares the database, starts
-the existing Sequin container without forcing recreation, and performs a
-bounded read-only check of the active search generation. It does not rebuild or
-promote search data. It then starts the Bun API and recommendation worker,
+`dev` ensures Compose infrastructure is healthy, prepares the database, and performs a
+bounded read-only check of the required database extensions and PGroonga indexes. It then starts the Bun API and recommendation worker,
 Vinext web app, and Aspire Dashboard in the foreground. The stable development endpoints are web
 `http://localhost:3000`, API `http://localhost:3001`, PostgreSQL
-`localhost:5432`, RustFS `http://localhost:9000`, Meilisearch
-`http://localhost:7700`, and Sequin `http://localhost:7376`. Aspire still injects
+`localhost:5432` and RustFS `http://localhost:9000`. Aspire still injects
 endpoint references between application processes. Stop only the application
 processes with Ctrl+C or `task dev:stop`; use `task infra:stop` when the shared
 infrastructure should also stop. Aspire remains a local-development control
 plane and does not generate or replace the production Nomad deployment.
 
-`task dev:search` remains an alias for the default search-capable topology. Use
-`task infra:status` for persistent infrastructure,
+Use `task infra:status` for persistent infrastructure,
 `task aspire:doctor` for prerequisite diagnostics, and `task aspire:describe`
 for machine-readable application state. The static `apps/about` site remains
 independent from the AppHost.
@@ -101,13 +95,10 @@ Infrastructure lifecycle commands are `task infra:start`, `task infra:up`,
 `task infra:stop`, `task infra:down`, and `task infra:logs`. `infra:start` only
 starts persistent services; `infra:up` additionally performs the idempotent
 RustFS bucket initialization. `task infra:reset` intentionally deletes all
-local PostgreSQL, RustFS, Meilisearch, and Sequin state before rebuilding a
-consistent default database and search generation; it requires confirmation.
-Use `task --yes local:reset` to reset and seed only the application database
-while coordinating Sequin and rebuilding search. Use
-`task --yes local:search:rebuild` to repair a stale local current index without
-resetting PostgreSQL. Both rebuild workflows are destructive, explicit, and
-restricted to loopback service endpoints.
+local PostgreSQL and RustFS state before rebuilding a consistent default database; it requires
+confirmation. Use `task --yes local:reset` to reset and seed only the application database. Use
+`task --yes local:search:rebuild` to rebuild the authoritative PGroonga indexes without resetting
+PostgreSQL.
 
 The main checks are:
 
@@ -238,8 +229,8 @@ The about site is deployed independently to Cloudflare Pages from the
 shared `production` GitHub environment, while its workflow and release trigger
 remain separate; platform `v*` tags never deploy About.
 The main Vinext site deploys to Cloudflare Workers; the API, background worker,
-PostgreSQL, Meilisearch, and Sequin run on Nomad; production object storage is
-Cloudflare R2. See [Production deployment](./docs/operations/production-deployment.md)
+PostgreSQL run on Nomad; production object storage and dedicated PostgreSQL logical backups use
+separate private Cloudflare R2 buckets. See [Production deployment](./docs/operations/production-deployment.md)
 for first installation, release, secret, and rollback procedures.
 
 ## License

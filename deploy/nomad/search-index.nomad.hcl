@@ -11,14 +11,6 @@ variable "search_action" {
   type = string
 }
 
-variable "search_projection" {
-  type = string
-}
-
-variable "search_index_uid" {
-  type = string
-}
-
 job "rezics-search-index" {
   namespace   = "rezics"
   datacenters = ["dc1"]
@@ -55,8 +47,6 @@ job "rezics-search-index" {
         args = [
           "search-index",
           var.search_action,
-          var.search_projection,
-          var.search_index_uid,
         ]
       }
 

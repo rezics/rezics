@@ -204,14 +204,22 @@ async function validatePersistedBatchNodes(
 	}
 	if (structure.kind === "realm.taxonomy") {
 		type DuplicateTagRow = { readonly contentUnitId: string };
+		const changedNodeIds = sql`array[${sql.join(
+			input.nodeIds.map((nodeId) => sql`${nodeId}::uuid`),
+			sql`, `,
+		)}]::uuid[]`;
 		const duplicate = await tx.execute<DuplicateTagRow>(sql`
-			select node.content_unit_id as "contentUnitId"
-			from ${contentStructureNode} node
-			inner join ${tag} taxonomy_tag on taxonomy_tag.id = node.content_unit_id
-			where node.structure_id = ${structure.id}::uuid
-				and node.deleted_at is null
-			group by node.content_unit_id
-			having count(*) > 1
+			select changed.content_unit_id as "contentUnitId"
+			from unnest(${changedNodeIds}) as requested(id)
+			inner join ${contentStructureNode} changed on changed.id = requested.id
+			inner join ${contentStructureNode} duplicate
+				on duplicate.structure_id = changed.structure_id
+				and duplicate.content_unit_id = changed.content_unit_id
+				and duplicate.id <> changed.id
+				and duplicate.deleted_at is null
+			inner join ${tag} taxonomy_tag on taxonomy_tag.id = changed.content_unit_id
+			where changed.structure_id = ${structure.id}::uuid
+				and changed.deleted_at is null
 			limit 1
 		`);
 		if (duplicate.rows.length)

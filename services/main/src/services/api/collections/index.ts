@@ -4,6 +4,7 @@ import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database, type DatabaseTransaction } from "../../database";
+import { toSafeInteger } from "../../database/integer";
 import { fractionalPositionBetween } from "../../ordering/position";
 import {
 	resolvedUnitLocalizationImageAssetId,
@@ -14,6 +15,7 @@ import {
 import {
 	collection,
 	collectionItem,
+	collectionStat,
 	collectionStructureRevisionHead,
 	creditAttribution,
 	profileFavoritesCollection,
@@ -211,7 +213,7 @@ export default new Elysia({ prefix: "/collections" })
 					favoritesProfileId: profileFavoritesCollection.profileId,
 					favoritesRank,
 					language: unitLocalization.language,
-					itemCount: sql<number>`(select count(*) from ${collectionItem} where ${collectionItem.collectionId} = ${collection.id})::int`,
+					itemCount: collectionStat.itemCount,
 					containsTarget: query.targetId
 						? sql<boolean>`exists(select 1 from ${collectionItem} selected_item where selected_item.collection_id = ${collection.id} and selected_item.unit_id = ${query.targetId})`
 						: sql<boolean>`false`,
@@ -228,6 +230,7 @@ export default new Elysia({ prefix: "/collections" })
 				})
 				.from(collection)
 				.innerJoin(unit, eq(unit.id, collection.id))
+				.innerJoin(collectionStat, eq(collectionStat.collectionId, collection.id))
 				.innerJoin(unitRevisionHead, eq(unitRevisionHead.unitId, unit.id))
 				.innerJoin(
 					collectionStructureRevisionHead,
@@ -297,6 +300,7 @@ export default new Elysia({ prefix: "/collections" })
 						...item
 					}) => ({
 						...item,
+						itemCount: toSafeInteger(item.itemCount, "Collection item count"),
 						purpose: favoritesProfileId
 							? ("favorites" as const)
 							: ("collection" as const),
