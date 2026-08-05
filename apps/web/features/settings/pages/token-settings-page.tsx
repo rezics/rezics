@@ -2,7 +2,6 @@
 
 import {
 	getApiApiTokensQueryKey,
-	PostApiApiTokensRequestPermissionsEnum,
 	type GetApiApiTokensStatus200,
 	useDeleteApiApiTokensByTokenId,
 	useGetApiApiTokens,
@@ -73,11 +72,14 @@ import {
 	type TokenQuotaLimitValues,
 	type ValidTokenQuotaLimits,
 } from "../model/token-quota-limits";
+import {
+	ContentAgentPermissions,
+	ReadOnlyPermissions,
+	type ApiTokenPermission,
+} from "../model/token-permission-templates";
 import { SettingsOverviewHref } from "../routing/settings-routes";
 
 type TokenRecord = GetApiApiTokensStatus200["items"][number];
-type ApiTokenPermission =
-	(typeof PostApiApiTokensRequestPermissionsEnum)[keyof typeof PostApiApiTokensRequestPermissionsEnum];
 type PermissionCategory = "content" | "identity" | "communication" | "platform";
 type PermissionResource =
 	| "unit"
@@ -169,26 +171,6 @@ const PermissionGroups = [
 	category: PermissionCategory;
 	actions: readonly (readonly [ApiTokenPermission, PermissionAction])[];
 }[];
-
-const ReadOnlyPermissions = [
-	"unit:read",
-	"profile:read",
-	"interaction:read",
-	"realm:read",
-	"message:read",
-	"notification:read",
-	"recommendation:read",
-	"upload:read",
-] as const satisfies readonly ApiTokenPermission[];
-
-const ContentAgentPermissions = [
-	"unit:read",
-	"unit:create",
-	"unit:update",
-	"profile:read",
-	"upload:read",
-	"upload:write",
-] as const satisfies readonly ApiTokenPermission[];
 
 function formatDate(value: string, locale: string) {
 	return new Intl.DateTimeFormat(locale, {

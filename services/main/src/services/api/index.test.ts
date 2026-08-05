@@ -134,6 +134,22 @@ describe("API root", () => {
 		expect(document.paths["/api/v1/slug-addresses/profile"]).toBeUndefined();
 	});
 
+	it("allows API-token credentials on Unit reference proposal and vote routes", () => {
+		const document = toOpenAPISchema(api);
+		const operations = [
+			document.paths["/api/v1/units/{type}/{unitId}/aliases"]?.post,
+			document.paths["/api/v1/units/{type}/{unitId}/aliases/{aliasId}/vote"]?.put,
+			document.paths["/api/v1/units/{type}/{unitId}/aliases/{aliasId}/vote"]?.delete,
+			document.paths["/api/v1/units/{type}/{unitId}/links"]?.post,
+			document.paths["/api/v1/units/{type}/{unitId}/links/{linkId}/vote"]?.put,
+			document.paths["/api/v1/units/{type}/{unitId}/links/{linkId}/vote"]?.delete,
+		];
+
+		for (const operation of operations) {
+			expect(operation?.security).toEqual([{ ApiToken: [] }, { SessionCookie: [] }]);
+		}
+	});
+
 	it("documents source-link candidates for every registered Unit kind", () => {
 		const document = toOpenAPISchema(api);
 		const operations = [
