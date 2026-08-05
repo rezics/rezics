@@ -1,12 +1,23 @@
 import { describe, expect, it } from "vitest";
 
-import { planBookContentStructureDraft, type CurrentBookDraftNode } from "./book-draft-plan";
+import {
+	newBookDraftUnitVisibility,
+	planBookContentStructureDraft,
+	type CurrentBookDraftNode,
+} from "./book-draft-plan";
 
 const current: CurrentBookDraftNode[] = [
 	{ id: "a", parentId: null, position: "a0", title: "A" },
 	{ id: "b", parentId: null, position: "a1", title: "B" },
 	{ id: "c", parentId: "a", position: "a0", title: "C" },
 ];
+
+describe("Book draft Unit lifecycle", () => {
+	it("defaults new Chapters and Labels to unlisted", () => {
+		expect(newBookDraftUnitVisibility("chapter")).toBe("unlisted");
+		expect(newBookDraftUnitVisibility("label")).toBe("unlisted");
+	});
+});
 
 describe("Book Content Structure draft planning", () => {
 	it("recognizes a semantic no-op without rewriting positions", () => {
