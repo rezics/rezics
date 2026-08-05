@@ -2,7 +2,7 @@ import { sql } from "drizzle-orm";
 import { check, date, index, text, unique, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { unitSourceLink } from "./unit-source-link";
+import { unitSourceLink } from "./unit";
 import {
 	createCreatedAtColumn,
 	createJsonObjectColumn,

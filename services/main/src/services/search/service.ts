@@ -40,12 +40,15 @@ import {
 	recommendationSnapshot,
 	recommendationUnitStat,
 	unit,
+	unitAlias,
+	unitAliasVoteStat,
 	unitOwnership,
 	unitLocalization,
 	unitEffectiveTag,
 	unitStructureMember,
 	unitStructureVoteStat,
 	unitVariant,
+	AliasSearchScoreThreshold,
 	VariantCapableUnitKindValues,
 } from "../database/schema";
 import { env } from "../config";
@@ -86,6 +89,8 @@ import { compileUnitPredicateSql } from "../filter/sql";
 
 const subjectUnit = alias(unit, "subject_unit");
 const searchLocalization = alias(unitLocalization, "search_localization");
+const searchAlias = alias(unitAlias, "search_alias");
+const searchAliasVoteStat = alias(unitAliasVoteStat, "search_alias_vote_stat");
 const facetLocalization = alias(unitLocalization, "facet_unit_localization");
 const facetUnitTag = alias(unitEffectiveTag, "facet_unit_tag");
 const facetRealmUnit = alias(realmUnit, "facet_realm_unit");
@@ -793,14 +798,12 @@ interface SearchCandidateRow extends Record<string, unknown> {
 interface SearchCandidatePage {
 	readonly rows: readonly SearchCandidateRow[];
 	readonly hasMore: boolean;
-	readonly scanTruncated: boolean;
 }
 
 interface SearchCandidateDatabaseRow extends Record<string, unknown> {
 	readonly id: string | null;
 	readonly primaryValue: string | null;
 	readonly secondaryValue: string | null;
-	readonly scanTruncated: boolean;
 }
 
 function readSearchCandidateRows(
@@ -837,24 +840,55 @@ interface SearchSortSql {
 
 function currentSearchTextCondition(query: string): SQL {
 	if (!query) return sql`true`;
+	const escapedQuery = sql`public.pgroonga_query_escape(${query})`;
 	return sql`(
 		public.current_search_metadata_v1(
 			${searchLocalization.title},
 			${searchLocalization.summary},
 			${searchLocalization.description}
-		) &@~ ${query}
+		) &@~ ${escapedQuery}
 		or (
 			${searchLocalization.contentStatus} = 'published'::content_status
-			and public.current_search_text_v1(${searchLocalization.content}) &@~ ${query}
+			and public.current_search_text_v1(${searchLocalization.content}) &@~ ${escapedQuery}
 		)
 	)`;
+}
+
+function currentSearchSources(query: string, languageBoundary: readonly ContentLanguage[]): SQL {
+	if (!query)
+		return sql`select ${unit.id} as unit_id, 0::numeric as relevance_score from ${unit}`;
+	const localizationLanguageCondition = languageBoundary.length
+		? inArray(searchLocalization.language, languageBoundary)
+		: sql`true`;
+	const aliasLanguageCondition = languageBoundary.length
+		? sql`(${searchAlias.language} is null or ${inArray(searchAlias.language, languageBoundary)})`
+		: sql`true`;
+	return sql`
+		select ${searchLocalization.unitId} as unit_id,
+			pgroonga_score(${searchLocalization}.tableoid, ${searchLocalization}.ctid)::numeric
+				as relevance_score
+		from ${unitLocalization} as ${searchLocalization}
+		where ${currentSearchTextCondition(query)}
+			and ${localizationLanguageCondition}
+		union all
+		select ${searchAlias.unitId} as unit_id,
+			pgroonga_score(${searchAlias}.tableoid, ${searchAlias}.ctid)::numeric
+				as relevance_score
+		from ${unitAlias} as ${searchAlias}
+		inner join ${unitAliasVoteStat} as ${searchAliasVoteStat}
+			on ${searchAliasVoteStat.aliasId} = ${searchAlias.id}
+		where ${searchAlias.deletedAt} is null
+			and ${searchAliasVoteStat.score} >= ${AliasSearchScoreThreshold}
+			and ${aliasLanguageCondition}
+			and ${searchAlias.term} &@~ public.pgroonga_query_escape(${query})
+	`;
 }
 
 function currentSearchSort(sort: SearchSort, query: string): SearchSortSql {
 	if (sort === "relevance") {
 		if (!query) throw new InvalidSearch("relevance requires a text query");
 		return {
-			primary: sql`pgroonga_score(search_localization.tableoid, search_localization.ctid)::numeric`,
+			primary: sql`eligible_matches.relevance_score`,
 			secondary: sql`extract(epoch from ${unit.updatedAt})::numeric`,
 			direction: "desc",
 		};
@@ -933,48 +967,24 @@ async function searchCandidatePage(input: {
 	readonly limit: number;
 	readonly languageBoundary: readonly ContentLanguage[];
 }): Promise<SearchCandidatePage> {
-	if (!input.branches.length) return { rows: [], hasMore: false, scanTruncated: false };
+	if (!input.branches.length) return { rows: [], hasMore: false };
 	const sort = currentSearchSort(input.sort, input.query);
 	const branchConditions = input.branches.map(
 		(branch) => sql`(${sql.join([...branch.conditions], sql` and `)})`,
 	);
-	const languageCondition = input.languageBoundary.length
-		? inArray(searchLocalization.language, input.languageBoundary)
-		: sql`true`;
 	const orderDirection = sort.direction === "asc" ? sql`asc` : sql`desc`;
 	const result = await database.transaction(async (tx) => {
 		await tx.execute(
 			sql`select set_config('statement_timeout', ${String(env.SEARCH_STATEMENT_TIMEOUT_MS)}, true)`,
 		);
 		return tx.execute<SearchCandidateDatabaseRow>(sql`
-			with candidate_localizations as materialized (
-				select ${searchLocalization}.tableoid as tableoid,
-					${searchLocalization}.ctid as ctid,
-					${searchLocalization}.*
-				from ${unitLocalization} as ${searchLocalization}
-				where ${currentSearchTextCondition(input.query)}
-					and ${languageCondition}
-				limit ${env.SEARCH_CANDIDATE_SCAN_LIMIT + 1}
-			), bounded_candidate_localizations as materialized (
-				select * from candidate_localizations
-				limit ${env.SEARCH_CANDIDATE_SCAN_LIMIT}
-			), candidate_status as (
-				select exists (
-					select 1 from candidate_localizations
-					offset ${env.SEARCH_CANDIDATE_SCAN_LIMIT}
-				) as scan_truncated
-			), matched_localizations as (
-				select distinct on (${unit.id})
-					${unit.id} as unit_id,
-					${sort.primary} as primary_order,
-					${sort.secondary} as secondary_order
-				from bounded_candidate_localizations as ${searchLocalization}
-				inner join lateral (
-					select candidate_unit.*
-					from ${unit} candidate_unit
-					where candidate_unit.id = ${searchLocalization.unitId}
-					offset 0
-				) as ${unit} on true
+			with search_sources(unit_id, relevance_score) as (
+				${currentSearchSources(input.query, input.languageBoundary)}
+			), eligible_matches as (
+				select ${unit.id} as unit_id,
+					max(search_sources.relevance_score)::numeric as relevance_score
+				from search_sources
+				inner join ${unit} on ${unit.id} = search_sources.unit_id
 				left join ${profile} on ${profile.id} = ${unit.id}
 				left join ${entity} on ${entity.id} = ${unit.id}
 				left join ${post} on ${post.id} = ${unit.id}
@@ -989,31 +999,37 @@ async function searchCandidatePage(input: {
 				left join ${media} on ${media.id} = ${unit.id}
 				left join ${software} on ${software.id} = ${unit.id}
 				where (${sql.join(branchConditions, sql` or `)})
-				order by ${unit.id}, ${sort.primary} desc,
-					${searchLocalization.position}, ${searchLocalization.language}
+				group by ${unit.id}
+			), ranked_units as (
+				select ${unit.id} as unit_id,
+					${sort.primary} as primary_order,
+					${sort.secondary} as secondary_order
+				from eligible_matches
+				inner join ${unit} on ${unit.id} = eligible_matches.unit_id
+				left join ${post} on ${post.id} = ${unit.id}
+				left join ${postReplyStat} on ${postReplyStat.postId} = ${unit.id}
+				left join ${unitFollowStat} on ${unitFollowStat.unitId} = ${unit.id}
+				left join ${poll} on ${poll.id} = ${unit.id}
 			), page as (
 				select unit_id, primary_order, secondary_order
-				from matched_localizations
+				from ranked_units
 				where ${keysetCondition(sort, input.position)}
 				order by primary_order ${orderDirection}, secondary_order ${orderDirection}, unit_id asc
 				limit ${input.limit + 1}
 			)
 			select page.unit_id::text as id,
 				page.primary_order::text as "primaryValue",
-				page.secondary_order::text as "secondaryValue",
-				candidate_status.scan_truncated as "scanTruncated"
-			from candidate_status
-			left join page on true
-			order by page.primary_order ${orderDirection} nulls last,
-				page.secondary_order ${orderDirection} nulls last,
-				page.unit_id asc nulls last
+				page.secondary_order::text as "secondaryValue"
+			from page
+			order by page.primary_order ${orderDirection},
+				page.secondary_order ${orderDirection},
+				page.unit_id asc
 		`);
 	});
 	const candidates = readSearchCandidateRows(result.rows);
 	return {
 		rows: candidates.slice(0, input.limit),
 		hasMore: candidates.length > input.limit,
-		scanTruncated: result.rows[0]?.scanTruncated ?? false,
 	};
 }
 
@@ -1163,13 +1179,13 @@ async function searchDomainScan(
 					unitId: last.id,
 				} satisfies SearchKeysetPosition)
 			: undefined;
-	const lowerBound = page.hasMore || page.scanTruncated;
+	const lowerBound = page.hasMore;
 	metrics.searchCandidateScan(
 		"current",
 		page.rows.length,
 		page.rows.length,
 		1,
-		page.scanTruncated,
+		false,
 		lowerBound,
 	);
 	const common = {
@@ -1205,8 +1221,8 @@ async function searchDomainScan(
  * Executes current-state Unit search.
  *
  * @remarks
- * REZICS v1 intentionally searches only current Unit localizations. Unit-local revision history
- * remains available through its authoritative history APIs.
+ * REZICS v1 intentionally searches only current Unit localization text and eligible Unit aliases.
+ * Unit-local revision history remains available through its authoritative history APIs.
  *
  * @todo
  * Add global revision full-text search after its authorization, lifecycle, ranking,
@@ -1313,10 +1329,10 @@ export async function searchGlobalIdentifiers(
 		identifiers.length,
 		identifiers.length,
 		1,
-		page.scanTruncated,
-		page.hasMore || page.scanTruncated,
+		false,
+		page.hasMore,
 	);
-	const lowerBound = page.hasMore || page.scanTruncated;
+	const lowerBound = page.hasMore;
 	return {
 		hits: identifiers,
 		total: {

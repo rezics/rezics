@@ -9,6 +9,6 @@ output "s3_endpoint" {
 }
 
 output "backup_bucket_name" {
-  description = "Dedicated private PostgreSQL backup bucket for scoped uploader/reader tokens."
+  description = "Dedicated private PostgreSQL backup bucket for the scoped Databasus token."
   value       = cloudflare_r2_bucket.postgres_backups.name
 }

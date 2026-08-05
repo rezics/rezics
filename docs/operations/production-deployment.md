@@ -7,7 +7,7 @@ Production has independent release boundaries:
 - the API is a two-allocation Nomad service;
 - the background worker is a separate one-allocation Nomad service;
 - database migration and derived-data maintenance are separate batch operations;
-- stateful PostgreSQL and its scheduled logical-backup/restore-drill jobs are outside the
+- stateful PostgreSQL and the Databasus backup manager/verification agent are outside the
   application release graph;
 - Outline is an unrelated team service and must not be stopped, migrated,
   reconfigured, or purged by REZICS delivery.
@@ -62,7 +62,7 @@ The dependency order is:
 6. web build, Cloudflare version-override verification, and promotion.
 
 Unchanged components are skipped. A database change conservatively invalidates
-API, worker, and projection. API and worker have separate images and separate
+API, worker, and derived-data maintenance. API and worker have separate images and separate
 Nomad deployments. The controller and fixed service deploy runners follow
 Nomad event streams at dependency edges; there is no interval polling loop.
 
@@ -88,18 +88,19 @@ in an application or build container.
 Nomad Variables are encrypted in Nomad state. Workload-associated policies
 expose only:
 
-| Namespace               | Path                       | Consumer                          |
-| ----------------------- | -------------------------- | --------------------------------- |
-| `rezics`                | `application/runtime`      | API and worker runtime tasks      |
-| `rezics`                | `database/operations`      | root/operator installation source |
-| `rezics-release`        | `release/database`         | database and maintenance tasks    |
-| `rezics-release`        | `release/config`           | web release task                  |
-| `rezics-infrastructure` | `database/backup-uploader` | scheduled logical backup only     |
-| `rezics-infrastructure` | `database/backup-reader`   | isolated restore drill only       |
+| Namespace               | Path                                    | Consumer                          |
+| ----------------------- | --------------------------------------- | --------------------------------- |
+| `rezics`                | `application/runtime`                   | API and worker runtime tasks      |
+| `rezics`                | `database/operations`                   | root/operator installation source |
+| `rezics-release`        | `release/database`                      | database and maintenance tasks    |
+| `rezics-release`        | `release/config`                        | web release task                  |
+| `rezics-infrastructure` | `database/databasus-control`            | Databasus master key only         |
+| `rezics-infrastructure` | `database/databasus-source`             | one-time source/R2 setup          |
+| `rezics-infrastructure` | `database/databasus-verification-agent` | restore agent only                |
 
 The reconciler copies the existing `database/operations` items into
 `release/database` without printing them. API and worker receive
-`DATABASE_URL`, never `DATABASE_ADMIN_URL`. Only the database/projection tasks
+`DATABASE_URL`, never `DATABASE_ADMIN_URL`. Only the database/maintenance tasks
 receive the administrative connection. Only the web task receives the scoped
 Cloudflare Worker token and public Turnstile site key. The temporary full-access
 Cloudflare token must never be installed in NixOS, Nomad, GitHub, or runtime
@@ -134,12 +135,13 @@ database before installing v1.0.0. Do not dispatch the routine rolling release
 graph against a database that recorded an earlier checksum for this baseline.
 
 For the v1.0.0 cutover, apply the stateful PostgreSQL jobspec first and wait for
-PostgreSQL readiness, then use `bootstrap-production.sh --confirm-empty-database`.
+PostgreSQL and pinned Databasus readiness, then use
+`bootstrap-production.sh --confirm-empty-database`.
 The bootstrap installs the database, verifies PostgreSQL 18.4, PGroonga 4.0.8,
 `approx_count` 1.0, the required preload settings and canonical indexes, and only then starts API
-and worker traffic. No v1 workload owns a logical CDC slot. The dedicated backup and isolated
-restore jobs are installed with the stateful topology but do not run until their independently
-scoped R2 Variables exist.
+and worker traffic. No v1 workload owns a logical CDC slot. Databasus owns the backup schedule,
+R2 transfer, GFS retention, catalog, notification, and weekly isolated restore; its separately
+installed verification agent uses the REZICS PostgreSQL 18 image.
 
 ## Cloudflare Worker release
 
@@ -170,8 +172,8 @@ Cloudflare Worker version. Never reverse a successful database migration merely
 to roll back application code. If a migration fails, repair forward before
 restarting release.
 
-The current installation is a single host and is not highly available. PostgreSQL has a daily
-complete logical-backup job and weekly complete isolated restore drill documented in
+The current installation is a single host and is not highly available. PostgreSQL has a
+Databasus-managed daily complete logical backup and weekly complete isolated restore documented in
 [PostgreSQL backup and recovery](./postgresql-backup-recovery.md); v1 deliberately makes no PITR
 claim. Outline data preservation means leaving its existing allocation,
 database, volumes, and object storage untouched; it does not authorize deleting

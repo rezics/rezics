@@ -32,7 +32,6 @@ export interface SearchPlanComplexity {
 	readonly injections: number;
 	readonly pageSize: number;
 	readonly statementTimeoutMs: number;
-	readonly candidateScanLimit: number;
 	readonly facetScanLimit: number;
 	readonly viewerRelative: boolean;
 	readonly countSemantics: "exact-when-exhausted-otherwise-lower-bound";
@@ -216,7 +215,6 @@ export class ValidatedSearchPlan<Request extends CompiledSearchRequest> {
 			injections: input.injections,
 			pageSize: request.pageSize,
 			statementTimeoutMs: env.SEARCH_STATEMENT_TIMEOUT_MS,
-			candidateScanLimit: env.SEARCH_CANDIDATE_SCAN_LIMIT,
 			facetScanLimit: env.SEARCH_FACET_SCAN_LIMIT,
 			viewerRelative: viewerRelative(request.domainFilter),
 			countSemantics: "exact-when-exhausted-otherwise-lower-bound",

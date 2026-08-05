@@ -3,28 +3,40 @@ import { drizzle } from "drizzle-orm/node-postgres";
 
 import { adminDatabase, adminDatabaseUrl, applicationDatabaseUrl } from "./admin-database";
 
-declare const postgresqlRoleNameProof: unique symbol;
-type PostgreSqlRoleName = string & { readonly [postgresqlRoleNameProof]: true };
+declare const postgresqlIdentifierProof: unique symbol;
+type PostgreSqlIdentifier = string & { readonly [postgresqlIdentifierProof]: true };
 
-function parsePostgreSqlRoleName(value: string, source: string): PostgreSqlRoleName {
+function parsePostgreSqlIdentifier(value: string, source: string): PostgreSqlIdentifier {
 	if (!/^[a-z][a-z0-9_]{0,62}$/.test(value)) {
-		throw new Error(`${source} must contain a safe PostgreSQL role name`);
+		throw new Error(`${source} must contain a safe PostgreSQL identifier`);
 	}
-	return value as PostgreSqlRoleName;
+	return value as PostgreSqlIdentifier;
 }
 
-function quoteRole(role: PostgreSqlRoleName): string {
-	return `"${role.replaceAll('"', '""')}"`;
+function quoteIdentifier(identifier: PostgreSqlIdentifier): string {
+	return `"${identifier.replaceAll('"', '""')}"`;
 }
 
-const adminRole = parsePostgreSqlRoleName(
-	decodeURIComponent(new URL(adminDatabaseUrl).username),
+const adminUrl = new URL(adminDatabaseUrl);
+const adminRole = parsePostgreSqlIdentifier(
+	decodeURIComponent(adminUrl.username),
 	"DATABASE_ADMIN_URL",
 );
-const applicationRole = parsePostgreSqlRoleName(
+const applicationRole = parsePostgreSqlIdentifier(
 	decodeURIComponent(new URL(applicationDatabaseUrl).username),
 	"DATABASE_URL",
 );
+const backupDatabaseUrl = process.env.DATABASE_BACKUP_URL;
+const backupUrl = backupDatabaseUrl ? new URL(backupDatabaseUrl) : undefined;
+const backupDatabaseName = backupUrl
+	? parsePostgreSqlIdentifier(
+			decodeURIComponent(backupUrl.pathname.slice(1)),
+			"DATABASE_BACKUP_URL database name",
+		)
+	: undefined;
+const backupRole = backupUrl
+	? parsePostgreSqlIdentifier(decodeURIComponent(backupUrl.username), "DATABASE_BACKUP_URL")
+	: undefined;
 
 const pool = adminDatabase.$client;
 const client = await pool.connect();
@@ -32,7 +44,7 @@ const migrationDatabase = drizzle({ client });
 
 try {
 	if (applicationRole !== adminRole) {
-		const role = quoteRole(applicationRole);
+		const role = quoteIdentifier(applicationRole);
 		await migrationDatabase.transaction(async (transaction) => {
 			await transaction.execute(sql.raw(`grant usage on schema public to ${role}`));
 			await transaction.execute(sql.raw(`grant usage on schema approx_count to ${role}`));
@@ -142,6 +154,71 @@ try {
 				proof.canWriteApproximateMetrics
 			)
 				throw new Error("Application database privilege proof failed");
+		});
+	}
+	if (backupRole) {
+		if (!backupUrl || !backupDatabaseName)
+			throw new Error("Database backup connection proof is missing");
+		if (
+			backupUrl.protocol !== adminUrl.protocol ||
+			backupUrl.host !== adminUrl.host ||
+			backupUrl.pathname !== adminUrl.pathname
+		)
+			throw new Error("Database backup and admin URLs must address the same database");
+		if (backupRole === adminRole || backupRole === applicationRole)
+			throw new Error(
+				"Database backup role must be distinct from admin and application roles",
+			);
+		const role = quoteIdentifier(backupRole);
+		await migrationDatabase.transaction(async (transaction) => {
+			await transaction.execute(
+				sql.raw(
+					`grant connect on database ${quoteIdentifier(backupDatabaseName)} to ${role}`,
+				),
+			);
+			await transaction.execute(sql.raw(`grant usage on schema public to ${role}`));
+			await transaction.execute(sql.raw(`grant usage on schema approx_count to ${role}`));
+			await transaction.execute(
+				sql.raw(`revoke all privileges on all tables in schema public from ${role}`),
+			);
+			await transaction.execute(
+				sql.raw(`grant select on all tables in schema public to ${role}`),
+			);
+			await transaction.execute(
+				sql.raw(`grant select on all sequences in schema public to ${role}`),
+			);
+			await transaction.execute(
+				sql.raw(`grant select on all tables in schema approx_count to ${role}`),
+			);
+			await transaction.execute(
+				sql.raw(
+					`alter default privileges in schema public grant select on tables to ${role}`,
+				),
+			);
+			await transaction.execute(
+				sql.raw(
+					`alter default privileges in schema public grant select on sequences to ${role}`,
+				),
+			);
+			const privilegeProof = await transaction.execute<
+				Record<string, unknown> & {
+					readonly canReadUnit: boolean;
+					readonly canWriteUnit: boolean;
+				}
+			>(sql`
+				select
+					has_table_privilege(${backupRole}, 'public.unit', 'SELECT')
+						as "canReadUnit",
+					(
+						has_table_privilege(${backupRole}, 'public.unit', 'INSERT')
+						or has_table_privilege(${backupRole}, 'public.unit', 'UPDATE')
+						or has_table_privilege(${backupRole}, 'public.unit', 'DELETE')
+						or has_table_privilege(${backupRole}, 'public.unit', 'TRUNCATE')
+					) as "canWriteUnit"
+			`);
+			const proof = privilegeProof.rows[0];
+			if (!proof?.canReadUnit || proof.canWriteUnit)
+				throw new Error("Databasus read-only database privilege proof failed");
 		});
 	}
 } finally {

@@ -1,81 +1,171 @@
 # PostgreSQL backup and recovery
 
-REZICS v1 retains complete PostgreSQL 18 logical archives in a dedicated private Cloudflare R2
-bucket. The application asset bucket and its credentials are never used for database backups.
-The design targets one completed, verified off-host recovery point every 24 hours and makes no
-point-in-time-recovery claim.
+REZICS uses [Databasus](https://github.com/databasus/databasus) `v3.51.0` to manage
+PostgreSQL 18 logical backups. Databasus owns `pg_dump`, compression, encryption, scheduling,
+the backup catalog and UI, Cloudflare R2 transfer, GFS retention, notifications, and scheduled
+restore verification. REZICS does not implement another backup format or object-transfer
+protocol.
 
-## What is backed up
+The initial objective is a newest successful, verified off-host recovery point no more than 24
+hours old. The retained logical recovery points are 7 daily, 4 weekly, and 12 monthly. A complete
+restore into an isolated disposable database runs every week. This is a backup and disaster
+recovery design, not high availability or point-in-time recovery.
 
-`postgres-logical-backup` runs `pg_dump --format=directory` against the entire authoritative
-database. The archive contains schemas, extensions, tables, rows, sequences, constraints, and
-index definitions. Logical archives do not contain PostgreSQL heap or index relation files, so
-the physical `pgrn*` PGroonga index bytes are absent while all source text in
-`unit_localization` remains present.
+## Data and responsibility boundaries
 
-Each UTC run is classified exactly once: day 1 is monthly, Sunday is weekly, and all other days
-are daily. Objects are uploaded to a never-reused prefix, all SHA-256 and TOC checks run first,
-and `COMPLETED.json` is uploaded last with an `If-None-Match: *` precondition. A prefix without a
-valid completion marker is not a recovery point.
+The authoritative database is backed up as a complete PostgreSQL custom-format logical archive.
+The archive includes extension declarations, tables, authoritative text, rows, sequences,
+constraints, functions, and index definitions. It does not include PostgreSQL heap files or
+PGroonga physical index files. During restore PostgreSQL recreates all three PGroonga indexes
+from `unit_localization` and `unit_alias`.
 
-Terraform under `infrastructure/cloudflare/r2` creates the bucket separately, disables its
-managed public domain, and intentionally creates no CORS or custom-domain configuration. Bucket
-Lock and lifecycle enforce these policy floors:
+The components have deliberately narrow ownership:
 
-| Class   | Prefix                | Immutable for | Lifecycle deletion | Storage                    |
-| ------- | --------------------- | ------------: | -----------------: | -------------------------- |
-| daily   | `postgresql/daily/`   |        8 days |             9 days | Standard                   |
-| weekly  | `postgresql/weekly/`  |       35 days |            36 days | Standard                   |
-| monthly | `postgresql/monthly/` |      370 days |           371 days | Standard, IA after 30 days |
+| Component                            | Responsibility                                                                                                                                             |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Databasus `v3.51.0`                  | Backup creation, zstd compression, AES-256-GCM encryption, R2 upload/download, GFS retention, catalog, audit UI, notification, and verification scheduling |
+| Databasus verification agent         | Download the selected archive and perform a real restore in a throwaway PostgreSQL container                                                               |
+| REZICS `postgres-verification` image | Supply PostgreSQL 18.4, PGroonga 4.0.8, `approx_count` 1.0, and post-restore search acceptance                                                             |
+| Cloudflare R2 Terraform              | Dedicated private bucket, disabled public domain, seven-day Bucket Lock floor, Infrequent Access transition, and incomplete multipart cleanup              |
+| Nomad Variables                      | Keep the Databasus master key, source read-only database credential, and bucket-scoped R2 credential outside images and jobspec source                     |
 
-The R2 uploader token is bucket-scoped Object Read & Write. The restore job has a different,
-bucket-scoped read-only token. Neither token may configure or expose the bucket, and the API,
-web, workers, and ordinary object-storage workload receive neither token.
+The R2 credential must be an account-owned, bucket-scoped **Object Read & Write** token for only
+the backup bucket. Databasus needs both directions because the same product uploads archives,
+downloads them for restore, and deletes recovery points after GFS expiry. Cloudflare R2 does not
+offer a single object credential that can write and delete without also reading. Terraform's
+account-level credential is separate and is never installed into Databasus.
 
-## Daily job
+Bucket Lock protects every object below `postgresql/databasus/` from deletion or overwrite for
+seven days. Databasus remains the only owner of 7-daily/4-weekly/12-monthly selection and
+deletion. Do not add an R2 expiry lifecycle to the same prefix: independent time-based deletion
+cannot express Databasus's GFS selection. R2 moves objects below this prefix to Infrequent Access
+after 30 days and aborts incomplete multipart uploads after one day.
 
-`deploy/nomad/postgres-backup.nomad.hcl` runs once per UTC day with overlap prohibited. It uses
-the pinned `postgres-backup` image, a mode-0700 allocation staging directory, PostgreSQL 18
-client/server version checks, a readable archive TOC, per-file hashes, extension/migration
-metadata, conditional R2 writes, and a remote inventory check. Local staging is removed only
-after R2 confirms the completion marker. Failed staging is retained for the allocation failure
-evidence and never acquires a completion marker.
+## Deployment
 
-Operators must alert when the newest valid marker is approaching 24 hours old, a job overlaps or
-fails, R2 inventory differs, local staging fills, or the next scheduled start cannot finish
-before the RPO target. `BACKUP_JOBS` starts at 2 and may be raised only after foreground latency,
-I/O, connections, dump duration, and free-space measurements justify it.
+Build and publish two PostgreSQL images from the same commit:
 
-## Weekly complete isolated restore
+```text
+docker build --target postgres ...
+docker build --target postgres-verification ...
+```
 
-“Complete isolated restore” means the job downloads the newest complete R2 snapshot, verifies
-every archive file, restores the whole logical database into a disposable PostgreSQL 18.4
-instance, rebuilds both PGroonga indexes from authoritative rows, runs `ANALYZE`, and verifies
-the pinned extension versions and index validity. It never restores over the primary and is given
-no production database credential.
+The ordinary image is pinned by digest in `postgres.nomad.hcl`. Publish the verification target
+in a repository where its PostgreSQL-major tag `:18` resolves to that exact build; this is the
+repository passed to the Databasus verification agent. Databasus itself must be
+`databasus/databasus:v3.51.0@sha256:<digest>`; the infrastructure deploy script rejects floating
+or different versions.
 
-`deploy/nomad/postgres-restore-drill.nomad.hcl` provides a weekly disposable sidecar database and
-ephemeral disk. The restore script requires the database name `rezics_restore_drill`, rejects an
-archive unless exactly the two checked-in PGroonga indexes are excluded from its TOC, restores
-everything else with `--exit-on-error --no-owner --no-privileges`, and recreates the indexes from
-`services/main/search/pgroonga-indexes.sql`. The allocation and its database storage are destroyed
-after the drill.
+The NixOS host must define a writable `rezics-databasus` host volume. The Databasus allocation
+mounts it at `/databasus-data`, exposes port 4005 only on loopback, and mounts its `secret.key`
+read-only from `rezics-infrastructure/database/databasus-control`. That independently stored key
+is sufficient for Databasus's documented manual recovery path even if its allocation and control
+database are lost.
 
-The job log is operational evidence, but a passing exit alone is not enough for a production RTO
-claim. Record download, restore, PGroonga rebuild, `ANALYZE`, verification, peak disk, and total
-duration. The measured RTO is their sum. Alert on any failure and retain the previous known-good
-recovery points; locked objects cannot and must not be manually cleaned up early.
+Run `install-production-variables.sh` once before the first deployment. Its input has separate
+`r2.application` and `r2.backupManager` credentials. It tests both buckets, creates a distinct
+read-only PostgreSQL source role, generates the Databasus master key, and stores the values in:
 
-## Manual maintenance
+| Namespace               | Path                                    | Consumer                                           |
+| ----------------------- | --------------------------------------- | -------------------------------------------------- |
+| `rezics`                | `database/operations`                   | Database installation and privilege reconciliation |
+| `rezics-infrastructure` | `database/databasus-control`            | Databasus `secret.key` template only               |
+| `rezics-infrastructure` | `database/databasus-source`             | One-time Databasus source and R2 setup             |
+| `rezics-infrastructure` | `database/databasus-verification-agent` | Verification-agent identity and one-time token     |
 
-- Check extensions and indexes: `database-operation.sh search-index check`.
-- Rebuild online: `database-operation.sh search-index reindex-concurrently`.
-- Rebuild offline/local: `task local:search:rebuild`.
-- Trigger a restore drill with Nomad's periodic-job force command after confirming sufficient
-  disposable CPU and disk. Never point the restore script at `rezics` or supply production DB
-  credentials.
+Never print a complete Variable or paste its secret items into a ticket, shell history, or
+Databasus URL. Access the loopback-only UI through an authenticated operator tunnel.
 
-Physical snapshots and `pg_basebackup` include PGroonga index files and are outside this retained
-backup design. Streaming replicas may be added later for HA, but replicas are not backups. A
-future sub-24-hour/PITR requirement must explicitly add physical base backups (accepting index
-bytes) or a separately designed continuous logical archive.
+## One-time Databasus configuration
+
+The setup is intentionally completed in Databasus's UI rather than through an undocumented
+internal API. Record the resulting Databasus audit entries and test results in the operations
+system.
+
+1. Create the owner account and production workspace. Disable public registration after the
+   required operators exist and require a separate account for each operator.
+2. Read the `database/databasus-source` Nomad Variable through the operator path. Add one
+   Cloudflare R2 storage with its endpoint, bucket, region `auto`, credentials, and immutable
+   prefix `postgresql/databasus/authoritative`. Test both upload and download.
+3. Add the `rezics` PostgreSQL database as a **logical** PostgreSQL 18 source. Use the supplied
+   backup role, never the superuser or application writer. Select the whole database and do not
+   exclude extension, schema, or index objects.
+4. Enable encrypted daily backups at a quiet UTC time. Select GFS retention with 0 hourly, 7
+   daily, 4 weekly, 12 monthly, and 0 yearly slots. Enable failure notifications and at least one
+   separately monitored delivery channel.
+5. Create a verification agent under Settings, copy its ID and one-time token, and immediately
+   pass the token on standard input to `install-databasus-verification-agent.sh`. Pass an
+   immutable lightweight runner image and the untagged REZICS verification PostgreSQL repository.
+6. Enable scheduled verification for `rezics` once per week. Enable verification-failure
+   notification. Trigger one manual backup and one manual verification before accepting the
+   installation.
+7. Add Databasus's own loopback PostgreSQL 17 `databasus` database as a second logical source,
+   using a read-only user created by Databasus rather than retaining its internal administrator
+   credential. Store its encrypted daily backup in a second R2 storage configuration with prefix
+   `postgresql/databasus/control` and retain 7 daily and 4 weekly copies. This preserves the UI,
+   schedules, encrypted credential records, and backup history; the independently stored
+   `secret.key` remains the primary recovery prerequisite.
+8. Only after the R2 backup, weekly-style verification, and failure-notification acceptance all
+   succeed, run `finalize-databasus-cutover.sh --confirm-verified-managed-backup`. This purges the
+   superseded custom Nomad jobs and their uploader/reader Variables without creating a backup
+   coverage gap during migration.
+
+The verification agent runs in the foreground under Nomad and mounts the Docker socket because
+Databasus creates and destroys the isolated restore containers itself. It is limited to one
+concurrent job, 2 CPUs, 4 GiB RAM, and 200 GiB disk by default. Raise the disk budget before the
+backup file plus restored raw database plus Databasus's 5 GiB safety allowance can exceed it.
+
+## What a weekly complete isolated restore proves
+
+“Complete isolated restore” means that Databasus downloads the latest encrypted R2 archive,
+decrypts it, starts a disposable PostgreSQL 18 container, restores the entire archive, compares
+source/restored table counts, reports the result, and destroys the container. It never overwrites
+or connects to the primary as a restore target.
+
+The verification repository's `:18` image wraps only `pg_restore`. After the upstream restore
+succeeds, the wrapper runs a generated SQL acceptance file. The file takes the canonical index
+names from `database/schema/pgroonga.ts` at image-build time and proves:
+
+- PGroonga is exactly 4.0.8 and `approx_count` is exactly 1.0;
+- all canonical indexes use PGroonga and are ready and valid;
+- metadata, published body, and alias fixture queries each use indexed scoring and return a
+  nonzero `pgroonga_score`;
+- the fixture transaction rolls back, so the disposable restored database remains unchanged.
+
+This wrapper does not schedule work, handle encryption, read R2, select backups, or implement
+retention. Failure exits through Databasus's normal verification result and notification path.
+
+## Monitoring and acceptance
+
+Alert when any of these conditions is true:
+
+- no successful off-host backup exists in the last 24 hours;
+- the newest backup has not completed verification inside the weekly schedule;
+- backup, retention cleanup, storage connection, notification, or verification fails;
+- the backup role loses whole-database read coverage;
+- the R2 bucket becomes public, its lock/lifecycle configuration drifts, or its object inventory
+  grows without matching Databasus catalog entries;
+- verification disk headroom falls below the documented requirement.
+
+The initial installation is accepted only after the UI shows a successful R2 backup, a successful
+weekly-style verification using the REZICS image, the expected table-count report, and successful
+failure-notification delivery. Record elapsed backup, download, restore, index-build, and total
+verification time; their sum is the measured recovery time, not a theoretical estimate.
+
+## Disaster recovery
+
+If Databasus is healthy, use its restore workflow and restore into a new database first. Never
+restore directly over `rezics`. Run the normal runtime and search-index checks before switching
+writers or readers.
+
+If Databasus itself is unavailable, retrieve the master key from the independent
+`database/databasus-control` Variable and follow Databasus's
+[manual recovery procedure](https://databasus.com/how-to-recover-without-databasus) for the R2
+archive and matching `.metadata` object. Restore with the REZICS PostgreSQL image so PGroonga and
+`approx_count` are available. The encrypted control-database backup can reconstruct the UI and
+configuration, but it is not required to decrypt or restore the authoritative archive.
+
+Physical `PGDATA`, `pg_basebackup`, WAL-G, pgBackRest, and Barman are outside this v1 logical-only
+policy because they carry PGroonga physical index bytes or establish a different physical/PITR
+recovery contract. A future point-in-time objective must add a separately reviewed physical
+backup design; a replica is not a backup.

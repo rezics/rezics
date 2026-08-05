@@ -81,8 +81,9 @@ collapse those sources:
 - a negative direct vote and positive structure support from the same profile
   cannot coexist.
 
-Tag aggregates, Tag filtering, and the current search projection read the
-effective tables. Provenance remains available for explanation and rebuilding.
+Tag aggregates and Tag filtering read the effective tables. Current Search joins them when a
+relational Filter requests Tag or Structure predicates; PGroonga contains no copied Tag document.
+Provenance remains available for explanation and rebuilding.
 Projection refreshes and aggregate refreshes take transaction-scoped advisory
 locks keyed by the affected target, Tag, Structure, and Profile dimensions.
 Application-vote changes and administrative definition corrections share the
@@ -103,11 +104,10 @@ from multiple paths collapse to the strongest accepted definition and are
 ranked with the Wilson lower bound, then stable score, count, and UUID
 tie-breakers.
 
-The search projection indexes accepted structures as `tag-structures`. Its
-display title and searchable text are derived live from ordered member Tag
-localizations and accepted aliases. Member localization, lifecycle, alias, and
-definition-vote changes fan out search invalidations to dependent structure
-documents.
+Search filters accepted structures through the authoritative effective relations. Display titles
+are derived live from ordered member Tag localizations and accepted aliases. Member localization,
+lifecycle, alias, and definition-vote changes update those authoritative rows directly; there is no
+search invalidation or dependent structure document.
 
 ## Cost model
 

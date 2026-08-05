@@ -42,7 +42,7 @@ import {
 } from "./columns";
 import { profile } from "./profile";
 import { moderationStatus, unit } from "./unit";
-import { unitContentLicense, unitContentLicenseStatus } from "./unit-content-license";
+import { unitContentLicense, unitContentLicenseStatus } from "./unit";
 import { unitRevision } from "./history";
 import { post } from "./post";
 

@@ -8,7 +8,7 @@ import {
 	searchDocumentRevisionHead,
 } from "../database/schema";
 import { findOrCreateRevisionContent, materializeStoredRevisionContent } from "../history/content";
-import { SearchDocumentRevisionConflict } from "./errors";
+import { SearchDocumentRevisionConflict } from "../search/errors";
 
 export const SearchDocumentContentModel = "rezics.search-document.v1" as const;
 

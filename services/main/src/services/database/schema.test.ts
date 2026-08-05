@@ -13,6 +13,7 @@ import {
 	apiQuotaPolicy,
 	book,
 	apiTokenQuotaBinding,
+	CanonicalPgroongaIndexes,
 	unitContentLicense,
 	contentStructure,
 	contentStructureNode,
@@ -24,6 +25,7 @@ import {
 	platformUnitReport,
 	realmUnitReport,
 	unit,
+	unitAlias,
 	unitDock,
 	conversationParticipantStat,
 	realmTagVoteStat,
@@ -78,6 +80,7 @@ import {
 	unitOwnershipClaim,
 	unitOwnershipClaimResolution,
 	unitAliasVoteStat,
+	unitLocalization,
 	unitReactionStat,
 	unitTagVoteStat,
 	unitEffectiveTag,
@@ -110,6 +113,25 @@ import {
 const dialect = new PgDialect();
 
 describe("database schema contracts", () => {
+	it("owns every canonical PGroonga index in the Drizzle Unit schema", () => {
+		const indexes = [unitLocalization, unitAlias]
+			.flatMap((table) => getTableConfig(table).indexes)
+			.filter((index) => index.config.method === "pgroonga");
+
+		expect(indexes.map((index) => index.config.name)).toEqual(CanonicalPgroongaIndexes);
+		for (const index of indexes.slice(0, 2)) {
+			const expression = index.config.columns[0];
+			expect(expression && dialect.sqlToQuery(expression as SQL).sql).toContain(
+				"public.pgroonga_text_full_text_search_ops_v2",
+			);
+			expect(index.config.with).toEqual({
+				lexicon_flags_mapping: expect.stringMatching(/^'.*"LARGE".*'$/),
+				index_flags_mapping: expect.stringMatching(/^'.*"LARGE".*'$/),
+			});
+		}
+		expect(indexes[2]?.config.where).toBeDefined();
+	});
+
 	it("keeps Book and Media release statuses required and database constrained", () => {
 		expect(WorkReleaseStatusValues).toEqual(["ongoing", "hiatus", "completed", "cancelled"]);
 		for (const [table, constraintName] of [

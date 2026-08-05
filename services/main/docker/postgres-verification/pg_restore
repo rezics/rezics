@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+readonly real_pg_restore="/usr/lib/postgresql/18/bin/pg_restore.real"
+readonly acceptance_sql="/opt/rezics/search-restore-acceptance.sql"
+
+database=""
+host=""
+port=""
+username=""
+arguments=("$@")
+for ((index = 0; index < ${#arguments[@]}; index += 1)); do
+	case "${arguments[index]}" in
+		-d | --dbname)
+			((index += 1))
+			database="${arguments[index]:-}"
+			;;
+		--dbname=*) database="${arguments[index]#*=}" ;;
+		-h | --host)
+			((index += 1))
+			host="${arguments[index]:-}"
+			;;
+		--host=*) host="${arguments[index]#*=}" ;;
+		-p | --port)
+			((index += 1))
+			port="${arguments[index]:-}"
+			;;
+		--port=*) port="${arguments[index]#*=}" ;;
+		-U | --username)
+			((index += 1))
+			username="${arguments[index]:-}"
+			;;
+		--username=*) username="${arguments[index]#*=}" ;;
+	esac
+done
+
+"${real_pg_restore}" "$@"
+
+if [[ -z "${database}" ]]; then
+	printf '%s\n' \
+		"REZICS restore acceptance requires pg_restore to receive --dbname" >&2
+	exit 64
+fi
+
+psql_arguments=(--no-psqlrc --set ON_ERROR_STOP=1 --dbname "${database}")
+[[ -z "${host}" ]] || psql_arguments+=(--host "${host}")
+[[ -z "${port}" ]] || psql_arguments+=(--port "${port}")
+[[ -z "${username}" ]] || psql_arguments+=(--username "${username}")
+
+psql "${psql_arguments[@]}" --file "${acceptance_sql}"

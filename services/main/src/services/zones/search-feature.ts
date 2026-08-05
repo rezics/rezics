@@ -24,9 +24,9 @@ import {
 	listSearchDocumentRevisions,
 	restoreSearchDocumentHistory,
 	updateSearchDocumentHistory,
-} from "./document-history";
-import { InvalidSearch, SearchDocumentRevisionConflict } from "./errors";
-import { resolveSearchDocument } from "./templates";
+} from "./search-feature-history";
+import { InvalidSearch, SearchDocumentRevisionConflict } from "../search/errors";
+import { resolveSearchDocument } from "../search/templates";
 
 export interface ZoneSearchFeatureProjection {
 	readonly zoneId: string;

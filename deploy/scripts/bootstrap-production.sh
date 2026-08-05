@@ -4,7 +4,7 @@ set -euo pipefail
 
 if (($# != 7)) || [[ "$1" != "--confirm-empty-database" ]]; then
 	printf '%s\n' \
-		"Usage: bootstrap-production.sh --confirm-empty-database <release> <api-image> <worker-image> <database-image> <postgres-image> <backup-image>" >&2
+		"Usage: bootstrap-production.sh --confirm-empty-database <release> <api-image> <worker-image> <database-image> <postgres-image> <databasus-image>" >&2
 	exit 64
 fi
 
@@ -13,12 +13,12 @@ readonly api_image="$3"
 readonly worker_image="$4"
 readonly database_image="$5"
 readonly postgres_image="$6"
-readonly backup_image="$7"
+readonly databasus_image="$7"
 repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 readonly repository_root
 readonly jobs_directory="${repository_root}/deploy/nomad"
 
-for image in "${api_image}" "${worker_image}" "${database_image}" "${postgres_image}" "${backup_image}"; do
+for image in "${api_image}" "${worker_image}" "${database_image}" "${postgres_image}"; do
 	if [[ ! "${image}" =~ @sha256:[0-9a-f]{64}$ ]]; then
 		printf 'Image must be immutable and include a sha256 digest: %s\n' "${image}" >&2
 		exit 64
@@ -26,7 +26,7 @@ for image in "${api_image}" "${worker_image}" "${database_image}" "${postgres_im
 done
 
 "${repository_root}/deploy/scripts/deploy-production-infrastructure.sh" \
-	--confirm-stateful-maintenance "${postgres_image}" "${backup_image}"
+	--confirm-stateful-maintenance "${postgres_image}" "${databasus_image}"
 
 "${repository_root}/deploy/scripts/install-production-database.sh" \
 	--confirm-empty-database "${release}" "${database_image}"

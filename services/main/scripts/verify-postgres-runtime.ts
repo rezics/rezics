@@ -16,8 +16,10 @@ interface RuntimeSettingRow extends Record<string, unknown> {
 	readonly trackWalIoTiming: string;
 	readonly walLevel: string;
 	readonly maxReplicationSlots: string;
+	readonly maxWorkerProcesses: string;
 	readonly maxWalSize: string;
 	readonly minWalSize: string;
+	readonly legacyWalEnabled: string;
 }
 
 try {
@@ -30,8 +32,10 @@ try {
 			wal_io_timing.setting as "trackWalIoTiming",
 			wal_level.setting as "walLevel",
 			replication_slots.setting as "maxReplicationSlots",
+			worker_processes.setting as "maxWorkerProcesses",
 			max_wal_size.setting as "maxWalSize",
-			min_wal_size.setting as "minWalSize"
+			min_wal_size.setting as "minWalSize",
+			coalesce(current_setting('pgroonga.enable_wal', true), 'off') as "legacyWalEnabled"
 		from pg_settings preload
 		cross join pg_settings wal_manager
 		cross join pg_settings crash_safe
@@ -39,6 +43,7 @@ try {
 		cross join pg_settings wal_io_timing
 		cross join pg_settings wal_level
 		cross join pg_settings replication_slots
+		cross join pg_settings worker_processes
 		cross join pg_settings max_wal_size
 		cross join pg_settings min_wal_size
 		where preload.name = 'shared_preload_libraries'
@@ -48,6 +53,7 @@ try {
 			and wal_io_timing.name = 'track_wal_io_timing'
 			and wal_level.name = 'wal_level'
 			and replication_slots.name = 'max_replication_slots'
+			and worker_processes.name = 'max_worker_processes'
 			and max_wal_size.name = 'max_wal_size'
 			and min_wal_size.name = 'min_wal_size'
 	`);
@@ -61,6 +67,10 @@ try {
 			throw new Error(`${preload} is not present in shared_preload_libraries`);
 	if (setting.walResourceManagerEnabled !== "on" || setting.crashSafeEnabled !== "on")
 		throw new Error("PGroonga WAL resource manager and crash-safe mode must both be enabled");
+	if (setting.legacyWalEnabled === "on")
+		throw new Error("Legacy PGroonga WAL must be disabled with WAL Resource Manager");
+	if (Number(setting.maxWorkerProcesses) < 12)
+		throw new Error("max_worker_processes must reserve the 12-process production budget");
 	if (setting.trackIoTiming !== "on" || setting.trackWalIoTiming !== "on")
 		throw new Error("PostgreSQL relation and WAL I/O timing must both be enabled");
 	if (setting.walLevel !== "replica" || setting.maxReplicationSlots !== "0")

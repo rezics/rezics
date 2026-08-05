@@ -1,0 +1,161 @@
+\set ON_ERROR_STOP on
+
+DO $verification$
+DECLARE
+  index_name text;
+BEGIN
+  IF (SELECT extversion FROM pg_extension WHERE extname = 'pgroonga') <> '4.0.8' THEN
+    RAISE EXCEPTION 'restored database does not use PGroonga 4.0.8';
+  END IF;
+  IF (SELECT extversion FROM pg_extension WHERE extname = 'approx_count') <> '1.0' THEN
+    RAISE EXCEPTION 'restored database does not use approx_count 1.0';
+  END IF;
+
+  FOREACH index_name IN ARRAY ARRAY[
+    '{{METADATA_INDEX}}',
+    '{{CONTENT_INDEX}}',
+    '{{ALIAS_INDEX}}'
+  ] LOOP
+    IF NOT EXISTS (
+      SELECT 1
+      FROM pg_index AS candidate
+      JOIN pg_class AS index_relation ON index_relation.oid = candidate.indexrelid
+      JOIN pg_namespace AS index_namespace ON index_namespace.oid = index_relation.relnamespace
+      JOIN pg_am AS access_method ON access_method.oid = index_relation.relam
+      WHERE index_namespace.nspname = 'public'
+        AND index_relation.relname = index_name
+        AND access_method.amname = 'pgroonga'
+        AND candidate.indisvalid
+        AND candidate.indisready
+    ) THEN
+      RAISE EXCEPTION 'restored PGroonga index is missing or invalid: %', index_name;
+    END IF;
+  END LOOP;
+END
+$verification$;
+
+BEGIN;
+SET LOCAL enable_seqscan = off;
+
+INSERT INTO public.unit (id, kind, status, visibility, moderation_status, published_at)
+VALUES (
+  '01980000-0000-7000-8000-000000000001'::uuid,
+  'book',
+  'published',
+  'public',
+  'approved',
+  now()
+);
+
+INSERT INTO public.unit_localization (
+  unit_id,
+  language,
+  title,
+  description,
+  content,
+  content_status
+)
+VALUES (
+  '01980000-0000-7000-8000-000000000001'::uuid,
+  'en',
+  'rezicsmetadataacceptance',
+  '{"_type":"portable-text","content":[]}'::jsonb,
+  '{"_type":"portable-text","content":[{"_type":"block","children":[{"_type":"span","text":"rezicsbodyacceptance"}]}]}'::jsonb,
+  'published'
+);
+
+INSERT INTO public.unit_alias (id, unit_id, term, normalized_term, language)
+VALUES (
+  '01980000-0000-7000-8000-000000000002'::uuid,
+  '01980000-0000-7000-8000-000000000001'::uuid,
+  'rezicsaliasacceptance',
+  'rezicsaliasacceptance',
+  'en'
+);
+
+INSERT INTO public.unit_alias_vote_stat (alias_id, score, vote_count)
+VALUES (
+  '01980000-0000-7000-8000-000000000002'::uuid,
+  {{ALIAS_SCORE_THRESHOLD}},
+  {{ALIAS_SCORE_THRESHOLD}}
+);
+
+DO $fixture$
+DECLARE
+  query_plan json;
+BEGIN
+  EXECUTE $query$
+    EXPLAIN (FORMAT JSON)
+    SELECT 1
+    FROM public.unit_localization AS localization
+    WHERE public.current_search_metadata_v1(
+        localization.title,
+        localization.summary,
+        localization.description
+      ) &@~ public.pgroonga_query_escape('rezicsmetadataacceptance')
+  $query$ INTO query_plan;
+  IF position('{{METADATA_INDEX}}' IN query_plan::text) = 0 THEN
+    RAISE EXCEPTION 'metadata acceptance query did not plan the restored PGroonga index';
+  END IF;
+
+  PERFORM 1
+  FROM public.unit_localization AS localization
+  WHERE public.current_search_metadata_v1(
+      localization.title,
+      localization.summary,
+      localization.description
+    ) &@~ public.pgroonga_query_escape('rezicsmetadataacceptance')
+    AND public.pgroonga_score(localization.tableoid, localization.ctid) > 0;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'restored metadata PGroonga index did not produce a scored match';
+  END IF;
+
+  EXECUTE $query$
+    EXPLAIN (FORMAT JSON)
+    SELECT 1
+    FROM public.unit_localization AS localization
+    WHERE public.current_search_text_v1(localization.content)
+      &@~ public.pgroonga_query_escape('rezicsbodyacceptance')
+  $query$ INTO query_plan;
+  IF position('{{CONTENT_INDEX}}' IN query_plan::text) = 0 THEN
+    RAISE EXCEPTION 'body acceptance query did not plan the restored PGroonga index';
+  END IF;
+
+  PERFORM 1
+  FROM public.unit_localization AS localization
+  WHERE public.current_search_text_v1(localization.content)
+      &@~ public.pgroonga_query_escape('rezicsbodyacceptance')
+    AND public.pgroonga_score(localization.tableoid, localization.ctid) > 0;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'restored content PGroonga index did not produce a scored match';
+  END IF;
+
+  EXECUTE $query$
+    EXPLAIN (FORMAT JSON)
+    SELECT 1
+    FROM public.unit_alias AS alias
+    JOIN public.unit_alias_vote_stat AS vote_stat ON vote_stat.alias_id = alias.id
+    WHERE alias.deleted_at IS NULL
+      AND vote_stat.score >= {{ALIAS_SCORE_THRESHOLD}}
+      AND (alias.language IS NULL OR alias.language = 'en')
+      AND alias.term &@~ public.pgroonga_query_escape('rezicsaliasacceptance')
+  $query$ INTO query_plan;
+  IF position('{{ALIAS_INDEX}}' IN query_plan::text) = 0 THEN
+    RAISE EXCEPTION 'alias acceptance query did not plan the restored PGroonga index';
+  END IF;
+
+  PERFORM 1
+  FROM public.unit_alias AS alias
+  JOIN public.unit_alias_vote_stat AS vote_stat ON vote_stat.alias_id = alias.id
+  WHERE alias.deleted_at IS NULL
+    AND vote_stat.score >= {{ALIAS_SCORE_THRESHOLD}}
+    AND (alias.language IS NULL OR alias.language = 'en')
+    AND alias.term &@~ public.pgroonga_query_escape('rezicsaliasacceptance')
+    AND public.pgroonga_score(alias.tableoid, alias.ctid) > 0;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'restored alias PGroonga index did not produce a scored match';
+  END IF;
+END
+$fixture$;
+
+ROLLBACK;

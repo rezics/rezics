@@ -4,7 +4,7 @@ import { check, foreignKey, integer, primaryKey, text, uuid } from "drizzle-orm/
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createUpdatedAtColumn } from "./columns";
 import { type ContentLanguage, ContentLanguageValues } from "./contract-values";
-import { unitLocalization } from "./unit-localization";
+import { unitLocalization } from "./unit";
 
 /**
  * Rebuildable current-state projection for localized Portable Text.

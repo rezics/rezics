@@ -62,7 +62,7 @@ import {
 	putZoneSearchFeature,
 	restoreZoneSearchFeature,
 	type ZoneSearchFeatureProjection,
-} from "../../search/documents";
+} from "../../zones/search-feature";
 import { ZonePageNotFound } from "../domain-extensions/errors";
 import { DockNotFound } from "../docks/errors";
 import { hydrateFeedItems } from "../feed";

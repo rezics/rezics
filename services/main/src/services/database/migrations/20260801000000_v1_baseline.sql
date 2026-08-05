@@ -30,12 +30,12 @@ CREATE EXTENSION IF NOT EXISTS amcheck WITH SCHEMA public;
 CREATE EXTENSION IF NOT EXISTS pgstattuple WITH SCHEMA public;
 
 -- Only semantic Portable Text span values enter the PGroonga expression indexes.
-CREATE FUNCTION public.current_search_text_v1(document jsonb) RETURNS jsonb
+CREATE FUNCTION public.current_search_text_v1(document jsonb) RETURNS text
     LANGUAGE sql IMMUTABLE PARALLEL SAFE
     AS $$
     SELECT coalesce(
-        jsonb_agg(child -> 'text' ORDER BY block.ordinality, child_row.ordinality),
-        '[]'::jsonb
+        string_agg(child ->> 'text', E'\n' ORDER BY block.ordinality, child_row.ordinality),
+        ''::text
     )
     FROM jsonb_array_elements(
         CASE
@@ -55,12 +55,13 @@ CREATE FUNCTION public.current_search_text_v1(document jsonb) RETURNS jsonb
     WHERE child ->> '_type' = 'span' AND jsonb_typeof(child -> 'text') = 'string'
 $$;
 
--- One JSONB expression keeps PGroonga's JSONB index single-column while preserving field text.
+-- One text expression keeps the metadata index single-column while preserving field text.
 CREATE FUNCTION public.current_search_metadata_v1(title text, summary text, description jsonb)
-RETURNS jsonb
+RETURNS text
     LANGUAGE sql IMMUTABLE PARALLEL SAFE
     AS $$
-    SELECT jsonb_build_array(title, summary) || public.current_search_text_v1(description)
+    SELECT coalesce(title, '') || E'\n' || coalesce(summary, '') || E'\n'
+        || public.current_search_text_v1(description)
 $$;
 
 --
@@ -8911,6 +8912,13 @@ CREATE INDEX unit_alias_normalized_idx ON public.unit_alias USING btree (normali
 
 
 --
+-- Name: unit_alias_term_search_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX unit_alias_term_search_idx ON public.unit_alias USING pgroonga (term) WHERE (deleted_at IS NULL);
+
+
+--
 -- Name: unit_alias_unit_language_normalized_key; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -9043,7 +9051,7 @@ CREATE INDEX unit_kind_status_created_at_idx ON public.unit USING btree (kind, s
 CREATE INDEX unit_localization_pgroonga_metadata_idx
     ON public.unit_localization
     USING pgroonga (
-        (public.current_search_metadata_v1(title, summary, description)) public.pgroonga_jsonb_full_text_search_ops_v2
+        (public.current_search_metadata_v1(title, summary, description)) public.pgroonga_text_full_text_search_ops_v2
     )
     WITH (
         lexicon_flags_mapping = '{"current_search_metadata_v1":["LARGE"]}',
@@ -9058,7 +9066,7 @@ CREATE INDEX unit_localization_pgroonga_metadata_idx
 CREATE INDEX unit_localization_pgroonga_content_idx
     ON public.unit_localization
     USING pgroonga (
-        (public.current_search_text_v1(content)) public.pgroonga_jsonb_full_text_search_ops_v2
+        (public.current_search_text_v1(content)) public.pgroonga_text_full_text_search_ops_v2
     )
     WITH (
         lexicon_flags_mapping = '{"current_search_text_v1":["LARGE"]}',

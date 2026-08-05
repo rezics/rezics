@@ -80,7 +80,7 @@ import {
 	getZoneSearchFeature,
 	putZoneSearchFeatureInTransaction,
 	type ZoneSearchFeatureProjection,
-} from "../search/documents";
+} from "../zones/search-feature";
 import { createDefaultSearchDocument } from "../search/templates";
 import {
 	assertPlatformCoreReady,

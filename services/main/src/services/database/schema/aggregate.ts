@@ -14,7 +14,7 @@ import {
 
 import { pgTable } from "./base";
 import { collection } from "./collection";
-import { unitAlias } from "./unit-alias";
+import { unitAlias } from "./unit";
 import { createTimestampMsColumn, createUpdatedAtColumn, createUuidv7PrimaryKey } from "./columns";
 import { conversation, message } from "./communication";
 import { pollOption } from "./poll";

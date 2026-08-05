@@ -28,8 +28,6 @@ export const WorkPolicy = {
 		maxResultWindow: 200,
 		statementTimeoutMs: 1_500,
 		statementTimeoutCeilingMs: 10_000,
-		maxCandidateScan: 512,
-		maxCandidateScanCeiling: 8_192,
 		maxFacetScan: 1_000,
 		maxFacetScanCeiling: 10_000,
 	},

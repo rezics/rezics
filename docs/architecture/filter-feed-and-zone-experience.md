@@ -72,7 +72,7 @@ recommendation order; `relevance` is text-query ranking and is invalid without
 a non-empty query. A document may select strategies but cannot define raw
 index fields or engine ranking expressions.
 
-The current Search projection implements `best` as descending global
+The current authoritative PostgreSQL Search query implements `best` as descending global
 `recommendationBest`, then descending update time, then ascending Unit ID for
 a stable tie-break. `recommendationBest` is the active recommendation
 snapshot's positive weighted engagement accumulated over the previous 24

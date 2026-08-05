@@ -120,12 +120,6 @@ export const env = createEnv({
 			.min(100)
 			.max(WorkPolicy.search.statementTimeoutCeilingMs)
 			.default(WorkPolicy.search.statementTimeoutMs),
-		SEARCH_CANDIDATE_SCAN_LIMIT: z.coerce
-			.number()
-			.int()
-			.min(WorkPolicy.search.maxPageSize + 1)
-			.max(WorkPolicy.search.maxCandidateScanCeiling)
-			.default(WorkPolicy.search.maxCandidateScan),
 		SEARCH_FACET_SCAN_LIMIT: z.coerce
 			.number()
 			.int()

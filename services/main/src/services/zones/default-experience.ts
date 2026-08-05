@@ -14,12 +14,12 @@ import type { DatabaseTransaction } from "../database";
 import { post, unitLocalization, unitOwnership, zonePage } from "../database/schema";
 import { createContentStructure, insertContentStructureNode } from "../content-structure/service";
 import { fractionalPositionAt } from "../ordering/position";
-import { getZoneSearchFeature, putZoneSearchFeatureInTransaction } from "../search/documents";
 import { createDefaultSearchDocument } from "../search/templates";
 import { insertUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
 import { replaceZonePageSlugAddress } from "../units/slug-address";
 import { getZonePageStructureProjection, listZonePageUnits } from "./pages";
+import { getZoneSearchFeature, putZoneSearchFeatureInTransaction } from "./search-feature";
 
 export interface ProvisionZoneDefaultExperienceInput {
 	readonly zoneId: string;

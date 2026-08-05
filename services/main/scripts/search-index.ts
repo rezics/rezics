@@ -1,6 +1,7 @@
 import { Client } from "pg";
 
-import { env } from "../src/services/config";
+import { LargeCapacityPgroongaIndexes } from "../src/services/database/schema/pgroonga";
+import { adminDatabaseUrl } from "./admin-database";
 import {
 	CanonicalPgroongaIndexes,
 	parseSearchIndexOptions,
@@ -51,18 +52,32 @@ async function check(client: Client): Promise<void> {
 		const state = states.get(index);
 		if (!state?.valid || !state.ready)
 			throw new Error(`Canonical PGroonga index is missing or invalid: ${index}`);
-		for (const option of requiredLargeOptions) {
-			if (!state.options?.some((value) => value.startsWith(`${option}=`)))
-				throw new Error(`Canonical PGroonga index is not LARGE-capacity: ${index}`);
-		}
+		if (LargeCapacityPgroongaIndexes.includes(index))
+			for (const option of requiredLargeOptions) {
+				if (!state.options?.some((value) => value.startsWith(`${option}=`)))
+					throw new Error(`Canonical PGroonga index is not LARGE-capacity: ${index}`);
+			}
 	}
-	console.info("PGroonga 4.0.8, approx_count 1.0, and all LARGE canonical indexes are ready");
+	const [broken, lagged] = await Promise.all([
+		client.query<{ index: string }>("select pgroonga_list_broken_indexes() as index"),
+		client.query<{ index: string }>("select pgroonga_list_lagged_indexes() as index"),
+	]);
+	if (broken.rows.length)
+		throw new Error(
+			`PGroonga reports broken indexes: ${broken.rows.map(({ index }) => index).join(", ")}`,
+		);
+	if (lagged.rows.length)
+		throw new Error(
+			`PGroonga reports lagged indexes: ${lagged.rows.map(({ index }) => index).join(", ")}`,
+		);
+	console.info(
+		"PGroonga 4.0.8, approx_count 1.0, and all canonical indexes are ready and healthy",
+	);
 }
 
 async function main(): Promise<void> {
 	const options = parseSearchIndexOptions(process.argv.slice(2));
-	const connectionString = process.env.DATABASE_ADMIN_URL ?? env.DATABASE_URL;
-	const client = new Client({ connectionString });
+	const client = new Client({ connectionString: adminDatabaseUrl });
 	await client.connect();
 	try {
 		if (options.action === "check") {

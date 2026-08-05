@@ -4,24 +4,28 @@ set -euo pipefail
 
 if (($# != 3)) || [[ "$1" != "--confirm-stateful-maintenance" ]]; then
 	printf '%s\n' \
-		"Usage: deploy-production-infrastructure.sh --confirm-stateful-maintenance <postgres-image> <backup-image>" >&2
+		"Usage: deploy-production-infrastructure.sh --confirm-stateful-maintenance <postgres-image> <databasus-image>" >&2
 	exit 64
 fi
 
 readonly postgres_image="$2"
-readonly backup_image="$3"
+readonly databasus_image="$3"
 readonly nomad_command="${NOMAD_BIN:-nomad}"
 repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 readonly repository_root
 readonly jobs_directory="${repository_root}/deploy/nomad"
 readonly infrastructure_namespace="rezics-infrastructure"
 
-for image in "${postgres_image}" "${backup_image}"; do
-	if [[ ! "${image}" =~ @sha256:[0-9a-f]{64}$ ]]; then
-		printf 'Image must be immutable and include a sha256 digest: %s\n' "${image}" >&2
-		exit 64
-	fi
-done
+if [[ ! "${postgres_image}" =~ @sha256:[0-9a-f]{64}$ ]]; then
+	printf 'PostgreSQL image must be immutable and include a sha256 digest: %s\n' \
+		"${postgres_image}" >&2
+	exit 64
+fi
+if [[ ! "${databasus_image}" =~ ^(docker\.io/)?databasus/databasus:v3\.51\.0@sha256:[0-9a-f]{64}$ ]]; then
+	printf 'Databasus must be pinned as databasus/databasus:v3.51.0@sha256:<digest>: %s\n' \
+		"${databasus_image}" >&2
+	exit 64
+fi
 
 if "${nomad_command}" job inspect -json rezics-infrastructure >/dev/null 2>&1; then
 	printf '%s\n' \
@@ -37,9 +41,7 @@ fi
 	--namespace "${infrastructure_namespace}" rezics-postgres
 
 "${repository_root}/deploy/scripts/apply-nomad-job.sh" \
-	"${jobs_directory}/postgres-backup.nomad.hcl" \
-	-var "backup_image=${backup_image}"
-"${repository_root}/deploy/scripts/apply-nomad-job.sh" \
-	"${jobs_directory}/postgres-restore-drill.nomad.hcl" \
-	-var "backup_image=${backup_image}" \
-	-var "postgres_image=${postgres_image}"
+	"${jobs_directory}/databasus.nomad.hcl" \
+	-var "databasus_image=${databasus_image}"
+"${repository_root}/deploy/scripts/wait-nomad-deployment.sh" \
+	--namespace "${infrastructure_namespace}" rezics-databasus

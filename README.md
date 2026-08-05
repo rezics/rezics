@@ -204,15 +204,15 @@ Both profiles use the fixed reference time `2026-07-15T12:00:00.000Z` unless
 then rebuilds localization metrics, recommendation snapshots, and aggregate
 projections before running its verifier. Use the confirmed root
 `task --yes local:reset` workflow when replacing existing disposable data; it
-also coordinates the external search projection. CI runs `task seed:contract`
-against fresh infrastructure, including a full external-index rebuild and
+also rebuilds the authoritative PostgreSQL schema and its PGroonga indexes. CI runs
+`task seed:contract` against fresh infrastructure, including PGroonga health and
 zone-scoped lookup of each official workspace fixture.
 
 Production environments require one private, operator-confirmed `db:install`
 before their first application rollout. A stable application tag runs the
 database release job only when database inputs changed; that job completes
 preflight, migration, privilege reconciliation, and verification before API or
-worker rollout. Only database and projection jobs receive
+worker rollout. Only database and maintenance jobs receive
 `DATABASE_ADMIN_URL`; runtime services receive the narrower `DATABASE_URL`.
 Do not run migrations independently in every application replica.
 

@@ -145,8 +145,6 @@ tasks:
                 --from "postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?search_path=public&sslmode=disable"
                 --to env://schema.src
                 --exclude atlas_schema_revisions
-                --exclude 'unit_localization.unit_localization_pgroonga_metadata_idx[type=index]'
-                --exclude 'unit_localization.unit_localization_pgroonga_content_idx[type=index]'
                 --exclude '*[type=extension|function|trigger]'
                 | grep -q '^Schemas are synced, no changes to be made\.$'
 

@@ -23,11 +23,15 @@ services:
             - -c
             - min_wal_size=2GB
             - -c
+            - max_worker_processes=12
+            - -c
             - track_io_timing=on
             - -c
             - track_wal_io_timing=on
             - -c
             - pgroonga.enable_wal_resource_manager=on
+            - -c
+            - pgroonga.enable_wal=off
             - -c
             - pgroonga.enable_crash_safe=on
         restart: unless-stopped
@@ -37,6 +41,8 @@ services:
             POSTGRES_USER: postgres
             REZICS_DATABASE_PASSWORD: rezics_app
             REZICS_DATABASE_USERNAME: rezics_app
+            REZICS_DATABASE_BACKUP_PASSWORD: rezics_backup
+            REZICS_DATABASE_BACKUP_USERNAME: rezics_backup
         ports:
             - "${COMPOSE_BIND_ADDRESS:-127.0.0.1}:${POSTGRES_HOST_PORT:-5432}:5432"
         volumes:
@@ -98,11 +104,15 @@ services:
                 "-c",
                 "min_wal_size=2GB",
                 "-c",
+                "max_worker_processes=12",
+                "-c",
                 "track_io_timing=on",
                 "-c",
                 "track_wal_io_timing=on",
                 "-c",
                 "pgroonga.enable_wal_resource_manager=on",
+                "-c",
+                "pgroonga.enable_wal=off",
                 "-c",
                 "pgroonga.enable_crash_safe=on",
             ]

@@ -1,9 +1,9 @@
-export const CanonicalPgroongaIndexes = [
-	"unit_localization_pgroonga_metadata_idx",
-	"unit_localization_pgroonga_content_idx",
-] as const;
+import {
+	CanonicalPgroongaIndexes,
+	type CanonicalPgroongaIndex,
+} from "../src/services/database/schema/pgroonga";
 
-export type CanonicalPgroongaIndex = (typeof CanonicalPgroongaIndexes)[number];
+export { CanonicalPgroongaIndexes, type CanonicalPgroongaIndex };
 export type SearchIndexAction = "check" | "reindex" | "reindex-concurrently";
 
 export interface SearchIndexOptions {

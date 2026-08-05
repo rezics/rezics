@@ -119,14 +119,14 @@ RUN apt-get update \
 
 COPY --chmod=0755 services/main/docker/postgres/init /docker-entrypoint-initdb.d
 
-FROM postgres AS postgres-backup
+FROM database-dependencies AS postgres-verification-acceptance
 
-RUN apt-get update \
-	&& apt-get install --yes --no-install-recommends awscli jq \
-	&& rm -rf /var/lib/apt/lists/*
+RUN yarn workspace @rezics/backend exec tsx scripts/render-search-restore-acceptance.ts \
+	> /search-restore-acceptance.sql
 
-COPY --chmod=0755 deploy/scripts/postgres-logical-backup.sh /usr/local/bin/postgres-logical-backup
-COPY --chmod=0755 deploy/scripts/postgres-restore-drill.sh /usr/local/bin/postgres-restore-drill
-COPY services/main/search/pgroonga-indexes.sql /opt/rezics/pgroonga-indexes.sql
+FROM postgres AS postgres-verification
 
-ENTRYPOINT []
+RUN mv /usr/lib/postgresql/18/bin/pg_restore /usr/lib/postgresql/18/bin/pg_restore.real
+
+COPY --from=postgres-verification-acceptance /search-restore-acceptance.sql /opt/rezics/search-restore-acceptance.sql
+COPY --chmod=0755 services/main/docker/postgres-verification/pg_restore /usr/lib/postgresql/18/bin/pg_restore

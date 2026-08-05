@@ -94,32 +94,14 @@ resource "cloudflare_r2_bucket_lock" "postgres_backups" {
 
   rules = [
     {
-      id      = "retain-daily-for-eight-days"
+      id      = "protect-databasus-recovery-points-for-seven-days"
       enabled = true
-      prefix  = "postgresql/daily/"
+      prefix  = "postgresql/databasus/"
       condition = {
         type            = "Age"
-        max_age_seconds = 691200
+        max_age_seconds = 604800
       }
-    },
-    {
-      id      = "retain-weekly-for-thirty-five-days"
-      enabled = true
-      prefix  = "postgresql/weekly/"
-      condition = {
-        type            = "Age"
-        max_age_seconds = 3024000
-      }
-    },
-    {
-      id      = "retain-monthly-for-three-hundred-seventy-days"
-      enabled = true
-      prefix  = "postgresql/monthly/"
-      condition = {
-        type            = "Age"
-        max_age_seconds = 31968000
-      }
-    },
+    }
   ]
 }
 
@@ -130,37 +112,18 @@ resource "cloudflare_r2_bucket_lifecycle" "postgres_backups" {
 
   rules = [
     {
-      id         = "delete-daily-after-nine-days"
+      id         = "archive-databasus-recovery-points"
       enabled    = true
-      conditions = { prefix = "postgresql/daily/" }
-      delete_objects_transition = {
-        condition = { type = "Age", max_age = 777600 }
-      }
-    },
-    {
-      id         = "delete-weekly-after-thirty-six-days"
-      enabled    = true
-      conditions = { prefix = "postgresql/weekly/" }
-      delete_objects_transition = {
-        condition = { type = "Age", max_age = 3110400 }
-      }
-    },
-    {
-      id         = "archive-and-delete-monthly"
-      enabled    = true
-      conditions = { prefix = "postgresql/monthly/" }
+      conditions = { prefix = "postgresql/databasus/" }
       storage_class_transitions = [{
         condition     = { type = "Age", max_age = 2592000 }
         storage_class = "InfrequentAccess"
       }]
-      delete_objects_transition = {
-        condition = { type = "Age", max_age = 32054400 }
-      }
     },
     {
       id         = "abort-incomplete-multipart-uploads"
       enabled    = true
-      conditions = { prefix = "postgresql/" }
+      conditions = { prefix = "postgresql/databasus/" }
       abort_multipart_uploads_transition = {
         condition = { type = "Age", max_age = 86400 }
       }

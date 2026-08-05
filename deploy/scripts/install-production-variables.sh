@@ -31,8 +31,8 @@ readonly variables=(
 	"rezics application/runtime"
 	"rezics database/operations"
 	"rezics-infrastructure nomad/jobs/rezics-postgres/postgres/postgres"
-	"rezics-infrastructure database/backup-uploader"
-	"rezics-infrastructure database/backup-reader"
+	"rezics-infrastructure database/databasus-control"
+	"rezics-infrastructure database/databasus-source"
 )
 for variable in "${variables[@]}"; do
 	read -r namespace path <<<"${variable}"
@@ -66,17 +66,15 @@ install -m 0600 /dev/stdin "${credentials_file}"
 jq -e '
   type == "object" and .schemaVersion == 1 and
   (.cloudflare | keys | sort) == ["accountId", "emailApiToken"] and
-  (.r2 | keys | sort) == ["application", "backupReader", "backupUploader", "endpoint"] and
+  (.r2 | keys | sort) == ["application", "backupManager", "endpoint"] and
   (.r2.application | keys | sort) == ["accessKeyId", "bucket", "secretAccessKey"] and
-  (.r2.backupReader | keys | sort) == ["accessKeyId", "bucket", "secretAccessKey"] and
-  (.r2.backupUploader | keys | sort) == ["accessKeyId", "bucket", "secretAccessKey"] and
-  .r2.application.bucket != .r2.backupUploader.bucket and
-  .r2.backupReader.bucket == .r2.backupUploader.bucket and
+  (.r2.backupManager | keys | sort) == ["accessKeyId", "bucket", "secretAccessKey"] and
+  .r2.application.bucket != .r2.backupManager.bucket and
   (.r2.endpoint | startswith("https://"))
 ' "${credentials_file}" >/dev/null
 
 readonly r2_endpoint="$(jq -er '.r2.endpoint' "${credentials_file}")"
-for workload in application backupUploader backupReader; do
+for workload in application backupManager; do
 	access_key_id="$(jq -er --arg workload "${workload}" '.r2[$workload].accessKeyId' "${credentials_file}")"
 	secret_access_key="$(jq -er --arg workload "${workload}" '.r2[$workload].secretAccessKey' "${credentials_file}")"
 	bucket="$(jq -er --arg workload "${workload}" '.r2[$workload].bucket' "${credentials_file}")"
@@ -88,24 +86,32 @@ unset access_key_id secret_access_key bucket
 
 printf 'u%s\n' "$(openssl rand -hex 10 | cut -c 1-19)" >"${work_directory}/postgres-username"
 printf 'u%s\n' "$(openssl rand -hex 10 | cut -c 1-19)" >"${work_directory}/application-database-username"
+printf 'u%s\n' "$(openssl rand -hex 10 | cut -c 1-19)" >"${work_directory}/backup-database-username"
 openssl rand -hex 32 >"${work_directory}/postgres-password"
 openssl rand -hex 32 >"${work_directory}/application-database-password"
+openssl rand -hex 32 >"${work_directory}/backup-database-password"
 openssl rand -hex 32 >"${work_directory}/better-auth-secret"
+openssl rand -hex 36 >"${work_directory}/databasus-secret-key"
 
 jq -n \
 	--slurpfile external "${credentials_file}" \
 	--rawfile turnstileSecret "${turnstile_secret_file}" \
 	--rawfile postgresUsername "${work_directory}/postgres-username" \
 	--rawfile applicationDatabaseUsername "${work_directory}/application-database-username" \
+	--rawfile backupDatabaseUsername "${work_directory}/backup-database-username" \
 	--rawfile postgresPassword "${work_directory}/postgres-password" \
 	--rawfile applicationDatabasePassword "${work_directory}/application-database-password" \
-	--rawfile betterAuthSecret "${work_directory}/better-auth-secret" '
+	--rawfile backupDatabasePassword "${work_directory}/backup-database-password" \
+	--rawfile betterAuthSecret "${work_directory}/better-auth-secret" \
+	--rawfile databasusSecretKey "${work_directory}/databasus-secret-key" '
   def value: rtrimstr("\n");
   ($external[0]) as $external |
   ($postgresUsername | value) as $postgresUsername |
   ($applicationDatabaseUsername | value) as $applicationDatabaseUsername |
+  ($backupDatabaseUsername | value) as $backupDatabaseUsername |
   ($postgresPassword | value) as $postgresPassword |
   ($applicationDatabasePassword | value) as $applicationDatabasePassword |
+  ($backupDatabasePassword | value) as $backupDatabasePassword |
   {
     DATABASE_URL: ("postgres://" + $applicationDatabaseUsername + ":" + $applicationDatabasePassword + "@127.0.0.1:5432/rezics?sslmode=disable"),
     BETTER_AUTH_SECRET: ($betterAuthSecret | value),
@@ -126,12 +132,12 @@ jq -n \
     S3_FORCE_PATH_STYLE: "false",
     S3_PRESIGN_EXPIRES_IN: "900",
     SEARCH_STATEMENT_TIMEOUT_MS: "1500",
-    SEARCH_CANDIDATE_SCAN_LIMIT: "512",
     SEARCH_FACET_SCAN_LIMIT: "1000",
     RECOMMENDATION_REFRESH_INTERVAL_MS: "300000"
   } as $applicationRuntime |
   ($applicationRuntime + {
-    DATABASE_ADMIN_URL: ("postgres://" + $postgresUsername + ":" + $postgresPassword + "@127.0.0.1:5432/rezics?sslmode=disable")
+    DATABASE_ADMIN_URL: ("postgres://" + $postgresUsername + ":" + $postgresPassword + "@127.0.0.1:5432/rezics?sslmode=disable"),
+    DATABASE_BACKUP_URL: ("postgres://" + $backupDatabaseUsername + ":" + $backupDatabasePassword + "@127.0.0.1:5432/rezics?sslmode=disable")
   }) as $databaseOperations |
   {
     variables: [
@@ -144,28 +150,34 @@ jq -n \
           POSTGRES_USER: $postgresUsername,
           POSTGRES_PASSWORD: $postgresPassword,
           REZICS_DATABASE_USERNAME: $applicationDatabaseUsername,
-          REZICS_DATABASE_PASSWORD: $applicationDatabasePassword
+          REZICS_DATABASE_PASSWORD: $applicationDatabasePassword,
+          REZICS_DATABASE_BACKUP_USERNAME: $backupDatabaseUsername,
+          REZICS_DATABASE_BACKUP_PASSWORD: $backupDatabasePassword
         }
       },
       {
         Namespace: "rezics-infrastructure",
-        Path: "database/backup-uploader",
+        Path: "database/databasus-control",
         Items: {
-          DATABASE_URL: ("postgres://" + $postgresUsername + ":" + $postgresPassword + "@127.0.0.1:5432/rezics?sslmode=disable"),
-          R2_ENDPOINT: $external.r2.endpoint,
-          R2_BUCKET: $external.r2.backupUploader.bucket,
-          R2_ACCESS_KEY_ID: $external.r2.backupUploader.accessKeyId,
-          R2_SECRET_ACCESS_KEY: $external.r2.backupUploader.secretAccessKey
+          DATABASUS_SECRET_KEY: ($databasusSecretKey | value)
         }
       },
       {
         Namespace: "rezics-infrastructure",
-        Path: "database/backup-reader",
+        Path: "database/databasus-source",
         Items: {
+          POSTGRES_HOST: "127.0.0.1",
+          POSTGRES_PORT: "5432",
+          POSTGRES_DATABASE: "rezics",
+          POSTGRES_USERNAME: $backupDatabaseUsername,
+          POSTGRES_PASSWORD: $backupDatabasePassword,
+          POSTGRES_VERSION: "18",
+          POSTGRES_SSL_MODE: "disable",
           R2_ENDPOINT: $external.r2.endpoint,
-          R2_BUCKET: $external.r2.backupReader.bucket,
-          R2_ACCESS_KEY_ID: $external.r2.backupReader.accessKeyId,
-          R2_SECRET_ACCESS_KEY: $external.r2.backupReader.secretAccessKey
+          R2_BUCKET: $external.r2.backupManager.bucket,
+          R2_ACCESS_KEY_ID: $external.r2.backupManager.accessKeyId,
+          R2_SECRET_ACCESS_KEY: $external.r2.backupManager.secretAccessKey,
+          R2_PREFIX: "postgresql/databasus/authoritative"
         }
       }
     ]
@@ -178,4 +190,4 @@ while IFS=$'\t' read -r namespace path items; do
 done < <(jq -rc '.variables[] | [.Namespace, .Path, (.Items | tojson)] | @tsv' "${variables_file}")
 
 bootstrap_complete=true
-printf '%s\n' "Installed production runtime, PostgreSQL, and independently scoped backup Variables"
+printf '%s\n' "Installed production runtime, PostgreSQL, and Databasus control/source Variables"

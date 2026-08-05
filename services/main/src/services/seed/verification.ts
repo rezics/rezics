@@ -244,7 +244,7 @@ export async function verifySeedDatabase(
 	};
 }
 
-/** Verifies the promoted external Search projection after a coordinated rebuild. */
+/** Verifies current authoritative PostgreSQL Search against the official Zone fixtures. */
 export async function verifySeedSearch(): Promise<void> {
 	for (const officialZone of OfficialZoneManifest) {
 		const fixture = SeedFixtureTitles[officialZone.searchTemplate];
@@ -266,7 +266,7 @@ export async function verifySeedSearch(): Promise<void> {
 		const hits = response.groups.flatMap((group) => group.hits);
 		if (!hits.some((hit) => hit.titles.includes(fixture.en)))
 			throw new Error(
-				`Promoted Search projection did not return the official ${officialZone.searchTemplate} fixture`,
+				`Authoritative Search did not return the official ${officialZone.searchTemplate} fixture`,
 			);
 	}
 }

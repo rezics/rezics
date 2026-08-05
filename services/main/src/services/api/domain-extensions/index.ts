@@ -89,7 +89,7 @@ import {
 	upsertZonePageUnit,
 	type ZonePageProjection,
 } from "../../zones/pages";
-import { getZoneSearchFeature } from "../../search/documents";
+import { getZoneSearchFeature } from "../../zones/search-feature";
 import { provisionZoneDefaultExperienceInTransaction } from "../../zones/default-experience";
 import { IdResponse, NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";

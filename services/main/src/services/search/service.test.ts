@@ -63,7 +63,7 @@ describe("direct PostgreSQL Search", () => {
 		expect(query).toContain('"realm_tag_vote_stat"."score" >=');
 	});
 
-	it("runs PGroonga, authorization, filters, and stable ordering in one bounded query", async () => {
+	it("runs PGroonga sources, authorization, filters, and stable ordering in one bounded query", async () => {
 		execute
 			.mockResolvedValueOnce({ rows: [] })
 			.mockResolvedValueOnce({
@@ -72,13 +72,11 @@ describe("direct PostgreSQL Search", () => {
 						id: first,
 						primaryValue: "8",
 						secondaryValue: "1720000000",
-						scanTruncated: false,
 					},
 					{
 						id: second,
 						primaryValue: "7",
 						secondaryValue: "1710000000",
-						scanTruncated: false,
 					},
 				],
 			})
@@ -99,14 +97,23 @@ describe("direct PostgreSQL Search", () => {
 				],
 			});
 
-		const result = await searchDomain("units", { query: "資料庫", limit: 1 });
+		const result = await searchDomain("units", {
+			query: "資料庫",
+			limit: 1,
+			Languages: ["en"],
+		});
 		const candidateSql = sqlText(execute.mock.calls[1]![0] as SQL);
 		expect(candidateSql).toContain("&@~");
+		expect(candidateSql).toContain("pgroonga_query_escape");
 		expect(candidateSql).toContain("current_search_text_v1");
-		expect(candidateSql).toContain("candidate_localizations as materialized");
-		expect(candidateSql).toContain("candidate_status");
-		expect(candidateSql).toContain("inner join lateral");
-		expect(candidateSql).toContain("offset 0");
+		expect(candidateSql).toContain('from "unit_alias" as "search_alias"');
+		expect(candidateSql).toContain('"search_alias_vote_stat"."score" >=');
+		expect(candidateSql).toContain('"search_alias"."deleted_at" is null');
+		expect(candidateSql).toContain('"search_alias"."language" is null or');
+		expect(candidateSql).toContain("search_sources");
+		expect(candidateSql).toContain("eligible_matches");
+		expect(candidateSql).toContain('group by "unit"."id"');
+		expect(candidateSql).not.toContain("candidate_localizations as materialized");
 		expect(candidateSql).toContain('"unit"."status"');
 		expect(candidateSql).toContain("limit");
 		expect(result.total).toEqual({ kind: "lower-bound", value: 2 });
@@ -129,7 +136,6 @@ describe("direct PostgreSQL Search", () => {
 						id: first,
 						primaryValue: "0",
 						secondaryValue: "1720000000",
-						scanTruncated: false,
 					},
 				],
 			})
@@ -139,7 +145,7 @@ describe("direct PostgreSQL Search", () => {
 		expect(result.nextCursor).toBeUndefined();
 	});
 
-	it("keeps the total typed as a lower bound when the PGroonga scan budget is reached", async () => {
+	it("treats query-language punctuation as escaped ordinary search text", async () => {
 		execute
 			.mockResolvedValueOnce({ rows: [] })
 			.mockResolvedValueOnce({
@@ -148,13 +154,14 @@ describe("direct PostgreSQL Search", () => {
 						id: first,
 						primaryValue: "0",
 						secondaryValue: "1720000000",
-						scanTruncated: true,
 					},
 				],
 			})
 			.mockResolvedValueOnce({ rows: [] });
-		const result = await searchDomain("units", { query: "common", limit: 20 });
-		expect(result.total).toEqual({ kind: "lower-bound", value: 1 });
+		const result = await searchDomain("units", { query: "(common OR hidden", limit: 20 });
+		const candidateSql = sqlText(execute.mock.calls[1]![0] as SQL);
+		expect(candidateSql.match(/pgroonga_query_escape/g)).toHaveLength(3);
+		expect(result.total).toEqual({ kind: "exact", value: 1 });
 		expect(result.nextCursor).toBeUndefined();
 	});
 });
