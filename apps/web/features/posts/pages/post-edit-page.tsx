@@ -11,7 +11,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { useState, type FormEvent } from "react";
 
-import { PortableTextEditor } from "@/features/editor/portable-text-editor";
+import {
+	PortableTextEditor,
+	spoilerPortableTextEditorCapabilities,
+} from "@/features/editor/portable-text-editor";
 import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
 import { ReviewEditPage } from "@/features/reviews/pages/review-edit-page";
@@ -181,6 +184,7 @@ function ReplyPostEditForm({ post }: { post: ReplyPost }) {
 		<form onChange={() => setDirty(true)} onSubmit={submit}>
 			<FieldGroup>
 				<PortableTextEditor
+					capabilities={spoilerPortableTextEditorCapabilities}
 					label={t.posts.replyBody}
 					onChange={(value) => {
 						setBody(value);

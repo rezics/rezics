@@ -128,6 +128,15 @@ export interface PortableTextLinkDefinition {
 	openInNewTab?: boolean;
 }
 
+export interface PortableTextSpoilerDefinition {
+	[key: string]: unknown;
+	_key: string;
+	_type: "spoiler";
+	scopeUnitId?: string;
+}
+
+export type PortableTextMarkDefinition = PortableTextLinkDefinition | PortableTextSpoilerDefinition;
+
 export interface PortableTextValueSpan {
 	[key: string]: unknown;
 	_key: string;
@@ -150,7 +159,7 @@ export interface PortableTextValueBlock {
 	_key: string;
 	_type: "block";
 	children: PortableTextValueChild[];
-	markDefs: PortableTextLinkDefinition[];
+	markDefs: PortableTextMarkDefinition[];
 	style: PortableTextStyle;
 	listItem?: PortableTextList;
 	level?: number;
@@ -207,6 +216,19 @@ export function isPortableTextUnitMention(value: unknown): value is PortableText
 	);
 }
 
+export function isPortableTextSpoilerDefinition(
+	value: unknown,
+): value is PortableTextSpoilerDefinition {
+	return (
+		isRecord(value) &&
+		value._type === "spoiler" &&
+		typeof value._key === "string" &&
+		(value.scopeUnitId === undefined ||
+			(typeof value.scopeUnitId === "string" &&
+				new RegExp(UUID_PATTERN, "i").test(value.scopeUnitId)))
+	);
+}
+
 /** Collects distinct mentioned Unit identities in first-appearance order. */
 export function collectPortableTextUnitMentionIds(value: unknown): string[] {
 	const ids = new Set<string>();
@@ -218,6 +240,22 @@ export function collectPortableTextUnitMentionIds(value: unknown): string[] {
 		if (!isPortableTextValueBlock(block)) continue;
 		for (const child of block.children)
 			if (child._type === "unit-mention") ids.add(child.unitId);
+	}
+	return [...ids];
+}
+
+/** Collects Unit identities needed to present mentions and scoped spoilers. */
+export function collectPortableTextPresentationUnitIds(value: unknown): string[] {
+	const ids = new Set(collectPortableTextUnitMentionIds(value));
+	const content =
+		isRecord(value) && value._type === "portable-text" && Array.isArray(value.content)
+			? value.content
+			: value;
+	for (const block of normalizePortableText(content)) {
+		if (!isPortableTextValueBlock(block)) continue;
+		for (const definition of block.markDefs)
+			if (definition._type === "spoiler" && definition.scopeUnitId)
+				ids.add(definition.scopeUnitId);
 	}
 	return [...ids];
 }
@@ -302,20 +340,41 @@ export function normalizePortableText(value: unknown): PortableTextValue {
 
 		const markDefs = Array.isArray(candidate.markDefs)
 			? candidate.markDefs.flatMap(
-					(definition, definitionIndex): PortableTextLinkDefinition[] => {
-						if (!isRecord(definition) || definition._type !== "link") return [];
-						const href = normalizePortableTextUrl(definition.href);
-						if (!href) return [];
+					(definition, definitionIndex): PortableTextMarkDefinition[] => {
+						if (!isRecord(definition)) return [];
+						if (definition._type === "link") {
+							const href = normalizePortableTextUrl(definition.href);
+							if (!href) return [];
+							return [
+								{
+									_key: keyOr(
+										definition._key,
+										`link-${blockIndex}-${definitionIndex}`,
+									),
+									_type: "link",
+									href,
+									...(typeof definition.openInNewTab === "boolean"
+										? { openInNewTab: definition.openInNewTab }
+										: {}),
+								},
+							];
+						}
+						if (definition._type !== "spoiler") return [];
+						if (
+							definition.scopeUnitId !== undefined &&
+							(typeof definition.scopeUnitId !== "string" ||
+								!new RegExp(UUID_PATTERN, "i").test(definition.scopeUnitId))
+						)
+							return [];
 						return [
 							{
 								_key: keyOr(
 									definition._key,
-									`link-${blockIndex}-${definitionIndex}`,
+									`spoiler-${blockIndex}-${definitionIndex}`,
 								),
-								_type: "link",
-								href,
-								...(typeof definition.openInNewTab === "boolean"
-									? { openInNewTab: definition.openInNewTab }
+								_type: "spoiler",
+								...(typeof definition.scopeUnitId === "string"
+									? { scopeUnitId: definition.scopeUnitId }
 									: {}),
 							},
 						];
@@ -323,6 +382,16 @@ export function normalizePortableText(value: unknown): PortableTextValue {
 				)
 			: [];
 		const annotationKeys = new Set(markDefs.map(({ _key }) => _key));
+		const spoilerKeys = new Set(
+			markDefs.flatMap((definition) =>
+				definition._type === "spoiler" ? [definition._key] : [],
+			),
+		);
+		const linkKeys = new Set(
+			markDefs.flatMap((definition) =>
+				definition._type === "link" ? [definition._key] : [],
+			),
+		);
 		const children = Array.isArray(candidate.children)
 			? candidate.children.flatMap((child, childIndex): PortableTextValueChild[] => {
 					if (isPortableTextUnitMention(child))
@@ -339,7 +408,7 @@ export function normalizePortableText(value: unknown): PortableTextValue {
 						typeof child.text !== "string"
 					)
 						return [];
-					const marks = Array.isArray(child.marks)
+					const supportedMarks = Array.isArray(child.marks)
 						? child.marks.filter(
 								(mark): mark is string =>
 									typeof mark === "string" &&
@@ -347,6 +416,10 @@ export function normalizePortableText(value: unknown): PortableTextValue {
 										annotationKeys.has(mark)),
 							)
 						: [];
+					const hasSpoiler = supportedMarks.some((mark) => spoilerKeys.has(mark));
+					const marks = hasSpoiler
+						? supportedMarks.filter((mark) => !linkKeys.has(mark))
+						: supportedMarks;
 					return [
 						{
 							_key: keyOr(child._key, `span-${blockIndex}-${childIndex}`),
@@ -365,12 +438,20 @@ export function normalizePortableText(value: unknown): PortableTextValue {
 				? Number(candidate.level)
 				: undefined;
 
+		const referencedAnnotationKeys = new Set(
+			children.flatMap((child) => (child._type === "span" ? child.marks : [])),
+		);
+		const referencedMarkDefs = markDefs.filter(
+			(definition) =>
+				definition._type !== "spoiler" || referencedAnnotationKeys.has(definition._key),
+		);
+
 		return [
 			{
 				_key: keyOr(candidate._key, `block-${blockIndex}`),
 				_type: "block",
 				children,
-				markDefs,
+				markDefs: referencedMarkDefs,
 				style: memberOf(PortableTextStyles, candidate.style) ? candidate.style : "normal",
 				...(listItem ? { listItem } : {}),
 				...(level ? { level } : {}),

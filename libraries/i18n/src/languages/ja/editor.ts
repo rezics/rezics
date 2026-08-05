@@ -1,5 +1,6 @@
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { jaTerminology } from "@rezics/i18n/terminology/ja";
+import { insert } from "native-i18n";
 
 const { forms: realmTerms } = jaTerminology.realm;
 const { forms: zoneTerms } = jaTerminology.zone;
@@ -23,6 +24,21 @@ export default {
 	addLink: "リンクを追加",
 	removeLink: "リンクを削除",
 	invalidLink: `サポートされている ${verbatimTerms.url.value} を入力してください。`,
+	spoiler: "ネタバレ",
+	addSpoiler: "ネタバレとしてマーク",
+	removeSpoiler: "ネタバレを解除",
+	showSpoiler: "ネタバレを表示",
+	showScopedSpoiler: insert("「{{title}}」のネタバレを表示", { title: String }),
+	spoilerPreview: "ネタバレ内容",
+	spoilerScope: "関連する項目（任意）",
+	spoilerScopePlaceholder: "項目を検索",
+	spoilerRange: "適用範囲",
+	spoilerRangeSelection: "選択中のテキスト",
+	spoilerRangeBlocks: "選択中のブロック",
+	spoilerRangeBody: "本文全体",
+	spoilerLinkConflict: "リンクのテキストをネタバレとしてマークすることはできません。",
+	spoilerTextOnlyHint:
+		"テキストのみがマークされ、画像やその他の埋め込みコンテンツは表示されたままです。",
 	undo: "元に戻す",
 	redo: "やり直す",
 	style: "文字スタイル",

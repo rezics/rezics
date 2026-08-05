@@ -19,7 +19,10 @@ import {
 import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
 import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/use-form-draft-content-language";
 import { portableTextDraftContentLanguageSample } from "@/features/content-languages/model/draft-content-language-sample";
-import { PortableTextEditor } from "@/features/editor/portable-text-editor";
+import {
+	PortableTextEditor,
+	spoilerPortableTextEditorCapabilities,
+} from "@/features/editor/portable-text-editor";
 import { optionalPostLocalizationText } from "@/features/posts/model/post-localization-input";
 import { MaximumPostPublishRealmCount } from "@/features/posts/model/post-publication";
 import { RealmScoreContextLink } from "@/features/realms/components/realm-score-context-link";
@@ -183,6 +186,7 @@ export function ReviewComposer({
 					</Field>
 					<ScoreInput disabled={!scoreRealm} onChange={setScore} value={score} />
 					<PortableTextEditor
+						capabilities={spoilerPortableTextEditorCapabilities}
 						label={t.ui.body}
 						onChange={setBody}
 						required

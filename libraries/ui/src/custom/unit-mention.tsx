@@ -1,7 +1,7 @@
 "use client";
 
 import {
-	collectPortableTextUnitMentionIds,
+	collectPortableTextPresentationUnitIds,
 	type PortableTextValueUnitMention,
 } from "@rezics/portable-text";
 import { useEffect, useMemo, useState } from "react";
@@ -16,7 +16,7 @@ export function useUnitMentionPresentations(
 	value: unknown,
 ): ReadonlyMap<string, UnitMentionPresentation> {
 	const resolveUnitMentions = useUnitMentionResolver();
-	const identity = collectPortableTextUnitMentionIds(value).join(",");
+	const identity = collectPortableTextPresentationUnitIds(value).join(",");
 	const ids = useMemo(() => (identity ? identity.split(",") : []), [identity]);
 	const [presentations, setPresentations] = useState<
 		ReadonlyMap<string, UnitMentionPresentation>

@@ -46,6 +46,7 @@ vi.mock("@tanstack/react-query", async (importOriginal) => ({
 }));
 
 vi.mock("@/features/editor/portable-text-editor", () => ({
+	spoilerPortableTextEditorCapabilities: { spoilers: true },
 	PortableTextEditor: ({
 		label,
 		onChange,

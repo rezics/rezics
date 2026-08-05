@@ -1,5 +1,6 @@
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
+import { insert } from "native-i18n";
 
 const { forms: realmTerms } = zhHansTerminology.realm;
 const { forms: zoneTerms } = zhHansTerminology.zone;
@@ -23,6 +24,20 @@ export default {
 	addLink: "添加链接",
 	removeLink: "移除链接",
 	invalidLink: "请输入支持的链接网址。",
+	spoiler: "剧透",
+	addSpoiler: "标记为剧透",
+	removeSpoiler: "移除剧透",
+	showSpoiler: "显示剧透",
+	showScopedSpoiler: insert("显示《{{title}}》剧透", { title: String }),
+	spoilerPreview: "剧透内容",
+	spoilerScope: "相关项目（选填）",
+	spoilerScopePlaceholder: "搜索项目",
+	spoilerRange: "应用范围",
+	spoilerRangeSelection: "所选文本",
+	spoilerRangeBlocks: "所选区块",
+	spoilerRangeBody: "全文",
+	spoilerLinkConflict: "链接文本不能同时标记为剧透。",
+	spoilerTextOnlyHint: "只会标记文本；图片和其他内嵌内容仍会显示。",
 	undo: "撤销",
 	redo: "重做",
 	style: "文本样式",

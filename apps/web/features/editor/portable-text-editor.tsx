@@ -10,6 +10,10 @@ import { useTranslation } from "@/i18n/client";
 type PortableTextEditorProps = ComponentProps<typeof PortableTextEditorComponent>;
 type PortableTextEditorModule = typeof import("@rezics/ui/custom/portable-text-editor");
 
+export const spoilerPortableTextEditorCapabilities = {
+	spoilers: true,
+} satisfies NonNullable<PortableTextEditorProps["capabilities"]>;
+
 let portableTextEditorModulePromise: Promise<PortableTextEditorModule> | undefined;
 
 function loadPortableTextEditorModule(): Promise<PortableTextEditorModule> {

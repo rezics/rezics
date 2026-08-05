@@ -6,11 +6,15 @@ import {
 	PortableTextEditable,
 	type Editor,
 	type EditorSelection,
+	type Path,
+	type PortableTextBlock as EditorPortableTextBlock,
+	type PortableTextTextBlock as EditorPortableTextTextBlock,
 	type RenderAnnotationFunction,
 	type RenderChildFunction,
 	type RenderDecoratorFunction,
 	type RenderStyleFunction,
 	useEditor,
+	useEditorSelector,
 } from "@portabletext/editor";
 import * as selectors from "@portabletext/editor/selectors";
 import { EventListenerPlugin } from "@portabletext/editor/plugins";
@@ -51,6 +55,7 @@ import {
 	Heading3Icon,
 	ItalicIcon,
 	LinkIcon,
+	EyeOffIcon,
 	ListIcon,
 	ListOrderedIcon,
 	PilcrowIcon,
@@ -62,6 +67,7 @@ import {
 import {
 	type FormEvent,
 	type KeyboardEvent,
+	type ReactElement,
 	type ReactNode,
 	useEffect,
 	useId,
@@ -84,6 +90,7 @@ import { Switch } from "../ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { cn } from "../utils";
 import { Button } from "./button";
+import { UnitPicker } from "./unit-picker";
 import { PortableTextContent } from "./portable-text-content";
 import { IdentityAvatar } from "./identity-avatar";
 import {
@@ -96,24 +103,68 @@ import { UnitMentionBadge, useUnitMentionPresentations } from "./unit-mention";
 
 export type PortableTextEditorValue = PortableTextValue;
 export type PortableTextEditorVariant = "compact" | "document";
+export interface PortableTextEditorCapabilities {
+	readonly spoilers?: boolean;
+}
 
 const editorFrameClassName =
 	"overflow-hidden rounded-xl border border-input bg-background shadow-xs/5 outline-none transition-[border-color,box-shadow] focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/32 motion-reduce:transition-none!";
 const toolbarToggleClassName = "aria-pressed:bg-surface-selected aria-pressed:text-foreground";
 
-const schemaDefinition = defineSchema({
+function isUnknownRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null;
+}
+
+function stripPortableTextSpoilersFromInput(value: unknown): unknown {
+	if (!Array.isArray(value)) return value;
+	return value.map((block) => {
+		if (!isUnknownRecord(block) || block._type !== "block") return block;
+		const markDefs = Array.isArray(block.markDefs) ? block.markDefs : [];
+		const spoilerKeys = new Set(
+			markDefs.flatMap((definition) =>
+				isUnknownRecord(definition) &&
+				definition._type === "spoiler" &&
+				typeof definition._key === "string"
+					? [definition._key]
+					: [],
+			),
+		);
+		if (spoilerKeys.size === 0) return block;
+		return {
+			...block,
+			children: Array.isArray(block.children)
+				? block.children.map((child) =>
+						isUnknownRecord(child) && Array.isArray(child.marks)
+							? {
+									...child,
+									marks: child.marks.filter(
+										(mark) =>
+											typeof mark !== "string" || !spoilerKeys.has(mark),
+									),
+								}
+							: child,
+					)
+				: block.children,
+			markDefs: markDefs.filter(
+				(definition) => !isUnknownRecord(definition) || definition._type !== "spoiler",
+			),
+		};
+	});
+}
+
+export function normalizePortableTextEditorValue(
+	value: unknown,
+	capabilities: PortableTextEditorCapabilities | undefined,
+): PortableTextValue {
+	return normalizePortableText(
+		capabilities?.spoilers ? value : stripPortableTextSpoilersFromInput(value),
+	);
+}
+
+const baseSchemaDefinition = {
 	decorators: [{ name: "strong" }, { name: "em" }],
 	styles: [{ name: "normal" }, { name: "h2" }, { name: "h3" }, { name: "blockquote" }],
 	lists: [{ name: "bullet" }, { name: "number" }],
-	annotations: [
-		{
-			name: "link",
-			fields: [
-				{ name: "href", type: "string" },
-				{ name: "openInNewTab", type: "boolean" },
-			],
-		},
-	],
 	inlineObjects: [
 		{
 			name: "unit-mention",
@@ -121,6 +172,29 @@ const schemaDefinition = defineSchema({
 		},
 	],
 	blockObjects: [],
+} as const;
+
+const linkAnnotationDefinition = {
+	name: "link",
+	fields: [
+		{ name: "href", type: "string" },
+		{ name: "openInNewTab", type: "boolean" },
+	],
+} as const;
+
+const spoilerAnnotationDefinition = {
+	name: "spoiler",
+	fields: [{ name: "scopeUnitId", type: "string" }],
+} as const;
+
+const standardSchemaDefinition = defineSchema({
+	...baseSchemaDefinition,
+	annotations: [linkAnnotationDefinition],
+});
+
+const spoilerSchemaDefinition = defineSchema({
+	...baseSchemaDefinition,
+	annotations: [linkAnnotationDefinition, spoilerAnnotationDefinition],
 });
 
 const linkShortcut = createKeyboardShortcut({
@@ -135,10 +209,18 @@ const extendDecorator: ExtendDecoratorSchemaType = (decorator) =>
 			? { ...decorator, icon: ItalicIcon, shortcut: italic }
 			: decorator;
 
-const extendAnnotation: ExtendAnnotationSchemaType = (annotation) =>
-	annotation.name === "link"
-		? { ...annotation, icon: LinkIcon, shortcut: linkShortcut }
-		: annotation;
+const extendAnnotation: ExtendAnnotationSchemaType = (annotation) => {
+	if (annotation.name === "link")
+		return {
+			...annotation,
+			icon: LinkIcon,
+			shortcut: linkShortcut,
+			mutuallyExclusive: ["spoiler"],
+		};
+	if (annotation.name === "spoiler")
+		return { ...annotation, icon: EyeOffIcon, mutuallyExclusive: ["link"] };
+	return annotation;
+};
 
 const extendList: ExtendListSchemaType = (list) =>
 	list.name === "bullet"
@@ -184,7 +266,16 @@ const renderDecorator: RenderDecoratorFunction = ({ value, children }) =>
 		<>{children}</>
 	);
 
-const renderAnnotation: RenderAnnotationFunction = ({ value, children }) => {
+const renderAnnotation: RenderAnnotationFunction = ({ schemaType, value, children }) => {
+	if (schemaType.name === "spoiler")
+		return (
+			<span
+				className="rounded-sm bg-foreground/10 px-0.5 shadow-[inset_0_-2px_0_0_var(--color-foreground)]"
+				data-editor-spoiler
+			>
+				{children}
+			</span>
+		);
 	const href = normalizePortableTextUrl(value.href);
 	if (!href) return <>{children}</>;
 	const openInNewTab = value.openInNewTab === true;
@@ -629,6 +720,16 @@ function ToolbarTooltip({ label, children }: { label: string; children: ReactNod
 	);
 }
 
+function ToolbarPopoverTrigger({ label, children }: { label: string; children: ReactElement }) {
+	return (
+		<ToolbarTooltip label={label}>
+			<span className="inline-flex shrink-0">
+				<PopoverTrigger asChild>{children}</PopoverTrigger>
+			</span>
+		</ToolbarTooltip>
+	);
+}
+
 function HistoryButtons() {
 	const { editor: labels } = useUiMessages();
 	const history = useHistoryButtons();
@@ -744,9 +845,98 @@ function ListButton({ schemaType }: { schemaType: ToolbarListSchemaType }) {
 	);
 }
 
+type SpoilerRange = "selection" | "blocks" | "body";
+type TextBlockEntry = {
+	readonly node: EditorPortableTextTextBlock;
+	readonly path: Path;
+};
+
+type EditorTextSpan = {
+	readonly _key: string;
+	readonly _type: "span";
+	readonly marks?: readonly string[];
+	readonly text: string;
+};
+
+function isSpoilerRange(value: string): value is SpoilerRange {
+	return value === "selection" || value === "blocks" || value === "body";
+}
+
+function isEditorTextSpan(value: unknown): value is EditorTextSpan {
+	if (!isUnknownRecord(value)) return false;
+	return (
+		value._type === "span" &&
+		typeof value._key === "string" &&
+		typeof value.text === "string" &&
+		(value.marks === undefined ||
+			(Array.isArray(value.marks) && value.marks.every((mark) => typeof mark === "string")))
+	);
+}
+
+function isEditorTextBlock(block: EditorPortableTextBlock): block is EditorPortableTextTextBlock {
+	return block._type === "block" && Array.isArray(block.children);
+}
+
+function rootTextBlockEntries(value: readonly EditorPortableTextBlock[]): TextBlockEntry[] {
+	return value.flatMap((block): TextBlockEntry[] =>
+		isEditorTextBlock(block) ? [{ node: block, path: [{ _key: block._key }] }] : [],
+	);
+}
+
+function selectionForTextBlocks(
+	blocks: readonly TextBlockEntry[],
+): NonNullable<EditorSelection> | null {
+	const points = blocks.flatMap(({ node, path }) =>
+		node.children.flatMap((child) =>
+			isEditorTextSpan(child) && child.text.length > 0
+				? [
+						{
+							path: [...path, "children", { _key: child._key }],
+							start: 0,
+							end: child.text.length,
+						},
+					]
+				: [],
+		),
+	);
+	const first = points[0];
+	const last = points.at(-1);
+	if (!first || !last) return null;
+	return {
+		anchor: { path: first.path, offset: first.start },
+		focus: { path: last.path, offset: last.end },
+	};
+}
+
+function textBlocksContainAnnotation(
+	blocks: readonly TextBlockEntry[],
+	annotationType: string,
+): boolean {
+	return blocks.some(({ node }) => {
+		const annotationKeys = new Set(
+			(node.markDefs ?? []).flatMap((definition) =>
+				definition._type === annotationType ? [definition._key] : [],
+			),
+		);
+		return (
+			annotationKeys.size > 0 &&
+			node.children.some(
+				(child) =>
+					isEditorTextSpan(child) &&
+					(child.marks ?? []).some((mark) => annotationKeys.has(mark)),
+			)
+		);
+	});
+}
+
 function LinkButton({ schemaType }: { schemaType: ToolbarAnnotationSchemaType }) {
 	const { editor: labels } = useUiMessages();
+	const editor = useEditor();
 	const button = useAnnotationButton({ schemaType });
+	const spoilerActive = useEditorSelector(
+		editor,
+		selectors.isActiveAnnotation("spoiler", { mode: "partial" }),
+	);
 	const hrefId = useId();
 	const openInNewTabInputId = useId();
 	const openInNewTabLabelId = useId();
@@ -808,20 +998,20 @@ function LinkButton({ schemaType }: { schemaType: ToolbarAnnotationSchemaType })
 				else if (open) close();
 			}}
 			open={open}
-			positioning={{ placement: "bottom-start" }}
+			positioning={{ placement: "bottom-start", gutter: 6 }}
 		>
-			<ToolbarTooltip label={labels.addLink}>
-				<PopoverTrigger asChild>
-					<Button
-						aria-label={labels.addLink}
-						disabled={button.snapshot.matches("disabled")}
-						size="icon-sm"
-						variant="quiet"
-					>
-						<LinkIcon />
-					</Button>
-				</PopoverTrigger>
-			</ToolbarTooltip>
+			<ToolbarPopoverTrigger
+				label={spoilerActive ? labels.spoilerLinkConflict : labels.addLink}
+			>
+				<Button
+					aria-label={labels.addLink}
+					disabled={button.snapshot.matches("disabled") || spoilerActive}
+					size="icon-sm"
+					variant="quiet"
+				>
+					<LinkIcon />
+				</Button>
+			</ToolbarPopoverTrigger>
 			<PopoverContent className="w-[min(22rem,calc(100vw-2rem))]">
 				<form onSubmit={submit}>
 					<PopoverHeader description={labels.linkPrompt} title={labels.addLink} />
@@ -869,6 +1059,176 @@ function LinkButton({ schemaType }: { schemaType: ToolbarAnnotationSchemaType })
 	);
 }
 
+function SpoilerButton({ schemaType }: { schemaType: ToolbarAnnotationSchemaType }) {
+	const { editor: labels } = useUiMessages();
+	const editor = useEditor();
+	const button = useAnnotationButton({ schemaType });
+	const selection = useEditorSelector(editor, selectors.getSelection);
+	const selectionExpanded = useEditorSelector(editor, selectors.isSelectionExpanded);
+	const selectedBlocks = useEditorSelector(editor, selectors.getSelectedTextBlocks);
+	const value = useEditorSelector(editor, selectors.getValue);
+	const linkActive = useEditorSelector(
+		editor,
+		selectors.isActiveAnnotation("link", { mode: "partial" }),
+	);
+	const spoilerActive = useEditorSelector(
+		editor,
+		selectors.isActiveAnnotation("spoiler", { mode: "partial" }),
+	);
+	const [range, setRange] = useState<SpoilerRange>("selection");
+	const [scopeUnitId, setScopeUnitId] = useState<string>();
+	const rangeId = useId();
+	const active =
+		button.snapshot.matches({ disabled: "active" }) ||
+		button.snapshot.matches({ enabled: "active" });
+	const open = button.snapshot.matches({ enabled: { inactive: "showing dialog" } });
+	const bodyBlocks = rootTextBlockEntries(value);
+	const targetBlocks = range === "blocks" ? selectedBlocks : bodyBlocks;
+	const targetSelection =
+		range === "selection"
+			? selectionExpanded
+				? selection
+				: null
+			: selectionForTextBlocks(targetBlocks);
+	const targetHasSpoiler =
+		range === "selection"
+			? spoilerActive
+			: textBlocksContainAnnotation(targetBlocks, "spoiler");
+	const hasLinkConflict =
+		!targetHasSpoiler &&
+		(range === "selection" ? linkActive : textBlocksContainAnnotation(targetBlocks, "link"));
+	const canSubmit = targetSelection !== null && !hasLinkConflict;
+
+	if (active) {
+		return (
+			<ToolbarTooltip label={labels.removeSpoiler}>
+				<Button
+					aria-label={labels.removeSpoiler}
+					aria-pressed
+					className={toolbarToggleClassName}
+					disabled={button.snapshot.matches("disabled")}
+					onClick={() => button.send({ type: "remove" })}
+					size="icon-sm"
+					variant="quiet"
+				>
+					<EyeOffIcon />
+				</Button>
+			</ToolbarTooltip>
+		);
+	}
+
+	function close() {
+		button.send({ type: "close dialog" });
+		setRange("selection");
+		setScopeUnitId(undefined);
+	}
+
+	function submit(event: FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		event.stopPropagation();
+		if (!targetSelection || hasLinkConflict) return;
+		if (targetHasSpoiler)
+			editor.send({
+				type: "annotation.remove",
+				annotation: { name: "spoiler" },
+				at: targetSelection,
+			});
+		else
+			editor.send({
+				type: "annotation.add",
+				annotation: {
+					name: "spoiler",
+					value: scopeUnitId ? { scopeUnitId } : {},
+				},
+				at: targetSelection,
+			});
+		close();
+		editor.send({ type: "focus" });
+	}
+
+	return (
+		<Popover
+			modal={false}
+			onOpenChange={({ open: nextOpen }) => {
+				if (nextOpen) button.send({ type: "open dialog" });
+				else if (open) close();
+			}}
+			open={open}
+			positioning={{ placement: "bottom-start", gutter: 6 }}
+		>
+			<ToolbarPopoverTrigger
+				label={linkActive ? labels.spoilerLinkConflict : labels.addSpoiler}
+			>
+				<Button
+					aria-label={labels.addSpoiler}
+					disabled={button.snapshot.matches("disabled") || linkActive}
+					size="icon-sm"
+					variant="quiet"
+				>
+					<EyeOffIcon />
+				</Button>
+			</ToolbarPopoverTrigger>
+			<PopoverContent className="w-[min(24rem,calc(100vw-2rem))]">
+				<form onSubmit={submit}>
+					<PopoverHeader
+						title={targetHasSpoiler ? labels.removeSpoiler : labels.addSpoiler}
+					/>
+					<PopoverBody className="grid gap-4">
+						<div className="grid gap-1.5">
+							<label className="font-medium text-sm" htmlFor={rangeId}>
+								{labels.spoilerRange}
+							</label>
+							<NativeSelect
+								className="w-full"
+								id={rangeId}
+								onChange={(event) => {
+									if (isSpoilerRange(event.target.value))
+										setRange(event.target.value);
+								}}
+								value={range}
+							>
+								<NativeSelectOption value="selection">
+									{labels.spoilerRangeSelection}
+								</NativeSelectOption>
+								<NativeSelectOption value="blocks">
+									{labels.spoilerRangeBlocks}
+								</NativeSelectOption>
+								<NativeSelectOption value="body">
+									{labels.spoilerRangeBody}
+								</NativeSelectOption>
+							</NativeSelect>
+						</div>
+						{targetHasSpoiler ? null : (
+							<div className="grid gap-1.5">
+								<span className="font-medium text-sm">{labels.spoilerScope}</span>
+								<UnitPicker
+									ariaLabel={labels.spoilerScope}
+									onValueChange={setScopeUnitId}
+									placeholder={labels.spoilerScopePlaceholder}
+									value={scopeUnitId}
+								/>
+							</div>
+						)}
+						<p className="text-muted-foreground text-xs">
+							{labels.spoilerTextOnlyHint}
+						</p>
+						{hasLinkConflict ? (
+							<p className="text-destructive text-sm" role="alert">
+								{labels.spoilerLinkConflict}
+							</p>
+						) : null}
+					</PopoverBody>
+					<PopoverFooter>
+						<Button disabled={!canSubmit} type="submit" variant="solid">
+							{targetHasSpoiler ? labels.removeSpoiler : labels.addSpoiler}
+						</Button>
+					</PopoverFooter>
+				</form>
+			</PopoverContent>
+		</Popover>
+	);
+}
+
 function Toolbar({ variant }: { variant: PortableTextEditorVariant }) {
 	const { editor: labels } = useUiMessages();
 	const schema = useToolbarSchema({
@@ -894,9 +1254,13 @@ function Toolbar({ variant }: { variant: PortableTextEditorVariant }) {
 				{schema.decorators.map((schemaType) => (
 					<DecoratorButton key={schemaType.name} schemaType={schemaType} />
 				))}
-				{schema.annotations.map((schemaType) => (
-					<LinkButton key={schemaType.name} schemaType={schemaType} />
-				))}
+				{schema.annotations.map((schemaType) =>
+					schemaType.name === "spoiler" ? (
+						<SpoilerButton key={schemaType.name} schemaType={schemaType} />
+					) : (
+						<LinkButton key={schemaType.name} schemaType={schemaType} />
+					),
+				)}
 			</div>
 			<span aria-hidden className="mx-1 h-5 w-px shrink-0 bg-border-weak" />
 			<div className="flex shrink-0 items-center gap-0.5">
@@ -912,6 +1276,7 @@ function EditorSurface({
 	value,
 	onChange,
 	variant,
+	capabilities,
 	ariaLabel,
 	ariaLabelledBy,
 	required,
@@ -920,17 +1285,22 @@ function EditorSurface({
 	value: PortableTextEditorValue;
 	onChange: (value: PortableTextEditorValue) => void;
 	variant: PortableTextEditorVariant;
+	capabilities: PortableTextEditorCapabilities | undefined;
 	ariaLabel: string;
 	ariaLabelledBy?: string;
 	required: boolean;
 	presentations: ReturnType<typeof useUnitMentionPresentations>;
 }) {
 	const { editor: labels } = useUiMessages();
+	const schemaDefinition = capabilities?.spoilers
+		? spoilerSchemaDefinition
+		: standardSchemaDefinition;
 	return (
 		<EditorProvider initialConfig={{ schemaDefinition, initialValue: value }}>
 			<EventListenerPlugin
 				on={(event) => {
-					if (event.type === "mutation") onChange(normalizePortableText(event.value));
+					if (event.type === "mutation")
+						onChange(normalizePortableTextEditorValue(event.value, capabilities));
 				}}
 			/>
 			<Toolbar variant={variant} />
@@ -956,6 +1326,7 @@ export function PortableTextEditor({
 	className,
 	label,
 	required = false,
+	capabilities,
 }: {
 	value: PortableTextEditorValue;
 	onChange: (value: PortableTextEditorValue) => void;
@@ -964,9 +1335,10 @@ export function PortableTextEditor({
 	className?: string;
 	label?: string;
 	required?: boolean;
+	capabilities?: PortableTextEditorCapabilities;
 }) {
 	const { editor: labels } = useUiMessages();
-	const normalized = normalizePortableText(value);
+	const normalized = normalizePortableTextEditorValue(value, capabilities);
 	const presentations = useUnitMentionPresentations(normalized);
 	const labelId = useId();
 	const accessibleLabel = label ?? ariaLabel ?? labels.richText;
@@ -975,6 +1347,7 @@ export function PortableTextEditor({
 		<EditorSurface
 			ariaLabel={accessibleLabel}
 			ariaLabelledBy={label ? labelId : undefined}
+			capabilities={capabilities}
 			onChange={onChange}
 			presentations={presentations}
 			required={required}

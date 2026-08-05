@@ -81,6 +81,7 @@ vi.mock("@/features/content-languages/hooks/use-form-draft-content-language", ()
 }));
 
 vi.mock("@/features/editor/portable-text-editor", () => ({
+	spoilerPortableTextEditorCapabilities: { spoilers: true },
 	PortableTextEditor: ({ onChange }: { onChange: (value: PortableTextValue) => void }) => (
 		<button onClick={() => onChange(body)} type="button">
 			Enter review body

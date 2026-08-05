@@ -25,6 +25,20 @@ export interface UiMessages {
 		addLink: string;
 		removeLink: string;
 		invalidLink: string;
+		spoiler: string;
+		addSpoiler: string;
+		removeSpoiler: string;
+		showSpoiler: string;
+		showScopedSpoiler: (input: { readonly title: string }) => string;
+		spoilerPreview: string;
+		spoilerScope: string;
+		spoilerScopePlaceholder: string;
+		spoilerRange: string;
+		spoilerRangeSelection: string;
+		spoilerRangeBlocks: string;
+		spoilerRangeBody: string;
+		spoilerLinkConflict: string;
+		spoilerTextOnlyHint: string;
 		undo: string;
 		redo: string;
 		style: string;
@@ -106,6 +120,20 @@ const DefaultMessages = {
 		addLink: "Add link",
 		removeLink: "Remove link",
 		invalidLink: "Enter a supported URL.",
+		spoiler: "Spoiler",
+		addSpoiler: "Mark as spoiler",
+		removeSpoiler: "Remove spoiler",
+		showSpoiler: "Show spoiler",
+		showScopedSpoiler: ({ title }) => `Show ${title} spoiler`,
+		spoilerPreview: "Spoiler content",
+		spoilerScope: "Related Unit (optional)",
+		spoilerScopePlaceholder: "Search Units",
+		spoilerRange: "Apply to",
+		spoilerRangeSelection: "Selected text",
+		spoilerRangeBlocks: "Selected paragraphs",
+		spoilerRangeBody: "Entire body",
+		spoilerLinkConflict: "Linked text cannot also be marked as a spoiler.",
+		spoilerTextOnlyHint: "Only text is marked. Images and embedded items remain visible.",
 		undo: "Undo",
 		redo: "Redo",
 		style: "Text style",

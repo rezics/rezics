@@ -1,5 +1,6 @@
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { koTerminology } from "@rezics/i18n/terminology/ko";
+import { insert } from "native-i18n";
 
 const { forms: realmTerms } = koTerminology.realm;
 const { forms: zoneTerms } = koTerminology.zone;
@@ -23,6 +24,20 @@ export default {
 	addLink: "링크 추가",
 	removeLink: "링크 제거",
 	invalidLink: `지원되는 ${verbatimTerms.url.value}를 입력하세요.`,
+	spoiler: "스포일러",
+	addSpoiler: "스포일러로 표시",
+	removeSpoiler: "스포일러 표시 제거",
+	showSpoiler: "스포일러 보기",
+	showScopedSpoiler: insert("{{title}} 스포일러 보기", { title: String }),
+	spoilerPreview: "스포일러 내용",
+	spoilerScope: "관련 항목(선택 사항)",
+	spoilerScopePlaceholder: "항목 검색",
+	spoilerRange: "적용 범위",
+	spoilerRangeSelection: "선택한 텍스트",
+	spoilerRangeBlocks: "선택한 블록",
+	spoilerRangeBody: "본문 전체",
+	spoilerLinkConflict: "링크 텍스트는 스포일러로 동시에 표시할 수 없습니다.",
+	spoilerTextOnlyHint: "텍스트만 표시되며 이미지와 기타 삽입 콘텐츠는 계속 보입니다.",
 	undo: "실행 취소",
 	redo: "다시 실행",
 	style: "텍스트 스타일",

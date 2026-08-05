@@ -1,5 +1,6 @@
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { esTerminology } from "@rezics/i18n/terminology/es";
+import { insert } from "native-i18n";
 
 const { forms: realmTerms } = esTerminology.realm;
 const { forms: zoneTerms } = esTerminology.zone;
@@ -23,6 +24,21 @@ export default {
 	addLink: "Añadir enlace",
 	removeLink: "Quitar enlace",
 	invalidLink: `Introduce una ${verbatimTerms.url.value} compatible.`,
+	spoiler: "Spoiler",
+	addSpoiler: "Marcar como spoiler",
+	removeSpoiler: "Quitar spoiler",
+	showSpoiler: "Mostrar spoiler",
+	showScopedSpoiler: insert("Mostrar spoiler de «{{title}}»", { title: String }),
+	spoilerPreview: "Contenido oculto",
+	spoilerScope: "Elemento relacionado (opcional)",
+	spoilerScopePlaceholder: "Buscar elementos",
+	spoilerRange: "Aplicar a",
+	spoilerRangeSelection: "Texto seleccionado",
+	spoilerRangeBlocks: "Bloques seleccionados",
+	spoilerRangeBody: "Cuerpo completo",
+	spoilerLinkConflict: "El texto con enlace no puede marcarse también como spoiler.",
+	spoilerTextOnlyHint:
+		"Solo se marca el texto; las imágenes y otros contenidos insertados siguen visibles.",
 	undo: "Deshacer",
 	redo: "Rehacer",
 	style: "Estilo de texto",

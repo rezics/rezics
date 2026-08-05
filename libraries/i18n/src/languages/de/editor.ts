@@ -1,5 +1,6 @@
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { deTerminology } from "@rezics/i18n/terminology/de";
+import { insert } from "native-i18n";
 
 const { forms: realmTerms } = deTerminology.realm;
 const { forms: zoneTerms } = deTerminology.zone;
@@ -23,6 +24,21 @@ export default {
 	addLink: "Link hinzufügen",
 	removeLink: "Link entfernen",
 	invalidLink: `Gib eine unterstützte ${verbatimTerms.url.value} ein.`,
+	spoiler: "Spoiler",
+	addSpoiler: "Als Spoiler markieren",
+	removeSpoiler: "Spoiler-Markierung entfernen",
+	showSpoiler: "Spoiler anzeigen",
+	showScopedSpoiler: insert("Spoiler zu „{{title}}“ anzeigen", { title: String }),
+	spoilerPreview: "Spoiler-Inhalt",
+	spoilerScope: "Zugehöriger Eintrag (optional)",
+	spoilerScopePlaceholder: "Einträge suchen",
+	spoilerRange: "Anwenden auf",
+	spoilerRangeSelection: "Ausgewählten Text",
+	spoilerRangeBlocks: "Ausgewählte Blöcke",
+	spoilerRangeBody: "Gesamten Inhalt",
+	spoilerLinkConflict: "Verlinkter Text kann nicht zugleich als Spoiler markiert werden.",
+	spoilerTextOnlyHint:
+		"Nur Text wird markiert; Bilder und andere eingebettete Inhalte bleiben sichtbar.",
 	undo: "Rückgängig",
 	redo: "Wiederholen",
 	style: "Textstil",

@@ -9,15 +9,96 @@ import {
 	normalizePortableText,
 	normalizePortableTextUrl,
 	type PortableTextImageBlock,
+	type PortableTextSpoilerDefinition,
 	type PortableTextValueUnitMention,
 	type PortableTextValueBlock,
 } from "@rezics/portable-text";
+import {
+	createContext,
+	type ReactNode,
+	useContext,
+	useEffect,
+	useId,
+	useRef,
+	useState,
+} from "react";
 
 import { cn } from "../utils";
 import { UnitMentionBadge, useUnitMentionPresentations } from "./unit-mention";
-import type { UnitMentionPresentation } from "./ui-provider";
+import { type UnitMentionPresentation, useUiMessages } from "./ui-provider";
 
 export type PortableTextContentVariant = "compact" | "article" | "preview";
+
+const SpoilerPresentationsContext = createContext<ReadonlyMap<string, UnitMentionPresentation>>(
+	new Map(),
+);
+
+function SpoilerMark({
+	children,
+	value,
+}: {
+	children: ReactNode;
+	value?: PortableTextSpoilerDefinition;
+}) {
+	const { editor: labels } = useUiMessages();
+	const presentations = useContext(SpoilerPresentationsContext);
+	const [revealed, setRevealed] = useState(false);
+	const contentId = useId();
+	const contentRef = useRef<HTMLSpanElement>(null);
+	const scopedTitle = value?.scopeUnitId
+		? presentations.get(value.scopeUnitId)?.label
+		: undefined;
+	const revealLabel = scopedTitle
+		? labels.showScopedSpoiler({ title: scopedTitle })
+		: labels.showSpoiler;
+
+	useEffect(() => {
+		if (revealed) contentRef.current?.focus();
+	}, [revealed]);
+
+	return (
+		<span
+			className="inline"
+			data-spoiler-scope-unit-id={value?.scopeUnitId}
+			data-spoiler-state={revealed ? "revealed" : "concealed"}
+		>
+			{revealed ? null : (
+				<button
+					aria-controls={contentId}
+					aria-label={revealLabel}
+					className="mx-0.5 inline-flex min-h-6 max-w-full cursor-pointer select-none items-center rounded-md bg-foreground px-2 py-0.5 align-baseline font-medium text-background text-xs leading-5 shadow-xs outline-none transition-colors hover:bg-foreground/88 focus-visible:ring-[3px] focus-visible:ring-ring/40 motion-reduce:transition-none"
+					onClick={() => setRevealed(true)}
+					type="button"
+				>
+					{revealLabel}
+				</button>
+			)}
+			<span
+				className="outline-none focus-visible:rounded-sm focus-visible:ring-[3px] focus-visible:ring-ring/40"
+				hidden={!revealed}
+				id={contentId}
+				ref={contentRef}
+				tabIndex={-1}
+			>
+				{children}
+			</span>
+		</span>
+	);
+}
+
+function PreviewSpoilerMark() {
+	const { editor: labels } = useUiMessages();
+	return (
+		<span
+			aria-label={labels.spoilerPreview}
+			className="mx-0.5 inline-flex min-h-5 min-w-20 select-none items-center rounded bg-foreground px-2 align-baseline text-background text-xs"
+			data-spoiler-state="preview"
+			role="img"
+		>
+			{labels.spoilerPreview}
+		</span>
+	);
+}
 
 const components = {
 	block: {
@@ -49,6 +130,7 @@ const components = {
 				</a>
 			);
 		},
+		spoiler: SpoilerMark,
 	},
 	types: {
 		image: ({ value }) => (
@@ -67,8 +149,11 @@ const previewComponents = {
 	marks: {
 		...components.marks,
 		link: ({ children }) => <>{children}</>,
+		spoiler: PreviewSpoilerMark,
 	},
-} satisfies PortableTextComponents<PortableTextValueBlock | PortableTextImageBlock>;
+} satisfies PortableTextComponents<
+	PortableTextValueBlock | PortableTextImageBlock | PortableTextValueUnitMention
+>;
 
 const variantClasses: Record<PortableTextContentVariant, string> = {
 	compact:
@@ -112,12 +197,14 @@ export function PortableTextContent({
 	};
 
 	return (
-		<div className={cn(variantClasses[variant], className)} data-portable-text={variant}>
-			<PortableText
-				components={resolvedComponents}
-				onMissingComponent={false}
-				value={normalized}
-			/>
-		</div>
+		<SpoilerPresentationsContext.Provider value={mentions}>
+			<div className={cn(variantClasses[variant], className)} data-portable-text={variant}>
+				<PortableText
+					components={resolvedComponents}
+					onMissingComponent={false}
+					value={normalized}
+				/>
+			</div>
+		</SpoilerPresentationsContext.Provider>
 	);
 }

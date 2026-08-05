@@ -37,6 +37,7 @@ import type { FeedActionPolicy } from "@/features/content-feed/model/feed-action
 import {
 	PortableTextEditor,
 	preloadPortableTextEditor,
+	spoilerPortableTextEditorCapabilities,
 } from "@/features/editor/portable-text-editor";
 import { RealmRulesAcknowledgementPrompt } from "@/features/realms/components/realm-rules-acknowledgement-prompt";
 import { useRealmRulesAcknowledgement } from "@/features/realms/hooks/use-realm-rules-acknowledgement";
@@ -396,6 +397,7 @@ function ReplyPostNode({
 								<FieldGroup>
 									<PortableTextEditor
 										ariaLabel={t.posts.replyBody}
+										capabilities={spoilerPortableTextEditorCapabilities}
 										onChange={setBody}
 										value={body}
 									/>
@@ -608,6 +610,7 @@ function ReplyPostComposer({
 					<FieldGroup>
 						<PortableTextEditor
 							ariaLabel={t.posts.replyBody}
+							capabilities={spoilerPortableTextEditorCapabilities}
 							key={editorKey}
 							onChange={setBody}
 							value={body}

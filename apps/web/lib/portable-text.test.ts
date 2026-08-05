@@ -1,5 +1,6 @@
 import {
 	collectPortableTextUnitMentionIds,
+	collectPortableTextPresentationUnitIds,
 	isPortableTextValueBlock,
 	normalizePortableText,
 	normalizePortableTextUrl,
@@ -56,6 +57,92 @@ describe("Portable Text boundaries", () => {
 		];
 
 		expect(normalizePortableText(document)).toEqual(document);
+	});
+
+	it("keeps spoiler annotations without changing their searchable span text", () => {
+		const document: PortableTextValue = [
+			{
+				_key: "block-1",
+				_type: "block",
+				children: [
+					{
+						_key: "span-1",
+						_type: "span",
+						text: "The searchable spoiler text",
+						marks: ["strong", "spoiler-1"],
+					},
+				],
+				markDefs: [
+					{
+						_key: "spoiler-1",
+						_type: "spoiler",
+						scopeUnitId: "019f73cb-926e-7e50-9a7f-da67701accb3",
+					},
+				],
+				style: "normal",
+			},
+		];
+
+		const normalized = normalizePortableText(document);
+		expect(normalized).toEqual(document);
+		expect(
+			normalized.flatMap((block) =>
+				isPortableTextValueBlock(block)
+					? block.children.flatMap((child) =>
+							child._type === "span" ? [child.text] : [],
+						)
+					: [],
+			),
+		).toEqual(["The searchable spoiler text"]);
+		expect(collectPortableTextPresentationUnitIds(document)).toEqual([
+			"019f73cb-926e-7e50-9a7f-da67701accb3",
+		]);
+	});
+
+	it("drops malformed spoiler metadata and link overlap without deleting text", () => {
+		expect(
+			normalizePortableText([
+				{
+					_key: "block-1",
+					_type: "block",
+					children: [
+						{
+							_key: "span-1",
+							_type: "span",
+							text: "Keep me",
+							marks: ["link-1", "spoiler-1", "invalid-spoiler"],
+						},
+					],
+					markDefs: [
+						{ _key: "link-1", _type: "link", href: "/safe" },
+						{ _key: "spoiler-1", _type: "spoiler" },
+						{
+							_key: "invalid-spoiler",
+							_type: "spoiler",
+							scopeUnitId: "not-a-unit-id",
+						},
+					],
+				},
+			]),
+		).toEqual([
+			{
+				_key: "block-1",
+				_type: "block",
+				children: [
+					{
+						_key: "span-1",
+						_type: "span",
+						text: "Keep me",
+						marks: ["spoiler-1"],
+					},
+				],
+				markDefs: [
+					{ _key: "link-1", _type: "link", href: "/safe" },
+					{ _key: "spoiler-1", _type: "spoiler" },
+				],
+				style: "normal",
+			},
+		]);
 	});
 
 	it("keeps only identity in generic Unit mentions and collects distinct identities", () => {

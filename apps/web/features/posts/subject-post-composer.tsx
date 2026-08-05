@@ -22,6 +22,7 @@ import { portableTextDraftContentLanguageSample } from "@/features/content-langu
 import {
 	PortableTextEditor,
 	preloadPortableTextEditor,
+	spoilerPortableTextEditorCapabilities,
 } from "@/features/editor/portable-text-editor";
 import { RealmRulesAcknowledgementPrompt } from "@/features/realms/components/realm-rules-acknowledgement-prompt";
 import { useRealmRulesAcknowledgement } from "@/features/realms/hooks/use-realm-rules-acknowledgement";
@@ -143,6 +144,7 @@ export function SubjectPostComposer({
 							</FieldDescription>
 						</Field>
 						<PortableTextEditor
+							capabilities={spoilerPortableTextEditorCapabilities}
 							label={t.ui.body}
 							onChange={setBody}
 							required

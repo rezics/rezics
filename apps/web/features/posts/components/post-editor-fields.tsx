@@ -3,7 +3,10 @@
 import type { PortableTextValue } from "@rezics/portable-text";
 import { Button, Spinner } from "@rezics/ui";
 
-import { PortableTextEditor } from "@/features/editor/portable-text-editor";
+import {
+	PortableTextEditor,
+	spoilerPortableTextEditorCapabilities,
+} from "@/features/editor/portable-text-editor";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 
@@ -23,7 +26,13 @@ export function PostEditorFields({
 	const { t } = useTranslation(["posts", "ui"]);
 	return (
 		<>
-			<PortableTextEditor label={t.ui.body} onChange={onBodyChange} required value={body} />
+			<PortableTextEditor
+				capabilities={spoilerPortableTextEditorCapabilities}
+				label={t.ui.body}
+				onChange={onBodyChange}
+				required
+				value={body}
+			/>
 			<RequestFailure error={error} />
 			<Button
 				className="w-fit"
