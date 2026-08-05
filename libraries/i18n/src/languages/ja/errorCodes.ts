@@ -178,6 +178,8 @@ export default {
 		"このタグ選定は他の場所で変更されました。最新の順序を読み込みました。もう一度お試しください。",
 	TagNotFound: "このタグは見つかりませんでした。",
 	UnitSourceLinkNotFound: "この作品の出典リンクは見つかりませんでした。",
+	UnitReferenceCurationChanged:
+		"参照情報の選定が別の場所で変更されました。最新の順序を読み込んだため、もう一度お試しください。",
 	UnitVariantKindMismatch:
 		"バリアントとそのメインは同じサポートされているユニットタイプを使用する必要があります。",
 	UnitVariantTargetIsVariant: "バリアントは直接メインを指す必要があります。",

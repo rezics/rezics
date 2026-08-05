@@ -7,6 +7,7 @@ import {
 	ListEntityEntriesQuery,
 	UnitSourceLinkParams,
 	UnitSourceLinkUnitParams,
+	UpdateUnitReferenceCurationBody,
 	UpdateUnitTagCurationBody,
 } from "./schema";
 
@@ -38,7 +39,7 @@ describe("Unit resource API schemas", () => {
 			sourceEntityUnitId: "018ff2b7-7c00-7000-8000-000000000001",
 		};
 		expect(Value.Check(AddUnitLinkBody, sourceLink)).toBe(true);
-		expect(Value.Check(AddUnitLinkBody, { ...sourceLink, position: "a0" })).toBe(true);
+		expect(Value.Check(AddUnitLinkBody, { ...sourceLink, position: "a0" })).toBe(false);
 		expect(Value.Check(AddUnitLinkBody, { ...sourceLink, role: "official" })).toBe(false);
 		expect(Value.Check(AddUnitLinkBody, { ...sourceLink, fallbackText: "Official page" })).toBe(
 			false,
@@ -77,7 +78,7 @@ describe("Unit resource API schemas", () => {
 		).toBe(false);
 	});
 
-	it("requires a Unit-scoped link identifier for source-link removal", () => {
+	it("requires a Unit-scoped link identifier for source-link voting and curation", () => {
 		for (const type of UnitKindValues)
 			expect(
 				Value.Check(UnitSourceLinkParams, {
@@ -91,6 +92,30 @@ describe("Unit resource API schemas", () => {
 				type: "profile",
 				unitId: "018ff2b7-7c00-7000-8000-000000000001",
 				linkId: "not-a-unit-link-id",
+			}),
+		).toBe(false);
+	});
+
+	it("requires a position exactly when a Unit reference is pinned", () => {
+		expect(
+			Value.Check(UpdateUnitReferenceCurationBody, {
+				baseVersion: 0,
+				pinned: true,
+				position: "a0",
+			}),
+		).toBe(true);
+		expect(
+			Value.Check(UpdateUnitReferenceCurationBody, {
+				baseVersion: 2,
+				pinned: false,
+				position: null,
+			}),
+		).toBe(true);
+		expect(
+			Value.Check(UpdateUnitReferenceCurationBody, {
+				baseVersion: 0,
+				pinned: true,
+				position: null,
 			}),
 		).toBe(false);
 	});

@@ -35,6 +35,8 @@ import {
 	ResourceVisibilityValues,
 	toEnumValues,
 	UnitContentLicenseStatusValues,
+	type UnitReferenceCurationKind,
+	UnitReferenceCurationKindValues,
 	type UnitKind,
 	UnitKindValues,
 	UnitStatusValues,
@@ -244,22 +246,27 @@ export const unitAlias = pgTable(
 		createdByProfileId: uuid().references((): AnyPgColumn => profile.id, {
 			onDelete: "set null",
 		}),
-		deletedAt: createTimestampMsColumn(),
+		pinned: boolean().default(false).notNull(),
+		position: fractionalIndexPosition(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		uniqueIndex("unit_alias_unit_language_normalized_key")
+		unique("unit_alias_unit_language_normalized_key")
 			.on(table.unitId, table.language, table.normalizedTerm)
-			.where(sql`${table.deletedAt} is null and ${table.language} is not null`),
-		uniqueIndex("unit_alias_unit_unscoped_normalized_key")
-			.on(table.unitId, table.normalizedTerm)
-			.where(sql`${table.deletedAt} is null and ${table.language} is null`),
+			.nullsNotDistinct(),
 		index("unit_alias_normalized_idx").on(table.normalizedTerm),
-		index(CanonicalPgroongaIndexes[2])
-			.using("pgroonga", table.term)
-			.where(sql`${table.deletedAt} is null`),
+		index(CanonicalPgroongaIndexes[2]).using("pgroonga", table.term),
 		index("unit_alias_created_by_idx").on(table.createdByProfileId),
+		index("unit_alias_unit_position_idx").on(
+			table.unitId,
+			table.pinned,
+			table.position,
+			table.id,
+		),
+		uniqueIndex("unit_alias_unit_pinned_position_unique")
+			.on(table.unitId, table.position)
+			.where(sql`${table.pinned}`),
 		check(
 			"unit_alias_term_not_blank",
 			sql`btrim(${table.term}) <> '' and btrim(${table.normalizedTerm}) <> ''`,
@@ -269,8 +276,9 @@ export const unitAlias = pgTable(
 			sql`${table.language} is null or ${inArray(table.language, ContentLanguageValues)}`,
 		),
 		check(
-			"unit_alias_deleted_at_check",
-			sql`${table.deletedAt} is null or ${table.deletedAt} >= ${table.createdAt}`,
+			"unit_alias_pinned_position_check",
+			sql`(${table.pinned} and ${table.position} is not null)
+				or (not ${table.pinned} and ${table.position} is null)`,
 		),
 	],
 );
@@ -284,7 +292,7 @@ export const unitAliasVote = pgTable(
 		profileId: uuid()
 			.notNull()
 			.references((): AnyPgColumn => profile.id, { onDelete: "cascade" }),
-		value: integer().notNull(),
+		value: integer().$type<-1 | 1>().notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
@@ -378,9 +386,11 @@ export const unitSourceLink = pgTable(
 		url: text().notNull(),
 		normalizedUrl: text().notNull(),
 		normalizedUrlHash: text().notNull(),
-		position: fractionalIndexPosition()
-			.default(sql`'a0'::text`)
-			.notNull(),
+		createdByProfileId: uuid().references((): AnyPgColumn => profile.id, {
+			onDelete: "set null",
+		}),
+		pinned: boolean().default(false).notNull(),
+		position: fractionalIndexPosition(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
@@ -390,12 +400,67 @@ export const unitSourceLink = pgTable(
 			table.sourceEntityId,
 			table.normalizedUrlHash,
 		),
-		index("unit_source_link_unit_position_idx").on(table.unitId, table.position, table.id),
+		index("unit_source_link_unit_position_idx").on(
+			table.unitId,
+			table.pinned,
+			table.position,
+			table.id,
+		),
+		uniqueIndex("unit_source_link_unit_pinned_position_unique")
+			.on(table.unitId, table.position)
+			.where(sql`${table.pinned}`),
 		index("unit_source_link_source_entity_idx").on(table.sourceEntityId),
+		index("unit_source_link_created_by_idx").on(table.createdByProfileId),
 		check(
 			"unit_source_link_url_check",
 			sql`${table.url} ~ '^https?://' and ${table.normalizedUrl} ~ '^https?://'`,
 		),
 		check("unit_source_link_hash_check", sql`${table.normalizedUrlHash} ~ '^[0-9a-f]{64}$'`),
+		check(
+			"unit_source_link_pinned_position_check",
+			sql`(${table.pinned} and ${table.position} is not null)
+				or (not ${table.pinned} and ${table.position} is null)`,
+		),
+	],
+);
+
+export const unitSourceLinkVote = pgTable(
+	"unit_source_link_vote",
+	{
+		linkId: uuid()
+			.notNull()
+			.references(() => unitSourceLink.id, { onDelete: "cascade" }),
+		profileId: uuid()
+			.notNull()
+			.references((): AnyPgColumn => profile.id, { onDelete: "cascade" }),
+		value: integer().$type<-1 | 1>().notNull(),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.linkId, table.profileId] }),
+		index("unit_source_link_vote_profile_idx").on(table.profileId),
+		check("unit_source_link_vote_value_check", sql`${table.value} in (-1, 1)`),
+	],
+);
+
+/** Optimistic-concurrency head for ordering each Unit reference candidate list. */
+export const unitReferenceCurationHead = pgTable(
+	"unit_reference_curation_head",
+	{
+		unitId: uuid()
+			.notNull()
+			.references(() => unit.id, { onDelete: "cascade" }),
+		kind: text().$type<UnitReferenceCurationKind>().notNull(),
+		version: integer().default(0).notNull(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.unitId, table.kind] }),
+		check(
+			"unit_reference_curation_head_kind_check",
+			inArray(table.kind, UnitReferenceCurationKindValues),
+		),
+		check("unit_reference_curation_head_version_check", sql`${table.version} >= 0`),
 	],
 );

@@ -8,7 +8,6 @@ import {
 	getApiUnitByUnitIdAssociationProposalsQueryKey,
 	useDeleteApiUnitByUnitIdAssociationProposalsByProposalId,
 	useDeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId,
-	useDeleteApiUnitsByTypeByUnitIdLinksByLinkId,
 	useDeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationId,
 	useGetApiUnitByUnitIdAssociationProposals,
 	usePatchApiUnitsByTypeByUnitIdVariantContext,
@@ -16,7 +15,6 @@ import {
 	usePostApiUnitByUnitIdAssociationProposalsByProposalIdDecline,
 	usePostApiUnitByUnitIdAssociationProposalsRequests,
 	usePostApiUnitsByTypeByUnitIdCreditAttributions,
-	usePostApiUnitsByTypeByUnitIdLinks,
 	usePostApiUnitsByTypeByUnitIdSubjectAssociations,
 	usePostApiUnitsByTypeByUnitIdVariantContextPromote,
 } from "@rezics/openapi-tanstack-query";
@@ -48,7 +46,6 @@ import {
 	Field,
 	FieldLabel,
 	IdentityAvatar,
-	Input,
 	NativeSelect,
 	NativeSelectOption,
 	QueryFailure,
@@ -60,16 +57,7 @@ import {
 	useEntitySearch,
 	useUnitMentionResolver,
 } from "@rezics/ui";
-import {
-	ArrowUpRight,
-	ExternalLink,
-	GitBranch,
-	Link2,
-	Plus,
-	Trash2,
-	UserRound,
-	UsersRound,
-} from "lucide-react";
+import { ArrowUpRight, GitBranch, Plus, Trash2, UserRound, UsersRound } from "lucide-react";
 import { type FormEvent, type ReactNode, useEffect, useMemo, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
@@ -528,104 +516,6 @@ function AddSubjectDialog({
 	);
 }
 
-function AddSourceLinkDialog({
-	open,
-	onOpenChange,
-	type,
-	unitId,
-}: {
-	readonly open: boolean;
-	readonly onOpenChange: (open: boolean) => void;
-	readonly type: WorkUnitType;
-	readonly unitId: string;
-}) {
-	const { t } = useTranslation(["ui", "units"]);
-	const queryClient = useQueryClient();
-	const [source, setSource] = useState<SelectedEntity>();
-	const create = usePostApiUnitsByTypeByUnitIdLinks();
-
-	async function submit(event: FormEvent<HTMLFormElement>) {
-		event.preventDefault();
-		if (!source || create.isPending) return;
-		const form = new FormData(event.currentTarget);
-		const url = String(form.get("url") ?? "").trim();
-		if (!url) return;
-		try {
-			await create.mutateAsync({
-				path: { type, unitId },
-				body: { sourceEntityUnitId: source.id, url },
-			});
-			await invalidateUnitDetail(queryClient, type, unitId);
-			setSource(undefined);
-			onOpenChange(false);
-			toast.create({
-				title: t.units.relationshipManagement.linkAdded,
-				type: "success",
-			});
-		} catch {
-			// The typed mutation state renders the localized API error below.
-		}
-	}
-
-	return (
-		<Dialog
-			onOpenChange={({ open: nextOpen }) => {
-				if (!create.isPending) onOpenChange(nextOpen);
-			}}
-			open={open}
-		>
-			<DialogContent showCloseButton={false} size="sm">
-				<DialogHeader
-					description={t.units.relationshipManagement.addLinkDescription}
-					title={t.units.relationshipManagement.addLink}
-				/>
-				<form
-					className="flex min-h-0 flex-1 flex-col"
-					onSubmit={(event) => void submit(event)}
-				>
-					<DialogBody className="grid gap-4">
-						<Field required>
-							<FieldLabel>{t.units.relationshipManagement.sourceEntity}</FieldLabel>
-							<EntityPicker
-								ariaLabel={t.units.relationshipManagement.sourceEntity}
-								index="entities"
-								onChange={setSource}
-								onClear={() => setSource(undefined)}
-								placeholder={t.ui.pickerPlaceholders.entity}
-								searchOnOpen
-								value={source}
-							/>
-						</Field>
-						<Field required>
-							<FieldLabel>{t.units.editor.linkUrl}</FieldLabel>
-							<Input
-								name="url"
-								placeholder={t.units.relationshipManagement.urlPlaceholder}
-								required
-								type="url"
-							/>
-						</Field>
-						<RequestFailure error={create.error} fallback={t.ui.retryLater} />
-					</DialogBody>
-					<DialogFooter>
-						<Button
-							disabled={create.isPending}
-							onClick={() => onOpenChange(false)}
-							type="button"
-							variant="outline"
-						>
-							{t.units.relationshipManagement.cancel}
-						</Button>
-						<Button disabled={!source} isLoading={create.isPending} type="submit">
-							{t.units.relationshipManagement.addLink}
-						</Button>
-					</DialogFooter>
-				</form>
-			</DialogContent>
-		</Dialog>
-	);
-}
-
 function AssociationRequestConfirmation({
 	onCancel,
 	onRequested,
@@ -1047,121 +937,6 @@ function SubjectSection({
 	);
 }
 
-function SourceLinksSection({
-	onAdd,
-	type,
-	unit,
-}: {
-	readonly onAdd: () => void;
-	readonly type: WorkUnitType;
-	readonly unit: Unit;
-}) {
-	const { t } = useTranslation(["ui", "units"]);
-	const queryClient = useQueryClient();
-	const remove = useDeleteApiUnitsByTypeByUnitIdLinksByLinkId();
-	const presentations = useResolvedUnitPresentations(
-		unit.links.map((link) => link.sourceEntityId),
-	);
-
-	return (
-		<RelationshipSection
-			action={
-				<Button onClick={onAdd} size="sm" type="button" variant="outline">
-					<Plus aria-hidden className="size-4" />
-					{t.units.relationshipManagement.addLink}
-				</Button>
-			}
-			count={unit.links.length}
-			description={t.units.relationshipManagement.linksDescription}
-			icon={Link2}
-			title={t.units.relationshipManagement.links}
-		>
-			{unit.links.length ? (
-				<div>
-					{unit.links.map((link) => {
-						const presentation = presentations.get(link.sourceEntityId);
-						const title = presentationFallback(
-							presentation,
-							t.units.relationshipManagement.unavailableUnit,
-						);
-						return (
-							<RelationshipRow
-								actions={
-									<>
-										<Button
-											aria-label={t.units.relationshipManagement.openLinkLabel(
-												{
-													name: title,
-												},
-											)}
-											asChild
-											size="icon-md"
-											variant="quiet"
-										>
-											<a href={link.url} rel="noreferrer" target="_blank">
-												<ExternalLink aria-hidden className="size-4" />
-											</a>
-										</Button>
-										<RemoveRelationshipDialog
-											description={t.units.relationshipManagement.removeLinkDescription(
-												{
-													name: title,
-												},
-											)}
-											label={t.units.relationshipManagement.removeLinkLabel({
-												name: title,
-											})}
-											onRemove={async () => {
-												try {
-													await remove.mutateAsync({
-														path: {
-															type,
-															unitId: unit.id,
-															linkId: link.id,
-														},
-													});
-													await invalidateUnitDetail(
-														queryClient,
-														type,
-														unit.id,
-													);
-													toast.create({
-														title: t.units.relationshipManagement
-															.linkRemoved,
-														type: "success",
-													});
-												} catch {
-													// The typed mutation state renders below.
-												}
-											}}
-											pending={remove.isPending}
-											title={t.units.relationshipManagement.removeLinkTitle}
-										/>
-									</>
-								}
-								avatar={presentation?.avatar}
-								description={
-									<span className="max-w-full truncate" title={link.url}>
-										{link.url}
-									</span>
-								}
-								key={link.id}
-								title={title}
-							/>
-						);
-					})}
-				</div>
-			) : (
-				<EmptyRelationshipState
-					description={t.units.relationshipManagement.noLinksDescription}
-					title={t.units.relationshipManagement.noLinks}
-				/>
-			)}
-			<RequestFailure error={remove.error} fallback={t.ui.retryLater} />
-		</RelationshipSection>
-	);
-}
-
 function MainUnitDialog({
 	currentMainUnitId,
 	open,
@@ -1442,7 +1217,6 @@ export function UnitRelationshipManager({
 	const queryClient = useQueryClient();
 	const [creditOpen, setCreditOpen] = useState(false);
 	const [subjectOpen, setSubjectOpen] = useState(false);
-	const [linkOpen, setLinkOpen] = useState(false);
 	const [mainOpen, setMainOpen] = useState(false);
 	const [pendingRequest, setPendingRequest] = useState<PendingAssociationRequest>();
 	const creditQueryOptions = {
@@ -1485,7 +1259,6 @@ export function UnitRelationshipManager({
 				type={type}
 				unit={unit}
 			/>
-			<SourceLinksSection onAdd={() => setLinkOpen(true)} type={type} unit={unit} />
 			{isVariantUnitType(type) ? (
 				<VariantSection onChangeMain={() => setMainOpen(true)} type={type} unit={unit} />
 			) : null}
@@ -1501,12 +1274,6 @@ export function UnitRelationshipManager({
 				onOpenChange={setSubjectOpen}
 				onRestricted={setPendingRequest}
 				open={subjectOpen}
-				type={type}
-				unitId={unit.id}
-			/>
-			<AddSourceLinkDialog
-				onOpenChange={setLinkOpen}
-				open={linkOpen}
 				type={type}
 				unitId={unit.id}
 			/>

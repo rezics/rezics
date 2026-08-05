@@ -76,6 +76,9 @@ import {
 	unitFollow,
 	unitFollowNotificationPreference,
 	unitSourceLink,
+	unitSourceLinkVote,
+	unitSourceLinkVoteStat,
+	unitReferenceCurationHead,
 	unitOwnership,
 	unitOwnershipClaim,
 	unitOwnershipClaimResolution,
@@ -129,7 +132,7 @@ describe("database schema contracts", () => {
 				index_flags_mapping: expect.stringMatching(/^'.*"LARGE".*'$/),
 			});
 		}
-		expect(indexes[2]?.config.where).toBeDefined();
+		expect(indexes[2]?.config.where).toBeUndefined();
 	});
 
 	it("keeps Book and Media release statuses required and database constrained", () => {
@@ -344,6 +347,7 @@ describe("database schema contracts", () => {
 		);
 		expect(UnitPermissionValues).toContain("unit.association.manage");
 		expect(UnitPermissionValues).toContain("unit.tag-curation.manage");
+		expect(UnitPermissionValues).toContain("unit.reference-curation.manage");
 		expect(UnitPermissionValues).toEqual(
 			expect.arrayContaining([
 				"unit.status.update",
@@ -501,7 +505,19 @@ describe("database schema contracts", () => {
 		);
 	});
 
-	it("stores source links without arbitrary presentation or type metadata", () => {
+	it("stores immutable, curated Alias voting candidates", () => {
+		const alias = getTableConfig(unitAlias);
+		expect(alias.columns.map((column) => column.name)).toEqual(
+			expect.arrayContaining(["created_by_profile_id", "pinned", "position"]),
+		);
+		expect(alias.columns.map((column) => column.name)).not.toContain("deleted_at");
+		expect(alias.uniqueConstraints.map((constraint) => constraint.name)).toContain(
+			"unit_alias_unit_language_normalized_key",
+		);
+		expect(alias.checks.map(({ name }) => name)).toContain("unit_alias_pinned_position_check");
+	});
+
+	it("stores immutable, curated source-link voting candidates", () => {
 		const link = getTableConfig(unitSourceLink);
 		expect(link.columns.map((column) => column.name)).toEqual(
 			expect.arrayContaining([
@@ -510,12 +526,20 @@ describe("database schema contracts", () => {
 				"url",
 				"normalized_url",
 				"normalized_url_hash",
+				"created_by_profile_id",
+				"pinned",
 				"position",
 			]),
 		);
 		expect(link.columns.map((column) => column.name)).not.toContain("role");
 		expect(link.columns.map((column) => column.name)).not.toContain("label");
+		expect(link.columns.map((column) => column.name)).not.toContain("deleted_at");
 		expect(link.checks.map(({ name }) => name)).not.toContain("unit_link_role_not_blank");
+		expect(link.checks.map(({ name }) => name)).toContain(
+			"unit_source_link_pinned_position_check",
+		);
+		expect(getTableConfig(unitSourceLinkVote).primaryKeys[0]?.columns).toHaveLength(2);
+		expect(getTableConfig(unitReferenceCurationHead).primaryKeys[0]?.columns).toHaveLength(2);
 	});
 
 	it("centralizes governance contracts and Post-identity note bindings", () => {
@@ -940,6 +964,7 @@ describe("database schema contracts", () => {
 		for (const table of [
 			scoreStat,
 			unitAliasVoteStat,
+			unitSourceLinkVoteStat,
 			unitTagVoteStat,
 			realmTagVoteStat,
 			unitReactionStat,
@@ -949,6 +974,7 @@ describe("database schema contracts", () => {
 		}
 		expect(scoreStat.totalCount.getSQLType()).toBe("bigint");
 		expect(unitAliasVoteStat.voteCount.getSQLType()).toBe("bigint");
+		expect(unitSourceLinkVoteStat.voteCount.getSQLType()).toBe("bigint");
 		expect(recommendationUnitStat.impressions.getSQLType()).toBe("bigint");
 		expect(recommendationMetricDaily.impressions.getSQLType()).toBe("bigint");
 		expect(recommendationSignalKind.enumValues).toEqual(

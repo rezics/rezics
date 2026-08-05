@@ -31,6 +31,7 @@ import { LocalizedPortableTextContent } from "@/features/content-language-displa
 import { LocalizedText } from "@/features/content-language-display/chinese-content-display-context";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { isVariantUnitType } from "./unit-types";
+import { UnitReferenceCandidates } from "./components/unit-reference-candidates";
 
 const Icons = {
 	book: BookOpen,
@@ -248,9 +249,13 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 				aria-label={t.units.detail.sections}
 			>
 				{(timedMedia
-					? [[t.units.detail.information, "#overview"]]
+					? [
+							[t.units.detail.information, "#overview"],
+							...(session ? [[t.units.references.title, "#references"]] : []),
+						]
 					: [
 							[t.units.detail.information, "#overview"],
+							...(session ? [[t.units.references.title, "#references"]] : []),
 							[t.units.content.title, "#contents"],
 							[t.posts.replies, "#replies"],
 							[t.engagement.reviews, "#reviews"],
@@ -405,7 +410,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 											key={link.id}
 											className="break-all text-link hover:text-link-hover hover:underline"
 											href={link.url}
-											rel="noreferrer"
+											rel="ugc nofollow noreferrer"
 											target="_blank"
 										>
 											{link.url}
@@ -455,6 +460,13 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 					)}
 				</aside>
 			</div>
+			{session ? (
+				<UnitReferenceCandidates
+					canCurate={item.capabilities.canCurateReferences}
+					type={type}
+					unitId={item.id}
+				/>
+			) : null}
 			{isVariantUnitType(type) ? (
 				<DetailSection title={t.feed.relatedWorks}>
 					<UnitShelf type={type} seedUnitId={item.id} />

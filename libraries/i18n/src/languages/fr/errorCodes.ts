@@ -196,6 +196,8 @@ export default {
 		"Cette sélection d’étiquettes a été modifiée ailleurs. Le dernier ordre a été chargé ; réessayez.",
 	TagNotFound: "Cette étiquette est introuvable.",
 	UnitSourceLinkNotFound: "Ce lien source de l’œuvre est introuvable.",
+	UnitReferenceCurationChanged:
+		"La sélection des références a été modifiée ailleurs. Le dernier ordre a été chargé ; veuillez réessayer.",
 	UnitVariantKindMismatch:
 		"Une variante et son élément principal doivent utiliser le même type de Unit pris en charge.",
 	UnitVariantTargetIsVariant: "Une variante doit pointer directement vers un élément principal.",

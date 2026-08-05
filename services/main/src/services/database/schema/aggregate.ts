@@ -14,7 +14,7 @@ import {
 
 import { pgTable } from "./base";
 import { collection } from "./collection";
-import { unitAlias } from "./unit";
+import { unitAlias, unitSourceLink } from "./unit";
 import { createTimestampMsColumn, createUpdatedAtColumn, createUuidv7PrimaryKey } from "./columns";
 import { conversation, message } from "./communication";
 import { pollOption } from "./poll";
@@ -83,6 +83,25 @@ export const unitAliasVoteStat = pgTable(
 	(table) => [
 		check("unit_alias_vote_stat_count_check", sql`${table.voteCount} >= 0`),
 		check("unit_alias_vote_stat_score_check", sql`abs(${table.score}) <= ${table.voteCount}`),
+	],
+);
+
+export const unitSourceLinkVoteStat = pgTable(
+	"unit_source_link_vote_stat",
+	{
+		linkId: uuid()
+			.primaryKey()
+			.references(() => unitSourceLink.id, { onDelete: "cascade" }),
+		score: bigint({ mode: "bigint" }).default(0n).notNull(),
+		voteCount: aggregateCount(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		check("unit_source_link_vote_stat_count_check", sql`${table.voteCount} >= 0`),
+		check(
+			"unit_source_link_vote_stat_score_check",
+			sql`abs(${table.score}) <= ${table.voteCount}`,
+		),
 	],
 );
 

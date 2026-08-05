@@ -27,6 +27,7 @@ import { WorkPolicy } from "../performance/policy";
 import {
 	type CreditAttributionRole,
 	isCreditAttributionRoleForUnitKind,
+	SourceLinkVisibilityScoreThreshold,
 	type WorkReleaseStatus,
 } from "../database/schema/contract-values";
 import { ContentStructureSnapshotSchema } from "../content-structure/contracts";
@@ -61,6 +62,8 @@ import {
 	unitOwnership,
 	subjectAssociation,
 	unitSourceLink,
+	unitSourceLinkVote,
+	unitSourceLinkVoteStat,
 	unitLocalization,
 	unitProgress,
 	unitTag,
@@ -111,6 +114,7 @@ import {
 } from "./attribution-authorization";
 import { wilsonLowerBoundSql } from "../tags/ranking";
 import { getPendingUnitOwnershipClaim } from "../ownership-claims/service";
+import { unitScope } from "../authorization/unit/scope";
 
 export type VariantUnitKind = "book" | "software" | "media";
 export type WorkUnitKind = VariantUnitKind | "series";
@@ -488,10 +492,48 @@ export async function getUnit(
 		contextPost: contextPosts.get(association.id) ?? null,
 	}));
 	const links = await database
-		.select()
+		.select({
+			id: unitSourceLink.id,
+			unitId: unitSourceLink.unitId,
+			sourceEntityId: unitSourceLink.sourceEntityId,
+			url: unitSourceLink.url,
+			normalizedUrl: unitSourceLink.normalizedUrl,
+			normalizedUrlHash: unitSourceLink.normalizedUrlHash,
+			createdByProfileId: unitSourceLink.createdByProfileId,
+			viewerVote: authorization.profileId
+				? sql<-1 | 1 | null>`(
+					select ${unitSourceLinkVote.value}
+					from ${unitSourceLinkVote}
+					where ${unitSourceLinkVote.linkId} = ${unitSourceLink.id}
+						and ${unitSourceLinkVote.profileId} = ${authorization.profileId}
+				)`
+				: sql<null>`null`,
+			score: unitSourceLinkVoteStat.score,
+			voteCount: unitSourceLinkVoteStat.voteCount,
+			accepted: sql<true>`true`,
+			pinned: unitSourceLink.pinned,
+			position: unitSourceLink.position,
+			createdAt: unitSourceLink.createdAt,
+			updatedAt: unitSourceLink.updatedAt,
+		})
 		.from(unitSourceLink)
-		.where(eq(unitSourceLink.unitId, base.id))
-		.orderBy(unitSourceLink.position, unitSourceLink.id);
+		.leftJoin(unitSourceLinkVoteStat, eq(unitSourceLinkVoteStat.linkId, unitSourceLink.id))
+		.where(
+			and(
+				eq(unitSourceLink.unitId, base.id),
+				sql`${unitSourceLink.pinned} or coalesce(${unitSourceLinkVoteStat.score}, 0) >= ${SourceLinkVisibilityScoreThreshold}`,
+			),
+		)
+		.orderBy(
+			desc(unitSourceLink.pinned),
+			sql`case when ${unitSourceLink.pinned} then ${unitSourceLink.position} end asc nulls last`,
+			desc(
+				wilsonLowerBoundSql(unitSourceLinkVoteStat.score, unitSourceLinkVoteStat.voteCount),
+			),
+			desc(unitSourceLinkVoteStat.score),
+			desc(unitSourceLinkVoteStat.voteCount),
+			unitSourceLink.id,
+		);
 	const tags = await database
 		.select({
 			tagId: unitTag.tagId,
@@ -547,6 +589,8 @@ export async function getUnit(
 	const [
 		canEdit,
 		canCurateTags,
+		canCurateAliases,
+		canCurateSourceLinks,
 		canManageRealmPublications,
 		accessDecision,
 		associationDecision,
@@ -556,6 +600,16 @@ export async function getUnit(
 	] = await Promise.all([
 		authorization.unit.canUpdate(base.id),
 		authorization.unit.decide(base.id, "unit.tag-curation.manage"),
+		authorization.unit.decide(
+			base.id,
+			"unit.reference-curation.manage",
+			unitScope("references", "aliases"),
+		),
+		authorization.unit.decide(
+			base.id,
+			"unit.reference-curation.manage",
+			unitScope("references", "source-links"),
+		),
 		authorization.unit.decide(base.id, "unit.realm-publication.manage"),
 		authorization.unit.decide(base.id, "unit.access.manage"),
 		authorization.unit.decide(base.id, "unit.association.manage"),
@@ -611,7 +665,11 @@ export async function getUnit(
 		),
 		localizations: localizations.map(presentUnitLocalization),
 		subjectAssociations,
-		links,
+		links: links.map((link) => ({
+			...link,
+			score: toSafeInteger(link.score ?? 0n, "source link vote score"),
+			voteCount: toSafeInteger(link.voteCount ?? 0n, "source link vote count"),
+		})),
 		tags: tags.map((tag) => ({
 			...tag,
 			id: tag.tagId,
@@ -660,6 +718,10 @@ export async function getUnit(
 			canManageAccess: accessDecision.allowed,
 			canManageAssociations: associationDecision.allowed,
 			canCurateTags: canCurateTags.allowed,
+			canCurateReferences: {
+				aliases: canCurateAliases.allowed,
+				sourceLinks: canCurateSourceLinks.allowed,
+			},
 			canManageRealmPublications: canManageRealmPublications.allowed,
 			hasDevelopmentPreviewAccess,
 		},

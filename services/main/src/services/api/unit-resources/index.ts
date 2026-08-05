@@ -10,7 +10,7 @@ import { getPlatformCapabilityCondition } from "../../authorization/platform/que
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
 import { unitOwnershipModeFromOwnerProfileId } from "../../authorization/unit/ownership";
 import { getUnitPermissionCondition } from "../../authorization/unit/query";
-import { associationTargetScope } from "../../authorization/unit/scope";
+import { associationTargetScope, unitScope } from "../../authorization/unit/scope";
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
 import {
@@ -35,12 +35,19 @@ import {
 	unitOwnership,
 	unitTagVote,
 	unitSourceLink,
+	unitSourceLinkVote,
+	unitSourceLinkVoteStat,
+	unitReferenceCurationHead,
 	unitTag,
 	unitTagVoteStat,
 	unitLocalization,
 } from "../../database/schema";
 import { isCreditAttributionRoleForUnitKind } from "../../database/schema/contract-values";
-import { AliasSearchScoreThreshold } from "../../database/schema/contract-values";
+import {
+	AliasSearchScoreThreshold,
+	SourceLinkVisibilityScoreThreshold,
+	type UnitReferenceCurationKind,
+} from "../../database/schema/contract-values";
 import {
 	AddUnitAliasBody,
 	AddUnitCreditBody,
@@ -59,6 +66,7 @@ import {
 	TagLocalizationParams,
 	TagUnitBody,
 	UpdateUnitTagCurationBody,
+	UpdateUnitReferenceCurationBody,
 	UnitAssociationParams,
 	UnitAliasParams,
 	UnitAliasUnitParams,
@@ -88,6 +96,7 @@ import { UnitIdParams } from "../schema";
 import {
 	toApiErrorResponse,
 	AliasResponse,
+	AliasCurationResponse,
 	AliasListResponse,
 	CreditAttributionResponse,
 	EntityDetailResponse,
@@ -99,6 +108,7 @@ import {
 	toPortableTextResponse,
 	UnitSourceLinkListResponse,
 	UnitSourceLinkResponse,
+	UnitSourceLinkCurationResponse,
 	VoteResponse,
 } from "../schema/response";
 import { AliasNotFound, TagApplicationNotFound, UnitSourceLinkNotFound } from "./errors";
@@ -113,6 +123,11 @@ import { AssociationContextPostInvalid } from "../../units/errors";
 import { updateDirectUnitTagCuration } from "../../tags/curation";
 import { getPendingUnitOwnershipClaim } from "../../ownership-claims/service";
 import { normalizeExternalWebUrl } from "./external-web-url";
+import { wilsonLowerBoundSql } from "../../tags/ranking";
+import {
+	updateUnitAliasCuration,
+	updateUnitSourceLinkCuration,
+} from "../../units/reference-curation";
 
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
@@ -158,7 +173,7 @@ async function ensureReadableSourceEntity(
 	if (!sourceEntity) throw new EntityEntryNotFound();
 }
 
-async function getAliasVoteSummary(aliasId: string, value: number | null) {
+async function getAliasVoteSummary(aliasId: string, value: -1 | 1 | null) {
 	const [totals] = await database
 		.select({ score: unitAliasVoteStat.score, voteCount: unitAliasVoteStat.voteCount })
 		.from(unitAliasVoteStat)
@@ -170,11 +185,121 @@ async function getAliasVoteSummary(aliasId: string, value: number | null) {
 	};
 }
 
+async function getSourceLinkVoteSummary(linkId: string, value: -1 | 1 | null) {
+	const [totals] = await database
+		.select({
+			score: unitSourceLinkVoteStat.score,
+			voteCount: unitSourceLinkVoteStat.voteCount,
+		})
+		.from(unitSourceLinkVoteStat)
+		.where(eq(unitSourceLinkVoteStat.linkId, linkId));
+	return {
+		value,
+		score: toSafeInteger(totals?.score ?? 0n, "source link vote score"),
+		voteCount: toSafeInteger(totals?.voteCount ?? 0n, "source link vote count"),
+	};
+}
+
+async function getReferenceCurationVersion(
+	unitId: string,
+	kind: UnitReferenceCurationKind,
+): Promise<number> {
+	const [head] = await database
+		.select({ version: unitReferenceCurationHead.version })
+		.from(unitReferenceCurationHead)
+		.where(
+			and(
+				eq(unitReferenceCurationHead.unitId, unitId),
+				eq(unitReferenceCurationHead.kind, kind),
+			),
+		)
+		.limit(1);
+	return head?.version ?? 0;
+}
+
 function normalizeAliasTerm(term: string): string {
 	return term.trim().normalize("NFKC").toLowerCase().replace(/\s+/g, " ");
 }
 
-async function getTagVoteSummary(unitId: string, tagId: string, value: number | null) {
+async function getAliasCandidate(aliasId: string, viewerProfileId: string) {
+	const [row] = await database
+		.select({
+			id: unitAlias.id,
+			unitId: unitAlias.unitId,
+			term: unitAlias.term,
+			normalizedTerm: unitAlias.normalizedTerm,
+			language: unitAlias.language,
+			kind: unitAlias.kind,
+			createdByProfileId: unitAlias.createdByProfileId,
+			viewerVote: unitAliasVote.value,
+			score: unitAliasVoteStat.score,
+			voteCount: unitAliasVoteStat.voteCount,
+			accepted: sql<boolean>`${unitAlias.pinned} or coalesce(${unitAliasVoteStat.score}, 0) >= ${AliasSearchScoreThreshold}`,
+			pinned: unitAlias.pinned,
+			position: unitAlias.position,
+			createdAt: unitAlias.createdAt,
+			updatedAt: unitAlias.updatedAt,
+		})
+		.from(unitAlias)
+		.leftJoin(unitAliasVoteStat, eq(unitAliasVoteStat.aliasId, unitAlias.id))
+		.leftJoin(
+			unitAliasVote,
+			and(
+				eq(unitAliasVote.aliasId, unitAlias.id),
+				eq(unitAliasVote.profileId, viewerProfileId),
+			),
+		)
+		.where(eq(unitAlias.id, aliasId))
+		.limit(1);
+	if (!row) throw new AliasNotFound();
+	return {
+		...row,
+		viewerVote: row.viewerVote,
+		score: toSafeInteger(row.score ?? 0n, "alias vote score"),
+		voteCount: toSafeInteger(row.voteCount ?? 0n, "alias vote count"),
+	};
+}
+
+async function getSourceLinkCandidate(linkId: string, viewerProfileId: string) {
+	const [row] = await database
+		.select({
+			id: unitSourceLink.id,
+			unitId: unitSourceLink.unitId,
+			sourceEntityId: unitSourceLink.sourceEntityId,
+			url: unitSourceLink.url,
+			normalizedUrl: unitSourceLink.normalizedUrl,
+			normalizedUrlHash: unitSourceLink.normalizedUrlHash,
+			createdByProfileId: unitSourceLink.createdByProfileId,
+			viewerVote: unitSourceLinkVote.value,
+			score: unitSourceLinkVoteStat.score,
+			voteCount: unitSourceLinkVoteStat.voteCount,
+			accepted: sql<boolean>`${unitSourceLink.pinned} or coalesce(${unitSourceLinkVoteStat.score}, 0) >= ${SourceLinkVisibilityScoreThreshold}`,
+			pinned: unitSourceLink.pinned,
+			position: unitSourceLink.position,
+			createdAt: unitSourceLink.createdAt,
+			updatedAt: unitSourceLink.updatedAt,
+		})
+		.from(unitSourceLink)
+		.leftJoin(unitSourceLinkVoteStat, eq(unitSourceLinkVoteStat.linkId, unitSourceLink.id))
+		.leftJoin(
+			unitSourceLinkVote,
+			and(
+				eq(unitSourceLinkVote.linkId, unitSourceLink.id),
+				eq(unitSourceLinkVote.profileId, viewerProfileId),
+			),
+		)
+		.where(eq(unitSourceLink.id, linkId))
+		.limit(1);
+	if (!row) throw new UnitSourceLinkNotFound();
+	return {
+		...row,
+		viewerVote: row.viewerVote,
+		score: toSafeInteger(row.score ?? 0n, "source link vote score"),
+		voteCount: toSafeInteger(row.voteCount ?? 0n, "source link vote count"),
+	};
+}
+
+async function getTagVoteSummary(unitId: string, tagId: string, value: -1 | 1 | null) {
 	const [totals] = await database
 		.select({ score: unitTagVoteStat.score, voteCount: unitTagVoteStat.voteCount })
 		.from(unitTagVoteStat)
@@ -673,39 +798,64 @@ export default new Elysia()
 		app
 			.get(
 				"/aliases",
-				async ({ params, authorization }) => {
+				async ({ params, profile, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
-					const rows = await database
-						.select({
-							id: unitAlias.id,
-							unitId: unitAlias.unitId,
-							term: unitAlias.term,
-							normalizedTerm: unitAlias.normalizedTerm,
-							language: unitAlias.language,
-							kind: unitAlias.kind,
-							createdByProfileId: unitAlias.createdByProfileId,
-							score: unitAliasVoteStat.score,
-							voteCount: unitAliasVoteStat.voteCount,
-							searchable: sql<boolean>`coalesce(${unitAliasVoteStat.score}, 0) >= ${AliasSearchScoreThreshold}`,
-							createdAt: unitAlias.createdAt,
-							updatedAt: unitAlias.updatedAt,
-						})
-						.from(unitAlias)
-						.leftJoin(unitAliasVoteStat, eq(unitAliasVoteStat.aliasId, unitAlias.id))
-						.where(
-							and(eq(unitAlias.unitId, params.unitId), isNull(unitAlias.deletedAt)),
-						)
-						.orderBy(
-							desc(sql`coalesce(${unitAliasVoteStat.score}, 0)`),
-							unitAlias.term,
-						);
+					const [rows, curationVersion] = await Promise.all([
+						database
+							.select({
+								id: unitAlias.id,
+								unitId: unitAlias.unitId,
+								term: unitAlias.term,
+								normalizedTerm: unitAlias.normalizedTerm,
+								language: unitAlias.language,
+								kind: unitAlias.kind,
+								createdByProfileId: unitAlias.createdByProfileId,
+								viewerVote: unitAliasVote.value,
+								score: unitAliasVoteStat.score,
+								voteCount: unitAliasVoteStat.voteCount,
+								accepted: sql<boolean>`${unitAlias.pinned} or coalesce(${unitAliasVoteStat.score}, 0) >= ${AliasSearchScoreThreshold}`,
+								pinned: unitAlias.pinned,
+								position: unitAlias.position,
+								createdAt: unitAlias.createdAt,
+								updatedAt: unitAlias.updatedAt,
+							})
+							.from(unitAlias)
+							.leftJoin(
+								unitAliasVoteStat,
+								eq(unitAliasVoteStat.aliasId, unitAlias.id),
+							)
+							.leftJoin(
+								unitAliasVote,
+								and(
+									eq(unitAliasVote.aliasId, unitAlias.id),
+									eq(unitAliasVote.profileId, profile.unitId),
+								),
+							)
+							.where(eq(unitAlias.unitId, params.unitId))
+							.orderBy(
+								desc(unitAlias.pinned),
+								sql`case when ${unitAlias.pinned} then ${unitAlias.position} end asc nulls last`,
+								desc(
+									wilsonLowerBoundSql(
+										unitAliasVoteStat.score,
+										unitAliasVoteStat.voteCount,
+									),
+								),
+								desc(sql`coalesce(${unitAliasVoteStat.score}, 0)`),
+								desc(sql`coalesce(${unitAliasVoteStat.voteCount}, 0)`),
+								unitAlias.id,
+							),
+						getReferenceCurationVersion(params.unitId, "alias"),
+					]);
 					return {
 						items: rows.map((row) => ({
 							...row,
+							viewerVote: row.viewerVote,
 							score: toSafeInteger(row.score ?? 0n, "alias vote score"),
 							voteCount: toSafeInteger(row.voteCount ?? 0n, "alias vote count"),
 						})),
+						curationVersion,
 					};
 				},
 				{
@@ -722,7 +872,7 @@ export default new Elysia()
 					await authorization.unit.ensureCanRead(params.unitId);
 					const term = body.term.trim();
 					const normalizedTerm = normalizeAliasTerm(term);
-					const result = await database.transaction(async (tx) => {
+					const aliasId = await database.transaction(async (tx) => {
 						const [created] = await tx
 							.insert(unitAlias)
 							.values({
@@ -733,78 +883,51 @@ export default new Elysia()
 								kind: body.kind,
 								createdByProfileId: profile.unitId,
 							})
+							.onConflictDoNothing()
 							.returning();
-						if (!created) throw new Error("Alias insertion did not return a row");
-						await recordUnitRevision(tx, {
-							unitId: params.unitId,
-							actorProfileId: profile.unitId,
-							event: "update",
-						});
-						return {
-							...created,
-							score: 0,
-							voteCount: 0,
-							searchable: false,
-						};
+						const candidate =
+							created ??
+							(
+								await tx
+									.select()
+									.from(unitAlias)
+									.where(
+										and(
+											eq(unitAlias.unitId, params.unitId),
+											eq(unitAlias.normalizedTerm, normalizedTerm),
+											body.language
+												? eq(unitAlias.language, body.language)
+												: isNull(unitAlias.language),
+										),
+									)
+									.limit(1)
+							)[0];
+						if (!candidate) throw new Error("Conflicting Alias could not be resolved");
+						await tx
+							.insert(unitAliasVote)
+							.values({
+								aliasId: candidate.id,
+								profileId: profile.unitId,
+								value: 1,
+							})
+							.onConflictDoUpdate({
+								target: [unitAliasVote.aliasId, unitAliasVote.profileId],
+								set: { value: 1, updatedAt: new Date() },
+							});
+						return candidate.id;
 					});
-					return result;
+					return getAliasCandidate(aliasId, profile.unitId);
 				},
 				{
-					access: "contribute:unit:update",
+					access: "contribute:interaction:write",
 					params: UnitAliasUnitParams,
 					body: AddUnitAliasBody,
 					response: {
 						[StatusCodes.OK]: AliasResponse,
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
 					},
-					detail: { summary: "Add Unit alias", tags: ["Units"] },
-				},
-			)
-			.delete(
-				"/aliases/:aliasId",
-				async ({ params, profile, authorization }) => {
-					await checkUnitType(params.unitId, params.type);
-					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
-						"aliases",
-					]);
-					await database.transaction(async (tx) => {
-						const deleted = await tx
-							.update(unitAlias)
-							.set({ deletedAt: new Date() })
-							.where(
-								and(
-									eq(unitAlias.id, params.aliasId),
-									eq(unitAlias.unitId, params.unitId),
-									isNull(unitAlias.deletedAt),
-								),
-							)
-							.returning({ id: unitAlias.id });
-						if (!deleted.length) throw new AliasNotFound();
-						await recordUnitRevision(tx, {
-							unitId: params.unitId,
-							actorProfileId: profile.unitId,
-							event: "update",
-						});
-					});
-					return new Response(null, { status: StatusCodes.NO_CONTENT });
-				},
-				{
-					access: "write:interaction:write",
-					params: UnitAliasParams,
-					response: {
-						[StatusCodes.NO_CONTENT]: t.Void(),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"AliasNotFound",
-						]),
-					},
-					detail: {
-						summary: "Delete Unit alias",
-						tags: ["Units"],
-						responses: NoContentResponse,
-					},
+					detail: { summary: "Propose Unit alias", tags: ["Units"] },
 				},
 			)
 			.put(
@@ -819,7 +942,6 @@ export default new Elysia()
 							and(
 								eq(unitAlias.id, params.aliasId),
 								eq(unitAlias.unitId, params.unitId),
-								isNull(unitAlias.deletedAt),
 							),
 						)
 						.limit(1);
@@ -833,16 +955,17 @@ export default new Elysia()
 						})
 						.onConflictDoUpdate({
 							target: [unitAliasVote.aliasId, unitAliasVote.profileId],
-							set: { value: body.value },
+							set: { value: body.value, updatedAt: new Date() },
 						});
 					return getAliasVoteSummary(params.aliasId, body.value);
 				},
 				{
-					access: "contribute:unit:update",
+					access: "contribute:interaction:write",
 					params: UnitAliasParams,
 					body: VoteBody,
 					response: {
 						[StatusCodes.OK]: VoteResponse,
+						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
 							"AliasNotFound",
@@ -863,7 +986,6 @@ export default new Elysia()
 							and(
 								eq(unitAlias.id, params.aliasId),
 								eq(unitAlias.unitId, params.unitId),
-								isNull(unitAlias.deletedAt),
 							),
 						)
 						.limit(1);
@@ -879,16 +1001,58 @@ export default new Elysia()
 					return getAliasVoteSummary(params.aliasId, null);
 				},
 				{
-					access: "write:unit:update",
+					access: "write:interaction:write",
 					params: UnitAliasParams,
 					response: {
 						[StatusCodes.OK]: VoteResponse,
+						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
 							"AliasNotFound",
 						]),
 					},
 					detail: { summary: "Remove Unit alias vote", tags: ["Units"] },
+				},
+			)
+			.patch(
+				"/aliases/:aliasId",
+				async ({ params, profile, authorization, body }) => {
+					await checkUnitType(params.unitId, params.type);
+					await authorization.unit.ensure(
+						params.unitId,
+						"unit.reference-curation.manage",
+						unitScope("references", "aliases"),
+					);
+					const result = await updateUnitAliasCuration({
+						unitId: params.unitId,
+						aliasId: params.aliasId,
+						actorProfileId: profile.unitId,
+						baseVersion: body.baseVersion,
+						state: body.pinned
+							? { pinned: true, position: body.position }
+							: { pinned: false, position: null },
+					});
+					return {
+						candidate: await getAliasCandidate(params.aliasId, profile.unitId),
+						curationVersion: result.curationVersion,
+					};
+				},
+				{
+					access: "write:unit:update",
+					params: UnitAliasParams,
+					body: UpdateUnitReferenceCurationBody,
+					response: {
+						[StatusCodes.OK]: AliasCurationResponse,
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"AliasNotFound",
+						]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"UnitReferenceCurationChanged",
+						]),
+					},
+					detail: { summary: "Update Unit Alias curation", tags: ["Units"] },
 				},
 			)
 			.post(
@@ -1126,15 +1290,64 @@ export default new Elysia()
 			)
 			.get(
 				"/links",
-				async ({ params, authorization }) => {
+				async ({ params, profile, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
-					return {
-						items: await database
-							.select()
+					const [rows, curationVersion] = await Promise.all([
+						database
+							.select({
+								id: unitSourceLink.id,
+								unitId: unitSourceLink.unitId,
+								sourceEntityId: unitSourceLink.sourceEntityId,
+								url: unitSourceLink.url,
+								normalizedUrl: unitSourceLink.normalizedUrl,
+								normalizedUrlHash: unitSourceLink.normalizedUrlHash,
+								createdByProfileId: unitSourceLink.createdByProfileId,
+								viewerVote: unitSourceLinkVote.value,
+								score: unitSourceLinkVoteStat.score,
+								voteCount: unitSourceLinkVoteStat.voteCount,
+								accepted: sql<boolean>`${unitSourceLink.pinned} or coalesce(${unitSourceLinkVoteStat.score}, 0) >= ${SourceLinkVisibilityScoreThreshold}`,
+								pinned: unitSourceLink.pinned,
+								position: unitSourceLink.position,
+								createdAt: unitSourceLink.createdAt,
+								updatedAt: unitSourceLink.updatedAt,
+							})
 							.from(unitSourceLink)
+							.leftJoin(
+								unitSourceLinkVoteStat,
+								eq(unitSourceLinkVoteStat.linkId, unitSourceLink.id),
+							)
+							.leftJoin(
+								unitSourceLinkVote,
+								and(
+									eq(unitSourceLinkVote.linkId, unitSourceLink.id),
+									eq(unitSourceLinkVote.profileId, profile.unitId),
+								),
+							)
 							.where(eq(unitSourceLink.unitId, params.unitId))
-							.orderBy(unitSourceLink.position, unitSourceLink.id),
+							.orderBy(
+								desc(unitSourceLink.pinned),
+								sql`case when ${unitSourceLink.pinned} then ${unitSourceLink.position} end asc nulls last`,
+								desc(
+									wilsonLowerBoundSql(
+										unitSourceLinkVoteStat.score,
+										unitSourceLinkVoteStat.voteCount,
+									),
+								),
+								desc(sql`coalesce(${unitSourceLinkVoteStat.score}, 0)`),
+								desc(sql`coalesce(${unitSourceLinkVoteStat.voteCount}, 0)`),
+								unitSourceLink.id,
+							),
+						getReferenceCurationVersion(params.unitId, "source_link"),
+					]);
+					return {
+						items: rows.map((row) => ({
+							...row,
+							viewerVote: row.viewerVote,
+							score: toSafeInteger(row.score ?? 0n, "source link vote score"),
+							voteCount: toSafeInteger(row.voteCount ?? 0n, "source link vote count"),
+						})),
+						curationVersion,
 					};
 				},
 				{
@@ -1144,44 +1357,29 @@ export default new Elysia()
 						[StatusCodes.OK]: UnitSourceLinkListResponse,
 						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
 					},
-					detail: { summary: "List Unit external links", tags: ["Units"] },
+					detail: { summary: "List Unit source-link candidates", tags: ["Units"] },
 				},
 			)
 			.post(
 				"/links",
-				async ({ params, authorization, body }) => {
+				async ({ params, profile, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
-					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
-						"external-links",
-					]);
+					await authorization.unit.ensureCanRead(params.unitId);
 					await ensureReadableSourceEntity(authorization.unit, body.sourceEntityUnitId);
-					// An external link is Unit metadata, not credit or an “is about” relationship.
-					// It intentionally does not consume either Entity association capability.
 					const { url, normalizedUrl } = normalizeExternalWebUrl(body.url);
 					const normalizedUrlHash = createHash("sha256")
 						.update(normalizedUrl)
 						.digest("hex");
-					const link = await database.transaction(async (tx) => {
-						await tx.execute(
-							sql`select pg_advisory_xact_lock(hashtextextended(${params.unitId}::text, 0))`,
-						);
-						const [last] = await tx
-							.select({ position: unitSourceLink.position })
-							.from(unitSourceLink)
-							.where(eq(unitSourceLink.unitId, params.unitId))
-							.orderBy(desc(unitSourceLink.position), desc(unitSourceLink.id))
-							.limit(1);
+					const linkId = await database.transaction(async (tx) => {
 						const [created] = await tx
 							.insert(unitSourceLink)
 							.values({
 								unitId: params.unitId,
 								sourceEntityId: body.sourceEntityUnitId,
 								url,
-								position:
-									body.position ??
-									fractionalPositionBetween(last?.position, null),
 								normalizedUrl,
 								normalizedUrlHash,
+								createdByProfileId: profile.unitId,
 							})
 							.onConflictDoNothing({
 								target: [
@@ -1191,91 +1389,181 @@ export default new Elysia()
 								],
 							})
 							.returning();
-						if (created) {
-							await recordUnitRevision(tx, {
-								unitId: params.unitId,
-								actorProfileId: authorization.profileId,
-								event: "update",
-							});
-							return created;
-						}
-						const [existing] = await tx
-							.select()
-							.from(unitSourceLink)
-							.where(
-								and(
-									eq(unitSourceLink.unitId, params.unitId),
-									eq(unitSourceLink.sourceEntityId, body.sourceEntityUnitId),
-									eq(unitSourceLink.normalizedUrlHash, normalizedUrlHash),
-								),
-							)
-							.limit(1);
-						if (!existing)
+						const candidate =
+							created ??
+							(
+								await tx
+									.select()
+									.from(unitSourceLink)
+									.where(
+										and(
+											eq(unitSourceLink.unitId, params.unitId),
+											eq(
+												unitSourceLink.sourceEntityId,
+												body.sourceEntityUnitId,
+											),
+											eq(unitSourceLink.normalizedUrlHash, normalizedUrlHash),
+										),
+									)
+									.limit(1)
+							)[0];
+						if (!candidate)
 							throw new Error("Conflicting external link could not be resolved");
-						if (existing.normalizedUrl !== normalizedUrl)
+						if (candidate.normalizedUrl !== normalizedUrl)
 							throw new Error("External link URL normalization hash collision");
-						return existing;
+						await tx
+							.insert(unitSourceLinkVote)
+							.values({
+								linkId: candidate.id,
+								profileId: profile.unitId,
+								value: 1,
+							})
+							.onConflictDoUpdate({
+								target: [unitSourceLinkVote.linkId, unitSourceLinkVote.profileId],
+								set: { value: 1, updatedAt: new Date() },
+							});
+						return candidate.id;
 					});
-					if (!link) throw new Error("External link insertion did not return a row");
-					return link;
+					return getSourceLinkCandidate(linkId, profile.unitId);
 				},
 				{
-					access: "contribute:unit:update",
+					access: "contribute:interaction:write",
 					params: UnitSourceLinkUnitParams,
 					body: AddUnitLinkBody,
 					response: {
 						[StatusCodes.OK]: UnitSourceLinkResponse,
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
 							"EntityEntryNotFound",
 						]),
 					},
-					detail: { summary: "Add Unit external link", tags: ["Units"] },
+					detail: { summary: "Propose Unit source link", tags: ["Units"] },
 				},
 			)
-			.delete(
-				"/links/:linkId",
-				async ({ params, profile, authorization }) => {
+			.put(
+				"/links/:linkId/vote",
+				async ({ params, profile, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
-					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
-						"external-links",
-					]);
-					await database.transaction(async (tx) => {
-						const deleted = await tx
-							.delete(unitSourceLink)
-							.where(
-								and(
-									eq(unitSourceLink.id, params.linkId),
-									eq(unitSourceLink.unitId, params.unitId),
-								),
-							)
-							.returning({ id: unitSourceLink.id });
-						if (!deleted.length) throw new UnitSourceLinkNotFound();
-						await recordUnitRevision(tx, {
-							unitId: params.unitId,
-							actorProfileId: profile.unitId,
-							event: "update",
+					await authorization.unit.ensureCanRead(params.unitId);
+					const [target] = await database
+						.select({ id: unitSourceLink.id })
+						.from(unitSourceLink)
+						.where(
+							and(
+								eq(unitSourceLink.id, params.linkId),
+								eq(unitSourceLink.unitId, params.unitId),
+							),
+						)
+						.limit(1);
+					if (!target) throw new UnitSourceLinkNotFound();
+					await database
+						.insert(unitSourceLinkVote)
+						.values({
+							linkId: params.linkId,
+							profileId: profile.unitId,
+							value: body.value,
+						})
+						.onConflictDoUpdate({
+							target: [unitSourceLinkVote.linkId, unitSourceLinkVote.profileId],
+							set: { value: body.value, updatedAt: new Date() },
 						});
-					});
-					return new Response(null, { status: StatusCodes.NO_CONTENT });
+					return getSourceLinkVoteSummary(params.linkId, body.value);
 				},
 				{
-					access: "write:unit:update",
+					access: "contribute:interaction:write",
 					params: UnitSourceLinkParams,
+					body: VoteBody,
 					response: {
-						[StatusCodes.NO_CONTENT]: t.Void(),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.OK]: VoteResponse,
+						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
 							"UnitSourceLinkNotFound",
 						]),
 					},
-					detail: {
-						summary: "Remove Unit external link",
-						tags: ["Units"],
-						responses: NoContentResponse,
+					detail: { summary: "Vote on Unit source link", tags: ["Units"] },
+				},
+			)
+			.delete(
+				"/links/:linkId/vote",
+				async ({ params, profile, authorization }) => {
+					await checkUnitType(params.unitId, params.type);
+					await authorization.unit.ensureCanRead(params.unitId);
+					const [target] = await database
+						.select({ id: unitSourceLink.id })
+						.from(unitSourceLink)
+						.where(
+							and(
+								eq(unitSourceLink.id, params.linkId),
+								eq(unitSourceLink.unitId, params.unitId),
+							),
+						)
+						.limit(1);
+					if (!target) throw new UnitSourceLinkNotFound();
+					await database
+						.delete(unitSourceLinkVote)
+						.where(
+							and(
+								eq(unitSourceLinkVote.linkId, params.linkId),
+								eq(unitSourceLinkVote.profileId, profile.unitId),
+							),
+						);
+					return getSourceLinkVoteSummary(params.linkId, null);
+				},
+				{
+					access: "write:interaction:write",
+					params: UnitSourceLinkParams,
+					response: {
+						[StatusCodes.OK]: VoteResponse,
+						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"UnitSourceLinkNotFound",
+						]),
 					},
+					detail: { summary: "Remove Unit source link vote", tags: ["Units"] },
+				},
+			)
+			.patch(
+				"/links/:linkId",
+				async ({ params, profile, authorization, body }) => {
+					await checkUnitType(params.unitId, params.type);
+					await authorization.unit.ensure(
+						params.unitId,
+						"unit.reference-curation.manage",
+						unitScope("references", "source-links"),
+					);
+					const result = await updateUnitSourceLinkCuration({
+						unitId: params.unitId,
+						linkId: params.linkId,
+						actorProfileId: profile.unitId,
+						baseVersion: body.baseVersion,
+						state: body.pinned
+							? { pinned: true, position: body.position }
+							: { pinned: false, position: null },
+					});
+					return {
+						candidate: await getSourceLinkCandidate(params.linkId, profile.unitId),
+						curationVersion: result.curationVersion,
+					};
+				},
+				{
+					access: "write:unit:update",
+					params: UnitSourceLinkParams,
+					body: UpdateUnitReferenceCurationBody,
+					response: {
+						[StatusCodes.OK]: UnitSourceLinkCurationResponse,
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"UnitSourceLinkNotFound",
+						]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"UnitReferenceCurationChanged",
+						]),
+					},
+					detail: { summary: "Update Unit source link curation", tags: ["Units"] },
 				},
 			)
 			.put(

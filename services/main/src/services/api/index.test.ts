@@ -134,16 +134,18 @@ describe("API root", () => {
 		expect(document.paths["/api/v1/slug-addresses/profile"]).toBeUndefined();
 	});
 
-	it("documents external links as a resource of every registered Unit kind", () => {
+	it("documents source-link candidates for every registered Unit kind", () => {
 		const document = toOpenAPISchema(api);
 		const operations = [
 			document.paths["/api/v1/units/{type}/{unitId}/links"]?.get,
 			document.paths["/api/v1/units/{type}/{unitId}/links"]?.post,
-			document.paths["/api/v1/units/{type}/{unitId}/links/{linkId}"]?.delete,
+			document.paths["/api/v1/units/{type}/{unitId}/links/{linkId}"]?.patch,
+			document.paths["/api/v1/units/{type}/{unitId}/links/{linkId}/vote"]?.put,
+			document.paths["/api/v1/units/{type}/{unitId}/links/{linkId}/vote"]?.delete,
 		];
 
 		for (const operation of operations) {
-			if (!operation) throw new Error("Expected a Unit external-link operation");
+			if (!operation) throw new Error("Expected a Unit source-link operation");
 			const typeParameter = operation.parameters?.find(
 				(parameter) =>
 					!("$ref" in parameter) && parameter.in === "path" && parameter.name === "type",
@@ -160,6 +162,12 @@ describe("API root", () => {
 		expect(JSON.stringify(postResponses?.[StatusCodes.NOT_FOUND])).toContain(
 			"EntityEntryNotFound",
 		);
+		expect(
+			document.paths["/api/v1/units/{type}/{unitId}/links/{linkId}"]?.delete,
+		).toBeUndefined();
+		expect(
+			document.paths["/api/v1/units/{type}/{unitId}/aliases/{aliasId}"]?.delete,
+		).toBeUndefined();
 	});
 
 	it("documents the development preview gate on unreleased Zone address writes", () => {

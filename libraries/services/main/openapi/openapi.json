@@ -10249,6 +10249,7 @@
 					"TagApplicationNotFound",
 					"UnitTagCurationChanged",
 					"UnitSourceLinkNotFound",
+					"UnitReferenceCurationChanged",
 					"InvalidMessageCursor",
 					"ConversationNotFound",
 					"ConversationParticipantsInvalid",
@@ -47353,6 +47354,7 @@
 													"unit.access.manage",
 													"unit.association.manage",
 													"unit.tag-curation.manage",
+													"unit.reference-curation.manage",
 													"unit.realm-publication.manage",
 													"realm.contribute",
 													"realm.units.create",
@@ -47506,6 +47508,7 @@
 																"unit.access.manage",
 																"unit.association.manage",
 																"unit.tag-curation.manage",
+																"unit.reference-curation.manage",
 																"unit.realm-publication.manage",
 																"realm.contribute",
 																"realm.units.create",
@@ -47539,6 +47542,7 @@
 																"unit.access.manage",
 																"unit.association.manage",
 																"unit.tag-curation.manage",
+																"unit.reference-curation.manage",
 																"unit.realm-publication.manage",
 																"realm.contribute",
 																"realm.units.create",
@@ -47572,6 +47576,7 @@
 																"unit.access.manage",
 																"unit.association.manage",
 																"unit.tag-curation.manage",
+																"unit.reference-curation.manage",
 																"unit.realm-publication.manage",
 																"realm.contribute",
 																"realm.units.create",
@@ -47758,7 +47763,7 @@
 										]
 									},
 									"grants": {
-										"maxItems": 24,
+										"maxItems": 25,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -47772,6 +47777,7 @@
 												"unit.access.manage",
 												"unit.association.manage",
 												"unit.tag-curation.manage",
+												"unit.reference-curation.manage",
 												"unit.realm-publication.manage",
 												"realm.contribute",
 												"realm.units.create",
@@ -47793,7 +47799,7 @@
 										}
 									},
 									"restrictions": {
-										"maxItems": 24,
+										"maxItems": 25,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -47807,6 +47813,7 @@
 												"unit.access.manage",
 												"unit.association.manage",
 												"unit.tag-curation.manage",
+												"unit.reference-curation.manage",
 												"unit.realm-publication.manage",
 												"realm.contribute",
 												"realm.units.create",
@@ -47900,6 +47907,7 @@
 													"unit.access.manage",
 													"unit.association.manage",
 													"unit.tag-curation.manage",
+													"unit.reference-curation.manage",
 													"unit.realm-publication.manage",
 													"realm.contribute",
 													"realm.units.create",
@@ -48053,6 +48061,7 @@
 																"unit.access.manage",
 																"unit.association.manage",
 																"unit.tag-curation.manage",
+																"unit.reference-curation.manage",
 																"unit.realm-publication.manage",
 																"realm.contribute",
 																"realm.units.create",
@@ -48086,6 +48095,7 @@
 																"unit.access.manage",
 																"unit.association.manage",
 																"unit.tag-curation.manage",
+																"unit.reference-curation.manage",
 																"unit.realm-publication.manage",
 																"realm.contribute",
 																"realm.units.create",
@@ -48119,6 +48129,7 @@
 																"unit.access.manage",
 																"unit.association.manage",
 																"unit.tag-curation.manage",
+																"unit.reference-curation.manage",
 																"unit.realm-publication.manage",
 																"realm.contribute",
 																"realm.units.create",
@@ -48550,6 +48561,7 @@
 															"unit.ownership.transfer",
 															"unit.association.manage",
 															"unit.tag-curation.manage",
+															"unit.reference-curation.manage",
 															"unit.realm-publication.manage",
 															"realm.contribute",
 															"realm.units.create",
@@ -49329,6 +49341,7 @@
 																"unit.access.manage",
 																"unit.association.manage",
 																"unit.tag-curation.manage",
+																"unit.reference-curation.manage",
 																"unit.realm-publication.manage",
 																"realm.contribute",
 																"realm.units.create",
@@ -49536,6 +49549,7 @@
 																"unit.access.manage",
 																"unit.association.manage",
 																"unit.tag-curation.manage",
+																"unit.reference-curation.manage",
 																"unit.realm-publication.manage",
 																"realm.contribute",
 																"realm.units.create",
@@ -49756,7 +49770,7 @@
 									"invitedProfileId": { "format": "uuid", "type": "string" },
 									"permissions": {
 										"minItems": 1,
-										"maxItems": 24,
+										"maxItems": 25,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -49770,6 +49784,7 @@
 												"unit.access.manage",
 												"unit.association.manage",
 												"unit.tag-curation.manage",
+												"unit.reference-curation.manage",
 												"unit.realm-publication.manage",
 												"realm.contribute",
 												"realm.units.create",
@@ -49851,6 +49866,7 @@
 													"unit.access.manage",
 													"unit.association.manage",
 													"unit.tag-curation.manage",
+													"unit.reference-curation.manage",
 													"unit.realm-publication.manage",
 													"realm.contribute",
 													"realm.units.create",
@@ -50153,6 +50169,7 @@
 													"unit.access.manage",
 													"unit.association.manage",
 													"unit.tag-curation.manage",
+													"unit.reference-curation.manage",
 													"unit.realm-publication.manage",
 													"realm.contribute",
 													"realm.units.create",
@@ -50398,6 +50415,7 @@
 													"unit.access.manage",
 													"unit.association.manage",
 													"unit.tag-curation.manage",
+													"unit.reference-curation.manage",
 													"unit.realm-publication.manage",
 													"realm.contribute",
 													"realm.units.create",
@@ -87848,6 +87866,12 @@
 													"url",
 													"normalizedUrl",
 													"normalizedUrlHash",
+													"createdByProfileId",
+													"viewerVote",
+													"score",
+													"voteCount",
+													"accepted",
+													"pinned",
 													"position",
 													"createdAt",
 													"updatedAt"
@@ -87865,11 +87889,65 @@
 													"url": { "type": "string" },
 													"normalizedUrl": { "type": "string" },
 													"normalizedUrlHash": { "type": "string" },
+													"createdByProfileId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"viewerVote": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"const": -1,
+																		"type": "number"
+																	},
+																	{ "const": 1, "type": "number" }
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"score": {
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "type": "integer" }
+														]
+													},
+													"voteCount": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"accepted": {
+														"const": true,
+														"type": "boolean"
+													},
+													"pinned": { "type": "boolean" },
 													"position": {
-														"format": "fractional-position",
-														"minLength": 2,
-														"maxLength": 512,
-														"type": "string"
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "fractional-position",
+																"minLength": 2,
+																"maxLength": 512,
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
 													},
 													"createdAt": {
 														"format": "date-time",
@@ -88378,6 +88456,7 @@
 												"canManageAccess",
 												"canManageAssociations",
 												"canCurateTags",
+												"canCurateReferences",
 												"canManageRealmPublications",
 												"hasDevelopmentPreviewAccess"
 											],
@@ -88386,6 +88465,14 @@
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
 												"canCurateTags": { "type": "boolean" },
+												"canCurateReferences": {
+													"type": "object",
+													"required": ["aliases", "sourceLinks"],
+													"properties": {
+														"aliases": { "type": "boolean" },
+														"sourceLinks": { "type": "boolean" }
+													}
+												},
 												"canManageRealmPublications": { "type": "boolean" },
 												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
@@ -90353,6 +90440,12 @@
 													"url",
 													"normalizedUrl",
 													"normalizedUrlHash",
+													"createdByProfileId",
+													"viewerVote",
+													"score",
+													"voteCount",
+													"accepted",
+													"pinned",
 													"position",
 													"createdAt",
 													"updatedAt"
@@ -90370,11 +90463,65 @@
 													"url": { "type": "string" },
 													"normalizedUrl": { "type": "string" },
 													"normalizedUrlHash": { "type": "string" },
+													"createdByProfileId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"viewerVote": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"const": -1,
+																		"type": "number"
+																	},
+																	{ "const": 1, "type": "number" }
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"score": {
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "type": "integer" }
+														]
+													},
+													"voteCount": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"accepted": {
+														"const": true,
+														"type": "boolean"
+													},
+													"pinned": { "type": "boolean" },
 													"position": {
-														"format": "fractional-position",
-														"minLength": 2,
-														"maxLength": 512,
-														"type": "string"
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "fractional-position",
+																"minLength": 2,
+																"maxLength": 512,
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
 													},
 													"createdAt": {
 														"format": "date-time",
@@ -90883,6 +91030,7 @@
 												"canManageAccess",
 												"canManageAssociations",
 												"canCurateTags",
+												"canCurateReferences",
 												"canManageRealmPublications",
 												"hasDevelopmentPreviewAccess"
 											],
@@ -90891,6 +91039,14 @@
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
 												"canCurateTags": { "type": "boolean" },
+												"canCurateReferences": {
+													"type": "object",
+													"required": ["aliases", "sourceLinks"],
+													"properties": {
+														"aliases": { "type": "boolean" },
+														"sourceLinks": { "type": "boolean" }
+													}
+												},
 												"canManageRealmPublications": { "type": "boolean" },
 												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
@@ -92872,6 +93028,12 @@
 													"url",
 													"normalizedUrl",
 													"normalizedUrlHash",
+													"createdByProfileId",
+													"viewerVote",
+													"score",
+													"voteCount",
+													"accepted",
+													"pinned",
 													"position",
 													"createdAt",
 													"updatedAt"
@@ -92889,11 +93051,65 @@
 													"url": { "type": "string" },
 													"normalizedUrl": { "type": "string" },
 													"normalizedUrlHash": { "type": "string" },
+													"createdByProfileId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"viewerVote": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"const": -1,
+																		"type": "number"
+																	},
+																	{ "const": 1, "type": "number" }
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"score": {
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "type": "integer" }
+														]
+													},
+													"voteCount": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"accepted": {
+														"const": true,
+														"type": "boolean"
+													},
+													"pinned": { "type": "boolean" },
 													"position": {
-														"format": "fractional-position",
-														"minLength": 2,
-														"maxLength": 512,
-														"type": "string"
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "fractional-position",
+																"minLength": 2,
+																"maxLength": 512,
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
 													},
 													"createdAt": {
 														"format": "date-time",
@@ -93402,6 +93618,7 @@
 												"canManageAccess",
 												"canManageAssociations",
 												"canCurateTags",
+												"canCurateReferences",
 												"canManageRealmPublications",
 												"hasDevelopmentPreviewAccess"
 											],
@@ -93410,6 +93627,14 @@
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
 												"canCurateTags": { "type": "boolean" },
+												"canCurateReferences": {
+													"type": "object",
+													"required": ["aliases", "sourceLinks"],
+													"properties": {
+														"aliases": { "type": "boolean" },
+														"sourceLinks": { "type": "boolean" }
+													}
+												},
 												"canManageRealmPublications": { "type": "boolean" },
 												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
@@ -95316,6 +95541,12 @@
 													"url",
 													"normalizedUrl",
 													"normalizedUrlHash",
+													"createdByProfileId",
+													"viewerVote",
+													"score",
+													"voteCount",
+													"accepted",
+													"pinned",
 													"position",
 													"createdAt",
 													"updatedAt"
@@ -95333,11 +95564,65 @@
 													"url": { "type": "string" },
 													"normalizedUrl": { "type": "string" },
 													"normalizedUrlHash": { "type": "string" },
+													"createdByProfileId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"viewerVote": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"const": -1,
+																		"type": "number"
+																	},
+																	{ "const": 1, "type": "number" }
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"score": {
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "type": "integer" }
+														]
+													},
+													"voteCount": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"accepted": {
+														"const": true,
+														"type": "boolean"
+													},
+													"pinned": { "type": "boolean" },
 													"position": {
-														"format": "fractional-position",
-														"minLength": 2,
-														"maxLength": 512,
-														"type": "string"
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "fractional-position",
+																"minLength": 2,
+																"maxLength": 512,
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
 													},
 													"createdAt": {
 														"format": "date-time",
@@ -95846,6 +96131,7 @@
 												"canManageAccess",
 												"canManageAssociations",
 												"canCurateTags",
+												"canCurateReferences",
 												"canManageRealmPublications",
 												"hasDevelopmentPreviewAccess"
 											],
@@ -95854,6 +96140,14 @@
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
 												"canCurateTags": { "type": "boolean" },
+												"canCurateReferences": {
+													"type": "object",
+													"required": ["aliases", "sourceLinks"],
+													"properties": {
+														"aliases": { "type": "boolean" },
+														"sourceLinks": { "type": "boolean" }
+													}
+												},
 												"canManageRealmPublications": { "type": "boolean" },
 												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
@@ -97748,6 +98042,12 @@
 													"url",
 													"normalizedUrl",
 													"normalizedUrlHash",
+													"createdByProfileId",
+													"viewerVote",
+													"score",
+													"voteCount",
+													"accepted",
+													"pinned",
 													"position",
 													"createdAt",
 													"updatedAt"
@@ -97765,11 +98065,65 @@
 													"url": { "type": "string" },
 													"normalizedUrl": { "type": "string" },
 													"normalizedUrlHash": { "type": "string" },
+													"createdByProfileId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"viewerVote": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"const": -1,
+																		"type": "number"
+																	},
+																	{ "const": 1, "type": "number" }
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"score": {
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "type": "integer" }
+														]
+													},
+													"voteCount": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"accepted": {
+														"const": true,
+														"type": "boolean"
+													},
+													"pinned": { "type": "boolean" },
 													"position": {
-														"format": "fractional-position",
-														"minLength": 2,
-														"maxLength": 512,
-														"type": "string"
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "fractional-position",
+																"minLength": 2,
+																"maxLength": 512,
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
 													},
 													"createdAt": {
 														"format": "date-time",
@@ -98278,6 +98632,7 @@
 												"canManageAccess",
 												"canManageAssociations",
 												"canCurateTags",
+												"canCurateReferences",
 												"canManageRealmPublications",
 												"hasDevelopmentPreviewAccess"
 											],
@@ -98286,6 +98641,14 @@
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
 												"canCurateTags": { "type": "boolean" },
+												"canCurateReferences": {
+													"type": "object",
+													"required": ["aliases", "sourceLinks"],
+													"properties": {
+														"aliases": { "type": "boolean" },
+														"sourceLinks": { "type": "boolean" }
+													}
+												},
 												"canManageRealmPublications": { "type": "boolean" },
 												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
@@ -100539,6 +100902,12 @@
 													"url",
 													"normalizedUrl",
 													"normalizedUrlHash",
+													"createdByProfileId",
+													"viewerVote",
+													"score",
+													"voteCount",
+													"accepted",
+													"pinned",
 													"position",
 													"createdAt",
 													"updatedAt"
@@ -100556,11 +100925,65 @@
 													"url": { "type": "string" },
 													"normalizedUrl": { "type": "string" },
 													"normalizedUrlHash": { "type": "string" },
+													"createdByProfileId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"viewerVote": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"const": -1,
+																		"type": "number"
+																	},
+																	{ "const": 1, "type": "number" }
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"score": {
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "type": "integer" }
+														]
+													},
+													"voteCount": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"accepted": {
+														"const": true,
+														"type": "boolean"
+													},
+													"pinned": { "type": "boolean" },
 													"position": {
-														"format": "fractional-position",
-														"minLength": 2,
-														"maxLength": 512,
-														"type": "string"
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "fractional-position",
+																"minLength": 2,
+																"maxLength": 512,
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
 													},
 													"createdAt": {
 														"format": "date-time",
@@ -101069,6 +101492,7 @@
 												"canManageAccess",
 												"canManageAssociations",
 												"canCurateTags",
+												"canCurateReferences",
 												"canManageRealmPublications",
 												"hasDevelopmentPreviewAccess"
 											],
@@ -101077,6 +101501,14 @@
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
 												"canCurateTags": { "type": "boolean" },
+												"canCurateReferences": {
+													"type": "object",
+													"required": ["aliases", "sourceLinks"],
+													"properties": {
+														"aliases": { "type": "boolean" },
+														"sourceLinks": { "type": "boolean" }
+													}
+												},
 												"canManageRealmPublications": { "type": "boolean" },
 												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
@@ -107859,7 +108291,7 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["items"],
+									"required": ["items", "curationVersion"],
 									"properties": {
 										"items": {
 											"type": "array",
@@ -107873,9 +108305,12 @@
 													"language",
 													"kind",
 													"createdByProfileId",
+													"viewerVote",
 													"score",
 													"voteCount",
-													"searchable",
+													"accepted",
+													"pinned",
+													"position",
 													"createdAt",
 													"updatedAt"
 												],
@@ -107902,6 +108337,21 @@
 															{ "type": "null" }
 														]
 													},
+													"viewerVote": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"const": -1,
+																		"type": "number"
+																	},
+																	{ "const": 1, "type": "number" }
+																]
+															},
+															{ "type": "null" }
+														]
+													},
 													"score": {
 														"anyOf": [
 															{
@@ -107913,16 +108363,30 @@
 														]
 													},
 													"voteCount": {
+														"minimum": 0,
 														"anyOf": [
 															{
 																"format": "integer",
 																"default": 0,
 																"type": "string"
 															},
-															{ "type": "integer" }
+															{ "minimum": 0, "type": "integer" }
 														]
 													},
-													"searchable": { "type": "boolean" },
+													"accepted": { "type": "boolean" },
+													"pinned": { "type": "boolean" },
+													"position": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "fractional-position",
+																"minLength": 2,
+																"maxLength": 512,
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
+													},
 													"createdAt": {
 														"format": "date-time",
 														"type": "string"
@@ -107933,6 +108397,17 @@
 													}
 												}
 											}
+										},
+										"curationVersion": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
 										}
 									}
 								}
@@ -107999,7 +108474,7 @@
 				"x-rezics-quota-cost-units": 1
 			},
 			"post": {
-				"summary": "Add Unit alias",
+				"summary": "Propose Unit alias",
 				"tags": ["Units"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
@@ -108086,9 +108561,12 @@
 										"language",
 										"kind",
 										"createdByProfileId",
+										"viewerVote",
 										"score",
 										"voteCount",
-										"searchable",
+										"accepted",
+										"pinned",
+										"position",
 										"createdAt",
 										"updatedAt"
 									],
@@ -108109,6 +108587,18 @@
 												{ "type": "null" }
 											]
 										},
+										"viewerVote": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
 										"score": {
 											"anyOf": [
 												{
@@ -108120,16 +108610,30 @@
 											]
 										},
 										"voteCount": {
+											"minimum": 0,
 											"anyOf": [
 												{
 													"format": "integer",
 													"default": 0,
 													"type": "string"
 												},
-												{ "type": "integer" }
+												{ "minimum": 0, "type": "integer" }
 											]
 										},
-										"searchable": { "type": "boolean" },
+										"accepted": { "type": "boolean" },
+										"pinned": { "type": "boolean" },
+										"position": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"format": "fractional-position",
+													"minLength": 2,
+													"maxLength": 512,
+													"type": "string"
+												},
+												{ "type": "null" }
+											]
+										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" }
 									}
@@ -108158,11 +108662,11 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "UnitAccessRestricted",
 													"type": "string",
 													"enum": [
-														"UnitPermissionForbidden",
-														"UnitAccessRestricted"
+														"UnitAccessRestricted",
+														"UnitPermissionForbidden"
 													]
 												},
 												"message": { "type": "string" },
@@ -108262,177 +108766,6 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/v1/units/{type}/{unitId}/aliases/{aliasId}": {
-			"delete": {
-				"summary": "Delete Unit alias",
-				"tags": ["Units"],
-				"responses": {
-					"204": {
-						"description": "Response for status 204",
-						"content": { "type": "void" }
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "UnitPermissionForbidden",
-													"type": "string",
-													"enum": [
-														"UnitPermissionForbidden",
-														"UnitAccessRestricted"
-													]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Response for status 404",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "UnitNotFound",
-													"type": "string",
-													"enum": ["UnitNotFound", "AliasNotFound"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
-							}
-						}
-					},
-					"429": {
-						"description": "API quota exceeded",
-						"headers": {
-							"Retry-After": {
-								"description": "Seconds until the limiting window or concurrency lease can be retried",
-								"schema": { "type": "integer", "minimum": 1 }
-							}
-						},
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"type": "string",
-													"enum": [
-														"ApiQuotaExceeded",
-														"ApiTokenRateLimitExceeded"
-													]
-												},
-												"message": { "type": "string" },
-												"details": {
-													"$ref": "#/components/schemas/JsonValue"
-												}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
-				"parameters": [
-					{
-						"name": "type",
-						"in": "path",
-						"required": true,
-						"schema": {
-							"type": "string",
-							"enum": [
-								"slug_namespace",
-								"profile",
-								"book",
-								"software",
-								"media",
-								"video",
-								"audio",
-								"release",
-								"entity",
-								"label",
-								"tag",
-								"structure",
-								"series",
-								"zone",
-								"zone_page",
-								"collection",
-								"post",
-								"poll",
-								"realm",
-								"realm_rule"
-							]
-						}
-					},
-					{
-						"name": "unitId",
-						"in": "path",
-						"required": true,
-						"schema": { "format": "uuid", "type": "string" }
-					},
-					{
-						"name": "aliasId",
-						"in": "path",
-						"required": true,
-						"schema": { "format": "uuid", "type": "string" }
-					}
-				],
-				"operationId": "deleteApiUnitsByTypeByUnitIdAliasesByAliasId",
-				"x-rezics-quota-route-operation-id": "deleteApiUnitsByTypeByUnitIdAliasesByAliasId",
-				"x-rezics-quota-operation-id": "*",
-				"x-rezics-quota-cost-units": 1
-			}
-		},
 		"/api/v1/units/{type}/{unitId}/aliases/{aliasId}/vote": {
 			"put": {
 				"summary": "Vote on Unit alias",
@@ -108509,12 +108842,8 @@
 											"anyOf": [
 												{
 													"anyOf": [
-														{
-															"format": "integer",
-															"default": 0,
-															"type": "string"
-														},
-														{ "type": "integer" }
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
 													]
 												},
 												{ "type": "null" }
@@ -108531,13 +108860,14 @@
 											]
 										},
 										"voteCount": {
+											"minimum": 0,
 											"anyOf": [
 												{
 													"format": "integer",
 													"default": 0,
 													"type": "string"
 												},
-												{ "type": "integer" }
+												{ "minimum": 0, "type": "integer" }
 											]
 										}
 									}
@@ -108550,6 +108880,36 @@
 						"content": {
 							"application/json": {
 								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitAccessRestricted",
+													"type": "string",
+													"enum": [
+														"UnitAccessRestricted",
+														"UnitPermissionForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
 							}
 						}
 					},
@@ -108701,12 +109061,8 @@
 											"anyOf": [
 												{
 													"anyOf": [
-														{
-															"format": "integer",
-															"default": 0,
-															"type": "string"
-														},
-														{ "type": "integer" }
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
 													]
 												},
 												{ "type": "null" }
@@ -108723,15 +109079,46 @@
 											]
 										},
 										"voteCount": {
+											"minimum": 0,
 											"anyOf": [
 												{
 													"format": "integer",
 													"default": 0,
 													"type": "string"
 												},
-												{ "type": "integer" }
+												{ "minimum": 0, "type": "integer" }
 											]
 										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitAccessRestricted",
+													"type": "string",
+													"enum": [
+														"UnitAccessRestricted",
+														"UnitPermissionForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
 									}
 								}
 							}
@@ -108820,6 +109207,384 @@
 				},
 				"operationId": "deleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote",
 				"x-rezics-quota-route-operation-id": "deleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/units/{type}/{unitId}/aliases/{aliasId}": {
+			"patch": {
+				"summary": "Update Unit Alias curation",
+				"tags": ["Units"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "type",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"slug_namespace",
+								"profile",
+								"book",
+								"software",
+								"media",
+								"video",
+								"audio",
+								"release",
+								"entity",
+								"label",
+								"tag",
+								"structure",
+								"series",
+								"zone",
+								"zone_page",
+								"collection",
+								"post",
+								"poll",
+								"realm",
+								"realm_rule"
+							]
+						}
+					},
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "aliasId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"anyOf": [
+									{
+										"additionalProperties": false,
+										"type": "object",
+										"required": ["baseVersion", "pinned", "position"],
+										"properties": {
+											"baseVersion": {
+												"minimum": 0,
+												"anyOf": [
+													{
+														"format": "integer",
+														"default": 0,
+														"type": "string"
+													},
+													{ "minimum": 0, "type": "integer" }
+												]
+											},
+											"pinned": { "const": true, "type": "boolean" },
+											"position": {
+												"format": "fractional-position",
+												"minLength": 2,
+												"maxLength": 512,
+												"type": "string"
+											}
+										}
+									},
+									{
+										"additionalProperties": false,
+										"type": "object",
+										"required": ["baseVersion", "pinned", "position"],
+										"properties": {
+											"baseVersion": {
+												"minimum": 0,
+												"anyOf": [
+													{
+														"format": "integer",
+														"default": 0,
+														"type": "string"
+													},
+													{ "minimum": 0, "type": "integer" }
+												]
+											},
+											"pinned": { "const": false, "type": "boolean" },
+											"position": { "type": "null" }
+										}
+									}
+								]
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["candidate", "curationVersion"],
+									"properties": {
+										"candidate": {
+											"type": "object",
+											"required": [
+												"id",
+												"unitId",
+												"term",
+												"normalizedTerm",
+												"language",
+												"kind",
+												"createdByProfileId",
+												"viewerVote",
+												"score",
+												"voteCount",
+												"accepted",
+												"pinned",
+												"position",
+												"createdAt",
+												"updatedAt"
+											],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"unitId": { "format": "uuid", "type": "string" },
+												"term": { "type": "string" },
+												"normalizedTerm": { "type": "string" },
+												"language": {
+													"nullable": true,
+													"anyOf": [
+														{ "type": "string" },
+														{ "type": "null" }
+													]
+												},
+												"kind": { "type": "string" },
+												"createdByProfileId": {
+													"nullable": true,
+													"anyOf": [
+														{ "format": "uuid", "type": "string" },
+														{ "type": "null" }
+													]
+												},
+												"viewerVote": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"anyOf": [
+																{ "const": -1, "type": "number" },
+																{ "const": 1, "type": "number" }
+															]
+														},
+														{ "type": "null" }
+													]
+												},
+												"score": {
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "type": "integer" }
+													]
+												},
+												"voteCount": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"accepted": { "type": "boolean" },
+												"pinned": { "type": "boolean" },
+												"position": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"format": "fractional-position",
+															"minLength": 2,
+															"maxLength": 512,
+															"type": "string"
+														},
+														{ "type": "null" }
+													]
+												},
+												"createdAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"updatedAt": {
+													"format": "date-time",
+													"type": "string"
+												}
+											}
+										},
+										"curationVersion": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound", "AliasNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitReferenceCurationChanged",
+													"type": "string",
+													"enum": ["UnitReferenceCurationChanged"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": [
+														"ApiQuotaExceeded",
+														"ApiTokenRateLimitExceeded"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "patchApiUnitsByTypeByUnitIdAliasesByAliasId",
+				"x-rezics-quota-route-operation-id": "patchApiUnitsByTypeByUnitIdAliasesByAliasId",
 				"x-rezics-quota-operation-id": "*",
 				"x-rezics-quota-cost-units": 1
 			}
@@ -109893,7 +110658,7 @@
 		},
 		"/api/v1/units/{type}/{unitId}/links": {
 			"get": {
-				"summary": "List Unit external links",
+				"summary": "List Unit source-link candidates",
 				"tags": ["Units"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
@@ -109942,7 +110707,7 @@
 								"schema": {
 									"additionalProperties": false,
 									"type": "object",
-									"required": ["items"],
+									"required": ["items", "curationVersion"],
 									"properties": {
 										"items": {
 											"type": "array",
@@ -109956,6 +110721,12 @@
 													"url",
 													"normalizedUrl",
 													"normalizedUrlHash",
+													"createdByProfileId",
+													"viewerVote",
+													"score",
+													"voteCount",
+													"accepted",
+													"pinned",
 													"position",
 													"createdAt",
 													"updatedAt"
@@ -109973,11 +110744,62 @@
 													"url": { "type": "string" },
 													"normalizedUrl": { "type": "string" },
 													"normalizedUrlHash": { "type": "string" },
+													"createdByProfileId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"viewerVote": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"const": -1,
+																		"type": "number"
+																	},
+																	{ "const": 1, "type": "number" }
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"score": {
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "type": "integer" }
+														]
+													},
+													"voteCount": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"accepted": { "type": "boolean" },
+													"pinned": { "type": "boolean" },
 													"position": {
-														"format": "fractional-position",
-														"minLength": 2,
-														"maxLength": 512,
-														"type": "string"
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "fractional-position",
+																"minLength": 2,
+																"maxLength": 512,
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
 													},
 													"createdAt": {
 														"format": "date-time",
@@ -109989,6 +110811,17 @@
 													}
 												}
 											}
+										},
+										"curationVersion": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
 										}
 									}
 								}
@@ -110082,7 +110915,7 @@
 				"x-rezics-quota-cost-units": 1
 			},
 			"post": {
-				"summary": "Add Unit external link",
+				"summary": "Propose Unit source link",
 				"tags": ["Units"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
@@ -110136,13 +110969,7 @@
 										"pattern": "^[Hh][Tt][Tt][Pp][Ss]?://",
 										"type": "string"
 									},
-									"sourceEntityUnitId": { "format": "uuid", "type": "string" },
-									"position": {
-										"format": "fractional-position",
-										"minLength": 2,
-										"maxLength": 512,
-										"type": "string"
-									}
+									"sourceEntityUnitId": { "format": "uuid", "type": "string" }
 								}
 							}
 						}
@@ -110164,6 +110991,12 @@
 										"url",
 										"normalizedUrl",
 										"normalizedUrlHash",
+										"createdByProfileId",
+										"viewerVote",
+										"score",
+										"voteCount",
+										"accepted",
+										"pinned",
 										"position",
 										"createdAt",
 										"updatedAt"
@@ -110175,11 +111008,59 @@
 										"url": { "type": "string" },
 										"normalizedUrl": { "type": "string" },
 										"normalizedUrlHash": { "type": "string" },
+										"createdByProfileId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"viewerVote": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"score": {
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "type": "integer" }
+											]
+										},
+										"voteCount": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"accepted": { "type": "boolean" },
+										"pinned": { "type": "boolean" },
 										"position": {
-											"format": "fractional-position",
-											"minLength": 2,
-											"maxLength": 512,
-											"type": "string"
+											"nullable": true,
+											"anyOf": [
+												{
+													"format": "fractional-position",
+													"minLength": 2,
+													"maxLength": 512,
+													"type": "string"
+												},
+												{ "type": "null" }
+											]
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" }
@@ -110209,11 +111090,11 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "UnitAccessRestricted",
 													"type": "string",
 													"enum": [
-														"UnitPermissionForbidden",
-														"UnitAccessRestricted"
+														"UnitAccessRestricted",
+														"UnitPermissionForbidden"
 													]
 												},
 												"message": { "type": "string" },
@@ -110313,14 +111194,122 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/v1/units/{type}/{unitId}/links/{linkId}": {
-			"delete": {
-				"summary": "Remove Unit external link",
+		"/api/v1/units/{type}/{unitId}/links/{linkId}/vote": {
+			"put": {
+				"summary": "Vote on Unit source link",
 				"tags": ["Units"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "type",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"slug_namespace",
+								"profile",
+								"book",
+								"software",
+								"media",
+								"video",
+								"audio",
+								"release",
+								"entity",
+								"label",
+								"tag",
+								"structure",
+								"series",
+								"zone",
+								"zone_page",
+								"collection",
+								"post",
+								"poll",
+								"realm",
+								"realm_rule"
+							]
+						}
+					},
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "linkId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["value"],
+								"properties": { "value": { "type": "string", "enum": [-1, 1] } }
+							}
+						}
+					},
+					"required": true
+				},
 				"responses": {
-					"204": {
-						"description": "Response for status 204",
-						"content": { "type": "void" }
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["value", "score", "voteCount"],
+									"properties": {
+										"value": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"score": {
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "type": "integer" }
+											]
+										},
+										"voteCount": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
 					},
 					"403": {
 						"description": "Response for status 403",
@@ -110335,11 +111324,11 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "UnitAccessRestricted",
 													"type": "string",
 													"enum": [
-														"UnitPermissionForbidden",
-														"UnitAccessRestricted"
+														"UnitAccessRestricted",
+														"UnitPermissionForbidden"
 													]
 												},
 												"message": { "type": "string" },
@@ -110436,6 +111425,14 @@
 						}
 					}
 				},
+				"operationId": "putApiUnitsByTypeByUnitIdLinksByLinkIdVote",
+				"x-rezics-quota-route-operation-id": "putApiUnitsByTypeByUnitIdLinksByLinkIdVote",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			},
+			"delete": {
+				"summary": "Remove Unit source link vote",
+				"tags": ["Units"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
 					{
@@ -110481,8 +111478,548 @@
 						"schema": { "format": "uuid", "type": "string" }
 					}
 				],
-				"operationId": "deleteApiUnitsByTypeByUnitIdLinksByLinkId",
-				"x-rezics-quota-route-operation-id": "deleteApiUnitsByTypeByUnitIdLinksByLinkId",
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["value", "score", "voteCount"],
+									"properties": {
+										"value": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"score": {
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "type": "integer" }
+											]
+										},
+										"voteCount": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitAccessRestricted",
+													"type": "string",
+													"enum": [
+														"UnitAccessRestricted",
+														"UnitPermissionForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"UnitSourceLinkNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": [
+														"ApiQuotaExceeded",
+														"ApiTokenRateLimitExceeded"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "deleteApiUnitsByTypeByUnitIdLinksByLinkIdVote",
+				"x-rezics-quota-route-operation-id": "deleteApiUnitsByTypeByUnitIdLinksByLinkIdVote",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/units/{type}/{unitId}/links/{linkId}": {
+			"patch": {
+				"summary": "Update Unit source link curation",
+				"tags": ["Units"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "type",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"slug_namespace",
+								"profile",
+								"book",
+								"software",
+								"media",
+								"video",
+								"audio",
+								"release",
+								"entity",
+								"label",
+								"tag",
+								"structure",
+								"series",
+								"zone",
+								"zone_page",
+								"collection",
+								"post",
+								"poll",
+								"realm",
+								"realm_rule"
+							]
+						}
+					},
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "linkId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"anyOf": [
+									{
+										"additionalProperties": false,
+										"type": "object",
+										"required": ["baseVersion", "pinned", "position"],
+										"properties": {
+											"baseVersion": {
+												"minimum": 0,
+												"anyOf": [
+													{
+														"format": "integer",
+														"default": 0,
+														"type": "string"
+													},
+													{ "minimum": 0, "type": "integer" }
+												]
+											},
+											"pinned": { "const": true, "type": "boolean" },
+											"position": {
+												"format": "fractional-position",
+												"minLength": 2,
+												"maxLength": 512,
+												"type": "string"
+											}
+										}
+									},
+									{
+										"additionalProperties": false,
+										"type": "object",
+										"required": ["baseVersion", "pinned", "position"],
+										"properties": {
+											"baseVersion": {
+												"minimum": 0,
+												"anyOf": [
+													{
+														"format": "integer",
+														"default": 0,
+														"type": "string"
+													},
+													{ "minimum": 0, "type": "integer" }
+												]
+											},
+											"pinned": { "const": false, "type": "boolean" },
+											"position": { "type": "null" }
+										}
+									}
+								]
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["candidate", "curationVersion"],
+									"properties": {
+										"candidate": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": [
+												"id",
+												"unitId",
+												"sourceEntityId",
+												"url",
+												"normalizedUrl",
+												"normalizedUrlHash",
+												"createdByProfileId",
+												"viewerVote",
+												"score",
+												"voteCount",
+												"accepted",
+												"pinned",
+												"position",
+												"createdAt",
+												"updatedAt"
+											],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"unitId": { "format": "uuid", "type": "string" },
+												"sourceEntityId": {
+													"format": "uuid",
+													"type": "string"
+												},
+												"url": { "type": "string" },
+												"normalizedUrl": { "type": "string" },
+												"normalizedUrlHash": { "type": "string" },
+												"createdByProfileId": {
+													"nullable": true,
+													"anyOf": [
+														{ "format": "uuid", "type": "string" },
+														{ "type": "null" }
+													]
+												},
+												"viewerVote": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"anyOf": [
+																{ "const": -1, "type": "number" },
+																{ "const": 1, "type": "number" }
+															]
+														},
+														{ "type": "null" }
+													]
+												},
+												"score": {
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "type": "integer" }
+													]
+												},
+												"voteCount": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"accepted": { "type": "boolean" },
+												"pinned": { "type": "boolean" },
+												"position": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"format": "fractional-position",
+															"minLength": 2,
+															"maxLength": 512,
+															"type": "string"
+														},
+														{ "type": "null" }
+													]
+												},
+												"createdAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"updatedAt": {
+													"format": "date-time",
+													"type": "string"
+												}
+											}
+										},
+										"curationVersion": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"UnitSourceLinkNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitReferenceCurationChanged",
+													"type": "string",
+													"enum": ["UnitReferenceCurationChanged"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": [
+														"ApiQuotaExceeded",
+														"ApiTokenRateLimitExceeded"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "patchApiUnitsByTypeByUnitIdLinksByLinkId",
+				"x-rezics-quota-route-operation-id": "patchApiUnitsByTypeByUnitIdLinksByLinkId",
 				"x-rezics-quota-operation-id": "*",
 				"x-rezics-quota-cost-units": 1
 			}
@@ -111271,12 +112808,8 @@
 											"anyOf": [
 												{
 													"anyOf": [
-														{
-															"format": "integer",
-															"default": 0,
-															"type": "string"
-														},
-														{ "type": "integer" }
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
 													]
 												},
 												{ "type": "null" }
@@ -111293,13 +112826,14 @@
 											]
 										},
 										"voteCount": {
+											"minimum": 0,
 											"anyOf": [
 												{
 													"format": "integer",
 													"default": 0,
 													"type": "string"
 												},
-												{ "type": "integer" }
+												{ "minimum": 0, "type": "integer" }
 											]
 										}
 									}
@@ -111507,12 +113041,8 @@
 											"anyOf": [
 												{
 													"anyOf": [
-														{
-															"format": "integer",
-															"default": 0,
-															"type": "string"
-														},
-														{ "type": "integer" }
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
 													]
 												},
 												{ "type": "null" }
@@ -111529,13 +113059,14 @@
 											]
 										},
 										"voteCount": {
+											"minimum": 0,
 											"anyOf": [
 												{
 													"format": "integer",
 													"default": 0,
 													"type": "string"
 												},
-												{ "type": "integer" }
+												{ "minimum": 0, "type": "integer" }
 											]
 										}
 									}

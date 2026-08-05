@@ -44,9 +44,7 @@ import {
 	unit,
 	UnitKindValues,
 	VariantCapableUnitKindValues,
-	unitAlias,
 	creditAttribution,
-	unitSourceLink,
 	unitLocalization,
 	unitRevision,
 	unitRevisionHead,
@@ -139,10 +137,8 @@ const UnitSnapshotSchema = z.object({
 	extension: SnapshotRowSchema.nullable(),
 	preference: SnapshotRowSchema.nullable(),
 	owned: z.object({
-		aliases: z.array(SnapshotRowSchema),
 		credits: z.array(SnapshotRowSchema),
 		subjectAssociations: z.array(SnapshotRowSchema),
-		links: z.array(SnapshotRowSchema),
 		tags: z.array(SnapshotRowSchema),
 		structureApplications: z.array(SnapshotRowSchema),
 		variants: z.array(SnapshotRowSchema),
@@ -234,9 +230,6 @@ const pollStateSchema = schemaFactory
 const unitStructureStateSchema = schemaFactory
 	.createSelectSchema(unitStructure)
 	.omit({ id: true, createdAt: true, updatedAt: true });
-const unitAliasRowSchema = schemaFactory.createSelectSchema(unitAlias, {
-	language: z.enum(ContentLanguageValues).nullable(),
-});
 const creditAttributionRowSchema = schemaFactory.createSelectSchema(creditAttribution, {
 	position: FractionalPositionSchema,
 	role: z.enum(CreditAttributionRoleValues),
@@ -244,9 +237,6 @@ const creditAttributionRowSchema = schemaFactory.createSelectSchema(creditAttrib
 const subjectAssociationRowSchema = schemaFactory.createSelectSchema(subjectAssociation, {
 	position: FractionalPositionSchema,
 	role: z.enum(SubjectAssociationRoleValues),
-});
-const unitSourceLinkRowSchema = schemaFactory.createSelectSchema(unitSourceLink, {
-	position: FractionalPositionSchema,
 });
 const unitTagRowSchema = schemaFactory.createSelectSchema(unitTag, {
 	position: FractionalPositionSchema.nullable(),
@@ -426,11 +416,6 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 		.from(unitLocalization)
 		.where(eq(unitLocalization.unitId, unitId))
 		.orderBy(unitLocalization.language);
-	const aliases = await tx
-		.select()
-		.from(unitAlias)
-		.where(eq(unitAlias.unitId, unitId))
-		.orderBy(unitAlias.id);
 	const credits = await tx
 		.select()
 		.from(creditAttribution)
@@ -441,11 +426,6 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 		.from(subjectAssociation)
 		.where(eq(subjectAssociation.unitId, unitId))
 		.orderBy(subjectAssociation.id);
-	const links = await tx
-		.select()
-		.from(unitSourceLink)
-		.where(eq(unitSourceLink.unitId, unitId))
-		.orderBy(unitSourceLink.id);
 	const tags = await tx
 		.select()
 		.from(unitTag)
@@ -464,10 +444,8 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 
 	const empty: SnapshotRow[] = [];
 	const owned: UnitSnapshot["owned"] = {
-		aliases,
 		credits,
 		subjectAssociations,
-		links,
 		tags,
 		structureApplications,
 		variants,
@@ -614,18 +592,6 @@ async function restoreExtension(
 				});
 			break;
 		}
-	}
-}
-
-async function restoreAliases(tx: DatabaseTransaction, unitId: string, rows: SnapshotRow[]) {
-	await tx.update(unitAlias).set({ deletedAt: new Date() }).where(eq(unitAlias.unitId, unitId));
-	for (const value of rows) {
-		const row = unitAliasRowSchema.parse(value);
-		const { createdAt: _createdAt, updatedAt: _updatedAt, ...state } = row;
-		await tx
-			.insert(unitAlias)
-			.values(row)
-			.onConflictDoUpdate({ target: unitAlias.id, set: state });
 	}
 }
 
@@ -781,21 +747,15 @@ export async function restoreUnitSnapshot(
 			})),
 		);
 	await restoreExtension(tx, unitId, snapshot.kind, snapshot.extension);
-	await restoreAliases(tx, unitId, snapshot.owned.aliases);
 	if (snapshot.kind === "software")
 		await tx.delete(softwareRequirement).where(eq(softwareRequirement.softwareId, unitId));
 	await tx.delete(creditAttribution).where(eq(creditAttribution.sourceUnitId, unitId));
 	await tx.delete(subjectAssociation).where(eq(subjectAssociation.unitId, unitId));
-	await tx.delete(unitSourceLink).where(eq(unitSourceLink.unitId, unitId));
 	await tx.delete(unitTag).where(eq(unitTag.unitId, unitId));
 	await tx.delete(unitStructureApplication).where(eq(unitStructureApplication.unitId, unitId));
 	await tx.delete(unitVariant).where(eq(unitVariant.variantUnitId, unitId));
 	if (snapshot.owned.credits.length) await tx.insert(creditAttribution).values(credits);
 	if (subjectAssociations.length) await tx.insert(subjectAssociation).values(subjectAssociations);
-	if (snapshot.owned.links.length)
-		await tx
-			.insert(unitSourceLink)
-			.values(snapshot.owned.links.map((row) => unitSourceLinkRowSchema.parse(row)));
 	if (snapshot.owned.tags.length)
 		await tx
 			.insert(unitTag)
@@ -896,10 +856,8 @@ function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 			model: SlotModels.relations,
 			payload: {
 				version: UnitRevisionSlotSchemaVersions.relations,
-				aliases: snapshot.owned.aliases,
 				credits: snapshot.owned.credits,
 				subjectAssociations: snapshot.owned.subjectAssociations,
-				links: snapshot.owned.links,
 				tags: snapshot.owned.tags,
 				structureApplications: snapshot.owned.structureApplications,
 				variants: snapshot.owned.variants,
@@ -998,10 +956,8 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 		extension: main.extension,
 		preference: null,
 		owned: {
-			aliases: relations.aliases,
 			credits: relations.credits,
 			subjectAssociations: relations.subjectAssociations,
-			links: relations.links,
 			tags: relations.tags,
 			structureApplications: relations.structureApplications,
 			variants: relations.variants,

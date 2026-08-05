@@ -1,3 +1,7 @@
+import { sql, type SQLWrapper } from "drizzle-orm";
+
+import { compareBytewisePositions } from "../ordering/position";
+
 export interface GlobalTagRankInput {
 	readonly tagId: string;
 	readonly pinned: boolean;
@@ -69,7 +73,7 @@ export function compareGlobalTagRank(left: GlobalTagRankInput, right: GlobalTagR
 			? 1
 			: right.position === null
 				? -1
-				: left.position.localeCompare(right.position);
+				: compareBytewisePositions(left.position, right.position);
 	const confidence =
 		wilsonLowerBound(right.score, right.voteCount) -
 		wilsonLowerBound(left.score, left.voteCount);
@@ -81,7 +85,6 @@ export function compareGlobalTagRank(left: GlobalTagRankInput, right: GlobalTagR
 			? 1
 			: right.position === null
 				? -1
-				: left.position.localeCompare(right.position);
-	return left.tagId.localeCompare(right.tagId);
+				: compareBytewisePositions(left.position, right.position);
+	return compareBytewisePositions(left.tagId, right.tagId);
 }
-import { sql, type SQLWrapper } from "drizzle-orm";

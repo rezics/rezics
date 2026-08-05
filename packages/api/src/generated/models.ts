@@ -5477,6 +5477,7 @@ export const ApiErrorCode = {
 	TagApplicationNotFound: "TagApplicationNotFound",
 	UnitTagCurationChanged: "UnitTagCurationChanged",
 	UnitSourceLinkNotFound: "UnitSourceLinkNotFound",
+	UnitReferenceCurationChanged: "UnitReferenceCurationChanged",
 	InvalidMessageCursor: "InvalidMessageCursor",
 	ConversationNotFound: "ConversationNotFound",
 	ConversationParticipantsInvalid: "ConversationParticipantsInvalid",
@@ -25325,6 +25326,7 @@ export const GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum = {
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.reference-curation.manage": "unit.reference-curation.manage",
 	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -25378,6 +25380,7 @@ export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum = {
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.reference-curation.manage": "unit.reference-curation.manage",
 	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -25408,6 +25411,7 @@ export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.reference-curation.manage": "unit.reference-curation.manage",
 	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -25438,6 +25442,7 @@ export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsInheritedEnum = 
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.reference-curation.manage": "unit.reference-curation.manage",
 	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -25685,6 +25690,7 @@ export const PutApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum = {
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.reference-curation.manage": "unit.reference-curation.manage",
 	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -25738,6 +25744,7 @@ export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum = {
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.reference-curation.manage": "unit.reference-curation.manage",
 	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -25768,6 +25775,7 @@ export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.reference-curation.manage": "unit.reference-curation.manage",
 	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -25798,6 +25806,7 @@ export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsInheritedEnum = 
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.reference-curation.manage": "unit.reference-curation.manage",
 	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -26082,6 +26091,7 @@ export const PutApiGovernanceUnitByUnitIdAccessRequestGrantsEnum = {
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.reference-curation.manage": "unit.reference-curation.manage",
 	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -26112,6 +26122,7 @@ export const PutApiGovernanceUnitByUnitIdAccessRequestRestrictionsEnum = {
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.reference-curation.manage": "unit.reference-curation.manage",
 	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -26454,6 +26465,7 @@ export const GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsPermis
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.reference-curation.manage": "unit.reference-curation.manage",
 	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -27158,6 +27170,7 @@ export const GetApiGovernanceUnitAccessInvitationsStatus200ItemsPermissionsEnum 
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.reference-curation.manage": "unit.reference-curation.manage",
 	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -27327,6 +27340,7 @@ export const GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsPermissi
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.reference-curation.manage": "unit.reference-curation.manage",
 	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -27554,6 +27568,7 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200PermissionsE
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.reference-curation.manage": "unit.reference-curation.manage",
 	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -27812,6 +27827,7 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsRequestPermissionsEnu
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.tag-curation.manage": "unit.tag-curation.manage",
+	"unit.reference-curation.manage": "unit.reference-curation.manage",
 	"unit.realm-publication.manage": "unit.realm-publication.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -27928,6 +27944,7 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptS
 		"unit.access.manage": "unit.access.manage",
 		"unit.association.manage": "unit.association.manage",
 		"unit.tag-curation.manage": "unit.tag-curation.manage",
+		"unit.reference-curation.manage": "unit.reference-curation.manage",
 		"unit.realm-publication.manage": "unit.realm-publication.manage",
 		"realm.contribute": "realm.contribute",
 		"realm.units.create": "realm.units.create",
@@ -28174,6 +28191,7 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecline
 		"unit.access.manage": "unit.access.manage",
 		"unit.association.manage": "unit.association.manage",
 		"unit.tag-curation.manage": "unit.tag-curation.manage",
+		"unit.reference-curation.manage": "unit.reference-curation.manage",
 		"unit.realm-publication.manage": "unit.realm-publication.manage",
 		"realm.contribute": "realm.contribute",
 		"realm.units.create": "realm.units.create",
@@ -60092,14 +60110,19 @@ export type PostApiUnitsByTypeStatus200 = {
 		 * @type string
 		 */
 		normalizedUrlHash: string;
+		createdByProfileId: (string | null) | null;
+		viewerVote: ((-1 | 1) | null) | null;
+		score: string | number;
+		voteCount: string | number;
 		/**
-		 * @description
-		 * Format: `fractional-position`
-		 * @minLength 2
-		 * @maxLength 512
-		 * @type string
+		 * @type boolean
 		 */
-		position: string;
+		accepted: true;
+		/**
+		 * @type boolean
+		 */
+		pinned: boolean;
+		position: (string | null) | null;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -60426,6 +60449,19 @@ export type PostApiUnitsByTypeStatus200 = {
 		 * @type boolean
 		 */
 		canCurateTags: boolean;
+		/**
+		 * @type object
+		 */
+		canCurateReferences: {
+			/**
+			 * @type boolean
+			 */
+			aliases: boolean;
+			/**
+			 * @type boolean
+			 */
+			sourceLinks: boolean;
+		};
 		/**
 		 * @type boolean
 		 */
@@ -62480,14 +62516,19 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		 * @type string
 		 */
 		normalizedUrlHash: string;
+		createdByProfileId: (string | null) | null;
+		viewerVote: ((-1 | 1) | null) | null;
+		score: string | number;
+		voteCount: string | number;
 		/**
-		 * @description
-		 * Format: `fractional-position`
-		 * @minLength 2
-		 * @maxLength 512
-		 * @type string
+		 * @type boolean
 		 */
-		position: string;
+		accepted: true;
+		/**
+		 * @type boolean
+		 */
+		pinned: boolean;
+		position: (string | null) | null;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -62814,6 +62855,19 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		 * @type boolean
 		 */
 		canCurateTags: boolean;
+		/**
+		 * @type object
+		 */
+		canCurateReferences: {
+			/**
+			 * @type boolean
+			 */
+			aliases: boolean;
+			/**
+			 * @type boolean
+			 */
+			sourceLinks: boolean;
+		};
 		/**
 		 * @type boolean
 		 */
@@ -63948,14 +64002,19 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		 * @type string
 		 */
 		normalizedUrlHash: string;
+		createdByProfileId: (string | null) | null;
+		viewerVote: ((-1 | 1) | null) | null;
+		score: string | number;
+		voteCount: string | number;
 		/**
-		 * @description
-		 * Format: `fractional-position`
-		 * @minLength 2
-		 * @maxLength 512
-		 * @type string
+		 * @type boolean
 		 */
-		position: string;
+		accepted: true;
+		/**
+		 * @type boolean
+		 */
+		pinned: boolean;
+		position: (string | null) | null;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -64282,6 +64341,19 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		 * @type boolean
 		 */
 		canCurateTags: boolean;
+		/**
+		 * @type object
+		 */
+		canCurateReferences: {
+			/**
+			 * @type boolean
+			 */
+			aliases: boolean;
+			/**
+			 * @type boolean
+			 */
+			sourceLinks: boolean;
+		};
 		/**
 		 * @type boolean
 		 */
@@ -65715,14 +65787,19 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 		 * @type string
 		 */
 		normalizedUrlHash: string;
+		createdByProfileId: (string | null) | null;
+		viewerVote: ((-1 | 1) | null) | null;
+		score: string | number;
+		voteCount: string | number;
 		/**
-		 * @description
-		 * Format: `fractional-position`
-		 * @minLength 2
-		 * @maxLength 512
-		 * @type string
+		 * @type boolean
 		 */
-		position: string;
+		accepted: true;
+		/**
+		 * @type boolean
+		 */
+		pinned: boolean;
+		position: (string | null) | null;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -66049,6 +66126,19 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 		 * @type boolean
 		 */
 		canCurateTags: boolean;
+		/**
+		 * @type object
+		 */
+		canCurateReferences: {
+			/**
+			 * @type boolean
+			 */
+			aliases: boolean;
+			/**
+			 * @type boolean
+			 */
+			sourceLinks: boolean;
+		};
 		/**
 		 * @type boolean
 		 */
@@ -67364,14 +67454,19 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 		 * @type string
 		 */
 		normalizedUrlHash: string;
+		createdByProfileId: (string | null) | null;
+		viewerVote: ((-1 | 1) | null) | null;
+		score: string | number;
+		voteCount: string | number;
 		/**
-		 * @description
-		 * Format: `fractional-position`
-		 * @minLength 2
-		 * @maxLength 512
-		 * @type string
+		 * @type boolean
 		 */
-		position: string;
+		accepted: true;
+		/**
+		 * @type boolean
+		 */
+		pinned: boolean;
+		position: (string | null) | null;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -67698,6 +67793,19 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 		 * @type boolean
 		 */
 		canCurateTags: boolean;
+		/**
+		 * @type object
+		 */
+		canCurateReferences: {
+			/**
+			 * @type boolean
+			 */
+			aliases: boolean;
+			/**
+			 * @type boolean
+			 */
+			sourceLinks: boolean;
+		};
 		/**
 		 * @type boolean
 		 */
@@ -69023,14 +69131,19 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		 * @type string
 		 */
 		normalizedUrlHash: string;
+		createdByProfileId: (string | null) | null;
+		viewerVote: ((-1 | 1) | null) | null;
+		score: string | number;
+		voteCount: string | number;
 		/**
-		 * @description
-		 * Format: `fractional-position`
-		 * @minLength 2
-		 * @maxLength 512
-		 * @type string
+		 * @type boolean
 		 */
-		position: string;
+		accepted: true;
+		/**
+		 * @type boolean
+		 */
+		pinned: boolean;
+		position: (string | null) | null;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -69357,6 +69470,19 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		 * @type boolean
 		 */
 		canCurateTags: boolean;
+		/**
+		 * @type object
+		 */
+		canCurateReferences: {
+			/**
+			 * @type boolean
+			 */
+			aliases: boolean;
+			/**
+			 * @type boolean
+			 */
+			sourceLinks: boolean;
+		};
 		/**
 		 * @type boolean
 		 */
@@ -75160,12 +75286,18 @@ export type GetApiUnitsByTypeByUnitIdAliasesStatus200 = {
 		 */
 		kind: string;
 		createdByProfileId: (string | null) | null;
+		viewerVote: ((-1 | 1) | null) | null;
 		score: string | number;
 		voteCount: string | number;
 		/**
 		 * @type boolean
 		 */
-		searchable: boolean;
+		accepted: boolean;
+		/**
+		 * @type boolean
+		 */
+		pinned: boolean;
+		position: (string | null) | null;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -75179,6 +75311,7 @@ export type GetApiUnitsByTypeByUnitIdAliasesStatus200 = {
 		 */
 		updatedAt: string;
 	}[];
+	curationVersion: string | number;
 };
 
 /**
@@ -75324,12 +75457,18 @@ export type PostApiUnitsByTypeByUnitIdAliasesStatus200 = {
 	 */
 	kind: string;
 	createdByProfileId: (string | null) | null;
+	viewerVote: ((-1 | 1) | null) | null;
 	score: string | number;
 	voteCount: string | number;
 	/**
 	 * @type boolean
 	 */
-	searchable: boolean;
+	accepted: boolean;
+	/**
+	 * @type boolean
+	 */
+	pinned: boolean;
+	position: (string | null) | null;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -75350,8 +75489,8 @@ export type PostApiUnitsByTypeByUnitIdAliasesStatus200 = {
 export type PostApiUnitsByTypeByUnitIdAliasesStatus400 = MalformedRequestBody;
 
 export const PostApiUnitsByTypeByUnitIdAliasesStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
 } as const;
 
 export type PostApiUnitsByTypeByUnitIdAliasesStatus403ErrorCodeEnum =
@@ -75366,7 +75505,7 @@ export type PostApiUnitsByTypeByUnitIdAliasesStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'UnitAccessRestricted'
 		 * @type string
 		 */
 		code: PostApiUnitsByTypeByUnitIdAliasesStatus403ErrorCodeEnum;
@@ -75536,206 +75675,6 @@ export type PostApiUnitsByTypeByUnitIdAliasesResponse =
 	| PostApiUnitsByTypeByUnitIdAliasesStatus429
 	| PostApiUnitsByTypeByUnitIdAliasesStatus500;
 
-export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdType = {
-	slug_namespace: "slug_namespace",
-	profile: "profile",
-	book: "book",
-	software: "software",
-	media: "media",
-	video: "video",
-	audio: "audio",
-	release: "release",
-	entity: "entity",
-	label: "label",
-	tag: "tag",
-	structure: "structure",
-	series: "series",
-	zone: "zone",
-	zone_page: "zone_page",
-	collection: "collection",
-	post: "post",
-	poll: "poll",
-	realm: "realm",
-	realm_rule: "realm_rule",
-} as const;
-
-export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdType =
-	(typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdType)[keyof typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdType];
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdPath = {
-	/**
-	 * @type string
-	 */
-	type: DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdType;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	aliasId: string;
-};
-
-/**
- * @type void
- */
-export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus204 = void;
-
-export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitAccessRestricted: "UnitAccessRestricted",
-} as const;
-
-export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitPermissionForbidden'
-		 * @type string
-		 */
-		code: DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	AliasNotFound: "AliasNotFound",
-} as const;
-
-export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus422 = ValidationError;
-
-export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429ErrorCodeEnum = {
-	ApiQuotaExceeded: "ApiQuotaExceeded",
-	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
-} as const;
-
-export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdOptions = {
-	body?: never;
-	path: DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdResponses = {
-	"204": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus204;
-	"403": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403;
-	"404": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404;
-	"422": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus422;
-	"429": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429;
-	"500": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdResponse =
-	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus204
-	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403
-	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404
-	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus422
-	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429
-	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus500;
-
 export const PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteType = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -75788,7 +75727,7 @@ export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVotePath = {
  * @type object
  */
 export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200 = {
-	value: ((string | number) | null) | null;
+	value: ((-1 | 1) | null) | null;
 	score: string | number;
 	voteCount: string | number;
 };
@@ -75797,6 +75736,42 @@ export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200 = {
  * @type object
  */
 export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus400 = MalformedRequestBody;
+
+export const PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus403ErrorCodeEnum = {
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus403ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus403ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitAccessRestricted'
+		 * @type string
+		 */
+		code: PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 export const PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
@@ -75910,6 +75885,7 @@ export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions = {
 export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponses = {
 	"200": PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200;
 	"400": PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus400;
+	"403": PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus403;
 	"404": PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404;
 	"422": PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422;
 	"429": PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429;
@@ -75922,6 +75898,7 @@ export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponses = {
 export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponse =
 	| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200
 	| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus400
+	| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus403
 	| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 	| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
 	| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429
@@ -75979,9 +75956,45 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVotePath = {
  * @type object
  */
 export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200 = {
-	value: ((string | number) | null) | null;
+	value: ((-1 | 1) | null) | null;
 	score: string | number;
 	voteCount: string | number;
+};
+
+export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus403ErrorCodeEnum = {
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus403ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitAccessRestricted'
+		 * @type string
+		 */
+		code: DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
 };
 
 export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404ErrorCodeEnum = {
@@ -76077,6 +76090,7 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions = {
  */
 export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponses = {
 	"200": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200;
+	"403": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus403;
 	"404": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404;
 	"422": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422;
 	"429": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429;
@@ -76088,10 +76102,333 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponses = {
  */
 export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponse =
 	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200
+	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus403
 	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
 	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429
 	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500;
+
+export const PatchApiUnitsByTypeByUnitIdAliasesByAliasIdType = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdAliasesByAliasIdType =
+	(typeof PatchApiUnitsByTypeByUnitIdAliasesByAliasIdType)[keyof typeof PatchApiUnitsByTypeByUnitIdAliasesByAliasIdType];
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdAliasesByAliasIdPath = {
+	/**
+	 * @type string
+	 */
+	type: PatchApiUnitsByTypeByUnitIdAliasesByAliasIdType;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	aliasId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus200 = {
+	/**
+	 * @type object
+	 */
+	candidate: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @type string
+		 */
+		term: string;
+		/**
+		 * @type string
+		 */
+		normalizedTerm: string;
+		language: (string | null) | null;
+		/**
+		 * @type string
+		 */
+		kind: string;
+		createdByProfileId: (string | null) | null;
+		viewerVote: ((-1 | 1) | null) | null;
+		score: string | number;
+		voteCount: string | number;
+		/**
+		 * @type boolean
+		 */
+		accepted: boolean;
+		/**
+		 * @type boolean
+		 */
+		pinned: boolean;
+		position: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	};
+	curationVersion: string | number;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus400 = MalformedRequestBody;
+
+export const PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	AliasNotFound: "AliasNotFound",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404ErrorCodeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitReferenceCurationChanged'
+		 * @type string
+		 */
+		code: "UnitReferenceCurationChanged";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus422 = ValidationError;
+
+export const PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429ErrorCodeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus500 = InternalError;
+
+export type PatchApiUnitsByTypeByUnitIdAliasesByAliasIdBody =
+	| {
+			baseVersion: string | number;
+			/**
+			 * @type boolean
+			 */
+			pinned: true;
+			/**
+			 * @description
+			 * Format: `fractional-position`
+			 * @minLength 2
+			 * @maxLength 512
+			 * @type string
+			 */
+			position: string;
+	  }
+	| {
+			baseVersion: string | number;
+			/**
+			 * @type boolean
+			 */
+			pinned: false;
+			/**
+			 * @type null
+			 */
+			position: null;
+	  };
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdAliasesByAliasIdOptions = {
+	body: PatchApiUnitsByTypeByUnitIdAliasesByAliasIdBody;
+	path: PatchApiUnitsByTypeByUnitIdAliasesByAliasIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdAliasesByAliasIdResponses = {
+	"200": PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus200;
+	"400": PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus400;
+	"403": PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403;
+	"404": PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404;
+	"409": PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus409;
+	"422": PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus422;
+	"429": PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429;
+	"500": PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PatchApiUnitsByTypeByUnitIdAliasesByAliasIdResponse =
+	| PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus200
+	| PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus400
+	| PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403
+	| PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404
+	| PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus409
+	| PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus422
+	| PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429
+	| PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus500;
 
 /**
  * @type object
@@ -77260,14 +77597,19 @@ export type GetApiUnitsByTypeByUnitIdLinksStatus200 = {
 		 * @type string
 		 */
 		normalizedUrlHash: string;
+		createdByProfileId: (string | null) | null;
+		viewerVote: ((-1 | 1) | null) | null;
+		score: string | number;
+		voteCount: string | number;
 		/**
-		 * @description
-		 * Format: `fractional-position`
-		 * @minLength 2
-		 * @maxLength 512
-		 * @type string
+		 * @type boolean
 		 */
-		position: string;
+		accepted: boolean;
+		/**
+		 * @type boolean
+		 */
+		pinned: boolean;
+		position: (string | null) | null;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -77281,6 +77623,7 @@ export type GetApiUnitsByTypeByUnitIdLinksStatus200 = {
 		 */
 		updatedAt: string;
 	}[];
+	curationVersion: string | number;
 };
 
 /**
@@ -77460,14 +77803,19 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus200 = {
 	 * @type string
 	 */
 	normalizedUrlHash: string;
+	createdByProfileId: (string | null) | null;
+	viewerVote: ((-1 | 1) | null) | null;
+	score: string | number;
+	voteCount: string | number;
 	/**
-	 * @description
-	 * Format: `fractional-position`
-	 * @minLength 2
-	 * @maxLength 512
-	 * @type string
+	 * @type boolean
 	 */
-	position: string;
+	accepted: boolean;
+	/**
+	 * @type boolean
+	 */
+	pinned: boolean;
+	position: (string | null) | null;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -77488,8 +77836,8 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus200 = {
 export type PostApiUnitsByTypeByUnitIdLinksStatus400 = MalformedRequestBody;
 
 export const PostApiUnitsByTypeByUnitIdLinksStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
 } as const;
 
 export type PostApiUnitsByTypeByUnitIdLinksStatus403ErrorCodeEnum =
@@ -77504,7 +77852,7 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'UnitAccessRestricted'
 		 * @type string
 		 */
 		code: PostApiUnitsByTypeByUnitIdLinksStatus403ErrorCodeEnum;
@@ -77617,14 +77965,6 @@ export type PostApiUnitsByTypeByUnitIdLinksBody = {
 	 * @type string
 	 */
 	sourceEntityUnitId: string;
-	/**
-	 * @description
-	 * Format: `fractional-position`
-	 * @minLength 2
-	 * @maxLength 512
-	 * @type string | undefined
-	 */
-	position?: string;
 };
 
 /**
@@ -77662,7 +78002,7 @@ export type PostApiUnitsByTypeByUnitIdLinksResponse =
 	| PostApiUnitsByTypeByUnitIdLinksStatus429
 	| PostApiUnitsByTypeByUnitIdLinksStatus500;
 
-export const DeleteApiUnitsByTypeByUnitIdLinksByLinkIdType = {
+export const PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteType = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
 	book: "book",
@@ -77685,17 +78025,17 @@ export const DeleteApiUnitsByTypeByUnitIdLinksByLinkIdType = {
 	realm_rule: "realm_rule",
 } as const;
 
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdType =
-	(typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdType)[keyof typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdType];
+export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteType =
+	(typeof PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteType)[keyof typeof PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteType];
 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdPath = {
+export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVotePath = {
 	/**
 	 * @type string
 	 */
-	type: DeleteApiUnitsByTypeByUnitIdLinksByLinkIdType;
+	type: PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteType;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -77711,31 +78051,40 @@ export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdPath = {
 };
 
 /**
- * @type void
+ * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus204 = void;
-
-export const DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitAccessRestricted: "UnitAccessRestricted",
-} as const;
-
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus403ErrorCodeEnum];
+export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200 = {
+	value: ((-1 | 1) | null) | null;
+	score: string | number;
+	voteCount: string | number;
+};
 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus403 = {
+export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus400 = MalformedRequestBody;
+
+export const PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403ErrorCodeEnum = {
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'UnitAccessRestricted'
 		 * @type string
 		 */
-		code: DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus403ErrorCodeEnum;
+		code: PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -77751,18 +78100,18 @@ export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus403 = {
 	requestId: string;
 };
 
-export const DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404ErrorCodeEnum = {
+export const PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	UnitSourceLinkNotFound: "UnitSourceLinkNotFound",
 } as const;
 
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404ErrorCodeEnum];
+export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404 = {
+export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -77771,7 +78120,7 @@ export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404ErrorCodeEnum;
+		code: PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -77790,20 +78139,20 @@ export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404 = {
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus422 = ValidationError;
+export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus422 = ValidationError;
 
-export const DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429ErrorCodeEnum = {
+export const PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429ErrorCodeEnum = {
 	ApiQuotaExceeded: "ApiQuotaExceeded",
 	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
 } as const;
 
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429ErrorCodeEnum];
+export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429 = {
+export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429 = {
 	/**
 	 * @type object
 	 */
@@ -77811,7 +78160,7 @@ export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429ErrorCodeEnum;
+		code: PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -77827,14 +78176,32 @@ export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429 = {
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus500 = InternalError;
+export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus500 = InternalError;
+
+export const PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteRequestValueEnum = {
+	"-1": -1,
+	"1": 1,
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteRequestValueEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteRequestValueEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteRequestValueEnum];
 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdOptions = {
-	body?: never;
-	path: DeleteApiUnitsByTypeByUnitIdLinksByLinkIdPath;
+export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteBody = {
+	/**
+	 * @type string
+	 */
+	value: PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteRequestValueEnum;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions = {
+	body: PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteBody;
+	path: PutApiUnitsByTypeByUnitIdLinksByLinkIdVotePath;
 	query?: never;
 	headers?: never;
 };
@@ -77842,25 +78209,558 @@ export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdOptions = {
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdResponses = {
-	"204": DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus204;
-	"403": DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus403;
-	"404": DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404;
-	"422": DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus422;
-	"429": DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429;
-	"500": DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus500;
+export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteResponses = {
+	"200": PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200;
+	"400": PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus400;
+	"403": PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403;
+	"404": PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404;
+	"422": PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus422;
+	"429": PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429;
+	"500": PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdResponse =
-	| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus204
-	| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus403
-	| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus404
-	| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus422
-	| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus429
-	| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdStatus500;
+export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteResponse =
+	| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200
+	| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus400
+	| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403
+	| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404
+	| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus422
+	| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429
+	| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus500;
+
+export const DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteType = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteType =
+	(typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteType)[keyof typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteType];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVotePath = {
+	/**
+	 * @type string
+	 */
+	type: DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteType;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	linkId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200 = {
+	value: ((-1 | 1) | null) | null;
+	score: string | number;
+	voteCount: string | number;
+};
+
+export const DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403ErrorCodeEnum = {
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitAccessRestricted'
+		 * @type string
+		 */
+		code: DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	UnitSourceLinkNotFound: "UnitSourceLinkNotFound",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus422 = ValidationError;
+
+export const DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions = {
+	body?: never;
+	path: DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVotePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteResponses = {
+	"200": DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200;
+	"403": DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403;
+	"404": DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404;
+	"422": DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus422;
+	"429": DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429;
+	"500": DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteResponse =
+	| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200
+	| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403
+	| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404
+	| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus422
+	| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429
+	| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus500;
+
+export const PatchApiUnitsByTypeByUnitIdLinksByLinkIdType = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdType =
+	(typeof PatchApiUnitsByTypeByUnitIdLinksByLinkIdType)[keyof typeof PatchApiUnitsByTypeByUnitIdLinksByLinkIdType];
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdPath = {
+	/**
+	 * @type string
+	 */
+	type: PatchApiUnitsByTypeByUnitIdLinksByLinkIdType;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	linkId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus200 = {
+	/**
+	 * @type object
+	 */
+	candidate: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		sourceEntityId: string;
+		/**
+		 * @type string
+		 */
+		url: string;
+		/**
+		 * @type string
+		 */
+		normalizedUrl: string;
+		/**
+		 * @type string
+		 */
+		normalizedUrlHash: string;
+		createdByProfileId: (string | null) | null;
+		viewerVote: ((-1 | 1) | null) | null;
+		score: string | number;
+		voteCount: string | number;
+		/**
+		 * @type boolean
+		 */
+		accepted: boolean;
+		/**
+		 * @type boolean
+		 */
+		pinned: boolean;
+		position: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	};
+	curationVersion: string | number;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus400 = MalformedRequestBody;
+
+export const PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus403ErrorCodeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus403ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	UnitSourceLinkNotFound: "UnitSourceLinkNotFound",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus404ErrorCodeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus404ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitReferenceCurationChanged'
+		 * @type string
+		 */
+		code: "UnitReferenceCurationChanged";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus422 = ValidationError;
+
+export const PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus429ErrorCodeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus429ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus500 = InternalError;
+
+export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdBody =
+	| {
+			baseVersion: string | number;
+			/**
+			 * @type boolean
+			 */
+			pinned: true;
+			/**
+			 * @description
+			 * Format: `fractional-position`
+			 * @minLength 2
+			 * @maxLength 512
+			 * @type string
+			 */
+			position: string;
+	  }
+	| {
+			baseVersion: string | number;
+			/**
+			 * @type boolean
+			 */
+			pinned: false;
+			/**
+			 * @type null
+			 */
+			position: null;
+	  };
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdOptions = {
+	body: PatchApiUnitsByTypeByUnitIdLinksByLinkIdBody;
+	path: PatchApiUnitsByTypeByUnitIdLinksByLinkIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdResponses = {
+	"200": PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus200;
+	"400": PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus400;
+	"403": PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus403;
+	"404": PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus404;
+	"409": PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus409;
+	"422": PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus422;
+	"429": PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus429;
+	"500": PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdResponse =
+	| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus200
+	| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus400
+	| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus403
+	| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus404
+	| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus409
+	| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus422
+	| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus429
+	| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus500;
 
 /**
  * @type object
@@ -78560,7 +79460,7 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdVotePath = {
  * @type object
  */
 export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200 = {
-	value: ((string | number) | null) | null;
+	value: ((-1 | 1) | null) | null;
 	score: string | number;
 	voteCount: string | number;
 };
@@ -78782,7 +79682,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVotePath = {
  * @type object
  */
 export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200 = {
-	value: ((string | number) | null) | null;
+	value: ((-1 | 1) | null) | null;
 	score: string | number;
 	voteCount: string | number;
 };

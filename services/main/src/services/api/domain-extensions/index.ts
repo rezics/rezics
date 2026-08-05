@@ -46,11 +46,13 @@ import {
 	unitOwnership,
 	unit,
 	unitSourceLink,
+	unitSourceLinkVoteStat,
 	unitLocalization,
 	zone,
 	unitDock,
 	imageAsset,
 } from "../../database/schema";
+import { SourceLinkVisibilityScoreThreshold } from "../../database/schema/contract-values";
 import { UnitNotFound } from "../../units/errors";
 import type { DatabaseTransaction } from "../../database";
 import { recordUnitRevision } from "../../units/history";
@@ -217,8 +219,13 @@ async function ensureRequirementSource(softwareId: string, sourceExternalLinkId?
 	const [source] = await database
 		.select({ id: unitSourceLink.id })
 		.from(unitSourceLink)
+		.leftJoin(unitSourceLinkVoteStat, eq(unitSourceLinkVoteStat.linkId, unitSourceLink.id))
 		.where(
-			and(eq(unitSourceLink.id, sourceExternalLinkId), eq(unitSourceLink.unitId, softwareId)),
+			and(
+				eq(unitSourceLink.id, sourceExternalLinkId),
+				eq(unitSourceLink.unitId, softwareId),
+				sql`${unitSourceLink.pinned} or coalesce(${unitSourceLinkVoteStat.score}, 0) >= ${SourceLinkVisibilityScoreThreshold}`,
+			),
 		)
 		.limit(1);
 	if (!source) throw new SoftwareSystemRequirementSourceInvalid();

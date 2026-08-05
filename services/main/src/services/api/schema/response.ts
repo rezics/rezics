@@ -379,7 +379,13 @@ export const UnitDetailResponse = t.Object({
 				url: t.String(),
 				normalizedUrl: t.String(),
 				normalizedUrlHash: t.String(),
-				position: FractionalPosition,
+				createdByProfileId: t.Nullable(Uuid),
+				viewerVote: t.Nullable(t.Union([t.Literal(-1), t.Literal(1)])),
+				score: t.Integer(),
+				voteCount: t.Integer({ minimum: 0 }),
+				accepted: t.Literal(true),
+				pinned: t.Boolean(),
+				position: t.Nullable(FractionalPosition),
 				createdAt: DateTime,
 				updatedAt: DateTime,
 			},
@@ -416,6 +422,10 @@ export const UnitDetailResponse = t.Object({
 		canManageAccess: t.Boolean(),
 		canManageAssociations: t.Boolean(),
 		canCurateTags: t.Boolean(),
+		canCurateReferences: t.Object({
+			aliases: t.Boolean(),
+			sourceLinks: t.Boolean(),
+		}),
 		canManageRealmPublications: t.Boolean(),
 		hasDevelopmentPreviewAccess: t.Boolean(),
 	}),
@@ -1395,14 +1405,20 @@ export const UnitSourceLinkResponse = t.Object(
 		url: t.String(),
 		normalizedUrl: t.String(),
 		normalizedUrlHash: t.String(),
-		position: FractionalPosition,
+		createdByProfileId: t.Nullable(Uuid),
+		viewerVote: t.Nullable(t.Union([t.Literal(-1), t.Literal(1)])),
+		score: t.Integer(),
+		voteCount: t.Integer({ minimum: 0 }),
+		accepted: t.Boolean(),
+		pinned: t.Boolean(),
+		position: t.Nullable(FractionalPosition),
 		createdAt: DateTime,
 		updatedAt: DateTime,
 	},
 	{ additionalProperties: false },
 );
 export const UnitSourceLinkListResponse = t.Object(
-	{ items: t.Array(UnitSourceLinkResponse) },
+	{ items: t.Array(UnitSourceLinkResponse), curationVersion: t.Integer({ minimum: 0 }) },
 	{ additionalProperties: false },
 );
 export const TagApplicationResponse = t.Object({
@@ -1424,15 +1440,29 @@ export const AliasResponse = t.Object({
 	language: NullableText,
 	kind: t.String(),
 	createdByProfileId: t.Nullable(Uuid),
+	viewerVote: t.Nullable(t.Union([t.Literal(-1), t.Literal(1)])),
 	score: t.Integer(),
-	voteCount: t.Integer(),
-	searchable: t.Boolean(),
+	voteCount: t.Integer({ minimum: 0 }),
+	accepted: t.Boolean(),
+	pinned: t.Boolean(),
+	position: t.Nullable(FractionalPosition),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
-export const AliasListResponse = t.Object({ items: t.Array(AliasResponse) });
+export const AliasListResponse = t.Object({
+	items: t.Array(AliasResponse),
+	curationVersion: t.Integer({ minimum: 0 }),
+});
+export const AliasCurationResponse = t.Object({
+	candidate: AliasResponse,
+	curationVersion: t.Integer({ minimum: 0 }),
+});
+export const UnitSourceLinkCurationResponse = t.Object({
+	candidate: UnitSourceLinkResponse,
+	curationVersion: t.Integer({ minimum: 0 }),
+});
 export const VoteResponse = t.Object({
-	value: t.Nullable(t.Integer()),
+	value: t.Nullable(t.Union([t.Literal(-1), t.Literal(1)])),
 	score: t.Integer(),
-	voteCount: t.Integer(),
+	voteCount: t.Integer({ minimum: 0 }),
 });

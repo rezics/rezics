@@ -163,6 +163,7 @@ export default {
 	UnitTagCurationChanged: "這筆標籤精選已在其他地方變更；已載入最新順序，請再試一次。",
 	TagNotFound: "找不到這個標籤。",
 	UnitSourceLinkNotFound: "找不到這個作品的來源連結。",
+	UnitReferenceCurationChanged: "這筆參考資料精選已在其他地方變更；已載入最新順序，請再試一次。",
 	UnitVariantKindMismatch: "變體與主版本必須使用相同且受支援的條目類型。",
 	UnitVariantTargetIsVariant: "變體必須直接指向主版本。",
 	UnitVariantSourceHasVariants: "已有變體的主版本不能成為變體。",

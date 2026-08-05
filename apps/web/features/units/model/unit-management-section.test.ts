@@ -7,6 +7,10 @@ const denied = {
 	canManageAccess: false,
 	canManageAssociations: false,
 	canCurateTags: false,
+	canCurateReferences: {
+		aliases: false,
+		sourceLinks: false,
+	},
 	canManageRealmPublications: false,
 	hasDevelopmentPreviewAccess: false,
 };

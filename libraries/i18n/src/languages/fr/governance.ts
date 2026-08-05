@@ -210,6 +210,7 @@ export default {
 			"unit.ownership.transfer": "Transférer la propriété",
 			"unit.association.manage": "Gérer les associations",
 			"unit.tag-curation.manage": "Gérer la sélection des étiquettes",
+			"unit.reference-curation.manage": "Gérer la sélection des références",
 			"unit.realm-publication.manage": `Gérer la diffusion dans ${realmTerms.label}`,
 			"realm.contribute": `Contribuer au ${realmTerms.inline}`,
 			"realm.units.create": "Créer des Units",

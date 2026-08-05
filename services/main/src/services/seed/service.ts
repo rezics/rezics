@@ -100,6 +100,7 @@ import {
 	CommunityOwnedUnitKindValues,
 	unitOwnership,
 	unitSourceLink,
+	unitSourceLinkVote,
 	unitLocalization,
 	unitDock,
 	unitSlugAddress,
@@ -940,6 +941,8 @@ async function seedUnitFixtures(
 			language: itemAt(data.languages(index), 0),
 			kind: itemAt(["common", "abbreviation", "alternate_title"] as const, index),
 			createdByProfileId: itemAt(profiles, index).id,
+			pinned: index % 11 === 0,
+			position: index % 11 === 0 ? fractionalPositionAt(index) : null,
 			createdAt: target.createdAt,
 			updatedAt: target.updatedAt,
 		};
@@ -963,7 +966,7 @@ async function seedUnitFixtures(
 	).map(({ alias, profile: voter }, index) => ({
 		aliasId: alias.id,
 		profileId: voter.id,
-		value: index % 5 === 0 ? -1 : 1,
+		value: (index % 5 === 0 ? -1 : 1) as -1 | 1,
 	}));
 	await writeBatches(aliasVotes, (batch) => tx.insert(unitAliasVote).values(batch));
 
@@ -985,6 +988,8 @@ async function seedUnitFixtures(
 			url,
 			normalizedUrl: url,
 			normalizedUrlHash: createHash("sha256").update(url).digest("hex"),
+			createdByProfileId: itemAt(profiles, index).id,
+			pinned: true,
 			position: fractionalPositionAt(index),
 		};
 	});
@@ -997,6 +1002,14 @@ async function seedUnitFixtures(
 				.returning({ id: unitSourceLink.id, unitId: unitSourceLink.unitId })),
 		);
 	}
+	await writeBatches(
+		links.map((link, index) => ({
+			linkId: link.id,
+			profileId: itemAt(profiles, index).id,
+			value: 1 as const,
+		})),
+		(batch) => tx.insert(unitSourceLinkVote).values(batch),
+	);
 	const tagRows = Array.from({ length: SeedPlan.unitTags }, (_, index) => ({
 		unitId: itemAt(works, Math.floor(index / 5)).id,
 		tagId: itemAt(tags, index * 7).id,

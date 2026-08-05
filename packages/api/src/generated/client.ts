@@ -403,12 +403,12 @@ import type {
 	GetApiUnitsByTypeByUnitIdAliasesResponses,
 	PostApiUnitsByTypeByUnitIdAliasesOptions,
 	PostApiUnitsByTypeByUnitIdAliasesResponses,
-	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdOptions,
-	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdResponses,
 	PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions,
 	PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponses,
 	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions,
 	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponses,
+	PatchApiUnitsByTypeByUnitIdAliasesByAliasIdOptions,
+	PatchApiUnitsByTypeByUnitIdAliasesByAliasIdResponses,
 	PostApiUnitsByTypeByUnitIdCreditAttributionsOptions,
 	PostApiUnitsByTypeByUnitIdCreditAttributionsResponses,
 	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdOptions,
@@ -421,8 +421,12 @@ import type {
 	GetApiUnitsByTypeByUnitIdLinksResponses,
 	PostApiUnitsByTypeByUnitIdLinksOptions,
 	PostApiUnitsByTypeByUnitIdLinksResponses,
-	DeleteApiUnitsByTypeByUnitIdLinksByLinkIdOptions,
-	DeleteApiUnitsByTypeByUnitIdLinksByLinkIdResponses,
+	PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions,
+	PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteResponses,
+	DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions,
+	DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteResponses,
+	PatchApiUnitsByTypeByUnitIdLinksByLinkIdOptions,
+	PatchApiUnitsByTypeByUnitIdLinksByLinkIdResponses,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdOptions,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdResponses,
 	PatchApiUnitsByTypeByUnitIdTagsByTagIdOptions,
@@ -4627,7 +4631,7 @@ export function getApiUnitsByTypeByUnitIdAliases<ThrowOnError extends boolean = 
 }
 
 /**
- * @summary Add Unit alias
+ * @summary Propose Unit alias
  * {@link /api/v1/units/:type/:unitId/aliases}
  */
 export function postApiUnitsByTypeByUnitIdAliases<ThrowOnError extends boolean = true>(
@@ -4644,28 +4648,6 @@ export function postApiUnitsByTypeByUnitIdAliases<ThrowOnError extends boolean =
 		],
 		...config,
 	}) as Promise<RequestResult<PostApiUnitsByTypeByUnitIdAliasesResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Delete Unit alias
- * {@link /api/v1/units/:type/:unitId/aliases/:aliasId}
- */
-export function deleteApiUnitsByTypeByUnitIdAliasesByAliasId<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "DELETE",
-		url: "/api/v1/units/{type}/{unitId}/aliases/{aliasId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdResponses, ThrowOnError>
-	>;
 }
 
 /**
@@ -4711,6 +4693,28 @@ export function deleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote<
 		...config,
 	}) as Promise<
 		RequestResult<DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Update Unit Alias curation
+ * {@link /api/v1/units/:type/:unitId/aliases/:aliasId}
+ */
+export function patchApiUnitsByTypeByUnitIdAliasesByAliasId<ThrowOnError extends boolean = true>(
+	options: Options<PatchApiUnitsByTypeByUnitIdAliasesByAliasIdOptions, ThrowOnError>,
+): Promise<RequestResult<PatchApiUnitsByTypeByUnitIdAliasesByAliasIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PATCH",
+		url: "/api/v1/units/{type}/{unitId}/aliases/{aliasId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<PatchApiUnitsByTypeByUnitIdAliasesByAliasIdResponses, ThrowOnError>
 	>;
 }
 
@@ -4829,7 +4833,7 @@ export function deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationId<
 }
 
 /**
- * @summary List Unit external links
+ * @summary List Unit source-link candidates
  * {@link /api/v1/units/:type/:unitId/links}
  */
 export function getApiUnitsByTypeByUnitIdLinks<ThrowOnError extends boolean = true>(
@@ -4849,7 +4853,7 @@ export function getApiUnitsByTypeByUnitIdLinks<ThrowOnError extends boolean = tr
 }
 
 /**
- * @summary Add Unit external link
+ * @summary Propose Unit source link
  * {@link /api/v1/units/:type/:unitId/links}
  */
 export function postApiUnitsByTypeByUnitIdLinks<ThrowOnError extends boolean = true>(
@@ -4869,23 +4873,65 @@ export function postApiUnitsByTypeByUnitIdLinks<ThrowOnError extends boolean = t
 }
 
 /**
- * @summary Remove Unit external link
- * {@link /api/v1/units/:type/:unitId/links/:linkId}
+ * @summary Vote on Unit source link
+ * {@link /api/v1/units/:type/:unitId/links/:linkId/vote}
  */
-export function deleteApiUnitsByTypeByUnitIdLinksByLinkId<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiUnitsByTypeByUnitIdLinksByLinkIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiUnitsByTypeByUnitIdLinksByLinkIdResponses, ThrowOnError>> {
+export function putApiUnitsByTypeByUnitIdLinksByLinkIdVote<ThrowOnError extends boolean = true>(
+	options: Options<PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/units/{type}/{unitId}/links/{linkId}/vote",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Remove Unit source link vote
+ * {@link /api/v1/units/:type/:unitId/links/:linkId/vote}
+ */
+export function deleteApiUnitsByTypeByUnitIdLinksByLinkIdVote<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "DELETE",
+		url: "/api/v1/units/{type}/{unitId}/links/{linkId}/vote",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Update Unit source link curation
+ * {@link /api/v1/units/:type/:unitId/links/:linkId}
+ */
+export function patchApiUnitsByTypeByUnitIdLinksByLinkId<ThrowOnError extends boolean = true>(
+	options: Options<PatchApiUnitsByTypeByUnitIdLinksByLinkIdOptions, ThrowOnError>,
+): Promise<RequestResult<PatchApiUnitsByTypeByUnitIdLinksByLinkIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PATCH",
 		url: "/api/v1/units/{type}/{unitId}/links/{linkId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<DeleteApiUnitsByTypeByUnitIdLinksByLinkIdResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PatchApiUnitsByTypeByUnitIdLinksByLinkIdResponses, ThrowOnError>>;
 }
 
 /**

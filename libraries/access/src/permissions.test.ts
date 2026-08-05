@@ -117,6 +117,9 @@ describe("permission schema", () => {
 		expect(isUnitPermissionGrantableToAuthenticated("realm.tag-voting.update")).toBe(false);
 		expect(isUnitPermissionGrantableToAuthenticated("realm.tag-contexts.manage")).toBe(false);
 		expect(isUnitPermissionGrantableToAuthenticated("unit.tag-curation.manage")).toBe(false);
+		expect(isUnitPermissionGrantableToAuthenticated("unit.reference-curation.manage")).toBe(
+			false,
+		);
 		expect(isUnitPermissionGrantableToAuthenticated("unit.realm-publication.manage")).toBe(
 			false,
 		);

@@ -107,8 +107,9 @@ describe("direct PostgreSQL Search", () => {
 		expect(candidateSql).toContain("pgroonga_query_escape");
 		expect(candidateSql).toContain("current_search_text_v1");
 		expect(candidateSql).toContain('from "unit_alias" as "search_alias"');
-		expect(candidateSql).toContain('"search_alias_vote_stat"."score" >=');
-		expect(candidateSql).toContain('"search_alias"."deleted_at" is null');
+		expect(candidateSql).toContain('coalesce("search_alias_vote_stat"."score", 0) >=');
+		expect(candidateSql).toContain('"search_alias"."pinned"');
+		expect(candidateSql).not.toContain('"search_alias"."deleted_at"');
 		expect(candidateSql).toContain('"search_alias"."language" is null or');
 		expect(candidateSql).toContain("search_sources");
 		expect(candidateSql).toContain("eligible_matches");

@@ -875,10 +875,10 @@ function currentSearchSources(query: string, languageBoundary: readonly ContentL
 			pgroonga_score(${searchAlias}.tableoid, ${searchAlias}.ctid)::numeric
 				as relevance_score
 		from ${unitAlias} as ${searchAlias}
-		inner join ${unitAliasVoteStat} as ${searchAliasVoteStat}
+		left join ${unitAliasVoteStat} as ${searchAliasVoteStat}
 			on ${searchAliasVoteStat.aliasId} = ${searchAlias.id}
-		where ${searchAlias.deletedAt} is null
-			and ${searchAliasVoteStat.score} >= ${AliasSearchScoreThreshold}
+		where (${searchAlias.pinned}
+				or coalesce(${searchAliasVoteStat.score}, 0) >= ${AliasSearchScoreThreshold})
 			and ${aliasLanguageCondition}
 			and ${searchAlias.term} &@~ public.pgroonga_query_escape(${query})
 	`;

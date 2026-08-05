@@ -419,6 +419,9 @@ export const AliasKindValues = [
 	"other",
 ] as const;
 export const AliasSearchScoreThreshold = 3;
+export const SourceLinkVisibilityScoreThreshold = 3;
+export const UnitReferenceCurationKindValues = ["alias", "source_link"] as const;
+export type UnitReferenceCurationKind = (typeof UnitReferenceCurationKindValues)[number];
 export const PollModeValues = ["single", "multiple"] as const;
 export const PollOptionSourceKindValues = ["literal", "unit"] as const;
 export const PollResultVisibilityValues = ["live", "after_close"] as const;

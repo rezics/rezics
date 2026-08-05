@@ -784,6 +784,7 @@ CREATE TYPE public.unit_permission AS ENUM (
     'unit.ownership.transfer',
     'unit.association.manage',
     'unit.tag-curation.manage',
+    'unit.reference-curation.manage',
     'unit.realm-publication.manage',
     'unit.delete',
     'realm.contribute',
@@ -2709,7 +2710,7 @@ CREATE TABLE public.unit_access_invitation (
     created_at timestamp(3) with time zone DEFAULT now() CONSTRAINT unit_access_invitation_v2_created_at_not_null NOT NULL,
     updated_at timestamp(3) with time zone DEFAULT now() CONSTRAINT unit_access_invitation_v2_updated_at_not_null NOT NULL,
     CONSTRAINT unit_access_invitation_expiry_check CHECK (((expires_at > created_at) AND ((access_expires_at IS NULL) OR (access_expires_at > created_at)))),
-    CONSTRAINT unit_access_invitation_permissions_check CHECK ((((cardinality(permissions) >= 1) AND (cardinality(permissions) <= 24)) AND (array_position(permissions, 'unit.ownership.transfer'::public.unit_permission) IS NULL) AND (array_position(permissions, 'unit.delete'::public.unit_permission) IS NULL))),
+    CONSTRAINT unit_access_invitation_permissions_check CHECK ((((cardinality(permissions) >= 1) AND (cardinality(permissions) <= 25)) AND (array_position(permissions, 'unit.ownership.transfer'::public.unit_permission) IS NULL) AND (array_position(permissions, 'unit.delete'::public.unit_permission) IS NULL))),
     CONSTRAINT unit_access_invitation_profiles_differ_check CHECK ((invited_profile_id <> invited_by_profile_id)),
     CONSTRAINT unit_access_invitation_resolution_shape_check CHECK ((((resolution IS NULL) AND (resolved_at IS NULL) AND (resolved_by_profile_id IS NULL)) OR ((resolution IS NOT NULL) AND (resolved_at IS NOT NULL) AND (resolved_by_profile_id IS NOT NULL)))),
     CONSTRAINT unit_access_invitation_scope_check CHECK (((cardinality(scope) <= 8) AND ((cardinality(scope) = 0) OR (array_to_string(scope, '/'::text) ~ '^[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9-]*)*$'::text))))
@@ -2756,11 +2757,12 @@ CREATE TABLE public.unit_alias (
     language text,
     kind public.alias_kind DEFAULT 'common'::public.alias_kind NOT NULL,
     created_by_profile_id uuid,
-    deleted_at timestamp(3) with time zone,
+    pinned boolean DEFAULT false NOT NULL,
+    "position" text COLLATE pg_catalog."C",
     created_at timestamp(3) with time zone DEFAULT now() NOT NULL,
     updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT unit_alias_deleted_at_check CHECK (((deleted_at IS NULL) OR (deleted_at >= created_at))),
     CONSTRAINT unit_alias_language_check CHECK (((language IS NULL) OR (language = ANY (ARRAY['zh'::text, 'en'::text, 'ja'::text, 'ko'::text, 'de'::text, 'fr'::text, 'es'::text])))),
+    CONSTRAINT unit_alias_pinned_position_check CHECK (((pinned AND ("position" IS NOT NULL)) OR ((NOT pinned) AND ("position" IS NULL)))),
     CONSTRAINT unit_alias_term_not_blank CHECK (((btrim(term) <> ''::text) AND (btrim(normalized_term) <> ''::text)))
 );
 
@@ -3247,11 +3249,56 @@ CREATE TABLE public.unit_source_link (
     url text CONSTRAINT unit_link_url_not_null NOT NULL,
     normalized_url text CONSTRAINT unit_link_normalized_url_not_null NOT NULL,
     normalized_url_hash text CONSTRAINT unit_link_normalized_url_hash_not_null NOT NULL,
-    "position" text DEFAULT 'a0'::text CONSTRAINT unit_link_position_not_null NOT NULL COLLATE pg_catalog."C",
+    created_by_profile_id uuid,
+    pinned boolean DEFAULT false NOT NULL,
+    "position" text COLLATE pg_catalog."C",
     created_at timestamp(3) with time zone DEFAULT now() CONSTRAINT unit_link_created_at_not_null NOT NULL,
     updated_at timestamp(3) with time zone DEFAULT now() CONSTRAINT unit_link_updated_at_not_null NOT NULL,
     CONSTRAINT unit_source_link_hash_check CHECK ((normalized_url_hash ~ '^[0-9a-f]{64}$'::text)),
+    CONSTRAINT unit_source_link_pinned_position_check CHECK (((pinned AND ("position" IS NOT NULL)) OR ((NOT pinned) AND ("position" IS NULL)))),
     CONSTRAINT unit_source_link_url_check CHECK (((url ~ '^https?://'::text) AND (normalized_url ~ '^https?://'::text)))
+);
+
+
+--
+-- Name: unit_source_link_vote; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.unit_source_link_vote (
+    link_id uuid NOT NULL,
+    profile_id uuid NOT NULL,
+    value integer NOT NULL,
+    created_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT unit_source_link_vote_value_check CHECK ((value = ANY (ARRAY['-1'::integer, 1])))
+);
+
+
+--
+-- Name: unit_source_link_vote_stat; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.unit_source_link_vote_stat (
+    link_id uuid NOT NULL,
+    score bigint DEFAULT 0 NOT NULL,
+    vote_count bigint DEFAULT 0 NOT NULL,
+    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT unit_source_link_vote_stat_count_check CHECK ((vote_count >= 0)),
+    CONSTRAINT unit_source_link_vote_stat_score_check CHECK ((abs(score) <= vote_count))
+);
+
+
+--
+-- Name: unit_reference_curation_head; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.unit_reference_curation_head (
+    unit_id uuid NOT NULL,
+    kind text NOT NULL,
+    version integer DEFAULT 0 NOT NULL,
+    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT unit_reference_curation_head_kind_check CHECK ((kind = ANY (ARRAY['alias'::text, 'source_link'::text]))),
+    CONSTRAINT unit_reference_curation_head_version_check CHECK ((version >= 0))
 );
 
 
@@ -4945,6 +4992,46 @@ BEGIN
           updated_at = now();
       END IF;
       DELETE FROM unit_alias_vote_stat WHERE alias_id = row_data.alias_id AND vote_count = 0;
+    END IF;
+  END LOOP;
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: maintain_unit_source_link_vote_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_unit_source_link_vote_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE row_data unit_source_link_vote%ROWTYPE; direction bigint; change record;
+BEGIN
+  FOR change IN
+    SELECT OLD AS row_data, -1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'DELETE')
+    UNION ALL SELECT NEW AS row_data, 1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'INSERT')
+  LOOP
+    row_data := change.row_data; direction := change.direction;
+    IF EXISTS (SELECT 1 FROM unit_source_link WHERE id = row_data.link_id) THEN
+      IF direction < 0 THEN
+        UPDATE unit_source_link_vote_stat SET score = score + direction * row_data.value,
+          vote_count = vote_count + direction, updated_at = now()
+        WHERE link_id = row_data.link_id;
+        IF NOT FOUND THEN
+          RAISE EXCEPTION 'missing unit_source_link_vote_stat row for decrement: %',
+            row_data.link_id USING ERRCODE = '23514';
+        END IF;
+      ELSE
+        INSERT INTO unit_source_link_vote_stat (link_id, score, vote_count)
+        VALUES (row_data.link_id, direction * row_data.value, direction)
+        ON CONFLICT (link_id) DO UPDATE SET
+          score = unit_source_link_vote_stat.score + excluded.score,
+          vote_count = unit_source_link_vote_stat.vote_count + excluded.vote_count,
+          updated_at = now();
+      END IF;
+      DELETE FROM unit_source_link_vote_stat
+      WHERE link_id = row_data.link_id AND vote_count = 0;
     END IF;
   END LOOP;
   RETURN NULL;
@@ -6959,6 +7046,14 @@ ALTER TABLE ONLY public.unit_alias
 
 
 --
+-- Name: unit_alias unit_alias_unit_language_normalized_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.unit_alias
+    ADD CONSTRAINT unit_alias_unit_language_normalized_key UNIQUE NULLS NOT DISTINCT (unit_id, language, normalized_term);
+
+
+--
 -- Name: unit_alias_vote unit_alias_vote_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -7260,6 +7355,30 @@ ALTER TABLE ONLY public.unit_source_link
 
 ALTER TABLE ONLY public.unit_source_link
     ADD CONSTRAINT unit_source_link_unit_source_hash_key UNIQUE (unit_id, source_entity_id, normalized_url_hash);
+
+
+--
+-- Name: unit_source_link_vote unit_source_link_vote_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.unit_source_link_vote
+    ADD CONSTRAINT unit_source_link_vote_pkey PRIMARY KEY (link_id, profile_id);
+
+
+--
+-- Name: unit_source_link_vote_stat unit_source_link_vote_stat_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.unit_source_link_vote_stat
+    ADD CONSTRAINT unit_source_link_vote_stat_pkey PRIMARY KEY (link_id);
+
+
+--
+-- Name: unit_reference_curation_head unit_reference_curation_head_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.unit_reference_curation_head
+    ADD CONSTRAINT unit_reference_curation_head_pkey PRIMARY KEY (unit_id, kind);
 
 
 --
@@ -8915,21 +9034,21 @@ CREATE INDEX unit_alias_normalized_idx ON public.unit_alias USING btree (normali
 -- Name: unit_alias_term_search_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX unit_alias_term_search_idx ON public.unit_alias USING pgroonga (term) WHERE (deleted_at IS NULL);
+CREATE INDEX unit_alias_term_search_idx ON public.unit_alias USING pgroonga (term);
 
 
 --
--- Name: unit_alias_unit_language_normalized_key; Type: INDEX; Schema: public; Owner: -
+-- Name: unit_alias_unit_pinned_position_unique; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX unit_alias_unit_language_normalized_key ON public.unit_alias USING btree (unit_id, language, normalized_term) WHERE ((deleted_at IS NULL) AND (language IS NOT NULL));
+CREATE UNIQUE INDEX unit_alias_unit_pinned_position_unique ON public.unit_alias USING btree (unit_id, "position") WHERE pinned;
 
 
 --
--- Name: unit_alias_unit_unscoped_normalized_key; Type: INDEX; Schema: public; Owner: -
+-- Name: unit_alias_unit_position_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX unit_alias_unit_unscoped_normalized_key ON public.unit_alias USING btree (unit_id, normalized_term) WHERE ((deleted_at IS NULL) AND (language IS NULL));
+CREATE INDEX unit_alias_unit_position_idx ON public.unit_alias USING btree (unit_id, pinned, "position", id);
 
 
 --
@@ -9359,10 +9478,31 @@ CREATE INDEX unit_source_link_source_entity_idx ON public.unit_source_link USING
 
 
 --
+-- Name: unit_source_link_created_by_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX unit_source_link_created_by_idx ON public.unit_source_link USING btree (created_by_profile_id);
+
+
+--
 -- Name: unit_source_link_unit_position_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX unit_source_link_unit_position_idx ON public.unit_source_link USING btree (unit_id, "position", id);
+CREATE INDEX unit_source_link_unit_position_idx ON public.unit_source_link USING btree (unit_id, pinned, "position", id);
+
+
+--
+-- Name: unit_source_link_unit_pinned_position_unique; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX unit_source_link_unit_pinned_position_unique ON public.unit_source_link USING btree (unit_id, "position") WHERE pinned;
+
+
+--
+-- Name: unit_source_link_vote_profile_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX unit_source_link_vote_profile_idx ON public.unit_source_link_vote USING btree (profile_id);
 
 
 --
@@ -12021,11 +12161,51 @@ ALTER TABLE ONLY public.unit_source_link
 
 
 --
+-- Name: unit_source_link unit_source_link_created_by_profile_id_profile_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.unit_source_link
+    ADD CONSTRAINT unit_source_link_created_by_profile_id_profile_id_fkey FOREIGN KEY (created_by_profile_id) REFERENCES public.profile(id) ON DELETE SET NULL;
+
+
+--
 -- Name: unit_source_link unit_source_link_unit_id_unit_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.unit_source_link
     ADD CONSTRAINT unit_source_link_unit_id_unit_id_fkey FOREIGN KEY (unit_id) REFERENCES public.unit(id) ON DELETE CASCADE;
+
+
+--
+-- Name: unit_source_link_vote unit_source_link_vote_link_id_unit_source_link_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.unit_source_link_vote
+    ADD CONSTRAINT unit_source_link_vote_link_id_unit_source_link_id_fkey FOREIGN KEY (link_id) REFERENCES public.unit_source_link(id) ON DELETE CASCADE;
+
+
+--
+-- Name: unit_source_link_vote unit_source_link_vote_profile_id_profile_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.unit_source_link_vote
+    ADD CONSTRAINT unit_source_link_vote_profile_id_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public.profile(id) ON DELETE CASCADE;
+
+
+--
+-- Name: unit_source_link_vote_stat unit_source_link_vote_stat_link_id_unit_source_link_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.unit_source_link_vote_stat
+    ADD CONSTRAINT unit_source_link_vote_stat_link_id_unit_source_link_id_fkey FOREIGN KEY (link_id) REFERENCES public.unit_source_link(id) ON DELETE CASCADE;
+
+
+--
+-- Name: unit_reference_curation_head unit_reference_curation_head_unit_id_unit_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.unit_reference_curation_head
+    ADD CONSTRAINT unit_reference_curation_head_unit_id_unit_id_fkey FOREIGN KEY (unit_id) REFERENCES public.unit(id) ON DELETE CASCADE;
 
 
 --
@@ -12563,6 +12743,13 @@ CREATE TRIGGER subject_association_wiki_context_post BEFORE INSERT OR UPDATE OF 
 --
 
 CREATE TRIGGER unit_alias_vote_stat_maintain AFTER INSERT OR DELETE OR UPDATE ON public.unit_alias_vote FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_alias_vote_stat();
+
+
+--
+-- Name: unit_source_link_vote unit_source_link_vote_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_source_link_vote_stat_maintain AFTER INSERT OR DELETE OR UPDATE ON public.unit_source_link_vote FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_source_link_vote_stat();
 
 
 --

@@ -61,6 +61,7 @@ export const UnitPermissionValues = [
 	"unit.ownership.transfer",
 	"unit.association.manage",
 	"unit.tag-curation.manage",
+	"unit.reference-curation.manage",
 	"unit.realm-publication.manage",
 	...RealmPermissionValues,
 	...EntityAssociationPermissionValues,
@@ -521,6 +522,14 @@ export const UnitPermissionDefinitions = {
 		rationale:
 			"Tag curation independently governs pinning, ordering, and removing whole tag applications without limiting community tagging or voting.",
 	},
+	"unit.reference-curation.manage": {
+		kind: "domain",
+		target: "unit",
+		resource: "unit.reference-curation",
+		action: "manage",
+		rationale:
+			"Reference curation independently governs pinning and ordering Alias and Source Link candidates without limiting community proposals or voting.",
+	},
 	"unit.realm-publication.manage": {
 		kind: "domain",
 		target: "unit",
@@ -666,6 +675,7 @@ export const UnitPermissionImplications: Partial<
 	"unit.ownership.transfer": ["unit.read"],
 	"unit.association.manage": ["unit.read"],
 	"unit.tag-curation.manage": ["unit.read"],
+	"unit.reference-curation.manage": ["unit.read"],
 	"unit.realm-publication.manage": ["unit.read"],
 	"realm.contribute": ["unit.read"],
 	"realm.units.create": ["unit.read"],

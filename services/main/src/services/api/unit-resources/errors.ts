@@ -38,9 +38,22 @@ export class UnitSourceLinkNotFound extends Data.TaggedError("UnitSourceLinkNotF
 	readonly message = "Unit source link not found";
 }
 
+export class UnitReferenceCurationChanged extends Data.TaggedError("UnitReferenceCurationChanged") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitReferenceCurationChanged.status;
+	readonly message = "Unit reference curation has changed";
+	readonly details: { readonly currentVersion: number };
+
+	constructor(currentVersion: number) {
+		super();
+		this.details = { currentVersion };
+	}
+}
+
 export const UnitResourceErrors = [
 	AliasNotFound,
 	TagApplicationNotFound,
 	UnitTagCurationChanged,
 	UnitSourceLinkNotFound,
+	UnitReferenceCurationChanged,
 ] as const;

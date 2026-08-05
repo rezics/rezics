@@ -100,7 +100,6 @@ export const AddUnitLinkBody = t.Object(
 			pattern: "^[Hh][Tt][Tt][Pp][Ss]?://",
 		}),
 		sourceEntityUnitId: Uuid,
-		position: t.Optional(FractionalPosition),
 	},
 	{ additionalProperties: false },
 );
@@ -194,6 +193,26 @@ export const UnitAliasParams = t.Object({
 	aliasId: Uuid,
 });
 export type UnitAliasParams = Static<typeof UnitAliasParams>;
+
+export const UpdateUnitReferenceCurationBody = t.Union([
+	t.Object(
+		{
+			baseVersion: t.Integer({ minimum: 0 }),
+			pinned: t.Literal(true),
+			position: FractionalPosition,
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			baseVersion: t.Integer({ minimum: 0 }),
+			pinned: t.Literal(false),
+			position: t.Null(),
+		},
+		{ additionalProperties: false },
+	),
+]);
+export type UpdateUnitReferenceCurationBody = Static<typeof UpdateUnitReferenceCurationBody>;
 
 export const VoteBody = t.Object(
 	{ value: t.Union([t.Literal(-1), t.Literal(1)]) },
