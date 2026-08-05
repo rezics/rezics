@@ -14,6 +14,7 @@ import { eq } from "drizzle-orm";
 
 import { database } from "../database";
 import { zone } from "../database/schema";
+import type { SearchCountResult } from "../counts/contract";
 import { InvalidSearch } from "./errors";
 import { getActiveSearchGeneration } from "./generation";
 import { createCandidateSearchContext, type CandidateSearchContext } from "./meilisearch";
@@ -31,6 +32,7 @@ import {
 	type CompiledSearchRequest,
 	type GroupedSearchCursorToken,
 } from "./query";
+import type { ValidatedSearchPlan } from "./validated-plan";
 import type { SearchCategory } from "./schema";
 import {
 	searchDomain,
@@ -48,10 +50,7 @@ interface RankedSearchHit {
 
 interface RankedSearchGroup<Hit extends RankedSearchHit> {
 	readonly hits: Hit[];
-	readonly total: {
-		readonly value: number;
-		readonly relation: "exact" | "lower-bound";
-	};
+	readonly total: SearchCountResult;
 	readonly offset: number;
 	readonly nextOffset: number;
 	readonly exhausted: boolean;
@@ -162,22 +161,17 @@ function mergeSearchFacets(
 	fields: readonly SearchField[],
 	groups: readonly (readonly SearchFacet[])[],
 ) {
-	const facetCounts = new Map<
-		string,
-		Map<string, { value: number; relation: "exact" | "lower-bound" }>
-	>();
+	const facetCounts = new Map<string, Map<string, SearchCountResult>>();
 	for (const facets of groups)
 		for (const facet of facets) {
 			const options =
-				facetCounts.get(facet.field) ??
-				new Map<string, { value: number; relation: "exact" | "lower-bound" }>();
+				facetCounts.get(facet.field) ?? new Map<string, SearchCountResult>();
 			for (const option of facet.options) {
 				const existing = options.get(option.value);
 				options.set(option.value, {
 					value: (existing?.value ?? 0) + option.count.value,
-					relation:
-						existing?.relation === "lower-bound" ||
-						option.count.relation === "lower-bound"
+					kind:
+						existing?.kind === "lower-bound" || option.count.kind === "lower-bound"
 							? "lower-bound"
 							: "exact",
 				});
@@ -335,12 +329,13 @@ async function executeCompiledSearchWithPresentation<Hit extends RankedSearchHit
 
 /** Executes an already proven, engine-independent Filter request. */
 export function executeCompiledSearch(
-	compiled: CompiledGroupedSearchRequest,
+	plan: ValidatedSearchPlan<CompiledGroupedSearchRequest>,
 	localizationLanguages: readonly ContentLanguage[],
 	profileId?: string,
 	enforcedZoneId?: string,
 	inputIdentity?: string,
 ) {
+	const { request: compiled } = plan;
 	return executeCompiledSearchWithPresentation(
 		compiled,
 		localizationLanguages,
@@ -353,12 +348,13 @@ export function executeCompiledSearch(
 
 /** @internal Executes one globally ranked Search Feed stream of Unit identities. */
 export async function executeCompiledSearchIdentifiers(
-	compiled: CompiledGlobalSearchRequest,
+	plan: ValidatedSearchPlan<CompiledGlobalSearchRequest>,
 	localizationLanguages: readonly ContentLanguage[],
 	profileId?: string,
 	enforcedZoneId?: string,
 	inputIdentity?: string,
 ) {
+	const { request: compiled } = plan;
 	const { scope, searchExpression, domainFilter, generation, requestHash } =
 		await resolveCompiledExecution(
 			compiled,
@@ -440,7 +436,7 @@ export async function executeCompiledSearchIdentifiers(
 		return {
 			query: compiled.query,
 			hits: [],
-			total: { value: 0, relation: "exact" as const },
+			total: { kind: "exact" as const, value: 0 },
 			facets: [],
 			nextCursor: undefined,
 		};

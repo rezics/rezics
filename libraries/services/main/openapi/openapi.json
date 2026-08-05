@@ -1,6 +1,6 @@
 {
 	"openapi": "3.2.0",
-	"info": { "title": "REZICS API", "version": "1.4.0" },
+	"info": { "title": "REZICS API", "version": "1.0.0" },
 	"components": {
 		"schemas": {
 			"JsonValue": {
@@ -45464,26 +45464,33 @@
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
 										"total": {
-											"type": "object",
-											"required": ["value", "relation"],
-											"properties": {
-												"value": {
-													"minimum": 0,
-													"anyOf": [
-														{
-															"format": "integer",
-															"default": 0,
+											"$id": "SearchCountResult",
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value"],
+													"properties": {
+														"kind": {
+															"const": "exact",
 															"type": "string"
 														},
-														{ "minimum": 0, "type": "integer" }
-													]
+														"value": { "minimum": 0, "type": "integer" }
+													}
 												},
-												"relation": {
-													"default": "exact",
-													"type": "string",
-													"enum": ["exact", "lower-bound"]
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value"],
+													"properties": {
+														"kind": {
+															"const": "lower-bound",
+															"type": "string"
+														},
+														"value": { "minimum": 0, "type": "integer" }
+													}
 												}
-											}
+											]
 										}
 									}
 								}
@@ -170710,35 +170717,45 @@
 															"properties": {
 																"value": { "type": "string" },
 																"count": {
-																	"type": "object",
-																	"required": [
-																		"value",
-																		"relation"
-																	],
-																	"properties": {
-																		"value": {
-																			"minimum": 0,
-																			"anyOf": [
-																				{
-																					"format": "integer",
-																					"default": 0,
+																	"$id": "SearchCountResult",
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"kind",
+																				"value"
+																			],
+																			"properties": {
+																				"kind": {
+																					"const": "exact",
 																					"type": "string"
 																				},
-																				{
+																				"value": {
 																					"minimum": 0,
 																					"type": "integer"
 																				}
-																			]
+																			}
 																		},
-																		"relation": {
-																			"default": "exact",
-																			"type": "string",
-																			"enum": [
-																				"exact",
-																				"lower-bound"
-																			]
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"kind",
+																				"value"
+																			],
+																			"properties": {
+																				"kind": {
+																					"const": "lower-bound",
+																					"type": "string"
+																				},
+																				"value": {
+																					"minimum": 0,
+																					"type": "integer"
+																				}
+																			}
 																		}
-																	}
+																	]
 																}
 															}
 														}
@@ -171072,29 +171089,39 @@
 														}
 													},
 													"total": {
-														"type": "object",
-														"required": ["value", "relation"],
-														"properties": {
-															"value": {
-																"minimum": 0,
-																"anyOf": [
-																	{
-																		"format": "integer",
-																		"default": 0,
+														"$id": "SearchCountResult",
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["kind", "value"],
+																"properties": {
+																	"kind": {
+																		"const": "exact",
 																		"type": "string"
 																	},
-																	{
+																	"value": {
 																		"minimum": 0,
 																		"type": "integer"
 																	}
-																]
+																}
 															},
-															"relation": {
-																"default": "exact",
-																"type": "string",
-																"enum": ["exact", "lower-bound"]
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["kind", "value"],
+																"properties": {
+																	"kind": {
+																		"const": "lower-bound",
+																		"type": "string"
+																	},
+																	"value": {
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																}
 															}
-														}
+														]
 													},
 													"limit": {
 														"anyOf": [
@@ -180221,35 +180248,45 @@
 															"properties": {
 																"value": { "type": "string" },
 																"count": {
-																	"type": "object",
-																	"required": [
-																		"value",
-																		"relation"
-																	],
-																	"properties": {
-																		"value": {
-																			"minimum": 0,
-																			"anyOf": [
-																				{
-																					"format": "integer",
-																					"default": 0,
+																	"$id": "SearchCountResult",
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"kind",
+																				"value"
+																			],
+																			"properties": {
+																				"kind": {
+																					"const": "exact",
 																					"type": "string"
 																				},
-																				{
+																				"value": {
 																					"minimum": 0,
 																					"type": "integer"
 																				}
-																			]
+																			}
 																		},
-																		"relation": {
-																			"default": "exact",
-																			"type": "string",
-																			"enum": [
-																				"exact",
-																				"lower-bound"
-																			]
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"kind",
+																				"value"
+																			],
+																			"properties": {
+																				"kind": {
+																					"const": "lower-bound",
+																					"type": "string"
+																				},
+																				"value": {
+																					"minimum": 0,
+																					"type": "integer"
+																				}
+																			}
 																		}
-																	}
+																	]
 																}
 															}
 														}
@@ -180258,26 +180295,33 @@
 											}
 										},
 										"total": {
-											"type": "object",
-											"required": ["value", "relation"],
-											"properties": {
-												"value": {
-													"minimum": 0,
-													"anyOf": [
-														{
-															"format": "integer",
-															"default": 0,
+											"$id": "SearchCountResult",
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value"],
+													"properties": {
+														"kind": {
+															"const": "exact",
 															"type": "string"
 														},
-														{ "minimum": 0, "type": "integer" }
-													]
+														"value": { "minimum": 0, "type": "integer" }
+													}
 												},
-												"relation": {
-													"default": "exact",
-													"type": "string",
-													"enum": ["exact", "lower-bound"]
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value"],
+													"properties": {
+														"kind": {
+															"const": "lower-bound",
+															"type": "string"
+														},
+														"value": { "minimum": 0, "type": "integer" }
+													}
 												}
-											}
+											]
 										}
 									}
 								}
@@ -183540,35 +183584,45 @@
 															"properties": {
 																"value": { "type": "string" },
 																"count": {
-																	"type": "object",
-																	"required": [
-																		"value",
-																		"relation"
-																	],
-																	"properties": {
-																		"value": {
-																			"minimum": 0,
-																			"anyOf": [
-																				{
-																					"format": "integer",
-																					"default": 0,
+																	"$id": "SearchCountResult",
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"kind",
+																				"value"
+																			],
+																			"properties": {
+																				"kind": {
+																					"const": "exact",
 																					"type": "string"
 																				},
-																				{
+																				"value": {
 																					"minimum": 0,
 																					"type": "integer"
 																				}
-																			]
+																			}
 																		},
-																		"relation": {
-																			"default": "exact",
-																			"type": "string",
-																			"enum": [
-																				"exact",
-																				"lower-bound"
-																			]
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"kind",
+																				"value"
+																			],
+																			"properties": {
+																				"kind": {
+																					"const": "lower-bound",
+																					"type": "string"
+																				},
+																				"value": {
+																					"minimum": 0,
+																					"type": "integer"
+																				}
+																			}
 																		}
-																	}
+																	]
 																}
 															}
 														}
@@ -183902,29 +183956,39 @@
 														}
 													},
 													"total": {
-														"type": "object",
-														"required": ["value", "relation"],
-														"properties": {
-															"value": {
-																"minimum": 0,
-																"anyOf": [
-																	{
-																		"format": "integer",
-																		"default": 0,
+														"$id": "SearchCountResult",
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["kind", "value"],
+																"properties": {
+																	"kind": {
+																		"const": "exact",
 																		"type": "string"
 																	},
-																	{
+																	"value": {
 																		"minimum": 0,
 																		"type": "integer"
 																	}
-																]
+																}
 															},
-															"relation": {
-																"default": "exact",
-																"type": "string",
-																"enum": ["exact", "lower-bound"]
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["kind", "value"],
+																"properties": {
+																	"kind": {
+																		"const": "lower-bound",
+																		"type": "string"
+																	},
+																	"value": {
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																}
 															}
-														}
+														]
 													},
 													"limit": {
 														"anyOf": [
@@ -193000,35 +193064,45 @@
 															"properties": {
 																"value": { "type": "string" },
 																"count": {
-																	"type": "object",
-																	"required": [
-																		"value",
-																		"relation"
-																	],
-																	"properties": {
-																		"value": {
-																			"minimum": 0,
-																			"anyOf": [
-																				{
-																					"format": "integer",
-																					"default": 0,
+																	"$id": "SearchCountResult",
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"kind",
+																				"value"
+																			],
+																			"properties": {
+																				"kind": {
+																					"const": "exact",
 																					"type": "string"
 																				},
-																				{
+																				"value": {
 																					"minimum": 0,
 																					"type": "integer"
 																				}
-																			]
+																			}
 																		},
-																		"relation": {
-																			"default": "exact",
-																			"type": "string",
-																			"enum": [
-																				"exact",
-																				"lower-bound"
-																			]
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"kind",
+																				"value"
+																			],
+																			"properties": {
+																				"kind": {
+																					"const": "lower-bound",
+																					"type": "string"
+																				},
+																				"value": {
+																					"minimum": 0,
+																					"type": "integer"
+																				}
+																			}
 																		}
-																	}
+																	]
 																}
 															}
 														}
@@ -193037,26 +193111,33 @@
 											}
 										},
 										"total": {
-											"type": "object",
-											"required": ["value", "relation"],
-											"properties": {
-												"value": {
-													"minimum": 0,
-													"anyOf": [
-														{
-															"format": "integer",
-															"default": 0,
+											"$id": "SearchCountResult",
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value"],
+													"properties": {
+														"kind": {
+															"const": "exact",
 															"type": "string"
 														},
-														{ "minimum": 0, "type": "integer" }
-													]
+														"value": { "minimum": 0, "type": "integer" }
+													}
 												},
-												"relation": {
-													"default": "exact",
-													"type": "string",
-													"enum": ["exact", "lower-bound"]
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value"],
+													"properties": {
+														"kind": {
+															"const": "lower-bound",
+															"type": "string"
+														},
+														"value": { "minimum": 0, "type": "integer" }
+													}
 												}
-											}
+											]
 										}
 									}
 								}
@@ -196407,35 +196488,45 @@
 															"properties": {
 																"value": { "type": "string" },
 																"count": {
-																	"type": "object",
-																	"required": [
-																		"value",
-																		"relation"
-																	],
-																	"properties": {
-																		"value": {
-																			"minimum": 0,
-																			"anyOf": [
-																				{
-																					"format": "integer",
-																					"default": 0,
+																	"$id": "SearchCountResult",
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"kind",
+																				"value"
+																			],
+																			"properties": {
+																				"kind": {
+																					"const": "exact",
 																					"type": "string"
 																				},
-																				{
+																				"value": {
 																					"minimum": 0,
 																					"type": "integer"
 																				}
-																			]
+																			}
 																		},
-																		"relation": {
-																			"default": "exact",
-																			"type": "string",
-																			"enum": [
-																				"exact",
-																				"lower-bound"
-																			]
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"kind",
+																				"value"
+																			],
+																			"properties": {
+																				"kind": {
+																					"const": "lower-bound",
+																					"type": "string"
+																				},
+																				"value": {
+																					"minimum": 0,
+																					"type": "integer"
+																				}
+																			}
 																		}
-																	}
+																	]
 																}
 															}
 														}
@@ -196769,29 +196860,39 @@
 														}
 													},
 													"total": {
-														"type": "object",
-														"required": ["value", "relation"],
-														"properties": {
-															"value": {
-																"minimum": 0,
-																"anyOf": [
-																	{
-																		"format": "integer",
-																		"default": 0,
+														"$id": "SearchCountResult",
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["kind", "value"],
+																"properties": {
+																	"kind": {
+																		"const": "exact",
 																		"type": "string"
 																	},
-																	{
+																	"value": {
 																		"minimum": 0,
 																		"type": "integer"
 																	}
-																]
+																}
 															},
-															"relation": {
-																"default": "exact",
-																"type": "string",
-																"enum": ["exact", "lower-bound"]
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["kind", "value"],
+																"properties": {
+																	"kind": {
+																		"const": "lower-bound",
+																		"type": "string"
+																	},
+																	"value": {
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																}
 															}
-														}
+														]
 													},
 													"limit": {
 														"anyOf": [
@@ -199798,35 +199899,45 @@
 															"properties": {
 																"value": { "type": "string" },
 																"count": {
-																	"type": "object",
-																	"required": [
-																		"value",
-																		"relation"
-																	],
-																	"properties": {
-																		"value": {
-																			"minimum": 0,
-																			"anyOf": [
-																				{
-																					"format": "integer",
-																					"default": 0,
+																	"$id": "SearchCountResult",
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"kind",
+																				"value"
+																			],
+																			"properties": {
+																				"kind": {
+																					"const": "exact",
 																					"type": "string"
 																				},
-																				{
+																				"value": {
 																					"minimum": 0,
 																					"type": "integer"
 																				}
-																			]
+																			}
 																		},
-																		"relation": {
-																			"default": "exact",
-																			"type": "string",
-																			"enum": [
-																				"exact",
-																				"lower-bound"
-																			]
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"kind",
+																				"value"
+																			],
+																			"properties": {
+																				"kind": {
+																					"const": "lower-bound",
+																					"type": "string"
+																				},
+																				"value": {
+																					"minimum": 0,
+																					"type": "integer"
+																				}
+																			}
 																		}
-																	}
+																	]
 																}
 															}
 														}
@@ -200160,29 +200271,39 @@
 														}
 													},
 													"total": {
-														"type": "object",
-														"required": ["value", "relation"],
-														"properties": {
-															"value": {
-																"minimum": 0,
-																"anyOf": [
-																	{
-																		"format": "integer",
-																		"default": 0,
+														"$id": "SearchCountResult",
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["kind", "value"],
+																"properties": {
+																	"kind": {
+																		"const": "exact",
 																		"type": "string"
 																	},
-																	{
+																	"value": {
 																		"minimum": 0,
 																		"type": "integer"
 																	}
-																]
+																}
 															},
-															"relation": {
-																"default": "exact",
-																"type": "string",
-																"enum": ["exact", "lower-bound"]
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["kind", "value"],
+																"properties": {
+																	"kind": {
+																		"const": "lower-bound",
+																		"type": "string"
+																	},
+																	"value": {
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																}
 															}
-														}
+														]
 													},
 													"limit": {
 														"anyOf": [
@@ -209289,35 +209410,45 @@
 															"properties": {
 																"value": { "type": "string" },
 																"count": {
-																	"type": "object",
-																	"required": [
-																		"value",
-																		"relation"
-																	],
-																	"properties": {
-																		"value": {
-																			"minimum": 0,
-																			"anyOf": [
-																				{
-																					"format": "integer",
-																					"default": 0,
+																	"$id": "SearchCountResult",
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"kind",
+																				"value"
+																			],
+																			"properties": {
+																				"kind": {
+																					"const": "exact",
 																					"type": "string"
 																				},
-																				{
+																				"value": {
 																					"minimum": 0,
 																					"type": "integer"
 																				}
-																			]
+																			}
 																		},
-																		"relation": {
-																			"default": "exact",
-																			"type": "string",
-																			"enum": [
-																				"exact",
-																				"lower-bound"
-																			]
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"kind",
+																				"value"
+																			],
+																			"properties": {
+																				"kind": {
+																					"const": "lower-bound",
+																					"type": "string"
+																				},
+																				"value": {
+																					"minimum": 0,
+																					"type": "integer"
+																				}
+																			}
 																		}
-																	}
+																	]
 																}
 															}
 														}
@@ -209326,26 +209457,33 @@
 											}
 										},
 										"total": {
-											"type": "object",
-											"required": ["value", "relation"],
-											"properties": {
-												"value": {
-													"minimum": 0,
-													"anyOf": [
-														{
-															"format": "integer",
-															"default": 0,
+											"$id": "SearchCountResult",
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value"],
+													"properties": {
+														"kind": {
+															"const": "exact",
 															"type": "string"
 														},
-														{ "minimum": 0, "type": "integer" }
-													]
+														"value": { "minimum": 0, "type": "integer" }
+													}
 												},
-												"relation": {
-													"default": "exact",
-													"type": "string",
-													"enum": ["exact", "lower-bound"]
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value"],
+													"properties": {
+														"kind": {
+															"const": "lower-bound",
+															"type": "string"
+														},
+														"value": { "minimum": 0, "type": "integer" }
+													}
 												}
-											}
+											]
 										}
 									}
 								}
@@ -209607,35 +209745,45 @@
 															"properties": {
 																"value": { "type": "string" },
 																"count": {
-																	"type": "object",
-																	"required": [
-																		"value",
-																		"relation"
-																	],
-																	"properties": {
-																		"value": {
-																			"minimum": 0,
-																			"anyOf": [
-																				{
-																					"format": "integer",
-																					"default": 0,
+																	"$id": "SearchCountResult",
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"kind",
+																				"value"
+																			],
+																			"properties": {
+																				"kind": {
+																					"const": "exact",
 																					"type": "string"
 																				},
-																				{
+																				"value": {
 																					"minimum": 0,
 																					"type": "integer"
 																				}
-																			]
+																			}
 																		},
-																		"relation": {
-																			"default": "exact",
-																			"type": "string",
-																			"enum": [
-																				"exact",
-																				"lower-bound"
-																			]
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"kind",
+																				"value"
+																			],
+																			"properties": {
+																				"kind": {
+																					"const": "lower-bound",
+																					"type": "string"
+																				},
+																				"value": {
+																					"minimum": 0,
+																					"type": "integer"
+																				}
+																			}
 																		}
-																	}
+																	]
 																}
 															}
 														}
@@ -209969,29 +210117,39 @@
 														}
 													},
 													"total": {
-														"type": "object",
-														"required": ["value", "relation"],
-														"properties": {
-															"value": {
-																"minimum": 0,
-																"anyOf": [
-																	{
-																		"format": "integer",
-																		"default": 0,
+														"$id": "SearchCountResult",
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["kind", "value"],
+																"properties": {
+																	"kind": {
+																		"const": "exact",
 																		"type": "string"
 																	},
-																	{
+																	"value": {
 																		"minimum": 0,
 																		"type": "integer"
 																	}
-																]
+																}
 															},
-															"relation": {
-																"default": "exact",
-																"type": "string",
-																"enum": ["exact", "lower-bound"]
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["kind", "value"],
+																"properties": {
+																	"kind": {
+																		"const": "lower-bound",
+																		"type": "string"
+																	},
+																	"value": {
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																}
 															}
-														}
+														]
 													},
 													"limit": {
 														"anyOf": [
@@ -215386,26 +215544,33 @@
 											}
 										},
 										"total": {
-											"type": "object",
-											"required": ["value", "relation"],
-											"properties": {
-												"value": {
-													"minimum": 0,
-													"anyOf": [
-														{
-															"format": "integer",
-															"default": 0,
+											"$id": "SearchCountResult",
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value"],
+													"properties": {
+														"kind": {
+															"const": "exact",
 															"type": "string"
 														},
-														{ "minimum": 0, "type": "integer" }
-													]
+														"value": { "minimum": 0, "type": "integer" }
+													}
 												},
-												"relation": {
-													"default": "exact",
-													"type": "string",
-													"enum": ["exact", "lower-bound"]
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value"],
+													"properties": {
+														"kind": {
+															"const": "lower-bound",
+															"type": "string"
+														},
+														"value": { "minimum": 0, "type": "integer" }
+													}
 												}
-											}
+											]
 										},
 										"nextCursor": {
 											"minLength": 1,

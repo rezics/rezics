@@ -86,13 +86,13 @@ export function UnitDiscussionSummarySection({
 	const displayTotal = (
 		total:
 			| Readonly<{
-					readonly relation: "exact" | "lower-bound";
+					readonly kind: "exact" | "lower-bound";
 					readonly value: string | number;
 			  }>
 			| undefined,
 	) =>
 		total
-			? total.relation === "lower-bound"
+			? total.kind === "lower-bound"
 				? t.engagement.atLeastCount({
 						count: numberFormat.format(toNonNegativeApiInteger(total.value)),
 					})

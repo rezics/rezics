@@ -61,7 +61,7 @@ export interface ApiFeedListProps extends ApiFeedListBaseProps {
 export interface ApiFeedResultMetadata {
 	readonly displayedCount: number;
 	readonly total: Readonly<{
-		readonly relation: "exact" | "lower-bound";
+		readonly kind: "exact" | "lower-bound";
 		readonly value: number;
 	}>;
 }
@@ -167,7 +167,7 @@ export function ApiFeedList({
 	});
 	const total = query.data?.pages[0]?.total;
 	const feedSetSize = total
-		? total.relation === "exact"
+		? total.kind === "exact"
 			? toNonNegativeApiInteger(total.value)
 			: -1
 		: undefined;
@@ -217,7 +217,7 @@ export function ApiFeedList({
 					{renderSummary({
 						displayedCount: items.length,
 						total: {
-							relation: total.relation,
+							kind: total.kind,
 							value: toNonNegativeApiInteger(total.value),
 						},
 					})}

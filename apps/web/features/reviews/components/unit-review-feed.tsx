@@ -95,7 +95,7 @@ export function UnitReviewFeed({
 		};
 		return (
 			<p className="text-sm text-muted-foreground" role="status">
-				{total.relation === "exact"
+				{total.kind === "exact"
 					? t.engagement.reviewResultRange(values)
 					: t.engagement.reviewResultRangeLowerBound(values)}
 			</p>

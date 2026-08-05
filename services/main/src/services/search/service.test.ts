@@ -232,7 +232,7 @@ describe("domain search SQL", () => {
 		});
 
 		expect(firstPage.hits).toEqual([{ id: first }, { id: second }]);
-		expect(firstPage.total).toEqual({ value: 3, relation: "lower-bound" });
+		expect(firstPage.total).toEqual({ kind: "lower-bound", value: 3 });
 		expect(firstPage.nextOffset).toBe(3);
 		expect(firstPage.exhausted).toBe(false);
 		expect(searchCandidates).toHaveBeenLastCalledWith([
@@ -611,7 +611,7 @@ describe("domain search SQL", () => {
 		});
 		const result = await searchDomain("units", { query: "book", limit: 1 });
 		expect(result.hits).toEqual([{ id: first, slugAddress: null }]);
-		expect(result.total).toEqual({ value: 2, relation: "lower-bound" });
+		expect(result.total).toEqual({ kind: "lower-bound", value: 2 });
 		expect(result.nextCursor).toBeDefined();
 		expect(parseSearchCursor(result.nextCursor ?? "").categories.units?.offset).toBe(1);
 		const statement = execute.mock.calls.at(-1)?.[0] as SQL | undefined;
@@ -643,7 +643,7 @@ describe("domain search SQL", () => {
 
 		const result = await searchDomain("units", { query: "book", limit: 1 });
 
-		expect(result.total).toEqual({ value: 2, relation: "exact" });
+		expect(result.total).toEqual({ kind: "exact", value: 2 });
 	});
 
 	it("batches bounded facet counts and omits unsupported category facets", async () => {
@@ -667,11 +667,11 @@ describe("domain search SQL", () => {
 		expect(facets).toEqual([
 			{
 				field: "category",
-				options: [{ value: "units", count: { value: 12, relation: "exact" } }],
+				options: [{ value: "units", count: { kind: "exact", value: 12 } }],
 			},
 			{
 				field: "language",
-				options: [{ value: "zh", count: { value: 8, relation: "exact" } }],
+				options: [{ value: "zh", count: { kind: "exact", value: 8 } }],
 			},
 		]);
 		expect(query).toContain("union all");

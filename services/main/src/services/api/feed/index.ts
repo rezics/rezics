@@ -21,6 +21,7 @@ import { resolveIdentity } from "../../auth/session";
 import { getProfileActivityReadCondition } from "../../authorization/profile-activity/query";
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import { database } from "../../database";
+import type { SearchCountResult } from "../../counts/contract";
 import { toSafeInteger } from "../../database/integer";
 import {
 	resolvedUnitLocalizationAvatar,
@@ -305,10 +306,10 @@ export function resolveFeedSearchCategories(
 
 interface FeedSearchSelection {
 	readonly ids: readonly string[];
-	readonly relation: "exact" | "lower-bound";
+	readonly kind: "exact" | "lower-bound";
 }
 
-type FeedTotalRelation = FeedSearchSelection["relation"];
+type FeedTotalKind = FeedSearchSelection["kind"];
 type FeedCandidateCoverage = "bounded" | "exhaustive";
 
 async function resolveFeedSearchSelection(input: {
@@ -335,9 +336,7 @@ async function resolveFeedSearchSelection(input: {
 	);
 	return {
 		ids: [...new Set(groups.flatMap((group) => group.hits.map((hit) => hit.id)))],
-		relation: groups.every((group) => group.total.relation === "exact")
-			? "exact"
-			: "lower-bound",
+		kind: groups.every((group) => group.total.kind === "exact") ? "exact" : "lower-bound",
 	};
 }
 
@@ -583,14 +582,14 @@ export function resolveFeedCandidateWindow<T>(
 export function createFeedTotal(input: {
 	readonly candidates: readonly unknown[];
 	readonly coverage: FeedCandidateCoverage;
-	readonly searchRelation: FeedTotalRelation;
-}): Readonly<{ value: number; relation: FeedTotalRelation }> {
+	readonly searchKind: FeedTotalKind;
+}): SearchCountResult {
 	return {
-		value: input.candidates.length,
-		relation:
-			input.coverage === "exhaustive" && input.searchRelation === "exact"
+		kind:
+			input.coverage === "exhaustive" && input.searchKind === "exact"
 				? "exact"
 				: "lower-bound",
+		value: input.candidates.length,
 	};
 }
 
@@ -1720,7 +1719,7 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 			total: createFeedTotal({
 				candidates: ranked,
 				coverage: sources.coverage,
-				searchRelation: searchSelection?.relation ?? "exact",
+				searchKind: searchSelection?.kind ?? "exact",
 			}),
 			nextCursor:
 				start + page.length < ranked.length && last

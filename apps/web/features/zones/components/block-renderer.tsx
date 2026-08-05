@@ -100,16 +100,16 @@ type SearchFacet = {
 	readonly field: string;
 	readonly options: readonly { readonly value: string }[];
 };
-type SearchExactness = {
+type SearchCountResult = {
 	readonly value: number;
-	readonly relation: "exact" | "lower-bound";
+	readonly kind: "exact" | "lower-bound";
 };
-const ExactZeroSearchTotal: SearchExactness = { value: 0, relation: "exact" };
+const ExactZeroSearchTotal: SearchCountResult = { kind: "exact", value: 0 };
 type SearchPage = {
 	readonly facets?: readonly SearchFacet[];
 	readonly results: readonly SearchResult[];
 	readonly nextCursor?: string;
-	readonly total: SearchExactness;
+	readonly total: SearchCountResult;
 };
 type ZoneFeedExecutionResponse = PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200;
 type ZoneFeedRequest = SearchFeatureRequest;
@@ -117,7 +117,7 @@ type ZoneFeedPage = {
 	readonly facets?: readonly SearchFacet[];
 	readonly items: readonly FeedItem[];
 	readonly nextCursor?: SearchFeedContinuationToken;
-	readonly total: SearchExactness;
+	readonly total: SearchCountResult;
 };
 
 interface ZoneBlockContextValue {
@@ -495,7 +495,7 @@ function SearchResults({
 }: {
 	results: readonly SearchResult[];
 	presentation: Pick<SearchPresentation, "results" | "showResultCount">;
-	total: SearchExactness;
+	total: SearchCountResult;
 	unitListLayout?: UnitListLayout;
 }) {
 	const context = useZoneBlocks();
@@ -507,7 +507,7 @@ function SearchResults({
 		<div className="mt-4 grid gap-3">
 			{presentation.showResultCount ? (
 				<p className="text-muted-foreground text-sm">
-					{total.relation === "exact"
+					{total.kind === "exact"
 						? search.resultCount({ count: total.value })
 						: search.atLeastResultCount({ count: total.value })}
 				</p>
@@ -577,7 +577,7 @@ function ZoneSearchFeature({
 	facets?: readonly SearchFacet[];
 	results?: readonly SearchResult[];
 	presentation: Pick<SearchPresentation, "results" | "showResultCount">;
-	total?: SearchExactness;
+	total?: SearchCountResult;
 	autoExecute?: boolean;
 	unitListLayout?: UnitListLayout;
 	initialPageSize?: number;
@@ -662,7 +662,7 @@ interface SearchExecutionResponse {
 		readonly hits: readonly SearchResult[];
 		readonly total: {
 			readonly value: string | number;
-			readonly relation: "exact" | "lower-bound";
+			readonly kind: "exact" | "lower-bound";
 		};
 	}[];
 }
@@ -674,10 +674,8 @@ function toSearchPage(value: SearchExecutionResponse): SearchPage {
 		results: value.groups.flatMap((group) => group.hits),
 		nextCursor: value.nextCursor,
 		total: {
+			kind: totals.some((total) => total.kind === "lower-bound") ? "lower-bound" : "exact",
 			value: totals.reduce((total, current) => total + Number(current.value), 0),
-			relation: totals.some((total) => total.relation === "lower-bound")
-				? "lower-bound"
-				: "exact",
 		},
 	};
 }
@@ -689,8 +687,8 @@ function toZoneFeedPage(value: ZoneFeedExecutionResponse): ZoneFeedPage {
 		// The successful Feed endpoint response is the proof for this route-specific brand.
 		nextCursor: value.nextCursor as SearchFeedContinuationToken | undefined,
 		total: {
+			kind: value.total.kind,
 			value: Number(value.total.value),
-			relation: value.total.relation,
 		},
 	};
 }

@@ -40,17 +40,18 @@ describe("feed candidate totals", () => {
 		{
 			name: "bounded candidate window",
 			coverage: "bounded" as const,
-			searchRelation: "exact" as const,
+			searchKind: "exact" as const,
 		},
 		{
 			name: "lower-bound Search selection",
 			coverage: "exhaustive" as const,
-			searchRelation: "lower-bound" as const,
+			searchKind: "lower-bound" as const,
 		},
-	])("returns a verified lower bound for a $name", ({ coverage, searchRelation }) => {
-		expect(
-			createFeedTotal({ candidates: ["first", "second"], coverage, searchRelation }),
-		).toEqual({ value: 2, relation: "lower-bound" });
+	])("returns a verified lower bound for a $name", ({ coverage, searchKind }) => {
+		expect(createFeedTotal({ candidates: ["first", "second"], coverage, searchKind })).toEqual({
+			kind: "lower-bound",
+			value: 2,
+		});
 	});
 
 	it("returns an exact total only when both candidate and Search inputs are exhaustive", () => {
@@ -58,9 +59,9 @@ describe("feed candidate totals", () => {
 			createFeedTotal({
 				candidates: ["first", "second"],
 				coverage: "exhaustive",
-				searchRelation: "exact",
+				searchKind: "exact",
 			}),
-		).toEqual({ value: 2, relation: "exact" });
+		).toEqual({ kind: "exact", value: 2 });
 	});
 });
 

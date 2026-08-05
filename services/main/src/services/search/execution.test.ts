@@ -48,7 +48,7 @@ describe("globally ranked Search Feed execution", () => {
 		searchGlobalIdentifiers
 			.mockResolvedValueOnce({
 				hits: [{ id: first }, { id: second }],
-				total: { value: 4, relation: "lower-bound" },
+				total: { kind: "lower-bound", value: 4 },
 				offset: 0,
 				nextOffset: 3,
 				exhausted: false,
@@ -57,7 +57,7 @@ describe("globally ranked Search Feed execution", () => {
 			})
 			.mockResolvedValueOnce({
 				hits: [{ id: third }],
-				total: { value: 4, relation: "exact" },
+				total: { kind: "exact", value: 4 },
 				offset: 3,
 				nextOffset: 4,
 				exhausted: true,
@@ -75,7 +75,7 @@ describe("globally ranked Search Feed execution", () => {
 		);
 
 		const result = await executeCompiledSearchIdentifiers(
-			compiled.request,
+			compiled.plan,
 			["zh", "en"],
 			undefined,
 			compiled.enforcedZoneId,
@@ -111,7 +111,7 @@ describe("globally ranked Search Feed execution", () => {
 			{ sortProfile: "feed", pageBudget: "global" },
 		);
 		const nextResult = await executeCompiledSearchIdentifiers(
-			nextCompiled.request,
+			nextCompiled.plan,
 			["zh", "en"],
 			undefined,
 			nextCompiled.enforcedZoneId,

@@ -20895,14 +20895,6 @@ export const PostApiFeedQueryStatus200ItemsRealmTagContextTagAvatarIconPrefixEnu
 export type PostApiFeedQueryStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum =
 	(typeof PostApiFeedQueryStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum)[keyof typeof PostApiFeedQueryStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum];
 
-export const PostApiFeedQueryStatus200TotalRelationEnum = {
-	exact: "exact",
-	"lower-bound": "lower-bound",
-} as const;
-
-export type PostApiFeedQueryStatus200TotalRelationEnum =
-	(typeof PostApiFeedQueryStatus200TotalRelationEnum)[keyof typeof PostApiFeedQueryStatus200TotalRelationEnum];
-
 /**
  * @type object
  */
@@ -23514,17 +23506,29 @@ export type PostApiFeedQueryStatus200 = {
 		  )
 	)[];
 	nextCursor: (string | null) | null;
-	/**
-	 * @type object
-	 */
-	total: {
-		value: string | number;
-		/**
-		 * @default 'exact'
-		 * @type string
-		 */
-		relation: PostApiFeedQueryStatus200TotalRelationEnum;
-	};
+	total:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "exact";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "lower-bound";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+		  };
 };
 
 export const PostApiFeedQueryStatus400ErrorCodeEnum = {
@@ -121141,14 +121145,6 @@ export type PostApiSearchFeaturesByTemplateExecutePath = {
 	template: PostApiSearchFeaturesByTemplateExecuteTemplate;
 };
 
-export const PostApiSearchFeaturesByTemplateExecuteStatus200FacetsOptionsCountRelationEnum = {
-	exact: "exact",
-	"lower-bound": "lower-bound",
-} as const;
-
-export type PostApiSearchFeaturesByTemplateExecuteStatus200FacetsOptionsCountRelationEnum =
-	(typeof PostApiSearchFeaturesByTemplateExecuteStatus200FacetsOptionsCountRelationEnum)[keyof typeof PostApiSearchFeaturesByTemplateExecuteStatus200FacetsOptionsCountRelationEnum];
-
 export const PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -121202,14 +121198,6 @@ export const PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsVariantMai
 export type PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum =
 	(typeof PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum)[keyof typeof PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum];
 
-export const PostApiSearchFeaturesByTemplateExecuteStatus200GroupsTotalRelationEnum = {
-	exact: "exact",
-	"lower-bound": "lower-bound",
-} as const;
-
-export type PostApiSearchFeaturesByTemplateExecuteStatus200GroupsTotalRelationEnum =
-	(typeof PostApiSearchFeaturesByTemplateExecuteStatus200GroupsTotalRelationEnum)[keyof typeof PostApiSearchFeaturesByTemplateExecuteStatus200GroupsTotalRelationEnum];
-
 /**
  * @type object
  */
@@ -121245,17 +121233,29 @@ export type PostApiSearchFeaturesByTemplateExecuteStatus200 = {
 			 * @type string
 			 */
 			value: string;
-			/**
-			 * @type object
-			 */
-			count: {
-				value: string | number;
-				/**
-				 * @default 'exact'
-				 * @type string
-				 */
-				relation: PostApiSearchFeaturesByTemplateExecuteStatus200FacetsOptionsCountRelationEnum;
-			};
+			count:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "exact";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "lower-bound";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  };
 		}[];
 	}[];
 	/**
@@ -121438,17 +121438,29 @@ export type PostApiSearchFeaturesByTemplateExecuteStatus200 = {
 			name?: (string | null) | null;
 			summary: (string | null) | null;
 		}[];
-		/**
-		 * @type object
-		 */
-		total: {
-			value: string | number;
-			/**
-			 * @default 'exact'
-			 * @type string
-			 */
-			relation: PostApiSearchFeaturesByTemplateExecuteStatus200GroupsTotalRelationEnum;
-		};
+		total:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "exact";
+					/**
+					 * @minLength 0
+					 * @type integer
+					 */
+					value: number;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "lower-bound";
+					/**
+					 * @minLength 0
+					 * @type integer
+					 */
+					value: number;
+			  };
 		limit: string | number;
 		/**
 		 * @type number
@@ -122822,22 +122834,6 @@ export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmTagContextTag
 
 export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum =
 	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum];
-
-export const PostApiSearchFeaturesByTemplateFeedStatus200FacetsOptionsCountRelationEnum = {
-	exact: "exact",
-	"lower-bound": "lower-bound",
-} as const;
-
-export type PostApiSearchFeaturesByTemplateFeedStatus200FacetsOptionsCountRelationEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedStatus200FacetsOptionsCountRelationEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200FacetsOptionsCountRelationEnum];
-
-export const PostApiSearchFeaturesByTemplateFeedStatus200TotalRelationEnum = {
-	exact: "exact",
-	"lower-bound": "lower-bound",
-} as const;
-
-export type PostApiSearchFeaturesByTemplateFeedStatus200TotalRelationEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedStatus200TotalRelationEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200TotalRelationEnum];
 
 /**
  * @type object
@@ -125486,30 +125482,54 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 			 * @type string
 			 */
 			value: string;
-			/**
-			 * @type object
-			 */
-			count: {
-				value: string | number;
-				/**
-				 * @default 'exact'
-				 * @type string
-				 */
-				relation: PostApiSearchFeaturesByTemplateFeedStatus200FacetsOptionsCountRelationEnum;
-			};
+			count:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "exact";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "lower-bound";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  };
 		}[];
 	}[];
-	/**
-	 * @type object
-	 */
-	total: {
-		value: string | number;
-		/**
-		 * @default 'exact'
-		 * @type string
-		 */
-		relation: PostApiSearchFeaturesByTemplateFeedStatus200TotalRelationEnum;
-	};
+	total:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "exact";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "lower-bound";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+		  };
 };
 
 /**
@@ -126969,14 +126989,6 @@ export type PostApiSearchZonesByZoneIdFeatureExecutePath = {
 	zoneId: string;
 };
 
-export const PostApiSearchZonesByZoneIdFeatureExecuteStatus200FacetsOptionsCountRelationEnum = {
-	exact: "exact",
-	"lower-bound": "lower-bound",
-} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureExecuteStatus200FacetsOptionsCountRelationEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureExecuteStatus200FacetsOptionsCountRelationEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureExecuteStatus200FacetsOptionsCountRelationEnum];
-
 export const PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -127030,14 +127042,6 @@ export const PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsVariantM
 export type PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum =
 	(typeof PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsTotalRelationEnum = {
-	exact: "exact",
-	"lower-bound": "lower-bound",
-} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsTotalRelationEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsTotalRelationEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsTotalRelationEnum];
-
 /**
  * @type object
  */
@@ -127073,17 +127077,29 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteStatus200 = {
 			 * @type string
 			 */
 			value: string;
-			/**
-			 * @type object
-			 */
-			count: {
-				value: string | number;
-				/**
-				 * @default 'exact'
-				 * @type string
-				 */
-				relation: PostApiSearchZonesByZoneIdFeatureExecuteStatus200FacetsOptionsCountRelationEnum;
-			};
+			count:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "exact";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "lower-bound";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  };
 		}[];
 	}[];
 	/**
@@ -127266,17 +127282,29 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteStatus200 = {
 			name?: (string | null) | null;
 			summary: (string | null) | null;
 		}[];
-		/**
-		 * @type object
-		 */
-		total: {
-			value: string | number;
-			/**
-			 * @default 'exact'
-			 * @type string
-			 */
-			relation: PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsTotalRelationEnum;
-		};
+		total:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "exact";
+					/**
+					 * @minLength 0
+					 * @type integer
+					 */
+					value: number;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "lower-bound";
+					/**
+					 * @minLength 0
+					 * @type integer
+					 */
+					value: number;
+			  };
 		limit: string | number;
 		/**
 		 * @type number
@@ -128624,22 +128652,6 @@ export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmTagContextT
 
 export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum =
 	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum];
-
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus200FacetsOptionsCountRelationEnum = {
-	exact: "exact",
-	"lower-bound": "lower-bound",
-} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus200FacetsOptionsCountRelationEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200FacetsOptionsCountRelationEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200FacetsOptionsCountRelationEnum];
-
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus200TotalRelationEnum = {
-	exact: "exact",
-	"lower-bound": "lower-bound",
-} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus200TotalRelationEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200TotalRelationEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200TotalRelationEnum];
 
 /**
  * @type object
@@ -131289,30 +131301,54 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 			 * @type string
 			 */
 			value: string;
-			/**
-			 * @type object
-			 */
-			count: {
-				value: string | number;
-				/**
-				 * @default 'exact'
-				 * @type string
-				 */
-				relation: PostApiSearchZonesByZoneIdFeatureFeedStatus200FacetsOptionsCountRelationEnum;
-			};
+			count:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "exact";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "lower-bound";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  };
 		}[];
 	}[];
-	/**
-	 * @type object
-	 */
-	total: {
-		value: string | number;
-		/**
-		 * @default 'exact'
-		 * @type string
-		 */
-		relation: PostApiSearchZonesByZoneIdFeatureFeedStatus200TotalRelationEnum;
-	};
+	total:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "exact";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "lower-bound";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+		  };
 };
 
 /**
@@ -132769,15 +132805,6 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecutePath = {
 	blockKey: string;
 };
 
-export const PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum =
-	{
-		exact: "exact",
-		"lower-bound": "lower-bound",
-	} as const;
-
-export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum =
-	(typeof PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum)[keyof typeof PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum];
-
 export const PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsHitsLanguageEnum =
 	{
 		zh: "zh",
@@ -132835,15 +132862,6 @@ export const PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200Group
 export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum =
 	(typeof PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum];
 
-export const PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum =
-	{
-		exact: "exact",
-		"lower-bound": "lower-bound",
-	} as const;
-
-export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum =
-	(typeof PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum)[keyof typeof PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum];
-
 /**
  * @type object
  */
@@ -132879,17 +132897,29 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200 = {
 			 * @type string
 			 */
 			value: string;
-			/**
-			 * @type object
-			 */
-			count: {
-				value: string | number;
-				/**
-				 * @default 'exact'
-				 * @type string
-				 */
-				relation: PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum;
-			};
+			count:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "exact";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "lower-bound";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  };
 		}[];
 	}[];
 	/**
@@ -133072,17 +133102,29 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200 = {
 			name?: (string | null) | null;
 			summary: (string | null) | null;
 		}[];
-		/**
-		 * @type object
-		 */
-		total: {
-			value: string | number;
-			/**
-			 * @default 'exact'
-			 * @type string
-			 */
-			relation: PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum;
-		};
+		total:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "exact";
+					/**
+					 * @minLength 0
+					 * @type integer
+					 */
+					value: number;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "lower-bound";
+					/**
+					 * @minLength 0
+					 * @type integer
+					 */
+					value: number;
+			  };
 		limit: string | number;
 		/**
 		 * @type number
@@ -134139,15 +134181,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecutePath =
 	blockKey: string;
 };
 
-export const PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum =
-	{
-		exact: "exact",
-		"lower-bound": "lower-bound",
-	} as const;
-
-export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum =
-	(typeof PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum];
-
 export const PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsHitsLanguageEnum =
 	{
 		zh: "zh",
@@ -134205,15 +134238,6 @@ export const PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatu
 export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum =
 	(typeof PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum];
 
-export const PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum =
-	{
-		exact: "exact",
-		"lower-bound": "lower-bound",
-	} as const;
-
-export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum =
-	(typeof PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum];
-
 /**
  * @type object
  */
@@ -134249,17 +134273,29 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus
 			 * @type string
 			 */
 			value: string;
-			/**
-			 * @type object
-			 */
-			count: {
-				value: string | number;
-				/**
-				 * @default 'exact'
-				 * @type string
-				 */
-				relation: PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum;
-			};
+			count:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "exact";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "lower-bound";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  };
 		}[];
 	}[];
 	/**
@@ -134442,17 +134478,29 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus
 			name?: (string | null) | null;
 			summary: (string | null) | null;
 		}[];
-		/**
-		 * @type object
-		 */
-		total: {
-			value: string | number;
-			/**
-			 * @default 'exact'
-			 * @type string
-			 */
-			relation: PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum;
-		};
+		total:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "exact";
+					/**
+					 * @minLength 0
+					 * @type integer
+					 */
+					value: number;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "lower-bound";
+					/**
+					 * @minLength 0
+					 * @type integer
+					 */
+					value: number;
+			  };
 		limit: string | number;
 		/**
 		 * @type number
@@ -135822,23 +135870,6 @@ export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200Items
 
 export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum =
 	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum];
-
-export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum =
-	{
-		exact: "exact",
-		"lower-bound": "lower-bound",
-	} as const;
-
-export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum =
-	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum];
-
-export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200TotalRelationEnum = {
-	exact: "exact",
-	"lower-bound": "lower-bound",
-} as const;
-
-export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200TotalRelationEnum =
-	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200TotalRelationEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200TotalRelationEnum];
 
 /**
  * @type object
@@ -138489,30 +138520,54 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 			 * @type string
 			 */
 			value: string;
-			/**
-			 * @type object
-			 */
-			count: {
-				value: string | number;
-				/**
-				 * @default 'exact'
-				 * @type string
-				 */
-				relation: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum;
-			};
+			count:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "exact";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "lower-bound";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  };
 		}[];
 	}[];
-	/**
-	 * @type object
-	 */
-	total: {
-		value: string | number;
-		/**
-		 * @default 'exact'
-		 * @type string
-		 */
-		relation: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200TotalRelationEnum;
-	};
+	total:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "exact";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "lower-bound";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+		  };
 };
 
 /**
@@ -139560,14 +139615,6 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteResponse =
 	| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500
 	| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus503;
 
-export const PostApiSearchStatus200FacetsOptionsCountRelationEnum = {
-	exact: "exact",
-	"lower-bound": "lower-bound",
-} as const;
-
-export type PostApiSearchStatus200FacetsOptionsCountRelationEnum =
-	(typeof PostApiSearchStatus200FacetsOptionsCountRelationEnum)[keyof typeof PostApiSearchStatus200FacetsOptionsCountRelationEnum];
-
 export const PostApiSearchStatus200GroupsHitsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -139620,14 +139667,6 @@ export const PostApiSearchStatus200GroupsHitsVariantMainUnitLanguageEnum = {
 export type PostApiSearchStatus200GroupsHitsVariantMainUnitLanguageEnum =
 	(typeof PostApiSearchStatus200GroupsHitsVariantMainUnitLanguageEnum)[keyof typeof PostApiSearchStatus200GroupsHitsVariantMainUnitLanguageEnum];
 
-export const PostApiSearchStatus200GroupsTotalRelationEnum = {
-	exact: "exact",
-	"lower-bound": "lower-bound",
-} as const;
-
-export type PostApiSearchStatus200GroupsTotalRelationEnum =
-	(typeof PostApiSearchStatus200GroupsTotalRelationEnum)[keyof typeof PostApiSearchStatus200GroupsTotalRelationEnum];
-
 /**
  * @type object
  */
@@ -139663,17 +139702,29 @@ export type PostApiSearchStatus200 = {
 			 * @type string
 			 */
 			value: string;
-			/**
-			 * @type object
-			 */
-			count: {
-				value: string | number;
-				/**
-				 * @default 'exact'
-				 * @type string
-				 */
-				relation: PostApiSearchStatus200FacetsOptionsCountRelationEnum;
-			};
+			count:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "exact";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "lower-bound";
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						value: number;
+				  };
 		}[];
 	}[];
 	/**
@@ -139856,17 +139907,29 @@ export type PostApiSearchStatus200 = {
 			name?: (string | null) | null;
 			summary: (string | null) | null;
 		}[];
-		/**
-		 * @type object
-		 */
-		total: {
-			value: string | number;
-			/**
-			 * @default 'exact'
-			 * @type string
-			 */
-			relation: PostApiSearchStatus200GroupsTotalRelationEnum;
-		};
+		total:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "exact";
+					/**
+					 * @minLength 0
+					 * @type integer
+					 */
+					value: number;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "lower-bound";
+					/**
+					 * @minLength 0
+					 * @type integer
+					 */
+					value: number;
+			  };
 		limit: string | number;
 		/**
 		 * @type number
@@ -142005,14 +142068,6 @@ export const PostApiSearchByIndexStatus200HitsVariantMainUnitLanguageEnum = {
 export type PostApiSearchByIndexStatus200HitsVariantMainUnitLanguageEnum =
 	(typeof PostApiSearchByIndexStatus200HitsVariantMainUnitLanguageEnum)[keyof typeof PostApiSearchByIndexStatus200HitsVariantMainUnitLanguageEnum];
 
-export const PostApiSearchByIndexStatus200TotalRelationEnum = {
-	exact: "exact",
-	"lower-bound": "lower-bound",
-} as const;
-
-export type PostApiSearchByIndexStatus200TotalRelationEnum =
-	(typeof PostApiSearchByIndexStatus200TotalRelationEnum)[keyof typeof PostApiSearchByIndexStatus200TotalRelationEnum];
-
 /**
  * @type object
  */
@@ -142189,17 +142244,29 @@ export type PostApiSearchByIndexStatus200 = {
 		name?: (string | null) | null;
 		summary: (string | null) | null;
 	}[];
-	/**
-	 * @type object
-	 */
-	total: {
-		value: string | number;
-		/**
-		 * @default 'exact'
-		 * @type string
-		 */
-		relation: PostApiSearchByIndexStatus200TotalRelationEnum;
-	};
+	total:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "exact";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "lower-bound";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+		  };
 	/**
 	 * @description Opaque continuation token returned by the preceding Search page. Clients must not inspect or modify it.
 	 * @minLength 1

@@ -39,14 +39,14 @@ describe("API response values", () => {
 			Check(SearchFeedResponse, {
 				items: [],
 				facets: [],
-				total: { value: 21, relation: "lower-bound" },
+				total: { kind: "lower-bound", value: 21 },
 				nextCursor: "s2_global-token",
 			}),
 		).toBe(true);
 		expect(
 			Check(SearchFeedResponse, {
 				items: [],
-				total: { value: 0, relation: "exact" },
+				total: { kind: "exact", value: 0 },
 				nextCursor: "",
 			}),
 		).toBe(false);

@@ -23,6 +23,8 @@ import {
 } from "@rezics/filter";
 import type { ContentLanguage } from "@rezics/i18n";
 
+import type { SearchCountResult } from "../counts/contract";
+
 import { InvalidSearch } from "./errors";
 import {
 	assertCurrentSearchFieldScalar,
@@ -42,6 +44,7 @@ import {
 	type SearchExpression,
 } from "./query";
 import { SearchCategories } from "./schema";
+import { ValidatedSearchPlan } from "./validated-plan";
 
 interface SearchTemplateDefinition {
 	readonly id: SearchTemplateId;
@@ -596,6 +599,7 @@ export interface CompiledSearchFeature<
 	Request extends CompiledSearchRequest = CompiledSearchRequest,
 > {
 	readonly request: Request;
+	readonly plan: ValidatedSearchPlan<Request>;
 	readonly enforcedZoneId?: string;
 	readonly inputIdentity: string;
 	readonly facetBindings: readonly {
@@ -732,21 +736,26 @@ export function compileSearchFeatureInput(
 		};
 	});
 	const domainFilter = combineUnitPredicates([input.document.filter, input.state.filter?.where]);
+	const request: CompiledSearchRequest = {
+		pageBudget: execution.pageBudget,
+		scope: context.scope,
+		categories,
+		query,
+		constraints: [...template.constraints, ...context.contextFilters],
+		searchExpression,
+		...(domainFilter ? { domainFilter } : {}),
+		sort,
+		pageSize,
+		maxResultWindow: input.document.results.maxResultWindow,
+		cursor: input.state.cursor,
+		facets: [...new Set(facets.map((facet) => facet.field))],
+	};
 	return {
-		request: {
-			pageBudget: execution.pageBudget,
-			scope: context.scope,
-			categories,
-			query,
-			constraints: [...template.constraints, ...context.contextFilters],
-			searchExpression,
-			...(domainFilter ? { domainFilter } : {}),
-			sort,
-			pageSize,
-			maxResultWindow: input.document.results.maxResultWindow,
-			cursor: input.state.cursor,
-			facets: [...new Set(facets.map((facet) => facet.field))],
-		},
+		request,
+		plan: ValidatedSearchPlan.create(request, {
+			contexts: input.contexts.length,
+			injections: input.injections.length,
+		}),
 		...(context.enforcedZoneId ? { enforcedZoneId: context.enforcedZoneId } : {}),
 		inputIdentity: `${execution.sortProfile}:${execution.pageBudget}:${canonicalSearchFeatureInput(
 			withoutCursor(input),
@@ -760,7 +769,7 @@ export function mapSearchFeatureFacets(
 		readonly field: SearchField;
 		readonly options: readonly {
 			readonly value: string;
-			readonly count: { readonly value: number; readonly relation: "exact" | "lower-bound" };
+			readonly count: SearchCountResult;
 		}[];
 	}[],
 	bindings: CompiledSearchFeature["facetBindings"],
@@ -789,7 +798,7 @@ export async function executeSearchFeatureInput(
 	const compiled = compileSearchFeatureInput(input, execution, hasDevelopmentPreviewAccess);
 	const { executeCompiledSearch } = await import("./execution");
 	const result = await executeCompiledSearch(
-		compiled.request,
+		compiled.plan,
 		localizationLanguages,
 		profileId,
 		compiled.enforcedZoneId,
@@ -812,7 +821,7 @@ export async function executeSearchFeatureFeedInput(
 	const compiled = compileSearchFeatureInput(input, execution, hasDevelopmentPreviewAccess);
 	const { executeCompiledSearchIdentifiers } = await import("./execution");
 	const result = await executeCompiledSearchIdentifiers(
-		compiled.request,
+		compiled.plan,
 		localizationLanguages,
 		profileId,
 		compiled.enforcedZoneId,

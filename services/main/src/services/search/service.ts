@@ -49,6 +49,7 @@ import {
 	VariantCapableUnitKindValues,
 } from "../database/schema";
 import { env } from "../config";
+import type { SearchCountResult } from "../counts/contract";
 import {
 	firstUnitLocalizationTitle,
 	localizationLanguageOrder,
@@ -801,10 +802,7 @@ interface SearchIdentifier {
 
 interface SearchDomainScanResult<Hit extends SearchIdentifier> {
 	readonly hits: Hit[];
-	readonly total: {
-		readonly value: number;
-		readonly relation: "exact" | "lower-bound";
-	};
+	readonly total: SearchCountResult;
 	readonly offset: number;
 	readonly nextOffset: number;
 	readonly exhausted: boolean;
@@ -1176,7 +1174,7 @@ async function searchDomainScan(
 		!exhausted,
 	);
 	const common = {
-		total: { value: authorizedCount, relation: exhausted ? "exact" : "lower-bound" } as const,
+		total: { kind: exhausted ? "exact" : "lower-bound", value: authorizedCount } as const,
 		offset: initialOffset,
 		nextOffset: nextOffset ?? scanOffset,
 		exhausted: nextOffset === undefined,
@@ -1414,7 +1412,7 @@ export async function searchGlobalIdentifiers(
 	);
 	return {
 		hits: identifiers,
-		total: { value: authorizedCount, relation: exhausted ? "exact" : "lower-bound" },
+		total: { kind: exhausted ? "exact" : "lower-bound", value: authorizedCount },
 		offset: initialOffset,
 		nextOffset: nextOffset ?? scanOffset,
 		exhausted: nextOffset === undefined,
@@ -1427,7 +1425,7 @@ export interface SearchFacet {
 	readonly field: string;
 	readonly options: readonly {
 		readonly value: string;
-		readonly count: { readonly value: number; readonly relation: "exact" | "lower-bound" };
+		readonly count: SearchCountResult;
 	}[];
 }
 
@@ -1596,15 +1594,12 @@ export async function searchDomainFacets(
 		)
 		${sql.join(queries, sql` union all `)}`,
 	);
-	const byField = new Map<
-		string,
-		{ value: string; count: { value: number; relation: "exact" | "lower-bound" } }[]
-	>();
+	const byField = new Map<string, { value: string; count: SearchCountResult }[]>();
 	for (const row of result.rows) {
 		const options = byField.get(row.field) ?? [];
 		options.push({
 			value: row.value,
-			count: { value: Number(row.count), relation: exhausted ? "exact" : "lower-bound" },
+			count: { kind: exhausted ? "exact" : "lower-bound", value: Number(row.count) },
 		});
 		byField.set(row.field, options);
 	}

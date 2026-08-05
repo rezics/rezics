@@ -1,4 +1,5 @@
 import type { FeedSortValues } from "../database/schema/contract-values";
+import { WorkPolicy } from "../performance/policy";
 
 export const RecommendationPolicyVersion = "hybrid_v1";
 
@@ -19,15 +20,18 @@ export const SortWeightByKind = {
 } as const satisfies Record<RecommendationSort, SortWeights>;
 
 export const RecommendationPolicy = {
-	maxCandidates: 280,
-	maxGraphCandidates: 120,
-	maxFollowCandidates: 60,
-	maxObjectiveCandidates: 80,
+	maxCandidates: WorkPolicy.recommendation.maxOnlineCandidates,
+	maxGraphCandidates: WorkPolicy.recommendation.maxEdgesPerUnit,
+	maxFollowCandidates: WorkPolicy.recommendation.maxFollowCandidates,
+	maxObjectiveCandidates: WorkPolicy.recommendation.maxObjectiveCandidates,
 	maxExplorationCandidates: 20,
-	maxEdgesPerUnit: 100,
-	maxInterestsPerProfile: 50,
-	maxInteractionsPerProfile: 100,
-	maxStructuralDegree: 500,
+	maxEdgesPerUnit: WorkPolicy.recommendation.maxEdgesPerUnit,
+	maxInterestsPerProfile: WorkPolicy.recommendation.maxInterestsPerProfile,
+	maxInteractionsPerProfile: WorkPolicy.recommendation.maxRecentInteractionsPerProfile,
+	maxStructuralSignals: WorkPolicy.recommendation.maxStructuralSignals,
+	maxStructuralDegree: WorkPolicy.recommendation.maxStructuralDegree,
+	maxRawStructuralPeers: WorkPolicy.recommendation.maxRawStructuralPeers,
+	maxBehavioralPeersPerUnit: WorkPolicy.recommendation.maxBehavioralPeersPerUnit,
 	mmrLambda: 0.8,
 	pageDiversityCap: 3,
 	explorationRatio: 0.1,

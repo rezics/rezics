@@ -5,6 +5,8 @@ import { createEnv } from "@t3-oss/env-core";
 import { config as loadEnv } from "dotenv";
 import { z } from "zod";
 
+import { WorkPolicy } from "../performance/policy";
+
 loadEnv({
 	path: resolve(dirname(fileURLToPath(import.meta.url)), "../../../../.env"),
 	quiet: true,
@@ -117,21 +119,36 @@ export const env = createEnv({
 		MEILISEARCH_RECONCILER_KEY: z.string().min(16).optional(),
 		SEQUIN_URL: origin.optional(),
 		SEQUIN_API_TOKEN: z.string().min(16).optional(),
-		SEARCH_CANDIDATE_BATCH_SIZE: z.coerce.number().int().min(20).max(1000).default(100),
-		SEARCH_CANDIDATE_SCAN_LIMIT: z.coerce.number().int().min(100).max(10_000).default(1_000),
-		SEARCH_CANDIDATE_MAX_ROUNDS: z.coerce.number().int().min(1).max(10).default(4),
+		SEARCH_CANDIDATE_BATCH_SIZE: z.coerce
+			.number()
+			.int()
+			.min(20)
+			.max(WorkPolicy.search.maxCandidateBatchSize)
+			.default(WorkPolicy.search.candidateBatchSize),
+		SEARCH_CANDIDATE_SCAN_LIMIT: z.coerce
+			.number()
+			.int()
+			.min(100)
+			.max(WorkPolicy.search.maxCandidateScanCeiling)
+			.default(WorkPolicy.search.maxCandidateScan),
+		SEARCH_CANDIDATE_MAX_ROUNDS: z.coerce
+			.number()
+			.int()
+			.min(1)
+			.max(WorkPolicy.search.maxCandidateRoundsCeiling)
+			.default(WorkPolicy.search.maxCandidateRounds),
 		SEARCH_CANDIDATE_TIME_BUDGET_MS: z.coerce
 			.number()
 			.int()
 			.min(100)
-			.max(10_000)
-			.default(1_500),
+			.max(WorkPolicy.search.candidateDeadlineCeilingMs)
+			.default(WorkPolicy.search.candidateDeadlineMs),
 		SEARCH_FACET_CANDIDATE_SCAN_LIMIT: z.coerce
 			.number()
 			.int()
 			.min(100)
-			.max(10_000)
-			.default(1_000),
+			.max(WorkPolicy.search.maxFacetCandidateScanCeiling)
+			.default(WorkPolicy.search.maxFacetCandidateScan),
 		RECOMMENDATION_REFRESH_INTERVAL_MS: z.coerce.number().int().min(60_000).default(300_000),
 		WORKER_HEALTH_HOST: z.string().min(1).default("127.0.0.1"),
 		WORKER_HEALTH_PORT: z.coerce.number().int().min(1).max(65_535).default(3002),

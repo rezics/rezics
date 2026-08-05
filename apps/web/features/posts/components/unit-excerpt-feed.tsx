@@ -42,7 +42,7 @@ export function UnitExcerptFeed({ targetId }: { readonly targetId: string }) {
 		};
 		return (
 			<p className="text-sm text-muted-foreground" role="status">
-				{total.relation === "exact"
+				{total.kind === "exact"
 					? t.engagement.excerptResultRange(values)
 					: t.engagement.excerptResultRangeLowerBound(values)}
 			</p>

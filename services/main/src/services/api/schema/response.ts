@@ -46,6 +46,7 @@ import {
 import { HealthCheckStateValues } from "../../health/model";
 import { CollectionConfigV1 } from "../users/schema";
 import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
+import { SearchCountResultSchema } from "../../counts/contract";
 export { toApiErrorResponse } from "./error-response";
 
 const NullableText = t.Nullable(t.String());
@@ -443,10 +444,6 @@ const SearchHit = t.Object({
 	name: t.Optional(NullableText),
 	summary: NullableText,
 });
-export const SearchExactness = t.Object({
-	value: t.Integer({ minimum: 0 }),
-	relation: t.UnionEnum(["exact", "lower-bound"]),
-});
 export const SearchResponse = t.Object({
 	query: t.String(),
 	nextCursor: t.Optional(SearchContinuationToken),
@@ -455,7 +452,7 @@ export const SearchResponse = t.Object({
 			t.Object({
 				controlKey: t.Optional(t.String()),
 				field: t.String(),
-				options: t.Array(t.Object({ value: t.String(), count: SearchExactness })),
+				options: t.Array(t.Object({ value: t.String(), count: SearchCountResultSchema })),
 			}),
 		),
 	),
@@ -463,7 +460,7 @@ export const SearchResponse = t.Object({
 		t.Object({
 			index: t.String(),
 			hits: t.Array(SearchHit),
-			total: SearchExactness,
+			total: SearchCountResultSchema,
 			limit: t.Integer(),
 			processingTimeMs: t.Number(),
 		}),
@@ -471,7 +468,7 @@ export const SearchResponse = t.Object({
 });
 export const DomainSearchResponse = t.Object({
 	hits: t.Array(SearchHit),
-	total: SearchExactness,
+	total: SearchCountResultSchema,
 	nextCursor: t.Optional(SearchContinuationToken),
 	limit: t.Integer(),
 	processingTimeMs: t.Number(),
@@ -736,14 +733,14 @@ export type FeedItemResponseValue =
 export const FeedResponse = t.Object({
 	items: t.Array(t.Union([FeedUnitItemResponse, FeedPostItemResponse])),
 	nextCursor: NullableText,
-	total: SearchExactness,
+	total: SearchCountResultSchema,
 });
 
 export const SearchFeedResponse = t.Object({
 	items: t.Array(t.Union([FeedUnitItemResponse, FeedPostItemResponse])),
 	nextCursor: t.Optional(SearchContinuationToken),
 	facets: SearchResponse.properties.facets,
-	total: SearchExactness,
+	total: SearchCountResultSchema,
 });
 
 export const PostFeedResponse = t.Object({
