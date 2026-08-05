@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
 	normalizePortableTextEditorValue,
 	PortableTextEditor,
@@ -53,6 +53,37 @@ vi.stubGlobal(
 afterEach(cleanup);
 
 describe("Portable Text editor spoiler capabilities", () => {
+	it("renders existing list blocks with list metadata and a content wrapper", async () => {
+		const rendered = render(
+			<UiProvider>
+				<PortableTextEditor
+					onChange={vi.fn()}
+					value={[
+						{
+							_key: "list-1",
+							_type: "block",
+							children: [
+								{ _key: "span-1", _type: "span", text: "First item", marks: [] },
+							],
+							markDefs: [],
+							style: "normal",
+							listItem: "bullet",
+							level: 1,
+						},
+					]}
+				/>
+			</UiProvider>,
+		);
+
+		await waitFor(() => expect(rendered.container.textContent).toContain("First item"));
+		const listItem = rendered.container.querySelector('[data-list-item="bullet"]');
+		expect(listItem).not.toBeNull();
+		expect(listItem?.getAttribute("data-level")).toBe("1");
+		expect(listItem?.getAttribute("data-list-index")).toBe("1");
+		expect(listItem?.querySelector(".pt-list-item-content")).not.toBeNull();
+		rendered.unmount();
+	});
+
 	it("preserves spoiler annotations in an enabled editor", () => {
 		const normalized = normalizePortableTextEditorValue(annotatedText, spoilerCapabilities);
 

@@ -12,6 +12,7 @@ import {
 	type RenderAnnotationFunction,
 	type RenderChildFunction,
 	type RenderDecoratorFunction,
+	type RenderListItemFunction,
 	type RenderStyleFunction,
 	useEditor,
 	useEditorSelector,
@@ -256,6 +257,10 @@ const renderStyle: RenderStyleFunction = ({ schemaType, children }) =>
 	) : (
 		<p className="my-3 leading-7 first:mt-0 last:mb-0">{children}</p>
 	);
+
+const renderListItem: RenderListItemFunction = ({ children }) => (
+	<div className="pt-list-item-content">{children}</div>
+);
 
 const renderDecorator: RenderDecoratorFunction = ({ value, children }) =>
 	value === "strong" ? (
@@ -614,7 +619,7 @@ function SlashCommandEditable({
 				aria-labelledby={ariaLabelledBy}
 				aria-required={required}
 				className={cn(
-					"max-w-none overflow-y-auto px-5 py-4 font-sans outline-none sm:px-6 sm:py-5",
+					"portable-text-editor-surface max-w-none overflow-y-auto px-5 py-4 font-sans outline-none sm:px-6 sm:py-5",
 					"[&_ol]:my-3 [&_ol]:list-decimal [&_ol]:ps-6 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:ps-6",
 					"focus-visible:outline-none",
 					variant === "document" ? "min-h-[30rem] text-base" : "min-h-44 text-[15px]",
@@ -626,7 +631,7 @@ function SlashCommandEditable({
 				renderAnnotation={renderAnnotation}
 				renderChild={renderChild}
 				renderDecorator={renderDecorator}
-				renderListItem={({ children }) => children}
+				renderListItem={renderListItem}
 				renderPlaceholder={() => (
 					<span className="inline-block ps-5 text-muted-foreground sm:ps-6">
 						{labels.placeholder}
