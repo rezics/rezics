@@ -15,6 +15,8 @@ const client = new Client({ connectionString: adminDatabaseUrl });
 try {
 	await client.connect();
 	await client.query(`
+		drop extension if exists approx_count cascade;
+		drop schema if exists approx_count cascade;
 		drop schema if exists "public" cascade;
 		create schema "public";
 	`);
