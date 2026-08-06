@@ -261,6 +261,9 @@ export function BookContentStructureEditor({
 							contentKind: "chapter",
 							content: writePortableText([]),
 							status: "draft",
+							...(submission.ownershipMode === undefined
+								? {}
+								: { ownershipMode: submission.ownershipMode }),
 						}
 					: {
 							...common,
@@ -346,6 +349,7 @@ export function BookContentStructureEditor({
 			</div>
 			{createRequest ? (
 				<BookContentNodeDialog
+					bookOwnershipMode={initial.ownershipMode}
 					error={save.error}
 					nodes={document.draft}
 					onClose={() => {

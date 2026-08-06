@@ -1,4 +1,5 @@
 import { Value } from "@sinclair/typebox/value";
+import { createPortableTextDocument } from "@rezics/block";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -29,6 +30,39 @@ describe("Content Structure API schemas", () => {
 			Value.Check(SaveBookContentStructureDraftBody, {
 				...body,
 				nodes: [{ ...body.nodes[0], title: "Untrusted title" }],
+			}),
+		).toBe(false);
+	});
+
+	it("accepts an optional Chapter ownership override", () => {
+		const node = {
+			state: "new",
+			id: "018ff2b7-7c00-7000-8000-000000000002",
+			parentId: null,
+			order: 0,
+			title: "Chapter",
+			language: "en",
+			contentKind: "chapter",
+			content: createPortableTextDocument([]),
+			status: "draft",
+		} as const;
+
+		expect(
+			Value.Check(SaveBookContentStructureDraftBody, {
+				baseRevisionId: "018ff2b7-7c00-7000-8000-000000000001",
+				nodes: [node],
+			}),
+		).toBe(true);
+		expect(
+			Value.Check(SaveBookContentStructureDraftBody, {
+				baseRevisionId: "018ff2b7-7c00-7000-8000-000000000001",
+				nodes: [{ ...node, ownershipMode: "community_owned" }],
+			}),
+		).toBe(true);
+		expect(
+			Value.Check(SaveBookContentStructureDraftBody, {
+				baseRevisionId: "018ff2b7-7c00-7000-8000-000000000001",
+				nodes: [{ ...node, ownershipMode: "invalid" }],
 			}),
 		).toBe(false);
 	});

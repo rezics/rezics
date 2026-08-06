@@ -43,6 +43,7 @@ function savedResponse(
 	const node = options.body.nodes.at(-1);
 	if (!node || node.state === "existing") throw new Error("Expected a newly inserted node");
 	return {
+		ownershipMode: "community_owned",
 		structureId: ids.structure,
 		latestRevisionId: ids.revision,
 		revisionCreated: true,
@@ -173,6 +174,7 @@ const initial: GetApiUnitsBookByUnitIdContentStructureNodesStatus200 & {
 	readonly structureId: string;
 	readonly latestRevisionId: string;
 } = {
+	ownershipMode: "community_owned",
 	structureId: ids.structure,
 	latestRevisionId: ids.revision,
 	items: [],
@@ -278,6 +280,26 @@ describe("BookContentStructureEditor node dialog", () => {
 		});
 		await vi.waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
 		expect(state.invalidate).toHaveBeenCalledWith(expect.anything(), ids.book);
+	});
+
+	it("sends an explicit Chapter ownership override", async () => {
+		renderEditor();
+
+		fireEvent.click(screen.getByRole("button", { name: "新建章節" }));
+		fireEvent.change(screen.getByRole("combobox", { name: "章節擁有方式" }), {
+			target: { value: "profile_owned" },
+		});
+		fireEvent.change(screen.getByRole("textbox", { name: "標題" }), {
+			target: { value: "個人章節" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "建立章節並儲存" }));
+
+		await vi.waitFor(() => expect(state.mutateAsync).toHaveBeenCalledOnce());
+		const options = state.mutateAsync.mock.calls[0]?.[0] as
+			PutApiUnitsBookByUnitIdContentStructureOptions | undefined;
+		expect(options?.body.nodes.at(-1)).toEqual(
+			expect.objectContaining({ ownershipMode: "profile_owned" }),
+		);
 	});
 
 	it("attaches a searched Unit through the same complete draft mutation", async () => {

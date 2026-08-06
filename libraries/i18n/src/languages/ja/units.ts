@@ -556,6 +556,15 @@ export default {
 		addAudio: `${audioTerms.inline}を追加`,
 		addChapterDescription:
 			"新しい章を作成するか、既存の章を検索して追加します。完了時にコンテンツ構造も保存されます。",
+		chapterOwnership: "章の所有形態",
+		bookDefaultOwnership: "書籍のデフォルトを使用",
+		profileOwnedChapter: "所有する章",
+		communityOwnedChapter: "公共の章",
+		chapterOwnershipDefaultDescription: insert(
+			"書籍の現在の所有形態を使用します：{{ownership}}。",
+			{ ownership: String },
+		),
+		chapterOwnershipOverrideDescription: "この章では書籍のデフォルトを上書きします。",
 		addLabelDescription:
 			"新しいラベルを作成するか、既存のラベルを検索して追加します。完了時にコンテンツ構造も保存されます。",
 		addVideoDescription: `新しい${videoTerms.inline}を作成するか、既存の項目を検索して追加します。完了するとコンテンツ構造も保存されます。`,

@@ -37,6 +37,7 @@ import {
 	RealmTagQueryStrategyValues,
 	SubjectAssociationRoleValues,
 	UnitKindValues,
+	UnitOwnershipModeValues,
 } from "../../database/schema/contract-values";
 import { FeedNonReviewPostKindValues, FeedUnitKindValues } from "../feed/schema";
 import {
@@ -1214,11 +1215,13 @@ const BookContentStructureNodeResponse = t.Object({
 	contentMetrics: ContentMetricResponse,
 });
 export const ContentStructureNodeListResponse = t.Object({
+	ownershipMode: t.UnionEnum(UnitOwnershipModeValues, { default: undefined }),
 	structureId: t.Nullable(Uuid),
 	latestRevisionId: t.Nullable(Uuid),
 	items: t.Array(BookContentStructureNodeResponse),
 });
 export const SaveBookContentStructureDraftResponse = t.Object({
+	ownershipMode: t.UnionEnum(UnitOwnershipModeValues, { default: undefined }),
 	structureId: Uuid,
 	latestRevisionId: Uuid,
 	revisionCreated: t.Boolean(),

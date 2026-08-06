@@ -82788,6 +82788,14 @@ export type GetApiUnitsBookByUnitIdContentStructureNodesQuery = {
 	localizationLanguages?: GetApiUnitsBookByUnitIdContentStructureNodesLocalizationLanguagesEnum[];
 };
 
+export const GetApiUnitsBookByUnitIdContentStructureNodesStatus200OwnershipModeEnum = {
+	profile_owned: "profile_owned",
+	community_owned: "community_owned",
+} as const;
+
+export type GetApiUnitsBookByUnitIdContentStructureNodesStatus200OwnershipModeEnum =
+	(typeof GetApiUnitsBookByUnitIdContentStructureNodesStatus200OwnershipModeEnum)[keyof typeof GetApiUnitsBookByUnitIdContentStructureNodesStatus200OwnershipModeEnum];
+
 export const GetApiUnitsBookByUnitIdContentStructureNodesStatus200ItemsContentKindEnum = {
 	chapter: "chapter",
 	label: "label",
@@ -82813,6 +82821,10 @@ export type GetApiUnitsBookByUnitIdContentStructureNodesStatus200ItemsLanguageEn
  * @type object
  */
 export type GetApiUnitsBookByUnitIdContentStructureNodesStatus200 = {
+	/**
+	 * @type string
+	 */
+	ownershipMode: GetApiUnitsBookByUnitIdContentStructureNodesStatus200OwnershipModeEnum;
 	structureId: (string | null) | null;
 	latestRevisionId: (string | null) | null;
 	/**
@@ -82941,6 +82953,14 @@ export type PutApiUnitsBookByUnitIdContentStructurePath = {
 	unitId: string;
 };
 
+export const PutApiUnitsBookByUnitIdContentStructureStatus200OwnershipModeEnum = {
+	profile_owned: "profile_owned",
+	community_owned: "community_owned",
+} as const;
+
+export type PutApiUnitsBookByUnitIdContentStructureStatus200OwnershipModeEnum =
+	(typeof PutApiUnitsBookByUnitIdContentStructureStatus200OwnershipModeEnum)[keyof typeof PutApiUnitsBookByUnitIdContentStructureStatus200OwnershipModeEnum];
+
 export const PutApiUnitsBookByUnitIdContentStructureStatus200ItemsContentKindEnum = {
 	chapter: "chapter",
 	label: "label",
@@ -82966,6 +82986,10 @@ export type PutApiUnitsBookByUnitIdContentStructureStatus200ItemsLanguageEnum =
  * @type object
  */
 export type PutApiUnitsBookByUnitIdContentStructureStatus200 = {
+	/**
+	 * @type string
+	 */
+	ownershipMode: PutApiUnitsBookByUnitIdContentStructureStatus200OwnershipModeEnum;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -83204,6 +83228,14 @@ export const PutApiUnitsBookByUnitIdContentStructureRequestNodesLanguageEnum = {
 export type PutApiUnitsBookByUnitIdContentStructureRequestNodesLanguageEnum =
 	(typeof PutApiUnitsBookByUnitIdContentStructureRequestNodesLanguageEnum)[keyof typeof PutApiUnitsBookByUnitIdContentStructureRequestNodesLanguageEnum];
 
+export const PutApiUnitsBookByUnitIdContentStructureRequestNodesOwnershipModeEnum = {
+	profile_owned: "profile_owned",
+	community_owned: "community_owned",
+} as const;
+
+export type PutApiUnitsBookByUnitIdContentStructureRequestNodesOwnershipModeEnum =
+	(typeof PutApiUnitsBookByUnitIdContentStructureRequestNodesOwnershipModeEnum)[keyof typeof PutApiUnitsBookByUnitIdContentStructureRequestNodesOwnershipModeEnum];
+
 /**
  * @type object
  */
@@ -83424,6 +83456,10 @@ export type PutApiUnitsBookByUnitIdContentStructureBody = {
 					)[];
 				};
 				status: "draft" | "published";
+				/**
+				 * @type string | undefined
+				 */
+				ownershipMode?: PutApiUnitsBookByUnitIdContentStructureRequestNodesOwnershipModeEnum;
 		  }
 		| {
 				/**

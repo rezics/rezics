@@ -1,5 +1,6 @@
 import type { ContentLanguage } from "@rezics/i18n";
 
+import type { UnitOwnershipMode } from "../database/schema/contract-values";
 import { ContentStructureInvalid } from "./errors";
 import { planDraftSiblingPositions } from "./draft-batch";
 
@@ -25,6 +26,7 @@ export type NewBookDraftNode =
 			readonly contentKind: "chapter";
 			readonly content: unknown;
 			readonly status: "draft" | "published";
+			readonly ownershipMode?: UnitOwnershipMode;
 	  })
 	| (NewBookDraftNodeBase & {
 			readonly contentKind: "label";
@@ -62,6 +64,13 @@ export type BookDraftPlan = {
 	readonly hasStructuralChanges: boolean;
 	readonly renamedExistingNodeIds: ReadonlySet<string>;
 };
+
+export function resolveChapterOwnershipMode(
+	bookOwnershipMode: UnitOwnershipMode,
+	chapterOwnershipMode: UnitOwnershipMode | undefined,
+): UnitOwnershipMode {
+	return chapterOwnershipMode ?? bookOwnershipMode;
+}
 
 export type ContentStructureDraftNodeBase = {
 	readonly state: "existing" | "new" | "attached";

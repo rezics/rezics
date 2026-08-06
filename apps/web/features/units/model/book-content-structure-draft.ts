@@ -410,6 +410,9 @@ export function toBookContentStructureSaveNodes(
 					contentKind: "chapter",
 					content: node.content,
 					status: node.status,
+					...(node.ownershipMode === undefined
+						? {}
+						: { ownershipMode: node.ownershipMode }),
 				};
 			return {
 				state: "new",

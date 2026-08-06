@@ -572,6 +572,16 @@ export default {
 		addAudio: `Añadir ${audioTerms.inline}`,
 		addChapterDescription:
 			"Crea un capítulo nuevo o busca un capítulo existente para añadirlo. Al terminar también se guardará la estructura de contenido.",
+		chapterOwnership: "Titularidad del capítulo",
+		bookDefaultOwnership: "Usar la predeterminada del libro",
+		profileOwnedChapter: "Capítulo propio",
+		communityOwnedChapter: "Capítulo comunitario",
+		chapterOwnershipDefaultDescription: insert(
+			"Usa la titularidad actual del libro: {{ownership}}.",
+			{ ownership: String },
+		),
+		chapterOwnershipOverrideDescription:
+			"Sobrescribe la titularidad predeterminada del libro para este capítulo.",
 		addLabelDescription:
 			"Crea una etiqueta nueva o busca una etiqueta existente para añadirla. Al terminar también se guardará la estructura de contenido.",
 		addVideoDescription: `Crea un ${videoTerms.inline} o busca uno existente para añadirlo. Esta acción también guarda la estructura de contenido.`,

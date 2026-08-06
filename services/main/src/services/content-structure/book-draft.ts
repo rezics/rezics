@@ -10,6 +10,12 @@ import {
 	unitOwnership,
 	unitLocalization,
 } from "../database/schema";
+import type { UnitOwnershipMode } from "../database/schema/contract-values";
+import {
+	createProfileOwnedUnitAccess,
+	createPublicEditableUnitAccess,
+	unitOwnershipModeFromOwnerProfileId,
+} from "../authorization/unit/ownership";
 import { isFirstUnitLocalization } from "../units/localization";
 import { insertUnit } from "../units/create";
 import { ensureSubjectPostTargetingAllowed } from "../posts/targeting";
@@ -27,6 +33,7 @@ import {
 	type BookDraftNode,
 	type ExistingBookDraftNode,
 	type NewBookDraftNode,
+	resolveChapterOwnershipMode,
 } from "./book-draft-plan";
 import { assertContentStructureDraftCommandLimit } from "./draft-batch";
 
@@ -45,11 +52,24 @@ async function createBookDraftContentUnit(
 	tx: DatabaseTransaction,
 	input: {
 		readonly bookId: string;
+		readonly bookOwnershipMode: UnitOwnershipMode | undefined;
 		readonly actorProfileId: string;
 		readonly node: NewBookDraftNode;
 	},
 ): Promise<string> {
 	const isChapter = input.node.contentKind === "chapter";
+	let ownershipMode: UnitOwnershipMode;
+	if (!isChapter) ownershipMode = "profile_owned";
+	else if (input.bookOwnershipMode)
+		ownershipMode = resolveChapterOwnershipMode(
+			input.bookOwnershipMode,
+			input.node.ownershipMode,
+		);
+	else if (input.node.ownershipMode) ownershipMode = input.node.ownershipMode;
+	else
+		throw new ContentStructureInvalid(
+			"Chapter ownership has no Book default or explicit override",
+		);
 	const published = isChapter ? input.node.status === "published" : true;
 	const created = await insertUnit(tx, {
 		kind: isChapter ? "post" : "label",
@@ -84,11 +104,8 @@ async function createBookDraftContentUnit(
 			profileId: input.actorProfileId,
 			nextBody: input.node.content,
 		});
-	await tx.insert(unitOwnership).values({
-		unitId: created.id,
-		profileId: input.actorProfileId,
-		assignedByProfileId: input.actorProfileId,
-	});
+	if (ownershipMode === "community_owned") await createPublicEditableUnitAccess(tx, created.id);
+	else await createProfileOwnedUnitAccess(tx, created.id, input.actorProfileId);
 	if (isChapter)
 		await createProfilePublisherAttribution(tx, {
 			sourceUnitId: created.id,
@@ -100,6 +117,20 @@ async function createBookDraftContentUnit(
 		event: "create",
 	});
 	return created.id;
+}
+
+async function readBookOwnershipMode(
+	tx: DatabaseTransaction,
+	bookId: string,
+): Promise<UnitOwnershipMode> {
+	const [owner] = await tx
+		.select({ profileId: unitOwnership.profileId })
+		.from(unitOwnership)
+		.where(and(eq(unitOwnership.unitId, bookId), isNull(unitOwnership.revokedAt)))
+		.limit(1)
+		.for("update");
+	if (!owner) throw new ContentStructureInvalid("Book has no active ownership");
+	return unitOwnershipModeFromOwnerProfileId(owner.profileId);
 }
 
 /**
@@ -238,6 +269,15 @@ export async function saveBookContentStructureDraft(
 			}));
 			const plan = planBookContentStructureDraft(current, draftNodes);
 			if (!plan.hasChanges) return { result: {} };
+			const needsBookOwnershipMode = plan.nodes.some(
+				(node) =>
+					node.state === "new" &&
+					node.contentKind === "chapter" &&
+					node.ownershipMode === undefined,
+			);
+			const bookOwnershipMode = needsBookOwnershipMode
+				? await readBookOwnershipMode(tx, input.ownerUnitId)
+				: undefined;
 
 			const currentById = new Map(currentRows.map((row) => [row.id, row]));
 			assertContentStructureDraftCommandLimit({
@@ -299,6 +339,7 @@ export async function saveBookContentStructureDraft(
 						? node.contentUnitId
 						: await createBookDraftContentUnit(tx, {
 								bookId: input.ownerUnitId,
+								bookOwnershipMode,
 								actorProfileId: input.actorProfileId,
 								node,
 							});

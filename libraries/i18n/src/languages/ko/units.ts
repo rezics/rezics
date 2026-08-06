@@ -550,6 +550,15 @@ export default {
 		addAudio: `${audioTerms.inline} 추가`,
 		addChapterDescription:
 			"새 챕터를 만들거나 기존 챕터를 검색해 추가합니다. 완료하면 콘텐츠 구조도 함께 저장됩니다.",
+		chapterOwnership: "챕터 소유 방식",
+		bookDefaultOwnership: "책 기본값 사용",
+		profileOwnedChapter: "소유 챕터",
+		communityOwnedChapter: "공공 챕터",
+		chapterOwnershipDefaultDescription: insert(
+			"책의 현재 소유 방식을 사용합니다: {{ownership}}.",
+			{ ownership: String },
+		),
+		chapterOwnershipOverrideDescription: "이 챕터에서 책의 기본값을 덮어씁니다.",
 		addLabelDescription:
 			"새 레이블을 만들거나 기존 레이블을 검색해 추가합니다. 완료하면 콘텐츠 구조도 함께 저장됩니다.",
 		addVideoDescription: `새 ${videoTerms.inline}을 만들거나 기존 항목을 검색해 추가하세요. 완료하면 콘텐츠 구조도 함께 저장됩니다.`,

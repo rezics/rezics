@@ -11,8 +11,11 @@ import {
 	EntityPicker,
 	type EntityPickerValue,
 	Field,
+	FieldDescription,
 	FieldLabel,
 	Input,
+	NativeSelect,
+	NativeSelectOption,
 	Tabs,
 	TabsContent,
 	TabsList,
@@ -23,6 +26,7 @@ import { useId, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import type { WorkOwnershipMode } from "./work-ownership-field";
 import type { BookDraftNode } from "../model/book-content-structure-draft";
 import {
 	BookContentStructureDestinationDialog,
@@ -39,6 +43,7 @@ export type BookContentNodeDialogSubmission =
 			readonly mode: "create";
 			readonly title: string;
 			readonly destination: BookStructureDestination;
+			readonly ownershipMode?: WorkOwnershipMode;
 	  }
 	| {
 			readonly mode: "attach";
@@ -48,9 +53,18 @@ export type BookContentNodeDialogSubmission =
 
 type DialogInput = {
 	readonly mode: "create" | "attach";
-	readonly create: { readonly title: string };
+	readonly create: {
+		readonly title: string;
+		readonly ownershipMode: "book_default" | WorkOwnershipMode;
+	};
 	readonly attach: { readonly unit?: EntityPickerValue };
 };
+
+function isChapterOwnershipSelection(
+	value: string,
+): value is DialogInput["create"]["ownershipMode"] {
+	return value === "book_default" || value === "profile_owned" || value === "community_owned";
+}
 
 function isDialogMode(value: string): value is DialogInput["mode"] {
 	return value === "create" || value === "attach";
@@ -66,6 +80,7 @@ function destinationLabel(
 }
 
 export function BookContentNodeDialog({
+	bookOwnershipMode,
 	error,
 	nodes,
 	onClose,
@@ -75,6 +90,7 @@ export function BookContentNodeDialog({
 	unsavedChanges,
 }: {
 	readonly error: unknown;
+	readonly bookOwnershipMode: WorkOwnershipMode;
 	readonly nodes: readonly BookDraftNode[];
 	readonly onClose: () => void;
 	readonly onSubmit: (submission: BookContentNodeDialogSubmission) => void;
@@ -86,7 +102,7 @@ export function BookContentNodeDialog({
 	const formId = useId();
 	const [input, setInput] = useState<DialogInput>({
 		mode: "create",
-		create: { title: "" },
+		create: { title: "", ownershipMode: "book_default" },
 		attach: {},
 	});
 	const [destination, setDestination] = useState<BookStructureDestination>(request.destination);
@@ -107,6 +123,10 @@ export function BookContentNodeDialog({
 				: t.units.content.attachLabelAndSave;
 	const canSubmit =
 		input.mode === "create" ? Boolean(input.create.title.trim()) : Boolean(input.attach.unit);
+	const defaultOwnershipLabel =
+		bookOwnershipMode === "community_owned"
+			? t.units.content.communityOwnedChapter
+			: t.units.content.profileOwnedChapter;
 
 	return (
 		<>
@@ -132,6 +152,9 @@ export function BookContentNodeDialog({
 											mode: "create",
 											title: normalizedTitle,
 											destination,
+											...(input.create.ownershipMode === "book_default"
+												? {}
+												: { ownershipMode: input.create.ownershipMode }),
 										});
 									return;
 								}
@@ -169,13 +192,56 @@ export function BookContentNodeDialog({
 												const title = event.currentTarget.value;
 												setInput((current) => ({
 													...current,
-													create: { title },
+													create: { ...current.create, title },
 												}));
 											}}
 											required
 											value={input.create.title}
 										/>
 									</Field>
+									{contentKind === "chapter" ? (
+										<Field>
+											<FieldLabel>
+												{t.units.content.chapterOwnership}
+											</FieldLabel>
+											<NativeSelect
+												name="chapterOwnership"
+												onChange={(event) => {
+													const nextValue = event.currentTarget.value;
+													if (!isChapterOwnershipSelection(nextValue))
+														return;
+													setInput((current) => ({
+														...current,
+														create: {
+															...current.create,
+															ownershipMode: nextValue,
+														},
+													}));
+												}}
+												value={input.create.ownershipMode}
+											>
+												<NativeSelectOption value="book_default">
+													{t.units.content.bookDefaultOwnership}
+												</NativeSelectOption>
+												<NativeSelectOption value="profile_owned">
+													{t.units.content.profileOwnedChapter}
+												</NativeSelectOption>
+												<NativeSelectOption value="community_owned">
+													{t.units.content.communityOwnedChapter}
+												</NativeSelectOption>
+											</NativeSelect>
+											<FieldDescription>
+												{input.create.ownershipMode === "book_default"
+													? t.units.content.chapterOwnershipDefaultDescription(
+															{
+																ownership: defaultOwnershipLabel,
+															},
+														)
+													: t.units.content
+															.chapterOwnershipOverrideDescription}
+											</FieldDescription>
+										</Field>
+									) : null}
 								</TabsContent>
 								<TabsContent className="pt-3" value="attach">
 									<Field required>

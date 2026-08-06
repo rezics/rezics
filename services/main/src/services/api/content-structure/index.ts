@@ -94,6 +94,7 @@ import {
 	orderReaderChapterIds,
 	selectReaderChapterLocalization,
 } from "../../content-structure/book-reading";
+import { unitOwnershipModeFromOwnerProfileId } from "../../authorization/unit/ownership";
 
 const UnitForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
 const ContentStructureForbiddenResponse = toApiErrorResponse([
@@ -212,6 +213,12 @@ async function readBookContentStructure(
 	canEditBook: boolean,
 	localizationLanguages: readonly ContentLanguage[] = [],
 ) {
+	const [owner] = await tx
+		.select({ profileId: unitOwnership.profileId })
+		.from(unitOwnership)
+		.where(and(eq(unitOwnership.unitId, bookId), isNull(unitOwnership.revokedAt)))
+		.limit(1);
+	const ownershipMode = unitOwnershipModeFromOwnerProfileId(owner?.profileId ?? null);
 	const [structure] = await tx
 		.select({ id: contentStructure.id })
 		.from(contentStructure)
@@ -223,7 +230,7 @@ async function readBookContentStructure(
 			),
 		)
 		.limit(1);
-	if (!structure) return { structureId: null, latestRevisionId: null, items: [] };
+	if (!structure) return { ownershipMode, structureId: null, latestRevisionId: null, items: [] };
 	const rows = await tx
 		.select({
 			id: contentStructureNode.id,
@@ -272,6 +279,7 @@ async function readBookContentStructure(
 		)
 		.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id));
 	return {
+		ownershipMode,
 		structureId: structure.id,
 		latestRevisionId: await getContentStructureRevision(tx, bookId, structure.id),
 		items: rows
@@ -904,6 +912,7 @@ export default new Elysia()
 				const saved = await readBookContentStructure(tx, params.unitId, true);
 				if (!saved.structureId || !saved.latestRevisionId) throw new BookNotFound();
 				return {
+					ownershipMode: saved.ownershipMode,
 					structureId: saved.structureId,
 					latestRevisionId: saved.latestRevisionId,
 					items: saved.items,

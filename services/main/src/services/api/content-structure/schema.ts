@@ -5,6 +5,7 @@ import { FractionalPosition, ContentLanguage, LocalizationLanguageQuery, Uuid } 
 import {
 	ContentRatingValues,
 	RealmTagQueryStrategyValues,
+	UnitOwnershipModeValues,
 } from "../../database/schema/contract-values";
 import { RevisionedBatchCommandLimit } from "../../history/revisioned-batch";
 
@@ -227,6 +228,7 @@ const NewBookContentStructureChapterDraftNode = t.Object(
 		contentKind: t.Literal("chapter"),
 		content: PortableTextDocument,
 		status: t.Union([t.Literal("draft"), t.Literal("published")]),
+		ownershipMode: t.Optional(t.UnionEnum(UnitOwnershipModeValues, { default: undefined })),
 	},
 	{ additionalProperties: false },
 );

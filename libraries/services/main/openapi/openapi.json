@@ -116176,8 +116176,17 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["structureId", "latestRevisionId", "items"],
+									"required": [
+										"ownershipMode",
+										"structureId",
+										"latestRevisionId",
+										"items"
+									],
 									"properties": {
+										"ownershipMode": {
+											"type": "string",
+											"enum": ["profile_owned", "community_owned"]
+										},
 										"structureId": {
 											"nullable": true,
 											"anyOf": [
@@ -116823,6 +116832,13 @@
 																	"type": "string"
 																}
 															]
+														},
+														"ownershipMode": {
+															"type": "string",
+															"enum": [
+																"profile_owned",
+																"community_owned"
+															]
 														}
 													}
 												},
@@ -116889,12 +116905,17 @@
 								"schema": {
 									"type": "object",
 									"required": [
+										"ownershipMode",
 										"structureId",
 										"latestRevisionId",
 										"revisionCreated",
 										"items"
 									],
 									"properties": {
+										"ownershipMode": {
+											"type": "string",
+											"enum": ["profile_owned", "community_owned"]
+										},
 										"structureId": { "format": "uuid", "type": "string" },
 										"latestRevisionId": { "format": "uuid", "type": "string" },
 										"revisionCreated": { "type": "boolean" },

@@ -560,6 +560,16 @@ export default {
 		addAudio: `Add ${audioTerms.inline}`,
 		addChapterDescription:
 			"Create a new chapter or search for an existing chapter to add. Completing this action also saves the content structure.",
+		chapterOwnership: "Chapter ownership",
+		bookDefaultOwnership: "Use Book default",
+		profileOwnedChapter: "Profile-owned Chapter",
+		communityOwnedChapter: "Community-owned Chapter",
+		chapterOwnershipDefaultDescription: insert(
+			"Use the Book's current ownership mode: {{ownership}}.",
+			{ ownership: String },
+		),
+		chapterOwnershipOverrideDescription:
+			"Override the Book's default ownership for this Chapter.",
 		addLabelDescription:
 			"Create a new label or search for an existing label to add. Completing this action also saves the content structure.",
 		addVideoDescription: `Create a new ${videoTerms.inline} or search for an existing one to add. Completing this action also saves the content structure.`,

@@ -579,6 +579,16 @@ export default {
 		addAudio: `${audioTerms.label} hinzufügen`,
 		addChapterDescription:
 			"Erstelle ein neues Kapitel oder suche nach einem vorhandenen Kapitel. Beim Abschluss wird auch die Inhaltsstruktur gespeichert.",
+		chapterOwnership: "Eigentumsform des Kapitels",
+		bookDefaultOwnership: "Buchstandard verwenden",
+		profileOwnedChapter: "Profilverwaltetes Kapitel",
+		communityOwnedChapter: "Gemeinschaftskapitel",
+		chapterOwnershipDefaultDescription: insert(
+			"Verwendet die aktuelle Eigentumsform des Buchs: {{ownership}}.",
+			{ ownership: String },
+		),
+		chapterOwnershipOverrideDescription:
+			"Die Eigentumsform des Buchs für dieses Kapitel überschreiben.",
 		addLabelDescription:
 			"Erstelle eine neue Bezeichnung oder suche nach einer vorhandenen Bezeichnung. Beim Abschluss wird auch die Inhaltsstruktur gespeichert.",
 		addVideoDescription: `Erstelle ein neues ${videoTerms.inline} oder suche ein vorhandenes zum Hinzufügen. Dabei wird auch die Inhaltsstruktur gespeichert.`,
