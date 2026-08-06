@@ -3,8 +3,8 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { getAdapter } from "better-auth/db/adapter";
-import { format, resolveConfig } from "prettier";
 import { auth } from "../src/services/auth";
+import { formatWithBiome } from "./format-with-biome";
 
 const schemaPath = resolve(
 	dirname(fileURLToPath(import.meta.url)),
@@ -59,10 +59,7 @@ let code = generated.code
 	],`,
 	);
 
-code = await format(code, {
-	...(await resolveConfig(schemaPath)),
-	parser: "typescript",
-});
+code = await formatWithBiome(code, schemaPath);
 
 const current = await readFile(schemaPath, "utf8").catch(() => "");
 if (current !== code) {

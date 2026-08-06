@@ -26,7 +26,8 @@ export interface StructuredLogger {
 export type LogWriter = (line: string, severity: LogSeverity) => void;
 
 export function getActiveTraceContext():
-	{ readonly traceId: string; readonly spanId: string } | undefined {
+	| { readonly traceId: string; readonly spanId: string }
+	| undefined {
 	const context = trace.getActiveSpan()?.spanContext();
 	return context?.traceId && context.spanId
 		? { traceId: context.traceId, spanId: context.spanId }

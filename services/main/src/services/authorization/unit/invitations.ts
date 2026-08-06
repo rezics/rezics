@@ -18,7 +18,11 @@ import { expandDelegableUnitPermissions } from "./policy";
 import type { UnitScope } from "./scope";
 
 export type UnitAccessInvitationState =
-	"pending" | "expired" | "accepted" | "declined" | "cancelled";
+	| "pending"
+	| "expired"
+	| "accepted"
+	| "declined"
+	| "cancelled";
 
 type InvitationRecord = typeof unitAccessInvitation.$inferSelect;
 

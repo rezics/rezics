@@ -63,8 +63,7 @@ const sheetPositionerVariants = tv({
 });
 
 interface SheetPositionerProps
-	extends
-		React.ComponentProps<typeof ArkDialog.Positioner>,
+	extends React.ComponentProps<typeof ArkDialog.Positioner>,
 		VariantProps<typeof sheetPositionerVariants> {}
 
 export const SheetPositioner = (props: SheetPositionerProps) => {
@@ -133,8 +132,7 @@ const sheetContentVariants = tv({
 });
 
 interface SheetContentProps
-	extends
-		React.ComponentProps<typeof ArkDialog.Content>,
+	extends React.ComponentProps<typeof ArkDialog.Content>,
 		VariantProps<typeof sheetContentVariants> {
 	/**
 	 * Show close button at the top right corner

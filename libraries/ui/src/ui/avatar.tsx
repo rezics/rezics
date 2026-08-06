@@ -33,7 +33,8 @@ const avatarVariants = tv({
 });
 
 interface AvatarProps
-	extends React.ComponentProps<typeof ArkAvatar.Root>, VariantProps<typeof avatarVariants> {}
+	extends React.ComponentProps<typeof ArkAvatar.Root>,
+		VariantProps<typeof avatarVariants> {}
 
 export const Avatar = (props: AvatarProps) => {
 	const { size = "md", className, ...rest } = props;
@@ -85,8 +86,7 @@ export const AvatarFallback = (props: React.ComponentProps<typeof ArkAvatar.Fall
 };
 
 interface AvatarBadgeProps
-	extends
-		React.ComponentProps<typeof ark.span>,
+	extends React.ComponentProps<typeof ark.span>,
 		Pick<VariantProps<typeof statusVariants>, "variant"> {}
 
 export const AvatarBadge = (props: AvatarBadgeProps) => {

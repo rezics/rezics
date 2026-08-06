@@ -23,10 +23,7 @@ export const ordinalPosition = () => integer();
 /** A zero-based observed position in a rendered result. */
 export const displayPosition = () => integer();
 
-export const createUuidv7PrimaryKey = () =>
-	uuid()
-		.default(sql`uuidv7()`)
-		.primaryKey();
+export const createUuidv7PrimaryKey = () => uuid().default(sql`uuidv7()`).primaryKey();
 
 /** Every persisted instant is UTC-aware and millisecond precise. */
 export const createTimestampMsColumn = () => timestamp({ withTimezone: true, precision: 3 });

@@ -27,7 +27,8 @@ export const toggleVariants = tv({
 });
 
 export interface ToggleProps
-	extends React.ComponentProps<typeof ArkToggle.Root>, VariantProps<typeof toggleVariants> {
+	extends React.ComponentProps<typeof ArkToggle.Root>,
+		VariantProps<typeof toggleVariants> {
 	/**
 	 * The variant of the toggle
 	 *

@@ -354,10 +354,8 @@ interface FeedEligibilityBaseScope {
 	readonly reviewScore?: never;
 }
 
-interface FeedReviewEligibilityScope extends Omit<
-	FeedEligibilityBaseScope,
-	"content" | "reviewScore"
-> {
+interface FeedReviewEligibilityScope
+	extends Omit<FeedEligibilityBaseScope, "content" | "reviewScore"> {
 	readonly content: readonly ["post:review"];
 	readonly reviewScore: Readonly<{
 		realmId: string;

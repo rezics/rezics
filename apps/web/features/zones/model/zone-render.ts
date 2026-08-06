@@ -34,10 +34,8 @@ export interface ZoneRenderWikiPost extends Omit<RawWikiPost, "body"> {
 	readonly body: PortableTextDocument;
 }
 
-export interface ZoneRenderProjection extends Omit<
-	RawProjection,
-	"zone" | "page" | "dock" | "navigations" | "references"
-> {
+export interface ZoneRenderProjection
+	extends Omit<RawProjection, "zone" | "page" | "dock" | "navigations" | "references"> {
 	readonly zone: Omit<RawProjection["zone"], "themeDocument"> & {
 		readonly themeDocument: ZoneThemeDocumentValue;
 	};

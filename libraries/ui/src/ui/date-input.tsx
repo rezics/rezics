@@ -15,7 +15,8 @@ export const useDateInput = useArkDateInput;
 export const useDateInputContext = useArkDateInputContext;
 
 interface DateInputProps
-	extends React.ComponentProps<typeof ArkDateInput.Root>, Pick<InputProps, "size"> {
+	extends React.ComponentProps<typeof ArkDateInput.Root>,
+		Pick<InputProps, "size"> {
 	/**
 	 * The separator to show between the date input fields.
 	 *
@@ -31,7 +32,8 @@ interface DateInputProps
 }
 
 interface DateInputControlProps
-	extends React.ComponentProps<typeof ArkDateInput.Root>, Pick<InputGroupProps, "size"> {
+	extends React.ComponentProps<typeof ArkDateInput.Root>,
+		Pick<InputGroupProps, "size"> {
 	/**
 	 * Whether to show the clear button.
 	 *

@@ -104,9 +104,8 @@ export const TreeViewTree = (props: React.ComponentProps<typeof ArkTreeView.Tree
 	);
 };
 
-export interface NodeProviderProps<
-	T extends TreeNodeType = TreeNodeType,
-> extends ArkTreeView.NodeProviderProps<T> {}
+export interface NodeProviderProps<T extends TreeNodeType = TreeNodeType>
+	extends ArkTreeView.NodeProviderProps<T> {}
 
 export const TreeViewNode = <T extends TreeNodeType>(props: NodeProviderProps<T>) => (
 	<ArkTreeView.NodeProvider data-slot="tree-view-node" {...props} />
@@ -137,8 +136,7 @@ const treeViewControlVariants = tv({
 });
 
 interface TreeViewBranchItemProps
-	extends
-		React.ComponentProps<typeof ArkTreeView.BranchControl>,
+	extends React.ComponentProps<typeof ArkTreeView.BranchControl>,
 		Pick<TreeViewBranchTitleProps, "icon" | "expandedIcon"> {}
 
 export const TreeViewBranchItem = (props: TreeViewBranchItemProps) => {

@@ -4,35 +4,35 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { buttonVariants } from "@rezics/ui";
 
 import {
-  getProductDocument,
-  getProductDocumentLocales,
-  getProductDocuments,
-  requireCompleteProductLocale,
+	getProductDocument,
+	getProductDocumentLocales,
+	getProductDocuments,
+	requireCompleteProductLocale,
 } from "../../../content/productDocuments";
 import {
-  PRODUCT_DEFINITIONS,
-  getProductById,
-  getProductBySlug,
-  isProductSlug,
+	PRODUCT_DEFINITIONS,
+	getProductById,
+	getProductBySlug,
+	isProductSlug,
 } from "../../../content/productRegistry";
 import { getSiteCopy } from "../../../content/locales";
 import {
-  ABOUT_LOCALES,
-  DEFAULT_LOCALE,
-  getAboutLocaleFallback,
-  getAppEntryUrl,
-  requireAboutLocale,
+	ABOUT_LOCALES,
+	DEFAULT_LOCALE,
+	getAboutLocaleFallback,
+	getAppEntryUrl,
+	requireAboutLocale,
 } from "../../../i18n/locales";
 import { getHomePath, getProductPath, getProductsPath } from "../../../i18n/productPaths";
 import SiteLayout from "../../../layouts/SiteLayout.astro";
 
 export async function getStaticPaths() {
-  await requireCompleteProductLocale(DEFAULT_LOCALE);
-  return ABOUT_LOCALES.flatMap((locale) =>
-    PRODUCT_DEFINITIONS.map((product) => ({
-      params: { locale, slug: product.slug },
-    })),
-  );
+	await requireCompleteProductLocale(DEFAULT_LOCALE);
+	return ABOUT_LOCALES.flatMap((locale) =>
+		PRODUCT_DEFINITIONS.map((product) => ({
+			params: { locale, slug: product.slug },
+		})),
+	);
 }
 
 const locale = requireAboutLocale(Astro.params.locale);
@@ -42,24 +42,22 @@ const product = getProductBySlug(slug);
 const copy = getSiteCopy(locale);
 const document = await getProductDocument(locale, product.id);
 if (!document) {
-  const fallbackLocale = getAboutLocaleFallback(locale);
-  if (!fallbackLocale) throw new Error(`Missing default product document: ${product.id}`);
-  return Astro.redirect(getProductPath(fallbackLocale, product.slug));
+	const fallbackLocale = getAboutLocaleFallback(locale);
+	if (!fallbackLocale) throw new Error(`Missing default product document: ${product.id}`);
+	return Astro.redirect(getProductPath(fallbackLocale, product.slug));
 }
 const { Content } = await render(document);
 const alternateLocales = await getProductDocumentLocales(product.id);
 const allDocuments = await getProductDocuments(locale);
-const documentsById = new Map(
-  allDocuments.map((entry) => [entry.definition.id, entry.document]),
-);
+const documentsById = new Map(allDocuments.map((entry) => [entry.definition.id, entry.document]));
 const related = product.relatedProductIds.map((id) => ({
-  definition: getProductById(id),
-  document: documentsById.get(id),
+	definition: getProductById(id),
+	document: documentsById.get(id),
 }));
 const layer = copy.products.layers[product.layer];
 const meta = {
-  title: `${document.data.title} — ${verbatimTerms.rezics.value}`,
-  description: document.data.description,
+	title: `${document.data.title} — ${verbatimTerms.rezics.value}`,
+	description: document.data.description,
 };
 ---
 

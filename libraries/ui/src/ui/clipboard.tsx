@@ -70,8 +70,7 @@ const clipboardValueVariants = tv({
 });
 
 interface ClipboardValueProps
-	extends
-		React.ComponentProps<typeof ArkClipboard.ValueText>,
+	extends React.ComponentProps<typeof ArkClipboard.ValueText>,
 		VariantProps<typeof clipboardValueVariants> {}
 
 export const ClipboardValue = (props: ClipboardValueProps) => {

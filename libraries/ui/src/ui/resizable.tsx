@@ -23,9 +23,8 @@ export const ResizablePanel = (props: React.ComponentProps<typeof ArkSplitter.Pa
 	<ArkSplitter.Panel data-slot="resizable-panel" {...props} />
 );
 
-interface ResizableResizeTriggerProps extends React.ComponentProps<
-	typeof ArkSplitter.ResizeTrigger
-> {
+interface ResizableResizeTriggerProps
+	extends React.ComponentProps<typeof ArkSplitter.ResizeTrigger> {
 	/**
 	 * Whether to show the handle
 	 *

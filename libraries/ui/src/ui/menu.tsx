@@ -147,7 +147,8 @@ const menuItemVariants = tv({
 });
 
 interface MenuItemProps
-	extends React.ComponentProps<typeof ArkMenu.Item>, VariantProps<typeof menuItemVariants> {}
+	extends React.ComponentProps<typeof ArkMenu.Item>,
+		VariantProps<typeof menuItemVariants> {}
 
 export const MenuItem = (props: MenuItemProps) => {
 	const { variant = "default", className, ...rest } = props;

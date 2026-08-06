@@ -36,8 +36,7 @@ export const inputVariants = tv({
 });
 
 export interface InputProps
-	extends
-		Omit<React.ComponentProps<typeof FieldInput>, "size">,
+	extends Omit<React.ComponentProps<typeof FieldInput>, "size">,
 		VariantProps<typeof inputVariants> {}
 
 export const Input = (props: InputProps) => {

@@ -3,7 +3,8 @@ import type { PostApiFeedQueryStatus200 } from "@rezics/openapi-tanstack-query";
 export type PostRealmContext = PostApiFeedQueryStatus200["items"][number]["realms"][number];
 
 export type PostRealmContextSelection =
-	{ readonly kind: "global" } | { readonly kind: "realm"; readonly realm: PostRealmContext };
+	| { readonly kind: "global" }
+	| { readonly kind: "realm"; readonly realm: PostRealmContext };
 
 const GlobalPostRealmContextSelection = {
 	kind: "global",

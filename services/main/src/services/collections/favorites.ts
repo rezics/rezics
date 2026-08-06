@@ -26,7 +26,8 @@ interface FavoritesIdentity {
 	readonly profileId: string;
 	readonly createdAt: Date;
 	readonly collection:
-		{ readonly kind: "generated" } | { readonly kind: "fixed"; readonly id: string };
+		| { readonly kind: "generated" }
+		| { readonly kind: "fixed"; readonly id: string };
 }
 
 async function ensureFavoritesForIdentityInTransaction(

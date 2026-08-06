@@ -12,7 +12,8 @@ export type UnitProgressState =
 	| TrackedUnitProgressState;
 
 export type EditableProgressState =
-	Extract<UnitProgressState, { readonly kind: "untracked" }> | TrackedUnitProgressState;
+	| Extract<UnitProgressState, { readonly kind: "untracked" }>
+	| TrackedUnitProgressState;
 
 export function deriveUnitProgressState({
 	authenticated,

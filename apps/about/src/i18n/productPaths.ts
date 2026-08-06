@@ -1,7 +1,13 @@
 import { ABOUT_LOCALES, ABOUT_SITE_ORIGIN, DEFAULT_LOCALE, type AboutLocale } from "./locales";
 
 export type PublicPageKind =
-	"home" | "how-it-works" | "uses" | "products" | "product" | "contact" | "legal";
+	| "home"
+	| "how-it-works"
+	| "uses"
+	| "products"
+	| "product"
+	| "contact"
+	| "legal";
 
 export type AlternatePath = {
 	readonly locale: AboutLocale;

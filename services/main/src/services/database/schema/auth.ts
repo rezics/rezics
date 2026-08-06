@@ -15,9 +15,7 @@ import { pgTable } from "./base";
 export const users = pgTable(
 	"users",
 	{
-		id: uuid("id")
-			.default(sql`uuidv7()`)
-			.primaryKey(),
+		id: uuid("id").default(sql`uuidv7()`).primaryKey(),
 		/** @UNIT_LOCALIZATION_EXEMPT Identity source: provider-owned sign-in name; public Profile titles remain Unit localizations. */
 		name: text("name").notNull(),
 		email: text("email").notNull().unique(),
@@ -46,9 +44,7 @@ export const users = pgTable(
 export const sessions = pgTable(
 	"sessions",
 	{
-		id: uuid("id")
-			.default(sql`uuidv7()`)
-			.primaryKey(),
+		id: uuid("id").default(sql`uuidv7()`).primaryKey(),
 		expiresAt: timestamp("expires_at", { withTimezone: true, precision: 3 }).notNull(),
 		token: text("token").notNull().unique(),
 		createdAt: timestamp("created_at", { withTimezone: true, precision: 3 })
@@ -70,9 +66,7 @@ export const sessions = pgTable(
 export const accounts = pgTable(
 	"accounts",
 	{
-		id: uuid("id")
-			.default(sql`uuidv7()`)
-			.primaryKey(),
+		id: uuid("id").default(sql`uuidv7()`).primaryKey(),
 		accountId: text("account_id").notNull(),
 		providerId: text("provider_id").notNull(),
 		userId: uuid("user_id")
@@ -108,9 +102,7 @@ export const accounts = pgTable(
 export const verifications = pgTable(
 	"verifications",
 	{
-		id: uuid("id")
-			.default(sql`uuidv7()`)
-			.primaryKey(),
+		id: uuid("id").default(sql`uuidv7()`).primaryKey(),
 		identifier: text("identifier").notNull(),
 		value: text("value").notNull(),
 		expiresAt: timestamp("expires_at", { withTimezone: true, precision: 3 }).notNull(),
@@ -128,9 +120,7 @@ export const verifications = pgTable(
 export const apikeys = pgTable(
 	"apikeys",
 	{
-		id: uuid("id")
-			.default(sql`uuidv7()`)
-			.primaryKey(),
+		id: uuid("id").default(sql`uuidv7()`).primaryKey(),
 		configId: text("config_id").default("default").notNull(),
 		name: text("name"),
 		start: text("start"),

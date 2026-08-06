@@ -105,7 +105,7 @@ function percentileById<T extends RecommendationCandidate>(
 	});
 	const denominator = Math.max(1, ordered.length - 1);
 	const percentiles = new Map<string, number>();
-	for (let start = 0; start < ordered.length;) {
+	for (let start = 0; start < ordered.length; ) {
 		let end = start + 1;
 		while (end < ordered.length && ordered[end]?.value === ordered[start]?.value) end += 1;
 		const percentile = (start + end - 1) / 2 / denominator;

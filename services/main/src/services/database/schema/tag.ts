@@ -214,9 +214,7 @@ export const realmUnitTag = pgTable(
 		tagId: uuid()
 			.notNull()
 			.references(() => tag.id, { onDelete: "cascade" }),
-		position: fractionalIndexPosition()
-			.default(sql`'a0'::text`)
-			.notNull(),
+		position: fractionalIndexPosition().default(sql`'a0'::text`).notNull(),
 		createdByProfileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "restrict" }),
@@ -248,9 +246,7 @@ export const profileUnitTag = pgTable(
 		tagId: uuid()
 			.notNull()
 			.references(() => tag.id, { onDelete: "cascade" }),
-		position: fractionalIndexPosition()
-			.default(sql`'a0'::text`)
-			.notNull(),
+		position: fractionalIndexPosition().default(sql`'a0'::text`).notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},

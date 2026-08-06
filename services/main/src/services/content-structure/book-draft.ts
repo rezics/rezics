@@ -45,7 +45,9 @@ export type SaveBookContentStructureDraftInput = {
 	readonly baseRevisionId: string;
 	readonly actorProfileId: string;
 	readonly nodes: readonly (
-		ExistingBookDraftNode | NewBookDraftNode | AttachedBookDraftNodeInput
+		| ExistingBookDraftNode
+		| NewBookDraftNode
+		| AttachedBookDraftNodeInput
 	)[];
 };
 

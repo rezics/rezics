@@ -10,7 +10,7 @@ export default defineConfig({
 		path: "./src/generated",
 		clean: true,
 		barrel: false,
-		format: "prettier",
+		format: "biome",
 		lint: false,
 	},
 	plugins: [

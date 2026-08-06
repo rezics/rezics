@@ -173,7 +173,9 @@ export interface PortableTextValueBlock {
  * those JSON-safe values lossless instead of coupling the format to a host.
  */
 export type PortableTextValue = (
-	PortableTextValueBlock | PortableTextImageBlock | PortableTextCustomBlock
+	| PortableTextValueBlock
+	| PortableTextImageBlock
+	| PortableTextCustomBlock
 )[];
 
 export function isPortableTextValueBlock(

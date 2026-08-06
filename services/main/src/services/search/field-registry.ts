@@ -11,7 +11,12 @@ import { SearchCategoryValues } from "@rezics/filter";
 import { InvalidSearch } from "./errors";
 
 export type SearchScalarKind =
-	"boolean" | "date" | "integer" | "string" | "uuid" | "realm-tag-vote";
+	| "boolean"
+	| "date"
+	| "integer"
+	| "string"
+	| "uuid"
+	| "realm-tag-vote";
 export type SearchFacetPolicy = "none" | "meili-low-cardinality" | "postgres-authorized";
 export type SearchSortPolicy = "none" | "meili" | "postgres-residual";
 

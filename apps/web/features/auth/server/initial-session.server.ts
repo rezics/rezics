@@ -8,7 +8,8 @@ export type InitialAuthSession =
 	| { readonly status: "unavailable" };
 
 type AuthSessionParseResult =
-	{ readonly valid: true; readonly data: AuthSession | null } | { readonly valid: false };
+	| { readonly valid: true; readonly data: AuthSession | null }
+	| { readonly valid: false };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);

@@ -15,7 +15,8 @@ export const useTagsInputContext = useArkTagsInputContext;
 export const TagsInputContext = ArkTagsInput.Context;
 
 interface TagsInputProps
-	extends React.ComponentProps<typeof ArkTagsInput.Root>, Pick<InputGroupProps, "size"> {
+	extends React.ComponentProps<typeof ArkTagsInput.Root>,
+		Pick<InputGroupProps, "size"> {
 	/**
 	 * Whether to show the clear button.
 	 *
@@ -55,7 +56,8 @@ export const TagsInput = (props: TagsInputProps) => {
 };
 
 interface TagsInputControlProps
-	extends React.ComponentProps<typeof ArkTagsInput.Control>, Pick<InputGroupProps, "size"> {
+	extends React.ComponentProps<typeof ArkTagsInput.Control>,
+		Pick<InputGroupProps, "size"> {
 	/**
 	 * Whether to show the clear button.
 	 *
@@ -92,7 +94,8 @@ export const TagsInputControl = (props: TagsInputControlProps) => {
 };
 
 interface TagsInputItemProps
-	extends React.ComponentProps<typeof ArkTagsInput.Item>, Pick<InputGroupProps, "size"> {
+	extends React.ComponentProps<typeof ArkTagsInput.Item>,
+		Pick<InputGroupProps, "size"> {
 	/**
 	 * Whether to show the clear trigger.
 	 *
@@ -225,7 +228,8 @@ export const TagsInputClearTrigger = (
 };
 
 interface TagsInputRootProviderProps
-	extends React.ComponentProps<typeof ArkTagsInput.RootProvider>, Pick<InputGroupProps, "size"> {
+	extends React.ComponentProps<typeof ArkTagsInput.RootProvider>,
+		Pick<InputGroupProps, "size"> {
 	/**
 	 * Whether to show the clear button.
 	 *

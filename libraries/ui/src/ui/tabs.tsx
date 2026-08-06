@@ -64,7 +64,8 @@ const tabsListVariants = tv({
 	},
 });
 interface TabsListProps
-	extends React.ComponentProps<typeof ArkTabs.List>, VariantProps<typeof tabsListVariants> {}
+	extends React.ComponentProps<typeof ArkTabs.List>,
+		VariantProps<typeof tabsListVariants> {}
 
 export const TabsList = (props: TabsListProps) => {
 	const { variant = "default", className, children, ...rest } = props;

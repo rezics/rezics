@@ -4,7 +4,7 @@ import { ABOUT_LOCALES, requireAboutLocale } from "../../../i18n/locales";
 import SiteLayout from "../../../layouts/SiteLayout.astro";
 
 export function getStaticPaths() {
-  return ABOUT_LOCALES.map((locale) => ({ params: { locale } }));
+	return ABOUT_LOCALES.map((locale) => ({ params: { locale } }));
 }
 
 const locale = requireAboutLocale(Astro.params.locale);

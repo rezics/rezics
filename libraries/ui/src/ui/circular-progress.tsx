@@ -8,8 +8,7 @@ import { cn } from "../utils";
 export const useCircularProgress = useProgressContext;
 
 interface CircularProgressProps
-	extends
-		React.ComponentProps<typeof ArkProgress.Root>,
+	extends React.ComponentProps<typeof ArkProgress.Root>,
 		Pick<CircularProgressTrackProps, "size" | "thickness"> {
 	/**
 	 * Shows indeterminate progress.

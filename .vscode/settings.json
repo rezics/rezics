@@ -23,7 +23,6 @@
 		"worktree"
 	],
 	"js/ts.experimental.useTsgo": true,
-	"oxc.fmt.configPath": ".oxfmtrc.json",
-	"editor.defaultFormatter": "oxc.oxc-vscode",
+	"editor.defaultFormatter": "biomejs.biome",
 	"editor.formatOnSave": true
 }

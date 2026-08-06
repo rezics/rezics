@@ -7,7 +7,8 @@ import { cn } from "../utils";
 import { Input, type InputProps } from "./input";
 
 interface InputOTPProps
-	extends React.ComponentProps<typeof ArkPinInput.Root>, Pick<InputProps, "size"> {}
+	extends React.ComponentProps<typeof ArkPinInput.Root>,
+		Pick<InputProps, "size"> {}
 
 export const InputOTP = (props: InputOTPProps) => {
 	const { placeholder, otp = true, className, children, ...rest } = props;

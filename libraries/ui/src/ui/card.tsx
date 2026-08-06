@@ -44,7 +44,8 @@ const cardMediaVariants = tv({
 });
 
 interface CardMediaProps
-	extends React.ComponentProps<typeof ark.div>, VariantProps<typeof cardMediaVariants> {}
+	extends React.ComponentProps<typeof ark.div>,
+		VariantProps<typeof cardMediaVariants> {}
 
 export const CardMedia = (props: CardMediaProps) => {
 	const { variant = "default", className, ...rest } = props;

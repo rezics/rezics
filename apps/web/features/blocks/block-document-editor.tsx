@@ -64,7 +64,13 @@ export interface BlockEditorNavigationOption {
 	readonly label: string;
 }
 export type BlockEditorAddableType =
-	"post-full-view" | "unit-ref" | "realm-ref" | "zone-ref" | "feed" | "menu" | "divider";
+	| "post-full-view"
+	| "unit-ref"
+	| "realm-ref"
+	| "zone-ref"
+	| "feed"
+	| "menu"
+	| "divider";
 const DefaultAddableBlockTypes: readonly BlockEditorAddableType[] = [
 	"post-full-view",
 	"realm-ref",

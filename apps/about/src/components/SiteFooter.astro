@@ -3,12 +3,7 @@ import { Logo } from "@rezics/ui";
 
 import type { SiteCopy } from "../content/locales";
 import type { AboutLocale } from "../i18n/locales";
-import {
-  getHomePath,
-  getHowItWorksPath,
-  getProductsPath,
-  getUsesPath,
-} from "../i18n/productPaths";
+import { getHomePath, getHowItWorksPath, getProductsPath, getUsesPath } from "../i18n/productPaths";
 
 type Props = { locale: AboutLocale; copy: SiteCopy };
 const { locale, copy } = Astro.props;

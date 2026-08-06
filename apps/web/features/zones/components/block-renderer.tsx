@@ -78,7 +78,8 @@ import type { ZoneRenderNavigation, ZoneRenderProjection } from "../model/zone-r
 type RenderUnit = ZoneRenderProjection["references"]["units"][number];
 type RenderAsset = ZoneRenderProjection["references"]["assets"][number];
 type ZoneBlockSurface =
-	{ readonly kind: "dock" } | { readonly kind: "page"; readonly pageId: string };
+	| { readonly kind: "dock" }
+	| { readonly kind: "page"; readonly pageId: string };
 type ZoneNavigationLayout = "horizontal" | "vertical";
 type NavigationLeafItem = Extract<NavigationItem, { target: unknown }>;
 type NavigationGroupItem = Extract<NavigationItem, { children: unknown }>;

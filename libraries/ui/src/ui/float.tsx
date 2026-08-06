@@ -26,7 +26,8 @@ const floatVariants = tv({
 });
 
 interface FloatProps
-	extends React.ComponentProps<typeof ark.div>, VariantProps<typeof floatVariants> {}
+	extends React.ComponentProps<typeof ark.div>,
+		VariantProps<typeof floatVariants> {}
 
 export const Float = (props: FloatProps) => {
 	const { placement = "top-end", className, ...rest } = props;

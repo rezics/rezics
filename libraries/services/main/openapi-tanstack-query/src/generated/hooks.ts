@@ -11898,7 +11898,8 @@ export function useGetZoneRenderProjection<
 		query,
 	}: {
 		path:
-			GetZoneRenderProjectionOptions["path"] | (() => GetZoneRenderProjectionOptions["path"]);
+			| GetZoneRenderProjectionOptions["path"]
+			| (() => GetZoneRenderProjectionOptions["path"]);
 		query?:
 			| GetZoneRenderProjectionOptions["query"]
 			| (() => GetZoneRenderProjectionOptions["query"]);
@@ -15468,7 +15469,8 @@ export function useGetApiUsersMeFollowing<
 		query,
 	}: {
 		query?:
-			GetApiUsersMeFollowingOptions["query"] | (() => GetApiUsersMeFollowingOptions["query"]);
+			| GetApiUsersMeFollowingOptions["query"]
+			| (() => GetApiUsersMeFollowingOptions["query"]);
 	} = {},
 	options: {
 		query?: Partial<
@@ -16077,7 +16079,8 @@ export function useGetUserProfileActivity<
 	}: {
 		path: GetUserProfileActivityOptions["path"] | (() => GetUserProfileActivityOptions["path"]);
 		query?:
-			GetUserProfileActivityOptions["query"] | (() => GetUserProfileActivityOptions["query"]);
+			| GetUserProfileActivityOptions["query"]
+			| (() => GetUserProfileActivityOptions["query"]);
 	},
 	options: {
 		query?: Partial<
@@ -22777,7 +22780,8 @@ export function useGetApiEntitiesByUnitId<
 	}: {
 		path: GetApiEntitiesByUnitIdOptions["path"] | (() => GetApiEntitiesByUnitIdOptions["path"]);
 		query?:
-			GetApiEntitiesByUnitIdOptions["query"] | (() => GetApiEntitiesByUnitIdOptions["query"]);
+			| GetApiEntitiesByUnitIdOptions["query"]
+			| (() => GetApiEntitiesByUnitIdOptions["query"]);
 	},
 	options: {
 		query?: Partial<
@@ -25831,8 +25835,8 @@ export function getApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsQu
 export function useGetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisions<
 	TData = GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus200,
 	TQueryData = GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus200,
-	TQueryKey extends QueryKey =
-		GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsQueryKey,
+	TQueryKey extends
+		QueryKey = GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsQueryKey,
 >(
 	{
 		path,
@@ -30594,7 +30598,8 @@ export function useGetApiReviewsByReviewId<
 		query,
 	}: {
 		path:
-			GetApiReviewsByReviewIdOptions["path"] | (() => GetApiReviewsByReviewIdOptions["path"]);
+			| GetApiReviewsByReviewIdOptions["path"]
+			| (() => GetApiReviewsByReviewIdOptions["path"]);
 		query?:
 			| GetApiReviewsByReviewIdOptions["query"]
 			| (() => GetApiReviewsByReviewIdOptions["query"]);
@@ -30916,7 +30921,8 @@ export function useGetApiScoresByTargetId<
 	}: {
 		path: GetApiScoresByTargetIdOptions["path"] | (() => GetApiScoresByTargetIdOptions["path"]);
 		query:
-			GetApiScoresByTargetIdOptions["query"] | (() => GetApiScoresByTargetIdOptions["query"]);
+			| GetApiScoresByTargetIdOptions["query"]
+			| (() => GetApiScoresByTargetIdOptions["query"]);
 	},
 	options: {
 		query?: Partial<
@@ -33440,7 +33446,8 @@ export function useGetApiRealmsByRealmId<
 	}: {
 		path: GetApiRealmsByRealmIdOptions["path"] | (() => GetApiRealmsByRealmIdOptions["path"]);
 		query?:
-			GetApiRealmsByRealmIdOptions["query"] | (() => GetApiRealmsByRealmIdOptions["query"]);
+			| GetApiRealmsByRealmIdOptions["query"]
+			| (() => GetApiRealmsByRealmIdOptions["query"]);
 	},
 	options: {
 		query?: Partial<

@@ -174,7 +174,8 @@ function presentPlatformReport(row: {
 }
 
 type PresentedReport =
-	ReturnType<typeof presentRealmReport> | ReturnType<typeof presentPlatformReport>;
+	| ReturnType<typeof presentRealmReport>
+	| ReturnType<typeof presentPlatformReport>;
 
 function compareReportsNewestFirst(
 	left: Pick<PresentedReport, "createdAt" | "id">,

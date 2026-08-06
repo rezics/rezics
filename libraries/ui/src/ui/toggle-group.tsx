@@ -23,7 +23,8 @@ type ToggleGroupContextProps = Pick<ToggleProps, "variant" | "size"> & {
 const ToggleGroupContext = React.createContext({} as ToggleGroupContextProps);
 
 interface ToggleGroupProps
-	extends React.ComponentProps<typeof ArkToggleGroup.Root>, ToggleGroupContextProps {}
+	extends React.ComponentProps<typeof ArkToggleGroup.Root>,
+		ToggleGroupContextProps {}
 
 const toggleGroupVariants = tv({
 	base: ["w-fit", "flex items-center gap-[--spacing(var(--gap))]", "rounded-lg"],

@@ -51,8 +51,7 @@ export const ComboboxControl = (props: React.ComponentProps<typeof ArkCombobox.C
 };
 
 interface ComboboxInputProps
-	extends
-		Omit<React.ComponentProps<typeof ArkCombobox.Input>, "size">,
+	extends Omit<React.ComponentProps<typeof ArkCombobox.Input>, "size">,
 		VariantProps<typeof inputVariants> {
 	/**
 	 * Whether the control is disabled.
@@ -247,8 +246,7 @@ export const comboboxItemVariants = tv({
 });
 
 interface ComboboxItemProps
-	extends
-		React.ComponentProps<typeof ArkCombobox.Item>,
+	extends React.ComponentProps<typeof ArkCombobox.Item>,
 		VariantProps<typeof comboboxItemVariants> {}
 
 export const ComboboxItem = (props: ComboboxItemProps) => {

@@ -23,7 +23,8 @@ const loadTagCreateRouteSearchParams = createLoader(tagCreateRouteParsers);
 const serializeTagCreateRouteSearchParams = createSerializer(tagCreateRouteParsers);
 
 export type UnitTagVoteContextAddress =
-	{ readonly kind: "global" } | { readonly kind: "realm"; readonly realmId: string };
+	| { readonly kind: "global" }
+	| { readonly kind: "realm"; readonly realmId: string };
 
 export interface UnitTagVoteCreateTarget {
 	readonly type: UnitDetailUnitType;

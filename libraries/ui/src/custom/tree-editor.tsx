@@ -6,10 +6,11 @@ import type { ComponentProps, ReactNode } from "react";
 import { cn } from "../utils";
 import { TreeView, TreeViewLabel, TreeViewTree, type TreeNodeType } from "../ui/tree-view";
 
-export interface TreeEditorProps<T extends TreeNodeType> extends Pick<
-	ComponentProps<typeof TreeView>,
-	"expandOnClick" | "onSelectionChange" | "selectedValue" | "selectionMode"
-> {
+export interface TreeEditorProps<T extends TreeNodeType>
+	extends Pick<
+		ComponentProps<typeof TreeView>,
+		"expandOnClick" | "onSelectionChange" | "selectedValue" | "selectionMode"
+	> {
 	collection: TreeCollection<T>;
 	label: string;
 	renderNode: (node: T, indexPath: number[]) => ReactNode;

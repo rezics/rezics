@@ -42,10 +42,8 @@ export const EditableArea = (props: React.ComponentProps<typeof ArkEditable.Area
 	);
 };
 
-export interface EditableInputProps extends Omit<
-	React.ComponentProps<typeof ArkEditable.Input>,
-	"size"
-> {}
+export interface EditableInputProps
+	extends Omit<React.ComponentProps<typeof ArkEditable.Input>, "size"> {}
 
 export const EditableInput = (props: EditableInputProps) => (
 	<ArkEditable.Input data-slot="editable-input" {...props} />

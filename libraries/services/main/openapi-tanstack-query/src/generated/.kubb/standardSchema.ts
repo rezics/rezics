@@ -37,10 +37,7 @@ export class ParseError extends Error {
 	constructor({
 		issues,
 		message,
-	}: {
-		issues: ReadonlyArray<StandardSchemaIssue>;
-		message?: string;
-	}) {
+	}: { issues: ReadonlyArray<StandardSchemaIssue>; message?: string }) {
 		super(message ?? "Validation failed");
 		this.name = "ParseError";
 		this.issues = issues;

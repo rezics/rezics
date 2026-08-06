@@ -27,8 +27,7 @@ const scrollAreaVariants = tv({
 });
 
 interface ScrollAreaProps
-	extends
-		React.ComponentProps<typeof ArkScrollArea.Root>,
+	extends React.ComponentProps<typeof ArkScrollArea.Root>,
 		VariantProps<typeof scrollAreaVariants> {}
 
 export const ScrollArea = (props: ScrollAreaProps) => {

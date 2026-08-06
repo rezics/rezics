@@ -11,7 +11,8 @@ import { useTranslation } from "@/i18n/client";
 
 /** Describes the only two safe edit transitions exposed by the shared menu. */
 export type PostOverflowEditAction =
-	Readonly<{ kind: "link"; href: string }> | Readonly<{ kind: "command"; onSelect: () => void }>;
+	| Readonly<{ kind: "link"; href: string }>
+	| Readonly<{ kind: "command"; onSelect: () => void }>;
 
 /**
  * Extends the shared feed overflow menu with management actions for a Post.

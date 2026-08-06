@@ -126,9 +126,9 @@ export const terminologyConcepts = defineTerminologyConcepts({
 export type TerminologyConceptKey = keyof typeof terminologyConcepts;
 
 export type TerminologyConceptKeyForLocale<Locale extends TerminologyLocale> = {
-	[
-		Concept in TerminologyConceptKey
-	]: Locale extends (typeof terminologyConcepts)[Concept]["locales"][number] ? Concept : never;
+	[Concept in TerminologyConceptKey]: Locale extends (typeof terminologyConcepts)[Concept]["locales"][number]
+		? Concept
+		: never;
 }[TerminologyConceptKey];
 
 type TerminologyForms<Concept extends TerminologyConceptKey> = Readonly<
@@ -143,9 +143,7 @@ export type LocalizedTerminologyEntry<Concept extends TerminologyConceptKey> = {
 };
 
 export type TerminologyForLocale<Locale extends TerminologyLocale> = {
-	readonly [
-		Concept in TerminologyConceptKeyForLocale<Locale>
-	]: LocalizedTerminologyEntry<Concept>;
+	readonly [Concept in TerminologyConceptKeyForLocale<Locale>]: LocalizedTerminologyEntry<Concept>;
 };
 
 export function defineTerminology<const Locale extends TerminologyLocale>(

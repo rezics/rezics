@@ -75,16 +75,18 @@ async function presentPlatformUnits<
 				.where(inArray(profile.id, ownerIds))
 		: [];
 	const ownerById = new Map(owners.map((owner) => [owner.profileId, owner]));
-	return rows.map((row): PlatformUnitLifecycleItem => ({
-		id: row.id,
-		kind: row.kind,
-		title: row.title,
-		status: row.status,
-		owner: row.ownerProfileId ? (ownerById.get(row.ownerProfileId) ?? null) : null,
-		deletedAt: row.deletedAt,
-		updatedAt: row.updatedAt,
-		protected: ProtectedUnitIds.has(row.id),
-	}));
+	return rows.map(
+		(row): PlatformUnitLifecycleItem => ({
+			id: row.id,
+			kind: row.kind,
+			title: row.title,
+			status: row.status,
+			owner: row.ownerProfileId ? (ownerById.get(row.ownerProfileId) ?? null) : null,
+			deletedAt: row.deletedAt,
+			updatedAt: row.updatedAt,
+			protected: ProtectedUnitIds.has(row.id),
+		}),
+	);
 }
 
 export async function listPlatformUnits(input: {

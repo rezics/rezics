@@ -36,8 +36,7 @@ export const nativeSelectVariants = tv({
 });
 
 interface NativeSelectProps
-	extends
-		Omit<React.ComponentProps<typeof ArkField.Select>, "size">,
+	extends Omit<React.ComponentProps<typeof ArkField.Select>, "size">,
 		VariantProps<typeof nativeSelectVariants> {
 	/**
 	 * Whether the select is invalid.

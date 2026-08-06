@@ -26,14 +26,14 @@ includes:
 
 tasks:
     format:
-        desc: Format source files with Prettier.
+        desc: Format supported source files with Biome.
         cmds:
-            - yarn exec prettier . --write
+            - yarn exec biome format --write .
 
     format:check:
-        desc: Check source formatting with Prettier.
+        desc: Check supported source formatting with Biome.
         cmds:
-            - yarn exec prettier . --check
+            - yarn exec biome format .
 
     counts:check:
         desc: Verify the online exact-count policy.

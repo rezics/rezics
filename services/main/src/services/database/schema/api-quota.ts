@@ -90,9 +90,7 @@ export const apiAccountQuotaBinding = pgTable(
 			.references(() => users.id, { onDelete: "cascade" }),
 		policyId: uuid().notNull(),
 		policySubjectKind: text().$type<"account">().default("account").notNull(),
-		configurationOverride: createJsonDocumentColumn()
-			.default(sql`'{}'::jsonb`)
-			.notNull(),
+		configurationOverride: createJsonDocumentColumn().default(sql`'{}'::jsonb`).notNull(),
 		validUntil: createTimestampMsColumn(),
 		assignmentReason: text().notNull(),
 		assignedByProfileId: uuid()
@@ -138,9 +136,7 @@ export const apiTokenQuotaBinding = pgTable(
 			.references(() => apikeys.id, { onDelete: "cascade" }),
 		policyId: uuid().notNull(),
 		policySubjectKind: text().$type<"token">().default("token").notNull(),
-		configurationOverride: createJsonDocumentColumn()
-			.default(sql`'{}'::jsonb`)
-			.notNull(),
+		configurationOverride: createJsonDocumentColumn().default(sql`'{}'::jsonb`).notNull(),
 		validUntil: createTimestampMsColumn(),
 		assignmentReason: text().notNull(),
 		assignedByProfileId: uuid()

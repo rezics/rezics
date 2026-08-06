@@ -65,7 +65,8 @@ function TagLocalizationForm({
 	tagId,
 }: {
 	readonly localization:
-		ReturnType<typeof useTagManagement>["tag"]["localizations"][number] | undefined;
+		| ReturnType<typeof useTagManagement>["tag"]["localizations"][number]
+		| undefined;
 	readonly tagId: string;
 }) {
 	const { t } = useTranslation(["ui"]);

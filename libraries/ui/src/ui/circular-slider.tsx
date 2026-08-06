@@ -18,8 +18,7 @@ interface CircularSliderContextValue {
 const CircularSliderContext = React.createContext({} as CircularSliderContextValue);
 
 export interface CircularSliderProps
-	extends
-		React.ComponentProps<typeof ArkAngleSlider.Root>,
+	extends React.ComponentProps<typeof ArkAngleSlider.Root>,
 		Partial<Pick<CircularSliderContextValue, "thickness" | "size">> {
 	markers?: boolean | number[];
 	markersAtSteps?: boolean;
@@ -187,10 +186,8 @@ export const CircularSliderThumb = (props: React.ComponentProps<typeof ArkAngleS
 	);
 };
 
-interface CircularSliderValueProps extends Omit<
-	React.ComponentProps<typeof ArkAngleSlider.ValueText>,
-	"prefix"
-> {
+interface CircularSliderValueProps
+	extends Omit<React.ComponentProps<typeof ArkAngleSlider.ValueText>, "prefix"> {
 	prefix?: React.ReactNode | string;
 	suffix?: React.ReactNode | string;
 }

@@ -107,7 +107,10 @@ type ContentLicenseActionPlan = {
 };
 
 type ModerationActionPlan =
-	StateActionPlan | LockActionPlan | ContentLicenseActionPlan | { type: "case_only" };
+	| StateActionPlan
+	| LockActionPlan
+	| ContentLicenseActionPlan
+	| { type: "case_only" };
 
 function canonicalize(value: unknown): unknown {
 	if (Array.isArray(value)) return value.map(canonicalize);

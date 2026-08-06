@@ -1,7 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
-import { format, resolveConfig } from "prettier";
 
 import deState from "../../../libraries/i18n/src/languages/de/state.ts";
 import enState from "../../../libraries/i18n/src/languages/en/state.ts";
@@ -11,6 +10,7 @@ import jaState from "../../../libraries/i18n/src/languages/ja/state.ts";
 import koState from "../../../libraries/i18n/src/languages/ko/state.ts";
 import zhHansState from "../../../libraries/i18n/src/languages/zh-Hans/state.ts";
 import zhHantState from "../../../libraries/i18n/src/languages/zh-Hant/state.ts";
+import { formatWithBiome } from "./format-with-biome.ts";
 
 const messages = {
 	de: deState.offlinePage,
@@ -148,11 +148,7 @@ const html = `<!doctype html>
 </html>
 `;
 
-const prettierConfig = await resolveConfig(outputPath);
-const formattedHtml = await format(html, {
-	...(prettierConfig ?? {}),
-	filepath: outputPath,
-});
+const formattedHtml = await formatWithBiome(html, outputPath);
 
 if (generationMode === "check") {
 	const currentHtml = await readFile(outputPath, "utf8");

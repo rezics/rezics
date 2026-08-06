@@ -47,6 +47,7 @@
 		"prepack": "yarn run build"
 	},
 	"devDependencies": {
+		"@biomejs/biome": "2.5.7",
 		"@kubb/adapter-oas": "5.0.0-beta.95",
 		"@kubb/plugin-fetch": "5.0.0-beta.95",
 		"@kubb/plugin-ts": "5.0.0-beta.95",

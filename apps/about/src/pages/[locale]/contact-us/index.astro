@@ -9,12 +9,12 @@ const maintainerAvatarUrl = "https://avatars.githubusercontent.com/u/68896486?v=
 const maintainerGithubUrl = "https://github.com/Edge-coordinates";
 
 export function getStaticPaths() {
-  return ABOUT_LOCALES.map((locale) => ({ params: { locale } }));
+	return ABOUT_LOCALES.map((locale) => ({ params: { locale } }));
 }
 
 const locale = requireAboutLocale(Astro.params.locale);
 if (locale !== DEFAULT_LOCALE) {
-  return Astro.redirect(`/${DEFAULT_LOCALE}/contact-us/`);
+	return Astro.redirect(`/${DEFAULT_LOCALE}/contact-us/`);
 }
 ---
 

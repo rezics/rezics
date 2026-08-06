@@ -55,7 +55,8 @@ export const alertVariants = tv({
 });
 
 interface AlertProps
-	extends React.ComponentProps<typeof ark.div>, VariantProps<typeof alertVariants> {}
+	extends React.ComponentProps<typeof ark.div>,
+		VariantProps<typeof alertVariants> {}
 
 export const Alert = (props: AlertProps) => {
 	const { variant, className, ...rest } = props;

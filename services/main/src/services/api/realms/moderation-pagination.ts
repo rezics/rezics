@@ -10,7 +10,8 @@ import { InvalidPaginationCursor } from "../../pagination/errors";
 export type RealmUnitModerationStatus = (typeof RealmUnitStatusValues)[number];
 export type RealmUnitModerationStatusFilter = RealmUnitModerationStatus | "current" | "all";
 export type RealmUnitModerationPublicationStateFilter =
-	(typeof RealmUnitPublicationStateValues)[number] | "all";
+	| (typeof RealmUnitPublicationStateValues)[number]
+	| "all";
 
 function isRealmUnitModerationStatus(
 	value: RealmUnitModerationStatusFilter,

@@ -11,7 +11,8 @@ import { Input, type InputProps } from "./input";
 export const useNumberInput = useNumberInputContext;
 
 interface NumberInputProps
-	extends React.ComponentProps<typeof ArkNumberInput.Root>, Pick<InputProps, "size"> {}
+	extends React.ComponentProps<typeof ArkNumberInput.Root>,
+		Pick<InputProps, "size"> {}
 
 export const NumberInput = (props: NumberInputProps) => {
 	const { size = "md", className, ...rest } = props;

@@ -94,7 +94,8 @@ export const badgeVariants = tv({
 export type BadgeVariant = VariantProps<typeof badgeVariants>["variant"];
 
 interface BadgeProps
-	extends React.ComponentProps<typeof ark.span>, VariantProps<typeof badgeVariants> {}
+	extends React.ComponentProps<typeof ark.span>,
+		VariantProps<typeof badgeVariants> {}
 
 export const Badge = (props: BadgeProps) => {
 	const { variant = "default", size = "md", pill = false, className, ...rest } = props;

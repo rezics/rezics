@@ -138,8 +138,7 @@ const drawerPositionerVariants = tv({
 });
 
 interface DrawerPositionerProps
-	extends
-		React.ComponentProps<typeof ArkDrawer.Positioner>,
+	extends React.ComponentProps<typeof ArkDrawer.Positioner>,
 		VariantProps<typeof drawerPositionerVariants> {}
 
 export const DrawerPositioner = (props: DrawerPositionerProps) => {
@@ -235,8 +234,7 @@ function needsFullHeightForSnapPoints(snapPoints: SnapPoint[]): boolean {
 }
 
 interface DrawerContentProps
-	extends
-		React.ComponentProps<typeof ArkDrawer.Content>,
+	extends React.ComponentProps<typeof ArkDrawer.Content>,
 		VariantProps<typeof drawerContentVariants> {
 	/**
 	 * Show the drag bar indicator
@@ -455,7 +453,8 @@ const drawerFooterVariants = tv({
 });
 
 interface DrawerFooterProps
-	extends React.ComponentProps<typeof ark.div>, VariantProps<typeof drawerFooterVariants> {}
+	extends React.ComponentProps<typeof ark.div>,
+		VariantProps<typeof drawerFooterVariants> {}
 
 export const DrawerFooter = (props: DrawerFooterProps) => {
 	const { variant = "default", className, ...rest } = props;

@@ -260,7 +260,8 @@ describe("BookContentStructureEditor node dialog", () => {
 
 		await vi.waitFor(() => expect(state.mutateAsync).toHaveBeenCalledOnce());
 		const options = state.mutateAsync.mock.calls[0]?.[0] as
-			PutApiUnitsBookByUnitIdContentStructureOptions | undefined;
+			| PutApiUnitsBookByUnitIdContentStructureOptions
+			| undefined;
 		expect(options).toEqual({
 			path: { unitId: ids.book },
 			body: {
@@ -296,7 +297,8 @@ describe("BookContentStructureEditor node dialog", () => {
 
 		await vi.waitFor(() => expect(state.mutateAsync).toHaveBeenCalledOnce());
 		const options = state.mutateAsync.mock.calls[0]?.[0] as
-			PutApiUnitsBookByUnitIdContentStructureOptions | undefined;
+			| PutApiUnitsBookByUnitIdContentStructureOptions
+			| undefined;
 		expect(options?.body.nodes.at(-1)).toEqual(
 			expect.objectContaining({ ownershipMode: "profile_owned" }),
 		);
@@ -314,7 +316,8 @@ describe("BookContentStructureEditor node dialog", () => {
 
 		await vi.waitFor(() => expect(state.mutateAsync).toHaveBeenCalledOnce());
 		const options = state.mutateAsync.mock.calls[0]?.[0] as
-			PutApiUnitsBookByUnitIdContentStructureOptions | undefined;
+			| PutApiUnitsBookByUnitIdContentStructureOptions
+			| undefined;
 		expect(options?.body.nodes[0]).toEqual({
 			state: "existing",
 			id: ids.existingNode,

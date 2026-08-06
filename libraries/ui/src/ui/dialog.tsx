@@ -140,8 +140,7 @@ export const dialogContentVariants = tv({
 });
 
 interface DialogContentProps
-	extends
-		React.ComponentProps<typeof ArkDialog.Content>,
+	extends React.ComponentProps<typeof ArkDialog.Content>,
 		VariantProps<typeof dialogContentVariants> {
 	/**
 	 * Stick the dialog to the bottom of the screen on mobile

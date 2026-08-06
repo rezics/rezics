@@ -8,18 +8,18 @@ import { getProductPath } from "../../../i18n/productPaths";
 import SiteLayout from "../../../layouts/SiteLayout.astro";
 
 export function getStaticPaths() {
-  return ABOUT_LOCALES.map((locale) => ({ params: { locale } }));
+	return ABOUT_LOCALES.map((locale) => ({ params: { locale } }));
 }
 
 const locale = requireAboutLocale(Astro.params.locale);
 const copy = getSiteCopy(locale);
 const products = await getProductDocuments(locale);
 const items = products.map(({ definition, document }) => ({
-  id: definition.id,
-  layer: definition.layer,
-  title: document.data.title,
-  summary: document.data.summary,
-  href: getProductPath(locale, definition.slug),
+	id: definition.id,
+	layer: definition.layer,
+	title: document.data.title,
+	summary: document.data.summary,
+	href: getProductPath(locale, definition.slug),
 }));
 const layers = PRODUCT_LAYER_IDS.map((id) => ({ id, ...copy.products.layers[id] }));
 ---

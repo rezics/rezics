@@ -8,7 +8,10 @@ import { quietControlVariants } from "./control-surface";
 
 type SharkButtonVariant = NonNullable<SharkButtonProps["variant"]>;
 export type ButtonVariant =
-	Exclude<SharkButtonVariant, "default" | "ghost"> | "brand" | "quiet" | "solid";
+	| Exclude<SharkButtonVariant, "default" | "ghost">
+	| "brand"
+	| "quiet"
+	| "solid";
 
 export interface ButtonProps extends Omit<SharkButtonProps, "variant"> {
 	/**

@@ -16,10 +16,8 @@ import { Button, type ButtonProps } from "./button";
 export const parseColor = parseColorArk;
 export const useColorPicker = useColorPickerContext;
 
-export interface ColorPickerProps extends Omit<
-	React.ComponentProps<typeof ArkColorPicker.Root>,
-	"defaultValue" | "value"
-> {
+export interface ColorPickerProps
+	extends Omit<React.ComponentProps<typeof ArkColorPicker.Root>, "defaultValue" | "value"> {
 	/**
 	 * The default value of the color picker.
 	 */
@@ -200,7 +198,8 @@ export const ColorPickerSlider = (
 };
 
 interface ColorPickerEyeDropperTrigger
-	extends React.ComponentProps<typeof ArkColorPicker.EyeDropperTrigger>, ButtonProps {}
+	extends React.ComponentProps<typeof ArkColorPicker.EyeDropperTrigger>,
+		ButtonProps {}
 
 export const ColorPickerEyeDropperTrigger = (props: ColorPickerEyeDropperTrigger) => {
 	const { variant = "outline", size = "icon-md", children, ...rest } = props;

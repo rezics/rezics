@@ -28,7 +28,8 @@ export type AuditActor =
 	  };
 
 export type AuditAuthority =
-	{ readonly kind: "platform" } | { readonly kind: "realm" | "unit"; readonly id: string };
+	| { readonly kind: "platform" }
+	| { readonly kind: "realm" | "unit"; readonly id: string };
 
 export interface AuditTarget {
 	readonly kind: string;

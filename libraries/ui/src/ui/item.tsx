@@ -59,7 +59,8 @@ const itemVariants = tv({
 });
 
 interface ItemProps
-	extends React.ComponentProps<typeof ark.div>, VariantProps<typeof itemVariants> {}
+	extends React.ComponentProps<typeof ark.div>,
+		VariantProps<typeof itemVariants> {}
 
 export const Item = (props: ItemProps) => {
 	const { variant = "default", className, ...rest } = props;
@@ -98,7 +99,8 @@ const itemMediaVariants = tv({
 });
 
 interface ItemMediaProps
-	extends React.ComponentProps<typeof ark.div>, VariantProps<typeof itemMediaVariants> {}
+	extends React.ComponentProps<typeof ark.div>,
+		VariantProps<typeof itemMediaVariants> {}
 
 export const ItemMedia = (props: ItemMediaProps) => {
 	const { variant = "default", className, ...rest } = props;

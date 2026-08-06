@@ -40,7 +40,8 @@ const swapIndicatorVariants = tv({
 });
 
 interface SwapProps
-	extends React.ComponentProps<typeof ArkSwap.Root>, VariantProps<typeof swapIndicatorVariants> {}
+	extends React.ComponentProps<typeof ArkSwap.Root>,
+		VariantProps<typeof swapIndicatorVariants> {}
 
 export const Swap = (props: SwapProps) => {
 	const { variant = "fade", lazyMount = true, unmountOnExit = true, className, ...rest } = props;

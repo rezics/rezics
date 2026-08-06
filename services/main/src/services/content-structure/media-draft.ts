@@ -46,14 +46,17 @@ export type AttachedMediaDraftNode = ContentStructureDraftNodeBase & {
 export type MediaDraftNode = ExistingMediaDraftNode | NewMediaDraftNode | AttachedMediaDraftNode;
 
 export type MediaContentStructureDraftBase =
-	{ readonly kind: "uninitialized" } | { readonly kind: "revision"; readonly revisionId: string };
+	| { readonly kind: "uninitialized" }
+	| { readonly kind: "revision"; readonly revisionId: string };
 
 export type SaveMediaContentStructureDraftInput = {
 	readonly ownerUnitId: string;
 	readonly base: MediaContentStructureDraftBase;
 	readonly actorProfileId: string;
 	readonly nodes: readonly (
-		ExistingMediaDraftNode | NewMediaDraftNode | Omit<AttachedMediaDraftNode, "title">
+		| ExistingMediaDraftNode
+		| NewMediaDraftNode
+		| Omit<AttachedMediaDraftNode, "title">
 	)[];
 };
 

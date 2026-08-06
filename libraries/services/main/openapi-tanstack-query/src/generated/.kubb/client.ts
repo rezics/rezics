@@ -19,7 +19,16 @@ import { type StandardSchemaValidator, validateStandardSchema } from "./standard
  * HTTP status codes treated as a success, everything else is an error.
  */
 export type SuccessStatusCode =
-	"200" | "201" | "202" | "203" | "204" | "205" | "206" | "207" | "208" | "226";
+	| "200"
+	| "201"
+	| "202"
+	| "203"
+	| "204"
+	| "205"
+	| "206"
+	| "207"
+	| "208"
+	| "226";
 
 /**
  * The success members of a per-status responses record.
@@ -776,7 +785,8 @@ export function createClientCore<TRequest = Request, TResponse = Response>(
 		const { querySerializer, pathSerializer } = resolveSerializers({ config, requestConfig });
 		const query: Record<string, unknown> = {
 			...((requestConfig.query ?? requestConfig.params) as
-				Record<string, unknown> | undefined),
+				| Record<string, unknown>
+				| undefined),
 		};
 		return serializeUrl({
 			parts: [requestConfig.baseURL ?? config.baseURL, requestConfig.url],

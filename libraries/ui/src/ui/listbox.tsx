@@ -75,8 +75,7 @@ const listboxItemVariants = tv({
 });
 
 interface ListboxItemProps
-	extends
-		React.ComponentProps<typeof ArkListbox.Item>,
+	extends React.ComponentProps<typeof ArkListbox.Item>,
 		VariantProps<typeof listboxItemVariants> {}
 
 export const ListboxItem = (props: ListboxItemProps) => {

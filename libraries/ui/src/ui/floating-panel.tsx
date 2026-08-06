@@ -130,8 +130,7 @@ export const FloatingPanelControl = (
 };
 
 interface FloatingPanelStageTriggerProps
-	extends
-		Omit<React.ComponentProps<typeof ArkFloatingPanel.StageTrigger>, "stage">,
+	extends Omit<React.ComponentProps<typeof ArkFloatingPanel.StageTrigger>, "stage">,
 		ButtonProps {}
 
 export const FloatingPanelMinimize = (props: FloatingPanelStageTriggerProps) => {

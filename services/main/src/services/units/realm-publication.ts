@@ -20,7 +20,12 @@ import {
 export type UnitRealmPublicationState = "active" | "withdrawn";
 export type UnitRealmPublicationStateFilter = UnitRealmPublicationState | "all";
 export type UnitRealmPublicationStatusFilter =
-	"current" | "all" | "pending" | "visible" | "hidden" | "removed";
+	| "current"
+	| "all"
+	| "pending"
+	| "visible"
+	| "hidden"
+	| "removed";
 
 type PublicationCursor = readonly [Date, string];
 type RealmUnitPublicationEventInsert = typeof realmUnitPublicationEvent.$inferInsert;

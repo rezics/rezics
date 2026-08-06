@@ -39,7 +39,8 @@ const inpuGroupVariants = tv({
 });
 
 export interface InputGroupProps
-	extends React.ComponentProps<typeof ark.div>, VariantProps<typeof inpuGroupVariants> {}
+	extends React.ComponentProps<typeof ark.div>,
+		VariantProps<typeof inpuGroupVariants> {}
 
 export const InputGroup = (props: InputGroupProps) => {
 	const { size = "md", className, ...rest } = props;
@@ -96,7 +97,8 @@ const inputGroupAddonVariants = tv({
 });
 
 interface InputGroupAddonProps
-	extends React.ComponentProps<typeof ark.div>, VariantProps<typeof inputGroupAddonVariants> {}
+	extends React.ComponentProps<typeof ark.div>,
+		VariantProps<typeof inputGroupAddonVariants> {}
 
 export const InputGroupAddon = (props: InputGroupAddonProps) => {
 	const { className, align = "inline-start", ...rest } = props;
@@ -147,8 +149,7 @@ const inputGroupButtonVariants = tv({
 });
 
 interface InputGroupButtonProps
-	extends
-		Omit<React.ComponentProps<typeof Button>, "size">,
+	extends Omit<React.ComponentProps<typeof Button>, "size">,
 		VariantProps<typeof inputGroupButtonVariants> {}
 
 export const InputGroupButton = (props: InputGroupButtonProps) => {

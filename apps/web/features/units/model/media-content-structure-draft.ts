@@ -35,7 +35,8 @@ export type AttachedMediaDraftNode = MediaDraftNodeBase & {
 export type MediaDraftNode = ExistingMediaDraftNode | NewMediaDraftNode | AttachedMediaDraftNode;
 
 export type InsertedMediaDraftNodeInput =
-	Omit<NewMediaDraftNode, "order"> | Omit<AttachedMediaDraftNode, "order">;
+	| Omit<NewMediaDraftNode, "order">
+	| Omit<AttachedMediaDraftNode, "order">;
 
 export type MediaDraftTreeNode = {
 	readonly node: MediaDraftNode;

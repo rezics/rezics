@@ -187,8 +187,7 @@ const hintContentVariants = tv({
 });
 
 interface HintContentProps
-	extends
-		React.ComponentProps<typeof ark.div>,
+	extends React.ComponentProps<typeof ark.div>,
 		Pick<PresenceProps, "lazyMount" | "unmountOnExit"> {}
 
 export const HintContent = (props: HintContentProps) => {

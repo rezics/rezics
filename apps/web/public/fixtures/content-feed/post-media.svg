@@ -1,22 +1,37 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 800" role="img">
-  <defs>
-    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#07172f"/>
-      <stop offset=".58" stop-color="#173e64"/>
-      <stop offset="1" stop-color="#d4794e"/>
-    </linearGradient>
-    <filter id="blur"><feGaussianBlur stdDeviation="12"/></filter>
-  </defs>
-  <rect width="1400" height="800" fill="url(#sky)"/>
-  <g fill="#0a1523">
-    <path d="M0 550h150v250H0zM120 470h190v330H120zM278 590h130v210H278zM380 420h220v380H380zM560 520h150v280H560zM680 350h250v450H680zM900 500h190v300H900zM1060 405h210v395h-210zM1240 535h160v265h-160z"/>
-  </g>
-  <g fill="none" stroke-linecap="round">
-    <path d="M-20 685C260 260 514 760 780 300s460 100 660-210" stroke="#7ee7ff" stroke-width="13" stroke-opacity=".24" filter="url(#blur)"/>
-    <path d="M-20 685C260 260 514 760 780 300s460 100 660-210" stroke="#b6f2ff" stroke-width="4"/>
-    <path d="M120 70c230 250 355 60 550 300s390 72 610 300" stroke="#ffd387" stroke-width="4"/>
-  </g>
-  <g fill="#fff4bd">
-    <circle cx="214" cy="468" r="10"/><circle cx="486" cy="574" r="10"/><circle cx="778" cy="304" r="10"/><circle cx="1088" cy="337" r="10"/>
-  </g>
+	<defs>
+		<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0" stop-color="#07172f" />
+			<stop offset=".58" stop-color="#173e64" />
+			<stop offset="1" stop-color="#d4794e" />
+		</linearGradient>
+		<filter id="blur"><feGaussianBlur stdDeviation="12" /></filter>
+	</defs>
+	<rect width="1400" height="800" fill="url(#sky)" />
+	<g fill="#0a1523">
+		<path
+			d="M0 550h150v250H0zM120 470h190v330H120zM278 590h130v210H278zM380 420h220v380H380zM560 520h150v280H560zM680 350h250v450H680zM900 500h190v300H900zM1060 405h210v395h-210zM1240 535h160v265h-160z"
+		/>
+	</g>
+	<g fill="none" stroke-linecap="round">
+		<path
+			d="M-20 685C260 260 514 760 780 300s460 100 660-210"
+			stroke="#7ee7ff"
+			stroke-width="13"
+			stroke-opacity=".24"
+			filter="url(#blur)"
+		/>
+		<path
+			d="M-20 685C260 260 514 760 780 300s460 100 660-210"
+			stroke="#b6f2ff"
+			stroke-width="4"
+		/>
+		<path d="M120 70c230 250 355 60 550 300s390 72 610 300" stroke="#ffd387" stroke-width="4" />
+	</g>
+	<g fill="#fff4bd">
+		<circle cx="214" cy="468" r="10" />
+		<circle cx="486" cy="574" r="10" />
+		<circle cx="778" cy="304" r="10" />
+		<circle cx="1088" cy="337" r="10" />
+	</g>
 </svg>

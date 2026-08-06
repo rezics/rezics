@@ -1,20 +1,13 @@
 ---
-import {
-  ABOUT_LOCALES,
-  ABOUT_LOCALE_META,
-  DEFAULT_LOCALE,
-} from "../i18n/locales";
+import { ABOUT_LOCALES, ABOUT_LOCALE_META, DEFAULT_LOCALE } from "../i18n/locales";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
-import {
-  getCanonicalForPath,
-  getHomePath,
-} from "../i18n/productPaths";
+import { getCanonicalForPath, getHomePath } from "../i18n/productPaths";
 
 const defaultPath = getHomePath(DEFAULT_LOCALE);
 const brand = verbatimTerms.rezics.value;
 const htmlLang = ABOUT_LOCALE_META[DEFAULT_LOCALE].htmlLang;
 const localizedPaths = Object.fromEntries(
-  ABOUT_LOCALES.map((locale) => [locale, getHomePath(locale)]),
+	ABOUT_LOCALES.map((locale) => [locale, getHomePath(locale)]),
 );
 ---
 

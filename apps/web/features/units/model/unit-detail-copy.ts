@@ -3,7 +3,12 @@ import type { Translation } from "@rezics/i18n";
 import type { UnitDetailUnitType } from "./unit-detail-section";
 
 export type UnitDetailSharedPage =
-	"overview" | "tags" | "associations" | "reviews" | "collections" | "discussion";
+	| "overview"
+	| "tags"
+	| "associations"
+	| "reviews"
+	| "collections"
+	| "discussion";
 
 export function unitDetailPageCopy(
 	t: Pick<Translation, "units">,

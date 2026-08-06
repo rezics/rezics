@@ -4,7 +4,9 @@ import type { ContentLanguage } from "@rezics/i18n";
 import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
 
 export type TagItemKey =
-	`global:${string}` | `realm:${string}:${string}` | `structure:${string}:${string}`;
+	| `global:${string}`
+	| `realm:${string}:${string}`
+	| `structure:${string}:${string}`;
 
 export interface TagIdentity {
 	readonly tagId: string;

@@ -9,7 +9,11 @@ export interface UpdateUnitInput {
 	readonly visibility?: "public" | "unlisted" | "private";
 	readonly contentRating?: "general" | "r15" | "r18" | "r18g";
 	readonly aiDisclosure?:
-		"unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
+		| "unknown"
+		| "none"
+		| "ai_assisted"
+		| "ai_originated"
+		| "machine_generated";
 	readonly license?: PublicationLicenseId | null;
 	readonly unit?: {
 		readonly releasedOn?: string | null;

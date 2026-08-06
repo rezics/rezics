@@ -734,7 +734,8 @@ export const SidebarMenuSubItem = ({
 );
 
 interface SidebarMenuSubButtonProps
-	extends React.ComponentProps<typeof ark.a>, VariantProps<typeof buttonVariants> {
+	extends React.ComponentProps<typeof ark.a>,
+		VariantProps<typeof buttonVariants> {
 	isActive?: boolean;
 }
 

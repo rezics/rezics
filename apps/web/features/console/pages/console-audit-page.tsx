@@ -75,7 +75,8 @@ export function ConsoleAuditPage() {
 								onChange={(event) => {
 									setCategory(
 										(event.currentTarget.value || undefined) as
-											AuditCategory | undefined,
+											| AuditCategory
+											| undefined,
 									);
 									setCursorHistory([undefined]);
 									setSelected(undefined);
@@ -103,7 +104,8 @@ export function ConsoleAuditPage() {
 								onChange={(event) => {
 									setOutcome(
 										(event.currentTarget.value || undefined) as
-											AuditOutcome | undefined,
+											| AuditOutcome
+											| undefined,
 									);
 									setCursorHistory([undefined]);
 									setSelected(undefined);

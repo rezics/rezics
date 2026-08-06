@@ -56,9 +56,8 @@ export const ImageCropperImage = (props: React.ComponentProps<typeof ArkImageCro
 	);
 };
 
-interface ImageCropperSelectionProps extends React.ComponentProps<
-	typeof ArkImageCropper.Selection
-> {
+interface ImageCropperSelectionProps
+	extends React.ComponentProps<typeof ArkImageCropper.Selection> {
 	/**
 	 * The axis of the grid to show.
 	 *

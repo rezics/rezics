@@ -10,6 +10,6 @@ export function hasSearchLanguagePresentationBoundary(
 ): boolean {
 	return Boolean(
 		(readSearchLanguageBoundary(state.expression)?.length ?? 0) > 0 ||
-		(readUnitLanguageBoundary(state.filter?.where)?.length ?? 0) > 0,
+			(readUnitLanguageBoundary(state.filter?.where)?.length ?? 0) > 0,
 	);
 }

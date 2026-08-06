@@ -32,7 +32,8 @@ export const Select: ArkSelect.RootComponent = (props) => {
 };
 
 interface SelectTriggerProps
-	extends React.ComponentProps<typeof ArkSelect.Trigger>, VariantProps<typeof inputVariants> {
+	extends React.ComponentProps<typeof ArkSelect.Trigger>,
+		VariantProps<typeof inputVariants> {
 	/**
 	 * Show clear trigger
 	 *

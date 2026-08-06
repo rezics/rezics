@@ -53,9 +53,7 @@ export const collectionItem = pgTable(
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "restrict" }),
-		position: fractionalIndexPosition()
-			.default(sql`'a0'::text`)
-			.notNull(),
+		position: fractionalIndexPosition().default(sql`'a0'::text`).notNull(),
 		addedByProfileId: uuid().references(() => profile.id, {
 			onDelete: "set null",
 		}),

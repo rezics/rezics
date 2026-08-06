@@ -41,7 +41,8 @@ export const DatePickerTrigger = (props: React.ComponentProps<typeof ArkDatePick
 };
 
 interface DatePickerInputProps
-	extends Omit<React.ComponentProps<typeof ArkDatePicker.Input>, "size">, InputProps {}
+	extends Omit<React.ComponentProps<typeof ArkDatePicker.Input>, "size">,
+		InputProps {}
 
 export const DatePickerInput = (props: DatePickerInputProps) => {
 	const { size, className, ...rest } = props;

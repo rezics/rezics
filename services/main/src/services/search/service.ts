@@ -1256,10 +1256,8 @@ export interface GlobalSearchBranch {
 	readonly searchExpression?: SearchExpression;
 }
 
-export interface GlobalSearchIdentifiersRequest extends Omit<
-	DomainSearchRequest,
-	"cursor" | "searchExpression"
-> {
+export interface GlobalSearchIdentifiersRequest
+	extends Omit<DomainSearchRequest, "cursor" | "searchExpression"> {
 	readonly branches: readonly GlobalSearchBranch[];
 	readonly cursor?: never;
 	readonly position?: SearchKeysetPosition;

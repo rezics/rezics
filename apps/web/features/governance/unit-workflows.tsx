@@ -609,7 +609,7 @@ function AssociationProposalManager({
 											isKnownAttributionRole(proposal.role)
 												? t.units.attributionRoles[proposal.role]
 												: proposal.kind === "subject" &&
-													  isSubjectAssociationRole(proposal.role)
+														isSubjectAssociationRole(proposal.role)
 													? t.units.subjectAssociationRoles[proposal.role]
 													: proposal.role}
 										</span>

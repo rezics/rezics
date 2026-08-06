@@ -33,7 +33,8 @@ export const statusVariants = tv({
 });
 
 interface StatusProps
-	extends React.ComponentProps<typeof ark.span>, VariantProps<typeof statusVariants> {}
+	extends React.ComponentProps<typeof ark.span>,
+		VariantProps<typeof statusVariants> {}
 
 export const Status = (props: StatusProps) => {
 	const { variant, size, className, ...rest } = props;

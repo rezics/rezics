@@ -122,10 +122,8 @@ export const FileUploadItemGroup = (
 	props: React.ComponentProps<typeof ArkFileUpload.ItemGroup>,
 ) => <ArkFileUpload.ItemGroup data-slot="file-upload-item-group" {...props} />;
 
-interface FileUploadListProps extends Omit<
-	React.ComponentProps<typeof ArkFileUpload.Item>,
-	"file"
-> {}
+interface FileUploadListProps
+	extends Omit<React.ComponentProps<typeof ArkFileUpload.Item>, "file"> {}
 
 export const FileUploadList = (props: FileUploadListProps) => {
 	const { className, ...rest } = props;

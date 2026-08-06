@@ -87,10 +87,12 @@ export function SearchEntityMultiSelect({
 				.then(
 					(hits) => {
 						if (request.signal.aborted) return;
-						const normalized = hits.map((hit): SearchEntityOption => ({
-							...hit,
-							kind: hit.kind ?? index,
-						}));
+						const normalized = hits.map(
+							(hit): SearchEntityOption => ({
+								...hit,
+								kind: hit.kind ?? index,
+							}),
+						);
 						set(uniqueOptions(selected, normalized));
 					},
 					() => {

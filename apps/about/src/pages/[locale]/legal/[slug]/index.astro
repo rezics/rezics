@@ -3,19 +3,17 @@ import { render } from "astro:content";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 import {
-  getLegalDocument,
-  getLegalDocumentLocales,
-  getLegalDocuments,
+	getLegalDocument,
+	getLegalDocumentLocales,
+	getLegalDocuments,
 } from "../../../../content/legalDocuments";
 import { ABOUT_LOCALES, DEFAULT_LOCALE, requireAboutLocale } from "../../../../i18n/locales";
 import SiteLayout from "../../../../layouts/SiteLayout.astro";
 
 export async function getStaticPaths() {
-  const documents = await getLegalDocuments();
-  const slugs = [...new Set(documents.map(({ slug }) => slug))].sort();
-  return slugs.flatMap((slug) =>
-    ABOUT_LOCALES.map((locale) => ({ params: { locale, slug } })),
-  );
+	const documents = await getLegalDocuments();
+	const slugs = [...new Set(documents.map(({ slug }) => slug))].sort();
+	return slugs.flatMap((slug) => ABOUT_LOCALES.map((locale) => ({ params: { locale, slug } })));
 }
 
 const locale = requireAboutLocale(Astro.params.locale);
@@ -24,15 +22,15 @@ if (!slug) throw new Error("Missing legal document slug.");
 
 const legalDocument = await getLegalDocument(locale, slug);
 if (!legalDocument) {
-  if (locale !== DEFAULT_LOCALE) return Astro.redirect(`/${DEFAULT_LOCALE}/legal/${slug}/`);
-  throw new Error(`Missing default legal document: ${slug}`);
+	if (locale !== DEFAULT_LOCALE) return Astro.redirect(`/${DEFAULT_LOCALE}/legal/${slug}/`);
+	throw new Error(`Missing default legal document: ${slug}`);
 }
 
 const { Content } = await render(legalDocument.document);
 const alternateLocales = await getLegalDocumentLocales(slug);
 const meta = {
-  title: `${legalDocument.document.data.title} — ${verbatimTerms.rezics.value}`,
-  description: legalDocument.document.data.description,
+	title: `${legalDocument.document.data.title} — ${verbatimTerms.rezics.value}`,
+	description: legalDocument.document.data.description,
 };
 ---
 

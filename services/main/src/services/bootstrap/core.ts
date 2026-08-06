@@ -37,7 +37,10 @@ export interface PlatformCoreIncomplete {
 }
 
 export type PlatformCoreState =
-	PlatformCoreReady | PlatformCoreUninstalled | PlatformCoreOccupied | PlatformCoreIncomplete;
+	| PlatformCoreReady
+	| PlatformCoreUninstalled
+	| PlatformCoreOccupied
+	| PlatformCoreIncomplete;
 
 export function classifyPlatformCore(
 	presentIdentityIds: ReadonlySet<string>,

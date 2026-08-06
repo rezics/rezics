@@ -1,5 +1,6 @@
 export type FeedDisplayContext =
-	Readonly<{ kind: "unscoped" }> | Readonly<{ kind: "unit"; unitId: string }>;
+	| Readonly<{ kind: "unscoped" }>
+	| Readonly<{ kind: "unit"; unitId: string }>;
 
 export const UnscopedFeedDisplayContext = {
 	kind: "unscoped",

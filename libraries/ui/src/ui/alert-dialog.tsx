@@ -63,7 +63,8 @@ export const AlertDialogFooter = (props: React.ComponentProps<typeof DialogFoote
 );
 
 interface AlertDialogActionProps
-	extends React.ComponentProps<typeof DialogClose>, Omit<ButtonProps, "variant"> {
+	extends React.ComponentProps<typeof DialogClose>,
+		Omit<ButtonProps, "variant"> {
 	/**
 	 * The variant of the action button
 	 *
@@ -79,7 +80,8 @@ export const AlertDialogAction = (props: AlertDialogActionProps) => {
 };
 
 interface AlertDialogCancelProps
-	extends React.ComponentProps<typeof DialogClose>, Omit<ButtonProps, "variant"> {}
+	extends React.ComponentProps<typeof DialogClose>,
+		Omit<ButtonProps, "variant"> {}
 
 export const AlertDialogCancel = (props: AlertDialogCancelProps) => (
 	<AlertDialogClose asChild data-slot="alert-dialog-cancel">

@@ -44,8 +44,9 @@ afterEach(() => {
 
 describe("draft content language detector client", () => {
 	it("loads the detection worker from a browser-served URL", async () => {
-		const { detectDraftContentLanguageInBrowser } =
-			await import("./draft-content-language-detector.client");
+		const { detectDraftContentLanguageInBrowser } = await import(
+			"./draft-content-language-detector.client"
+		);
 		const signal = new AbortController().signal;
 		const detection = detectDraftContentLanguageInBrowser(
 			"A sufficiently long sample.",

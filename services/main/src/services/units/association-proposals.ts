@@ -38,7 +38,11 @@ import {
 import { ensureWikiAssociationContextPost } from "./association-context";
 
 export type AssociationProposalState =
-	"pending" | "expired" | "accepted" | "declined" | "cancelled";
+	| "pending"
+	| "expired"
+	| "accepted"
+	| "declined"
+	| "cancelled";
 
 type ProposalRecord = typeof unitAssociationProposal.$inferSelect;
 type AssociationRoleInput =

@@ -131,10 +131,8 @@ export const TimerActionTrigger = (props: React.ComponentProps<typeof ArkTimer.A
 	<ArkTimer.ActionTrigger data-slot="timer-action" {...props} />
 );
 
-interface TimerActionProps extends Omit<
-	React.ComponentProps<typeof ArkTimer.ActionTrigger>,
-	"action"
-> {}
+interface TimerActionProps
+	extends Omit<React.ComponentProps<typeof ArkTimer.ActionTrigger>, "action"> {}
 
 export const TimerPause = (props: TimerActionProps) => (
 	<ArkTimer.ActionTrigger aria-label="Pause" data-slot="timer-pause" {...props} action="pause" />

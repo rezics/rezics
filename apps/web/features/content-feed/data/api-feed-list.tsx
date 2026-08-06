@@ -180,11 +180,11 @@ export function ApiFeedList({
 		});
 	const showControls = Boolean(
 		onSortChange ||
-		onContentKindsChange ||
-		onLanguagesChange ||
-		onRealmIdsChange ||
-		search ||
-		onTagIdsChange,
+			onContentKindsChange ||
+			onLanguagesChange ||
+			onRealmIdsChange ||
+			search ||
+			onTagIdsChange,
 	);
 	const requestedRealmId = realmIds.length === 1 ? realmIds[0] : undefined;
 	return (

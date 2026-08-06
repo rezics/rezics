@@ -23,9 +23,7 @@ export const book = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		uniqueIndex("book_isbn13_key")
-			.on(table.isbn13)
-			.where(sql`${table.isbn13} is not null`),
+		uniqueIndex("book_isbn13_key").on(table.isbn13).where(sql`${table.isbn13} is not null`),
 		index("book_publication_date_idx").on(table.publicationDate),
 		check("book_isbn13_check", sql`${table.isbn13} is null or ${table.isbn13} ~ '^[0-9]{13}$'`),
 		check("book_page_count_check", sql`${table.pageCount} is null or ${table.pageCount} > 0`),

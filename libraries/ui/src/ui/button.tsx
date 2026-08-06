@@ -107,7 +107,8 @@ export const buttonVariants = tv({
 });
 
 export interface ButtonProps
-	extends React.ComponentProps<typeof ark.button>, VariantProps<typeof buttonVariants> {
+	extends React.ComponentProps<typeof ark.button>,
+		VariantProps<typeof buttonVariants> {
 	/**
 	 * Apply a click effect to the button
 	 *

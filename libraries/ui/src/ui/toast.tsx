@@ -21,10 +21,8 @@ export const toast = createToaster({
 	max: 3,
 });
 
-interface ToasterProps extends Omit<
-	React.ComponentProps<typeof ArkToaster>,
-	"toaster" | "children"
-> {
+interface ToasterProps
+	extends Omit<React.ComponentProps<typeof ArkToaster>, "toaster" | "children"> {
 	/**
 	 * Toaster instance
 	 */

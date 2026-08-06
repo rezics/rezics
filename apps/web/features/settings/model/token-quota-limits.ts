@@ -15,7 +15,9 @@ export type TokenQuotaLimitValues = Record<TokenQuotaLimitName, string>;
 export type ValidTokenQuotaLimits = Record<TokenQuotaLimitName, number>;
 
 export type ParsedTokenQuotaLimit =
-	{ kind: "empty" } | { kind: "invalid" } | { kind: "valid"; value: number };
+	| { kind: "empty" }
+	| { kind: "invalid" }
+	| { kind: "valid"; value: number };
 
 export function getTokenQuotaLimitRanges(
 	policyLimits: ValidTokenQuotaLimits,

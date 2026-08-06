@@ -35,10 +35,10 @@
 		}
 	},
 	"devDependencies": {
+		"@biomejs/biome": "2.5.7",
 		"@microsoft/aspire-cli": "13.4.6",
 		"@types/node": "26",
 		"@vitest/coverage-v8": "4.1.10",
-		"prettier": "3",
 		"typescript": "7",
 		"vitest": "4.1.10"
 	}

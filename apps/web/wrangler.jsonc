@@ -7,32 +7,32 @@
 	"assets": {
 		"directory": "dist/client",
 		"not_found_handling": "none",
-		"binding": "ASSETS",
+		"binding": "ASSETS"
 	},
 	"version_metadata": {
-		"binding": "WORKER_VERSION",
+		"binding": "WORKER_VERSION"
 	},
 	"secrets": {
-		"required": ["TURNSTILE_SITE_KEY"],
+		"required": ["TURNSTILE_SITE_KEY"]
 	},
 	"observability": {
 		"enabled": true,
 		"logs": {
 			"enabled": true,
 			"head_sampling_rate": 1,
-			"invocation_logs": true,
+			"invocation_logs": true
 		},
 		"traces": {
 			"enabled": true,
-			"head_sampling_rate": 0.1,
-		},
+			"head_sampling_rate": 0.1
+		}
 	},
 	"workers_dev": true,
 	"preview_urls": true,
 	"vars": {
 		"FRONTEND_URL": "http://localhost:3000",
 		"REZICS_API_ORIGIN": "http://localhost:3001",
-		"TURNSTILE_ALLOWED_HOSTNAMES": "localhost,127.0.0.1",
+		"TURNSTILE_ALLOWED_HOSTNAMES": "localhost,127.0.0.1"
 	},
 	"env": {
 		"production": {
@@ -40,24 +40,24 @@
 			"workers_dev": false,
 			"preview_urls": false,
 			"version_metadata": {
-				"binding": "WORKER_VERSION",
+				"binding": "WORKER_VERSION"
 			},
 			"secrets": {
-				"required": ["TURNSTILE_SITE_KEY"],
+				"required": ["TURNSTILE_SITE_KEY"]
 			},
 			"routes": [
 				{
 					"pattern": "www.rezics.com",
-					"custom_domain": true,
-				},
+					"custom_domain": true
+				}
 			],
 			"vars": {
 				"FONT_AWESOME_KIT_CSS_URL": "https://fa.rezics.com/fontawesome/7.2.0/css/rezics.min.css",
 				"FONT_AWESOME_KIT_LICENSE": "free",
 				"FRONTEND_URL": "https://www.rezics.com",
 				"REZICS_API_ORIGIN": "https://api.rezics.com",
-				"TURNSTILE_ALLOWED_HOSTNAMES": "www.rezics.com,rezics.com",
-			},
-		},
-	},
+				"TURNSTILE_ALLOWED_HOSTNAMES": "www.rezics.com,rezics.com"
+			}
+		}
+	}
 }

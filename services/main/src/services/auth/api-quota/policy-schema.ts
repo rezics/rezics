@@ -141,7 +141,8 @@ export type ApiAccountQuotaPolicyConfiguration = ApiTokenQuotaPolicyConfiguratio
 	maxActiveTokens: number;
 };
 export type ApiQuotaPolicyConfiguration =
-	ApiAccountQuotaPolicyConfiguration | ApiTokenQuotaPolicyConfiguration;
+	| ApiAccountQuotaPolicyConfiguration
+	| ApiTokenQuotaPolicyConfiguration;
 export type ApiAccountQuotaOverride = {
 	limits?: ApiQuotaLimitOverride;
 	maxActiveTokens?: number;

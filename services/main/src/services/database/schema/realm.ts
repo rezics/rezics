@@ -232,9 +232,7 @@ export const realmPin = pgTable(
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
 		kind: realmPinKind().default("pinned").notNull(),
-		position: fractionalIndexPosition()
-			.default(sql`'a0'::text`)
-			.notNull(),
+		position: fractionalIndexPosition().default(sql`'a0'::text`).notNull(),
 		createdByProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),

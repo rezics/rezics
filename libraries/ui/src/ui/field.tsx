@@ -44,7 +44,8 @@ const fieldVariants = tv({
 });
 
 interface FieldProps
-	extends React.ComponentProps<typeof ArkField.Root>, VariantProps<typeof fieldVariants> {}
+	extends React.ComponentProps<typeof ArkField.Root>,
+		VariantProps<typeof fieldVariants> {}
 
 export const Field = (props: FieldProps) => {
 	const { orientation = "vertical", reverse = false, className, ...rest } = props;

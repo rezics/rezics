@@ -1,7 +1,13 @@
 import type { ContentLanguage } from "@rezics/i18n";
 
 export type DraftContentLanguageDetectionStatus =
-	"idle" | "detecting" | "insufficient" | "detected" | "ambiguous" | "unsupported" | "failed";
+	| "idle"
+	| "detecting"
+	| "insufficient"
+	| "detected"
+	| "ambiguous"
+	| "unsupported"
+	| "failed";
 
 export type DraftContentLanguageState =
 	| {

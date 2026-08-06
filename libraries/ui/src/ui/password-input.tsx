@@ -18,7 +18,8 @@ import {
 export const usePasswordInput = usePasswordInputContext;
 
 interface PasswordInputProps
-	extends React.ComponentProps<typeof ArkPasswordInput.Root>, Pick<InputGroupProps, "size"> {}
+	extends React.ComponentProps<typeof ArkPasswordInput.Root>,
+		Pick<InputGroupProps, "size"> {}
 
 export const PasswordInput = (props: PasswordInputProps) => {
 	const { size = "md", className, ...rest } = props;

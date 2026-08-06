@@ -8086,7 +8086,9 @@ export type GetApiReadyResponses = {
  * @description Union of all possible responses
  */
 export type GetApiReadyResponse =
-	GetApiReadyStatus200 | GetApiReadyStatus500 | GetApiReadyStatus503;
+	| GetApiReadyStatus200
+	| GetApiReadyStatus500
+	| GetApiReadyStatus503;
 
 export const GetApiNotificationsDirection = {
 	before: "before",
@@ -9640,7 +9642,8 @@ export type GetApiRecommendationsUnitsStatus200 = {
 			  } | null)
 			| null;
 		recommendationReason:
-			(GetApiRecommendationsUnitsStatus200ItemsRecommendationReason | null) | null;
+			| (GetApiRecommendationsUnitsStatus200ItemsRecommendationReason | null)
+			| null;
 		source: (GetApiRecommendationsUnitsStatus200ItemsSource | null) | null;
 		/**
 		 * @type object
@@ -14648,7 +14651,9 @@ export type GetApiApiTokensResponses = {
  * @description Union of all possible responses
  */
 export type GetApiApiTokensResponse =
-	GetApiApiTokensStatus200 | GetApiApiTokensStatus401 | GetApiApiTokensStatus500;
+	| GetApiApiTokensStatus200
+	| GetApiApiTokensStatus401
+	| GetApiApiTokensStatus500;
 
 export const PostApiApiTokensStatus200PermissionsEnum = {
 	"unit:read": "unit:read",
@@ -21332,7 +21337,8 @@ export type PostApiFeedQueryStatus200 = {
 				};
 				viewerReaction: (string | null) | null;
 				recommendationReason:
-					(PostApiFeedQueryStatus200ItemsRecommendationReason | null) | null;
+					| (PostApiFeedQueryStatus200ItemsRecommendationReason | null)
+					| null;
 				tracking:
 					| ({
 							/**
@@ -21815,7 +21821,8 @@ export type PostApiFeedQueryStatus200 = {
 						};
 						viewerReaction: (string | null) | null;
 						recommendationReason:
-							(PostApiFeedQueryStatus200ItemsRecommendationReason | null) | null;
+							| (PostApiFeedQueryStatus200ItemsRecommendationReason | null)
+							| null;
 						tracking:
 							| ({
 									/**
@@ -22485,7 +22492,8 @@ export type PostApiFeedQueryStatus200 = {
 						};
 						viewerReaction: (string | null) | null;
 						recommendationReason:
-							(PostApiFeedQueryStatus200ItemsRecommendationReason | null) | null;
+							| (PostApiFeedQueryStatus200ItemsRecommendationReason | null)
+							| null;
 						tracking:
 							| ({
 									/**
@@ -23173,7 +23181,8 @@ export type PostApiFeedQueryStatus200 = {
 						};
 						viewerReaction: (string | null) | null;
 						recommendationReason:
-							(PostApiFeedQueryStatus200ItemsRecommendationReason | null) | null;
+							| (PostApiFeedQueryStatus200ItemsRecommendationReason | null)
+							| null;
 						tracking:
 							| ({
 									/**
@@ -48969,7 +48978,9 @@ export type GetApiUsersMeBlocksResponses = {
  * @description Union of all possible responses
  */
 export type GetApiUsersMeBlocksResponse =
-	GetApiUsersMeBlocksStatus200 | GetApiUsersMeBlocksStatus429 | GetApiUsersMeBlocksStatus500;
+	| GetApiUsersMeBlocksStatus200
+	| GetApiUsersMeBlocksStatus429
+	| GetApiUsersMeBlocksStatus500;
 
 /**
  * @type object
@@ -53283,7 +53294,8 @@ export type GetApiUnitsByTypeByUnitIdTagsStatus200 = {
 			 */
 			tagId: string;
 			language:
-				(GetApiUnitsByTypeByUnitIdTagsStatus200StructuresMembersLanguage | null) | null;
+				| (GetApiUnitsByTypeByUnitIdTagsStatus200StructuresMembersLanguage | null)
+				| null;
 			title: (string | null) | null;
 			summary: (string | null) | null;
 			avatar:
@@ -61449,7 +61461,11 @@ export type PostApiUnitsByTypeBody =
 			 */
 			contentRating?: PostApiUnitsByTypeRequestContentRatingEnum;
 			aiDisclosure?:
-				"unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
+				| "unknown"
+				| "none"
+				| "ai_assisted"
+				| "ai_originated"
+				| "machine_generated";
 			license?: (PostApiUnitsByTypeRequestLicense | null) | null;
 			details:
 				| {
@@ -61757,7 +61773,11 @@ export type PostApiUnitsByTypeBody =
 			 */
 			contentRating?: PostApiUnitsByTypeRequestContentRatingEnum;
 			aiDisclosure?:
-				"unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
+				| "unknown"
+				| "none"
+				| "ai_assisted"
+				| "ai_originated"
+				| "machine_generated";
 			license?: (PostApiUnitsByTypeRequestLicense | null) | null;
 			details:
 				| {
@@ -72103,7 +72123,8 @@ export type GetApiHistoryChangeTagsResponses = {
  * @description Union of all possible responses
  */
 export type GetApiHistoryChangeTagsResponse =
-	GetApiHistoryChangeTagsStatus200 | GetApiHistoryChangeTagsStatus500;
+	| GetApiHistoryChangeTagsStatus200
+	| GetApiHistoryChangeTagsStatus500;
 
 export const GetApiEntitiesCreditAttributionSearch = {
 	direct: "direct",
@@ -103396,7 +103417,9 @@ export type GetApiPostsResponses = {
  * @description Union of all possible responses
  */
 export type GetApiPostsResponse =
-	GetApiPostsStatus200 | GetApiPostsStatus422 | GetApiPostsStatus500;
+	| GetApiPostsStatus200
+	| GetApiPostsStatus422
+	| GetApiPostsStatus500;
 
 /**
  * @type object
@@ -108901,7 +108924,9 @@ export type GetApiRealmsResponses = {
  * @description Union of all possible responses
  */
 export type GetApiRealmsResponse =
-	GetApiRealmsStatus200 | GetApiRealmsStatus422 | GetApiRealmsStatus500;
+	| GetApiRealmsStatus200
+	| GetApiRealmsStatus422
+	| GetApiRealmsStatus500;
 
 /**
  * @type object
@@ -111176,7 +111201,8 @@ export type GetApiRealmsByRealmIdTaxonomyDraftStatus200 = {
 		 */
 		position: string;
 		queryStrategy:
-			(GetApiRealmsByRealmIdTaxonomyDraftStatus200ItemsQueryStrategy | null) | null;
+			| (GetApiRealmsByRealmIdTaxonomyDraftStatus200ItemsQueryStrategy | null)
+			| null;
 		contextPostId: (string | null) | null;
 		contextSummary: (string | null) | null;
 	}[];
@@ -111481,7 +111507,8 @@ export type PutApiRealmsByRealmIdTaxonomyDraftStatus200 = {
 		 */
 		position: string;
 		queryStrategy:
-			(PutApiRealmsByRealmIdTaxonomyDraftStatus200ItemsQueryStrategy | null) | null;
+			| (PutApiRealmsByRealmIdTaxonomyDraftStatus200ItemsQueryStrategy | null)
+			| null;
 		contextPostId: (string | null) | null;
 		contextSummary: (string | null) | null;
 	}[];
@@ -111703,7 +111730,8 @@ export type PutApiRealmsByRealmIdTaxonomyDraftBody = {
 				parentId: (string | null) | null;
 				order: string | number;
 				queryStrategy:
-					(PutApiRealmsByRealmIdTaxonomyDraftRequestNodesQueryStrategy | null) | null;
+					| (PutApiRealmsByRealmIdTaxonomyDraftRequestNodesQueryStrategy | null)
+					| null;
 		  }
 		| {
 				/**
@@ -111756,7 +111784,8 @@ export type PutApiRealmsByRealmIdTaxonomyDraftBody = {
 				parentId: (string | null) | null;
 				order: string | number;
 				queryStrategy:
-					(PutApiRealmsByRealmIdTaxonomyDraftRequestNodesQueryStrategy | null) | null;
+					| (PutApiRealmsByRealmIdTaxonomyDraftRequestNodesQueryStrategy | null)
+					| null;
 				/**
 				 * @type object
 				 */
@@ -114883,7 +114912,8 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 						 */
 						id: string;
 						language:
-							(GetApiRealmsByRealmIdPinsStatus200ContentItemsLanguage | null) | null;
+							| (GetApiRealmsByRealmIdPinsStatus200ContentItemsLanguage | null)
+							| null;
 						/**
 						 * @type array
 						 */
@@ -115555,7 +115585,8 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 						 */
 						id: string;
 						language:
-							(GetApiRealmsByRealmIdPinsStatus200ContentItemsLanguage | null) | null;
+							| (GetApiRealmsByRealmIdPinsStatus200ContentItemsLanguage | null)
+							| null;
 						/**
 						 * @type array
 						 */
@@ -116245,7 +116276,8 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 						 */
 						id: string;
 						language:
-							(GetApiRealmsByRealmIdPinsStatus200ContentItemsLanguage | null) | null;
+							| (GetApiRealmsByRealmIdPinsStatus200ContentItemsLanguage | null)
+							| null;
 						/**
 						 * @type array
 						 */
@@ -118183,7 +118215,8 @@ export type GetApiRealmsByRealmIdTagContextsStatus200 = {
 		 */
 		contextReadable: boolean;
 		contextLanguage:
-			(GetApiRealmsByRealmIdTagContextsStatus200ItemsContextLanguage | null) | null;
+			| (GetApiRealmsByRealmIdTagContextsStatus200ItemsContextLanguage | null)
+			| null;
 		contextTitle: (string | null) | null;
 	}[];
 	nextCursor: (string | null) | null;
@@ -121697,9 +121730,11 @@ export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200 = {
 		actorProfileId: string;
 		actorName: (string | null) | null;
 		previousState:
-			(GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsPreviousState | null) | null;
+			| (GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsPreviousState | null)
+			| null;
 		resultingState:
-			(GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsResultingState | null) | null;
+			| (GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsResultingState | null)
+			| null;
 		previousPostTargetingLocked: (boolean | null) | null;
 		resultingPostTargetingLocked: (boolean | null) | null;
 		/**
@@ -130769,7 +130804,8 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 				 */
 				id: string;
 				language:
-					(PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage | null) | null;
+					| (PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage | null)
+					| null;
 				/**
 				 * @type array
 				 */

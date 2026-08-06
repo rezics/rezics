@@ -27,7 +27,8 @@ export const announcementVariants = tv({
 });
 
 interface AnnouncementProps
-	extends React.ComponentProps<typeof ark.div>, VariantProps<typeof announcementVariants> {
+	extends React.ComponentProps<typeof ark.div>,
+		VariantProps<typeof announcementVariants> {
 	/**
 	 * The ARIA role of the announcement.
 	 *

@@ -2,12 +2,23 @@ import type { Attributes, Counter, Histogram, Meter, UpDownCounter } from "@open
 
 export type DependencyName = "postgresql" | "s3" | "cloudflare-email" | "outbound-http";
 export type RequestMethod =
-	"GET" | "HEAD" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS" | "OTHER";
+	| "GET"
+	| "HEAD"
+	| "POST"
+	| "PUT"
+	| "PATCH"
+	| "DELETE"
+	| "OPTIONS"
+	| "OTHER";
 export type StatusClass = "1xx" | "2xx" | "3xx" | "4xx" | "5xx" | "unknown";
 export type ReadinessState = "ready" | "not_ready";
 export type ReadinessCheckState = "ready" | "degraded" | "unavailable";
 export type ReadinessFailureCategory =
-	"configuration" | "dependency" | "not_ready" | "timeout" | "overall_timeout";
+	| "configuration"
+	| "dependency"
+	| "not_ready"
+	| "timeout"
+	| "overall_timeout";
 
 export interface DatabasePoolState {
 	readonly total: number;

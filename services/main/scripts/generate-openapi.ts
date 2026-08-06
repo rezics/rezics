@@ -6,7 +6,6 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { toOpenAPISchema } from "@elysiajs/openapi";
 import type { OpenAPIV3 } from "openapi-types";
-import { format, resolveConfig } from "prettier";
 
 import { ApiErrorCodes } from "../src/services/api/errors";
 import {
@@ -14,6 +13,7 @@ import {
 	resolveApiQuotaOperation,
 } from "../src/services/auth/api-quota/operation";
 import { RezicsVersion } from "../src/version";
+import { formatWithBiome } from "./format-with-biome";
 
 const { initializeObservability } = await import("@rezics/observability");
 const observability = initializeObservability({
@@ -269,9 +269,5 @@ const outputPath = resolve(
 );
 
 mkdirSync(dirname(outputPath), { recursive: true });
-const prettierConfig = (await resolveConfig(outputPath)) ?? {};
-writeFileSync(
-	outputPath,
-	await format(JSON.stringify(document), { ...prettierConfig, filepath: outputPath }),
-);
+writeFileSync(outputPath, await formatWithBiome(JSON.stringify(document), outputPath));
 await observability.shutdown();

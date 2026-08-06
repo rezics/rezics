@@ -143,9 +143,7 @@ export const creditAttribution = pgTable(
 			.notNull()
 			.references(() => unit.id, { onDelete: "restrict" }),
 		role: text().$type<CreditAttributionRole>().notNull(),
-		position: fractionalIndexPosition()
-			.default(sql`'a0'::text`)
-			.notNull(),
+		position: fractionalIndexPosition().default(sql`'a0'::text`).notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
@@ -185,9 +183,7 @@ export const subjectAssociation = pgTable(
 			.references(() => entity.id, { onDelete: "restrict" }),
 		contextPostId: uuid().references(() => post.id, { onDelete: "restrict" }),
 		role: text().$type<SubjectAssociationRole>().notNull(),
-		position: fractionalIndexPosition()
-			.default(sql`'a0'::text`)
-			.notNull(),
+		position: fractionalIndexPosition().default(sql`'a0'::text`).notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},

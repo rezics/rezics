@@ -53,10 +53,7 @@ function parseReferenceTime(value: string | undefined): Date {
 }
 
 export function createSeedRunOptions(
-	input: {
-		readonly profile?: SeedProfile;
-		readonly referenceTime?: Date;
-	} = {},
+	input: { readonly profile?: SeedProfile; readonly referenceTime?: Date } = {},
 ): SeedRunOptions {
 	const profile = input.profile ?? "demo";
 	const referenceTime = input.referenceTime ?? new Date(DefaultSeedReferenceTime);

@@ -390,12 +390,14 @@ export function AdvancedSearchBuilder({
 					onChange={(next) =>
 						updateCondition({
 							...condition,
-							values: next.map((option): DraftSearchValue => ({
-								value: option.id,
-								label: option.label,
-								kind: option.kind,
-								avatar: option.avatar,
-							})),
+							values: next.map(
+								(option): DraftSearchValue => ({
+									value: option.id,
+									label: option.label,
+									kind: option.kind,
+									avatar: option.avatar,
+								}),
+							),
 						})
 					}
 					placeholder={

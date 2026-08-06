@@ -145,10 +145,7 @@ export const unitAccessGrant = pgTable(
 		realmId: uuid().references(() => realm.id, { onDelete: "cascade" }),
 		realmRelation: realmAccessSubjectRelation().$type<RealmAccessSubjectRelation>(),
 		permission: unitPermission().$type<DelegableUnitPermission>().notNull(),
-		scope: text()
-			.array()
-			.default(sql`array[]::text[]`)
-			.notNull(),
+		scope: text().array().default(sql`array[]::text[]`).notNull(),
 		grantedByProfileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "restrict" }),
@@ -224,10 +221,7 @@ export const unitAccessInvitation = pgTable(
 			.notNull()
 			.references(() => profile.id, { onDelete: "cascade" }),
 		permissions: unitPermission().$type<DelegableUnitPermission>().array().notNull(),
-		scope: text()
-			.array()
-			.default(sql`array[]::text[]`)
-			.notNull(),
+		scope: text().array().default(sql`array[]::text[]`).notNull(),
 		invitedByProfileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "restrict" }),
@@ -294,10 +288,7 @@ export const unitAccessRestriction = pgTable(
 		realmId: uuid().references(() => realm.id, { onDelete: "cascade" }),
 		realmRelation: realmAccessSubjectRelation().$type<RealmAccessSubjectRelation>(),
 		permission: unitPermission().$type<DelegableUnitPermission>().notNull(),
-		scope: text()
-			.array()
-			.default(sql`array[]::text[]`)
-			.notNull(),
+		scope: text().array().default(sql`array[]::text[]`).notNull(),
 		reasonCode: governanceReasonCode().notNull(),
 		createdByProfileId: uuid()
 			.notNull()

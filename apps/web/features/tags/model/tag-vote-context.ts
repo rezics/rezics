@@ -5,7 +5,8 @@ import type {
 } from "./tag-presentation";
 
 export type TagVoteContextRequest =
-	{ readonly kind: "global" } | { readonly kind: "realm"; readonly realmId: string };
+	| { readonly kind: "global" }
+	| { readonly kind: "realm"; readonly realmId: string };
 
 export const GlobalTagVoteContext = {
 	kind: "global",

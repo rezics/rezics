@@ -1,6 +1,24 @@
 <svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
-  <defs><linearGradient id="brand" x1="70" y1="560" x2="740" y2="0" gradientUnits="userSpaceOnUse"><stop offset=".5" stop-color="#ef4444"/><stop offset="1" stop-color="#ef44ff"/></linearGradient></defs>
-  <rect width="1200" height="630" fill="#fff"/>
-  <path fill="url(#brand)" d="M0 368.571 482.143 47.143l-53.572 214.286L750 47.143v214.286L267.857 582.857l53.572-214.286L0 582.857Z"/>
-  <text x="800" y="520" fill="#121116" font-family="Inter Display, Inter, sans-serif" font-size="86" font-weight="700" letter-spacing="8">REZICS</text>
+	<defs>
+		<linearGradient id="brand" x1="70" y1="560" x2="740" y2="0" gradientUnits="userSpaceOnUse">
+			<stop offset=".5" stop-color="#ef4444" />
+			<stop offset="1" stop-color="#ef44ff" />
+		</linearGradient>
+	</defs>
+	<rect width="1200" height="630" fill="#fff" />
+	<path
+		fill="url(#brand)"
+		d="M0 368.571 482.143 47.143l-53.572 214.286L750 47.143v214.286L267.857 582.857l53.572-214.286L0 582.857Z"
+	/>
+	<text
+		x="800"
+		y="520"
+		fill="#121116"
+		font-family="Inter Display, Inter, sans-serif"
+		font-size="86"
+		font-weight="700"
+		letter-spacing="8"
+	>
+		REZICS
+	</text>
 </svg>
