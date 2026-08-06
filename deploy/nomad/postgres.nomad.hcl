@@ -117,8 +117,8 @@ job "rezics-postgres" {
         }
       }
 
-      kill_signal    = "SIGTERM"
-      kill_timeout   = "60s"
+      kill_signal    = "SIGINT"
+      kill_timeout   = "2m"
       shutdown_delay = "5s"
 
       resources {

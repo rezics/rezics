@@ -137,7 +137,9 @@ The stateful PostgreSQL jobspec allocates 4,000 MHz and 8 GiB, including a 2 GiB
 shared buffer cache and settings sized for the host. It remains outside the
 application release graph. Apply and verify that jobspec before a release that
 depends on new database resource settings; a normal stable application tag does
-not mutate the stateful job.
+not mutate the stateful job. Nomad sends `SIGINT` for PostgreSQL's fast shutdown
+mode so persistent application pools cannot turn a graceful rollout into a
+forced `SIGKILL` after the task timeout.
 
 `deploy/scripts/database-operation.sh release` runs preflight, migration, and
 verification in one serialized batch job. It asserts that both administrative
