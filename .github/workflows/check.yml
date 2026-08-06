@@ -21,6 +21,14 @@ jobs:
             - name: Checkout
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+            - name: Restore Yarn cache
+              uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+              with:
+                  path: ~/.yarn/berry/cache
+                  key: yarn-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+                  restore-keys: |
+                      yarn-${{ runner.os }}-
+
             - name: Install Nix
               uses: cachix/install-nix-action@630ae543ea3a38a9a4166f03376c02c50f408342 # v31
               with:

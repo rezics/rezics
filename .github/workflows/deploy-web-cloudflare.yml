@@ -1,0 +1,99 @@
+name: Deploy Web to Cloudflare Workers
+
+on:
+    push:
+        branches: [main]
+        paths:
+            - ".yarn/**"
+            - ".yarnrc.yml"
+            - "apps/web/**"
+            - "libraries/**"
+            - "packages/**"
+            - "package.json"
+            - "deploy/scripts/deploy-cloudflare-worker.sh"
+            - "yarn.lock"
+    workflow_dispatch:
+        inputs:
+            release:
+                description: "Optional Cloudflare Worker version tag"
+                required: false
+                type: string
+
+concurrency:
+    group: web-production
+    cancel-in-progress: false
+
+permissions:
+    contents: read
+
+jobs:
+    deploy:
+        name: Build and deploy Web
+        runs-on: ubuntu-latest
+        environment: production
+        timeout-minutes: 30
+        env:
+            CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+            TURNSTILE_SITE_KEY: ${{ secrets.TURNSTILE_SITE_KEY }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Restore Yarn cache
+              uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+              with:
+                  path: ~/.yarn/berry/cache
+                  key: yarn-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+                  restore-keys: |
+                      yarn-${{ runner.os }}-
+
+            - name: Setup Node
+              uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+              with:
+                  node-version: 26
+
+            - name: Install Corepack
+              run: npm install --global corepack@0.35.0 && corepack enable
+
+            - name: Validate Cloudflare deployment secrets
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  test -n "${CLOUDFLARE_API_TOKEN}"
+                  test -n "${TURNSTILE_SITE_KEY}"
+
+            - name: Install dependencies
+              run: yarn install --immutable
+
+            - name: Type-check Web
+              run: yarn workspace @rezics/frontend run typecheck
+
+            - name: Build Web Worker
+              run: |
+                  set -euo pipefail
+                  CLOUDFLARE_ENV=production TURNSTILE_SITE_KEY="${TURNSTILE_SITE_KEY}" \
+                      yarn workspace @rezics/frontend run generate:offline
+                  CLOUDFLARE_ENV=production TURNSTILE_SITE_KEY="${TURNSTILE_SITE_KEY}" \
+                      yarn workspace @rezics/frontend run build
+
+            - name: Prepare Worker secrets file
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  worker_secrets_file="${RUNNER_TEMP}/rezics-worker-secrets.json"
+                  jq -n --arg site_key "${TURNSTILE_SITE_KEY}" \
+                      '{TURNSTILE_SITE_KEY: $site_key}' >"${worker_secrets_file}"
+                  chmod 0600 "${worker_secrets_file}"
+                  echo "worker_secrets_file=${worker_secrets_file}" >>"${GITHUB_ENV}"
+
+            - name: Deploy verified Worker version
+              shell: bash
+              env:
+                  INPUT_RELEASE: ${{ inputs.release }}
+              run: |
+                  set -euo pipefail
+                  release="${INPUT_RELEASE:-main-${GITHUB_SHA:0:12}}"
+                  REZICS_DEPLOY_RESULT_FILE="${RUNNER_TEMP}/rezics-web-deploy.json" \
+                      bash deploy/scripts/deploy-cloudflare-worker.sh \
+                          "${release}" "${worker_secrets_file}"

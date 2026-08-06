@@ -16,6 +16,9 @@ permissions:
 jobs:
     release:
         name: Dispatch server release
+        # v1.0.0 is reissued by the explicitly authorized manual deployment;
+        # moving that tag must not dispatch a second CI server deployment.
+        if: github.ref_name != 'v1.0.0'
         runs-on: ubuntu-latest
         environment: production
         timeout-minutes: 10
