@@ -2,6 +2,7 @@
 
 import {
 	type GetApiPostsByPostIdStatus200,
+	useGetApiChaptersByChapterId,
 	useGetApiPostsByPostId,
 } from "@rezics/openapi-tanstack-query";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
@@ -17,6 +18,7 @@ import { ReviewPostDetail } from "@/features/reviews/components/review-post-deta
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
+import { hasErrorCode } from "@/i18n/errors";
 import { PostDetailArticle } from "../components/post-detail-article";
 import { getPublisherUnitIds } from "../attribution-list";
 import { PostOverflowMenu } from "../components/post-overflow-menu";
@@ -42,6 +44,19 @@ import { unitDetailHref } from "@/features/units/routing/unit-detail-routes";
 
 type WikiPost = Extract<GetApiPostsByPostIdStatus200, { postKind: "wiki" }>;
 
+/**
+ * Resolves chapter IDs before rendering the generic post surface.
+ *
+ * @remarks
+ * The current chapter API returns one readable Book context. This keeps the
+ * existing Global, Realm, and Zone post entry points compatible while the
+ * multi-Book context contract is still pending.
+ *
+ * @todo When feed items expose the resolved Book content-structure context,
+ * build the Reader URL directly from the Feed card and remove this lookup.
+ * @todo When the chapter API returns multiple Book contexts, render a Book
+ * context selector instead of selecting the current single returned context.
+ */
 export function PostDetailPage({
 	context,
 	id,
@@ -58,6 +73,10 @@ export function PostDetailPage({
 	const requestedLanguage = useRequestedContentLanguage();
 	const router = useApplicationRouter();
 	const requestedRealmId = context?.kind === "realm" ? context.realmId : undefined;
+	const chapterQuery = useGetApiChaptersByChapterId({
+		path: { chapterId: id },
+		query: { localizationLanguages },
+	});
 	const query = useGetApiPostsByPostId({
 		path: { postId: id },
 		query: {
@@ -80,6 +99,18 @@ export function PostDetailPage({
 		query.data?.postKind === "wiki" && query.data.subject?.type === "zone"
 			? query.data.subject
 			: undefined;
+	const chapterBookId = chapterQuery.data?.bookId;
+	const chapterId = chapterQuery.data?.chapterId;
+	useEffect(() => {
+		if (!chapterBookId || !chapterId) return;
+		router.replace(
+			withContentLanguage(
+				`/units/book/${chapterBookId}/read/${chapterId}`,
+				requestedLanguage,
+			),
+			{ scroll: false },
+		);
+	}, [chapterBookId, chapterId, requestedLanguage, router]);
 	useEffect(() => {
 		if (wikiZone && context?.kind !== "zone") {
 			router.replace(
@@ -108,6 +139,11 @@ export function PostDetailPage({
 		wikiZone,
 	]);
 
+	if (chapterQuery.isPending || chapterQuery.data) return <QueryPending />;
+	if (chapterQuery.isError && !hasErrorCode(chapterQuery.error, "ChapterNotFound"))
+		return (
+			<QueryFailure error={chapterQuery.error} retry={() => void chapterQuery.refetch()} />
+		);
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (hasRealmContext && contextQuery.isError)
