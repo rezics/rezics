@@ -1,11 +1,6 @@
--- REZICS v1.0.0 database baseline.
--- Machine-generated from the validated final PostgreSQL schema on 2026-08-05.
--- Object order: types, tables, functions, constraints/indexes, foreign keys/publications, triggers.
-
 --
 -- PostgreSQL database dump
 --
-
 
 
 -- Dumped from database version 18.4 (Debian 18.4-1.pgdg13+1)
@@ -23,46 +18,54 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
-CREATE EXTENSION IF NOT EXISTS pg_stat_statements WITH SCHEMA public;
-CREATE EXTENSION IF NOT EXISTS pgroonga WITH SCHEMA public;
-CREATE EXTENSION IF NOT EXISTS approx_count;
+--
+-- Name: approx_count; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA approx_count;
+
+
+--
+-- Name: public; Type: SCHEMA; Schema: -; Owner: -
+--
+
+-- *not* creating schema, since initdb creates it
+
+
+--
+-- Name: amcheck; Type: EXTENSION; Schema: -; Owner: -
+--
+
 CREATE EXTENSION IF NOT EXISTS amcheck WITH SCHEMA public;
+
+
+--
+-- Name: approx_count; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS approx_count WITH SCHEMA approx_count;
+
+
+--
+-- Name: pg_stat_statements; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements WITH SCHEMA public;
+
+
+--
+-- Name: pgroonga; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS pgroonga WITH SCHEMA public;
+
+
+--
+-- Name: pgstattuple; Type: EXTENSION; Schema: -; Owner: -
+--
+
 CREATE EXTENSION IF NOT EXISTS pgstattuple WITH SCHEMA public;
 
--- Only semantic Portable Text span values enter the PGroonga expression indexes.
-CREATE FUNCTION public.current_search_text_v1(document jsonb) RETURNS text
-    LANGUAGE sql IMMUTABLE PARALLEL SAFE
-    AS $$
-    SELECT coalesce(
-        string_agg(child ->> 'text', E'\n' ORDER BY block.ordinality, child_row.ordinality),
-        ''::text
-    )
-    FROM jsonb_array_elements(
-        CASE
-            WHEN jsonb_typeof(document) = 'object' AND document ->> '_type' = 'portable-text'
-                THEN coalesce(document -> 'content', '[]'::jsonb)
-            WHEN jsonb_typeof(document) = 'array' THEN document
-            ELSE '[]'::jsonb
-        END
-    ) WITH ORDINALITY AS block(value, ordinality)
-    CROSS JOIN LATERAL jsonb_array_elements(
-        CASE
-            WHEN block.value ->> '_type' = 'block'
-                THEN coalesce(block.value -> 'children', '[]'::jsonb)
-            ELSE '[]'::jsonb
-        END
-    ) WITH ORDINALITY AS child_row(child, ordinality)
-    WHERE child ->> '_type' = 'span' AND jsonb_typeof(child -> 'text') = 'string'
-$$;
-
--- One text expression keeps the metadata index single-column while preserving field text.
-CREATE FUNCTION public.current_search_metadata_v1(title text, summary text, description jsonb)
-RETURNS text
-    LANGUAGE sql IMMUTABLE PARALLEL SAFE
-    AS $$
-    SELECT coalesce(title, '') || E'\n' || coalesce(summary, '') || E'\n'
-        || public.current_search_text_v1(description)
-$$;
 
 --
 -- Name: ai_disclosure; Type: TYPE; Schema: public; Owner: -
@@ -867,6 +870,2944 @@ CREATE TYPE public.user_account_state_value AS ENUM (
 
 
 --
+-- Name: apply_book_chapter_delta(uuid, uuid, bigint, bigint); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.apply_book_chapter_delta(p_book_unit_id uuid, p_node_id uuid, p_all_delta bigint, p_public_delta bigint) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    IF p_all_delta = 0 AND p_public_delta = 0 THEN
+        RETURN;
+    END IF;
+
+    IF p_all_delta < 0 OR p_public_delta < 0 THEN
+        UPDATE public.book_chapter_stat SET
+            all_count = all_count + p_all_delta,
+            public_count = public_count + p_public_delta,
+            updated_at = now()
+        WHERE book_unit_id = p_book_unit_id;
+
+        UPDATE public.book_chapter_progress_stat AS stat SET
+            all_completed_count = stat.all_completed_count + p_all_delta,
+            public_completed_count = stat.public_completed_count + p_public_delta,
+            updated_at = now()
+        FROM public.content_structure_node_progress AS progress
+        WHERE progress.node_id = p_node_id
+          AND stat.profile_id = progress.profile_id
+          AND stat.book_unit_id = p_book_unit_id;
+    ELSE
+        UPDATE public.book_chapter_stat SET
+            all_count = all_count + p_all_delta,
+            public_count = public_count + p_public_delta,
+            updated_at = now()
+        WHERE book_unit_id = p_book_unit_id;
+        IF NOT FOUND THEN
+            INSERT INTO public.book_chapter_stat (book_unit_id, all_count, public_count)
+            VALUES (p_book_unit_id, p_all_delta, p_public_delta);
+        END IF;
+
+        UPDATE public.book_chapter_progress_stat AS stat SET
+            all_completed_count = stat.all_completed_count + p_all_delta,
+            public_completed_count = stat.public_completed_count + p_public_delta,
+            updated_at = now()
+        FROM public.content_structure_node_progress AS progress
+        WHERE progress.node_id = p_node_id
+          AND stat.profile_id = progress.profile_id
+          AND stat.book_unit_id = p_book_unit_id;
+
+        INSERT INTO public.book_chapter_progress_stat (
+            profile_id, book_unit_id, all_completed_count, public_completed_count
+        )
+        SELECT progress.profile_id, p_book_unit_id, p_all_delta, p_public_delta
+        FROM public.content_structure_node_progress AS progress
+        WHERE progress.node_id = p_node_id
+          AND NOT EXISTS (
+              SELECT 1 FROM public.book_chapter_progress_stat AS existing
+              WHERE existing.profile_id = progress.profile_id
+                AND existing.book_unit_id = p_book_unit_id
+          );
+    END IF;
+END
+$$;
+
+
+--
+-- Name: apply_post_reply_stat_delta(uuid, uuid, bigint, bigint); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.apply_post_reply_stat_delta(p_root_post_id uuid, p_parent_post_id uuid, p_undeleted_delta bigint, p_visible_delta bigint) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF p_undeleted_delta = 0 AND p_visible_delta = 0 THEN
+    RETURN;
+  END IF;
+
+  UPDATE post_reply_stat SET
+    undeleted_direct_count = undeleted_direct_count
+      + CASE WHEN p_parent_post_id = p_root_post_id THEN p_undeleted_delta ELSE 0 END,
+    undeleted_descendant_count = undeleted_descendant_count + p_undeleted_delta,
+    visible_direct_count = visible_direct_count
+      + CASE WHEN p_parent_post_id = p_root_post_id THEN p_visible_delta ELSE 0 END,
+    visible_descendant_count = visible_descendant_count + p_visible_delta,
+    updated_at = now()
+  WHERE post_id = p_root_post_id;
+  IF NOT FOUND AND EXISTS (SELECT 1 FROM post WHERE id = p_root_post_id) THEN
+    RAISE EXCEPTION 'missing post_reply_stat row for root %', p_root_post_id
+      USING ERRCODE = '23514';
+  END IF;
+
+  IF p_parent_post_id IS NOT NULL AND p_parent_post_id <> p_root_post_id THEN
+    UPDATE post_reply_stat SET
+      undeleted_direct_count = undeleted_direct_count + p_undeleted_delta,
+      visible_direct_count = visible_direct_count + p_visible_delta,
+      updated_at = now()
+    WHERE post_id = p_parent_post_id;
+    IF NOT FOUND AND EXISTS (SELECT 1 FROM post WHERE id = p_parent_post_id) THEN
+      RAISE EXCEPTION 'missing post_reply_stat row for parent %', p_parent_post_id
+        USING ERRCODE = '23514';
+    END IF;
+  END IF;
+END;
+$$;
+
+
+--
+-- Name: apply_reaction_change(uuid, uuid, uuid, text, timestamp with time zone, bigint); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.apply_reaction_change(p_profile_id uuid, p_unit_id uuid, p_realm_id uuid, p_reaction text, p_occurred_at timestamp with time zone, p_direction bigint) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE unit_weight double precision; profile_weight double precision;
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM unit WHERE id = p_unit_id) THEN RETURN; END IF;
+
+  IF p_realm_id IS NULL OR EXISTS (SELECT 1 FROM realm WHERE id = p_realm_id) THEN
+    IF p_direction < 0 THEN
+      UPDATE unit_reaction_stat SET reaction_count = reaction_count + p_direction,
+        updated_at = now()
+      WHERE unit_id = p_unit_id AND realm_id IS NOT DISTINCT FROM p_realm_id
+        AND reaction = p_reaction::reaction_kind;
+      IF NOT FOUND THEN
+        RAISE EXCEPTION 'missing unit_reaction_stat row for decrement: %, %, %',
+          p_unit_id, p_realm_id, p_reaction USING ERRCODE = '23514';
+      END IF;
+    ELSE
+      INSERT INTO unit_reaction_stat (unit_id, realm_id, reaction, reaction_count)
+      VALUES (p_unit_id, p_realm_id, p_reaction::reaction_kind, p_direction)
+      ON CONFLICT (unit_id, realm_id, reaction) DO UPDATE SET
+        reaction_count = unit_reaction_stat.reaction_count + excluded.reaction_count,
+        updated_at = now();
+    END IF;
+    DELETE FROM unit_reaction_stat
+    WHERE unit_id = p_unit_id AND realm_id IS NOT DISTINCT FROM p_realm_id
+      AND reaction = p_reaction::reaction_kind AND reaction_count = 0;
+  END IF;
+
+  IF p_direction < 0 THEN
+    UPDATE unit_reaction_global_stat SET reaction_count = reaction_count + p_direction,
+      updated_at = now()
+    WHERE unit_id = p_unit_id AND reaction = p_reaction::reaction_kind;
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'missing unit_reaction_global_stat row for decrement: %, %',
+        p_unit_id, p_reaction USING ERRCODE = '23514';
+    END IF;
+  ELSE
+    INSERT INTO unit_reaction_global_stat (unit_id, reaction, reaction_count)
+    VALUES (p_unit_id, p_reaction::reaction_kind, p_direction)
+    ON CONFLICT (unit_id, reaction) DO UPDATE SET
+      reaction_count = unit_reaction_global_stat.reaction_count + excluded.reaction_count,
+      updated_at = now();
+  END IF;
+  DELETE FROM unit_reaction_global_stat
+  WHERE unit_id = p_unit_id AND reaction = p_reaction::reaction_kind AND reaction_count = 0;
+
+  IF p_reaction = 'upvote' THEN
+    PERFORM apply_unit_engagement_stat(p_unit_id, p_upvotes => p_direction);
+    unit_weight := 3; profile_weight := 3;
+  ELSE
+    PERFORM apply_unit_engagement_stat(p_unit_id, p_downvotes => p_direction);
+    unit_weight := 0; profile_weight := -4;
+  END IF;
+  PERFORM apply_recommendation_unit_signal(
+    p_unit_id, p_occurred_at, p_reaction,
+    p_direction, p_direction * unit_weight
+  );
+  PERFORM apply_recommendation_profile_signal(
+    p_profile_id, p_unit_id, p_occurred_at, p_reaction,
+    p_direction, p_direction * profile_weight
+  );
+END;
+$$;
+
+
+--
+-- Name: apply_recommendation_profile_signal(uuid, uuid, timestamp with time zone, text, bigint, double precision); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.apply_recommendation_profile_signal(p_profile_id uuid, p_unit_id uuid, p_occurred_at timestamp with time zone, p_kind text, p_count_delta bigint, p_weight_delta double precision) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  bucket timestamptz := date_bin(interval '1 hour', p_occurred_at, timestamptz '2000-01-01 00:00:00+00');
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM profile WHERE id = p_profile_id)
+    OR NOT EXISTS (SELECT 1 FROM unit WHERE id = p_unit_id) THEN
+    RETURN;
+  END IF;
+  IF p_count_delta < 0 THEN
+    UPDATE recommendation_profile_signal_hourly SET
+      signal_count = signal_count + p_count_delta,
+      weight = weight + p_weight_delta,
+      updated_at = now()
+    WHERE profile_id = p_profile_id AND unit_id = p_unit_id
+      AND bucket_start = bucket AND kind = p_kind::recommendation_signal_kind;
+  ELSE
+    INSERT INTO recommendation_profile_signal_hourly (
+      profile_id, unit_id, bucket_start, kind, signal_count, weight
+    ) VALUES (
+      p_profile_id, p_unit_id, bucket, p_kind::recommendation_signal_kind,
+      p_count_delta, p_weight_delta
+    )
+    ON CONFLICT (profile_id, unit_id, bucket_start, kind) DO UPDATE SET
+      signal_count = recommendation_profile_signal_hourly.signal_count + excluded.signal_count,
+      weight = recommendation_profile_signal_hourly.weight + excluded.weight,
+      updated_at = now();
+  END IF;
+
+  DELETE FROM recommendation_profile_signal_hourly
+  WHERE profile_id = p_profile_id AND unit_id = p_unit_id AND bucket_start = bucket
+    AND kind = p_kind::recommendation_signal_kind AND signal_count = 0 AND weight = 0;
+END;
+$$;
+
+
+--
+-- Name: apply_recommendation_unit_signal(uuid, timestamp with time zone, text, bigint, double precision); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.apply_recommendation_unit_signal(p_unit_id uuid, p_occurred_at timestamp with time zone, p_kind text, p_count_delta bigint, p_weight_delta double precision) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  bucket timestamptz := date_bin(interval '1 hour', p_occurred_at, timestamptz '2000-01-01 00:00:00+00');
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM unit WHERE id = p_unit_id) THEN
+    RETURN;
+  END IF;
+  IF p_count_delta < 0 THEN
+    UPDATE recommendation_unit_signal_hourly SET
+      signal_count = signal_count + p_count_delta,
+      weight = weight + p_weight_delta,
+      updated_at = now()
+    WHERE unit_id = p_unit_id AND bucket_start = bucket
+      AND kind = p_kind::recommendation_signal_kind;
+  ELSE
+    INSERT INTO recommendation_unit_signal_hourly (
+      unit_id, bucket_start, kind, signal_count, weight
+    ) VALUES (
+      p_unit_id, bucket, p_kind::recommendation_signal_kind, p_count_delta, p_weight_delta
+    )
+    ON CONFLICT (unit_id, bucket_start, kind) DO UPDATE SET
+      signal_count = recommendation_unit_signal_hourly.signal_count + excluded.signal_count,
+      weight = recommendation_unit_signal_hourly.weight + excluded.weight,
+      updated_at = now();
+  END IF;
+
+  DELETE FROM recommendation_unit_signal_hourly
+  WHERE unit_id = p_unit_id AND bucket_start = bucket
+    AND kind = p_kind::recommendation_signal_kind
+    AND signal_count = 0 AND weight = 0;
+END;
+$$;
+
+
+--
+-- Name: apply_unit_engagement_stat(uuid, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.apply_unit_engagement_stat(p_unit_id uuid, p_upvotes bigint DEFAULT 0, p_downvotes bigint DEFAULT 0, p_replies bigint DEFAULT 0, p_favorites bigint DEFAULT 0, p_shares bigint DEFAULT 0, p_high_scores bigint DEFAULT 0, p_active_progress bigint DEFAULT 0, p_completions bigint DEFAULT 0, p_negative_progress bigint DEFAULT 0) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM unit WHERE id = p_unit_id) THEN
+    RETURN;
+  END IF;
+  IF p_upvotes = 0 AND p_downvotes = 0 AND p_replies = 0 AND p_favorites = 0
+    AND p_shares = 0 AND p_high_scores = 0 AND p_active_progress = 0
+    AND p_completions = 0 AND p_negative_progress = 0 THEN
+    RETURN;
+  END IF;
+
+  UPDATE unit_engagement_stat SET
+    upvotes = upvotes + p_upvotes,
+    downvotes = downvotes + p_downvotes,
+    replies = replies + p_replies,
+    favorites = favorites + p_favorites,
+    shares = shares + p_shares,
+    high_scores = high_scores + p_high_scores,
+    active_progress = active_progress + p_active_progress,
+    completions = completions + p_completions,
+    negative_progress = negative_progress + p_negative_progress,
+    updated_at = now()
+  WHERE unit_id = p_unit_id;
+
+  IF NOT FOUND THEN
+    IF p_upvotes < 0 OR p_downvotes < 0 OR p_replies < 0 OR p_favorites < 0
+      OR p_shares < 0 OR p_high_scores < 0 OR p_active_progress < 0
+      OR p_completions < 0 OR p_negative_progress < 0 THEN
+      RAISE EXCEPTION 'missing unit_engagement_stat row for decrement: %', p_unit_id
+        USING ERRCODE = '23514';
+    END IF;
+    INSERT INTO unit_engagement_stat (
+      unit_id, upvotes, downvotes, replies, favorites, shares, high_scores,
+      active_progress, completions, negative_progress
+    ) VALUES (
+      p_unit_id, p_upvotes, p_downvotes, p_replies, p_favorites, p_shares,
+      p_high_scores, p_active_progress, p_completions, p_negative_progress
+    )
+    ON CONFLICT (unit_id) DO UPDATE SET
+      upvotes = unit_engagement_stat.upvotes + excluded.upvotes,
+      downvotes = unit_engagement_stat.downvotes + excluded.downvotes,
+      replies = unit_engagement_stat.replies + excluded.replies,
+      favorites = unit_engagement_stat.favorites + excluded.favorites,
+      shares = unit_engagement_stat.shares + excluded.shares,
+      high_scores = unit_engagement_stat.high_scores + excluded.high_scores,
+      active_progress = unit_engagement_stat.active_progress + excluded.active_progress,
+      completions = unit_engagement_stat.completions + excluded.completions,
+      negative_progress = unit_engagement_stat.negative_progress + excluded.negative_progress,
+      updated_at = now();
+  END IF;
+
+  DELETE FROM unit_engagement_stat
+  WHERE unit_id = p_unit_id AND upvotes = 0 AND downvotes = 0 AND replies = 0
+    AND favorites = 0 AND shares = 0 AND high_scores = 0 AND active_progress = 0
+    AND completions = 0 AND negative_progress = 0;
+END;
+$$;
+
+
+--
+-- Name: assert_post_targeting_allowed(uuid, jsonb, uuid); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.assert_post_targeting_allowed(p_source_post_id uuid, p_targets jsonb, p_explicit_realm_id uuid DEFAULT NULL::uuid) RETURNS void
+    LANGUAGE plpgsql
+    SET search_path TO 'pg_catalog', 'public'
+    AS $$
+DECLARE
+  target_record record;
+  realm_record record;
+  target_locked boolean;
+BEGIN
+  IF p_targets IS NULL OR jsonb_array_length(p_targets) = 0 THEN
+    RETURN;
+  END IF;
+
+  PERFORM pg_advisory_xact_lock(hashtextextended(p_source_post_id::text, 4));
+
+  FOR target_record IN
+    SELECT DISTINCT ON (target_id)
+      target_id,
+      relation
+    FROM jsonb_to_recordset(p_targets) AS target(target_id uuid, relation text)
+    ORDER BY
+      target_id,
+      CASE relation WHEN 'subject' THEN 0 WHEN 'root' THEN 1 WHEN 'parent' THEN 2 END
+  LOOP
+    SELECT target.post_targeting_locked
+      INTO target_locked
+      FROM public.unit AS target
+      WHERE target.id = target_record.target_id
+      FOR SHARE;
+    IF target_locked THEN
+      RAISE EXCEPTION 'Post target does not accept new Post relations'
+        USING
+          ERRCODE = '23514',
+          CONSTRAINT = 'post_targeting_global_unlocked',
+          DETAIL = jsonb_build_object(
+            'scope', 'global',
+            'relation', target_record.relation,
+            'targetUnitId', target_record.target_id
+          )::text;
+    END IF;
+  END LOOP;
+
+  FOR realm_record IN
+    SELECT realm_id
+    FROM (
+      SELECT source_realm.realm_id
+      FROM public.realm_unit AS source_realm
+      WHERE source_realm.unit_id = p_source_post_id
+        AND source_realm.publication_state = 'active'
+      UNION
+      SELECT p_explicit_realm_id
+      WHERE p_explicit_realm_id IS NOT NULL
+    ) AS source_realms
+    ORDER BY realm_id
+  LOOP
+    FOR target_record IN
+      SELECT DISTINCT ON (target_id)
+        target_id,
+        relation
+      FROM jsonb_to_recordset(p_targets) AS target(target_id uuid, relation text)
+      ORDER BY
+        target_id,
+        CASE relation WHEN 'subject' THEN 0 WHEN 'root' THEN 1 WHEN 'parent' THEN 2 END
+    LOOP
+      SELECT realm_target.post_targeting_locked
+        INTO target_locked
+        FROM public.realm_unit AS realm_target
+        WHERE realm_target.realm_id = realm_record.realm_id
+          AND realm_target.unit_id = target_record.target_id
+          AND realm_target.publication_state = 'active'
+        FOR SHARE;
+      IF target_locked THEN
+        RAISE EXCEPTION 'Post target does not accept new Post relations in this Realm'
+          USING
+            ERRCODE = '23514',
+            CONSTRAINT = 'post_targeting_realm_unlocked',
+            DETAIL = jsonb_build_object(
+              'scope', 'realm',
+              'relation', target_record.relation,
+              'targetUnitId', target_record.target_id,
+              'realmId', realm_record.realm_id
+            )::text;
+      END IF;
+    END LOOP;
+  END LOOP;
+END;
+$$;
+
+
+--
+-- Name: book_chapter_node_scope(uuid, uuid, timestamp with time zone); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.book_chapter_node_scope(p_structure_id uuid, p_content_unit_id uuid, p_node_deleted_at timestamp with time zone) RETURNS TABLE(book_unit_id uuid, all_eligible boolean, public_eligible boolean)
+    LANGUAGE sql STABLE
+    AS $$
+SELECT
+    structure.owner_unit_id,
+    structure.kind = 'book.contents'
+        AND structure.deleted_at IS NULL
+        AND p_node_deleted_at IS NULL
+        AND content_unit.kind = 'post'
+        AND content_unit.deleted_at IS NULL
+        AND content_post.kind = 'chapter' AS all_eligible,
+    structure.kind = 'book.contents'
+        AND structure.deleted_at IS NULL
+        AND p_node_deleted_at IS NULL
+        AND content_unit.kind = 'post'
+        AND content_unit.deleted_at IS NULL
+        AND content_post.kind = 'chapter'
+        AND content_unit.status = 'published'
+        AND content_unit.visibility IN ('public', 'unlisted') AS public_eligible
+FROM public.content_structure AS structure
+JOIN public.unit AS content_unit ON content_unit.id = p_content_unit_id
+LEFT JOIN public.post AS content_post ON content_post.id = content_unit.id
+WHERE structure.id = p_structure_id
+$$;
+
+
+--
+-- Name: content_structure_node_reject_cycle(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.content_structure_node_reject_cycle() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF NEW.parent_id IS NULL THEN
+    RETURN NEW;
+  END IF;
+  IF EXISTS (
+    WITH RECURSIVE ancestors AS (
+      SELECT node.id, node.parent_id
+      FROM content_structure_node AS node
+      WHERE node.id = NEW.parent_id AND node.structure_id = NEW.structure_id
+      UNION ALL
+      SELECT parent.id, parent.parent_id
+      FROM content_structure_node AS parent
+      JOIN ancestors AS child ON child.parent_id = parent.id
+      WHERE parent.structure_id = NEW.structure_id
+    )
+    SELECT 1 FROM ancestors WHERE id = NEW.id
+  ) THEN
+    RAISE EXCEPTION 'content_structure_node cycle detected'
+      USING ERRCODE = '23514';
+  END IF;
+  RETURN NEW;
+END
+$$;
+
+
+--
+-- Name: current_search_metadata_v1(text, text, jsonb); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.current_search_metadata_v1(title text, summary text, description jsonb) RETURNS text
+    LANGUAGE sql IMMUTABLE PARALLEL SAFE
+    AS $$
+    SELECT coalesce(title, '') || E'\n' || coalesce(summary, '') || E'\n'
+        || public.current_search_text_v1(description)
+$$;
+
+
+--
+-- Name: current_search_text_v1(jsonb); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.current_search_text_v1(document jsonb) RETURNS text
+    LANGUAGE sql IMMUTABLE PARALLEL SAFE
+    AS $$
+    SELECT coalesce(
+        string_agg(child ->> 'text', E'\n' ORDER BY block.ordinality, child_row.ordinality),
+        ''::text
+    )
+    FROM jsonb_array_elements(
+        CASE
+            WHEN jsonb_typeof(document) = 'object' AND document ->> '_type' = 'portable-text'
+                THEN coalesce(document -> 'content', '[]'::jsonb)
+            WHEN jsonb_typeof(document) = 'array' THEN document
+            ELSE '[]'::jsonb
+        END
+    ) WITH ORDINALITY AS block(value, ordinality)
+    CROSS JOIN LATERAL jsonb_array_elements(
+        CASE
+            WHEN block.value ->> '_type' = 'block'
+                THEN coalesce(block.value -> 'children', '[]'::jsonb)
+            ELSE '[]'::jsonb
+        END
+    ) WITH ORDINALITY AS child_row(child, ordinality)
+    WHERE child ->> '_type' = 'span' AND jsonb_typeof(child -> 'text') = 'string'
+$$;
+
+
+--
+-- Name: enforce_post_realm_mount_targeting(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.enforce_post_realm_mount_targeting() RETURNS trigger
+    LANGUAGE plpgsql
+    SET search_path TO 'pg_catalog', 'public'
+    AS $$
+DECLARE
+  targets jsonb;
+BEGIN
+  SELECT coalesce(jsonb_agg(target), '[]'::jsonb)
+    INTO targets
+    FROM (
+      SELECT jsonb_build_object(
+        'target_id', stored_post.subject_unit_id,
+        'relation', 'subject'
+      ) AS target
+      FROM public.post AS stored_post
+      WHERE stored_post.id = NEW.unit_id
+        AND stored_post.subject_unit_id IS NOT NULL
+
+      UNION ALL
+
+      SELECT jsonb_build_object(
+        'target_id', stored_reply.root_post_id,
+        'relation', 'root'
+      )
+      FROM public.post_reply AS stored_reply
+      WHERE stored_reply.post_id = NEW.unit_id
+
+      UNION ALL
+
+      SELECT jsonb_build_object(
+        'target_id', stored_reply.parent_post_id,
+        'relation', 'parent'
+      )
+      FROM public.post_reply AS stored_reply
+      WHERE stored_reply.post_id = NEW.unit_id
+        AND stored_reply.parent_post_id IS NOT NULL
+    ) AS post_targets;
+
+  IF jsonb_array_length(targets) > 0 THEN
+    PERFORM public.assert_post_targeting_allowed(NEW.unit_id, targets, NEW.realm_id);
+  END IF;
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: enforce_post_reply_targeting(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.enforce_post_reply_targeting() RETURNS trigger
+    LANGUAGE plpgsql
+    SET search_path TO 'pg_catalog', 'public'
+    AS $$
+DECLARE
+  targets jsonb;
+  should_check boolean;
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    should_check := true;
+  ELSE
+    should_check :=
+      NEW.root_post_id IS DISTINCT FROM OLD.root_post_id OR
+      NEW.parent_post_id IS DISTINCT FROM OLD.parent_post_id;
+  END IF;
+
+  IF should_check THEN
+    targets := jsonb_build_array(jsonb_build_object(
+      'target_id', NEW.root_post_id,
+      'relation', 'root'
+    ));
+    IF NEW.parent_post_id IS NOT NULL THEN
+      targets := targets || jsonb_build_array(jsonb_build_object(
+        'target_id', NEW.parent_post_id,
+        'relation', 'parent'
+      ));
+    END IF;
+    PERFORM public.assert_post_targeting_allowed(NEW.post_id, targets);
+  END IF;
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: enforce_post_subject_targeting(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.enforce_post_subject_targeting() RETURNS trigger
+    LANGUAGE plpgsql
+    SET search_path TO 'pg_catalog', 'public'
+    AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    IF NEW.subject_unit_id IS NOT NULL THEN
+      PERFORM public.assert_post_targeting_allowed(
+        NEW.id,
+        jsonb_build_array(jsonb_build_object(
+          'target_id', NEW.subject_unit_id,
+          'relation', 'subject'
+        ))
+      );
+    END IF;
+  ELSIF NEW.subject_unit_id IS DISTINCT FROM OLD.subject_unit_id
+    AND NEW.subject_unit_id IS NOT NULL THEN
+    PERFORM public.assert_post_targeting_allowed(
+      NEW.id,
+      jsonb_build_array(jsonb_build_object(
+        'target_id', NEW.subject_unit_id,
+        'relation', 'subject'
+      ))
+    );
+  END IF;
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: enforce_realm_tag_context_wiki_post(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.enforce_realm_tag_context_wiki_post() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM "post"
+    WHERE "post"."id" = NEW."context_post_id"
+      AND "post"."kind" = 'wiki'
+  ) THEN
+    RAISE EXCEPTION 'Realm Tag Context Post % must be a Wiki Post', NEW."context_post_id"
+      USING ERRCODE = '23514';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: enforce_realm_tag_voting_enabled(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.enforce_realm_tag_voting_enabled() RETURNS trigger
+    LANGUAGE plpgsql
+    SET search_path TO 'pg_catalog', 'public'
+    AS $$
+BEGIN
+  PERFORM 1
+  FROM public.realm
+  WHERE id = NEW.realm_id
+    AND realm_tag_voting_enabled
+  FOR SHARE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Realm-scoped Tag voting is not enabled for Realm %', NEW.realm_id
+      USING
+        ERRCODE = '23514',
+        CONSTRAINT = 'realm_tag_vote_realm_tag_voting_enabled';
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: enforce_realm_taxonomy_tag_query_strategy(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.enforce_realm_taxonomy_tag_query_strategy() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  is_realm_taxonomy_tag boolean;
+BEGIN
+  SELECT EXISTS (
+    SELECT 1
+    FROM "content_structure"
+    INNER JOIN "tag" ON "tag"."id" = NEW."content_unit_id"
+    WHERE "content_structure"."id" = NEW."structure_id"
+      AND "content_structure"."kind" = 'realm.taxonomy'
+  ) INTO is_realm_taxonomy_tag;
+
+  IF is_realm_taxonomy_tag AND NEW."realm_tag_query_strategy" IS NULL THEN
+    NEW."realm_tag_query_strategy" := 'global_effective';
+  ELSIF NOT is_realm_taxonomy_tag AND NEW."realm_tag_query_strategy" IS NOT NULL THEN
+    RAISE EXCEPTION
+      'Realm Tag query strategy is only valid for Realm taxonomy Tag nodes'
+      USING ERRCODE = '23514';
+  END IF;
+  IF is_realm_taxonomy_tag AND NEW."deleted_at" IS NULL AND EXISTS (
+    SELECT 1
+    FROM "content_structure_node" AS existing
+    WHERE existing."structure_id" = NEW."structure_id"
+      AND existing."content_unit_id" = NEW."content_unit_id"
+      AND existing."deleted_at" IS NULL
+      AND existing."id" <> NEW."id"
+  ) THEN
+    RAISE EXCEPTION
+      'A Realm taxonomy can contain a Tag only once'
+      USING ERRCODE = '23514';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: enforce_unit_variant_star(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.enforce_unit_variant_star() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  PERFORM id
+  FROM unit
+  WHERE id IN (NEW.variant_unit_id, NEW.main_unit_id)
+  ORDER BY id
+  FOR UPDATE;
+
+  IF EXISTS (
+    SELECT 1
+    FROM unit_variant target_relationship
+    WHERE target_relationship.variant_unit_id = NEW.main_unit_id
+  ) THEN
+    RAISE EXCEPTION 'a Variant must point directly to a Main'
+      USING ERRCODE = '23514', CONSTRAINT = 'unit_variant_target_is_variant';
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM unit_variant child_relationship
+    WHERE child_relationship.main_unit_id = NEW.variant_unit_id
+  ) THEN
+    RAISE EXCEPTION 'a Main with Variants cannot become a Variant'
+      USING ERRCODE = '23514', CONSTRAINT = 'unit_variant_source_has_variants';
+  END IF;
+
+  RETURN NEW;
+END
+$$;
+
+
+--
+-- Name: enforce_wiki_association_context_post(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.enforce_wiki_association_context_post() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF NEW.context_post_id IS NULL THEN
+    RETURN NEW;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1
+    FROM post
+    WHERE id = NEW.context_post_id
+      AND kind = 'wiki'::post_kind
+  ) THEN
+    RAISE EXCEPTION 'association context post % must be a wiki Post', NEW.context_post_id
+      USING ERRCODE = '23514';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: guard_unit_content_license_mutation(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.guard_unit_content_license_mutation() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF TG_OP = 'DELETE' THEN
+    RAISE EXCEPTION 'unit_content_license history is immutable';
+  END IF;
+
+  IF ROW(
+    NEW."id",
+    NEW."unit_id",
+    NEW."granted_by_profile_id",
+    NEW."reference_license_slug",
+    NEW."granted_at"
+  ) IS DISTINCT FROM ROW(
+    OLD."id",
+    OLD."unit_id",
+    OLD."granted_by_profile_id",
+    OLD."reference_license_slug",
+    OLD."granted_at"
+  ) THEN
+    RAISE EXCEPTION 'unit_content_license grant facts are immutable';
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: initialize_collection_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.initialize_collection_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO collection_stat (collection_id) VALUES (NEW.id);
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: initialize_conversation_stats(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.initialize_conversation_stats() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO conversation_stat (conversation_id) VALUES (NEW.id);
+  INSERT INTO conversation_participant_stat (conversation_id, profile_id, sort_at)
+  VALUES (NEW.id, NEW.participant_low_profile_id, NEW.created_at),
+    (NEW.id, NEW.participant_high_profile_id, NEW.created_at);
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: initialize_notification_recipient_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.initialize_notification_recipient_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    INSERT INTO public.notification_recipient_stat (profile_id)
+    VALUES (NEW.id) ON CONFLICT DO NOTHING;
+    RETURN NEW;
+END
+$$;
+
+
+--
+-- Name: initialize_poll_option_vote_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.initialize_poll_option_vote_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO poll_option_vote_stat (option_id) VALUES (NEW.id);
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: initialize_post_reply_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.initialize_post_reply_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO post_reply_stat (post_id) VALUES (NEW.id) ON CONFLICT DO NOTHING;
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: initialize_realm_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.initialize_realm_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    INSERT INTO public.realm_stat (realm_id) VALUES (NEW.id) ON CONFLICT DO NOTHING;
+    RETURN NEW;
+END
+$$;
+
+
+--
+-- Name: initialize_realm_unit_moderation_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.initialize_realm_unit_moderation_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    INSERT INTO public.realm_unit_moderation_stat (realm_id, unit_id)
+    VALUES (NEW.realm_id, NEW.unit_id) ON CONFLICT DO NOTHING;
+    RETURN NEW;
+END
+$$;
+
+
+--
+-- Name: lock_unit_effective_tag_key(uuid, uuid); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.lock_unit_effective_tag_key(target_unit_id uuid, target_tag_id uuid) RETURNS void
+    LANGUAGE sql
+    AS $$
+  SELECT pg_advisory_xact_lock(hashtextextended(
+    target_unit_id::text || ':' || target_tag_id::text,
+    71001
+  ))
+$$;
+
+
+--
+-- Name: lock_unit_effective_tag_vote_key(uuid, uuid, uuid); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.lock_unit_effective_tag_vote_key(target_unit_id uuid, target_tag_id uuid, target_profile_id uuid) RETURNS void
+    LANGUAGE sql
+    AS $$
+  SELECT pg_advisory_xact_lock(hashtextextended(
+    target_unit_id::text || ':' || target_tag_id::text || ':' || target_profile_id::text,
+    71002
+  ))
+$$;
+
+
+--
+-- Name: lock_unit_structure_definition_key(uuid); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.lock_unit_structure_definition_key(target_structure_id uuid) RETURNS void
+    LANGUAGE sql
+    AS $$
+  SELECT pg_advisory_xact_lock(hashtextextended(
+    target_structure_id::text,
+    71005
+  ))
+$$;
+
+
+--
+-- Name: maintain_book_chapter_from_node(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_book_chapter_from_node() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    old_scope record;
+    new_scope record;
+BEGIN
+    IF TG_OP <> 'INSERT' THEN
+        SELECT * INTO old_scope FROM public.book_chapter_node_scope(
+            OLD.structure_id, OLD.content_unit_id, OLD.deleted_at
+        );
+        IF old_scope.all_eligible THEN
+            PERFORM public.apply_book_chapter_delta(
+                old_scope.book_unit_id,
+                OLD.id,
+                -1,
+                CASE WHEN old_scope.public_eligible THEN -1 ELSE 0 END
+            );
+        END IF;
+    END IF;
+    IF TG_OP <> 'DELETE' THEN
+        SELECT * INTO new_scope FROM public.book_chapter_node_scope(
+            NEW.structure_id, NEW.content_unit_id, NEW.deleted_at
+        );
+        IF new_scope.all_eligible THEN
+            PERFORM public.apply_book_chapter_delta(
+                new_scope.book_unit_id,
+                NEW.id,
+                1,
+                CASE WHEN new_scope.public_eligible THEN 1 ELSE 0 END
+            );
+        END IF;
+    END IF;
+    RETURN NULL;
+END
+$$;
+
+
+--
+-- Name: maintain_book_chapter_from_post(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_book_chapter_from_post() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    occurrence record;
+    content_unit public.unit%ROWTYPE;
+    old_chapter boolean := TG_OP <> 'INSERT' AND OLD.kind = 'chapter';
+    new_chapter boolean := TG_OP <> 'DELETE' AND NEW.kind = 'chapter';
+    common_active boolean;
+BEGIN
+    SELECT * INTO content_unit FROM public.unit WHERE id = coalesce(NEW.id, OLD.id);
+    FOR occurrence IN
+        SELECT node.id, node.deleted_at, structure.owner_unit_id,
+               structure.kind, structure.deleted_at AS structure_deleted_at
+        FROM public.content_structure_node AS node
+        JOIN public.content_structure AS structure ON structure.id = node.structure_id
+        WHERE node.content_unit_id = coalesce(NEW.id, OLD.id)
+    LOOP
+        common_active := occurrence.kind = 'book.contents'
+            AND occurrence.structure_deleted_at IS NULL
+            AND occurrence.deleted_at IS NULL
+            AND content_unit.kind = 'post'
+            AND content_unit.deleted_at IS NULL;
+        PERFORM public.apply_book_chapter_delta(
+            occurrence.owner_unit_id,
+            occurrence.id,
+            (CASE WHEN common_active AND new_chapter THEN 1 ELSE 0 END)
+                - (CASE WHEN common_active AND old_chapter THEN 1 ELSE 0 END),
+            (CASE WHEN common_active AND new_chapter AND content_unit.status = 'published'
+                    AND content_unit.visibility IN ('public', 'unlisted') THEN 1 ELSE 0 END)
+                - (CASE WHEN common_active AND old_chapter AND content_unit.status = 'published'
+                    AND content_unit.visibility IN ('public', 'unlisted') THEN 1 ELSE 0 END)
+        );
+    END LOOP;
+    RETURN NULL;
+END
+$$;
+
+
+--
+-- Name: maintain_book_chapter_from_progress(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_book_chapter_from_progress() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    scope record;
+BEGIN
+    IF TG_OP <> 'INSERT' THEN
+        SELECT chapter_scope.* INTO scope
+        FROM public.content_structure_node AS node
+        CROSS JOIN LATERAL public.book_chapter_node_scope(
+            node.structure_id, node.content_unit_id, node.deleted_at
+        ) AS chapter_scope
+        WHERE node.id = OLD.node_id;
+        IF scope.all_eligible THEN
+            UPDATE public.book_chapter_progress_stat SET
+                all_completed_count = all_completed_count - 1,
+                public_completed_count = public_completed_count
+                    - CASE WHEN scope.public_eligible THEN 1 ELSE 0 END,
+                updated_at = now()
+            WHERE profile_id = OLD.profile_id AND book_unit_id = scope.book_unit_id;
+        END IF;
+    END IF;
+    IF TG_OP <> 'DELETE' THEN
+        SELECT chapter_scope.* INTO scope
+        FROM public.content_structure_node AS node
+        CROSS JOIN LATERAL public.book_chapter_node_scope(
+            node.structure_id, node.content_unit_id, node.deleted_at
+        ) AS chapter_scope
+        WHERE node.id = NEW.node_id;
+        IF scope.all_eligible THEN
+            INSERT INTO public.book_chapter_progress_stat (
+                profile_id, book_unit_id, all_completed_count, public_completed_count
+            ) VALUES (
+                NEW.profile_id,
+                scope.book_unit_id,
+                1,
+                CASE WHEN scope.public_eligible THEN 1 ELSE 0 END
+            )
+            ON CONFLICT (profile_id, book_unit_id) DO UPDATE SET
+                all_completed_count = public.book_chapter_progress_stat.all_completed_count + 1,
+                public_completed_count = public.book_chapter_progress_stat.public_completed_count
+                    + EXCLUDED.public_completed_count,
+                updated_at = now();
+        END IF;
+    END IF;
+    RETURN NULL;
+END
+$$;
+
+
+--
+-- Name: maintain_book_chapter_from_structure(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_book_chapter_from_structure() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    occurrence record;
+    old_active boolean := TG_OP <> 'INSERT'
+        AND OLD.kind = 'book.contents' AND OLD.deleted_at IS NULL;
+    new_active boolean := TG_OP <> 'DELETE'
+        AND NEW.kind = 'book.contents' AND NEW.deleted_at IS NULL;
+BEGIN
+    IF old_active = new_active THEN
+        RETURN NULL;
+    END IF;
+    FOR occurrence IN
+        SELECT node.id, node.owner_unit_id, content_unit.status, content_unit.visibility
+        FROM public.content_structure_node AS node
+        JOIN public.unit AS content_unit ON content_unit.id = node.content_unit_id
+        JOIN public.post AS content_post ON content_post.id = content_unit.id
+        WHERE node.structure_id = coalesce(NEW.id, OLD.id)
+          AND node.deleted_at IS NULL
+          AND content_unit.kind = 'post'
+          AND content_unit.deleted_at IS NULL
+          AND content_post.kind = 'chapter'
+    LOOP
+        PERFORM public.apply_book_chapter_delta(
+            occurrence.owner_unit_id,
+            occurrence.id,
+            (CASE WHEN new_active THEN 1 ELSE 0 END)
+                - (CASE WHEN old_active THEN 1 ELSE 0 END),
+            (CASE WHEN new_active AND occurrence.status = 'published'
+                    AND occurrence.visibility IN ('public', 'unlisted') THEN 1 ELSE 0 END)
+                - (CASE WHEN old_active AND occurrence.status = 'published'
+                    AND occurrence.visibility IN ('public', 'unlisted') THEN 1 ELSE 0 END)
+        );
+    END LOOP;
+    RETURN NULL;
+END
+$$;
+
+
+--
+-- Name: maintain_book_chapter_from_unit(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_book_chapter_from_unit() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    occurrence record;
+    is_chapter boolean;
+    old_all boolean;
+    old_public boolean;
+    new_all boolean;
+    new_public boolean;
+BEGIN
+    SELECT kind = 'chapter' INTO is_chapter FROM public.post WHERE id = NEW.id;
+    IF NOT coalesce(is_chapter, false) THEN
+        RETURN NULL;
+    END IF;
+    FOR occurrence IN
+        SELECT node.id, node.deleted_at, structure.owner_unit_id,
+               structure.kind, structure.deleted_at AS structure_deleted_at
+        FROM public.content_structure_node AS node
+        JOIN public.content_structure AS structure ON structure.id = node.structure_id
+        WHERE node.content_unit_id = NEW.id
+    LOOP
+        old_all := occurrence.kind = 'book.contents'
+            AND occurrence.structure_deleted_at IS NULL
+            AND occurrence.deleted_at IS NULL
+            AND OLD.kind = 'post' AND OLD.deleted_at IS NULL;
+        new_all := occurrence.kind = 'book.contents'
+            AND occurrence.structure_deleted_at IS NULL
+            AND occurrence.deleted_at IS NULL
+            AND NEW.kind = 'post' AND NEW.deleted_at IS NULL;
+        old_public := old_all AND OLD.status = 'published'
+            AND OLD.visibility IN ('public', 'unlisted');
+        new_public := new_all AND NEW.status = 'published'
+            AND NEW.visibility IN ('public', 'unlisted');
+        PERFORM public.apply_book_chapter_delta(
+            occurrence.owner_unit_id,
+            occurrence.id,
+            (CASE WHEN new_all THEN 1 ELSE 0 END) - (CASE WHEN old_all THEN 1 ELSE 0 END),
+            (CASE WHEN new_public THEN 1 ELSE 0 END)
+                - (CASE WHEN old_public THEN 1 ELSE 0 END)
+        );
+    END LOOP;
+    RETURN NULL;
+END
+$$;
+
+
+--
+-- Name: maintain_collection_item_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_collection_item_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE changed record;
+BEGIN
+  FOR changed IN
+    SELECT OLD.collection_id AS collection_id, -1::bigint AS direction
+      WHERE TG_OP IN ('UPDATE', 'DELETE')
+    UNION ALL
+    SELECT NEW.collection_id AS collection_id, 1::bigint AS direction
+      WHERE TG_OP IN ('UPDATE', 'INSERT')
+  LOOP
+    UPDATE collection_stat
+    SET item_count = item_count + changed.direction, updated_at = now()
+    WHERE collection_id = changed.collection_id;
+    IF NOT FOUND AND EXISTS (SELECT 1 FROM collection WHERE id = changed.collection_id) THEN
+      RAISE EXCEPTION 'missing collection_stat row for %', changed.collection_id
+        USING ERRCODE = '23514';
+    END IF;
+  END LOOP;
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: maintain_effective_tag_from_direct_context(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_effective_tag_from_direct_context() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  PERFORM refresh_unit_effective_tag(
+    coalesce(NEW.unit_id, OLD.unit_id),
+    coalesce(NEW.tag_id, OLD.tag_id)
+  );
+  RETURN NULL;
+END
+$$;
+
+
+--
+-- Name: maintain_effective_tag_from_direct_vote(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_effective_tag_from_direct_vote() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  PERFORM refresh_unit_effective_tag_vote(
+    coalesce(NEW.unit_id, OLD.unit_id),
+    coalesce(NEW.tag_id, OLD.tag_id),
+    coalesce(NEW.profile_id, OLD.profile_id)
+  );
+  RETURN NULL;
+END
+$$;
+
+
+--
+-- Name: maintain_effective_tag_from_structure_support(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_effective_tag_from_structure_support() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  target_unit_id uuid := coalesce(NEW.unit_id, OLD.unit_id);
+  target_tag_id uuid := coalesce(NEW.tag_id, OLD.tag_id);
+  target_profile_id uuid := coalesce(NEW.profile_id, OLD.profile_id);
+BEGIN
+  PERFORM refresh_unit_effective_tag(target_unit_id, target_tag_id);
+  PERFORM refresh_unit_effective_tag_vote(
+    target_unit_id,
+    target_tag_id,
+    target_profile_id
+  );
+  RETURN NULL;
+END
+$$;
+
+
+--
+-- Name: maintain_favorite_item_stats(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_favorite_item_stats() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE row_data collection_item%ROWTYPE; direction bigint; is_favorite boolean; change record;
+BEGIN
+  IF TG_OP = 'UPDATE' AND
+    (OLD.collection_id, OLD.unit_id, OLD.added_by_profile_id, OLD.created_at) IS NOT DISTINCT FROM
+    (NEW.collection_id, NEW.unit_id, NEW.added_by_profile_id, NEW.created_at) THEN
+    RETURN NULL;
+  END IF;
+  FOR change IN
+    SELECT OLD AS row_data, -1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'DELETE')
+    UNION ALL SELECT NEW AS row_data, 1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'INSERT')
+  LOOP
+    row_data := change.row_data; direction := change.direction;
+    SELECT EXISTS (
+      SELECT 1 FROM profile_favorites_collection
+      WHERE collection_id = row_data.collection_id
+    ) INTO is_favorite;
+    IF is_favorite THEN
+      PERFORM apply_unit_engagement_stat(row_data.unit_id, p_favorites => direction);
+      PERFORM apply_recommendation_unit_signal(
+        row_data.unit_id, row_data.created_at, 'favorite', direction, direction * 5
+      );
+      IF row_data.added_by_profile_id IS NOT NULL THEN
+        PERFORM apply_recommendation_profile_signal(
+          row_data.added_by_profile_id, row_data.unit_id, row_data.created_at,
+          'favorite', direction, direction * 5
+        );
+      END IF;
+    END IF;
+  END LOOP;
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: maintain_message_stats(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_message_stats() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE recipient_id uuid;
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    UPDATE conversation_stat SET last_message_id = NEW.id, last_message_at = NEW.created_at,
+      updated_at = now()
+    WHERE conversation_id = NEW.conversation_id
+      AND (last_message_at IS NULL OR (last_message_at, last_message_id) < (NEW.created_at, NEW.id));
+    UPDATE conversation_participant_stat SET last_message_id = NEW.id,
+      last_message_at = NEW.created_at, sort_at = NEW.created_at, updated_at = now()
+    WHERE conversation_id = NEW.conversation_id
+      AND (last_message_at IS NULL OR (last_message_at, last_message_id) < (NEW.created_at, NEW.id));
+    SELECT CASE WHEN participant_low_profile_id = NEW.sender_profile_id
+      THEN participant_high_profile_id ELSE participant_low_profile_id END
+    INTO recipient_id FROM conversation WHERE id = NEW.conversation_id;
+    IF NEW.deleted_at IS NULL AND message_is_unread(
+      NEW.conversation_id, recipient_id, NEW.created_at, NEW.id
+    ) THEN
+      UPDATE conversation_participant_stat SET unread_count = unread_count + 1,
+        updated_at = now()
+      WHERE conversation_id = NEW.conversation_id AND profile_id = recipient_id;
+    END IF;
+  ELSIF TG_OP = 'UPDATE' AND OLD.deleted_at IS DISTINCT FROM NEW.deleted_at THEN
+    SELECT CASE WHEN participant_low_profile_id = NEW.sender_profile_id
+      THEN participant_high_profile_id ELSE participant_low_profile_id END
+    INTO recipient_id FROM conversation WHERE id = NEW.conversation_id;
+    IF message_is_unread(NEW.conversation_id, recipient_id, NEW.created_at, NEW.id) THEN
+      UPDATE conversation_participant_stat SET
+        unread_count = unread_count + CASE
+          WHEN OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL THEN -1
+          WHEN OLD.deleted_at IS NOT NULL AND NEW.deleted_at IS NULL THEN 1 ELSE 0 END,
+        updated_at = now()
+      WHERE conversation_id = NEW.conversation_id AND profile_id = recipient_id;
+    END IF;
+  ELSIF TG_OP = 'DELETE' THEN
+    SELECT CASE WHEN participant_low_profile_id = OLD.sender_profile_id
+      THEN participant_high_profile_id ELSE participant_low_profile_id END
+    INTO recipient_id FROM conversation WHERE id = OLD.conversation_id;
+    IF recipient_id IS NOT NULL AND OLD.deleted_at IS NULL AND message_is_unread(
+      OLD.conversation_id, recipient_id, OLD.created_at, OLD.id
+    ) THEN
+      UPDATE conversation_participant_stat SET unread_count = unread_count - 1,
+        updated_at = now()
+      WHERE conversation_id = OLD.conversation_id AND profile_id = recipient_id;
+    END IF;
+    PERFORM refresh_conversation_last_message(OLD.conversation_id);
+  END IF;
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: maintain_notification_recipient_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_notification_recipient_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    old_delta bigint := CASE
+        WHEN TG_OP <> 'INSERT' AND OLD.in_app_visible AND OLD.read_at IS NULL THEN -1 ELSE 0 END;
+    new_delta bigint := CASE
+        WHEN TG_OP <> 'DELETE' AND NEW.in_app_visible AND NEW.read_at IS NULL THEN 1 ELSE 0 END;
+BEGIN
+    IF TG_OP <> 'INSERT' AND old_delta <> 0 THEN
+        INSERT INTO public.notification_recipient_stat (profile_id, unread_count)
+        VALUES (OLD.recipient_profile_id, old_delta)
+        ON CONFLICT (profile_id) DO UPDATE SET
+            unread_count = public.notification_recipient_stat.unread_count + EXCLUDED.unread_count,
+            updated_at = now();
+    END IF;
+    IF TG_OP <> 'DELETE' AND new_delta <> 0 THEN
+        INSERT INTO public.notification_recipient_stat (profile_id, unread_count)
+        VALUES (NEW.recipient_profile_id, new_delta)
+        ON CONFLICT (profile_id) DO UPDATE SET
+            unread_count = public.notification_recipient_stat.unread_count + EXCLUDED.unread_count,
+            updated_at = now();
+    END IF;
+    RETURN coalesce(NEW, OLD);
+END
+$$;
+
+
+--
+-- Name: maintain_poll_option_vote_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_poll_option_vote_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE changed record;
+BEGIN
+  FOR changed IN
+    SELECT OLD.option_id AS option_id, -1::bigint AS direction
+      WHERE TG_OP IN ('UPDATE', 'DELETE')
+    UNION ALL
+    SELECT NEW.option_id AS option_id, 1::bigint AS direction
+      WHERE TG_OP IN ('UPDATE', 'INSERT')
+  LOOP
+    UPDATE poll_option_vote_stat
+    SET vote_count = vote_count + changed.direction, updated_at = now()
+    WHERE option_id = changed.option_id;
+    IF NOT FOUND AND EXISTS (SELECT 1 FROM poll_option WHERE id = changed.option_id) THEN
+      RAISE EXCEPTION 'missing poll_option_vote_stat row for %', changed.option_id
+        USING ERRCODE = '23514';
+    END IF;
+  END LOOP;
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: maintain_post_reply_stats(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_post_reply_stats() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE reply_unit unit%ROWTYPE;
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    SELECT * INTO STRICT reply_unit FROM unit WHERE id = NEW.post_id;
+    PERFORM apply_post_reply_stat_delta(
+      NEW.root_post_id,
+      NEW.parent_post_id,
+      (reply_unit.deleted_at IS NULL)::int,
+      (reply_unit.deleted_at IS NULL AND reply_unit.status = 'published'
+        AND reply_unit.visibility = 'public'
+        AND reply_unit.moderation_status = 'approved')::int
+    );
+    IF reply_unit.deleted_at IS NULL THEN
+      PERFORM apply_unit_engagement_stat(NEW.root_post_id, p_replies => 1);
+      IF NEW.parent_post_id IS NOT NULL THEN
+        PERFORM apply_unit_engagement_stat(NEW.parent_post_id, p_replies => 1);
+      END IF;
+    END IF;
+    PERFORM apply_recommendation_unit_signal(NEW.root_post_id, NEW.created_at, 'reply', 1, 4);
+    IF NEW.parent_post_id IS NOT NULL THEN
+      PERFORM apply_recommendation_unit_signal(
+        NEW.parent_post_id, NEW.created_at, 'reply', 1, 4
+      );
+    END IF;
+  ELSIF TG_OP = 'DELETE' AND EXISTS (SELECT 1 FROM unit WHERE id = OLD.post_id) THEN
+    SELECT * INTO STRICT reply_unit FROM unit WHERE id = OLD.post_id;
+    PERFORM apply_post_reply_stat_delta(
+      OLD.root_post_id,
+      OLD.parent_post_id,
+      -(reply_unit.deleted_at IS NULL)::int,
+      -(reply_unit.deleted_at IS NULL AND reply_unit.status = 'published'
+        AND reply_unit.visibility = 'public'
+        AND reply_unit.moderation_status = 'approved')::int
+    );
+    IF reply_unit.deleted_at IS NULL THEN
+      PERFORM apply_unit_engagement_stat(OLD.root_post_id, p_replies => -1);
+      IF OLD.parent_post_id IS NOT NULL THEN
+        PERFORM apply_unit_engagement_stat(OLD.parent_post_id, p_replies => -1);
+      END IF;
+    END IF;
+    PERFORM apply_recommendation_unit_signal(OLD.root_post_id, OLD.created_at, 'reply', -1, -4);
+    IF OLD.parent_post_id IS NOT NULL THEN
+      PERFORM apply_recommendation_unit_signal(
+        OLD.parent_post_id, OLD.created_at, 'reply', -1, -4
+      );
+    END IF;
+  END IF;
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: maintain_realm_member_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_realm_member_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    old_delta bigint := CASE WHEN TG_OP <> 'INSERT' AND OLD.state = 'active' THEN -1 ELSE 0 END;
+    new_delta bigint := CASE WHEN TG_OP <> 'DELETE' AND NEW.state = 'active' THEN 1 ELSE 0 END;
+BEGIN
+    IF TG_OP <> 'INSERT' AND old_delta <> 0 THEN
+        INSERT INTO public.realm_stat (realm_id, active_member_count)
+        VALUES (OLD.realm_id, old_delta)
+        ON CONFLICT (realm_id) DO UPDATE SET
+            active_member_count = public.realm_stat.active_member_count + EXCLUDED.active_member_count,
+            updated_at = now();
+    END IF;
+    IF TG_OP <> 'DELETE' AND new_delta <> 0 THEN
+        INSERT INTO public.realm_stat (realm_id, active_member_count)
+        VALUES (NEW.realm_id, new_delta)
+        ON CONFLICT (realm_id) DO UPDATE SET
+            active_member_count = public.realm_stat.active_member_count + EXCLUDED.active_member_count,
+            updated_at = now();
+    END IF;
+    RETURN coalesce(NEW, OLD);
+END
+$$;
+
+
+--
+-- Name: maintain_realm_tag_vote_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_realm_tag_vote_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  row_data realm_tag_vote%ROWTYPE;
+  direction bigint;
+  change record;
+BEGIN
+  FOR change IN
+    SELECT OLD AS row_data, -1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'DELETE')
+    UNION ALL
+    SELECT NEW AS row_data, 1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'INSERT')
+  LOOP
+    row_data := change.row_data;
+    direction := change.direction;
+    IF direction < 0 THEN
+      UPDATE realm_tag_vote_stat
+      SET
+        score = score + direction * row_data.value,
+        vote_count = vote_count + direction,
+        updated_at = now()
+      WHERE realm_id = row_data.realm_id
+        AND unit_id = row_data.unit_id
+        AND tag_id = row_data.tag_id;
+      IF NOT FOUND THEN
+        RAISE EXCEPTION 'missing realm_tag_vote_stat row for decrement: %, %, %',
+          row_data.realm_id, row_data.unit_id, row_data.tag_id
+          USING ERRCODE = '23514';
+      END IF;
+    ELSE
+      INSERT INTO realm_tag_vote_stat (realm_id, unit_id, tag_id, score, vote_count)
+      VALUES (
+        row_data.realm_id,
+        row_data.unit_id,
+        row_data.tag_id,
+        direction * row_data.value,
+        direction
+      )
+      ON CONFLICT (realm_id, unit_id, tag_id) DO UPDATE SET
+        score = realm_tag_vote_stat.score + excluded.score,
+        vote_count = realm_tag_vote_stat.vote_count + excluded.vote_count,
+        updated_at = now();
+    END IF;
+    DELETE FROM realm_tag_vote_stat
+    WHERE realm_id = row_data.realm_id
+      AND unit_id = row_data.unit_id
+      AND tag_id = row_data.tag_id
+      AND vote_count = 0;
+  END LOOP;
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: maintain_realm_unit_report_case_state(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_realm_unit_report_case_state() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    delta bigint :=
+        CASE WHEN NEW.state IN ('new', 'triaged', 'assigned', 'escalated', 'reviewing')
+            THEN 1 ELSE 0 END
+        - CASE WHEN OLD.state IN ('new', 'triaged', 'assigned', 'escalated', 'reviewing')
+            THEN 1 ELSE 0 END;
+BEGIN
+    IF delta <> 0 THEN
+        INSERT INTO public.realm_unit_moderation_stat (
+            realm_id, unit_id, open_report_count
+        )
+        SELECT realm_id, unit_id, count(*) * delta
+        FROM public.realm_unit_report
+        WHERE case_id = NEW.id
+        GROUP BY realm_id, unit_id
+        ON CONFLICT (realm_id, unit_id) DO UPDATE SET
+            open_report_count = public.realm_unit_moderation_stat.open_report_count
+                + EXCLUDED.open_report_count,
+            updated_at = now();
+    END IF;
+    RETURN NEW;
+END
+$$;
+
+
+--
+-- Name: maintain_realm_unit_report_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_realm_unit_report_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    old_delta bigint := 0;
+    new_delta bigint := 0;
+BEGIN
+    IF TG_OP <> 'INSERT' THEN
+        SELECT CASE WHEN state IN ('new', 'triaged', 'assigned', 'escalated', 'reviewing')
+            THEN -1 ELSE 0 END INTO old_delta
+        FROM public.moderation_case WHERE id = OLD.case_id;
+    END IF;
+    IF TG_OP <> 'DELETE' THEN
+        SELECT CASE WHEN state IN ('new', 'triaged', 'assigned', 'escalated', 'reviewing')
+            THEN 1 ELSE 0 END INTO new_delta
+        FROM public.moderation_case WHERE id = NEW.case_id;
+    END IF;
+    IF TG_OP <> 'INSERT' AND old_delta <> 0 THEN
+        UPDATE public.realm_unit_moderation_stat SET
+            open_report_count = open_report_count + old_delta,
+            updated_at = now()
+        WHERE realm_id = OLD.realm_id AND unit_id = OLD.unit_id;
+    END IF;
+    IF TG_OP <> 'DELETE' AND new_delta <> 0 THEN
+        INSERT INTO public.realm_unit_moderation_stat (realm_id, unit_id, open_report_count)
+        VALUES (NEW.realm_id, NEW.unit_id, new_delta)
+        ON CONFLICT (realm_id, unit_id) DO UPDATE SET
+            open_report_count = public.realm_unit_moderation_stat.open_report_count
+                + EXCLUDED.open_report_count,
+            updated_at = now();
+    END IF;
+    RETURN coalesce(NEW, OLD);
+END
+$$;
+
+
+--
+-- Name: maintain_recommendation_event_signals(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_recommendation_event_signals() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE row_data recommendation_event%ROWTYPE; direction bigint;
+unit_weight double precision; profile_weight double precision;
+change record;
+BEGIN
+  FOR change IN
+    SELECT OLD AS row_data, -1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'DELETE')
+    UNION ALL SELECT NEW AS row_data, 1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'INSERT')
+  LOOP
+    row_data := change.row_data; direction := change.direction;
+    IF row_data.profile_id IS NOT NULL
+      AND row_data.type IN ('impression', 'open', 'dwell_30s', 'not_interested') THEN
+      unit_weight := CASE row_data.type WHEN 'open' THEN 1 WHEN 'dwell_30s' THEN 2 ELSE 0 END;
+      profile_weight := CASE row_data.type WHEN 'open' THEN 1 WHEN 'dwell_30s' THEN 2
+        WHEN 'not_interested' THEN -4 ELSE 0 END;
+      PERFORM apply_recommendation_unit_signal(
+        row_data.target_unit_id, row_data.occurred_at,
+        row_data.type::text, direction, direction * unit_weight
+      );
+      IF row_data.type <> 'impression' THEN
+        PERFORM apply_recommendation_profile_signal(
+          row_data.profile_id, row_data.target_unit_id, row_data.occurred_at,
+          row_data.type::text, direction,
+          direction * profile_weight
+        );
+      END IF;
+    END IF;
+  END LOOP;
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: maintain_reply_unit_state(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_reply_unit_state() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE relation post_reply%ROWTYPE;
+old_counted boolean;
+new_counted boolean;
+old_visible boolean;
+new_visible boolean;
+BEGIN
+  SELECT * INTO relation FROM post_reply WHERE post_id = OLD.id;
+  IF NOT FOUND THEN RETURN NULL; END IF;
+  old_counted := OLD.deleted_at IS NULL;
+  new_counted := NEW.deleted_at IS NULL;
+  old_visible := old_counted AND OLD.status = 'published' AND OLD.visibility = 'public'
+    AND OLD.moderation_status = 'approved';
+  new_visible := new_counted AND NEW.status = 'published' AND NEW.visibility = 'public'
+    AND NEW.moderation_status = 'approved';
+  IF old_counted IS DISTINCT FROM new_counted THEN
+    PERFORM apply_unit_engagement_stat(
+      relation.root_post_id, p_replies => CASE WHEN new_counted THEN 1 ELSE -1 END
+    );
+    IF relation.parent_post_id IS NOT NULL THEN
+      PERFORM apply_unit_engagement_stat(
+        relation.parent_post_id, p_replies => CASE WHEN new_counted THEN 1 ELSE -1 END
+      );
+    END IF;
+  END IF;
+  PERFORM apply_post_reply_stat_delta(
+    relation.root_post_id,
+    relation.parent_post_id,
+    new_counted::int - old_counted::int,
+    new_visible::int - old_visible::int
+  );
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: maintain_score_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_score_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  row_data score%ROWTYPE;
+  direction bigint;
+  signal_kind text;
+  unit_weight double precision;
+  profile_weight double precision;
+  change record;
+BEGIN
+  FOR change IN
+    SELECT OLD AS row_data, -1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'DELETE')
+    UNION ALL
+    SELECT NEW AS row_data, 1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'INSERT')
+  LOOP
+    row_data := change.row_data;
+    direction := change.direction;
+    IF EXISTS (SELECT 1 FROM unit WHERE id = row_data.unit_id)
+      AND EXISTS (SELECT 1 FROM realm WHERE id = row_data.realm_id) THEN
+      IF direction < 0 THEN
+        UPDATE score_stat SET
+          total_count = total_count + direction,
+          total_score = total_score + direction * row_data.value,
+          score_1_count = score_1_count + direction * (row_data.value = 1)::int,
+          score_2_count = score_2_count + direction * (row_data.value = 2)::int,
+          score_3_count = score_3_count + direction * (row_data.value = 3)::int,
+          score_4_count = score_4_count + direction * (row_data.value = 4)::int,
+          score_5_count = score_5_count + direction * (row_data.value = 5)::int,
+          score_6_count = score_6_count + direction * (row_data.value = 6)::int,
+          score_7_count = score_7_count + direction * (row_data.value = 7)::int,
+          score_8_count = score_8_count + direction * (row_data.value = 8)::int,
+          score_9_count = score_9_count + direction * (row_data.value = 9)::int,
+          score_10_count = score_10_count + direction * (row_data.value = 10)::int,
+          updated_at = now()
+        WHERE unit_id = row_data.unit_id AND realm_id = row_data.realm_id;
+        IF NOT FOUND THEN
+          RAISE EXCEPTION 'missing score_stat row for decrement: %, %',
+            row_data.unit_id, row_data.realm_id USING ERRCODE = '23514';
+        END IF;
+      ELSE
+        INSERT INTO score_stat (
+          unit_id, realm_id, total_count, total_score,
+          score_1_count, score_2_count, score_3_count, score_4_count, score_5_count,
+          score_6_count, score_7_count, score_8_count, score_9_count, score_10_count
+        ) VALUES (
+          row_data.unit_id, row_data.realm_id, direction, direction * row_data.value,
+          direction * (row_data.value = 1)::int, direction * (row_data.value = 2)::int,
+          direction * (row_data.value = 3)::int, direction * (row_data.value = 4)::int,
+          direction * (row_data.value = 5)::int, direction * (row_data.value = 6)::int,
+          direction * (row_data.value = 7)::int, direction * (row_data.value = 8)::int,
+          direction * (row_data.value = 9)::int, direction * (row_data.value = 10)::int
+        )
+        ON CONFLICT (unit_id, realm_id) DO UPDATE SET
+          total_count = score_stat.total_count + excluded.total_count,
+          total_score = score_stat.total_score + excluded.total_score,
+          score_1_count = score_stat.score_1_count + excluded.score_1_count,
+          score_2_count = score_stat.score_2_count + excluded.score_2_count,
+          score_3_count = score_stat.score_3_count + excluded.score_3_count,
+          score_4_count = score_stat.score_4_count + excluded.score_4_count,
+          score_5_count = score_stat.score_5_count + excluded.score_5_count,
+          score_6_count = score_stat.score_6_count + excluded.score_6_count,
+          score_7_count = score_stat.score_7_count + excluded.score_7_count,
+          score_8_count = score_stat.score_8_count + excluded.score_8_count,
+          score_9_count = score_stat.score_9_count + excluded.score_9_count,
+          score_10_count = score_stat.score_10_count + excluded.score_10_count,
+          updated_at = now();
+      END IF;
+      DELETE FROM score_stat
+      WHERE unit_id = row_data.unit_id AND realm_id = row_data.realm_id AND total_count = 0;
+    END IF;
+
+    PERFORM apply_unit_engagement_stat(
+      row_data.unit_id, p_high_scores => direction * (row_data.value >= 8)::int
+    );
+    IF row_data.value >= 8 THEN
+      signal_kind := 'score_high'; unit_weight := 5; profile_weight := 5;
+    ELSIF row_data.value >= 6 THEN
+      signal_kind := 'score_medium'; unit_weight := 3; profile_weight := 3;
+    ELSIF row_data.value <= 3 THEN
+      signal_kind := 'score_low'; unit_weight := 0; profile_weight := -4;
+    ELSE
+      signal_kind := NULL; unit_weight := 0; profile_weight := 0;
+    END IF;
+    IF signal_kind IS NOT NULL THEN
+      IF unit_weight > 0 THEN
+        PERFORM apply_recommendation_unit_signal(
+          row_data.unit_id, row_data.updated_at, signal_kind, direction, direction * unit_weight
+        );
+      END IF;
+      PERFORM apply_recommendation_profile_signal(
+        row_data.profile_id, row_data.unit_id, row_data.updated_at, signal_kind,
+        direction, direction * profile_weight
+      );
+    END IF;
+  END LOOP;
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: maintain_structure_application_support(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_structure_application_support() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF TG_OP = 'DELETE' OR NEW.value = -1 THEN
+    DELETE FROM unit_tag_structure_support
+    WHERE unit_id = coalesce(NEW.unit_id, OLD.unit_id)
+      AND structure_id = coalesce(NEW.structure_id, OLD.structure_id)
+      AND profile_id = coalesce(NEW.profile_id, OLD.profile_id);
+  ELSE
+    INSERT INTO unit_tag_structure_support (
+      unit_id,
+      tag_id,
+      profile_id,
+      structure_id
+    )
+    SELECT NEW.unit_id, member.member_unit_id, NEW.profile_id, NEW.structure_id
+    FROM unit_structure_member member
+    WHERE member.structure_id = NEW.structure_id
+    ON CONFLICT DO NOTHING;
+  END IF;
+  RETURN NULL;
+END
+$$;
+
+
+--
+-- Name: maintain_unit_alias_vote_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_unit_alias_vote_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE row_data unit_alias_vote%ROWTYPE; direction bigint; change record;
+BEGIN
+  FOR change IN
+    SELECT OLD AS row_data, -1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'DELETE')
+    UNION ALL SELECT NEW AS row_data, 1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'INSERT')
+  LOOP
+    row_data := change.row_data; direction := change.direction;
+    IF EXISTS (SELECT 1 FROM unit_alias WHERE id = row_data.alias_id) THEN
+      IF direction < 0 THEN
+        UPDATE unit_alias_vote_stat SET score = score + direction * row_data.value,
+          vote_count = vote_count + direction, updated_at = now()
+        WHERE alias_id = row_data.alias_id;
+        IF NOT FOUND THEN
+          RAISE EXCEPTION 'missing unit_alias_vote_stat row for decrement: %',
+            row_data.alias_id USING ERRCODE = '23514';
+        END IF;
+      ELSE
+        INSERT INTO unit_alias_vote_stat (alias_id, score, vote_count)
+        VALUES (row_data.alias_id, direction * row_data.value, direction)
+        ON CONFLICT (alias_id) DO UPDATE SET
+          score = unit_alias_vote_stat.score + excluded.score,
+          vote_count = unit_alias_vote_stat.vote_count + excluded.vote_count,
+          updated_at = now();
+      END IF;
+      DELETE FROM unit_alias_vote_stat WHERE alias_id = row_data.alias_id AND vote_count = 0;
+    END IF;
+  END LOOP;
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: maintain_unit_follow_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_unit_follow_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE row_data unit_follow%ROWTYPE; direction bigint; change record;
+BEGIN
+  FOR change IN
+    SELECT OLD AS row_data, -1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'DELETE')
+    UNION ALL SELECT NEW AS row_data, 1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'INSERT')
+  LOOP
+    row_data := change.row_data; direction := change.direction;
+    IF EXISTS (SELECT 1 FROM unit WHERE id = row_data.unit_id) THEN
+      IF direction < 0 THEN
+        UPDATE unit_follow_stat SET follower_count = follower_count + direction,
+          updated_at = now() WHERE unit_id = row_data.unit_id;
+        IF NOT FOUND THEN
+          RAISE EXCEPTION 'missing unit_follow_stat row for decrement: %',
+            row_data.unit_id USING ERRCODE = '23514';
+        END IF;
+      ELSE
+        INSERT INTO unit_follow_stat (unit_id, follower_count)
+        VALUES (row_data.unit_id, direction)
+        ON CONFLICT (unit_id) DO UPDATE SET
+          follower_count = unit_follow_stat.follower_count + excluded.follower_count,
+          updated_at = now();
+      END IF;
+      DELETE FROM unit_follow_stat WHERE unit_id = row_data.unit_id AND follower_count = 0;
+    END IF;
+  END LOOP;
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: maintain_unit_progress_stats(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_unit_progress_stats() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE row_data unit_progress%ROWTYPE; direction bigint;
+signal_kind text; signal_weight double precision;
+change record;
+BEGIN
+  FOR change IN
+    SELECT OLD AS row_data, -1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'DELETE')
+    UNION ALL SELECT NEW AS row_data, 1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'INSERT')
+  LOOP
+    row_data := change.row_data; direction := change.direction;
+    IF row_data.deleted_at IS NULL AND row_data.status IN ('active', 'completed', 'dropped') THEN
+      PERFORM apply_unit_engagement_stat(
+        row_data.unit_id,
+        p_active_progress => direction * (row_data.status = 'active')::int,
+        p_completions => direction * (row_data.status = 'completed')::int,
+        p_negative_progress => direction * (row_data.status = 'dropped')::int
+      );
+      signal_kind := CASE row_data.status WHEN 'active' THEN 'progress_active'
+        WHEN 'completed' THEN 'progress_completed' ELSE 'progress_dropped' END;
+      signal_weight := CASE row_data.status WHEN 'active' THEN 3
+        WHEN 'completed' THEN 5 ELSE -4 END;
+      IF signal_weight > 0 THEN
+        PERFORM apply_recommendation_unit_signal(
+          row_data.unit_id, row_data.last_seen_at, signal_kind, direction,
+          direction * signal_weight
+        );
+      END IF;
+      PERFORM apply_recommendation_profile_signal(
+        row_data.profile_id, row_data.unit_id, row_data.last_seen_at, signal_kind,
+        direction, direction * signal_weight
+      );
+    END IF;
+  END LOOP;
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: maintain_unit_reaction_stats(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_unit_reaction_stats() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF TG_OP IN ('UPDATE', 'DELETE') THEN
+    PERFORM apply_reaction_change(
+      OLD.profile_id, OLD.unit_id, OLD.realm_id, OLD.reaction::text, OLD.updated_at, -1
+    );
+  END IF;
+  IF TG_OP IN ('UPDATE', 'INSERT') THEN
+    PERFORM apply_reaction_change(
+      NEW.profile_id, NEW.unit_id, NEW.realm_id, NEW.reaction::text, NEW.updated_at, 1
+    );
+  END IF;
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: maintain_unit_share_stats(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_unit_share_stats() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE row_data unit_share%ROWTYPE; direction bigint; change record;
+BEGIN
+  FOR change IN
+    SELECT OLD AS row_data, -1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'DELETE')
+    UNION ALL SELECT NEW AS row_data, 1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'INSERT')
+  LOOP
+    row_data := change.row_data; direction := change.direction;
+    PERFORM apply_unit_engagement_stat(row_data.unit_id, p_shares => direction);
+    PERFORM apply_recommendation_unit_signal(
+      row_data.unit_id, row_data.created_at, 'share', direction, direction * 4
+    );
+    PERFORM apply_recommendation_profile_signal(
+      row_data.profile_id, row_data.unit_id, row_data.created_at, 'share', direction,
+      direction * 4
+    );
+  END LOOP;
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: maintain_unit_source_link_vote_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_unit_source_link_vote_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE row_data unit_source_link_vote%ROWTYPE; direction bigint; change record;
+BEGIN
+  FOR change IN
+    SELECT OLD AS row_data, -1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'DELETE')
+    UNION ALL SELECT NEW AS row_data, 1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'INSERT')
+  LOOP
+    row_data := change.row_data; direction := change.direction;
+    IF EXISTS (SELECT 1 FROM unit_source_link WHERE id = row_data.link_id) THEN
+      IF direction < 0 THEN
+        UPDATE unit_source_link_vote_stat SET score = score + direction * row_data.value,
+          vote_count = vote_count + direction, updated_at = now()
+        WHERE link_id = row_data.link_id;
+        IF NOT FOUND THEN
+          RAISE EXCEPTION 'missing unit_source_link_vote_stat row for decrement: %',
+            row_data.link_id USING ERRCODE = '23514';
+        END IF;
+      ELSE
+        INSERT INTO unit_source_link_vote_stat (link_id, score, vote_count)
+        VALUES (row_data.link_id, direction * row_data.value, direction)
+        ON CONFLICT (link_id) DO UPDATE SET
+          score = unit_source_link_vote_stat.score + excluded.score,
+          vote_count = unit_source_link_vote_stat.vote_count + excluded.vote_count,
+          updated_at = now();
+      END IF;
+      DELETE FROM unit_source_link_vote_stat
+      WHERE link_id = row_data.link_id AND vote_count = 0;
+    END IF;
+  END LOOP;
+  RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: maintain_unit_structure_application_vote_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_unit_structure_application_vote_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  PERFORM refresh_unit_structure_application_vote_stat(
+    coalesce(NEW.unit_id, OLD.unit_id),
+    coalesce(NEW.structure_id, OLD.structure_id)
+  );
+  RETURN NULL;
+END
+$$;
+
+
+--
+-- Name: maintain_unit_structure_vote_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_unit_structure_vote_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  PERFORM refresh_unit_structure_vote_stat(
+    coalesce(NEW.structure_id, OLD.structure_id)
+  );
+  RETURN NULL;
+END
+$$;
+
+
+--
+-- Name: maintain_unit_tag_vote_stat(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.maintain_unit_tag_vote_stat() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  target_unit_id uuid := coalesce(NEW.unit_id, OLD.unit_id);
+  target_tag_id uuid := coalesce(NEW.tag_id, OLD.tag_id);
+BEGIN
+  PERFORM lock_unit_effective_tag_key(target_unit_id, target_tag_id);
+  INSERT INTO unit_tag_vote_stat (unit_id, tag_id, score, vote_count)
+  SELECT
+    target_unit_id,
+    target_tag_id,
+    coalesce(sum(value), 0)::bigint,
+    count(*)::bigint
+  FROM unit_effective_tag_vote
+  WHERE unit_id = target_unit_id AND tag_id = target_tag_id
+  HAVING count(*) > 0
+  ON CONFLICT (unit_id, tag_id) DO UPDATE SET
+    score = excluded.score,
+    vote_count = excluded.vote_count,
+    updated_at = now();
+  DELETE FROM unit_tag_vote_stat
+  WHERE unit_id = target_unit_id
+    AND tag_id = target_tag_id
+    AND vote_count = 0;
+  RETURN NULL;
+END
+$$;
+
+
+--
+-- Name: message_is_unread(uuid, uuid, timestamp with time zone, uuid); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.message_is_unread(p_conversation_id uuid, p_recipient_id uuid, p_message_created_at timestamp with time zone, p_message_id uuid) RETURNS boolean
+    LANGUAGE sql STABLE
+    AS $$
+  SELECT marker.id IS NULL OR (p_message_created_at, p_message_id) > (marker.created_at, marker.id)
+  FROM (SELECT 1) seed
+  LEFT JOIN conversation_read read_state
+    ON read_state.conversation_id = p_conversation_id AND read_state.profile_id = p_recipient_id
+  LEFT JOIN message marker ON marker.id = read_state.last_read_message_id;
+$$;
+
+
+--
+-- Name: prepare_unit_structure_definition(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.prepare_unit_structure_definition() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  invalid_member_count integer;
+BEGIN
+  IF cardinality(NEW.member_unit_ids) <>
+    (SELECT count(DISTINCT member_id) FROM unnest(NEW.member_unit_ids) member_id)
+  THEN
+    RAISE EXCEPTION 'Unit structure members must be distinct'
+      USING ERRCODE = '23514';
+  END IF;
+
+  IF NEW.kind = 'tag.hierarchy_path' THEN
+    SELECT count(*) INTO invalid_member_count
+    FROM unnest(NEW.member_unit_ids) member_id
+    LEFT JOIN tag ON tag.id = member_id
+    LEFT JOIN unit ON unit.id = member_id
+    WHERE tag.id IS NULL
+       OR unit.kind <> 'tag'
+       OR unit.status <> 'published'
+       OR unit.visibility <> 'public'
+       OR unit.moderation_status <> 'approved'
+       OR unit.deleted_at IS NOT NULL;
+    IF invalid_member_count <> 0 THEN
+      RAISE EXCEPTION 'Tag hierarchy paths require active public Tag members'
+        USING ERRCODE = '23514';
+    END IF;
+  ELSE
+    RAISE EXCEPTION 'Unsupported Unit structure kind: %', NEW.kind
+      USING ERRCODE = '23514';
+  END IF;
+
+  IF TG_OP = 'UPDATE' THEN
+    PERFORM lock_unit_structure_definition_key(NEW.id);
+    IF EXISTS (
+      SELECT 1
+      FROM unit_structure_application application
+      WHERE application.structure_id = NEW.id
+        AND application.unit_id = ANY(NEW.member_unit_ids)
+    ) THEN
+      RAISE EXCEPTION 'A Tag hierarchy path cannot contain an existing application target'
+        USING ERRCODE = '23514';
+    END IF;
+    IF EXISTS (
+      SELECT 1
+      FROM unit_structure_application_vote application_vote
+      CROSS JOIN unnest(NEW.member_unit_ids) member_id
+      JOIN unit_tag_vote direct_vote
+        ON direct_vote.unit_id = application_vote.unit_id
+       AND direct_vote.tag_id = member_id
+       AND direct_vote.profile_id = application_vote.profile_id
+       AND direct_vote.value = -1
+      WHERE application_vote.structure_id = NEW.id
+        AND application_vote.value = 1
+    ) THEN
+      RAISE EXCEPTION 'Administrative Structure correction conflicts with a negative direct Tag vote'
+        USING ERRCODE = '23514';
+    END IF;
+  END IF;
+  RETURN NEW;
+END
+$$;
+
+
+--
+-- Name: project_unit_structure_definition(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.project_unit_structure_definition() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF TG_OP = 'UPDATE' THEN
+    DELETE FROM unit_structure_edge
+    WHERE structure_id = NEW.id;
+    DELETE FROM unit_structure_member
+    WHERE structure_id = NEW.id;
+  END IF;
+
+  INSERT INTO unit_structure_member (
+    structure_id,
+    ordinal,
+    member_unit_id
+  )
+  SELECT NEW.id, member.ordinality - 1, member.id
+  FROM unnest(NEW.member_unit_ids) WITH ORDINALITY AS member(id, ordinality);
+
+  INSERT INTO unit_structure_edge (
+    structure_id,
+    ordinal,
+    parent_unit_id,
+    child_unit_id
+  )
+  SELECT NEW.id, member.ordinality - 1, member.id, NEW.member_unit_ids[member.ordinality + 1]
+  FROM unnest(NEW.member_unit_ids) WITH ORDINALITY AS member(id, ordinality)
+  WHERE member.ordinality < cardinality(NEW.member_unit_ids);
+
+  IF TG_OP = 'UPDATE' THEN
+    INSERT INTO unit_tag_structure_support (
+      unit_id,
+      tag_id,
+      profile_id,
+      structure_id
+    )
+    SELECT
+      application_vote.unit_id,
+      member.member_unit_id,
+      application_vote.profile_id,
+      application_vote.structure_id
+    FROM unit_structure_application_vote application_vote
+    JOIN unit_structure_member member
+      ON member.structure_id = application_vote.structure_id
+    WHERE application_vote.structure_id = NEW.id
+      AND application_vote.value = 1
+    ORDER BY
+      application_vote.unit_id,
+      member.member_unit_id,
+      application_vote.profile_id
+    ON CONFLICT DO NOTHING;
+  END IF;
+  RETURN NEW;
+END
+$$;
+
+
+--
+-- Name: protect_association_context_post_kind(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.protect_association_context_post_kind() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF OLD.kind = 'wiki'::post_kind
+    AND NEW.kind <> 'wiki'::post_kind
+    AND (
+      EXISTS (
+        SELECT 1 FROM subject_association
+        WHERE context_post_id = OLD.id
+      )
+      OR EXISTS (
+        SELECT 1 FROM unit_association_proposal
+        WHERE context_post_id = OLD.id
+      )
+    )
+  THEN
+    RAISE EXCEPTION 'referenced association context post % must remain a wiki Post', OLD.id
+      USING ERRCODE = '23514';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: protect_conversation_aggregate_identity(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.protect_conversation_aggregate_identity() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF (OLD.id, OLD.participant_low_profile_id, OLD.participant_high_profile_id, OLD.created_at)
+    IS DISTINCT FROM
+    (NEW.id, NEW.participant_low_profile_id, NEW.participant_high_profile_id, NEW.created_at) THEN
+    RAISE EXCEPTION 'conversation aggregate identity is immutable' USING ERRCODE = '55000';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: protect_conversation_read_identity(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.protect_conversation_read_identity() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF (OLD.conversation_id, OLD.profile_id) IS DISTINCT FROM (NEW.conversation_id, NEW.profile_id) THEN
+    RAISE EXCEPTION 'conversation read identity is immutable' USING ERRCODE = '55000';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: protect_immutable_unit_structure(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.protect_immutable_unit_structure() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF pg_trigger_depth() > 1 THEN
+    RETURN CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
+  END IF;
+  IF TG_TABLE_NAME = 'unit_structure'
+     AND TG_OP = 'UPDATE'
+     AND current_setting('rezics.unit_structure_admin_edit_id', true) = OLD.id::text
+     AND NEW.id IS NOT DISTINCT FROM OLD.id
+     AND NEW.unit_kind IS NOT DISTINCT FROM OLD.unit_kind
+     AND NEW.kind IS NOT DISTINCT FROM OLD.kind
+     AND NEW.definition_version IS NOT DISTINCT FROM OLD.definition_version
+     AND NEW.created_by_profile_id IS NOT DISTINCT FROM OLD.created_by_profile_id
+     AND NEW.created_at IS NOT DISTINCT FROM OLD.created_at
+  THEN
+    RETURN NEW;
+  END IF;
+  RAISE EXCEPTION 'Unit structure definitions and projections are immutable'
+    USING ERRCODE = '55000';
+END
+$$;
+
+
+--
+-- Name: protect_message_aggregate_identity(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.protect_message_aggregate_identity() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF (OLD.id, OLD.conversation_id, OLD.sender_profile_id, OLD.created_at)
+    IS DISTINCT FROM (NEW.id, NEW.conversation_id, NEW.sender_profile_id, NEW.created_at) THEN
+    RAISE EXCEPTION 'message aggregate identity is immutable' USING ERRCODE = '55000';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: protect_post_reply_identity(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.protect_post_reply_identity() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF (OLD.post_id, OLD.root_post_id, OLD.parent_post_id, OLD.depth, OLD.created_at)
+    IS DISTINCT FROM
+    (NEW.post_id, NEW.root_post_id, NEW.parent_post_id, NEW.depth, NEW.created_at) THEN
+    RAISE EXCEPTION 'post_reply identity is immutable' USING ERRCODE = '55000';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: protect_realm_tag_context_post_kind(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.protect_realm_tag_context_post_kind() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF OLD."kind" = 'wiki'
+    AND NEW."kind" <> 'wiki'
+    AND EXISTS (
+      SELECT 1
+      FROM "realm_tag_context"
+      WHERE "context_post_id" = OLD."id"
+    )
+  THEN
+    RAISE EXCEPTION 'Post % is a Realm Tag Context and must remain a Wiki Post', OLD."id"
+      USING ERRCODE = '23514';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: protect_unit_revision_identity(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.protect_unit_revision_identity() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	IF ROW(
+		OLD."id",
+		OLD."unit_id",
+		OLD."parent_revision_id",
+		OLD."actor_profile_id",
+		OLD."edit_summary",
+		OLD."minor",
+		OLD."byte_size",
+		OLD."created_at"
+	) IS DISTINCT FROM ROW(
+		NEW."id",
+		NEW."unit_id",
+		NEW."parent_revision_id",
+		NEW."actor_profile_id",
+		NEW."edit_summary",
+		NEW."minor",
+		NEW."byte_size",
+		NEW."created_at"
+	) THEN
+		RAISE EXCEPTION 'unit_revision identity is immutable' USING ERRCODE = '55000';
+	END IF;
+	RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: refresh_book_localized_content_metric_stat(uuid); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.refresh_book_localized_content_metric_stat(p_book_unit_id uuid) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    DELETE FROM public.book_localized_content_metric_stat
+    WHERE book_unit_id = p_book_unit_id;
+
+    INSERT INTO public.book_localized_content_metric_stat (
+        book_unit_id, language, chapter_count, word_count, character_count
+    )
+    SELECT p_book_unit_id, metric.language, count(*), sum(metric.word_count),
+        sum(metric.character_count)
+    FROM public.content_structure_node AS node
+    JOIN public.content_structure AS structure
+        ON structure.id = node.structure_id
+        AND structure.owner_unit_id = node.owner_unit_id
+    JOIN public.post AS content_post ON content_post.id = node.content_unit_id
+    JOIN public.unit AS content_unit ON content_unit.id = node.content_unit_id
+    JOIN public.unit_localization AS localization ON localization.unit_id = node.content_unit_id
+    JOIN public.unit_localization_content_metric AS metric
+        ON metric.unit_id = node.content_unit_id
+        AND metric.language = localization.language
+    WHERE structure.owner_unit_id = p_book_unit_id
+      AND structure.kind = 'book.contents'
+      AND structure.deleted_at IS NULL
+      AND node.deleted_at IS NULL
+      AND content_post.kind = 'chapter'
+      AND content_unit.deleted_at IS NULL
+      AND content_unit.status = 'published'
+      AND content_unit.visibility IN ('public', 'unlisted')
+      AND localization.content_status = 'published'
+    GROUP BY metric.language;
+END
+$$;
+
+
+--
+-- Name: refresh_book_metric_from_content_unit(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.refresh_book_metric_from_content_unit() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    book_id uuid;
+BEGIN
+    FOR book_id IN
+        SELECT DISTINCT node.owner_unit_id
+        FROM public.content_structure_node AS node
+        JOIN public.content_structure AS structure ON structure.id = node.structure_id
+        WHERE node.content_unit_id = coalesce(NEW.id, OLD.id)
+          AND structure.kind = 'book.contents'
+    LOOP
+        PERFORM public.refresh_book_localized_content_metric_stat(book_id);
+    END LOOP;
+    RETURN NULL;
+END
+$$;
+
+
+--
+-- Name: refresh_book_metric_from_localization(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.refresh_book_metric_from_localization() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    book_id uuid;
+    p_content_unit_id uuid := coalesce(NEW.unit_id, OLD.unit_id);
+BEGIN
+    FOR book_id IN
+        SELECT DISTINCT node.owner_unit_id
+        FROM public.content_structure_node AS node
+        JOIN public.content_structure AS structure ON structure.id = node.structure_id
+        WHERE node.content_unit_id = p_content_unit_id
+          AND structure.kind = 'book.contents'
+    LOOP
+        PERFORM public.refresh_book_localized_content_metric_stat(book_id);
+    END LOOP;
+    RETURN NULL;
+END
+$$;
+
+
+--
+-- Name: refresh_book_metric_from_node(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.refresh_book_metric_from_node() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    IF TG_OP <> 'INSERT' THEN
+        PERFORM public.refresh_book_localized_content_metric_stat(OLD.owner_unit_id);
+    END IF;
+    IF TG_OP <> 'DELETE' AND (
+        TG_OP = 'INSERT' OR NEW.owner_unit_id IS DISTINCT FROM OLD.owner_unit_id
+    ) THEN
+        PERFORM public.refresh_book_localized_content_metric_stat(NEW.owner_unit_id);
+    END IF;
+    RETURN NULL;
+END
+$$;
+
+
+--
+-- Name: refresh_book_metric_from_structure(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.refresh_book_metric_from_structure() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    IF TG_OP <> 'INSERT' THEN
+        PERFORM public.refresh_book_localized_content_metric_stat(OLD.owner_unit_id);
+    END IF;
+    IF TG_OP <> 'DELETE' AND (
+        TG_OP = 'INSERT' OR NEW.owner_unit_id IS DISTINCT FROM OLD.owner_unit_id
+    ) THEN
+        PERFORM public.refresh_book_localized_content_metric_stat(NEW.owner_unit_id);
+    END IF;
+    RETURN NULL;
+END
+$$;
+
+
+--
+-- Name: refresh_conversation_last_message(uuid); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.refresh_conversation_last_message(p_conversation_id uuid) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE latest message%ROWTYPE;
+created_at_value timestamptz;
+BEGIN
+  SELECT * INTO latest FROM message
+  WHERE conversation_id = p_conversation_id
+  ORDER BY created_at DESC, id DESC LIMIT 1;
+  SELECT created_at INTO created_at_value FROM conversation WHERE id = p_conversation_id;
+  IF created_at_value IS NULL THEN RETURN; END IF;
+  UPDATE conversation_stat SET last_message_id = latest.id,
+    last_message_at = latest.created_at, updated_at = now()
+  WHERE conversation_id = p_conversation_id;
+  UPDATE conversation_participant_stat SET last_message_id = latest.id,
+    last_message_at = latest.created_at,
+    sort_at = coalesce(latest.created_at, created_at_value), updated_at = now()
+  WHERE conversation_id = p_conversation_id;
+END;
+$$;
+
+
+--
+-- Name: refresh_unit_effective_tag(uuid, uuid); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.refresh_unit_effective_tag(target_unit_id uuid, target_tag_id uuid) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  has_direct boolean;
+  support_count bigint;
+BEGIN
+  PERFORM lock_unit_effective_tag_key(target_unit_id, target_tag_id);
+  SELECT EXISTS (
+    SELECT 1 FROM unit_tag
+    WHERE unit_id = target_unit_id AND tag_id = target_tag_id
+  ) INTO has_direct;
+  SELECT count(*)
+  FROM unit_tag_structure_support
+  WHERE unit_id = target_unit_id AND tag_id = target_tag_id
+  INTO support_count;
+
+  IF has_direct OR support_count > 0 THEN
+    INSERT INTO unit_effective_tag (
+      unit_id,
+      tag_id,
+      direct,
+      structure_support_count
+    )
+    VALUES (target_unit_id, target_tag_id, has_direct, support_count)
+    ON CONFLICT (unit_id, tag_id) DO UPDATE SET
+      direct = excluded.direct,
+      structure_support_count = excluded.structure_support_count,
+      updated_at = now();
+  ELSE
+    DELETE FROM unit_effective_tag
+    WHERE unit_id = target_unit_id AND tag_id = target_tag_id;
+  END IF;
+END
+$$;
+
+
+--
+-- Name: refresh_unit_effective_tag_vote(uuid, uuid, uuid); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.refresh_unit_effective_tag_vote(target_unit_id uuid, target_tag_id uuid, target_profile_id uuid) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  direct_value integer;
+  has_structure_support boolean;
+BEGIN
+  PERFORM lock_unit_effective_tag_vote_key(
+    target_unit_id,
+    target_tag_id,
+    target_profile_id
+  );
+  SELECT value INTO direct_value
+  FROM unit_tag_vote
+  WHERE unit_id = target_unit_id
+    AND tag_id = target_tag_id
+    AND profile_id = target_profile_id;
+  SELECT EXISTS (
+    SELECT 1 FROM unit_tag_structure_support
+    WHERE unit_id = target_unit_id
+      AND tag_id = target_tag_id
+      AND profile_id = target_profile_id
+  ) INTO has_structure_support;
+
+  IF direct_value IS NOT NULL OR has_structure_support THEN
+    INSERT INTO unit_effective_tag_vote (
+      unit_id,
+      tag_id,
+      profile_id,
+      value
+    )
+    VALUES (
+      target_unit_id,
+      target_tag_id,
+      target_profile_id,
+      coalesce(direct_value, 1)
+    )
+    ON CONFLICT (unit_id, tag_id, profile_id) DO UPDATE SET
+      value = excluded.value,
+      updated_at = now();
+  ELSE
+    DELETE FROM unit_effective_tag_vote
+    WHERE unit_id = target_unit_id
+      AND tag_id = target_tag_id
+      AND profile_id = target_profile_id;
+  END IF;
+END
+$$;
+
+
+--
+-- Name: refresh_unit_structure_application_vote_stat(uuid, uuid); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.refresh_unit_structure_application_vote_stat(target_unit_id uuid, target_structure_id uuid) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  PERFORM pg_advisory_xact_lock(hashtextextended(
+    target_unit_id::text || ':' || target_structure_id::text,
+    71004
+  ));
+  INSERT INTO unit_structure_application_vote_stat (
+    unit_id,
+    structure_id,
+    score,
+    vote_count
+  )
+  SELECT
+    target_unit_id,
+    target_structure_id,
+    coalesce(sum(value), 0)::bigint,
+    count(*)::bigint
+  FROM unit_structure_application_vote
+  WHERE unit_id = target_unit_id AND structure_id = target_structure_id
+  ON CONFLICT (unit_id, structure_id) DO UPDATE SET
+    score = excluded.score,
+    vote_count = excluded.vote_count,
+    updated_at = now();
+  DELETE FROM unit_structure_application_vote_stat
+  WHERE unit_id = target_unit_id
+    AND structure_id = target_structure_id
+    AND vote_count = 0;
+END
+$$;
+
+
+--
+-- Name: refresh_unit_structure_vote_stat(uuid); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.refresh_unit_structure_vote_stat(target_structure_id uuid) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  PERFORM pg_advisory_xact_lock(hashtextextended(
+    target_structure_id::text,
+    71003
+  ));
+  INSERT INTO unit_structure_vote_stat (structure_id, score, vote_count)
+  SELECT
+    target_structure_id,
+    coalesce(sum(value), 0)::bigint,
+    count(*)::bigint
+  FROM unit_structure_vote
+  WHERE structure_id = target_structure_id
+  ON CONFLICT (structure_id) DO UPDATE SET
+    score = excluded.score,
+    vote_count = excluded.vote_count,
+    updated_at = now();
+  DELETE FROM unit_structure_vote_stat
+  WHERE structure_id = target_structure_id AND vote_count = 0;
+END
+$$;
+
+
+--
+-- Name: reject_conflicting_direct_tag_vote(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.reject_conflicting_direct_tag_vote() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  PERFORM lock_unit_effective_tag_vote_key(
+    NEW.unit_id,
+    NEW.tag_id,
+    NEW.profile_id
+  );
+  IF NEW.value = -1 AND EXISTS (
+    SELECT 1 FROM unit_tag_structure_support
+    WHERE unit_id = NEW.unit_id
+      AND tag_id = NEW.tag_id
+      AND profile_id = NEW.profile_id
+  ) THEN
+    RAISE EXCEPTION 'A negative direct Tag vote conflicts with positive structure support'
+      USING ERRCODE = '23514';
+  END IF;
+  RETURN NEW;
+END
+$$;
+
+
+--
+-- Name: reject_conflicting_structure_application_vote(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.reject_conflicting_structure_application_vote() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  PERFORM lock_unit_structure_definition_key(NEW.structure_id);
+  IF EXISTS (
+    SELECT 1
+    FROM unit_structure_member member
+    WHERE member.structure_id = NEW.structure_id
+      AND member.member_unit_id = NEW.unit_id
+  ) THEN
+    RAISE EXCEPTION 'A Tag hierarchy path cannot be applied to one of its members'
+      USING ERRCODE = '23514';
+  END IF;
+  PERFORM lock_unit_effective_tag_vote_key(
+    NEW.unit_id,
+    member.member_unit_id,
+    NEW.profile_id
+  )
+  FROM unit_structure_member member
+  WHERE member.structure_id = NEW.structure_id
+  ORDER BY member.member_unit_id;
+
+  IF NEW.value = 1 AND EXISTS (
+    SELECT 1
+    FROM unit_structure_member member
+    JOIN unit_tag_vote direct_vote
+      ON direct_vote.unit_id = NEW.unit_id
+     AND direct_vote.tag_id = member.member_unit_id
+     AND direct_vote.profile_id = NEW.profile_id
+     AND direct_vote.value = -1
+    WHERE member.structure_id = NEW.structure_id
+  ) THEN
+    RAISE EXCEPTION 'Positive structure support conflicts with a negative direct Tag vote'
+      USING ERRCODE = '23514';
+  END IF;
+  RETURN NEW;
+END
+$$;
+
+
+--
+-- Name: reject_immutable_history_mutation(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.reject_immutable_history_mutation() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	RAISE EXCEPTION '% is append-only', TG_TABLE_NAME USING ERRCODE = '55000';
+END;
+$$;
+
+
+--
+-- Name: remove_reply_signals_before_unit_delete(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.remove_reply_signals_before_unit_delete() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE relation post_reply%ROWTYPE;
+BEGIN
+  SELECT * INTO relation FROM post_reply WHERE post_id = OLD.id;
+  IF NOT FOUND THEN RETURN OLD; END IF;
+  PERFORM apply_post_reply_stat_delta(
+    relation.root_post_id,
+    relation.parent_post_id,
+    -(OLD.deleted_at IS NULL)::int,
+    -(OLD.deleted_at IS NULL AND OLD.status = 'published' AND OLD.visibility = 'public'
+      AND OLD.moderation_status = 'approved')::int
+  );
+  IF OLD.deleted_at IS NULL THEN
+    PERFORM apply_unit_engagement_stat(relation.root_post_id, p_replies => -1);
+    IF relation.parent_post_id IS NOT NULL THEN
+      PERFORM apply_unit_engagement_stat(relation.parent_post_id, p_replies => -1);
+    END IF;
+  END IF;
+  PERFORM apply_recommendation_unit_signal(
+    relation.root_post_id, relation.created_at, 'reply', -1, -4
+  );
+  IF relation.parent_post_id IS NOT NULL THEN
+    PERFORM apply_recommendation_unit_signal(
+      relation.parent_post_id, relation.created_at, 'reply', -1, -4
+    );
+  END IF;
+  RETURN OLD;
+END;
+$$;
+
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
 -- Name: account_enforcement; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1170,6 +4111,49 @@ CREATE TABLE public.book (
     CONSTRAINT book_page_count_check CHECK (((page_count IS NULL) OR (page_count > 0))),
     CONSTRAINT book_release_status_check CHECK ((release_status = ANY (ARRAY['ongoing'::text, 'hiatus'::text, 'completed'::text, 'cancelled'::text]))),
     CONSTRAINT book_word_count_check CHECK (((word_count IS NULL) OR (word_count >= 0)))
+);
+
+
+--
+-- Name: book_chapter_progress_stat; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.book_chapter_progress_stat (
+    profile_id uuid NOT NULL,
+    book_unit_id uuid NOT NULL,
+    all_completed_count bigint DEFAULT 0 NOT NULL,
+    public_completed_count bigint DEFAULT 0 NOT NULL,
+    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT book_chapter_progress_stat_count_check CHECK (((all_completed_count >= 0) AND (public_completed_count >= 0) AND (public_completed_count <= all_completed_count)))
+);
+
+
+--
+-- Name: book_chapter_stat; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.book_chapter_stat (
+    book_unit_id uuid NOT NULL,
+    all_count bigint DEFAULT 0 NOT NULL,
+    public_count bigint DEFAULT 0 NOT NULL,
+    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT book_chapter_stat_count_check CHECK (((all_count >= 0) AND (public_count >= 0) AND (public_count <= all_count)))
+);
+
+
+--
+-- Name: book_localized_content_metric_stat; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.book_localized_content_metric_stat (
+    book_unit_id uuid NOT NULL,
+    language text NOT NULL,
+    chapter_count bigint DEFAULT 0 NOT NULL,
+    word_count bigint DEFAULT 0 NOT NULL,
+    character_count bigint DEFAULT 0 NOT NULL,
+    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT book_localized_content_metric_stat_count_check CHECK (((chapter_count >= 0) AND (word_count >= 0) AND (character_count >= 0))),
+    CONSTRAINT book_localized_content_metric_stat_language_check CHECK ((language = ANY (ARRAY['zh'::text, 'en'::text, 'ja'::text, 'ko'::text, 'de'::text, 'fr'::text, 'es'::text])))
 );
 
 
@@ -1696,6 +4680,18 @@ CREATE TABLE public.notification_preference (
 
 
 --
+-- Name: notification_recipient_stat; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.notification_recipient_stat (
+    profile_id uuid NOT NULL,
+    unread_count bigint DEFAULT 0 NOT NULL,
+    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT notification_recipient_stat_count_check CHECK ((unread_count >= 0))
+);
+
+
+--
 -- Name: platform_capability_grant; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -2066,6 +5062,18 @@ CREATE TABLE public.realm_score_context (
 
 
 --
+-- Name: realm_stat; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.realm_stat (
+    realm_id uuid NOT NULL,
+    active_member_count bigint DEFAULT 0 NOT NULL,
+    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT realm_stat_count_check CHECK ((active_member_count >= 0))
+);
+
+
+--
 -- Name: realm_tag_context; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -2125,6 +5133,19 @@ CREATE TABLE public.realm_unit (
     post_targeting_locked boolean DEFAULT false NOT NULL,
     publication_state public.realm_unit_publication_state DEFAULT 'active'::public.realm_unit_publication_state NOT NULL,
     CONSTRAINT realm_unit_not_self_check CHECK ((realm_id <> unit_id))
+);
+
+
+--
+-- Name: realm_unit_moderation_stat; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.realm_unit_moderation_stat (
+    realm_id uuid NOT NULL,
+    unit_id uuid NOT NULL,
+    open_report_count bigint DEFAULT 0 NOT NULL,
+    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT realm_unit_moderation_stat_count_check CHECK ((open_report_count >= 0))
 );
 
 
@@ -2355,8 +5376,14 @@ CREATE TABLE public.recommendation_unit_stat (
     engagement_24h double precision DEFAULT 0 NOT NULL,
     engagement_7d double precision DEFAULT 0 NOT NULL,
     created_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+    unit_created_at timestamp(3) with time zone NOT NULL,
+    best_score double precision NOT NULL,
+    hot_score double precision NOT NULL,
+    top_score double precision NOT NULL,
+    rising_score double precision NOT NULL,
     CONSTRAINT recommendation_unit_stat_counts_check CHECK (((impressions >= 0) AND (opens >= 0) AND (dwell_30s >= 0) AND (upvotes >= 0) AND (downvotes >= 0) AND (replies >= 0) AND (favorites >= 0) AND (shares >= 0) AND (high_scores >= 0) AND (active_progress >= 0) AND (completions >= 0) AND (negative_progress >= 0))),
-    CONSTRAINT recommendation_unit_stat_engagement_check CHECK (((engagement_6h >= (0)::double precision) AND (engagement_24h >= (0)::double precision) AND (engagement_7d >= (0)::double precision)))
+    CONSTRAINT recommendation_unit_stat_engagement_check CHECK (((engagement_6h >= (0)::double precision) AND (engagement_24h >= (0)::double precision) AND (engagement_7d >= (0)::double precision))),
+    CONSTRAINT recommendation_unit_stat_objective_score_check CHECK (((best_score >= (0)::double precision) AND (hot_score >= (0)::double precision) AND (top_score >= (0)::double precision) AND (rising_score >= (0)::double precision)))
 );
 
 
@@ -2710,7 +5737,7 @@ CREATE TABLE public.unit_access_invitation (
     created_at timestamp(3) with time zone DEFAULT now() CONSTRAINT unit_access_invitation_v2_created_at_not_null NOT NULL,
     updated_at timestamp(3) with time zone DEFAULT now() CONSTRAINT unit_access_invitation_v2_updated_at_not_null NOT NULL,
     CONSTRAINT unit_access_invitation_expiry_check CHECK (((expires_at > created_at) AND ((access_expires_at IS NULL) OR (access_expires_at > created_at)))),
-    CONSTRAINT unit_access_invitation_permissions_check CHECK ((((cardinality(permissions) >= 1) AND (cardinality(permissions) <= 25)) AND (array_position(permissions, 'unit.ownership.transfer'::public.unit_permission) IS NULL) AND (array_position(permissions, 'unit.delete'::public.unit_permission) IS NULL))),
+    CONSTRAINT unit_access_invitation_permissions_check CHECK (((cardinality(permissions) >= 1) AND (cardinality(permissions) <= 25) AND (array_position(permissions, 'unit.ownership.transfer'::public.unit_permission) IS NULL) AND (array_position(permissions, 'unit.delete'::public.unit_permission) IS NULL))),
     CONSTRAINT unit_access_invitation_profiles_differ_check CHECK ((invited_profile_id <> invited_by_profile_id)),
     CONSTRAINT unit_access_invitation_resolution_shape_check CHECK ((((resolution IS NULL) AND (resolved_at IS NULL) AND (resolved_by_profile_id IS NULL)) OR ((resolution IS NOT NULL) AND (resolved_at IS NOT NULL) AND (resolved_by_profile_id IS NOT NULL)))),
     CONSTRAINT unit_access_invitation_scope_check CHECK (((cardinality(scope) <= 8) AND ((cardinality(scope) = 0) OR (array_to_string(scope, '/'::text) ~ '^[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9-]*)*$'::text))))
@@ -3150,6 +6177,20 @@ CREATE TABLE public.unit_reaction_stat (
 
 
 --
+-- Name: unit_reference_curation_head; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.unit_reference_curation_head (
+    unit_id uuid NOT NULL,
+    kind text NOT NULL,
+    version integer DEFAULT 0 NOT NULL,
+    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT unit_reference_curation_head_kind_check CHECK ((kind = ANY (ARRAY['alias'::text, 'source_link'::text]))),
+    CONSTRAINT unit_reference_curation_head_version_check CHECK ((version >= 0))
+);
+
+
+--
 -- Name: unit_revision; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -3285,20 +6326,6 @@ CREATE TABLE public.unit_source_link_vote_stat (
     updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
     CONSTRAINT unit_source_link_vote_stat_count_check CHECK ((vote_count >= 0)),
     CONSTRAINT unit_source_link_vote_stat_score_check CHECK ((abs(score) <= vote_count))
-);
-
-
---
--- Name: unit_reference_curation_head; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.unit_reference_curation_head (
-    unit_id uuid NOT NULL,
-    kind text NOT NULL,
-    version integer DEFAULT 0 NOT NULL,
-    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT unit_reference_curation_head_kind_check CHECK ((kind = ANY (ARRAY['alias'::text, 'source_link'::text]))),
-    CONSTRAINT unit_reference_curation_head_version_check CHECK ((version >= 0))
 );
 
 
@@ -3622,2262 +6649,6 @@ CREATE TABLE public.zone_search_feature (
 
 
 --
--- Name: apply_reaction_change(uuid, uuid, uuid, text, timestamp with time zone, bigint); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.apply_reaction_change(p_profile_id uuid, p_unit_id uuid, p_realm_id uuid, p_reaction text, p_occurred_at timestamp with time zone, p_direction bigint) RETURNS void
-    LANGUAGE plpgsql
-    AS $$
-DECLARE unit_weight double precision; profile_weight double precision;
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM unit WHERE id = p_unit_id) THEN RETURN; END IF;
-
-  IF p_realm_id IS NULL OR EXISTS (SELECT 1 FROM realm WHERE id = p_realm_id) THEN
-    IF p_direction < 0 THEN
-      UPDATE unit_reaction_stat SET reaction_count = reaction_count + p_direction,
-        updated_at = now()
-      WHERE unit_id = p_unit_id AND realm_id IS NOT DISTINCT FROM p_realm_id
-        AND reaction = p_reaction::reaction_kind;
-      IF NOT FOUND THEN
-        RAISE EXCEPTION 'missing unit_reaction_stat row for decrement: %, %, %',
-          p_unit_id, p_realm_id, p_reaction USING ERRCODE = '23514';
-      END IF;
-    ELSE
-      INSERT INTO unit_reaction_stat (unit_id, realm_id, reaction, reaction_count)
-      VALUES (p_unit_id, p_realm_id, p_reaction::reaction_kind, p_direction)
-      ON CONFLICT (unit_id, realm_id, reaction) DO UPDATE SET
-        reaction_count = unit_reaction_stat.reaction_count + excluded.reaction_count,
-        updated_at = now();
-    END IF;
-    DELETE FROM unit_reaction_stat
-    WHERE unit_id = p_unit_id AND realm_id IS NOT DISTINCT FROM p_realm_id
-      AND reaction = p_reaction::reaction_kind AND reaction_count = 0;
-  END IF;
-
-  IF p_direction < 0 THEN
-    UPDATE unit_reaction_global_stat SET reaction_count = reaction_count + p_direction,
-      updated_at = now()
-    WHERE unit_id = p_unit_id AND reaction = p_reaction::reaction_kind;
-    IF NOT FOUND THEN
-      RAISE EXCEPTION 'missing unit_reaction_global_stat row for decrement: %, %',
-        p_unit_id, p_reaction USING ERRCODE = '23514';
-    END IF;
-  ELSE
-    INSERT INTO unit_reaction_global_stat (unit_id, reaction, reaction_count)
-    VALUES (p_unit_id, p_reaction::reaction_kind, p_direction)
-    ON CONFLICT (unit_id, reaction) DO UPDATE SET
-      reaction_count = unit_reaction_global_stat.reaction_count + excluded.reaction_count,
-      updated_at = now();
-  END IF;
-  DELETE FROM unit_reaction_global_stat
-  WHERE unit_id = p_unit_id AND reaction = p_reaction::reaction_kind AND reaction_count = 0;
-
-  IF p_reaction = 'upvote' THEN
-    PERFORM apply_unit_engagement_stat(p_unit_id, p_upvotes => p_direction);
-    unit_weight := 3; profile_weight := 3;
-  ELSE
-    PERFORM apply_unit_engagement_stat(p_unit_id, p_downvotes => p_direction);
-    unit_weight := 0; profile_weight := -4;
-  END IF;
-  PERFORM apply_recommendation_unit_signal(
-    p_unit_id, p_occurred_at, p_reaction,
-    p_direction, p_direction * unit_weight
-  );
-  PERFORM apply_recommendation_profile_signal(
-    p_profile_id, p_unit_id, p_occurred_at, p_reaction,
-    p_direction, p_direction * profile_weight
-  );
-END;
-$$;
-
-
---
--- Name: apply_recommendation_profile_signal(uuid, uuid, timestamp with time zone, text, bigint, double precision); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.apply_recommendation_profile_signal(p_profile_id uuid, p_unit_id uuid, p_occurred_at timestamp with time zone, p_kind text, p_count_delta bigint, p_weight_delta double precision) RETURNS void
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-  bucket timestamptz := date_bin(interval '1 hour', p_occurred_at, timestamptz '2000-01-01 00:00:00+00');
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM profile WHERE id = p_profile_id)
-    OR NOT EXISTS (SELECT 1 FROM unit WHERE id = p_unit_id) THEN
-    RETURN;
-  END IF;
-  IF p_count_delta < 0 THEN
-    UPDATE recommendation_profile_signal_hourly SET
-      signal_count = signal_count + p_count_delta,
-      weight = weight + p_weight_delta,
-      updated_at = now()
-    WHERE profile_id = p_profile_id AND unit_id = p_unit_id
-      AND bucket_start = bucket AND kind = p_kind::recommendation_signal_kind;
-  ELSE
-    INSERT INTO recommendation_profile_signal_hourly (
-      profile_id, unit_id, bucket_start, kind, signal_count, weight
-    ) VALUES (
-      p_profile_id, p_unit_id, bucket, p_kind::recommendation_signal_kind,
-      p_count_delta, p_weight_delta
-    )
-    ON CONFLICT (profile_id, unit_id, bucket_start, kind) DO UPDATE SET
-      signal_count = recommendation_profile_signal_hourly.signal_count + excluded.signal_count,
-      weight = recommendation_profile_signal_hourly.weight + excluded.weight,
-      updated_at = now();
-  END IF;
-
-  DELETE FROM recommendation_profile_signal_hourly
-  WHERE profile_id = p_profile_id AND unit_id = p_unit_id AND bucket_start = bucket
-    AND kind = p_kind::recommendation_signal_kind AND signal_count = 0 AND weight = 0;
-END;
-$$;
-
-
---
--- Name: apply_recommendation_unit_signal(uuid, timestamp with time zone, text, bigint, double precision); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.apply_recommendation_unit_signal(p_unit_id uuid, p_occurred_at timestamp with time zone, p_kind text, p_count_delta bigint, p_weight_delta double precision) RETURNS void
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-  bucket timestamptz := date_bin(interval '1 hour', p_occurred_at, timestamptz '2000-01-01 00:00:00+00');
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM unit WHERE id = p_unit_id) THEN
-    RETURN;
-  END IF;
-  IF p_count_delta < 0 THEN
-    UPDATE recommendation_unit_signal_hourly SET
-      signal_count = signal_count + p_count_delta,
-      weight = weight + p_weight_delta,
-      updated_at = now()
-    WHERE unit_id = p_unit_id AND bucket_start = bucket
-      AND kind = p_kind::recommendation_signal_kind;
-  ELSE
-    INSERT INTO recommendation_unit_signal_hourly (
-      unit_id, bucket_start, kind, signal_count, weight
-    ) VALUES (
-      p_unit_id, bucket, p_kind::recommendation_signal_kind, p_count_delta, p_weight_delta
-    )
-    ON CONFLICT (unit_id, bucket_start, kind) DO UPDATE SET
-      signal_count = recommendation_unit_signal_hourly.signal_count + excluded.signal_count,
-      weight = recommendation_unit_signal_hourly.weight + excluded.weight,
-      updated_at = now();
-  END IF;
-
-  DELETE FROM recommendation_unit_signal_hourly
-  WHERE unit_id = p_unit_id AND bucket_start = bucket
-    AND kind = p_kind::recommendation_signal_kind
-    AND signal_count = 0 AND weight = 0;
-END;
-$$;
-
-
---
--- Name: apply_unit_engagement_stat(uuid, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.apply_unit_engagement_stat(p_unit_id uuid, p_upvotes bigint DEFAULT 0, p_downvotes bigint DEFAULT 0, p_replies bigint DEFAULT 0, p_favorites bigint DEFAULT 0, p_shares bigint DEFAULT 0, p_high_scores bigint DEFAULT 0, p_active_progress bigint DEFAULT 0, p_completions bigint DEFAULT 0, p_negative_progress bigint DEFAULT 0) RETURNS void
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM unit WHERE id = p_unit_id) THEN
-    RETURN;
-  END IF;
-  IF p_upvotes = 0 AND p_downvotes = 0 AND p_replies = 0 AND p_favorites = 0
-    AND p_shares = 0 AND p_high_scores = 0 AND p_active_progress = 0
-    AND p_completions = 0 AND p_negative_progress = 0 THEN
-    RETURN;
-  END IF;
-
-  UPDATE unit_engagement_stat SET
-    upvotes = upvotes + p_upvotes,
-    downvotes = downvotes + p_downvotes,
-    replies = replies + p_replies,
-    favorites = favorites + p_favorites,
-    shares = shares + p_shares,
-    high_scores = high_scores + p_high_scores,
-    active_progress = active_progress + p_active_progress,
-    completions = completions + p_completions,
-    negative_progress = negative_progress + p_negative_progress,
-    updated_at = now()
-  WHERE unit_id = p_unit_id;
-
-  IF NOT FOUND THEN
-    IF p_upvotes < 0 OR p_downvotes < 0 OR p_replies < 0 OR p_favorites < 0
-      OR p_shares < 0 OR p_high_scores < 0 OR p_active_progress < 0
-      OR p_completions < 0 OR p_negative_progress < 0 THEN
-      RAISE EXCEPTION 'missing unit_engagement_stat row for decrement: %', p_unit_id
-        USING ERRCODE = '23514';
-    END IF;
-    INSERT INTO unit_engagement_stat (
-      unit_id, upvotes, downvotes, replies, favorites, shares, high_scores,
-      active_progress, completions, negative_progress
-    ) VALUES (
-      p_unit_id, p_upvotes, p_downvotes, p_replies, p_favorites, p_shares,
-      p_high_scores, p_active_progress, p_completions, p_negative_progress
-    )
-    ON CONFLICT (unit_id) DO UPDATE SET
-      upvotes = unit_engagement_stat.upvotes + excluded.upvotes,
-      downvotes = unit_engagement_stat.downvotes + excluded.downvotes,
-      replies = unit_engagement_stat.replies + excluded.replies,
-      favorites = unit_engagement_stat.favorites + excluded.favorites,
-      shares = unit_engagement_stat.shares + excluded.shares,
-      high_scores = unit_engagement_stat.high_scores + excluded.high_scores,
-      active_progress = unit_engagement_stat.active_progress + excluded.active_progress,
-      completions = unit_engagement_stat.completions + excluded.completions,
-      negative_progress = unit_engagement_stat.negative_progress + excluded.negative_progress,
-      updated_at = now();
-  END IF;
-
-  DELETE FROM unit_engagement_stat
-  WHERE unit_id = p_unit_id AND upvotes = 0 AND downvotes = 0 AND replies = 0
-    AND favorites = 0 AND shares = 0 AND high_scores = 0 AND active_progress = 0
-    AND completions = 0 AND negative_progress = 0;
-END;
-$$;
-
-
---
--- Name: apply_post_reply_stat_delta(uuid, uuid, bigint, bigint); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.apply_post_reply_stat_delta(p_root_post_id uuid, p_parent_post_id uuid, p_undeleted_delta bigint, p_visible_delta bigint) RETURNS void
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  IF p_undeleted_delta = 0 AND p_visible_delta = 0 THEN
-    RETURN;
-  END IF;
-
-  UPDATE post_reply_stat SET
-    undeleted_direct_count = undeleted_direct_count
-      + CASE WHEN p_parent_post_id = p_root_post_id THEN p_undeleted_delta ELSE 0 END,
-    undeleted_descendant_count = undeleted_descendant_count + p_undeleted_delta,
-    visible_direct_count = visible_direct_count
-      + CASE WHEN p_parent_post_id = p_root_post_id THEN p_visible_delta ELSE 0 END,
-    visible_descendant_count = visible_descendant_count + p_visible_delta,
-    updated_at = now()
-  WHERE post_id = p_root_post_id;
-  IF NOT FOUND AND EXISTS (SELECT 1 FROM post WHERE id = p_root_post_id) THEN
-    RAISE EXCEPTION 'missing post_reply_stat row for root %', p_root_post_id
-      USING ERRCODE = '23514';
-  END IF;
-
-  IF p_parent_post_id IS NOT NULL AND p_parent_post_id <> p_root_post_id THEN
-    UPDATE post_reply_stat SET
-      undeleted_direct_count = undeleted_direct_count + p_undeleted_delta,
-      visible_direct_count = visible_direct_count + p_visible_delta,
-      updated_at = now()
-    WHERE post_id = p_parent_post_id;
-    IF NOT FOUND AND EXISTS (SELECT 1 FROM post WHERE id = p_parent_post_id) THEN
-      RAISE EXCEPTION 'missing post_reply_stat row for parent %', p_parent_post_id
-        USING ERRCODE = '23514';
-    END IF;
-  END IF;
-END;
-$$;
-
-
---
--- Name: assert_post_targeting_allowed(uuid, jsonb, uuid); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.assert_post_targeting_allowed(p_source_post_id uuid, p_targets jsonb, p_explicit_realm_id uuid DEFAULT NULL::uuid) RETURNS void
-    LANGUAGE plpgsql
-    SET search_path TO 'pg_catalog', 'public'
-    AS $$
-DECLARE
-  target_record record;
-  realm_record record;
-  target_locked boolean;
-BEGIN
-  IF p_targets IS NULL OR jsonb_array_length(p_targets) = 0 THEN
-    RETURN;
-  END IF;
-
-  PERFORM pg_advisory_xact_lock(hashtextextended(p_source_post_id::text, 4));
-
-  FOR target_record IN
-    SELECT DISTINCT ON (target_id)
-      target_id,
-      relation
-    FROM jsonb_to_recordset(p_targets) AS target(target_id uuid, relation text)
-    ORDER BY
-      target_id,
-      CASE relation WHEN 'subject' THEN 0 WHEN 'root' THEN 1 WHEN 'parent' THEN 2 END
-  LOOP
-    SELECT target.post_targeting_locked
-      INTO target_locked
-      FROM public.unit AS target
-      WHERE target.id = target_record.target_id
-      FOR SHARE;
-    IF target_locked THEN
-      RAISE EXCEPTION 'Post target does not accept new Post relations'
-        USING
-          ERRCODE = '23514',
-          CONSTRAINT = 'post_targeting_global_unlocked',
-          DETAIL = jsonb_build_object(
-            'scope', 'global',
-            'relation', target_record.relation,
-            'targetUnitId', target_record.target_id
-          )::text;
-    END IF;
-  END LOOP;
-
-  FOR realm_record IN
-    SELECT realm_id
-    FROM (
-      SELECT source_realm.realm_id
-      FROM public.realm_unit AS source_realm
-      WHERE source_realm.unit_id = p_source_post_id
-        AND source_realm.publication_state = 'active'
-      UNION
-      SELECT p_explicit_realm_id
-      WHERE p_explicit_realm_id IS NOT NULL
-    ) AS source_realms
-    ORDER BY realm_id
-  LOOP
-    FOR target_record IN
-      SELECT DISTINCT ON (target_id)
-        target_id,
-        relation
-      FROM jsonb_to_recordset(p_targets) AS target(target_id uuid, relation text)
-      ORDER BY
-        target_id,
-        CASE relation WHEN 'subject' THEN 0 WHEN 'root' THEN 1 WHEN 'parent' THEN 2 END
-    LOOP
-      SELECT realm_target.post_targeting_locked
-        INTO target_locked
-        FROM public.realm_unit AS realm_target
-        WHERE realm_target.realm_id = realm_record.realm_id
-          AND realm_target.unit_id = target_record.target_id
-          AND realm_target.publication_state = 'active'
-        FOR SHARE;
-      IF target_locked THEN
-        RAISE EXCEPTION 'Post target does not accept new Post relations in this Realm'
-          USING
-            ERRCODE = '23514',
-            CONSTRAINT = 'post_targeting_realm_unlocked',
-            DETAIL = jsonb_build_object(
-              'scope', 'realm',
-              'relation', target_record.relation,
-              'targetUnitId', target_record.target_id,
-              'realmId', realm_record.realm_id
-            )::text;
-      END IF;
-    END LOOP;
-  END LOOP;
-END;
-$$;
-
-
---
--- Name: content_structure_node_reject_cycle(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.content_structure_node_reject_cycle() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  IF NEW.parent_id IS NULL THEN
-    RETURN NEW;
-  END IF;
-  IF EXISTS (
-    WITH RECURSIVE ancestors AS (
-      SELECT node.id, node.parent_id
-      FROM content_structure_node AS node
-      WHERE node.id = NEW.parent_id AND node.structure_id = NEW.structure_id
-      UNION ALL
-      SELECT parent.id, parent.parent_id
-      FROM content_structure_node AS parent
-      JOIN ancestors AS child ON child.parent_id = parent.id
-      WHERE parent.structure_id = NEW.structure_id
-    )
-    SELECT 1 FROM ancestors WHERE id = NEW.id
-  ) THEN
-    RAISE EXCEPTION 'content_structure_node cycle detected'
-      USING ERRCODE = '23514';
-  END IF;
-  RETURN NEW;
-END
-$$;
-
-
---
--- Name: enforce_post_realm_mount_targeting(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.enforce_post_realm_mount_targeting() RETURNS trigger
-    LANGUAGE plpgsql
-    SET search_path TO 'pg_catalog', 'public'
-    AS $$
-DECLARE
-  targets jsonb;
-BEGIN
-  SELECT coalesce(jsonb_agg(target), '[]'::jsonb)
-    INTO targets
-    FROM (
-      SELECT jsonb_build_object(
-        'target_id', stored_post.subject_unit_id,
-        'relation', 'subject'
-      ) AS target
-      FROM public.post AS stored_post
-      WHERE stored_post.id = NEW.unit_id
-        AND stored_post.subject_unit_id IS NOT NULL
-
-      UNION ALL
-
-      SELECT jsonb_build_object(
-        'target_id', stored_reply.root_post_id,
-        'relation', 'root'
-      )
-      FROM public.post_reply AS stored_reply
-      WHERE stored_reply.post_id = NEW.unit_id
-
-      UNION ALL
-
-      SELECT jsonb_build_object(
-        'target_id', stored_reply.parent_post_id,
-        'relation', 'parent'
-      )
-      FROM public.post_reply AS stored_reply
-      WHERE stored_reply.post_id = NEW.unit_id
-        AND stored_reply.parent_post_id IS NOT NULL
-    ) AS post_targets;
-
-  IF jsonb_array_length(targets) > 0 THEN
-    PERFORM public.assert_post_targeting_allowed(NEW.unit_id, targets, NEW.realm_id);
-  END IF;
-  RETURN NULL;
-END;
-$$;
-
-
---
--- Name: enforce_post_reply_targeting(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.enforce_post_reply_targeting() RETURNS trigger
-    LANGUAGE plpgsql
-    SET search_path TO 'pg_catalog', 'public'
-    AS $$
-DECLARE
-  targets jsonb;
-  should_check boolean;
-BEGIN
-  IF TG_OP = 'INSERT' THEN
-    should_check := true;
-  ELSE
-    should_check :=
-      NEW.root_post_id IS DISTINCT FROM OLD.root_post_id OR
-      NEW.parent_post_id IS DISTINCT FROM OLD.parent_post_id;
-  END IF;
-
-  IF should_check THEN
-    targets := jsonb_build_array(jsonb_build_object(
-      'target_id', NEW.root_post_id,
-      'relation', 'root'
-    ));
-    IF NEW.parent_post_id IS NOT NULL THEN
-      targets := targets || jsonb_build_array(jsonb_build_object(
-        'target_id', NEW.parent_post_id,
-        'relation', 'parent'
-      ));
-    END IF;
-    PERFORM public.assert_post_targeting_allowed(NEW.post_id, targets);
-  END IF;
-  RETURN NULL;
-END;
-$$;
-
-
---
--- Name: enforce_post_subject_targeting(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.enforce_post_subject_targeting() RETURNS trigger
-    LANGUAGE plpgsql
-    SET search_path TO 'pg_catalog', 'public'
-    AS $$
-BEGIN
-  IF TG_OP = 'INSERT' THEN
-    IF NEW.subject_unit_id IS NOT NULL THEN
-      PERFORM public.assert_post_targeting_allowed(
-        NEW.id,
-        jsonb_build_array(jsonb_build_object(
-          'target_id', NEW.subject_unit_id,
-          'relation', 'subject'
-        ))
-      );
-    END IF;
-  ELSIF NEW.subject_unit_id IS DISTINCT FROM OLD.subject_unit_id
-    AND NEW.subject_unit_id IS NOT NULL THEN
-    PERFORM public.assert_post_targeting_allowed(
-      NEW.id,
-      jsonb_build_array(jsonb_build_object(
-        'target_id', NEW.subject_unit_id,
-        'relation', 'subject'
-      ))
-    );
-  END IF;
-  RETURN NULL;
-END;
-$$;
-
-
---
--- Name: enforce_realm_tag_context_wiki_post(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.enforce_realm_tag_context_wiki_post() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1
-    FROM "post"
-    WHERE "post"."id" = NEW."context_post_id"
-      AND "post"."kind" = 'wiki'
-  ) THEN
-    RAISE EXCEPTION 'Realm Tag Context Post % must be a Wiki Post', NEW."context_post_id"
-      USING ERRCODE = '23514';
-  END IF;
-  RETURN NEW;
-END;
-$$;
-
-
---
--- Name: enforce_realm_tag_voting_enabled(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.enforce_realm_tag_voting_enabled() RETURNS trigger
-    LANGUAGE plpgsql
-    SET search_path TO 'pg_catalog', 'public'
-    AS $$
-BEGIN
-  PERFORM 1
-  FROM public.realm
-  WHERE id = NEW.realm_id
-    AND realm_tag_voting_enabled
-  FOR SHARE;
-
-  IF NOT FOUND THEN
-    RAISE EXCEPTION 'Realm-scoped Tag voting is not enabled for Realm %', NEW.realm_id
-      USING
-        ERRCODE = '23514',
-        CONSTRAINT = 'realm_tag_vote_realm_tag_voting_enabled';
-  END IF;
-
-  RETURN NEW;
-END;
-$$;
-
-
---
--- Name: enforce_realm_taxonomy_tag_query_strategy(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.enforce_realm_taxonomy_tag_query_strategy() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-  is_realm_taxonomy_tag boolean;
-BEGIN
-  SELECT EXISTS (
-    SELECT 1
-    FROM "content_structure"
-    INNER JOIN "tag" ON "tag"."id" = NEW."content_unit_id"
-    WHERE "content_structure"."id" = NEW."structure_id"
-      AND "content_structure"."kind" = 'realm.taxonomy'
-  ) INTO is_realm_taxonomy_tag;
-
-  IF is_realm_taxonomy_tag AND NEW."realm_tag_query_strategy" IS NULL THEN
-    NEW."realm_tag_query_strategy" := 'global_effective';
-  ELSIF NOT is_realm_taxonomy_tag AND NEW."realm_tag_query_strategy" IS NOT NULL THEN
-    RAISE EXCEPTION
-      'Realm Tag query strategy is only valid for Realm taxonomy Tag nodes'
-      USING ERRCODE = '23514';
-  END IF;
-  IF is_realm_taxonomy_tag AND NEW."deleted_at" IS NULL AND EXISTS (
-    SELECT 1
-    FROM "content_structure_node" AS existing
-    WHERE existing."structure_id" = NEW."structure_id"
-      AND existing."content_unit_id" = NEW."content_unit_id"
-      AND existing."deleted_at" IS NULL
-      AND existing."id" <> NEW."id"
-  ) THEN
-    RAISE EXCEPTION
-      'A Realm taxonomy can contain a Tag only once'
-      USING ERRCODE = '23514';
-  END IF;
-  RETURN NEW;
-END;
-$$;
-
-
---
--- Name: enforce_unit_variant_star(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.enforce_unit_variant_star() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  PERFORM id
-  FROM unit
-  WHERE id IN (NEW.variant_unit_id, NEW.main_unit_id)
-  ORDER BY id
-  FOR UPDATE;
-
-  IF EXISTS (
-    SELECT 1
-    FROM unit_variant target_relationship
-    WHERE target_relationship.variant_unit_id = NEW.main_unit_id
-  ) THEN
-    RAISE EXCEPTION 'a Variant must point directly to a Main'
-      USING ERRCODE = '23514', CONSTRAINT = 'unit_variant_target_is_variant';
-  END IF;
-
-  IF EXISTS (
-    SELECT 1
-    FROM unit_variant child_relationship
-    WHERE child_relationship.main_unit_id = NEW.variant_unit_id
-  ) THEN
-    RAISE EXCEPTION 'a Main with Variants cannot become a Variant'
-      USING ERRCODE = '23514', CONSTRAINT = 'unit_variant_source_has_variants';
-  END IF;
-
-  RETURN NEW;
-END
-$$;
-
-
---
--- Name: enforce_wiki_association_context_post(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.enforce_wiki_association_context_post() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  IF NEW.context_post_id IS NULL THEN
-    RETURN NEW;
-  END IF;
-  IF NOT EXISTS (
-    SELECT 1
-    FROM post
-    WHERE id = NEW.context_post_id
-      AND kind = 'wiki'::post_kind
-  ) THEN
-    RAISE EXCEPTION 'association context post % must be a wiki Post', NEW.context_post_id
-      USING ERRCODE = '23514';
-  END IF;
-  RETURN NEW;
-END;
-$$;
-
-
---
--- Name: guard_unit_content_license_mutation(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.guard_unit_content_license_mutation() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  IF TG_OP = 'DELETE' THEN
-    RAISE EXCEPTION 'unit_content_license history is immutable';
-  END IF;
-
-  IF ROW(
-    NEW."id",
-    NEW."unit_id",
-    NEW."granted_by_profile_id",
-    NEW."reference_license_slug",
-    NEW."granted_at"
-  ) IS DISTINCT FROM ROW(
-    OLD."id",
-    OLD."unit_id",
-    OLD."granted_by_profile_id",
-    OLD."reference_license_slug",
-    OLD."granted_at"
-  ) THEN
-    RAISE EXCEPTION 'unit_content_license grant facts are immutable';
-  END IF;
-
-  RETURN NEW;
-END;
-$$;
-
-
---
--- Name: initialize_conversation_stats(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.initialize_conversation_stats() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  INSERT INTO conversation_stat (conversation_id) VALUES (NEW.id);
-  INSERT INTO conversation_participant_stat (conversation_id, profile_id, sort_at)
-  VALUES (NEW.id, NEW.participant_low_profile_id, NEW.created_at),
-    (NEW.id, NEW.participant_high_profile_id, NEW.created_at);
-  RETURN NULL;
-END;
-$$;
-
-
---
--- Name: initialize_post_reply_stat(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.initialize_post_reply_stat() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  INSERT INTO post_reply_stat (post_id) VALUES (NEW.id) ON CONFLICT DO NOTHING;
-  RETURN NULL;
-END;
-$$;
-
-
---
--- Name: lock_unit_effective_tag_key(uuid, uuid); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.lock_unit_effective_tag_key(target_unit_id uuid, target_tag_id uuid) RETURNS void
-    LANGUAGE sql
-    AS $$
-  SELECT pg_advisory_xact_lock(hashtextextended(
-    target_unit_id::text || ':' || target_tag_id::text,
-    71001
-  ))
-$$;
-
-
---
--- Name: lock_unit_effective_tag_vote_key(uuid, uuid, uuid); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.lock_unit_effective_tag_vote_key(target_unit_id uuid, target_tag_id uuid, target_profile_id uuid) RETURNS void
-    LANGUAGE sql
-    AS $$
-  SELECT pg_advisory_xact_lock(hashtextextended(
-    target_unit_id::text || ':' || target_tag_id::text || ':' || target_profile_id::text,
-    71002
-  ))
-$$;
-
-
---
--- Name: lock_unit_structure_definition_key(uuid); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.lock_unit_structure_definition_key(target_structure_id uuid) RETURNS void
-    LANGUAGE sql
-    AS $$
-  SELECT pg_advisory_xact_lock(hashtextextended(
-    target_structure_id::text,
-    71005
-  ))
-$$;
-
-
---
--- Name: initialize_collection_stat(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.initialize_collection_stat() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  INSERT INTO collection_stat (collection_id) VALUES (NEW.id);
-  RETURN NULL;
-END;
-$$;
-
-
---
--- Name: initialize_poll_option_vote_stat(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.initialize_poll_option_vote_stat() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  INSERT INTO poll_option_vote_stat (option_id) VALUES (NEW.id);
-  RETURN NULL;
-END;
-$$;
-
-
---
--- Name: maintain_effective_tag_from_direct_context(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maintain_effective_tag_from_direct_context() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  PERFORM refresh_unit_effective_tag(
-    coalesce(NEW.unit_id, OLD.unit_id),
-    coalesce(NEW.tag_id, OLD.tag_id)
-  );
-  RETURN NULL;
-END
-$$;
-
-
---
--- Name: maintain_effective_tag_from_direct_vote(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maintain_effective_tag_from_direct_vote() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  PERFORM refresh_unit_effective_tag_vote(
-    coalesce(NEW.unit_id, OLD.unit_id),
-    coalesce(NEW.tag_id, OLD.tag_id),
-    coalesce(NEW.profile_id, OLD.profile_id)
-  );
-  RETURN NULL;
-END
-$$;
-
-
---
--- Name: maintain_effective_tag_from_structure_support(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maintain_effective_tag_from_structure_support() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-  target_unit_id uuid := coalesce(NEW.unit_id, OLD.unit_id);
-  target_tag_id uuid := coalesce(NEW.tag_id, OLD.tag_id);
-  target_profile_id uuid := coalesce(NEW.profile_id, OLD.profile_id);
-BEGIN
-  PERFORM refresh_unit_effective_tag(target_unit_id, target_tag_id);
-  PERFORM refresh_unit_effective_tag_vote(
-    target_unit_id,
-    target_tag_id,
-    target_profile_id
-  );
-  RETURN NULL;
-END
-$$;
-
-
---
--- Name: maintain_favorite_item_stats(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maintain_favorite_item_stats() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE row_data collection_item%ROWTYPE; direction bigint; is_favorite boolean; change record;
-BEGIN
-  IF TG_OP = 'UPDATE' AND
-    (OLD.collection_id, OLD.unit_id, OLD.added_by_profile_id, OLD.created_at) IS NOT DISTINCT FROM
-    (NEW.collection_id, NEW.unit_id, NEW.added_by_profile_id, NEW.created_at) THEN
-    RETURN NULL;
-  END IF;
-  FOR change IN
-    SELECT OLD AS row_data, -1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'DELETE')
-    UNION ALL SELECT NEW AS row_data, 1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'INSERT')
-  LOOP
-    row_data := change.row_data; direction := change.direction;
-    SELECT EXISTS (
-      SELECT 1 FROM profile_favorites_collection
-      WHERE collection_id = row_data.collection_id
-    ) INTO is_favorite;
-    IF is_favorite THEN
-      PERFORM apply_unit_engagement_stat(row_data.unit_id, p_favorites => direction);
-      PERFORM apply_recommendation_unit_signal(
-        row_data.unit_id, row_data.created_at, 'favorite', direction, direction * 5
-      );
-      IF row_data.added_by_profile_id IS NOT NULL THEN
-        PERFORM apply_recommendation_profile_signal(
-          row_data.added_by_profile_id, row_data.unit_id, row_data.created_at,
-          'favorite', direction, direction * 5
-        );
-      END IF;
-    END IF;
-  END LOOP;
-  RETURN NULL;
-END;
-$$;
-
-
---
--- Name: maintain_collection_item_stat(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maintain_collection_item_stat() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE changed record;
-BEGIN
-  FOR changed IN
-    SELECT OLD.collection_id AS collection_id, -1::bigint AS direction
-      WHERE TG_OP IN ('UPDATE', 'DELETE')
-    UNION ALL
-    SELECT NEW.collection_id AS collection_id, 1::bigint AS direction
-      WHERE TG_OP IN ('UPDATE', 'INSERT')
-  LOOP
-    UPDATE collection_stat
-    SET item_count = item_count + changed.direction, updated_at = now()
-    WHERE collection_id = changed.collection_id;
-    IF NOT FOUND AND EXISTS (SELECT 1 FROM collection WHERE id = changed.collection_id) THEN
-      RAISE EXCEPTION 'missing collection_stat row for %', changed.collection_id
-        USING ERRCODE = '23514';
-    END IF;
-  END LOOP;
-  RETURN NULL;
-END;
-$$;
-
-
---
--- Name: maintain_message_stats(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maintain_message_stats() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE recipient_id uuid;
-BEGIN
-  IF TG_OP = 'INSERT' THEN
-    UPDATE conversation_stat SET last_message_id = NEW.id, last_message_at = NEW.created_at,
-      updated_at = now()
-    WHERE conversation_id = NEW.conversation_id
-      AND (last_message_at IS NULL OR (last_message_at, last_message_id) < (NEW.created_at, NEW.id));
-    UPDATE conversation_participant_stat SET last_message_id = NEW.id,
-      last_message_at = NEW.created_at, sort_at = NEW.created_at, updated_at = now()
-    WHERE conversation_id = NEW.conversation_id
-      AND (last_message_at IS NULL OR (last_message_at, last_message_id) < (NEW.created_at, NEW.id));
-    SELECT CASE WHEN participant_low_profile_id = NEW.sender_profile_id
-      THEN participant_high_profile_id ELSE participant_low_profile_id END
-    INTO recipient_id FROM conversation WHERE id = NEW.conversation_id;
-    IF NEW.deleted_at IS NULL AND message_is_unread(
-      NEW.conversation_id, recipient_id, NEW.created_at, NEW.id
-    ) THEN
-      UPDATE conversation_participant_stat SET unread_count = unread_count + 1,
-        updated_at = now()
-      WHERE conversation_id = NEW.conversation_id AND profile_id = recipient_id;
-    END IF;
-  ELSIF TG_OP = 'UPDATE' AND OLD.deleted_at IS DISTINCT FROM NEW.deleted_at THEN
-    SELECT CASE WHEN participant_low_profile_id = NEW.sender_profile_id
-      THEN participant_high_profile_id ELSE participant_low_profile_id END
-    INTO recipient_id FROM conversation WHERE id = NEW.conversation_id;
-    IF message_is_unread(NEW.conversation_id, recipient_id, NEW.created_at, NEW.id) THEN
-      UPDATE conversation_participant_stat SET
-        unread_count = unread_count + CASE
-          WHEN OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL THEN -1
-          WHEN OLD.deleted_at IS NOT NULL AND NEW.deleted_at IS NULL THEN 1 ELSE 0 END,
-        updated_at = now()
-      WHERE conversation_id = NEW.conversation_id AND profile_id = recipient_id;
-    END IF;
-  ELSIF TG_OP = 'DELETE' THEN
-    SELECT CASE WHEN participant_low_profile_id = OLD.sender_profile_id
-      THEN participant_high_profile_id ELSE participant_low_profile_id END
-    INTO recipient_id FROM conversation WHERE id = OLD.conversation_id;
-    IF recipient_id IS NOT NULL AND OLD.deleted_at IS NULL AND message_is_unread(
-      OLD.conversation_id, recipient_id, OLD.created_at, OLD.id
-    ) THEN
-      UPDATE conversation_participant_stat SET unread_count = unread_count - 1,
-        updated_at = now()
-      WHERE conversation_id = OLD.conversation_id AND profile_id = recipient_id;
-    END IF;
-    PERFORM refresh_conversation_last_message(OLD.conversation_id);
-  END IF;
-  RETURN NULL;
-END;
-$$;
-
-
---
--- Name: maintain_post_reply_stats(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maintain_post_reply_stats() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE reply_unit unit%ROWTYPE;
-BEGIN
-  IF TG_OP = 'INSERT' THEN
-    SELECT * INTO STRICT reply_unit FROM unit WHERE id = NEW.post_id;
-    PERFORM apply_post_reply_stat_delta(
-      NEW.root_post_id,
-      NEW.parent_post_id,
-      (reply_unit.deleted_at IS NULL)::int,
-      (reply_unit.deleted_at IS NULL AND reply_unit.status = 'published'
-        AND reply_unit.visibility = 'public'
-        AND reply_unit.moderation_status = 'approved')::int
-    );
-    IF reply_unit.deleted_at IS NULL THEN
-      PERFORM apply_unit_engagement_stat(NEW.root_post_id, p_replies => 1);
-      IF NEW.parent_post_id IS NOT NULL THEN
-        PERFORM apply_unit_engagement_stat(NEW.parent_post_id, p_replies => 1);
-      END IF;
-    END IF;
-    PERFORM apply_recommendation_unit_signal(NEW.root_post_id, NEW.created_at, 'reply', 1, 4);
-    IF NEW.parent_post_id IS NOT NULL THEN
-      PERFORM apply_recommendation_unit_signal(
-        NEW.parent_post_id, NEW.created_at, 'reply', 1, 4
-      );
-    END IF;
-  ELSIF TG_OP = 'DELETE' AND EXISTS (SELECT 1 FROM unit WHERE id = OLD.post_id) THEN
-    SELECT * INTO STRICT reply_unit FROM unit WHERE id = OLD.post_id;
-    PERFORM apply_post_reply_stat_delta(
-      OLD.root_post_id,
-      OLD.parent_post_id,
-      -(reply_unit.deleted_at IS NULL)::int,
-      -(reply_unit.deleted_at IS NULL AND reply_unit.status = 'published'
-        AND reply_unit.visibility = 'public'
-        AND reply_unit.moderation_status = 'approved')::int
-    );
-    IF reply_unit.deleted_at IS NULL THEN
-      PERFORM apply_unit_engagement_stat(OLD.root_post_id, p_replies => -1);
-      IF OLD.parent_post_id IS NOT NULL THEN
-        PERFORM apply_unit_engagement_stat(OLD.parent_post_id, p_replies => -1);
-      END IF;
-    END IF;
-    PERFORM apply_recommendation_unit_signal(OLD.root_post_id, OLD.created_at, 'reply', -1, -4);
-    IF OLD.parent_post_id IS NOT NULL THEN
-      PERFORM apply_recommendation_unit_signal(
-        OLD.parent_post_id, OLD.created_at, 'reply', -1, -4
-      );
-    END IF;
-  END IF;
-  RETURN NULL;
-END;
-$$;
-
-
---
--- Name: maintain_poll_option_vote_stat(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maintain_poll_option_vote_stat() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE changed record;
-BEGIN
-  FOR changed IN
-    SELECT OLD.option_id AS option_id, -1::bigint AS direction
-      WHERE TG_OP IN ('UPDATE', 'DELETE')
-    UNION ALL
-    SELECT NEW.option_id AS option_id, 1::bigint AS direction
-      WHERE TG_OP IN ('UPDATE', 'INSERT')
-  LOOP
-    UPDATE poll_option_vote_stat
-    SET vote_count = vote_count + changed.direction, updated_at = now()
-    WHERE option_id = changed.option_id;
-    IF NOT FOUND AND EXISTS (SELECT 1 FROM poll_option WHERE id = changed.option_id) THEN
-      RAISE EXCEPTION 'missing poll_option_vote_stat row for %', changed.option_id
-        USING ERRCODE = '23514';
-    END IF;
-  END LOOP;
-  RETURN NULL;
-END;
-$$;
-
-
---
--- Name: maintain_realm_tag_vote_stat(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maintain_realm_tag_vote_stat() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-  row_data realm_tag_vote%ROWTYPE;
-  direction bigint;
-  change record;
-BEGIN
-  FOR change IN
-    SELECT OLD AS row_data, -1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'DELETE')
-    UNION ALL
-    SELECT NEW AS row_data, 1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'INSERT')
-  LOOP
-    row_data := change.row_data;
-    direction := change.direction;
-    IF direction < 0 THEN
-      UPDATE realm_tag_vote_stat
-      SET
-        score = score + direction * row_data.value,
-        vote_count = vote_count + direction,
-        updated_at = now()
-      WHERE realm_id = row_data.realm_id
-        AND unit_id = row_data.unit_id
-        AND tag_id = row_data.tag_id;
-      IF NOT FOUND THEN
-        RAISE EXCEPTION 'missing realm_tag_vote_stat row for decrement: %, %, %',
-          row_data.realm_id, row_data.unit_id, row_data.tag_id
-          USING ERRCODE = '23514';
-      END IF;
-    ELSE
-      INSERT INTO realm_tag_vote_stat (realm_id, unit_id, tag_id, score, vote_count)
-      VALUES (
-        row_data.realm_id,
-        row_data.unit_id,
-        row_data.tag_id,
-        direction * row_data.value,
-        direction
-      )
-      ON CONFLICT (realm_id, unit_id, tag_id) DO UPDATE SET
-        score = realm_tag_vote_stat.score + excluded.score,
-        vote_count = realm_tag_vote_stat.vote_count + excluded.vote_count,
-        updated_at = now();
-    END IF;
-    DELETE FROM realm_tag_vote_stat
-    WHERE realm_id = row_data.realm_id
-      AND unit_id = row_data.unit_id
-      AND tag_id = row_data.tag_id
-      AND vote_count = 0;
-  END LOOP;
-  RETURN NULL;
-END;
-$$;
-
-
---
--- Name: maintain_recommendation_event_signals(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maintain_recommendation_event_signals() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE row_data recommendation_event%ROWTYPE; direction bigint;
-unit_weight double precision; profile_weight double precision;
-change record;
-BEGIN
-  FOR change IN
-    SELECT OLD AS row_data, -1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'DELETE')
-    UNION ALL SELECT NEW AS row_data, 1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'INSERT')
-  LOOP
-    row_data := change.row_data; direction := change.direction;
-    IF row_data.profile_id IS NOT NULL
-      AND row_data.type IN ('impression', 'open', 'dwell_30s', 'not_interested') THEN
-      unit_weight := CASE row_data.type WHEN 'open' THEN 1 WHEN 'dwell_30s' THEN 2 ELSE 0 END;
-      profile_weight := CASE row_data.type WHEN 'open' THEN 1 WHEN 'dwell_30s' THEN 2
-        WHEN 'not_interested' THEN -4 ELSE 0 END;
-      PERFORM apply_recommendation_unit_signal(
-        row_data.target_unit_id, row_data.occurred_at,
-        row_data.type::text, direction, direction * unit_weight
-      );
-      IF row_data.type <> 'impression' THEN
-        PERFORM apply_recommendation_profile_signal(
-          row_data.profile_id, row_data.target_unit_id, row_data.occurred_at,
-          row_data.type::text, direction,
-          direction * profile_weight
-        );
-      END IF;
-    END IF;
-  END LOOP;
-  RETURN NULL;
-END;
-$$;
-
-
---
--- Name: maintain_reply_unit_state(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maintain_reply_unit_state() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE relation post_reply%ROWTYPE;
-old_counted boolean;
-new_counted boolean;
-old_visible boolean;
-new_visible boolean;
-BEGIN
-  SELECT * INTO relation FROM post_reply WHERE post_id = OLD.id;
-  IF NOT FOUND THEN RETURN NULL; END IF;
-  old_counted := OLD.deleted_at IS NULL;
-  new_counted := NEW.deleted_at IS NULL;
-  old_visible := old_counted AND OLD.status = 'published' AND OLD.visibility = 'public'
-    AND OLD.moderation_status = 'approved';
-  new_visible := new_counted AND NEW.status = 'published' AND NEW.visibility = 'public'
-    AND NEW.moderation_status = 'approved';
-  IF old_counted IS DISTINCT FROM new_counted THEN
-    PERFORM apply_unit_engagement_stat(
-      relation.root_post_id, p_replies => CASE WHEN new_counted THEN 1 ELSE -1 END
-    );
-    IF relation.parent_post_id IS NOT NULL THEN
-      PERFORM apply_unit_engagement_stat(
-        relation.parent_post_id, p_replies => CASE WHEN new_counted THEN 1 ELSE -1 END
-      );
-    END IF;
-  END IF;
-  PERFORM apply_post_reply_stat_delta(
-    relation.root_post_id,
-    relation.parent_post_id,
-    new_counted::int - old_counted::int,
-    new_visible::int - old_visible::int
-  );
-  RETURN NULL;
-END;
-$$;
-
-
---
--- Name: maintain_score_stat(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maintain_score_stat() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-  row_data score%ROWTYPE;
-  direction bigint;
-  signal_kind text;
-  unit_weight double precision;
-  profile_weight double precision;
-  change record;
-BEGIN
-  FOR change IN
-    SELECT OLD AS row_data, -1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'DELETE')
-    UNION ALL
-    SELECT NEW AS row_data, 1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'INSERT')
-  LOOP
-    row_data := change.row_data;
-    direction := change.direction;
-    IF EXISTS (SELECT 1 FROM unit WHERE id = row_data.unit_id)
-      AND EXISTS (SELECT 1 FROM realm WHERE id = row_data.realm_id) THEN
-      IF direction < 0 THEN
-        UPDATE score_stat SET
-          total_count = total_count + direction,
-          total_score = total_score + direction * row_data.value,
-          score_1_count = score_1_count + direction * (row_data.value = 1)::int,
-          score_2_count = score_2_count + direction * (row_data.value = 2)::int,
-          score_3_count = score_3_count + direction * (row_data.value = 3)::int,
-          score_4_count = score_4_count + direction * (row_data.value = 4)::int,
-          score_5_count = score_5_count + direction * (row_data.value = 5)::int,
-          score_6_count = score_6_count + direction * (row_data.value = 6)::int,
-          score_7_count = score_7_count + direction * (row_data.value = 7)::int,
-          score_8_count = score_8_count + direction * (row_data.value = 8)::int,
-          score_9_count = score_9_count + direction * (row_data.value = 9)::int,
-          score_10_count = score_10_count + direction * (row_data.value = 10)::int,
-          updated_at = now()
-        WHERE unit_id = row_data.unit_id AND realm_id = row_data.realm_id;
-        IF NOT FOUND THEN
-          RAISE EXCEPTION 'missing score_stat row for decrement: %, %',
-            row_data.unit_id, row_data.realm_id USING ERRCODE = '23514';
-        END IF;
-      ELSE
-        INSERT INTO score_stat (
-          unit_id, realm_id, total_count, total_score,
-          score_1_count, score_2_count, score_3_count, score_4_count, score_5_count,
-          score_6_count, score_7_count, score_8_count, score_9_count, score_10_count
-        ) VALUES (
-          row_data.unit_id, row_data.realm_id, direction, direction * row_data.value,
-          direction * (row_data.value = 1)::int, direction * (row_data.value = 2)::int,
-          direction * (row_data.value = 3)::int, direction * (row_data.value = 4)::int,
-          direction * (row_data.value = 5)::int, direction * (row_data.value = 6)::int,
-          direction * (row_data.value = 7)::int, direction * (row_data.value = 8)::int,
-          direction * (row_data.value = 9)::int, direction * (row_data.value = 10)::int
-        )
-        ON CONFLICT (unit_id, realm_id) DO UPDATE SET
-          total_count = score_stat.total_count + excluded.total_count,
-          total_score = score_stat.total_score + excluded.total_score,
-          score_1_count = score_stat.score_1_count + excluded.score_1_count,
-          score_2_count = score_stat.score_2_count + excluded.score_2_count,
-          score_3_count = score_stat.score_3_count + excluded.score_3_count,
-          score_4_count = score_stat.score_4_count + excluded.score_4_count,
-          score_5_count = score_stat.score_5_count + excluded.score_5_count,
-          score_6_count = score_stat.score_6_count + excluded.score_6_count,
-          score_7_count = score_stat.score_7_count + excluded.score_7_count,
-          score_8_count = score_stat.score_8_count + excluded.score_8_count,
-          score_9_count = score_stat.score_9_count + excluded.score_9_count,
-          score_10_count = score_stat.score_10_count + excluded.score_10_count,
-          updated_at = now();
-      END IF;
-      DELETE FROM score_stat
-      WHERE unit_id = row_data.unit_id AND realm_id = row_data.realm_id AND total_count = 0;
-    END IF;
-
-    PERFORM apply_unit_engagement_stat(
-      row_data.unit_id, p_high_scores => direction * (row_data.value >= 8)::int
-    );
-    IF row_data.value >= 8 THEN
-      signal_kind := 'score_high'; unit_weight := 5; profile_weight := 5;
-    ELSIF row_data.value >= 6 THEN
-      signal_kind := 'score_medium'; unit_weight := 3; profile_weight := 3;
-    ELSIF row_data.value <= 3 THEN
-      signal_kind := 'score_low'; unit_weight := 0; profile_weight := -4;
-    ELSE
-      signal_kind := NULL; unit_weight := 0; profile_weight := 0;
-    END IF;
-    IF signal_kind IS NOT NULL THEN
-      IF unit_weight > 0 THEN
-        PERFORM apply_recommendation_unit_signal(
-          row_data.unit_id, row_data.updated_at, signal_kind, direction, direction * unit_weight
-        );
-      END IF;
-      PERFORM apply_recommendation_profile_signal(
-        row_data.profile_id, row_data.unit_id, row_data.updated_at, signal_kind,
-        direction, direction * profile_weight
-      );
-    END IF;
-  END LOOP;
-  RETURN NULL;
-END;
-$$;
-
-
---
--- Name: maintain_structure_application_support(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maintain_structure_application_support() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  IF TG_OP = 'DELETE' OR NEW.value = -1 THEN
-    DELETE FROM unit_tag_structure_support
-    WHERE unit_id = coalesce(NEW.unit_id, OLD.unit_id)
-      AND structure_id = coalesce(NEW.structure_id, OLD.structure_id)
-      AND profile_id = coalesce(NEW.profile_id, OLD.profile_id);
-  ELSE
-    INSERT INTO unit_tag_structure_support (
-      unit_id,
-      tag_id,
-      profile_id,
-      structure_id
-    )
-    SELECT NEW.unit_id, member.member_unit_id, NEW.profile_id, NEW.structure_id
-    FROM unit_structure_member member
-    WHERE member.structure_id = NEW.structure_id
-    ON CONFLICT DO NOTHING;
-  END IF;
-  RETURN NULL;
-END
-$$;
-
-
---
--- Name: maintain_unit_alias_vote_stat(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maintain_unit_alias_vote_stat() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE row_data unit_alias_vote%ROWTYPE; direction bigint; change record;
-BEGIN
-  FOR change IN
-    SELECT OLD AS row_data, -1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'DELETE')
-    UNION ALL SELECT NEW AS row_data, 1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'INSERT')
-  LOOP
-    row_data := change.row_data; direction := change.direction;
-    IF EXISTS (SELECT 1 FROM unit_alias WHERE id = row_data.alias_id) THEN
-      IF direction < 0 THEN
-        UPDATE unit_alias_vote_stat SET score = score + direction * row_data.value,
-          vote_count = vote_count + direction, updated_at = now()
-        WHERE alias_id = row_data.alias_id;
-        IF NOT FOUND THEN
-          RAISE EXCEPTION 'missing unit_alias_vote_stat row for decrement: %',
-            row_data.alias_id USING ERRCODE = '23514';
-        END IF;
-      ELSE
-        INSERT INTO unit_alias_vote_stat (alias_id, score, vote_count)
-        VALUES (row_data.alias_id, direction * row_data.value, direction)
-        ON CONFLICT (alias_id) DO UPDATE SET
-          score = unit_alias_vote_stat.score + excluded.score,
-          vote_count = unit_alias_vote_stat.vote_count + excluded.vote_count,
-          updated_at = now();
-      END IF;
-      DELETE FROM unit_alias_vote_stat WHERE alias_id = row_data.alias_id AND vote_count = 0;
-    END IF;
-  END LOOP;
-  RETURN NULL;
-END;
-$$;
-
-
---
--- Name: maintain_unit_source_link_vote_stat(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maintain_unit_source_link_vote_stat() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE row_data unit_source_link_vote%ROWTYPE; direction bigint; change record;
-BEGIN
-  FOR change IN
-    SELECT OLD AS row_data, -1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'DELETE')
-    UNION ALL SELECT NEW AS row_data, 1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'INSERT')
-  LOOP
-    row_data := change.row_data; direction := change.direction;
-    IF EXISTS (SELECT 1 FROM unit_source_link WHERE id = row_data.link_id) THEN
-      IF direction < 0 THEN
-        UPDATE unit_source_link_vote_stat SET score = score + direction * row_data.value,
-          vote_count = vote_count + direction, updated_at = now()
-        WHERE link_id = row_data.link_id;
-        IF NOT FOUND THEN
-          RAISE EXCEPTION 'missing unit_source_link_vote_stat row for decrement: %',
-            row_data.link_id USING ERRCODE = '23514';
-        END IF;
-      ELSE
-        INSERT INTO unit_source_link_vote_stat (link_id, score, vote_count)
-        VALUES (row_data.link_id, direction * row_data.value, direction)
-        ON CONFLICT (link_id) DO UPDATE SET
-          score = unit_source_link_vote_stat.score + excluded.score,
-          vote_count = unit_source_link_vote_stat.vote_count + excluded.vote_count,
-          updated_at = now();
-      END IF;
-      DELETE FROM unit_source_link_vote_stat
-      WHERE link_id = row_data.link_id AND vote_count = 0;
-    END IF;
-  END LOOP;
-  RETURN NULL;
-END;
-$$;
-
-
---
--- Name: maintain_unit_follow_stat(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maintain_unit_follow_stat() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE row_data unit_follow%ROWTYPE; direction bigint; change record;
-BEGIN
-  FOR change IN
-    SELECT OLD AS row_data, -1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'DELETE')
-    UNION ALL SELECT NEW AS row_data, 1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'INSERT')
-  LOOP
-    row_data := change.row_data; direction := change.direction;
-    IF EXISTS (SELECT 1 FROM unit WHERE id = row_data.unit_id) THEN
-      IF direction < 0 THEN
-        UPDATE unit_follow_stat SET follower_count = follower_count + direction,
-          updated_at = now() WHERE unit_id = row_data.unit_id;
-        IF NOT FOUND THEN
-          RAISE EXCEPTION 'missing unit_follow_stat row for decrement: %',
-            row_data.unit_id USING ERRCODE = '23514';
-        END IF;
-      ELSE
-        INSERT INTO unit_follow_stat (unit_id, follower_count)
-        VALUES (row_data.unit_id, direction)
-        ON CONFLICT (unit_id) DO UPDATE SET
-          follower_count = unit_follow_stat.follower_count + excluded.follower_count,
-          updated_at = now();
-      END IF;
-      DELETE FROM unit_follow_stat WHERE unit_id = row_data.unit_id AND follower_count = 0;
-    END IF;
-  END LOOP;
-  RETURN NULL;
-END;
-$$;
-
-
---
--- Name: maintain_unit_progress_stats(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maintain_unit_progress_stats() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE row_data unit_progress%ROWTYPE; direction bigint;
-signal_kind text; signal_weight double precision;
-change record;
-BEGIN
-  FOR change IN
-    SELECT OLD AS row_data, -1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'DELETE')
-    UNION ALL SELECT NEW AS row_data, 1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'INSERT')
-  LOOP
-    row_data := change.row_data; direction := change.direction;
-    IF row_data.deleted_at IS NULL AND row_data.status IN ('active', 'completed', 'dropped') THEN
-      PERFORM apply_unit_engagement_stat(
-        row_data.unit_id,
-        p_active_progress => direction * (row_data.status = 'active')::int,
-        p_completions => direction * (row_data.status = 'completed')::int,
-        p_negative_progress => direction * (row_data.status = 'dropped')::int
-      );
-      signal_kind := CASE row_data.status WHEN 'active' THEN 'progress_active'
-        WHEN 'completed' THEN 'progress_completed' ELSE 'progress_dropped' END;
-      signal_weight := CASE row_data.status WHEN 'active' THEN 3
-        WHEN 'completed' THEN 5 ELSE -4 END;
-      IF signal_weight > 0 THEN
-        PERFORM apply_recommendation_unit_signal(
-          row_data.unit_id, row_data.last_seen_at, signal_kind, direction,
-          direction * signal_weight
-        );
-      END IF;
-      PERFORM apply_recommendation_profile_signal(
-        row_data.profile_id, row_data.unit_id, row_data.last_seen_at, signal_kind,
-        direction, direction * signal_weight
-      );
-    END IF;
-  END LOOP;
-  RETURN NULL;
-END;
-$$;
-
-
---
--- Name: maintain_unit_reaction_stats(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maintain_unit_reaction_stats() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  IF TG_OP IN ('UPDATE', 'DELETE') THEN
-    PERFORM apply_reaction_change(
-      OLD.profile_id, OLD.unit_id, OLD.realm_id, OLD.reaction::text, OLD.updated_at, -1
-    );
-  END IF;
-  IF TG_OP IN ('UPDATE', 'INSERT') THEN
-    PERFORM apply_reaction_change(
-      NEW.profile_id, NEW.unit_id, NEW.realm_id, NEW.reaction::text, NEW.updated_at, 1
-    );
-  END IF;
-  RETURN NULL;
-END;
-$$;
-
-
---
--- Name: maintain_unit_share_stats(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maintain_unit_share_stats() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE row_data unit_share%ROWTYPE; direction bigint; change record;
-BEGIN
-  FOR change IN
-    SELECT OLD AS row_data, -1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'DELETE')
-    UNION ALL SELECT NEW AS row_data, 1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'INSERT')
-  LOOP
-    row_data := change.row_data; direction := change.direction;
-    PERFORM apply_unit_engagement_stat(row_data.unit_id, p_shares => direction);
-    PERFORM apply_recommendation_unit_signal(
-      row_data.unit_id, row_data.created_at, 'share', direction, direction * 4
-    );
-    PERFORM apply_recommendation_profile_signal(
-      row_data.profile_id, row_data.unit_id, row_data.created_at, 'share', direction,
-      direction * 4
-    );
-  END LOOP;
-  RETURN NULL;
-END;
-$$;
-
-
---
--- Name: maintain_unit_structure_application_vote_stat(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maintain_unit_structure_application_vote_stat() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  PERFORM refresh_unit_structure_application_vote_stat(
-    coalesce(NEW.unit_id, OLD.unit_id),
-    coalesce(NEW.structure_id, OLD.structure_id)
-  );
-  RETURN NULL;
-END
-$$;
-
-
---
--- Name: maintain_unit_structure_vote_stat(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maintain_unit_structure_vote_stat() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  PERFORM refresh_unit_structure_vote_stat(
-    coalesce(NEW.structure_id, OLD.structure_id)
-  );
-  RETURN NULL;
-END
-$$;
-
-
---
--- Name: maintain_unit_tag_vote_stat(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maintain_unit_tag_vote_stat() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-  target_unit_id uuid := coalesce(NEW.unit_id, OLD.unit_id);
-  target_tag_id uuid := coalesce(NEW.tag_id, OLD.tag_id);
-BEGIN
-  PERFORM lock_unit_effective_tag_key(target_unit_id, target_tag_id);
-  INSERT INTO unit_tag_vote_stat (unit_id, tag_id, score, vote_count)
-  SELECT
-    target_unit_id,
-    target_tag_id,
-    coalesce(sum(value), 0)::bigint,
-    count(*)::bigint
-  FROM unit_effective_tag_vote
-  WHERE unit_id = target_unit_id AND tag_id = target_tag_id
-  HAVING count(*) > 0
-  ON CONFLICT (unit_id, tag_id) DO UPDATE SET
-    score = excluded.score,
-    vote_count = excluded.vote_count,
-    updated_at = now();
-  DELETE FROM unit_tag_vote_stat
-  WHERE unit_id = target_unit_id
-    AND tag_id = target_tag_id
-    AND vote_count = 0;
-  RETURN NULL;
-END
-$$;
-
-
---
--- Name: message_is_unread(uuid, uuid, timestamp with time zone, uuid); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.message_is_unread(p_conversation_id uuid, p_recipient_id uuid, p_message_created_at timestamp with time zone, p_message_id uuid) RETURNS boolean
-    LANGUAGE sql STABLE
-    AS $$
-  SELECT marker.id IS NULL OR (p_message_created_at, p_message_id) > (marker.created_at, marker.id)
-  FROM (SELECT 1) seed
-  LEFT JOIN conversation_read read_state
-    ON read_state.conversation_id = p_conversation_id AND read_state.profile_id = p_recipient_id
-  LEFT JOIN message marker ON marker.id = read_state.last_read_message_id;
-$$;
-
-
---
--- Name: prepare_unit_structure_definition(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.prepare_unit_structure_definition() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-  invalid_member_count integer;
-BEGIN
-  IF cardinality(NEW.member_unit_ids) <>
-    (SELECT count(DISTINCT member_id) FROM unnest(NEW.member_unit_ids) member_id)
-  THEN
-    RAISE EXCEPTION 'Unit structure members must be distinct'
-      USING ERRCODE = '23514';
-  END IF;
-
-  IF NEW.kind = 'tag.hierarchy_path' THEN
-    SELECT count(*) INTO invalid_member_count
-    FROM unnest(NEW.member_unit_ids) member_id
-    LEFT JOIN tag ON tag.id = member_id
-    LEFT JOIN unit ON unit.id = member_id
-    WHERE tag.id IS NULL
-       OR unit.kind <> 'tag'
-       OR unit.status <> 'published'
-       OR unit.visibility <> 'public'
-       OR unit.moderation_status <> 'approved'
-       OR unit.deleted_at IS NOT NULL;
-    IF invalid_member_count <> 0 THEN
-      RAISE EXCEPTION 'Tag hierarchy paths require active public Tag members'
-        USING ERRCODE = '23514';
-    END IF;
-  ELSE
-    RAISE EXCEPTION 'Unsupported Unit structure kind: %', NEW.kind
-      USING ERRCODE = '23514';
-  END IF;
-
-  IF TG_OP = 'UPDATE' THEN
-    PERFORM lock_unit_structure_definition_key(NEW.id);
-    IF EXISTS (
-      SELECT 1
-      FROM unit_structure_application application
-      WHERE application.structure_id = NEW.id
-        AND application.unit_id = ANY(NEW.member_unit_ids)
-    ) THEN
-      RAISE EXCEPTION 'A Tag hierarchy path cannot contain an existing application target'
-        USING ERRCODE = '23514';
-    END IF;
-    IF EXISTS (
-      SELECT 1
-      FROM unit_structure_application_vote application_vote
-      CROSS JOIN unnest(NEW.member_unit_ids) member_id
-      JOIN unit_tag_vote direct_vote
-        ON direct_vote.unit_id = application_vote.unit_id
-       AND direct_vote.tag_id = member_id
-       AND direct_vote.profile_id = application_vote.profile_id
-       AND direct_vote.value = -1
-      WHERE application_vote.structure_id = NEW.id
-        AND application_vote.value = 1
-    ) THEN
-      RAISE EXCEPTION 'Administrative Structure correction conflicts with a negative direct Tag vote'
-        USING ERRCODE = '23514';
-    END IF;
-  END IF;
-  RETURN NEW;
-END
-$$;
-
-
---
--- Name: project_unit_structure_definition(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.project_unit_structure_definition() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  IF TG_OP = 'UPDATE' THEN
-    DELETE FROM unit_structure_edge
-    WHERE structure_id = NEW.id;
-    DELETE FROM unit_structure_member
-    WHERE structure_id = NEW.id;
-  END IF;
-
-  INSERT INTO unit_structure_member (
-    structure_id,
-    ordinal,
-    member_unit_id
-  )
-  SELECT NEW.id, member.ordinality - 1, member.id
-  FROM unnest(NEW.member_unit_ids) WITH ORDINALITY AS member(id, ordinality);
-
-  INSERT INTO unit_structure_edge (
-    structure_id,
-    ordinal,
-    parent_unit_id,
-    child_unit_id
-  )
-  SELECT NEW.id, member.ordinality - 1, member.id, NEW.member_unit_ids[member.ordinality + 1]
-  FROM unnest(NEW.member_unit_ids) WITH ORDINALITY AS member(id, ordinality)
-  WHERE member.ordinality < cardinality(NEW.member_unit_ids);
-
-  IF TG_OP = 'UPDATE' THEN
-    INSERT INTO unit_tag_structure_support (
-      unit_id,
-      tag_id,
-      profile_id,
-      structure_id
-    )
-    SELECT
-      application_vote.unit_id,
-      member.member_unit_id,
-      application_vote.profile_id,
-      application_vote.structure_id
-    FROM unit_structure_application_vote application_vote
-    JOIN unit_structure_member member
-      ON member.structure_id = application_vote.structure_id
-    WHERE application_vote.structure_id = NEW.id
-      AND application_vote.value = 1
-    ORDER BY
-      application_vote.unit_id,
-      member.member_unit_id,
-      application_vote.profile_id
-    ON CONFLICT DO NOTHING;
-  END IF;
-  RETURN NEW;
-END
-$$;
-
-
---
--- Name: protect_association_context_post_kind(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.protect_association_context_post_kind() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  IF OLD.kind = 'wiki'::post_kind
-    AND NEW.kind <> 'wiki'::post_kind
-    AND (
-      EXISTS (
-        SELECT 1 FROM subject_association
-        WHERE context_post_id = OLD.id
-      )
-      OR EXISTS (
-        SELECT 1 FROM unit_association_proposal
-        WHERE context_post_id = OLD.id
-      )
-    )
-  THEN
-    RAISE EXCEPTION 'referenced association context post % must remain a wiki Post', OLD.id
-      USING ERRCODE = '23514';
-  END IF;
-  RETURN NEW;
-END;
-$$;
-
-
---
--- Name: protect_conversation_aggregate_identity(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.protect_conversation_aggregate_identity() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  IF (OLD.id, OLD.participant_low_profile_id, OLD.participant_high_profile_id, OLD.created_at)
-    IS DISTINCT FROM
-    (NEW.id, NEW.participant_low_profile_id, NEW.participant_high_profile_id, NEW.created_at) THEN
-    RAISE EXCEPTION 'conversation aggregate identity is immutable' USING ERRCODE = '55000';
-  END IF;
-  RETURN NEW;
-END;
-$$;
-
-
---
--- Name: protect_conversation_read_identity(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.protect_conversation_read_identity() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  IF (OLD.conversation_id, OLD.profile_id) IS DISTINCT FROM (NEW.conversation_id, NEW.profile_id) THEN
-    RAISE EXCEPTION 'conversation read identity is immutable' USING ERRCODE = '55000';
-  END IF;
-  RETURN NEW;
-END;
-$$;
-
-
---
--- Name: protect_immutable_unit_structure(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.protect_immutable_unit_structure() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  IF pg_trigger_depth() > 1 THEN
-    RETURN CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
-  END IF;
-  IF TG_TABLE_NAME = 'unit_structure'
-     AND TG_OP = 'UPDATE'
-     AND current_setting('rezics.unit_structure_admin_edit_id', true) = OLD.id::text
-     AND NEW.id IS NOT DISTINCT FROM OLD.id
-     AND NEW.unit_kind IS NOT DISTINCT FROM OLD.unit_kind
-     AND NEW.kind IS NOT DISTINCT FROM OLD.kind
-     AND NEW.definition_version IS NOT DISTINCT FROM OLD.definition_version
-     AND NEW.created_by_profile_id IS NOT DISTINCT FROM OLD.created_by_profile_id
-     AND NEW.created_at IS NOT DISTINCT FROM OLD.created_at
-  THEN
-    RETURN NEW;
-  END IF;
-  RAISE EXCEPTION 'Unit structure definitions and projections are immutable'
-    USING ERRCODE = '55000';
-END
-$$;
-
-
---
--- Name: protect_message_aggregate_identity(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.protect_message_aggregate_identity() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  IF (OLD.id, OLD.conversation_id, OLD.sender_profile_id, OLD.created_at)
-    IS DISTINCT FROM (NEW.id, NEW.conversation_id, NEW.sender_profile_id, NEW.created_at) THEN
-    RAISE EXCEPTION 'message aggregate identity is immutable' USING ERRCODE = '55000';
-  END IF;
-  RETURN NEW;
-END;
-$$;
-
-
---
--- Name: protect_post_reply_identity(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.protect_post_reply_identity() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  IF (OLD.post_id, OLD.root_post_id, OLD.parent_post_id, OLD.depth, OLD.created_at)
-    IS DISTINCT FROM
-    (NEW.post_id, NEW.root_post_id, NEW.parent_post_id, NEW.depth, NEW.created_at) THEN
-    RAISE EXCEPTION 'post_reply identity is immutable' USING ERRCODE = '55000';
-  END IF;
-  RETURN NEW;
-END;
-$$;
-
-
---
--- Name: protect_realm_tag_context_post_kind(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.protect_realm_tag_context_post_kind() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  IF OLD."kind" = 'wiki'
-    AND NEW."kind" <> 'wiki'
-    AND EXISTS (
-      SELECT 1
-      FROM "realm_tag_context"
-      WHERE "context_post_id" = OLD."id"
-    )
-  THEN
-    RAISE EXCEPTION 'Post % is a Realm Tag Context and must remain a Wiki Post', OLD."id"
-      USING ERRCODE = '23514';
-  END IF;
-  RETURN NEW;
-END;
-$$;
-
-
---
--- Name: protect_unit_revision_identity(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.protect_unit_revision_identity() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-	IF ROW(
-		OLD."id",
-		OLD."unit_id",
-		OLD."parent_revision_id",
-		OLD."actor_profile_id",
-		OLD."edit_summary",
-		OLD."minor",
-		OLD."byte_size",
-		OLD."created_at"
-	) IS DISTINCT FROM ROW(
-		NEW."id",
-		NEW."unit_id",
-		NEW."parent_revision_id",
-		NEW."actor_profile_id",
-		NEW."edit_summary",
-		NEW."minor",
-		NEW."byte_size",
-		NEW."created_at"
-	) THEN
-		RAISE EXCEPTION 'unit_revision identity is immutable' USING ERRCODE = '55000';
-	END IF;
-	RETURN NEW;
-END;
-$$;
-
-
---
--- Name: refresh_conversation_last_message(uuid); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.refresh_conversation_last_message(p_conversation_id uuid) RETURNS void
-    LANGUAGE plpgsql
-    AS $$
-DECLARE latest message%ROWTYPE;
-created_at_value timestamptz;
-BEGIN
-  SELECT * INTO latest FROM message
-  WHERE conversation_id = p_conversation_id
-  ORDER BY created_at DESC, id DESC LIMIT 1;
-  SELECT created_at INTO created_at_value FROM conversation WHERE id = p_conversation_id;
-  IF created_at_value IS NULL THEN RETURN; END IF;
-  UPDATE conversation_stat SET last_message_id = latest.id,
-    last_message_at = latest.created_at, updated_at = now()
-  WHERE conversation_id = p_conversation_id;
-  UPDATE conversation_participant_stat SET last_message_id = latest.id,
-    last_message_at = latest.created_at,
-    sort_at = coalesce(latest.created_at, created_at_value), updated_at = now()
-  WHERE conversation_id = p_conversation_id;
-END;
-$$;
-
-
---
--- Name: refresh_unit_effective_tag(uuid, uuid); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.refresh_unit_effective_tag(target_unit_id uuid, target_tag_id uuid) RETURNS void
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-  has_direct boolean;
-  support_count bigint;
-BEGIN
-  PERFORM lock_unit_effective_tag_key(target_unit_id, target_tag_id);
-  SELECT EXISTS (
-    SELECT 1 FROM unit_tag
-    WHERE unit_id = target_unit_id AND tag_id = target_tag_id
-  ) INTO has_direct;
-  SELECT count(*)
-  FROM unit_tag_structure_support
-  WHERE unit_id = target_unit_id AND tag_id = target_tag_id
-  INTO support_count;
-
-  IF has_direct OR support_count > 0 THEN
-    INSERT INTO unit_effective_tag (
-      unit_id,
-      tag_id,
-      direct,
-      structure_support_count
-    )
-    VALUES (target_unit_id, target_tag_id, has_direct, support_count)
-    ON CONFLICT (unit_id, tag_id) DO UPDATE SET
-      direct = excluded.direct,
-      structure_support_count = excluded.structure_support_count,
-      updated_at = now();
-  ELSE
-    DELETE FROM unit_effective_tag
-    WHERE unit_id = target_unit_id AND tag_id = target_tag_id;
-  END IF;
-END
-$$;
-
-
---
--- Name: refresh_unit_effective_tag_vote(uuid, uuid, uuid); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.refresh_unit_effective_tag_vote(target_unit_id uuid, target_tag_id uuid, target_profile_id uuid) RETURNS void
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-  direct_value integer;
-  has_structure_support boolean;
-BEGIN
-  PERFORM lock_unit_effective_tag_vote_key(
-    target_unit_id,
-    target_tag_id,
-    target_profile_id
-  );
-  SELECT value INTO direct_value
-  FROM unit_tag_vote
-  WHERE unit_id = target_unit_id
-    AND tag_id = target_tag_id
-    AND profile_id = target_profile_id;
-  SELECT EXISTS (
-    SELECT 1 FROM unit_tag_structure_support
-    WHERE unit_id = target_unit_id
-      AND tag_id = target_tag_id
-      AND profile_id = target_profile_id
-  ) INTO has_structure_support;
-
-  IF direct_value IS NOT NULL OR has_structure_support THEN
-    INSERT INTO unit_effective_tag_vote (
-      unit_id,
-      tag_id,
-      profile_id,
-      value
-    )
-    VALUES (
-      target_unit_id,
-      target_tag_id,
-      target_profile_id,
-      coalesce(direct_value, 1)
-    )
-    ON CONFLICT (unit_id, tag_id, profile_id) DO UPDATE SET
-      value = excluded.value,
-      updated_at = now();
-  ELSE
-    DELETE FROM unit_effective_tag_vote
-    WHERE unit_id = target_unit_id
-      AND tag_id = target_tag_id
-      AND profile_id = target_profile_id;
-  END IF;
-END
-$$;
-
-
---
--- Name: refresh_unit_structure_application_vote_stat(uuid, uuid); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.refresh_unit_structure_application_vote_stat(target_unit_id uuid, target_structure_id uuid) RETURNS void
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  PERFORM pg_advisory_xact_lock(hashtextextended(
-    target_unit_id::text || ':' || target_structure_id::text,
-    71004
-  ));
-  INSERT INTO unit_structure_application_vote_stat (
-    unit_id,
-    structure_id,
-    score,
-    vote_count
-  )
-  SELECT
-    target_unit_id,
-    target_structure_id,
-    coalesce(sum(value), 0)::bigint,
-    count(*)::bigint
-  FROM unit_structure_application_vote
-  WHERE unit_id = target_unit_id AND structure_id = target_structure_id
-  ON CONFLICT (unit_id, structure_id) DO UPDATE SET
-    score = excluded.score,
-    vote_count = excluded.vote_count,
-    updated_at = now();
-  DELETE FROM unit_structure_application_vote_stat
-  WHERE unit_id = target_unit_id
-    AND structure_id = target_structure_id
-    AND vote_count = 0;
-END
-$$;
-
-
---
--- Name: refresh_unit_structure_vote_stat(uuid); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.refresh_unit_structure_vote_stat(target_structure_id uuid) RETURNS void
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  PERFORM pg_advisory_xact_lock(hashtextextended(
-    target_structure_id::text,
-    71003
-  ));
-  INSERT INTO unit_structure_vote_stat (structure_id, score, vote_count)
-  SELECT
-    target_structure_id,
-    coalesce(sum(value), 0)::bigint,
-    count(*)::bigint
-  FROM unit_structure_vote
-  WHERE structure_id = target_structure_id
-  ON CONFLICT (structure_id) DO UPDATE SET
-    score = excluded.score,
-    vote_count = excluded.vote_count,
-    updated_at = now();
-  DELETE FROM unit_structure_vote_stat
-  WHERE structure_id = target_structure_id AND vote_count = 0;
-END
-$$;
-
-
---
--- Name: reject_conflicting_direct_tag_vote(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.reject_conflicting_direct_tag_vote() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  PERFORM lock_unit_effective_tag_vote_key(
-    NEW.unit_id,
-    NEW.tag_id,
-    NEW.profile_id
-  );
-  IF NEW.value = -1 AND EXISTS (
-    SELECT 1 FROM unit_tag_structure_support
-    WHERE unit_id = NEW.unit_id
-      AND tag_id = NEW.tag_id
-      AND profile_id = NEW.profile_id
-  ) THEN
-    RAISE EXCEPTION 'A negative direct Tag vote conflicts with positive structure support'
-      USING ERRCODE = '23514';
-  END IF;
-  RETURN NEW;
-END
-$$;
-
-
---
--- Name: reject_conflicting_structure_application_vote(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.reject_conflicting_structure_application_vote() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  PERFORM lock_unit_structure_definition_key(NEW.structure_id);
-  IF EXISTS (
-    SELECT 1
-    FROM unit_structure_member member
-    WHERE member.structure_id = NEW.structure_id
-      AND member.member_unit_id = NEW.unit_id
-  ) THEN
-    RAISE EXCEPTION 'A Tag hierarchy path cannot be applied to one of its members'
-      USING ERRCODE = '23514';
-  END IF;
-  PERFORM lock_unit_effective_tag_vote_key(
-    NEW.unit_id,
-    member.member_unit_id,
-    NEW.profile_id
-  )
-  FROM unit_structure_member member
-  WHERE member.structure_id = NEW.structure_id
-  ORDER BY member.member_unit_id;
-
-  IF NEW.value = 1 AND EXISTS (
-    SELECT 1
-    FROM unit_structure_member member
-    JOIN unit_tag_vote direct_vote
-      ON direct_vote.unit_id = NEW.unit_id
-     AND direct_vote.tag_id = member.member_unit_id
-     AND direct_vote.profile_id = NEW.profile_id
-     AND direct_vote.value = -1
-    WHERE member.structure_id = NEW.structure_id
-  ) THEN
-    RAISE EXCEPTION 'Positive structure support conflicts with a negative direct Tag vote'
-      USING ERRCODE = '23514';
-  END IF;
-  RETURN NEW;
-END
-$$;
-
-
---
--- Name: reject_immutable_history_mutation(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.reject_immutable_history_mutation() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-	RAISE EXCEPTION '% is append-only', TG_TABLE_NAME USING ERRCODE = '55000';
-END;
-$$;
-
-
---
--- Name: remove_reply_signals_before_unit_delete(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.remove_reply_signals_before_unit_delete() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE relation post_reply%ROWTYPE;
-BEGIN
-  SELECT * INTO relation FROM post_reply WHERE post_id = OLD.id;
-  IF NOT FOUND THEN RETURN OLD; END IF;
-  PERFORM apply_post_reply_stat_delta(
-    relation.root_post_id,
-    relation.parent_post_id,
-    -(OLD.deleted_at IS NULL)::int,
-    -(OLD.deleted_at IS NULL AND OLD.status = 'published' AND OLD.visibility = 'public'
-      AND OLD.moderation_status = 'approved')::int
-  );
-  IF OLD.deleted_at IS NULL THEN
-    PERFORM apply_unit_engagement_stat(relation.root_post_id, p_replies => -1);
-    IF relation.parent_post_id IS NOT NULL THEN
-      PERFORM apply_unit_engagement_stat(relation.parent_post_id, p_replies => -1);
-    END IF;
-  END IF;
-  PERFORM apply_recommendation_unit_signal(
-    relation.root_post_id, relation.created_at, 'reply', -1, -4
-  );
-  IF relation.parent_post_id IS NOT NULL THEN
-    PERFORM apply_recommendation_unit_signal(
-      relation.parent_post_id, relation.created_at, 'reply', -1, -4
-    );
-  END IF;
-  RETURN OLD;
-END;
-$$;
-
-
---
 -- Name: account_enforcement account_enforcement_decision_action_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -6003,6 +6774,30 @@ ALTER TABLE ONLY public.audio
 
 ALTER TABLE ONLY public.audit_event
     ADD CONSTRAINT audit_event_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: book_chapter_progress_stat book_chapter_progress_stat_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.book_chapter_progress_stat
+    ADD CONSTRAINT book_chapter_progress_stat_pkey PRIMARY KEY (profile_id, book_unit_id);
+
+
+--
+-- Name: book_chapter_stat book_chapter_stat_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.book_chapter_stat
+    ADD CONSTRAINT book_chapter_stat_pkey PRIMARY KEY (book_unit_id);
+
+
+--
+-- Name: book_localized_content_metric_stat book_localized_content_metric_stat_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.book_localized_content_metric_stat
+    ADD CONSTRAINT book_localized_content_metric_stat_pkey PRIMARY KEY (book_unit_id, language);
 
 
 --
@@ -6366,6 +7161,14 @@ ALTER TABLE ONLY public.notification_preference
 
 
 --
+-- Name: notification_recipient_stat notification_recipient_stat_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.notification_recipient_stat
+    ADD CONSTRAINT notification_recipient_stat_pkey PRIMARY KEY (profile_id);
+
+
+--
 -- Name: platform_capability_grant platform_capability_grant_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -6646,6 +7449,14 @@ ALTER TABLE ONLY public.realm_score_context
 
 
 --
+-- Name: realm_stat realm_stat_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.realm_stat
+    ADD CONSTRAINT realm_stat_pkey PRIMARY KEY (realm_id);
+
+
+--
 -- Name: realm_tag_context realm_tag_context_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -6667,6 +7478,14 @@ ALTER TABLE ONLY public.realm_tag_vote
 
 ALTER TABLE ONLY public.realm_tag_vote_stat
     ADD CONSTRAINT realm_tag_vote_stat_pkey PRIMARY KEY (realm_id, unit_id, tag_id);
+
+
+--
+-- Name: realm_unit_moderation_stat realm_unit_moderation_stat_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.realm_unit_moderation_stat
+    ADD CONSTRAINT realm_unit_moderation_stat_pkey PRIMARY KEY (realm_id, unit_id);
 
 
 --
@@ -7270,6 +8089,14 @@ ALTER TABLE ONLY public.unit_reaction_stat
 
 
 --
+-- Name: unit_reference_curation_head unit_reference_curation_head_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.unit_reference_curation_head
+    ADD CONSTRAINT unit_reference_curation_head_pkey PRIMARY KEY (unit_id, kind);
+
+
+--
 -- Name: unit_revision_head unit_revision_head_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -7371,14 +8198,6 @@ ALTER TABLE ONLY public.unit_source_link_vote
 
 ALTER TABLE ONLY public.unit_source_link_vote_stat
     ADD CONSTRAINT unit_source_link_vote_stat_pkey PRIMARY KEY (link_id);
-
-
---
--- Name: unit_reference_curation_head unit_reference_curation_head_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.unit_reference_curation_head
-    ADD CONSTRAINT unit_reference_curation_head_pkey PRIMARY KEY (unit_id, kind);
 
 
 --
@@ -8744,10 +9563,31 @@ CREATE INDEX recommendation_unit_signal_hourly_bucket_idx ON public.recommendati
 
 
 --
+-- Name: recommendation_unit_stat_snapshot_best_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX recommendation_unit_stat_snapshot_best_idx ON public.recommendation_unit_stat USING btree (snapshot_id, best_score DESC NULLS LAST, unit_created_at DESC NULLS LAST, unit_id DESC NULLS LAST) WHERE (context_realm_id IS NULL);
+
+
+--
 -- Name: recommendation_unit_stat_snapshot_hot_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX recommendation_unit_stat_snapshot_hot_idx ON public.recommendation_unit_stat USING btree (snapshot_id, engagement_24h DESC NULLS LAST, unit_id);
+CREATE INDEX recommendation_unit_stat_snapshot_hot_idx ON public.recommendation_unit_stat USING btree (snapshot_id, hot_score DESC NULLS LAST, unit_created_at DESC NULLS LAST, unit_id DESC NULLS LAST) WHERE (context_realm_id IS NULL);
+
+
+--
+-- Name: recommendation_unit_stat_snapshot_rising_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX recommendation_unit_stat_snapshot_rising_idx ON public.recommendation_unit_stat USING btree (snapshot_id, rising_score DESC NULLS LAST, unit_created_at DESC NULLS LAST, unit_id DESC NULLS LAST) WHERE (context_realm_id IS NULL);
+
+
+--
+-- Name: recommendation_unit_stat_snapshot_top_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX recommendation_unit_stat_snapshot_top_idx ON public.recommendation_unit_stat USING btree (snapshot_id, top_score DESC NULLS LAST, unit_created_at DESC NULLS LAST, unit_id DESC NULLS LAST) WHERE (context_realm_id IS NULL);
 
 
 --
@@ -9164,47 +10004,6 @@ CREATE INDEX unit_kind_status_created_at_idx ON public.unit USING btree (kind, s
 
 
 --
--- Name: unit_localization_pgroonga_metadata_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX unit_localization_pgroonga_metadata_idx
-    ON public.unit_localization
-    USING pgroonga (
-        (public.current_search_metadata_v1(title, summary, description)) public.pgroonga_text_full_text_search_ops_v2
-    )
-    WITH (
-        lexicon_flags_mapping = '{"current_search_metadata_v1":["LARGE"]}',
-        index_flags_mapping = '{"current_search_metadata_v1":["LARGE"]}'
-    );
-
-
---
--- Name: unit_localization_pgroonga_content_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX unit_localization_pgroonga_content_idx
-    ON public.unit_localization
-    USING pgroonga (
-        (public.current_search_text_v1(content)) public.pgroonga_text_full_text_search_ops_v2
-    )
-    WITH (
-        lexicon_flags_mapping = '{"current_search_text_v1":["LARGE"]}',
-        index_flags_mapping = '{"current_search_text_v1":["LARGE"]}'
-    );
-
-
---
--- Name: unit_public_discoverable_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX unit_public_discoverable_idx ON public.unit USING btree (id)
-    WHERE status = 'published'::public.unit_status
-        AND visibility = 'public'::public.resource_visibility
-        AND moderation_status = 'approved'::public.moderation_status
-        AND deleted_at IS NULL;
-
-
---
 -- Name: unit_localization_content_status_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -9216,6 +10015,20 @@ CREATE INDEX unit_localization_content_status_idx ON public.unit_localization US
 --
 
 CREATE INDEX unit_localization_language_unit_idx ON public.unit_localization USING btree (language, unit_id);
+
+
+--
+-- Name: unit_localization_pgroonga_content_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX unit_localization_pgroonga_content_idx ON public.unit_localization USING pgroonga (public.current_search_text_v1(content)) WITH (lexicon_flags_mapping='{"current_search_text_v1":["LARGE"]}', index_flags_mapping='{"current_search_text_v1":["LARGE"]}');
+
+
+--
+-- Name: unit_localization_pgroonga_metadata_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX unit_localization_pgroonga_metadata_idx ON public.unit_localization USING pgroonga (public.current_search_metadata_v1(title, summary, description)) WITH (lexicon_flags_mapping='{"current_search_metadata_v1":["LARGE"]}', index_flags_mapping='{"current_search_metadata_v1":["LARGE"]}');
 
 
 --
@@ -9380,6 +10193,13 @@ CREATE INDEX unit_progress_unit_status_idx ON public.unit_progress USING btree (
 
 
 --
+-- Name: unit_public_discoverable_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX unit_public_discoverable_idx ON public.unit USING btree (id) WHERE ((status = 'published'::public.unit_status) AND (visibility = 'public'::public.resource_visibility) AND (moderation_status = 'approved'::public.moderation_status) AND (deleted_at IS NULL));
+
+
+--
 -- Name: unit_reaction_profile_created_at_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -9471,13 +10291,6 @@ CREATE INDEX unit_slug_address_target_unit_idx ON public.unit_slug_address USING
 
 
 --
--- Name: unit_source_link_source_entity_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX unit_source_link_source_entity_idx ON public.unit_source_link USING btree (source_entity_id);
-
-
---
 -- Name: unit_source_link_created_by_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -9485,10 +10298,10 @@ CREATE INDEX unit_source_link_created_by_idx ON public.unit_source_link USING bt
 
 
 --
--- Name: unit_source_link_unit_position_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: unit_source_link_source_entity_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX unit_source_link_unit_position_idx ON public.unit_source_link USING btree (unit_id, pinned, "position", id);
+CREATE INDEX unit_source_link_source_entity_idx ON public.unit_source_link USING btree (source_entity_id);
 
 
 --
@@ -9496,6 +10309,13 @@ CREATE INDEX unit_source_link_unit_position_idx ON public.unit_source_link USING
 --
 
 CREATE UNIQUE INDEX unit_source_link_unit_pinned_position_unique ON public.unit_source_link USING btree (unit_id, "position") WHERE pinned;
+
+
+--
+-- Name: unit_source_link_unit_position_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX unit_source_link_unit_position_idx ON public.unit_source_link USING btree (unit_id, pinned, "position", id);
 
 
 --
@@ -9678,6 +10498,524 @@ CREATE INDEX verifications_identifier_idx ON public.verifications USING btree (i
 --
 
 CREATE INDEX zone_page_zone_created_idx ON public.zone_page USING btree (zone_id, created_at, id);
+
+
+--
+-- Name: audit_event audit_event_append_only; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER audit_event_append_only BEFORE DELETE OR UPDATE ON public.audit_event FOR EACH ROW EXECUTE FUNCTION public.reject_immutable_history_mutation();
+
+
+--
+-- Name: content_structure_node book_chapter_node_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER book_chapter_node_stat_maintain AFTER INSERT OR DELETE OR UPDATE OF structure_id, content_unit_id, deleted_at ON public.content_structure_node FOR EACH ROW EXECUTE FUNCTION public.maintain_book_chapter_from_node();
+
+
+--
+-- Name: post book_chapter_post_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER book_chapter_post_stat_maintain AFTER INSERT OR DELETE OR UPDATE OF kind ON public.post FOR EACH ROW EXECUTE FUNCTION public.maintain_book_chapter_from_post();
+
+
+--
+-- Name: content_structure_node_progress book_chapter_progress_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER book_chapter_progress_stat_maintain AFTER INSERT OR DELETE OR UPDATE OF profile_id, node_id ON public.content_structure_node_progress FOR EACH ROW EXECUTE FUNCTION public.maintain_book_chapter_from_progress();
+
+
+--
+-- Name: content_structure book_chapter_structure_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER book_chapter_structure_stat_maintain AFTER INSERT OR DELETE OR UPDATE OF kind, deleted_at ON public.content_structure FOR EACH ROW EXECUTE FUNCTION public.maintain_book_chapter_from_structure();
+
+
+--
+-- Name: unit book_chapter_unit_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER book_chapter_unit_stat_maintain AFTER UPDATE OF kind, status, visibility, deleted_at ON public.unit FOR EACH ROW EXECUTE FUNCTION public.maintain_book_chapter_from_unit();
+
+
+--
+-- Name: unit_localization_content_metric book_localized_metric_content_refresh; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER book_localized_metric_content_refresh AFTER INSERT OR DELETE OR UPDATE OF unit_id, language, word_count, character_count ON public.unit_localization_content_metric FOR EACH ROW EXECUTE FUNCTION public.refresh_book_metric_from_localization();
+
+
+--
+-- Name: unit_localization book_localized_metric_localization_refresh; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER book_localized_metric_localization_refresh AFTER INSERT OR DELETE OR UPDATE OF unit_id, language, content_status ON public.unit_localization FOR EACH ROW EXECUTE FUNCTION public.refresh_book_metric_from_localization();
+
+
+--
+-- Name: content_structure_node book_localized_metric_node_refresh; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER book_localized_metric_node_refresh AFTER INSERT OR DELETE OR UPDATE OF structure_id, owner_unit_id, content_unit_id, deleted_at ON public.content_structure_node FOR EACH ROW EXECUTE FUNCTION public.refresh_book_metric_from_node();
+
+
+--
+-- Name: post book_localized_metric_post_refresh; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER book_localized_metric_post_refresh AFTER INSERT OR DELETE OR UPDATE OF kind ON public.post FOR EACH ROW EXECUTE FUNCTION public.refresh_book_metric_from_content_unit();
+
+
+--
+-- Name: content_structure book_localized_metric_structure_refresh; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER book_localized_metric_structure_refresh AFTER INSERT OR DELETE OR UPDATE OF owner_unit_id, kind, deleted_at ON public.content_structure FOR EACH ROW EXECUTE FUNCTION public.refresh_book_metric_from_structure();
+
+
+--
+-- Name: unit book_localized_metric_unit_refresh; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER book_localized_metric_unit_refresh AFTER UPDATE OF kind, status, visibility, deleted_at ON public.unit FOR EACH ROW EXECUTE FUNCTION public.refresh_book_metric_from_content_unit();
+
+
+--
+-- Name: collection_item collection_item_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER collection_item_stat_maintain AFTER INSERT OR DELETE OR UPDATE OF collection_id ON public.collection_item FOR EACH ROW EXECUTE FUNCTION public.maintain_collection_item_stat();
+
+
+--
+-- Name: collection collection_stat_initialize; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER collection_stat_initialize AFTER INSERT ON public.collection FOR EACH ROW EXECUTE FUNCTION public.initialize_collection_stat();
+
+
+--
+-- Name: content_structure_node content_structure_node_acyclic; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE CONSTRAINT TRIGGER content_structure_node_acyclic AFTER INSERT OR UPDATE ON public.content_structure_node DEFERRABLE INITIALLY IMMEDIATE FOR EACH ROW EXECUTE FUNCTION public.content_structure_node_reject_cycle();
+
+
+--
+-- Name: content_structure_node content_structure_node_realm_tag_query_strategy; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER content_structure_node_realm_tag_query_strategy BEFORE INSERT OR UPDATE OF structure_id, content_unit_id, realm_tag_query_strategy, deleted_at ON public.content_structure_node FOR EACH ROW EXECUTE FUNCTION public.enforce_realm_taxonomy_tag_query_strategy();
+
+
+--
+-- Name: conversation conversation_aggregate_identity_protect; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER conversation_aggregate_identity_protect BEFORE UPDATE ON public.conversation FOR EACH ROW EXECUTE FUNCTION public.protect_conversation_aggregate_identity();
+
+
+--
+-- Name: conversation_read conversation_read_identity_protect; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER conversation_read_identity_protect BEFORE UPDATE ON public.conversation_read FOR EACH ROW EXECUTE FUNCTION public.protect_conversation_read_identity();
+
+
+--
+-- Name: conversation conversation_stats_initialize; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER conversation_stats_initialize AFTER INSERT ON public.conversation FOR EACH ROW EXECUTE FUNCTION public.initialize_conversation_stats();
+
+
+--
+-- Name: collection_item favorite_item_stats_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER favorite_item_stats_maintain AFTER INSERT OR DELETE OR UPDATE ON public.collection_item FOR EACH ROW EXECUTE FUNCTION public.maintain_favorite_item_stats();
+
+
+--
+-- Name: message message_aggregate_identity_protect; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER message_aggregate_identity_protect BEFORE UPDATE ON public.message FOR EACH ROW EXECUTE FUNCTION public.protect_message_aggregate_identity();
+
+
+--
+-- Name: message message_stats_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER message_stats_maintain AFTER INSERT OR DELETE OR UPDATE OF deleted_at ON public.message FOR EACH ROW EXECUTE FUNCTION public.maintain_message_stats();
+
+
+--
+-- Name: profile notification_recipient_stat_initialize; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER notification_recipient_stat_initialize AFTER INSERT ON public.profile FOR EACH ROW EXECUTE FUNCTION public.initialize_notification_recipient_stat();
+
+
+--
+-- Name: notification notification_recipient_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER notification_recipient_stat_maintain AFTER INSERT OR DELETE OR UPDATE OF recipient_profile_id, in_app_visible, read_at ON public.notification FOR EACH ROW EXECUTE FUNCTION public.maintain_notification_recipient_stat();
+
+
+--
+-- Name: poll_option poll_option_vote_stat_initialize; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER poll_option_vote_stat_initialize AFTER INSERT ON public.poll_option FOR EACH ROW EXECUTE FUNCTION public.initialize_poll_option_vote_stat();
+
+
+--
+-- Name: poll_vote poll_option_vote_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER poll_option_vote_stat_maintain AFTER INSERT OR DELETE OR UPDATE OF option_id ON public.poll_vote FOR EACH ROW EXECUTE FUNCTION public.maintain_poll_option_vote_stat();
+
+
+--
+-- Name: post post_association_context_kind_protect; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER post_association_context_kind_protect BEFORE UPDATE OF kind ON public.post FOR EACH ROW EXECUTE FUNCTION public.protect_association_context_post_kind();
+
+
+--
+-- Name: realm_unit post_realm_mount_targeting_enforce; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER post_realm_mount_targeting_enforce AFTER INSERT OR UPDATE OF realm_id, unit_id ON public.realm_unit FOR EACH ROW EXECUTE FUNCTION public.enforce_post_realm_mount_targeting();
+
+
+--
+-- Name: post post_realm_tag_context_kind; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER post_realm_tag_context_kind BEFORE UPDATE OF kind ON public.post FOR EACH ROW EXECUTE FUNCTION public.protect_realm_tag_context_post_kind();
+
+
+--
+-- Name: post_reply post_reply_identity_protect; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER post_reply_identity_protect BEFORE UPDATE ON public.post_reply FOR EACH ROW EXECUTE FUNCTION public.protect_post_reply_identity();
+
+
+--
+-- Name: post post_reply_stat_initialize; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER post_reply_stat_initialize AFTER INSERT ON public.post FOR EACH ROW EXECUTE FUNCTION public.initialize_post_reply_stat();
+
+
+--
+-- Name: post_reply post_reply_stats_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER post_reply_stats_maintain AFTER INSERT OR DELETE OR UPDATE ON public.post_reply FOR EACH ROW EXECUTE FUNCTION public.maintain_post_reply_stats();
+
+
+--
+-- Name: post_reply post_reply_targeting_enforce; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER post_reply_targeting_enforce AFTER INSERT OR UPDATE OF root_post_id, parent_post_id ON public.post_reply FOR EACH ROW EXECUTE FUNCTION public.enforce_post_reply_targeting();
+
+
+--
+-- Name: post post_subject_targeting_enforce; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER post_subject_targeting_enforce AFTER INSERT OR UPDATE OF subject_unit_id ON public.post FOR EACH ROW EXECUTE FUNCTION public.enforce_post_subject_targeting();
+
+
+--
+-- Name: realm_member realm_member_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER realm_member_stat_maintain AFTER INSERT OR DELETE OR UPDATE OF realm_id, state ON public.realm_member FOR EACH ROW EXECUTE FUNCTION public.maintain_realm_member_stat();
+
+
+--
+-- Name: realm realm_stat_initialize; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER realm_stat_initialize AFTER INSERT ON public.realm FOR EACH ROW EXECUTE FUNCTION public.initialize_realm_stat();
+
+
+--
+-- Name: realm_tag_context realm_tag_context_wiki_post; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER realm_tag_context_wiki_post BEFORE INSERT OR UPDATE OF context_post_id ON public.realm_tag_context FOR EACH ROW EXECUTE FUNCTION public.enforce_realm_tag_context_wiki_post();
+
+
+--
+-- Name: realm_tag_vote realm_tag_vote_realm_tag_voting_enabled; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER realm_tag_vote_realm_tag_voting_enabled BEFORE INSERT OR UPDATE ON public.realm_tag_vote FOR EACH ROW EXECUTE FUNCTION public.enforce_realm_tag_voting_enabled();
+
+
+--
+-- Name: realm_tag_vote realm_tag_vote_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER realm_tag_vote_stat_maintain AFTER INSERT OR DELETE OR UPDATE ON public.realm_tag_vote FOR EACH ROW EXECUTE FUNCTION public.maintain_realm_tag_vote_stat();
+
+
+--
+-- Name: realm_unit realm_unit_moderation_stat_initialize; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER realm_unit_moderation_stat_initialize AFTER INSERT ON public.realm_unit FOR EACH ROW EXECUTE FUNCTION public.initialize_realm_unit_moderation_stat();
+
+
+--
+-- Name: moderation_case realm_unit_report_case_state_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER realm_unit_report_case_state_maintain AFTER UPDATE OF state ON public.moderation_case FOR EACH ROW EXECUTE FUNCTION public.maintain_realm_unit_report_case_state();
+
+
+--
+-- Name: realm_unit_report realm_unit_report_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER realm_unit_report_stat_maintain AFTER INSERT OR DELETE OR UPDATE OF case_id, realm_id, unit_id ON public.realm_unit_report FOR EACH ROW EXECUTE FUNCTION public.maintain_realm_unit_report_stat();
+
+
+--
+-- Name: recommendation_event recommendation_event_signals_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER recommendation_event_signals_maintain AFTER INSERT OR UPDATE ON public.recommendation_event FOR EACH ROW EXECUTE FUNCTION public.maintain_recommendation_event_signals();
+
+
+--
+-- Name: unit reply_signals_remove_before_unit_delete; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER reply_signals_remove_before_unit_delete BEFORE DELETE ON public.unit FOR EACH ROW EXECUTE FUNCTION public.remove_reply_signals_before_unit_delete();
+
+
+--
+-- Name: unit reply_unit_state_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER reply_unit_state_maintain AFTER UPDATE OF status, visibility, moderation_status, deleted_at ON public.unit FOR EACH ROW WHEN (((old.status IS DISTINCT FROM new.status) OR (old.visibility IS DISTINCT FROM new.visibility) OR (old.moderation_status IS DISTINCT FROM new.moderation_status) OR (old.deleted_at IS DISTINCT FROM new.deleted_at))) EXECUTE FUNCTION public.maintain_reply_unit_state();
+
+
+--
+-- Name: revision_content revision_content_immutable; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER revision_content_immutable BEFORE DELETE OR UPDATE ON public.revision_content FOR EACH ROW EXECUTE FUNCTION public.reject_immutable_history_mutation();
+
+
+--
+-- Name: score score_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER score_stat_maintain AFTER INSERT OR DELETE OR UPDATE ON public.score FOR EACH ROW EXECUTE FUNCTION public.maintain_score_stat();
+
+
+--
+-- Name: subject_association subject_association_wiki_context_post; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER subject_association_wiki_context_post BEFORE INSERT OR UPDATE OF context_post_id ON public.subject_association FOR EACH ROW EXECUTE FUNCTION public.enforce_wiki_association_context_post();
+
+
+--
+-- Name: unit_alias_vote unit_alias_vote_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_alias_vote_stat_maintain AFTER INSERT OR DELETE OR UPDATE ON public.unit_alias_vote FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_alias_vote_stat();
+
+
+--
+-- Name: unit_association_proposal unit_association_proposal_wiki_context_post; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_association_proposal_wiki_context_post BEFORE INSERT OR UPDATE OF context_post_id, kind ON public.unit_association_proposal FOR EACH ROW EXECUTE FUNCTION public.enforce_wiki_association_context_post();
+
+
+--
+-- Name: unit_content_license unit_content_license_guard_mutation; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_content_license_guard_mutation BEFORE DELETE OR UPDATE ON public.unit_content_license FOR EACH ROW EXECUTE FUNCTION public.guard_unit_content_license_mutation();
+
+
+--
+-- Name: unit_follow unit_follow_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_follow_stat_maintain AFTER INSERT OR DELETE OR UPDATE ON public.unit_follow FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_follow_stat();
+
+
+--
+-- Name: unit_progress unit_progress_stats_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_progress_stats_maintain AFTER INSERT OR DELETE OR UPDATE OF profile_id, unit_id, status, last_seen_at, deleted_at ON public.unit_progress FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_progress_stats();
+
+
+--
+-- Name: unit_reaction unit_reaction_stats_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_reaction_stats_maintain AFTER INSERT OR DELETE OR UPDATE ON public.unit_reaction FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_reaction_stats();
+
+
+--
+-- Name: unit_revision unit_revision_identity_immutable; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_revision_identity_immutable BEFORE UPDATE ON public.unit_revision FOR EACH ROW EXECUTE FUNCTION public.protect_unit_revision_identity();
+
+
+--
+-- Name: unit_revision_slot unit_revision_slot_immutable; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_revision_slot_immutable BEFORE DELETE OR UPDATE ON public.unit_revision_slot FOR EACH ROW EXECUTE FUNCTION public.reject_immutable_history_mutation();
+
+
+--
+-- Name: unit_revision_tag unit_revision_tag_immutable; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_revision_tag_immutable BEFORE DELETE OR UPDATE ON public.unit_revision_tag FOR EACH ROW EXECUTE FUNCTION public.reject_immutable_history_mutation();
+
+
+--
+-- Name: unit_share unit_share_stats_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_share_stats_maintain AFTER INSERT OR DELETE OR UPDATE ON public.unit_share FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_share_stats();
+
+
+--
+-- Name: unit_source_link_vote unit_source_link_vote_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_source_link_vote_stat_maintain AFTER INSERT OR DELETE OR UPDATE ON public.unit_source_link_vote FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_source_link_vote_stat();
+
+
+--
+-- Name: unit_structure_application_vote unit_structure_application_vote_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_structure_application_vote_stat_maintain AFTER INSERT OR DELETE OR UPDATE ON public.unit_structure_application_vote FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_structure_application_vote_stat();
+
+
+--
+-- Name: unit_structure_application_vote unit_structure_application_vote_support_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_structure_application_vote_support_maintain AFTER INSERT OR DELETE OR UPDATE ON public.unit_structure_application_vote FOR EACH ROW EXECUTE FUNCTION public.maintain_structure_application_support();
+
+
+--
+-- Name: unit_structure_application_vote unit_structure_application_vote_tag_conflict; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_structure_application_vote_tag_conflict BEFORE INSERT OR UPDATE ON public.unit_structure_application_vote FOR EACH ROW EXECUTE FUNCTION public.reject_conflicting_structure_application_vote();
+
+
+--
+-- Name: unit_structure unit_structure_definition_immutable; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_structure_definition_immutable BEFORE DELETE OR UPDATE ON public.unit_structure FOR EACH ROW EXECUTE FUNCTION public.protect_immutable_unit_structure();
+
+
+--
+-- Name: unit_structure unit_structure_definition_project; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_structure_definition_project AFTER INSERT OR UPDATE ON public.unit_structure FOR EACH ROW EXECUTE FUNCTION public.project_unit_structure_definition();
+
+
+--
+-- Name: unit_structure unit_structure_definition_validate; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_structure_definition_validate BEFORE INSERT OR UPDATE ON public.unit_structure FOR EACH ROW EXECUTE FUNCTION public.prepare_unit_structure_definition();
+
+
+--
+-- Name: unit_structure_edge unit_structure_edge_immutable; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_structure_edge_immutable BEFORE INSERT OR DELETE OR UPDATE ON public.unit_structure_edge FOR EACH ROW EXECUTE FUNCTION public.protect_immutable_unit_structure();
+
+
+--
+-- Name: unit_structure_member unit_structure_member_immutable; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_structure_member_immutable BEFORE INSERT OR DELETE OR UPDATE ON public.unit_structure_member FOR EACH ROW EXECUTE FUNCTION public.protect_immutable_unit_structure();
+
+
+--
+-- Name: unit_structure_vote unit_structure_vote_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_structure_vote_stat_maintain AFTER INSERT OR DELETE OR UPDATE ON public.unit_structure_vote FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_structure_vote_stat();
+
+
+--
+-- Name: unit_tag unit_tag_effective_context_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_tag_effective_context_maintain AFTER INSERT OR DELETE ON public.unit_tag FOR EACH ROW EXECUTE FUNCTION public.maintain_effective_tag_from_direct_context();
+
+
+--
+-- Name: unit_tag_structure_support unit_tag_structure_support_effective_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_tag_structure_support_effective_maintain AFTER INSERT OR DELETE ON public.unit_tag_structure_support FOR EACH ROW EXECUTE FUNCTION public.maintain_effective_tag_from_structure_support();
+
+
+--
+-- Name: unit_tag_vote unit_tag_vote_effective_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_tag_vote_effective_maintain AFTER INSERT OR DELETE OR UPDATE ON public.unit_tag_vote FOR EACH ROW EXECUTE FUNCTION public.maintain_effective_tag_from_direct_vote();
+
+
+--
+-- Name: unit_effective_tag_vote unit_tag_vote_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_tag_vote_stat_maintain AFTER INSERT OR DELETE OR UPDATE ON public.unit_effective_tag_vote FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_tag_vote_stat();
+
+
+--
+-- Name: unit_tag_vote unit_tag_vote_structure_conflict; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_tag_vote_structure_conflict BEFORE INSERT OR UPDATE ON public.unit_tag_vote FOR EACH ROW EXECUTE FUNCTION public.reject_conflicting_direct_tag_vote();
+
+
+--
+-- Name: unit_variant unit_variant_star_enforce; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER unit_variant_star_enforce BEFORE INSERT OR UPDATE OF variant_unit_id, main_unit_id ON public.unit_variant FOR EACH ROW EXECUTE FUNCTION public.enforce_unit_variant_star();
 
 
 --
@@ -9873,11 +11211,43 @@ ALTER TABLE ONLY public.audit_event
 
 
 --
+-- Name: book_chapter_progress_stat book_chapter_progress_stat_book_unit_id_unit_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.book_chapter_progress_stat
+    ADD CONSTRAINT book_chapter_progress_stat_book_unit_id_unit_id_fkey FOREIGN KEY (book_unit_id) REFERENCES public.unit(id) ON DELETE CASCADE;
+
+
+--
+-- Name: book_chapter_progress_stat book_chapter_progress_stat_profile_id_profile_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.book_chapter_progress_stat
+    ADD CONSTRAINT book_chapter_progress_stat_profile_id_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public.profile(id) ON DELETE CASCADE;
+
+
+--
+-- Name: book_chapter_stat book_chapter_stat_book_unit_id_unit_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.book_chapter_stat
+    ADD CONSTRAINT book_chapter_stat_book_unit_id_unit_id_fkey FOREIGN KEY (book_unit_id) REFERENCES public.unit(id) ON DELETE CASCADE;
+
+
+--
 -- Name: book book_id_unit_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.book
     ADD CONSTRAINT book_id_unit_id_fkey FOREIGN KEY (id) REFERENCES public.unit(id) ON DELETE CASCADE;
+
+
+--
+-- Name: book_localized_content_metric_stat book_localized_content_metric_stat_book_unit_id_unit_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.book_localized_content_metric_stat
+    ADD CONSTRAINT book_localized_content_metric_stat_book_unit_id_unit_id_fkey FOREIGN KEY (book_unit_id) REFERENCES public.unit(id) ON DELETE CASCADE;
 
 
 --
@@ -10409,6 +11779,14 @@ ALTER TABLE ONLY public.notification
 
 
 --
+-- Name: notification_recipient_stat notification_recipient_stat_profile_id_profile_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.notification_recipient_stat
+    ADD CONSTRAINT notification_recipient_stat_profile_id_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public.profile(id) ON DELETE CASCADE;
+
+
+--
 -- Name: notification notification_subject_unit_id_unit_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -10873,6 +12251,14 @@ ALTER TABLE ONLY public.realm_score_context
 
 
 --
+-- Name: realm_stat realm_stat_realm_id_realm_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.realm_stat
+    ADD CONSTRAINT realm_stat_realm_id_realm_id_fkey FOREIGN KEY (realm_id) REFERENCES public.realm(id) ON DELETE CASCADE;
+
+
+--
 -- Name: realm_tag_context realm_tag_context_context_post_id_post_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -10982,6 +12368,22 @@ ALTER TABLE ONLY public.realm_tag_vote
 
 ALTER TABLE ONLY public.realm_tag_vote
     ADD CONSTRAINT realm_tag_vote_unit_fkey FOREIGN KEY (unit_id) REFERENCES public.unit(id) ON DELETE CASCADE;
+
+
+--
+-- Name: realm_unit_moderation_stat realm_unit_moderation_stat_realm_id_realm_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.realm_unit_moderation_stat
+    ADD CONSTRAINT realm_unit_moderation_stat_realm_id_realm_id_fkey FOREIGN KEY (realm_id) REFERENCES public.realm(id) ON DELETE CASCADE;
+
+
+--
+-- Name: realm_unit_moderation_stat realm_unit_moderation_stat_unit_id_unit_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.realm_unit_moderation_stat
+    ADD CONSTRAINT realm_unit_moderation_stat_unit_id_unit_id_fkey FOREIGN KEY (unit_id) REFERENCES public.unit(id) ON DELETE CASCADE;
 
 
 --
@@ -12049,6 +13451,14 @@ ALTER TABLE ONLY public.unit_reaction
 
 
 --
+-- Name: unit_reference_curation_head unit_reference_curation_head_unit_id_unit_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.unit_reference_curation_head
+    ADD CONSTRAINT unit_reference_curation_head_unit_id_unit_id_fkey FOREIGN KEY (unit_id) REFERENCES public.unit(id) ON DELETE CASCADE;
+
+
+--
 -- Name: unit_revision unit_revision_actor_profile_id_profile_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -12153,19 +13563,19 @@ ALTER TABLE ONLY public.unit_slug_address
 
 
 --
--- Name: unit_source_link unit_source_link_source_entity_id_entity_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.unit_source_link
-    ADD CONSTRAINT unit_source_link_source_entity_id_entity_id_fkey FOREIGN KEY (source_entity_id) REFERENCES public.entity(id) ON DELETE RESTRICT;
-
-
---
 -- Name: unit_source_link unit_source_link_created_by_profile_id_profile_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.unit_source_link
     ADD CONSTRAINT unit_source_link_created_by_profile_id_profile_id_fkey FOREIGN KEY (created_by_profile_id) REFERENCES public.profile(id) ON DELETE SET NULL;
+
+
+--
+-- Name: unit_source_link unit_source_link_source_entity_id_entity_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.unit_source_link
+    ADD CONSTRAINT unit_source_link_source_entity_id_entity_id_fkey FOREIGN KEY (source_entity_id) REFERENCES public.entity(id) ON DELETE RESTRICT;
 
 
 --
@@ -12198,14 +13608,6 @@ ALTER TABLE ONLY public.unit_source_link_vote
 
 ALTER TABLE ONLY public.unit_source_link_vote_stat
     ADD CONSTRAINT unit_source_link_vote_stat_link_id_unit_source_link_id_fkey FOREIGN KEY (link_id) REFERENCES public.unit_source_link(id) ON DELETE CASCADE;
-
-
---
--- Name: unit_reference_curation_head unit_reference_curation_head_unit_id_unit_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.unit_reference_curation_head
-    ADD CONSTRAINT unit_reference_curation_head_unit_id_unit_id_fkey FOREIGN KEY (unit_id) REFERENCES public.unit(id) ON DELETE CASCADE;
 
 
 --
@@ -12529,1169 +13931,10 @@ ALTER TABLE ONLY public.zone_search_feature
 
 
 --
--- Name: audit_event audit_event_append_only; Type: TRIGGER; Schema: public; Owner: -
+-- Name: rezics_search_projection_publication; Type: PUBLICATION; Schema: -; Owner: -
 --
 
-CREATE TRIGGER audit_event_append_only BEFORE DELETE OR UPDATE ON public.audit_event FOR EACH ROW EXECUTE FUNCTION public.reject_immutable_history_mutation();
-
-
---
--- Name: content_structure_node content_structure_node_acyclic; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE CONSTRAINT TRIGGER content_structure_node_acyclic AFTER INSERT OR UPDATE ON public.content_structure_node DEFERRABLE INITIALLY IMMEDIATE FOR EACH ROW EXECUTE FUNCTION public.content_structure_node_reject_cycle();
-
-
---
--- Name: content_structure_node content_structure_node_realm_tag_query_strategy; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER content_structure_node_realm_tag_query_strategy BEFORE INSERT OR UPDATE OF structure_id, content_unit_id, realm_tag_query_strategy, deleted_at ON public.content_structure_node FOR EACH ROW EXECUTE FUNCTION public.enforce_realm_taxonomy_tag_query_strategy();
-
-
---
--- Name: conversation conversation_aggregate_identity_protect; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER conversation_aggregate_identity_protect BEFORE UPDATE ON public.conversation FOR EACH ROW EXECUTE FUNCTION public.protect_conversation_aggregate_identity();
-
-
---
--- Name: conversation_read conversation_read_identity_protect; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER conversation_read_identity_protect BEFORE UPDATE ON public.conversation_read FOR EACH ROW EXECUTE FUNCTION public.protect_conversation_read_identity();
-
-
---
--- Name: conversation conversation_stats_initialize; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER conversation_stats_initialize AFTER INSERT ON public.conversation FOR EACH ROW EXECUTE FUNCTION public.initialize_conversation_stats();
-
-
---
--- Name: collection collection_stat_initialize; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER collection_stat_initialize AFTER INSERT ON public.collection FOR EACH ROW EXECUTE FUNCTION public.initialize_collection_stat();
-
-
---
--- Name: collection_item collection_item_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER collection_item_stat_maintain AFTER INSERT OR DELETE OR UPDATE OF collection_id ON public.collection_item FOR EACH ROW EXECUTE FUNCTION public.maintain_collection_item_stat();
-
-
---
--- Name: collection_item favorite_item_stats_maintain; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER favorite_item_stats_maintain AFTER INSERT OR DELETE OR UPDATE ON public.collection_item FOR EACH ROW EXECUTE FUNCTION public.maintain_favorite_item_stats();
-
-
---
--- Name: message message_aggregate_identity_protect; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER message_aggregate_identity_protect BEFORE UPDATE ON public.message FOR EACH ROW EXECUTE FUNCTION public.protect_message_aggregate_identity();
-
-
---
--- Name: message message_stats_maintain; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER message_stats_maintain AFTER INSERT OR DELETE OR UPDATE OF deleted_at ON public.message FOR EACH ROW EXECUTE FUNCTION public.maintain_message_stats();
-
-
---
--- Name: post post_association_context_kind_protect; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER post_association_context_kind_protect BEFORE UPDATE OF kind ON public.post FOR EACH ROW EXECUTE FUNCTION public.protect_association_context_post_kind();
-
-
---
--- Name: realm_unit post_realm_mount_targeting_enforce; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER post_realm_mount_targeting_enforce AFTER INSERT OR UPDATE OF realm_id, unit_id ON public.realm_unit FOR EACH ROW EXECUTE FUNCTION public.enforce_post_realm_mount_targeting();
-
-
---
--- Name: post post_realm_tag_context_kind; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER post_realm_tag_context_kind BEFORE UPDATE OF kind ON public.post FOR EACH ROW EXECUTE FUNCTION public.protect_realm_tag_context_post_kind();
-
-
---
--- Name: post_reply post_reply_identity_protect; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER post_reply_identity_protect BEFORE UPDATE ON public.post_reply FOR EACH ROW EXECUTE FUNCTION public.protect_post_reply_identity();
-
-
---
--- Name: post post_reply_stat_initialize; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER post_reply_stat_initialize AFTER INSERT ON public.post FOR EACH ROW EXECUTE FUNCTION public.initialize_post_reply_stat();
-
-
---
--- Name: post_reply post_reply_stats_maintain; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER post_reply_stats_maintain AFTER INSERT OR DELETE OR UPDATE ON public.post_reply FOR EACH ROW EXECUTE FUNCTION public.maintain_post_reply_stats();
-
-
---
--- Name: post_reply post_reply_targeting_enforce; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER post_reply_targeting_enforce AFTER INSERT OR UPDATE OF root_post_id, parent_post_id ON public.post_reply FOR EACH ROW EXECUTE FUNCTION public.enforce_post_reply_targeting();
-
-
---
--- Name: poll_option poll_option_vote_stat_initialize; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER poll_option_vote_stat_initialize AFTER INSERT ON public.poll_option FOR EACH ROW EXECUTE FUNCTION public.initialize_poll_option_vote_stat();
-
-
---
--- Name: poll_vote poll_option_vote_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER poll_option_vote_stat_maintain AFTER INSERT OR DELETE OR UPDATE OF option_id ON public.poll_vote FOR EACH ROW EXECUTE FUNCTION public.maintain_poll_option_vote_stat();
-
-
---
--- Name: post post_subject_targeting_enforce; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER post_subject_targeting_enforce AFTER INSERT OR UPDATE OF subject_unit_id ON public.post FOR EACH ROW EXECUTE FUNCTION public.enforce_post_subject_targeting();
-
-
---
--- Name: realm_tag_context realm_tag_context_wiki_post; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER realm_tag_context_wiki_post BEFORE INSERT OR UPDATE OF context_post_id ON public.realm_tag_context FOR EACH ROW EXECUTE FUNCTION public.enforce_realm_tag_context_wiki_post();
-
-
---
--- Name: realm_tag_vote realm_tag_vote_realm_tag_voting_enabled; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER realm_tag_vote_realm_tag_voting_enabled BEFORE INSERT OR UPDATE ON public.realm_tag_vote FOR EACH ROW EXECUTE FUNCTION public.enforce_realm_tag_voting_enabled();
-
-
---
--- Name: realm_tag_vote realm_tag_vote_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER realm_tag_vote_stat_maintain AFTER INSERT OR DELETE OR UPDATE ON public.realm_tag_vote FOR EACH ROW EXECUTE FUNCTION public.maintain_realm_tag_vote_stat();
-
-
---
--- Name: recommendation_event recommendation_event_signals_maintain; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER recommendation_event_signals_maintain AFTER INSERT OR UPDATE ON public.recommendation_event FOR EACH ROW EXECUTE FUNCTION public.maintain_recommendation_event_signals();
-
-
---
--- Name: unit reply_signals_remove_before_unit_delete; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER reply_signals_remove_before_unit_delete BEFORE DELETE ON public.unit FOR EACH ROW EXECUTE FUNCTION public.remove_reply_signals_before_unit_delete();
-
-
---
--- Name: unit reply_unit_state_maintain; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER reply_unit_state_maintain AFTER UPDATE OF status, visibility, moderation_status, deleted_at ON public.unit FOR EACH ROW WHEN (((old.status IS DISTINCT FROM new.status) OR (old.visibility IS DISTINCT FROM new.visibility) OR (old.moderation_status IS DISTINCT FROM new.moderation_status) OR (old.deleted_at IS DISTINCT FROM new.deleted_at))) EXECUTE FUNCTION public.maintain_reply_unit_state();
-
-
---
--- Name: revision_content revision_content_immutable; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER revision_content_immutable BEFORE DELETE OR UPDATE ON public.revision_content FOR EACH ROW EXECUTE FUNCTION public.reject_immutable_history_mutation();
-
-
---
--- Name: score score_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER score_stat_maintain AFTER INSERT OR DELETE OR UPDATE ON public.score FOR EACH ROW EXECUTE FUNCTION public.maintain_score_stat();
-
-
---
--- Name: subject_association subject_association_wiki_context_post; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER subject_association_wiki_context_post BEFORE INSERT OR UPDATE OF context_post_id ON public.subject_association FOR EACH ROW EXECUTE FUNCTION public.enforce_wiki_association_context_post();
-
-
---
--- Name: unit_alias_vote unit_alias_vote_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_alias_vote_stat_maintain AFTER INSERT OR DELETE OR UPDATE ON public.unit_alias_vote FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_alias_vote_stat();
-
-
---
--- Name: unit_source_link_vote unit_source_link_vote_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_source_link_vote_stat_maintain AFTER INSERT OR DELETE OR UPDATE ON public.unit_source_link_vote FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_source_link_vote_stat();
-
-
---
--- Name: unit_association_proposal unit_association_proposal_wiki_context_post; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_association_proposal_wiki_context_post BEFORE INSERT OR UPDATE OF context_post_id, kind ON public.unit_association_proposal FOR EACH ROW EXECUTE FUNCTION public.enforce_wiki_association_context_post();
-
-
---
--- Name: unit_content_license unit_content_license_guard_mutation; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_content_license_guard_mutation BEFORE DELETE OR UPDATE ON public.unit_content_license FOR EACH ROW EXECUTE FUNCTION public.guard_unit_content_license_mutation();
-
-
---
--- Name: unit_follow unit_follow_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_follow_stat_maintain AFTER INSERT OR DELETE OR UPDATE ON public.unit_follow FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_follow_stat();
-
-
---
--- Name: unit_progress unit_progress_stats_maintain; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_progress_stats_maintain AFTER INSERT OR DELETE OR UPDATE OF profile_id, unit_id, status, last_seen_at, deleted_at ON public.unit_progress FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_progress_stats();
-
-
---
--- Name: unit_reaction unit_reaction_stats_maintain; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_reaction_stats_maintain AFTER INSERT OR DELETE OR UPDATE ON public.unit_reaction FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_reaction_stats();
-
-
---
--- Name: unit_revision unit_revision_identity_immutable; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_revision_identity_immutable BEFORE UPDATE ON public.unit_revision FOR EACH ROW EXECUTE FUNCTION public.protect_unit_revision_identity();
-
-
---
--- Name: unit_revision_slot unit_revision_slot_immutable; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_revision_slot_immutable BEFORE DELETE OR UPDATE ON public.unit_revision_slot FOR EACH ROW EXECUTE FUNCTION public.reject_immutable_history_mutation();
-
-
---
--- Name: unit_revision_tag unit_revision_tag_immutable; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_revision_tag_immutable BEFORE DELETE OR UPDATE ON public.unit_revision_tag FOR EACH ROW EXECUTE FUNCTION public.reject_immutable_history_mutation();
-
-
---
--- Name: unit_share unit_share_stats_maintain; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_share_stats_maintain AFTER INSERT OR DELETE OR UPDATE ON public.unit_share FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_share_stats();
-
-
---
--- Name: unit_structure_application_vote unit_structure_application_vote_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_structure_application_vote_stat_maintain AFTER INSERT OR DELETE OR UPDATE ON public.unit_structure_application_vote FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_structure_application_vote_stat();
-
-
---
--- Name: unit_structure_application_vote unit_structure_application_vote_support_maintain; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_structure_application_vote_support_maintain AFTER INSERT OR DELETE OR UPDATE ON public.unit_structure_application_vote FOR EACH ROW EXECUTE FUNCTION public.maintain_structure_application_support();
-
-
---
--- Name: unit_structure_application_vote unit_structure_application_vote_tag_conflict; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_structure_application_vote_tag_conflict BEFORE INSERT OR UPDATE ON public.unit_structure_application_vote FOR EACH ROW EXECUTE FUNCTION public.reject_conflicting_structure_application_vote();
-
-
---
--- Name: unit_structure unit_structure_definition_immutable; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_structure_definition_immutable BEFORE DELETE OR UPDATE ON public.unit_structure FOR EACH ROW EXECUTE FUNCTION public.protect_immutable_unit_structure();
-
-
---
--- Name: unit_structure unit_structure_definition_project; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_structure_definition_project AFTER INSERT OR UPDATE ON public.unit_structure FOR EACH ROW EXECUTE FUNCTION public.project_unit_structure_definition();
-
-
---
--- Name: unit_structure unit_structure_definition_validate; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_structure_definition_validate BEFORE INSERT OR UPDATE ON public.unit_structure FOR EACH ROW EXECUTE FUNCTION public.prepare_unit_structure_definition();
-
-
---
--- Name: unit_structure_edge unit_structure_edge_immutable; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_structure_edge_immutable BEFORE INSERT OR DELETE OR UPDATE ON public.unit_structure_edge FOR EACH ROW EXECUTE FUNCTION public.protect_immutable_unit_structure();
-
-
---
--- Name: unit_structure_member unit_structure_member_immutable; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_structure_member_immutable BEFORE INSERT OR DELETE OR UPDATE ON public.unit_structure_member FOR EACH ROW EXECUTE FUNCTION public.protect_immutable_unit_structure();
-
-
---
--- Name: unit_structure_vote unit_structure_vote_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_structure_vote_stat_maintain AFTER INSERT OR DELETE OR UPDATE ON public.unit_structure_vote FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_structure_vote_stat();
-
-
---
--- Name: unit_tag unit_tag_effective_context_maintain; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_tag_effective_context_maintain AFTER INSERT OR DELETE ON public.unit_tag FOR EACH ROW EXECUTE FUNCTION public.maintain_effective_tag_from_direct_context();
-
-
---
--- Name: unit_tag_structure_support unit_tag_structure_support_effective_maintain; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_tag_structure_support_effective_maintain AFTER INSERT OR DELETE ON public.unit_tag_structure_support FOR EACH ROW EXECUTE FUNCTION public.maintain_effective_tag_from_structure_support();
-
-
---
--- Name: unit_tag_vote unit_tag_vote_effective_maintain; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_tag_vote_effective_maintain AFTER INSERT OR DELETE OR UPDATE ON public.unit_tag_vote FOR EACH ROW EXECUTE FUNCTION public.maintain_effective_tag_from_direct_vote();
-
-
---
--- Name: unit_effective_tag_vote unit_tag_vote_stat_maintain; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_tag_vote_stat_maintain AFTER INSERT OR DELETE OR UPDATE ON public.unit_effective_tag_vote FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_tag_vote_stat();
-
-
---
--- Name: unit_tag_vote unit_tag_vote_structure_conflict; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_tag_vote_structure_conflict BEFORE INSERT OR UPDATE ON public.unit_tag_vote FOR EACH ROW EXECUTE FUNCTION public.reject_conflicting_direct_tag_vote();
-
-
---
--- Name: unit_variant unit_variant_star_enforce; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER unit_variant_star_enforce BEFORE INSERT OR UPDATE OF variant_unit_id, main_unit_id ON public.unit_variant FOR EACH ROW EXECUTE FUNCTION public.enforce_unit_variant_star();
-
-
---
--- Name: realm_stat; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.realm_stat (
-    realm_id uuid NOT NULL,
-    active_member_count bigint DEFAULT 0 NOT NULL,
-    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT realm_stat_pkey PRIMARY KEY (realm_id),
-    CONSTRAINT realm_stat_count_check CHECK (active_member_count >= 0),
-    CONSTRAINT realm_stat_realm_id_realm_id_fkey FOREIGN KEY (realm_id)
-        REFERENCES public.realm(id) ON DELETE CASCADE
-);
-
-
---
--- Name: realm_unit_moderation_stat; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.realm_unit_moderation_stat (
-    realm_id uuid NOT NULL,
-    unit_id uuid NOT NULL,
-    open_report_count bigint DEFAULT 0 NOT NULL,
-    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT realm_unit_moderation_stat_pkey PRIMARY KEY (realm_id, unit_id),
-    CONSTRAINT realm_unit_moderation_stat_count_check CHECK (open_report_count >= 0),
-    CONSTRAINT realm_unit_moderation_stat_realm_id_realm_id_fkey FOREIGN KEY (realm_id)
-        REFERENCES public.realm(id) ON DELETE CASCADE,
-    CONSTRAINT realm_unit_moderation_stat_unit_id_unit_id_fkey FOREIGN KEY (unit_id)
-        REFERENCES public.unit(id) ON DELETE CASCADE
-);
-
-
---
--- Name: notification_recipient_stat; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.notification_recipient_stat (
-    profile_id uuid NOT NULL,
-    unread_count bigint DEFAULT 0 NOT NULL,
-    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT notification_recipient_stat_pkey PRIMARY KEY (profile_id),
-    CONSTRAINT notification_recipient_stat_count_check CHECK (unread_count >= 0),
-    CONSTRAINT notification_recipient_stat_profile_id_profile_id_fkey FOREIGN KEY (profile_id)
-        REFERENCES public.profile(id) ON DELETE CASCADE
-);
-
-
---
--- Name: book_chapter_stat; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.book_chapter_stat (
-    book_unit_id uuid NOT NULL,
-    all_count bigint DEFAULT 0 NOT NULL,
-    public_count bigint DEFAULT 0 NOT NULL,
-    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT book_chapter_stat_pkey PRIMARY KEY (book_unit_id),
-    CONSTRAINT book_chapter_stat_count_check CHECK (
-        all_count >= 0 AND public_count >= 0 AND public_count <= all_count
-    ),
-    CONSTRAINT book_chapter_stat_book_unit_id_unit_id_fkey FOREIGN KEY (book_unit_id)
-        REFERENCES public.unit(id) ON DELETE CASCADE
-);
-
-
---
--- Name: book_chapter_progress_stat; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.book_chapter_progress_stat (
-    profile_id uuid NOT NULL,
-    book_unit_id uuid NOT NULL,
-    all_completed_count bigint DEFAULT 0 NOT NULL,
-    public_completed_count bigint DEFAULT 0 NOT NULL,
-    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT book_chapter_progress_stat_pkey PRIMARY KEY (profile_id, book_unit_id),
-    CONSTRAINT book_chapter_progress_stat_count_check CHECK (
-        all_completed_count >= 0
-        AND public_completed_count >= 0
-        AND public_completed_count <= all_completed_count
-    ),
-    CONSTRAINT book_chapter_progress_stat_profile_id_profile_id_fkey FOREIGN KEY (profile_id)
-        REFERENCES public.profile(id) ON DELETE CASCADE,
-    CONSTRAINT book_chapter_progress_stat_book_unit_id_unit_id_fkey FOREIGN KEY (book_unit_id)
-        REFERENCES public.unit(id) ON DELETE CASCADE
-);
-
-
---
--- Name: book_localized_content_metric_stat; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.book_localized_content_metric_stat (
-    book_unit_id uuid NOT NULL,
-    language text NOT NULL,
-    chapter_count bigint DEFAULT 0 NOT NULL,
-    word_count bigint DEFAULT 0 NOT NULL,
-    character_count bigint DEFAULT 0 NOT NULL,
-    updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT book_localized_content_metric_stat_pkey PRIMARY KEY (book_unit_id, language),
-    CONSTRAINT book_localized_content_metric_stat_language_check CHECK (
-        language = ANY (ARRAY['zh'::text, 'en'::text, 'ja'::text, 'ko'::text,
-            'de'::text, 'fr'::text, 'es'::text])
-    ),
-    CONSTRAINT book_localized_content_metric_stat_count_check CHECK (
-        chapter_count >= 0 AND word_count >= 0 AND character_count >= 0
-    ),
-    CONSTRAINT book_localized_content_metric_stat_book_unit_id_unit_id_fkey
-        FOREIGN KEY (book_unit_id) REFERENCES public.unit(id) ON DELETE CASCADE
-);
-
-
--- Rebuild one Book's public localized metrics on the same transaction as source changes.
-CREATE FUNCTION public.refresh_book_localized_content_metric_stat(p_book_unit_id uuid)
-RETURNS void
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-    DELETE FROM public.book_localized_content_metric_stat
-    WHERE book_unit_id = p_book_unit_id;
-
-    INSERT INTO public.book_localized_content_metric_stat (
-        book_unit_id, language, chapter_count, word_count, character_count
-    )
-    SELECT p_book_unit_id, metric.language, count(*), sum(metric.word_count),
-        sum(metric.character_count)
-    FROM public.content_structure_node AS node
-    JOIN public.content_structure AS structure
-        ON structure.id = node.structure_id
-        AND structure.owner_unit_id = node.owner_unit_id
-    JOIN public.post AS content_post ON content_post.id = node.content_unit_id
-    JOIN public.unit AS content_unit ON content_unit.id = node.content_unit_id
-    JOIN public.unit_localization AS localization ON localization.unit_id = node.content_unit_id
-    JOIN public.unit_localization_content_metric AS metric
-        ON metric.unit_id = node.content_unit_id
-        AND metric.language = localization.language
-    WHERE structure.owner_unit_id = p_book_unit_id
-      AND structure.kind = 'book.contents'
-      AND structure.deleted_at IS NULL
-      AND node.deleted_at IS NULL
-      AND content_post.kind = 'chapter'
-      AND content_unit.deleted_at IS NULL
-      AND content_unit.status = 'published'
-      AND content_unit.visibility IN ('public', 'unlisted')
-      AND localization.content_status = 'published'
-    GROUP BY metric.language;
-END
-$$;
-
-
-CREATE FUNCTION public.refresh_book_metric_from_node() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-    IF TG_OP <> 'INSERT' THEN
-        PERFORM public.refresh_book_localized_content_metric_stat(OLD.owner_unit_id);
-    END IF;
-    IF TG_OP <> 'DELETE' AND (
-        TG_OP = 'INSERT' OR NEW.owner_unit_id IS DISTINCT FROM OLD.owner_unit_id
-    ) THEN
-        PERFORM public.refresh_book_localized_content_metric_stat(NEW.owner_unit_id);
-    END IF;
-    RETURN NULL;
-END
-$$;
-
-
-CREATE FUNCTION public.refresh_book_metric_from_structure() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-    IF TG_OP <> 'INSERT' THEN
-        PERFORM public.refresh_book_localized_content_metric_stat(OLD.owner_unit_id);
-    END IF;
-    IF TG_OP <> 'DELETE' AND (
-        TG_OP = 'INSERT' OR NEW.owner_unit_id IS DISTINCT FROM OLD.owner_unit_id
-    ) THEN
-        PERFORM public.refresh_book_localized_content_metric_stat(NEW.owner_unit_id);
-    END IF;
-    RETURN NULL;
-END
-$$;
-
-
-CREATE FUNCTION public.refresh_book_metric_from_content_unit() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-    book_id uuid;
-BEGIN
-    FOR book_id IN
-        SELECT DISTINCT node.owner_unit_id
-        FROM public.content_structure_node AS node
-        JOIN public.content_structure AS structure ON structure.id = node.structure_id
-        WHERE node.content_unit_id = coalesce(NEW.id, OLD.id)
-          AND structure.kind = 'book.contents'
-    LOOP
-        PERFORM public.refresh_book_localized_content_metric_stat(book_id);
-    END LOOP;
-    RETURN NULL;
-END
-$$;
-
-
-CREATE FUNCTION public.refresh_book_metric_from_localization() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-    book_id uuid;
-    p_content_unit_id uuid := coalesce(NEW.unit_id, OLD.unit_id);
-BEGIN
-    FOR book_id IN
-        SELECT DISTINCT node.owner_unit_id
-        FROM public.content_structure_node AS node
-        JOIN public.content_structure AS structure ON structure.id = node.structure_id
-        WHERE node.content_unit_id = p_content_unit_id
-          AND structure.kind = 'book.contents'
-    LOOP
-        PERFORM public.refresh_book_localized_content_metric_stat(book_id);
-    END LOOP;
-    RETURN NULL;
-END
-$$;
-
-
--- Return the Book and eligibility represented by one prospective Chapter node state.
-CREATE FUNCTION public.book_chapter_node_scope(
-    p_structure_id uuid,
-    p_content_unit_id uuid,
-    p_node_deleted_at timestamp with time zone
-) RETURNS TABLE (book_unit_id uuid, all_eligible boolean, public_eligible boolean)
-    LANGUAGE sql STABLE
-    AS $$
-SELECT
-    structure.owner_unit_id,
-    structure.kind = 'book.contents'
-        AND structure.deleted_at IS NULL
-        AND p_node_deleted_at IS NULL
-        AND content_unit.kind = 'post'
-        AND content_unit.deleted_at IS NULL
-        AND content_post.kind = 'chapter' AS all_eligible,
-    structure.kind = 'book.contents'
-        AND structure.deleted_at IS NULL
-        AND p_node_deleted_at IS NULL
-        AND content_unit.kind = 'post'
-        AND content_unit.deleted_at IS NULL
-        AND content_post.kind = 'chapter'
-        AND content_unit.status = 'published'
-        AND content_unit.visibility IN ('public', 'unlisted') AS public_eligible
-FROM public.content_structure AS structure
-JOIN public.unit AS content_unit ON content_unit.id = p_content_unit_id
-LEFT JOIN public.post AS content_post ON content_post.id = content_unit.id
-WHERE structure.id = p_structure_id
-$$;
-
-
--- Apply one exact Chapter-membership delta, including every completed Profile.
-CREATE FUNCTION public.apply_book_chapter_delta(
-    p_book_unit_id uuid,
-    p_node_id uuid,
-    p_all_delta bigint,
-    p_public_delta bigint
-) RETURNS void
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-    IF p_all_delta = 0 AND p_public_delta = 0 THEN
-        RETURN;
-    END IF;
-
-    IF p_all_delta < 0 OR p_public_delta < 0 THEN
-        UPDATE public.book_chapter_stat SET
-            all_count = all_count + p_all_delta,
-            public_count = public_count + p_public_delta,
-            updated_at = now()
-        WHERE book_unit_id = p_book_unit_id;
-
-        UPDATE public.book_chapter_progress_stat AS stat SET
-            all_completed_count = stat.all_completed_count + p_all_delta,
-            public_completed_count = stat.public_completed_count + p_public_delta,
-            updated_at = now()
-        FROM public.content_structure_node_progress AS progress
-        WHERE progress.node_id = p_node_id
-          AND stat.profile_id = progress.profile_id
-          AND stat.book_unit_id = p_book_unit_id;
-    ELSE
-        UPDATE public.book_chapter_stat SET
-            all_count = all_count + p_all_delta,
-            public_count = public_count + p_public_delta,
-            updated_at = now()
-        WHERE book_unit_id = p_book_unit_id;
-        IF NOT FOUND THEN
-            INSERT INTO public.book_chapter_stat (book_unit_id, all_count, public_count)
-            VALUES (p_book_unit_id, p_all_delta, p_public_delta);
-        END IF;
-
-        UPDATE public.book_chapter_progress_stat AS stat SET
-            all_completed_count = stat.all_completed_count + p_all_delta,
-            public_completed_count = stat.public_completed_count + p_public_delta,
-            updated_at = now()
-        FROM public.content_structure_node_progress AS progress
-        WHERE progress.node_id = p_node_id
-          AND stat.profile_id = progress.profile_id
-          AND stat.book_unit_id = p_book_unit_id;
-
-        INSERT INTO public.book_chapter_progress_stat (
-            profile_id, book_unit_id, all_completed_count, public_completed_count
-        )
-        SELECT progress.profile_id, p_book_unit_id, p_all_delta, p_public_delta
-        FROM public.content_structure_node_progress AS progress
-        WHERE progress.node_id = p_node_id
-          AND NOT EXISTS (
-              SELECT 1 FROM public.book_chapter_progress_stat AS existing
-              WHERE existing.profile_id = progress.profile_id
-                AND existing.book_unit_id = p_book_unit_id
-          );
-    END IF;
-END
-$$;
-
-
-CREATE FUNCTION public.maintain_book_chapter_from_node() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-    old_scope record;
-    new_scope record;
-BEGIN
-    IF TG_OP <> 'INSERT' THEN
-        SELECT * INTO old_scope FROM public.book_chapter_node_scope(
-            OLD.structure_id, OLD.content_unit_id, OLD.deleted_at
-        );
-        IF old_scope.all_eligible THEN
-            PERFORM public.apply_book_chapter_delta(
-                old_scope.book_unit_id,
-                OLD.id,
-                -1,
-                CASE WHEN old_scope.public_eligible THEN -1 ELSE 0 END
-            );
-        END IF;
-    END IF;
-    IF TG_OP <> 'DELETE' THEN
-        SELECT * INTO new_scope FROM public.book_chapter_node_scope(
-            NEW.structure_id, NEW.content_unit_id, NEW.deleted_at
-        );
-        IF new_scope.all_eligible THEN
-            PERFORM public.apply_book_chapter_delta(
-                new_scope.book_unit_id,
-                NEW.id,
-                1,
-                CASE WHEN new_scope.public_eligible THEN 1 ELSE 0 END
-            );
-        END IF;
-    END IF;
-    RETURN NULL;
-END
-$$;
-
-
-CREATE FUNCTION public.maintain_book_chapter_from_progress() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-    scope record;
-BEGIN
-    IF TG_OP <> 'INSERT' THEN
-        SELECT chapter_scope.* INTO scope
-        FROM public.content_structure_node AS node
-        CROSS JOIN LATERAL public.book_chapter_node_scope(
-            node.structure_id, node.content_unit_id, node.deleted_at
-        ) AS chapter_scope
-        WHERE node.id = OLD.node_id;
-        IF scope.all_eligible THEN
-            UPDATE public.book_chapter_progress_stat SET
-                all_completed_count = all_completed_count - 1,
-                public_completed_count = public_completed_count
-                    - CASE WHEN scope.public_eligible THEN 1 ELSE 0 END,
-                updated_at = now()
-            WHERE profile_id = OLD.profile_id AND book_unit_id = scope.book_unit_id;
-        END IF;
-    END IF;
-    IF TG_OP <> 'DELETE' THEN
-        SELECT chapter_scope.* INTO scope
-        FROM public.content_structure_node AS node
-        CROSS JOIN LATERAL public.book_chapter_node_scope(
-            node.structure_id, node.content_unit_id, node.deleted_at
-        ) AS chapter_scope
-        WHERE node.id = NEW.node_id;
-        IF scope.all_eligible THEN
-            INSERT INTO public.book_chapter_progress_stat (
-                profile_id, book_unit_id, all_completed_count, public_completed_count
-            ) VALUES (
-                NEW.profile_id,
-                scope.book_unit_id,
-                1,
-                CASE WHEN scope.public_eligible THEN 1 ELSE 0 END
-            )
-            ON CONFLICT (profile_id, book_unit_id) DO UPDATE SET
-                all_completed_count = public.book_chapter_progress_stat.all_completed_count + 1,
-                public_completed_count = public.book_chapter_progress_stat.public_completed_count
-                    + EXCLUDED.public_completed_count,
-                updated_at = now();
-        END IF;
-    END IF;
-    RETURN NULL;
-END
-$$;
-
-
--- Re-evaluate all occurrences when a Chapter Unit changes lifecycle or visibility.
-CREATE FUNCTION public.maintain_book_chapter_from_unit() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-    occurrence record;
-    is_chapter boolean;
-    old_all boolean;
-    old_public boolean;
-    new_all boolean;
-    new_public boolean;
-BEGIN
-    SELECT kind = 'chapter' INTO is_chapter FROM public.post WHERE id = NEW.id;
-    IF NOT coalesce(is_chapter, false) THEN
-        RETURN NULL;
-    END IF;
-    FOR occurrence IN
-        SELECT node.id, node.deleted_at, structure.owner_unit_id,
-               structure.kind, structure.deleted_at AS structure_deleted_at
-        FROM public.content_structure_node AS node
-        JOIN public.content_structure AS structure ON structure.id = node.structure_id
-        WHERE node.content_unit_id = NEW.id
-    LOOP
-        old_all := occurrence.kind = 'book.contents'
-            AND occurrence.structure_deleted_at IS NULL
-            AND occurrence.deleted_at IS NULL
-            AND OLD.kind = 'post' AND OLD.deleted_at IS NULL;
-        new_all := occurrence.kind = 'book.contents'
-            AND occurrence.structure_deleted_at IS NULL
-            AND occurrence.deleted_at IS NULL
-            AND NEW.kind = 'post' AND NEW.deleted_at IS NULL;
-        old_public := old_all AND OLD.status = 'published'
-            AND OLD.visibility IN ('public', 'unlisted');
-        new_public := new_all AND NEW.status = 'published'
-            AND NEW.visibility IN ('public', 'unlisted');
-        PERFORM public.apply_book_chapter_delta(
-            occurrence.owner_unit_id,
-            occurrence.id,
-            (CASE WHEN new_all THEN 1 ELSE 0 END) - (CASE WHEN old_all THEN 1 ELSE 0 END),
-            (CASE WHEN new_public THEN 1 ELSE 0 END)
-                - (CASE WHEN old_public THEN 1 ELSE 0 END)
-        );
-    END LOOP;
-    RETURN NULL;
-END
-$$;
-
-
--- Re-evaluate all occurrences when a Post enters or leaves the Chapter kind.
-CREATE FUNCTION public.maintain_book_chapter_from_post() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-    occurrence record;
-    content_unit public.unit%ROWTYPE;
-    old_chapter boolean := TG_OP <> 'INSERT' AND OLD.kind = 'chapter';
-    new_chapter boolean := TG_OP <> 'DELETE' AND NEW.kind = 'chapter';
-    common_active boolean;
-BEGIN
-    SELECT * INTO content_unit FROM public.unit WHERE id = coalesce(NEW.id, OLD.id);
-    FOR occurrence IN
-        SELECT node.id, node.deleted_at, structure.owner_unit_id,
-               structure.kind, structure.deleted_at AS structure_deleted_at
-        FROM public.content_structure_node AS node
-        JOIN public.content_structure AS structure ON structure.id = node.structure_id
-        WHERE node.content_unit_id = coalesce(NEW.id, OLD.id)
-    LOOP
-        common_active := occurrence.kind = 'book.contents'
-            AND occurrence.structure_deleted_at IS NULL
-            AND occurrence.deleted_at IS NULL
-            AND content_unit.kind = 'post'
-            AND content_unit.deleted_at IS NULL;
-        PERFORM public.apply_book_chapter_delta(
-            occurrence.owner_unit_id,
-            occurrence.id,
-            (CASE WHEN common_active AND new_chapter THEN 1 ELSE 0 END)
-                - (CASE WHEN common_active AND old_chapter THEN 1 ELSE 0 END),
-            (CASE WHEN common_active AND new_chapter AND content_unit.status = 'published'
-                    AND content_unit.visibility IN ('public', 'unlisted') THEN 1 ELSE 0 END)
-                - (CASE WHEN common_active AND old_chapter AND content_unit.status = 'published'
-                    AND content_unit.visibility IN ('public', 'unlisted') THEN 1 ELSE 0 END)
-        );
-    END LOOP;
-    RETURN NULL;
-END
-$$;
-
-
--- Re-evaluate a structure's nodes when it enters or leaves the active Book contents scope.
-CREATE FUNCTION public.maintain_book_chapter_from_structure() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-    occurrence record;
-    old_active boolean := TG_OP <> 'INSERT'
-        AND OLD.kind = 'book.contents' AND OLD.deleted_at IS NULL;
-    new_active boolean := TG_OP <> 'DELETE'
-        AND NEW.kind = 'book.contents' AND NEW.deleted_at IS NULL;
-BEGIN
-    IF old_active = new_active THEN
-        RETURN NULL;
-    END IF;
-    FOR occurrence IN
-        SELECT node.id, node.owner_unit_id, content_unit.status, content_unit.visibility
-        FROM public.content_structure_node AS node
-        JOIN public.unit AS content_unit ON content_unit.id = node.content_unit_id
-        JOIN public.post AS content_post ON content_post.id = content_unit.id
-        WHERE node.structure_id = coalesce(NEW.id, OLD.id)
-          AND node.deleted_at IS NULL
-          AND content_unit.kind = 'post'
-          AND content_unit.deleted_at IS NULL
-          AND content_post.kind = 'chapter'
-    LOOP
-        PERFORM public.apply_book_chapter_delta(
-            occurrence.owner_unit_id,
-            occurrence.id,
-            (CASE WHEN new_active THEN 1 ELSE 0 END)
-                - (CASE WHEN old_active THEN 1 ELSE 0 END),
-            (CASE WHEN new_active AND occurrence.status = 'published'
-                    AND occurrence.visibility IN ('public', 'unlisted') THEN 1 ELSE 0 END)
-                - (CASE WHEN old_active AND occurrence.status = 'published'
-                    AND occurrence.visibility IN ('public', 'unlisted') THEN 1 ELSE 0 END)
-        );
-    END LOOP;
-    RETURN NULL;
-END
-$$;
-
-
---
--- Name: maintain_realm_member_stat(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maintain_realm_member_stat() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-    old_delta bigint := CASE WHEN TG_OP <> 'INSERT' AND OLD.state = 'active' THEN -1 ELSE 0 END;
-    new_delta bigint := CASE WHEN TG_OP <> 'DELETE' AND NEW.state = 'active' THEN 1 ELSE 0 END;
-BEGIN
-    IF TG_OP <> 'INSERT' AND old_delta <> 0 THEN
-        INSERT INTO public.realm_stat (realm_id, active_member_count)
-        VALUES (OLD.realm_id, old_delta)
-        ON CONFLICT (realm_id) DO UPDATE SET
-            active_member_count = public.realm_stat.active_member_count + EXCLUDED.active_member_count,
-            updated_at = now();
-    END IF;
-    IF TG_OP <> 'DELETE' AND new_delta <> 0 THEN
-        INSERT INTO public.realm_stat (realm_id, active_member_count)
-        VALUES (NEW.realm_id, new_delta)
-        ON CONFLICT (realm_id) DO UPDATE SET
-            active_member_count = public.realm_stat.active_member_count + EXCLUDED.active_member_count,
-            updated_at = now();
-    END IF;
-    RETURN coalesce(NEW, OLD);
-END
-$$;
-
-
---
--- Name: maintain_notification_recipient_stat(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.maintain_notification_recipient_stat() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-    old_delta bigint := CASE
-        WHEN TG_OP <> 'INSERT' AND OLD.in_app_visible AND OLD.read_at IS NULL THEN -1 ELSE 0 END;
-    new_delta bigint := CASE
-        WHEN TG_OP <> 'DELETE' AND NEW.in_app_visible AND NEW.read_at IS NULL THEN 1 ELSE 0 END;
-BEGIN
-    IF TG_OP <> 'INSERT' AND old_delta <> 0 THEN
-        INSERT INTO public.notification_recipient_stat (profile_id, unread_count)
-        VALUES (OLD.recipient_profile_id, old_delta)
-        ON CONFLICT (profile_id) DO UPDATE SET
-            unread_count = public.notification_recipient_stat.unread_count + EXCLUDED.unread_count,
-            updated_at = now();
-    END IF;
-    IF TG_OP <> 'DELETE' AND new_delta <> 0 THEN
-        INSERT INTO public.notification_recipient_stat (profile_id, unread_count)
-        VALUES (NEW.recipient_profile_id, new_delta)
-        ON CONFLICT (profile_id) DO UPDATE SET
-            unread_count = public.notification_recipient_stat.unread_count + EXCLUDED.unread_count,
-            updated_at = now();
-    END IF;
-    RETURN coalesce(NEW, OLD);
-END
-$$;
-
-
-CREATE FUNCTION public.maintain_realm_unit_report_stat() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-    old_delta bigint := 0;
-    new_delta bigint := 0;
-BEGIN
-    IF TG_OP <> 'INSERT' THEN
-        SELECT CASE WHEN state IN ('new', 'triaged', 'assigned', 'escalated', 'reviewing')
-            THEN -1 ELSE 0 END INTO old_delta
-        FROM public.moderation_case WHERE id = OLD.case_id;
-    END IF;
-    IF TG_OP <> 'DELETE' THEN
-        SELECT CASE WHEN state IN ('new', 'triaged', 'assigned', 'escalated', 'reviewing')
-            THEN 1 ELSE 0 END INTO new_delta
-        FROM public.moderation_case WHERE id = NEW.case_id;
-    END IF;
-    IF TG_OP <> 'INSERT' AND old_delta <> 0 THEN
-        UPDATE public.realm_unit_moderation_stat SET
-            open_report_count = open_report_count + old_delta,
-            updated_at = now()
-        WHERE realm_id = OLD.realm_id AND unit_id = OLD.unit_id;
-    END IF;
-    IF TG_OP <> 'DELETE' AND new_delta <> 0 THEN
-        INSERT INTO public.realm_unit_moderation_stat (realm_id, unit_id, open_report_count)
-        VALUES (NEW.realm_id, NEW.unit_id, new_delta)
-        ON CONFLICT (realm_id, unit_id) DO UPDATE SET
-            open_report_count = public.realm_unit_moderation_stat.open_report_count
-                + EXCLUDED.open_report_count,
-            updated_at = now();
-    END IF;
-    RETURN coalesce(NEW, OLD);
-END
-$$;
-
-CREATE FUNCTION public.maintain_realm_unit_report_case_state() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-    delta bigint :=
-        CASE WHEN NEW.state IN ('new', 'triaged', 'assigned', 'escalated', 'reviewing')
-            THEN 1 ELSE 0 END
-        - CASE WHEN OLD.state IN ('new', 'triaged', 'assigned', 'escalated', 'reviewing')
-            THEN 1 ELSE 0 END;
-BEGIN
-    IF delta <> 0 THEN
-        INSERT INTO public.realm_unit_moderation_stat (
-            realm_id, unit_id, open_report_count
-        )
-        SELECT realm_id, unit_id, count(*) * delta
-        FROM public.realm_unit_report
-        WHERE case_id = NEW.id
-        GROUP BY realm_id, unit_id
-        ON CONFLICT (realm_id, unit_id) DO UPDATE SET
-            open_report_count = public.realm_unit_moderation_stat.open_report_count
-                + EXCLUDED.open_report_count,
-            updated_at = now();
-    END IF;
-    RETURN NEW;
-END
-$$;
-
-
-CREATE FUNCTION public.initialize_realm_stat() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-    INSERT INTO public.realm_stat (realm_id) VALUES (NEW.id) ON CONFLICT DO NOTHING;
-    RETURN NEW;
-END
-$$;
-
-CREATE FUNCTION public.initialize_realm_unit_moderation_stat() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-    INSERT INTO public.realm_unit_moderation_stat (realm_id, unit_id)
-    VALUES (NEW.realm_id, NEW.unit_id) ON CONFLICT DO NOTHING;
-    RETURN NEW;
-END
-$$;
-
-CREATE FUNCTION public.initialize_notification_recipient_stat() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-    INSERT INTO public.notification_recipient_stat (profile_id)
-    VALUES (NEW.id) ON CONFLICT DO NOTHING;
-    RETURN NEW;
-END
-$$;
-
-
-CREATE TRIGGER realm_stat_initialize
-AFTER INSERT ON public.realm
-FOR EACH ROW EXECUTE FUNCTION public.initialize_realm_stat();
-
-CREATE TRIGGER realm_unit_moderation_stat_initialize
-AFTER INSERT ON public.realm_unit
-FOR EACH ROW EXECUTE FUNCTION public.initialize_realm_unit_moderation_stat();
-
-CREATE TRIGGER notification_recipient_stat_initialize
-AFTER INSERT ON public.profile
-FOR EACH ROW EXECUTE FUNCTION public.initialize_notification_recipient_stat();
-
-
-CREATE TRIGGER realm_member_stat_maintain
-AFTER INSERT OR DELETE OR UPDATE OF realm_id, state ON public.realm_member
-FOR EACH ROW EXECUTE FUNCTION public.maintain_realm_member_stat();
-
-CREATE TRIGGER notification_recipient_stat_maintain
-AFTER INSERT OR DELETE OR UPDATE OF recipient_profile_id, in_app_visible, read_at ON public.notification
-FOR EACH ROW EXECUTE FUNCTION public.maintain_notification_recipient_stat();
-
-CREATE TRIGGER realm_unit_report_stat_maintain
-AFTER INSERT OR DELETE OR UPDATE OF case_id, realm_id, unit_id ON public.realm_unit_report
-FOR EACH ROW EXECUTE FUNCTION public.maintain_realm_unit_report_stat();
-
-CREATE TRIGGER realm_unit_report_case_state_maintain
-AFTER UPDATE OF state ON public.moderation_case
-FOR EACH ROW EXECUTE FUNCTION public.maintain_realm_unit_report_case_state();
-
-CREATE TRIGGER book_chapter_node_stat_maintain
-AFTER INSERT OR DELETE OR UPDATE OF structure_id, content_unit_id, deleted_at
-ON public.content_structure_node
-FOR EACH ROW EXECUTE FUNCTION public.maintain_book_chapter_from_node();
-
-CREATE TRIGGER book_chapter_progress_stat_maintain
-AFTER INSERT OR DELETE OR UPDATE OF profile_id, node_id
-ON public.content_structure_node_progress
-FOR EACH ROW EXECUTE FUNCTION public.maintain_book_chapter_from_progress();
-
-CREATE TRIGGER book_chapter_unit_stat_maintain
-AFTER UPDATE OF kind, status, visibility, deleted_at ON public.unit
-FOR EACH ROW EXECUTE FUNCTION public.maintain_book_chapter_from_unit();
-
-CREATE TRIGGER book_chapter_post_stat_maintain
-AFTER INSERT OR DELETE OR UPDATE OF kind ON public.post
-FOR EACH ROW EXECUTE FUNCTION public.maintain_book_chapter_from_post();
-
-CREATE TRIGGER book_chapter_structure_stat_maintain
-AFTER INSERT OR DELETE OR UPDATE OF kind, deleted_at ON public.content_structure
-FOR EACH ROW EXECUTE FUNCTION public.maintain_book_chapter_from_structure();
-
-CREATE TRIGGER book_localized_metric_node_refresh
-AFTER INSERT OR DELETE OR UPDATE OF structure_id, owner_unit_id, content_unit_id, deleted_at
-ON public.content_structure_node
-FOR EACH ROW EXECUTE FUNCTION public.refresh_book_metric_from_node();
-
-CREATE TRIGGER book_localized_metric_structure_refresh
-AFTER INSERT OR DELETE OR UPDATE OF owner_unit_id, kind, deleted_at
-ON public.content_structure
-FOR EACH ROW EXECUTE FUNCTION public.refresh_book_metric_from_structure();
-
-CREATE TRIGGER book_localized_metric_unit_refresh
-AFTER UPDATE OF kind, status, visibility, deleted_at ON public.unit
-FOR EACH ROW EXECUTE FUNCTION public.refresh_book_metric_from_content_unit();
-
-CREATE TRIGGER book_localized_metric_post_refresh
-AFTER INSERT OR DELETE OR UPDATE OF kind ON public.post
-FOR EACH ROW EXECUTE FUNCTION public.refresh_book_metric_from_content_unit();
-
-CREATE TRIGGER book_localized_metric_localization_refresh
-AFTER INSERT OR DELETE OR UPDATE OF unit_id, language, content_status
-ON public.unit_localization
-FOR EACH ROW EXECUTE FUNCTION public.refresh_book_metric_from_localization();
-
-CREATE TRIGGER book_localized_metric_content_refresh
-AFTER INSERT OR DELETE OR UPDATE OF unit_id, language, word_count, character_count
-ON public.unit_localization_content_metric
-FOR EACH ROW EXECUTE FUNCTION public.refresh_book_metric_from_localization();
+CREATE PUBLICATION rezics_search_projection_publication WITH (publish = 'insert, update, delete, truncate');
 
 
 --

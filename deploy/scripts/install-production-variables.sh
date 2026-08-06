@@ -133,7 +133,7 @@ jq -n \
     S3_PRESIGN_EXPIRES_IN: "900",
     SEARCH_STATEMENT_TIMEOUT_MS: "1500",
     SEARCH_FACET_SCAN_LIMIT: "1000",
-    RECOMMENDATION_REFRESH_INTERVAL_MS: "300000"
+    RECOMMENDATION_REFRESH_INTERVAL_MS: "86400000"
   } as $applicationRuntime |
   ($applicationRuntime + {
     DATABASE_ADMIN_URL: ("postgres://" + $postgresUsername + ":" + $postgresPassword + "@127.0.0.1:5432/rezics?sslmode=disable"),

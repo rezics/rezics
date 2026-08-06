@@ -86,22 +86,28 @@ async function run() {
 		try {
 			await runWorkerJob({ name: "email.dispatch", retryCount: 0 }, dispatchEmailBatch);
 			if (Date.now() >= nextRecommendationAt) {
-				nextRecommendationAt = Date.now() + env.RECOMMENDATION_REFRESH_INTERVAL_MS;
-				await runWorkerJob({ name: "recommendation.refresh", retryCount: 0 }, async () => {
-					const snapshotId = await refreshRecommendationSnapshot();
-					await aggregateRecommendationMetrics();
-					await purgeRecommendationData();
-					logger.info(
-						snapshotId
-							? "Recommendation refresh completed"
-							: "Recommendation refresh skipped",
-						{
-							eventName: snapshotId
-								? "recommendation.refresh.completed"
-								: "recommendation.refresh.skipped",
+				try {
+					await runWorkerJob(
+						{ name: "recommendation.refresh", retryCount: 0 },
+						async () => {
+							const snapshotId = await refreshRecommendationSnapshot();
+							await aggregateRecommendationMetrics();
+							await purgeRecommendationData();
+							logger.info(
+								snapshotId
+									? "Recommendation refresh completed"
+									: "Recommendation refresh skipped",
+								{
+									eventName: snapshotId
+										? "recommendation.refresh.completed"
+										: "recommendation.refresh.skipped",
+								},
+							);
 						},
 					);
-				});
+				} finally {
+					nextRecommendationAt = Date.now() + env.RECOMMENDATION_REFRESH_INTERVAL_MS;
+				}
 			}
 			if (Date.now() >= nextImageAssetCleanupAt) {
 				nextImageAssetCleanupAt = Date.now() + env.IMAGE_ASSET_CLEANUP_INTERVAL_MS;

@@ -37,7 +37,7 @@ export const RecommendationPolicy = {
 	explorationRatio: 0.1,
 	interestHalfLifeDays: 30,
 	interestMaxAgeDays: 180,
-	snapshotRetentionHours: 24,
-	snapshotStaleHours: 2,
+	snapshotRetentionHours: 72,
+	snapshotStaleHours: 36,
 	eventRetentionDays: 90,
 } as const;

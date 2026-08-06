@@ -67,7 +67,10 @@ import {
 	type RecommendationCandidate,
 	type RecommendationStats,
 } from "../../recommendations/ranking";
-import { recommendationObjectiveExpression } from "../../recommendations/sql-ranking";
+import {
+	isMaterializedRecommendationSort,
+	recommendationObjectiveOrder,
+} from "../../recommendations/sql-ranking";
 import { createRecommendationTracking } from "../../recommendations/tracking";
 import { presentAvatar } from "../../units/avatar";
 import { presentImageAsset } from "../../units/service";
@@ -610,29 +613,43 @@ async function getCandidateSources(input: {
 		input.asOf,
 		input.anchorId,
 	);
-	const snapshotJoin = input.snapshotId
-		? and(
-				eq(recommendationUnitStat.snapshotId, input.snapshotId),
-				eq(recommendationUnitStat.unitId, unit.id),
-				isNull(recommendationUnitStat.contextRealmId),
-			)
-		: sql`false`;
-	const objective = recommendationObjectiveExpression(input.sort, input.asOf);
 	const objectiveLimit = input.viewer.personalized
 		? RecommendationPolicy.maxObjectiveCandidates
 		: RecommendationPolicy.maxCandidates - RecommendationPolicy.maxExplorationCandidates;
-	const objectivePromise = database
-		.select({
-			id: unit.id,
-			engagement6h: recommendationUnitStat.engagement6h,
-			engagement24h: recommendationUnitStat.engagement24h,
-		})
-		.from(unit)
-		.leftJoin(post, eq(post.id, unit.id))
-		.leftJoin(recommendationUnitStat, snapshotJoin)
-		.where(condition)
-		.orderBy(desc(objective), desc(unit.createdAt), desc(unit.id))
-		.limit(objectiveLimit + 1);
+	const materializedObjectiveOrder = isMaterializedRecommendationSort(input.sort)
+		? recommendationObjectiveOrder(input.sort)
+		: null;
+	const objectivePromise =
+		input.snapshotId && materializedObjectiveOrder
+			? database
+					.select({
+						id: recommendationUnitStat.unitId,
+						engagement6h: recommendationUnitStat.engagement6h,
+						engagement24h: recommendationUnitStat.engagement24h,
+					})
+					.from(recommendationUnitStat)
+					.innerJoin(unit, eq(unit.id, recommendationUnitStat.unitId))
+					.leftJoin(post, eq(post.id, unit.id))
+					.where(
+						and(
+							eq(recommendationUnitStat.snapshotId, input.snapshotId),
+							isNull(recommendationUnitStat.contextRealmId),
+							condition,
+						),
+					)
+					.orderBy(...materializedObjectiveOrder)
+					.limit(objectiveLimit + 1)
+			: database
+					.select({
+						id: unit.id,
+						engagement6h: sql<number | null>`null`,
+						engagement24h: sql<number | null>`null`,
+					})
+					.from(unit)
+					.leftJoin(post, eq(post.id, unit.id))
+					.where(condition)
+					.orderBy(desc(unit.createdAt), desc(unit.id))
+					.limit(objectiveLimit + 1);
 	const recentPromise = database
 		.select({ id: unit.id })
 		.from(unit)

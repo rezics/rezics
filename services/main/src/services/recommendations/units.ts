@@ -23,7 +23,7 @@ import {
 	type RecommendationCandidate,
 	type RecommendationStats,
 } from "./ranking";
-import { recommendationObjectiveExpression } from "./sql-ranking";
+import { recommendationObjectiveOrder } from "./sql-ranking";
 import { createRecommendationTracking } from "./tracking";
 
 export type RecommendedUnitKind = "book" | "software" | "media";
@@ -126,14 +126,29 @@ export async function recommendUnits(input: {
 				isNull(recommendationUnitStat.contextRealmId),
 			)
 		: sql`false`;
-	const objective = recommendationObjectiveExpression("best", input.asOf);
-	const objectivePromise = database
-		.select({ id: unit.id, activity: recommendationUnitStat.engagement24h })
-		.from(unit)
-		.leftJoin(recommendationUnitStat, statJoin)
-		.where(condition)
-		.orderBy(desc(objective), desc(unit.createdAt), desc(unit.id))
-		.limit(RecommendationPolicy.maxObjectiveCandidates);
+	const objectivePromise = snapshotId
+		? database
+				.select({
+					id: recommendationUnitStat.unitId,
+					activity: recommendationUnitStat.engagement24h,
+				})
+				.from(recommendationUnitStat)
+				.innerJoin(unit, eq(unit.id, recommendationUnitStat.unitId))
+				.where(
+					and(
+						eq(recommendationUnitStat.snapshotId, snapshotId),
+						isNull(recommendationUnitStat.contextRealmId),
+						condition,
+					),
+				)
+				.orderBy(...recommendationObjectiveOrder("best"))
+				.limit(RecommendationPolicy.maxObjectiveCandidates)
+		: database
+				.select({ id: unit.id, activity: sql<number | null>`null` })
+				.from(unit)
+				.where(condition)
+				.orderBy(desc(unit.createdAt), desc(unit.id))
+				.limit(RecommendationPolicy.maxObjectiveCandidates);
 	const recentPromise = database
 		.select({ id: unit.id })
 		.from(unit)

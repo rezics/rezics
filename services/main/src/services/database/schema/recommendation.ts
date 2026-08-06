@@ -163,6 +163,11 @@ export const recommendationUnitStat = pgTable(
 		engagement6h: doublePrecision("engagement_6h").default(0).notNull(),
 		engagement24h: doublePrecision("engagement_24h").default(0).notNull(),
 		engagement7d: doublePrecision("engagement_7d").default(0).notNull(),
+		unitCreatedAt: createTimestampMsColumn().notNull(),
+		bestScore: doublePrecision("best_score").notNull(),
+		hotScore: doublePrecision("hot_score").notNull(),
+		topScore: doublePrecision("top_score").notNull(),
+		risingScore: doublePrecision("rising_score").notNull(),
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
@@ -175,11 +180,38 @@ export const recommendationUnitStat = pgTable(
 			name: "recommendation_stat_snapshot_fkey",
 		}).onDelete("cascade"),
 		index("recommendation_unit_stat_snapshot_unit_idx").on(table.snapshotId, table.unitId),
-		index("recommendation_unit_stat_snapshot_hot_idx").on(
-			table.snapshotId,
-			table.engagement24h.desc(),
-			table.unitId,
-		),
+		index("recommendation_unit_stat_snapshot_best_idx")
+			.on(
+				table.snapshotId,
+				table.bestScore.desc(),
+				table.unitCreatedAt.desc(),
+				table.unitId.desc(),
+			)
+			.where(sql`${table.contextRealmId} is null`),
+		index("recommendation_unit_stat_snapshot_hot_idx")
+			.on(
+				table.snapshotId,
+				table.hotScore.desc(),
+				table.unitCreatedAt.desc(),
+				table.unitId.desc(),
+			)
+			.where(sql`${table.contextRealmId} is null`),
+		index("recommendation_unit_stat_snapshot_top_idx")
+			.on(
+				table.snapshotId,
+				table.topScore.desc(),
+				table.unitCreatedAt.desc(),
+				table.unitId.desc(),
+			)
+			.where(sql`${table.contextRealmId} is null`),
+		index("recommendation_unit_stat_snapshot_rising_idx")
+			.on(
+				table.snapshotId,
+				table.risingScore.desc(),
+				table.unitCreatedAt.desc(),
+				table.unitId.desc(),
+			)
+			.where(sql`${table.contextRealmId} is null`),
 		check(
 			"recommendation_unit_stat_counts_check",
 			sql`${table.impressions} >= 0 and ${table.opens} >= 0 and ${table.dwell30s} >= 0 and ${table.upvotes} >= 0 and ${table.downvotes} >= 0 and ${table.replies} >= 0 and ${table.favorites} >= 0 and ${table.shares} >= 0 and ${table.highScores} >= 0 and ${table.activeProgress} >= 0 and ${table.completions} >= 0 and ${table.negativeProgress} >= 0`,
@@ -187,6 +219,10 @@ export const recommendationUnitStat = pgTable(
 		check(
 			"recommendation_unit_stat_engagement_check",
 			sql`${table.engagement6h} >= 0 and ${table.engagement24h} >= 0 and ${table.engagement7d} >= 0`,
+		),
+		check(
+			"recommendation_unit_stat_objective_score_check",
+			sql`${table.bestScore} >= 0 and ${table.hotScore} >= 0 and ${table.topScore} >= 0 and ${table.risingScore} >= 0`,
 		),
 	],
 );

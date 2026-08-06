@@ -126,7 +126,11 @@ export const env = createEnv({
 			.min(100)
 			.max(WorkPolicy.search.maxFacetScanCeiling)
 			.default(WorkPolicy.search.maxFacetScan),
-		RECOMMENDATION_REFRESH_INTERVAL_MS: z.coerce.number().int().min(60_000).default(300_000),
+		RECOMMENDATION_REFRESH_INTERVAL_MS: z.coerce
+			.number()
+			.int()
+			.min(WorkPolicy.recommendation.minimumRefreshIntervalMs)
+			.default(WorkPolicy.recommendation.minimumRefreshIntervalMs),
 		WORKER_HEALTH_HOST: z.string().min(1).default("127.0.0.1"),
 		WORKER_HEALTH_PORT: z.coerce.number().int().min(1).max(65_535).default(3002),
 	},

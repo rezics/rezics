@@ -4,8 +4,51 @@ import { database, type DatabaseTransaction, withDatabaseSession } from "../data
 import { recommendationSnapshot, unit } from "../database/schema";
 import { WorkPolicy } from "../performance/policy";
 import { RecommendationPolicy, RecommendationPolicyVersion } from "./policy";
+import {
+	recommendationObjectiveExpression,
+	type RecommendationObjectiveSqlSource,
+} from "./sql-ranking";
 
-async function buildUnitStats(tx: DatabaseTransaction, snapshotId: string) {
+const GroupedRecommendationObjectiveSqlSource = {
+	createdAt: sql<Date>`grouped.unit_created_at`,
+	impressions: sql<bigint>`grouped.impressions`,
+	opens: sql<bigint>`grouped.opens`,
+	dwell30s: sql<bigint>`grouped.dwell30s`,
+	upvotes: sql<bigint>`grouped.upvotes`,
+	downvotes: sql<bigint>`grouped.downvotes`,
+	replies: sql<bigint>`grouped.replies`,
+	favorites: sql<bigint>`grouped.favorites`,
+	shares: sql<bigint>`grouped.shares`,
+	highScores: sql<bigint>`grouped.high_scores`,
+	activeProgress: sql<bigint>`grouped.active_progress`,
+	completions: sql<bigint>`grouped.completions`,
+	negativeProgress: sql<bigint>`grouped.negative_progress`,
+	engagement6h: sql<number>`grouped.engagement6h`,
+	engagement24h: sql<number>`grouped.engagement24h`,
+	engagement7d: sql<number>`grouped.engagement7d`,
+} satisfies RecommendationObjectiveSqlSource;
+
+async function buildUnitStats(tx: DatabaseTransaction, snapshotId: string, sourceWatermark: Date) {
+	const bestScore = recommendationObjectiveExpression(
+		"best",
+		sourceWatermark,
+		GroupedRecommendationObjectiveSqlSource,
+	);
+	const hotScore = recommendationObjectiveExpression(
+		"hot",
+		sourceWatermark,
+		GroupedRecommendationObjectiveSqlSource,
+	);
+	const topScore = recommendationObjectiveExpression(
+		"top",
+		sourceWatermark,
+		GroupedRecommendationObjectiveSqlSource,
+	);
+	const risingScore = recommendationObjectiveExpression(
+		"rising",
+		sourceWatermark,
+		GroupedRecommendationObjectiveSqlSource,
+	);
 	await tx.execute(sql`
 		WITH unit_identity AS (
 			SELECT source.id AS source_unit_id,
@@ -19,18 +62,19 @@ async function buildUnitStats(tx: DatabaseTransaction, snapshotId: string) {
 				sum(signal_count) FILTER (WHERE kind = 'open') AS opens,
 				sum(signal_count) FILTER (WHERE kind = 'dwell_30s') AS dwell30s
 			FROM recommendation_unit_signal_hourly
-			WHERE bucket_start >= now() - ${RecommendationPolicy.eventRetentionDays} * interval '1 day'
+			WHERE bucket_start >= ${sourceWatermark}::timestamptz - ${RecommendationPolicy.eventRetentionDays} * interval '1 day'
 			GROUP BY unit_id
 		), window_stats AS (
 			SELECT unit_id,
-				coalesce(sum(weight) FILTER (WHERE bucket_start >= now() - interval '6 hours'), 0) AS engagement6h,
-				coalesce(sum(weight) FILTER (WHERE bucket_start >= now() - interval '24 hours'), 0) AS engagement24h,
+				coalesce(sum(weight) FILTER (WHERE bucket_start >= ${sourceWatermark}::timestamptz - interval '6 hours'), 0) AS engagement6h,
+				coalesce(sum(weight) FILTER (WHERE bucket_start >= ${sourceWatermark}::timestamptz - interval '24 hours'), 0) AS engagement24h,
 				coalesce(sum(weight), 0) AS engagement7d
 			FROM recommendation_unit_signal_hourly
-			WHERE bucket_start >= now() - interval '7 days' AND weight > 0
+			WHERE bucket_start >= ${sourceWatermark}::timestamptz - interval '7 days' AND weight > 0
 			GROUP BY unit_id
 		), grouped AS (
 			SELECT identity.discovery_unit_id AS unit_id,
+				discovery.created_at AS unit_created_at,
 				coalesce(sum(es.impressions), 0) AS impressions,
 				coalesce(sum(es.opens), 0) AS opens,
 				coalesce(sum(es.dwell30s), 0) AS dwell30s,
@@ -54,32 +98,38 @@ async function buildUnitStats(tx: DatabaseTransaction, snapshotId: string) {
 			LEFT JOIN window_stats ws ON ws.unit_id = identity.source_unit_id
 			WHERE discovery.status = 'published' AND discovery.visibility = 'public'
 				AND discovery.moderation_status = 'approved' AND discovery.deleted_at IS NULL
-			GROUP BY identity.discovery_unit_id
+			GROUP BY identity.discovery_unit_id, discovery.created_at
 		)
 		INSERT INTO recommendation_unit_stat (
 				snapshot_id, unit_id, context_realm_id, impressions, opens, dwell_30s,
 			upvotes, downvotes, replies, favorites, shares, high_scores,
 			active_progress, completions, negative_progress,
-				engagement_6h, engagement_24h, engagement_7d
+				engagement_6h, engagement_24h, engagement_7d, unit_created_at,
+				best_score, hot_score, top_score, rising_score
 		)
 		SELECT ${snapshotId}::uuid, grouped.unit_id, NULL,
 			grouped.impressions, grouped.opens, grouped.dwell30s,
 			grouped.upvotes, grouped.downvotes, grouped.replies, grouped.favorites,
 			grouped.shares, grouped.high_scores, grouped.active_progress,
 			grouped.completions, grouped.negative_progress, grouped.engagement6h,
-			grouped.engagement24h, grouped.engagement7d
+			grouped.engagement24h, grouped.engagement7d, grouped.unit_created_at,
+			${bestScore}, ${hotScore}, ${topScore}, ${risingScore}
 		FROM grouped
 	`);
 }
 
-async function buildProfileInterests(tx: DatabaseTransaction, snapshotId: string) {
+async function buildProfileInterests(
+	tx: DatabaseTransaction,
+	snapshotId: string,
+	sourceWatermark: Date,
+) {
 	await tx.execute(sql`
 		WITH decayed AS (
 			SELECT profile_id, unit_id,
-				sum(weight * exp(-ln(2) * extract(epoch FROM (now() - bucket_start)) / (${RecommendationPolicy.interestHalfLifeDays} * 86400))) AS weight
+				sum(weight * exp(-ln(2) * extract(epoch FROM (${sourceWatermark}::timestamptz - bucket_start)) / (${RecommendationPolicy.interestHalfLifeDays} * 86400))) AS weight
 			FROM recommendation_profile_signal_hourly
 			WHERE weight <> 0
-				AND bucket_start >= now() - ${RecommendationPolicy.interestMaxAgeDays} * interval '1 day'
+				AND bucket_start >= ${sourceWatermark}::timestamptz - ${RecommendationPolicy.interestMaxAgeDays} * interval '1 day'
 			GROUP BY profile_id, unit_id
 		), resolved AS (
 			SELECT d.profile_id, coalesce(relationship.main_unit_id, d.unit_id) AS unit_id,
@@ -236,17 +286,20 @@ export async function refreshRecommendationSnapshot(): Promise<string | null> {
 		if (!lock.rows[0]?.acquired) return null;
 		let snapshotId: string | null = null;
 		try {
+			const sourceWatermark = new Date();
 			const [snapshot] = await session
 				.insert(recommendationSnapshot)
 				.values({
 					policyVersion: RecommendationPolicyVersion,
-					sourceWatermark: new Date(),
+					sourceWatermark,
 				})
 				.returning({ id: recommendationSnapshot.id });
 			if (!snapshot) throw new Error("Recommendation snapshot insertion returned no row");
 			snapshotId = snapshot.id;
-			await session.transaction((tx) => buildUnitStats(tx, snapshot.id));
-			await session.transaction((tx) => buildProfileInterests(tx, snapshot.id));
+			await session.transaction((tx) => buildUnitStats(tx, snapshot.id, sourceWatermark));
+			await session.transaction((tx) =>
+				buildProfileInterests(tx, snapshot.id, sourceWatermark),
+			);
 
 			let afterId: string | undefined;
 			for (;;) {

@@ -29,9 +29,7 @@ describe("public API client", () => {
 			method: "GET",
 			headers: {},
 		});
-		expect(new Headers(publicRequest.headers).get("Authorization")).toBe(
-			`Bearer ${token}`,
-		);
+		expect(new Headers(publicRequest.headers).get("Authorization")).toBe(`Bearer ${token}`);
 		await expect(
 			client.interceptors.request.run({
 				url: "https://example.com/api/v1/health",

@@ -43,6 +43,7 @@ export const WorkPolicy = {
 		maxPublicProgressCountScan: 1_001,
 	},
 	recommendation: {
+		minimumRefreshIntervalMs: 86_400_000,
 		maxStructuralSignals: 32,
 		maxStructuralDegree: 256,
 		maxRawStructuralPeers: 8_192,
