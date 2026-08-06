@@ -23,7 +23,8 @@ advisory diagnostic signal: its result never gates merge, tag creation, GitHub
 Release publication, or production dispatch. Fix deterministic failures when
 they are found, but do not couple deployment availability to Check.
 
-A stable `vMAJOR.MINOR.PATCH` tag starts `release.yml`. The workflow:
+A stable `vMAJOR.MINOR.PATCH` tag starts the server `release.yml` workflow. That
+workflow:
 
 1. passes the protected `production` GitHub environment before the job starts;
 2. obtains a short-lived GitHub OIDC JWT for audience
@@ -33,14 +34,21 @@ A stable `vMAJOR.MINOR.PATCH` tag starts `release.yml`. The workflow:
 4. requires a matching `202 Accepted` receipt containing the tag ref, commit,
    dispatched job ID, and evaluation ID;
 5. creates the GitHub Release if it does not already exist;
-6. exits without polling, streaming logs, or deciding deployment success.
+6. exits without polling, streaming logs, or deciding server deployment success.
+
+The Web Worker has a separate GitHub-owned release boundary. A `web/v*` tag or
+an explicit manual dispatch starts `deploy-web-cloudflare.yml`, which builds and
+promotes the Worker with the protected GitHub `production` environment. It does
+not enter the Nomad server release graph.
 
 The gateway validates the immutable repository and owner IDs, workflow ref,
 GitHub-hosted runner, `production` environment, stable tag, commit, issuer, and
 audience. Nomad independently requires the mapped `production` environment
-claim before granting the workflow a five-minute token with only `dispatch-job`
-in `rezics-release`. GitHub receives no server login, SSH credential, Nomad
-token, database secret, Cloudflare token, or registry credential.
+claim before granting the server workflow a five-minute token with only
+`dispatch-job` in `rezics-release`. The server workflow receives no server
+login, SSH credential, Nomad token, database secret, Cloudflare token, or
+registry credential; the separate Web workflow receives only its scoped
+Cloudflare deployment secrets from GitHub's protected environment.
 
 ## Server release graph
 
@@ -58,13 +66,13 @@ The dependency order is:
    immutable digest references;
 3. database preflight, migration, privilege reconciliation, and verification;
 4. independent API and worker rollouts;
-5. explicit derived-data maintenance and PGroonga index health verification;
-6. web build, Cloudflare version-override verification, and promotion.
+5. explicit derived-data maintenance and PGroonga index health verification.
 
 Unchanged components are skipped. A database change conservatively invalidates
 API, worker, and derived-data maintenance. API and worker have separate images and separate
-Nomad deployments. The controller and fixed service deploy runners follow
-Nomad event streams at dependency edges; there is no interval polling loop.
+Nomad deployments. Web is independent of this graph. The controller and fixed
+service deploy runners follow Nomad event streams at dependency edges; there is
+no interval polling loop.
 
 Nomad's canary, auto-promotion, and automatic-revert behavior follows the
 [Nomad update specification](https://developer.hashicorp.com/nomad/docs/job-specification/update).
@@ -93,7 +101,6 @@ expose only:
 | `rezics`                | `application/runtime`                   | API and worker runtime tasks      |
 | `rezics`                | `database/operations`                   | root/operator installation source |
 | `rezics-release`        | `release/database`                      | database and maintenance tasks    |
-| `rezics-release`        | `release/config`                        | web release task                  |
 | `rezics-infrastructure` | `database/databasus-control`            | Databasus master key only         |
 | `rezics-infrastructure` | `database/databasus-source`             | one-time source/R2 setup          |
 | `rezics-infrastructure` | `database/databasus-verification-agent` | restore agent only                |
@@ -101,11 +108,10 @@ expose only:
 The reconciler copies the existing `database/operations` items into
 `release/database` without printing them. API and worker receive
 `DATABASE_URL`, never `DATABASE_ADMIN_URL`. Only the database/maintenance tasks
-receive the administrative connection. Only the web task receives the scoped
-Cloudflare Worker token and public Turnstile site key. The temporary full-access
-Cloudflare token must never be installed in NixOS, Nomad, GitHub, or runtime
-configuration. Backup credentials belong to a dedicated private R2 bucket and are never copied
-into an application or release Variable.
+receive the administrative connection. The Web workflow receives its scoped
+Cloudflare deployment secrets from GitHub's protected environment; they are not
+copied into NixOS or Nomad. Backup credentials belong to a dedicated private R2
+bucket and are never copied into an application or release Variable.
 
 See the [Nomad Variables access model](https://developer.hashicorp.com/nomad/docs/concepts/variables)
 and [workload identity model](https://developer.hashicorp.com/nomad/docs/concepts/workload-identity).
@@ -121,7 +127,7 @@ application version can no longer run. Database migrations are forward
 operations and are not automatically reversed.
 
 Derived-data maintenance is a distinct job so it is independently observable and resumable.
-If database work fails, API, worker, maintenance, and web promotion do not run.
+If database work fails, API, worker, and maintenance do not run.
 Outline uses its existing independent database configuration and is never part
 of these operations.
 
@@ -145,8 +151,8 @@ installed verification agent uses the REZICS PostgreSQL 18 image.
 
 ## Cloudflare Worker release
 
-The web job installs the repository-pinned Yarn version, verifies generated
-offline and Cloudflare binding artifacts, builds the Worker, and uploads a new
+The GitHub Web workflow installs the repository-pinned Yarn version, verifies
+generated offline and Cloudflare binding artifacts, builds the Worker, and uploads a new
 version. When production already exists, it stages the new version at 0%, waits
 for a bounded series of version-override probes to pass, promotes it to 100%,
 and waits for a bounded series of production probes to pass. These retries
@@ -161,11 +167,22 @@ and API hostnames remain separate origins.
 
 ## Operations and rollback
 
-Apply NixOS changes before moving an application tag that depends on them. A
-host activation reconciles OIDC, workload policies, protected Variables, and
-all fixed release parent jobs. Verify the gateway health endpoint, rootless
-Docker daemon, loopback registry, Nomad client drivers, and Outline allocation
-before dispatching the application release.
+Apply NixOS changes before moving a server application tag that depends on them.
+A host activation reconciles OIDC, workload policies, protected Variables, and
+the fixed server release parent jobs. Verify the gateway health endpoint,
+rootless Docker daemon, loopback registry, Nomad client drivers, and Outline
+allocation before dispatching the application release. When upgrading an
+installation that still has the retired `rezics-release-web` parent, first
+verify that no Web child allocation is running, then deregister that parent,
+purge its obsolete `release/config` Variable, and remove its old workload ACL
+policy; subsequent activations no longer recreate any of them. The exact
+one-time cleanup is:
+
+```sh
+rezics-nomad-operator job stop -namespace=rezics-release -purge -yes rezics-release-web
+rezics-nomad-operator var purge -namespace=rezics-release release/config
+rezics-nomad-operator acl policy delete rezics-release-web-variable
+```
 
 Application rollback uses a previously recorded API/worker digest and a prior
 Cloudflare Worker version. Never reverse a successful database migration merely

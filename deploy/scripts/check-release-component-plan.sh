@@ -17,9 +17,9 @@ printf '%s\n' '{}' >"${empty_state}"
 
 jq -e '
 	.schemaVersion == 1 and
-	([.components[].name] == ["database", "api", "worker", "projection", "web"]) and
-	([.components[] | select(.changed)] | length == 5) and
-	(.changed == ["database", "api", "worker", "projection", "web"])
+	([.components[].name] == ["database", "api", "worker", "projection"]) and
+	([.components[] | select(.changed)] | length == 4) and
+	(.changed == ["database", "api", "worker", "projection"])
 ' "${first_plan}" >/dev/null
 
 jq '{

@@ -228,8 +228,9 @@ The about site is deployed independently to Cloudflare Pages from the
 `about/v*` release tag or a manual workflow dispatch. Its deployment uses the
 shared `production` GitHub environment, while its workflow and release trigger
 remain separate; platform `v*` tags never deploy About.
-The main Vinext site deploys to Cloudflare Workers; the API, background worker,
-PostgreSQL run on Nomad; production object storage and dedicated PostgreSQL logical backups use
+The main Vinext site deploys to Cloudflare Workers from its separate `web/v*`
+or manual GitHub workflow; the API, background worker, and PostgreSQL run on
+Nomad; production object storage and dedicated PostgreSQL logical backups use
 separate private Cloudflare R2 buckets. See [Production deployment](./docs/operations/production-deployment.md)
 for first installation, release, secret, and rollback procedures.
 

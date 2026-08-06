@@ -75,31 +75,6 @@
 				"services/main/src/services/studio/**",
 				"deploy/scripts/database-operation.sh"
 			]
-		},
-		"web": {
-			"order": 50,
-			"inputs": [
-				"package.json",
-				"yarn.lock",
-				".yarnrc.yml",
-				".yarn/releases/yarn-4.17.1.cjs",
-				"devenv.nix",
-				"devenv.yaml",
-				"apps/web/**",
-				"libraries/avatar/**",
-				"libraries/block/**",
-				"libraries/filter/**",
-				"libraries/fixture-client/**",
-				"libraries/fixture-data/**",
-				"libraries/i18n/**",
-				"libraries/license/**",
-				"libraries/portable-text/**",
-				"libraries/services/main/openapi-tanstack-query/**",
-				"libraries/slug/**",
-				"libraries/ui/**",
-				"packages/brand/**",
-				"deploy/scripts/deploy-cloudflare-worker.sh"
-			]
 		}
 	}
 }
