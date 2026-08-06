@@ -31,6 +31,16 @@ tasks:
         cmds:
             - yarn exec tsx scripts/refresh-recommendations.ts
 
+    scale-seed:
+        desc: Insert local-only, published Book/Software/Media fixtures in bounded batches (does not refresh recommendations).
+        cmds:
+            - yarn exec tsx scripts/scale-seed.ts seed {{.CLI_ARGS}}
+
+    scale-seed:purge:
+        desc: Remove a local scale-seed run by its run id.
+        cmds:
+            - yarn exec tsx scripts/scale-seed.ts purge {{.CLI_ARGS}}
+
     aggregates:reconcile:
         desc: Verify authoritative aggregate tables against their source facts.
         cmds:
