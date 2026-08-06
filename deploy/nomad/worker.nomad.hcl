@@ -57,6 +57,7 @@ job "rezics-worker" {
 
       env {
         DEPLOYMENT_ENVIRONMENT = "production"
+        DATABASE_POOL_MAX      = "6"
         NODE_ENV               = "production"
         REZICS_RELEASE         = var.release
       }
@@ -112,7 +113,7 @@ job "rezics-worker" {
       shutdown_delay = "5s"
 
       resources {
-        cpu    = 1000
+        cpu    = 1500
         memory = 2048
       }
     }

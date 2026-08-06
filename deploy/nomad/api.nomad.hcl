@@ -17,7 +17,31 @@ job "rezics-api" {
   }
 
   group "api" {
-    count = 2
+    count = 4
+
+    scaling {
+      enabled = true
+      min     = 4
+      max     = 8
+
+      policy {
+        cooldown            = "1m"
+        evaluation_interval = "15s"
+        on_check_error      = "fail"
+
+        check "api_cpu" {
+          source = "nomad-apm"
+          query  = "avg_cpu-allocated"
+
+          strategy "target-value" {
+            target         = 65
+            threshold      = 0.15
+            max_scale_up   = 2
+            max_scale_down = 1
+          }
+        }
+      }
+    }
 
     update {
       canary            = 1
@@ -57,6 +81,7 @@ job "rezics-api" {
 
       env {
         DEPLOYMENT_ENVIRONMENT = "production"
+        DATABASE_POOL_MAX      = "6"
         NODE_ENV               = "production"
         REZICS_RELEASE         = var.release
       }
@@ -122,7 +147,7 @@ job "rezics-api" {
       shutdown_delay = "10s"
 
       resources {
-        cpu    = 1000
+        cpu    = 1800
         memory = 1536
       }
     }

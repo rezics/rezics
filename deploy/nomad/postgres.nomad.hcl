@@ -56,7 +56,16 @@ job "rezics-postgres" {
           "-c", "max_wal_senders=10",
           "-c", "max_wal_size=8GB",
           "-c", "min_wal_size=2GB",
+          "-c", "max_connections=100",
+          "-c", "shared_buffers=2GB",
+          "-c", "effective_cache_size=6GB",
+          "-c", "work_mem=8MB",
+          "-c", "maintenance_work_mem=512MB",
+          "-c", "autovacuum_work_mem=512MB",
           "-c", "max_worker_processes=12",
+          "-c", "max_parallel_workers=8",
+          "-c", "max_parallel_workers_per_gather=2",
+          "-c", "max_parallel_maintenance_workers=2",
           "-c", "shared_preload_libraries=pg_stat_statements,pgroonga_wal_resource_manager,pgroonga_crash_safer",
           "-c", "pgroonga.enable_wal_resource_manager=on",
           "-c", "pgroonga.enable_wal=off",
@@ -113,8 +122,8 @@ job "rezics-postgres" {
       shutdown_delay = "5s"
 
       resources {
-        cpu    = 1500
-        memory = 3072
+        cpu    = 4000
+        memory = 8192
       }
     }
   }

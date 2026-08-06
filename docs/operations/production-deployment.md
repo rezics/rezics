@@ -4,8 +4,10 @@ Production has independent release boundaries:
 
 - `apps/web` is a Vinext Cloudflare Worker on `www.rezics.com`;
 - `apps/about` keeps its independent Cloudflare Pages release path;
-- the API is a two-allocation Nomad service;
-- the background worker is a separate one-allocation Nomad service;
+- the API is a production Elysia/Bun bundle, executed by the pinned Bun runtime
+  in a Nomad service that scales from four to eight allocations;
+- the background worker is a compiled Bun executable in a separate
+  one-allocation Nomad service;
 - database migration and derived-data maintenance are separate batch operations;
 - stateful PostgreSQL and the Databasus backup manager/verification agent are outside the
   application release graph;
@@ -76,6 +78,11 @@ no interval polling loop.
 
 Nomad's canary, auto-promotion, and automatic-revert behavior follows the
 [Nomad update specification](https://developer.hashicorp.com/nomad/docs/job-specification/update).
+The host-managed Nomad Autoscaler evaluates the API's average percentage of
+allocated CPU every 15 seconds, targets 65%, and observes a one-minute cooldown.
+It can add at most two allocations or remove at most one allocation per
+evaluation, while Traefik's watched Nomad catalog routes traffic to the healthy
+allocation set. The scaler cannot exceed the jobspec's four-to-eight bounds.
 Cloudflare pre-traffic verification uses
 [Worker version overrides](https://developers.cloudflare.com/workers/versions-and-deployments/version-overrides/).
 
@@ -117,6 +124,20 @@ See the [Nomad Variables access model](https://developer.hashicorp.com/nomad/doc
 and [workload identity model](https://developer.hashicorp.com/nomad/docs/concepts/workload-identity).
 
 ## Database rules
+
+Each API or worker process owns a six-connection `node-postgres` pool. Eight API
+allocations plus the worker therefore admit at most 54 application connections;
+the ninth temporary API canary raises that bound to 60. PostgreSQL keeps
+`max_connections = 100`, of which three are reserved for superusers, leaving 37
+ordinary slots beyond the worst application rollout. Increase the autoscaling
+maximum only after checking both PostgreSQL connection headroom and the
+application's pool waiting metric.
+
+The stateful PostgreSQL jobspec allocates 4,000 MHz and 8 GiB, including a 2 GiB
+shared buffer cache and settings sized for the host. It remains outside the
+application release graph. Apply and verify that jobspec before a release that
+depends on new database resource settings; a normal stable application tag does
+not mutate the stateful job.
 
 `deploy/scripts/database-operation.sh release` runs preflight, migration, and
 verification in one serialized batch job. It asserts that both administrative
@@ -169,7 +190,11 @@ and API hostnames remain separate origins.
 
 Apply NixOS changes before moving a server application tag that depends on them.
 A host activation reconciles OIDC, workload policies, protected Variables, and
-the fixed server release parent jobs. Verify the gateway health endpoint,
+the fixed server release parent jobs. It also installs the Nomad Autoscaler and
+its long-lived client token whose sole policy is `scale` in the `rezics`
+namespace. The Nomad client reserves 2,000 MHz and 2 GiB for the host and
+control-plane services. Verify the autoscaler health endpoint on
+`127.0.0.1:15001`, the gateway health endpoint,
 rootless Docker daemon, loopback registry, Nomad client drivers, and Outline
 allocation before dispatching the application release. When upgrading an
 installation that still has the retired `rezics-release-web` parent, first
