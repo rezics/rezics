@@ -4,6 +4,7 @@ ARG NODE_IMAGE=node:26-bookworm-slim@sha256:9e6f9357d371591e32ab6f2d8a26d63bdd0d
 ARG BUN_IMAGE=oven/bun:1.3.11-slim@sha256:478281fdd196871c7e51ba6a820b7803a8ae97042ec86cdbc2e1c6b6626442d9
 ARG POSTGRES_IMAGE=postgres:18.4-trixie@sha256:3a82e1f56c8f0f5616a11103ac3d47e632c3938698946a7ad26da0df1334744a
 ARG COREPACK_VERSION=0.35.0
+ARG BUN_VERSION=1.3.11
 ARG PGROONGA_VERSION=4.0.8-1
 ARG APPROX_COUNT_COMMIT=341dfa19f73e60d22a8869ccb03bd252d888cec7
 
@@ -36,6 +37,21 @@ COPY libraries/slug/package.json libraries/slug/package.json
 COPY packages/brand/package.json packages/brand/package.json
 COPY services/main/package.json services/main/package.json
 
+FROM ${BUN_IMAGE} AS bun-compiler
+
+ARG BUN_VERSION
+USER root
+
+ADD --checksum=sha256:8611ba935af886f05a6f38740a15160326c15e5d5d07adef966130b4493607ed \
+    https://github.com/oven-sh/bun/releases/download/bun-v${BUN_VERSION}/bun-linux-x64.zip \
+    /tmp/bun-linux-x64.zip
+
+RUN apt-get update \
+	&& apt-get install --yes --no-install-recommends unzip \
+	&& unzip /tmp/bun-linux-x64.zip -d /tmp \
+	&& install -m 0755 /tmp/bun-linux-x64/bun /usr/local/bin/bun-modern \
+	&& rm -rf /tmp/bun-linux-x64 /tmp/bun-linux-x64.zip /var/lib/apt/lists/*
+
 FROM scratch AS backend-source
 
 COPY libraries/access /libraries/access
@@ -56,7 +72,7 @@ RUN --mount=type=cache,target=/root/.yarn/berry/cache \
 	yarn workspaces focus @rezics/backend --production
 COPY --from=backend-source / /workspace/
 
-FROM ${BUN_IMAGE} AS backend-runtime
+FROM ${BUN_IMAGE} AS backend-build
 
 ENV DEPLOYMENT_ENVIRONMENT=production \
     HOST=127.0.0.1 \
@@ -66,18 +82,66 @@ ENV DEPLOYMENT_ENVIRONMENT=production \
     WORKER_HEALTH_PORT=3002
 WORKDIR /workspace
 
+COPY --from=bun-compiler /usr/local/bin/bun-modern /usr/local/bin/bun-modern
 COPY --from=main-dependencies --chown=bun:bun /workspace /workspace
 
 USER bun
-EXPOSE 3001 3002
 
-FROM backend-runtime AS api
+FROM backend-build AS api-build
 
-CMD ["bun", "services/main/src/index.ts"]
+RUN bun-modern build \
+	--external=sharp \
+	--minify-whitespace \
+	--minify-syntax \
+	--outdir=/tmp/api \
+	--sourcemap=inline \
+	--target=bun \
+	services/main/src/index.ts
 
-FROM backend-runtime AS worker
+FROM backend-build AS worker-build
 
-CMD ["bun", "services/main/src/worker.ts"]
+RUN bun-modern build \
+	--compile \
+	--minify-whitespace \
+	--minify-syntax \
+	--sourcemap \
+	--outfile=/tmp/rezics-worker \
+	services/main/src/worker.ts
+
+FROM ${BUN_IMAGE} AS api
+
+ENV DEPLOYMENT_ENVIRONMENT=production \
+    HOST=127.0.0.1 \
+    NODE_ENV=production \
+    PORT=3001
+WORKDIR /app
+
+COPY --from=bun-compiler /usr/local/bin/bun-modern /usr/local/bin/bun-modern
+COPY --from=api-build --chown=bun:bun /tmp/api/index.js /app/rezics-api.js
+COPY --from=main-dependencies --chown=bun:bun /workspace/node_modules/@img/colour /app/node_modules/@img/colour
+COPY --from=main-dependencies --chown=bun:bun /workspace/node_modules/@img/sharp-libvips-linux-x64 /app/node_modules/@img/sharp-libvips-linux-x64
+COPY --from=main-dependencies --chown=bun:bun /workspace/node_modules/@img/sharp-linux-x64 /app/node_modules/@img/sharp-linux-x64
+COPY --from=main-dependencies --chown=bun:bun /workspace/node_modules/detect-libc /app/node_modules/detect-libc
+COPY --from=main-dependencies --chown=bun:bun /workspace/node_modules/semver /app/node_modules/semver
+COPY --from=main-dependencies --chown=bun:bun /workspace/node_modules/sharp /app/node_modules/sharp
+
+USER bun
+EXPOSE 3001
+CMD ["/usr/local/bin/bun-modern", "/app/rezics-api.js"]
+
+FROM ${BUN_IMAGE} AS worker
+
+ENV DEPLOYMENT_ENVIRONMENT=production \
+    NODE_ENV=production \
+    WORKER_HEALTH_HOST=127.0.0.1 \
+    WORKER_HEALTH_PORT=3002
+WORKDIR /app
+
+COPY --from=worker-build --chown=bun:bun /tmp/rezics-worker /app/rezics-worker
+
+USER bun
+EXPOSE 3002
+CMD ["/app/rezics-worker"]
 
 FROM backend-dependency-manifests AS database-dependencies
 RUN --mount=type=cache,target=/root/.yarn/berry/cache \

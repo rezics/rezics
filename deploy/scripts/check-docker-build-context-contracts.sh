@@ -6,8 +6,12 @@ readonly brand_dist_directory_exception='!packages/brand/dist/'
 readonly brand_dist_content_exception='!packages/brand/dist/**'
 readonly required_brand_asset='packages/brand/dist/avatar.png'
 readonly postgres_init_copy='COPY --chmod=0755 services/main/docker/postgres/init /docker-entrypoint-initdb.d'
-readonly api_stage='FROM backend-runtime AS api'
-readonly worker_stage='FROM backend-runtime AS worker'
+readonly api_stage='FROM ${BUN_IMAGE} AS api'
+readonly worker_stage='FROM ${BUN_IMAGE} AS worker'
+readonly api_binary_command='CMD ["/usr/local/bin/bun-modern", "/app/rezics-api.js"]'
+readonly worker_binary_command='CMD ["/app/rezics-worker"]'
+readonly compile_flag='--compile'
+readonly bun_bundle_target='--target=bun'
 
 for exception in \
 	"${brand_dist_directory_exception}" \
@@ -41,5 +45,23 @@ for runtime_stage in "${api_stage}" "${worker_stage}"; do
 		exit 1
 	fi
 done
+
+for binary_command in "${api_binary_command}" "${worker_binary_command}"; do
+	if ! grep -Fxq "${binary_command}" Dockerfile; then
+		printf 'Dockerfile is missing compiled runtime command: %s\n' \
+			"${binary_command}" >&2
+		exit 1
+	fi
+done
+
+if [[ "$(grep -Fc -- "${compile_flag}" Dockerfile)" -ne 1 ]]; then
+	printf 'Dockerfile must compile exactly the worker entrypoint\n' >&2
+	exit 1
+fi
+
+if [[ "$(grep -Fc -- "${bun_bundle_target}" Dockerfile)" -ne 1 ]]; then
+	printf 'Dockerfile must produce exactly one Bun-targeted API bundle\n' >&2
+	exit 1
+fi
 
 printf '%s\n' 'Validated Docker build-context contracts'

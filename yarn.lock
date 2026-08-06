@@ -5279,6 +5279,8 @@ __metadata:
     "@elysiajs/cors": "npm:^1.4.2"
     "@elysiajs/openapi": "npm:^1.4.15"
     "@faker-js/faker": "npm:^10.5.0"
+    "@img/sharp-libvips-linux-x64": "npm:1.2.4"
+    "@img/sharp-linux-x64": "npm:0.34.5"
     "@rezics/access": "workspace:*"
     "@rezics/avatar": "workspace:*"
     "@rezics/block": "workspace:*"
@@ -5316,6 +5318,11 @@ __metadata:
     tsx: "npm:4"
     typescript: "npm:7"
     zod: "npm:^4.4.3"
+  dependenciesMeta:
+    "@img/sharp-libvips-linux-x64":
+      optional: true
+    "@img/sharp-linux-x64":
+      optional: true
   languageName: unknown
   linkType: soft
 
