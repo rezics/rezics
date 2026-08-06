@@ -2,16 +2,8 @@ name: Deploy Web to Cloudflare Workers
 
 on:
     push:
-        branches: [main]
-        paths:
-            - ".yarn/**"
-            - ".yarnrc.yml"
-            - "apps/web/**"
-            - "libraries/**"
-            - "packages/**"
-            - "package.json"
-            - "deploy/scripts/deploy-cloudflare-worker.sh"
-            - "yarn.lock"
+        tags:
+            - "web/v*"
     workflow_dispatch:
         inputs:
             release:
@@ -93,7 +85,14 @@ jobs:
                   INPUT_RELEASE: ${{ inputs.release }}
               run: |
                   set -euo pipefail
-                  release="${INPUT_RELEASE:-main-${GITHUB_SHA:0:12}}"
+                  release="${INPUT_RELEASE}"
+                  if [[ -z "${release}" ]]; then
+                      if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+                          release="${GITHUB_REF_NAME}"
+                      else
+                          release="manual-${GITHUB_SHA:0:12}"
+                      fi
+                  fi
                   REZICS_DEPLOY_RESULT_FILE="${RUNNER_TEMP}/rezics-web-deploy.json" \
                       bash deploy/scripts/deploy-cloudflare-worker.sh \
                           "${release}" "${worker_secrets_file}"
