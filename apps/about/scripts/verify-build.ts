@@ -111,6 +111,7 @@ const expectedFunctionRoutes = [
 	"/products/*",
 	"/contact-us",
 	"/contact-us/",
+	"/legal/*",
 ] as const;
 const functionRoutes = JSON.parse(
 	await readFile(join(distRoot, "_routes.json"), "utf8"),

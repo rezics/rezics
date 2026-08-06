@@ -1,13 +1,5 @@
 import { PRODUCT_DEFINITIONS } from "../src/content/productRegistry";
-import { DEFAULT_LOCALE, negotiateAboutLocale, type AboutLocale } from "../src/i18n/locales";
-import {
-	getContactPath,
-	getHomePath,
-	getHowItWorksPath,
-	getProductPath,
-	getProductsPath,
-	getUsesPath,
-} from "../src/i18n/productPaths";
+import { isAboutLocale, negotiateAboutLocale, type AboutLocale } from "../src/i18n/locales";
 
 type PagesMiddlewareContext = {
 	readonly request: Request;
@@ -18,21 +10,37 @@ const publicProductSlugs: ReadonlySet<string> = new Set(
 	PRODUCT_DEFINITIONS.map(({ slug }) => slug),
 );
 
+const publicEntryPaths: ReadonlySet<string> = new Set([
+	"/",
+	"/how-it-works",
+	"/uses",
+	"/products",
+	"/contact-us",
+]);
+
+const legalDocumentPathPattern = /^\/legal\/[^/]+$/;
+
 function normalizePathname(pathname: string): string {
 	return pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
 }
 
-function resolveLocalizedEntry(pathname: string, locale: AboutLocale): string | undefined {
+function hasLocalePrefix(pathname: string): boolean {
+	const firstSegment = pathname.split("/")[1];
+	return firstSegment !== undefined && isAboutLocale(firstSegment);
+}
+
+function isPublicPagePath(pathname: string): boolean {
 	const normalized = normalizePathname(pathname);
-	if (normalized === "/") return getHomePath(locale);
-	if (normalized === "/how-it-works") return getHowItWorksPath(locale);
-	if (normalized === "/uses") return getUsesPath(locale);
-	if (normalized === "/products") return getProductsPath(locale);
-	if (normalized === "/contact-us") return getContactPath(DEFAULT_LOCALE);
+	if (publicEntryPaths.has(normalized) || legalDocumentPathPattern.test(normalized)) return true;
 
 	const productMatch = normalized.match(/^\/products\/([^/]+)$/);
 	const slug = productMatch?.[1];
-	return slug && publicProductSlugs.has(slug) ? getProductPath(locale, slug) : undefined;
+	return slug !== undefined && publicProductSlugs.has(slug);
+}
+
+function getLocalizedPagePath(pathname: string, locale: AboutLocale): string {
+	const normalized = normalizePathname(pathname);
+	return normalized === "/" ? `/${locale}/` : `/${locale}${normalized}/`;
 }
 
 function redirect(requestUrl: URL, targetPath: string): Response {
@@ -54,7 +62,11 @@ export async function onRequest(context: PagesMiddlewareContext): Promise<Respon
 	}
 
 	const url = new URL(context.request.url);
+	if (hasLocalePrefix(url.pathname)) return context.next();
+
 	const locale = negotiateAboutLocale(context.request.headers.get("accept-language"));
-	const targetPath = resolveLocalizedEntry(url.pathname, locale);
+	const targetPath = isPublicPagePath(url.pathname)
+		? getLocalizedPagePath(url.pathname, locale)
+		: undefined;
 	return targetPath ? redirect(url, targetPath) : context.next();
 }
