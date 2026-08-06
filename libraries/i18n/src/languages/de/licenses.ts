@@ -37,6 +37,7 @@ export default {
 		none: "Keine",
 		viewTerms: `Bedingungen für ${verbatimTerms.rezicsUnitContentLicenseV1.value} anzeigen`,
 		grantNotice: `Nach der Erteilung kann diese Lizenz nicht widerrufen werden und gilt weiterhin für künftige ${postTerms.pluralLabel} zu diesem Inhalt sowie bei Eigentumsübertragungen.`,
+		confirmationLabel: `Ich habe die ${verbatimTerms.rezicsUnitContentLicenseV1.value} gelesen und stimme ihr zu. Ich bestätige außerdem, dass ich berechtigt bin, diese Lizenz für diesen Inhalt zu erteilen.`,
 		noneNotice:
 			"Es wird keine Inhaltslizenz erteilt. Wähle „Keine“ nur, wenn dieses Werk ausschließlich als Verzeichniseintrag dient und keine Inhalte des Werks veröffentlicht oder bereitgestellt werden.",
 		noneConfirmationTitle: `Ohne Inhaltslizenz für ${verbatimTerms.rezics.value} erstellen?`,

@@ -50,6 +50,14 @@ function renderedForm(container: HTMLElement): HTMLFormElement {
 	return form;
 }
 
+function contentLicenseConfirmation(container: HTMLElement): HTMLInputElement {
+	const checkbox = container.querySelector<HTMLInputElement>(
+		'input[name="contentLicenseConfirmation"]',
+	);
+	if (!checkbox) throw new Error("Expected a content license confirmation checkbox");
+	return checkbox;
+}
+
 describe("UnitContentLicenseField", () => {
 	it("defaults a new work to the current content license", () => {
 		const { container } = render(
@@ -60,6 +68,9 @@ describe("UnitContentLicenseField", () => {
 		const select = contentLicenseSelect(container);
 
 		expect(select).toHaveProperty("value", CurrentUnitContentLicenseSlug);
+		const confirmation = contentLicenseConfirmation(container);
+		expect(confirmation).toHaveProperty("required", true);
+		expect(confirmation).toHaveProperty("checked", false);
 		expect(screen.queryByRole("alertdialog")).toBeNull();
 	});
 
@@ -121,6 +132,7 @@ describe("UnitContentLicenseField", () => {
 		await screen.findByRole("alertdialog");
 		fireEvent.click(screen.getByRole("button", { name: "改為無授權" }));
 		await waitFor(() => expect(select).toHaveProperty("value", "none"));
+		expect(container.querySelector('input[name="contentLicenseConfirmation"]')).toBeNull();
 	});
 
 	it("still requires confirmation before granting an unlicensed existing work", async () => {
@@ -138,6 +150,31 @@ describe("UnitContentLicenseField", () => {
 
 		fireEvent.click(screen.getByRole("button", { name: "確認授權" }));
 		await waitFor(() => expect(select).toHaveProperty("value", CurrentUnitContentLicenseSlug));
+		const confirmation = contentLicenseConfirmation(container);
+		expect(confirmation).toHaveProperty("required", true);
+		expect(confirmation).toHaveProperty("checked", false);
+	});
+
+	it("requires fresh confirmation after switching away from and back to a license", async () => {
+		const { container } = render(
+			<TranslationProvider initial={translation.snapshot}>
+				<UnitContentLicenseField context="create" />
+			</TranslationProvider>,
+		);
+		const select = contentLicenseSelect(container);
+		const confirmation = contentLicenseConfirmation(container);
+
+		fireEvent.click(confirmation);
+		expect(confirmation).toHaveProperty("checked", true);
+		fireEvent.change(select, { target: { value: "none" } });
+		await screen.findByRole("alertdialog");
+		fireEvent.click(screen.getByRole("button", { name: "改為無授權" }));
+		await waitFor(() => expect(select).toHaveProperty("value", "none"));
+
+		fireEvent.change(select, { target: { value: CurrentUnitContentLicenseSlug } });
+		await waitFor(() => expect(contentLicenseConfirmation(container)).toBeTruthy());
+		const restoredConfirmation = contentLicenseConfirmation(container);
+		expect(restoredConfirmation).toHaveProperty("checked", false);
 	});
 
 	it("keeps an existing irrevocable grant selected and disabled", () => {

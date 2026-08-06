@@ -37,6 +37,7 @@ export default {
 		viewTerms: `View ${verbatimTerms.rezicsUnitContentLicenseV1.value}`,
 		grantNotice:
 			"Once granted, this license cannot be revoked and continues to cover later contributions and ownership transfers.",
+		confirmationLabel: `I have read and agree to the ${verbatimTerms.rezicsUnitContentLicenseV1.value} and confirm that I have authority to grant this license for the content.`,
 		noneNotice:
 			"No content license will be granted. Choose None only when this work is an index entry and will not publish or host the work’s content.",
 		noneConfirmationTitle: `Create without a content license for ${verbatimTerms.rezics.value}?`,

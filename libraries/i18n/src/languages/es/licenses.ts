@@ -37,6 +37,7 @@ export default {
 		viewTerms: `Consultar ${verbatimTerms.rezicsUnitContentLicenseV1.value}`,
 		grantNotice:
 			"Una vez concedida, esta licencia no se puede revocar y continúa aplicándose a las contribuciones posteriores y a las transferencias de propiedad.",
+		confirmationLabel: `He leído y acepto la ${verbatimTerms.rezicsUnitContentLicenseV1.value} y confirmo que tengo autoridad para conceder esta licencia para este contenido.`,
 		noneNotice:
 			"No se concederá ninguna licencia de contenido. Elige «Ninguna» solo si esta obra se usará como entrada de índice y no se publicará ni alojará su contenido.",
 		noneConfirmationTitle: `¿Crear sin una licencia de contenido para ${verbatimTerms.rezics.value}?`,

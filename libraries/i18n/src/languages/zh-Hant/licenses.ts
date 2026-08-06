@@ -34,6 +34,7 @@ export default {
 		none: "無",
 		viewTerms: `查看 ${verbatimTerms.rezicsUnitContentLicenseV1.value}`,
 		grantNotice: "授權後不可撤銷，並持續適用於這項內容的後續貢獻及所有權移轉。",
+		confirmationLabel: `我已閱讀並同意 ${verbatimTerms.rezicsUnitContentLicenseV1.value}，並確認我有權就這項內容授予此授權。`,
 		noneNotice:
 			"不會授予內容授權。只有在這項作品僅用於索引資料，且不會發佈或託管作品內容時，才應選擇「無」。",
 		noneConfirmationTitle: `不授予 ${verbatimTerms.rezics.value} 內容授權？`,

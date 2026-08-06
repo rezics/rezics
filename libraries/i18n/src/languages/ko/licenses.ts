@@ -37,6 +37,7 @@ export default {
 		viewTerms: `${verbatimTerms.rezicsUnitContentLicenseV1.value} 보기`,
 		grantNotice:
 			"한 번 부여하면 철회할 수 없으며, 이 콘텐츠에 대한 이후 기여와 소유권 이전에도 계속 적용됩니다.",
+		confirmationLabel: `${verbatimTerms.rezicsUnitContentLicenseV1.value}을(를) 읽고 동의했으며, 이 콘텐츠에 이 라이선스를 부여할 권한이 있음을 확인합니다.`,
 		noneNotice:
 			"콘텐츠 라이선스가 부여되지 않습니다. 이 작품을 색인 항목으로만 사용하고 작품 콘텐츠를 게시하거나 호스팅하지 않을 때만 ‘없음’을 선택하세요.",
 		noneConfirmationTitle: `${verbatimTerms.rezics.value} 콘텐츠 라이선스 없이 만드시겠습니까?`,

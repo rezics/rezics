@@ -37,6 +37,7 @@ export default {
 		viewTerms: `${verbatimTerms.rezicsUnitContentLicenseV1.value} を見る`,
 		grantNotice:
 			"一度付与すると撤回できず、このコンテンツへの今後の貢献と所有権の移転にも引き続き適用されます。",
+		confirmationLabel: `${verbatimTerms.rezicsUnitContentLicenseV1.value}を読み、同意したうえで、このコンテンツについてこのライセンスを付与する権限があることを確認します。`,
 		noneNotice:
 			"コンテンツライセンスは付与されません。この作品を索引項目としてのみ使用し、作品のコンテンツを公開またはホストしない場合に限り「なし」を選択してください。",
 		noneConfirmationTitle: `${verbatimTerms.rezics.value} へのコンテンツライセンスなしで作成しますか？`,

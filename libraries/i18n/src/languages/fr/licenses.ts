@@ -37,6 +37,7 @@ export default {
 		viewTerms: `Consulter ${verbatimTerms.rezicsUnitContentLicenseV1.value}`,
 		grantNotice:
 			"Une fois accordée, cette licence ne peut plus être révoquée et continue de couvrir les contributions ultérieures et les transferts de propriété.",
+		confirmationLabel: `J’ai lu et j’accepte la ${verbatimTerms.rezicsUnitContentLicenseV1.value}. Je confirme également être habilité à accorder cette licence pour ce contenu.`,
 		noneNotice:
 			"Aucune licence de contenu ne sera accordée. Choisissez « Aucune » uniquement si cette œuvre sert d’entrée d’index et si son contenu ne sera ni publié ni hébergé.",
 		noneConfirmationTitle: `Créer sans licence de contenu pour ${verbatimTerms.rezics.value} ?`,

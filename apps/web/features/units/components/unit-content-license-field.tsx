@@ -17,6 +17,7 @@ import {
 	AlertDialogTitle,
 	Badge,
 	Button,
+	Checkbox,
 	Field,
 	FieldDescription,
 	FieldLabel,
@@ -27,7 +28,7 @@ import {
 	NativeSelectOption,
 } from "@rezics/ui";
 import { CircleHelp } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import { unitContentLicenseHref } from "../model/unit-content-license";
@@ -94,7 +95,10 @@ export function UnitContentLicenseField(props: UnitContentLicenseFieldProps) {
 	const [selectedSlug, setSelectedSlug] = useState<UnitContentLicenseSlug | null>(() =>
 		props.context === "create" ? CurrentUnitContentLicenseSlug : props.grantedSlug,
 	);
+	const [licenseConfirmed, setLicenseConfirmed] = useState(false);
 	const [pendingChange, setPendingChange] = useState<PendingContentLicenseChange | null>(null);
+	const confirmationInputId = useId();
+	const confirmationLabelId = useId();
 	const committedSlug = existingGrant ?? selectedSlug;
 	const referenceSlug =
 		existingGrant ??
@@ -138,8 +142,10 @@ export function UnitContentLicenseField(props: UnitContentLicenseFieldProps) {
 					onChange={(event) => {
 						const selection = event.currentTarget.value;
 						if (isUnitContentLicenseSlug(selection)) {
-							if (props.context === "create") setSelectedSlug(selection);
-							else setPendingChange({ kind: "grant", slug: selection });
+							if (props.context === "create") {
+								setSelectedSlug(selection);
+								setLicenseConfirmed(false);
+							} else setPendingChange({ kind: "grant", slug: selection });
 							return;
 						}
 						if (props.context === "create" && selectedSlug !== null)
@@ -163,6 +169,25 @@ export function UnitContentLicenseField(props: UnitContentLicenseFieldProps) {
 							: t.licenses.unitContent.noneNotice}
 				</FieldDescription>
 			</Field>
+			{committedSlug ? (
+				<Field className="w-auto" orientation="horizontal" required>
+					<Checkbox
+						aria-labelledby={confirmationLabelId}
+						checked={licenseConfirmed}
+						ids={{ hiddenInput: confirmationInputId }}
+						name="contentLicenseConfirmation"
+						onCheckedChange={({ checked }) => setLicenseConfirmed(checked === true)}
+						required
+					/>
+					<FieldLabel
+						className="font-normal"
+						htmlFor={confirmationInputId}
+						id={confirmationLabelId}
+					>
+						{t.licenses.unitContent.confirmationLabel}
+					</FieldLabel>
+				</Field>
+			) : null}
 			<AlertDialog
 				onOpenChange={(open) => {
 					if (!open) setPendingChange(null);
@@ -195,9 +220,14 @@ export function UnitContentLicenseField(props: UnitContentLicenseFieldProps) {
 						</AlertDialogCancel>
 						<AlertDialogAction
 							onClick={() => {
-								if (pendingChange?.kind === "grant")
+								if (pendingChange?.kind === "grant") {
 									setSelectedSlug(pendingChange.slug);
-								if (pendingChange?.kind === "select-none") setSelectedSlug(null);
+									setLicenseConfirmed(false);
+								}
+								if (pendingChange?.kind === "select-none") {
+									setSelectedSlug(null);
+									setLicenseConfirmed(false);
+								}
 								setPendingChange(null);
 							}}
 						>
