@@ -13,12 +13,14 @@ The site publishes six locale-prefixed editions:
 /{locale}/uses/
 /{locale}/products/
 /{locale}/products/[slug]/
+/{locale}/legal/[slug]/
 ```
 
 The supported locales are `zh-hant`, `zh-hans`, `en`, `ja`, `de`, and `ko`.
-The v1 `/zh-hant/contact-us/` route remains supported. Missing non-default
-product translations and contact editions redirect to the default `zh-hant`
-content. Cloudflare Pages middleware negotiates `Accept-Language` only for
+The default locale is `en`, and the Unit content license is currently published
+in English. Missing non-default product, legal, and contact editions redirect
+to the default English content. Cloudflare Pages middleware negotiates
+`Accept-Language` only for
 supported routes without a locale prefix.
 
 ## Architecture

@@ -12,6 +12,7 @@ import {
 	getContactPath,
 	getHomePath,
 	getHowItWorksPath,
+	getLegalPath,
 	getProductPath,
 	getProductsPath,
 	getUsesPath,
@@ -66,9 +67,32 @@ if (
 ) {
 	throw new Error("The default locale must include every registered product.");
 }
+const legalFilesByLocale = new Map(
+	await Promise.all(
+		ABOUT_LOCALES.map(async (locale) => {
+			try {
+				const files = await readdir(join(localeContentRoot, locale, "legal"));
+				return [
+					locale,
+					files
+						.filter((file) => file.endsWith(".mdx"))
+						.map((file) => file.replace(/\.mdx$/, "")),
+				] as const;
+			} catch {
+				return [locale, [] as string[]] as const;
+			}
+		}),
+	),
+);
+const legalSlugs = [...new Set([...legalFilesByLocale.values()].flat())];
+const legalDocumentCount = [...legalFilesByLocale.values()].reduce(
+	(count, slugs) => count + slugs.length,
+	0,
+);
 const expectedUrlCount =
 	ABOUT_LOCALES.length * 4 +
 	[...productIdsByLocale.values()].reduce((count, productIds) => count + productIds.length, 0) +
+	legalDocumentCount +
 	1;
 
 const sitemap = await readFile(join(distRoot, "sitemap.xml"), "utf8");
@@ -166,6 +190,25 @@ for (const locale of ABOUT_LOCALES) {
 		!html.includes(`rel="canonical" href="${contactCanonical}"`)
 	) {
 		throw new Error(`Missing ${locale} contact fallback redirect.`);
+	}
+}
+
+for (const slug of legalSlugs) {
+	for (const locale of ABOUT_LOCALES) {
+		const html = await readOutput(getLegalPath(locale, slug));
+		const hasDocument = legalFilesByLocale.get(locale)?.includes(slug) ?? false;
+		if (hasDocument) {
+			const canonical = new URL(getLegalPath(locale, slug), ABOUT_SITE_ORIGIN).toString();
+			if (!html.includes(`rel="canonical" href="${canonical}"`)) {
+				throw new Error(`Missing canonical ${canonical} in legal document ${slug}.`);
+			}
+			continue;
+		}
+
+		const fallbackPath = getLegalPath(DEFAULT_LOCALE, slug);
+		if (locale === DEFAULT_LOCALE || !html.includes(`url=${fallbackPath}`)) {
+			throw new Error(`Missing ${locale} legal fallback redirect for ${slug}.`);
+		}
 	}
 }
 

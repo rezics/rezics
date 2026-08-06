@@ -50,9 +50,7 @@ describe("Cloudflare language redirects", () => {
 		const response = await onRequest(requestContext);
 
 		expect(response.status).toBe(302);
-		expect(response.headers.get("location")).toBe(
-			"https://about.rezics.com/zh-hant/contact-us/",
-		);
+		expect(response.headers.get("location")).toBe("https://about.rezics.com/en/contact-us/");
 	});
 
 	test("passes canonical pages through", async () => {

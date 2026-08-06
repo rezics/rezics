@@ -677,6 +677,39 @@ img {
 	color: color-mix(in srgb, var(--foreground) 86%, var(--muted-foreground));
 }
 
+.legal-body {
+	padding-block: clamp(5rem, 10vw, 9rem);
+}
+
+.legal-body .prose {
+	max-width: var(--reading-max);
+	margin: 0 auto;
+	font-size: 1.02rem;
+	line-height: 1.8;
+}
+
+.legal-body .prose h1 {
+	margin: 0 0 2.5rem;
+	font-family: var(--rezics-font-heading);
+	font-size: clamp(2.8rem, 7vw, 5.5rem);
+	font-weight: 700;
+	line-height: 1;
+	letter-spacing: -0.045em;
+}
+
+.legal-body .prose h2 {
+	margin: 3rem 0 1rem;
+	padding-bottom: 0.75rem;
+	border-bottom: 1px solid var(--border-weak);
+	font-size: 1.7rem;
+	line-height: 1.2;
+}
+
+.legal-body .prose li,
+.legal-body .prose p {
+	color: color-mix(in srgb, var(--foreground) 86%, var(--muted-foreground));
+}
+
 .product-aside {
 	position: sticky;
 	top: 7rem;

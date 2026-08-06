@@ -2,12 +2,12 @@ export const ABOUT_LOCALES = ["zh-hant", "zh-hans", "en", "ja", "de", "ko"] as c
 
 export type AboutLocale = (typeof ABOUT_LOCALES)[number];
 
-export const DEFAULT_LOCALE = "zh-hant" as const satisfies AboutLocale;
+export const DEFAULT_LOCALE = "en" as const satisfies AboutLocale;
 export type FallbackLocale = Exclude<AboutLocale, typeof DEFAULT_LOCALE>;
 
 export const ABOUT_LOCALE_FALLBACKS = {
+	"zh-hant": DEFAULT_LOCALE,
 	"zh-hans": DEFAULT_LOCALE,
-	en: DEFAULT_LOCALE,
 	ja: DEFAULT_LOCALE,
 	de: DEFAULT_LOCALE,
 	ko: DEFAULT_LOCALE,

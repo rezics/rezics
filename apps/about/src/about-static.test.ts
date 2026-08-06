@@ -22,6 +22,7 @@ import {
 	getContactPath,
 	getHomePath,
 	getHowItWorksPath,
+	getLegalPath,
 	getProductPath,
 	getProductsPath,
 	getUsesPath,
@@ -95,12 +96,13 @@ describe("public content contract", () => {
 		expect(getUsesPath("en")).toBe("/en/uses/");
 		expect(getProductsPath("en")).toBe("/en/products/");
 		expect(getProductPath("en", "unit")).toBe("/en/products/unit/");
-		expect(getContactPath()).toBe("/zh-hant/contact-us/");
-		expect(getAlternatePaths("contact")).toEqual([
-			{ locale: "zh-hant", path: "/zh-hant/contact-us/" },
-		]);
+		expect(getLegalPath("en", "rezics-unit-content-license-v1")).toBe(
+			"/en/legal/rezics-unit-content-license-v1/",
+		);
+		expect(getContactPath()).toBe("/en/contact-us/");
+		expect(getAlternatePaths("contact")).toEqual([{ locale: "en", path: "/en/contact-us/" }]);
 		expect(getAlternatePaths("product", "unit")).toHaveLength(ABOUT_LOCALES.length);
-		expect(getAboutLocaleFallback("en")).toBe(DEFAULT_LOCALE);
+		expect(getAboutLocaleFallback("zh-hant")).toBe(DEFAULT_LOCALE);
 		expect(getAboutLocaleFallback(DEFAULT_LOCALE)).toBeUndefined();
 	});
 });
