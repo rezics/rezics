@@ -5,6 +5,7 @@ import Elysia, { t } from "elysia";
 import session from "../../auth/session";
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
+import { estimateCount } from "../../counts/contract";
 import { firstUnitLocalizationTitle } from "../../units/localization";
 import {
 	conversation,
@@ -114,6 +115,7 @@ export default new Elysia({ prefix: "/messages" })
 						where m.id = ${conversationParticipantStat.lastMessageId}
 					)`,
 					unreadCount: conversationParticipantStat.unreadCount,
+					aggregateUpdatedAt: conversationParticipantStat.updatedAt,
 					createdAt: conversation.createdAt,
 					updatedAt: conversationParticipantStat.sortAt,
 					sortAt: conversationParticipantStat.sortAt,
@@ -139,9 +141,12 @@ export default new Elysia({ prefix: "/messages" })
 			const page = candidates.slice(0, limit);
 			const last = page.at(-1);
 			return {
-				items: page.map(({ sortAt: _, ...item }) => ({
+				items: page.map(({ sortAt: _, aggregateUpdatedAt, ...item }) => ({
 					...item,
-					unreadCount: toSafeInteger(item.unreadCount, "conversation unread count"),
+					unreadCount: estimateCount(
+						toSafeInteger(item.unreadCount, "conversation unread count"),
+						aggregateUpdatedAt,
+					),
 				})),
 				nextCursor:
 					candidates.length > limit && last
@@ -251,6 +256,7 @@ export default new Elysia({ prefix: "/messages" })
 						where m.id = ${conversationParticipantStat.lastMessageId}
 					)`,
 					unreadCount: conversationParticipantStat.unreadCount,
+					aggregateUpdatedAt: conversationParticipantStat.updatedAt,
 					createdAt: conversation.createdAt,
 					updatedAt: conversationParticipantStat.sortAt,
 				})
@@ -268,9 +274,13 @@ export default new Elysia({ prefix: "/messages" })
 				)
 				.limit(1);
 			if (!row) throw new ConversationNotFound();
+			const { aggregateUpdatedAt, unreadCount, ...conversationRow } = row;
 			return {
-				...row,
-				unreadCount: toSafeInteger(row.unreadCount, "conversation unread count"),
+				...conversationRow,
+				unreadCount: estimateCount(
+					toSafeInteger(unreadCount, "conversation unread count"),
+					aggregateUpdatedAt,
+				),
 			};
 		},
 		{

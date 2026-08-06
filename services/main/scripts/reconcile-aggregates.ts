@@ -239,23 +239,6 @@ const checks: readonly { name: string; query: SQL }[] = [
 		`,
 	},
 	{
-		name: "notification_recipient_stat",
-		query: sql`
-			with expected as (
-				select profile.id as profile_id,
-					count(notification.id) filter (
-						where notification.in_app_visible and notification.read_at is null
-					) as unread_count
-				from profile left join notification on notification.recipient_profile_id = profile.id
-				group by profile.id
-			)
-			select count(*)::text as drift_count from expected
-			full join notification_recipient_stat using (profile_id)
-			where expected.profile_id is null or notification_recipient_stat.profile_id is null
-				or expected.unread_count is distinct from notification_recipient_stat.unread_count
-		`,
-	},
-	{
 		name: "realm_unit_moderation_stat",
 		query: sql`
 			with expected as (
@@ -440,8 +423,7 @@ const checks: readonly { name: string; query: SQL }[] = [
 			), participant_expected as (
 				select conversation.id as conversation_id, participant.profile_id,
 					latest.id as last_message_id, latest.created_at as last_message_at,
-					coalesce(latest.created_at, conversation.created_at) as sort_at,
-					count(unread.id) filter (where unread.id is not null) as unread_count
+					coalesce(latest.created_at, conversation.created_at) as sort_at
 				from conversation
 				cross join lateral (values (conversation.participant_low_profile_id),
 					(conversation.participant_high_profile_id)) participant(profile_id)
@@ -449,6 +431,51 @@ const checks: readonly { name: string; query: SQL }[] = [
 					select id, created_at from message where conversation_id = conversation.id
 					order by created_at desc, id desc limit 1
 				) latest on true
+			), participant_drift as (
+				select 1 from participant_expected
+				full join conversation_participant_stat using (conversation_id, profile_id)
+				where participant_expected.conversation_id is null
+					or conversation_participant_stat.conversation_id is null
+					or row(participant_expected.last_message_id,
+						participant_expected.last_message_at, participant_expected.sort_at) is distinct from
+						row(conversation_participant_stat.last_message_id,
+						conversation_participant_stat.last_message_at,
+						conversation_participant_stat.sort_at)
+			)
+			select ((select count(*) from conversation_drift) +
+				(select count(*) from participant_drift))::text as drift_count
+		`,
+	},
+];
+
+/** Unread counters are estimates; report their drift without failing reconciliation. */
+const advisoryChecks: readonly { name: string; query: SQL }[] = [
+	{
+		name: "notification_unread_count",
+		query: sql`
+			with expected as (
+				select profile.id as profile_id,
+					count(notification.id) filter (
+						where notification.in_app_visible and notification.read_at is null
+					) as unread_count
+				from profile left join notification on notification.recipient_profile_id = profile.id
+				group by profile.id
+			)
+			select count(*)::text as drift_count from expected
+			full join notification_recipient_stat using (profile_id)
+			where expected.profile_id is null or notification_recipient_stat.profile_id is null
+				or expected.unread_count is distinct from notification_recipient_stat.unread_count
+		`,
+	},
+	{
+		name: "conversation_unread_count",
+		query: sql`
+			with expected as (
+				select conversation.id as conversation_id, participant.profile_id,
+					count(unread.id) filter (where unread.id is not null) as unread_count
+				from conversation
+				cross join lateral (values (conversation.participant_low_profile_id),
+					(conversation.participant_high_profile_id)) participant(profile_id)
 				left join conversation_read read_state
 					on read_state.conversation_id = conversation.id
 					and read_state.profile_id = participant.profile_id
@@ -458,23 +485,12 @@ const checks: readonly { name: string; query: SQL }[] = [
 					and unread.deleted_at is null
 					and (marker.id is null or (unread.created_at, unread.id) >
 						(marker.created_at, marker.id))
-				group by conversation.id, participant.profile_id, latest.id, latest.created_at,
-					conversation.created_at
-			), participant_drift as (
-				select 1 from participant_expected
-				full join conversation_participant_stat using (conversation_id, profile_id)
-				where participant_expected.conversation_id is null
-					or conversation_participant_stat.conversation_id is null
-					or row(participant_expected.last_message_id,
-						participant_expected.last_message_at, participant_expected.sort_at,
-						participant_expected.unread_count) is distinct from
-						row(conversation_participant_stat.last_message_id,
-							conversation_participant_stat.last_message_at,
-							conversation_participant_stat.sort_at,
-							conversation_participant_stat.unread_count)
+				group by conversation.id, participant.profile_id
 			)
-			select ((select count(*) from conversation_drift) +
-				(select count(*) from participant_drift))::text as drift_count
+			select count(*)::text as drift_count from expected
+			full join conversation_participant_stat using (conversation_id, profile_id)
+			where expected.conversation_id is null or conversation_participant_stat.conversation_id is null
+				or expected.unread_count is distinct from conversation_participant_stat.unread_count
 		`,
 	},
 ];
@@ -489,6 +505,14 @@ try {
 			`${check.name}: ${driftCount} drifted rows (${Math.round(performance.now() - startedAt)} ms)`,
 		);
 		drifted ||= driftCount > 0;
+	}
+	for (const check of advisoryChecks) {
+		const startedAt = performance.now();
+		const result = await database.execute<{ drift_count: string }>(check.query);
+		const driftCount = toSafeInteger(result.rows[0]?.drift_count ?? "0", check.name);
+		const message = `${check.name} (advisory): ${driftCount} drifted rows (${Math.round(performance.now() - startedAt)} ms)`;
+		if (driftCount > 0) console.warn(message);
+		else console.info(message);
 	}
 	if (drifted) throw new Error("Aggregate reconciliation found drift");
 } finally {

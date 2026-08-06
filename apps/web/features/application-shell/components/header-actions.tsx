@@ -6,7 +6,11 @@ import { useGetApiNotificationsUnreadCount } from "@rezics/openapi-tanstack-quer
 import { Button, ChoiceSelect, Skeleton } from "@rezics/ui";
 import { Bell, Plus } from "lucide-react";
 
-import { normalizeUnreadCount } from "@/features/notifications/model/unread-count";
+import {
+	formatUnreadCount,
+	isEstimatedUnreadCount,
+	normalizeUnreadCount,
+} from "@/features/notifications/model/unread-count";
 import { NotificationsHref } from "@/features/notifications/routing/notification-routes";
 import { useTranslation } from "@/i18n/client";
 import { AppLink } from "./app-link";
@@ -58,10 +62,13 @@ function NotificationAction() {
 	const unread = useGetApiNotificationsUnreadCount({
 		query: { refetchInterval: 60_000 },
 	});
-	const count = normalizeUnreadCount(unread.data?.count);
-	const badge = count > 99 ? "99+" : String(count);
+	const unreadCount = unread.data?.count;
+	const count = normalizeUnreadCount(unreadCount);
+	const badge = formatUnreadCount(unreadCount);
 	const label = count
-		? t.notifications.center.headerUnreadLabel({ count })
+		? isEstimatedUnreadCount(unreadCount)
+			? t.notifications.center.headerUnreadEstimateLabel({ count })
+			: t.notifications.center.headerUnreadLabel({ count })
 		: t.notifications.center.headerLabel;
 
 	return (

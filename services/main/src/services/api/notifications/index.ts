@@ -8,6 +8,7 @@ import { toUiLocale } from "@rezics/i18n";
 import session from "../../auth/session";
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
+import { estimateCount } from "../../counts/contract";
 import { firstUnitLocalizationTitle } from "../../units/localization";
 import {
 	notification,
@@ -183,7 +184,10 @@ export default new Elysia({ prefix: "/notifications" })
 				};
 			});
 			const [unread] = await database
-				.select({ value: notificationRecipientStat.unreadCount })
+				.select({
+					value: notificationRecipientStat.unreadCount,
+					updatedAt: notificationRecipientStat.updatedAt,
+				})
 				.from(notificationRecipientStat)
 				.where(eq(notificationRecipientStat.profileId, profile.unitId))
 				.limit(1);
@@ -208,7 +212,10 @@ export default new Elysia({ prefix: "/notifications" })
 							unreadOnly,
 						})
 					: (query.cursor ?? null),
-				unreadCount: toSafeInteger(unread?.value ?? 0n, "notification unread count"),
+				unreadCount: estimateCount(
+					toSafeInteger(unread?.value ?? 0n, "notification unread count"),
+					unread?.updatedAt ?? new Date(),
+				),
 			};
 		},
 		{
@@ -225,12 +232,18 @@ export default new Elysia({ prefix: "/notifications" })
 		"/unread-count",
 		async ({ profile }) => {
 			const [row] = await database
-				.select({ value: notificationRecipientStat.unreadCount })
+				.select({
+					value: notificationRecipientStat.unreadCount,
+					updatedAt: notificationRecipientStat.updatedAt,
+				})
 				.from(notificationRecipientStat)
 				.where(eq(notificationRecipientStat.profileId, profile.unitId))
 				.limit(1);
 			return {
-				count: toSafeInteger(row?.value ?? 0n, "notification unread count"),
+				count: estimateCount(
+					toSafeInteger(row?.value ?? 0n, "notification unread count"),
+					row?.updatedAt ?? new Date(),
+				),
 			};
 		},
 		{

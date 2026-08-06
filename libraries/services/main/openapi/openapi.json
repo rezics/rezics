@@ -13348,13 +13348,59 @@
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
 										"unreadCount": {
+											"$id": "CountResult",
 											"anyOf": [
 												{
-													"format": "integer",
-													"default": 0,
-													"type": "string"
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value"],
+													"properties": {
+														"kind": {
+															"const": "exact",
+															"type": "string"
+														},
+														"value": { "minimum": 0, "type": "integer" }
+													}
 												},
-												{ "type": "integer" }
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value", "asOf"],
+													"properties": {
+														"kind": {
+															"const": "estimate",
+															"type": "string"
+														},
+														"value": {
+															"minimum": 0,
+															"type": "integer"
+														},
+														"asOf": {
+															"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+															"type": "string"
+														},
+														"modifiedSinceAnalyze": {
+															"minimum": 0,
+															"type": "integer"
+														},
+														"relativeError": {
+															"minimum": 0,
+															"type": "number"
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value"],
+													"properties": {
+														"kind": {
+															"const": "lower-bound",
+															"type": "string"
+														},
+														"value": { "minimum": 0, "type": "integer" }
+													}
+												}
 											]
 										}
 									}
@@ -13464,13 +13510,59 @@
 									"required": ["count"],
 									"properties": {
 										"count": {
+											"$id": "CountResult",
 											"anyOf": [
 												{
-													"format": "integer",
-													"default": 0,
-													"type": "string"
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value"],
+													"properties": {
+														"kind": {
+															"const": "exact",
+															"type": "string"
+														},
+														"value": { "minimum": 0, "type": "integer" }
+													}
 												},
-												{ "type": "integer" }
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value", "asOf"],
+													"properties": {
+														"kind": {
+															"const": "estimate",
+															"type": "string"
+														},
+														"value": {
+															"minimum": 0,
+															"type": "integer"
+														},
+														"asOf": {
+															"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+															"type": "string"
+														},
+														"modifiedSinceAnalyze": {
+															"minimum": 0,
+															"type": "integer"
+														},
+														"relativeError": {
+															"minimum": 0,
+															"type": "number"
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value"],
+													"properties": {
+														"kind": {
+															"const": "lower-bound",
+															"type": "string"
+														},
+														"value": { "minimum": 0, "type": "integer" }
+													}
+												}
 											]
 										}
 									}
@@ -20230,13 +20322,69 @@
 														]
 													},
 													"unreadCount": {
+														"$id": "CountResult",
 														"anyOf": [
 															{
-																"format": "integer",
-																"default": 0,
-																"type": "string"
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["kind", "value"],
+																"properties": {
+																	"kind": {
+																		"const": "exact",
+																		"type": "string"
+																	},
+																	"value": {
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																}
 															},
-															{ "type": "integer" }
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"kind",
+																	"value",
+																	"asOf"
+																],
+																"properties": {
+																	"kind": {
+																		"const": "estimate",
+																		"type": "string"
+																	},
+																	"value": {
+																		"minimum": 0,
+																		"type": "integer"
+																	},
+																	"asOf": {
+																		"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+																		"type": "string"
+																	},
+																	"modifiedSinceAnalyze": {
+																		"minimum": 0,
+																		"type": "integer"
+																	},
+																	"relativeError": {
+																		"minimum": 0,
+																		"type": "number"
+																	}
+																}
+															},
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["kind", "value"],
+																"properties": {
+																	"kind": {
+																		"const": "lower-bound",
+																		"type": "string"
+																	},
+																	"value": {
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																}
+															}
 														]
 													},
 													"createdAt": {
@@ -20574,13 +20722,59 @@
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
 										"unreadCount": {
+											"$id": "CountResult",
 											"anyOf": [
 												{
-													"format": "integer",
-													"default": 0,
-													"type": "string"
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value"],
+													"properties": {
+														"kind": {
+															"const": "exact",
+															"type": "string"
+														},
+														"value": { "minimum": 0, "type": "integer" }
+													}
 												},
-												{ "type": "integer" }
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value", "asOf"],
+													"properties": {
+														"kind": {
+															"const": "estimate",
+															"type": "string"
+														},
+														"value": {
+															"minimum": 0,
+															"type": "integer"
+														},
+														"asOf": {
+															"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?Z$",
+															"type": "string"
+														},
+														"modifiedSinceAnalyze": {
+															"minimum": 0,
+															"type": "integer"
+														},
+														"relativeError": {
+															"minimum": 0,
+															"type": "number"
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "value"],
+													"properties": {
+														"kind": {
+															"const": "lower-bound",
+															"type": "string"
+														},
+														"value": { "minimum": 0, "type": "integer" }
+													}
+												}
 											]
 										},
 										"createdAt": { "format": "date-time", "type": "string" },

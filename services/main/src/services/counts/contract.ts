@@ -29,6 +29,7 @@ export const CountResultSchema = Type.Union(
 	{ $id: "CountResult" },
 );
 export type CountResult = Static<typeof CountResultSchema>;
+export type EstimateCount = Static<typeof EstimateCountSchema>;
 
 /** Search/facet counts can be exact only after exhaustion; they are never estimates. */
 export const SearchCountResultSchema = Type.Union([ExactCountSchema, LowerBoundCountSchema], {
@@ -44,6 +45,13 @@ export function exactCount(value: number): CountResult {
 export function lowerBoundCount(value: number): CountResult {
 	assertCountValue(value);
 	return { kind: "lower-bound", value };
+}
+
+export function estimateCount(value: number, asOf: Date): EstimateCount {
+	assertCountValue(value);
+	if (Number.isNaN(asOf.getTime()))
+		throw new RangeError("Count estimate timestamp must be valid");
+	return { kind: "estimate", value, asOf: asOf.toISOString() };
 }
 
 export function parseCountResult(value: unknown): CountResult {

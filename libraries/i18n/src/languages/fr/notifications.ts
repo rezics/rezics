@@ -13,6 +13,9 @@ export default {
 			"Consultez les activités récentes et les mises à jour système qui demandent votre attention.",
 		headerLabel: "Notifications",
 		headerUnreadLabel: insert("Notifications, {{count}} non lues", { count: Number }),
+		headerUnreadEstimateLabel: insert("Notifications, environ {{count}} non lues", {
+			count: Number,
+		}),
 		receivedInvitations: "Invitations d’accès reçues",
 		invitationsDescription:
 			"Consultez les invitations à accéder à une Unit envoyées par d’autres personnes et répondez-y.",

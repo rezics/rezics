@@ -12,6 +12,7 @@ export default {
 		description: "查看需要你留意的最新活動與系統更新。",
 		headerLabel: "通知",
 		headerUnreadLabel: insert("通知，{{count}} 則未讀", { count: Number }),
+		headerUnreadEstimateLabel: insert("通知，約 {{count}} 則未讀", { count: Number }),
 		receivedInvitations: "收到的存取邀請",
 		invitationsDescription: "檢視並回應其他使用者傳送給你的條目存取邀請。",
 		backToNotifications: "返回通知",

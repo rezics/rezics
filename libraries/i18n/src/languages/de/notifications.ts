@@ -13,6 +13,9 @@ export default {
 			"Prüfe aktuelle Aktivitäten und Systemmeldungen, die deine Aufmerksamkeit erfordern.",
 		headerLabel: "Benachrichtigungen",
 		headerUnreadLabel: insert("Benachrichtigungen, {{count}} ungelesen", { count: Number }),
+		headerUnreadEstimateLabel: insert("Benachrichtigungen, etwa {{count}} ungelesen", {
+			count: Number,
+		}),
 		receivedInvitations: "Erhaltene Zugriffseinladungen",
 		invitationsDescription:
 			"Prüfe und beantworte Einladungen anderer Personen zum Zugriff auf eine Unit.",

@@ -13,6 +13,9 @@ export default {
 			"Revisa la actividad reciente y las actualizaciones del sistema que requieran tu atención.",
 		headerLabel: "Notificaciones",
 		headerUnreadLabel: insert("Notificaciones, {{count}} sin leer", { count: Number }),
+		headerUnreadEstimateLabel: insert("Notificaciones, aproximadamente {{count}} sin leer", {
+			count: Number,
+		}),
 		receivedInvitations: "Invitaciones de acceso recibidas",
 		invitationsDescription:
 			"Revisa y responde a las invitaciones de otras personas para acceder a una Unit.",

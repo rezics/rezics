@@ -12,6 +12,7 @@ export default {
 		description: "あなたの注意が必要な最近のアクティビティとシステム更新を確認。",
 		headerLabel: "通知",
 		headerUnreadLabel: insert("通知、{{count}} 未読", { count: Number }),
+		headerUnreadEstimateLabel: insert("通知、未読約{{count}}件", { count: Number }),
 		receivedInvitations: "受け取ったアクセス招待",
 		invitationsDescription: "他の人から送られたユニットアクセスの招待を確認して応答。",
 		backToNotifications: "通知に戻る",

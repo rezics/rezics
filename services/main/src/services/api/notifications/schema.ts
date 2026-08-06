@@ -5,6 +5,7 @@ import {
 	ModerationActionKindValues,
 	NotificationKindValues,
 } from "../../database/schema/contract-values";
+import { CountResultSchema } from "../../counts/contract";
 import { DateTime, Uuid } from "../schema";
 
 export const NotificationCursorQuery = t.Object({
@@ -120,11 +121,11 @@ export const NotificationListResponse = t.Object({
 	items: t.Array(NotificationItemResponse),
 	nextCursor: t.Nullable(t.String()),
 	pollCursor: t.Nullable(t.String()),
-	unreadCount: t.Integer(),
+	unreadCount: CountResultSchema,
 });
 
 export const NotificationPreferencesResponse = t.Object({
 	items: t.Array(t.Object({ kind: t.String(), inApp: t.Boolean(), email: t.Boolean() })),
 });
 
-export const UnreadCountResponse = t.Object({ count: t.Integer() });
+export const UnreadCountResponse = t.Object({ count: CountResultSchema });

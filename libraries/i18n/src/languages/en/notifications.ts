@@ -12,6 +12,9 @@ export default {
 		description: "Review recent activity and system updates that need your attention.",
 		headerLabel: "Notifications",
 		headerUnreadLabel: insert("Notifications, {{count}} unread", { count: Number }),
+		headerUnreadEstimateLabel: insert("Notifications, about {{count}} unread", {
+			count: Number,
+		}),
 		receivedInvitations: "Received access invitations",
 		invitationsDescription:
 			"Review and respond to Unit access invitations sent to you by other people.",

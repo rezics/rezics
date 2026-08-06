@@ -12,6 +12,7 @@ export default {
 		description: "주의가 필요한 최근 활동 및 시스템 업데이트 검토.",
 		headerLabel: "알림",
 		headerUnreadLabel: insert("알림, {{count}} 읽지 않음", { count: Number }),
+		headerUnreadEstimateLabel: insert("알림, 약 {{count}}개 읽지 않음", { count: Number }),
 		receivedInvitations: "받은 접근 초대",
 		invitationsDescription: "다른 사람이 보낸 유닛 접근 초대 검토 및 응답.",
 		backToNotifications: "알림으로 돌아가기",

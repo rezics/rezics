@@ -8475,7 +8475,55 @@ export type GetApiNotificationsStatus200 = {
 	)[];
 	nextCursor: (string | null) | null;
 	pollCursor: (string | null) | null;
-	unreadCount: string | number;
+	unreadCount:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "exact";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "estimate";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+				/**
+				 * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$
+				 * @type string
+				 */
+				asOf: string;
+				/**
+				 * @minLength 0
+				 * @type integer | undefined
+				 */
+				modifiedSinceAnalyze?: number;
+				/**
+				 * @minLength 0
+				 * @type number | undefined
+				 */
+				relativeError?: number;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "lower-bound";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+		  };
 };
 
 /**
@@ -8583,7 +8631,55 @@ export type GetApiNotificationsResponse =
  * @type object
  */
 export type GetApiNotificationsUnreadCountStatus200 = {
-	count: string | number;
+	count:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "exact";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "estimate";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+				/**
+				 * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$
+				 * @type string
+				 */
+				asOf: string;
+				/**
+				 * @minLength 0
+				 * @type integer | undefined
+				 */
+				modifiedSinceAnalyze?: number;
+				/**
+				 * @minLength 0
+				 * @type number | undefined
+				 */
+				relativeError?: number;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "lower-bound";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+		  };
 };
 
 export const GetApiNotificationsUnreadCountStatus429ErrorCodeEnum = {
@@ -12836,7 +12932,55 @@ export type GetApiMessagesConversationsStatus200 = {
 		otherUserName: (string | null) | null;
 		lastMessageAt: (string | null) | null;
 		lastMessage: (string | null) | null;
-		unreadCount: string | number;
+		unreadCount:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "exact";
+					/**
+					 * @minLength 0
+					 * @type integer
+					 */
+					value: number;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "estimate";
+					/**
+					 * @minLength 0
+					 * @type integer
+					 */
+					value: number;
+					/**
+					 * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$
+					 * @type string
+					 */
+					asOf: string;
+					/**
+					 * @minLength 0
+					 * @type integer | undefined
+					 */
+					modifiedSinceAnalyze?: number;
+					/**
+					 * @minLength 0
+					 * @type number | undefined
+					 */
+					relativeError?: number;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "lower-bound";
+					/**
+					 * @minLength 0
+					 * @type integer
+					 */
+					value: number;
+			  };
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -13177,7 +13321,55 @@ export type GetApiMessagesConversationsByConversationIdStatus200 = {
 	otherUserName: (string | null) | null;
 	lastMessageAt: (string | null) | null;
 	lastMessage: (string | null) | null;
-	unreadCount: string | number;
+	unreadCount:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "exact";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "estimate";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+				/**
+				 * @pattern ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$
+				 * @type string
+				 */
+				asOf: string;
+				/**
+				 * @minLength 0
+				 * @type integer | undefined
+				 */
+				modifiedSinceAnalyze?: number;
+				/**
+				 * @minLength 0
+				 * @type number | undefined
+				 */
+				relativeError?: number;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "lower-bound";
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				value: number;
+		  };
 	/**
 	 * @description
 	 * Format: `date-time`

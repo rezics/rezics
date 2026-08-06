@@ -1,5 +1,6 @@
 import { t } from "elysia";
 
+import { CountResultSchema } from "../../counts/contract";
 import { DateTime, Uuid } from "../schema";
 
 export const MessageCursorQuery = t.Object({
@@ -22,7 +23,7 @@ export const ConversationResponse = t.Object({
 	otherUserName: t.Nullable(t.String()),
 	lastMessageAt: t.Nullable(DateTime),
 	lastMessage: t.Nullable(t.String()),
-	unreadCount: t.Integer(),
+	unreadCount: CountResultSchema,
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
