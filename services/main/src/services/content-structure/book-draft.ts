@@ -19,6 +19,7 @@ import {
 import { isFirstUnitLocalization } from "../units/localization";
 import { insertUnit } from "../units/create";
 import { ensureSubjectPostTargetingAllowed } from "../posts/targeting";
+import { shouldCreateProfilePublisherAttributionForPost } from "../posts/attribution-policy";
 import { applyNewPostTagMentionVotes } from "../posts/tag-mentions";
 import { createProfilePublisherAttribution } from "../units/attribution";
 import { recordUnitRevision } from "../units/history";
@@ -106,7 +107,7 @@ async function createBookDraftContentUnit(
 		});
 	if (ownershipMode === "community_owned") await createPublicEditableUnitAccess(tx, created.id);
 	else await createProfileOwnedUnitAccess(tx, created.id, input.actorProfileId);
-	if (isChapter)
+	if (isChapter && shouldCreateProfilePublisherAttributionForPost(ownershipMode))
 		await createProfilePublisherAttribution(tx, {
 			sourceUnitId: created.id,
 			profileId: input.actorProfileId,

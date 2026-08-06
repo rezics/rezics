@@ -7,9 +7,9 @@ import {
 	createPublicEditableUnitAccess,
 	grantRealmAccessManagersUnitGovernance,
 } from "../authorization/unit/ownership";
-import { OfficialProfileIds } from "../bootstrap/manifest";
 import type { DatabaseTransaction } from "../database";
 import { post, unitLocalization } from "../database/schema";
+import { shouldCreateProfilePublisherAttributionForPost } from "./attribution-policy";
 import { applyNewPostTagMentionVotes } from "./tag-mentions";
 import { publishPostToRealms } from "./publication";
 import { ensureSubjectPostTargetingAllowed } from "./targeting";
@@ -78,8 +78,9 @@ export async function createWikiPost(
 		profileId: input.profileId,
 		nextBody: input.body,
 	});
-	if (input.accessMode === "community_owned")
-		await createPublicEditableUnitAccess(tx, created.id);
+	const ownershipMode =
+		input.accessMode === "community_owned" ? "community_owned" : "profile_owned";
+	if (ownershipMode === "community_owned") await createPublicEditableUnitAccess(tx, created.id);
 	else await createProfileOwnedUnitAccess(tx, created.id, input.profileId);
 	if (input.governanceRealmId)
 		await grantRealmAccessManagersUnitGovernance(tx, {
@@ -87,11 +88,11 @@ export async function createWikiPost(
 			realmId: input.governanceRealmId,
 			grantedByProfileId: input.profileId,
 		});
-	await createProfilePublisherAttribution(tx, {
-		sourceUnitId: created.id,
-		profileId:
-			input.accessMode === "community_owned" ? OfficialProfileIds.community : input.profileId,
-	});
+	if (shouldCreateProfilePublisherAttributionForPost(ownershipMode))
+		await createProfilePublisherAttribution(tx, {
+			sourceUnitId: created.id,
+			profileId: input.profileId,
+		});
 	await publishPostToRealms(tx, {
 		postId: created.id,
 		realmIds: input.publishRealmIds,
