@@ -5,7 +5,7 @@ type JourneyCopy = CardCopy & { readonly result: string };
 type ActionCardCopy = CardCopy & { readonly action: string };
 
 export type MainPageId = "home" | "how" | "uses" | "products";
-export type PageId = MainPageId | "contact" | "legal";
+export type PageId = MainPageId | "contact" | "legal" | "docs";
 
 export type SiteCopy = {
 	readonly nav: {

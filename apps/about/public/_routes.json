@@ -10,7 +10,8 @@
 		"/products/*",
 		"/contact-us",
 		"/contact-us/",
-		"/legal/*"
+		"/legal/*",
+		"/docs/*"
 	],
 	"exclude": []
 }

@@ -1,5 +1,5 @@
 import { access, readdir, readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { join, relative, sep } from "node:path";
 
 import { PRODUCT_IDS, getProductById, isProductId } from "../src/content/productRegistry";
 import {
@@ -10,6 +10,7 @@ import {
 } from "../src/i18n/locales";
 import {
 	getContactPath,
+	getDocumentationPath,
 	getHomePath,
 	getHowItWorksPath,
 	getLegalPath,
@@ -39,6 +40,22 @@ async function outputExists(publicPath: string): Promise<boolean> {
 		return true;
 	} catch {
 		return false;
+	}
+}
+
+async function findMdxFiles(directory: string): Promise<readonly string[]> {
+	try {
+		const entries = await readdir(directory, { withFileTypes: true });
+		const files = await Promise.all(
+			entries.map(async (entry) => {
+				const entryPath = join(directory, entry.name);
+				if (entry.isDirectory()) return findMdxFiles(entryPath);
+				return entry.isFile() && entry.name.endsWith(".mdx") ? [entryPath] : [];
+			}),
+		);
+		return files.flat();
+	} catch {
+		return [];
 	}
 }
 
@@ -89,10 +106,33 @@ const legalDocumentCount = [...legalFilesByLocale.values()].reduce(
 	(count, slugs) => count + slugs.length,
 	0,
 );
+const documentationFilesByLocale = new Map(
+	await Promise.all(
+		ABOUT_LOCALES.map(async (locale) => {
+			const directory = join(localeContentRoot, locale, "docs");
+			const files = await findMdxFiles(directory);
+			return [
+				locale,
+				files.map((file) =>
+					relative(directory, file)
+						.replace(/\.mdx$/u, "")
+						.split(sep)
+						.join("/"),
+				),
+			] as const;
+		}),
+	),
+);
+const documentationSlugs = [...new Set([...documentationFilesByLocale.values()].flat())];
+const documentationDocumentCount = [...documentationFilesByLocale.values()].reduce(
+	(count, slugs) => count + slugs.length,
+	0,
+);
 const expectedUrlCount =
 	ABOUT_LOCALES.length * 4 +
 	[...productIdsByLocale.values()].reduce((count, productIds) => count + productIds.length, 0) +
 	legalDocumentCount +
+	documentationDocumentCount +
 	1;
 
 const sitemap = await readFile(join(distRoot, "sitemap.xml"), "utf8");
@@ -112,6 +152,7 @@ const expectedFunctionRoutes = [
 	"/contact-us",
 	"/contact-us/",
 	"/legal/*",
+	"/docs/*",
 ] as const;
 const functionRoutes = JSON.parse(
 	await readFile(join(distRoot, "_routes.json"), "utf8"),
@@ -209,6 +250,30 @@ for (const slug of legalSlugs) {
 		const fallbackPath = getLegalPath(DEFAULT_LOCALE, slug);
 		if (locale === DEFAULT_LOCALE || !html.includes(`url=${fallbackPath}`)) {
 			throw new Error(`Missing ${locale} legal fallback redirect for ${slug}.`);
+		}
+	}
+}
+
+for (const slug of documentationSlugs) {
+	for (const locale of ABOUT_LOCALES) {
+		const html = await readOutput(getDocumentationPath(locale, slug));
+		const hasDocument = documentationFilesByLocale.get(locale)?.includes(slug) ?? false;
+		if (hasDocument) {
+			const canonical = new URL(
+				getDocumentationPath(locale, slug),
+				ABOUT_SITE_ORIGIN,
+			).toString();
+			if (!html.includes(`rel="canonical" href="${canonical}"`)) {
+				throw new Error(
+					`Missing canonical ${canonical} in documentation document ${slug}.`,
+				);
+			}
+			continue;
+		}
+
+		const fallbackPath = getDocumentationPath(DEFAULT_LOCALE, slug);
+		if (locale === DEFAULT_LOCALE || !html.includes(`url=${fallbackPath}`)) {
+			throw new Error(`Missing ${locale} documentation fallback for ${slug}.`);
 		}
 	}
 }

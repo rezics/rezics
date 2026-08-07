@@ -20,6 +20,7 @@ import {
 import {
 	getAlternatePaths,
 	getContactPath,
+	getDocumentationPath,
 	getHomePath,
 	getHowItWorksPath,
 	getLegalPath,
@@ -99,6 +100,7 @@ describe("public content contract", () => {
 		expect(getLegalPath("en", "rezics-unit-content-license-v1")).toBe(
 			"/en/legal/rezics-unit-content-license-v1/",
 		);
+		expect(getDocumentationPath("en", "api/tokens")).toBe("/en/docs/api/tokens/");
 		expect(getContactPath()).toBe("/en/contact-us/");
 		expect(getAlternatePaths("contact")).toEqual([{ locale: "en", path: "/en/contact-us/" }]);
 		expect(getAlternatePaths("product", "unit")).toHaveLength(ABOUT_LOCALES.length);

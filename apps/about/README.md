@@ -14,6 +14,7 @@ The site publishes six locale-prefixed editions:
 /{locale}/products/
 /{locale}/products/[slug]/
 /{locale}/legal/[slug]/
+/{locale}/docs/[...slug]/
 ```
 
 The supported locales are `zh-hant`, `zh-hans`, `en`, `ja`, `de`, and `ko`.
@@ -28,9 +29,12 @@ supported routes without a locale prefix.
 - `src/content/locales/contract.ts` owns the typed About copy contract.
 - `src/content/locales/{locale}/content.ts` owns each locale's complete site copy.
 - `src/content/locales/{locale}/products/*.mdx` owns localized product documents.
+- `src/content/locales/{locale}/docs/**/*.mdx` owns localized documentation.
 - `src/content/productRegistry.ts` owns stable product identities and relations.
 - `src/content/productDocuments.ts` validates document path, locale, uniqueness,
   default-locale completeness, and localized availability.
+- `src/content/documentationDocuments.ts` validates documentation paths, locales,
+  uniqueness, and localized availability.
 - `src/pages/[locale]` contains canonical Astro routes.
 - `functions/_middleware.ts` handles request-time locale negotiation for
   unprefixed public routes.

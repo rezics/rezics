@@ -31,4 +31,16 @@ const legal = defineCollection({
 	}),
 });
 
-export const collections = { products, legal };
+const docs = defineCollection({
+	loader: glob({
+		base: "./src/content/locales",
+		pattern: "*/docs/**/*.mdx",
+	}),
+	schema: z.object({
+		locale: z.enum(ABOUT_LOCALES),
+		title: z.string().trim().min(1),
+		description: z.string().trim().min(1),
+	}),
+});
+
+export const collections = { products, legal, docs };

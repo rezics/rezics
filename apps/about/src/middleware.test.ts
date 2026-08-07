@@ -67,6 +67,20 @@ describe("Cloudflare language redirects", () => {
 		expect(response.headers.get("vary")).toBe("Accept-Language");
 	});
 
+	test("prefixes documentation pages without inspecting localized content availability", async () => {
+		const requestContext = context("/docs/api/tokens?from=test", {
+			headers: { "Accept-Language": "de-DE,de;q=0.9,en;q=0.7" },
+		});
+
+		const response = await onRequest(requestContext);
+
+		expect(response.status).toBe(302);
+		expect(response.headers.get("location")).toBe(
+			"https://about.rezics.com/de/docs/api/tokens/?from=test",
+		);
+		expect(response.headers.get("vary")).toBe("Accept-Language");
+	});
+
 	test("passes canonical pages through", async () => {
 		const requestContext = context("/en/products/unit/");
 
@@ -88,6 +102,7 @@ describe("Cloudflare language redirects", () => {
 		"/product",
 		"/en/products/catalog/",
 		"/products/not-registered",
+		"/docs",
 		"/images/rezics-official-realm.webp",
 	])("does not restore unsupported or pre-v1 path %s", async (path) => {
 		const requestContext = context(path);

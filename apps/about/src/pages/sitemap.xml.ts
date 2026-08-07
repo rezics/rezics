@@ -1,9 +1,11 @@
+import { getDocumentationDocuments } from "../content/documentationDocuments";
 import { getProductDocuments } from "../content/productDocuments";
 import { getLegalDocuments } from "../content/legalDocuments";
 import { ABOUT_LOCALES, DEFAULT_LOCALE } from "../i18n/locales";
 import {
 	getCanonicalForPath,
 	getContactPath,
+	getDocumentationPath,
 	getHomePath,
 	getHowItWorksPath,
 	getLegalPath,
@@ -20,6 +22,7 @@ export async function GET(): Promise<Response> {
 		})),
 	);
 	const legalDocuments = await getLegalDocuments();
+	const documentationDocuments = await getDocumentationDocuments();
 	const urls = productsByLocale.flatMap(({ locale, products }) =>
 		[
 			getHomePath(locale),
@@ -32,6 +35,11 @@ export async function GET(): Promise<Response> {
 	urls.push(
 		...legalDocuments.map(({ locale, slug }) =>
 			getCanonicalForPath(getLegalPath(locale, slug)),
+		),
+	);
+	urls.push(
+		...documentationDocuments.map(({ locale, slug }) =>
+			getCanonicalForPath(getDocumentationPath(locale, slug)),
 		),
 	);
 	urls.push(getCanonicalForPath(getContactPath(DEFAULT_LOCALE)));

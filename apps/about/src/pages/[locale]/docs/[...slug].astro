@@ -1,0 +1,50 @@
+---
+import { render } from "astro:content";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
+import {
+	getDocumentationDocument,
+	getDocumentationDocumentLocales,
+	getDocumentationDocuments,
+} from "../../../content/documentationDocuments";
+import { ABOUT_LOCALES, DEFAULT_LOCALE, requireAboutLocale } from "../../../i18n/locales";
+import SiteLayout from "../../../layouts/SiteLayout.astro";
+
+export async function getStaticPaths() {
+	const documents = await getDocumentationDocuments();
+	const slugs = [...new Set(documents.map(({ slug }) => slug))].sort();
+	return slugs.flatMap((slug) => ABOUT_LOCALES.map((locale) => ({ params: { locale, slug } })));
+}
+
+const locale = requireAboutLocale(Astro.params.locale);
+const slug = Astro.params.slug;
+if (!slug) throw new Error("Missing documentation slug.");
+
+const documentationDocument = await getDocumentationDocument(locale, slug);
+if (!documentationDocument) {
+	if (locale !== DEFAULT_LOCALE) return Astro.redirect(`/${DEFAULT_LOCALE}/docs/${slug}/`);
+	throw new Error(`Missing default documentation document: ${slug}`);
+}
+
+const { Content } = await render(documentationDocument.document);
+const alternateLocales = await getDocumentationDocumentLocales(slug);
+const meta = {
+	title: `${documentationDocument.document.data.title} — ${verbatimTerms.rezics.value}`,
+	description: documentationDocument.document.data.description,
+};
+---
+
+<SiteLayout
+  locale={locale}
+  active="docs"
+  pageKind="docs"
+  slug={slug}
+  alternateLocales={alternateLocales}
+  meta={meta}
+>
+  <div class="shell docs-body">
+    <article class="prose">
+      <Content />
+    </article>
+  </div>
+</SiteLayout>

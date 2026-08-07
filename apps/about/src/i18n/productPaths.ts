@@ -7,7 +7,8 @@ export type PublicPageKind =
 	| "products"
 	| "product"
 	| "contact"
-	| "legal";
+	| "legal"
+	| "docs";
 
 export type AlternatePath = {
 	readonly locale: AboutLocale;
@@ -38,6 +39,10 @@ export function getLegalPath(locale: AboutLocale, slug: string): string {
 	return `/${locale}/legal/${slug}/`;
 }
 
+export function getDocumentationPath(locale: AboutLocale, slug: string): string {
+	return `/${locale}/docs/${slug}/`;
+}
+
 export function getContactPath(locale: AboutLocale = DEFAULT_LOCALE): string {
 	return `/${locale}/contact-us/`;
 }
@@ -58,6 +63,9 @@ export function getLocalizedPath(locale: AboutLocale, kind: PublicPageKind, slug
 		case "legal":
 			if (!slug) throw new Error("A legal document slug is required.");
 			return getLegalPath(locale, slug);
+		case "docs":
+			if (!slug) throw new Error("A documentation slug is required.");
+			return getDocumentationPath(locale, slug);
 		case "contact":
 			return getContactPath(locale);
 	}

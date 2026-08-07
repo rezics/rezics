@@ -19,6 +19,7 @@ const publicEntryPaths: ReadonlySet<string> = new Set([
 ]);
 
 const legalDocumentPathPattern = /^\/legal\/[^/]+$/;
+const documentationPathPattern = /^\/docs\/[^/]+(?:\/[^/]+)*$/;
 
 function normalizePathname(pathname: string): string {
 	return pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
@@ -31,7 +32,12 @@ function hasLocalePrefix(pathname: string): boolean {
 
 function isPublicPagePath(pathname: string): boolean {
 	const normalized = normalizePathname(pathname);
-	if (publicEntryPaths.has(normalized) || legalDocumentPathPattern.test(normalized)) return true;
+	if (
+		publicEntryPaths.has(normalized) ||
+		legalDocumentPathPattern.test(normalized) ||
+		documentationPathPattern.test(normalized)
+	)
+		return true;
 
 	const productMatch = normalized.match(/^\/products\/([^/]+)$/);
 	const slug = productMatch?.[1];
