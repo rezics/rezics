@@ -103929,7 +103929,10 @@
 						"name": "kind",
 						"in": "query",
 						"required": false,
-						"schema": { "maxLength": 64, "type": "string" }
+						"schema": {
+							"type": "string",
+							"enum": ["person", "organization", "character"]
+						}
 					},
 					{
 						"name": "query",
@@ -103993,7 +103996,14 @@
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
-													"kind": { "type": "string" },
+													"kind": {
+														"type": "string",
+														"enum": [
+															"person",
+															"organization",
+															"character"
+														]
+													},
 													"verified": { "type": "boolean" },
 													"language": {
 														"type": "string",
@@ -104265,7 +104275,10 @@
 										"type": "string",
 										"enum": ["profile_owned", "community_owned"]
 									},
-									"kind": { "minLength": 1, "maxLength": 64, "type": "string" },
+									"kind": {
+										"type": "string",
+										"enum": ["person", "organization", "character"]
+									},
 									"localization": {
 										"additionalProperties": false,
 										"type": "object",
@@ -104800,7 +104813,10 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
-										"kind": { "type": "string" },
+										"kind": {
+											"type": "string",
+											"enum": ["person", "organization", "character"]
+										},
 										"verified": { "type": "boolean" },
 										"ownershipMode": {
 											"default": "profile_owned",

@@ -3,6 +3,7 @@ import { type Static, t } from "elysia";
 import {
 	AliasKindValues,
 	CreditAttributionRoleValues,
+	EntityKindValues,
 	SubjectAssociationRoleValues,
 	UnitKindValues,
 } from "../../database/schema/contract-values";
@@ -28,7 +29,7 @@ export type CreateUnitResourceBody = Static<typeof CreateUnitResourceBody>;
 export const CreateEntityBody = t.Object(
 	{
 		ownershipMode: UnitOwnershipMode,
-		kind: t.Optional(t.String({ minLength: 1, maxLength: 64 })),
+		kind: t.Optional(t.UnionEnum(EntityKindValues, { default: undefined })),
 		localization: LocalizationInput,
 	},
 	{ additionalProperties: false },
@@ -38,7 +39,7 @@ export type CreateEntityBody = Static<typeof CreateEntityBody>;
 export const ListEntityEntriesQuery = t.Object(
 	{
 		creditAttributionSearch: t.Optional(t.Union([t.Literal("direct"), t.Literal("public")])),
-		kind: t.Optional(t.String({ maxLength: 64 })),
+		kind: t.Optional(t.UnionEnum(EntityKindValues, { default: undefined })),
 		query: t.Optional(t.String({ minLength: 1, maxLength: 200 })),
 		...LocalizationLanguageQuery,
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),

@@ -30,6 +30,7 @@ import {
 	ContentRatingValues,
 	ContentStructureKindValues,
 	CreditAttributionRoleValues,
+	EntityKindValues,
 	ProgressDatePrecisionValues,
 	ProgressEntryKindValues,
 	ProgressStatusValues,
@@ -489,7 +490,7 @@ export const EntityListResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			id: Uuid,
-			kind: t.String(),
+			kind: t.UnionEnum(EntityKindValues, { default: undefined }),
 			verified: t.Boolean(),
 			language: ContentLanguage,
 			avatar: AvatarResponse,
@@ -992,7 +993,7 @@ const LocalizationSummary = t.Object({
 });
 export const EntityDetailResponse = t.Object({
 	id: Uuid,
-	kind: t.String(),
+	kind: t.UnionEnum(EntityKindValues, { default: undefined }),
 	verified: t.Boolean(),
 	ownershipMode: t.UnionEnum(["profile_owned", "community_owned"]),
 	ownershipClaim: t.Nullable(PendingUnitOwnershipClaimSummaryResponse),

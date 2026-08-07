@@ -42,7 +42,10 @@ import {
 	unitTagVoteStat,
 	unitLocalization,
 } from "../../database/schema";
-import { isCreditAttributionRoleForUnitKind } from "../../database/schema/contract-values";
+import {
+	isCreditAttributionRoleForUnitKind,
+	isEntityKind,
+} from "../../database/schema/contract-values";
 import {
 	AliasSearchScoreThreshold,
 	SourceLinkVisibilityScoreThreshold,
@@ -151,6 +154,11 @@ const publiclyReadableUnitCondition = () =>
 		eq(unit.moderationStatus, "approved"),
 		isNull(unit.deletedAt),
 	);
+
+function requireEntityKind(value: string) {
+	if (!isEntityKind(value)) throw new Error("Persisted Entity kind is not supported");
+	return value;
+}
 
 async function ensureUnitMutationAuthorized(
 	authorization: UnitAuthorization<string>,
@@ -400,13 +408,15 @@ export default new Elysia()
 						.orderBy(desc(unit.createdAt))
 						.limit(query.limit ?? 20);
 					return {
-						items: items.map(({ avatar, bannerAssetId, coverAssetId, ...item }) => ({
-							...item,
-							kind: item.kind ?? "unknown",
-							avatar: presentAvatar(avatar),
-							banner: presentImageAsset(bannerAssetId, "banner"),
-							cover: presentImageAsset(coverAssetId, "cover"),
-						})),
+						items: items.map(
+							({ avatar, bannerAssetId, coverAssetId, kind, ...item }) => ({
+								...item,
+								kind: requireEntityKind(kind),
+								avatar: presentAvatar(avatar),
+								banner: presentImageAsset(bannerAssetId, "banner"),
+								cover: presentImageAsset(coverAssetId, "cover"),
+							}),
+						),
 					};
 				},
 				{
@@ -573,7 +583,7 @@ export default new Elysia()
 						ownershipMode: unitOwnershipModeFromOwnerProfileId(
 							owner?.profileId ?? null,
 						),
-						kind: entry.kind ?? "unknown",
+						kind: requireEntityKind(entry.kind),
 						language: selectedLocalization.language,
 						avatar: presentAvatar(
 							resolveUnitLocalizationAvatarFromOrdered(

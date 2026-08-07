@@ -763,7 +763,7 @@ async function seedUnitFixtures(
 	await writeBatches(
 		entities.map((value, index) => ({
 			id: value.id,
-			kind: index < 45 ? "person" : index < 65 ? "organization" : "platform",
+			kind: index < 45 ? "person" : index < 65 ? "organization" : "character",
 			verified: false,
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,

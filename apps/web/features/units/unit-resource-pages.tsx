@@ -238,6 +238,9 @@ export function EntityDetailPage({ id }: { id: string }) {
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	const avatar = localization?.avatar ?? query.data.avatar;
 	const banner = localization?.banner ?? query.data.banner;
+	const entityKindLabel = isCommunityUnitEntityKind(query.data.kind)
+		? t.ui[query.data.kind]
+		: query.data.kind;
 	return (
 		<UnitFrame title={displayedTitle}>
 			{banner ? (
@@ -252,7 +255,7 @@ export function EntityDetailPage({ id }: { id: string }) {
 					/>
 					<p>
 						<span className="text-muted-foreground">{t.entities.kind}</span>{" "}
-						{query.data.kind}
+						{entityKindLabel}
 					</p>
 					<p>
 						<span className="text-muted-foreground">{t.entities.verification}</span>{" "}

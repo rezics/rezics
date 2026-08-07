@@ -71904,6 +71904,14 @@ export const GetApiEntitiesCreditAttributionSearch = {
 export type GetApiEntitiesCreditAttributionSearch =
 	(typeof GetApiEntitiesCreditAttributionSearch)[keyof typeof GetApiEntitiesCreditAttributionSearch];
 
+export const GetApiEntitiesKind = {
+	person: "person",
+	organization: "organization",
+	character: "character",
+} as const;
+
+export type GetApiEntitiesKind = (typeof GetApiEntitiesKind)[keyof typeof GetApiEntitiesKind];
+
 export const GetApiEntitiesLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
@@ -71926,10 +71934,9 @@ export type GetApiEntitiesQuery = {
 	 */
 	creditAttributionSearch?: GetApiEntitiesCreditAttributionSearch;
 	/**
-	 * @maxLength 64
 	 * @type string | undefined
 	 */
-	kind?: string;
+	kind?: GetApiEntitiesKind;
 	/**
 	 * @minLength 1
 	 * @maxLength 200
@@ -71945,6 +71952,15 @@ export type GetApiEntitiesQuery = {
 	 */
 	limit?: string | number;
 };
+
+export const GetApiEntitiesStatus200ItemsKindEnum = {
+	person: "person",
+	organization: "organization",
+	character: "character",
+} as const;
+
+export type GetApiEntitiesStatus200ItemsKindEnum =
+	(typeof GetApiEntitiesStatus200ItemsKindEnum)[keyof typeof GetApiEntitiesStatus200ItemsKindEnum];
 
 export const GetApiEntitiesStatus200ItemsLanguageEnum = {
 	zh: "zh",
@@ -71984,7 +72000,7 @@ export type GetApiEntitiesStatus200 = {
 		/**
 		 * @type string
 		 */
-		kind: string;
+		kind: GetApiEntitiesStatus200ItemsKindEnum;
 		/**
 		 * @type boolean
 		 */
@@ -72286,6 +72302,15 @@ export const PostApiEntitiesRequestOwnershipModeEnum = {
 export type PostApiEntitiesRequestOwnershipModeEnum =
 	(typeof PostApiEntitiesRequestOwnershipModeEnum)[keyof typeof PostApiEntitiesRequestOwnershipModeEnum];
 
+export const PostApiEntitiesRequestKindEnum = {
+	person: "person",
+	organization: "organization",
+	character: "character",
+} as const;
+
+export type PostApiEntitiesRequestKindEnum =
+	(typeof PostApiEntitiesRequestKindEnum)[keyof typeof PostApiEntitiesRequestKindEnum];
+
 export const PostApiEntitiesRequestLocalizationLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -72316,11 +72341,9 @@ export type PostApiEntitiesBody = {
 	 */
 	ownershipMode: PostApiEntitiesRequestOwnershipModeEnum;
 	/**
-	 * @minLength 1
-	 * @maxLength 64
 	 * @type string | undefined
 	 */
-	kind?: string;
+	kind?: PostApiEntitiesRequestKindEnum;
 	/**
 	 * @type object
 	 */
@@ -72605,6 +72628,15 @@ export type GetApiEntitiesByUnitIdQuery = {
 	localizationLanguages?: GetApiEntitiesByUnitIdLocalizationLanguagesEnum[];
 };
 
+export const GetApiEntitiesByUnitIdStatus200KindEnum = {
+	person: "person",
+	organization: "organization",
+	character: "character",
+} as const;
+
+export type GetApiEntitiesByUnitIdStatus200KindEnum =
+	(typeof GetApiEntitiesByUnitIdStatus200KindEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200KindEnum];
+
 export const GetApiEntitiesByUnitIdStatus200OwnershipModeEnum = {
 	profile_owned: "profile_owned",
 	community_owned: "community_owned",
@@ -72824,7 +72856,7 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 	/**
 	 * @type string
 	 */
-	kind: string;
+	kind: GetApiEntitiesByUnitIdStatus200KindEnum;
 	/**
 	 * @type boolean
 	 */

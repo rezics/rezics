@@ -1,9 +1,10 @@
 import { Value } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { UnitKindValues } from "../../database/schema/contract-values";
+import { EntityKindValues, UnitKindValues } from "../../database/schema/contract-values";
 import {
 	AddUnitLinkBody,
+	CreateEntityBody,
 	ListEntityEntriesQuery,
 	UnitSourceLinkParams,
 	UnitSourceLinkUnitParams,
@@ -12,6 +13,28 @@ import {
 } from "./schema";
 
 describe("Unit resource API schemas", () => {
+	it("accepts only the supported Entity kinds", () => {
+		const localization = { language: "en", title: "Example" };
+		for (const kind of EntityKindValues) {
+			expect(
+				Value.Check(CreateEntityBody, {
+					ownershipMode: "profile_owned",
+					kind,
+					localization,
+				}),
+			).toBe(true);
+			expect(Value.Check(ListEntityEntriesQuery, { kind })).toBe(true);
+		}
+		expect(
+			Value.Check(CreateEntityBody, {
+				ownershipMode: "profile_owned",
+				kind: "platform",
+				localization,
+			}),
+		).toBe(false);
+		expect(Value.Check(ListEntityEntriesQuery, { kind: "platform" })).toBe(false);
+	});
+
 	it("accepts only direct-permission or public credit Entity searches", () => {
 		expect(
 			Value.Check(ListEntityEntriesQuery, {

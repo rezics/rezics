@@ -37,6 +37,7 @@ export const UnitKindValues = [
 	"realm",
 	"realm_rule",
 ] as const;
+export const EntityKindValues = ["person", "organization", "character"] as const;
 export const CommunityOwnedUnitKindValues = [
 	"book",
 	"software",
@@ -63,6 +64,7 @@ export const UnitOwnershipClaimResolutionValues = [
 ] as const;
 
 export type UnitKind = (typeof UnitKindValues)[number];
+export type EntityKind = (typeof EntityKindValues)[number];
 export type UnitOwnershipMode = (typeof UnitOwnershipModeValues)[number];
 export type UnitOwnershipClaimableUnitKind = (typeof UnitOwnershipClaimableUnitKindValues)[number];
 export type UnitOwnershipClaimResolution = (typeof UnitOwnershipClaimResolutionValues)[number];
@@ -145,6 +147,10 @@ export const SubjectAssociationRoleValues = [
 ] as const;
 export type SubjectAssociationRole = (typeof SubjectAssociationRoleValues)[number];
 export type AssociationRole = CreditAttributionRole | SubjectAssociationRole;
+
+export function isEntityKind(value: string): value is EntityKind {
+	return (EntityKindValues as readonly string[]).includes(value);
+}
 
 export function isCreditAttributionRole(value: string): value is CreditAttributionRole {
 	return (CreditAttributionRoleValues as readonly string[]).includes(value);

@@ -17,6 +17,7 @@ import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
+import { isCommunityUnitEntityKind } from "@/features/create/model/community-unit-search";
 
 export interface SearchEntityOption extends EntityPickerHit {
 	readonly kind: string;
@@ -50,7 +51,7 @@ export function SearchEntityMultiSelect({
 	readonly emptyLabel: string;
 	readonly removeLabel: string;
 }) {
-	const { t: nav } = useTranslation("nav");
+	const { t } = useTranslation(["nav", "ui"]);
 	const searchEntities = useEntitySearch();
 	const { collection, set } = useListCollection<SearchEntityOption>({
 		initialItems: [...selected],
@@ -60,8 +61,9 @@ export function SearchEntityMultiSelect({
 	const [inputValue, setInputValue] = useState("");
 	const [isPending, setIsPending] = useState(false);
 	const [isError, setIsError] = useState(false);
-	const kindLabels: Readonly<Record<string, string>> = nav.following.types;
-	const kindLabel = (kind: string) => kindLabels[kind] ?? kind;
+	const kindLabels: Readonly<Record<string, string>> = t.nav.following.types;
+	const kindLabel = (kind: string) =>
+		isCommunityUnitEntityKind(kind) ? t.ui[kind] : (kindLabels[kind] ?? kind);
 
 	useEffect(() => {
 		set(uniqueOptions(selected, collection.items));

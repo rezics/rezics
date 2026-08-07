@@ -365,7 +365,7 @@ The terms under which a Unit's work is made available to the public; this is not
 
 ## entity
 
-A Unit representing a person, organization, or platform that can participate in attributions and subject associations.
+A Unit representing a person, organization, or character that can participate in attributions and subject associations.
 
 | Locale | Status | Slot | Approved form | Forbidden forms |
 | --- | --- | --- | --- | --- |
