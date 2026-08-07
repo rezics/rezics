@@ -614,7 +614,7 @@ export default new Elysia()
 				)
 					referencedUnitIds.add(change.target.unitId);
 			}
-			for (const unitId of referencedUnitIds) await authorization.unit.ensureCanRead(unitId);
+			await authorization.unit.ensureCanReadMany([...referencedUnitIds]);
 			const result = await database.transaction(async (tx) => {
 				await ensureReleasedContentStructureApi(tx, params.unitId, authorization);
 				return applyContentStructureBatch(tx, {

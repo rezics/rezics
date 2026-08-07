@@ -1,4 +1,4 @@
-import { and, eq, isNull, or, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, or, sql } from "drizzle-orm";
 
 import { database, type DatabaseExecutor, type DatabaseTransaction } from "../../database";
 import { unit, unitAccessGrant, unitAccessRestriction, unitOwnership } from "../../database/schema";
@@ -13,6 +13,7 @@ import {
 } from "./policy";
 import { scopeCovers, scopeKey, type UnitScope } from "./scope";
 import { profileMatchesRealmAccessSubject } from "./realm-subject";
+import { getUnitReadCondition } from "./query";
 
 export type UnitAccessDecision =
 	| { readonly allowed: true; readonly source: "public" | "platform" | "owner" }
@@ -265,6 +266,26 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 		onDenied: () => E | UnitNotFound = () => new UnitNotFound(),
 	): Promise<void> {
 		if (!(await this.canRead(unitId))) throw onDenied();
+	}
+
+	async ensureCanReadMany(unitIds: readonly string[]): Promise<void>;
+	async ensureCanReadMany<E extends Error>(
+		unitIds: readonly string[],
+		onDenied: (unitId: string) => E,
+	): Promise<void>;
+	async ensureCanReadMany<E extends Error>(
+		unitIds: readonly string[],
+		onDenied: (unitId: string) => E | UnitNotFound = () => new UnitNotFound(),
+	): Promise<void> {
+		const uniqueIds = [...new Set(unitIds)];
+		if (!uniqueIds.length) return;
+		const readable = await database
+			.select({ id: unit.id })
+			.from(unit)
+			.where(and(inArray(unit.id, uniqueIds), getUnitReadCondition(this.profileId)));
+		const readableIds = new Set(readable.map(({ id }) => id));
+		const deniedId = uniqueIds.find((id) => !readableIds.has(id));
+		if (deniedId) throw onDenied(deniedId);
 	}
 
 	async canUpdate(unitId: string, scope: UnitScope = []): Promise<boolean> {

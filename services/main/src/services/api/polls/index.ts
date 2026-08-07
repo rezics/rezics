@@ -49,9 +49,7 @@ export default new Elysia({ prefix: "/polls" })
 					),
 				),
 			];
-			await Promise.all(
-				targetUnitIds.map((targetUnitId) => authorization.unit.ensureCanRead(targetUnitId)),
-			);
+			await authorization.unit.ensureCanReadMany(targetUnitIds);
 			const id = await database.transaction(async (tx) => {
 				const pollUnit = await insertUnit(tx, {
 					kind: "poll",

@@ -73,7 +73,7 @@ import {
 	isFractionalPosition,
 } from "../ordering/position";
 import { AssociationContextPostInvalid, UnitRevisionConflict } from "./errors";
-import { ensureWikiAssociationContextPost } from "./association-context";
+import { ensureWikiAssociationContextPosts } from "./association-context";
 import { insertUnit } from "./create";
 import { finalizeInitialUnitStatusRevision } from "./status";
 import { ensureUnitVariantLifecycle } from "./variant-policy";
@@ -704,7 +704,7 @@ export async function restoreUnitSnapshot(
 		.filter((targetEntityId) => !currentSubjectTargetIds.has(targetEntityId))
 		.sort((left, right) => left.localeCompare(right)))
 		await authorization.entity.ensureAssociationAllowed(tx, targetEntityId, "subject");
-	for (const contextPostId of [
+	const newContextPostIds = [
 		...new Set(
 			subjectAssociations.flatMap(({ contextPostId }) =>
 				contextPostId ? [contextPostId] : [],
@@ -712,13 +712,12 @@ export async function restoreUnitSnapshot(
 		),
 	]
 		.filter((contextPostId) => !currentContextPostIds.has(contextPostId))
-		.sort((left, right) => left.localeCompare(right))) {
-		await authorization.unit.ensureCanRead(
-			contextPostId,
-			() => new AssociationContextPostInvalid(),
-		);
-		await ensureWikiAssociationContextPost(tx, contextPostId);
-	}
+		.sort((left, right) => left.localeCompare(right));
+	await authorization.unit.ensureCanReadMany(
+		newContextPostIds,
+		() => new AssociationContextPostInvalid(),
+	);
+	await ensureWikiAssociationContextPosts(tx, newContextPostIds);
 	if (snapshot.kind === "post" && snapshot.extension) {
 		const postState = postStateSchema.parse(snapshot.extension);
 		if (postState.subjectUnitId !== current.subjectUnitId && postState.subjectUnitId)

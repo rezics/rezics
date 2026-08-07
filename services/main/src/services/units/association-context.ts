@@ -22,12 +22,20 @@ export async function ensureWikiAssociationContextPost(
 	tx: DatabaseTransaction,
 	contextPostId: string,
 ): Promise<void> {
-	const [contextPost] = await tx
-		.select({ kind: post.kind })
+	await ensureWikiAssociationContextPosts(tx, [contextPostId]);
+}
+
+export async function ensureWikiAssociationContextPosts(
+	tx: DatabaseTransaction,
+	contextPostIds: readonly string[],
+): Promise<void> {
+	const uniqueIds = [...new Set(contextPostIds)];
+	if (!uniqueIds.length) return;
+	const contextPosts = await tx
+		.select({ id: post.id })
 		.from(post)
-		.where(eq(post.id, contextPostId))
-		.limit(1);
-	if (contextPost?.kind !== "wiki") throw new AssociationContextPostInvalid();
+		.where(and(inArray(post.id, uniqueIds), eq(post.kind, "wiki")));
+	if (contextPosts.length !== uniqueIds.length) throw new AssociationContextPostInvalid();
 }
 
 export interface AssociationContextPostPresentation {

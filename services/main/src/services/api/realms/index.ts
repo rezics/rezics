@@ -1023,11 +1023,7 @@ export default new Elysia({ prefix: "/realms" })
 			const referencedUnitIds = body.nodes.flatMap((node) =>
 				node.state === "new" && node.content.kind === "unit" ? [node.content.unitId] : [],
 			);
-			await Promise.all(
-				[...new Set(referencedUnitIds)].map((unitId) =>
-					authorization.unit.ensureCanRead(unitId),
-				),
-			);
+			await authorization.unit.ensureCanReadMany(referencedUnitIds);
 			return database.transaction(async (tx) => {
 				await tx.execute(
 					sql`select pg_advisory_xact_lock(hashtextextended(${`${params.realmId}:realm-taxonomy-draft`}::text, 0))`,

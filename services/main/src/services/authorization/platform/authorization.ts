@@ -91,13 +91,39 @@ export class PlatformAuthorization<ProfileId extends string | undefined> {
 		capabilities: readonly [Capability, ...Capability[]],
 		executor: DatabaseExecutor = database,
 	): Promise<ReadonlyMap<Capability, boolean>> {
-		const decisions = await Promise.all(
+		if (!this.profileId)
+			return new Map(capabilities.map((capability) => [capability, false] as const));
+		const grantingCapabilities = [
+			...new Set(
+				capabilities.flatMap((capability) => grantingPlatformCapabilities(capability)),
+			),
+		];
+		const grants = await executor
+			.select({ capability: platformCapabilityGrant.capability })
+			.from(platformCapabilityGrant)
+			.where(
+				and(
+					eq(platformCapabilityGrant.profileId, this.profileId),
+					inArray(platformCapabilityGrant.capability, grantingCapabilities),
+					isNull(platformCapabilityGrant.revokedAt),
+					or(
+						isNull(platformCapabilityGrant.expiresAt),
+						sql`${platformCapabilityGrant.expiresAt} > now()`,
+					),
+				),
+			);
+		const grantedCapabilities = new Set(grants.map(({ capability }) => capability));
+		return new Map(
 			capabilities.map(
-				async (capability) =>
-					[capability, await this.hasCapability(capability, executor)] as const,
+				(capability) =>
+					[
+						capability,
+						grantingPlatformCapabilities(capability).some((grantingCapability) =>
+							grantedCapabilities.has(grantingCapability),
+						),
+					] as const,
 			),
 		);
-		return new Map(decisions);
 	}
 
 	async ensureCapability(
