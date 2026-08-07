@@ -188,15 +188,38 @@ export interface CompiledGlobalSearchRequest extends CompiledSearchRequestBase {
 
 export type CompiledSearchRequest = CompiledGroupedSearchRequest | CompiledGlobalSearchRequest;
 
-export const SearchCursorVersion = 1 as const;
+/** Invalidates cursors created before same-direction row-value index seeks. */
+export const SearchCursorVersion = 2 as const;
 
-export interface SearchKeysetPosition {
+interface BaseSearchKeysetPosition {
 	/** PostgreSQL-rendered primary sort value; parsed only through a server-owned cast. */
 	readonly primary: string | null;
 	/** PostgreSQL-rendered secondary sort value when the sort contract has one. */
 	readonly secondary: string | null;
 	readonly unitId: string;
 }
+
+/** Position in a single index-ordered candidate stream. */
+export interface OrderedSearchKeysetPosition extends BaseSearchKeysetPosition {
+	/** Missing only on cursors issued before index-ordered Search pagination. */
+	readonly source?: "ordered";
+}
+
+/** Position in the positive-score or zero-score phase of one immutable best snapshot. */
+export interface BestSearchKeysetPosition extends BaseSearchKeysetPosition {
+	readonly source: "best-positive" | "best-zero";
+	readonly snapshotId: string | null;
+}
+
+/** Position in the zero-count or positive-count phase of a sparse counter ordering. */
+export interface SparseCountSearchKeysetPosition extends BaseSearchKeysetPosition {
+	readonly source: "count-positive" | "count-zero";
+}
+
+export type SearchKeysetPosition =
+	| OrderedSearchKeysetPosition
+	| BestSearchKeysetPosition
+	| SparseCountSearchKeysetPosition;
 
 export interface SearchCursorState {
 	readonly version: typeof SearchCursorVersion;
@@ -214,12 +237,13 @@ export interface SearchCursorState {
 	>;
 }
 
-export const GlobalSearchCursorVersion = 2 as const;
+/** Invalidates global cursors created before same-direction row-value index seeks. */
+export const GlobalSearchCursorVersion = 3 as const;
 
 /**
  * Cursor for one globally ranked candidate stream shared by every selected category.
  *
- * This is deliberately distinct from the v1 per-category cursor: a category
+ * This is deliberately distinct from the per-category cursor: a category
  * offset cannot be interpreted as a position in the global ordering.
  */
 export interface GlobalSearchCursorState {
@@ -328,13 +352,25 @@ function hasValidSearchCursorIdentity(candidate: Record<string, unknown>): boole
 function isSearchKeysetPosition(value: unknown): value is SearchKeysetPosition {
 	if (!value || typeof value !== "object" || Array.isArray(value)) return false;
 	const candidate = value as Record<string, unknown>;
-	return (
+	const validBase =
 		(candidate.primary === null || typeof candidate.primary === "string") &&
 		(candidate.secondary === null || typeof candidate.secondary === "string") &&
 		typeof candidate.unitId === "string" &&
 		/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(
 			candidate.unitId,
-		)
+		);
+	if (!validBase) return false;
+	if (candidate.source === undefined || candidate.source === "ordered")
+		return candidate.snapshotId === undefined;
+	if (candidate.source === "count-positive" || candidate.source === "count-zero")
+		return candidate.snapshotId === undefined;
+	if (candidate.source !== "best-positive" && candidate.source !== "best-zero") return false;
+	return (
+		candidate.snapshotId === null ||
+		(typeof candidate.snapshotId === "string" &&
+			/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(
+				candidate.snapshotId,
+			))
 	);
 }
 
@@ -345,7 +381,7 @@ function assertGlobalSearchCursorState(value: unknown): asserts value is GlobalS
 		candidate.version !== GlobalSearchCursorVersion ||
 		!hasValidSearchCursorIdentity(candidate) ||
 		!Number.isSafeInteger(candidate.seen) ||
-		(candidate.seen as number) < 1 ||
+		(candidate.seen as number) < 0 ||
 		!isSearchKeysetPosition(candidate.position)
 	)
 		throw new TypeError("Invalid Search cursor");

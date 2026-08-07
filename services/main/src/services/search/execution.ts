@@ -22,6 +22,7 @@ import {
 	createGlobalSearchCursor,
 	createSearchCursor,
 	GlobalSearchCursorVersion,
+	SearchCursorVersion,
 	parseGlobalSearchCursor,
 	parseSearchCursor,
 	specializeSearchExpressionForCategory,
@@ -36,7 +37,8 @@ import type { SearchCategory } from "./schema";
 import {
 	searchDomain,
 	searchDomainFacets,
-	searchGlobalIdentifiers,
+	searchDomainWithFacets,
+	searchGlobalIdentifiersWithFacets,
 	validateSearchDomainRequest,
 	type SearchFacet,
 } from "./service";
@@ -63,6 +65,15 @@ type DomainSearchExecutor<Hit extends RankedSearchHit> = (
 	category: SearchCategory,
 	request: Parameters<typeof searchDomain>[1],
 ) => Promise<RankedSearchGroup<Hit>>;
+
+type DomainSearchWithFacetsExecutor<Hit extends RankedSearchHit> = (
+	category: SearchCategory,
+	request: Parameters<typeof searchDomain>[1],
+	fields: readonly string[],
+) => Promise<{
+	readonly group: RankedSearchGroup<Hit>;
+	readonly facets: SearchFacet[];
+}>;
 
 async function resolveScope(compiled: CompiledSearchRequest): Promise<{
 	categories: SearchCategory[];
@@ -198,6 +209,7 @@ async function executeCompiledSearchWithPresentation<Hit extends RankedSearchHit
 	compiled: CompiledGroupedSearchRequest,
 	localizationLanguages: readonly ContentLanguage[],
 	domainSearch: DomainSearchExecutor<Hit>,
+	domainSearchWithFacets: DomainSearchWithFacetsExecutor<Hit> | undefined,
 	profileId?: string,
 	enforcedZoneId?: string,
 	inputIdentity?: string,
@@ -250,10 +262,12 @@ async function executeCompiledSearchWithPresentation<Hit extends RankedSearchHit
 					searchSeen: cursor?.categories[category]?.seen ?? 0,
 					searchPosition: cursor?.categories[category]?.position,
 				};
-				const [group, facets] = await Promise.all([
-					domainSearch(category, domainRequest),
-					searchDomainFacets(category, domainRequest, facetFields),
-				]);
+				const { group, facets } = domainSearchWithFacets
+					? await domainSearchWithFacets(category, domainRequest, facetFields)
+					: await Promise.all([
+							domainSearch(category, domainRequest),
+							searchDomainFacets(category, domainRequest, facetFields),
+						]).then(([group, facets]) => ({ group, facets }));
 				return {
 					state: "result",
 					category,
@@ -312,7 +326,7 @@ async function executeCompiledSearchWithPresentation<Hit extends RankedSearchHit
 		facets,
 		nextCursor: hasNext
 			? createSearchCursor({
-					version: 1,
+					version: SearchCursorVersion,
 					requestHash,
 					pageSize: compiled.pageSize,
 					categories,
@@ -334,6 +348,7 @@ export function executeCompiledSearch(
 		compiled,
 		localizationLanguages,
 		searchDomain,
+		searchDomainWithFacets,
 		profileId,
 		enforcedZoneId,
 		inputIdentity,
@@ -428,8 +443,8 @@ export async function executeCompiledSearchIdentifiers(
 			nextCursor: undefined,
 		};
 
-	const [page, facetGroups] = await Promise.all([
-		searchGlobalIdentifiers({
+	const { page, facetGroups } = await searchGlobalIdentifiersWithFacets(
+		{
 			profileId,
 			localizationLanguages,
 			query: compiled.query,
@@ -446,23 +461,24 @@ export async function executeCompiledSearchIdentifiers(
 					? { searchExpression: result.request.searchExpression }
 					: {}),
 			})),
-		}),
-		Promise.all(
-			results.map((result) =>
-				searchDomainFacets(result.category, result.request, facetFields),
-			),
-		),
-	]);
+		},
+		results.map((result) => ({
+			category: result.category,
+			fields: facetFields,
+		})),
+	);
 	const hasNext = !page.exhausted && page.nextOffset < compiled.maxResultWindow;
-	const last = page.hits.at(-1);
 	const nextPosition = page.nextPosition;
-	if (hasNext && (!last || !nextPosition))
+	if (hasNext && !nextPosition)
 		throw new TypeError("PostgreSQL Search page omitted its keyset position");
 	return {
 		query: compiled.query,
 		hits: page.hits,
 		total: page.total,
-		facets: mergeSearchFacets(compiled.facets, facetGroups),
+		facets: mergeSearchFacets(
+			compiled.facets,
+			facetGroups.map(({ facets }) => facets),
+		),
 		nextCursor: hasNext
 			? createGlobalSearchCursor({
 					version: GlobalSearchCursorVersion,

@@ -13,9 +13,16 @@ import {
 	type CompiledSearchRequest,
 	type SearchExpression,
 } from "./query";
-import { resolveCurrentSearchFilterDefinition } from "./field-registry";
+import {
+	resolveCurrentSearchFilterDefinition,
+	resolveCurrentSearchSortDefinition,
+} from "./field-registry";
 
 export interface SearchPlanComplexity {
+	readonly boundedCandidateVerification: true;
+	readonly candidateSources: readonly ("btree" | "sparse-btree" | "pgroonga")[];
+	readonly orderingIndexes: readonly string[];
+	readonly maxCandidatesScanned: number;
 	readonly filterNodes: number;
 	readonly filterDepth: number;
 	readonly filterValues: number;
@@ -177,6 +184,21 @@ export class ValidatedSearchPlan<Request extends CompiledSearchRequest> {
 
 		const filter = summarizeFilter(request.domainFilter);
 		const expression = summarizeExpression(request.searchExpression);
+		const sortDefinitions = request.categories.map((category) =>
+			resolveCurrentSearchSortDefinition(category, request.sort, request.query),
+		);
+		if (sortDefinitions.some((definition) => definition.candidateSource === null))
+			throw new InvalidSearch("Search sort has no bounded physical candidate source");
+		const candidateSources = [
+			...new Set(
+				sortDefinitions.flatMap((definition) =>
+					definition.candidateSource === null ? [] : [definition.candidateSource],
+				),
+			),
+		];
+		const orderingIndexes = [
+			...new Set(sortDefinitions.flatMap((definition) => definition.orderingIndexes)),
+		];
 		const executedPredicates = request.categories.flatMap((category) => {
 			if (!request.searchExpression) return [];
 			const specialized = specializeSearchExpressionForCategory(
@@ -199,6 +221,10 @@ export class ValidatedSearchPlan<Request extends CompiledSearchRequest> {
 			}
 		}).length;
 		return new ValidatedSearchPlan(request, {
+			boundedCandidateVerification: true,
+			candidateSources,
+			orderingIndexes,
+			maxCandidatesScanned: WorkPolicy.search.maxCandidatesScanned,
 			filterNodes: filter.nodes,
 			filterDepth: filter.depth,
 			filterValues: filter.values,

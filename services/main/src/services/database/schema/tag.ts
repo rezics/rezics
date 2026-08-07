@@ -46,7 +46,7 @@ export const unitTag = pgTable(
 	},
 	(table) => [
 		primaryKey({ columns: [table.unitId, table.tagId] }),
-		index("unit_tag_tag_idx").on(table.tagId),
+		index("unit_tag_tag_idx").on(table.tagId, table.unitId),
 		index("unit_tag_created_by_idx").on(table.createdByProfileId),
 		index("unit_tag_unit_position_idx").on(
 			table.unitId,
@@ -254,6 +254,7 @@ export const profileUnitTag = pgTable(
 		primaryKey({ columns: [table.profileId, table.unitId, table.tagId] }),
 		index("profile_unit_tag_unit_idx").on(table.unitId, table.profileId),
 		index("profile_unit_tag_tag_idx").on(table.tagId),
+		index("profile_unit_tag_profile_tag_idx").on(table.profileId, table.tagId, table.unitId),
 		check("profile_unit_tag_not_self_check", sql`${table.unitId} <> ${table.tagId}`),
 	],
 );

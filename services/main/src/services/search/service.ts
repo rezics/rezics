@@ -19,7 +19,6 @@ import { database } from "../database";
 import {
 	book,
 	unitContentLicense,
-	collection,
 	creditAttribution,
 	contentStructure,
 	contentStructureNode,
@@ -29,7 +28,6 @@ import {
 	post,
 	postReply,
 	postReplyStat,
-	profile,
 	unitFollowStat,
 	realm,
 	realmTagContext,
@@ -38,20 +36,19 @@ import {
 	software,
 	softwareRequirement,
 	recommendationSnapshot,
-	recommendationUnitStat,
+	searchBestScore,
+	unitSearchDocument,
 	unit,
-	unitAlias,
-	unitAliasVoteStat,
 	unitOwnership,
 	unitLocalization,
 	unitEffectiveTag,
 	unitStructureMember,
 	unitStructureVoteStat,
 	unitVariant,
-	AliasSearchScoreThreshold,
 	VariantCapableUnitKindValues,
 } from "../database/schema";
 import { env } from "../config";
+import { WorkPolicy } from "../performance/policy";
 import type { SearchCountResult } from "../counts/contract";
 import {
 	resolvedUnitLocalizationLanguage,
@@ -73,6 +70,7 @@ import {
 	createSearchCursor,
 	parseSearchCursor,
 	readSearchExpressionLanguageBoundary,
+	SearchCursorVersion,
 	type GroupedSearchCursorToken,
 	type SearchKeysetPosition,
 	type SearchExpression,
@@ -85,12 +83,10 @@ import {
 	type SearchSort,
 } from "./schema";
 import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
-import { compileUnitPredicateSql } from "../filter/sql";
+import { compileUnitPredicateCandidateSet, compileUnitPredicateSql } from "../filter/sql";
 
 const subjectUnit = alias(unit, "subject_unit");
-const searchLocalization = alias(unitLocalization, "search_localization");
-const searchAlias = alias(unitAlias, "search_alias");
-const searchAliasVoteStat = alias(unitAliasVoteStat, "search_alias_vote_stat");
+const boundedSearchDocument = alias(unitSearchDocument, "bounded_search_document");
 const facetLocalization = alias(unitLocalization, "facet_unit_localization");
 const facetUnitTag = alias(unitEffectiveTag, "facet_unit_tag");
 const facetRealmUnit = alias(realmUnit, "facet_realm_unit");
@@ -354,37 +350,115 @@ function compileFilter(
 		return condition;
 	}
 	const typeSpecificScalar: Partial<
-		Record<SearchControlPredicate["field"], { readonly kind: string; readonly column: SQL }>
+		Record<
+			SearchControlPredicate["field"],
+			{
+				readonly kind: string;
+				readonly relation: SQL;
+				readonly id: SQL;
+				readonly column: SQL;
+			}
+		>
 	> = {
-		"book-isbn13": { kind: "book", column: sql`${book.isbn13}` },
-		"book-publication-date": { kind: "book", column: sql`${book.publicationDate}` },
-		"book-format": { kind: "book", column: sql`${book.format}` },
-		"media-kind": { kind: "media", column: sql`${media.kind}` },
-		"media-release-date": { kind: "media", column: sql`${media.releaseDate}` },
-		"software-release-date": { kind: "software", column: sql`${software.releaseDate}` },
-		"software-version-label": { kind: "software", column: sql`${software.versionLabel}` },
+		"book-isbn13": {
+			kind: "book",
+			relation: sql`${book}`,
+			id: sql`${book.id}`,
+			column: sql`${book.isbn13}`,
+		},
+		"book-publication-date": {
+			kind: "book",
+			relation: sql`${book}`,
+			id: sql`${book.id}`,
+			column: sql`${book.publicationDate}`,
+		},
+		"book-format": {
+			kind: "book",
+			relation: sql`${book}`,
+			id: sql`${book.id}`,
+			column: sql`${book.format}`,
+		},
+		"media-kind": {
+			kind: "media",
+			relation: sql`${media}`,
+			id: sql`${media.id}`,
+			column: sql`${media.kind}`,
+		},
+		"media-release-date": {
+			kind: "media",
+			relation: sql`${media}`,
+			id: sql`${media.id}`,
+			column: sql`${media.releaseDate}`,
+		},
+		"software-release-date": {
+			kind: "software",
+			relation: sql`${software}`,
+			id: sql`${software.id}`,
+			column: sql`${software.releaseDate}`,
+		},
+		"software-version-label": {
+			kind: "software",
+			relation: sql`${software}`,
+			id: sql`${software.id}`,
+			column: sql`${software.versionLabel}`,
+		},
 	};
 	const scalarDefinition = typeSpecificScalar[filter.field];
 	if (scalarDefinition)
-		return sql`${unit.kind}::text = ${scalarDefinition.kind} and ${scalarColumnCondition(
-			scalarDefinition.column,
-			filter,
-		)}`;
+		return sql`${unit.kind}::text = ${scalarDefinition.kind} and exists (
+			select 1 from ${scalarDefinition.relation}
+			where ${scalarDefinition.id} = ${unit.id}
+				and ${scalarColumnCondition(scalarDefinition.column, filter)}
+		)`;
 	const typeSpecificNumeric: Partial<
-		Record<SearchControlPredicate["field"], { readonly kind: string; readonly column: SQL }>
+		Record<
+			SearchControlPredicate["field"],
+			{
+				readonly kind: string;
+				readonly relation: SQL;
+				readonly id: SQL;
+				readonly column: SQL;
+			}
+		>
 	> = {
-		"book-page-count": { kind: "book", column: sql`${book.pageCount}` },
-		"book-word-count": { kind: "book", column: sql`${book.wordCount}` },
-		"media-runtime-minutes": { kind: "media", column: sql`${media.runtimeMinutes}` },
-		"media-episode-count": { kind: "media", column: sql`${media.episodeCount}` },
-		"media-season-count": { kind: "media", column: sql`${media.seasonCount}` },
+		"book-page-count": {
+			kind: "book",
+			relation: sql`${book}`,
+			id: sql`${book.id}`,
+			column: sql`${book.pageCount}`,
+		},
+		"book-word-count": {
+			kind: "book",
+			relation: sql`${book}`,
+			id: sql`${book.id}`,
+			column: sql`${book.wordCount}`,
+		},
+		"media-runtime-minutes": {
+			kind: "media",
+			relation: sql`${media}`,
+			id: sql`${media.id}`,
+			column: sql`${media.runtimeMinutes}`,
+		},
+		"media-episode-count": {
+			kind: "media",
+			relation: sql`${media}`,
+			id: sql`${media.id}`,
+			column: sql`${media.episodeCount}`,
+		},
+		"media-season-count": {
+			kind: "media",
+			relation: sql`${media}`,
+			id: sql`${media.id}`,
+			column: sql`${media.seasonCount}`,
+		},
 	};
 	const numericDefinition = typeSpecificNumeric[filter.field];
 	if (numericDefinition)
-		return sql`${unit.kind}::text = ${numericDefinition.kind} and ${numericColumnCondition(
-			numericDefinition.column,
-			filter,
-		)}`;
+		return sql`${unit.kind}::text = ${numericDefinition.kind} and exists (
+			select 1 from ${numericDefinition.relation}
+			where ${numericDefinition.id} = ${unit.id}
+				and ${numericColumnCondition(numericDefinition.column, filter)}
+		)`;
 	if (filter.field === "software-platform")
 		return sql`${unit.kind} = 'software' and ${softwareRequirementCondition(
 			filter,
@@ -565,35 +639,92 @@ function compileFilter(
 				: filter.value
 					? sql`(${poll.closedAt} is not null or ${poll.closesAt} <= now())`
 					: sql`(${poll.closedAt} is null and (${poll.closesAt} is null or ${poll.closesAt} > now()))`;
-		return filter.operator === "not-equals" ? sql`not (${match})` : match;
+		const condition = filter.operator === "not-equals" ? sql`not (${match})` : match;
+		return sql`exists (
+			select 1 from ${poll}
+			where ${poll.id} = ${unit.id} and ${condition}
+		)`;
 	}
 
-	const columnByField: Partial<Record<SearchControlPredicate["field"], SQL>> = {
-		kind:
-			category === "entities"
-				? sql`${entity.kind}`
-				: category === "posts"
-					? sql`${post.kind}`
-					: category === "reviews"
-						? sql`${subjectUnit.kind}`
-						: sql`${unit.kind}`,
+	if (filter.field === "kind") {
+		if (category === "entities")
+			return sql`exists (
+				select 1 from ${entity}
+				where ${entity.id} = ${unit.id}
+					and ${scalarColumnCondition(sql`${entity.kind}`, filter)}
+			)`;
+		if (category === "posts")
+			return sql`exists (
+				select 1 from ${post}
+				where ${post.id} = ${unit.id}
+					and ${scalarColumnCondition(sql`${post.kind}`, filter)}
+			)`;
+		if (category === "reviews")
+			return sql`exists (
+				select 1 from ${post}
+				inner join ${unit} as ${subjectUnit} on ${subjectUnit.id} = ${post.subjectUnitId}
+				where ${post.id} = ${unit.id}
+					and ${scalarColumnCondition(sql`${subjectUnit.kind}`, filter)}
+			)`;
+		return scalarColumnCondition(sql`${unit.kind}`, filter);
+	}
+
+	const directUnitColumnByField: Partial<Record<SearchControlPredicate["field"], SQL>> = {
 		"content-rating": sql`${unit.contentRating}`,
 		"ai-disclosure": sql`${unit.aiDisclosure}`,
 		license: sql`${unit.license}`,
-		subject: sql`${post.subjectUnitId}`,
-		target: sql`${post.subjectUnitId}`,
-		root: sql`${postReply.rootPostId}`,
-		parent: sql`${postReply.parentPostId}`,
-		"join-policy": sql`${realm.joinPolicy}`,
-		"results-visibility": sql`${poll.resultVisibility}`,
 		"created-at": sql`${unit.createdAt}`,
 		"updated-at": sql`${unit.updatedAt}`,
 		"published-at": sql`${unit.publishedAt}`,
-		"closes-at": sql`${poll.closesAt}`,
 	};
-	const column = columnByField[filter.field];
-	if (!column) throw new InvalidSearch(`${filter.field} is not implemented`);
-	return scalarColumnCondition(column, filter);
+	const directUnitColumn = directUnitColumnByField[filter.field];
+	if (directUnitColumn) return scalarColumnCondition(directUnitColumn, filter);
+
+	const oneToOneColumnByField: Partial<
+		Record<
+			SearchControlPredicate["field"],
+			{ readonly relation: SQL; readonly id: SQL; readonly column: SQL }
+		>
+	> = {
+		subject: {
+			relation: sql`${post}`,
+			id: sql`${post.id}`,
+			column: sql`${post.subjectUnitId}`,
+		},
+		target: { relation: sql`${post}`, id: sql`${post.id}`, column: sql`${post.subjectUnitId}` },
+		root: {
+			relation: sql`${postReply}`,
+			id: sql`${postReply.postId}`,
+			column: sql`${postReply.rootPostId}`,
+		},
+		parent: {
+			relation: sql`${postReply}`,
+			id: sql`${postReply.postId}`,
+			column: sql`${postReply.parentPostId}`,
+		},
+		"join-policy": {
+			relation: sql`${realm}`,
+			id: sql`${realm.id}`,
+			column: sql`${realm.joinPolicy}`,
+		},
+		"results-visibility": {
+			relation: sql`${poll}`,
+			id: sql`${poll.id}`,
+			column: sql`${poll.resultVisibility}`,
+		},
+		"closes-at": {
+			relation: sql`${poll}`,
+			id: sql`${poll.id}`,
+			column: sql`${poll.closesAt}`,
+		},
+	};
+	const oneToOneColumn = oneToOneColumnByField[filter.field];
+	if (!oneToOneColumn) throw new InvalidSearch(`${filter.field} is not implemented`);
+	return sql`exists (
+		select 1 from ${oneToOneColumn.relation}
+		where ${oneToOneColumn.id} = ${unit.id}
+			and ${scalarColumnCondition(oneToOneColumn.column, filter)}
+	)`;
 }
 
 /**
@@ -646,21 +777,60 @@ export function compilePostgresSearchExpression(
 	return sql`(${sql.join(clauses, expression.operator === "all" ? sql` and ` : sql` or `)})`;
 }
 
+function buildCommonSearchConditions(request: DomainSearchRequest): SQL[] {
+	const readCondition = getUnitReadCondition(request.profileId, { discoverableOnly: true });
+	if (!readCondition) throw new Error("Unit read policy produced no SQL condition");
+	const conditions: SQL[] = [readCondition];
+	if (request.scopeUnitId) {
+		const direct = sql`${unit.id} = ${request.scopeUnitId}::uuid`;
+		conditions.push(
+			request.includeScopeDescendants
+				? sql`(${direct} or exists (
+					select 1
+					from ${contentStructureNode}
+					inner join ${contentStructure}
+						on ${contentStructure.id} = ${contentStructureNode.structureId}
+					where ${contentStructureNode.ownerUnitId} = ${request.scopeUnitId}::uuid
+						and ${contentStructureNode.contentUnitId} = ${unit.id}
+						and ${contentStructureNode.deletedAt} is null
+						and ${contentStructure.deletedAt} is null
+						and ${contentStructure.kind} in ('book.contents', 'post.contents')
+				))`
+				: direct,
+		);
+	}
+	if (request.domainFilter)
+		conditions.push(
+			compileUnitPredicateSql(request.domainFilter, {
+				unitId: sql`${unit.id}`,
+				unitKind: sql`${unit.kind}`,
+				viewerProfileId: request.profileId,
+			}),
+		);
+	return conditions;
+}
+
 function buildSearchConditions(
 	category: SearchCategory,
 	request: DomainSearchRequest,
 	expression: SearchExpression | undefined,
+	includeCommonConditions = true,
 ): SQL[] {
 	validateRequest(category, request);
-	const readCondition = getUnitReadCondition(request.profileId, { discoverableOnly: true });
-	if (!readCondition) throw new Error("Unit read policy produced no SQL condition");
-
-	const conditions: SQL[] = [
-		readCondition,
+	const conditions = includeCommonConditions ? buildCommonSearchConditions(request) : [];
+	conditions.push(
 		sql`${unit.kind}::text = ANY(${toTextArray(CurrentSearchUnitKindsByCategory[category])})`,
-	];
-	if (category === "posts") conditions.push(sql`${post.kind} <> 'review'::post_kind`);
-	if (category === "reviews") conditions.push(sql`${post.kind} = 'review'`);
+	);
+	if (category === "posts")
+		conditions.push(sql`exists (
+			select 1 from ${post}
+			where ${post.id} = ${unit.id} and ${post.kind} <> 'review'::post_kind
+		)`);
+	if (category === "reviews")
+		conditions.push(sql`exists (
+			select 1 from ${post}
+			where ${post.id} = ${unit.id} and ${post.kind} = 'review'::post_kind
+		)`);
 	if (category === "tag-structures")
 		conditions.push(sql`exists (
 			select 1 from ${unitStructureVoteStat}
@@ -686,34 +856,8 @@ function buildSearchConditions(
 			select 1 from ${unitVariant}
 			where ${unitVariant.variantUnitId} = ${unit.id}
 		)`);
-	if (request.scopeUnitId) {
-		const direct = sql`${unit.id} = ${request.scopeUnitId}::uuid`;
-		conditions.push(
-			request.includeScopeDescendants
-				? sql`(${direct} or exists (
-					select 1
-					from ${contentStructureNode}
-					inner join ${contentStructure}
-						on ${contentStructure.id} = ${contentStructureNode.structureId}
-					where ${contentStructureNode.ownerUnitId} = ${request.scopeUnitId}::uuid
-						and ${contentStructureNode.contentUnitId} = ${unit.id}
-						and ${contentStructureNode.deletedAt} is null
-						and ${contentStructure.deletedAt} is null
-						and ${contentStructure.kind} in ('book.contents', 'post.contents')
-				))`
-				: direct,
-		);
-	}
 	if (expression)
 		conditions.push(compilePostgresSearchExpression(category, expression, request.profileId));
-	if (request.domainFilter)
-		conditions.push(
-			compileUnitPredicateSql(request.domainFilter, {
-				unitId: sql`${unit.id}`,
-				unitKind: sql`${unit.kind}`,
-				viewerProfileId: request.profileId,
-			}),
-		);
 	return conditions;
 }
 
@@ -793,38 +937,125 @@ interface SearchCandidateRow extends Record<string, unknown> {
 	readonly id: string;
 	readonly primaryValue: string;
 	readonly secondaryValue: string;
+	readonly position: SearchKeysetPosition;
 }
 
 interface SearchCandidatePage {
 	readonly rows: readonly SearchCandidateRow[];
 	readonly hasMore: boolean;
+	readonly nextPosition?: SearchKeysetPosition;
+	readonly scannedCount: number;
+	readonly boundedTextFallback: boolean;
 }
 
 interface SearchCandidateDatabaseRow extends Record<string, unknown> {
 	readonly id: string | null;
 	readonly primaryValue: string | null;
 	readonly secondaryValue: string | null;
+	readonly source: CandidateSourceName | null;
+	readonly snapshotId: string | null;
+	readonly hasMore: boolean;
+	readonly continuationPrimary: string | null;
+	readonly continuationSecondary: string | null;
+	readonly continuationUnitId: string | null;
+	readonly continuationSource: CandidateSourceName | null;
+	readonly continuationSnapshotId: string | null;
+	readonly scannedCount: number;
+	readonly snapshotAvailable: boolean;
+	readonly boundedTextFallback: boolean;
 }
 
-function readSearchCandidateRows(
-	rows: readonly SearchCandidateDatabaseRow[],
-): readonly SearchCandidateRow[] {
+type CandidateSourceName =
+	| "ordered"
+	| "best-positive"
+	| "best-zero"
+	| "count-positive"
+	| "count-zero";
+
+function isCandidateSourceName(value: unknown): value is CandidateSourceName {
+	return (
+		value === "ordered" ||
+		value === "best-positive" ||
+		value === "best-zero" ||
+		value === "count-positive" ||
+		value === "count-zero"
+	);
+}
+
+function searchKeysetPosition(input: {
+	readonly primary: string;
+	readonly secondary: string;
+	readonly unitId: string;
+	readonly source: CandidateSourceName;
+	readonly snapshotId: string | null;
+}): SearchKeysetPosition {
+	const base = {
+		primary: input.primary,
+		secondary: input.secondary,
+		unitId: input.unitId,
+	} as const;
+	return input.source === "best-positive" || input.source === "best-zero"
+		? { ...base, source: input.source, snapshotId: input.snapshotId }
+		: input.source === "count-positive" || input.source === "count-zero"
+			? { ...base, source: input.source }
+			: { ...base, source: "ordered" };
+}
+
+function readSearchCandidatePage(rows: readonly SearchCandidateDatabaseRow[]): SearchCandidatePage {
+	const metadata = rows[0];
+	if (!metadata) throw new Error("PostgreSQL returned no Search candidate metadata");
+	if (!metadata.snapshotAvailable) throw new InvalidSearch("Search cursor snapshot has expired");
 	const candidates: SearchCandidateRow[] = [];
 	for (const row of rows) {
 		if (row.id === null && row.primaryValue === null && row.secondaryValue === null) continue;
 		if (
 			typeof row.id !== "string" ||
 			typeof row.primaryValue !== "string" ||
-			typeof row.secondaryValue !== "string"
+			typeof row.secondaryValue !== "string" ||
+			!isCandidateSourceName(row.source)
 		)
 			throw new Error("PostgreSQL returned an invalid Search candidate row");
 		candidates.push({
 			id: row.id,
 			primaryValue: row.primaryValue,
 			secondaryValue: row.secondaryValue,
+			position: searchKeysetPosition({
+				primary: row.primaryValue,
+				secondary: row.secondaryValue,
+				unitId: row.id,
+				source: row.source,
+				snapshotId: row.snapshotId,
+			}),
 		});
 	}
-	return candidates;
+	if (!metadata.hasMore)
+		return {
+			rows: candidates,
+			hasMore: false,
+			scannedCount: metadata.scannedCount,
+			boundedTextFallback: metadata.boundedTextFallback,
+		};
+	if (
+		metadata.continuationPrimary === null ||
+		metadata.continuationSecondary === null ||
+		metadata.continuationUnitId === null ||
+		!isCandidateSourceName(metadata.continuationSource)
+	)
+		throw new Error("PostgreSQL omitted the Search continuation position");
+	const nextPosition = searchKeysetPosition({
+		primary: metadata.continuationPrimary,
+		secondary: metadata.continuationSecondary,
+		unitId: metadata.continuationUnitId,
+		source: metadata.continuationSource,
+		snapshotId: metadata.continuationSnapshotId,
+	});
+	return {
+		rows: candidates,
+		hasMore: true,
+		nextPosition,
+		scannedCount: metadata.scannedCount,
+		boundedTextFallback: metadata.boundedTextFallback,
+	};
 }
 
 interface PreparedSearchBranch {
@@ -832,205 +1063,884 @@ interface PreparedSearchBranch {
 	readonly conditions: readonly SQL[];
 }
 
-interface SearchSortSql {
-	readonly primary: SQL;
-	readonly secondary: SQL;
+interface OrderedCandidateSource {
+	readonly statement: SQL;
 	readonly direction: "asc" | "desc";
 }
 
-function currentSearchTextCondition(query: string): SQL {
-	if (!query) return sql`true`;
-	const escapedQuery = sql`public.pgroonga_query_escape(${query})`;
-	return sql`(
-		public.current_search_metadata_v1(
-			${searchLocalization.title},
-			${searchLocalization.summary},
-			${searchLocalization.description}
-		) &@~ ${escapedQuery}
-		or (
-			${searchLocalization.contentStatus} = 'published'::content_status
-			and public.current_search_text_v1(${searchLocalization.content}) &@~ ${escapedQuery}
-		)
-	)`;
+const publicDiscoverableCandidate = sql`${unit.status} = 'published'::unit_status
+	and ${unit.visibility} = 'public'::resource_visibility
+	and ${unit.moderationStatus} = 'approved'::moderation_status
+	and ${unit.deletedAt} is null`;
+
+function requirePositionValues(position: SearchKeysetPosition): {
+	readonly primary: string;
+	readonly secondary: string;
+} {
+	if (position.primary === null || position.secondary === null)
+		throw new InvalidSearch("Search cursor is missing a sort value");
+	return { primary: position.primary, secondary: position.secondary };
 }
 
-function currentSearchSources(query: string, languageBoundary: readonly ContentLanguage[]): SQL {
+function requireOrderedPosition(
+	position: SearchKeysetPosition | undefined,
+): SearchKeysetPosition | undefined {
+	if (position?.source && position.source !== "ordered")
+		throw new InvalidSearch("Search cursor does not match this ordering source");
+	return position;
+}
+
+function bigintKeysetCondition(
+	column: SQL,
+	id: SQL,
+	direction: "asc" | "desc",
+	position: SearchKeysetPosition | undefined,
+): SQL {
+	if (!position) return sql`true`;
+	const { primary } = requirePositionValues(position);
+	return direction === "asc"
+		? sql`(${column}, ${id}) > (${primary}::bigint, ${position.unitId}::uuid)`
+		: sql`(${column}, ${id}) < (${primary}::bigint, ${position.unitId}::uuid)`;
+}
+
+function timestampKeysetCondition(
+	column: SQL,
+	id: SQL,
+	direction: "asc" | "desc",
+	position: SearchKeysetPosition | undefined,
+	value: "primary" | "secondary" = "primary",
+): SQL {
+	if (!position) return sql`true`;
+	const values = requirePositionValues(position);
+	const cursorTimestamp = sql`to_timestamp(${values[value]}::double precision)`;
+	return direction === "asc"
+		? sql`(${column}, ${id}) > (${cursorTimestamp}, ${position.unitId}::uuid)`
+		: sql`(${column}, ${id}) < (${cursorTimestamp}, ${position.unitId}::uuid)`;
+}
+
+function idKeysetCondition(
+	id: SQL,
+	direction: "asc" | "desc",
+	position: SearchKeysetPosition | undefined,
+): SQL {
+	if (!position) return sql`true`;
+	return direction === "asc"
+		? sql`${id} > ${position.unitId}::uuid`
+		: sql`${id} < ${position.unitId}::uuid`;
+}
+
+function nullableTimestampCandidateSource(input: {
+	readonly column: SQL;
+	readonly id: SQL;
+	readonly relation: SQL;
+	readonly baseCondition: SQL;
+	readonly direction: "asc" | "desc";
+	readonly position: SearchKeysetPosition | undefined;
+	readonly limit: number;
+}): OrderedCandidateSource {
+	const { primary } = input.position
+		? requirePositionValues(input.position)
+		: { primary: undefined };
+	const sentinelNumber = input.direction === "asc" ? 1e100 : -1e100;
+	const positionIsNull = primary !== undefined && Number(primary) === sentinelNumber;
+	const orderDirection = input.direction === "asc" ? sql`asc` : sql`desc`;
+	const sentinel = input.direction === "asc" ? sql`1e100::numeric` : sql`-1e100::numeric`;
+	const branches: SQL[] = [];
+	if (!positionIsNull) {
+		branches.push(sql`
+			select ${input.id} as unit_id,
+				extract(epoch from ${input.column})::numeric as primary_order,
+				0::numeric as secondary_order,
+				0::integer as source_phase,
+				'ordered'::text as source_name,
+				null::uuid as snapshot_id,
+				false as search_fallback
+			from ${input.relation}
+			where ${input.baseCondition}
+				and ${input.column} is not null
+				and ${timestampKeysetCondition(
+					input.column,
+					input.id,
+					input.direction,
+					input.position,
+				)}
+			order by ${input.column} ${orderDirection}, ${input.id} ${orderDirection}
+			limit ${input.limit}`);
+	}
+	branches.push(sql`
+		select ${input.id} as unit_id,
+			${sentinel} as primary_order,
+			0::numeric as secondary_order,
+			1::integer as source_phase,
+			'ordered'::text as source_name,
+			null::uuid as snapshot_id,
+			false as search_fallback
+		from ${input.relation}
+		where ${input.baseCondition}
+			and ${input.column} is null
+			and ${idKeysetCondition(
+				input.id,
+				input.direction,
+				positionIsNull ? input.position : undefined,
+			)}
+		order by ${input.id} ${orderDirection}
+		limit ${input.limit}`);
+	return {
+		direction: input.direction,
+		statement: sql`
+			select nullable_source.*
+			from (${sql.join(
+				branches.map((branch) => sql`(${branch})`),
+				sql` union all `,
+			)}) as nullable_source
+			order by source_phase asc, primary_order ${orderDirection},
+				secondary_order ${orderDirection}, unit_id ${orderDirection}
+			limit ${input.limit}`,
+	};
+}
+
+function bestCandidateSource(
+	position: SearchKeysetPosition | undefined,
+	limit: number,
+	seeded = false,
+): OrderedCandidateSource {
+	if (position && position.source !== "best-positive" && position.source !== "best-zero")
+		throw new InvalidSearch("This best cursor predates snapshot-pinned pagination");
+	const bestPosition =
+		position?.source === "best-positive" || position?.source === "best-zero"
+			? position
+			: undefined;
+	const selectedSnapshot = bestPosition
+		? bestPosition.snapshotId === null
+			? sql`select ${recommendationSnapshot.id} from ${recommendationSnapshot} where false`
+			: sql`select ${recommendationSnapshot.id}
+				from ${recommendationSnapshot}
+				where ${recommendationSnapshot.id} = ${bestPosition.snapshotId}::uuid
+					and ${recommendationSnapshot.state} = 'ready'::recommendation_snapshot_state`
+		: sql`select ${recommendationSnapshot.id}
+			from ${recommendationSnapshot}
+			where ${recommendationSnapshot.active} = true
+			limit 1`;
+	const positivePosition = bestPosition?.source === "best-positive" ? bestPosition : undefined;
+	const zeroPosition = bestPosition?.source === "best-zero" ? bestPosition : undefined;
+	const includePositive =
+		bestPosition?.source !== "best-zero" && bestPosition?.snapshotId !== null;
+	const positive = sql`
+		select ${searchBestScore.unitId} as unit_id,
+			${searchBestScore.score}::numeric as primary_order,
+			extract(epoch from ${searchBestScore.unitUpdatedAt})::numeric as secondary_order,
+			0::integer as source_phase,
+			'best-positive'::text as source_name,
+			${searchBestScore.snapshotId} as snapshot_id,
+			false as search_fallback
+		from ${searchBestScore}
+		${
+			seeded
+				? sql`inner join filter_seed on filter_seed.unit_id = ${searchBestScore.unitId}`
+				: sql``
+		}
+		inner join selected_best_snapshot
+			on selected_best_snapshot.id = ${searchBestScore.snapshotId}
+		where ${
+			positivePosition
+				? (
+						() => {
+							const { primary, secondary } = requirePositionValues(positivePosition);
+							return sql`(
+								${searchBestScore.score},
+								${searchBestScore.unitUpdatedAt},
+								${searchBestScore.unitId}
+							) < (
+								${primary}::double precision,
+								to_timestamp(${secondary}::double precision),
+								${positivePosition.unitId}::uuid
+							)`;
+						}
+					)()
+				: sql`true`
+		}
+		order by ${searchBestScore.score} desc,
+			${searchBestScore.unitUpdatedAt} desc,
+			${searchBestScore.unitId} desc
+		limit ${limit}`;
+	const zero = sql`
+		select ${unit.id} as unit_id,
+			0::numeric as primary_order,
+			extract(epoch from ${unit.updatedAt})::numeric as secondary_order,
+			1::integer as source_phase,
+			'best-zero'::text as source_name,
+			(select id from selected_best_snapshot) as snapshot_id,
+			false as search_fallback
+		from ${unit}
+		${seeded ? sql`inner join filter_seed on filter_seed.unit_id = ${unit.id}` : sql``}
+		where ${publicDiscoverableCandidate}
+			and not exists (
+				select 1
+				from ${searchBestScore}
+				inner join selected_best_snapshot
+					on selected_best_snapshot.id = ${searchBestScore.snapshotId}
+				where ${searchBestScore.unitId} = ${unit.id}
+			)
+			and ${timestampKeysetCondition(
+				sql`${unit.updatedAt}`,
+				sql`${unit.id}`,
+				"desc",
+				zeroPosition,
+				"secondary",
+			)}
+		order by ${unit.updatedAt} desc, ${unit.id} desc
+		limit ${limit}`;
+	const branches = includePositive ? [positive, zero] : [zero];
+	return {
+		direction: "desc",
+		statement: sql`
+			with selected_best_snapshot as materialized (${selectedSnapshot})
+			select best_source.*
+			from (${sql.join(
+				branches.map((branch) => sql`(${branch})`),
+				sql` union all `,
+			)}) as best_source
+			order by source_phase asc, primary_order desc, secondary_order desc, unit_id desc
+			limit ${limit}`,
+	};
+}
+
+function sparseFollowerCandidateSource(
+	position: SearchKeysetPosition | undefined,
+	direction: "asc" | "desc",
+	limit: number,
+	seeded = false,
+): OrderedCandidateSource {
+	if (position && position.source !== "count-positive" && position.source !== "count-zero")
+		throw new InvalidSearch("This count cursor predates sparse index pagination");
+	const positivePhase = direction === "desc" ? 0 : 1;
+	const zeroPhase = direction === "asc" ? 0 : 1;
+	const cursorPhase =
+		position?.source === "count-positive"
+			? positivePhase
+			: position?.source === "count-zero"
+				? zeroPhase
+				: undefined;
+	const branches: SQL[] = [];
+	const orderDirection = direction === "asc" ? sql`asc` : sql`desc`;
+	if (cursorPhase === undefined || positivePhase >= cursorPhase) {
+		const positivePosition =
+			cursorPhase === positivePhase && position?.source === "count-positive"
+				? position
+				: undefined;
+		const orderDirection = direction === "asc" ? sql`asc` : sql`desc`;
+		branches.push(sql`
+			select ${unitFollowStat.unitId} as unit_id,
+				${unitFollowStat.followerCount}::numeric as primary_order,
+				0::numeric as secondary_order,
+				${positivePhase}::integer as source_phase,
+				'count-positive'::text as source_name,
+				null::uuid as snapshot_id,
+				false as search_fallback
+			from ${unitFollowStat}
+			${
+				seeded
+					? sql`inner join filter_seed on filter_seed.unit_id = ${unitFollowStat.unitId}`
+					: sql``
+			}
+			where ${unitFollowStat.followerCount} > 0
+				and ${bigintKeysetCondition(
+					sql`${unitFollowStat.followerCount}`,
+					sql`${unitFollowStat.unitId}`,
+					direction,
+					positivePosition,
+				)}
+			order by ${unitFollowStat.followerCount} ${orderDirection},
+				${unitFollowStat.unitId} ${orderDirection}
+			limit ${limit}`);
+	}
+	if (cursorPhase === undefined || zeroPhase >= cursorPhase) {
+		const zeroPosition =
+			cursorPhase === zeroPhase && position?.source === "count-zero" ? position : undefined;
+		branches.push(sql`
+			select ${unit.id} as unit_id,
+				0::numeric as primary_order,
+				0::numeric as secondary_order,
+				${zeroPhase}::integer as source_phase,
+				'count-zero'::text as source_name,
+				null::uuid as snapshot_id,
+				false as search_fallback
+			from ${unit}
+			${seeded ? sql`inner join filter_seed on filter_seed.unit_id = ${unit.id}` : sql``}
+			where ${publicDiscoverableCandidate}
+				and not exists (
+					select 1 from ${unitFollowStat}
+					where ${unitFollowStat.unitId} = ${unit.id}
+						and ${unitFollowStat.followerCount} > 0
+				)
+				and ${idKeysetCondition(sql`${unit.id}`, direction, zeroPosition)}
+			order by ${unit.id} ${orderDirection}
+			limit ${limit}`);
+	}
+	return {
+		direction,
+		statement: sql`
+			select count_source.*
+			from (${sql.join(
+				branches.map((branch) => sql`(${branch})`),
+				sql` union all `,
+			)}) as count_source
+			order by source_phase asc, primary_order ${orderDirection},
+				secondary_order ${orderDirection}, unit_id ${orderDirection}
+			limit ${limit}`,
+	};
+}
+
+function textCandidateSource(
+	query: string,
+	languageBoundary: readonly ContentLanguage[],
+	position: SearchKeysetPosition | undefined,
+	limit: number,
+): OrderedCandidateSource {
+	const orderedPosition = requireOrderedPosition(position);
+	const cursorValues = orderedPosition ? requirePositionValues(orderedPosition) : undefined;
+	const cursorMicros = cursorValues
+		? sql`round(${cursorValues.primary}::numeric * 1000000)::bigint`
+		: sql`null::bigint`;
+	return {
+		direction: "desc",
+		statement: sql`
+			select text_candidate.unit_id,
+				(text_candidate.unit_updated_at_micros::numeric / 1000000) as primary_order,
+				0::numeric as secondary_order,
+				0::integer as source_phase,
+				'ordered'::text as source_name,
+				null::uuid as snapshot_id,
+				(not text_candidate.search_matched) as search_fallback,
+				text_candidate.search_matched
+			from public.search_text_candidates(
+				${query},
+				${toTextArray(languageBoundary)},
+				${cursorMicros},
+				${orderedPosition?.unitId ?? null}::uuid,
+				${WorkPolicy.search.maxEstimatedPostings},
+				${limit}
+			) as text_candidate
+			order by text_candidate.unit_updated_at_micros desc,
+				text_candidate.unit_id desc
+			limit ${limit}`,
+	};
+}
+
+function seededUnitCandidateSource(
+	sort: SearchSort,
+	position: SearchKeysetPosition | undefined,
+	limit: number,
+): OrderedCandidateSource | undefined {
+	if (sort === "best") return bestCandidateSource(position, limit, true);
+	if (sort === "followerCount:asc" || sort === "followerCount:desc")
+		return sparseFollowerCandidateSource(
+			position,
+			sort.endsWith(":asc") ? "asc" : "desc",
+			limit,
+			true,
+		);
+	const direction = sort.endsWith(":asc") ? "asc" : "desc";
+	const orderDirection = direction === "asc" ? sql`asc` : sql`desc`;
+	const orderedPosition = requireOrderedPosition(position);
+	if (sort === "replyCount:asc" || sort === "replyCount:desc")
+		return {
+			direction,
+			statement: sql`
+				select ${postReplyStat.postId} as unit_id,
+					${postReplyStat.searchReplyCount}::numeric as primary_order,
+					0::numeric as secondary_order,
+					0::integer as source_phase,
+					'ordered'::text as source_name,
+					null::uuid as snapshot_id,
+					false as search_fallback
+				from ${postReplyStat}
+				inner join filter_seed on filter_seed.unit_id = ${postReplyStat.postId}
+				where ${bigintKeysetCondition(
+					sql`${postReplyStat.searchReplyCount}`,
+					sql`${postReplyStat.postId}`,
+					direction,
+					orderedPosition,
+				)}
+				order by ${postReplyStat.searchReplyCount} ${orderDirection},
+					${postReplyStat.postId} ${orderDirection}
+				limit ${limit}`,
+		};
+	if (sort === "closesAt:asc" || sort === "closesAt:desc")
+		return nullableTimestampCandidateSource({
+			column: sql`${poll.closesAt}`,
+			id: sql`${poll.id}`,
+			relation: sql`${poll} inner join filter_seed on filter_seed.unit_id = ${poll.id}`,
+			baseCondition: sql`true`,
+			direction,
+			position: orderedPosition,
+			limit,
+		});
+	const resolvedSort = sort === "relevance" ? "updatedAt:desc" : sort;
+	if (
+		resolvedSort !== "createdAt:asc" &&
+		resolvedSort !== "createdAt:desc" &&
+		resolvedSort !== "updatedAt:asc" &&
+		resolvedSort !== "updatedAt:desc" &&
+		resolvedSort !== "publishedAt:asc" &&
+		resolvedSort !== "publishedAt:desc"
+	)
+		return undefined;
+	const timestamp = resolvedSort.startsWith("createdAt")
+		? sql`${unit.createdAt}`
+		: resolvedSort.startsWith("publishedAt")
+			? sql`${unit.publishedAt}`
+			: sql`${unit.updatedAt}`;
+	if (resolvedSort.startsWith("publishedAt"))
+		return nullableTimestampCandidateSource({
+			column: timestamp,
+			id: sql`${unit.id}`,
+			relation: sql`${unit} inner join filter_seed on filter_seed.unit_id = ${unit.id}`,
+			baseCondition: publicDiscoverableCandidate,
+			direction,
+			position: orderedPosition,
+			limit,
+		});
+	return {
+		direction,
+		statement: sql`
+			select ${unit.id} as unit_id,
+				extract(epoch from ${timestamp})::numeric as primary_order,
+				0::numeric as secondary_order,
+				0::integer as source_phase,
+				'ordered'::text as source_name,
+				null::uuid as snapshot_id,
+				false as search_fallback,
+				false as search_matched
+			from filter_seed
+			inner join ${unit} on ${unit.id} = filter_seed.unit_id
+			where ${publicDiscoverableCandidate}
+				and ${timestampKeysetCondition(
+					timestamp,
+					sql`${unit.id}`,
+					direction,
+					orderedPosition,
+				)}
+			order by ${timestamp} ${orderDirection}, ${unit.id} ${orderDirection}
+			limit ${limit}`,
+	};
+}
+
+function orderedCandidateSource(input: {
+	readonly query: string;
+	readonly sort: SearchSort;
+	readonly position?: SearchKeysetPosition;
+	readonly languageBoundary: readonly ContentLanguage[];
+	readonly limit: number;
+}): OrderedCandidateSource {
+	if (input.sort === "relevance")
+		return textCandidateSource(
+			input.query,
+			input.languageBoundary,
+			input.position,
+			input.limit,
+		);
+	if (input.sort === "best") return bestCandidateSource(input.position, input.limit);
+	const direction = input.sort.endsWith(":asc") ? "asc" : "desc";
+	if (input.sort === "followerCount:asc" || input.sort === "followerCount:desc")
+		return sparseFollowerCandidateSource(input.position, direction, input.limit);
+	const orderDirection = direction === "asc" ? sql`asc` : sql`desc`;
+	const position = requireOrderedPosition(input.position);
+	if (input.sort === "replyCount:asc" || input.sort === "replyCount:desc")
+		return {
+			direction,
+			statement: sql`
+				select ${postReplyStat.postId} as unit_id,
+					${postReplyStat.searchReplyCount}::numeric as primary_order,
+					0::numeric as secondary_order,
+					0::integer as source_phase,
+					'ordered'::text as source_name,
+					null::uuid as snapshot_id,
+					false as search_fallback
+				from ${postReplyStat}
+				where ${bigintKeysetCondition(
+					sql`${postReplyStat.searchReplyCount}`,
+					sql`${postReplyStat.postId}`,
+					direction,
+					position,
+				)}
+				order by ${postReplyStat.searchReplyCount} ${orderDirection},
+					${postReplyStat.postId} ${orderDirection}
+				limit ${input.limit}`,
+		};
+	if (input.sort === "closesAt:asc" || input.sort === "closesAt:desc")
+		return nullableTimestampCandidateSource({
+			column: sql`${poll.closesAt}`,
+			id: sql`${poll.id}`,
+			relation: sql`${poll}`,
+			baseCondition: sql`true`,
+			direction,
+			position,
+			limit: input.limit,
+		});
+	const timestamps: Partial<Record<SearchSort, SQL>> = {
+		"createdAt:asc": sql`${unit.createdAt}`,
+		"createdAt:desc": sql`${unit.createdAt}`,
+		"updatedAt:asc": sql`${unit.updatedAt}`,
+		"updatedAt:desc": sql`${unit.updatedAt}`,
+		"publishedAt:asc": sql`${unit.publishedAt}`,
+		"publishedAt:desc": sql`${unit.publishedAt}`,
+	};
+	const timestamp = timestamps[input.sort];
+	if (!timestamp) throw new InvalidSearch(`${input.sort} has no PostgreSQL search ordering`);
+	if (input.sort === "publishedAt:asc" || input.sort === "publishedAt:desc")
+		return nullableTimestampCandidateSource({
+			column: timestamp,
+			id: sql`${unit.id}`,
+			relation: sql`${unit}`,
+			baseCondition: publicDiscoverableCandidate,
+			direction,
+			position,
+			limit: input.limit,
+		});
+	return {
+		direction,
+		statement: sql`
+			select ${unit.id} as unit_id,
+				extract(epoch from ${timestamp})::numeric as primary_order,
+				0::numeric as secondary_order,
+				0::integer as source_phase,
+				'ordered'::text as source_name,
+				null::uuid as snapshot_id,
+				false as search_fallback
+			from ${unit}
+			where ${publicDiscoverableCandidate}
+				and ${timestampKeysetCondition(timestamp, sql`${unit.id}`, direction, position)}
+			order by ${timestamp} ${orderDirection}, ${unit.id} ${orderDirection}
+			limit ${input.limit}`,
+	};
+}
+
+function currentSearchDocumentCondition(
+	query: string,
+	languageBoundary: readonly ContentLanguage[],
+): SQL {
+	const languageColumns: Readonly<Record<ContentLanguage, SQL>> = {
+		zh: sql`${boundedSearchDocument.textZh}`,
+		en: sql`${boundedSearchDocument.textEn}`,
+		ja: sql`${boundedSearchDocument.textJa}`,
+		ko: sql`${boundedSearchDocument.textKo}`,
+		de: sql`${boundedSearchDocument.textDe}`,
+		fr: sql`${boundedSearchDocument.textFr}`,
+		es: sql`${boundedSearchDocument.textEs}`,
+	};
+	const columns = languageBoundary.length
+		? languageBoundary.map((language) => languageColumns[language])
+		: [sql`${boundedSearchDocument.textAll}`];
+	return sql`(${sql.join(
+		columns.map((column) => sql`${column} &@~ public.pgroonga_query_escape(${query})`),
+		sql` or `,
+	)})`;
+}
+
+function currentSearchSources(
+	query: string,
+	languageBoundary: readonly ContentLanguage[],
+	candidateRelation: SQL,
+	sourceMayPreMatch: boolean,
+): SQL {
 	if (!query)
-		return sql`select ${unit.id} as unit_id, 0::numeric as relevance_score from ${unit}`;
-	const localizationLanguageCondition = languageBoundary.length
-		? inArray(searchLocalization.language, languageBoundary)
-		: sql`true`;
-	const aliasLanguageCondition = languageBoundary.length
-		? sql`(${searchAlias.language} is null or ${inArray(searchAlias.language, languageBoundary)})`
-		: sql`true`;
+		return sql`select bounded_search_candidate.unit_id
+			from ${candidateRelation} as bounded_search_candidate`;
+	const boundedMatch = sql`exists (
+		select 1
+		from ${unitSearchDocument} as ${boundedSearchDocument}
+		where ${boundedSearchDocument.unitId} = bounded_search_candidate.unit_id
+			and ${currentSearchDocumentCondition(query, languageBoundary)}
+	)`;
+	if (!sourceMayPreMatch)
+		return sql`select bounded_search_candidate.unit_id
+			from ${candidateRelation} as bounded_search_candidate
+			where ${boundedMatch}`;
 	return sql`
-		select ${searchLocalization.unitId} as unit_id,
-			pgroonga_score(${searchLocalization}.tableoid, ${searchLocalization}.ctid)::numeric
-				as relevance_score
-		from ${unitLocalization} as ${searchLocalization}
-		where ${currentSearchTextCondition(query)}
-			and ${localizationLanguageCondition}
+		select bounded_search_candidate.unit_id
+		from ${candidateRelation} as bounded_search_candidate
+		where bounded_search_candidate.search_matched
 		union all
-		select ${searchAlias.unitId} as unit_id,
-			pgroonga_score(${searchAlias}.tableoid, ${searchAlias}.ctid)::numeric
-				as relevance_score
-		from ${unitAlias} as ${searchAlias}
-		left join ${unitAliasVoteStat} as ${searchAliasVoteStat}
-			on ${searchAliasVoteStat.aliasId} = ${searchAlias.id}
-		where (${searchAlias.pinned}
-				or coalesce(${searchAliasVoteStat.score}, 0) >= ${AliasSearchScoreThreshold})
-			and ${aliasLanguageCondition}
-			and ${searchAlias.term} &@~ public.pgroonga_query_escape(${query})
+		select bounded_search_candidate.unit_id
+		from ${candidateRelation} as bounded_search_candidate
+		where not bounded_search_candidate.search_matched
+			and ${boundedMatch}
 	`;
 }
 
-function currentSearchSort(sort: SearchSort, query: string): SearchSortSql {
-	if (sort === "relevance") {
-		if (!query) throw new InvalidSearch("relevance requires a text query");
-		return {
-			primary: sql`eligible_matches.relevance_score`,
-			secondary: sql`extract(epoch from ${unit.updatedAt})::numeric`,
-			direction: "desc",
-		};
-	}
-	if (sort === "best")
-		return {
-			primary: sql`coalesce((
-				select ${recommendationUnitStat.engagement24h}
-				from ${recommendationUnitStat}
-				inner join ${recommendationSnapshot}
-					on ${recommendationSnapshot.id} = ${recommendationUnitStat.snapshotId}
-					and ${recommendationSnapshot.active} = true
-				where ${recommendationUnitStat.unitId} = ${unit.id}
-					and ${recommendationUnitStat.contextRealmId} is null
-				limit 1
-			), 0)::numeric`,
-			secondary: sql`extract(epoch from ${unit.updatedAt})::numeric`,
-			direction: "desc",
-		};
-	const timestampSorts: Partial<Record<SearchSort, SQL>> = {
-		"createdAt:asc": sql`extract(epoch from ${unit.createdAt})::numeric`,
-		"createdAt:desc": sql`extract(epoch from ${unit.createdAt})::numeric`,
-		"updatedAt:asc": sql`extract(epoch from ${unit.updatedAt})::numeric`,
-		"updatedAt:desc": sql`extract(epoch from ${unit.updatedAt})::numeric`,
-		"publishedAt:asc": sql`coalesce(extract(epoch from ${unit.publishedAt})::numeric, 1e100::numeric)`,
-		"publishedAt:desc": sql`coalesce(extract(epoch from ${unit.publishedAt})::numeric, -1e100::numeric)`,
-		"closesAt:asc": sql`coalesce(extract(epoch from ${poll.closesAt})::numeric, 1e100::numeric)`,
-		"closesAt:desc": sql`coalesce(extract(epoch from ${poll.closesAt})::numeric, -1e100::numeric)`,
-	};
-	const timestamp = timestampSorts[sort];
-	if (timestamp)
-		return {
-			primary: timestamp,
-			secondary: sql`0::numeric`,
-			direction: sort.endsWith(":asc") ? "asc" : "desc",
-		};
-	if (sort === "followerCount:asc" || sort === "followerCount:desc")
-		return {
-			primary: sql`coalesce(${unitFollowStat.followerCount}, 0)::numeric`,
-			secondary: sql`0::numeric`,
-			direction: sort.endsWith(":asc") ? "asc" : "desc",
-		};
-	if (sort === "replyCount:asc" || sort === "replyCount:desc")
-		return {
-			primary: sql`coalesce(case when ${post.kind} = 'reply' then ${postReplyStat.undeletedDirectCount} else ${postReplyStat.undeletedDescendantCount} end, 0)::numeric`,
-			secondary: sql`0::numeric`,
-			direction: sort.endsWith(":asc") ? "asc" : "desc",
-		};
-	throw new InvalidSearch(`${sort} has no PostgreSQL search ordering`);
+async function searchCandidateBatch(input: {
+	readonly branches: readonly PreparedSearchBranch[];
+	readonly candidateSet?: SQL;
+	readonly commonConditions?: readonly SQL[];
+	readonly query: string;
+	readonly sort: SearchSort;
+	readonly position?: SearchKeysetPosition;
+	readonly limit: number;
+	readonly scanLimit: number;
+	readonly languageBoundary: readonly ContentLanguage[];
+}): Promise<SearchCandidatePage> {
+	if (!input.branches.length)
+		return { rows: [], hasMore: false, scannedCount: 0, boundedTextFallback: false };
+	const source =
+		(input.candidateSet
+			? seededUnitCandidateSource(input.sort, input.position, input.scanLimit + 1)
+			: undefined) ??
+		orderedCandidateSource({
+			query: input.query,
+			sort: input.sort,
+			position: input.position,
+			languageBoundary: input.languageBoundary,
+			limit: input.scanLimit + 1,
+		});
+	const branchConditions = input.branches.map(
+		(branch) => sql`(${sql.join([...branch.conditions], sql` and `)})`,
+	);
+	const eligibilityConditions = [
+		...(input.commonConditions ?? []),
+		sql`(${sql.join(branchConditions, sql` or `)})`,
+	];
+	const orderDirection = source.direction === "asc" ? sql`asc` : sql`desc`;
+	const boundedSearchSources = currentSearchSources(
+		input.query,
+		input.languageBoundary,
+		sql`scanned_candidates`,
+		input.sort === "relevance",
+	);
+	const snapshotAvailable =
+		input.sort === "best" &&
+		(input.position?.source === "best-positive" || input.position?.source === "best-zero")
+			? input.position.snapshotId === null
+				? sql`true`
+				: sql`exists (
+					select 1 from ${recommendationSnapshot}
+					where ${recommendationSnapshot.id} = ${input.position.snapshotId}::uuid
+						and ${recommendationSnapshot.state} = 'ready'::recommendation_snapshot_state
+				)`
+			: sql`true`;
+	const result = await database.transaction(async (tx) => {
+		await tx.execute(
+			sql`select set_config('statement_timeout', ${String(env.SEARCH_STATEMENT_TIMEOUT_MS)}, true)`,
+		);
+		return tx.execute<SearchCandidateDatabaseRow>(sql`
+			with ${
+				input.candidateSet
+					? sql`filter_seed(unit_id) as materialized (${input.candidateSet}),`
+					: sql``
+			} ordered_source as materialized (
+				${source.statement}
+			), scanned_candidates as materialized (
+				select * from ordered_source
+				order by source_phase asc, primary_order ${orderDirection},
+					secondary_order ${orderDirection}, unit_id ${orderDirection}
+				limit ${input.scanLimit}
+			), raw_search_sources(unit_id) as materialized (
+				${boundedSearchSources}
+			), search_sources(unit_id) as materialized (
+				select distinct unit_id
+				from raw_search_sources
+			), eligible_matches as (
+				select ${unit.id} as unit_id,
+					scanned_candidates.primary_order,
+					scanned_candidates.secondary_order,
+					scanned_candidates.source_phase,
+					scanned_candidates.source_name,
+					scanned_candidates.snapshot_id
+				from scanned_candidates
+				inner join search_sources on search_sources.unit_id = scanned_candidates.unit_id
+				inner join ${unit} on ${unit.id} = scanned_candidates.unit_id
+				where ${sql.join(eligibilityConditions, sql` and `)}
+			), accepted as materialized (
+				select unit_id, primary_order, secondary_order, source_phase,
+					source_name, snapshot_id
+				from eligible_matches
+				order by source_phase asc, primary_order ${orderDirection},
+					secondary_order ${orderDirection}, unit_id ${orderDirection}
+				limit ${input.limit + 1}
+			), page as materialized (
+				select * from accepted
+				order by source_phase asc, primary_order ${orderDirection},
+					secondary_order ${orderDirection}, unit_id ${orderDirection}
+				limit ${input.limit}
+			), continuation as (
+				select
+					((select count(*) from accepted) > ${input.limit}
+						or (select count(*) from ordered_source) > ${input.scanLimit}) as has_more,
+					case
+						when (select count(*) from accepted) > ${input.limit}
+							then (select primary_order from page order by source_phase desc,
+								primary_order ${source.direction === "asc" ? sql`desc` : sql`asc`},
+								secondary_order ${source.direction === "asc" ? sql`desc` : sql`asc`},
+								unit_id ${source.direction === "asc" ? sql`desc` : sql`asc`} limit 1)
+						when (select count(*) from ordered_source) > ${input.scanLimit}
+							then (select primary_order from scanned_candidates order by source_phase desc,
+								primary_order ${source.direction === "asc" ? sql`desc` : sql`asc`},
+								secondary_order ${source.direction === "asc" ? sql`desc` : sql`asc`},
+								unit_id ${source.direction === "asc" ? sql`desc` : sql`asc`} limit 1)
+					end as continuation_primary,
+					case
+						when (select count(*) from accepted) > ${input.limit}
+							then (select secondary_order from page order by source_phase desc,
+								primary_order ${source.direction === "asc" ? sql`desc` : sql`asc`},
+								secondary_order ${source.direction === "asc" ? sql`desc` : sql`asc`},
+								unit_id ${source.direction === "asc" ? sql`desc` : sql`asc`} limit 1)
+						when (select count(*) from ordered_source) > ${input.scanLimit}
+							then (select secondary_order from scanned_candidates order by source_phase desc,
+								primary_order ${source.direction === "asc" ? sql`desc` : sql`asc`},
+								secondary_order ${source.direction === "asc" ? sql`desc` : sql`asc`},
+								unit_id ${source.direction === "asc" ? sql`desc` : sql`asc`} limit 1)
+					end as continuation_secondary,
+					case
+						when (select count(*) from accepted) > ${input.limit}
+							then (select unit_id from page order by source_phase desc,
+								primary_order ${source.direction === "asc" ? sql`desc` : sql`asc`},
+								secondary_order ${source.direction === "asc" ? sql`desc` : sql`asc`},
+								unit_id ${source.direction === "asc" ? sql`desc` : sql`asc`} limit 1)
+						when (select count(*) from ordered_source) > ${input.scanLimit}
+							then (select unit_id from scanned_candidates order by source_phase desc,
+								primary_order ${source.direction === "asc" ? sql`desc` : sql`asc`},
+								secondary_order ${source.direction === "asc" ? sql`desc` : sql`asc`},
+								unit_id ${source.direction === "asc" ? sql`desc` : sql`asc`} limit 1)
+					end as continuation_unit_id,
+					case
+						when (select count(*) from accepted) > ${input.limit}
+							then (select source_name from page order by source_phase desc,
+								primary_order ${source.direction === "asc" ? sql`desc` : sql`asc`},
+								secondary_order ${source.direction === "asc" ? sql`desc` : sql`asc`},
+								unit_id ${source.direction === "asc" ? sql`desc` : sql`asc`} limit 1)
+						when (select count(*) from ordered_source) > ${input.scanLimit}
+							then (select source_name from scanned_candidates order by source_phase desc,
+								primary_order ${source.direction === "asc" ? sql`desc` : sql`asc`},
+								secondary_order ${source.direction === "asc" ? sql`desc` : sql`asc`},
+								unit_id ${source.direction === "asc" ? sql`desc` : sql`asc`} limit 1)
+					end as continuation_source,
+					case
+						when (select count(*) from accepted) > ${input.limit}
+							then (select snapshot_id from page order by source_phase desc,
+								primary_order ${source.direction === "asc" ? sql`desc` : sql`asc`},
+								secondary_order ${source.direction === "asc" ? sql`desc` : sql`asc`},
+								unit_id ${source.direction === "asc" ? sql`desc` : sql`asc`} limit 1)
+						when (select count(*) from ordered_source) > ${input.scanLimit}
+							then (select snapshot_id from scanned_candidates order by source_phase desc,
+								primary_order ${source.direction === "asc" ? sql`desc` : sql`asc`},
+								secondary_order ${source.direction === "asc" ? sql`desc` : sql`asc`},
+								unit_id ${source.direction === "asc" ? sql`desc` : sql`asc`} limit 1)
+					end as continuation_snapshot_id,
+					(select count(*)::integer from scanned_candidates) as scanned_count,
+					coalesce((select bool_or(search_fallback) from ordered_source), false)
+						as bounded_text_fallback,
+					${snapshotAvailable} as snapshot_available
+			)
+			select page.unit_id::text as id,
+				page.primary_order::text as "primaryValue",
+				page.secondary_order::text as "secondaryValue",
+				page.source_name as source,
+				page.snapshot_id::text as "snapshotId",
+				continuation.has_more as "hasMore",
+				continuation.continuation_primary::text as "continuationPrimary",
+				continuation.continuation_secondary::text as "continuationSecondary",
+				continuation.continuation_unit_id::text as "continuationUnitId",
+				continuation.continuation_source as "continuationSource",
+				continuation.continuation_snapshot_id::text as "continuationSnapshotId",
+				continuation.scanned_count as "scannedCount",
+				continuation.bounded_text_fallback as "boundedTextFallback",
+				continuation.snapshot_available as "snapshotAvailable"
+			from continuation
+			left join page on true
+			order by page.source_phase asc, page.primary_order ${orderDirection},
+				page.secondary_order ${orderDirection},
+				page.unit_id ${orderDirection}
+		`);
+	});
+	return readSearchCandidatePage(result.rows);
 }
 
-function keysetCondition(sort: SearchSortSql, position: SearchKeysetPosition | undefined): SQL {
-	if (!position) return sql`true`;
-	if (position.primary === null || position.secondary === null)
-		throw new InvalidSearch("Search cursor is missing a sort value");
-	const primary = sql`${position.primary}::numeric`;
-	const secondary = sql`${position.secondary}::numeric`;
-	return sort.direction === "asc"
-		? sql`(
-			primary_order > ${primary}
-			or (primary_order = ${primary} and secondary_order > ${secondary})
-			or (primary_order = ${primary} and secondary_order = ${secondary} and unit_id > ${position.unitId}::uuid)
-		)`
-		: sql`(
-			primary_order < ${primary}
-			or (primary_order = ${primary} and secondary_order < ${secondary})
-			or (primary_order = ${primary} and secondary_order = ${secondary} and unit_id > ${position.unitId}::uuid)
-		)`;
+async function resolveSparseCandidateSet(candidateSet: SQL | undefined): Promise<SQL | undefined> {
+	if (!candidateSet) return undefined;
+	const maximumCandidates = WorkPolicy.search.maxCandidatesScanned;
+	const result = await database.transaction(async (tx) => {
+		await tx.execute(
+			sql`select set_config('statement_timeout', ${String(env.SEARCH_STATEMENT_TIMEOUT_MS)}, true)`,
+		);
+		return tx.execute<{ id: string }>(sql`
+			select candidate_seed.unit_id::text as id
+			from (${candidateSet}) as candidate_seed
+			limit ${maximumCandidates + 1}
+		`);
+	});
+	if (result.rows.length > maximumCandidates) return undefined;
+	const ids = [...new Set(result.rows.map(({ id }) => id))];
+	return sql`select bounded_seed.unit_id
+		from unnest(${toUuidArray(ids)}) as bounded_seed(unit_id)`;
 }
 
 async function searchCandidatePage(input: {
 	readonly branches: readonly PreparedSearchBranch[];
+	readonly candidateSet?: SQL;
+	readonly commonConditions?: readonly SQL[];
 	readonly query: string;
 	readonly sort: SearchSort;
 	readonly position?: SearchKeysetPosition;
 	readonly limit: number;
 	readonly languageBoundary: readonly ContentLanguage[];
 }): Promise<SearchCandidatePage> {
-	if (!input.branches.length) return { rows: [], hasMore: false };
-	const sort = currentSearchSort(input.sort, input.query);
-	const branchConditions = input.branches.map(
-		(branch) => sql`(${sql.join([...branch.conditions], sql` and `)})`,
-	);
-	const orderDirection = sort.direction === "asc" ? sql`asc` : sql`desc`;
-	const result = await database.transaction(async (tx) => {
-		await tx.execute(
-			sql`select set_config('statement_timeout', ${String(env.SEARCH_STATEMENT_TIMEOUT_MS)}, true)`,
-		);
-		return tx.execute<SearchCandidateDatabaseRow>(sql`
-			with search_sources(unit_id, relevance_score) as (
-				${currentSearchSources(input.query, input.languageBoundary)}
-			), eligible_matches as (
-				select ${unit.id} as unit_id,
-					max(search_sources.relevance_score)::numeric as relevance_score
-				from search_sources
-				inner join ${unit} on ${unit.id} = search_sources.unit_id
-				left join ${profile} on ${profile.id} = ${unit.id}
-				left join ${entity} on ${entity.id} = ${unit.id}
-				left join ${post} on ${post.id} = ${unit.id}
-				left join ${postReply} on ${postReply.postId} = ${unit.id}
-				left join ${postReplyStat} on ${postReplyStat.postId} = ${unit.id}
-				left join ${unitFollowStat} on ${unitFollowStat.unitId} = ${unit.id}
-				left join ${unit} as ${subjectUnit} on ${subjectUnit.id} = ${post.subjectUnitId}
-				left join ${realm} on ${realm.id} = ${unit.id}
-				left join ${collection} on ${collection.id} = ${unit.id}
-				left join ${poll} on ${poll.id} = ${unit.id}
-				left join ${book} on ${book.id} = ${unit.id}
-				left join ${media} on ${media.id} = ${unit.id}
-				left join ${software} on ${software.id} = ${unit.id}
-				where (${sql.join(branchConditions, sql` or `)})
-				group by ${unit.id}
-			), ranked_units as (
-				select ${unit.id} as unit_id,
-					${sort.primary} as primary_order,
-					${sort.secondary} as secondary_order
-				from eligible_matches
-				inner join ${unit} on ${unit.id} = eligible_matches.unit_id
-				left join ${post} on ${post.id} = ${unit.id}
-				left join ${postReplyStat} on ${postReplyStat.postId} = ${unit.id}
-				left join ${unitFollowStat} on ${unitFollowStat.unitId} = ${unit.id}
-				left join ${poll} on ${poll.id} = ${unit.id}
-			), page as (
-				select unit_id, primary_order, secondary_order
-				from ranked_units
-				where ${keysetCondition(sort, input.position)}
-				order by primary_order ${orderDirection}, secondary_order ${orderDirection}, unit_id asc
-				limit ${input.limit + 1}
-			)
-			select page.unit_id::text as id,
-				page.primary_order::text as "primaryValue",
-				page.secondary_order::text as "secondaryValue"
-			from page
-			order by page.primary_order ${orderDirection},
-				page.secondary_order ${orderDirection},
-				page.unit_id asc
-		`);
-	});
-	const candidates = readSearchCandidateRows(result.rows);
-	return {
-		rows: candidates.slice(0, input.limit),
-		hasMore: candidates.length > input.limit,
-	};
+	if (!input.branches.length)
+		return { rows: [], hasMore: false, scannedCount: 0, boundedTextFallback: false };
+	const candidateSet = await resolveSparseCandidateSet(input.candidateSet);
+	const maximumScan = WorkPolicy.search.maxCandidatesScanned;
+	const rows: SearchCandidateRow[] = [];
+	let position = input.position;
+	let scannedCount = 0;
+	let scanLimit = Math.min(maximumScan, Math.max(input.limit + 1, 64));
+	while (rows.length < input.limit && scannedCount < maximumScan) {
+		const batch = await searchCandidateBatch({
+			...input,
+			candidateSet,
+			position,
+			limit: input.limit - rows.length,
+			scanLimit: Math.min(scanLimit, maximumScan - scannedCount),
+		});
+		rows.push(...batch.rows);
+		scannedCount += batch.scannedCount;
+		if (!batch.hasMore)
+			return {
+				rows,
+				hasMore: false,
+				scannedCount,
+				boundedTextFallback: batch.boundedTextFallback,
+			};
+		if (!batch.nextPosition)
+			throw new Error("PostgreSQL Search batch omitted its keyset continuation");
+		position = batch.nextPosition;
+		if (rows.length >= input.limit)
+			return {
+				rows,
+				hasMore: true,
+				nextPosition: position,
+				scannedCount,
+				boundedTextFallback: batch.boundedTextFallback,
+			};
+		if (batch.boundedTextFallback)
+			return {
+				rows,
+				hasMore: true,
+				nextPosition: position,
+				scannedCount,
+				boundedTextFallback: true,
+			};
+		if (batch.scannedCount < 1)
+			throw new Error("PostgreSQL Search batch made no keyset progress");
+		scanLimit = Math.min(maximumScan - scannedCount, scanLimit * 2);
+	}
+	return position
+		? {
+				rows,
+				hasMore: true,
+				nextPosition: position,
+				scannedCount,
+				boundedTextFallback: false,
+			}
+		: { rows, hasMore: false, scannedCount, boundedTextFallback: false };
 }
 
 async function hydrateSearchHits(
@@ -1095,12 +2005,27 @@ function searchDomainScan(
 	request: DomainSearchRequest,
 	presentation: "identifiers",
 ): Promise<SearchDomainScanResult<SearchIdentifier>>;
+function searchDomainScan(
+	category: SearchCategory,
+	request: DomainSearchRequest,
+	presentation: "hits",
+	facetFields: readonly string[],
+): Promise<
+	SearchDomainScanResult<SearchHitWithoutSlugAddress> & {
+		readonly facets: SearchFacet[];
+	}
+>;
 async function searchDomainScan(
 	category: SearchCategory,
 	request: DomainSearchRequest,
 	presentation: "hits" | "identifiers",
+	facetFields: readonly string[] = [],
 ): Promise<
-	SearchDomainScanResult<SearchHitWithoutSlugAddress> | SearchDomainScanResult<SearchIdentifier>
+	| SearchDomainScanResult<SearchHitWithoutSlugAddress>
+	| SearchDomainScanResult<SearchIdentifier>
+	| (SearchDomainScanResult<SearchHitWithoutSlugAddress> & {
+			readonly facets: SearchFacet[];
+	  })
 > {
 	const startedAt = performance.now();
 	const searchExpression = buildEffectiveSearchExpression(request);
@@ -1151,38 +2076,51 @@ async function searchDomainScan(
 		cursorSeen = categoryState?.seen ?? 0;
 		cursorPosition = categoryState?.position;
 	}
-	const page = await searchCandidatePage({
+	const hasFacets = facetFields.some((field) => facetSpec(category, field));
+	const candidates = await searchCandidatePage({
 		branches: [{ category, conditions }],
+		...(request.domainFilter
+			? {
+					candidateSet: compileUnitPredicateCandidateSet(
+						request.domainFilter,
+						request.profileId,
+					),
+				}
+			: {}),
 		query: request.query?.trim() ?? "",
 		sort,
 		position: cursorPosition,
-		limit,
+		limit: hasFacets ? Math.max(limit, env.SEARCH_FACET_SCAN_LIMIT) : limit,
 		languageBoundary: presentationLanguages,
 	});
+	const page = sliceSearchCandidatePage(candidates, limit);
 	const identifiers = page.rows.map(({ id }) => ({ id }));
-	const hits =
+	const [hits, facets] = await Promise.all([
 		presentation === "hits"
-			? await hydrateSearchHits(
+			? hydrateSearchHits(
 					category,
 					page.rows.map(({ id }) => id),
 					request,
 					presentationLanguages,
 				)
-			: [];
+			: Promise.resolve([]),
+		hasFacets
+			? aggregateDomainFacets(
+					category,
+					facetFields,
+					candidates.rows.map(({ id }) => id),
+					!candidates.hasMore,
+				)
+			: Promise.resolve([]),
+	]);
+	if (hasFacets)
+		metrics.searchFacetScan("current", candidates.scannedCount, 1, candidates.hasMore);
 	const seen = cursorSeen + page.rows.length;
-	const last = page.rows.at(-1);
-	const nextPosition =
-		page.hasMore && last
-			? ({
-					primary: last.primaryValue,
-					secondary: last.secondaryValue,
-					unitId: last.id,
-				} satisfies SearchKeysetPosition)
-			: undefined;
+	const nextPosition = page.nextPosition;
 	const lowerBound = page.hasMore;
 	metrics.searchCandidateScan(
 		"current",
-		page.rows.length,
+		page.scannedCount,
 		page.rows.length,
 		1,
 		false,
@@ -1191,7 +2129,7 @@ async function searchDomainScan(
 	const common = {
 		total: {
 			kind: lowerBound ? "lower-bound" : "exact",
-			value: seen + (page.hasMore ? 1 : 0),
+			value: seen,
 		} as const,
 		offset: cursorSeen,
 		nextOffset: seen,
@@ -1200,7 +2138,7 @@ async function searchDomainScan(
 		nextCursor: !nextPosition
 			? undefined
 			: createSearchCursor({
-					version: 1,
+					version: SearchCursorVersion,
 					requestHash,
 					pageSize: limit,
 					categories: {
@@ -1214,7 +2152,9 @@ async function searchDomainScan(
 		limit,
 		processingTimeMs: Math.round((performance.now() - startedAt) * 1000) / 1000,
 	};
-	return presentation === "hits" ? { ...common, hits } : { ...common, hits: identifiers };
+	return presentation === "hits"
+		? { ...common, hits, ...(hasFacets ? { facets } : {}) }
+		: { ...common, hits: identifiers };
 }
 
 /**
@@ -1243,6 +2183,28 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 	};
 }
 
+/** @internal Resolves a grouped page and its first-page facets from one candidate window. */
+export async function searchDomainWithFacets(
+	category: SearchCategory,
+	request: DomainSearchRequest,
+	fields: readonly string[],
+) {
+	const { facets, ...result } = await searchDomainScan(category, request, "hits", fields);
+	const slugAddresses = await getPublicCanonicalUnitSlugAddresses(
+		result.hits.map((hit) => hit.id),
+	);
+	return {
+		group: {
+			...result,
+			hits: result.hits.map((hit) => ({
+				...hit,
+				slugAddress: slugAddresses.get(hit.id) ?? null,
+			})),
+		},
+		facets,
+	};
+}
+
 /** @internal Authoritative ranking and pagination without Search presentation hydration. */
 export function searchDomainIdentifiers(
 	category: SearchCategory,
@@ -1263,19 +2225,24 @@ export interface GlobalSearchIdentifiersRequest
 	readonly position?: SearchKeysetPosition;
 }
 
-/**
- * Executes one globally sorted authoritative stream across mutually exclusive categories.
- *
- * @internal
- */
-export async function searchGlobalIdentifiers(
+interface PreparedGlobalSearchRequest {
+	readonly branches: readonly (PreparedSearchBranch & {
+		readonly searchExpression?: SearchExpression;
+	})[];
+	readonly sort: SearchSort;
+	readonly limit: number;
+	readonly initialOffset: number;
+	readonly languageBoundary: readonly ContentLanguage[];
+	readonly commonConditions: readonly SQL[];
+	readonly candidateSet?: SQL;
+}
+
+function prepareGlobalSearchRequest(
 	request: GlobalSearchIdentifiersRequest,
-): Promise<SearchDomainScanResult<SearchIdentifier>> {
-	const startedAt = performance.now();
+): PreparedGlobalSearchRequest {
 	if (!request.branches.length) throw new InvalidSearch("Search requires at least one category");
 	if (new Set(request.branches.map(({ category }) => category)).size !== request.branches.length)
 		throw new InvalidSearch("Search categories must be unique");
-
 	const { branches, ...commonRequest } = request;
 	const preparedBranches = branches.map((branch) => {
 		const domainRequest = {
@@ -1285,65 +2252,109 @@ export async function searchGlobalIdentifiers(
 		const searchExpression = buildEffectiveSearchExpression(domainRequest);
 		return {
 			category: branch.category,
-			conditions: buildSearchConditions(branch.category, domainRequest, searchExpression),
+			conditions: buildSearchConditions(
+				branch.category,
+				domainRequest,
+				searchExpression,
+				false,
+			),
 			...(searchExpression ? { searchExpression } : {}),
 		};
 	});
-	const sort = request.sort ?? (request.query?.trim() ? "relevance" : "best");
-	const limit = request.limit ?? 20;
-	const initialOffset = request.offset ?? 0;
-	const languageBoundary = [
-		...new Set(
-			[
-				...preparedBranches.flatMap(
-					({ searchExpression }) =>
-						readSearchExpressionLanguageBoundary(searchExpression) ?? [],
-				),
-				...(readUnitLanguageBoundary(request.domainFilter) ?? []),
-			].filter(isContentLanguage),
-		),
-	];
-	const page = await searchCandidatePage({
+	return {
 		branches: preparedBranches,
-		query: request.query?.trim() ?? "",
-		sort,
-		position: request.position,
-		limit,
-		languageBoundary,
-	});
+		sort: request.sort ?? (request.query?.trim() ? "relevance" : "best"),
+		limit: request.limit ?? 20,
+		initialOffset: request.offset ?? 0,
+		commonConditions: buildCommonSearchConditions(commonRequest),
+		...(request.domainFilter
+			? {
+					candidateSet: compileUnitPredicateCandidateSet(
+						request.domainFilter,
+						request.profileId,
+					),
+				}
+			: {}),
+		languageBoundary: [
+			...new Set(
+				[
+					...preparedBranches.flatMap(
+						({ searchExpression }) =>
+							readSearchExpressionLanguageBoundary(searchExpression) ?? [],
+					),
+					...(readUnitLanguageBoundary(request.domainFilter) ?? []),
+				].filter(isContentLanguage),
+			),
+		],
+	};
+}
+
+function sliceSearchCandidatePage(window: SearchCandidatePage, limit: number): SearchCandidatePage {
+	if (window.rows.length <= limit) return window;
+	const rows = window.rows.slice(0, limit);
+	const last = rows.at(-1);
+	if (!last) throw new Error("Search candidate window could not produce a page cursor");
+	return {
+		rows,
+		hasMore: true,
+		nextPosition: last.position,
+		scannedCount: window.scannedCount,
+		boundedTextFallback: window.boundedTextFallback,
+	};
+}
+
+function globalIdentifierResult(
+	page: SearchCandidatePage,
+	limit: number,
+	initialOffset: number,
+	startedAt: number,
+): SearchDomainScanResult<SearchIdentifier> {
 	const identifiers = page.rows.map(({ id }) => ({ id }));
 	const nextOffset = initialOffset + identifiers.length;
-	const last = page.rows.at(-1);
-	const nextPosition =
-		page.hasMore && last
-			? ({
-					primary: last.primaryValue,
-					secondary: last.secondaryValue,
-					unitId: last.id,
-				} satisfies SearchKeysetPosition)
-			: undefined;
 	metrics.searchCandidateScan(
 		"current",
-		identifiers.length,
+		page.scannedCount,
 		identifiers.length,
 		1,
 		false,
 		page.hasMore,
 	);
-	const lowerBound = page.hasMore;
 	return {
 		hits: identifiers,
 		total: {
-			kind: lowerBound ? "lower-bound" : "exact",
-			value: nextOffset + (page.hasMore ? 1 : 0),
+			kind: page.hasMore ? "lower-bound" : "exact",
+			value: nextOffset,
 		},
 		offset: initialOffset,
 		nextOffset,
 		exhausted: !page.hasMore,
-		nextPosition,
+		nextPosition: page.nextPosition,
 		limit,
 		processingTimeMs: Math.round((performance.now() - startedAt) * 1000) / 1000,
 	};
+}
+
+/**
+ * Executes one globally sorted authoritative stream across mutually exclusive categories.
+ *
+ * @internal
+ */
+export async function searchGlobalIdentifiers(
+	request: GlobalSearchIdentifiersRequest,
+): Promise<SearchDomainScanResult<SearchIdentifier>> {
+	const startedAt = performance.now();
+	const prepared = prepareGlobalSearchRequest(request);
+	const page = await searchCandidatePage({
+		branches: prepared.branches,
+		candidateSet: prepared.candidateSet,
+		commonConditions: prepared.commonConditions,
+		query: request.query?.trim() ?? "",
+		sort: prepared.sort,
+		position: request.position,
+		limit: prepared.limit,
+		languageBoundary: prepared.languageBoundary,
+	});
+	return globalIdentifierResult(page, prepared.limit, prepared.initialOffset, startedAt);
 }
 
 export interface SearchFacet {
@@ -1411,11 +2422,15 @@ function facetSpec(
 		return {
 			value:
 				category === "entities"
-					? sql`${entity.kind}`
+					? sql`(select ${entity.kind} from ${entity} where ${entity.id} = ${unit.id})`
 					: category === "reviews"
-						? sql`${subjectUnit.kind}`
+						? sql`(select ${subjectUnit.kind}
+							from ${post}
+							inner join ${unit} as ${subjectUnit}
+								on ${subjectUnit.id} = ${post.subjectUnitId}
+							where ${post.id} = ${unit.id})`
 						: category === "posts"
-							? sql`${post.kind}`
+							? sql`(select ${post.kind} from ${post} where ${post.id} = ${unit.id})`
 							: sql`${unit.kind}`,
 			join: none,
 		};
@@ -1423,73 +2438,40 @@ function facetSpec(
 		"content-rating": sql`${unit.contentRating}`,
 		"ai-disclosure": sql`${unit.aiDisclosure}`,
 		license: sql`${unit.license}`,
-		"join-policy": sql`${realm.joinPolicy}`,
-		multiple: sql`${poll.mode} = 'multiple'`,
-		"results-visibility": sql`${poll.resultVisibility}`,
-		closed: sql`${poll.closedAt} is not null or ${poll.closesAt} <= now()`,
+		"join-policy": sql`(select ${realm.joinPolicy} from ${realm} where ${realm.id} = ${unit.id})`,
+		multiple: sql`(select ${poll.mode} = 'multiple' from ${poll} where ${poll.id} = ${unit.id})`,
+		"results-visibility": sql`(select ${poll.resultVisibility}
+			from ${poll} where ${poll.id} = ${unit.id})`,
+		closed: sql`(select ${poll.closedAt} is not null or ${poll.closesAt} <= now()
+			from ${poll} where ${poll.id} = ${unit.id})`,
 	};
 	const value = scalar[field];
 	return value ? { value, join: none } : undefined;
 }
 
-/** Conjunctive facet counts for the effective configured request, batched per category. */
-export async function searchDomainFacets(
+async function aggregateDomainFacets(
 	category: SearchCategory,
-	request: DomainSearchRequest,
 	fields: readonly string[],
+	candidateIds: readonly string[],
+	exhausted: boolean,
 ): Promise<SearchFacet[]> {
-	if (!fields.length) return [];
 	const requestedFacets = fields.flatMap((field) => {
 		const spec = facetSpec(category, field);
 		return spec ? [{ field, spec }] : [];
 	});
-	if (!requestedFacets.length) return [];
-	const searchExpression = buildEffectiveSearchExpression(request);
-	const conditions = buildSearchConditions(category, request, searchExpression);
-	const candidateLimit = env.SEARCH_FACET_SCAN_LIMIT;
-	const languageBoundary = [
-		...new Set(
-			[
-				...(readSearchExpressionLanguageBoundary(searchExpression) ?? []),
-				...(readUnitLanguageBoundary(request.domainFilter) ?? []),
-			].filter(isContentLanguage),
-		),
-	];
-	const candidates = await searchCandidatePage({
-		branches: [{ category, conditions }],
-		query: request.query?.trim() ?? "",
-		sort: request.sort ?? (request.query?.trim() ? "relevance" : "best"),
-		limit: candidateLimit,
-		languageBoundary,
-	});
-	const exhausted = !candidates.hasMore;
-	metrics.searchFacetScan("current", candidates.rows.length, 1, !exhausted);
-	if (!candidates.rows.length) return [];
-	const candidateIds = candidates.rows.map(({ id }) => id);
+	if (!requestedFacets.length || !candidateIds.length) return [];
 	const queries = requestedFacets.map(
-		({ field, spec }) =>
-			sql`(
-				select ${field}::text as field, (${spec.value})::text as value,
+		({ field, spec }) => sql`(
+			select ${field}::text as field, (${spec.value})::text as value,
 				count(distinct ${unit.id})::text as count
 			from search_candidate
-			join ${unit} on ${unit.id} = search_candidate.unit_id
-			left join ${profile} on ${profile.id} = ${unit.id}
-			left join ${entity} on ${entity.id} = ${unit.id}
-			left join ${post} on ${post.id} = ${unit.id}
-			left join ${postReply} on ${postReply.postId} = ${unit.id}
-			left join ${unit} as ${subjectUnit} on ${subjectUnit.id} = ${post.subjectUnitId}
-			left join ${realm} on ${realm.id} = ${unit.id}
-			left join ${collection} on ${collection.id} = ${unit.id}
-			left join ${poll} on ${poll.id} = ${unit.id}
-			left join ${book} on ${book.id} = ${unit.id}
-			left join ${media} on ${media.id} = ${unit.id}
-			left join ${software} on ${software.id} = ${unit.id}
+			inner join ${unit} on ${unit.id} = search_candidate.unit_id
 			${spec.join}
-			where ${sql.join(conditions, sql` and `)} and (${spec.value}) is not null
+			where (${spec.value}) is not null
 			group by (${spec.value})
-				order by count(distinct ${unit.id}) desc, (${spec.value})::text
-				limit 100
-			)`,
+			order by count(distinct ${unit.id}) desc, (${spec.value})::text
+			limit 100
+		)`,
 	);
 	const result = await database.execute<{ field: string; value: string; count: string }>(
 		sql`with search_candidate(unit_id) as (
@@ -1510,6 +2492,237 @@ export async function searchDomainFacets(
 		const options = byField.get(field);
 		return options ? [{ field, options }] : [];
 	});
+}
+
+/** Conjunctive facet counts for the effective configured request, batched per category. */
+export async function searchDomainFacets(
+	category: SearchCategory,
+	request: DomainSearchRequest,
+	fields: readonly string[],
+): Promise<SearchFacet[]> {
+	if (!fields.length) return [];
+	const searchExpression = buildEffectiveSearchExpression(request);
+	const conditions = buildSearchConditions(category, request, searchExpression);
+	const candidateLimit = env.SEARCH_FACET_SCAN_LIMIT;
+	const languageBoundary = [
+		...new Set(
+			[
+				...(readSearchExpressionLanguageBoundary(searchExpression) ?? []),
+				...(readUnitLanguageBoundary(request.domainFilter) ?? []),
+			].filter(isContentLanguage),
+		),
+	];
+	const candidates = await searchCandidatePage({
+		branches: [{ category, conditions }],
+		...(request.domainFilter
+			? {
+					candidateSet: compileUnitPredicateCandidateSet(
+						request.domainFilter,
+						request.profileId,
+					),
+				}
+			: {}),
+		query: request.query?.trim() ?? "",
+		sort: request.sort ?? (request.query?.trim() ? "relevance" : "best"),
+		limit: candidateLimit,
+		languageBoundary,
+	});
+	const exhausted = !candidates.hasMore;
+	metrics.searchFacetScan("current", candidates.rows.length, 1, !exhausted);
+	return aggregateDomainFacets(
+		category,
+		fields,
+		candidates.rows.map(({ id }) => id),
+		exhausted,
+	);
+}
+
+/**
+ * Computes every global facet group from one bounded ranked candidate stream.
+ *
+ * Category predicates are rechecked against the bounded UUID set so facet
+ * semantics remain category-specific without rerunning candidate generation.
+ */
+interface PreparedGlobalFacetBranch extends PreparedSearchBranch {
+	readonly fields: readonly string[];
+}
+
+async function aggregateGlobalFacets(
+	preparedBranches: readonly PreparedGlobalFacetBranch[],
+	candidateIds: readonly string[],
+	exhausted: boolean,
+): Promise<readonly { readonly category: SearchCategory; readonly facets: SearchFacet[] }[]> {
+	const requestedFacets = preparedBranches.flatMap((branch) =>
+		branch.fields.flatMap((field) => {
+			const spec = facetSpec(branch.category, field);
+			return spec ? [{ ...branch, field, spec }] : [];
+		}),
+	);
+	if (!requestedFacets.length) return [];
+	if (!candidateIds.length)
+		return preparedBranches.map(({ category }) => ({ category, facets: [] }));
+	const eligibilityRows = preparedBranches.map(
+		({ category, conditions }) =>
+			sql`(${category}::text, (${sql.join([...conditions], sql` and `)}))`,
+	);
+	const queries = requestedFacets.map(
+		({ category, field, spec }) => sql`(
+			select ${category}::text as category, ${field}::text as field,
+				(${spec.value})::text as value,
+				count(distinct ${unit.id})::text as count
+			from eligible_category
+			inner join ${unit} on ${unit.id} = eligible_category.unit_id
+			${spec.join}
+			where eligible_category.category = ${category}::text
+				and (${spec.value}) is not null
+			group by (${spec.value})
+			order by count(distinct ${unit.id}) desc, (${spec.value})::text
+			limit 100
+		)`,
+	);
+	const result = await database.execute<{
+		category: SearchCategory;
+		field: string;
+		value: string;
+		count: string;
+	}>(sql`with search_candidate(unit_id) as (
+		select * from unnest(${toUuidArray(candidateIds)})
+	), eligible_category(unit_id, category) as materialized (
+		select ${unit.id}, eligibility.category
+		from search_candidate
+		inner join ${unit} on ${unit.id} = search_candidate.unit_id
+		cross join lateral (values ${sql.join(eligibilityRows, sql`, `)})
+			as eligibility(category, matches)
+		where eligibility.matches
+	)
+	${sql.join(queries, sql` union all `)}`);
+	const optionsByCategoryField = new Map<string, { value: string; count: SearchCountResult }[]>();
+	for (const row of result.rows) {
+		const key = `${row.category}:${row.field}`;
+		const options = optionsByCategoryField.get(key) ?? [];
+		options.push({
+			value: row.value,
+			count: { kind: exhausted ? "exact" : "lower-bound", value: Number(row.count) },
+		});
+		optionsByCategoryField.set(key, options);
+	}
+	return preparedBranches.map(({ category, fields }) => ({
+		category,
+		facets: fields.flatMap((field) => {
+			const options = optionsByCategoryField.get(`${category}:${field}`);
+			return options ? [{ field, options }] : [];
+		}),
+	}));
+}
+
+export async function searchGlobalFacets(
+	branches: readonly {
+		readonly category: SearchCategory;
+		readonly request: DomainSearchRequest;
+		readonly fields: readonly string[];
+	}[],
+): Promise<readonly { readonly category: SearchCategory; readonly facets: SearchFacet[] }[]> {
+	if (!branches.length || branches.every(({ fields }) => !fields.length)) return [];
+	const preparedBranches = branches.map(({ category, request, fields }) => {
+		const searchExpression = buildEffectiveSearchExpression(request);
+		return {
+			category,
+			request,
+			fields,
+			searchExpression,
+			conditions: buildSearchConditions(category, request, searchExpression),
+		};
+	});
+	if (
+		!preparedBranches.some((branch) =>
+			branch.fields.some((field) => facetSpec(branch.category, field)),
+		)
+	)
+		return [];
+	const first = preparedBranches[0];
+	if (!first) return [];
+	const languageBoundary = [
+		...new Set(
+			[
+				...preparedBranches.flatMap(
+					({ searchExpression }) =>
+						readSearchExpressionLanguageBoundary(searchExpression) ?? [],
+				),
+				...(readUnitLanguageBoundary(first.request.domainFilter) ?? []),
+			].filter(isContentLanguage),
+		),
+	];
+	const candidates = await searchCandidatePage({
+		branches: preparedBranches,
+		query: first.request.query?.trim() ?? "",
+		sort: first.request.sort ?? (first.request.query?.trim() ? "relevance" : "best"),
+		limit: env.SEARCH_FACET_SCAN_LIMIT,
+		languageBoundary,
+	});
+	const exhausted = !candidates.hasMore;
+	metrics.searchFacetScan("current", candidates.scannedCount, 1, !exhausted);
+	return aggregateGlobalFacets(
+		preparedBranches,
+		candidates.rows.map(({ id }) => id),
+		exhausted,
+	);
+}
+
+/**
+ * Resolves the global page and first-page facets from one ranked candidate window.
+ * The page cursor is cut at the final returned hit even when the shared window is wider.
+ */
+export async function searchGlobalIdentifiersWithFacets(
+	request: GlobalSearchIdentifiersRequest,
+	facetFields: readonly {
+		readonly category: SearchCategory;
+		readonly fields: readonly string[];
+	}[],
+): Promise<{
+	readonly page: SearchDomainScanResult<SearchIdentifier>;
+	readonly facetGroups: readonly {
+		readonly category: SearchCategory;
+		readonly facets: SearchFacet[];
+	}[];
+}> {
+	const startedAt = performance.now();
+	const prepared = prepareGlobalSearchRequest(request);
+	const fieldsByCategory = new Map(
+		facetFields.map(({ category, fields }) => [category, fields] as const),
+	);
+	const facetBranches: PreparedGlobalFacetBranch[] = prepared.branches.map((branch) => ({
+		...branch,
+		fields: fieldsByCategory.get(branch.category) ?? [],
+	}));
+	const hasFacets = facetBranches.some((branch) =>
+		branch.fields.some((field) => facetSpec(branch.category, field)),
+	);
+	const candidates = await searchCandidatePage({
+		branches: prepared.branches,
+		candidateSet: prepared.candidateSet,
+		commonConditions: prepared.commonConditions,
+		query: request.query?.trim() ?? "",
+		sort: prepared.sort,
+		position: request.position,
+		limit: hasFacets ? Math.max(prepared.limit, env.SEARCH_FACET_SCAN_LIMIT) : prepared.limit,
+		languageBoundary: prepared.languageBoundary,
+	});
+	const page = globalIdentifierResult(
+		sliceSearchCandidatePage(candidates, prepared.limit),
+		prepared.limit,
+		prepared.initialOffset,
+		startedAt,
+	);
+	if (!hasFacets) return { page, facetGroups: [] };
+	metrics.searchFacetScan("current", candidates.scannedCount, 1, candidates.hasMore);
+	return {
+		page,
+		facetGroups: await aggregateGlobalFacets(
+			facetBranches,
+			candidates.rows.map(({ id }) => id),
+			!candidates.hasMore,
+		),
+	};
 }
 
 export async function searchGrouped(request: {

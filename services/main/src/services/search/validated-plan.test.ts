@@ -38,6 +38,10 @@ describe("validated search plan", () => {
 		);
 
 		expect(plan.complexity).toMatchObject({
+			boundedCandidateVerification: true,
+			candidateSources: ["sparse-btree"],
+			orderingIndexes: ["search_best_score_order_idx", "unit_public_updated_at_desc_idx"],
+			maxCandidatesScanned: WorkPolicy.search.maxCandidatesScanned,
 			expressionNodes: 4,
 			positiveBranches: 1,
 			negativeBranches: 1,

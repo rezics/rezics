@@ -227,6 +227,40 @@ export const recommendationUnitStat = pgTable(
 	],
 );
 
+/**
+ * Sparse, immutable Search ordering projection for one recommendation snapshot.
+ *
+ * Zero-score Units are deliberately absent and are read from the public Unit
+ * updated-at index. This keeps the daily projection proportional to Units with
+ * positive 24-hour engagement instead of the complete Search universe.
+ */
+export const searchBestScore = pgTable(
+	"search_best_score",
+	{
+		snapshotId: uuid().notNull(),
+		unitId: uuid()
+			.notNull()
+			.references(() => unit.id, { onDelete: "cascade" }),
+		score: doublePrecision().notNull(),
+		unitUpdatedAt: createTimestampMsColumn().notNull(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.snapshotId, table.unitId] }),
+		foreignKey({
+			columns: [table.snapshotId],
+			foreignColumns: [recommendationSnapshot.id],
+			name: "search_best_score_snapshot_fkey",
+		}).onDelete("cascade"),
+		index("search_best_score_order_idx").on(
+			table.snapshotId,
+			table.score.desc().nullsFirst(),
+			table.unitUpdatedAt.desc().nullsFirst(),
+			table.unitId.desc().nullsFirst(),
+		),
+		check("search_best_score_positive_check", sql`${table.score} > 0`),
+	],
+);
+
 export const recommendationUnitEdge = pgTable(
 	"recommendation_unit_edge",
 	{

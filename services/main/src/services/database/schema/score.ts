@@ -40,7 +40,7 @@ export const score = pgTable(
 	(table) => [
 		unique("score_profile_unit_realm_key").on(table.profileId, table.unitId, table.realmId),
 		index("score_unit_realm_value_idx").on(table.unitId, table.realmId, table.value),
-		index("score_realm_idx").on(table.realmId),
+		index("score_realm_idx").on(table.realmId, table.unitId),
 		index("score_public_profile_updated_at_idx")
 			.on(table.profileId, table.updatedAt.desc(), table.id.desc())
 			.where(sql`${table.visibility} = 'public'`),
@@ -73,7 +73,7 @@ export const postScore = pgTable(
 	(table) => [
 		primaryKey({ columns: [table.postId, table.scoreId] }),
 		unique("post_score_post_position_key").on(table.postId, table.position),
-		index("post_score_score_idx").on(table.scoreId),
+		index("post_score_score_idx").on(table.scoreId, table.postId),
 	],
 );
 

@@ -121,7 +121,7 @@ describe("Search language presentation boundary", () => {
 describe("global Search cursor", () => {
 	it("round-trips one global keyset without accepting a grouped cursor shape", () => {
 		const state = {
-			version: 2,
+			version: 3,
 			requestHash: "a".repeat(64),
 			pageSize: 20,
 			seen: 37,
@@ -133,7 +133,7 @@ describe("global Search cursor", () => {
 		} as const;
 		const cursor = createGlobalSearchCursor(state);
 		const groupedCursor = createSearchCursor({
-			version: 1,
+			version: 2,
 			requestHash: state.requestHash,
 			pageSize: state.pageSize,
 			categories: { units: { seen: 37, exhausted: false, position: state.position } },
@@ -151,7 +151,7 @@ describe("global Search cursor", () => {
 	it("rejects a negative global seen count before encoding", () => {
 		expect(() =>
 			createGlobalSearchCursor({
-				version: 2,
+				version: 3,
 				requestHash: "a".repeat(64),
 				pageSize: 20,
 				seen: -1,
@@ -162,5 +162,39 @@ describe("global Search cursor", () => {
 				},
 			}),
 		).toThrow("Invalid Search cursor");
+	});
+
+	it("round-trips a zero-hit continuation that still advances its keyset", () => {
+		const state = {
+			version: 3,
+			requestHash: "c".repeat(64),
+			pageSize: 20,
+			seen: 0,
+			position: {
+				primary: "1720000000",
+				secondary: "0",
+				unitId: "019f7eed-5d42-7102-8387-cc1d13b176d2",
+				source: "ordered",
+			},
+		} as const;
+
+		expect(parseGlobalSearchCursor(createGlobalSearchCursor(state))).toEqual(state);
+	});
+
+	it("round-trips the best phase and immutable snapshot identity", () => {
+		const state = {
+			version: 3,
+			requestHash: "b".repeat(64),
+			pageSize: 20,
+			seen: 20,
+			position: {
+				primary: "0",
+				secondary: "1720000000",
+				unitId: "019f7eed-5d42-7102-8387-cc1d13b176d2",
+				source: "best-zero",
+				snapshotId: "019fda5f-0f34-76c6-a57f-d3d03ea687fc",
+			},
+		} as const;
+		expect(parseGlobalSearchCursor(createGlobalSearchCursor(state))).toEqual(state);
 	});
 });

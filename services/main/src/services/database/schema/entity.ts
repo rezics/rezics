@@ -154,6 +154,10 @@ export const creditAttribution = pgTable(
 			table.role,
 		),
 		index("credit_attribution_credited_unit_role_idx").on(table.creditedUnitId, table.role),
+		index("credit_attribution_search_source_idx").on(table.creditedUnitId, table.sourceUnitId),
+		index("credit_attribution_publisher_search_source_idx")
+			.on(table.creditedUnitId, table.sourceUnitId)
+			.where(sql`${table.role} = 'publisher'`),
 		index("credit_attribution_source_position_idx").on(
 			table.sourceUnitId,
 			table.position,
@@ -194,6 +198,7 @@ export const subjectAssociation = pgTable(
 			table.role,
 		),
 		index("subject_association_entity_role_idx").on(table.entityId, table.role),
+		index("subject_association_search_unit_idx").on(table.entityId, table.unitId),
 		index("subject_association_context_post_idx")
 			.on(table.contextPostId)
 			.where(sql`${table.contextPostId} is not null`),

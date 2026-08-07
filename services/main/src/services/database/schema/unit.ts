@@ -100,6 +100,36 @@ export const unit = pgTable(
 			.where(
 				sql`${table.status} = 'published'::unit_status and ${table.visibility} = 'public'::resource_visibility and ${table.moderationStatus} = 'approved'::moderation_status and ${table.deletedAt} is null`,
 			),
+		index("unit_public_created_at_asc_idx")
+			.on(table.createdAt.asc(), table.id.asc())
+			.where(
+				sql`${table.status} = 'published'::unit_status and ${table.visibility} = 'public'::resource_visibility and ${table.moderationStatus} = 'approved'::moderation_status and ${table.deletedAt} is null`,
+			),
+		index("unit_public_created_at_desc_idx")
+			.on(table.createdAt.desc().nullsFirst(), table.id.desc().nullsFirst())
+			.where(
+				sql`${table.status} = 'published'::unit_status and ${table.visibility} = 'public'::resource_visibility and ${table.moderationStatus} = 'approved'::moderation_status and ${table.deletedAt} is null`,
+			),
+		index("unit_public_updated_at_asc_idx")
+			.on(table.updatedAt.asc(), table.id.asc())
+			.where(
+				sql`${table.status} = 'published'::unit_status and ${table.visibility} = 'public'::resource_visibility and ${table.moderationStatus} = 'approved'::moderation_status and ${table.deletedAt} is null`,
+			),
+		index("unit_public_updated_at_desc_idx")
+			.on(table.updatedAt.desc().nullsFirst(), table.id.desc().nullsFirst())
+			.where(
+				sql`${table.status} = 'published'::unit_status and ${table.visibility} = 'public'::resource_visibility and ${table.moderationStatus} = 'approved'::moderation_status and ${table.deletedAt} is null`,
+			),
+		index("unit_public_published_at_asc_idx")
+			.on(table.publishedAt.asc(), table.id.asc())
+			.where(
+				sql`${table.status} = 'published'::unit_status and ${table.visibility} = 'public'::resource_visibility and ${table.moderationStatus} = 'approved'::moderation_status and ${table.deletedAt} is null`,
+			),
+		index("unit_public_published_at_desc_idx")
+			.on(table.publishedAt.desc().nullsLast(), table.id.desc().nullsFirst())
+			.where(
+				sql`${table.status} = 'published'::unit_status and ${table.visibility} = 'public'::resource_visibility and ${table.moderationStatus} = 'approved'::moderation_status and ${table.deletedAt} is null`,
+			),
 		index("unit_kind_status_created_at_idx")
 			.on(table.kind, table.status, table.createdAt.desc(), table.id.desc())
 			.where(sql`${table.deletedAt} is null`),

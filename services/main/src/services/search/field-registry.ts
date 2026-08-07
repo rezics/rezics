@@ -37,6 +37,8 @@ export interface SearchSortDefinition {
 	readonly categories: readonly SearchCategory[];
 	readonly requiresQuery: boolean;
 	readonly postgres: readonly string[];
+	readonly candidateSource: "btree" | "sparse-btree" | "pgroonga" | null;
+	readonly orderingIndexes: readonly string[];
 }
 
 const allCategories: readonly SearchCategory[] = [
@@ -500,92 +502,132 @@ export const CurrentSearchSortRegistry = {
 	best: {
 		categories: SearchCategoryValues,
 		requiresQuery: false,
-		postgres: ["ranking.recommendationBest:desc", "ranking.updatedAt:desc", "id:asc"],
+		postgres: ["ranking.recommendationBest:desc", "ranking.updatedAt:desc", "id:desc"],
+		candidateSource: "sparse-btree",
+		orderingIndexes: ["search_best_score_order_idx", "unit_public_updated_at_desc_idx"],
 	},
 	relevance: {
 		categories: SearchCategoryValues,
 		requiresQuery: true,
 		postgres: [],
+		candidateSource: "pgroonga",
+		orderingIndexes: [
+			"unit_localization_pgroonga_metadata_idx",
+			"unit_localization_pgroonga_content_idx",
+			"unit_alias_term_search_idx",
+		],
 	},
 	"createdAt:asc": {
 		categories: SearchCategoryValues,
 		requiresQuery: false,
 		postgres: ["ranking.createdAt:asc", "id:asc"],
+		candidateSource: "btree",
+		orderingIndexes: ["unit_public_created_at_asc_idx"],
 	},
 	"createdAt:desc": {
 		categories: SearchCategoryValues,
 		requiresQuery: false,
-		postgres: ["ranking.createdAt:desc", "id:asc"],
+		postgres: ["ranking.createdAt:desc", "id:desc"],
+		candidateSource: "btree",
+		orderingIndexes: ["unit_public_created_at_desc_idx"],
 	},
 	"updatedAt:asc": {
 		categories: SearchCategoryValues,
 		requiresQuery: false,
 		postgres: ["ranking.updatedAt:asc", "id:asc"],
+		candidateSource: "btree",
+		orderingIndexes: ["unit_public_updated_at_asc_idx"],
 	},
 	"updatedAt:desc": {
 		categories: SearchCategoryValues,
 		requiresQuery: false,
-		postgres: ["ranking.updatedAt:desc", "id:asc"],
+		postgres: ["ranking.updatedAt:desc", "id:desc"],
+		candidateSource: "btree",
+		orderingIndexes: ["unit_public_updated_at_desc_idx"],
 	},
 	"publishedAt:asc": {
 		categories: ["units"],
 		requiresQuery: false,
 		postgres: ["ranking.publishedAt:asc", "id:asc"],
+		candidateSource: "btree",
+		orderingIndexes: ["unit_public_published_at_asc_idx"],
 	},
 	"publishedAt:desc": {
 		categories: ["units"],
 		requiresQuery: false,
-		postgres: ["ranking.publishedAt:desc", "id:asc"],
+		postgres: ["ranking.publishedAt:desc", "id:desc"],
+		candidateSource: "btree",
+		orderingIndexes: ["unit_public_published_at_desc_idx"],
 	},
 	"followerCount:asc": {
 		categories: ["users", "realms"],
 		requiresQuery: false,
 		postgres: ["ranking.followerCount:asc", "id:asc"],
+		candidateSource: "sparse-btree",
+		orderingIndexes: ["unit_follow_stat_count_asc_idx", "unit_public_discoverable_idx"],
 	},
 	"followerCount:desc": {
 		categories: ["users", "realms"],
 		requiresQuery: false,
-		postgres: ["ranking.followerCount:desc", "id:asc"],
+		postgres: ["ranking.followerCount:desc", "id:desc"],
+		candidateSource: "sparse-btree",
+		orderingIndexes: ["unit_follow_stat_count_desc_idx", "unit_public_discoverable_idx"],
 	},
 	"replyCount:asc": {
 		categories: ["posts"],
 		requiresQuery: false,
 		postgres: ["ranking.replyCount:asc", "id:asc"],
+		candidateSource: "btree",
+		orderingIndexes: ["post_reply_stat_search_count_asc_idx"],
 	},
 	"replyCount:desc": {
 		categories: ["posts"],
 		requiresQuery: false,
-		postgres: ["ranking.replyCount:desc", "id:asc"],
+		postgres: ["ranking.replyCount:desc", "id:desc"],
+		candidateSource: "btree",
+		orderingIndexes: ["post_reply_stat_search_count_desc_idx"],
 	},
 	"closesAt:asc": {
 		categories: ["polls"],
 		requiresQuery: false,
 		postgres: ["filters.closesAt:asc", "id:asc"],
+		candidateSource: "btree",
+		orderingIndexes: ["poll_closes_at_asc_idx"],
 	},
 	"closesAt:desc": {
 		categories: ["polls"],
 		requiresQuery: false,
-		postgres: ["filters.closesAt:desc", "id:asc"],
+		postgres: ["filters.closesAt:desc", "id:desc"],
+		candidateSource: "btree",
+		orderingIndexes: ["poll_closes_at_desc_idx"],
 	},
 	"title:asc": {
 		categories: [],
 		requiresQuery: false,
 		postgres: [],
+		candidateSource: null,
+		orderingIndexes: [],
 	},
 	"title:desc": {
 		categories: [],
 		requiresQuery: false,
 		postgres: [],
+		candidateSource: null,
+		orderingIndexes: [],
 	},
 	"progressLastSeenAt:asc": {
 		categories: [],
 		requiresQuery: false,
 		postgres: [],
+		candidateSource: null,
+		orderingIndexes: [],
 	},
 	"progressLastSeenAt:desc": {
 		categories: [],
 		requiresQuery: false,
 		postgres: [],
+		candidateSource: null,
+		orderingIndexes: [],
 	},
 } as const satisfies Readonly<Record<SearchSort, SearchSortDefinition>>;
 

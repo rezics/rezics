@@ -14,6 +14,7 @@ import {
 	readSimpleFeedFilter,
 	realmTagQueryPredicate,
 	SimpleFeedContentKindValues,
+	type UnitPredicate,
 	unitFilterSearchQuery,
 } from "@rezics/filter";
 import { sql } from "drizzle-orm";
@@ -26,7 +27,7 @@ import {
 	RealmUnitStatusValues,
 	UnitKindValues,
 } from "../database/schema/contract-values";
-import { compileUnitPredicateSql } from "./sql";
+import { compileUnitPredicateCandidateSet, compileUnitPredicateSql } from "./sql";
 
 const RealmId = "00000000-0000-4000-8000-000000000001";
 const TagId = "00000000-0000-4000-8000-000000000002";
@@ -166,7 +167,7 @@ describe("domain Filter contract", () => {
 		expect(collectUnitPredicateReferenceIds(filter)).toEqual([RealmId]);
 	});
 
-	it("compiles credited-Entity and subject-Entity relations as indexed existence checks", () => {
+	it("compiles credited-Entity and subject-Entity relations as indexed membership checks", () => {
 		const query = dialect.sqlToQuery(
 			compileUnitPredicateSql(
 				{
@@ -180,10 +181,100 @@ describe("domain Filter contract", () => {
 		);
 
 		expect(query.sql).toContain("from credit_attribution filter_credit_attribution");
-		expect(query.sql).toContain("filter_credit_attribution.source_unit_id = candidate.id");
+		expect(query.sql).toContain("candidate.id in");
+		expect(query.sql).toContain("select filter_credit_attribution.source_unit_id");
 		expect(query.sql).toContain("from subject_association filter_subject_association");
-		expect(query.sql).toContain("filter_subject_association.unit_id = candidate.id");
+		expect(query.sql).toContain("select filter_subject_association.unit_id");
 		expect(query.params).toEqual([RealmId, RealmId]);
+	});
+
+	it("derives an indexed union seed only when every OR branch is safely seedable", () => {
+		const candidateSet = compileUnitPredicateCandidateSet({
+			any: [
+				{ creditAttributions: { some: { id: { in: [RealmId] } } } },
+				{ subjectAssociations: { some: { id: { in: [RealmId] } } } },
+			],
+		});
+		if (!candidateSet) throw new Error("Expected a relation-driven candidate set");
+		const query = dialect.sqlToQuery(candidateSet);
+
+		expect(query.sql).toContain("filter_credit_attribution.source_unit_id as unit_id");
+		expect(query.sql).toContain(" union ");
+		expect(query.sql).toContain("filter_subject_association.unit_id");
+		expect(query.params).toEqual([RealmId, RealmId]);
+		expect(
+			compileUnitPredicateCandidateSet({
+				any: [
+					{ creditAttributions: { some: { id: { in: [RealmId] } } } },
+					{ kind: { in: ["book"] } },
+				],
+			}),
+		).toBeUndefined();
+	});
+
+	it("derives bounded reverse-index seeds for every sparse relationship filter", () => {
+		const cases: readonly {
+			readonly filter: UnitPredicate;
+			readonly table: string;
+			readonly column: string;
+		}[] = [
+			{
+				filter: {
+					tags: {
+						some: {
+							tag: { id: { in: [TagId] } },
+							authority: { kind: "global", view: { kind: "effective" } },
+						},
+					},
+				},
+				table: "unit_effective_tag",
+				column: "filter_effective_tag.tag_id",
+			},
+			{
+				filter: { scores: { received: { some: { realm: { id: { in: [RealmId] } } } } } },
+				table: "score filter_candidate_score",
+				column: "filter_candidate_score.realm_id",
+			},
+			{
+				filter: { post: { is: { subject: { is: { id: { in: [RealmId] } } } } } },
+				table: "post filter_candidate_post",
+				column: "filter_candidate_post.subject_unit_id",
+			},
+			{
+				filter: { collection: { is: { items: { some: { id: { in: [RealmId] } } } } } },
+				table: "collection_item filter_candidate_collection_item",
+				column: "filter_candidate_collection_item.unit_id",
+			},
+		];
+
+		for (const { filter, table, column } of cases) {
+			const candidateSet = compileUnitPredicateCandidateSet(filter);
+			if (!candidateSet) throw new Error(`Expected a bounded candidate set for ${table}`);
+			const query = dialect.sqlToQuery(candidateSet);
+			expect(query.sql).toContain(table);
+			expect(query.sql).toContain(column);
+		}
+	});
+
+	it("does not materialize low-selectivity Filter dimensions without an equality anchor", () => {
+		expect(
+			compileUnitPredicateCandidateSet({
+				localizations: { some: { language: { in: ["en"] } } },
+			}),
+		).toBeUndefined();
+		expect(
+			compileUnitPredicateCandidateSet({
+				creditAttributions: { some: { kind: { in: ["profile"] } } },
+			}),
+		).toBeUndefined();
+		expect(
+			compileUnitPredicateCandidateSet({
+				any: [
+					{ tags: { some: { tag: { id: { in: [TagId] } } } } },
+					{ kind: { in: ["book"] } },
+				],
+			}),
+		).toBeUndefined();
 	});
 
 	it("maps Realm taxonomy query strategies to independent Tag authorities", () => {

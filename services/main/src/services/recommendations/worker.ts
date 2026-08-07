@@ -1,7 +1,7 @@
 import { and, desc, eq, gt, lt, ne, sql } from "drizzle-orm";
 
 import { database, type DatabaseTransaction, withDatabaseSession } from "../database";
-import { recommendationSnapshot, unit } from "../database/schema";
+import { recommendationSnapshot, searchBestScore, unit } from "../database/schema";
 import { WorkPolicy } from "../performance/policy";
 import { RecommendationPolicy, RecommendationPolicyVersion } from "./policy";
 import {
@@ -27,6 +27,41 @@ const GroupedRecommendationObjectiveSqlSource = {
 	engagement24h: sql<number>`grouped.engagement24h`,
 	engagement7d: sql<number>`grouped.engagement7d`,
 } satisfies RecommendationObjectiveSqlSource;
+
+/**
+ * Builds the Search `best` projection from the bounded 24-hour signal window.
+ *
+ * The projection is intentionally sparse: its work is proportional to recent
+ * positive signal rows, not to every discoverable Unit in the catalogue.
+ */
+async function buildSearchBestScores(
+	tx: DatabaseTransaction,
+	snapshotId: string,
+	sourceWatermark: Date,
+) {
+	await tx.execute(sql`
+		with positive_score as (
+			select coalesce(relationship.main_unit_id, signal.unit_id) as unit_id,
+				sum(signal.weight)::double precision as score
+			from recommendation_unit_signal_hourly signal
+			left join unit_variant relationship
+				on relationship.variant_unit_id = signal.unit_id
+			where signal.bucket_start >= ${sourceWatermark}::timestamptz - interval '24 hours'
+				and signal.weight > 0
+			group by coalesce(relationship.main_unit_id, signal.unit_id)
+			having sum(signal.weight) > 0
+		)
+		insert into ${searchBestScore} (snapshot_id, unit_id, score, unit_updated_at)
+		select ${snapshotId}::uuid, positive_score.unit_id,
+			positive_score.score, discovery.updated_at
+		from positive_score
+		join unit discovery on discovery.id = positive_score.unit_id
+		where discovery.status = 'published'
+			and discovery.visibility = 'public'
+			and discovery.moderation_status = 'approved'
+			and discovery.deleted_at is null
+	`);
+}
 
 async function buildUnitStats(tx: DatabaseTransaction, snapshotId: string, sourceWatermark: Date) {
 	const bestScore = recommendationObjectiveExpression(
@@ -296,6 +331,9 @@ export async function refreshRecommendationSnapshot(): Promise<string | null> {
 				.returning({ id: recommendationSnapshot.id });
 			if (!snapshot) throw new Error("Recommendation snapshot insertion returned no row");
 			snapshotId = snapshot.id;
+			await session.transaction((tx) =>
+				buildSearchBestScores(tx, snapshot.id, sourceWatermark),
+			);
 			await session.transaction((tx) => buildUnitStats(tx, snapshot.id, sourceWatermark));
 			await session.transaction((tx) =>
 				buildProfileInterests(tx, snapshot.id, sourceWatermark),

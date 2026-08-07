@@ -220,7 +220,14 @@ export const unitFollowStat = pgTable(
 		followerCount: aggregateCount(),
 		updatedAt: createUpdatedAtColumn(),
 	},
-	(table) => [check("unit_follow_stat_count_check", sql`${table.followerCount} >= 0`)],
+	(table) => [
+		index("unit_follow_stat_count_asc_idx").on(table.followerCount.asc(), table.unitId.asc()),
+		index("unit_follow_stat_count_desc_idx").on(
+			table.followerCount.desc().nullsFirst(),
+			table.unitId.desc().nullsFirst(),
+		),
+		check("unit_follow_stat_count_check", sql`${table.followerCount} >= 0`),
+	],
 );
 
 export const unitReactionStat = pgTable(
@@ -268,14 +275,24 @@ export const postReplyStat = pgTable(
 			.references(() => post.id, { onDelete: "cascade" }),
 		undeletedDirectCount: aggregateCount(),
 		undeletedDescendantCount: aggregateCount(),
+		/** Count used by Search: direct replies for reply Posts, descendants otherwise. */
+		searchReplyCount: aggregateCount(),
 		visibleDirectCount: aggregateCount(),
 		visibleDescendantCount: aggregateCount(),
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
+		index("post_reply_stat_search_count_asc_idx").on(
+			table.searchReplyCount.asc(),
+			table.postId.asc(),
+		),
+		index("post_reply_stat_search_count_desc_idx").on(
+			table.searchReplyCount.desc().nullsFirst(),
+			table.postId.desc().nullsFirst(),
+		),
 		check(
 			"post_reply_stat_count_check",
-			sql`${table.undeletedDirectCount} >= 0 and ${table.undeletedDescendantCount} >= 0 and ${table.visibleDirectCount} >= 0 and ${table.visibleDescendantCount} >= 0`,
+			sql`${table.undeletedDirectCount} >= 0 and ${table.undeletedDescendantCount} >= 0 and ${table.searchReplyCount} >= 0 and ${table.visibleDirectCount} >= 0 and ${table.visibleDescendantCount} >= 0`,
 		),
 	],
 );

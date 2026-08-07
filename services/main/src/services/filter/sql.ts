@@ -378,6 +378,368 @@ export interface CompileUnitPredicateSqlInput {
 	readonly viewerProfileId?: string;
 }
 
+function combineCandidateSets(
+	sets: readonly SQL[],
+	operator: "intersect" | "union",
+): SQL | undefined {
+	if (!sets.length) return undefined;
+	if (sets.length === 1) return sets[0];
+	// Every positive conjunct is independently a safe superset seed. Choosing one keeps the
+	// reverse-index probe streaming; INTERSECT would have to materialize every matching relation
+	// before an outer LIMIT could stop it. Disjunctions need every branch, but UNION ALL preserves
+	// streaming too. The bounded seed probe deduplicates the resulting UUIDs in memory.
+	if (operator === "intersect") return sets[0];
+	return sql`${sql.join(
+		sets.map((set) => sql`(${set})`),
+		sql` union all `,
+	)}`;
+}
+
+function realmPlacementCandidateSet(filter: RealmPlacementFilter): SQL | undefined {
+	const conjunctiveSets: SQL[] = [];
+	if (filter.all) {
+		const allSet = combineCandidateSets(
+			filter.all.flatMap((child) => {
+				const childSet = realmPlacementCandidateSet(child);
+				return childSet ? [childSet] : [];
+			}),
+			"intersect",
+		);
+		if (allSet) conjunctiveSets.push(allSet);
+	}
+	if (filter.any) {
+		const childSets = filter.any.map(realmPlacementCandidateSet);
+		if (childSets.every((set): set is SQL => set !== undefined)) {
+			const anySet = combineCandidateSets(childSets, "union");
+			if (anySet) conjunctiveSets.push(anySet);
+		}
+	}
+	if (filter.realm?.id)
+		conjunctiveSets.push(sql`select filter_realm_unit.unit_id
+			from realm_unit filter_realm_unit
+			join unit filter_realm on filter_realm.id = filter_realm_unit.realm_id
+			where ${realmPlacementCondition(filter)}`);
+	return combineCandidateSets(conjunctiveSets, "intersect");
+}
+
+function tagAssertionCandidateSet(
+	filter: TagAssertionFilter,
+	viewerProfileId?: string,
+): SQL | undefined {
+	const conjunctiveSets: SQL[] = [];
+	if (filter.all) {
+		const allSet = combineCandidateSets(
+			filter.all.flatMap((child) => {
+				const childSet = tagAssertionCandidateSet(child, viewerProfileId);
+				return childSet ? [childSet] : [];
+			}),
+			"intersect",
+		);
+		if (allSet) conjunctiveSets.push(allSet);
+	}
+	if (filter.any) {
+		const childSets = filter.any.map((child) =>
+			tagAssertionCandidateSet(child, viewerProfileId),
+		);
+		if (childSets.every((set): set is SQL => set !== undefined)) {
+			const anySet = combineCandidateSets(childSets, "union");
+			if (anySet) conjunctiveSets.push(anySet);
+		}
+	}
+	const authority = filter.authority;
+	const tagIds = filter.tag?.id?.in;
+	if (!authority || (authority.kind === "global" && authority.view.kind === "effective")) {
+		if (tagIds)
+			conjunctiveSets.push(sql`select filter_effective_tag.unit_id
+				from unit_effective_tag filter_effective_tag
+				where ${valuesCondition(sql`filter_effective_tag.tag_id`, tagIds, true)}`);
+	} else if (authority.kind === "global") {
+		if (tagIds)
+			conjunctiveSets.push(sql`select filter_unit_tag.unit_id
+				from unit_tag filter_unit_tag
+				where ${valuesCondition(sql`filter_unit_tag.tag_id`, tagIds, true)}`);
+	} else if (authority.kind === "realm" && authority.view.kind === "policy") {
+		const realmIds = authority.realm.id?.in;
+		if (realmIds || tagIds)
+			conjunctiveSets.push(sql`select filter_realm_tag.unit_id
+				from realm_unit_tag filter_realm_tag
+				where ${conjunction([
+					realmIds
+						? valuesCondition(sql`filter_realm_tag.realm_id`, realmIds, true)
+						: sql`true`,
+					tagIds
+						? valuesCondition(sql`filter_realm_tag.tag_id`, tagIds, true)
+						: sql`true`,
+				])}`);
+	} else if (authority.kind === "realm") {
+		const realmIds = authority.realm.id?.in;
+		if (realmIds || tagIds)
+			conjunctiveSets.push(sql`select filter_realm_tag_stat.unit_id
+				from realm_tag_vote_stat filter_realm_tag_stat
+				where ${conjunction([
+					realmIds
+						? valuesCondition(sql`filter_realm_tag_stat.realm_id`, realmIds, true)
+						: sql`true`,
+					tagIds
+						? valuesCondition(sql`filter_realm_tag_stat.tag_id`, tagIds, true)
+						: sql`true`,
+				])}`);
+	} else if (viewerProfileId) {
+		conjunctiveSets.push(sql`select filter_profile_tag.unit_id
+			from profile_unit_tag filter_profile_tag
+			where filter_profile_tag.profile_id = ${viewerProfileId}::uuid
+				and ${
+					tagIds
+						? valuesCondition(sql`filter_profile_tag.tag_id`, tagIds, true)
+						: sql`true`
+				}`);
+	}
+	return combineCandidateSets(conjunctiveSets, "intersect");
+}
+
+function scoreCandidateSet(
+	filter: ScoreFilter,
+	viewerProfileId: string | undefined,
+	target: "received" | "displayed",
+): SQL | undefined {
+	const conjunctiveSets: SQL[] = [];
+	if (filter.all) {
+		const allSet = combineCandidateSets(
+			filter.all.flatMap((child) => {
+				const childSet = scoreCandidateSet(child, viewerProfileId, target);
+				return childSet ? [childSet] : [];
+			}),
+			"intersect",
+		);
+		if (allSet) conjunctiveSets.push(allSet);
+	}
+	if (filter.any) {
+		const childSets = filter.any.map((child) =>
+			scoreCandidateSet(child, viewerProfileId, target),
+		);
+		if (childSets.every((set): set is SQL => set !== undefined)) {
+			const anySet = combineCandidateSets(childSets, "union");
+			if (anySet) conjunctiveSets.push(anySet);
+		}
+	}
+	const authorAnchored =
+		filter.author?.kind === "viewer"
+			? viewerProfileId !== undefined
+			: filter.author?.id !== undefined;
+	if (filter.realm?.id || filter.target?.id || authorAnchored) {
+		const source = sql`from score filter_candidate_score
+			join unit filter_candidate_score_realm
+				on filter_candidate_score_realm.id = filter_candidate_score.realm_id
+			join unit filter_candidate_score_target
+				on filter_candidate_score_target.id = filter_candidate_score.unit_id`;
+		const condition = scoreCondition(
+			filter,
+			{
+				value: sql`filter_candidate_score.value`,
+				realmId: sql`filter_candidate_score.realm_id`,
+				realmKind: sql`filter_candidate_score_realm.kind`,
+				targetId: sql`filter_candidate_score.unit_id`,
+				targetKind: sql`filter_candidate_score_target.kind`,
+				authorId: sql`filter_candidate_score.profile_id`,
+			},
+			viewerProfileId,
+		);
+		conjunctiveSets.push(
+			target === "received"
+				? sql`select filter_candidate_score.unit_id as unit_id
+					${source}
+					where ${condition}`
+				: sql`select filter_candidate_post_score.post_id as unit_id
+					from post_score filter_candidate_post_score
+					join score filter_candidate_score
+						on filter_candidate_score.id = filter_candidate_post_score.score_id
+					join unit filter_candidate_score_realm
+						on filter_candidate_score_realm.id = filter_candidate_score.realm_id
+					join unit filter_candidate_score_target
+						on filter_candidate_score_target.id = filter_candidate_score.unit_id
+					where ${condition}`,
+		);
+	}
+	return combineCandidateSets(conjunctiveSets, "intersect");
+}
+
+function postCandidateSet(filter: PostFilter, viewerProfileId?: string): SQL | undefined {
+	const conjunctiveSets: SQL[] = [];
+	if (filter.all) {
+		const allSet = combineCandidateSets(
+			filter.all.flatMap((child) => {
+				const childSet = postCandidateSet(child, viewerProfileId);
+				return childSet ? [childSet] : [];
+			}),
+			"intersect",
+		);
+		if (allSet) conjunctiveSets.push(allSet);
+	}
+	if (filter.any) {
+		const childSets = filter.any.map((child) => postCandidateSet(child, viewerProfileId));
+		if (childSets.every((set): set is SQL => set !== undefined)) {
+			const anySet = combineCandidateSets(childSets, "union");
+			if (anySet) conjunctiveSets.push(anySet);
+		}
+	}
+	if (filter.subject && "is" in filter.subject && filter.subject.is.id)
+		conjunctiveSets.push(sql`select filter_candidate_post.id as unit_id
+			from post filter_candidate_post
+			where ${valuesCondition(
+				sql`filter_candidate_post.subject_unit_id`,
+				filter.subject.is.id.in,
+				true,
+			)}`);
+	if (filter.explainsRealmTag) {
+		const realmIds = filter.explainsRealmTag.realm.id?.in;
+		const tagIds = filter.explainsRealmTag.tag?.id?.in;
+		if (realmIds || tagIds)
+			conjunctiveSets.push(sql`select filter_candidate_context.context_post_id as unit_id
+				from realm_tag_context filter_candidate_context
+				where ${conjunction([
+					realmIds
+						? valuesCondition(sql`filter_candidate_context.realm_id`, realmIds, true)
+						: sql`true`,
+					tagIds
+						? valuesCondition(sql`filter_candidate_context.tag_id`, tagIds, true)
+						: sql`true`,
+				])}`);
+	}
+	const displayed = filter.scores?.displayed;
+	if (displayed && "some" in displayed) {
+		const displayedSet = scoreCandidateSet(displayed.some, viewerProfileId, "displayed");
+		if (displayedSet) conjunctiveSets.push(displayedSet);
+	}
+	return combineCandidateSets(conjunctiveSets, "intersect");
+}
+
+function collectionCandidateSet(filter: CollectionFilter): SQL | undefined {
+	const conjunctiveSets: SQL[] = [];
+	if (filter.all) {
+		const allSet = combineCandidateSets(
+			filter.all.flatMap((child) => {
+				const childSet = collectionCandidateSet(child);
+				return childSet ? [childSet] : [];
+			}),
+			"intersect",
+		);
+		if (allSet) conjunctiveSets.push(allSet);
+	}
+	if (filter.any) {
+		const childSets = filter.any.map(collectionCandidateSet);
+		if (childSets.every((set): set is SQL => set !== undefined)) {
+			const anySet = combineCandidateSets(childSets, "union");
+			if (anySet) conjunctiveSets.push(anySet);
+		}
+	}
+	if (filter.items && "some" in filter.items && filter.items.some.id)
+		conjunctiveSets.push(sql`select filter_candidate_collection_item.collection_id as unit_id
+			from collection_item filter_candidate_collection_item
+			where ${valuesCondition(
+				sql`filter_candidate_collection_item.unit_id`,
+				filter.items.some.id.in,
+				true,
+			)}`);
+	return combineCandidateSets(conjunctiveSets, "intersect");
+}
+
+/**
+ * Returns an indexed, positive candidate set that is guaranteed to contain every matching Unit.
+ * Unsupported or negative clauses are deliberately omitted; the complete predicate is always
+ * reapplied after ordering, so this optimization can widen a seed but can never widen results.
+ */
+export function compileUnitPredicateCandidateSet(
+	filter: UnitPredicate,
+	viewerProfileId?: string,
+): SQL | undefined {
+	const conjunctiveSets: SQL[] = [];
+	if (filter.all) {
+		const allSet = combineCandidateSets(
+			filter.all.flatMap((child) => {
+				const childSet = compileUnitPredicateCandidateSet(child, viewerProfileId);
+				return childSet ? [childSet] : [];
+			}),
+			"intersect",
+		);
+		if (allSet) conjunctiveSets.push(allSet);
+	}
+	if (filter.any) {
+		const childSets = filter.any.map((child) =>
+			compileUnitPredicateCandidateSet(child, viewerProfileId),
+		);
+		if (childSets.every((set): set is SQL => set !== undefined)) {
+			const anySet = combineCandidateSets(childSets, "union");
+			if (anySet) conjunctiveSets.push(anySet);
+		}
+	}
+	if (filter.id)
+		conjunctiveSets.push(sql`select candidate_unit.id as unit_id
+			from unit candidate_unit
+			where ${valuesCondition(sql`candidate_unit.id`, filter.id.in, true)}`);
+	if (filter.realms && "some" in filter.realms) {
+		const realmSet = realmPlacementCandidateSet(filter.realms.some);
+		if (realmSet) conjunctiveSets.push(realmSet);
+	}
+	if (
+		filter.creditAttributions &&
+		"some" in filter.creditAttributions &&
+		filter.creditAttributions.some.id
+	)
+		conjunctiveSets.push(sql`select filter_credit_attribution.source_unit_id as unit_id
+			from credit_attribution filter_credit_attribution
+			join unit filter_credited_unit
+				on filter_credited_unit.id = filter_credit_attribution.credited_unit_id
+			where ${unitReferenceCondition(
+				filter.creditAttributions.some,
+				sql`filter_credited_unit.id`,
+				sql`filter_credited_unit.kind`,
+			)}`);
+	if (
+		filter.subjectAssociations &&
+		"some" in filter.subjectAssociations &&
+		filter.subjectAssociations.some.id
+	)
+		conjunctiveSets.push(sql`select filter_subject_association.unit_id
+			from subject_association filter_subject_association
+			join unit filter_subject_entity
+				on filter_subject_entity.id = filter_subject_association.entity_id
+			where ${unitReferenceCondition(
+				filter.subjectAssociations.some,
+				sql`filter_subject_entity.id`,
+				sql`filter_subject_entity.kind`,
+			)}`);
+	if (filter.publishers && "some" in filter.publishers)
+		conjunctiveSets.push(sql`select filter_publisher.source_unit_id as unit_id
+			from credit_attribution filter_publisher
+			where filter_publisher.role = 'publisher'
+				and ${profileReferenceCondition(
+					filter.publishers.some,
+					sql`filter_publisher.credited_unit_id`,
+					viewerProfileId,
+				)}`);
+	if (filter.tags && "some" in filter.tags) {
+		const tagSet = tagAssertionCandidateSet(filter.tags.some, viewerProfileId);
+		if (tagSet) conjunctiveSets.push(tagSet);
+	}
+	if (filter.scores?.received && "some" in filter.scores.received) {
+		const scoreSet = scoreCandidateSet(
+			filter.scores.received.some,
+			viewerProfileId,
+			"received",
+		);
+		if (scoreSet) conjunctiveSets.push(scoreSet);
+	}
+	if (filter.post && "is" in filter.post) {
+		const postSet = postCandidateSet(filter.post.is, viewerProfileId);
+		if (postSet) conjunctiveSets.push(postSet);
+	}
+	if (filter.collection && "is" in filter.collection) {
+		const collectionSet = collectionCandidateSet(filter.collection.is);
+		if (collectionSet) conjunctiveSets.push(collectionSet);
+	}
+	return combineCandidateSets(conjunctiveSets, "intersect");
+}
+
 /** Compiles a validated domain Filter to a parameterized Feed eligibility predicate. */
 export function compileUnitPredicateSql(
 	filter: UnitPredicate,
@@ -418,36 +780,34 @@ export function compileUnitPredicateSql(
 	if (filter.creditAttributions) {
 		const relation = filter.creditAttributions;
 		const reference = "some" in relation ? relation.some : relation.none;
-		const exists = sql`exists (
-			select 1
+		const membership = sql`${input.unitId} in (
+			select filter_credit_attribution.source_unit_id
 			from credit_attribution filter_credit_attribution
 			join unit filter_credited_unit
 				on filter_credited_unit.id = filter_credit_attribution.credited_unit_id
-			where filter_credit_attribution.source_unit_id = ${input.unitId}
-				and ${unitReferenceCondition(
-					reference,
-					sql`filter_credited_unit.id`,
-					sql`filter_credited_unit.kind`,
-				)}
+			where ${unitReferenceCondition(
+				reference,
+				sql`filter_credited_unit.id`,
+				sql`filter_credited_unit.kind`,
+			)}
 		)`;
-		conditions.push("some" in relation ? exists : sql`not (${exists})`);
+		conditions.push("some" in relation ? membership : sql`not (${membership})`);
 	}
 	if (filter.subjectAssociations) {
 		const relation = filter.subjectAssociations;
 		const reference = "some" in relation ? relation.some : relation.none;
-		const exists = sql`exists (
-			select 1
+		const membership = sql`${input.unitId} in (
+			select filter_subject_association.unit_id
 			from subject_association filter_subject_association
 			join unit filter_subject_entity
 				on filter_subject_entity.id = filter_subject_association.entity_id
-			where filter_subject_association.unit_id = ${input.unitId}
-				and ${unitReferenceCondition(
-					reference,
-					sql`filter_subject_entity.id`,
-					sql`filter_subject_entity.kind`,
-				)}
+			where ${unitReferenceCondition(
+				reference,
+				sql`filter_subject_entity.id`,
+				sql`filter_subject_entity.kind`,
+			)}
 		)`;
-		conditions.push("some" in relation ? exists : sql`not (${exists})`);
+		conditions.push("some" in relation ? membership : sql`not (${membership})`);
 	}
 	if (filter.publishers) {
 		const relation = filter.publishers;

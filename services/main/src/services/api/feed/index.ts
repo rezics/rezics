@@ -77,7 +77,7 @@ import { presentImageAsset } from "../../units/service";
 import { compileUnitPredicateSql } from "../../filter/sql";
 import { InvalidSearch, SearchUnavailable } from "../../search/errors";
 import { SearchCategories } from "../../search/schema";
-import { searchDomain } from "../../search/service";
+import { searchDomainIdentifiers } from "../../search/service";
 import {
 	getPublicCanonicalUnitSlugAddresses,
 	type PublicCanonicalUnitSlugAddress,
@@ -328,7 +328,7 @@ async function resolveFeedSearchSelection(input: {
 	);
 	const groups = await Promise.all(
 		categories.map((category) =>
-			searchDomain(category, {
+			searchDomainIdentifiers(category, {
 				...(input.filter ? { domainFilter: input.filter } : {}),
 				...(input.profileId ? { profileId: input.profileId } : {}),
 				query: input.query,
@@ -1662,13 +1662,13 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 			...(simpleSelection?.realmIds.length ? { realmIds: simpleSelection.realmIds } : {}),
 		};
 		let searchSelection: FeedSearchSelection | undefined;
-		if (body.filter && "search" in body.filter)
+		if (body.filter)
 			try {
 				searchSelection = await resolveFeedSearchSelection({
 					content: baseScope.content,
 					filter: baseScope.filter,
 					profileId: viewer.profileId,
-					query: body.filter.search.query,
+					query: "search" in body.filter ? body.filter.search.query : "",
 				});
 			} catch (cause) {
 				if (cause instanceof InvalidSearch || cause instanceof SearchUnavailable)

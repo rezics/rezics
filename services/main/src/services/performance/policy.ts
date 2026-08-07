@@ -26,6 +26,8 @@ export const WorkPolicy = {
 		maxFacets: 20,
 		maxPageSize: 100,
 		maxResultWindow: 10_000,
+		maxCandidatesScanned: 4_096,
+		maxEstimatedPostings: 50_000,
 		statementTimeoutMs: 1_500,
 		statementTimeoutCeilingMs: 10_000,
 		maxFacetScan: 1_000,

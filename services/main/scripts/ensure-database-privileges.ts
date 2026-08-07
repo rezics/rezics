@@ -105,6 +105,11 @@ try {
 					$privileges$
 				`),
 			);
+			await transaction.execute(
+				sql.raw(
+					`grant execute on function public.search_text_candidates(text,text[],bigint,uuid,integer,integer) to ${role}`,
+				),
+			);
 			const privilegeProof = await transaction.execute<
 				Record<string, unknown> & {
 					readonly canMaintainUnit: boolean;
@@ -112,6 +117,7 @@ try {
 					readonly canReadEstimate: boolean;
 					readonly canRunApproximateWriter: boolean;
 					readonly canRunPgroongaCommand: boolean;
+					readonly canRunSearchText: boolean;
 					readonly canWriteApproximateMetrics: boolean;
 				}
 			>(sql`
@@ -138,6 +144,11 @@ try {
 							and function.proname = 'pgroonga_command'
 							and has_function_privilege(${applicationRole}, function.oid, 'EXECUTE')
 					) as "canRunPgroongaCommand",
+					has_function_privilege(
+						${applicationRole},
+						'public.search_text_candidates(text,text[],bigint,uuid,integer,integer)',
+						'EXECUTE'
+					) as "canRunSearchText",
 					has_table_privilege(
 						${applicationRole},
 						'approx_count.metrics',
@@ -148,6 +159,7 @@ try {
 			if (
 				!proof?.canReadEstimate ||
 				!proof.canReadApproximateMetrics ||
+				!proof.canRunSearchText ||
 				proof.canMaintainUnit ||
 				proof.canRunApproximateWriter ||
 				proof.canRunPgroongaCommand ||

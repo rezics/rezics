@@ -19,4 +19,12 @@ describe("Search field capability contract", () => {
 		for (const field of Object.values(SearchFieldByDomainRequestFilter))
 			expect(CurrentSearchFieldRegistry[field]).toBeDefined();
 	});
+
+	it("advertises no supported sort without a physical ordering source", () => {
+		for (const definition of Object.values(CurrentSearchSortRegistry)) {
+			if (!definition.categories.length) continue;
+			expect(definition.candidateSource).not.toBeNull();
+			expect(definition.orderingIndexes.length).toBeGreaterThan(0);
+		}
+	});
 });

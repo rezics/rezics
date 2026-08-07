@@ -53,6 +53,11 @@ export const poll = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
+		index("poll_closes_at_asc_idx").on(table.closesAt.asc().nullsLast(), table.id.asc()),
+		index("poll_closes_at_desc_idx").on(
+			table.closesAt.desc().nullsLast(),
+			table.id.desc().nullsFirst(),
+		),
 		check(
 			"poll_closes_at_check",
 			sql`${table.closesAt} is null or ${table.closesAt} > ${table.createdAt}`,

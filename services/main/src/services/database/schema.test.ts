@@ -96,6 +96,7 @@ import {
 	unitStructureVote,
 	UnitStructureKindValues,
 	sharedSearchQuery,
+	unitSearchDocument,
 	unitSlugAddress,
 	unitRevisionSlot,
 	unitStatusEvent,
@@ -117,7 +118,7 @@ const dialect = new PgDialect();
 
 describe("database schema contracts", () => {
 	it("owns every canonical PGroonga index in the Drizzle Unit schema", () => {
-		const indexes = [unitLocalization, unitAlias]
+		const indexes = [unitLocalization, unitAlias, unitSearchDocument]
 			.flatMap((table) => getTableConfig(table).indexes)
 			.filter((index) => index.config.method === "pgroonga");
 
@@ -133,6 +134,10 @@ describe("database schema contracts", () => {
 			});
 		}
 		expect(indexes[2]?.config.where).toBeUndefined();
+		expect(indexes[3]?.config.with).toEqual({
+			lexicon_flags_mapping: expect.stringMatching(/^'.*"LARGE".*'$/),
+			index_flags_mapping: expect.stringMatching(/^'.*"LARGE".*'$/),
+		});
 	});
 
 	it("keeps Book and Media release statuses required and database constrained", () => {

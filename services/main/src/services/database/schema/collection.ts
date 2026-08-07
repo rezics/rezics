@@ -68,7 +68,7 @@ export const collectionItem = pgTable(
 			table.unitId,
 		),
 		unique("collection_item_position_unique").on(table.collectionId, table.position),
-		index("collection_item_unit_idx").on(table.unitId),
+		index("collection_item_unit_idx").on(table.unitId, table.collectionId),
 		index("collection_item_added_by_idx").on(table.addedByProfileId),
 		check("collection_item_not_self_check", sql`${table.collectionId} <> ${table.unitId}`),
 	],
