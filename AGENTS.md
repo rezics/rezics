@@ -4,7 +4,7 @@ STUDY DEEPLY BEFORE ANYTHING, PROACTIVELY RESEARCH ONLINE TO ENSURE BEST PRACTIC
 
 - Read [CONTRIBUTING.md](./CONTRIBUTING.md) before making changes.
 - Put all agent-generated temporary artifacts under `.temp/`, including reports and any notes or checklists used to keep implementation aligned with an agreed plan. Remove artifacts created for the current task before finishing unless the user explicitly asks to retain them; never delete pre-existing or user-provided files.
-- Treat v1.0.0 as the first supported compatibility baseline. Remove and do not restore pre-v1 routes, schema versions, migrations, adapters, compatibility aliases, or removal guards. After v1.0.0, preserve supported public and persisted contracts according to SemVer, or change them through an explicit major release and migration plan.
+- Treat v1.0.0 as the first supported compatibility baseline. Remove and do not restore pre-v1 routes, schema versions, migrations, adapters, compatibility aliases, or removal guards. REZICS uses Romantic Versioning (RomVer) after v1.0.0: versions are `PROJECT.MAJOR.MINOR`, the second segment is for significant or breaking product, public API, or persisted-contract changes, and the third segment is for smaller additions, fixes, and maintenance releases. A breaking release must still include an explicit migration or cutover plan; it does not require a PROJECT bump.
 
 ## Frontend verification
 

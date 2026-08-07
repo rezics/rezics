@@ -6,6 +6,19 @@
 - Run the nearest relevant checks first, then broader checks affected by the change. Preserve unrelated worktree changes.
 - Maintainer-facing repository language is English. Keep localization content, test fixtures, and native-language names in their target language.
 
+## Versioning
+
+REZICS uses Romantic Versioning (RomVer) in `PROJECT.MAJOR.MINOR` form.
+
+- Increment `PROJECT` only when REZICS becomes a separate product generation.
+- Increment `MAJOR` for significant or breaking product, public API, or persisted-contract changes.
+- Increment `MINOR` for smaller additions, fixes, and maintenance releases.
+
+For example, `1.2.0` is Project 1, Major 2, Minor 0. Independent packages keep
+their own RomVer release lines, so `@rezics/api@1.6.0` is valid independently of
+the platform version. A breaking release must include an explicit migration or
+cutover plan, even though it remains within Project 1.
+
 ## Advisory GitHub checks
 
 The GitHub `Check` workflow is advisory. Its result does not block merging,

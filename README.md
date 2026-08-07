@@ -6,6 +6,9 @@ REZICS is a community-driven, cross-language knowledge network for works. Commun
 around shared interests, classify and discuss the works they care about, and
 keep a work's index, discussion, and collective knowledge together.
 
+REZICS uses Romantic Versioning (RomVer), `PROJECT.MAJOR.MINOR`; see
+[Contributing](./CONTRIBUTING.md#versioning) for the release policy.
+
 Everything — books, games, media, posts, shelves, tags, and realms — is modeled
 as a unified `Unit`, allowing the same identity, classification, attribution, and
 social layers to work across content types and languages.
