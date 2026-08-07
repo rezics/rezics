@@ -24,6 +24,7 @@ import {
 import type { ContentLanguage } from "@rezics/i18n";
 
 import type { SearchCountResult } from "../counts/contract";
+import { WorkPolicy } from "../performance/policy";
 
 import { InvalidSearch } from "./errors";
 import {
@@ -92,7 +93,7 @@ const CommonFields = [
 const ContentLicenseFields = ["content-license"] as const satisfies readonly SearchField[];
 const WorkZoneCategories = ["units", "posts", "reviews", "collections"] as const;
 const CreditedProfileCategories = getCurrentSearchFieldDefinition("credited-profile").categories;
-export const SearchMaxResultWindow = 200;
+export const SearchMaxResultWindow = WorkPolicy.search.maxResultWindow;
 
 const TemplateDefinitions = {
 	global: {

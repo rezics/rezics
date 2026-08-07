@@ -89,4 +89,63 @@ describe("globally ranked PostgreSQL Search execution", () => {
 		expect(result.nextCursor).toBeUndefined();
 		expect(result.total).toEqual({ kind: "exact", value: 0 });
 	});
+
+	it("continues the global keyset beyond the former 200-result window", async () => {
+		const document = createDefaultSearchDocument("global");
+		let cursor: string | undefined;
+
+		for (let pageIndex = 0; pageIndex < 5; pageIndex += 1) {
+			const hits = Array.from({ length: 50 }, (_, itemIndex) => ({
+				id: `019f7eed-5d42-7102-8387-${(pageIndex * 50 + itemIndex + 1)
+					.toString(16)
+					.padStart(12, "0")}`,
+			}));
+			const last = hits.at(-1);
+			if (!last) throw new Error("Expected a non-empty Search page fixture");
+			const nextOffset = (pageIndex + 1) * 50;
+			const position = {
+				primary: String(1_720_000_000 - nextOffset),
+				secondary: "0",
+				unitId: last.id,
+			} as const;
+			searchGlobalIdentifiers.mockResolvedValueOnce({
+				hits,
+				total: { kind: "lower-bound", value: nextOffset + 1 },
+				offset: pageIndex * 50,
+				nextOffset,
+				exhausted: false,
+				nextPosition: position,
+				limit: 50,
+				processingTimeMs: 1,
+			});
+			const compiled = compileSearchFeatureInput(
+				{
+					document,
+					contexts: [],
+					injections: [],
+					state: {
+						pageSize: 50,
+						sort: "createdAt:desc",
+						...(cursor ? { cursor } : {}),
+					},
+				},
+				{ sortProfile: "feed", pageBudget: "global" },
+			);
+
+			const result = await executeCompiledSearchIdentifiers(
+				compiled.plan,
+				["en"],
+				undefined,
+				compiled.enforcedZoneId,
+				compiled.inputIdentity,
+			);
+			cursor = result.nextCursor;
+			expect(cursor).toBeDefined();
+		}
+
+		expect(parseGlobalSearchCursor(cursor ?? "")).toMatchObject({ seen: 250 });
+		expect(searchGlobalIdentifiers).toHaveBeenLastCalledWith(
+			expect.objectContaining({ limit: 50, offset: 200 }),
+		);
+	});
 });

@@ -13,7 +13,7 @@ function request(patch: Partial<CompiledGroupedSearchRequest> = {}): CompiledGro
 		constraints: [],
 		sort: "best",
 		pageSize: 20,
-		maxResultWindow: 200,
+		maxResultWindow: WorkPolicy.search.maxResultWindow,
 		facets: [],
 		...patch,
 	};

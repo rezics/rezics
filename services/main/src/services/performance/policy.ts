@@ -25,7 +25,7 @@ export const WorkPolicy = {
 		maxInjections: 50,
 		maxFacets: 20,
 		maxPageSize: 100,
-		maxResultWindow: 200,
+		maxResultWindow: 10_000,
 		statementTimeoutMs: 1_500,
 		statementTimeoutCeilingMs: 10_000,
 		maxFacetScan: 1_000,

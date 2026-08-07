@@ -5,6 +5,7 @@ import {
 	compileSearchFeatureInput as compileSearchFeatureInputForPolicy,
 	createDefaultSearchDocument,
 	resolveSearchDocument,
+	SearchMaxResultWindow,
 } from "./templates";
 
 const TagId = "019b0000-0000-7000-8000-000000000001";
@@ -591,7 +592,10 @@ describe("Search Feature v1", () => {
 			resolveSearchDocument(
 				{
 					...original,
-					results: { ...original.results, maxResultWindow: 201 },
+					results: {
+						...original.results,
+						maxResultWindow: SearchMaxResultWindow + 1,
+					},
 				},
 				true,
 			),
@@ -605,7 +609,7 @@ describe("Search Feature v1", () => {
 			injections: [],
 			state: {},
 		});
-		expect(compiled.request.maxResultWindow).toBe(200);
+		expect(compiled.request.maxResultWindow).toBe(10_000);
 	});
 
 	it("accepts a cursor-free shared query and rejects duplicate display hints", () => {
