@@ -1,4 +1,10 @@
-import { SpanKind, SpanStatusCode, trace } from "@opentelemetry/api";
+import {
+	context as otelContext,
+	type Context,
+	SpanKind,
+	SpanStatusCode,
+	trace,
+} from "@opentelemetry/api";
 
 import { normalizeOperationName, type DependencyName } from "./metrics";
 import { getActiveObservability, peekActiveObservability } from "./state";
@@ -82,20 +88,73 @@ export async function observedFetch(
 	return withDependencySpan(options, () => fetch(input, init));
 }
 
-export function instrumentPostgresClient<T extends object>(client: T): T {
-	return new Proxy(client, {
+const instrumentedPostgresClients = new WeakMap<object, object>();
+
+function createInstrumentedPostgresClient<T extends object>(
+	client: T,
+	boundContext?: Context,
+	cacheSource = true,
+): T {
+	const existing = cacheSource ? instrumentedPostgresClients.get(client) : undefined;
+	// The map stores only proxies created from this exact client and therefore preserves T's surface.
+	if (existing) return existing as T;
+	const instrumented = new Proxy(client, {
 		get(target, property, receiver): unknown {
 			const value: unknown = Reflect.get(target, property, receiver);
+			if (property === "connect" && typeof value === "function")
+				return (...arguments_: unknown[]) => {
+					const connectionContext = otelContext.active();
+					const callback = arguments_.at(-1);
+					if (typeof callback === "function") {
+						const wrappedArguments = arguments_.slice(0, -1);
+						wrappedArguments.push(
+							(error: unknown, connected: unknown, ...rest: unknown[]) =>
+								otelContext.with(connectionContext, () =>
+									Reflect.apply(callback, undefined, [
+										error,
+										connected !== null && typeof connected === "object"
+											? createInstrumentedPostgresClient(
+													connected,
+													connectionContext,
+													false,
+												)
+											: connected,
+										...rest,
+									]),
+								),
+						);
+						return Reflect.apply(value, target, wrappedArguments);
+					}
+					return Promise.resolve(Reflect.apply(value, target, arguments_)).then(
+						(connected) =>
+							connected !== null && typeof connected === "object"
+								? createInstrumentedPostgresClient(
+										connected,
+										connectionContext,
+										false,
+									)
+								: connected,
+					);
+				};
 			if (property !== "query" || typeof value !== "function") return value;
 			return (...arguments_: unknown[]) => {
 				if (typeof arguments_.at(-1) === "function")
 					return Reflect.apply(value, target, arguments_);
-				return withDependencySpan({ dependency: "postgresql", operation: "query" }, () =>
-					Promise.resolve(Reflect.apply(value, target, arguments_)),
-				);
+				const query = () =>
+					withDependencySpan({ dependency: "postgresql", operation: "query" }, () =>
+						Promise.resolve(Reflect.apply(value, target, arguments_)),
+					);
+				return boundContext ? otelContext.with(boundContext, query) : query();
 			};
 		},
 	});
+	if (cacheSource) instrumentedPostgresClients.set(client, instrumented);
+	instrumentedPostgresClients.set(instrumented, instrumented);
+	return instrumented;
+}
+
+export function instrumentPostgresClient<T extends object>(client: T): T {
+	return createInstrumentedPostgresClient(client);
 }
 
 export async function runWorkerJob<T>(
