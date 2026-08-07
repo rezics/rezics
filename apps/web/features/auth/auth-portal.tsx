@@ -14,6 +14,7 @@ import {
 	useMemo,
 	useRef,
 	useState,
+	type FocusEventHandler,
 	type FormEvent,
 	type ReactNode,
 } from "react";
@@ -38,6 +39,7 @@ import { authSearchParamsParsers } from "@/lib/search-params";
 import { AuthPortalContext, type AuthPortalOptions, useAuthPortal } from "./auth-portal-context";
 import { AuthPasswordField, AuthTextField } from "./components/auth-form-field";
 import { TurnstileWidget } from "./components/turnstile-widget";
+import { passwordConfirmationMatches } from "./model/password-confirmation";
 
 const AuthPolicyHrefs = {
 	userAgreement: "https://about.rezics.com/policies/user-agreement",
@@ -395,14 +397,35 @@ function RegisterForm({
 	]);
 	const [error, setError] = useState<string>();
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [passwordConfirmationError, setPasswordConfirmationError] = useState(false);
 	const [turnstileResetKey, setTurnstileResetKey] = useState(0);
 	const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 	const passwordVisibilityLabel = (visible: boolean) =>
 		visible ? t.auth.hidePassword : t.auth.showPassword;
+	const confirmPasswordVisibilityLabel = (visible: boolean) =>
+		visible ? t.auth.hideConfirmPassword : t.auth.showConfirmPassword;
+	const handleConfirmPasswordBlur: FocusEventHandler<HTMLInputElement> = (event) => {
+		const form = event.currentTarget.form;
+		if (!form) return;
+		const formData = new FormData(form);
+		const password = String(formData.get("password") ?? "");
+		const confirmPassword = String(formData.get("confirmPassword") ?? "");
+		setPasswordConfirmationError(
+			confirmPassword.length > 0 && !passwordConfirmationMatches(password, confirmPassword),
+		);
+	};
 
 	async function onSubmit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		setError(undefined);
+		const formData = new FormData(event.currentTarget);
+		const password = String(formData.get("password") ?? "");
+		const confirmPassword = String(formData.get("confirmPassword") ?? "");
+		if (!passwordConfirmationMatches(password, confirmPassword)) {
+			setPasswordConfirmationError(true);
+			return;
+		}
+		setPasswordConfirmationError(false);
 		if (!turnstileToken) {
 			setError(t.auth.securityVerificationRequired);
 			return;
@@ -410,12 +433,11 @@ function RegisterForm({
 		setIsSubmitting(true);
 
 		try {
-			const formData = new FormData(event.currentTarget);
 			const email = String(formData.get("email"));
 			const result = await authClient.signUp.email({
 				email,
 				name: String(formData.get("name")),
-				password: String(formData.get("password")),
+				password,
 				registrationContentLanguage: toContentLanguage(locale.target),
 				fetchOptions: {
 					headers: {
@@ -463,6 +485,15 @@ function RegisterForm({
 						minLength={8}
 						name="password"
 						visibilityLabel={passwordVisibilityLabel}
+					/>
+					<AuthPasswordField
+						autoComplete="new-password"
+						error={passwordConfirmationError ? t.auth.passwordMismatch : undefined}
+						label={t.auth.confirmPassword}
+						minLength={8}
+						name="confirmPassword"
+						onBlur={handleConfirmPasswordBlur}
+						visibilityLabel={confirmPasswordVisibilityLabel}
 					/>
 					<TurnstileWidget
 						label={t.auth.securityVerificationLabel}
@@ -584,19 +615,33 @@ function ResetPasswordForm({
 	const [error, setError] = useState<string>();
 	const [isComplete, setIsComplete] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [passwordMismatch, setPasswordMismatch] = useState(false);
 	const newPasswordVisibilityLabel = (visible: boolean) =>
 		visible ? t.auth.hideNewPassword : t.auth.showNewPassword;
 	const confirmPasswordVisibilityLabel = (visible: boolean) =>
 		visible ? t.auth.hideConfirmPassword : t.auth.showConfirmPassword;
+	const handleConfirmPasswordBlur: FocusEventHandler<HTMLInputElement> = (event) => {
+		const form = event.currentTarget.form;
+		if (!form) return;
+		const formData = new FormData(form);
+		const newPassword = String(formData.get("password") ?? "");
+		const confirmPassword = String(formData.get("confirmPassword") ?? "");
+		setPasswordMismatch(
+			confirmPassword.length > 0 &&
+				!passwordConfirmationMatches(newPassword, confirmPassword),
+		);
+	};
 
 	async function onSubmit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		if (!token) return;
 
+		setPasswordMismatch(false);
 		const formData = new FormData(event.currentTarget);
 		const newPassword = String(formData.get("password"));
 		if (newPassword !== String(formData.get("confirmPassword"))) {
-			setError(t.auth.passwordMismatch);
+			setPasswordMismatch(true);
+			setError(undefined);
 			return;
 		}
 
@@ -639,8 +684,10 @@ function ResetPasswordForm({
 						<AuthPasswordField
 							autoComplete="new-password"
 							label={t.auth.confirmPassword}
+							error={passwordMismatch ? t.auth.passwordMismatch : undefined}
 							minLength={8}
 							name="confirmPassword"
+							onBlur={handleConfirmPasswordBlur}
 							visibilityLabel={confirmPasswordVisibilityLabel}
 						/>
 						<FormError error={error} />

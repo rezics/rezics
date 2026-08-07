@@ -3,6 +3,7 @@
 import {
 	Field,
 	FieldDescription,
+	FieldError,
 	FieldLabel,
 	FieldRequiredIndicator,
 	Input,
@@ -12,7 +13,7 @@ import {
 	PasswordInputTrigger,
 	type InputProps,
 } from "@rezics/ui";
-import { useId, useState } from "react";
+import { useId, useState, type FocusEventHandler } from "react";
 
 type AuthTextFieldProps = Omit<InputProps, "name" | "required" | "size"> & {
 	description?: string;
@@ -57,26 +58,32 @@ export function AuthTextField({
 type AuthPasswordFieldProps = {
 	autoComplete: "current-password" | "new-password";
 	description?: string;
+	error?: string;
 	label: string;
-	minLength: number;
+	minLength?: number;
 	name: string;
+	onBlur?: FocusEventHandler<HTMLInputElement>;
 	visibilityLabel: (visible: boolean) => string;
 };
 
 export function AuthPasswordField({
 	autoComplete,
 	description,
+	error,
 	label,
 	minLength,
 	name,
+	onBlur,
 	visibilityLabel,
 }: AuthPasswordFieldProps) {
 	const id = useId();
 	const descriptionId = description ? `${id}-description` : undefined;
+	const errorId = error ? `${id}-error` : undefined;
+	const descriptionReferences = [descriptionId, errorId].filter(Boolean).join(" ");
 	const [visible, setVisible] = useState(false);
 
 	return (
-		<Field required>
+		<Field invalid={Boolean(error)} required>
 			<FieldLabel htmlFor={id}>
 				{label}
 				<FieldRequiredIndicator />
@@ -93,9 +100,11 @@ export function AuthPasswordField({
 			>
 				<PasswordInputGroup>
 					<PasswordInputInput
-						aria-describedby={descriptionId}
+						aria-describedby={descriptionReferences || undefined}
+						aria-invalid={error ? true : undefined}
 						autoCapitalize="none"
 						minLength={minLength}
+						onBlur={onBlur}
 						spellCheck={false}
 					/>
 					<PasswordInputTrigger
@@ -109,6 +118,7 @@ export function AuthPasswordField({
 			{description ? (
 				<FieldDescription id={descriptionId}>{description}</FieldDescription>
 			) : null}
+			{error ? <FieldError id={errorId}>{error}</FieldError> : null}
 		</Field>
 	);
 }

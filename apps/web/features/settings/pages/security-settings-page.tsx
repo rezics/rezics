@@ -11,12 +11,13 @@ import {
 	Field,
 	FieldGroup,
 	FieldLabel,
-	Input,
 	ManagementWorkspaceSectionHeader,
 } from "@rezics/ui";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type FocusEventHandler, type FormEvent } from "react";
 
+import { AuthPasswordField } from "@/features/auth/components/auth-form-field";
+import { passwordConfirmationMatches } from "@/features/auth/model/password-confirmation";
 import { useTranslation } from "@/i18n/client";
 import { authClient } from "@/lib/auth-client";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
@@ -38,14 +39,26 @@ function formatDate(value: Date | string, locale: string) {
 }
 
 export function SecuritySettingsPage() {
-	const { t, locale } = useTranslation(["settings", "ui"]);
+	const { t, locale } = useTranslation(["auth", "settings", "ui"]);
 	const currentSession = useHydratedSession();
 	const [sessionList, setSessionList] = useState<SessionListState>({ status: "pending" });
-	const [passwordState, setPasswordState] = useState<"idle" | "pending" | "saved" | "error">(
-		"idle",
-	);
+	const [passwordState, setPasswordState] = useState<
+		"idle" | "pending" | "saved" | "error" | "mismatch"
+	>("idle");
 	const [revokingToken, setRevokingToken] = useState<string>();
 	const [sessionActionFailed, setSessionActionFailed] = useState(false);
+	const handleConfirmPasswordBlur: FocusEventHandler<HTMLInputElement> = (event) => {
+		const form = event.currentTarget.form;
+		if (!form) return;
+		const formData = new FormData(form);
+		const newPassword = String(formData.get("newPassword") ?? "");
+		const confirmPassword = String(formData.get("confirmPassword") ?? "");
+		const isMismatch =
+			confirmPassword.length > 0 &&
+			!passwordConfirmationMatches(newPassword, confirmPassword);
+		if (isMismatch) setPasswordState("mismatch");
+		else if (passwordState === "mismatch") setPasswordState("idle");
+	};
 
 	useEffect(() => {
 		let active = true;
@@ -67,13 +80,21 @@ export function SecuritySettingsPage() {
 
 	async function changePassword(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		setPasswordState("pending");
 		const element = event.currentTarget;
 		const form = new FormData(element);
+		const currentPassword = String(form.get("currentPassword") ?? "");
+		const newPassword = String(form.get("newPassword") ?? "");
+		const confirmPassword = String(form.get("confirmPassword") ?? "");
+		if (!passwordConfirmationMatches(newPassword, confirmPassword)) {
+			setPasswordState("mismatch");
+			return;
+		}
+
+		setPasswordState("pending");
 		try {
 			const result = await authClient.changePassword({
-				currentPassword: String(form.get("currentPassword") ?? ""),
-				newPassword: String(form.get("newPassword") ?? ""),
+				currentPassword,
+				newPassword,
 				revokeOtherSessions: form.get("revokeOtherSessions") === "on",
 			});
 			if (result.error) {
@@ -126,25 +147,41 @@ export function SecuritySettingsPage() {
 					<CardContent className="p-6">
 						<form onSubmit={changePassword}>
 							<FieldGroup>
-								<Field required>
-									<FieldLabel>{t.settings.currentPassword}</FieldLabel>
-									<Input
-										autoComplete="current-password"
-										name="currentPassword"
-										required
-										type="password"
-									/>
-								</Field>
-								<Field required>
-									<FieldLabel>{t.settings.newPassword}</FieldLabel>
-									<Input
-										autoComplete="new-password"
-										minLength={8}
-										name="newPassword"
-										required
-										type="password"
-									/>
-								</Field>
+								<AuthPasswordField
+									autoComplete="current-password"
+									label={t.settings.currentPassword}
+									name="currentPassword"
+									visibilityLabel={(visible) =>
+										visible ? t.auth.hidePassword : t.auth.showPassword
+									}
+								/>
+								<AuthPasswordField
+									autoComplete="new-password"
+									description={t.auth.passwordMinimum}
+									label={t.settings.newPassword}
+									minLength={8}
+									name="newPassword"
+									visibilityLabel={(visible) =>
+										visible ? t.auth.hideNewPassword : t.auth.showNewPassword
+									}
+								/>
+								<AuthPasswordField
+									autoComplete="new-password"
+									error={
+										passwordState === "mismatch"
+											? t.auth.passwordMismatch
+											: undefined
+									}
+									label={t.auth.confirmPassword}
+									minLength={8}
+									name="confirmPassword"
+									onBlur={handleConfirmPasswordBlur}
+									visibilityLabel={(visible) =>
+										visible
+											? t.auth.hideConfirmPassword
+											: t.auth.showConfirmPassword
+									}
+								/>
 								<Field orientation="horizontal">
 									<Checkbox defaultChecked name="revokeOtherSessions" />
 									<FieldLabel>{t.settings.revokeOtherSessions}</FieldLabel>

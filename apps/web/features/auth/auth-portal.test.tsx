@@ -56,6 +56,7 @@ vi.mock("@rezics/ui", () => ({
 	),
 	Field: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 	FieldDescription: (props: HTMLAttributes<HTMLParagraphElement>) => <p {...props} />,
+	FieldError: (props: HTMLAttributes<HTMLParagraphElement>) => <p {...props} />,
 	FieldGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 	FieldLabel: (props: LabelHTMLAttributes<HTMLLabelElement>) => <label {...props} />,
 	FieldRequiredIndicator: () => <span>*</span>,

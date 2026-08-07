@@ -47,4 +47,27 @@ describe("authentication form fields", () => {
 		expect(input.getAttribute("type")).toBe("text");
 		expect(screen.getByRole("button", { name: "Hide new password" })).toBeTruthy();
 	});
+
+	it("associates a mismatch message with the confirmation input", () => {
+		render(
+			<AuthPasswordField
+				autoComplete="new-password"
+				error="The passwords do not match."
+				label="Confirm password"
+				minLength={8}
+				name="confirmPassword"
+				visibilityLabel={(visible) =>
+					visible ? "Hide password confirmation" : "Show password confirmation"
+				}
+			/>,
+		);
+
+		const input = screen.getByLabelText(/^Confirm password/);
+		const error = screen.getByText("The passwords do not match.");
+		const errorId = error.getAttribute("id");
+
+		expect(errorId).toBeTruthy();
+		expect(input.getAttribute("aria-invalid")).toBe("true");
+		expect(input.getAttribute("aria-describedby")).toContain(errorId ?? "");
+	});
 });
