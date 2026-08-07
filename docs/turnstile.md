@@ -24,6 +24,12 @@ rejects Cloudflare's test site key and test secret. A deployment accidentally
 left with local allowed hostnames remains fail-closed because Siteverify's
 production hostname cannot pass the backend allowlist.
 
+With the official test secret, development still calls Cloudflare Siteverify but
+does not require action or hostname metadata: Cloudflare's dummy success response
+does not provide the production widget metadata. This exception requires both the
+official test secret and `REZICS_RELEASE=development`; real credentials and all
+released environments keep the full action and hostname checks.
+
 ## Production widget
 
 Create one Managed Widget in the REZICS Cloudflare account:
@@ -39,9 +45,9 @@ test pair for local development and automated tests instead.
 The frontend renders the Widget explicitly because the registration dialog is
 dynamic. It uses action `turnstile-spin-v1`, disables Turnstile's hidden form
 field, and passes the token only through Better Auth's request header. The backend
-accepts the token only when Siteverify reports that same action and an allowed
-hostname. Tokens are discarded after expiry, challenge errors, and every failed
-registration attempt.
+accepts real-widget tokens only when Siteverify reports that same action and an
+allowed hostname. Tokens are discarded after expiry, challenge errors, and every
+failed registration attempt.
 
 If a Content Security Policy is introduced, allow
 `https://challenges.cloudflare.com` in the directives required by the current

@@ -5,7 +5,7 @@ import { captcha } from "better-auth/plugins";
 import { getActiveObservability } from "@rezics/observability";
 import { ContentLanguageValues } from "@rezics/i18n";
 
-import { env } from "../config";
+import { CloudflareTurnstileTestSecretKey, env } from "../config";
 import { database } from "../database";
 import * as schema from "../database/schema/auth";
 import { enqueueAuthenticationEmail } from "../email/outbox";
@@ -27,6 +27,13 @@ function requireTurnstileConfiguration() {
 }
 
 const turnstile = requireTurnstileConfiguration();
+const turnstileVerificationConstraints =
+	env.REZICS_RELEASE === "development" && turnstile.secretKey === CloudflareTurnstileTestSecretKey
+		? {}
+		: {
+				expectedAction: "turnstile-spin-v1",
+				allowedHostnames: turnstile.allowedHostnames,
+			};
 
 export const auth = betterAuth({
 	baseURL: env.BETTER_AUTH_URL,
@@ -50,8 +57,7 @@ export const auth = betterAuth({
 			provider: "cloudflare-turnstile",
 			secretKey: turnstile.secretKey,
 			endpoints: ["/sign-up/email"],
-			expectedAction: "turnstile-spin-v1",
-			allowedHostnames: turnstile.allowedHostnames,
+			...turnstileVerificationConstraints,
 		}),
 		apiKey({
 			references: "user",

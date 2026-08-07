@@ -21,6 +21,8 @@ const release = z.union([
 	z.string().regex(/^v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/),
 ]);
 
+export const CloudflareTurnstileTestSecretKey = "1x0000000000000000000000000000000AA";
+
 const hostname = z
 	.string()
 	.trim()
@@ -148,6 +150,6 @@ if (
 
 if (
 	env.TURNSTILE_ALLOWED_HOSTNAMES?.some((value) => !["localhost", "127.0.0.1"].includes(value)) &&
-	env.TURNSTILE_SECRET_KEY === "1x0000000000000000000000000000000AA"
+	env.TURNSTILE_SECRET_KEY === CloudflareTurnstileTestSecretKey
 )
 	throw new Error("The Cloudflare Turnstile test secret key cannot be used in production");
