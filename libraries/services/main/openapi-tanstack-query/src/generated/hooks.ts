@@ -24279,18 +24279,22 @@ export function useDeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationI
 
 export const getApiUnitsByTypeByUnitIdLinksQueryKey = ({
 	path,
+	query,
 }: Omit<GetApiUnitsByTypeByUnitIdLinksOptions, "headers">) =>
-	[{ url: "/api/v1/units/:type/:unitId/links", params: path }] as const;
+	[
+		{ url: "/api/v1/units/:type/:unitId/links", params: path },
+		...(query ? [query] : []),
+	] as const;
 
 type GetApiUnitsByTypeByUnitIdLinksQueryKey = ReturnType<
 	typeof getApiUnitsByTypeByUnitIdLinksQueryKey
 >;
 
 export function getApiUnitsByTypeByUnitIdLinksQueryOptions(
-	{ path }: GetApiUnitsByTypeByUnitIdLinksOptions,
+	{ path, query }: GetApiUnitsByTypeByUnitIdLinksOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiUnitsByTypeByUnitIdLinksQueryKey({ path });
+	const queryKey = getApiUnitsByTypeByUnitIdLinksQueryKey({ path, query });
 	return queryOptions<
 		GetApiUnitsByTypeByUnitIdLinksStatus200,
 		ResponseErrorConfig<
@@ -24307,6 +24311,7 @@ export function getApiUnitsByTypeByUnitIdLinksQueryOptions(
 			const { data } = await getApiUnitsByTypeByUnitIdLinks({
 				...config,
 				path,
+				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
 			});
@@ -24326,10 +24331,14 @@ export function useGetApiUnitsByTypeByUnitIdLinks<
 >(
 	{
 		path,
+		query,
 	}: {
 		path:
 			| GetApiUnitsByTypeByUnitIdLinksOptions["path"]
 			| (() => GetApiUnitsByTypeByUnitIdLinksOptions["path"]);
+		query?:
+			| GetApiUnitsByTypeByUnitIdLinksOptions["query"]
+			| (() => GetApiUnitsByTypeByUnitIdLinksOptions["query"]);
 	},
 	options: {
 		query?: Partial<
@@ -24351,7 +24360,10 @@ export function useGetApiUnitsByTypeByUnitIdLinks<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
 	const queryKey =
 		resolvedOptions?.queryKey ?? getApiUnitsByTypeByUnitIdLinksQueryKey(resolvedParams);
 

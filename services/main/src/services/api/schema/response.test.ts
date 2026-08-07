@@ -7,6 +7,7 @@ import {
 	toPortableTextResponse,
 	ChapterDetailResponse,
 	ContentMetricResponse,
+	EntityDetailResponse,
 	FeedNonReviewPostItemResponse,
 	FeedReviewItemResponse,
 	FeedUnitItemResponse,
@@ -345,5 +346,14 @@ describe("API response values", () => {
 				creditedUnit: { ...attribution.creditedUnit, followerCount: 1.5 },
 			}),
 		).toBe(false);
+	});
+
+	it("exposes accepted source links with their source Entity on Entity detail", () => {
+		expect(EntityDetailResponse.required).toContain("links");
+		expect(EntityDetailResponse.properties.links.items.properties.accepted.const).toBe(true);
+		expect(EntityDetailResponse.properties.links.items.required).toContain("sourceEntity");
+		expect(
+			EntityDetailResponse.properties.links.items.properties.sourceEntity.required,
+		).toContain("avatar");
 	});
 });

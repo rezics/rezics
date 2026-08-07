@@ -27,7 +27,6 @@ import { WorkPolicy } from "../performance/policy";
 import {
 	type CreditAttributionRole,
 	isCreditAttributionRoleForUnitKind,
-	SourceLinkVisibilityScoreThreshold,
 	type WorkReleaseStatus,
 } from "../database/schema/contract-values";
 import { ContentStructureSnapshotSchema } from "../content-structure/contracts";
@@ -61,9 +60,6 @@ import {
 	unit,
 	unitOwnership,
 	subjectAssociation,
-	unitSourceLink,
-	unitSourceLinkVote,
-	unitSourceLinkVoteStat,
 	unitLocalization,
 	unitProgress,
 	unitTag,
@@ -115,6 +111,7 @@ import {
 import { wilsonLowerBoundSql } from "../tags/ranking";
 import { getPendingUnitOwnershipClaim } from "../ownership-claims/service";
 import { unitScope } from "../authorization/unit/scope";
+import { getAcceptedUnitSourceLinks } from "./source-links";
 
 export type VariantUnitKind = "book" | "software" | "media";
 export type WorkUnitKind = VariantUnitKind | "series";
@@ -491,49 +488,7 @@ export async function getUnit(
 		...association,
 		contextPost: contextPosts.get(association.id) ?? null,
 	}));
-	const links = await database
-		.select({
-			id: unitSourceLink.id,
-			unitId: unitSourceLink.unitId,
-			sourceEntityId: unitSourceLink.sourceEntityId,
-			url: unitSourceLink.url,
-			normalizedUrl: unitSourceLink.normalizedUrl,
-			normalizedUrlHash: unitSourceLink.normalizedUrlHash,
-			createdByProfileId: unitSourceLink.createdByProfileId,
-			viewerVote: authorization.profileId
-				? sql<-1 | 1 | null>`(
-					select ${unitSourceLinkVote.value}
-					from ${unitSourceLinkVote}
-					where ${unitSourceLinkVote.linkId} = ${unitSourceLink.id}
-						and ${unitSourceLinkVote.profileId} = ${authorization.profileId}
-				)`
-				: sql<null>`null`,
-			score: unitSourceLinkVoteStat.score,
-			voteCount: unitSourceLinkVoteStat.voteCount,
-			accepted: sql<true>`true`,
-			pinned: unitSourceLink.pinned,
-			position: unitSourceLink.position,
-			createdAt: unitSourceLink.createdAt,
-			updatedAt: unitSourceLink.updatedAt,
-		})
-		.from(unitSourceLink)
-		.leftJoin(unitSourceLinkVoteStat, eq(unitSourceLinkVoteStat.linkId, unitSourceLink.id))
-		.where(
-			and(
-				eq(unitSourceLink.unitId, base.id),
-				sql`${unitSourceLink.pinned} or coalesce(${unitSourceLinkVoteStat.score}, 0) >= ${SourceLinkVisibilityScoreThreshold}`,
-			),
-		)
-		.orderBy(
-			desc(unitSourceLink.pinned),
-			sql`case when ${unitSourceLink.pinned} then ${unitSourceLink.position} end asc nulls last`,
-			desc(
-				wilsonLowerBoundSql(unitSourceLinkVoteStat.score, unitSourceLinkVoteStat.voteCount),
-			),
-			desc(unitSourceLinkVoteStat.score),
-			desc(unitSourceLinkVoteStat.voteCount),
-			unitSourceLink.id,
-		);
+	const links = await getAcceptedUnitSourceLinks(base.id, authorization.profileId);
 	const tags = await database
 		.select({
 			tagId: unitTag.tagId,
@@ -665,11 +620,7 @@ export async function getUnit(
 		),
 		localizations: localizations.map(presentUnitLocalization),
 		subjectAssociations,
-		links: links.map((link) => ({
-			...link,
-			score: toSafeInteger(link.score ?? 0n, "source link vote score"),
-			voteCount: toSafeInteger(link.voteCount ?? 0n, "source link vote count"),
-		})),
+		links,
 		tags: tags.map((tag) => ({
 			...tag,
 			id: tag.tagId,

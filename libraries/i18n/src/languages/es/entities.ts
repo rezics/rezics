@@ -12,4 +12,10 @@ export default {
 	unverified: "Sin verificar",
 	newEntity: `Nueva ${entityTerms.inline}`,
 	newTag: "Nuevo tag",
+	sourceLinksDescription: `Páginas públicas que respaldan la información sobre esta ${entityTerms.inline}.`,
+	sourceLinksEmpty: "Aún no hay enlaces de fuentes.",
+	relatedContentTitle: "Contenido relacionado",
+	relatedContentDescription: `Contenido relacionado con esta ${entityTerms.inline}.`,
+	relatedContentEmptyTitle: "No hay contenido relacionado",
+	relatedContentEmptyDescription: "Todavía no hay contenido relacionado que mostrar.",
 } satisfies typeof import("../zh-Hant/entities").default;

@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { createHash } from "node:crypto";
+import type { ContentLanguage } from "@rezics/i18n";
 
 import { and, asc, desc, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
@@ -74,6 +75,7 @@ import {
 	UnitAliasParams,
 	UnitAliasUnitParams,
 	UnitSourceLinkParams,
+	UnitSourceLinkListQuery,
 	UnitSourceLinkUnitParams,
 	UnitUnitParams,
 	UnitTagParams,
@@ -90,6 +92,7 @@ import {
 import {
 	getAttributionSummariesByUnitIds,
 	getPublicUnitSummariesByIds,
+	getReadableUnitPresentationsByIds,
 } from "../../units/attribution";
 import { ensureDirectCreditAttributionAllowed } from "../../units/attribution-authorization";
 import { presentImageAsset } from "../../units/service";
@@ -131,6 +134,7 @@ import {
 	updateUnitAliasCuration,
 	updateUnitSourceLinkCuration,
 } from "../../units/reference-curation";
+import { getAcceptedUnitSourceLinks } from "../../units/source-links";
 
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
@@ -166,6 +170,22 @@ async function ensureUnitMutationAuthorized(
 	scope: readonly string[],
 ): Promise<void> {
 	await authorization.ensureCanUpdate(unitId, [scope]);
+}
+
+async function attachReadableSourceEntities<Link extends { readonly sourceEntityId: string }>(
+	links: readonly Link[],
+	localizationLanguages: readonly ContentLanguage[],
+	profileId?: string,
+) {
+	const sourceEntities = await getReadableUnitPresentationsByIds({
+		unitIds: [...new Set(links.map(({ sourceEntityId }) => sourceEntityId))],
+		localizationLanguages,
+		profileId,
+	});
+	return links.flatMap((link) => {
+		const sourceEntity = sourceEntities.get(link.sourceEntityId);
+		return sourceEntity ? [{ ...link, sourceEntity }] : [];
+	});
 }
 
 async function ensureReadableSourceEntity(
@@ -494,6 +514,15 @@ export default new Elysia()
 						createdAt: row.createdAt,
 						updatedAt: row.updatedAt,
 					}));
+					const acceptedLinks = await getAcceptedUnitSourceLinks(
+						params.unitId,
+						identity.authorization.profileId,
+					);
+					const links = await attachReadableSourceEntities(
+						acceptedLinks,
+						localizationLanguages,
+						identity.authorization.profileId,
+					);
 					const creditAttributions = await database
 						.select({
 							id: creditAttribution.id,
@@ -610,6 +639,7 @@ export default new Elysia()
 						localizations,
 						attributions,
 						owner: ownerSummary,
+						links,
 						ownershipClaim: ownershipClaim
 							? { ...ownershipClaim, state: "pending" as const }
 							: null,
@@ -1300,9 +1330,10 @@ export default new Elysia()
 			)
 			.get(
 				"/links",
-				async ({ params, profile, authorization }) => {
+				async ({ params, query, profile, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
+					const localizationLanguages = query.localizationLanguages ?? [];
 					const [rows, curationVersion] = await Promise.all([
 						database
 							.select({
@@ -1350,19 +1381,25 @@ export default new Elysia()
 							),
 						getReferenceCurationVersion(params.unitId, "source_link"),
 					]);
+					const links = rows.map((row) => ({
+						...row,
+						viewerVote: row.viewerVote,
+						score: toSafeInteger(row.score ?? 0n, "source link vote score"),
+						voteCount: toSafeInteger(row.voteCount ?? 0n, "source link vote count"),
+					}));
 					return {
-						items: rows.map((row) => ({
-							...row,
-							viewerVote: row.viewerVote,
-							score: toSafeInteger(row.score ?? 0n, "source link vote score"),
-							voteCount: toSafeInteger(row.voteCount ?? 0n, "source link vote count"),
-						})),
+						items: await attachReadableSourceEntities(
+							links,
+							localizationLanguages,
+							profile.unitId,
+						),
 						curationVersion,
 					};
 				},
 				{
 					access: "unit:read",
 					params: UnitSourceLinkUnitParams,
+					query: UnitSourceLinkListQuery,
 					response: {
 						[StatusCodes.OK]: UnitSourceLinkListResponse,
 						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,

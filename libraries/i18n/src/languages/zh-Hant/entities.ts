@@ -12,4 +12,10 @@ export default {
 	unverified: "未驗證",
 	newEntity: `建立${entityTerms.label}`,
 	newTag: "建立標籤",
+	sourceLinksDescription: `可佐證此${entityTerms.inline}資訊的公開頁面。`,
+	sourceLinksEmpty: "目前沒有來源連結。",
+	relatedContentTitle: "相關內容",
+	relatedContentDescription: `與此${entityTerms.inline}相關的內容。`,
+	relatedContentEmptyTitle: "尚無相關內容",
+	relatedContentEmptyDescription: "目前沒有可顯示的相關內容。",
 };

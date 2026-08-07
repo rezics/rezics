@@ -2242,6 +2242,192 @@ export type UnitPredicate = {
 						  };
 				};
 		  };
+	creditAttributions?:
+		| {
+				/**
+				 * @type object
+				 */
+				some: {
+					/**
+					 * @type object | undefined
+					 */
+					id?: {
+						/**
+						 * @type array
+						 */
+						in: string[];
+					};
+					/**
+					 * @type object | undefined
+					 */
+					kind?: {
+						/**
+						 * @type array
+						 */
+						in: (
+							| "slug_namespace"
+							| "profile"
+							| "book"
+							| "software"
+							| "media"
+							| "video"
+							| "audio"
+							| "release"
+							| "entity"
+							| "label"
+							| "tag"
+							| "structure"
+							| "series"
+							| "zone"
+							| "zone_page"
+							| "collection"
+							| "post"
+							| "poll"
+							| "realm"
+							| "realm_rule"
+						)[];
+					};
+				};
+		  }
+		| {
+				/**
+				 * @type object
+				 */
+				none: {
+					/**
+					 * @type object | undefined
+					 */
+					id?: {
+						/**
+						 * @type array
+						 */
+						in: string[];
+					};
+					/**
+					 * @type object | undefined
+					 */
+					kind?: {
+						/**
+						 * @type array
+						 */
+						in: (
+							| "slug_namespace"
+							| "profile"
+							| "book"
+							| "software"
+							| "media"
+							| "video"
+							| "audio"
+							| "release"
+							| "entity"
+							| "label"
+							| "tag"
+							| "structure"
+							| "series"
+							| "zone"
+							| "zone_page"
+							| "collection"
+							| "post"
+							| "poll"
+							| "realm"
+							| "realm_rule"
+						)[];
+					};
+				};
+		  };
+	subjectAssociations?:
+		| {
+				/**
+				 * @type object
+				 */
+				some: {
+					/**
+					 * @type object | undefined
+					 */
+					id?: {
+						/**
+						 * @type array
+						 */
+						in: string[];
+					};
+					/**
+					 * @type object | undefined
+					 */
+					kind?: {
+						/**
+						 * @type array
+						 */
+						in: (
+							| "slug_namespace"
+							| "profile"
+							| "book"
+							| "software"
+							| "media"
+							| "video"
+							| "audio"
+							| "release"
+							| "entity"
+							| "label"
+							| "tag"
+							| "structure"
+							| "series"
+							| "zone"
+							| "zone_page"
+							| "collection"
+							| "post"
+							| "poll"
+							| "realm"
+							| "realm_rule"
+						)[];
+					};
+				};
+		  }
+		| {
+				/**
+				 * @type object
+				 */
+				none: {
+					/**
+					 * @type object | undefined
+					 */
+					id?: {
+						/**
+						 * @type array
+						 */
+						in: string[];
+					};
+					/**
+					 * @type object | undefined
+					 */
+					kind?: {
+						/**
+						 * @type array
+						 */
+						in: (
+							| "slug_namespace"
+							| "profile"
+							| "book"
+							| "software"
+							| "media"
+							| "video"
+							| "audio"
+							| "release"
+							| "entity"
+							| "label"
+							| "tag"
+							| "structure"
+							| "series"
+							| "zone"
+							| "zone_page"
+							| "collection"
+							| "post"
+							| "poll"
+							| "realm"
+							| "realm_rule"
+						)[];
+					};
+				};
+		  };
 	publishers?:
 		| {
 				some:
@@ -73035,6 +73221,53 @@ export const GetApiEntitiesByUnitIdStatus200OwnerAvatarIconPrefixEnum = {
 export type GetApiEntitiesByUnitIdStatus200OwnerAvatarIconPrefixEnum =
 	(typeof GetApiEntitiesByUnitIdStatus200OwnerAvatarIconPrefixEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200OwnerAvatarIconPrefixEnum];
 
+export const GetApiEntitiesByUnitIdStatus200LinksSourceEntityKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetApiEntitiesByUnitIdStatus200LinksSourceEntityKindEnum =
+	(typeof GetApiEntitiesByUnitIdStatus200LinksSourceEntityKindEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200LinksSourceEntityKindEnum];
+
+export const GetApiEntitiesByUnitIdStatus200LinksSourceEntityLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiEntitiesByUnitIdStatus200LinksSourceEntityLanguageEnum =
+	(typeof GetApiEntitiesByUnitIdStatus200LinksSourceEntityLanguageEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200LinksSourceEntityLanguageEnum];
+
+export const GetApiEntitiesByUnitIdStatus200LinksSourceEntityAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiEntitiesByUnitIdStatus200LinksSourceEntityAvatarIconPrefixEnum =
+	(typeof GetApiEntitiesByUnitIdStatus200LinksSourceEntityAvatarIconPrefixEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200LinksSourceEntityAvatarIconPrefixEnum];
+
 export const GetApiEntitiesByUnitIdStatus200CreditAttributionsRoleEnum = {
 	author: "author",
 	"co-author": "co-author",
@@ -73720,6 +73953,152 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 					| null;
 		  } | null)
 		| null;
+	/**
+	 * @type array
+	 */
+	links: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		sourceEntityId: string;
+		/**
+		 * @type string
+		 */
+		url: string;
+		/**
+		 * @type string
+		 */
+		normalizedUrl: string;
+		/**
+		 * @type string
+		 */
+		normalizedUrlHash: string;
+		createdByProfileId: (string | null) | null;
+		viewerVote: ((-1 | 1) | null) | null;
+		score: string | number;
+		voteCount: string | number;
+		/**
+		 * @type boolean
+		 */
+		accepted: true;
+		/**
+		 * @type boolean
+		 */
+		pinned: boolean;
+		position: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+		/**
+		 * @type object
+		 */
+		sourceEntity: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @default 'slug_namespace'
+			 * @type string
+			 */
+			kind: GetApiEntitiesByUnitIdStatus200LinksSourceEntityKindEnum;
+			/**
+			 * @type string
+			 */
+			language: GetApiEntitiesByUnitIdStatus200LinksSourceEntityLanguageEnum;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: GetApiEntitiesByUnitIdStatus200LinksSourceEntityAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
+				| null;
+		};
+	}[];
 	/**
 	 * @type object
 	 */
@@ -78002,6 +78381,76 @@ export type GetApiUnitsByTypeByUnitIdLinksPath = {
 	unitId: string;
 };
 
+export const GetApiUnitsByTypeByUnitIdLinksLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdLinksLocalizationLanguagesEnum =
+	(typeof GetApiUnitsByTypeByUnitIdLinksLocalizationLanguagesEnum)[keyof typeof GetApiUnitsByTypeByUnitIdLinksLocalizationLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdLinksQuery = {
+	/**
+	 * @type array | undefined
+	 */
+	localizationLanguages?: GetApiUnitsByTypeByUnitIdLinksLocalizationLanguagesEnum[];
+};
+
+export const GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityKindEnum =
+	(typeof GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityKindEnum)[keyof typeof GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityKindEnum];
+
+export const GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityLanguageEnum =
+	(typeof GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityLanguageEnum)[keyof typeof GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityLanguageEnum];
+
+export const GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityAvatarIconPrefixEnum =
+	(typeof GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityAvatarIconPrefixEnum)[keyof typeof GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityAvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -78065,6 +78514,92 @@ export type GetApiUnitsByTypeByUnitIdLinksStatus200 = {
 		 * @type string
 		 */
 		updatedAt: string;
+		/**
+		 * @type object
+		 */
+		sourceEntity: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @default 'slug_namespace'
+			 * @type string
+			 */
+			kind: GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityKindEnum;
+			/**
+			 * @type string
+			 */
+			language: GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityLanguageEnum;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
+				| null;
+		};
 	}[];
 	curationVersion: string | number;
 };
@@ -78145,7 +78680,7 @@ export type GetApiUnitsByTypeByUnitIdLinksStatus500 = InternalError;
 export type GetApiUnitsByTypeByUnitIdLinksOptions = {
 	body?: never;
 	path: GetApiUnitsByTypeByUnitIdLinksPath;
-	query?: never;
+	query?: GetApiUnitsByTypeByUnitIdLinksQuery;
 	headers?: never;
 };
 

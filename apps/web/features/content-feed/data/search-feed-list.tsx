@@ -137,14 +137,20 @@ export function SearchFeedResults({
 }
 
 export function SearchFeedList({
+	"aria-label": ariaLabel,
 	displayContext = UnscopedFeedDisplayContext,
+	emptyBody,
+	emptyTitle,
 	pagination = "load-more",
 	request,
 	requestedRealmId,
 	source,
 	template,
 }: {
+	readonly "aria-label"?: string;
 	readonly displayContext?: FeedDisplayContext;
+	readonly emptyBody?: string;
+	readonly emptyTitle?: string;
 	readonly pagination?: FeedPaginationMode;
 	readonly request: SearchFeedRequest;
 	readonly requestedRealmId?: string;
@@ -160,7 +166,10 @@ export function SearchFeedList({
 	});
 	return (
 		<SearchFeedResults
+			aria-label={ariaLabel}
 			displayContext={displayContext}
+			emptyBody={emptyBody}
+			emptyTitle={emptyTitle}
 			pagination={pagination}
 			preserveDisplayedLanguage={hasSearchLanguagePresentationBoundary(request.state)}
 			query={query}

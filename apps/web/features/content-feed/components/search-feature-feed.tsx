@@ -16,13 +16,19 @@ import type { FeedPaginationMode } from "@/features/content-feed/model/feed-cont
 import { SearchFeature, type SearchFeatureRequest } from "@/features/search/search-feature";
 
 export function SearchFeatureFeed({
+	"aria-label": ariaLabel,
 	displayContext,
+	emptyBody,
+	emptyTitle,
 	initialRequest,
 	pagination = "load-more",
 	requestedRealmId,
 	template,
 }: {
+	readonly "aria-label"?: string;
 	readonly displayContext?: FeedDisplayContext;
+	readonly emptyBody?: string;
+	readonly emptyTitle?: string;
 	readonly initialRequest: SearchFeedRequest;
 	readonly pagination?: FeedPaginationMode;
 	readonly requestedRealmId?: string;
@@ -70,7 +76,10 @@ export function SearchFeatureFeed({
 			surface="feed"
 		>
 			<SearchFeedResults
+				aria-label={ariaLabel}
 				displayContext={displayContext}
+				emptyBody={emptyBody}
+				emptyTitle={emptyTitle}
 				pagination={pagination}
 				query={results}
 				requestedRealmId={requestedRealmId}

@@ -138,6 +138,11 @@ export const UnitSourceLinkUnitParams = t.Object({
 });
 export type UnitSourceLinkUnitParams = Static<typeof UnitSourceLinkUnitParams>;
 
+export const UnitSourceLinkListQuery = t.Object(LocalizationLanguageQuery, {
+	additionalProperties: false,
+});
+export type UnitSourceLinkListQuery = Static<typeof UnitSourceLinkListQuery>;
+
 export const UnitSourceLinkParams = t.Object({
 	...UnitSourceLinkUnitParams.properties,
 	linkId: Uuid,

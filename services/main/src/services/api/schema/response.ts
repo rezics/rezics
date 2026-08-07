@@ -150,17 +150,16 @@ const UnitSummaryFields = {
 } as const;
 
 export const UnitSummaryResponse = t.Object(UnitSummaryFields);
+export const UnitPresentationResponse = t.Object({
+	id: Uuid,
+	kind: t.UnionEnum(UnitKindValues),
+	language: ContentLanguage,
+	title: NullableText,
+	summary: NullableText,
+	avatar: AvatarResponse,
+});
 export const UnitPresentationListResponse = t.Object({
-	items: t.Array(
-		t.Object({
-			id: Uuid,
-			kind: t.UnionEnum(UnitKindValues),
-			language: ContentLanguage,
-			title: NullableText,
-			summary: NullableText,
-			avatar: AvatarResponse,
-		}),
-	),
+	items: t.Array(UnitPresentationResponse),
 });
 
 const UnitAttributionSummaryFields = {
@@ -342,6 +341,44 @@ const PendingUnitOwnershipClaimSummaryResponse = t.Object(
 	{ additionalProperties: false },
 );
 
+const UnitSourceLinkIdentityResponseFields = {
+	id: Uuid,
+	unitId: Uuid,
+	sourceEntityId: Uuid,
+	url: t.String(),
+	normalizedUrl: t.String(),
+	normalizedUrlHash: t.String(),
+	createdByProfileId: t.Nullable(Uuid),
+	viewerVote: t.Nullable(t.Union([t.Literal(-1), t.Literal(1)])),
+	score: t.Integer(),
+	voteCount: t.Integer({ minimum: 0 }),
+} as const;
+
+const UnitSourceLinkCurationResponseFields = {
+	pinned: t.Boolean(),
+	position: t.Nullable(FractionalPosition),
+	createdAt: DateTime,
+	updatedAt: DateTime,
+} as const;
+
+const AcceptedUnitSourceLinkResponse = t.Object(
+	{
+		...UnitSourceLinkIdentityResponseFields,
+		accepted: t.Literal(true),
+		...UnitSourceLinkCurationResponseFields,
+	},
+	{ additionalProperties: false },
+);
+const AcceptedEntitySourceLinkResponse = t.Object(
+	{
+		...UnitSourceLinkIdentityResponseFields,
+		accepted: t.Literal(true),
+		...UnitSourceLinkCurationResponseFields,
+		sourceEntity: UnitPresentationResponse,
+	},
+	{ additionalProperties: false },
+);
+
 export const UnitDetailResponse = t.Object({
 	id: Uuid,
 	type: ManageableUnitTypeResponse,
@@ -372,28 +409,7 @@ export const UnitDetailResponse = t.Object({
 			contextPost: t.Nullable(AssociationContextPostResponse),
 		}),
 	),
-	links: t.Array(
-		t.Object(
-			{
-				id: Uuid,
-				unitId: Uuid,
-				sourceEntityId: Uuid,
-				url: t.String(),
-				normalizedUrl: t.String(),
-				normalizedUrlHash: t.String(),
-				createdByProfileId: t.Nullable(Uuid),
-				viewerVote: t.Nullable(t.Union([t.Literal(-1), t.Literal(1)])),
-				score: t.Integer(),
-				voteCount: t.Integer({ minimum: 0 }),
-				accepted: t.Literal(true),
-				pinned: t.Boolean(),
-				position: t.Nullable(FractionalPosition),
-				createdAt: DateTime,
-				updatedAt: DateTime,
-			},
-			{ additionalProperties: false },
-		),
-	),
+	links: t.Array(AcceptedUnitSourceLinkResponse),
 	tags: t.Array(
 		t.Object({
 			id: Uuid,
@@ -1006,6 +1022,7 @@ export const EntityDetailResponse = t.Object({
 	localizations: t.Array(LocalizationResponse),
 	attributions: t.Array(UnitAttributionSummaryResponse),
 	owner: t.Nullable(UnitSummaryResponse),
+	links: t.Array(AcceptedEntitySourceLinkResponse),
 	capabilities: t.Object({
 		canEdit: t.Boolean(),
 		canEditCreditAttributions: t.Boolean(),
@@ -1403,26 +1420,23 @@ export const SubjectAssociationResponse = t.Object({
 });
 export const UnitSourceLinkResponse = t.Object(
 	{
-		id: Uuid,
-		unitId: Uuid,
-		sourceEntityId: Uuid,
-		url: t.String(),
-		normalizedUrl: t.String(),
-		normalizedUrlHash: t.String(),
-		createdByProfileId: t.Nullable(Uuid),
-		viewerVote: t.Nullable(t.Union([t.Literal(-1), t.Literal(1)])),
-		score: t.Integer(),
-		voteCount: t.Integer({ minimum: 0 }),
+		...UnitSourceLinkIdentityResponseFields,
 		accepted: t.Boolean(),
-		pinned: t.Boolean(),
-		position: t.Nullable(FractionalPosition),
-		createdAt: DateTime,
-		updatedAt: DateTime,
+		...UnitSourceLinkCurationResponseFields,
+	},
+	{ additionalProperties: false },
+);
+const UnitSourceLinkListItemResponse = t.Object(
+	{
+		...UnitSourceLinkIdentityResponseFields,
+		accepted: t.Boolean(),
+		...UnitSourceLinkCurationResponseFields,
+		sourceEntity: UnitPresentationResponse,
 	},
 	{ additionalProperties: false },
 );
 export const UnitSourceLinkListResponse = t.Object(
-	{ items: t.Array(UnitSourceLinkResponse), curationVersion: t.Integer({ minimum: 0 }) },
+	{ items: t.Array(UnitSourceLinkListItemResponse), curationVersion: t.Integer({ minimum: 0 }) },
 	{ additionalProperties: false },
 );
 export const TagApplicationResponse = t.Object({

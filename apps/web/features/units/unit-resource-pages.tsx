@@ -24,12 +24,11 @@ import { type FormEvent, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { BookOpenIcon } from "lucide-react";
 
-import { Banner, Cover, PageHeading } from "@rezics/ui";
+import { Cover, PageHeading } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import { UnitList, type UnitListItem as UiUnitListItem } from "@rezics/ui";
 import { IdentityAvatar } from "@rezics/ui";
 import { Button } from "@rezics/ui";
-import { Card, CardContent } from "@rezics/ui";
 import { Item, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from "@rezics/ui";
 import { LinkBox, LinkOverlay } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
@@ -41,7 +40,6 @@ import { DraftContentLanguageField } from "@/features/content-languages/componen
 import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/use-form-draft-content-language";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
-import { ContentLanguageVersionMenu } from "@/features/content-languages/components/content-language-version-menu";
 import { ContentLanguageEditorProvider } from "@/features/content-languages/hooks/use-content-language-editor";
 import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
 import { StudioTagCreateHref } from "@/features/create/model/studio-section";
@@ -59,12 +57,7 @@ import {
 import { LocalizationMediaFallbackNotice } from "@/features/media/components/localization-media-fallback-notice";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useTranslation } from "@/i18n/client";
-import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
-import { selectLocalization } from "@/lib/localization";
-import { profileHref } from "@/features/profiles/profile-route";
-import { EntityOwnershipClaimButton } from "@/features/ownership-claims/components/unit-ownership-claim-actions";
-import { UnitReportOverflowMenu } from "@/features/reports/components/unit-report-dialog";
 
 function UnitFrame({
 	title,
@@ -194,123 +187,6 @@ export function TagsPage() {
 				error={query.isError}
 				href={(item) => `/tags/${item.id}`}
 			/>
-		</UnitFrame>
-	);
-}
-
-export function EntityDetailPage({ id }: { id: string }) {
-	const { t } = useTranslation([
-		"actions",
-		"entities",
-		"errors",
-		"governance",
-		"media",
-		"ui",
-		"units",
-	]);
-	const localizationLanguages = useLocalizationLanguages();
-	const query = useGetApiEntitiesByUnitId({
-		path: { unitId: id },
-		query: { localizationLanguages },
-	});
-	useLocalizationFallbackToast({
-		actualLanguage: query.data?.language ?? null,
-		localizationLanguages,
-		unitId: id,
-	});
-	const localization = query.data
-		? selectLocalization(query.data.localizations, query.data.language ?? "")
-		: null;
-	const displayedTitle = useChineseContentText(
-		localization?.title ?? t.ui.unnamed,
-		localization?.title ? localization.language : null,
-	);
-	const displayedSummary = useChineseContentText(
-		localization?.summary ?? "",
-		localization?.language,
-	);
-	const displayedOwnerTitle = useChineseContentText(
-		query.data?.owner?.title ?? t.ui.unnamed,
-		query.data?.owner?.title ? query.data.owner.language : undefined,
-	);
-	if (query.isPending) return <QueryPending />;
-	if (query.isError || !query.data)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
-	const avatar = localization?.avatar ?? query.data.avatar;
-	const banner = localization?.banner ?? query.data.banner;
-	const entityKindLabel = isCommunityUnitEntityKind(query.data.kind)
-		? t.ui[query.data.kind]
-		: query.data.kind;
-	return (
-		<UnitFrame title={displayedTitle}>
-			{banner ? (
-				<Banner alt="" className="rounded-2xl bg-muted" priority src={banner.url} />
-			) : null}
-			<Card>
-				<CardContent className="grid gap-3 p-5 text-sm">
-					<IdentityAvatar
-						avatar={avatar}
-						className="size-20"
-						fallback={displayedTitle.slice(0, 1).toUpperCase()}
-					/>
-					<p>
-						<span className="text-muted-foreground">{t.entities.kind}</span>{" "}
-						{entityKindLabel}
-					</p>
-					<p>
-						<span className="text-muted-foreground">{t.entities.verification}</span>{" "}
-						{query.data.verified ? t.entities.verified : t.entities.unverified}
-					</p>
-					{query.data.owner ? (
-						<p>
-							<span className="text-muted-foreground">{t.entities.owner}</span>{" "}
-							<Link
-								className="underline underline-offset-4"
-								href={profileHref({
-									id: query.data.owner.id,
-									slugAddress: query.data.owner.slugAddress,
-								})}
-							>
-								{displayedOwnerTitle}
-							</Link>
-						</p>
-					) : null}
-					{displayedSummary ? <p>{displayedSummary}</p> : null}
-					<div className="flex flex-wrap items-center gap-2">
-						<EntityOwnershipClaimButton
-							ownershipMode={query.data.ownershipMode}
-							pendingClaim={query.data.ownershipClaim}
-							unitId={query.data.id}
-						/>
-						{query.data.capabilities.canEdit ? (
-							<Button variant="solid" asChild className="w-fit">
-								<Link href={`/entities/${query.data.id}/edit`}>{t.ui.edit}</Link>
-							</Button>
-						) : null}
-						{query.data.capabilities.canManageAccess ||
-						query.data.capabilities.canEditCreditAttributions ||
-						query.data.capabilities.canManageCreditAssociations ||
-						query.data.capabilities.canManageSubjectAssociations ? (
-							<Button asChild className="w-fit" variant="outline">
-								<Link href={`/entities/${query.data.id}/governance`}>
-									{t.governance.open}
-								</Link>
-							</Button>
-						) : null}
-						<UnitReportOverflowMenu
-							additionalItems={
-								<ContentLanguageVersionMenu
-									availableLanguages={query.data.localizations.map(
-										({ language }) => language,
-									)}
-									currentLanguage={query.data.language}
-								/>
-							}
-							unitId={query.data.id}
-						/>
-					</div>
-				</CardContent>
-			</Card>
 		</UnitFrame>
 	);
 }

@@ -12,4 +12,10 @@ export default {
 	unverified: "未验证",
 	newEntity: `创建${entityTerms.label}`,
 	newTag: "创建标签",
+	sourceLinksDescription: `可佐证此${entityTerms.inline}信息的公开页面。`,
+	sourceLinksEmpty: "目前没有来源链接。",
+	relatedContentTitle: "相关内容",
+	relatedContentDescription: `与此${entityTerms.inline}相关的内容。`,
+	relatedContentEmptyTitle: "暂无相关内容",
+	relatedContentEmptyDescription: "目前没有可显示的相关内容。",
 } satisfies typeof import("../zh-Hant/entities").default;

@@ -415,6 +415,40 @@ export function compileUnitPredicateSql(
 		);
 		conditions.push("some" in relation ? condition : sql`not (${condition})`);
 	}
+	if (filter.creditAttributions) {
+		const relation = filter.creditAttributions;
+		const reference = "some" in relation ? relation.some : relation.none;
+		const exists = sql`exists (
+			select 1
+			from credit_attribution filter_credit_attribution
+			join unit filter_credited_unit
+				on filter_credited_unit.id = filter_credit_attribution.credited_unit_id
+			where filter_credit_attribution.source_unit_id = ${input.unitId}
+				and ${unitReferenceCondition(
+					reference,
+					sql`filter_credited_unit.id`,
+					sql`filter_credited_unit.kind`,
+				)}
+		)`;
+		conditions.push("some" in relation ? exists : sql`not (${exists})`);
+	}
+	if (filter.subjectAssociations) {
+		const relation = filter.subjectAssociations;
+		const reference = "some" in relation ? relation.some : relation.none;
+		const exists = sql`exists (
+			select 1
+			from subject_association filter_subject_association
+			join unit filter_subject_entity
+				on filter_subject_entity.id = filter_subject_association.entity_id
+			where filter_subject_association.unit_id = ${input.unitId}
+				and ${unitReferenceCondition(
+					reference,
+					sql`filter_subject_entity.id`,
+					sql`filter_subject_entity.kind`,
+				)}
+		)`;
+		conditions.push("some" in relation ? exists : sql`not (${exists})`);
+	}
 	if (filter.publishers) {
 		const relation = filter.publishers;
 		const publisherFilter = "some" in relation ? relation.some : relation.none;

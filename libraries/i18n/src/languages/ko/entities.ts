@@ -12,4 +12,10 @@ export default {
 	unverified: "검증되지 않음",
 	newEntity: `새 ${entityTerms.label}`,
 	newTag: "새 태그",
+	sourceLinksDescription: `이 ${entityTerms.inline}에 관한 정보를 뒷받침하는 공개 페이지입니다.`,
+	sourceLinksEmpty: "아직 출처 링크가 없습니다.",
+	relatedContentTitle: "관련 콘텐츠",
+	relatedContentDescription: `이 ${entityTerms.inline}와 관련된 콘텐츠입니다.`,
+	relatedContentEmptyTitle: "관련 콘텐츠 없음",
+	relatedContentEmptyDescription: "아직 표시할 관련 콘텐츠가 없습니다.",
 } satisfies typeof import("../zh-Hant/entities").default;

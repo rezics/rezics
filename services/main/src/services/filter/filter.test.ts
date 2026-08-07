@@ -2,6 +2,7 @@ import {
 	assertUnitPredicate,
 	assertUnitFilter,
 	canonicalUnitPredicate,
+	collectUnitPredicateReferenceIds,
 	createSimpleFeedFilter,
 	FilterContentLanguageValues,
 	FilterPostKindValues,
@@ -151,6 +152,38 @@ describe("domain Filter contract", () => {
 				},
 			}),
 		).not.toThrow();
+	});
+
+	it("accepts credited-Entity and subject-Entity relations at the runtime boundary", () => {
+		const filter = {
+			any: [
+				{ creditAttributions: { some: { id: { in: [RealmId] } } } },
+				{ subjectAssociations: { some: { id: { in: [RealmId] } } } },
+			],
+		};
+
+		expect(() => assertUnitPredicate(filter)).not.toThrow();
+		expect(collectUnitPredicateReferenceIds(filter)).toEqual([RealmId]);
+	});
+
+	it("compiles credited-Entity and subject-Entity relations as indexed existence checks", () => {
+		const query = dialect.sqlToQuery(
+			compileUnitPredicateSql(
+				{
+					any: [
+						{ creditAttributions: { some: { id: { in: [RealmId] } } } },
+						{ subjectAssociations: { some: { id: { in: [RealmId] } } } },
+					],
+				},
+				{ unitId: sql`candidate.id`, unitKind: sql`candidate.kind` },
+			),
+		);
+
+		expect(query.sql).toContain("from credit_attribution filter_credit_attribution");
+		expect(query.sql).toContain("filter_credit_attribution.source_unit_id = candidate.id");
+		expect(query.sql).toContain("from subject_association filter_subject_association");
+		expect(query.sql).toContain("filter_subject_association.unit_id = candidate.id");
+		expect(query.params).toEqual([RealmId, RealmId]);
 	});
 
 	it("maps Realm taxonomy query strategies to independent Tag authorities", () => {
