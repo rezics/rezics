@@ -81,6 +81,8 @@ export default defineConfig(({ command }) => ({
 			build: {
 				rolldownOptions: {
 					output: {
+						// Preserve module initialization order across the intentionally non-recursive editor split.
+						strictExecutionOrder: true,
 						codeSplitting: {
 							groups: [
 								{
