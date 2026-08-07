@@ -8,7 +8,7 @@ const requirement = {
 	softwareId: "019b76da-a800-7300-8000-000000000002",
 	platformEntityId: null,
 	tier: "recommended",
-	sourceLinkId: null,
+	sourceExternalLinkId: null,
 	hardware: {
 		memory: "16 GB",
 		storage: { amount: 50, unit: "GB" },

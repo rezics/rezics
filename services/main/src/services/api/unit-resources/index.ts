@@ -35,9 +35,9 @@ import {
 	unitAliasVoteStat,
 	unitOwnership,
 	unitTagVote,
-	unitSourceLink,
-	unitSourceLinkVote,
-	unitSourceLinkVoteStat,
+	unitExternalLink,
+	unitExternalLinkVote,
+	unitExternalLinkVoteStat,
 	unitReferenceCurationHead,
 	unitTag,
 	unitTagVoteStat,
@@ -49,14 +49,14 @@ import {
 } from "../../database/schema/contract-values";
 import {
 	AliasSearchScoreThreshold,
-	SourceLinkVisibilityScoreThreshold,
+	ExternalLinkVisibilityScoreThreshold,
 	type UnitReferenceCurationKind,
 } from "../../database/schema/contract-values";
 import {
 	AddUnitAliasBody,
 	AddUnitCreditBody,
 	AddUnitSubjectAssociationBody,
-	AddUnitLinkBody,
+	AddUnitExternalLinkBody,
 	AttributionAssociationParams,
 	AttributionUnitParams,
 	CreateUnitResourceBody,
@@ -74,9 +74,9 @@ import {
 	UnitAssociationParams,
 	UnitAliasParams,
 	UnitAliasUnitParams,
-	UnitSourceLinkParams,
-	UnitSourceLinkListQuery,
-	UnitSourceLinkUnitParams,
+	UnitExternalLinkParams,
+	UnitExternalLinkListQuery,
+	UnitExternalLinkUnitParams,
 	UnitUnitParams,
 	UnitTagParams,
 	VoteBody,
@@ -112,12 +112,12 @@ import {
 	TagDetailResponse,
 	TagListResponse,
 	toPortableTextResponse,
-	UnitSourceLinkListResponse,
-	UnitSourceLinkResponse,
-	UnitSourceLinkCurationResponse,
+	UnitExternalLinkListResponse,
+	UnitExternalLinkResponse,
+	UnitExternalLinkCurationResponse,
 	VoteResponse,
 } from "../schema/response";
-import { AliasNotFound, TagApplicationNotFound, UnitSourceLinkNotFound } from "./errors";
+import { AliasNotFound, TagApplicationNotFound, UnitExternalLinkNotFound } from "./errors";
 import { TagNotFound } from "../tags/errors";
 import {
 	CreditAttributionNotFound,
@@ -132,9 +132,9 @@ import { normalizeExternalWebUrl } from "./external-web-url";
 import { wilsonLowerBoundSql } from "../../tags/ranking";
 import {
 	updateUnitAliasCuration,
-	updateUnitSourceLinkCuration,
+	updateUnitExternalLinkCuration,
 } from "../../units/reference-curation";
-import { getAcceptedUnitSourceLinks } from "../../units/source-links";
+import { getAcceptedUnitExternalLinks } from "../../units/external-links";
 
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
@@ -172,17 +172,19 @@ async function ensureUnitMutationAuthorized(
 	await authorization.ensureCanUpdate(unitId, [scope]);
 }
 
-async function attachReadableSourceEntities<Link extends { readonly sourceEntityId: string }>(
-	links: readonly Link[],
+async function attachReadableSourceEntities<
+	ExternalLink extends { readonly sourceEntityId: string },
+>(
+	externalLinks: readonly ExternalLink[],
 	localizationLanguages: readonly ContentLanguage[],
 	profileId?: string,
 ) {
 	const sourceEntities = await getReadableUnitPresentationsByIds({
-		unitIds: [...new Set(links.map(({ sourceEntityId }) => sourceEntityId))],
+		unitIds: [...new Set(externalLinks.map(({ sourceEntityId }) => sourceEntityId))],
 		localizationLanguages,
 		profileId,
 	});
-	return links.flatMap((link) => {
+	return externalLinks.flatMap((link) => {
 		const sourceEntity = sourceEntities.get(link.sourceEntityId);
 		return sourceEntity ? [{ ...link, sourceEntity }] : [];
 	});
@@ -190,13 +192,13 @@ async function attachReadableSourceEntities<Link extends { readonly sourceEntity
 
 async function ensureReadableSourceEntity(
 	authorization: UnitAuthorization<string>,
-	sourceEntityUnitId: string,
+	sourceEntityId: string,
 ): Promise<void> {
-	await authorization.ensureCanRead(sourceEntityUnitId, () => new EntityEntryNotFound());
+	await authorization.ensureCanRead(sourceEntityId, () => new EntityEntryNotFound());
 	const [sourceEntity] = await database
 		.select({ id: entity.id })
 		.from(entity)
-		.where(eq(entity.id, sourceEntityUnitId))
+		.where(eq(entity.id, sourceEntityId))
 		.limit(1);
 	if (!sourceEntity) throw new EntityEntryNotFound();
 }
@@ -213,18 +215,18 @@ async function getAliasVoteSummary(aliasId: string, value: -1 | 1 | null) {
 	};
 }
 
-async function getSourceLinkVoteSummary(linkId: string, value: -1 | 1 | null) {
+async function getExternalLinkVoteSummary(externalLinkId: string, value: -1 | 1 | null) {
 	const [totals] = await database
 		.select({
-			score: unitSourceLinkVoteStat.score,
-			voteCount: unitSourceLinkVoteStat.voteCount,
+			score: unitExternalLinkVoteStat.score,
+			voteCount: unitExternalLinkVoteStat.voteCount,
 		})
-		.from(unitSourceLinkVoteStat)
-		.where(eq(unitSourceLinkVoteStat.linkId, linkId));
+		.from(unitExternalLinkVoteStat)
+		.where(eq(unitExternalLinkVoteStat.externalLinkId, externalLinkId));
 	return {
 		value,
-		score: toSafeInteger(totals?.score ?? 0n, "source link vote score"),
-		voteCount: toSafeInteger(totals?.voteCount ?? 0n, "source link vote count"),
+		score: toSafeInteger(totals?.score ?? 0n, "external link vote score"),
+		voteCount: toSafeInteger(totals?.voteCount ?? 0n, "external link vote count"),
 	};
 }
 
@@ -288,42 +290,45 @@ async function getAliasCandidate(aliasId: string, viewerProfileId: string) {
 	};
 }
 
-async function getSourceLinkCandidate(linkId: string, viewerProfileId: string) {
+async function getExternalLinkCandidate(externalLinkId: string, viewerProfileId: string) {
 	const [row] = await database
 		.select({
-			id: unitSourceLink.id,
-			unitId: unitSourceLink.unitId,
-			sourceEntityId: unitSourceLink.sourceEntityId,
-			url: unitSourceLink.url,
-			normalizedUrl: unitSourceLink.normalizedUrl,
-			normalizedUrlHash: unitSourceLink.normalizedUrlHash,
-			createdByProfileId: unitSourceLink.createdByProfileId,
-			viewerVote: unitSourceLinkVote.value,
-			score: unitSourceLinkVoteStat.score,
-			voteCount: unitSourceLinkVoteStat.voteCount,
-			accepted: sql<boolean>`${unitSourceLink.pinned} or coalesce(${unitSourceLinkVoteStat.score}, 0) >= ${SourceLinkVisibilityScoreThreshold}`,
-			pinned: unitSourceLink.pinned,
-			position: unitSourceLink.position,
-			createdAt: unitSourceLink.createdAt,
-			updatedAt: unitSourceLink.updatedAt,
+			id: unitExternalLink.id,
+			unitId: unitExternalLink.unitId,
+			sourceEntityId: unitExternalLink.sourceEntityId,
+			url: unitExternalLink.url,
+			normalizedUrl: unitExternalLink.normalizedUrl,
+			normalizedUrlHash: unitExternalLink.normalizedUrlHash,
+			createdByProfileId: unitExternalLink.createdByProfileId,
+			viewerVote: unitExternalLinkVote.value,
+			score: unitExternalLinkVoteStat.score,
+			voteCount: unitExternalLinkVoteStat.voteCount,
+			accepted: sql<boolean>`${unitExternalLink.pinned} or coalesce(${unitExternalLinkVoteStat.score}, 0) >= ${ExternalLinkVisibilityScoreThreshold}`,
+			pinned: unitExternalLink.pinned,
+			position: unitExternalLink.position,
+			createdAt: unitExternalLink.createdAt,
+			updatedAt: unitExternalLink.updatedAt,
 		})
-		.from(unitSourceLink)
-		.leftJoin(unitSourceLinkVoteStat, eq(unitSourceLinkVoteStat.linkId, unitSourceLink.id))
+		.from(unitExternalLink)
 		.leftJoin(
-			unitSourceLinkVote,
+			unitExternalLinkVoteStat,
+			eq(unitExternalLinkVoteStat.externalLinkId, unitExternalLink.id),
+		)
+		.leftJoin(
+			unitExternalLinkVote,
 			and(
-				eq(unitSourceLinkVote.linkId, unitSourceLink.id),
-				eq(unitSourceLinkVote.profileId, viewerProfileId),
+				eq(unitExternalLinkVote.externalLinkId, unitExternalLink.id),
+				eq(unitExternalLinkVote.profileId, viewerProfileId),
 			),
 		)
-		.where(eq(unitSourceLink.id, linkId))
+		.where(eq(unitExternalLink.id, externalLinkId))
 		.limit(1);
-	if (!row) throw new UnitSourceLinkNotFound();
+	if (!row) throw new UnitExternalLinkNotFound();
 	return {
 		...row,
 		viewerVote: row.viewerVote,
-		score: toSafeInteger(row.score ?? 0n, "source link vote score"),
-		voteCount: toSafeInteger(row.voteCount ?? 0n, "source link vote count"),
+		score: toSafeInteger(row.score ?? 0n, "external link vote score"),
+		voteCount: toSafeInteger(row.voteCount ?? 0n, "external link vote count"),
 	};
 }
 
@@ -514,12 +519,12 @@ export default new Elysia()
 						createdAt: row.createdAt,
 						updatedAt: row.updatedAt,
 					}));
-					const acceptedLinks = await getAcceptedUnitSourceLinks(
+					const acceptedExternalLinks = await getAcceptedUnitExternalLinks(
 						params.unitId,
 						identity.authorization.profileId,
 					);
-					const links = await attachReadableSourceEntities(
-						acceptedLinks,
+					const externalLinks = await attachReadableSourceEntities(
+						acceptedExternalLinks,
 						localizationLanguages,
 						identity.authorization.profileId,
 					);
@@ -639,7 +644,7 @@ export default new Elysia()
 						localizations,
 						attributions,
 						owner: ownerSummary,
-						links,
+						externalLinks,
 						ownershipClaim: ownershipClaim
 							? { ...ownershipClaim, state: "pending" as const }
 							: null,
@@ -1329,7 +1334,7 @@ export default new Elysia()
 				},
 			)
 			.get(
-				"/links",
+				"/external-links",
 				async ({ params, query, profile, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
@@ -1337,59 +1342,59 @@ export default new Elysia()
 					const [rows, curationVersion] = await Promise.all([
 						database
 							.select({
-								id: unitSourceLink.id,
-								unitId: unitSourceLink.unitId,
-								sourceEntityId: unitSourceLink.sourceEntityId,
-								url: unitSourceLink.url,
-								normalizedUrl: unitSourceLink.normalizedUrl,
-								normalizedUrlHash: unitSourceLink.normalizedUrlHash,
-								createdByProfileId: unitSourceLink.createdByProfileId,
-								viewerVote: unitSourceLinkVote.value,
-								score: unitSourceLinkVoteStat.score,
-								voteCount: unitSourceLinkVoteStat.voteCount,
-								accepted: sql<boolean>`${unitSourceLink.pinned} or coalesce(${unitSourceLinkVoteStat.score}, 0) >= ${SourceLinkVisibilityScoreThreshold}`,
-								pinned: unitSourceLink.pinned,
-								position: unitSourceLink.position,
-								createdAt: unitSourceLink.createdAt,
-								updatedAt: unitSourceLink.updatedAt,
+								id: unitExternalLink.id,
+								unitId: unitExternalLink.unitId,
+								sourceEntityId: unitExternalLink.sourceEntityId,
+								url: unitExternalLink.url,
+								normalizedUrl: unitExternalLink.normalizedUrl,
+								normalizedUrlHash: unitExternalLink.normalizedUrlHash,
+								createdByProfileId: unitExternalLink.createdByProfileId,
+								viewerVote: unitExternalLinkVote.value,
+								score: unitExternalLinkVoteStat.score,
+								voteCount: unitExternalLinkVoteStat.voteCount,
+								accepted: sql<boolean>`${unitExternalLink.pinned} or coalesce(${unitExternalLinkVoteStat.score}, 0) >= ${ExternalLinkVisibilityScoreThreshold}`,
+								pinned: unitExternalLink.pinned,
+								position: unitExternalLink.position,
+								createdAt: unitExternalLink.createdAt,
+								updatedAt: unitExternalLink.updatedAt,
 							})
-							.from(unitSourceLink)
+							.from(unitExternalLink)
 							.leftJoin(
-								unitSourceLinkVoteStat,
-								eq(unitSourceLinkVoteStat.linkId, unitSourceLink.id),
+								unitExternalLinkVoteStat,
+								eq(unitExternalLinkVoteStat.externalLinkId, unitExternalLink.id),
 							)
 							.leftJoin(
-								unitSourceLinkVote,
+								unitExternalLinkVote,
 								and(
-									eq(unitSourceLinkVote.linkId, unitSourceLink.id),
-									eq(unitSourceLinkVote.profileId, profile.unitId),
+									eq(unitExternalLinkVote.externalLinkId, unitExternalLink.id),
+									eq(unitExternalLinkVote.profileId, profile.unitId),
 								),
 							)
-							.where(eq(unitSourceLink.unitId, params.unitId))
+							.where(eq(unitExternalLink.unitId, params.unitId))
 							.orderBy(
-								desc(unitSourceLink.pinned),
-								sql`case when ${unitSourceLink.pinned} then ${unitSourceLink.position} end asc nulls last`,
+								desc(unitExternalLink.pinned),
+								sql`case when ${unitExternalLink.pinned} then ${unitExternalLink.position} end asc nulls last`,
 								desc(
 									wilsonLowerBoundSql(
-										unitSourceLinkVoteStat.score,
-										unitSourceLinkVoteStat.voteCount,
+										unitExternalLinkVoteStat.score,
+										unitExternalLinkVoteStat.voteCount,
 									),
 								),
-								desc(sql`coalesce(${unitSourceLinkVoteStat.score}, 0)`),
-								desc(sql`coalesce(${unitSourceLinkVoteStat.voteCount}, 0)`),
-								unitSourceLink.id,
+								desc(sql`coalesce(${unitExternalLinkVoteStat.score}, 0)`),
+								desc(sql`coalesce(${unitExternalLinkVoteStat.voteCount}, 0)`),
+								unitExternalLink.id,
 							),
-						getReferenceCurationVersion(params.unitId, "source_link"),
+						getReferenceCurationVersion(params.unitId, "external_link"),
 					]);
-					const links = rows.map((row) => ({
+					const externalLinks = rows.map((row) => ({
 						...row,
 						viewerVote: row.viewerVote,
-						score: toSafeInteger(row.score ?? 0n, "source link vote score"),
-						voteCount: toSafeInteger(row.voteCount ?? 0n, "source link vote count"),
+						score: toSafeInteger(row.score ?? 0n, "external link vote score"),
+						voteCount: toSafeInteger(row.voteCount ?? 0n, "external link vote count"),
 					}));
 					return {
 						items: await attachReadableSourceEntities(
-							links,
+							externalLinks,
 							localizationLanguages,
 							profile.unitId,
 						),
@@ -1398,31 +1403,31 @@ export default new Elysia()
 				},
 				{
 					access: "unit:read",
-					params: UnitSourceLinkUnitParams,
-					query: UnitSourceLinkListQuery,
+					params: UnitExternalLinkUnitParams,
+					query: UnitExternalLinkListQuery,
 					response: {
-						[StatusCodes.OK]: UnitSourceLinkListResponse,
+						[StatusCodes.OK]: UnitExternalLinkListResponse,
 						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
 					},
-					detail: { summary: "List Unit source-link candidates", tags: ["Units"] },
+					detail: { summary: "List Unit external-link candidates", tags: ["Units"] },
 				},
 			)
 			.post(
-				"/links",
+				"/external-links",
 				async ({ params, profile, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
-					await ensureReadableSourceEntity(authorization.unit, body.sourceEntityUnitId);
+					await ensureReadableSourceEntity(authorization.unit, body.sourceEntityId);
 					const { url, normalizedUrl } = normalizeExternalWebUrl(body.url);
 					const normalizedUrlHash = createHash("sha256")
 						.update(normalizedUrl)
 						.digest("hex");
-					const linkId = await database.transaction(async (tx) => {
+					const externalLinkId = await database.transaction(async (tx) => {
 						const [created] = await tx
-							.insert(unitSourceLink)
+							.insert(unitExternalLink)
 							.values({
 								unitId: params.unitId,
-								sourceEntityId: body.sourceEntityUnitId,
+								sourceEntityId: body.sourceEntityId,
 								url,
 								normalizedUrl,
 								normalizedUrlHash,
@@ -1430,9 +1435,9 @@ export default new Elysia()
 							})
 							.onConflictDoNothing({
 								target: [
-									unitSourceLink.unitId,
-									unitSourceLink.sourceEntityId,
-									unitSourceLink.normalizedUrlHash,
+									unitExternalLink.unitId,
+									unitExternalLink.sourceEntityId,
+									unitExternalLink.normalizedUrlHash,
 								],
 							})
 							.returning();
@@ -1441,15 +1446,18 @@ export default new Elysia()
 							(
 								await tx
 									.select()
-									.from(unitSourceLink)
+									.from(unitExternalLink)
 									.where(
 										and(
-											eq(unitSourceLink.unitId, params.unitId),
+											eq(unitExternalLink.unitId, params.unitId),
 											eq(
-												unitSourceLink.sourceEntityId,
-												body.sourceEntityUnitId,
+												unitExternalLink.sourceEntityId,
+												body.sourceEntityId,
 											),
-											eq(unitSourceLink.normalizedUrlHash, normalizedUrlHash),
+											eq(
+												unitExternalLink.normalizedUrlHash,
+												normalizedUrlHash,
+											),
 										),
 									)
 									.limit(1)
@@ -1459,131 +1467,137 @@ export default new Elysia()
 						if (candidate.normalizedUrl !== normalizedUrl)
 							throw new Error("External link URL normalization hash collision");
 						await tx
-							.insert(unitSourceLinkVote)
+							.insert(unitExternalLinkVote)
 							.values({
-								linkId: candidate.id,
+								externalLinkId: candidate.id,
 								profileId: profile.unitId,
 								value: 1,
 							})
 							.onConflictDoUpdate({
-								target: [unitSourceLinkVote.linkId, unitSourceLinkVote.profileId],
+								target: [
+									unitExternalLinkVote.externalLinkId,
+									unitExternalLinkVote.profileId,
+								],
 								set: { value: 1, updatedAt: new Date() },
 							});
 						return candidate.id;
 					});
-					return getSourceLinkCandidate(linkId, profile.unitId);
+					return getExternalLinkCandidate(externalLinkId, profile.unitId);
 				},
 				{
 					access: "contribute:interaction:write",
-					params: UnitSourceLinkUnitParams,
-					body: AddUnitLinkBody,
+					params: UnitExternalLinkUnitParams,
+					body: AddUnitExternalLinkBody,
 					response: {
-						[StatusCodes.OK]: UnitSourceLinkResponse,
+						[StatusCodes.OK]: UnitExternalLinkResponse,
 						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
 							"EntityEntryNotFound",
 						]),
 					},
-					detail: { summary: "Propose Unit source link", tags: ["Units"] },
+					detail: { summary: "Propose Unit external link", tags: ["Units"] },
 				},
 			)
 			.put(
-				"/links/:linkId/vote",
+				"/external-links/:externalLinkId/vote",
 				async ({ params, profile, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const [target] = await database
-						.select({ id: unitSourceLink.id })
-						.from(unitSourceLink)
+						.select({ id: unitExternalLink.id })
+						.from(unitExternalLink)
 						.where(
 							and(
-								eq(unitSourceLink.id, params.linkId),
-								eq(unitSourceLink.unitId, params.unitId),
+								eq(unitExternalLink.id, params.externalLinkId),
+								eq(unitExternalLink.unitId, params.unitId),
 							),
 						)
 						.limit(1);
-					if (!target) throw new UnitSourceLinkNotFound();
+					if (!target) throw new UnitExternalLinkNotFound();
 					await database
-						.insert(unitSourceLinkVote)
+						.insert(unitExternalLinkVote)
 						.values({
-							linkId: params.linkId,
+							externalLinkId: params.externalLinkId,
 							profileId: profile.unitId,
 							value: body.value,
 						})
 						.onConflictDoUpdate({
-							target: [unitSourceLinkVote.linkId, unitSourceLinkVote.profileId],
+							target: [
+								unitExternalLinkVote.externalLinkId,
+								unitExternalLinkVote.profileId,
+							],
 							set: { value: body.value, updatedAt: new Date() },
 						});
-					return getSourceLinkVoteSummary(params.linkId, body.value);
+					return getExternalLinkVoteSummary(params.externalLinkId, body.value);
 				},
 				{
 					access: "contribute:interaction:write",
-					params: UnitSourceLinkParams,
+					params: UnitExternalLinkParams,
 					body: VoteBody,
 					response: {
 						[StatusCodes.OK]: VoteResponse,
 						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
-							"UnitSourceLinkNotFound",
+							"UnitExternalLinkNotFound",
 						]),
 					},
-					detail: { summary: "Vote on Unit source link", tags: ["Units"] },
+					detail: { summary: "Vote on Unit external link", tags: ["Units"] },
 				},
 			)
 			.delete(
-				"/links/:linkId/vote",
+				"/external-links/:externalLinkId/vote",
 				async ({ params, profile, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const [target] = await database
-						.select({ id: unitSourceLink.id })
-						.from(unitSourceLink)
+						.select({ id: unitExternalLink.id })
+						.from(unitExternalLink)
 						.where(
 							and(
-								eq(unitSourceLink.id, params.linkId),
-								eq(unitSourceLink.unitId, params.unitId),
+								eq(unitExternalLink.id, params.externalLinkId),
+								eq(unitExternalLink.unitId, params.unitId),
 							),
 						)
 						.limit(1);
-					if (!target) throw new UnitSourceLinkNotFound();
+					if (!target) throw new UnitExternalLinkNotFound();
 					await database
-						.delete(unitSourceLinkVote)
+						.delete(unitExternalLinkVote)
 						.where(
 							and(
-								eq(unitSourceLinkVote.linkId, params.linkId),
-								eq(unitSourceLinkVote.profileId, profile.unitId),
+								eq(unitExternalLinkVote.externalLinkId, params.externalLinkId),
+								eq(unitExternalLinkVote.profileId, profile.unitId),
 							),
 						);
-					return getSourceLinkVoteSummary(params.linkId, null);
+					return getExternalLinkVoteSummary(params.externalLinkId, null);
 				},
 				{
 					access: "write:interaction:write",
-					params: UnitSourceLinkParams,
+					params: UnitExternalLinkParams,
 					response: {
 						[StatusCodes.OK]: VoteResponse,
 						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
-							"UnitSourceLinkNotFound",
+							"UnitExternalLinkNotFound",
 						]),
 					},
-					detail: { summary: "Remove Unit source link vote", tags: ["Units"] },
+					detail: { summary: "Remove Unit external link vote", tags: ["Units"] },
 				},
 			)
 			.patch(
-				"/links/:linkId",
+				"/external-links/:externalLinkId",
 				async ({ params, profile, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensure(
 						params.unitId,
 						"unit.reference-curation.manage",
-						unitScope("references", "source-links"),
+						unitScope("references", "external-links"),
 					);
-					const result = await updateUnitSourceLinkCuration({
+					const result = await updateUnitExternalLinkCuration({
 						unitId: params.unitId,
-						linkId: params.linkId,
+						externalLinkId: params.externalLinkId,
 						actorProfileId: profile.unitId,
 						baseVersion: body.baseVersion,
 						state: body.pinned
@@ -1591,26 +1605,29 @@ export default new Elysia()
 							: { pinned: false, position: null },
 					});
 					return {
-						candidate: await getSourceLinkCandidate(params.linkId, profile.unitId),
+						candidate: await getExternalLinkCandidate(
+							params.externalLinkId,
+							profile.unitId,
+						),
 						curationVersion: result.curationVersion,
 					};
 				},
 				{
 					access: "write:unit:update",
-					params: UnitSourceLinkParams,
+					params: UnitExternalLinkParams,
 					body: UpdateUnitReferenceCurationBody,
 					response: {
-						[StatusCodes.OK]: UnitSourceLinkCurationResponse,
+						[StatusCodes.OK]: UnitExternalLinkCurationResponse,
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
-							"UnitSourceLinkNotFound",
+							"UnitExternalLinkNotFound",
 						]),
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
 							"UnitReferenceCurationChanged",
 						]),
 					},
-					detail: { summary: "Update Unit source link curation", tags: ["Units"] },
+					detail: { summary: "Update Unit external link curation", tags: ["Units"] },
 				},
 			)
 			.put(

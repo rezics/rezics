@@ -193,7 +193,7 @@ export default {
 	UnitTagCurationChanged:
 		"Esta selección de etiquetas se ha modificado en otro lugar. Se ha cargado el orden más reciente; inténtalo de nuevo.",
 	TagNotFound: "No se ha encontrado esta etiqueta.",
-	UnitSourceLinkNotFound: "No se ha encontrado este enlace de fuente de la obra.",
+	UnitExternalLinkNotFound: "No se ha encontrado este enlace externo de la obra.",
 	UnitReferenceCurationChanged:
 		"La selección de referencias cambió en otro lugar. Se cargó el orden más reciente; inténtalo de nuevo.",
 	UnitVariantKindMismatch:

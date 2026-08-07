@@ -74,7 +74,7 @@ export const SystemRequirementBody = t.Object(
 	{
 		platformEntityId: t.Optional(t.Nullable(Uuid)),
 		tier: t.String({ minLength: 1, maxLength: 32 }),
-		sourceLinkId: t.Optional(t.Nullable(Uuid)),
+		sourceExternalLinkId: t.Optional(t.Nullable(Uuid)),
 		hardware: t.Record(t.String(), JsonValue),
 	},
 	{ additionalProperties: false },
@@ -207,7 +207,7 @@ export const SystemRequirementResponse = t.Object({
 	softwareId: Uuid,
 	platformEntityId: t.Nullable(Uuid),
 	tier: t.String(),
-	sourceLinkId: t.Nullable(Uuid),
+	sourceExternalLinkId: t.Nullable(Uuid),
 	hardware: SystemRequirementHardwareResponse,
 	createdAt: DateTime,
 	updatedAt: DateTime,

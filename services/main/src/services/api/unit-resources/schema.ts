@@ -94,17 +94,17 @@ export const AddUnitSubjectAssociationBody = t.Object(
 );
 export type AddUnitSubjectAssociationBody = Static<typeof AddUnitSubjectAssociationBody>;
 
-export const AddUnitLinkBody = t.Object(
+export const AddUnitExternalLinkBody = t.Object(
 	{
 		url: t.String({
 			format: "uri",
 			pattern: "^[Hh][Tt][Tt][Pp][Ss]?://",
 		}),
-		sourceEntityUnitId: Uuid,
+		sourceEntityId: Uuid,
 	},
 	{ additionalProperties: false },
 );
-export type AddUnitLinkBody = Static<typeof AddUnitLinkBody>;
+export type AddUnitExternalLinkBody = Static<typeof AddUnitExternalLinkBody>;
 
 export const UnitUnitParams = t.Object({ type: WorkUnitType, unitId: Uuid });
 export type UnitUnitParams = Static<typeof UnitUnitParams>;
@@ -132,22 +132,22 @@ export const UnitAssociationParams = t.Object({
 });
 export type UnitAssociationParams = Static<typeof UnitAssociationParams>;
 
-export const UnitSourceLinkUnitParams = t.Object({
+export const UnitExternalLinkUnitParams = t.Object({
 	type: t.Union(UnitKindValues.map((value) => t.Literal(value))),
 	unitId: Uuid,
 });
-export type UnitSourceLinkUnitParams = Static<typeof UnitSourceLinkUnitParams>;
+export type UnitExternalLinkUnitParams = Static<typeof UnitExternalLinkUnitParams>;
 
-export const UnitSourceLinkListQuery = t.Object(LocalizationLanguageQuery, {
+export const UnitExternalLinkListQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,
 });
-export type UnitSourceLinkListQuery = Static<typeof UnitSourceLinkListQuery>;
+export type UnitExternalLinkListQuery = Static<typeof UnitExternalLinkListQuery>;
 
-export const UnitSourceLinkParams = t.Object({
-	...UnitSourceLinkUnitParams.properties,
-	linkId: Uuid,
+export const UnitExternalLinkParams = t.Object({
+	...UnitExternalLinkUnitParams.properties,
+	externalLinkId: Uuid,
 });
-export type UnitSourceLinkParams = Static<typeof UnitSourceLinkParams>;
+export type UnitExternalLinkParams = Static<typeof UnitExternalLinkParams>;
 
 export const UnitTagParams = t.Object({ type: WorkUnitType, unitId: Uuid, tagId: Uuid });
 export type UnitTagParams = Static<typeof UnitTagParams>;

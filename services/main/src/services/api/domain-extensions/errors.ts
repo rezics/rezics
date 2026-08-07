@@ -6,7 +6,7 @@ export class SoftwareSystemRequirementSourceInvalid extends Data.TaggedError(
 ) {
 	static readonly status = StatusCodes.BAD_REQUEST as const;
 	readonly status = SoftwareSystemRequirementSourceInvalid.status;
-	readonly message = "System requirement source link must belong to this Software";
+	readonly message = "System requirement external link must belong to this Software";
 }
 
 export class SeriesReleaseNotFound extends Data.TaggedError("SeriesReleaseNotFound") {

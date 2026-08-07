@@ -75,9 +75,9 @@ import {
 	unitAccessRestriction,
 	unitFollow,
 	unitFollowNotificationPreference,
-	unitSourceLink,
-	unitSourceLinkVote,
-	unitSourceLinkVoteStat,
+	unitExternalLink,
+	unitExternalLinkVote,
+	unitExternalLinkVoteStat,
 	unitReferenceCurationHead,
 	unitOwnership,
 	unitOwnershipClaim,
@@ -522,8 +522,8 @@ describe("database schema contracts", () => {
 		expect(alias.checks.map(({ name }) => name)).toContain("unit_alias_pinned_position_check");
 	});
 
-	it("stores immutable, curated source-link voting candidates", () => {
-		const link = getTableConfig(unitSourceLink);
+	it("stores immutable, curated external-link voting candidates", () => {
+		const link = getTableConfig(unitExternalLink);
 		expect(link.columns.map((column) => column.name)).toEqual(
 			expect.arrayContaining([
 				"unit_id",
@@ -541,9 +541,9 @@ describe("database schema contracts", () => {
 		expect(link.columns.map((column) => column.name)).not.toContain("deleted_at");
 		expect(link.checks.map(({ name }) => name)).not.toContain("unit_link_role_not_blank");
 		expect(link.checks.map(({ name }) => name)).toContain(
-			"unit_source_link_pinned_position_check",
+			"unit_external_link_pinned_position_check",
 		);
-		expect(getTableConfig(unitSourceLinkVote).primaryKeys[0]?.columns).toHaveLength(2);
+		expect(getTableConfig(unitExternalLinkVote).primaryKeys[0]?.columns).toHaveLength(2);
 		expect(getTableConfig(unitReferenceCurationHead).primaryKeys[0]?.columns).toHaveLength(2);
 	});
 
@@ -969,7 +969,7 @@ describe("database schema contracts", () => {
 		for (const table of [
 			scoreStat,
 			unitAliasVoteStat,
-			unitSourceLinkVoteStat,
+			unitExternalLinkVoteStat,
 			unitTagVoteStat,
 			realmTagVoteStat,
 			unitReactionStat,
@@ -979,7 +979,7 @@ describe("database schema contracts", () => {
 		}
 		expect(scoreStat.totalCount.getSQLType()).toBe("bigint");
 		expect(unitAliasVoteStat.voteCount.getSQLType()).toBe("bigint");
-		expect(unitSourceLinkVoteStat.voteCount.getSQLType()).toBe("bigint");
+		expect(unitExternalLinkVoteStat.voteCount.getSQLType()).toBe("bigint");
 		expect(recommendationUnitStat.impressions.getSQLType()).toBe("bigint");
 		expect(recommendationMetricDaily.impressions.getSQLType()).toBe("bigint");
 		expect(recommendationSignalKind.enumValues).toEqual(

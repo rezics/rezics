@@ -1407,44 +1407,44 @@ import type {
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus422,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus429,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus500,
-	GetApiUnitsByTypeByUnitIdLinksOptions,
-	GetApiUnitsByTypeByUnitIdLinksStatus200,
-	GetApiUnitsByTypeByUnitIdLinksStatus404,
-	GetApiUnitsByTypeByUnitIdLinksStatus422,
-	GetApiUnitsByTypeByUnitIdLinksStatus429,
-	GetApiUnitsByTypeByUnitIdLinksStatus500,
-	PostApiUnitsByTypeByUnitIdLinksOptions,
-	PostApiUnitsByTypeByUnitIdLinksStatus200,
-	PostApiUnitsByTypeByUnitIdLinksStatus400,
-	PostApiUnitsByTypeByUnitIdLinksStatus403,
-	PostApiUnitsByTypeByUnitIdLinksStatus404,
-	PostApiUnitsByTypeByUnitIdLinksStatus422,
-	PostApiUnitsByTypeByUnitIdLinksStatus429,
-	PostApiUnitsByTypeByUnitIdLinksStatus500,
-	PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions,
-	PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200,
-	PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus400,
-	PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403,
-	PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404,
-	PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus422,
-	PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429,
-	PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus500,
-	DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions,
-	DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200,
-	DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403,
-	DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404,
-	DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus422,
-	DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429,
-	DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus500,
-	PatchApiUnitsByTypeByUnitIdLinksByLinkIdOptions,
-	PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus200,
-	PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus400,
-	PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus403,
-	PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus404,
-	PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus409,
-	PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus422,
-	PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus429,
-	PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus500,
+	GetApiUnitsByTypeByUnitIdExternalLinksOptions,
+	GetApiUnitsByTypeByUnitIdExternalLinksStatus200,
+	GetApiUnitsByTypeByUnitIdExternalLinksStatus404,
+	GetApiUnitsByTypeByUnitIdExternalLinksStatus422,
+	GetApiUnitsByTypeByUnitIdExternalLinksStatus429,
+	GetApiUnitsByTypeByUnitIdExternalLinksStatus500,
+	PostApiUnitsByTypeByUnitIdExternalLinksOptions,
+	PostApiUnitsByTypeByUnitIdExternalLinksStatus200,
+	PostApiUnitsByTypeByUnitIdExternalLinksStatus400,
+	PostApiUnitsByTypeByUnitIdExternalLinksStatus403,
+	PostApiUnitsByTypeByUnitIdExternalLinksStatus404,
+	PostApiUnitsByTypeByUnitIdExternalLinksStatus422,
+	PostApiUnitsByTypeByUnitIdExternalLinksStatus429,
+	PostApiUnitsByTypeByUnitIdExternalLinksStatus500,
+	PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions,
+	PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus200,
+	PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus400,
+	PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403,
+	PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404,
+	PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus422,
+	PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429,
+	PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus500,
+	DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions,
+	DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus200,
+	DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403,
+	DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404,
+	DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus422,
+	DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429,
+	DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus500,
+	PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdOptions,
+	PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus200,
+	PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus400,
+	PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus403,
+	PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus404,
+	PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus409,
+	PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus422,
+	PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus429,
+	PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus500,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdOptions,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdStatus200,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdStatus400,
@@ -2673,11 +2673,11 @@ import {
 	deleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId,
 	postApiUnitsByTypeByUnitIdSubjectAssociations,
 	deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationId,
-	getApiUnitsByTypeByUnitIdLinks,
-	postApiUnitsByTypeByUnitIdLinks,
-	putApiUnitsByTypeByUnitIdLinksByLinkIdVote,
-	deleteApiUnitsByTypeByUnitIdLinksByLinkIdVote,
-	patchApiUnitsByTypeByUnitIdLinksByLinkId,
+	getApiUnitsByTypeByUnitIdExternalLinks,
+	postApiUnitsByTypeByUnitIdExternalLinks,
+	putApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote,
+	deleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote,
+	patchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkId,
 	putApiUnitsByTypeByUnitIdTagsByTagId,
 	patchApiUnitsByTypeByUnitIdTagsByTagId,
 	deleteApiUnitsByTypeByUnitIdTagsByTagId,
@@ -24277,38 +24277,38 @@ export function useDeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationI
 	>;
 }
 
-export const getApiUnitsByTypeByUnitIdLinksQueryKey = ({
+export const getApiUnitsByTypeByUnitIdExternalLinksQueryKey = ({
 	path,
 	query,
-}: Omit<GetApiUnitsByTypeByUnitIdLinksOptions, "headers">) =>
+}: Omit<GetApiUnitsByTypeByUnitIdExternalLinksOptions, "headers">) =>
 	[
-		{ url: "/api/v1/units/:type/:unitId/links", params: path },
+		{ url: "/api/v1/units/:type/:unitId/external-links", params: path },
 		...(query ? [query] : []),
 	] as const;
 
-type GetApiUnitsByTypeByUnitIdLinksQueryKey = ReturnType<
-	typeof getApiUnitsByTypeByUnitIdLinksQueryKey
+type GetApiUnitsByTypeByUnitIdExternalLinksQueryKey = ReturnType<
+	typeof getApiUnitsByTypeByUnitIdExternalLinksQueryKey
 >;
 
-export function getApiUnitsByTypeByUnitIdLinksQueryOptions(
-	{ path, query }: GetApiUnitsByTypeByUnitIdLinksOptions,
+export function getApiUnitsByTypeByUnitIdExternalLinksQueryOptions(
+	{ path, query }: GetApiUnitsByTypeByUnitIdExternalLinksOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiUnitsByTypeByUnitIdLinksQueryKey({ path, query });
+	const queryKey = getApiUnitsByTypeByUnitIdExternalLinksQueryKey({ path, query });
 	return queryOptions<
-		GetApiUnitsByTypeByUnitIdLinksStatus200,
+		GetApiUnitsByTypeByUnitIdExternalLinksStatus200,
 		ResponseErrorConfig<
-			| GetApiUnitsByTypeByUnitIdLinksStatus404
-			| GetApiUnitsByTypeByUnitIdLinksStatus422
-			| GetApiUnitsByTypeByUnitIdLinksStatus429
-			| GetApiUnitsByTypeByUnitIdLinksStatus500
+			| GetApiUnitsByTypeByUnitIdExternalLinksStatus404
+			| GetApiUnitsByTypeByUnitIdExternalLinksStatus422
+			| GetApiUnitsByTypeByUnitIdExternalLinksStatus429
+			| GetApiUnitsByTypeByUnitIdExternalLinksStatus500
 		>,
-		GetApiUnitsByTypeByUnitIdLinksStatus200,
+		GetApiUnitsByTypeByUnitIdExternalLinksStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUnitsByTypeByUnitIdLinks({
+			const { data } = await getApiUnitsByTypeByUnitIdExternalLinks({
 				...config,
 				path,
 				query,
@@ -24321,34 +24321,34 @@ export function getApiUnitsByTypeByUnitIdLinksQueryOptions(
 }
 
 /**
- * @summary List Unit source-link candidates
- * {@link /api/v1/units/:type/:unitId/links}
+ * @summary List Unit external-link candidates
+ * {@link /api/v1/units/:type/:unitId/external-links}
  */
-export function useGetApiUnitsByTypeByUnitIdLinks<
-	TData = GetApiUnitsByTypeByUnitIdLinksStatus200,
-	TQueryData = GetApiUnitsByTypeByUnitIdLinksStatus200,
-	TQueryKey extends QueryKey = GetApiUnitsByTypeByUnitIdLinksQueryKey,
+export function useGetApiUnitsByTypeByUnitIdExternalLinks<
+	TData = GetApiUnitsByTypeByUnitIdExternalLinksStatus200,
+	TQueryData = GetApiUnitsByTypeByUnitIdExternalLinksStatus200,
+	TQueryKey extends QueryKey = GetApiUnitsByTypeByUnitIdExternalLinksQueryKey,
 >(
 	{
 		path,
 		query,
 	}: {
 		path:
-			| GetApiUnitsByTypeByUnitIdLinksOptions["path"]
-			| (() => GetApiUnitsByTypeByUnitIdLinksOptions["path"]);
+			| GetApiUnitsByTypeByUnitIdExternalLinksOptions["path"]
+			| (() => GetApiUnitsByTypeByUnitIdExternalLinksOptions["path"]);
 		query?:
-			| GetApiUnitsByTypeByUnitIdLinksOptions["query"]
-			| (() => GetApiUnitsByTypeByUnitIdLinksOptions["query"]);
+			| GetApiUnitsByTypeByUnitIdExternalLinksOptions["query"]
+			| (() => GetApiUnitsByTypeByUnitIdExternalLinksOptions["query"]);
 	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiUnitsByTypeByUnitIdLinksStatus200,
+				GetApiUnitsByTypeByUnitIdExternalLinksStatus200,
 				ResponseErrorConfig<
-					| GetApiUnitsByTypeByUnitIdLinksStatus404
-					| GetApiUnitsByTypeByUnitIdLinksStatus422
-					| GetApiUnitsByTypeByUnitIdLinksStatus429
-					| GetApiUnitsByTypeByUnitIdLinksStatus500
+					| GetApiUnitsByTypeByUnitIdExternalLinksStatus404
+					| GetApiUnitsByTypeByUnitIdExternalLinksStatus422
+					| GetApiUnitsByTypeByUnitIdExternalLinksStatus429
+					| GetApiUnitsByTypeByUnitIdExternalLinksStatus500
 				>,
 				TData,
 				TQueryData,
@@ -24365,11 +24365,11 @@ export function useGetApiUnitsByTypeByUnitIdLinks<
 		query: typeof query === "function" ? query() : query,
 	};
 	const queryKey =
-		resolvedOptions?.queryKey ?? getApiUnitsByTypeByUnitIdLinksQueryKey(resolvedParams);
+		resolvedOptions?.queryKey ?? getApiUnitsByTypeByUnitIdExternalLinksQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiUnitsByTypeByUnitIdLinksQueryOptions(resolvedParams, config),
+			...getApiUnitsByTypeByUnitIdExternalLinksQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -24377,10 +24377,10 @@ export function useGetApiUnitsByTypeByUnitIdLinks<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiUnitsByTypeByUnitIdLinksStatus404
-			| GetApiUnitsByTypeByUnitIdLinksStatus422
-			| GetApiUnitsByTypeByUnitIdLinksStatus429
-			| GetApiUnitsByTypeByUnitIdLinksStatus500
+			| GetApiUnitsByTypeByUnitIdExternalLinksStatus404
+			| GetApiUnitsByTypeByUnitIdExternalLinksStatus422
+			| GetApiUnitsByTypeByUnitIdExternalLinksStatus429
+			| GetApiUnitsByTypeByUnitIdExternalLinksStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -24389,29 +24389,29 @@ export function useGetApiUnitsByTypeByUnitIdLinks<
 	return queryResult;
 }
 
-export const postApiUnitsByTypeByUnitIdLinksMutationKey = () =>
-	[{ url: "/api/v1/units/:type/:unitId/links" }] as const;
+export const postApiUnitsByTypeByUnitIdExternalLinksMutationKey = () =>
+	[{ url: "/api/v1/units/:type/:unitId/external-links" }] as const;
 
-export function postApiUnitsByTypeByUnitIdLinksMutationOptions<TContext = unknown>(
+export function postApiUnitsByTypeByUnitIdExternalLinksMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = postApiUnitsByTypeByUnitIdLinksMutationKey();
+	const mutationKey = postApiUnitsByTypeByUnitIdExternalLinksMutationKey();
 	return mutationOptions<
-		PostApiUnitsByTypeByUnitIdLinksStatus200,
+		PostApiUnitsByTypeByUnitIdExternalLinksStatus200,
 		ResponseErrorConfig<
-			| PostApiUnitsByTypeByUnitIdLinksStatus400
-			| PostApiUnitsByTypeByUnitIdLinksStatus403
-			| PostApiUnitsByTypeByUnitIdLinksStatus404
-			| PostApiUnitsByTypeByUnitIdLinksStatus422
-			| PostApiUnitsByTypeByUnitIdLinksStatus429
-			| PostApiUnitsByTypeByUnitIdLinksStatus500
+			| PostApiUnitsByTypeByUnitIdExternalLinksStatus400
+			| PostApiUnitsByTypeByUnitIdExternalLinksStatus403
+			| PostApiUnitsByTypeByUnitIdExternalLinksStatus404
+			| PostApiUnitsByTypeByUnitIdExternalLinksStatus422
+			| PostApiUnitsByTypeByUnitIdExternalLinksStatus429
+			| PostApiUnitsByTypeByUnitIdExternalLinksStatus500
 		>,
-		PostApiUnitsByTypeByUnitIdLinksOptions,
+		PostApiUnitsByTypeByUnitIdExternalLinksOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiUnitsByTypeByUnitIdLinks({
+			const { data } = await postApiUnitsByTypeByUnitIdExternalLinks({
 				...config,
 				path,
 				body,
@@ -24423,131 +24423,22 @@ export function postApiUnitsByTypeByUnitIdLinksMutationOptions<TContext = unknow
 }
 
 /**
- * @summary Propose Unit source link
- * {@link /api/v1/units/:type/:unitId/links}
+ * @summary Propose Unit external link
+ * {@link /api/v1/units/:type/:unitId/external-links}
  */
-export function usePostApiUnitsByTypeByUnitIdLinks<TContext>(
+export function usePostApiUnitsByTypeByUnitIdExternalLinks<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PostApiUnitsByTypeByUnitIdLinksStatus200,
+			PostApiUnitsByTypeByUnitIdExternalLinksStatus200,
 			ResponseErrorConfig<
-				| PostApiUnitsByTypeByUnitIdLinksStatus400
-				| PostApiUnitsByTypeByUnitIdLinksStatus403
-				| PostApiUnitsByTypeByUnitIdLinksStatus404
-				| PostApiUnitsByTypeByUnitIdLinksStatus422
-				| PostApiUnitsByTypeByUnitIdLinksStatus429
-				| PostApiUnitsByTypeByUnitIdLinksStatus500
+				| PostApiUnitsByTypeByUnitIdExternalLinksStatus400
+				| PostApiUnitsByTypeByUnitIdExternalLinksStatus403
+				| PostApiUnitsByTypeByUnitIdExternalLinksStatus404
+				| PostApiUnitsByTypeByUnitIdExternalLinksStatus422
+				| PostApiUnitsByTypeByUnitIdExternalLinksStatus429
+				| PostApiUnitsByTypeByUnitIdExternalLinksStatus500
 			>,
-			PostApiUnitsByTypeByUnitIdLinksOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? postApiUnitsByTypeByUnitIdLinksMutationKey();
-
-	const baseOptions = postApiUnitsByTypeByUnitIdLinksMutationOptions(
-		config,
-	) as UseMutationOptions<
-		PostApiUnitsByTypeByUnitIdLinksStatus200,
-		ResponseErrorConfig<
-			| PostApiUnitsByTypeByUnitIdLinksStatus400
-			| PostApiUnitsByTypeByUnitIdLinksStatus403
-			| PostApiUnitsByTypeByUnitIdLinksStatus404
-			| PostApiUnitsByTypeByUnitIdLinksStatus422
-			| PostApiUnitsByTypeByUnitIdLinksStatus429
-			| PostApiUnitsByTypeByUnitIdLinksStatus500
-		>,
-		PostApiUnitsByTypeByUnitIdLinksOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PostApiUnitsByTypeByUnitIdLinksStatus200,
-		ResponseErrorConfig<
-			| PostApiUnitsByTypeByUnitIdLinksStatus400
-			| PostApiUnitsByTypeByUnitIdLinksStatus403
-			| PostApiUnitsByTypeByUnitIdLinksStatus404
-			| PostApiUnitsByTypeByUnitIdLinksStatus422
-			| PostApiUnitsByTypeByUnitIdLinksStatus429
-			| PostApiUnitsByTypeByUnitIdLinksStatus500
-		>,
-		PostApiUnitsByTypeByUnitIdLinksOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PostApiUnitsByTypeByUnitIdLinksStatus200,
-		ResponseErrorConfig<
-			| PostApiUnitsByTypeByUnitIdLinksStatus400
-			| PostApiUnitsByTypeByUnitIdLinksStatus403
-			| PostApiUnitsByTypeByUnitIdLinksStatus404
-			| PostApiUnitsByTypeByUnitIdLinksStatus422
-			| PostApiUnitsByTypeByUnitIdLinksStatus429
-			| PostApiUnitsByTypeByUnitIdLinksStatus500
-		>,
-		PostApiUnitsByTypeByUnitIdLinksOptions,
-		TContext
-	>;
-}
-
-export const putApiUnitsByTypeByUnitIdLinksByLinkIdVoteMutationKey = () =>
-	[{ url: "/api/v1/units/:type/:unitId/links/:linkId/vote" }] as const;
-
-export function putApiUnitsByTypeByUnitIdLinksByLinkIdVoteMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = putApiUnitsByTypeByUnitIdLinksByLinkIdVoteMutationKey();
-	return mutationOptions<
-		PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200,
-		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus400
-			| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403
-			| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404
-			| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus422
-			| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429
-			| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus500
-		>,
-		PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiUnitsByTypeByUnitIdLinksByLinkIdVote({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Vote on Unit source link
- * {@link /api/v1/units/:type/:unitId/links/:linkId/vote}
- */
-export function usePutApiUnitsByTypeByUnitIdLinksByLinkIdVote<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200,
-			ResponseErrorConfig<
-				| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus400
-				| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403
-				| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404
-				| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus422
-				| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429
-				| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus500
-			>,
-			PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions,
+			PostApiUnitsByTypeByUnitIdExternalLinksOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -24556,35 +24447,35 @@ export function usePutApiUnitsByTypeByUnitIdLinksByLinkIdVote<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ?? putApiUnitsByTypeByUnitIdLinksByLinkIdVoteMutationKey();
+		mutationOptions.mutationKey ?? postApiUnitsByTypeByUnitIdExternalLinksMutationKey();
 
-	const baseOptions = putApiUnitsByTypeByUnitIdLinksByLinkIdVoteMutationOptions(
+	const baseOptions = postApiUnitsByTypeByUnitIdExternalLinksMutationOptions(
 		config,
 	) as UseMutationOptions<
-		PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200,
+		PostApiUnitsByTypeByUnitIdExternalLinksStatus200,
 		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus400
-			| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403
-			| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404
-			| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus422
-			| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429
-			| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus500
+			| PostApiUnitsByTypeByUnitIdExternalLinksStatus400
+			| PostApiUnitsByTypeByUnitIdExternalLinksStatus403
+			| PostApiUnitsByTypeByUnitIdExternalLinksStatus404
+			| PostApiUnitsByTypeByUnitIdExternalLinksStatus422
+			| PostApiUnitsByTypeByUnitIdExternalLinksStatus429
+			| PostApiUnitsByTypeByUnitIdExternalLinksStatus500
 		>,
-		PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions,
+		PostApiUnitsByTypeByUnitIdExternalLinksOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200,
+		PostApiUnitsByTypeByUnitIdExternalLinksStatus200,
 		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus400
-			| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403
-			| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404
-			| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus422
-			| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429
-			| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus500
+			| PostApiUnitsByTypeByUnitIdExternalLinksStatus400
+			| PostApiUnitsByTypeByUnitIdExternalLinksStatus403
+			| PostApiUnitsByTypeByUnitIdExternalLinksStatus404
+			| PostApiUnitsByTypeByUnitIdExternalLinksStatus422
+			| PostApiUnitsByTypeByUnitIdExternalLinksStatus429
+			| PostApiUnitsByTypeByUnitIdExternalLinksStatus500
 		>,
-		PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions,
+		PostApiUnitsByTypeByUnitIdExternalLinksOptions,
 		TContext
 	>(
 		{
@@ -24594,42 +24485,153 @@ export function usePutApiUnitsByTypeByUnitIdLinksByLinkIdVote<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200,
+		PostApiUnitsByTypeByUnitIdExternalLinksStatus200,
 		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus400
-			| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403
-			| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404
-			| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus422
-			| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429
-			| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus500
+			| PostApiUnitsByTypeByUnitIdExternalLinksStatus400
+			| PostApiUnitsByTypeByUnitIdExternalLinksStatus403
+			| PostApiUnitsByTypeByUnitIdExternalLinksStatus404
+			| PostApiUnitsByTypeByUnitIdExternalLinksStatus422
+			| PostApiUnitsByTypeByUnitIdExternalLinksStatus429
+			| PostApiUnitsByTypeByUnitIdExternalLinksStatus500
 		>,
-		PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions,
+		PostApiUnitsByTypeByUnitIdExternalLinksOptions,
 		TContext
 	>;
 }
 
-export const deleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteMutationKey = () =>
-	[{ url: "/api/v1/units/:type/:unitId/links/:linkId/vote" }] as const;
+export const putApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteMutationKey = () =>
+	[{ url: "/api/v1/units/:type/:unitId/external-links/:externalLinkId/vote" }] as const;
 
-export function deleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = deleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteMutationKey();
+export function putApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = putApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteMutationKey();
 	return mutationOptions<
-		DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200,
+		PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403
-			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404
-			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus422
-			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429
-			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus500
+			| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus400
+			| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403
+			| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404
+			| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus422
+			| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429
+			| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus500
 		>,
-		DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions,
+		PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Vote on Unit external link
+ * {@link /api/v1/units/:type/:unitId/external-links/:externalLinkId/vote}
+ */
+export function usePutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus200,
+			ResponseErrorConfig<
+				| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus400
+				| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403
+				| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404
+				| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus422
+				| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429
+				| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus500
+			>,
+			PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		putApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteMutationKey();
+
+	const baseOptions = putApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus400
+			| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403
+			| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404
+			| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus422
+			| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429
+			| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus500
+		>,
+		PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus400
+			| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403
+			| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404
+			| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus422
+			| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429
+			| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus500
+		>,
+		PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus400
+			| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403
+			| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404
+			| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus422
+			| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429
+			| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus500
+		>,
+		PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions,
+		TContext
+	>;
+}
+
+export const deleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteMutationKey = () =>
+	[{ url: "/api/v1/units/:type/:unitId/external-links/:externalLinkId/vote" }] as const;
+
+export function deleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = deleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteMutationKey();
+	return mutationOptions<
+		DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus200,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403
+			| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404
+			| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus422
+			| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429
+			| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus500
+		>,
+		DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiUnitsByTypeByUnitIdLinksByLinkIdVote({
+			const { data } = await deleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote({
 				...config,
 				path,
 				throwOnError: true,
@@ -24640,21 +24642,21 @@ export function deleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteMutationOptions<TCo
 }
 
 /**
- * @summary Remove Unit source link vote
- * {@link /api/v1/units/:type/:unitId/links/:linkId/vote}
+ * @summary Remove Unit external link vote
+ * {@link /api/v1/units/:type/:unitId/external-links/:externalLinkId/vote}
  */
-export function useDeleteApiUnitsByTypeByUnitIdLinksByLinkIdVote<TContext>(
+export function useDeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200,
+			DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus200,
 			ResponseErrorConfig<
-				| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403
-				| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404
-				| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus422
-				| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429
-				| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus500
+				| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403
+				| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404
+				| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus422
+				| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429
+				| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus500
 			>,
-			DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions,
+			DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -24663,33 +24665,35 @@ export function useDeleteApiUnitsByTypeByUnitIdLinksByLinkIdVote<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ?? deleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteMutationKey();
+		mutationOptions.mutationKey ??
+		deleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteMutationKey();
 
-	const baseOptions = deleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteMutationOptions(
-		config,
-	) as UseMutationOptions<
-		DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200,
-		ResponseErrorConfig<
-			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403
-			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404
-			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus422
-			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429
-			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus500
-		>,
-		DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions,
-		TContext
-	>;
+	const baseOptions =
+		deleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteMutationOptions(
+			config,
+		) as UseMutationOptions<
+			DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus200,
+			ResponseErrorConfig<
+				| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403
+				| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404
+				| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus422
+				| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429
+				| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus500
+			>,
+			DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions,
+			TContext
+		>;
 
 	return useMutation<
-		DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200,
+		DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403
-			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404
-			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus422
-			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429
-			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus500
+			| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403
+			| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404
+			| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus422
+			| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429
+			| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus500
 		>,
-		DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions,
+		DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions,
 		TContext
 	>(
 		{
@@ -24699,43 +24703,43 @@ export function useDeleteApiUnitsByTypeByUnitIdLinksByLinkIdVote<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200,
+		DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403
-			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404
-			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus422
-			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429
-			| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus500
+			| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403
+			| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404
+			| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus422
+			| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429
+			| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus500
 		>,
-		DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions,
+		DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions,
 		TContext
 	>;
 }
 
-export const patchApiUnitsByTypeByUnitIdLinksByLinkIdMutationKey = () =>
-	[{ url: "/api/v1/units/:type/:unitId/links/:linkId" }] as const;
+export const patchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdMutationKey = () =>
+	[{ url: "/api/v1/units/:type/:unitId/external-links/:externalLinkId" }] as const;
 
-export function patchApiUnitsByTypeByUnitIdLinksByLinkIdMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = patchApiUnitsByTypeByUnitIdLinksByLinkIdMutationKey();
+export function patchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = patchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdMutationKey();
 	return mutationOptions<
-		PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus200,
+		PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus200,
 		ResponseErrorConfig<
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus400
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus403
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus404
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus409
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus422
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus429
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus500
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus400
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus403
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus404
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus409
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus422
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus429
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus500
 		>,
-		PatchApiUnitsByTypeByUnitIdLinksByLinkIdOptions,
+		PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiUnitsByTypeByUnitIdLinksByLinkId({
+			const { data } = await patchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkId({
 				...config,
 				path,
 				body,
@@ -24747,23 +24751,23 @@ export function patchApiUnitsByTypeByUnitIdLinksByLinkIdMutationOptions<TContext
 }
 
 /**
- * @summary Update Unit source link curation
- * {@link /api/v1/units/:type/:unitId/links/:linkId}
+ * @summary Update Unit external link curation
+ * {@link /api/v1/units/:type/:unitId/external-links/:externalLinkId}
  */
-export function usePatchApiUnitsByTypeByUnitIdLinksByLinkId<TContext>(
+export function usePatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkId<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus200,
+			PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus200,
 			ResponseErrorConfig<
-				| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus400
-				| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus403
-				| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus404
-				| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus409
-				| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus422
-				| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus429
-				| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus500
+				| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus400
+				| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus403
+				| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus404
+				| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus409
+				| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus422
+				| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus429
+				| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus500
 			>,
-			PatchApiUnitsByTypeByUnitIdLinksByLinkIdOptions,
+			PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -24772,37 +24776,38 @@ export function usePatchApiUnitsByTypeByUnitIdLinksByLinkId<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ?? patchApiUnitsByTypeByUnitIdLinksByLinkIdMutationKey();
+		mutationOptions.mutationKey ??
+		patchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdMutationKey();
 
-	const baseOptions = patchApiUnitsByTypeByUnitIdLinksByLinkIdMutationOptions(
+	const baseOptions = patchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdMutationOptions(
 		config,
 	) as UseMutationOptions<
-		PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus200,
+		PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus200,
 		ResponseErrorConfig<
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus400
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus403
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus404
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus409
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus422
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus429
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus500
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus400
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus403
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus404
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus409
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus422
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus429
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus500
 		>,
-		PatchApiUnitsByTypeByUnitIdLinksByLinkIdOptions,
+		PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus200,
+		PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus200,
 		ResponseErrorConfig<
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus400
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus403
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus404
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus409
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus422
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus429
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus500
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus400
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus403
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus404
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus409
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus422
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus429
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus500
 		>,
-		PatchApiUnitsByTypeByUnitIdLinksByLinkIdOptions,
+		PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdOptions,
 		TContext
 	>(
 		{
@@ -24812,17 +24817,17 @@ export function usePatchApiUnitsByTypeByUnitIdLinksByLinkId<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus200,
+		PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus200,
 		ResponseErrorConfig<
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus400
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus403
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus404
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus409
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus422
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus429
-			| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus500
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus400
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus403
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus404
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus409
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus422
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus429
+			| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus500
 		>,
-		PatchApiUnitsByTypeByUnitIdLinksByLinkIdOptions,
+		PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdOptions,
 		TContext
 	>;
 }

@@ -341,7 +341,7 @@ const PendingUnitOwnershipClaimSummaryResponse = t.Object(
 	{ additionalProperties: false },
 );
 
-const UnitSourceLinkIdentityResponseFields = {
+const UnitExternalLinkIdentityResponseFields = {
 	id: Uuid,
 	unitId: Uuid,
 	sourceEntityId: Uuid,
@@ -354,26 +354,26 @@ const UnitSourceLinkIdentityResponseFields = {
 	voteCount: t.Integer({ minimum: 0 }),
 } as const;
 
-const UnitSourceLinkCurationResponseFields = {
+const UnitExternalLinkCurationResponseFields = {
 	pinned: t.Boolean(),
 	position: t.Nullable(FractionalPosition),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 } as const;
 
-const AcceptedUnitSourceLinkResponse = t.Object(
+const AcceptedUnitExternalLinkResponse = t.Object(
 	{
-		...UnitSourceLinkIdentityResponseFields,
+		...UnitExternalLinkIdentityResponseFields,
 		accepted: t.Literal(true),
-		...UnitSourceLinkCurationResponseFields,
+		...UnitExternalLinkCurationResponseFields,
 	},
 	{ additionalProperties: false },
 );
-const AcceptedEntitySourceLinkResponse = t.Object(
+const AcceptedEntityExternalLinkResponse = t.Object(
 	{
-		...UnitSourceLinkIdentityResponseFields,
+		...UnitExternalLinkIdentityResponseFields,
 		accepted: t.Literal(true),
-		...UnitSourceLinkCurationResponseFields,
+		...UnitExternalLinkCurationResponseFields,
 		sourceEntity: UnitPresentationResponse,
 	},
 	{ additionalProperties: false },
@@ -409,7 +409,7 @@ export const UnitDetailResponse = t.Object({
 			contextPost: t.Nullable(AssociationContextPostResponse),
 		}),
 	),
-	links: t.Array(AcceptedUnitSourceLinkResponse),
+	externalLinks: t.Array(AcceptedUnitExternalLinkResponse),
 	tags: t.Array(
 		t.Object({
 			id: Uuid,
@@ -442,7 +442,7 @@ export const UnitDetailResponse = t.Object({
 		canCurateTags: t.Boolean(),
 		canCurateReferences: t.Object({
 			aliases: t.Boolean(),
-			sourceLinks: t.Boolean(),
+			externalLinks: t.Boolean(),
 		}),
 		canManageRealmPublications: t.Boolean(),
 		hasDevelopmentPreviewAccess: t.Boolean(),
@@ -1022,7 +1022,7 @@ export const EntityDetailResponse = t.Object({
 	localizations: t.Array(LocalizationResponse),
 	attributions: t.Array(UnitAttributionSummaryResponse),
 	owner: t.Nullable(UnitSummaryResponse),
-	links: t.Array(AcceptedEntitySourceLinkResponse),
+	externalLinks: t.Array(AcceptedEntityExternalLinkResponse),
 	capabilities: t.Object({
 		canEdit: t.Boolean(),
 		canEditCreditAttributions: t.Boolean(),
@@ -1418,25 +1418,28 @@ export const SubjectAssociationResponse = t.Object({
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
-export const UnitSourceLinkResponse = t.Object(
+export const UnitExternalLinkResponse = t.Object(
 	{
-		...UnitSourceLinkIdentityResponseFields,
+		...UnitExternalLinkIdentityResponseFields,
 		accepted: t.Boolean(),
-		...UnitSourceLinkCurationResponseFields,
+		...UnitExternalLinkCurationResponseFields,
 	},
 	{ additionalProperties: false },
 );
-const UnitSourceLinkListItemResponse = t.Object(
+const UnitExternalLinkListItemResponse = t.Object(
 	{
-		...UnitSourceLinkIdentityResponseFields,
+		...UnitExternalLinkIdentityResponseFields,
 		accepted: t.Boolean(),
-		...UnitSourceLinkCurationResponseFields,
+		...UnitExternalLinkCurationResponseFields,
 		sourceEntity: UnitPresentationResponse,
 	},
 	{ additionalProperties: false },
 );
-export const UnitSourceLinkListResponse = t.Object(
-	{ items: t.Array(UnitSourceLinkListItemResponse), curationVersion: t.Integer({ minimum: 0 }) },
+export const UnitExternalLinkListResponse = t.Object(
+	{
+		items: t.Array(UnitExternalLinkListItemResponse),
+		curationVersion: t.Integer({ minimum: 0 }),
+	},
 	{ additionalProperties: false },
 );
 export const TagApplicationResponse = t.Object({
@@ -1475,8 +1478,8 @@ export const AliasCurationResponse = t.Object({
 	candidate: AliasResponse,
 	curationVersion: t.Integer({ minimum: 0 }),
 });
-export const UnitSourceLinkCurationResponse = t.Object({
-	candidate: UnitSourceLinkResponse,
+export const UnitExternalLinkCurationResponse = t.Object({
+	candidate: UnitExternalLinkResponse,
 	curationVersion: t.Integer({ minimum: 0 }),
 });
 export const VoteResponse = t.Object({

@@ -2,13 +2,13 @@
 
 import {
 	getApiEntitiesByUnitIdQueryKey,
-	getApiUnitsByTypeByUnitIdLinksQueryKey,
+	getApiUnitsByTypeByUnitIdExternalLinksQueryKey,
 	type GetApiEntitiesByUnitIdStatus200,
-	type GetApiUnitsByTypeByUnitIdLinksStatus200,
-	useDeleteApiUnitsByTypeByUnitIdLinksByLinkIdVote,
-	useGetApiUnitsByTypeByUnitIdLinks,
-	usePostApiUnitsByTypeByUnitIdLinks,
-	usePutApiUnitsByTypeByUnitIdLinksByLinkIdVote,
+	type GetApiUnitsByTypeByUnitIdExternalLinksStatus200,
+	useDeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote,
+	useGetApiUnitsByTypeByUnitIdExternalLinks,
+	usePostApiUnitsByTypeByUnitIdExternalLinks,
+	usePutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote,
 } from "@rezics/openapi-tanstack-query";
 import {
 	Badge,
@@ -42,11 +42,11 @@ import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 
-type EntityDetailSourceLink = GetApiEntitiesByUnitIdStatus200["links"][number];
-type EntitySourceLinkCandidate = GetApiUnitsByTypeByUnitIdLinksStatus200["items"][number];
+type EntityDetailExternalLink = GetApiEntitiesByUnitIdStatus200["externalLinks"][number];
+type EntityExternalLinkCandidate = GetApiUnitsByTypeByUnitIdExternalLinksStatus200["items"][number];
 type SelectedEntity = { readonly id: string; readonly label: string };
 
-function SourceLinkVoteControls({
+function ExternalLinkVoteControls({
 	busy,
 	canVote,
 	link,
@@ -55,7 +55,7 @@ function SourceLinkVoteControls({
 }: {
 	readonly busy: boolean;
 	readonly canVote: boolean;
-	readonly link: EntitySourceLinkCandidate;
+	readonly link: EntityExternalLinkCandidate;
 	readonly onClear: () => void;
 	readonly onVote: (value: -1 | 1) => void;
 }) {
@@ -108,7 +108,7 @@ function SourceLinkVoteControls({
 	);
 }
 
-function SourceLinkCard({
+function ExternalLinkCard({
 	busy,
 	canVote,
 	link,
@@ -117,7 +117,7 @@ function SourceLinkCard({
 }: {
 	readonly busy: boolean;
 	readonly canVote: boolean;
-	readonly link: EntitySourceLinkCandidate;
+	readonly link: EntityExternalLinkCandidate;
 	readonly onClear: () => void;
 	readonly onVote: (value: -1 | 1) => void;
 }) {
@@ -198,7 +198,7 @@ function SourceLinkCard({
 							<ExternalLink aria-hidden className="size-3.5 shrink-0" />
 						</a>
 					</PopoverClose>
-					<SourceLinkVoteControls
+					<ExternalLinkVoteControls
 						busy={busy}
 						canVote={canVote}
 						link={link}
@@ -211,12 +211,12 @@ function SourceLinkCard({
 	);
 }
 
-export function EntitySourceLinks({
+export function EntityExternalLinks({
 	entityId,
-	initialLinks,
+	initialExternalLinks,
 }: {
 	readonly entityId: string;
-	readonly initialLinks: readonly EntityDetailSourceLink[];
+	readonly initialExternalLinks: readonly EntityDetailExternalLink[];
 }) {
 	const { t } = useTranslation(["entities", "errors", "ui", "units"]);
 	const { data: session } = useHydratedSession();
@@ -230,24 +230,24 @@ export function EntitySourceLinks({
 		path: { type: "entity" as const, unitId: entityId },
 		query: { localizationLanguages },
 	};
-	const query = useGetApiUnitsByTypeByUnitIdLinks(queryOptions, {
+	const query = useGetApiUnitsByTypeByUnitIdExternalLinks(queryOptions, {
 		query: { enabled: Boolean(session) },
 	});
-	const create = usePostApiUnitsByTypeByUnitIdLinks();
-	const vote = usePutApiUnitsByTypeByUnitIdLinksByLinkIdVote();
-	const clearVote = useDeleteApiUnitsByTypeByUnitIdLinksByLinkIdVote();
+	const create = usePostApiUnitsByTypeByUnitIdExternalLinks();
+	const vote = usePutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote();
+	const clearVote = useDeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote();
 	const refresh = () =>
 		Promise.all([
 			queryClient.invalidateQueries({
-				queryKey: getApiUnitsByTypeByUnitIdLinksQueryKey(queryOptions),
+				queryKey: getApiUnitsByTypeByUnitIdExternalLinksQueryKey(queryOptions),
 			}),
 			queryClient.invalidateQueries({
 				queryKey: getApiEntitiesByUnitIdQueryKey({ path: { unitId: entityId } }),
 			}),
 		]);
-	const links: readonly EntitySourceLinkCandidate[] = session
-		? (query.data?.items ?? initialLinks)
-		: initialLinks;
+	const externalLinks: readonly EntityExternalLinkCandidate[] = session
+		? (query.data?.items ?? initialExternalLinks)
+		: initialExternalLinks;
 	const voteBusy = vote.isPending || clearVote.isPending;
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
@@ -256,25 +256,27 @@ export function EntitySourceLinks({
 		try {
 			await create.mutateAsync({
 				path: { type: "entity", unitId: entityId },
-				body: { sourceEntityUnitId: source.id, url: url.trim() },
+				body: { sourceEntityId: source.id, url: url.trim() },
 			});
 			await refresh();
 			setSource(undefined);
 			setUrl("");
 			setDialogOpen(false);
-			toast.create({ title: t.units.references.linkProposed, type: "success" });
+			toast.create({ title: t.units.references.externalLinkProposed, type: "success" });
 		} catch {
 			// The typed mutation error is rendered in the dialog.
 		}
 	}
 
 	return (
-		<section className="grid scroll-mt-20 gap-4" id="source-links">
+		<section className="grid scroll-mt-20 gap-4" id="external-links">
 			<div className="flex flex-wrap items-end justify-between gap-3">
 				<div className="grid gap-1">
-					<h2 className="font-heading text-xl font-bold">{t.units.detail.links}</h2>
+					<h2 className="font-heading text-xl font-bold">
+						{t.units.detail.externalLinks}
+					</h2>
 					<p className="text-sm text-muted-foreground">
-						{t.entities.sourceLinksDescription}
+						{t.entities.externalLinksDescription}
 					</p>
 				</div>
 				{developmentPreview.state === "allowed" ? (
@@ -285,14 +287,14 @@ export function EntitySourceLinks({
 						variant="outline"
 					>
 						<Plus aria-hidden />
-						{t.units.references.proposeLink}
+						{t.units.references.proposeExternalLink}
 					</Button>
 				) : null}
 			</div>
-			{links.length ? (
+			{externalLinks.length ? (
 				<div className="flex flex-wrap gap-2">
-					{links.map((link) => (
-						<SourceLinkCard
+					{externalLinks.map((link) => (
+						<ExternalLinkCard
 							busy={voteBusy}
 							canVote={Boolean(session)}
 							key={link.id}
@@ -300,7 +302,11 @@ export function EntitySourceLinks({
 							onClear={() =>
 								void clearVote
 									.mutateAsync({
-										path: { type: "entity", unitId: entityId, linkId: link.id },
+										path: {
+											type: "entity",
+											unitId: entityId,
+											externalLinkId: link.id,
+										},
 									})
 									.then(refresh)
 									.catch(() => undefined)
@@ -308,7 +314,11 @@ export function EntitySourceLinks({
 							onVote={(value) =>
 								void vote
 									.mutateAsync({
-										path: { type: "entity", unitId: entityId, linkId: link.id },
+										path: {
+											type: "entity",
+											unitId: entityId,
+											externalLinkId: link.id,
+										},
 										body: { value },
 									})
 									.then(refresh)
@@ -318,7 +328,7 @@ export function EntitySourceLinks({
 					))}
 				</div>
 			) : (
-				<p className="text-sm text-muted-foreground">{t.entities.sourceLinksEmpty}</p>
+				<p className="text-sm text-muted-foreground">{t.entities.externalLinksEmpty}</p>
 			)}
 			<RequestFailure
 				error={query.error ?? vote.error ?? clearVote.error}
@@ -333,13 +343,13 @@ export function EntitySourceLinks({
 			>
 				<DialogContent showCloseButton={!create.isPending} size="sm">
 					<DialogHeader
-						description={t.entities.sourceLinksDescription}
-						title={t.units.references.proposeLink}
+						description={t.entities.externalLinksDescription}
+						title={t.units.references.proposeExternalLink}
 					/>
 					<DialogBody>
 						<form
 							className="grid gap-4"
-							id={`entity-source-link-${entityId}`}
+							id={`entity-external-link-${entityId}`}
 							onSubmit={submit}
 						>
 							<Field required>
@@ -355,7 +365,7 @@ export function EntitySourceLinks({
 								/>
 							</Field>
 							<Field required>
-								<FieldLabel>{t.units.references.sourceUrl}</FieldLabel>
+								<FieldLabel>{t.units.references.externalUrl}</FieldLabel>
 								<Input
 									onChange={(event) => setUrl(event.currentTarget.value)}
 									placeholder={t.units.references.urlPlaceholder}
@@ -378,11 +388,11 @@ export function EntitySourceLinks({
 						</Button>
 						<Button
 							disabled={!source || !url.trim()}
-							form={`entity-source-link-${entityId}`}
+							form={`entity-external-link-${entityId}`}
 							isLoading={create.isPending}
 							type="submit"
 						>
-							{t.units.references.proposeLink}
+							{t.units.references.proposeExternalLink}
 						</Button>
 					</DialogFooter>
 				</DialogContent>

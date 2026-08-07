@@ -10768,7 +10768,7 @@
 					"AliasNotFound",
 					"TagApplicationNotFound",
 					"UnitTagCurationChanged",
-					"UnitSourceLinkNotFound",
+					"UnitExternalLinkNotFound",
 					"UnitReferenceCurationChanged",
 					"InvalidMessageCursor",
 					"ConversationNotFound",
@@ -66148,7 +66148,7 @@
 													"softwareId",
 													"platformEntityId",
 													"tier",
-													"sourceLinkId",
+													"sourceExternalLinkId",
 													"hardware",
 													"createdAt",
 													"updatedAt"
@@ -66167,7 +66167,7 @@
 														]
 													},
 													"tier": { "type": "string" },
-													"sourceLinkId": {
+													"sourceExternalLinkId": {
 														"nullable": true,
 														"anyOf": [
 															{ "format": "uuid", "type": "string" },
@@ -66295,7 +66295,7 @@
 										]
 									},
 									"tier": { "minLength": 1, "maxLength": 32, "type": "string" },
-									"sourceLinkId": {
+									"sourceExternalLinkId": {
 										"nullable": true,
 										"anyOf": [
 											{ "format": "uuid", "type": "string" },
@@ -66348,7 +66348,7 @@
 										"softwareId",
 										"platformEntityId",
 										"tier",
-										"sourceLinkId",
+										"sourceExternalLinkId",
 										"hardware",
 										"createdAt",
 										"updatedAt"
@@ -66364,7 +66364,7 @@
 											]
 										},
 										"tier": { "type": "string" },
-										"sourceLinkId": {
+										"sourceExternalLinkId": {
 											"nullable": true,
 											"anyOf": [
 												{ "format": "uuid", "type": "string" },
@@ -66589,7 +66589,7 @@
 										]
 									},
 									"tier": { "minLength": 1, "maxLength": 32, "type": "string" },
-									"sourceLinkId": {
+									"sourceExternalLinkId": {
 										"nullable": true,
 										"anyOf": [
 											{ "format": "uuid", "type": "string" },
@@ -66642,7 +66642,7 @@
 										"softwareId",
 										"platformEntityId",
 										"tier",
-										"sourceLinkId",
+										"sourceExternalLinkId",
 										"hardware",
 										"createdAt",
 										"updatedAt"
@@ -66658,7 +66658,7 @@
 											]
 										},
 										"tier": { "type": "string" },
-										"sourceLinkId": {
+										"sourceExternalLinkId": {
 											"nullable": true,
 											"anyOf": [
 												{ "format": "uuid", "type": "string" },
@@ -86917,7 +86917,7 @@
 										"cover",
 										"localizations",
 										"subjectAssociations",
-										"links",
+										"externalLinks",
 										"tags",
 										"progressStatistics",
 										"versions",
@@ -88541,7 +88541,7 @@
 												}
 											}
 										},
-										"links": {
+										"externalLinks": {
 											"type": "array",
 											"items": {
 												"additionalProperties": false,
@@ -89154,10 +89154,10 @@
 												"canCurateTags": { "type": "boolean" },
 												"canCurateReferences": {
 													"type": "object",
-													"required": ["aliases", "sourceLinks"],
+													"required": ["aliases", "externalLinks"],
 													"properties": {
 														"aliases": { "type": "boolean" },
-														"sourceLinks": { "type": "boolean" }
+														"externalLinks": { "type": "boolean" }
 													}
 												},
 												"canManageRealmPublications": { "type": "boolean" },
@@ -89491,7 +89491,7 @@
 										"cover",
 										"localizations",
 										"subjectAssociations",
-										"links",
+										"externalLinks",
 										"tags",
 										"progressStatistics",
 										"versions",
@@ -91115,7 +91115,7 @@
 												}
 											}
 										},
-										"links": {
+										"externalLinks": {
 											"type": "array",
 											"items": {
 												"additionalProperties": false,
@@ -91728,10 +91728,10 @@
 												"canCurateTags": { "type": "boolean" },
 												"canCurateReferences": {
 													"type": "object",
-													"required": ["aliases", "sourceLinks"],
+													"required": ["aliases", "externalLinks"],
 													"properties": {
 														"aliases": { "type": "boolean" },
-														"sourceLinks": { "type": "boolean" }
+														"externalLinks": { "type": "boolean" }
 													}
 												},
 												"canManageRealmPublications": { "type": "boolean" },
@@ -92079,7 +92079,7 @@
 										"cover",
 										"localizations",
 										"subjectAssociations",
-										"links",
+										"externalLinks",
 										"tags",
 										"progressStatistics",
 										"versions",
@@ -93703,7 +93703,7 @@
 												}
 											}
 										},
-										"links": {
+										"externalLinks": {
 											"type": "array",
 											"items": {
 												"additionalProperties": false,
@@ -94316,10 +94316,10 @@
 												"canCurateTags": { "type": "boolean" },
 												"canCurateReferences": {
 													"type": "object",
-													"required": ["aliases", "sourceLinks"],
+													"required": ["aliases", "externalLinks"],
 													"properties": {
 														"aliases": { "type": "boolean" },
-														"sourceLinks": { "type": "boolean" }
+														"externalLinks": { "type": "boolean" }
 													}
 												},
 												"canManageRealmPublications": { "type": "boolean" },
@@ -94592,7 +94592,7 @@
 										"cover",
 										"localizations",
 										"subjectAssociations",
-										"links",
+										"externalLinks",
 										"tags",
 										"progressStatistics",
 										"versions",
@@ -96216,7 +96216,7 @@
 												}
 											}
 										},
-										"links": {
+										"externalLinks": {
 											"type": "array",
 											"items": {
 												"additionalProperties": false,
@@ -96829,10 +96829,10 @@
 												"canCurateTags": { "type": "boolean" },
 												"canCurateReferences": {
 													"type": "object",
-													"required": ["aliases", "sourceLinks"],
+													"required": ["aliases", "externalLinks"],
 													"properties": {
 														"aliases": { "type": "boolean" },
-														"sourceLinks": { "type": "boolean" }
+														"externalLinks": { "type": "boolean" }
 													}
 												},
 												"canManageRealmPublications": { "type": "boolean" },
@@ -97093,7 +97093,7 @@
 										"cover",
 										"localizations",
 										"subjectAssociations",
-										"links",
+										"externalLinks",
 										"tags",
 										"progressStatistics",
 										"versions",
@@ -98717,7 +98717,7 @@
 												}
 											}
 										},
-										"links": {
+										"externalLinks": {
 											"type": "array",
 											"items": {
 												"additionalProperties": false,
@@ -99330,10 +99330,10 @@
 												"canCurateTags": { "type": "boolean" },
 												"canCurateReferences": {
 													"type": "object",
-													"required": ["aliases", "sourceLinks"],
+													"required": ["aliases", "externalLinks"],
 													"properties": {
 														"aliases": { "type": "boolean" },
-														"sourceLinks": { "type": "boolean" }
+														"externalLinks": { "type": "boolean" }
 													}
 												},
 												"canManageRealmPublications": { "type": "boolean" },
@@ -99953,7 +99953,7 @@
 										"cover",
 										"localizations",
 										"subjectAssociations",
-										"links",
+										"externalLinks",
 										"tags",
 										"progressStatistics",
 										"versions",
@@ -101577,7 +101577,7 @@
 												}
 											}
 										},
-										"links": {
+										"externalLinks": {
 											"type": "array",
 											"items": {
 												"additionalProperties": false,
@@ -102190,10 +102190,10 @@
 												"canCurateTags": { "type": "boolean" },
 												"canCurateReferences": {
 													"type": "object",
-													"required": ["aliases", "sourceLinks"],
+													"required": ["aliases", "externalLinks"],
 													"properties": {
 														"aliases": { "type": "boolean" },
-														"sourceLinks": { "type": "boolean" }
+														"externalLinks": { "type": "boolean" }
 													}
 												},
 												"canManageRealmPublications": { "type": "boolean" },
@@ -105327,7 +105327,7 @@
 										"localizations",
 										"attributions",
 										"owner",
-										"links",
+										"externalLinks",
 										"capabilities",
 										"creditAttributions",
 										"subjectAssociations"
@@ -106454,7 +106454,7 @@
 												{ "type": "null" }
 											]
 										},
-										"links": {
+										"externalLinks": {
 											"type": "array",
 											"items": {
 												"additionalProperties": false,
@@ -111635,9 +111635,9 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/v1/units/{type}/{unitId}/links": {
+		"/api/v1/units/{type}/{unitId}/external-links": {
 			"get": {
-				"summary": "List Unit source-link candidates",
+				"summary": "List Unit external-link candidates",
 				"tags": ["Units"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
@@ -112072,13 +112072,13 @@
 						}
 					}
 				},
-				"operationId": "getApiUnitsByTypeByUnitIdLinks",
-				"x-rezics-quota-route-operation-id": "getApiUnitsByTypeByUnitIdLinks",
+				"operationId": "getApiUnitsByTypeByUnitIdExternal-links",
+				"x-rezics-quota-route-operation-id": "getApiUnitsByTypeByUnitIdExternal-links",
 				"x-rezics-quota-operation-id": "*",
 				"x-rezics-quota-cost-units": 1
 			},
 			"post": {
-				"summary": "Propose Unit source link",
+				"summary": "Propose Unit external link",
 				"tags": ["Units"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
@@ -112125,14 +112125,14 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["url", "sourceEntityUnitId"],
+								"required": ["url", "sourceEntityId"],
 								"properties": {
 									"url": {
 										"format": "uri",
 										"pattern": "^[Hh][Tt][Tt][Pp][Ss]?://",
 										"type": "string"
 									},
-									"sourceEntityUnitId": { "format": "uuid", "type": "string" }
+									"sourceEntityId": { "format": "uuid", "type": "string" }
 								}
 							}
 						}
@@ -112351,15 +112351,15 @@
 						}
 					}
 				},
-				"operationId": "postApiUnitsByTypeByUnitIdLinks",
-				"x-rezics-quota-route-operation-id": "postApiUnitsByTypeByUnitIdLinks",
+				"operationId": "postApiUnitsByTypeByUnitIdExternal-links",
+				"x-rezics-quota-route-operation-id": "postApiUnitsByTypeByUnitIdExternal-links",
 				"x-rezics-quota-operation-id": "*",
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/v1/units/{type}/{unitId}/links/{linkId}/vote": {
+		"/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}/vote": {
 			"put": {
-				"summary": "Vote on Unit source link",
+				"summary": "Vote on Unit external link",
 				"tags": ["Units"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
@@ -112400,7 +112400,7 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
-						"name": "linkId",
+						"name": "externalLinkId",
 						"in": "path",
 						"required": true,
 						"schema": { "format": "uuid", "type": "string" }
@@ -112521,7 +112521,7 @@
 													"type": "string",
 													"enum": [
 														"UnitNotFound",
-														"UnitSourceLinkNotFound"
+														"UnitExternalLinkNotFound"
 													]
 												},
 												"message": { "type": "string" },
@@ -112588,13 +112588,13 @@
 						}
 					}
 				},
-				"operationId": "putApiUnitsByTypeByUnitIdLinksByLinkIdVote",
-				"x-rezics-quota-route-operation-id": "putApiUnitsByTypeByUnitIdLinksByLinkIdVote",
+				"operationId": "putApiUnitsByTypeByUnitIdExternal-linksByExternalLinkIdVote",
+				"x-rezics-quota-route-operation-id": "putApiUnitsByTypeByUnitIdExternal-linksByExternalLinkIdVote",
 				"x-rezics-quota-operation-id": "*",
 				"x-rezics-quota-cost-units": 1
 			},
 			"delete": {
-				"summary": "Remove Unit source link vote",
+				"summary": "Remove Unit external link vote",
 				"tags": ["Units"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
@@ -112635,7 +112635,7 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
-						"name": "linkId",
+						"name": "externalLinkId",
 						"in": "path",
 						"required": true,
 						"schema": { "format": "uuid", "type": "string" }
@@ -112735,7 +112735,7 @@
 													"type": "string",
 													"enum": [
 														"UnitNotFound",
-														"UnitSourceLinkNotFound"
+														"UnitExternalLinkNotFound"
 													]
 												},
 												"message": { "type": "string" },
@@ -112802,15 +112802,15 @@
 						}
 					}
 				},
-				"operationId": "deleteApiUnitsByTypeByUnitIdLinksByLinkIdVote",
-				"x-rezics-quota-route-operation-id": "deleteApiUnitsByTypeByUnitIdLinksByLinkIdVote",
+				"operationId": "deleteApiUnitsByTypeByUnitIdExternal-linksByExternalLinkIdVote",
+				"x-rezics-quota-route-operation-id": "deleteApiUnitsByTypeByUnitIdExternal-linksByExternalLinkIdVote",
 				"x-rezics-quota-operation-id": "*",
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/v1/units/{type}/{unitId}/links/{linkId}": {
+		"/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}": {
 			"patch": {
-				"summary": "Update Unit source link curation",
+				"summary": "Update Unit external link curation",
 				"tags": ["Units"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
@@ -112851,7 +112851,7 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
-						"name": "linkId",
+						"name": "externalLinkId",
 						"in": "path",
 						"required": true,
 						"schema": { "format": "uuid", "type": "string" }
@@ -113087,7 +113087,7 @@
 													"type": "string",
 													"enum": [
 														"UnitNotFound",
-														"UnitSourceLinkNotFound"
+														"UnitExternalLinkNotFound"
 													]
 												},
 												"message": { "type": "string" },
@@ -113181,8 +113181,8 @@
 						}
 					}
 				},
-				"operationId": "patchApiUnitsByTypeByUnitIdLinksByLinkId",
-				"x-rezics-quota-route-operation-id": "patchApiUnitsByTypeByUnitIdLinksByLinkId",
+				"operationId": "patchApiUnitsByTypeByUnitIdExternal-linksByExternalLinkId",
+				"x-rezics-quota-route-operation-id": "patchApiUnitsByTypeByUnitIdExternal-linksByExternalLinkId",
 				"x-rezics-quota-operation-id": "*",
 				"x-rezics-quota-cost-units": 1
 			}

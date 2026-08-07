@@ -417,16 +417,16 @@ import type {
 	PostApiUnitsByTypeByUnitIdSubjectAssociationsResponses,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdOptions,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdResponses,
-	GetApiUnitsByTypeByUnitIdLinksOptions,
-	GetApiUnitsByTypeByUnitIdLinksResponses,
-	PostApiUnitsByTypeByUnitIdLinksOptions,
-	PostApiUnitsByTypeByUnitIdLinksResponses,
-	PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions,
-	PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteResponses,
-	DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions,
-	DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteResponses,
-	PatchApiUnitsByTypeByUnitIdLinksByLinkIdOptions,
-	PatchApiUnitsByTypeByUnitIdLinksByLinkIdResponses,
+	GetApiUnitsByTypeByUnitIdExternalLinksOptions,
+	GetApiUnitsByTypeByUnitIdExternalLinksResponses,
+	PostApiUnitsByTypeByUnitIdExternalLinksOptions,
+	PostApiUnitsByTypeByUnitIdExternalLinksResponses,
+	PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions,
+	PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteResponses,
+	DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions,
+	DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteResponses,
+	PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdOptions,
+	PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdResponses,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdOptions,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdResponses,
 	PatchApiUnitsByTypeByUnitIdTagsByTagIdOptions,
@@ -4833,105 +4833,139 @@ export function deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationId<
 }
 
 /**
- * @summary List Unit source-link candidates
- * {@link /api/v1/units/:type/:unitId/links}
+ * @summary List Unit external-link candidates
+ * {@link /api/v1/units/:type/:unitId/external-links}
  */
-export function getApiUnitsByTypeByUnitIdLinks<ThrowOnError extends boolean = true>(
-	options: Options<GetApiUnitsByTypeByUnitIdLinksOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitsByTypeByUnitIdLinksResponses, ThrowOnError>> {
+export function getApiUnitsByTypeByUnitIdExternalLinks<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUnitsByTypeByUnitIdExternalLinksOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiUnitsByTypeByUnitIdExternalLinksResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/v1/units/{type}/{unitId}/links",
+		url: "/api/v1/units/{type}/{unitId}/external-links",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<GetApiUnitsByTypeByUnitIdLinksResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiUnitsByTypeByUnitIdExternalLinksResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Propose Unit source link
- * {@link /api/v1/units/:type/:unitId/links}
+ * @summary Propose Unit external link
+ * {@link /api/v1/units/:type/:unitId/external-links}
  */
-export function postApiUnitsByTypeByUnitIdLinks<ThrowOnError extends boolean = true>(
-	options: Options<PostApiUnitsByTypeByUnitIdLinksOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiUnitsByTypeByUnitIdLinksResponses, ThrowOnError>> {
+export function postApiUnitsByTypeByUnitIdExternalLinks<ThrowOnError extends boolean = true>(
+	options: Options<PostApiUnitsByTypeByUnitIdExternalLinksOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiUnitsByTypeByUnitIdExternalLinksResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/v1/units/{type}/{unitId}/links",
+		url: "/api/v1/units/{type}/{unitId}/external-links",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PostApiUnitsByTypeByUnitIdLinksResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PostApiUnitsByTypeByUnitIdExternalLinksResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Vote on Unit source link
- * {@link /api/v1/units/:type/:unitId/links/:linkId/vote}
+ * @summary Vote on Unit external link
+ * {@link /api/v1/units/:type/:unitId/external-links/:externalLinkId/vote}
  */
-export function putApiUnitsByTypeByUnitIdLinksByLinkIdVote<ThrowOnError extends boolean = true>(
-	options: Options<PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteResponses, ThrowOnError>> {
+export function putApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/v1/units/{type}/{unitId}/links/{linkId}/vote",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Remove Unit source link vote
- * {@link /api/v1/units/:type/:unitId/links/:linkId/vote}
- */
-export function deleteApiUnitsByTypeByUnitIdLinksByLinkIdVote<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "DELETE",
-		url: "/api/v1/units/{type}/{unitId}/links/{linkId}/vote",
+		url: "/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}/vote",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
 	}) as Promise<
-		RequestResult<DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteResponses, ThrowOnError>
+		RequestResult<
+			PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteResponses,
+			ThrowOnError
+		>
 	>;
 }
 
 /**
- * @summary Update Unit source link curation
- * {@link /api/v1/units/:type/:unitId/links/:linkId}
+ * @summary Remove Unit external link vote
+ * {@link /api/v1/units/:type/:unitId/external-links/:externalLinkId/vote}
  */
-export function patchApiUnitsByTypeByUnitIdLinksByLinkId<ThrowOnError extends boolean = true>(
-	options: Options<PatchApiUnitsByTypeByUnitIdLinksByLinkIdOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiUnitsByTypeByUnitIdLinksByLinkIdResponses, ThrowOnError>> {
+export function deleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteResponses,
+		ThrowOnError
+	>
+> {
 	const { client: request = client, ...config } = options;
 
 	return request({
-		method: "PATCH",
-		url: "/api/v1/units/{type}/{unitId}/links/{linkId}",
+		method: "DELETE",
+		url: "/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}/vote",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PatchApiUnitsByTypeByUnitIdLinksByLinkIdResponses, ThrowOnError>>;
+	}) as Promise<
+		RequestResult<
+			DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary Update Unit external link curation
+ * {@link /api/v1/units/:type/:unitId/external-links/:externalLinkId}
+ */
+export function patchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PATCH",
+		url: "/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<
+			PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdResponses,
+			ThrowOnError
+		>
+	>;
 }
 
 /**

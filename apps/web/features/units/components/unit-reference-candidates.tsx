@@ -2,17 +2,17 @@
 
 import {
 	getApiUnitsByTypeByUnitIdAliasesQueryKey,
-	getApiUnitsByTypeByUnitIdLinksQueryKey,
+	getApiUnitsByTypeByUnitIdExternalLinksQueryKey,
 	useDeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote,
-	useDeleteApiUnitsByTypeByUnitIdLinksByLinkIdVote,
+	useDeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote,
 	useGetApiUnitsByTypeByUnitIdAliases,
-	useGetApiUnitsByTypeByUnitIdLinks,
+	useGetApiUnitsByTypeByUnitIdExternalLinks,
 	usePatchApiUnitsByTypeByUnitIdAliasesByAliasId,
-	usePatchApiUnitsByTypeByUnitIdLinksByLinkId,
+	usePatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkId,
 	usePostApiUnitsByTypeByUnitIdAliases,
-	usePostApiUnitsByTypeByUnitIdLinks,
+	usePostApiUnitsByTypeByUnitIdExternalLinks,
 	usePutApiUnitsByTypeByUnitIdAliasesByAliasIdVote,
-	usePutApiUnitsByTypeByUnitIdLinksByLinkIdVote,
+	usePutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote,
 } from "@rezics/openapi-tanstack-query";
 import {
 	Badge,
@@ -339,7 +339,7 @@ function AliasCandidates({
 	);
 }
 
-function SourceLinkCandidates({
+function ExternalLinkCandidates({
 	canCurate,
 	type,
 	unitId,
@@ -352,15 +352,15 @@ function SourceLinkCandidates({
 	const queryClient = useQueryClient();
 	const [source, setSource] = useState<SelectedEntity>();
 	const queryOptions = { path: { type, unitId } } as const;
-	const query = useGetApiUnitsByTypeByUnitIdLinks(queryOptions);
-	const create = usePostApiUnitsByTypeByUnitIdLinks();
-	const vote = usePutApiUnitsByTypeByUnitIdLinksByLinkIdVote();
-	const clearVote = useDeleteApiUnitsByTypeByUnitIdLinksByLinkIdVote();
-	const curate = usePatchApiUnitsByTypeByUnitIdLinksByLinkId();
+	const query = useGetApiUnitsByTypeByUnitIdExternalLinks(queryOptions);
+	const create = usePostApiUnitsByTypeByUnitIdExternalLinks();
+	const vote = usePutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote();
+	const clearVote = useDeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote();
+	const curate = usePatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkId();
 	const refresh = async () => {
 		await Promise.all([
 			queryClient.invalidateQueries({
-				queryKey: getApiUnitsByTypeByUnitIdLinksQueryKey(queryOptions),
+				queryKey: getApiUnitsByTypeByUnitIdExternalLinksQueryKey(queryOptions),
 			}),
 			invalidateUnitDetail(queryClient, type, unitId),
 		]);
@@ -375,12 +375,12 @@ function SourceLinkCandidates({
 		try {
 			await create.mutateAsync({
 				path: { type, unitId },
-				body: { sourceEntityUnitId: source.id, url },
+				body: { sourceEntityId: source.id, url },
 			});
 			event.currentTarget.reset();
 			setSource(undefined);
 			await refresh();
-			toast.create({ title: t.units.references.linkProposed, type: "success" });
+			toast.create({ title: t.units.references.externalLinkProposed, type: "success" });
 		} catch {
 			// The typed mutation error is rendered below.
 		}
@@ -395,8 +395,8 @@ function SourceLinkCandidates({
 	return (
 		<Card appearance="outlined">
 			<CardHeader>
-				<CardTitle>{t.units.references.linksTitle}</CardTitle>
-				<CardDescription>{t.units.references.linksDescription}</CardDescription>
+				<CardTitle>{t.units.references.externalLinksTitle}</CardTitle>
+				<CardDescription>{t.units.references.externalLinksDescription}</CardDescription>
 			</CardHeader>
 			<CardContent className="grid gap-4">
 				<form
@@ -416,7 +416,7 @@ function SourceLinkCandidates({
 						/>
 					</Field>
 					<Field required>
-						<FieldLabel>{t.units.references.sourceUrl}</FieldLabel>
+						<FieldLabel>{t.units.references.externalUrl}</FieldLabel>
 						<Input
 							name="url"
 							placeholder={t.units.references.urlPlaceholder}
@@ -430,10 +430,13 @@ function SourceLinkCandidates({
 						isLoading={create.isPending}
 						type="submit"
 					>
-						{t.units.references.proposeLink}
+						{t.units.references.proposeExternalLink}
 					</Button>
 				</form>
-				<CandidateList empty={t.units.references.noLinks} hasItems={items.length > 0}>
+				<CandidateList
+					empty={t.units.references.noExternalLinks}
+					hasItems={items.length > 0}
+				>
 					{items.map((candidate) => (
 						<li className="grid gap-3 p-3" key={candidate.id}>
 							<div className="flex flex-wrap items-start justify-between gap-2">
@@ -457,7 +460,11 @@ function SourceLinkCandidates({
 									onClear={() =>
 										void clearVote
 											.mutateAsync({
-												path: { type, unitId, linkId: candidate.id },
+												path: {
+													type,
+													unitId,
+													externalLinkId: candidate.id,
+												},
 											})
 											.then(refresh)
 											.catch(() => undefined)
@@ -465,7 +472,11 @@ function SourceLinkCandidates({
 									onVote={(value) =>
 										void vote
 											.mutateAsync({
-												path: { type, unitId, linkId: candidate.id },
+												path: {
+													type,
+													unitId,
+													externalLinkId: candidate.id,
+												},
 												body: { value },
 											})
 											.then(refresh)
@@ -483,7 +494,11 @@ function SourceLinkCandidates({
 										onUpdate={(state) =>
 											void curate
 												.mutateAsync({
-													path: { type, unitId, linkId: candidate.id },
+													path: {
+														type,
+														unitId,
+														externalLinkId: candidate.id,
+													},
 													body: state.pinned
 														? { baseVersion: curationVersion, ...state }
 														: {
@@ -515,7 +530,7 @@ export function UnitReferenceCandidates({
 	type,
 	unitId,
 }: {
-	readonly canCurate: { readonly aliases: boolean; readonly sourceLinks: boolean };
+	readonly canCurate: { readonly aliases: boolean; readonly externalLinks: boolean };
 	readonly type: UnitType;
 	readonly unitId: string;
 }) {
@@ -528,8 +543,8 @@ export function UnitReferenceCandidates({
 			</div>
 			<div className="grid gap-4 xl:grid-cols-2">
 				<AliasCandidates canCurate={canCurate.aliases} type={type} unitId={unitId} />
-				<SourceLinkCandidates
-					canCurate={canCurate.sourceLinks}
+				<ExternalLinkCandidates
+					canCurate={canCurate.externalLinks}
 					type={type}
 					unitId={unitId}
 				/>

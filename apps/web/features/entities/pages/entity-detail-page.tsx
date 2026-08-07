@@ -24,7 +24,7 @@ import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-t
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { selectLocalization } from "@/lib/localization";
 import { EntityRelatedFeed } from "../components/entity-related-feed";
-import { EntitySourceLinks } from "../components/entity-source-links";
+import { EntityExternalLinks } from "../components/entity-external-links";
 
 export function EntityDetailPage({ id }: { readonly id: string }) {
 	const { t } = useTranslation([
@@ -143,7 +143,10 @@ export function EntityDetailPage({ id }: { readonly id: string }) {
 					</div>
 				</CardContent>
 			</Card>
-			<EntitySourceLinks entityId={query.data.id} initialLinks={query.data.links} />
+			<EntityExternalLinks
+				entityId={query.data.id}
+				initialExternalLinks={query.data.externalLinks}
+			/>
 			<EntityRelatedFeed entityId={query.data.id} />
 		</main>
 	);

@@ -32,10 +32,10 @@ export class UnitTagCurationChanged extends Data.TaggedError("UnitTagCurationCha
 	}
 }
 
-export class UnitSourceLinkNotFound extends Data.TaggedError("UnitSourceLinkNotFound") {
+export class UnitExternalLinkNotFound extends Data.TaggedError("UnitExternalLinkNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = UnitSourceLinkNotFound.status;
-	readonly message = "Unit source link not found";
+	readonly status = UnitExternalLinkNotFound.status;
+	readonly message = "Unit external link not found";
 }
 
 export class UnitReferenceCurationChanged extends Data.TaggedError("UnitReferenceCurationChanged") {
@@ -54,6 +54,6 @@ export const UnitResourceErrors = [
 	AliasNotFound,
 	TagApplicationNotFound,
 	UnitTagCurationChanged,
-	UnitSourceLinkNotFound,
+	UnitExternalLinkNotFound,
 	UnitReferenceCurationChanged,
 ] as const;

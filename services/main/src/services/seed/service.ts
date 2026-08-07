@@ -99,8 +99,8 @@ import {
 	creditAttribution,
 	CommunityOwnedUnitKindValues,
 	unitOwnership,
-	unitSourceLink,
-	unitSourceLinkVote,
+	unitExternalLink,
+	unitExternalLinkVote,
 	unitLocalization,
 	unitDock,
 	unitSlugAddress,
@@ -997,18 +997,18 @@ async function seedUnitFixtures(
 	for (const batch of chunks(linkInputs)) {
 		links.push(
 			...(await tx
-				.insert(unitSourceLink)
+				.insert(unitExternalLink)
 				.values(batch)
-				.returning({ id: unitSourceLink.id, unitId: unitSourceLink.unitId })),
+				.returning({ id: unitExternalLink.id, unitId: unitExternalLink.unitId })),
 		);
 	}
 	await writeBatches(
 		links.map((link, index) => ({
-			linkId: link.id,
+			externalLinkId: link.id,
 			profileId: itemAt(profiles, index).id,
 			value: 1 as const,
 		})),
-		(batch) => tx.insert(unitSourceLinkVote).values(batch),
+		(batch) => tx.insert(unitExternalLinkVote).values(batch),
 	);
 	const tagRows = Array.from({ length: SeedPlan.unitTags }, (_, index) => ({
 		unitId: itemAt(works, Math.floor(index / 5)).id,
@@ -1063,7 +1063,7 @@ async function seedUnitFixtures(
 				softwareId: softwareUnit.id,
 				platformEntityId: itemAt(entities.slice(65), index).id,
 				tier: index % 2 === 0 ? "minimum" : "recommended",
-				sourceLinkId: linkByUnitId.get(softwareUnit.id)?.id,
+				sourceExternalLinkId: linkByUnitId.get(softwareUnit.id)?.id,
 				hardware: {
 					memoryGb: index % 2 === 0 ? 8 : 16,
 					storageGb: 40 + (index % 8) * 10,

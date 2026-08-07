@@ -82,8 +82,8 @@ const checks: readonly { name: string; query: SQL }[] = [
 				select 'alias'::text as kind, alias_id::text as identity, sum(value) as score,
 					count(*) as vote_count from unit_alias_vote group by alias_id
 				union all
-				select 'source_link', link_id::text, sum(value), count(*)
-				from unit_source_link_vote group by link_id
+				select 'external_link', external_link_id::text, sum(value), count(*)
+				from unit_external_link_vote group by external_link_id
 				union all
 				select 'unit_tag', unit_id || ':' || tag_id, sum(value), count(*)
 				from unit_effective_tag_vote group by unit_id, tag_id
@@ -101,8 +101,8 @@ const checks: readonly { name: string; query: SQL }[] = [
 				select 'alias'::text as kind, alias_id::text as identity, score, vote_count
 				from unit_alias_vote_stat
 				union all
-				select 'source_link', link_id::text, score, vote_count
-				from unit_source_link_vote_stat
+				select 'external_link', external_link_id::text, score, vote_count
+				from unit_external_link_vote_stat
 				union all
 				select 'unit_tag', unit_id || ':' || tag_id, score, vote_count from unit_tag_vote_stat
 				union all

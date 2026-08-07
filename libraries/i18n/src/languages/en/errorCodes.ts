@@ -176,7 +176,7 @@ export default {
 	UnitTagCurationChanged:
 		"This Tag curation changed elsewhere. The latest order has been loaded; try again.",
 	TagNotFound: "This Tag could not be found.",
-	UnitSourceLinkNotFound: "This Unit source link could not be found.",
+	UnitExternalLinkNotFound: "This Unit external link could not be found.",
 	UnitReferenceCurationChanged:
 		"This reference curation changed elsewhere. The latest order has been loaded; try again.",
 	UnitVariantKindMismatch: "A Variant and its Main must use the same supported Unit type.",

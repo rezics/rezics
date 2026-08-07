@@ -3,11 +3,11 @@ import { describe, expect, it } from "vitest";
 
 import { EntityKindValues, UnitKindValues } from "../../database/schema/contract-values";
 import {
-	AddUnitLinkBody,
+	AddUnitExternalLinkBody,
 	CreateEntityBody,
 	ListEntityEntriesQuery,
-	UnitSourceLinkParams,
-	UnitSourceLinkUnitParams,
+	UnitExternalLinkParams,
+	UnitExternalLinkUnitParams,
 	UpdateUnitReferenceCurationBody,
 	UpdateUnitTagCurationBody,
 } from "./schema";
@@ -56,65 +56,77 @@ describe("Unit resource API schemas", () => {
 		).toBe(false);
 	});
 
-	it("accepts only structured source-link fields", () => {
-		const sourceLink = {
+	it("accepts only structured external-link fields", () => {
+		const externalLink = {
 			url: "https://example.test/units/book",
-			sourceEntityUnitId: "018ff2b7-7c00-7000-8000-000000000001",
+			sourceEntityId: "018ff2b7-7c00-7000-8000-000000000001",
 		};
-		expect(Value.Check(AddUnitLinkBody, sourceLink)).toBe(true);
-		expect(Value.Check(AddUnitLinkBody, { ...sourceLink, position: "a0" })).toBe(false);
-		expect(Value.Check(AddUnitLinkBody, { ...sourceLink, role: "official" })).toBe(false);
-		expect(Value.Check(AddUnitLinkBody, { ...sourceLink, fallbackText: "Official page" })).toBe(
+		expect(Value.Check(AddUnitExternalLinkBody, externalLink)).toBe(true);
+		expect(Value.Check(AddUnitExternalLinkBody, { ...externalLink, position: "a0" })).toBe(
 			false,
 		);
-		expect(Value.Check(AddUnitLinkBody, { ...sourceLink, label: "Official page" })).toBe(false);
+		expect(Value.Check(AddUnitExternalLinkBody, { ...externalLink, role: "official" })).toBe(
+			false,
+		);
 		expect(
-			Value.Check(AddUnitLinkBody, { ...sourceLink, url: "ftp://example.test/book" }),
+			Value.Check(AddUnitExternalLinkBody, {
+				...externalLink,
+				fallbackText: "Official page",
+			}),
 		).toBe(false);
 		expect(
-			Value.Check(AddUnitLinkBody, {
-				...sourceLink,
+			Value.Check(AddUnitExternalLinkBody, { ...externalLink, label: "Official page" }),
+		).toBe(false);
+		expect(
+			Value.Check(AddUnitExternalLinkBody, {
+				...externalLink,
+				url: "ftp://example.test/book",
+			}),
+		).toBe(false);
+		expect(
+			Value.Check(AddUnitExternalLinkBody, {
+				...externalLink,
 				url: "HTTPS://EXAMPLE.TEST/units/book",
 			}),
 		).toBe(true);
 		expect(
-			Value.Check(AddUnitLinkBody, {
-				...sourceLink,
+			Value.Check(AddUnitExternalLinkBody, {
+				...externalLink,
 				url: `https://example.test/${"a".repeat(2_000)}`,
 			}),
 		).toBe(true);
 	});
 
-	it("accepts every registered Unit kind as a source-link owner", () => {
+	it("accepts every registered Unit kind as a external-link owner", () => {
 		for (const type of UnitKindValues)
 			expect(
-				Value.Check(UnitSourceLinkUnitParams, {
+				Value.Check(UnitExternalLinkUnitParams, {
 					type,
 					unitId: "018ff2b7-7c00-7000-8000-000000000001",
 				}),
 			).toBe(true);
 		expect(
-			Value.Check(UnitSourceLinkUnitParams, {
+			Value.Check(UnitExternalLinkUnitParams, {
 				type: "unknown",
 				unitId: "018ff2b7-7c00-7000-8000-000000000001",
 			}),
 		).toBe(false);
 	});
 
-	it("requires a Unit-scoped link identifier for source-link voting and curation", () => {
+	it("requires a Unit-scoped link identifier for external-link voting and curation", () => {
 		for (const type of UnitKindValues)
 			expect(
-				Value.Check(UnitSourceLinkParams, {
+				Value.Check(UnitExternalLinkParams, {
 					type,
 					unitId: "018ff2b7-7c00-7000-8000-000000000001",
-					linkId: "018ff2b7-7c00-7000-8000-000000000002",
+					externalLinkId: "018ff2b7-7c00-7000-8000-000000000002",
 				}),
 			).toBe(true);
 		expect(
-			Value.Check(UnitSourceLinkParams, {
+			Value.Check(UnitExternalLinkParams, {
 				type: "profile",
 				unitId: "018ff2b7-7c00-7000-8000-000000000001",
-				linkId: "not-a-unit-link-id",
+				externalLinkId: "not-a-unit-link-id",
 			}),
 		).toBe(false);
 	});

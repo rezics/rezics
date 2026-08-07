@@ -9,7 +9,7 @@ const denied = {
 	canCurateTags: false,
 	canCurateReferences: {
 		aliases: false,
-		sourceLinks: false,
+		externalLinks: false,
 	},
 	canManageRealmPublications: false,
 	hasDevelopmentPreviewAccess: false,

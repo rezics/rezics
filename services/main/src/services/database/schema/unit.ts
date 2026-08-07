@@ -403,8 +403,8 @@ export const unitContentLicense = pgTable(
 	],
 );
 
-export const unitSourceLink = pgTable(
-	"unit_source_link",
+export const unitExternalLink = pgTable(
+	"unit_external_link",
 	{
 		id: createUuidv7PrimaryKey(),
 		unitId: uuid()
@@ -425,41 +425,41 @@ export const unitSourceLink = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		unique("unit_source_link_unit_source_hash_key").on(
+		unique("unit_external_link_unit_source_hash_key").on(
 			table.unitId,
 			table.sourceEntityId,
 			table.normalizedUrlHash,
 		),
-		index("unit_source_link_unit_position_idx").on(
+		index("unit_external_link_unit_position_idx").on(
 			table.unitId,
 			table.pinned,
 			table.position,
 			table.id,
 		),
-		uniqueIndex("unit_source_link_unit_pinned_position_unique")
+		uniqueIndex("unit_external_link_unit_pinned_position_unique")
 			.on(table.unitId, table.position)
 			.where(sql`${table.pinned}`),
-		index("unit_source_link_source_entity_idx").on(table.sourceEntityId),
-		index("unit_source_link_created_by_idx").on(table.createdByProfileId),
+		index("unit_external_link_source_entity_idx").on(table.sourceEntityId),
+		index("unit_external_link_created_by_idx").on(table.createdByProfileId),
 		check(
-			"unit_source_link_url_check",
+			"unit_external_link_url_check",
 			sql`${table.url} ~ '^https?://' and ${table.normalizedUrl} ~ '^https?://'`,
 		),
-		check("unit_source_link_hash_check", sql`${table.normalizedUrlHash} ~ '^[0-9a-f]{64}$'`),
+		check("unit_external_link_hash_check", sql`${table.normalizedUrlHash} ~ '^[0-9a-f]{64}$'`),
 		check(
-			"unit_source_link_pinned_position_check",
+			"unit_external_link_pinned_position_check",
 			sql`(${table.pinned} and ${table.position} is not null)
 				or (not ${table.pinned} and ${table.position} is null)`,
 		),
 	],
 );
 
-export const unitSourceLinkVote = pgTable(
-	"unit_source_link_vote",
+export const unitExternalLinkVote = pgTable(
+	"unit_external_link_vote",
 	{
-		linkId: uuid()
+		externalLinkId: uuid()
 			.notNull()
-			.references(() => unitSourceLink.id, { onDelete: "cascade" }),
+			.references(() => unitExternalLink.id, { onDelete: "cascade" }),
 		profileId: uuid()
 			.notNull()
 			.references((): AnyPgColumn => profile.id, { onDelete: "cascade" }),
@@ -468,9 +468,9 @@ export const unitSourceLinkVote = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.linkId, table.profileId] }),
-		index("unit_source_link_vote_profile_idx").on(table.profileId),
-		check("unit_source_link_vote_value_check", sql`${table.value} in (-1, 1)`),
+		primaryKey({ columns: [table.externalLinkId, table.profileId] }),
+		index("unit_external_link_vote_profile_idx").on(table.profileId),
+		check("unit_external_link_vote_value_check", sql`${table.value} in (-1, 1)`),
 	],
 );
 

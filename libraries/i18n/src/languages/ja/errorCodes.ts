@@ -177,7 +177,7 @@ export default {
 	UnitTagCurationChanged:
 		"このタグ選定は他の場所で変更されました。最新の順序を読み込みました。もう一度お試しください。",
 	TagNotFound: "このタグは見つかりませんでした。",
-	UnitSourceLinkNotFound: "この作品の出典リンクは見つかりませんでした。",
+	UnitExternalLinkNotFound: "この作品の外部リンクは見つかりませんでした。",
 	UnitReferenceCurationChanged:
 		"参照情報の選定が別の場所で変更されました。最新の順序を読み込んだため、もう一度お試しください。",
 	UnitVariantKindMismatch:

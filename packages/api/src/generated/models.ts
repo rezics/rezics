@@ -5662,7 +5662,7 @@ export const ApiErrorCode = {
 	AliasNotFound: "AliasNotFound",
 	TagApplicationNotFound: "TagApplicationNotFound",
 	UnitTagCurationChanged: "UnitTagCurationChanged",
-	UnitSourceLinkNotFound: "UnitSourceLinkNotFound",
+	UnitExternalLinkNotFound: "UnitExternalLinkNotFound",
 	UnitReferenceCurationChanged: "UnitReferenceCurationChanged",
 	InvalidMessageCursor: "InvalidMessageCursor",
 	ConversationNotFound: "ConversationNotFound",
@@ -41466,7 +41466,7 @@ export type GetApiSoftwareBySoftwareIdSystemRequirementsStatus200 = {
 		 * @type string
 		 */
 		tier: string;
-		sourceLinkId: (string | null) | null;
+		sourceExternalLinkId: (string | null) | null;
 		/**
 		 * @type object
 		 */
@@ -41596,7 +41596,7 @@ export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus200 = {
 	 * @type string
 	 */
 	tier: string;
-	sourceLinkId: (string | null) | null;
+	sourceExternalLinkId: (string | null) | null;
 	/**
 	 * @type object
 	 */
@@ -41769,7 +41769,7 @@ export type PostApiSoftwareBySoftwareIdSystemRequirementsBody = {
 	 * @type string
 	 */
 	tier: string;
-	sourceLinkId?: (string | null) | null;
+	sourceExternalLinkId?: (string | null) | null;
 	/**
 	 * @type object
 	 */
@@ -41860,7 +41860,7 @@ export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus200
 	 * @type string
 	 */
 	tier: string;
-	sourceLinkId: (string | null) | null;
+	sourceExternalLinkId: (string | null) | null;
 	/**
 	 * @type object
 	 */
@@ -42033,7 +42033,7 @@ export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdBody = {
 	 * @type string
 	 */
 	tier: string;
-	sourceLinkId?: (string | null) | null;
+	sourceExternalLinkId?: (string | null) | null;
 	/**
 	 * @type object
 	 */
@@ -60437,7 +60437,7 @@ export type PostApiUnitsByTypeStatus200 = {
 	/**
 	 * @type array
 	 */
-	links: {
+	externalLinks: {
 		/**
 		 * @description
 		 * Format: `uuid`
@@ -60818,7 +60818,7 @@ export type PostApiUnitsByTypeStatus200 = {
 			/**
 			 * @type boolean
 			 */
-			sourceLinks: boolean;
+			externalLinks: boolean;
 		};
 		/**
 		 * @type boolean
@@ -62851,7 +62851,7 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 	/**
 	 * @type array
 	 */
-	links: {
+	externalLinks: {
 		/**
 		 * @description
 		 * Format: `uuid`
@@ -63232,7 +63232,7 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 			/**
 			 * @type boolean
 			 */
-			sourceLinks: boolean;
+			externalLinks: boolean;
 		};
 		/**
 		 * @type boolean
@@ -64337,7 +64337,7 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 	/**
 	 * @type array
 	 */
-	links: {
+	externalLinks: {
 		/**
 		 * @description
 		 * Format: `uuid`
@@ -64718,7 +64718,7 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 			/**
 			 * @type boolean
 			 */
-			sourceLinks: boolean;
+			externalLinks: boolean;
 		};
 		/**
 		 * @type boolean
@@ -66122,7 +66122,7 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 	/**
 	 * @type array
 	 */
-	links: {
+	externalLinks: {
 		/**
 		 * @description
 		 * Format: `uuid`
@@ -66503,7 +66503,7 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 			/**
 			 * @type boolean
 			 */
-			sourceLinks: boolean;
+			externalLinks: boolean;
 		};
 		/**
 		 * @type boolean
@@ -67789,7 +67789,7 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 	/**
 	 * @type array
 	 */
-	links: {
+	externalLinks: {
 		/**
 		 * @description
 		 * Format: `uuid`
@@ -68170,7 +68170,7 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 			/**
 			 * @type boolean
 			 */
-			sourceLinks: boolean;
+			externalLinks: boolean;
 		};
 		/**
 		 * @type boolean
@@ -69466,7 +69466,7 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 	/**
 	 * @type array
 	 */
-	links: {
+	externalLinks: {
 		/**
 		 * @description
 		 * Format: `uuid`
@@ -69847,7 +69847,7 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 			/**
 			 * @type boolean
 			 */
-			sourceLinks: boolean;
+			externalLinks: boolean;
 		};
 		/**
 		 * @type boolean
@@ -72991,7 +72991,7 @@ export const GetApiEntitiesByUnitIdStatus200OwnerAvatarIconPrefixEnum = {
 export type GetApiEntitiesByUnitIdStatus200OwnerAvatarIconPrefixEnum =
 	(typeof GetApiEntitiesByUnitIdStatus200OwnerAvatarIconPrefixEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200OwnerAvatarIconPrefixEnum];
 
-export const GetApiEntitiesByUnitIdStatus200LinksSourceEntityKindEnum = {
+export const GetApiEntitiesByUnitIdStatus200ExternalLinksSourceEntityKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
 	book: "book",
@@ -73014,10 +73014,10 @@ export const GetApiEntitiesByUnitIdStatus200LinksSourceEntityKindEnum = {
 	realm_rule: "realm_rule",
 } as const;
 
-export type GetApiEntitiesByUnitIdStatus200LinksSourceEntityKindEnum =
-	(typeof GetApiEntitiesByUnitIdStatus200LinksSourceEntityKindEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200LinksSourceEntityKindEnum];
+export type GetApiEntitiesByUnitIdStatus200ExternalLinksSourceEntityKindEnum =
+	(typeof GetApiEntitiesByUnitIdStatus200ExternalLinksSourceEntityKindEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200ExternalLinksSourceEntityKindEnum];
 
-export const GetApiEntitiesByUnitIdStatus200LinksSourceEntityLanguageEnum = {
+export const GetApiEntitiesByUnitIdStatus200ExternalLinksSourceEntityLanguageEnum = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -73027,16 +73027,16 @@ export const GetApiEntitiesByUnitIdStatus200LinksSourceEntityLanguageEnum = {
 	es: "es",
 } as const;
 
-export type GetApiEntitiesByUnitIdStatus200LinksSourceEntityLanguageEnum =
-	(typeof GetApiEntitiesByUnitIdStatus200LinksSourceEntityLanguageEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200LinksSourceEntityLanguageEnum];
+export type GetApiEntitiesByUnitIdStatus200ExternalLinksSourceEntityLanguageEnum =
+	(typeof GetApiEntitiesByUnitIdStatus200ExternalLinksSourceEntityLanguageEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200ExternalLinksSourceEntityLanguageEnum];
 
-export const GetApiEntitiesByUnitIdStatus200LinksSourceEntityAvatarIconPrefixEnum = {
+export const GetApiEntitiesByUnitIdStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
 } as const;
 
-export type GetApiEntitiesByUnitIdStatus200LinksSourceEntityAvatarIconPrefixEnum =
-	(typeof GetApiEntitiesByUnitIdStatus200LinksSourceEntityAvatarIconPrefixEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200LinksSourceEntityAvatarIconPrefixEnum];
+export type GetApiEntitiesByUnitIdStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum =
+	(typeof GetApiEntitiesByUnitIdStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum];
 
 export const GetApiEntitiesByUnitIdStatus200CreditAttributionsRoleEnum = {
 	author: "author",
@@ -73726,7 +73726,7 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 	/**
 	 * @type array
 	 */
-	links: {
+	externalLinks: {
 		/**
 		 * @description
 		 * Format: `uuid`
@@ -73796,11 +73796,11 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 			 * @default 'slug_namespace'
 			 * @type string
 			 */
-			kind: GetApiEntitiesByUnitIdStatus200LinksSourceEntityKindEnum;
+			kind: GetApiEntitiesByUnitIdStatus200ExternalLinksSourceEntityKindEnum;
 			/**
 			 * @type string
 			 */
-			language: GetApiEntitiesByUnitIdStatus200LinksSourceEntityLanguageEnum;
+			language: GetApiEntitiesByUnitIdStatus200ExternalLinksSourceEntityLanguageEnum;
 			title: (string | null) | null;
 			summary: (string | null) | null;
 			avatar:
@@ -73854,7 +73854,7 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 											/**
 											 * @type string
 											 */
-											prefix: GetApiEntitiesByUnitIdStatus200LinksSourceEntityAvatarIconPrefixEnum;
+											prefix: GetApiEntitiesByUnitIdStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum;
 											/**
 											 * @maxLength 128
 											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -78109,7 +78109,7 @@ export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdRespon
 	| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus429
 	| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus500;
 
-export const GetApiUnitsByTypeByUnitIdLinksType = {
+export const GetApiUnitsByTypeByUnitIdExternalLinksType = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
 	book: "book",
@@ -78132,17 +78132,17 @@ export const GetApiUnitsByTypeByUnitIdLinksType = {
 	realm_rule: "realm_rule",
 } as const;
 
-export type GetApiUnitsByTypeByUnitIdLinksType =
-	(typeof GetApiUnitsByTypeByUnitIdLinksType)[keyof typeof GetApiUnitsByTypeByUnitIdLinksType];
+export type GetApiUnitsByTypeByUnitIdExternalLinksType =
+	(typeof GetApiUnitsByTypeByUnitIdExternalLinksType)[keyof typeof GetApiUnitsByTypeByUnitIdExternalLinksType];
 
 /**
  * @type object
  */
-export type GetApiUnitsByTypeByUnitIdLinksPath = {
+export type GetApiUnitsByTypeByUnitIdExternalLinksPath = {
 	/**
 	 * @type string
 	 */
-	type: GetApiUnitsByTypeByUnitIdLinksType;
+	type: GetApiUnitsByTypeByUnitIdExternalLinksType;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -78151,7 +78151,7 @@ export type GetApiUnitsByTypeByUnitIdLinksPath = {
 	unitId: string;
 };
 
-export const GetApiUnitsByTypeByUnitIdLinksLocalizationLanguagesEnum = {
+export const GetApiUnitsByTypeByUnitIdExternalLinksLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -78161,20 +78161,20 @@ export const GetApiUnitsByTypeByUnitIdLinksLocalizationLanguagesEnum = {
 	es: "es",
 } as const;
 
-export type GetApiUnitsByTypeByUnitIdLinksLocalizationLanguagesEnum =
-	(typeof GetApiUnitsByTypeByUnitIdLinksLocalizationLanguagesEnum)[keyof typeof GetApiUnitsByTypeByUnitIdLinksLocalizationLanguagesEnum];
+export type GetApiUnitsByTypeByUnitIdExternalLinksLocalizationLanguagesEnum =
+	(typeof GetApiUnitsByTypeByUnitIdExternalLinksLocalizationLanguagesEnum)[keyof typeof GetApiUnitsByTypeByUnitIdExternalLinksLocalizationLanguagesEnum];
 
 /**
  * @type object
  */
-export type GetApiUnitsByTypeByUnitIdLinksQuery = {
+export type GetApiUnitsByTypeByUnitIdExternalLinksQuery = {
 	/**
 	 * @type array | undefined
 	 */
-	localizationLanguages?: GetApiUnitsByTypeByUnitIdLinksLocalizationLanguagesEnum[];
+	localizationLanguages?: GetApiUnitsByTypeByUnitIdExternalLinksLocalizationLanguagesEnum[];
 };
 
-export const GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityKindEnum = {
+export const GetApiUnitsByTypeByUnitIdExternalLinksStatus200ItemsSourceEntityKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
 	book: "book",
@@ -78197,10 +78197,10 @@ export const GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityKindEnum = 
 	realm_rule: "realm_rule",
 } as const;
 
-export type GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityKindEnum =
-	(typeof GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityKindEnum)[keyof typeof GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityKindEnum];
+export type GetApiUnitsByTypeByUnitIdExternalLinksStatus200ItemsSourceEntityKindEnum =
+	(typeof GetApiUnitsByTypeByUnitIdExternalLinksStatus200ItemsSourceEntityKindEnum)[keyof typeof GetApiUnitsByTypeByUnitIdExternalLinksStatus200ItemsSourceEntityKindEnum];
 
-export const GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityLanguageEnum = {
+export const GetApiUnitsByTypeByUnitIdExternalLinksStatus200ItemsSourceEntityLanguageEnum = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -78210,21 +78210,22 @@ export const GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityLanguageEnu
 	es: "es",
 } as const;
 
-export type GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityLanguageEnum =
-	(typeof GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityLanguageEnum)[keyof typeof GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityLanguageEnum];
+export type GetApiUnitsByTypeByUnitIdExternalLinksStatus200ItemsSourceEntityLanguageEnum =
+	(typeof GetApiUnitsByTypeByUnitIdExternalLinksStatus200ItemsSourceEntityLanguageEnum)[keyof typeof GetApiUnitsByTypeByUnitIdExternalLinksStatus200ItemsSourceEntityLanguageEnum];
 
-export const GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityAvatarIconPrefixEnum = {
-	fas: "fas",
-	fab: "fab",
-} as const;
+export const GetApiUnitsByTypeByUnitIdExternalLinksStatus200ItemsSourceEntityAvatarIconPrefixEnum =
+	{
+		fas: "fas",
+		fab: "fab",
+	} as const;
 
-export type GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityAvatarIconPrefixEnum =
-	(typeof GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityAvatarIconPrefixEnum)[keyof typeof GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityAvatarIconPrefixEnum];
+export type GetApiUnitsByTypeByUnitIdExternalLinksStatus200ItemsSourceEntityAvatarIconPrefixEnum =
+	(typeof GetApiUnitsByTypeByUnitIdExternalLinksStatus200ItemsSourceEntityAvatarIconPrefixEnum)[keyof typeof GetApiUnitsByTypeByUnitIdExternalLinksStatus200ItemsSourceEntityAvatarIconPrefixEnum];
 
 /**
  * @type object
  */
-export type GetApiUnitsByTypeByUnitIdLinksStatus200 = {
+export type GetApiUnitsByTypeByUnitIdExternalLinksStatus200 = {
 	/**
 	 * @type array
 	 */
@@ -78298,11 +78299,11 @@ export type GetApiUnitsByTypeByUnitIdLinksStatus200 = {
 			 * @default 'slug_namespace'
 			 * @type string
 			 */
-			kind: GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityKindEnum;
+			kind: GetApiUnitsByTypeByUnitIdExternalLinksStatus200ItemsSourceEntityKindEnum;
 			/**
 			 * @type string
 			 */
-			language: GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityLanguageEnum;
+			language: GetApiUnitsByTypeByUnitIdExternalLinksStatus200ItemsSourceEntityLanguageEnum;
 			title: (string | null) | null;
 			summary: (string | null) | null;
 			avatar:
@@ -78356,7 +78357,7 @@ export type GetApiUnitsByTypeByUnitIdLinksStatus200 = {
 											/**
 											 * @type string
 											 */
-											prefix: GetApiUnitsByTypeByUnitIdLinksStatus200ItemsSourceEntityAvatarIconPrefixEnum;
+											prefix: GetApiUnitsByTypeByUnitIdExternalLinksStatus200ItemsSourceEntityAvatarIconPrefixEnum;
 											/**
 											 * @maxLength 128
 											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -78377,7 +78378,7 @@ export type GetApiUnitsByTypeByUnitIdLinksStatus200 = {
 /**
  * @type object
  */
-export type GetApiUnitsByTypeByUnitIdLinksStatus404 = {
+export type GetApiUnitsByTypeByUnitIdExternalLinksStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -78405,20 +78406,20 @@ export type GetApiUnitsByTypeByUnitIdLinksStatus404 = {
 /**
  * @type object
  */
-export type GetApiUnitsByTypeByUnitIdLinksStatus422 = ValidationError;
+export type GetApiUnitsByTypeByUnitIdExternalLinksStatus422 = ValidationError;
 
-export const GetApiUnitsByTypeByUnitIdLinksStatus429ErrorCodeEnum = {
+export const GetApiUnitsByTypeByUnitIdExternalLinksStatus429ErrorCodeEnum = {
 	ApiQuotaExceeded: "ApiQuotaExceeded",
 	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
 } as const;
 
-export type GetApiUnitsByTypeByUnitIdLinksStatus429ErrorCodeEnum =
-	(typeof GetApiUnitsByTypeByUnitIdLinksStatus429ErrorCodeEnum)[keyof typeof GetApiUnitsByTypeByUnitIdLinksStatus429ErrorCodeEnum];
+export type GetApiUnitsByTypeByUnitIdExternalLinksStatus429ErrorCodeEnum =
+	(typeof GetApiUnitsByTypeByUnitIdExternalLinksStatus429ErrorCodeEnum)[keyof typeof GetApiUnitsByTypeByUnitIdExternalLinksStatus429ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type GetApiUnitsByTypeByUnitIdLinksStatus429 = {
+export type GetApiUnitsByTypeByUnitIdExternalLinksStatus429 = {
 	/**
 	 * @type object
 	 */
@@ -78426,7 +78427,7 @@ export type GetApiUnitsByTypeByUnitIdLinksStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: GetApiUnitsByTypeByUnitIdLinksStatus429ErrorCodeEnum;
+		code: GetApiUnitsByTypeByUnitIdExternalLinksStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -78442,40 +78443,40 @@ export type GetApiUnitsByTypeByUnitIdLinksStatus429 = {
 /**
  * @type object
  */
-export type GetApiUnitsByTypeByUnitIdLinksStatus500 = InternalError;
+export type GetApiUnitsByTypeByUnitIdExternalLinksStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type GetApiUnitsByTypeByUnitIdLinksOptions = {
+export type GetApiUnitsByTypeByUnitIdExternalLinksOptions = {
 	body?: never;
-	path: GetApiUnitsByTypeByUnitIdLinksPath;
-	query?: GetApiUnitsByTypeByUnitIdLinksQuery;
+	path: GetApiUnitsByTypeByUnitIdExternalLinksPath;
+	query?: GetApiUnitsByTypeByUnitIdExternalLinksQuery;
 	headers?: never;
 };
 
 /**
  * @type object
  */
-export type GetApiUnitsByTypeByUnitIdLinksResponses = {
-	"200": GetApiUnitsByTypeByUnitIdLinksStatus200;
-	"404": GetApiUnitsByTypeByUnitIdLinksStatus404;
-	"422": GetApiUnitsByTypeByUnitIdLinksStatus422;
-	"429": GetApiUnitsByTypeByUnitIdLinksStatus429;
-	"500": GetApiUnitsByTypeByUnitIdLinksStatus500;
+export type GetApiUnitsByTypeByUnitIdExternalLinksResponses = {
+	"200": GetApiUnitsByTypeByUnitIdExternalLinksStatus200;
+	"404": GetApiUnitsByTypeByUnitIdExternalLinksStatus404;
+	"422": GetApiUnitsByTypeByUnitIdExternalLinksStatus422;
+	"429": GetApiUnitsByTypeByUnitIdExternalLinksStatus429;
+	"500": GetApiUnitsByTypeByUnitIdExternalLinksStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type GetApiUnitsByTypeByUnitIdLinksResponse =
-	| GetApiUnitsByTypeByUnitIdLinksStatus200
-	| GetApiUnitsByTypeByUnitIdLinksStatus404
-	| GetApiUnitsByTypeByUnitIdLinksStatus422
-	| GetApiUnitsByTypeByUnitIdLinksStatus429
-	| GetApiUnitsByTypeByUnitIdLinksStatus500;
+export type GetApiUnitsByTypeByUnitIdExternalLinksResponse =
+	| GetApiUnitsByTypeByUnitIdExternalLinksStatus200
+	| GetApiUnitsByTypeByUnitIdExternalLinksStatus404
+	| GetApiUnitsByTypeByUnitIdExternalLinksStatus422
+	| GetApiUnitsByTypeByUnitIdExternalLinksStatus429
+	| GetApiUnitsByTypeByUnitIdExternalLinksStatus500;
 
-export const PostApiUnitsByTypeByUnitIdLinksType = {
+export const PostApiUnitsByTypeByUnitIdExternalLinksType = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
 	book: "book",
@@ -78498,17 +78499,17 @@ export const PostApiUnitsByTypeByUnitIdLinksType = {
 	realm_rule: "realm_rule",
 } as const;
 
-export type PostApiUnitsByTypeByUnitIdLinksType =
-	(typeof PostApiUnitsByTypeByUnitIdLinksType)[keyof typeof PostApiUnitsByTypeByUnitIdLinksType];
+export type PostApiUnitsByTypeByUnitIdExternalLinksType =
+	(typeof PostApiUnitsByTypeByUnitIdExternalLinksType)[keyof typeof PostApiUnitsByTypeByUnitIdExternalLinksType];
 
 /**
  * @type object
  */
-export type PostApiUnitsByTypeByUnitIdLinksPath = {
+export type PostApiUnitsByTypeByUnitIdExternalLinksPath = {
 	/**
 	 * @type string
 	 */
-	type: PostApiUnitsByTypeByUnitIdLinksType;
+	type: PostApiUnitsByTypeByUnitIdExternalLinksType;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -78520,7 +78521,7 @@ export type PostApiUnitsByTypeByUnitIdLinksPath = {
 /**
  * @type object
  */
-export type PostApiUnitsByTypeByUnitIdLinksStatus200 = {
+export type PostApiUnitsByTypeByUnitIdExternalLinksStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -78581,20 +78582,20 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus200 = {
 /**
  * @type object
  */
-export type PostApiUnitsByTypeByUnitIdLinksStatus400 = MalformedRequestBody;
+export type PostApiUnitsByTypeByUnitIdExternalLinksStatus400 = MalformedRequestBody;
 
-export const PostApiUnitsByTypeByUnitIdLinksStatus403ErrorCodeEnum = {
+export const PostApiUnitsByTypeByUnitIdExternalLinksStatus403ErrorCodeEnum = {
 	UnitAccessRestricted: "UnitAccessRestricted",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 } as const;
 
-export type PostApiUnitsByTypeByUnitIdLinksStatus403ErrorCodeEnum =
-	(typeof PostApiUnitsByTypeByUnitIdLinksStatus403ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdLinksStatus403ErrorCodeEnum];
+export type PostApiUnitsByTypeByUnitIdExternalLinksStatus403ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdExternalLinksStatus403ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdExternalLinksStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PostApiUnitsByTypeByUnitIdLinksStatus403 = {
+export type PostApiUnitsByTypeByUnitIdExternalLinksStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -78603,7 +78604,7 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus403 = {
 		 * @default 'UnitAccessRestricted'
 		 * @type string
 		 */
-		code: PostApiUnitsByTypeByUnitIdLinksStatus403ErrorCodeEnum;
+		code: PostApiUnitsByTypeByUnitIdExternalLinksStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -78619,18 +78620,18 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus403 = {
 	requestId: string;
 };
 
-export const PostApiUnitsByTypeByUnitIdLinksStatus404ErrorCodeEnum = {
+export const PostApiUnitsByTypeByUnitIdExternalLinksStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	EntityEntryNotFound: "EntityEntryNotFound",
 } as const;
 
-export type PostApiUnitsByTypeByUnitIdLinksStatus404ErrorCodeEnum =
-	(typeof PostApiUnitsByTypeByUnitIdLinksStatus404ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdLinksStatus404ErrorCodeEnum];
+export type PostApiUnitsByTypeByUnitIdExternalLinksStatus404ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdExternalLinksStatus404ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdExternalLinksStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PostApiUnitsByTypeByUnitIdLinksStatus404 = {
+export type PostApiUnitsByTypeByUnitIdExternalLinksStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -78639,7 +78640,7 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: PostApiUnitsByTypeByUnitIdLinksStatus404ErrorCodeEnum;
+		code: PostApiUnitsByTypeByUnitIdExternalLinksStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -78658,20 +78659,20 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus404 = {
 /**
  * @type object
  */
-export type PostApiUnitsByTypeByUnitIdLinksStatus422 = ValidationError;
+export type PostApiUnitsByTypeByUnitIdExternalLinksStatus422 = ValidationError;
 
-export const PostApiUnitsByTypeByUnitIdLinksStatus429ErrorCodeEnum = {
+export const PostApiUnitsByTypeByUnitIdExternalLinksStatus429ErrorCodeEnum = {
 	ApiQuotaExceeded: "ApiQuotaExceeded",
 	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
 } as const;
 
-export type PostApiUnitsByTypeByUnitIdLinksStatus429ErrorCodeEnum =
-	(typeof PostApiUnitsByTypeByUnitIdLinksStatus429ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdLinksStatus429ErrorCodeEnum];
+export type PostApiUnitsByTypeByUnitIdExternalLinksStatus429ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdExternalLinksStatus429ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdExternalLinksStatus429ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PostApiUnitsByTypeByUnitIdLinksStatus429 = {
+export type PostApiUnitsByTypeByUnitIdExternalLinksStatus429 = {
 	/**
 	 * @type object
 	 */
@@ -78679,7 +78680,7 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: PostApiUnitsByTypeByUnitIdLinksStatus429ErrorCodeEnum;
+		code: PostApiUnitsByTypeByUnitIdExternalLinksStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -78695,12 +78696,12 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus429 = {
 /**
  * @type object
  */
-export type PostApiUnitsByTypeByUnitIdLinksStatus500 = InternalError;
+export type PostApiUnitsByTypeByUnitIdExternalLinksStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type PostApiUnitsByTypeByUnitIdLinksBody = {
+export type PostApiUnitsByTypeByUnitIdExternalLinksBody = {
 	/**
 	 * @description
 	 * Format: `uri`
@@ -78712,15 +78713,15 @@ export type PostApiUnitsByTypeByUnitIdLinksBody = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	sourceEntityUnitId: string;
+	sourceEntityId: string;
 };
 
 /**
  * @type object
  */
-export type PostApiUnitsByTypeByUnitIdLinksOptions = {
-	body: PostApiUnitsByTypeByUnitIdLinksBody;
-	path: PostApiUnitsByTypeByUnitIdLinksPath;
+export type PostApiUnitsByTypeByUnitIdExternalLinksOptions = {
+	body: PostApiUnitsByTypeByUnitIdExternalLinksBody;
+	path: PostApiUnitsByTypeByUnitIdExternalLinksPath;
 	query?: never;
 	headers?: never;
 };
@@ -78728,29 +78729,29 @@ export type PostApiUnitsByTypeByUnitIdLinksOptions = {
 /**
  * @type object
  */
-export type PostApiUnitsByTypeByUnitIdLinksResponses = {
-	"200": PostApiUnitsByTypeByUnitIdLinksStatus200;
-	"400": PostApiUnitsByTypeByUnitIdLinksStatus400;
-	"403": PostApiUnitsByTypeByUnitIdLinksStatus403;
-	"404": PostApiUnitsByTypeByUnitIdLinksStatus404;
-	"422": PostApiUnitsByTypeByUnitIdLinksStatus422;
-	"429": PostApiUnitsByTypeByUnitIdLinksStatus429;
-	"500": PostApiUnitsByTypeByUnitIdLinksStatus500;
+export type PostApiUnitsByTypeByUnitIdExternalLinksResponses = {
+	"200": PostApiUnitsByTypeByUnitIdExternalLinksStatus200;
+	"400": PostApiUnitsByTypeByUnitIdExternalLinksStatus400;
+	"403": PostApiUnitsByTypeByUnitIdExternalLinksStatus403;
+	"404": PostApiUnitsByTypeByUnitIdExternalLinksStatus404;
+	"422": PostApiUnitsByTypeByUnitIdExternalLinksStatus422;
+	"429": PostApiUnitsByTypeByUnitIdExternalLinksStatus429;
+	"500": PostApiUnitsByTypeByUnitIdExternalLinksStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PostApiUnitsByTypeByUnitIdLinksResponse =
-	| PostApiUnitsByTypeByUnitIdLinksStatus200
-	| PostApiUnitsByTypeByUnitIdLinksStatus400
-	| PostApiUnitsByTypeByUnitIdLinksStatus403
-	| PostApiUnitsByTypeByUnitIdLinksStatus404
-	| PostApiUnitsByTypeByUnitIdLinksStatus422
-	| PostApiUnitsByTypeByUnitIdLinksStatus429
-	| PostApiUnitsByTypeByUnitIdLinksStatus500;
+export type PostApiUnitsByTypeByUnitIdExternalLinksResponse =
+	| PostApiUnitsByTypeByUnitIdExternalLinksStatus200
+	| PostApiUnitsByTypeByUnitIdExternalLinksStatus400
+	| PostApiUnitsByTypeByUnitIdExternalLinksStatus403
+	| PostApiUnitsByTypeByUnitIdExternalLinksStatus404
+	| PostApiUnitsByTypeByUnitIdExternalLinksStatus422
+	| PostApiUnitsByTypeByUnitIdExternalLinksStatus429
+	| PostApiUnitsByTypeByUnitIdExternalLinksStatus500;
 
-export const PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteType = {
+export const PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteType = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
 	book: "book",
@@ -78773,17 +78774,17 @@ export const PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteType = {
 	realm_rule: "realm_rule",
 } as const;
 
-export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteType =
-	(typeof PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteType)[keyof typeof PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteType];
+export type PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteType =
+	(typeof PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteType)[keyof typeof PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteType];
 
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVotePath = {
+export type PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVotePath = {
 	/**
 	 * @type string
 	 */
-	type: PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteType;
+	type: PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteType;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -78795,13 +78796,13 @@ export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVotePath = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	linkId: string;
+	externalLinkId: string;
 };
 
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200 = {
+export type PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus200 = {
 	value: ((-1 | 1) | null) | null;
 	score: string | number;
 	voteCount: string | number;
@@ -78810,20 +78811,21 @@ export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200 = {
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus400 = MalformedRequestBody;
+export type PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus400 =
+	MalformedRequestBody;
 
-export const PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403ErrorCodeEnum = {
+export const PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403ErrorCodeEnum = {
 	UnitAccessRestricted: "UnitAccessRestricted",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 } as const;
 
-export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403ErrorCodeEnum =
-	(typeof PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403ErrorCodeEnum];
+export type PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403 = {
+export type PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -78832,7 +78834,7 @@ export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403 = {
 		 * @default 'UnitAccessRestricted'
 		 * @type string
 		 */
-		code: PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403ErrorCodeEnum;
+		code: PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -78848,18 +78850,18 @@ export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403 = {
 	requestId: string;
 };
 
-export const PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404ErrorCodeEnum = {
+export const PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
-	UnitSourceLinkNotFound: "UnitSourceLinkNotFound",
+	UnitExternalLinkNotFound: "UnitExternalLinkNotFound",
 } as const;
 
-export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404ErrorCodeEnum =
-	(typeof PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404ErrorCodeEnum];
+export type PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404 = {
+export type PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -78868,7 +78870,7 @@ export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404ErrorCodeEnum;
+		code: PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -78887,20 +78889,20 @@ export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404 = {
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus422 = ValidationError;
+export type PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus422 = ValidationError;
 
-export const PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429ErrorCodeEnum = {
+export const PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429ErrorCodeEnum = {
 	ApiQuotaExceeded: "ApiQuotaExceeded",
 	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
 } as const;
 
-export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429ErrorCodeEnum =
-	(typeof PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429ErrorCodeEnum];
+export type PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429 = {
+export type PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429 = {
 	/**
 	 * @type object
 	 */
@@ -78908,7 +78910,7 @@ export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429ErrorCodeEnum;
+		code: PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -78924,32 +78926,32 @@ export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429 = {
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus500 = InternalError;
+export type PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus500 = InternalError;
 
-export const PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteRequestValueEnum = {
+export const PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteRequestValueEnum = {
 	"-1": -1,
 	"1": 1,
 } as const;
 
-export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteRequestValueEnum =
-	(typeof PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteRequestValueEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteRequestValueEnum];
+export type PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteRequestValueEnum =
+	(typeof PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteRequestValueEnum)[keyof typeof PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteRequestValueEnum];
 
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteBody = {
+export type PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteBody = {
 	/**
 	 * @type string
 	 */
-	value: PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteRequestValueEnum;
+	value: PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteRequestValueEnum;
 };
 
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions = {
-	body: PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteBody;
-	path: PutApiUnitsByTypeByUnitIdLinksByLinkIdVotePath;
+export type PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions = {
+	body: PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteBody;
+	path: PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVotePath;
 	query?: never;
 	headers?: never;
 };
@@ -78957,29 +78959,29 @@ export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions = {
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteResponses = {
-	"200": PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200;
-	"400": PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus400;
-	"403": PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403;
-	"404": PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404;
-	"422": PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus422;
-	"429": PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429;
-	"500": PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus500;
+export type PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteResponses = {
+	"200": PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus200;
+	"400": PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus400;
+	"403": PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403;
+	"404": PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404;
+	"422": PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus422;
+	"429": PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429;
+	"500": PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteResponse =
-	| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200
-	| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus400
-	| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403
-	| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404
-	| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus422
-	| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429
-	| PutApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus500;
+export type PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteResponse =
+	| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus200
+	| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus400
+	| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403
+	| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404
+	| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus422
+	| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429
+	| PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus500;
 
-export const DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteType = {
+export const DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteType = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
 	book: "book",
@@ -79002,17 +79004,17 @@ export const DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteType = {
 	realm_rule: "realm_rule",
 } as const;
 
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteType =
-	(typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteType)[keyof typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteType];
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteType =
+	(typeof DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteType)[keyof typeof DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteType];
 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVotePath = {
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVotePath = {
 	/**
 	 * @type string
 	 */
-	type: DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteType;
+	type: DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteType;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -79024,30 +79026,30 @@ export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVotePath = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	linkId: string;
+	externalLinkId: string;
 };
 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200 = {
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus200 = {
 	value: ((-1 | 1) | null) | null;
 	score: string | number;
 	voteCount: string | number;
 };
 
-export const DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403ErrorCodeEnum = {
+export const DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403ErrorCodeEnum = {
 	UnitAccessRestricted: "UnitAccessRestricted",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 } as const;
 
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403ErrorCodeEnum];
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403 = {
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -79056,7 +79058,7 @@ export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403 = {
 		 * @default 'UnitAccessRestricted'
 		 * @type string
 		 */
-		code: DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403ErrorCodeEnum;
+		code: DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -79072,18 +79074,18 @@ export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403 = {
 	requestId: string;
 };
 
-export const DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404ErrorCodeEnum = {
+export const DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
-	UnitSourceLinkNotFound: "UnitSourceLinkNotFound",
+	UnitExternalLinkNotFound: "UnitExternalLinkNotFound",
 } as const;
 
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404ErrorCodeEnum];
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404 = {
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -79092,7 +79094,7 @@ export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404ErrorCodeEnum;
+		code: DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -79111,20 +79113,21 @@ export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404 = {
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus422 = ValidationError;
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus422 =
+	ValidationError;
 
-export const DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429ErrorCodeEnum = {
+export const DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429ErrorCodeEnum = {
 	ApiQuotaExceeded: "ApiQuotaExceeded",
 	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
 } as const;
 
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429ErrorCodeEnum];
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429 = {
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429 = {
 	/**
 	 * @type object
 	 */
@@ -79132,7 +79135,7 @@ export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429ErrorCodeEnum;
+		code: DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -79148,14 +79151,14 @@ export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429 = {
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus500 = InternalError;
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions = {
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions = {
 	body?: never;
-	path: DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVotePath;
+	path: DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVotePath;
 	query?: never;
 	headers?: never;
 };
@@ -79163,27 +79166,27 @@ export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteOptions = {
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteResponses = {
-	"200": DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200;
-	"403": DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403;
-	"404": DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404;
-	"422": DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus422;
-	"429": DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429;
-	"500": DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus500;
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteResponses = {
+	"200": DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus200;
+	"403": DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403;
+	"404": DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404;
+	"422": DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus422;
+	"429": DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429;
+	"500": DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteResponse =
-	| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus200
-	| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus403
-	| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus404
-	| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus422
-	| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus429
-	| DeleteApiUnitsByTypeByUnitIdLinksByLinkIdVoteStatus500;
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteResponse =
+	| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus200
+	| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403
+	| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404
+	| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus422
+	| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429
+	| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus500;
 
-export const PatchApiUnitsByTypeByUnitIdLinksByLinkIdType = {
+export const PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdType = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
 	book: "book",
@@ -79206,17 +79209,17 @@ export const PatchApiUnitsByTypeByUnitIdLinksByLinkIdType = {
 	realm_rule: "realm_rule",
 } as const;
 
-export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdType =
-	(typeof PatchApiUnitsByTypeByUnitIdLinksByLinkIdType)[keyof typeof PatchApiUnitsByTypeByUnitIdLinksByLinkIdType];
+export type PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdType =
+	(typeof PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdType)[keyof typeof PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdType];
 
 /**
  * @type object
  */
-export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdPath = {
+export type PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdPath = {
 	/**
 	 * @type string
 	 */
-	type: PatchApiUnitsByTypeByUnitIdLinksByLinkIdType;
+	type: PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdType;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -79228,13 +79231,13 @@ export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdPath = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	linkId: string;
+	externalLinkId: string;
 };
 
 /**
  * @type object
  */
-export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus200 = {
+export type PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus200 = {
 	/**
 	 * @type object
 	 */
@@ -79301,20 +79304,21 @@ export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus200 = {
 /**
  * @type object
  */
-export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus400 = MalformedRequestBody;
+export type PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus400 =
+	MalformedRequestBody;
 
-export const PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus403ErrorCodeEnum = {
+export const PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
 } as const;
 
-export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus403ErrorCodeEnum =
-	(typeof PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus403ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus403ErrorCodeEnum];
+export type PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus403ErrorCodeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus403ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus403 = {
+export type PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -79323,7 +79327,7 @@ export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus403ErrorCodeEnum;
+		code: PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -79339,18 +79343,18 @@ export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus403 = {
 	requestId: string;
 };
 
-export const PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus404ErrorCodeEnum = {
+export const PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
-	UnitSourceLinkNotFound: "UnitSourceLinkNotFound",
+	UnitExternalLinkNotFound: "UnitExternalLinkNotFound",
 } as const;
 
-export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus404ErrorCodeEnum =
-	(typeof PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus404ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus404ErrorCodeEnum];
+export type PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus404ErrorCodeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus404ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus404 = {
+export type PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -79359,7 +79363,7 @@ export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus404ErrorCodeEnum;
+		code: PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -79378,7 +79382,7 @@ export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus404 = {
 /**
  * @type object
  */
-export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus409 = {
+export type PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus409 = {
 	/**
 	 * @type object
 	 */
@@ -79406,20 +79410,20 @@ export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus409 = {
 /**
  * @type object
  */
-export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus422 = ValidationError;
+export type PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus422 = ValidationError;
 
-export const PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus429ErrorCodeEnum = {
+export const PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus429ErrorCodeEnum = {
 	ApiQuotaExceeded: "ApiQuotaExceeded",
 	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
 } as const;
 
-export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus429ErrorCodeEnum =
-	(typeof PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus429ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus429ErrorCodeEnum];
+export type PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus429ErrorCodeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus429ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus429ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus429 = {
+export type PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus429 = {
 	/**
 	 * @type object
 	 */
@@ -79427,7 +79431,7 @@ export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus429 = {
 		/**
 		 * @type string
 		 */
-		code: PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus429ErrorCodeEnum;
+		code: PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -79443,9 +79447,9 @@ export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus429 = {
 /**
  * @type object
  */
-export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus500 = InternalError;
+export type PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus500 = InternalError;
 
-export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdBody =
+export type PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdBody =
 	| {
 			baseVersion: string | number;
 			/**
@@ -79476,9 +79480,9 @@ export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdBody =
 /**
  * @type object
  */
-export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdOptions = {
-	body: PatchApiUnitsByTypeByUnitIdLinksByLinkIdBody;
-	path: PatchApiUnitsByTypeByUnitIdLinksByLinkIdPath;
+export type PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdOptions = {
+	body: PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdBody;
+	path: PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdPath;
 	query?: never;
 	headers?: never;
 };
@@ -79486,29 +79490,29 @@ export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdOptions = {
 /**
  * @type object
  */
-export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdResponses = {
-	"200": PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus200;
-	"400": PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus400;
-	"403": PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus403;
-	"404": PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus404;
-	"409": PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus409;
-	"422": PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus422;
-	"429": PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus429;
-	"500": PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus500;
+export type PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdResponses = {
+	"200": PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus200;
+	"400": PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus400;
+	"403": PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus403;
+	"404": PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus404;
+	"409": PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus409;
+	"422": PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus422;
+	"429": PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus429;
+	"500": PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PatchApiUnitsByTypeByUnitIdLinksByLinkIdResponse =
-	| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus200
-	| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus400
-	| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus403
-	| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus404
-	| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus409
-	| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus422
-	| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus429
-	| PatchApiUnitsByTypeByUnitIdLinksByLinkIdStatus500;
+export type PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdResponse =
+	| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus200
+	| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus400
+	| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus403
+	| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus404
+	| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus409
+	| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus422
+	| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus429
+	| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus500;
 
 /**
  * @type object

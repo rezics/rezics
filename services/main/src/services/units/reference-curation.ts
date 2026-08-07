@@ -5,13 +5,13 @@ import { database, type DatabaseTransaction } from "../database";
 import {
 	unitAlias,
 	unitReferenceCurationHead,
-	unitSourceLink,
+	unitExternalLink,
 	type UnitReferenceCurationKind,
 } from "../database/schema";
 import {
 	AliasNotFound,
 	UnitReferenceCurationChanged,
-	UnitSourceLinkNotFound,
+	UnitExternalLinkNotFound,
 } from "../api/unit-resources/errors";
 
 export type UnitReferenceCurationState =
@@ -153,45 +153,51 @@ export async function updateUnitAliasCuration(input: {
 	});
 }
 
-export async function updateUnitSourceLinkCuration(input: {
+export async function updateUnitExternalLinkCuration(input: {
 	readonly unitId: string;
-	readonly linkId: string;
+	readonly externalLinkId: string;
 	readonly actorProfileId: string;
 	readonly baseVersion: number;
 	readonly state: UnitReferenceCurationState;
 }) {
 	return database.transaction(async (tx) => {
-		const head = await lockCurationHead(tx, input.unitId, "source_link", input.baseVersion);
+		const head = await lockCurationHead(tx, input.unitId, "external_link", input.baseVersion);
 		const [current] = await tx
 			.select()
-			.from(unitSourceLink)
+			.from(unitExternalLink)
 			.where(
-				and(eq(unitSourceLink.unitId, input.unitId), eq(unitSourceLink.id, input.linkId)),
+				and(
+					eq(unitExternalLink.unitId, input.unitId),
+					eq(unitExternalLink.id, input.externalLinkId),
+				),
 			)
 			.limit(1)
 			.for("update");
-		if (!current) throw new UnitSourceLinkNotFound();
+		if (!current) throw new UnitExternalLinkNotFound();
 		const previous = readUnitReferenceCurationState(current);
 		if (unitReferenceCurationStatesEqual(previous, input.state))
 			return { candidate: current, curationVersion: head.version };
 		const [candidate] = await tx
-			.update(unitSourceLink)
+			.update(unitExternalLink)
 			.set({ ...input.state, updatedAt: new Date() })
 			.where(
-				and(eq(unitSourceLink.unitId, input.unitId), eq(unitSourceLink.id, input.linkId)),
+				and(
+					eq(unitExternalLink.unitId, input.unitId),
+					eq(unitExternalLink.id, input.externalLinkId),
+				),
 			)
 			.returning();
-		if (!candidate) throw new UnitSourceLinkNotFound();
+		if (!candidate) throw new UnitExternalLinkNotFound();
 		const curationVersion = await advanceCurationHead(tx, {
 			unitId: input.unitId,
-			kind: "source_link",
+			kind: "external_link",
 			currentVersion: head.version,
 		});
 		await recordCurationAudit(tx, {
 			actorProfileId: input.actorProfileId,
 			unitId: input.unitId,
-			kind: "source_link",
-			candidateId: input.linkId,
+			kind: "external_link",
+			candidateId: input.externalLinkId,
 			previous,
 			resulting: input.state,
 			version: curationVersion,

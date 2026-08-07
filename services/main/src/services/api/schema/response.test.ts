@@ -348,12 +348,16 @@ describe("API response values", () => {
 		).toBe(false);
 	});
 
-	it("exposes accepted source links with their source Entity on Entity detail", () => {
-		expect(EntityDetailResponse.required).toContain("links");
-		expect(EntityDetailResponse.properties.links.items.properties.accepted.const).toBe(true);
-		expect(EntityDetailResponse.properties.links.items.required).toContain("sourceEntity");
+	it("exposes accepted external links with their source Entity on Entity detail", () => {
+		expect(EntityDetailResponse.required).toContain("externalLinks");
+		expect(EntityDetailResponse.properties.externalLinks.items.properties.accepted.const).toBe(
+			true,
+		);
+		expect(EntityDetailResponse.properties.externalLinks.items.required).toContain(
+			"sourceEntity",
+		);
 		expect(
-			EntityDetailResponse.properties.links.items.properties.sourceEntity.required,
+			EntityDetailResponse.properties.externalLinks.items.properties.sourceEntity.required,
 		).toContain("avatar");
 	});
 });

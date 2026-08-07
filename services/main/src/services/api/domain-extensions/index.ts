@@ -45,14 +45,14 @@ import {
 	seriesRelease,
 	unitOwnership,
 	unit,
-	unitSourceLink,
-	unitSourceLinkVoteStat,
+	unitExternalLink,
+	unitExternalLinkVoteStat,
 	unitLocalization,
 	zone,
 	unitDock,
 	imageAsset,
 } from "../../database/schema";
-import { SourceLinkVisibilityScoreThreshold } from "../../database/schema/contract-values";
+import { ExternalLinkVisibilityScoreThreshold } from "../../database/schema/contract-values";
 import { UnitNotFound } from "../../units/errors";
 import type { DatabaseTransaction } from "../../database";
 import { recordUnitRevision } from "../../units/history";
@@ -217,14 +217,17 @@ async function createBaseUnit(
 async function ensureRequirementSource(softwareId: string, sourceExternalLinkId?: string | null) {
 	if (!sourceExternalLinkId) return;
 	const [source] = await database
-		.select({ id: unitSourceLink.id })
-		.from(unitSourceLink)
-		.leftJoin(unitSourceLinkVoteStat, eq(unitSourceLinkVoteStat.linkId, unitSourceLink.id))
+		.select({ id: unitExternalLink.id })
+		.from(unitExternalLink)
+		.leftJoin(
+			unitExternalLinkVoteStat,
+			eq(unitExternalLinkVoteStat.externalLinkId, unitExternalLink.id),
+		)
 		.where(
 			and(
-				eq(unitSourceLink.id, sourceExternalLinkId),
-				eq(unitSourceLink.unitId, softwareId),
-				sql`${unitSourceLink.pinned} or coalesce(${unitSourceLinkVoteStat.score}, 0) >= ${SourceLinkVisibilityScoreThreshold}`,
+				eq(unitExternalLink.id, sourceExternalLinkId),
+				eq(unitExternalLink.unitId, softwareId),
+				sql`${unitExternalLink.pinned} or coalesce(${unitExternalLinkVoteStat.score}, 0) >= ${ExternalLinkVisibilityScoreThreshold}`,
 			),
 		)
 		.limit(1);
@@ -1635,7 +1638,7 @@ export default new Elysia()
 					await ensureUnitMutationAuthorized(authorization.unit, params.softwareId, [
 						"system-requirements",
 					]);
-					await ensureRequirementSource(params.softwareId, body.sourceLinkId);
+					await ensureRequirementSource(params.softwareId, body.sourceExternalLinkId);
 					const [softwareRecord] = await database
 						.select({ id: software.id })
 						.from(software)
@@ -1649,7 +1652,7 @@ export default new Elysia()
 								softwareId: params.softwareId,
 								platformEntityId: body.platformEntityId,
 								tier: body.tier,
-								sourceLinkId: body.sourceLinkId,
+								sourceExternalLinkId: body.sourceExternalLinkId,
 								hardware: body.hardware,
 							})
 							.returning();
@@ -1688,14 +1691,14 @@ export default new Elysia()
 					await ensureUnitMutationAuthorized(authorization.unit, params.softwareId, [
 						"system-requirements",
 					]);
-					await ensureRequirementSource(params.softwareId, body.sourceLinkId);
+					await ensureRequirementSource(params.softwareId, body.sourceExternalLinkId);
 					return database.transaction(async (tx) => {
 						const rows = await tx
 							.update(softwareRequirement)
 							.set({
 								platformEntityId: body.platformEntityId,
 								tier: body.tier,
-								sourceLinkId: body.sourceLinkId,
+								sourceExternalLinkId: body.sourceExternalLinkId,
 								hardware: body.hardware,
 							})
 							.where(

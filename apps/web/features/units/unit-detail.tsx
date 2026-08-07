@@ -401,11 +401,11 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 						</DetailSection>
 					)}
 
-					{item.links.length > 0 && (
-						<DetailSection title={t.units.detail.links}>
+					{item.externalLinks.length > 0 && (
+						<DetailSection title={t.units.detail.externalLinks}>
 							<Card>
 								<CardContent className="grid gap-2 p-5 text-sm">
-									{item.links.map((link) => (
+									{item.externalLinks.map((link) => (
 										<a
 											key={link.id}
 											className="break-all text-link hover:text-link-hover hover:underline"

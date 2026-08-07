@@ -193,7 +193,7 @@ export default {
 	UnitTagCurationChanged:
 		"Diese Tag-Kuratierung wurde an anderer Stelle geändert. Die neueste Reihenfolge wurde geladen; versuche es erneut.",
 	TagNotFound: "Dieser Tag wurde nicht gefunden.",
-	UnitSourceLinkNotFound: "Dieser Quellenlink des Werks wurde nicht gefunden.",
+	UnitExternalLinkNotFound: "Dieser externe Link des Werks wurde nicht gefunden.",
 	UnitReferenceCurationChanged:
 		"Die Referenzkuratierung wurde an anderer Stelle geändert. Die aktuelle Reihenfolge wurde geladen; bitte erneut versuchen.",
 	UnitVariantKindMismatch:

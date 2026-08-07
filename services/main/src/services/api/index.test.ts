@@ -146,9 +146,11 @@ describe("API root", () => {
 			document.paths["/api/v1/units/{type}/{unitId}/aliases"]?.post,
 			document.paths["/api/v1/units/{type}/{unitId}/aliases/{aliasId}/vote"]?.put,
 			document.paths["/api/v1/units/{type}/{unitId}/aliases/{aliasId}/vote"]?.delete,
-			document.paths["/api/v1/units/{type}/{unitId}/links"]?.post,
-			document.paths["/api/v1/units/{type}/{unitId}/links/{linkId}/vote"]?.put,
-			document.paths["/api/v1/units/{type}/{unitId}/links/{linkId}/vote"]?.delete,
+			document.paths["/api/v1/units/{type}/{unitId}/external-links"]?.post,
+			document.paths["/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}/vote"]
+				?.put,
+			document.paths["/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}/vote"]
+				?.delete,
 		];
 
 		for (const operation of operations) {
@@ -156,18 +158,20 @@ describe("API root", () => {
 		}
 	});
 
-	it("documents source-link candidates for every registered Unit kind", () => {
+	it("documents external-link candidates for every registered Unit kind", () => {
 		const document = toOpenAPISchema(api);
 		const operations = [
-			document.paths["/api/v1/units/{type}/{unitId}/links"]?.get,
-			document.paths["/api/v1/units/{type}/{unitId}/links"]?.post,
-			document.paths["/api/v1/units/{type}/{unitId}/links/{linkId}"]?.patch,
-			document.paths["/api/v1/units/{type}/{unitId}/links/{linkId}/vote"]?.put,
-			document.paths["/api/v1/units/{type}/{unitId}/links/{linkId}/vote"]?.delete,
+			document.paths["/api/v1/units/{type}/{unitId}/external-links"]?.get,
+			document.paths["/api/v1/units/{type}/{unitId}/external-links"]?.post,
+			document.paths["/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}"]?.patch,
+			document.paths["/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}/vote"]
+				?.put,
+			document.paths["/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}/vote"]
+				?.delete,
 		];
 
 		for (const operation of operations) {
-			if (!operation) throw new Error("Expected a Unit source-link operation");
+			if (!operation) throw new Error("Expected a Unit external-link operation");
 			const typeParameter = operation.parameters?.find(
 				(parameter) =>
 					!("$ref" in parameter) && parameter.in === "path" && parameter.name === "type",
@@ -180,12 +184,12 @@ describe("API root", () => {
 		}
 
 		const postResponses =
-			document.paths["/api/v1/units/{type}/{unitId}/links"]?.post?.responses;
+			document.paths["/api/v1/units/{type}/{unitId}/external-links"]?.post?.responses;
 		expect(JSON.stringify(postResponses?.[StatusCodes.NOT_FOUND])).toContain(
 			"EntityEntryNotFound",
 		);
 		expect(
-			document.paths["/api/v1/units/{type}/{unitId}/links/{linkId}"]?.delete,
+			document.paths["/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}"]?.delete,
 		).toBeUndefined();
 		expect(
 			document.paths["/api/v1/units/{type}/{unitId}/aliases/{aliasId}"]?.delete,

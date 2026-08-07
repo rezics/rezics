@@ -111,7 +111,7 @@ import {
 import { wilsonLowerBoundSql } from "../tags/ranking";
 import { getPendingUnitOwnershipClaim } from "../ownership-claims/service";
 import { unitScope } from "../authorization/unit/scope";
-import { getAcceptedUnitSourceLinks } from "./source-links";
+import { getAcceptedUnitExternalLinks } from "./external-links";
 
 export type VariantUnitKind = "book" | "software" | "media";
 export type WorkUnitKind = VariantUnitKind | "series";
@@ -488,7 +488,7 @@ export async function getUnit(
 		...association,
 		contextPost: contextPosts.get(association.id) ?? null,
 	}));
-	const links = await getAcceptedUnitSourceLinks(base.id, authorization.profileId);
+	const externalLinks = await getAcceptedUnitExternalLinks(base.id, authorization.profileId);
 	const tags = await database
 		.select({
 			tagId: unitTag.tagId,
@@ -545,7 +545,7 @@ export async function getUnit(
 		canEdit,
 		canCurateTags,
 		canCurateAliases,
-		canCurateSourceLinks,
+		canCurateExternalLinks,
 		canManageRealmPublications,
 		accessDecision,
 		associationDecision,
@@ -563,7 +563,7 @@ export async function getUnit(
 		authorization.unit.decide(
 			base.id,
 			"unit.reference-curation.manage",
-			unitScope("references", "source-links"),
+			unitScope("references", "external-links"),
 		),
 		authorization.unit.decide(base.id, "unit.realm-publication.manage"),
 		authorization.unit.decide(base.id, "unit.access.manage"),
@@ -620,7 +620,7 @@ export async function getUnit(
 		),
 		localizations: localizations.map(presentUnitLocalization),
 		subjectAssociations,
-		links,
+		externalLinks,
 		tags: tags.map((tag) => ({
 			...tag,
 			id: tag.tagId,
@@ -671,7 +671,7 @@ export async function getUnit(
 			canCurateTags: canCurateTags.allowed,
 			canCurateReferences: {
 				aliases: canCurateAliases.allowed,
-				sourceLinks: canCurateSourceLinks.allowed,
+				externalLinks: canCurateExternalLinks.allowed,
 			},
 			canManageRealmPublications: canManageRealmPublications.allowed,
 			hasDevelopmentPreviewAccess,

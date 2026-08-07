@@ -22,16 +22,19 @@ export function SoftwareRequirementsPage() {
 	if (detail.type !== "software")
 		throw new Error("Software requirements cannot be rendered for another Unit type");
 	return (
-		<SoftwareRequirementsContent softwareId={detail.unit.id} sourceLinks={detail.unit.links} />
+		<SoftwareRequirementsContent
+			softwareId={detail.unit.id}
+			externalLinks={detail.unit.externalLinks}
+		/>
 	);
 }
 
 function SoftwareRequirementsContent({
 	softwareId,
-	sourceLinks,
+	externalLinks,
 }: {
 	softwareId: string;
-	sourceLinks: readonly { readonly id: string; readonly url: string }[];
+	externalLinks: readonly { readonly id: string; readonly url: string }[];
 }) {
 	const query = useGetApiSoftwareBySoftwareIdSystemRequirements({
 		path: { softwareId },
@@ -49,8 +52,8 @@ function SoftwareRequirementsContent({
 			) : query.data?.items.length ? (
 				<div className="grid gap-3 md:grid-cols-2">
 					{query.data.items.map((requirement) => {
-						const sourceLink = sourceLinks.find(
-							({ id }) => id === requirement.sourceLinkId,
+						const externalLink = externalLinks.find(
+							({ id }) => id === requirement.sourceExternalLinkId,
 						);
 						return (
 							<Card key={requirement.id}>
@@ -79,23 +82,23 @@ function SoftwareRequirementsContent({
 												</DataListItemValue>
 											</DataListItem>
 										) : null}
-										{requirement.sourceLinkId ? (
+										{requirement.sourceExternalLinkId ? (
 											<DataListItem>
 												<DataListItemLabel>
 													{t.units.detail.requirementSource}
 												</DataListItemLabel>
 												<DataListItemValue className="break-all text-end">
-													{sourceLink ? (
+													{externalLink ? (
 														<a
 															className="text-link hover:text-link-hover hover:underline"
-															href={sourceLink.url}
+															href={externalLink.url}
 															rel="noreferrer"
 															target="_blank"
 														>
-															{sourceLink.url}
+															{externalLink.url}
 														</a>
 													) : (
-														requirement.sourceLinkId
+														requirement.sourceExternalLinkId
 													)}
 												</DataListItemValue>
 											</DataListItem>
