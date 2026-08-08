@@ -14,7 +14,7 @@ export default {
 	subtitle: "作品因讨论而被看见",
 	personalized: "为你推荐",
 	sortLabel: "动态排序",
-	sort: { best: "最佳", hot: "热门", new: "最新", top: "高评价", rising: "热度上升" },
+	sort: { best: "最佳", new: "最新" },
 	filtersLabel: "动态筛选",
 	filters: {
 		title: "筛选",

@@ -45,18 +45,9 @@ export const WorkPolicy = {
 		maxPublicProgressCountScan: 1_001,
 	},
 	recommendation: {
-		minimumRefreshIntervalMs: 86_400_000,
-		maxStructuralSignals: 32,
-		maxStructuralDegree: 256,
-		maxRawStructuralPeers: 8_192,
-		maxEdgesPerUnit: 64,
-		maxInterestsPerProfile: 50,
-		maxRecentInteractionsPerProfile: 50,
-		maxBehavioralPeersPerUnit: 64,
-		maxObjectiveCandidates: 256,
-		maxFollowCandidates: 60,
-		maxOnlineCandidates: 512,
-		maxRefreshBatchUnits: 500,
+		minimumRefreshIntervalMs: 3_600_000,
+		maxRelationCandidates: 256,
+		maxOnlineCandidates: 256,
 	},
 	import: {
 		defaultBatchSize: 500,
@@ -65,12 +56,6 @@ export const WorkPolicy = {
 } as const;
 
 function assertPolicyInvariants(): void {
-	if (
-		WorkPolicy.recommendation.maxRawStructuralPeers !==
-		WorkPolicy.recommendation.maxStructuralSignals *
-			WorkPolicy.recommendation.maxStructuralDegree
-	)
-		throw new Error("Recommendation structural budget is internally inconsistent");
 	if (
 		WorkPolicy.localization.maxBatchUnits * WorkPolicy.localization.maxLanguagesPerUnit !==
 		3_500

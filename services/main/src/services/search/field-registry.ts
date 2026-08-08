@@ -504,7 +504,12 @@ export const CurrentSearchSortRegistry = {
 		requiresQuery: false,
 		postgres: ["ranking.recommendationBest:desc", "ranking.updatedAt:desc", "id:desc"],
 		candidateSource: "sparse-btree",
-		orderingIndexes: ["search_best_score_order_idx", "unit_public_updated_at_desc_idx"],
+		orderingIndexes: [
+			"unit_best_score_order_idx",
+			"unit_best_score_kind_order_idx",
+			"unit_public_updated_at_desc_idx",
+			"unit_public_kind_updated_at_desc_idx",
+		],
 	},
 	relevance: {
 		categories: SearchCategoryValues,

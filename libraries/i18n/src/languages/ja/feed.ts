@@ -14,7 +14,7 @@ export default {
 	subtitle: "作品は議論を通じて可視化されます",
 	personalized: "あなたのために",
 	sortLabel: "フィードの並べ替え",
-	sort: { best: "ベスト", hot: "ホット", new: "新着", top: "トップ", rising: "注目" },
+	sort: { best: "ベスト", new: "新着" },
 	filtersLabel: "フィードフィルター",
 	filters: {
 		title: "フィルター",

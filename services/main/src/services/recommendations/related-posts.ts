@@ -1,4 +1,5 @@
-import { and, desc, eq, exists, inArray, ne, or, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, ne } from "drizzle-orm";
+import type { ContentLanguage } from "@rezics/i18n";
 
 import {
 	getFeedEligibilityCondition,
@@ -7,16 +8,10 @@ import {
 	type CandidateSources,
 	type FeedEligibilityScope,
 } from "../api/feed";
-import { database } from "../database";
-import {
-	post,
-	recommendationProfileInterest,
-	recommendationUnitEdge,
-	unit,
-	creditAttribution,
-} from "../database/schema";
 import type { RecommendationReason } from "../api/recommendations/schema";
-import type { ContentLanguage } from "@rezics/i18n";
+import { database } from "../database";
+import { creditAttribution, post, unit } from "../database/schema";
+import { searchGlobalIdentifiers } from "../search/service";
 import type { RecommendationSnapshotContext, RecommendationViewer } from "./context";
 import { RecommendationPolicy, RecommendationPolicyVersion } from "./policy";
 import { rankRecommendations } from "./ranking";
@@ -39,134 +34,78 @@ export async function recommendRelatedPosts(input: {
 		...RelatedPostFeedQuery,
 		localizationLanguages: input.localizationLanguages,
 	};
-	const snapshotId = input.snapshot?.id;
-	const seedIds = [input.seed.id, ...(input.seed.subjectId ? [input.seed.subjectId] : [])];
 	const eligible = getFeedEligibilityCondition(
 		input.viewer,
 		feedQuery,
 		input.asOf,
 		input.afterId,
 	);
-	const graphScore = sql<number>`sum(${recommendationUnitEdge.score})`;
-	const graphPromise = snapshotId
-		? database
-				.select({ id: recommendationUnitEdge.targetUnitId, score: graphScore })
-				.from(recommendationUnitEdge)
-				.innerJoin(post, eq(post.id, recommendationUnitEdge.targetUnitId))
-				.innerJoin(unit, eq(unit.id, post.id))
-				.where(
-					and(
-						eq(recommendationUnitEdge.snapshotId, snapshotId),
-						inArray(recommendationUnitEdge.sourceUnitId, seedIds),
-						ne(recommendationUnitEdge.targetUnitId, input.seed.id),
-						eligible,
-					),
-				)
-				.groupBy(recommendationUnitEdge.targetUnitId)
-				.orderBy(desc(graphScore), desc(recommendationUnitEdge.targetUnitId))
-				.limit(RecommendationPolicy.maxGraphCandidates)
-		: Promise.resolve([]);
-	const profileScore = sql<number>`sum(${recommendationProfileInterest.weight} * ${recommendationUnitEdge.score})`;
-	const profilePromise =
-		snapshotId && input.viewer.personalized && input.viewer.profileId
+	const [subjectRows, creditRows, best] = await Promise.all([
+		input.seed.subjectId
 			? database
-					.select({ id: recommendationUnitEdge.targetUnitId, score: profileScore })
-					.from(recommendationProfileInterest)
-					.innerJoin(
-						recommendationUnitEdge,
-						and(
-							eq(
-								recommendationUnitEdge.snapshotId,
-								recommendationProfileInterest.snapshotId,
-							),
-							eq(
-								recommendationUnitEdge.sourceUnitId,
-								recommendationProfileInterest.unitId,
-							),
-						),
-					)
-					.innerJoin(post, eq(post.id, recommendationUnitEdge.targetUnitId))
+					.select({ id: post.id })
+					.from(post)
 					.innerJoin(unit, eq(unit.id, post.id))
 					.where(
 						and(
-							eq(recommendationProfileInterest.snapshotId, snapshotId),
-							eq(recommendationProfileInterest.profileId, input.viewer.profileId),
-							ne(recommendationUnitEdge.targetUnitId, input.seed.id),
+							eq(post.subjectUnitId, input.seed.subjectId),
+							ne(post.id, input.seed.id),
 							eligible,
 						),
 					)
-					.groupBy(recommendationUnitEdge.targetUnitId)
-					.orderBy(desc(profileScore), desc(recommendationUnitEdge.targetUnitId))
-					.limit(RecommendationPolicy.maxGraphCandidates)
-			: Promise.resolve([]);
-	const contextualPromise = database
-		.select({ id: post.id })
-		.from(post)
-		.innerJoin(unit, eq(unit.id, post.id))
-		.where(
-			and(
-				ne(post.id, input.seed.id),
-				eligible,
-				or(
-					input.seed.subjectId ? eq(post.subjectUnitId, input.seed.subjectId) : undefined,
-					input.seed.creditedUnitIds.length
-						? exists(
-								database
-									.select({ id: creditAttribution.id })
-									.from(creditAttribution)
-									.where(
-										and(
-											eq(creditAttribution.sourceUnitId, post.id),
-											inArray(creditAttribution.creditedUnitId, [
-												...input.seed.creditedUnitIds,
-											]),
-										),
-									),
-							)
-						: undefined,
-				),
-			),
-		)
-		.orderBy(desc(unit.createdAt), desc(unit.id))
-		.limit(RecommendationPolicy.maxObjectiveCandidates);
-	const recentPromise = database
-		.select({ id: post.id })
-		.from(post)
-		.innerJoin(unit, eq(unit.id, post.id))
-		.where(and(ne(post.id, input.seed.id), eligible))
-		.orderBy(desc(unit.createdAt), desc(unit.id))
-		.limit(RecommendationPolicy.maxExplorationCandidates);
-	const [graphRows, profileRows, contextualRows, recentRows] = await Promise.all([
-		graphPromise,
-		profilePromise,
-		contextualPromise,
-		recentPromise,
+					.orderBy(desc(post.createdAt), desc(post.id))
+					.limit(RecommendationPolicy.maxRelationCandidates)
+			: [],
+		input.seed.creditedUnitIds.length
+			? database
+					.selectDistinct({ id: creditAttribution.sourceUnitId })
+					.from(creditAttribution)
+					.innerJoin(post, eq(post.id, creditAttribution.sourceUnitId))
+					.innerJoin(unit, eq(unit.id, post.id))
+					.where(
+						and(
+							inArray(creditAttribution.creditedUnitId, [
+								...input.seed.creditedUnitIds,
+							]),
+							ne(post.id, input.seed.id),
+							eligible,
+						),
+					)
+					.orderBy(creditAttribution.sourceUnitId)
+					.limit(RecommendationPolicy.maxRelationCandidates)
+			: [],
+		searchGlobalIdentifiers({
+			branches: [
+				{
+					category: "posts",
+					searchExpression: {
+						field: "kind",
+						operator: "any-of",
+						values: ["post", "reply"],
+					},
+					sourceUnitKinds: ["post"],
+				},
+			],
+			contentRatings: [...input.viewer.contentRatings],
+			...(input.viewer.profileId ? { profileId: input.viewer.profileId } : {}),
+			limit: RecommendationPolicy.maxCandidates,
+			sort: "best",
+		}),
 	]);
-	const relevance = new Map<string, number>();
-	const reason = new Map<string, RecommendationReason>();
-	for (const row of graphRows) {
-		relevance.set(row.id, (relevance.get(row.id) ?? 0) + Number(row.score) * 2);
-		reason.set(row.id, "related_subject");
-	}
-	for (const row of contextualRows) {
-		relevance.set(row.id, (relevance.get(row.id) ?? 0) + 0.5);
-		if (!reason.has(row.id)) reason.set(row.id, "related_subject");
-	}
-	for (const row of profileRows) {
-		relevance.set(row.id, (relevance.get(row.id) ?? 0) + Number(row.score));
-		if (!reason.has(row.id)) reason.set(row.id, "based_on_activity");
-	}
-	for (const row of recentRows) if (!reason.has(row.id)) reason.set(row.id, "new_and_relevant");
+	const contextualIds = new Set([
+		...subjectRows.map(({ id }) => id),
+		...creditRows.map(({ id }) => id),
+	]);
+	const reason = new Map<string, RecommendationReason>(
+		[...contextualIds].map((id) => [id, "related_subject"]),
+	);
 	const sources: CandidateSources = {
 		ids: [
 			...new Set([
-				...graphRows.map(({ id }) => id),
-				...contextualRows.map(({ id }) => id),
-				...profileRows.map(({ id }) => id),
-				...recentRows.map(({ id }) => id),
+				...contextualIds,
+				...best.hits.map(({ id }) => id).filter((id) => id !== input.seed.id),
 			]),
 		].slice(0, RecommendationPolicy.maxCandidates),
-		relevance,
 		reason,
 	};
 	const candidates = await getFeedRankingCandidates({
@@ -174,16 +113,13 @@ export async function recommendRelatedPosts(input: {
 		sources,
 		viewer: input.viewer,
 		query: feedQuery,
-		snapshotId: snapshotId ?? null,
+		snapshotId: input.snapshot?.id ?? null,
 		asOf: input.asOf,
 		...(input.afterId ? { anchorId: input.afterId } : {}),
 	});
-	const ranked = rankRecommendations(candidates, {
-		sort: "best",
-		personalized: true,
-		asOf: input.asOf,
-		pageSize: input.pageSize,
-	});
+	const ranked = rankRecommendations(candidates, { sort: "best" }).sort(
+		(left, right) => Number(contextualIds.has(right.id)) - Number(contextualIds.has(left.id)),
+	);
 	const start = input.afterId ? ranked.findIndex(({ id }) => id === input.afterId) + 1 : 0;
 	if (input.afterId && start === 0) return null;
 	const page = ranked.slice(start, start + input.pageSize);

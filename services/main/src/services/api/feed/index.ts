@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { StatusCodes } from "http-status-codes";
-import { and, asc, desc, eq, exists, inArray, isNull, lte, or, sql, type SQL } from "drizzle-orm";
+import { and, asc, eq, exists, inArray, isNull, lte, or, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
 import type { PresentedAvatar } from "@rezics/avatar";
@@ -43,9 +43,7 @@ import {
 	realmStat,
 	realmTagContext,
 	realmUnit,
-	recommendationProfileInterest,
-	recommendationUnitEdge,
-	recommendationUnitStat,
+	unitBestScore,
 	unit,
 	unitLocalization,
 	unitReaction,
@@ -60,24 +58,15 @@ import {
 	resolveRecommendationViewer,
 	type RecommendationViewer,
 } from "../../recommendations/context";
-import { RecommendationPolicy } from "../../recommendations/policy";
-import {
-	EmptyRecommendationStats,
-	rankRecommendations,
-	type RecommendationCandidate,
-	type RecommendationStats,
-} from "../../recommendations/ranking";
-import {
-	isMaterializedRecommendationSort,
-	recommendationObjectiveOrder,
-} from "../../recommendations/sql-ranking";
+import type { RecommendationCandidate } from "../../recommendations/ranking";
 import { createRecommendationTracking } from "../../recommendations/tracking";
 import { presentAvatar } from "../../units/avatar";
 import { presentImageAsset } from "../../units/service";
 import { compileUnitPredicateSql } from "../../filter/sql";
 import { InvalidSearch, SearchUnavailable } from "../../search/errors";
 import { SearchCategories } from "../../search/schema";
-import { searchDomainIdentifiers } from "../../search/service";
+import type { SearchExpression, SearchKeysetPosition } from "../../search/query";
+import { searchGlobalIdentifiers, type GlobalSearchBranch } from "../../search/service";
 import {
 	getPublicCanonicalUnitSlugAddresses,
 	type PublicCanonicalUnitSlugAddress,
@@ -110,7 +99,6 @@ import {
 	type FeedSort,
 } from "./schema";
 
-const preferredLocalization = alias(unitLocalization, "preferred_localization");
 const feedContextRealm = alias(unit, "feed_context_realm");
 const feedReviewScoreTargetUnit = alias(unit, "feed_review_score_target_unit");
 const feedReviewScoreRealm = alias(unit, "feed_review_score_realm");
@@ -310,6 +298,8 @@ export function resolveFeedSearchCategories(
 interface FeedSearchSelection {
 	readonly ids: readonly string[];
 	readonly kind: "exact" | "lower-bound";
+	readonly coverage: FeedCandidateCoverage;
+	readonly nextPosition?: SearchKeysetPosition;
 }
 
 type FeedTotalKind = FeedSearchSelection["kind"];
@@ -319,27 +309,66 @@ async function resolveFeedSearchSelection(input: {
 	readonly content?: readonly FeedContentKind[];
 	readonly filter: UnitPredicate | undefined;
 	readonly profileId: string | undefined;
+	readonly contentRatings: RecommendationViewer["contentRatings"];
 	readonly query: string;
+	readonly sort: FeedSort;
+	readonly limit: number;
+	readonly eligibilityCondition: SQL;
+	readonly position?: SearchKeysetPosition;
 }): Promise<FeedSearchSelection> {
-	const categories = resolveFeedSearchCategories(input.content);
-	const pageSize = Math.max(
-		1,
-		Math.floor(RecommendationPolicy.maxCandidates / categories.length),
+	const definitions = resolveFeedContentSelection(input.content).selected;
+	const grouped = new Map<
+		SearchCategory,
+		{ values: Set<string>; sourceUnitKinds: Set<(typeof unit.$inferSelect)["kind"]> }
+	>();
+	for (const contentKind of definitions) {
+		const category = FeedSearchCategoryByContentKind[contentKind];
+		const definition = FeedContentDefinitions[contentKind];
+		const group = grouped.get(category) ?? {
+			values: new Set<string>(),
+			sourceUnitKinds: new Set<(typeof unit.$inferSelect)["kind"]>(),
+		};
+		if (definition.itemType === "unit") {
+			group.values.add(definition.unitKind);
+			group.sourceUnitKinds.add(definition.unitKind);
+		} else {
+			group.values.add(definition.postKind);
+			group.sourceUnitKinds.add("post");
+		}
+		grouped.set(category, group);
+	}
+	const branches: GlobalSearchBranch[] = [...grouped].map(
+		([category, { values, sourceUnitKinds }]) => {
+			const selectedKinds = [...values];
+			const searchExpression: SearchExpression | undefined =
+				category === "units" || category === "posts"
+					? selectedKinds.length === 1
+						? { field: "kind", operator: "equals", value: selectedKinds[0]! }
+						: { field: "kind", operator: "any-of", values: selectedKinds }
+					: undefined;
+			return {
+				category,
+				...(searchExpression ? { searchExpression } : {}),
+				sourceUnitKinds: [...sourceUnitKinds],
+			};
+		},
 	);
-	const groups = await Promise.all(
-		categories.map((category) =>
-			searchDomainIdentifiers(category, {
-				...(input.filter ? { domainFilter: input.filter } : {}),
-				...(input.profileId ? { profileId: input.profileId } : {}),
-				query: input.query,
-				limit: pageSize,
-				sort: "best",
-			}),
-		),
-	);
+	const page = await searchGlobalIdentifiers({
+		branches,
+		...(input.filter ? { domainFilter: input.filter } : {}),
+		...(input.profileId ? { profileId: input.profileId } : {}),
+		contentRatings: [...input.contentRatings],
+		query: input.query,
+		limit: input.limit,
+		sort: input.sort === "new" ? "createdAt:desc" : "best",
+		additionalConditions: [input.eligibilityCondition],
+		...(input.position ? { position: input.position } : {}),
+	});
 	return {
-		ids: [...new Set(groups.flatMap((group) => group.hits.map((hit) => hit.id)))],
-		kind: groups.every((group) => group.total.kind === "exact") ? "exact" : "lower-bound",
+		ids: page.hits.map(({ id }) => id),
+		kind: page.total.kind,
+		coverage: page.exhausted ? "exhaustive" : "bounded",
+		...(page.nextPosition ? { nextPosition: page.nextPosition } : {}),
 	};
 }
 
@@ -350,7 +379,6 @@ interface FeedEligibilityBaseScope {
 	readonly realmIds?: readonly string[];
 	readonly subjectId?: string;
 	readonly filter?: UnitPredicate;
-	readonly searchCandidateIds?: readonly string[];
 	readonly reviewScore?: never;
 }
 
@@ -377,9 +405,31 @@ export function resolveFeedLocalizationLanguages(
 	return requestedLanguages?.length ? requestedLanguages : viewer.preferredLanguages;
 }
 
+const FeedSearchPosition = t.Union([
+	t.Object(
+		{
+			primary: t.String(),
+			secondary: t.String(),
+			unitId: t.String({ format: "uuid" }),
+			source: t.Literal("ordered"),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			primary: t.String(),
+			secondary: t.String(),
+			unitId: t.String({ format: "uuid" }),
+			source: t.Union([t.Literal("best-positive"), t.Literal("best-zero")]),
+			snapshotId: t.Nullable(t.String({ format: "uuid" })),
+		},
+		{ additionalProperties: false },
+	),
+]);
+
 const FeedCursor = t.Object(
 	{
-		v: t.Literal(9),
+		v: t.Literal(10),
 		sort: FeedSortSchema,
 		filterHash: t.Nullable(t.String({ pattern: "^[0-9a-f]{64}$" })),
 		filterLanguages: t.Array(t.UnionEnum(ContentLanguageValues), { uniqueItems: true }),
@@ -391,11 +441,35 @@ const FeedCursor = t.Object(
 		policyVersion: RecommendationPolicyVersionSchema,
 		limit: t.Integer({ minimum: 1, maximum: 50 }),
 		asOf: t.String({ format: "date-time" }),
-		lastId: t.String({ format: "uuid" }),
+		searchPosition: FeedSearchPosition,
+		positionOffset: t.Integer({ minimum: 0 }),
 	},
 	{ additionalProperties: false },
 );
 type FeedCursor = typeof FeedCursor.static;
+
+function toFeedSearchPosition(position: SearchKeysetPosition): FeedCursor["searchPosition"] {
+	if (position.primary === null || position.secondary === null)
+		throw new Error("Feed Search returned an incomplete keyset position");
+	if (position.source === "count-positive" || position.source === "count-zero")
+		throw new Error("Feed Search returned an incompatible sparse-count position");
+	if (!position.source || position.source === "ordered")
+		return {
+			primary: position.primary,
+			secondary: position.secondary,
+			unitId: position.unitId,
+			source: "ordered",
+		};
+	if (position.source === "best-positive" || position.source === "best-zero")
+		return {
+			primary: position.primary,
+			secondary: position.secondary,
+			unitId: position.unitId,
+			source: position.source,
+			snapshotId: position.snapshotId,
+		};
+	throw new Error("Feed Search returned an unsupported keyset position");
+}
 
 function decodeCursor(value: string | undefined) {
 	if (!value) return undefined;
@@ -445,7 +519,17 @@ export function getFeedEligibilityCondition(
 	const { unitKinds, postKinds } = resolveFeedContentSelection(scope.content);
 	const contentCondition = or(
 		unitKinds.length ? inArray(unit.kind, unitKinds) : undefined,
-		postKinds.length ? and(eq(unit.kind, "post"), inArray(post.kind, postKinds)) : undefined,
+		postKinds.length
+			? and(
+					eq(unit.kind, "post"),
+					exists(
+						database
+							.select({ id: post.id })
+							.from(post)
+							.where(and(eq(post.id, unit.id), inArray(post.kind, postKinds))),
+					),
+				)
+			: undefined,
 	);
 	return and(
 		contentCondition,
@@ -454,15 +538,21 @@ export function getFeedEligibilityCondition(
 		eq(unit.moderationStatus, "approved"),
 		isNull(unit.deletedAt),
 		lte(unit.createdAt, asOf),
-		sql`(${unit.kind} <> 'post' or ${post.kind} <> 'reply'::post_kind or exists (
-			select 1 from post_reply readable_reply
-			join unit readable_root on readable_root.id = readable_reply.root_post_id
-			where readable_reply.post_id = ${post.id}
-				and readable_root.status = 'published'
-				and readable_root.visibility = 'public'
-				and readable_root.moderation_status = 'approved'
-				and readable_root.deleted_at is null
-		))`,
+		sql`(${unit.kind} <> 'post'
+			or not exists (
+				select 1 from post candidate_post
+				where candidate_post.id = ${unit.id}
+					and candidate_post.kind = 'reply'::post_kind
+			)
+			or exists (
+				select 1 from post_reply readable_reply
+				join unit readable_root on readable_root.id = readable_reply.root_post_id
+				where readable_reply.post_id = ${unit.id}
+					and readable_root.status = 'published'
+					and readable_root.visibility = 'public'
+					and readable_root.moderation_status = 'approved'
+					and readable_root.deleted_at is null
+			))`,
 		scope.languages?.length
 			? sql`exists (
 				select 1 from unit_localization scoped_localization
@@ -485,7 +575,14 @@ export function getFeedEligibilityCondition(
 					and scoped_content.publication_state = 'active'
 			)`
 			: undefined,
-		scope.subjectId ? eq(post.subjectUnitId, scope.subjectId) : undefined,
+		scope.subjectId
+			? exists(
+					database
+						.select({ id: post.id })
+						.from(post)
+						.where(and(eq(post.id, unit.id), eq(post.subjectUnitId, scope.subjectId))),
+				)
+			: undefined,
 		scope.reviewScore
 			? exists(
 					database
@@ -503,7 +600,7 @@ export function getFeedEligibilityCondition(
 						.innerJoin(feedReviewScoreRealm, eq(feedReviewScoreRealm.id, score.realmId))
 						.where(
 							and(
-								eq(postScore.postId, post.id),
+								eq(postScore.postId, unit.id),
 								eq(score.realmId, scope.reviewScore.realmId),
 								inArray(score.value, scope.reviewScore.values),
 								getProfileActivityReadCondition({
@@ -530,11 +627,6 @@ export function getFeedEligibilityCondition(
 					...(viewer.profileId ? { viewerProfileId: viewer.profileId } : {}),
 				})
 			: undefined,
-		scope.searchCandidateIds
-			? scope.searchCandidateIds.length
-				? inArray(unit.id, [...scope.searchCandidateIds])
-				: sql`false`
-			: undefined,
 		viewer.contentRatings.length
 			? inArray(unit.contentRating, viewer.contentRatings)
 			: undefined,
@@ -558,12 +650,7 @@ export function getFeedEligibilityCondition(
 
 export interface CandidateSources {
 	ids: string[];
-	relevance: Map<string, number>;
 	reason: Map<string, RecommendationReason>;
-}
-
-interface FeedCandidateSourceWindow extends CandidateSources {
-	readonly coverage: FeedCandidateCoverage;
 }
 
 /** @internal Resolves rows returned by a `limit + 1` exhaustion probe. */
@@ -584,214 +671,19 @@ export function createFeedTotal(input: {
 	readonly candidates: readonly unknown[];
 	readonly coverage: FeedCandidateCoverage;
 	readonly searchKind: FeedTotalKind;
+	readonly positionOffset?: number;
 }): SearchCountResult {
+	const positionOffset = input.positionOffset ?? 0;
+	if (!Number.isSafeInteger(positionOffset) || positionOffset < 0)
+		throw new RangeError("Feed position offset must be a non-negative safe integer");
+	const value = positionOffset + input.candidates.length;
+	if (!Number.isSafeInteger(value)) throw new RangeError("Feed total exceeds safe integer range");
 	return {
 		kind:
 			input.coverage === "exhaustive" && input.searchKind === "exact"
 				? "exact"
 				: "lower-bound",
-		value: input.candidates.length,
-	};
-}
-
-type CandidateReason =
-	CandidateSources["reason"] extends Map<string, infer Reason> ? Reason : never;
-
-async function getCandidateSources(input: {
-	viewer: RecommendationViewer;
-	query: FeedEligibilityScope;
-	sort: FeedSort;
-	snapshotId: string | null;
-	asOf: Date;
-	anchorId?: string;
-}): Promise<FeedCandidateSourceWindow> {
-	const condition = getFeedEligibilityCondition(
-		input.viewer,
-		input.query,
-		input.asOf,
-		input.anchorId,
-	);
-	const objectiveLimit = input.viewer.personalized
-		? RecommendationPolicy.maxObjectiveCandidates
-		: RecommendationPolicy.maxCandidates - RecommendationPolicy.maxExplorationCandidates;
-	const materializedObjectiveOrder = isMaterializedRecommendationSort(input.sort)
-		? recommendationObjectiveOrder(input.sort)
-		: null;
-	const objectivePromise =
-		input.snapshotId && materializedObjectiveOrder
-			? database
-					.select({
-						id: recommendationUnitStat.unitId,
-						engagement6h: recommendationUnitStat.engagement6h,
-						engagement24h: recommendationUnitStat.engagement24h,
-					})
-					.from(recommendationUnitStat)
-					.innerJoin(unit, eq(unit.id, recommendationUnitStat.unitId))
-					.leftJoin(post, eq(post.id, unit.id))
-					.where(
-						and(
-							eq(recommendationUnitStat.snapshotId, input.snapshotId),
-							isNull(recommendationUnitStat.contextRealmId),
-							condition,
-						),
-					)
-					.orderBy(...materializedObjectiveOrder)
-					.limit(objectiveLimit + 1)
-			: database
-					.select({
-						id: unit.id,
-						engagement6h: sql<number | null>`null`,
-						engagement24h: sql<number | null>`null`,
-					})
-					.from(unit)
-					.leftJoin(post, eq(post.id, unit.id))
-					.where(condition)
-					.orderBy(desc(unit.createdAt), desc(unit.id))
-					.limit(objectiveLimit + 1);
-	const recentPromise = database
-		.select({ id: unit.id })
-		.from(unit)
-		.leftJoin(post, eq(post.id, unit.id))
-		.where(condition)
-		.orderBy(desc(unit.createdAt), desc(unit.id))
-		.limit(RecommendationPolicy.maxExplorationCandidates);
-	const graphScore = sql<number>`sum(${recommendationProfileInterest.weight} * ${recommendationUnitEdge.score})`;
-	const graphPromise =
-		input.viewer.personalized && input.viewer.profileId && input.snapshotId
-			? database
-					.select({ id: recommendationUnitEdge.targetUnitId, score: graphScore })
-					.from(recommendationProfileInterest)
-					.innerJoin(
-						recommendationUnitEdge,
-						and(
-							eq(
-								recommendationUnitEdge.snapshotId,
-								recommendationProfileInterest.snapshotId,
-							),
-							eq(
-								recommendationUnitEdge.sourceUnitId,
-								recommendationProfileInterest.unitId,
-							),
-						),
-					)
-					.innerJoin(unit, eq(unit.id, recommendationUnitEdge.targetUnitId))
-					.leftJoin(post, eq(post.id, unit.id))
-					.where(
-						and(
-							eq(recommendationProfileInterest.snapshotId, input.snapshotId),
-							eq(recommendationProfileInterest.profileId, input.viewer.profileId),
-							condition,
-						),
-					)
-					.groupBy(recommendationUnitEdge.targetUnitId)
-					.orderBy(desc(graphScore), desc(recommendationUnitEdge.targetUnitId))
-					.limit(RecommendationPolicy.maxGraphCandidates)
-			: Promise.resolve([]);
-	const followedPromise =
-		input.viewer.personalized && input.viewer.profileId
-			? database
-					.selectDistinct({ id: unit.id, createdAt: unit.createdAt })
-					.from(unit)
-					.leftJoin(post, eq(post.id, unit.id))
-					.innerJoin(
-						unitFollow,
-						and(
-							eq(unitFollow.followerProfileId, input.viewer.profileId),
-							or(
-								eq(unitFollow.unitId, unit.id),
-								sql`exists (
-									select 1 from credit_attribution followed_attribution
-									where followed_attribution.source_unit_id = ${unit.id}
-										and followed_attribution.credited_unit_id = ${unitFollow.unitId}
-								)`,
-							),
-						),
-					)
-					.where(condition)
-					.orderBy(desc(unit.createdAt), desc(unit.id))
-					.limit(RecommendationPolicy.maxFollowCandidates)
-			: Promise.resolve([]);
-	const realmPromise =
-		input.viewer.personalized && input.viewer.profileId
-			? database
-					.selectDistinct({ id: unit.id, createdAt: unit.createdAt })
-					.from(unit)
-					.leftJoin(post, eq(post.id, unit.id))
-					.innerJoin(
-						realmUnit,
-						and(
-							eq(realmUnit.unitId, unit.id),
-							eq(realmUnit.status, "visible"),
-							eq(realmUnit.publicationState, "active"),
-						),
-					)
-					.innerJoin(
-						unitFollow,
-						and(
-							eq(unitFollow.followerProfileId, input.viewer.profileId),
-							eq(unitFollow.unitId, realmUnit.realmId),
-						),
-					)
-					.where(condition)
-					.orderBy(desc(unit.createdAt), desc(unit.id))
-					.limit(RecommendationPolicy.maxFollowCandidates)
-			: Promise.resolve([]);
-
-	const [objectiveProbeRows, recentRows, graphRows, followedRows, realmRows] = await Promise.all([
-		objectivePromise,
-		recentPromise,
-		graphPromise,
-		followedPromise,
-		realmPromise,
-	]);
-	const objectiveWindow = resolveFeedCandidateWindow(objectiveProbeRows, objectiveLimit);
-	const objectiveRows = objectiveWindow.rows;
-	const relevance = new Map<string, number>();
-	const reason = new Map<string, CandidateReason>();
-	const addRanked = (
-		rows: readonly { id: string }[],
-		weight: number,
-		nextReason: "followed_unit" | "followed_realm" | "based_on_activity",
-	) => {
-		rows.forEach(({ id }, index) => {
-			relevance.set(id, (relevance.get(id) ?? 0) + weight / (60 + index + 1));
-			if (!reason.has(id)) reason.set(id, nextReason);
-		});
-	};
-	addRanked(followedRows, 4, "followed_unit");
-	addRanked(realmRows, 4, "followed_realm");
-	addRanked(graphRows, 4, "based_on_activity");
-	for (const row of objectiveRows) {
-		if (reason.has(row.id)) continue;
-		if (input.sort === "new") {
-			reason.set(row.id, "new_and_relevant");
-			continue;
-		}
-		const popular =
-			input.sort === "rising"
-				? toNumber(row.engagement6h) > 0
-				: toNumber(row.engagement24h) > 0;
-		if (popular) reason.set(row.id, "popular_now");
-	}
-	for (const { id } of recentRows) if (!reason.has(id)) reason.set(id, "new_and_relevant");
-	const personalIds = [...relevance.entries()]
-		.sort((left, right) => right[1] - left[1] || right[0].localeCompare(left[0]))
-		.slice(
-			0,
-			RecommendationPolicy.maxGraphCandidates + RecommendationPolicy.maxFollowCandidates,
-		)
-		.map(([id]) => id);
-	return {
-		ids: [
-			...new Set([
-				...personalIds,
-				...objectiveRows.map(({ id }) => id),
-				...recentRows.map(({ id }) => id),
-			]),
-		].slice(0, RecommendationPolicy.maxCandidates),
-		coverage: objectiveWindow.coverage,
-		relevance,
-		reason,
+		value,
 	};
 }
 
@@ -803,14 +695,6 @@ export interface FeedRankingCandidate extends RecommendationCandidate {
 	subjectId: string | null;
 	rootPostId: string | null;
 	parentPostId: string | null;
-}
-
-function toNumber(value: number | null | undefined) {
-	return Number(value ?? 0);
-}
-
-function toCount(value: bigint | null | undefined, name: string) {
-	return toSafeInteger(value ?? 0n, name);
 }
 
 export function getFeedCandidateRealmIdExpression(
@@ -857,19 +741,8 @@ export async function getFeedRankingCandidates(input: {
 	if (!input.ids.length) return [];
 	const selectedRealmId = getFeedCandidateRealmIdExpression(input.viewer, input.query.realmIds);
 	const snapshotJoin = input.snapshotId
-		? and(
-				eq(recommendationUnitStat.snapshotId, input.snapshotId),
-				eq(recommendationUnitStat.unitId, unit.id),
-				isNull(recommendationUnitStat.contextRealmId),
-			)
+		? and(eq(unitBestScore.snapshotId, input.snapshotId), eq(unitBestScore.unitId, unit.id))
 		: sql`false`;
-	const preferredLanguage = input.viewer.preferredLanguages.length
-		? sql<boolean>`exists (
-			select 1 from ${unitLocalization} ${preferredLocalization}
-			where ${preferredLocalization.unitId} = ${unit.id}
-				and ${inArray(preferredLocalization.language, input.viewer.preferredLanguages)}
-		)`
-		: sql<boolean>`false`;
 	const rows = await database
 		.select({
 			id: unit.id,
@@ -886,27 +759,13 @@ export async function getFeedRankingCandidates(input: {
 			rootPostId: postReply.rootPostId,
 			parentPostId: postReply.parentPostId,
 			createdAt: unit.createdAt,
-			preferredLanguage,
-			impressions: recommendationUnitStat.impressions,
-			opens: recommendationUnitStat.opens,
-			dwell30s: recommendationUnitStat.dwell30s,
-			upvotes: recommendationUnitStat.upvotes,
-			downvotes: recommendationUnitStat.downvotes,
-			replies: recommendationUnitStat.replies,
-			favorites: recommendationUnitStat.favorites,
-			shares: recommendationUnitStat.shares,
-			highScores: recommendationUnitStat.highScores,
-			activeProgress: recommendationUnitStat.activeProgress,
-			completions: recommendationUnitStat.completions,
-			negativeProgress: recommendationUnitStat.negativeProgress,
-			engagement6h: recommendationUnitStat.engagement6h,
-			engagement24h: recommendationUnitStat.engagement24h,
-			engagement7d: recommendationUnitStat.engagement7d,
+			updatedAt: unit.updatedAt,
+			bestScore: sql<number>`coalesce(${unitBestScore.score}, 0)`,
 		})
 		.from(unit)
 		.leftJoin(post, eq(post.id, unit.id))
 		.leftJoin(postReply, eq(postReply.postId, unit.id))
-		.leftJoin(recommendationUnitStat, snapshotJoin)
+		.leftJoin(unitBestScore, snapshotJoin)
 		.where(
 			and(
 				inArray(unit.id, input.ids),
@@ -921,24 +780,8 @@ export async function getFeedRankingCandidates(input: {
 					? { unitKind: row.unitKind, postKind: null }
 					: null;
 		if (!kind) return [];
-		const stats: RecommendationStats = {
-			...EmptyRecommendationStats,
-			impressions: toCount(row.impressions, "recommendation impressions"),
-			opens: toCount(row.opens, "recommendation opens"),
-			dwell30s: toCount(row.dwell30s, "recommendation dwell count"),
-			upvotes: toCount(row.upvotes, "recommendation upvotes"),
-			downvotes: toCount(row.downvotes, "recommendation downvotes"),
-			replies: toCount(row.replies, "recommendation replies"),
-			favorites: toCount(row.favorites, "recommendation favorites"),
-			shares: toCount(row.shares, "recommendation shares"),
-			highScores: toCount(row.highScores, "recommendation high scores"),
-			activeProgress: toCount(row.activeProgress, "recommendation active progress"),
-			completions: toCount(row.completions, "recommendation completions"),
-			negativeProgress: toCount(row.negativeProgress, "recommendation negative progress"),
-			engagement6h: toNumber(row.engagement6h),
-			engagement24h: toNumber(row.engagement24h),
-			engagement7d: toNumber(row.engagement7d),
-		};
+		if (row.bestScore > 0 && !input.sources.reason.has(row.id))
+			input.sources.reason.set(row.id, "popular_now");
 		return [
 			{
 				id: row.id,
@@ -949,10 +792,8 @@ export async function getFeedRankingCandidates(input: {
 				rootPostId: row.rootPostId,
 				parentPostId: row.parentPostId,
 				createdAt: row.createdAt,
-				personalizedRelevance:
-					(input.sources.relevance.get(row.id) ?? 0) +
-					(input.viewer.personalized && row.preferredLanguage ? 0.05 : 0),
-				stats,
+				updatedAt: row.updatedAt,
+				bestScore: row.bestScore,
 			},
 		];
 	});
@@ -1661,24 +1502,27 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 			...(localizationLanguages.length ? { localizationLanguages } : {}),
 			...(simpleSelection?.realmIds.length ? { realmIds: simpleSelection.realmIds } : {}),
 		};
-		let searchSelection: FeedSearchSelection | undefined;
-		if (body.filter)
-			try {
-				searchSelection = await resolveFeedSearchSelection({
-					content: baseScope.content,
-					filter: baseScope.filter,
-					profileId: viewer.profileId,
-					query: "search" in body.filter ? body.filter.search.query : "",
-				});
-			} catch (cause) {
-				if (cause instanceof InvalidSearch || cause instanceof SearchUnavailable)
-					throw cause;
-				throw new SearchUnavailable(cause);
-			}
-		const scope: FeedEligibilityScope = {
-			...baseScope,
-			...(searchSelection ? { searchCandidateIds: searchSelection.ids } : {}),
-		};
+		const sort = body.sort ?? "best";
+		const limit = body.limit ?? 20;
+		const scope: FeedEligibilityScope = baseScope;
+		const asOf = cursor ? new Date(cursor.asOf) : new Date();
+		let searchSelection: FeedSearchSelection;
+		try {
+			searchSelection = await resolveFeedSearchSelection({
+				content: baseScope.content,
+				filter: baseScope.filter,
+				profileId: viewer.profileId,
+				contentRatings: viewer.contentRatings,
+				query: body.filter && "search" in body.filter ? body.filter.search.query : "",
+				sort,
+				limit,
+				eligibilityCondition: getFeedEligibilityCondition(viewer, scope, asOf),
+				...(cursor ? { position: cursor.searchPosition } : {}),
+			});
+		} catch (cause) {
+			if (cause instanceof InvalidSearch || cause instanceof SearchUnavailable) throw cause;
+			throw new SearchUnavailable(cause);
+		}
 		const snapshot = cursor?.snapshotId
 			? await resolveRecommendationSnapshot(cursor.snapshotId)
 			: cursor
@@ -1688,16 +1532,14 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 		const snapshotContext = snapshot ?? fallbackRecommendationSnapshot;
 		if (cursor && cursor.policyVersion !== snapshotContext.policyVersion)
 			throw new InvalidFeedCursor();
-		const sort = body.sort ?? "best";
-		const asOf = cursor ? new Date(cursor.asOf) : new Date();
-		const sources = await getCandidateSources({
-			viewer,
-			query: scope,
-			sort,
-			snapshotId: snapshotContext.id,
-			asOf,
-			...(cursor ? { anchorId: cursor.lastId } : {}),
-		});
+		const sources: CandidateSources = {
+			ids: [...searchSelection.ids],
+			reason: new Map(
+				sort === "new"
+					? searchSelection.ids.map((id) => [id, "new_and_relevant"] as const)
+					: [],
+			),
+		};
 		const candidates = await getFeedRankingCandidates({
 			ids: sources.ids,
 			sources,
@@ -1705,60 +1547,52 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 			query: scope,
 			snapshotId: snapshotContext.id,
 			asOf,
-			...(cursor ? { anchorId: cursor.lastId } : {}),
 		});
-		const ranked = rankRecommendations(candidates, {
-			sort,
-			personalized: viewer.personalized,
-			asOf,
-			pageSize: body.limit ?? 20,
-			...(simpleSelection?.realmIds.length === 1
-				? { scopedRealmId: simpleSelection.realmIds[0] }
-				: {}),
+		const candidateById = new Map(candidates.map((candidate) => [candidate.id, candidate]));
+		const page = searchSelection.ids.flatMap((id) => {
+			const candidate = candidateById.get(id);
+			return candidate ? [candidate] : [];
 		});
-		const start = cursor ? ranked.findIndex(({ id }) => id === cursor.lastId) + 1 : 0;
-		if (cursor && start === 0) throw new InvalidFeedCursor();
-		const limit = body.limit ?? 20;
-		const page = ranked.slice(start, start + limit);
+		const positionOffset = cursor?.positionOffset ?? 0;
 		const requestId = crypto.randomUUID();
 		const items = await hydrateFeedItems(page, viewer, scope, asOf, {
 			kind: "recommendation",
 			reasons: sources.reason,
 			surface: "home_feed",
 			requestId,
-			positionOffset: start,
+			positionOffset,
 			policyVersion: snapshotContext.policyVersion,
 		});
-		const last = page.at(-1);
 		return {
 			items,
 			total: createFeedTotal({
-				candidates: ranked,
-				coverage: sources.coverage,
-				searchKind: searchSelection?.kind ?? "exact",
+				candidates: page,
+				coverage: searchSelection.coverage,
+				searchKind: searchSelection.kind,
+				positionOffset,
 			}),
-			nextCursor:
-				start + page.length < ranked.length && last
-					? Buffer.from(
-							JSON.stringify({
-								v: 9,
-								sort,
-								filterHash: body.filter
-									? createHash("sha256")
-											.update(canonicalUnitFilter(body.filter))
-											.digest("hex")
-									: null,
-								filterLanguages,
-								localizationLanguages,
-								personalized: viewer.personalized,
-								snapshotId: snapshotContext.id,
-								policyVersion: snapshotContext.policyVersion,
-								limit,
-								asOf: asOf.toISOString(),
-								lastId: last.id,
-							}),
-						).toString("base64url")
-					: null,
+			nextCursor: searchSelection.nextPosition
+				? Buffer.from(
+						JSON.stringify({
+							v: 10,
+							sort,
+							filterHash: body.filter
+								? createHash("sha256")
+										.update(canonicalUnitFilter(body.filter))
+										.digest("hex")
+								: null,
+							filterLanguages,
+							localizationLanguages,
+							personalized: viewer.personalized,
+							snapshotId: snapshotContext.id,
+							policyVersion: snapshotContext.policyVersion,
+							limit,
+							asOf: asOf.toISOString(),
+							searchPosition: toFeedSearchPosition(searchSelection.nextPosition),
+							positionOffset: positionOffset + page.length,
+						}),
+					).toString("base64url")
+				: null,
 		};
 	},
 	{

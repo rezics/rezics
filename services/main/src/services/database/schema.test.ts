@@ -37,7 +37,6 @@ import {
 	realmRuleRevision,
 	recommendationMetricDaily,
 	recommendationSignalKind,
-	recommendationUnitStat,
 	governancePostBinding,
 	governanceReasonCode,
 	GovernanceNoteRoleValues,
@@ -980,7 +979,6 @@ describe("database schema contracts", () => {
 		expect(scoreStat.totalCount.getSQLType()).toBe("bigint");
 		expect(unitAliasVoteStat.voteCount.getSQLType()).toBe("bigint");
 		expect(unitExternalLinkVoteStat.voteCount.getSQLType()).toBe("bigint");
-		expect(recommendationUnitStat.impressions.getSQLType()).toBe("bigint");
 		expect(recommendationMetricDaily.impressions.getSQLType()).toBe("bigint");
 		expect(recommendationSignalKind.enumValues).toEqual(
 			expect.arrayContaining(["score_high", "score_medium", "score_low"]),

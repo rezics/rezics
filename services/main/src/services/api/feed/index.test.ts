@@ -60,8 +60,20 @@ describe("feed candidate totals", () => {
 				candidates: ["first", "second"],
 				coverage: "exhaustive",
 				searchKind: "exact",
+				positionOffset: 20,
 			}),
-		).toEqual({ kind: "exact", value: 2 });
+		).toEqual({ kind: "exact", value: 22 });
+	});
+
+	it("rejects an invalid keyset position offset", () => {
+		expect(() =>
+			createFeedTotal({
+				candidates: [],
+				coverage: "exhaustive",
+				searchKind: "exact",
+				positionOffset: -1,
+			}),
+		).toThrow(RangeError);
 	});
 });
 

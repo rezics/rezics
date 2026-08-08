@@ -40024,7 +40024,7 @@
 									"sort": {
 										"default": "best",
 										"type": "string",
-										"enum": ["best", "hot", "new", "top", "rising"]
+										"enum": ["best", "new"]
 									},
 									"cursor": { "maxLength": 1024, "type": "string" },
 									"limit": {

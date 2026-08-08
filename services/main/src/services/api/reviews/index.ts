@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { and, asc, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -15,7 +15,6 @@ import {
 	postProgressEntry,
 	postReplyStat,
 	postScore,
-	recommendationUnitStat,
 	score,
 	scoreStat,
 	unit,
@@ -43,7 +42,6 @@ import {
 	resolveRecommendationSnapshot,
 	resolveRecommendationViewer,
 } from "../../recommendations/context";
-import { recommendationObjectiveExpression } from "../../recommendations/sql-ranking";
 import {
 	IdResponse,
 	ScoreAggregateResponse,
@@ -81,13 +79,37 @@ import { ContentLanguage, Uuid } from "../schema";
 import { RecommendationPolicyVersionSchema } from "../recommendations/schema";
 import { ValidationError } from "../errors";
 import { applyNewPostTagMentionVotes } from "../../posts/tag-mentions";
+import type { SearchKeysetPosition } from "../../search/query";
+import { searchGlobalIdentifiers } from "../../search/service";
 
 const UnitReadFailureResponse = toApiErrorResponse(["UnitNotFound"]);
 const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
 
+const ReviewSearchPosition = t.Union([
+	t.Object(
+		{
+			primary: t.String(),
+			secondary: t.String(),
+			unitId: Uuid,
+			source: t.Literal("ordered"),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			primary: t.String(),
+			secondary: t.String(),
+			unitId: Uuid,
+			source: t.Union([t.Literal("best-positive"), t.Literal("best-zero")]),
+			snapshotId: t.Nullable(Uuid),
+		},
+		{ additionalProperties: false },
+	),
+]);
+
 const ReviewListCursor = t.Object(
 	{
-		v: t.Literal(2),
+		v: t.Literal(4),
 		targetId: t.Nullable(Uuid),
 		languages: t.Array(ContentLanguage, { maxItems: 50, uniqueItems: true }),
 		localizationLanguages: t.Array(ContentLanguage, {
@@ -105,10 +127,8 @@ const ReviewListCursor = t.Object(
 		policyVersion: RecommendationPolicyVersionSchema,
 		limit: t.Integer({ minimum: 1, maximum: 50 }),
 		asOf: t.String({ format: "date-time" }),
-		lastRankValue: t.Number(),
-		lastCreatedAt: t.String({ format: "date-time" }),
-		lastId: Uuid,
-		consumed: t.Integer({ minimum: 1 }),
+		searchPosition: ReviewSearchPosition,
+		consumed: t.Integer({ minimum: 0 }),
 	},
 	{ additionalProperties: false },
 );
@@ -154,6 +174,31 @@ function validateReviewListCursor(
 
 function encodeReviewListCursor(value: ReviewListCursor) {
 	return Buffer.from(JSON.stringify(value)).toString("base64url");
+}
+
+function toReviewSearchPosition(
+	position: SearchKeysetPosition,
+): ReviewListCursor["searchPosition"] {
+	if (position.primary === null || position.secondary === null)
+		throw new Error("Review Search returned an incomplete keyset position");
+	if (position.source === "count-positive" || position.source === "count-zero")
+		throw new Error("Review Search returned an incompatible sparse-count position");
+	if (!position.source || position.source === "ordered")
+		return {
+			primary: position.primary,
+			secondary: position.secondary,
+			unitId: position.unitId,
+			source: "ordered",
+		};
+	if (position.source === "best-positive" || position.source === "best-zero")
+		return {
+			primary: position.primary,
+			secondary: position.secondary,
+			unitId: position.unitId,
+			source: position.source,
+			snapshotId: position.snapshotId,
+		};
+	throw new Error("Review Search returned an unsupported keyset position");
 }
 
 export default new Elysia()
@@ -204,58 +249,42 @@ export default new Elysia()
 					const sort = query.sort ?? "best";
 					const limit = query.limit ?? 20;
 					const asOf = cursor ? new Date(cursor.asOf) : new Date();
-					const snapshotJoin = snapshotContext.id
-						? and(
-								eq(recommendationUnitStat.snapshotId, snapshotContext.id),
-								eq(recommendationUnitStat.unitId, unit.id),
-								isNull(recommendationUnitStat.contextRealmId),
-							)
-						: sql`false`;
-					const rankValue = recommendationObjectiveExpression(sort, asOf);
-					const cursorCreatedAt = cursor ? new Date(cursor.lastCreatedAt) : undefined;
-					const cursorCondition =
-						cursor && cursorCreatedAt
-							? or(
-									lt(rankValue, cursor.lastRankValue),
-									and(
-										eq(rankValue, cursor.lastRankValue),
-										lt(unit.createdAt, cursorCreatedAt),
+					const searchPage = await searchGlobalIdentifiers({
+						branches: [{ category: "reviews", sourceUnitKinds: ["post"] }],
+						...(viewer.profileId ? { profileId: viewer.profileId } : {}),
+						additionalConditions: [
+							getFeedEligibilityCondition(rankingViewer, scope, asOf),
+						],
+						limit,
+						sort: sort === "new" ? "createdAt:desc" : "best",
+						...(cursor ? { position: cursor.searchPosition } : {}),
+					});
+					const candidateIds = searchPage.hits.map(({ id }) => id);
+					const candidateRows = candidateIds.length
+						? await database
+								.select({
+									id: unit.id,
+									subjectId: post.subjectUnitId,
+									realmId: getFeedCandidateRealmIdExpression(
+										rankingViewer,
+										scope.realmIds,
 									),
-									and(
-										eq(rankValue, cursor.lastRankValue),
-										eq(unit.createdAt, cursorCreatedAt),
-										lt(unit.id, cursor.lastId),
-									),
-								)
-							: undefined;
-					const ranked = await database
-						.select({
-							id: unit.id,
-							subjectId: post.subjectUnitId,
-							realmId: getFeedCandidateRealmIdExpression(
-								rankingViewer,
-								scope.realmIds,
-							),
-							rankValue,
-							createdAt: unit.createdAt,
-						})
-						.from(unit)
-						.leftJoin(post, eq(post.id, unit.id))
-						.leftJoin(recommendationUnitStat, snapshotJoin)
-						.where(
-							and(
-								getFeedEligibilityCondition(rankingViewer, scope, asOf),
-								cursorCondition,
-							),
-						)
-						.orderBy(desc(rankValue), desc(unit.createdAt), desc(unit.id))
-						.limit(limit + 1);
-					const page = ranked.slice(0, limit);
+								})
+								.from(unit)
+								.innerJoin(post, eq(post.id, unit.id))
+								.where(inArray(unit.id, candidateIds))
+						: [];
+					const candidateById = new Map(
+						candidateRows.map((candidate) => [candidate.id, candidate]),
+					);
+					const page = candidateIds.flatMap((id) => {
+						const candidate = candidateById.get(id);
+						return candidate ? [candidate] : [];
+					});
 					const consumed = (cursor?.consumed ?? 0) + page.length;
-					const totalCount =
-						ranked.length <= limit
-							? ({ kind: "exact", value: consumed } as const)
-							: ({ kind: "lower-bound", value: consumed + 1 } as const);
+					const totalCount = searchPage.exhausted
+						? ({ kind: "exact", value: consumed } as const)
+						: ({ kind: "lower-bound", value: consumed + 1 } as const);
 					const hydrated = await hydrateFeedItems(page, rankingViewer, scope, asOf, {
 						kind: "contextual",
 					});
@@ -273,33 +302,29 @@ export default new Elysia()
 								: [],
 						),
 					);
-					const last = page.at(-1);
 					const scoreRealmId =
 						scoreFilter.status === "present" ? scoreFilter.realmId : null;
 					const scores = scoreFilter.status === "present" ? scoreFilter.values : [];
 					return {
 						totalCount,
-						nextCursor:
-							ranked.length > limit && last
-								? encodeReviewListCursor({
-										v: 2,
-										targetId: query.targetId ?? null,
-										languages: query.languages ?? [],
-										localizationLanguages: query.localizationLanguages ?? [],
-										realmIds: query.realmIds ?? [],
-										scoreRealmId,
-										scores: [...scores],
-										sort,
-										snapshotId: snapshotContext.id,
-										policyVersion: snapshotContext.policyVersion,
-										limit,
-										asOf: asOf.toISOString(),
-										lastRankValue: last.rankValue,
-										lastCreatedAt: last.createdAt.toISOString(),
-										lastId: last.id,
-										consumed,
-									})
-								: null,
+						nextCursor: searchPage.nextPosition
+							? encodeReviewListCursor({
+									v: 4,
+									targetId: query.targetId ?? null,
+									languages: query.languages ?? [],
+									localizationLanguages: query.localizationLanguages ?? [],
+									realmIds: query.realmIds ?? [],
+									scoreRealmId,
+									scores: [...scores],
+									sort,
+									snapshotId: snapshotContext.id,
+									policyVersion: snapshotContext.policyVersion,
+									limit,
+									asOf: asOf.toISOString(),
+									searchPosition: toReviewSearchPosition(searchPage.nextPosition),
+									consumed,
+								})
+							: null,
 						items: hydrated.flatMap((item) => {
 							if (item.itemType !== "post" || item.postKind !== "review") return [];
 							const metadata = reviewMetadata.get(item.id);

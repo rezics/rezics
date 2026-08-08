@@ -4,11 +4,13 @@ import type { SharedSearchQueryDocument } from "@rezics/filter";
 
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createUuidv7PrimaryKey } from "./columns";
+import type { UnitKind } from "./contract-values";
 import { CanonicalPgroongaIndexes } from "./pgroonga";
 import { profile } from "./profile";
 import { unit } from "./unit";
 
 const UnitSearchTextColumnNames = [
+	"unit_kind",
 	"text_all",
 	"text_zh",
 	"text_en",
@@ -36,6 +38,7 @@ export const unitSearchDocument = pgTable(
 		unitId: uuid()
 			.primaryKey()
 			.references(() => unit.id, { onDelete: "cascade" }),
+		unitKind: text().$type<UnitKind>().notNull(),
 		unitUpdatedAtMicros: bigint({ mode: "bigint" }).notNull(),
 		searchOrderKey: text().notNull(),
 		textAll: text(),
@@ -51,6 +54,7 @@ export const unitSearchDocument = pgTable(
 		index(CanonicalPgroongaIndexes[3])
 			.using(
 				"pgroonga",
+				table.unitKind.op("public.pgroonga_text_term_search_ops_v2"),
 				table.textAll,
 				table.textZh,
 				table.textEn,

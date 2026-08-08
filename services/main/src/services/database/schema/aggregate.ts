@@ -533,28 +533,3 @@ export const recommendationUnitSignalHourly = pgTable(
 		check("recommendation_unit_signal_hourly_weight_check", sql`${table.weight} >= 0`),
 	],
 );
-
-export const recommendationProfileSignalHourly = pgTable(
-	"recommendation_profile_signal_hourly",
-	{
-		profileId: uuid()
-			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
-		bucketStart: createTimestampMsColumn().notNull(),
-		kind: recommendationSignalKind().notNull(),
-		signalCount: aggregateCount(),
-		weight: doublePrecision().default(0).notNull(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		primaryKey({ columns: [table.profileId, table.unitId, table.bucketStart, table.kind] }),
-		index("recommendation_profile_signal_hourly_bucket_idx").on(
-			table.bucketStart,
-			table.profileId,
-		),
-		check("recommendation_profile_signal_hourly_count_check", sql`${table.signalCount} >= 0`),
-	],
-);

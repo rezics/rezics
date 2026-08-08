@@ -2,10 +2,7 @@ import type { PostApiFeedQueryRequestSortEnum } from "@rezics/openapi-tanstack-q
 
 export const FeedSortValues = [
 	"best",
-	"hot",
 	"new",
-	"top",
-	"rising",
 ] as const satisfies readonly PostApiFeedQueryRequestSortEnum[];
 export type FeedSort = (typeof FeedSortValues)[number];
 

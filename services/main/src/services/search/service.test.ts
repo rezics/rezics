@@ -1,4 +1,4 @@
-import { type SQL } from "drizzle-orm";
+import { sql, type SQL } from "drizzle-orm";
 import { PgDialect } from "drizzle-orm/pg-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -30,6 +30,7 @@ import { parseSearchCursor } from "./query";
 import {
 	compilePostgresSearchExpression,
 	searchDomain,
+	searchGlobalIdentifiers,
 	searchGlobalIdentifiersWithFacets,
 } from "./service";
 
@@ -176,6 +177,35 @@ describe("direct PostgreSQL Search", () => {
 		expect(result.nextCursor).toBeUndefined();
 	});
 
+	it("applies server-owned eligibility while filling a global Top-K page", async () => {
+		execute.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({
+			rows: [
+				candidateRow({
+					id: first,
+					primaryValue: "1720000000",
+					secondaryValue: "0",
+					hasMore: false,
+				}),
+			],
+		});
+
+		const result = await searchGlobalIdentifiers({
+			branches: [{ category: "reviews", sourceUnitKinds: ["post"] }],
+			additionalConditions: [
+				sql.raw(
+					"exists (select 1 from post bounded_review_gate where bounded_review_gate.id = unit.id)",
+				),
+			],
+			limit: 20,
+			sort: "createdAt:desc",
+		});
+
+		const candidateSql = sqlText(execute.mock.calls[1]![0] as SQL);
+		expect(candidateSql).toContain("bounded_review_gate");
+		expect(candidateSql).toContain("scanned_candidates as materialized");
+		expect(result.hits).toEqual([{ id: first }]);
+	});
+
 	it("compiles descending cursors as row-value index seeks", async () => {
 		execute
 			.mockResolvedValueOnce({ rows: [] })
@@ -226,7 +256,10 @@ describe("direct PostgreSQL Search", () => {
 		const candidateQuery = dialect.sqlToQuery(execute.mock.calls[1]![0] as SQL);
 		expect(candidateQuery.sql).toContain("public.search_text_candidates");
 		expect(candidateQuery.params.filter((value) => value === "(common OR hidden")).toHaveLength(
-			2,
+			9,
+		);
+		expect(candidateQuery.params).toEqual(
+			expect.arrayContaining(["book", "software", "media"]),
 		);
 		expect(result.total).toEqual({ kind: "exact", value: 1 });
 		expect(result.nextCursor).toBeUndefined();
@@ -257,8 +290,10 @@ describe("direct PostgreSQL Search", () => {
 
 		const result = await searchDomain("units", { limit: 20, sort: "best" });
 		const candidateSql = sqlText(execute.mock.calls[1]![0] as SQL);
-		expect(candidateSql).toContain('from "search_best_score"');
-		expect(candidateSql).toContain('order by "search_best_score"."score" desc');
+		expect(candidateSql).toContain('from "unit_best_score"');
+		expect(candidateSql).toContain('order by "unit_best_score"."score" desc');
+		expect(candidateSql).toContain('"unit_best_score"."unit_kind" =');
+		expect(candidateSql).toContain('"unit"."kind" =');
 		expect(candidateSql).toContain('order by "unit"."updated_at" desc, "unit"."id" desc');
 		expect(candidateSql).not.toContain("row_number()");
 		expect(candidateSql).toContain("scanned_candidates as materialized");
@@ -475,7 +510,7 @@ describe("direct PostgreSQL Search", () => {
 		expect(candidateSql).toContain("filter_seed(unit_id) as materialized");
 		expect(seedSql).toContain("from unit_effective_tag filter_effective_tag");
 		expect(candidateSql).toContain(
-			'inner join filter_seed on filter_seed.unit_id = "search_best_score"."unit_id"',
+			'inner join filter_seed on filter_seed.unit_id = "unit_best_score"."unit_id"',
 		);
 		expect(candidateSql).toContain(
 			'inner join filter_seed on filter_seed.unit_id = "unit"."id"',

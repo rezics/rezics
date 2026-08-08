@@ -36,7 +36,7 @@ import {
 	software,
 	softwareRequirement,
 	recommendationSnapshot,
-	searchBestScore,
+	unitBestScore,
 	unitSearchDocument,
 	unit,
 	unitOwnership,
@@ -45,6 +45,8 @@ import {
 	unitStructureMember,
 	unitStructureVoteStat,
 	unitVariant,
+	type UnitKind,
+	UnitKindValues,
 	VariantCapableUnitKindValues,
 } from "../database/schema";
 import { env } from "../config";
@@ -1061,6 +1063,7 @@ function readSearchCandidatePage(rows: readonly SearchCandidateDatabaseRow[]): S
 interface PreparedSearchBranch {
 	readonly category: SearchCategory;
 	readonly conditions: readonly SQL[];
+	readonly sourceUnitKinds: readonly UnitKind[];
 }
 
 interface OrderedCandidateSource {
@@ -1072,6 +1075,24 @@ const publicDiscoverableCandidate = sql`${unit.status} = 'published'::unit_statu
 	and ${unit.visibility} = 'public'::resource_visibility
 	and ${unit.moderationStatus} = 'approved'::moderation_status
 	and ${unit.deletedAt} is null`;
+
+function resolveSourceUnitKinds(
+	category: SearchCategory,
+	requestedKinds?: readonly string[],
+): readonly UnitKind[] {
+	const categoryKinds = CurrentSearchUnitKindsByCategory[category];
+	if (category !== "units" || !requestedKinds?.length) return categoryKinds;
+	const requested = new Set(
+		requestedKinds.filter((kind): kind is UnitKind =>
+			UnitKindValues.some((candidate) => candidate === kind),
+		),
+	);
+	return categoryKinds.filter((kind) => requested.has(kind));
+}
+
+function mergeSourceUnitKinds(branches: readonly PreparedSearchBranch[]): readonly UnitKind[] {
+	return [...new Set(branches.flatMap(({ sourceUnitKinds }) => sourceUnitKinds))];
+}
 
 function requirePositionValues(position: SearchKeysetPosition): {
 	readonly primary: string;
@@ -1203,9 +1224,18 @@ function bestCandidateSource(
 	position: SearchKeysetPosition | undefined,
 	limit: number,
 	seeded = false,
+	sourceUnitKinds?: readonly UnitKind[],
 ): OrderedCandidateSource {
 	if (position && position.source !== "best-positive" && position.source !== "best-zero")
 		throw new InvalidSearch("This best cursor predates snapshot-pinned pagination");
+	if (sourceUnitKinds?.length === 0)
+		return {
+			direction: "desc",
+			statement: sql`select null::uuid as unit_id, 0::numeric as primary_order,
+				0::numeric as secondary_order, 0::integer as source_phase,
+				'best-zero'::text as source_name, null::uuid as snapshot_id,
+				false as search_fallback where false`,
+		};
 	const bestPosition =
 		position?.source === "best-positive" || position?.source === "best-zero"
 			? position
@@ -1225,70 +1255,92 @@ function bestCandidateSource(
 	const zeroPosition = bestPosition?.source === "best-zero" ? bestPosition : undefined;
 	const includePositive =
 		bestPosition?.source !== "best-zero" && bestPosition?.snapshotId !== null;
+	const positiveKeyset = positivePosition
+		? (() => {
+				const { primary, secondary } = requirePositionValues(positivePosition);
+				return sql`(
+					${unitBestScore.score},
+					${unitBestScore.unitUpdatedAt},
+					${unitBestScore.unitId}
+				) < (
+					${primary}::double precision,
+					to_timestamp(${secondary}::double precision),
+					${positivePosition.unitId}::uuid
+				)`;
+			})()
+		: sql`true`;
+	const kindDimensions: readonly (UnitKind | undefined)[] = sourceUnitKinds?.length
+		? sourceUnitKinds
+		: [undefined];
+	const positiveByKind = kindDimensions.map(
+		(kind) => sql`
+			select ${unitBestScore.unitId} as unit_id,
+				${unitBestScore.score}::numeric as primary_order,
+				extract(epoch from ${unitBestScore.unitUpdatedAt})::numeric as secondary_order,
+				0::integer as source_phase,
+				'best-positive'::text as source_name,
+				${unitBestScore.snapshotId} as snapshot_id,
+				false as search_fallback
+			from ${unitBestScore}
+			${
+				seeded
+					? sql`inner join filter_seed on filter_seed.unit_id = ${unitBestScore.unitId}`
+					: sql``
+			}
+			inner join selected_best_snapshot
+				on selected_best_snapshot.id = ${unitBestScore.snapshotId}
+			where ${kind ? sql`${unitBestScore.unitKind} = ${kind}` : sql`true`}
+				and ${positiveKeyset}
+			order by ${unitBestScore.score} desc,
+				${unitBestScore.unitUpdatedAt} desc,
+				${unitBestScore.unitId} desc
+			limit ${limit}`,
+	);
 	const positive = sql`
-		select ${searchBestScore.unitId} as unit_id,
-			${searchBestScore.score}::numeric as primary_order,
-			extract(epoch from ${searchBestScore.unitUpdatedAt})::numeric as secondary_order,
-			0::integer as source_phase,
-			'best-positive'::text as source_name,
-			${searchBestScore.snapshotId} as snapshot_id,
-			false as search_fallback
-		from ${searchBestScore}
-		${
-			seeded
-				? sql`inner join filter_seed on filter_seed.unit_id = ${searchBestScore.unitId}`
-				: sql``
-		}
-		inner join selected_best_snapshot
-			on selected_best_snapshot.id = ${searchBestScore.snapshotId}
-		where ${
-			positivePosition
-				? (
-						() => {
-							const { primary, secondary } = requirePositionValues(positivePosition);
-							return sql`(
-								${searchBestScore.score},
-								${searchBestScore.unitUpdatedAt},
-								${searchBestScore.unitId}
-							) < (
-								${primary}::double precision,
-								to_timestamp(${secondary}::double precision),
-								${positivePosition.unitId}::uuid
-							)`;
-						}
-					)()
-				: sql`true`
-		}
-		order by ${searchBestScore.score} desc,
-			${searchBestScore.unitUpdatedAt} desc,
-			${searchBestScore.unitId} desc
+		select positive_kind_source.*
+		from (${sql.join(
+			positiveByKind.map((branch) => sql`(${branch})`),
+			sql` union all `,
+		)}) as positive_kind_source
+		order by primary_order desc, secondary_order desc, unit_id desc
 		limit ${limit}`;
+	const zeroByKind = kindDimensions.map(
+		(kind) => sql`
+			select ${unit.id} as unit_id,
+				0::numeric as primary_order,
+				extract(epoch from ${unit.updatedAt})::numeric as secondary_order,
+				1::integer as source_phase,
+				'best-zero'::text as source_name,
+				(select id from selected_best_snapshot) as snapshot_id,
+				false as search_fallback
+			from ${unit}
+			${seeded ? sql`inner join filter_seed on filter_seed.unit_id = ${unit.id}` : sql``}
+			where ${publicDiscoverableCandidate}
+				and ${kind ? sql`${unit.kind} = ${kind}` : sql`true`}
+				and not exists (
+					select 1
+					from ${unitBestScore}
+					inner join selected_best_snapshot
+						on selected_best_snapshot.id = ${unitBestScore.snapshotId}
+					where ${unitBestScore.unitId} = ${unit.id}
+				)
+				and ${timestampKeysetCondition(
+					sql`${unit.updatedAt}`,
+					sql`${unit.id}`,
+					"desc",
+					zeroPosition,
+					"secondary",
+				)}
+			order by ${unit.updatedAt} desc, ${unit.id} desc
+			limit ${limit}`,
+	);
 	const zero = sql`
-		select ${unit.id} as unit_id,
-			0::numeric as primary_order,
-			extract(epoch from ${unit.updatedAt})::numeric as secondary_order,
-			1::integer as source_phase,
-			'best-zero'::text as source_name,
-			(select id from selected_best_snapshot) as snapshot_id,
-			false as search_fallback
-		from ${unit}
-		${seeded ? sql`inner join filter_seed on filter_seed.unit_id = ${unit.id}` : sql``}
-		where ${publicDiscoverableCandidate}
-			and not exists (
-				select 1
-				from ${searchBestScore}
-				inner join selected_best_snapshot
-					on selected_best_snapshot.id = ${searchBestScore.snapshotId}
-				where ${searchBestScore.unitId} = ${unit.id}
-			)
-			and ${timestampKeysetCondition(
-				sql`${unit.updatedAt}`,
-				sql`${unit.id}`,
-				"desc",
-				zeroPosition,
-				"secondary",
-			)}
-		order by ${unit.updatedAt} desc, ${unit.id} desc
+		select zero_kind_source.*
+		from (${sql.join(
+			zeroByKind.map((branch) => sql`(${branch})`),
+			sql` union all `,
+		)}) as zero_kind_source
+		order by secondary_order desc, unit_id desc
 		limit ${limit}`;
 	const branches = includePositive ? [positive, zero] : [zero];
 	return {
@@ -1394,6 +1446,7 @@ function sparseFollowerCandidateSource(
 function textCandidateSource(
 	query: string,
 	languageBoundary: readonly ContentLanguage[],
+	sourceUnitKinds: readonly UnitKind[],
 	position: SearchKeysetPosition | undefined,
 	limit: number,
 ): OrderedCandidateSource {
@@ -1402,9 +1455,16 @@ function textCandidateSource(
 	const cursorMicros = cursorValues
 		? sql`round(${cursorValues.primary}::numeric * 1000000)::bigint`
 		: sql`null::bigint`;
-	return {
-		direction: "desc",
-		statement: sql`
+	if (!sourceUnitKinds.length)
+		return {
+			direction: "desc",
+			statement: sql`select null::uuid as unit_id, 0::numeric as primary_order,
+				0::numeric as secondary_order, 0::integer as source_phase,
+				'ordered'::text as source_name, null::uuid as snapshot_id,
+				false as search_fallback, false as search_matched where false`,
+		};
+	const kindSources = sourceUnitKinds.map(
+		(kind) => sql`
 			select text_candidate.unit_id,
 				(text_candidate.unit_updated_at_micros::numeric / 1000000) as primary_order,
 				0::numeric as secondary_order,
@@ -1416,6 +1476,7 @@ function textCandidateSource(
 			from public.search_text_candidates(
 				${query},
 				${toTextArray(languageBoundary)},
+				${kind},
 				${cursorMicros},
 				${orderedPosition?.unitId ?? null}::uuid,
 				${WorkPolicy.search.maxEstimatedPostings},
@@ -1423,6 +1484,17 @@ function textCandidateSource(
 			) as text_candidate
 			order by text_candidate.unit_updated_at_micros desc,
 				text_candidate.unit_id desc
+			limit ${limit}`,
+	);
+	return {
+		direction: "desc",
+		statement: sql`
+			select text_kind_source.*
+			from (${sql.join(
+				kindSources.map((branch) => sql`(${branch})`),
+				sql` union all `,
+			)}) as text_kind_source
+			order by primary_order desc, unit_id desc
 			limit ${limit}`,
 	};
 }
@@ -1531,16 +1603,19 @@ function orderedCandidateSource(input: {
 	readonly sort: SearchSort;
 	readonly position?: SearchKeysetPosition;
 	readonly languageBoundary: readonly ContentLanguage[];
+	readonly sourceUnitKinds: readonly UnitKind[];
 	readonly limit: number;
 }): OrderedCandidateSource {
 	if (input.sort === "relevance")
 		return textCandidateSource(
 			input.query,
 			input.languageBoundary,
+			input.sourceUnitKinds,
 			input.position,
 			input.limit,
 		);
-	if (input.sort === "best") return bestCandidateSource(input.position, input.limit);
+	if (input.sort === "best")
+		return bestCandidateSource(input.position, input.limit, false, input.sourceUnitKinds);
 	const direction = input.sort.endsWith(":asc") ? "asc" : "desc";
 	if (input.sort === "followerCount:asc" || input.sort === "followerCount:desc")
 		return sparseFollowerCandidateSource(input.position, direction, input.limit);
@@ -1598,9 +1673,16 @@ function orderedCandidateSource(input: {
 			position,
 			limit: input.limit,
 		});
-	return {
-		direction,
-		statement: sql`
+	if (!input.sourceUnitKinds.length)
+		return {
+			direction,
+			statement: sql`select null::uuid as unit_id, 0::numeric as primary_order,
+				0::numeric as secondary_order, 0::integer as source_phase,
+				'ordered'::text as source_name, null::uuid as snapshot_id,
+				false as search_fallback where false`,
+		};
+	const kindSources = input.sourceUnitKinds.map(
+		(kind) => sql`
 			select ${unit.id} as unit_id,
 				extract(epoch from ${timestamp})::numeric as primary_order,
 				0::numeric as secondary_order,
@@ -1610,8 +1692,20 @@ function orderedCandidateSource(input: {
 				false as search_fallback
 			from ${unit}
 			where ${publicDiscoverableCandidate}
+				and ${unit.kind} = ${kind}
 				and ${timestampKeysetCondition(timestamp, sql`${unit.id}`, direction, position)}
 			order by ${timestamp} ${orderDirection}, ${unit.id} ${orderDirection}
+			limit ${input.limit}`,
+	);
+	return {
+		direction,
+		statement: sql`
+			select ordered_kind_source.*
+			from (${sql.join(
+				kindSources.map((branch) => sql`(${branch})`),
+				sql` union all `,
+			)}) as ordered_kind_source
+			order by primary_order ${orderDirection}, unit_id ${orderDirection}
 			limit ${input.limit}`,
 	};
 }
@@ -1691,6 +1785,7 @@ async function searchCandidateBatch(input: {
 			sort: input.sort,
 			position: input.position,
 			languageBoundary: input.languageBoundary,
+			sourceUnitKinds: mergeSourceUnitKinds(input.branches),
 			limit: input.scanLimit + 1,
 		});
 	const branchConditions = input.branches.map(
@@ -2078,7 +2173,13 @@ async function searchDomainScan(
 	}
 	const hasFacets = facetFields.some((field) => facetSpec(category, field));
 	const candidates = await searchCandidatePage({
-		branches: [{ category, conditions }],
+		branches: [
+			{
+				category,
+				conditions,
+				sourceUnitKinds: resolveSourceUnitKinds(category, request.kinds),
+			},
+		],
 		...(request.domainFilter
 			? {
 					candidateSet: compileUnitPredicateCandidateSet(
@@ -2216,6 +2317,8 @@ export function searchDomainIdentifiers(
 export interface GlobalSearchBranch {
 	readonly category: SearchCategory;
 	readonly searchExpression?: SearchExpression;
+	/** Exact Unit roots used by the ordered source before branch predicates run. */
+	readonly sourceUnitKinds?: readonly UnitKind[];
 }
 
 export interface GlobalSearchIdentifiersRequest
@@ -2223,6 +2326,8 @@ export interface GlobalSearchIdentifiersRequest
 	readonly branches: readonly GlobalSearchBranch[];
 	readonly cursor?: never;
 	readonly position?: SearchKeysetPosition;
+	/** Server-owned predicates evaluated inside the bounded Top-K scan. */
+	readonly additionalConditions?: readonly SQL[];
 }
 
 interface PreparedGlobalSearchRequest {
@@ -2243,15 +2348,22 @@ function prepareGlobalSearchRequest(
 	if (!request.branches.length) throw new InvalidSearch("Search requires at least one category");
 	if (new Set(request.branches.map(({ category }) => category)).size !== request.branches.length)
 		throw new InvalidSearch("Search categories must be unique");
-	const { branches, ...commonRequest } = request;
+	const { branches, additionalConditions = [], ...commonRequest } = request;
 	const preparedBranches = branches.map((branch) => {
 		const domainRequest = {
 			...commonRequest,
 			...(branch.searchExpression ? { searchExpression: branch.searchExpression } : {}),
 		} satisfies DomainSearchRequest;
 		const searchExpression = buildEffectiveSearchExpression(domainRequest);
+		const categoryKinds: readonly UnitKind[] =
+			CurrentSearchUnitKindsByCategory[branch.category];
+		const sourceUnitKinds =
+			branch.sourceUnitKinds ?? resolveSourceUnitKinds(branch.category, commonRequest.kinds);
+		if (sourceUnitKinds.some((kind) => !categoryKinds.includes(kind)))
+			throw new InvalidSearch("Global Search branch has a Unit kind outside its category");
 		return {
 			category: branch.category,
+			sourceUnitKinds,
 			conditions: buildSearchConditions(
 				branch.category,
 				domainRequest,
@@ -2266,7 +2378,7 @@ function prepareGlobalSearchRequest(
 		sort: request.sort ?? (request.query?.trim() ? "relevance" : "best"),
 		limit: request.limit ?? 20,
 		initialOffset: request.offset ?? 0,
-		commonConditions: buildCommonSearchConditions(commonRequest),
+		commonConditions: [...buildCommonSearchConditions(commonRequest), ...additionalConditions],
 		...(request.domainFilter
 			? {
 					candidateSet: compileUnitPredicateCandidateSet(
@@ -2513,7 +2625,13 @@ export async function searchDomainFacets(
 		),
 	];
 	const candidates = await searchCandidatePage({
-		branches: [{ category, conditions }],
+		branches: [
+			{
+				category,
+				conditions,
+				sourceUnitKinds: resolveSourceUnitKinds(category, request.kinds),
+			},
+		],
 		...(request.domainFilter
 			? {
 					candidateSet: compileUnitPredicateCandidateSet(
@@ -2630,6 +2748,7 @@ export async function searchGlobalFacets(
 			request,
 			fields,
 			searchExpression,
+			sourceUnitKinds: resolveSourceUnitKinds(category, request.kinds),
 			conditions: buildSearchConditions(category, request, searchExpression),
 		};
 	});

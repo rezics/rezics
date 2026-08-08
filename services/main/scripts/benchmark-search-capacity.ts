@@ -142,7 +142,7 @@ function searchSql(cursor = false): string {
 				0::numeric as secondary_order,
 				text_candidate.search_matched
 			from public.search_text_candidates(
-				$1, array[]::text[],
+				$1, array[]::text[], 'book',
 				${cursor ? "$2::bigint, $3::uuid" : "null, null"},
 				50000,
 				65
@@ -230,8 +230,9 @@ function tagOrderedUpdatedAtSql(cursor: boolean): string {
 
 function bestPositiveSql(cursor: boolean, limit = 20): string {
 	return `select score.unit_id
-		from public.search_best_score score
+		from public.unit_best_score score
 		where score.snapshot_id = $1::uuid
+		  and score.unit_kind = 'book'
 		  ${
 				cursor
 					? `and (score.score, score.unit_updated_at, score.unit_id)
@@ -246,11 +247,12 @@ function bestZeroSql(cursor: boolean, limit = 20): string {
 	return `select candidate.id as unit_id
 		from public.unit candidate
 		where candidate.status = 'published'
+		  and candidate.kind = 'book'
 		  and candidate.visibility = 'public'
 		  and candidate.moderation_status = 'approved'
 		  and candidate.deleted_at is null
 		  and not exists (
-			select 1 from public.search_best_score positive
+			select 1 from public.unit_best_score positive
 			where positive.snapshot_id = $1::uuid and positive.unit_id = candidate.id
 		  )
 		  ${cursor ? "and (candidate.updated_at, candidate.id) < ($2::timestamptz, $3::uuid)" : ""}
@@ -451,11 +453,11 @@ try {
 		`);
 		await client.query(`
 			insert into public.unit_search_document (
-				unit_id, unit_updated_at_micros,
+				unit_id, unit_kind, unit_updated_at_micros,
 				search_order_key, text_all,
 				text_zh, text_en, text_ja
 			)
-			select fixture.unit_id,
+			select fixture.unit_id, candidate.kind,
 				(extract(epoch from candidate.updated_at) * 1000000)::bigint,
 				lpad(((extract(epoch from candidate.updated_at) * 1000000)::bigint)::text, 20, '0')
 					|| ':' || fixture.unit_id::text,
@@ -519,10 +521,10 @@ try {
 		if (!id) throw new Error("Search capacity snapshot insertion returned no row");
 		capacitySnapshotId = id;
 		await client.query(
-			`insert into public.search_best_score (
-				snapshot_id, unit_id, score, unit_updated_at
+			`insert into public.unit_best_score (
+				snapshot_id, unit_id, unit_kind, score, unit_updated_at
 			)
-			select $1::uuid, fixture.unit_id,
+			select $1::uuid, fixture.unit_id, candidate.kind,
 				($2::integer - fixture.ordinal + 1)::double precision,
 				candidate.updated_at
 			from public.search_capacity_fixture_v1 fixture
@@ -534,7 +536,7 @@ try {
 		await client.query("analyze public.unit");
 		await client.query("analyze public.unit_localization");
 		await client.query("analyze public.unit_search_document");
-		await client.query("analyze public.search_best_score");
+		await client.query("analyze public.unit_best_score");
 		await client.query("analyze public.unit_effective_tag");
 		loadMilliseconds = Math.round(performance.now() - loadStartedAt);
 	}
@@ -693,8 +695,8 @@ try {
 		readonly updatedAt: string;
 	}>(
 		`select unit_id as id, score, unit_updated_at::text as "updatedAt"
-		 from public.search_best_score
-		 where snapshot_id = $1::uuid
+		 from public.unit_best_score
+		 where snapshot_id = $1::uuid and unit_kind = 'book'
 		 order by score desc, unit_updated_at desc, unit_id desc
 		 offset $2::integer limit 1`,
 		[capacitySnapshotId, Math.floor(positiveCount / 2)],
@@ -709,11 +711,12 @@ try {
 		`select candidate.id, candidate.updated_at::text as "updatedAt"
 		 from public.unit candidate
 		 where candidate.status = 'published'
+		   and candidate.kind = 'book'
 		   and candidate.visibility = 'public'
 		   and candidate.moderation_status = 'approved'
 		   and candidate.deleted_at is null
 		   and not exists (
-			 select 1 from public.search_best_score positive
+			 select 1 from public.unit_best_score positive
 			 where positive.snapshot_id = $1::uuid and positive.unit_id = candidate.id
 		   )
 		 order by candidate.updated_at desc, candidate.id desc
@@ -756,12 +759,12 @@ try {
 			["best positive first page", bestPositiveFirstPlan],
 			["best positive deep cursor", bestPositiveDeepPlan],
 		] as const)
-			requireOrderingIndex(name, plan, "search_best_score_order_idx");
+			requireOrderingIndex(name, plan, "unit_best_score_kind_order_idx");
 		for (const [name, plan] of [
 			["best zero first page", bestZeroFirstPlan],
 			["best zero deep cursor", bestZeroDeepPlan],
 		] as const)
-			requireOrderingIndex(name, plan, "unit_public_updated_at_desc_idx");
+			requireOrderingIndex(name, plan, "unit_public_kind_updated_at_desc_idx");
 		requireBoundedPlan("best positive deep cursor", bestPositiveDeepPlan, 512);
 		requireBoundedPlan("best zero deep cursor", bestZeroDeepPlan, 512);
 	}

@@ -16,7 +16,8 @@ describe("Feed URL state", () => {
 		expect(feedQueryParser.parseServerSide(undefined)).toBe("");
 		expect(feedQueryParser.parseServerSide("memory")).toBe("memory");
 		expect(feedQueryParser.parseServerSide("x".repeat(501))).toBe("");
-		expect(feedSortParser.parseServerSide("hot")).toBe("hot");
+		expect(feedSortParser.parseServerSide("new")).toBe("new");
+		expect(feedSortParser.parseServerSide("hot")).toBe("best");
 		expect(feedSortParser.parseServerSide("unknown")).toBe("best");
 		expect(feedContentParser.parseServerSide(undefined)).toEqual([]);
 		expect(feedContentParser.parseServerSide("unit:book,post:review")).toEqual([

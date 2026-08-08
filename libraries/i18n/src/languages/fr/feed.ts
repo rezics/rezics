@@ -14,13 +14,7 @@ export default {
 	subtitle: "Les œuvres gagnent en visibilité grâce aux échanges",
 	personalized: "Pour vous",
 	sortLabel: "Tri du fil",
-	sort: {
-		best: "Meilleur",
-		hot: "Tendance",
-		new: "Nouveau",
-		top: "Populaire",
-		rising: "En hausse",
-	},
+	sort: { best: "Meilleur", new: "Nouveau" },
 	filtersLabel: "Filtres du fil",
 	filters: {
 		title: "Filtres",

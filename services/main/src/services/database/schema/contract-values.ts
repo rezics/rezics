@@ -432,7 +432,7 @@ export const PollModeValues = ["single", "multiple"] as const;
 export const PollOptionSourceKindValues = ["literal", "unit"] as const;
 export const PollResultVisibilityValues = ["live", "after_close"] as const;
 export const ReactionKindValues = ["upvote", "downvote"] as const;
-export const FeedSortValues = ["best", "hot", "new", "top", "rising"] as const;
+export const FeedSortValues = ["best", "new"] as const;
 export const RecommendationSurfaceValues = [
 	"home_feed",
 	"home_book",

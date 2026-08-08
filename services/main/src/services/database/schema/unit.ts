@@ -120,6 +120,16 @@ export const unit = pgTable(
 			.where(
 				sql`${table.status} = 'published'::unit_status and ${table.visibility} = 'public'::resource_visibility and ${table.moderationStatus} = 'approved'::moderation_status and ${table.deletedAt} is null`,
 			),
+		index("unit_public_kind_created_at_desc_idx")
+			.on(table.kind, table.createdAt.desc().nullsFirst(), table.id.desc().nullsFirst())
+			.where(
+				sql`${table.status} = 'published'::unit_status and ${table.visibility} = 'public'::resource_visibility and ${table.moderationStatus} = 'approved'::moderation_status and ${table.deletedAt} is null`,
+			),
+		index("unit_public_kind_updated_at_desc_idx")
+			.on(table.kind, table.updatedAt.desc().nullsFirst(), table.id.desc().nullsFirst())
+			.where(
+				sql`${table.status} = 'published'::unit_status and ${table.visibility} = 'public'::resource_visibility and ${table.moderationStatus} = 'approved'::moderation_status and ${table.deletedAt} is null`,
+			),
 		index("unit_public_published_at_asc_idx")
 			.on(table.publishedAt.asc(), table.id.asc())
 			.where(

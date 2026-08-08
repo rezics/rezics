@@ -1,58 +1,46 @@
-import { and, desc, eq, gt, lt, ne, sql } from "drizzle-orm";
+import { and, desc, eq, lt, ne, sql } from "drizzle-orm";
 
 import { database, type DatabaseTransaction, withDatabaseSession } from "../database";
-import { recommendationSnapshot, searchBestScore, unit } from "../database/schema";
-import { WorkPolicy } from "../performance/policy";
+import { recommendationSnapshot, unitBestScore } from "../database/schema";
 import { RecommendationPolicy, RecommendationPolicyVersion } from "./policy";
-import {
-	recommendationObjectiveExpression,
-	type RecommendationObjectiveSqlSource,
-} from "./sql-ranking";
-
-const GroupedRecommendationObjectiveSqlSource = {
-	createdAt: sql<Date>`grouped.unit_created_at`,
-	impressions: sql<bigint>`grouped.impressions`,
-	opens: sql<bigint>`grouped.opens`,
-	dwell30s: sql<bigint>`grouped.dwell30s`,
-	upvotes: sql<bigint>`grouped.upvotes`,
-	downvotes: sql<bigint>`grouped.downvotes`,
-	replies: sql<bigint>`grouped.replies`,
-	favorites: sql<bigint>`grouped.favorites`,
-	shares: sql<bigint>`grouped.shares`,
-	highScores: sql<bigint>`grouped.high_scores`,
-	activeProgress: sql<bigint>`grouped.active_progress`,
-	completions: sql<bigint>`grouped.completions`,
-	negativeProgress: sql<bigint>`grouped.negative_progress`,
-	engagement6h: sql<number>`grouped.engagement6h`,
-	engagement24h: sql<number>`grouped.engagement24h`,
-	engagement7d: sql<number>`grouped.engagement7d`,
-} satisfies RecommendationObjectiveSqlSource;
 
 /**
- * Builds the Search `best` projection from the bounded 24-hour signal window.
+ * Materializes the sparse, shared `best` sort key for one immutable snapshot.
  *
- * The projection is intentionally sparse: its work is proportional to recent
- * positive signal rows, not to every discoverable Unit in the catalogue.
+ * Only Units with positive recent signal are written. Zero-score Units stay out
+ * of this table and are served directly from the public Unit updated-at index.
+ * This makes refresh cost proportional to recent activity, not catalogue size.
  */
-async function buildSearchBestScores(
+async function buildUnitBestScores(
 	tx: DatabaseTransaction,
 	snapshotId: string,
 	sourceWatermark: Date,
 ) {
+	const halfLifeSeconds = RecommendationPolicy.bestHalfLifeHours * 3_600;
 	await tx.execute(sql`
 		with positive_score as (
 			select coalesce(relationship.main_unit_id, signal.unit_id) as unit_id,
-				sum(signal.weight)::double precision as score
+				sum(
+					signal.weight * exp(
+						-ln(2) * extract(epoch from (
+							${sourceWatermark}::timestamptz - signal.bucket_start
+						)) / ${halfLifeSeconds}
+					)
+				)::double precision as score
 			from recommendation_unit_signal_hourly signal
 			left join unit_variant relationship
 				on relationship.variant_unit_id = signal.unit_id
-			where signal.bucket_start >= ${sourceWatermark}::timestamptz - interval '24 hours'
+			where signal.bucket_start >= ${sourceWatermark}::timestamptz
+					- ${RecommendationPolicy.bestWindowDays} * interval '1 day'
+				and signal.bucket_start <= ${sourceWatermark}::timestamptz
 				and signal.weight > 0
 			group by coalesce(relationship.main_unit_id, signal.unit_id)
 			having sum(signal.weight) > 0
 		)
-		insert into ${searchBestScore} (snapshot_id, unit_id, score, unit_updated_at)
-		select ${snapshotId}::uuid, positive_score.unit_id,
+		insert into ${unitBestScore} (
+			snapshot_id, unit_id, unit_kind, score, unit_updated_at
+		)
+		select ${snapshotId}::uuid, positive_score.unit_id, discovery.kind,
 			positive_score.score, discovery.updated_at
 		from positive_score
 		join unit discovery on discovery.id = positive_score.unit_id
@@ -60,256 +48,6 @@ async function buildSearchBestScores(
 			and discovery.visibility = 'public'
 			and discovery.moderation_status = 'approved'
 			and discovery.deleted_at is null
-	`);
-}
-
-async function buildUnitStats(tx: DatabaseTransaction, snapshotId: string, sourceWatermark: Date) {
-	const bestScore = recommendationObjectiveExpression(
-		"best",
-		sourceWatermark,
-		GroupedRecommendationObjectiveSqlSource,
-	);
-	const hotScore = recommendationObjectiveExpression(
-		"hot",
-		sourceWatermark,
-		GroupedRecommendationObjectiveSqlSource,
-	);
-	const topScore = recommendationObjectiveExpression(
-		"top",
-		sourceWatermark,
-		GroupedRecommendationObjectiveSqlSource,
-	);
-	const risingScore = recommendationObjectiveExpression(
-		"rising",
-		sourceWatermark,
-		GroupedRecommendationObjectiveSqlSource,
-	);
-	await tx.execute(sql`
-		WITH unit_identity AS (
-			SELECT source.id AS source_unit_id,
-				coalesce(relationship.main_unit_id, source.id) AS discovery_unit_id
-			FROM unit source
-			LEFT JOIN unit_variant relationship
-				ON relationship.variant_unit_id = source.id
-		), event_stats AS (
-			SELECT unit_id,
-				sum(signal_count) FILTER (WHERE kind = 'impression') AS impressions,
-				sum(signal_count) FILTER (WHERE kind = 'open') AS opens,
-				sum(signal_count) FILTER (WHERE kind = 'dwell_30s') AS dwell30s
-			FROM recommendation_unit_signal_hourly
-			WHERE bucket_start >= ${sourceWatermark}::timestamptz - ${RecommendationPolicy.eventRetentionDays} * interval '1 day'
-			GROUP BY unit_id
-		), window_stats AS (
-			SELECT unit_id,
-				coalesce(sum(weight) FILTER (WHERE bucket_start >= ${sourceWatermark}::timestamptz - interval '6 hours'), 0) AS engagement6h,
-				coalesce(sum(weight) FILTER (WHERE bucket_start >= ${sourceWatermark}::timestamptz - interval '24 hours'), 0) AS engagement24h,
-				coalesce(sum(weight), 0) AS engagement7d
-			FROM recommendation_unit_signal_hourly
-			WHERE bucket_start >= ${sourceWatermark}::timestamptz - interval '7 days' AND weight > 0
-			GROUP BY unit_id
-		), grouped AS (
-			SELECT identity.discovery_unit_id AS unit_id,
-				discovery.created_at AS unit_created_at,
-				coalesce(sum(es.impressions), 0) AS impressions,
-				coalesce(sum(es.opens), 0) AS opens,
-				coalesce(sum(es.dwell30s), 0) AS dwell30s,
-				coalesce(sum(current_stat.upvotes), 0) AS upvotes,
-				coalesce(sum(current_stat.downvotes), 0) AS downvotes,
-				coalesce(sum(current_stat.replies), 0) AS replies,
-				coalesce(sum(current_stat.favorites), 0) AS favorites,
-				coalesce(sum(current_stat.shares), 0) AS shares,
-				coalesce(sum(current_stat.high_scores), 0) AS high_scores,
-				coalesce(sum(current_stat.active_progress), 0) AS active_progress,
-				coalesce(sum(current_stat.completions), 0) AS completions,
-				coalesce(sum(current_stat.negative_progress), 0) AS negative_progress,
-				coalesce(sum(ws.engagement6h), 0) AS engagement6h,
-				coalesce(sum(ws.engagement24h), 0) AS engagement24h,
-				coalesce(sum(ws.engagement7d), 0) AS engagement7d
-			FROM unit_identity identity
-			JOIN unit discovery ON discovery.id = identity.discovery_unit_id
-			LEFT JOIN event_stats es ON es.unit_id = identity.source_unit_id
-			LEFT JOIN unit_engagement_stat current_stat
-				ON current_stat.unit_id = identity.source_unit_id
-			LEFT JOIN window_stats ws ON ws.unit_id = identity.source_unit_id
-			WHERE discovery.status = 'published' AND discovery.visibility = 'public'
-				AND discovery.moderation_status = 'approved' AND discovery.deleted_at IS NULL
-			GROUP BY identity.discovery_unit_id, discovery.created_at
-		)
-		INSERT INTO recommendation_unit_stat (
-				snapshot_id, unit_id, context_realm_id, impressions, opens, dwell_30s,
-			upvotes, downvotes, replies, favorites, shares, high_scores,
-			active_progress, completions, negative_progress,
-				engagement_6h, engagement_24h, engagement_7d, unit_created_at,
-				best_score, hot_score, top_score, rising_score
-		)
-		SELECT ${snapshotId}::uuid, grouped.unit_id, NULL,
-			grouped.impressions, grouped.opens, grouped.dwell30s,
-			grouped.upvotes, grouped.downvotes, grouped.replies, grouped.favorites,
-			grouped.shares, grouped.high_scores, grouped.active_progress,
-			grouped.completions, grouped.negative_progress, grouped.engagement6h,
-			grouped.engagement24h, grouped.engagement7d, grouped.unit_created_at,
-			${bestScore}, ${hotScore}, ${topScore}, ${risingScore}
-		FROM grouped
-	`);
-}
-
-async function buildProfileInterests(
-	tx: DatabaseTransaction,
-	snapshotId: string,
-	sourceWatermark: Date,
-) {
-	await tx.execute(sql`
-		WITH decayed AS (
-			SELECT profile_id, unit_id,
-				sum(weight * exp(-ln(2) * extract(epoch FROM (${sourceWatermark}::timestamptz - bucket_start)) / (${RecommendationPolicy.interestHalfLifeDays} * 86400))) AS weight
-			FROM recommendation_profile_signal_hourly
-			WHERE weight <> 0
-				AND bucket_start >= ${sourceWatermark}::timestamptz - ${RecommendationPolicy.interestMaxAgeDays} * interval '1 day'
-			GROUP BY profile_id, unit_id
-		), resolved AS (
-			SELECT d.profile_id, coalesce(relationship.main_unit_id, d.unit_id) AS unit_id,
-				sum(d.weight) AS weight
-			FROM decayed d
-			LEFT JOIN unit_variant relationship ON relationship.variant_unit_id = d.unit_id
-			GROUP BY d.profile_id, coalesce(relationship.main_unit_id, d.unit_id)
-		), ranked AS (
-			SELECT resolved.profile_id, resolved.unit_id, resolved.weight,
-				row_number() OVER (
-					PARTITION BY resolved.profile_id
-					ORDER BY resolved.weight DESC, resolved.unit_id
-				) AS rank
-			FROM resolved
-			JOIN profile_preference preference ON preference.profile_id = resolved.profile_id
-			LEFT JOIN recommendation_exclusion exclusion
-				ON exclusion.profile_id = resolved.profile_id
-				AND exclusion.unit_id = resolved.unit_id
-			WHERE preference.personalized_feed
-				AND resolved.weight > 0 AND exclusion.unit_id IS NULL
-		)
-		INSERT INTO recommendation_profile_interest (snapshot_id, profile_id, unit_id, weight, rank)
-		SELECT ${snapshotId}::uuid, profile_id, unit_id, weight, rank::int
-		FROM ranked WHERE rank <= ${RecommendationPolicy.maxInterestsPerProfile}
-	`);
-}
-
-async function buildUnitEdges(
-	tx: DatabaseTransaction,
-	snapshotId: string,
-	sourceUnitIds: readonly string[],
-) {
-	if (
-		sourceUnitIds.length < 1 ||
-		sourceUnitIds.length > WorkPolicy.recommendation.maxRefreshBatchUnits
-	)
-		throw new RangeError("Recommendation edge batch exceeds the server-owned limit");
-	const sourceUnitIdList = sql.join(
-		sourceUnitIds.map((id) => sql`${id}::uuid`),
-		sql`, `,
-	);
-	await tx.execute(sql`
-		WITH structural_signal AS (
-			SELECT unit_id AS source_id, 'tag'::text AS kind, tag_id AS signal_id, 1.0 AS weight
-			FROM unit_tag
-			WHERE unit_id IN (${sourceUnitIdList})
-			UNION ALL
-			SELECT source_unit_id, 'credit', credited_unit_id, 1.25
-			FROM credit_attribution
-			WHERE source_unit_id IN (${sourceUnitIdList})
-			UNION ALL
-			SELECT unit_id, 'subject', entity_id, 1.25
-			FROM subject_association
-			WHERE unit_id IN (${sourceUnitIdList})
-			UNION ALL
-			SELECT release_unit_id, 'series', series_id, 2.0
-			FROM series_release
-			WHERE release_unit_id IN (${sourceUnitIdList})
-			UNION ALL
-			SELECT id, 'post-subject', subject_unit_id, 2.0
-			FROM post
-			WHERE id IN (${sourceUnitIdList}) AND subject_unit_id IS NOT NULL
-		), bounded_signal AS (
-			SELECT source_id, kind, signal_id, weight
-			FROM (
-				SELECT structural_signal.*,
-					row_number() OVER (
-						PARTITION BY source_id
-						ORDER BY weight DESC, kind, signal_id
-					) AS signal_rank
-				FROM structural_signal
-			) ranked_signal
-			WHERE signal_rank <= ${RecommendationPolicy.maxStructuralSignals}
-		), bounded_peer AS (
-			SELECT signal.source_id, peer.target_id, signal.weight,
-				peer.peer_count
-			FROM bounded_signal signal
-			CROSS JOIN LATERAL (
-				SELECT target_id, count(*) OVER () AS peer_count
-				FROM (
-					SELECT candidate.target_id
-					FROM (
-					SELECT candidate.unit_id AS target_id
-					FROM unit_tag candidate
-					WHERE signal.kind = 'tag' AND candidate.tag_id = signal.signal_id
-					UNION ALL
-					SELECT candidate.source_unit_id
-					FROM credit_attribution candidate
-					WHERE signal.kind = 'credit'
-						AND candidate.credited_unit_id = signal.signal_id
-					UNION ALL
-					SELECT candidate.unit_id
-					FROM subject_association candidate
-					WHERE signal.kind = 'subject' AND candidate.entity_id = signal.signal_id
-					UNION ALL
-					SELECT candidate.release_unit_id
-					FROM series_release candidate
-					WHERE signal.kind = 'series' AND candidate.series_id = signal.signal_id
-					UNION ALL
-					SELECT signal.signal_id
-					WHERE signal.kind = 'post-subject'
-					) candidate
-					WHERE candidate.target_id <> signal.source_id
-					ORDER BY candidate.target_id
-					LIMIT ${RecommendationPolicy.maxStructuralDegree + 1}
-				) capped_candidate
-			) peer
-		), aggregated AS (
-			SELECT source_id, target_id,
-				sum(weight / ln(2 + peer_count))::double precision AS score
-			FROM bounded_peer
-			WHERE peer_count <= ${RecommendationPolicy.maxStructuralDegree}
-			GROUP BY source_id, target_id
-		), resolved AS (
-			SELECT aggregated.source_id,
-				coalesce(target_variant.main_unit_id, aggregated.target_id) AS target_id,
-				sum(aggregated.score)::double precision AS score
-			FROM aggregated
-			LEFT JOIN unit_variant target_variant
-				ON target_variant.variant_unit_id = aggregated.target_id
-			LEFT JOIN unit_variant source_variant
-				ON source_variant.variant_unit_id = aggregated.source_id
-			WHERE coalesce(target_variant.main_unit_id, aggregated.target_id)
-				<> coalesce(source_variant.main_unit_id, aggregated.source_id)
-			GROUP BY aggregated.source_id,
-				coalesce(target_variant.main_unit_id, aggregated.target_id)
-		), ranked AS (
-			SELECT resolved.*,
-				row_number() OVER (PARTITION BY source_id ORDER BY score DESC, target_id) AS rank
-			FROM resolved
-		)
-		INSERT INTO recommendation_unit_edge (
-			snapshot_id, source_unit_id, target_unit_id,
-			structural_score, behavioral_score, score, rank
-		)
-		SELECT ${snapshotId}::uuid, ranked.source_id, ranked.target_id,
-			ranked.score, 0, ranked.score, ranked.rank::int
-		FROM ranked
-		JOIN unit source_unit ON source_unit.id = ranked.source_id
-		JOIN unit target_unit ON target_unit.id = ranked.target_id
-		WHERE ranked.rank <= ${RecommendationPolicy.maxEdgesPerUnit}
-			AND source_unit.status = 'published' AND source_unit.visibility = 'public'
-			AND source_unit.moderation_status = 'approved' AND source_unit.deleted_at IS NULL
-			AND target_unit.status = 'published' AND target_unit.visibility = 'public'
-			AND target_unit.moderation_status = 'approved' AND target_unit.deleted_at IS NULL
 	`);
 }
 
@@ -332,40 +70,8 @@ export async function refreshRecommendationSnapshot(): Promise<string | null> {
 			if (!snapshot) throw new Error("Recommendation snapshot insertion returned no row");
 			snapshotId = snapshot.id;
 			await session.transaction((tx) =>
-				buildSearchBestScores(tx, snapshot.id, sourceWatermark),
+				buildUnitBestScores(tx, snapshot.id, sourceWatermark),
 			);
-			await session.transaction((tx) => buildUnitStats(tx, snapshot.id, sourceWatermark));
-			await session.transaction((tx) =>
-				buildProfileInterests(tx, snapshot.id, sourceWatermark),
-			);
-
-			let afterId: string | undefined;
-			for (;;) {
-				const sourceRows = await session
-					.select({ id: unit.id })
-					.from(unit)
-					.where(
-						and(
-							eq(unit.status, "published"),
-							eq(unit.visibility, "public"),
-							eq(unit.moderationStatus, "approved"),
-							sql`${unit.deletedAt} is null`,
-							afterId ? gt(unit.id, afterId) : undefined,
-						),
-					)
-					.orderBy(unit.id)
-					.limit(WorkPolicy.recommendation.maxRefreshBatchUnits);
-				if (!sourceRows.length) break;
-				await session.transaction((tx) =>
-					buildUnitEdges(
-						tx,
-						snapshot.id,
-						sourceRows.map(({ id }) => id),
-					),
-				);
-				afterId = sourceRows.at(-1)?.id;
-				if (sourceRows.length < WorkPolicy.recommendation.maxRefreshBatchUnits) break;
-			}
 
 			await session.transaction(async (tx) => {
 				const completedAt = new Date();
@@ -404,22 +110,22 @@ export async function refreshRecommendationSnapshot(): Promise<string | null> {
 
 export async function aggregateRecommendationMetrics() {
 	await database.execute(sql`
-			INSERT INTO recommendation_metric_daily (
-				day, surface, policy_version, impressions, opens, dwell_30s, not_interested
+		insert into recommendation_metric_daily (
+			day, surface, policy_version, impressions, opens, dwell_30s, not_interested
 		)
-		SELECT occurred_at::date, surface, policy_version,
-			count(*) FILTER (WHERE type = 'impression'),
-			count(*) FILTER (WHERE type = 'open'),
-			count(*) FILTER (WHERE type = 'dwell_30s'),
-			count(*) FILTER (WHERE type = 'not_interested')
-		FROM recommendation_event
-		WHERE surface IS NOT NULL AND policy_version IS NOT NULL
-			AND occurred_at >= current_date - interval '2 days'
-		GROUP BY occurred_at::date, surface, policy_version
-		ON CONFLICT (day, surface, policy_version) DO UPDATE SET
+		select occurred_at::date, surface, policy_version,
+			count(*) filter (where type = 'impression'),
+			count(*) filter (where type = 'open'),
+			count(*) filter (where type = 'dwell_30s'),
+			count(*) filter (where type = 'not_interested')
+		from recommendation_event
+		where surface is not null and policy_version is not null
+			and occurred_at >= current_date - interval '2 days'
+		group by occurred_at::date, surface, policy_version
+		on conflict (day, surface, policy_version) do update set
 			impressions = excluded.impressions,
 			opens = excluded.opens,
-				dwell_30s = excluded.dwell_30s,
+			dwell_30s = excluded.dwell_30s,
 			not_interested = excluded.not_interested
 	`);
 }
@@ -432,7 +138,7 @@ export async function purgeRecommendationData(now = new Date()) {
 		now.getTime() - RecommendationPolicy.snapshotRetentionHours * 3_600_000,
 	);
 	const signalBoundary = new Date(
-		now.getTime() - RecommendationPolicy.interestMaxAgeDays * 86_400_000,
+		now.getTime() - RecommendationPolicy.signalRetentionDays * 86_400_000,
 	);
 	await database
 		.delete(recommendationSnapshot)
@@ -447,9 +153,6 @@ export async function purgeRecommendationData(now = new Date()) {
 	);
 	await database.execute(
 		sql`delete from recommendation_unit_signal_hourly where bucket_start < ${signalBoundary}`,
-	);
-	await database.execute(
-		sql`delete from recommendation_profile_signal_hourly where bucket_start < ${signalBoundary}`,
 	);
 }
 

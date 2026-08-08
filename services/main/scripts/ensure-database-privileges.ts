@@ -107,7 +107,7 @@ try {
 			);
 			await transaction.execute(
 				sql.raw(
-					`grant execute on function public.search_text_candidates(text,text[],bigint,uuid,integer,integer) to ${role}`,
+					`grant execute on function public.search_text_candidates(text,text[],text,bigint,uuid,integer,integer) to ${role}`,
 				),
 			);
 			const privilegeProof = await transaction.execute<
@@ -146,7 +146,7 @@ try {
 					) as "canRunPgroongaCommand",
 					has_function_privilege(
 						${applicationRole},
-						'public.search_text_candidates(text,text[],bigint,uuid,integer,integer)',
+						'public.search_text_candidates(text,text[],text,bigint,uuid,integer,integer)',
 						'EXECUTE'
 					) as "canRunSearchText",
 					has_table_privilege(

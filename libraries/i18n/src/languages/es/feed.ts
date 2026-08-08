@@ -14,7 +14,7 @@ export default {
 	subtitle: "Las obras cobran visibilidad a través de la conversación",
 	personalized: "Para ti",
 	sortLabel: "Orden de novedades",
-	sort: { best: "Mejor", hot: "Tendencia", new: "Nuevo", top: "Destacado", rising: "En alza" },
+	sort: { best: "Mejor", new: "Nuevo" },
 	filtersLabel: "Filtros de novedades",
 	filters: {
 		title: "Filtros",

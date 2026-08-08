@@ -14,7 +14,7 @@ export default {
 	subtitle: "Durch Diskussionen werden Werke sichtbar",
 	personalized: "Für dich",
 	sortLabel: "Feed-Sortierung",
-	sort: { best: "Beste", hot: "Im Trend", new: "Neu", top: "Top", rising: "Aufsteigend" },
+	sort: { best: "Beste", new: "Neu" },
 	filtersLabel: "Feed-Filter",
 	filters: {
 		title: "Filter",

@@ -42,10 +42,15 @@ registry. Created, updated, published, poll-close, reply-count, and follower-cou
 the complete sort tuple and Unit ID. Ascending indexes use an ascending Unit-ID tie-breaker and
 descending indexes use a descending tie-breaker, allowing PostgreSQL row-value comparisons to
 start at the cursor instead of filtering every preceding index entry. Nullable timestamps use
-separate non-null and null phases. `best` pins the cursor to one immutable daily recommendation
-snapshot: positive 24-hour scores use the sparse `search_best_score_order_idx`, then zero-score
-Units continue from `unit_public_updated_at_desc_idx`. The sparse projection is rebuilt before a
-new snapshot becomes active, so its size follows positive activity rather than all Units.
+separate non-null and null phases. `best` pins the cursor to one immutable hourly recommendation
+snapshot: positive time-decayed scores use the sparse `unit_best_score_kind_order_idx`, then
+zero-score Units continue from `unit_public_kind_updated_at_desc_idx`. Per-kind Top-K branches
+are merged after each branch has used its equality-leading index. The sparse projection is rebuilt
+before a new snapshot becomes active, so its size follows recent positive activity rather than all
+Units.
+
+See [Sparse best ranking](../../../../../docs/architecture/sparse-best-ranking.md) for the shared
+Feed/Search model, 500-million-row complexity boundary, and deployment cutover.
 
 For an unfiltered page, B-tree candidate generation is `O(log N + k)` at every cursor depth, not
 only on the first page. Residual authorization or relational filters make the request

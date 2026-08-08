@@ -14,7 +14,7 @@ export default {
 	subtitle: "作品因討論而被看見",
 	personalized: "為你推薦",
 	sortLabel: "動態排序",
-	sort: { best: "最佳", hot: "熱門", new: "最新", top: "高評價", rising: "熱度上升" },
+	sort: { best: "最佳", new: "最新" },
 	filtersLabel: "動態篩選",
 	filters: {
 		title: "篩選",

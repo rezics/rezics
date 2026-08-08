@@ -14,7 +14,7 @@ export default {
 	subtitle: "Works become visible through discussion",
 	personalized: "For you",
 	sortLabel: "Feed sorting",
-	sort: { best: "Best", hot: "Hot", new: "New", top: "Top", rising: "Rising" },
+	sort: { best: "Best", new: "New" },
 	filtersLabel: "Feed filters",
 	filters: {
 		title: "Filters",

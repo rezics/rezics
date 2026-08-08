@@ -3,10 +3,11 @@ import { describe, expect, it } from "vitest";
 import { requirePolicyBound, WorkPolicy } from "./policy";
 
 describe("bounded-work policy", () => {
-	it("keeps the structural peer proof equal to S * D", () => {
-		expect(WorkPolicy.recommendation.maxRawStructuralPeers).toBe(
-			WorkPolicy.recommendation.maxStructuralSignals *
-				WorkPolicy.recommendation.maxStructuralDegree,
+	it("keeps recommendation work independent from catalogue size", () => {
+		expect(WorkPolicy.recommendation.minimumRefreshIntervalMs).toBe(3_600_000);
+		expect(WorkPolicy.recommendation.maxOnlineCandidates).toBe(256);
+		expect(WorkPolicy.recommendation.maxRelationCandidates).toBeLessThanOrEqual(
+			WorkPolicy.recommendation.maxOnlineCandidates,
 		);
 	});
 

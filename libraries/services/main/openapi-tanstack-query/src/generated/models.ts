@@ -23984,10 +23984,7 @@ export type PostApiFeedQueryStatus503 = {
 
 export const PostApiFeedQueryRequestSortEnum = {
 	best: "best",
-	hot: "hot",
 	new: "new",
-	top: "top",
-	rising: "rising",
 } as const;
 
 export type PostApiFeedQueryRequestSortEnum =

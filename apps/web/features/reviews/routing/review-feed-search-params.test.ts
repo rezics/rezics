@@ -19,7 +19,7 @@ describe("Review Feed route state", () => {
 				label: "Readers",
 			},
 			scores: [8, 9],
-			sort: "top",
+			sort: "new",
 			tags: ["019f9000-0000-7000-8000-000000000004"],
 		});
 		const params = new URL(href, "https://example.invalid").searchParams;
@@ -41,7 +41,7 @@ describe("Review Feed route state", () => {
 			reviewFeedSearchParams.scores.parseServerSide(requiredParam(params, "scores")),
 		).toEqual([8, 9]);
 		expect(reviewFeedSearchParams.sort.parseServerSide(requiredParam(params, "sort"))).toBe(
-			"top",
+			"new",
 		);
 		expect(reviewFeedSearchParams.tags.parseServerSide(requiredParam(params, "tags"))).toEqual([
 			"019f9000-0000-7000-8000-000000000004",

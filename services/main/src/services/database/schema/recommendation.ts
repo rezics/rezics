@@ -7,7 +7,6 @@ import {
 	doublePrecision,
 	foreignKey,
 	index,
-	integer,
 	pgEnum,
 	primaryKey,
 	text,
@@ -21,6 +20,7 @@ import {
 	RecommendationEventTypeValues,
 	RecommendationSnapshotStateValues,
 	RecommendationSurfaceValues,
+	type UnitKind,
 	toEnumValues,
 } from "./contract-values";
 import {
@@ -31,7 +31,6 @@ import {
 } from "./columns";
 import { profile } from "./profile";
 import { unit } from "./unit";
-import { realm } from "./realm";
 
 export const recommendationSurface = pgEnum(
 	"recommendation_surface",
@@ -139,108 +138,19 @@ export const recommendationExclusion = pgTable(
 	],
 );
 
-export const recommendationUnitStat = pgTable(
-	"recommendation_unit_stat",
-	{
-		id: createUuidv7PrimaryKey(),
-		snapshotId: uuid().notNull(),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
-		contextRealmId: uuid().references(() => realm.id, { onDelete: "cascade" }),
-		impressions: bigint({ mode: "bigint" }).default(0n).notNull(),
-		opens: bigint({ mode: "bigint" }).default(0n).notNull(),
-		dwell30s: bigint("dwell_30s", { mode: "bigint" }).default(0n).notNull(),
-		upvotes: bigint({ mode: "bigint" }).default(0n).notNull(),
-		downvotes: bigint({ mode: "bigint" }).default(0n).notNull(),
-		replies: bigint({ mode: "bigint" }).default(0n).notNull(),
-		favorites: bigint({ mode: "bigint" }).default(0n).notNull(),
-		shares: bigint({ mode: "bigint" }).default(0n).notNull(),
-		highScores: bigint({ mode: "bigint" }).default(0n).notNull(),
-		activeProgress: bigint({ mode: "bigint" }).default(0n).notNull(),
-		completions: bigint({ mode: "bigint" }).default(0n).notNull(),
-		negativeProgress: bigint({ mode: "bigint" }).default(0n).notNull(),
-		engagement6h: doublePrecision("engagement_6h").default(0).notNull(),
-		engagement24h: doublePrecision("engagement_24h").default(0).notNull(),
-		engagement7d: doublePrecision("engagement_7d").default(0).notNull(),
-		unitCreatedAt: createTimestampMsColumn().notNull(),
-		bestScore: doublePrecision("best_score").notNull(),
-		hotScore: doublePrecision("hot_score").notNull(),
-		topScore: doublePrecision("top_score").notNull(),
-		risingScore: doublePrecision("rising_score").notNull(),
-		createdAt: createCreatedAtColumn(),
-	},
-	(table) => [
-		unique("recommendation_unit_stat_identity_key")
-			.on(table.snapshotId, table.unitId, table.contextRealmId)
-			.nullsNotDistinct(),
-		foreignKey({
-			columns: [table.snapshotId],
-			foreignColumns: [recommendationSnapshot.id],
-			name: "recommendation_stat_snapshot_fkey",
-		}).onDelete("cascade"),
-		index("recommendation_unit_stat_snapshot_unit_idx").on(table.snapshotId, table.unitId),
-		index("recommendation_unit_stat_snapshot_best_idx")
-			.on(
-				table.snapshotId,
-				table.bestScore.desc(),
-				table.unitCreatedAt.desc(),
-				table.unitId.desc(),
-			)
-			.where(sql`${table.contextRealmId} is null`),
-		index("recommendation_unit_stat_snapshot_hot_idx")
-			.on(
-				table.snapshotId,
-				table.hotScore.desc(),
-				table.unitCreatedAt.desc(),
-				table.unitId.desc(),
-			)
-			.where(sql`${table.contextRealmId} is null`),
-		index("recommendation_unit_stat_snapshot_top_idx")
-			.on(
-				table.snapshotId,
-				table.topScore.desc(),
-				table.unitCreatedAt.desc(),
-				table.unitId.desc(),
-			)
-			.where(sql`${table.contextRealmId} is null`),
-		index("recommendation_unit_stat_snapshot_rising_idx")
-			.on(
-				table.snapshotId,
-				table.risingScore.desc(),
-				table.unitCreatedAt.desc(),
-				table.unitId.desc(),
-			)
-			.where(sql`${table.contextRealmId} is null`),
-		check(
-			"recommendation_unit_stat_counts_check",
-			sql`${table.impressions} >= 0 and ${table.opens} >= 0 and ${table.dwell30s} >= 0 and ${table.upvotes} >= 0 and ${table.downvotes} >= 0 and ${table.replies} >= 0 and ${table.favorites} >= 0 and ${table.shares} >= 0 and ${table.highScores} >= 0 and ${table.activeProgress} >= 0 and ${table.completions} >= 0 and ${table.negativeProgress} >= 0`,
-		),
-		check(
-			"recommendation_unit_stat_engagement_check",
-			sql`${table.engagement6h} >= 0 and ${table.engagement24h} >= 0 and ${table.engagement7d} >= 0`,
-		),
-		check(
-			"recommendation_unit_stat_objective_score_check",
-			sql`${table.bestScore} >= 0 and ${table.hotScore} >= 0 and ${table.topScore} >= 0 and ${table.risingScore} >= 0`,
-		),
-	],
-);
-
 /**
- * Sparse, immutable Search ordering projection for one recommendation snapshot.
+ * Sparse, immutable `best` ordering projection for one recommendation snapshot.
  *
  * Zero-score Units are deliberately absent and are read from the public Unit
- * updated-at index. This keeps the daily projection proportional to Units with
- * positive 24-hour engagement instead of the complete Search universe.
+ * updated-at index. Work and storage therefore follow recently active Units,
+ * never the complete discovery universe.
  */
-export const searchBestScore = pgTable(
-	"search_best_score",
+export const unitBestScore = pgTable(
+	"unit_best_score",
 	{
 		snapshotId: uuid().notNull(),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
+		unitKind: text().$type<UnitKind>().notNull(),
 		score: doublePrecision().notNull(),
 		unitUpdatedAt: createTimestampMsColumn().notNull(),
 	},
@@ -249,88 +159,27 @@ export const searchBestScore = pgTable(
 		foreignKey({
 			columns: [table.snapshotId],
 			foreignColumns: [recommendationSnapshot.id],
-			name: "search_best_score_snapshot_fkey",
+			name: "unit_best_score_snapshot_fkey",
 		}).onDelete("cascade"),
-		index("search_best_score_order_idx").on(
+		foreignKey({
+			columns: [table.unitId, table.unitKind],
+			foreignColumns: [unit.id, unit.kind],
+			name: "unit_best_score_unit_fkey",
+		}).onDelete("cascade"),
+		index("unit_best_score_order_idx").on(
 			table.snapshotId,
 			table.score.desc().nullsFirst(),
 			table.unitUpdatedAt.desc().nullsFirst(),
 			table.unitId.desc().nullsFirst(),
 		),
-		check("search_best_score_positive_check", sql`${table.score} > 0`),
-	],
-);
-
-export const recommendationUnitEdge = pgTable(
-	"recommendation_unit_edge",
-	{
-		snapshotId: uuid().notNull(),
-		sourceUnitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
-		targetUnitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
-		structuralScore: doublePrecision().default(0).notNull(),
-		behavioralScore: doublePrecision().default(0).notNull(),
-		score: doublePrecision().notNull(),
-		rank: integer().notNull(),
-		createdAt: createCreatedAtColumn(),
-	},
-	(table) => [
-		primaryKey({ columns: [table.snapshotId, table.sourceUnitId, table.targetUnitId] }),
-		foreignKey({
-			columns: [table.snapshotId],
-			foreignColumns: [recommendationSnapshot.id],
-			name: "recommendation_edge_snapshot_fkey",
-		}).onDelete("cascade"),
-		index("recommendation_unit_edge_source_rank_idx").on(
+		index("unit_best_score_kind_order_idx").on(
 			table.snapshotId,
-			table.sourceUnitId,
-			table.rank,
+			table.unitKind,
+			table.score.desc().nullsFirst(),
+			table.unitUpdatedAt.desc().nullsFirst(),
+			table.unitId.desc().nullsFirst(),
 		),
-		index("recommendation_unit_edge_target_idx").on(table.snapshotId, table.targetUnitId),
-		check(
-			"recommendation_unit_edge_not_self_check",
-			sql`${table.sourceUnitId} <> ${table.targetUnitId}`,
-		),
-		check(
-			"recommendation_unit_edge_score_check",
-			sql`${table.structuralScore} >= 0 and ${table.behavioralScore} >= 0 and ${table.score} > 0 and ${table.rank} between 1 and 100`,
-		),
-	],
-);
-
-export const recommendationProfileInterest = pgTable(
-	"recommendation_profile_interest",
-	{
-		snapshotId: uuid().notNull(),
-		profileId: uuid()
-			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
-		weight: doublePrecision().notNull(),
-		rank: integer().notNull(),
-		createdAt: createCreatedAtColumn(),
-	},
-	(table) => [
-		primaryKey({ columns: [table.snapshotId, table.profileId, table.unitId] }),
-		foreignKey({
-			columns: [table.snapshotId],
-			foreignColumns: [recommendationSnapshot.id],
-			name: "recommendation_interest_snapshot_fkey",
-		}).onDelete("cascade"),
-		index("recommendation_profile_interest_profile_rank_idx").on(
-			table.snapshotId,
-			table.profileId,
-			table.rank,
-		),
-		check(
-			"recommendation_profile_interest_value_check",
-			sql`${table.weight} > 0 and ${table.rank} between 1 and 50`,
-		),
+		check("unit_best_score_positive_check", sql`${table.score} > 0`),
 	],
 );
 

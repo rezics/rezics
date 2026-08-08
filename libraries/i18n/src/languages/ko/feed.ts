@@ -14,7 +14,7 @@ export default {
 	subtitle: "작품은 토론을 통해 표시됩니다.",
 	personalized: "당신을 위해",
 	sortLabel: "피드 정렬",
-	sort: { best: "최고", hot: "인기", new: "새로움", top: "인기", rising: "상승 중" },
+	sort: { best: "최고", new: "새로움" },
 	filtersLabel: "피드 필터",
 	filters: {
 		title: "필터",
