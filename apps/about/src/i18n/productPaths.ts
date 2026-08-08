@@ -1,4 +1,4 @@
-import { ABOUT_LOCALES, ABOUT_SITE_ORIGIN, DEFAULT_LOCALE, type AboutLocale } from "./locales";
+import { ABOUT_LOCALES, ABOUT_SITE_ORIGIN, type AboutLocale } from "./locales";
 
 export type PublicPageKind =
 	| "home"
@@ -43,7 +43,7 @@ export function getDocumentationPath(locale: AboutLocale, slug: string): string 
 	return `/${locale}/docs/${slug}/`;
 }
 
-export function getContactPath(locale: AboutLocale = DEFAULT_LOCALE): string {
+export function getContactPath(locale: AboutLocale): string {
 	return `/${locale}/contact-us/`;
 }
 
@@ -76,8 +76,7 @@ export function getCanonicalForPath(path: string): string {
 }
 
 export function getAlternatePaths(kind: PublicPageKind, slug?: string): readonly AlternatePath[] {
-	const locales = kind === "contact" ? [DEFAULT_LOCALE] : ABOUT_LOCALES;
-	return locales.map((locale) => ({
+	return ABOUT_LOCALES.map((locale) => ({
 		locale,
 		path: getLocalizedPath(locale, kind, slug),
 	}));

@@ -1,8 +1,9 @@
 ---
 import { buttonVariants } from "@rezics/ui";
 
-import { enContactCopy as copy } from "../../../content/locales/en/contact";
+import { CONTACT_LOCALES, getContactCopy, isContactLocale } from "../../../content/locales";
 import { ABOUT_LOCALES, DEFAULT_LOCALE, requireAboutLocale } from "../../../i18n/locales";
+import { getContactPath } from "../../../i18n/productPaths";
 import SiteLayout from "../../../layouts/SiteLayout.astro";
 
 const maintainerAvatarUrl = "https://avatars.githubusercontent.com/u/68896486?v=4";
@@ -13,12 +14,25 @@ export function getStaticPaths() {
 }
 
 const locale = requireAboutLocale(Astro.params.locale);
-if (locale !== DEFAULT_LOCALE) {
-	return Astro.redirect(`/${DEFAULT_LOCALE}/contact-us/`);
+const contactPage = isContactLocale(locale)
+	? { status: "localized" as const, copy: getContactCopy(locale) }
+	: {
+			status: "fallback" as const,
+			response: Astro.redirect(getContactPath(DEFAULT_LOCALE)),
+		};
+if (contactPage.status === "fallback") {
+	return contactPage.response;
 }
+const copy = contactPage.copy;
 ---
 
-<SiteLayout locale={locale} active="contact" pageKind="contact" meta={copy.meta}>
+<SiteLayout
+  locale={locale}
+  active="contact"
+  pageKind="contact"
+  alternateLocales={CONTACT_LOCALES}
+  meta={copy.meta}
+>
   <section class="page-hero contact-hero">
     <div class="shell page-hero__inner">
       <h1>{copy.hero.title}</h1>

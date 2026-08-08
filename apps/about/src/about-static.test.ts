@@ -9,7 +9,7 @@ import {
 	isProductId,
 	validateProductRegistry,
 } from "./content/productRegistry";
-import { getSiteCopy } from "./content/locales";
+import { CONTACT_LOCALES, getContactCopy, getSiteCopy, isContactLocale } from "./content/locales";
 import { PRODUCT_LAYER_IDS } from "./content/productTypes";
 import {
 	ABOUT_LOCALES,
@@ -90,6 +90,13 @@ describe("public content contract", () => {
 		}
 	});
 
+	test("registers every available contact translation", () => {
+		expect(CONTACT_LOCALES).toEqual(["zh-hant", "en"]);
+		expect(getContactCopy("zh-hant").hero.title).toBe("聯繫我們");
+		expect(getContactCopy("en").hero.title).toBe("Contact us");
+		expect(isContactLocale("zh-hans")).toBe(false);
+	});
+
 	test("builds stable public paths and uses the valid app root", () => {
 		expect(getAppEntryUrl()).toBe("https://www.rezics.com/");
 		expect(getHomePath("en")).toBe("/en/");
@@ -101,8 +108,9 @@ describe("public content contract", () => {
 			"/en/legal/rezics-unit-content-license-v1/",
 		);
 		expect(getDocumentationPath("en", "api/tokens")).toBe("/en/docs/api/tokens/");
-		expect(getContactPath()).toBe("/en/contact-us/");
-		expect(getAlternatePaths("contact")).toEqual([{ locale: "en", path: "/en/contact-us/" }]);
+		expect(getContactPath("en")).toBe("/en/contact-us/");
+		expect(getContactPath("zh-hant")).toBe("/zh-hant/contact-us/");
+		expect(getAlternatePaths("contact")).toHaveLength(ABOUT_LOCALES.length);
 		expect(getAlternatePaths("product", "unit")).toHaveLength(ABOUT_LOCALES.length);
 		expect(getAboutLocaleFallback("zh-hant")).toBe(DEFAULT_LOCALE);
 		expect(getAboutLocaleFallback(DEFAULT_LOCALE)).toBeUndefined();

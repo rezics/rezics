@@ -116,7 +116,7 @@ const copy = getSiteCopy(locale);
         <h2>{copy.home.contact.title}</h2>
         <p>{copy.home.contact.body}</p>
         <div>
-          <a class={buttonVariants({ variant: "outline", size: "xl" })} href={getContactPath()}>
+          <a class={buttonVariants({ variant: "outline", size: "xl" })} href={getContactPath(locale)}>
             {copy.home.contact.action}
           </a>
         </div>

@@ -1,7 +1,8 @@
 import { getDocumentationDocuments } from "../content/documentationDocuments";
 import { getProductDocuments } from "../content/productDocuments";
 import { getLegalDocuments } from "../content/legalDocuments";
-import { ABOUT_LOCALES, DEFAULT_LOCALE } from "../i18n/locales";
+import { CONTACT_LOCALES } from "../content/locales";
+import { ABOUT_LOCALES } from "../i18n/locales";
 import {
 	getCanonicalForPath,
 	getContactPath,
@@ -42,7 +43,7 @@ export async function GET(): Promise<Response> {
 			getCanonicalForPath(getDocumentationPath(locale, slug)),
 		),
 	);
-	urls.push(getCanonicalForPath(getContactPath(DEFAULT_LOCALE)));
+	urls.push(...CONTACT_LOCALES.map((locale) => getCanonicalForPath(getContactPath(locale))));
 
 	return new Response(
 		`<?xml version="1.0" encoding="UTF-8"?>

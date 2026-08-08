@@ -7,6 +7,12 @@ import type { SiteCopy } from "./contract";
 import { zhHansContent } from "./zh-hans/content";
 import { zhHantContent } from "./zh-hant/content";
 
+export {
+	CONTACT_LOCALES,
+	getContactCopy,
+	isContactLocale,
+} from "./contact";
+export type { ContactLocale } from "./contact";
 export type { ContactCopy, MainPageId, PageId, SiteCopy } from "./contract";
 
 const contentByLocale = {

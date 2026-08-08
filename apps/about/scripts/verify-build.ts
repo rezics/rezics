@@ -2,6 +2,7 @@ import { access, readdir, readFile } from "node:fs/promises";
 import { join, relative, sep } from "node:path";
 
 import { PRODUCT_IDS, getProductById, isProductId } from "../src/content/productRegistry";
+import { CONTACT_LOCALES, isContactLocale } from "../src/content/locales";
 import {
 	ABOUT_LOCALES,
 	ABOUT_LOCALE_META,
@@ -133,7 +134,7 @@ const expectedUrlCount =
 	[...productIdsByLocale.values()].reduce((count, productIds) => count + productIds.length, 0) +
 	legalDocumentCount +
 	documentationDocumentCount +
-	1;
+	CONTACT_LOCALES.length;
 
 const sitemap = await readFile(join(distRoot, "sitemap.xml"), "utf8");
 const sitemapUrls = sitemap.match(/<url>/g) ?? [];
@@ -178,7 +179,7 @@ for (const locale of ABOUT_LOCALES) {
 	const home = await readOutput(homePath);
 	if (
 		!home.includes('class="page-section home-contact"') ||
-		!home.includes(`href="${getContactPath()}"`)
+		!home.includes(`href="${getContactPath(locale)}"`)
 	) {
 		throw new Error(`Missing the contact call to action in ${homePath}`);
 	}
@@ -218,18 +219,31 @@ for (const locale of ABOUT_LOCALES) {
 	}
 }
 
-const contactPath = getContactPath(DEFAULT_LOCALE);
-const contact = await readOutput(contactPath);
-const contactCanonical = new URL(contactPath, ABOUT_SITE_ORIGIN).toString();
-if (!contact.includes(`rel="canonical" href="${contactCanonical}"`)) {
-	throw new Error(`Missing canonical ${contactCanonical} in ${contactPath}`);
-}
+const defaultContactPath = getContactPath(DEFAULT_LOCALE);
+const defaultContactCanonical = new URL(defaultContactPath, ABOUT_SITE_ORIGIN).toString();
 for (const locale of ABOUT_LOCALES) {
-	if (locale === DEFAULT_LOCALE) continue;
-	const html = await readOutput(getContactPath(locale));
+	const localizedContactPath = getContactPath(locale);
+	const html = await readOutput(localizedContactPath);
+	if (isContactLocale(locale)) {
+		const canonical = new URL(localizedContactPath, ABOUT_SITE_ORIGIN).toString();
+		if (!html.includes(`rel="canonical" href="${canonical}"`)) {
+			throw new Error(`Missing canonical ${canonical} in ${localizedContactPath}`);
+		}
+		for (const alternateLocale of CONTACT_LOCALES) {
+			const alternate = new URL(
+				getContactPath(alternateLocale),
+				ABOUT_SITE_ORIGIN,
+			).toString();
+			const languageTag = ABOUT_LOCALE_META[alternateLocale].htmlLang;
+			if (!html.includes(`hreflang="${languageTag}" href="${alternate}"`)) {
+				throw new Error(`Missing ${alternateLocale} alternate on ${localizedContactPath}.`);
+			}
+		}
+		continue;
+	}
 	if (
-		!html.includes(`url=${contactPath}`) ||
-		!html.includes(`rel="canonical" href="${contactCanonical}"`)
+		!html.includes(`url=${defaultContactPath}`) ||
+		!html.includes(`rel="canonical" href="${defaultContactCanonical}"`)
 	) {
 		throw new Error(`Missing ${locale} contact fallback redirect.`);
 	}
