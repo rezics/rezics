@@ -1,4 +1,5 @@
 import { and, desc, eq, sql } from "drizzle-orm";
+import type { ContentLanguage } from "@rezics/i18n";
 
 import { database } from "../database";
 import { toSafeInteger } from "../database/integer";
@@ -9,6 +10,7 @@ import {
 } from "../database/schema";
 import { ExternalLinkVisibilityScoreThreshold } from "../database/schema/contract-values";
 import { wilsonLowerBoundSql } from "../tags/ranking";
+import { getReadableUnitPresentationsByIds } from "./attribution";
 
 /** Returns only external links accepted for public detail presentation. */
 export async function getAcceptedUnitExternalLinks(unitId: string, viewerProfileId?: string) {
@@ -67,4 +69,36 @@ export async function getAcceptedUnitExternalLinks(unitId: string, viewerProfile
 		score: toSafeInteger(link.score ?? 0n, "external link vote score"),
 		voteCount: toSafeInteger(link.voteCount ?? 0n, "external link vote count"),
 	}));
+}
+
+export async function attachReadableSourceEntities<
+	ExternalLink extends { readonly sourceEntityId: string },
+>(
+	externalLinks: readonly ExternalLink[],
+	localizationLanguages: readonly ContentLanguage[],
+	profileId?: string,
+) {
+	const sourceEntities = await getReadableUnitPresentationsByIds({
+		unitIds: [...new Set(externalLinks.map(({ sourceEntityId }) => sourceEntityId))],
+		localizationLanguages,
+		profileId,
+	});
+	return externalLinks.flatMap((link) => {
+		const sourceEntity = sourceEntities.get(link.sourceEntityId);
+		return sourceEntity ? [{ ...link, sourceEntity }] : [];
+	});
+}
+
+/** Returns accepted links only when their localized source Entity is readable. */
+export async function getAcceptedUnitExternalLinksWithSources(input: {
+	readonly unitId: string;
+	readonly localizationLanguages: readonly ContentLanguage[];
+	readonly profileId?: string;
+}) {
+	const externalLinks = await getAcceptedUnitExternalLinks(input.unitId, input.profileId);
+	return attachReadableSourceEntities(
+		externalLinks,
+		input.localizationLanguages,
+		input.profileId,
+	);
 }

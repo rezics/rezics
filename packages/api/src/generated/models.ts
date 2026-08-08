@@ -59596,6 +59596,53 @@ export const PostApiUnitsByTypeStatus200SubjectAssociationsRoleEnum = {
 export type PostApiUnitsByTypeStatus200SubjectAssociationsRoleEnum =
 	(typeof PostApiUnitsByTypeStatus200SubjectAssociationsRoleEnum)[keyof typeof PostApiUnitsByTypeStatus200SubjectAssociationsRoleEnum];
 
+export const PostApiUnitsByTypeStatus200ExternalLinksSourceEntityKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type PostApiUnitsByTypeStatus200ExternalLinksSourceEntityKindEnum =
+	(typeof PostApiUnitsByTypeStatus200ExternalLinksSourceEntityKindEnum)[keyof typeof PostApiUnitsByTypeStatus200ExternalLinksSourceEntityKindEnum];
+
+export const PostApiUnitsByTypeStatus200ExternalLinksSourceEntityLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiUnitsByTypeStatus200ExternalLinksSourceEntityLanguageEnum =
+	(typeof PostApiUnitsByTypeStatus200ExternalLinksSourceEntityLanguageEnum)[keyof typeof PostApiUnitsByTypeStatus200ExternalLinksSourceEntityLanguageEnum];
+
+export const PostApiUnitsByTypeStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PostApiUnitsByTypeStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum =
+	(typeof PostApiUnitsByTypeStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum)[keyof typeof PostApiUnitsByTypeStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum];
+
 export const PostApiUnitsByTypeStatus200VariantContextVariantsTypeEnum = {
 	book: "book",
 	software: "software",
@@ -60490,6 +60537,92 @@ export type PostApiUnitsByTypeStatus200 = {
 		 * @type string
 		 */
 		updatedAt: string;
+		/**
+		 * @type object
+		 */
+		sourceEntity: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @default 'slug_namespace'
+			 * @type string
+			 */
+			kind: PostApiUnitsByTypeStatus200ExternalLinksSourceEntityKindEnum;
+			/**
+			 * @type string
+			 */
+			language: PostApiUnitsByTypeStatus200ExternalLinksSourceEntityLanguageEnum;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: PostApiUnitsByTypeStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
+				| null;
+		};
 	}[];
 	/**
 	 * @type array
@@ -62010,6 +62143,53 @@ export const GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsRoleEnum = {
 export type GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsRoleEnum =
 	(typeof GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsRoleEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsRoleEnum];
 
+export const GetApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityKindEnum =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityKindEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityKindEnum];
+
+export const GetApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityLanguageEnum =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityLanguageEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityLanguageEnum];
+
+export const GetApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum];
+
 export const GetApiUnitsByTypeByUnitIdStatus200VariantContextVariantsTypeEnum = {
 	book: "book",
 	software: "software",
@@ -62904,6 +63084,92 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		 * @type string
 		 */
 		updatedAt: string;
+		/**
+		 * @type object
+		 */
+		sourceEntity: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @default 'slug_namespace'
+			 * @type string
+			 */
+			kind: GetApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityKindEnum;
+			/**
+			 * @type string
+			 */
+			language: GetApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityLanguageEnum;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: GetApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
+				| null;
+		};
 	}[];
 	/**
 	 * @type array
@@ -63495,6 +63761,53 @@ export const PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsRoleEnum = {
 
 export type PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsRoleEnum =
 	(typeof PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsRoleEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsRoleEnum];
+
+export const PatchApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityKindEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityKindEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityKindEnum];
+
+export const PatchApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityLanguageEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityLanguageEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityLanguageEnum];
+
+export const PatchApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum];
 
 export const PatchApiUnitsByTypeByUnitIdStatus200VariantContextVariantsTypeEnum = {
 	book: "book",
@@ -64390,6 +64703,92 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		 * @type string
 		 */
 		updatedAt: string;
+		/**
+		 * @type object
+		 */
+		sourceEntity: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @default 'slug_namespace'
+			 * @type string
+			 */
+			kind: PatchApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityKindEnum;
+			/**
+			 * @type string
+			 */
+			language: PatchApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityLanguageEnum;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: PatchApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
+				| null;
+		};
 	}[];
 	/**
 	 * @type array
@@ -65278,6 +65677,55 @@ export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociatio
 
 export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsRoleEnum =
 	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsRoleEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsRoleEnum];
+
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200ExternalLinksSourceEntityKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200ExternalLinksSourceEntityKindEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200ExternalLinksSourceEntityKindEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200ExternalLinksSourceEntityKindEnum];
+
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200ExternalLinksSourceEntityLanguageEnum =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200ExternalLinksSourceEntityLanguageEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200ExternalLinksSourceEntityLanguageEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200ExternalLinksSourceEntityLanguageEnum];
+
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum =
+	{
+		fas: "fas",
+		fab: "fab",
+	} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum];
 
 export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200VariantContextVariantsTypeEnum = {
 	book: "book",
@@ -66175,6 +66623,92 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 		 * @type string
 		 */
 		updatedAt: string;
+		/**
+		 * @type object
+		 */
+		sourceEntity: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @default 'slug_namespace'
+			 * @type string
+			 */
+			kind: PatchApiUnitsByTypeByUnitIdVariantContextStatus200ExternalLinksSourceEntityKindEnum;
+			/**
+			 * @type string
+			 */
+			language: PatchApiUnitsByTypeByUnitIdVariantContextStatus200ExternalLinksSourceEntityLanguageEnum;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: PatchApiUnitsByTypeByUnitIdVariantContextStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
+				| null;
+		};
 	}[];
 	/**
 	 * @type array
@@ -66943,6 +67477,56 @@ export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAsso
 
 export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsRoleEnum =
 	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsRoleEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsRoleEnum];
+
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200ExternalLinksSourceEntityKindEnum =
+	{
+		slug_namespace: "slug_namespace",
+		profile: "profile",
+		book: "book",
+		software: "software",
+		media: "media",
+		video: "video",
+		audio: "audio",
+		release: "release",
+		entity: "entity",
+		label: "label",
+		tag: "tag",
+		structure: "structure",
+		series: "series",
+		zone: "zone",
+		zone_page: "zone_page",
+		collection: "collection",
+		post: "post",
+		poll: "poll",
+		realm: "realm",
+		realm_rule: "realm_rule",
+	} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200ExternalLinksSourceEntityKindEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200ExternalLinksSourceEntityKindEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200ExternalLinksSourceEntityKindEnum];
+
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200ExternalLinksSourceEntityLanguageEnum =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200ExternalLinksSourceEntityLanguageEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200ExternalLinksSourceEntityLanguageEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200ExternalLinksSourceEntityLanguageEnum];
+
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum =
+	{
+		fas: "fas",
+		fab: "fab",
+	} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum];
 
 export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200VariantContextVariantsTypeEnum =
 	{
@@ -67842,6 +68426,92 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 		 * @type string
 		 */
 		updatedAt: string;
+		/**
+		 * @type object
+		 */
+		sourceEntity: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @default 'slug_namespace'
+			 * @type string
+			 */
+			kind: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200ExternalLinksSourceEntityKindEnum;
+			/**
+			 * @type string
+			 */
+			language: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200ExternalLinksSourceEntityLanguageEnum;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
+				| null;
+		};
 	}[];
 	/**
 	 * @type array
@@ -68620,6 +69290,56 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAss
 
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsRoleEnum =
 	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsRoleEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsRoleEnum];
+
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200ExternalLinksSourceEntityKindEnum =
+	{
+		slug_namespace: "slug_namespace",
+		profile: "profile",
+		book: "book",
+		software: "software",
+		media: "media",
+		video: "video",
+		audio: "audio",
+		release: "release",
+		entity: "entity",
+		label: "label",
+		tag: "tag",
+		structure: "structure",
+		series: "series",
+		zone: "zone",
+		zone_page: "zone_page",
+		collection: "collection",
+		post: "post",
+		poll: "poll",
+		realm: "realm",
+		realm_rule: "realm_rule",
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200ExternalLinksSourceEntityKindEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200ExternalLinksSourceEntityKindEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200ExternalLinksSourceEntityKindEnum];
+
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200ExternalLinksSourceEntityLanguageEnum =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200ExternalLinksSourceEntityLanguageEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200ExternalLinksSourceEntityLanguageEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200ExternalLinksSourceEntityLanguageEnum];
+
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum =
+	{
+		fas: "fas",
+		fab: "fab",
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum];
 
 export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200VariantContextVariantsTypeEnum =
 	{
@@ -69519,6 +70239,92 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		 * @type string
 		 */
 		updatedAt: string;
+		/**
+		 * @type object
+		 */
+		sourceEntity: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @default 'slug_namespace'
+			 * @type string
+			 */
+			kind: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200ExternalLinksSourceEntityKindEnum;
+			/**
+			 * @type string
+			 */
+			language: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200ExternalLinksSourceEntityLanguageEnum;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200ExternalLinksSourceEntityAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
+				| null;
+		};
 	}[];
 	/**
 	 * @type array

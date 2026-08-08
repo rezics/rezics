@@ -361,15 +361,7 @@ const UnitExternalLinkCurationResponseFields = {
 	updatedAt: DateTime,
 } as const;
 
-const AcceptedUnitExternalLinkResponse = t.Object(
-	{
-		...UnitExternalLinkIdentityResponseFields,
-		accepted: t.Literal(true),
-		...UnitExternalLinkCurationResponseFields,
-	},
-	{ additionalProperties: false },
-);
-const AcceptedEntityExternalLinkResponse = t.Object(
+const AcceptedExternalLinkResponse = t.Object(
 	{
 		...UnitExternalLinkIdentityResponseFields,
 		accepted: t.Literal(true),
@@ -409,7 +401,7 @@ export const UnitDetailResponse = t.Object({
 			contextPost: t.Nullable(AssociationContextPostResponse),
 		}),
 	),
-	externalLinks: t.Array(AcceptedUnitExternalLinkResponse),
+	externalLinks: t.Array(AcceptedExternalLinkResponse),
 	tags: t.Array(
 		t.Object({
 			id: Uuid,
@@ -1022,7 +1014,7 @@ export const EntityDetailResponse = t.Object({
 	localizations: t.Array(LocalizationResponse),
 	attributions: t.Array(UnitAttributionSummaryResponse),
 	owner: t.Nullable(UnitSummaryResponse),
-	externalLinks: t.Array(AcceptedEntityExternalLinkResponse),
+	externalLinks: t.Array(AcceptedExternalLinkResponse),
 	capabilities: t.Object({
 		canEdit: t.Boolean(),
 		canEditCreditAttributions: t.Boolean(),

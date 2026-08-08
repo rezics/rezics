@@ -111,7 +111,7 @@ import {
 import { wilsonLowerBoundSql } from "../tags/ranking";
 import { getPendingUnitOwnershipClaim } from "../ownership-claims/service";
 import { unitScope } from "../authorization/unit/scope";
-import { getAcceptedUnitExternalLinks } from "./external-links";
+import { getAcceptedUnitExternalLinksWithSources } from "./external-links";
 
 export type VariantUnitKind = "book" | "software" | "media";
 export type WorkUnitKind = VariantUnitKind | "series";
@@ -488,7 +488,11 @@ export async function getUnit(
 		...association,
 		contextPost: contextPosts.get(association.id) ?? null,
 	}));
-	const externalLinks = await getAcceptedUnitExternalLinks(base.id, authorization.profileId);
+	const externalLinks = await getAcceptedUnitExternalLinksWithSources({
+		unitId: base.id,
+		localizationLanguages,
+		profileId: authorization.profileId,
+	});
 	const tags = await database
 		.select({
 			tagId: unitTag.tagId,

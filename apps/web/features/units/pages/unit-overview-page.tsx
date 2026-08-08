@@ -26,6 +26,7 @@ import {
 	CompactCreditAttributionGroups,
 	PrimaryBookAuthorSection,
 } from "../components/unit-attribution-sections";
+import { UnitExternalLinkList } from "../components/unit-external-links";
 import { UnitSubjectGroups } from "../components/unit-subject-groups";
 import { SeriesReleaseFeed } from "../components/series-release-feed";
 import { useUnitDetail } from "../components/unit-detail-workspace";
@@ -208,6 +209,8 @@ export function UnitOverviewPage() {
 						</div>
 					</DetailSection>
 				) : null}
+
+				<UnitExternalLinkList links={unit.externalLinks} />
 			</aside>
 		</div>
 	);

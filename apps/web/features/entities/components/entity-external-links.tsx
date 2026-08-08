@@ -11,7 +11,6 @@ import {
 	usePutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote,
 } from "@rezics/openapi-tanstack-query";
 import {
-	Badge,
 	Button,
 	Dialog,
 	DialogBody,
@@ -21,21 +20,16 @@ import {
 	EntityPicker,
 	Field,
 	FieldLabel,
-	IdentityAvatar,
 	Input,
-	Popover,
-	PopoverClose,
-	PopoverContent,
-	PopoverTrigger,
 	cn,
 	toast,
 } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowBigDownIcon, ArrowBigUpIcon, ExternalLink, Plus } from "lucide-react";
+import { ArrowBigDownIcon, ArrowBigUpIcon, Plus } from "lucide-react";
 import { type FormEvent, useState } from "react";
 
-import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { useDevelopmentPreviewAccess } from "@/features/preview-access/components/development-preview-boundary";
+import { UnitExternalLinkBadge } from "@/features/units/components/unit-external-links";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -121,93 +115,19 @@ function ExternalLinkCard({
 	readonly onClear: () => void;
 	readonly onVote: (value: -1 | 1) => void;
 }) {
-	const { t } = useTranslation(["ui", "units"]);
-	const title = useChineseContentText(
-		link.sourceEntity.title ?? t.ui.unnamed,
-		link.sourceEntity.title ? link.sourceEntity.language : null,
-	);
-	const summary = useChineseContentText(
-		link.sourceEntity.summary ?? "",
-		link.sourceEntity.language,
-	);
-	const score = toFiniteApiNumber(link.score) ?? 0;
-	const avatarFallback = title.trim().slice(0, 1).toUpperCase() || "#";
-	const variant =
-		link.viewerVote === 1 ? "success" : link.viewerVote === -1 ? "destructive" : "outline";
-
 	return (
-		<Badge className="max-w-full gap-0 overflow-visible p-0" pill variant={variant}>
-			<Popover
-				autoFocus={false}
-				closeOnEscape
-				closeOnInteractOutside
-				modal={false}
-				positioning={{ placement: "bottom-start", gutter: 8 }}
-			>
-				<PopoverTrigger asChild>
-					<button
-						className="inline-flex min-w-0 max-w-full items-center gap-1.5 rounded-full px-2.5 py-1.5 outline-none hover:bg-foreground/5 focus-visible:ring-2 focus-visible:ring-ring/40"
-						type="button"
-					>
-						<IdentityAvatar
-							avatar={link.sourceEntity.avatar}
-							className="size-5 text-[0.625rem]"
-							fallback={avatarFallback}
-							size="sm"
-						/>
-						<span className="min-w-0 truncate">{title}</span>
-						<span className="shrink-0 tabular-nums text-[0.6875rem] opacity-75">
-							{score}
-						</span>
-					</button>
-				</PopoverTrigger>
-				<PopoverContent className="grid w-[min(22rem,calc(100vw-2rem))] gap-4 p-(--space)">
-					<div className="flex min-w-0 items-start gap-3">
-						<IdentityAvatar
-							avatar={link.sourceEntity.avatar}
-							className="size-11 shrink-0"
-							fallback={avatarFallback}
-						/>
-						<div className="min-w-0">
-							<p className="truncate font-semibold">{title}</p>
-							<div className="mt-1 flex flex-wrap gap-1">
-								<Badge variant={link.accepted ? "secondary" : "outline"}>
-									{link.accepted
-										? t.units.references.accepted
-										: t.units.references.candidate}
-								</Badge>
-								{link.pinned ? (
-									<Badge variant="secondary">{t.units.references.pinned}</Badge>
-								) : null}
-							</div>
-						</div>
-					</div>
-					{summary ? (
-						<p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
-							{summary}
-						</p>
-					) : null}
-					<PopoverClose asChild>
-						<a
-							className="inline-flex min-w-0 items-center gap-1.5 break-all text-sm text-link hover:text-link-hover hover:underline"
-							href={link.url}
-							rel="ugc nofollow noreferrer"
-							target="_blank"
-						>
-							<span>{link.url}</span>
-							<ExternalLink aria-hidden className="size-3.5 shrink-0" />
-						</a>
-					</PopoverClose>
-					<ExternalLinkVoteControls
-						busy={busy}
-						canVote={canVote}
-						link={link}
-						onClear={onClear}
-						onVote={onVote}
-					/>
-				</PopoverContent>
-			</Popover>
-		</Badge>
+		<UnitExternalLinkBadge
+			controls={
+				<ExternalLinkVoteControls
+					busy={busy}
+					canVote={canVote}
+					link={link}
+					onClear={onClear}
+					onVote={onVote}
+				/>
+			}
+			link={link}
+		/>
 	);
 }
 

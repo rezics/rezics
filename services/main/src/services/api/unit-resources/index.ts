@@ -1,6 +1,5 @@
 import { StatusCodes } from "http-status-codes";
 import { createHash } from "node:crypto";
-import type { ContentLanguage } from "@rezics/i18n";
 
 import { and, asc, desc, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
@@ -92,7 +91,6 @@ import {
 import {
 	getAttributionSummariesByUnitIds,
 	getPublicUnitSummariesByIds,
-	getReadableUnitPresentationsByIds,
 } from "../../units/attribution";
 import { ensureDirectCreditAttributionAllowed } from "../../units/attribution-authorization";
 import { presentImageAsset } from "../../units/service";
@@ -134,7 +132,10 @@ import {
 	updateUnitAliasCuration,
 	updateUnitExternalLinkCuration,
 } from "../../units/reference-curation";
-import { getAcceptedUnitExternalLinks } from "../../units/external-links";
+import {
+	attachReadableSourceEntities,
+	getAcceptedUnitExternalLinksWithSources,
+} from "../../units/external-links";
 
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
@@ -170,24 +171,6 @@ async function ensureUnitMutationAuthorized(
 	scope: readonly string[],
 ): Promise<void> {
 	await authorization.ensureCanUpdate(unitId, [scope]);
-}
-
-async function attachReadableSourceEntities<
-	ExternalLink extends { readonly sourceEntityId: string },
->(
-	externalLinks: readonly ExternalLink[],
-	localizationLanguages: readonly ContentLanguage[],
-	profileId?: string,
-) {
-	const sourceEntities = await getReadableUnitPresentationsByIds({
-		unitIds: [...new Set(externalLinks.map(({ sourceEntityId }) => sourceEntityId))],
-		localizationLanguages,
-		profileId,
-	});
-	return externalLinks.flatMap((link) => {
-		const sourceEntity = sourceEntities.get(link.sourceEntityId);
-		return sourceEntity ? [{ ...link, sourceEntity }] : [];
-	});
 }
 
 async function ensureReadableSourceEntity(
@@ -519,15 +502,11 @@ export default new Elysia()
 						createdAt: row.createdAt,
 						updatedAt: row.updatedAt,
 					}));
-					const acceptedExternalLinks = await getAcceptedUnitExternalLinks(
-						params.unitId,
-						identity.authorization.profileId,
-					);
-					const externalLinks = await attachReadableSourceEntities(
-						acceptedExternalLinks,
+					const externalLinks = await getAcceptedUnitExternalLinksWithSources({
+						unitId: params.unitId,
 						localizationLanguages,
-						identity.authorization.profileId,
-					);
+						profileId: identity.authorization.profileId,
+					});
 					const creditAttributions = await database
 						.select({
 							id: creditAttribution.id,

@@ -19,6 +19,7 @@ import {
 	ReviewDetailResponse,
 	SearchFeedResponse,
 	SearchResponse,
+	UnitDetailResponse,
 	UnitDetailAttributionSummaryResponse,
 	UnitProgressStatisticsResponse,
 	UnitVariantContextResponse,
@@ -348,16 +349,13 @@ describe("API response values", () => {
 		).toBe(false);
 	});
 
-	it("exposes accepted external links with their source Entity on Entity detail", () => {
-		expect(EntityDetailResponse.required).toContain("externalLinks");
-		expect(EntityDetailResponse.properties.externalLinks.items.properties.accepted.const).toBe(
-			true,
-		);
-		expect(EntityDetailResponse.properties.externalLinks.items.required).toContain(
-			"sourceEntity",
-		);
-		expect(
-			EntityDetailResponse.properties.externalLinks.items.properties.sourceEntity.required,
-		).toContain("avatar");
+	it("uses one accepted external-link contract with source presentation on every detail", () => {
+		const unitExternalLink = UnitDetailResponse.properties.externalLinks.items;
+		const entityExternalLink = EntityDetailResponse.properties.externalLinks.items;
+
+		expect(unitExternalLink).toBe(entityExternalLink);
+		expect(unitExternalLink.properties.accepted.const).toBe(true);
+		expect(unitExternalLink.required).toContain("sourceEntity");
+		expect(unitExternalLink.properties.sourceEntity.required).toContain("avatar");
 	});
 });
