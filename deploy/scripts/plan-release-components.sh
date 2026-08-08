@@ -2,12 +2,14 @@
 
 set -euo pipefail
 
-if (($# != 1)); then
-	printf '%s\n' "Usage: plan-release-components.sh <component-state.json>" >&2
+if (($# < 1 || $# > 2)); then
+	printf '%s\n' \
+		"Usage: plan-release-components.sh <component-state.json> [release]" >&2
 	exit 64
 fi
 
 readonly state_file="$1"
+readonly release="${2:-}"
 repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 readonly repository_root
 readonly manifest_file="${repository_root}/deploy/release/components.json"
@@ -16,12 +18,21 @@ cd "${repository_root}"
 
 jq -e '
 	.schemaVersion == 1 and
+	(.maintenanceCutovers | type == "array") and
+	([.maintenanceCutovers[]] | unique | length) == (.maintenanceCutovers | length) and
+	all(.maintenanceCutovers[];
+		type == "string" and test("^v[0-9]+\\.[0-9]+\\.[0-9]+$")) and
 	(.components | type == "object" and length > 0) and
 	all(.components[];
 		(.order | type == "number") and
 		(.inputs | type == "array" and length > 0) and
 		all(.inputs[]; type == "string" and length > 0))
 ' "${manifest_file}" >/dev/null
+
+if [[ -n "${release}" && ! "${release}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+	printf 'Release identity is malformed: %s\n' "${release}" >&2
+	exit 64
+fi
 
 if [[ -s "${state_file}" ]]; then
 	jq -e 'type == "object"' "${state_file}" >/dev/null
@@ -30,7 +41,8 @@ else
 	state_json='{}'
 fi
 readonly state_json
-readonly commit="$(git rev-parse 'HEAD^{commit}')"
+commit="$(git rev-parse 'HEAD^{commit}')"
+readonly commit
 components_file="$(mktemp)"
 readonly components_file
 trap 'rm -f "${components_file}"' EXIT
@@ -85,9 +97,14 @@ done < <(jq -r '.components | keys[]' "${manifest_file}")
 
 jq -s \
 	--arg commit "${commit}" \
+	--arg release "${release}" \
+	--slurpfile manifest "${manifest_file}" \
 	'sort_by(.order) as $components | {
 	  schemaVersion: 1,
 	  commit: $commit,
+	  maintenanceRequired: (
+	    $release != "" and ($manifest[0].maintenanceCutovers | index($release)) != null
+	  ),
 	  components: $components,
 	  changed: ([$components[] | select(.changed) | .name])
 	}' "${components_file}"

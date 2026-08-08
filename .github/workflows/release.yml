@@ -23,6 +23,9 @@ jobs:
         environment: production
         timeout-minutes: 10
         steps:
+            - name: Checkout release metadata
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
             - name: Dispatch immutable tag
               shell: bash
               env:
@@ -69,8 +72,16 @@ jobs:
                   jq '{status, job_id, eval_id, ref, sha}' "${dispatch_response}"
 
                   if ! gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
-                      gh release create "${GITHUB_REF_NAME}" \
-                          --verify-tag \
-                          --title "REZICS ${GITHUB_REF_NAME}" \
-                          --generate-notes
+                      release_notes="docs/releases/${GITHUB_REF_NAME#v}.md"
+                      release_args=(
+                          "${GITHUB_REF_NAME}"
+                          --verify-tag
+                          --title "REZICS ${GITHUB_REF_NAME}"
+                      )
+                      if [[ -f "${release_notes}" ]]; then
+                          release_args+=(--notes-file "${release_notes}")
+                      else
+                          release_args+=(--generate-notes)
+                      fi
+                      gh release create "${release_args[@]}"
                   fi

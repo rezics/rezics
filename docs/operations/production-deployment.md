@@ -43,6 +43,15 @@ an explicit manual dispatch starts `deploy-web-cloudflare.yml`, which builds and
 promotes the Worker with the protected GitHub `production` environment. It does
 not enter the Nomad server release graph.
 
+The public TypeScript client has another independent boundary. An
+`api/vMAJOR.MINOR.PATCH` tag must match `packages/api/package.json`; the
+`publish-api.yml` workflow regenerates and verifies the client, runs its type,
+test, build, and package-content checks, and then publishes `@rezics/api` through
+npm Trusted Publishing. No npm token is stored in GitHub. Before the first run,
+the npm package owner must configure the trusted publisher for repository
+`rezics/rezics`, workflow `publish-api.yml`, and GitHub environment
+`production`.
+
 The gateway validates the immutable repository and owner IDs, workflow ref,
 GitHub-hosted runner, `production` environment, stable tag, commit, issuer, and
 audience. Nomad independently requires the mapped `production` environment
@@ -66,9 +75,12 @@ The dependency order is:
    targets;
 2. controller imports those archives into the loopback registry and resolves
    immutable digest references;
-3. database preflight, migration, privilege reconciliation, and verification;
-4. independent API and worker rollouts;
-5. explicit derived-data maintenance and PGroonga index health verification.
+3. for a release listed in `maintenanceCutovers`, the fixed maintenance job
+   verifies the low-priority HTTP 503 fallback and stops worker then API;
+4. database preflight, migration, privilege reconciliation, and verification;
+5. independent API and worker rollouts, which automatically shadow the fallback
+   again after API readiness succeeds;
+6. explicit derived-data maintenance and PGroonga index health verification.
 
 Unchanged components are skipped. A database change conservatively invalidates
 API, worker, and derived-data maintenance. API and worker have separate images and separate
@@ -94,7 +106,7 @@ only its own Docker socket and a writable copy of the tagged source. It never
 receives Nomad credentials, the host Docker socket, or the Nix daemon socket.
 The controller executes only its separate root-owned source copy.
 
-API and worker rollouts use pre-registered deploy jobs. Their host `exec` tasks
+API and worker rollouts use pre-registered deploy jobs. Their constrained tasks
 run as `rezics-deploy`, reject anything except the matching
 `127.0.0.1:5000/rezics-<component>@sha256:<digest>` form, and can apply only the
 fixed jobspecs installed by NixOS. The production deploy token is never mounted
@@ -144,10 +156,30 @@ forced `SIGKILL` after the task timeout.
 `deploy/scripts/database-operation.sh release` runs preflight, migration, and
 verification in one serialized batch job. It asserts that both administrative
 and runtime URLs target the REZICS production database before doing any work.
-Migration files must follow expand/contract delivery: deploy backward-compatible
-structures first; destructive cleanup belongs in a later release after the old
-application version can no longer run. Database migrations are forward
-operations and are not automatically reversed.
+Migration files normally follow expand/contract delivery: deploy
+backward-compatible structures first, then clean up only after the old
+application can no longer run. A release that intentionally changes the
+persisted contract may instead be listed in `maintenanceCutovers`. For that
+release, all replacement images must be available before the controller stops
+writers and public API traffic, and only the new jobs may resume after migration
+verification. Database migrations are forward operations and are not
+automatically reversed.
+
+`v1.3.0` uses this explicit cutover because it deletes four non-core,
+recomputable recommendation projection tables and replaces the sparse ranking
+function/index contract. Its DDL runs in one transaction while writers are
+stopped, and the release verifies the canonical PGroonga indexes before it
+restores API traffic. If the migration or verification fails, API and worker
+remain stopped and the fallback continues returning 503. A transaction failure
+rolls back the whole migration; otherwise repair forward and retry incomplete
+components. Restore the pre-cutover backup with the 1.2.0 binaries only before
+any 1.3.0 traffic has resumed; after resumption, repair forward.
+
+For the 1.3.0 release, activate the sibling NixOS revision and verify the
+maintenance fallback and all seven release jobs first. Then create the
+`v1.3.0` tag from `main`, observe the server release to completion in Nomad, and
+only then create `api/v1.7.0` from the same application commit. Confirm the npm
+package before announcing the public client update.
 
 Derived-data maintenance is a distinct job so it is independently observable and resumable.
 If database work fails, API, worker, and maintenance do not run.
@@ -192,7 +224,9 @@ and API hostnames remain separate origins.
 
 Apply NixOS changes before moving a server application tag that depends on them.
 A host activation reconciles OIDC, workload policies, protected Variables, and
-the fixed server release parent jobs. It also installs the Nomad Autoscaler and
+the fixed server release parent jobs. For 1.3.0, activation must also install and
+health-check the always-on maintenance fallback and register the fixed
+maintenance batch before the tag is created. It also installs the Nomad Autoscaler and
 its long-lived client token whose sole policy is `scale` in the `rezics`
 namespace. The Nomad client reserves 2,000 MHz and 2 GiB for the host and
 control-plane services. Verify the autoscaler health endpoint on

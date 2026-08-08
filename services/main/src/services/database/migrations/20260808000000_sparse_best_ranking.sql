@@ -1,4 +1,4 @@
--- atlas:txmode none
+-- atlas:txmode file
 
 ALTER TABLE public.search_best_score RENAME TO unit_best_score;
 ALTER TABLE public.unit_best_score
@@ -23,19 +23,19 @@ ALTER TABLE public.unit_best_score
     ON DELETE CASCADE NOT VALID;
 ALTER TABLE public.unit_best_score VALIDATE CONSTRAINT unit_best_score_unit_fkey;
 
-CREATE INDEX CONCURRENTLY unit_best_score_kind_order_idx
+CREATE INDEX unit_best_score_kind_order_idx
     ON public.unit_best_score (
         snapshot_id, unit_kind, score DESC, unit_updated_at DESC, unit_id DESC
     );
 
-CREATE INDEX CONCURRENTLY unit_public_kind_created_at_desc_idx
+CREATE INDEX unit_public_kind_created_at_desc_idx
     ON public.unit (kind, created_at DESC, id DESC)
     WHERE status = 'published'::public.unit_status
       AND visibility = 'public'::public.resource_visibility
       AND moderation_status = 'approved'::public.moderation_status
       AND deleted_at IS NULL;
 
-CREATE INDEX CONCURRENTLY unit_public_kind_updated_at_desc_idx
+CREATE INDEX unit_public_kind_updated_at_desc_idx
     ON public.unit (kind, updated_at DESC, id DESC)
     WHERE status = 'published'::public.unit_status
       AND visibility = 'public'::public.resource_visibility
@@ -86,8 +86,8 @@ CREATE TRIGGER unit_search_document_from_unit
     AFTER INSERT OR UPDATE OF kind, updated_at ON public.unit
     FOR EACH ROW EXECUTE FUNCTION public.refresh_unit_search_document_from_unit();
 
-DROP INDEX CONCURRENTLY public.unit_search_document_pgroonga_idx;
-CREATE INDEX CONCURRENTLY unit_search_document_pgroonga_idx
+DROP INDEX public.unit_search_document_pgroonga_idx;
+CREATE INDEX unit_search_document_pgroonga_idx
     ON public.unit_search_document USING pgroonga (
         unit_kind public.pgroonga_text_term_search_ops_v2,
         text_all, text_zh, text_en, text_ja, text_ko, text_de, text_fr, text_es,

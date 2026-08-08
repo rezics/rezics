@@ -1,10 +1,12 @@
 {
 	"schemaVersion": 1,
+	"maintenanceCutovers": ["v1.3.0"],
 	"components": {
 		"database": {
 			"order": 10,
 			"inputs": [
 				"Dockerfile",
+				"deploy/release/components.json",
 				"package.json",
 				"yarn.lock",
 				".yarnrc.yml",

@@ -87,6 +87,7 @@ case "${operation}" in
 		preflight
 		migrate
 		verify
+		search_index check
 		;;
 	preflight) preflight ;;
 	migrate) migrate ;;

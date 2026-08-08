@@ -1,0 +1,74 @@
+name: Publish API package
+
+on:
+    push:
+        tags:
+            - "api/v*.*.*"
+
+concurrency:
+    group: api-package-${{ github.ref }}
+    cancel-in-progress: false
+
+permissions:
+    contents: read
+    id-token: write
+
+jobs:
+    publish:
+        name: Verify and publish @rezics/api
+        runs-on: ubuntu-latest
+        environment: production
+        timeout-minutes: 30
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  fetch-depth: 0
+
+            - name: Setup Node and npm registry
+              uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+              with:
+                  node-version: 26
+                  registry-url: https://registry.npmjs.org
+                  package-manager-cache: false
+
+            - name: Install Corepack
+              run: npm install --global corepack@0.35.0 && corepack enable
+
+            - name: Verify release identity
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  expected_version="${GITHUB_REF_NAME#api/v}"
+                  package_version="$(jq -er '.version' packages/api/package.json)"
+                  if [[ ! "${expected_version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || \
+                      [[ "${package_version}" != "${expected_version}" ]]; then
+                      printf 'API tag %s does not match package version %s\n' \
+                          "${GITHUB_REF_NAME}" "${package_version}" >&2
+                      exit 1
+                  fi
+                  git merge-base --is-ancestor "${GITHUB_SHA}" refs/remotes/origin/main
+
+            - name: Install dependencies
+              run: yarn install --immutable
+
+            - name: Verify generated contract
+              run: |
+                  yarn workspace @rezics/api run generate
+                  git diff --exit-code -- packages/api/src/generated
+                  test -z "$(git ls-files --others --exclude-standard packages/api/src/generated)"
+
+            - name: Verify API package
+              run: |
+                  yarn workspace @rezics/api run typecheck
+                  yarn workspace @rezics/api run test
+                  yarn workspace @rezics/api run build
+
+            - name: Verify package contents
+              working-directory: packages/api
+              run: npm pack --dry-run --json
+
+            - name: Publish API package with provenance
+              working-directory: packages/api
+              run: npm publish --access public

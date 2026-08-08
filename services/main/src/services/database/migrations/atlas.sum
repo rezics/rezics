@@ -1,4 +1,4 @@
-h1:Q0yQQIGLKeS9TFRhPa9db4YW/MxcBR6tTPyDrXo+ObE=
+h1:nPn31D4jAjPEvsDqS3ohUzW6u0ckc4Fa9avSSobfRNk=
 20260801000000_v1_baseline.sql h1:RkSyDwLRpFOPI7iqWg+WlFc5TAshnB4gsRkBpsTMjGY=
 20260807000000_search_ordered_candidates.sql h1:rPOS8iAdRmWOfc9lpyCNNsFWjduRV1e27Q1Mc1QpTFc=
 20260807000001_backfill_search_best_score.sql h1:lmLn+kpWiNWEPlk40W4QRIGsqpWezY//UsNaaZ8FToc=
@@ -6,4 +6,4 @@ h1:Q0yQQIGLKeS9TFRhPa9db4YW/MxcBR6tTPyDrXo+ObE=
 20260807000003_search_relation_candidate_indexes.sql h1:rs8zkyAZeahdGLOn4spSfUwkXuyyJ+NO5UALYz5mHNc=
 20260807000004_search_filter_candidate_indexes.sql h1:/Pas0HQHIDQJSZp3yEllGS+6v6pbXkbOqjbN2ey5lXo=
 20260807000005_unit_external_links.sql h1:sntQMhzoTxCxq45ZzemovDMIMz6Gl4lO2oEN7exhrsU=
-20260808000000_sparse_best_ranking.sql h1:nlQezoHGjRwcRIVFVpz7DEo8wEitVLOsIGyhRFSKg7M=
+20260808000000_sparse_best_ranking.sql h1:Qh+H7dLz4HYG3BThoa6U9tdEIVcUtXdKpZ0+DZ0sXvc=
