@@ -202,6 +202,7 @@ export async function recordStudioWorkRelation(
  */
 export async function rebuildStudioWorkRelations(): Promise<void> {
 	await database.transaction(async (tx) => {
+		await tx.execute(sql`set local statement_timeout = 0`);
 		await lockStudioWorkProjection(tx);
 		await tx.delete(studioWorkRelation);
 		await tx.execute(sql`
