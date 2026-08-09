@@ -400,7 +400,6 @@ export default {
 	moderationTransition: insert("{{from}} → {{to}}", { from: String, to: String }),
 	closeModeration: "閉じる",
 	moderationAction: "ガバナンスアクション",
-	moderationReason: "理由",
 	includeAnnotation: "注釈を含める",
 	annotation: "注釈",
 	annotationRole: "注釈の表示",

@@ -409,7 +409,6 @@ export default {
 	moderationTransition: insert("{{from}} → {{to}}", { from: String, to: String }),
 	closeModeration: "Fermer",
 	moderationAction: "Action de gouvernance",
-	moderationReason: "Motif",
 	includeAnnotation: "Inclure une annotation",
 	annotation: "Annotation",
 	annotationRole: "Visibilité de l’annotation",

@@ -7,76 +7,92 @@ export class GovernanceNoteNotFound extends Data.TaggedError("GovernanceNoteNotF
 	readonly message = "Governance note not found";
 }
 
-export class ModerationTargetNotFound extends Data.TaggedError("ModerationTargetNotFound") {
+export class ContentGovernanceTargetNotFound extends Data.TaggedError(
+	"ContentGovernanceTargetNotFound",
+) {
 	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = ModerationTargetNotFound.status;
-	readonly message = "Moderation target not found";
+	readonly status = ContentGovernanceTargetNotFound.status;
+	readonly message = "Content governance target not found";
 }
 
-export class ModerationRealmMissing extends Data.TaggedError("ModerationRealmMissing") {
+export class ContentReviewRealmMissing extends Data.TaggedError("ContentReviewRealmMissing") {
 	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = ModerationRealmMissing.status;
-	readonly message = "Realm moderation case is missing its Realm";
+	readonly status = ContentReviewRealmMissing.status;
+	readonly message = "Realm content review case is missing its Realm";
 }
 
-export class ModerationCaseNotFound extends Data.TaggedError("ModerationCaseNotFound") {
+export class ContentReviewCaseNotFound extends Data.TaggedError("ContentReviewCaseNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = ModerationCaseNotFound.status;
-	readonly message = "Moderation case not found";
+	readonly status = ContentReviewCaseNotFound.status;
+	readonly message = "Content review case not found";
 }
 
-export class ModerationReversalInvalid extends Data.TaggedError("ModerationReversalInvalid") {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = ModerationReversalInvalid.status;
-	readonly message = "reversesActionId is required exactly for reverse actions";
-}
-
-export class ModerationReversedActionInvalid extends Data.TaggedError(
-	"ModerationReversedActionInvalid",
+export class ContentGovernanceReversedActionInvalid extends Data.TaggedError(
+	"ContentGovernanceReversedActionInvalid",
 ) {
 	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = ModerationReversedActionInvalid.status;
+	readonly status = ContentGovernanceReversedActionInvalid.status;
 	readonly message = "The reversed action must belong to this case";
 }
 
-export class ModerationActionIncompatible extends Data.TaggedError("ModerationActionIncompatible") {
+export class ContentGovernanceActionIncompatible extends Data.TaggedError(
+	"ContentGovernanceActionIncompatible",
+) {
 	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = ModerationActionIncompatible.status;
-	readonly message = "The moderation action is not valid for this target";
+	readonly status = ContentGovernanceActionIncompatible.status;
+	readonly message = "The content governance action is not valid for this target";
 }
 
-export class ModerationTransitionInvalid extends Data.TaggedError("ModerationTransitionInvalid") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = ModerationTransitionInvalid.status;
-	readonly message = "The moderation target cannot make that state transition";
-}
-
-export class ModerationActionNoEffect extends Data.TaggedError("ModerationActionNoEffect") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = ModerationActionNoEffect.status;
-	readonly message = "The moderation action would not change the target";
-}
-
-export class ModerationReversalUnavailable extends Data.TaggedError(
-	"ModerationReversalUnavailable",
+export class ContentGovernanceTransitionInvalid extends Data.TaggedError(
+	"ContentGovernanceTransitionInvalid",
 ) {
 	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = ModerationReversalUnavailable.status;
-	readonly message = "The moderation action cannot be reversed from its current state";
+	readonly status = ContentGovernanceTransitionInvalid.status;
+	readonly message = "The content governance target cannot make that state transition";
 }
 
-export class ModerationIdempotencyConflict extends Data.TaggedError(
-	"ModerationIdempotencyConflict",
+export class ContentGovernanceActionNoEffect extends Data.TaggedError(
+	"ContentGovernanceActionNoEffect",
 ) {
 	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = ModerationIdempotencyConflict.status;
+	readonly status = ContentGovernanceActionNoEffect.status;
+	readonly message = "The content governance action would not change the target";
+}
+
+export class ContentGovernanceReversalUnavailable extends Data.TaggedError(
+	"ContentGovernanceReversalUnavailable",
+) {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = ContentGovernanceReversalUnavailable.status;
+	readonly message = "The content governance action cannot be reversed from its current state";
+}
+
+export class ContentGovernanceIdempotencyConflict extends Data.TaggedError(
+	"ContentGovernanceIdempotencyConflict",
+) {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = ContentGovernanceIdempotencyConflict.status;
 	readonly message = "The idempotency key was already used for a different request";
 }
 
-export class ModerationNoteRoleDuplicate extends Data.TaggedError("ModerationNoteRoleDuplicate") {
+export class GovernanceNoteRoleDuplicate extends Data.TaggedError("GovernanceNoteRoleDuplicate") {
 	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = ModerationNoteRoleDuplicate.status;
-	readonly message = "A moderation action can create at most one note for each role";
+	readonly status = GovernanceNoteRoleDuplicate.status;
+	readonly message = "A governance operation can create at most one note for each role";
+}
+
+export class ContentGovernanceRuleSourceForbidden extends Data.TaggedError(
+	"ContentGovernanceRuleSourceForbidden",
+) {
+	static readonly status = StatusCodes.BAD_REQUEST as const;
+	readonly status = ContentGovernanceRuleSourceForbidden.status;
+	readonly message = "The selected rule source is outside this content authority";
+}
+
+export class ContentGovernanceRuleChanged extends Data.TaggedError("ContentGovernanceRuleChanged") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = ContentGovernanceRuleChanged.status;
+	readonly message = "A selected rule is no longer part of the current rule revision";
 }
 
 export class EnforcementExpiryInvalid extends Data.TaggedError("EnforcementExpiryInvalid") {
@@ -228,17 +244,18 @@ export class UnitNotDeleted extends Data.TaggedError("UnitNotDeleted") {
 
 export const GovernanceErrors = [
 	GovernanceNoteNotFound,
-	ModerationTargetNotFound,
-	ModerationRealmMissing,
-	ModerationCaseNotFound,
-	ModerationReversalInvalid,
-	ModerationReversedActionInvalid,
-	ModerationActionIncompatible,
-	ModerationTransitionInvalid,
-	ModerationActionNoEffect,
-	ModerationReversalUnavailable,
-	ModerationIdempotencyConflict,
-	ModerationNoteRoleDuplicate,
+	ContentGovernanceTargetNotFound,
+	ContentReviewRealmMissing,
+	ContentReviewCaseNotFound,
+	ContentGovernanceReversedActionInvalid,
+	ContentGovernanceActionIncompatible,
+	ContentGovernanceTransitionInvalid,
+	ContentGovernanceActionNoEffect,
+	ContentGovernanceReversalUnavailable,
+	ContentGovernanceIdempotencyConflict,
+	GovernanceNoteRoleDuplicate,
+	ContentGovernanceRuleSourceForbidden,
+	ContentGovernanceRuleChanged,
 	EnforcementExpiryInvalid,
 	EnforcementNotFound,
 	EnforcementAlreadyRevoked,

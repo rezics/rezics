@@ -4,7 +4,7 @@ import { assertPlatformCoreReady, inspectPlatformCore } from "../bootstrap/core"
 import { BootstrapUnitIds, OfficialZoneManifest } from "../bootstrap/manifest";
 import { database } from "../database";
 import {
-	moderationCase,
+	contentReviewCase,
 	notification,
 	apiTokenQuotaOverride,
 	platformCapabilityGrant,
@@ -138,7 +138,7 @@ export async function verifySeedDatabase(
 		officialZoneFixtures,
 		coverageContractResults,
 		notificationsResult,
-		moderationCasesResult,
+		contentReviewCasesResult,
 		demoPlatformGrantResult,
 	] = await Promise.all([
 		database
@@ -195,7 +195,7 @@ export async function verifySeedDatabase(
 			})),
 		),
 		database.select({ value: count() }).from(notification),
-		database.select({ value: count() }).from(moderationCase),
+		database.select({ value: count() }).from(contentReviewCase),
 		database
 			.select({ value: count() })
 			.from(platformCapabilityGrant)
@@ -233,8 +233,8 @@ export async function verifySeedDatabase(
 		);
 	if (includesSeedScenario(options, "governance"))
 		requirePositive(
-			moderationCasesResult[0]?.value ?? 0,
-			"Governance scenario produced no moderation cases",
+			contentReviewCasesResult[0]?.value ?? 0,
+			"Governance scenario produced no content review cases",
 		);
 	return {
 		profile: options.profile,

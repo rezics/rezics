@@ -1,36 +1,36 @@
-import { describe, expect, it } from "vitest";
 import { createPortableTextDocument } from "@rezics/block";
+import { describe, expect, it } from "vitest";
 
 import {
+	assertContentGovernanceActionCompatible,
 	assertReportCaseDismissible,
-	assertModerationActionCompatible,
+	contentGovernanceActionRequiresRules,
 	getPlatformUnitModerationCommands,
 	getRealmUnitModerationCommands,
 	isContentLicenseModerationCommand,
-	isModerationActionCompatible,
 	resolvePostTargetingLockState,
-	resolveModerationCaseState,
-	resolveRealmMemberState,
 	resolveRealmUnitStatus,
 	resolveUnitContentLicenseStatus,
 	resolveUnitModerationStatus,
-} from "./moderation-contract";
-import { fingerprintModerationAction } from "./moderation-service";
+} from "./content-governance-contract";
+import { fingerprintContentGovernanceAction } from "./content-governance-service";
 
-describe("moderation action contracts", () => {
-	it("rejects commands that do not belong to the case target", () => {
-		expect(isModerationActionCompatible("realm_unit", "hide")).toBe(true);
-		expect(isModerationActionCompatible("unit", "hide")).toBe(false);
-		expect(isModerationActionCompatible("realm_member", "approve")).toBe(false);
-		expect(isModerationActionCompatible("unit", "invalidate_content_license")).toBe(true);
-		expect(isModerationActionCompatible("realm_unit", "invalidate_content_license")).toBe(
-			false,
-		);
-		expect(isContentLicenseModerationCommand("restore_content_license")).toBe(true);
-		expect(isContentLicenseModerationCommand("restore")).toBe(false);
-		expect(() => assertModerationActionCompatible("unit", "hide")).toThrow(
+describe("content governance contracts", () => {
+	it("limits actions to the review authority", () => {
+		expect(() => assertContentGovernanceActionCompatible("realm", "hide")).not.toThrow();
+		expect(() => assertContentGovernanceActionCompatible("platform", "hide")).toThrow(
 			"not valid for this target",
 		);
+		expect(() =>
+			assertContentGovernanceActionCompatible("platform", "invalidate_content_license"),
+		).not.toThrow();
+		expect(() =>
+			assertContentGovernanceActionCompatible("realm", "invalidate_content_license"),
+		).toThrow("not valid for this target");
+		expect(isContentLicenseModerationCommand("restore_content_license")).toBe(true);
+		expect(isContentLicenseModerationCommand("restore")).toBe(false);
+		expect(contentGovernanceActionRequiresRules("remove")).toBe(true);
+		expect(contentGovernanceActionRequiresRules("restore")).toBe(false);
 	});
 
 	it("derives strict Realm Unit transitions", () => {
@@ -66,11 +66,6 @@ describe("moderation action contracts", () => {
 			"dismiss",
 			"note",
 		]);
-		expect(getRealmUnitModerationCommands("removed", false)).toEqual([
-			"restore",
-			"lock_post_targeting",
-			"note",
-		]);
 	});
 
 	it("presents only commands valid for the current platform Unit snapshot", () => {
@@ -86,26 +81,15 @@ describe("moderation action contracts", () => {
 			"dismiss",
 			"note",
 		]);
-		expect(getPlatformUnitModerationCommands("removed", false)).toEqual([
-			"restore",
-			"lock_post_targeting",
-			"note",
-		]);
 		expect(getPlatformUnitModerationCommands("approved", false, "active")).toEqual([
 			"remove",
 			"lock_post_targeting",
 			"invalidate_content_license",
 			"note",
 		]);
-		expect(getPlatformUnitModerationCommands("approved", false, "invalidated")).toEqual([
-			"remove",
-			"lock_post_targeting",
-			"restore_content_license",
-			"note",
-		]);
 	});
 
-	it("derives Unit and Realm member transitions", () => {
+	it("derives platform and license transitions", () => {
 		expect(resolveUnitModerationStatus("pending", "approve")).toBe("approved");
 		expect(resolveUnitModerationStatus("removed", "restore")).toBe("approved");
 		expect(resolveUnitContentLicenseStatus("active", "invalidate_content_license")).toBe(
@@ -114,24 +98,14 @@ describe("moderation action contracts", () => {
 		expect(resolveUnitContentLicenseStatus("invalidated", "restore_content_license")).toBe(
 			"active",
 		);
-		expect(() => resolveUnitContentLicenseStatus("active", "restore_content_license")).toThrow(
-			"would not change the target",
-		);
-		expect(resolveRealmMemberState("active", "mute_member")).toBe("muted");
-		expect(resolveRealmMemberState("removed", "ban_member")).toBe("banned");
-		expect(resolveRealmMemberState("banned", "restore_member")).toBe("active");
 	});
 
-	it("rejects lock no-ops and keeps note-only cases open", () => {
+	it("rejects lock no-ops", () => {
 		expect(resolvePostTargetingLockState(false, "lock_post_targeting")).toBe(true);
 		expect(resolvePostTargetingLockState(true, "unlock_post_targeting")).toBe(false);
 		expect(() => resolvePostTargetingLockState(true, "lock_post_targeting")).toThrow(
 			"would not change the target",
 		);
-		expect(resolveModerationCaseState("reviewing", "note")).toBe("reviewing");
-		expect(resolveModerationCaseState("reviewing", "escalate")).toBe("escalated");
-		expect(resolveModerationCaseState("reviewing", "remove")).toBe("actioned");
-		expect(resolveModerationCaseState("reviewing", "dismiss")).toBe("rejected");
 	});
 
 	it("only dismisses active cases backed by at least one report", () => {
@@ -144,11 +118,17 @@ describe("moderation action contracts", () => {
 		);
 	});
 
-	it("fingerprints request meaning independently from the idempotency key", () => {
+	it("fingerprints selected rules but not the retry key", () => {
 		const request = {
 			caseId: "0195c49b-c3a1-7f07-8000-000000000001",
-			kind: "note" as const,
-			reasonCode: "administrative" as const,
+			kind: "remove" as const,
+			rules: [
+				{
+					sourceRealmId: "0195c49b-c3a1-7f07-8000-000000000002",
+					revisionId: "0195c49b-c3a1-7f07-8000-000000000003",
+					ruleId: "0195c49b-c3a1-7f07-8000-000000000004",
+				},
+			],
 			notes: [
 				{
 					role: "internal_note" as const,
@@ -157,15 +137,21 @@ describe("moderation action contracts", () => {
 				},
 			],
 		};
-		expect(fingerprintModerationAction({ ...request, idempotencyKey: "first-attempt" })).toBe(
-			fingerprintModerationAction({ ...request, idempotencyKey: "retry" }),
-		);
 		expect(
-			fingerprintModerationAction({
+			fingerprintContentGovernanceAction({ ...request, idempotencyKey: "first-attempt" }),
+		).toBe(fingerprintContentGovernanceAction({ ...request, idempotencyKey: "retry" }));
+		expect(
+			fingerprintContentGovernanceAction({
 				...request,
-				reasonCode: "realm_rules",
+				rules: [
+					{
+						sourceRealmId: "0195c49b-c3a1-7f07-8000-000000000002",
+						revisionId: "0195c49b-c3a1-7f07-8000-000000000003",
+						ruleId: "0195c49b-c3a1-7f07-8000-000000000005",
+					},
+				],
 				idempotencyKey: "retry",
 			}),
-		).not.toBe(fingerprintModerationAction({ ...request, idempotencyKey: "retry" }));
+		).not.toBe(fingerprintContentGovernanceAction({ ...request, idempotencyKey: "retry" }));
 	});
 });

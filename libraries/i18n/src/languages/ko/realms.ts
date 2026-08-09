@@ -395,7 +395,6 @@ export default {
 	moderationTransition: insert("{{from}} → {{to}}", { from: String, to: String }),
 	closeModeration: "닫기",
 	moderationAction: "거버넌스 조치",
-	moderationReason: "이유",
 	includeAnnotation: "주석 포함",
 	annotation: "주석",
 	annotationRole: "주석 표시 여부",

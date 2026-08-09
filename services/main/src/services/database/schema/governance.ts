@@ -1,5 +1,4 @@
 import { sql } from "drizzle-orm";
-import { OfficialRealmUnitIds } from "@rezics/slug";
 import {
 	boolean,
 	check,
@@ -7,6 +6,8 @@ import {
 	index,
 	integer,
 	pgEnum,
+	primaryKey,
+	smallint,
 	text,
 	unique,
 	uniqueIndex,
@@ -23,13 +24,15 @@ import {
 	realmUnitStatus,
 } from "./realm";
 import {
+	AccountEnforcementActionKindValues,
+	ActiveContentReviewCaseStateValues,
+	ContentGovernanceActionKindValues,
+	ContentReviewAuthorityValues,
+	ContentReviewCaseStateValues,
 	EnforcementKindValues,
 	GovernanceReasonCodeValues,
 	GovernanceNoteRoleValues,
 	GovernanceNoteSubjectKindValues,
-	ModerationActionKindValues,
-	ModerationCaseStateValues,
-	ModerationTargetKindValues,
 	toEnumValues,
 } from "./contract-values";
 import {
@@ -41,7 +44,7 @@ import {
 	createUuidv7PrimaryKey,
 } from "./columns";
 import { profile } from "./profile";
-import { moderationStatus, unit } from "./unit";
+import { unit } from "./unit";
 import { unitContentLicense, unitContentLicenseStatus } from "./unit";
 import { unitRevision } from "./history";
 import { post } from "./post";
@@ -50,18 +53,21 @@ export const governanceReasonCode = pgEnum(
 	"governance_reason_code",
 	toEnumValues(GovernanceReasonCodeValues),
 );
-export const moderationAuthority = pgEnum("moderation_authority", ["platform", "realm"]);
-export const moderationCaseState = pgEnum(
-	"moderation_case_state",
-	toEnumValues(ModerationCaseStateValues),
+export const contentReviewAuthority = pgEnum(
+	"content_review_authority",
+	toEnumValues(ContentReviewAuthorityValues),
 );
-export const moderationTargetKind = pgEnum(
-	"moderation_target_kind",
-	toEnumValues(ModerationTargetKindValues),
+export const contentReviewCaseState = pgEnum(
+	"content_review_case_state",
+	toEnumValues(ContentReviewCaseStateValues),
 );
-export const moderationActionKind = pgEnum(
-	"moderation_action_kind",
-	toEnumValues(ModerationActionKindValues),
+export const contentGovernanceActionKind = pgEnum(
+	"content_governance_action_kind",
+	toEnumValues(ContentGovernanceActionKindValues),
+);
+export const accountEnforcementActionKind = pgEnum(
+	"account_enforcement_action_kind",
+	toEnumValues(AccountEnforcementActionKindValues),
 );
 export const enforcementKind = pgEnum("enforcement_kind", toEnumValues(EnforcementKindValues));
 export const governanceNoteRole = pgEnum(
@@ -88,16 +94,16 @@ export const auditCredentialKind = pgEnum("audit_credential_kind", [
 export const auditAuthorityKind = pgEnum("audit_authority_kind", ["platform", "realm", "unit"]);
 export const AuditEventSchemaVersion = 1 as const;
 
-export const moderationCase = pgTable(
-	"moderation_case",
+export const contentReviewCase = pgTable(
+	"content_review_case",
 	{
 		id: createUuidv7PrimaryKey(),
-		state: moderationCaseState().default("new").notNull(),
-		authority: moderationAuthority().default("platform").notNull(),
+		state: contentReviewCaseState().default("new").notNull(),
+		authority: contentReviewAuthority().default("platform").notNull(),
 		realmId: uuid().references(() => realm.id, { onDelete: "restrict" }),
-		targetKind: moderationTargetKind().notNull(),
-		targetId: uuid().notNull(),
-		targetPath: text(),
+		targetUnitId: uuid()
+			.notNull()
+			.references(() => unit.id, { onDelete: "restrict" }),
 		assignedProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
 		duplicateOfCaseId: uuid(),
 		createdAt: createCreatedAtColumn(),
@@ -107,67 +113,90 @@ export const moderationCase = pgTable(
 		foreignKey({
 			columns: [table.duplicateOfCaseId],
 			foreignColumns: [table.id],
-			name: "moderation_case_duplicate_fkey",
+			name: "content_review_case_duplicate_fkey",
 		}).onDelete("set null"),
-		index("moderation_case_authority_state_created_idx").on(
+		index("content_review_case_authority_state_created_idx").on(
 			table.authority,
 			table.state,
 			table.createdAt,
 			table.id,
 		),
-		index("moderation_case_realm_state_created_idx").on(
+		index("content_review_case_authority_created_idx").on(
+			table.authority,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
+		index("content_review_case_realm_state_created_idx").on(
 			table.realmId,
 			table.state,
 			table.createdAt,
 			table.id,
 		),
-		index("moderation_case_assignee_state_idx").on(
+		index("content_review_case_realm_created_idx").on(
+			table.realmId,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
+		index("content_review_case_platform_updated_idx")
+			.on(table.updatedAt.desc(), table.id.desc())
+			.where(sql`${table.authority} = 'platform'::content_review_authority`),
+		index("content_review_case_platform_state_updated_idx")
+			.on(table.state, table.updatedAt.desc(), table.id.desc())
+			.where(sql`${table.authority} = 'platform'::content_review_authority`),
+		index("content_review_case_assignee_state_idx").on(
 			table.assignedProfileId,
 			table.state,
 			table.createdAt,
 			table.id,
 		),
-		index("moderation_case_target_idx").on(table.targetKind, table.targetId),
-		index("moderation_case_duplicate_idx").on(table.duplicateOfCaseId),
+		index("content_review_case_target_idx").on(table.targetUnitId, table.createdAt, table.id),
+		index("content_review_case_duplicate_idx").on(table.duplicateOfCaseId),
+		uniqueIndex("content_review_case_platform_active_target_key")
+			.on(table.targetUnitId)
+			.where(
+				sql`${table.authority} = 'platform'::content_review_authority and ${table.state} in (${sql.join(
+					ActiveContentReviewCaseStateValues.map(
+						(state) => sql`${state}::content_review_case_state`,
+					),
+					sql`, `,
+				)})`,
+			),
+		uniqueIndex("content_review_case_realm_active_target_key")
+			.on(table.realmId, table.targetUnitId)
+			.where(
+				sql`${table.authority} = 'realm'::content_review_authority and ${table.state} in (${sql.join(
+					ActiveContentReviewCaseStateValues.map(
+						(state) => sql`${state}::content_review_case_state`,
+					),
+					sql`, `,
+				)})`,
+			),
 		check(
-			"moderation_case_authority_check",
-			sql`(${table.authority} = 'realm'::moderation_authority) = (${table.realmId} is not null)`,
+			"content_review_case_authority_check",
+			sql`(${table.authority} = 'realm'::content_review_authority) = (${table.realmId} is not null)`,
 		),
 		check(
-			"moderation_case_path_check",
-			sql`(${table.targetKind} = 'unit_field'::moderation_target_kind) = (nullif(btrim(${table.targetPath}), '') is not null)`,
+			"content_review_case_duplicate_state_check",
+			sql`(${table.state} = 'duplicate'::content_review_case_state) = (${table.duplicateOfCaseId} is not null)`,
 		),
 		check(
-			"moderation_case_duplicate_state_check",
-			sql`(${table.state} = 'duplicate'::moderation_case_state) = (${table.duplicateOfCaseId} is not null)`,
-		),
-		check(
-			"moderation_case_not_self_duplicate",
+			"content_review_case_not_self_duplicate",
 			sql`${table.duplicateOfCaseId} is null or ${table.duplicateOfCaseId} <> ${table.id}`,
 		),
 	],
 );
 
-export const realmUnitReport = pgTable(
-	"realm_unit_report",
+export const contentReport = pgTable(
+	"content_report",
 	{
 		id: createUuidv7PrimaryKey(),
-		caseId: uuid()
-			.notNull()
-			.references(() => moderationCase.id, { onDelete: "restrict" }),
 		reporterProfileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "restrict" }),
-		realmId: uuid()
-			.notNull()
-			.references(() => realm.id, { onDelete: "restrict" }),
-		unitId: uuid()
+		contextRealmId: uuid().references(() => realm.id, { onDelete: "restrict" }),
+		targetUnitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "restrict" }),
-		ruleRevisionId: uuid().notNull(),
-		ruleId: uuid()
-			.notNull()
-			.references(() => realmRule.id, { onDelete: "restrict" }),
 		/** Reporter-authored evidence, stored verbatim without content-language metadata. */
 		details: text(),
 		reportedRevisionId: uuid().notNull(),
@@ -175,68 +204,43 @@ export const realmUnitReport = pgTable(
 	},
 	(table) => [
 		foreignKey({
-			columns: [table.realmId, table.unitId],
-			foreignColumns: [realmUnit.realmId, realmUnit.unitId],
-			name: "realm_unit_report_realm_unit_fkey",
-		}).onDelete("restrict"),
-		foreignKey({
-			columns: [table.realmId, table.ruleRevisionId],
-			foreignColumns: [realmRuleRevision.realmId, realmRuleRevision.id],
-			name: "realm_unit_report_rule_revision_realm_fkey",
-		}).onDelete("restrict"),
-		foreignKey({
-			columns: [table.ruleId, table.ruleRevisionId],
-			foreignColumns: [realmRule.id, realmRule.revisionId],
-			name: "realm_unit_report_rule_revision_fkey",
-		}).onDelete("restrict"),
-		foreignKey({
-			columns: [table.reportedRevisionId, table.unitId],
+			columns: [table.reportedRevisionId, table.targetUnitId],
 			foreignColumns: [unitRevision.id, unitRevision.unitId],
-			name: "realm_unit_report_revision_unit_fkey",
+			name: "content_report_revision_unit_fkey",
 		}).onDelete("restrict"),
-		unique("realm_unit_report_case_reporter_key").on(table.caseId, table.reporterProfileId),
-		index("realm_unit_report_realm_created_at_idx").on(
-			table.realmId,
-			table.createdAt.desc(),
-			table.id.desc(),
-		),
-		index("realm_unit_report_realm_unit_created_at_idx").on(
-			table.realmId,
-			table.unitId,
-			table.createdAt.desc(),
-		),
-		index("realm_unit_report_unit_idx").on(table.unitId),
-		index("realm_unit_report_case_idx").on(table.caseId),
-		index("realm_unit_report_rule_idx").on(table.ruleId),
-		index("realm_unit_report_reporter_created_at_idx").on(
+		index("content_report_reporter_created_idx").on(
 			table.reporterProfileId,
 			table.createdAt.desc(),
 			table.id.desc(),
 		),
+		index("content_report_context_target_created_idx").on(
+			table.contextRealmId,
+			table.targetUnitId,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
+		index("content_report_target_created_idx").on(
+			table.targetUnitId,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
 		check(
-			"realm_unit_report_details_not_blank",
+			"content_report_details_not_blank",
 			sql`${table.details} is null or btrim(${table.details}) <> ''`,
 		),
 		check(
-			"realm_unit_report_details_length",
+			"content_report_details_length",
 			sql`${table.details} is null or char_length(${table.details}) <= 2000`,
 		),
 	],
 );
 
-export const platformUnitReport = pgTable(
-	"platform_unit_report",
+export const contentReportRule = pgTable(
+	"content_report_rule",
 	{
-		id: createUuidv7PrimaryKey(),
-		caseId: uuid()
+		reportId: uuid()
 			.notNull()
-			.references(() => moderationCase.id, { onDelete: "restrict" }),
-		reporterProfileId: uuid()
-			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "restrict" }),
+			.references(() => contentReport.id, { onDelete: "cascade" }),
 		ruleSourceRealmId: uuid()
 			.notNull()
 			.references(() => realm.id, { onDelete: "restrict" }),
@@ -244,69 +248,101 @@ export const platformUnitReport = pgTable(
 		ruleId: uuid()
 			.notNull()
 			.references(() => realmRule.id, { onDelete: "restrict" }),
-		/** Reporter-authored evidence, stored verbatim without content-language metadata. */
-		details: text(),
-		reportedRevisionId: uuid().notNull(),
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
 		foreignKey({
 			columns: [table.ruleSourceRealmId, table.ruleRevisionId],
 			foreignColumns: [realmRuleRevision.realmId, realmRuleRevision.id],
-			name: "platform_unit_report_rule_revision_realm_fkey",
+			name: "content_report_rule_revision_realm_fkey",
 		}).onDelete("restrict"),
 		foreignKey({
 			columns: [table.ruleId, table.ruleRevisionId],
 			foreignColumns: [realmRule.id, realmRule.revisionId],
-			name: "platform_unit_report_rule_revision_fkey",
+			name: "content_report_rule_revision_fkey",
 		}).onDelete("restrict"),
-		foreignKey({
-			columns: [table.reportedRevisionId, table.unitId],
-			foreignColumns: [unitRevision.id, unitRevision.unitId],
-			name: "platform_unit_report_revision_unit_fkey",
-		}).onDelete("restrict"),
-		unique("platform_unit_report_case_reporter_key").on(table.caseId, table.reporterProfileId),
-		index("platform_unit_report_created_at_idx").on(table.createdAt.desc(), table.id.desc()),
-		index("platform_unit_report_unit_created_at_idx").on(table.unitId, table.createdAt.desc()),
-		index("platform_unit_report_case_idx").on(table.caseId),
-		index("platform_unit_report_rule_idx").on(table.ruleId),
-		index("platform_unit_report_reporter_created_at_idx").on(
-			table.reporterProfileId,
-			table.createdAt.desc(),
-			table.id.desc(),
-		),
-		check(
-			"platform_unit_report_details_not_blank",
-			sql`${table.details} is null or btrim(${table.details}) <> ''`,
-		),
-		check(
-			"platform_unit_report_details_length",
-			sql`${table.details} is null or char_length(${table.details}) <= 2000`,
-		),
-		check(
-			"platform_unit_report_rule_source_check",
-			sql`${table.ruleSourceRealmId} = ${OfficialRealmUnitIds.rule}::uuid`,
-		),
+		primaryKey({
+			columns: [table.reportId, table.ruleId],
+			name: "content_report_rule_pkey",
+		}),
+		index("content_report_rule_source_report_idx").on(table.ruleSourceRealmId, table.reportId),
+		index("content_report_rule_rule_report_idx").on(table.ruleId, table.reportId),
 	],
 );
 
-export const moderationAction = pgTable(
-	"moderation_action",
+export const contentReportReferral = pgTable(
+	"content_report_referral",
+	{
+		id: createUuidv7PrimaryKey(),
+		reportId: uuid()
+			.notNull()
+			.references(() => contentReport.id, { onDelete: "cascade" }),
+		caseId: uuid()
+			.notNull()
+			.references(() => contentReviewCase.id, { onDelete: "restrict" }),
+		ruleSourceRealmId: uuid()
+			.notNull()
+			.references(() => realm.id, { onDelete: "restrict" }),
+		createdAt: createCreatedAtColumn(),
+	},
+	(table) => [
+		unique("content_report_referral_report_source_key").on(
+			table.reportId,
+			table.ruleSourceRealmId,
+		),
+		unique("content_report_referral_case_report_key").on(table.caseId, table.reportId),
+		index("content_report_referral_case_created_idx").on(
+			table.caseId,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
+		index("content_report_referral_source_created_idx").on(
+			table.ruleSourceRealmId,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
+		index("content_report_referral_report_idx").on(table.reportId, table.caseId),
+	],
+);
+
+/** A fixed 256-way counter fan-out bounds contention on viral review cases. */
+export const contentReviewCaseReportCounter = pgTable(
+	"content_review_case_report_counter",
+	{
+		caseId: uuid()
+			.notNull()
+			.references(() => contentReviewCase.id, { onDelete: "cascade" }),
+		bucket: smallint().notNull(),
+		count: integer().default(0).notNull(),
+	},
+	(table) => [
+		primaryKey({
+			columns: [table.caseId, table.bucket],
+			name: "content_review_case_report_counter_pkey",
+		}),
+		check(
+			"content_review_case_report_counter_bucket_check",
+			sql`${table.bucket} between 0 and 255`,
+		),
+		check("content_review_case_report_counter_count_check", sql`${table.count} >= 0`),
+	],
+);
+
+export const contentGovernanceAction = pgTable(
+	"content_governance_action",
 	{
 		id: createUuidv7PrimaryKey(),
 		caseId: uuid()
 			.notNull()
-			.references(() => moderationCase.id, { onDelete: "restrict" }),
+			.references(() => contentReviewCase.id, { onDelete: "restrict" }),
 		actorProfileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "restrict" }),
-		kind: moderationActionKind().notNull(),
-		resultingStatus: moderationStatus(),
+		kind: contentGovernanceActionKind().notNull(),
 		resultingPostTargetingLocked: boolean(),
 		contentLicenseId: uuid(),
 		previousContentLicenseStatus: unitContentLicenseStatus(),
 		resultingContentLicenseStatus: unitContentLicenseStatus(),
-		reasonCode: governanceReasonCode().notNull(),
 		reversesActionId: uuid(),
 		previousState: text(),
 		resultingState: text(),
@@ -320,38 +356,44 @@ export const moderationAction = pgTable(
 		foreignKey({
 			columns: [table.reversesActionId],
 			foreignColumns: [table.id],
-			name: "moderation_action_reverses_fkey",
+			name: "content_governance_action_reverses_fkey",
 		}).onDelete("restrict"),
 		foreignKey({
 			columns: [table.contentLicenseId],
 			foreignColumns: [unitContentLicense.id],
-			name: "moderation_action_content_license_fkey",
+			name: "content_governance_action_content_license_fkey",
 		}).onDelete("restrict"),
-		uniqueIndex("moderation_action_actor_case_idempotency_key")
+		uniqueIndex("content_governance_action_actor_case_idempotency_key")
 			.on(table.actorProfileId, table.caseId, table.idempotencyKey)
 			.where(sql`${table.idempotencyKey} is not null`),
-		index("moderation_action_case_created_at_idx").on(table.caseId, table.createdAt, table.id),
-		index("moderation_action_actor_created_at_idx").on(
+		index("content_governance_action_case_created_idx").on(
+			table.caseId,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
+		index("content_governance_action_actor_created_idx").on(
 			table.actorProfileId,
 			table.createdAt.desc(),
 			table.id.desc(),
 		),
-		index("moderation_action_reverses_idx").on(table.reversesActionId),
-		index("moderation_action_content_license_created_at_idx").on(
+		uniqueIndex("content_governance_action_reverses_key")
+			.on(table.reversesActionId)
+			.where(sql`${table.reversesActionId} is not null`),
+		index("content_governance_action_content_license_created_idx").on(
 			table.contentLicenseId,
 			table.createdAt.desc(),
 			table.id.desc(),
 		),
 		check(
-			"moderation_action_state_outcome_check",
+			"content_governance_action_state_outcome_check",
 			sql`(${table.previousState} is null) = (${table.resultingState} is null)`,
 		),
 		check(
-			"moderation_action_post_targeting_lock_outcome_check",
+			"content_governance_action_post_targeting_lock_outcome_check",
 			sql`(${table.previousPostTargetingLocked} is null) = (${table.resultingPostTargetingLocked} is null)`,
 		),
 		check(
-			"moderation_action_single_outcome_check",
+			"content_governance_action_single_outcome_check",
 			sql`num_nonnulls(
 				${table.previousState},
 				${table.previousPostTargetingLocked},
@@ -359,7 +401,26 @@ export const moderationAction = pgTable(
 			) <= 1`,
 		),
 		check(
-			"moderation_action_content_license_transition_check",
+			"content_governance_action_kind_outcome_check",
+			sql`(
+				${table.kind} in ('approve', 'hide', 'remove', 'restore')
+				and ${table.previousState} is not null
+			) or (
+				${table.kind} in ('lock_post_targeting', 'unlock_post_targeting')
+				and ${table.previousPostTargetingLocked} is not null
+			) or (
+				${table.kind} in ('invalidate_content_license', 'restore_content_license')
+				and ${table.previousContentLicenseStatus} is not null
+			) or (
+				${table.kind} = 'reverse'
+				and num_nonnulls(
+					${table.previousState},
+					${table.previousPostTargetingLocked}
+				) = 1
+			)`,
+		),
+		check(
+			"content_governance_action_content_license_transition_check",
 			sql`(
 				${table.kind} = 'invalidate_content_license'
 				and ${table.contentLicenseId} is not null
@@ -385,17 +446,55 @@ export const moderationAction = pgTable(
 			)`,
 		),
 		check(
-			"moderation_action_request_fingerprint_check",
+			"content_governance_action_request_fingerprint_check",
 			sql`${table.requestFingerprint} is null or ${table.requestFingerprint} ~ '^[0-9a-f]{64}$'`,
 		),
 		check(
-			"moderation_action_not_self_reverse",
+			"content_governance_action_not_self_reverse",
 			sql`${table.reversesActionId} is null or ${table.reversesActionId} <> ${table.id}`,
 		),
 		check(
-			"moderation_action_reversal_check",
-			sql`(${table.kind} in ('reverse', 'revoke_enforcement', 'restore_content_license')) = (${table.reversesActionId} is not null)`,
+			"content_governance_action_reversal_check",
+			sql`(${table.kind} in ('reverse', 'restore_content_license')) = (${table.reversesActionId} is not null)`,
 		),
+	],
+);
+
+export const contentGovernanceActionRule = pgTable(
+	"content_governance_action_rule",
+	{
+		actionId: uuid()
+			.notNull()
+			.references(() => contentGovernanceAction.id, { onDelete: "cascade" }),
+		ruleSourceRealmId: uuid()
+			.notNull()
+			.references(() => realm.id, { onDelete: "restrict" }),
+		ruleRevisionId: uuid().notNull(),
+		ruleId: uuid()
+			.notNull()
+			.references(() => realmRule.id, { onDelete: "restrict" }),
+		createdAt: createCreatedAtColumn(),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.ruleSourceRealmId, table.ruleRevisionId],
+			foreignColumns: [realmRuleRevision.realmId, realmRuleRevision.id],
+			name: "content_governance_action_rule_revision_realm_fkey",
+		}).onDelete("restrict"),
+		foreignKey({
+			columns: [table.ruleId, table.ruleRevisionId],
+			foreignColumns: [realmRule.id, realmRule.revisionId],
+			name: "content_governance_action_rule_revision_fkey",
+		}).onDelete("restrict"),
+		primaryKey({
+			columns: [table.actionId, table.ruleId],
+			name: "content_governance_action_rule_pkey",
+		}),
+		index("content_governance_action_rule_source_action_idx").on(
+			table.ruleSourceRealmId,
+			table.actionId,
+		),
+		index("content_governance_action_rule_rule_action_idx").on(table.ruleId, table.actionId),
 	],
 );
 
@@ -414,16 +513,18 @@ export const realmUnitStatusEvent = pgTable(
 		changedByProfileId: uuid().references(() => profile.id, {
 			onDelete: "set null",
 		}),
-		moderationActionId: uuid(),
+		contentGovernanceActionId: uuid(),
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
 		foreignKey({
-			columns: [table.moderationActionId],
-			foreignColumns: [moderationAction.id],
-			name: "realm_unit_status_event_moderation_action_fkey",
+			columns: [table.contentGovernanceActionId],
+			foreignColumns: [contentGovernanceAction.id],
+			name: "realm_unit_status_event_content_governance_action_fkey",
 		}).onDelete("restrict"),
-		unique("realm_unit_status_event_action_key").on(table.moderationActionId),
+		unique("realm_unit_status_event_content_governance_action_key").on(
+			table.contentGovernanceActionId,
+		),
 		index("realm_unit_status_event_history_idx").on(
 			table.realmId,
 			table.unitId,
@@ -498,6 +599,52 @@ export const governancePostBinding = pgTable(
 	],
 );
 
+export const accountEnforcementAction = pgTable(
+	"account_enforcement_action",
+	{
+		id: createUuidv7PrimaryKey(),
+		actorProfileId: uuid()
+			.notNull()
+			.references(() => profile.id, { onDelete: "restrict" }),
+		targetProfileId: uuid()
+			.notNull()
+			.references(() => profile.id, { onDelete: "restrict" }),
+		kind: accountEnforcementActionKind().notNull(),
+		enforcementKind: enforcementKind().notNull(),
+		reversesActionId: uuid(),
+		requestId: text(),
+		createdAt: createCreatedAtColumn(),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.reversesActionId],
+			foreignColumns: [table.id],
+			name: "account_enforcement_action_reverses_fkey",
+		}).onDelete("restrict"),
+		uniqueIndex("account_enforcement_action_reverses_key")
+			.on(table.reversesActionId)
+			.where(sql`${table.reversesActionId} is not null`),
+		index("account_enforcement_action_target_created_idx").on(
+			table.targetProfileId,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
+		index("account_enforcement_action_actor_created_idx").on(
+			table.actorProfileId,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
+		check(
+			"account_enforcement_action_reversal_check",
+			sql`(${table.kind} = 'revoke'::account_enforcement_action_kind) = (${table.reversesActionId} is not null)`,
+		),
+		check(
+			"account_enforcement_action_not_self_reverse",
+			sql`${table.reversesActionId} is null or ${table.reversesActionId} <> ${table.id}`,
+		),
+	],
+);
+
 export const accountEnforcement = pgTable(
 	"account_enforcement",
 	{
@@ -510,8 +657,10 @@ export const accountEnforcement = pgTable(
 		expiresAt: createTimestampMsColumn(),
 		decisionActionId: uuid()
 			.notNull()
-			.references(() => moderationAction.id, { onDelete: "restrict" }),
-		revocationActionId: uuid().references(() => moderationAction.id, { onDelete: "restrict" }),
+			.references(() => accountEnforcementAction.id, { onDelete: "restrict" }),
+		revocationActionId: uuid().references(() => accountEnforcementAction.id, {
+			onDelete: "restrict",
+		}),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},

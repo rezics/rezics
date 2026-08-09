@@ -6,8 +6,8 @@ export const IntegrityConstraints = [
 	},
 	{ table: "email_outbox", name: "email_outbox_intent_check" },
 	{
-		table: "moderation_action",
-		name: "moderation_action_content_license_transition_check",
+		table: "content_governance_action",
+		name: "content_governance_action_content_license_transition_check",
 	},
 	{
 		table: "unit_ownership_claim",

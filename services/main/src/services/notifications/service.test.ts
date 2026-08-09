@@ -60,7 +60,7 @@ describe("notification translation selection", () => {
 		).toBe("report_resolution");
 		expect(
 			notificationTranslationKey("moderation", {
-				type: "moderation_action",
+				type: "content_governance_action",
 			}),
 		).toBe("moderation");
 	});

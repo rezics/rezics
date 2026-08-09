@@ -1,8 +1,8 @@
 import { type Static, t } from "elysia";
 
 import {
-	GovernanceReasonCodeValues,
-	ModerationActionKindValues,
+	ContentGovernanceActionKindValues,
+	EnforcementKindValues,
 	NotificationKindValues,
 } from "../../database/schema/contract-values";
 import { CountResultSchema } from "../../counts/contract";
@@ -51,10 +51,11 @@ const NotificationItemBase = {
 export const ModerationNotificationPayload = t.Union([
 	t.Object(
 		{
-			type: t.Literal("moderation_action"),
+			type: t.Literal("content_governance_action"),
 			actionId: Uuid,
-			actionKind: t.UnionEnum(ModerationActionKindValues, { default: undefined }),
-			reasonCode: t.UnionEnum(GovernanceReasonCodeValues, { default: undefined }),
+			actionKind: t.UnionEnum(ContentGovernanceActionKindValues, {
+				default: undefined,
+			}),
 			publicNoticePostId: t.Optional(Uuid),
 		},
 		{ additionalProperties: false },
@@ -63,10 +64,24 @@ export const ModerationNotificationPayload = t.Union([
 		{
 			type: t.Literal("report_resolution"),
 			reportId: Uuid,
-			reportScope: t.Union([t.Literal("platform"), t.Literal("realm")]),
+			referralId: Uuid,
+			actionId: t.Optional(Uuid),
+			actionKind: t.Optional(
+				t.UnionEnum(ContentGovernanceActionKindValues, {
+					default: undefined,
+				}),
+			),
+			resolution: t.Optional(t.Literal("dismissed")),
+			publicNoticePostId: t.Optional(Uuid),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			type: t.Literal("account_enforcement_action"),
 			actionId: Uuid,
-			actionKind: t.UnionEnum(ModerationActionKindValues, { default: undefined }),
-			reasonCode: t.UnionEnum(GovernanceReasonCodeValues, { default: undefined }),
+			actionKind: t.Union([t.Literal("issue"), t.Literal("revoke")]),
+			enforcementKind: t.UnionEnum(EnforcementKindValues, { default: undefined }),
 			publicNoticePostId: t.Optional(Uuid),
 		},
 		{ additionalProperties: false },

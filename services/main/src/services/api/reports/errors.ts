@@ -33,10 +33,17 @@ export class ReportRuleChanged extends Data.TaggedError("ReportRuleChanged") {
 	readonly message = "The selected report rule is not part of the current rule revision";
 }
 
+export class ReportRuleSourceForbidden extends Data.TaggedError("ReportRuleSourceForbidden") {
+	static readonly status = StatusCodes.BAD_REQUEST as const;
+	readonly status = ReportRuleSourceForbidden.status;
+	readonly message = "Reports may only cite the current Realm and official rules";
+}
+
 export const ReportErrors = [
 	ReportRealmMismatch,
 	ReportAlreadySubmitted,
 	ReportTargetRevisionUnavailable,
 	ReportRuleUnavailable,
 	ReportRuleChanged,
+	ReportRuleSourceForbidden,
 ] as const;

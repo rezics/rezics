@@ -3,14 +3,18 @@
 import { createBlockKey, createPortableTextDocument } from "@rezics/block";
 import {
 	GetApiReportsPlatformCasesState,
-	PostApiGovernanceModerationActionsRequestReasonCodeEnum,
+	getApiGovernanceContentReviewCasesQueryKey,
+	getApiReportsPlatformCases,
 	getApiReportsPlatformCasesQueryKey,
-	useGetApiReportsPlatformCases,
-	usePostApiGovernanceModerationActions,
+	getApiReportsReviewCasesByCaseId,
+	getApiReportsReviewCasesByCaseIdQueryKey,
+	type GetApiReportsPlatformCasesQuery,
 	type GetApiReportsPlatformCasesState as PlatformCaseState,
 	type GetApiReportsPlatformCasesStatus200,
-	type PostApiGovernanceModerationActionsBody,
-	type PostApiGovernanceModerationActionsRequestReasonCodeEnum as GovernanceReasonCode,
+	type PostApiGovernanceContentGovernanceActionsBody,
+	useGetApiReportsUnitsByUnitIdDestinations,
+	usePatchApiGovernanceContentReviewCasesByCaseId,
+	usePostApiGovernanceContentGovernanceActions,
 } from "@rezics/openapi-tanstack-query";
 import {
 	AlertDialog,
@@ -27,7 +31,9 @@ import {
 	CardContent,
 	CardHeader,
 	CardTitle,
+	Checkbox,
 	Field,
+	FieldDescription,
 	FieldLabel,
 	ManagementWorkspaceSectionHeader,
 	NativeSelect,
@@ -37,29 +43,79 @@ import {
 	Textarea,
 	toast,
 } from "@rezics/ui";
-import { useQueryClient } from "@tanstack/react-query";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 
-import { publicUnitHref } from "@/features/units/routing/public-unit-route";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
 import { useDraftContentLanguage } from "@/features/content-languages/hooks/use-draft-content-language";
+import {
+	ContentGovernanceMaximumRuleReferences,
+	updateContentRuleSelection,
+} from "@/features/governance/model/content-rule-selection";
+import { publicUnitHref } from "@/features/units/routing/public-unit-route";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { useConsoleWorkspace } from "../components/console-workspace";
 
 type PlatformReportCase = GetApiReportsPlatformCasesStatus200["items"][number];
-type PlatformCommand = PlatformReportCase["allowedCommands"][number];
+type PlatformCommand =
+	| "approve"
+	| "remove"
+	| "restore"
+	| "lock_post_targeting"
+	| "unlock_post_targeting"
+	| "invalidate_content_license"
+	| "restore_content_license"
+	| "dismiss"
+	| "note";
 type ConfirmedCommand = Extract<PlatformCommand, "remove" | "invalidate_content_license">;
 
 const CaseStates = Object.values(GetApiReportsPlatformCasesState);
-const GovernanceReasonCodes = Object.values(
-	PostApiGovernanceModerationActionsRequestReasonCodeEnum,
-);
+const AdverseCommands = new Set<PlatformCommand>([
+	"remove",
+	"lock_post_targeting",
+	"invalidate_content_license",
+]);
 
-function selectCommand(value: string, allowed: readonly PlatformCommand[]): PlatformCommand {
-	return allowed.find((command) => command === value) ?? allowed[0] ?? "note";
+function isPlatformCommand(value: string): value is PlatformCommand {
+	return [
+		"approve",
+		"remove",
+		"restore",
+		"lock_post_targeting",
+		"unlock_post_targeting",
+		"invalidate_content_license",
+		"restore_content_license",
+		"dismiss",
+		"note",
+	].includes(value);
+}
+
+function selectCommand(value: string, allowed: readonly string[]): PlatformCommand {
+	if (isPlatformCommand(value) && allowed.includes(value)) return value;
+	const first = allowed.find(isPlatformCommand);
+	return first ?? "note";
+}
+
+function createNoteDocument(text: string) {
+	return createPortableTextDocument([
+		{
+			_type: "block" as const,
+			_key: createBlockKey(),
+			style: "normal",
+			markDefs: [],
+			children: [
+				{
+					_type: "span" as const,
+					_key: createBlockKey(),
+					text,
+					marks: [],
+				},
+			],
+		},
+	]);
 }
 
 export function ConsoleModerationPage() {
@@ -73,97 +129,191 @@ export function ConsoleModerationPage() {
 		caseId: "",
 		value: "note" as PlatformCommand,
 	});
-	const [reasonCode, setReasonCode] = useState<GovernanceReasonCode>("content_policy");
+	const [ruleSelection, setRuleSelection] = useState({ caseId: "", keys: [] as string[] });
 	const [note, setNote] = useState("");
 	const noteLanguage = useDraftContentLanguage(note);
 	const [confirmedCommand, setConfirmedCommand] = useState<ConfirmedCommand | null>(null);
-	const cases = useGetApiReportsPlatformCases(
-		{ query: { state, localizationLanguages, limit: 100 } },
-		{ query: { enabled: canModerate } },
-	);
-	const mutation = usePostApiGovernanceModerationActions();
 
-	if (!canModerate) return <p className="text-destructive text-sm">{t.errors.forbidden}</p>;
-	if (cases.isPending) return <QueryPending />;
-	if (cases.isError || !cases.data)
-		return <QueryFailure error={cases.error} retry={() => void cases.refetch()} />;
-
-	const selected =
-		cases.data.items.find((item) => item.caseId === selectedCaseId) ?? cases.data.items[0];
-	const command =
-		selected && commandSelection.caseId === selected.caseId
+	const casesQuery = {
+		state,
+		localizationLanguages,
+		limit: 50,
+	} satisfies GetApiReportsPlatformCasesQuery;
+	const cases = useInfiniteQuery({
+		queryKey: getApiReportsPlatformCasesQueryKey({ query: casesQuery }),
+		queryFn: async ({ pageParam, signal }) => {
+			const { data } = await getApiReportsPlatformCases({
+				query: { ...casesQuery, ...(pageParam ? { cursor: pageParam } : {}) },
+				signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+		initialPageParam: "",
+		getNextPageParam: (page) => page.nextCursor ?? undefined,
+		enabled: canModerate,
+	});
+	const caseItems = cases.data?.pages.flatMap((page) => page.items) ?? [];
+	const selected = caseItems.find((item) => item.caseId === selectedCaseId) ?? caseItems[0];
+	const command = selected
+		? commandSelection.caseId === selected.caseId
 			? selectCommand(commandSelection.value, selected.allowedCommands)
-			: (selected?.allowedCommands[0] ?? "note");
+			: selectCommand("", selected.allowedCommands)
+		: "note";
+
+	const reports = useInfiniteQuery({
+		queryKey: getApiReportsReviewCasesByCaseIdQueryKey({
+			path: { caseId: selected?.caseId ?? "00000000-0000-7000-8000-000000000000" },
+			query: { localizationLanguages, limit: 50 },
+		}),
+		queryFn: async ({ pageParam, signal }) => {
+			if (!selected) throw new Error("A selected content review case is required");
+			const { data } = await getApiReportsReviewCasesByCaseId({
+				path: { caseId: selected.caseId },
+				query: {
+					localizationLanguages,
+					limit: 50,
+					...(pageParam ? { cursor: pageParam } : {}),
+				},
+				signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+		initialPageParam: "",
+		getNextPageParam: (page) => page.nextCursor ?? undefined,
+		enabled: Boolean(selected),
+	});
+	const destinations = useGetApiReportsUnitsByUnitIdDestinations(
+		{
+			path: { unitId: selected?.unitId ?? "00000000-0000-7000-8000-000000000000" },
+			query: { localizationLanguages },
+		},
+		{ query: { enabled: Boolean(selected) } },
+	);
+	const actionMutation = usePostApiGovernanceContentGovernanceActions();
+	const caseMutation = usePatchApiGovernanceContentReviewCasesByCaseId();
+	const mutationPending = actionMutation.isPending || caseMutation.isPending;
+	const selectedRuleKeys =
+		selected && ruleSelection.caseId === selected.caseId ? ruleSelection.keys : [];
+	const availableRuleKeys = (destinations.data?.items ?? []).flatMap((destination) =>
+		destination.rules.map((rule) => `${destination.id}:${destination.revisionId}:${rule.id}`),
+	);
+	const currentSelectedRuleKeys = selectedRuleKeys.filter((key) =>
+		availableRuleKeys.includes(key),
+	);
+	const selectedRules = (destinations.data?.items ?? []).flatMap((destination) =>
+		destination.rules
+			.filter((rule) =>
+				currentSelectedRuleKeys.includes(
+					`${destination.id}:${destination.revisionId}:${rule.id}`,
+				),
+			)
+			.map((rule) => ({
+				sourceRealmId: destination.id,
+				revisionId: destination.revisionId,
+				ruleId: rule.id,
+			})),
+	);
 	const noteRequired = command === "note";
 	const noteValid = !noteRequired || note.trim().length > 0;
+	const rulesValid = !AdverseCommands.has(command) || selectedRules.length > 0;
 
-	async function applyModeration() {
-		if (!selected || mutation.isPending || !noteValid) return;
+	async function refreshCaseData(caseId: string) {
+		await Promise.all([
+			queryClient.invalidateQueries({ queryKey: getApiReportsPlatformCasesQueryKey() }),
+			queryClient.invalidateQueries({
+				queryKey: getApiReportsReviewCasesByCaseIdQueryKey({
+					path: { caseId },
+					query: { localizationLanguages, limit: 50 },
+				}),
+			}),
+			queryClient.invalidateQueries({
+				queryKey: getApiGovernanceContentReviewCasesQueryKey(),
+			}),
+		]);
+	}
+
+	async function applyGovernance() {
+		if (!selected || mutationPending || !noteValid || !rulesValid) return;
 		const normalizedNote = note.trim();
-		const notes = normalizedNote
-			? [
-					{
-						role: "internal_note" as const,
-						language: await noteLanguage.resolveLanguage(normalizedNote),
-						content: createPortableTextDocument([
-							{
-								_type: "block" as const,
-								_key: createBlockKey(),
-								style: "normal",
-								markDefs: [],
-								children: [
-									{
-										_type: "span" as const,
-										_key: createBlockKey(),
-										text: normalizedNote,
-										marks: [],
-									},
-								],
-							},
-						]),
-					},
-				]
+		const language = normalizedNote
+			? await noteLanguage.resolveLanguage(normalizedNote)
 			: undefined;
-		const common = {
-			caseId: selected.caseId,
-			reasonCode,
-			idempotencyKey: crypto.randomUUID(),
-		};
-		let body: PostApiGovernanceModerationActionsBody;
-		if (command === "note") {
-			if (!notes) return;
-			body = { ...common, kind: "note", notes };
-		} else if (command === "restore_content_license") {
-			if (selected.contentLicense?.status !== "invalidated") return;
-			body = {
-				...common,
-				kind: "restore_content_license",
-				reversesActionId: selected.contentLicense.invalidationActionId,
-				...(notes ? { notes } : {}),
-			};
-		} else body = { ...common, kind: command, ...(notes ? { notes } : {}) };
+		const document = normalizedNote ? createNoteDocument(normalizedNote) : undefined;
 		try {
-			await mutation.mutateAsync({ body });
+			if (command === "note" || command === "dismiss") {
+				if (command === "note" && (!language || !document)) return;
+				await caseMutation.mutateAsync({
+					path: { caseId: selected.caseId },
+					body: {
+						...(command === "dismiss" ? { state: "rejected" as const } : {}),
+						...(language && document
+							? { internalNote: { language, content: document } }
+							: {}),
+					},
+				});
+			} else {
+				const notes =
+					language && document
+						? [{ role: "internal_note" as const, language, content: document }]
+						: undefined;
+				const common = {
+					caseId: selected.caseId,
+					idempotencyKey: crypto.randomUUID(),
+					...(notes ? { notes } : {}),
+				};
+				let body: PostApiGovernanceContentGovernanceActionsBody;
+				if (AdverseCommands.has(command)) {
+					if (
+						command !== "remove" &&
+						command !== "lock_post_targeting" &&
+						command !== "invalidate_content_license"
+					)
+						return;
+					body = { ...common, kind: command, rules: selectedRules };
+				} else if (command === "restore_content_license") {
+					if (selected.contentLicense?.status !== "invalidated") return;
+					body = {
+						...common,
+						kind: "restore_content_license",
+						reversesActionId: selected.contentLicense.invalidationActionId,
+					};
+				} else {
+					if (
+						command !== "approve" &&
+						command !== "restore" &&
+						command !== "unlock_post_targeting"
+					)
+						return;
+					body = { ...common, kind: command };
+				}
+				await actionMutation.mutateAsync({ body });
+			}
 			setNote("");
+			setRuleSelection({ caseId: selected.caseId, keys: [] });
 			noteLanguage.enableAutomaticDetection();
 			toast.create({ title: t.console.moderation.succeeded, type: "success" });
-			await queryClient.invalidateQueries({
-				queryKey: getApiReportsPlatformCasesQueryKey(),
-			});
+			await refreshCaseData(selected.caseId);
 		} catch {
-			// The typed mutation state renders the localized request failure below.
+			// Typed mutation state renders the localized request failure below.
 		}
 	}
 
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		if (!noteValid) return;
+		if (!noteValid || !rulesValid) return;
 		if (command === "remove" || command === "invalidate_content_license") {
 			setConfirmedCommand(command);
 			return;
 		}
-		void applyModeration();
+		void applyGovernance();
 	}
+
+	if (!canModerate) return <p className="text-destructive text-sm">{t.errors.forbidden}</p>;
+	if (cases.isPending) return <QueryPending />;
+	if (cases.isError)
+		return <QueryFailure error={cases.error} retry={() => void cases.refetch()} />;
 
 	return (
 		<section>
@@ -200,7 +350,10 @@ export function ConsoleModerationPage() {
 			</Card>
 			<div className="grid gap-4 xl:grid-cols-[minmax(18rem,0.72fr)_minmax(0,1.6fr)]">
 				<CaseList
-					items={cases.data.items}
+					hasMore={cases.hasNextPage}
+					isLoadingMore={cases.isFetchingNextPage}
+					items={caseItems}
+					onLoadMore={() => void cases.fetchNextPage()}
 					onSelect={setSelectedCaseId}
 					selectedCaseId={selected?.caseId}
 				/>
@@ -215,76 +368,154 @@ export function ConsoleModerationPage() {
 								<h3 className="font-heading font-bold">
 									{t.console.moderation.reports}
 								</h3>
-								{selected.reports.map((report) => (
-									<article
-										className="grid gap-2 rounded-lg border p-4 text-sm"
-										key={report.id}
+								{reports.isPending ? <QueryPending /> : null}
+								{reports.isError ? (
+									<QueryFailure
+										error={reports.error}
+										retry={() => void reports.refetch()}
+									/>
+								) : null}
+								{reports.data?.pages
+									.flatMap((page) => page.items)
+									.map((report) => (
+										<article
+											className="grid gap-2 rounded-lg border p-4 text-sm"
+											key={report.id}
+										>
+											<div className="flex flex-wrap justify-between gap-2">
+												<p className="font-medium">
+													{report.rules
+														.map((rule) => rule.title)
+														.join(" · ")}
+												</p>
+												<time
+													className="text-muted-foreground text-xs"
+													dateTime={report.createdAt}
+												>
+													{t.reports.reportedAt({
+														date: new Intl.DateTimeFormat(
+															locale.current,
+															{
+																dateStyle: "medium",
+																timeStyle: "short",
+															},
+														).format(new Date(report.createdAt)),
+													})}
+												</time>
+											</div>
+											{report.details ? (
+												<p className="whitespace-pre-wrap rounded-md bg-muted/35 p-3">
+													{report.details}
+												</p>
+											) : null}
+										</article>
+									))}
+								{reports.hasNextPage ? (
+									<Button
+										disabled={reports.isFetchingNextPage}
+										isLoading={reports.isFetchingNextPage}
+										onClick={() => void reports.fetchNextPage()}
+										variant="outline"
 									>
-										<div className="flex flex-wrap justify-between gap-2">
-											<p className="font-medium">{report.rule.title}</p>
-											<time
-												className="text-muted-foreground text-xs"
-												dateTime={report.createdAt}
-											>
-												{t.reports.reportedAt({
-													date: new Intl.DateTimeFormat(locale.current, {
-														dateStyle: "medium",
-														timeStyle: "short",
-													}).format(new Date(report.createdAt)),
-												})}
-											</time>
-										</div>
-										{report.details ? (
-											<p className="whitespace-pre-wrap rounded-md bg-muted/35 p-3">
-												{report.details}
-											</p>
-										) : null}
-									</article>
-								))}
+										{t.reports.myReports.loadMore}
+									</Button>
+								) : null}
 							</div>
 							<form className="grid gap-4" onSubmit={submit}>
-								<div className="grid gap-4 sm:grid-cols-2">
-									<Field required>
-										<FieldLabel>{t.console.moderation.action}</FieldLabel>
-										<NativeSelect
-											onChange={(event) =>
-												setCommandSelection({
-													caseId: selected.caseId,
-													value: selectCommand(
-														event.currentTarget.value,
-														selected.allowedCommands,
-													),
-												})
-											}
-											value={command}
-										>
-											{selected.allowedCommands.map((value) => (
+								<Field required>
+									<FieldLabel>{t.console.moderation.action}</FieldLabel>
+									<NativeSelect
+										onChange={(event) =>
+											setCommandSelection({
+												caseId: selected.caseId,
+												value: selectCommand(
+													event.currentTarget.value,
+													selected.allowedCommands,
+												),
+											})
+										}
+										value={command}
+									>
+										{selected.allowedCommands
+											.filter(isPlatformCommand)
+											.map((value) => (
 												<NativeSelectOption key={value} value={value}>
 													{t.realms.governanceActions[value]}
 												</NativeSelectOption>
 											))}
-										</NativeSelect>
-									</Field>
+									</NativeSelect>
+								</Field>
+								{AdverseCommands.has(command) ? (
 									<Field required>
-										<FieldLabel>{t.console.moderation.reason}</FieldLabel>
-										<NativeSelect
-											onChange={(event) => {
-												const value = GovernanceReasonCodes.find(
-													(candidate) =>
-														candidate === event.currentTarget.value,
-												);
-												if (value) setReasonCode(value);
-											}}
-											value={reasonCode}
-										>
-											{GovernanceReasonCodes.map((value) => (
-												<NativeSelectOption key={value} value={value}>
-													{t.realms.governanceReasons[value]}
-												</NativeSelectOption>
+										<FieldLabel>{t.reports.rule}</FieldLabel>
+										<div className="grid gap-3">
+											{destinations.data?.items.map((destination) => (
+												<fieldset
+													className="grid gap-2 rounded-lg border p-3"
+													key={destination.id}
+												>
+													<legend className="px-1 font-medium text-sm">
+														{destination.title ?? destination.id}
+													</legend>
+													{destination.rules.map((rule) => {
+														const key = `${destination.id}:${destination.revisionId}:${rule.id}`;
+														const checked =
+															currentSelectedRuleKeys.includes(key);
+														return (
+															<label
+																className="flex items-start gap-2 text-sm"
+																key={key}
+															>
+																<Checkbox
+																	checked={checked}
+																	disabled={
+																		!checked &&
+																		currentSelectedRuleKeys.length >=
+																			ContentGovernanceMaximumRuleReferences
+																	}
+																	onCheckedChange={({
+																		checked,
+																	}) => {
+																		setRuleSelection(
+																			(current) => {
+																				const keys =
+																					current.caseId ===
+																					selected.caseId
+																						? current.keys.filter(
+																								(
+																									value,
+																								) =>
+																									availableRuleKeys.includes(
+																										value,
+																									),
+																							)
+																						: [];
+																				return {
+																					caseId: selected.caseId,
+																					keys: updateContentRuleSelection(
+																						keys,
+																						key,
+																						checked ===
+																							true,
+																					),
+																				};
+																			},
+																		);
+																	}}
+																/>
+																<span>{rule.title}</span>
+															</label>
+														);
+													})}
+												</fieldset>
 											))}
-										</NativeSelect>
+										</div>
+										{destinations.data && !destinations.data.items.length ? (
+											<FieldDescription>{t.reports.noRules}</FieldDescription>
+										) : null}
+										<FieldDescription>{t.reports.ruleLimit}</FieldDescription>
 									</Field>
-								</div>
+								) : null}
 								<Field required={noteRequired}>
 									<FieldLabel>{t.console.moderation.internalNote}</FieldLabel>
 									<Textarea
@@ -296,10 +527,16 @@ export function ConsoleModerationPage() {
 									/>
 								</Field>
 								<DraftContentLanguageField controller={noteLanguage} />
-								<RequestFailure error={mutation.error} />
+								<RequestFailure
+									error={
+										actionMutation.error ??
+										caseMutation.error ??
+										destinations.error
+									}
+								/>
 								<Button
-									disabled={!noteValid}
-									isLoading={mutation.isPending}
+									disabled={!noteValid || !rulesValid}
+									isLoading={mutationPending}
 									type="submit"
 									variant={
 										command === "remove" ||
@@ -323,7 +560,7 @@ export function ConsoleModerationPage() {
 			</div>
 			<AlertDialog
 				onOpenChange={({ open }) => {
-					if (!mutation.isPending && !open) setConfirmedCommand(null);
+					if (!mutationPending && !open) setConfirmedCommand(null);
 				}}
 				open={confirmedCommand !== null}
 			>
@@ -345,14 +582,14 @@ export function ConsoleModerationPage() {
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
-						<AlertDialogCancel disabled={mutation.isPending}>
+						<AlertDialogCancel disabled={mutationPending}>
 							{t.console.cancel}
 						</AlertDialogCancel>
 						<AlertDialogAction
-							disabled={mutation.isPending}
+							disabled={mutationPending}
 							onClick={() => {
 								setConfirmedCommand(null);
-								void applyModeration();
+								void applyGovernance();
 							}}
 							variant="destructive"
 						>
@@ -368,11 +605,17 @@ export function ConsoleModerationPage() {
 }
 
 function CaseList({
+	hasMore,
+	isLoadingMore,
 	items,
+	onLoadMore,
 	onSelect,
 	selectedCaseId,
 }: {
+	readonly hasMore: boolean;
+	readonly isLoadingMore: boolean;
 	readonly items: readonly PlatformReportCase[];
+	readonly onLoadMore: () => void;
 	readonly onSelect: (caseId: string) => void;
 	readonly selectedCaseId?: string;
 }) {
@@ -401,11 +644,9 @@ function CaseList({
 									{t.reports.caseStates[item.caseState]}
 								</span>
 							</span>
-							<Badge
-								variant={Number(item.openReportCount) > 0 ? "warning" : "outline"}
-							>
+							<Badge variant={Number(item.reportCount) > 0 ? "warning" : "outline"}>
 								{t.console.moderation.reportCount({
-									count: Number(item.openReportCount),
+									count: Number(item.reportCount),
 								})}
 							</Badge>
 						</Button>
@@ -415,6 +656,16 @@ function CaseList({
 						{t.console.moderation.empty}
 					</p>
 				)}
+				{hasMore ? (
+					<Button
+						disabled={isLoadingMore}
+						isLoading={isLoadingMore}
+						onClick={onLoadMore}
+						variant="outline"
+					>
+						{t.reports.myReports.loadMore}
+					</Button>
+				) : null}
 			</CardContent>
 		</Card>
 	);

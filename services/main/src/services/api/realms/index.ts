@@ -1,7 +1,7 @@
 import { DevelopmentPreviewCapability, RealmUnitCreatePermissionValues } from "@rezics/access";
 import type { ContentLanguage } from "@rezics/i18n";
 import { StatusCodes } from "http-status-codes";
-import { and, desc, eq, gt, inArray, isNull, lt, max, notInArray, or, sql } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNull, lt, max, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import { recordAuditEvent as appendAuditEvent } from "../../audit";
@@ -38,21 +38,23 @@ import {
 import {
 	contentStructure,
 	contentStructureNode,
-	ActiveReportCaseStateValues,
-	moderationAction,
-	moderationCase,
+	ActiveContentReviewCaseStateValues,
+	contentGovernanceAction,
+	contentGovernanceActionRule,
+	contentReport,
+	contentReportReferral,
+	contentReviewCase,
+	contentReviewCaseReportCounter,
 	post,
 	profile as profileTable,
 	realm,
 	realmStat,
 	realmUnit,
-	realmUnitModerationStat,
 	realmMember,
 	realmPin,
 	realmRule,
 	realmRuleAcceptance,
 	realmRuleRevision,
-	realmUnitReport,
 	realmScoreContext,
 	realmTagContext,
 	realmTagVote,
@@ -66,7 +68,7 @@ import {
 	unitLocalization,
 	unitRevisionHead,
 } from "../../database/schema";
-import { listGovernanceNotes } from "../../governance/note-service";
+import { createGovernanceNotePost, listGovernanceNotes } from "../../governance/note-service";
 import { createNotification } from "../../notifications/service";
 import { findRealmMembership, getCurrentRealmRules } from "../../realms/service";
 import { listRealmVotedTags } from "../../tags/service";
@@ -103,7 +105,7 @@ import {
 	SaveRealmTaxonomyDraftResponse,
 	toPortableTextResponse,
 } from "../schema/response";
-import { realmUnitReportCaseAdvisoryLock } from "../reports/advisory-lock";
+import { contentReviewCaseAdvisoryLock } from "../reports/advisory-lock";
 import {
 	AcknowledgeRealmRulesBody,
 	ApplyRealmPolicyTagBody,
@@ -117,6 +119,7 @@ import {
 	ListRealmsQuery,
 	MoveRealmPinsBody,
 	ModerateRealmUnitBody,
+	ReviewRealmUnitBody,
 	UpdateRealmRulesBody,
 	RealmUnitParams,
 	RealmTagContextParams,
@@ -133,6 +136,7 @@ import {
 	RealmUnitModerationResponse,
 	RealmUnitHistoryQuery,
 	RealmUnitModerationActionResponse,
+	RealmUnitReviewResponse,
 	RealmUnitModerationHistoryResponse,
 	RealmMemberParams,
 	RealmParams,
@@ -157,13 +161,13 @@ import {
 } from "./moderation-pagination";
 import { requireCurrentRealmRuleRevision } from "./rule-acknowledgement";
 import {
-	executeAuthorizedModerationAction,
-	loadModerationCaseForAction,
-} from "../governance/moderation-service";
-import { getRealmUnitModerationCommands } from "../governance/moderation-contract";
-import { type CreateModerationActionBody } from "../governance/schema";
+	executeAuthorizedContentGovernanceAction,
+	loadContentReviewCaseForAction,
+} from "../governance/content-governance-service";
+import { getRealmUnitModerationCommands } from "../governance/content-governance-contract";
+import { type CreateContentGovernanceActionBody } from "../governance/schema";
+import { ContentGovernanceActionNoEffect as ModerationActionNoEffect } from "../governance/errors";
 import {
-	GovernanceReasonCodeValues,
 	RealmScoreContextPostKindValues,
 	RealmUnitStatusValues,
 } from "../../database/schema/contract-values";
@@ -215,12 +219,6 @@ function presentRealmUnitStatus(value: string | null) {
 	return status;
 }
 
-function presentGovernanceReasonCode(value: string) {
-	const reasonCode = GovernanceReasonCodeValues.find((candidate) => candidate === value);
-	if (!reasonCode) throw new Error("Realm moderation action has an invalid reason code");
-	return reasonCode;
-}
-
 function realmUnitModerationSelection(
 	localizationLanguages: ListRealmUnitsQuery["localizationLanguages"],
 ) {
@@ -234,10 +232,14 @@ function realmUnitModerationSelection(
 		publicationState: realmUnit.publicationState,
 		postTargetingLocked: realmUnit.postTargetingLocked,
 		openReportCount: sql<number>`coalesce((
-			select ${realmUnitModerationStat.openReportCount}::int
-			from ${realmUnitModerationStat}
-			where ${realmUnitModerationStat.realmId} = ${realmUnit.realmId}
-				and ${realmUnitModerationStat.unitId} = ${realmUnit.unitId}
+			select sum(${contentReviewCaseReportCounter.count})::int
+			from ${contentReviewCase}
+			inner join ${contentReviewCaseReportCounter}
+				on ${contentReviewCaseReportCounter.caseId} = ${contentReviewCase.id}
+			where ${contentReviewCase.authority} = 'realm'
+				and ${contentReviewCase.realmId} = ${realmUnit.realmId}
+				and ${contentReviewCase.targetUnitId} = ${realmUnit.unitId}
+				and ${inArray(contentReviewCase.state, ActiveContentReviewCaseStateValues)}
 		), 0)`,
 		moderationStatus: unit.moderationStatus,
 		createdAt: realmUnit.createdAt,
@@ -2723,12 +2725,13 @@ export default new Elysia({ prefix: "/realms" })
 						query.reported
 							? sql`exists (
 									select 1
-									from ${realmUnitReport}
-									inner join ${moderationCase}
-										on ${moderationCase.id} = ${realmUnitReport.caseId}
-									where ${realmUnitReport.realmId} = ${realmUnit.realmId}
-										and ${realmUnitReport.unitId} = ${realmUnit.unitId}
-										and ${inArray(moderationCase.state, ActiveReportCaseStateValues)}
+									from ${contentReviewCase}
+									inner join ${contentReportReferral}
+										on ${contentReportReferral.caseId} = ${contentReviewCase.id}
+									where ${contentReviewCase.authority} = 'realm'
+										and ${contentReviewCase.realmId} = ${realmUnit.realmId}
+										and ${contentReviewCase.targetUnitId} = ${realmUnit.unitId}
+										and ${inArray(contentReviewCase.state, ActiveContentReviewCaseStateValues)}
 								)`
 							: undefined,
 						cursor
@@ -2827,42 +2830,70 @@ export default new Elysia({ prefix: "/realms" })
 			if (!target) throw new RealmUnitNotFound();
 			const actions = await database
 				.select({
-					id: moderationAction.id,
-					caseId: moderationAction.caseId,
-					kind: moderationAction.kind,
-					actorProfileId: moderationAction.actorProfileId,
+					id: contentGovernanceAction.id,
+					caseId: contentGovernanceAction.caseId,
+					kind: contentGovernanceAction.kind,
+					actorProfileId: contentGovernanceAction.actorProfileId,
 					actorName: firstUnitLocalizationTitle(profileTable.id),
-					previousState: moderationAction.previousState,
-					resultingState: moderationAction.resultingState,
-					previousPostTargetingLocked: moderationAction.previousPostTargetingLocked,
-					resultingPostTargetingLocked: moderationAction.resultingPostTargetingLocked,
-					reasonCode: moderationAction.reasonCode,
-					reversesActionId: moderationAction.reversesActionId,
-					createdAt: moderationAction.createdAt,
+					previousState: contentGovernanceAction.previousState,
+					resultingState: contentGovernanceAction.resultingState,
+					previousPostTargetingLocked:
+						contentGovernanceAction.previousPostTargetingLocked,
+					resultingPostTargetingLocked:
+						contentGovernanceAction.resultingPostTargetingLocked,
+					reversesActionId: contentGovernanceAction.reversesActionId,
+					createdAt: contentGovernanceAction.createdAt,
 				})
-				.from(moderationAction)
-				.innerJoin(moderationCase, eq(moderationCase.id, moderationAction.caseId))
-				.leftJoin(profileTable, eq(profileTable.id, moderationAction.actorProfileId))
+				.from(contentGovernanceAction)
+				.innerJoin(
+					contentReviewCase,
+					eq(contentReviewCase.id, contentGovernanceAction.caseId),
+				)
+				.leftJoin(profileTable, eq(profileTable.id, contentGovernanceAction.actorProfileId))
 				.where(
 					and(
-						eq(moderationCase.authority, "realm"),
-						eq(moderationCase.realmId, params.realmId),
-						eq(moderationCase.targetKind, "realm_unit"),
-						eq(moderationCase.targetId, params.unitId),
+						eq(contentReviewCase.authority, "realm"),
+						eq(contentReviewCase.realmId, params.realmId),
+						eq(contentReviewCase.targetUnitId, params.unitId),
 					),
 				)
-				.orderBy(desc(moderationAction.createdAt), desc(moderationAction.id))
+				.orderBy(desc(contentGovernanceAction.createdAt), desc(contentGovernanceAction.id))
 				.limit(query.limit ?? 50);
 			const actionIds = actions.map((action) => action.id);
-			const notes = actionIds.length
-				? await database.transaction((tx) =>
-						listGovernanceNotes(tx, {
-							subjectKind: "moderation_action",
-							subjectIds: actionIds,
-							roles: ["internal_note", "public_notice"],
-						}),
-					)
-				: [];
+			const [notes, ruleRows] = actionIds.length
+				? await Promise.all([
+						database.transaction((tx) =>
+							listGovernanceNotes(tx, {
+								subjectKind: "content_governance_action",
+								subjectIds: actionIds,
+								roles: ["internal_note", "public_notice"],
+							}),
+						),
+						database
+							.select({
+								actionId: contentGovernanceActionRule.actionId,
+								sourceRealmId: contentGovernanceActionRule.ruleSourceRealmId,
+								revisionId: contentGovernanceActionRule.ruleRevisionId,
+								ruleId: contentGovernanceActionRule.ruleId,
+							})
+							.from(contentGovernanceActionRule)
+							.where(inArray(contentGovernanceActionRule.actionId, actionIds))
+							.orderBy(
+								contentGovernanceActionRule.actionId,
+								contentGovernanceActionRule.ruleSourceRealmId,
+								contentGovernanceActionRule.ruleId,
+							),
+					])
+				: [[], []];
+			const rulesByAction = new Map<
+				string,
+				Array<{ sourceRealmId: string; revisionId: string; ruleId: string }>
+			>();
+			for (const rule of ruleRows) {
+				const items = rulesByAction.get(rule.actionId) ?? [];
+				items.push(rule);
+				rulesByAction.set(rule.actionId, items);
+			}
 			const notesByAction = new Map<
 				string,
 				Array<{
@@ -2894,7 +2925,7 @@ export default new Elysia({ prefix: "/realms" })
 					...action,
 					previousState: presentRealmUnitStatus(action.previousState),
 					resultingState: presentRealmUnitStatus(action.resultingState),
-					reasonCode: presentGovernanceReasonCode(action.reasonCode),
+					rules: rulesByAction.get(action.id) ?? [],
 					notes: notesByAction.get(action.id) ?? [],
 				})),
 			};
@@ -2916,7 +2947,9 @@ export default new Elysia({ prefix: "/realms" })
 		async ({ params, profile, authorization, body }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.units.moderate");
 			const result = await database.transaction(async (tx) => {
-				await tx.execute(realmUnitReportCaseAdvisoryLock(params.realmId, params.unitId));
+				await tx.execute(
+					contentReviewCaseAdvisoryLock("realm", params.realmId, params.unitId),
+				);
 				const [target] = await tx
 					.select({ unitId: realmUnit.unitId })
 					.from(realmUnit)
@@ -2930,92 +2963,75 @@ export default new Elysia({ prefix: "/realms" })
 				if (!target) throw new RealmUnitNotFound();
 				const [idempotentAction] = body.idempotencyKey
 					? await tx
-							.select({ caseId: moderationAction.caseId })
-							.from(moderationAction)
+							.select({ caseId: contentGovernanceAction.caseId })
+							.from(contentGovernanceAction)
 							.innerJoin(
-								moderationCase,
-								eq(moderationCase.id, moderationAction.caseId),
+								contentReviewCase,
+								eq(contentReviewCase.id, contentGovernanceAction.caseId),
 							)
 							.where(
 								and(
-									eq(moderationAction.actorProfileId, profile.unitId),
-									eq(moderationAction.idempotencyKey, body.idempotencyKey),
-									eq(moderationCase.authority, "realm"),
-									eq(moderationCase.realmId, params.realmId),
-									eq(moderationCase.targetKind, "realm_unit"),
-									eq(moderationCase.targetId, params.unitId),
+									eq(contentGovernanceAction.actorProfileId, profile.unitId),
+									eq(contentGovernanceAction.idempotencyKey, body.idempotencyKey),
+									eq(contentReviewCase.authority, "realm"),
+									eq(contentReviewCase.realmId, params.realmId),
+									eq(contentReviewCase.targetUnitId, params.unitId),
 								),
 							)
-							.orderBy(desc(moderationAction.createdAt), desc(moderationAction.id))
+							.orderBy(
+								desc(contentGovernanceAction.createdAt),
+								desc(contentGovernanceAction.id),
+							)
 							.limit(1)
 					: [];
 				let caseRow = idempotentAction
-					? await loadModerationCaseForAction(tx, idempotentAction.caseId)
+					? await loadContentReviewCaseForAction(tx, idempotentAction.caseId)
 					: undefined;
 				if (!caseRow) {
 					const [candidate] = await tx
-						.select({ id: moderationCase.id })
-						.from(moderationCase)
+						.select({ id: contentReviewCase.id })
+						.from(contentReviewCase)
 						.where(
 							and(
-								eq(moderationCase.authority, "realm"),
-								eq(moderationCase.realmId, params.realmId),
-								eq(moderationCase.targetKind, "realm_unit"),
-								eq(moderationCase.targetId, params.unitId),
-								body.command === "dismiss"
-									? and(
-											inArray(
-												moderationCase.state,
-												ActiveReportCaseStateValues,
-											),
-											sql`exists (
-													select 1
-													from ${realmUnitReport}
-													where ${realmUnitReport.caseId} = ${moderationCase.id}
-												)`,
-										)
-									: notInArray(moderationCase.state, [
-											"resolved",
-											"duplicate",
-											"rejected",
-										]),
+								eq(contentReviewCase.authority, "realm"),
+								eq(contentReviewCase.realmId, params.realmId),
+								eq(contentReviewCase.targetUnitId, params.unitId),
+								inArray(contentReviewCase.state, [
+									...ActiveContentReviewCaseStateValues,
+									"actioned",
+								]),
 							),
 						)
-						.orderBy(desc(moderationCase.updatedAt), desc(moderationCase.id))
+						.orderBy(desc(contentReviewCase.updatedAt), desc(contentReviewCase.id))
 						.limit(1);
 					caseRow = candidate
-						? await loadModerationCaseForAction(tx, candidate.id)
+						? await loadContentReviewCaseForAction(tx, candidate.id)
 						: undefined;
 				}
 				if (!caseRow) {
 					const [createdCase] = await tx
-						.insert(moderationCase)
+						.insert(contentReviewCase)
 						.values({
 							state: "reviewing",
 							authority: "realm",
 							realmId: params.realmId,
-							targetKind: "realm_unit",
-							targetId: params.unitId,
+							targetUnitId: params.unitId,
 						})
 						.returning();
 					if (!createdCase)
-						throw new Error("Realm moderation case insertion did not return a row");
+						throw new Error("Realm content review case insertion did not return a row");
 					caseRow = createdCase;
 				}
 				const common = {
 					caseId: caseRow.id,
-					reasonCode: body.reasonCode,
 					idempotencyKey: body.idempotencyKey,
+					...(body.annotation ? { notes: [body.annotation] } : {}),
 				};
-				const actionBody: CreateModerationActionBody =
-					body.command === "note"
-						? { ...common, kind: "note", notes: [body.annotation] }
-						: {
-								...common,
-								kind: body.command,
-								...(body.annotation ? { notes: [body.annotation] } : {}),
-							};
-				const executed = await executeAuthorizedModerationAction(tx, {
+				const actionBody: CreateContentGovernanceActionBody =
+					"rules" in body
+						? { ...common, kind: body.command, rules: body.rules }
+						: { ...common, kind: body.command };
+				const executed = await executeAuthorizedContentGovernanceAction(tx, {
 					caseRow,
 					actorProfileId: profile.unitId,
 					body: actionBody,
@@ -3026,10 +3042,14 @@ export default new Elysia({ prefix: "/realms" })
 						publicationState: realmUnit.publicationState,
 						postTargetingLocked: realmUnit.postTargetingLocked,
 						openReportCount: sql<number>`coalesce((
-							select ${realmUnitModerationStat.openReportCount}::int
-							from ${realmUnitModerationStat}
-							where ${realmUnitModerationStat.realmId} = ${realmUnit.realmId}
-								and ${realmUnitModerationStat.unitId} = ${realmUnit.unitId}
+							select sum(${contentReviewCaseReportCounter.count})::int
+							from ${contentReviewCase}
+							inner join ${contentReviewCaseReportCounter}
+								on ${contentReviewCaseReportCounter.caseId} = ${contentReviewCase.id}
+							where ${contentReviewCase.authority} = 'realm'
+								and ${contentReviewCase.realmId} = ${realmUnit.realmId}
+								and ${contentReviewCase.targetUnitId} = ${realmUnit.unitId}
+								and ${inArray(contentReviewCase.state, ActiveContentReviewCaseStateValues)}
 						), 0)`,
 						updatedAt: realmUnit.updatedAt,
 					})
@@ -3064,16 +3084,184 @@ export default new Elysia({ prefix: "/realms" })
 			body: ModerateRealmUnitBody,
 			response: {
 				[StatusCodes.OK]: RealmUnitModerationActionResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ModerationActionIncompatible"]),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"ContentGovernanceActionIncompatible",
+					"ContentGovernanceRuleSourceForbidden",
+				]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmUnitNotFound"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse([
-					"ModerationTransitionInvalid",
-					"ModerationActionNoEffect",
-					"ModerationIdempotencyConflict",
+					"ContentGovernanceTransitionInvalid",
+					"ContentGovernanceActionNoEffect",
+					"ContentGovernanceIdempotencyConflict",
+					"ContentGovernanceRuleChanged",
 					"PostTargetingLocked",
 				]),
 			},
-			detail: { summary: "Apply Realm Unit moderation command", tags: ["Realms"] },
+			detail: { summary: "Apply a Realm content governance action", tags: ["Realms"] },
+		},
+	)
+	.post(
+		"/:realmId/units/:unitId/review",
+		async ({ params, profile, authorization, body }) => {
+			await authorization.realm.ensureCapability(params.realmId, "realm.units.moderate");
+			const result = await database.transaction(async (tx) => {
+				await tx.execute(
+					contentReviewCaseAdvisoryLock("realm", params.realmId, params.unitId),
+				);
+				const [target] = await tx
+					.select({ unitId: realmUnit.unitId })
+					.from(realmUnit)
+					.where(
+						and(
+							eq(realmUnit.realmId, params.realmId),
+							eq(realmUnit.unitId, params.unitId),
+						),
+					)
+					.limit(1);
+				if (!target) throw new RealmUnitNotFound();
+				let [caseRow] = await tx
+					.select()
+					.from(contentReviewCase)
+					.where(
+						and(
+							eq(contentReviewCase.authority, "realm"),
+							eq(contentReviewCase.realmId, params.realmId),
+							eq(contentReviewCase.targetUnitId, params.unitId),
+							inArray(contentReviewCase.state, ActiveContentReviewCaseStateValues),
+							body.command === "dismiss"
+								? sql`exists (
+									select 1 from ${contentReportReferral}
+									where ${contentReportReferral.caseId} = ${contentReviewCase.id}
+								)`
+								: undefined,
+						),
+					)
+					.orderBy(desc(contentReviewCase.updatedAt), desc(contentReviewCase.id))
+					.for("update")
+					.limit(1);
+				if (!caseRow && body.command === "dismiss") throw new ModerationActionNoEffect();
+				if (!caseRow) {
+					[caseRow] = await tx
+						.insert(contentReviewCase)
+						.values({
+							state: "reviewing",
+							authority: "realm",
+							realmId: params.realmId,
+							targetUnitId: params.unitId,
+						})
+						.returning();
+				}
+				if (!caseRow)
+					throw new Error("Realm content review case insertion returned no row");
+				const reportRows = await tx
+					.select({
+						referralId: contentReportReferral.id,
+						reportId: contentReport.id,
+						reporterProfileId: contentReport.reporterProfileId,
+					})
+					.from(contentReportReferral)
+					.innerJoin(contentReport, eq(contentReport.id, contentReportReferral.reportId))
+					.where(eq(contentReportReferral.caseId, caseRow.id));
+				const annotation = body.annotation
+					? await createGovernanceNotePost(tx, {
+							actorProfileId: profile.unitId,
+							subjectKind: "content_review_case",
+							subjectId: caseRow.id,
+							subjectUnitId: params.unitId,
+							realmId: params.realmId,
+							publicRecipientProfileIds: [
+								...new Set(reportRows.map((report) => report.reporterProfileId)),
+							],
+							note: body.annotation,
+						})
+					: undefined;
+				const caseState =
+					body.command === "dismiss" ? ("rejected" as const) : caseRow.state;
+				if (body.command === "dismiss") {
+					await tx
+						.update(contentReviewCase)
+						.set({ state: caseState })
+						.where(eq(contentReviewCase.id, caseRow.id));
+					for (const report of reportRows)
+						await createNotification(tx, {
+							recipientProfileId: report.reporterProfileId,
+							actorProfileId: profile.unitId,
+							kind: "moderation",
+							subjectUnitId: params.unitId,
+							payload: {
+								type: "report_resolution",
+								reportId: report.reportId,
+								referralId: report.referralId,
+								resolution: "dismissed",
+								publicNoticePostId:
+									body.annotation?.role === "public_notice"
+										? annotation?.postId
+										: undefined,
+							},
+						});
+				}
+				await appendAuditEvent(tx, {
+					category: "admin_activity",
+					outcome: "succeeded",
+					actor: { kind: "profile", profileId: profile.unitId },
+					authority: { kind: "realm", id: params.realmId },
+					action: `content_review.${body.command}`,
+					target: { kind: "realm_unit", id: params.unitId },
+					details: { caseId: caseRow.id, notePostId: annotation?.postId },
+				});
+				const [updatedTarget] = await tx
+					.select({
+						status: realmUnit.status,
+						publicationState: realmUnit.publicationState,
+						postTargetingLocked: realmUnit.postTargetingLocked,
+						openReportCount: sql<number>`coalesce((
+							select sum(${contentReviewCaseReportCounter.count})::int
+							from ${contentReviewCase}
+							inner join ${contentReviewCaseReportCounter}
+								on ${contentReviewCaseReportCounter.caseId} = ${contentReviewCase.id}
+							where ${contentReviewCase.authority} = 'realm'
+								and ${contentReviewCase.realmId} = ${realmUnit.realmId}
+								and ${contentReviewCase.targetUnitId} = ${realmUnit.unitId}
+								and ${inArray(contentReviewCase.state, ActiveContentReviewCaseStateValues)}
+						), 0)`,
+						updatedAt: realmUnit.updatedAt,
+					})
+					.from(realmUnit)
+					.where(
+						and(
+							eq(realmUnit.realmId, params.realmId),
+							eq(realmUnit.unitId, params.unitId),
+						),
+					)
+					.limit(1);
+				if (!updatedTarget) throw new RealmUnitNotFound();
+				return { caseId: caseRow.id, caseState, target: updatedTarget };
+			});
+			return {
+				...result,
+				target: {
+					...result.target,
+					allowedCommands: [
+						...getRealmUnitModerationCommands(
+							result.target.status,
+							result.target.postTargetingLocked,
+							result.target.openReportCount > 0,
+						),
+					],
+				},
+			};
+		},
+		{
+			access: "contribute:unit:update",
+			params: RealmUnitParams,
+			body: ReviewRealmUnitBody,
+			response: {
+				[StatusCodes.OK]: RealmUnitReviewResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmUnitNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentGovernanceActionNoEffect"]),
+			},
+			detail: { summary: "Update a Realm content review case", tags: ["Realms"] },
 		},
 	);

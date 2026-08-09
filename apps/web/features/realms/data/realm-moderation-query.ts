@@ -108,7 +108,6 @@ export function refreshRealmModerationData(
 		queryClient.invalidateQueries({
 			queryKey: getApiRealmsByRealmIdReportsQueryKey({
 				path: { realmId },
-				query: { unitId, limit: 100 },
 			}),
 		}),
 		invalidatePostQueries(queryClient, unitId),

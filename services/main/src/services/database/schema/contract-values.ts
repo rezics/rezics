@@ -366,6 +366,46 @@ export const PlatformUnitModerationCommandValues = [
 	"dismiss",
 	"note",
 ] as const;
+export const ContentReviewAuthorityValues = ["platform", "realm"] as const;
+export const ContentReviewCaseStateValues = [
+	"new",
+	"triaged",
+	"assigned",
+	"actioned",
+	"resolved",
+	"duplicate",
+	"rejected",
+	"escalated",
+	"reviewing",
+] as const;
+export const ActiveContentReviewCaseStateValues = [
+	"new",
+	"triaged",
+	"assigned",
+	"escalated",
+	"reviewing",
+] as const satisfies readonly (typeof ContentReviewCaseStateValues)[number][];
+export const ContentGovernanceActionKindValues = [
+	"approve",
+	"hide",
+	"remove",
+	"restore",
+	"lock_post_targeting",
+	"unlock_post_targeting",
+	"invalidate_content_license",
+	"restore_content_license",
+	"reverse",
+] as const;
+export const ContentGovernanceRuleRequiredActionKindValues = [
+	"hide",
+	"remove",
+	"lock_post_targeting",
+	"invalidate_content_license",
+] as const satisfies readonly (typeof ContentGovernanceActionKindValues)[number][];
+export const ContentGovernanceMaxRuleSources = 2;
+export const ContentGovernanceMaxRuleReferences = 32;
+export const ContentReviewReportCounterBuckets = 256;
+export const AccountEnforcementActionKindValues = ["issue", "revoke"] as const;
 export const GovernanceReasonCodeValues = [
 	"content_policy",
 	"copyright",
@@ -383,37 +423,11 @@ export const GovernanceReasonCodeValues = [
 ] as const;
 export const GovernanceNoteRoleValues = ["evidence", "internal_note", "public_notice"] as const;
 export const GovernanceNoteSubjectKindValues = [
-	"moderation_case",
-	"moderation_action",
+	"content_review_case",
+	"content_governance_action",
+	"account_enforcement_action",
 	"unit_access_restriction",
 	"realm_unit_status_event",
-] as const;
-export const ModerationTargetKindValues = [
-	"unit",
-	"unit_field",
-	"profile",
-	"realm_unit",
-	"realm_member",
-] as const;
-export const ModerationActionKindValues = [
-	"approve",
-	"hide",
-	"remove",
-	"restore",
-	"lock_post_targeting",
-	"unlock_post_targeting",
-	"invalidate_content_license",
-	"restore_content_license",
-	...EnforcementKindValues,
-	"revoke_enforcement",
-	"mute_member",
-	"remove_member",
-	"ban_member",
-	"restore_member",
-	"escalate",
-	"reverse",
-	"note",
-	"dismiss",
 ] as const;
 export const AliasKindValues = [
 	"common",
@@ -461,25 +475,6 @@ export const RecommendationReasonValues = [
 	"new_and_relevant",
 ] as const;
 export const RecommendationSnapshotStateValues = ["building", "ready", "failed"] as const;
-export const ModerationCaseStateValues = [
-	"new",
-	"triaged",
-	"assigned",
-	"actioned",
-	"resolved",
-	"duplicate",
-	"rejected",
-	"escalated",
-	"reviewing",
-] as const;
-export const ActiveReportCaseStateValues = [
-	"new",
-	"triaged",
-	"assigned",
-	"escalated",
-	"reviewing",
-] as const satisfies readonly (typeof ModerationCaseStateValues)[number][];
-
 export const AssociationKindValues = ["credit", "subject"] as const;
 export type AssociationKind = (typeof AssociationKindValues)[number];
 export const AssociationProposalDirectionValues = ["request", "invitation"] as const;

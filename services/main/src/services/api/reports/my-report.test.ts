@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { InvalidPaginationCursor } from "../../pagination/errors";
-import { decodeMyReportCursor, encodeMyReportCursor, toMyReportStatus } from "./my-report";
+import {
+	decodeMyReportCursor,
+	encodeMyReportCursor,
+	toAggregateMyReportStatus,
+	toMyReportStatus,
+} from "./my-report";
 
 describe("current-user report projection", () => {
 	it("round-trips a stable report cursor", () => {
@@ -32,5 +37,12 @@ describe("current-user report projection", () => {
 		["rejected", "not_actioned"],
 	] as const)("maps %s to the public %s state", (state, expected) => {
 		expect(toMyReportStatus(state)).toBe(expected);
+	});
+
+	it("aggregates independent referral outcomes without hiding active review", () => {
+		expect(toAggregateMyReportStatus(["resolved", "reviewing"])).toBe("reviewing");
+		expect(toAggregateMyReportStatus(["resolved", "rejected"])).toBe("completed");
+		expect(toAggregateMyReportStatus(["duplicate", "duplicate"])).toBe("merged");
+		expect(toAggregateMyReportStatus(["duplicate", "rejected"])).toBe("not_actioned");
 	});
 });

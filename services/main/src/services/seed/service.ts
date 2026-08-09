@@ -32,6 +32,7 @@ import { database, type DatabaseTransaction } from "../database";
 import { isFirstUnitLocalization } from "../units/localization";
 import {
 	accountEnforcement,
+	accountEnforcementAction,
 	accounts,
 	apikeys,
 	auditEvent,
@@ -53,11 +54,15 @@ import {
 	softwareRequirement,
 	media,
 	message,
-	moderationAction,
-	moderationCase,
+	contentGovernanceAction,
+	contentGovernanceActionRule,
+	contentReport,
+	contentReportReferral,
+	contentReportRule,
+	contentReviewCase,
+	contentReviewCaseReportCounter,
 	notification,
 	notificationPreference,
-	platformUnitReport,
 	poll,
 	pollOption,
 	pollVote,
@@ -77,7 +82,6 @@ import {
 	realmRule,
 	realmRuleAcceptance,
 	realmRuleRevision,
-	realmUnitReport,
 	realmScoreContext,
 	realmTagContext,
 	realmTagVote,
@@ -150,7 +154,6 @@ import {
 	DemoCredentials,
 	latestDate,
 	position,
-	selectSeedRealmModerationTarget,
 	SeedPlan,
 	SeedFixtureTitles,
 	type SeedData,
@@ -2420,207 +2423,233 @@ async function seedGovernance(
 		...content.rootPosts,
 		...content.reviews,
 	];
-	const targetKinds = ["unit", "unit_field", "profile", "realm_unit", "realm_member"] as const;
-	const normalCases: (typeof moderationCase.$inferSelect)[] = [];
-	for (const batch of chunks(
-		Array.from({ length: SeedPlan.moderationCases - 10 }, (_, index) => {
-			const targetKind = itemAt(targetKinds, index);
-			const realmTarget =
-				targetKind === "realm_member" || targetKind === "realm_unit"
-					? selectSeedRealmModerationTarget(targetKind, index, {
-							members: structure.realmMembers,
-							units: structure.realmUnits,
-						})
-					: null;
-			const targetId = realmTarget
-				? realmTarget.targetId
-				: targetKind === "profile"
-					? itemAt(profiles, index * 7).id
-					: itemAt(governanceTargets, index * 13).id;
-			const createdAt = data.pastDate(180);
-			return {
-				state: itemAt(
-					[
-						"new",
-						"triaged",
-						"assigned",
-						"actioned",
-						"resolved",
-						"rejected",
-						"escalated",
-					] as const,
-					index,
-				),
-				authority: realmTarget?.authority ?? ("platform" as const),
-				realmId: realmTarget?.realmId ?? null,
-				targetKind,
-				targetId,
-				targetPath: targetKind === "unit_field" ? "/localizations/en/title" : null,
-				assignedProfileId: index % 4 === 0 ? null : itemAt(profiles, index * 19 + 1).id,
-				createdAt,
-				updatedAt: createdAt,
-			};
-		}),
-	)) {
-		normalCases.push(...(await tx.insert(moderationCase).values(batch).returning()));
+	if (SeedPlan.contentReviewCases % 2 !== 0)
+		throw new Error("Seed content review case count must be even");
+	const pairCount = SeedPlan.contentReviewCases / 2;
+	const seenTargetUnitIds = new Set<string>();
+	const caseTargets: { realmId: string; unitId: string }[] = [];
+	for (const candidate of structure.realmUnits) {
+		if (seenTargetUnitIds.has(candidate.unitId)) continue;
+		seenTargetUnitIds.add(candidate.unitId);
+		caseTargets.push(candidate);
+		if (caseTargets.length === pairCount) break;
 	}
-	const duplicateCases = await tx
-		.insert(moderationCase)
+	if (caseTargets.length !== pairCount)
+		throw new Error(`Seed governance requires ${pairCount} distinct Realm Unit targets`);
+
+	const caseStates = [
+		"new",
+		"triaged",
+		"assigned",
+		"actioned",
+		"resolved",
+		"rejected",
+		"escalated",
+		"reviewing",
+	] as const;
+	const cases = await tx
+		.insert(contentReviewCase)
 		.values(
-			Array.from({ length: 10 }, (_, index) => {
-				const original = itemAt(normalCases, index * 3);
-				return {
-					state: "duplicate" as const,
-					authority: original.authority,
-					realmId: original.realmId,
-					targetKind: original.targetKind,
-					targetId: original.targetId,
-					targetPath: original.targetPath,
-					assignedProfileId: original.assignedProfileId,
-					duplicateOfCaseId: original.id,
-					createdAt: data.pastDate(90),
-					updatedAt: data.pastDate(30),
+			caseTargets.flatMap((target, index) => {
+				const createdAt = data.pastDate(180);
+				const common = {
+					targetUnitId: target.unitId,
+					assignedProfileId: index % 4 === 0 ? null : itemAt(profiles, index * 19 + 1).id,
+					createdAt,
+					updatedAt: createdAt,
 				};
+				return [
+					{
+						...common,
+						authority: "realm" as const,
+						realmId: target.realmId,
+						state: itemAt(caseStates, index),
+					},
+					{
+						...common,
+						authority: "platform" as const,
+						realmId: null,
+						state: itemAt(caseStates, index + 3),
+					},
+				];
 			}),
 		)
 		.returning();
-	const cases = [...normalCases, ...duplicateCases];
-	const realmUnitCases = cases.filter(
-		(value) =>
-			value.authority === "realm" &&
-			value.realmId !== null &&
-			value.targetKind === "realm_unit",
+	const caseByAuthorityTarget = new Map(
+		cases.map((caseRow) => [
+			`${caseRow.authority}:${caseRow.realmId ?? "platform"}:${caseRow.targetUnitId}`,
+			caseRow,
+		]),
 	);
-	const platformUnitCases = cases.filter(
-		(value) => value.authority === "platform" && value.targetKind === "unit",
-	);
-	const realmReportCount = Math.floor(SeedPlan.reports / 2);
-	for (let index = 0; index < realmReportCount; index += 1) {
-		const caseRow = itemAt(realmUnitCases, index);
-		if (!caseRow.realmId) throw new Error("Seed Realm Unit case is missing its Realm");
-		const [reportedRevision] = await tx
-			.select({ id: unitRevisionHead.revisionId })
-			.from(unitRevisionHead)
-			.where(eq(unitRevisionHead.unitId, caseRow.targetId))
-			.limit(1);
-		if (!reportedRevision)
-			throw new Error(`Seed Report target ${caseRow.targetId} is missing its revision head`);
-		const [ruleRevision] = await tx
-			.select({ id: realmRuleRevision.id })
-			.from(realmRuleRevision)
-			.where(eq(realmRuleRevision.realmId, caseRow.realmId))
-			.orderBy(sql`${realmRuleRevision.version} desc`)
-			.limit(1);
-		if (!ruleRevision)
-			throw new Error(`Seed Realm ${caseRow.realmId} is missing its rule revision`);
-		const [rule] = await tx
-			.select({ id: realmRule.id })
-			.from(realmRule)
-			.where(eq(realmRule.revisionId, ruleRevision.id))
-			.orderBy(realmRule.position, realmRule.id)
-			.limit(1);
-		if (!rule) throw new Error(`Seed Realm ${caseRow.realmId} is missing its rule`);
-		const reporterIndex = Math.floor(index / realmUnitCases.length);
-		await tx.insert(realmUnitReport).values({
-			caseId: caseRow.id,
-			reporterProfileId: itemAt(profiles, reporterIndex).id,
-			realmId: caseRow.realmId,
-			unitId: caseRow.targetId,
-			ruleRevisionId: ruleRevision.id,
-			ruleId: rule.id,
-			details: index % 4 === 0 ? null : `Seeded Unit report ${position(index)}`,
-			reportedRevisionId: reportedRevision.id,
-			createdAt: latestDate(data.pastDate(90), caseRow.createdAt),
-		});
-	}
-	const [platformRuleRevision] = await tx
-		.select({ id: realmRuleRevision.id })
+	const ruleSourceRealmIds = [
+		OfficialRealmUnitIds.rule,
+		...new Set(caseTargets.map((target) => target.realmId)),
+	];
+	const ruleRevisionRows = await tx
+		.select({ id: realmRuleRevision.id, realmId: realmRuleRevision.realmId })
 		.from(realmRuleRevision)
-		.where(eq(realmRuleRevision.realmId, OfficialRealmUnitIds.rule))
-		.orderBy(sql`${realmRuleRevision.version} desc`)
-		.limit(1);
-	if (!platformRuleRevision) throw new Error("REZICS Rule is missing its rule revision");
-	const platformRules = await tx
-		.select({ id: realmRule.id })
+		.where(inArray(realmRuleRevision.realmId, ruleSourceRealmIds))
+		.orderBy(realmRuleRevision.realmId, sql`${realmRuleRevision.version} desc`);
+	const currentRuleRevisionByRealm = new Map<string, string>();
+	for (const revision of ruleRevisionRows)
+		if (!currentRuleRevisionByRealm.has(revision.realmId))
+			currentRuleRevisionByRealm.set(revision.realmId, revision.id);
+	if (currentRuleRevisionByRealm.size !== ruleSourceRealmIds.length)
+		throw new Error("Seed governance target is missing a current rule revision");
+	const ruleRows = await tx
+		.select({ id: realmRule.id, revisionId: realmRule.revisionId })
 		.from(realmRule)
-		.where(eq(realmRule.revisionId, platformRuleRevision.id))
-		.orderBy(realmRule.position, realmRule.id);
-	if (platformRules.length === 0) throw new Error("REZICS Rule is missing its rules");
-	const platformReportCount = SeedPlan.reports - realmReportCount;
-	for (let index = 0; index < platformReportCount; index += 1) {
-		const caseRow = itemAt(platformUnitCases, index);
-		const [reportedRevision] = await tx
-			.select({ id: unitRevisionHead.revisionId })
-			.from(unitRevisionHead)
-			.where(eq(unitRevisionHead.unitId, caseRow.targetId))
-			.limit(1);
-		if (!reportedRevision)
-			throw new Error(`Seed Report target ${caseRow.targetId} is missing its revision head`);
-		const reporterIndex = Math.floor(index / platformUnitCases.length);
-		await tx.insert(platformUnitReport).values({
-			caseId: caseRow.id,
-			reporterProfileId: itemAt(profiles, reporterIndex).id,
-			unitId: caseRow.targetId,
-			ruleSourceRealmId: OfficialRealmUnitIds.rule,
-			ruleRevisionId: platformRuleRevision.id,
-			ruleId: itemAt(platformRules, index).id,
-			details: index % 4 === 0 ? null : `Seeded platform Unit report ${position(index)}`,
-			reportedRevisionId: reportedRevision.id,
-			createdAt: latestDate(data.pastDate(90), caseRow.createdAt),
-		});
+		.where(inArray(realmRule.revisionId, [...currentRuleRevisionByRealm.values()]))
+		.orderBy(realmRule.revisionId, realmRule.position, realmRule.id);
+	const rulesByRevision = new Map<string, string[]>();
+	for (const ruleRow of ruleRows) {
+		const rules = rulesByRevision.get(ruleRow.revisionId) ?? [];
+		rules.push(ruleRow.id);
+		rulesByRevision.set(ruleRow.revisionId, rules);
 	}
+	const revisionHeadRows = await tx
+		.select({ unitId: unitRevisionHead.unitId, revisionId: unitRevisionHead.revisionId })
+		.from(unitRevisionHead)
+		.where(
+			inArray(
+				unitRevisionHead.unitId,
+				caseTargets.map((target) => target.unitId),
+			),
+		);
+	const revisionHeadByUnit = new Map(revisionHeadRows.map((row) => [row.unitId, row.revisionId]));
+	if (revisionHeadByUnit.size !== caseTargets.length)
+		throw new Error("Seed governance target is missing its Unit revision head");
 
-	const actionKinds = [
-		"approve",
-		"remove",
-		"restore",
-		"lock_post_targeting",
-		"unlock_post_targeting",
-		"warning",
-		"silence",
-		"suspension",
-		"ban",
-		"rate_limit",
-		"trust_restriction",
-		"note",
-	] as const;
-	const normalActions: (typeof moderationAction.$inferSelect)[] = [];
-	for (const batch of chunks(
-		Array.from(
-			{ length: SeedPlan.moderationActions - SeedPlan.accountEnforcements - 10 },
-			(_, index) => {
-				const caseRow = itemAt(cases, index);
-				const actor = itemAt(profiles, index * 7 + 1);
-				const kind = itemAt(actionKinds, index);
-				return {
-					caseId: caseRow.id,
-					actorProfileId: actor.id,
-					kind,
-					resultingStatus: kind === "remove" ? ("removed" as const) : null,
-					previousPostTargetingLocked:
-						kind === "lock_post_targeting"
-							? false
-							: kind === "unlock_post_targeting"
-								? true
-								: null,
-					resultingPostTargetingLocked:
-						kind === "lock_post_targeting"
+	const reportCounters = new Map<string, { caseId: string; bucket: number; count: number }>();
+	for (let index = 0; index < SeedPlan.reports; index += 1) {
+		const target = itemAt(caseTargets, index);
+		const reporter = itemAt(profiles, index * 7);
+		const reportedRevisionId = revisionHeadByUnit.get(target.unitId);
+		if (!reportedRevisionId)
+			throw new Error(`Seed Report target ${target.unitId} is missing its revision head`);
+		const [createdReport] = await tx
+			.insert(contentReport)
+			.values({
+				reporterProfileId: reporter.id,
+				contextRealmId: target.realmId,
+				targetUnitId: target.unitId,
+				details: index % 4 === 0 ? null : `Seeded content report ${position(index)}`,
+				reportedRevisionId,
+				createdAt: latestDate(data.pastDate(90), reporter.createdAt),
+			})
+			.returning({ id: contentReport.id, createdAt: contentReport.createdAt });
+		if (!createdReport) throw new Error("Seed content Report insertion returned no row");
+		const selectedSources =
+			index % 4 === 0
+				? [target.realmId, OfficialRealmUnitIds.rule]
+				: index % 2 === 0
+					? [OfficialRealmUnitIds.rule]
+					: [target.realmId];
+		for (const sourceRealmId of selectedSources) {
+			const ruleRevisionId = currentRuleRevisionByRealm.get(sourceRealmId);
+			if (!ruleRevisionId)
+				throw new Error(`Seed rule source ${sourceRealmId} has no current revision`);
+			const ruleId = itemAt(rulesByRevision.get(ruleRevisionId) ?? [], index);
+			await tx.insert(contentReportRule).values({
+				reportId: createdReport.id,
+				ruleSourceRealmId: sourceRealmId,
+				ruleRevisionId,
+				ruleId,
+				createdAt: createdReport.createdAt,
+			});
+			const authority = sourceRealmId === OfficialRealmUnitIds.rule ? "platform" : "realm";
+			const caseRow = caseByAuthorityTarget.get(
+				`${authority}:${authority === "platform" ? "platform" : target.realmId}:${target.unitId}`,
+			);
+			if (!caseRow) throw new Error("Seed Report referral has no matching review case");
+			await tx.insert(contentReportReferral).values({
+				reportId: createdReport.id,
+				caseId: caseRow.id,
+				ruleSourceRealmId: sourceRealmId,
+				createdAt: createdReport.createdAt,
+			});
+			const bucket = (index * 37) % 256;
+			const counterKey = `${caseRow.id}:${bucket}`;
+			const current = reportCounters.get(counterKey);
+			reportCounters.set(counterKey, {
+				caseId: caseRow.id,
+				bucket,
+				count: (current?.count ?? 0) + 1,
+			});
+		}
+	}
+	await writeBatches([...reportCounters.values()], (batch) =>
+		tx.insert(contentReviewCaseReportCounter).values(batch),
+	);
+
+	const normalActions: (typeof contentGovernanceAction.$inferSelect)[] = [];
+	const normalActionCount = SeedPlan.contentGovernanceActions - 10;
+	for (let index = 0; index < normalActionCount; index += 1) {
+		const caseRow = itemAt(cases, index);
+		const actor = itemAt(profiles, index * 7 + 1);
+		const kind = itemAt(
+			["approve", "remove", "lock_post_targeting", "unlock_post_targeting"] as const,
+			index,
+		);
+		const isStateAction = kind === "approve" || kind === "remove";
+		const previousState = isStateAction
+			? kind === "approve"
+				? "pending"
+				: caseRow.authority === "platform"
+					? "approved"
+					: "visible"
+			: null;
+		const resultingState = isStateAction
+			? kind === "approve"
+				? caseRow.authority === "platform"
+					? "approved"
+					: "visible"
+				: "removed"
+			: null;
+		const [createdAction] = await tx
+			.insert(contentGovernanceAction)
+			.values({
+				caseId: caseRow.id,
+				actorProfileId: actor.id,
+				kind,
+				previousState,
+				resultingState,
+				previousPostTargetingLocked:
+					kind === "lock_post_targeting"
+						? false
+						: kind === "unlock_post_targeting"
 							? true
-							: kind === "unlock_post_targeting"
-								? false
-								: null,
-					reasonCode: "administrative" as const,
-					requestId: `seed-request-${position(index)}`,
-					idempotencyKey: `seed-action-${position(index)}`,
-					createdAt: latestDate(data.pastDate(120), caseRow.createdAt, actor.createdAt),
-				};
-			},
-		),
-	)) {
-		normalActions.push(...(await tx.insert(moderationAction).values(batch).returning()));
+							: null,
+				resultingPostTargetingLocked:
+					kind === "lock_post_targeting"
+						? true
+						: kind === "unlock_post_targeting"
+							? false
+							: null,
+				requestId: `seed-content-governance-request-${position(index)}`,
+				idempotencyKey: `seed-content-governance-action-${position(index)}`,
+				createdAt: latestDate(data.pastDate(120), caseRow.createdAt, actor.createdAt),
+			})
+			.returning();
+		if (!createdAction)
+			throw new Error("Seed content governance Action insertion returned no row");
+		normalActions.push(createdAction);
+		if (kind === "remove" || kind === "lock_post_targeting") {
+			const sourceRealmId = caseRow.realmId ?? OfficialRealmUnitIds.rule;
+			const ruleRevisionId = currentRuleRevisionByRealm.get(sourceRealmId);
+			if (!ruleRevisionId)
+				throw new Error(`Seed governance action source ${sourceRealmId} has no revision`);
+			await tx.insert(contentGovernanceActionRule).values({
+				actionId: createdAction.id,
+				ruleSourceRealmId: sourceRealmId,
+				ruleRevisionId,
+				ruleId: itemAt(rulesByRevision.get(ruleRevisionId) ?? [], index),
+				createdAt: createdAction.createdAt,
+			});
+		}
 	}
 	const reverseActions = await tx
-		.insert(moderationAction)
+		.insert(contentGovernanceAction)
 		.values(
 			Array.from({ length: 10 }, (_, index) => {
 				const reversed = itemAt(normalActions, index);
@@ -2629,55 +2658,46 @@ async function seedGovernance(
 					caseId: reversed.caseId,
 					actorProfileId: actor.id,
 					kind: "reverse" as const,
-					reasonCode: "administrative" as const,
 					reversesActionId: reversed.id,
-					requestId: `seed-reverse-request-${position(index)}`,
-					idempotencyKey: `seed-reverse-${position(index)}`,
+					previousState: reversed.resultingState,
+					resultingState: reversed.previousState,
+					previousPostTargetingLocked: reversed.resultingPostTargetingLocked,
+					resultingPostTargetingLocked: reversed.previousPostTargetingLocked,
+					requestId: `seed-content-governance-reverse-request-${position(index)}`,
+					idempotencyKey: `seed-content-governance-reverse-${position(index)}`,
 					createdAt: latestDate(data.pastDate(30), reversed.createdAt, actor.createdAt),
 				};
 			}),
 		)
 		.returning();
-	const profileById = new Map(profiles.map((value) => [value.id, value]));
-	const profileCases = cases.filter(
-		(value) => value.targetKind === "profile" && value.authority === "platform",
-	);
 	const enforcementPlans = Array.from({ length: SeedPlan.accountEnforcements }, (_, index) => {
-		const caseRow = itemAt(profileCases, index);
-		const targetProfile = profileById.get(caseRow.targetId);
-		if (!targetProfile) {
-			throw new Error(`Missing seed enforcement target Profile ${caseRow.targetId}`);
-		}
+		const targetProfile = itemAt(profiles, index * 13);
 		const actor = itemAt(profiles, index * 7 + 1);
-		const startsAt = latestDate(
-			data.pastDate(90),
-			caseRow.createdAt,
-			targetProfile.createdAt,
-			actor.createdAt,
-		);
+		const startsAt = latestDate(data.pastDate(90), targetProfile.createdAt, actor.createdAt);
 		return createSeedEnforcementPlan({
 			index,
 			profileId: targetProfile.id,
-			caseId: caseRow.id,
 			actorProfileId: actor.id,
 			kind: itemAt(EnforcementKindValues, index),
 			startsAt,
 			expiresAt: index % 4 === 0 ? null : new Date(startsAt.getTime() + 30 * 86_400_000),
 		});
 	});
-	const enforcementActions: (typeof moderationAction.$inferSelect)[] = [];
+	const enforcementActions: (typeof accountEnforcementAction.$inferSelect)[] = [];
 	for (const batch of chunks(enforcementPlans.map((value) => value.action))) {
-		enforcementActions.push(...(await tx.insert(moderationAction).values(batch).returning()));
+		enforcementActions.push(
+			...(await tx.insert(accountEnforcementAction).values(batch).returning()),
+		);
 	}
-	const enforcementActionIdByKey = new Map<string, string>();
+	const enforcementActionIdByRequest = new Map<string, string>();
 	for (const action of enforcementActions) {
-		if (action.idempotencyKey) enforcementActionIdByKey.set(action.idempotencyKey, action.id);
+		if (action.requestId) enforcementActionIdByRequest.set(action.requestId, action.id);
 	}
 	await writeBatches(
 		enforcementPlans.map((plan) => {
-			const decisionActionId = enforcementActionIdByKey.get(plan.action.idempotencyKey);
+			const decisionActionId = enforcementActionIdByRequest.get(plan.action.requestId);
 			if (!decisionActionId) {
-				throw new Error(`Missing seed enforcement decision ${plan.action.idempotencyKey}`);
+				throw new Error(`Missing seed enforcement decision ${plan.action.requestId}`);
 			}
 			return { ...plan.enforcement, decisionActionId };
 		}),

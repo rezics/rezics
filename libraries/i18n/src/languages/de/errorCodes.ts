@@ -97,25 +97,32 @@ export default {
 	ContentStructureNotFound: "Diese Inhaltsstruktur wurde nicht gefunden.",
 	ContentStructureNodeNotFound: "Dieser Knoten der Inhaltsstruktur wurde nicht gefunden.",
 	ReviewNotFound: "Diese Rezension wurde nicht gefunden.",
-	ModerationTargetNotFound: "Das Moderationsziel wurde nicht gefunden.",
-	ModerationRealmMissing: `In diesem Moderationsfall fehlt der ${realmTerms.inline}.`,
-	ModerationCaseNotFound: "Dieser Moderationsfall wurde nicht gefunden.",
-	ModerationReversalInvalid: "Die Anfrage zur Rücknahme ist ungültig.",
-	ModerationReversedActionInvalid: "Die zurückgenommene Aktion gehört nicht zu diesem Fall.",
-	ModerationActionIncompatible: "Diese Aktion ist für das Moderationsziel nicht verfügbar.",
-	ModerationTransitionInvalid:
+	ContentGovernanceTargetNotFound: "Das Moderationsziel wurde nicht gefunden.",
+	ContentReviewRealmMissing: `In diesem Moderationsfall fehlt der ${realmTerms.inline}.`,
+	ContentReviewCaseNotFound: "Dieser Moderationsfall wurde nicht gefunden.",
+	ContentGovernanceReversedActionInvalid:
+		"Die zurückgenommene Aktion gehört nicht zu diesem Fall.",
+	ContentGovernanceActionIncompatible:
+		"Diese Aktion ist für das Moderationsziel nicht verfügbar.",
+	ContentGovernanceTransitionInvalid:
 		"Das Ziel kann diesen Wechsel des Moderationsstatus nicht vornehmen.",
-	ModerationActionNoEffect: "Die Moderationsaktion würde das Ziel nicht ändern.",
-	ModerationReversalUnavailable: "Diese Aktion kann nicht mehr sicher zurückgenommen werden.",
-	ModerationIdempotencyConflict:
+	ContentGovernanceActionNoEffect: "Die Moderationsaktion würde das Ziel nicht ändern.",
+	ContentGovernanceReversalUnavailable:
+		"Diese Aktion kann nicht mehr sicher zurückgenommen werden.",
+	ContentGovernanceIdempotencyConflict:
 		"Dieser Wiederholungsschlüssel wurde bereits für eine andere Moderationsanfrage verwendet.",
-	ModerationNoteRoleDuplicate:
+	GovernanceNoteRoleDuplicate:
 		"Füge höchstens eine interne Notiz und eine öffentliche Mitteilung hinzu.",
 	ReportAlreadySubmitted: "Du hast diese Unit für den laufenden Fall bereits gemeldet.",
 	ReportTargetRevisionUnavailable: "Diese Unit hat keine Revision, die gemeldet werden kann.",
 	ReportRuleUnavailable:
 		"Für den gewählten Zuständigkeitsbereich gibt es keine aktuellen Regeln.",
 	ReportRuleChanged: "Die gewählte Regel wurde geändert. Wähle sie vor dem Senden erneut aus.",
+	ReportRuleSourceForbidden: `Meldungen dürfen nur Regeln des aktuellen ${realmTerms.label} und offizielle Regeln anführen.`,
+	ContentGovernanceRuleSourceForbidden:
+		"Die gewählte Regel liegt außerhalb dieser Zuständigkeit für Inhalts-Governance.",
+	ContentGovernanceRuleChanged:
+		"Eine gewählte Regel gehört nicht mehr zur aktuellen Regelversion. Wähle sie erneut aus.",
 	EnforcementExpiryInvalid: "Der Ablauf der Maßnahme muss in der Zukunft liegen.",
 	EnforcementNotFound: "Diese Maßnahme wurde nicht gefunden.",
 	EnforcementAlreadyRevoked: "Diese Maßnahme wurde bereits aufgehoben.",

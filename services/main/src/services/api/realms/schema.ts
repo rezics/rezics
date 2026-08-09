@@ -2,8 +2,8 @@ import { type Static, t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
 
 import {
-	GovernanceReasonCodeValues,
-	ModerationActionKindValues,
+	ContentGovernanceActionKindValues,
+	ContentGovernanceMaxRuleReferences,
 	RealmModerationCommandValues,
 	RealmJoinPolicyValues,
 	RealmMemberStateValues,
@@ -13,7 +13,6 @@ import {
 	RealmTagQueryStrategyValues,
 	RealmUnitPublicationStateValues,
 	RealmUnitStatusValues,
-	RealmUnitMutationCommandValues,
 	UnitStatusValues,
 	ResourceVisibilityValues,
 } from "../../database/schema/contract-values";
@@ -27,7 +26,10 @@ import {
 	LocalizationInput,
 	Uuid,
 } from "../schema";
-import { ModerationActionResponse } from "../governance/schema";
+import {
+	ContentGovernanceActionResponse,
+	ContentGovernanceRuleReference,
+} from "../governance/schema";
 
 const RealmVisibility = t.Union(ResourceVisibilityValues.map((value) => t.Literal(value)));
 
@@ -40,7 +42,6 @@ const RealmPageKind = t.UnionEnum(RealmPageKindValues);
 
 const RealmUnitStatus = t.UnionEnum(RealmUnitStatusValues, { default: undefined });
 const RealmUnitPublicationState = t.UnionEnum(RealmUnitPublicationStateValues);
-const GovernanceReasonCode = t.UnionEnum(GovernanceReasonCodeValues);
 
 export const ListRealmsQuery = t.Object(
 	{
@@ -438,29 +439,59 @@ const RealmModerationAnnotation = t.Object(
 	},
 	{ additionalProperties: false },
 );
-const RealmModerationCommon = {
-	reasonCode: GovernanceReasonCode,
+const RealmGovernanceCommon = {
 	idempotencyKey: t.Optional(t.String({ minLength: 1, maxLength: 256 })),
 };
 export const ModerateRealmUnitBody = t.Union([
 	t.Object(
 		{
-			...RealmModerationCommon,
-			command: t.Union([t.UnionEnum(RealmUnitMutationCommandValues), t.Literal("dismiss")]),
+			...RealmGovernanceCommon,
+			command: t.Union([
+				t.Literal("hide"),
+				t.Literal("remove"),
+				t.Literal("lock_post_targeting"),
+			]),
+			rules: t.Array(ContentGovernanceRuleReference, {
+				minItems: 1,
+				maxItems: ContentGovernanceMaxRuleReferences,
+				uniqueItems: true,
+			}),
 			annotation: t.Optional(RealmModerationAnnotation),
 		},
 		{ additionalProperties: false },
 	),
 	t.Object(
 		{
-			...RealmModerationCommon,
+			...RealmGovernanceCommon,
+			command: t.Union([
+				t.Literal("approve"),
+				t.Literal("restore"),
+				t.Literal("unlock_post_targeting"),
+			]),
+			annotation: t.Optional(RealmModerationAnnotation),
+		},
+		{ additionalProperties: false },
+	),
+]);
+export type ModerateRealmUnitBody = Static<typeof ModerateRealmUnitBody>;
+
+export const ReviewRealmUnitBody = t.Union([
+	t.Object(
+		{
+			command: t.Literal("dismiss"),
+			annotation: t.Optional(RealmModerationAnnotation),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
 			command: t.Literal("note"),
 			annotation: RealmModerationAnnotation,
 		},
 		{ additionalProperties: false },
 	),
 ]);
-export type ModerateRealmUnitBody = Static<typeof ModerateRealmUnitBody>;
+export type ReviewRealmUnitBody = Static<typeof ReviewRealmUnitBody>;
 
 const RealmModerationCommand = t.UnionEnum(RealmModerationCommandValues);
 const RealmUnitModerationTargetResponse = t.Object({
@@ -494,7 +525,23 @@ export const RealmUnitListResponse = t.Object({
 });
 
 export const RealmUnitModerationActionResponse = t.Object({
-	...ModerationActionResponse.properties,
+	...ContentGovernanceActionResponse.properties,
+	target: RealmUnitModerationTargetResponse,
+});
+
+export const RealmUnitReviewResponse = t.Object({
+	caseId: Uuid,
+	caseState: t.Union([
+		t.Literal("new"),
+		t.Literal("triaged"),
+		t.Literal("assigned"),
+		t.Literal("actioned"),
+		t.Literal("resolved"),
+		t.Literal("duplicate"),
+		t.Literal("rejected"),
+		t.Literal("escalated"),
+		t.Literal("reviewing"),
+	]),
 	target: RealmUnitModerationTargetResponse,
 });
 
@@ -513,14 +560,16 @@ export const RealmUnitModerationHistoryResponse = t.Object({
 		t.Object({
 			id: Uuid,
 			caseId: Uuid,
-			kind: t.UnionEnum(ModerationActionKindValues),
+			kind: t.UnionEnum(ContentGovernanceActionKindValues),
 			actorProfileId: Uuid,
 			actorName: t.Nullable(t.String()),
 			previousState: t.Nullable(RealmUnitStatus),
 			resultingState: t.Nullable(RealmUnitStatus),
 			previousPostTargetingLocked: t.Nullable(t.Boolean()),
 			resultingPostTargetingLocked: t.Nullable(t.Boolean()),
-			reasonCode: GovernanceReasonCode,
+			rules: t.Array(ContentGovernanceRuleReference, {
+				maxItems: ContentGovernanceMaxRuleReferences,
+			}),
 			reversesActionId: t.Nullable(Uuid),
 			notes: t.Array(RealmModerationNoteResponse),
 			createdAt: DateTime,

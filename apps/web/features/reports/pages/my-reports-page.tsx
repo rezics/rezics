@@ -159,15 +159,49 @@ function MyReportsContent({ selectedReportId }: { readonly selectedReportId?: st
 										<dt className="text-muted-foreground">
 											{t.reports.myReports.scope}
 										</dt>
-										<dd className="mt-1 font-medium">
-											{t.reports.myReports.scopes[item.scope]}
+										<dd className="mt-2 grid gap-2">
+											{item.referrals.map((referral) => (
+												<div
+													className="flex flex-wrap items-center gap-2"
+													key={referral.id}
+												>
+													<span className="font-medium">
+														{referral.destinationTitle ??
+															t.reports.myReports.scopes[
+																referral.scope
+															]}
+													</span>
+													<Badge
+														variant={
+															MyReportStatusBadgeVariants[
+																referral.status
+															]
+														}
+													>
+														{
+															t.reports.myReports.statuses[
+																referral.status
+															]
+														}
+													</Badge>
+													<span className="text-muted-foreground text-xs">
+														{t.reports.caseStates[referral.caseState]}
+													</span>
+												</div>
+											))}
 										</dd>
 									</div>
 									<div>
 										<dt className="text-muted-foreground">
 											{t.reports.myReports.rule}
 										</dt>
-										<dd className="mt-1 font-medium">{item.rule.title}</dd>
+										<dd className="mt-2 grid gap-1">
+											{item.rules.map((rule) => (
+												<span className="font-medium" key={rule.id}>
+													{rule.title}
+												</span>
+											))}
+										</dd>
 									</div>
 									{item.details ? (
 										<div className="sm:col-span-2">

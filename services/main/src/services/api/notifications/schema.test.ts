@@ -9,18 +9,16 @@ describe("notification payload contracts", () => {
 	it("carries semantic references without copied display text", () => {
 		expect(
 			Check(ModerationNotificationPayload, {
-				type: "moderation_action",
+				type: "content_governance_action",
 				actionId,
 				actionKind: "remove",
-				reasonCode: "content_policy",
 			}),
 		).toBe(true);
 		expect(
 			Check(ModerationNotificationPayload, {
-				type: "moderation_action",
+				type: "content_governance_action",
 				actionId,
 				actionKind: "remove",
-				reasonCode: "content_policy",
 				message: "copied display text",
 			}),
 		).toBe(false);
@@ -31,7 +29,7 @@ describe("notification payload contracts", () => {
 			Check(ModerationNotificationPayload, {
 				type: "report_resolution",
 				reportId: actionId,
-				reportScope: "platform",
+				referralId: actionId,
 				actionId,
 				actionKind: "remove",
 				reasonCode: "free-form",
@@ -39,24 +37,20 @@ describe("notification payload contracts", () => {
 		).toBe(false);
 	});
 
-	it("identifies the report table scope in resolution notifications", () => {
+	it("identifies the exact referral resolved by a review team", () => {
 		expect(
 			Check(ModerationNotificationPayload, {
 				type: "report_resolution",
 				reportId: actionId,
-				reportScope: "realm",
-				actionId,
-				actionKind: "dismiss",
-				reasonCode: "realm_rules",
+				referralId: actionId,
+				resolution: "dismissed",
 			}),
 		).toBe(true);
 		expect(
 			Check(ModerationNotificationPayload, {
 				type: "report_resolution",
 				reportId: actionId,
-				actionId,
-				actionKind: "dismiss",
-				reasonCode: "realm_rules",
+				resolution: "dismissed",
 			}),
 		).toBe(false);
 	});

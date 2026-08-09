@@ -95,8 +95,8 @@ export const SeedPlan = {
 	notificationPreferences: 300,
 	notifications: 500,
 	reports: 120,
-	moderationCases: 60,
-	moderationActions: 90,
+	contentReviewCases: 60,
+	contentGovernanceActions: 70,
 	accountEnforcements: 20,
 	auditEvents: 150,
 	recommendationEvents: 10_000,
@@ -295,62 +295,11 @@ export function latestDate(first: Date, ...rest: Date[]): Date {
 	return new Date(Math.max(...timestamps));
 }
 
-interface SeedRealmMemberTarget {
-	readonly realmId: string;
-	readonly profileId: string;
-}
-
-interface SeedRealmUnitTarget {
-	readonly realmId: string;
-	readonly unitId: string;
-}
-
-export type SeedRealmModerationTarget =
-	| {
-			authority: "realm";
-			realmId: string;
-			targetKind: "realm_member";
-			targetId: string;
-	  }
-	| {
-			authority: "realm";
-			realmId: string;
-			targetKind: "realm_unit";
-			targetId: string;
-	  };
-
-export function selectSeedRealmModerationTarget(
-	targetKind: SeedRealmModerationTarget["targetKind"],
-	index: number,
-	targets: {
-		readonly members: readonly SeedRealmMemberTarget[];
-		readonly units: readonly SeedRealmUnitTarget[];
-	},
-): SeedRealmModerationTarget {
-	if (targetKind === "realm_member") {
-		const target = cycleValue(targets.members, index);
-		return {
-			authority: "realm",
-			realmId: target.realmId,
-			targetKind,
-			targetId: target.profileId,
-		};
-	}
-	const target = cycleValue(targets.units, index);
-	return {
-		authority: "realm",
-		realmId: target.realmId,
-		targetKind,
-		targetId: target.unitId,
-	};
-}
-
 type SeedEnforcementKind = (typeof EnforcementKindValues)[number];
 
 export function createSeedEnforcementPlan(input: {
 	readonly index: number;
 	readonly profileId: string;
-	readonly caseId: string;
 	readonly actorProfileId: string;
 	readonly kind: SeedEnforcementKind;
 	readonly startsAt: Date;
@@ -359,12 +308,11 @@ export function createSeedEnforcementPlan(input: {
 	const suffix = position(input.index);
 	return {
 		action: {
-			caseId: input.caseId,
 			actorProfileId: input.actorProfileId,
-			kind: input.kind,
-			reasonCode: "administrative" as const,
+			targetProfileId: input.profileId,
+			kind: "issue" as const,
+			enforcementKind: input.kind,
 			requestId: `seed-enforcement-request-${suffix}`,
-			idempotencyKey: `seed-enforcement-${suffix}`,
 			createdAt: input.startsAt,
 		},
 		enforcement: {

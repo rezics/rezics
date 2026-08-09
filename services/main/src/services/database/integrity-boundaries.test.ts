@@ -8,7 +8,7 @@ import {
 	creditAttribution,
 	emailOutbox,
 	imageObject,
-	moderationAction,
+	contentGovernanceAction,
 	postProgressEntry,
 	postScore,
 	profileRealmTagSubscription,
@@ -80,9 +80,9 @@ describe("database integrity boundaries", () => {
 		],
 		[emailOutbox, "email_outbox_intent_check", '"email_outbox"."locale" is not null'],
 		[
-			moderationAction,
-			"moderation_action_content_license_transition_check",
-			'"moderation_action"."previous_content_license_status" is not null',
+			contentGovernanceAction,
+			"content_governance_action_content_license_transition_check",
+			'"content_governance_action"."previous_content_license_status" is not null',
 		],
 		[
 			unitOwnershipClaim,

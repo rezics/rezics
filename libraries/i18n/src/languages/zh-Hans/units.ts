@@ -169,7 +169,7 @@ export default {
 		republish: "重新发布",
 		loadMore: "加载更多",
 		unnamedRealm: `未命名${realmTerms.label}`,
-		governanceReason: insert("治理原因：{{reason}}", { reason: String }),
+		governanceAction: insert("治理处置：{{action}}", { action: String }),
 	},
 	series: {
 		kind: "系列类型",

@@ -4,48 +4,65 @@ import { describe, expect, it } from "vitest";
 
 import {
 	CreateAccountEnforcementBody,
-	CreateModerationActionBody,
+	CreateContentGovernanceActionBody,
 	CreateUnitAccessInvitationBody,
 	OverrideUnitOwnershipBody,
 	ReplaceUnitSubjectAccessBody,
 	RevokeAccountEnforcementBody,
 	TransferUnitOwnershipBody,
-	UpdateModerationCaseBody,
+	UpdateContentReviewCaseBody,
 } from "./schema";
 
 const profileId = "0195c49b-8f3b-7e18-8c45-c2f36ee8d337";
 const secondProfileId = "0195c49b-8f3b-7e18-8c45-c2f36ee8d338";
 const content = createPortableTextDocument([], "0123456789ab");
 const internalNote = { language: "en", content };
+const rule = {
+	sourceRealmId: profileId,
+	revisionId: secondProfileId,
+	ruleId: "0195c49b-8f3b-7e18-8c45-c2f36ee8d339",
+};
 
 describe("adjacent governance API contracts", () => {
-	it("keeps moderation case prose in a Post-backed internal note", () => {
-		expect(Check(UpdateModerationCaseBody, { internalNote })).toBe(true);
-		expect(Check(UpdateModerationCaseBody, { reason: "copied rationale" })).toBe(false);
-		expect(Check(UpdateModerationCaseBody, { safeSummary: "copied summary" })).toBe(false);
+	it("keeps review-case prose in a Post-backed internal note", () => {
+		expect(Check(UpdateContentReviewCaseBody, { internalNote })).toBe(true);
+		expect(Check(UpdateContentReviewCaseBody, { reason: "copied rationale" })).toBe(false);
+		expect(Check(UpdateContentReviewCaseBody, { safeSummary: "copied summary" })).toBe(false);
 	});
 
-	it("requires restoration to reference the exact license invalidation action", () => {
+	it("requires rules for adverse actions and an exact restoration reference", () => {
 		expect(
-			Check(CreateModerationActionBody, {
+			Check(CreateContentGovernanceActionBody, {
 				caseId: profileId,
 				kind: "invalidate_content_license",
-				reasonCode: "copyright",
+				rules: [rule],
 			}),
 		).toBe(true);
 		expect(
-			Check(CreateModerationActionBody, {
+			Check(CreateContentGovernanceActionBody, {
+				caseId: profileId,
+				kind: "invalidate_content_license",
+			}),
+		).toBe(false);
+		expect(
+			Check(CreateContentGovernanceActionBody, {
 				caseId: profileId,
 				kind: "restore_content_license",
-				reasonCode: "appeal",
 				reversesActionId: secondProfileId,
 			}),
 		).toBe(true);
 		expect(
-			Check(CreateModerationActionBody, {
+			Check(CreateContentGovernanceActionBody, {
 				caseId: profileId,
 				kind: "restore_content_license",
-				reasonCode: "appeal",
+			}),
+		).toBe(false);
+		expect(
+			Check(CreateContentGovernanceActionBody, {
+				caseId: profileId,
+				kind: "remove",
+				rules: [rule],
+				reasonCode: "content_policy",
 			}),
 		).toBe(false);
 	});
@@ -178,7 +195,6 @@ describe("adjacent governance API contracts", () => {
 			Check(CreateAccountEnforcementBody, {
 				profileId,
 				kind: "warning",
-				reasonCode: "content_policy",
 				notes: [{ role: "public_notice", language: "en", content }],
 			}),
 		).toBe(true);
@@ -187,9 +203,9 @@ describe("adjacent governance API contracts", () => {
 				profileId,
 				kind: "warning",
 				reasonCode: "content_policy",
-				publicMessage: "copied public message",
 			}),
 		).toBe(false);
-		expect(Check(RevokeAccountEnforcementBody, { reasonCode: "appeal" })).toBe(true);
+		expect(Check(RevokeAccountEnforcementBody, {})).toBe(true);
+		expect(Check(RevokeAccountEnforcementBody, { reasonCode: "appeal" })).toBe(false);
 	});
 });

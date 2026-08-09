@@ -1,13 +1,14 @@
 "use client";
 
 import {
-	useGetApiRealmsByRealmIdRules,
+	getApiReportsMeQueryKey,
 	useGetApiReportsUnitsByUnitIdDestinations,
 	usePostApiReportsUnitsByUnitId,
-	getApiReportsMeQueryKey,
 } from "@rezics/openapi-tanstack-query";
 import {
+	Badge,
 	Button,
+	Checkbox,
 	Dialog,
 	DialogBody,
 	DialogContent,
@@ -20,8 +21,6 @@ import {
 	MenuContent,
 	MenuItem,
 	MenuTrigger,
-	NativeSelect,
-	NativeSelectOption,
 	Textarea,
 	toast,
 } from "@rezics/ui";
@@ -31,11 +30,14 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { useAuthPortal } from "@/features/auth/auth-portal-context";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
+import {
+	ContentGovernanceMaximumRuleReferences,
+	updateContentRuleSelection,
+} from "@/features/governance/model/content-rule-selection";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
-import { selectReportRealmId, selectReportRuleId } from "../model/report-selection";
 import { MyReportsHref } from "../routing/report-routes";
 
 export type UnitReportTarget = Readonly<{
@@ -57,54 +59,58 @@ export function UnitReportDialog({
 	const queryClient = useQueryClient();
 	const localizationLanguages = useLocalizationLanguages();
 	const selectionContextKey = `${unitId}:${realmId ?? ""}`;
-	const [realmSelection, setRealmSelection] = useState({
+	const [ruleSelection, setRuleSelection] = useState({
 		contextKey: selectionContextKey,
-		value: realmId ?? "",
+		keys: [] as string[],
 	});
-	const [ruleSelection, setRuleSelection] = useState({ realmId: "", value: "" });
 	const [details, setDetails] = useState("");
 	const destinations = useGetApiReportsUnitsByUnitIdDestinations(
 		{
 			path: { unitId },
-			query: { localizationLanguages },
+			query: {
+				localizationLanguages,
+				...(realmId ? { contextRealmId: realmId } : {}),
+			},
 		},
 		{ query: { enabled: open } },
 	);
-	const selectedRealmId =
-		realmSelection.contextKey === selectionContextKey ? realmSelection.value : "";
-	const effectiveRealmId = selectReportRealmId(
-		destinations.data?.items,
-		realmId,
-		selectedRealmId,
+	const selectedKeys = ruleSelection.contextKey === selectionContextKey ? ruleSelection.keys : [];
+	const availableRuleKeys = (destinations.data?.items ?? []).flatMap((destination) =>
+		destination.rules.map((rule) => `${destination.id}:${destination.revisionId}:${rule.id}`),
 	);
-	const rules = useGetApiRealmsByRealmIdRules(
-		{
-			path: { realmId: effectiveRealmId ?? "" },
-			query: { localizationLanguages },
-		},
-		{ query: { enabled: open && Boolean(effectiveRealmId) } },
+	const currentSelectedKeys = selectedKeys.filter((key) => availableRuleKeys.includes(key));
+	const selectedRules = (destinations.data?.items ?? []).flatMap((destination) =>
+		destination.rules
+			.filter((rule) =>
+				currentSelectedKeys.includes(
+					`${destination.id}:${destination.revisionId}:${rule.id}`,
+				),
+			)
+			.map((rule) => ({
+				sourceRealmId: destination.id,
+				revisionId: destination.revisionId,
+				ruleId: rule.id,
+			})),
 	);
-	const selectedRuleId = ruleSelection.realmId === effectiveRealmId ? ruleSelection.value : "";
-	const effectiveRuleId = selectReportRuleId(rules.data?.items, selectedRuleId);
 	const submitReport = usePostApiReportsUnitsByUnitId();
-	const canSubmit = Boolean(effectiveRealmId && effectiveRuleId) && !submitReport.isPending;
+	const canSubmit = selectedRules.length > 0 && !submitReport.isPending;
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		if (!effectiveRealmId || !effectiveRuleId || submitReport.isPending) return;
+		if (!selectedRules.length || submitReport.isPending) return;
 		const normalizedDetails = details.trim();
 		try {
 			await submitReport.mutateAsync({
 				path: { unitId },
 				query: { localizationLanguages },
 				body: {
-					ruleRealmId: effectiveRealmId,
-					ruleId: effectiveRuleId,
+					...(realmId ? { contextRealmId: realmId } : {}),
+					rules: selectedRules,
 					...(normalizedDetails ? { details: normalizedDetails } : {}),
 				},
 			});
 			setDetails("");
-			setRuleSelection({ realmId: "", value: "" });
+			setRuleSelection({ contextKey: selectionContextKey, keys: [] });
 			onOpenChange(false);
 			await queryClient.invalidateQueries({ queryKey: getApiReportsMeQueryKey() });
 			toast.create({
@@ -133,60 +139,75 @@ export function UnitReportDialog({
 				<DialogBody>
 					<form className="grid gap-4" id={`report-unit-${unitId}`} onSubmit={submit}>
 						<Field required>
-							<FieldLabel>{t.reports.realm}</FieldLabel>
-							<NativeSelect
-								disabled={
-									destinations.isPending || !destinations.data?.items.length
-								}
-								onChange={(event) => {
-									const value = event.currentTarget.value;
-									setRealmSelection({ contextKey: selectionContextKey, value });
-									setRuleSelection({ realmId: value, value: "" });
-								}}
-								value={effectiveRealmId ?? ""}
-							>
-								{destinations.data?.items.length ? null : (
-									<NativeSelectOption value="">
-										{t.reports.chooseRealm}
-									</NativeSelectOption>
-								)}
-								{destinations.data?.items.map((item) => (
-									<NativeSelectOption key={item.id} value={item.id}>
-										{item.title ?? item.id}
-									</NativeSelectOption>
+							<FieldLabel>{t.reports.rule}</FieldLabel>
+							<div className="grid gap-3">
+								{destinations.data?.items.map((destination) => (
+									<fieldset
+										className="grid gap-2 rounded-lg border border-border-weak p-3"
+										key={destination.id}
+									>
+										<legend className="flex max-w-full items-center gap-2 px-1 text-sm">
+											<span className="truncate font-medium">
+												{destination.title ?? destination.id}
+											</span>
+											<Badge variant="outline">
+												{t.reports.myReports.scopes[destination.scope]}
+											</Badge>
+										</legend>
+										{destination.rules.map((rule) => {
+											const key = `${destination.id}:${destination.revisionId}:${rule.id}`;
+											const checked = currentSelectedKeys.includes(key);
+											return (
+												<label
+													className="flex items-start gap-2 text-sm"
+													key={key}
+												>
+													<Checkbox
+														checked={checked}
+														disabled={
+															!checked &&
+															currentSelectedKeys.length >=
+																ContentGovernanceMaximumRuleReferences
+														}
+														onCheckedChange={({ checked }) => {
+															setRuleSelection((current) => {
+																const keys =
+																	current.contextKey ===
+																	selectionContextKey
+																		? current.keys.filter(
+																				(value) =>
+																					availableRuleKeys.includes(
+																						value,
+																					),
+																			)
+																		: [];
+																return {
+																	contextKey: selectionContextKey,
+																	keys: updateContentRuleSelection(
+																		keys,
+																		key,
+																		checked === true,
+																	),
+																};
+															});
+														}}
+													/>
+													<span>{rule.title}</span>
+												</label>
+											);
+										})}
+									</fieldset>
 								))}
-							</NativeSelect>
+							</div>
 							{destinations.data && !destinations.data.items.length ? (
 								<FieldDescription>{t.reports.noRealms}</FieldDescription>
-							) : null}
-						</Field>
-						<Field required>
-							<FieldLabel>{t.reports.rule}</FieldLabel>
-							<NativeSelect
-								disabled={rules.isPending || !rules.data?.items.length}
-								onChange={(event) => {
-									if (!effectiveRealmId) return;
-									setRuleSelection({
-										realmId: effectiveRealmId,
-										value: event.currentTarget.value,
-									});
-								}}
-								value={effectiveRuleId ?? ""}
-							>
-								{rules.data?.items.length ? null : (
-									<NativeSelectOption value="">
-										{t.reports.chooseRule}
-									</NativeSelectOption>
-								)}
-								{rules.data?.items.map((item) => (
-									<NativeSelectOption key={item.id} value={item.id}>
-										{item.title}
-									</NativeSelectOption>
-								))}
-							</NativeSelect>
-							{rules.data && !rules.data.items.length ? (
+							) : destinations.data &&
+								destinations.data.items.every(
+									(destination) => !destination.rules.length,
+								) ? (
 								<FieldDescription>{t.reports.noRules}</FieldDescription>
 							) : null}
+							<FieldDescription>{t.reports.ruleLimit}</FieldDescription>
 						</Field>
 						<Field>
 							<FieldLabel>{t.reports.details}</FieldLabel>
@@ -199,9 +220,7 @@ export function UnitReportDialog({
 							/>
 							<FieldDescription>{t.reports.detailsHint}</FieldDescription>
 						</Field>
-						<RequestFailure
-							error={submitReport.error ?? destinations.error ?? rules.error}
-						/>
+						<RequestFailure error={submitReport.error ?? destinations.error} />
 					</form>
 				</DialogBody>
 				<DialogFooter>

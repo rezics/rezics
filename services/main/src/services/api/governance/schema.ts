@@ -9,9 +9,12 @@ import { PortableTextDocument } from "@rezics/block";
 import { type Static, t } from "elysia";
 
 import {
+	ContentGovernanceActionKindValues,
+	ContentGovernanceMaxRuleReferences,
+	ContentGovernanceRuleRequiredActionKindValues,
+	ContentReviewCaseStateValues,
 	EnforcementKindValues,
 	GovernanceReasonCodeValues,
-	ModerationCaseStateValues,
 	UnitKindValues,
 	UnitStatusValues,
 } from "../../database/schema/contract-values";
@@ -19,7 +22,9 @@ import { DateTime, ContentLanguage, Uuid } from "../schema";
 
 const NullableUuid = t.Nullable(Uuid);
 
-const ModerationCaseState = t.Union(ModerationCaseStateValues.map((value) => t.Literal(value)));
+const ContentReviewCaseState = t.UnionEnum(ContentReviewCaseStateValues, {
+	default: undefined,
+});
 
 const GovernanceReasonCode = t.UnionEnum(GovernanceReasonCodeValues, { default: undefined });
 export const GovernanceInternalNote = t.Object(
@@ -59,22 +64,30 @@ export const UpdateGovernanceNoteBody = t.Object(
 	{ additionalProperties: false },
 );
 const GovernanceNoteBindingResponse = t.Pick(GovernanceNoteResponse, ["postId", "role"]);
-const ModerationActionCommon = {
+export const ContentGovernanceRuleReference = t.Object(
+	{
+		sourceRealmId: Uuid,
+		revisionId: Uuid,
+		ruleId: Uuid,
+	},
+	{ additionalProperties: false },
+);
+export type ContentGovernanceRuleReference = Static<typeof ContentGovernanceRuleReference>;
+const ContentGovernanceActionCommon = {
 	caseId: Uuid,
-	reasonCode: GovernanceReasonCode,
 	notes: t.Optional(GovernanceActionNotes),
 	idempotencyKey: t.Optional(t.String({ minLength: 1, maxLength: 256 })),
 };
 
-export const ListModerationCasesQuery = t.Object({
+export const ListContentReviewCasesQuery = t.Object({
 	realmId: t.Optional(Uuid),
-	state: t.Optional(ModerationCaseState),
+	state: t.Optional(ContentReviewCaseState),
 	limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
 });
-export const ModerationCaseParams = t.Object({ caseId: Uuid });
-export const UpdateModerationCaseBody = t.Object(
+export const ContentReviewCaseParams = t.Object({ caseId: Uuid });
+export const UpdateContentReviewCaseBody = t.Object(
 	{
-		state: t.Optional(ModerationCaseState),
+		state: t.Optional(ContentReviewCaseState),
 		assignedProfileId: t.Optional(NullableUuid),
 		duplicateOfCaseId: t.Optional(NullableUuid),
 		internalNote: t.Optional(GovernanceInternalNote),
@@ -87,31 +100,37 @@ const UnitScope = t.Array(
 	{ maxItems: 8 },
 );
 
-export const CreateModerationActionBody = t.Union([
+const RuleReferences = t.Array(ContentGovernanceRuleReference, {
+	minItems: 1,
+	maxItems: ContentGovernanceMaxRuleReferences,
+	uniqueItems: true,
+});
+const AdverseContentGovernanceActionKind = t.Union(
+	ContentGovernanceRuleRequiredActionKindValues.map((kind) => t.Literal(kind)),
+);
+const NonAdverseContentGovernanceActionKind = t.Union(
+	(["approve", "restore", "unlock_post_targeting"] as const).map((kind) => t.Literal(kind)),
+);
+
+export const CreateContentGovernanceActionBody = t.Union([
 	t.Object(
 		{
-			...ModerationActionCommon,
-			kind: t.Union([
-				t.Literal("approve"),
-				t.Literal("hide"),
-				t.Literal("remove"),
-				t.Literal("restore"),
-				t.Literal("lock_post_targeting"),
-				t.Literal("unlock_post_targeting"),
-				t.Literal("invalidate_content_license"),
-				t.Literal("mute_member"),
-				t.Literal("remove_member"),
-				t.Literal("ban_member"),
-				t.Literal("restore_member"),
-				t.Literal("dismiss"),
-				t.Literal("escalate"),
-			]),
+			...ContentGovernanceActionCommon,
+			kind: AdverseContentGovernanceActionKind,
+			rules: RuleReferences,
 		},
 		{ additionalProperties: false },
 	),
 	t.Object(
 		{
-			...ModerationActionCommon,
+			...ContentGovernanceActionCommon,
+			kind: NonAdverseContentGovernanceActionKind,
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			...ContentGovernanceActionCommon,
 			kind: t.Literal("restore_content_license"),
 			reversesActionId: Uuid,
 		},
@@ -119,29 +138,20 @@ export const CreateModerationActionBody = t.Union([
 	),
 	t.Object(
 		{
-			...ModerationActionCommon,
+			...ContentGovernanceActionCommon,
 			kind: t.Literal("reverse"),
 			reversesActionId: Uuid,
 		},
 		{ additionalProperties: false },
 	),
-	t.Object(
-		{
-			...ModerationActionCommon,
-			kind: t.Literal("note"),
-			notes: t.Array(GovernanceActionNote, { minItems: 1, maxItems: 2 }),
-		},
-		{ additionalProperties: false },
-	),
 ]);
-export type CreateModerationActionBody = Static<typeof CreateModerationActionBody>;
+export type CreateContentGovernanceActionBody = Static<typeof CreateContentGovernanceActionBody>;
 
 const AccountEnforcementKind = t.Union(EnforcementKindValues.map((value) => t.Literal(value)));
 export const CreateAccountEnforcementBody = t.Object(
 	{
 		profileId: Uuid,
 		kind: AccountEnforcementKind,
-		reasonCode: GovernanceReasonCode,
 		notes: t.Optional(GovernanceActionNotes),
 		expiresAt: t.Optional(t.String({ format: "date-time" })),
 	},
@@ -150,7 +160,6 @@ export const CreateAccountEnforcementBody = t.Object(
 export const AccountEnforcementParams = t.Object({ enforcementId: Uuid });
 export const RevokeAccountEnforcementBody = t.Object(
 	{
-		reasonCode: GovernanceReasonCode,
 		notes: t.Optional(GovernanceActionNotes),
 	},
 	{ additionalProperties: false },
@@ -317,27 +326,27 @@ export const ListUnitAccessCandidatesQuery = t.Object(
 	{ additionalProperties: false },
 );
 
-export const ModerationCaseResponse = t.Object({
+export const ContentReviewCaseResponse = t.Object({
 	id: Uuid,
-	state: t.String(),
-	authority: t.String(),
+	state: ContentReviewCaseState,
+	authority: t.Union([t.Literal("platform"), t.Literal("realm")]),
 	realmId: t.Nullable(Uuid),
-	targetKind: t.String(),
-	targetId: Uuid,
-	targetPath: t.Nullable(t.String()),
+	targetUnitId: Uuid,
 	assignedProfileId: t.Nullable(Uuid),
 	duplicateOfCaseId: t.Nullable(Uuid),
 	notes: t.Array(GovernanceNoteResponse),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
-export const ModerationCaseListResponse = t.Object({ items: t.Array(ModerationCaseResponse) });
+export const ContentReviewCaseListResponse = t.Object({
+	items: t.Array(ContentReviewCaseResponse),
+});
 
-export const ModerationActionResponse = t.Object({
+export const ContentGovernanceActionResponse = t.Object({
 	id: Uuid,
 	caseId: Uuid,
 	actorProfileId: Uuid,
-	kind: t.String(),
+	kind: t.UnionEnum(ContentGovernanceActionKindValues),
 	previousState: t.Nullable(t.String()),
 	resultingState: t.Nullable(t.String()),
 	previousPostTargetingLocked: t.Nullable(t.Boolean()),
@@ -348,13 +357,23 @@ export const ModerationActionResponse = t.Object({
 	resultingContentLicenseStatus: t.Nullable(
 		t.Union([t.Literal("active"), t.Literal("invalidated")]),
 	),
-	resultingStatus: t.Nullable(t.String()),
 	resultingPostTargetingLocked: t.Nullable(t.Boolean()),
-	reasonCode: t.String(),
 	reversesActionId: t.Nullable(Uuid),
+	rules: t.Array(
+		t.Object(
+			{
+				sourceRealmId: Uuid,
+				revisionId: Uuid,
+				ruleId: Uuid,
+			},
+			{ additionalProperties: false },
+		),
+		{ maxItems: ContentGovernanceMaxRuleReferences },
+	),
 	notes: t.Array(GovernanceNoteBindingResponse),
 	createdAt: DateTime,
 });
+export type ContentGovernanceActionResponse = Static<typeof ContentGovernanceActionResponse>;
 
 export const EnforcementResponse = t.Object({
 	id: Uuid,

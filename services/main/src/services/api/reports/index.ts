@@ -7,17 +7,21 @@ import session from "../../auth/session";
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import { database } from "../../database";
 import {
-	ActiveReportCaseStateValues,
+	ActiveContentReviewCaseStateValues,
+	ContentGovernanceMaxRuleSources,
+	ContentReviewReportCounterBuckets,
 	type ContentLanguage,
-	type ModerationCaseStateValues,
-	moderationAction,
-	moderationCase,
-	platformUnitReport,
+	type ContentReviewCaseStateValues,
+	contentGovernanceAction,
+	contentReport,
+	contentReportReferral,
+	contentReportRule,
+	contentReviewCase,
+	contentReviewCaseReportCounter,
 	realm,
 	realmRule,
 	realmRuleRevision,
 	realmUnit,
-	realmUnitReport,
 	unit,
 	unitContentLicense,
 	unitRevisionHead,
@@ -31,28 +35,28 @@ import {
 	getPublicCanonicalUnitSlugAddresses,
 	type PublicCanonicalUnitSlugAddress,
 } from "../../units/slug-address";
+import { currentRealmRuleRevisionReadLock } from "../../realms/rule-revision-lock";
 import {
 	getPlatformUnitModerationCommands,
-	isActiveReportCaseState,
-} from "../governance/moderation-contract";
+	isActiveContentReviewCaseState,
+} from "../governance/content-governance-contract";
 import { toApiErrorResponse } from "../schema/response";
 import {
 	ReportAlreadySubmitted,
 	ReportRealmMismatch,
 	ReportRuleChanged,
+	ReportRuleSourceForbidden,
 	ReportRuleUnavailable,
 	ReportTargetRevisionUnavailable,
 } from "./errors";
-import {
-	platformUnitReportCaseAdvisoryLock,
-	realmUnitReportCaseAdvisoryLock,
-} from "./advisory-lock";
+import { contentReviewCaseAdvisoryLock, contentReviewReporterAdvisoryLock } from "./advisory-lock";
 import {
 	CreateReportBody,
 	CreateReportQuery,
 	ListMyReportsQuery,
 	ListPlatformReportCasesQuery,
 	ListRealmReportsQuery,
+	ListReviewCaseReportsQuery,
 	MyReportListResponse,
 	type MyReportResponse,
 	PlatformReportCaseListResponse,
@@ -62,129 +66,148 @@ import {
 	ReportRealmParams,
 	ReportResponse,
 	ReportUnitParams,
+	ReviewCaseParams,
 } from "./schema";
-import { decodeMyReportCursor, encodeMyReportCursor, toMyReportStatus } from "./my-report";
+import {
+	decodeMyReportCursor,
+	encodeMyReportCursor,
+	toAggregateMyReportStatus,
+	toMyReportStatus,
+} from "./my-report";
 
 type LocalizationLanguages = Parameters<typeof resolvedUnitLocalizationLanguage>[1];
-type ModerationCaseState = (typeof ModerationCaseStateValues)[number];
+type ContentReviewCaseState = (typeof ContentReviewCaseStateValues)[number];
 
-const realmReportSelection = (localizationLanguages: LocalizationLanguages) => ({
-	id: realmUnitReport.id,
-	caseId: realmUnitReport.caseId,
-	scope: sql<"realm">`'realm'`,
-	realmId: realmUnitReport.realmId,
-	unitId: realmUnitReport.unitId,
-	ruleId: realmUnitReport.ruleId,
-	ruleRevisionId: realmUnitReport.ruleRevisionId,
-	ruleLanguage: resolvedUnitLocalizationLanguage(realmUnitReport.ruleId, localizationLanguages),
-	ruleTitle: resolvedUnitLocalizationTitle(realmUnitReport.ruleId, localizationLanguages),
-	details: realmUnitReport.details,
-	reportedRevisionId: realmUnitReport.reportedRevisionId,
-	caseState: moderationCase.state,
-	createdAt: realmUnitReport.createdAt,
-});
+const reportSelection = {
+	id: contentReport.id,
+	reporterProfileId: contentReport.reporterProfileId,
+	unitId: contentReport.targetUnitId,
+	contextRealmId: contentReport.contextRealmId,
+	details: contentReport.details,
+	reportedRevisionId: contentReport.reportedRevisionId,
+	createdAt: contentReport.createdAt,
+};
 
-const platformReportSelection = (localizationLanguages: LocalizationLanguages) => ({
-	id: platformUnitReport.id,
-	caseId: platformUnitReport.caseId,
-	scope: sql<"platform">`'platform'`,
-	ruleSourceRealmId: platformUnitReport.ruleSourceRealmId,
-	unitId: platformUnitReport.unitId,
-	ruleId: platformUnitReport.ruleId,
-	ruleRevisionId: platformUnitReport.ruleRevisionId,
-	ruleLanguage: resolvedUnitLocalizationLanguage(
-		platformUnitReport.ruleId,
-		localizationLanguages,
-	),
-	ruleTitle: resolvedUnitLocalizationTitle(platformUnitReport.ruleId, localizationLanguages),
-	details: platformUnitReport.details,
-	reportedRevisionId: platformUnitReport.reportedRevisionId,
-	caseState: moderationCase.state,
-	createdAt: platformUnitReport.createdAt,
-});
+type ReportRow = typeof contentReport.$inferSelect;
+type ReportSelection = Pick<
+	ReportRow,
+	"id" | "reporterProfileId" | "contextRealmId" | "details" | "reportedRevisionId" | "createdAt"
+> & { readonly unitId: string };
 
-function presentRealmReport(row: {
-	readonly id: string;
-	readonly caseId: string;
-	readonly realmId: string;
-	readonly unitId: string;
-	readonly ruleId: string;
-	readonly ruleRevisionId: string;
-	readonly ruleLanguage: ContentLanguage | null;
-	readonly ruleTitle: string | null;
-	readonly details: string | null;
-	readonly reportedRevisionId: string;
-	readonly caseState: ModerationCaseState;
-	readonly createdAt: Date;
-}) {
-	if (!row.ruleLanguage || !row.ruleTitle)
-		throw new Error(`Report rule ${row.ruleId} has no localization`);
-	return {
-		id: row.id,
-		caseId: row.caseId,
-		scope: "realm" as const,
-		realmId: row.realmId,
-		unitId: row.unitId,
-		rule: {
-			id: row.ruleId,
-			revisionId: row.ruleRevisionId,
-			language: row.ruleLanguage,
-			title: row.ruleTitle,
-		},
-		details: row.details,
-		reportedRevisionId: row.reportedRevisionId,
-		caseState: row.caseState,
-		createdAt: row.createdAt,
-	};
+type HydratedReport = ReportSelection & {
+	readonly rules: readonly {
+		readonly id: string;
+		readonly sourceRealmId: string;
+		readonly revisionId: string;
+		readonly language: ContentLanguage;
+		readonly title: string;
+	}[];
+	readonly referrals: readonly {
+		readonly id: string;
+		readonly caseId: string;
+		readonly scope: "platform" | "realm";
+		readonly realmId: string | null;
+		readonly caseState: ContentReviewCaseState;
+		readonly destinationTitle: string | null;
+	}[];
+};
+
+async function hydrateReports(
+	rows: readonly ReportSelection[],
+	localizationLanguages: LocalizationLanguages,
+): Promise<HydratedReport[]> {
+	if (!rows.length) return [];
+	const reportIds = rows.map((row) => row.id);
+	const [ruleRows, referralRows] = await Promise.all([
+		database
+			.select({
+				reportId: contentReportRule.reportId,
+				id: contentReportRule.ruleId,
+				sourceRealmId: contentReportRule.ruleSourceRealmId,
+				revisionId: contentReportRule.ruleRevisionId,
+				language: resolvedUnitLocalizationLanguage(
+					contentReportRule.ruleId,
+					localizationLanguages,
+				),
+				title: resolvedUnitLocalizationTitle(
+					contentReportRule.ruleId,
+					localizationLanguages,
+				),
+			})
+			.from(contentReportRule)
+			.where(inArray(contentReportRule.reportId, reportIds))
+			.orderBy(
+				contentReportRule.reportId,
+				contentReportRule.ruleSourceRealmId,
+				contentReportRule.ruleId,
+			),
+		database
+			.select({
+				id: contentReportReferral.id,
+				reportId: contentReportReferral.reportId,
+				caseId: contentReportReferral.caseId,
+				authority: contentReviewCase.authority,
+				realmId: contentReviewCase.realmId,
+				caseState: contentReviewCase.state,
+				destinationTitle: resolvedUnitLocalizationTitle(
+					contentReportReferral.ruleSourceRealmId,
+					localizationLanguages,
+				),
+			})
+			.from(contentReportReferral)
+			.innerJoin(contentReviewCase, eq(contentReviewCase.id, contentReportReferral.caseId))
+			.where(inArray(contentReportReferral.reportId, reportIds))
+			.orderBy(contentReportReferral.reportId, contentReportReferral.ruleSourceRealmId),
+	]);
+	const rulesByReport = new Map<string, HydratedReport["rules"][number][]>();
+	for (const rule of ruleRows) {
+		if (!rule.language || !rule.title)
+			throw new Error(`Report rule ${rule.id} has no localization`);
+		const rules = rulesByReport.get(rule.reportId) ?? [];
+		rules.push({ ...rule, language: rule.language, title: rule.title });
+		rulesByReport.set(rule.reportId, rules);
+	}
+	const referralsByReport = new Map<string, HydratedReport["referrals"][number][]>();
+	for (const referral of referralRows) {
+		const referrals = referralsByReport.get(referral.reportId) ?? [];
+		referrals.push({
+			id: referral.id,
+			caseId: referral.caseId,
+			scope: referral.authority,
+			realmId: referral.realmId,
+			caseState: referral.caseState,
+			destinationTitle: referral.destinationTitle,
+		});
+		referralsByReport.set(referral.reportId, referrals);
+	}
+	return rows.map((row) => {
+		const rules = rulesByReport.get(row.id);
+		const referrals = referralsByReport.get(row.id);
+		if (!rules?.length || !referrals?.length)
+			throw new Error(`Content report ${row.id} has an incomplete rule/referral graph`);
+		return { ...row, rules, referrals };
+	});
 }
 
-function presentPlatformReport(row: {
-	readonly id: string;
-	readonly caseId: string;
-	readonly ruleSourceRealmId: string;
-	readonly unitId: string;
-	readonly ruleId: string;
-	readonly ruleRevisionId: string;
-	readonly ruleLanguage: ContentLanguage | null;
-	readonly ruleTitle: string | null;
-	readonly details: string | null;
-	readonly reportedRevisionId: string;
-	readonly caseState: ModerationCaseState;
-	readonly createdAt: Date;
-}) {
-	if (!row.ruleLanguage || !row.ruleTitle)
-		throw new Error(`Report rule ${row.ruleId} has no localization`);
+function presentReport(report: HydratedReport) {
 	return {
-		id: row.id,
-		caseId: row.caseId,
-		scope: "platform" as const,
-		ruleSourceRealmId: row.ruleSourceRealmId,
-		unitId: row.unitId,
-		rule: {
-			id: row.ruleId,
-			revisionId: row.ruleRevisionId,
-			language: row.ruleLanguage,
-			title: row.ruleTitle,
-		},
-		details: row.details,
-		reportedRevisionId: row.reportedRevisionId,
-		caseState: row.caseState,
-		createdAt: row.createdAt,
+		id: report.id,
+		unitId: report.unitId,
+		contextRealmId: report.contextRealmId,
+		rules: report.rules.map((rule) => ({
+			id: rule.id,
+			sourceRealmId: rule.sourceRealmId,
+			revisionId: rule.revisionId,
+			language: rule.language,
+			title: rule.title,
+		})),
+		referrals: report.referrals.map(
+			({ destinationTitle: _destinationTitle, ...referral }) => referral,
+		),
+		details: report.details,
+		reportedRevisionId: report.reportedRevisionId,
+		createdAt: report.createdAt,
 	};
-}
-
-type PresentedReport =
-	| ReturnType<typeof presentRealmReport>
-	| ReturnType<typeof presentPlatformReport>;
-
-function compareReportsNewestFirst(
-	left: Pick<PresentedReport, "createdAt" | "id">,
-	right: Pick<PresentedReport, "createdAt" | "id">,
-): number {
-	const timeDifference = right.createdAt.getTime() - left.createdAt.getTime();
-	if (timeDifference !== 0) return timeDifference;
-	if (left.id === right.id) return 0;
-	return left.id < right.id ? 1 : -1;
 }
 
 async function listReadableReportTargets(
@@ -207,46 +230,88 @@ async function listReadableReportTargets(
 type ReadableReportTarget = Awaited<ReturnType<typeof listReadableReportTargets>>[number];
 
 function presentMyReport(
-	report: PresentedReport,
+	report: HydratedReport,
 	target: ReadableReportTarget | undefined,
 	slugAddress: PublicCanonicalUnitSlugAddress | null,
 ): MyReportResponse {
+	const referrals = report.referrals.map((referral) => ({
+		...referral,
+		status: toMyReportStatus(referral.caseState),
+	}));
 	return {
 		id: report.id,
-		scope: report.scope,
-		status: toMyReportStatus(report.caseState),
+		status: toAggregateMyReportStatus(report.referrals.map((referral) => referral.caseState)),
 		target: target
-			? {
-					state: "available",
-					unit: {
-						...target,
-						slugAddress,
-					},
-				}
+			? { state: "available", unit: { ...target, slugAddress } }
 			: { state: "unavailable" },
-		rule: {
-			language: report.rule.language,
-			title: report.rule.title,
-		},
+		rules: report.rules.map((rule) => ({
+			id: rule.id,
+			sourceRealmId: rule.sourceRealmId,
+			revisionId: rule.revisionId,
+			language: rule.language,
+			title: rule.title,
+		})),
+		referrals,
 		details: report.details,
 		createdAt: report.createdAt,
 	};
 }
 
-async function hasCurrentRules(realmId: string): Promise<boolean> {
-	const [current] = await database
-		.select({ id: realmRuleRevision.id })
-		.from(realmRuleRevision)
-		.where(eq(realmRuleRevision.realmId, realmId))
-		.orderBy(desc(realmRuleRevision.version))
-		.limit(1);
-	if (!current) return false;
-	const [rule] = await database
-		.select({ id: realmRule.id })
+async function loadReportDestination(
+	realmId: string,
+	scope: "platform" | "realm",
+	localizationLanguages: LocalizationLanguages,
+) {
+	const [[destination], [currentRevision]] = await Promise.all([
+		database
+			.select({
+				id: realm.id,
+				language: resolvedUnitLocalizationLanguage(realm.id, localizationLanguages),
+				title: resolvedUnitLocalizationTitle(realm.id, localizationLanguages),
+			})
+			.from(realm)
+			.where(eq(realm.id, realmId))
+			.limit(1),
+		database
+			.select({ id: realmRuleRevision.id })
+			.from(realmRuleRevision)
+			.where(eq(realmRuleRevision.realmId, realmId))
+			.orderBy(desc(realmRuleRevision.version))
+			.limit(1),
+	]);
+	if (!destination || !destination.language || !currentRevision) return undefined;
+	const rules = await database
+		.select({
+			id: realmRule.id,
+			language: resolvedUnitLocalizationLanguage(realmRule.id, localizationLanguages),
+			title: resolvedUnitLocalizationTitle(realmRule.id, localizationLanguages),
+		})
 		.from(realmRule)
-		.where(eq(realmRule.revisionId, current.id))
-		.limit(1);
-	return Boolean(rule);
+		.where(eq(realmRule.revisionId, currentRevision.id))
+		.orderBy(realmRule.position, realmRule.id)
+		.limit(100);
+	const presentedRules = rules.map((rule) => {
+		if (!rule.language || !rule.title)
+			throw new Error(`Report rule ${rule.id} has no localization`);
+		return { id: rule.id, language: rule.language, title: rule.title };
+	});
+	if (!presentedRules.length) return undefined;
+	return {
+		...destination,
+		language: destination.language,
+		scope,
+		revisionId: currentRevision.id,
+		rules: presentedRules,
+	};
+}
+
+function reportCursorCondition(cursor: ReturnType<typeof decodeMyReportCursor>) {
+	return cursor
+		? or(
+				lt(contentReport.createdAt, cursor.createdAt),
+				and(eq(contentReport.createdAt, cursor.createdAt), lt(contentReport.id, cursor.id)),
+			)
+		: undefined;
 }
 
 export default new Elysia().use(session).group("", (app) =>
@@ -256,84 +321,40 @@ export default new Elysia().use(session).group("", (app) =>
 			async ({ profile, query }) => {
 				const requestedReportId = query.reportId;
 				const limit = requestedReportId ? 1 : (query.limit ?? 30);
-				const cursor = decodeMyReportCursor(query.cursor);
-				const realmCursorCondition = cursor
-					? or(
-							lt(realmUnitReport.createdAt, cursor.createdAt),
-							and(
-								eq(realmUnitReport.createdAt, cursor.createdAt),
-								lt(realmUnitReport.id, cursor.id),
-							),
-						)
-					: undefined;
-				const platformCursorCondition = cursor
-					? or(
-							lt(platformUnitReport.createdAt, cursor.createdAt),
-							and(
-								eq(platformUnitReport.createdAt, cursor.createdAt),
-								lt(platformUnitReport.id, cursor.id),
-							),
-						)
-					: undefined;
-				const [realmRows, platformRows] = await Promise.all([
-					database
-						.select(realmReportSelection(query.localizationLanguages))
-						.from(realmUnitReport)
-						.innerJoin(moderationCase, eq(moderationCase.id, realmUnitReport.caseId))
-						.where(
-							and(
-								eq(realmUnitReport.reporterProfileId, profile.unitId),
-								requestedReportId
-									? eq(realmUnitReport.id, requestedReportId)
-									: undefined,
-								realmCursorCondition,
-							),
-						)
-						.orderBy(desc(realmUnitReport.createdAt), desc(realmUnitReport.id))
-						.limit(limit + 1),
-					database
-						.select(platformReportSelection(query.localizationLanguages))
-						.from(platformUnitReport)
-						.innerJoin(moderationCase, eq(moderationCase.id, platformUnitReport.caseId))
-						.where(
-							and(
-								eq(platformUnitReport.reporterProfileId, profile.unitId),
-								requestedReportId
-									? eq(platformUnitReport.id, requestedReportId)
-									: undefined,
-								platformCursorCondition,
-							),
-						)
-						.orderBy(desc(platformUnitReport.createdAt), desc(platformUnitReport.id))
-						.limit(limit + 1),
-				]);
-				const ordered = [
-					...realmRows.map(presentRealmReport),
-					...platformRows.map(presentPlatformReport),
-				]
-					.sort(compareReportsNewestFirst)
-					.slice(0, limit + 1);
-				const page = ordered.slice(0, limit);
-				const last = page.at(-1);
-				const nextCursor =
-					!requestedReportId && ordered.length > limit && last
-						? encodeMyReportCursor({ createdAt: last.createdAt, id: last.id })
-						: null;
-				const unitIds = page.map((report) => report.unitId);
+				const cursor = requestedReportId ? undefined : decodeMyReportCursor(query.cursor);
+				const rows = await database
+					.select(reportSelection)
+					.from(contentReport)
+					.where(
+						and(
+							eq(contentReport.reporterProfileId, profile.unitId),
+							requestedReportId ? eq(contentReport.id, requestedReportId) : undefined,
+							reportCursorCondition(cursor),
+						),
+					)
+					.orderBy(desc(contentReport.createdAt), desc(contentReport.id))
+					.limit(limit + 1);
+				const pageRows = rows.slice(0, limit);
+				const reports = await hydrateReports(pageRows, query.localizationLanguages);
+				const unitIds = reports.map((report) => report.unitId);
 				const [targets, slugAddresses] = await Promise.all([
 					listReadableReportTargets(unitIds, profile.unitId, query.localizationLanguages),
 					getPublicCanonicalUnitSlugAddresses(unitIds),
 				]);
 				const targetById = new Map(targets.map((target) => [target.id, target]));
+				const last = pageRows.at(-1);
 				return {
-					items: page.map((report) =>
+					items: reports.map((report) =>
 						presentMyReport(
 							report,
 							targetById.get(report.unitId),
 							slugAddresses.get(report.unitId) ?? null,
 						),
 					),
-					nextCursor,
+					nextCursor:
+						!requestedReportId && rows.length > limit && last
+							? encodeMyReportCursor({ createdAt: last.createdAt, id: last.id })
+							: null,
 				};
 			},
 			{
@@ -343,89 +364,50 @@ export default new Elysia().use(session).group("", (app) =>
 					[StatusCodes.OK]: MyReportListResponse,
 					[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
 				},
-				detail: { summary: "List current user's Unit reports", tags: ["Reports"] },
+				detail: { summary: "List current user's content reports", tags: ["Reports"] },
 			},
 		)
 		.get(
 			"/reports/units/:unitId/destinations",
 			async ({ params, query, authorization }) => {
 				await authorization.unit.ensureCanRead(params.unitId);
-				const [platformDestination, realmRows] = await Promise.all([
-					database
-						.select({
-							id: realm.id,
-							language: resolvedUnitLocalizationLanguage(
-								realm.id,
-								query.localizationLanguages,
-							),
-							title: resolvedUnitLocalizationTitle(
-								realm.id,
-								query.localizationLanguages,
-							),
-						})
-						.from(realm)
-						.where(eq(realm.id, OfficialRealmUnitIds.rule))
-						.limit(1),
-					database
-						.select({
-							id: realm.id,
-							language: resolvedUnitLocalizationLanguage(
-								realm.id,
-								query.localizationLanguages,
-							),
-							title: resolvedUnitLocalizationTitle(
-								realm.id,
-								query.localizationLanguages,
-							),
-							updatedAt: realmUnit.updatedAt,
-						})
+				if (query.contextRealmId) {
+					await authorization.unit.ensureCanRead(
+						query.contextRealmId,
+						() => new UnitNotFound("Realm"),
+					);
+					const [membership] = await database
+						.select({ unitId: realmUnit.unitId })
 						.from(realmUnit)
-						.innerJoin(realm, eq(realm.id, realmUnit.realmId))
 						.where(
 							and(
+								eq(realmUnit.realmId, query.contextRealmId),
 								eq(realmUnit.unitId, params.unitId),
-								sql`${realm.id} <> ${OfficialRealmUnitIds.rule}::uuid`,
 							),
 						)
-						.orderBy(desc(realmUnit.updatedAt), desc(realm.id))
-						.limit(query.limit ?? 100),
-				]);
-				const global = platformDestination[0];
-				if (!global || !(await hasCurrentRules(global.id)))
-					throw new Error("REZICS Rule bootstrap Realm is unavailable");
-				if (!global.language)
-					throw new Error("REZICS Rule bootstrap Realm has no localization");
-				const readableRealmRows = (
+						.limit(1);
+					if (!membership) throw new ReportRealmMismatch();
+				}
+				const destinationRequests = [
+					{ id: OfficialRealmUnitIds.rule, scope: "platform" as const },
+					...(query.contextRealmId && query.contextRealmId !== OfficialRealmUnitIds.rule
+						? [{ id: query.contextRealmId, scope: "realm" as const }]
+						: []),
+				];
+				const items = (
 					await Promise.all(
-						realmRows.map(async (row) =>
-							(await authorization.unit.canRead(row.id)) &&
-							(await hasCurrentRules(row.id))
-								? row
-								: null,
+						destinationRequests.map((destination) =>
+							loadReportDestination(
+								destination.id,
+								destination.scope,
+								query.localizationLanguages,
+							),
 						),
 					)
-				).filter((row) => row !== null);
-				return {
-					items: [
-						{
-							id: global.id,
-							language: global.language,
-							title: global.title,
-							scope: "platform" as const,
-						},
-						...readableRealmRows.map(({ updatedAt: _updatedAt, ...row }) => {
-							if (!row.language)
-								throw new Error(
-									`Report destination Realm ${row.id} has no localization`,
-								);
-							return {
-								...row,
-								language: row.language,
-								scope: "realm" as const,
-							};
-						}),
-					],
-				};
+				).filter((item) => item !== undefined);
+				if (!items.some((item) => item.scope === "platform"))
+					throw new Error("REZICS Rule bootstrap Realm is unavailable");
+				return { items };
 			},
 			{
 				access: "report:write",
@@ -433,10 +415,11 @@ export default new Elysia().use(session).group("", (app) =>
 				query: ReportDestinationsQuery,
 				response: {
 					[StatusCodes.OK]: ReportDestinationsResponse,
+					[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ReportRealmMismatch"]),
 					[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 				},
 				detail: {
-					summary: "List rule Realms that can receive a Unit report",
+					summary: "List the context and official rule sources for a content report",
 					tags: ["Reports"],
 				},
 			},
@@ -445,20 +428,55 @@ export default new Elysia().use(session).group("", (app) =>
 			"/realms/:realmId/reports",
 			async ({ params, query, authorization }) => {
 				await authorization.realm.ensureCapability(params.realmId, "realm.units.moderate");
+				const limit = query.limit ?? 50;
+				const cursor = decodeMyReportCursor(query.cursor);
 				const rows = await database
-					.select(realmReportSelection(query.localizationLanguages))
-					.from(realmUnitReport)
-					.innerJoin(moderationCase, eq(moderationCase.id, realmUnitReport.caseId))
+					.select({
+						...reportSelection,
+						referralCreatedAt: contentReportReferral.createdAt,
+						referralId: contentReportReferral.id,
+					})
+					.from(contentReportReferral)
+					.innerJoin(
+						contentReviewCase,
+						eq(contentReviewCase.id, contentReportReferral.caseId),
+					)
+					.innerJoin(contentReport, eq(contentReport.id, contentReportReferral.reportId))
 					.where(
 						and(
-							eq(realmUnitReport.realmId, params.realmId),
-							query.unitId ? eq(realmUnitReport.unitId, query.unitId) : undefined,
-							query.state ? eq(moderationCase.state, query.state) : undefined,
+							eq(contentReviewCase.authority, "realm"),
+							eq(contentReviewCase.realmId, params.realmId),
+							eq(contentReportReferral.ruleSourceRealmId, params.realmId),
+							query.unitId
+								? eq(contentReviewCase.targetUnitId, query.unitId)
+								: undefined,
+							query.state ? eq(contentReviewCase.state, query.state) : undefined,
+							cursor
+								? or(
+										lt(contentReportReferral.createdAt, cursor.createdAt),
+										and(
+											eq(contentReportReferral.createdAt, cursor.createdAt),
+											lt(contentReportReferral.id, cursor.id),
+										),
+									)
+								: undefined,
 						),
 					)
-					.orderBy(desc(realmUnitReport.createdAt), desc(realmUnitReport.id))
-					.limit(query.limit ?? 50);
-				return { items: rows.map(presentRealmReport) };
+					.orderBy(desc(contentReportReferral.createdAt), desc(contentReportReferral.id))
+					.limit(limit + 1);
+				const page = rows.slice(0, limit);
+				const reports = await hydrateReports(page, query.localizationLanguages);
+				const last = page.at(-1);
+				return {
+					items: reports.map(presentReport),
+					nextCursor:
+						rows.length > limit && last
+							? encodeMyReportCursor({
+									createdAt: last.referralCreatedAt,
+									id: last.referralId,
+								})
+							: null,
+				};
 			},
 			{
 				access: "session-only",
@@ -466,9 +484,84 @@ export default new Elysia().use(session).group("", (app) =>
 				query: ListRealmReportsQuery,
 				response: {
 					[StatusCodes.OK]: ReportListResponse,
+					[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
 					[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
 				},
-				detail: { summary: "List reports for a Realm", tags: ["Reports"] },
+				detail: { summary: "List content reports referred to a Realm", tags: ["Reports"] },
+			},
+		)
+		.get(
+			"/reports/review-cases/:caseId",
+			async ({ params, query, authorization }) => {
+				const [caseRow] = await database
+					.select({
+						id: contentReviewCase.id,
+						authority: contentReviewCase.authority,
+						realmId: contentReviewCase.realmId,
+					})
+					.from(contentReviewCase)
+					.where(eq(contentReviewCase.id, params.caseId))
+					.limit(1);
+				if (!caseRow) return { items: [], nextCursor: null };
+				if (caseRow.authority === "realm" && caseRow.realmId)
+					await authorization.realm.ensureCapability(
+						caseRow.realmId,
+						"realm.units.moderate",
+					);
+				else await authorization.platform.ensureCapability("platform.moderate");
+				const limit = query.limit ?? 50;
+				const cursor = decodeMyReportCursor(query.cursor);
+				const rows = await database
+					.select({
+						...reportSelection,
+						referralCreatedAt: contentReportReferral.createdAt,
+						referralId: contentReportReferral.id,
+					})
+					.from(contentReportReferral)
+					.innerJoin(contentReport, eq(contentReport.id, contentReportReferral.reportId))
+					.where(
+						and(
+							eq(contentReportReferral.caseId, params.caseId),
+							cursor
+								? or(
+										lt(contentReportReferral.createdAt, cursor.createdAt),
+										and(
+											eq(contentReportReferral.createdAt, cursor.createdAt),
+											lt(contentReportReferral.id, cursor.id),
+										),
+									)
+								: undefined,
+						),
+					)
+					.orderBy(desc(contentReportReferral.createdAt), desc(contentReportReferral.id))
+					.limit(limit + 1);
+				const page = rows.slice(0, limit);
+				const reports = await hydrateReports(page, query.localizationLanguages);
+				const last = page.at(-1);
+				return {
+					items: reports.map(presentReport),
+					nextCursor:
+						rows.length > limit && last
+							? encodeMyReportCursor({
+									createdAt: last.referralCreatedAt,
+									id: last.referralId,
+								})
+							: null,
+				};
+			},
+			{
+				access: "session-only",
+				params: ReviewCaseParams,
+				query: ListReviewCaseReportsQuery,
+				response: {
+					[StatusCodes.OK]: ReportListResponse,
+					[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+					[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+						"RealmCapabilityRequired",
+						"PlatformCapabilityRequired",
+					]),
+				},
+				detail: { summary: "List reports in one content review case", tags: ["Reports"] },
 			},
 		)
 		.get(
@@ -478,10 +571,12 @@ export default new Elysia().use(session).group("", (app) =>
 				const canManageContentLicenses = await authorization.platform.hasCapability(
 					"unit.content_license.manage",
 				);
+				const limit = query.limit ?? 50;
+				const cursor = decodeMyReportCursor(query.cursor);
 				const rows = await database
-					.selectDistinct({
-						caseId: moderationCase.id,
-						caseState: moderationCase.state,
+					.select({
+						caseId: contentReviewCase.id,
+						caseState: contentReviewCase.state,
 						unitId: unit.id,
 						unitKind: unit.kind,
 						language: resolvedUnitLocalizationLanguage(
@@ -491,61 +586,58 @@ export default new Elysia().use(session).group("", (app) =>
 						title: resolvedUnitLocalizationTitle(unit.id, query.localizationLanguages),
 						moderationStatus: unit.moderationStatus,
 						postTargetingLocked: unit.postTargetingLocked,
-						createdAt: moderationCase.createdAt,
-						updatedAt: moderationCase.updatedAt,
+						reportCount: sql<number>`coalesce((
+							select sum(${contentReviewCaseReportCounter.count})::int
+							from ${contentReviewCaseReportCounter}
+							where ${contentReviewCaseReportCounter.caseId} = ${contentReviewCase.id}
+						), 0)`,
+						createdAt: contentReviewCase.createdAt,
+						updatedAt: contentReviewCase.updatedAt,
 					})
-					.from(moderationCase)
-					.innerJoin(platformUnitReport, eq(platformUnitReport.caseId, moderationCase.id))
-					.innerJoin(unit, eq(unit.id, moderationCase.targetId))
+					.from(contentReviewCase)
+					.innerJoin(unit, eq(unit.id, contentReviewCase.targetUnitId))
 					.where(
 						and(
-							eq(moderationCase.authority, "platform"),
-							eq(moderationCase.targetKind, "unit"),
-							query.state ? eq(moderationCase.state, query.state) : undefined,
+							eq(contentReviewCase.authority, "platform"),
+							query.state ? eq(contentReviewCase.state, query.state) : undefined,
+							sql`exists (
+								select 1 from ${contentReportReferral}
+								where ${contentReportReferral.caseId} = ${contentReviewCase.id}
+							)`,
+							cursor
+								? or(
+										lt(contentReviewCase.updatedAt, cursor.createdAt),
+										and(
+											eq(contentReviewCase.updatedAt, cursor.createdAt),
+											lt(contentReviewCase.id, cursor.id),
+										),
+									)
+								: undefined,
 						),
 					)
-					.orderBy(desc(moderationCase.updatedAt), desc(moderationCase.id))
-					.limit(query.limit ?? 50);
-				if (rows.length === 0) return { items: [] };
-				const [reportRows, contentLicenseRows] = await Promise.all([
-					database
-						.select(platformReportSelection(query.localizationLanguages))
-						.from(platformUnitReport)
-						.innerJoin(moderationCase, eq(moderationCase.id, platformUnitReport.caseId))
-						.where(
-							inArray(
-								platformUnitReport.caseId,
-								rows.map((row) => row.caseId),
-							),
-						)
-						.orderBy(desc(platformUnitReport.createdAt), desc(platformUnitReport.id)),
-					database
-						.select({
-							id: unitContentLicense.id,
-							unitId: unitContentLicense.unitId,
-							status: unitContentLicense.status,
-							grantedAt: unitContentLicense.grantedAt,
-						})
-						.from(unitContentLicense)
-						.where(
-							inArray(
-								unitContentLicense.unitId,
-								rows.map((row) => row.unitId),
-							),
-						)
-						.orderBy(
-							sql`${unitContentLicense.status} = 'active' desc`,
-							desc(unitContentLicense.grantedAt),
-							desc(unitContentLicense.id),
+					.orderBy(desc(contentReviewCase.updatedAt), desc(contentReviewCase.id))
+					.limit(limit + 1);
+				const page = rows.slice(0, limit);
+				if (!page.length) return { items: [], nextCursor: null };
+				const contentLicenseRows = await database
+					.select({
+						id: unitContentLicense.id,
+						unitId: unitContentLicense.unitId,
+						status: unitContentLicense.status,
+						grantedAt: unitContentLicense.grantedAt,
+					})
+					.from(unitContentLicense)
+					.where(
+						inArray(
+							unitContentLicense.unitId,
+							page.map((row) => row.unitId),
 						),
-				]);
-				const reportsByCase = new Map<string, ReturnType<typeof presentPlatformReport>[]>();
-				for (const reportRow of reportRows) {
-					const presented = presentPlatformReport(reportRow);
-					const reports = reportsByCase.get(reportRow.caseId) ?? [];
-					reports.push(presented);
-					reportsByCase.set(reportRow.caseId, reports);
-				}
+					)
+					.orderBy(
+						sql`${unitContentLicense.status} = 'active' desc`,
+						desc(unitContentLicense.grantedAt),
+						desc(unitContentLicense.id),
+					);
 				const contentLicenseByUnit = new Map<string, (typeof contentLicenseRows)[number]>();
 				for (const contentLicense of contentLicenseRows)
 					if (!contentLicenseByUnit.has(contentLicense.unitId))
@@ -553,86 +645,66 @@ export default new Elysia().use(session).group("", (app) =>
 				const invalidatedContentLicenses = [...contentLicenseByUnit.values()].filter(
 					(contentLicense) => contentLicense.status === "invalidated",
 				);
-				const invalidationActionRows = invalidatedContentLicenses.length
+				const invalidationActions = invalidatedContentLicenses.length
 					? await database
 							.select({
-								id: moderationAction.id,
-								contentLicenseId: moderationAction.contentLicenseId,
-								createdAt: moderationAction.createdAt,
+								id: contentGovernanceAction.id,
+								contentLicenseId: contentGovernanceAction.contentLicenseId,
+								createdAt: contentGovernanceAction.createdAt,
 							})
-							.from(moderationAction)
+							.from(contentGovernanceAction)
 							.where(
 								and(
 									inArray(
-										moderationAction.contentLicenseId,
-										invalidatedContentLicenses.map(
-											(contentLicense) => contentLicense.id,
-										),
+										contentGovernanceAction.contentLicenseId,
+										invalidatedContentLicenses.map((license) => license.id),
 									),
-									eq(moderationAction.kind, "invalidate_content_license"),
+									eq(contentGovernanceAction.kind, "invalidate_content_license"),
 									eq(
-										moderationAction.resultingContentLicenseStatus,
+										contentGovernanceAction.resultingContentLicenseStatus,
 										"invalidated",
 									),
 								),
 							)
-							.orderBy(desc(moderationAction.createdAt), desc(moderationAction.id))
+							.orderBy(
+								desc(contentGovernanceAction.createdAt),
+								desc(contentGovernanceAction.id),
+							)
 					: [];
-				const invalidationActionByContentLicense = new Map<string, string>();
-				for (const action of invalidationActionRows)
+				const invalidationActionByLicense = new Map<string, string>();
+				for (const action of invalidationActions)
 					if (
 						action.contentLicenseId &&
-						!invalidationActionByContentLicense.has(action.contentLicenseId)
+						!invalidationActionByLicense.has(action.contentLicenseId)
 					)
-						invalidationActionByContentLicense.set(action.contentLicenseId, action.id);
-				const presentedContentLicenseByUnit = new Map<
-					string,
-					| {
-							id: string;
-							status: "active";
-					  }
-					| {
-							id: string;
-							status: "invalidated";
-							invalidationActionId: string;
-					  }
-				>();
-				for (const contentLicense of contentLicenseByUnit.values()) {
-					if (contentLicense.status === "active") {
-						presentedContentLicenseByUnit.set(contentLicense.unitId, {
-							id: contentLicense.id,
-							status: "active",
-						});
-						continue;
-					}
-					const invalidationActionId = invalidationActionByContentLicense.get(
-						contentLicense.id,
-					);
-					if (!invalidationActionId)
-						throw new Error(
-							`Invalidated content license ${contentLicense.id} has no invalidation action`,
-						);
-					presentedContentLicenseByUnit.set(contentLicense.unitId, {
-						id: contentLicense.id,
-						status: "invalidated",
-						invalidationActionId,
-					});
-				}
+						invalidationActionByLicense.set(action.contentLicenseId, action.id);
+				const last = page.at(-1);
 				return {
-					items: rows.map((row) => {
+					items: page.map((row) => {
 						if (!row.language)
 							throw new Error(`Reported Unit ${row.unitId} has no localization`);
-						const reports = reportsByCase.get(row.caseId);
-						if (!reports?.length)
-							throw new Error(`Platform report case ${row.caseId} has no reports`);
-						const hasOpenReports = isActiveReportCaseState(row.caseState);
-						const contentLicense =
-							presentedContentLicenseByUnit.get(row.unitId) ?? null;
+						const license = contentLicenseByUnit.get(row.unitId);
+						const contentLicense = !license
+							? null
+							: license.status === "active"
+								? { id: license.id, status: "active" as const }
+								: {
+										id: license.id,
+										status: "invalidated" as const,
+										invalidationActionId:
+											invalidationActionByLicense.get(license.id) ??
+											(() => {
+												throw new Error(
+													`Invalidated content license ${license.id} has no action`,
+												);
+											})(),
+									};
+						const hasOpenReports = isActiveContentReviewCaseState(row.caseState);
 						return {
 							...row,
 							language: row.language,
 							contentLicense,
-							openReportCount: hasOpenReports ? reports.length : 0,
+							reportCount: Number(row.reportCount),
 							allowedCommands: [
 								...getPlatformUnitModerationCommands(
 									row.moderationStatus,
@@ -643,9 +715,12 @@ export default new Elysia().use(session).group("", (app) =>
 									hasOpenReports,
 								),
 							],
-							reports,
 						};
 					}),
+					nextCursor:
+						rows.length > limit && last
+							? encodeMyReportCursor({ createdAt: last.updatedAt, id: last.caseId })
+							: null,
 				};
 			},
 			{
@@ -653,10 +728,11 @@ export default new Elysia().use(session).group("", (app) =>
 				query: ListPlatformReportCasesQuery,
 				response: {
 					[StatusCodes.OK]: PlatformReportCaseListResponse,
+					[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
 					[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 				},
 				detail: {
-					summary: "List platform-governed Unit report cases",
+					summary: "List platform content review cases",
 					tags: ["Reports"],
 				},
 			},
@@ -664,222 +740,270 @@ export default new Elysia().use(session).group("", (app) =>
 		.post(
 			"/reports/units/:unitId",
 			async ({ params, body, query, profile, authorization }) => {
+				const sourceRealmIds = [
+					...new Set(body.rules.map((rule) => rule.sourceRealmId)),
+				].sort();
+				if (sourceRealmIds.length > ContentGovernanceMaxRuleSources)
+					throw new ReportRuleSourceForbidden();
+				const allowedSourceRealmIds = new Set([
+					OfficialRealmUnitIds.rule,
+					...(body.contextRealmId ? [body.contextRealmId] : []),
+				]);
+				if (
+					sourceRealmIds.some(
+						(sourceRealmId) => !allowedSourceRealmIds.has(sourceRealmId),
+					) ||
+					new Set(body.rules.map((rule) => rule.ruleId)).size !== body.rules.length
+				)
+					throw new ReportRuleSourceForbidden();
 				await Promise.all([
 					authorization.unit.ensureCanRead(params.unitId),
-					authorization.unit.ensureCanRead(
-						body.ruleRealmId,
-						() => new UnitNotFound("Realm"),
+					...sourceRealmIds.map((sourceRealmId) =>
+						authorization.unit.ensureCanRead(
+							sourceRealmId,
+							() => new UnitNotFound("Realm"),
+						),
 					),
 				]);
 				const details = body.details?.trim() || null;
 				return database.transaction(async (tx) => {
-					await tx.execute(
-						sql`select pg_advisory_xact_lock(hashtextextended(${body.ruleRealmId}::text, 0))`,
-					);
-					const [currentRuleRevision] = await tx
-						.select({ id: realmRuleRevision.id })
-						.from(realmRuleRevision)
-						.where(eq(realmRuleRevision.realmId, body.ruleRealmId))
-						.orderBy(desc(realmRuleRevision.version))
-						.limit(1);
-					if (!currentRuleRevision) throw new ReportRuleUnavailable();
-					const [selectedRule] = await tx
-						.select({
-							id: realmRule.id,
-							revisionId: realmRule.revisionId,
-							language: resolvedUnitLocalizationLanguage(
-								realmRule.id,
-								query.localizationLanguages,
-							),
-							title: resolvedUnitLocalizationTitle(
-								realmRule.id,
-								query.localizationLanguages,
-							),
-						})
-						.from(realmRule)
-						.where(
-							and(
-								eq(realmRule.id, body.ruleId),
-								eq(realmRule.revisionId, currentRuleRevision.id),
-							),
-						)
-						.limit(1);
-					if (!selectedRule) throw new ReportRuleChanged();
-					if (!selectedRule.language || !selectedRule.title)
-						throw new Error(`Report rule ${selectedRule.id} has no localization`);
-
+					if (body.contextRealmId) {
+						const [membership] = await tx
+							.select({ unitId: realmUnit.unitId })
+							.from(realmUnit)
+							.where(
+								and(
+									eq(realmUnit.realmId, body.contextRealmId),
+									eq(realmUnit.unitId, params.unitId),
+								),
+							)
+							.for("key share")
+							.limit(1);
+						if (!membership) throw new ReportRealmMismatch();
+					}
+					for (const sourceRealmId of sourceRealmIds)
+						await tx.execute(currentRealmRuleRevisionReadLock(sourceRealmId));
+					const selectedRuleRows: Array<{
+						id: string;
+						sourceRealmId: string;
+						revisionId: string;
+						language: ContentLanguage;
+						title: string;
+					}> = [];
+					for (const sourceRealmId of sourceRealmIds) {
+						const sourceRules = body.rules.filter(
+							(rule) => rule.sourceRealmId === sourceRealmId,
+						);
+						const [currentRevision] = await tx
+							.select({ id: realmRuleRevision.id })
+							.from(realmRuleRevision)
+							.where(eq(realmRuleRevision.realmId, sourceRealmId))
+							.orderBy(desc(realmRuleRevision.version))
+							.limit(1);
+						if (!currentRevision) throw new ReportRuleUnavailable();
+						if (sourceRules.some((rule) => rule.revisionId !== currentRevision.id))
+							throw new ReportRuleChanged();
+						const selectedRules = await tx
+							.select({
+								id: realmRule.id,
+								language: resolvedUnitLocalizationLanguage(
+									realmRule.id,
+									query.localizationLanguages,
+								),
+								title: resolvedUnitLocalizationTitle(
+									realmRule.id,
+									query.localizationLanguages,
+								),
+							})
+							.from(realmRule)
+							.where(
+								and(
+									eq(realmRule.revisionId, currentRevision.id),
+									inArray(
+										realmRule.id,
+										sourceRules.map((rule) => rule.ruleId),
+									),
+								),
+							);
+						if (selectedRules.length !== sourceRules.length)
+							throw new ReportRuleChanged();
+						for (const selectedRule of selectedRules) {
+							if (!selectedRule.language || !selectedRule.title)
+								throw new Error(
+									`Report rule ${selectedRule.id} has no localization`,
+								);
+							selectedRuleRows.push({
+								id: selectedRule.id,
+								sourceRealmId,
+								revisionId: currentRevision.id,
+								language: selectedRule.language,
+								title: selectedRule.title,
+							});
+						}
+					}
 					const [target] = await tx
-						.select({
-							unitId: unitRevisionHead.unitId,
-							reportedRevisionId: unitRevisionHead.revisionId,
-						})
+						.select({ revisionId: unitRevisionHead.revisionId })
 						.from(unitRevisionHead)
 						.where(eq(unitRevisionHead.unitId, params.unitId))
 						.limit(1);
 					if (!target) throw new ReportTargetRevisionUnavailable();
-					const rule = {
-						id: selectedRule.id,
-						revisionId: selectedRule.revisionId,
-						language: selectedRule.language,
-						title: selectedRule.title,
-					};
 
-					if (body.ruleRealmId === OfficialRealmUnitIds.rule) {
-						await tx.execute(platformUnitReportCaseAdvisoryLock(params.unitId));
-						let [activeCase] = await tx
-							.select({ id: moderationCase.id, state: moderationCase.state })
-							.from(moderationCase)
-							.where(
-								and(
-									eq(moderationCase.authority, "platform"),
-									eq(moderationCase.targetKind, "unit"),
-									eq(moderationCase.targetId, params.unitId),
-									inArray(moderationCase.state, ActiveReportCaseStateValues),
-								),
-							)
-							.orderBy(desc(moderationCase.updatedAt), desc(moderationCase.id))
-							.limit(1);
-						if (activeCase) {
-							const [existing] = await tx
-								.select({ id: platformUnitReport.id })
-								.from(platformUnitReport)
+					const routes = sourceRealmIds
+						.map((sourceRealmId) => ({
+							sourceRealmId,
+							authority:
+								sourceRealmId === OfficialRealmUnitIds.rule
+									? ("platform" as const)
+									: ("realm" as const),
+							realmId:
+								sourceRealmId === OfficialRealmUnitIds.rule ? null : sourceRealmId,
+						}))
+						.sort((left, right) =>
+							`${left.authority}:${left.realmId ?? ""}`.localeCompare(
+								`${right.authority}:${right.realmId ?? ""}`,
+							),
+						);
+					const [createdReport] = await tx
+						.insert(contentReport)
+						.values({
+							reporterProfileId: profile.unitId,
+							contextRealmId: body.contextRealmId,
+							targetUnitId: params.unitId,
+							details,
+							reportedRevisionId: target.revisionId,
+						})
+						.returning(reportSelection);
+					if (!createdReport) throw new Error("Content report insertion returned no row");
+					await tx.insert(contentReportRule).values(
+						selectedRuleRows.map((rule) => ({
+							reportId: createdReport.id,
+							ruleSourceRealmId: rule.sourceRealmId,
+							ruleRevisionId: rule.revisionId,
+							ruleId: rule.id,
+						})),
+					);
+
+					const referrals: Array<{
+						id: string;
+						caseId: string;
+						scope: "platform" | "realm";
+						realmId: string | null;
+						caseState: ContentReviewCaseState;
+					}> = [];
+					for (const route of routes) {
+						const loadActiveCase = () =>
+							tx
+								.select({
+									id: contentReviewCase.id,
+									state: contentReviewCase.state,
+								})
+								.from(contentReviewCase)
 								.where(
 									and(
-										eq(platformUnitReport.caseId, activeCase.id),
-										eq(platformUnitReport.reporterProfileId, profile.unitId),
+										eq(contentReviewCase.authority, route.authority),
+										route.realmId
+											? eq(contentReviewCase.realmId, route.realmId)
+											: undefined,
+										eq(contentReviewCase.targetUnitId, params.unitId),
+										inArray(
+											contentReviewCase.state,
+											ActiveContentReviewCaseStateValues,
+										),
 									),
 								)
-								.limit(1);
-							if (existing) throw new ReportAlreadySubmitted();
-						} else {
-							[activeCase] = await tx
-								.insert(moderationCase)
+								.orderBy(
+									desc(contentReviewCase.updatedAt),
+									desc(contentReviewCase.id),
+								)
+								.limit(1)
+								.for("share");
+						let [caseRow] = await loadActiveCase();
+						if (!caseRow) {
+							await tx.execute(
+								contentReviewCaseAdvisoryLock(
+									route.authority,
+									route.realmId,
+									params.unitId,
+								),
+							);
+							[caseRow] = await loadActiveCase();
+						}
+						if (!caseRow) {
+							[caseRow] = await tx
+								.insert(contentReviewCase)
 								.values({
-									authority: "platform",
-									targetKind: "unit",
-									targetId: params.unitId,
+									authority: route.authority,
+									realmId: route.realmId,
+									targetUnitId: params.unitId,
 								})
 								.returning({
-									id: moderationCase.id,
-									state: moderationCase.state,
+									id: contentReviewCase.id,
+									state: contentReviewCase.state,
 								});
 						}
-						if (!activeCase)
-							throw new Error("Moderation case insertion did not return a row");
-						const [created] = await tx
-							.insert(platformUnitReport)
-							.values({
-								caseId: activeCase.id,
-								reporterProfileId: profile.unitId,
-								unitId: params.unitId,
-								ruleSourceRealmId: body.ruleRealmId,
-								ruleRevisionId: selectedRule.revisionId,
-								ruleId: selectedRule.id,
-								details,
-								reportedRevisionId: target.reportedRevisionId,
-							})
-							.returning({
-								id: platformUnitReport.id,
-								caseId: platformUnitReport.caseId,
-								unitId: platformUnitReport.unitId,
-								ruleSourceRealmId: platformUnitReport.ruleSourceRealmId,
-								details: platformUnitReport.details,
-								reportedRevisionId: platformUnitReport.reportedRevisionId,
-								createdAt: platformUnitReport.createdAt,
-							});
-						if (!created)
-							throw new Error("Platform report insertion did not return a row");
-						return {
-							...created,
-							scope: "platform" as const,
-							rule,
-							caseState: activeCase.state,
-						};
-					}
-
-					await tx.execute(
-						realmUnitReportCaseAdvisoryLock(body.ruleRealmId, params.unitId),
-					);
-					const [membership] = await tx
-						.select({ unitId: realmUnit.unitId })
-						.from(realmUnit)
-						.where(
-							and(
-								eq(realmUnit.realmId, body.ruleRealmId),
-								eq(realmUnit.unitId, params.unitId),
-							),
-						)
-						.limit(1);
-					if (!membership) throw new ReportRealmMismatch();
-					let [activeCase] = await tx
-						.select({ id: moderationCase.id, state: moderationCase.state })
-						.from(moderationCase)
-						.where(
-							and(
-								eq(moderationCase.authority, "realm"),
-								eq(moderationCase.realmId, body.ruleRealmId),
-								eq(moderationCase.targetKind, "realm_unit"),
-								eq(moderationCase.targetId, params.unitId),
-								inArray(moderationCase.state, ActiveReportCaseStateValues),
-							),
-						)
-						.orderBy(desc(moderationCase.updatedAt), desc(moderationCase.id))
-						.limit(1);
-					if (activeCase) {
+						if (!caseRow)
+							throw new Error("Content review case insertion returned no row");
+						await tx.execute(
+							contentReviewReporterAdvisoryLock(caseRow.id, profile.unitId),
+						);
 						const [existing] = await tx
-							.select({ id: realmUnitReport.id })
-							.from(realmUnitReport)
+							.select({ id: contentReport.id })
+							.from(contentReportReferral)
+							.innerJoin(
+								contentReport,
+								eq(contentReport.id, contentReportReferral.reportId),
+							)
 							.where(
 								and(
-									eq(realmUnitReport.caseId, activeCase.id),
-									eq(realmUnitReport.reporterProfileId, profile.unitId),
+									eq(contentReportReferral.caseId, caseRow.id),
+									eq(contentReport.reporterProfileId, profile.unitId),
 								),
 							)
 							.limit(1);
 						if (existing) throw new ReportAlreadySubmitted();
-					} else {
-						[activeCase] = await tx
-							.insert(moderationCase)
+						const [referral] = await tx
+							.insert(contentReportReferral)
 							.values({
-								authority: "realm",
-								realmId: body.ruleRealmId,
-								targetKind: "realm_unit",
-								targetId: params.unitId,
+								reportId: createdReport.id,
+								caseId: caseRow.id,
+								ruleSourceRealmId: route.sourceRealmId,
 							})
-							.returning({
-								id: moderationCase.id,
-								state: moderationCase.state,
+							.returning({ id: contentReportReferral.id });
+						if (!referral)
+							throw new Error("Content report referral insertion returned no row");
+						await tx
+							.insert(contentReviewCaseReportCounter)
+							.values({
+								caseId: caseRow.id,
+								bucket: sql<number>`mod((hashtextextended(${createdReport.id}::text, 0) & 2147483647), ${ContentReviewReportCounterBuckets})::smallint`,
+								count: 1,
+							})
+							.onConflictDoUpdate({
+								target: [
+									contentReviewCaseReportCounter.caseId,
+									contentReviewCaseReportCounter.bucket,
+								],
+								set: {
+									count: sql`${contentReviewCaseReportCounter.count} + 1`,
+								},
 							});
-					}
-					if (!activeCase)
-						throw new Error("Moderation case insertion did not return a row");
-					const [created] = await tx
-						.insert(realmUnitReport)
-						.values({
-							caseId: activeCase.id,
-							reporterProfileId: profile.unitId,
-							realmId: body.ruleRealmId,
-							unitId: params.unitId,
-							ruleRevisionId: selectedRule.revisionId,
-							ruleId: selectedRule.id,
-							details,
-							reportedRevisionId: target.reportedRevisionId,
-						})
-						.returning({
-							id: realmUnitReport.id,
-							caseId: realmUnitReport.caseId,
-							realmId: realmUnitReport.realmId,
-							unitId: realmUnitReport.unitId,
-							details: realmUnitReport.details,
-							reportedRevisionId: realmUnitReport.reportedRevisionId,
-							createdAt: realmUnitReport.createdAt,
+						referrals.push({
+							id: referral.id,
+							caseId: caseRow.id,
+							scope: route.authority,
+							realmId: route.realmId,
+							caseState: caseRow.state,
 						});
-					if (!created) throw new Error("Realm report insertion did not return a row");
+					}
 					return {
-						...created,
-						scope: "realm" as const,
-						rule,
-						caseState: activeCase.state,
+						id: createdReport.id,
+						unitId: createdReport.unitId,
+						contextRealmId: createdReport.contextRealmId,
+						rules: selectedRuleRows,
+						referrals,
+						details: createdReport.details,
+						reportedRevisionId: createdReport.reportedRevisionId,
+						createdAt: createdReport.createdAt,
 					};
 				});
 			},
@@ -890,7 +1014,10 @@ export default new Elysia().use(session).group("", (app) =>
 				body: CreateReportBody,
 				response: {
 					[StatusCodes.OK]: ReportResponse,
-					[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ReportRealmMismatch"]),
+					[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+						"ReportRealmMismatch",
+						"ReportRuleSourceForbidden",
+					]),
 					[StatusCodes.CONFLICT]: toApiErrorResponse([
 						"ReportAlreadySubmitted",
 						"ReportTargetRevisionUnavailable",
@@ -899,7 +1026,10 @@ export default new Elysia().use(session).group("", (app) =>
 					]),
 					[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 				},
-				detail: { summary: "Report a Unit under a selected Realm rule", tags: ["Reports"] },
+				detail: {
+					summary: "Report content under selected current rules",
+					tags: ["Reports"],
+				},
 			},
 		),
 );

@@ -111,6 +111,8 @@ import type {
 	GetApiReportsUnitsByUnitIdDestinationsResponses,
 	GetApiRealmsByRealmIdReportsOptions,
 	GetApiRealmsByRealmIdReportsResponses,
+	GetApiReportsReviewCasesByCaseIdOptions,
+	GetApiReportsReviewCasesByCaseIdResponses,
 	GetApiReportsPlatformCasesOptions,
 	GetApiReportsPlatformCasesResponses,
 	PostApiReportsUnitsByUnitIdOptions,
@@ -159,18 +161,18 @@ import type {
 	GetApiGovernanceNotesByPostIdResponses,
 	PatchApiGovernanceNotesByPostIdOptions,
 	PatchApiGovernanceNotesByPostIdResponses,
-	GetApiGovernanceModerationCasesOptions,
-	GetApiGovernanceModerationCasesResponses,
-	GetApiGovernanceModerationCasesByCaseIdOptions,
-	GetApiGovernanceModerationCasesByCaseIdResponses,
-	PatchApiGovernanceModerationCasesByCaseIdOptions,
-	PatchApiGovernanceModerationCasesByCaseIdResponses,
-	PostApiGovernanceModerationActionsOptions,
-	PostApiGovernanceModerationActionsResponses,
-	PostApiGovernanceModerationEnforcementsOptions,
-	PostApiGovernanceModerationEnforcementsResponses,
-	PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeOptions,
-	PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeResponses,
+	GetApiGovernanceContentReviewCasesOptions,
+	GetApiGovernanceContentReviewCasesResponses,
+	GetApiGovernanceContentReviewCasesByCaseIdOptions,
+	GetApiGovernanceContentReviewCasesByCaseIdResponses,
+	PatchApiGovernanceContentReviewCasesByCaseIdOptions,
+	PatchApiGovernanceContentReviewCasesByCaseIdResponses,
+	PostApiGovernanceContentGovernanceActionsOptions,
+	PostApiGovernanceContentGovernanceActionsResponses,
+	PostApiGovernanceAccountEnforcementsOptions,
+	PostApiGovernanceAccountEnforcementsResponses,
+	PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeOptions,
+	PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeResponses,
 	GetApiAuditEventsOptions,
 	GetApiAuditEventsResponses,
 	PostApiSeriesOptions,
@@ -669,6 +671,8 @@ import type {
 	PatchApiRealmsByRealmIdUnitsByUnitIdResponses,
 	GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions,
 	GetApiRealmsByRealmIdUnitsByUnitIdHistoryResponses,
+	PostApiRealmsByRealmIdUnitsByUnitIdReviewOptions,
+	PostApiRealmsByRealmIdUnitsByUnitIdReviewResponses,
 	GetApiRealmsByRealmIdWikiNavigationOptions,
 	GetApiRealmsByRealmIdWikiNavigationResponses,
 	PostApiRealmsByRealmIdWikiNavigationOptions,
@@ -1654,7 +1658,7 @@ export function postApiFeedQuery<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary List current user's Unit reports
+ * @summary List current user's content reports
  * {@link /api/v1/reports/me}
  */
 export function getApiReportsMe<ThrowOnError extends boolean = true>(
@@ -1674,7 +1678,7 @@ export function getApiReportsMe<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary List rule Realms that can receive a Unit report
+ * @summary List the context and official rule sources for a content report
  * {@link /api/v1/reports/units/:unitId/destinations}
  */
 export function getApiReportsUnitsByUnitIdDestinations<ThrowOnError extends boolean = true>(
@@ -1694,7 +1698,7 @@ export function getApiReportsUnitsByUnitIdDestinations<ThrowOnError extends bool
 }
 
 /**
- * @summary List reports for a Realm
+ * @summary List content reports referred to a Realm
  * {@link /api/v1/realms/:realmId/reports}
  */
 export function getApiRealmsByRealmIdReports<ThrowOnError extends boolean = true>(
@@ -1711,7 +1715,24 @@ export function getApiRealmsByRealmIdReports<ThrowOnError extends boolean = true
 }
 
 /**
- * @summary List platform-governed Unit report cases
+ * @summary List reports in one content review case
+ * {@link /api/v1/reports/review-cases/:caseId}
+ */
+export function getApiReportsReviewCasesByCaseId<ThrowOnError extends boolean = true>(
+	options: Options<GetApiReportsReviewCasesByCaseIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiReportsReviewCasesByCaseIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/reports/review-cases/{caseId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiReportsReviewCasesByCaseIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List platform content review cases
  * {@link /api/v1/reports/platform/cases}
  */
 export function getApiReportsPlatformCases<ThrowOnError extends boolean = true>(
@@ -1728,7 +1749,7 @@ export function getApiReportsPlatformCases<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary Report a Unit under a selected Realm rule
+ * @summary Report content under selected current rules
  * {@link /api/v1/reports/units/:unitId}
  */
 export function postApiReportsUnitsByUnitId<ThrowOnError extends boolean = true>(
@@ -2222,117 +2243,116 @@ export function patchApiGovernanceNotesByPostId<ThrowOnError extends boolean = t
 }
 
 /**
- * @summary List moderation cases
- * {@link /api/v1/governance/moderation/cases}
+ * @summary List content review cases
+ * {@link /api/v1/governance/content-review/cases}
  */
-export function getApiGovernanceModerationCases<ThrowOnError extends boolean = true>(
-	options: Options<GetApiGovernanceModerationCasesOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiGovernanceModerationCasesResponses, ThrowOnError>> {
+export function getApiGovernanceContentReviewCases<ThrowOnError extends boolean = true>(
+	options: Options<GetApiGovernanceContentReviewCasesOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiGovernanceContentReviewCasesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/v1/governance/moderation/cases",
+		url: "/api/v1/governance/content-review/cases",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<GetApiGovernanceModerationCasesResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiGovernanceContentReviewCasesResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Get moderation case
- * {@link /api/v1/governance/moderation/cases/:caseId}
+ * @summary Get content review case
+ * {@link /api/v1/governance/content-review/cases/:caseId}
  */
-export function getApiGovernanceModerationCasesByCaseId<ThrowOnError extends boolean = true>(
-	options: Options<GetApiGovernanceModerationCasesByCaseIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiGovernanceModerationCasesByCaseIdResponses, ThrowOnError>> {
+export function getApiGovernanceContentReviewCasesByCaseId<ThrowOnError extends boolean = true>(
+	options: Options<GetApiGovernanceContentReviewCasesByCaseIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiGovernanceContentReviewCasesByCaseIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/v1/governance/moderation/cases/{caseId}",
+		url: "/api/v1/governance/content-review/cases/{caseId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<GetApiGovernanceModerationCasesByCaseIdResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiGovernanceContentReviewCasesByCaseIdResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Update moderation case
- * {@link /api/v1/governance/moderation/cases/:caseId}
+ * @summary Update content review case
+ * {@link /api/v1/governance/content-review/cases/:caseId}
  */
-export function patchApiGovernanceModerationCasesByCaseId<ThrowOnError extends boolean = true>(
-	options: Options<PatchApiGovernanceModerationCasesByCaseIdOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiGovernanceModerationCasesByCaseIdResponses, ThrowOnError>> {
+export function patchApiGovernanceContentReviewCasesByCaseId<ThrowOnError extends boolean = true>(
+	options: Options<PatchApiGovernanceContentReviewCasesByCaseIdOptions, ThrowOnError>,
+): Promise<RequestResult<PatchApiGovernanceContentReviewCasesByCaseIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PATCH",
-		url: "/api/v1/governance/moderation/cases/{caseId}",
+		url: "/api/v1/governance/content-review/cases/{caseId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<PatchApiGovernanceModerationCasesByCaseIdResponses, ThrowOnError>>;
+	}) as Promise<
+		RequestResult<PatchApiGovernanceContentReviewCasesByCaseIdResponses, ThrowOnError>
+	>;
 }
 
 /**
- * @summary Apply moderation action
- * {@link /api/v1/governance/moderation/actions}
+ * @summary Apply content governance action
+ * {@link /api/v1/governance/content-governance/actions}
  */
-export function postApiGovernanceModerationActions<ThrowOnError extends boolean = true>(
-	options: Options<PostApiGovernanceModerationActionsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiGovernanceModerationActionsResponses, ThrowOnError>> {
+export function postApiGovernanceContentGovernanceActions<ThrowOnError extends boolean = true>(
+	options: Options<PostApiGovernanceContentGovernanceActionsOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiGovernanceContentGovernanceActionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/v1/governance/moderation/actions",
+		url: "/api/v1/governance/content-governance/actions",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<PostApiGovernanceModerationActionsResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PostApiGovernanceContentGovernanceActionsResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Create account enforcement
- * {@link /api/v1/governance/moderation/enforcements}
+ * {@link /api/v1/governance/account-enforcements}
  */
-export function postApiGovernanceModerationEnforcements<ThrowOnError extends boolean = true>(
-	options: Options<PostApiGovernanceModerationEnforcementsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiGovernanceModerationEnforcementsResponses, ThrowOnError>> {
+export function postApiGovernanceAccountEnforcements<ThrowOnError extends boolean = true>(
+	options: Options<PostApiGovernanceAccountEnforcementsOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiGovernanceAccountEnforcementsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/v1/governance/moderation/enforcements",
+		url: "/api/v1/governance/account-enforcements",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<PostApiGovernanceModerationEnforcementsResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PostApiGovernanceAccountEnforcementsResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Revoke account enforcement
- * {@link /api/v1/governance/moderation/enforcements/:enforcementId/revoke}
+ * {@link /api/v1/governance/account-enforcements/:enforcementId/revoke}
  */
-export function postApiGovernanceModerationEnforcementsByEnforcementIdRevoke<
+export function postApiGovernanceAccountEnforcementsByEnforcementIdRevoke<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<
-		PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeOptions,
+		PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeOptions,
 		ThrowOnError
 	>,
 ): Promise<
-	RequestResult<
-		PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeResponses,
-		ThrowOnError
-	>
+	RequestResult<PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/v1/governance/moderation/enforcements/{enforcementId}/revoke",
+		url: "/api/v1/governance/account-enforcements/{enforcementId}/revoke",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<
-			PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeResponses,
+			PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeResponses,
 			ThrowOnError
 		>
 	>;
@@ -7370,7 +7390,7 @@ export function getApiRealmsByRealmIdUnitsByUnitId<ThrowOnError extends boolean 
 }
 
 /**
- * @summary Apply Realm Unit moderation command
+ * @summary Apply a Realm content governance action
  * {@link /api/v1/realms/:realmId/units/:unitId}
  */
 export function patchApiRealmsByRealmIdUnitsByUnitId<ThrowOnError extends boolean = true>(
@@ -7404,6 +7424,26 @@ export function getApiRealmsByRealmIdUnitsByUnitIdHistory<ThrowOnError extends b
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdHistoryResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Update a Realm content review case
+ * {@link /api/v1/realms/:realmId/units/:unitId/review}
+ */
+export function postApiRealmsByRealmIdUnitsByUnitIdReview<ThrowOnError extends boolean = true>(
+	options: Options<PostApiRealmsByRealmIdUnitsByUnitIdReviewOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiRealmsByRealmIdUnitsByUnitIdReviewResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/realms/{realmId}/units/{unitId}/review",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiRealmsByRealmIdUnitsByUnitIdReviewResponses, ThrowOnError>>;
 }
 
 /**

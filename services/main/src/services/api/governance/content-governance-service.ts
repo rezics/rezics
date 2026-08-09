@@ -1,17 +1,20 @@
 import { createHash } from "node:crypto";
 
-import { and, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull } from "drizzle-orm";
+import { OfficialRealmUnitIds } from "@rezics/slug";
 
 import { recordAuditEvent } from "../../audit";
 import type { DatabaseTransaction } from "../../database";
 import {
-	moderationAction,
-	moderationCase,
-	platformUnitReport,
-	profile as profileTable,
-	realmMember,
+	contentGovernanceAction,
+	contentGovernanceActionRule,
+	contentReport,
+	contentReportReferral,
+	contentReviewCase,
+	ContentGovernanceMaxRuleSources,
+	realmRule,
+	realmRuleRevision,
 	realmUnit,
-	realmUnitReport,
 	realmUnitStatusEvent,
 	unit,
 	unitContentLicense,
@@ -19,53 +22,54 @@ import {
 } from "../../database/schema";
 import { createGovernanceNotePost, listGovernanceNotes } from "../../governance/note-service";
 import { createNotification } from "../../notifications/service";
+import { currentRealmRuleRevisionReadLock } from "../../realms/rule-revision-lock";
 import {
-	ModerationActionIncompatible,
-	ModerationActionNoEffect,
-	ModerationIdempotencyConflict,
-	ModerationNoteRoleDuplicate,
-	ModerationRealmMissing,
-	ModerationReversalUnavailable,
-	ModerationReversedActionInvalid,
-	ModerationTargetNotFound,
-	ModerationTransitionInvalid,
+	ContentGovernanceActionIncompatible as ModerationActionIncompatible,
+	ContentGovernanceActionNoEffect as ModerationActionNoEffect,
+	ContentGovernanceIdempotencyConflict as ModerationIdempotencyConflict,
+	ContentGovernanceReversalUnavailable as ModerationReversalUnavailable,
+	ContentGovernanceReversedActionInvalid as ModerationReversedActionInvalid,
+	ContentGovernanceTargetNotFound as ModerationTargetNotFound,
+	ContentGovernanceTransitionInvalid as ModerationTransitionInvalid,
+	ContentReviewRealmMissing as ModerationRealmMissing,
+	GovernanceNoteRoleDuplicate as ModerationNoteRoleDuplicate,
+	ContentGovernanceRuleChanged,
+	ContentGovernanceRuleSourceForbidden,
 } from "./errors";
 import {
-	assertReportCaseDismissible,
-	assertModerationActionCompatible,
-	isActiveReportCaseState,
+	assertContentGovernanceActionCompatible,
+	isActiveContentReviewCaseState,
 	resolvePostTargetingLockState,
-	resolveModerationCaseState,
-	resolveRealmMemberState,
 	resolveRealmUnitStatus,
 	resolveUnitContentLicenseStatus,
 	resolveUnitModerationStatus,
-	type RealmMemberState,
 	type RealmUnitStatus,
 	type UnitContentLicenseStatus,
 	type UnitModerationStatus,
-} from "./moderation-contract";
-import type { CreateModerationActionBody } from "./schema";
+} from "./content-governance-contract";
+import type {
+	CreateContentGovernanceActionBody,
+	ContentGovernanceActionResponse,
+	ContentGovernanceRuleReference,
+} from "./schema";
 
-export const moderationActionSelection = {
-	id: moderationAction.id,
-	caseId: moderationAction.caseId,
-	actorProfileId: moderationAction.actorProfileId,
-	kind: moderationAction.kind,
-	previousState: moderationAction.previousState,
-	resultingState: moderationAction.resultingState,
-	previousPostTargetingLocked: moderationAction.previousPostTargetingLocked,
-	contentLicenseId: moderationAction.contentLicenseId,
-	previousContentLicenseStatus: moderationAction.previousContentLicenseStatus,
-	resultingContentLicenseStatus: moderationAction.resultingContentLicenseStatus,
-	resultingStatus: moderationAction.resultingStatus,
-	resultingPostTargetingLocked: moderationAction.resultingPostTargetingLocked,
-	reasonCode: moderationAction.reasonCode,
-	reversesActionId: moderationAction.reversesActionId,
-	createdAt: moderationAction.createdAt,
+export const contentGovernanceActionSelection = {
+	id: contentGovernanceAction.id,
+	caseId: contentGovernanceAction.caseId,
+	actorProfileId: contentGovernanceAction.actorProfileId,
+	kind: contentGovernanceAction.kind,
+	previousState: contentGovernanceAction.previousState,
+	resultingState: contentGovernanceAction.resultingState,
+	previousPostTargetingLocked: contentGovernanceAction.previousPostTargetingLocked,
+	contentLicenseId: contentGovernanceAction.contentLicenseId,
+	previousContentLicenseStatus: contentGovernanceAction.previousContentLicenseStatus,
+	resultingContentLicenseStatus: contentGovernanceAction.resultingContentLicenseStatus,
+	resultingPostTargetingLocked: contentGovernanceAction.resultingPostTargetingLocked,
+	reversesActionId: contentGovernanceAction.reversesActionId,
+	createdAt: contentGovernanceAction.createdAt,
 };
 
-export type ModerationCaseRecord = typeof moderationCase.$inferSelect;
+export type ContentReviewCaseRecord = typeof contentReviewCase.$inferSelect;
 
 type ModerationTargetContext = {
 	recipientProfileIds: readonly string[];
@@ -86,11 +90,6 @@ type StateActionPlan =
 			type: "realm_unit_state";
 			previousState: RealmUnitStatus;
 			resultingState: RealmUnitStatus;
-	  }
-	| {
-			type: "realm_member_state";
-			previousState: RealmMemberState;
-			resultingState: RealmMemberState;
 	  };
 
 type LockActionPlan = {
@@ -106,11 +105,7 @@ type ContentLicenseActionPlan = {
 	resultingContentLicenseStatus: UnitContentLicenseStatus;
 };
 
-type ModerationActionPlan =
-	| StateActionPlan
-	| LockActionPlan
-	| ContentLicenseActionPlan
-	| { type: "case_only" };
+type ContentGovernanceActionPlan = StateActionPlan | LockActionPlan | ContentLicenseActionPlan;
 
 function canonicalize(value: unknown): unknown {
 	if (Array.isArray(value)) return value.map(canonicalize);
@@ -132,31 +127,23 @@ function isRealmUnitStatus(value: string): value is RealmUnitStatus {
 	return value === "pending" || value === "visible" || value === "hidden" || value === "removed";
 }
 
-function isRealmMemberState(value: string): value is RealmMemberState {
-	return (
-		value === "active" ||
-		value === "pending" ||
-		value === "muted" ||
-		value === "removed" ||
-		value === "banned"
-	);
-}
-
-export function fingerprintModerationAction(body: CreateModerationActionBody): string {
+export function fingerprintContentGovernanceAction(
+	body: CreateContentGovernanceActionBody,
+): string {
 	const { idempotencyKey: _idempotencyKey, ...request } = body;
 	return createHash("sha256")
 		.update(JSON.stringify(canonicalize(request)))
 		.digest("hex");
 }
 
-export async function loadModerationCaseForAction(
+export async function loadContentReviewCaseForAction(
 	tx: DatabaseTransaction,
 	caseId: string,
-): Promise<ModerationCaseRecord | undefined> {
+): Promise<ContentReviewCaseRecord | undefined> {
 	const [row] = await tx
 		.select()
-		.from(moderationCase)
-		.where(eq(moderationCase.id, caseId))
+		.from(contentReviewCase)
+		.where(eq(contentReviewCase.id, caseId))
 		.for("update")
 		.limit(1);
 	return row;
@@ -164,36 +151,14 @@ export async function loadModerationCaseForAction(
 
 async function getModerationTargetContext(
 	tx: DatabaseTransaction,
-	row: ModerationCaseRecord,
+	row: ContentReviewCaseRecord,
 ): Promise<ModerationTargetContext> {
-	if (row.targetKind === "unit" || row.targetKind === "unit_field") {
-		const [target] = await tx
-			.select({ id: unit.id })
-			.from(unit)
-			.where(eq(unit.id, row.targetId))
-			.limit(1);
-		if (!target) throw new ModerationTargetNotFound();
-		const owners = await tx
-			.select({ profileId: unitOwnership.profileId })
-			.from(unitOwnership)
-			.where(and(eq(unitOwnership.unitId, target.id), isNull(unitOwnership.revokedAt)));
-		return { recipientProfileIds: presentProfileIds(owners), subjectUnitId: target.id };
-	}
-	if (row.targetKind === "profile") {
-		const [target] = await tx
-			.select({ id: profileTable.id })
-			.from(profileTable)
-			.where(eq(profileTable.id, row.targetId))
-			.limit(1);
-		if (!target) throw new ModerationTargetNotFound();
-		return { recipientProfileIds: [target.id], subjectUnitId: target.id };
-	}
-	if (row.targetKind === "realm_unit") {
+	if (row.authority === "realm") {
 		if (!row.realmId) throw new ModerationRealmMissing();
 		const [target] = await tx
 			.select({ unitId: realmUnit.unitId })
 			.from(realmUnit)
-			.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetId)))
+			.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetUnitId)))
 			.limit(1);
 		if (!target) throw new ModerationTargetNotFound();
 		const owners = await tx
@@ -205,30 +170,28 @@ async function getModerationTargetContext(
 			subjectUnitId: target.unitId,
 		};
 	}
-	if (row.targetKind === "realm_member") {
-		if (!row.realmId) throw new ModerationRealmMissing();
-		const [target] = await tx
-			.select({ profileId: realmMember.profileId })
-			.from(realmMember)
-			.where(
-				and(eq(realmMember.realmId, row.realmId), eq(realmMember.profileId, row.targetId)),
-			)
-			.limit(1);
-		if (!target) throw new ModerationTargetNotFound();
-		return { recipientProfileIds: [target.profileId], subjectUnitId: row.realmId };
-	}
-	throw new ModerationTargetNotFound();
+	const [target] = await tx
+		.select({ id: unit.id })
+		.from(unit)
+		.where(eq(unit.id, row.targetUnitId))
+		.limit(1);
+	if (!target) throw new ModerationTargetNotFound();
+	const owners = await tx
+		.select({ profileId: unitOwnership.profileId })
+		.from(unitOwnership)
+		.where(and(eq(unitOwnership.unitId, target.id), isNull(unitOwnership.revokedAt)));
+	return { recipientProfileIds: presentProfileIds(owners), subjectUnitId: target.id };
 }
 
 async function loadUnitStatePlan(
 	tx: DatabaseTransaction,
-	row: ModerationCaseRecord,
+	row: ContentReviewCaseRecord,
 	action: "approve" | "remove" | "restore",
 ): Promise<StateActionPlan> {
 	const [current] = await tx
 		.select({ status: unit.moderationStatus })
 		.from(unit)
-		.where(eq(unit.id, row.targetId))
+		.where(eq(unit.id, row.targetUnitId))
 		.for("update")
 		.limit(1);
 	if (!current) throw new ModerationTargetNotFound();
@@ -241,14 +204,14 @@ async function loadUnitStatePlan(
 
 async function loadRealmUnitStatePlan(
 	tx: DatabaseTransaction,
-	row: ModerationCaseRecord,
+	row: ContentReviewCaseRecord,
 	action: "approve" | "hide" | "remove" | "restore",
 ): Promise<StateActionPlan> {
 	if (!row.realmId) throw new ModerationRealmMissing();
 	const [current] = await tx
 		.select({ status: realmUnit.status })
 		.from(realmUnit)
-		.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetId)))
+		.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetUnitId)))
 		.for("update")
 		.limit(1);
 	if (!current) throw new ModerationTargetNotFound();
@@ -259,44 +222,24 @@ async function loadRealmUnitStatePlan(
 	};
 }
 
-async function loadMemberStatePlan(
-	tx: DatabaseTransaction,
-	row: ModerationCaseRecord,
-	action: "mute_member" | "remove_member" | "ban_member" | "restore_member",
-): Promise<StateActionPlan> {
-	if (!row.realmId) throw new ModerationRealmMissing();
-	const [current] = await tx
-		.select({ state: realmMember.state })
-		.from(realmMember)
-		.where(and(eq(realmMember.realmId, row.realmId), eq(realmMember.profileId, row.targetId)))
-		.for("update")
-		.limit(1);
-	if (!current) throw new ModerationTargetNotFound();
-	return {
-		type: "realm_member_state",
-		previousState: current.state,
-		resultingState: resolveRealmMemberState(current.state, action),
-	};
-}
-
 async function loadPostTargetingLockPlan(
 	tx: DatabaseTransaction,
-	row: ModerationCaseRecord,
+	row: ContentReviewCaseRecord,
 	action: "lock_post_targeting" | "unlock_post_targeting",
 ): Promise<LockActionPlan> {
-	if (row.targetKind === "realm_unit") {
+	if (row.authority === "realm") {
 		if (!row.realmId) throw new ModerationRealmMissing();
 		const [targetUnit] = await tx
 			.select({ id: unit.id })
 			.from(unit)
-			.where(eq(unit.id, row.targetId))
+			.where(eq(unit.id, row.targetUnitId))
 			.for("share")
 			.limit(1);
 		if (!targetUnit) throw new ModerationTargetNotFound();
 		const [current] = await tx
 			.select({ postTargetingLocked: realmUnit.postTargetingLocked })
 			.from(realmUnit)
-			.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetId)))
+			.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetUnitId)))
 			.for("update")
 			.limit(1);
 		if (!current) throw new ModerationTargetNotFound();
@@ -309,11 +252,10 @@ async function loadPostTargetingLockPlan(
 			),
 		};
 	}
-	if (row.targetKind !== "unit") throw new ModerationActionIncompatible();
 	const [current] = await tx
 		.select({ postTargetingLocked: unit.postTargetingLocked })
 		.from(unit)
-		.where(eq(unit.id, row.targetId))
+		.where(eq(unit.id, row.targetUnitId))
 		.for("update")
 		.limit(1);
 	if (!current) throw new ModerationTargetNotFound();
@@ -329,14 +271,13 @@ async function loadPostTargetingLockPlan(
 
 async function lockContentLicenseTargetUnit(
 	tx: DatabaseTransaction,
-	row: ModerationCaseRecord,
+	row: ContentReviewCaseRecord,
 ): Promise<void> {
-	if (row.targetKind !== "unit" || row.authority !== "platform")
-		throw new ModerationActionIncompatible();
+	if (row.authority !== "platform") throw new ModerationActionIncompatible();
 	const [target] = await tx
 		.select({ id: unit.id })
 		.from(unit)
-		.where(eq(unit.id, row.targetId))
+		.where(eq(unit.id, row.targetUnitId))
 		.for("update")
 		.limit(1);
 	if (!target) throw new ModerationTargetNotFound();
@@ -344,7 +285,7 @@ async function lockContentLicenseTargetUnit(
 
 async function loadContentLicenseInvalidationPlan(
 	tx: DatabaseTransaction,
-	row: ModerationCaseRecord,
+	row: ContentReviewCaseRecord,
 ): Promise<ContentLicenseActionPlan> {
 	await lockContentLicenseTargetUnit(tx, row);
 	const [current] = await tx
@@ -355,7 +296,7 @@ async function loadContentLicenseInvalidationPlan(
 		.from(unitContentLicense)
 		.where(
 			and(
-				eq(unitContentLicense.unitId, row.targetId),
+				eq(unitContentLicense.unitId, row.targetUnitId),
 				eq(unitContentLicense.status, "active"),
 			),
 		)
@@ -375,21 +316,21 @@ async function loadContentLicenseInvalidationPlan(
 
 async function loadContentLicenseRestorationPlan(
 	tx: DatabaseTransaction,
-	row: ModerationCaseRecord,
+	row: ContentReviewCaseRecord,
 	reversesActionId: string,
 ): Promise<ContentLicenseActionPlan> {
 	await lockContentLicenseTargetUnit(tx, row);
 	const [invalidation] = await tx
 		.select({
-			id: moderationAction.id,
-			caseId: moderationAction.caseId,
-			kind: moderationAction.kind,
-			contentLicenseId: moderationAction.contentLicenseId,
-			previousContentLicenseStatus: moderationAction.previousContentLicenseStatus,
-			resultingContentLicenseStatus: moderationAction.resultingContentLicenseStatus,
+			id: contentGovernanceAction.id,
+			caseId: contentGovernanceAction.caseId,
+			kind: contentGovernanceAction.kind,
+			contentLicenseId: contentGovernanceAction.contentLicenseId,
+			previousContentLicenseStatus: contentGovernanceAction.previousContentLicenseStatus,
+			resultingContentLicenseStatus: contentGovernanceAction.resultingContentLicenseStatus,
 		})
-		.from(moderationAction)
-		.where(eq(moderationAction.id, reversesActionId))
+		.from(contentGovernanceAction)
+		.where(eq(contentGovernanceAction.id, reversesActionId))
 		.limit(1);
 	if (
 		!invalidation ||
@@ -401,24 +342,22 @@ async function loadContentLicenseRestorationPlan(
 		throw new ModerationReversedActionInvalid();
 	const [invalidationCase] = await tx
 		.select({
-			authority: moderationCase.authority,
-			targetKind: moderationCase.targetKind,
-			targetId: moderationCase.targetId,
+			authority: contentReviewCase.authority,
+			targetUnitId: contentReviewCase.targetUnitId,
 		})
-		.from(moderationCase)
-		.where(eq(moderationCase.id, invalidation.caseId))
+		.from(contentReviewCase)
+		.where(eq(contentReviewCase.id, invalidation.caseId))
 		.limit(1);
 	if (
 		!invalidationCase ||
 		invalidationCase.authority !== "platform" ||
-		invalidationCase.targetKind !== "unit" ||
-		invalidationCase.targetId !== row.targetId
+		invalidationCase.targetUnitId !== row.targetUnitId
 	)
 		throw new ModerationReversedActionInvalid();
 	const [existingRestoration] = await tx
-		.select({ id: moderationAction.id })
-		.from(moderationAction)
-		.where(eq(moderationAction.reversesActionId, invalidation.id))
+		.select({ id: contentGovernanceAction.id })
+		.from(contentGovernanceAction)
+		.where(eq(contentGovernanceAction.reversesActionId, invalidation.id))
 		.limit(1);
 	if (existingRestoration) throw new ModerationReversalUnavailable();
 	const [current] = await tx
@@ -431,14 +370,15 @@ async function loadContentLicenseRestorationPlan(
 		.where(eq(unitContentLicense.id, invalidation.contentLicenseId))
 		.for("update")
 		.limit(1);
-	if (!current || current.unitId !== row.targetId) throw new ModerationReversedActionInvalid();
+	if (!current || current.unitId !== row.targetUnitId)
+		throw new ModerationReversedActionInvalid();
 	if (current.status !== "invalidated") throw new ModerationReversalUnavailable();
 	const [activeGrant] = await tx
 		.select({ id: unitContentLicense.id })
 		.from(unitContentLicense)
 		.where(
 			and(
-				eq(unitContentLicense.unitId, row.targetId),
+				eq(unitContentLicense.unitId, row.targetUnitId),
 				eq(unitContentLicense.status, "active"),
 			),
 		)
@@ -457,33 +397,33 @@ async function loadContentLicenseRestorationPlan(
 
 async function loadReversalPlan(
 	tx: DatabaseTransaction,
-	row: ModerationCaseRecord,
+	row: ContentReviewCaseRecord,
 	reversesActionId: string,
-): Promise<ModerationActionPlan> {
+): Promise<ContentGovernanceActionPlan> {
 	const [reversed] = await tx
 		.select({
-			id: moderationAction.id,
-			caseId: moderationAction.caseId,
-			kind: moderationAction.kind,
-			previousState: moderationAction.previousState,
-			resultingState: moderationAction.resultingState,
-			previousPostTargetingLocked: moderationAction.previousPostTargetingLocked,
-			resultingPostTargetingLocked: moderationAction.resultingPostTargetingLocked,
+			id: contentGovernanceAction.id,
+			caseId: contentGovernanceAction.caseId,
+			kind: contentGovernanceAction.kind,
+			previousState: contentGovernanceAction.previousState,
+			resultingState: contentGovernanceAction.resultingState,
+			previousPostTargetingLocked: contentGovernanceAction.previousPostTargetingLocked,
+			resultingPostTargetingLocked: contentGovernanceAction.resultingPostTargetingLocked,
 		})
-		.from(moderationAction)
-		.where(eq(moderationAction.id, reversesActionId))
+		.from(contentGovernanceAction)
+		.where(eq(contentGovernanceAction.id, reversesActionId))
 		.limit(1);
 	if (!reversed || reversed.caseId !== row.id) throw new ModerationReversedActionInvalid();
 	const [existingReversal] = await tx
-		.select({ id: moderationAction.id })
-		.from(moderationAction)
-		.where(eq(moderationAction.reversesActionId, reversed.id))
+		.select({ id: contentGovernanceAction.id })
+		.from(contentGovernanceAction)
+		.where(eq(contentGovernanceAction.reversesActionId, reversed.id))
 		.limit(1);
 	if (existingReversal) throw new ModerationReversalUnavailable();
 	if (reversed.kind === "reverse") throw new ModerationReversalUnavailable();
 
 	if (reversed.previousState !== null && reversed.resultingState !== null) {
-		if (row.targetKind === "unit" || row.targetKind === "unit_field") {
+		if (row.authority === "platform") {
 			if (
 				!isUnitModerationStatus(reversed.previousState) ||
 				!isUnitModerationStatus(reversed.resultingState)
@@ -492,7 +432,7 @@ async function loadReversalPlan(
 			const [current] = await tx
 				.select({ state: unit.moderationStatus })
 				.from(unit)
-				.where(eq(unit.id, row.targetId))
+				.where(eq(unit.id, row.targetUnitId))
 				.for("update")
 				.limit(1);
 			if (!current) throw new ModerationTargetNotFound();
@@ -504,7 +444,7 @@ async function loadReversalPlan(
 				resultingState: reversed.previousState,
 			};
 		}
-		if (row.targetKind === "realm_unit") {
+		if (row.authority === "realm") {
 			if (
 				!isRealmUnitStatus(reversed.previousState) ||
 				!isRealmUnitStatus(reversed.resultingState)
@@ -514,7 +454,9 @@ async function loadReversalPlan(
 			const [current] = await tx
 				.select({ state: realmUnit.status })
 				.from(realmUnit)
-				.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetId)))
+				.where(
+					and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetUnitId)),
+				)
 				.for("update")
 				.limit(1);
 			if (!current) throw new ModerationTargetNotFound();
@@ -526,52 +468,27 @@ async function loadReversalPlan(
 				resultingState: reversed.previousState,
 			};
 		}
-		if (row.targetKind === "realm_member") {
-			if (
-				!isRealmMemberState(reversed.previousState) ||
-				!isRealmMemberState(reversed.resultingState)
-			)
-				throw new ModerationReversalUnavailable();
-			if (!row.realmId) throw new ModerationRealmMissing();
-			const [current] = await tx
-				.select({ state: realmMember.state })
-				.from(realmMember)
-				.where(
-					and(
-						eq(realmMember.realmId, row.realmId),
-						eq(realmMember.profileId, row.targetId),
-					),
-				)
-				.for("update")
-				.limit(1);
-			if (!current) throw new ModerationTargetNotFound();
-			if (current.state !== reversed.resultingState)
-				throw new ModerationReversalUnavailable();
-			return {
-				type: "realm_member_state",
-				previousState: current.state,
-				resultingState: reversed.previousState,
-			};
-		}
 	}
 
 	if (
 		reversed.previousPostTargetingLocked !== null &&
 		reversed.resultingPostTargetingLocked !== null
 	) {
-		if (row.targetKind === "realm_unit") {
+		if (row.authority === "realm") {
 			if (!row.realmId) throw new ModerationRealmMissing();
 			const [targetUnit] = await tx
 				.select({ id: unit.id })
 				.from(unit)
-				.where(eq(unit.id, row.targetId))
+				.where(eq(unit.id, row.targetUnitId))
 				.for("share")
 				.limit(1);
 			if (!targetUnit) throw new ModerationTargetNotFound();
 			const [current] = await tx
 				.select({ postTargetingLocked: realmUnit.postTargetingLocked })
 				.from(realmUnit)
-				.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetId)))
+				.where(
+					and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetUnitId)),
+				)
 				.for("update")
 				.limit(1);
 			if (!current) throw new ModerationTargetNotFound();
@@ -583,11 +500,11 @@ async function loadReversalPlan(
 				resultingPostTargetingLocked: reversed.previousPostTargetingLocked,
 			};
 		}
-		if (row.targetKind === "unit") {
+		if (row.authority === "platform") {
 			const [current] = await tx
 				.select({ postTargetingLocked: unit.postTargetingLocked })
 				.from(unit)
-				.where(eq(unit.id, row.targetId))
+				.where(eq(unit.id, row.targetUnitId))
 				.for("update")
 				.limit(1);
 			if (!current) throw new ModerationTargetNotFound();
@@ -603,50 +520,108 @@ async function loadReversalPlan(
 	throw new ModerationReversalUnavailable();
 }
 
+function getRequestedRuleReferences(
+	body: CreateContentGovernanceActionBody,
+): readonly ContentGovernanceRuleReference[] {
+	return "rules" in body ? body.rules : [];
+}
+
+async function validateContentGovernanceRules(
+	tx: DatabaseTransaction,
+	row: ContentReviewCaseRecord,
+	body: CreateContentGovernanceActionBody,
+): Promise<ContentGovernanceRuleReference[]> {
+	const references = [...getRequestedRuleReferences(body)].sort((left, right) =>
+		left.sourceRealmId === right.sourceRealmId
+			? left.ruleId.localeCompare(right.ruleId)
+			: left.sourceRealmId.localeCompare(right.sourceRealmId),
+	);
+	if (new Set(references.map((reference) => reference.ruleId)).size !== references.length)
+		throw new ContentGovernanceRuleChanged();
+	const sourceRealmIds = [...new Set(references.map((reference) => reference.sourceRealmId))];
+	if (sourceRealmIds.length > ContentGovernanceMaxRuleSources)
+		throw new ContentGovernanceRuleSourceForbidden();
+	const allowedSourceRealmIds = new Set(
+		row.authority === "platform"
+			? [OfficialRealmUnitIds.rule]
+			: [OfficialRealmUnitIds.rule, ...(row.realmId ? [row.realmId] : [])],
+	);
+	if (sourceRealmIds.some((sourceRealmId) => !allowedSourceRealmIds.has(sourceRealmId)))
+		throw new ContentGovernanceRuleSourceForbidden();
+
+	for (const sourceRealmId of sourceRealmIds)
+		await tx.execute(currentRealmRuleRevisionReadLock(sourceRealmId));
+
+	for (const sourceRealmId of sourceRealmIds) {
+		const sourceReferences = references.filter(
+			(reference) => reference.sourceRealmId === sourceRealmId,
+		);
+		const [currentRevision] = await tx
+			.select({ id: realmRuleRevision.id })
+			.from(realmRuleRevision)
+			.where(eq(realmRuleRevision.realmId, sourceRealmId))
+			.orderBy(desc(realmRuleRevision.version))
+			.limit(1);
+		if (
+			!currentRevision ||
+			sourceReferences.some((reference) => reference.revisionId !== currentRevision.id)
+		)
+			throw new ContentGovernanceRuleChanged();
+		const selectedRules = await tx
+			.select({ id: realmRule.id })
+			.from(realmRule)
+			.where(
+				and(
+					eq(realmRule.revisionId, currentRevision.id),
+					inArray(
+						realmRule.id,
+						sourceReferences.map((reference) => reference.ruleId),
+					),
+				),
+			);
+		if (selectedRules.length !== sourceReferences.length)
+			throw new ContentGovernanceRuleChanged();
+	}
+	return references;
+}
+
 async function deriveActionPlan(
 	tx: DatabaseTransaction,
-	row: ModerationCaseRecord,
-	body: CreateModerationActionBody,
-): Promise<ModerationActionPlan> {
-	assertModerationActionCompatible(row.targetKind, body.kind);
+	row: ContentReviewCaseRecord,
+	body: CreateContentGovernanceActionBody,
+): Promise<ContentGovernanceActionPlan> {
+	assertContentGovernanceActionCompatible(row.authority, body.kind);
 	if (body.kind === "reverse") return loadReversalPlan(tx, row, body.reversesActionId);
 	if (body.kind === "invalidate_content_license")
 		return loadContentLicenseInvalidationPlan(tx, row);
 	if (body.kind === "restore_content_license")
 		return loadContentLicenseRestorationPlan(tx, row, body.reversesActionId);
 	if (body.kind === "approve" || body.kind === "remove" || body.kind === "restore") {
-		if (row.targetKind === "realm_unit") return loadRealmUnitStatePlan(tx, row, body.kind);
+		if (row.authority === "realm") return loadRealmUnitStatePlan(tx, row, body.kind);
 		return loadUnitStatePlan(tx, row, body.kind);
 	}
 	if (body.kind === "hide") return loadRealmUnitStatePlan(tx, row, body.kind);
 	if (body.kind === "lock_post_targeting" || body.kind === "unlock_post_targeting")
 		return loadPostTargetingLockPlan(tx, row, body.kind);
-	if (
-		body.kind === "mute_member" ||
-		body.kind === "remove_member" ||
-		body.kind === "ban_member" ||
-		body.kind === "restore_member"
-	)
-		return loadMemberStatePlan(tx, row, body.kind);
-	resolveModerationCaseState(row.state, body.kind);
-	return { type: "case_only" };
+	throw new ModerationActionIncompatible();
 }
 
 async function executeActionPlan(
 	tx: DatabaseTransaction,
-	row: ModerationCaseRecord,
-	plan: ModerationActionPlan,
+	row: ContentReviewCaseRecord,
+	plan: ContentGovernanceActionPlan,
 	input: {
 		actorProfileId: string;
 		actionId: string;
-		reasonCode: CreateModerationActionBody["reasonCode"];
 	},
 ): Promise<void> {
 	if (plan.type === "unit_state") {
 		const [updated] = await tx
 			.update(unit)
 			.set({ moderationStatus: plan.resultingState })
-			.where(and(eq(unit.id, row.targetId), eq(unit.moderationStatus, plan.previousState)))
+			.where(
+				and(eq(unit.id, row.targetUnitId), eq(unit.moderationStatus, plan.previousState)),
+			)
 			.returning({ id: unit.id });
 		if (!updated) throw new ModerationTransitionInvalid();
 		return;
@@ -659,7 +634,7 @@ async function executeActionPlan(
 			.where(
 				and(
 					eq(realmUnit.realmId, row.realmId),
-					eq(realmUnit.unitId, row.targetId),
+					eq(realmUnit.unitId, row.targetUnitId),
 					eq(realmUnit.status, plan.previousState),
 				),
 			)
@@ -667,28 +642,12 @@ async function executeActionPlan(
 		if (!updated) throw new ModerationTransitionInvalid();
 		await tx.insert(realmUnitStatusEvent).values({
 			realmId: row.realmId,
-			unitId: row.targetId,
+			unitId: row.targetUnitId,
 			fromStatus: plan.previousState,
 			toStatus: plan.resultingState,
 			changedByProfileId: input.actorProfileId,
-			moderationActionId: input.actionId,
+			contentGovernanceActionId: input.actionId,
 		});
-		return;
-	}
-	if (plan.type === "realm_member_state") {
-		if (!row.realmId) throw new ModerationRealmMissing();
-		const [updated] = await tx
-			.update(realmMember)
-			.set({ state: plan.resultingState })
-			.where(
-				and(
-					eq(realmMember.realmId, row.realmId),
-					eq(realmMember.profileId, row.targetId),
-					eq(realmMember.state, plan.previousState),
-				),
-			)
-			.returning({ profileId: realmMember.profileId });
-		if (!updated) throw new ModerationTransitionInvalid();
 		return;
 	}
 	if (plan.type === "unit_post_targeting_lock") {
@@ -697,7 +656,7 @@ async function executeActionPlan(
 			.set({ postTargetingLocked: plan.resultingPostTargetingLocked })
 			.where(
 				and(
-					eq(unit.id, row.targetId),
+					eq(unit.id, row.targetUnitId),
 					eq(unit.postTargetingLocked, plan.previousPostTargetingLocked),
 				),
 			)
@@ -713,7 +672,7 @@ async function executeActionPlan(
 			.where(
 				and(
 					eq(realmUnit.realmId, row.realmId),
-					eq(realmUnit.unitId, row.targetId),
+					eq(realmUnit.unitId, row.targetUnitId),
 					eq(realmUnit.postTargetingLocked, plan.previousPostTargetingLocked),
 				),
 			)
@@ -728,7 +687,7 @@ async function executeActionPlan(
 			.where(
 				and(
 					eq(unitContentLicense.id, plan.contentLicenseId),
-					eq(unitContentLicense.unitId, row.targetId),
+					eq(unitContentLicense.unitId, row.targetUnitId),
 					eq(unitContentLicense.status, plan.previousContentLicenseStatus),
 				),
 			)
@@ -738,27 +697,27 @@ async function executeActionPlan(
 	}
 }
 
-export async function executeAuthorizedModerationAction(
+export async function executeAuthorizedContentGovernanceAction(
 	tx: DatabaseTransaction,
 	input: {
-		caseRow: ModerationCaseRecord;
+		caseRow: ContentReviewCaseRecord;
 		actorProfileId: string;
-		body: CreateModerationActionBody;
+		body: CreateContentGovernanceActionBody;
 	},
 ) {
-	const fingerprint = fingerprintModerationAction(input.body);
+	const fingerprint = fingerprintContentGovernanceAction(input.body);
 	if (input.body.idempotencyKey) {
 		const [existing] = await tx
 			.select({
-				...moderationActionSelection,
-				requestFingerprint: moderationAction.requestFingerprint,
+				...contentGovernanceActionSelection,
+				requestFingerprint: contentGovernanceAction.requestFingerprint,
 			})
-			.from(moderationAction)
+			.from(contentGovernanceAction)
 			.where(
 				and(
-					eq(moderationAction.actorProfileId, input.actorProfileId),
-					eq(moderationAction.caseId, input.caseRow.id),
-					eq(moderationAction.idempotencyKey, input.body.idempotencyKey),
+					eq(contentGovernanceAction.actorProfileId, input.actorProfileId),
+					eq(contentGovernanceAction.caseId, input.caseRow.id),
+					eq(contentGovernanceAction.idempotencyKey, input.body.idempotencyKey),
 				),
 			)
 			.limit(1);
@@ -768,55 +727,48 @@ export async function executeAuthorizedModerationAction(
 			const { requestFingerprint: _requestFingerprint, ...created } = existing;
 			const notes = (
 				await listGovernanceNotes(tx, {
-					subjectKind: "moderation_action",
+					subjectKind: "content_governance_action",
 					subjectIds: [created.id],
 				})
 			).map(({ postId, role }) => ({ postId, role }));
-			return { created: { ...created, notes }, replayed: true };
+			const rules = await tx
+				.select({
+					sourceRealmId: contentGovernanceActionRule.ruleSourceRealmId,
+					revisionId: contentGovernanceActionRule.ruleRevisionId,
+					ruleId: contentGovernanceActionRule.ruleId,
+				})
+				.from(contentGovernanceActionRule)
+				.where(eq(contentGovernanceActionRule.actionId, created.id))
+				.orderBy(
+					contentGovernanceActionRule.ruleSourceRealmId,
+					contentGovernanceActionRule.ruleId,
+				);
+			const response = { ...created, rules, notes } satisfies ContentGovernanceActionResponse;
+			return { created: response, replayed: true };
 		}
 	}
 
 	const noteRoles = new Set(input.body.notes?.map((note) => note.role));
 	if (noteRoles.size !== (input.body.notes?.length ?? 0)) throw new ModerationNoteRoleDuplicate();
+	const rules = await validateContentGovernanceRules(tx, input.caseRow, input.body);
 	const target = await getModerationTargetContext(tx, input.caseRow);
-	const caseReports =
-		input.caseRow.authority === "platform"
-			? (
-					await tx
-						.select({
-							id: platformUnitReport.id,
-							reporterProfileId: platformUnitReport.reporterProfileId,
-						})
-						.from(platformUnitReport)
-						.where(eq(platformUnitReport.caseId, input.caseRow.id))
-				).map((row) => ({ ...row, scope: "platform" as const }))
-			: (
-					await tx
-						.select({
-							id: realmUnitReport.id,
-							reporterProfileId: realmUnitReport.reporterProfileId,
-						})
-						.from(realmUnitReport)
-						.where(eq(realmUnitReport.caseId, input.caseRow.id))
-				).map((row) => ({ ...row, scope: "realm" as const }));
+	const caseReports = await tx
+		.select({
+			referralId: contentReportReferral.id,
+			reportId: contentReport.id,
+			reporterProfileId: contentReport.reporterProfileId,
+		})
+		.from(contentReportReferral)
+		.innerJoin(contentReport, eq(contentReport.id, contentReportReferral.reportId))
+		.where(eq(contentReportReferral.caseId, input.caseRow.id));
 	const reportRecipientProfileIds = presentProfileIds(
 		caseReports.map(({ reporterProfileId }) => ({ profileId: reporterProfileId })),
 	);
-	if (input.body.kind === "dismiss")
-		assertReportCaseDismissible(input.caseRow.state, caseReports.length);
 	const plan = await deriveActionPlan(tx, input.caseRow, input.body);
 	const previousState =
-		plan.type === "unit_state" ||
-		plan.type === "realm_unit_state" ||
-		plan.type === "realm_member_state"
-			? plan.previousState
-			: null;
+		plan.type === "unit_state" || plan.type === "realm_unit_state" ? plan.previousState : null;
 	const resultingState =
-		plan.type === "unit_state" ||
-		plan.type === "realm_unit_state" ||
-		plan.type === "realm_member_state"
-			? plan.resultingState
-			: null;
+		plan.type === "unit_state" || plan.type === "realm_unit_state" ? plan.resultingState : null;
 	const isPostTargetingLockPlan =
 		plan.type === "unit_post_targeting_lock" || plan.type === "realm_unit_post_targeting_lock";
 	const previousPostTargetingLocked = isPostTargetingLockPlan
@@ -834,7 +786,7 @@ export async function executeAuthorizedModerationAction(
 		? plan.resultingContentLicenseStatus
 		: null;
 	const [created] = await tx
-		.insert(moderationAction)
+		.insert(contentGovernanceAction)
 		.values({
 			caseId: input.caseRow.id,
 			actorProfileId: input.actorProfileId,
@@ -845,9 +797,7 @@ export async function executeAuthorizedModerationAction(
 			contentLicenseId,
 			previousContentLicenseStatus,
 			resultingContentLicenseStatus,
-			resultingStatus: plan.type === "unit_state" ? plan.resultingState : null,
 			resultingPostTargetingLocked,
-			reasonCode: input.body.reasonCode,
 			reversesActionId:
 				input.body.kind === "reverse" || input.body.kind === "restore_content_license"
 					? input.body.reversesActionId
@@ -855,8 +805,17 @@ export async function executeAuthorizedModerationAction(
 			idempotencyKey: input.body.idempotencyKey,
 			requestFingerprint: fingerprint,
 		})
-		.returning(moderationActionSelection);
-	if (!created) throw new Error("Moderation action insertion did not return a row");
+		.returning(contentGovernanceActionSelection);
+	if (!created) throw new Error("Content governance action insertion did not return a row");
+	if (rules.length)
+		await tx.insert(contentGovernanceActionRule).values(
+			rules.map((rule) => ({
+				actionId: created.id,
+				ruleSourceRealmId: rule.sourceRealmId,
+				ruleRevisionId: rule.revisionId,
+				ruleId: rule.ruleId,
+			})),
+		);
 	const noteBindings: Array<{
 		postId: string;
 		role: "internal_note" | "public_notice";
@@ -865,7 +824,7 @@ export async function executeAuthorizedModerationAction(
 		for (const note of input.body.notes ?? []) {
 			const binding = await createGovernanceNotePost(tx, {
 				actorProfileId: input.actorProfileId,
-				subjectKind: "moderation_action",
+				subjectKind: "content_governance_action",
 				subjectId: created.id,
 				subjectUnitId: target.subjectUnitId,
 				realmId: input.caseRow.realmId,
@@ -881,36 +840,33 @@ export async function executeAuthorizedModerationAction(
 	await executeActionPlan(tx, input.caseRow, plan, {
 		actorProfileId: input.actorProfileId,
 		actionId: created.id,
-		reasonCode: input.body.reasonCode,
 	});
 	if (!(isPostTargetingLockPlan && plan.resultingPostTargetingLocked)) await createNotes();
 	const notePostIds = noteBindings.map((binding) => binding.postId);
-	const nextCaseState = resolveModerationCaseState(input.caseRow.state, input.body.kind);
-	if (nextCaseState !== input.caseRow.state)
+	const nextCaseState = "actioned" as const;
+	if (input.caseRow.state !== nextCaseState)
 		await tx
-			.update(moderationCase)
+			.update(contentReviewCase)
 			.set({ state: nextCaseState })
-			.where(eq(moderationCase.id, input.caseRow.id));
+			.where(eq(contentReviewCase.id, input.caseRow.id));
 	const publicNoticePostId = noteBindings.find(
 		(binding) => binding.role === "public_notice",
 	)?.postId;
-	if ((input.body.kind !== "note" || publicNoticePostId) && input.body.kind !== "dismiss")
-		for (const recipientProfileId of target.recipientProfileIds) {
-			await createNotification(tx, {
-				recipientProfileId,
-				actorProfileId: input.actorProfileId,
-				kind: "moderation",
-				subjectUnitId: target.subjectUnitId,
-				payload: {
-					type: "moderation_action",
-					actionId: created.id,
-					actionKind: input.body.kind,
-					reasonCode: input.body.reasonCode,
-					publicNoticePostId,
-				},
-			});
-		}
-	if (input.body.kind !== "note" && !isActiveReportCaseState(nextCaseState))
+	for (const recipientProfileId of target.recipientProfileIds) {
+		await createNotification(tx, {
+			recipientProfileId,
+			actorProfileId: input.actorProfileId,
+			kind: "moderation",
+			subjectUnitId: target.subjectUnitId,
+			payload: {
+				type: "content_governance_action",
+				actionId: created.id,
+				actionKind: input.body.kind,
+				publicNoticePostId,
+			},
+		});
+	}
+	if (!isActiveContentReviewCaseState(nextCaseState))
 		for (const caseReport of caseReports) {
 			await createNotification(tx, {
 				recipientProfileId: caseReport.reporterProfileId,
@@ -919,11 +875,10 @@ export async function executeAuthorizedModerationAction(
 				subjectUnitId: target.subjectUnitId,
 				payload: {
 					type: "report_resolution",
-					reportId: caseReport.id,
-					reportScope: caseReport.scope,
+					reportId: caseReport.reportId,
+					referralId: caseReport.referralId,
 					actionId: created.id,
 					actionKind: input.body.kind,
-					reasonCode: input.body.reasonCode,
 					publicNoticePostId,
 				},
 			});
@@ -936,19 +891,23 @@ export async function executeAuthorizedModerationAction(
 			input.caseRow.authority === "realm" && input.caseRow.realmId
 				? { kind: "realm", id: input.caseRow.realmId }
 				: { kind: "platform" },
-		action: `moderation.${input.body.kind}`,
-		reasonCode: input.body.reasonCode,
+		action: `content_governance.${input.body.kind}`,
 		target: {
-			kind: input.caseRow.targetKind,
-			id: input.caseRow.targetId,
-			path: input.caseRow.targetPath ?? undefined,
+			kind: input.caseRow.authority === "realm" ? "realm_unit" : "unit",
+			id: input.caseRow.targetUnitId,
 		},
 		details: {
-			moderationActionId: created.id,
+			contentGovernanceActionId: created.id,
 			caseId: input.caseRow.id,
 			realmId: input.caseRow.realmId,
+			rules,
 			notePostIds,
 		},
 	});
-	return { created: { ...created, notes: noteBindings }, replayed: false };
+	const response = {
+		...created,
+		rules,
+		notes: noteBindings,
+	} satisfies ContentGovernanceActionResponse;
+	return { created: response, replayed: false };
 }

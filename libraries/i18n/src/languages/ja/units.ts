@@ -185,7 +185,7 @@ export default {
 		republish: "再公開",
 		loadMore: "さらに読み込む",
 		unnamedRealm: `名称未設定の${realmTerms.label}`,
-		governanceReason: insert("管理上の理由：{{reason}}", { reason: String }),
+		governanceAction: insert("ガバナンス措置：{{action}}", { action: String }),
 	},
 	series: {
 		kind: "シリーズ種類",

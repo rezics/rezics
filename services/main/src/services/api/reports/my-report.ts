@@ -1,6 +1,6 @@
 import { t } from "elysia";
 
-import type { ModerationCaseStateValues } from "../../database/schema";
+import type { ContentReviewCaseStateValues } from "../../database/schema";
 import { parseJsonCursor } from "../../pagination";
 import { InvalidPaginationCursor } from "../../pagination/errors";
 import type { MyReportStatus } from "./schema";
@@ -43,9 +43,9 @@ export function encodeMyReportCursor(boundary: MyReportCursorBoundary): string {
 	).toString("base64url");
 }
 
-type ModerationCaseState = (typeof ModerationCaseStateValues)[number];
+type ContentReviewCaseState = (typeof ContentReviewCaseStateValues)[number];
 
-export function toMyReportStatus(state: ModerationCaseState): MyReportStatus {
+export function toMyReportStatus(state: ContentReviewCaseState): MyReportStatus {
 	switch (state) {
 		case "new":
 			return "submitted";
@@ -64,4 +64,15 @@ export function toMyReportStatus(state: ModerationCaseState): MyReportStatus {
 		default:
 			return state satisfies never;
 	}
+}
+
+export function toAggregateMyReportStatus(
+	states: readonly ContentReviewCaseState[],
+): MyReportStatus {
+	const statuses = states.map(toMyReportStatus);
+	if (statuses.some((status) => status === "reviewing")) return "reviewing";
+	if (statuses.some((status) => status === "submitted")) return "submitted";
+	if (statuses.some((status) => status === "completed")) return "completed";
+	if (statuses.every((status) => status === "merged")) return "merged";
+	return "not_actioned";
 }

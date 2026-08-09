@@ -345,24 +345,6 @@ export const realmStat = pgTable(
 	(table) => [check("realm_stat_count_check", sql`${table.activeMemberCount} >= 0`)],
 );
 
-export const realmUnitModerationStat = pgTable(
-	"realm_unit_moderation_stat",
-	{
-		realmId: uuid()
-			.notNull()
-			.references(() => realm.id, { onDelete: "cascade" }),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
-		openReportCount: aggregateCount(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		primaryKey({ columns: [table.realmId, table.unitId] }),
-		check("realm_unit_moderation_stat_count_check", sql`${table.openReportCount} >= 0`),
-	],
-);
-
 export const notificationRecipientStat = pgTable(
 	"notification_recipient_stat",
 	{

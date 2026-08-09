@@ -10,7 +10,6 @@ import {
 	dateOnly,
 	latestDate,
 	position,
-	selectSeedRealmModerationTarget,
 	SeedLanguages,
 } from "./data";
 
@@ -86,46 +85,20 @@ describe("seed data", () => {
 		expect(() => latestDate(new Date(Number.NaN))).toThrow(/invalid seed dates/);
 	});
 
-	it("derives Realm moderation targets from existing relationship rows", () => {
-		const targets = {
-			members: [{ realmId: "realm-a", profileId: "profile-a" }],
-			units: [{ realmId: "realm-b", unitId: "unit-b" }],
-		};
-
-		expect(selectSeedRealmModerationTarget("realm_member", 0, targets)).toEqual({
-			authority: "realm",
-			realmId: "realm-a",
-			targetKind: "realm_member",
-			targetId: "profile-a",
-		});
-		expect(selectSeedRealmModerationTarget("realm_unit", 0, targets)).toEqual({
-			authority: "realm",
-			realmId: "realm-b",
-			targetKind: "realm_unit",
-			targetId: "unit-b",
-		});
-		expect(() =>
-			selectSeedRealmModerationTarget("realm_member", 0, {
-				members: [],
-				units: targets.units,
-			}),
-		).toThrow(/cycle must not be empty/);
-	});
-
 	it("uses one enforcement kind for its decision and account record", () => {
 		const startsAt = new Date("2026-07-15T12:00:00.000Z");
 		const plan = createSeedEnforcementPlan({
 			index: 12,
 			profileId: "profile-a",
-			caseId: "case-a",
 			actorProfileId: "profile-b",
 			kind: "suspension",
 			startsAt,
 			expiresAt: null,
 		});
 
-		expect(plan.action.kind).toBe(plan.enforcement.kind);
-		expect(plan.action.idempotencyKey).toBe("seed-enforcement-00000012");
+		expect(plan.action.kind).toBe("issue");
+		expect(plan.action.enforcementKind).toBe(plan.enforcement.kind);
+		expect(plan.action.requestId).toBe("seed-enforcement-request-00000012");
 		expect(plan.enforcement).toMatchObject({ profileId: "profile-a", startsAt });
 	});
 

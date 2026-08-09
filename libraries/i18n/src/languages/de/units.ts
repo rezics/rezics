@@ -192,7 +192,7 @@ export default {
 		republish: "Erneut veröffentlichen",
 		loadMore: "Mehr laden",
 		unnamedRealm: `Unbenannter ${realmTerms.label}`,
-		governanceReason: insert("Moderationsgrund: {{reason}}", { reason: String }),
+		governanceAction: insert("Governance-Maßnahme: {{action}}", { action: String }),
 	},
 	series: {
 		kind: "Art der Reihe",

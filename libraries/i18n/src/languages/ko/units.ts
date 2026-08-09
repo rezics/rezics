@@ -183,7 +183,7 @@ export default {
 		republish: "다시 게시",
 		loadMore: "더 보기",
 		unnamedRealm: `이름 없는 ${realmTerms.label}`,
-		governanceReason: insert("관리 사유: {{reason}}", { reason: String }),
+		governanceAction: insert("거버넌스 조치: {{action}}", { action: String }),
 	},
 	series: {
 		kind: "시리즈 종류",

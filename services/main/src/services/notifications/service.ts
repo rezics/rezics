@@ -1,13 +1,13 @@
 import { and, eq } from "drizzle-orm";
 
 import { notification, notificationPreference } from "../database/schema";
-import type { GovernanceReasonCodeValues, ModerationActionKindValues } from "../database/schema";
+import type { ContentGovernanceActionKindValues, EnforcementKindValues } from "../database/schema";
 import type { DatabaseTransaction } from "../database";
 import { enqueueNotificationEmail } from "../email/outbox";
 import { emailIntentDeliveryEnabled } from "../email/policy";
 
-type GovernanceReasonCode = (typeof GovernanceReasonCodeValues)[number];
-type ModerationActionKind = (typeof ModerationActionKindValues)[number];
+type ContentGovernanceActionKind = (typeof ContentGovernanceActionKindValues)[number];
+type EnforcementKind = (typeof EnforcementKindValues)[number];
 
 type NotificationBase = {
 	recipientProfileId: string;
@@ -28,19 +28,25 @@ export type NotificationInput = NotificationBase &
 				kind: "moderation";
 				payload:
 					| {
-							type: "moderation_action";
+							type: "content_governance_action";
 							actionId: string;
-							actionKind: ModerationActionKind;
-							reasonCode: GovernanceReasonCode;
+							actionKind: ContentGovernanceActionKind;
 							publicNoticePostId?: string;
 					  }
 					| {
 							type: "report_resolution";
 							reportId: string;
-							reportScope: "platform" | "realm";
+							referralId: string;
+							actionId?: string;
+							actionKind?: ContentGovernanceActionKind;
+							resolution?: "dismissed";
+							publicNoticePostId?: string;
+					  }
+					| {
+							type: "account_enforcement_action";
 							actionId: string;
-							actionKind: ModerationActionKind;
-							reasonCode: GovernanceReasonCode;
+							actionKind: "issue" | "revoke";
+							enforcementKind: EnforcementKind;
 							publicNoticePostId?: string;
 					  };
 		  }

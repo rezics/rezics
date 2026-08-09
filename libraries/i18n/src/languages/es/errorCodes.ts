@@ -100,25 +100,30 @@ export default {
 	ContentStructureNotFound: "No se ha encontrado esta estructura de contenido.",
 	ContentStructureNodeNotFound: "No se ha encontrado este nodo de la estructura de contenido.",
 	ReviewNotFound: "No se ha encontrado esta reseña.",
-	ModerationTargetNotFound: "No se ha encontrado el destino de moderación.",
-	ModerationRealmMissing: `Falta el ${realmTerms.inline} en este caso de moderación.`,
-	ModerationCaseNotFound: "No se ha encontrado este caso de moderación.",
-	ModerationReversalInvalid: "La solicitud de reversión no es válida.",
-	ModerationReversedActionInvalid: "La acción revertida no pertenece a este caso.",
-	ModerationActionIncompatible: "Esta acción no está disponible para el destino de moderación.",
-	ModerationTransitionInvalid:
+	ContentGovernanceTargetNotFound: "No se ha encontrado el destino de moderación.",
+	ContentReviewRealmMissing: `Falta el ${realmTerms.inline} en este caso de moderación.`,
+	ContentReviewCaseNotFound: "No se ha encontrado este caso de moderación.",
+	ContentGovernanceReversedActionInvalid: "La acción revertida no pertenece a este caso.",
+	ContentGovernanceActionIncompatible:
+		"Esta acción no está disponible para el destino de moderación.",
+	ContentGovernanceTransitionInvalid:
 		"El destino no puede realizar esa transición de estado de moderación.",
-	ModerationActionNoEffect: "La acción de moderación no modificaría el destino.",
-	ModerationReversalUnavailable: "Ya no se puede revertir esta acción de forma segura.",
-	ModerationIdempotencyConflict:
+	ContentGovernanceActionNoEffect: "La acción de moderación no modificaría el destino.",
+	ContentGovernanceReversalUnavailable: "Ya no se puede revertir esta acción de forma segura.",
+	ContentGovernanceIdempotencyConflict:
 		"Esta clave de reintento ya se ha usado para otra solicitud de moderación.",
-	ModerationNoteRoleDuplicate: "Añade como máximo una nota interna y un aviso público.",
+	GovernanceNoteRoleDuplicate: "Añade como máximo una nota interna y un aviso público.",
 	ReportAlreadySubmitted: "Ya has denunciado esta unidad para el caso activo.",
 	ReportTargetRevisionUnavailable:
 		"Esta unidad no tiene ninguna revisión que se pueda denunciar.",
 	ReportRuleUnavailable: "El alcance de gobernanza seleccionado no tiene reglas vigentes.",
 	ReportRuleChanged:
 		"La regla seleccionada ha cambiado. Vuelve a elegir una regla antes de enviar.",
+	ReportRuleSourceForbidden: `Las denuncias solo pueden citar las reglas del ${realmTerms.inline} actual y las reglas oficiales.`,
+	ContentGovernanceRuleSourceForbidden:
+		"La regla seleccionada está fuera de esta autoridad de gobernanza de contenido.",
+	ContentGovernanceRuleChanged:
+		"Una regla seleccionada ya no pertenece a la revisión vigente. Vuelve a seleccionarla.",
 	EnforcementExpiryInvalid: "El vencimiento de la medida debe estar en el futuro.",
 	EnforcementNotFound: "No se ha encontrado esta medida.",
 	EnforcementAlreadyRevoked: "Esta medida ya se ha revocado.",

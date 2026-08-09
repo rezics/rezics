@@ -374,7 +374,6 @@ export default {
 	moderationTransition: insert("{{from}} → {{to}}", { from: String, to: String }),
 	closeModeration: "关闭",
 	moderationAction: "治理动作",
-	moderationReason: "理由",
 	includeAnnotation: "附加注解",
 	annotation: "注解内容",
 	annotationRole: "注解可见范围",

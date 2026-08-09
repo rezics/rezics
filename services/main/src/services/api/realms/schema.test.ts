@@ -18,6 +18,7 @@ import {
 	RealmUnitModerationActionResponse,
 	RealmUnitModerationQuery,
 	RealmUnitModerationResponse,
+	ReviewRealmUnitBody,
 	UpdateRealmTagVotingBody,
 	UpdateRealmBody,
 	UpdateRealmRulesBody,
@@ -237,33 +238,37 @@ describe("Realm moderation API contract", () => {
 		).toBe(true);
 	});
 
-	it("accepts commands and rejects client-authored resulting state", () => {
+	it("requires rule references for adverse actions and rejects the removed reason field", () => {
 		expect(
 			Check(ModerateRealmUnitBody, {
 				command: "hide",
-				reasonCode: "realm_rules",
+				rules: [
+					{
+						sourceRealmId: "019fa3ab-72a9-7792-b2e3-43aa8a9c755d",
+						revisionId: "019fa3ab-72a9-7792-b2e3-43aa8a9c755e",
+						ruleId: "019fa3ab-72a9-7792-b2e3-43aa8a9c755f",
+					},
+				],
 				idempotencyKey: "moderate-0195c49b",
 			}),
 		).toBe(true);
 		expect(
 			Check(ModerateRealmUnitBody, {
-				status: "hidden",
+				command: "hide",
 				reasonCode: "realm_rules",
 			}),
 		).toBe(false);
 	});
 
-	it("requires a Post-backed annotation for note commands", () => {
+	it("keeps review-only note and dismiss commands out of content actions", () => {
 		expect(
 			Check(ModerateRealmUnitBody, {
 				command: "note",
-				reasonCode: "administrative",
 			}),
 		).toBe(false);
 		expect(
-			Check(ModerateRealmUnitBody, {
+			Check(ReviewRealmUnitBody, {
 				command: "note",
-				reasonCode: "administrative",
 				annotation: {
 					role: "internal_note",
 					language: "zh",
@@ -271,6 +276,7 @@ describe("Realm moderation API contract", () => {
 				},
 			}),
 		).toBe(true);
+		expect(Check(ReviewRealmUnitBody, { command: "dismiss" })).toBe(true);
 	});
 
 	it("returns the updated target snapshot after moderation", () => {
@@ -286,10 +292,9 @@ describe("Realm moderation API contract", () => {
 				contentLicenseId: null,
 				previousContentLicenseStatus: null,
 				resultingContentLicenseStatus: null,
-				resultingStatus: "visible",
 				resultingPostTargetingLocked: null,
-				reasonCode: "realm_rules",
 				reversesActionId: null,
+				rules: [],
 				notes: [],
 				createdAt: "2026-07-27T12:30:00.000Z",
 				target: {

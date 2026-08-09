@@ -232,9 +232,9 @@ function RealmPublicationCard({
 			<CardContent className="flex flex-wrap items-center justify-between gap-3">
 				<div className="text-muted-foreground text-sm">
 					{item.latestGovernance
-						? copy.governanceReason({
-								reason: t.realms.governanceReasons[
-									item.latestGovernance.reasonCode
+						? copy.governanceAction({
+								action: t.realms.governanceActions[
+									item.latestGovernance.actionKind
 								],
 							})
 						: null}

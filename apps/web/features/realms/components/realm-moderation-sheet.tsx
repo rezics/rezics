@@ -7,13 +7,18 @@ import {
 	type ContentLanguage,
 } from "@rezics/i18n";
 import {
+	getApiRealmsByRealmIdReports,
+	getApiRealmsByRealmIdReportsQueryKey,
 	useGetApiRealmsByRealmIdUnitsByUnitIdHistory,
-	useGetApiRealmsByRealmIdReports,
+	useGetApiReportsUnitsByUnitIdDestinations,
 	usePatchApiRealmsByRealmIdUnitsByUnitId,
-	type GetApiRealmsByRealmIdUnitsQuery,
-	type GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200,
+	usePostApiRealmsByRealmIdUnitsByUnitIdReview,
+	type GetApiRealmsByRealmIdReportsQuery,
 	type GetApiRealmsByRealmIdReportsStatus200,
+	type GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200,
+	type GetApiRealmsByRealmIdUnitsQuery,
 	type PatchApiRealmsByRealmIdUnitsByUnitIdBody,
+	type PostApiRealmsByRealmIdUnitsByUnitIdReviewBody,
 } from "@rezics/openapi-tanstack-query";
 import type { PortableTextValue } from "@rezics/portable-text";
 import {
@@ -28,6 +33,7 @@ import {
 	Button,
 	Checkbox,
 	Field,
+	FieldDescription,
 	FieldLabel,
 	NativeSelect,
 	NativeSelectOption,
@@ -39,14 +45,19 @@ import {
 	Skeleton,
 	toast,
 } from "@rezics/ui";
-import { useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState, type FormEvent } from "react";
 
+import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
+import {
+	ContentGovernanceMaximumRuleReferences,
+	updateContentRuleSelection,
+} from "@/features/governance/model/content-rule-selection";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { readPortableText, writePortableText } from "@/lib/block";
-import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import {
 	RealmModerationHistoryQuery,
 	refreshRealmModerationData,
@@ -54,9 +65,8 @@ import {
 	type RealmModerationUnit,
 } from "../data/realm-moderation-query";
 import {
-	GovernanceReasonCodes,
 	hasAuthoredAnnotation,
-	toGovernanceReasonCode,
+	realmGovernanceActionRequiresRules,
 	toRealmModerationCommand,
 	type RealmModerationCommand,
 } from "../model/moderation-contract";
@@ -66,6 +76,16 @@ type RealmModerationHistoryAction =
 	GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200["items"][number];
 type RealmUnitReport = GetApiRealmsByRealmIdReportsStatus200["items"][number];
 type ModerationAnnotationRole = "internal_note" | "public_notice";
+type GovernanceSubmission =
+	| { readonly type: "action"; readonly body: PatchApiRealmsByRealmIdUnitsByUnitIdBody }
+	| {
+			readonly type: "review";
+			readonly body: PostApiRealmsByRealmIdUnitsByUnitIdReviewBody;
+	  };
+
+function ruleSelectionKey(sourceRealmId: string, revisionId: string, ruleId: string): string {
+	return `${sourceRealmId}:${revisionId}:${ruleId}`;
+}
 
 export function RealmModerationSheet({
 	realmId,
@@ -83,21 +103,44 @@ export function RealmModerationSheet({
 	readonly onOpenChange: (open: boolean) => void;
 }) {
 	const { t, locale } = useTranslation(["locale", "posts", "realms", "reports"]);
+	const localizationLanguages = useLocalizationLanguages();
 	const queryClient = useQueryClient();
-	const mutation = usePatchApiRealmsByRealmIdUnitsByUnitId();
+	const actionMutation = usePatchApiRealmsByRealmIdUnitsByUnitId();
+	const reviewMutation = usePostApiRealmsByRealmIdUnitsByUnitIdReview();
 	const history = useGetApiRealmsByRealmIdUnitsByUnitIdHistory({
 		path: { realmId, unitId: unit.unitId },
 		query: RealmModerationHistoryQuery,
 	});
-	const reports = useGetApiRealmsByRealmIdReports({
-		path: { realmId },
-		query: { unitId: unit.unitId, limit: 100 },
+	const reportQuery = {
+		unitId: unit.unitId,
+		localizationLanguages,
+		limit: 50,
+	} satisfies GetApiRealmsByRealmIdReportsQuery;
+	const reports = useInfiniteQuery({
+		queryKey: getApiRealmsByRealmIdReportsQueryKey({
+			path: { realmId },
+			query: reportQuery,
+		}),
+		queryFn: async ({ pageParam, signal }) => {
+			const { data } = await getApiRealmsByRealmIdReports({
+				path: { realmId },
+				query: { ...reportQuery, ...(pageParam ? { cursor: pageParam } : {}) },
+				signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+		initialPageParam: "",
+		getNextPageParam: (page) => page.nextCursor ?? undefined,
 	});
-	const [command, setCommand] = useState<RealmModerationCommand>(
+	const destinations = useGetApiReportsUnitsByUnitIdDestinations({
+		path: { unitId: unit.unitId },
+		query: { contextRealmId: realmId, localizationLanguages },
+	});
+	const [commandSelection, setCommandSelection] = useState<RealmModerationCommand>(
 		() => unit.allowedCommands[0] ?? "note",
 	);
-	const [reasonCode, setReasonCode] =
-		useState<(typeof GovernanceReasonCodes)[number]>("realm_rules");
+	const [selectedRuleKeys, setSelectedRuleKeys] = useState<string[]>([]);
 	const [includeAnnotation, setIncludeAnnotation] = useState(false);
 	const [annotationRole, setAnnotationRole] = useState<ModerationAnnotationRole>("internal_note");
 	const [annotationLanguage, setAnnotationLanguage] = useState<ContentLanguage>(
@@ -106,13 +149,50 @@ export function RealmModerationSheet({
 	const [annotation, setAnnotation] = useState<PortableTextValue>([]);
 	const [removeConfirmationOpen, setRemoveConfirmationOpen] = useState(false);
 	const submissionInFlight = useRef(false);
+	const command = toRealmModerationCommand(commandSelection, unit.allowedCommands);
+	const rulesRequired = realmGovernanceActionRequiresRules(command);
+	const availableRuleKeys = (destinations.data?.items ?? []).flatMap((destination) =>
+		destination.rules.map((rule) =>
+			ruleSelectionKey(destination.id, destination.revisionId, rule.id),
+		),
+	);
+	const currentSelectedRuleKeys = selectedRuleKeys.filter((key) =>
+		availableRuleKeys.includes(key),
+	);
+	const selectedRules = (destinations.data?.items ?? []).flatMap((destination) =>
+		destination.rules
+			.filter((rule) =>
+				currentSelectedRuleKeys.includes(
+					ruleSelectionKey(destination.id, destination.revisionId, rule.id),
+				),
+			)
+			.map((rule) => ({
+				sourceRealmId: destination.id,
+				revisionId: destination.revisionId,
+				ruleId: rule.id,
+			})),
+	);
 	const annotationRequested = command === "note" || includeAnnotation;
 	const annotationValid = !annotationRequested || hasAuthoredAnnotation(annotation);
+	const rulesValid = !rulesRequired || selectedRules.length > 0;
+	const mutationPending = actionMutation.isPending || reviewMutation.isPending;
 	const title = unit.title ?? t.posts.untitled;
 	const formId = `realm-moderation-${unit.unitId}`;
+	const reportItems = reports.data?.pages.flatMap((page) => page.items) ?? [];
+	const ruleTitles = new Map(
+		(destinations.data?.items ?? []).flatMap((destination) =>
+			destination.rules.map(
+				(rule) =>
+					[
+						ruleSelectionKey(destination.id, destination.revisionId, rule.id),
+						rule.title,
+					] as const,
+			),
+		),
+	);
 
-	function buildBody(): PatchApiRealmsByRealmIdUnitsByUnitIdBody | undefined {
-		if (!annotationValid) return undefined;
+	function buildSubmission(): GovernanceSubmission | undefined {
+		if (!annotationValid || !rulesValid) return undefined;
 		const authoredAnnotation = annotationRequested
 			? {
 					role: annotationRole,
@@ -122,31 +202,46 @@ export function RealmModerationSheet({
 			: undefined;
 		if (command === "note") {
 			if (!authoredAnnotation) return undefined;
+			return { type: "review", body: { command, annotation: authoredAnnotation } };
+		}
+		if (command === "dismiss") {
 			return {
-				command,
-				reasonCode,
-				idempotencyKey: crypto.randomUUID(),
-				annotation: authoredAnnotation,
+				type: "review",
+				body: {
+					command,
+					...(authoredAnnotation ? { annotation: authoredAnnotation } : {}),
+				},
 			};
 		}
-		return {
-			command,
-			reasonCode,
+		const common = {
 			idempotencyKey: crypto.randomUUID(),
 			...(authoredAnnotation ? { annotation: authoredAnnotation } : {}),
 		};
+		if (realmGovernanceActionRequiresRules(command)) {
+			if (!selectedRules.length) return undefined;
+			return { type: "action", body: { ...common, command, rules: selectedRules } };
+		}
+		if (command !== "approve" && command !== "restore" && command !== "unlock_post_targeting")
+			return undefined;
+		return { type: "action", body: { ...common, command } };
 	}
 
-	async function applyModeration() {
+	async function applyGovernance() {
 		if (submissionInFlight.current) return;
-		const body = buildBody();
-		if (!body) return;
+		const submission = buildSubmission();
+		if (!submission) return;
 		submissionInFlight.current = true;
 		try {
-			const result = await mutation.mutateAsync({
-				path: { realmId, unitId: unit.unitId },
-				body,
-			});
+			const result =
+				submission.type === "action"
+					? await actionMutation.mutateAsync({
+							path: { realmId, unitId: unit.unitId },
+							body: submission.body,
+						})
+					: await reviewMutation.mutateAsync({
+							path: { realmId, unitId: unit.unitId },
+							body: submission.body,
+						});
 			if (queueCache)
 				updateRealmModerationQueueCache(
 					queryClient,
@@ -169,26 +264,26 @@ export function RealmModerationSheet({
 
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		if (!annotationValid) return;
+		if (!annotationValid || !rulesValid) return;
 		if (command === "remove") {
 			setRemoveConfirmationOpen(true);
 			return;
 		}
-		void applyModeration();
+		void applyGovernance();
 	}
 
 	return (
 		<>
 			<Sheet
 				onOpenChange={({ open }) => {
-					if (!open && !mutation.isPending) onOpenChange(false);
+					if (!open && !mutationPending) onOpenChange(false);
 				}}
 				open
 			>
 				<SheetContent
 					className="sm:max-w-2xl"
 					placement="right"
-					showCloseButton={!mutation.isPending}
+					showCloseButton={!mutationPending}
 				>
 					<SheetHeader
 						description={t.realms.moderationSnapshot({
@@ -201,45 +296,91 @@ export function RealmModerationSheet({
 					/>
 					<SheetBody className="grid content-start gap-6">
 						<form className="grid gap-4" id={formId} onSubmit={submit}>
-							<div className="grid gap-4 sm:grid-cols-2">
+							<Field required>
+								<FieldLabel>{t.realms.moderationAction}</FieldLabel>
+								<NativeSelect
+									onChange={(event) =>
+										setCommandSelection(
+											toRealmModerationCommand(
+												event.currentTarget.value,
+												unit.allowedCommands,
+											),
+										)
+									}
+									value={command}
+								>
+									{unit.allowedCommands.map((value) => (
+										<NativeSelectOption key={value} value={value}>
+											{t.realms.governanceActions[value]}
+										</NativeSelectOption>
+									))}
+								</NativeSelect>
+							</Field>
+
+							{rulesRequired ? (
 								<Field required>
-									<FieldLabel>{t.realms.moderationAction}</FieldLabel>
-									<NativeSelect
-										value={command}
-										onChange={(event) =>
-											setCommand(
-												toRealmModerationCommand(
-													event.currentTarget.value,
-													unit.allowedCommands,
-												),
-											)
-										}
-									>
-										{unit.allowedCommands.map((value) => (
-											<NativeSelectOption key={value} value={value}>
-												{t.realms.governanceActions[value]}
-											</NativeSelectOption>
-										))}
-									</NativeSelect>
+									<FieldLabel>{t.reports.rule}</FieldLabel>
+									{destinations.isPending ? (
+										<Skeleton className="h-28 rounded-xl" />
+									) : null}
+									{destinations.error ? (
+										<RequestFailure error={destinations.error} />
+									) : null}
+									{destinations.data?.items.map((destination) => (
+										<fieldset
+											className="grid gap-2 rounded-lg border p-3"
+											key={destination.id}
+										>
+											<legend className="px-1 font-medium text-sm">
+												{destination.title ??
+													t.reports.myReports.scopes[destination.scope]}
+											</legend>
+											{destination.rules.map((rule) => {
+												const key = ruleSelectionKey(
+													destination.id,
+													destination.revisionId,
+													rule.id,
+												);
+												const checked =
+													currentSelectedRuleKeys.includes(key);
+												return (
+													<label
+														className="flex items-start gap-2 text-sm"
+														key={key}
+													>
+														<Checkbox
+															checked={checked}
+															disabled={
+																!checked &&
+																currentSelectedRuleKeys.length >=
+																	ContentGovernanceMaximumRuleReferences
+															}
+															onCheckedChange={({ checked }) =>
+																setSelectedRuleKeys((current) =>
+																	updateContentRuleSelection(
+																		current.filter((value) =>
+																			availableRuleKeys.includes(
+																				value,
+																			),
+																		),
+																		key,
+																		checked === true,
+																	),
+																)
+															}
+														/>
+														<span>{rule.title}</span>
+													</label>
+												);
+											})}
+										</fieldset>
+									))}
+									{destinations.data && !destinations.data.items.length ? (
+										<FieldDescription>{t.reports.noRules}</FieldDescription>
+									) : null}
+									<FieldDescription>{t.reports.ruleLimit}</FieldDescription>
 								</Field>
-								<Field required>
-									<FieldLabel>{t.realms.moderationReason}</FieldLabel>
-									<NativeSelect
-										value={reasonCode}
-										onChange={(event) =>
-											setReasonCode(
-												toGovernanceReasonCode(event.currentTarget.value),
-											)
-										}
-									>
-										{GovernanceReasonCodes.map((value) => (
-											<NativeSelectOption key={value} value={value}>
-												{t.realms.governanceReasons[value]}
-											</NativeSelectOption>
-										))}
-									</NativeSelect>
-								</Field>
-							</div>
+							) : null}
 
 							<Field className="w-auto" orientation="horizontal">
 								<Checkbox
@@ -260,7 +401,6 @@ export function RealmModerationSheet({
 										<Field required>
 											<FieldLabel>{t.realms.annotationRole}</FieldLabel>
 											<NativeSelect
-												value={annotationRole}
 												onChange={(event) =>
 													setAnnotationRole(
 														event.currentTarget.value ===
@@ -269,6 +409,7 @@ export function RealmModerationSheet({
 															: "internal_note",
 													)
 												}
+												value={annotationRole}
 											>
 												<NativeSelectOption value="internal_note">
 													{t.realms.annotationRoles.internal_note}
@@ -281,12 +422,12 @@ export function RealmModerationSheet({
 										<Field required>
 											<FieldLabel>{t.realms.annotationLanguage}</FieldLabel>
 											<NativeSelect
-												value={annotationLanguage}
 												onChange={(event) => {
 													const value = event.currentTarget.value;
 													if (isContentLanguage(value))
 														setAnnotationLanguage(value);
 												}}
+												value={annotationLanguage}
 											>
 												{ContentLanguageValues.map((value) => (
 													<NativeSelectOption key={value} value={value}>
@@ -307,24 +448,37 @@ export function RealmModerationSheet({
 									</p>
 								</div>
 							) : null}
-							<RequestFailure error={mutation.error} />
+							<RequestFailure error={actionMutation.error ?? reviewMutation.error} />
 						</form>
 
 						<div className="grid gap-3 border-t pt-5">
 							<h3 className="font-heading font-bold">{t.reports.heading}</h3>
-							{reports.isPending ? (
-								<Skeleton className="h-32 rounded-xl" />
-							) : reports.error ? (
-								<RequestFailure error={reports.error} />
-							) : reports.data?.items.length ? (
+							{reports.isPending ? <Skeleton className="h-32 rounded-xl" /> : null}
+							{reports.isError ? <RequestFailure error={reports.error} /> : null}
+							{reportItems.length ? (
 								<div className="grid gap-3">
-									{reports.data.items.map((item) => (
-										<RealmReportItem key={item.id} report={item} />
+									{reportItems.map((item) => (
+										<RealmReportItem
+											key={item.id}
+											realmId={realmId}
+											report={item}
+										/>
 									))}
+									{reports.hasNextPage ? (
+										<Button
+											disabled={reports.isFetchingNextPage}
+											isLoading={reports.isFetchingNextPage}
+											onClick={() => void reports.fetchNextPage()}
+											type="button"
+											variant="outline"
+										>
+											{t.reports.myReports.loadMore}
+										</Button>
+									) : null}
 								</div>
-							) : (
+							) : reports.isSuccess ? (
 								<p className="text-muted-foreground text-sm">{t.reports.empty}</p>
-							)}
+							) : null}
 						</div>
 
 						<div className="grid gap-3 border-t pt-5">
@@ -336,7 +490,11 @@ export function RealmModerationSheet({
 							) : history.data?.items.length ? (
 								<div className="grid gap-3">
 									{history.data.items.map((item) => (
-										<RealmModerationHistoryItem key={item.id} item={item} />
+										<RealmModerationHistoryItem
+											item={item}
+											key={item.id}
+											ruleTitles={ruleTitles}
+										/>
 									))}
 								</div>
 							) : (
@@ -348,7 +506,7 @@ export function RealmModerationSheet({
 					</SheetBody>
 					<SheetFooter>
 						<Button
-							disabled={mutation.isPending}
+							disabled={mutationPending}
 							onClick={() => onOpenChange(false)}
 							type="button"
 							variant="outline"
@@ -356,9 +514,9 @@ export function RealmModerationSheet({
 							{t.realms.closeModeration}
 						</Button>
 						<Button
-							disabled={!annotationValid}
+							disabled={!annotationValid || !rulesValid}
 							form={formId}
-							isLoading={mutation.isPending}
+							isLoading={mutationPending}
 							type="submit"
 							variant={command === "remove" ? "destructive" : "solid"}
 						>
@@ -370,7 +528,7 @@ export function RealmModerationSheet({
 
 			<AlertDialog
 				onOpenChange={({ open }) => {
-					if (!mutation.isPending) setRemoveConfirmationOpen(open);
+					if (!mutationPending) setRemoveConfirmationOpen(open);
 				}}
 				open={removeConfirmationOpen}
 			>
@@ -382,14 +540,14 @@ export function RealmModerationSheet({
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
-						<AlertDialogCancel disabled={mutation.isPending}>
+						<AlertDialogCancel disabled={mutationPending}>
 							{t.realms.cancelModeration}
 						</AlertDialogCancel>
 						<AlertDialogAction
-							disabled={mutation.isPending}
+							disabled={mutationPending}
 							onClick={() => {
 								setRemoveConfirmationOpen(false);
-								void applyModeration();
+								void applyGovernance();
 							}}
 							variant="destructive"
 						>
@@ -402,12 +560,21 @@ export function RealmModerationSheet({
 	);
 }
 
-function RealmReportItem({ report }: { readonly report: RealmUnitReport }) {
+function RealmReportItem({
+	realmId,
+	report,
+}: {
+	readonly realmId: string;
+	readonly report: RealmUnitReport;
+}) {
 	const { t, locale } = useTranslation(["reports"]);
+	const referral = report.referrals.find(
+		(item) => item.scope === "realm" && item.realmId === realmId,
+	);
 	return (
 		<article className="grid gap-3 rounded-lg border p-4 text-sm">
 			<div className="flex flex-wrap items-start justify-between gap-2">
-				<p className="font-medium">{report.rule.title}</p>
+				<p className="font-medium">{report.rules.map((rule) => rule.title).join(" · ")}</p>
 				<time className="text-muted-foreground text-xs" dateTime={report.createdAt}>
 					{t.reports.reportedAt({
 						date: formatDateTime(report.createdAt, locale.current),
@@ -415,9 +582,11 @@ function RealmReportItem({ report }: { readonly report: RealmUnitReport }) {
 				</time>
 			</div>
 			<div className="grid gap-1 text-muted-foreground text-xs">
-				<p>
-					{t.reports.caseState}: {t.reports.caseStates[report.caseState]}
-				</p>
+				{referral ? (
+					<p>
+						{t.reports.caseState}: {t.reports.caseStates[referral.caseState]}
+					</p>
+				) : null}
 				<p>
 					{t.reports.revision}: <code>{report.reportedRevisionId}</code>
 				</p>
@@ -429,8 +598,14 @@ function RealmReportItem({ report }: { readonly report: RealmUnitReport }) {
 	);
 }
 
-function RealmModerationHistoryItem({ item }: { item: RealmModerationHistoryAction }) {
-	const { t, locale } = useTranslation(["locale", "realms"]);
+function RealmModerationHistoryItem({
+	item,
+	ruleTitles,
+}: {
+	readonly item: RealmModerationHistoryAction;
+	readonly ruleTitles: ReadonlyMap<string, string>;
+}) {
+	const { t, locale } = useTranslation(["locale", "realms", "reports"]);
 	return (
 		<article className="grid gap-3 rounded-lg border p-4 text-sm">
 			<div className="flex flex-wrap items-start justify-between gap-2">
@@ -443,9 +618,23 @@ function RealmModerationHistoryItem({ item }: { item: RealmModerationHistoryActi
 				<p>
 					{t.realms.actionBy}: {item.actorName ?? t.realms.unknownMember}
 				</p>
-				<p>
-					{t.realms.moderationReason}: {t.realms.governanceReasons[item.reasonCode]}
-				</p>
+				{item.rules.length ? (
+					<p>
+						{t.reports.rule}:{" "}
+						{item.rules
+							.map(
+								(rule) =>
+									ruleTitles.get(
+										ruleSelectionKey(
+											rule.sourceRealmId,
+											rule.revisionId,
+											rule.ruleId,
+										),
+									) ?? rule.ruleId,
+							)
+							.join(" · ")}
+					</p>
+				) : null}
 				{item.previousState && item.resultingState ? (
 					<p>
 						{t.realms.stateTransition}:{" "}

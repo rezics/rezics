@@ -187,7 +187,7 @@ export default {
 		republish: "Republish",
 		loadMore: "Load more",
 		unnamedRealm: `Unnamed ${realmTerms.label}`,
-		governanceReason: insert("Governance reason: {{reason}}", { reason: String }),
+		governanceAction: insert("Governance action: {{action}}", { action: String }),
 	},
 	series: {
 		kind: "Series kind",

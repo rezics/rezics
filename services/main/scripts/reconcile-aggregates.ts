@@ -239,27 +239,21 @@ const checks: readonly { name: string; query: SQL }[] = [
 		`,
 	},
 	{
-		name: "realm_unit_moderation_stat",
+		name: "content_review_case_report_counter",
 		query: sql`
 			with expected as (
-				select realm_unit.realm_id, realm_unit.unit_id,
-					count(realm_unit_report.id) filter (
-						where moderation_case.state in (
-							'new', 'triaged', 'assigned', 'escalated', 'reviewing'
-						)
-					) as open_report_count
-				from realm_unit
-				left join realm_unit_report
-					on realm_unit_report.realm_id = realm_unit.realm_id
-					and realm_unit_report.unit_id = realm_unit.unit_id
-				left join moderation_case on moderation_case.id = realm_unit_report.case_id
-				group by realm_unit.realm_id, realm_unit.unit_id
+				select case_id, count(*) as report_count
+				from content_report_referral
+				group by case_id
+			), actual as (
+				select case_id, sum(count) as report_count
+				from content_review_case_report_counter
+				group by case_id
 			)
 			select count(*)::text as drift_count from expected
-			full join realm_unit_moderation_stat using (realm_id, unit_id)
-			where expected.realm_id is null or realm_unit_moderation_stat.realm_id is null
-				or expected.open_report_count is distinct from
-					realm_unit_moderation_stat.open_report_count
+			full join actual using (case_id)
+			where expected.case_id is null or actual.case_id is null
+				or expected.report_count is distinct from actual.report_count
 		`,
 	},
 	{

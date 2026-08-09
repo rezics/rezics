@@ -22,8 +22,14 @@ import {
 	creditAttribution,
 	unitAssociationProposal,
 	subjectAssociation,
-	platformUnitReport,
-	realmUnitReport,
+	accountEnforcementAction,
+	contentGovernanceAction,
+	contentGovernanceActionRule,
+	contentReport,
+	contentReportReferral,
+	contentReportRule,
+	contentReviewCase,
+	contentReviewCaseReportCounter,
 	unit,
 	unitAlias,
 	unitDock,
@@ -47,9 +53,8 @@ import {
 	isCreditAttributionUnitKind,
 	DockKindValues,
 	DockKindsByUnitKind,
-	moderationAction,
-	moderationCase,
-	ModerationActionKindValues,
+	ContentGovernanceActionKindValues,
+	GovernanceNoteSubjectKindValues,
 	NonRealmUnitKindValues,
 	PostKindValues,
 	RealmScoreContextPostKindValues,
@@ -558,13 +563,23 @@ describe("database schema contracts", () => {
 			"unlock_post_targeting",
 		]);
 		expect(PostKindValues).toContain("governance_note");
-		expect(ModerationActionKindValues).toEqual(
-			expect.arrayContaining(["hide", "note", "warning", "revoke_enforcement"]),
+		expect(ContentGovernanceActionKindValues).toEqual(
+			expect.arrayContaining(["hide", "remove", "reverse"]),
+		);
+		expect(ContentGovernanceActionKindValues).not.toEqual(
+			expect.arrayContaining(["note", "warning", "revoke_enforcement"]),
 		);
 		expect(GovernanceReasonCodeValues).toEqual(
 			expect.arrayContaining(["content_policy", "realm_rules", "administrative"]),
 		);
 		expect(GovernanceNoteRoleValues).toEqual(["evidence", "internal_note", "public_notice"]);
+		expect(GovernanceNoteSubjectKindValues).toEqual(
+			expect.arrayContaining([
+				"content_review_case",
+				"content_governance_action",
+				"account_enforcement_action",
+			]),
+		);
 
 		const binding = getTableConfig(governancePostBinding);
 		expect(binding.columns.map((column) => column.name)).not.toContain("revision_id");
@@ -580,7 +595,7 @@ describe("database schema contracts", () => {
 			"realm_unit_status_event_realm_unit_fkey",
 		);
 		expect(event.uniqueConstraints.map((constraint) => constraint.name)).toContain(
-			"realm_unit_status_event_action_key",
+			"realm_unit_status_event_content_governance_action_key",
 		);
 		expect(event.columns.map((column) => column.name)).not.toContain("annotation_document");
 
@@ -601,15 +616,17 @@ describe("database schema contracts", () => {
 			"realm_unit_publication_event_transition_check",
 		);
 
-		const action = getTableConfig(moderationAction);
+		const action = getTableConfig(contentGovernanceAction);
 		expect(governanceReasonCode.enumValues).toEqual(GovernanceReasonCodeValues);
-		expect(moderationAction.reasonCode.enumValues).toEqual(GovernanceReasonCodeValues);
 		expect(unitAccessRestriction.reasonCode.enumValues).toEqual(GovernanceReasonCodeValues);
 		expect(action.indexes.map((index) => index.config.name)).toContain(
-			"moderation_action_actor_case_idempotency_key",
+			"content_governance_action_actor_case_idempotency_key",
 		);
 		expect(action.indexes.map((index) => index.config.name)).toContain(
-			"moderation_action_content_license_created_at_idx",
+			"content_governance_action_content_license_created_idx",
+		);
+		expect(action.indexes.map((index) => index.config.name)).toContain(
+			"content_governance_action_reverses_key",
 		);
 		expect(action.columns.map((column) => column.name)).toEqual(
 			expect.arrayContaining([
@@ -620,68 +637,84 @@ describe("database schema contracts", () => {
 		);
 		expect(action.checks.map((constraint) => constraint.name)).toEqual(
 			expect.arrayContaining([
-				"moderation_action_state_outcome_check",
-				"moderation_action_post_targeting_lock_outcome_check",
-				"moderation_action_single_outcome_check",
-				"moderation_action_content_license_transition_check",
-				"moderation_action_request_fingerprint_check",
+				"content_governance_action_state_outcome_check",
+				"content_governance_action_post_targeting_lock_outcome_check",
+				"content_governance_action_single_outcome_check",
+				"content_governance_action_kind_outcome_check",
+				"content_governance_action_content_license_transition_check",
+				"content_governance_action_request_fingerprint_check",
 			]),
 		);
-		const realmReportConfig = getTableConfig(realmUnitReport);
-		expect(realmReportConfig.columns.map((column) => column.name)).toEqual(
+		expect(action.columns.map((column) => column.name)).not.toEqual(
+			expect.arrayContaining(["reason_code", "resulting_status"]),
+		);
+		const reportConfig = getTableConfig(contentReport);
+		expect(reportConfig.columns.map((column) => column.name)).toEqual(
 			expect.arrayContaining([
-				"case_id",
 				"reporter_profile_id",
-				"realm_id",
-				"unit_id",
-				"rule_revision_id",
-				"rule_id",
+				"context_realm_id",
+				"target_unit_id",
 				"details",
 				"reported_revision_id",
 			]),
 		);
-		expect(realmReportConfig.uniqueConstraints.map((constraint) => constraint.name)).toContain(
-			"realm_unit_report_case_reporter_key",
+		expect(reportConfig.foreignKeys.map((key) => key.getName())).toContain(
+			"content_report_revision_unit_fkey",
 		);
-		expect(realmReportConfig.foreignKeys.map((key) => key.getName())).toEqual(
+		const reportRuleConfig = getTableConfig(contentReportRule);
+		expect(reportRuleConfig.columns.map((column) => column.name)).toEqual(
 			expect.arrayContaining([
-				"realm_unit_report_revision_unit_fkey",
-				"realm_unit_report_realm_unit_fkey",
-				"realm_unit_report_rule_revision_realm_fkey",
-				"realm_unit_report_rule_revision_fkey",
-			]),
-		);
-		const platformReportConfig = getTableConfig(platformUnitReport);
-		expect(platformReportConfig.columns.map((column) => column.name)).toEqual(
-			expect.arrayContaining([
-				"case_id",
-				"reporter_profile_id",
-				"unit_id",
+				"report_id",
 				"rule_source_realm_id",
 				"rule_revision_id",
 				"rule_id",
-				"details",
-				"reported_revision_id",
+			]),
+		);
+		expect(reportRuleConfig.foreignKeys.map((key) => key.getName())).toEqual(
+			expect.arrayContaining([
+				"content_report_rule_revision_realm_fkey",
+				"content_report_rule_revision_fkey",
+			]),
+		);
+		const referralConfig = getTableConfig(contentReportReferral);
+		expect(referralConfig.indexes.map((index) => index.config.name)).toEqual(
+			expect.arrayContaining([
+				"content_report_referral_case_created_idx",
+				"content_report_referral_source_created_idx",
+			]),
+		);
+		expect(referralConfig.uniqueConstraints.map((constraint) => constraint.name)).toEqual(
+			expect.arrayContaining([
+				"content_report_referral_report_source_key",
+				"content_report_referral_case_report_key",
+			]),
+		);
+		const reviewCaseConfig = getTableConfig(contentReviewCase);
+		expect(reviewCaseConfig.columns.map((column) => column.name)).toEqual(
+			expect.arrayContaining(["authority", "realm_id", "target_unit_id", "state"]),
+		);
+		expect(reviewCaseConfig.columns.map((column) => column.name)).not.toEqual(
+			expect.arrayContaining(["target_kind", "target_id", "target_path", "reason"]),
+		);
+		expect(reviewCaseConfig.indexes.map((index) => index.config.name)).toEqual(
+			expect.arrayContaining([
+				"content_review_case_authority_created_idx",
+				"content_review_case_realm_created_idx",
+				"content_review_case_platform_updated_idx",
+				"content_review_case_platform_state_updated_idx",
 			]),
 		);
 		expect(
-			platformReportConfig.uniqueConstraints.map((constraint) => constraint.name),
-		).toContain("platform_unit_report_case_reporter_key");
-		expect(platformReportConfig.foreignKeys.map((key) => key.getName())).toEqual(
+			getTableConfig(contentReviewCaseReportCounter).checks.map(({ name }) => name),
+		).toEqual(
 			expect.arrayContaining([
-				"platform_unit_report_revision_unit_fkey",
-				"platform_unit_report_rule_revision_realm_fkey",
-				"platform_unit_report_rule_revision_fkey",
+				"content_review_case_report_counter_bucket_check",
+				"content_review_case_report_counter_count_check",
 			]),
 		);
-		expect(platformReportConfig.checks.map((constraint) => constraint.name)).toContain(
-			"platform_unit_report_rule_source_check",
-		);
-		expect(getTableConfig(moderationCase).columns.map((column) => column.name)).not.toEqual(
-			expect.arrayContaining(["reason", "safe_summary"]),
-		);
-		expect(action.columns.map((column) => column.name)).not.toEqual(
-			expect.arrayContaining(["reason", "public_message"]),
+		expect(getTableConfig(contentGovernanceActionRule).primaryKeys).toHaveLength(1);
+		expect(getTableConfig(accountEnforcementAction).columns.map(({ name }) => name)).toEqual(
+			expect.arrayContaining(["target_profile_id", "kind", "enforcement_kind"]),
 		);
 		expect(getTableConfig(auditEvent).columns.map((column) => column.name)).not.toContain(
 			"reason",

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
 	hasAuthoredAnnotation,
-	toGovernanceReasonCode,
+	realmGovernanceActionRequiresRules,
 	toRealmModerationCommand,
 	toRealmModerationStatus,
 } from "./moderation-contract";
@@ -11,8 +11,15 @@ describe("Realm moderation UI contract", () => {
 	it("rejects stale select values at the generated contract boundary", () => {
 		const allowed = ["hide", "remove", "lock_post_targeting", "note"] as const;
 		expect(toRealmModerationCommand("approve", allowed)).toBe("hide");
-		expect(toGovernanceReasonCode("not_a_reason")).toBe("other");
 		expect(toRealmModerationStatus("not_a_status")).toBe("all");
+	});
+
+	it("requires one or more rule references only for adverse content actions", () => {
+		expect(realmGovernanceActionRequiresRules("hide")).toBe(true);
+		expect(realmGovernanceActionRequiresRules("remove")).toBe(true);
+		expect(realmGovernanceActionRequiresRules("lock_post_targeting")).toBe(true);
+		expect(realmGovernanceActionRequiresRules("approve")).toBe(false);
+		expect(realmGovernanceActionRequiresRules("note")).toBe(false);
 	});
 
 	it("requires authored text or an image before creating an annotation Post", () => {

@@ -1,7 +1,6 @@
-import {
-	PatchApiRealmsByRealmIdUnitsByUnitIdRequestReasonCodeEnum,
-	type GetApiRealmsByRealmIdUnitsStatus200ItemsAllowedCommandsEnum,
-	type GetApiRealmsByRealmIdUnitsStatus200ItemsStatusEnum,
+import type {
+	GetApiRealmsByRealmIdUnitsStatus200ItemsAllowedCommandsEnum,
+	GetApiRealmsByRealmIdUnitsStatus200ItemsStatusEnum,
 } from "@rezics/openapi-tanstack-query";
 import { isPortableTextValueBlock, type PortableTextValue } from "@rezics/portable-text";
 
@@ -14,10 +13,6 @@ export const RealmModerationStatuses = [
 	"hidden",
 	"removed",
 ] as const satisfies readonly RealmModerationStatus[];
-
-export const GovernanceReasonCodes = Object.values(
-	PatchApiRealmsByRealmIdUnitsByUnitIdRequestReasonCodeEnum,
-);
 
 export function hasAuthoredAnnotation(value: PortableTextValue): boolean {
 	return value.some(
@@ -41,6 +36,8 @@ export function toRealmModerationCommand(
 	return allowed.find((command) => command === value) ?? allowed[0] ?? "note";
 }
 
-export function toGovernanceReasonCode(value: string): (typeof GovernanceReasonCodes)[number] {
-	return GovernanceReasonCodes.find((reason) => reason === value) ?? "other";
+export function realmGovernanceActionRequiresRules(
+	command: RealmModerationCommand,
+): command is Extract<RealmModerationCommand, "hide" | "remove" | "lock_post_targeting"> {
+	return command === "hide" || command === "remove" || command === "lock_post_targeting";
 }

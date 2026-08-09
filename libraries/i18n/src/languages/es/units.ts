@@ -189,7 +189,7 @@ export default {
 		republish: "Volver a publicar",
 		loadMore: "Cargar más",
 		unnamedRealm: `${realmTerms.label} sin nombre`,
-		governanceReason: insert("Motivo de gobernanza: {{reason}}", { reason: String }),
+		governanceAction: insert("Medida de gobernanza: {{action}}", { action: String }),
 	},
 	series: {
 		kind: "Tipo de serie",

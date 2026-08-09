@@ -4,8 +4,8 @@ import { and, desc, eq, inArray, isNotNull, lt, or, sql } from "drizzle-orm";
 import type { Authorization } from "../authorization";
 import { database, type DatabaseTransaction } from "../database";
 import {
-	moderationAction,
-	moderationCase,
+	contentGovernanceAction,
+	contentReviewCase,
 	realmUnit,
 	realmUnitPublicationEvent,
 	unit,
@@ -228,27 +228,29 @@ export async function listUnitRealmPublications(input: {
 	const realmIds = rows.map((row) => row.realmId);
 	const governanceRows = realmIds.length
 		? await database
-				.selectDistinctOn([moderationCase.realmId], {
-					realmId: moderationCase.realmId,
-					actionId: moderationAction.id,
-					reasonCode: moderationAction.reasonCode,
-					createdAt: moderationAction.createdAt,
+				.selectDistinctOn([contentReviewCase.realmId], {
+					realmId: contentReviewCase.realmId,
+					actionId: contentGovernanceAction.id,
+					actionKind: contentGovernanceAction.kind,
+					createdAt: contentGovernanceAction.createdAt,
 				})
-				.from(moderationAction)
-				.innerJoin(moderationCase, eq(moderationCase.id, moderationAction.caseId))
+				.from(contentGovernanceAction)
+				.innerJoin(
+					contentReviewCase,
+					eq(contentReviewCase.id, contentGovernanceAction.caseId),
+				)
 				.where(
 					and(
-						eq(moderationCase.authority, "realm"),
-						inArray(moderationCase.realmId, realmIds),
-						eq(moderationCase.targetKind, "realm_unit"),
-						eq(moderationCase.targetId, input.unitId),
-						isNotNull(moderationAction.resultingState),
+						eq(contentReviewCase.authority, "realm"),
+						inArray(contentReviewCase.realmId, realmIds),
+						eq(contentReviewCase.targetUnitId, input.unitId),
+						isNotNull(contentGovernanceAction.resultingState),
 					),
 				)
 				.orderBy(
-					moderationCase.realmId,
-					desc(moderationAction.createdAt),
-					desc(moderationAction.id),
+					contentReviewCase.realmId,
+					desc(contentGovernanceAction.createdAt),
+					desc(contentGovernanceAction.id),
 				)
 		: [];
 	const governanceByRealm = new Map(
@@ -259,7 +261,7 @@ export async function listUnitRealmPublications(input: {
 							row.realmId,
 							{
 								actionId: row.actionId,
-								reasonCode: row.reasonCode,
+								actionKind: row.actionKind,
 								createdAt: row.createdAt,
 							},
 						] as const,

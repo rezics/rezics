@@ -100,19 +100,20 @@ export default {
 	ContentStructureNotFound: "Cette structure de contenu est introuvable.",
 	ContentStructureNodeNotFound: "Ce nœud de la structure de contenu est introuvable.",
 	ReviewNotFound: "Cet avis est introuvable.",
-	ModerationTargetNotFound: "La cible de modération est introuvable.",
-	ModerationRealmMissing: `Le ${realmTerms.inline} est absent de ce dossier de modération.`,
-	ModerationCaseNotFound: "Ce dossier de modération est introuvable.",
-	ModerationReversalInvalid: "La demande d’annulation n’est pas valide.",
-	ModerationReversedActionInvalid: "L’action annulée n’appartient pas à ce dossier.",
-	ModerationActionIncompatible: "Cette action n’est pas disponible pour la cible de modération.",
-	ModerationTransitionInvalid:
+	ContentGovernanceTargetNotFound: "La cible de modération est introuvable.",
+	ContentReviewRealmMissing: `Le ${realmTerms.inline} est absent de ce dossier de modération.`,
+	ContentReviewCaseNotFound: "Ce dossier de modération est introuvable.",
+	ContentGovernanceReversedActionInvalid: "L’action annulée n’appartient pas à ce dossier.",
+	ContentGovernanceActionIncompatible:
+		"Cette action n’est pas disponible pour la cible de modération.",
+	ContentGovernanceTransitionInvalid:
 		"La cible ne peut pas effectuer cette transition d’état de modération.",
-	ModerationActionNoEffect: "L’action de modération ne modifierait pas la cible.",
-	ModerationReversalUnavailable: "Cette action ne peut plus être annulée en toute sécurité.",
-	ModerationIdempotencyConflict:
+	ContentGovernanceActionNoEffect: "L’action de modération ne modifierait pas la cible.",
+	ContentGovernanceReversalUnavailable:
+		"Cette action ne peut plus être annulée en toute sécurité.",
+	ContentGovernanceIdempotencyConflict:
 		"Cette clé de nouvelle tentative a déjà été utilisée pour une autre demande de modération.",
-	ModerationNoteRoleDuplicate: "Ajoutez au maximum une note interne et un avis public.",
+	GovernanceNoteRoleDuplicate: "Ajoutez au maximum une note interne et un avis public.",
 	ReportAlreadySubmitted: "Vous avez déjà signalé cette unité pour le dossier en cours.",
 	ReportTargetRevisionUnavailable:
 		"Cette unité ne possède aucune révision pouvant être signalée.",
@@ -120,6 +121,11 @@ export default {
 		"Le périmètre de gouvernance sélectionné ne comporte aucune règle en vigueur.",
 	ReportRuleChanged:
 		"La règle sélectionnée a changé. Sélectionnez-en une à nouveau avant l’envoi.",
+	ReportRuleSourceForbidden: `Les signalements ne peuvent citer que les règles du ${realmTerms.inline} actuel et les règles officielles.`,
+	ContentGovernanceRuleSourceForbidden:
+		"La règle sélectionnée ne relève pas de cette autorité de gouvernance des contenus.",
+	ContentGovernanceRuleChanged:
+		"Une règle sélectionnée ne figure plus dans la version actuelle. Sélectionnez-la à nouveau.",
 	EnforcementExpiryInvalid: "L’expiration de la mesure doit se situer dans le futur.",
 	EnforcementNotFound: "Cette mesure est introuvable.",
 	EnforcementAlreadyRevoked: "Cette mesure a déjà été révoquée.",

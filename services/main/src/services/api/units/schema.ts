@@ -4,7 +4,7 @@ import { UnitContentLicenseSlugs } from "@rezics/license";
 import {
 	CreditAttributionRoleValues,
 	UnitOwnershipModeValues,
-	GovernanceReasonCodeValues,
+	ContentGovernanceActionKindValues,
 	RealmUnitPublicationStateValues,
 	RealmUnitStatusValues,
 } from "../../database/schema/contract-values";
@@ -94,7 +94,7 @@ export const UnitRealmPublicationListResponse = t.Object({
 			latestGovernance: t.Nullable(
 				t.Object({
 					actionId: Uuid,
-					reasonCode: t.UnionEnum(GovernanceReasonCodeValues),
+					actionKind: t.UnionEnum(ContentGovernanceActionKindValues),
 					createdAt: DateTime,
 				}),
 			),
