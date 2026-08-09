@@ -409,6 +409,8 @@ import type {
 	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponses,
 	PatchApiUnitsByTypeByUnitIdAliasesByAliasIdOptions,
 	PatchApiUnitsByTypeByUnitIdAliasesByAliasIdResponses,
+	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdOptions,
+	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdResponses,
 	PostApiUnitsByTypeByUnitIdCreditAttributionsOptions,
 	PostApiUnitsByTypeByUnitIdCreditAttributionsResponses,
 	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdOptions,
@@ -427,6 +429,8 @@ import type {
 	DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteResponses,
 	PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdOptions,
 	PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdResponses,
+	DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdOptions,
+	DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdResponses,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdOptions,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdResponses,
 	PatchApiUnitsByTypeByUnitIdTagsByTagIdOptions,
@@ -4611,7 +4615,7 @@ export function putApiTagsByTagIdLocalizationsByLanguage<ThrowOnError extends bo
 }
 
 /**
- * @summary List Unit aliases
+ * @summary List Unit alias references
  * {@link /api/v1/units/:type/:unitId/aliases}
  */
 export function getApiUnitsByTypeByUnitIdAliases<ThrowOnError extends boolean = true>(
@@ -4715,6 +4719,28 @@ export function patchApiUnitsByTypeByUnitIdAliasesByAliasId<ThrowOnError extends
 		...config,
 	}) as Promise<
 		RequestResult<PatchApiUnitsByTypeByUnitIdAliasesByAliasIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Withdraw Unit alias reference
+ * {@link /api/v1/units/:type/:unitId/aliases/:aliasId}
+ */
+export function deleteApiUnitsByTypeByUnitIdAliasesByAliasId<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/v1/units/{type}/{unitId}/aliases/{aliasId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdResponses, ThrowOnError>
 	>;
 }
 
@@ -4833,7 +4859,7 @@ export function deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationId<
 }
 
 /**
- * @summary List Unit external-link candidates
+ * @summary List Unit external-link references
  * {@link /api/v1/units/:type/:unitId/external-links}
  */
 export function getApiUnitsByTypeByUnitIdExternalLinks<ThrowOnError extends boolean = true>(
@@ -4963,6 +4989,38 @@ export function patchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkId<
 	}) as Promise<
 		RequestResult<
 			PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary Withdraw Unit external-link reference
+ * {@link /api/v1/units/:type/:unitId/external-links/:externalLinkId}
+ */
+export function deleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<
+			DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdResponses,
 			ThrowOnError
 		>
 	>;

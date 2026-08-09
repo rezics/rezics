@@ -19,14 +19,14 @@ import { useChineseContentText } from "@/features/content-language-display/chine
 import { useTranslation } from "@/i18n/client";
 import { toFiniteApiNumber } from "@/lib/api-number";
 
-type AcceptedUnitExternalLinkPresentation =
+type UnitDetailExternalLinkPresentation =
 	GetApiUnitsByTypeByUnitIdStatus200["externalLinks"][number];
-type UnitExternalLinkCandidatePresentation =
+type UnitExternalLinkListItemPresentation =
 	GetApiUnitsByTypeByUnitIdExternalLinksStatus200["items"][number];
 
 export type UnitExternalLinkPresentation =
-	| AcceptedUnitExternalLinkPresentation
-	| UnitExternalLinkCandidatePresentation;
+	| UnitDetailExternalLinkPresentation
+	| UnitExternalLinkListItemPresentation;
 
 export function UnitExternalLinkBadge({
 	controls,
@@ -44,10 +44,14 @@ export function UnitExternalLinkBadge({
 		link.sourceEntity.summary ?? "",
 		link.sourceEntity.language,
 	);
-	const score = toFiniteApiNumber(link.score) ?? 0;
+	const score = toFiniteApiNumber(link.voteSummary.score) ?? 0;
 	const avatarFallback = title.trim().slice(0, 1).toUpperCase() || "#";
 	const variant =
-		link.viewerVote === 1 ? "success" : link.viewerVote === -1 ? "destructive" : "outline";
+		link.voteSummary.viewerVote === 1
+			? "success"
+			: link.voteSummary.viewerVote === -1
+				? "destructive"
+				: "outline";
 
 	return (
 		<Badge className="max-w-full gap-0 overflow-visible p-0" pill variant={variant}>
@@ -84,16 +88,11 @@ export function UnitExternalLinkBadge({
 						/>
 						<div className="min-w-0">
 							<p className="truncate font-semibold">{title}</p>
-							<div className="mt-1 flex flex-wrap gap-1">
-								<Badge variant={link.accepted ? "secondary" : "outline"}>
-									{link.accepted
-										? t.units.references.accepted
-										: t.units.references.candidate}
-								</Badge>
-								{link.pinned ? (
+							{link.pinned ? (
+								<div className="mt-1 flex flex-wrap gap-1">
 									<Badge variant="secondary">{t.units.references.pinned}</Badge>
-								) : null}
-							</div>
+								</div>
+							) : null}
 						</div>
 					</div>
 					{summary ? (
@@ -122,7 +121,7 @@ export function UnitExternalLinkBadge({
 export function UnitExternalLinkList({
 	links,
 }: {
-	readonly links: readonly AcceptedUnitExternalLinkPresentation[];
+	readonly links: readonly UnitDetailExternalLinkPresentation[];
 }) {
 	const { t } = useTranslation(["units"]);
 	if (!links.length) return null;

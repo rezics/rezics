@@ -482,7 +482,7 @@ export default {
 	references: {
 		title: "Community-Referenzen",
 		description:
-			"Schlagen Sie Suchaliasnamen und externe Links vor und stimmen Sie darüber ab. Kuratierte Referenzen stehen zuerst, danach stehen gemeinschaftlich bewertete Kandidaten.",
+			"Schlagen Sie Suchaliasnamen und externe Links vor und stimmen Sie darüber ab. Angeheftete Referenzen stehen zuerst; die übrigen werden nach Community-Wertung sortiert.",
 		aliasesTitle: "Aliasnamen",
 		aliasesDescription: "Alternative Namen, unter denen dieses Werk gefunden werden kann.",
 		externalLinksTitle: "Externe Links",
@@ -495,8 +495,6 @@ export default {
 		sourcePlaceholder: "Quelleneintrag auswählen",
 		externalUrl: `Externe ${verbatimTerms.url.value}`,
 		urlPlaceholder: `${verbatimTerms.https.value}://`,
-		accepted: "Angenommen",
-		candidate: "Kandidat",
 		pinned: "Angeheftet",
 		voteSummary: insert("Wertung {{score}} · {{count}} Stimmen", {
 			score: String,
@@ -508,10 +506,12 @@ export default {
 		unpin: "Lösen",
 		moveEarlier: "Nach vorne",
 		moveLater: "Nach hinten",
+		withdraw: "Referenz zurückziehen",
+		withdrawConfirm: "Diese Referenz zurückziehen? Ihr Abstimmungsverlauf bleibt erhalten.",
 		aliasProposed: "Aliasname vorgeschlagen",
 		externalLinkProposed: "Externer Link vorgeschlagen",
-		noAliases: "Noch keine Alias-Kandidaten.",
-		noExternalLinks: "Noch keine Kandidaten für externe Links.",
+		noAliases: "Noch keine Aliasnamen.",
+		noExternalLinks: "Noch keine externen Links.",
 	},
 	contentLanguages: {
 		controlLabel: "Inhaltssprache",

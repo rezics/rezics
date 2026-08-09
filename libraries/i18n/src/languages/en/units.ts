@@ -467,7 +467,7 @@ export default {
 	references: {
 		title: "Community references",
 		description:
-			"Propose and vote on search aliases and external links. Curated references stay first; community-ranked candidates come next.",
+			"Propose and vote on search aliases and external links. Pinned references stay first; the rest are ranked by community votes.",
 		aliasesTitle: "Aliases",
 		aliasesDescription: "Alternative names that can help people find this Unit.",
 		externalLinksTitle: "External links",
@@ -480,8 +480,6 @@ export default {
 		sourcePlaceholder: `Choose a source ${entityTerms.inline}`,
 		externalUrl: `External ${verbatimTerms.url.value}`,
 		urlPlaceholder: `${verbatimTerms.https.value}://`,
-		accepted: "Accepted",
-		candidate: "Candidate",
 		pinned: "Pinned",
 		voteSummary: insert("Score {{score}} · {{count}} votes", {
 			score: String,
@@ -493,10 +491,12 @@ export default {
 		unpin: "Unpin",
 		moveEarlier: "Move earlier",
 		moveLater: "Move later",
+		withdraw: "Withdraw reference",
+		withdrawConfirm: "Withdraw this reference? Its vote history will be retained.",
 		aliasProposed: "Alias proposed",
 		externalLinkProposed: "External link proposed",
-		noAliases: "No alias candidates yet.",
-		noExternalLinks: "No external-link candidates yet.",
+		noAliases: "No aliases yet.",
+		noExternalLinks: "No external links yet.",
 	},
 	contentLanguages: {
 		controlLabel: "Content language",

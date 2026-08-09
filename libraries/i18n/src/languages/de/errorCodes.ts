@@ -196,6 +196,10 @@ export default {
 	UnitExternalLinkNotFound: "Dieser externe Link des Werks wurde nicht gefunden.",
 	UnitReferenceCurationChanged:
 		"Die Referenzkuratierung wurde an anderer Stelle geändert. Die aktuelle Reihenfolge wurde geladen; bitte erneut versuchen.",
+	UnitReferenceLimitReached: "Dieses Werk hat bereits die Höchstzahl aktiver Referenzen.",
+	UnitReferencePinnedLimitReached:
+		"Dieses Werk hat bereits die Höchstzahl angehefteter Referenzen.",
+	UnitReferenceWithdrawn: "Diese Referenz wurde zurückgezogen.",
 	UnitVariantKindMismatch:
 		"Eine Variante und ihr Haupteintrag müssen denselben unterstützten Unit-Typ verwenden.",
 	UnitVariantTargetIsVariant: "Eine Variante muss direkt auf einen Haupteintrag verweisen.",

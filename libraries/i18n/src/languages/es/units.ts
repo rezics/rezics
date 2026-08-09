@@ -476,7 +476,7 @@ export default {
 	references: {
 		title: "Referencias de la comunidad",
 		description:
-			"Propón alias de búsqueda y enlaces externos y vótalos. Las referencias seleccionadas aparecen primero, seguidas de las candidatas ordenadas por la comunidad.",
+			"Propón alias de búsqueda y enlaces externos y vótalos. Las referencias fijadas aparecen primero; las demás siguen la clasificación de la comunidad.",
 		aliasesTitle: "Alias",
 		aliasesDescription: "Nombres alternativos que ayudan a encontrar esta obra.",
 		externalLinksTitle: "Enlaces externos",
@@ -489,8 +489,6 @@ export default {
 		sourcePlaceholder: `Elige ${entityTerms.inline} de origen`,
 		externalUrl: `${verbatimTerms.url.value} externa`,
 		urlPlaceholder: `${verbatimTerms.https.value}://`,
-		accepted: "Aceptada",
-		candidate: "Candidata",
 		pinned: "Fijada",
 		voteSummary: insert("Puntuación {{score}} · {{count}} votos", {
 			score: String,
@@ -502,10 +500,12 @@ export default {
 		unpin: "Desfijar",
 		moveEarlier: "Mover antes",
 		moveLater: "Mover después",
+		withdraw: "Retirar referencia",
+		withdrawConfirm: "¿Retirar esta referencia? Se conservará su historial de votos.",
 		aliasProposed: "Alias propuesto",
 		externalLinkProposed: "Enlace externo propuesto",
-		noAliases: "Aún no hay candidatos de alias.",
-		noExternalLinks: "Aún no hay candidatos de enlaces externos.",
+		noAliases: "Aún no hay alias.",
+		noExternalLinks: "Aún no hay enlaces externos.",
 	},
 	contentLanguages: {
 		controlLabel: "Idioma del contenido",

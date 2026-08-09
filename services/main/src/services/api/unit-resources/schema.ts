@@ -5,6 +5,8 @@ import {
 	CreditAttributionRoleValues,
 	EntityKindValues,
 	SubjectAssociationRoleValues,
+	UnitReferencePageDefault,
+	UnitReferencePageMaximum,
 	UnitKindValues,
 } from "../../database/schema/contract-values";
 import {
@@ -138,9 +140,21 @@ export const UnitExternalLinkUnitParams = t.Object({
 });
 export type UnitExternalLinkUnitParams = Static<typeof UnitExternalLinkUnitParams>;
 
-export const UnitExternalLinkListQuery = t.Object(LocalizationLanguageQuery, {
-	additionalProperties: false,
-});
+const UnitReferencePaginationQuery = {
+	cursor: t.Optional(t.String({ minLength: 1, maxLength: 1024 })),
+	limit: t.Optional(
+		t.Integer({
+			minimum: 1,
+			maximum: UnitReferencePageMaximum,
+			default: UnitReferencePageDefault,
+		}),
+	),
+};
+
+export const UnitExternalLinkListQuery = t.Object(
+	{ ...LocalizationLanguageQuery, ...UnitReferencePaginationQuery },
+	{ additionalProperties: false },
+);
 export type UnitExternalLinkListQuery = Static<typeof UnitExternalLinkListQuery>;
 
 export const UnitExternalLinkParams = t.Object({
@@ -193,6 +207,11 @@ export const UnitAliasUnitParams = t.Object({
 });
 export type UnitAliasUnitParams = Static<typeof UnitAliasUnitParams>;
 
+export const UnitAliasListQuery = t.Object(UnitReferencePaginationQuery, {
+	additionalProperties: false,
+});
+export type UnitAliasListQuery = Static<typeof UnitAliasListQuery>;
+
 export const UnitAliasParams = t.Object({
 	type: t.Union(UnitKindValues.map((value) => t.Literal(value))),
 	unitId: Uuid,
@@ -219,6 +238,12 @@ export const UpdateUnitReferenceCurationBody = t.Union([
 	),
 ]);
 export type UpdateUnitReferenceCurationBody = Static<typeof UpdateUnitReferenceCurationBody>;
+
+export const WithdrawUnitReferenceQuery = t.Object(
+	{ baseVersion: t.Integer({ minimum: 0 }) },
+	{ additionalProperties: false },
+);
+export type WithdrawUnitReferenceQuery = Static<typeof WithdrawUnitReferenceQuery>;
 
 export const VoteBody = t.Object(
 	{ value: t.Union([t.Literal(-1), t.Literal(1)]) },

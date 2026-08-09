@@ -54,8 +54,8 @@ function ExternalLinkVoteControls({
 	readonly onVote: (value: -1 | 1) => void;
 }) {
 	const { t } = useTranslation(["units"]);
-	const score = toFiniteApiNumber(link.score) ?? 0;
-	const voteCount = toNonNegativeApiInteger(link.voteCount);
+	const score = toFiniteApiNumber(link.voteSummary.score) ?? 0;
+	const voteCount = toNonNegativeApiInteger(link.voteSummary.voteCount);
 	return (
 		<div className="grid gap-2">
 			<span className="text-xs text-muted-foreground">
@@ -67,32 +67,38 @@ function ExternalLinkVoteControls({
 			{canVote ? (
 				<div className="flex flex-wrap items-center gap-1">
 					<Button
-						aria-pressed={link.viewerVote === 1}
-						className={cn(link.viewerVote === 1 && "text-primary hover:text-primary")}
+						aria-pressed={link.voteSummary.viewerVote === 1}
+						className={cn(
+							link.voteSummary.viewerVote === 1 && "text-primary hover:text-primary",
+						)}
 						disabled={busy}
-						onClick={() => (link.viewerVote === 1 ? onClear() : onVote(1))}
+						onClick={() => (link.voteSummary.viewerVote === 1 ? onClear() : onVote(1))}
 						size="sm"
 						type="button"
 						variant="quiet"
 					>
 						<ArrowBigUpIcon
 							aria-hidden
-							fill={link.viewerVote === 1 ? "currentColor" : "none"}
+							fill={link.voteSummary.viewerVote === 1 ? "currentColor" : "none"}
 						/>
 						{t.units.references.support}
 					</Button>
 					<Button
-						aria-pressed={link.viewerVote === -1}
-						className={cn(link.viewerVote === -1 && "text-info hover:text-info")}
+						aria-pressed={link.voteSummary.viewerVote === -1}
+						className={cn(
+							link.voteSummary.viewerVote === -1 && "text-info hover:text-info",
+						)}
 						disabled={busy}
-						onClick={() => (link.viewerVote === -1 ? onClear() : onVote(-1))}
+						onClick={() =>
+							link.voteSummary.viewerVote === -1 ? onClear() : onVote(-1)
+						}
 						size="sm"
 						type="button"
 						variant="quiet"
 					>
 						<ArrowBigDownIcon
 							aria-hidden
-							fill={link.viewerVote === -1 ? "currentColor" : "none"}
+							fill={link.voteSummary.viewerVote === -1 ? "currentColor" : "none"}
 						/>
 						{t.units.references.oppose}
 					</Button>

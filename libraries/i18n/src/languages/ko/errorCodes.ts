@@ -174,6 +174,10 @@ export default {
 	UnitExternalLinkNotFound: "이 작품의 외부 링크를 찾을 수 없습니다.",
 	UnitReferenceCurationChanged:
 		"참조 정보 선별이 다른 곳에서 변경되었습니다. 최신 순서를 불러왔으니 다시 시도해 주세요.",
+	UnitReferenceLimitReached: "이 작품에서 활성화할 수 있는 참고 자료 수가 한도에 도달했습니다.",
+	UnitReferencePinnedLimitReached:
+		"이 작품에서 고정할 수 있는 참고 자료 수가 한도에 도달했습니다.",
+	UnitReferenceWithdrawn: "이 참고 자료는 철회되었습니다.",
 	UnitVariantKindMismatch: "변형과 주 버전은 동일한 지원 유닛 유형을 사용해야 합니다.",
 	UnitVariantTargetIsVariant: "변형은 반드시 주 버전을 직접 가리켜야 합니다.",
 	UnitVariantSourceHasVariants: "변형이 있는 주 버전은 변형이 될 수 없습니다.",

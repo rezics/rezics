@@ -1,12 +1,14 @@
 "use client";
 
 import {
+	getApiUnitsByTypeByUnitIdAliases,
 	getApiUnitsByTypeByUnitIdAliasesQueryKey,
+	getApiUnitsByTypeByUnitIdExternalLinks,
 	getApiUnitsByTypeByUnitIdExternalLinksQueryKey,
+	useDeleteApiUnitsByTypeByUnitIdAliasesByAliasId,
 	useDeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote,
+	useDeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkId,
 	useDeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote,
-	useGetApiUnitsByTypeByUnitIdAliases,
-	useGetApiUnitsByTypeByUnitIdExternalLinks,
 	usePatchApiUnitsByTypeByUnitIdAliasesByAliasId,
 	usePatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkId,
 	usePostApiUnitsByTypeByUnitIdAliases,
@@ -30,7 +32,7 @@ import {
 	QueryPending,
 	toast,
 } from "@rezics/ui";
-import { useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import {
 	ArrowBigDownIcon,
 	ArrowBigUpIcon,
@@ -39,6 +41,7 @@ import {
 	ExternalLink,
 	Pin,
 	PinOff,
+	Trash2,
 } from "lucide-react";
 import { type FormEvent, type ReactNode, useState } from "react";
 
@@ -55,16 +58,9 @@ import type { UnitType } from "../unit-types";
 
 type SelectedEntity = { readonly id: string; readonly label: string };
 
-function CandidateStatus({ accepted, pinned }: { accepted: boolean; pinned: boolean }) {
+function ReferenceStatus({ pinned }: { readonly pinned: boolean }) {
 	const { t } = useTranslation(["units"]);
-	return (
-		<div className="flex flex-wrap gap-1">
-			<Badge variant={accepted ? "secondary" : "outline"}>
-				{accepted ? t.units.references.accepted : t.units.references.candidate}
-			</Badge>
-			{pinned ? <Badge variant="secondary">{t.units.references.pinned}</Badge> : null}
-		</div>
-	);
+	return pinned ? <Badge variant="secondary">{t.units.references.pinned}</Badge> : null;
 }
 
 function CandidateVoteControls({
@@ -212,18 +208,35 @@ function AliasCandidates({
 	readonly type: UnitType;
 	readonly unitId: string;
 }) {
-	const { t } = useTranslation(["errors", "units"]);
+	const { t } = useTranslation(["actions", "errors", "units"]);
 	const queryClient = useQueryClient();
-	const queryOptions = { path: { type, unitId } } as const;
-	const query = useGetApiUnitsByTypeByUnitIdAliases(queryOptions);
+	const [queryGeneration, setQueryGeneration] = useState(0);
+	const queryOptions = { path: { type, unitId }, query: { limit: 50 } } as const;
+	const queryKey = getApiUnitsByTypeByUnitIdAliasesQueryKey(queryOptions);
+	const query = useInfiniteQuery({
+		queryKey: [...queryKey, queryGeneration],
+		queryFn: async ({ pageParam, signal }) => {
+			const { data } = await getApiUnitsByTypeByUnitIdAliases({
+				path: queryOptions.path,
+				query: { ...queryOptions.query, ...(pageParam ? { cursor: pageParam } : {}) },
+				signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+		initialPageParam: "",
+		getNextPageParam: (page) => page.nextCursor ?? undefined,
+	});
 	const create = usePostApiUnitsByTypeByUnitIdAliases();
 	const vote = usePutApiUnitsByTypeByUnitIdAliasesByAliasIdVote();
 	const clearVote = useDeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote();
 	const curate = usePatchApiUnitsByTypeByUnitIdAliasesByAliasId();
-	const refresh = () =>
-		queryClient.invalidateQueries({
-			queryKey: getApiUnitsByTypeByUnitIdAliasesQueryKey(queryOptions),
-		});
+	const withdraw = useDeleteApiUnitsByTypeByUnitIdAliasesByAliasId();
+	const refresh = () => {
+		queryClient.removeQueries({ queryKey });
+		setQueryGeneration((current) => current + 1);
+		return Promise.resolve();
+	};
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -242,11 +255,10 @@ function AliasCandidates({
 	}
 
 	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
-	const items = query.data?.items ?? [];
-	const curationVersion = toNonNegativeApiInteger(query.data?.curationVersion);
-	const busy = vote.isPending || clearVote.isPending || curate.isPending;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void refresh()} />;
+	const items = query.data.pages.flatMap((page) => page.items);
+	const curationVersion = toNonNegativeApiInteger(query.data.pages[0]?.curationVersion);
+	const busy = vote.isPending || clearVote.isPending || curate.isPending || withdraw.isPending;
 	return (
 		<Card appearance="outlined">
 			<CardHeader>
@@ -275,10 +287,7 @@ function AliasCandidates({
 								<div className="min-w-0">
 									<p className="break-words font-medium">{candidate.term}</p>
 								</div>
-								<CandidateStatus
-									accepted={candidate.accepted}
-									pinned={candidate.pinned}
-								/>
+								<ReferenceStatus pinned={candidate.pinned} />
 							</div>
 							<div className="flex flex-wrap items-center justify-between gap-2">
 								<CandidateVoteControls
@@ -300,38 +309,91 @@ function AliasCandidates({
 											.then(refresh)
 											.catch(() => undefined)
 									}
-									score={candidate.score}
-									viewerVote={candidate.viewerVote}
-									voteCount={candidate.voteCount}
+									score={candidate.voteSummary.score}
+									viewerVote={candidate.voteSummary.viewerVote}
+									voteCount={candidate.voteSummary.voteCount}
 								/>
 								{canCurate ? (
-									<CurationControls
-										busy={busy}
-										candidate={candidate}
-										candidates={items}
-										onUpdate={(state) =>
-											void curate
-												.mutateAsync({
-													path: { type, unitId, aliasId: candidate.id },
-													body: state.pinned
-														? { baseVersion: curationVersion, ...state }
-														: {
-																baseVersion: curationVersion,
-																pinned: false,
-																position: null,
-															},
-												})
-												.then(refresh, refresh)
-												.catch(() => undefined)
-										}
-									/>
+									<div className="flex flex-wrap items-center gap-1">
+										<CurationControls
+											busy={busy}
+											candidate={candidate}
+											candidates={items}
+											onUpdate={(state) =>
+												void curate
+													.mutateAsync({
+														path: {
+															type,
+															unitId,
+															aliasId: candidate.id,
+														},
+														body: state.pinned
+															? {
+																	baseVersion: curationVersion,
+																	...state,
+																}
+															: {
+																	baseVersion: curationVersion,
+																	pinned: false,
+																	position: null,
+																},
+													})
+													.then(refresh, refresh)
+													.catch(() => undefined)
+											}
+										/>
+										<Button
+											aria-label={t.units.references.withdraw}
+											disabled={busy}
+											onClick={() => {
+												if (
+													!window.confirm(
+														t.units.references.withdrawConfirm,
+													)
+												)
+													return;
+												void withdraw
+													.mutateAsync({
+														path: {
+															type,
+															unitId,
+															aliasId: candidate.id,
+														},
+														query: { baseVersion: curationVersion },
+													})
+													.then(refresh, refresh)
+													.catch(() => undefined);
+											}}
+											size="icon-sm"
+											type="button"
+											variant="quiet"
+										>
+											<Trash2 aria-hidden />
+										</Button>
+									</div>
 								) : null}
 							</div>
 						</li>
 					))}
 				</CandidateList>
+				{query.hasNextPage ? (
+					<Button
+						isLoading={query.isFetchingNextPage}
+						onClick={() => void query.fetchNextPage()}
+						type="button"
+						variant="outline"
+					>
+						{t.actions.loadMore}
+					</Button>
+				) : null}
 				<RequestFailure
-					error={create.error ?? vote.error ?? clearVote.error ?? curate.error}
+					error={
+						create.error ??
+						vote.error ??
+						clearVote.error ??
+						curate.error ??
+						withdraw.error
+					}
 					fallback={t.errors.unknown}
 				/>
 			</CardContent>
@@ -348,22 +410,35 @@ function ExternalLinkCandidates({
 	readonly type: UnitType;
 	readonly unitId: string;
 }) {
-	const { t } = useTranslation(["errors", "units"]);
+	const { t } = useTranslation(["actions", "errors", "units"]);
 	const queryClient = useQueryClient();
 	const [source, setSource] = useState<SelectedEntity>();
-	const queryOptions = { path: { type, unitId } } as const;
-	const query = useGetApiUnitsByTypeByUnitIdExternalLinks(queryOptions);
+	const [queryGeneration, setQueryGeneration] = useState(0);
+	const queryOptions = { path: { type, unitId }, query: { limit: 50 } } as const;
+	const queryKey = getApiUnitsByTypeByUnitIdExternalLinksQueryKey(queryOptions);
+	const query = useInfiniteQuery({
+		queryKey: [...queryKey, queryGeneration],
+		queryFn: async ({ pageParam, signal }) => {
+			const { data } = await getApiUnitsByTypeByUnitIdExternalLinks({
+				path: queryOptions.path,
+				query: { ...queryOptions.query, ...(pageParam ? { cursor: pageParam } : {}) },
+				signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+		initialPageParam: "",
+		getNextPageParam: (page) => page.nextCursor ?? undefined,
+	});
 	const create = usePostApiUnitsByTypeByUnitIdExternalLinks();
 	const vote = usePutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote();
 	const clearVote = useDeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote();
 	const curate = usePatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkId();
+	const withdraw = useDeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkId();
 	const refresh = async () => {
-		await Promise.all([
-			queryClient.invalidateQueries({
-				queryKey: getApiUnitsByTypeByUnitIdExternalLinksQueryKey(queryOptions),
-			}),
-			invalidateUnitDetail(queryClient, type, unitId),
-		]);
+		queryClient.removeQueries({ queryKey });
+		setQueryGeneration((current) => current + 1);
+		await invalidateUnitDetail(queryClient, type, unitId);
 	};
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
@@ -387,11 +462,10 @@ function ExternalLinkCandidates({
 	}
 
 	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
-	const items = query.data?.items ?? [];
-	const curationVersion = toNonNegativeApiInteger(query.data?.curationVersion);
-	const busy = vote.isPending || clearVote.isPending || curate.isPending;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void refresh()} />;
+	const items = query.data.pages.flatMap((page) => page.items);
+	const curationVersion = toNonNegativeApiInteger(query.data.pages[0]?.curationVersion);
+	const busy = vote.isPending || clearVote.isPending || curate.isPending || withdraw.isPending;
 	return (
 		<Card appearance="outlined">
 			<CardHeader>
@@ -449,10 +523,7 @@ function ExternalLinkCandidates({
 									{candidate.url}{" "}
 									<ExternalLink aria-hidden className="inline size-3" />
 								</a>
-								<CandidateStatus
-									accepted={candidate.accepted}
-									pinned={candidate.pinned}
-								/>
+								<ReferenceStatus pinned={candidate.pinned} />
 							</div>
 							<div className="flex flex-wrap items-center justify-between gap-2">
 								<CandidateVoteControls
@@ -482,42 +553,91 @@ function ExternalLinkCandidates({
 											.then(refresh)
 											.catch(() => undefined)
 									}
-									score={candidate.score}
-									viewerVote={candidate.viewerVote}
-									voteCount={candidate.voteCount}
+									score={candidate.voteSummary.score}
+									viewerVote={candidate.voteSummary.viewerVote}
+									voteCount={candidate.voteSummary.voteCount}
 								/>
 								{canCurate ? (
-									<CurationControls
-										busy={busy}
-										candidate={candidate}
-										candidates={items}
-										onUpdate={(state) =>
-											void curate
-												.mutateAsync({
-													path: {
-														type,
-														unitId,
-														externalLinkId: candidate.id,
-													},
-													body: state.pinned
-														? { baseVersion: curationVersion, ...state }
-														: {
-																baseVersion: curationVersion,
-																pinned: false,
-																position: null,
-															},
-												})
-												.then(refresh, refresh)
-												.catch(() => undefined)
-										}
-									/>
+									<div className="flex flex-wrap items-center gap-1">
+										<CurationControls
+											busy={busy}
+											candidate={candidate}
+											candidates={items}
+											onUpdate={(state) =>
+												void curate
+													.mutateAsync({
+														path: {
+															type,
+															unitId,
+															externalLinkId: candidate.id,
+														},
+														body: state.pinned
+															? {
+																	baseVersion: curationVersion,
+																	...state,
+																}
+															: {
+																	baseVersion: curationVersion,
+																	pinned: false,
+																	position: null,
+																},
+													})
+													.then(refresh, refresh)
+													.catch(() => undefined)
+											}
+										/>
+										<Button
+											aria-label={t.units.references.withdraw}
+											disabled={busy}
+											onClick={() => {
+												if (
+													!window.confirm(
+														t.units.references.withdrawConfirm,
+													)
+												)
+													return;
+												void withdraw
+													.mutateAsync({
+														path: {
+															type,
+															unitId,
+															externalLinkId: candidate.id,
+														},
+														query: { baseVersion: curationVersion },
+													})
+													.then(refresh, refresh)
+													.catch(() => undefined);
+											}}
+											size="icon-sm"
+											type="button"
+											variant="quiet"
+										>
+											<Trash2 aria-hidden />
+										</Button>
+									</div>
 								) : null}
 							</div>
 						</li>
 					))}
 				</CandidateList>
+				{query.hasNextPage ? (
+					<Button
+						isLoading={query.isFetchingNextPage}
+						onClick={() => void query.fetchNextPage()}
+						type="button"
+						variant="outline"
+					>
+						{t.actions.loadMore}
+					</Button>
+				) : null}
 				<RequestFailure
-					error={create.error ?? vote.error ?? clearVote.error ?? curate.error}
+					error={
+						create.error ??
+						vote.error ??
+						clearVote.error ??
+						curate.error ??
+						withdraw.error
+					}
 					fallback={t.errors.unknown}
 				/>
 			</CardContent>

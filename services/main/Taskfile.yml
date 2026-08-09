@@ -156,6 +156,7 @@ tasks:
                 --to env://schema.src
                 --exclude atlas_schema_revisions
                 --exclude '*[type=extension|function|trigger]'
+                --exclude 'unit_localization.unit_localization_pgroonga_*[type=index]'
                 | grep -q '^Schemas are synced, no changes to be made\.$'
 
     db:migrate:dry-run:

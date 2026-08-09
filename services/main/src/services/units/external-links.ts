@@ -1,19 +1,21 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import type { ContentLanguage } from "@rezics/i18n";
 
 import { database } from "../database";
-import { toSafeInteger } from "../database/integer";
 import {
 	unitExternalLink,
 	unitExternalLinkVote,
 	unitExternalLinkVoteStat,
+	UnitExternalLinkPreviewLimit,
+	UnitReferenceActiveLimit,
 } from "../database/schema";
-import { ExternalLinkVisibilityScoreThreshold } from "../database/schema/contract-values";
-import { wilsonLowerBoundSql } from "../tags/ranking";
+import { UnitReferenceLimitReached } from "../api/unit-resources/errors";
+import { presentBinaryVoteSummary } from "../votes/binary";
+import { paginateUnitReferences, unitReferenceRankingVersion } from "./reference-pagination";
 import { getReadableUnitPresentationsByIds } from "./attribution";
 
-/** Returns only external links accepted for public detail presentation. */
-export async function getAcceptedUnitExternalLinks(unitId: string, viewerProfileId?: string) {
+/** Returns the bounded, community-ranked external-link preview for a Unit detail. */
+export async function getUnitExternalLinkPreview(unitId: string, viewerProfileId?: string) {
 	const rows = await database
 		.select({
 			id: unitExternalLink.id,
@@ -23,17 +25,10 @@ export async function getAcceptedUnitExternalLinks(unitId: string, viewerProfile
 			normalizedUrl: unitExternalLink.normalizedUrl,
 			normalizedUrlHash: unitExternalLink.normalizedUrlHash,
 			createdByProfileId: unitExternalLink.createdByProfileId,
-			viewerVote: viewerProfileId
-				? sql<-1 | 1 | null>`(
-					select ${unitExternalLinkVote.value}
-					from ${unitExternalLinkVote}
-					where ${unitExternalLinkVote.externalLinkId} = ${unitExternalLink.id}
-						and ${unitExternalLinkVote.profileId} = ${viewerProfileId}
-				)`
-				: sql<null>`null`,
+			viewerVote: unitExternalLinkVote.value,
 			score: unitExternalLinkVoteStat.score,
 			voteCount: unitExternalLinkVoteStat.voteCount,
-			accepted: sql<true>`true`,
+			voteUpdatedAt: unitExternalLinkVoteStat.updatedAt,
 			pinned: unitExternalLink.pinned,
 			position: unitExternalLink.position,
 			createdAt: unitExternalLink.createdAt,
@@ -44,31 +39,41 @@ export async function getAcceptedUnitExternalLinks(unitId: string, viewerProfile
 			unitExternalLinkVoteStat,
 			eq(unitExternalLinkVoteStat.externalLinkId, unitExternalLink.id),
 		)
-		.where(
+		.leftJoin(
+			unitExternalLinkVote,
 			and(
-				eq(unitExternalLink.unitId, unitId),
-				sql`${unitExternalLink.pinned} or coalesce(${unitExternalLinkVoteStat.score}, 0) >= ${ExternalLinkVisibilityScoreThreshold}`,
+				eq(unitExternalLinkVote.externalLinkId, unitExternalLink.id),
+				viewerProfileId ? eq(unitExternalLinkVote.profileId, viewerProfileId) : sql`false`,
 			),
 		)
-		.orderBy(
-			desc(unitExternalLink.pinned),
-			sql`case when ${unitExternalLink.pinned} then ${unitExternalLink.position} end asc nulls last`,
-			desc(
-				wilsonLowerBoundSql(
-					unitExternalLinkVoteStat.score,
-					unitExternalLinkVoteStat.voteCount,
-				),
-			),
-			desc(unitExternalLinkVoteStat.score),
-			desc(unitExternalLinkVoteStat.voteCount),
-			unitExternalLink.id,
-		);
+		.where(and(eq(unitExternalLink.unitId, unitId), isNull(unitExternalLink.withdrawnAt)))
+		.limit(UnitReferenceActiveLimit + 1);
 
-	return rows.map((link) => ({
-		...link,
-		score: toSafeInteger(link.score ?? 0n, "external link vote score"),
-		voteCount: toSafeInteger(link.voteCount ?? 0n, "external link vote count"),
-	}));
+	if (rows.length > UnitReferenceActiveLimit)
+		throw new UnitReferenceLimitReached(UnitReferenceActiveLimit);
+	const references = rows.map((row) => {
+		const { viewerVote, score, voteCount, voteUpdatedAt, ...reference } = row;
+		return {
+			...reference,
+			voteSummary: presentBinaryVoteSummary({
+				score: score ?? 0n,
+				voteCount: voteCount ?? 0n,
+				viewerVote,
+				updatedAt: voteUpdatedAt,
+				name: "External link",
+			}),
+		};
+	});
+	return paginateUnitReferences({
+		references,
+		context: {
+			unitId,
+			kind: "external_link",
+			curationVersion: 0,
+			rankingVersion: unitReferenceRankingVersion(references),
+		},
+		limit: UnitExternalLinkPreviewLimit,
+	}).items;
 }
 
 export async function attachReadableSourceEntities<
@@ -89,13 +94,13 @@ export async function attachReadableSourceEntities<
 	});
 }
 
-/** Returns accepted links only when their localized source Entity is readable. */
-export async function getAcceptedUnitExternalLinksWithSources(input: {
+/** Returns preview links only when their localized source Entity is readable. */
+export async function getUnitExternalLinkPreviewWithSources(input: {
 	readonly unitId: string;
 	readonly localizationLanguages: readonly ContentLanguage[];
 	readonly profileId?: string;
 }) {
-	const externalLinks = await getAcceptedUnitExternalLinks(input.unitId, input.profileId);
+	const externalLinks = await getUnitExternalLinkPreview(input.unitId, input.profileId);
 	return attachReadableSourceEntities(
 		externalLinks,
 		input.localizationLanguages,

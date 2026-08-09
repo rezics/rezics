@@ -27,8 +27,6 @@ vi.mock("@/i18n/client", () => ({
 			units: {
 				detail: { externalLinks: "External links" },
 				references: {
-					accepted: "Accepted",
-					candidate: "Candidate",
 					pinned: "Pinned",
 				},
 			},
@@ -50,10 +48,14 @@ const link = {
 	normalizedUrl: "https://catalog.example.test/books/example",
 	normalizedUrlHash: "a".repeat(64),
 	createdByProfileId: null,
-	viewerVote: null,
-	score: 7,
-	voteCount: 9,
-	accepted: true,
+	voteSummary: {
+		positiveCount: 8,
+		negativeCount: 1,
+		score: 7,
+		voteCount: 9,
+		viewerVote: null,
+		asOf: "2026-08-08T00:00:00.000Z",
+	},
 	pinned: true,
 	position: "a0",
 	createdAt: "2026-08-08T00:00:00.000Z",
@@ -71,7 +73,7 @@ const link = {
 describe("Unit external-link presentation", () => {
 	afterEach(cleanup);
 
-	it("omits the complete detail section when no accepted links are available", () => {
+	it("omits the complete detail section when no links are available", () => {
 		const { container } = render(<UnitExternalLinkList links={[]} />);
 
 		expect(container.childElementCount).toBe(0);
@@ -83,7 +85,6 @@ describe("Unit external-link presentation", () => {
 		expect(screen.getByRole("heading", { name: "External links" })).toBeTruthy();
 		expect(screen.getAllByText("Example Catalog")).toHaveLength(2);
 		expect(screen.getAllByTestId("source-avatar")).toHaveLength(2);
-		expect(screen.getByText("Accepted")).toBeTruthy();
 		expect(screen.getByText("Pinned")).toBeTruthy();
 		const externalLink = screen.getByRole("link", { name: link.url });
 		expect(externalLink.getAttribute("href")).toBe(link.url);

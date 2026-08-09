@@ -316,6 +316,19 @@ export const UnitProgressStatisticsResponse = t.Object({
 	backlog: CountResultSchema,
 });
 
+/** Aggregate facts for one -1/+1 vote target. */
+export const BinaryVoteSummaryResponse = t.Object(
+	{
+		positiveCount: t.Integer({ minimum: 0 }),
+		negativeCount: t.Integer({ minimum: 0 }),
+		score: t.Integer(),
+		voteCount: t.Integer({ minimum: 0 }),
+		viewerVote: t.Nullable(t.Union([t.Literal(-1), t.Literal(1)])),
+		asOf: t.Nullable(DateTime),
+	},
+	{ additionalProperties: false },
+);
+
 export const AssociationContextPostResponse = t.Object({
 	id: Uuid,
 	subjectId: t.Nullable(Uuid),
@@ -349,9 +362,7 @@ const UnitExternalLinkIdentityResponseFields = {
 	normalizedUrl: t.String(),
 	normalizedUrlHash: t.String(),
 	createdByProfileId: t.Nullable(Uuid),
-	viewerVote: t.Nullable(t.Union([t.Literal(-1), t.Literal(1)])),
-	score: t.Integer(),
-	voteCount: t.Integer({ minimum: 0 }),
+	voteSummary: BinaryVoteSummaryResponse,
 } as const;
 
 const UnitExternalLinkCurationResponseFields = {
@@ -361,10 +372,9 @@ const UnitExternalLinkCurationResponseFields = {
 	updatedAt: DateTime,
 } as const;
 
-const AcceptedExternalLinkResponse = t.Object(
+const UnitDetailExternalLinkResponse = t.Object(
 	{
 		...UnitExternalLinkIdentityResponseFields,
-		accepted: t.Literal(true),
 		...UnitExternalLinkCurationResponseFields,
 		sourceEntity: UnitPresentationResponse,
 	},
@@ -401,7 +411,7 @@ export const UnitDetailResponse = t.Object({
 			contextPost: t.Nullable(AssociationContextPostResponse),
 		}),
 	),
-	externalLinks: t.Array(AcceptedExternalLinkResponse),
+	externalLinks: t.Array(UnitDetailExternalLinkResponse),
 	tags: t.Array(
 		t.Object({
 			id: Uuid,
@@ -1014,7 +1024,7 @@ export const EntityDetailResponse = t.Object({
 	localizations: t.Array(LocalizationResponse),
 	attributions: t.Array(UnitAttributionSummaryResponse),
 	owner: t.Nullable(UnitSummaryResponse),
-	externalLinks: t.Array(AcceptedExternalLinkResponse),
+	externalLinks: t.Array(UnitDetailExternalLinkResponse),
 	capabilities: t.Object({
 		canEdit: t.Boolean(),
 		canEditCreditAttributions: t.Boolean(),
@@ -1413,7 +1423,6 @@ export const SubjectAssociationResponse = t.Object({
 export const UnitExternalLinkResponse = t.Object(
 	{
 		...UnitExternalLinkIdentityResponseFields,
-		accepted: t.Boolean(),
 		...UnitExternalLinkCurationResponseFields,
 	},
 	{ additionalProperties: false },
@@ -1421,7 +1430,6 @@ export const UnitExternalLinkResponse = t.Object(
 const UnitExternalLinkListItemResponse = t.Object(
 	{
 		...UnitExternalLinkIdentityResponseFields,
-		accepted: t.Boolean(),
 		...UnitExternalLinkCurationResponseFields,
 		sourceEntity: UnitPresentationResponse,
 	},
@@ -1430,6 +1438,7 @@ const UnitExternalLinkListItemResponse = t.Object(
 export const UnitExternalLinkListResponse = t.Object(
 	{
 		items: t.Array(UnitExternalLinkListItemResponse),
+		nextCursor: NullableText,
 		curationVersion: t.Integer({ minimum: 0 }),
 	},
 	{ additionalProperties: false },
@@ -1453,10 +1462,7 @@ export const AliasResponse = t.Object({
 	language: NullableText,
 	kind: t.String(),
 	createdByProfileId: t.Nullable(Uuid),
-	viewerVote: t.Nullable(t.Union([t.Literal(-1), t.Literal(1)])),
-	score: t.Integer(),
-	voteCount: t.Integer({ minimum: 0 }),
-	accepted: t.Boolean(),
+	voteSummary: BinaryVoteSummaryResponse,
 	pinned: t.Boolean(),
 	position: t.Nullable(FractionalPosition),
 	createdAt: DateTime,
@@ -1464,18 +1470,15 @@ export const AliasResponse = t.Object({
 });
 export const AliasListResponse = t.Object({
 	items: t.Array(AliasResponse),
+	nextCursor: NullableText,
 	curationVersion: t.Integer({ minimum: 0 }),
 });
 export const AliasCurationResponse = t.Object({
-	candidate: AliasResponse,
+	reference: AliasResponse,
 	curationVersion: t.Integer({ minimum: 0 }),
 });
 export const UnitExternalLinkCurationResponse = t.Object({
-	candidate: UnitExternalLinkResponse,
+	reference: UnitExternalLinkResponse,
 	curationVersion: t.Integer({ minimum: 0 }),
 });
-export const VoteResponse = t.Object({
-	value: t.Nullable(t.Union([t.Literal(-1), t.Literal(1)])),
-	score: t.Integer(),
-	voteCount: t.Integer({ minimum: 0 }),
-});
+export const VoteResponse = BinaryVoteSummaryResponse;

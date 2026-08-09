@@ -83,6 +83,10 @@ export const unitAliasVoteStat = pgTable(
 	(table) => [
 		check("unit_alias_vote_stat_count_check", sql`${table.voteCount} >= 0`),
 		check("unit_alias_vote_stat_score_check", sql`abs(${table.score}) <= ${table.voteCount}`),
+		check(
+			"unit_alias_vote_stat_parity_check",
+			sql`(${table.voteCount} + ${table.score}) % 2 = 0`,
+		),
 	],
 );
 
@@ -101,6 +105,10 @@ export const unitExternalLinkVoteStat = pgTable(
 		check(
 			"unit_external_link_vote_stat_score_check",
 			sql`abs(${table.score}) <= ${table.voteCount}`,
+		),
+		check(
+			"unit_external_link_vote_stat_parity_check",
+			sql`(${table.voteCount} + ${table.score}) % 2 = 0`,
 		),
 	],
 );
@@ -123,6 +131,10 @@ export const unitTagVoteStat = pgTable(
 		}).onDelete("cascade"),
 		check("unit_tag_vote_stat_count_check", sql`${table.voteCount} >= 0`),
 		check("unit_tag_vote_stat_score_check", sql`abs(${table.score}) <= ${table.voteCount}`),
+		check(
+			"unit_tag_vote_stat_parity_check",
+			sql`(${table.voteCount} + ${table.score}) % 2 = 0`,
+		),
 	],
 );
 
@@ -141,6 +153,10 @@ export const unitStructureVoteStat = pgTable(
 		check(
 			"unit_structure_vote_stat_score_check",
 			sql`abs(${table.score}) <= ${table.voteCount}`,
+		),
+		check(
+			"unit_structure_vote_stat_parity_check",
+			sql`(${table.voteCount} + ${table.score}) % 2 = 0`,
 		),
 	],
 );
@@ -165,6 +181,10 @@ export const unitStructureApplicationVoteStat = pgTable(
 		check(
 			"unit_structure_application_vote_stat_score_check",
 			sql`abs(${table.score}) <= ${table.voteCount}`,
+		),
+		check(
+			"unit_structure_application_vote_stat_parity_check",
+			sql`(${table.voteCount} + ${table.score}) % 2 = 0`,
 		),
 	],
 );
@@ -208,6 +228,10 @@ export const realmTagVoteStat = pgTable(
 		),
 		check("realm_tag_vote_stat_count_check", sql`${table.voteCount} >= 0`),
 		check("realm_tag_vote_stat_score_check", sql`abs(${table.score}) <= ${table.voteCount}`),
+		check(
+			"realm_tag_vote_stat_parity_check",
+			sql`(${table.voteCount} + ${table.score}) % 2 = 0`,
+		),
 	],
 );
 

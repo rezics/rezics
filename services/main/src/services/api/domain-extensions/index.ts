@@ -46,13 +46,11 @@ import {
 	unitOwnership,
 	unit,
 	unitExternalLink,
-	unitExternalLinkVoteStat,
 	unitLocalization,
 	zone,
 	unitDock,
 	imageAsset,
 } from "../../database/schema";
-import { ExternalLinkVisibilityScoreThreshold } from "../../database/schema/contract-values";
 import { UnitNotFound } from "../../units/errors";
 import type { DatabaseTransaction } from "../../database";
 import { recordUnitRevision } from "../../units/history";
@@ -219,15 +217,11 @@ async function ensureRequirementSource(softwareId: string, sourceExternalLinkId?
 	const [source] = await database
 		.select({ id: unitExternalLink.id })
 		.from(unitExternalLink)
-		.leftJoin(
-			unitExternalLinkVoteStat,
-			eq(unitExternalLinkVoteStat.externalLinkId, unitExternalLink.id),
-		)
 		.where(
 			and(
 				eq(unitExternalLink.id, sourceExternalLinkId),
 				eq(unitExternalLink.unitId, softwareId),
-				sql`${unitExternalLink.pinned} or coalesce(${unitExternalLinkVoteStat.score}, 0) >= ${ExternalLinkVisibilityScoreThreshold}`,
+				isNull(unitExternalLink.withdrawnAt),
 			),
 		)
 		.limit(1);

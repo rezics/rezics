@@ -50,10 +50,45 @@ export class UnitReferenceCurationChanged extends Data.TaggedError("UnitReferenc
 	}
 }
 
+export class UnitReferenceLimitReached extends Data.TaggedError("UnitReferenceLimitReached") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitReferenceLimitReached.status;
+	readonly message = "Unit reference limit reached";
+	readonly details: { readonly maxActiveReferences: number };
+
+	constructor(maxActiveReferences: number) {
+		super();
+		this.details = { maxActiveReferences };
+	}
+}
+
+export class UnitReferencePinnedLimitReached extends Data.TaggedError(
+	"UnitReferencePinnedLimitReached",
+) {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitReferencePinnedLimitReached.status;
+	readonly message = "Pinned Unit reference limit reached";
+	readonly details: { readonly maxPinnedReferences: number };
+
+	constructor(maxPinnedReferences: number) {
+		super();
+		this.details = { maxPinnedReferences };
+	}
+}
+
+export class UnitReferenceWithdrawn extends Data.TaggedError("UnitReferenceWithdrawn") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitReferenceWithdrawn.status;
+	readonly message = "Unit reference has been withdrawn";
+}
+
 export const UnitResourceErrors = [
 	AliasNotFound,
 	TagApplicationNotFound,
 	UnitTagCurationChanged,
 	UnitExternalLinkNotFound,
 	UnitReferenceCurationChanged,
+	UnitReferenceLimitReached,
+	UnitReferencePinnedLimitReached,
+	UnitReferenceWithdrawn,
 ] as const;

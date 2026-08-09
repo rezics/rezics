@@ -21,6 +21,9 @@ env "main" {
 
 		// Drizzle does not export these durable objects, so explicit SQL
 		// migrations own them and Atlas must not infer their removal.
-		exclude = ["*[type=extension|function|trigger]"]
+		exclude = [
+			"*[type=extension|function|trigger]",
+			"unit_localization.unit_localization_pgroonga_*[type=index]",
+		]
 	}
 }

@@ -1,6 +1,6 @@
 {
 	"openapi": "3.2.0",
-	"info": { "title": "REZICS API", "version": "1.3.0" },
+	"info": { "title": "REZICS API", "version": "1.4.0" },
 	"components": {
 		"schemas": {
 			"JsonValue": {
@@ -10770,6 +10770,9 @@
 					"UnitTagCurationChanged",
 					"UnitExternalLinkNotFound",
 					"UnitReferenceCurationChanged",
+					"UnitReferenceLimitReached",
+					"UnitReferencePinnedLimitReached",
+					"UnitReferenceWithdrawn",
 					"InvalidMessageCursor",
 					"ConversationNotFound",
 					"ConversationParticipantsInvalid",
@@ -88554,10 +88557,7 @@
 													"normalizedUrl",
 													"normalizedUrlHash",
 													"createdByProfileId",
-													"viewerVote",
-													"score",
-													"voteCount",
-													"accepted",
+													"voteSummary",
 													"pinned",
 													"position",
 													"createdAt",
@@ -88584,45 +88584,99 @@
 															{ "type": "null" }
 														]
 													},
-													"viewerVote": {
-														"nullable": true,
-														"anyOf": [
-															{
+													"voteSummary": {
+														"additionalProperties": false,
+														"type": "object",
+														"required": [
+															"positiveCount",
+															"negativeCount",
+															"score",
+															"voteCount",
+															"viewerVote",
+															"asOf"
+														],
+														"properties": {
+															"positiveCount": {
+																"minimum": 0,
 																"anyOf": [
 																	{
-																		"const": -1,
-																		"type": "number"
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
 																	},
-																	{ "const": 1, "type": "number" }
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
 																]
 															},
-															{ "type": "null" }
-														]
-													},
-													"score": {
-														"anyOf": [
-															{
-																"format": "integer",
-																"default": 0,
-																"type": "string"
+															"negativeCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
 															},
-															{ "type": "integer" }
-														]
-													},
-													"voteCount": {
-														"minimum": 0,
-														"anyOf": [
-															{
-																"format": "integer",
-																"default": 0,
-																"type": "string"
+															"score": {
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{ "type": "integer" }
+																]
 															},
-															{ "minimum": 0, "type": "integer" }
-														]
-													},
-													"accepted": {
-														"const": true,
-														"type": "boolean"
+															"voteCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
+															"viewerVote": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"anyOf": [
+																			{
+																				"const": -1,
+																				"type": "number"
+																			},
+																			{
+																				"const": 1,
+																				"type": "number"
+																			}
+																		]
+																	},
+																	{ "type": "null" }
+																]
+															},
+															"asOf": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"format": "date-time",
+																		"type": "string"
+																	},
+																	{ "type": "null" }
+																]
+															}
+														}
 													},
 													"pinned": { "type": "boolean" },
 													"position": {
@@ -91297,10 +91351,7 @@
 													"normalizedUrl",
 													"normalizedUrlHash",
 													"createdByProfileId",
-													"viewerVote",
-													"score",
-													"voteCount",
-													"accepted",
+													"voteSummary",
 													"pinned",
 													"position",
 													"createdAt",
@@ -91327,45 +91378,99 @@
 															{ "type": "null" }
 														]
 													},
-													"viewerVote": {
-														"nullable": true,
-														"anyOf": [
-															{
+													"voteSummary": {
+														"additionalProperties": false,
+														"type": "object",
+														"required": [
+															"positiveCount",
+															"negativeCount",
+															"score",
+															"voteCount",
+															"viewerVote",
+															"asOf"
+														],
+														"properties": {
+															"positiveCount": {
+																"minimum": 0,
 																"anyOf": [
 																	{
-																		"const": -1,
-																		"type": "number"
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
 																	},
-																	{ "const": 1, "type": "number" }
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
 																]
 															},
-															{ "type": "null" }
-														]
-													},
-													"score": {
-														"anyOf": [
-															{
-																"format": "integer",
-																"default": 0,
-																"type": "string"
+															"negativeCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
 															},
-															{ "type": "integer" }
-														]
-													},
-													"voteCount": {
-														"minimum": 0,
-														"anyOf": [
-															{
-																"format": "integer",
-																"default": 0,
-																"type": "string"
+															"score": {
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{ "type": "integer" }
+																]
 															},
-															{ "minimum": 0, "type": "integer" }
-														]
-													},
-													"accepted": {
-														"const": true,
-														"type": "boolean"
+															"voteCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
+															"viewerVote": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"anyOf": [
+																			{
+																				"const": -1,
+																				"type": "number"
+																			},
+																			{
+																				"const": 1,
+																				"type": "number"
+																			}
+																		]
+																	},
+																	{ "type": "null" }
+																]
+															},
+															"asOf": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"format": "date-time",
+																		"type": "string"
+																	},
+																	{ "type": "null" }
+																]
+															}
+														}
 													},
 													"pinned": { "type": "boolean" },
 													"position": {
@@ -94054,10 +94159,7 @@
 													"normalizedUrl",
 													"normalizedUrlHash",
 													"createdByProfileId",
-													"viewerVote",
-													"score",
-													"voteCount",
-													"accepted",
+													"voteSummary",
 													"pinned",
 													"position",
 													"createdAt",
@@ -94084,45 +94186,99 @@
 															{ "type": "null" }
 														]
 													},
-													"viewerVote": {
-														"nullable": true,
-														"anyOf": [
-															{
+													"voteSummary": {
+														"additionalProperties": false,
+														"type": "object",
+														"required": [
+															"positiveCount",
+															"negativeCount",
+															"score",
+															"voteCount",
+															"viewerVote",
+															"asOf"
+														],
+														"properties": {
+															"positiveCount": {
+																"minimum": 0,
 																"anyOf": [
 																	{
-																		"const": -1,
-																		"type": "number"
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
 																	},
-																	{ "const": 1, "type": "number" }
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
 																]
 															},
-															{ "type": "null" }
-														]
-													},
-													"score": {
-														"anyOf": [
-															{
-																"format": "integer",
-																"default": 0,
-																"type": "string"
+															"negativeCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
 															},
-															{ "type": "integer" }
-														]
-													},
-													"voteCount": {
-														"minimum": 0,
-														"anyOf": [
-															{
-																"format": "integer",
-																"default": 0,
-																"type": "string"
+															"score": {
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{ "type": "integer" }
+																]
 															},
-															{ "minimum": 0, "type": "integer" }
-														]
-													},
-													"accepted": {
-														"const": true,
-														"type": "boolean"
+															"voteCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
+															"viewerVote": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"anyOf": [
+																			{
+																				"const": -1,
+																				"type": "number"
+																			},
+																			{
+																				"const": 1,
+																				"type": "number"
+																			}
+																		]
+																	},
+																	{ "type": "null" }
+																]
+															},
+															"asOf": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"format": "date-time",
+																		"type": "string"
+																	},
+																	{ "type": "null" }
+																]
+															}
+														}
 													},
 													"pinned": { "type": "boolean" },
 													"position": {
@@ -96736,10 +96892,7 @@
 													"normalizedUrl",
 													"normalizedUrlHash",
 													"createdByProfileId",
-													"viewerVote",
-													"score",
-													"voteCount",
-													"accepted",
+													"voteSummary",
 													"pinned",
 													"position",
 													"createdAt",
@@ -96766,45 +96919,99 @@
 															{ "type": "null" }
 														]
 													},
-													"viewerVote": {
-														"nullable": true,
-														"anyOf": [
-															{
+													"voteSummary": {
+														"additionalProperties": false,
+														"type": "object",
+														"required": [
+															"positiveCount",
+															"negativeCount",
+															"score",
+															"voteCount",
+															"viewerVote",
+															"asOf"
+														],
+														"properties": {
+															"positiveCount": {
+																"minimum": 0,
 																"anyOf": [
 																	{
-																		"const": -1,
-																		"type": "number"
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
 																	},
-																	{ "const": 1, "type": "number" }
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
 																]
 															},
-															{ "type": "null" }
-														]
-													},
-													"score": {
-														"anyOf": [
-															{
-																"format": "integer",
-																"default": 0,
-																"type": "string"
+															"negativeCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
 															},
-															{ "type": "integer" }
-														]
-													},
-													"voteCount": {
-														"minimum": 0,
-														"anyOf": [
-															{
-																"format": "integer",
-																"default": 0,
-																"type": "string"
+															"score": {
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{ "type": "integer" }
+																]
 															},
-															{ "minimum": 0, "type": "integer" }
-														]
-													},
-													"accepted": {
-														"const": true,
-														"type": "boolean"
+															"voteCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
+															"viewerVote": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"anyOf": [
+																			{
+																				"const": -1,
+																				"type": "number"
+																			},
+																			{
+																				"const": 1,
+																				"type": "number"
+																			}
+																		]
+																	},
+																	{ "type": "null" }
+																]
+															},
+															"asOf": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"format": "date-time",
+																		"type": "string"
+																	},
+																	{ "type": "null" }
+																]
+															}
+														}
 													},
 													"pinned": { "type": "boolean" },
 													"position": {
@@ -99406,10 +99613,7 @@
 													"normalizedUrl",
 													"normalizedUrlHash",
 													"createdByProfileId",
-													"viewerVote",
-													"score",
-													"voteCount",
-													"accepted",
+													"voteSummary",
 													"pinned",
 													"position",
 													"createdAt",
@@ -99436,45 +99640,99 @@
 															{ "type": "null" }
 														]
 													},
-													"viewerVote": {
-														"nullable": true,
-														"anyOf": [
-															{
+													"voteSummary": {
+														"additionalProperties": false,
+														"type": "object",
+														"required": [
+															"positiveCount",
+															"negativeCount",
+															"score",
+															"voteCount",
+															"viewerVote",
+															"asOf"
+														],
+														"properties": {
+															"positiveCount": {
+																"minimum": 0,
 																"anyOf": [
 																	{
-																		"const": -1,
-																		"type": "number"
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
 																	},
-																	{ "const": 1, "type": "number" }
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
 																]
 															},
-															{ "type": "null" }
-														]
-													},
-													"score": {
-														"anyOf": [
-															{
-																"format": "integer",
-																"default": 0,
-																"type": "string"
+															"negativeCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
 															},
-															{ "type": "integer" }
-														]
-													},
-													"voteCount": {
-														"minimum": 0,
-														"anyOf": [
-															{
-																"format": "integer",
-																"default": 0,
-																"type": "string"
+															"score": {
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{ "type": "integer" }
+																]
 															},
-															{ "minimum": 0, "type": "integer" }
-														]
-													},
-													"accepted": {
-														"const": true,
-														"type": "boolean"
+															"voteCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
+															"viewerVote": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"anyOf": [
+																			{
+																				"const": -1,
+																				"type": "number"
+																			},
+																			{
+																				"const": 1,
+																				"type": "number"
+																			}
+																		]
+																	},
+																	{ "type": "null" }
+																]
+															},
+															"asOf": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"format": "date-time",
+																		"type": "string"
+																	},
+																	{ "type": "null" }
+																]
+															}
+														}
 													},
 													"pinned": { "type": "boolean" },
 													"position": {
@@ -102435,10 +102693,7 @@
 													"normalizedUrl",
 													"normalizedUrlHash",
 													"createdByProfileId",
-													"viewerVote",
-													"score",
-													"voteCount",
-													"accepted",
+													"voteSummary",
 													"pinned",
 													"position",
 													"createdAt",
@@ -102465,45 +102720,99 @@
 															{ "type": "null" }
 														]
 													},
-													"viewerVote": {
-														"nullable": true,
-														"anyOf": [
-															{
+													"voteSummary": {
+														"additionalProperties": false,
+														"type": "object",
+														"required": [
+															"positiveCount",
+															"negativeCount",
+															"score",
+															"voteCount",
+															"viewerVote",
+															"asOf"
+														],
+														"properties": {
+															"positiveCount": {
+																"minimum": 0,
 																"anyOf": [
 																	{
-																		"const": -1,
-																		"type": "number"
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
 																	},
-																	{ "const": 1, "type": "number" }
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
 																]
 															},
-															{ "type": "null" }
-														]
-													},
-													"score": {
-														"anyOf": [
-															{
-																"format": "integer",
-																"default": 0,
-																"type": "string"
+															"negativeCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
 															},
-															{ "type": "integer" }
-														]
-													},
-													"voteCount": {
-														"minimum": 0,
-														"anyOf": [
-															{
-																"format": "integer",
-																"default": 0,
-																"type": "string"
+															"score": {
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{ "type": "integer" }
+																]
 															},
-															{ "minimum": 0, "type": "integer" }
-														]
-													},
-													"accepted": {
-														"const": true,
-														"type": "boolean"
+															"voteCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
+															"viewerVote": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"anyOf": [
+																			{
+																				"const": -1,
+																				"type": "number"
+																			},
+																			{
+																				"const": 1,
+																				"type": "number"
+																			}
+																		]
+																	},
+																	{ "type": "null" }
+																]
+															},
+															"asOf": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"format": "date-time",
+																		"type": "string"
+																	},
+																	{ "type": "null" }
+																]
+															}
+														}
 													},
 													"pinned": { "type": "boolean" },
 													"position": {
@@ -107481,10 +107790,7 @@
 													"normalizedUrl",
 													"normalizedUrlHash",
 													"createdByProfileId",
-													"viewerVote",
-													"score",
-													"voteCount",
-													"accepted",
+													"voteSummary",
 													"pinned",
 													"position",
 													"createdAt",
@@ -107511,45 +107817,99 @@
 															{ "type": "null" }
 														]
 													},
-													"viewerVote": {
-														"nullable": true,
-														"anyOf": [
-															{
+													"voteSummary": {
+														"additionalProperties": false,
+														"type": "object",
+														"required": [
+															"positiveCount",
+															"negativeCount",
+															"score",
+															"voteCount",
+															"viewerVote",
+															"asOf"
+														],
+														"properties": {
+															"positiveCount": {
+																"minimum": 0,
 																"anyOf": [
 																	{
-																		"const": -1,
-																		"type": "number"
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
 																	},
-																	{ "const": 1, "type": "number" }
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
 																]
 															},
-															{ "type": "null" }
-														]
-													},
-													"score": {
-														"anyOf": [
-															{
-																"format": "integer",
-																"default": 0,
-																"type": "string"
+															"negativeCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
 															},
-															{ "type": "integer" }
-														]
-													},
-													"voteCount": {
-														"minimum": 0,
-														"anyOf": [
-															{
-																"format": "integer",
-																"default": 0,
-																"type": "string"
+															"score": {
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{ "type": "integer" }
+																]
 															},
-															{ "minimum": 0, "type": "integer" }
-														]
-													},
-													"accepted": {
-														"const": true,
-														"type": "boolean"
+															"voteCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
+															"viewerVote": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"anyOf": [
+																			{
+																				"const": -1,
+																				"type": "number"
+																			},
+																			{
+																				"const": 1,
+																				"type": "number"
+																			}
+																		]
+																	},
+																	{ "type": "null" }
+																]
+															},
+															"asOf": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"format": "date-time",
+																		"type": "string"
+																	},
+																	{ "type": "null" }
+																]
+															}
+														}
 													},
 													"pinned": { "type": "boolean" },
 													"position": {
@@ -110236,7 +110596,7 @@
 		},
 		"/api/v1/units/{type}/{unitId}/aliases": {
 			"get": {
-				"summary": "List Unit aliases",
+				"summary": "List Unit alias references",
 				"tags": ["Units"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
@@ -110275,6 +110635,26 @@
 						"in": "path",
 						"required": true,
 						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "cursor",
+						"in": "query",
+						"required": false,
+						"schema": { "minLength": 1, "maxLength": 1024, "type": "string" }
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 50,
+							"default": 20,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 50, "default": 20, "type": "integer" }
+							]
+						}
 					}
 				],
 				"responses": {
@@ -110284,7 +110664,7 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["items", "curationVersion"],
+									"required": ["items", "nextCursor", "curationVersion"],
 									"properties": {
 										"items": {
 											"type": "array",
@@ -110298,10 +110678,7 @@
 													"language",
 													"kind",
 													"createdByProfileId",
-													"viewerVote",
-													"score",
-													"voteCount",
-													"accepted",
+													"voteSummary",
 													"pinned",
 													"position",
 													"createdAt",
@@ -110330,43 +110707,100 @@
 															{ "type": "null" }
 														]
 													},
-													"viewerVote": {
-														"nullable": true,
-														"anyOf": [
-															{
+													"voteSummary": {
+														"additionalProperties": false,
+														"type": "object",
+														"required": [
+															"positiveCount",
+															"negativeCount",
+															"score",
+															"voteCount",
+															"viewerVote",
+															"asOf"
+														],
+														"properties": {
+															"positiveCount": {
+																"minimum": 0,
 																"anyOf": [
 																	{
-																		"const": -1,
-																		"type": "number"
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
 																	},
-																	{ "const": 1, "type": "number" }
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
 																]
 															},
-															{ "type": "null" }
-														]
-													},
-													"score": {
-														"anyOf": [
-															{
-																"format": "integer",
-																"default": 0,
-																"type": "string"
+															"negativeCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
 															},
-															{ "type": "integer" }
-														]
-													},
-													"voteCount": {
-														"minimum": 0,
-														"anyOf": [
-															{
-																"format": "integer",
-																"default": 0,
-																"type": "string"
+															"score": {
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{ "type": "integer" }
+																]
 															},
-															{ "minimum": 0, "type": "integer" }
-														]
+															"voteCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
+															"viewerVote": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"anyOf": [
+																			{
+																				"const": -1,
+																				"type": "number"
+																			},
+																			{
+																				"const": 1,
+																				"type": "number"
+																			}
+																		]
+																	},
+																	{ "type": "null" }
+																]
+															},
+															"asOf": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"format": "date-time",
+																		"type": "string"
+																	},
+																	{ "type": "null" }
+																]
+															}
+														}
 													},
-													"accepted": { "type": "boolean" },
 													"pinned": { "type": "boolean" },
 													"position": {
 														"nullable": true,
@@ -110391,6 +110825,10 @@
 												}
 											}
 										},
+										"nextCursor": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
 										"curationVersion": {
 											"minimum": 0,
 											"anyOf": [
@@ -110402,6 +110840,33 @@
 												{ "minimum": 0, "type": "integer" }
 											]
 										}
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitReferenceLimitReached",
+													"type": "string",
+													"enum": ["UnitReferenceLimitReached"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
 									}
 								}
 							}
@@ -110554,10 +111019,7 @@
 										"language",
 										"kind",
 										"createdByProfileId",
-										"viewerVote",
-										"score",
-										"voteCount",
-										"accepted",
+										"voteSummary",
 										"pinned",
 										"position",
 										"createdAt",
@@ -110580,40 +111042,82 @@
 												{ "type": "null" }
 											]
 										},
-										"viewerVote": {
-											"nullable": true,
-											"anyOf": [
-												{
+										"voteSummary": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": [
+												"positiveCount",
+												"negativeCount",
+												"score",
+												"voteCount",
+												"viewerVote",
+												"asOf"
+											],
+											"properties": {
+												"positiveCount": {
+													"minimum": 0,
 													"anyOf": [
-														{ "const": -1, "type": "number" },
-														{ "const": 1, "type": "number" }
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
 													]
 												},
-												{ "type": "null" }
-											]
-										},
-										"score": {
-											"anyOf": [
-												{
-													"format": "integer",
-													"default": 0,
-													"type": "string"
+												"negativeCount": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
 												},
-												{ "type": "integer" }
-											]
-										},
-										"voteCount": {
-											"minimum": 0,
-											"anyOf": [
-												{
-													"format": "integer",
-													"default": 0,
-													"type": "string"
+												"score": {
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "type": "integer" }
+													]
 												},
-												{ "minimum": 0, "type": "integer" }
-											]
+												"voteCount": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"viewerVote": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"anyOf": [
+																{ "const": -1, "type": "number" },
+																{ "const": 1, "type": "number" }
+															]
+														},
+														{ "type": "null" }
+													]
+												},
+												"asOf": {
+													"nullable": true,
+													"anyOf": [
+														{ "format": "date-time", "type": "string" },
+														{ "type": "null" }
+													]
+												}
+											}
 										},
-										"accepted": { "type": "boolean" },
 										"pinned": { "type": "boolean" },
 										"position": {
 											"nullable": true,
@@ -110688,6 +111192,36 @@
 													"default": "UnitNotFound",
 													"type": "string",
 													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitReferenceLimitReached",
+													"type": "string",
+													"enum": [
+														"UnitReferenceLimitReached",
+														"UnitReferenceWithdrawn"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -110827,19 +111361,37 @@
 						"content": {
 							"application/json": {
 								"schema": {
+									"additionalProperties": false,
 									"type": "object",
-									"required": ["value", "score", "voteCount"],
+									"required": [
+										"positiveCount",
+										"negativeCount",
+										"score",
+										"voteCount",
+										"viewerVote",
+										"asOf"
+									],
 									"properties": {
-										"value": {
-											"nullable": true,
+										"positiveCount": {
+											"minimum": 0,
 											"anyOf": [
 												{
-													"anyOf": [
-														{ "const": -1, "type": "number" },
-														{ "const": 1, "type": "number" }
-													]
+													"format": "integer",
+													"default": 0,
+													"type": "string"
 												},
-												{ "type": "null" }
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"negativeCount": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
 											]
 										},
 										"score": {
@@ -110861,6 +111413,25 @@
 													"type": "string"
 												},
 												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"viewerVote": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"asOf": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
 											]
 										}
 									}
@@ -111046,19 +111617,37 @@
 						"content": {
 							"application/json": {
 								"schema": {
+									"additionalProperties": false,
 									"type": "object",
-									"required": ["value", "score", "voteCount"],
+									"required": [
+										"positiveCount",
+										"negativeCount",
+										"score",
+										"voteCount",
+										"viewerVote",
+										"asOf"
+									],
 									"properties": {
-										"value": {
-											"nullable": true,
+										"positiveCount": {
+											"minimum": 0,
 											"anyOf": [
 												{
-													"anyOf": [
-														{ "const": -1, "type": "number" },
-														{ "const": 1, "type": "number" }
-													]
+													"format": "integer",
+													"default": 0,
+													"type": "string"
 												},
-												{ "type": "null" }
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"negativeCount": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
 											]
 										},
 										"score": {
@@ -111080,6 +111669,25 @@
 													"type": "string"
 												},
 												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"viewerVote": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"asOf": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
 											]
 										}
 									}
@@ -111316,9 +111924,9 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["candidate", "curationVersion"],
+									"required": ["reference", "curationVersion"],
 									"properties": {
-										"candidate": {
+										"reference": {
 											"type": "object",
 											"required": [
 												"id",
@@ -111328,10 +111936,7 @@
 												"language",
 												"kind",
 												"createdByProfileId",
-												"viewerVote",
-												"score",
-												"voteCount",
-												"accepted",
+												"voteSummary",
 												"pinned",
 												"position",
 												"createdAt",
@@ -111357,40 +111962,91 @@
 														{ "type": "null" }
 													]
 												},
-												"viewerVote": {
-													"nullable": true,
-													"anyOf": [
-														{
+												"voteSummary": {
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"positiveCount",
+														"negativeCount",
+														"score",
+														"voteCount",
+														"viewerVote",
+														"asOf"
+													],
+													"properties": {
+														"positiveCount": {
+															"minimum": 0,
 															"anyOf": [
-																{ "const": -1, "type": "number" },
-																{ "const": 1, "type": "number" }
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
 															]
 														},
-														{ "type": "null" }
-													]
-												},
-												"score": {
-													"anyOf": [
-														{
-															"format": "integer",
-															"default": 0,
-															"type": "string"
+														"negativeCount": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
 														},
-														{ "type": "integer" }
-													]
-												},
-												"voteCount": {
-													"minimum": 0,
-													"anyOf": [
-														{
-															"format": "integer",
-															"default": 0,
-															"type": "string"
+														"score": {
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "type": "integer" }
+															]
 														},
-														{ "minimum": 0, "type": "integer" }
-													]
+														"voteCount": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
+														},
+														"viewerVote": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"anyOf": [
+																		{
+																			"const": -1,
+																			"type": "number"
+																		},
+																		{
+																			"const": 1,
+																			"type": "number"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"asOf": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date-time",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														}
+													}
 												},
-												"accepted": { "type": "boolean" },
 												"pinned": { "type": "boolean" },
 												"position": {
 													"nullable": true,
@@ -111437,6 +112093,160 @@
 								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound", "AliasNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitReferenceCurationChanged",
+													"type": "string",
+													"enum": [
+														"UnitReferenceCurationChanged",
+														"UnitReferencePinnedLimitReached"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": [
+														"ApiQuotaExceeded",
+														"ApiTokenRateLimitExceeded"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "patchApiUnitsByTypeByUnitIdAliasesByAliasId",
+				"x-rezics-quota-route-operation-id": "patchApiUnitsByTypeByUnitIdAliasesByAliasId",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			},
+			"delete": {
+				"summary": "Withdraw Unit alias reference",
+				"tags": ["Units"],
+				"responses": {
+					"204": {
+						"description": "Response for status 204",
+						"content": { "type": "void" }
 					},
 					"403": {
 						"description": "Response for status 403",
@@ -111576,8 +112386,65 @@
 						}
 					}
 				},
-				"operationId": "patchApiUnitsByTypeByUnitIdAliasesByAliasId",
-				"x-rezics-quota-route-operation-id": "patchApiUnitsByTypeByUnitIdAliasesByAliasId",
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "type",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"slug_namespace",
+								"profile",
+								"book",
+								"software",
+								"media",
+								"video",
+								"audio",
+								"release",
+								"entity",
+								"label",
+								"tag",
+								"structure",
+								"series",
+								"zone",
+								"zone_page",
+								"collection",
+								"post",
+								"poll",
+								"realm",
+								"realm_rule"
+							]
+						}
+					},
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "aliasId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "baseVersion",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"minimum": 0,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 0, "type": "integer" }
+							]
+						}
+					}
+				],
+				"operationId": "deleteApiUnitsByTypeByUnitIdAliasesByAliasId",
+				"x-rezics-quota-route-operation-id": "deleteApiUnitsByTypeByUnitIdAliasesByAliasId",
 				"x-rezics-quota-operation-id": "*",
 				"x-rezics-quota-cost-units": 1
 			}
@@ -112651,7 +113518,7 @@
 		},
 		"/api/v1/units/{type}/{unitId}/external-links": {
 			"get": {
-				"summary": "List Unit external-link candidates",
+				"summary": "List Unit external-link references",
 				"tags": ["Units"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
@@ -112705,6 +113572,26 @@
 								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
 							}
 						}
+					},
+					{
+						"name": "cursor",
+						"in": "query",
+						"required": false,
+						"schema": { "minLength": 1, "maxLength": 1024, "type": "string" }
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 50,
+							"default": 20,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 50, "default": 20, "type": "integer" }
+							]
+						}
 					}
 				],
 				"responses": {
@@ -112715,7 +113602,7 @@
 								"schema": {
 									"additionalProperties": false,
 									"type": "object",
-									"required": ["items", "curationVersion"],
+									"required": ["items", "nextCursor", "curationVersion"],
 									"properties": {
 										"items": {
 											"type": "array",
@@ -112730,10 +113617,7 @@
 													"normalizedUrl",
 													"normalizedUrlHash",
 													"createdByProfileId",
-													"viewerVote",
-													"score",
-													"voteCount",
-													"accepted",
+													"voteSummary",
 													"pinned",
 													"position",
 													"createdAt",
@@ -112760,43 +113644,100 @@
 															{ "type": "null" }
 														]
 													},
-													"viewerVote": {
-														"nullable": true,
-														"anyOf": [
-															{
+													"voteSummary": {
+														"additionalProperties": false,
+														"type": "object",
+														"required": [
+															"positiveCount",
+															"negativeCount",
+															"score",
+															"voteCount",
+															"viewerVote",
+															"asOf"
+														],
+														"properties": {
+															"positiveCount": {
+																"minimum": 0,
 																"anyOf": [
 																	{
-																		"const": -1,
-																		"type": "number"
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
 																	},
-																	{ "const": 1, "type": "number" }
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
 																]
 															},
-															{ "type": "null" }
-														]
-													},
-													"score": {
-														"anyOf": [
-															{
-																"format": "integer",
-																"default": 0,
-																"type": "string"
+															"negativeCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
 															},
-															{ "type": "integer" }
-														]
-													},
-													"voteCount": {
-														"minimum": 0,
-														"anyOf": [
-															{
-																"format": "integer",
-																"default": 0,
-																"type": "string"
+															"score": {
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{ "type": "integer" }
+																]
 															},
-															{ "minimum": 0, "type": "integer" }
-														]
+															"voteCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
+															"viewerVote": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"anyOf": [
+																			{
+																				"const": -1,
+																				"type": "number"
+																			},
+																			{
+																				"const": 1,
+																				"type": "number"
+																			}
+																		]
+																	},
+																	{ "type": "null" }
+																]
+															},
+															"asOf": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"format": "date-time",
+																		"type": "string"
+																	},
+																	{ "type": "null" }
+																]
+															}
+														}
 													},
-													"accepted": { "type": "boolean" },
 													"pinned": { "type": "boolean" },
 													"position": {
 														"nullable": true,
@@ -112989,6 +113930,10 @@
 												}
 											}
 										},
+										"nextCursor": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
 										"curationVersion": {
 											"minimum": 0,
 											"anyOf": [
@@ -113021,6 +113966,33 @@
 													"default": "UnitNotFound",
 													"type": "string",
 													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitReferenceLimitReached",
+													"type": "string",
+													"enum": ["UnitReferenceLimitReached"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -113169,10 +114141,7 @@
 										"normalizedUrl",
 										"normalizedUrlHash",
 										"createdByProfileId",
-										"viewerVote",
-										"score",
-										"voteCount",
-										"accepted",
+										"voteSummary",
 										"pinned",
 										"position",
 										"createdAt",
@@ -113192,40 +114161,82 @@
 												{ "type": "null" }
 											]
 										},
-										"viewerVote": {
-											"nullable": true,
-											"anyOf": [
-												{
+										"voteSummary": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": [
+												"positiveCount",
+												"negativeCount",
+												"score",
+												"voteCount",
+												"viewerVote",
+												"asOf"
+											],
+											"properties": {
+												"positiveCount": {
+													"minimum": 0,
 													"anyOf": [
-														{ "const": -1, "type": "number" },
-														{ "const": 1, "type": "number" }
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
 													]
 												},
-												{ "type": "null" }
-											]
-										},
-										"score": {
-											"anyOf": [
-												{
-													"format": "integer",
-													"default": 0,
-													"type": "string"
+												"negativeCount": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
 												},
-												{ "type": "integer" }
-											]
-										},
-										"voteCount": {
-											"minimum": 0,
-											"anyOf": [
-												{
-													"format": "integer",
-													"default": 0,
-													"type": "string"
+												"score": {
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "type": "integer" }
+													]
 												},
-												{ "minimum": 0, "type": "integer" }
-											]
+												"voteCount": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"viewerVote": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"anyOf": [
+																{ "const": -1, "type": "number" },
+																{ "const": 1, "type": "number" }
+															]
+														},
+														{ "type": "null" }
+													]
+												},
+												"asOf": {
+													"nullable": true,
+													"anyOf": [
+														{ "format": "date-time", "type": "string" },
+														{ "type": "null" }
+													]
+												}
+											}
 										},
-										"accepted": { "type": "boolean" },
 										"pinned": { "type": "boolean" },
 										"position": {
 											"nullable": true,
@@ -113300,6 +114311,36 @@
 													"default": "UnitNotFound",
 													"type": "string",
 													"enum": ["UnitNotFound", "EntityEntryNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitReferenceLimitReached",
+													"type": "string",
+													"enum": [
+														"UnitReferenceLimitReached",
+														"UnitReferenceWithdrawn"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -113439,19 +114480,37 @@
 						"content": {
 							"application/json": {
 								"schema": {
+									"additionalProperties": false,
 									"type": "object",
-									"required": ["value", "score", "voteCount"],
+									"required": [
+										"positiveCount",
+										"negativeCount",
+										"score",
+										"voteCount",
+										"viewerVote",
+										"asOf"
+									],
 									"properties": {
-										"value": {
-											"nullable": true,
+										"positiveCount": {
+											"minimum": 0,
 											"anyOf": [
 												{
-													"anyOf": [
-														{ "const": -1, "type": "number" },
-														{ "const": 1, "type": "number" }
-													]
+													"format": "integer",
+													"default": 0,
+													"type": "string"
 												},
-												{ "type": "null" }
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"negativeCount": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
 											]
 										},
 										"score": {
@@ -113473,6 +114532,25 @@
 													"type": "string"
 												},
 												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"viewerVote": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"asOf": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
 											]
 										}
 									}
@@ -113661,19 +114739,37 @@
 						"content": {
 							"application/json": {
 								"schema": {
+									"additionalProperties": false,
 									"type": "object",
-									"required": ["value", "score", "voteCount"],
+									"required": [
+										"positiveCount",
+										"negativeCount",
+										"score",
+										"voteCount",
+										"viewerVote",
+										"asOf"
+									],
 									"properties": {
-										"value": {
-											"nullable": true,
+										"positiveCount": {
+											"minimum": 0,
 											"anyOf": [
 												{
-													"anyOf": [
-														{ "const": -1, "type": "number" },
-														{ "const": 1, "type": "number" }
-													]
+													"format": "integer",
+													"default": 0,
+													"type": "string"
 												},
-												{ "type": "null" }
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"negativeCount": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
 											]
 										},
 										"score": {
@@ -113695,6 +114791,25 @@
 													"type": "string"
 												},
 												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"viewerVote": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"asOf": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
 											]
 										}
 									}
@@ -113934,9 +115049,9 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["candidate", "curationVersion"],
+									"required": ["reference", "curationVersion"],
 									"properties": {
-										"candidate": {
+										"reference": {
 											"additionalProperties": false,
 											"type": "object",
 											"required": [
@@ -113947,10 +115062,7 @@
 												"normalizedUrl",
 												"normalizedUrlHash",
 												"createdByProfileId",
-												"viewerVote",
-												"score",
-												"voteCount",
-												"accepted",
+												"voteSummary",
 												"pinned",
 												"position",
 												"createdAt",
@@ -113973,40 +115085,91 @@
 														{ "type": "null" }
 													]
 												},
-												"viewerVote": {
-													"nullable": true,
-													"anyOf": [
-														{
+												"voteSummary": {
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"positiveCount",
+														"negativeCount",
+														"score",
+														"voteCount",
+														"viewerVote",
+														"asOf"
+													],
+													"properties": {
+														"positiveCount": {
+															"minimum": 0,
 															"anyOf": [
-																{ "const": -1, "type": "number" },
-																{ "const": 1, "type": "number" }
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
 															]
 														},
-														{ "type": "null" }
-													]
-												},
-												"score": {
-													"anyOf": [
-														{
-															"format": "integer",
-															"default": 0,
-															"type": "string"
+														"negativeCount": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
 														},
-														{ "type": "integer" }
-													]
-												},
-												"voteCount": {
-													"minimum": 0,
-													"anyOf": [
-														{
-															"format": "integer",
-															"default": 0,
-															"type": "string"
+														"score": {
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "type": "integer" }
+															]
 														},
-														{ "minimum": 0, "type": "integer" }
-													]
+														"voteCount": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
+														},
+														"viewerVote": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"anyOf": [
+																		{
+																			"const": -1,
+																			"type": "number"
+																		},
+																		{
+																			"const": 1,
+																			"type": "number"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"asOf": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date-time",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														}
+													}
 												},
-												"accepted": { "type": "boolean" },
 												"pinned": { "type": "boolean" },
 												"position": {
 													"nullable": true,
@@ -114053,6 +115216,163 @@
 								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"UnitExternalLinkNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitReferenceCurationChanged",
+													"type": "string",
+													"enum": [
+														"UnitReferenceCurationChanged",
+														"UnitReferencePinnedLimitReached"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": [
+														"ApiQuotaExceeded",
+														"ApiTokenRateLimitExceeded"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "patchApiUnitsByTypeByUnitIdExternal-linksByExternalLinkId",
+				"x-rezics-quota-route-operation-id": "patchApiUnitsByTypeByUnitIdExternal-linksByExternalLinkId",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			},
+			"delete": {
+				"summary": "Withdraw Unit external-link reference",
+				"tags": ["Units"],
+				"responses": {
+					"204": {
+						"description": "Response for status 204",
+						"content": { "type": "void" }
 					},
 					"403": {
 						"description": "Response for status 403",
@@ -114195,8 +115515,65 @@
 						}
 					}
 				},
-				"operationId": "patchApiUnitsByTypeByUnitIdExternal-linksByExternalLinkId",
-				"x-rezics-quota-route-operation-id": "patchApiUnitsByTypeByUnitIdExternal-linksByExternalLinkId",
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "type",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"slug_namespace",
+								"profile",
+								"book",
+								"software",
+								"media",
+								"video",
+								"audio",
+								"release",
+								"entity",
+								"label",
+								"tag",
+								"structure",
+								"series",
+								"zone",
+								"zone_page",
+								"collection",
+								"post",
+								"poll",
+								"realm",
+								"realm_rule"
+							]
+						}
+					},
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "externalLinkId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "baseVersion",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"minimum": 0,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 0, "type": "integer" }
+							]
+						}
+					}
+				],
+				"operationId": "deleteApiUnitsByTypeByUnitIdExternal-linksByExternalLinkId",
+				"x-rezics-quota-route-operation-id": "deleteApiUnitsByTypeByUnitIdExternal-linksByExternalLinkId",
 				"x-rezics-quota-operation-id": "*",
 				"x-rezics-quota-cost-units": 1
 			}
@@ -114977,19 +116354,37 @@
 						"content": {
 							"application/json": {
 								"schema": {
+									"additionalProperties": false,
 									"type": "object",
-									"required": ["value", "score", "voteCount"],
+									"required": [
+										"positiveCount",
+										"negativeCount",
+										"score",
+										"voteCount",
+										"viewerVote",
+										"asOf"
+									],
 									"properties": {
-										"value": {
-											"nullable": true,
+										"positiveCount": {
+											"minimum": 0,
 											"anyOf": [
 												{
-													"anyOf": [
-														{ "const": -1, "type": "number" },
-														{ "const": 1, "type": "number" }
-													]
+													"format": "integer",
+													"default": 0,
+													"type": "string"
 												},
-												{ "type": "null" }
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"negativeCount": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
 											]
 										},
 										"score": {
@@ -115011,6 +116406,25 @@
 													"type": "string"
 												},
 												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"viewerVote": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"asOf": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
 											]
 										}
 									}
@@ -115210,19 +116624,37 @@
 						"content": {
 							"application/json": {
 								"schema": {
+									"additionalProperties": false,
 									"type": "object",
-									"required": ["value", "score", "voteCount"],
+									"required": [
+										"positiveCount",
+										"negativeCount",
+										"score",
+										"voteCount",
+										"viewerVote",
+										"asOf"
+									],
 									"properties": {
-										"value": {
-											"nullable": true,
+										"positiveCount": {
+											"minimum": 0,
 											"anyOf": [
 												{
-													"anyOf": [
-														{ "const": -1, "type": "number" },
-														{ "const": 1, "type": "number" }
-													]
+													"format": "integer",
+													"default": 0,
+													"type": "string"
 												},
-												{ "type": "null" }
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"negativeCount": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
 											]
 										},
 										"score": {
@@ -115244,6 +116676,25 @@
 													"type": "string"
 												},
 												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"viewerVote": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"asOf": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
 											]
 										}
 									}

@@ -425,9 +425,15 @@ export const AliasKindValues = [
 	"other",
 ] as const;
 export const AliasSearchScoreThreshold = 3;
-export const ExternalLinkVisibilityScoreThreshold = 3;
 export const UnitReferenceCurationKindValues = ["alias", "external_link"] as const;
 export type UnitReferenceCurationKind = (typeof UnitReferenceCurationKindValues)[number];
+/** Maximum active references of one kind owned by one Unit. */
+export const UnitReferenceActiveLimit = 128;
+/** Maximum curated references of one kind owned by one Unit. */
+export const UnitReferencePinnedLimit = 16;
+export const UnitReferencePageDefault = 20;
+export const UnitReferencePageMaximum = 50;
+export const UnitExternalLinkPreviewLimit = 16;
 export const PollModeValues = ["single", "multiple"] as const;
 export const PollOptionSourceKindValues = ["literal", "unit"] as const;
 export const PollResultVisibilityValues = ["live", "after_close"] as const;

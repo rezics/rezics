@@ -461,7 +461,7 @@ export default {
 	references: {
 		title: "커뮤니티 참조 정보",
 		description:
-			"검색 별칭과 외부 링크를 제안하고 투표할 수 있습니다. 선별된 정보가 먼저, 커뮤니티 투표 순 후보가 그다음에 표시됩니다.",
+			"검색 별칭과 외부 링크를 제안하고 투표할 수 있습니다. 고정된 정보가 먼저, 나머지는 커뮤니티 투표 순으로 표시됩니다.",
 		aliasesTitle: "별칭",
 		aliasesDescription: "이 작품을 더 쉽게 찾을 수 있게 하는 다른 이름입니다.",
 		externalLinksTitle: "외부 링크",
@@ -474,8 +474,6 @@ export default {
 		sourcePlaceholder: "출처 개체 선택",
 		externalUrl: `외부 ${verbatimTerms.url.value}`,
 		urlPlaceholder: `${verbatimTerms.https.value}://`,
-		accepted: "채택됨",
-		candidate: "후보",
 		pinned: "고정됨",
 		voteSummary: insert("점수 {{score}} · {{count}}표", { score: String, count: String }),
 		support: "지지",
@@ -484,10 +482,12 @@ export default {
 		unpin: "고정 해제",
 		moveEarlier: "앞으로 이동",
 		moveLater: "뒤로 이동",
+		withdraw: "참고 자료 철회",
+		withdrawConfirm: "이 참고 자료를 철회할까요? 투표 기록은 유지됩니다.",
 		aliasProposed: "별칭을 제안했습니다",
 		externalLinkProposed: "외부 링크를 제안했습니다",
-		noAliases: "아직 별칭 후보가 없습니다.",
-		noExternalLinks: "아직 외부 링크 후보가 없습니다.",
+		noAliases: "아직 별칭이 없습니다.",
+		noExternalLinks: "아직 외부 링크가 없습니다.",
 	},
 	contentLanguages: {
 		controlLabel: "콘텐츠 언어",

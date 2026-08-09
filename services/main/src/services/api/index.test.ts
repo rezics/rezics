@@ -158,12 +158,13 @@ describe("API root", () => {
 		}
 	});
 
-	it("documents external-link candidates for every registered Unit kind", () => {
+	it("documents external-link references for every registered Unit kind", () => {
 		const document = toOpenAPISchema(api);
 		const operations = [
 			document.paths["/api/v1/units/{type}/{unitId}/external-links"]?.get,
 			document.paths["/api/v1/units/{type}/{unitId}/external-links"]?.post,
 			document.paths["/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}"]?.patch,
+			document.paths["/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}"]?.delete,
 			document.paths["/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}/vote"]
 				?.put,
 			document.paths["/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}/vote"]
@@ -189,11 +190,8 @@ describe("API root", () => {
 			"EntityEntryNotFound",
 		);
 		expect(
-			document.paths["/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}"]?.delete,
-		).toBeUndefined();
-		expect(
 			document.paths["/api/v1/units/{type}/{unitId}/aliases/{aliasId}"]?.delete,
-		).toBeUndefined();
+		).toBeDefined();
 	});
 
 	it("documents the development preview gate on unreleased Zone address writes", () => {

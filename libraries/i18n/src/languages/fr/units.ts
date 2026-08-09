@@ -480,7 +480,7 @@ export default {
 	references: {
 		title: "Références de la communauté",
 		description:
-			"Proposez des alias de recherche et des liens sources, puis votez. Les références sélectionnées précèdent les propositions classées par la communauté.",
+			"Proposez des alias de recherche et des liens sources, puis votez. Les références épinglées précèdent les autres, classées par la communauté.",
 		aliasesTitle: "Alias",
 		aliasesDescription: "D’autres noms permettant de retrouver plus facilement cette œuvre.",
 		externalLinksTitle: "Liens externes",
@@ -494,8 +494,6 @@ export default {
 		sourcePlaceholder: `Choisir une ${entityTerms.inline} source`,
 		externalUrl: `${verbatimTerms.url.value} externe`,
 		urlPlaceholder: `${verbatimTerms.https.value}://`,
-		accepted: "Acceptée",
-		candidate: "Proposition",
 		pinned: "Épinglée",
 		voteSummary: insert("Score {{score}} · {{count}} votes", {
 			score: String,
@@ -507,10 +505,12 @@ export default {
 		unpin: "Désépingler",
 		moveEarlier: "Déplacer plus haut",
 		moveLater: "Déplacer plus bas",
+		withdraw: "Retirer la référence",
+		withdrawConfirm: "Retirer cette référence ? Son historique de votes sera conservé.",
 		aliasProposed: "Alias proposé",
 		externalLinkProposed: "Lien externe proposé",
-		noAliases: "Aucune proposition d’alias pour le moment.",
-		noExternalLinks: "Aucune proposition de lien externe pour le moment.",
+		noAliases: "Aucun alias pour le moment.",
+		noExternalLinks: "Aucun lien externe pour le moment.",
 	},
 	contentLanguages: {
 		controlLabel: "Langue du contenu",

@@ -198,6 +198,11 @@ export default {
 	UnitExternalLinkNotFound: "Ce lien externe de l’œuvre est introuvable.",
 	UnitReferenceCurationChanged:
 		"La sélection des références a été modifiée ailleurs. Le dernier ordre a été chargé ; veuillez réessayer.",
+	UnitReferenceLimitReached:
+		"Cette œuvre a déjà atteint le nombre maximal de références actives.",
+	UnitReferencePinnedLimitReached:
+		"Cette œuvre a déjà atteint le nombre maximal de références épinglées.",
+	UnitReferenceWithdrawn: "Cette référence a été retirée.",
 	UnitVariantKindMismatch:
 		"Une variante et son élément principal doivent utiliser le même type de Unit pris en charge.",
 	UnitVariantTargetIsVariant: "Une variante doit pointer directement vers un élément principal.",

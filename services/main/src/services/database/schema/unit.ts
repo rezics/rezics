@@ -286,6 +286,7 @@ export const unitAlias = pgTable(
 		createdByProfileId: uuid().references((): AnyPgColumn => profile.id, {
 			onDelete: "set null",
 		}),
+		withdrawnAt: createTimestampMsColumn(),
 		pinned: boolean().default(false).notNull(),
 		position: fractionalIndexPosition(),
 		createdAt: createCreatedAtColumn(),
@@ -298,15 +299,12 @@ export const unitAlias = pgTable(
 		index("unit_alias_normalized_idx").on(table.normalizedTerm),
 		index(CanonicalPgroongaIndexes[2]).using("pgroonga", table.term),
 		index("unit_alias_created_by_idx").on(table.createdByProfileId),
-		index("unit_alias_unit_position_idx").on(
-			table.unitId,
-			table.pinned,
-			table.position,
-			table.id,
-		),
+		index("unit_alias_unit_position_idx")
+			.on(table.unitId, table.pinned, table.position, table.id)
+			.where(sql`${table.withdrawnAt} is null`),
 		uniqueIndex("unit_alias_unit_pinned_position_unique")
 			.on(table.unitId, table.position)
-			.where(sql`${table.pinned}`),
+			.where(sql`${table.pinned} and ${table.withdrawnAt} is null`),
 		check(
 			"unit_alias_term_not_blank",
 			sql`btrim(${table.term}) <> '' and btrim(${table.normalizedTerm}) <> ''`,
@@ -318,7 +316,11 @@ export const unitAlias = pgTable(
 		check(
 			"unit_alias_pinned_position_check",
 			sql`(${table.pinned} and ${table.position} is not null)
-				or (not ${table.pinned} and ${table.position} is null)`,
+					or (not ${table.pinned} and ${table.position} is null)`,
+		),
+		check(
+			"unit_alias_withdrawn_curation_check",
+			sql`${table.withdrawnAt} is null or (not ${table.pinned} and ${table.position} is null)`,
 		),
 	],
 );
@@ -429,6 +431,7 @@ export const unitExternalLink = pgTable(
 		createdByProfileId: uuid().references((): AnyPgColumn => profile.id, {
 			onDelete: "set null",
 		}),
+		withdrawnAt: createTimestampMsColumn(),
 		pinned: boolean().default(false).notNull(),
 		position: fractionalIndexPosition(),
 		createdAt: createCreatedAtColumn(),
@@ -440,15 +443,12 @@ export const unitExternalLink = pgTable(
 			table.sourceEntityId,
 			table.normalizedUrlHash,
 		),
-		index("unit_external_link_unit_position_idx").on(
-			table.unitId,
-			table.pinned,
-			table.position,
-			table.id,
-		),
+		index("unit_external_link_unit_position_idx")
+			.on(table.unitId, table.pinned, table.position, table.id)
+			.where(sql`${table.withdrawnAt} is null`),
 		uniqueIndex("unit_external_link_unit_pinned_position_unique")
 			.on(table.unitId, table.position)
-			.where(sql`${table.pinned}`),
+			.where(sql`${table.pinned} and ${table.withdrawnAt} is null`),
 		index("unit_external_link_source_entity_idx").on(table.sourceEntityId),
 		index("unit_external_link_created_by_idx").on(table.createdByProfileId),
 		check(
@@ -459,7 +459,11 @@ export const unitExternalLink = pgTable(
 		check(
 			"unit_external_link_pinned_position_check",
 			sql`(${table.pinned} and ${table.position} is not null)
-				or (not ${table.pinned} and ${table.position} is null)`,
+					or (not ${table.pinned} and ${table.position} is null)`,
+		),
+		check(
+			"unit_external_link_withdrawn_curation_check",
+			sql`${table.withdrawnAt} is null or (not ${table.pinned} and ${table.position} is null)`,
 		),
 	],
 );
@@ -484,7 +488,7 @@ export const unitExternalLinkVote = pgTable(
 	],
 );
 
-/** Optimistic-concurrency head for ordering each Unit reference candidate list. */
+/** Optimistic-concurrency head for ordering each Unit reference list. */
 export const unitReferenceCurationHead = pgTable(
 	"unit_reference_curation_head",
 	{

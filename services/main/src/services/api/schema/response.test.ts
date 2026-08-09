@@ -349,12 +349,13 @@ describe("API response values", () => {
 		).toBe(false);
 	});
 
-	it("uses one accepted external-link contract with source presentation on every detail", () => {
+	it("uses one vote-backed external-link contract with source presentation on every detail", () => {
 		const unitExternalLink = UnitDetailResponse.properties.externalLinks.items;
 		const entityExternalLink = EntityDetailResponse.properties.externalLinks.items;
 
 		expect(unitExternalLink).toBe(entityExternalLink);
-		expect(unitExternalLink.properties.accepted.const).toBe(true);
+		expect(unitExternalLink.required).not.toContain("accepted");
+		expect(unitExternalLink.required).toContain("voteSummary");
 		expect(unitExternalLink.required).toContain("sourceEntity");
 		expect(unitExternalLink.properties.sourceEntity.required).toContain("avatar");
 	});

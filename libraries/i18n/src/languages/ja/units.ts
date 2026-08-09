@@ -463,7 +463,7 @@ export default {
 	references: {
 		title: "コミュニティ参照情報",
 		description:
-			"検索用の別名や外部リンクを提案し、投票できます。選定済みの情報を先に、その後にコミュニティ投票順の候補を表示します。",
+			"検索用の別名や外部リンクを提案し、投票できます。固定した情報を先に、その後をコミュニティ投票順で表示します。",
 		aliasesTitle: "別名",
 		aliasesDescription: "この作品を見つけやすくするための別の名称です。",
 		externalLinksTitle: "外部リンク",
@@ -476,8 +476,6 @@ export default {
 		sourcePlaceholder: "出典元を選択",
 		externalUrl: `外部${verbatimTerms.url.value}`,
 		urlPlaceholder: `${verbatimTerms.https.value}://`,
-		accepted: "採用済み",
-		candidate: "候補",
 		pinned: "固定済み",
 		voteSummary: insert("スコア {{score}}・{{count}}票", { score: String, count: String }),
 		support: "支持",
@@ -486,10 +484,12 @@ export default {
 		unpin: "固定解除",
 		moveEarlier: "前へ移動",
 		moveLater: "後ろへ移動",
+		withdraw: "参照情報を取り下げる",
+		withdrawConfirm: "この参照情報を取り下げますか？投票履歴は保持されます。",
 		aliasProposed: "別名を提案しました",
 		externalLinkProposed: "外部リンクを提案しました",
-		noAliases: "別名の候補はまだありません。",
-		noExternalLinks: "外部リンクの候補はまだありません。",
+		noAliases: "別名はまだありません。",
+		noExternalLinks: "外部リンクはまだありません。",
 	},
 	contentLanguages: {
 		controlLabel: "コンテンツ言語",

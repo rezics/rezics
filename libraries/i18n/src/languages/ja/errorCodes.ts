@@ -180,6 +180,9 @@ export default {
 	UnitExternalLinkNotFound: "この作品の外部リンクは見つかりませんでした。",
 	UnitReferenceCurationChanged:
 		"参照情報の選定が別の場所で変更されました。最新の順序を読み込んだため、もう一度お試しください。",
+	UnitReferenceLimitReached: "この作品で有効にできる参照情報の上限に達しています。",
+	UnitReferencePinnedLimitReached: "この作品で固定できる参照情報の上限に達しています。",
+	UnitReferenceWithdrawn: "この参照情報は取り下げられました。",
 	UnitVariantKindMismatch:
 		"バリアントとそのメインは同じサポートされているユニットタイプを使用する必要があります。",
 	UnitVariantTargetIsVariant: "バリアントは直接メインを指す必要があります。",

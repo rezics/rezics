@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { createHash } from "node:crypto";
 
-import { and, asc, desc, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -12,7 +12,6 @@ import { unitOwnershipModeFromOwnerProfileId } from "../../authorization/unit/ow
 import { getUnitPermissionCondition } from "../../authorization/unit/query";
 import { associationTargetScope, unitScope } from "../../authorization/unit/scope";
 import { database } from "../../database";
-import { toSafeInteger } from "../../database/integer";
 import {
 	avatarReferenceFromColumns,
 	resolveUnitLocalizationAvatarFromOrdered,
@@ -47,9 +46,9 @@ import {
 	isEntityKind,
 } from "../../database/schema/contract-values";
 import {
-	AliasSearchScoreThreshold,
-	ExternalLinkVisibilityScoreThreshold,
 	type UnitReferenceCurationKind,
+	UnitReferenceActiveLimit,
+	UnitReferencePageDefault,
 } from "../../database/schema/contract-values";
 import {
 	AddUnitAliasBody,
@@ -70,7 +69,9 @@ import {
 	TagUnitBody,
 	UpdateUnitTagCurationBody,
 	UpdateUnitReferenceCurationBody,
+	WithdrawUnitReferenceQuery,
 	UnitAssociationParams,
+	UnitAliasListQuery,
 	UnitAliasParams,
 	UnitAliasUnitParams,
 	UnitExternalLinkParams,
@@ -115,7 +116,13 @@ import {
 	UnitExternalLinkCurationResponse,
 	VoteResponse,
 } from "../schema/response";
-import { AliasNotFound, TagApplicationNotFound, UnitExternalLinkNotFound } from "./errors";
+import {
+	AliasNotFound,
+	TagApplicationNotFound,
+	UnitExternalLinkNotFound,
+	UnitReferenceLimitReached,
+	UnitReferenceWithdrawn,
+} from "./errors";
 import { TagNotFound } from "../tags/errors";
 import {
 	CreditAttributionNotFound,
@@ -127,14 +134,21 @@ import { AssociationContextPostInvalid } from "../../units/errors";
 import { updateDirectUnitTagCuration } from "../../tags/curation";
 import { getPendingUnitOwnershipClaim } from "../../ownership-claims/service";
 import { normalizeExternalWebUrl } from "./external-web-url";
-import { wilsonLowerBoundSql } from "../../tags/ranking";
 import {
+	ensureUnitReferenceCanBeCreated,
 	updateUnitAliasCuration,
 	updateUnitExternalLinkCuration,
+	withdrawUnitAlias,
+	withdrawUnitExternalLink,
 } from "../../units/reference-curation";
 import {
+	paginateUnitReferences,
+	unitReferenceRankingVersion,
+} from "../../units/reference-pagination";
+import { presentBinaryVoteSummary } from "../../votes/binary";
+import {
 	attachReadableSourceEntities,
-	getAcceptedUnitExternalLinksWithSources,
+	getUnitExternalLinkPreviewWithSources,
 } from "../../units/external-links";
 
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
@@ -188,14 +202,20 @@ async function ensureReadableSourceEntity(
 
 async function getAliasVoteSummary(aliasId: string, value: -1 | 1 | null) {
 	const [totals] = await database
-		.select({ score: unitAliasVoteStat.score, voteCount: unitAliasVoteStat.voteCount })
+		.select({
+			score: unitAliasVoteStat.score,
+			voteCount: unitAliasVoteStat.voteCount,
+			updatedAt: unitAliasVoteStat.updatedAt,
+		})
 		.from(unitAliasVoteStat)
 		.where(eq(unitAliasVoteStat.aliasId, aliasId));
-	return {
-		value,
-		score: toSafeInteger(totals?.score ?? 0n, "alias vote score"),
-		voteCount: toSafeInteger(totals?.voteCount ?? 0n, "alias vote count"),
-	};
+	return presentBinaryVoteSummary({
+		score: totals?.score ?? 0n,
+		voteCount: totals?.voteCount ?? 0n,
+		viewerVote: value,
+		updatedAt: totals?.updatedAt,
+		name: "Alias",
+	});
 }
 
 async function getExternalLinkVoteSummary(externalLinkId: string, value: -1 | 1 | null) {
@@ -203,14 +223,17 @@ async function getExternalLinkVoteSummary(externalLinkId: string, value: -1 | 1 
 		.select({
 			score: unitExternalLinkVoteStat.score,
 			voteCount: unitExternalLinkVoteStat.voteCount,
+			updatedAt: unitExternalLinkVoteStat.updatedAt,
 		})
 		.from(unitExternalLinkVoteStat)
 		.where(eq(unitExternalLinkVoteStat.externalLinkId, externalLinkId));
-	return {
-		value,
-		score: toSafeInteger(totals?.score ?? 0n, "external link vote score"),
-		voteCount: toSafeInteger(totals?.voteCount ?? 0n, "external link vote count"),
-	};
+	return presentBinaryVoteSummary({
+		score: totals?.score ?? 0n,
+		voteCount: totals?.voteCount ?? 0n,
+		viewerVote: value,
+		updatedAt: totals?.updatedAt,
+		name: "External link",
+	});
 }
 
 async function getReferenceCurationVersion(
@@ -234,7 +257,7 @@ function normalizeAliasTerm(term: string): string {
 	return term.trim().normalize("NFKC").toLowerCase().replace(/\s+/g, " ");
 }
 
-async function getAliasCandidate(aliasId: string, viewerProfileId: string) {
+async function getAliasReference(aliasId: string, viewerProfileId: string) {
 	const [row] = await database
 		.select({
 			id: unitAlias.id,
@@ -247,7 +270,7 @@ async function getAliasCandidate(aliasId: string, viewerProfileId: string) {
 			viewerVote: unitAliasVote.value,
 			score: unitAliasVoteStat.score,
 			voteCount: unitAliasVoteStat.voteCount,
-			accepted: sql<boolean>`${unitAlias.pinned} or coalesce(${unitAliasVoteStat.score}, 0) >= ${AliasSearchScoreThreshold}`,
+			voteUpdatedAt: unitAliasVoteStat.updatedAt,
 			pinned: unitAlias.pinned,
 			position: unitAlias.position,
 			createdAt: unitAlias.createdAt,
@@ -262,18 +285,23 @@ async function getAliasCandidate(aliasId: string, viewerProfileId: string) {
 				eq(unitAliasVote.profileId, viewerProfileId),
 			),
 		)
-		.where(eq(unitAlias.id, aliasId))
+		.where(and(eq(unitAlias.id, aliasId), isNull(unitAlias.withdrawnAt)))
 		.limit(1);
 	if (!row) throw new AliasNotFound();
+	const { viewerVote, score, voteCount, voteUpdatedAt, ...reference } = row;
 	return {
-		...row,
-		viewerVote: row.viewerVote,
-		score: toSafeInteger(row.score ?? 0n, "alias vote score"),
-		voteCount: toSafeInteger(row.voteCount ?? 0n, "alias vote count"),
+		...reference,
+		voteSummary: presentBinaryVoteSummary({
+			score: score ?? 0n,
+			voteCount: voteCount ?? 0n,
+			viewerVote,
+			updatedAt: voteUpdatedAt,
+			name: "Alias",
+		}),
 	};
 }
 
-async function getExternalLinkCandidate(externalLinkId: string, viewerProfileId: string) {
+async function getExternalLinkReference(externalLinkId: string, viewerProfileId: string) {
 	const [row] = await database
 		.select({
 			id: unitExternalLink.id,
@@ -286,7 +314,7 @@ async function getExternalLinkCandidate(externalLinkId: string, viewerProfileId:
 			viewerVote: unitExternalLinkVote.value,
 			score: unitExternalLinkVoteStat.score,
 			voteCount: unitExternalLinkVoteStat.voteCount,
-			accepted: sql<boolean>`${unitExternalLink.pinned} or coalesce(${unitExternalLinkVoteStat.score}, 0) >= ${ExternalLinkVisibilityScoreThreshold}`,
+			voteUpdatedAt: unitExternalLinkVoteStat.updatedAt,
 			pinned: unitExternalLink.pinned,
 			position: unitExternalLink.position,
 			createdAt: unitExternalLink.createdAt,
@@ -304,27 +332,38 @@ async function getExternalLinkCandidate(externalLinkId: string, viewerProfileId:
 				eq(unitExternalLinkVote.profileId, viewerProfileId),
 			),
 		)
-		.where(eq(unitExternalLink.id, externalLinkId))
+		.where(and(eq(unitExternalLink.id, externalLinkId), isNull(unitExternalLink.withdrawnAt)))
 		.limit(1);
 	if (!row) throw new UnitExternalLinkNotFound();
+	const { viewerVote, score, voteCount, voteUpdatedAt, ...reference } = row;
 	return {
-		...row,
-		viewerVote: row.viewerVote,
-		score: toSafeInteger(row.score ?? 0n, "external link vote score"),
-		voteCount: toSafeInteger(row.voteCount ?? 0n, "external link vote count"),
+		...reference,
+		voteSummary: presentBinaryVoteSummary({
+			score: score ?? 0n,
+			voteCount: voteCount ?? 0n,
+			viewerVote,
+			updatedAt: voteUpdatedAt,
+			name: "External link",
+		}),
 	};
 }
 
 async function getTagVoteSummary(unitId: string, tagId: string, value: -1 | 1 | null) {
 	const [totals] = await database
-		.select({ score: unitTagVoteStat.score, voteCount: unitTagVoteStat.voteCount })
+		.select({
+			score: unitTagVoteStat.score,
+			voteCount: unitTagVoteStat.voteCount,
+			updatedAt: unitTagVoteStat.updatedAt,
+		})
 		.from(unitTagVoteStat)
 		.where(and(eq(unitTagVoteStat.unitId, unitId), eq(unitTagVoteStat.tagId, tagId)));
-	return {
-		value,
-		score: toSafeInteger(totals?.score ?? 0n, "tag vote score"),
-		voteCount: toSafeInteger(totals?.voteCount ?? 0n, "tag vote count"),
-	};
+	return presentBinaryVoteSummary({
+		score: totals?.score ?? 0n,
+		voteCount: totals?.voteCount ?? 0n,
+		viewerVote: value,
+		updatedAt: totals?.updatedAt,
+		name: "Tag",
+	});
 }
 
 export default new Elysia()
@@ -502,7 +541,7 @@ export default new Elysia()
 						createdAt: row.createdAt,
 						updatedAt: row.updatedAt,
 					}));
-					const externalLinks = await getAcceptedUnitExternalLinksWithSources({
+					const externalLinks = await getUnitExternalLinkPreviewWithSources({
 						unitId: params.unitId,
 						localizationLanguages,
 						profileId: identity.authorization.profileId,
@@ -822,7 +861,7 @@ export default new Elysia()
 		app
 			.get(
 				"/aliases",
-				async ({ params, profile, authorization }) => {
+				async ({ params, query, profile, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const [rows, curationVersion] = await Promise.all([
@@ -838,7 +877,7 @@ export default new Elysia()
 								viewerVote: unitAliasVote.value,
 								score: unitAliasVoteStat.score,
 								voteCount: unitAliasVoteStat.voteCount,
-								accepted: sql<boolean>`${unitAlias.pinned} or coalesce(${unitAliasVoteStat.score}, 0) >= ${AliasSearchScoreThreshold}`,
+								voteUpdatedAt: unitAliasVoteStat.updatedAt,
 								pinned: unitAlias.pinned,
 								position: unitAlias.position,
 								createdAt: unitAlias.createdAt,
@@ -856,37 +895,55 @@ export default new Elysia()
 									eq(unitAliasVote.profileId, profile.unitId),
 								),
 							)
-							.where(eq(unitAlias.unitId, params.unitId))
-							.orderBy(
-								desc(unitAlias.pinned),
-								sql`case when ${unitAlias.pinned} then ${unitAlias.position} end asc nulls last`,
-								desc(
-									wilsonLowerBoundSql(
-										unitAliasVoteStat.score,
-										unitAliasVoteStat.voteCount,
-									),
+							.where(
+								and(
+									eq(unitAlias.unitId, params.unitId),
+									isNull(unitAlias.withdrawnAt),
 								),
-								desc(sql`coalesce(${unitAliasVoteStat.score}, 0)`),
-								desc(sql`coalesce(${unitAliasVoteStat.voteCount}, 0)`),
-								unitAlias.id,
-							),
+							)
+							.limit(UnitReferenceActiveLimit + 1),
 						getReferenceCurationVersion(params.unitId, "alias"),
 					]);
+					if (rows.length > UnitReferenceActiveLimit)
+						throw new UnitReferenceLimitReached(UnitReferenceActiveLimit);
+					const references = rows.map((row) => {
+						const { viewerVote, score, voteCount, voteUpdatedAt, ...reference } = row;
+						return {
+							...reference,
+							voteSummary: presentBinaryVoteSummary({
+								score: score ?? 0n,
+								voteCount: voteCount ?? 0n,
+								viewerVote,
+								updatedAt: voteUpdatedAt,
+								name: "Alias",
+							}),
+						};
+					});
+					const page = paginateUnitReferences({
+						references,
+						context: {
+							unitId: params.unitId,
+							kind: "alias",
+							curationVersion,
+							rankingVersion: unitReferenceRankingVersion(references),
+						},
+						cursor: query.cursor,
+						limit: query.limit ?? UnitReferencePageDefault,
+					});
 					return {
-						items: rows.map((row) => ({
-							...row,
-							viewerVote: row.viewerVote,
-							score: toSafeInteger(row.score ?? 0n, "alias vote score"),
-							voteCount: toSafeInteger(row.voteCount ?? 0n, "alias vote count"),
-						})),
+						...page,
 						curationVersion,
 					};
 				},
 				{
 					access: "unit:read",
 					params: UnitAliasUnitParams,
-					response: { [StatusCodes.OK]: AliasListResponse },
-					detail: { summary: "List Unit aliases", tags: ["Units"] },
+					query: UnitAliasListQuery,
+					response: {
+						[StatusCodes.OK]: AliasListResponse,
+						[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitReferenceLimitReached"]),
+					},
+					detail: { summary: "List Unit alias references", tags: ["Units"] },
 				},
 			)
 			.post(
@@ -897,50 +954,59 @@ export default new Elysia()
 					const term = body.term.trim();
 					const normalizedTerm = normalizeAliasTerm(term);
 					const aliasId = await database.transaction(async (tx) => {
-						const [created] = await tx
-							.insert(unitAlias)
-							.values({
+						await tx.execute(
+							sql`select pg_advisory_xact_lock(hashtextextended(${`unit-reference:alias:${params.unitId}`}, 0))`,
+						);
+						const [existing] = await tx
+							.select()
+							.from(unitAlias)
+							.where(
+								and(
+									eq(unitAlias.unitId, params.unitId),
+									eq(unitAlias.normalizedTerm, normalizedTerm),
+									body.language
+										? eq(unitAlias.language, body.language)
+										: isNull(unitAlias.language),
+								),
+							)
+							.limit(1);
+						if (existing?.withdrawnAt) throw new UnitReferenceWithdrawn();
+						if (!existing)
+							await ensureUnitReferenceCanBeCreated(tx, {
 								unitId: params.unitId,
-								term,
-								normalizedTerm,
-								language: body.language,
-								kind: body.kind,
-								createdByProfileId: profile.unitId,
-							})
-							.onConflictDoNothing()
-							.returning();
-						const candidate =
-							created ??
+								kind: "alias",
+							});
+						const reference =
+							existing ??
 							(
 								await tx
-									.select()
-									.from(unitAlias)
-									.where(
-										and(
-											eq(unitAlias.unitId, params.unitId),
-											eq(unitAlias.normalizedTerm, normalizedTerm),
-											body.language
-												? eq(unitAlias.language, body.language)
-												: isNull(unitAlias.language),
-										),
-									)
-									.limit(1)
+									.insert(unitAlias)
+									.values({
+										unitId: params.unitId,
+										term,
+										normalizedTerm,
+										language: body.language,
+										kind: body.kind,
+										createdByProfileId: profile.unitId,
+									})
+									.returning()
 							)[0];
-						if (!candidate) throw new Error("Conflicting Alias could not be resolved");
+						if (!reference) throw new Error("Alias could not be created");
 						await tx
 							.insert(unitAliasVote)
 							.values({
-								aliasId: candidate.id,
+								aliasId: reference.id,
 								profileId: profile.unitId,
 								value: 1,
 							})
 							.onConflictDoUpdate({
 								target: [unitAliasVote.aliasId, unitAliasVote.profileId],
 								set: { value: 1, updatedAt: new Date() },
+								setWhere: ne(unitAliasVote.value, 1),
 							});
-						return candidate.id;
+						return reference.id;
 					});
-					return getAliasCandidate(aliasId, profile.unitId);
+					return getAliasReference(aliasId, profile.unitId);
 				},
 				{
 					access: "contribute:interaction:write",
@@ -950,6 +1016,10 @@ export default new Elysia()
 						[StatusCodes.OK]: AliasResponse,
 						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"UnitReferenceLimitReached",
+							"UnitReferenceWithdrawn",
+						]),
 					},
 					detail: { summary: "Propose Unit alias", tags: ["Units"] },
 				},
@@ -966,6 +1036,7 @@ export default new Elysia()
 							and(
 								eq(unitAlias.id, params.aliasId),
 								eq(unitAlias.unitId, params.unitId),
+								isNull(unitAlias.withdrawnAt),
 							),
 						)
 						.limit(1);
@@ -980,6 +1051,7 @@ export default new Elysia()
 						.onConflictDoUpdate({
 							target: [unitAliasVote.aliasId, unitAliasVote.profileId],
 							set: { value: body.value, updatedAt: new Date() },
+							setWhere: ne(unitAliasVote.value, body.value),
 						});
 					return getAliasVoteSummary(params.aliasId, body.value);
 				},
@@ -1010,6 +1082,7 @@ export default new Elysia()
 							and(
 								eq(unitAlias.id, params.aliasId),
 								eq(unitAlias.unitId, params.unitId),
+								isNull(unitAlias.withdrawnAt),
 							),
 						)
 						.limit(1);
@@ -1057,7 +1130,7 @@ export default new Elysia()
 							: { pinned: false, position: null },
 					});
 					return {
-						candidate: await getAliasCandidate(params.aliasId, profile.unitId),
+						reference: await getAliasReference(params.aliasId, profile.unitId),
 						curationVersion: result.curationVersion,
 					};
 				},
@@ -1074,9 +1147,49 @@ export default new Elysia()
 						]),
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
 							"UnitReferenceCurationChanged",
+							"UnitReferencePinnedLimitReached",
 						]),
 					},
 					detail: { summary: "Update Unit Alias curation", tags: ["Units"] },
+				},
+			)
+			.delete(
+				"/aliases/:aliasId",
+				async ({ params, query, profile, authorization }) => {
+					await checkUnitType(params.unitId, params.type);
+					await authorization.unit.ensure(
+						params.unitId,
+						"unit.reference-curation.manage",
+						unitScope("references", "aliases"),
+					);
+					await withdrawUnitAlias({
+						unitId: params.unitId,
+						aliasId: params.aliasId,
+						actorProfileId: profile.unitId,
+						baseVersion: query.baseVersion,
+					});
+					return new Response(null, { status: StatusCodes.NO_CONTENT });
+				},
+				{
+					access: "write:unit:update",
+					params: UnitAliasParams,
+					query: WithdrawUnitReferenceQuery,
+					response: {
+						[StatusCodes.NO_CONTENT]: t.Void(),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"AliasNotFound",
+						]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"UnitReferenceCurationChanged",
+						]),
+					},
+					detail: {
+						summary: "Withdraw Unit alias reference",
+						tags: ["Units"],
+						responses: NoContentResponse,
+					},
 				},
 			)
 			.post(
@@ -1331,7 +1444,7 @@ export default new Elysia()
 								viewerVote: unitExternalLinkVote.value,
 								score: unitExternalLinkVoteStat.score,
 								voteCount: unitExternalLinkVoteStat.voteCount,
-								accepted: sql<boolean>`${unitExternalLink.pinned} or coalesce(${unitExternalLinkVoteStat.score}, 0) >= ${ExternalLinkVisibilityScoreThreshold}`,
+								voteUpdatedAt: unitExternalLinkVoteStat.updatedAt,
 								pinned: unitExternalLink.pinned,
 								position: unitExternalLink.position,
 								createdAt: unitExternalLink.createdAt,
@@ -1349,34 +1462,48 @@ export default new Elysia()
 									eq(unitExternalLinkVote.profileId, profile.unitId),
 								),
 							)
-							.where(eq(unitExternalLink.unitId, params.unitId))
-							.orderBy(
-								desc(unitExternalLink.pinned),
-								sql`case when ${unitExternalLink.pinned} then ${unitExternalLink.position} end asc nulls last`,
-								desc(
-									wilsonLowerBoundSql(
-										unitExternalLinkVoteStat.score,
-										unitExternalLinkVoteStat.voteCount,
-									),
+							.where(
+								and(
+									eq(unitExternalLink.unitId, params.unitId),
+									isNull(unitExternalLink.withdrawnAt),
 								),
-								desc(sql`coalesce(${unitExternalLinkVoteStat.score}, 0)`),
-								desc(sql`coalesce(${unitExternalLinkVoteStat.voteCount}, 0)`),
-								unitExternalLink.id,
-							),
+							)
+							.limit(UnitReferenceActiveLimit + 1),
 						getReferenceCurationVersion(params.unitId, "external_link"),
 					]);
-					const externalLinks = rows.map((row) => ({
-						...row,
-						viewerVote: row.viewerVote,
-						score: toSafeInteger(row.score ?? 0n, "external link vote score"),
-						voteCount: toSafeInteger(row.voteCount ?? 0n, "external link vote count"),
-					}));
+					if (rows.length > UnitReferenceActiveLimit)
+						throw new UnitReferenceLimitReached(UnitReferenceActiveLimit);
+					const references = rows.map((row) => {
+						const { viewerVote, score, voteCount, voteUpdatedAt, ...reference } = row;
+						return {
+							...reference,
+							voteSummary: presentBinaryVoteSummary({
+								score: score ?? 0n,
+								voteCount: voteCount ?? 0n,
+								viewerVote,
+								updatedAt: voteUpdatedAt,
+								name: "External link",
+							}),
+						};
+					});
+					const page = paginateUnitReferences({
+						references,
+						context: {
+							unitId: params.unitId,
+							kind: "external_link",
+							curationVersion,
+							rankingVersion: unitReferenceRankingVersion(references),
+						},
+						cursor: query.cursor,
+						limit: query.limit ?? UnitReferencePageDefault,
+					});
 					return {
 						items: await attachReadableSourceEntities(
-							externalLinks,
+							page.items,
 							localizationLanguages,
 							profile.unitId,
 						),
+						nextCursor: page.nextCursor,
 						curationVersion,
 					};
 				},
@@ -1387,8 +1514,9 @@ export default new Elysia()
 					response: {
 						[StatusCodes.OK]: UnitExternalLinkListResponse,
 						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+						[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitReferenceLimitReached"]),
 					},
-					detail: { summary: "List Unit external-link candidates", tags: ["Units"] },
+					detail: { summary: "List Unit external-link references", tags: ["Units"] },
 				},
 			)
 			.post(
@@ -1402,53 +1530,51 @@ export default new Elysia()
 						.update(normalizedUrl)
 						.digest("hex");
 					const externalLinkId = await database.transaction(async (tx) => {
-						const [created] = await tx
-							.insert(unitExternalLink)
-							.values({
+						await tx.execute(
+							sql`select pg_advisory_xact_lock(hashtextextended(${`unit-reference:external_link:${params.unitId}`}, 0))`,
+						);
+						const [existing] = await tx
+							.select()
+							.from(unitExternalLink)
+							.where(
+								and(
+									eq(unitExternalLink.unitId, params.unitId),
+									eq(unitExternalLink.sourceEntityId, body.sourceEntityId),
+									eq(unitExternalLink.normalizedUrlHash, normalizedUrlHash),
+								),
+							)
+							.limit(1);
+						if (existing?.withdrawnAt) throw new UnitReferenceWithdrawn();
+						if (
+							existing?.normalizedUrl !== undefined &&
+							existing.normalizedUrl !== normalizedUrl
+						)
+							throw new Error("External link URL normalization hash collision");
+						if (!existing)
+							await ensureUnitReferenceCanBeCreated(tx, {
 								unitId: params.unitId,
-								sourceEntityId: body.sourceEntityId,
-								url,
-								normalizedUrl,
-								normalizedUrlHash,
-								createdByProfileId: profile.unitId,
-							})
-							.onConflictDoNothing({
-								target: [
-									unitExternalLink.unitId,
-									unitExternalLink.sourceEntityId,
-									unitExternalLink.normalizedUrlHash,
-								],
-							})
-							.returning();
-						const candidate =
-							created ??
+								kind: "external_link",
+							});
+						const reference =
+							existing ??
 							(
 								await tx
-									.select()
-									.from(unitExternalLink)
-									.where(
-										and(
-											eq(unitExternalLink.unitId, params.unitId),
-											eq(
-												unitExternalLink.sourceEntityId,
-												body.sourceEntityId,
-											),
-											eq(
-												unitExternalLink.normalizedUrlHash,
-												normalizedUrlHash,
-											),
-										),
-									)
-									.limit(1)
+									.insert(unitExternalLink)
+									.values({
+										unitId: params.unitId,
+										sourceEntityId: body.sourceEntityId,
+										url,
+										normalizedUrl,
+										normalizedUrlHash,
+										createdByProfileId: profile.unitId,
+									})
+									.returning()
 							)[0];
-						if (!candidate)
-							throw new Error("Conflicting external link could not be resolved");
-						if (candidate.normalizedUrl !== normalizedUrl)
-							throw new Error("External link URL normalization hash collision");
+						if (!reference) throw new Error("External link could not be created");
 						await tx
 							.insert(unitExternalLinkVote)
 							.values({
-								externalLinkId: candidate.id,
+								externalLinkId: reference.id,
 								profileId: profile.unitId,
 								value: 1,
 							})
@@ -1458,10 +1584,11 @@ export default new Elysia()
 									unitExternalLinkVote.profileId,
 								],
 								set: { value: 1, updatedAt: new Date() },
+								setWhere: ne(unitExternalLinkVote.value, 1),
 							});
-						return candidate.id;
+						return reference.id;
 					});
-					return getExternalLinkCandidate(externalLinkId, profile.unitId);
+					return getExternalLinkReference(externalLinkId, profile.unitId);
 				},
 				{
 					access: "contribute:interaction:write",
@@ -1473,6 +1600,10 @@ export default new Elysia()
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
 							"EntityEntryNotFound",
+						]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"UnitReferenceLimitReached",
+							"UnitReferenceWithdrawn",
 						]),
 					},
 					detail: { summary: "Propose Unit external link", tags: ["Units"] },
@@ -1490,6 +1621,7 @@ export default new Elysia()
 							and(
 								eq(unitExternalLink.id, params.externalLinkId),
 								eq(unitExternalLink.unitId, params.unitId),
+								isNull(unitExternalLink.withdrawnAt),
 							),
 						)
 						.limit(1);
@@ -1507,6 +1639,7 @@ export default new Elysia()
 								unitExternalLinkVote.profileId,
 							],
 							set: { value: body.value, updatedAt: new Date() },
+							setWhere: ne(unitExternalLinkVote.value, body.value),
 						});
 					return getExternalLinkVoteSummary(params.externalLinkId, body.value);
 				},
@@ -1537,6 +1670,7 @@ export default new Elysia()
 							and(
 								eq(unitExternalLink.id, params.externalLinkId),
 								eq(unitExternalLink.unitId, params.unitId),
+								isNull(unitExternalLink.withdrawnAt),
 							),
 						)
 						.limit(1);
@@ -1584,7 +1718,7 @@ export default new Elysia()
 							: { pinned: false, position: null },
 					});
 					return {
-						candidate: await getExternalLinkCandidate(
+						reference: await getExternalLinkReference(
 							params.externalLinkId,
 							profile.unitId,
 						),
@@ -1604,9 +1738,49 @@ export default new Elysia()
 						]),
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
 							"UnitReferenceCurationChanged",
+							"UnitReferencePinnedLimitReached",
 						]),
 					},
 					detail: { summary: "Update Unit external link curation", tags: ["Units"] },
+				},
+			)
+			.delete(
+				"/external-links/:externalLinkId",
+				async ({ params, query, profile, authorization }) => {
+					await checkUnitType(params.unitId, params.type);
+					await authorization.unit.ensure(
+						params.unitId,
+						"unit.reference-curation.manage",
+						unitScope("references", "external-links"),
+					);
+					await withdrawUnitExternalLink({
+						unitId: params.unitId,
+						externalLinkId: params.externalLinkId,
+						actorProfileId: profile.unitId,
+						baseVersion: query.baseVersion,
+					});
+					return new Response(null, { status: StatusCodes.NO_CONTENT });
+				},
+				{
+					access: "write:unit:update",
+					params: UnitExternalLinkParams,
+					query: WithdrawUnitReferenceQuery,
+					response: {
+						[StatusCodes.NO_CONTENT]: t.Void(),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"UnitExternalLinkNotFound",
+						]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"UnitReferenceCurationChanged",
+						]),
+					},
+					detail: {
+						summary: "Withdraw Unit external-link reference",
+						tags: ["Units"],
+						responses: NoContentResponse,
+					},
 				},
 			)
 			.put(

@@ -5664,6 +5664,9 @@ export const ApiErrorCode = {
 	UnitTagCurationChanged: "UnitTagCurationChanged",
 	UnitExternalLinkNotFound: "UnitExternalLinkNotFound",
 	UnitReferenceCurationChanged: "UnitReferenceCurationChanged",
+	UnitReferenceLimitReached: "UnitReferenceLimitReached",
+	UnitReferencePinnedLimitReached: "UnitReferencePinnedLimitReached",
+	UnitReferenceWithdrawn: "UnitReferenceWithdrawn",
 	InvalidMessageCursor: "InvalidMessageCursor",
 	ConversationNotFound: "ConversationNotFound",
 	ConversationParticipantsInvalid: "ConversationParticipantsInvalid",
@@ -60743,13 +60746,17 @@ export type PostApiUnitsByTypeStatus200 = {
 		 */
 		normalizedUrlHash: string;
 		createdByProfileId: (string | null) | null;
-		viewerVote: ((-1 | 1) | null) | null;
-		score: string | number;
-		voteCount: string | number;
 		/**
-		 * @type boolean
+		 * @type object
 		 */
-		accepted: true;
+		voteSummary: {
+			positiveCount: string | number;
+			negativeCount: string | number;
+			score: string | number;
+			voteCount: string | number;
+			viewerVote: ((-1 | 1) | null) | null;
+			asOf: (string | null) | null;
+		};
 		/**
 		 * @type boolean
 		 */
@@ -63290,13 +63297,17 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		 */
 		normalizedUrlHash: string;
 		createdByProfileId: (string | null) | null;
-		viewerVote: ((-1 | 1) | null) | null;
-		score: string | number;
-		voteCount: string | number;
 		/**
-		 * @type boolean
+		 * @type object
 		 */
-		accepted: true;
+		voteSummary: {
+			positiveCount: string | number;
+			negativeCount: string | number;
+			score: string | number;
+			voteCount: string | number;
+			viewerVote: ((-1 | 1) | null) | null;
+			asOf: (string | null) | null;
+		};
 		/**
 		 * @type boolean
 		 */
@@ -64909,13 +64920,17 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		 */
 		normalizedUrlHash: string;
 		createdByProfileId: (string | null) | null;
-		viewerVote: ((-1 | 1) | null) | null;
-		score: string | number;
-		voteCount: string | number;
 		/**
-		 * @type boolean
+		 * @type object
 		 */
-		accepted: true;
+		voteSummary: {
+			positiveCount: string | number;
+			negativeCount: string | number;
+			score: string | number;
+			voteCount: string | number;
+			viewerVote: ((-1 | 1) | null) | null;
+			asOf: (string | null) | null;
+		};
 		/**
 		 * @type boolean
 		 */
@@ -66829,13 +66844,17 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 		 */
 		normalizedUrlHash: string;
 		createdByProfileId: (string | null) | null;
-		viewerVote: ((-1 | 1) | null) | null;
-		score: string | number;
-		voteCount: string | number;
 		/**
-		 * @type boolean
+		 * @type object
 		 */
-		accepted: true;
+		voteSummary: {
+			positiveCount: string | number;
+			negativeCount: string | number;
+			score: string | number;
+			voteCount: string | number;
+			viewerVote: ((-1 | 1) | null) | null;
+			asOf: (string | null) | null;
+		};
 		/**
 		 * @type boolean
 		 */
@@ -68632,13 +68651,17 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 		 */
 		normalizedUrlHash: string;
 		createdByProfileId: (string | null) | null;
-		viewerVote: ((-1 | 1) | null) | null;
-		score: string | number;
-		voteCount: string | number;
 		/**
-		 * @type boolean
+		 * @type object
 		 */
-		accepted: true;
+		voteSummary: {
+			positiveCount: string | number;
+			negativeCount: string | number;
+			score: string | number;
+			voteCount: string | number;
+			viewerVote: ((-1 | 1) | null) | null;
+			asOf: (string | null) | null;
+		};
 		/**
 		 * @type boolean
 		 */
@@ -70445,13 +70468,17 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		 */
 		normalizedUrlHash: string;
 		createdByProfileId: (string | null) | null;
-		viewerVote: ((-1 | 1) | null) | null;
-		score: string | number;
-		voteCount: string | number;
 		/**
-		 * @type boolean
+		 * @type object
 		 */
-		accepted: true;
+		voteSummary: {
+			positiveCount: string | number;
+			negativeCount: string | number;
+			score: string | number;
+			voteCount: string | number;
+			viewerVote: ((-1 | 1) | null) | null;
+			asOf: (string | null) | null;
+		};
 		/**
 		 * @type boolean
 		 */
@@ -74791,13 +74818,17 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 		 */
 		normalizedUrlHash: string;
 		createdByProfileId: (string | null) | null;
-		viewerVote: ((-1 | 1) | null) | null;
-		score: string | number;
-		voteCount: string | number;
 		/**
-		 * @type boolean
+		 * @type object
 		 */
-		accepted: true;
+		voteSummary: {
+			positiveCount: string | number;
+			negativeCount: string | number;
+			score: string | number;
+			voteCount: string | number;
+			viewerVote: ((-1 | 1) | null) | null;
+			asOf: (string | null) | null;
+		};
 		/**
 		 * @type boolean
 		 */
@@ -76880,6 +76911,22 @@ export type GetApiUnitsByTypeByUnitIdAliasesPath = {
 /**
  * @type object
  */
+export type GetApiUnitsByTypeByUnitIdAliasesQuery = {
+	/**
+	 * @minLength 1
+	 * @maxLength 1024
+	 * @type string | undefined
+	 */
+	cursor?: string;
+	/**
+	 * @default 20
+	 */
+	limit?: string | number;
+};
+
+/**
+ * @type object
+ */
 export type GetApiUnitsByTypeByUnitIdAliasesStatus200 = {
 	/**
 	 * @type array
@@ -76911,13 +76958,17 @@ export type GetApiUnitsByTypeByUnitIdAliasesStatus200 = {
 		 */
 		kind: string;
 		createdByProfileId: (string | null) | null;
-		viewerVote: ((-1 | 1) | null) | null;
-		score: string | number;
-		voteCount: string | number;
 		/**
-		 * @type boolean
+		 * @type object
 		 */
-		accepted: boolean;
+		voteSummary: {
+			positiveCount: string | number;
+			negativeCount: string | number;
+			score: string | number;
+			voteCount: string | number;
+			viewerVote: ((-1 | 1) | null) | null;
+			asOf: (string | null) | null;
+		};
 		/**
 		 * @type boolean
 		 */
@@ -76936,7 +76987,36 @@ export type GetApiUnitsByTypeByUnitIdAliasesStatus200 = {
 		 */
 		updatedAt: string;
 	}[];
+	nextCursor: (string | null) | null;
 	curationVersion: string | number;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdAliasesStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitReferenceLimitReached'
+		 * @type string
+		 */
+		code: "UnitReferenceLimitReached";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
 };
 
 /**
@@ -76987,7 +77067,7 @@ export type GetApiUnitsByTypeByUnitIdAliasesStatus500 = InternalError;
 export type GetApiUnitsByTypeByUnitIdAliasesOptions = {
 	body?: never;
 	path: GetApiUnitsByTypeByUnitIdAliasesPath;
-	query?: never;
+	query?: GetApiUnitsByTypeByUnitIdAliasesQuery;
 	headers?: never;
 };
 
@@ -76996,6 +77076,7 @@ export type GetApiUnitsByTypeByUnitIdAliasesOptions = {
  */
 export type GetApiUnitsByTypeByUnitIdAliasesResponses = {
 	"200": GetApiUnitsByTypeByUnitIdAliasesStatus200;
+	"409": GetApiUnitsByTypeByUnitIdAliasesStatus409;
 	"422": GetApiUnitsByTypeByUnitIdAliasesStatus422;
 	"429": GetApiUnitsByTypeByUnitIdAliasesStatus429;
 	"500": GetApiUnitsByTypeByUnitIdAliasesStatus500;
@@ -77006,6 +77087,7 @@ export type GetApiUnitsByTypeByUnitIdAliasesResponses = {
  */
 export type GetApiUnitsByTypeByUnitIdAliasesResponse =
 	| GetApiUnitsByTypeByUnitIdAliasesStatus200
+	| GetApiUnitsByTypeByUnitIdAliasesStatus409
 	| GetApiUnitsByTypeByUnitIdAliasesStatus422
 	| GetApiUnitsByTypeByUnitIdAliasesStatus429
 	| GetApiUnitsByTypeByUnitIdAliasesStatus500;
@@ -77082,13 +77164,17 @@ export type PostApiUnitsByTypeByUnitIdAliasesStatus200 = {
 	 */
 	kind: string;
 	createdByProfileId: (string | null) | null;
-	viewerVote: ((-1 | 1) | null) | null;
-	score: string | number;
-	voteCount: string | number;
 	/**
-	 * @type boolean
+	 * @type object
 	 */
-	accepted: boolean;
+	voteSummary: {
+		positiveCount: string | number;
+		negativeCount: string | number;
+		score: string | number;
+		voteCount: string | number;
+		viewerVote: ((-1 | 1) | null) | null;
+		asOf: (string | null) | null;
+	};
 	/**
 	 * @type boolean
 	 */
@@ -77162,6 +77248,42 @@ export type PostApiUnitsByTypeByUnitIdAliasesStatus404 = {
 		 * @type string
 		 */
 		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitsByTypeByUnitIdAliasesStatus409ErrorCodeEnum = {
+	UnitReferenceLimitReached: "UnitReferenceLimitReached",
+	UnitReferenceWithdrawn: "UnitReferenceWithdrawn",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdAliasesStatus409ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdAliasesStatus409ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdAliasesStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdAliasesStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitReferenceLimitReached'
+		 * @type string
+		 */
+		code: PostApiUnitsByTypeByUnitIdAliasesStatus409ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -77283,6 +77405,7 @@ export type PostApiUnitsByTypeByUnitIdAliasesResponses = {
 	"400": PostApiUnitsByTypeByUnitIdAliasesStatus400;
 	"403": PostApiUnitsByTypeByUnitIdAliasesStatus403;
 	"404": PostApiUnitsByTypeByUnitIdAliasesStatus404;
+	"409": PostApiUnitsByTypeByUnitIdAliasesStatus409;
 	"422": PostApiUnitsByTypeByUnitIdAliasesStatus422;
 	"429": PostApiUnitsByTypeByUnitIdAliasesStatus429;
 	"500": PostApiUnitsByTypeByUnitIdAliasesStatus500;
@@ -77296,6 +77419,7 @@ export type PostApiUnitsByTypeByUnitIdAliasesResponse =
 	| PostApiUnitsByTypeByUnitIdAliasesStatus400
 	| PostApiUnitsByTypeByUnitIdAliasesStatus403
 	| PostApiUnitsByTypeByUnitIdAliasesStatus404
+	| PostApiUnitsByTypeByUnitIdAliasesStatus409
 	| PostApiUnitsByTypeByUnitIdAliasesStatus422
 	| PostApiUnitsByTypeByUnitIdAliasesStatus429
 	| PostApiUnitsByTypeByUnitIdAliasesStatus500;
@@ -77352,9 +77476,12 @@ export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVotePath = {
  * @type object
  */
 export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200 = {
-	value: ((-1 | 1) | null) | null;
+	positiveCount: string | number;
+	negativeCount: string | number;
 	score: string | number;
 	voteCount: string | number;
+	viewerVote: ((-1 | 1) | null) | null;
+	asOf: (string | null) | null;
 };
 
 /**
@@ -77581,9 +77708,12 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVotePath = {
  * @type object
  */
 export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200 = {
-	value: ((-1 | 1) | null) | null;
+	positiveCount: string | number;
+	negativeCount: string | number;
 	score: string | number;
 	voteCount: string | number;
+	viewerVote: ((-1 | 1) | null) | null;
+	asOf: (string | null) | null;
 };
 
 export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus403ErrorCodeEnum = {
@@ -77788,7 +77918,7 @@ export type PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus200 = {
 	/**
 	 * @type object
 	 */
-	candidate: {
+	reference: {
 		/**
 		 * @description
 		 * Format: `uuid`
@@ -77815,13 +77945,17 @@ export type PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus200 = {
 		 */
 		kind: string;
 		createdByProfileId: (string | null) | null;
-		viewerVote: ((-1 | 1) | null) | null;
-		score: string | number;
-		voteCount: string | number;
 		/**
-		 * @type boolean
+		 * @type object
 		 */
-		accepted: boolean;
+		voteSummary: {
+			positiveCount: string | number;
+			negativeCount: string | number;
+			score: string | number;
+			voteCount: string | number;
+			viewerVote: ((-1 | 1) | null) | null;
+			asOf: (string | null) | null;
+		};
 		/**
 		 * @type boolean
 		 */
@@ -77920,6 +78054,14 @@ export type PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404 = {
 	requestId: string;
 };
 
+export const PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus409ErrorCodeEnum = {
+	UnitReferenceCurationChanged: "UnitReferenceCurationChanged",
+	UnitReferencePinnedLimitReached: "UnitReferencePinnedLimitReached",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus409ErrorCodeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus409ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus409ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -77932,7 +78074,7 @@ export type PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus409 = {
 		 * @default 'UnitReferenceCurationChanged'
 		 * @type string
 		 */
-		code: "UnitReferenceCurationChanged";
+		code: PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus409ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -78054,6 +78196,243 @@ export type PatchApiUnitsByTypeByUnitIdAliasesByAliasIdResponse =
 	| PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus422
 	| PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429
 	| PatchApiUnitsByTypeByUnitIdAliasesByAliasIdStatus500;
+
+export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdType = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdType =
+	(typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdType)[keyof typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdType];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdPath = {
+	/**
+	 * @type string
+	 */
+	type: DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdType;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	aliasId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdQuery = {
+	baseVersion: string | number;
+};
+
+/**
+ * @type void
+ */
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus204 = void;
+
+export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	AliasNotFound: "AliasNotFound",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitReferenceCurationChanged'
+		 * @type string
+		 */
+		code: "UnitReferenceCurationChanged";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus422 = ValidationError;
+
+export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdOptions = {
+	body?: never;
+	path: DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdPath;
+	query: DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdResponses = {
+	"204": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus204;
+	"403": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403;
+	"404": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404;
+	"409": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus409;
+	"422": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus422;
+	"429": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429;
+	"500": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdResponse =
+	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus204
+	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403
+	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404
+	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus409
+	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus422
+	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429
+	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus500;
 
 /**
  * @type object
@@ -79205,6 +79584,16 @@ export type GetApiUnitsByTypeByUnitIdExternalLinksQuery = {
 	 * @type array | undefined
 	 */
 	localizationLanguages?: GetApiUnitsByTypeByUnitIdExternalLinksLocalizationLanguagesEnum[];
+	/**
+	 * @minLength 1
+	 * @maxLength 1024
+	 * @type string | undefined
+	 */
+	cursor?: string;
+	/**
+	 * @default 20
+	 */
+	limit?: string | number;
 };
 
 export const GetApiUnitsByTypeByUnitIdExternalLinksStatus200ItemsSourceEntityKindEnum = {
@@ -79294,13 +79683,17 @@ export type GetApiUnitsByTypeByUnitIdExternalLinksStatus200 = {
 		 */
 		normalizedUrlHash: string;
 		createdByProfileId: (string | null) | null;
-		viewerVote: ((-1 | 1) | null) | null;
-		score: string | number;
-		voteCount: string | number;
 		/**
-		 * @type boolean
+		 * @type object
 		 */
-		accepted: boolean;
+		voteSummary: {
+			positiveCount: string | number;
+			negativeCount: string | number;
+			score: string | number;
+			voteCount: string | number;
+			viewerVote: ((-1 | 1) | null) | null;
+			asOf: (string | null) | null;
+		};
 		/**
 		 * @type boolean
 		 */
@@ -79405,6 +79798,7 @@ export type GetApiUnitsByTypeByUnitIdExternalLinksStatus200 = {
 				| null;
 		};
 	}[];
+	nextCursor: (string | null) | null;
 	curationVersion: string | number;
 };
 
@@ -79421,6 +79815,34 @@ export type GetApiUnitsByTypeByUnitIdExternalLinksStatus404 = {
 		 * @type string
 		 */
 		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdExternalLinksStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitReferenceLimitReached'
+		 * @type string
+		 */
+		code: "UnitReferenceLimitReached";
 		/**
 		 * @type string
 		 */
@@ -79494,6 +79916,7 @@ export type GetApiUnitsByTypeByUnitIdExternalLinksOptions = {
 export type GetApiUnitsByTypeByUnitIdExternalLinksResponses = {
 	"200": GetApiUnitsByTypeByUnitIdExternalLinksStatus200;
 	"404": GetApiUnitsByTypeByUnitIdExternalLinksStatus404;
+	"409": GetApiUnitsByTypeByUnitIdExternalLinksStatus409;
 	"422": GetApiUnitsByTypeByUnitIdExternalLinksStatus422;
 	"429": GetApiUnitsByTypeByUnitIdExternalLinksStatus429;
 	"500": GetApiUnitsByTypeByUnitIdExternalLinksStatus500;
@@ -79505,6 +79928,7 @@ export type GetApiUnitsByTypeByUnitIdExternalLinksResponses = {
 export type GetApiUnitsByTypeByUnitIdExternalLinksResponse =
 	| GetApiUnitsByTypeByUnitIdExternalLinksStatus200
 	| GetApiUnitsByTypeByUnitIdExternalLinksStatus404
+	| GetApiUnitsByTypeByUnitIdExternalLinksStatus409
 	| GetApiUnitsByTypeByUnitIdExternalLinksStatus422
 	| GetApiUnitsByTypeByUnitIdExternalLinksStatus429
 	| GetApiUnitsByTypeByUnitIdExternalLinksStatus500;
@@ -79586,13 +80010,17 @@ export type PostApiUnitsByTypeByUnitIdExternalLinksStatus200 = {
 	 */
 	normalizedUrlHash: string;
 	createdByProfileId: (string | null) | null;
-	viewerVote: ((-1 | 1) | null) | null;
-	score: string | number;
-	voteCount: string | number;
 	/**
-	 * @type boolean
+	 * @type object
 	 */
-	accepted: boolean;
+	voteSummary: {
+		positiveCount: string | number;
+		negativeCount: string | number;
+		score: string | number;
+		voteCount: string | number;
+		viewerVote: ((-1 | 1) | null) | null;
+		asOf: (string | null) | null;
+	};
 	/**
 	 * @type boolean
 	 */
@@ -79689,6 +80117,42 @@ export type PostApiUnitsByTypeByUnitIdExternalLinksStatus404 = {
 	requestId: string;
 };
 
+export const PostApiUnitsByTypeByUnitIdExternalLinksStatus409ErrorCodeEnum = {
+	UnitReferenceLimitReached: "UnitReferenceLimitReached",
+	UnitReferenceWithdrawn: "UnitReferenceWithdrawn",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdExternalLinksStatus409ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdExternalLinksStatus409ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdExternalLinksStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdExternalLinksStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitReferenceLimitReached'
+		 * @type string
+		 */
+		code: PostApiUnitsByTypeByUnitIdExternalLinksStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
 /**
  * @type object
  */
@@ -79767,6 +80231,7 @@ export type PostApiUnitsByTypeByUnitIdExternalLinksResponses = {
 	"400": PostApiUnitsByTypeByUnitIdExternalLinksStatus400;
 	"403": PostApiUnitsByTypeByUnitIdExternalLinksStatus403;
 	"404": PostApiUnitsByTypeByUnitIdExternalLinksStatus404;
+	"409": PostApiUnitsByTypeByUnitIdExternalLinksStatus409;
 	"422": PostApiUnitsByTypeByUnitIdExternalLinksStatus422;
 	"429": PostApiUnitsByTypeByUnitIdExternalLinksStatus429;
 	"500": PostApiUnitsByTypeByUnitIdExternalLinksStatus500;
@@ -79780,6 +80245,7 @@ export type PostApiUnitsByTypeByUnitIdExternalLinksResponse =
 	| PostApiUnitsByTypeByUnitIdExternalLinksStatus400
 	| PostApiUnitsByTypeByUnitIdExternalLinksStatus403
 	| PostApiUnitsByTypeByUnitIdExternalLinksStatus404
+	| PostApiUnitsByTypeByUnitIdExternalLinksStatus409
 	| PostApiUnitsByTypeByUnitIdExternalLinksStatus422
 	| PostApiUnitsByTypeByUnitIdExternalLinksStatus429
 	| PostApiUnitsByTypeByUnitIdExternalLinksStatus500;
@@ -79836,9 +80302,12 @@ export type PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVotePath = {
  * @type object
  */
 export type PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus200 = {
-	value: ((-1 | 1) | null) | null;
+	positiveCount: string | number;
+	negativeCount: string | number;
 	score: string | number;
 	voteCount: string | number;
+	viewerVote: ((-1 | 1) | null) | null;
+	asOf: (string | null) | null;
 };
 
 /**
@@ -80066,9 +80535,12 @@ export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVotePath = 
  * @type object
  */
 export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus200 = {
-	value: ((-1 | 1) | null) | null;
+	positiveCount: string | number;
+	negativeCount: string | number;
 	score: string | number;
 	voteCount: string | number;
+	viewerVote: ((-1 | 1) | null) | null;
+	asOf: (string | null) | null;
 };
 
 export const DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403ErrorCodeEnum = {
@@ -80274,7 +80746,7 @@ export type PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus200 = 
 	/**
 	 * @type object
 	 */
-	candidate: {
+	reference: {
 		/**
 		 * @description
 		 * Format: `uuid`
@@ -80306,13 +80778,17 @@ export type PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus200 = 
 		 */
 		normalizedUrlHash: string;
 		createdByProfileId: (string | null) | null;
-		viewerVote: ((-1 | 1) | null) | null;
-		score: string | number;
-		voteCount: string | number;
 		/**
-		 * @type boolean
+		 * @type object
 		 */
-		accepted: boolean;
+		voteSummary: {
+			positiveCount: string | number;
+			negativeCount: string | number;
+			score: string | number;
+			voteCount: string | number;
+			viewerVote: ((-1 | 1) | null) | null;
+			asOf: (string | null) | null;
+		};
 		/**
 		 * @type boolean
 		 */
@@ -80412,6 +80888,14 @@ export type PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus404 = 
 	requestId: string;
 };
 
+export const PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus409ErrorCodeEnum = {
+	UnitReferenceCurationChanged: "UnitReferenceCurationChanged",
+	UnitReferencePinnedLimitReached: "UnitReferencePinnedLimitReached",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus409ErrorCodeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus409ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus409ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -80424,7 +80908,7 @@ export type PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus409 = 
 		 * @default 'UnitReferenceCurationChanged'
 		 * @type string
 		 */
-		code: "UnitReferenceCurationChanged";
+		code: PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus409ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -80546,6 +81030,243 @@ export type PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdResponse =
 	| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus422
 	| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus429
 	| PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus500;
+
+export const DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdType = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdType =
+	(typeof DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdType)[keyof typeof DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdType];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdPath = {
+	/**
+	 * @type string
+	 */
+	type: DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdType;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	externalLinkId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdQuery = {
+	baseVersion: string | number;
+};
+
+/**
+ * @type void
+ */
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus204 = void;
+
+export const DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	UnitExternalLinkNotFound: "UnitExternalLinkNotFound",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus404ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitReferenceCurationChanged'
+		 * @type string
+		 */
+		code: "UnitReferenceCurationChanged";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus422 = ValidationError;
+
+export const DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdOptions = {
+	body?: never;
+	path: DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdPath;
+	query: DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdResponses = {
+	"204": DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus204;
+	"403": DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus403;
+	"404": DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus404;
+	"409": DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus409;
+	"422": DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus422;
+	"429": DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus429;
+	"500": DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdResponse =
+	| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus204
+	| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus403
+	| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus404
+	| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus409
+	| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus422
+	| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus429
+	| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdStatus500;
 
 /**
  * @type object
@@ -81245,9 +81966,12 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdVotePath = {
  * @type object
  */
 export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200 = {
-	value: ((-1 | 1) | null) | null;
+	positiveCount: string | number;
+	negativeCount: string | number;
 	score: string | number;
 	voteCount: string | number;
+	viewerVote: ((-1 | 1) | null) | null;
+	asOf: (string | null) | null;
 };
 
 /**
@@ -81467,9 +82191,12 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVotePath = {
  * @type object
  */
 export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200 = {
-	value: ((-1 | 1) | null) | null;
+	positiveCount: string | number;
+	negativeCount: string | number;
 	score: string | number;
 	voteCount: string | number;
+	viewerVote: ((-1 | 1) | null) | null;
+	asOf: (string | null) | null;
 };
 
 export const DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403ErrorCodeEnum = {

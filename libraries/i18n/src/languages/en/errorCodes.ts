@@ -179,6 +179,10 @@ export default {
 	UnitExternalLinkNotFound: "This Unit external link could not be found.",
 	UnitReferenceCurationChanged:
 		"This reference curation changed elsewhere. The latest order has been loaded; try again.",
+	UnitReferenceLimitReached: "This Unit already has the maximum number of active references.",
+	UnitReferencePinnedLimitReached:
+		"This Unit already has the maximum number of pinned references.",
+	UnitReferenceWithdrawn: "This reference has been withdrawn.",
 	UnitVariantKindMismatch: "A Variant and its Main must use the same supported Unit type.",
 	UnitVariantTargetIsVariant: "A Variant must point directly to a Main.",
 	UnitVariantSourceHasVariants: "A Main with Variants cannot become a Variant.",
