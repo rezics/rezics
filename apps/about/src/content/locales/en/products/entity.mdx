@@ -1,37 +1,40 @@
 ---
 productId: entity
 locale: en
-title: "Entity"
-summary: "Real and fictional entities connected to Units through CreditAttribution and SubjectAttribution."
-description: "Real and fictional entities connected to Units through CreditAttribution and SubjectAttribution."
+title: "Entities & Attribution"
+summary: "Make authors, translators, publishers, characters, and concepts referable identities, distinguishing who created something from whom content is about."
+description: "Entities include more than people and organizations: they also include characters and concepts. Credit attribution and subject association separately carry creative and topical relationships."
+statusNote: "Entity identity, credit attribution, subject association, and source links are available; fuller external authority identifiers and dedicated wiki relationships remain in development."
 ---
 
-## What it makes possible
+## Core purpose
 
-Entity turns the underlying model into something readers can understand and communities can maintain. Real and fictional entities connected to Units through CreditAttribution and SubjectAttribution.
+A title is only one way to find a work. Readers also arrive through authors, translators, publishers, illustrators, characters, and worldbuilding concepts. REZICS makes those objects reusable Entities rather than leaving them as text fields on every page.
 
-## Who uses it
+Entities can be real people and organizations or fictional characters and concepts. They share stable identity and multilingual presentation, while their relationships retain distinct meanings.
 
-Readers use it to recognize the same work; communities use it to preserve context; editors use it to prevent duplication and fragmentation.
+## Two relationships that must not be confused
 
-## A concrete journey
+### Credit attribution
 
-- Entity represents real people and organizations as well as fictional characters.
-- CreditAttribution expresses authors, translators, publishers, and other contribution roles.
-- SubjectAttribution expresses characters, protagonists, and derivative relations.
+This says who did what for content or a work: author, translator, publisher, developer, or distributor. The relationship can preserve role, order, and sources so attribution does not depend on free text.
 
-## How it works
+### Subject association
 
-1. Select a stable Entity record instead of entering an identity-less name string.
-2. Choose Credit or Subject, a relationship type, the Entity, and the target Unit.
-3. Review the result in Book, Post, Wiki, Picture, Media, or Software.
+This says whom or what content discusses, includes, or derives from: a protagonist, appearing character, theme, adaptation, or fan work. It never mistakes the character discussed for a creator.
 
-## How it connects
+## What is available now
 
-Entity does not stand alone. It shares identity, context, or workflow with Work · Book · Post · History.
+1. Create multilingual identities for people, organizations, characters, and concepts.
+1. Connect author, translator, publisher, and other credits to books, Posts, and other works.
+1. Connect characters, subjects, and derivative relationships to the correct objects.
+1. Preserve traceable links to sources and external pages.
+1. Reuse the same entity data in search and work detail pages.
 
-## Clear boundaries
+## In development
 
-- Attribution relates Entity and Unit; Tag is not a replacement.
-- SubjectAttribution is not CreditAttribution.
-- Source / Provenance is a later extension, not a complete first-release product.
+External authority IDs, source evidence, and relationships for entity-specific knowledge pages will be strengthened. A character's wiki explanation belongs in a Post and is connected to the character and work through subject association; long text does not belong in a relationship row.
+
+## Relationships and boundaries
+
+Entities do not replace user accounts: accounts identify who signs in and acts, while Entities describe objects in the work network. A source link is not credit attribution; official sites, platform pages, and author relationships must be expressed separately.

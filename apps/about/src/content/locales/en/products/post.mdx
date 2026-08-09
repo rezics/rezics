@@ -1,35 +1,37 @@
 ---
 productId: post
 locale: en
-title: "Post"
-summary: "An editable, traceable content unit that can appear in feeds."
-description: "An editable, traceable content unit that can appear in feeds."
+title: "Posts"
+summary: "Carry articles, wikis, reviews, replies, and chapter content so that every publication retains identity, context, and traceable versions."
+description: "Post is REZICS's foundational publication surface. It is itself a Unit, and can carry multilingual content, attribution, linked subjects, and publication contexts in multiple Realms without transferring ownership."
+statusNote: "Article details, Portable Text bodies, global/Realm context switching, interaction bars, reply discussions, and other foundations are implemented."
 ---
 
-## What it makes possible
+## Core purpose
 
-Post turns the underlying model into something readers can understand and communities can maintain. An editable, traceable content unit that can appear in feeds.
+A publication is not merely an isolated page. A Post carries Unit identity, multilingual content, creative attribution, subjects, tags, Realm publication context, history, replies, and interactions. Articles, wikis, reviews, replies, chapters, and pictures all use a shared publication protocol, then add the rules of their own product role.
 
-## Who uses it
+## What is available now
 
-Readers, creators, and community editors use this surface to read, organize, and discuss concrete content.
+1. Create Portable Text titles, summaries, and rich-text bodies with links, spoilers, images, and Unit mentions.
+1. Show article details with author or publisher, relative time, type, and multilingual body content.
+1. Provide an interaction status bar, reply entry point, and shared participation context.
+1. Switch between global and Realm reading contexts; the desktop view has a Realm sidebar and mobile uses a selector.
+1. Show work and entity subjects, related content, and replies.
+1. Publish the same Post to multiple Realms without transferring it.
 
-## A concrete journey
+## Realm publication context
 
-- An editable, traceable content unit that can appear in feeds.
-- Post connects only the capabilities explicitly listed in the registry.
+Realm context answers which community perspective a reader is viewing. Entering from a Realm retains that context; entering from the global view can select another Realm where the Post has been published. Removing a Realm removes the publication relation, not the Post itself.
 
-## How it works
+## Portable Text and Blocks
 
-1. Create or select a stable Post record.
-2. Complete the core task in the product’s own interface.
-3. At publication, connected History and API capabilities continue the workflow.
+A body is not raw JSON. It is wrapped in a document with `_type: "portable-text"`, stable `_key` values, and version semantics. Block documents define storage, API, cache, rendering boundaries, and revalidation. This permits mentions, custom blocks, metrics, and more presentation forms.
 
-## How it connects
+## In development
 
-Post does not stand alone. It shares identity, context, or workflow with Wiki · Picture · Review · Editor · History · Entity.
+Draft editing for published content, more Post surfaces built through Block Schema, Q&A and question-Post relationships, and mature default-context behavior for multiple Realms remain in development or planning.
 
-## Clear boundaries
+## Relationships and boundaries
 
-- Internal protocols remain in related product pages and developer documentation.
-- Navigation grouping does not change domain relationships.
+A Post is not a work Unit or a Content Structure. Chapters reuse the same Post protocol, but every occurrence in a structure has its own node identity. Short replies use reply relations; formal revisions use editing and History. These mechanisms do not replace one another.

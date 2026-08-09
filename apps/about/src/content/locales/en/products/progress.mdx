@@ -1,35 +1,40 @@
 ---
 productId: progress
 locale: en
-title: "Progress"
-summary: "General reading or usage progress; GameBook Journey remains a separate model."
-description: "General reading or usage progress; GameBook Journey remains a separate model."
+title: "Reading Progress"
+summary: "Preserve personal states such as want to read, in progress, complete, and paused, together with genuinely resumable chapter positions and progress events."
+description: "Reading Progress belongs to the user and does not rewrite public work data; it connects a personal reading journey through a work Unit and a Content Structure position."
+statusNote: "Progress states, percentage, events, chapter-reader reports, work progress pages, statistics, and import interfaces are available."
 ---
 
-## What it makes possible
+## Core purpose
 
-Progress turns the underlying model into something readers can understand and communities can maintain. General reading or usage progress; GameBook Journey remains a separate model.
+For an ongoing web novel, “reading” is not only a percentage. A reader needs to know how far a work has updated, which chapter they reached, when they last read, and where to resume.
 
-## Who uses it
+Reading Progress keeps this data in the user's own space and does not write personal state back as public fact about a work.
 
-Individuals preserve their own reading context while communities curate, discuss, and extend shared knowledge.
+## What is available now
 
-## A concrete journey
+1. Record the states: want to start, in progress, complete, paused, and abandoned.
+1. Store numeric progress, percentage, start and completion times, and notes.
+1. Let readers report a stable content position from a chapter reader.
+1. Show work summaries, statistics, and event timelines.
+1. Let books and media use their own estimation rules.
+1. Provide import interfaces that create or update existing records.
+1. Restore a resumable entry point when a reader opens a work again.
 
-- General reading or usage progress; GameBook Journey remains a separate model.
-- Progress connects only the capabilities explicitly listed in the registry.
+## Relationship to Content Structure
 
-## How it works
+Progress should refer to a recognizable structure node and chapter context, not merely to a string such as “Chapter 368.” A string becomes unreliable after chapters are inserted, renamed, or reordered. Content Structure provides the stable occurrence; Progress records how far a particular user has reached.
 
-1. Create or select a stable Progress record.
-2. Complete the core task in the product’s own interface.
-3. At publication, connected History and API capabilities continue the workflow.
+## Value to the reader
 
-## How it connects
+Reading trails can improve library sorting, update reminders, recommendations, search, and discovery, but they are first and foremost user data. Anonymous signals can be used only under explicit privacy and aggregation rules; the product must not turn personal history into public social pressure.
 
-Progress does not stand alone. It shares identity, context, or workflow with Book · GameBook · Library · History.
+## In development
 
-## Clear boundaries
+Cross-platform automatic synchronization, source-level update tracking, fuller batch import, and additional protocols for gamebook journeys remain in development. Ordinary Progress must not prefill navigation fields for interactive fiction that has not yet been implemented.
 
-- Internal protocols remain in related product pages and developer documentation.
-- Navigation grouping does not change domain relationships.
+## Relationships and boundaries
+
+Progress is not complete version history, a collection, or a work state. A serialized work's completion is public information; a reader's completion is personal. They can be compared, but they must not be stored in the same field.

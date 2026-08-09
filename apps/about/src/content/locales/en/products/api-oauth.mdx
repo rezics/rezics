@@ -1,35 +1,37 @@
 ---
 productId: api-oauth
 locale: en
-title: "API & OAuth"
-summary: "Permissioned API, OAuth, and MCP entry points for connecting REZICS."
-description: "Permissioned API, OAuth, and MCP entry points for connecting REZICS."
+title: "API, OAuth & MCP"
+summary: "Connect external tools to the work network with explicit permissions, quotas, and reviewable scope—while distinguishing what is available from what is still planned."
+description: "REZICS already provides a typed API, an OpenAPI contract, and API tokens. OAuth authorization and MCP product integrations remain in development."
+statusNote: "The API, OpenAPI, access policies, API-token authentication, and quotas are implemented; OAuth application authorization and an official MCP connection are not yet complete products."
 ---
 
-## What it makes possible
+## Core purpose
 
-API & OAuth turns the underlying model into something readers can understand and communities can maintain. Permissioned API, OAuth, and MCP entry points for connecting REZICS.
+An open connection does not mean giving every third party all data. Each application must know what it may read and write, whom it represents, which quota applies, and how it can recover from failure.
 
-## Who uses it
+REZICS treats server routes and typed schema definitions as the single hand-authored contract source, then generates OpenAPI, typed clients, and documentation from them. Typed server-side access policies enforce authentication and authorization; a hidden interface control is never the security boundary.
 
-Developers and community tools connect to REZICS with explicit authority instead of creating a second identity system.
+## What is available now
 
-## A concrete journey
+1. Access works, content, Realms, progress, and other exposed capabilities through the public API.
+1. Generate consistent OpenAPI documentation from server routes and typed schema definitions.
+1. Authenticate requests with a session or a scoped API token.
+1. Apply operation-specific quotas, error responses, and server-side access policies.
+1. Use generated typed clients and the `@rezics/api` package.
+1. Keep concurrency tokens, request limits, and recoverable semantics for complex workflows such as content structures.
 
-- Permissioned API, OAuth, and MCP entry points for connecting REZICS.
-- API & OAuth connects only the capabilities explicitly listed in the registry.
+## The direction for OAuth and MCP
 
-## How it works
+OAuth will let people authorize third-party applications without sharing a password or long-lived personal token. MCP can let AI tools help add books, update metadata, or run workflows within a scope that people can understand and revoke.
 
-1. Create or select a stable API & OAuth record.
-2. Complete the core task in the product’s own interface.
-3. At publication, connected History and API capabilities continue the workflow.
+The goal is controlled participation in building work data even for people who do not use APIs directly. Third-party OAuth applications, consent screens, callbacks, security review, and an official MCP server are not all implemented yet, so these capabilities are marked as in development.
 
-## How it connects
+## Large-content workflows
 
-API & OAuth does not stand alone. It shares identity, context, or workflow with Token · Content Structure · Editor · Feed · Entity.
+For a book content structure, a single request may compile at most 10,000 logical changes; the limit is not the book's total node count. A large web-novel import must batch work, retain checkpoints, handle stale revisions and uncertain outcomes, and never place hundreds of thousands of nodes in one unbounded transaction.
 
-## Clear boundaries
+## Relationships and boundaries
 
-- Internal protocols remain in related product pages and developer documentation.
-- Navigation grouping does not change domain relationships.
+OpenAPI describes a transport contract; it does not automatically describe every multi-step task. The API does not bypass product permissions, and MCP gains no extra authority merely because an AI calls it. Data and viewer permission must be revalidated at every network, storage, and cache boundary.

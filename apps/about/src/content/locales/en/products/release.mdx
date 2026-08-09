@@ -1,35 +1,34 @@
 ---
 productId: release
 locale: en
-title: "Release"
-summary: "Represents a work released in a particular version, language, medium, or market."
-description: "Represents a work released in a particular version, language, medium, or market."
+title: "Releases and Editions"
+summary: "Record the editions in which a work truly appears at a particular language, region, platform, format, and point in time."
+description: "A work's identity answers what it is; a Release answers which version was published when and where, by whom, and in what form."
+statusNote: "Release identity, series relationships, and Unit presentation foundations are available; fuller platform-version ranges and difference comparison remain in development."
 ---
 
-## What it makes possible
+## Core purpose
 
-Release turns the underlying model into something readers can understand and communities can maintain. Represents a work released in a particular version, language, medium, or market.
+The same work may first be serialized on a web platform, then published as a book, released in other languages, and even republished on another platform. These differences cannot be resolved by duplicating work identity, nor can they all be compressed into a text field named “version.”
 
-## Who uses it
+A Release is an independent Unit that describes one concrete publication that can be identified, cited, and related.
 
-Readers use it to recognize the same work; communities use it to preserve context; editors use it to prevent duplication and fragmentation.
+## What is available now
 
-## A concrete journey
+1. Create Releases with stable IDs and multilingual presentation.
+1. Relate it to a series and its corresponding work Unit.
+1. Represent platform, language, region, format, publisher, and time context.
+1. Show actual edition relationships in work details and series pages.
+1. Let reviews, collections, and external sources point more precisely to the version they need.
 
-- Represents a work released in a particular version, language, medium, or market.
-- Release connects only the capabilities explicitly listed in the registry.
+## Why it matters
 
-## How it works
+The original serialization, a translated serialization, and a published edition can share work context while retaining their own sources and update rhythms. Readers can therefore identify which version they are viewing instead of assuming that matching titles mean identical content.
 
-1. Create or select a stable Release record.
-2. Complete the core task in the product’s own interface.
-3. At publication, connected History and API capabilities continue the workflow.
+## In development
 
-## How it connects
+Version differences, platform-version ranges, and import validation remain in development. Reliable source and identity governance must come first; string similarity must not automatically declare two releases to be the same.
 
-Release does not stand alone. It shares identity, context, or workflow with Work · Book · Media · Software · Series.
+## Relationships and boundaries
 
-## Clear boundaries
-
-- Internal protocols remain in related product pages and developer documentation.
-- Navigation grouping does not change domain relationships.
+A Release is not another work, and it does not manage sales, inventory, file delivery, or DRM. It preserves an understandable release identity and its relations; actual reading still returns to lawful sources or licensed content-hosting services.

@@ -1,35 +1,34 @@
 ---
 productId: score
 locale: en
-title: "Score"
-summary: "Structured ratings that reviews and work surfaces can reference."
-description: "Structured ratings that reviews and work surfaces can reference."
+title: "Realm Scores"
+summary: "Keep scoring dimensions and results in Realm context, from simple votes to the judgments different communities genuinely value."
+description: "A score is structured, aggregable evaluation. It may attach to a review or be used independently on a work page, but never replaces a full review."
+statusNote: "Realm score contexts, score entry, scores attached to reviews, work overviews, and filtering are available; governance for custom dimensions remains in development."
 ---
 
-## What it makes possible
+## Core purpose
 
-Score turns the underlying model into something readers can understand and communities can maintain. Reviews and work surfaces can reference the same structured rating.
+Different reader communities value different things. Light-novel readers, translation readers, and a particular work's Realm may use different dimensions, or they may prefer the simplest one-time vote. REZICS therefore puts scores in Realm context rather than offering only a seemingly global, objective average.
 
-## Who uses it
+## What is available now
 
-Readers, creators, and community editors use this surface to read, organize, and discuss concrete content.
+1. Score a Unit in a specified Realm score context.
+1. Attach one or more scores to a review.
+1. Show community score overviews and personal actions on work details.
+1. Filter reviews by Realm and score relationships.
+1. Preserve every score's source instead of writing aggregates as work facts.
 
-## A concrete journey
+## Why Realm context matters
 
-- Let reviews and work surfaces reference the same structured rating.
-- Score connects only the capabilities explicitly listed in the registry.
+Differences associated with region and language are often community differences. Rather than add ever more hidden filters to one global score, REZICS lets a Realm directly own visible rules, dimensions, and discussion context.
 
-## How it works
+Simple voting should remain easy. Communities that truly need finer judgment can create specialized dimensions, avoiding a scoring system so complex that nobody uses it.
 
-1. Create or select a stable Score record.
-2. Complete the core task in the product’s own interface.
-3. At publication, connected History and API capabilities continue the workflow.
+## In development
 
-## How it connects
+Multilingual labels for custom dimensions, versioned structural specifications, event-based scores, rankings, and dynamic collections need stronger governance. The first phase prioritizes dimensions the platform can fully localize, then gradually opens Realm extensions.
 
-Score does not stand alone. It shares identity, context, or workflow with Review · Work · Feed · History.
+## Relationships and boundaries
 
-## Clear boundaries
-
-- Internal protocols remain in related product pages and developer documentation.
-- Navigation grouping does not change domain relationships.
+A score is neither a review nor source-free ranking truth. It provides structured comparison; text reviews retain reasons. Recommendations may use score signals but must not write their results back as public work data.

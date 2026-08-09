@@ -100,7 +100,7 @@ export type SiteCopy = {
 		readonly open: CardCopy;
 		readonly closing: ActionCardCopy;
 		readonly contact: ActionCardCopy;
-		readonly v1?: HomeV1Copy;
+		readonly v1: HomeV1Copy;
 	};
 	readonly how: {
 		readonly eyebrow: string;
@@ -108,7 +108,7 @@ export type SiteCopy = {
 		readonly lead: string;
 		readonly stages: readonly CardCopy[];
 		readonly integrity: CardCopy;
-		readonly v1?: HowV1Copy;
+		readonly v1: HowV1Copy;
 	};
 	readonly uses: {
 		readonly eyebrow: string;
@@ -127,7 +127,7 @@ export type SiteCopy = {
 		readonly allLayers: string;
 		readonly empty: string;
 		readonly openProduct: string;
-		readonly stage?: ProductStageCopy;
+		readonly stage: ProductStageCopy;
 		readonly layers: Record<ProductLayerId, CardCopy>;
 	};
 	readonly product: {

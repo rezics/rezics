@@ -1,37 +1,38 @@
 ---
 productId: token
 locale: en
-title: "Token"
-summary: "Carries authority and usage limits in a machine-verifiable access credential."
-description: "Carries authority and usage limits in a machine-verifiable access credential."
+title: "API Tokens"
+summary: "Create revocable, scoped, auditable, quota-protected credentials for scripts, development tools, and controlled automation."
+description: "An API token uses the server's access vocabulary and receives only explicitly granted capabilities; it never automatically inherits an account's full authority."
+statusNote: "Token creation, one-time display, hashed storage, permission templates, activation and revocation, operation quotas, and management interfaces are available."
 ---
 
-## What it makes possible
+## Core purpose
 
-Token turns the underlying model into something readers can understand and communities can maintain. Carries authority and usage limits in a machine-verifiable access credential.
+API tokens suit personal scripts, command-line tools, development environments, and controlled automation. They are not another account password: each is a dedicated key that can open only required operations, be revoked at any time, and is subject to quotas and auditing.
 
-## Who uses it
+## What is available now
 
-Developers and community tools connect to REZICS with explicit authority instead of creating a second identity system.
+1. Create a named token for a purpose with the least necessary permissions.
+1. Display the complete secret only once at creation; the server stores a one-way hash.
+1. Use the same access vocabulary and templates as platform policy.
+1. Activate, disable, or revoke an individual token without affecting an account's other credentials.
+1. Set operation-specific API quotas and limits.
+1. View token status in personal settings and platform administration.
+1. Call permitted operations with standard API-token authentication.
 
-## A concrete journey
+## Least privilege
 
-- An application connects to REZICS on a person’s explicit authority.
-- A token receives only the granted scopes.
-- Revocation ends access to protected capabilities.
+Start from a concrete task: reading public works, updating particular metadata, or managing one's own content. Even when the account has broader authority, a token receives only the explicitly granted scope. The server still checks the target unit, Realm, and operation.
 
-## How it works
+## Quotas and observable failure
 
-1. A person or administrator establishes authority.
-2. The OAuth flow issues a scoped token.
-3. The API checks identity, scope, and limits on every request.
+A quota is not one global rate. API workloads differ, so operation-specific limits give large imports, ordinary queries, and sensitive writes separate boundaries. Limit exceeded, insufficient permission, revoked credentials, and data conflicts must all return identifiable errors.
 
-## How it connects
+## Safe use
 
-Token does not stand alone. It shares identity, context, or workflow with API & OAuth · Content Structure · Editor · Work.
+Never put a complete token in public code, chats, browser history, logs, or version control. Revoke and recreate it immediately if exposed; clean up unmaintained tokens regularly.
 
-## Clear boundaries
+## Relationships and boundaries
 
-- A token is not a work identity and carries no editorial content.
-- It does not bypass community rules or publication licenses.
-- Secrets and credentials never belong on public pages.
+Tokens do not provide third-party user authorization—that is OAuth's role—and do not automatically become MCP credentials. Future tool integrations may use tokens or OAuth, but both must obey the same server-side permissions and quotas.

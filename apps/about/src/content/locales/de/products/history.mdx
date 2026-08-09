@@ -1,36 +1,35 @@
 ---
 productId: history
 locale: de
-title: "Verlauf"
-summary: "Veröffentlichte Versionen, Unterschiede und Sperren auf Feld- oder Blockebene."
-description: "Veröffentlichte Versionen, Unterschiede und Sperren auf Feld- oder Blockebene."
+title: "Veröffentlichungsgeschichte"
+summary: "Veröffentlichte Revisionen, Unterschiede und Wiederherstellungskontext von Einheitsfeldern, Portable-Text-Blöcken und Inhaltsstrukturen je nach Bedarf des Produkts bewahren."
+description: "Geschichte erstellt Versionen nur an formellen Veröffentlichungsgrenzen; verschiedene Produkte können eine passende Geschichtsgranularität wählen, ohne zu einem einzigen Gesamtsnapshot gezwungen zu sein."
+statusNote: "Revisionslisten, Vergleiche, Veröffentlichung und Wiederherstellung durch neue Revisionen für Einheiten, Beiträge und Inhaltsstrukturen sind verfügbar; Diskussionen zu Versionen werden weiterentwickelt."
 ---
 
-## Was es ermöglicht
+## Kernpositionierung
 
-Verlauf macht das Grundmodell für Lesende verständlich und für Communities dauerhaft pflegbar. Veröffentlichte Versionen, Unterschiede und Sperren auf Feld- oder Blockebene.
+Buchmetadaten, der Volltext eines Beitrags und ein Kapitelverzeichnis sind nicht dieselbe Art von Daten und benötigen nicht dieselbe Geschichtsstrategie. REZICS lässt jedes Produkt den tatsächlich nachzuverfolgenden Bereich bestimmen und erstellt Revisionen erst bei der formellen Veröffentlichung.
 
-## Wer es nutzt
+Entwürfe können wiederholt gespeichert und validiert werden; die Geschichte zeichnet veröffentlichte Versionen auf, nicht jede Tastatureingabe oder noch nicht zustande gekommene Inhalte.
 
-Autorinnen und Redaktionen strukturieren und veröffentlichen Änderungen; Lesende erhalten ein zusammenhängendes, nachvollziehbares Ergebnis.
+## Bereits verfügbar
 
-## Ein konkreter Weg
+1. Veröffentlichte Revisionen und die aktuelle Version einer Einheit auflisten.
+1. Die Inhaltsgeschichte und Verwaltungsseite eines Beitrags ansehen.
+1. Revisionen der Inhaltsstrukturen von Büchern, Medien, Sammlungen und anderen Inhalten speichern.
+1. Ergänzungen, Verschiebungen, Änderungen und Entfernungen von Knoten zwischen zwei Strukturversionen vergleichen.
+1. Einen früheren Zustand durch Erstellen einer neuen Revision wiederherstellen, ohne bestehende Geschichte zu überschreiben.
+1. Mit Tokens zur optimistischen Nebenläufigkeitskontrolle verhindern, dass veraltete Entwürfe neuere Versionen stillschweigend überschreiben.
 
-- Historienbereich für Book, Beitrag oder Community-Bereich wählen.
-- Veröffentlichte Versionen vergleichen.
+## Warum die Geschichtsgranularität unterschiedlich ist
 
-## Wie es funktioniert
+Ein Portable-Text-Artikel lässt sich gut nach Blockidentität vergleichen; ein großer Kapitelbaum nach stabilen Knoten-IDs und Positionen; allgemeine Einheitsfelder verfolgen möglicherweise nur bestimmte verwaltbare Eigenschaften. Ein gemeinsames Geschichtsprotokoll übernimmt Revisionsidentität und Veröffentlichungsgrenzen, die Produktprojektion erklärt dagegen die Unterschiede.
 
-1. Adapter definiert Feld- oder Blockbereich.
-2. Nur Veröffentlichung erzeugt eine formale Version.
-3. Ergebnis in der Produktansicht zeigen.
+## In Entwicklung
 
-## Wie es verbunden ist
+Eigene Diskussionsbereiche für jede Revision, aus der Geschichte erzeugte Diskussionsbeiträge, feinere Sperren für Felder und Blöcke sowie sprachübergreifende Versionsbeschreibungen werden weiterentwickelt. Vor der formellen Einführung behauptet die Fähigkeitsdokumentation weder beliebige automatische Zusammenführung noch vollständige Zeitreisen für Entwürfe.
 
-Verlauf steht nicht allein, sondern teilt Identität, Kontext oder Abläufe mit Buch · Beitrag · Community-Bereich · Inhaltsstruktur · Editor.
+## Beziehungen und Grenzen
 
-## Klare Grenzen
-
-- Verlauf ist unabhängig von Editor.
-- Kein universeller Gesamt-Snapshot.
-- Automatische Zusammenführung oder erzwungene Sperrübernahme wird nicht behauptet.
+Die Geschichte gehört weder zum Editor noch ist sie ein Prüfprotokoll. Der Editor verwaltet den aktuellen Entwurf, die Geschichte bewahrt veröffentlichte Inhaltsversionen und die Plattformprüfung zeichnet Sicherheits- und Governance-Vorgänge auf. Auch eine Wiederherstellung muss eine neue Revision erzeugen und darf keine spätere Geschichte durch eine frühere Version überschreiben.

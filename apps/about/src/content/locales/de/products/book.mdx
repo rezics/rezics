@@ -1,37 +1,41 @@
 ---
 productId: book
 locale: de
-title: "Buch"
-summary: "Eine Oberfläche für Identität, Varianten, Struktur, Inhalt und Zuordnung eines Buches."
-description: "Eine Oberfläche für Identität, Varianten, Struktur, Inhalt und Zuordnung eines Buches."
+title: "Bücher und Webromane"
+summary: "Veröffentlichte Bücher und fortlaufend aktualisierte Webromane gemeinsam verstehen und plattformübergreifende Quellen, Sprachen, Kapitel und Lesezusammenhänge wieder mit demselben Werk verbinden."
+description: "Ein Buch ist eine indexierbare Werkeinheit; es beschreibt nicht nur Erstauflagen, sondern auch Serien, Kolumnen, Light Novels und andere Buchformen, die sich fortlaufend entwickeln."
+statusNote: "Buchidentität, Details, Quellenlinks, Kapitel-Inhaltsstrukturen, Leseansicht und Grundlagen für den Lesefortschritt sind umgesetzt; die plattformübergreifende Webroman-Integration und der Import der ersten 400.000 Bücher werden vorangetrieben."
 ---
 
-## Was es ermöglicht
+## Kernpositionierung
 
-Buch macht das Grundmodell für Lesende verständlich und für Communities dauerhaft pflegbar. Eine Oberfläche für Identität, Varianten, Struktur, Inhalt und Zuordnung eines Buches.
+Bücher in REZICS sind nicht nur für internationale Standardbuchnummern und Erstauflagen ausgelegt. Sie können veröffentlichte Bücher, Webromane, Light Novels, Kolumnen, Comics und andere Werke mit einer übergreifenden Buchidentität und Inhaltsreihenfolge beschreiben.
 
-## Wer es nutzt
+Bei Webromanen wird ein Werk aktualisiert, auf eine andere Plattform verlegt, übersetzt und veröffentlicht und kann zugleich auf mehreren Plattformen erscheinen. Das Buch bewahrt die Werkidentität; Quellen, Ausgaben, Inhaltsstruktur und Lesefortschritt halten jeweils fest, wo es erscheint, welche Ausgaben es gibt, wie sein Inhalt angeordnet ist und bis wohin eine lesende Person gelesen hat.
 
-Lesende, Schaffende und Community-Redaktionen lesen, ordnen und besprechen hier konkrete Inhalte.
+## Bereits verfügbar
 
-## Ein konkreter Weg
+1. Mehrsprachige Buchidentitäten, Cover, Zusammenfassungen, Status und Beziehungen anlegen.
+1. Autorinnen und Autoren, Übersetzende, Verlage, Serien, Ausgaben, Tags und externe Quellen verbinden.
+1. Mit der Inhaltsstruktur ein hierarchisches Kapitelverzeichnis erstellen und vorhandene Kapitel oder Beiträge wiederverwenden.
+1. In der Leseansicht kapitelweise vor- und zurückgehen sowie letzte Position und Lesefortschritt speichern.
+1. Den Änderungskontext der Inhaltsstruktur durch veröffentlichte Revisionen bewahren.
+1. Zwischen Indexeinträgen mit ausschließlich Metadaten und Büchern unterscheiden, für deren Inhalte REZICS die Berechtigung zur Bereitstellung besitzt.
 
-- main und variants bleiben unter einer Buch-Identität.
-- ContentStructure ordnet Kapitel und verwendet Beiträge als Vorkommen wieder.
-- Credit und Subject verwalten Beiträge und Figurenbeziehungen.
+## Plattformübergreifende Webromane
 
-## Wie es funktioniert
+Eine Plattform-URL ist nur eine Quelle. Ein idealer Leseeinstieg erkennt zunächst, welches Buch zu einer URL gehört, und zeigt dann Originaltitel, übersetzte Titel, Serienstatus, Kapitelaktualisierungen und legale Lesequellen gemeinsam. So müssen für dasselbe Werk bei einem Plattformwechsel, einer Übersetzung oder Veröffentlichung weder Sammlungen noch Community-Wissen erneut aufgebaut werden.
 
-1. Buch-Identität und Varianten verbinden.
-2. Kapitelvorkommen strukturieren.
-3. Veröffentlichte Felder und Struktur in History erfassen.
+Der Startplan für Version eins bringt die ersten 400.000 Bücher ein, um den Kaltstart der Suche zu lösen. Der eigentliche langfristige Wert sind plattformübergreifende Identitäten, sprachübergreifende Beziehungen, Quellenkorrekturen, Lesespuren und die Erinnerung der Themenraum-Communitys, die sich danach ansammeln.
 
-## Wie es verbunden ist
+## Grenzen für Inhalte und Berechtigungen
 
-Buch steht nicht allein, sondern teilt Identität, Kontext oder Abläufe mit Werk · Gamebook · Veröffentlichung · Inhaltsstruktur · Entität.
+`unit.license` beschreibt die öffentliche Lizenz, unter der das Originalwerk nach außen steht; die Berechtigung einer Werkeinheit zur Bereitstellung von Inhalten beantwortet dagegen, ob REZICS den Volltext anbieten darf. Ohne eine solche Berechtigung kann die Plattform Index und Quellen speichern, geschützte Inhalte jedoch nicht eigenmächtig hosten, nur weil sie eine URL gefunden hat.
 
-## Klare Grenzen
+## In Entwicklung
 
-- GameBuch ist eine Form von Buch.
-- Chapter ist kein eigenständiges Produkt.
-- Credit und Subject haben verschiedene Aufgaben.
+Das Auflösen plattformübergreifender Quellen, Batch-Import und -Korrektur, Duplikaterkennung, Governance für Zusammenführungen, die Aggregation von Serienaktualisierungen und eine umfassendere Suche nach Webromanen befinden sich noch in Entwicklung. Diese Arbeiten bauen auf batchfähigen, wiederherstellbaren Schreibvorgängen für Inhaltsstrukturen und einer Identitätsgovernance im großen Maßstab auf.
+
+## Beziehungen und Grenzen
+
+Ein Buch ist eine Werkidentität, keine bestimmte Ausgabe, keine Plattformseite, keine persönliche Bibliothek und keine JSON-Liste von Kapiteln. Kapitelinhalt gehört zu Beiträgen, die Inhaltsstruktur verwaltet die Reihenfolge und der Lesestatus gehört zum eigenen Lesefortschritt der jeweiligen Person.

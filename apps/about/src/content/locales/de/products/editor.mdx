@@ -1,36 +1,40 @@
 ---
 productId: editor
 locale: de
-title: "Editor"
-summary: "Gemeinsamer, erweiterbarer Bearbeitungsablauf für verschiedene Inhaltstypen."
-description: "Gemeinsamer, erweiterbarer Bearbeitungsablauf für verschiedene Inhaltstypen."
+title: "Portable-Text-Editor"
+summary: "Mit strukturiertem Rich Text überprüfbare, zitierbare und entwicklungsfähige Inhalte erstellen und zugleich die künftige Richtung einer Eins-zu-eins-Umwandlung mit REZICS Markdown bewahren."
+description: "Der Editor dient Beiträgen, Wikis, Rezensionen, Antworten und Inhaltsstrukturen; er verantwortet Eingabeerlebnis und Validierung, besitzt jedoch weder Produktidentität noch Veröffentlichungsgeschichte."
+statusNote: "Portable-Text-Rich-Text-Bearbeitung, Formatierungswerkzeuge, Links, Spoiler, Bilder, Einheitserwähnungen und Einstiege über Slash-Befehle sind umgesetzt; die bidirektionale Bearbeitung mit CodeMirror 6 und Markdown wird weiterentwickelt."
 ---
 
-## Was es ermöglicht
+## Kernpositionierung
 
-Editor macht das Grundmodell für Lesende verständlich und für Communities dauerhaft pflegbar. Gemeinsamer, erweiterbarer Bearbeitungsablauf für verschiedene Inhaltstypen.
+REZICS behandelt Rich Text nicht als undurchsichtige Anzeigemarkierung. Der Editor bearbeitet Portable-Text-Strukturen unmittelbar, sodass Absätze, Überschriften, Listen, Markierungen, Links, Bilder, Einheitserwähnungen und benutzerdefinierte Blöcke validiert, umgewandelt und sicher gerendert werden können.
 
-## Wer es nutzt
+Vom Editor erzeugter Inhalt wird in ein Portable-Text-Dokument von Block Schema eingebettet und behält die Semantik von `_type`, `_key` und Dokumentversion. Beim Speichern und Lesen wird erneut validiert; nicht allein den Typen zur Kompilierzeit wird vertraut.
 
-Autorinnen und Redaktionen strukturieren und veröffentlichen Änderungen; Lesende erhalten ein zusammenhängendes, nachvollziehbares Ergebnis.
+## Bereits verfügbar
 
-## Ein konkreter Weg
+1. Gewöhnliche Absätze, Überschriften, Zitate, Aufzählungen und nummerierte Listen bearbeiten.
+1. Stilmarkierungen und Anmerkungen wie Fett, Kursiv, Links und Spoiler anwenden.
+1. Bilder und andere unterstützte Blöcke einfügen und validieren.
+1. Werke, Figuren und andere Identitäten durch Einheitserwähnungen in den Volltext einfügen, statt nur Anzeigetext zu speichern.
+1. Über Einstiege für Slash-Befehle oder Erwähnungen nach strukturiertem Inhalt suchen und ihn einfügen.
+1. Die verfügbaren Fähigkeiten je Produkt begrenzen, sodass Rezensionen, Antworten oder Wikis nur zulässige Inhaltsformen verwenden.
+1. Externe Eingaben normalisieren und bei nicht unterstützten Markierungen sowie fehlerhaften URLs explizit auf eine einfachere Darstellung zurückfallen.
 
-- Gemeinsamer, erweiterbarer Bearbeitungsablauf für verschiedene Inhaltstypen.
-- Editor nutzt nur ausdrücklich registrierte Fähigkeiten.
+## Was Portable Text ermöglicht
 
-## Wie es funktioniert
+Portable Text trennt Darstellung von Semantik: Linkziele, Spoilermarkierungen, IDs von Einheitserwähnungen und Bildressourcen besitzen jeweils eine validierbare Form. Der Renderer kann für dynamische Inhaltsvorschauen, Beitragsdetails oder andere Oberflächen eine angemessene Darstellung wählen, ohne den ursprünglichen Inhalt umzuschreiben.
 
-1. Stabilen Editor-Datensatz wählen.
-2. Kernaufgabe in der eigenen Oberfläche erledigen.
-3. Nach Veröffentlichung schließen History und API an.
+Aus demselben Inhalt lassen sich außerdem sprachbewusste Wortzahl, Lesezeit und Inhaltsindikatoren berechnen; die Blockidentität unterstützt künftig Absatzkommentare und feinere Geschichte.
 
-## Wie es verbunden ist
+## CodeMirror 6 und REZICS Markdown
 
-Editor steht nicht allein, sondern teilt Identität, Kontext oder Abläufe mit Beitrag · Buch · Inhaltsstruktur · Verlauf · API & OAuth.
+Die langfristige Richtung ist, mit CodeMirror 6 allgemeine Text- und Codebearbeitung zu bieten und zwischen der benutzerdefinierten Portable-Text-Strukturspezifikation und der Syntax von REZICS Markdown eine Eins-zu-eins-Beziehung der Semantik zu bewahren. Ziel ist nicht ein einmaliger Export, sondern dass Rich Text und Markdown zuverlässig hin und her wechseln können, sodass sich frei zwischen Rich Text und Klartext arbeiten lässt.
 
-## Klare Grenzen
+Dieser Teil wird noch weiterentwickelt. Verfügbar ist derzeit der Portable-Text-Rich-Text-Editor, nicht der noch unvollständige vollständige bidirektionale Markdown-Arbeitsablauf.
 
-- Editor behauptet keine unbelegten Fähigkeiten.
-- Interne Protokolle bleiben in Produkt- und Entwicklerdokumentation.
-- Navigation ändert keine Domänenbeziehung.
+## Beziehungen und Grenzen
+
+Der Editor ist weder das Inhaltsmodell noch schreibt er jede Tastatureingabe in die formelle Geschichte. Produkte wie Beiträge bestimmen Felder und Berechtigungen, Block Schema validiert die Dokumente, und erst die Veröffentlichungsgrenze lässt die Geschichte nachvollziehbare Revisionen bilden.

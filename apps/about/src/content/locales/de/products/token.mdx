@@ -1,37 +1,38 @@
 ---
 productId: token
 locale: de
-title: "Token"
-summary: "Trägt Berechtigungen und Nutzungsgrenzen in einem maschinenprüfbaren Zugangsnachweis."
-description: "Trägt Berechtigungen und Nutzungsgrenzen in einem maschinenprüfbaren Zugangsnachweis."
+title: "API-Tokens"
+summary: "Widerrufbare, begrenzbare, prüfbare und durch Kontingente geschützte Zugangsdaten für Skripte, Entwicklungswerkzeuge und kontrollierte Automatisierung schaffen."
+description: "API-Tokens verwenden dasselbe Berechtigungsvokabular wie der Server und erhalten nur ausdrücklich gewährte Fähigkeiten; sie übernehmen nicht automatisch die vollständige Macht eines Kontos."
+statusNote: "Token-Erstellung, einmalige Anzeige, gehashte Speicherung, Berechtigungsvorlagen, Aktivierung und Widerruf, Kontingente je Vorgang sowie Verwaltungsoberflächen sind verfügbar."
 ---
 
-## Was es ermöglicht
+## Kernpositionierung
 
-Token macht das Grundmodell für Lesende verständlich und für Communities dauerhaft pflegbar. Trägt Berechtigungen und Nutzungsgrenzen in einem maschinenprüfbaren Zugangsnachweis.
+API-Tokens eignen sich für persönliche Skripte, Befehlszeilenwerkzeuge, Entwicklungsumgebungen und kontrollierte Automatisierung. Sie sind kein weiterer Satz von Konto-Passwörtern, sondern ein spezieller Schlüssel, der nur notwendige Vorgänge öffnen kann, jederzeit widerrufbar ist und Kontingenten sowie Prüfung unterliegt.
 
-## Wer es nutzt
+## Bereits verfügbar
 
-Entwicklungsteams und Community-Werkzeuge verbinden sich mit klaren Rechten mit REZICS, ohne ein zweites Identitätssystem zu schaffen.
+1. Tokens mit Name, Zweck und den minimal nötigen Berechtigungen erstellen.
+1. Das vollständige Geheimnis beim Erstellen nur einmal anzeigen; der Server speichert einen irreversiblen Hash.
+1. Dasselbe Berechtigungsvokabular und dieselben Vorlagen wie die Zugriffsrichtlinie der Plattform verwenden.
+1. Einen einzelnen Token aktivieren, deaktivieren oder widerrufen, ohne andere Zugangsdaten des Kontos zu beeinflussen.
+1. Für API-Vorgänge eigene Kontingente und Limits festlegen.
+1. Den Token-Status in persönlichen Einstellungen und der Plattformverwaltung einsehen.
+1. Erlaubte Vorgänge mit der Standardauthentifizierung für API-Tokens aufrufen.
 
-## Ein konkreter Weg
+## Minimale Berechtigung
 
-- Eine Anwendung verbindet sich mit ausdrücklicher Berechtigung einer Person mit REZICS.
-- Ein Token erhält nur die gewährten Bereiche.
-- Ein Widerruf beendet den Zugriff auf geschützte Fähigkeiten.
+Tokens sollten von einer konkreten Aufgabe ausgehen, etwa nur öffentliche Werke lesen, bestimmte Metadaten aktualisieren oder eigene Inhalte verwalten. Auch wenn das Konto selbst weitergehende Berechtigungen hat, erhält ein Token nur den ausdrücklich ausgestellten Bereich; der Server prüft Zieleinheit, Themenraum und Vorgang weiterhin erneut.
 
-## Wie es funktioniert
+## Kontingente und beobachtbare Fehler
 
-1. Eine Person oder Verwaltung erteilt die Berechtigung.
-2. OAuth stellt ein Token mit begrenztem Umfang aus.
-3. Die API prüft Identität, Umfang und Grenzen bei jeder Anfrage.
+Kontingente sind nicht nur eine globale Rate. Unterschiedliche API-Vorgänge haben unterschiedliche Arbeitslasten, und für Tokens lassen sich je Vorgang Grenzen anwenden, sodass große Importe, allgemeine Abfragen und sensible Schreibvorgänge unterschiedliche Schranken haben. Überschrittene Limits, fehlende Berechtigung, widerrufene Zugangsdaten und Datenkonflikte müssen jeweils erkennbare Fehler zurückgeben.
 
-## Wie es verbunden ist
+## Sicher verwenden
 
-Token steht nicht allein, sondern teilt Identität, Kontext oder Abläufe mit API & OAuth · Inhaltsstruktur · Editor · Werk.
+Vollständige Tokens dürfen nicht in öffentlichem Code, Chat-Inhalten, Browser-Verlauf, Protokollen oder Versionsverwaltung erscheinen. Bei einem entdeckten Leck sollten sie sofort widerrufen und neu erstellt werden; auch nicht mehr gepflegte Tokens sollten regelmäßig bereinigt werden.
 
-## Klare Grenzen
+## Beziehungen und Grenzen
 
-- Ein Token ist keine Werkidentität und trägt keine redaktionellen Inhalte.
-- Es umgeht weder Community-Regeln noch Veröffentlichungslizenzen.
-- Geheimnisse und Zugangsdaten gehören nie auf öffentliche Seiten.
+Ein Token stellt keinen Autorisierungsablauf für Drittanbieter-Nutzende bereit; das ist die Aufgabe von OAuth. Er wird auch nicht automatisch zu MCP-Zugangsdaten. Künftige Tool-Integrationen können Tokens oder OAuth verwenden, müssen jedoch dieselben serverseitigen Berechtigungen und Kontingente einhalten.

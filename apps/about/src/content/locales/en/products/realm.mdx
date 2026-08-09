@@ -1,35 +1,38 @@
 ---
 productId: realm
 locale: en
-title: "Realm"
-summary: "Shared context for a community or subject without owning linked content."
-description: "Shared context for a community or subject without owning linked content."
+title: "Realm Reader Communities"
+summary: "Build long-term community contexts around works, genres, and shared interests, helping readers move from finding works to finding genuine fellow readers."
+description: "A Realm can govern publication relations, rules, classification, and curation, but content does not give it ownership of a work or Post merely by appearing in the community."
+statusNote: "Realm creation, members, public pages, content feeds, rule acknowledgement, policy tags, score contexts, wikis, pins, content governance, and Docks are available."
 ---
 
-## What it makes possible
+## Core purpose
 
-Realm turns the underlying model into something readers can understand and communities can maintain. Shared context for a community or subject without owning linked content.
+A Realm is a long-term community built around a common interest, not merely a discussion board. It combines members, rules, publication and tag contexts, scores, wikis, feeds, Docks, and governance under an evolving Unit.
 
-## Who uses it
+For example, around a web novel, the core product loop is to discover cross-language material, join or create a community, discuss it, correct source information, and leave knowledge for the next reader.
 
-Individuals preserve their own reading context while communities curate, discuss, and extend shared knowledge.
+## What is available now
 
-## A concrete journey
+1. Create multilingual Realm identities, summaries, and public pages.
+1. Join, view members, and manage membership states.
+1. Publish Posts, collections, and other Units to a Realm feed.
+1. Set rules for member acknowledgement, content governance, and pending queues.
+1. Use policy tags, Realm tag contexts, classification trees, and score contexts.
+1. Provide wikis, navigation, pins, and configurable Docks.
+1. Switch between global and Realm context on Post detail pages.
 
-- Shared context for a community or subject without owning linked content.
-- Realm connects only the capabilities explicitly listed in the registry.
+## Publication does not transfer ownership
 
-## How it works
+Publishing to a Realm creates only a governable relation. A Realm can reject or hide that relation, add a status, or remove it, but it cannot delete the source Unit. Only content that a Realm directly creates or owns follows its ownership relation.
 
-1. Create or select a stable Realm record.
-2. Complete the core task in the product’s own interface.
-3. At publication, connected History and API capabilities continue the workflow.
+Membership does not currently provide an arbitrary role hierarchy. Management capabilities come from explicit Unit and access permissions together with governance rules. Documentation will not pretend that an unimplemented role system already exists.
 
-## How it connects
+## In development
 
-Realm does not stand alone. It shares identity, context, or workflow with Zone · Feed · Collection · Work · Tag.
+Full state history for Realm–Unit relations, annotations, granular notification preferences, custom taxonomy-label filtering, and cross-language governance remain in development. Automatically following a Realm after joining, and the scope of bell notifications, are important questions for later design.
 
-## Clear boundaries
+## Relationships and boundaries
 
-- Internal protocols remain in related product pages and developer documentation.
-- Navigation grouping does not change domain relationships.
+A Realm is not a work classification, collection, or Zone. It is a community with membership and governance context. Zones organize particular surfaces inside or across products; collections are curated lists.

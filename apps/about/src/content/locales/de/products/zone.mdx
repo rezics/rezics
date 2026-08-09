@@ -1,37 +1,37 @@
 ---
 productId: zone
 locale: de
-title: "Community-Bereich"
-summary: "Community-Bereich aus Abfragen, Konfiguration und Blockprotokollen."
-description: "Community-Bereich aus Abfragen, Konfiguration und Blockprotokollen."
+title: "Community-Bereiche und Ablagebereiche"
+summary: "Mit Block Schema, Suchbedingungen und Navigation anpassbare Oberflächen für Webromanbibliotheken, Light-Novel-Bibliotheken, Werk-Wikis und personalisierte Entdeckung zusammensetzen."
+description: "Ein Community-Bereich besitzt Inhalte nicht unmittelbar; verlässliche Filter und Blockdokumente bestimmen, was er zeigt. Ein Ablagebereich setzt wiederverwendbare Blöcke an festgelegte Stellen in Themenräumen und Einheiten."
+statusNote: "Community-Bereich-Identität, Suchbedingungen, Navigationsstruktur, Wiki-Community-Bereiche und Grundlagen für Ablagebereiche von Themenräumen und Einheiten sind umgesetzt; vollständige Themen und Selbstbedienungs-Komposition befinden sich noch in Entwicklung."
 ---
 
-## Was es ermöglicht
+## Kernpositionierung
 
-Community-Bereich macht das Grundmodell für Lesende verständlich und für Communities dauerhaft pflegbar. Community-Bereich aus Abfragen, Konfiguration und Blockprotokollen.
+Ein Community-Bereich ermöglicht es Nutzenden, eine Inhaltsoberfläche nach ihren Bedürfnissen zu organisieren. Der größte Unterschied zu einem Themenraum besteht darin, dass Inhalte dort gewöhnlich erscheinen, weil sie Such- und Filterbedingungen erfüllen, nicht weil der Community-Bereich sie besitzt oder eine feste Mitgliedsbeziehung speichert.
 
-## Wer es nutzt
+Ein Ablagebereich ist eine einheitsübergreifende Oberfläche für Seitenleisten und Hilfsblöcke. Verschiedene Reiter eines Themenraums sowie Detailseiten von Büchern, Medien, Software und anderen Produkten können an festgelegten Stellen kontrollierte Blöcke einfügen und dabei ihre jeweiligen offiziellen Bereiche behalten.
 
-Einzelne bewahren ihren Lesekontext, während Communities gemeinsames Wissen kuratieren, diskutieren und weiterführen.
+## Block Schema ist die gemeinsame Grundlage
 
-## Ein konkreter Weg
+Seiten, Navigation und Ablagebereiche von Community-Bereichen verwenden alle Blockdokumente mit `_type`, `_key` und Versionssemantik. Portable Text, vollständige Beitragsansichten, Einheitslisten, Inhaltsdynamik, Menüs und Suchvorlagen haben jeweils geschlossene Strukturspezifikationen, Parsingregeln, Berechtigungen und Fehlerzustände, statt beliebiges JSON auf dem Client auszuführen.
 
-- Bereiche mit Block Schema zusammensetzen.
-- Anzeige über Abfragen bestimmen, ohne Eigentum zu übertragen.
-- Veröffentlichte Konfiguration in History halten.
+## Welche Produkte sie bedienen können
 
-## Wie es funktioniert
+1. **Katalog-Community-Bereiche**: Bibliotheken für Bücher, Webromane, veröffentlichte Bücher, Light Novels, Comics, Filme oder Software können auf derselben Grundlage von Werkeinheiten unterschiedliche Filter und Darstellungen schaffen.
+1. **Werk-Wikis**: Menüs, Wiki-Beiträge und Suchblöcke organisieren Wissenseinstiege über Werke und Bücher hinweg.
+1. **Personalisierte Entdeckung**: Beliebte, empfohlene und bestimmte Tag-Kombinationen können durch verlässliche Suchvorlagen entstehen.
+1. **Besondere Themen**: Große Serien, Spielmodule oder medienübergreifende Welten können denselben Inhalt wiederverwenden, ohne ihn in jeden Community-Bereich zu kopieren.
 
-1. Blöcke und Abfragen konfigurieren.
-2. Feed- und Katalogergebnis prüfen.
-3. Konfiguration veröffentlichen.
+## Bereits vorhandene Grundlagen
 
-## Wie es verbunden ist
+Identität von Community-Bereichen, Suchbedingungen, Inhaltsstruktur der Navigation, Routing und Verwaltungsoberfläche für Wiki-Community-Bereiche sowie Lesen, Bearbeiten und Rendern von Ablagebereichen in Themenräumen und Einheiten sind bereits vorhanden. Blöcke werden erneut nach besitzender Person, betrachtender Person, Sichtbarkeit und Referenzziel validiert.
 
-Community-Bereich steht nicht allein, sondern teilt Identität, Kontext oder Abläufe mit Themenraum · Feed · Sammlung · Tag · Verlauf.
+## In Entwicklung
 
-## Klare Grenzen
+Vollständige Themenkonfiguration, Selbstbedienungs-Komposition, weitere Blöcke, wiederverwendbare Blockeinheiten für mehrere Besitzende, Positionen von Ablagebereichen auf Mobilgeräten und große Suchprojektionen befinden sich in Entwicklung. Auch selten genutzte Blöcke müssen kontrolliert verzögert geladen werden, damit nicht jede Seite die Kosten sämtlicher Komponenten trägt.
 
-- Community-Bereich besitzt verlinkte Inhalte nicht.
-- Block Schema und Community-Bereich Atom sind interne Protokolle.
-- Feed ist keine Karussellfunktion.
+## Beziehungen und Grenzen
+
+Ein Community-Bereich ist weder Themenraum, Tag, Sammlung noch feste Seite. Er setzt Abfrage und Darstellung zusammen; Identität und Eigentum eines Inhalts bleiben an der ursprünglichen Einheit. Ein Blockdokument sollte nur dann zu einer Einheit aufgewertet werden, wenn es tatsächlich eigenständige Autorenschaft, Veröffentlichung, Sichtbarkeit oder Wiederverwendung über mehrere Besitzende hinweg benötigt.

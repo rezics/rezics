@@ -1,37 +1,41 @@
 ---
 productId: book
 locale: en
-title: "Book"
-summary: "One product surface for a book’s identity, variants, structure, content, and attribution."
-description: "One product surface for a book’s identity, variants, structure, content, and attribution."
+title: "Books & Web Novels"
+summary: "Understand published books and continuously updated web novels together, reconnecting cross-platform sources, languages, chapters, and reading context to one work."
+description: "A book is an indexable work unit. It describes more than a first edition: serial fiction, columns, light novels, and other book forms that continue to evolve."
+statusNote: "Book identity, detail views, source links, chapter content structures, the reader, and progress foundations are implemented; cross-platform web-novel integration and the first 400,000-book import are under way."
 ---
 
-## What it makes possible
+## Core purpose
 
-Book turns the underlying model into something readers can understand and communities can maintain. One product surface for a book’s identity, variants, structure, content, and attribution.
+REZICS books are not designed only for International Standard Book Numbers and first editions. They can describe published books, web novels, light novels, columns, comics, and other works with a coherent book identity and ordered content.
 
-## Who uses it
+For a web novel, a work can update, move platforms, be translated, be published, and exist on several platforms at once. The book retains its work identity; sources, releases, content structure, and reading progress separately record where it appears, which versions exist, how content is ordered, and where a reader stopped.
 
-Readers, creators, and community editors use this surface to read, organize, and discuss concrete content.
+## What is available now
 
-## A concrete journey
+1. Create multilingual book identities with covers, summaries, status, and relationships.
+1. Connect authors, translators, publishers, series, releases, tags, and external sources.
+1. Build a tree of chapters with content structure and reuse existing chapters or posts.
+1. Move between chapters in the reader and preserve the last position and reading progress.
+1. Preserve the change context of content structures through published revisions.
+1. Distinguish index-only records from books for which REZICS has the right to host content.
 
-- See main and variants under one Book identity rather than splitting every edition into unrelated works.
-- Generate chapter order from ContentStructure and reuse one Post through separate occurrences.
-- Manage authors, translators, publishers, characters, protagonists, and derivative relations.
+## Cross-platform web novels
 
-## How it works
+A platform URL is evidence of a source, not the work itself. A useful reading entry point first identifies the book behind that URL, then presents original and translated titles, serial status, chapter updates, and lawful reading sources together. The same work therefore need not rebuild its collections and community knowledge after a move, translation, or publication.
 
-1. Create the Book identity and connect main with its variants.
-2. Arrange chapter occurrences in ContentStructure to produce the reading tree.
-3. At publication, Book fields and structure enter their respective History adapters.
+The first release will import 400,000 books to address search cold start. The durable asset is what follows: cross-platform identity, cross-language relationships, source verification, reading trails, and Realm community memory.
 
-## How it connects
+## Content and license boundaries
 
-Book does not stand alone. It shares identity, context, or workflow with Work · GameBook · Release · Content Structure · Entity.
+`unit.license` describes the original work's public license. A work unit's content-hosting license answers whether REZICS may provide the text itself. Without hosting rights, the platform may retain an index and source links, but may not host protected content merely because it found a URL.
 
-## Clear boundaries
+## In development
 
-- GameBook is a Book manifestation using GameContentStructure.
-- Chapter is a protocol concept, not an independent public product.
-- CreditAttribution and SubjectAttribution serve contribution and subject relations respectively.
+Cross-platform source resolution, batch-import verification, duplicate detection, merge governance, serial-update aggregation, and more complete web-novel search are in development. They rely on batchable, recoverable content-structure writes and governance that works at scale.
+
+## Relationships and boundaries
+
+A book is a work identity, not a particular release, platform page, personal library, or JSON list of chapters. Posts carry chapter content, content structure manages order, and reading state belongs to each reader's own progress.

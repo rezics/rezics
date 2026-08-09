@@ -1,36 +1,37 @@
 ---
 productId: post
 locale: de
-title: "Beitrag"
-summary: "Eine bearbeitbare, nachvollziehbare Inhaltseinheit für Feeds."
-description: "Eine bearbeitbare, nachvollziehbare Inhaltseinheit für Feeds."
+title: "Beiträge"
+summary: "Artikel, Wikis, Rezensionen, Antworten und Kapitelinhalte tragen, damit jede Veröffentlichung Identität, Kontext und nachvollziehbare Versionen bewahrt."
+description: "Ein Beitrag ist die grundlegende Veröffentlichungsoberfläche von REZICS und selbst eine Einheit; er kann mehrsprachig sein, zugeschrieben werden, thematisch verknüpft werden und in mehreren Themenraum-Kontexten erscheinen, ohne dass Eigentum übergeht."
+statusNote: "Artikeldetailseiten, Portable-Text-Volltexte, das Umschalten zwischen globalem und Themenraum-Kontext, Interaktionsleisten und Antwortdiskussionen sind umgesetzt."
 ---
 
-## Was es ermöglicht
+## Kernpositionierung
 
-Beitrag macht das Grundmodell für Lesende verständlich und für Communities dauerhaft pflegbar. Eine bearbeitbare, nachvollziehbare Inhaltseinheit für Feeds.
+Eine Veröffentlichung ist mehr als eine isolierte Seite. Ein Beitrag bewahrt die Identität einer Einheit und kann mehrsprachige Inhalte, kreative Zuschreibung, Themen, Tags, Themenraum-Veröffentlichungskontext, Geschichte, Antworten und Interaktionen haben. Artikel, Wikis, Rezensionen, Antworten, Kapitel und Bilder bauen auf diesem gemeinsamen Protokoll auf und fügen ihre eigenen Produktregeln hinzu.
 
-## Wer es nutzt
+## Bereits verfügbar
 
-Lesende, Schaffende und Community-Redaktionen lesen, ordnen und besprechen hier konkrete Inhalte.
+1. Titel, Zusammenfassung, Rich-Text-Volltext, Links, Spoilermarkierungen, Bilder und Einheitserwähnungen mit Portable Text erstellen.
+1. Auf einer Artikeldetailseite Autorin oder Autor beziehungsweise veröffentlichende Person, relative Zeit, Inhaltsart und mehrsprachigen Volltext darstellen.
+1. Über die Interaktionsleiste einen Einstieg für Antworten und gemeinsame Beteiligungsaktionen bieten.
+1. Den Lesezusammenhang zwischen globaler Ansicht und verschiedenen Themenräumen wechseln; am Desktop erscheint eine Seitenleiste für Themenräume, auf Mobilgeräten ein Bereich zur Kontextauswahl.
+1. Werk- oder Entitätsthemen, verwandte Inhalte und Antwortdiskussionen anzeigen.
+1. Denselben Beitrag in mehreren Themenräumen veröffentlichen, ohne das Eigentum am Beitrag an einen Themenraum zu übertragen.
 
-## Ein konkreter Weg
+## Themenraum-Kontext
 
-- Eine bearbeitbare, nachvollziehbare Inhaltseinheit für Feeds.
-- Beitrag nutzt nur ausdrücklich registrierte Fähigkeiten.
+Der Themenraum-Kontext beantwortet: „Aus der Sicht welcher Community wird dieser Inhalt gerade gelesen?“ Beim Einstieg aus einem Themenraum kann die Detailseite diesen Kontext bewahren; beim Einstieg über die globale Ansicht kann die nutzende Person weiterhin andere Themenräume auswählen, in denen der Beitrag veröffentlicht wurde. Ein Themenraum kann seine Veröffentlichungsbeziehung zu einem Beitrag entfernen, doch das bedeutet nicht, dass der Beitrag selbst gelöscht wird.
 
-## Wie es funktioniert
+## Portable Text und Block Schema
 
-1. Stabilen Beitrag-Datensatz wählen.
-2. Kernaufgabe in der eigenen Oberfläche erledigen.
-3. Nach Veröffentlichung schließen History und API an.
+Der Volltext wird nicht direkt als beliebiges JSON gespeichert. Portable Text wird in ein Blockdokument mit `_type: "portable-text"`, stabilem `_key` und Versionssemantik eingebettet; Speicher-, API-, Cache- und Renderinggrenzen müssen ihn jeweils erneut validieren. So lassen sich später Einheitserwähnungen, benutzerdefinierte Blöcke, Inhaltsindikatoren und weitere Darstellungsweisen sicher ergänzen.
 
-## Wie es verbunden ist
+## In Entwicklung
 
-Beitrag steht nicht allein, sondern teilt Identität, Kontext oder Abläufe mit Wiki · Bild · Rezension · Editor · Verlauf · Entität.
+Beim erneuten Bearbeiten veröffentlichter Inhalte als Entwurf speichern, weitere Beitragsoberflächen mit Block Schema zusammensetzen, Beziehungen für Frage-und-Antwort- beziehungsweise Fragentyp-Beiträge und ausgereiftere Standardkontexte für mehrere Themenräume befinden sich noch in Entwicklung oder Planung.
 
-## Klare Grenzen
+## Beziehungen und Grenzen
 
-- Beitrag behauptet keine unbelegten Fähigkeiten.
-- Interne Protokolle bleiben in Produkt- und Entwicklerdokumentation.
-- Navigation ändert keine Domänenbeziehung.
+Ein Beitrag ist keine Werkeinheit und keine Inhaltsstruktur. Ein Kapitel kann denselben Beitrag wiederverwenden; jedes Auftreten in einer Struktur hat jedoch seine eigene Knotenidentität. Kurze Antworten verwenden die Antwortbeziehung; formelle Revisionen gehören dagegen zu Bearbeitung und Geschichte des Beitrags. Keines von beiden darf das andere ersetzen.

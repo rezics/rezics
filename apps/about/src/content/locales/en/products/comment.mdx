@@ -1,35 +1,33 @@
 ---
 productId: comment
 locale: en
-title: "Comment"
-summary: "A response product attached to content and discussion context."
-description: "A response product attached to content and discussion context."
+title: "Replies & Discussion"
+summary: "Keep short responses beside the post and Realm context they discuss, forming traceable discussion trees with bounded depth."
+description: "A reply retains Post identity and reuses Unit and publication capabilities while root, parent, and depth maintain discussion context."
+statusNote: "Reply creation, discussion trees, nested responses, editing, deletion state, and discussion on post detail pages are available."
 ---
 
-## What it makes possible
+## Core purpose
 
-Comment turns the underlying model into something readers can understand and communities can maintain. A response product attached to content and discussion context.
+Replies carry short, direct discussion without becoming a new long-form article, yet retain identity, author, time, language, and editability. REZICS therefore keeps them as Posts and Units, with dedicated relationships for the discussion tree.
 
-## Who uses it
+## What is available now
 
-Readers, creators, and community editors use this surface to read, organize, and discuss concrete content.
+1. Reply to posts, reviews, and other replies.
+1. Retain the root post, direct parent, and depth for complete context.
+1. Progressively expand or collapse later replies on post detail pages.
+1. Edit mutable replies and expose deleted content with observable state.
+1. Retain Realm context so discussion returns to its original community.
+1. Bound depth to prevent unbounded recursive structures.
 
-## A concrete journey
+## Why not a separate reply format
 
-- A response product attached to content and discussion context.
-- Comment connects only the capabilities explicitly listed in the registry.
+Replies reuse Portable Text, permissions, history, attribution, and content language rather than maintaining a weaker comment format. The model still distinguishes ordinary posts from reply relationships, so search and feeds do not treat every short response as a top-level article.
 
-## How it works
+## In development
 
-1. Create or select a stable Comment record.
-2. Complete the core task in the product’s own interface.
-3. At publication, connected History and API capabilities continue the workflow.
+Pagination, ordering, notifications, cross-language presentation, and finer content governance for large discussions will improve. A reply that becomes formal knowledge should create or revise a wiki or post rather than make a thread permanent documentation.
 
-## How it connects
+## Relationships and boundaries
 
-Comment does not stand alone. It shares identity, context, or workflow with Post · Review · Feed · History.
-
-## Clear boundaries
-
-- Internal protocols remain in related product pages and developer documentation.
-- Navigation grouping does not change domain relationships.
+A reply is not a formal revision, score, or work metadata. Deleting one must not break its tree; observable missing/deleted state keeps later content intelligible.

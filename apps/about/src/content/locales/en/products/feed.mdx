@@ -1,35 +1,35 @@
 ---
 productId: feed
 locale: en
-title: "Feed"
-summary: "Recognizable streams that combine updates from several product surfaces."
-description: "Recognizable streams that combine updates from several product surfaces."
+title: "Content Feeds"
+summary: "Compose work, post, and community updates into sourced, contextual, continuously paginable streams—not an indiscriminate timeline."
+description: "A feed is a filtered, ordered content list. Each content type supplies its own card projection while participation, collection, and sharing operations are shared."
+statusNote: "Home and Realm feeds, typed content cards, cursor pagination, Realm context, interactions, collection, and sharing foundations are available; more presentation modes are in development."
 ---
 
-## What it makes possible
+## Core purpose
 
-Feed turns the underlying model into something readers can understand and communities can maintain. Recognizable streams that combine updates from several product surfaces.
+A feed is a core REZICS discovery surface. It does not own content: following, Realms, Zones, search conditions, and content relationships produce a bounded, paginable list that leads back to its source.
 
-## Who uses it
+## Card-list model
 
-Individuals preserve their own reading context while communities curate, discuss, and extend shared knowledge.
+The first release prioritizes card lists. Every item shares publisher, language, Realm context, participation, adding to collections, and sharing protocols; books, posts, and collections then supply card content appropriate to their own information density.
 
-## A concrete journey
+This avoids maintaining an unextendable bundle of generic cards inside the feed and avoids forcing special layouts, such as carousels, into every content item. Horizontal book lists and other curated elements fit better in Zone or Dock blocks.
 
-- Recognizable streams that combine updates from several product surfaces.
-- Feed connects only the capabilities explicitly listed in the registry.
+## What is available now
 
-## How it works
+1. Load typed content items on the home page and in Realms.
+1. Continue results using cursor pagination and bounded page sizes.
+1. Show a post card's primary Realm and return to the correct detail context.
+1. Project summaries, work data, and appropriate actions by content type.
+1. Offer replies, reactions, collection, sharing, and content-governance entry points.
+1. Reuse the same trusted filtering semantics for search and Zones.
 
-1. Create or select a stable Feed record.
-2. Complete the core task in the product’s own interface.
-3. At publication, connected History and API capabilities continue the workflow.
+## In development
 
-## How it connects
+Search lists, masonry layouts, more ordering strategies, personalized recommendations, and cross-language summaries are in development. Each must preserve bounded fan-out, stable cursors, and source traceability rather than use full loading or deep offset pagination.
 
-Feed does not stand alone. It shares identity, context, or workflow with Realm · Zone · Post · Comment · Tag.
+## Relationships and boundaries
 
-## Clear boundaries
-
-- Internal protocols remain in related product pages and developer documentation.
-- Navigation grouping does not change domain relationships.
+Feeds do not own content or turn recommendations into work structure. Realms, Zones, and search determine context and conditions; cards project data; the source Unit remains authoritative for interaction and detail.

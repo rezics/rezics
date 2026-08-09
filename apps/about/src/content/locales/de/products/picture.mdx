@@ -1,36 +1,36 @@
 ---
 productId: picture
 locale: de
-title: "Bild"
-summary: "Beitrag(kind=PICTURE) mit einem oder mehreren geordneten Bildern."
-description: "Beitrag(kind=PICTURE) mit einem oder mehreren geordneten Bildern."
+title: "Bildbeiträge"
+summary: "Ein oder mehrere geordnete Bilder als Kern einer Veröffentlichung behandeln und zugleich Titel, Beschreibung, Quelle, Zuschreibung und Werkbeziehungen bewahren."
+description: "Ein Bildbeitrag ist eine Art von Beitrag, keine Kategorie für Bilddateien; er bietet ein bildorientiertes Veröffentlichungsprotokoll für Illustrationen, Fotografien, Screenshots und kurze Comics."
+statusNote: "Das Domänenmodell und die Inhaltsgrenzen für Bildbeiträge sind festgelegt, grundlegende Fähigkeiten für Beiträge und Medien können wiederverwendet werden; vollständige Erstellungsabläufe und bildorientierte Detailoberflächen befinden sich noch in Entwicklung."
 ---
 
-## Was es ermöglicht
+## Kernpositionierung
 
-Bild macht das Grundmodell für Lesende verständlich und für Communities dauerhaft pflegbar. Beitrag(kind=PICTURE) mit einem oder mehreren geordneten Bildern.
+Ein Bildbeitrag bezeichnet eine Veröffentlichung, bei der ein oder mehrere geordnete Bilder den Hauptinhalt bilden. Gewöhnliche Artikel können ebenfalls Bilder enthalten; nur wenn die Bildfolge selbst das Werk bildet, braucht sie die spezifische Validierung, Listenvorschau, Detailgestaltung und das Blätterverhalten eines Bildbeitrags.
 
-## Wer es nutzt
+Ein Bildbeitrag bleibt ein Beitrag und eine Einheit. Daher kann er Titel, mehrsprachige Beschreibung, Autorenschaft, Zeitpunkt, Tags, Antworten, Sammlungen, Lizenz, Quellen und Themenraum-Veröffentlichungskontext unmittelbar wiederverwenden.
 
-Lesende, Schaffende und Community-Redaktionen lesen, ordnen und besprechen hier konkrete Inhalte.
+## Festgelegte Inhaltsregeln
 
-## Ein konkreter Weg
+1. Mindestens ein Bild enthalten; für ein einzelnes und für mehrere Bilder dasselbe Modell verwenden.
+1. Mehreren Bildern eine von der Autorin oder dem Autor festgelegte stabile Reihenfolge geben.
+1. Jedes Bild kann eine Ressourcenreferenz, Alternativtext und eine optionale Beschreibung haben.
+1. Das erste Bild kann als Standardvorschau in Listen dienen; ein eigenständiges Cover muss nicht voreilig ergänzt werden.
+1. Semantik wie Illustration, Fotografie, Comic oder Screenshot durch Tags beschreiben, statt weitere Beitragstypen hinzuzufügen.
 
-- Beitrag(kind=PICTURE) mit einem oder mehreren geordneten Bildern.
-- Bild nutzt nur ausdrücklich registrierte Fähigkeiten.
+## Grenzen zu anderen Inhalten
 
-## Wie es funktioniert
+Ein Artikel mit eingebetteten Bildern bleibt ein gewöhnlicher Beitrag; eine Rezension mit vielen Screenshots bleibt eine Rezension; ein Comickapitel ist zunächst ein Kapitel in der Inhaltsstruktur eines Buches. Ein Bildbeitrag wird nur verwendet, wenn keine stärkere Produktrolle besteht und die Bildfolge selbst den Kern der Veröffentlichung ausmacht.
 
-1. Stabilen Bild-Datensatz wählen.
-2. Kernaufgabe in der eigenen Oberfläche erledigen.
-3. Nach Veröffentlichung schließen History und API an.
+Eine mehrseitige Illustration kann ein Bildbeitrag sein; ein Bildband oder Comic mit übergreifendem Buchtitel, Inhaltsverzeichnis und Lesereihenfolge ist ein Buch; eine von Nutzenden gesammelte Gruppe von Bildwerken ist eine Sammlung.
 
-## Wie es verbunden ist
+## In Entwicklung
 
-Bild steht nicht allein, sondern teilt Identität, Kontext oder Abläufe mit Beitrag · Wiki · Rezension · Entität · Tag.
+Das Bearbeiten von Bildfolgen, Upload-Validierung, Arbeitsabläufe für Alternativtexte, bildorientierte Karten der Inhaltsdynamik, Detailansicht und mehrseitiges Lesen müssen noch fertiggestellt werden. Die Fähigkeitskarte kennzeichnet sie deshalb als „In Entwicklung“, statt sie allein wegen eines vollständigen Datenentwurfs als verfügbar auszugeben.
 
-## Klare Grenzen
+## Beziehungen und Grenzen
 
-- Bild behauptet keine unbelegten Fähigkeiten.
-- Interne Protokolle bleiben in Produkt- und Entwicklerdokumentation.
-- Navigation ändert keine Domänenbeziehung.
+Die zugrunde liegende Bildressource ist keine Einheit; sie bewahrt Datei, Abmessungen und Format. Der Bildbeitrag ist die Veröffentlichungsidentität, die gesammelt, rezensiert, getaggt und mit externen Quellen verbunden werden kann; daher werden keine parallelen Bild- oder Galerieeinheiten geschaffen.

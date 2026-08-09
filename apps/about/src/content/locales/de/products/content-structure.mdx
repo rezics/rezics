@@ -1,37 +1,60 @@
 ---
 productId: content-structure
 locale: de
-title: "Inhaltsstruktur"
-summary: "Verwaltet Position, Reihenfolge, Wiederverwendung und optionale Spielstruktur."
-description: "Verwaltet Position, Reihenfolge, Wiederverwendung und optionale Spielstruktur."
+title: "Block Schema und Inhaltsstruktur"
+summary: "Inhalte in entwicklungsfähigen Blockdokumenten ausdrücken und mit stabilen Knoten Kapitelreihenfolge, Auftretensorte, Wiederverwendung und veröffentlichte Revisionen verwalten."
+description: "Block Schema ist die gemeinsame Dokumentgrundlage für REZICS-Inhaltsoberflächen; die Inhaltsstruktur organisiert Einheiten, statt Inhalt und Inhaltsverzeichnis in einem JSON-Dokument zu vermischen."
+statusNote: "Block Schema, Portable-Text-Dokumente, Inhaltsstrukturen für Bücher und Medien, Revisionsgeschichte und das Speichern vollständiger Entwürfe sind umgesetzt; weitere Blöcke und Arbeitsabläufe für große Importe befinden sich in Entwicklung."
 ---
 
-## Was es ermöglicht
+## Zwei zusammenwirkende Grundlagen
 
-Inhaltsstruktur macht das Grundmodell für Lesende verständlich und für Communities dauerhaft pflegbar. Verwaltet Position, Reihenfolge, Wiederverwendung und optionale Spielstruktur.
+REZICS modelliert getrennt, „was der Inhalt ist“ und „wo der Inhalt erscheint“.
 
-## Wer es nutzt
+- **Block Schema** legt fest, aus welchen typisierten Blöcken ein renderbares Dokument besteht und wie jeder Block stabile Identität, Version und Validierungsregeln bewahrt.
+- **Inhaltsstruktur** legt Auftretensorte von Inhaltseinheiten, Eltern-Kind-Beziehungen, Reihenfolge, Ziele und veröffentlichte Revisionen fest.
 
-Autorinnen und Redaktionen strukturieren und veröffentlichen Änderungen; Lesende erhalten ein zusammenhängendes, nachvollziehbares Ergebnis.
+Durch diese Trennung kann dasselbe Kapitel oder derselbe Beitrag an mehreren Stellen wiederverwendet werden, ohne den Volltext zu kopieren. Jedes Auftreten kann dennoch eine eigene Knoten-ID, Reihenfolge und Navigationssemantik besitzen.
 
-## Ein konkreter Weg
+## Block Schema: kein rohes JSON
 
-- Geordneter Baum für Position, Reihenfolge und Wiederverwendung.
-- Game-Modus ergänzt Verzweigung und DAG-Prüfung.
-- Der erste öffentliche Adapter ist Book.
+Fast jedes speicherbare JSON-Dokument benötigt zunächst ein erkennbares Grundobjekt, statt ein beliebiges Portable-Text-Array direkt in ein Feld zu legen. Das elementarste Portable-Text-Dokument hat diese Semantik:
 
-## Wie es funktioniert
+```ts
+{
+  _type: "portable-text",
+  _key: "Schlüssel aus 6 Byte bzw. 12 Hexadezimalzeichen",
+  content: PortableText,
+}
+```
 
-1. Vorkommen statt Beiträge als Knoten platzieren.
-2. Game auf die normale Struktur aufsetzen.
-3. Book- oder GameBook-Ergebnis prüfen.
+`_type` bestimmt das Parsing- und Renderingprotokoll; `_key` lässt Blöcke ihre Identität über Revisionen, Absatzkommentare und Strukturvorgänge hinweg behalten; die Dokumentversion setzt bei jeder Entwicklung der Strukturspezifikation eine explizite Migrationsgrenze. Auf die Formatvalidierung müssen weiterhin Validierungen von Referenzen, Berechtigungen und Sichtbarkeit folgen; allein das Format einer Kennung beweist nicht, dass ihr Ziel gelesen werden darf.
 
-## Wie es verbunden ist
+## Umgesetzte Blockfamilien
 
-Inhaltsstruktur steht nicht allein, sondern teilt Identität, Kontext oder Abläufe mit Buch · Gamebook · Beitrag · Editor · Verlauf.
+Das gemeinsame Block Schema kann derzeit Portable Text, Einheitsreferenzen, vollständige Beitragsdarstellung, Einheitslisten, suchgesteuerte Inhaltsdynamik, Menüs und andere kontrollierte Inhaltsoberflächen ausdrücken. Jede Variante ist Teil einer geschlossenen Vereinigung; unbekannte Blöcke dürfen nicht stillschweigend durch den Renderer gelangen.
 
-## Klare Grenzen
+Community-Bereiche, Ablagebereiche, Wiki-Navigation und künftig wiederverwendbare Dokumente beruhen auf derselben Grundlage. Ob ein Blockdokument zu einer eigenständigen Einheit wird, muss durch echte Anforderungen wie Wiederverwendung über mehrere Besitzende hinweg, eigenständige Autorenschaft, Veröffentlichungsgeschichte oder Sichtbarkeit begründet sein.
 
-- Kein übergeordnetes Trägerprodukt.
-- Editor, History und API bleiben getrennt.
-- Unbestätigte Adapter werden nicht beworben.
+## Was die Inhaltsstruktur bereits kann
+
+1. Typisierte Strukturen für Bücher, Medien, Beiträge, Klassifikationsstrukturen in Themenräumen und Navigation erstellen.
+1. Große geordnete Bäume mit stabilen Knoten-IDs, Elternknoten und fraktionalen Positionswerten speichern.
+1. Knoten auf wiederverwendbare Inhaltseinheiten verweisen lassen und zwischen Inhalt, Einheitsziel und externer URL unterscheiden.
+1. Buch- und Medienstrukturen als vollständigen Entwurf bearbeiten und begrenzte Änderungen anschließend zu atomaren Anfragen kompilieren.
+1. Revisionen speichern, Unterschiede vergleichen und einen früheren Zustand über eine neue Revision wiederherstellen.
+1. Den Lesenden die Struktur als Inhaltsverzeichnis, vorheriges und nächstes Kapitel sowie Position des Lesefortschritts projizieren lassen.
+
+## Große Serien und Importe
+
+Eine einzelne Strukturänderung kompiliert höchstens 10.000 logische Befehle. Das Limit betrifft eine atomare Änderung, nicht die Gesamtzahl der Knoten eines ganzen Buches. Große Webromane können den vollständigen Baum in mehrere wiederherstellbare Schreibvorgänge aufteilen: Jeder Vorgang übermittelt bereits festgeschriebene Knoten und eine begrenzte Gruppe neuer Knoten; nach Erfolg erhält er das Revisionstoken für den nächsten Vorgang.
+
+Werke mit mehr als 10.000 Kapiteln müssen daher weder in eine unbegrenzte Transaktion geladen werden noch auf Konflikterkennung verzichten. Ein Import kann unterbrochen und später fortgesetzt werden; zum Schluss lässt sich der vollständige Snapshot validieren.
+
+## In Entwicklung und Planung
+
+Weitere Blockvarianten, Blockeinheiten mit mehreren Besitzenden, starke Referenzindizes, Absatzkommentare, vollständige Arbeitsabläufe für große Importe und GameContentStructure befinden sich jeweils in Entwicklung oder Planung. Jeder neue Block muss Zustände für Speichern, Veröffentlichen, Lesen, Löschen, Cache und Fehler definieren.
+
+## Beziehungen und Grenzen
+
+Block Schema ist kein Editor, und die Inhaltsstruktur ist nicht der Volltext. Der Editor erzeugt validierte Dokumente, Beiträge und Kapitel besitzen den Inhalt, die Inhaltsstruktur ordnet ihre Auftretensorte an, und die Geschichte bewahrt veröffentlichte Revisionen.

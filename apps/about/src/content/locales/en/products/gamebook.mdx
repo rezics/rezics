@@ -1,37 +1,34 @@
 ---
 productId: gamebook
 locale: en
-title: "GameBook"
-summary: "A branching reading manifestation formed when Book uses GameContentStructure."
-description: "A branching reading manifestation formed when Book uses GameContentStructure."
+title: "Gamebooks"
+summary: "Add entry points, choices, branches, convergence, and endings to ordinary book structure while preserving the journey a reader actually takes."
+description: "A gamebook is an interactive-reading product formed when a book uses GameContentStructure. Its architecture is designed, but it has no formal product interface yet."
+statusNote: "GameContentStructure, choices, and journeys are architecturally designed; the data model, authoring tools, and reader interface are not yet implemented as formal capabilities."
 ---
 
-## What it makes possible
+## Core purpose
 
-GameBook turns the underlying model into something readers can understand and communities can maintain. A branching reading manifestation formed when Book uses GameContentStructure.
+A gamebook is not a visual-novel engine. It is a digital model of traditional interactive fiction: a reader reads a chapter, chooses an option at its end, and then goes to another chapter. Multiple routes can converge or reach different endings.
 
-## Who uses it
+Ordinary content structure continues to manage chapter content and editorial order. GameContentStructure overlays a playable directed graph, and a Journey records the immutable path each reader actually takes.
 
-Readers, creators, and community editors use this surface to read, organize, and discuss concrete content.
+## Established design
 
-## A concrete journey
+1. Use a content-structure node's stable occurrence identity as a graph node, not a reusable chapter ID.
+1. Make every choice a stable directed edge whose source and destination are not rewritten in place.
+1. Record the selected choice, time, and arrived node in each journey step; point a journey to its current path end.
+1. Let journeys share prefixes without copying history.
+1. Handle content changes with stable IDs, retirement records, and local invalidation—not an invented book-wide version ID.
 
-- Readers move from Entrance through Passage and Choice to branches, merges, or Ending.
-- Authors validate entry points, stable IDs, retired nodes, and a directed acyclic structure.
-- Journey and JourneyStep retain the path while Progress exposes only a general summary.
+## First-phase product boundary
 
-## How it works
+The first phase covers only acyclic chapter graphs, choices, branching, convergence, and endings. It excludes variables, conditions, scripts, combat, resource management, and a visual-novel runtime. If these capabilities become appropriate later, their need must be demonstrated with new, distinct fields and product rules rather than turning Gamebooks into a general-purpose game engine.
 
-1. Create a Book, then enable GameContentStructure.
-2. Configure Entrance, Passage, Choice, Ending, and layout, then pass DAG validation.
-3. Write choices to JourneyStep while retired content keeps existing paths explainable.
+## Not yet implemented
 
-## How it connects
+An author-facing graphical editor, pre-publication path validation, choice statistics, Journey-branch management, reader navigation, and history compatibility are all planned. The capability map therefore marks Gamebooks as “planned” rather than presenting a complete design document as a usable product.
 
-GameBook does not stand alone. It shares identity, context, or workflow with Book · Content Structure · Progress · History.
+## Relationships and boundaries
 
-## Clear boundaries
-
-- The parent is always Book; GameContentStructure is an optional capability mode.
-- There are no variables, conditions, scripts, combat, loops, or visual-novel runtime.
-- Progress does not store Journey.
+Gamebooks are not a new Unit type; they are still books. Ordinary reading progress can record reading status and statistics, but it does not handle interactive navigation. The actual path must be preserved by the Journey model.

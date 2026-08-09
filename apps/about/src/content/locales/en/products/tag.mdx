@@ -1,35 +1,35 @@
 ---
 productId: tag
 locale: en
-title: "Tag"
-summary: "Shared, queryable tagging infrastructure for REZICS products."
-description: "Shared, queryable tagging infrastructure for REZICS products."
+title: "Tags & Community Classification"
+summary: "Use one tag identity across global, Realm, and personal contexts, so classification can be voted on, governed, and reused across products."
+description: "Tags provide lightweight but governable vocabulary for light novels, themes, and content features; they do not replace work, series, entity, or community identity."
+statusNote: "Tags, voting, Realm contexts, and basic structural management are available; complete hierarchy closure, tree filtering, and large-scale faceted projections are in development."
 ---
 
-## What it makes possible
+## Core purpose
 
-Tag turns the underlying model into something readers can understand and communities can maintain. Shared, queryable tagging infrastructure for REZICS products.
+Terms such as “light novel,” “isekai,” “women's fiction,” or “completed” help readers describe taste, but are not work identities. A tag is a localizable, reusable Unit that can be used across books, Posts, collections, Realms, and Zones.
 
-## Who uses it
+## Four contexts of use
 
-Readers use it to recognize the same work; communities use it to preserve context; editors use it to prevent duplication and fragmentation.
+1. **Global community votes** collect platform-wide judgments about a tag's applicability.
+1. **Realm-context votes** let a particular community express its own classification view.
+1. **Realm policy tags** are maintained directly by community governance for rules and curation.
+1. **Personal tags** serve only a user's own organization and do not claim public fact.
 
-## A concrete journey
+## What is available now
 
-- Shared, queryable tagging infrastructure for REZICS products.
-- Tag connects only the capabilities explicitly listed in the registry.
+1. Create multilingual tag identities and descriptions.
+1. Add, vote for, or withdraw tag judgments on works and content.
+1. Switch between global and Realm classification context.
+1. Create tag structures and manage membership relationships.
+1. Share vocabulary across work pages, search, Realms, and curation surfaces.
 
-## How it works
+## In development
 
-1. Create or select a stable Tag record.
-2. Complete the core task in the product’s own interface.
-3. At publication, connected History and API capabilities continue the workflow.
+Hierarchy reads currently follow accepted adjacent relationships. Search, feeds, and tree filtering need versioned hierarchy-reachability projections for consistent ancestor/descendant semantics at scale; each request must not perform unbounded recursive queries.
 
-## How it connects
+## Relationships and boundaries
 
-Tag does not stand alone. It shares identity, context, or workflow with Work · Post · Collection · Realm · Zone.
-
-## Clear boundaries
-
-- Internal protocols remain in related product pages and developer documentation.
-- Navigation grouping does not change domain relationships.
+Tags are not folders, permission boundaries, series, or work identities. Facts expressible through an entity, series, release, or Realm relationship should not be reduced to an ambiguous tag.

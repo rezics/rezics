@@ -1,36 +1,37 @@
 ---
 productId: api-oauth
 locale: de
-title: "API & OAuth"
-summary: "Berechtigte API-, OAuth- und MCP-Schnittstellen für REZICS."
-description: "Berechtigte API-, OAuth- und MCP-Schnittstellen für REZICS."
+title: "API, OAuth und MCP"
+summary: "Externe Werkzeuge innerhalb klarer Berechtigungen, Kontingente und überprüfbarer Bereiche mit dem Werknetz verbinden und zugleich verfügbare von noch geplanten Protokollen unterscheiden."
+description: "REZICS verfügt bereits über eine typisierte API, einen OpenAPI-Vertrag und API-Tokens; die OAuth-Autorisierung und MCP-Produktintegrationen befinden sich dagegen noch in Entwicklung."
+statusNote: "API, OpenAPI, Zugriffsrichtlinien, API-Token-Authentifizierung und Kontingente sind umgesetzt; OAuth-Anwendungsautorisierung und eine offizielle MCP-Anbindung sind noch nicht als vollständige Produkte verfügbar."
 ---
 
-## Was es ermöglicht
+## Kernpositionierung
 
-API & OAuth macht das Grundmodell für Lesende verständlich und für Communities dauerhaft pflegbar. Berechtigte API-, OAuth- und MCP-Schnittstellen für REZICS.
+Eine offene Anbindung bedeutet nicht, alle Daten an Dritte weiterzugeben. Jede Anwendung muss genau wissen, was sie lesen und schreiben darf, für wen sie handelt, welchen Kontingenten sie unterliegt und wie sie sich nach einem Fehler wiederherstellt.
 
-## Wer es nutzt
+Die Serverrouten und typisierten Strukturdefinitionen von REZICS sind die einzige handgeschriebene Vertragsquelle; daraus werden OpenAPI, typisierte Clients und Dokumentation erzeugt. Authentifizierung und Berechtigungen werden durch typisierte Zugriffsrichtlinien auf dem Server durchgesetzt und hängen nicht davon ab, ob die Oberfläche Schaltflächen ausblendet.
 
-Entwicklungsteams und Community-Werkzeuge verbinden sich mit klaren Rechten mit REZICS, ohne ein zweites Identitätssystem zu schaffen.
+## Bereits verfügbar
 
-## Ein konkreter Weg
+1. Über die öffentliche API auf Werke, Inhalte, Bereiche, Fortschritt und andere freigegebene Fähigkeiten zugreifen.
+1. Aus Serverrouten und typisierten Strukturdefinitionen konsistente OpenAPI-Dokumentation erzeugen.
+1. Anfragen mit einer Sitzung oder einem API-Token mit klar abgegrenzten Berechtigungen authentifizieren.
+1. Kontingente, Fehlerantworten und serverseitige Zugriffsrichtlinien auf unterschiedliche Vorgänge anwenden.
+1. Den erzeugten typisierten Client und das Paket `@rezics/api` verwenden.
+1. Für komplexe Arbeitsabläufe wie Inhaltsstrukturen konkurrierende Tokens, Anfragelimits und wiederherstellbare Semantik beibehalten.
 
-- Berechtigte API-, OAuth- und MCP-Schnittstellen für REZICS.
-- API & OAuth nutzt nur ausdrücklich registrierte Fähigkeiten.
+## Ausrichtung für OAuth und MCP
 
-## Wie es funktioniert
+OAuth soll es Nutzenden ermöglichen, Drittanbieteranwendungen zu autorisieren, ohne Passwörter oder langfristige persönliche Tokens preiszugeben. MCP kann AI-Werkzeuge dabei unterstützen, Bücher zu ergänzen, Metadaten zu aktualisieren oder Arbeitsabläufe innerhalb eines für Nutzende verständlichen und widerrufbaren Bereichs auszuführen.
 
-1. Stabilen API & OAuth-Datensatz wählen.
-2. Kernaufgabe in der eigenen Oberfläche erledigen.
-3. Nach Veröffentlichung schließen History und API an.
+Das langfristige Ziel ist, dass auch Menschen ohne API-Kenntnisse über kontrollierte Werkzeuge am Aufbau von Werkdaten teilnehmen können. Drittanbieteranwendungen für OAuth, Einwilligungsbildschirme, Callback-URLs, Sicherheitsprüfungen und ein offizieller MCP-Server sind jedoch noch nicht vollständig umgesetzt; der Fähigkeitsstatus lautet daher „In Entwicklung“.
 
-## Wie es verbunden ist
+## Große Inhaltsarbeitsabläufe
 
-API & OAuth steht nicht allein, sondern teilt Identität, Kontext oder Abläufe mit Token · Inhaltsstruktur · Editor · Feed · Entität.
+Am Beispiel der Inhaltsstruktur eines Buches: Eine einzelne Anfrage ist auf 10.000 kompilierte logische Änderungen begrenzt, nicht jedoch die Gesamtzahl der Knoten eines ganzen Buches. Der Import großer Webromane muss in Batches erfolgen, Prüfpunkte speichern sowie abgelaufene Revisionen und ungewisse Ergebnisse verarbeiten; Hunderttausende Knoten dürfen nicht in eine unbegrenzte Transaktion gepackt werden.
 
-## Klare Grenzen
+## Beziehungen und Grenzen
 
-- API & OAuth behauptet keine unbelegten Fähigkeiten.
-- Interne Protokolle bleiben in Produkt- und Entwicklerdokumentation.
-- Navigation ändert keine Domänenbeziehung.
+OpenAPI beschreibt den Übertragungsvertrag, nicht automatisch jede mehrstufige Aufgabe. Die API umgeht keine Produktberechtigungen; MCP erhält keine zusätzlichen Berechtigungen, nur weil es von AI aufgerufen wird. Bei jeder Grenze zwischen Netzwerk, Speicherung oder Cache müssen Daten und Berechtigungen der betrachtenden Person erneut validiert werden.

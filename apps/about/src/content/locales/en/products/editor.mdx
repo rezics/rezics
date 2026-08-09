@@ -1,35 +1,40 @@
 ---
 productId: editor
 locale: en
-title: "Editor"
-summary: "A consistent but extensible editing workflow shared by different content types."
-description: "A consistent but extensible editing workflow shared by different content types."
+title: "Portable Text Editor"
+summary: "Create verifiable, referable, evolvable content with structured rich text while preserving a future one-to-one conversion path with REZICS Markdown."
+description: "The editor serves Posts, wikis, reviews, replies, and content structures. It owns input experience and validation, not product identity or publication history."
+statusNote: "Portable Text rich-text editing, formatting tools, links, spoilers, images, Unit mentions, and slash-command entry points are implemented; bidirectional CodeMirror 6/Markdown editing remains in development."
 ---
 
-## What it makes possible
+## Core purpose
 
-Editor turns the underlying model into something readers can understand and communities can maintain. A consistent but extensible editing workflow shared by different content types.
+REZICS does not treat rich text as opaque display markup. The editor directly manipulates Portable Text structures, so paragraphs, headings, lists, marks, links, images, Unit mentions, and custom blocks can be validated, transformed, and safely rendered.
 
-## Who uses it
+The editor wraps its output in a Block Schema Portable Text document with `_type`, `_key`, and document-version semantics. Saving and reading revalidate it; compile-time types alone are not trusted.
 
-Authors and editors use it to compose and publish change; readers receive a coherent and traceable result.
+## What is available now
 
-## A concrete journey
+1. Edit paragraphs, headings, quotes, bullet lists, and numbered lists.
+1. Apply bold, italic, link, and spoiler marks and annotations.
+1. Insert and validate images and other supported blocks.
+1. Use Unit mentions to put works, people, and other identities in a body rather than only their display text.
+1. Search for and insert structured content through slash commands and mention entry points.
+1. Restrict capabilities by product so reviews, replies, and wikis use only lawful content shapes.
+1. Normalize external input and explicitly degrade unsupported marks and invalid URLs.
 
-- A consistent but extensible editing workflow shared by different content types.
-- Editor connects only the capabilities explicitly listed in the registry.
+## What Portable Text provides
 
-## How it works
+Portable Text separates presentation from meaning: link targets, spoiler marks, Unit-mention IDs, and image resources have verifiable shapes. Renderers can select appropriate presentation for feed previews, article detail, and other surfaces without rewriting the source.
 
-1. Create or select a stable Editor record.
-2. Complete the core task in the product’s own interface.
-3. At publication, connected History and API capabilities continue the workflow.
+The same content can support language-aware word count, reading time, and content metrics, while block identity enables future paragraph comments and finer history.
 
-## How it connects
+## CodeMirror 6 and REZICS Markdown
 
-Editor does not stand alone. It shares identity, context, or workflow with Post · Book · Content Structure · History · API & OAuth.
+The long-term direction uses CodeMirror 6 for general text/code editing while maintaining a one-to-one semantic relationship between the custom Portable Text schema and REZICS Markdown. The aim is reliable round-tripping—not a one-off export—so people can freely switch between rich and plain-text editing.
 
-## Clear boundaries
+This is still in development. The available feature is the Portable Text rich-text editor, not a finished bidirectional Markdown workflow.
 
-- Internal protocols remain in related product pages and developer documentation.
-- Navigation grouping does not change domain relationships.
+## Relationships and boundaries
+
+The editor is not the content model and does not write every keystroke into formal history. Products such as Posts decide fields and permissions, Block Schema validates documents, and the publication boundary lets History create traceable revisions.

@@ -1,37 +1,37 @@
 ---
 productId: zone
 locale: en
-title: "Zone"
-summary: "A community space composed from queries, configuration, and block protocols."
-description: "A community space composed from queries, configuration, and block protocols."
+title: "Zones & Docks"
+summary: "Compose custom surfaces from Block Schema, search conditions, and navigation for web-novel libraries, light-novel libraries, work wikis, and personalized discovery."
+description: "A Zone does not directly own content: trusted filters and block documents determine what it shows. A Dock places reusable blocks at designated positions in Realms and Units."
+statusNote: "Zone identity, search conditions, navigation structure, wiki Zones, and Realm/Unit Dock foundations are implemented; full theming and self-service composition remain in development."
 ---
 
-## What it makes possible
+## Core purpose
 
-Zone turns the underlying model into something readers can understand and communities can maintain. A community space composed from queries, configuration, and block protocols.
+A Zone organizes a content surface around user needs. Unlike a Realm, content usually appears because it matches search and filters, not because the Zone owns it or holds a fixed membership relationship.
 
-## Who uses it
+Docks are common sidebar or auxiliary-block surfaces for Units. Realm tabs, books, media, software, and other detail pages can insert controlled blocks at designated positions while retaining their official product sections.
 
-Individuals preserve their own reading context while communities curate, discuss, and extend shared knowledge.
+## Block Schema is the shared foundation
 
-## A concrete journey
+Zone pages, navigation, and Docks use block documents with `_type`, `_key`, and version semantics. Portable Text, full Post views, Unit lists, feeds, menus, and search templates each have closed schemas, parsing rules, permissions, and failure states; arbitrary JSON never executes in a client.
 
-- Compose headers, feeds, curated lists, and other blocks through Block Schema.
-- Use queries and configuration to decide what appears without transferring ownership.
-- Track published configuration through a Zone-specific History adapter.
+## Products they can serve
 
-## How it works
+1. **Catalogue Zones** for book, web-novel, published-book, light-novel, comics, film, or software libraries.
+1. **Work wikis** organized by menus, wiki Posts, and search blocks across works and books.
+1. **Personalized discovery** from trusted search templates for popular, recommended, or tag combinations.
+1. **Special subjects** such as large series, game modules, or cross-media worlds, without copying shared content into every Zone.
 
-1. Select blocks and configure each query or reference.
-2. Verify feed cards and work results in the product preview.
-3. Publish the configuration as a traceable Zone version.
+## Foundations available now
 
-## How it connects
+Zone identity, search conditions, navigation content structure, wiki Zone routes and administration, and Realm/Unit Dock reading, editing, and rendering exist. Blocks revalidate owner, viewer, visibility, and referenced targets.
 
-Zone does not stand alone. It shares identity, context, or workflow with Realm · Feed · Collection · Tag · History.
+## In development
 
-## Clear boundaries
+Full themes, self-service composition, more blocks, reusable cross-owner block Units, mobile Dock placement, and large search projections remain in development. Low-frequency blocks require controlled lazy loading so no page pays for every component.
 
-- Zone is a query-and-configuration space, not a content ownership container.
-- Block Schema and Zone Atom remain internal protocols.
-- Feed owns content streams; carousel behavior belongs to a Dock-like surface.
+## Relationships and boundaries
+
+A Zone is not a Realm, tag, collection, or fixed page. It composes queries and presentation while content identity and ownership remain on the source Unit. A block document becomes a Unit only when independent authorship, publication, visibility, or cross-owner reuse genuinely requires it.

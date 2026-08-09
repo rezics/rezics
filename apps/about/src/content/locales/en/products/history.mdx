@@ -1,37 +1,35 @@
 ---
 productId: history
 locale: en
-title: "History"
-summary: "Published-version history, diffs, and locks scoped to fields or blocks."
-description: "Published-version history, diffs, and locks scoped to fields or blocks."
+title: "Publication History"
+summary: "Preserve published revisions, differences, and restoration context for Unit fields, Portable Text blocks, and content structures as each product requires."
+description: "History creates versions only at formal publication boundaries; different products can choose the history granularity that suits them instead of being forced into one whole-record snapshot."
+statusNote: "Revision lists, comparison, publication, and restoration by creating a new revision are available for Units, Posts, and content structures; version discussion continues to expand."
 ---
 
-## What it makes possible
+## Core purpose
 
-History turns the underlying model into something readers can understand and communities can maintain. Published-version history, diffs, and locks scoped to fields or blocks.
+Book metadata, Post bodies, and chapter tables of contents are not the same kind of data, and they do not need the same history strategy. REZICS lets each product define the scope that truly needs tracking, then creates revisions on formal publication.
 
-## Who uses it
+Drafts can be saved and validated repeatedly. History records published versions, not every keystroke or content that has not yet taken effect.
 
-Authors and editors use it to compose and publish change; readers receive a coherent and traceable result.
+## What is available now
 
-## A concrete journey
+1. List a Unit's published revisions and current version.
+1. View Post content history and management pages.
+1. Preserve revisions for books, media, collections, and other content structures.
+1. Compare node additions, moves, changes, and removals between two structure versions.
+1. Restore a past state by creating a new revision, without overwriting existing history.
+1. Use optimistic-concurrency tokens to prevent a stale draft from silently overwriting a newer version.
 
-- Choose a Book field, Post block, or Zone configuration to inspect its own history scope.
-- Compare field- or block-level differences between published versions.
-- Inspect lock state and scope before returning to the consuming product.
+## Why history granularity differs
 
-## How it works
+A Portable Text article is suited to comparison by block identity. A large chapter tree needs comparison by stable node ID and position. General Unit fields may track only specific governable attributes. A shared history protocol handles revision identity and publication boundaries; product projections interpret the differences.
 
-1. A product adapter defines the field or block scope.
-2. Only publication creates a formal version; draft operations remain outside formal History.
-3. Versions, diffs, and locks appear within Book, Post, and Zone interfaces.
+## In development
 
-## How it connects
+Dedicated discussion spaces for each revision, discussion Posts created from history, finer field/block locking, and cross-language version descriptions continue to expand. Until they are formally available, capability documentation will not claim support for arbitrary automatic merges or complete draft time travel.
 
-History does not stand alone. It shares identity, context, or workflow with Book · Post · Zone · Content Structure · Editor.
+## Relationships and boundaries
 
-## Clear boundaries
-
-- History is an independent core capability, not part of Editor.
-- Products are not forced into a universal whole-object snapshot.
-- This page does not claim automatic merge, fixed lock expiry, forced takeover, or arbitrary restore.
+History does not belong to the editor, and it is not an audit record. The editor manages the current draft; History preserves published content versions; platform audit records security and governance actions. Restoration must also create a new revision: a past version must not overwrite later history.

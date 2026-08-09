@@ -1,35 +1,36 @@
 ---
 productId: picture
 locale: en
-title: "Picture"
-summary: "A Post(kind=PICTURE) containing one or more ordered images."
-description: "A Post(kind=PICTURE) containing one or more ordered images."
+title: "Picture Posts"
+summary: "Use one or more ordered images as the subject of a publication while retaining title, description, source, attribution, and work relationships."
+description: "A picture post is a kind of Post, not an image-file category. It provides an image-first publication protocol for illustration, photography, screenshots, and short comics."
+statusNote: "The picture-post domain model and content boundaries are established, and basic Post/media capabilities can be reused; complete creation flows and image-first detail interfaces remain in development."
 ---
 
-## What it makes possible
+## Core purpose
 
-Picture turns the underlying model into something readers can understand and communities can maintain. A Post(kind=PICTURE) containing one or more ordered images.
+A picture post represents a publication whose primary content is one or more ordered images. Ordinary articles can also insert images, but picture-post-specific validation, list previews, detail layouts, and pagination behavior are needed only when the image sequence itself constitutes the work.
 
-## Who uses it
+A picture post remains both a Post and a Unit. It can therefore directly reuse titles, multilingual descriptions, authors, time, tags, replies, collections, licenses, sources, and Realm publication context.
 
-Readers, creators, and community editors use this surface to read, organize, and discuss concrete content.
+## Established content rules
 
-## A concrete journey
+1. Include at least one image; single-image and multi-image posts use the same model.
+1. Multiple images have a stable order specified by the author.
+1. Each image can have an asset reference, alt text, and an optional description.
+1. The first image can serve as the default list preview, without rushing to add an independent cover.
+1. Semantics such as illustration, photography, comics, or screenshots are described by tags rather than adding more Post types.
 
-- A Post(kind=PICTURE) containing one or more ordered images.
-- Picture connects only the capabilities explicitly listed in the registry.
+## Boundaries with other content
 
-## How it works
+An article with images remains an ordinary Post. A review containing many screenshots remains a review. A comic chapter is first a chapter in a book's Content Structure. Use a picture post only when there is no stronger product role and the image sequence is the subject of the publication.
 
-1. Create or select a stable Picture record.
-2. Complete the core task in the product’s own interface.
-3. At publication, connected History and API capabilities continue the workflow.
+A multipage illustration can be one picture post. An art book or comic with an overall title, table of contents, and reading order is a book. A group of image works collected by a user is a collection.
 
-## How it connects
+## In development
 
-Picture does not stand alone. It shares identity, context, or workflow with Post · Wiki · Review · Entity · Tag.
+Image-sequence editing, upload validation, alt-text workflows, image-first content-feed cards, detail views, and multipage reading still need to be completed. The capability map therefore marks picture posts as “In development” rather than claiming availability from a complete data design alone.
 
-## Clear boundaries
+## Relationships and boundaries
 
-- Internal protocols remain in related product pages and developer documentation.
-- Navigation grouping does not change domain relationships.
+Underlying image assets are not Units; they preserve files, dimensions, and formats. A picture post is the publication identity that can be collected, reviewed, tagged, and connected to external sources, so parallel image or gallery Units are not created.

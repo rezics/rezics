@@ -1,37 +1,34 @@
 ---
 productId: gamebook
 locale: de
-title: "Gamebook"
-summary: "Eine verzweigte Leseform, wenn Book GameContentStructure verwendet."
-description: "Eine verzweigte Leseform, wenn Book GameContentStructure verwendet."
+title: "Spielbücher"
+summary: "Die gewöhnliche Inhaltsstruktur eines Buches um Einstiege, Entscheidungen, Verzweigungen, Zusammenführungen und Enden erweitern und zugleich die Wege bewahren, die Lesende tatsächlich gegangen sind."
+description: "Ein Spielbuch ist ein interaktives Leseprodukt, das entsteht, wenn ein Buch GameContentStructure verwendet; seine Architektur ist bereits entworfen, eine formelle Produktoberfläche gibt es jedoch noch nicht."
+statusNote: "GameContentStructure, Optionen und Reisen sind architektonisch entworfen; Datenmodell, Werkzeuge für Autorinnen und Autoren sowie die Leseoberfläche sind noch nicht als formelle Fähigkeiten umgesetzt."
 ---
 
-## Was es ermöglicht
+## Kernpositionierung
 
-Gamebook macht das Grundmodell für Lesende verständlich und für Communities dauerhaft pflegbar. Eine verzweigte Leseform, wenn Book GameContentStructure verwendet.
+Ein Spielbuch ist keine Visual-Novel-Engine, sondern ein digitales Modell eines traditionellen interaktiven Romans: Lesende lesen ein Kapitel, wählen an dessen Ende eine Option und gelangen dann zu einem anderen Kapitel. Mehrere Wege können zusammenlaufen und zu unterschiedlichen Enden führen.
 
-## Wer es nutzt
+Die allgemeine Inhaltsstruktur bleibt für Kapitelinhalt und Bearbeitungsreihenfolge zuständig; GameContentStructure legt darüber einen spielbaren gerichteten Graphen; die Reise zeichnet den unveränderlichen Weg auf, den jede lesende Person tatsächlich genommen hat.
 
-Lesende, Schaffende und Community-Redaktionen lesen, ordnen und besprechen hier konkrete Inhalte.
+## Festgelegtes Design
 
-## Ein konkreter Weg
+1. Die stabile Auftretensidentität von Inhaltsstrukturknoten als Graphknoten verwenden, statt mit wiederverwendbaren Kapitel-IDs direkt zu navigieren.
+1. Jede Option ist eine stabile gerichtete Kante; Quelle und Ziel werden nicht an Ort und Stelle umgeschrieben.
+1. Ein Reiseschritt bewahrt tatsächliche Wahl, Zeitpunkt und erreichten Knoten, während die Reise auf das Ende des aktuellen Wegs verweist.
+1. Mehrere Reisen können Präfixe teilen, ohne die gesamte Geschichte zu duplizieren.
+1. Inhaltsaktualisierungen mit stabilen IDs, Ausmusterungsaufzeichnungen und lokaler Invalidierung behandeln, statt für das gesamte Buch zusätzliche Versions-IDs zu erfinden.
 
-- Von Entrance über Passage und Choice zum Ending lesen.
-- Stabile IDs, Ruhestand und DAG prüfen.
-- JourneyStep hält den gewählten Pfad fest.
+## Produktgrenze der ersten Phase
 
-## Wie es funktioniert
+Die erste Phase behandelt nur azyklische Kapitelgraphen, Optionen, Verzweigungen, Zusammenführungen und Enden. Variablen, Bedingungen, Skripte, Kämpfe, Ressourcenverwaltung und eine Ausführungsumgebung für Visual Novels gehören nicht dazu. Wenn diese Fähigkeiten künftig entstehen, müssen sie durch neue, eigene Felder und Produktregeln begründet sein, statt aus dem Spielbuch eine universelle Spiele-Engine zu machen.
 
-1. GameContentStructure für Book aktivieren.
-2. Verzweigungen konfigurieren und validieren.
-3. Auswahl in JourneyStep erfassen.
+## Noch nicht umgesetzt
 
-## Wie es verbunden ist
+Ein grafischer Editor für Autorinnen und Autoren, Pfadvalidierung vor der Veröffentlichung, Optionsstatistiken, Verwaltung von Reiseverzweigungen, Navigation für Lesende und Kompatibilität der Geschichte befinden sich noch in Planung. Die Fähigkeitskarte kennzeichnet Spielbücher deshalb als „Geplant“, statt ein vollständiges Designdokument als bereits nutzbares Produkt auszugeben.
 
-Gamebook steht nicht allein, sondern teilt Identität, Kontext oder Abläufe mit Buch · Inhaltsstruktur · Fortschritt · Verlauf.
+## Beziehungen und Grenzen
 
-## Klare Grenzen
-
-- Das Elternprodukt ist immer Book.
-- Keine Variablen, Skripte, Kämpfe oder Schleifen.
-- Progress speichert keine Journey.
+Spielbücher sind kein neuer Einheitstyp, sondern weiterhin Bücher. Der gewöhnliche Lesefortschritt kann Lesestatus und Statistiken speichern, übernimmt jedoch nicht die interaktive Navigation; der tatsächliche Weg muss im Reisemodell bewahrt werden.

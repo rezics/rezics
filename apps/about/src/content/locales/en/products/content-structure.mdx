@@ -1,37 +1,60 @@
 ---
 productId: content-structure
 locale: en
-title: "Content Structure"
-summary: "Manages placement, order, reuse, and optional game structure across content carriers."
-description: "Manages placement, order, reuse, and optional game structure across content carriers."
+title: "Block Schema & Content Structure"
+summary: "Express content with evolvable block documents, then use stable nodes to manage chapter order, occurrence, reuse, and published revisions."
+description: "Block Schema is the shared document foundation for REZICS content surfaces; Content Structure organizes Units instead of mixing content and a table of contents into one JSON document."
+statusNote: "Block Schema, Portable Text documents, book/media content structures, revision history, and complete draft storage are implemented; more blocks and large-import workflows are in development."
 ---
 
-## What it makes possible
+## Two foundations that work together
 
-Content Structure turns the underlying model into something readers can understand and communities can maintain. Manages placement, order, reuse, and optional game structure across content carriers.
+REZICS models what content is separately from where it appears.
 
-## Who uses it
+- **Block Schema** defines the typed blocks in a renderable document and how each retains stable identity, versioning, and validation rules.
+- **Content Structure** defines content occurrence, parent/child relationships, order, destinations, and published revisions.
 
-Authors and editors use it to compose and publish change; readers receive a coherent and traceable result.
+The separation lets a chapter or Post be reused in several places without copying its body, while every occurrence has its own node ID, order, and navigation meaning.
 
-## A concrete journey
+## Block Schema: not raw JSON
 
-- ContentStructure uses an ordered tree for placement, order, and reuse.
-- GameContentStructure adds Entrance, Passage, Ending, Choice, retirement, layout, and DAG validation.
-- The first public adapter is the confirmed Book integration.
+Nearly every saved JSON document needs an identifiable base object rather than an arbitrary Portable Text array put directly in a field. The most basic Portable Text document has these semantics:
 
-## How it works
+```ts
+{
+  _type: "portable-text",
+  _key: "6-byte / 12-character hexadecimal key",
+  content: PortableText,
+}
+```
 
-1. Create occurrences in Tree mode; a Node is not the same thing as a Post.
-2. Switch to Game mode when branching is needed, still layered over the ordinary structure.
-3. Validate the resulting Book directory or GameBook reader experience.
+`_type` selects the parsing and rendering protocol; `_key` preserves block identity during revisions, paragraph comments, and structural operations; document versions set clear migration boundaries. Format validation is followed by reference, permission, and visibility checks: an identifier's shape alone never proves its target is readable.
 
-## How it connects
+## Implemented block families
 
-Content Structure does not stand alone. It shares identity, context, or workflow with Book · GameBook · Post · Editor · History.
+The shared Block Schema currently represents Portable Text, Unit references, full Post views, Unit lists, search-driven feeds, menus, and other controlled content surfaces. Every variant belongs to a closed union, so an unknown block never silently passes a renderer.
 
-## Clear boundaries
+Zones, Docks, wiki navigation, and future reusable documents build on this foundation. A block document becomes an independent Unit only when cross-owner reuse, independent authorship, publication history, or visibility proves the need.
 
-- Content Structure has no carrier parent and is not GameBook’s parent.
-- Editor, History, and API have distinct responsibilities.
-- Media and Series adapters are not advertised until their current documents confirm them.
+## What Content Structure can do now
+
+1. Build typed structures for books, media, Posts, Realm classification, and navigation.
+1. Preserve large ordered trees with stable node IDs, parent nodes, and fractional positions.
+1. Let nodes reference reusable content Units and distinguish content, Unit destinations, and external URLs.
+1. Edit complete book/media drafts, then compile bounded changes into atomic requests.
+1. Preserve revisions, compare differences, and restore an older state by creating a new revision.
+1. Project structures into a table of contents, previous/next chapter navigation, and reading-progress positions.
+
+## Large serials and imports
+
+One structural change compiles to at most 10,000 logical commands. That caps an atomic change, not a book's total node count. A large web novel can write a complete tree through recoverable batches, each carrying committed nodes and a bounded set of new nodes; a successful batch returns the revision token needed by the next one.
+
+Works with more than 10,000 chapters therefore need neither an unbounded transaction nor weaker conflict detection. An import can resume after interruption and validate the complete snapshot at the end.
+
+## In development and planned
+
+More block variants, cross-owner block Units, strong-reference indexes, paragraph comments, complete large-import workflows, and GameContentStructure are in development or planned. Every block must define saving, publishing, reading, deletion, caching, and failure states.
+
+## Relationships and boundaries
+
+Block Schema is not an editor, and Content Structure is not the body text. The editor produces validated documents; Posts and chapters own content; Content Structure places it; History preserves published revisions.
