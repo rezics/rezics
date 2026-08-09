@@ -202,6 +202,24 @@ export const verbatimTerms = {
 		category: "format",
 		rationale: "Data format name.",
 	},
+	portableText: {
+		value: "Portable Text",
+		category: "format",
+		rationale: "Structured rich-text specification name used by the REZICS editor.",
+		scope: "about",
+	},
+	markdown: {
+		value: "Markdown",
+		category: "format",
+		rationale: "Plain-text markup format name.",
+		scope: "about",
+	},
+	codeMirror6: {
+		value: "CodeMirror 6",
+		category: "brand",
+		rationale: "Editor framework name used in the documented editing roadmap.",
+		scope: "about",
+	},
 	jsonLd: {
 		value: "JSON-LD",
 		category: "format",

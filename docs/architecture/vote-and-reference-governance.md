@@ -80,6 +80,12 @@ mutation. Each cursor also binds a SHA-256 fingerprint of every active ranking
 tuple; a concurrent vote that changes ordering invalidates the next page rather
 than allowing a duplicate or omission.
 
+This is one of the exceptional cross-row limits described by
+[Data integrity and workload budgets](./data-integrity-and-workload-budgets.md):
+it protects a shared, fully ranked public representation rather than masking an
+unbounded corpus query. API page maxima remain workload budgets and are not
+database constraints.
+
 ## Workload assumptions
 
 The capacity baseline applies independently to every corpus-scale reference,
@@ -211,7 +217,8 @@ client version `1.8.0`.
 3. Deploy the new API and frontend together. Old binaries are incompatible
    with the new response shape, pagination, and withdrawal endpoint.
 4. Verify reference-limit conflicts, cursor invalidation, aggregate parity,
-   search exclusion after Alias withdrawal, lock waits, and replica lag.
+   search exclusion after Alias withdrawal, destination-capacity enforcement
+   when a row's `unit_id` changes, lock waits, and replica lag.
 5. Resume writes. Rollback requires the previous binary and a database restore;
    the public contract and withdrawn-reference lifecycle do not have a mixed-
    version compatibility alias.

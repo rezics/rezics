@@ -1,5 +1,4 @@
 import { and, eq } from "drizzle-orm";
-import { PortableTextDocument, parseNullableDocument } from "@rezics/block";
 import type { ContentLanguage } from "@rezics/i18n";
 import type { AvatarReference } from "@rezics/avatar";
 
@@ -13,6 +12,7 @@ import { profile as profileTable, unit, unitLocalization } from "../../database/
 import { presentAvatar } from "../../units/avatar";
 import { presentImageAsset } from "../../units/service";
 import { getPublicCanonicalUnitSlugAddress } from "../../units/slug-address";
+import { presentNullablePortableTextDocument } from "../../documents/portable-text-presentation";
 import { ProfileNotFound } from "./errors";
 
 export function publicProfileSelection(localizationLanguages: readonly ContentLanguage[] = []) {
@@ -77,7 +77,10 @@ export async function presentProfile<
 		slugAddress: await getPublicCanonicalUnitSlugAddress(profile.id),
 		status: profile.status.toLowerCase(),
 		visibility: profile.visibility.toLowerCase(),
-		description: parseNullableDocument(PortableTextDocument, profile.description),
+		description: presentNullablePortableTextDocument(
+			profile.description,
+			"unit_localization.description",
+		),
 		avatar: presentAvatar(avatar),
 		banner: presentImageAsset(bannerAssetId, "banner"),
 	};

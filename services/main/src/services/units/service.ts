@@ -1,11 +1,7 @@
 import { DevelopmentPreviewCapability } from "@rezics/access";
 import { and, desc, eq, exists, isNull, lt, not, or, sql } from "drizzle-orm";
 import type { AvatarReference } from "@rezics/avatar";
-import {
-	PortableTextDocument,
-	parseNullableDocument,
-	type PortableTextDocument as PortableTextDocumentValue,
-} from "@rezics/block";
+import type { PortableTextDocument as PortableTextDocumentValue } from "@rezics/block";
 import type { Static } from "elysia";
 import type { ContentLanguage } from "@rezics/i18n";
 import {
@@ -72,6 +68,7 @@ import { ensureImageAssetsAttachable, imageAssetContentUrl } from "../api/image-
 import { UnitDetailResponse } from "../api/schema/response";
 import { CreditAttributionRoleInvalid } from "../entities/errors";
 import { fractionalPositionBetween } from "../ordering/position";
+import { presentNullablePortableTextDocument } from "../documents/portable-text-presentation";
 import {
 	UnitChanged,
 	UnitContentLicenseGrantForbidden,
@@ -188,7 +185,10 @@ export function presentUnitLocalization({
 }: StoredUnitLocalization) {
 	return {
 		...row,
-		description: parseNullableDocument(PortableTextDocument, description),
+		description: presentNullablePortableTextDocument(
+			description,
+			"unit_localization.description",
+		),
 		avatar: presentAvatar(
 			avatarReferenceFromColumns({
 				avatarType,

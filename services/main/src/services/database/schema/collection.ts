@@ -2,7 +2,12 @@ import { sql } from "drizzle-orm";
 import { check, index, primaryKey, unique, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { createCreatedAtColumn, createUpdatedAtColumn, fractionalIndexPosition } from "./columns";
+import {
+	createCreatedAtColumn,
+	createFractionalIndexPositionByteLengthConstraint,
+	createUpdatedAtColumn,
+	fractionalIndexPosition,
+} from "./columns";
 import { profile } from "./profile";
 import { unit } from "./unit";
 
@@ -71,5 +76,9 @@ export const collectionItem = pgTable(
 		index("collection_item_unit_idx").on(table.unitId, table.collectionId),
 		index("collection_item_added_by_idx").on(table.addedByProfileId),
 		check("collection_item_not_self_check", sql`${table.collectionId} <> ${table.unitId}`),
+		createFractionalIndexPositionByteLengthConstraint(
+			"collection_item_position_byte_length_check",
+			table.position,
+		),
 	],
 );

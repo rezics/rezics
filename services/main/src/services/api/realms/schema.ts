@@ -20,6 +20,7 @@ import {
 import {
 	DateTime,
 	FractionalPosition,
+	FractionalPositionInput,
 	ContentLanguage,
 	LocalizationLanguagePriority,
 	LocalizationLanguageQuery,
@@ -339,7 +340,7 @@ export const RealmTagVoteBody = t.Object(
 export type RealmTagVoteBody = Static<typeof RealmTagVoteBody>;
 
 export const ApplyRealmPolicyTagBody = t.Object(
-	{ position: t.Optional(FractionalPosition) },
+	{ position: t.Optional(FractionalPositionInput) },
 	{ additionalProperties: false },
 );
 export type ApplyRealmPolicyTagBody = Static<typeof ApplyRealmPolicyTagBody>;

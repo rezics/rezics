@@ -4,6 +4,7 @@ import { check, foreignKey, index, integer, primaryKey, unique, uuid } from "dri
 import { pgTable } from "./base";
 import {
 	createCreatedAtColumn,
+	createFractionalIndexPositionByteLengthConstraint,
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
 	fractionalIndexPosition,
@@ -74,6 +75,10 @@ export const postScore = pgTable(
 		primaryKey({ columns: [table.postId, table.scoreId] }),
 		unique("post_score_post_position_key").on(table.postId, table.position),
 		index("post_score_score_idx").on(table.scoreId, table.postId),
+		createFractionalIndexPositionByteLengthConstraint(
+			"post_score_position_byte_length_check",
+			table.position,
+		),
 	],
 );
 

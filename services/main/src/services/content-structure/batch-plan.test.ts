@@ -2,6 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import { ContentStructureSnapshotSchema, type ContentStructureNodeState } from "./contracts";
 import { planContentStructureBatch, type ContentStructureBatchCommand } from "./batch-plan";
+import {
+	compareFractionalPositions,
+	fractionalPositionBetween,
+	fractionalPositionNeedsRebalance,
+} from "../ordering/position";
 
 const StructureId = "019b1234-1234-7000-8000-000000000001";
 const OwnerId = "019b1234-1234-7000-8000-000000000002";
@@ -56,6 +61,13 @@ function snapshot() {
 			node({ id: SecondNodeId, contentUnitId: SecondContentId, position: "a1" }),
 		],
 	});
+}
+
+function pathologicalPosition(): string {
+	let position = "a0";
+	while (!fractionalPositionNeedsRebalance(position))
+		position = fractionalPositionBetween(position, "a1");
+	return position;
 }
 
 describe("Content Structure batch planner", () => {
@@ -161,5 +173,36 @@ describe("Content Structure batch planner", () => {
 				})),
 			),
 		).toThrow(/10000 commands/);
+	});
+
+	it("compacts only the degraded sibling group without changing its order", () => {
+		const before = ContentStructureSnapshotSchema.parse({
+			...snapshot(),
+			nodes: [
+				node({
+					id: FirstNodeId,
+					contentUnitId: FirstContentId,
+					position: pathologicalPosition(),
+				}),
+				node({ id: SecondNodeId, contentUnitId: SecondContentId, position: "a1" }),
+			],
+		});
+
+		const plan = planContentStructureBatch(before, [
+			{
+				opId: "unchanged",
+				type: "node.update",
+				nodeId: FirstNodeId,
+				contentUnitId: FirstContentId,
+			},
+		]);
+		const orderedIds = [...plan.after.nodes]
+			.sort((left, right) => compareFractionalPositions(left.position, right.position))
+			.map(({ id }) => id);
+
+		expect(orderedIds).toEqual([FirstNodeId, SecondNodeId]);
+		expect(
+			plan.after.nodes.every(({ position }) => !fractionalPositionNeedsRebalance(position)),
+		).toBe(true);
 	});
 });

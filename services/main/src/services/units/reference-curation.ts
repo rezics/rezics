@@ -66,6 +66,16 @@ async function lockCurationHead(
 	return head;
 }
 
+/** Uses the same key as the database trigger for every collection mutation. */
+async function lockUnitReferenceCollection(
+	tx: DatabaseTransaction,
+	input: { readonly unitId: string; readonly kind: UnitReferenceCurationKind },
+): Promise<void> {
+	await tx.execute(
+		sql`select pg_advisory_xact_lock(hashtextextended(${`unit-reference:${input.kind}:${input.unitId}`}, 0))`,
+	);
+}
+
 async function advanceCurationHead(
 	tx: DatabaseTransaction,
 	input: {
@@ -119,9 +129,7 @@ export async function ensureUnitReferenceCanBeCreated(
 	tx: DatabaseTransaction,
 	input: { readonly unitId: string; readonly kind: UnitReferenceCurationKind },
 ): Promise<void> {
-	await tx.execute(
-		sql`select pg_advisory_xact_lock(hashtextextended(${`unit-reference:${input.kind}:${input.unitId}`}, 0))`,
-	);
+	await lockUnitReferenceCollection(tx, input);
 	const active =
 		input.kind === "alias"
 			? await tx
@@ -183,6 +191,7 @@ export async function updateUnitAliasCuration(input: {
 	readonly state: UnitReferenceCurationState;
 }) {
 	return database.transaction(async (tx) => {
+		await lockUnitReferenceCollection(tx, { unitId: input.unitId, kind: "alias" });
 		const head = await lockCurationHead(tx, input.unitId, "alias", input.baseVersion);
 		const [current] = await tx
 			.select()
@@ -234,6 +243,10 @@ export async function updateUnitExternalLinkCuration(input: {
 	readonly state: UnitReferenceCurationState;
 }) {
 	return database.transaction(async (tx) => {
+		await lockUnitReferenceCollection(tx, {
+			unitId: input.unitId,
+			kind: "external_link",
+		});
 		const head = await lockCurationHead(tx, input.unitId, "external_link", input.baseVersion);
 		const [current] = await tx
 			.select()
@@ -314,6 +327,7 @@ export async function withdrawUnitAlias(input: {
 	readonly baseVersion: number;
 }): Promise<void> {
 	await database.transaction(async (tx) => {
+		await lockUnitReferenceCollection(tx, { unitId: input.unitId, kind: "alias" });
 		const head = await lockCurationHead(tx, input.unitId, "alias", input.baseVersion);
 		const [current] = await tx
 			.select()
@@ -355,6 +369,10 @@ export async function withdrawUnitExternalLink(input: {
 	readonly baseVersion: number;
 }): Promise<void> {
 	await database.transaction(async (tx) => {
+		await lockUnitReferenceCollection(tx, {
+			unitId: input.unitId,
+			kind: "external_link",
+		});
 		const head = await lockCurationHead(tx, input.unitId, "external_link", input.baseVersion);
 		const [current] = await tx
 			.select()

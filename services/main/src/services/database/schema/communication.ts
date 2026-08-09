@@ -168,6 +168,7 @@ export const emailOutbox = pgTable(
 						)
 						and nullif(btrim(${table.recipientEmail}), '') is not null
 						and nullif(btrim(${table.actionUrl}), '') is not null
+						and ${table.locale} is not null
 						and ${inArray(table.locale, DeliveryLocaleValues)}
 					) or (
 						${table.status} in (

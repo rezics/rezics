@@ -28,6 +28,7 @@ import {
 } from "./contract-values";
 import {
 	createCreatedAtColumn,
+	createFractionalIndexPositionByteLengthConstraint,
 	createTimestampMsColumn,
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
@@ -263,5 +264,9 @@ export const postProgressEntry = pgTable(
 		unique("post_progress_entry_progress_entry_key").on(table.progressEntryId),
 		unique("post_progress_entry_post_position_key").on(table.postId, table.position),
 		index("post_progress_entry_progress_entry_idx").on(table.progressEntryId),
+		createFractionalIndexPositionByteLengthConstraint(
+			"post_progress_entry_position_byte_length_check",
+			table.position,
+		),
 	],
 );

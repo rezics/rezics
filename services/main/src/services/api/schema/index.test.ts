@@ -5,19 +5,30 @@ import { describe, expect, it } from "vitest";
 import {
 	DisplayPosition,
 	FractionalPosition,
+	FractionalPositionInput,
 	ContentLanguage,
 	LocalizationLanguagePriority,
 	OrdinalPosition,
 } from ".";
+import {
+	FractionalPositionInputMaximumBytes,
+	fractionalPositionBetween,
+} from "../../ordering/position";
 
 describe("position schemas", () => {
 	it("keep fractional, ordinal, and display position contracts distinct", () => {
 		const fractional = TypeCompiler.Compile(FractionalPosition);
+		const fractionalInput = TypeCompiler.Compile(FractionalPositionInput);
 		const ordinal = TypeCompiler.Compile(OrdinalPosition);
 		const display = TypeCompiler.Compile(DisplayPosition);
 
 		expect(fractional.Check("a0V")).toBe(true);
 		expect(fractional.Check("V")).toBe(false);
+		let longPosition = "a0";
+		while (longPosition.length <= FractionalPositionInputMaximumBytes)
+			longPosition = fractionalPositionBetween(longPosition, "a1");
+		expect(fractional.Check(longPosition)).toBe(true);
+		expect(fractionalInput.Check(longPosition)).toBe(false);
 		expect(ordinal.Check(1_000)).toBe(true);
 		expect(ordinal.Check(-1)).toBe(false);
 		expect(display.Check(999)).toBe(true);

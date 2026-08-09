@@ -99,6 +99,9 @@ export class ObservabilityMetrics {
 	readonly #searchAuthoritativeRejections: Histogram;
 	readonly #searchBudgetHits: Counter;
 	readonly #searchLowerBoundTotals: Counter;
+	readonly #persistedDocumentRepairs: Counter;
+	readonly #fractionalPositionRebalances: Counter;
+	readonly #fractionalPositionRebalanceMembers: Histogram;
 	#workerHeartbeatAt: number | undefined;
 	#activeWorkerJobStartedAt: number | undefined;
 	#databasePoolState: (() => DatabasePoolState) | undefined;
@@ -148,6 +151,16 @@ export class ObservabilityMetrics {
 		this.#searchLowerBoundTotals = meter.createCounter("rezics.search.lower_bound_totals", {
 			unit: "{query}",
 		});
+		this.#persistedDocumentRepairs = meter.createCounter("rezics.persisted_document.repairs", {
+			unit: "{document}",
+		});
+		this.#fractionalPositionRebalances = meter.createCounter("rezics.ordering.rebalances", {
+			unit: "{rebalance}",
+		});
+		this.#fractionalPositionRebalanceMembers = meter.createHistogram(
+			"rezics.ordering.rebalance.members",
+			{ unit: "{member}" },
+		);
 
 		meter
 			.createObservableGauge("rezics.runtime.memory.rss", { unit: "By" })
@@ -311,5 +324,21 @@ export class ObservabilityMetrics {
 			this.#searchBudgetHits.add(1, attributes);
 			this.#searchLowerBoundTotals.add(1, attributes);
 		}
+	}
+
+	persistedDocumentRepaired(source: string): void {
+		this.#persistedDocumentRepairs.add(1, {
+			"document.source": normalizeOperationName(source),
+		});
+	}
+
+	fractionalPositionRebalanced(owner: string, members: number): void {
+		if (!Number.isSafeInteger(members) || members <= 0)
+			throw new Error(
+				"Fractional-position rebalance members must be a positive safe integer",
+			);
+		const attributes = { "ordering.owner": normalizeOperationName(owner) };
+		this.#fractionalPositionRebalances.add(1, attributes);
+		this.#fractionalPositionRebalanceMembers.record(members, attributes);
 	}
 }

@@ -11,7 +11,7 @@ import {
 } from "../../database/schema/contract-values";
 import {
 	DateTime,
-	FractionalPosition,
+	FractionalPositionInput,
 	ContentLanguage,
 	LocalizationLanguageQuery,
 	LocalizationInput,
@@ -81,7 +81,7 @@ export type TagLocalizationParams = Static<typeof TagLocalizationParams>;
 export const AddUnitCreditBody = t.Object({
 	creditedUnitId: Uuid,
 	role: t.UnionEnum(CreditAttributionRoleValues),
-	position: t.Optional(FractionalPosition),
+	position: t.Optional(FractionalPositionInput),
 });
 export type AddUnitCreditBody = Static<typeof AddUnitCreditBody>;
 
@@ -90,7 +90,7 @@ export const AddUnitSubjectAssociationBody = t.Object(
 		entityId: Uuid,
 		contextPostId: t.Optional(Uuid),
 		role: t.UnionEnum(SubjectAssociationRoleValues),
-		position: t.Optional(FractionalPosition),
+		position: t.Optional(FractionalPositionInput),
 	},
 	{ additionalProperties: false },
 );
@@ -173,7 +173,7 @@ export const UpdateUnitTagCurationBody = t.Union([
 	t.Object(
 		{
 			pinned: t.Literal(true),
-			position: FractionalPosition,
+			position: FractionalPositionInput,
 			updatedAt: DateTime,
 			expectedFeaturedTagIds: t.Array(Uuid),
 		},
@@ -224,7 +224,7 @@ export const UpdateUnitReferenceCurationBody = t.Union([
 		{
 			baseVersion: t.Integer({ minimum: 0 }),
 			pinned: t.Literal(true),
-			position: FractionalPosition,
+			position: FractionalPositionInput,
 		},
 		{ additionalProperties: false },
 	),

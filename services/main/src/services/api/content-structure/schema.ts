@@ -1,7 +1,12 @@
 import { type Static, t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
 
-import { FractionalPosition, ContentLanguage, LocalizationLanguageQuery, Uuid } from "../schema";
+import {
+	ContentLanguage,
+	FractionalPositionInput,
+	LocalizationLanguageQuery,
+	Uuid,
+} from "../schema";
 import {
 	ContentRatingValues,
 	RealmTagQueryStrategyValues,
@@ -70,7 +75,7 @@ export const CreateGenericContentStructureNodeBody = t.Object(
 		content: t.Union([ExistingContentUnit, InlineLabelContent]),
 		documentKey: t.Optional(t.String({ pattern: "^[0-9a-f]{12}$" })),
 		target: t.Optional(ContentStructureTarget),
-		position: t.Optional(FractionalPosition),
+		position: t.Optional(FractionalPositionInput),
 		contentRating: t.Optional(t.UnionEnum(ContentRatingValues)),
 		realmTagQueryStrategy: t.Optional(t.UnionEnum(RealmTagQueryStrategyValues)),
 	},
@@ -84,7 +89,7 @@ export const UpdateGenericContentStructureNodeBody = t.Object(
 		contentUnitId: t.Optional(Uuid),
 		documentKey: t.Optional(t.Nullable(t.String({ pattern: "^[0-9a-f]{12}$" }))),
 		target: t.Optional(ContentStructureTarget),
-		position: t.Optional(FractionalPosition),
+		position: t.Optional(FractionalPositionInput),
 		contentRating: t.Optional(t.Nullable(t.UnionEnum(ContentRatingValues))),
 		realmTagQueryStrategy: t.Optional(t.UnionEnum(RealmTagQueryStrategyValues)),
 	},

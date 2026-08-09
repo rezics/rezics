@@ -1,4 +1,9 @@
-import { compareFractionalPositions, fractionalPositionBetween } from "../ordering/position";
+import {
+	compareFractionalPositions,
+	fractionalPositionBetween,
+	rebalanceFractionalPositionSequence,
+} from "../ordering/position";
+import { peekActiveObservability } from "@rezics/observability";
 import { RevisionedBatchCommandLimit } from "../history/revisioned-batch";
 import {
 	ContentStructureSnapshotSchema,
@@ -109,6 +114,32 @@ function orderedSiblings(nodes: ReadonlyMap<string, ContentStructureNodeState>) 
 	return siblings;
 }
 
+function rebalanceDenseSiblingPositions(
+	nodes: Map<string, ContentStructureNodeState>,
+	siblings: ReadonlyMap<string | null, readonly string[]>,
+	rebalancedNodeIds: Set<string>,
+): void {
+	for (const ids of siblings.values()) {
+		const plan = rebalanceFractionalPositionSequence(
+			ids.map((id) => {
+				const node = nodes.get(id);
+				if (!node)
+					throw new Error("Content Structure sibling order references a missing node");
+				return node.position;
+			}),
+		);
+		for (const index of plan.changedIndexes) {
+			const id = ids[index];
+			const node = id ? nodes.get(id) : undefined;
+			const position = plan.positions[index];
+			if (!id || !node || !position)
+				throw new Error("Content Structure sibling rebalance lost a node");
+			nodes.set(id, { ...node, position });
+			rebalancedNodeIds.add(id);
+		}
+	}
+}
+
 function insertAtPlacement(
 	command: ContentStructureBatchCommand,
 	nodes: ReadonlyMap<string, ContentStructureNodeState>,
@@ -203,6 +234,8 @@ export function planContentStructureBatch(
 	const reservedNodeIds = new Set(originalById.keys());
 	const nodes = new Map(before.nodes.map((node) => [node.id, { ...node }] as const));
 	const siblings = orderedSiblings(nodes);
+	const rebalancedNodeIds = new Set<string>();
+	rebalanceDenseSiblingPositions(nodes, siblings, rebalancedNodeIds);
 	let structure = { ...before.structure };
 
 	for (const command of commands) {
@@ -362,6 +395,12 @@ export function planContentStructureBatch(
 				break;
 		}
 	}
+	rebalanceDenseSiblingPositions(nodes, siblings, rebalancedNodeIds);
+	if (rebalancedNodeIds.size)
+		peekActiveObservability()?.metrics.fractionalPositionRebalanced(
+			"content-structure",
+			rebalancedNodeIds.size,
+		);
 
 	for (const [id, node] of nodes) {
 		const original = originalById.get(id);

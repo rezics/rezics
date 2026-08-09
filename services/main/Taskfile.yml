@@ -138,6 +138,12 @@ tasks:
         cmds:
             - yarn exec atlas migrate validate --dir file://src/services/database/migrations
 
+    db:constraints:
+        desc: Show or validate one staged integrity constraint.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - yarn exec tsx scripts/validate-integrity-constraints.ts {{.CLI_ARGS}}
+
     db:check:
         desc: Replay migrations and verify that they match the Drizzle schema.
         cmds:
@@ -147,6 +153,9 @@ tasks:
             - >-
                 yarn exec atlas migrate apply --env main
                 --url "postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?search_path=public&sslmode=disable"
+            - >-
+                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
+                yarn exec tsx scripts/validate-integrity-constraints.ts validate-disposable
             - >-
                 DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
                 yarn exec tsx scripts/search-index.ts check

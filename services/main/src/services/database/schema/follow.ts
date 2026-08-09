@@ -2,7 +2,12 @@ import { sql } from "drizzle-orm";
 import { boolean, check, index, primaryKey, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { createCreatedAtColumn, createUpdatedAtColumn, fractionalIndexPosition } from "./columns";
+import {
+	createCreatedAtColumn,
+	createFractionalIndexPositionByteLengthConstraint,
+	createUpdatedAtColumn,
+	fractionalIndexPosition,
+} from "./columns";
 import { profile } from "./profile";
 import { unit } from "./unit";
 
@@ -44,5 +49,9 @@ export const unitFollow = pgTable(
 			table.followerProfileId,
 		),
 		check("unit_follow_not_self_check", sql`${table.followerProfileId} <> ${table.unitId}`),
+		createFractionalIndexPositionByteLengthConstraint(
+			"unit_follow_position_byte_length_check",
+			table.position,
+		),
 	],
 );

@@ -28,6 +28,7 @@ import {
 } from "./contract-values";
 import {
 	createCreatedAtColumn,
+	createFractionalIndexPositionByteLengthConstraint,
 	fractionalIndexPosition,
 	ordinalPosition,
 	createTimestampMsColumn,
@@ -248,6 +249,10 @@ export const realmPin = pgTable(
 		index("realm_pin_unit_idx").on(table.unitId),
 		index("realm_pin_created_by_idx").on(table.createdByProfileId),
 		check("realm_pin_not_self_check", sql`${table.realmId} <> ${table.unitId}`),
+		createFractionalIndexPositionByteLengthConstraint(
+			"realm_pin_position_byte_length_check",
+			table.position,
+		),
 	],
 );
 

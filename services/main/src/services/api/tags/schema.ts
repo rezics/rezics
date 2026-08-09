@@ -6,6 +6,7 @@ import {
 	DateTime,
 	DateTimeString,
 	FractionalPosition,
+	FractionalPositionInput,
 	Uuid,
 } from "../schema";
 import { WorkUnitType } from "../units/schema";
@@ -141,7 +142,7 @@ export const RealmTagSubscriptionParams = t.Object({ realmId: Uuid });
 export type RealmTagSubscriptionParams = Static<typeof RealmTagSubscriptionParams>;
 
 export const UpsertRealmTagSubscriptionBody = t.Object(
-	{ position: t.Optional(FractionalPosition) },
+	{ position: t.Optional(FractionalPositionInput) },
 	{ additionalProperties: false },
 );
 export type UpsertRealmTagSubscriptionBody = Static<typeof UpsertRealmTagSubscriptionBody>;

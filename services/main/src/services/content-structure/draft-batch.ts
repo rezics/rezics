@@ -1,5 +1,10 @@
 import { RevisionedBatchCommandLimit } from "../history/revisioned-batch";
-import { compareBytewisePositions, fractionalPositionsBetween } from "../ordering/position";
+import { peekActiveObservability } from "@rezics/observability";
+import {
+	compareBytewisePositions,
+	fractionalPositionsBetween,
+	rebalanceFractionalPositionSequence,
+} from "../ordering/position";
 import { ContentStructureInvalid } from "./errors";
 
 type CurrentDraftMember = {
@@ -57,6 +62,7 @@ export function planDraftSiblingPositions(input: {
 		desiredByParent.set(node.parentId, siblings);
 	}
 	const positions = new Map<string, string>();
+	const rebalancedIds = new Set<string>();
 	for (const [parentId, desiredSiblings] of desiredByParent) {
 		desiredSiblings.sort((left, right) => left.order - right.order);
 		const desiredIds = new Set(desiredSiblings.map(({ id }) => id));
@@ -67,6 +73,18 @@ export function planDraftSiblingPositions(input: {
 					compareBytewisePositions(left.position, right.position) ||
 					left.id.localeCompare(right.id),
 			);
+		const currentRebalance = rebalanceFractionalPositionSequence(
+			currentSiblings.map(({ position }) => position),
+		);
+		for (const index of currentRebalance.changedIndexes) {
+			const member = currentSiblings[index];
+			const position = currentRebalance.positions[index];
+			if (!member || !position) throw new Error("Draft sibling rebalance lost a member");
+			const compacted = { ...member, position };
+			currentSiblings[index] = compacted;
+			currentById.set(member.id, compacted);
+			rebalancedIds.add(member.id);
+		}
 		const currentIndexById = new Map(
 			currentSiblings.map(({ id }, index) => [id, index] as const),
 		);
@@ -111,9 +129,28 @@ export function planDraftSiblingPositions(input: {
 				before = position;
 			}
 		}
+		const desiredRebalance = rebalanceFractionalPositionSequence(
+			desiredSiblings.map(({ id }) => {
+				const position = positions.get(id);
+				if (!position) throw new Error("Draft sibling plan lost a desired position");
+				return position;
+			}),
+		);
+		for (const memberIndex of desiredRebalance.changedIndexes) {
+			const member = desiredSiblings[memberIndex];
+			const position = desiredRebalance.positions[memberIndex];
+			if (!member || !position) throw new Error("Draft sibling rebalance lost a member");
+			positions.set(member.id, position);
+			rebalancedIds.add(member.id);
+		}
 	}
 	if (positions.size !== input.desiredNodes.length)
 		throw new Error("Draft sibling planning did not position every desired member");
+	if (rebalancedIds.size)
+		peekActiveObservability()?.metrics.fractionalPositionRebalanced(
+			"content-structure-draft",
+			rebalancedIds.size,
+		);
 	return positions;
 }
 

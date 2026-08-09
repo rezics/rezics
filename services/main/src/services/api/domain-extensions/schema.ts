@@ -13,6 +13,7 @@ import { t } from "elysia";
 import {
 	DateTime,
 	FractionalPosition,
+	FractionalPositionInput,
 	ContentLanguage,
 	LocalizationLanguageQuery,
 	LocalizationInput,
@@ -59,7 +60,7 @@ export const SeriesReleaseListQuery = t.Object(LocalizationLanguageQuery, {
 export const SeriesReleaseParams = t.Object({ seriesId: Uuid, releaseId: Uuid });
 export const UpsertSeriesReleaseBody = t.Object(
 	{
-		position: FractionalPosition,
+		position: FractionalPositionInput,
 		releasedOn: t.Optional(t.Nullable(t.String({ format: "date" }))),
 	},
 	{ additionalProperties: false },
@@ -149,7 +150,7 @@ export const ZonePageBody = t.Object(
 );
 export const ZonePagePlacementBody = t.Object(
 	{
-		position: t.Optional(FractionalPosition),
+		position: t.Optional(FractionalPositionInput),
 		parentPageId: t.Optional(t.Nullable(Uuid)),
 		baseStructureRevisionId: t.Optional(Uuid),
 	},

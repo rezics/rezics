@@ -87,12 +87,14 @@ export const unitOwnershipClaim = pgTable(
 				and ${table.resolvedByProfileId} is null
 				and ${table.resultingOwnershipId} is null
 			) or (
-				${table.resolution} = 'approved'
+				${table.resolution} is not null
+				and ${table.resolution} = 'approved'
 				and ${table.resolvedAt} is not null
 				and ${table.resolvedByProfileId} is not null
 				and ${table.resultingOwnershipId} is not null
 			) or (
-				${table.resolution} in ('rejected', 'withdrawn', 'superseded')
+				${table.resolution} is not null
+				and ${table.resolution} in ('rejected', 'withdrawn', 'superseded')
 				and ${table.resolvedAt} is not null
 				and ${table.resolvedByProfileId} is not null
 				and ${table.resultingOwnershipId} is null

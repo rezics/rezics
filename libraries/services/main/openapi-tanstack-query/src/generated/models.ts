@@ -10317,7 +10317,7 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 					 * @description
 					 * Format: `fractional-position`
 					 * @minLength 2
-					 * @maxLength 512
+					 * @maxLength 1024
 					 * @type string
 					 */
 					position: string;
@@ -10771,7 +10771,7 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 								 * @description
 								 * Format: `fractional-position`
 								 * @minLength 2
-								 * @maxLength 512
+								 * @maxLength 1024
 								 * @type string
 								 */
 								position: string;
@@ -10988,7 +10988,7 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 					 * @description
 					 * Format: `fractional-position`
 					 * @minLength 2
-					 * @maxLength 512
+					 * @maxLength 1024
 					 * @type string
 					 */
 					position: string;
@@ -11442,7 +11442,7 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 								 * @description
 								 * Format: `fractional-position`
 								 * @minLength 2
-								 * @maxLength 512
+								 * @maxLength 1024
 								 * @type string
 								 */
 								position: string;
@@ -11677,7 +11677,7 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 					 * @description
 					 * Format: `fractional-position`
 					 * @minLength 2
-					 * @maxLength 512
+					 * @maxLength 1024
 					 * @type string
 					 */
 					position: string;
@@ -12131,7 +12131,7 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 								 * @description
 								 * Format: `fractional-position`
 								 * @minLength 2
-								 * @maxLength 512
+								 * @maxLength 1024
 								 * @type string
 								 */
 								position: string;
@@ -21289,7 +21289,7 @@ export type PostApiFeedQueryStatus200 = {
 					 * @description
 					 * Format: `fractional-position`
 					 * @minLength 2
-					 * @maxLength 512
+					 * @maxLength 1024
 					 * @type string
 					 */
 					position: string;
@@ -21773,7 +21773,7 @@ export type PostApiFeedQueryStatus200 = {
 							 * @description
 							 * Format: `fractional-position`
 							 * @minLength 2
-							 * @maxLength 512
+							 * @maxLength 1024
 							 * @type string
 							 */
 							position: string;
@@ -22227,7 +22227,7 @@ export type PostApiFeedQueryStatus200 = {
 										 * @description
 										 * Format: `fractional-position`
 										 * @minLength 2
-										 * @maxLength 512
+										 * @maxLength 1024
 										 * @type string
 										 */
 										position: string;
@@ -22444,7 +22444,7 @@ export type PostApiFeedQueryStatus200 = {
 							 * @description
 							 * Format: `fractional-position`
 							 * @minLength 2
-							 * @maxLength 512
+							 * @maxLength 1024
 							 * @type string
 							 */
 							position: string;
@@ -22898,7 +22898,7 @@ export type PostApiFeedQueryStatus200 = {
 										 * @description
 										 * Format: `fractional-position`
 										 * @minLength 2
-										 * @maxLength 512
+										 * @maxLength 1024
 										 * @type string
 										 */
 										position: string;
@@ -23133,7 +23133,7 @@ export type PostApiFeedQueryStatus200 = {
 							 * @description
 							 * Format: `fractional-position`
 							 * @minLength 2
-							 * @maxLength 512
+							 * @maxLength 1024
 							 * @type string
 							 */
 							position: string;
@@ -23587,7 +23587,7 @@ export type PostApiFeedQueryStatus200 = {
 										 * @description
 										 * Format: `fractional-position`
 										 * @minLength 2
-										 * @maxLength 512
+										 * @maxLength 1024
 										 * @type string
 										 */
 										position: string;
@@ -35269,7 +35269,7 @@ export type GetApiSeriesBySeriesIdReleasesStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -37296,7 +37296,7 @@ export type GetZoneRenderProjectionStatus200 = {
 							 * @description
 							 * Format: `fractional-position`
 							 * @minLength 2
-							 * @maxLength 512
+							 * @maxLength 1024
 							 * @type string
 							 */
 							position: string;
@@ -37833,7 +37833,7 @@ export type GetApiZonesByZoneIdPagesStatus200 = {
 					 * @description
 					 * Format: `fractional-position`
 					 * @minLength 2
-					 * @maxLength 512
+					 * @maxLength 1024
 					 * @type string
 					 */
 					position: string;
@@ -38070,7 +38070,7 @@ export type PostApiZonesByZoneIdPagesStatus200 = {
 				 * @description
 				 * Format: `fractional-position`
 				 * @minLength 2
-				 * @maxLength 512
+				 * @maxLength 1024
 				 * @type string
 				 */
 				position: string;
@@ -38496,7 +38496,7 @@ export type GetApiZonesByZoneIdPagesByPageIdStatus200 = {
 				 * @description
 				 * Format: `fractional-position`
 				 * @minLength 2
-				 * @maxLength 512
+				 * @maxLength 1024
 				 * @type string
 				 */
 				position: string;
@@ -38730,7 +38730,7 @@ export type PutApiZonesByZoneIdPagesByPageIdStatus200 = {
 				 * @description
 				 * Format: `fractional-position`
 				 * @minLength 2
-				 * @maxLength 512
+				 * @maxLength 1024
 				 * @type string
 				 */
 				position: string;
@@ -39156,7 +39156,7 @@ export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus200 = {
 				 * @description
 				 * Format: `fractional-position`
 				 * @minLength 2
-				 * @maxLength 512
+				 * @maxLength 1024
 				 * @type string
 				 */
 				position: string;
@@ -40664,7 +40664,7 @@ export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus200 = {
 	 * @description
 	 * Format: `fractional-position`
 	 * @minLength 2
-	 * @maxLength 512
+	 * @maxLength 1024
 	 * @type string
 	 */
 	position: string;
@@ -43981,7 +43981,7 @@ export type GetApiUsersMeStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -47243,7 +47243,7 @@ export type GetApiUsersMeFollowingStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -47423,7 +47423,7 @@ export type GetApiUsersMeFollowingByUnitIdStatus200 =
 			 * @description
 			 * Format: `fractional-position`
 			 * @minLength 2
-			 * @maxLength 512
+			 * @maxLength 1024
 			 * @type string
 			 */
 			position: string;
@@ -47453,7 +47453,7 @@ export type GetApiUsersMeFollowingByUnitIdStatus200 =
 			 * @description
 			 * Format: `fractional-position`
 			 * @minLength 2
-			 * @maxLength 512
+			 * @maxLength 1024
 			 * @type string
 			 */
 			position: string;
@@ -47900,7 +47900,7 @@ export type PatchApiUsersMeFollowingByUnitIdStatus200 = {
 	 * @description
 	 * Format: `fractional-position`
 	 * @minLength 2
-	 * @maxLength 512
+	 * @maxLength 1024
 	 * @type string
 	 */
 	position: string;
@@ -48097,7 +48097,7 @@ export type PutApiUsersMeFollowingByUnitIdSettingsStatus200 =
 			 * @description
 			 * Format: `fractional-position`
 			 * @minLength 2
-			 * @maxLength 512
+			 * @maxLength 1024
 			 * @type string
 			 */
 			position: string;
@@ -48127,7 +48127,7 @@ export type PutApiUsersMeFollowingByUnitIdSettingsStatus200 =
 			 * @description
 			 * Format: `fractional-position`
 			 * @minLength 2
-			 * @maxLength 512
+			 * @maxLength 1024
 			 * @type string
 			 */
 			position: string;
@@ -53741,7 +53741,7 @@ export type GetApiUnitsByTypeByUnitIdTagsStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -54921,7 +54921,7 @@ export type GetApiUsersMeTagRealmSubscriptionsStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -55148,7 +55148,7 @@ export type PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200 = {
 	 * @description
 	 * Format: `fractional-position`
 	 * @minLength 2
-	 * @maxLength 512
+	 * @maxLength 1024
 	 * @type string
 	 */
 	position: string;
@@ -58201,7 +58201,7 @@ export type GetApiUnitsByIdByUnitIdSeriesMembershipsStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -59361,7 +59361,7 @@ export type GetApiUnitsByTypeStatus200 = {
 			 * @description
 			 * Format: `fractional-position`
 			 * @minLength 2
-			 * @maxLength 512
+			 * @maxLength 1024
 			 * @type string
 			 */
 			position: string;
@@ -59984,7 +59984,7 @@ export type PostApiUnitsByTypeStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -60410,7 +60410,7 @@ export type PostApiUnitsByTypeStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -60675,7 +60675,7 @@ export type PostApiUnitsByTypeStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -62535,7 +62535,7 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -62961,7 +62961,7 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -63226,7 +63226,7 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -64158,7 +64158,7 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -64584,7 +64584,7 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -64849,7 +64849,7 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -66082,7 +66082,7 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -66508,7 +66508,7 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -66773,7 +66773,7 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -67889,7 +67889,7 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -68315,7 +68315,7 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -68580,7 +68580,7 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -69706,7 +69706,7 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -70132,7 +70132,7 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -70397,7 +70397,7 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -74306,7 +74306,7 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -74565,7 +74565,7 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -76134,7 +76134,7 @@ export type GetApiTagsByTagIdStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -78538,7 +78538,7 @@ export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200 = {
 	 * @description
 	 * Format: `fractional-position`
 	 * @minLength 2
-	 * @maxLength 512
+	 * @maxLength 1024
 	 * @type string
 	 */
 	position: string;
@@ -79107,7 +79107,7 @@ export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200 = {
 	 * @description
 	 * Format: `fractional-position`
 	 * @minLength 2
-	 * @maxLength 512
+	 * @maxLength 1024
 	 * @type string
 	 */
 	position: string;
@@ -82898,7 +82898,7 @@ export type GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -84309,7 +84309,7 @@ export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus200
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -84778,7 +84778,7 @@ export type PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -85404,7 +85404,7 @@ export type GetApiUnitsBookByUnitIdContentStructureNodesStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -85583,7 +85583,7 @@ export type PutApiUnitsBookByUnitIdContentStructureStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -86184,7 +86184,7 @@ export type GetApiUnitsMediaByUnitIdContentStructureNodesStatus200 =
 				 * @description
 				 * Format: `fractional-position`
 				 * @minLength 2
-				 * @maxLength 512
+				 * @maxLength 1024
 				 * @type string
 				 */
 				position: string;
@@ -86351,7 +86351,7 @@ export type PutApiUnitsMediaByUnitIdContentStructureStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -86778,7 +86778,7 @@ export type GetApiChaptersByChapterIdStatus200 = {
 	 * @description
 	 * Format: `fractional-position`
 	 * @minLength 2
-	 * @maxLength 512
+	 * @maxLength 1024
 	 * @type string
 	 */
 	position: string;
@@ -91432,7 +91432,7 @@ export type GetApiCollectionsStatus200 = {
 			 * @description
 			 * Format: `fractional-position`
 			 * @minLength 2
-			 * @maxLength 512
+			 * @maxLength 1024
 			 * @type string
 			 */
 			position: string;
@@ -91809,7 +91809,7 @@ export type PostApiCollectionsStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -92654,7 +92654,7 @@ export type GetApiCollectionsFavoritesStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -93422,7 +93422,7 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 			 * @description
 			 * Format: `fractional-position`
 			 * @minLength 2
-			 * @maxLength 512
+			 * @maxLength 1024
 			 * @type string
 			 */
 			position: string;
@@ -93467,7 +93467,7 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 						 * @description
 						 * Format: `fractional-position`
 						 * @minLength 2
-						 * @maxLength 512
+						 * @maxLength 1024
 						 * @type string
 						 */
 						position: string;
@@ -93953,7 +93953,7 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 								 * @description
 								 * Format: `fractional-position`
 								 * @minLength 2
-								 * @maxLength 512
+								 * @maxLength 1024
 								 * @type string
 								 */
 								position: string;
@@ -94407,7 +94407,7 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 											 * @description
 											 * Format: `fractional-position`
 											 * @minLength 2
-											 * @maxLength 512
+											 * @maxLength 1024
 											 * @type string
 											 */
 											position: string;
@@ -94626,7 +94626,7 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 								 * @description
 								 * Format: `fractional-position`
 								 * @minLength 2
-								 * @maxLength 512
+								 * @maxLength 1024
 								 * @type string
 								 */
 								position: string;
@@ -95080,7 +95080,7 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 											 * @description
 											 * Format: `fractional-position`
 											 * @minLength 2
-											 * @maxLength 512
+											 * @maxLength 1024
 											 * @type string
 											 */
 											position: string;
@@ -95317,7 +95317,7 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 								 * @description
 								 * Format: `fractional-position`
 								 * @minLength 2
-								 * @maxLength 512
+								 * @maxLength 1024
 								 * @type string
 								 */
 								position: string;
@@ -95771,7 +95771,7 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 											 * @description
 											 * Format: `fractional-position`
 											 * @minLength 2
-											 * @maxLength 512
+											 * @maxLength 1024
 											 * @type string
 											 */
 											position: string;
@@ -96344,7 +96344,7 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -96876,7 +96876,7 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -100339,7 +100339,7 @@ export type GetApiReviewsStatus200 = {
 			 * @description
 			 * Format: `fractional-position`
 			 * @minLength 2
-			 * @maxLength 512
+			 * @maxLength 1024
 			 * @type string
 			 */
 			position: string;
@@ -100791,7 +100791,7 @@ export type GetApiReviewsStatus200 = {
 						 * @description
 						 * Format: `fractional-position`
 						 * @minLength 2
-						 * @maxLength 512
+						 * @maxLength 1024
 						 * @type string
 						 */
 						position: string;
@@ -101729,7 +101729,7 @@ export type GetApiReviewsByReviewIdStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -104711,7 +104711,7 @@ export type GetApiPostsByPostIdScoresStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -104854,7 +104854,7 @@ export type PutApiPostsByPostIdScoresStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -105220,7 +105220,7 @@ export type GetApiPostsStatus200 = {
 			 * @description
 			 * Format: `fractional-position`
 			 * @minLength 2
-			 * @maxLength 512
+			 * @maxLength 1024
 			 * @type string
 			 */
 			position: string;
@@ -106662,7 +106662,7 @@ export type GetApiPostsByPostIdStatus200 =
 				 * @description
 				 * Format: `fractional-position`
 				 * @minLength 2
-				 * @maxLength 512
+				 * @maxLength 1024
 				 * @type string
 				 */
 				position: string;
@@ -107041,7 +107041,7 @@ export type GetApiPostsByPostIdStatus200 =
 				 * @description
 				 * Format: `fractional-position`
 				 * @minLength 2
-				 * @maxLength 512
+				 * @maxLength 1024
 				 * @type string
 				 */
 				position: string;
@@ -107420,7 +107420,7 @@ export type GetApiPostsByPostIdStatus200 =
 				 * @description
 				 * Format: `fractional-position`
 				 * @minLength 2
-				 * @maxLength 512
+				 * @maxLength 1024
 				 * @type string
 				 */
 				position: string;
@@ -107803,7 +107803,7 @@ export type GetApiPostsByPostIdStatus200 =
 				 * @description
 				 * Format: `fractional-position`
 				 * @minLength 2
-				 * @maxLength 512
+				 * @maxLength 1024
 				 * @type string
 				 */
 				position: string;
@@ -108216,7 +108216,7 @@ export type GetApiPostsByPostIdStatus200 =
 				 * @description
 				 * Format: `fractional-position`
 				 * @minLength 2
-				 * @maxLength 512
+				 * @maxLength 1024
 				 * @type string
 				 */
 				position: string;
@@ -109220,7 +109220,7 @@ export type GetApiPostsByPostIdRepliesStatus200 = {
 			 * @description
 			 * Format: `fractional-position`
 			 * @minLength 2
-			 * @maxLength 512
+			 * @maxLength 1024
 			 * @type string
 			 */
 			position: string;
@@ -109764,7 +109764,7 @@ export type PostApiPostsByPostIdRepliesStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -113034,7 +113034,7 @@ export type GetApiRealmsByRealmIdTaxonomyStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -113297,7 +113297,7 @@ export type GetApiRealmsByRealmIdTaxonomyDraftStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -113603,7 +113603,7 @@ export type PutApiRealmsByRealmIdTaxonomyDraftStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -116500,7 +116500,7 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 		 * @description
 		 * Format: `fractional-position`
 		 * @minLength 2
-		 * @maxLength 512
+		 * @maxLength 1024
 		 * @type string
 		 */
 		position: string;
@@ -116552,7 +116552,7 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 					 * @description
 					 * Format: `fractional-position`
 					 * @minLength 2
-					 * @maxLength 512
+					 * @maxLength 1024
 					 * @type string
 					 */
 					position: string;
@@ -117038,7 +117038,7 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 							 * @description
 							 * Format: `fractional-position`
 							 * @minLength 2
-							 * @maxLength 512
+							 * @maxLength 1024
 							 * @type string
 							 */
 							position: string;
@@ -117492,7 +117492,7 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 										 * @description
 										 * Format: `fractional-position`
 										 * @minLength 2
-										 * @maxLength 512
+										 * @maxLength 1024
 										 * @type string
 										 */
 										position: string;
@@ -117711,7 +117711,7 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 							 * @description
 							 * Format: `fractional-position`
 							 * @minLength 2
-							 * @maxLength 512
+							 * @maxLength 1024
 							 * @type string
 							 */
 							position: string;
@@ -118165,7 +118165,7 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 										 * @description
 										 * Format: `fractional-position`
 										 * @minLength 2
-										 * @maxLength 512
+										 * @maxLength 1024
 										 * @type string
 										 */
 										position: string;
@@ -118402,7 +118402,7 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 							 * @description
 							 * Format: `fractional-position`
 							 * @minLength 2
-							 * @maxLength 512
+							 * @maxLength 1024
 							 * @type string
 							 */
 							position: string;
@@ -118856,7 +118856,7 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 										 * @description
 										 * Format: `fractional-position`
 										 * @minLength 2
-										 * @maxLength 512
+										 * @maxLength 1024
 										 * @type string
 										 */
 										position: string;
@@ -119462,7 +119462,7 @@ export type PutApiRealmsByRealmIdPinsByUnitIdStatus200 = {
 	 * @description
 	 * Format: `fractional-position`
 	 * @minLength 2
-	 * @maxLength 512
+	 * @maxLength 1024
 	 * @type string
 	 */
 	position: string;
@@ -121383,7 +121383,7 @@ export type PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus200 = {
 	 * @description
 	 * Format: `fractional-position`
 	 * @minLength 2
-	 * @maxLength 512
+	 * @maxLength 1024
 	 * @type string
 	 */
 	position: string;
@@ -127110,7 +127110,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 					 * @description
 					 * Format: `fractional-position`
 					 * @minLength 2
-					 * @maxLength 512
+					 * @maxLength 1024
 					 * @type string
 					 */
 					position: string;
@@ -127596,7 +127596,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 							 * @description
 							 * Format: `fractional-position`
 							 * @minLength 2
-							 * @maxLength 512
+							 * @maxLength 1024
 							 * @type string
 							 */
 							position: string;
@@ -128050,7 +128050,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 										 * @description
 										 * Format: `fractional-position`
 										 * @minLength 2
-										 * @maxLength 512
+										 * @maxLength 1024
 										 * @type string
 										 */
 										position: string;
@@ -128269,7 +128269,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 							 * @description
 							 * Format: `fractional-position`
 							 * @minLength 2
-							 * @maxLength 512
+							 * @maxLength 1024
 							 * @type string
 							 */
 							position: string;
@@ -128723,7 +128723,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 										 * @description
 										 * Format: `fractional-position`
 										 * @minLength 2
-										 * @maxLength 512
+										 * @maxLength 1024
 										 * @type string
 										 */
 										position: string;
@@ -128960,7 +128960,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 							 * @description
 							 * Format: `fractional-position`
 							 * @minLength 2
-							 * @maxLength 512
+							 * @maxLength 1024
 							 * @type string
 							 */
 							position: string;
@@ -129414,7 +129414,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 										 * @description
 										 * Format: `fractional-position`
 										 * @minLength 2
-										 * @maxLength 512
+										 * @maxLength 1024
 										 * @type string
 										 */
 										position: string;
@@ -132930,7 +132930,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 					 * @description
 					 * Format: `fractional-position`
 					 * @minLength 2
-					 * @maxLength 512
+					 * @maxLength 1024
 					 * @type string
 					 */
 					position: string;
@@ -133416,7 +133416,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 							 * @description
 							 * Format: `fractional-position`
 							 * @minLength 2
-							 * @maxLength 512
+							 * @maxLength 1024
 							 * @type string
 							 */
 							position: string;
@@ -133870,7 +133870,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 										 * @description
 										 * Format: `fractional-position`
 										 * @minLength 2
-										 * @maxLength 512
+										 * @maxLength 1024
 										 * @type string
 										 */
 										position: string;
@@ -134089,7 +134089,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 							 * @description
 							 * Format: `fractional-position`
 							 * @minLength 2
-							 * @maxLength 512
+							 * @maxLength 1024
 							 * @type string
 							 */
 							position: string;
@@ -134543,7 +134543,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 										 * @description
 										 * Format: `fractional-position`
 										 * @minLength 2
-										 * @maxLength 512
+										 * @maxLength 1024
 										 * @type string
 										 */
 										position: string;
@@ -134780,7 +134780,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 							 * @description
 							 * Format: `fractional-position`
 							 * @minLength 2
-							 * @maxLength 512
+							 * @maxLength 1024
 							 * @type string
 							 */
 							position: string;
@@ -135234,7 +135234,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 										 * @description
 										 * Format: `fractional-position`
 										 * @minLength 2
-										 * @maxLength 512
+										 * @maxLength 1024
 										 * @type string
 										 */
 										position: string;
@@ -140149,7 +140149,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 					 * @description
 					 * Format: `fractional-position`
 					 * @minLength 2
-					 * @maxLength 512
+					 * @maxLength 1024
 					 * @type string
 					 */
 					position: string;
@@ -140635,7 +140635,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 							 * @description
 							 * Format: `fractional-position`
 							 * @minLength 2
-							 * @maxLength 512
+							 * @maxLength 1024
 							 * @type string
 							 */
 							position: string;
@@ -141089,7 +141089,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 										 * @description
 										 * Format: `fractional-position`
 										 * @minLength 2
-										 * @maxLength 512
+										 * @maxLength 1024
 										 * @type string
 										 */
 										position: string;
@@ -141308,7 +141308,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 							 * @description
 							 * Format: `fractional-position`
 							 * @minLength 2
-							 * @maxLength 512
+							 * @maxLength 1024
 							 * @type string
 							 */
 							position: string;
@@ -141762,7 +141762,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 										 * @description
 										 * Format: `fractional-position`
 										 * @minLength 2
-										 * @maxLength 512
+										 * @maxLength 1024
 										 * @type string
 										 */
 										position: string;
@@ -141999,7 +141999,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 							 * @description
 							 * Format: `fractional-position`
 							 * @minLength 2
-							 * @maxLength 512
+							 * @maxLength 1024
 							 * @type string
 							 */
 							position: string;
@@ -142453,7 +142453,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 										 * @description
 										 * Format: `fractional-position`
 										 * @minLength 2
-										 * @maxLength 512
+										 * @maxLength 1024
 										 * @type string
 										 */
 										position: string;

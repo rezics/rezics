@@ -2,7 +2,9 @@ import {
 	compareFractionalPositions,
 	fractionalPositionBetween,
 	fractionalPositionsBetween,
+	rebalanceFractionalPositionSequence,
 } from "../ordering/position";
+import { peekActiveObservability } from "@rezics/observability";
 import { RevisionedBatchCommandLimit } from "../history/revisioned-batch";
 import {
 	diffCollectionStructureSnapshots,
@@ -96,6 +98,26 @@ export function planCollectionBatch(input: {
 		input.before.items.map((item) => [item.targetUnitId, { ...item }] as const),
 	);
 	const ids = orderedIds(items);
+	const rebalancedIds = new Set<string>();
+	const rebalanceIfNeeded = () => {
+		const plan = rebalanceFractionalPositionSequence(
+			ids.map((id) => {
+				const item = items.get(id);
+				if (!item) throw new Error("Collection order references a missing item");
+				return item.position;
+			}),
+		);
+		for (const index of plan.changedIndexes) {
+			const targetId = ids[index];
+			const current = targetId ? items.get(targetId) : undefined;
+			const position = plan.positions[index];
+			if (!targetId || !current || !position)
+				throw new Error("Collection rebalance lost an item");
+			items.set(targetId, { ...current, position });
+			rebalancedIds.add(targetId);
+		}
+	};
+	rebalanceIfNeeded();
 	const results: Array<{
 		opId: string;
 		applied: true;
@@ -191,6 +213,12 @@ export function planCollectionBatch(input: {
 			}
 		}
 	}
+	rebalanceIfNeeded();
+	if (rebalancedIds.size)
+		peekActiveObservability()?.metrics.fractionalPositionRebalanced(
+			"collection",
+			rebalancedIds.size,
+		);
 
 	const after = parseCollectionStructureSnapshot({
 		version: 1,

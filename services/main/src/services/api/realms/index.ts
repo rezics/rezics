@@ -1727,7 +1727,7 @@ export default new Elysia({ prefix: "/realms" })
 					return {
 						...item,
 						title: item.title,
-						content: toPortableTextResponse(item.content),
+						content: toPortableTextResponse(item.content, "unit_localization.content"),
 					};
 				}),
 			};
@@ -2883,7 +2883,7 @@ export default new Elysia({ prefix: "/realms" })
 					latestRevisionId: note.latestRevisionId,
 					role: note.role,
 					language: note.language,
-					content: toPortableTextResponse(note.content),
+					content: toPortableTextResponse(note.content, "post.body"),
 					createdAt: note.createdAt,
 					updatedAt: note.updatedAt,
 				});

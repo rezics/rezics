@@ -2,7 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import { parseCollectionStructureSnapshot } from "./contracts";
 import { planCollectionBatch, type CollectionBatchCommand } from "./batch-plan";
-import { compareFractionalPositions } from "../ordering/position";
+import {
+	compareFractionalPositions,
+	fractionalPositionBetween,
+	fractionalPositionNeedsRebalance,
+} from "../ordering/position";
 
 const CollectionId = "019b1234-1234-7000-8000-000000000001";
 const FirstTargetId = "019b1234-1234-7000-8000-000000000002";
@@ -37,6 +41,13 @@ function order(plan: ReturnType<typeof planCollectionBatch>) {
 	return [...plan.after.items]
 		.sort((left, right) => compareFractionalPositions(left.position, right.position))
 		.map(({ targetUnitId }) => targetUnitId);
+}
+
+function pathologicalPosition(): string {
+	let position = "a0";
+	while (!fractionalPositionNeedsRebalance(position))
+		position = fractionalPositionBetween(position, "a1");
+	return position;
 }
 
 describe("Collection Structure batch planner", () => {
@@ -111,5 +122,38 @@ describe("Collection Structure batch planner", () => {
 				})),
 			}),
 		).toThrow(/10000 commands/);
+	});
+
+	it("compacts a degraded order inside the owned Collection snapshot", () => {
+		const before = parseCollectionStructureSnapshot({
+			version: 1,
+			collectionId: CollectionId,
+			items: [
+				{
+					targetUnitId: FirstTargetId,
+					position: pathologicalPosition(),
+					addedByProfileId: ActorId,
+					addedAt: AddedAt,
+				},
+				{
+					targetUnitId: SecondTargetId,
+					position: "a1",
+					addedByProfileId: ActorId,
+					addedAt: AddedAt,
+				},
+			],
+		});
+
+		const plan = planCollectionBatch({
+			before,
+			actorProfileId: ActorId,
+			reviewSubjectByTargetId: new Map(),
+			commands: [{ opId: "existing", type: "item.add", targetId: FirstTargetId }],
+		});
+
+		expect(order(plan)).toEqual([FirstTargetId, SecondTargetId]);
+		expect(
+			plan.after.items.every(({ position }) => !fractionalPositionNeedsRebalance(position)),
+		).toBe(true);
 	});
 });

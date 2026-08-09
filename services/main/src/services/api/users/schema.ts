@@ -14,7 +14,7 @@ import {
 	ContentLanguage,
 	ContentRating,
 	DateTime,
-	FractionalPosition,
+	FractionalPositionInput,
 	LocalizationLanguageQuery,
 	NonRealmUnitKind,
 	PublicationLicense,
@@ -249,7 +249,7 @@ export type FollowingListQuery = Static<typeof FollowingListQuery>;
 export const UpdateFollowingBody = t.Object(
 	{
 		favorite: t.Optional(t.Boolean()),
-		position: t.Optional(FractionalPosition),
+		position: t.Optional(FractionalPositionInput),
 	},
 	{ additionalProperties: false },
 );

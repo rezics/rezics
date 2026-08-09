@@ -1136,7 +1136,9 @@ export default new Elysia()
 				title: selected.title ?? "",
 				language: selected.language,
 				availableLanguages: localizations.map(({ language }) => language),
-				content: canPresentContent ? toPortableTextResponse(selected.content) : null,
+				content: canPresentContent
+					? toPortableTextResponse(selected.content, "unit_localization.content")
+					: null,
 				contentMetrics,
 				status: canPresentContent ? selected.contentStatus : null,
 				updatedAt: selected.updatedAt,

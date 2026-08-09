@@ -1429,7 +1429,7 @@ export async function hydrateFeedItems(
 			subjectId: row.subjectId,
 			rootPostId: row.rootPostId,
 			parentPostId: row.parentPostId,
-			body: row.body === null ? null : toPortableTextResponse(row.body),
+			body: row.body === null ? null : toPortableTextResponse(row.body, "post.body"),
 			replyCount:
 				row.postKind === "reply"
 					? (childCount.get(row.id) ?? 0)

@@ -17,7 +17,6 @@ import {
 	ZonePageBlockHostPolicy,
 	ZoneThemeDocument,
 	assertUnitReferencedBlockDocument,
-	assertWikiPostPortableTextDocument,
 	assertNavigationDocument,
 	assertResolvedBlockReferences,
 	assertResolvedNavigationReferences,
@@ -53,6 +52,7 @@ import {
 } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
 import type { DatabaseTransaction } from "../../database";
+import { presentWikiPostPortableTextDocument } from "../../documents/portable-text-presentation";
 import { recordUnitRevision } from "../../units/history";
 import {
 	createNavigationStructure,
@@ -773,9 +773,12 @@ export default new Elysia()
 							query.localizationLanguages ?? [],
 						);
 						if (!presented || !selected?.content) return [];
-						assertWikiPostPortableTextDocument(selected.content);
-						mergeBlockReferences({ blocks: [selected.content] });
-						return [{ ...presented, body: selected.content }];
+						const content = presentWikiPostPortableTextDocument(
+							selected.content,
+							"unit_localization.content",
+						);
+						mergeBlockReferences({ blocks: [content] });
+						return [{ ...presented, body: content }];
 					});
 					for (const id of wikiPostIds) unitIds.delete(id);
 					const referenceRows = await getReadableRenderLocalizationRows(

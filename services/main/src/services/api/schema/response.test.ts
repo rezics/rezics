@@ -1,5 +1,6 @@
 import { Check, Decode, Encode } from "@sinclair/typebox/value";
-import { describe, expect, it } from "vitest";
+import { getActiveObservability } from "@rezics/observability";
+import { describe, expect, it, vi } from "vitest";
 
 import { DateTime, DateTimeString } from ".";
 import {
@@ -139,7 +140,7 @@ describe("API response values", () => {
 		expect(Encode(CollectionContentResponse, response)).toEqual(response);
 	});
 
-	it("accepts proven Portable Text and rejects malformed persisted data", () => {
+	it("keeps proven Portable Text and isolates malformed persisted data", () => {
 		const value = {
 			_type: "portable-text" as const,
 			_key: "001122aabbcc",
@@ -154,14 +155,19 @@ describe("API response values", () => {
 			],
 		};
 
-		expect(toPortableTextResponse(value)).toBe(value);
-		expect(() =>
-			toPortableTextResponse({
-				_type: "portable-text",
-				_key: "not-a-block-key",
-				content: [],
-			}),
-		).toThrow("Invalid Block document");
+		expect(toPortableTextResponse(value, "post.body")).toBe(value);
+		const repaired = vi.spyOn(getActiveObservability().metrics, "persistedDocumentRepaired");
+		expect(
+			toPortableTextResponse(
+				{
+					_type: "portable-text",
+					_key: "not-a-block-key",
+					content: [null, { _type: "image", assetId: "not-a-uuid" }],
+				},
+				"post.body",
+			),
+		).toEqual({ _type: "portable-text", _key: "000000000000", content: [] });
+		expect(repaired).toHaveBeenCalledWith("post.body");
 	});
 
 	it("keeps every viewer-safe Main-Variant state explicit", () => {

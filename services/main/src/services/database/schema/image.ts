@@ -106,8 +106,11 @@ export const imageObject = pgTable(
 				and ${table.height} is null
 			) or (
 				${table.mediaType} is not null
+				and ${table.byteSize} is not null
 				and ${table.byteSize} > 0
+				and ${table.width} is not null
 				and ${table.width} > 0
+				and ${table.height} is not null
 				and ${table.height} > 0
 			)`,
 		),

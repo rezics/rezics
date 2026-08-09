@@ -21,7 +21,11 @@ import {
 	UnitStatusValues,
 	WorkReleaseStatusValues,
 } from "../../database/schema/contract-values";
-import { isFractionalPosition } from "../../ordering/position";
+import {
+	FractionalPositionInputMaximumBytes,
+	FractionalPositionStorageMaximumBytes,
+	isFractionalPosition,
+} from "../../ordering/position";
 
 FormatRegistry.Set("fractional-position", isFractionalPosition);
 FormatRegistry.Set("single-emoji-grapheme", isSingleEmojiGrapheme);
@@ -134,11 +138,18 @@ export const LocalizationImageInput = {
 	coverAssetId: t.Optional(t.Nullable(Uuid)),
 };
 
-/** A case-sensitive fractional index used by mutable ordered sequences. */
+/** A persisted case-sensitive fractional index returned by mutable ordered sequences. */
 export const FractionalPosition = t.String({
 	format: "fractional-position",
 	minLength: 2,
-	maxLength: 512,
+	maxLength: FractionalPositionStorageMaximumBytes,
+});
+
+/** External position input cannot consume the server's compaction safety margin. */
+export const FractionalPositionInput = t.String({
+	format: "fractional-position",
+	minLength: 2,
+	maxLength: FractionalPositionInputMaximumBytes,
 });
 
 /** A zero-based dense position used by sequences replaced atomically. */

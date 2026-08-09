@@ -11,7 +11,12 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { createCreatedAtColumn, createUpdatedAtColumn, fractionalIndexPosition } from "./columns";
+import {
+	createCreatedAtColumn,
+	createFractionalIndexPositionByteLengthConstraint,
+	createUpdatedAtColumn,
+	fractionalIndexPosition,
+} from "./columns";
 import { profile } from "./profile";
 import { unit } from "./unit";
 import { post } from "./post";
@@ -63,6 +68,10 @@ export const unitTag = pgTable(
 				or (not ${table.pinned} and ${table.position} is null)`,
 		),
 		check("unit_tag_not_self_check", sql`${table.unitId} <> ${table.tagId}`),
+		createFractionalIndexPositionByteLengthConstraint(
+			"unit_tag_position_byte_length_check",
+			table.position,
+		),
 	],
 );
 
@@ -96,6 +105,10 @@ export const profileRealmTagSubscription = pgTable(
 			table.realmId,
 		),
 		index("profile_realm_tag_subscription_realm_idx").on(table.realmId, table.profileId),
+		createFractionalIndexPositionByteLengthConstraint(
+			"profile_realm_tag_subscription_position_byte_length_check",
+			table.position,
+		),
 	],
 );
 
@@ -230,6 +243,10 @@ export const realmUnitTag = pgTable(
 		}).onDelete("cascade"),
 		index("realm_unit_tag_tag_idx").on(table.realmId, table.tagId, table.unitId),
 		check("realm_unit_tag_not_self_check", sql`${table.unitId} <> ${table.tagId}`),
+		createFractionalIndexPositionByteLengthConstraint(
+			"realm_unit_tag_position_byte_length_check",
+			table.position,
+		),
 	],
 );
 
@@ -256,5 +273,9 @@ export const profileUnitTag = pgTable(
 		index("profile_unit_tag_tag_idx").on(table.tagId),
 		index("profile_unit_tag_profile_tag_idx").on(table.profileId, table.tagId, table.unitId),
 		check("profile_unit_tag_not_self_check", sql`${table.unitId} <> ${table.tagId}`),
+		createFractionalIndexPositionByteLengthConstraint(
+			"profile_unit_tag_position_byte_length_check",
+			table.position,
+		),
 	],
 );

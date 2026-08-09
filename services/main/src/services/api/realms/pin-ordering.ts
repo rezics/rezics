@@ -1,4 +1,8 @@
-import { fractionalPositionsBetween } from "../../ordering/position";
+import {
+	fractionalPositionsBetween,
+	rebalanceFractionalPositionSequence,
+} from "../../ordering/position";
+import { peekActiveObservability } from "@rezics/observability";
 import type { MoveRealmPinsBody, RealmPinKind } from "./schema";
 
 export interface OrderedRealmPin {
@@ -68,8 +72,7 @@ export function planRealmPinMove(
 	const destinationPins = orderedPins.filter(
 		({ unitId, kind }) => kind === request.destinationKind && !selectedIds.has(unitId),
 	);
-	let beforePosition: string | null;
-	let afterPosition: string | null;
+	let destinationIndex: number;
 	if (request.placement.kind === "after") {
 		const anchorUnitId = request.placement.unitId;
 		const anchorIndex = destinationPins.findIndex(({ unitId }) => unitId === anchorUnitId);
@@ -79,32 +82,76 @@ export function planRealmPinMove(
 				field: "placement",
 				message: "the destination must be an unselected pin in the destination category",
 			};
-		beforePosition = destinationPins[anchorIndex]?.position ?? null;
-		afterPosition = destinationPins[anchorIndex + 1]?.position ?? null;
+		destinationIndex = anchorIndex + 1;
 	} else if (request.placement.kind === "start") {
-		beforePosition = null;
-		afterPosition = destinationPins[0]?.position ?? null;
+		destinationIndex = 0;
 	} else {
-		beforePosition = destinationPins.at(-1)?.position ?? null;
-		afterPosition = null;
+		destinationIndex = destinationPins.length;
 	}
 
+	const originalPositionById = new Map(
+		orderedPins.map(({ unitId, position }) => [unitId, position] as const),
+	);
+	const rebalancedIds = new Set<string>();
+	const destinationRebalance = rebalanceFractionalPositionSequence(
+		destinationPins.map(({ position }) => position),
+	);
+	for (const index of destinationRebalance.changedIndexes) {
+		const pin = destinationPins[index];
+		const position = destinationRebalance.positions[index];
+		if (!pin || !position) throw new Error("Realm pin rebalance lost a destination pin");
+		destinationPins[index] = { ...pin, position };
+		rebalancedIds.add(pin.unitId);
+	}
+	const beforePosition =
+		destinationIndex > 0 ? (destinationPins[destinationIndex - 1]?.position ?? null) : null;
+	const afterPosition =
+		destinationIndex < destinationPins.length
+			? (destinationPins[destinationIndex]?.position ?? null)
+			: null;
 	const positions = fractionalPositionsBetween(
 		beforePosition,
 		afterPosition,
 		selectedPins.length,
 	);
-	return {
-		ok: true,
-		positions: selectedPins.map((pin, index) => {
+	const destinationOrder = [...destinationPins];
+	destinationOrder.splice(
+		destinationIndex,
+		0,
+		...selectedPins.map((pin, index) => {
 			const position = positions[index];
 			if (!position)
 				throw new Error("Fractional position generation returned too few values");
-			return {
-				unitId: pin.unitId,
-				kind: request.destinationKind,
-				position,
-			};
+			return { ...pin, kind: request.destinationKind, position };
 		}),
+	);
+	const finalRebalance = rebalanceFractionalPositionSequence(
+		destinationOrder.map(({ position }) => position),
+	);
+	for (const index of finalRebalance.changedIndexes) {
+		const pin = destinationOrder[index];
+		const position = finalRebalance.positions[index];
+		if (!pin || !position) throw new Error("Realm pin rebalance lost a moved pin");
+		destinationOrder[index] = { ...pin, position };
+		rebalancedIds.add(pin.unitId);
+	}
+	if (rebalancedIds.size)
+		peekActiveObservability()?.metrics.fractionalPositionRebalanced(
+			"realm-pin",
+			rebalancedIds.size,
+		);
+	return {
+		ok: true,
+		positions: destinationOrder.flatMap((pin) =>
+			selectedIds.has(pin.unitId) || originalPositionById.get(pin.unitId) !== pin.position
+				? [
+						{
+							unitId: pin.unitId,
+							kind: request.destinationKind,
+							position: pin.position,
+						},
+					]
+				: [],
+		),
 	};
 }

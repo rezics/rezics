@@ -713,7 +713,9 @@ describe("database schema contracts", () => {
 		expect(display.uniqueConstraints.map((constraint) => constraint.name)).toContain(
 			"post_score_post_position_key",
 		);
-		expect(display.checks).toHaveLength(0);
+		expect(display.checks.map(({ name }) => name)).toEqual([
+			"post_score_position_byte_length_check",
+		]);
 
 		expect(getTableConfig(realmScoreContext).foreignKeys.map((key) => key.getName())).toContain(
 			"realm_score_context_post_realm_fkey",

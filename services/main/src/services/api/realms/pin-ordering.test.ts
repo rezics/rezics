@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { compareFractionalPositions, fractionalPositionAt } from "../../ordering/position";
+import {
+	compareFractionalPositions,
+	fractionalPositionAt,
+	fractionalPositionBetween,
+	fractionalPositionNeedsRebalance,
+} from "../../ordering/position";
 import { planRealmPinMove, type OrderedRealmPin } from "./pin-ordering";
 
 const pins = [
@@ -77,5 +82,27 @@ describe("Realm pin ordering", () => {
 			field: "placement",
 			message: "the destination must be an unselected pin in the destination category",
 		});
+	});
+
+	it("rebases the destination category when a pathological gap crosses the threshold", () => {
+		let longPosition = "a0";
+		while (!fractionalPositionNeedsRebalance(longPosition))
+			longPosition = fractionalPositionBetween(longPosition, "a1");
+		const planned = planRealmPinMove(
+			[
+				{ unitId: "source", kind: "pinned", position: "a0" },
+				{ unitId: "destination", kind: "highlight", position: longPosition },
+			],
+			{
+				unitIds: ["source"],
+				destinationKind: "highlight",
+				placement: { kind: "end" },
+			},
+		);
+
+		expect(planned.ok).toBe(true);
+		if (!planned.ok) throw new Error(planned.message);
+		expect(planned.positions.map(({ unitId }) => unitId)).toEqual(["destination", "source"]);
+		expect(planned.positions.every(({ position }) => position.length < 10)).toBe(true);
 	});
 });

@@ -152,6 +152,8 @@ describe("observability runtime", () => {
 		active?.metrics.readinessCheckFinished("database", "unavailable", 12, "timeout");
 		active?.metrics.readinessTransition("ready", "not_ready");
 		active?.metrics.workerHeartbeat(Date.now() - 1_000);
+		active?.metrics.persistedDocumentRepaired("unit_localization.content");
+		active?.metrics.fractionalPositionRebalanced("content-structure", 12);
 		await active?.flush();
 
 		const serialized = JSON.stringify(metricExporter.getMetrics());
@@ -160,6 +162,11 @@ describe("observability runtime", () => {
 		expect(serialized).toContain("rezics.readiness.transitions");
 		expect(serialized).toContain("rezics.worker.heartbeat.age");
 		expect(serialized).toContain("rezics.worker.job.active_age");
+		expect(serialized).toContain("rezics.persisted_document.repairs");
+		expect(serialized).toContain("unit_localization.content");
+		expect(serialized).toContain("rezics.ordering.rebalances");
+		expect(serialized).toContain("rezics.ordering.rebalance.members");
+		expect(serialized).toContain("content-structure");
 		expect(serialized).not.toContain("userId");
 	});
 

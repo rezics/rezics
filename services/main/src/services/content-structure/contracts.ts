@@ -10,7 +10,7 @@ import {
 	type PostKind,
 	type UnitKind,
 } from "../database/schema/contract-values";
-import { isFractionalPosition } from "../ordering/position";
+import { FractionalPositionStorageMaximumBytes, isFractionalPosition } from "../ordering/position";
 
 export const ContentStructureContentModel = "rezics.content-structure.v1" as const;
 export const ContentStructureCheckpointDepth = 32;
@@ -43,7 +43,10 @@ export function shouldCheckpointContentStructureRevision(input: {
 
 const UuidSchema = z.uuid();
 const DateSchema = z.coerce.date();
-const FractionalPositionSchema = z.string().refine(isFractionalPosition);
+const FractionalPositionSchema = z
+	.string()
+	.max(FractionalPositionStorageMaximumBytes)
+	.refine(isFractionalPosition);
 
 export const ContentStructureTargetSchema = z.discriminatedUnion("kind", [
 	z.object({ kind: z.literal("content") }),

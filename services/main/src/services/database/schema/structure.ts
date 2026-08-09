@@ -14,7 +14,12 @@ import {
 
 import { pgTable } from "./base";
 import { type UnitStructureKind, UnitStructureKindValues } from "./contract-values";
-import { createCreatedAtColumn, createUpdatedAtColumn, fractionalIndexPosition } from "./columns";
+import {
+	createCreatedAtColumn,
+	createFractionalIndexPositionByteLengthConstraint,
+	createUpdatedAtColumn,
+	fractionalIndexPosition,
+} from "./columns";
 import { profile } from "./profile";
 import { unit } from "./unit";
 import { tag } from "./tag";
@@ -189,6 +194,10 @@ export const unitStructureApplication = pgTable(
 		check(
 			"unit_structure_application_not_self_check",
 			sql`${table.unitId} <> ${table.structureId}`,
+		),
+		createFractionalIndexPositionByteLengthConstraint(
+			"unit_structure_application_position_byte_length_check",
+			table.position,
 		),
 	],
 );

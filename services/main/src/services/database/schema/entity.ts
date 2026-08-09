@@ -4,6 +4,7 @@ import { boolean, check, index, pgEnum, text, unique, uuid } from "drizzle-orm/p
 import { pgTable } from "./base";
 import {
 	createCreatedAtColumn,
+	createFractionalIndexPositionByteLengthConstraint,
 	createTimestampMsColumn,
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
@@ -168,6 +169,10 @@ export const creditAttribution = pgTable(
 			"credit_attribution_not_self_check",
 			sql`${table.sourceUnitId} <> ${table.creditedUnitId}`,
 		),
+		createFractionalIndexPositionByteLengthConstraint(
+			"credit_attribution_position_byte_length_check",
+			table.position,
+		),
 	],
 );
 
@@ -205,5 +210,9 @@ export const subjectAssociation = pgTable(
 		index("subject_association_unit_position_idx").on(table.unitId, table.position, table.id),
 		check("subject_association_role_check", inArray(table.role, SubjectAssociationRoleValues)),
 		check("subject_association_not_self_check", sql`${table.unitId} <> ${table.entityId}`),
+		createFractionalIndexPositionByteLengthConstraint(
+			"subject_association_position_byte_length_check",
+			table.position,
+		),
 	],
 );

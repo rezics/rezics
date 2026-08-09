@@ -8,7 +8,7 @@ import {
 import type { ContentLanguage } from "@rezics/i18n";
 import { InvalidPaginationCursor } from "../pagination/errors";
 import { parseJsonCursor } from "../pagination";
-import { isFractionalPosition } from "../ordering/position";
+import { isStorageSafeFractionalPosition } from "../ordering/position";
 
 const FollowingCursor = t.Object(
 	{
@@ -61,7 +61,7 @@ export function decodeFollowingCursor(
 			)
 		)
 			throw new InvalidPaginationCursor();
-		if (!isFractionalPosition(cursor.position)) throw new InvalidPaginationCursor();
+		if (!isStorageSafeFractionalPosition(cursor.position)) throw new InvalidPaginationCursor();
 		return {
 			favorite: cursor.favorite,
 			position: cursor.position,

@@ -107,7 +107,7 @@ function toReplyResponse<
 	attributions: readonly UnitAttributionSummary[],
 	availableLanguages: readonly ContentLanguage[] = [row.language],
 ) {
-	const body = toPortableTextResponse(row.body);
+	const body = toPortableTextResponse(row.body, "post.body");
 	return {
 		id: row.id,
 		postKind: "reply" as const,
@@ -317,7 +317,7 @@ export default new Elysia()
 							realmId: query.realmId ?? null,
 							attributions: attributions.get(item.id) ?? [],
 							replyCount: toSafeInteger(item.replyCount, "reply count"),
-							body: toPortableTextResponse(item.body),
+							body: toPortableTextResponse(item.body, "post.body"),
 						})),
 					};
 				},
@@ -608,7 +608,10 @@ export default new Elysia()
 							...common,
 							postKind: "review" as const,
 							targetId,
-							body: row.body === null ? null : toPortableTextResponse(row.body),
+							body:
+								row.body === null
+									? null
+									: toPortableTextResponse(row.body, "post.body"),
 							progressEntry: progressEntries[0]
 								? {
 										unitId: progressEntries[0].unitId,
@@ -635,7 +638,7 @@ export default new Elysia()
 						subjectId: row.subjectId,
 						rootPostId: row.rootPostId,
 						parentPostId: row.parentPostId,
-						body: toPortableTextResponse(row.body),
+						body: toPortableTextResponse(row.body, "post.body"),
 						latestRevisionId: row.latestRevisionId,
 						capabilities: {
 							canEdit,

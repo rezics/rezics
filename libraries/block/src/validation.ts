@@ -1,5 +1,6 @@
 import { type Static, type TSchema } from "@sinclair/typebox";
 import { Check } from "@sinclair/typebox/value";
+import { normalizePortableText } from "@rezics/portable-text";
 
 import {
 	Block as BlockSchema,
@@ -217,6 +218,39 @@ export function isPortableTextDocument(value: unknown): value is PortableTextDoc
 	return Check(PortableTextDocument, value);
 }
 
+export type PortableTextDocumentNormalization =
+	| { readonly state: "valid"; readonly document: PortableTextDocumentValue }
+	| { readonly state: "repaired"; readonly document: PortableTextDocumentValue };
+
+const RepairedPortableTextDocumentKey = "000000000000";
+const BlockKeyPattern = /^[0-9a-f]{12}$/;
+
+/**
+ * Isolates malformed persisted Portable Text at a read boundary.
+ *
+ * Valid documents retain object identity. Invalid envelope fields and content
+ * are narrowed to the render-safe vocabulary without mutating persistence, so
+ * one corrupt row cannot fail a complete list or feed response.
+ */
+export function normalizePortableTextDocument(value: unknown): PortableTextDocumentNormalization {
+	if (isPortableTextDocument(value)) return { state: "valid", document: value };
+	const record =
+		typeof value === "object" && value !== null
+			? (value as Record<string, unknown>)
+			: undefined;
+	return {
+		state: "repaired",
+		document: {
+			_type: "portable-text",
+			_key:
+				typeof record?._key === "string" && BlockKeyPattern.test(record._key)
+					? record._key
+					: RepairedPortableTextDocumentKey,
+			content: normalizePortableText(record?.content),
+		},
+	};
+}
+
 export function getPortableTextContent(value: unknown): PortableTextDocumentValue["content"] {
 	assertDocument(PortableTextDocument, value);
 	return value.content;
@@ -343,6 +377,22 @@ export function assertWikiPostPortableTextDocument(
 ): asserts value is PortableTextDocumentValue {
 	assertDocument(PortableTextDocument, value);
 	assertBlockTree({ _key: `${value._key}:wiki-host`, blocks: [value] }, WikiPostBlockHostPolicy);
+}
+
+/** Repairs malformed persisted Wiki Portable Text to a render-safe empty body. */
+export function normalizeWikiPostPortableTextDocument(
+	value: unknown,
+): PortableTextDocumentNormalization {
+	const normalized = normalizePortableTextDocument(value);
+	try {
+		assertWikiPostPortableTextDocument(normalized.document);
+		return normalized;
+	} catch {
+		return {
+			state: "repaired",
+			document: { ...normalized.document, content: [] },
+		};
+	}
 }
 
 export interface BlockReferences {

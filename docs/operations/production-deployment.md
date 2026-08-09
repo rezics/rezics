@@ -165,6 +165,14 @@ writers and public API traffic, and only the new jobs may resume after migration
 verification. Database migrations are forward operations and are not
 automatically reversed.
 
+Corpus-scale `CHECK` constraints follow the staged procedure in
+[Data integrity and workload budgets](../architecture/data-integrity-and-workload-budgets.md#constraint-rollout).
+An `ADD CONSTRAINT ... NOT VALID` migration protects new writes but does not
+authorize the release job to scan historical tables. Operators inspect staged
+state and validate one allowlisted constraint at a time after checking I/O,
+replica lag, and lock headroom. Unvalidated historical state is an explicit
+operational item, not a reason to hide validation inside application startup.
+
 `v1.3.0` uses this explicit cutover because it deletes four non-core,
 recomputable recommendation projection tables and replaces the sparse ranking
 function/index contract. Its DDL runs in one transaction while writers are

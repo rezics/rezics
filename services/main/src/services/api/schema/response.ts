@@ -5,11 +5,7 @@ import {
 	FontAwesomeIconPrefixValues,
 	FontAwesomeProvider,
 } from "@rezics/avatar";
-import {
-	PortableTextDocument,
-	parseDocument,
-	type PortableTextDocument as PortableTextDocumentValue,
-} from "@rezics/block";
+import { PortableTextDocument } from "@rezics/block";
 import { SearchContinuationToken } from "@rezics/filter";
 import { UnitContentLicenseSlugs } from "@rezics/license";
 import {
@@ -49,14 +45,14 @@ import { HealthCheckStateValues } from "../../health/model";
 import { CollectionConfigV1 } from "../users/schema";
 import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
 import { CountResultSchema, SearchCountResultSchema } from "../../counts/contract";
+export {
+	presentPortableTextDocument as toPortableTextResponse,
+	type PortableTextPersistenceSource,
+} from "../../documents/portable-text-presentation";
 export { toApiErrorResponse } from "./error-response";
 
 const NullableText = t.Nullable(t.String());
 const OrdinaryPostKindResponse = t.Union([t.Literal("post"), t.Literal("reply")]);
-export function toPortableTextResponse(value: unknown): PortableTextDocumentValue {
-	return parseDocument(PortableTextDocument, value);
-}
-
 export const CompletionStateResponse = t.Object({ completed: t.Boolean() });
 export const UpdateStateResponse = t.Object({ updated: t.Boolean() });
 

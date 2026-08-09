@@ -45,6 +45,7 @@ import {
 } from "./contract-values";
 import {
 	createCreatedAtColumn,
+	createFractionalIndexPositionByteLengthConstraint,
 	createJsonDocumentColumn,
 	createTimestampMsColumn,
 	createUpdatedAtColumn,
@@ -250,10 +251,12 @@ export const unitLocalization = pgTable(
 				${table.avatarType} = 'icon'
 				and ${table.avatarAssetId} is null
 				and ${table.avatarEmoji} is null
+				and ${table.avatarIconPrefix} is not null
 				and ${table.avatarIconPrefix} in (${sql.join(
 					FontAwesomeIconPrefixValues.map((prefix) => sql`${prefix}`),
 					sql`, `,
 				)})
+				and ${table.avatarIconName} is not null
 				and ${table.avatarIconName} ~ ${FontAwesomeIconNamePatternSource}
 				and char_length(${table.avatarIconName}) <= 128
 			)`,
@@ -265,6 +268,10 @@ export const unitLocalization = pgTable(
 		check(
 			"unit_localization_content_state_check",
 			sql`(${table.content} is null) = (${table.contentStatus} is null)`,
+		),
+		createFractionalIndexPositionByteLengthConstraint(
+			"unit_localization_position_byte_length_check",
+			table.position,
 		),
 	],
 );
@@ -321,6 +328,10 @@ export const unitAlias = pgTable(
 		check(
 			"unit_alias_withdrawn_curation_check",
 			sql`${table.withdrawnAt} is null or (not ${table.pinned} and ${table.position} is null)`,
+		),
+		createFractionalIndexPositionByteLengthConstraint(
+			"unit_alias_position_byte_length_check",
+			table.position,
 		),
 	],
 );
@@ -464,6 +475,10 @@ export const unitExternalLink = pgTable(
 		check(
 			"unit_external_link_withdrawn_curation_check",
 			sql`${table.withdrawnAt} is null or (not ${table.pinned} and ${table.position} is null)`,
+		),
+		createFractionalIndexPositionByteLengthConstraint(
+			"unit_external_link_position_byte_length_check",
+			table.position,
 		),
 	],
 );

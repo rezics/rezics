@@ -1,12 +1,9 @@
-import {
-	PortableTextDocument,
-	parseDocument,
-	type PortableTextDocument as PortableTextDocumentValue,
-} from "@rezics/block";
+import type { PortableTextDocument as PortableTextDocumentValue } from "@rezics/block";
 import { and, eq, inArray } from "drizzle-orm";
 import type { ContentLanguage } from "@rezics/i18n";
 
 import type { DatabaseTransaction } from "../database";
+import { presentPortableTextDocument } from "../documents/portable-text-presentation";
 import {
 	governancePostBinding,
 	post,
@@ -167,7 +164,7 @@ export async function listGovernanceNotes(
 		subjectId: row.subjectId,
 		role: row.role,
 		language: row.language,
-		content: parseDocument(PortableTextDocument, row.content),
+		content: presentPortableTextDocument(row.content, "post.body"),
 		createdAt: row.createdAt,
 		updatedAt: row.updatedAt,
 	}));

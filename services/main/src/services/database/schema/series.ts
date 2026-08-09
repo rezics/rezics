@@ -2,7 +2,12 @@ import { sql } from "drizzle-orm";
 import { check, date, index, primaryKey, text, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { createCreatedAtColumn, createUpdatedAtColumn, fractionalIndexPosition } from "./columns";
+import {
+	createCreatedAtColumn,
+	createFractionalIndexPositionByteLengthConstraint,
+	createUpdatedAtColumn,
+	fractionalIndexPosition,
+} from "./columns";
 import { unit } from "./unit";
 
 export const series = pgTable(
@@ -44,5 +49,9 @@ export const seriesRelease = pgTable(
 		),
 		index("series_release_unit_idx").on(table.releaseUnitId),
 		check("series_release_not_self_check", sql`${table.seriesId} <> ${table.releaseUnitId}`),
+		createFractionalIndexPositionByteLengthConstraint(
+			"series_release_position_byte_length_check",
+			table.position,
+		),
 	],
 );

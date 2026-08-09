@@ -26,6 +26,7 @@ import {
 	createPortableTextDocument,
 	isDocument,
 	isPortableTextDocument,
+	normalizeWikiPostPortableTextDocument,
 	updatePortableTextDocument,
 } from "@rezics/block";
 import {
@@ -120,6 +121,27 @@ describe("Block document contracts", () => {
 				],
 			}),
 		).toThrow("not allowed");
+	});
+
+	test("isolates persisted Wiki blocks that violate their render host policy", () => {
+		const normalized = normalizeWikiPostPortableTextDocument({
+			_type: "portable-text",
+			_key: "000000000050",
+			content: [
+				{
+					_type: "menu",
+					_key: "000000000057",
+					navigationId: "019b0000-0000-7000-8000-000000000001",
+					orientation: "horizontal",
+					appearance: "links",
+				},
+			],
+		});
+
+		expect(normalized).toEqual({
+			state: "repaired",
+			document: { _type: "portable-text", _key: "000000000050", content: [] },
+		});
 	});
 
 	test("treats Post Full View as a Wiki Post reference", () => {

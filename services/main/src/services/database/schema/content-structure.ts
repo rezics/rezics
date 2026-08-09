@@ -4,6 +4,7 @@ import { check, foreignKey, index, text, unique, uniqueIndex, uuid } from "drizz
 import { pgTable } from "./base";
 import {
 	createCreatedAtColumn,
+	createFractionalIndexPositionByteLengthConstraint,
 	createTimestampMsColumn,
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
@@ -151,6 +152,7 @@ export const contentStructureNode = pgTable(
 			) or (
 				${table.targetKind} = 'external'
 				and ${table.targetUnitId} is null
+				and ${table.targetUrl} is not null
 				and ${table.targetUrl} ~ '^https://[^[:space:]]+$'
 				and char_length(${table.targetUrl}) <= 2000
 			)`,
@@ -158,6 +160,10 @@ export const contentStructureNode = pgTable(
 		check(
 			"content_structure_node_deleted_at_check",
 			sql`${table.deletedAt} is null or ${table.deletedAt} >= ${table.createdAt}`,
+		),
+		createFractionalIndexPositionByteLengthConstraint(
+			"content_structure_node_position_byte_length_check",
+			table.position,
 		),
 	],
 );

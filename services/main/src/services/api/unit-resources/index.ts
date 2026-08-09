@@ -534,7 +534,10 @@ export default new Elysia()
 						description:
 							row.description === null
 								? null
-								: toPortableTextResponse(row.description),
+								: toPortableTextResponse(
+										row.description,
+										"unit_localization.description",
+									),
 						avatar: presentAvatar(avatarReferenceFromColumns(row)),
 						banner: presentImageAsset(row.bannerAssetId, "banner"),
 						cover: presentImageAsset(row.coverAssetId, "cover"),
@@ -814,7 +817,10 @@ export default new Elysia()
 							description:
 								row.description === null
 									? null
-									: toPortableTextResponse(row.description),
+									: toPortableTextResponse(
+											row.description,
+											"unit_localization.description",
+										),
 							avatar: presentAvatar(avatarReferenceFromColumns(row)),
 							banner: presentImageAsset(row.bannerAssetId, "banner"),
 							cover: presentImageAsset(row.coverAssetId, "cover"),

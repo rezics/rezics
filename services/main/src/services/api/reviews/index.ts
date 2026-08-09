@@ -595,7 +595,10 @@ export default new Elysia()
 						realmId: query.realmId ?? null,
 						attributions: attributionMap.get(review.id) ?? [],
 						targetId,
-						body: review.body === null ? null : toPortableTextResponse(review.body),
+						body:
+							review.body === null
+								? null
+								: toPortableTextResponse(review.body, "post.body"),
 						replyCount: toSafeInteger(review.replyCount, "reply count"),
 						subject,
 						scores,

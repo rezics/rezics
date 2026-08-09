@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { isFractionalPosition } from "../ordering/position";
+import { FractionalPositionStorageMaximumBytes, isFractionalPosition } from "../ordering/position";
 
 export const CollectionStructureContentModel = "rezics.collection-structure.v1" as const;
 export const CollectionStructureCheckpointDepth = 32;
@@ -32,7 +32,10 @@ export function shouldCheckpointCollectionStructureRevision(input: {
 }
 
 const UuidSchema = z.uuid();
-const FractionalPositionSchema = z.string().refine(isFractionalPosition);
+const FractionalPositionSchema = z
+	.string()
+	.max(FractionalPositionStorageMaximumBytes)
+	.refine(isFractionalPosition);
 
 export const CollectionStructureItemStateSchema = z.object({
 	targetUnitId: UuidSchema,

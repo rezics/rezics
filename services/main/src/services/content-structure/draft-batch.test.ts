@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { fractionalPositionsBetween } from "../ordering/position";
+import {
+	fractionalPositionBetween,
+	fractionalPositionNeedsRebalance,
+	fractionalPositionsBetween,
+} from "../ordering/position";
 import {
 	assertContentStructureDraftCommandLimit,
 	deletedDraftSubtreeRootIds,
@@ -59,5 +63,25 @@ describe("complete Content Structure draft command accounting", () => {
 				changedDesiredNodeCount: repositionedIds.length,
 			}),
 		).not.toThrow();
+	});
+
+	it("compacts a degraded sibling group before compiling draft changes", () => {
+		let degraded = "a0";
+		while (!fractionalPositionNeedsRebalance(degraded))
+			degraded = fractionalPositionBetween(degraded, "a1");
+		const current = [
+			{ id: "first", parentId: null, position: degraded },
+			{ id: "second", parentId: null, position: "a1" },
+		];
+
+		const planned = planDraftSiblingPositions({
+			currentNodes: current,
+			desiredNodes: current.map(({ id, parentId }, order) => ({ id, parentId, order })),
+		});
+
+		expect(planned.get("first")).not.toBe(degraded);
+		expect(
+			[...planned.values()].every((position) => !fractionalPositionNeedsRebalance(position)),
+		).toBe(true);
 	});
 });

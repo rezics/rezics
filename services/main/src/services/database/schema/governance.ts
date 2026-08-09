@@ -363,12 +363,16 @@ export const moderationAction = pgTable(
 			sql`(
 				${table.kind} = 'invalidate_content_license'
 				and ${table.contentLicenseId} is not null
+				and ${table.previousContentLicenseStatus} is not null
 				and ${table.previousContentLicenseStatus} = 'active'
+				and ${table.resultingContentLicenseStatus} is not null
 				and ${table.resultingContentLicenseStatus} = 'invalidated'
 			) or (
 				${table.kind} = 'restore_content_license'
 				and ${table.contentLicenseId} is not null
+				and ${table.previousContentLicenseStatus} is not null
 				and ${table.previousContentLicenseStatus} = 'invalidated'
+				and ${table.resultingContentLicenseStatus} is not null
 				and ${table.resultingContentLicenseStatus} = 'active'
 			) or (
 				${table.kind} not in (

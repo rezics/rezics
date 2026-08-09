@@ -70,6 +70,7 @@ import {
 import {
 	compareBytewisePositions,
 	compareFractionalPositions,
+	FractionalPositionStorageMaximumBytes,
 	isFractionalPosition,
 } from "../ordering/position";
 import { AssociationContextPostInvalid, UnitRevisionConflict } from "./errors";
@@ -107,7 +108,10 @@ const UnitLocalizationContentSchema = z.union([
 ]);
 const ZoneBoundaryDocumentSchema = createDocumentSchema(ZoneBoundaryDocument);
 const ZoneThemeDocumentSchema = createDocumentSchema(ZoneThemeDocument);
-const FractionalPositionSchema = z.string().refine(isFractionalPosition);
+const FractionalPositionSchema = z
+	.string()
+	.max(FractionalPositionStorageMaximumBytes)
+	.refine(isFractionalPosition);
 export const UnitRevisionSchemaVersion = 1 as const;
 export const UnitRevisionSlotSchemaVersions = {
 	main: 1,
