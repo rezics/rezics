@@ -166,10 +166,6 @@ export const enContent = {
 			title: "Keep meanings separate; connect them to create value.",
 			body: "Identity is not a title, a release is not a series, a content block is not a structure node, and a community space does not own every work it references. Clear boundaries make links explainable.",
 		},
-		interfaceTitle: "The same model appears in a real product surface.",
-		interfaceBody: `The public ${BRAND} ${enTerminology.realm.forms.inline} page combines search, community context, a content feed, and entrances to works. The image comes from a public first-party page and contains no personal account data.`,
-		screenshotAlt: `Public ${BRAND} ${enTerminology.realm.forms.inline} page with navigation, search, a ${enTerminology.realm.forms.inline} heading, and first-party content cards.`,
-		screenshotCaption: `Public product surface · official ${BRAND} ${enTerminology.realm.forms.inline}`,
 	},
 	uses: {
 		eyebrow: "Start with the need",

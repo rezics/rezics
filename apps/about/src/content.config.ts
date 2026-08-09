@@ -16,6 +16,7 @@ const products = defineCollection({
 		title: z.string().trim().min(1),
 		summary: z.string().trim().min(1),
 		description: z.string().trim().min(1),
+		statusNote: z.string().trim().min(1).optional(),
 	}),
 });
 

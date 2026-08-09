@@ -103,7 +103,7 @@ describe("Cloudflare language redirects", () => {
 		"/en/products/catalog/",
 		"/products/not-registered",
 		"/docs",
-		"/images/rezics-official-realm.webp",
+		"/images/not-found.webp",
 	])("does not restore unsupported or pre-v1 path %s", async (path) => {
 		const requestContext = context(path);
 

@@ -168,10 +168,6 @@ export const deContent = {
 			title: "Bedeutungen trennen, zu Wert verbinden.",
 			body: "Identität ist kein Titel, Veröffentlichung keine Serie, Inhaltsblock kein Strukturknoten und ein Community-Raum besitzt nicht jedes referenzierte Werk.",
 		},
-		interfaceTitle: "Dasselbe Modell erscheint in einer echten Produktoberfläche.",
-		interfaceBody: `Die öffentliche ${BRAND}-Seite eines Themenraums verbindet Suche, Community-Kontext, Feed und Werkzugänge. Das Bild enthält keine persönlichen Kontodaten.`,
-		screenshotAlt: `Öffentliche ${BRAND}-Themenraumseite mit Navigation, Suche, Überschrift und offiziellen Inhaltskarten.`,
-		screenshotCaption: `Öffentliche Produktoberfläche · offizieller ${BRAND}-${deTerminology.realm.forms.label}`,
 	},
 	uses: {
 		eyebrow: "Beim Bedarf beginnen",

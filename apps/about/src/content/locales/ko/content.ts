@@ -162,10 +162,6 @@ export const koContent = {
 			title: "의미를 분리하고 가치로 연결합니다.",
 			body: "정체성은 제목이 아니고, 릴리스는 시리즈가 아니며, 콘텐츠 블록은 구조 노드가 아닙니다. 분명한 경계가 연결을 설명 가능하게 합니다.",
 		},
-		interfaceTitle: "같은 모델이 실제 제품 화면에 나타납니다.",
-		interfaceBody: `공개 ${BRAND} ${koTerminology.realm.forms.label} 페이지는 검색, 커뮤니티 맥락, 피드, 작품 입구를 결합합니다. 이미지에는 개인 계정 정보가 없습니다.`,
-		screenshotAlt: `탐색, 검색, ${koTerminology.realm.forms.label} 제목, 공식 콘텐츠 카드가 있는 공개 ${BRAND} ${koTerminology.realm.forms.label} 페이지.`,
-		screenshotCaption: `공개 제품 화면 · ${BRAND} 공식 ${koTerminology.realm.forms.label}`,
 	},
 	uses: {
 		eyebrow: "필요에서 시작",

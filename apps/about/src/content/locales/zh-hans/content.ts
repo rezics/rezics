@@ -143,10 +143,6 @@ export const zhHansContent = {
 			title: "分开保存意义，连接起来形成价值。",
 			body: "身份不是名称，发行不是系列，内容区块不是目录节点，社区空间也不拥有它所引用的作品。清楚边界让每一条连接都能被解释。",
 		},
-		interfaceTitle: "同一套模型，落在真实产品界面中。",
-		interfaceBody: `公开的 ${BRAND} ${zhHansTerminology.realm.forms.label}页把搜索、社区上下文、内容流与作品入口组合在一起。画面来自主站公开页面，不含个人账号数据。`,
-		screenshotAlt: `${BRAND} 公开${zhHansTerminology.realm.forms.label}页，包含导航、搜索、${zhHansTerminology.realm.forms.label}标题与官方内容卡片。`,
-		screenshotCaption: `公开界面实况 · ${BRAND} 官方${zhHansTerminology.realm.forms.label}`,
 	},
 	uses: {
 		eyebrow: "从需要出发",

@@ -11,6 +11,7 @@ const items = [
 	{
 		id: "unit",
 		layer: "identity" as const,
+		stage: "available" as const,
 		title: "Work",
 		summary: "One identity across languages.",
 		href: "/en/products/unit/",
@@ -18,6 +19,7 @@ const items = [
 	{
 		id: "realm",
 		layer: "community" as const,
+		stage: "planned" as const,
 		title: "Realm",
 		summary: "A community around shared interests.",
 		href: "/en/products/realm/",
@@ -29,6 +31,14 @@ const labels = {
 	all: "All",
 	empty: "No capabilities match.",
 	open: "View capability",
+	stage: {
+		legend: "Capability status",
+		labels: {
+			available: "Available",
+			development: "In development",
+			planned: "Planned",
+		},
+	},
 };
 
 describe("ProductDirectory", () => {
@@ -54,5 +64,19 @@ describe("ProductDirectory", () => {
 			target: { value: "not present" },
 		});
 		expect(screen.getByText(labels.empty)).toBeInTheDocument();
+	});
+
+	test("renders and searches the explicit capability stage", () => {
+		render(<ProductDirectory items={items} labels={labels} layers={layers} />);
+
+		expect(screen.getAllByText("Available").length).toBeGreaterThan(0);
+		expect(screen.getAllByText("Planned").length).toBeGreaterThan(0);
+
+		fireEvent.change(screen.getByRole("searchbox"), {
+			target: { value: "planned" },
+		});
+
+		expect(screen.getByRole("link", { name: /Realm/ })).toBeInTheDocument();
+		expect(screen.queryByRole("link", { name: /Work/ })).not.toBeInTheDocument();
 	});
 });

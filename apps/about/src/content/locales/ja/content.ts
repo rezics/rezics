@@ -155,10 +155,6 @@ export const jaContent = {
 			title: "意味を分け、価値としてつなぐ。",
 			body: "識別は題名ではなく、リリースはシリーズではなく、内容ブロックは構造ノードではありません。明確な境界が関係を説明可能にします。",
 		},
-		interfaceTitle: "同じモデルが実際の製品画面に現れます。",
-		interfaceBody: `公開 ${BRAND} ${jaTerminology.realm.forms.label}ページは、検索、コミュニティ文脈、フィード、作品への入口を組み合わせます。画像に個人アカウント情報は含まれません。`,
-		screenshotAlt: `ナビゲーション、検索、${jaTerminology.realm.forms.label}名、公式コンテンツカードを含む公開 ${BRAND} ${jaTerminology.realm.forms.label}ページ。`,
-		screenshotCaption: `公開製品画面・${BRAND} 公式${jaTerminology.realm.forms.label}`,
 	},
 	uses: {
 		eyebrow: "必要から始める",

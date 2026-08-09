@@ -21,7 +21,10 @@ const copy = getSiteCopy(locale);
       <h1>{copy.home.title}</h1>
       <p class="hero-lead">{copy.home.lead}</p>
       <div class="hero-actions">
-        <a class={buttonVariants({ variant: "brand", size: "xl" })} href={getUsesPath(locale)}>
+        <a
+          class={buttonVariants({ variant: "brand", size: "xl" })}
+          href={copy.home.v1 ? getAppEntryUrl() : getUsesPath(locale)}
+        >
           {copy.home.explore}
         </a>
         <a class={buttonVariants({ variant: "outline", size: "xl" })} href={getHowItWorksPath(locale)}>
@@ -31,63 +34,157 @@ const copy = getSiteCopy(locale);
     </div>
   </section>
 
-  <section class="page-section">
-    <div class="shell split-statement">
-      <h2>{copy.home.problem.title}</h2>
-      <div><p>{copy.home.problem.body}</p></div>
-    </div>
-  </section>
+  {
+    copy.home.v1 ? (
+      <>
+        <section class="home-focus" aria-label={copy.home.v1.focus.label}>
+          <div class="shell home-focus__inner">
+            <strong>{copy.home.v1.focus.label}</strong>
+            <ul>
+              {copy.home.v1.focus.items.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </div>
+        </section>
 
-  <section class="page-section">
-    <div class="shell">
-      <div class="section-heading">
-        <h2>{copy.home.promise.title}</h2>
-        <p>{copy.home.promise.body}</p>
-      </div>
-      <div class="principle-grid">
-        {copy.home.principles.map((principle) => (
-          <article class="principle-card">
-            <h3>{principle.title}</h3>
-            <p>{principle.body}</p>
-          </article>
-        ))}
-      </div>
-    </div>
-  </section>
+        <section class="page-section home-identity-section">
+          <div class="shell home-identity-layout">
+            <div class="section-heading">
+              <p class="section-index">01</p>
+              <h2>{copy.home.v1.identity.title}</h2>
+              <p>{copy.home.v1.identity.body}</p>
+            </div>
+            <div class="identity-map">
+              <div class="identity-map__node identity-map__work">
+                <span>REZICS</span>
+                <strong>{copy.home.v1.identity.workTitle}</strong>
+              </div>
+              <section class="identity-map__node identity-map__sources">
+                <h3>{copy.home.v1.identity.sourcesTitle}</h3>
+                <ul>
+                  {copy.home.v1.identity.sources.map((source) => (
+                    <li>{source}</li>
+                  ))}
+                </ul>
+              </section>
+              <section class="identity-map__node identity-map__names">
+                <h3>{copy.home.v1.identity.namesTitle}</h3>
+                <p>{copy.home.v1.identity.originalName}</p>
+                <p>{copy.home.v1.identity.translatedName}</p>
+              </section>
+              {[copy.home.v1.identity.updates, copy.home.v1.identity.progress, copy.home.v1.identity.realm].map(
+                (item, index) => (
+                  <section class={`identity-map__node identity-map__signal identity-map__signal--${index + 1}`}>
+                    <h3>{item.title}</h3>
+                    <p>{item.body}</p>
+                  </section>
+                ),
+              )}
+            </div>
+          </div>
+        </section>
 
-  <section class="page-section">
-    <div class="shell">
-      <div class="section-heading">
-        <h2>{copy.home.model.title}</h2>
-        <p>{copy.home.model.body}</p>
-      </div>
-      <ol class="model-flow">
-        {copy.home.model.steps.map((step) => (
-          <li>
-            <h3>{step.title}</h3>
-            <p>{step.body}</p>
-          </li>
-        ))}
-      </ol>
-    </div>
-  </section>
+        <section class="page-section home-loop-section">
+          <div class="shell">
+            <div class="section-heading">
+              <p class="section-index">02</p>
+              <h2>{copy.home.v1.loop.title}</h2>
+              <p>{copy.home.v1.loop.body}</p>
+            </div>
+            <ol class="network-loop">
+              {copy.home.v1.loop.steps.map((step) => (
+                <li>
+                  <span aria-hidden="true" />
+                  <h3>{step.title}</h3>
+                  <p>{step.body}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
 
-  <section class="page-section">
-    <div class="shell">
-      <div class="section-heading">
-        <h2>{copy.home.outcomes.title}</h2>
-        <p>{copy.home.outcomes.body}</p>
-      </div>
-      <div class="outcome-grid">
-        {copy.home.outcomes.cards.map((card) => (
-          <article class="outcome-card">
-            <h3>{card.title}</h3>
-            <p>{card.body}</p>
-          </article>
-        ))}
-      </div>
-    </div>
-  </section>
+        <section class="page-section home-foundation-section">
+          <div class="shell">
+            <div class="section-heading">
+              <p class="section-index">03</p>
+              <h2>{copy.home.v1.foundation.title}</h2>
+              <p>{copy.home.v1.foundation.body}</p>
+            </div>
+            <div class="foundation-rails">
+              {copy.home.v1.foundation.pillars.map((pillar) => (
+                <article>
+                  <h3>{pillar.title}</h3>
+                  <p>{pillar.body}</p>
+                </article>
+              ))}
+            </div>
+            <p class="foundation-closing">{copy.home.v1.foundation.closing}</p>
+          </div>
+        </section>
+      </>
+    ) : (
+      <>
+        <section class="page-section">
+          <div class="shell split-statement">
+            <h2>{copy.home.problem.title}</h2>
+            <div><p>{copy.home.problem.body}</p></div>
+          </div>
+        </section>
+
+        <section class="page-section">
+          <div class="shell">
+            <div class="section-heading">
+              <h2>{copy.home.promise.title}</h2>
+              <p>{copy.home.promise.body}</p>
+            </div>
+            <div class="principle-grid">
+              {copy.home.principles.map((principle) => (
+                <article class="principle-card">
+                  <h3>{principle.title}</h3>
+                  <p>{principle.body}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section class="page-section">
+          <div class="shell">
+            <div class="section-heading">
+              <h2>{copy.home.model.title}</h2>
+              <p>{copy.home.model.body}</p>
+            </div>
+            <ol class="model-flow">
+              {copy.home.model.steps.map((step) => (
+                <li>
+                  <h3>{step.title}</h3>
+                  <p>{step.body}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        <section class="page-section">
+          <div class="shell">
+            <div class="section-heading">
+              <h2>{copy.home.outcomes.title}</h2>
+              <p>{copy.home.outcomes.body}</p>
+            </div>
+            <div class="outcome-grid">
+              {copy.home.outcomes.cards.map((card) => (
+                <article class="outcome-card">
+                  <h3>{card.title}</h3>
+                  <p>{card.body}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      </>
+    )
+  }
 
   <section class="page-section">
     <div class="shell split-statement">

@@ -17,6 +17,7 @@ const products = await getProductDocuments(locale);
 const items = products.map(({ definition, document }) => ({
 	id: definition.id,
 	layer: definition.layer,
+	stage: definition.stage,
 	title: document.data.title,
 	summary: document.data.summary,
 	href: getProductPath(locale, definition.slug),
@@ -43,6 +44,7 @@ const layers = PRODUCT_LAYER_IDS.map((id) => ({ id, ...copy.products.layers[id] 
         all: copy.products.allLayers,
         empty: copy.products.empty,
         open: copy.products.openProduct,
+        stage: copy.products.stage,
       }}
     />
   </div>

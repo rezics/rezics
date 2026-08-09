@@ -3,6 +3,7 @@ import { render } from "astro:content";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { buttonVariants } from "@rezics/ui";
 
+import { ProductStageBadge } from "../../../components/ProductStageBadge";
 import {
 	getProductDocument,
 	getProductDocumentLocales,
@@ -55,6 +56,7 @@ const related = product.relatedProductIds.map((id) => ({
 	document: documentsById.get(id),
 }));
 const layer = copy.products.layers[product.layer];
+const stageCopy = copy.products.stage;
 const meta = {
 	title: `${document.data.title} — ${verbatimTerms.rezics.value}`,
 	description: document.data.description,
@@ -78,9 +80,22 @@ const meta = {
       </nav>
       <h1>{document.data.title}</h1>
       <p class="product-hero__summary">{document.data.summary}</p>
-      <div class="product-meta">
-        <span>{copy.product.layerLabel}: {layer.title}</span>
-      </div>
+      {
+        stageCopy && document.data.statusNote ? (
+          <div class="product-status-bar">
+            <span class="product-status-bar__label">{stageCopy.current}</span>
+            <ProductStageBadge label={stageCopy.labels[product.stage]} stage={product.stage} />
+            <p>{document.data.statusNote}</p>
+            <span class="product-status-bar__layer">
+              {copy.product.layerLabel}｜{layer.title}
+            </span>
+          </div>
+        ) : (
+          <div class="product-meta">
+            <span>{copy.product.layerLabel}: {layer.title}</span>
+          </div>
+        )
+      }
     </div>
   </section>
 
