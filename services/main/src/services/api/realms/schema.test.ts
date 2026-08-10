@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import {
 	AcknowledgeRealmRulesBody,
+	CreateRealmBody,
 	CreateRealmPinBody,
 	CreateRealmTagContextBody,
 	CreateRealmWikiBody,
@@ -25,6 +26,26 @@ import {
 } from "./schema";
 
 describe("Realm member API contract", () => {
+	it("bounds and deduplicates creation-time Tag choices", () => {
+		const body = {
+			localization: { language: "en", title: "Example Realm" },
+			visibility: "public",
+			joinPolicy: "open",
+		} as const;
+		const tagId = "019b0000-0000-7000-8000-000000000099";
+		expect(Check(CreateRealmBody, { ...body, initialTagIds: [tagId] })).toBe(true);
+		expect(Check(CreateRealmBody, { ...body, initialTagIds: [tagId, tagId] })).toBe(false);
+		expect(
+			Check(CreateRealmBody, {
+				...body,
+				initialTagIds: Array.from(
+					{ length: 33 },
+					(_, index) => `019b0000-0000-7000-8000-${String(index).padStart(12, "0")}`,
+				),
+			}),
+		).toBe(false);
+	});
+
 	it("accepts an exact Profile identity filter", () => {
 		expect(
 			Check(ListRealmMembersQuery, {

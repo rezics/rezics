@@ -26,6 +26,7 @@ import {
 	LocalizationInput,
 	Uuid,
 } from "../schema";
+import { InitialTagApplicationLimit } from "../../tags/initial-applications";
 import {
 	ContentGovernanceActionResponse,
 	ContentGovernanceRuleReference,
@@ -53,6 +54,9 @@ export const ListRealmsQuery = t.Object(
 export type ListRealmsQuery = Static<typeof ListRealmsQuery>;
 
 export const CreateRealmBody = t.Object({
+	initialTagIds: t.Optional(
+		t.Array(Uuid, { maxItems: InitialTagApplicationLimit, uniqueItems: true, default: [] }),
+	),
 	localization: LocalizationInput,
 	visibility: RealmVisibility,
 	joinPolicy: RealmJoinPolicy,

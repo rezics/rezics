@@ -98,6 +98,43 @@ serialization, joined-object hydration, network bytes, and per-client
 fairness. They do not excuse offset pagination, unindexed filters, or a plan
 whose cost grows with corpus size.
 
+## Creation-time Tag applications
+
+Book, Media, Software, and Realm creation accepts at most 32 distinct initial
+Tag IDs. One indexed `tag.id IN (...)` lookup proves that every requested Tag
+is public, published, approved, and not deleted; one batched insert creates the
+direct `unit_tag` applications and one batched insert records the creator's
+positive `unit_tag_vote` rows. The work is therefore `O(k)` for `k <= 32`, uses
+bounded request memory and network payloads, adds no per-Tag query loop, and
+remains inside the Unit creation transaction. Collection membership and the
+temporary single-select rule are presentation policy, not persisted
+invariants. API quotas provide admission backpressure; concurrent creates use
+different `unit_id` keys and only read shared Tag rows, so popular Tags do not
+serialize otherwise unrelated creation transactions.
+
+Capacity planning assumes an average of four direct Tags per Unit, with a
+long-tailed Tag distribution and one creator vote per initial application. At
+500 million Units this is approximately 2 billion `unit_tag` rows and 2 billion
+creator-vote rows; at 3 billion Units it is approximately 12 billion rows in
+each relation. Each application writes the relation primary key plus the
+reverse Tag index, and each vote writes its primary key plus Tag/Profile
+indexes and the existing bounded aggregate maintenance. Reads by Unit use the
+leading primary-key columns; reverse Tag reads use the `(tag_id, unit_id)`
+index and must remain keyset-paginated. The request path never loads a corpus
+slice, and the seven curated Collections are a bounded control dataset with at
+most 100 items fetched per create-form field.
+
+No new absolute latency target is introduced: this work stays within the
+existing Unit-create transaction objective and adds three bounded database
+statements. Observe create-transaction latency, lock waits, vote-aggregate
+trigger time, relation/index growth, WAL volume, replica lag, and reverse-index
+page splits. Before either relation approaches single-node storage or index
+maintenance limits, hash-partition it by `unit_id`; at the 3-billion-Unit
+estimate, route Unit-owned writes and reads to the same shard and serve global
+Tag discovery from partitioned/asynchronous projections. Partition rollout is
+a forward schema cutover with backfill and dual-read verification, not a
+whole-corpus request-path migration.
+
 ## Fractional positions
 
 Fractional positions use a canonical ASCII alphabet, so character length and

@@ -72,6 +72,7 @@ import { createGovernanceNotePost, listGovernanceNotes } from "../../governance/
 import { createNotification } from "../../notifications/service";
 import { findRealmMembership, getCurrentRealmRules } from "../../realms/service";
 import { listRealmVotedTags } from "../../tags/service";
+import { applyInitialTags } from "../../tags/initial-applications";
 import type { DatabaseTransaction } from "../../database";
 import { recordUnitRevision } from "../../units/history";
 import { insertUnit } from "../../units/create";
@@ -204,7 +205,6 @@ import { ValidationError } from "../errors";
 import { planRealmPinMove } from "./pin-ordering";
 
 const RealmNotFoundResponse = toApiErrorResponse(["RealmNotFound"]);
-const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
 const RealmMutationNotFoundResponse = toApiErrorResponse(["RealmNotFound", "ImageAssetNotFound"]);
 const RealmMutationForbiddenResponse = toApiErrorResponse(["RealmCapabilityRequired"]);
 const RealmSlugMutationForbiddenResponse = toApiErrorResponse([
@@ -695,6 +695,11 @@ export default new Elysia({ prefix: "/realms" })
 					followerProfileId: profile.unitId,
 					unitId: created.id,
 				});
+				await applyInitialTags(tx, {
+					unitId: created.id,
+					profileId: profile.unitId,
+					tagIds: body.initialTagIds ?? [],
+				});
 				const taxonomySnapshot = ContentStructureSnapshotSchema.parse({
 					version: 1,
 					structure: taxonomy,
@@ -719,7 +724,7 @@ export default new Elysia({ prefix: "/realms" })
 			body: CreateRealmBody,
 			response: {
 				[StatusCodes.OK]: IdResponse,
-				[StatusCodes.NOT_FOUND]: ImageAssetNotFoundResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ImageAssetNotFound", "TagNotFound"]),
 			},
 			detail: { summary: "Create Realm", tags: ["Realms"] },
 		},

@@ -11,6 +11,9 @@ import {
 	accounts,
 	apiQuotaPolicy,
 	apiQuotaPolicyRevision,
+	collection,
+	collectionStructureRevisionHead,
+	creditAttribution,
 	profileFavoritesCollection,
 	platformCapabilityGrant,
 	contentStructure,
@@ -64,6 +67,10 @@ import {
 	ensureFavoritesInTransaction,
 	ensureFixedFavoritesInTransaction,
 } from "../collections/favorites";
+import {
+	createCollectionStructureHistory,
+	getCollectionStructureHeadRevision,
+} from "../collection-structure/history";
 import { lockPlatformAccess } from "../platform-access";
 import { storage } from "../storage";
 import { insertUnit, insertUnitIfMissing } from "../units/create";
@@ -100,6 +107,7 @@ import {
 	BootstrapRealmManifest,
 	BootstrapPlatformAccessManifest,
 	BootstrapUnitIds,
+	CuratedCreationTagCollectionManifest,
 	OfficialProfileIds,
 	OfficialRealmManifest,
 	OfficialZoneAvatarAsset,
@@ -548,6 +556,92 @@ async function ensureProfileFavorites(tx: DatabaseTransaction): Promise<void> {
 		} else {
 			await ensureFavoritesInTransaction(tx, targetProfile.id);
 		}
+	}
+}
+
+async function ensureCuratedCreationTagCollections(tx: DatabaseTransaction): Promise<void> {
+	const createdAt = bootstrapEpoch();
+	for (const value of CuratedCreationTagCollectionManifest) {
+		const created = await insertUnitIfMissing(tx, {
+			id: value.id,
+			kind: "collection",
+			status: "published",
+			visibility: "public",
+			publishedAt: createdAt,
+			createdAt,
+			updatedAt: createdAt,
+			statusActor: { kind: "system" },
+		});
+		const [storedUnit] = await tx
+			.select({
+				id: unit.id,
+				kind: unit.kind,
+				status: unit.status,
+				visibility: unit.visibility,
+				moderationStatus: unit.moderationStatus,
+				deletedAt: unit.deletedAt,
+			})
+			.from(unit)
+			.where(eq(unit.id, value.id))
+			.limit(1);
+		assertFields(`curated Tag Collection ${value.key}`, storedUnit, {
+			id: value.id,
+			kind: "collection",
+			status: "published",
+			visibility: "public",
+			moderationStatus: "approved",
+			deletedAt: null,
+		});
+
+		let changed = created !== null;
+		const insertedCollection = await tx
+			.insert(collection)
+			.values({ id: value.id })
+			.onConflictDoNothing()
+			.returning({ id: collection.id });
+		changed ||= insertedCollection.length > 0;
+		const [storedCollection] = await tx
+			.select({ id: collection.id })
+			.from(collection)
+			.where(eq(collection.id, value.id))
+			.limit(1);
+		assertFields(`curated Tag Collection marker ${value.key}`, storedCollection, {
+			id: value.id,
+		});
+		for (const [index, localization] of value.localizations.entries()) {
+			changed =
+				(await ensureLocalization(tx, {
+					unitId: value.id,
+					position: fractionalPositionAt(index),
+					...localization,
+				})) || changed;
+		}
+		changed = (await ensureOwnership(tx, value.id, OfficialProfileIds.editorial)) || changed;
+		const publisher = await tx
+			.insert(creditAttribution)
+			.values({
+				sourceUnitId: value.id,
+				creditedUnitId: OfficialProfileIds.editorial,
+				role: "publisher",
+				position: "a0",
+				createdAt,
+				updatedAt: createdAt,
+			})
+			.onConflictDoNothing()
+			.returning({ id: creditAttribution.id });
+		changed ||= publisher.length > 0;
+		if (changed)
+			await recordUnitRevision(tx, {
+				unitId: value.id,
+				actorProfileId: OfficialProfileIds.editorial,
+				event: "create",
+				message: "Bootstrap curated creation Tag Collection",
+			});
+		if (!(await getCollectionStructureHeadRevision(tx, value.id)))
+			await createCollectionStructureHistory(tx, {
+				collectionId: value.id,
+				actorProfileId: OfficialProfileIds.editorial,
+			});
 	}
 }
 
@@ -1559,6 +1653,13 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 				...localization,
 			})),
 		),
+		...CuratedCreationTagCollectionManifest.flatMap((curatedCollection) =>
+			curatedCollection.localizations.map((localization, index) => ({
+				unitId: curatedCollection.id,
+				position: fractionalPositionAt(index),
+				...localization,
+			})),
+		),
 		...BootstrapRealmManifest.flatMap((bootstrapRealm) =>
 			bootstrapRealm.localizations.map((localization, index) => ({
 				unitId: bootstrapRealm.id,
@@ -1629,6 +1730,10 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 		accountCount,
 		profileCount,
 		bootstrapProfileOwners,
+		curatedTagCollections,
+		curatedTagCollectionOwners,
+		curatedTagCollectionPublishers,
+		curatedTagCollectionStructureHeads,
 		bootstrapPlatformAccess,
 		officialRealms,
 		bootstrapRuleRevision,
@@ -1688,6 +1793,55 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 				and(
 					inArray(unitOwnership.unitId, BootstrapProfileIdValues),
 					isNull(unitOwnership.revokedAt),
+				),
+			),
+		database
+			.select({ id: collection.id })
+			.from(collection)
+			.where(
+				inArray(
+					collection.id,
+					CuratedCreationTagCollectionManifest.map((value) => value.id),
+				),
+			),
+		database
+			.select({
+				unitId: unitOwnership.unitId,
+				profileId: unitOwnership.profileId,
+			})
+			.from(unitOwnership)
+			.where(
+				and(
+					inArray(
+						unitOwnership.unitId,
+						CuratedCreationTagCollectionManifest.map((value) => value.id),
+					),
+					isNull(unitOwnership.revokedAt),
+				),
+			),
+		database
+			.select({
+				sourceUnitId: creditAttribution.sourceUnitId,
+				creditedUnitId: creditAttribution.creditedUnitId,
+				role: creditAttribution.role,
+			})
+			.from(creditAttribution)
+			.where(
+				and(
+					inArray(
+						creditAttribution.sourceUnitId,
+						CuratedCreationTagCollectionManifest.map((value) => value.id),
+					),
+					eq(creditAttribution.role, "publisher"),
+				),
+			),
+		database
+			.select({ collectionId: collectionStructureRevisionHead.collectionId })
+			.from(collectionStructureRevisionHead)
+			.where(
+				inArray(
+					collectionStructureRevisionHead.collectionId,
+					CuratedCreationTagCollectionManifest.map((value) => value.id),
 				),
 			),
 		database
@@ -1868,6 +2022,9 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 					...BootstrapProfileManifest.map(
 						(bootstrapProfile) => bootstrapProfile.profileId,
 					),
+					...CuratedCreationTagCollectionManifest.map(
+						(curatedCollection) => curatedCollection.id,
+					),
 					...BootstrapRealmManifest.map((bootstrapRealm) => bootstrapRealm.id),
 					...RezicsRuleRealmManifest.rules.items.map((rule) => rule.id),
 					...OfficialZoneManifest.map((officialZone) => officialZone.id),
@@ -1928,6 +2085,33 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 		profileCount[0]?.value === BootstrapProfileIdValues.length &&
 		bootstrapProfileOwners.length === BootstrapProfileIdValues.length &&
 		bootstrapProfileOwners.every((owner) => owner.profileId === owner.unitId) &&
+		curatedTagCollections.length === CuratedCreationTagCollectionManifest.length &&
+		CuratedCreationTagCollectionManifest.every((expected) =>
+			curatedTagCollections.some((actual) => actual.id === expected.id),
+		) &&
+		curatedTagCollectionOwners.length === CuratedCreationTagCollectionManifest.length &&
+		CuratedCreationTagCollectionManifest.every((expected) =>
+			curatedTagCollectionOwners.some(
+				(actual) =>
+					actual.unitId === expected.id &&
+					actual.profileId === OfficialProfileIds.editorial,
+			),
+		) &&
+		curatedTagCollectionPublishers.length === CuratedCreationTagCollectionManifest.length &&
+		CuratedCreationTagCollectionManifest.every((expected) =>
+			curatedTagCollectionPublishers.some(
+				(actual) =>
+					actual.sourceUnitId === expected.id &&
+					actual.creditedUnitId === OfficialProfileIds.editorial &&
+					actual.role === "publisher",
+			),
+		) &&
+		curatedTagCollectionStructureHeads.length === CuratedCreationTagCollectionManifest.length &&
+		CuratedCreationTagCollectionManifest.every((expected) =>
+			curatedTagCollectionStructureHeads.some(
+				(actual) => actual.collectionId === expected.id,
+			),
+		) &&
 		BootstrapPlatformAccessManifest.every((access) =>
 			access.capabilities.every((capability) =>
 				bootstrapPlatformAccess.some(
@@ -2125,6 +2309,7 @@ async function installPlatform(
 		await ensureSlugNamespaces(tx);
 		const issuedCredentials = await ensureBootstrapProfiles(tx);
 		await ensureProfileFavorites(tx);
+		await ensureCuratedCreationTagCollections(tx);
 		await ensureBootstrapPlatformAccess(tx);
 		await ensureDefaultApiQuotaPolicies(tx);
 		for (const realm of BootstrapRealmManifest) await ensureBootstrapRealm(tx, realm);

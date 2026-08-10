@@ -21,6 +21,7 @@ import { Authorization } from "../authorization";
 import {
 	BootstrapAuthUserIds,
 	BootstrapUnitIds,
+	CuratedCreationTagCollectionManifest,
 	OfficialProfileIds,
 	OfficialRealmManifest,
 	OfficialZoneAvatarAsset,
@@ -133,6 +134,7 @@ import { loadContentStructureSnapshot } from "../content-structure/storage";
 import {
 	createCollectionStructureHistory,
 	getCollectionStructureHeadRevision,
+	mutateCollectionStructureWithHistory,
 } from "../collection-structure/history";
 import { createDockHistory, getDockRevisionId } from "../api/docks/history";
 import { RecommendationPolicyVersion } from "../recommendations/policy";
@@ -1821,6 +1823,41 @@ async function seedStructure(
 		),
 		(batch) => tx.insert(collectionItem).values(batch),
 	);
+	for (const [
+		collectionIndex,
+		curatedCollection,
+	] of CuratedCreationTagCollectionManifest.entries()) {
+		const baseRevisionId = await getCollectionStructureHeadRevision(tx, curatedCollection.id);
+		if (!baseRevisionId)
+			throw new Error(
+				`Curated creation Tag Collection ${curatedCollection.key} has no Bootstrap revision`,
+			);
+		const selectedTags = Array.from({ length: 8 }, (_, index) =>
+			itemAt(unitFixtures.tags, collectionIndex * 11 + index),
+		);
+		await mutateCollectionStructureWithHistory(
+			tx,
+			{
+				collectionId: curatedCollection.id,
+				actorProfileId: OfficialProfileIds.editorial,
+				baseRevisionId,
+				message: "Seeded development Tag choices",
+			},
+			async () => {
+				await tx.insert(collectionItem).values(
+					selectedTags.map((selectedTag, index) => ({
+						collectionId: curatedCollection.id,
+						unitId: selectedTag.id,
+						position: fractionalPositionAt(index),
+						addedByProfileId: OfficialProfileIds.editorial,
+						createdAt: data.referenceTime,
+						updatedAt: data.referenceTime,
+					})),
+				);
+				return { seeded: true };
+			},
+		);
+	}
 
 	const editableUnits = [...unitFixtures.works, ...unitFixtures.series, ...content.rootPosts];
 	await writeBatches(

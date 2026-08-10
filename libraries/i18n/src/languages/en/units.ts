@@ -21,6 +21,9 @@ export default {
 		audio: audioTerms.label,
 	},
 	creation: {
+		workForm: "Work form",
+		commonCategories: "Common categories",
+		commonTopics: "Common topics",
 		workOwnershipLabel: "Work ownership",
 		ownedWork: "Owned work",
 		ownedWorkDescription:

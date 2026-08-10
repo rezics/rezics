@@ -21,6 +21,9 @@ export default {
 		audio: audioTerms.label,
 	},
 	creation: {
+		workForm: "作品形式",
+		commonCategories: "よく使われるカテゴリー",
+		commonTopics: "よく使われるトピック",
 		workOwnershipLabel: "作品の所有形態",
 		ownedWork: "所有作品",
 		ownedWorkDescription:

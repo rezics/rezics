@@ -21,6 +21,9 @@ export default {
 		audio: audioTerms.label,
 	},
 	creation: {
+		workForm: "Forma de la obra",
+		commonCategories: "Categorías habituales",
+		commonTopics: "Temas habituales",
 		workOwnershipLabel: "Titularidad de la obra",
 		ownedWork: "Obra propia",
 		ownedWorkDescription:

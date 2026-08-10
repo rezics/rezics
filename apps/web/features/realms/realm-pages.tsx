@@ -76,6 +76,7 @@ import { RealmPinnedContentSection } from "./components/realm-pinned-content-sec
 import { RealmRulesCard, type RealmRulePresentation } from "./components/realm-rules-card";
 import { RealmRulesAcknowledgementPrompt } from "./components/realm-rules-acknowledgement-prompt";
 import { useRealmRulesAcknowledgement } from "./hooks/use-realm-rules-acknowledgement";
+import { RealmCreationTagFields } from "@/features/tags/components/curated-creation-tag-fields";
 
 export function RealmsPage() {
 	const { t } = useTranslation(["actions", "media", "posts", "realms", "state", "ui"]);
@@ -153,11 +154,12 @@ function RealmListCard({ realm }: { readonly realm: GetApiRealmsStatus200["items
 }
 
 function RealmCreateContent() {
-	const { t } = useTranslation(["actions", "media", "posts", "realms", "state", "ui"]);
+	const { t } = useTranslation(["actions", "media", "posts", "realms", "state", "ui", "units"]);
 	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(null);
 	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(null);
+	const [tagIds, setTagIds] = useState<readonly string[]>([]);
 	const language = useFormDraftContentLanguage(["title", "summary"]);
 	const create = usePostApiRealms();
 
@@ -172,6 +174,7 @@ function RealmCreateContent() {
 		create.mutate(
 			{
 				body: {
+					initialTagIds: [...tagIds],
 					localization: {
 						language: contentLanguage,
 						title,
@@ -207,6 +210,7 @@ function RealmCreateContent() {
 							<Textarea name="summary" maxLength={2000} />
 						</Field>
 						<DraftContentLanguageField controller={language.controller} />
+						<RealmCreationTagFields onTagIdsChange={setTagIds} tagIds={tagIds} />
 						<Field>
 							<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
 							<AvatarField onChange={setAvatar} value={avatar} />

@@ -73,6 +73,12 @@ const UnitMutationNotFoundResponse = toApiErrorResponse([
 	"ImageAssetNotFound",
 	"EntityEntryNotFound",
 ]);
+const UnitCreateNotFoundResponse = toApiErrorResponse([
+	"UnitNotFound",
+	"ImageAssetNotFound",
+	"EntityEntryNotFound",
+	"TagNotFound",
+]);
 const UnitCreateForbiddenResponse = toApiErrorResponse([
 	"ApiTokenPermissionRequired",
 	"EmailVerificationRequired",
@@ -438,7 +444,10 @@ export default new Elysia({ prefix: "/units" })
 				throw new ValidationError({
 					details: "must match the requested Unit type",
 				});
-			return createUnit(authorization, body);
+			return createUnit(authorization, {
+				...body,
+				initialTagIds: body.initialTagIds ?? [],
+			});
 		},
 		{
 			access: "contribute:unit:create",
@@ -450,7 +459,7 @@ export default new Elysia({ prefix: "/units" })
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.FORBIDDEN]: UnitCreateForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
+				[StatusCodes.NOT_FOUND]: UnitCreateNotFoundResponse,
 				[StatusCodes.CONFLICT]: UnitCreateConflictResponse,
 			},
 			detail: { summary: "Create unit", tags: ["Units"] },

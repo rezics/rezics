@@ -60,6 +60,7 @@ import {
 } from "./components/work-ownership-field";
 import { WorkReleaseStatusField } from "./components/work-release-status-field";
 import { isWorkReleaseStatus } from "./model/work-release-status";
+import { WorkCreationTagFields } from "@/features/tags/components/curated-creation-tag-fields";
 
 export function UnitBrowsePage({ type }: { type: WorkUnitType }) {
 	const { t } = useTranslation(["actions", "media", "ui", "units"]);
@@ -218,6 +219,8 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 	const [creditValidationRequested, setCreditValidationRequested] = useState(false);
 	const [versionKind, setVersionKind] = useState<"main" | "variant">("main");
 	const [mainVersion, setMainVersion] = useState<EntityPickerValue>();
+	const [formTagId, setFormTagId] = useState<string | null>(null);
+	const [categoryTagIds, setCategoryTagIds] = useState<readonly string[]>([]);
 	const creditEntitySearchScope: CreditEntitySearchScope =
 		ownershipMode === "community_owned" ? "public" : "direct";
 	const language = useFormDraftContentLanguage(["title", "summary"]);
@@ -279,6 +282,9 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 					? ({ kind: "variant", mainUnitId: mainVersion.id } as const)
 					: ({ kind: "main" } as const);
 			const common = {
+				initialTagIds: Array.from(
+					new Set(formTagId ? [formTagId, ...categoryTagIds] : categoryTagIds),
+				),
 				version,
 				details,
 				localization: {
@@ -456,6 +462,13 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 							<Textarea maxLength={2000} name="summary" />
 						</Field>
 						<DraftContentLanguageField controller={language.controller} />
+						<WorkCreationTagFields
+							categoryTagIds={categoryTagIds}
+							formTagId={formTagId}
+							onCategoryTagIdsChange={setCategoryTagIds}
+							onFormTagIdChange={setFormTagId}
+							type={type}
+						/>
 						<Field>
 							<FieldLabel>{t.media.roles.cover.title}</FieldLabel>
 							<LocalizationImageUploadField

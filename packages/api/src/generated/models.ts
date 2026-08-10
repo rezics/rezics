@@ -61386,6 +61386,7 @@ export const PostApiUnitsByTypeStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	ImageAssetNotFound: "ImageAssetNotFound",
 	EntityEntryNotFound: "EntityEntryNotFound",
+	TagNotFound: "TagNotFound",
 } as const;
 
 export type PostApiUnitsByTypeStatus404ErrorCodeEnum =
@@ -61632,6 +61633,11 @@ export type PostApiUnitsByTypeBody =
 					| "studio"
 					| "distributor";
 			}[];
+			/**
+			 * @default
+			 * @type array | undefined
+			 */
+			initialTagIds?: string[];
 			creditAttributionRequestConsent: "direct_only" | "allow_requests";
 			version:
 				| {
@@ -61944,6 +61950,11 @@ export type PostApiUnitsByTypeBody =
 					| "studio"
 					| "distributor";
 			}[];
+			/**
+			 * @default
+			 * @type array | undefined
+			 */
+			initialTagIds?: string[];
 			creditAttributionRequestConsent: "direct_only" | "allow_requests";
 			version:
 				| {
@@ -111137,6 +111148,14 @@ export type PostApiRealmsStatus200 = {
  */
 export type PostApiRealmsStatus400 = MalformedRequestBody;
 
+export const PostApiRealmsStatus404ErrorCodeEnum = {
+	ImageAssetNotFound: "ImageAssetNotFound",
+	TagNotFound: "TagNotFound",
+} as const;
+
+export type PostApiRealmsStatus404ErrorCodeEnum =
+	(typeof PostApiRealmsStatus404ErrorCodeEnum)[keyof typeof PostApiRealmsStatus404ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -111149,7 +111168,7 @@ export type PostApiRealmsStatus404 = {
 		 * @default 'ImageAssetNotFound'
 		 * @type string
 		 */
-		code: "ImageAssetNotFound";
+		code: PostApiRealmsStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -111249,6 +111268,11 @@ export type PostApiRealmsRequestJoinPolicyEnum =
  * @type object
  */
 export type PostApiRealmsBody = {
+	/**
+	 * @default
+	 * @type array | undefined
+	 */
+	initialTagIds?: string[];
 	/**
 	 * @type object
 	 */

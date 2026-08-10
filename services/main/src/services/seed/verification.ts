@@ -1,12 +1,17 @@
 import { and, count, eq, inArray, isNotNull, isNull, notInArray, sql } from "drizzle-orm";
 
 import { assertPlatformCoreReady, inspectPlatformCore } from "../bootstrap/core";
-import { BootstrapUnitIds, OfficialZoneManifest } from "../bootstrap/manifest";
+import {
+	BootstrapUnitIds,
+	CuratedCreationTagCollectionManifest,
+	OfficialZoneManifest,
+} from "../bootstrap/manifest";
 import { database } from "../database";
 import {
 	contentReviewCase,
 	notification,
 	apiTokenQuotaOverride,
+	collectionItem,
 	platformCapabilityGrant,
 	postScore,
 	profile,
@@ -136,6 +141,7 @@ export async function verifySeedDatabase(
 		missingContentMetricsResult,
 		activeSnapshotsResult,
 		officialZoneFixtures,
+		curatedTagCollectionItems,
 		coverageContractResults,
 		notificationsResult,
 		contentReviewCasesResult,
@@ -188,6 +194,16 @@ export async function verifySeedDatabase(
 					SeedFixtureTitles.software.en,
 				]),
 			),
+		database
+			.select({ collectionId: collectionItem.collectionId, value: count() })
+			.from(collectionItem)
+			.where(
+				inArray(
+					collectionItem.collectionId,
+					CuratedCreationTagCollectionManifest.map((value) => value.id),
+				),
+			)
+			.groupBy(collectionItem.collectionId),
 		Promise.all(
 			coverageContractQueries.map(async ({ name, query }) => ({
 				name,
@@ -219,6 +235,11 @@ export async function verifySeedDatabase(
 	] as const)
 		if (!officialZoneFixtures.some((row) => row.kind === kind && row.title === fixture.en))
 			throw new Error(`Seed service did not create the official ${kind} search fixture`);
+	for (const expected of CuratedCreationTagCollectionManifest)
+		requirePositive(
+			curatedTagCollectionItems.find((row) => row.collectionId === expected.id)?.value ?? 0,
+			`Seed service did not populate curated Tag Collection ${expected.key}`,
+		);
 	for (const result of coverageContractResults)
 		requirePositive(result.value, `${result.name} feature-contract scenario produced no rows`);
 	requireZero(missingContentMetrics, "Seed content is missing derived localization metrics");

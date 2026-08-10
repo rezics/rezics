@@ -21,6 +21,9 @@ export default {
 		audio: audioTerms.label,
 	},
 	creation: {
+		workForm: "작품 형식",
+		commonCategories: "일반적인 분류",
+		commonTopics: "일반적인 주제",
 		workOwnershipLabel: "작품 소유 방식",
 		ownedWork: "소유 작품",
 		ownedWorkDescription:

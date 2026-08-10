@@ -20,6 +20,7 @@ import {
 	Uuid,
 	WorkReleaseStatus,
 } from "../schema";
+import { InitialTagApplicationLimit } from "../../tags/initial-applications";
 
 export const VariantUnitType = t.Union([
 	t.Literal("book"),
@@ -168,6 +169,9 @@ const UnitContentLicenseGrantInput = t.Object(
 );
 
 const CreateUnitFields = {
+	initialTagIds: t.Optional(
+		t.Array(Uuid, { maxItems: InitialTagApplicationLimit, uniqueItems: true, default: [] }),
+	),
 	creditAttributionRequestConsent: t.Union([
 		t.Literal("direct_only"),
 		t.Literal("allow_requests"),

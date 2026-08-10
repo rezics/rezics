@@ -76,6 +76,21 @@ export const OfficialRealmUnitIds = {
 } as const;
 
 /**
+ * Immutable identities for the first-party Tag Collections used during creation.
+ *
+ * @alpha
+ */
+export const CuratedCreationTagCollectionUnitIds = {
+	bookForm: "019b76da-a800-7260-8000-000000000001",
+	bookCategory: "019b76da-a800-7260-8000-000000000002",
+	mediaForm: "019b76da-a800-7260-8000-000000000003",
+	mediaCategory: "019b76da-a800-7260-8000-000000000004",
+	softwareForm: "019b76da-a800-7260-8000-000000000005",
+	softwareCategory: "019b76da-a800-7260-8000-000000000006",
+	realmTopic: "019b76da-a800-7260-8000-000000000007",
+} as const;
+
+/**
  * Immutable identities for the first-party Zones followed by default.
  *
  * @alpha

@@ -10,6 +10,7 @@ import {
 	BootstrapRealmManifest,
 	BootstrapPlatformAdministratorProfile,
 	BootstrapUnitIds,
+	CuratedCreationTagCollectionManifest,
 	OfficialProfileManifest,
 	OfficialRealmManifest,
 	OfficialZoneManifest,
@@ -68,6 +69,22 @@ describe("database bootstrap manifest", () => {
 		]);
 		for (const profile of BootstrapProfileManifest) {
 			expect(BootstrapUnitIds).toContain(profile.favoritesCollectionId);
+		}
+	});
+
+	it("reserves the seven curated creation Tag Collections as ordinary Collections", () => {
+		expect(CuratedCreationTagCollectionManifest.map((value) => value.key)).toEqual([
+			"book.form",
+			"book.category",
+			"media.form",
+			"media.category",
+			"software.form",
+			"software.category",
+			"realm.topic",
+		]);
+		for (const value of CuratedCreationTagCollectionManifest) {
+			expect(BootstrapUnitIds).toContain(value.id);
+			expect(value.localizations.map(({ language }) => language)).toEqual(["zh", "en"]);
 		}
 	});
 

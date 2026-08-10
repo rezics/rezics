@@ -111,6 +111,7 @@ import {
 	resolveEntityCreditAttributionCreationMode,
 } from "./attribution-authorization";
 import { wilsonLowerBoundSql } from "../tags/ranking";
+import { applyInitialTags } from "../tags/initial-applications";
 import { getPendingUnitOwnershipClaim } from "../ownership-claims/service";
 import { unitScope } from "../authorization/unit/scope";
 import { getUnitExternalLinkPreviewWithSources } from "./external-links";
@@ -143,6 +144,7 @@ type CreateUnitAccessInput =
 	  };
 
 export type CreateUnitInput = CreateUnitAccessInput & {
+	initialTagIds: readonly string[];
 	creditAttributionRequestConsent: CreditAttributionRequestConsent;
 	version: { readonly kind: "main" } | { readonly kind: "variant"; readonly mainUnitId: string };
 	localization: {
@@ -292,6 +294,11 @@ export async function createUnit(
 				grantedByProfileId: ownerId,
 				referenceLicenseSlug: input.contentLicense.referenceLicenseSlug,
 			});
+		await applyInitialTags(tx, {
+			unitId: created.id,
+			profileId: ownerId,
+			tagIds: input.initialTagIds,
+		});
 		if (input.version.kind === "variant") {
 			const [main] = await tx
 				.select({

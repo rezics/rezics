@@ -21,6 +21,9 @@ export default {
 		audio: audioTerms.label,
 	},
 	creation: {
+		workForm: "作品形式",
+		commonCategories: "常见分类",
+		commonTopics: "常见主题",
 		workOwnershipLabel: "作品所有方式",
 		ownedWork: "自有作品",
 		ownedWorkDescription: "由你的个人资料拥有并管理；之后可通过权限设置开放其他人编辑。",

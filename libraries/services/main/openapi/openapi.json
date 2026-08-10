@@ -85919,6 +85919,13 @@
 													}
 												}
 											},
+											"initialTagIds": {
+												"maxItems": 32,
+												"uniqueItems": true,
+												"default": [],
+												"type": "array",
+												"items": { "format": "uuid", "type": "string" }
+											},
 											"creditAttributionRequestConsent": {
 												"anyOf": [
 													{ "const": "direct_only", "type": "string" },
@@ -86563,6 +86570,13 @@
 														}
 													}
 												}
+											},
+											"initialTagIds": {
+												"maxItems": 32,
+												"uniqueItems": true,
+												"default": [],
+												"type": "array",
+												"items": { "format": "uuid", "type": "string" }
 											},
 											"creditAttributionRequestConsent": {
 												"anyOf": [
@@ -89717,7 +89731,8 @@
 													"enum": [
 														"UnitNotFound",
 														"ImageAssetNotFound",
-														"EntityEntryNotFound"
+														"EntityEntryNotFound",
+														"TagNotFound"
 													]
 												},
 												"message": { "type": "string" },
@@ -156003,6 +156018,13 @@
 								"type": "object",
 								"required": ["localization", "visibility", "joinPolicy"],
 								"properties": {
+									"initialTagIds": {
+										"maxItems": 32,
+										"uniqueItems": true,
+										"default": [],
+										"type": "array",
+										"items": { "format": "uuid", "type": "string" }
+									},
 									"localization": {
 										"additionalProperties": false,
 										"type": "object",
@@ -156415,7 +156437,7 @@
 												"code": {
 													"default": "ImageAssetNotFound",
 													"type": "string",
-													"enum": ["ImageAssetNotFound"]
+													"enum": ["ImageAssetNotFound", "TagNotFound"]
 												},
 												"message": { "type": "string" },
 												"details": {}
