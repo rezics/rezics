@@ -207,6 +207,11 @@ tasks:
         cmds:
             - yarn exec tsx scripts/install-platform.ts {{.CLI_ARGS}}
 
+    bootstrap:curated-collections:
+        desc: Run the one-off local backfill for the fixed creation-time Tag Collections.
+        cmds:
+            - yarn exec tsx scripts/ensure-curated-creation-tag-collections.ts {{.CLI_ARGS}}
+
     platform:installation:check:
         desc: Verify a fresh installation against the complete factory bundle.
         cmds:

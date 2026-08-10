@@ -559,7 +559,7 @@ async function ensureProfileFavorites(tx: DatabaseTransaction): Promise<void> {
 	}
 }
 
-async function ensureCuratedCreationTagCollections(tx: DatabaseTransaction): Promise<void> {
+export async function ensureCuratedCreationTagCollections(tx: DatabaseTransaction): Promise<void> {
 	const createdAt = bootstrapEpoch();
 	for (const value of CuratedCreationTagCollectionManifest) {
 		const created = await insertUnitIfMissing(tx, {
