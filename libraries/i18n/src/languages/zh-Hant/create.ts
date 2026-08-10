@@ -17,6 +17,13 @@ export default {
 		overview: "內容類型",
 		backToOverview: "返回內容類型",
 	},
+	entityHelp: {
+		label: "開啟署名說明",
+		title: "署名說明",
+		description: `署名需要關聯${entityTerms.inline}。如果搜尋不到${entityTerms.inline}，或想建立例如代表自己的作者身分，請先建立${entityTerms.inline}。`,
+		createEntity: `建立${entityTerms.inline}`,
+		close: "關閉",
+	},
 	sections: {
 		book: { label: "書籍", description: "查看及管理與您相關的書籍。" },
 		software: { label: "軟體", description: "查看及管理與您相關的軟體條目。" },

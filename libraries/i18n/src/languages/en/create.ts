@@ -17,6 +17,13 @@ export default {
 		overview: "Content types",
 		backToOverview: "Back to content types",
 	},
+	entityHelp: {
+		label: "Learn about credits",
+		title: "Credit guidance",
+		description: `Credits must link to an ${entityTerms.inline}. If you cannot find an ${entityTerms.inline}, or want to create an author identity for yourself, create an ${entityTerms.inline} first.`,
+		createEntity: `Create an ${entityTerms.inline}`,
+		close: "Close",
+	},
 	sections: {
 		book: { label: "Books", description: "View and manage books related to your work." },
 		software: {

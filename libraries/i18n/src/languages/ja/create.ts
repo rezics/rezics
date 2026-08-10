@@ -17,6 +17,13 @@ export default {
 		overview: "コンテンツの種類",
 		backToOverview: "コンテンツの種類に戻る",
 	},
+	entityHelp: {
+		label: "クレジットの説明を開く",
+		title: "クレジットの説明",
+		description: `クレジットには${entityTerms.inline}が必要です。${entityTerms.inline}が見つからない場合や、例えば自分自身を著者として登録したい場合は、先に${entityTerms.inline}を作成してください。`,
+		createEntity: `${entityTerms.label}を作成`,
+		close: "閉じる",
+	},
 	sections: {
 		book: { label: "書籍", description: "あなたの作業に関連する書籍を表示および管理" },
 		software: {

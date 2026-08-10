@@ -17,6 +17,13 @@ export default {
 		overview: "内容类型",
 		backToOverview: "返回内容类型",
 	},
+	entityHelp: {
+		label: "打开署名说明",
+		title: "署名说明",
+		description: `署名需要关联${entityTerms.inline}。如果搜索不到${entityTerms.inline}，或想创建例如代表自己的作者身份，请先创建${entityTerms.inline}。`,
+		createEntity: `创建${entityTerms.inline}`,
+		close: "关闭",
+	},
 	sections: {
 		book: { label: "书籍", description: "查看及管理与您相关的书籍。" },
 		software: { label: "软件", description: "查看及管理与您相关的软件条目。" },

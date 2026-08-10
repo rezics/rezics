@@ -52,7 +52,7 @@ vi.stubGlobal(
 	},
 );
 
-const translation = await create(resources).getTranslation(["ui", "units"], ["zh-Hant"]);
+const translation = await create(resources).getTranslation(["create", "ui", "units"], ["zh-Hant"]);
 function renderEditor({
 	onChange = vi.fn(),
 	search = vi.fn(async () => []),
@@ -89,6 +89,7 @@ describe("UnitCreditAttributionEditor", () => {
 		const entity = screen.getByRole("button", { name: "署名實體 1" });
 
 		expect(screen.getByText("署名").tagName).toBe("LEGEND");
+		expect(screen.getByRole("button", { name: "開啟署名說明" })).toBeTruthy();
 		expect(role).toHaveProperty("value", "director");
 		expect(screen.queryByRole("option", { name: "選擇角色" })).toBeNull();
 		expect(

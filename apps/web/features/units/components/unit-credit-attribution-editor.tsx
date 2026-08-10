@@ -19,6 +19,7 @@ import {
 	useEntitySearch,
 } from "@rezics/ui";
 
+import { EntityCreationHelp } from "@/features/create/components/entity-creation-help";
 import { useTranslation } from "@/i18n/client";
 import {
 	CreditAttributionRolesByUnitType,
@@ -59,7 +60,10 @@ export function UnitCreditAttributionEditor({
 
 	return (
 		<FieldSet className="gap-3">
-			<FieldLegend>{t.units.creation.creditAttributionsTitle}</FieldLegend>
+			<FieldLegend className="flex items-center gap-1">
+				{t.units.creation.creditAttributionsTitle}
+				<EntityCreationHelp />
+			</FieldLegend>
 			<div className="grid gap-3">
 				{value.map((draft, index) => {
 					const number = index + 1;

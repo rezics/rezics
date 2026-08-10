@@ -18,6 +18,13 @@ export default {
 		overview: "Inhaltstypen",
 		backToOverview: "Zurück zu den Inhaltstypen",
 	},
+	entityHelp: {
+		label: "Hinweise zu Mitwirkungsangaben öffnen",
+		title: "Hinweise zu Mitwirkungsangaben",
+		description: `Mitwirkungsangaben müssen mit einer ${entityTerms.inline} verknüpft sein. Wenn du keine ${entityTerms.inline} findest oder zum Beispiel eine eigene Autorenidentität anlegen möchtest, lege bitte zuerst eine ${entityTerms.inline} an.`,
+		createEntity: `${entityTerms.label} erstellen`,
+		close: "Schließen",
+	},
 	sections: {
 		book: {
 			label: "Bücher",

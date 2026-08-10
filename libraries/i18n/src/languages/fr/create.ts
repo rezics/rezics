@@ -17,6 +17,13 @@ export default {
 		overview: "Types de contenu",
 		backToOverview: "Retour aux types de contenu",
 	},
+	entityHelp: {
+		label: "En savoir plus sur les crédits",
+		title: "Informations sur les crédits",
+		description: `Les crédits doivent être associés à une ${entityTerms.inline}. Si vous ne trouvez pas d’${entityTerms.inline} ou souhaitez créer, par exemple, une identité d’auteur pour vous-même, créez d’abord une ${entityTerms.inline}.`,
+		createEntity: `Créer une ${entityTerms.inline}`,
+		close: "Fermer",
+	},
 	sections: {
 		book: {
 			label: "Livres",

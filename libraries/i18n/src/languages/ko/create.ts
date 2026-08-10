@@ -17,6 +17,13 @@ export default {
 		overview: "콘텐츠 유형",
 		backToOverview: "콘텐츠 유형으로 돌아가기",
 	},
+	entityHelp: {
+		label: "크레딧 안내 보기",
+		title: "크레딧 안내",
+		description: `크레딧에는 ${entityTerms.inline}가 필요합니다. ${entityTerms.inline}를 찾을 수 없거나, 예를 들어 자신을 작가로 등록하고 싶다면 먼저 ${entityTerms.inline}를 만드세요.`,
+		createEntity: `${entityTerms.inline} 만들기`,
+		close: "닫기",
+	},
 	sections: {
 		book: { label: "도서", description: "작업과 관련된 도서를 보고 관리하세요." },
 		software: {
