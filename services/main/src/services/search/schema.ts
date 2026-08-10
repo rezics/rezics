@@ -11,6 +11,7 @@ import type { ContentLanguage } from "@rezics/i18n";
 import type { PublicationLicenseId } from "@rezics/license";
 import type { PublicSlugAddressValue } from "@rezics/slug";
 
+import type { ContentRatingPolicy } from "../content-rating/policy";
 import type { SearchExpression } from "./query";
 import type { SearchKeysetPosition } from "./query";
 
@@ -80,6 +81,8 @@ export interface DomainSearchRequest {
 	searchPosition?: SearchKeysetPosition;
 	/** Server-owned number of prior results represented by the keyset. */
 	searchSeen?: number;
+	/** Server-owned effective content-rating policy; never accepted directly from an API body. */
+	contentRatingPolicy?: ContentRatingPolicy;
 }
 
 export const SearchFieldByDomainRequestFilter = {

@@ -11,6 +11,7 @@ import {
 	recommendationExclusion,
 	post,
 	unit,
+	ContentRatingValues,
 } from "../../database/schema";
 import { InvalidPaginationCursor } from "../../pagination/errors";
 import { parseJsonCursor } from "../../pagination";
@@ -42,9 +43,10 @@ import {
 
 const UnitRecommendationCursor = t.Object(
 	{
-		v: t.Literal(1),
+		v: t.Literal(2),
 		type: t.Nullable(t.Union([t.Literal("book"), t.Literal("software"), t.Literal("media")])),
 		seedUnitId: t.Nullable(t.String({ format: "uuid" })),
+		contentRatings: t.Array(t.UnionEnum(ContentRatingValues), { uniqueItems: true }),
 		personalized: t.Boolean(),
 		snapshotId: t.Nullable(t.String({ format: "uuid" })),
 		policyVersion: RecommendationPolicyVersionSchema,
@@ -58,8 +60,9 @@ type UnitRecommendationCursor = typeof UnitRecommendationCursor.static;
 
 const RelatedPostCursor = t.Object(
 	{
-		v: t.Literal(1),
+		v: t.Literal(2),
 		postId: t.String({ format: "uuid" }),
+		contentRatings: t.Array(t.UnionEnum(ContentRatingValues), { uniqueItems: true }),
 		personalized: t.Boolean(),
 		snapshotId: t.Nullable(t.String({ format: "uuid" })),
 		policyVersion: RecommendationPolicyVersionSchema,
@@ -70,6 +73,13 @@ const RelatedPostCursor = t.Object(
 	{ additionalProperties: false },
 );
 type RelatedPostCursor = typeof RelatedPostCursor.static;
+
+function equalOrderedValues(
+	left: readonly (number | string)[],
+	right: readonly (number | string)[],
+) {
+	return left.length === right.length && left.every((value, index) => value === right[index]);
+}
 
 function decodeUnitCursor(value?: string) {
 	if (!value) return undefined;
@@ -152,6 +162,7 @@ export default new Elysia({ prefix: "/recommendations" })
 				cursor &&
 				(cursor.type !== (query.type ?? null) ||
 					cursor.seedUnitId !== (query.seedUnitId ?? null) ||
+					!equalOrderedValues(cursor.contentRatings, viewer.contentRatings) ||
 					cursor.personalized !== viewer.personalized ||
 					cursor.limit !== (query.limit ?? 20) ||
 					Number.isNaN(Date.parse(cursor.asOf)))
@@ -208,9 +219,10 @@ export default new Elysia({ prefix: "/recommendations" })
 				items: result.items,
 				nextCursor: result.nextId
 					? encodeCursor({
-							v: 1,
+							v: 2,
 							type: query.type ?? null,
 							seedUnitId: query.seedUnitId ?? null,
+							contentRatings: [...viewer.contentRatings],
 							personalized: viewer.personalized,
 							snapshotId: snapshot?.id ?? null,
 							policyVersion,
@@ -243,6 +255,7 @@ export default new Elysia({ prefix: "/recommendations" })
 			if (
 				cursor &&
 				(cursor.postId !== params.postId ||
+					!equalOrderedValues(cursor.contentRatings, viewer.contentRatings) ||
 					cursor.personalized !== viewer.personalized ||
 					cursor.limit !== (query.limit ?? 20) ||
 					Number.isNaN(Date.parse(cursor.asOf)))
@@ -291,8 +304,9 @@ export default new Elysia({ prefix: "/recommendations" })
 				items: result.items,
 				nextCursor: result.nextId
 					? encodeCursor({
-							v: 1,
+							v: 2,
 							postId: params.postId,
+							contentRatings: [...viewer.contentRatings],
 							personalized: viewer.personalized,
 							snapshotId: snapshot?.id ?? null,
 							policyVersion,

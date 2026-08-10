@@ -3,6 +3,7 @@ import { SearchContinuationToken } from "@rezics/filter";
 import { PublicationLicenseIds } from "@rezics/license";
 
 import { SearchCategories, SearchSorts } from "../../search/schema";
+import { ContentRatingValues } from "../../database/schema/contract-values";
 import { ContentLanguage, LocalizationLanguagePriority, Uuid } from "../schema";
 
 const SearchCategory = t.Union(SearchCategories.map((category) => t.Literal(category)));
@@ -12,6 +13,10 @@ const SearchSort = t.Union(SearchSorts.map((sort) => t.Literal(sort)));
 const SearchStringList = t.Array(t.String({ minLength: 1 }), { maxItems: 50 });
 const SearchLanguageList = t.Array(ContentLanguage, { maxItems: 50 });
 const SearchLicenseList = t.Array(t.UnionEnum(PublicationLicenseIds), { maxItems: 50 });
+const SearchContentRatingList = t.Array(t.UnionEnum(ContentRatingValues), {
+	maxItems: ContentRatingValues.length,
+	uniqueItems: true,
+});
 
 export const DomainSearchBody = t.Object(
 	{
@@ -21,7 +26,7 @@ export const DomainSearchBody = t.Object(
 		localizationLanguages: LocalizationLanguagePriority,
 		Languages: t.Optional(SearchLanguageList),
 		kinds: t.Optional(SearchStringList),
-		contentRatings: t.Optional(SearchStringList),
+		contentRatings: t.Optional(SearchContentRatingList),
 		aiDisclosures: t.Optional(SearchStringList),
 		licenses: t.Optional(SearchLicenseList),
 		contentLicenseActive: t.Optional(t.Boolean()),

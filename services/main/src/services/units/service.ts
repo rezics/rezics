@@ -21,6 +21,11 @@ import { toSafeInteger } from "../database/integer";
 import { exactCount, lowerBoundCount } from "../counts/contract";
 import { WorkPolicy } from "../performance/policy";
 import {
+	DefaultContentRatingPolicy,
+	getContentRatingCondition,
+	type ContentRatingPolicy,
+} from "../content-rating/policy";
+import {
 	type CreditAttributionRole,
 	isCreditAttributionRoleForUnitKind,
 	type WorkReleaseStatus,
@@ -688,6 +693,7 @@ export async function listUnits(
 	cursor?: [string, string],
 	limit = 20,
 	localizationLanguages: readonly ContentLanguage[] = [],
+	contentRatingPolicy: ContentRatingPolicy = DefaultContentRatingPolicy,
 ) {
 	const rows = await database
 		.select({
@@ -729,6 +735,7 @@ export async function listUnits(
 				eq(unit.visibility, "public"),
 				eq(unit.moderationStatus, "approved"),
 				isNull(unit.deletedAt),
+				getContentRatingCondition(contentRatingPolicy),
 				not(
 					exists(
 						database

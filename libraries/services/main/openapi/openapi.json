@@ -222604,9 +222604,14 @@
 										"items": { "minLength": 1, "type": "string" }
 									},
 									"contentRatings": {
-										"maxItems": 50,
+										"maxItems": 4,
+										"uniqueItems": true,
 										"type": "array",
-										"items": { "minLength": 1, "type": "string" }
+										"items": {
+											"default": "general",
+											"type": "string",
+											"enum": ["general", "r15", "r18", "r18g"]
+										}
 									},
 									"aiDisclosures": {
 										"maxItems": 50,

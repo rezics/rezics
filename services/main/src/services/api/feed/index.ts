@@ -18,6 +18,10 @@ import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
 import { OfficialRealmUnitIds } from "@rezics/slug";
 
 import { resolveIdentity } from "../../auth/session";
+import {
+	contentRatingPolicyFromAllowlist,
+	getContentRatingCondition,
+} from "../../content-rating/policy";
 import { getProfileActivityReadCondition } from "../../authorization/profile-activity/query";
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import { database } from "../../database";
@@ -50,6 +54,7 @@ import {
 	unitReactionGlobalStat,
 	unitRevisionHead,
 	unitStructureMember,
+	ContentRatingValues,
 } from "../../database/schema";
 import { parseJsonCursor } from "../../pagination";
 import {
@@ -98,6 +103,7 @@ import {
 	type FeedRequest as FeedRequestType,
 	type FeedSort,
 } from "./schema";
+import type { ContentRating } from "../../database/schema/contract-values";
 
 const feedContextRealm = alias(unit, "feed_context_realm");
 const feedReviewScoreTargetUnit = alias(unit, "feed_review_score_target_unit");
@@ -357,6 +363,7 @@ async function resolveFeedSearchSelection(input: {
 		branches,
 		...(input.filter ? { domainFilter: input.filter } : {}),
 		...(input.profileId ? { profileId: input.profileId } : {}),
+		contentRatingPolicy: contentRatingPolicyFromAllowlist(input.contentRatings),
 		contentRatings: [...input.contentRatings],
 		query: input.query,
 		limit: input.limit,
@@ -429,13 +436,14 @@ const FeedSearchPosition = t.Union([
 
 const FeedCursor = t.Object(
 	{
-		v: t.Literal(10),
+		v: t.Literal(11),
 		sort: FeedSortSchema,
 		filterHash: t.Nullable(t.String({ pattern: "^[0-9a-f]{64}$" })),
 		filterLanguages: t.Array(t.UnionEnum(ContentLanguageValues), { uniqueItems: true }),
 		localizationLanguages: t.Array(t.UnionEnum(ContentLanguageValues), {
 			uniqueItems: true,
 		}),
+		contentRatings: t.Array(t.UnionEnum(ContentRatingValues), { uniqueItems: true }),
 		personalized: t.Boolean(),
 		snapshotId: t.Nullable(t.String({ format: "uuid" })),
 		policyVersion: RecommendationPolicyVersionSchema,
@@ -486,6 +494,7 @@ function validateCursor(
 	personalized: boolean,
 	filterLanguages: readonly ContentLanguage[],
 	localizationLanguages: readonly ContentLanguage[],
+	contentRatings: readonly ContentRating[],
 ) {
 	if (!cursor) return;
 	const filterHash = query.filter
@@ -500,6 +509,8 @@ function validateCursor(
 		cursor.localizationLanguages.some(
 			(language, index) => language !== localizationLanguages[index],
 		) ||
+		cursor.contentRatings.length !== contentRatings.length ||
+		cursor.contentRatings.some((rating, index) => rating !== contentRatings[index]) ||
 		cursor.personalized !== personalized ||
 		cursor.limit !== (query.limit ?? 20) ||
 		Number.isNaN(Date.parse(cursor.asOf))
@@ -627,9 +638,7 @@ export function getFeedEligibilityCondition(
 					...(viewer.profileId ? { viewerProfileId: viewer.profileId } : {}),
 				})
 			: undefined,
-		viewer.contentRatings.length
-			? inArray(unit.contentRating, viewer.contentRatings)
-			: undefined,
+		getContentRatingCondition(contentRatingPolicyFromAllowlist(viewer.contentRatings)),
 		viewer.profileId
 			? sql`not exists (
 				select 1 from credit_attribution attribution
@@ -1494,7 +1503,14 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 			body.localizationLanguages,
 			viewer,
 		);
-		validateCursor(cursor, body, viewer.personalized, filterLanguages, localizationLanguages);
+		validateCursor(
+			cursor,
+			body,
+			viewer.personalized,
+			filterLanguages,
+			localizationLanguages,
+			viewer.contentRatings,
+		);
 		const baseScope: FeedEligibilityScope = {
 			...(body.filter?.where ? { filter: body.filter.where } : {}),
 			...(contentKinds?.length ? { content: contentKinds } : {}),
@@ -1574,7 +1590,7 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 			nextCursor: searchSelection.nextPosition
 				? Buffer.from(
 						JSON.stringify({
-							v: 10,
+							v: 11,
 							sort,
 							filterHash: body.filter
 								? createHash("sha256")
@@ -1583,6 +1599,7 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 								: null,
 							filterLanguages,
 							localizationLanguages,
+							contentRatings: [...viewer.contentRatings],
 							personalized: viewer.personalized,
 							snapshotId: snapshotContext.id,
 							policyVersion: snapshotContext.policyVersion,

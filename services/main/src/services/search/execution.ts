@@ -14,6 +14,11 @@ import { eq } from "drizzle-orm";
 
 import { database } from "../database";
 import { zone } from "../database/schema";
+import {
+	contentRatingPolicyFromAllowlist,
+	contentRatingPolicyKey,
+	resolveViewerContentRatings,
+} from "../content-rating/policy";
 import type { SearchCountResult } from "../counts/contract";
 import { InvalidSearch } from "./errors";
 import {
@@ -117,15 +122,21 @@ async function resolveCompiledExecution(
 	compiled: CompiledSearchRequest,
 	localizationLanguages: readonly ContentLanguage[],
 	enforcedZoneId?: string,
+	profileId?: string,
 	inputIdentity?: string,
 ) {
-	const configuredScope = await resolveScope(compiled);
-	const hostScope = enforcedZoneId
-		? await resolveScope({
+	const hostScopePromise = enforcedZoneId
+		? resolveScope({
 				...compiled,
 				scope: { kind: "zone", zoneId: enforcedZoneId },
 			})
-		: undefined;
+		: Promise.resolve(undefined);
+	const [contentRatings, configuredScope, hostScope] = await Promise.all([
+		resolveViewerContentRatings(profileId),
+		resolveScope(compiled),
+		hostScopePromise,
+	]);
+	const contentRatingPolicy = contentRatingPolicyFromAllowlist(contentRatings);
 	const scope = {
 		categories: hostScope
 			? configuredScope.categories.filter((category) =>
@@ -158,12 +169,13 @@ async function resolveCompiledExecution(
 				maxResultWindow: compiled.maxResultWindow,
 				searchExpression,
 				domainFilter: domainFilter ? canonicalUnitPredicate(domainFilter) : undefined,
+				contentRatingPolicy: contentRatingPolicyKey(contentRatingPolicy),
 				facets: compiled.facets,
 				inputIdentity,
 			}),
 		)
 		.digest("hex");
-	return { scope, searchExpression, domainFilter, requestHash };
+	return { scope, searchExpression, domainFilter, requestHash, contentRatingPolicy };
 }
 
 function mergeSearchFacets(
@@ -214,12 +226,14 @@ async function executeCompiledSearchWithPresentation<Hit extends RankedSearchHit
 	enforcedZoneId?: string,
 	inputIdentity?: string,
 ) {
-	const { scope, searchExpression, domainFilter, requestHash } = await resolveCompiledExecution(
-		compiled,
-		localizationLanguages,
-		enforcedZoneId,
-		inputIdentity,
-	);
+	const { scope, searchExpression, domainFilter, requestHash, contentRatingPolicy } =
+		await resolveCompiledExecution(
+			compiled,
+			localizationLanguages,
+			enforcedZoneId,
+			profileId,
+			inputIdentity,
+		);
 	let cursor: ReturnType<typeof parseSearchCursor> | undefined;
 	if (compiled.cursor)
 		try {
@@ -249,6 +263,7 @@ async function executeCompiledSearchWithPresentation<Hit extends RankedSearchHit
 					return { state: "skipped", category } as const;
 				const domainRequest = {
 					profileId,
+					contentRatingPolicy,
 					localizationLanguages,
 					query: compiled.query,
 					limit: compiled.pageSize,
@@ -364,12 +379,14 @@ export async function executeCompiledSearchIdentifiers(
 	inputIdentity?: string,
 ) {
 	const { request: compiled } = plan;
-	const { scope, searchExpression, domainFilter, requestHash } = await resolveCompiledExecution(
-		compiled,
-		localizationLanguages,
-		enforcedZoneId,
-		inputIdentity,
-	);
+	const { scope, searchExpression, domainFilter, requestHash, contentRatingPolicy } =
+		await resolveCompiledExecution(
+			compiled,
+			localizationLanguages,
+			enforcedZoneId,
+			profileId,
+			inputIdentity,
+		);
 	let cursor: ReturnType<typeof parseGlobalSearchCursor> | undefined;
 	if (compiled.cursor)
 		try {
@@ -394,6 +411,7 @@ export async function executeCompiledSearchIdentifiers(
 				return { state: "skipped", category } as const;
 			const domainRequest = {
 				profileId,
+				contentRatingPolicy,
 				localizationLanguages,
 				query: compiled.query,
 				limit: compiled.pageSize,
@@ -446,6 +464,7 @@ export async function executeCompiledSearchIdentifiers(
 	const { page, facetGroups } = await searchGlobalIdentifiersWithFacets(
 		{
 			profileId,
+			contentRatingPolicy,
 			localizationLanguages,
 			query: compiled.query,
 			offset: cursor?.seen ?? 0,

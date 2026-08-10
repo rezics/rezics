@@ -12,6 +12,11 @@ import {
 	unitFollowNotificationPreference,
 } from "../database/schema";
 import type { UnitKind } from "../database/schema/contract-values";
+import {
+	DefaultContentRatingPolicy,
+	getContentRatingCondition,
+	type ContentRatingPolicy,
+} from "../content-rating/policy";
 import { UnitNotFound } from "../units/errors";
 import {
 	resolvedUnitLocalizationAvatar,
@@ -55,6 +60,7 @@ type ListFollowingInput = {
 	readonly localizationLanguages?: readonly ContentLanguage[];
 	readonly cursor?: string;
 	readonly limit: number;
+	readonly contentRatingPolicy?: ContentRatingPolicy;
 };
 
 function followingCursorCondition(cursor: FollowingCursorBoundary | undefined) {
@@ -73,7 +79,13 @@ function followingCursorCondition(cursor: FollowingCursorBoundary | undefined) {
 
 export async function listFollowing(input: ListFollowingInput) {
 	const localizationLanguages = input.localizationLanguages ?? [];
-	const cursor = decodeFollowingCursor(input.cursor, input.kind, localizationLanguages);
+	const contentRatingPolicy = input.contentRatingPolicy ?? DefaultContentRatingPolicy;
+	const cursor = decodeFollowingCursor(
+		input.cursor,
+		input.kind,
+		localizationLanguages,
+		contentRatingPolicy.kind === "allow" ? contentRatingPolicy.ratings : [],
+	);
 	const rows = await database
 		.select({
 			id: unit.id,
@@ -98,6 +110,7 @@ export async function listFollowing(input: ListFollowingInput) {
 				eq(unitFollow.followerProfileId, input.followerProfileId),
 				input.kind ? eq(unit.kind, input.kind) : undefined,
 				getUnitReadCondition(input.followerProfileId),
+				getContentRatingCondition(contentRatingPolicy),
 				followingCursorCondition(cursor),
 			),
 		)
@@ -116,11 +129,16 @@ export async function listFollowing(input: ListFollowingInput) {
 		})),
 		nextCursor:
 			rows.length > input.limit && last
-				? encodeFollowingCursor(input.kind, localizationLanguages, {
-						favorite: last.favorite,
-						position: last.position,
-						unitId: last.id,
-					})
+				? encodeFollowingCursor(
+						input.kind,
+						localizationLanguages,
+						contentRatingPolicy.kind === "allow" ? contentRatingPolicy.ratings : [],
+						{
+							favorite: last.favorite,
+							position: last.position,
+							unitId: last.id,
+						},
+					)
 				: null,
 	};
 }

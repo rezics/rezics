@@ -1810,21 +1810,23 @@ export default new Elysia({ prefix: "/realms" })
 				identity.authorization.profileId,
 				false,
 			);
+			const contentItems = await hydrateFeedItems(
+				items.map((item) => ({
+					id: item.unitId,
+					realmId: params.realmId,
+				})),
+				viewer,
+				{
+					content: FeedContentKindValues,
+					localizationLanguages: query.localizationLanguages,
+				},
+				new Date(),
+				{ kind: "contextual" },
+			);
+			const visibleUnitIds = new Set(contentItems.map((item) => item.id));
 			return {
-				items,
-				contentItems: await hydrateFeedItems(
-					items.map((item) => ({
-						id: item.unitId,
-						realmId: params.realmId,
-					})),
-					viewer,
-					{
-						content: FeedContentKindValues,
-						localizationLanguages: query.localizationLanguages,
-					},
-					new Date(),
-					{ kind: "contextual" },
-				),
+				items: items.filter((item) => visibleUnitIds.has(item.unitId)),
+				contentItems,
 			};
 		},
 		{

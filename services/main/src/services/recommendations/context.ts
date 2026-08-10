@@ -3,13 +3,21 @@ import type { ContentLanguage } from "@rezics/i18n";
 import { OfficialRealmUnitIds } from "@rezics/slug";
 
 import { database } from "../database";
-import { ContentRatingValues, profilePreference, recommendationSnapshot } from "../database/schema";
+import {
+	DefaultContentRatingValues,
+	profilePreference,
+	recommendationSnapshot,
+} from "../database/schema";
+import {
+	contentRatingAllowlistFromStored,
+	type AllowedContentRatings,
+} from "../content-rating/policy";
 import { RecommendationPolicy, RecommendationPolicyVersion } from "./policy";
 
 export interface RecommendationViewer {
 	profileId?: string;
 	personalized: boolean;
-	contentRatings: (typeof ContentRatingValues)[number][];
+	contentRatings: AllowedContentRatings;
 	preferredLanguages: ContentLanguage[];
 	defaultScoreRealmId: string;
 }
@@ -29,7 +37,7 @@ export async function resolveRecommendationViewer(
 		return {
 			profileId: undefined,
 			personalized: false,
-			contentRatings: [],
+			contentRatings: DefaultContentRatingValues,
 			preferredLanguages: [],
 			defaultScoreRealmId: OfficialRealmUnitIds.score,
 		};
@@ -46,7 +54,7 @@ export async function resolveRecommendationViewer(
 	return {
 		profileId,
 		personalized: resolvePersonalization(preference?.personalized, personalizedOverride),
-		contentRatings: preference?.contentRatings ?? [],
+		contentRatings: contentRatingAllowlistFromStored(preference?.contentRatings),
 		preferredLanguages: preference?.preferredLanguages ?? [],
 		defaultScoreRealmId: preference?.defaultScoreRealmId ?? OfficialRealmUnitIds.score,
 	};

@@ -8,6 +8,7 @@ import {
 	type CandidateSources,
 	type FeedEligibilityScope,
 } from "../api/feed";
+import { contentRatingPolicyFromAllowlist } from "../content-rating/policy";
 import type { RecommendationReason } from "../api/recommendations/schema";
 import { database } from "../database";
 import { creditAttribution, post, unit } from "../database/schema";
@@ -87,6 +88,7 @@ export async function recommendRelatedPosts(input: {
 				},
 			],
 			contentRatings: [...input.viewer.contentRatings],
+			contentRatingPolicy: contentRatingPolicyFromAllowlist(input.viewer.contentRatings),
 			...(input.viewer.profileId ? { profileId: input.viewer.profileId } : {}),
 			limit: RecommendationPolicy.maxCandidates,
 			sort: "best",

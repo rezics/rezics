@@ -15,6 +15,11 @@ import { isContentLanguage, type ContentLanguage } from "@rezics/i18n";
 import { getActiveObservability } from "@rezics/observability";
 
 import { getUnitReadCondition } from "../authorization/unit/query";
+import {
+	DefaultContentRatingPolicy,
+	getContentRatingCondition,
+	contentRatingPolicyKey,
+} from "../content-rating/policy";
 import { database } from "../database";
 import {
 	book,
@@ -783,6 +788,9 @@ function buildCommonSearchConditions(request: DomainSearchRequest): SQL[] {
 	const readCondition = getUnitReadCondition(request.profileId, { discoverableOnly: true });
 	if (!readCondition) throw new Error("Unit read policy produced no SQL condition");
 	const conditions: SQL[] = [readCondition];
+	conditions.push(
+		getContentRatingCondition(request.contentRatingPolicy ?? DefaultContentRatingPolicy),
+	);
 	if (request.scopeUnitId) {
 		const direct = sql`${unit.id} = ${request.scopeUnitId}::uuid`;
 		conditions.push(
@@ -2143,6 +2151,9 @@ async function searchDomainScan(
 				limit,
 				sort,
 				localizationLanguages: request.localizationLanguages,
+				contentRatingPolicy: contentRatingPolicyKey(
+					request.contentRatingPolicy ?? DefaultContentRatingPolicy,
+				),
 				expression: searchExpression,
 				domainFilter: request.domainFilter
 					? canonicalUnitPredicate(request.domainFilter)
@@ -2851,6 +2862,7 @@ export async function searchGrouped(request: {
 	localizationLanguages: readonly ContentLanguage[];
 	Languages?: ContentLanguage[];
 	limitPerIndex?: number;
+	contentRatingPolicy?: DomainSearchRequest["contentRatingPolicy"];
 }) {
 	const groups = await Promise.all(
 		request.indexes.map(async (category) => {
@@ -2860,6 +2872,7 @@ export async function searchGrouped(request: {
 				localizationLanguages: request.localizationLanguages,
 				Languages: request.Languages,
 				limit: request.limitPerIndex ?? 5,
+				contentRatingPolicy: request.contentRatingPolicy,
 			});
 			return { index: category, ...result };
 		}),

@@ -7,6 +7,7 @@ import { parseNullablePublicationLicenseId } from "@rezics/license";
 import { OfficialRealmUnitIds } from "@rezics/slug";
 
 import session, { resolveIdentity } from "../../auth/session";
+import { contentRatingPolicyFromAllowlist } from "../../content-rating/policy";
 import { database } from "../../database";
 import {
 	avatarReferenceToColumns,
@@ -79,6 +80,7 @@ import {
 	updateFollowingPresentation,
 } from "../../following/service";
 import { listStudioContent, recordStudioVisit } from "../../studio/service";
+import { resolveRecommendationViewer } from "../../recommendations/context";
 import {
 	PreferencesNotFound,
 	ProfileChanged,
@@ -437,14 +439,17 @@ export default new Elysia({ prefix: "/users" })
 	)
 	.get(
 		"/me/following",
-		async ({ profile, query }) =>
-			listFollowing({
+		async ({ profile, query }) => {
+			const viewer = await resolveRecommendationViewer(profile.unitId, false);
+			return listFollowing({
 				followerProfileId: profile.unitId,
 				kind: query.kind,
 				localizationLanguages: query.localizationLanguages,
 				cursor: query.cursor,
 				limit: query.limit ?? 30,
-			}),
+				contentRatingPolicy: contentRatingPolicyFromAllowlist(viewer.contentRatings),
+			});
+		},
 		{
 			access: "interaction:read",
 			query: FollowingListQuery,

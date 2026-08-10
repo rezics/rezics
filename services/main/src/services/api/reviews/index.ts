@@ -3,6 +3,7 @@ import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
+import { contentRatingPolicyFromAllowlist } from "../../content-rating/policy";
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
 import {
@@ -21,6 +22,7 @@ import {
 	unitOwnership,
 	unitLocalization,
 	unitProgressEntry,
+	ContentRatingValues,
 } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
@@ -109,13 +111,14 @@ const ReviewSearchPosition = t.Union([
 
 const ReviewListCursor = t.Object(
 	{
-		v: t.Literal(4),
+		v: t.Literal(5),
 		targetId: t.Nullable(Uuid),
 		languages: t.Array(ContentLanguage, { maxItems: 50, uniqueItems: true }),
 		localizationLanguages: t.Array(ContentLanguage, {
 			maxItems: 50,
 			uniqueItems: true,
 		}),
+		contentRatings: t.Array(t.UnionEnum(ContentRatingValues), { uniqueItems: true }),
 		realmIds: t.Array(Uuid, { maxItems: 50, uniqueItems: true }),
 		scoreRealmId: t.Nullable(Uuid),
 		scores: t.Array(t.Integer({ minimum: 1, maximum: 10 }), {
@@ -154,6 +157,7 @@ function validateReviewListCursor(
 	cursor: ReviewListCursor | undefined,
 	query: ListReviewsQuery,
 	scoreFilter: ReturnType<typeof resolveReviewScoreFilter>,
+	contentRatings: readonly (typeof ContentRatingValues)[number][],
 ) {
 	if (!cursor) return;
 	const scoreRealmId = scoreFilter.status === "present" ? scoreFilter.realmId : null;
@@ -162,6 +166,7 @@ function validateReviewListCursor(
 		cursor.targetId !== (query.targetId ?? null) ||
 		!equalOrderedValues(cursor.languages, query.languages ?? []) ||
 		!equalOrderedValues(cursor.localizationLanguages, query.localizationLanguages ?? []) ||
+		!equalOrderedValues(cursor.contentRatings, contentRatings) ||
 		!equalOrderedValues(cursor.realmIds, query.realmIds ?? []) ||
 		cursor.scoreRealmId !== scoreRealmId ||
 		!equalOrderedValues(cursor.scores, scores) ||
@@ -217,7 +222,7 @@ export default new Elysia()
 							scores: "scores and scoreRealmId must be provided together",
 						});
 					const cursor = decodeReviewListCursor(query.cursor);
-					validateReviewListCursor(cursor, query, scoreFilter);
+					validateReviewListCursor(cursor, query, scoreFilter, viewer.contentRatings);
 					const snapshot = cursor?.snapshotId
 						? await resolveRecommendationSnapshot(cursor.snapshotId)
 						: cursor
@@ -252,6 +257,10 @@ export default new Elysia()
 					const searchPage = await searchGlobalIdentifiers({
 						branches: [{ category: "reviews", sourceUnitKinds: ["post"] }],
 						...(viewer.profileId ? { profileId: viewer.profileId } : {}),
+						contentRatingPolicy: contentRatingPolicyFromAllowlist(
+							viewer.contentRatings,
+						),
+						contentRatings: [...viewer.contentRatings],
 						additionalConditions: [
 							getFeedEligibilityCondition(rankingViewer, scope, asOf),
 						],
@@ -309,11 +318,12 @@ export default new Elysia()
 						totalCount,
 						nextCursor: searchPage.nextPosition
 							? encodeReviewListCursor({
-									v: 4,
+									v: 5,
 									targetId: query.targetId ?? null,
 									languages: query.languages ?? [],
 									localizationLanguages: query.localizationLanguages ?? [],
 									realmIds: query.realmIds ?? [],
+									contentRatings: [...viewer.contentRatings],
 									scoreRealmId,
 									scores: [...scores],
 									sort,

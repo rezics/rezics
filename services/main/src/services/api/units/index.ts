@@ -2,6 +2,8 @@ import { StatusCodes } from "http-status-codes";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
+import { contentRatingPolicyFromAllowlist } from "../../content-rating/policy";
+import { resolveRecommendationViewer } from "../../recommendations/context";
 import { decodeCursor, encodeCursor } from "../../pagination";
 import { listUnitStatusEvents } from "../../units/status";
 import {
@@ -396,10 +398,21 @@ export default new Elysia({ prefix: "/units" })
 	)
 	.get(
 		"/:type",
-		async ({ params, query }) => {
+		async ({ params, query, request }) => {
 			const limit = query.limit ?? 20;
 			const cursor = decodeCursor(query.cursor);
-			const rows = await listUnits(params.type, cursor, limit, query.localizationLanguages);
+			const identity = await resolveIdentity(request, "unit:read");
+			const viewer = await resolveRecommendationViewer(
+				identity.authorization.profileId,
+				false,
+			);
+			const rows = await listUnits(
+				params.type,
+				cursor,
+				limit,
+				query.localizationLanguages,
+				contentRatingPolicyFromAllowlist(viewer.contentRatings),
+			);
 			const hasMore = rows.length > limit;
 			const items = hasMore ? rows.slice(0, limit) : rows;
 			const last = items.at(-1);

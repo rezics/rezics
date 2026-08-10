@@ -30,6 +30,10 @@ import { and, eq, isNull } from "drizzle-orm";
 import { t } from "elysia";
 
 import { resolveIdentity } from "../../auth/session";
+import {
+	contentRatingPolicyFromAllowlist,
+	resolveContentRatingPolicy,
+} from "../../content-rating/policy";
 import { resolveRecommendationViewer } from "../../recommendations/context";
 import { AuthenticationRequired } from "../../auth/errors";
 import {
@@ -922,9 +926,14 @@ export default new Elysia({ prefix: "/search" })
 				const indexes = (body.indexes ?? [...SearchCategories]).filter(
 					(index) => hasDevelopmentPreviewAccess || index !== "tag-structures",
 				);
+				const viewer = await resolveRecommendationViewer(
+					identity.authorization.profileId,
+					false,
+				);
 				return await searchGrouped({
 					...body,
 					profileId: identity.authorization.profileId,
+					contentRatingPolicy: contentRatingPolicyFromAllowlist(viewer.contentRatings),
 					indexes,
 				});
 			} catch (error) {
@@ -995,9 +1004,17 @@ export default new Elysia({ prefix: "/search" })
 				);
 			}
 			try {
+				const viewer = await resolveRecommendationViewer(
+					identity.authorization.profileId,
+					false,
+				);
 				return await searchDomain(params.index, {
 					...body,
 					profileId: identity.authorization.profileId,
+					contentRatingPolicy: resolveContentRatingPolicy(
+						viewer.contentRatings,
+						body.contentRatings,
+					),
 				});
 			} catch (cause) {
 				if (cause instanceof InvalidSearch || cause instanceof SearchUnavailable)

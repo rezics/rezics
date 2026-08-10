@@ -61,6 +61,7 @@ import { authClient } from "@/lib/auth-client";
 import { buildLocalizationLanguages, selectLocalization } from "@/lib/localization";
 import { SettingsOverviewHref } from "./routing/settings-routes";
 import { ProfileAttributionProposalManager } from "@/features/governance/unit-workflows";
+import { resetContentRatingDependentQueries } from "@/features/content-feed/data/content-rating-cache";
 import { FeedQueryKey } from "@/features/content-feed/query";
 import { setPresentationPreferencesQueryData } from "@/features/preferences/data/use-presentation-preferences";
 import { ContentRatingPreferenceField } from "./components/content-rating-preference-field";
@@ -314,10 +315,16 @@ export function PreferenceSettings() {
 	const update = usePutApiUsersMePreferences({
 		mutation: {
 			onSuccess: async (data) => {
+				const previousRatings = preferences.data?.contentRatings;
+				const contentRatingsChanged =
+					!previousRatings ||
+					previousRatings.length !== data.contentRatings.length ||
+					previousRatings.some((rating, index) => rating !== data.contentRatings[index]);
 				queryClient.setQueryData(getApiUsersMePreferencesQueryKey(), data);
 				if (session)
 					setPresentationPreferencesQueryData(queryClient, session.user.id, data);
-				await queryClient.invalidateQueries({ queryKey: FeedQueryKey });
+				if (contentRatingsChanged) await resetContentRatingDependentQueries(queryClient);
+				else await queryClient.invalidateQueries({ queryKey: FeedQueryKey });
 			},
 		},
 	});

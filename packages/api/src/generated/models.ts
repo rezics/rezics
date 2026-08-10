@@ -147380,6 +147380,16 @@ export const PostApiSearchByIndexRequestLanguagesEnum = {
 export type PostApiSearchByIndexRequestLanguagesEnum =
 	(typeof PostApiSearchByIndexRequestLanguagesEnum)[keyof typeof PostApiSearchByIndexRequestLanguagesEnum];
 
+export const PostApiSearchByIndexRequestContentRatingsEnum = {
+	general: "general",
+	r15: "r15",
+	r18: "r18",
+	r18g: "r18g",
+} as const;
+
+export type PostApiSearchByIndexRequestContentRatingsEnum =
+	(typeof PostApiSearchByIndexRequestContentRatingsEnum)[keyof typeof PostApiSearchByIndexRequestContentRatingsEnum];
+
 export const PostApiSearchByIndexRequestLicensesEnum = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
@@ -147452,7 +147462,7 @@ export type PostApiSearchByIndexBody = {
 	/**
 	 * @type array | undefined
 	 */
-	contentRatings?: string[];
+	contentRatings?: PostApiSearchByIndexRequestContentRatingsEnum[];
 	/**
 	 * @type array | undefined
 	 */

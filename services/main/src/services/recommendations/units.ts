@@ -2,6 +2,7 @@ import { and, eq, exists, inArray, isNull, lte, not, sql } from "drizzle-orm";
 import type { ContentLanguage } from "@rezics/i18n";
 
 import type { RecommendationReason, RecommendationSurface } from "../api/recommendations/schema";
+import { contentRatingPolicyFromAllowlist } from "../content-rating/policy";
 import { database } from "../database";
 import { unit, unitBestScore, unitLocalization, unitVariant } from "../database/schema";
 import { compareFractionalPositions } from "../ordering/position";
@@ -42,9 +43,7 @@ function eligibleUnit(input: {
 					.where(eq(unitVariant.variantUnitId, unit.id)),
 			),
 		),
-		input.viewer.contentRatings.length
-			? inArray(unit.contentRating, input.viewer.contentRatings)
-			: undefined,
+		inArray(unit.contentRating, input.viewer.contentRatings),
 		input.viewer.profileId
 			? sql`(${unit.id} = ${input.afterId ?? null}::uuid or not exists (
 				select 1 from recommendation_exclusion excluded
@@ -113,6 +112,7 @@ export async function recommendUnits(input: {
 		],
 		kinds: [...kinds],
 		contentRatings: [...input.viewer.contentRatings],
+		contentRatingPolicy: contentRatingPolicyFromAllowlist(input.viewer.contentRatings),
 		...(input.viewer.profileId ? { profileId: input.viewer.profileId } : {}),
 		limit: RecommendationPolicy.maxCandidates,
 		sort: "best",

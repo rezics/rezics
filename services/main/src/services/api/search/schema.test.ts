@@ -27,4 +27,25 @@ describe("Search presentation localization", () => {
 			}),
 		).toBe(false);
 	});
+
+	it("accepts only canonical content ratings", () => {
+		expect(
+			Check(DomainSearchBody, {
+				localizationLanguages: ["zh", "en"],
+				contentRatings: ["general", "r15", "r18"],
+			}),
+		).toBe(true);
+		expect(
+			Check(DomainSearchBody, {
+				localizationLanguages: ["zh", "en"],
+				contentRatings: ["r18", "r18"],
+			}),
+		).toBe(false);
+		expect(
+			Check(DomainSearchBody, {
+				localizationLanguages: ["zh", "en"],
+				contentRatings: ["adult"],
+			}),
+		).toBe(false);
+	});
 });
