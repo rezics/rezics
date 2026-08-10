@@ -28,12 +28,21 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { useAuthPortal } from "@/features/auth/auth-portal-context";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
-import { updateContentRuleSelection } from "@/features/governance/model/content-rule-selection";
+import {
+	getContentRuleDestination,
+	getContentRuleKeys,
+	getContentRuleReferences,
+	retainAvailableContentRuleSelection,
+	updateContentRuleSelection,
+} from "@/features/governance/model/content-rule-selection";
+import {
+	ContentRuleMultiSelect,
+	ContentRuleSourceSelect,
+} from "@/features/governance/components/content-rule-picker";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
-import { ReportRuleMultiSelect } from "./report-rule-multi-select";
 import { MyReportsHref } from "../routing/report-routes";
 
 export type UnitReportTarget = Readonly<{
@@ -57,6 +66,7 @@ export function UnitReportDialog({
 	const selectionContextKey = `${unitId}:${realmId ?? ""}`;
 	const [ruleSelection, setRuleSelection] = useState({
 		contextKey: selectionContextKey,
+		sourceId: "",
 		keys: [] as string[],
 	});
 	const [details, setDetails] = useState("");
@@ -70,36 +80,48 @@ export function UnitReportDialog({
 		},
 		{ query: { enabled: open } },
 	);
+	const destinationItems = destinations.data?.items ?? [];
 	const selectedKeys = ruleSelection.contextKey === selectionContextKey ? ruleSelection.keys : [];
-	const availableRuleKeys = (destinations.data?.items ?? []).flatMap((destination) =>
-		destination.rules.map((rule) => `${destination.id}:${destination.revisionId}:${rule.id}`),
+	const currentSelectedKeys = retainAvailableContentRuleSelection(selectedKeys, destinationItems);
+	const activeDestination = getContentRuleDestination(
+		destinationItems,
+		ruleSelection.contextKey === selectionContextKey ? ruleSelection.sourceId : undefined,
 	);
-	const availableRuleKeySet = new Set(availableRuleKeys);
-	const currentSelectedKeys = selectedKeys.filter((key) => availableRuleKeySet.has(key));
-	const currentSelectedKeySet = new Set(currentSelectedKeys);
-	const selectedRules = (destinations.data?.items ?? []).flatMap((destination) =>
-		destination.rules
-			.filter((rule) =>
-				currentSelectedKeySet.has(`${destination.id}:${destination.revisionId}:${rule.id}`),
-			)
-			.map((rule) => ({
-				sourceRealmId: destination.id,
-				revisionId: destination.revisionId,
-				ruleId: rule.id,
-			})),
-	);
+	const activeSelectedKeys = activeDestination
+		? getContentRuleKeys(activeDestination).filter((key) => currentSelectedKeys.includes(key))
+		: [];
+	const selectedRules = getContentRuleReferences(destinationItems, currentSelectedKeys);
 	const submitReport = usePostApiReportsUnitsByUnitId();
 	const canSubmit = selectedRules.length > 0 && !submitReport.isPending;
 
+	function updateRuleSource(sourceId: string) {
+		if (!destinationItems.some(({ id }) => id === sourceId)) return;
+		setRuleSelection((current) => ({
+			contextKey: selectionContextKey,
+			sourceId,
+			keys:
+				current.contextKey === selectionContextKey
+					? retainAvailableContentRuleSelection(current.keys, destinationItems)
+					: [],
+		}));
+	}
+
 	function updateRuleCheckedState(key: string, checked: boolean) {
 		setRuleSelection((current) => {
-			if (!availableRuleKeySet.has(key)) return current;
+			const availableRuleKeys = new Set(
+				destinationItems.flatMap((destination) => getContentRuleKeys(destination)),
+			);
+			if (!availableRuleKeys.has(key)) return current;
 			const keys =
 				current.contextKey === selectionContextKey
-					? current.keys.filter((value) => availableRuleKeySet.has(value))
+					? retainAvailableContentRuleSelection(current.keys, destinationItems)
 					: [];
 			return {
 				contextKey: selectionContextKey,
+				sourceId:
+					current.contextKey === selectionContextKey
+						? current.sourceId
+						: (activeDestination?.id ?? ""),
 				keys: updateContentRuleSelection(keys, key, checked),
 			};
 		});
@@ -120,7 +142,7 @@ export function UnitReportDialog({
 				},
 			});
 			setDetails("");
-			setRuleSelection({ contextKey: selectionContextKey, keys: [] });
+			setRuleSelection({ contextKey: selectionContextKey, sourceId: "", keys: [] });
 			onOpenChange(false);
 			await queryClient.invalidateQueries({ queryKey: getApiReportsMeQueryKey() });
 			toast.create({
@@ -148,27 +170,46 @@ export function UnitReportDialog({
 				<DialogHeader description={t.reports.description} title={t.reports.title} />
 				<DialogBody>
 					<form className="grid gap-4" id={`report-unit-${unitId}`} onSubmit={submit}>
+						{destinationItems.length > 1 ? (
+							<Field>
+								<FieldLabel>{t.reports.realm}</FieldLabel>
+								<ContentRuleSourceSelect
+									destinations={destinationItems}
+									labels={{
+										ariaLabel: t.reports.realm,
+										choose: t.reports.chooseRealm,
+										scopeLabels: t.reports.myReports.scopes,
+									}}
+									onValueChange={updateRuleSource}
+									value={activeDestination?.id}
+								/>
+							</Field>
+						) : null}
 						<Field required>
 							<FieldLabel>{t.reports.rule}</FieldLabel>
-							<ReportRuleMultiSelect
-								destinations={destinations.data?.items ?? []}
+							<ContentRuleMultiSelect
+								destination={activeDestination}
 								labels={{
 									ariaLabel: t.reports.rule,
 									choose: t.reports.chooseRule,
 									clear: t.reports.clearRules,
 									selectedCount: t.reports.selectedRuleCount,
-									scopeLabels: t.reports.myReports.scopes,
 								}}
 								onClear={() =>
-									setRuleSelection({ contextKey: selectionContextKey, keys: [] })
+									setRuleSelection({
+										contextKey: selectionContextKey,
+										sourceId: activeDestination?.id ?? "",
+										keys: [],
+									})
 								}
 								onRuleCheckedChange={updateRuleCheckedState}
-								selectedKeys={currentSelectedKeys}
+								selectedKeys={activeSelectedKeys}
+								totalSelectedCount={currentSelectedKeys.length}
 							/>
-							{destinations.data && !destinations.data.items.length ? (
+							{destinations.data && !destinationItems.length ? (
 								<FieldDescription>{t.reports.noRealms}</FieldDescription>
 							) : destinations.data &&
-								destinations.data.items.every(
+								destinationItems.every(
 									(destination) => !destination.rules.length,
 								) ? (
 								<FieldDescription>{t.reports.noRules}</FieldDescription>

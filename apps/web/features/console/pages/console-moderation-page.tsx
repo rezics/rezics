@@ -31,7 +31,6 @@ import {
 	CardContent,
 	CardHeader,
 	CardTitle,
-	Checkbox,
 	Field,
 	FieldDescription,
 	FieldLabel,
@@ -50,9 +49,13 @@ import { AppLink as Link } from "@/features/application-shell/components/app-lin
 import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
 import { useDraftContentLanguage } from "@/features/content-languages/hooks/use-draft-content-language";
 import {
-	ContentGovernanceMaximumRuleReferences,
+	getContentRuleDestination,
+	getContentRuleKeys,
+	getContentRuleReferences,
+	retainAvailableContentRuleSelection,
 	updateContentRuleSelection,
 } from "@/features/governance/model/content-rule-selection";
+import { ContentRuleMultiSelect } from "@/features/governance/components/content-rule-picker";
 import { publicUnitHref } from "@/features/units/routing/public-unit-route";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -129,7 +132,10 @@ export function ConsoleModerationPage() {
 		caseId: "",
 		value: "note" as PlatformCommand,
 	});
-	const [ruleSelection, setRuleSelection] = useState({ caseId: "", keys: [] as string[] });
+	const [ruleSelection, setRuleSelection] = useState({
+		caseId: "",
+		keys: [] as string[],
+	});
 	const [note, setNote] = useState("");
 	const noteLanguage = useDraftContentLanguage(note);
 	const [confirmedCommand, setConfirmedCommand] = useState<ConfirmedCommand | null>(null);
@@ -196,28 +202,39 @@ export function ConsoleModerationPage() {
 	const mutationPending = actionMutation.isPending || caseMutation.isPending;
 	const selectedRuleKeys =
 		selected && ruleSelection.caseId === selected.caseId ? ruleSelection.keys : [];
-	const availableRuleKeys = (destinations.data?.items ?? []).flatMap((destination) =>
-		destination.rules.map((rule) => `${destination.id}:${destination.revisionId}:${rule.id}`),
+	const destinationItems = destinations.data?.items ?? [];
+	const currentSelectedRuleKeys = retainAvailableContentRuleSelection(
+		selectedRuleKeys,
+		destinationItems,
 	);
-	const currentSelectedRuleKeys = selectedRuleKeys.filter((key) =>
-		availableRuleKeys.includes(key),
-	);
-	const selectedRules = (destinations.data?.items ?? []).flatMap((destination) =>
-		destination.rules
-			.filter((rule) =>
-				currentSelectedRuleKeys.includes(
-					`${destination.id}:${destination.revisionId}:${rule.id}`,
-				),
+	const activeDestination = getContentRuleDestination(destinationItems);
+	const activeSelectedRuleKeys = activeDestination
+		? getContentRuleKeys(activeDestination).filter((key) =>
+				currentSelectedRuleKeys.includes(key),
 			)
-			.map((rule) => ({
-				sourceRealmId: destination.id,
-				revisionId: destination.revisionId,
-				ruleId: rule.id,
-			})),
-	);
+		: [];
+	const selectedRules = getContentRuleReferences(destinationItems, currentSelectedRuleKeys);
 	const noteRequired = command === "note";
 	const noteValid = !noteRequired || note.trim().length > 0;
 	const rulesValid = !AdverseCommands.has(command) || selectedRules.length > 0;
+
+	function updateRuleCheckedState(key: string, checked: boolean) {
+		const availableRuleKeys = new Set(
+			destinationItems.flatMap((destination) => getContentRuleKeys(destination)),
+		);
+		if (!availableRuleKeys.has(key) || !selected) return;
+		setRuleSelection((current) => ({
+			caseId: selected.caseId,
+			keys: updateContentRuleSelection(
+				retainAvailableContentRuleSelection(
+					current.caseId === selected.caseId ? current.keys : [],
+					destinationItems,
+				),
+				key,
+				checked,
+			),
+		}));
+	}
 
 	async function refreshCaseData(caseId: string) {
 		await Promise.all([
@@ -449,66 +466,24 @@ export function ConsoleModerationPage() {
 									<Field required>
 										<FieldLabel>{t.reports.rule}</FieldLabel>
 										<div className="grid gap-3">
-											{destinations.data?.items.map((destination) => (
-												<fieldset
-													className="grid gap-2 rounded-lg border p-3"
-													key={destination.id}
-												>
-													<legend className="px-1 font-medium text-sm">
-														{destination.title ?? destination.id}
-													</legend>
-													{destination.rules.map((rule) => {
-														const key = `${destination.id}:${destination.revisionId}:${rule.id}`;
-														const checked =
-															currentSelectedRuleKeys.includes(key);
-														return (
-															<label
-																className="flex items-start gap-2 text-sm"
-																key={key}
-															>
-																<Checkbox
-																	checked={checked}
-																	disabled={
-																		!checked &&
-																		currentSelectedRuleKeys.length >=
-																			ContentGovernanceMaximumRuleReferences
-																	}
-																	onCheckedChange={({
-																		checked,
-																	}) => {
-																		setRuleSelection(
-																			(current) => {
-																				const keys =
-																					current.caseId ===
-																					selected.caseId
-																						? current.keys.filter(
-																								(
-																									value,
-																								) =>
-																									availableRuleKeys.includes(
-																										value,
-																									),
-																							)
-																						: [];
-																				return {
-																					caseId: selected.caseId,
-																					keys: updateContentRuleSelection(
-																						keys,
-																						key,
-																						checked ===
-																							true,
-																					),
-																				};
-																			},
-																		);
-																	}}
-																/>
-																<span>{rule.title}</span>
-															</label>
-														);
-													})}
-												</fieldset>
-											))}
+											<ContentRuleMultiSelect
+												destination={activeDestination}
+												labels={{
+													ariaLabel: t.reports.rule,
+													choose: t.reports.chooseRule,
+													clear: t.reports.clearRules,
+													selectedCount: t.reports.selectedRuleCount,
+												}}
+												onClear={() =>
+													setRuleSelection({
+														caseId: selected.caseId,
+														keys: [],
+													})
+												}
+												onRuleCheckedChange={updateRuleCheckedState}
+												selectedKeys={activeSelectedRuleKeys}
+												totalSelectedCount={currentSelectedRuleKeys.length}
+											/>
 										</div>
 										{destinations.data && !destinations.data.items.length ? (
 											<FieldDescription>{t.reports.noRules}</FieldDescription>

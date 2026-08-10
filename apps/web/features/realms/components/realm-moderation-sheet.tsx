@@ -51,9 +51,17 @@ import { useRef, useState, type FormEvent } from "react";
 import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import {
-	ContentGovernanceMaximumRuleReferences,
+	contentRuleSelectionKey,
+	getContentRuleDestination,
+	getContentRuleKeys,
+	getContentRuleReferences,
+	retainAvailableContentRuleSelection,
 	updateContentRuleSelection,
 } from "@/features/governance/model/content-rule-selection";
+import {
+	ContentRuleMultiSelect,
+	ContentRuleSourceSelect,
+} from "@/features/governance/components/content-rule-picker";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -82,10 +90,6 @@ type GovernanceSubmission =
 			readonly type: "review";
 			readonly body: PostApiRealmsByRealmIdUnitsByUnitIdReviewBody;
 	  };
-
-function ruleSelectionKey(sourceRealmId: string, revisionId: string, ruleId: string): string {
-	return `${sourceRealmId}:${revisionId}:${ruleId}`;
-}
 
 export function RealmModerationSheet({
 	realmId,
@@ -141,6 +145,7 @@ export function RealmModerationSheet({
 		() => unit.allowedCommands[0] ?? "note",
 	);
 	const [selectedRuleKeys, setSelectedRuleKeys] = useState<string[]>([]);
+	const [ruleSourceId, setRuleSourceId] = useState("");
 	const [includeAnnotation, setIncludeAnnotation] = useState(false);
 	const [annotationRole, setAnnotationRole] = useState<ModerationAnnotationRole>("internal_note");
 	const [annotationLanguage, setAnnotationLanguage] = useState<ContentLanguage>(
@@ -151,27 +156,18 @@ export function RealmModerationSheet({
 	const submissionInFlight = useRef(false);
 	const command = toRealmModerationCommand(commandSelection, unit.allowedCommands);
 	const rulesRequired = realmGovernanceActionRequiresRules(command);
-	const availableRuleKeys = (destinations.data?.items ?? []).flatMap((destination) =>
-		destination.rules.map((rule) =>
-			ruleSelectionKey(destination.id, destination.revisionId, rule.id),
-		),
+	const destinationItems = destinations.data?.items ?? [];
+	const currentSelectedRuleKeys = retainAvailableContentRuleSelection(
+		selectedRuleKeys,
+		destinationItems,
 	);
-	const currentSelectedRuleKeys = selectedRuleKeys.filter((key) =>
-		availableRuleKeys.includes(key),
-	);
-	const selectedRules = (destinations.data?.items ?? []).flatMap((destination) =>
-		destination.rules
-			.filter((rule) =>
-				currentSelectedRuleKeys.includes(
-					ruleSelectionKey(destination.id, destination.revisionId, rule.id),
-				),
+	const activeDestination = getContentRuleDestination(destinationItems, ruleSourceId);
+	const activeSelectedRuleKeys = activeDestination
+		? getContentRuleKeys(activeDestination).filter((key) =>
+				currentSelectedRuleKeys.includes(key),
 			)
-			.map((rule) => ({
-				sourceRealmId: destination.id,
-				revisionId: destination.revisionId,
-				ruleId: rule.id,
-			})),
-	);
+		: [];
+	const selectedRules = getContentRuleReferences(destinationItems, currentSelectedRuleKeys);
 	const annotationRequested = command === "note" || includeAnnotation;
 	const annotationValid = !annotationRequested || hasAuthoredAnnotation(annotation);
 	const rulesValid = !rulesRequired || selectedRules.length > 0;
@@ -180,16 +176,35 @@ export function RealmModerationSheet({
 	const formId = `realm-moderation-${unit.unitId}`;
 	const reportItems = reports.data?.pages.flatMap((page) => page.items) ?? [];
 	const ruleTitles = new Map(
-		(destinations.data?.items ?? []).flatMap((destination) =>
+		destinationItems.flatMap((destination) =>
 			destination.rules.map(
 				(rule) =>
 					[
-						ruleSelectionKey(destination.id, destination.revisionId, rule.id),
+						contentRuleSelectionKey(destination.id, destination.revisionId, rule.id),
 						rule.title,
 					] as const,
 			),
 		),
 	);
+
+	function updateRuleSource(sourceId: string) {
+		if (!destinationItems.some(({ id }) => id === sourceId)) return;
+		setRuleSourceId(sourceId);
+	}
+
+	function updateRuleCheckedState(key: string, checked: boolean) {
+		const availableRuleKeys = new Set(
+			destinationItems.flatMap((destination) => getContentRuleKeys(destination)),
+		);
+		if (!availableRuleKeys.has(key)) return;
+		setSelectedRuleKeys((current) =>
+			updateContentRuleSelection(
+				retainAvailableContentRuleSelection(current, destinationItems),
+				key,
+				checked,
+			),
+		);
+	}
 
 	function buildSubmission(): GovernanceSubmission | undefined {
 		if (!annotationValid || !rulesValid) return undefined;
@@ -318,68 +333,49 @@ export function RealmModerationSheet({
 							</Field>
 
 							{rulesRequired ? (
-								<Field required>
-									<FieldLabel>{t.reports.rule}</FieldLabel>
-									{destinations.isPending ? (
-										<Skeleton className="h-28 rounded-xl" />
+								<>
+									{destinationItems.length > 1 ? (
+										<Field>
+											<FieldLabel>{t.reports.realm}</FieldLabel>
+											<ContentRuleSourceSelect
+												destinations={destinationItems}
+												labels={{
+													ariaLabel: t.reports.realm,
+													choose: t.reports.chooseRealm,
+													scopeLabels: t.reports.myReports.scopes,
+												}}
+												onValueChange={updateRuleSource}
+												value={activeDestination?.id}
+											/>
+										</Field>
 									) : null}
-									{destinations.error ? (
-										<RequestFailure error={destinations.error} />
-									) : null}
-									{destinations.data?.items.map((destination) => (
-										<fieldset
-											className="grid gap-2 rounded-lg border p-3"
-											key={destination.id}
-										>
-											<legend className="px-1 font-medium text-sm">
-												{destination.title ??
-													t.reports.myReports.scopes[destination.scope]}
-											</legend>
-											{destination.rules.map((rule) => {
-												const key = ruleSelectionKey(
-													destination.id,
-													destination.revisionId,
-													rule.id,
-												);
-												const checked =
-													currentSelectedRuleKeys.includes(key);
-												return (
-													<label
-														className="flex items-start gap-2 text-sm"
-														key={key}
-													>
-														<Checkbox
-															checked={checked}
-															disabled={
-																!checked &&
-																currentSelectedRuleKeys.length >=
-																	ContentGovernanceMaximumRuleReferences
-															}
-															onCheckedChange={({ checked }) =>
-																setSelectedRuleKeys((current) =>
-																	updateContentRuleSelection(
-																		current.filter((value) =>
-																			availableRuleKeys.includes(
-																				value,
-																			),
-																		),
-																		key,
-																		checked === true,
-																	),
-																)
-															}
-														/>
-														<span>{rule.title}</span>
-													</label>
-												);
-											})}
-										</fieldset>
-									))}
-									{destinations.data && !destinations.data.items.length ? (
-										<FieldDescription>{t.reports.noRules}</FieldDescription>
-									) : null}
-									<FieldDescription>{t.reports.ruleLimit}</FieldDescription>
-								</Field>
+									<Field required>
+										<FieldLabel>{t.reports.rule}</FieldLabel>
+										{destinations.isPending ? (
+											<Skeleton className="h-28 rounded-xl" />
+										) : null}
+										{destinations.error ? (
+											<RequestFailure error={destinations.error} />
+										) : null}
+										<ContentRuleMultiSelect
+											destination={activeDestination}
+											labels={{
+												ariaLabel: t.reports.rule,
+												choose: t.reports.chooseRule,
+												clear: t.reports.clearRules,
+												selectedCount: t.reports.selectedRuleCount,
+											}}
+											onClear={() => setSelectedRuleKeys([])}
+											onRuleCheckedChange={updateRuleCheckedState}
+											selectedKeys={activeSelectedRuleKeys}
+											totalSelectedCount={currentSelectedRuleKeys.length}
+										/>
+										{destinations.data && !destinations.data.items.length ? (
+											<FieldDescription>{t.reports.noRules}</FieldDescription>
+										) : null}
+										<FieldDescription>{t.reports.ruleLimit}</FieldDescription>
+									</Field>
+								</>
 							) : null}
 
 							<Field className="w-auto" orientation="horizontal">
@@ -625,7 +621,7 @@ function RealmModerationHistoryItem({
 							.map(
 								(rule) =>
 									ruleTitles.get(
-										ruleSelectionKey(
+										contentRuleSelectionKey(
 											rule.sourceRealmId,
 											rule.revisionId,
 											rule.ruleId,
