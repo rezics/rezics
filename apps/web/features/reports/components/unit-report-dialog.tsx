@@ -6,9 +6,7 @@ import {
 	usePostApiReportsUnitsByUnitId,
 } from "@rezics/openapi-tanstack-query";
 import {
-	Badge,
 	Button,
-	Checkbox,
 	Dialog,
 	DialogBody,
 	DialogContent,
@@ -30,14 +28,12 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { useAuthPortal } from "@/features/auth/auth-portal-context";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
-import {
-	ContentGovernanceMaximumRuleReferences,
-	updateContentRuleSelection,
-} from "@/features/governance/model/content-rule-selection";
+import { updateContentRuleSelection } from "@/features/governance/model/content-rule-selection";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
+import { ReportRuleMultiSelect } from "./report-rule-multi-select";
 import { MyReportsHref } from "../routing/report-routes";
 
 export type UnitReportTarget = Readonly<{
@@ -78,13 +74,13 @@ export function UnitReportDialog({
 	const availableRuleKeys = (destinations.data?.items ?? []).flatMap((destination) =>
 		destination.rules.map((rule) => `${destination.id}:${destination.revisionId}:${rule.id}`),
 	);
-	const currentSelectedKeys = selectedKeys.filter((key) => availableRuleKeys.includes(key));
+	const availableRuleKeySet = new Set(availableRuleKeys);
+	const currentSelectedKeys = selectedKeys.filter((key) => availableRuleKeySet.has(key));
+	const currentSelectedKeySet = new Set(currentSelectedKeys);
 	const selectedRules = (destinations.data?.items ?? []).flatMap((destination) =>
 		destination.rules
 			.filter((rule) =>
-				currentSelectedKeys.includes(
-					`${destination.id}:${destination.revisionId}:${rule.id}`,
-				),
+				currentSelectedKeySet.has(`${destination.id}:${destination.revisionId}:${rule.id}`),
 			)
 			.map((rule) => ({
 				sourceRealmId: destination.id,
@@ -94,6 +90,20 @@ export function UnitReportDialog({
 	);
 	const submitReport = usePostApiReportsUnitsByUnitId();
 	const canSubmit = selectedRules.length > 0 && !submitReport.isPending;
+
+	function updateRuleCheckedState(key: string, checked: boolean) {
+		setRuleSelection((current) => {
+			if (!availableRuleKeySet.has(key)) return current;
+			const keys =
+				current.contextKey === selectionContextKey
+					? current.keys.filter((value) => availableRuleKeySet.has(value))
+					: [];
+			return {
+				contextKey: selectionContextKey,
+				keys: updateContentRuleSelection(keys, key, checked),
+			};
+		});
+	}
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -140,65 +150,21 @@ export function UnitReportDialog({
 					<form className="grid gap-4" id={`report-unit-${unitId}`} onSubmit={submit}>
 						<Field required>
 							<FieldLabel>{t.reports.rule}</FieldLabel>
-							<div className="grid gap-3">
-								{destinations.data?.items.map((destination) => (
-									<fieldset
-										className="grid gap-2 rounded-lg border border-border-weak p-3"
-										key={destination.id}
-									>
-										<legend className="flex max-w-full items-center gap-2 px-1 text-sm">
-											<span className="truncate font-medium">
-												{destination.title ?? destination.id}
-											</span>
-											<Badge variant="outline">
-												{t.reports.myReports.scopes[destination.scope]}
-											</Badge>
-										</legend>
-										{destination.rules.map((rule) => {
-											const key = `${destination.id}:${destination.revisionId}:${rule.id}`;
-											const checked = currentSelectedKeys.includes(key);
-											return (
-												<label
-													className="flex items-start gap-2 text-sm"
-													key={key}
-												>
-													<Checkbox
-														checked={checked}
-														disabled={
-															!checked &&
-															currentSelectedKeys.length >=
-																ContentGovernanceMaximumRuleReferences
-														}
-														onCheckedChange={({ checked }) => {
-															setRuleSelection((current) => {
-																const keys =
-																	current.contextKey ===
-																	selectionContextKey
-																		? current.keys.filter(
-																				(value) =>
-																					availableRuleKeys.includes(
-																						value,
-																					),
-																			)
-																		: [];
-																return {
-																	contextKey: selectionContextKey,
-																	keys: updateContentRuleSelection(
-																		keys,
-																		key,
-																		checked === true,
-																	),
-																};
-															});
-														}}
-													/>
-													<span>{rule.title}</span>
-												</label>
-											);
-										})}
-									</fieldset>
-								))}
-							</div>
+							<ReportRuleMultiSelect
+								destinations={destinations.data?.items ?? []}
+								labels={{
+									ariaLabel: t.reports.rule,
+									choose: t.reports.chooseRule,
+									clear: t.reports.clearRules,
+									selectedCount: t.reports.selectedRuleCount,
+									scopeLabels: t.reports.myReports.scopes,
+								}}
+								onClear={() =>
+									setRuleSelection({ contextKey: selectionContextKey, keys: [] })
+								}
+								onRuleCheckedChange={updateRuleCheckedState}
+								selectedKeys={currentSelectedKeys}
+							/>
 							{destinations.data && !destinations.data.items.length ? (
 								<FieldDescription>{t.reports.noRealms}</FieldDescription>
 							) : destinations.data &&
@@ -207,7 +173,13 @@ export function UnitReportDialog({
 								) ? (
 								<FieldDescription>{t.reports.noRules}</FieldDescription>
 							) : null}
-							<FieldDescription>{t.reports.ruleLimit}</FieldDescription>
+							<FieldDescription>
+								{currentSelectedKeys.length > 0
+									? t.reports.selectedRuleCount({
+											count: currentSelectedKeys.length,
+										})
+									: t.reports.ruleLimit}
+							</FieldDescription>
 						</Field>
 						<Field>
 							<FieldLabel>{t.reports.details}</FieldLabel>

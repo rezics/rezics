@@ -13,6 +13,8 @@ export default {
 	rule: "적용 규칙(복수 선택 가능)",
 	ruleLimit: "규칙은 최대 32개까지 선택할 수 있습니다.",
 	chooseRule: "규칙 선택",
+	clearRules: "선택한 규칙 지우기",
+	selectedRuleCount: insert("규칙 {{count}} / 32개 선택됨", { count: Number }),
 	noRules: "현재 사용할 수 있는 규칙이 없습니다.",
 	details: "추가 설명(선택)",
 	detailsPlaceholder: "무슨 일이 있었고 어디를 확인해야 하는지 설명해 주세요.",

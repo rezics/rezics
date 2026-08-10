@@ -13,6 +13,8 @@ export default {
 	rule: "Anwendbare Regeln (Mehrfachauswahl)",
 	ruleLimit: "Wähle bis zu 32 Regeln aus.",
 	chooseRule: "Regel auswählen",
+	clearRules: "Ausgewählte Regeln löschen",
+	selectedRuleCount: insert("{{count}} / 32 Regeln ausgewählt", { count: Number }),
 	noRules: "Derzeit sind keine anwendbaren Regeln verfügbar.",
 	details: "Zusätzliche Angaben (optional)",
 	detailsPlaceholder: "Beschreibe, was passiert ist und welche Stelle geprüft werden soll.",

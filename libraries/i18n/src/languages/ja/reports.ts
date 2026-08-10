@@ -13,6 +13,8 @@ export default {
 	rule: "適用するルール（複数選択可）",
 	ruleLimit: "最大32件のルールを選択できます。",
 	chooseRule: "ルールを選択",
+	clearRules: "選択したルールを解除",
+	selectedRuleCount: insert("{{count}} / 32件のルールを選択中", { count: Number }),
 	noRules: "現在利用できるルールはありません。",
 	details: "補足（任意）",
 	detailsPlaceholder: "何が起きたか、確認すべき箇所を説明してください。",

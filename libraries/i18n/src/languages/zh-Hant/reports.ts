@@ -13,6 +13,8 @@ export default {
 	rule: "適用規則（可複選）",
 	ruleLimit: "最多可選擇 32 條規則。",
 	chooseRule: "選擇規則",
+	clearRules: "清除已選規則",
+	selectedRuleCount: insert("已選 {{count}} / 32 條規則", { count: Number }),
 	noRules: "目前沒有可用規則。",
 	details: "補充說明（選填）",
 	detailsPlaceholder: "說明發生了什麼事，以及治理人員應注意的位置。",

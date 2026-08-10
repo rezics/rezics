@@ -13,6 +13,8 @@ export default {
 	rule: "Reglas aplicables (selección múltiple)",
 	ruleLimit: "Selecciona hasta 32 reglas.",
 	chooseRule: "Elegir una regla",
+	clearRules: "Borrar reglas seleccionadas",
+	selectedRuleCount: insert("{{count}} / 32 reglas seleccionadas", { count: Number }),
 	noRules: "No hay reglas aplicables disponibles en este momento.",
 	details: "Información adicional (opcional)",
 	detailsPlaceholder: "Explica qué ocurrió y dónde debe revisar el equipo de moderación.",

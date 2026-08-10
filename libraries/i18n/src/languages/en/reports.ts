@@ -13,6 +13,8 @@ export default {
 	rule: "Applicable rules (select all that apply)",
 	ruleLimit: "Select up to 32 rules.",
 	chooseRule: "Choose a rule",
+	clearRules: "Clear selected rules",
+	selectedRuleCount: insert("{{count}} / 32 rules selected", { count: Number }),
 	noRules: "No applicable rules are currently available.",
 	details: "Additional details (optional)",
 	detailsPlaceholder: "Explain what happened and where moderators should look.",
