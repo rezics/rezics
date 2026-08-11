@@ -2643,6 +2643,8 @@ async function seedGovernance(
 	const reverseActions: (typeof contentGovernanceAction.$inferSelect)[] = [];
 	for (let index = 0; index < 10; index += 1) {
 		const reversed = itemAt(normalActions, index);
+		if (!reversed.decisionId)
+			throw new Error("Seed content governance Action is missing its created decision");
 		const actor = itemAt(profiles, index * 11 + 2);
 		const caseRow = cases.find((candidate) => candidate.id === reversed.caseId);
 		if (!caseRow) throw new Error("Seed reversed action has no review case");

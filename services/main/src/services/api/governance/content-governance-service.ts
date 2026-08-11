@@ -647,7 +647,7 @@ export async function executeAuthorizedContentGovernanceAction(
 					subjectIds: [created.id],
 				})
 			).map(({ postId, role }) => ({ postId, role }));
-			const rules = await listGovernanceDecisionRules(tx, decisionId);
+			const rules = decisionId ? await listGovernanceDecisionRules(tx, decisionId) : [];
 			const response = { ...created, rules, notes } satisfies ContentGovernanceActionResponse;
 			return { created: response, replayed: true };
 		}
@@ -702,6 +702,7 @@ export async function executeAuthorizedContentGovernanceAction(
 			)
 			.limit(1);
 		if (!reversedAction) throw new ModerationReversedActionInvalid();
+		if (!reversedAction.decisionId) throw new ModerationReversalUnavailable();
 		reversedDecisionId = reversedAction.decisionId;
 	}
 	const decision = await createGovernanceDecision(tx, {

@@ -19,7 +19,7 @@ import { toSafeInteger } from "../../database/integer";
 import { ContentStructureSnapshotSchema } from "../../content-structure/contracts";
 import { createContentStructureHistory } from "../../content-structure/history";
 import { saveRealmTaxonomyDraft } from "../../content-structure/realm-taxonomy-draft";
-import { fractionalPositionAt, fractionalPositionBetween } from "../../ordering/position";
+import { fractionalPositionBetween } from "../../ordering/position";
 import { decodeCursor, encodeCursor } from "../../pagination";
 import {
 	avatarReferenceFromColumns,
@@ -71,6 +71,7 @@ import {
 import { createGovernanceNotePost, listGovernanceNotes } from "../../governance/note-service";
 import { createNotification } from "../../notifications/service";
 import { findRealmMembership, getCurrentRealmRules } from "../../realms/service";
+import { publishRealmRuleRevision } from "../../realms/rule-publication";
 import { listRealmVotedTags } from "../../tags/service";
 import { applyInitialTags } from "../../tags/initial-applications";
 import type { DatabaseTransaction } from "../../database";
@@ -99,7 +100,6 @@ import {
 	SavedResponse,
 	ScoreContextResponse,
 } from "../schema/action-response";
-import { hasUniqueLocalizationLanguages } from "../schema";
 import {
 	toApiErrorResponse,
 	RealmDetailResponse,
@@ -1563,70 +1563,23 @@ export default new Elysia({ prefix: "/realms" })
 			await ensureRealmFieldsAuthorized(authorization, params.realmId, "realm.rules.update", [
 				"rules",
 			]);
-			const duplicateLocalizationRuleIndex = body.rules.findIndex(
-				(rule) => !hasUniqueLocalizationLanguages(rule.localizations),
-			);
-			if (duplicateLocalizationRuleIndex !== -1)
-				throw new ValidationError({
-					path: `rules.${duplicateLocalizationRuleIndex}.localizations`,
-					reason: "duplicate_language",
-				});
 			const revision = await database.transaction(async (tx) => {
-				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${params.realmId}::text, 0))`,
-				);
-				const latest = await getCurrentRealmRules(params.realmId, tx);
-				const currentRevisionId = latest?.revisionId ?? null;
-				if (body.baseRevisionId !== currentRevisionId)
-					throw new RealmRuleRevisionChanged({ currentRevisionId });
-				const [created] = await tx
-					.insert(realmRuleRevision)
-					.values({
-						realmId: params.realmId,
-						version: (latest?.version ?? 0) + 1,
-						acknowledgementMode: body.acknowledgementMode,
-						requireOnJoin: body.requireOnJoin,
-						requireOnPost: body.requireOnPost,
-						createdByProfileId: profile.unitId,
-					})
-					.returning();
-				if (!created) throw new Error("Realm rule revision insertion did not return a row");
-				for (const [index, rule] of body.rules.entries()) {
-					const ruleUnit = await insertUnit(tx, {
-						kind: "realm_rule",
-						status: "published",
-						visibility: "unlisted",
-						publishedAt: new Date(),
-						statusActor: { kind: "profile", profileId: profile.unitId },
-					});
-					await tx.insert(unitLocalization).values(
-						rule.localizations.map((localization, localizationIndex) => ({
-							unitId: ruleUnit.id,
-							language: localization.language,
-							position: fractionalPositionAt(localizationIndex),
-							title: localization.title,
-							content: localization.content,
-							contentStatus: "published" as const,
-						})),
-					);
-					await tx.insert(unitOwnership).values({
-						unitId: ruleUnit.id,
-						profileId: profile.unitId,
-						assignedByProfileId: profile.unitId,
-					});
-					await tx.insert(realmRule).values({
-						id: ruleUnit.id,
-						revisionId: created.id,
-						position: index,
-					});
-				}
-				await recordUnitRevision(tx, {
-					unitId: params.realmId,
+				const result = await publishRealmRuleRevision(tx, {
+					realmId: params.realmId,
 					actorProfileId: profile.unitId,
-					event: "update",
+					...body,
 				});
+				if (result.status === "revision_changed")
+					throw new RealmRuleRevisionChanged({
+						currentRevisionId: result.currentRevisionId,
+					});
+				if (result.status === "duplicate_localization")
+					throw new ValidationError({
+						path: `rules.${result.ruleIndex}.localizations`,
+						reason: "duplicate_language",
+					});
 				await recordAuditEvent(tx, profile.unitId, "realm.rules.update", params.realmId);
-				return created;
+				return result.revision;
 			});
 			return { id: revision.id, version: revision.version };
 		},
@@ -2813,7 +2766,11 @@ export default new Elysia({ prefix: "/realms" })
 				.orderBy(desc(contentGovernanceAction.createdAt), desc(contentGovernanceAction.id))
 				.limit(query.limit ?? 50);
 			const actionIds = actions.map((action) => action.id);
-			const actionIdByDecisionId = new Map(actions.map((action) => [action.decisionId, action.id]));
+			const actionIdByDecisionId = new Map(
+				actions.flatMap((action) =>
+					action.decisionId ? [[action.decisionId, action.id] as const] : [],
+				),
+			);
 			const decisionIds = [...actionIdByDecisionId.keys()];
 			const [notes, ruleRows] = actionIds.length
 				? await Promise.all([

@@ -81,6 +81,7 @@ case "${operation}" in
 	install)
 		migrate
 		yarn exec tsx scripts/install-platform.ts --yes
+		yarn exec tsx scripts/seed-official-rule-realm.ts --yes --if-needed
 		verify
 		project
 		;;

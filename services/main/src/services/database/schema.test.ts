@@ -100,6 +100,8 @@ import {
 	unitStructureEdge,
 	unitStructureMember,
 	unitStructureVote,
+	unitMergeRequest,
+	userAccountState,
 	UnitStructureKindValues,
 	sharedSearchQuery,
 	unitSearchDocument,
@@ -716,6 +718,16 @@ describe("database schema contracts", () => {
 			]),
 		);
 		expect(getTableConfig(governanceDecisionRule).primaryKeys).toHaveLength(1);
+		for (const table of [
+			userAccountState,
+			accountEnforcementAction,
+			contentGovernanceAction,
+			unitAccessRestriction,
+			unitMergeRequest,
+		]) {
+			const decisionId = getTableConfig(table).columns.find(({ name }) => name === "decision_id");
+			expect(decisionId?.notNull).toBe(false);
+		}
 		expect(getTableConfig(accountEnforcementAction).columns.map(({ name }) => name)).toEqual(
 			expect.arrayContaining(["target_profile_id", "kind", "enforcement_kind"]),
 		);

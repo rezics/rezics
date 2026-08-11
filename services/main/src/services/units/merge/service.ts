@@ -203,7 +203,7 @@ async function presentRequests(
 		});
 		byRequest.set(review.requestId, items);
 	}
-	const decisionIds = [...new Set(rows.map((row) => row.decisionId))];
+	const decisionIds = [...new Set(rows.flatMap((row) => (row.decisionId ? [row.decisionId] : [])))];
 	const ruleRows = decisionIds.length
 		? await executor
 				.select({
@@ -241,7 +241,7 @@ async function presentRequests(
 			state: row.state,
 			proposer: { profileId: row.proposerProfileId, label: row.proposerLabel },
 			overrideOfRequestId: row.overrideOfRequestId,
-			rules: rulesByDecision.get(row.decisionId) ?? [],
+			rules: row.decisionId ? (rulesByDecision.get(row.decisionId) ?? []) : [],
 			note: row.note,
 			policy: {
 				version: row.policyVersion,
@@ -416,6 +416,7 @@ async function existingCommandMatches(
 	input: CreateMergeInput & { readonly overrideOfRequestId?: string },
 	mode: UnitMergeRequestMode,
 ): Promise<boolean> {
+	if (!row.decisionId) return false;
 	const existingRules = await listGovernanceDecisionRules(executor, row.decisionId);
 	return (
 		row.mode === mode &&
@@ -789,6 +790,13 @@ export async function reviewUnitMerge(input: {
 					.set({ state: "expired", updatedAt: now })
 					.where(eq(unitMergeRequest.id, request.id));
 				return { outcome: "expired" };
+			}
+			if (!request.decisionId) {
+				await tx
+					.update(unitMergeRequest)
+					.set({ state: "superseded", supersededAt: now, updatedAt: now })
+					.where(eq(unitMergeRequest.id, request.id));
+				return { outcome: "stale" };
 			}
 			if (request.requestFingerprint !== input.requestFingerprint)
 				throw new UnitMergeReviewFingerprintMismatch();

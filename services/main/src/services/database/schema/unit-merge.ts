@@ -92,9 +92,7 @@ export const unitMergeRequest = pgTable(
 			.references(() => profile.id, { onDelete: "restrict" }),
 		idempotencyKey: text().notNull(),
 		overrideOfRequestId: uuid(),
-		decisionId: uuid()
-			.notNull()
-			.references(() => governanceDecision.id, { onDelete: "restrict" }),
+		decisionId: uuid().references(() => governanceDecision.id, { onDelete: "restrict" }),
 		note: text(),
 		policyVersion: smallint().notNull(),
 		requiredApprovals: smallint().notNull(),
@@ -142,7 +140,9 @@ export const unitMergeRequest = pgTable(
 			table.proposerProfileId,
 			table.idempotencyKey,
 		),
-		unique("unit_merge_request_decision_key").on(table.decisionId),
+		uniqueIndex("unit_merge_request_decision_key")
+			.on(table.decisionId)
+			.where(sql`${table.decisionId} is not null`),
 		index("unit_merge_request_pending_expiry_idx")
 			.on(table.expiresAt, table.id)
 			.where(sql`${table.state} = 'pending_review'::unit_merge_request_state`),

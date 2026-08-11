@@ -25,9 +25,7 @@ export const userAccountState = pgTable(
 	{
 		userId: uuid().primaryKey(),
 		state: userAccountStateValue().default("active").notNull(),
-		decisionId: uuid()
-			.notNull()
-			.references(() => governanceDecision.id, { onDelete: "restrict" }),
+		decisionId: uuid().references(() => governanceDecision.id, { onDelete: "restrict" }),
 		note: text(),
 		expiresAt: createTimestampMsColumn(),
 		updatedByProfileId: uuid().notNull(),
@@ -48,7 +46,9 @@ export const userAccountState = pgTable(
 		}).onDelete("restrict"),
 		index("user_account_state_state_expiry_idx").on(table.state, table.expiresAt),
 		index("user_account_state_updated_by_idx").on(table.updatedByProfileId),
-		index("user_account_state_decision_idx").on(table.decisionId),
+		index("user_account_state_decision_idx")
+			.on(table.decisionId)
+			.where(sql`${table.decisionId} is not null`),
 		check("user_account_state_revision_check", sql`${table.revision} > 0`),
 		check(
 			"user_account_state_shape_check",

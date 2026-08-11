@@ -181,8 +181,10 @@ from `dev` and from the target-database `db:migrate` operation.
 `db:install` is the explicit first-installation workflow for an empty target
 database. It applies pending migrations, reconciles application-role
 privileges, installs the Git-versioned factory bundle, and issues the initial
-platform Profile credentials. It refuses an already installed or occupied
-database unless local setup deliberately supplies `--if-needed`.
+platform Profile credentials. It then publishes the special official Rule
+starter Seed only if the fixed Rule Realm has no online revision. It refuses an
+already installed or occupied database unless local setup deliberately
+supplies `--if-needed`.
 
 `db:prepare` is the recurring pre-deploy administration workflow. It applies
 pending migrations, reconciles application-role privileges, and then performs
@@ -196,9 +198,11 @@ available only through the separately confirmed
 Platform Installation and Seed are separate database services with different
 safety contracts. Installation copies the factory Profiles, Realms, Zones,
 content, policies, navigation, and required media exactly once; those records
-become ordinary platform-owned product data afterward. Seed owns disposable
-development scenarios and refuses to run when non-installation data already
-exists.
+become ordinary platform-owned product data afterward. Rule revisions are not
+part of that factory bundle: the special official Rule Seed initializes an
+empty online history without reconciling it later. The ordinary Seed owns
+disposable development scenarios and refuses to run when non-installation data
+already exists.
 
 ```sh
 # Reproducible demo data without communication or governance cases.

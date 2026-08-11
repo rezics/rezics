@@ -255,14 +255,9 @@ describe("database bootstrap manifest", () => {
 			expect.objectContaining({ language: "zh", title: "REZICS Rule" }),
 			expect.objectContaining({ language: "en", title: "REZICS Rule" }),
 		]);
-		expect(RezicsRuleRealmManifest.rules.items).toHaveLength(11);
-		expect(RezicsRuleRealmManifest.rules.items.at(-1)?.localizations).toEqual([
-			expect.objectContaining({ language: "zh", title: "網址與命名空間完整性" }),
-			expect.objectContaining({
-				language: "en",
-				title: "Address and namespace integrity",
-			}),
-		]);
+		expect(RezicsRuleRealmManifest).not.toHaveProperty("rules");
+		expect(BootstrapUnitIds).not.toContain("019b76da-a800-7360-8000-000000000001");
+		expect(BootstrapUnitIds).not.toContain("019b76da-a800-7360-8000-000000000011");
 		expect(
 			RezicsRuleRealmManifest.access.find(
 				(value) => value.profileId === BootstrapPlatformAccessManifest[1].profileId,

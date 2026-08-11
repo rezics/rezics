@@ -211,8 +211,16 @@ tasks:
                 DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
                 yarn exec tsx scripts/check-bootstrap-unit-merge-access-cutover.ts verify-and-clean
             - >-
+                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
+                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
+                yarn exec tsx scripts/check-governance-rule-cutover.ts seed
+            - >-
                 yarn exec atlas migrate apply --env main
                 --url "postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?search_path=public&sslmode=disable"
+            - >-
+                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
+                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
+                yarn exec tsx scripts/check-governance-rule-cutover.ts verify-and-clean
             - >-
                 REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
                 DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
@@ -275,6 +283,11 @@ tasks:
         cmds:
             - yarn exec tsx scripts/install-platform.ts {{.CLI_ARGS}}
 
+    official-rules:seed:
+        desc: Publish starter content only when the official Rule Realm has no online history.
+        cmds:
+            - yarn exec tsx scripts/seed-official-rule-realm.ts {{.CLI_ARGS}}
+
     bootstrap:curated-collections:
         desc: Run the one-off local backfill for the fixed creation-time Tag Collections.
         cmds:
@@ -303,6 +316,9 @@ tasks:
             - task: platform:install
               vars:
                   CLI_ARGS: "{{.CLI_ARGS}}"
+            - task: official-rules:seed
+              vars:
+                  CLI_ARGS: --yes --if-needed
             - task: platform:verify
             - task: db:runtime:verify
             - task: db:project

@@ -11,18 +11,34 @@ an immutable `governance_decision` with exactly one basis:
 There is no ungrounded decision basis. Approvals, restorations, and other new
 policy judgments cite Rules. Pure workflow events stay outside this ledger.
 
+This contract applies to decisions created by 1.7 and later. The 1.7 cutover
+preserves pre-1.7 operational rows but deletes their obsolete reason values
+instead of inventing a Rule mapping. Those rows have a nullable domain
+`decision_id`; they are not `governance_decision` rows and cannot serve as an
+exact-reversal basis. All application writers produce a non-null link, and
+database triggers reject any new domain row that omits it.
+
 `governance_decision_rule` proves both `(source Realm, revision)` and `(Rule,
 revision)` with composite foreign keys. A deferred database trigger verifies the
 Rule count at commit. The writer creates the decision as unfinalized, attaches
 its complete basis, and finalizes it in the same transaction. An unfinalized
 decision cannot commit; after finalization the database rejects Rule inserts
 as well as decision or basis updates and deletes. Domain action tables keep
-operational transition fields and reference one decision; audit events
-reference the same decision instead of copying a reason string.
+operational transition fields and new rows reference one decision; new audit
+events reference the same decision instead of copying a reason string.
 
 Machine authorization and execution failures are not policy rationales.
 `audit_event.outcome_code` stores those bounded machine outcomes, while
 `governance_decision_id` stores a human policy basis.
+
+## Official Rule lifecycle
+
+Bootstrap reserves the official Rule Realm identity and its access boundary,
+but Rule revisions and Rule Units are online data. Core verification therefore
+never compares their IDs or contents with repository state. A separate initial
+Seed publishes starter Rules only when that Realm has no revision and never
+reconciles an existing history. Every later edit uses the ordinary immutable
+Realm Rule publication path and allocates new UUIDv7 Rule identities.
 
 ## Authority and Rule sources
 
@@ -86,6 +102,11 @@ avoid deadlock cycles. The deferred basis validation runs once per decision,
 not once per Rule, so the maximum basis does not create quadratic commit work.
 A viral target can be a write hot key, so target-scoped domain locks must remain
 shorter than the transaction and must not wrap remote work.
+
+Domain decision-reference indexes are partial on `decision_id IS NOT NULL`.
+They exclude the fixed pre-1.7 historical boundary and grow only with new
+governance writes; a nullable historical row is never consulted while
+validating a new Rule basis.
 
 The 500M baseline requires storage-optimized PostgreSQL with NVMe random I/O,
 read replicas for history, and measured autovacuum/WAL capacity. Capture

@@ -1,25 +1,8 @@
--- v1.7 intentionally has no enum-to-Rule compatibility mapping. An installed
--- database must use the documented reset-and-restore cutover so operators can
--- re-attest every active policy decision against an immutable Rule revision.
+-- v1.7 intentionally has no enum-to-Rule compatibility mapping. Existing
+-- operational rows are retained with a NULL decision_id, while obsolete human
+-- reason values are discarded. Every v1.7 policy write records a Rule-backed
+-- or reversal decision instead of deriving one from the discarded value.
 SET LOCAL search_path = public;
-
-DO $governance_rule_cutover$
-BEGIN
-  IF EXISTS (SELECT 1 FROM "unit")
-    OR EXISTS (SELECT 1 FROM "users")
-    OR EXISTS (SELECT 1 FROM "content_governance_action")
-    OR EXISTS (SELECT 1 FROM "account_enforcement_action")
-    OR EXISTS (SELECT 1 FROM "unit_access_restriction")
-    OR EXISTS (SELECT 1 FROM "unit_merge_request")
-    OR EXISTS (SELECT 1 FROM "user_account_state")
-    OR EXISTS (SELECT 1 FROM "audit_event")
-  THEN
-    RAISE EXCEPTION 'v1.7 governance Rule cutover requires an empty replacement database'
-      USING ERRCODE = '23514',
-        HINT = 'Follow docs/releases/1.7.0-governance-rule-cutover.md; legacy reason codes are deliberately not mapped.';
-  END IF;
-END
-$governance_rule_cutover$;
 
 -- Create enum type "governance_authority_kind"
 CREATE TYPE "governance_authority_kind" AS ENUM ('platform', 'realm', 'zone', 'unit');
@@ -83,23 +66,20 @@ CREATE INDEX "governance_decision_zone_created_idx" ON "governance_decision" ("a
 ALTER TABLE "user_account_state"
   DROP CONSTRAINT "user_account_state_shape_check",
   DROP COLUMN "reason",
-  ADD COLUMN "decision_id" uuid NOT NULL,
+  ADD COLUMN "decision_id" uuid NULL,
   ADD CONSTRAINT "user_account_state_decision_id_governance_decision_id_fkey"
-    FOREIGN KEY ("decision_id") REFERENCES "governance_decision" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+    FOREIGN KEY ("decision_id") REFERENCES "governance_decision" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT NOT VALID,
   ADD CONSTRAINT "user_account_state_shape_check" CHECK (
     ((state = 'active'::user_account_state_value) AND (note IS NULL) AND (expires_at IS NULL))
     OR (state = 'suspended'::user_account_state_value)
     OR ((state = 'closed'::user_account_state_value) AND (expires_at IS NULL))
-  );
-CREATE INDEX "user_account_state_decision_idx" ON "user_account_state" ("decision_id");
+  ) NOT VALID;
 -- Modify "account_enforcement_action" table
-ALTER TABLE "account_enforcement_action" ADD COLUMN "decision_id" uuid NOT NULL, ADD CONSTRAINT "account_enforcement_action_decision_key" UNIQUE ("decision_id"), ADD CONSTRAINT "account_enforcement_action_0PMYZ0KnJ9vg_fkey" FOREIGN KEY ("decision_id") REFERENCES "governance_decision" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT;
+ALTER TABLE "account_enforcement_action" ADD COLUMN "decision_id" uuid NULL, ADD CONSTRAINT "account_enforcement_action_0PMYZ0KnJ9vg_fkey" FOREIGN KEY ("decision_id") REFERENCES "governance_decision" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT NOT VALID;
 -- Modify "audit_event" table
-ALTER TABLE "audit_event" DROP CONSTRAINT "audit_event_schema_version_check", ADD CONSTRAINT "audit_event_schema_version_check" CHECK (schema_version = 2), DROP COLUMN "reason_code", ALTER COLUMN "schema_version" SET DEFAULT 2, ADD COLUMN "outcome_code" text NULL, ADD COLUMN "governance_decision_id" uuid NULL, ADD CONSTRAINT "audit_event_outcome_code_check" CHECK ((outcome_code IS NULL) OR ((btrim(outcome_code) <> ''::text) AND (octet_length(outcome_code) <= 128))), ADD CONSTRAINT "audit_event_governance_decision_id_governance_decision_id_fkey" FOREIGN KEY ("governance_decision_id") REFERENCES "governance_decision" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT;
--- Create index "audit_event_governance_decision_idx" to table: "audit_event"
-CREATE INDEX "audit_event_governance_decision_idx" ON "audit_event" ("governance_decision_id");
+ALTER TABLE "audit_event" DROP CONSTRAINT "audit_event_schema_version_check", ADD CONSTRAINT "audit_event_schema_version_check" CHECK (schema_version IN (1, 2)) NOT VALID, DROP COLUMN "reason_code", ALTER COLUMN "schema_version" SET DEFAULT 2, ADD COLUMN "outcome_code" text NULL, ADD COLUMN "governance_decision_id" uuid NULL, ADD CONSTRAINT "audit_event_outcome_code_check" CHECK ((outcome_code IS NULL) OR ((btrim(outcome_code) <> ''::text) AND (octet_length(outcome_code) <= 128))) NOT VALID, ADD CONSTRAINT "audit_event_governance_decision_id_governance_decision_id_fkey" FOREIGN KEY ("governance_decision_id") REFERENCES "governance_decision" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT NOT VALID;
 -- Modify "content_governance_action" table
-ALTER TABLE "content_governance_action" ADD COLUMN "decision_id" uuid NOT NULL, ADD CONSTRAINT "content_governance_action_decision_key" UNIQUE ("decision_id"), ADD CONSTRAINT "content_governance_action_I2nC8QuZSwcG_fkey" FOREIGN KEY ("decision_id") REFERENCES "governance_decision" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT;
+ALTER TABLE "content_governance_action" ADD COLUMN "decision_id" uuid NULL, ADD CONSTRAINT "content_governance_action_I2nC8QuZSwcG_fkey" FOREIGN KEY ("decision_id") REFERENCES "governance_decision" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT NOT VALID;
 -- Create "governance_decision_rule" table
 CREATE TABLE "governance_decision_rule" (
   "decision_id" uuid NOT NULL,
@@ -223,14 +203,49 @@ CREATE TRIGGER "governance_decision_rule_immutable"
 BEFORE INSERT OR UPDATE OR DELETE ON "governance_decision_rule"
 FOR EACH ROW EXECUTE FUNCTION "protect_governance_decision_rule_mutation"();
 -- Modify "unit_access_restriction" table
-ALTER TABLE "unit_access_restriction" DROP COLUMN "reason_code", ADD COLUMN "decision_id" uuid NOT NULL, ADD CONSTRAINT "unit_access_restriction_decision_id_governance_decision_id_fkey" FOREIGN KEY ("decision_id") REFERENCES "governance_decision" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT;
--- Create index "unit_access_restriction_decision_idx" to table: "unit_access_restriction"
-CREATE INDEX "unit_access_restriction_decision_idx" ON "unit_access_restriction" ("decision_id");
+ALTER TABLE "unit_access_restriction" DROP COLUMN "reason_code", ADD COLUMN "decision_id" uuid NULL, ADD CONSTRAINT "unit_access_restriction_decision_id_governance_decision_id_fkey" FOREIGN KEY ("decision_id") REFERENCES "governance_decision" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT NOT VALID;
 -- Modify "unit_merge_request" table
-ALTER TABLE "unit_merge_request" DROP COLUMN "reason_code", ADD COLUMN "decision_id" uuid NOT NULL, ADD CONSTRAINT "unit_merge_request_decision_key" UNIQUE ("decision_id"), ADD CONSTRAINT "unit_merge_request_decision_id_governance_decision_id_fkey" FOREIGN KEY ("decision_id") REFERENCES "governance_decision" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT;
+ALTER TABLE "unit_merge_request" DROP COLUMN "reason_code", ADD COLUMN "decision_id" uuid NULL, ADD CONSTRAINT "unit_merge_request_decision_id_governance_decision_id_fkey" FOREIGN KEY ("decision_id") REFERENCES "governance_decision" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT NOT VALID;
+
+-- The columns remain nullable only for rows that already existed at cutover.
+-- Every post-cutover domain insert must carry its transactionally finalized
+-- governance decision, including SQL writers outside the application service.
+CREATE FUNCTION "require_governance_decision_on_insert"() RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+BEGIN
+  IF NEW.decision_id IS NULL THEN
+    RAISE EXCEPTION '% inserts require a governance decision', TG_TABLE_NAME
+      USING ERRCODE = '23514',
+        CONSTRAINT = TG_TABLE_NAME || '_decision_required';
+  END IF;
+  RETURN NEW;
+END
+$$;
+
+CREATE TRIGGER "user_account_state_decision_required"
+BEFORE INSERT ON "user_account_state"
+FOR EACH ROW EXECUTE FUNCTION "require_governance_decision_on_insert"();
+
+CREATE TRIGGER "account_enforcement_action_decision_required"
+BEFORE INSERT ON "account_enforcement_action"
+FOR EACH ROW EXECUTE FUNCTION "require_governance_decision_on_insert"();
+
+CREATE TRIGGER "content_governance_action_decision_required"
+BEFORE INSERT ON "content_governance_action"
+FOR EACH ROW EXECUTE FUNCTION "require_governance_decision_on_insert"();
+
+CREATE TRIGGER "unit_access_restriction_decision_required"
+BEFORE INSERT ON "unit_access_restriction"
+FOR EACH ROW EXECUTE FUNCTION "require_governance_decision_on_insert"();
+
+CREATE TRIGGER "unit_merge_request_decision_required"
+BEFORE INSERT ON "unit_merge_request"
+FOR EACH ROW EXECUTE FUNCTION "require_governance_decision_on_insert"();
 -- Drop enum type "governance_reason_code"
 DROP TYPE "governance_reason_code";
--- Drop the second legacy human-reason enum; all adverse account state changes now cite Rules.
+-- Drop the second obsolete human-reason enum; new adverse account state changes cite Rules.
 DROP TYPE "user_account_state_reason";
 -- Drop "content_governance_action_rule" table
 DROP TABLE "content_governance_action_rule";

@@ -61,6 +61,7 @@ import {
 	EnforcementChanged,
 	EnforcementExpiryInvalid,
 	EnforcementNotFound,
+	GovernanceReversalUnavailable,
 	GovernanceNoteNotFound,
 	ContentReviewCaseNotFound as ModerationCaseNotFound,
 	GovernanceNoteRoleDuplicate as ModerationNoteRoleDuplicate,
@@ -650,6 +651,7 @@ export default new Elysia({ prefix: "/governance" })
 					.limit(1);
 				if (!current) throw new EnforcementNotFound();
 				if (current.revocationActionId) throw new EnforcementAlreadyRevoked();
+				if (!current.decisionId) throw new GovernanceReversalUnavailable();
 				const decision = await createGovernanceDecision(tx, {
 					action: "account.enforcement.revoke",
 					actorProfileId: profile.unitId,

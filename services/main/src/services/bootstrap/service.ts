@@ -26,8 +26,6 @@ import {
 	profilePreference,
 	realm,
 	realmMember,
-	realmRule,
-	realmRuleRevision,
 	realmUnit,
 	unit,
 	unitAccessGrant,
@@ -107,7 +105,6 @@ import {
 	OfficialRealmAvatarAsset,
 	OfficialRealmManifest,
 	OfficialZoneManifest,
-	RezicsRuleRealmManifest,
 	RezicsScoreRealmManifest,
 	SlugNamespaceManifest,
 	TopLevelSlugNamespaceUnitIds,
@@ -876,7 +873,6 @@ async function ensureBootstrapRealm(
 			state: "active",
 		});
 	}
-	if ("rules" in value) changed = (await ensureBootstrapRealmRules(tx, value)) || changed;
 	if (changed)
 		await recordUnitRevision(tx, {
 			unitId: value.id,
@@ -884,110 +880,6 @@ async function ensureBootstrapRealm(
 			event: "create",
 			message: "Bootstrap official Realm",
 		});
-}
-
-async function ensureBootstrapRealmRules(
-	tx: DatabaseTransaction,
-	value: typeof RezicsRuleRealmManifest,
-): Promise<boolean> {
-	const createdAt = bootstrapEpoch();
-	const definition = value.rules;
-	let changed = false;
-	const insertedRevision = await tx
-		.insert(realmRuleRevision)
-		.values({
-			id: definition.revisionId,
-			realmId: value.id,
-			version: definition.version,
-			acknowledgementMode: definition.acknowledgementMode,
-			requireOnJoin: definition.requireOnJoin,
-			requireOnPost: definition.requireOnPost,
-			createdByProfileId: value.ownerProfileId,
-			publishedAt: createdAt,
-		})
-		.onConflictDoNothing()
-		.returning({ id: realmRuleRevision.id });
-	changed ||= insertedRevision.length > 0;
-	const [storedRevision] = await tx
-		.select({
-			id: realmRuleRevision.id,
-			realmId: realmRuleRevision.realmId,
-			version: realmRuleRevision.version,
-			acknowledgementMode: realmRuleRevision.acknowledgementMode,
-			requireOnJoin: realmRuleRevision.requireOnJoin,
-			requireOnPost: realmRuleRevision.requireOnPost,
-			createdByProfileId: realmRuleRevision.createdByProfileId,
-		})
-		.from(realmRuleRevision)
-		.where(eq(realmRuleRevision.id, definition.revisionId))
-		.limit(1);
-	assertFields("REZICS Rule revision", storedRevision, {
-		id: definition.revisionId,
-		realmId: value.id,
-		version: definition.version,
-		acknowledgementMode: definition.acknowledgementMode,
-		requireOnJoin: definition.requireOnJoin,
-		requireOnPost: definition.requireOnPost,
-		createdByProfileId: value.ownerProfileId,
-	});
-
-	for (const [position, ruleDefinition] of definition.items.entries()) {
-		const createdRuleUnit = await insertUnitIfMissing(tx, {
-			id: ruleDefinition.id,
-			kind: "realm_rule",
-			status: "published",
-			visibility: "unlisted",
-			publishedAt: createdAt,
-			createdAt,
-			updatedAt: createdAt,
-			statusActor: { kind: "system" },
-		});
-		let ruleChanged = createdRuleUnit !== null;
-		for (const [localizationIndex, localization] of ruleDefinition.localizations.entries())
-			ruleChanged =
-				(await ensureLocalization(tx, {
-					unitId: ruleDefinition.id,
-					position: fractionalPositionAt(localizationIndex),
-					contentStatus: "published",
-					...localization,
-				})) || ruleChanged;
-		ruleChanged =
-			(await ensureOwnership(tx, ruleDefinition.id, value.ownerProfileId)) || ruleChanged;
-		const insertedRule = await tx
-			.insert(realmRule)
-			.values({
-				id: ruleDefinition.id,
-				revisionId: definition.revisionId,
-				position,
-				createdAt,
-			})
-			.onConflictDoNothing()
-			.returning({ id: realmRule.id });
-		ruleChanged ||= insertedRule.length > 0;
-		const [storedRule] = await tx
-			.select({
-				id: realmRule.id,
-				revisionId: realmRule.revisionId,
-				position: realmRule.position,
-			})
-			.from(realmRule)
-			.where(eq(realmRule.id, ruleDefinition.id))
-			.limit(1);
-		assertFields(`REZICS Rule item ${position + 1}`, storedRule, {
-			id: ruleDefinition.id,
-			revisionId: definition.revisionId,
-			position,
-		});
-		if (ruleChanged)
-			await recordUnitRevision(tx, {
-				unitId: ruleDefinition.id,
-				actorProfileId: value.ownerProfileId,
-				event: createdRuleUnit ? "create" : "update",
-				message: "Bootstrap REZICS Rule item",
-			});
-		changed ||= ruleChanged;
-	}
-	return changed;
 }
 
 async function ensureScoreRealmProfileDefaults(tx: DatabaseTransaction): Promise<void> {
@@ -1619,20 +1511,6 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 				...localization,
 			})),
 		),
-		...RezicsRuleRealmManifest.rules.items.flatMap((rule) =>
-			rule.localizations.map((localization, index) => ({
-				unitId: rule.id,
-				position: fractionalPositionAt(index),
-				summary: null,
-				avatarType: null,
-				avatarAssetId: null,
-				avatarEmoji: null,
-				avatarIconPrefix: null,
-				avatarIconName: null,
-				contentStatus: "published" as const,
-				...localization,
-			})),
-		),
 		...OfficialZoneManifest.flatMap((officialZone) =>
 			officialZone.localizations.map((localization, index) => ({
 				unitId: officialZone.id,
@@ -1688,8 +1566,6 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 		curatedTagCollectionStructureHeads,
 		bootstrapPlatformAccess,
 		officialRealms,
-		bootstrapRuleRevision,
-		bootstrapRules,
 		officialZones,
 		officialZoneDocks,
 		officialWikiPosts,
@@ -1825,28 +1701,6 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 			),
 		database
 			.select({
-				id: realmRuleRevision.id,
-				realmId: realmRuleRevision.realmId,
-				version: realmRuleRevision.version,
-			})
-			.from(realmRuleRevision)
-			.where(eq(realmRuleRevision.id, RezicsRuleRealmManifest.rules.revisionId))
-			.limit(1),
-		database
-			.select({
-				id: realmRule.id,
-				revisionId: realmRule.revisionId,
-				position: realmRule.position,
-			})
-			.from(realmRule)
-			.where(
-				inArray(
-					realmRule.id,
-					RezicsRuleRealmManifest.rules.items.map((rule) => rule.id),
-				),
-			),
-		database
-			.select({
 				id: zone.id,
 				filterDocument: zone.filterDocument,
 				themeDocument: zone.themeDocument,
@@ -1969,7 +1823,6 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 					...BootstrapProfileManifest.map((bootstrapProfile) => bootstrapProfile.profileId),
 					...CuratedCreationTagCollectionManifest.map((curatedCollection) => curatedCollection.id),
 					...BootstrapRealmManifest.map((bootstrapRealm) => bootstrapRealm.id),
-					...RezicsRuleRealmManifest.rules.items.map((rule) => rule.id),
 					...OfficialZoneManifest.map((officialZone) => officialZone.id),
 					...OfficialZoneManifest.map((officialZone) => officialZone.wikiPost.id),
 					...OfficialZoneManifest.map((officialZone) => officialZone.homePage.id),
@@ -2068,21 +1921,6 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 		officialRealms.length === BootstrapRealmManifest.length &&
 		BootstrapRealmManifest.every((expected) =>
 			officialRealms.some((actual) => actual.id === expected.id),
-		) &&
-		bootstrapRuleRevision.some(
-			(revision) =>
-				revision.id === RezicsRuleRealmManifest.rules.revisionId &&
-				revision.realmId === RezicsRuleRealmManifest.id &&
-				revision.version === RezicsRuleRealmManifest.rules.version,
-		) &&
-		bootstrapRules.length === RezicsRuleRealmManifest.rules.items.length &&
-		RezicsRuleRealmManifest.rules.items.every((expected, position) =>
-			bootstrapRules.some(
-				(actual) =>
-					actual.id === expected.id &&
-					actual.revisionId === RezicsRuleRealmManifest.rules.revisionId &&
-					actual.position === position,
-			),
 		) &&
 		officialZones.length === OfficialZoneManifest.length &&
 		OfficialZoneManifest.every((expected) =>

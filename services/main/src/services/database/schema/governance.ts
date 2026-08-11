@@ -485,9 +485,7 @@ export const contentGovernanceAction = pgTable(
 	"content_governance_action",
 	{
 		id: createUuidv7PrimaryKey(),
-		decisionId: uuid()
-			.notNull()
-			.references(() => governanceDecision.id, { onDelete: "restrict" }),
+		decisionId: uuid().references(() => governanceDecision.id, { onDelete: "restrict" }),
 		caseId: uuid()
 			.notNull()
 			.references(() => contentReviewCase.id, { onDelete: "restrict" }),
@@ -522,7 +520,9 @@ export const contentGovernanceAction = pgTable(
 		uniqueIndex("content_governance_action_actor_case_idempotency_key")
 			.on(table.actorProfileId, table.caseId, table.idempotencyKey)
 			.where(sql`${table.idempotencyKey} is not null`),
-		unique("content_governance_action_decision_key").on(table.decisionId),
+		uniqueIndex("content_governance_action_decision_key")
+			.on(table.decisionId)
+			.where(sql`${table.decisionId} is not null`),
 		index("content_governance_action_case_created_idx").on(
 			table.caseId,
 			table.createdAt.desc(),
@@ -722,9 +722,7 @@ export const accountEnforcementAction = pgTable(
 	"account_enforcement_action",
 	{
 		id: createUuidv7PrimaryKey(),
-		decisionId: uuid()
-			.notNull()
-			.references(() => governanceDecision.id, { onDelete: "restrict" }),
+		decisionId: uuid().references(() => governanceDecision.id, { onDelete: "restrict" }),
 		actorProfileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "restrict" }),
@@ -746,7 +744,9 @@ export const accountEnforcementAction = pgTable(
 		uniqueIndex("account_enforcement_action_reverses_key")
 			.on(table.reversesActionId)
 			.where(sql`${table.reversesActionId} is not null`),
-		unique("account_enforcement_action_decision_key").on(table.decisionId),
+		uniqueIndex("account_enforcement_action_decision_key")
+			.on(table.decisionId)
+			.where(sql`${table.decisionId} is not null`),
 		index("account_enforcement_action_target_created_idx").on(
 			table.targetProfileId,
 			table.createdAt.desc(),
@@ -856,13 +856,12 @@ export const auditEvent = pgTable(
 			table.createdAt.desc(),
 		),
 		index("audit_event_target_idx").on(table.targetKind, table.targetId),
-		index("audit_event_governance_decision_idx").on(table.governanceDecisionId),
+		index("audit_event_governance_decision_idx")
+			.on(table.governanceDecisionId)
+			.where(sql`${table.governanceDecisionId} is not null`),
 		index("audit_event_request_idx").on(table.requestId),
 		index("audit_event_trace_idx").on(table.traceId),
-		check(
-			"audit_event_schema_version_check",
-			sql`${table.schemaVersion} = ${AuditEventSchemaVersion}`,
-		),
+		check("audit_event_schema_version_check", sql`${table.schemaVersion} in (1, 2)`),
 		check("audit_event_action_check", sql`btrim(${table.action}) <> ''`),
 		check(
 			"audit_event_outcome_code_check",

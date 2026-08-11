@@ -289,9 +289,7 @@ export const unitAccessRestriction = pgTable(
 		realmRelation: realmAccessSubjectRelation().$type<RealmAccessSubjectRelation>(),
 		permission: unitPermission().$type<DelegableUnitPermission>().notNull(),
 		scope: text().array().default(sql`array[]::text[]`).notNull(),
-		decisionId: uuid()
-			.notNull()
-			.references(() => governanceDecision.id, { onDelete: "restrict" }),
+		decisionId: uuid().references(() => governanceDecision.id, { onDelete: "restrict" }),
 		createdByProfileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "restrict" }),
@@ -315,7 +313,9 @@ export const unitAccessRestriction = pgTable(
 			.on(table.realmId, table.unitId, table.permission)
 			.where(sql`${table.revokedAt} is null and ${table.subjectKind} = 'realm'`),
 		index("unit_access_restriction_created_by_idx").on(table.createdByProfileId),
-		index("unit_access_restriction_decision_idx").on(table.decisionId),
+		index("unit_access_restriction_decision_idx")
+			.on(table.decisionId)
+			.where(sql`${table.decisionId} is not null`),
 		check(
 			"unit_access_restriction_subject_shape_check",
 			sql`(
