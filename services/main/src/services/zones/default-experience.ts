@@ -6,7 +6,6 @@ import {
 	walkBlockTree,
 } from "@rezics/block";
 import type { ContentLanguage } from "@rezics/i18n";
-import type { SearchTemplateId } from "@rezics/filter";
 import { ZoneHomePageSlug } from "@rezics/slug";
 import { sql } from "drizzle-orm";
 
@@ -14,19 +13,16 @@ import type { DatabaseTransaction } from "../database";
 import { post, unitLocalization, unitOwnership, zonePage } from "../database/schema";
 import { createContentStructure, insertContentStructureNode } from "../content-structure/service";
 import { fractionalPositionAt } from "../ordering/position";
-import { createDefaultSearchDocument } from "../search/templates";
 import { insertUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
 import { replaceZonePageSlugAddress } from "../units/slug-address";
 import { getZonePageStructureProjection, listZonePageUnits } from "./pages";
-import { getZoneSearchFeature, putZoneSearchFeatureInTransaction } from "./search-feature";
 
 export interface ProvisionZoneDefaultExperienceInput {
 	readonly zoneId: string;
 	readonly actorProfileId: string;
 	readonly language: ContentLanguage;
 	readonly title: string;
-	readonly searchTemplate: SearchTemplateId;
 }
 
 async function createDefaultFeedPage(
@@ -105,25 +101,18 @@ async function createDefaultFeedPage(
 /**
  * Establishes the minimum usable Zone graph in the caller's transaction.
  *
- * A Zone is never committed without an enabled SearchDocument and a reachable
- * home Zone Page containing a Feed Block.
+ * A Zone is never committed without a reachable home Zone Page containing a
+ * Feed Block. The Feed reads the Zone-owned Filter document directly.
  */
 export async function provisionZoneDefaultExperienceInTransaction(
 	tx: DatabaseTransaction,
 	input: ProvisionZoneDefaultExperienceInput,
-): Promise<{ readonly pageId: string; readonly searchDocumentId: string }> {
+): Promise<{ readonly pageId: string }> {
 	await tx.execute(
 		sql`select pg_advisory_xact_lock(hashtextextended(${`zone-graph:${input.zoneId}`}::text, 0))`,
 	);
-	const searchFeature = await putZoneSearchFeatureInTransaction(tx, {
-		zoneId: input.zoneId,
-		enabled: true,
-		document: createDefaultSearchDocument(input.searchTemplate),
-		actorProfileId: input.actorProfileId,
-		message: "Create default Zone Search Feature",
-	});
 	const pageId = await createDefaultFeedPage(tx, input, true);
-	return { pageId, searchDocumentId: searchFeature.searchDocumentId };
+	return { pageId };
 }
 
 /** Idempotently repairs the minimum experience for a pre-existing Zone. */
@@ -134,16 +123,6 @@ export async function ensureZoneDefaultExperienceInTransaction(
 	await tx.execute(
 		sql`select pg_advisory_xact_lock(hashtextextended(${`zone-graph:${input.zoneId}`}::text, 0))`,
 	);
-	const searchFeature = await getZoneSearchFeature(tx, input.zoneId);
-	if (!searchFeature?.enabled)
-		await putZoneSearchFeatureInTransaction(tx, {
-			zoneId: input.zoneId,
-			enabled: true,
-			document: searchFeature?.document ?? createDefaultSearchDocument(input.searchTemplate),
-			...(searchFeature ? { baseRevisionId: searchFeature.latestRevisionId } : {}),
-			actorProfileId: input.actorProfileId,
-			message: "Repair required Zone Search Feature",
-		});
 	const pages = await listZonePageUnits(tx, input.zoneId, [input.language]);
 	const hasFeed = pages.some((page) => {
 		if (!page.placement) return false;

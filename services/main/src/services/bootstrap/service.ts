@@ -84,12 +84,6 @@ import {
 	type ProvisionZoneDefaultExperienceInput,
 } from "../zones/default-experience";
 import {
-	getZoneSearchFeature,
-	putZoneSearchFeatureInTransaction,
-	type ZoneSearchFeatureProjection,
-} from "../zones/search-feature";
-import { createDefaultSearchDocument } from "../search/templates";
-import {
 	assertPlatformCoreReady,
 	describePlatformCoreState,
 	inspectPlatformCore,
@@ -1284,26 +1278,6 @@ async function ensureOfficialZonePage(
 	return changed;
 }
 
-async function ensureOfficialZoneSearchFeature(
-	tx: DatabaseTransaction,
-	value: (typeof OfficialZoneManifest)[number],
-): Promise<boolean> {
-	const expectedDocument = createDefaultSearchDocument(value.searchTemplate);
-	const current = await getZoneSearchFeature(tx, value.id);
-	if (current?.enabled && valuesEqual(current.document, expectedDocument)) return false;
-	await putZoneSearchFeatureInTransaction(tx, {
-		zoneId: value.id,
-		enabled: true,
-		document: expectedDocument,
-		...(current ? { baseRevisionId: current.latestRevisionId } : {}),
-		actorProfileId: value.ownerProfileId,
-		message: current
-			? "Reconcile official Zone Search Feature"
-			: "Bootstrap official Zone Search Feature",
-	});
-	return true;
-}
-
 async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 	const createdAt = bootstrapEpoch();
 	for (const value of OfficialZoneManifest) {
@@ -1318,7 +1292,7 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 		});
 		const [storedZone] = await tx
 			.select({
-				boundaryDocument: zone.boundaryDocument,
+				filterDocument: zone.filterDocument,
 				themeDocument: zone.themeDocument,
 			})
 			.from(zone)
@@ -1326,13 +1300,13 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 			.limit(1);
 		if (storedZone) {
 			if (
-				!valuesEqual(storedZone.boundaryDocument, value.boundaryDocument) ||
+				!valuesEqual(storedZone.filterDocument, value.filterDocument) ||
 				!valuesEqual(storedZone.themeDocument, value.themeDocument)
 			) {
 				await tx
 					.update(zone)
 					.set({
-						boundaryDocument: value.boundaryDocument,
+						filterDocument: value.filterDocument,
 						themeDocument: value.themeDocument,
 						updatedAt: createdAt,
 					})
@@ -1342,14 +1316,13 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 		} else {
 			await tx.insert(zone).values({
 				id: value.id,
-				boundaryDocument: value.boundaryDocument,
+				filterDocument: value.filterDocument,
 				themeDocument: value.themeDocument,
 				createdAt,
 				updatedAt: createdAt,
 			});
 			changed = true;
 		}
-		changed = (await ensureOfficialZoneSearchFeature(tx, value)) || changed;
 		changed = (await ensureOfficialWikiPost(tx, value)) || changed;
 		changed = (await ensureOfficialZonePage(tx, value)) || changed;
 		const [storedNavigation] = await tx
@@ -1507,8 +1480,6 @@ async function getZoneDefaultExperienceInput(
 		actorProfileId: owner.profileId,
 		language: localization.language,
 		title: localization.title,
-		searchTemplate:
-			OfficialZoneManifest.find((candidate) => candidate.id === zoneId)?.searchTemplate ?? "global",
 	};
 }
 
@@ -1530,8 +1501,6 @@ async function areAllZoneExperiencesReady(): Promise<boolean> {
 			.innerJoin(unit, eq(unit.id, zone.id))
 			.where(and(eq(unit.kind, "zone"), isNull(unit.deletedAt)));
 		for (const { id } of zones) {
-			const feature = await getZoneSearchFeature(tx, id);
-			if (!feature?.enabled) return false;
 			const pages = await listZonePageUnits(tx, id);
 			if (
 				!pages.some((page) => {
@@ -1709,7 +1678,6 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 		bootstrapRuleRevision,
 		bootstrapRules,
 		officialZones,
-		officialZoneSearchFeatures,
 		officialZoneDocks,
 		officialWikiPosts,
 		officialZonePages,
@@ -1867,7 +1835,7 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 		database
 			.select({
 				id: zone.id,
-				boundaryDocument: zone.boundaryDocument,
+				filterDocument: zone.filterDocument,
 				themeDocument: zone.themeDocument,
 			})
 			.from(zone)
@@ -1877,14 +1845,6 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 					OfficialZoneManifest.map((value) => value.id),
 				),
 			),
-		database.transaction(async (tx) => {
-			const features: ZoneSearchFeatureProjection[] = [];
-			for (const value of OfficialZoneManifest) {
-				const feature = await getZoneSearchFeature(tx, value.id);
-				if (feature) features.push(feature);
-			}
-			return features;
-		}),
 		database
 			.select({ unitId: unitDock.unitId, document: unitDock.document })
 			.from(unitDock)
@@ -2112,17 +2072,8 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 			officialZones.some(
 				(actual) =>
 					actual.id === expected.id &&
-					valuesEqual(actual.boundaryDocument, expected.boundaryDocument) &&
+					valuesEqual(actual.filterDocument, expected.filterDocument) &&
 					valuesEqual(actual.themeDocument, expected.themeDocument),
-			),
-		) &&
-		officialZoneSearchFeatures.length === OfficialZoneManifest.length &&
-		OfficialZoneManifest.every((expected) =>
-			officialZoneSearchFeatures.some(
-				(actual) =>
-					actual.zoneId === expected.id &&
-					actual.enabled &&
-					valuesEqual(actual.document, createDefaultSearchDocument(expected.searchTemplate)),
 			),
 		) &&
 		officialWikiPosts.length === OfficialZoneManifest.length &&

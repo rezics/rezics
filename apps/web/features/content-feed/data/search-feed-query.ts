@@ -1,26 +1,27 @@
 import type {
-	EmbeddableSearchTemplateId,
+	FilterDocument,
+	SearchFeatureContext,
 	SearchFeatureState,
 	SearchFeatureSurface,
+	SearchInjection,
 } from "@rezics/filter";
 import type { ContentLanguage } from "@rezics/i18n";
 import {
-	postApiSearchFeaturesByTemplateFeed,
-	postApiSearchZonesByZoneIdFeatureFeed,
-	type PostApiSearchFeaturesByTemplateExecuteBody,
+	postApiSearchFilterFeed,
+	postApiSearchZonesByZoneIdFilterFeed,
 } from "@rezics/openapi-tanstack-query";
 import type { SearchFeedContinuationToken } from "../model/search-feed-continuation-token";
 
 export type SearchFeedState = Omit<SearchFeatureState, "cursor"> & Readonly<{ cursor?: never }>;
 
-export type SearchFeedRequest = Readonly<
-	Pick<PostApiSearchFeaturesByTemplateExecuteBody, "contexts" | "injections"> & {
-		readonly state: SearchFeedState;
-	}
->;
+export interface SearchFeedRequest {
+	readonly contexts: readonly SearchFeatureContext[];
+	readonly injections: readonly SearchInjection[];
+	readonly state: SearchFeedState;
+}
 
 export type SearchFeedSource =
-	| Readonly<{ kind: "template"; template: EmbeddableSearchTemplateId }>
+	| Readonly<{ kind: "filter"; filterDocument: FilterDocument }>
 	| Readonly<{ kind: "zone"; zoneId: string }>;
 
 export function withoutSearchFeedCursor(state: SearchFeatureState): SearchFeedState {
@@ -47,10 +48,16 @@ export async function fetchSearchFeedPage({
 		...request.state,
 		...(cursor ? { cursor } : {}),
 	};
-	if (source.kind === "template") {
-		const { data } = await postApiSearchFeaturesByTemplateFeed({
-			path: { template: source.template },
-			body: { ...request, localizationLanguages: [...localizationLanguages], state, surface },
+	if (source.kind === "filter") {
+		const { data } = await postApiSearchFilterFeed({
+			body: {
+				filterDocument: source.filterDocument,
+				contexts: [...request.contexts],
+				injections: [...request.injections],
+				localizationLanguages: [...localizationLanguages],
+				state,
+				surface,
+			},
 			signal,
 		});
 		return {
@@ -59,10 +66,10 @@ export async function fetchSearchFeedPage({
 			nextCursor: (data.nextCursor as SearchFeedContinuationToken | undefined) ?? null,
 		};
 	}
-	const { data } = await postApiSearchZonesByZoneIdFeatureFeed({
+	const { data } = await postApiSearchZonesByZoneIdFilterFeed({
 		path: { zoneId: source.zoneId },
 		body: {
-			injections: request.injections,
+			injections: [...request.injections],
 			localizationLanguages: [...localizationLanguages],
 			state,
 			surface,

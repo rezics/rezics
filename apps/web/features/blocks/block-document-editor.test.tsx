@@ -42,11 +42,7 @@ const labels = {
 	style: "Style",
 	sources: {
 		global: "Global",
-		book: "Book",
-		media: "Media",
-		software: "Software",
-		realm: "Realm",
-		zone: "Zone",
+		inline: "Inline",
 	},
 	appearances: {
 		inline: "Inline",

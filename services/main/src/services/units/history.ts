@@ -5,12 +5,12 @@ import { AvatarTypeValues, FontAwesomeIconPrefixValues } from "@rezics/avatar";
 import {
 	PollContentBlock,
 	UnitReferencedBlockDocument,
-	ZoneBoundaryDocument,
 	ZoneThemeDocument,
 	isDocument,
 	isPortableTextDocument,
 	type PortableTextDocument as PortableTextDocumentValue,
 } from "@rezics/block";
+import { assertFilterDocument, type FilterDocument } from "@rezics/filter";
 import type { Static, TSchema } from "@sinclair/typebox";
 import { type ContentLanguage, ContentLanguageValues, isContentLanguage } from "@rezics/i18n";
 import { PublicationLicenseIds } from "@rezics/license";
@@ -106,7 +106,14 @@ const UnitLocalizationContentSchema = z.union([
 	PollContentBlockSchema,
 	UnitReferencedBlockDocumentSchema,
 ]);
-const ZoneBoundaryDocumentSchema = createDocumentSchema(ZoneBoundaryDocument);
+const FilterDocumentSchema = z.custom<FilterDocument>((value): value is FilterDocument => {
+	try {
+		assertFilterDocument(value);
+		return true;
+	} catch {
+		return false;
+	}
+});
 const ZoneThemeDocumentSchema = createDocumentSchema(ZoneThemeDocument);
 const FractionalPositionSchema = z
 	.string()
@@ -223,7 +230,7 @@ const realmStateSchema = schemaFactory
 	.omit({ id: true, createdAt: true, updatedAt: true });
 const zoneStateSchema = schemaFactory
 	.createSelectSchema(zone, {
-		boundaryDocument: ZoneBoundaryDocumentSchema,
+		filterDocument: FilterDocumentSchema,
 		themeDocument: ZoneThemeDocumentSchema,
 	})
 	.omit({ id: true, createdAt: true, updatedAt: true });

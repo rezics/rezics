@@ -18,7 +18,7 @@ const TagId = "00000000-0000-7000-8000-000000000003";
 describe("tagSearchHref", () => {
 	it("serializes one Tag through the shared search URL contract", () => {
 		expect(tagSearchHref("book", [{ tagId: "tag-a", label: "Fantasy" }])).toBe(
-			"/search?template=book&tag=tag-a&tagLabel=Fantasy",
+			"/search?tag=tag-a&tagLabel=Fantasy",
 		);
 	});
 
@@ -29,10 +29,10 @@ describe("tagSearchHref", () => {
 				{ tagId: "tag-b", label: "Mystery" },
 				{ tagId: "tag-a", label: "Fantasy duplicate" },
 			]),
-		).toBe("/search?template=media&tag=tag-a,tag-b&tagLabel=Fantasy+duplicate,Mystery");
+		).toBe("/search?tag=tag-a,tag-b&tagLabel=Fantasy+duplicate,Mystery");
 	});
 
-	it("uses the global search template for a series", () => {
+	it("uses the same Filter search contract for a series", () => {
 		expect(tagSearchHref("series", [{ tagId: "tag-a", label: "Fantasy" }])).toBe(
 			"/search?tag=tag-a&tagLabel=Fantasy",
 		);

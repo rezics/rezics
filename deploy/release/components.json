@@ -1,6 +1,6 @@
 {
 	"schemaVersion": 1,
-	"maintenanceCutovers": ["v1.3.0", "v1.4.0"],
+	"maintenanceCutovers": ["v1.3.0", "v1.4.0", "v1.6.0"],
 	"components": {
 		"database": {
 			"order": 10,
@@ -14,9 +14,13 @@
 				"services/main/package.json",
 				"services/main/atlas.hcl",
 				"services/main/src/services/database/**",
+				"services/main/src/services/history/content.ts",
 				"services/main/src/services/bootstrap/**",
 				"services/main/scripts/ensure-database-privileges.ts",
+				"services/main/scripts/filter-document-cutover.ts",
+				"services/main/scripts/migrate-filter-documents.ts",
 				"services/main/scripts/verify-platform-core.ts",
+				"libraries/filter/**",
 				"deploy/scripts/database-operation.sh"
 			]
 		},

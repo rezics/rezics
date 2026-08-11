@@ -87,7 +87,6 @@ export function PostList({
 			key={`${realmId ?? "global"}:${subjectId ?? "all"}`}
 			pagination={pagination}
 			requestedRealmId={requestedRealmId}
-			template="global"
 		/>
 	) : (
 		<SearchFeedList
@@ -95,7 +94,7 @@ export function PostList({
 			pagination={pagination}
 			request={request}
 			requestedRealmId={requestedRealmId}
-			template="global"
+			source={{ kind: "filter", filterDocument: {} }}
 		/>
 	);
 }

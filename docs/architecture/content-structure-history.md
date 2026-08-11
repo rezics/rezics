@@ -204,31 +204,32 @@ PostgreSQL advisory locks are transaction scoped and released automatically at t
 ## Search Feature
 
 `@rezics/filter` defines both the engine-independent `UnitFilter` and Search Feature input: one
-versioned SearchDocument, server-established contexts, provenance-bearing injections, and
-untrusted interaction state. Full-text matching is the positive `UnitFilter.search` constraint;
-structured domain selection is `UnitFilter.where`. The server owns six v1 templates—global, Book,
-Media, Software, Realm, and Zone—and the field registry. A document
-may disable or arrange template capabilities and repeat Tag controls, but cannot introduce or widen
-fields, operators, sorts, facets, page sizes, or result windows.
+sparse `FilterDocument`, server-established contexts, provenance-bearing injections, and untrusted
+interaction state. Full-text matching is the positive `UnitFilter.search` constraint; structured
+domain selection is `UnitFilter.where`. The server owns one global capability ceiling and field
+registry. A Filter document may narrow categories, add a fixed predicate, sparsely override
+controls, and repeat Tag controls, but cannot introduce or widen fields, operators, sorts, facets,
+page sizes, or result windows. `{}` adds no document-level condition or default.
 
-Only Zone management persists a custom SearchDocument in v1. Other surfaces use a system template
-plus allowed contexts and injections. Realm search is the global template with a fixed hidden Realm
-context; Tag links inject refinements into the same input boundary. Contexts, document constraints,
-injections, defaults, and user state remain distinct by provenance and are composed by the compiler,
-so browser state cannot replace a fixed context or injected predicate.
+A Zone persists its Filter document directly. Other surfaces use `{}` or an inline Filter document
+plus allowed contexts and injections. Realm search uses `{}` with a fixed hidden Realm context; Tag
+links inject refinements into the same input boundary. Contexts, document constraints, injections,
+server fallbacks, and user state remain distinct by provenance and are composed by the compiler, so
+browser state cannot replace a fixed context or injected predicate.
 
 Quick filters, the advanced builder, and hidden-filter disclosure are renderer concerns over one
 `SearchControlExpression` contract. “Advanced” names only the frontend editing experience; it never
 selects a backend mode, changes field availability, or changes execution semantics. Controls retain
 stable `controlKey` identity, including repeated Tag controls, through UI state, compilation, facet
-results, and canonical input hashing. Search and Feed Blocks store only a stable template-or-Zone
-Search Feature source; Content Structure nodes never embed a query schema.
+results, and canonical input hashing. Search and Feed Blocks choose the global `{}`, the hosting
+Zone document, or one inline sparse Filter document; Content Structure nodes never embed a query
+schema.
 A Feed Block adds presentation settings only and does not persist Feed-owned filter defaults.
 Search owns execution controls, facets, relevance, and the Search Service adapter; it does not own
 a second filtering language. A Search Feature may be presented through the Feed item renderer
-without widening the general Feed API. SearchDocument has distinct Search and Feed sort profiles,
-including ordered options and empty-query/text-query defaults. Relevance is query-only and may
-appear only in the Search profile. The Feed profile defaults to `best` with or without text and is
+without widening the general Feed API. The server has distinct Search and Feed sort policies,
+including ordered options and empty-query/text-query fallbacks. Relevance is query-only and may
+appear only in the Search policy. The Feed policy defaults to `best` with or without text and is
 validated not to expose relevance.
 
 The general Feed endpoint accepts the bounded domain Filter through `POST /feed/query`; its standard

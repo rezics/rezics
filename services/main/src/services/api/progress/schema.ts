@@ -24,7 +24,7 @@ export const ListProgressQuery = t.Object(
 );
 export type ListProgressQuery = Static<typeof ListProgressQuery>;
 
-const ProgressSearchFeatureExecution = t.Omit(SearchFeatureInput, ["document", "contexts"]);
+const ProgressSearchFeatureExecution = t.Omit(SearchFeatureInput, ["filterDocument", "contexts"]);
 export const ProgressSearchBody = t.Object(
 	{
 		...ProgressSearchFeatureExecution.properties,

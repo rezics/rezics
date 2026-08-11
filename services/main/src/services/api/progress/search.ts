@@ -1,21 +1,40 @@
 import { createHash } from "node:crypto";
 import {
+	createFilterDocument,
 	defaultSearchSort,
 	parseSearchFeatureInput,
-	searchSortConfiguration,
 	unitFilterSearchQuery,
 } from "@rezics/filter";
 
 import { InvalidSearch } from "../../search/errors";
 import {
-	createDefaultSearchDocument,
 	ProgressSearchSorts,
-	resolveSearchDocument,
+	resolveFilterDocument,
+	type SearchEndpointPolicy,
 	type ProgressSearchSort,
-} from "../../search/templates";
+} from "../../search/filter-document";
 import type { SearchCountResult } from "../../counts/contract";
+import { WorkPolicy } from "../../performance/policy";
 
-const ProgressSearchDocument = createDefaultSearchDocument("progress");
+const ProgressFilterDocument = createFilterDocument({
+	categories: ["units"],
+	where: { kind: { in: ["book", "media", "software"] } },
+});
+const ProgressEndpointPolicy = {
+	fields: [],
+	sorts: ProgressSearchSorts,
+	defaultSorts: {
+		search: {
+			emptyQuery: "progressLastSeenAt:desc",
+			textQuery: "progressLastSeenAt:desc",
+		},
+		feed: {
+			emptyQuery: "progressLastSeenAt:desc",
+			textQuery: "progressLastSeenAt:desc",
+		},
+	},
+	facets: [],
+} as const satisfies SearchEndpointPolicy;
 const ProgressSearchSortSet: ReadonlySet<string> = new Set(ProgressSearchSorts);
 
 interface ProgressSearchCursor {
@@ -43,7 +62,7 @@ export interface ResolvedProgressSearchRequest {
 }
 
 export function getProgressSearchDefinition() {
-	return resolveSearchDocument(ProgressSearchDocument, true);
+	return resolveFilterDocument(ProgressFilterDocument, true, ProgressEndpointPolicy);
 }
 
 function isProgressSearchSort(value: string): value is ProgressSearchSort {
@@ -128,7 +147,7 @@ export function resolveProgressSearchRequest(value: unknown): ResolvedProgressSe
 		const body =
 			value && typeof value === "object" ? (value as Record<string, unknown>) : undefined;
 		input = parseSearchFeatureInput({
-			document: ProgressSearchDocument,
+			filterDocument: ProgressFilterDocument,
 			contexts: [],
 			injections: body?.injections,
 			state: body?.state,
@@ -144,12 +163,12 @@ export function resolveProgressSearchRequest(value: unknown): ResolvedProgressSe
 		throw new InvalidSearch("Progress Search scope is established by the server");
 
 	const query = unitFilterSearchQuery(input.state.filter).trim();
-	const configuration = searchSortConfiguration(ProgressSearchDocument, "search");
+	const configuration = getProgressSearchDefinition().sort.search;
 	const sort = input.state.sort ?? defaultSearchSort(configuration, query);
 	if (!isProgressSearchSort(sort) || !configuration.options.includes(sort))
 		throw new InvalidSearch("Progress Search sort is unavailable");
-	const pageSize = input.state.pageSize ?? ProgressSearchDocument.results.pageSize;
-	if (pageSize > ProgressSearchDocument.results.maxPageSize)
+	const pageSize = input.state.pageSize ?? 20;
+	if (pageSize > WorkPolicy.search.maxPageSize)
 		throw new InvalidSearch("Progress Search page size exceeds its configured maximum");
 	const requestHash = createHash("sha256")
 		.update(JSON.stringify({ query, sort, pageSize }))
@@ -159,7 +178,7 @@ export function resolveProgressSearchRequest(value: unknown): ResolvedProgressSe
 		cursor &&
 		(cursor.requestHash !== requestHash ||
 			cursor.pageSize !== pageSize ||
-			cursor.consumed + pageSize > ProgressSearchDocument.results.maxResultWindow ||
+			cursor.consumed + pageSize > WorkPolicy.search.maxResultWindow ||
 			(sort.startsWith("progressLastSeenAt:") &&
 				(cursor.boundary.sortValue === null ||
 					!Number.isFinite(Date.parse(cursor.boundary.sortValue)))))

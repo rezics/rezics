@@ -271,14 +271,61 @@ describe("Block document contracts", () => {
 				{
 					_type: "feed",
 					_key: "000000000011",
-					feature: { kind: "template", template: "global" },
+					feature: { kind: "global" },
 					presentation: { pagination: "load-more", showResultCount: true },
 				},
 			],
 		} satisfies BlockDocumentValue;
 
 		expect(() => assertBlockDocument(document)).not.toThrow();
-		expect(document.blocks[0]!.feature).toEqual({ kind: "template", template: "global" });
+		expect(document.blocks[0]!.feature).toEqual({ kind: "global" });
+	});
+
+	test("validates inline Filter semantics and collects its Unit references", () => {
+		const labelId = "019b0000-0000-7000-8000-000000000001";
+		const tagId = "019b0000-0000-7000-8000-000000000002";
+		const relationId = "019b0000-0000-7000-8000-000000000003";
+		const document = {
+			_type: "block-document",
+			_key: "000000000014",
+			blocks: [
+				{
+					_type: "feed",
+					_key: "000000000015",
+					feature: {
+						kind: "inline",
+						filterDocument: {
+							where: { creditAttributions: { some: { id: { in: [relationId] } } } },
+							controls: [
+								{
+									key: "tag",
+									labelUnitId: labelId,
+									optionPolicy: { kind: "include", values: [tagId] },
+								},
+							],
+						},
+					},
+					presentation: { pagination: "load-more", showResultCount: true },
+				},
+			],
+		} satisfies BlockDocumentValue;
+
+		expect(() => assertBlockDocument(document)).not.toThrow();
+		expect([...collectBlockReferences(document).unitIds]).toEqual([relationId, labelId, tagId]);
+		expect(() =>
+			assertBlockDocument({
+				...document,
+				blocks: [
+					{
+						...document.blocks[0],
+						feature: {
+							kind: "inline",
+							filterDocument: { categories: ["units", "units"] },
+						},
+					},
+				],
+			}),
+		).toThrow("categories must be unique");
 	});
 
 	test("rejects Feed-owned filter defaults", () => {
@@ -290,7 +337,7 @@ describe("Block document contracts", () => {
 					{
 						_type: "feed",
 						_key: "000000000013",
-						feature: { kind: "template", template: "global" },
+						feature: { kind: "global" },
 						defaults: [],
 						presentation: { pagination: "load-more", showResultCount: true },
 					},

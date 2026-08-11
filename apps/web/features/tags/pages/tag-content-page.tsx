@@ -38,7 +38,7 @@ export function TagContentPage() {
 				resolveOptionLabel={(control, value) =>
 					control.field === "tag" && value === tag.id ? label : undefined
 				}
-				source={{ kind: "template", template: "global" }}
+				source={{ kind: "filter", filterDocument: {} }}
 			/>
 		</TagDetailSectionFrame>
 	);

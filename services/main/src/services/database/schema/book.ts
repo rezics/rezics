@@ -16,7 +16,7 @@ export const book = pgTable(
 		isbn13: text(),
 		publicationDate: date(),
 		pageCount: integer(),
-		/** Authoritative editorial metadata used by the Book Search template. */
+		/** Authoritative editorial metadata available to Book Zone filtering. */
 		wordCount: integer(),
 		format: text(),
 		createdAt: createCreatedAtColumn(),

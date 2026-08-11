@@ -55,12 +55,8 @@ export default {
 		orientation: "排列方向",
 		style: "樣式",
 		sources: {
-			global: "全域模板",
-			book: "書籍模板",
-			media: "媒體模板",
-			software: "軟體模板",
-			realm: `${realmTerms.label}模板`,
-			zone: `${zoneTerms.label}模板`,
+			global: "全域篩選條件",
+			inline: "內嵌篩選條件",
 		},
 		appearances: {
 			inline: "行內",

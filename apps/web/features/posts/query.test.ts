@@ -10,7 +10,7 @@ describe("Post query invalidation", () => {
 		const discussionKey = [
 			...SearchFeedQueryKey,
 			"feed",
-			{ kind: "template", template: "global" },
+			{ kind: "filter", filterDocument: {} },
 			{ subjectId: "book-1" },
 		] as const;
 		queryClient.setQueryData(discussionKey, { pages: [] });

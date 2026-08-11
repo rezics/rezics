@@ -8,7 +8,6 @@ import {
 	type UnitReferencedBlock,
 	type UnitReferencedBlockDocument,
 } from "@rezics/block";
-import { EmbeddableSearchTemplateIdValues, type EmbeddableSearchTemplateId } from "@rezics/filter";
 import {
 	Button,
 	Card,
@@ -42,7 +41,7 @@ export interface BlockEditorLabels {
 	readonly showResultCount: string;
 	readonly orientation: string;
 	readonly style: string;
-	readonly sources: Record<EmbeddableSearchTemplateId, string>;
+	readonly sources: Record<"global" | "inline", string>;
 	readonly appearances: Record<
 		"inline" | "card" | "cover" | "links" | "buttons" | "tabs" | "drawer",
 		string
@@ -86,10 +85,6 @@ const DividerStyles = ["line", "space", "section"] as const;
 
 function isAddableBlockType(value: string): value is BlockEditorAddableType {
 	return DefaultAddableBlockTypes.some((type) => type === value);
-}
-
-function isSearchTemplateId(value: string): value is EmbeddableSearchTemplateId {
-	return EmbeddableSearchTemplateIdValues.some((template) => template === value);
 }
 
 function isFeedPaginationMode(value: string): value is FeedPaginationMode {
@@ -390,20 +385,25 @@ function BlockFields({
 							const value = event.currentTarget.value;
 							if (value === "zone-feature" && allowZoneSearchSource)
 								onChange({ ...block, feature: { kind: "zone" } });
-							else if (isSearchTemplateId(value))
+							else if (value === "global") onChange({ ...block, feature: { kind: "global" } });
+							else if (value === "inline")
 								onChange({
 									...block,
-									feature: { kind: "template", template: value },
+									feature: {
+										kind: "inline",
+										filterDocument:
+											block.feature.kind === "inline" ? block.feature.filterDocument : {},
+									},
 								});
 						}}
-						value={block.feature.kind === "zone" ? "zone-feature" : block.feature.template}
+						value={block.feature.kind === "zone" ? "zone-feature" : block.feature.kind}
 					>
 						{allowZoneSearchSource || block.feature.kind === "zone" ? (
 							<NativeSelectOption disabled={!allowZoneSearchSource} value="zone-feature">
 								{labels.zoneSearch}
 							</NativeSelectOption>
 						) : null}
-						{EmbeddableSearchTemplateIdValues.map((value) => (
+						{(["global", "inline"] as const).map((value) => (
 							<NativeSelectOption key={value} value={value}>
 								{labels.sources[value]}
 							</NativeSelectOption>

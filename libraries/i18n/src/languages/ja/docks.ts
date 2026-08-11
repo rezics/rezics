@@ -55,12 +55,8 @@ export default {
 		orientation: "向き",
 		style: "スタイル",
 		sources: {
-			global: "グローバルテンプレート",
-			book: "書籍テンプレート",
-			media: "メディアテンプレート",
-			software: "ソフトウェアテンプレート",
-			realm: `${realmTerms.label} テンプレート`,
-			zone: `${zoneTerms.label} テンプレート`,
+			global: "グローバルフィルター",
+			inline: "インラインフィルター",
 		},
 		appearances: {
 			inline: "インライン",

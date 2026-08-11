@@ -55,12 +55,8 @@ export default {
 		orientation: "Ausrichtung",
 		style: "Stil",
 		sources: {
-			global: "Globale Vorlage",
-			book: "Buchvorlage",
-			media: "Medienvorlage",
-			software: "Softwarevorlage",
-			realm: `${realmTerms.label}-Vorlage`,
-			zone: `${zoneTerms.label}-Vorlage`,
+			global: "Globaler Filter",
+			inline: "Eingebetteter Filter",
 		},
 		appearances: {
 			inline: "Im Text",

@@ -18,8 +18,8 @@ import {
 import { useProfileContext } from "./profile-layout";
 
 const ProfileContentFeedSource = {
-	kind: "template",
-	template: "global",
+	kind: "filter",
+	filterDocument: {},
 } satisfies SearchFeedSource;
 
 export function ProfileContentPage() {

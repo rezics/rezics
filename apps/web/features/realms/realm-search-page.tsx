@@ -38,7 +38,7 @@ export function RealmSearchPage({ realmId }: { readonly realmId: string }) {
 		<ScopedSearchPage
 			contexts={[{ kind: "realm", realmId }]}
 			id={`realm-${realmId}-search`}
-			source={{ kind: "template", template: "global" }}
+			source={{ kind: "filter", filterDocument: {} }}
 		/>
 	);
 }

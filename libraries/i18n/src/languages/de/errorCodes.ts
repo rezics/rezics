@@ -287,9 +287,6 @@ export default {
 	RealmTagVotingDisabled: `Tag-Abstimmungen sind in diesem ${realmTerms.inline} nicht aktiviert.`,
 	RealmTagContextRequired: `Dieses ${realmTerms.inline} muss den Tag zuerst in einer derzeit sichtbaren offiziellen Erklärung beschreiben.`,
 	RealmTagSelfReferenceForbidden: "Ein Tag kann nicht auf sich selbst angewendet werden.",
-	SearchDocumentRevisionConflict:
-		"Die Suchkonfiguration wurde geändert. Lade sie vor dem Speichern neu.",
-	ZoneSearchFeatureNotFound: `Dieser ${zoneTerms.inline} hat keine aktivierte Suchfunktion.`,
 	SharedSearchQueryNotFound: "Diese geteilte Suchanfrage wurde nicht gefunden.",
 	InvalidTagStructure: `Dieser ${tagStructureTerms.inline} ist ungültig.`,
 	TagStructureNotFound: `Dieser ${tagStructureTerms.inline} wurde nicht gefunden.`,

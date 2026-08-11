@@ -10,9 +10,10 @@ first_plan="$(mktemp)"
 second_plan="$(mktemp)"
 maintenance_plan="$(mktemp)"
 maintenance_v1_4_plan="$(mktemp)"
+maintenance_v1_6_plan="$(mktemp)"
 ordinary_plan="$(mktemp)"
-readonly empty_state matching_state first_plan second_plan maintenance_plan maintenance_v1_4_plan ordinary_plan
-trap 'rm -f "${empty_state}" "${matching_state}" "${first_plan}" "${second_plan}" "${maintenance_plan}" "${maintenance_v1_4_plan}" "${ordinary_plan}"' EXIT
+readonly empty_state matching_state first_plan second_plan maintenance_plan maintenance_v1_4_plan maintenance_v1_6_plan ordinary_plan
+trap 'rm -f "${empty_state}" "${matching_state}" "${first_plan}" "${second_plan}" "${maintenance_plan}" "${maintenance_v1_4_plan}" "${maintenance_v1_6_plan}" "${ordinary_plan}"' EXIT
 
 printf '%s\n' '{}' >"${empty_state}"
 "${repository_root}/deploy/scripts/plan-release-components.sh" \
@@ -48,6 +49,10 @@ jq -e '.maintenanceRequired == true' "${maintenance_plan}" >/dev/null
 "${repository_root}/deploy/scripts/plan-release-components.sh" \
 	"${matching_state}" v1.4.0 >"${maintenance_v1_4_plan}"
 jq -e '.maintenanceRequired == true' "${maintenance_v1_4_plan}" >/dev/null
+
+"${repository_root}/deploy/scripts/plan-release-components.sh" \
+	"${matching_state}" v1.6.0 >"${maintenance_v1_6_plan}"
+jq -e '.maintenanceRequired == true' "${maintenance_v1_6_plan}" >/dev/null
 
 "${repository_root}/deploy/scripts/plan-release-components.sh" \
 	"${matching_state}" v1.3.1 >"${ordinary_plan}"

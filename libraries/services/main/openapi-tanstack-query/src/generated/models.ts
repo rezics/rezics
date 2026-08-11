@@ -3598,14 +3598,2218 @@ export type DockDocument = {
 										/**
 										 * @type string
 										 */
-										kind: "template";
-										template: "global" | "book" | "media" | "software" | "realm" | "zone";
+										kind: "global";
 								  }
 								| {
 										/**
 										 * @type string
 										 */
 										kind: "zone";
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										kind: "inline";
+										/**
+										 * @type object
+										 */
+										filterDocument: {
+											/**
+											 * @type array | undefined
+											 */
+											categories?: (
+												| "units"
+												| "users"
+												| "entities"
+												| "tags"
+												| "tag-structures"
+												| "posts"
+												| "realms"
+												| "collections"
+												| "reviews"
+												| "polls"
+											)[];
+											/**
+											 * @type object | undefined
+											 */
+											where?: {
+												/**
+												 * @type array | undefined
+												 */
+												all?: UnitPredicate[];
+												/**
+												 * @type array | undefined
+												 */
+												any?: UnitPredicate[];
+												/**
+												 * @type object | undefined
+												 */
+												not?: UnitPredicate;
+												/**
+												 * @type object | undefined
+												 */
+												id?: {
+													/**
+													 * @type array
+													 */
+													in: string[];
+												};
+												/**
+												 * @type object | undefined
+												 */
+												kind?: {
+													/**
+													 * @type array
+													 */
+													in: (
+														| "slug_namespace"
+														| "profile"
+														| "book"
+														| "software"
+														| "media"
+														| "video"
+														| "audio"
+														| "release"
+														| "entity"
+														| "label"
+														| "tag"
+														| "structure"
+														| "series"
+														| "zone"
+														| "zone_page"
+														| "collection"
+														| "post"
+														| "poll"
+														| "realm"
+														| "realm_rule"
+													)[];
+												};
+												localizations?:
+													| {
+															/**
+															 * @type object
+															 */
+															some: {
+																/**
+																 * @type array | undefined
+																 */
+																all?: LocalizationFilter[];
+																/**
+																 * @type array | undefined
+																 */
+																any?: LocalizationFilter[];
+																/**
+																 * @type object | undefined
+																 */
+																not?: LocalizationFilter;
+																/**
+																 * @type object | undefined
+																 */
+																language?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: ("zh" | "en" | "ja" | "ko" | "de" | "fr" | "es")[];
+																};
+															};
+													  }
+													| {
+															/**
+															 * @type object
+															 */
+															none: {
+																/**
+																 * @type array | undefined
+																 */
+																all?: LocalizationFilter[];
+																/**
+																 * @type array | undefined
+																 */
+																any?: LocalizationFilter[];
+																/**
+																 * @type object | undefined
+																 */
+																not?: LocalizationFilter;
+																/**
+																 * @type object | undefined
+																 */
+																language?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: ("zh" | "en" | "ja" | "ko" | "de" | "fr" | "es")[];
+																};
+															};
+													  };
+												realms?:
+													| {
+															/**
+															 * @type object
+															 */
+															some: {
+																/**
+																 * @type array | undefined
+																 */
+																all?: RealmPlacementFilter[];
+																/**
+																 * @type array | undefined
+																 */
+																any?: RealmPlacementFilter[];
+																/**
+																 * @type object | undefined
+																 */
+																not?: RealmPlacementFilter;
+																/**
+																 * @type object | undefined
+																 */
+																realm?: {
+																	/**
+																	 * @type object | undefined
+																	 */
+																	id?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: string[];
+																	};
+																	/**
+																	 * @type object | undefined
+																	 */
+																	kind?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: (
+																			| "slug_namespace"
+																			| "profile"
+																			| "book"
+																			| "software"
+																			| "media"
+																			| "video"
+																			| "audio"
+																			| "release"
+																			| "entity"
+																			| "label"
+																			| "tag"
+																			| "structure"
+																			| "series"
+																			| "zone"
+																			| "zone_page"
+																			| "collection"
+																			| "post"
+																			| "poll"
+																			| "realm"
+																			| "realm_rule"
+																		)[];
+																	};
+																};
+																/**
+																 * @type object | undefined
+																 */
+																status?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: ("pending" | "visible" | "hidden" | "removed")[];
+																};
+																/**
+																 * @type object | undefined
+																 */
+																publicationState?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: ("active" | "withdrawn")[];
+																};
+															};
+													  }
+													| {
+															/**
+															 * @type object
+															 */
+															none: {
+																/**
+																 * @type array | undefined
+																 */
+																all?: RealmPlacementFilter[];
+																/**
+																 * @type array | undefined
+																 */
+																any?: RealmPlacementFilter[];
+																/**
+																 * @type object | undefined
+																 */
+																not?: RealmPlacementFilter;
+																/**
+																 * @type object | undefined
+																 */
+																realm?: {
+																	/**
+																	 * @type object | undefined
+																	 */
+																	id?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: string[];
+																	};
+																	/**
+																	 * @type object | undefined
+																	 */
+																	kind?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: (
+																			| "slug_namespace"
+																			| "profile"
+																			| "book"
+																			| "software"
+																			| "media"
+																			| "video"
+																			| "audio"
+																			| "release"
+																			| "entity"
+																			| "label"
+																			| "tag"
+																			| "structure"
+																			| "series"
+																			| "zone"
+																			| "zone_page"
+																			| "collection"
+																			| "post"
+																			| "poll"
+																			| "realm"
+																			| "realm_rule"
+																		)[];
+																	};
+																};
+																/**
+																 * @type object | undefined
+																 */
+																status?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: ("pending" | "visible" | "hidden" | "removed")[];
+																};
+																/**
+																 * @type object | undefined
+																 */
+																publicationState?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: ("active" | "withdrawn")[];
+																};
+															};
+													  };
+												tags?:
+													| {
+															/**
+															 * @type object
+															 */
+															some: {
+																/**
+																 * @type array | undefined
+																 */
+																all?: TagAssertionFilter[];
+																/**
+																 * @type array | undefined
+																 */
+																any?: TagAssertionFilter[];
+																/**
+																 * @type object | undefined
+																 */
+																not?: TagAssertionFilter;
+																/**
+																 * @type object | undefined
+																 */
+																tag?: {
+																	/**
+																	 * @type object | undefined
+																	 */
+																	id?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: string[];
+																	};
+																	/**
+																	 * @type object | undefined
+																	 */
+																	kind?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: (
+																			| "slug_namespace"
+																			| "profile"
+																			| "book"
+																			| "software"
+																			| "media"
+																			| "video"
+																			| "audio"
+																			| "release"
+																			| "entity"
+																			| "label"
+																			| "tag"
+																			| "structure"
+																			| "series"
+																			| "zone"
+																			| "zone_page"
+																			| "collection"
+																			| "post"
+																			| "poll"
+																			| "realm"
+																			| "realm_rule"
+																		)[];
+																	};
+																};
+																authority?:
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "global";
+																			view:
+																				| {
+																						/**
+																						 * @type string
+																						 */
+																						kind: "effective";
+																						/**
+																						 * @type object | undefined
+																						 */
+																						consensus?: {
+																							score?:
+																								| {
+																										/**
+																										 * @type array
+																										 */
+																										in: number[];
+																								  }
+																								| {
+																										range:
+																											| {
+																													/**
+																													 * @type integer
+																													 */
+																													minimum: number;
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													maximum?: number;
+																											  }
+																											| {
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													minimum?: number;
+																													/**
+																													 * @type integer
+																													 */
+																													maximum: number;
+																											  };
+																								  };
+																							voteCount?:
+																								| {
+																										/**
+																										 * @type array
+																										 */
+																										in: number[];
+																								  }
+																								| {
+																										range:
+																											| {
+																													/**
+																													 * @type integer
+																													 */
+																													minimum: number;
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													maximum?: number;
+																											  }
+																											| {
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													minimum?: number;
+																													/**
+																													 * @type integer
+																													 */
+																													maximum: number;
+																											  };
+																								  };
+																						};
+																				  }
+																				| {
+																						/**
+																						 * @type string
+																						 */
+																						kind: "direct";
+																				  };
+																	  }
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "realm";
+																			/**
+																			 * @type object
+																			 */
+																			realm: {
+																				/**
+																				 * @type object | undefined
+																				 */
+																				id?: {
+																					/**
+																					 * @type array
+																					 */
+																					in: string[];
+																				};
+																				/**
+																				 * @type object | undefined
+																				 */
+																				kind?: {
+																					/**
+																					 * @type array
+																					 */
+																					in: (
+																						| "slug_namespace"
+																						| "profile"
+																						| "book"
+																						| "software"
+																						| "media"
+																						| "video"
+																						| "audio"
+																						| "release"
+																						| "entity"
+																						| "label"
+																						| "tag"
+																						| "structure"
+																						| "series"
+																						| "zone"
+																						| "zone_page"
+																						| "collection"
+																						| "post"
+																						| "poll"
+																						| "realm"
+																						| "realm_rule"
+																					)[];
+																				};
+																			};
+																			view:
+																				| {
+																						/**
+																						 * @type string
+																						 */
+																						kind: "policy";
+																				  }
+																				| {
+																						/**
+																						 * @type string
+																						 */
+																						kind: "community";
+																						/**
+																						 * @type object | undefined
+																						 */
+																						consensus?: {
+																							score?:
+																								| {
+																										/**
+																										 * @type array
+																										 */
+																										in: number[];
+																								  }
+																								| {
+																										range:
+																											| {
+																													/**
+																													 * @type integer
+																													 */
+																													minimum: number;
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													maximum?: number;
+																											  }
+																											| {
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													minimum?: number;
+																													/**
+																													 * @type integer
+																													 */
+																													maximum: number;
+																											  };
+																								  };
+																							voteCount?:
+																								| {
+																										/**
+																										 * @type array
+																										 */
+																										in: number[];
+																								  }
+																								| {
+																										range:
+																											| {
+																													/**
+																													 * @type integer
+																													 */
+																													minimum: number;
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													maximum?: number;
+																											  }
+																											| {
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													minimum?: number;
+																													/**
+																													 * @type integer
+																													 */
+																													maximum: number;
+																											  };
+																								  };
+																						};
+																				  };
+																	  }
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "profile";
+																			/**
+																			 * @type object
+																			 */
+																			profile: {
+																				/**
+																				 * @type string
+																				 */
+																				kind: "viewer";
+																			};
+																	  };
+															};
+													  }
+													| {
+															/**
+															 * @type object
+															 */
+															none: {
+																/**
+																 * @type array | undefined
+																 */
+																all?: TagAssertionFilter[];
+																/**
+																 * @type array | undefined
+																 */
+																any?: TagAssertionFilter[];
+																/**
+																 * @type object | undefined
+																 */
+																not?: TagAssertionFilter;
+																/**
+																 * @type object | undefined
+																 */
+																tag?: {
+																	/**
+																	 * @type object | undefined
+																	 */
+																	id?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: string[];
+																	};
+																	/**
+																	 * @type object | undefined
+																	 */
+																	kind?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: (
+																			| "slug_namespace"
+																			| "profile"
+																			| "book"
+																			| "software"
+																			| "media"
+																			| "video"
+																			| "audio"
+																			| "release"
+																			| "entity"
+																			| "label"
+																			| "tag"
+																			| "structure"
+																			| "series"
+																			| "zone"
+																			| "zone_page"
+																			| "collection"
+																			| "post"
+																			| "poll"
+																			| "realm"
+																			| "realm_rule"
+																		)[];
+																	};
+																};
+																authority?:
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "global";
+																			view:
+																				| {
+																						/**
+																						 * @type string
+																						 */
+																						kind: "effective";
+																						/**
+																						 * @type object | undefined
+																						 */
+																						consensus?: {
+																							score?:
+																								| {
+																										/**
+																										 * @type array
+																										 */
+																										in: number[];
+																								  }
+																								| {
+																										range:
+																											| {
+																													/**
+																													 * @type integer
+																													 */
+																													minimum: number;
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													maximum?: number;
+																											  }
+																											| {
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													minimum?: number;
+																													/**
+																													 * @type integer
+																													 */
+																													maximum: number;
+																											  };
+																								  };
+																							voteCount?:
+																								| {
+																										/**
+																										 * @type array
+																										 */
+																										in: number[];
+																								  }
+																								| {
+																										range:
+																											| {
+																													/**
+																													 * @type integer
+																													 */
+																													minimum: number;
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													maximum?: number;
+																											  }
+																											| {
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													minimum?: number;
+																													/**
+																													 * @type integer
+																													 */
+																													maximum: number;
+																											  };
+																								  };
+																						};
+																				  }
+																				| {
+																						/**
+																						 * @type string
+																						 */
+																						kind: "direct";
+																				  };
+																	  }
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "realm";
+																			/**
+																			 * @type object
+																			 */
+																			realm: {
+																				/**
+																				 * @type object | undefined
+																				 */
+																				id?: {
+																					/**
+																					 * @type array
+																					 */
+																					in: string[];
+																				};
+																				/**
+																				 * @type object | undefined
+																				 */
+																				kind?: {
+																					/**
+																					 * @type array
+																					 */
+																					in: (
+																						| "slug_namespace"
+																						| "profile"
+																						| "book"
+																						| "software"
+																						| "media"
+																						| "video"
+																						| "audio"
+																						| "release"
+																						| "entity"
+																						| "label"
+																						| "tag"
+																						| "structure"
+																						| "series"
+																						| "zone"
+																						| "zone_page"
+																						| "collection"
+																						| "post"
+																						| "poll"
+																						| "realm"
+																						| "realm_rule"
+																					)[];
+																				};
+																			};
+																			view:
+																				| {
+																						/**
+																						 * @type string
+																						 */
+																						kind: "policy";
+																				  }
+																				| {
+																						/**
+																						 * @type string
+																						 */
+																						kind: "community";
+																						/**
+																						 * @type object | undefined
+																						 */
+																						consensus?: {
+																							score?:
+																								| {
+																										/**
+																										 * @type array
+																										 */
+																										in: number[];
+																								  }
+																								| {
+																										range:
+																											| {
+																													/**
+																													 * @type integer
+																													 */
+																													minimum: number;
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													maximum?: number;
+																											  }
+																											| {
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													minimum?: number;
+																													/**
+																													 * @type integer
+																													 */
+																													maximum: number;
+																											  };
+																								  };
+																							voteCount?:
+																								| {
+																										/**
+																										 * @type array
+																										 */
+																										in: number[];
+																								  }
+																								| {
+																										range:
+																											| {
+																													/**
+																													 * @type integer
+																													 */
+																													minimum: number;
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													maximum?: number;
+																											  }
+																											| {
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													minimum?: number;
+																													/**
+																													 * @type integer
+																													 */
+																													maximum: number;
+																											  };
+																								  };
+																						};
+																				  };
+																	  }
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "profile";
+																			/**
+																			 * @type object
+																			 */
+																			profile: {
+																				/**
+																				 * @type string
+																				 */
+																				kind: "viewer";
+																			};
+																	  };
+															};
+													  };
+												creditAttributions?:
+													| {
+															/**
+															 * @type object
+															 */
+															some: {
+																/**
+																 * @type object | undefined
+																 */
+																id?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: string[];
+																};
+																/**
+																 * @type object | undefined
+																 */
+																kind?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: (
+																		| "slug_namespace"
+																		| "profile"
+																		| "book"
+																		| "software"
+																		| "media"
+																		| "video"
+																		| "audio"
+																		| "release"
+																		| "entity"
+																		| "label"
+																		| "tag"
+																		| "structure"
+																		| "series"
+																		| "zone"
+																		| "zone_page"
+																		| "collection"
+																		| "post"
+																		| "poll"
+																		| "realm"
+																		| "realm_rule"
+																	)[];
+																};
+															};
+													  }
+													| {
+															/**
+															 * @type object
+															 */
+															none: {
+																/**
+																 * @type object | undefined
+																 */
+																id?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: string[];
+																};
+																/**
+																 * @type object | undefined
+																 */
+																kind?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: (
+																		| "slug_namespace"
+																		| "profile"
+																		| "book"
+																		| "software"
+																		| "media"
+																		| "video"
+																		| "audio"
+																		| "release"
+																		| "entity"
+																		| "label"
+																		| "tag"
+																		| "structure"
+																		| "series"
+																		| "zone"
+																		| "zone_page"
+																		| "collection"
+																		| "post"
+																		| "poll"
+																		| "realm"
+																		| "realm_rule"
+																	)[];
+																};
+															};
+													  };
+												subjectAssociations?:
+													| {
+															/**
+															 * @type object
+															 */
+															some: {
+																/**
+																 * @type object | undefined
+																 */
+																id?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: string[];
+																};
+																/**
+																 * @type object | undefined
+																 */
+																kind?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: (
+																		| "slug_namespace"
+																		| "profile"
+																		| "book"
+																		| "software"
+																		| "media"
+																		| "video"
+																		| "audio"
+																		| "release"
+																		| "entity"
+																		| "label"
+																		| "tag"
+																		| "structure"
+																		| "series"
+																		| "zone"
+																		| "zone_page"
+																		| "collection"
+																		| "post"
+																		| "poll"
+																		| "realm"
+																		| "realm_rule"
+																	)[];
+																};
+															};
+													  }
+													| {
+															/**
+															 * @type object
+															 */
+															none: {
+																/**
+																 * @type object | undefined
+																 */
+																id?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: string[];
+																};
+																/**
+																 * @type object | undefined
+																 */
+																kind?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: (
+																		| "slug_namespace"
+																		| "profile"
+																		| "book"
+																		| "software"
+																		| "media"
+																		| "video"
+																		| "audio"
+																		| "release"
+																		| "entity"
+																		| "label"
+																		| "tag"
+																		| "structure"
+																		| "series"
+																		| "zone"
+																		| "zone_page"
+																		| "collection"
+																		| "post"
+																		| "poll"
+																		| "realm"
+																		| "realm_rule"
+																	)[];
+																};
+															};
+													  };
+												publishers?:
+													| {
+															some:
+																| {
+																		/**
+																		 * @type string
+																		 */
+																		kind: "viewer";
+																  }
+																| {
+																		/**
+																		 * @type string
+																		 */
+																		kind: "profile";
+																		/**
+																		 * @type object
+																		 */
+																		id: {
+																			/**
+																			 * @type array
+																			 */
+																			in: string[];
+																		};
+																  };
+													  }
+													| {
+															none:
+																| {
+																		/**
+																		 * @type string
+																		 */
+																		kind: "viewer";
+																  }
+																| {
+																		/**
+																		 * @type string
+																		 */
+																		kind: "profile";
+																		/**
+																		 * @type object
+																		 */
+																		id: {
+																			/**
+																			 * @type array
+																			 */
+																			in: string[];
+																		};
+																  };
+													  };
+												/**
+												 * @type object | undefined
+												 */
+												scores?: {
+													received?:
+														| {
+																/**
+																 * @type object
+																 */
+																some: {
+																	/**
+																	 * @type array | undefined
+																	 */
+																	all?: ScoreFilter[];
+																	/**
+																	 * @type array | undefined
+																	 */
+																	any?: ScoreFilter[];
+																	/**
+																	 * @type object | undefined
+																	 */
+																	not?: ScoreFilter;
+																	value?:
+																		| {
+																				/**
+																				 * @type array
+																				 */
+																				in: number[];
+																		  }
+																		| {
+																				range:
+																					| {
+																							/**
+																							 * @minLength 1
+																							 * @maxLength 10
+																							 * @type integer
+																							 */
+																							minimum: number;
+																							/**
+																							 * @minLength 1
+																							 * @maxLength 10
+																							 * @type integer | undefined
+																							 */
+																							maximum?: number;
+																					  }
+																					| {
+																							/**
+																							 * @minLength 1
+																							 * @maxLength 10
+																							 * @type integer | undefined
+																							 */
+																							minimum?: number;
+																							/**
+																							 * @minLength 1
+																							 * @maxLength 10
+																							 * @type integer
+																							 */
+																							maximum: number;
+																					  };
+																		  };
+																	/**
+																	 * @type object | undefined
+																	 */
+																	realm?: {
+																		/**
+																		 * @type object | undefined
+																		 */
+																		id?: {
+																			/**
+																			 * @type array
+																			 */
+																			in: string[];
+																		};
+																		/**
+																		 * @type object | undefined
+																		 */
+																		kind?: {
+																			/**
+																			 * @type array
+																			 */
+																			in: (
+																				| "slug_namespace"
+																				| "profile"
+																				| "book"
+																				| "software"
+																				| "media"
+																				| "video"
+																				| "audio"
+																				| "release"
+																				| "entity"
+																				| "label"
+																				| "tag"
+																				| "structure"
+																				| "series"
+																				| "zone"
+																				| "zone_page"
+																				| "collection"
+																				| "post"
+																				| "poll"
+																				| "realm"
+																				| "realm_rule"
+																			)[];
+																		};
+																	};
+																	/**
+																	 * @type object | undefined
+																	 */
+																	target?: {
+																		/**
+																		 * @type object | undefined
+																		 */
+																		id?: {
+																			/**
+																			 * @type array
+																			 */
+																			in: string[];
+																		};
+																		/**
+																		 * @type object | undefined
+																		 */
+																		kind?: {
+																			/**
+																			 * @type array
+																			 */
+																			in: (
+																				| "slug_namespace"
+																				| "profile"
+																				| "book"
+																				| "software"
+																				| "media"
+																				| "video"
+																				| "audio"
+																				| "release"
+																				| "entity"
+																				| "label"
+																				| "tag"
+																				| "structure"
+																				| "series"
+																				| "zone"
+																				| "zone_page"
+																				| "collection"
+																				| "post"
+																				| "poll"
+																				| "realm"
+																				| "realm_rule"
+																			)[];
+																		};
+																	};
+																	author?:
+																		| {
+																				/**
+																				 * @type string
+																				 */
+																				kind: "viewer";
+																		  }
+																		| {
+																				/**
+																				 * @type string
+																				 */
+																				kind: "profile";
+																				/**
+																				 * @type object
+																				 */
+																				id: {
+																					/**
+																					 * @type array
+																					 */
+																					in: string[];
+																				};
+																		  };
+																};
+														  }
+														| {
+																/**
+																 * @type object
+																 */
+																none: {
+																	/**
+																	 * @type array | undefined
+																	 */
+																	all?: ScoreFilter[];
+																	/**
+																	 * @type array | undefined
+																	 */
+																	any?: ScoreFilter[];
+																	/**
+																	 * @type object | undefined
+																	 */
+																	not?: ScoreFilter;
+																	value?:
+																		| {
+																				/**
+																				 * @type array
+																				 */
+																				in: number[];
+																		  }
+																		| {
+																				range:
+																					| {
+																							/**
+																							 * @minLength 1
+																							 * @maxLength 10
+																							 * @type integer
+																							 */
+																							minimum: number;
+																							/**
+																							 * @minLength 1
+																							 * @maxLength 10
+																							 * @type integer | undefined
+																							 */
+																							maximum?: number;
+																					  }
+																					| {
+																							/**
+																							 * @minLength 1
+																							 * @maxLength 10
+																							 * @type integer | undefined
+																							 */
+																							minimum?: number;
+																							/**
+																							 * @minLength 1
+																							 * @maxLength 10
+																							 * @type integer
+																							 */
+																							maximum: number;
+																					  };
+																		  };
+																	/**
+																	 * @type object | undefined
+																	 */
+																	realm?: {
+																		/**
+																		 * @type object | undefined
+																		 */
+																		id?: {
+																			/**
+																			 * @type array
+																			 */
+																			in: string[];
+																		};
+																		/**
+																		 * @type object | undefined
+																		 */
+																		kind?: {
+																			/**
+																			 * @type array
+																			 */
+																			in: (
+																				| "slug_namespace"
+																				| "profile"
+																				| "book"
+																				| "software"
+																				| "media"
+																				| "video"
+																				| "audio"
+																				| "release"
+																				| "entity"
+																				| "label"
+																				| "tag"
+																				| "structure"
+																				| "series"
+																				| "zone"
+																				| "zone_page"
+																				| "collection"
+																				| "post"
+																				| "poll"
+																				| "realm"
+																				| "realm_rule"
+																			)[];
+																		};
+																	};
+																	/**
+																	 * @type object | undefined
+																	 */
+																	target?: {
+																		/**
+																		 * @type object | undefined
+																		 */
+																		id?: {
+																			/**
+																			 * @type array
+																			 */
+																			in: string[];
+																		};
+																		/**
+																		 * @type object | undefined
+																		 */
+																		kind?: {
+																			/**
+																			 * @type array
+																			 */
+																			in: (
+																				| "slug_namespace"
+																				| "profile"
+																				| "book"
+																				| "software"
+																				| "media"
+																				| "video"
+																				| "audio"
+																				| "release"
+																				| "entity"
+																				| "label"
+																				| "tag"
+																				| "structure"
+																				| "series"
+																				| "zone"
+																				| "zone_page"
+																				| "collection"
+																				| "post"
+																				| "poll"
+																				| "realm"
+																				| "realm_rule"
+																			)[];
+																		};
+																	};
+																	author?:
+																		| {
+																				/**
+																				 * @type string
+																				 */
+																				kind: "viewer";
+																		  }
+																		| {
+																				/**
+																				 * @type string
+																				 */
+																				kind: "profile";
+																				/**
+																				 * @type object
+																				 */
+																				id: {
+																					/**
+																					 * @type array
+																					 */
+																					in: string[];
+																				};
+																		  };
+																};
+														  };
+												};
+												post?:
+													| {
+															/**
+															 * @type object
+															 */
+															is: {
+																/**
+																 * @type array | undefined
+																 */
+																all?: PostFilter[];
+																/**
+																 * @type array | undefined
+																 */
+																any?: PostFilter[];
+																/**
+																 * @type object | undefined
+																 */
+																not?: PostFilter;
+																/**
+																 * @type object | undefined
+																 */
+																kind?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: (
+																		| "post"
+																		| "reply"
+																		| "excerpt"
+																		| "review"
+																		| "chapter"
+																		| "page"
+																		| "wiki"
+																		| "picture"
+																		| "governance_note"
+																	)[];
+																};
+																subject?:
+																	| {
+																			/**
+																			 * @type object
+																			 */
+																			is: {
+																				/**
+																				 * @type object | undefined
+																				 */
+																				id?: {
+																					/**
+																					 * @type array
+																					 */
+																					in: string[];
+																				};
+																				/**
+																				 * @type object | undefined
+																				 */
+																				kind?: {
+																					/**
+																					 * @type array
+																					 */
+																					in: (
+																						| "slug_namespace"
+																						| "profile"
+																						| "book"
+																						| "software"
+																						| "media"
+																						| "video"
+																						| "audio"
+																						| "release"
+																						| "entity"
+																						| "label"
+																						| "tag"
+																						| "structure"
+																						| "series"
+																						| "zone"
+																						| "zone_page"
+																						| "collection"
+																						| "post"
+																						| "poll"
+																						| "realm"
+																						| "realm_rule"
+																					)[];
+																				};
+																			};
+																	  }
+																	| {
+																			/**
+																			 * @type boolean
+																			 */
+																			absent: true;
+																	  };
+																/**
+																 * @type object | undefined
+																 */
+																scores?: {
+																	displayed?:
+																		| {
+																				/**
+																				 * @type object
+																				 */
+																				some: {
+																					/**
+																					 * @type array | undefined
+																					 */
+																					all?: ScoreFilter[];
+																					/**
+																					 * @type array | undefined
+																					 */
+																					any?: ScoreFilter[];
+																					/**
+																					 * @type object | undefined
+																					 */
+																					not?: ScoreFilter;
+																					value?:
+																						| {
+																								/**
+																								 * @type array
+																								 */
+																								in: number[];
+																						  }
+																						| {
+																								range:
+																									| {
+																											/**
+																											 * @minLength 1
+																											 * @maxLength 10
+																											 * @type integer
+																											 */
+																											minimum: number;
+																											/**
+																											 * @minLength 1
+																											 * @maxLength 10
+																											 * @type integer | undefined
+																											 */
+																											maximum?: number;
+																									  }
+																									| {
+																											/**
+																											 * @minLength 1
+																											 * @maxLength 10
+																											 * @type integer | undefined
+																											 */
+																											minimum?: number;
+																											/**
+																											 * @minLength 1
+																											 * @maxLength 10
+																											 * @type integer
+																											 */
+																											maximum: number;
+																									  };
+																						  };
+																					/**
+																					 * @type object | undefined
+																					 */
+																					realm?: {
+																						/**
+																						 * @type object | undefined
+																						 */
+																						id?: {
+																							/**
+																							 * @type array
+																							 */
+																							in: string[];
+																						};
+																						/**
+																						 * @type object | undefined
+																						 */
+																						kind?: {
+																							/**
+																							 * @type array
+																							 */
+																							in: (
+																								| "slug_namespace"
+																								| "profile"
+																								| "book"
+																								| "software"
+																								| "media"
+																								| "video"
+																								| "audio"
+																								| "release"
+																								| "entity"
+																								| "label"
+																								| "tag"
+																								| "structure"
+																								| "series"
+																								| "zone"
+																								| "zone_page"
+																								| "collection"
+																								| "post"
+																								| "poll"
+																								| "realm"
+																								| "realm_rule"
+																							)[];
+																						};
+																					};
+																					/**
+																					 * @type object | undefined
+																					 */
+																					target?: {
+																						/**
+																						 * @type object | undefined
+																						 */
+																						id?: {
+																							/**
+																							 * @type array
+																							 */
+																							in: string[];
+																						};
+																						/**
+																						 * @type object | undefined
+																						 */
+																						kind?: {
+																							/**
+																							 * @type array
+																							 */
+																							in: (
+																								| "slug_namespace"
+																								| "profile"
+																								| "book"
+																								| "software"
+																								| "media"
+																								| "video"
+																								| "audio"
+																								| "release"
+																								| "entity"
+																								| "label"
+																								| "tag"
+																								| "structure"
+																								| "series"
+																								| "zone"
+																								| "zone_page"
+																								| "collection"
+																								| "post"
+																								| "poll"
+																								| "realm"
+																								| "realm_rule"
+																							)[];
+																						};
+																					};
+																					author?:
+																						| {
+																								/**
+																								 * @type string
+																								 */
+																								kind: "viewer";
+																						  }
+																						| {
+																								/**
+																								 * @type string
+																								 */
+																								kind: "profile";
+																								/**
+																								 * @type object
+																								 */
+																								id: {
+																									/**
+																									 * @type array
+																									 */
+																									in: string[];
+																								};
+																						  };
+																				};
+																		  }
+																		| {
+																				/**
+																				 * @type object
+																				 */
+																				none: {
+																					/**
+																					 * @type array | undefined
+																					 */
+																					all?: ScoreFilter[];
+																					/**
+																					 * @type array | undefined
+																					 */
+																					any?: ScoreFilter[];
+																					/**
+																					 * @type object | undefined
+																					 */
+																					not?: ScoreFilter;
+																					value?:
+																						| {
+																								/**
+																								 * @type array
+																								 */
+																								in: number[];
+																						  }
+																						| {
+																								range:
+																									| {
+																											/**
+																											 * @minLength 1
+																											 * @maxLength 10
+																											 * @type integer
+																											 */
+																											minimum: number;
+																											/**
+																											 * @minLength 1
+																											 * @maxLength 10
+																											 * @type integer | undefined
+																											 */
+																											maximum?: number;
+																									  }
+																									| {
+																											/**
+																											 * @minLength 1
+																											 * @maxLength 10
+																											 * @type integer | undefined
+																											 */
+																											minimum?: number;
+																											/**
+																											 * @minLength 1
+																											 * @maxLength 10
+																											 * @type integer
+																											 */
+																											maximum: number;
+																									  };
+																						  };
+																					/**
+																					 * @type object | undefined
+																					 */
+																					realm?: {
+																						/**
+																						 * @type object | undefined
+																						 */
+																						id?: {
+																							/**
+																							 * @type array
+																							 */
+																							in: string[];
+																						};
+																						/**
+																						 * @type object | undefined
+																						 */
+																						kind?: {
+																							/**
+																							 * @type array
+																							 */
+																							in: (
+																								| "slug_namespace"
+																								| "profile"
+																								| "book"
+																								| "software"
+																								| "media"
+																								| "video"
+																								| "audio"
+																								| "release"
+																								| "entity"
+																								| "label"
+																								| "tag"
+																								| "structure"
+																								| "series"
+																								| "zone"
+																								| "zone_page"
+																								| "collection"
+																								| "post"
+																								| "poll"
+																								| "realm"
+																								| "realm_rule"
+																							)[];
+																						};
+																					};
+																					/**
+																					 * @type object | undefined
+																					 */
+																					target?: {
+																						/**
+																						 * @type object | undefined
+																						 */
+																						id?: {
+																							/**
+																							 * @type array
+																							 */
+																							in: string[];
+																						};
+																						/**
+																						 * @type object | undefined
+																						 */
+																						kind?: {
+																							/**
+																							 * @type array
+																							 */
+																							in: (
+																								| "slug_namespace"
+																								| "profile"
+																								| "book"
+																								| "software"
+																								| "media"
+																								| "video"
+																								| "audio"
+																								| "release"
+																								| "entity"
+																								| "label"
+																								| "tag"
+																								| "structure"
+																								| "series"
+																								| "zone"
+																								| "zone_page"
+																								| "collection"
+																								| "post"
+																								| "poll"
+																								| "realm"
+																								| "realm_rule"
+																							)[];
+																						};
+																					};
+																					author?:
+																						| {
+																								/**
+																								 * @type string
+																								 */
+																								kind: "viewer";
+																						  }
+																						| {
+																								/**
+																								 * @type string
+																								 */
+																								kind: "profile";
+																								/**
+																								 * @type object
+																								 */
+																								id: {
+																									/**
+																									 * @type array
+																									 */
+																									in: string[];
+																								};
+																						  };
+																				};
+																		  };
+																};
+																/**
+																 * @type object | undefined
+																 */
+																explainsRealmTag?: {
+																	/**
+																	 * @type object
+																	 */
+																	realm: {
+																		/**
+																		 * @type object | undefined
+																		 */
+																		id?: {
+																			/**
+																			 * @type array
+																			 */
+																			in: string[];
+																		};
+																		/**
+																		 * @type object | undefined
+																		 */
+																		kind?: {
+																			/**
+																			 * @type array
+																			 */
+																			in: (
+																				| "slug_namespace"
+																				| "profile"
+																				| "book"
+																				| "software"
+																				| "media"
+																				| "video"
+																				| "audio"
+																				| "release"
+																				| "entity"
+																				| "label"
+																				| "tag"
+																				| "structure"
+																				| "series"
+																				| "zone"
+																				| "zone_page"
+																				| "collection"
+																				| "post"
+																				| "poll"
+																				| "realm"
+																				| "realm_rule"
+																			)[];
+																		};
+																	};
+																	/**
+																	 * @type object | undefined
+																	 */
+																	tag?: {
+																		/**
+																		 * @type object | undefined
+																		 */
+																		id?: {
+																			/**
+																			 * @type array
+																			 */
+																			in: string[];
+																		};
+																		/**
+																		 * @type object | undefined
+																		 */
+																		kind?: {
+																			/**
+																			 * @type array
+																			 */
+																			in: (
+																				| "slug_namespace"
+																				| "profile"
+																				| "book"
+																				| "software"
+																				| "media"
+																				| "video"
+																				| "audio"
+																				| "release"
+																				| "entity"
+																				| "label"
+																				| "tag"
+																				| "structure"
+																				| "series"
+																				| "zone"
+																				| "zone_page"
+																				| "collection"
+																				| "post"
+																				| "poll"
+																				| "realm"
+																				| "realm_rule"
+																			)[];
+																		};
+																	};
+																};
+															};
+													  }
+													| {
+															/**
+															 * @type boolean
+															 */
+															absent: true;
+													  };
+												collection?:
+													| {
+															/**
+															 * @type object
+															 */
+															is: {
+																/**
+																 * @type array | undefined
+																 */
+																all?: CollectionFilter[];
+																/**
+																 * @type array | undefined
+																 */
+																any?: CollectionFilter[];
+																/**
+																 * @type object | undefined
+																 */
+																not?: CollectionFilter;
+																items?:
+																	| {
+																			/**
+																			 * @type object
+																			 */
+																			some: {
+																				/**
+																				 * @type object | undefined
+																				 */
+																				id?: {
+																					/**
+																					 * @type array
+																					 */
+																					in: string[];
+																				};
+																				/**
+																				 * @type object | undefined
+																				 */
+																				kind?: {
+																					/**
+																					 * @type array
+																					 */
+																					in: (
+																						| "slug_namespace"
+																						| "profile"
+																						| "book"
+																						| "software"
+																						| "media"
+																						| "video"
+																						| "audio"
+																						| "release"
+																						| "entity"
+																						| "label"
+																						| "tag"
+																						| "structure"
+																						| "series"
+																						| "zone"
+																						| "zone_page"
+																						| "collection"
+																						| "post"
+																						| "poll"
+																						| "realm"
+																						| "realm_rule"
+																					)[];
+																				};
+																			};
+																	  }
+																	| {
+																			/**
+																			 * @type object
+																			 */
+																			none: {
+																				/**
+																				 * @type object | undefined
+																				 */
+																				id?: {
+																					/**
+																					 * @type array
+																					 */
+																					in: string[];
+																				};
+																				/**
+																				 * @type object | undefined
+																				 */
+																				kind?: {
+																					/**
+																					 * @type array
+																					 */
+																					in: (
+																						| "slug_namespace"
+																						| "profile"
+																						| "book"
+																						| "software"
+																						| "media"
+																						| "video"
+																						| "audio"
+																						| "release"
+																						| "entity"
+																						| "label"
+																						| "tag"
+																						| "structure"
+																						| "series"
+																						| "zone"
+																						| "zone_page"
+																						| "collection"
+																						| "post"
+																						| "poll"
+																						| "realm"
+																						| "realm_rule"
+																					)[];
+																				};
+																			};
+																	  };
+															};
+													  }
+													| {
+															/**
+															 * @type boolean
+															 */
+															absent: true;
+													  };
+											};
+											/**
+											 * @type array | undefined
+											 */
+											controls?: {
+												/**
+												 * @minLength 1
+												 * @maxLength 64
+												 * @pattern ^[a-z][a-z0-9-]*$
+												 * @type string
+												 */
+												key: string;
+												field?:
+													| "category"
+													| "kind"
+													| "language"
+													| "content-rating"
+													| "ai-disclosure"
+													| "license"
+													| "tag"
+													| "credit"
+													| "credited-profile"
+													| "realm"
+													| "realm-tag-context"
+													| "zone"
+													| "subject"
+													| "target"
+													| "root"
+													| "parent"
+													| "owner"
+													| "join-policy"
+													| "multiple"
+													| "results-visibility"
+													| "closed"
+													| "created-at"
+													| "updated-at"
+													| "published-at"
+													| "closes-at"
+													| "content-license"
+													| "book-isbn13"
+													| "book-publication-date"
+													| "book-page-count"
+													| "book-word-count"
+													| "book-format"
+													| "media-kind"
+													| "media-release-date"
+													| "media-runtime-minutes"
+													| "media-episode-count"
+													| "media-season-count"
+													| "software-release-date"
+													| "software-version-label"
+													| "software-platform"
+													| "software-requirement-tier"
+													| "realm-tag-vote";
+												/**
+												 * @type boolean | undefined
+												 */
+												enabled?: boolean;
+												disclosure?: "visible" | "hidden";
+												/**
+												 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+												 * @type string | undefined
+												 */
+												labelUnitId?: string;
+												optionPolicy?:
+													| {
+															/**
+															 * @type string
+															 */
+															kind: "all";
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															kind: "include";
+															/**
+															 * @type array
+															 */
+															values: (string | number | boolean)[];
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															kind: "exclude";
+															/**
+															 * @type array
+															 */
+															values: (string | number | boolean)[];
+													  };
+												/**
+												 * @type boolean | undefined
+												 */
+												required?: boolean;
+											}[];
+										};
 								  };
 					  };
 				layout: "list" | "grid" | "carousel";
@@ -3631,14 +5835,2218 @@ export type DockDocument = {
 							/**
 							 * @type string
 							 */
-							kind: "template";
-							template: "global" | "book" | "media" | "software" | "realm" | "zone";
+							kind: "global";
 					  }
 					| {
 							/**
 							 * @type string
 							 */
 							kind: "zone";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "inline";
+							/**
+							 * @type object
+							 */
+							filterDocument: {
+								/**
+								 * @type array | undefined
+								 */
+								categories?: (
+									| "units"
+									| "users"
+									| "entities"
+									| "tags"
+									| "tag-structures"
+									| "posts"
+									| "realms"
+									| "collections"
+									| "reviews"
+									| "polls"
+								)[];
+								/**
+								 * @type object | undefined
+								 */
+								where?: {
+									/**
+									 * @type array | undefined
+									 */
+									all?: UnitPredicate[];
+									/**
+									 * @type array | undefined
+									 */
+									any?: UnitPredicate[];
+									/**
+									 * @type object | undefined
+									 */
+									not?: UnitPredicate;
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "video"
+											| "audio"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+									localizations?:
+										| {
+												/**
+												 * @type object
+												 */
+												some: {
+													/**
+													 * @type array | undefined
+													 */
+													all?: LocalizationFilter[];
+													/**
+													 * @type array | undefined
+													 */
+													any?: LocalizationFilter[];
+													/**
+													 * @type object | undefined
+													 */
+													not?: LocalizationFilter;
+													/**
+													 * @type object | undefined
+													 */
+													language?: {
+														/**
+														 * @type array
+														 */
+														in: ("zh" | "en" | "ja" | "ko" | "de" | "fr" | "es")[];
+													};
+												};
+										  }
+										| {
+												/**
+												 * @type object
+												 */
+												none: {
+													/**
+													 * @type array | undefined
+													 */
+													all?: LocalizationFilter[];
+													/**
+													 * @type array | undefined
+													 */
+													any?: LocalizationFilter[];
+													/**
+													 * @type object | undefined
+													 */
+													not?: LocalizationFilter;
+													/**
+													 * @type object | undefined
+													 */
+													language?: {
+														/**
+														 * @type array
+														 */
+														in: ("zh" | "en" | "ja" | "ko" | "de" | "fr" | "es")[];
+													};
+												};
+										  };
+									realms?:
+										| {
+												/**
+												 * @type object
+												 */
+												some: {
+													/**
+													 * @type array | undefined
+													 */
+													all?: RealmPlacementFilter[];
+													/**
+													 * @type array | undefined
+													 */
+													any?: RealmPlacementFilter[];
+													/**
+													 * @type object | undefined
+													 */
+													not?: RealmPlacementFilter;
+													/**
+													 * @type object | undefined
+													 */
+													realm?: {
+														/**
+														 * @type object | undefined
+														 */
+														id?: {
+															/**
+															 * @type array
+															 */
+															in: string[];
+														};
+														/**
+														 * @type object | undefined
+														 */
+														kind?: {
+															/**
+															 * @type array
+															 */
+															in: (
+																| "slug_namespace"
+																| "profile"
+																| "book"
+																| "software"
+																| "media"
+																| "video"
+																| "audio"
+																| "release"
+																| "entity"
+																| "label"
+																| "tag"
+																| "structure"
+																| "series"
+																| "zone"
+																| "zone_page"
+																| "collection"
+																| "post"
+																| "poll"
+																| "realm"
+																| "realm_rule"
+															)[];
+														};
+													};
+													/**
+													 * @type object | undefined
+													 */
+													status?: {
+														/**
+														 * @type array
+														 */
+														in: ("pending" | "visible" | "hidden" | "removed")[];
+													};
+													/**
+													 * @type object | undefined
+													 */
+													publicationState?: {
+														/**
+														 * @type array
+														 */
+														in: ("active" | "withdrawn")[];
+													};
+												};
+										  }
+										| {
+												/**
+												 * @type object
+												 */
+												none: {
+													/**
+													 * @type array | undefined
+													 */
+													all?: RealmPlacementFilter[];
+													/**
+													 * @type array | undefined
+													 */
+													any?: RealmPlacementFilter[];
+													/**
+													 * @type object | undefined
+													 */
+													not?: RealmPlacementFilter;
+													/**
+													 * @type object | undefined
+													 */
+													realm?: {
+														/**
+														 * @type object | undefined
+														 */
+														id?: {
+															/**
+															 * @type array
+															 */
+															in: string[];
+														};
+														/**
+														 * @type object | undefined
+														 */
+														kind?: {
+															/**
+															 * @type array
+															 */
+															in: (
+																| "slug_namespace"
+																| "profile"
+																| "book"
+																| "software"
+																| "media"
+																| "video"
+																| "audio"
+																| "release"
+																| "entity"
+																| "label"
+																| "tag"
+																| "structure"
+																| "series"
+																| "zone"
+																| "zone_page"
+																| "collection"
+																| "post"
+																| "poll"
+																| "realm"
+																| "realm_rule"
+															)[];
+														};
+													};
+													/**
+													 * @type object | undefined
+													 */
+													status?: {
+														/**
+														 * @type array
+														 */
+														in: ("pending" | "visible" | "hidden" | "removed")[];
+													};
+													/**
+													 * @type object | undefined
+													 */
+													publicationState?: {
+														/**
+														 * @type array
+														 */
+														in: ("active" | "withdrawn")[];
+													};
+												};
+										  };
+									tags?:
+										| {
+												/**
+												 * @type object
+												 */
+												some: {
+													/**
+													 * @type array | undefined
+													 */
+													all?: TagAssertionFilter[];
+													/**
+													 * @type array | undefined
+													 */
+													any?: TagAssertionFilter[];
+													/**
+													 * @type object | undefined
+													 */
+													not?: TagAssertionFilter;
+													/**
+													 * @type object | undefined
+													 */
+													tag?: {
+														/**
+														 * @type object | undefined
+														 */
+														id?: {
+															/**
+															 * @type array
+															 */
+															in: string[];
+														};
+														/**
+														 * @type object | undefined
+														 */
+														kind?: {
+															/**
+															 * @type array
+															 */
+															in: (
+																| "slug_namespace"
+																| "profile"
+																| "book"
+																| "software"
+																| "media"
+																| "video"
+																| "audio"
+																| "release"
+																| "entity"
+																| "label"
+																| "tag"
+																| "structure"
+																| "series"
+																| "zone"
+																| "zone_page"
+																| "collection"
+																| "post"
+																| "poll"
+																| "realm"
+																| "realm_rule"
+															)[];
+														};
+													};
+													authority?:
+														| {
+																/**
+																 * @type string
+																 */
+																kind: "global";
+																view:
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "effective";
+																			/**
+																			 * @type object | undefined
+																			 */
+																			consensus?: {
+																				score?:
+																					| {
+																							/**
+																							 * @type array
+																							 */
+																							in: number[];
+																					  }
+																					| {
+																							range:
+																								| {
+																										/**
+																										 * @type integer
+																										 */
+																										minimum: number;
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										maximum?: number;
+																								  }
+																								| {
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										minimum?: number;
+																										/**
+																										 * @type integer
+																										 */
+																										maximum: number;
+																								  };
+																					  };
+																				voteCount?:
+																					| {
+																							/**
+																							 * @type array
+																							 */
+																							in: number[];
+																					  }
+																					| {
+																							range:
+																								| {
+																										/**
+																										 * @type integer
+																										 */
+																										minimum: number;
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										maximum?: number;
+																								  }
+																								| {
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										minimum?: number;
+																										/**
+																										 * @type integer
+																										 */
+																										maximum: number;
+																								  };
+																					  };
+																			};
+																	  }
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "direct";
+																	  };
+														  }
+														| {
+																/**
+																 * @type string
+																 */
+																kind: "realm";
+																/**
+																 * @type object
+																 */
+																realm: {
+																	/**
+																	 * @type object | undefined
+																	 */
+																	id?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: string[];
+																	};
+																	/**
+																	 * @type object | undefined
+																	 */
+																	kind?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: (
+																			| "slug_namespace"
+																			| "profile"
+																			| "book"
+																			| "software"
+																			| "media"
+																			| "video"
+																			| "audio"
+																			| "release"
+																			| "entity"
+																			| "label"
+																			| "tag"
+																			| "structure"
+																			| "series"
+																			| "zone"
+																			| "zone_page"
+																			| "collection"
+																			| "post"
+																			| "poll"
+																			| "realm"
+																			| "realm_rule"
+																		)[];
+																	};
+																};
+																view:
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "policy";
+																	  }
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "community";
+																			/**
+																			 * @type object | undefined
+																			 */
+																			consensus?: {
+																				score?:
+																					| {
+																							/**
+																							 * @type array
+																							 */
+																							in: number[];
+																					  }
+																					| {
+																							range:
+																								| {
+																										/**
+																										 * @type integer
+																										 */
+																										minimum: number;
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										maximum?: number;
+																								  }
+																								| {
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										minimum?: number;
+																										/**
+																										 * @type integer
+																										 */
+																										maximum: number;
+																								  };
+																					  };
+																				voteCount?:
+																					| {
+																							/**
+																							 * @type array
+																							 */
+																							in: number[];
+																					  }
+																					| {
+																							range:
+																								| {
+																										/**
+																										 * @type integer
+																										 */
+																										minimum: number;
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										maximum?: number;
+																								  }
+																								| {
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										minimum?: number;
+																										/**
+																										 * @type integer
+																										 */
+																										maximum: number;
+																								  };
+																					  };
+																			};
+																	  };
+														  }
+														| {
+																/**
+																 * @type string
+																 */
+																kind: "profile";
+																/**
+																 * @type object
+																 */
+																profile: {
+																	/**
+																	 * @type string
+																	 */
+																	kind: "viewer";
+																};
+														  };
+												};
+										  }
+										| {
+												/**
+												 * @type object
+												 */
+												none: {
+													/**
+													 * @type array | undefined
+													 */
+													all?: TagAssertionFilter[];
+													/**
+													 * @type array | undefined
+													 */
+													any?: TagAssertionFilter[];
+													/**
+													 * @type object | undefined
+													 */
+													not?: TagAssertionFilter;
+													/**
+													 * @type object | undefined
+													 */
+													tag?: {
+														/**
+														 * @type object | undefined
+														 */
+														id?: {
+															/**
+															 * @type array
+															 */
+															in: string[];
+														};
+														/**
+														 * @type object | undefined
+														 */
+														kind?: {
+															/**
+															 * @type array
+															 */
+															in: (
+																| "slug_namespace"
+																| "profile"
+																| "book"
+																| "software"
+																| "media"
+																| "video"
+																| "audio"
+																| "release"
+																| "entity"
+																| "label"
+																| "tag"
+																| "structure"
+																| "series"
+																| "zone"
+																| "zone_page"
+																| "collection"
+																| "post"
+																| "poll"
+																| "realm"
+																| "realm_rule"
+															)[];
+														};
+													};
+													authority?:
+														| {
+																/**
+																 * @type string
+																 */
+																kind: "global";
+																view:
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "effective";
+																			/**
+																			 * @type object | undefined
+																			 */
+																			consensus?: {
+																				score?:
+																					| {
+																							/**
+																							 * @type array
+																							 */
+																							in: number[];
+																					  }
+																					| {
+																							range:
+																								| {
+																										/**
+																										 * @type integer
+																										 */
+																										minimum: number;
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										maximum?: number;
+																								  }
+																								| {
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										minimum?: number;
+																										/**
+																										 * @type integer
+																										 */
+																										maximum: number;
+																								  };
+																					  };
+																				voteCount?:
+																					| {
+																							/**
+																							 * @type array
+																							 */
+																							in: number[];
+																					  }
+																					| {
+																							range:
+																								| {
+																										/**
+																										 * @type integer
+																										 */
+																										minimum: number;
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										maximum?: number;
+																								  }
+																								| {
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										minimum?: number;
+																										/**
+																										 * @type integer
+																										 */
+																										maximum: number;
+																								  };
+																					  };
+																			};
+																	  }
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "direct";
+																	  };
+														  }
+														| {
+																/**
+																 * @type string
+																 */
+																kind: "realm";
+																/**
+																 * @type object
+																 */
+																realm: {
+																	/**
+																	 * @type object | undefined
+																	 */
+																	id?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: string[];
+																	};
+																	/**
+																	 * @type object | undefined
+																	 */
+																	kind?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: (
+																			| "slug_namespace"
+																			| "profile"
+																			| "book"
+																			| "software"
+																			| "media"
+																			| "video"
+																			| "audio"
+																			| "release"
+																			| "entity"
+																			| "label"
+																			| "tag"
+																			| "structure"
+																			| "series"
+																			| "zone"
+																			| "zone_page"
+																			| "collection"
+																			| "post"
+																			| "poll"
+																			| "realm"
+																			| "realm_rule"
+																		)[];
+																	};
+																};
+																view:
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "policy";
+																	  }
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "community";
+																			/**
+																			 * @type object | undefined
+																			 */
+																			consensus?: {
+																				score?:
+																					| {
+																							/**
+																							 * @type array
+																							 */
+																							in: number[];
+																					  }
+																					| {
+																							range:
+																								| {
+																										/**
+																										 * @type integer
+																										 */
+																										minimum: number;
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										maximum?: number;
+																								  }
+																								| {
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										minimum?: number;
+																										/**
+																										 * @type integer
+																										 */
+																										maximum: number;
+																								  };
+																					  };
+																				voteCount?:
+																					| {
+																							/**
+																							 * @type array
+																							 */
+																							in: number[];
+																					  }
+																					| {
+																							range:
+																								| {
+																										/**
+																										 * @type integer
+																										 */
+																										minimum: number;
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										maximum?: number;
+																								  }
+																								| {
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										minimum?: number;
+																										/**
+																										 * @type integer
+																										 */
+																										maximum: number;
+																								  };
+																					  };
+																			};
+																	  };
+														  }
+														| {
+																/**
+																 * @type string
+																 */
+																kind: "profile";
+																/**
+																 * @type object
+																 */
+																profile: {
+																	/**
+																	 * @type string
+																	 */
+																	kind: "viewer";
+																};
+														  };
+												};
+										  };
+									creditAttributions?:
+										| {
+												/**
+												 * @type object
+												 */
+												some: {
+													/**
+													 * @type object | undefined
+													 */
+													id?: {
+														/**
+														 * @type array
+														 */
+														in: string[];
+													};
+													/**
+													 * @type object | undefined
+													 */
+													kind?: {
+														/**
+														 * @type array
+														 */
+														in: (
+															| "slug_namespace"
+															| "profile"
+															| "book"
+															| "software"
+															| "media"
+															| "video"
+															| "audio"
+															| "release"
+															| "entity"
+															| "label"
+															| "tag"
+															| "structure"
+															| "series"
+															| "zone"
+															| "zone_page"
+															| "collection"
+															| "post"
+															| "poll"
+															| "realm"
+															| "realm_rule"
+														)[];
+													};
+												};
+										  }
+										| {
+												/**
+												 * @type object
+												 */
+												none: {
+													/**
+													 * @type object | undefined
+													 */
+													id?: {
+														/**
+														 * @type array
+														 */
+														in: string[];
+													};
+													/**
+													 * @type object | undefined
+													 */
+													kind?: {
+														/**
+														 * @type array
+														 */
+														in: (
+															| "slug_namespace"
+															| "profile"
+															| "book"
+															| "software"
+															| "media"
+															| "video"
+															| "audio"
+															| "release"
+															| "entity"
+															| "label"
+															| "tag"
+															| "structure"
+															| "series"
+															| "zone"
+															| "zone_page"
+															| "collection"
+															| "post"
+															| "poll"
+															| "realm"
+															| "realm_rule"
+														)[];
+													};
+												};
+										  };
+									subjectAssociations?:
+										| {
+												/**
+												 * @type object
+												 */
+												some: {
+													/**
+													 * @type object | undefined
+													 */
+													id?: {
+														/**
+														 * @type array
+														 */
+														in: string[];
+													};
+													/**
+													 * @type object | undefined
+													 */
+													kind?: {
+														/**
+														 * @type array
+														 */
+														in: (
+															| "slug_namespace"
+															| "profile"
+															| "book"
+															| "software"
+															| "media"
+															| "video"
+															| "audio"
+															| "release"
+															| "entity"
+															| "label"
+															| "tag"
+															| "structure"
+															| "series"
+															| "zone"
+															| "zone_page"
+															| "collection"
+															| "post"
+															| "poll"
+															| "realm"
+															| "realm_rule"
+														)[];
+													};
+												};
+										  }
+										| {
+												/**
+												 * @type object
+												 */
+												none: {
+													/**
+													 * @type object | undefined
+													 */
+													id?: {
+														/**
+														 * @type array
+														 */
+														in: string[];
+													};
+													/**
+													 * @type object | undefined
+													 */
+													kind?: {
+														/**
+														 * @type array
+														 */
+														in: (
+															| "slug_namespace"
+															| "profile"
+															| "book"
+															| "software"
+															| "media"
+															| "video"
+															| "audio"
+															| "release"
+															| "entity"
+															| "label"
+															| "tag"
+															| "structure"
+															| "series"
+															| "zone"
+															| "zone_page"
+															| "collection"
+															| "post"
+															| "poll"
+															| "realm"
+															| "realm_rule"
+														)[];
+													};
+												};
+										  };
+									publishers?:
+										| {
+												some:
+													| {
+															/**
+															 * @type string
+															 */
+															kind: "viewer";
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															kind: "profile";
+															/**
+															 * @type object
+															 */
+															id: {
+																/**
+																 * @type array
+																 */
+																in: string[];
+															};
+													  };
+										  }
+										| {
+												none:
+													| {
+															/**
+															 * @type string
+															 */
+															kind: "viewer";
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															kind: "profile";
+															/**
+															 * @type object
+															 */
+															id: {
+																/**
+																 * @type array
+																 */
+																in: string[];
+															};
+													  };
+										  };
+									/**
+									 * @type object | undefined
+									 */
+									scores?: {
+										received?:
+											| {
+													/**
+													 * @type object
+													 */
+													some: {
+														/**
+														 * @type array | undefined
+														 */
+														all?: ScoreFilter[];
+														/**
+														 * @type array | undefined
+														 */
+														any?: ScoreFilter[];
+														/**
+														 * @type object | undefined
+														 */
+														not?: ScoreFilter;
+														value?:
+															| {
+																	/**
+																	 * @type array
+																	 */
+																	in: number[];
+															  }
+															| {
+																	range:
+																		| {
+																				/**
+																				 * @minLength 1
+																				 * @maxLength 10
+																				 * @type integer
+																				 */
+																				minimum: number;
+																				/**
+																				 * @minLength 1
+																				 * @maxLength 10
+																				 * @type integer | undefined
+																				 */
+																				maximum?: number;
+																		  }
+																		| {
+																				/**
+																				 * @minLength 1
+																				 * @maxLength 10
+																				 * @type integer | undefined
+																				 */
+																				minimum?: number;
+																				/**
+																				 * @minLength 1
+																				 * @maxLength 10
+																				 * @type integer
+																				 */
+																				maximum: number;
+																		  };
+															  };
+														/**
+														 * @type object | undefined
+														 */
+														realm?: {
+															/**
+															 * @type object | undefined
+															 */
+															id?: {
+																/**
+																 * @type array
+																 */
+																in: string[];
+															};
+															/**
+															 * @type object | undefined
+															 */
+															kind?: {
+																/**
+																 * @type array
+																 */
+																in: (
+																	| "slug_namespace"
+																	| "profile"
+																	| "book"
+																	| "software"
+																	| "media"
+																	| "video"
+																	| "audio"
+																	| "release"
+																	| "entity"
+																	| "label"
+																	| "tag"
+																	| "structure"
+																	| "series"
+																	| "zone"
+																	| "zone_page"
+																	| "collection"
+																	| "post"
+																	| "poll"
+																	| "realm"
+																	| "realm_rule"
+																)[];
+															};
+														};
+														/**
+														 * @type object | undefined
+														 */
+														target?: {
+															/**
+															 * @type object | undefined
+															 */
+															id?: {
+																/**
+																 * @type array
+																 */
+																in: string[];
+															};
+															/**
+															 * @type object | undefined
+															 */
+															kind?: {
+																/**
+																 * @type array
+																 */
+																in: (
+																	| "slug_namespace"
+																	| "profile"
+																	| "book"
+																	| "software"
+																	| "media"
+																	| "video"
+																	| "audio"
+																	| "release"
+																	| "entity"
+																	| "label"
+																	| "tag"
+																	| "structure"
+																	| "series"
+																	| "zone"
+																	| "zone_page"
+																	| "collection"
+																	| "post"
+																	| "poll"
+																	| "realm"
+																	| "realm_rule"
+																)[];
+															};
+														};
+														author?:
+															| {
+																	/**
+																	 * @type string
+																	 */
+																	kind: "viewer";
+															  }
+															| {
+																	/**
+																	 * @type string
+																	 */
+																	kind: "profile";
+																	/**
+																	 * @type object
+																	 */
+																	id: {
+																		/**
+																		 * @type array
+																		 */
+																		in: string[];
+																	};
+															  };
+													};
+											  }
+											| {
+													/**
+													 * @type object
+													 */
+													none: {
+														/**
+														 * @type array | undefined
+														 */
+														all?: ScoreFilter[];
+														/**
+														 * @type array | undefined
+														 */
+														any?: ScoreFilter[];
+														/**
+														 * @type object | undefined
+														 */
+														not?: ScoreFilter;
+														value?:
+															| {
+																	/**
+																	 * @type array
+																	 */
+																	in: number[];
+															  }
+															| {
+																	range:
+																		| {
+																				/**
+																				 * @minLength 1
+																				 * @maxLength 10
+																				 * @type integer
+																				 */
+																				minimum: number;
+																				/**
+																				 * @minLength 1
+																				 * @maxLength 10
+																				 * @type integer | undefined
+																				 */
+																				maximum?: number;
+																		  }
+																		| {
+																				/**
+																				 * @minLength 1
+																				 * @maxLength 10
+																				 * @type integer | undefined
+																				 */
+																				minimum?: number;
+																				/**
+																				 * @minLength 1
+																				 * @maxLength 10
+																				 * @type integer
+																				 */
+																				maximum: number;
+																		  };
+															  };
+														/**
+														 * @type object | undefined
+														 */
+														realm?: {
+															/**
+															 * @type object | undefined
+															 */
+															id?: {
+																/**
+																 * @type array
+																 */
+																in: string[];
+															};
+															/**
+															 * @type object | undefined
+															 */
+															kind?: {
+																/**
+																 * @type array
+																 */
+																in: (
+																	| "slug_namespace"
+																	| "profile"
+																	| "book"
+																	| "software"
+																	| "media"
+																	| "video"
+																	| "audio"
+																	| "release"
+																	| "entity"
+																	| "label"
+																	| "tag"
+																	| "structure"
+																	| "series"
+																	| "zone"
+																	| "zone_page"
+																	| "collection"
+																	| "post"
+																	| "poll"
+																	| "realm"
+																	| "realm_rule"
+																)[];
+															};
+														};
+														/**
+														 * @type object | undefined
+														 */
+														target?: {
+															/**
+															 * @type object | undefined
+															 */
+															id?: {
+																/**
+																 * @type array
+																 */
+																in: string[];
+															};
+															/**
+															 * @type object | undefined
+															 */
+															kind?: {
+																/**
+																 * @type array
+																 */
+																in: (
+																	| "slug_namespace"
+																	| "profile"
+																	| "book"
+																	| "software"
+																	| "media"
+																	| "video"
+																	| "audio"
+																	| "release"
+																	| "entity"
+																	| "label"
+																	| "tag"
+																	| "structure"
+																	| "series"
+																	| "zone"
+																	| "zone_page"
+																	| "collection"
+																	| "post"
+																	| "poll"
+																	| "realm"
+																	| "realm_rule"
+																)[];
+															};
+														};
+														author?:
+															| {
+																	/**
+																	 * @type string
+																	 */
+																	kind: "viewer";
+															  }
+															| {
+																	/**
+																	 * @type string
+																	 */
+																	kind: "profile";
+																	/**
+																	 * @type object
+																	 */
+																	id: {
+																		/**
+																		 * @type array
+																		 */
+																		in: string[];
+																	};
+															  };
+													};
+											  };
+									};
+									post?:
+										| {
+												/**
+												 * @type object
+												 */
+												is: {
+													/**
+													 * @type array | undefined
+													 */
+													all?: PostFilter[];
+													/**
+													 * @type array | undefined
+													 */
+													any?: PostFilter[];
+													/**
+													 * @type object | undefined
+													 */
+													not?: PostFilter;
+													/**
+													 * @type object | undefined
+													 */
+													kind?: {
+														/**
+														 * @type array
+														 */
+														in: (
+															| "post"
+															| "reply"
+															| "excerpt"
+															| "review"
+															| "chapter"
+															| "page"
+															| "wiki"
+															| "picture"
+															| "governance_note"
+														)[];
+													};
+													subject?:
+														| {
+																/**
+																 * @type object
+																 */
+																is: {
+																	/**
+																	 * @type object | undefined
+																	 */
+																	id?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: string[];
+																	};
+																	/**
+																	 * @type object | undefined
+																	 */
+																	kind?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: (
+																			| "slug_namespace"
+																			| "profile"
+																			| "book"
+																			| "software"
+																			| "media"
+																			| "video"
+																			| "audio"
+																			| "release"
+																			| "entity"
+																			| "label"
+																			| "tag"
+																			| "structure"
+																			| "series"
+																			| "zone"
+																			| "zone_page"
+																			| "collection"
+																			| "post"
+																			| "poll"
+																			| "realm"
+																			| "realm_rule"
+																		)[];
+																	};
+																};
+														  }
+														| {
+																/**
+																 * @type boolean
+																 */
+																absent: true;
+														  };
+													/**
+													 * @type object | undefined
+													 */
+													scores?: {
+														displayed?:
+															| {
+																	/**
+																	 * @type object
+																	 */
+																	some: {
+																		/**
+																		 * @type array | undefined
+																		 */
+																		all?: ScoreFilter[];
+																		/**
+																		 * @type array | undefined
+																		 */
+																		any?: ScoreFilter[];
+																		/**
+																		 * @type object | undefined
+																		 */
+																		not?: ScoreFilter;
+																		value?:
+																			| {
+																					/**
+																					 * @type array
+																					 */
+																					in: number[];
+																			  }
+																			| {
+																					range:
+																						| {
+																								/**
+																								 * @minLength 1
+																								 * @maxLength 10
+																								 * @type integer
+																								 */
+																								minimum: number;
+																								/**
+																								 * @minLength 1
+																								 * @maxLength 10
+																								 * @type integer | undefined
+																								 */
+																								maximum?: number;
+																						  }
+																						| {
+																								/**
+																								 * @minLength 1
+																								 * @maxLength 10
+																								 * @type integer | undefined
+																								 */
+																								minimum?: number;
+																								/**
+																								 * @minLength 1
+																								 * @maxLength 10
+																								 * @type integer
+																								 */
+																								maximum: number;
+																						  };
+																			  };
+																		/**
+																		 * @type object | undefined
+																		 */
+																		realm?: {
+																			/**
+																			 * @type object | undefined
+																			 */
+																			id?: {
+																				/**
+																				 * @type array
+																				 */
+																				in: string[];
+																			};
+																			/**
+																			 * @type object | undefined
+																			 */
+																			kind?: {
+																				/**
+																				 * @type array
+																				 */
+																				in: (
+																					| "slug_namespace"
+																					| "profile"
+																					| "book"
+																					| "software"
+																					| "media"
+																					| "video"
+																					| "audio"
+																					| "release"
+																					| "entity"
+																					| "label"
+																					| "tag"
+																					| "structure"
+																					| "series"
+																					| "zone"
+																					| "zone_page"
+																					| "collection"
+																					| "post"
+																					| "poll"
+																					| "realm"
+																					| "realm_rule"
+																				)[];
+																			};
+																		};
+																		/**
+																		 * @type object | undefined
+																		 */
+																		target?: {
+																			/**
+																			 * @type object | undefined
+																			 */
+																			id?: {
+																				/**
+																				 * @type array
+																				 */
+																				in: string[];
+																			};
+																			/**
+																			 * @type object | undefined
+																			 */
+																			kind?: {
+																				/**
+																				 * @type array
+																				 */
+																				in: (
+																					| "slug_namespace"
+																					| "profile"
+																					| "book"
+																					| "software"
+																					| "media"
+																					| "video"
+																					| "audio"
+																					| "release"
+																					| "entity"
+																					| "label"
+																					| "tag"
+																					| "structure"
+																					| "series"
+																					| "zone"
+																					| "zone_page"
+																					| "collection"
+																					| "post"
+																					| "poll"
+																					| "realm"
+																					| "realm_rule"
+																				)[];
+																			};
+																		};
+																		author?:
+																			| {
+																					/**
+																					 * @type string
+																					 */
+																					kind: "viewer";
+																			  }
+																			| {
+																					/**
+																					 * @type string
+																					 */
+																					kind: "profile";
+																					/**
+																					 * @type object
+																					 */
+																					id: {
+																						/**
+																						 * @type array
+																						 */
+																						in: string[];
+																					};
+																			  };
+																	};
+															  }
+															| {
+																	/**
+																	 * @type object
+																	 */
+																	none: {
+																		/**
+																		 * @type array | undefined
+																		 */
+																		all?: ScoreFilter[];
+																		/**
+																		 * @type array | undefined
+																		 */
+																		any?: ScoreFilter[];
+																		/**
+																		 * @type object | undefined
+																		 */
+																		not?: ScoreFilter;
+																		value?:
+																			| {
+																					/**
+																					 * @type array
+																					 */
+																					in: number[];
+																			  }
+																			| {
+																					range:
+																						| {
+																								/**
+																								 * @minLength 1
+																								 * @maxLength 10
+																								 * @type integer
+																								 */
+																								minimum: number;
+																								/**
+																								 * @minLength 1
+																								 * @maxLength 10
+																								 * @type integer | undefined
+																								 */
+																								maximum?: number;
+																						  }
+																						| {
+																								/**
+																								 * @minLength 1
+																								 * @maxLength 10
+																								 * @type integer | undefined
+																								 */
+																								minimum?: number;
+																								/**
+																								 * @minLength 1
+																								 * @maxLength 10
+																								 * @type integer
+																								 */
+																								maximum: number;
+																						  };
+																			  };
+																		/**
+																		 * @type object | undefined
+																		 */
+																		realm?: {
+																			/**
+																			 * @type object | undefined
+																			 */
+																			id?: {
+																				/**
+																				 * @type array
+																				 */
+																				in: string[];
+																			};
+																			/**
+																			 * @type object | undefined
+																			 */
+																			kind?: {
+																				/**
+																				 * @type array
+																				 */
+																				in: (
+																					| "slug_namespace"
+																					| "profile"
+																					| "book"
+																					| "software"
+																					| "media"
+																					| "video"
+																					| "audio"
+																					| "release"
+																					| "entity"
+																					| "label"
+																					| "tag"
+																					| "structure"
+																					| "series"
+																					| "zone"
+																					| "zone_page"
+																					| "collection"
+																					| "post"
+																					| "poll"
+																					| "realm"
+																					| "realm_rule"
+																				)[];
+																			};
+																		};
+																		/**
+																		 * @type object | undefined
+																		 */
+																		target?: {
+																			/**
+																			 * @type object | undefined
+																			 */
+																			id?: {
+																				/**
+																				 * @type array
+																				 */
+																				in: string[];
+																			};
+																			/**
+																			 * @type object | undefined
+																			 */
+																			kind?: {
+																				/**
+																				 * @type array
+																				 */
+																				in: (
+																					| "slug_namespace"
+																					| "profile"
+																					| "book"
+																					| "software"
+																					| "media"
+																					| "video"
+																					| "audio"
+																					| "release"
+																					| "entity"
+																					| "label"
+																					| "tag"
+																					| "structure"
+																					| "series"
+																					| "zone"
+																					| "zone_page"
+																					| "collection"
+																					| "post"
+																					| "poll"
+																					| "realm"
+																					| "realm_rule"
+																				)[];
+																			};
+																		};
+																		author?:
+																			| {
+																					/**
+																					 * @type string
+																					 */
+																					kind: "viewer";
+																			  }
+																			| {
+																					/**
+																					 * @type string
+																					 */
+																					kind: "profile";
+																					/**
+																					 * @type object
+																					 */
+																					id: {
+																						/**
+																						 * @type array
+																						 */
+																						in: string[];
+																					};
+																			  };
+																	};
+															  };
+													};
+													/**
+													 * @type object | undefined
+													 */
+													explainsRealmTag?: {
+														/**
+														 * @type object
+														 */
+														realm: {
+															/**
+															 * @type object | undefined
+															 */
+															id?: {
+																/**
+																 * @type array
+																 */
+																in: string[];
+															};
+															/**
+															 * @type object | undefined
+															 */
+															kind?: {
+																/**
+																 * @type array
+																 */
+																in: (
+																	| "slug_namespace"
+																	| "profile"
+																	| "book"
+																	| "software"
+																	| "media"
+																	| "video"
+																	| "audio"
+																	| "release"
+																	| "entity"
+																	| "label"
+																	| "tag"
+																	| "structure"
+																	| "series"
+																	| "zone"
+																	| "zone_page"
+																	| "collection"
+																	| "post"
+																	| "poll"
+																	| "realm"
+																	| "realm_rule"
+																)[];
+															};
+														};
+														/**
+														 * @type object | undefined
+														 */
+														tag?: {
+															/**
+															 * @type object | undefined
+															 */
+															id?: {
+																/**
+																 * @type array
+																 */
+																in: string[];
+															};
+															/**
+															 * @type object | undefined
+															 */
+															kind?: {
+																/**
+																 * @type array
+																 */
+																in: (
+																	| "slug_namespace"
+																	| "profile"
+																	| "book"
+																	| "software"
+																	| "media"
+																	| "video"
+																	| "audio"
+																	| "release"
+																	| "entity"
+																	| "label"
+																	| "tag"
+																	| "structure"
+																	| "series"
+																	| "zone"
+																	| "zone_page"
+																	| "collection"
+																	| "post"
+																	| "poll"
+																	| "realm"
+																	| "realm_rule"
+																)[];
+															};
+														};
+													};
+												};
+										  }
+										| {
+												/**
+												 * @type boolean
+												 */
+												absent: true;
+										  };
+									collection?:
+										| {
+												/**
+												 * @type object
+												 */
+												is: {
+													/**
+													 * @type array | undefined
+													 */
+													all?: CollectionFilter[];
+													/**
+													 * @type array | undefined
+													 */
+													any?: CollectionFilter[];
+													/**
+													 * @type object | undefined
+													 */
+													not?: CollectionFilter;
+													items?:
+														| {
+																/**
+																 * @type object
+																 */
+																some: {
+																	/**
+																	 * @type object | undefined
+																	 */
+																	id?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: string[];
+																	};
+																	/**
+																	 * @type object | undefined
+																	 */
+																	kind?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: (
+																			| "slug_namespace"
+																			| "profile"
+																			| "book"
+																			| "software"
+																			| "media"
+																			| "video"
+																			| "audio"
+																			| "release"
+																			| "entity"
+																			| "label"
+																			| "tag"
+																			| "structure"
+																			| "series"
+																			| "zone"
+																			| "zone_page"
+																			| "collection"
+																			| "post"
+																			| "poll"
+																			| "realm"
+																			| "realm_rule"
+																		)[];
+																	};
+																};
+														  }
+														| {
+																/**
+																 * @type object
+																 */
+																none: {
+																	/**
+																	 * @type object | undefined
+																	 */
+																	id?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: string[];
+																	};
+																	/**
+																	 * @type object | undefined
+																	 */
+																	kind?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: (
+																			| "slug_namespace"
+																			| "profile"
+																			| "book"
+																			| "software"
+																			| "media"
+																			| "video"
+																			| "audio"
+																			| "release"
+																			| "entity"
+																			| "label"
+																			| "tag"
+																			| "structure"
+																			| "series"
+																			| "zone"
+																			| "zone_page"
+																			| "collection"
+																			| "post"
+																			| "poll"
+																			| "realm"
+																			| "realm_rule"
+																		)[];
+																	};
+																};
+														  };
+												};
+										  }
+										| {
+												/**
+												 * @type boolean
+												 */
+												absent: true;
+										  };
+								};
+								/**
+								 * @type array | undefined
+								 */
+								controls?: {
+									/**
+									 * @minLength 1
+									 * @maxLength 64
+									 * @pattern ^[a-z][a-z0-9-]*$
+									 * @type string
+									 */
+									key: string;
+									field?:
+										| "category"
+										| "kind"
+										| "language"
+										| "content-rating"
+										| "ai-disclosure"
+										| "license"
+										| "tag"
+										| "credit"
+										| "credited-profile"
+										| "realm"
+										| "realm-tag-context"
+										| "zone"
+										| "subject"
+										| "target"
+										| "root"
+										| "parent"
+										| "owner"
+										| "join-policy"
+										| "multiple"
+										| "results-visibility"
+										| "closed"
+										| "created-at"
+										| "updated-at"
+										| "published-at"
+										| "closes-at"
+										| "content-license"
+										| "book-isbn13"
+										| "book-publication-date"
+										| "book-page-count"
+										| "book-word-count"
+										| "book-format"
+										| "media-kind"
+										| "media-release-date"
+										| "media-runtime-minutes"
+										| "media-episode-count"
+										| "media-season-count"
+										| "software-release-date"
+										| "software-version-label"
+										| "software-platform"
+										| "software-requirement-tier"
+										| "realm-tag-vote";
+									/**
+									 * @type boolean | undefined
+									 */
+									enabled?: boolean;
+									disclosure?: "visible" | "hidden";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string | undefined
+									 */
+									labelUnitId?: string;
+									optionPolicy?:
+										| {
+												/**
+												 * @type string
+												 */
+												kind: "all";
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												kind: "include";
+												/**
+												 * @type array
+												 */
+												values: (string | number | boolean)[];
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												kind: "exclude";
+												/**
+												 * @type array
+												 */
+												values: (string | number | boolean)[];
+										  };
+									/**
+									 * @type boolean | undefined
+									 */
+									required?: boolean;
+								}[];
+							};
 					  };
 				/**
 				 * @type object
@@ -4131,14 +8539,2218 @@ export type UnitReferencedBlockDocument = {
 										/**
 										 * @type string
 										 */
-										kind: "template";
-										template: "global" | "book" | "media" | "software" | "realm" | "zone";
+										kind: "global";
 								  }
 								| {
 										/**
 										 * @type string
 										 */
 										kind: "zone";
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										kind: "inline";
+										/**
+										 * @type object
+										 */
+										filterDocument: {
+											/**
+											 * @type array | undefined
+											 */
+											categories?: (
+												| "units"
+												| "users"
+												| "entities"
+												| "tags"
+												| "tag-structures"
+												| "posts"
+												| "realms"
+												| "collections"
+												| "reviews"
+												| "polls"
+											)[];
+											/**
+											 * @type object | undefined
+											 */
+											where?: {
+												/**
+												 * @type array | undefined
+												 */
+												all?: UnitPredicate[];
+												/**
+												 * @type array | undefined
+												 */
+												any?: UnitPredicate[];
+												/**
+												 * @type object | undefined
+												 */
+												not?: UnitPredicate;
+												/**
+												 * @type object | undefined
+												 */
+												id?: {
+													/**
+													 * @type array
+													 */
+													in: string[];
+												};
+												/**
+												 * @type object | undefined
+												 */
+												kind?: {
+													/**
+													 * @type array
+													 */
+													in: (
+														| "slug_namespace"
+														| "profile"
+														| "book"
+														| "software"
+														| "media"
+														| "video"
+														| "audio"
+														| "release"
+														| "entity"
+														| "label"
+														| "tag"
+														| "structure"
+														| "series"
+														| "zone"
+														| "zone_page"
+														| "collection"
+														| "post"
+														| "poll"
+														| "realm"
+														| "realm_rule"
+													)[];
+												};
+												localizations?:
+													| {
+															/**
+															 * @type object
+															 */
+															some: {
+																/**
+																 * @type array | undefined
+																 */
+																all?: LocalizationFilter[];
+																/**
+																 * @type array | undefined
+																 */
+																any?: LocalizationFilter[];
+																/**
+																 * @type object | undefined
+																 */
+																not?: LocalizationFilter;
+																/**
+																 * @type object | undefined
+																 */
+																language?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: ("zh" | "en" | "ja" | "ko" | "de" | "fr" | "es")[];
+																};
+															};
+													  }
+													| {
+															/**
+															 * @type object
+															 */
+															none: {
+																/**
+																 * @type array | undefined
+																 */
+																all?: LocalizationFilter[];
+																/**
+																 * @type array | undefined
+																 */
+																any?: LocalizationFilter[];
+																/**
+																 * @type object | undefined
+																 */
+																not?: LocalizationFilter;
+																/**
+																 * @type object | undefined
+																 */
+																language?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: ("zh" | "en" | "ja" | "ko" | "de" | "fr" | "es")[];
+																};
+															};
+													  };
+												realms?:
+													| {
+															/**
+															 * @type object
+															 */
+															some: {
+																/**
+																 * @type array | undefined
+																 */
+																all?: RealmPlacementFilter[];
+																/**
+																 * @type array | undefined
+																 */
+																any?: RealmPlacementFilter[];
+																/**
+																 * @type object | undefined
+																 */
+																not?: RealmPlacementFilter;
+																/**
+																 * @type object | undefined
+																 */
+																realm?: {
+																	/**
+																	 * @type object | undefined
+																	 */
+																	id?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: string[];
+																	};
+																	/**
+																	 * @type object | undefined
+																	 */
+																	kind?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: (
+																			| "slug_namespace"
+																			| "profile"
+																			| "book"
+																			| "software"
+																			| "media"
+																			| "video"
+																			| "audio"
+																			| "release"
+																			| "entity"
+																			| "label"
+																			| "tag"
+																			| "structure"
+																			| "series"
+																			| "zone"
+																			| "zone_page"
+																			| "collection"
+																			| "post"
+																			| "poll"
+																			| "realm"
+																			| "realm_rule"
+																		)[];
+																	};
+																};
+																/**
+																 * @type object | undefined
+																 */
+																status?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: ("pending" | "visible" | "hidden" | "removed")[];
+																};
+																/**
+																 * @type object | undefined
+																 */
+																publicationState?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: ("active" | "withdrawn")[];
+																};
+															};
+													  }
+													| {
+															/**
+															 * @type object
+															 */
+															none: {
+																/**
+																 * @type array | undefined
+																 */
+																all?: RealmPlacementFilter[];
+																/**
+																 * @type array | undefined
+																 */
+																any?: RealmPlacementFilter[];
+																/**
+																 * @type object | undefined
+																 */
+																not?: RealmPlacementFilter;
+																/**
+																 * @type object | undefined
+																 */
+																realm?: {
+																	/**
+																	 * @type object | undefined
+																	 */
+																	id?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: string[];
+																	};
+																	/**
+																	 * @type object | undefined
+																	 */
+																	kind?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: (
+																			| "slug_namespace"
+																			| "profile"
+																			| "book"
+																			| "software"
+																			| "media"
+																			| "video"
+																			| "audio"
+																			| "release"
+																			| "entity"
+																			| "label"
+																			| "tag"
+																			| "structure"
+																			| "series"
+																			| "zone"
+																			| "zone_page"
+																			| "collection"
+																			| "post"
+																			| "poll"
+																			| "realm"
+																			| "realm_rule"
+																		)[];
+																	};
+																};
+																/**
+																 * @type object | undefined
+																 */
+																status?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: ("pending" | "visible" | "hidden" | "removed")[];
+																};
+																/**
+																 * @type object | undefined
+																 */
+																publicationState?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: ("active" | "withdrawn")[];
+																};
+															};
+													  };
+												tags?:
+													| {
+															/**
+															 * @type object
+															 */
+															some: {
+																/**
+																 * @type array | undefined
+																 */
+																all?: TagAssertionFilter[];
+																/**
+																 * @type array | undefined
+																 */
+																any?: TagAssertionFilter[];
+																/**
+																 * @type object | undefined
+																 */
+																not?: TagAssertionFilter;
+																/**
+																 * @type object | undefined
+																 */
+																tag?: {
+																	/**
+																	 * @type object | undefined
+																	 */
+																	id?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: string[];
+																	};
+																	/**
+																	 * @type object | undefined
+																	 */
+																	kind?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: (
+																			| "slug_namespace"
+																			| "profile"
+																			| "book"
+																			| "software"
+																			| "media"
+																			| "video"
+																			| "audio"
+																			| "release"
+																			| "entity"
+																			| "label"
+																			| "tag"
+																			| "structure"
+																			| "series"
+																			| "zone"
+																			| "zone_page"
+																			| "collection"
+																			| "post"
+																			| "poll"
+																			| "realm"
+																			| "realm_rule"
+																		)[];
+																	};
+																};
+																authority?:
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "global";
+																			view:
+																				| {
+																						/**
+																						 * @type string
+																						 */
+																						kind: "effective";
+																						/**
+																						 * @type object | undefined
+																						 */
+																						consensus?: {
+																							score?:
+																								| {
+																										/**
+																										 * @type array
+																										 */
+																										in: number[];
+																								  }
+																								| {
+																										range:
+																											| {
+																													/**
+																													 * @type integer
+																													 */
+																													minimum: number;
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													maximum?: number;
+																											  }
+																											| {
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													minimum?: number;
+																													/**
+																													 * @type integer
+																													 */
+																													maximum: number;
+																											  };
+																								  };
+																							voteCount?:
+																								| {
+																										/**
+																										 * @type array
+																										 */
+																										in: number[];
+																								  }
+																								| {
+																										range:
+																											| {
+																													/**
+																													 * @type integer
+																													 */
+																													minimum: number;
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													maximum?: number;
+																											  }
+																											| {
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													minimum?: number;
+																													/**
+																													 * @type integer
+																													 */
+																													maximum: number;
+																											  };
+																								  };
+																						};
+																				  }
+																				| {
+																						/**
+																						 * @type string
+																						 */
+																						kind: "direct";
+																				  };
+																	  }
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "realm";
+																			/**
+																			 * @type object
+																			 */
+																			realm: {
+																				/**
+																				 * @type object | undefined
+																				 */
+																				id?: {
+																					/**
+																					 * @type array
+																					 */
+																					in: string[];
+																				};
+																				/**
+																				 * @type object | undefined
+																				 */
+																				kind?: {
+																					/**
+																					 * @type array
+																					 */
+																					in: (
+																						| "slug_namespace"
+																						| "profile"
+																						| "book"
+																						| "software"
+																						| "media"
+																						| "video"
+																						| "audio"
+																						| "release"
+																						| "entity"
+																						| "label"
+																						| "tag"
+																						| "structure"
+																						| "series"
+																						| "zone"
+																						| "zone_page"
+																						| "collection"
+																						| "post"
+																						| "poll"
+																						| "realm"
+																						| "realm_rule"
+																					)[];
+																				};
+																			};
+																			view:
+																				| {
+																						/**
+																						 * @type string
+																						 */
+																						kind: "policy";
+																				  }
+																				| {
+																						/**
+																						 * @type string
+																						 */
+																						kind: "community";
+																						/**
+																						 * @type object | undefined
+																						 */
+																						consensus?: {
+																							score?:
+																								| {
+																										/**
+																										 * @type array
+																										 */
+																										in: number[];
+																								  }
+																								| {
+																										range:
+																											| {
+																													/**
+																													 * @type integer
+																													 */
+																													minimum: number;
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													maximum?: number;
+																											  }
+																											| {
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													minimum?: number;
+																													/**
+																													 * @type integer
+																													 */
+																													maximum: number;
+																											  };
+																								  };
+																							voteCount?:
+																								| {
+																										/**
+																										 * @type array
+																										 */
+																										in: number[];
+																								  }
+																								| {
+																										range:
+																											| {
+																													/**
+																													 * @type integer
+																													 */
+																													minimum: number;
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													maximum?: number;
+																											  }
+																											| {
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													minimum?: number;
+																													/**
+																													 * @type integer
+																													 */
+																													maximum: number;
+																											  };
+																								  };
+																						};
+																				  };
+																	  }
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "profile";
+																			/**
+																			 * @type object
+																			 */
+																			profile: {
+																				/**
+																				 * @type string
+																				 */
+																				kind: "viewer";
+																			};
+																	  };
+															};
+													  }
+													| {
+															/**
+															 * @type object
+															 */
+															none: {
+																/**
+																 * @type array | undefined
+																 */
+																all?: TagAssertionFilter[];
+																/**
+																 * @type array | undefined
+																 */
+																any?: TagAssertionFilter[];
+																/**
+																 * @type object | undefined
+																 */
+																not?: TagAssertionFilter;
+																/**
+																 * @type object | undefined
+																 */
+																tag?: {
+																	/**
+																	 * @type object | undefined
+																	 */
+																	id?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: string[];
+																	};
+																	/**
+																	 * @type object | undefined
+																	 */
+																	kind?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: (
+																			| "slug_namespace"
+																			| "profile"
+																			| "book"
+																			| "software"
+																			| "media"
+																			| "video"
+																			| "audio"
+																			| "release"
+																			| "entity"
+																			| "label"
+																			| "tag"
+																			| "structure"
+																			| "series"
+																			| "zone"
+																			| "zone_page"
+																			| "collection"
+																			| "post"
+																			| "poll"
+																			| "realm"
+																			| "realm_rule"
+																		)[];
+																	};
+																};
+																authority?:
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "global";
+																			view:
+																				| {
+																						/**
+																						 * @type string
+																						 */
+																						kind: "effective";
+																						/**
+																						 * @type object | undefined
+																						 */
+																						consensus?: {
+																							score?:
+																								| {
+																										/**
+																										 * @type array
+																										 */
+																										in: number[];
+																								  }
+																								| {
+																										range:
+																											| {
+																													/**
+																													 * @type integer
+																													 */
+																													minimum: number;
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													maximum?: number;
+																											  }
+																											| {
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													minimum?: number;
+																													/**
+																													 * @type integer
+																													 */
+																													maximum: number;
+																											  };
+																								  };
+																							voteCount?:
+																								| {
+																										/**
+																										 * @type array
+																										 */
+																										in: number[];
+																								  }
+																								| {
+																										range:
+																											| {
+																													/**
+																													 * @type integer
+																													 */
+																													minimum: number;
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													maximum?: number;
+																											  }
+																											| {
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													minimum?: number;
+																													/**
+																													 * @type integer
+																													 */
+																													maximum: number;
+																											  };
+																								  };
+																						};
+																				  }
+																				| {
+																						/**
+																						 * @type string
+																						 */
+																						kind: "direct";
+																				  };
+																	  }
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "realm";
+																			/**
+																			 * @type object
+																			 */
+																			realm: {
+																				/**
+																				 * @type object | undefined
+																				 */
+																				id?: {
+																					/**
+																					 * @type array
+																					 */
+																					in: string[];
+																				};
+																				/**
+																				 * @type object | undefined
+																				 */
+																				kind?: {
+																					/**
+																					 * @type array
+																					 */
+																					in: (
+																						| "slug_namespace"
+																						| "profile"
+																						| "book"
+																						| "software"
+																						| "media"
+																						| "video"
+																						| "audio"
+																						| "release"
+																						| "entity"
+																						| "label"
+																						| "tag"
+																						| "structure"
+																						| "series"
+																						| "zone"
+																						| "zone_page"
+																						| "collection"
+																						| "post"
+																						| "poll"
+																						| "realm"
+																						| "realm_rule"
+																					)[];
+																				};
+																			};
+																			view:
+																				| {
+																						/**
+																						 * @type string
+																						 */
+																						kind: "policy";
+																				  }
+																				| {
+																						/**
+																						 * @type string
+																						 */
+																						kind: "community";
+																						/**
+																						 * @type object | undefined
+																						 */
+																						consensus?: {
+																							score?:
+																								| {
+																										/**
+																										 * @type array
+																										 */
+																										in: number[];
+																								  }
+																								| {
+																										range:
+																											| {
+																													/**
+																													 * @type integer
+																													 */
+																													minimum: number;
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													maximum?: number;
+																											  }
+																											| {
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													minimum?: number;
+																													/**
+																													 * @type integer
+																													 */
+																													maximum: number;
+																											  };
+																								  };
+																							voteCount?:
+																								| {
+																										/**
+																										 * @type array
+																										 */
+																										in: number[];
+																								  }
+																								| {
+																										range:
+																											| {
+																													/**
+																													 * @type integer
+																													 */
+																													minimum: number;
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													maximum?: number;
+																											  }
+																											| {
+																													/**
+																													 * @type integer | undefined
+																													 */
+																													minimum?: number;
+																													/**
+																													 * @type integer
+																													 */
+																													maximum: number;
+																											  };
+																								  };
+																						};
+																				  };
+																	  }
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "profile";
+																			/**
+																			 * @type object
+																			 */
+																			profile: {
+																				/**
+																				 * @type string
+																				 */
+																				kind: "viewer";
+																			};
+																	  };
+															};
+													  };
+												creditAttributions?:
+													| {
+															/**
+															 * @type object
+															 */
+															some: {
+																/**
+																 * @type object | undefined
+																 */
+																id?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: string[];
+																};
+																/**
+																 * @type object | undefined
+																 */
+																kind?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: (
+																		| "slug_namespace"
+																		| "profile"
+																		| "book"
+																		| "software"
+																		| "media"
+																		| "video"
+																		| "audio"
+																		| "release"
+																		| "entity"
+																		| "label"
+																		| "tag"
+																		| "structure"
+																		| "series"
+																		| "zone"
+																		| "zone_page"
+																		| "collection"
+																		| "post"
+																		| "poll"
+																		| "realm"
+																		| "realm_rule"
+																	)[];
+																};
+															};
+													  }
+													| {
+															/**
+															 * @type object
+															 */
+															none: {
+																/**
+																 * @type object | undefined
+																 */
+																id?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: string[];
+																};
+																/**
+																 * @type object | undefined
+																 */
+																kind?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: (
+																		| "slug_namespace"
+																		| "profile"
+																		| "book"
+																		| "software"
+																		| "media"
+																		| "video"
+																		| "audio"
+																		| "release"
+																		| "entity"
+																		| "label"
+																		| "tag"
+																		| "structure"
+																		| "series"
+																		| "zone"
+																		| "zone_page"
+																		| "collection"
+																		| "post"
+																		| "poll"
+																		| "realm"
+																		| "realm_rule"
+																	)[];
+																};
+															};
+													  };
+												subjectAssociations?:
+													| {
+															/**
+															 * @type object
+															 */
+															some: {
+																/**
+																 * @type object | undefined
+																 */
+																id?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: string[];
+																};
+																/**
+																 * @type object | undefined
+																 */
+																kind?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: (
+																		| "slug_namespace"
+																		| "profile"
+																		| "book"
+																		| "software"
+																		| "media"
+																		| "video"
+																		| "audio"
+																		| "release"
+																		| "entity"
+																		| "label"
+																		| "tag"
+																		| "structure"
+																		| "series"
+																		| "zone"
+																		| "zone_page"
+																		| "collection"
+																		| "post"
+																		| "poll"
+																		| "realm"
+																		| "realm_rule"
+																	)[];
+																};
+															};
+													  }
+													| {
+															/**
+															 * @type object
+															 */
+															none: {
+																/**
+																 * @type object | undefined
+																 */
+																id?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: string[];
+																};
+																/**
+																 * @type object | undefined
+																 */
+																kind?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: (
+																		| "slug_namespace"
+																		| "profile"
+																		| "book"
+																		| "software"
+																		| "media"
+																		| "video"
+																		| "audio"
+																		| "release"
+																		| "entity"
+																		| "label"
+																		| "tag"
+																		| "structure"
+																		| "series"
+																		| "zone"
+																		| "zone_page"
+																		| "collection"
+																		| "post"
+																		| "poll"
+																		| "realm"
+																		| "realm_rule"
+																	)[];
+																};
+															};
+													  };
+												publishers?:
+													| {
+															some:
+																| {
+																		/**
+																		 * @type string
+																		 */
+																		kind: "viewer";
+																  }
+																| {
+																		/**
+																		 * @type string
+																		 */
+																		kind: "profile";
+																		/**
+																		 * @type object
+																		 */
+																		id: {
+																			/**
+																			 * @type array
+																			 */
+																			in: string[];
+																		};
+																  };
+													  }
+													| {
+															none:
+																| {
+																		/**
+																		 * @type string
+																		 */
+																		kind: "viewer";
+																  }
+																| {
+																		/**
+																		 * @type string
+																		 */
+																		kind: "profile";
+																		/**
+																		 * @type object
+																		 */
+																		id: {
+																			/**
+																			 * @type array
+																			 */
+																			in: string[];
+																		};
+																  };
+													  };
+												/**
+												 * @type object | undefined
+												 */
+												scores?: {
+													received?:
+														| {
+																/**
+																 * @type object
+																 */
+																some: {
+																	/**
+																	 * @type array | undefined
+																	 */
+																	all?: ScoreFilter[];
+																	/**
+																	 * @type array | undefined
+																	 */
+																	any?: ScoreFilter[];
+																	/**
+																	 * @type object | undefined
+																	 */
+																	not?: ScoreFilter;
+																	value?:
+																		| {
+																				/**
+																				 * @type array
+																				 */
+																				in: number[];
+																		  }
+																		| {
+																				range:
+																					| {
+																							/**
+																							 * @minLength 1
+																							 * @maxLength 10
+																							 * @type integer
+																							 */
+																							minimum: number;
+																							/**
+																							 * @minLength 1
+																							 * @maxLength 10
+																							 * @type integer | undefined
+																							 */
+																							maximum?: number;
+																					  }
+																					| {
+																							/**
+																							 * @minLength 1
+																							 * @maxLength 10
+																							 * @type integer | undefined
+																							 */
+																							minimum?: number;
+																							/**
+																							 * @minLength 1
+																							 * @maxLength 10
+																							 * @type integer
+																							 */
+																							maximum: number;
+																					  };
+																		  };
+																	/**
+																	 * @type object | undefined
+																	 */
+																	realm?: {
+																		/**
+																		 * @type object | undefined
+																		 */
+																		id?: {
+																			/**
+																			 * @type array
+																			 */
+																			in: string[];
+																		};
+																		/**
+																		 * @type object | undefined
+																		 */
+																		kind?: {
+																			/**
+																			 * @type array
+																			 */
+																			in: (
+																				| "slug_namespace"
+																				| "profile"
+																				| "book"
+																				| "software"
+																				| "media"
+																				| "video"
+																				| "audio"
+																				| "release"
+																				| "entity"
+																				| "label"
+																				| "tag"
+																				| "structure"
+																				| "series"
+																				| "zone"
+																				| "zone_page"
+																				| "collection"
+																				| "post"
+																				| "poll"
+																				| "realm"
+																				| "realm_rule"
+																			)[];
+																		};
+																	};
+																	/**
+																	 * @type object | undefined
+																	 */
+																	target?: {
+																		/**
+																		 * @type object | undefined
+																		 */
+																		id?: {
+																			/**
+																			 * @type array
+																			 */
+																			in: string[];
+																		};
+																		/**
+																		 * @type object | undefined
+																		 */
+																		kind?: {
+																			/**
+																			 * @type array
+																			 */
+																			in: (
+																				| "slug_namespace"
+																				| "profile"
+																				| "book"
+																				| "software"
+																				| "media"
+																				| "video"
+																				| "audio"
+																				| "release"
+																				| "entity"
+																				| "label"
+																				| "tag"
+																				| "structure"
+																				| "series"
+																				| "zone"
+																				| "zone_page"
+																				| "collection"
+																				| "post"
+																				| "poll"
+																				| "realm"
+																				| "realm_rule"
+																			)[];
+																		};
+																	};
+																	author?:
+																		| {
+																				/**
+																				 * @type string
+																				 */
+																				kind: "viewer";
+																		  }
+																		| {
+																				/**
+																				 * @type string
+																				 */
+																				kind: "profile";
+																				/**
+																				 * @type object
+																				 */
+																				id: {
+																					/**
+																					 * @type array
+																					 */
+																					in: string[];
+																				};
+																		  };
+																};
+														  }
+														| {
+																/**
+																 * @type object
+																 */
+																none: {
+																	/**
+																	 * @type array | undefined
+																	 */
+																	all?: ScoreFilter[];
+																	/**
+																	 * @type array | undefined
+																	 */
+																	any?: ScoreFilter[];
+																	/**
+																	 * @type object | undefined
+																	 */
+																	not?: ScoreFilter;
+																	value?:
+																		| {
+																				/**
+																				 * @type array
+																				 */
+																				in: number[];
+																		  }
+																		| {
+																				range:
+																					| {
+																							/**
+																							 * @minLength 1
+																							 * @maxLength 10
+																							 * @type integer
+																							 */
+																							minimum: number;
+																							/**
+																							 * @minLength 1
+																							 * @maxLength 10
+																							 * @type integer | undefined
+																							 */
+																							maximum?: number;
+																					  }
+																					| {
+																							/**
+																							 * @minLength 1
+																							 * @maxLength 10
+																							 * @type integer | undefined
+																							 */
+																							minimum?: number;
+																							/**
+																							 * @minLength 1
+																							 * @maxLength 10
+																							 * @type integer
+																							 */
+																							maximum: number;
+																					  };
+																		  };
+																	/**
+																	 * @type object | undefined
+																	 */
+																	realm?: {
+																		/**
+																		 * @type object | undefined
+																		 */
+																		id?: {
+																			/**
+																			 * @type array
+																			 */
+																			in: string[];
+																		};
+																		/**
+																		 * @type object | undefined
+																		 */
+																		kind?: {
+																			/**
+																			 * @type array
+																			 */
+																			in: (
+																				| "slug_namespace"
+																				| "profile"
+																				| "book"
+																				| "software"
+																				| "media"
+																				| "video"
+																				| "audio"
+																				| "release"
+																				| "entity"
+																				| "label"
+																				| "tag"
+																				| "structure"
+																				| "series"
+																				| "zone"
+																				| "zone_page"
+																				| "collection"
+																				| "post"
+																				| "poll"
+																				| "realm"
+																				| "realm_rule"
+																			)[];
+																		};
+																	};
+																	/**
+																	 * @type object | undefined
+																	 */
+																	target?: {
+																		/**
+																		 * @type object | undefined
+																		 */
+																		id?: {
+																			/**
+																			 * @type array
+																			 */
+																			in: string[];
+																		};
+																		/**
+																		 * @type object | undefined
+																		 */
+																		kind?: {
+																			/**
+																			 * @type array
+																			 */
+																			in: (
+																				| "slug_namespace"
+																				| "profile"
+																				| "book"
+																				| "software"
+																				| "media"
+																				| "video"
+																				| "audio"
+																				| "release"
+																				| "entity"
+																				| "label"
+																				| "tag"
+																				| "structure"
+																				| "series"
+																				| "zone"
+																				| "zone_page"
+																				| "collection"
+																				| "post"
+																				| "poll"
+																				| "realm"
+																				| "realm_rule"
+																			)[];
+																		};
+																	};
+																	author?:
+																		| {
+																				/**
+																				 * @type string
+																				 */
+																				kind: "viewer";
+																		  }
+																		| {
+																				/**
+																				 * @type string
+																				 */
+																				kind: "profile";
+																				/**
+																				 * @type object
+																				 */
+																				id: {
+																					/**
+																					 * @type array
+																					 */
+																					in: string[];
+																				};
+																		  };
+																};
+														  };
+												};
+												post?:
+													| {
+															/**
+															 * @type object
+															 */
+															is: {
+																/**
+																 * @type array | undefined
+																 */
+																all?: PostFilter[];
+																/**
+																 * @type array | undefined
+																 */
+																any?: PostFilter[];
+																/**
+																 * @type object | undefined
+																 */
+																not?: PostFilter;
+																/**
+																 * @type object | undefined
+																 */
+																kind?: {
+																	/**
+																	 * @type array
+																	 */
+																	in: (
+																		| "post"
+																		| "reply"
+																		| "excerpt"
+																		| "review"
+																		| "chapter"
+																		| "page"
+																		| "wiki"
+																		| "picture"
+																		| "governance_note"
+																	)[];
+																};
+																subject?:
+																	| {
+																			/**
+																			 * @type object
+																			 */
+																			is: {
+																				/**
+																				 * @type object | undefined
+																				 */
+																				id?: {
+																					/**
+																					 * @type array
+																					 */
+																					in: string[];
+																				};
+																				/**
+																				 * @type object | undefined
+																				 */
+																				kind?: {
+																					/**
+																					 * @type array
+																					 */
+																					in: (
+																						| "slug_namespace"
+																						| "profile"
+																						| "book"
+																						| "software"
+																						| "media"
+																						| "video"
+																						| "audio"
+																						| "release"
+																						| "entity"
+																						| "label"
+																						| "tag"
+																						| "structure"
+																						| "series"
+																						| "zone"
+																						| "zone_page"
+																						| "collection"
+																						| "post"
+																						| "poll"
+																						| "realm"
+																						| "realm_rule"
+																					)[];
+																				};
+																			};
+																	  }
+																	| {
+																			/**
+																			 * @type boolean
+																			 */
+																			absent: true;
+																	  };
+																/**
+																 * @type object | undefined
+																 */
+																scores?: {
+																	displayed?:
+																		| {
+																				/**
+																				 * @type object
+																				 */
+																				some: {
+																					/**
+																					 * @type array | undefined
+																					 */
+																					all?: ScoreFilter[];
+																					/**
+																					 * @type array | undefined
+																					 */
+																					any?: ScoreFilter[];
+																					/**
+																					 * @type object | undefined
+																					 */
+																					not?: ScoreFilter;
+																					value?:
+																						| {
+																								/**
+																								 * @type array
+																								 */
+																								in: number[];
+																						  }
+																						| {
+																								range:
+																									| {
+																											/**
+																											 * @minLength 1
+																											 * @maxLength 10
+																											 * @type integer
+																											 */
+																											minimum: number;
+																											/**
+																											 * @minLength 1
+																											 * @maxLength 10
+																											 * @type integer | undefined
+																											 */
+																											maximum?: number;
+																									  }
+																									| {
+																											/**
+																											 * @minLength 1
+																											 * @maxLength 10
+																											 * @type integer | undefined
+																											 */
+																											minimum?: number;
+																											/**
+																											 * @minLength 1
+																											 * @maxLength 10
+																											 * @type integer
+																											 */
+																											maximum: number;
+																									  };
+																						  };
+																					/**
+																					 * @type object | undefined
+																					 */
+																					realm?: {
+																						/**
+																						 * @type object | undefined
+																						 */
+																						id?: {
+																							/**
+																							 * @type array
+																							 */
+																							in: string[];
+																						};
+																						/**
+																						 * @type object | undefined
+																						 */
+																						kind?: {
+																							/**
+																							 * @type array
+																							 */
+																							in: (
+																								| "slug_namespace"
+																								| "profile"
+																								| "book"
+																								| "software"
+																								| "media"
+																								| "video"
+																								| "audio"
+																								| "release"
+																								| "entity"
+																								| "label"
+																								| "tag"
+																								| "structure"
+																								| "series"
+																								| "zone"
+																								| "zone_page"
+																								| "collection"
+																								| "post"
+																								| "poll"
+																								| "realm"
+																								| "realm_rule"
+																							)[];
+																						};
+																					};
+																					/**
+																					 * @type object | undefined
+																					 */
+																					target?: {
+																						/**
+																						 * @type object | undefined
+																						 */
+																						id?: {
+																							/**
+																							 * @type array
+																							 */
+																							in: string[];
+																						};
+																						/**
+																						 * @type object | undefined
+																						 */
+																						kind?: {
+																							/**
+																							 * @type array
+																							 */
+																							in: (
+																								| "slug_namespace"
+																								| "profile"
+																								| "book"
+																								| "software"
+																								| "media"
+																								| "video"
+																								| "audio"
+																								| "release"
+																								| "entity"
+																								| "label"
+																								| "tag"
+																								| "structure"
+																								| "series"
+																								| "zone"
+																								| "zone_page"
+																								| "collection"
+																								| "post"
+																								| "poll"
+																								| "realm"
+																								| "realm_rule"
+																							)[];
+																						};
+																					};
+																					author?:
+																						| {
+																								/**
+																								 * @type string
+																								 */
+																								kind: "viewer";
+																						  }
+																						| {
+																								/**
+																								 * @type string
+																								 */
+																								kind: "profile";
+																								/**
+																								 * @type object
+																								 */
+																								id: {
+																									/**
+																									 * @type array
+																									 */
+																									in: string[];
+																								};
+																						  };
+																				};
+																		  }
+																		| {
+																				/**
+																				 * @type object
+																				 */
+																				none: {
+																					/**
+																					 * @type array | undefined
+																					 */
+																					all?: ScoreFilter[];
+																					/**
+																					 * @type array | undefined
+																					 */
+																					any?: ScoreFilter[];
+																					/**
+																					 * @type object | undefined
+																					 */
+																					not?: ScoreFilter;
+																					value?:
+																						| {
+																								/**
+																								 * @type array
+																								 */
+																								in: number[];
+																						  }
+																						| {
+																								range:
+																									| {
+																											/**
+																											 * @minLength 1
+																											 * @maxLength 10
+																											 * @type integer
+																											 */
+																											minimum: number;
+																											/**
+																											 * @minLength 1
+																											 * @maxLength 10
+																											 * @type integer | undefined
+																											 */
+																											maximum?: number;
+																									  }
+																									| {
+																											/**
+																											 * @minLength 1
+																											 * @maxLength 10
+																											 * @type integer | undefined
+																											 */
+																											minimum?: number;
+																											/**
+																											 * @minLength 1
+																											 * @maxLength 10
+																											 * @type integer
+																											 */
+																											maximum: number;
+																									  };
+																						  };
+																					/**
+																					 * @type object | undefined
+																					 */
+																					realm?: {
+																						/**
+																						 * @type object | undefined
+																						 */
+																						id?: {
+																							/**
+																							 * @type array
+																							 */
+																							in: string[];
+																						};
+																						/**
+																						 * @type object | undefined
+																						 */
+																						kind?: {
+																							/**
+																							 * @type array
+																							 */
+																							in: (
+																								| "slug_namespace"
+																								| "profile"
+																								| "book"
+																								| "software"
+																								| "media"
+																								| "video"
+																								| "audio"
+																								| "release"
+																								| "entity"
+																								| "label"
+																								| "tag"
+																								| "structure"
+																								| "series"
+																								| "zone"
+																								| "zone_page"
+																								| "collection"
+																								| "post"
+																								| "poll"
+																								| "realm"
+																								| "realm_rule"
+																							)[];
+																						};
+																					};
+																					/**
+																					 * @type object | undefined
+																					 */
+																					target?: {
+																						/**
+																						 * @type object | undefined
+																						 */
+																						id?: {
+																							/**
+																							 * @type array
+																							 */
+																							in: string[];
+																						};
+																						/**
+																						 * @type object | undefined
+																						 */
+																						kind?: {
+																							/**
+																							 * @type array
+																							 */
+																							in: (
+																								| "slug_namespace"
+																								| "profile"
+																								| "book"
+																								| "software"
+																								| "media"
+																								| "video"
+																								| "audio"
+																								| "release"
+																								| "entity"
+																								| "label"
+																								| "tag"
+																								| "structure"
+																								| "series"
+																								| "zone"
+																								| "zone_page"
+																								| "collection"
+																								| "post"
+																								| "poll"
+																								| "realm"
+																								| "realm_rule"
+																							)[];
+																						};
+																					};
+																					author?:
+																						| {
+																								/**
+																								 * @type string
+																								 */
+																								kind: "viewer";
+																						  }
+																						| {
+																								/**
+																								 * @type string
+																								 */
+																								kind: "profile";
+																								/**
+																								 * @type object
+																								 */
+																								id: {
+																									/**
+																									 * @type array
+																									 */
+																									in: string[];
+																								};
+																						  };
+																				};
+																		  };
+																};
+																/**
+																 * @type object | undefined
+																 */
+																explainsRealmTag?: {
+																	/**
+																	 * @type object
+																	 */
+																	realm: {
+																		/**
+																		 * @type object | undefined
+																		 */
+																		id?: {
+																			/**
+																			 * @type array
+																			 */
+																			in: string[];
+																		};
+																		/**
+																		 * @type object | undefined
+																		 */
+																		kind?: {
+																			/**
+																			 * @type array
+																			 */
+																			in: (
+																				| "slug_namespace"
+																				| "profile"
+																				| "book"
+																				| "software"
+																				| "media"
+																				| "video"
+																				| "audio"
+																				| "release"
+																				| "entity"
+																				| "label"
+																				| "tag"
+																				| "structure"
+																				| "series"
+																				| "zone"
+																				| "zone_page"
+																				| "collection"
+																				| "post"
+																				| "poll"
+																				| "realm"
+																				| "realm_rule"
+																			)[];
+																		};
+																	};
+																	/**
+																	 * @type object | undefined
+																	 */
+																	tag?: {
+																		/**
+																		 * @type object | undefined
+																		 */
+																		id?: {
+																			/**
+																			 * @type array
+																			 */
+																			in: string[];
+																		};
+																		/**
+																		 * @type object | undefined
+																		 */
+																		kind?: {
+																			/**
+																			 * @type array
+																			 */
+																			in: (
+																				| "slug_namespace"
+																				| "profile"
+																				| "book"
+																				| "software"
+																				| "media"
+																				| "video"
+																				| "audio"
+																				| "release"
+																				| "entity"
+																				| "label"
+																				| "tag"
+																				| "structure"
+																				| "series"
+																				| "zone"
+																				| "zone_page"
+																				| "collection"
+																				| "post"
+																				| "poll"
+																				| "realm"
+																				| "realm_rule"
+																			)[];
+																		};
+																	};
+																};
+															};
+													  }
+													| {
+															/**
+															 * @type boolean
+															 */
+															absent: true;
+													  };
+												collection?:
+													| {
+															/**
+															 * @type object
+															 */
+															is: {
+																/**
+																 * @type array | undefined
+																 */
+																all?: CollectionFilter[];
+																/**
+																 * @type array | undefined
+																 */
+																any?: CollectionFilter[];
+																/**
+																 * @type object | undefined
+																 */
+																not?: CollectionFilter;
+																items?:
+																	| {
+																			/**
+																			 * @type object
+																			 */
+																			some: {
+																				/**
+																				 * @type object | undefined
+																				 */
+																				id?: {
+																					/**
+																					 * @type array
+																					 */
+																					in: string[];
+																				};
+																				/**
+																				 * @type object | undefined
+																				 */
+																				kind?: {
+																					/**
+																					 * @type array
+																					 */
+																					in: (
+																						| "slug_namespace"
+																						| "profile"
+																						| "book"
+																						| "software"
+																						| "media"
+																						| "video"
+																						| "audio"
+																						| "release"
+																						| "entity"
+																						| "label"
+																						| "tag"
+																						| "structure"
+																						| "series"
+																						| "zone"
+																						| "zone_page"
+																						| "collection"
+																						| "post"
+																						| "poll"
+																						| "realm"
+																						| "realm_rule"
+																					)[];
+																				};
+																			};
+																	  }
+																	| {
+																			/**
+																			 * @type object
+																			 */
+																			none: {
+																				/**
+																				 * @type object | undefined
+																				 */
+																				id?: {
+																					/**
+																					 * @type array
+																					 */
+																					in: string[];
+																				};
+																				/**
+																				 * @type object | undefined
+																				 */
+																				kind?: {
+																					/**
+																					 * @type array
+																					 */
+																					in: (
+																						| "slug_namespace"
+																						| "profile"
+																						| "book"
+																						| "software"
+																						| "media"
+																						| "video"
+																						| "audio"
+																						| "release"
+																						| "entity"
+																						| "label"
+																						| "tag"
+																						| "structure"
+																						| "series"
+																						| "zone"
+																						| "zone_page"
+																						| "collection"
+																						| "post"
+																						| "poll"
+																						| "realm"
+																						| "realm_rule"
+																					)[];
+																				};
+																			};
+																	  };
+															};
+													  }
+													| {
+															/**
+															 * @type boolean
+															 */
+															absent: true;
+													  };
+											};
+											/**
+											 * @type array | undefined
+											 */
+											controls?: {
+												/**
+												 * @minLength 1
+												 * @maxLength 64
+												 * @pattern ^[a-z][a-z0-9-]*$
+												 * @type string
+												 */
+												key: string;
+												field?:
+													| "category"
+													| "kind"
+													| "language"
+													| "content-rating"
+													| "ai-disclosure"
+													| "license"
+													| "tag"
+													| "credit"
+													| "credited-profile"
+													| "realm"
+													| "realm-tag-context"
+													| "zone"
+													| "subject"
+													| "target"
+													| "root"
+													| "parent"
+													| "owner"
+													| "join-policy"
+													| "multiple"
+													| "results-visibility"
+													| "closed"
+													| "created-at"
+													| "updated-at"
+													| "published-at"
+													| "closes-at"
+													| "content-license"
+													| "book-isbn13"
+													| "book-publication-date"
+													| "book-page-count"
+													| "book-word-count"
+													| "book-format"
+													| "media-kind"
+													| "media-release-date"
+													| "media-runtime-minutes"
+													| "media-episode-count"
+													| "media-season-count"
+													| "software-release-date"
+													| "software-version-label"
+													| "software-platform"
+													| "software-requirement-tier"
+													| "realm-tag-vote";
+												/**
+												 * @type boolean | undefined
+												 */
+												enabled?: boolean;
+												disclosure?: "visible" | "hidden";
+												/**
+												 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+												 * @type string | undefined
+												 */
+												labelUnitId?: string;
+												optionPolicy?:
+													| {
+															/**
+															 * @type string
+															 */
+															kind: "all";
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															kind: "include";
+															/**
+															 * @type array
+															 */
+															values: (string | number | boolean)[];
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															kind: "exclude";
+															/**
+															 * @type array
+															 */
+															values: (string | number | boolean)[];
+													  };
+												/**
+												 * @type boolean | undefined
+												 */
+												required?: boolean;
+											}[];
+										};
 								  };
 					  };
 				layout: "list" | "grid" | "carousel";
@@ -4164,14 +10776,2218 @@ export type UnitReferencedBlockDocument = {
 							/**
 							 * @type string
 							 */
-							kind: "template";
-							template: "global" | "book" | "media" | "software" | "realm" | "zone";
+							kind: "global";
 					  }
 					| {
 							/**
 							 * @type string
 							 */
 							kind: "zone";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "inline";
+							/**
+							 * @type object
+							 */
+							filterDocument: {
+								/**
+								 * @type array | undefined
+								 */
+								categories?: (
+									| "units"
+									| "users"
+									| "entities"
+									| "tags"
+									| "tag-structures"
+									| "posts"
+									| "realms"
+									| "collections"
+									| "reviews"
+									| "polls"
+								)[];
+								/**
+								 * @type object | undefined
+								 */
+								where?: {
+									/**
+									 * @type array | undefined
+									 */
+									all?: UnitPredicate[];
+									/**
+									 * @type array | undefined
+									 */
+									any?: UnitPredicate[];
+									/**
+									 * @type object | undefined
+									 */
+									not?: UnitPredicate;
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "video"
+											| "audio"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+									localizations?:
+										| {
+												/**
+												 * @type object
+												 */
+												some: {
+													/**
+													 * @type array | undefined
+													 */
+													all?: LocalizationFilter[];
+													/**
+													 * @type array | undefined
+													 */
+													any?: LocalizationFilter[];
+													/**
+													 * @type object | undefined
+													 */
+													not?: LocalizationFilter;
+													/**
+													 * @type object | undefined
+													 */
+													language?: {
+														/**
+														 * @type array
+														 */
+														in: ("zh" | "en" | "ja" | "ko" | "de" | "fr" | "es")[];
+													};
+												};
+										  }
+										| {
+												/**
+												 * @type object
+												 */
+												none: {
+													/**
+													 * @type array | undefined
+													 */
+													all?: LocalizationFilter[];
+													/**
+													 * @type array | undefined
+													 */
+													any?: LocalizationFilter[];
+													/**
+													 * @type object | undefined
+													 */
+													not?: LocalizationFilter;
+													/**
+													 * @type object | undefined
+													 */
+													language?: {
+														/**
+														 * @type array
+														 */
+														in: ("zh" | "en" | "ja" | "ko" | "de" | "fr" | "es")[];
+													};
+												};
+										  };
+									realms?:
+										| {
+												/**
+												 * @type object
+												 */
+												some: {
+													/**
+													 * @type array | undefined
+													 */
+													all?: RealmPlacementFilter[];
+													/**
+													 * @type array | undefined
+													 */
+													any?: RealmPlacementFilter[];
+													/**
+													 * @type object | undefined
+													 */
+													not?: RealmPlacementFilter;
+													/**
+													 * @type object | undefined
+													 */
+													realm?: {
+														/**
+														 * @type object | undefined
+														 */
+														id?: {
+															/**
+															 * @type array
+															 */
+															in: string[];
+														};
+														/**
+														 * @type object | undefined
+														 */
+														kind?: {
+															/**
+															 * @type array
+															 */
+															in: (
+																| "slug_namespace"
+																| "profile"
+																| "book"
+																| "software"
+																| "media"
+																| "video"
+																| "audio"
+																| "release"
+																| "entity"
+																| "label"
+																| "tag"
+																| "structure"
+																| "series"
+																| "zone"
+																| "zone_page"
+																| "collection"
+																| "post"
+																| "poll"
+																| "realm"
+																| "realm_rule"
+															)[];
+														};
+													};
+													/**
+													 * @type object | undefined
+													 */
+													status?: {
+														/**
+														 * @type array
+														 */
+														in: ("pending" | "visible" | "hidden" | "removed")[];
+													};
+													/**
+													 * @type object | undefined
+													 */
+													publicationState?: {
+														/**
+														 * @type array
+														 */
+														in: ("active" | "withdrawn")[];
+													};
+												};
+										  }
+										| {
+												/**
+												 * @type object
+												 */
+												none: {
+													/**
+													 * @type array | undefined
+													 */
+													all?: RealmPlacementFilter[];
+													/**
+													 * @type array | undefined
+													 */
+													any?: RealmPlacementFilter[];
+													/**
+													 * @type object | undefined
+													 */
+													not?: RealmPlacementFilter;
+													/**
+													 * @type object | undefined
+													 */
+													realm?: {
+														/**
+														 * @type object | undefined
+														 */
+														id?: {
+															/**
+															 * @type array
+															 */
+															in: string[];
+														};
+														/**
+														 * @type object | undefined
+														 */
+														kind?: {
+															/**
+															 * @type array
+															 */
+															in: (
+																| "slug_namespace"
+																| "profile"
+																| "book"
+																| "software"
+																| "media"
+																| "video"
+																| "audio"
+																| "release"
+																| "entity"
+																| "label"
+																| "tag"
+																| "structure"
+																| "series"
+																| "zone"
+																| "zone_page"
+																| "collection"
+																| "post"
+																| "poll"
+																| "realm"
+																| "realm_rule"
+															)[];
+														};
+													};
+													/**
+													 * @type object | undefined
+													 */
+													status?: {
+														/**
+														 * @type array
+														 */
+														in: ("pending" | "visible" | "hidden" | "removed")[];
+													};
+													/**
+													 * @type object | undefined
+													 */
+													publicationState?: {
+														/**
+														 * @type array
+														 */
+														in: ("active" | "withdrawn")[];
+													};
+												};
+										  };
+									tags?:
+										| {
+												/**
+												 * @type object
+												 */
+												some: {
+													/**
+													 * @type array | undefined
+													 */
+													all?: TagAssertionFilter[];
+													/**
+													 * @type array | undefined
+													 */
+													any?: TagAssertionFilter[];
+													/**
+													 * @type object | undefined
+													 */
+													not?: TagAssertionFilter;
+													/**
+													 * @type object | undefined
+													 */
+													tag?: {
+														/**
+														 * @type object | undefined
+														 */
+														id?: {
+															/**
+															 * @type array
+															 */
+															in: string[];
+														};
+														/**
+														 * @type object | undefined
+														 */
+														kind?: {
+															/**
+															 * @type array
+															 */
+															in: (
+																| "slug_namespace"
+																| "profile"
+																| "book"
+																| "software"
+																| "media"
+																| "video"
+																| "audio"
+																| "release"
+																| "entity"
+																| "label"
+																| "tag"
+																| "structure"
+																| "series"
+																| "zone"
+																| "zone_page"
+																| "collection"
+																| "post"
+																| "poll"
+																| "realm"
+																| "realm_rule"
+															)[];
+														};
+													};
+													authority?:
+														| {
+																/**
+																 * @type string
+																 */
+																kind: "global";
+																view:
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "effective";
+																			/**
+																			 * @type object | undefined
+																			 */
+																			consensus?: {
+																				score?:
+																					| {
+																							/**
+																							 * @type array
+																							 */
+																							in: number[];
+																					  }
+																					| {
+																							range:
+																								| {
+																										/**
+																										 * @type integer
+																										 */
+																										minimum: number;
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										maximum?: number;
+																								  }
+																								| {
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										minimum?: number;
+																										/**
+																										 * @type integer
+																										 */
+																										maximum: number;
+																								  };
+																					  };
+																				voteCount?:
+																					| {
+																							/**
+																							 * @type array
+																							 */
+																							in: number[];
+																					  }
+																					| {
+																							range:
+																								| {
+																										/**
+																										 * @type integer
+																										 */
+																										minimum: number;
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										maximum?: number;
+																								  }
+																								| {
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										minimum?: number;
+																										/**
+																										 * @type integer
+																										 */
+																										maximum: number;
+																								  };
+																					  };
+																			};
+																	  }
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "direct";
+																	  };
+														  }
+														| {
+																/**
+																 * @type string
+																 */
+																kind: "realm";
+																/**
+																 * @type object
+																 */
+																realm: {
+																	/**
+																	 * @type object | undefined
+																	 */
+																	id?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: string[];
+																	};
+																	/**
+																	 * @type object | undefined
+																	 */
+																	kind?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: (
+																			| "slug_namespace"
+																			| "profile"
+																			| "book"
+																			| "software"
+																			| "media"
+																			| "video"
+																			| "audio"
+																			| "release"
+																			| "entity"
+																			| "label"
+																			| "tag"
+																			| "structure"
+																			| "series"
+																			| "zone"
+																			| "zone_page"
+																			| "collection"
+																			| "post"
+																			| "poll"
+																			| "realm"
+																			| "realm_rule"
+																		)[];
+																	};
+																};
+																view:
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "policy";
+																	  }
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "community";
+																			/**
+																			 * @type object | undefined
+																			 */
+																			consensus?: {
+																				score?:
+																					| {
+																							/**
+																							 * @type array
+																							 */
+																							in: number[];
+																					  }
+																					| {
+																							range:
+																								| {
+																										/**
+																										 * @type integer
+																										 */
+																										minimum: number;
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										maximum?: number;
+																								  }
+																								| {
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										minimum?: number;
+																										/**
+																										 * @type integer
+																										 */
+																										maximum: number;
+																								  };
+																					  };
+																				voteCount?:
+																					| {
+																							/**
+																							 * @type array
+																							 */
+																							in: number[];
+																					  }
+																					| {
+																							range:
+																								| {
+																										/**
+																										 * @type integer
+																										 */
+																										minimum: number;
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										maximum?: number;
+																								  }
+																								| {
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										minimum?: number;
+																										/**
+																										 * @type integer
+																										 */
+																										maximum: number;
+																								  };
+																					  };
+																			};
+																	  };
+														  }
+														| {
+																/**
+																 * @type string
+																 */
+																kind: "profile";
+																/**
+																 * @type object
+																 */
+																profile: {
+																	/**
+																	 * @type string
+																	 */
+																	kind: "viewer";
+																};
+														  };
+												};
+										  }
+										| {
+												/**
+												 * @type object
+												 */
+												none: {
+													/**
+													 * @type array | undefined
+													 */
+													all?: TagAssertionFilter[];
+													/**
+													 * @type array | undefined
+													 */
+													any?: TagAssertionFilter[];
+													/**
+													 * @type object | undefined
+													 */
+													not?: TagAssertionFilter;
+													/**
+													 * @type object | undefined
+													 */
+													tag?: {
+														/**
+														 * @type object | undefined
+														 */
+														id?: {
+															/**
+															 * @type array
+															 */
+															in: string[];
+														};
+														/**
+														 * @type object | undefined
+														 */
+														kind?: {
+															/**
+															 * @type array
+															 */
+															in: (
+																| "slug_namespace"
+																| "profile"
+																| "book"
+																| "software"
+																| "media"
+																| "video"
+																| "audio"
+																| "release"
+																| "entity"
+																| "label"
+																| "tag"
+																| "structure"
+																| "series"
+																| "zone"
+																| "zone_page"
+																| "collection"
+																| "post"
+																| "poll"
+																| "realm"
+																| "realm_rule"
+															)[];
+														};
+													};
+													authority?:
+														| {
+																/**
+																 * @type string
+																 */
+																kind: "global";
+																view:
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "effective";
+																			/**
+																			 * @type object | undefined
+																			 */
+																			consensus?: {
+																				score?:
+																					| {
+																							/**
+																							 * @type array
+																							 */
+																							in: number[];
+																					  }
+																					| {
+																							range:
+																								| {
+																										/**
+																										 * @type integer
+																										 */
+																										minimum: number;
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										maximum?: number;
+																								  }
+																								| {
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										minimum?: number;
+																										/**
+																										 * @type integer
+																										 */
+																										maximum: number;
+																								  };
+																					  };
+																				voteCount?:
+																					| {
+																							/**
+																							 * @type array
+																							 */
+																							in: number[];
+																					  }
+																					| {
+																							range:
+																								| {
+																										/**
+																										 * @type integer
+																										 */
+																										minimum: number;
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										maximum?: number;
+																								  }
+																								| {
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										minimum?: number;
+																										/**
+																										 * @type integer
+																										 */
+																										maximum: number;
+																								  };
+																					  };
+																			};
+																	  }
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "direct";
+																	  };
+														  }
+														| {
+																/**
+																 * @type string
+																 */
+																kind: "realm";
+																/**
+																 * @type object
+																 */
+																realm: {
+																	/**
+																	 * @type object | undefined
+																	 */
+																	id?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: string[];
+																	};
+																	/**
+																	 * @type object | undefined
+																	 */
+																	kind?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: (
+																			| "slug_namespace"
+																			| "profile"
+																			| "book"
+																			| "software"
+																			| "media"
+																			| "video"
+																			| "audio"
+																			| "release"
+																			| "entity"
+																			| "label"
+																			| "tag"
+																			| "structure"
+																			| "series"
+																			| "zone"
+																			| "zone_page"
+																			| "collection"
+																			| "post"
+																			| "poll"
+																			| "realm"
+																			| "realm_rule"
+																		)[];
+																	};
+																};
+																view:
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "policy";
+																	  }
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			kind: "community";
+																			/**
+																			 * @type object | undefined
+																			 */
+																			consensus?: {
+																				score?:
+																					| {
+																							/**
+																							 * @type array
+																							 */
+																							in: number[];
+																					  }
+																					| {
+																							range:
+																								| {
+																										/**
+																										 * @type integer
+																										 */
+																										minimum: number;
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										maximum?: number;
+																								  }
+																								| {
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										minimum?: number;
+																										/**
+																										 * @type integer
+																										 */
+																										maximum: number;
+																								  };
+																					  };
+																				voteCount?:
+																					| {
+																							/**
+																							 * @type array
+																							 */
+																							in: number[];
+																					  }
+																					| {
+																							range:
+																								| {
+																										/**
+																										 * @type integer
+																										 */
+																										minimum: number;
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										maximum?: number;
+																								  }
+																								| {
+																										/**
+																										 * @type integer | undefined
+																										 */
+																										minimum?: number;
+																										/**
+																										 * @type integer
+																										 */
+																										maximum: number;
+																								  };
+																					  };
+																			};
+																	  };
+														  }
+														| {
+																/**
+																 * @type string
+																 */
+																kind: "profile";
+																/**
+																 * @type object
+																 */
+																profile: {
+																	/**
+																	 * @type string
+																	 */
+																	kind: "viewer";
+																};
+														  };
+												};
+										  };
+									creditAttributions?:
+										| {
+												/**
+												 * @type object
+												 */
+												some: {
+													/**
+													 * @type object | undefined
+													 */
+													id?: {
+														/**
+														 * @type array
+														 */
+														in: string[];
+													};
+													/**
+													 * @type object | undefined
+													 */
+													kind?: {
+														/**
+														 * @type array
+														 */
+														in: (
+															| "slug_namespace"
+															| "profile"
+															| "book"
+															| "software"
+															| "media"
+															| "video"
+															| "audio"
+															| "release"
+															| "entity"
+															| "label"
+															| "tag"
+															| "structure"
+															| "series"
+															| "zone"
+															| "zone_page"
+															| "collection"
+															| "post"
+															| "poll"
+															| "realm"
+															| "realm_rule"
+														)[];
+													};
+												};
+										  }
+										| {
+												/**
+												 * @type object
+												 */
+												none: {
+													/**
+													 * @type object | undefined
+													 */
+													id?: {
+														/**
+														 * @type array
+														 */
+														in: string[];
+													};
+													/**
+													 * @type object | undefined
+													 */
+													kind?: {
+														/**
+														 * @type array
+														 */
+														in: (
+															| "slug_namespace"
+															| "profile"
+															| "book"
+															| "software"
+															| "media"
+															| "video"
+															| "audio"
+															| "release"
+															| "entity"
+															| "label"
+															| "tag"
+															| "structure"
+															| "series"
+															| "zone"
+															| "zone_page"
+															| "collection"
+															| "post"
+															| "poll"
+															| "realm"
+															| "realm_rule"
+														)[];
+													};
+												};
+										  };
+									subjectAssociations?:
+										| {
+												/**
+												 * @type object
+												 */
+												some: {
+													/**
+													 * @type object | undefined
+													 */
+													id?: {
+														/**
+														 * @type array
+														 */
+														in: string[];
+													};
+													/**
+													 * @type object | undefined
+													 */
+													kind?: {
+														/**
+														 * @type array
+														 */
+														in: (
+															| "slug_namespace"
+															| "profile"
+															| "book"
+															| "software"
+															| "media"
+															| "video"
+															| "audio"
+															| "release"
+															| "entity"
+															| "label"
+															| "tag"
+															| "structure"
+															| "series"
+															| "zone"
+															| "zone_page"
+															| "collection"
+															| "post"
+															| "poll"
+															| "realm"
+															| "realm_rule"
+														)[];
+													};
+												};
+										  }
+										| {
+												/**
+												 * @type object
+												 */
+												none: {
+													/**
+													 * @type object | undefined
+													 */
+													id?: {
+														/**
+														 * @type array
+														 */
+														in: string[];
+													};
+													/**
+													 * @type object | undefined
+													 */
+													kind?: {
+														/**
+														 * @type array
+														 */
+														in: (
+															| "slug_namespace"
+															| "profile"
+															| "book"
+															| "software"
+															| "media"
+															| "video"
+															| "audio"
+															| "release"
+															| "entity"
+															| "label"
+															| "tag"
+															| "structure"
+															| "series"
+															| "zone"
+															| "zone_page"
+															| "collection"
+															| "post"
+															| "poll"
+															| "realm"
+															| "realm_rule"
+														)[];
+													};
+												};
+										  };
+									publishers?:
+										| {
+												some:
+													| {
+															/**
+															 * @type string
+															 */
+															kind: "viewer";
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															kind: "profile";
+															/**
+															 * @type object
+															 */
+															id: {
+																/**
+																 * @type array
+																 */
+																in: string[];
+															};
+													  };
+										  }
+										| {
+												none:
+													| {
+															/**
+															 * @type string
+															 */
+															kind: "viewer";
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															kind: "profile";
+															/**
+															 * @type object
+															 */
+															id: {
+																/**
+																 * @type array
+																 */
+																in: string[];
+															};
+													  };
+										  };
+									/**
+									 * @type object | undefined
+									 */
+									scores?: {
+										received?:
+											| {
+													/**
+													 * @type object
+													 */
+													some: {
+														/**
+														 * @type array | undefined
+														 */
+														all?: ScoreFilter[];
+														/**
+														 * @type array | undefined
+														 */
+														any?: ScoreFilter[];
+														/**
+														 * @type object | undefined
+														 */
+														not?: ScoreFilter;
+														value?:
+															| {
+																	/**
+																	 * @type array
+																	 */
+																	in: number[];
+															  }
+															| {
+																	range:
+																		| {
+																				/**
+																				 * @minLength 1
+																				 * @maxLength 10
+																				 * @type integer
+																				 */
+																				minimum: number;
+																				/**
+																				 * @minLength 1
+																				 * @maxLength 10
+																				 * @type integer | undefined
+																				 */
+																				maximum?: number;
+																		  }
+																		| {
+																				/**
+																				 * @minLength 1
+																				 * @maxLength 10
+																				 * @type integer | undefined
+																				 */
+																				minimum?: number;
+																				/**
+																				 * @minLength 1
+																				 * @maxLength 10
+																				 * @type integer
+																				 */
+																				maximum: number;
+																		  };
+															  };
+														/**
+														 * @type object | undefined
+														 */
+														realm?: {
+															/**
+															 * @type object | undefined
+															 */
+															id?: {
+																/**
+																 * @type array
+																 */
+																in: string[];
+															};
+															/**
+															 * @type object | undefined
+															 */
+															kind?: {
+																/**
+																 * @type array
+																 */
+																in: (
+																	| "slug_namespace"
+																	| "profile"
+																	| "book"
+																	| "software"
+																	| "media"
+																	| "video"
+																	| "audio"
+																	| "release"
+																	| "entity"
+																	| "label"
+																	| "tag"
+																	| "structure"
+																	| "series"
+																	| "zone"
+																	| "zone_page"
+																	| "collection"
+																	| "post"
+																	| "poll"
+																	| "realm"
+																	| "realm_rule"
+																)[];
+															};
+														};
+														/**
+														 * @type object | undefined
+														 */
+														target?: {
+															/**
+															 * @type object | undefined
+															 */
+															id?: {
+																/**
+																 * @type array
+																 */
+																in: string[];
+															};
+															/**
+															 * @type object | undefined
+															 */
+															kind?: {
+																/**
+																 * @type array
+																 */
+																in: (
+																	| "slug_namespace"
+																	| "profile"
+																	| "book"
+																	| "software"
+																	| "media"
+																	| "video"
+																	| "audio"
+																	| "release"
+																	| "entity"
+																	| "label"
+																	| "tag"
+																	| "structure"
+																	| "series"
+																	| "zone"
+																	| "zone_page"
+																	| "collection"
+																	| "post"
+																	| "poll"
+																	| "realm"
+																	| "realm_rule"
+																)[];
+															};
+														};
+														author?:
+															| {
+																	/**
+																	 * @type string
+																	 */
+																	kind: "viewer";
+															  }
+															| {
+																	/**
+																	 * @type string
+																	 */
+																	kind: "profile";
+																	/**
+																	 * @type object
+																	 */
+																	id: {
+																		/**
+																		 * @type array
+																		 */
+																		in: string[];
+																	};
+															  };
+													};
+											  }
+											| {
+													/**
+													 * @type object
+													 */
+													none: {
+														/**
+														 * @type array | undefined
+														 */
+														all?: ScoreFilter[];
+														/**
+														 * @type array | undefined
+														 */
+														any?: ScoreFilter[];
+														/**
+														 * @type object | undefined
+														 */
+														not?: ScoreFilter;
+														value?:
+															| {
+																	/**
+																	 * @type array
+																	 */
+																	in: number[];
+															  }
+															| {
+																	range:
+																		| {
+																				/**
+																				 * @minLength 1
+																				 * @maxLength 10
+																				 * @type integer
+																				 */
+																				minimum: number;
+																				/**
+																				 * @minLength 1
+																				 * @maxLength 10
+																				 * @type integer | undefined
+																				 */
+																				maximum?: number;
+																		  }
+																		| {
+																				/**
+																				 * @minLength 1
+																				 * @maxLength 10
+																				 * @type integer | undefined
+																				 */
+																				minimum?: number;
+																				/**
+																				 * @minLength 1
+																				 * @maxLength 10
+																				 * @type integer
+																				 */
+																				maximum: number;
+																		  };
+															  };
+														/**
+														 * @type object | undefined
+														 */
+														realm?: {
+															/**
+															 * @type object | undefined
+															 */
+															id?: {
+																/**
+																 * @type array
+																 */
+																in: string[];
+															};
+															/**
+															 * @type object | undefined
+															 */
+															kind?: {
+																/**
+																 * @type array
+																 */
+																in: (
+																	| "slug_namespace"
+																	| "profile"
+																	| "book"
+																	| "software"
+																	| "media"
+																	| "video"
+																	| "audio"
+																	| "release"
+																	| "entity"
+																	| "label"
+																	| "tag"
+																	| "structure"
+																	| "series"
+																	| "zone"
+																	| "zone_page"
+																	| "collection"
+																	| "post"
+																	| "poll"
+																	| "realm"
+																	| "realm_rule"
+																)[];
+															};
+														};
+														/**
+														 * @type object | undefined
+														 */
+														target?: {
+															/**
+															 * @type object | undefined
+															 */
+															id?: {
+																/**
+																 * @type array
+																 */
+																in: string[];
+															};
+															/**
+															 * @type object | undefined
+															 */
+															kind?: {
+																/**
+																 * @type array
+																 */
+																in: (
+																	| "slug_namespace"
+																	| "profile"
+																	| "book"
+																	| "software"
+																	| "media"
+																	| "video"
+																	| "audio"
+																	| "release"
+																	| "entity"
+																	| "label"
+																	| "tag"
+																	| "structure"
+																	| "series"
+																	| "zone"
+																	| "zone_page"
+																	| "collection"
+																	| "post"
+																	| "poll"
+																	| "realm"
+																	| "realm_rule"
+																)[];
+															};
+														};
+														author?:
+															| {
+																	/**
+																	 * @type string
+																	 */
+																	kind: "viewer";
+															  }
+															| {
+																	/**
+																	 * @type string
+																	 */
+																	kind: "profile";
+																	/**
+																	 * @type object
+																	 */
+																	id: {
+																		/**
+																		 * @type array
+																		 */
+																		in: string[];
+																	};
+															  };
+													};
+											  };
+									};
+									post?:
+										| {
+												/**
+												 * @type object
+												 */
+												is: {
+													/**
+													 * @type array | undefined
+													 */
+													all?: PostFilter[];
+													/**
+													 * @type array | undefined
+													 */
+													any?: PostFilter[];
+													/**
+													 * @type object | undefined
+													 */
+													not?: PostFilter;
+													/**
+													 * @type object | undefined
+													 */
+													kind?: {
+														/**
+														 * @type array
+														 */
+														in: (
+															| "post"
+															| "reply"
+															| "excerpt"
+															| "review"
+															| "chapter"
+															| "page"
+															| "wiki"
+															| "picture"
+															| "governance_note"
+														)[];
+													};
+													subject?:
+														| {
+																/**
+																 * @type object
+																 */
+																is: {
+																	/**
+																	 * @type object | undefined
+																	 */
+																	id?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: string[];
+																	};
+																	/**
+																	 * @type object | undefined
+																	 */
+																	kind?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: (
+																			| "slug_namespace"
+																			| "profile"
+																			| "book"
+																			| "software"
+																			| "media"
+																			| "video"
+																			| "audio"
+																			| "release"
+																			| "entity"
+																			| "label"
+																			| "tag"
+																			| "structure"
+																			| "series"
+																			| "zone"
+																			| "zone_page"
+																			| "collection"
+																			| "post"
+																			| "poll"
+																			| "realm"
+																			| "realm_rule"
+																		)[];
+																	};
+																};
+														  }
+														| {
+																/**
+																 * @type boolean
+																 */
+																absent: true;
+														  };
+													/**
+													 * @type object | undefined
+													 */
+													scores?: {
+														displayed?:
+															| {
+																	/**
+																	 * @type object
+																	 */
+																	some: {
+																		/**
+																		 * @type array | undefined
+																		 */
+																		all?: ScoreFilter[];
+																		/**
+																		 * @type array | undefined
+																		 */
+																		any?: ScoreFilter[];
+																		/**
+																		 * @type object | undefined
+																		 */
+																		not?: ScoreFilter;
+																		value?:
+																			| {
+																					/**
+																					 * @type array
+																					 */
+																					in: number[];
+																			  }
+																			| {
+																					range:
+																						| {
+																								/**
+																								 * @minLength 1
+																								 * @maxLength 10
+																								 * @type integer
+																								 */
+																								minimum: number;
+																								/**
+																								 * @minLength 1
+																								 * @maxLength 10
+																								 * @type integer | undefined
+																								 */
+																								maximum?: number;
+																						  }
+																						| {
+																								/**
+																								 * @minLength 1
+																								 * @maxLength 10
+																								 * @type integer | undefined
+																								 */
+																								minimum?: number;
+																								/**
+																								 * @minLength 1
+																								 * @maxLength 10
+																								 * @type integer
+																								 */
+																								maximum: number;
+																						  };
+																			  };
+																		/**
+																		 * @type object | undefined
+																		 */
+																		realm?: {
+																			/**
+																			 * @type object | undefined
+																			 */
+																			id?: {
+																				/**
+																				 * @type array
+																				 */
+																				in: string[];
+																			};
+																			/**
+																			 * @type object | undefined
+																			 */
+																			kind?: {
+																				/**
+																				 * @type array
+																				 */
+																				in: (
+																					| "slug_namespace"
+																					| "profile"
+																					| "book"
+																					| "software"
+																					| "media"
+																					| "video"
+																					| "audio"
+																					| "release"
+																					| "entity"
+																					| "label"
+																					| "tag"
+																					| "structure"
+																					| "series"
+																					| "zone"
+																					| "zone_page"
+																					| "collection"
+																					| "post"
+																					| "poll"
+																					| "realm"
+																					| "realm_rule"
+																				)[];
+																			};
+																		};
+																		/**
+																		 * @type object | undefined
+																		 */
+																		target?: {
+																			/**
+																			 * @type object | undefined
+																			 */
+																			id?: {
+																				/**
+																				 * @type array
+																				 */
+																				in: string[];
+																			};
+																			/**
+																			 * @type object | undefined
+																			 */
+																			kind?: {
+																				/**
+																				 * @type array
+																				 */
+																				in: (
+																					| "slug_namespace"
+																					| "profile"
+																					| "book"
+																					| "software"
+																					| "media"
+																					| "video"
+																					| "audio"
+																					| "release"
+																					| "entity"
+																					| "label"
+																					| "tag"
+																					| "structure"
+																					| "series"
+																					| "zone"
+																					| "zone_page"
+																					| "collection"
+																					| "post"
+																					| "poll"
+																					| "realm"
+																					| "realm_rule"
+																				)[];
+																			};
+																		};
+																		author?:
+																			| {
+																					/**
+																					 * @type string
+																					 */
+																					kind: "viewer";
+																			  }
+																			| {
+																					/**
+																					 * @type string
+																					 */
+																					kind: "profile";
+																					/**
+																					 * @type object
+																					 */
+																					id: {
+																						/**
+																						 * @type array
+																						 */
+																						in: string[];
+																					};
+																			  };
+																	};
+															  }
+															| {
+																	/**
+																	 * @type object
+																	 */
+																	none: {
+																		/**
+																		 * @type array | undefined
+																		 */
+																		all?: ScoreFilter[];
+																		/**
+																		 * @type array | undefined
+																		 */
+																		any?: ScoreFilter[];
+																		/**
+																		 * @type object | undefined
+																		 */
+																		not?: ScoreFilter;
+																		value?:
+																			| {
+																					/**
+																					 * @type array
+																					 */
+																					in: number[];
+																			  }
+																			| {
+																					range:
+																						| {
+																								/**
+																								 * @minLength 1
+																								 * @maxLength 10
+																								 * @type integer
+																								 */
+																								minimum: number;
+																								/**
+																								 * @minLength 1
+																								 * @maxLength 10
+																								 * @type integer | undefined
+																								 */
+																								maximum?: number;
+																						  }
+																						| {
+																								/**
+																								 * @minLength 1
+																								 * @maxLength 10
+																								 * @type integer | undefined
+																								 */
+																								minimum?: number;
+																								/**
+																								 * @minLength 1
+																								 * @maxLength 10
+																								 * @type integer
+																								 */
+																								maximum: number;
+																						  };
+																			  };
+																		/**
+																		 * @type object | undefined
+																		 */
+																		realm?: {
+																			/**
+																			 * @type object | undefined
+																			 */
+																			id?: {
+																				/**
+																				 * @type array
+																				 */
+																				in: string[];
+																			};
+																			/**
+																			 * @type object | undefined
+																			 */
+																			kind?: {
+																				/**
+																				 * @type array
+																				 */
+																				in: (
+																					| "slug_namespace"
+																					| "profile"
+																					| "book"
+																					| "software"
+																					| "media"
+																					| "video"
+																					| "audio"
+																					| "release"
+																					| "entity"
+																					| "label"
+																					| "tag"
+																					| "structure"
+																					| "series"
+																					| "zone"
+																					| "zone_page"
+																					| "collection"
+																					| "post"
+																					| "poll"
+																					| "realm"
+																					| "realm_rule"
+																				)[];
+																			};
+																		};
+																		/**
+																		 * @type object | undefined
+																		 */
+																		target?: {
+																			/**
+																			 * @type object | undefined
+																			 */
+																			id?: {
+																				/**
+																				 * @type array
+																				 */
+																				in: string[];
+																			};
+																			/**
+																			 * @type object | undefined
+																			 */
+																			kind?: {
+																				/**
+																				 * @type array
+																				 */
+																				in: (
+																					| "slug_namespace"
+																					| "profile"
+																					| "book"
+																					| "software"
+																					| "media"
+																					| "video"
+																					| "audio"
+																					| "release"
+																					| "entity"
+																					| "label"
+																					| "tag"
+																					| "structure"
+																					| "series"
+																					| "zone"
+																					| "zone_page"
+																					| "collection"
+																					| "post"
+																					| "poll"
+																					| "realm"
+																					| "realm_rule"
+																				)[];
+																			};
+																		};
+																		author?:
+																			| {
+																					/**
+																					 * @type string
+																					 */
+																					kind: "viewer";
+																			  }
+																			| {
+																					/**
+																					 * @type string
+																					 */
+																					kind: "profile";
+																					/**
+																					 * @type object
+																					 */
+																					id: {
+																						/**
+																						 * @type array
+																						 */
+																						in: string[];
+																					};
+																			  };
+																	};
+															  };
+													};
+													/**
+													 * @type object | undefined
+													 */
+													explainsRealmTag?: {
+														/**
+														 * @type object
+														 */
+														realm: {
+															/**
+															 * @type object | undefined
+															 */
+															id?: {
+																/**
+																 * @type array
+																 */
+																in: string[];
+															};
+															/**
+															 * @type object | undefined
+															 */
+															kind?: {
+																/**
+																 * @type array
+																 */
+																in: (
+																	| "slug_namespace"
+																	| "profile"
+																	| "book"
+																	| "software"
+																	| "media"
+																	| "video"
+																	| "audio"
+																	| "release"
+																	| "entity"
+																	| "label"
+																	| "tag"
+																	| "structure"
+																	| "series"
+																	| "zone"
+																	| "zone_page"
+																	| "collection"
+																	| "post"
+																	| "poll"
+																	| "realm"
+																	| "realm_rule"
+																)[];
+															};
+														};
+														/**
+														 * @type object | undefined
+														 */
+														tag?: {
+															/**
+															 * @type object | undefined
+															 */
+															id?: {
+																/**
+																 * @type array
+																 */
+																in: string[];
+															};
+															/**
+															 * @type object | undefined
+															 */
+															kind?: {
+																/**
+																 * @type array
+																 */
+																in: (
+																	| "slug_namespace"
+																	| "profile"
+																	| "book"
+																	| "software"
+																	| "media"
+																	| "video"
+																	| "audio"
+																	| "release"
+																	| "entity"
+																	| "label"
+																	| "tag"
+																	| "structure"
+																	| "series"
+																	| "zone"
+																	| "zone_page"
+																	| "collection"
+																	| "post"
+																	| "poll"
+																	| "realm"
+																	| "realm_rule"
+																)[];
+															};
+														};
+													};
+												};
+										  }
+										| {
+												/**
+												 * @type boolean
+												 */
+												absent: true;
+										  };
+									collection?:
+										| {
+												/**
+												 * @type object
+												 */
+												is: {
+													/**
+													 * @type array | undefined
+													 */
+													all?: CollectionFilter[];
+													/**
+													 * @type array | undefined
+													 */
+													any?: CollectionFilter[];
+													/**
+													 * @type object | undefined
+													 */
+													not?: CollectionFilter;
+													items?:
+														| {
+																/**
+																 * @type object
+																 */
+																some: {
+																	/**
+																	 * @type object | undefined
+																	 */
+																	id?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: string[];
+																	};
+																	/**
+																	 * @type object | undefined
+																	 */
+																	kind?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: (
+																			| "slug_namespace"
+																			| "profile"
+																			| "book"
+																			| "software"
+																			| "media"
+																			| "video"
+																			| "audio"
+																			| "release"
+																			| "entity"
+																			| "label"
+																			| "tag"
+																			| "structure"
+																			| "series"
+																			| "zone"
+																			| "zone_page"
+																			| "collection"
+																			| "post"
+																			| "poll"
+																			| "realm"
+																			| "realm_rule"
+																		)[];
+																	};
+																};
+														  }
+														| {
+																/**
+																 * @type object
+																 */
+																none: {
+																	/**
+																	 * @type object | undefined
+																	 */
+																	id?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: string[];
+																	};
+																	/**
+																	 * @type object | undefined
+																	 */
+																	kind?: {
+																		/**
+																		 * @type array
+																		 */
+																		in: (
+																			| "slug_namespace"
+																			| "profile"
+																			| "book"
+																			| "software"
+																			| "media"
+																			| "video"
+																			| "audio"
+																			| "release"
+																			| "entity"
+																			| "label"
+																			| "tag"
+																			| "structure"
+																			| "series"
+																			| "zone"
+																			| "zone_page"
+																			| "collection"
+																			| "post"
+																			| "poll"
+																			| "realm"
+																			| "realm_rule"
+																		)[];
+																	};
+																};
+														  };
+												};
+										  }
+										| {
+												/**
+												 * @type boolean
+												 */
+												absent: true;
+										  };
+								};
+								/**
+								 * @type array | undefined
+								 */
+								controls?: {
+									/**
+									 * @minLength 1
+									 * @maxLength 64
+									 * @pattern ^[a-z][a-z0-9-]*$
+									 * @type string
+									 */
+									key: string;
+									field?:
+										| "category"
+										| "kind"
+										| "language"
+										| "content-rating"
+										| "ai-disclosure"
+										| "license"
+										| "tag"
+										| "credit"
+										| "credited-profile"
+										| "realm"
+										| "realm-tag-context"
+										| "zone"
+										| "subject"
+										| "target"
+										| "root"
+										| "parent"
+										| "owner"
+										| "join-policy"
+										| "multiple"
+										| "results-visibility"
+										| "closed"
+										| "created-at"
+										| "updated-at"
+										| "published-at"
+										| "closes-at"
+										| "content-license"
+										| "book-isbn13"
+										| "book-publication-date"
+										| "book-page-count"
+										| "book-word-count"
+										| "book-format"
+										| "media-kind"
+										| "media-release-date"
+										| "media-runtime-minutes"
+										| "media-episode-count"
+										| "media-season-count"
+										| "software-release-date"
+										| "software-version-label"
+										| "software-platform"
+										| "software-requirement-tier"
+										| "realm-tag-vote";
+									/**
+									 * @type boolean | undefined
+									 */
+									enabled?: boolean;
+									disclosure?: "visible" | "hidden";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string | undefined
+									 */
+									labelUnitId?: string;
+									optionPolicy?:
+										| {
+												/**
+												 * @type string
+												 */
+												kind: "all";
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												kind: "include";
+												/**
+												 * @type array
+												 */
+												values: (string | number | boolean)[];
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												kind: "exclude";
+												/**
+												 * @type array
+												 */
+												values: (string | number | boolean)[];
+										  };
+									/**
+									 * @type boolean | undefined
+									 */
+									required?: boolean;
+								}[];
+							};
 					  };
 				/**
 				 * @type object
@@ -4368,7 +13184,7 @@ export type UnitReferencedBlockDocument = {
 	)[];
 };
 
-export const ZoneBoundaryDocumentCategoriesEnum = {
+export const FilterDocumentCategoriesEnum = {
 	units: "units",
 	users: "users",
 	entities: "entities",
@@ -4381,30 +13197,136 @@ export const ZoneBoundaryDocumentCategoriesEnum = {
 	polls: "polls",
 } as const;
 
-export type ZoneBoundaryDocumentCategoriesEnum =
-	(typeof ZoneBoundaryDocumentCategoriesEnum)[keyof typeof ZoneBoundaryDocumentCategoriesEnum];
+export type FilterDocumentCategoriesEnum =
+	(typeof FilterDocumentCategoriesEnum)[keyof typeof FilterDocumentCategoriesEnum];
+
+export const FilterDocumentControlsFieldEnum = {
+	category: "category",
+	kind: "kind",
+	language: "language",
+	"content-rating": "content-rating",
+	"ai-disclosure": "ai-disclosure",
+	license: "license",
+	tag: "tag",
+	credit: "credit",
+	"credited-profile": "credited-profile",
+	realm: "realm",
+	"realm-tag-context": "realm-tag-context",
+	zone: "zone",
+	subject: "subject",
+	target: "target",
+	root: "root",
+	parent: "parent",
+	owner: "owner",
+	"join-policy": "join-policy",
+	multiple: "multiple",
+	"results-visibility": "results-visibility",
+	closed: "closed",
+	"created-at": "created-at",
+	"updated-at": "updated-at",
+	"published-at": "published-at",
+	"closes-at": "closes-at",
+	"content-license": "content-license",
+	"book-isbn13": "book-isbn13",
+	"book-publication-date": "book-publication-date",
+	"book-page-count": "book-page-count",
+	"book-word-count": "book-word-count",
+	"book-format": "book-format",
+	"media-kind": "media-kind",
+	"media-release-date": "media-release-date",
+	"media-runtime-minutes": "media-runtime-minutes",
+	"media-episode-count": "media-episode-count",
+	"media-season-count": "media-season-count",
+	"software-release-date": "software-release-date",
+	"software-version-label": "software-version-label",
+	"software-platform": "software-platform",
+	"software-requirement-tier": "software-requirement-tier",
+	"realm-tag-vote": "realm-tag-vote",
+} as const;
+
+export type FilterDocumentControlsFieldEnum =
+	(typeof FilterDocumentControlsFieldEnum)[keyof typeof FilterDocumentControlsFieldEnum];
+
+export const FilterDocumentControlsDisclosureEnum = {
+	visible: "visible",
+	hidden: "hidden",
+} as const;
+
+export type FilterDocumentControlsDisclosureEnum =
+	(typeof FilterDocumentControlsDisclosureEnum)[keyof typeof FilterDocumentControlsDisclosureEnum];
 
 /**
  * @type object
  */
-export type ZoneBoundaryDocument = {
+export type FilterDocument = {
 	/**
-	 * @type string
+	 * @type array | undefined
 	 */
-	_type: "zone-boundary";
-	/**
-	 * @pattern ^[0-9a-f]{12}$
-	 * @type string
-	 */
-	_key: string;
-	/**
-	 * @type array
-	 */
-	categories: ZoneBoundaryDocumentCategoriesEnum[];
+	categories?: FilterDocumentCategoriesEnum[];
 	/**
 	 * @type object | undefined
 	 */
-	filter?: UnitPredicate;
+	where?: UnitPredicate;
+	/**
+	 * @type array | undefined
+	 */
+	controls?: {
+		/**
+		 * @minLength 1
+		 * @maxLength 64
+		 * @pattern ^[a-z][a-z0-9-]*$
+		 * @type string
+		 */
+		key: string;
+		/**
+		 * @type string | undefined
+		 */
+		field?: FilterDocumentControlsFieldEnum;
+		/**
+		 * @type boolean | undefined
+		 */
+		enabled?: boolean;
+		/**
+		 * @type string | undefined
+		 */
+		disclosure?: FilterDocumentControlsDisclosureEnum;
+		/**
+		 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+		 * @type string | undefined
+		 */
+		labelUnitId?: string;
+		optionPolicy?:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "all";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "include";
+					/**
+					 * @type array
+					 */
+					values: (string | number | boolean)[];
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "exclude";
+					/**
+					 * @type array
+					 */
+					values: (string | number | boolean)[];
+			  };
+		/**
+		 * @type boolean | undefined
+		 */
+		required?: boolean;
+	}[];
 };
 
 export const ZoneThemeDocumentColorSchemeEnum = {
@@ -4452,20 +13374,7 @@ export type ZoneThemeDocument = {
 	density: ZoneThemeDocumentDensityEnum;
 };
 
-export const SearchDocumentV1TemplateIdEnum = {
-	global: "global",
-	book: "book",
-	media: "media",
-	software: "software",
-	progress: "progress",
-	realm: "realm",
-	zone: "zone",
-} as const;
-
-export type SearchDocumentV1TemplateIdEnum =
-	(typeof SearchDocumentV1TemplateIdEnum)[keyof typeof SearchDocumentV1TemplateIdEnum];
-
-export const SearchDocumentV1CategoriesEnum = {
+export const SearchFeatureDefinitionCategoriesEnum = {
 	units: "units",
 	users: "users",
 	entities: "entities",
@@ -4478,10 +13387,154 @@ export const SearchDocumentV1CategoriesEnum = {
 	polls: "polls",
 } as const;
 
-export type SearchDocumentV1CategoriesEnum =
-	(typeof SearchDocumentV1CategoriesEnum)[keyof typeof SearchDocumentV1CategoriesEnum];
+export type SearchFeatureDefinitionCategoriesEnum =
+	(typeof SearchFeatureDefinitionCategoriesEnum)[keyof typeof SearchFeatureDefinitionCategoriesEnum];
 
-export const SearchDocumentV1ControlsFieldEnum = {
+export const SearchFeatureDefinitionSortSearchDefaultsEmptyQueryEnum = {
+	best: "best",
+	relevance: "relevance",
+	"createdAt:asc": "createdAt:asc",
+	"createdAt:desc": "createdAt:desc",
+	"updatedAt:asc": "updatedAt:asc",
+	"updatedAt:desc": "updatedAt:desc",
+	"publishedAt:asc": "publishedAt:asc",
+	"publishedAt:desc": "publishedAt:desc",
+	"followerCount:asc": "followerCount:asc",
+	"followerCount:desc": "followerCount:desc",
+	"replyCount:asc": "replyCount:asc",
+	"replyCount:desc": "replyCount:desc",
+	"closesAt:asc": "closesAt:asc",
+	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
+} as const;
+
+export type SearchFeatureDefinitionSortSearchDefaultsEmptyQueryEnum =
+	(typeof SearchFeatureDefinitionSortSearchDefaultsEmptyQueryEnum)[keyof typeof SearchFeatureDefinitionSortSearchDefaultsEmptyQueryEnum];
+
+export const SearchFeatureDefinitionSortSearchDefaultsTextQueryEnum = {
+	best: "best",
+	relevance: "relevance",
+	"createdAt:asc": "createdAt:asc",
+	"createdAt:desc": "createdAt:desc",
+	"updatedAt:asc": "updatedAt:asc",
+	"updatedAt:desc": "updatedAt:desc",
+	"publishedAt:asc": "publishedAt:asc",
+	"publishedAt:desc": "publishedAt:desc",
+	"followerCount:asc": "followerCount:asc",
+	"followerCount:desc": "followerCount:desc",
+	"replyCount:asc": "replyCount:asc",
+	"replyCount:desc": "replyCount:desc",
+	"closesAt:asc": "closesAt:asc",
+	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
+} as const;
+
+export type SearchFeatureDefinitionSortSearchDefaultsTextQueryEnum =
+	(typeof SearchFeatureDefinitionSortSearchDefaultsTextQueryEnum)[keyof typeof SearchFeatureDefinitionSortSearchDefaultsTextQueryEnum];
+
+export const SearchFeatureDefinitionSortSearchOptionsEnum = {
+	best: "best",
+	relevance: "relevance",
+	"createdAt:asc": "createdAt:asc",
+	"createdAt:desc": "createdAt:desc",
+	"updatedAt:asc": "updatedAt:asc",
+	"updatedAt:desc": "updatedAt:desc",
+	"publishedAt:asc": "publishedAt:asc",
+	"publishedAt:desc": "publishedAt:desc",
+	"followerCount:asc": "followerCount:asc",
+	"followerCount:desc": "followerCount:desc",
+	"replyCount:asc": "replyCount:asc",
+	"replyCount:desc": "replyCount:desc",
+	"closesAt:asc": "closesAt:asc",
+	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
+} as const;
+
+export type SearchFeatureDefinitionSortSearchOptionsEnum =
+	(typeof SearchFeatureDefinitionSortSearchOptionsEnum)[keyof typeof SearchFeatureDefinitionSortSearchOptionsEnum];
+
+export const SearchFeatureDefinitionSortFeedDefaultsEmptyQueryEnum = {
+	best: "best",
+	relevance: "relevance",
+	"createdAt:asc": "createdAt:asc",
+	"createdAt:desc": "createdAt:desc",
+	"updatedAt:asc": "updatedAt:asc",
+	"updatedAt:desc": "updatedAt:desc",
+	"publishedAt:asc": "publishedAt:asc",
+	"publishedAt:desc": "publishedAt:desc",
+	"followerCount:asc": "followerCount:asc",
+	"followerCount:desc": "followerCount:desc",
+	"replyCount:asc": "replyCount:asc",
+	"replyCount:desc": "replyCount:desc",
+	"closesAt:asc": "closesAt:asc",
+	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
+} as const;
+
+export type SearchFeatureDefinitionSortFeedDefaultsEmptyQueryEnum =
+	(typeof SearchFeatureDefinitionSortFeedDefaultsEmptyQueryEnum)[keyof typeof SearchFeatureDefinitionSortFeedDefaultsEmptyQueryEnum];
+
+export const SearchFeatureDefinitionSortFeedDefaultsTextQueryEnum = {
+	best: "best",
+	relevance: "relevance",
+	"createdAt:asc": "createdAt:asc",
+	"createdAt:desc": "createdAt:desc",
+	"updatedAt:asc": "updatedAt:asc",
+	"updatedAt:desc": "updatedAt:desc",
+	"publishedAt:asc": "publishedAt:asc",
+	"publishedAt:desc": "publishedAt:desc",
+	"followerCount:asc": "followerCount:asc",
+	"followerCount:desc": "followerCount:desc",
+	"replyCount:asc": "replyCount:asc",
+	"replyCount:desc": "replyCount:desc",
+	"closesAt:asc": "closesAt:asc",
+	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
+} as const;
+
+export type SearchFeatureDefinitionSortFeedDefaultsTextQueryEnum =
+	(typeof SearchFeatureDefinitionSortFeedDefaultsTextQueryEnum)[keyof typeof SearchFeatureDefinitionSortFeedDefaultsTextQueryEnum];
+
+export const SearchFeatureDefinitionSortFeedOptionsEnum = {
+	best: "best",
+	relevance: "relevance",
+	"createdAt:asc": "createdAt:asc",
+	"createdAt:desc": "createdAt:desc",
+	"updatedAt:asc": "updatedAt:asc",
+	"updatedAt:desc": "updatedAt:desc",
+	"publishedAt:asc": "publishedAt:asc",
+	"publishedAt:desc": "publishedAt:desc",
+	"followerCount:asc": "followerCount:asc",
+	"followerCount:desc": "followerCount:desc",
+	"replyCount:asc": "replyCount:asc",
+	"replyCount:desc": "replyCount:desc",
+	"closesAt:asc": "closesAt:asc",
+	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
+} as const;
+
+export type SearchFeatureDefinitionSortFeedOptionsEnum =
+	(typeof SearchFeatureDefinitionSortFeedOptionsEnum)[keyof typeof SearchFeatureDefinitionSortFeedOptionsEnum];
+
+export const SearchFeatureDefinitionControlsFieldEnum = {
 	category: "category",
 	kind: "kind",
 	language: "language",
@@ -4525,194 +13578,55 @@ export const SearchDocumentV1ControlsFieldEnum = {
 	"realm-tag-vote": "realm-tag-vote",
 } as const;
 
-export type SearchDocumentV1ControlsFieldEnum =
-	(typeof SearchDocumentV1ControlsFieldEnum)[keyof typeof SearchDocumentV1ControlsFieldEnum];
+export type SearchFeatureDefinitionControlsFieldEnum =
+	(typeof SearchFeatureDefinitionControlsFieldEnum)[keyof typeof SearchFeatureDefinitionControlsFieldEnum];
 
-export const SearchDocumentV1ControlsDisclosureEnum = {
+export const SearchFeatureDefinitionControlsComponentEnum = {
+	select: "select",
+	"multi-select": "multi-select",
+	toggle: "toggle",
+	"date-range": "date-range",
+	"value-range": "value-range",
+	"realm-tag-vote": "realm-tag-vote",
+} as const;
+
+export type SearchFeatureDefinitionControlsComponentEnum =
+	(typeof SearchFeatureDefinitionControlsComponentEnum)[keyof typeof SearchFeatureDefinitionControlsComponentEnum];
+
+export const SearchFeatureDefinitionControlsOperatorsEnum = {
+	equals: "equals",
+	"not-equals": "not-equals",
+	"any-of": "any-of",
+	"all-of": "all-of",
+	"none-of": "none-of",
+	range: "range",
+	exists: "exists",
+	matches: "matches",
+} as const;
+
+export type SearchFeatureDefinitionControlsOperatorsEnum =
+	(typeof SearchFeatureDefinitionControlsOperatorsEnum)[keyof typeof SearchFeatureDefinitionControlsOperatorsEnum];
+
+export const SearchFeatureDefinitionControlsDisclosureEnum = {
 	visible: "visible",
 	hidden: "hidden",
 } as const;
 
-export type SearchDocumentV1ControlsDisclosureEnum =
-	(typeof SearchDocumentV1ControlsDisclosureEnum)[keyof typeof SearchDocumentV1ControlsDisclosureEnum];
-
-export const SearchDocumentV1SectionsDisclosureEnum = {
-	visible: "visible",
-	hidden: "hidden",
-} as const;
-
-export type SearchDocumentV1SectionsDisclosureEnum =
-	(typeof SearchDocumentV1SectionsDisclosureEnum)[keyof typeof SearchDocumentV1SectionsDisclosureEnum];
-
-export const SearchDocumentV1SortSearchDefaultsEmptyQueryEnum = {
-	best: "best",
-	relevance: "relevance",
-	"createdAt:asc": "createdAt:asc",
-	"createdAt:desc": "createdAt:desc",
-	"updatedAt:asc": "updatedAt:asc",
-	"updatedAt:desc": "updatedAt:desc",
-	"publishedAt:asc": "publishedAt:asc",
-	"publishedAt:desc": "publishedAt:desc",
-	"followerCount:asc": "followerCount:asc",
-	"followerCount:desc": "followerCount:desc",
-	"replyCount:asc": "replyCount:asc",
-	"replyCount:desc": "replyCount:desc",
-	"closesAt:asc": "closesAt:asc",
-	"closesAt:desc": "closesAt:desc",
-	"title:asc": "title:asc",
-	"title:desc": "title:desc",
-	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
-	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
-} as const;
-
-export type SearchDocumentV1SortSearchDefaultsEmptyQueryEnum =
-	(typeof SearchDocumentV1SortSearchDefaultsEmptyQueryEnum)[keyof typeof SearchDocumentV1SortSearchDefaultsEmptyQueryEnum];
-
-export const SearchDocumentV1SortSearchDefaultsTextQueryEnum = {
-	best: "best",
-	relevance: "relevance",
-	"createdAt:asc": "createdAt:asc",
-	"createdAt:desc": "createdAt:desc",
-	"updatedAt:asc": "updatedAt:asc",
-	"updatedAt:desc": "updatedAt:desc",
-	"publishedAt:asc": "publishedAt:asc",
-	"publishedAt:desc": "publishedAt:desc",
-	"followerCount:asc": "followerCount:asc",
-	"followerCount:desc": "followerCount:desc",
-	"replyCount:asc": "replyCount:asc",
-	"replyCount:desc": "replyCount:desc",
-	"closesAt:asc": "closesAt:asc",
-	"closesAt:desc": "closesAt:desc",
-	"title:asc": "title:asc",
-	"title:desc": "title:desc",
-	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
-	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
-} as const;
-
-export type SearchDocumentV1SortSearchDefaultsTextQueryEnum =
-	(typeof SearchDocumentV1SortSearchDefaultsTextQueryEnum)[keyof typeof SearchDocumentV1SortSearchDefaultsTextQueryEnum];
-
-export const SearchDocumentV1SortSearchOptionsEnum = {
-	best: "best",
-	relevance: "relevance",
-	"createdAt:asc": "createdAt:asc",
-	"createdAt:desc": "createdAt:desc",
-	"updatedAt:asc": "updatedAt:asc",
-	"updatedAt:desc": "updatedAt:desc",
-	"publishedAt:asc": "publishedAt:asc",
-	"publishedAt:desc": "publishedAt:desc",
-	"followerCount:asc": "followerCount:asc",
-	"followerCount:desc": "followerCount:desc",
-	"replyCount:asc": "replyCount:asc",
-	"replyCount:desc": "replyCount:desc",
-	"closesAt:asc": "closesAt:asc",
-	"closesAt:desc": "closesAt:desc",
-	"title:asc": "title:asc",
-	"title:desc": "title:desc",
-	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
-	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
-} as const;
-
-export type SearchDocumentV1SortSearchOptionsEnum =
-	(typeof SearchDocumentV1SortSearchOptionsEnum)[keyof typeof SearchDocumentV1SortSearchOptionsEnum];
-
-export const SearchDocumentV1SortFeedDefaultsEmptyQueryEnum = {
-	best: "best",
-	relevance: "relevance",
-	"createdAt:asc": "createdAt:asc",
-	"createdAt:desc": "createdAt:desc",
-	"updatedAt:asc": "updatedAt:asc",
-	"updatedAt:desc": "updatedAt:desc",
-	"publishedAt:asc": "publishedAt:asc",
-	"publishedAt:desc": "publishedAt:desc",
-	"followerCount:asc": "followerCount:asc",
-	"followerCount:desc": "followerCount:desc",
-	"replyCount:asc": "replyCount:asc",
-	"replyCount:desc": "replyCount:desc",
-	"closesAt:asc": "closesAt:asc",
-	"closesAt:desc": "closesAt:desc",
-	"title:asc": "title:asc",
-	"title:desc": "title:desc",
-	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
-	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
-} as const;
-
-export type SearchDocumentV1SortFeedDefaultsEmptyQueryEnum =
-	(typeof SearchDocumentV1SortFeedDefaultsEmptyQueryEnum)[keyof typeof SearchDocumentV1SortFeedDefaultsEmptyQueryEnum];
-
-export const SearchDocumentV1SortFeedDefaultsTextQueryEnum = {
-	best: "best",
-	relevance: "relevance",
-	"createdAt:asc": "createdAt:asc",
-	"createdAt:desc": "createdAt:desc",
-	"updatedAt:asc": "updatedAt:asc",
-	"updatedAt:desc": "updatedAt:desc",
-	"publishedAt:asc": "publishedAt:asc",
-	"publishedAt:desc": "publishedAt:desc",
-	"followerCount:asc": "followerCount:asc",
-	"followerCount:desc": "followerCount:desc",
-	"replyCount:asc": "replyCount:asc",
-	"replyCount:desc": "replyCount:desc",
-	"closesAt:asc": "closesAt:asc",
-	"closesAt:desc": "closesAt:desc",
-	"title:asc": "title:asc",
-	"title:desc": "title:desc",
-	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
-	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
-} as const;
-
-export type SearchDocumentV1SortFeedDefaultsTextQueryEnum =
-	(typeof SearchDocumentV1SortFeedDefaultsTextQueryEnum)[keyof typeof SearchDocumentV1SortFeedDefaultsTextQueryEnum];
-
-export const SearchDocumentV1SortFeedOptionsEnum = {
-	best: "best",
-	relevance: "relevance",
-	"createdAt:asc": "createdAt:asc",
-	"createdAt:desc": "createdAt:desc",
-	"updatedAt:asc": "updatedAt:asc",
-	"updatedAt:desc": "updatedAt:desc",
-	"publishedAt:asc": "publishedAt:asc",
-	"publishedAt:desc": "publishedAt:desc",
-	"followerCount:asc": "followerCount:asc",
-	"followerCount:desc": "followerCount:desc",
-	"replyCount:asc": "replyCount:asc",
-	"replyCount:desc": "replyCount:desc",
-	"closesAt:asc": "closesAt:asc",
-	"closesAt:desc": "closesAt:desc",
-	"title:asc": "title:asc",
-	"title:desc": "title:desc",
-	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
-	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
-} as const;
-
-export type SearchDocumentV1SortFeedOptionsEnum =
-	(typeof SearchDocumentV1SortFeedOptionsEnum)[keyof typeof SearchDocumentV1SortFeedOptionsEnum];
+export type SearchFeatureDefinitionControlsDisclosureEnum =
+	(typeof SearchFeatureDefinitionControlsDisclosureEnum)[keyof typeof SearchFeatureDefinitionControlsDisclosureEnum];
 
 /**
  * @type object
  */
-export type SearchDocumentV1 = {
-	/**
-	 * @type number
-	 */
-	version: 1;
+export type SearchFeatureDefinition = {
 	/**
 	 * @type object
 	 */
-	template: {
-		/**
-		 * @type string
-		 */
-		id: SearchDocumentV1TemplateIdEnum;
-		/**
-		 * @type number
-		 */
-		version: 1;
-	};
+	filterDocument: FilterDocument;
 	/**
 	 * @type array
 	 */
-	categories: SearchDocumentV1CategoriesEnum[];
+	categories: SearchFeatureDefinitionCategoriesEnum[];
 	/**
 	 * @type object
 	 */
@@ -4722,475 +13636,10 @@ export type SearchDocumentV1 = {
 		 */
 		enabled: boolean;
 		/**
-		 * @default false
 		 * @type boolean | undefined
 		 */
 		required?: boolean;
 	};
-	/**
-	 * @type object | undefined
-	 */
-	filter?: UnitPredicate;
-	/**
-	 * @type array
-	 */
-	defaults: {
-		/**
-		 * @minLength 1
-		 * @maxLength 64
-		 * @pattern ^[a-z][a-z0-9-]*$
-		 * @type string
-		 */
-		controlKey: string;
-		filter:
-			| {
-					field:
-						| "category"
-						| "kind"
-						| "language"
-						| "content-rating"
-						| "ai-disclosure"
-						| "license"
-						| "tag"
-						| "credit"
-						| "credited-profile"
-						| "realm"
-						| "realm-tag-context"
-						| "zone"
-						| "subject"
-						| "target"
-						| "root"
-						| "parent"
-						| "owner"
-						| "join-policy"
-						| "multiple"
-						| "results-visibility"
-						| "closed"
-						| "created-at"
-						| "updated-at"
-						| "published-at"
-						| "closes-at"
-						| "content-license"
-						| "book-isbn13"
-						| "book-publication-date"
-						| "book-page-count"
-						| "book-word-count"
-						| "book-format"
-						| "media-kind"
-						| "media-release-date"
-						| "media-runtime-minutes"
-						| "media-episode-count"
-						| "media-season-count"
-						| "software-release-date"
-						| "software-version-label"
-						| "software-platform"
-						| "software-requirement-tier";
-					/**
-					 * @type string
-					 */
-					operator: "equals";
-					value: string | number | boolean;
-			  }
-			| {
-					field:
-						| "category"
-						| "kind"
-						| "language"
-						| "content-rating"
-						| "ai-disclosure"
-						| "license"
-						| "tag"
-						| "credit"
-						| "credited-profile"
-						| "realm"
-						| "realm-tag-context"
-						| "zone"
-						| "subject"
-						| "target"
-						| "root"
-						| "parent"
-						| "owner"
-						| "join-policy"
-						| "multiple"
-						| "results-visibility"
-						| "closed"
-						| "created-at"
-						| "updated-at"
-						| "published-at"
-						| "closes-at"
-						| "content-license"
-						| "book-isbn13"
-						| "book-publication-date"
-						| "book-page-count"
-						| "book-word-count"
-						| "book-format"
-						| "media-kind"
-						| "media-release-date"
-						| "media-runtime-minutes"
-						| "media-episode-count"
-						| "media-season-count"
-						| "software-release-date"
-						| "software-version-label"
-						| "software-platform"
-						| "software-requirement-tier";
-					/**
-					 * @type string
-					 */
-					operator: "not-equals";
-					value: string | number | boolean;
-			  }
-			| {
-					field:
-						| "category"
-						| "kind"
-						| "language"
-						| "content-rating"
-						| "ai-disclosure"
-						| "license"
-						| "tag"
-						| "credit"
-						| "credited-profile"
-						| "realm"
-						| "realm-tag-context"
-						| "zone"
-						| "subject"
-						| "target"
-						| "root"
-						| "parent"
-						| "owner"
-						| "join-policy"
-						| "multiple"
-						| "results-visibility"
-						| "closed"
-						| "created-at"
-						| "updated-at"
-						| "published-at"
-						| "closes-at"
-						| "content-license"
-						| "book-isbn13"
-						| "book-publication-date"
-						| "book-page-count"
-						| "book-word-count"
-						| "book-format"
-						| "media-kind"
-						| "media-release-date"
-						| "media-runtime-minutes"
-						| "media-episode-count"
-						| "media-season-count"
-						| "software-release-date"
-						| "software-version-label"
-						| "software-platform"
-						| "software-requirement-tier";
-					operator: "any-of" | "all-of" | "none-of";
-					/**
-					 * @type array
-					 */
-					values: (string | number | boolean)[];
-			  }
-			| (
-					| {
-							field:
-								| "category"
-								| "kind"
-								| "language"
-								| "content-rating"
-								| "ai-disclosure"
-								| "license"
-								| "tag"
-								| "credit"
-								| "credited-profile"
-								| "realm"
-								| "realm-tag-context"
-								| "zone"
-								| "subject"
-								| "target"
-								| "root"
-								| "parent"
-								| "owner"
-								| "join-policy"
-								| "multiple"
-								| "results-visibility"
-								| "closed"
-								| "created-at"
-								| "updated-at"
-								| "published-at"
-								| "closes-at"
-								| "content-license"
-								| "book-isbn13"
-								| "book-publication-date"
-								| "book-page-count"
-								| "book-word-count"
-								| "book-format"
-								| "media-kind"
-								| "media-release-date"
-								| "media-runtime-minutes"
-								| "media-episode-count"
-								| "media-season-count"
-								| "software-release-date"
-								| "software-version-label"
-								| "software-platform"
-								| "software-requirement-tier";
-							/**
-							 * @type string
-							 */
-							operator: "range";
-							lower: string | number | boolean;
-							upper?: string | number | boolean;
-					  }
-					| {
-							field:
-								| "category"
-								| "kind"
-								| "language"
-								| "content-rating"
-								| "ai-disclosure"
-								| "license"
-								| "tag"
-								| "credit"
-								| "credited-profile"
-								| "realm"
-								| "realm-tag-context"
-								| "zone"
-								| "subject"
-								| "target"
-								| "root"
-								| "parent"
-								| "owner"
-								| "join-policy"
-								| "multiple"
-								| "results-visibility"
-								| "closed"
-								| "created-at"
-								| "updated-at"
-								| "published-at"
-								| "closes-at"
-								| "content-license"
-								| "book-isbn13"
-								| "book-publication-date"
-								| "book-page-count"
-								| "book-word-count"
-								| "book-format"
-								| "media-kind"
-								| "media-release-date"
-								| "media-runtime-minutes"
-								| "media-episode-count"
-								| "media-season-count"
-								| "software-release-date"
-								| "software-version-label"
-								| "software-platform"
-								| "software-requirement-tier";
-							/**
-							 * @type string
-							 */
-							operator: "range";
-							lower?: string | number | boolean;
-							upper: string | number | boolean;
-					  }
-			  )
-			| {
-					field:
-						| "category"
-						| "kind"
-						| "language"
-						| "content-rating"
-						| "ai-disclosure"
-						| "license"
-						| "tag"
-						| "credit"
-						| "credited-profile"
-						| "realm"
-						| "realm-tag-context"
-						| "zone"
-						| "subject"
-						| "target"
-						| "root"
-						| "parent"
-						| "owner"
-						| "join-policy"
-						| "multiple"
-						| "results-visibility"
-						| "closed"
-						| "created-at"
-						| "updated-at"
-						| "published-at"
-						| "closes-at"
-						| "content-license"
-						| "book-isbn13"
-						| "book-publication-date"
-						| "book-page-count"
-						| "book-word-count"
-						| "book-format"
-						| "media-kind"
-						| "media-release-date"
-						| "media-runtime-minutes"
-						| "media-episode-count"
-						| "media-season-count"
-						| "software-release-date"
-						| "software-version-label"
-						| "software-platform"
-						| "software-requirement-tier";
-					/**
-					 * @type string
-					 */
-					operator: "exists";
-					/**
-					 * @type boolean
-					 */
-					value: boolean;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					field: "realm-tag-vote";
-					/**
-					 * @type string
-					 */
-					operator: "matches";
-					/**
-					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-					 * @type string
-					 */
-					realmId: string;
-					/**
-					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-					 * @type string
-					 */
-					tagId: string;
-					score?:
-						| {
-								/**
-								 * @type integer
-								 */
-								lower: number;
-								/**
-								 * @type integer | undefined
-								 */
-								upper?: number;
-						  }
-						| {
-								/**
-								 * @type integer | undefined
-								 */
-								lower?: number;
-								/**
-								 * @type integer
-								 */
-								upper: number;
-						  };
-					voteCount?:
-						| {
-								/**
-								 * @minLength 0
-								 * @type integer
-								 */
-								lower: number;
-								/**
-								 * @minLength 0
-								 * @type integer | undefined
-								 */
-								upper?: number;
-						  }
-						| {
-								/**
-								 * @minLength 0
-								 * @type integer | undefined
-								 */
-								lower?: number;
-								/**
-								 * @minLength 0
-								 * @type integer
-								 */
-								upper: number;
-						  };
-			  };
-	}[];
-	/**
-	 * @type array
-	 */
-	controls: {
-		/**
-		 * @minLength 1
-		 * @maxLength 64
-		 * @pattern ^[a-z][a-z0-9-]*$
-		 * @type string
-		 */
-		key: string;
-		/**
-		 * @type string
-		 */
-		field: SearchDocumentV1ControlsFieldEnum;
-		/**
-		 * @type boolean
-		 */
-		enabled: boolean;
-		/**
-		 * @type string
-		 */
-		disclosure: SearchDocumentV1ControlsDisclosureEnum;
-		/**
-		 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-		 * @type string | undefined
-		 */
-		labelUnitId?: string;
-		optionPolicy?:
-			| {
-					/**
-					 * @type string
-					 */
-					kind: "all";
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					kind: "include";
-					/**
-					 * @type array
-					 */
-					values: (string | number | boolean)[];
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					kind: "exclude";
-					/**
-					 * @type array
-					 */
-					values: (string | number | boolean)[];
-			  };
-		/**
-		 * @default false
-		 * @type boolean | undefined
-		 */
-		required?: boolean;
-	}[];
-	/**
-	 * @type array
-	 */
-	sections: {
-		/**
-		 * @minLength 1
-		 * @maxLength 64
-		 * @pattern ^[a-z][a-z0-9-]*$
-		 * @type string
-		 */
-		key: string;
-		/**
-		 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-		 * @type string | undefined
-		 */
-		labelUnitId?: string;
-		/**
-		 * @type string
-		 */
-		disclosure: SearchDocumentV1SectionsDisclosureEnum;
-		/**
-		 * @type array
-		 */
-		controls: string[];
-	}[];
 	/**
 	 * @type object
 	 */
@@ -5206,16 +13655,16 @@ export type SearchDocumentV1 = {
 				/**
 				 * @type string
 				 */
-				emptyQuery: SearchDocumentV1SortSearchDefaultsEmptyQueryEnum;
+				emptyQuery: SearchFeatureDefinitionSortSearchDefaultsEmptyQueryEnum;
 				/**
 				 * @type string
 				 */
-				textQuery: SearchDocumentV1SortSearchDefaultsTextQueryEnum;
+				textQuery: SearchFeatureDefinitionSortSearchDefaultsTextQueryEnum;
 			};
 			/**
 			 * @type array
 			 */
-			options: SearchDocumentV1SortSearchOptionsEnum[];
+			options: SearchFeatureDefinitionSortSearchOptionsEnum[];
 		};
 		/**
 		 * @type object
@@ -5228,136 +13677,18 @@ export type SearchDocumentV1 = {
 				/**
 				 * @type string
 				 */
-				emptyQuery: SearchDocumentV1SortFeedDefaultsEmptyQueryEnum;
+				emptyQuery: SearchFeatureDefinitionSortFeedDefaultsEmptyQueryEnum;
 				/**
 				 * @type string
 				 */
-				textQuery: SearchDocumentV1SortFeedDefaultsTextQueryEnum;
+				textQuery: SearchFeatureDefinitionSortFeedDefaultsTextQueryEnum;
 			};
 			/**
 			 * @type array
 			 */
-			options: SearchDocumentV1SortFeedOptionsEnum[];
+			options: SearchFeatureDefinitionSortFeedOptionsEnum[];
 		};
 	};
-	/**
-	 * @type object
-	 */
-	results: {
-		/**
-		 * @minLength 1
-		 * @maxLength 50
-		 * @type integer
-		 */
-		pageSize: number;
-		/**
-		 * @minLength 1
-		 * @maxLength 100
-		 * @type integer
-		 */
-		maxPageSize: number;
-		/**
-		 * @minLength 1
-		 * @maxLength 100000
-		 * @type integer
-		 */
-		maxResultWindow: number;
-		/**
-		 * @type array
-		 */
-		facets: string[];
-	};
-};
-
-export const SearchFeatureDefinitionV1ControlsFieldEnum = {
-	category: "category",
-	kind: "kind",
-	language: "language",
-	"content-rating": "content-rating",
-	"ai-disclosure": "ai-disclosure",
-	license: "license",
-	tag: "tag",
-	credit: "credit",
-	"credited-profile": "credited-profile",
-	realm: "realm",
-	"realm-tag-context": "realm-tag-context",
-	zone: "zone",
-	subject: "subject",
-	target: "target",
-	root: "root",
-	parent: "parent",
-	owner: "owner",
-	"join-policy": "join-policy",
-	multiple: "multiple",
-	"results-visibility": "results-visibility",
-	closed: "closed",
-	"created-at": "created-at",
-	"updated-at": "updated-at",
-	"published-at": "published-at",
-	"closes-at": "closes-at",
-	"content-license": "content-license",
-	"book-isbn13": "book-isbn13",
-	"book-publication-date": "book-publication-date",
-	"book-page-count": "book-page-count",
-	"book-word-count": "book-word-count",
-	"book-format": "book-format",
-	"media-kind": "media-kind",
-	"media-release-date": "media-release-date",
-	"media-runtime-minutes": "media-runtime-minutes",
-	"media-episode-count": "media-episode-count",
-	"media-season-count": "media-season-count",
-	"software-release-date": "software-release-date",
-	"software-version-label": "software-version-label",
-	"software-platform": "software-platform",
-	"software-requirement-tier": "software-requirement-tier",
-	"realm-tag-vote": "realm-tag-vote",
-} as const;
-
-export type SearchFeatureDefinitionV1ControlsFieldEnum =
-	(typeof SearchFeatureDefinitionV1ControlsFieldEnum)[keyof typeof SearchFeatureDefinitionV1ControlsFieldEnum];
-
-export const SearchFeatureDefinitionV1ControlsComponentEnum = {
-	select: "select",
-	"multi-select": "multi-select",
-	toggle: "toggle",
-	"date-range": "date-range",
-	"value-range": "value-range",
-	"realm-tag-vote": "realm-tag-vote",
-} as const;
-
-export type SearchFeatureDefinitionV1ControlsComponentEnum =
-	(typeof SearchFeatureDefinitionV1ControlsComponentEnum)[keyof typeof SearchFeatureDefinitionV1ControlsComponentEnum];
-
-export const SearchFeatureDefinitionV1ControlsOperatorsEnum = {
-	equals: "equals",
-	"not-equals": "not-equals",
-	"any-of": "any-of",
-	"all-of": "all-of",
-	"none-of": "none-of",
-	range: "range",
-	exists: "exists",
-	matches: "matches",
-} as const;
-
-export type SearchFeatureDefinitionV1ControlsOperatorsEnum =
-	(typeof SearchFeatureDefinitionV1ControlsOperatorsEnum)[keyof typeof SearchFeatureDefinitionV1ControlsOperatorsEnum];
-
-export const SearchFeatureDefinitionV1ControlsDisclosureEnum = {
-	visible: "visible",
-	hidden: "hidden",
-} as const;
-
-export type SearchFeatureDefinitionV1ControlsDisclosureEnum =
-	(typeof SearchFeatureDefinitionV1ControlsDisclosureEnum)[keyof typeof SearchFeatureDefinitionV1ControlsDisclosureEnum];
-
-/**
- * @type object
- */
-export type SearchFeatureDefinitionV1 = {
-	/**
-	 * @type object
-	 */
-	document: SearchDocumentV1;
 	/**
 	 * @type array
 	 */
@@ -5372,15 +13703,15 @@ export type SearchFeatureDefinitionV1 = {
 		/**
 		 * @type string
 		 */
-		field: SearchFeatureDefinitionV1ControlsFieldEnum;
+		field: SearchFeatureDefinitionControlsFieldEnum;
 		/**
 		 * @type string
 		 */
-		component: SearchFeatureDefinitionV1ControlsComponentEnum;
+		component: SearchFeatureDefinitionControlsComponentEnum;
 		/**
 		 * @type array
 		 */
-		operators: SearchFeatureDefinitionV1ControlsOperatorsEnum[];
+		operators: SearchFeatureDefinitionControlsOperatorsEnum[];
 		optionSource?:
 			| {
 					/**
@@ -5443,16 +13774,13 @@ export type SearchFeatureDefinitionV1 = {
 		 */
 		required?: boolean;
 		/**
+		 * @type boolean
+		 */
+		enabled: boolean;
+		/**
 		 * @type string
 		 */
-		disclosure: SearchFeatureDefinitionV1ControlsDisclosureEnum;
-		/**
-		 * @minLength 1
-		 * @maxLength 64
-		 * @pattern ^[a-z][a-z0-9-]*$
-		 * @type string | undefined
-		 */
-		sectionKey?: string;
+		disclosure: SearchFeatureDefinitionControlsDisclosureEnum;
 	}[];
 };
 
@@ -5547,8 +13875,6 @@ export const ApiErrorCode = {
 	TagStructureDefinitionConflict: "TagStructureDefinitionConflict",
 	InvalidSearch: "InvalidSearch",
 	SearchUnavailable: "SearchUnavailable",
-	SearchDocumentRevisionConflict: "SearchDocumentRevisionConflict",
-	ZoneSearchFeatureNotFound: "ZoneSearchFeatureNotFound",
 	SharedSearchQueryNotFound: "SharedSearchQueryNotFound",
 	InvalidPaginationCursor: "InvalidPaginationCursor",
 	ProfileNotFound: "ProfileNotFound",
@@ -42007,7 +50333,7 @@ export type GetApiZonesByZoneIdStatus200 = {
 	/**
 	 * @type object
 	 */
-	boundaryDocument: ZoneBoundaryDocument;
+	filterDocument: FilterDocument;
 	/**
 	 * @type object
 	 */
@@ -42388,7 +50714,7 @@ export type PatchApiZonesByZoneIdStatus200 = {
 	/**
 	 * @type object
 	 */
-	boundaryDocument: ZoneBoundaryDocument;
+	filterDocument: FilterDocument;
 	/**
 	 * @type object
 	 */
@@ -42801,7 +51127,7 @@ export type PatchApiZonesByZoneIdBody = {
 	/**
 	 * @type object | undefined
 	 */
-	boundaryDocument?: ZoneBoundaryDocument;
+	filterDocument?: FilterDocument;
 	/**
 	 * @type object | undefined
 	 */
@@ -43252,7 +51578,7 @@ export type GetZoneRenderProjectionStatus200 = {
 		/**
 		 * @type object
 		 */
-		boundaryDocument: ZoneBoundaryDocument;
+		filterDocument: FilterDocument;
 		/**
 		 * @type object
 		 */
@@ -47645,7 +55971,7 @@ export type PostApiZonesBody = {
 	/**
 	 * @type object
 	 */
-	boundaryDocument: ZoneBoundaryDocument;
+	filterDocument: FilterDocument;
 	/**
 	 * @type object
 	 */
@@ -94525,6 +102851,2705 @@ export type GetApiProgressResponse =
 	| GetApiProgressStatus429
 	| GetApiProgressStatus500;
 
+export const GetApiProgressSearchFilterStatus200FilterDocumentCategoriesEnum = {
+	units: "units",
+	users: "users",
+	entities: "entities",
+	tags: "tags",
+	"tag-structures": "tag-structures",
+	posts: "posts",
+	realms: "realms",
+	collections: "collections",
+	reviews: "reviews",
+	polls: "polls",
+} as const;
+
+export type GetApiProgressSearchFilterStatus200FilterDocumentCategoriesEnum =
+	(typeof GetApiProgressSearchFilterStatus200FilterDocumentCategoriesEnum)[keyof typeof GetApiProgressSearchFilterStatus200FilterDocumentCategoriesEnum];
+
+export const GetApiProgressSearchFilterStatus200FilterDocumentWhereKindInEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetApiProgressSearchFilterStatus200FilterDocumentWhereKindInEnum =
+	(typeof GetApiProgressSearchFilterStatus200FilterDocumentWhereKindInEnum)[keyof typeof GetApiProgressSearchFilterStatus200FilterDocumentWhereKindInEnum];
+
+export const GetApiProgressSearchFilterStatus200FilterDocumentControlsFieldEnum = {
+	category: "category",
+	kind: "kind",
+	language: "language",
+	"content-rating": "content-rating",
+	"ai-disclosure": "ai-disclosure",
+	license: "license",
+	tag: "tag",
+	credit: "credit",
+	"credited-profile": "credited-profile",
+	realm: "realm",
+	"realm-tag-context": "realm-tag-context",
+	zone: "zone",
+	subject: "subject",
+	target: "target",
+	root: "root",
+	parent: "parent",
+	owner: "owner",
+	"join-policy": "join-policy",
+	multiple: "multiple",
+	"results-visibility": "results-visibility",
+	closed: "closed",
+	"created-at": "created-at",
+	"updated-at": "updated-at",
+	"published-at": "published-at",
+	"closes-at": "closes-at",
+	"content-license": "content-license",
+	"book-isbn13": "book-isbn13",
+	"book-publication-date": "book-publication-date",
+	"book-page-count": "book-page-count",
+	"book-word-count": "book-word-count",
+	"book-format": "book-format",
+	"media-kind": "media-kind",
+	"media-release-date": "media-release-date",
+	"media-runtime-minutes": "media-runtime-minutes",
+	"media-episode-count": "media-episode-count",
+	"media-season-count": "media-season-count",
+	"software-release-date": "software-release-date",
+	"software-version-label": "software-version-label",
+	"software-platform": "software-platform",
+	"software-requirement-tier": "software-requirement-tier",
+	"realm-tag-vote": "realm-tag-vote",
+} as const;
+
+export type GetApiProgressSearchFilterStatus200FilterDocumentControlsFieldEnum =
+	(typeof GetApiProgressSearchFilterStatus200FilterDocumentControlsFieldEnum)[keyof typeof GetApiProgressSearchFilterStatus200FilterDocumentControlsFieldEnum];
+
+export const GetApiProgressSearchFilterStatus200FilterDocumentControlsDisclosureEnum = {
+	visible: "visible",
+	hidden: "hidden",
+} as const;
+
+export type GetApiProgressSearchFilterStatus200FilterDocumentControlsDisclosureEnum =
+	(typeof GetApiProgressSearchFilterStatus200FilterDocumentControlsDisclosureEnum)[keyof typeof GetApiProgressSearchFilterStatus200FilterDocumentControlsDisclosureEnum];
+
+export const GetApiProgressSearchFilterStatus200CategoriesEnum = {
+	units: "units",
+	users: "users",
+	entities: "entities",
+	tags: "tags",
+	"tag-structures": "tag-structures",
+	posts: "posts",
+	realms: "realms",
+	collections: "collections",
+	reviews: "reviews",
+	polls: "polls",
+} as const;
+
+export type GetApiProgressSearchFilterStatus200CategoriesEnum =
+	(typeof GetApiProgressSearchFilterStatus200CategoriesEnum)[keyof typeof GetApiProgressSearchFilterStatus200CategoriesEnum];
+
+export const GetApiProgressSearchFilterStatus200SortSearchDefaultsEmptyQueryEnum = {
+	best: "best",
+	relevance: "relevance",
+	"createdAt:asc": "createdAt:asc",
+	"createdAt:desc": "createdAt:desc",
+	"updatedAt:asc": "updatedAt:asc",
+	"updatedAt:desc": "updatedAt:desc",
+	"publishedAt:asc": "publishedAt:asc",
+	"publishedAt:desc": "publishedAt:desc",
+	"followerCount:asc": "followerCount:asc",
+	"followerCount:desc": "followerCount:desc",
+	"replyCount:asc": "replyCount:asc",
+	"replyCount:desc": "replyCount:desc",
+	"closesAt:asc": "closesAt:asc",
+	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
+} as const;
+
+export type GetApiProgressSearchFilterStatus200SortSearchDefaultsEmptyQueryEnum =
+	(typeof GetApiProgressSearchFilterStatus200SortSearchDefaultsEmptyQueryEnum)[keyof typeof GetApiProgressSearchFilterStatus200SortSearchDefaultsEmptyQueryEnum];
+
+export const GetApiProgressSearchFilterStatus200SortSearchDefaultsTextQueryEnum = {
+	best: "best",
+	relevance: "relevance",
+	"createdAt:asc": "createdAt:asc",
+	"createdAt:desc": "createdAt:desc",
+	"updatedAt:asc": "updatedAt:asc",
+	"updatedAt:desc": "updatedAt:desc",
+	"publishedAt:asc": "publishedAt:asc",
+	"publishedAt:desc": "publishedAt:desc",
+	"followerCount:asc": "followerCount:asc",
+	"followerCount:desc": "followerCount:desc",
+	"replyCount:asc": "replyCount:asc",
+	"replyCount:desc": "replyCount:desc",
+	"closesAt:asc": "closesAt:asc",
+	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
+} as const;
+
+export type GetApiProgressSearchFilterStatus200SortSearchDefaultsTextQueryEnum =
+	(typeof GetApiProgressSearchFilterStatus200SortSearchDefaultsTextQueryEnum)[keyof typeof GetApiProgressSearchFilterStatus200SortSearchDefaultsTextQueryEnum];
+
+export const GetApiProgressSearchFilterStatus200SortSearchOptionsEnum = {
+	best: "best",
+	relevance: "relevance",
+	"createdAt:asc": "createdAt:asc",
+	"createdAt:desc": "createdAt:desc",
+	"updatedAt:asc": "updatedAt:asc",
+	"updatedAt:desc": "updatedAt:desc",
+	"publishedAt:asc": "publishedAt:asc",
+	"publishedAt:desc": "publishedAt:desc",
+	"followerCount:asc": "followerCount:asc",
+	"followerCount:desc": "followerCount:desc",
+	"replyCount:asc": "replyCount:asc",
+	"replyCount:desc": "replyCount:desc",
+	"closesAt:asc": "closesAt:asc",
+	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
+} as const;
+
+export type GetApiProgressSearchFilterStatus200SortSearchOptionsEnum =
+	(typeof GetApiProgressSearchFilterStatus200SortSearchOptionsEnum)[keyof typeof GetApiProgressSearchFilterStatus200SortSearchOptionsEnum];
+
+export const GetApiProgressSearchFilterStatus200SortFeedDefaultsEmptyQueryEnum = {
+	best: "best",
+	relevance: "relevance",
+	"createdAt:asc": "createdAt:asc",
+	"createdAt:desc": "createdAt:desc",
+	"updatedAt:asc": "updatedAt:asc",
+	"updatedAt:desc": "updatedAt:desc",
+	"publishedAt:asc": "publishedAt:asc",
+	"publishedAt:desc": "publishedAt:desc",
+	"followerCount:asc": "followerCount:asc",
+	"followerCount:desc": "followerCount:desc",
+	"replyCount:asc": "replyCount:asc",
+	"replyCount:desc": "replyCount:desc",
+	"closesAt:asc": "closesAt:asc",
+	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
+} as const;
+
+export type GetApiProgressSearchFilterStatus200SortFeedDefaultsEmptyQueryEnum =
+	(typeof GetApiProgressSearchFilterStatus200SortFeedDefaultsEmptyQueryEnum)[keyof typeof GetApiProgressSearchFilterStatus200SortFeedDefaultsEmptyQueryEnum];
+
+export const GetApiProgressSearchFilterStatus200SortFeedDefaultsTextQueryEnum = {
+	best: "best",
+	relevance: "relevance",
+	"createdAt:asc": "createdAt:asc",
+	"createdAt:desc": "createdAt:desc",
+	"updatedAt:asc": "updatedAt:asc",
+	"updatedAt:desc": "updatedAt:desc",
+	"publishedAt:asc": "publishedAt:asc",
+	"publishedAt:desc": "publishedAt:desc",
+	"followerCount:asc": "followerCount:asc",
+	"followerCount:desc": "followerCount:desc",
+	"replyCount:asc": "replyCount:asc",
+	"replyCount:desc": "replyCount:desc",
+	"closesAt:asc": "closesAt:asc",
+	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
+} as const;
+
+export type GetApiProgressSearchFilterStatus200SortFeedDefaultsTextQueryEnum =
+	(typeof GetApiProgressSearchFilterStatus200SortFeedDefaultsTextQueryEnum)[keyof typeof GetApiProgressSearchFilterStatus200SortFeedDefaultsTextQueryEnum];
+
+export const GetApiProgressSearchFilterStatus200SortFeedOptionsEnum = {
+	best: "best",
+	relevance: "relevance",
+	"createdAt:asc": "createdAt:asc",
+	"createdAt:desc": "createdAt:desc",
+	"updatedAt:asc": "updatedAt:asc",
+	"updatedAt:desc": "updatedAt:desc",
+	"publishedAt:asc": "publishedAt:asc",
+	"publishedAt:desc": "publishedAt:desc",
+	"followerCount:asc": "followerCount:asc",
+	"followerCount:desc": "followerCount:desc",
+	"replyCount:asc": "replyCount:asc",
+	"replyCount:desc": "replyCount:desc",
+	"closesAt:asc": "closesAt:asc",
+	"closesAt:desc": "closesAt:desc",
+	"title:asc": "title:asc",
+	"title:desc": "title:desc",
+	"progressLastSeenAt:asc": "progressLastSeenAt:asc",
+	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
+} as const;
+
+export type GetApiProgressSearchFilterStatus200SortFeedOptionsEnum =
+	(typeof GetApiProgressSearchFilterStatus200SortFeedOptionsEnum)[keyof typeof GetApiProgressSearchFilterStatus200SortFeedOptionsEnum];
+
+export const GetApiProgressSearchFilterStatus200ControlsFieldEnum = {
+	category: "category",
+	kind: "kind",
+	language: "language",
+	"content-rating": "content-rating",
+	"ai-disclosure": "ai-disclosure",
+	license: "license",
+	tag: "tag",
+	credit: "credit",
+	"credited-profile": "credited-profile",
+	realm: "realm",
+	"realm-tag-context": "realm-tag-context",
+	zone: "zone",
+	subject: "subject",
+	target: "target",
+	root: "root",
+	parent: "parent",
+	owner: "owner",
+	"join-policy": "join-policy",
+	multiple: "multiple",
+	"results-visibility": "results-visibility",
+	closed: "closed",
+	"created-at": "created-at",
+	"updated-at": "updated-at",
+	"published-at": "published-at",
+	"closes-at": "closes-at",
+	"content-license": "content-license",
+	"book-isbn13": "book-isbn13",
+	"book-publication-date": "book-publication-date",
+	"book-page-count": "book-page-count",
+	"book-word-count": "book-word-count",
+	"book-format": "book-format",
+	"media-kind": "media-kind",
+	"media-release-date": "media-release-date",
+	"media-runtime-minutes": "media-runtime-minutes",
+	"media-episode-count": "media-episode-count",
+	"media-season-count": "media-season-count",
+	"software-release-date": "software-release-date",
+	"software-version-label": "software-version-label",
+	"software-platform": "software-platform",
+	"software-requirement-tier": "software-requirement-tier",
+	"realm-tag-vote": "realm-tag-vote",
+} as const;
+
+export type GetApiProgressSearchFilterStatus200ControlsFieldEnum =
+	(typeof GetApiProgressSearchFilterStatus200ControlsFieldEnum)[keyof typeof GetApiProgressSearchFilterStatus200ControlsFieldEnum];
+
+export const GetApiProgressSearchFilterStatus200ControlsComponentEnum = {
+	select: "select",
+	"multi-select": "multi-select",
+	toggle: "toggle",
+	"date-range": "date-range",
+	"value-range": "value-range",
+	"realm-tag-vote": "realm-tag-vote",
+} as const;
+
+export type GetApiProgressSearchFilterStatus200ControlsComponentEnum =
+	(typeof GetApiProgressSearchFilterStatus200ControlsComponentEnum)[keyof typeof GetApiProgressSearchFilterStatus200ControlsComponentEnum];
+
+export const GetApiProgressSearchFilterStatus200ControlsOperatorsEnum = {
+	equals: "equals",
+	"not-equals": "not-equals",
+	"any-of": "any-of",
+	"all-of": "all-of",
+	"none-of": "none-of",
+	range: "range",
+	exists: "exists",
+	matches: "matches",
+} as const;
+
+export type GetApiProgressSearchFilterStatus200ControlsOperatorsEnum =
+	(typeof GetApiProgressSearchFilterStatus200ControlsOperatorsEnum)[keyof typeof GetApiProgressSearchFilterStatus200ControlsOperatorsEnum];
+
+export const GetApiProgressSearchFilterStatus200ControlsDisclosureEnum = {
+	visible: "visible",
+	hidden: "hidden",
+} as const;
+
+export type GetApiProgressSearchFilterStatus200ControlsDisclosureEnum =
+	(typeof GetApiProgressSearchFilterStatus200ControlsDisclosureEnum)[keyof typeof GetApiProgressSearchFilterStatus200ControlsDisclosureEnum];
+
+/**
+ * @type object
+ */
+export type GetApiProgressSearchFilterStatus200 = {
+	/**
+	 * @type object
+	 */
+	filterDocument: {
+		/**
+		 * @type array | undefined
+		 */
+		categories?: GetApiProgressSearchFilterStatus200FilterDocumentCategoriesEnum[];
+		/**
+		 * @type object | undefined
+		 */
+		where?: {
+			/**
+			 * @type array | undefined
+			 */
+			all?: UnitPredicate[];
+			/**
+			 * @type array | undefined
+			 */
+			any?: UnitPredicate[];
+			/**
+			 * @type object | undefined
+			 */
+			not?: UnitPredicate;
+			/**
+			 * @type object | undefined
+			 */
+			id?: {
+				/**
+				 * @type array
+				 */
+				in: string[];
+			};
+			/**
+			 * @type object | undefined
+			 */
+			kind?: {
+				/**
+				 * @type array
+				 */
+				in: GetApiProgressSearchFilterStatus200FilterDocumentWhereKindInEnum[];
+			};
+			localizations?:
+				| {
+						/**
+						 * @type object
+						 */
+						some: {
+							/**
+							 * @type array | undefined
+							 */
+							all?: LocalizationFilter[];
+							/**
+							 * @type array | undefined
+							 */
+							any?: LocalizationFilter[];
+							/**
+							 * @type object | undefined
+							 */
+							not?: LocalizationFilter;
+							/**
+							 * @type object | undefined
+							 */
+							language?: {
+								/**
+								 * @type array
+								 */
+								in: ("zh" | "en" | "ja" | "ko" | "de" | "fr" | "es")[];
+							};
+						};
+				  }
+				| {
+						/**
+						 * @type object
+						 */
+						none: {
+							/**
+							 * @type array | undefined
+							 */
+							all?: LocalizationFilter[];
+							/**
+							 * @type array | undefined
+							 */
+							any?: LocalizationFilter[];
+							/**
+							 * @type object | undefined
+							 */
+							not?: LocalizationFilter;
+							/**
+							 * @type object | undefined
+							 */
+							language?: {
+								/**
+								 * @type array
+								 */
+								in: ("zh" | "en" | "ja" | "ko" | "de" | "fr" | "es")[];
+							};
+						};
+				  };
+			realms?:
+				| {
+						/**
+						 * @type object
+						 */
+						some: {
+							/**
+							 * @type array | undefined
+							 */
+							all?: RealmPlacementFilter[];
+							/**
+							 * @type array | undefined
+							 */
+							any?: RealmPlacementFilter[];
+							/**
+							 * @type object | undefined
+							 */
+							not?: RealmPlacementFilter;
+							/**
+							 * @type object | undefined
+							 */
+							realm?: {
+								/**
+								 * @type object | undefined
+								 */
+								id?: {
+									/**
+									 * @type array
+									 */
+									in: string[];
+								};
+								/**
+								 * @type object | undefined
+								 */
+								kind?: {
+									/**
+									 * @type array
+									 */
+									in: (
+										| "slug_namespace"
+										| "profile"
+										| "book"
+										| "software"
+										| "media"
+										| "video"
+										| "audio"
+										| "release"
+										| "entity"
+										| "label"
+										| "tag"
+										| "structure"
+										| "series"
+										| "zone"
+										| "zone_page"
+										| "collection"
+										| "post"
+										| "poll"
+										| "realm"
+										| "realm_rule"
+									)[];
+								};
+							};
+							/**
+							 * @type object | undefined
+							 */
+							status?: {
+								/**
+								 * @type array
+								 */
+								in: ("pending" | "visible" | "hidden" | "removed")[];
+							};
+							/**
+							 * @type object | undefined
+							 */
+							publicationState?: {
+								/**
+								 * @type array
+								 */
+								in: ("active" | "withdrawn")[];
+							};
+						};
+				  }
+				| {
+						/**
+						 * @type object
+						 */
+						none: {
+							/**
+							 * @type array | undefined
+							 */
+							all?: RealmPlacementFilter[];
+							/**
+							 * @type array | undefined
+							 */
+							any?: RealmPlacementFilter[];
+							/**
+							 * @type object | undefined
+							 */
+							not?: RealmPlacementFilter;
+							/**
+							 * @type object | undefined
+							 */
+							realm?: {
+								/**
+								 * @type object | undefined
+								 */
+								id?: {
+									/**
+									 * @type array
+									 */
+									in: string[];
+								};
+								/**
+								 * @type object | undefined
+								 */
+								kind?: {
+									/**
+									 * @type array
+									 */
+									in: (
+										| "slug_namespace"
+										| "profile"
+										| "book"
+										| "software"
+										| "media"
+										| "video"
+										| "audio"
+										| "release"
+										| "entity"
+										| "label"
+										| "tag"
+										| "structure"
+										| "series"
+										| "zone"
+										| "zone_page"
+										| "collection"
+										| "post"
+										| "poll"
+										| "realm"
+										| "realm_rule"
+									)[];
+								};
+							};
+							/**
+							 * @type object | undefined
+							 */
+							status?: {
+								/**
+								 * @type array
+								 */
+								in: ("pending" | "visible" | "hidden" | "removed")[];
+							};
+							/**
+							 * @type object | undefined
+							 */
+							publicationState?: {
+								/**
+								 * @type array
+								 */
+								in: ("active" | "withdrawn")[];
+							};
+						};
+				  };
+			tags?:
+				| {
+						/**
+						 * @type object
+						 */
+						some: {
+							/**
+							 * @type array | undefined
+							 */
+							all?: TagAssertionFilter[];
+							/**
+							 * @type array | undefined
+							 */
+							any?: TagAssertionFilter[];
+							/**
+							 * @type object | undefined
+							 */
+							not?: TagAssertionFilter;
+							/**
+							 * @type object | undefined
+							 */
+							tag?: {
+								/**
+								 * @type object | undefined
+								 */
+								id?: {
+									/**
+									 * @type array
+									 */
+									in: string[];
+								};
+								/**
+								 * @type object | undefined
+								 */
+								kind?: {
+									/**
+									 * @type array
+									 */
+									in: (
+										| "slug_namespace"
+										| "profile"
+										| "book"
+										| "software"
+										| "media"
+										| "video"
+										| "audio"
+										| "release"
+										| "entity"
+										| "label"
+										| "tag"
+										| "structure"
+										| "series"
+										| "zone"
+										| "zone_page"
+										| "collection"
+										| "post"
+										| "poll"
+										| "realm"
+										| "realm_rule"
+									)[];
+								};
+							};
+							authority?:
+								| {
+										/**
+										 * @type string
+										 */
+										kind: "global";
+										view:
+											| {
+													/**
+													 * @type string
+													 */
+													kind: "effective";
+													/**
+													 * @type object | undefined
+													 */
+													consensus?: {
+														score?:
+															| {
+																	/**
+																	 * @type array
+																	 */
+																	in: number[];
+															  }
+															| {
+																	range:
+																		| {
+																				/**
+																				 * @type integer
+																				 */
+																				minimum: number;
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				maximum?: number;
+																		  }
+																		| {
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				minimum?: number;
+																				/**
+																				 * @type integer
+																				 */
+																				maximum: number;
+																		  };
+															  };
+														voteCount?:
+															| {
+																	/**
+																	 * @type array
+																	 */
+																	in: number[];
+															  }
+															| {
+																	range:
+																		| {
+																				/**
+																				 * @type integer
+																				 */
+																				minimum: number;
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				maximum?: number;
+																		  }
+																		| {
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				minimum?: number;
+																				/**
+																				 * @type integer
+																				 */
+																				maximum: number;
+																		  };
+															  };
+													};
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													kind: "direct";
+											  };
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										kind: "realm";
+										/**
+										 * @type object
+										 */
+										realm: {
+											/**
+											 * @type object | undefined
+											 */
+											id?: {
+												/**
+												 * @type array
+												 */
+												in: string[];
+											};
+											/**
+											 * @type object | undefined
+											 */
+											kind?: {
+												/**
+												 * @type array
+												 */
+												in: (
+													| "slug_namespace"
+													| "profile"
+													| "book"
+													| "software"
+													| "media"
+													| "video"
+													| "audio"
+													| "release"
+													| "entity"
+													| "label"
+													| "tag"
+													| "structure"
+													| "series"
+													| "zone"
+													| "zone_page"
+													| "collection"
+													| "post"
+													| "poll"
+													| "realm"
+													| "realm_rule"
+												)[];
+											};
+										};
+										view:
+											| {
+													/**
+													 * @type string
+													 */
+													kind: "policy";
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													kind: "community";
+													/**
+													 * @type object | undefined
+													 */
+													consensus?: {
+														score?:
+															| {
+																	/**
+																	 * @type array
+																	 */
+																	in: number[];
+															  }
+															| {
+																	range:
+																		| {
+																				/**
+																				 * @type integer
+																				 */
+																				minimum: number;
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				maximum?: number;
+																		  }
+																		| {
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				minimum?: number;
+																				/**
+																				 * @type integer
+																				 */
+																				maximum: number;
+																		  };
+															  };
+														voteCount?:
+															| {
+																	/**
+																	 * @type array
+																	 */
+																	in: number[];
+															  }
+															| {
+																	range:
+																		| {
+																				/**
+																				 * @type integer
+																				 */
+																				minimum: number;
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				maximum?: number;
+																		  }
+																		| {
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				minimum?: number;
+																				/**
+																				 * @type integer
+																				 */
+																				maximum: number;
+																		  };
+															  };
+													};
+											  };
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										kind: "profile";
+										/**
+										 * @type object
+										 */
+										profile: {
+											/**
+											 * @type string
+											 */
+											kind: "viewer";
+										};
+								  };
+						};
+				  }
+				| {
+						/**
+						 * @type object
+						 */
+						none: {
+							/**
+							 * @type array | undefined
+							 */
+							all?: TagAssertionFilter[];
+							/**
+							 * @type array | undefined
+							 */
+							any?: TagAssertionFilter[];
+							/**
+							 * @type object | undefined
+							 */
+							not?: TagAssertionFilter;
+							/**
+							 * @type object | undefined
+							 */
+							tag?: {
+								/**
+								 * @type object | undefined
+								 */
+								id?: {
+									/**
+									 * @type array
+									 */
+									in: string[];
+								};
+								/**
+								 * @type object | undefined
+								 */
+								kind?: {
+									/**
+									 * @type array
+									 */
+									in: (
+										| "slug_namespace"
+										| "profile"
+										| "book"
+										| "software"
+										| "media"
+										| "video"
+										| "audio"
+										| "release"
+										| "entity"
+										| "label"
+										| "tag"
+										| "structure"
+										| "series"
+										| "zone"
+										| "zone_page"
+										| "collection"
+										| "post"
+										| "poll"
+										| "realm"
+										| "realm_rule"
+									)[];
+								};
+							};
+							authority?:
+								| {
+										/**
+										 * @type string
+										 */
+										kind: "global";
+										view:
+											| {
+													/**
+													 * @type string
+													 */
+													kind: "effective";
+													/**
+													 * @type object | undefined
+													 */
+													consensus?: {
+														score?:
+															| {
+																	/**
+																	 * @type array
+																	 */
+																	in: number[];
+															  }
+															| {
+																	range:
+																		| {
+																				/**
+																				 * @type integer
+																				 */
+																				minimum: number;
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				maximum?: number;
+																		  }
+																		| {
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				minimum?: number;
+																				/**
+																				 * @type integer
+																				 */
+																				maximum: number;
+																		  };
+															  };
+														voteCount?:
+															| {
+																	/**
+																	 * @type array
+																	 */
+																	in: number[];
+															  }
+															| {
+																	range:
+																		| {
+																				/**
+																				 * @type integer
+																				 */
+																				minimum: number;
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				maximum?: number;
+																		  }
+																		| {
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				minimum?: number;
+																				/**
+																				 * @type integer
+																				 */
+																				maximum: number;
+																		  };
+															  };
+													};
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													kind: "direct";
+											  };
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										kind: "realm";
+										/**
+										 * @type object
+										 */
+										realm: {
+											/**
+											 * @type object | undefined
+											 */
+											id?: {
+												/**
+												 * @type array
+												 */
+												in: string[];
+											};
+											/**
+											 * @type object | undefined
+											 */
+											kind?: {
+												/**
+												 * @type array
+												 */
+												in: (
+													| "slug_namespace"
+													| "profile"
+													| "book"
+													| "software"
+													| "media"
+													| "video"
+													| "audio"
+													| "release"
+													| "entity"
+													| "label"
+													| "tag"
+													| "structure"
+													| "series"
+													| "zone"
+													| "zone_page"
+													| "collection"
+													| "post"
+													| "poll"
+													| "realm"
+													| "realm_rule"
+												)[];
+											};
+										};
+										view:
+											| {
+													/**
+													 * @type string
+													 */
+													kind: "policy";
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													kind: "community";
+													/**
+													 * @type object | undefined
+													 */
+													consensus?: {
+														score?:
+															| {
+																	/**
+																	 * @type array
+																	 */
+																	in: number[];
+															  }
+															| {
+																	range:
+																		| {
+																				/**
+																				 * @type integer
+																				 */
+																				minimum: number;
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				maximum?: number;
+																		  }
+																		| {
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				minimum?: number;
+																				/**
+																				 * @type integer
+																				 */
+																				maximum: number;
+																		  };
+															  };
+														voteCount?:
+															| {
+																	/**
+																	 * @type array
+																	 */
+																	in: number[];
+															  }
+															| {
+																	range:
+																		| {
+																				/**
+																				 * @type integer
+																				 */
+																				minimum: number;
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				maximum?: number;
+																		  }
+																		| {
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				minimum?: number;
+																				/**
+																				 * @type integer
+																				 */
+																				maximum: number;
+																		  };
+															  };
+													};
+											  };
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										kind: "profile";
+										/**
+										 * @type object
+										 */
+										profile: {
+											/**
+											 * @type string
+											 */
+											kind: "viewer";
+										};
+								  };
+						};
+				  };
+			creditAttributions?:
+				| {
+						/**
+						 * @type object
+						 */
+						some: {
+							/**
+							 * @type object | undefined
+							 */
+							id?: {
+								/**
+								 * @type array
+								 */
+								in: string[];
+							};
+							/**
+							 * @type object | undefined
+							 */
+							kind?: {
+								/**
+								 * @type array
+								 */
+								in: (
+									| "slug_namespace"
+									| "profile"
+									| "book"
+									| "software"
+									| "media"
+									| "video"
+									| "audio"
+									| "release"
+									| "entity"
+									| "label"
+									| "tag"
+									| "structure"
+									| "series"
+									| "zone"
+									| "zone_page"
+									| "collection"
+									| "post"
+									| "poll"
+									| "realm"
+									| "realm_rule"
+								)[];
+							};
+						};
+				  }
+				| {
+						/**
+						 * @type object
+						 */
+						none: {
+							/**
+							 * @type object | undefined
+							 */
+							id?: {
+								/**
+								 * @type array
+								 */
+								in: string[];
+							};
+							/**
+							 * @type object | undefined
+							 */
+							kind?: {
+								/**
+								 * @type array
+								 */
+								in: (
+									| "slug_namespace"
+									| "profile"
+									| "book"
+									| "software"
+									| "media"
+									| "video"
+									| "audio"
+									| "release"
+									| "entity"
+									| "label"
+									| "tag"
+									| "structure"
+									| "series"
+									| "zone"
+									| "zone_page"
+									| "collection"
+									| "post"
+									| "poll"
+									| "realm"
+									| "realm_rule"
+								)[];
+							};
+						};
+				  };
+			subjectAssociations?:
+				| {
+						/**
+						 * @type object
+						 */
+						some: {
+							/**
+							 * @type object | undefined
+							 */
+							id?: {
+								/**
+								 * @type array
+								 */
+								in: string[];
+							};
+							/**
+							 * @type object | undefined
+							 */
+							kind?: {
+								/**
+								 * @type array
+								 */
+								in: (
+									| "slug_namespace"
+									| "profile"
+									| "book"
+									| "software"
+									| "media"
+									| "video"
+									| "audio"
+									| "release"
+									| "entity"
+									| "label"
+									| "tag"
+									| "structure"
+									| "series"
+									| "zone"
+									| "zone_page"
+									| "collection"
+									| "post"
+									| "poll"
+									| "realm"
+									| "realm_rule"
+								)[];
+							};
+						};
+				  }
+				| {
+						/**
+						 * @type object
+						 */
+						none: {
+							/**
+							 * @type object | undefined
+							 */
+							id?: {
+								/**
+								 * @type array
+								 */
+								in: string[];
+							};
+							/**
+							 * @type object | undefined
+							 */
+							kind?: {
+								/**
+								 * @type array
+								 */
+								in: (
+									| "slug_namespace"
+									| "profile"
+									| "book"
+									| "software"
+									| "media"
+									| "video"
+									| "audio"
+									| "release"
+									| "entity"
+									| "label"
+									| "tag"
+									| "structure"
+									| "series"
+									| "zone"
+									| "zone_page"
+									| "collection"
+									| "post"
+									| "poll"
+									| "realm"
+									| "realm_rule"
+								)[];
+							};
+						};
+				  };
+			publishers?:
+				| {
+						some:
+							| {
+									/**
+									 * @type string
+									 */
+									kind: "viewer";
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									kind: "profile";
+									/**
+									 * @type object
+									 */
+									id: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+							  };
+				  }
+				| {
+						none:
+							| {
+									/**
+									 * @type string
+									 */
+									kind: "viewer";
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									kind: "profile";
+									/**
+									 * @type object
+									 */
+									id: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+							  };
+				  };
+			/**
+			 * @type object | undefined
+			 */
+			scores?: {
+				received?:
+					| {
+							/**
+							 * @type object
+							 */
+							some: {
+								/**
+								 * @type array | undefined
+								 */
+								all?: ScoreFilter[];
+								/**
+								 * @type array | undefined
+								 */
+								any?: ScoreFilter[];
+								/**
+								 * @type object | undefined
+								 */
+								not?: ScoreFilter;
+								value?:
+									| {
+											/**
+											 * @type array
+											 */
+											in: number[];
+									  }
+									| {
+											range:
+												| {
+														/**
+														 * @minLength 1
+														 * @maxLength 10
+														 * @type integer
+														 */
+														minimum: number;
+														/**
+														 * @minLength 1
+														 * @maxLength 10
+														 * @type integer | undefined
+														 */
+														maximum?: number;
+												  }
+												| {
+														/**
+														 * @minLength 1
+														 * @maxLength 10
+														 * @type integer | undefined
+														 */
+														minimum?: number;
+														/**
+														 * @minLength 1
+														 * @maxLength 10
+														 * @type integer
+														 */
+														maximum: number;
+												  };
+									  };
+								/**
+								 * @type object | undefined
+								 */
+								realm?: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "video"
+											| "audio"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+								/**
+								 * @type object | undefined
+								 */
+								target?: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "video"
+											| "audio"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+								author?:
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "viewer";
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "profile";
+											/**
+											 * @type object
+											 */
+											id: {
+												/**
+												 * @type array
+												 */
+												in: string[];
+											};
+									  };
+							};
+					  }
+					| {
+							/**
+							 * @type object
+							 */
+							none: {
+								/**
+								 * @type array | undefined
+								 */
+								all?: ScoreFilter[];
+								/**
+								 * @type array | undefined
+								 */
+								any?: ScoreFilter[];
+								/**
+								 * @type object | undefined
+								 */
+								not?: ScoreFilter;
+								value?:
+									| {
+											/**
+											 * @type array
+											 */
+											in: number[];
+									  }
+									| {
+											range:
+												| {
+														/**
+														 * @minLength 1
+														 * @maxLength 10
+														 * @type integer
+														 */
+														minimum: number;
+														/**
+														 * @minLength 1
+														 * @maxLength 10
+														 * @type integer | undefined
+														 */
+														maximum?: number;
+												  }
+												| {
+														/**
+														 * @minLength 1
+														 * @maxLength 10
+														 * @type integer | undefined
+														 */
+														minimum?: number;
+														/**
+														 * @minLength 1
+														 * @maxLength 10
+														 * @type integer
+														 */
+														maximum: number;
+												  };
+									  };
+								/**
+								 * @type object | undefined
+								 */
+								realm?: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "video"
+											| "audio"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+								/**
+								 * @type object | undefined
+								 */
+								target?: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "video"
+											| "audio"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+								author?:
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "viewer";
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "profile";
+											/**
+											 * @type object
+											 */
+											id: {
+												/**
+												 * @type array
+												 */
+												in: string[];
+											};
+									  };
+							};
+					  };
+			};
+			post?:
+				| {
+						/**
+						 * @type object
+						 */
+						is: {
+							/**
+							 * @type array | undefined
+							 */
+							all?: PostFilter[];
+							/**
+							 * @type array | undefined
+							 */
+							any?: PostFilter[];
+							/**
+							 * @type object | undefined
+							 */
+							not?: PostFilter;
+							/**
+							 * @type object | undefined
+							 */
+							kind?: {
+								/**
+								 * @type array
+								 */
+								in: (
+									| "post"
+									| "reply"
+									| "excerpt"
+									| "review"
+									| "chapter"
+									| "page"
+									| "wiki"
+									| "picture"
+									| "governance_note"
+								)[];
+							};
+							subject?:
+								| {
+										/**
+										 * @type object
+										 */
+										is: {
+											/**
+											 * @type object | undefined
+											 */
+											id?: {
+												/**
+												 * @type array
+												 */
+												in: string[];
+											};
+											/**
+											 * @type object | undefined
+											 */
+											kind?: {
+												/**
+												 * @type array
+												 */
+												in: (
+													| "slug_namespace"
+													| "profile"
+													| "book"
+													| "software"
+													| "media"
+													| "video"
+													| "audio"
+													| "release"
+													| "entity"
+													| "label"
+													| "tag"
+													| "structure"
+													| "series"
+													| "zone"
+													| "zone_page"
+													| "collection"
+													| "post"
+													| "poll"
+													| "realm"
+													| "realm_rule"
+												)[];
+											};
+										};
+								  }
+								| {
+										/**
+										 * @type boolean
+										 */
+										absent: true;
+								  };
+							/**
+							 * @type object | undefined
+							 */
+							scores?: {
+								displayed?:
+									| {
+											/**
+											 * @type object
+											 */
+											some: {
+												/**
+												 * @type array | undefined
+												 */
+												all?: ScoreFilter[];
+												/**
+												 * @type array | undefined
+												 */
+												any?: ScoreFilter[];
+												/**
+												 * @type object | undefined
+												 */
+												not?: ScoreFilter;
+												value?:
+													| {
+															/**
+															 * @type array
+															 */
+															in: number[];
+													  }
+													| {
+															range:
+																| {
+																		/**
+																		 * @minLength 1
+																		 * @maxLength 10
+																		 * @type integer
+																		 */
+																		minimum: number;
+																		/**
+																		 * @minLength 1
+																		 * @maxLength 10
+																		 * @type integer | undefined
+																		 */
+																		maximum?: number;
+																  }
+																| {
+																		/**
+																		 * @minLength 1
+																		 * @maxLength 10
+																		 * @type integer | undefined
+																		 */
+																		minimum?: number;
+																		/**
+																		 * @minLength 1
+																		 * @maxLength 10
+																		 * @type integer
+																		 */
+																		maximum: number;
+																  };
+													  };
+												/**
+												 * @type object | undefined
+												 */
+												realm?: {
+													/**
+													 * @type object | undefined
+													 */
+													id?: {
+														/**
+														 * @type array
+														 */
+														in: string[];
+													};
+													/**
+													 * @type object | undefined
+													 */
+													kind?: {
+														/**
+														 * @type array
+														 */
+														in: (
+															| "slug_namespace"
+															| "profile"
+															| "book"
+															| "software"
+															| "media"
+															| "video"
+															| "audio"
+															| "release"
+															| "entity"
+															| "label"
+															| "tag"
+															| "structure"
+															| "series"
+															| "zone"
+															| "zone_page"
+															| "collection"
+															| "post"
+															| "poll"
+															| "realm"
+															| "realm_rule"
+														)[];
+													};
+												};
+												/**
+												 * @type object | undefined
+												 */
+												target?: {
+													/**
+													 * @type object | undefined
+													 */
+													id?: {
+														/**
+														 * @type array
+														 */
+														in: string[];
+													};
+													/**
+													 * @type object | undefined
+													 */
+													kind?: {
+														/**
+														 * @type array
+														 */
+														in: (
+															| "slug_namespace"
+															| "profile"
+															| "book"
+															| "software"
+															| "media"
+															| "video"
+															| "audio"
+															| "release"
+															| "entity"
+															| "label"
+															| "tag"
+															| "structure"
+															| "series"
+															| "zone"
+															| "zone_page"
+															| "collection"
+															| "post"
+															| "poll"
+															| "realm"
+															| "realm_rule"
+														)[];
+													};
+												};
+												author?:
+													| {
+															/**
+															 * @type string
+															 */
+															kind: "viewer";
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															kind: "profile";
+															/**
+															 * @type object
+															 */
+															id: {
+																/**
+																 * @type array
+																 */
+																in: string[];
+															};
+													  };
+											};
+									  }
+									| {
+											/**
+											 * @type object
+											 */
+											none: {
+												/**
+												 * @type array | undefined
+												 */
+												all?: ScoreFilter[];
+												/**
+												 * @type array | undefined
+												 */
+												any?: ScoreFilter[];
+												/**
+												 * @type object | undefined
+												 */
+												not?: ScoreFilter;
+												value?:
+													| {
+															/**
+															 * @type array
+															 */
+															in: number[];
+													  }
+													| {
+															range:
+																| {
+																		/**
+																		 * @minLength 1
+																		 * @maxLength 10
+																		 * @type integer
+																		 */
+																		minimum: number;
+																		/**
+																		 * @minLength 1
+																		 * @maxLength 10
+																		 * @type integer | undefined
+																		 */
+																		maximum?: number;
+																  }
+																| {
+																		/**
+																		 * @minLength 1
+																		 * @maxLength 10
+																		 * @type integer | undefined
+																		 */
+																		minimum?: number;
+																		/**
+																		 * @minLength 1
+																		 * @maxLength 10
+																		 * @type integer
+																		 */
+																		maximum: number;
+																  };
+													  };
+												/**
+												 * @type object | undefined
+												 */
+												realm?: {
+													/**
+													 * @type object | undefined
+													 */
+													id?: {
+														/**
+														 * @type array
+														 */
+														in: string[];
+													};
+													/**
+													 * @type object | undefined
+													 */
+													kind?: {
+														/**
+														 * @type array
+														 */
+														in: (
+															| "slug_namespace"
+															| "profile"
+															| "book"
+															| "software"
+															| "media"
+															| "video"
+															| "audio"
+															| "release"
+															| "entity"
+															| "label"
+															| "tag"
+															| "structure"
+															| "series"
+															| "zone"
+															| "zone_page"
+															| "collection"
+															| "post"
+															| "poll"
+															| "realm"
+															| "realm_rule"
+														)[];
+													};
+												};
+												/**
+												 * @type object | undefined
+												 */
+												target?: {
+													/**
+													 * @type object | undefined
+													 */
+													id?: {
+														/**
+														 * @type array
+														 */
+														in: string[];
+													};
+													/**
+													 * @type object | undefined
+													 */
+													kind?: {
+														/**
+														 * @type array
+														 */
+														in: (
+															| "slug_namespace"
+															| "profile"
+															| "book"
+															| "software"
+															| "media"
+															| "video"
+															| "audio"
+															| "release"
+															| "entity"
+															| "label"
+															| "tag"
+															| "structure"
+															| "series"
+															| "zone"
+															| "zone_page"
+															| "collection"
+															| "post"
+															| "poll"
+															| "realm"
+															| "realm_rule"
+														)[];
+													};
+												};
+												author?:
+													| {
+															/**
+															 * @type string
+															 */
+															kind: "viewer";
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															kind: "profile";
+															/**
+															 * @type object
+															 */
+															id: {
+																/**
+																 * @type array
+																 */
+																in: string[];
+															};
+													  };
+											};
+									  };
+							};
+							/**
+							 * @type object | undefined
+							 */
+							explainsRealmTag?: {
+								/**
+								 * @type object
+								 */
+								realm: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "video"
+											| "audio"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+								/**
+								 * @type object | undefined
+								 */
+								tag?: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "video"
+											| "audio"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+							};
+						};
+				  }
+				| {
+						/**
+						 * @type boolean
+						 */
+						absent: true;
+				  };
+			collection?:
+				| {
+						/**
+						 * @type object
+						 */
+						is: {
+							/**
+							 * @type array | undefined
+							 */
+							all?: CollectionFilter[];
+							/**
+							 * @type array | undefined
+							 */
+							any?: CollectionFilter[];
+							/**
+							 * @type object | undefined
+							 */
+							not?: CollectionFilter;
+							items?:
+								| {
+										/**
+										 * @type object
+										 */
+										some: {
+											/**
+											 * @type object | undefined
+											 */
+											id?: {
+												/**
+												 * @type array
+												 */
+												in: string[];
+											};
+											/**
+											 * @type object | undefined
+											 */
+											kind?: {
+												/**
+												 * @type array
+												 */
+												in: (
+													| "slug_namespace"
+													| "profile"
+													| "book"
+													| "software"
+													| "media"
+													| "video"
+													| "audio"
+													| "release"
+													| "entity"
+													| "label"
+													| "tag"
+													| "structure"
+													| "series"
+													| "zone"
+													| "zone_page"
+													| "collection"
+													| "post"
+													| "poll"
+													| "realm"
+													| "realm_rule"
+												)[];
+											};
+										};
+								  }
+								| {
+										/**
+										 * @type object
+										 */
+										none: {
+											/**
+											 * @type object | undefined
+											 */
+											id?: {
+												/**
+												 * @type array
+												 */
+												in: string[];
+											};
+											/**
+											 * @type object | undefined
+											 */
+											kind?: {
+												/**
+												 * @type array
+												 */
+												in: (
+													| "slug_namespace"
+													| "profile"
+													| "book"
+													| "software"
+													| "media"
+													| "video"
+													| "audio"
+													| "release"
+													| "entity"
+													| "label"
+													| "tag"
+													| "structure"
+													| "series"
+													| "zone"
+													| "zone_page"
+													| "collection"
+													| "post"
+													| "poll"
+													| "realm"
+													| "realm_rule"
+												)[];
+											};
+										};
+								  };
+						};
+				  }
+				| {
+						/**
+						 * @type boolean
+						 */
+						absent: true;
+				  };
+		};
+		/**
+		 * @type array | undefined
+		 */
+		controls?: {
+			/**
+			 * @minLength 1
+			 * @maxLength 64
+			 * @pattern ^[a-z][a-z0-9-]*$
+			 * @type string
+			 */
+			key: string;
+			/**
+			 * @type string | undefined
+			 */
+			field?: GetApiProgressSearchFilterStatus200FilterDocumentControlsFieldEnum;
+			/**
+			 * @type boolean | undefined
+			 */
+			enabled?: boolean;
+			/**
+			 * @type string | undefined
+			 */
+			disclosure?: GetApiProgressSearchFilterStatus200FilterDocumentControlsDisclosureEnum;
+			/**
+			 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+			 * @type string | undefined
+			 */
+			labelUnitId?: string;
+			optionPolicy?:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "all";
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "include";
+						/**
+						 * @type array
+						 */
+						values: (string | number | boolean)[];
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "exclude";
+						/**
+						 * @type array
+						 */
+						values: (string | number | boolean)[];
+				  };
+			/**
+			 * @type boolean | undefined
+			 */
+			required?: boolean;
+		}[];
+	};
+	/**
+	 * @type array
+	 */
+	categories: GetApiProgressSearchFilterStatus200CategoriesEnum[];
+	/**
+	 * @type object
+	 */
+	query: {
+		/**
+		 * @type boolean
+		 */
+		enabled: boolean;
+		/**
+		 * @type boolean | undefined
+		 */
+		required?: boolean;
+	};
+	/**
+	 * @type object
+	 */
+	sort: {
+		/**
+		 * @type object
+		 */
+		search: {
+			/**
+			 * @type object
+			 */
+			defaults: {
+				/**
+				 * @type string
+				 */
+				emptyQuery: GetApiProgressSearchFilterStatus200SortSearchDefaultsEmptyQueryEnum;
+				/**
+				 * @type string
+				 */
+				textQuery: GetApiProgressSearchFilterStatus200SortSearchDefaultsTextQueryEnum;
+			};
+			/**
+			 * @type array
+			 */
+			options: GetApiProgressSearchFilterStatus200SortSearchOptionsEnum[];
+		};
+		/**
+		 * @type object
+		 */
+		feed: {
+			/**
+			 * @type object
+			 */
+			defaults: {
+				/**
+				 * @type string
+				 */
+				emptyQuery: GetApiProgressSearchFilterStatus200SortFeedDefaultsEmptyQueryEnum;
+				/**
+				 * @type string
+				 */
+				textQuery: GetApiProgressSearchFilterStatus200SortFeedDefaultsTextQueryEnum;
+			};
+			/**
+			 * @type array
+			 */
+			options: GetApiProgressSearchFilterStatus200SortFeedOptionsEnum[];
+		};
+	};
+	/**
+	 * @type array
+	 */
+	controls: {
+		/**
+		 * @minLength 1
+		 * @maxLength 64
+		 * @pattern ^[a-z][a-z0-9-]*$
+		 * @type string
+		 */
+		key: string;
+		/**
+		 * @type string
+		 */
+		field: GetApiProgressSearchFilterStatus200ControlsFieldEnum;
+		/**
+		 * @type string
+		 */
+		component: GetApiProgressSearchFilterStatus200ControlsComponentEnum;
+		/**
+		 * @type array
+		 */
+		operators: GetApiProgressSearchFilterStatus200ControlsOperatorsEnum[];
+		optionSource?:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "facet";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "static";
+					/**
+					 * @type array
+					 */
+					options: {
+						value: string | number | boolean;
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string | undefined
+						 */
+						labelUnitId?: string;
+					}[];
+			  };
+		optionPolicy?:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "all";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "include";
+					/**
+					 * @type array
+					 */
+					values: (string | number | boolean)[];
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "exclude";
+					/**
+					 * @type array
+					 */
+					values: (string | number | boolean)[];
+			  };
+		/**
+		 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+		 * @type string | undefined
+		 */
+		labelUnitId?: string;
+		/**
+		 * @default false
+		 * @type boolean | undefined
+		 */
+		required?: boolean;
+		/**
+		 * @type boolean
+		 */
+		enabled: boolean;
+		/**
+		 * @type string
+		 */
+		disclosure: GetApiProgressSearchFilterStatus200ControlsDisclosureEnum;
+	}[];
+};
+
+export const GetApiProgressSearchFilterStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiProgressSearchFilterStatus429ErrorCodeEnum =
+	(typeof GetApiProgressSearchFilterStatus429ErrorCodeEnum)[keyof typeof GetApiProgressSearchFilterStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiProgressSearchFilterStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: GetApiProgressSearchFilterStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiProgressSearchFilterStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiProgressSearchFilterOptions = {
+	body?: never;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiProgressSearchFilterResponses = {
+	"200": GetApiProgressSearchFilterStatus200;
+	"429": GetApiProgressSearchFilterStatus429;
+	"500": GetApiProgressSearchFilterStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiProgressSearchFilterResponse =
+	| GetApiProgressSearchFilterStatus200
+	| GetApiProgressSearchFilterStatus429
+	| GetApiProgressSearchFilterStatus500;
+
 export const PostApiProgressSearchStatus200ItemsStatusEnum = {
 	backlog: "backlog",
 	active: "active",
@@ -133196,50 +144221,22 @@ export type DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdResponse =
 	| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429
 	| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500;
 
-export const GetApiSearchFeaturesByTemplateTemplate = {
-	global: "global",
-	book: "book",
-	media: "media",
-	software: "software",
-	progress: "progress",
-	realm: "realm",
-	zone: "zone",
-} as const;
-
-export type GetApiSearchFeaturesByTemplateTemplate =
-	(typeof GetApiSearchFeaturesByTemplateTemplate)[keyof typeof GetApiSearchFeaturesByTemplateTemplate];
+/**
+ * @type object
+ */
+export type GetApiSearchFilterStatus200 = SearchFeatureDefinition;
 
 /**
  * @type object
  */
-export type GetApiSearchFeaturesByTemplatePath = {
-	/**
-	 * @type string
-	 */
-	template: GetApiSearchFeaturesByTemplateTemplate;
-};
+export type GetApiSearchFilterStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type GetApiSearchFeaturesByTemplateStatus200 = SearchFeatureDefinitionV1;
-
-/**
- * @type object
- */
-export type GetApiSearchFeaturesByTemplateStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type GetApiSearchFeaturesByTemplateStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type GetApiSearchFeaturesByTemplateOptions = {
+export type GetApiSearchFilterOptions = {
 	body?: never;
-	path: GetApiSearchFeaturesByTemplatePath;
+	path?: never;
 	query?: never;
 	headers?: never;
 };
@@ -133247,43 +144244,93 @@ export type GetApiSearchFeaturesByTemplateOptions = {
 /**
  * @type object
  */
-export type GetApiSearchFeaturesByTemplateResponses = {
-	"200": GetApiSearchFeaturesByTemplateStatus200;
-	"422": GetApiSearchFeaturesByTemplateStatus422;
-	"500": GetApiSearchFeaturesByTemplateStatus500;
+export type GetApiSearchFilterResponses = {
+	"200": GetApiSearchFilterStatus200;
+	"500": GetApiSearchFilterStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type GetApiSearchFeaturesByTemplateResponse =
-	| GetApiSearchFeaturesByTemplateStatus200
-	| GetApiSearchFeaturesByTemplateStatus422
-	| GetApiSearchFeaturesByTemplateStatus500;
-
-export const PostApiSearchFeaturesByTemplateExecuteTemplate = {
-	global: "global",
-	book: "book",
-	media: "media",
-	software: "software",
-	realm: "realm",
-	zone: "zone",
-} as const;
-
-export type PostApiSearchFeaturesByTemplateExecuteTemplate =
-	(typeof PostApiSearchFeaturesByTemplateExecuteTemplate)[keyof typeof PostApiSearchFeaturesByTemplateExecuteTemplate];
+export type GetApiSearchFilterResponse = GetApiSearchFilterStatus200 | GetApiSearchFilterStatus500;
 
 /**
  * @type object
  */
-export type PostApiSearchFeaturesByTemplateExecutePath = {
-	/**
-	 * @type string
-	 */
-	template: PostApiSearchFeaturesByTemplateExecuteTemplate;
+export type PostApiSearchFilterDefinitionStatus200 = SearchFeatureDefinition;
+
+/**
+ * @type object
+ */
+export type PostApiSearchFilterDefinitionStatus400 = MalformedRequestBody;
+
+export type PostApiSearchFilterDefinitionStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidSearch'
+				 * @type string
+				 */
+				code: "InvalidSearch";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiSearchFilterDefinitionStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiSearchFilterDefinitionBody = FilterDocument;
+
+/**
+ * @type object
+ */
+export type PostApiSearchFilterDefinitionOptions = {
+	body: PostApiSearchFilterDefinitionBody;
+	path?: never;
+	query?: never;
+	headers?: never;
 };
 
-export const PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsLanguageEnum = {
+/**
+ * @type object
+ */
+export type PostApiSearchFilterDefinitionResponses = {
+	"200": PostApiSearchFilterDefinitionStatus200;
+	"400": PostApiSearchFilterDefinitionStatus400;
+	"422": PostApiSearchFilterDefinitionStatus422;
+	"500": PostApiSearchFilterDefinitionStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiSearchFilterDefinitionResponse =
+	| PostApiSearchFilterDefinitionStatus200
+	| PostApiSearchFilterDefinitionStatus400
+	| PostApiSearchFilterDefinitionStatus422
+	| PostApiSearchFilterDefinitionStatus500;
+
+export const PostApiSearchFilterExecuteStatus200GroupsHitsLanguageEnum = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -133293,53 +144340,52 @@ export const PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsLanguageEn
 	es: "es",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsLanguageEnum =
-	(typeof PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsLanguageEnum)[keyof typeof PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsLanguageEnum];
+export type PostApiSearchFilterExecuteStatus200GroupsHitsLanguageEnum =
+	(typeof PostApiSearchFilterExecuteStatus200GroupsHitsLanguageEnum)[keyof typeof PostApiSearchFilterExecuteStatus200GroupsHitsLanguageEnum];
 
-export const PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsAvatarIconPrefixEnum = {
+export const PostApiSearchFilterExecuteStatus200GroupsHitsAvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsAvatarIconPrefixEnum =
-	(typeof PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsAvatarIconPrefixEnum)[keyof typeof PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsAvatarIconPrefixEnum];
+export type PostApiSearchFilterExecuteStatus200GroupsHitsAvatarIconPrefixEnum =
+	(typeof PostApiSearchFilterExecuteStatus200GroupsHitsAvatarIconPrefixEnum)[keyof typeof PostApiSearchFilterExecuteStatus200GroupsHitsAvatarIconPrefixEnum];
 
-export const PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsVariantRoleEnum = {
+export const PostApiSearchFilterExecuteStatus200GroupsHitsVariantRoleEnum = {
 	standalone: "standalone",
 	main: "main",
 	variant: "variant",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsVariantRoleEnum =
-	(typeof PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsVariantRoleEnum)[keyof typeof PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsVariantRoleEnum];
+export type PostApiSearchFilterExecuteStatus200GroupsHitsVariantRoleEnum =
+	(typeof PostApiSearchFilterExecuteStatus200GroupsHitsVariantRoleEnum)[keyof typeof PostApiSearchFilterExecuteStatus200GroupsHitsVariantRoleEnum];
 
-export const PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsVariantMainUnitTypeEnum = {
+export const PostApiSearchFilterExecuteStatus200GroupsHitsVariantMainUnitTypeEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsVariantMainUnitTypeEnum =
-	(typeof PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsVariantMainUnitTypeEnum)[keyof typeof PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsVariantMainUnitTypeEnum];
+export type PostApiSearchFilterExecuteStatus200GroupsHitsVariantMainUnitTypeEnum =
+	(typeof PostApiSearchFilterExecuteStatus200GroupsHitsVariantMainUnitTypeEnum)[keyof typeof PostApiSearchFilterExecuteStatus200GroupsHitsVariantMainUnitTypeEnum];
 
-export const PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum =
-	{
-		zh: "zh",
-		en: "en",
-		ja: "ja",
-		ko: "ko",
-		de: "de",
-		fr: "fr",
-		es: "es",
-	} as const;
+export const PostApiSearchFilterExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
 
-export type PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum =
-	(typeof PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum)[keyof typeof PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum];
+export type PostApiSearchFilterExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum =
+	(typeof PostApiSearchFilterExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum)[keyof typeof PostApiSearchFilterExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum];
 
 /**
  * @type object
  */
-export type PostApiSearchFeaturesByTemplateExecuteStatus200 = {
+export type PostApiSearchFilterExecuteStatus200 = {
 	/**
 	 * @type string
 	 */
@@ -133446,7 +144492,7 @@ export type PostApiSearchFeaturesByTemplateExecuteStatus200 = {
 			/**
 			 * @type string
 			 */
-			language: PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsLanguageEnum;
+			language: PostApiSearchFilterExecuteStatus200GroupsHitsLanguageEnum;
 			title: (string | null) | null;
 			/**
 			 * @type array
@@ -133507,7 +144553,7 @@ export type PostApiSearchFeaturesByTemplateExecuteStatus200 = {
 											/**
 											 * @type string
 											 */
-											prefix: PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsAvatarIconPrefixEnum;
+											prefix: PostApiSearchFilterExecuteStatus200GroupsHitsAvatarIconPrefixEnum;
 											/**
 											 * @maxLength 128
 											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -133524,7 +144570,7 @@ export type PostApiSearchFeaturesByTemplateExecuteStatus200 = {
 			 * @default 'standalone'
 			 * @type string | undefined
 			 */
-			variantRole?: PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsVariantRoleEnum;
+			variantRole?: PostApiSearchFilterExecuteStatus200GroupsHitsVariantRoleEnum;
 			variantMain?:
 				| {
 						/**
@@ -133551,11 +144597,11 @@ export type PostApiSearchFeaturesByTemplateExecuteStatus200 = {
 							 * @default 'book'
 							 * @type string
 							 */
-							type: PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsVariantMainUnitTypeEnum;
+							type: PostApiSearchFilterExecuteStatus200GroupsHitsVariantMainUnitTypeEnum;
 							/**
 							 * @type string
 							 */
-							language: PostApiSearchFeaturesByTemplateExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum;
+							language: PostApiSearchFilterExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum;
 							title: (string | null) | null;
 							cover:
 								| ({
@@ -133610,9 +144656,9 @@ export type PostApiSearchFeaturesByTemplateExecuteStatus200 = {
 /**
  * @type object
  */
-export type PostApiSearchFeaturesByTemplateExecuteStatus400 = MalformedRequestBody;
+export type PostApiSearchFilterExecuteStatus400 = MalformedRequestBody;
 
-export type PostApiSearchFeaturesByTemplateExecuteStatus422 =
+export type PostApiSearchFilterExecuteStatus422 =
 	| {
 			/**
 			 * @type object
@@ -133639,47 +144685,15 @@ export type PostApiSearchFeaturesByTemplateExecuteStatus422 =
 	  }
 	| ValidationError;
 
-export const PostApiSearchFeaturesByTemplateExecuteStatus429ErrorCodeEnum = {
-	ApiQuotaExceeded: "ApiQuotaExceeded",
-	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
-} as const;
-
-export type PostApiSearchFeaturesByTemplateExecuteStatus429ErrorCodeEnum =
-	(typeof PostApiSearchFeaturesByTemplateExecuteStatus429ErrorCodeEnum)[keyof typeof PostApiSearchFeaturesByTemplateExecuteStatus429ErrorCodeEnum];
+/**
+ * @type object
+ */
+export type PostApiSearchFilterExecuteStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type PostApiSearchFeaturesByTemplateExecuteStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PostApiSearchFeaturesByTemplateExecuteStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiSearchFeaturesByTemplateExecuteStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type PostApiSearchFeaturesByTemplateExecuteStatus503 = {
+export type PostApiSearchFilterExecuteStatus503 = {
 	/**
 	 * @type object
 	 */
@@ -133704,15 +144718,15 @@ export type PostApiSearchFeaturesByTemplateExecuteStatus503 = {
 	requestId: string;
 };
 
-export const PostApiSearchFeaturesByTemplateExecuteRequestInjectionsSourceEnum = {
+export const PostApiSearchFilterExecuteRequestInjectionsSourceEnum = {
 	tag: "tag",
 	link: "link",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateExecuteRequestInjectionsSourceEnum =
-	(typeof PostApiSearchFeaturesByTemplateExecuteRequestInjectionsSourceEnum)[keyof typeof PostApiSearchFeaturesByTemplateExecuteRequestInjectionsSourceEnum];
+export type PostApiSearchFilterExecuteRequestInjectionsSourceEnum =
+	(typeof PostApiSearchFilterExecuteRequestInjectionsSourceEnum)[keyof typeof PostApiSearchFilterExecuteRequestInjectionsSourceEnum];
 
-export const PostApiSearchFeaturesByTemplateExecuteRequestStateSortEnum = {
+export const PostApiSearchFilterExecuteRequestStateSortEnum = {
 	best: "best",
 	relevance: "relevance",
 	"createdAt:asc": "createdAt:asc",
@@ -133733,10 +144747,10 @@ export const PostApiSearchFeaturesByTemplateExecuteRequestStateSortEnum = {
 	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateExecuteRequestStateSortEnum =
-	(typeof PostApiSearchFeaturesByTemplateExecuteRequestStateSortEnum)[keyof typeof PostApiSearchFeaturesByTemplateExecuteRequestStateSortEnum];
+export type PostApiSearchFilterExecuteRequestStateSortEnum =
+	(typeof PostApiSearchFilterExecuteRequestStateSortEnum)[keyof typeof PostApiSearchFilterExecuteRequestStateSortEnum];
 
-export const PostApiSearchFeaturesByTemplateExecuteRequestLocalizationLanguagesEnum = {
+export const PostApiSearchFilterExecuteRequestLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -133746,13 +144760,17 @@ export const PostApiSearchFeaturesByTemplateExecuteRequestLocalizationLanguagesE
 	es: "es",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateExecuteRequestLocalizationLanguagesEnum =
-	(typeof PostApiSearchFeaturesByTemplateExecuteRequestLocalizationLanguagesEnum)[keyof typeof PostApiSearchFeaturesByTemplateExecuteRequestLocalizationLanguagesEnum];
+export type PostApiSearchFilterExecuteRequestLocalizationLanguagesEnum =
+	(typeof PostApiSearchFilterExecuteRequestLocalizationLanguagesEnum)[keyof typeof PostApiSearchFilterExecuteRequestLocalizationLanguagesEnum];
 
 /**
  * @type object
  */
-export type PostApiSearchFeaturesByTemplateExecuteBody = {
+export type PostApiSearchFilterExecuteBody = {
+	/**
+	 * @type object
+	 */
+	filterDocument: FilterDocument;
 	/**
 	 * @type array
 	 */
@@ -133814,7 +144832,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 		/**
 		 * @type string
 		 */
-		source: PostApiSearchFeaturesByTemplateExecuteRequestInjectionsSourceEnum;
+		source: PostApiSearchFilterExecuteRequestInjectionsSourceEnum;
 		/**
 		 * @type object
 		 */
@@ -134203,7 +145221,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 		/**
 		 * @type string | undefined
 		 */
-		sort?: PostApiSearchFeaturesByTemplateExecuteRequestStateSortEnum;
+		sort?: PostApiSearchFilterExecuteRequestStateSortEnum;
 		/**
 		 * @minLength 1
 		 * @maxLength 100
@@ -134610,15 +145628,15 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 	/**
 	 * @type array
 	 */
-	localizationLanguages: PostApiSearchFeaturesByTemplateExecuteRequestLocalizationLanguagesEnum[];
+	localizationLanguages: PostApiSearchFilterExecuteRequestLocalizationLanguagesEnum[];
 };
 
 /**
  * @type object
  */
-export type PostApiSearchFeaturesByTemplateExecuteOptions = {
-	body: PostApiSearchFeaturesByTemplateExecuteBody;
-	path: PostApiSearchFeaturesByTemplateExecutePath;
+export type PostApiSearchFilterExecuteOptions = {
+	body: PostApiSearchFilterExecuteBody;
+	path?: never;
 	query?: never;
 	headers?: never;
 };
@@ -134626,49 +145644,25 @@ export type PostApiSearchFeaturesByTemplateExecuteOptions = {
 /**
  * @type object
  */
-export type PostApiSearchFeaturesByTemplateExecuteResponses = {
-	"200": PostApiSearchFeaturesByTemplateExecuteStatus200;
-	"400": PostApiSearchFeaturesByTemplateExecuteStatus400;
-	"422": PostApiSearchFeaturesByTemplateExecuteStatus422;
-	"429": PostApiSearchFeaturesByTemplateExecuteStatus429;
-	"500": PostApiSearchFeaturesByTemplateExecuteStatus500;
-	"503": PostApiSearchFeaturesByTemplateExecuteStatus503;
+export type PostApiSearchFilterExecuteResponses = {
+	"200": PostApiSearchFilterExecuteStatus200;
+	"400": PostApiSearchFilterExecuteStatus400;
+	"422": PostApiSearchFilterExecuteStatus422;
+	"500": PostApiSearchFilterExecuteStatus500;
+	"503": PostApiSearchFilterExecuteStatus503;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PostApiSearchFeaturesByTemplateExecuteResponse =
-	| PostApiSearchFeaturesByTemplateExecuteStatus200
-	| PostApiSearchFeaturesByTemplateExecuteStatus400
-	| PostApiSearchFeaturesByTemplateExecuteStatus422
-	| PostApiSearchFeaturesByTemplateExecuteStatus429
-	| PostApiSearchFeaturesByTemplateExecuteStatus500
-	| PostApiSearchFeaturesByTemplateExecuteStatus503;
+export type PostApiSearchFilterExecuteResponse =
+	| PostApiSearchFilterExecuteStatus200
+	| PostApiSearchFilterExecuteStatus400
+	| PostApiSearchFilterExecuteStatus422
+	| PostApiSearchFilterExecuteStatus500
+	| PostApiSearchFilterExecuteStatus503;
 
-export const PostApiSearchFeaturesByTemplateFeedTemplate = {
-	global: "global",
-	book: "book",
-	media: "media",
-	software: "software",
-	realm: "realm",
-	zone: "zone",
-} as const;
-
-export type PostApiSearchFeaturesByTemplateFeedTemplate =
-	(typeof PostApiSearchFeaturesByTemplateFeedTemplate)[keyof typeof PostApiSearchFeaturesByTemplateFeedTemplate];
-
-/**
- * @type object
- */
-export type PostApiSearchFeaturesByTemplateFeedPath = {
-	/**
-	 * @type string
-	 */
-	template: PostApiSearchFeaturesByTemplateFeedTemplate;
-};
-
-export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsLanguage = {
+export const PostApiSearchFilterFeedStatus200ItemsLanguage = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -134678,10 +145672,10 @@ export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsLanguage = {
 	es: "es",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsLanguage =
-	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsLanguage)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsLanguage];
+export type PostApiSearchFilterFeedStatus200ItemsLanguage =
+	(typeof PostApiSearchFilterFeedStatus200ItemsLanguage)[keyof typeof PostApiSearchFilterFeedStatus200ItemsLanguage];
 
-export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsAvailableLanguagesEnum = {
+export const PostApiSearchFilterFeedStatus200ItemsAvailableLanguagesEnum = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -134691,10 +145685,10 @@ export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsAvailableLanguages
 	es: "es",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsAvailableLanguagesEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsAvailableLanguagesEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsAvailableLanguagesEnum];
+export type PostApiSearchFilterFeedStatus200ItemsAvailableLanguagesEnum =
+	(typeof PostApiSearchFilterFeedStatus200ItemsAvailableLanguagesEnum)[keyof typeof PostApiSearchFilterFeedStatus200ItemsAvailableLanguagesEnum];
 
-export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsRoleEnum = {
+export const PostApiSearchFilterFeedStatus200ItemsAttributionsRoleEnum = {
 	author: "author",
 	"co-author": "co-author",
 	translator: "translator",
@@ -134715,10 +145709,10 @@ export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsRoleEn
 	distributor: "distributor",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsRoleEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsRoleEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsRoleEnum];
+export type PostApiSearchFilterFeedStatus200ItemsAttributionsRoleEnum =
+	(typeof PostApiSearchFilterFeedStatus200ItemsAttributionsRoleEnum)[keyof typeof PostApiSearchFilterFeedStatus200ItemsAttributionsRoleEnum];
 
-export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitKindEnum = {
+export const PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
 	book: "book",
@@ -134741,33 +145735,10 @@ export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCredit
 	realm_rule: "realm_rule",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitKindEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitKindEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitKindEnum];
+export type PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitKindEnum =
+	(typeof PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitKindEnum)[keyof typeof PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitKindEnum];
 
-export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum =
-	{
-		zh: "zh",
-		en: "en",
-		ja: "ja",
-		ko: "ko",
-		de: "de",
-		fr: "fr",
-		es: "es",
-	} as const;
-
-export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum];
-
-export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
-	{
-		fas: "fas",
-		fab: "fab",
-	} as const;
-
-export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum];
-
-export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsLanguageEnum = {
+export const PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -134777,18 +145748,39 @@ export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsLanguageEnum
 	es: "es",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsLanguageEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsLanguageEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsLanguageEnum];
+export type PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum =
+	(typeof PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum)[keyof typeof PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum];
 
-export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsAvatarIconPrefixEnum = {
+export const PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsAvatarIconPrefixEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsAvatarIconPrefixEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsAvatarIconPrefixEnum];
+export type PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
+	(typeof PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum];
 
-export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsRecommendationReason = {
+export const PostApiSearchFilterFeedStatus200ItemsRealmsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiSearchFilterFeedStatus200ItemsRealmsLanguageEnum =
+	(typeof PostApiSearchFilterFeedStatus200ItemsRealmsLanguageEnum)[keyof typeof PostApiSearchFilterFeedStatus200ItemsRealmsLanguageEnum];
+
+export const PostApiSearchFilterFeedStatus200ItemsRealmsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PostApiSearchFilterFeedStatus200ItemsRealmsAvatarIconPrefixEnum =
+	(typeof PostApiSearchFilterFeedStatus200ItemsRealmsAvatarIconPrefixEnum)[keyof typeof PostApiSearchFilterFeedStatus200ItemsRealmsAvatarIconPrefixEnum];
+
+export const PostApiSearchFilterFeedStatus200ItemsRecommendationReason = {
 	followed_unit: "followed_unit",
 	followed_realm: "followed_realm",
 	based_on_activity: "based_on_activity",
@@ -134797,10 +145789,10 @@ export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsRecommendationReas
 	new_and_relevant: "new_and_relevant",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsRecommendationReason =
-	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsRecommendationReason)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsRecommendationReason];
+export type PostApiSearchFilterFeedStatus200ItemsRecommendationReason =
+	(typeof PostApiSearchFilterFeedStatus200ItemsRecommendationReason)[keyof typeof PostApiSearchFilterFeedStatus200ItemsRecommendationReason];
 
-export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsTrackingSurfaceEnum = {
+export const PostApiSearchFilterFeedStatus200ItemsTrackingSurfaceEnum = {
 	home_feed: "home_feed",
 	home_book: "home_book",
 	home_software: "home_software",
@@ -134809,10 +145801,10 @@ export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsTrackingSurfaceEnu
 	post_related: "post_related",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsTrackingSurfaceEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsTrackingSurfaceEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsTrackingSurfaceEnum];
+export type PostApiSearchFilterFeedStatus200ItemsTrackingSurfaceEnum =
+	(typeof PostApiSearchFilterFeedStatus200ItemsTrackingSurfaceEnum)[keyof typeof PostApiSearchFilterFeedStatus200ItemsTrackingSurfaceEnum];
 
-export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsUnitKindEnum = {
+export const PostApiSearchFilterFeedStatus200ItemsUnitKindEnum = {
 	profile: "profile",
 	book: "book",
 	software: "software",
@@ -134828,32 +145820,31 @@ export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsUnitKindEnum = {
 	realm: "realm",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsUnitKindEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsUnitKindEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsUnitKindEnum];
+export type PostApiSearchFilterFeedStatus200ItemsUnitKindEnum =
+	(typeof PostApiSearchFilterFeedStatus200ItemsUnitKindEnum)[keyof typeof PostApiSearchFilterFeedStatus200ItemsUnitKindEnum];
 
-export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsPresentationAvatarIconPrefixEnum = {
+export const PostApiSearchFilterFeedStatus200ItemsPresentationAvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsPresentationAvatarIconPrefixEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsPresentationAvatarIconPrefixEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsPresentationAvatarIconPrefixEnum];
+export type PostApiSearchFilterFeedStatus200ItemsPresentationAvatarIconPrefixEnum =
+	(typeof PostApiSearchFilterFeedStatus200ItemsPresentationAvatarIconPrefixEnum)[keyof typeof PostApiSearchFilterFeedStatus200ItemsPresentationAvatarIconPrefixEnum];
 
-export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsPresentationRealmTagContextLanguage =
-	{
-		zh: "zh",
-		en: "en",
-		ja: "ja",
-		ko: "ko",
-		de: "de",
-		fr: "fr",
-		es: "es",
-	} as const;
+export const PostApiSearchFilterFeedStatus200ItemsPresentationRealmTagContextLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
 
-export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsPresentationRealmTagContextLanguage =
-	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsPresentationRealmTagContextLanguage)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsPresentationRealmTagContextLanguage];
+export type PostApiSearchFilterFeedStatus200ItemsPresentationRealmTagContextLanguage =
+	(typeof PostApiSearchFilterFeedStatus200ItemsPresentationRealmTagContextLanguage)[keyof typeof PostApiSearchFilterFeedStatus200ItemsPresentationRealmTagContextLanguage];
 
-export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsRoleEnum = {
+export const PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsRoleEnum = {
 	author: "author",
 	"co-author": "co-author",
 	translator: "translator",
@@ -134874,37 +145865,36 @@ export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttrib
 	distributor: "distributor",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsRoleEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsRoleEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsRoleEnum];
+export type PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsRoleEnum =
+	(typeof PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsRoleEnum)[keyof typeof PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsRoleEnum];
 
-export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum =
-	{
-		slug_namespace: "slug_namespace",
-		profile: "profile",
-		book: "book",
-		software: "software",
-		media: "media",
-		video: "video",
-		audio: "audio",
-		release: "release",
-		entity: "entity",
-		label: "label",
-		tag: "tag",
-		structure: "structure",
-		series: "series",
-		zone: "zone",
-		zone_page: "zone_page",
-		collection: "collection",
-		post: "post",
-		poll: "poll",
-		realm: "realm",
-		realm_rule: "realm_rule",
-	} as const;
+export const PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
 
-export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum];
+export type PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum =
+	(typeof PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum)[keyof typeof PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum];
 
-export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum =
+export const PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum =
 	{
 		zh: "zh",
 		en: "en",
@@ -134915,19 +145905,19 @@ export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttrib
 		es: "es",
 	} as const;
 
-export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum];
+export type PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum =
+	(typeof PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum)[keyof typeof PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum];
 
-export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
+export const PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
 	{
 		fas: "fas",
 		fab: "fab",
 	} as const;
 
-export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum];
+export type PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
+	(typeof PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum];
 
-export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsSubjectLanguageEnum = {
+export const PostApiSearchFilterFeedStatus200ItemsSubjectLanguageEnum = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -134937,10 +145927,10 @@ export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsSubjectLanguageEnu
 	es: "es",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsSubjectLanguageEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsSubjectLanguageEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsSubjectLanguageEnum];
+export type PostApiSearchFilterFeedStatus200ItemsSubjectLanguageEnum =
+	(typeof PostApiSearchFilterFeedStatus200ItemsSubjectLanguageEnum)[keyof typeof PostApiSearchFilterFeedStatus200ItemsSubjectLanguageEnum];
 
-export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsPostKindEnum = {
+export const PostApiSearchFilterFeedStatus200ItemsPostKindEnum = {
 	post: "post",
 	reply: "reply",
 	excerpt: "excerpt",
@@ -134948,10 +145938,10 @@ export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsPostKindEnum = {
 	picture: "picture",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsPostKindEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsPostKindEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsPostKindEnum];
+export type PostApiSearchFilterFeedStatus200ItemsPostKindEnum =
+	(typeof PostApiSearchFilterFeedStatus200ItemsPostKindEnum)[keyof typeof PostApiSearchFilterFeedStatus200ItemsPostKindEnum];
 
-export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmTagContextTagLanguageEnum = {
+export const PostApiSearchFilterFeedStatus200ItemsRealmTagContextTagLanguageEnum = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -134961,22 +145951,21 @@ export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmTagContextTag
 	es: "es",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmTagContextTagLanguageEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmTagContextTagLanguageEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmTagContextTagLanguageEnum];
+export type PostApiSearchFilterFeedStatus200ItemsRealmTagContextTagLanguageEnum =
+	(typeof PostApiSearchFilterFeedStatus200ItemsRealmTagContextTagLanguageEnum)[keyof typeof PostApiSearchFilterFeedStatus200ItemsRealmTagContextTagLanguageEnum];
 
-export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum =
-	{
-		fas: "fas",
-		fab: "fab",
-	} as const;
+export const PostApiSearchFilterFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
 
-export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum];
+export type PostApiSearchFilterFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum =
+	(typeof PostApiSearchFilterFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum)[keyof typeof PostApiSearchFilterFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum];
 
 /**
  * @type object
  */
-export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
+export type PostApiSearchFilterFeedStatus200 = {
 	/**
 	 * @type array
 	 */
@@ -134988,11 +145977,11 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 				 * @type string
 				 */
 				id: string;
-				language: (PostApiSearchFeaturesByTemplateFeedStatus200ItemsLanguage | null) | null;
+				language: (PostApiSearchFilterFeedStatus200ItemsLanguage | null) | null;
 				/**
 				 * @type array
 				 */
-				availableLanguages: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAvailableLanguagesEnum[];
+				availableLanguages: PostApiSearchFilterFeedStatus200ItemsAvailableLanguagesEnum[];
 				/**
 				 * @type array
 				 */
@@ -135007,7 +145996,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 					 * @default 'author'
 					 * @type string
 					 */
-					role: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsRoleEnum;
+					role: PostApiSearchFilterFeedStatus200ItemsAttributionsRoleEnum;
 					/**
 					 * @description
 					 * Format: `fractional-position`
@@ -135030,11 +146019,11 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 						 * @default 'slug_namespace'
 						 * @type string
 						 */
-						kind: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
+						kind: PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
 						/**
 						 * @type string
 						 */
-						language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum;
+						language: PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 						slugAddress:
 							| ({
 									/**
@@ -135109,7 +146098,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 														/**
 														 * @type string
 														 */
-														prefix: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
+														prefix: PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
 														/**
 														 * @maxLength 128
 														 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -135138,7 +146127,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 					/**
 					 * @type string
 					 */
-					language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsLanguageEnum;
+					language: PostApiSearchFilterFeedStatus200ItemsRealmsLanguageEnum;
 					slugAddress:
 						| ({
 								/**
@@ -135213,7 +146202,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 													/**
 													 * @type string
 													 */
-													prefix: PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsAvatarIconPrefixEnum;
+													prefix: PostApiSearchFilterFeedStatus200ItemsRealmsAvatarIconPrefixEnum;
 													/**
 													 * @maxLength 128
 													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -135249,7 +146238,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 				};
 				viewerReaction: (string | null) | null;
 				recommendationReason:
-					| (PostApiSearchFeaturesByTemplateFeedStatus200ItemsRecommendationReason | null)
+					| (PostApiSearchFilterFeedStatus200ItemsRecommendationReason | null)
 					| null;
 				tracking:
 					| ({
@@ -135263,7 +146252,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 							 * @default 'home_feed'
 							 * @type string
 							 */
-							surface: PostApiSearchFeaturesByTemplateFeedStatus200ItemsTrackingSurfaceEnum;
+							surface: PostApiSearchFilterFeedStatus200ItemsTrackingSurfaceEnum;
 							position: string | number;
 							/**
 							 * @minLength 1
@@ -135289,7 +146278,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 				 * @default 'profile'
 				 * @type string
 				 */
-				unitKind: PostApiSearchFeaturesByTemplateFeedStatus200ItemsUnitKindEnum;
+				unitKind: PostApiSearchFilterFeedStatus200ItemsUnitKindEnum;
 				/**
 				 * @type null
 				 */
@@ -135408,7 +146397,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 															/**
 															 * @type string
 															 */
-															prefix: PostApiSearchFeaturesByTemplateFeedStatus200ItemsPresentationAvatarIconPrefixEnum;
+															prefix: PostApiSearchFilterFeedStatus200ItemsPresentationAvatarIconPrefixEnum;
 															/**
 															 * @maxLength 128
 															 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -135451,7 +146440,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 										 */
 										contextPostId: string;
 										language:
-											| (PostApiSearchFeaturesByTemplateFeedStatus200ItemsPresentationRealmTagContextLanguage | null)
+											| (PostApiSearchFilterFeedStatus200ItemsPresentationRealmTagContextLanguage | null)
 											| null;
 										summary: (string | null) | null;
 								  } | null)
@@ -135472,11 +146461,11 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language: (PostApiSearchFeaturesByTemplateFeedStatus200ItemsLanguage | null) | null;
+						language: (PostApiSearchFilterFeedStatus200ItemsLanguage | null) | null;
 						/**
 						 * @type array
 						 */
-						availableLanguages: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAvailableLanguagesEnum[];
+						availableLanguages: PostApiSearchFilterFeedStatus200ItemsAvailableLanguagesEnum[];
 						/**
 						 * @type array
 						 */
@@ -135491,7 +146480,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 							 * @default 'author'
 							 * @type string
 							 */
-							role: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsRoleEnum;
+							role: PostApiSearchFilterFeedStatus200ItemsAttributionsRoleEnum;
 							/**
 							 * @description
 							 * Format: `fractional-position`
@@ -135514,11 +146503,11 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 								 * @default 'slug_namespace'
 								 * @type string
 								 */
-								kind: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
+								kind: PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
 								/**
 								 * @type string
 								 */
-								language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum;
+								language: PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 								slugAddress:
 									| ({
 											/**
@@ -135593,7 +146582,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 																/**
 																 * @type string
 																 */
-																prefix: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
+																prefix: PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
 																/**
 																 * @maxLength 128
 																 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -135622,7 +146611,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 							/**
 							 * @type string
 							 */
-							language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsLanguageEnum;
+							language: PostApiSearchFilterFeedStatus200ItemsRealmsLanguageEnum;
 							slugAddress:
 								| ({
 										/**
@@ -135697,7 +146686,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 															/**
 															 * @type string
 															 */
-															prefix: PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsAvatarIconPrefixEnum;
+															prefix: PostApiSearchFilterFeedStatus200ItemsRealmsAvatarIconPrefixEnum;
 															/**
 															 * @maxLength 128
 															 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -135733,7 +146722,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 						};
 						viewerReaction: (string | null) | null;
 						recommendationReason:
-							| (PostApiSearchFeaturesByTemplateFeedStatus200ItemsRecommendationReason | null)
+							| (PostApiSearchFilterFeedStatus200ItemsRecommendationReason | null)
 							| null;
 						tracking:
 							| ({
@@ -135747,7 +146736,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 									 * @default 'home_feed'
 									 * @type string
 									 */
-									surface: PostApiSearchFeaturesByTemplateFeedStatus200ItemsTrackingSurfaceEnum;
+									surface: PostApiSearchFilterFeedStatus200ItemsTrackingSurfaceEnum;
 									position: string | number;
 									/**
 									 * @minLength 1
@@ -135945,7 +146934,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 										 * @default 'author'
 										 * @type string
 										 */
-										role: PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsRoleEnum;
+										role: PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsRoleEnum;
 										/**
 										 * @description
 										 * Format: `fractional-position`
@@ -135968,11 +146957,11 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 											 * @default 'slug_namespace'
 											 * @type string
 											 */
-											kind: PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
+											kind: PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
 											/**
 											 * @type string
 											 */
-											language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum;
+											language: PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum;
 											slugAddress:
 												| ({
 														/**
@@ -136047,7 +147036,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 																			/**
 																			 * @type string
 																			 */
-																			prefix: PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum;
+																			prefix: PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum;
 																			/**
 																			 * @maxLength 128
 																			 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -136080,7 +147069,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 									/**
 									 * @type string
 									 */
-									language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsSubjectLanguageEnum;
+									language: PostApiSearchFilterFeedStatus200ItemsSubjectLanguageEnum;
 									title: (string | null) | null;
 									summary: (string | null) | null;
 									cover:
@@ -136134,7 +147123,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 						 * @default 'post'
 						 * @type string
 						 */
-						postKind: PostApiSearchFeaturesByTemplateFeedStatus200ItemsPostKindEnum;
+						postKind: PostApiSearchFilterFeedStatus200ItemsPostKindEnum;
 				  }
 				| {
 						/**
@@ -136143,11 +147132,11 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language: (PostApiSearchFeaturesByTemplateFeedStatus200ItemsLanguage | null) | null;
+						language: (PostApiSearchFilterFeedStatus200ItemsLanguage | null) | null;
 						/**
 						 * @type array
 						 */
-						availableLanguages: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAvailableLanguagesEnum[];
+						availableLanguages: PostApiSearchFilterFeedStatus200ItemsAvailableLanguagesEnum[];
 						/**
 						 * @type array
 						 */
@@ -136162,7 +147151,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 							 * @default 'author'
 							 * @type string
 							 */
-							role: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsRoleEnum;
+							role: PostApiSearchFilterFeedStatus200ItemsAttributionsRoleEnum;
 							/**
 							 * @description
 							 * Format: `fractional-position`
@@ -136185,11 +147174,11 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 								 * @default 'slug_namespace'
 								 * @type string
 								 */
-								kind: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
+								kind: PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
 								/**
 								 * @type string
 								 */
-								language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum;
+								language: PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 								slugAddress:
 									| ({
 											/**
@@ -136264,7 +147253,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 																/**
 																 * @type string
 																 */
-																prefix: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
+																prefix: PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
 																/**
 																 * @maxLength 128
 																 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -136293,7 +147282,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 							/**
 							 * @type string
 							 */
-							language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsLanguageEnum;
+							language: PostApiSearchFilterFeedStatus200ItemsRealmsLanguageEnum;
 							slugAddress:
 								| ({
 										/**
@@ -136368,7 +147357,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 															/**
 															 * @type string
 															 */
-															prefix: PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsAvatarIconPrefixEnum;
+															prefix: PostApiSearchFilterFeedStatus200ItemsRealmsAvatarIconPrefixEnum;
 															/**
 															 * @maxLength 128
 															 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -136404,7 +147393,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 						};
 						viewerReaction: (string | null) | null;
 						recommendationReason:
-							| (PostApiSearchFeaturesByTemplateFeedStatus200ItemsRecommendationReason | null)
+							| (PostApiSearchFilterFeedStatus200ItemsRecommendationReason | null)
 							| null;
 						tracking:
 							| ({
@@ -136418,7 +147407,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 									 * @default 'home_feed'
 									 * @type string
 									 */
-									surface: PostApiSearchFeaturesByTemplateFeedStatus200ItemsTrackingSurfaceEnum;
+									surface: PostApiSearchFilterFeedStatus200ItemsTrackingSurfaceEnum;
 									position: string | number;
 									/**
 									 * @minLength 1
@@ -136616,7 +147605,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 										 * @default 'author'
 										 * @type string
 										 */
-										role: PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsRoleEnum;
+										role: PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsRoleEnum;
 										/**
 										 * @description
 										 * Format: `fractional-position`
@@ -136639,11 +147628,11 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 											 * @default 'slug_namespace'
 											 * @type string
 											 */
-											kind: PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
+											kind: PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
 											/**
 											 * @type string
 											 */
-											language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum;
+											language: PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum;
 											slugAddress:
 												| ({
 														/**
@@ -136718,7 +147707,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 																			/**
 																			 * @type string
 																			 */
-																			prefix: PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum;
+																			prefix: PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum;
 																			/**
 																			 * @maxLength 128
 																			 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -136751,7 +147740,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 									/**
 									 * @type string
 									 */
-									language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsSubjectLanguageEnum;
+									language: PostApiSearchFilterFeedStatus200ItemsSubjectLanguageEnum;
 									title: (string | null) | null;
 									summary: (string | null) | null;
 									cover:
@@ -136832,11 +147821,11 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language: (PostApiSearchFeaturesByTemplateFeedStatus200ItemsLanguage | null) | null;
+						language: (PostApiSearchFilterFeedStatus200ItemsLanguage | null) | null;
 						/**
 						 * @type array
 						 */
-						availableLanguages: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAvailableLanguagesEnum[];
+						availableLanguages: PostApiSearchFilterFeedStatus200ItemsAvailableLanguagesEnum[];
 						/**
 						 * @type array
 						 */
@@ -136851,7 +147840,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 							 * @default 'author'
 							 * @type string
 							 */
-							role: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsRoleEnum;
+							role: PostApiSearchFilterFeedStatus200ItemsAttributionsRoleEnum;
 							/**
 							 * @description
 							 * Format: `fractional-position`
@@ -136874,11 +147863,11 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 								 * @default 'slug_namespace'
 								 * @type string
 								 */
-								kind: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
+								kind: PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
 								/**
 								 * @type string
 								 */
-								language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum;
+								language: PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 								slugAddress:
 									| ({
 											/**
@@ -136953,7 +147942,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 																/**
 																 * @type string
 																 */
-																prefix: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
+																prefix: PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
 																/**
 																 * @maxLength 128
 																 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -136982,7 +147971,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 							/**
 							 * @type string
 							 */
-							language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsLanguageEnum;
+							language: PostApiSearchFilterFeedStatus200ItemsRealmsLanguageEnum;
 							slugAddress:
 								| ({
 										/**
@@ -137057,7 +148046,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 															/**
 															 * @type string
 															 */
-															prefix: PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsAvatarIconPrefixEnum;
+															prefix: PostApiSearchFilterFeedStatus200ItemsRealmsAvatarIconPrefixEnum;
 															/**
 															 * @maxLength 128
 															 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -137093,7 +148082,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 						};
 						viewerReaction: (string | null) | null;
 						recommendationReason:
-							| (PostApiSearchFeaturesByTemplateFeedStatus200ItemsRecommendationReason | null)
+							| (PostApiSearchFilterFeedStatus200ItemsRecommendationReason | null)
 							| null;
 						tracking:
 							| ({
@@ -137107,7 +148096,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 									 * @default 'home_feed'
 									 * @type string
 									 */
-									surface: PostApiSearchFeaturesByTemplateFeedStatus200ItemsTrackingSurfaceEnum;
+									surface: PostApiSearchFilterFeedStatus200ItemsTrackingSurfaceEnum;
 									position: string | number;
 									/**
 									 * @minLength 1
@@ -137305,7 +148294,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 										 * @default 'author'
 										 * @type string
 										 */
-										role: PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsRoleEnum;
+										role: PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsRoleEnum;
 										/**
 										 * @description
 										 * Format: `fractional-position`
@@ -137328,11 +148317,11 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 											 * @default 'slug_namespace'
 											 * @type string
 											 */
-											kind: PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
+											kind: PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
 											/**
 											 * @type string
 											 */
-											language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum;
+											language: PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum;
 											slugAddress:
 												| ({
 														/**
@@ -137407,7 +148396,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 																			/**
 																			 * @type string
 																			 */
-																			prefix: PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum;
+																			prefix: PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum;
 																			/**
 																			 * @maxLength 128
 																			 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -137440,7 +148429,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 									/**
 									 * @type string
 									 */
-									language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsSubjectLanguageEnum;
+									language: PostApiSearchFilterFeedStatus200ItemsSubjectLanguageEnum;
 									title: (string | null) | null;
 									summary: (string | null) | null;
 									cover:
@@ -137515,7 +148504,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 										/**
 										 * @type string
 										 */
-										language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmTagContextTagLanguageEnum;
+										language: PostApiSearchFilterFeedStatus200ItemsRealmTagContextTagLanguageEnum;
 										title: (string | null) | null;
 										avatar:
 											| (
@@ -137568,7 +148557,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 																		/**
 																		 * @type string
 																		 */
-																		prefix: PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum;
+																		prefix: PostApiSearchFilterFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum;
 																		/**
 																		 * @maxLength 128
 																		 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -137667,9 +148656,9 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 /**
  * @type object
  */
-export type PostApiSearchFeaturesByTemplateFeedStatus400 = MalformedRequestBody;
+export type PostApiSearchFilterFeedStatus400 = MalformedRequestBody;
 
-export type PostApiSearchFeaturesByTemplateFeedStatus422 =
+export type PostApiSearchFilterFeedStatus422 =
 	| {
 			/**
 			 * @type object
@@ -137696,47 +148685,15 @@ export type PostApiSearchFeaturesByTemplateFeedStatus422 =
 	  }
 	| ValidationError;
 
-export const PostApiSearchFeaturesByTemplateFeedStatus429ErrorCodeEnum = {
-	ApiQuotaExceeded: "ApiQuotaExceeded",
-	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
-} as const;
-
-export type PostApiSearchFeaturesByTemplateFeedStatus429ErrorCodeEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedStatus429ErrorCodeEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus429ErrorCodeEnum];
+/**
+ * @type object
+ */
+export type PostApiSearchFilterFeedStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type PostApiSearchFeaturesByTemplateFeedStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PostApiSearchFeaturesByTemplateFeedStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiSearchFeaturesByTemplateFeedStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type PostApiSearchFeaturesByTemplateFeedStatus503 = {
+export type PostApiSearchFilterFeedStatus503 = {
 	/**
 	 * @type object
 	 */
@@ -137761,15 +148718,15 @@ export type PostApiSearchFeaturesByTemplateFeedStatus503 = {
 	requestId: string;
 };
 
-export const PostApiSearchFeaturesByTemplateFeedRequestInjectionsSourceEnum = {
+export const PostApiSearchFilterFeedRequestInjectionsSourceEnum = {
 	tag: "tag",
 	link: "link",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateFeedRequestInjectionsSourceEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedRequestInjectionsSourceEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedRequestInjectionsSourceEnum];
+export type PostApiSearchFilterFeedRequestInjectionsSourceEnum =
+	(typeof PostApiSearchFilterFeedRequestInjectionsSourceEnum)[keyof typeof PostApiSearchFilterFeedRequestInjectionsSourceEnum];
 
-export const PostApiSearchFeaturesByTemplateFeedRequestStateSortEnum = {
+export const PostApiSearchFilterFeedRequestStateSortEnum = {
 	best: "best",
 	relevance: "relevance",
 	"createdAt:asc": "createdAt:asc",
@@ -137790,10 +148747,10 @@ export const PostApiSearchFeaturesByTemplateFeedRequestStateSortEnum = {
 	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateFeedRequestStateSortEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedRequestStateSortEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedRequestStateSortEnum];
+export type PostApiSearchFilterFeedRequestStateSortEnum =
+	(typeof PostApiSearchFilterFeedRequestStateSortEnum)[keyof typeof PostApiSearchFilterFeedRequestStateSortEnum];
 
-export const PostApiSearchFeaturesByTemplateFeedRequestLocalizationLanguagesEnum = {
+export const PostApiSearchFilterFeedRequestLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -137803,21 +148760,25 @@ export const PostApiSearchFeaturesByTemplateFeedRequestLocalizationLanguagesEnum
 	es: "es",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateFeedRequestLocalizationLanguagesEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedRequestLocalizationLanguagesEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedRequestLocalizationLanguagesEnum];
+export type PostApiSearchFilterFeedRequestLocalizationLanguagesEnum =
+	(typeof PostApiSearchFilterFeedRequestLocalizationLanguagesEnum)[keyof typeof PostApiSearchFilterFeedRequestLocalizationLanguagesEnum];
 
-export const PostApiSearchFeaturesByTemplateFeedRequestSurfaceEnum = {
+export const PostApiSearchFilterFeedRequestSurfaceEnum = {
 	search: "search",
 	feed: "feed",
 } as const;
 
-export type PostApiSearchFeaturesByTemplateFeedRequestSurfaceEnum =
-	(typeof PostApiSearchFeaturesByTemplateFeedRequestSurfaceEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedRequestSurfaceEnum];
+export type PostApiSearchFilterFeedRequestSurfaceEnum =
+	(typeof PostApiSearchFilterFeedRequestSurfaceEnum)[keyof typeof PostApiSearchFilterFeedRequestSurfaceEnum];
 
 /**
  * @type object
  */
-export type PostApiSearchFeaturesByTemplateFeedBody = {
+export type PostApiSearchFilterFeedBody = {
+	/**
+	 * @type object
+	 */
+	filterDocument: FilterDocument;
 	/**
 	 * @type array
 	 */
@@ -137879,7 +148840,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 		/**
 		 * @type string
 		 */
-		source: PostApiSearchFeaturesByTemplateFeedRequestInjectionsSourceEnum;
+		source: PostApiSearchFilterFeedRequestInjectionsSourceEnum;
 		/**
 		 * @type object
 		 */
@@ -138268,7 +149229,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 		/**
 		 * @type string | undefined
 		 */
-		sort?: PostApiSearchFeaturesByTemplateFeedRequestStateSortEnum;
+		sort?: PostApiSearchFilterFeedRequestStateSortEnum;
 		/**
 		 * @minLength 1
 		 * @maxLength 100
@@ -138675,19 +149636,19 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 	/**
 	 * @type array
 	 */
-	localizationLanguages: PostApiSearchFeaturesByTemplateFeedRequestLocalizationLanguagesEnum[];
+	localizationLanguages: PostApiSearchFilterFeedRequestLocalizationLanguagesEnum[];
 	/**
 	 * @type string
 	 */
-	surface: PostApiSearchFeaturesByTemplateFeedRequestSurfaceEnum;
+	surface: PostApiSearchFilterFeedRequestSurfaceEnum;
 };
 
 /**
  * @type object
  */
-export type PostApiSearchFeaturesByTemplateFeedOptions = {
-	body: PostApiSearchFeaturesByTemplateFeedBody;
-	path: PostApiSearchFeaturesByTemplateFeedPath;
+export type PostApiSearchFilterFeedOptions = {
+	body: PostApiSearchFilterFeedBody;
+	path?: never;
 	query?: never;
 	headers?: never;
 };
@@ -138695,30 +149656,28 @@ export type PostApiSearchFeaturesByTemplateFeedOptions = {
 /**
  * @type object
  */
-export type PostApiSearchFeaturesByTemplateFeedResponses = {
-	"200": PostApiSearchFeaturesByTemplateFeedStatus200;
-	"400": PostApiSearchFeaturesByTemplateFeedStatus400;
-	"422": PostApiSearchFeaturesByTemplateFeedStatus422;
-	"429": PostApiSearchFeaturesByTemplateFeedStatus429;
-	"500": PostApiSearchFeaturesByTemplateFeedStatus500;
-	"503": PostApiSearchFeaturesByTemplateFeedStatus503;
+export type PostApiSearchFilterFeedResponses = {
+	"200": PostApiSearchFilterFeedStatus200;
+	"400": PostApiSearchFilterFeedStatus400;
+	"422": PostApiSearchFilterFeedStatus422;
+	"500": PostApiSearchFilterFeedStatus500;
+	"503": PostApiSearchFilterFeedStatus503;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PostApiSearchFeaturesByTemplateFeedResponse =
-	| PostApiSearchFeaturesByTemplateFeedStatus200
-	| PostApiSearchFeaturesByTemplateFeedStatus400
-	| PostApiSearchFeaturesByTemplateFeedStatus422
-	| PostApiSearchFeaturesByTemplateFeedStatus429
-	| PostApiSearchFeaturesByTemplateFeedStatus500
-	| PostApiSearchFeaturesByTemplateFeedStatus503;
+export type PostApiSearchFilterFeedResponse =
+	| PostApiSearchFilterFeedStatus200
+	| PostApiSearchFilterFeedStatus400
+	| PostApiSearchFilterFeedStatus422
+	| PostApiSearchFilterFeedStatus500
+	| PostApiSearchFilterFeedStatus503;
 
 /**
  * @type object
  */
-export type GetApiSearchZonesByZoneIdFeaturePath = {
+export type GetApiSearchZonesByZoneIdFilterPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -138730,245 +149689,12 @@ export type GetApiSearchZonesByZoneIdFeaturePath = {
 /**
  * @type object
  */
-export type GetApiSearchZonesByZoneIdFeatureStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	zoneId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	searchDocumentId: string;
-	/**
-	 * @type boolean
-	 */
-	enabled: boolean;
-	/**
-	 * @type object
-	 */
-	definition: SearchFeatureDefinitionV1;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	latestRevisionId: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
-};
+export type GetApiSearchZonesByZoneIdFilterStatus200 = SearchFeatureDefinition;
 
 /**
  * @type object
  */
-export type GetApiSearchZonesByZoneIdFeatureStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitPermissionForbidden'
-		 * @type string
-		 */
-		code: "UnitPermissionForbidden";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const GetApiSearchZonesByZoneIdFeatureStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	ZoneSearchFeatureNotFound: "ZoneSearchFeatureNotFound",
-} as const;
-
-export type GetApiSearchZonesByZoneIdFeatureStatus404ErrorCodeEnum =
-	(typeof GetApiSearchZonesByZoneIdFeatureStatus404ErrorCodeEnum)[keyof typeof GetApiSearchZonesByZoneIdFeatureStatus404ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type GetApiSearchZonesByZoneIdFeatureStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: GetApiSearchZonesByZoneIdFeatureStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiSearchZonesByZoneIdFeatureStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type GetApiSearchZonesByZoneIdFeatureStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type GetApiSearchZonesByZoneIdFeatureOptions = {
-	body?: never;
-	path: GetApiSearchZonesByZoneIdFeaturePath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type GetApiSearchZonesByZoneIdFeatureResponses = {
-	"200": GetApiSearchZonesByZoneIdFeatureStatus200;
-	"403": GetApiSearchZonesByZoneIdFeatureStatus403;
-	"404": GetApiSearchZonesByZoneIdFeatureStatus404;
-	"422": GetApiSearchZonesByZoneIdFeatureStatus422;
-	"500": GetApiSearchZonesByZoneIdFeatureStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type GetApiSearchZonesByZoneIdFeatureResponse =
-	| GetApiSearchZonesByZoneIdFeatureStatus200
-	| GetApiSearchZonesByZoneIdFeatureStatus403
-	| GetApiSearchZonesByZoneIdFeatureStatus404
-	| GetApiSearchZonesByZoneIdFeatureStatus422
-	| GetApiSearchZonesByZoneIdFeatureStatus500;
-
-/**
- * @type object
- */
-export type PutApiSearchZonesByZoneIdFeaturePath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	zoneId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiSearchZonesByZoneIdFeatureStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	zoneId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	searchDocumentId: string;
-	/**
-	 * @type boolean
-	 */
-	enabled: boolean;
-	/**
-	 * @type object
-	 */
-	definition: SearchFeatureDefinitionV1;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	latestRevisionId: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
-};
-
-/**
- * @type object
- */
-export type PutApiSearchZonesByZoneIdFeatureStatus400 = MalformedRequestBody;
-
-/**
- * @type object
- */
-export type PutApiSearchZonesByZoneIdFeatureStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitPermissionForbidden'
-		 * @type string
-		 */
-		code: "UnitPermissionForbidden";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiSearchZonesByZoneIdFeatureStatus404 = {
+export type GetApiSearchZonesByZoneIdFilterStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -138993,35 +149719,7 @@ export type PutApiSearchZonesByZoneIdFeatureStatus404 = {
 	requestId: string;
 };
 
-/**
- * @type object
- */
-export type PutApiSearchZonesByZoneIdFeatureStatus409 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'SearchDocumentRevisionConflict'
-		 * @type string
-		 */
-		code: "SearchDocumentRevisionConflict";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export type PutApiSearchZonesByZoneIdFeatureStatus422 =
+export type GetApiSearchZonesByZoneIdFilterStatus422 =
 	| {
 			/**
 			 * @type object
@@ -139051,35 +149749,14 @@ export type PutApiSearchZonesByZoneIdFeatureStatus422 =
 /**
  * @type object
  */
-export type PutApiSearchZonesByZoneIdFeatureStatus500 = InternalError;
+export type GetApiSearchZonesByZoneIdFilterStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type PutApiSearchZonesByZoneIdFeatureBody = {
-	/**
-	 * @type object
-	 */
-	document: SearchDocumentV1;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string | undefined
-	 */
-	baseRevisionId?: string;
-	/**
-	 * @maxLength 500
-	 * @type string | undefined
-	 */
-	message?: string;
-};
-
-/**
- * @type object
- */
-export type PutApiSearchZonesByZoneIdFeatureOptions = {
-	body: PutApiSearchZonesByZoneIdFeatureBody;
-	path: PutApiSearchZonesByZoneIdFeaturePath;
+export type GetApiSearchZonesByZoneIdFilterOptions = {
+	body?: never;
+	path: GetApiSearchZonesByZoneIdFilterPath;
 	query?: never;
 	headers?: never;
 };
@@ -139087,32 +149764,26 @@ export type PutApiSearchZonesByZoneIdFeatureOptions = {
 /**
  * @type object
  */
-export type PutApiSearchZonesByZoneIdFeatureResponses = {
-	"200": PutApiSearchZonesByZoneIdFeatureStatus200;
-	"400": PutApiSearchZonesByZoneIdFeatureStatus400;
-	"403": PutApiSearchZonesByZoneIdFeatureStatus403;
-	"404": PutApiSearchZonesByZoneIdFeatureStatus404;
-	"409": PutApiSearchZonesByZoneIdFeatureStatus409;
-	"422": PutApiSearchZonesByZoneIdFeatureStatus422;
-	"500": PutApiSearchZonesByZoneIdFeatureStatus500;
+export type GetApiSearchZonesByZoneIdFilterResponses = {
+	"200": GetApiSearchZonesByZoneIdFilterStatus200;
+	"404": GetApiSearchZonesByZoneIdFilterStatus404;
+	"422": GetApiSearchZonesByZoneIdFilterStatus422;
+	"500": GetApiSearchZonesByZoneIdFilterStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PutApiSearchZonesByZoneIdFeatureResponse =
-	| PutApiSearchZonesByZoneIdFeatureStatus200
-	| PutApiSearchZonesByZoneIdFeatureStatus400
-	| PutApiSearchZonesByZoneIdFeatureStatus403
-	| PutApiSearchZonesByZoneIdFeatureStatus404
-	| PutApiSearchZonesByZoneIdFeatureStatus409
-	| PutApiSearchZonesByZoneIdFeatureStatus422
-	| PutApiSearchZonesByZoneIdFeatureStatus500;
+export type GetApiSearchZonesByZoneIdFilterResponse =
+	| GetApiSearchZonesByZoneIdFilterStatus200
+	| GetApiSearchZonesByZoneIdFilterStatus404
+	| GetApiSearchZonesByZoneIdFilterStatus422
+	| GetApiSearchZonesByZoneIdFilterStatus500;
 
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdFeatureExecutePath = {
+export type PostApiSearchZonesByZoneIdFilterExecutePath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -139121,7 +149792,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecutePath = {
 	zoneId: string;
 };
 
-export const PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsLanguageEnum = {
+export const PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsLanguageEnum = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -139131,36 +149802,36 @@ export const PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsLanguage
 	es: "es",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsLanguageEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsLanguageEnum];
+export type PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsLanguageEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsLanguageEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsAvatarIconPrefixEnum = {
+export const PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsAvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsAvatarIconPrefixEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsAvatarIconPrefixEnum];
+export type PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsAvatarIconPrefixEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsAvatarIconPrefixEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsVariantRoleEnum = {
+export const PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsVariantRoleEnum = {
 	standalone: "standalone",
 	main: "main",
 	variant: "variant",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsVariantRoleEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsVariantRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsVariantRoleEnum];
+export type PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsVariantRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsVariantRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsVariantRoleEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsVariantMainUnitTypeEnum = {
+export const PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsVariantMainUnitTypeEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsVariantMainUnitTypeEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsVariantMainUnitTypeEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsVariantMainUnitTypeEnum];
+export type PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsVariantMainUnitTypeEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsVariantMainUnitTypeEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsVariantMainUnitTypeEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum =
+export const PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum =
 	{
 		zh: "zh",
 		en: "en",
@@ -139171,13 +149842,13 @@ export const PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsVariantM
 		es: "es",
 	} as const;
 
-export type PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum];
+export type PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum];
 
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdFeatureExecuteStatus200 = {
+export type PostApiSearchZonesByZoneIdFilterExecuteStatus200 = {
 	/**
 	 * @type string
 	 */
@@ -139284,7 +149955,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteStatus200 = {
 			/**
 			 * @type string
 			 */
-			language: PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsLanguageEnum;
+			language: PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsLanguageEnum;
 			title: (string | null) | null;
 			/**
 			 * @type array
@@ -139345,7 +150016,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteStatus200 = {
 											/**
 											 * @type string
 											 */
-											prefix: PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsAvatarIconPrefixEnum;
+											prefix: PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsAvatarIconPrefixEnum;
 											/**
 											 * @maxLength 128
 											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -139362,7 +150033,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteStatus200 = {
 			 * @default 'standalone'
 			 * @type string | undefined
 			 */
-			variantRole?: PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsVariantRoleEnum;
+			variantRole?: PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsVariantRoleEnum;
 			variantMain?:
 				| {
 						/**
@@ -139389,11 +150060,11 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteStatus200 = {
 							 * @default 'book'
 							 * @type string
 							 */
-							type: PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsVariantMainUnitTypeEnum;
+							type: PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsVariantMainUnitTypeEnum;
 							/**
 							 * @type string
 							 */
-							language: PostApiSearchZonesByZoneIdFeatureExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum;
+							language: PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum;
 							title: (string | null) | null;
 							cover:
 								| ({
@@ -139448,20 +150119,12 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteStatus200 = {
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdFeatureExecuteStatus400 = MalformedRequestBody;
-
-export const PostApiSearchZonesByZoneIdFeatureExecuteStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	ZoneSearchFeatureNotFound: "ZoneSearchFeatureNotFound",
-} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureExecuteStatus404ErrorCodeEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureExecuteStatus404ErrorCodeEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureExecuteStatus404ErrorCodeEnum];
+export type PostApiSearchZonesByZoneIdFilterExecuteStatus400 = MalformedRequestBody;
 
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdFeatureExecuteStatus404 = {
+export type PostApiSearchZonesByZoneIdFilterExecuteStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -139470,7 +150133,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: PostApiSearchZonesByZoneIdFeatureExecuteStatus404ErrorCodeEnum;
+		code: "UnitNotFound";
 		/**
 		 * @type string
 		 */
@@ -139486,7 +150149,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteStatus404 = {
 	requestId: string;
 };
 
-export type PostApiSearchZonesByZoneIdFeatureExecuteStatus422 =
+export type PostApiSearchZonesByZoneIdFilterExecuteStatus422 =
 	| {
 			/**
 			 * @type object
@@ -139513,47 +150176,15 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteStatus422 =
 	  }
 	| ValidationError;
 
-export const PostApiSearchZonesByZoneIdFeatureExecuteStatus429ErrorCodeEnum = {
-	ApiQuotaExceeded: "ApiQuotaExceeded",
-	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
-} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureExecuteStatus429ErrorCodeEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureExecuteStatus429ErrorCodeEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureExecuteStatus429ErrorCodeEnum];
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFilterExecuteStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdFeatureExecuteStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PostApiSearchZonesByZoneIdFeatureExecuteStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiSearchZonesByZoneIdFeatureExecuteStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type PostApiSearchZonesByZoneIdFeatureExecuteStatus503 = {
+export type PostApiSearchZonesByZoneIdFilterExecuteStatus503 = {
 	/**
 	 * @type object
 	 */
@@ -139578,15 +150209,15 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteStatus503 = {
 	requestId: string;
 };
 
-export const PostApiSearchZonesByZoneIdFeatureExecuteRequestInjectionsSourceEnum = {
+export const PostApiSearchZonesByZoneIdFilterExecuteRequestInjectionsSourceEnum = {
 	tag: "tag",
 	link: "link",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureExecuteRequestInjectionsSourceEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureExecuteRequestInjectionsSourceEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureExecuteRequestInjectionsSourceEnum];
+export type PostApiSearchZonesByZoneIdFilterExecuteRequestInjectionsSourceEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterExecuteRequestInjectionsSourceEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterExecuteRequestInjectionsSourceEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureExecuteRequestStateSortEnum = {
+export const PostApiSearchZonesByZoneIdFilterExecuteRequestStateSortEnum = {
 	best: "best",
 	relevance: "relevance",
 	"createdAt:asc": "createdAt:asc",
@@ -139607,10 +150238,10 @@ export const PostApiSearchZonesByZoneIdFeatureExecuteRequestStateSortEnum = {
 	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureExecuteRequestStateSortEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureExecuteRequestStateSortEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureExecuteRequestStateSortEnum];
+export type PostApiSearchZonesByZoneIdFilterExecuteRequestStateSortEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterExecuteRequestStateSortEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterExecuteRequestStateSortEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureExecuteRequestLocalizationLanguagesEnum = {
+export const PostApiSearchZonesByZoneIdFilterExecuteRequestLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -139620,13 +150251,13 @@ export const PostApiSearchZonesByZoneIdFeatureExecuteRequestLocalizationLanguage
 	es: "es",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureExecuteRequestLocalizationLanguagesEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureExecuteRequestLocalizationLanguagesEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureExecuteRequestLocalizationLanguagesEnum];
+export type PostApiSearchZonesByZoneIdFilterExecuteRequestLocalizationLanguagesEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterExecuteRequestLocalizationLanguagesEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterExecuteRequestLocalizationLanguagesEnum];
 
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
+export type PostApiSearchZonesByZoneIdFilterExecuteBody = {
 	/**
 	 * @type array
 	 */
@@ -139634,7 +150265,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 		/**
 		 * @type string
 		 */
-		source: PostApiSearchZonesByZoneIdFeatureExecuteRequestInjectionsSourceEnum;
+		source: PostApiSearchZonesByZoneIdFilterExecuteRequestInjectionsSourceEnum;
 		/**
 		 * @type object
 		 */
@@ -140023,7 +150654,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 		/**
 		 * @type string | undefined
 		 */
-		sort?: PostApiSearchZonesByZoneIdFeatureExecuteRequestStateSortEnum;
+		sort?: PostApiSearchZonesByZoneIdFilterExecuteRequestStateSortEnum;
 		/**
 		 * @minLength 1
 		 * @maxLength 100
@@ -140430,15 +151061,15 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 	/**
 	 * @type array
 	 */
-	localizationLanguages: PostApiSearchZonesByZoneIdFeatureExecuteRequestLocalizationLanguagesEnum[];
+	localizationLanguages: PostApiSearchZonesByZoneIdFilterExecuteRequestLocalizationLanguagesEnum[];
 };
 
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdFeatureExecuteOptions = {
-	body: PostApiSearchZonesByZoneIdFeatureExecuteBody;
-	path: PostApiSearchZonesByZoneIdFeatureExecutePath;
+export type PostApiSearchZonesByZoneIdFilterExecuteOptions = {
+	body: PostApiSearchZonesByZoneIdFilterExecuteBody;
+	path: PostApiSearchZonesByZoneIdFilterExecutePath;
 	query?: never;
 	headers?: never;
 };
@@ -140446,32 +151077,30 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteOptions = {
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdFeatureExecuteResponses = {
-	"200": PostApiSearchZonesByZoneIdFeatureExecuteStatus200;
-	"400": PostApiSearchZonesByZoneIdFeatureExecuteStatus400;
-	"404": PostApiSearchZonesByZoneIdFeatureExecuteStatus404;
-	"422": PostApiSearchZonesByZoneIdFeatureExecuteStatus422;
-	"429": PostApiSearchZonesByZoneIdFeatureExecuteStatus429;
-	"500": PostApiSearchZonesByZoneIdFeatureExecuteStatus500;
-	"503": PostApiSearchZonesByZoneIdFeatureExecuteStatus503;
+export type PostApiSearchZonesByZoneIdFilterExecuteResponses = {
+	"200": PostApiSearchZonesByZoneIdFilterExecuteStatus200;
+	"400": PostApiSearchZonesByZoneIdFilterExecuteStatus400;
+	"404": PostApiSearchZonesByZoneIdFilterExecuteStatus404;
+	"422": PostApiSearchZonesByZoneIdFilterExecuteStatus422;
+	"500": PostApiSearchZonesByZoneIdFilterExecuteStatus500;
+	"503": PostApiSearchZonesByZoneIdFilterExecuteStatus503;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PostApiSearchZonesByZoneIdFeatureExecuteResponse =
-	| PostApiSearchZonesByZoneIdFeatureExecuteStatus200
-	| PostApiSearchZonesByZoneIdFeatureExecuteStatus400
-	| PostApiSearchZonesByZoneIdFeatureExecuteStatus404
-	| PostApiSearchZonesByZoneIdFeatureExecuteStatus422
-	| PostApiSearchZonesByZoneIdFeatureExecuteStatus429
-	| PostApiSearchZonesByZoneIdFeatureExecuteStatus500
-	| PostApiSearchZonesByZoneIdFeatureExecuteStatus503;
+export type PostApiSearchZonesByZoneIdFilterExecuteResponse =
+	| PostApiSearchZonesByZoneIdFilterExecuteStatus200
+	| PostApiSearchZonesByZoneIdFilterExecuteStatus400
+	| PostApiSearchZonesByZoneIdFilterExecuteStatus404
+	| PostApiSearchZonesByZoneIdFilterExecuteStatus422
+	| PostApiSearchZonesByZoneIdFilterExecuteStatus500
+	| PostApiSearchZonesByZoneIdFilterExecuteStatus503;
 
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdFeatureFeedPath = {
+export type PostApiSearchZonesByZoneIdFilterFeedPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -140480,7 +151109,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedPath = {
 	zoneId: string;
 };
 
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage = {
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsLanguage = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -140490,10 +151119,10 @@ export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage = {
 	es: "es",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage];
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsLanguage =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsLanguage)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsLanguage];
 
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAvailableLanguagesEnum = {
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAvailableLanguagesEnum = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -140503,10 +151132,10 @@ export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAvailableLanguag
 	es: "es",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAvailableLanguagesEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAvailableLanguagesEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAvailableLanguagesEnum];
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAvailableLanguagesEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAvailableLanguagesEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAvailableLanguagesEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsRoleEnum = {
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsRoleEnum = {
 	author: "author",
 	"co-author": "co-author",
 	translator: "translator",
@@ -140527,10 +151156,10 @@ export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsRole
 	distributor: "distributor",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsRoleEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsRoleEnum];
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsRoleEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitKindEnum = {
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCreditedUnitKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
 	book: "book",
@@ -140553,10 +151182,10 @@ export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCred
 	realm_rule: "realm_rule",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitKindEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitKindEnum];
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCreditedUnitKindEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCreditedUnitKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCreditedUnitKindEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum =
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum =
 	{
 		zh: "zh",
 		en: "en",
@@ -140567,19 +151196,19 @@ export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCred
 		es: "es",
 	} as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum];
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
 	{
 		fas: "fas",
 		fab: "fab",
 	} as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum];
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsLanguageEnum = {
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmsLanguageEnum = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -140589,18 +151218,18 @@ export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsLanguageEn
 	es: "es",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsLanguageEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsLanguageEnum];
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmsLanguageEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmsLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmsLanguageEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsAvatarIconPrefixEnum = {
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmsAvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsAvatarIconPrefixEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsAvatarIconPrefixEnum];
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmsAvatarIconPrefixEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmsAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmsAvatarIconPrefixEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRecommendationReason = {
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRecommendationReason = {
 	followed_unit: "followed_unit",
 	followed_realm: "followed_realm",
 	based_on_activity: "based_on_activity",
@@ -140609,10 +151238,10 @@ export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRecommendationRe
 	new_and_relevant: "new_and_relevant",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRecommendationReason =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRecommendationReason)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRecommendationReason];
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRecommendationReason =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRecommendationReason)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRecommendationReason];
 
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsTrackingSurfaceEnum = {
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsTrackingSurfaceEnum = {
 	home_feed: "home_feed",
 	home_book: "home_book",
 	home_software: "home_software",
@@ -140621,10 +151250,10 @@ export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsTrackingSurfaceE
 	post_related: "post_related",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsTrackingSurfaceEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsTrackingSurfaceEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsTrackingSurfaceEnum];
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsTrackingSurfaceEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsTrackingSurfaceEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsTrackingSurfaceEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsUnitKindEnum = {
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsUnitKindEnum = {
 	profile: "profile",
 	book: "book",
 	software: "software",
@@ -140640,18 +151269,18 @@ export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsUnitKindEnum = {
 	realm: "realm",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsUnitKindEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsUnitKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsUnitKindEnum];
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsUnitKindEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsUnitKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsUnitKindEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPresentationAvatarIconPrefixEnum = {
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsPresentationAvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPresentationAvatarIconPrefixEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPresentationAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPresentationAvatarIconPrefixEnum];
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsPresentationAvatarIconPrefixEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsPresentationAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsPresentationAvatarIconPrefixEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPresentationRealmTagContextLanguage =
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsPresentationRealmTagContextLanguage =
 	{
 		zh: "zh",
 		en: "en",
@@ -140662,10 +151291,10 @@ export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPresentationReal
 		es: "es",
 	} as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPresentationRealmTagContextLanguage =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPresentationRealmTagContextLanguage)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPresentationRealmTagContextLanguage];
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsPresentationRealmTagContextLanguage =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsPresentationRealmTagContextLanguage)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsPresentationRealmTagContextLanguage];
 
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsRoleEnum = {
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsRoleEnum = {
 	author: "author",
 	"co-author": "co-author",
 	translator: "translator",
@@ -140686,10 +151315,10 @@ export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttr
 	distributor: "distributor",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsRoleEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsRoleEnum];
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsRoleEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum =
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum =
 	{
 		slug_namespace: "slug_namespace",
 		profile: "profile",
@@ -140713,10 +151342,10 @@ export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttr
 		realm_rule: "realm_rule",
 	} as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum];
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum =
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum =
 	{
 		zh: "zh",
 		en: "en",
@@ -140727,19 +151356,19 @@ export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttr
 		es: "es",
 	} as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum];
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
 	{
 		fas: "fas",
 		fab: "fab",
 	} as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum];
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsSubjectLanguageEnum = {
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSubjectLanguageEnum = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -140749,10 +151378,10 @@ export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsSubjectLanguageE
 	es: "es",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsSubjectLanguageEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsSubjectLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsSubjectLanguageEnum];
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSubjectLanguageEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSubjectLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSubjectLanguageEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPostKindEnum = {
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsPostKindEnum = {
 	post: "post",
 	reply: "reply",
 	excerpt: "excerpt",
@@ -140760,10 +151389,10 @@ export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPostKindEnum = {
 	picture: "picture",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPostKindEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPostKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPostKindEnum];
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsPostKindEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsPostKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsPostKindEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmTagContextTagLanguageEnum = {
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmTagContextTagLanguageEnum = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -140773,22 +151402,22 @@ export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmTagContextT
 	es: "es",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmTagContextTagLanguageEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmTagContextTagLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmTagContextTagLanguageEnum];
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmTagContextTagLanguageEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmTagContextTagLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmTagContextTagLanguageEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum =
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum =
 	{
 		fas: "fas",
 		fab: "fab",
 	} as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum];
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum];
 
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200 = {
 	/**
 	 * @type array
 	 */
@@ -140800,11 +151429,11 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 				 * @type string
 				 */
 				id: string;
-				language: (PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage | null) | null;
+				language: (PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsLanguage | null) | null;
 				/**
 				 * @type array
 				 */
-				availableLanguages: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAvailableLanguagesEnum[];
+				availableLanguages: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAvailableLanguagesEnum[];
 				/**
 				 * @type array
 				 */
@@ -140819,7 +151448,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 					 * @default 'author'
 					 * @type string
 					 */
-					role: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsRoleEnum;
+					role: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsRoleEnum;
 					/**
 					 * @description
 					 * Format: `fractional-position`
@@ -140842,11 +151471,11 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 						 * @default 'slug_namespace'
 						 * @type string
 						 */
-						kind: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
+						kind: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
 						/**
 						 * @type string
 						 */
-						language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum;
+						language: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 						slugAddress:
 							| ({
 									/**
@@ -140921,7 +151550,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 														/**
 														 * @type string
 														 */
-														prefix: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
+														prefix: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
 														/**
 														 * @maxLength 128
 														 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -140950,7 +151579,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 					/**
 					 * @type string
 					 */
-					language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsLanguageEnum;
+					language: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmsLanguageEnum;
 					slugAddress:
 						| ({
 								/**
@@ -141025,7 +151654,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 													/**
 													 * @type string
 													 */
-													prefix: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsAvatarIconPrefixEnum;
+													prefix: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmsAvatarIconPrefixEnum;
 													/**
 													 * @maxLength 128
 													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -141061,7 +151690,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 				};
 				viewerReaction: (string | null) | null;
 				recommendationReason:
-					| (PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRecommendationReason | null)
+					| (PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRecommendationReason | null)
 					| null;
 				tracking:
 					| ({
@@ -141075,7 +151704,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 							 * @default 'home_feed'
 							 * @type string
 							 */
-							surface: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsTrackingSurfaceEnum;
+							surface: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsTrackingSurfaceEnum;
 							position: string | number;
 							/**
 							 * @minLength 1
@@ -141101,7 +151730,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 				 * @default 'profile'
 				 * @type string
 				 */
-				unitKind: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsUnitKindEnum;
+				unitKind: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsUnitKindEnum;
 				/**
 				 * @type null
 				 */
@@ -141220,7 +151849,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 															/**
 															 * @type string
 															 */
-															prefix: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPresentationAvatarIconPrefixEnum;
+															prefix: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsPresentationAvatarIconPrefixEnum;
 															/**
 															 * @maxLength 128
 															 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -141263,7 +151892,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 										 */
 										contextPostId: string;
 										language:
-											| (PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPresentationRealmTagContextLanguage | null)
+											| (PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsPresentationRealmTagContextLanguage | null)
 											| null;
 										summary: (string | null) | null;
 								  } | null)
@@ -141284,11 +151913,11 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language: (PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage | null) | null;
+						language: (PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsLanguage | null) | null;
 						/**
 						 * @type array
 						 */
-						availableLanguages: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAvailableLanguagesEnum[];
+						availableLanguages: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAvailableLanguagesEnum[];
 						/**
 						 * @type array
 						 */
@@ -141303,7 +151932,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 							 * @default 'author'
 							 * @type string
 							 */
-							role: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsRoleEnum;
+							role: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsRoleEnum;
 							/**
 							 * @description
 							 * Format: `fractional-position`
@@ -141326,11 +151955,11 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 								 * @default 'slug_namespace'
 								 * @type string
 								 */
-								kind: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
+								kind: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
 								/**
 								 * @type string
 								 */
-								language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum;
+								language: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 								slugAddress:
 									| ({
 											/**
@@ -141405,7 +152034,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 																/**
 																 * @type string
 																 */
-																prefix: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
+																prefix: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
 																/**
 																 * @maxLength 128
 																 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -141434,7 +152063,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 							/**
 							 * @type string
 							 */
-							language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsLanguageEnum;
+							language: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmsLanguageEnum;
 							slugAddress:
 								| ({
 										/**
@@ -141509,7 +152138,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 															/**
 															 * @type string
 															 */
-															prefix: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsAvatarIconPrefixEnum;
+															prefix: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmsAvatarIconPrefixEnum;
 															/**
 															 * @maxLength 128
 															 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -141545,7 +152174,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 						};
 						viewerReaction: (string | null) | null;
 						recommendationReason:
-							| (PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRecommendationReason | null)
+							| (PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRecommendationReason | null)
 							| null;
 						tracking:
 							| ({
@@ -141559,7 +152188,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 									 * @default 'home_feed'
 									 * @type string
 									 */
-									surface: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsTrackingSurfaceEnum;
+									surface: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsTrackingSurfaceEnum;
 									position: string | number;
 									/**
 									 * @minLength 1
@@ -141757,7 +152386,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 										 * @default 'author'
 										 * @type string
 										 */
-										role: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsRoleEnum;
+										role: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsRoleEnum;
 										/**
 										 * @description
 										 * Format: `fractional-position`
@@ -141780,11 +152409,11 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 											 * @default 'slug_namespace'
 											 * @type string
 											 */
-											kind: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
+											kind: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
 											/**
 											 * @type string
 											 */
-											language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum;
+											language: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum;
 											slugAddress:
 												| ({
 														/**
@@ -141859,7 +152488,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 																			/**
 																			 * @type string
 																			 */
-																			prefix: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum;
+																			prefix: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum;
 																			/**
 																			 * @maxLength 128
 																			 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -141892,7 +152521,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 									/**
 									 * @type string
 									 */
-									language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsSubjectLanguageEnum;
+									language: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSubjectLanguageEnum;
 									title: (string | null) | null;
 									summary: (string | null) | null;
 									cover:
@@ -141946,7 +152575,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 						 * @default 'post'
 						 * @type string
 						 */
-						postKind: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPostKindEnum;
+						postKind: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsPostKindEnum;
 				  }
 				| {
 						/**
@@ -141955,11 +152584,11 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language: (PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage | null) | null;
+						language: (PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsLanguage | null) | null;
 						/**
 						 * @type array
 						 */
-						availableLanguages: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAvailableLanguagesEnum[];
+						availableLanguages: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAvailableLanguagesEnum[];
 						/**
 						 * @type array
 						 */
@@ -141974,7 +152603,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 							 * @default 'author'
 							 * @type string
 							 */
-							role: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsRoleEnum;
+							role: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsRoleEnum;
 							/**
 							 * @description
 							 * Format: `fractional-position`
@@ -141997,11 +152626,11 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 								 * @default 'slug_namespace'
 								 * @type string
 								 */
-								kind: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
+								kind: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
 								/**
 								 * @type string
 								 */
-								language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum;
+								language: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 								slugAddress:
 									| ({
 											/**
@@ -142076,7 +152705,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 																/**
 																 * @type string
 																 */
-																prefix: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
+																prefix: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
 																/**
 																 * @maxLength 128
 																 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -142105,7 +152734,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 							/**
 							 * @type string
 							 */
-							language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsLanguageEnum;
+							language: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmsLanguageEnum;
 							slugAddress:
 								| ({
 										/**
@@ -142180,7 +152809,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 															/**
 															 * @type string
 															 */
-															prefix: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsAvatarIconPrefixEnum;
+															prefix: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmsAvatarIconPrefixEnum;
 															/**
 															 * @maxLength 128
 															 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -142216,7 +152845,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 						};
 						viewerReaction: (string | null) | null;
 						recommendationReason:
-							| (PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRecommendationReason | null)
+							| (PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRecommendationReason | null)
 							| null;
 						tracking:
 							| ({
@@ -142230,7 +152859,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 									 * @default 'home_feed'
 									 * @type string
 									 */
-									surface: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsTrackingSurfaceEnum;
+									surface: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsTrackingSurfaceEnum;
 									position: string | number;
 									/**
 									 * @minLength 1
@@ -142428,7 +153057,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 										 * @default 'author'
 										 * @type string
 										 */
-										role: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsRoleEnum;
+										role: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsRoleEnum;
 										/**
 										 * @description
 										 * Format: `fractional-position`
@@ -142451,11 +153080,11 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 											 * @default 'slug_namespace'
 											 * @type string
 											 */
-											kind: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
+											kind: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
 											/**
 											 * @type string
 											 */
-											language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum;
+											language: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum;
 											slugAddress:
 												| ({
 														/**
@@ -142530,7 +153159,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 																			/**
 																			 * @type string
 																			 */
-																			prefix: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum;
+																			prefix: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum;
 																			/**
 																			 * @maxLength 128
 																			 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -142563,7 +153192,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 									/**
 									 * @type string
 									 */
-									language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsSubjectLanguageEnum;
+									language: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSubjectLanguageEnum;
 									title: (string | null) | null;
 									summary: (string | null) | null;
 									cover:
@@ -142644,11 +153273,11 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language: (PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage | null) | null;
+						language: (PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsLanguage | null) | null;
 						/**
 						 * @type array
 						 */
-						availableLanguages: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAvailableLanguagesEnum[];
+						availableLanguages: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAvailableLanguagesEnum[];
 						/**
 						 * @type array
 						 */
@@ -142663,7 +153292,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 							 * @default 'author'
 							 * @type string
 							 */
-							role: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsRoleEnum;
+							role: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsRoleEnum;
 							/**
 							 * @description
 							 * Format: `fractional-position`
@@ -142686,11 +153315,11 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 								 * @default 'slug_namespace'
 								 * @type string
 								 */
-								kind: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
+								kind: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
 								/**
 								 * @type string
 								 */
-								language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum;
+								language: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 								slugAddress:
 									| ({
 											/**
@@ -142765,7 +153394,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 																/**
 																 * @type string
 																 */
-																prefix: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
+																prefix: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
 																/**
 																 * @maxLength 128
 																 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -142794,7 +153423,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 							/**
 							 * @type string
 							 */
-							language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsLanguageEnum;
+							language: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmsLanguageEnum;
 							slugAddress:
 								| ({
 										/**
@@ -142869,7 +153498,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 															/**
 															 * @type string
 															 */
-															prefix: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsAvatarIconPrefixEnum;
+															prefix: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmsAvatarIconPrefixEnum;
 															/**
 															 * @maxLength 128
 															 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -142905,7 +153534,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 						};
 						viewerReaction: (string | null) | null;
 						recommendationReason:
-							| (PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRecommendationReason | null)
+							| (PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRecommendationReason | null)
 							| null;
 						tracking:
 							| ({
@@ -142919,7 +153548,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 									 * @default 'home_feed'
 									 * @type string
 									 */
-									surface: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsTrackingSurfaceEnum;
+									surface: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsTrackingSurfaceEnum;
 									position: string | number;
 									/**
 									 * @minLength 1
@@ -143117,7 +153746,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 										 * @default 'author'
 										 * @type string
 										 */
-										role: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsRoleEnum;
+										role: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsRoleEnum;
 										/**
 										 * @description
 										 * Format: `fractional-position`
@@ -143140,11 +153769,11 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 											 * @default 'slug_namespace'
 											 * @type string
 											 */
-											kind: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
+											kind: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
 											/**
 											 * @type string
 											 */
-											language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum;
+											language: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum;
 											slugAddress:
 												| ({
 														/**
@@ -143219,7 +153848,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 																			/**
 																			 * @type string
 																			 */
-																			prefix: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum;
+																			prefix: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum;
 																			/**
 																			 * @maxLength 128
 																			 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -143252,7 +153881,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 									/**
 									 * @type string
 									 */
-									language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsSubjectLanguageEnum;
+									language: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSubjectLanguageEnum;
 									title: (string | null) | null;
 									summary: (string | null) | null;
 									cover:
@@ -143327,7 +153956,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 										/**
 										 * @type string
 										 */
-										language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmTagContextTagLanguageEnum;
+										language: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmTagContextTagLanguageEnum;
 										title: (string | null) | null;
 										avatar:
 											| (
@@ -143380,7 +154009,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 																		/**
 																		 * @type string
 																		 */
-																		prefix: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum;
+																		prefix: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsRealmTagContextTagAvatarIconPrefixEnum;
 																		/**
 																		 * @maxLength 128
 																		 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -143479,20 +154108,12 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus400 = MalformedRequestBody;
-
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	ZoneSearchFeatureNotFound: "ZoneSearchFeatureNotFound",
-} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus404ErrorCodeEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus404ErrorCodeEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus404ErrorCodeEnum];
+export type PostApiSearchZonesByZoneIdFilterFeedStatus400 = MalformedRequestBody;
 
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus404 = {
+export type PostApiSearchZonesByZoneIdFilterFeedStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -143501,7 +154122,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: PostApiSearchZonesByZoneIdFeatureFeedStatus404ErrorCodeEnum;
+		code: "UnitNotFound";
 		/**
 		 * @type string
 		 */
@@ -143517,7 +154138,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus404 = {
 	requestId: string;
 };
 
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus422 =
+export type PostApiSearchZonesByZoneIdFilterFeedStatus422 =
 	| {
 			/**
 			 * @type object
@@ -143544,47 +154165,15 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus422 =
 	  }
 	| ValidationError;
 
-export const PostApiSearchZonesByZoneIdFeatureFeedStatus429ErrorCodeEnum = {
-	ApiQuotaExceeded: "ApiQuotaExceeded",
-	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
-} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus429ErrorCodeEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus429ErrorCodeEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus429ErrorCodeEnum];
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFilterFeedStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PostApiSearchZonesByZoneIdFeatureFeedStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type PostApiSearchZonesByZoneIdFeatureFeedStatus503 = {
+export type PostApiSearchZonesByZoneIdFilterFeedStatus503 = {
 	/**
 	 * @type object
 	 */
@@ -143609,15 +154198,15 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus503 = {
 	requestId: string;
 };
 
-export const PostApiSearchZonesByZoneIdFeatureFeedRequestInjectionsSourceEnum = {
+export const PostApiSearchZonesByZoneIdFilterFeedRequestInjectionsSourceEnum = {
 	tag: "tag",
 	link: "link",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedRequestInjectionsSourceEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedRequestInjectionsSourceEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedRequestInjectionsSourceEnum];
+export type PostApiSearchZonesByZoneIdFilterFeedRequestInjectionsSourceEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedRequestInjectionsSourceEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedRequestInjectionsSourceEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureFeedRequestStateSortEnum = {
+export const PostApiSearchZonesByZoneIdFilterFeedRequestStateSortEnum = {
 	best: "best",
 	relevance: "relevance",
 	"createdAt:asc": "createdAt:asc",
@@ -143638,10 +154227,10 @@ export const PostApiSearchZonesByZoneIdFeatureFeedRequestStateSortEnum = {
 	"progressLastSeenAt:desc": "progressLastSeenAt:desc",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedRequestStateSortEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedRequestStateSortEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedRequestStateSortEnum];
+export type PostApiSearchZonesByZoneIdFilterFeedRequestStateSortEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedRequestStateSortEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedRequestStateSortEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureFeedRequestLocalizationLanguagesEnum = {
+export const PostApiSearchZonesByZoneIdFilterFeedRequestLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -143651,21 +154240,21 @@ export const PostApiSearchZonesByZoneIdFeatureFeedRequestLocalizationLanguagesEn
 	es: "es",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedRequestLocalizationLanguagesEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedRequestLocalizationLanguagesEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedRequestLocalizationLanguagesEnum];
+export type PostApiSearchZonesByZoneIdFilterFeedRequestLocalizationLanguagesEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedRequestLocalizationLanguagesEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedRequestLocalizationLanguagesEnum];
 
-export const PostApiSearchZonesByZoneIdFeatureFeedRequestSurfaceEnum = {
+export const PostApiSearchZonesByZoneIdFilterFeedRequestSurfaceEnum = {
 	search: "search",
 	feed: "feed",
 } as const;
 
-export type PostApiSearchZonesByZoneIdFeatureFeedRequestSurfaceEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureFeedRequestSurfaceEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedRequestSurfaceEnum];
+export type PostApiSearchZonesByZoneIdFilterFeedRequestSurfaceEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedRequestSurfaceEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedRequestSurfaceEnum];
 
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
+export type PostApiSearchZonesByZoneIdFilterFeedBody = {
 	/**
 	 * @type array
 	 */
@@ -143673,7 +154262,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 		/**
 		 * @type string
 		 */
-		source: PostApiSearchZonesByZoneIdFeatureFeedRequestInjectionsSourceEnum;
+		source: PostApiSearchZonesByZoneIdFilterFeedRequestInjectionsSourceEnum;
 		/**
 		 * @type object
 		 */
@@ -144062,7 +154651,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 		/**
 		 * @type string | undefined
 		 */
-		sort?: PostApiSearchZonesByZoneIdFeatureFeedRequestStateSortEnum;
+		sort?: PostApiSearchZonesByZoneIdFilterFeedRequestStateSortEnum;
 		/**
 		 * @minLength 1
 		 * @maxLength 100
@@ -144469,19 +155058,19 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 	/**
 	 * @type array
 	 */
-	localizationLanguages: PostApiSearchZonesByZoneIdFeatureFeedRequestLocalizationLanguagesEnum[];
+	localizationLanguages: PostApiSearchZonesByZoneIdFilterFeedRequestLocalizationLanguagesEnum[];
 	/**
 	 * @type string
 	 */
-	surface: PostApiSearchZonesByZoneIdFeatureFeedRequestSurfaceEnum;
+	surface: PostApiSearchZonesByZoneIdFilterFeedRequestSurfaceEnum;
 };
 
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdFeatureFeedOptions = {
-	body: PostApiSearchZonesByZoneIdFeatureFeedBody;
-	path: PostApiSearchZonesByZoneIdFeatureFeedPath;
+export type PostApiSearchZonesByZoneIdFilterFeedOptions = {
+	body: PostApiSearchZonesByZoneIdFilterFeedBody;
+	path: PostApiSearchZonesByZoneIdFilterFeedPath;
 	query?: never;
 	headers?: never;
 };
@@ -144489,429 +155078,25 @@ export type PostApiSearchZonesByZoneIdFeatureFeedOptions = {
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdFeatureFeedResponses = {
-	"200": PostApiSearchZonesByZoneIdFeatureFeedStatus200;
-	"400": PostApiSearchZonesByZoneIdFeatureFeedStatus400;
-	"404": PostApiSearchZonesByZoneIdFeatureFeedStatus404;
-	"422": PostApiSearchZonesByZoneIdFeatureFeedStatus422;
-	"429": PostApiSearchZonesByZoneIdFeatureFeedStatus429;
-	"500": PostApiSearchZonesByZoneIdFeatureFeedStatus500;
-	"503": PostApiSearchZonesByZoneIdFeatureFeedStatus503;
+export type PostApiSearchZonesByZoneIdFilterFeedResponses = {
+	"200": PostApiSearchZonesByZoneIdFilterFeedStatus200;
+	"400": PostApiSearchZonesByZoneIdFilterFeedStatus400;
+	"404": PostApiSearchZonesByZoneIdFilterFeedStatus404;
+	"422": PostApiSearchZonesByZoneIdFilterFeedStatus422;
+	"500": PostApiSearchZonesByZoneIdFilterFeedStatus500;
+	"503": PostApiSearchZonesByZoneIdFilterFeedStatus503;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PostApiSearchZonesByZoneIdFeatureFeedResponse =
-	| PostApiSearchZonesByZoneIdFeatureFeedStatus200
-	| PostApiSearchZonesByZoneIdFeatureFeedStatus400
-	| PostApiSearchZonesByZoneIdFeatureFeedStatus404
-	| PostApiSearchZonesByZoneIdFeatureFeedStatus422
-	| PostApiSearchZonesByZoneIdFeatureFeedStatus429
-	| PostApiSearchZonesByZoneIdFeatureFeedStatus500
-	| PostApiSearchZonesByZoneIdFeatureFeedStatus503;
-
-/**
- * @type object
- */
-export type GetApiSearchZonesByZoneIdFeatureRevisionsPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	zoneId: string;
-};
-
-export const GetApiSearchZonesByZoneIdFeatureRevisionsStatus200ItemsKindEnum = {
-	create: "create",
-	update: "update",
-	delete: "delete",
-	restore: "restore",
-} as const;
-
-export type GetApiSearchZonesByZoneIdFeatureRevisionsStatus200ItemsKindEnum =
-	(typeof GetApiSearchZonesByZoneIdFeatureRevisionsStatus200ItemsKindEnum)[keyof typeof GetApiSearchZonesByZoneIdFeatureRevisionsStatus200ItemsKindEnum];
-
-/**
- * @type object
- */
-export type GetApiSearchZonesByZoneIdFeatureRevisionsStatus200 = {
-	/**
-	 * @type array
-	 */
-	items: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		id: string;
-		parentRevisionId: (string | null) | null;
-		sourceRevisionId: (string | null) | null;
-		actorProfileId: (string | null) | null;
-		/**
-		 * @default 'create'
-		 * @type string
-		 */
-		kind: GetApiSearchZonesByZoneIdFeatureRevisionsStatus200ItemsKindEnum;
-		editSummary: (string | null) | null;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		createdAt: string;
-	}[];
-};
-
-/**
- * @type object
- */
-export type GetApiSearchZonesByZoneIdFeatureRevisionsStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitPermissionForbidden'
-		 * @type string
-		 */
-		code: "UnitPermissionForbidden";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const GetApiSearchZonesByZoneIdFeatureRevisionsStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	ZoneSearchFeatureNotFound: "ZoneSearchFeatureNotFound",
-} as const;
-
-export type GetApiSearchZonesByZoneIdFeatureRevisionsStatus404ErrorCodeEnum =
-	(typeof GetApiSearchZonesByZoneIdFeatureRevisionsStatus404ErrorCodeEnum)[keyof typeof GetApiSearchZonesByZoneIdFeatureRevisionsStatus404ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type GetApiSearchZonesByZoneIdFeatureRevisionsStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: GetApiSearchZonesByZoneIdFeatureRevisionsStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiSearchZonesByZoneIdFeatureRevisionsStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type GetApiSearchZonesByZoneIdFeatureRevisionsStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type GetApiSearchZonesByZoneIdFeatureRevisionsOptions = {
-	body?: never;
-	path: GetApiSearchZonesByZoneIdFeatureRevisionsPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type GetApiSearchZonesByZoneIdFeatureRevisionsResponses = {
-	"200": GetApiSearchZonesByZoneIdFeatureRevisionsStatus200;
-	"403": GetApiSearchZonesByZoneIdFeatureRevisionsStatus403;
-	"404": GetApiSearchZonesByZoneIdFeatureRevisionsStatus404;
-	"422": GetApiSearchZonesByZoneIdFeatureRevisionsStatus422;
-	"500": GetApiSearchZonesByZoneIdFeatureRevisionsStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type GetApiSearchZonesByZoneIdFeatureRevisionsResponse =
-	| GetApiSearchZonesByZoneIdFeatureRevisionsStatus200
-	| GetApiSearchZonesByZoneIdFeatureRevisionsStatus403
-	| GetApiSearchZonesByZoneIdFeatureRevisionsStatus404
-	| GetApiSearchZonesByZoneIdFeatureRevisionsStatus422
-	| GetApiSearchZonesByZoneIdFeatureRevisionsStatus500;
-
-/**
- * @type object
- */
-export type PostApiSearchZonesByZoneIdFeatureRestorePath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	zoneId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	zoneId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	searchDocumentId: string;
-	/**
-	 * @type boolean
-	 */
-	enabled: boolean;
-	/**
-	 * @type object
-	 */
-	definition: SearchFeatureDefinitionV1;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	latestRevisionId: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
-};
-
-/**
- * @type object
- */
-export type PostApiSearchZonesByZoneIdFeatureRestoreStatus400 = MalformedRequestBody;
-
-/**
- * @type object
- */
-export type PostApiSearchZonesByZoneIdFeatureRestoreStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitPermissionForbidden'
-		 * @type string
-		 */
-		code: "UnitPermissionForbidden";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const PostApiSearchZonesByZoneIdFeatureRestoreStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	ZoneSearchFeatureNotFound: "ZoneSearchFeatureNotFound",
-} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureRestoreStatus404ErrorCodeEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus404ErrorCodeEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus404ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PostApiSearchZonesByZoneIdFeatureRestoreStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: PostApiSearchZonesByZoneIdFeatureRestoreStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiSearchZonesByZoneIdFeatureRestoreStatus409 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'SearchDocumentRevisionConflict'
-		 * @type string
-		 */
-		code: "SearchDocumentRevisionConflict";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export type PostApiSearchZonesByZoneIdFeatureRestoreStatus422 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'InvalidSearch'
-				 * @type string
-				 */
-				code: "InvalidSearch";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| ValidationError;
-
-/**
- * @type object
- */
-export type PostApiSearchZonesByZoneIdFeatureRestoreStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type PostApiSearchZonesByZoneIdFeatureRestoreBody = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	sourceRevisionId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	baseRevisionId: string;
-	/**
-	 * @maxLength 500
-	 * @type string | undefined
-	 */
-	message?: string;
-};
-
-/**
- * @type object
- */
-export type PostApiSearchZonesByZoneIdFeatureRestoreOptions = {
-	body: PostApiSearchZonesByZoneIdFeatureRestoreBody;
-	path: PostApiSearchZonesByZoneIdFeatureRestorePath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PostApiSearchZonesByZoneIdFeatureRestoreResponses = {
-	"200": PostApiSearchZonesByZoneIdFeatureRestoreStatus200;
-	"400": PostApiSearchZonesByZoneIdFeatureRestoreStatus400;
-	"403": PostApiSearchZonesByZoneIdFeatureRestoreStatus403;
-	"404": PostApiSearchZonesByZoneIdFeatureRestoreStatus404;
-	"409": PostApiSearchZonesByZoneIdFeatureRestoreStatus409;
-	"422": PostApiSearchZonesByZoneIdFeatureRestoreStatus422;
-	"500": PostApiSearchZonesByZoneIdFeatureRestoreStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PostApiSearchZonesByZoneIdFeatureRestoreResponse =
-	| PostApiSearchZonesByZoneIdFeatureRestoreStatus200
-	| PostApiSearchZonesByZoneIdFeatureRestoreStatus400
-	| PostApiSearchZonesByZoneIdFeatureRestoreStatus403
-	| PostApiSearchZonesByZoneIdFeatureRestoreStatus404
-	| PostApiSearchZonesByZoneIdFeatureRestoreStatus409
-	| PostApiSearchZonesByZoneIdFeatureRestoreStatus422
-	| PostApiSearchZonesByZoneIdFeatureRestoreStatus500;
+export type PostApiSearchZonesByZoneIdFilterFeedResponse =
+	| PostApiSearchZonesByZoneIdFilterFeedStatus200
+	| PostApiSearchZonesByZoneIdFilterFeedStatus400
+	| PostApiSearchZonesByZoneIdFilterFeedStatus404
+	| PostApiSearchZonesByZoneIdFilterFeedStatus422
+	| PostApiSearchZonesByZoneIdFilterFeedStatus500
+	| PostApiSearchZonesByZoneIdFilterFeedStatus503;
 
 /**
  * @type object
@@ -145266,7 +155451,6 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400 = Mal
 export const PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	DockNotFound: "DockNotFound",
-	ZoneSearchFeatureNotFound: "ZoneSearchFeatureNotFound",
 } as const;
 
 export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404ErrorCodeEnum =
@@ -146644,7 +156828,6 @@ export const PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatu
 	{
 		UnitNotFound: "UnitNotFound",
 		ZonePageNotFound: "ZonePageNotFound",
-		ZoneSearchFeatureNotFound: "ZoneSearchFeatureNotFound",
 	} as const;
 
 export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404ErrorCodeEnum =
@@ -150704,7 +160887,6 @@ export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404Error
 	UnitNotFound: "UnitNotFound",
 	DockNotFound: "DockNotFound",
 	ZonePageNotFound: "ZonePageNotFound",
-	ZoneSearchFeatureNotFound: "ZoneSearchFeatureNotFound",
 } as const;
 
 export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404ErrorCodeEnum =
@@ -152263,17 +162445,102 @@ export type PostApiSearchResponse =
 	| PostApiSearchStatus500
 	| PostApiSearchStatus503;
 
-export const PostApiSearchSharedQueriesStatus201DocumentTemplateEnum = {
-	global: "global",
-	book: "book",
-	media: "media",
-	software: "software",
-	realm: "realm",
-	zone: "zone",
+export const PostApiSearchSharedQueriesStatus201DocumentFilterDocumentCategoriesEnum = {
+	units: "units",
+	users: "users",
+	entities: "entities",
+	tags: "tags",
+	"tag-structures": "tag-structures",
+	posts: "posts",
+	realms: "realms",
+	collections: "collections",
+	reviews: "reviews",
+	polls: "polls",
 } as const;
 
-export type PostApiSearchSharedQueriesStatus201DocumentTemplateEnum =
-	(typeof PostApiSearchSharedQueriesStatus201DocumentTemplateEnum)[keyof typeof PostApiSearchSharedQueriesStatus201DocumentTemplateEnum];
+export type PostApiSearchSharedQueriesStatus201DocumentFilterDocumentCategoriesEnum =
+	(typeof PostApiSearchSharedQueriesStatus201DocumentFilterDocumentCategoriesEnum)[keyof typeof PostApiSearchSharedQueriesStatus201DocumentFilterDocumentCategoriesEnum];
+
+export const PostApiSearchSharedQueriesStatus201DocumentFilterDocumentWhereKindInEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type PostApiSearchSharedQueriesStatus201DocumentFilterDocumentWhereKindInEnum =
+	(typeof PostApiSearchSharedQueriesStatus201DocumentFilterDocumentWhereKindInEnum)[keyof typeof PostApiSearchSharedQueriesStatus201DocumentFilterDocumentWhereKindInEnum];
+
+export const PostApiSearchSharedQueriesStatus201DocumentFilterDocumentControlsFieldEnum = {
+	category: "category",
+	kind: "kind",
+	language: "language",
+	"content-rating": "content-rating",
+	"ai-disclosure": "ai-disclosure",
+	license: "license",
+	tag: "tag",
+	credit: "credit",
+	"credited-profile": "credited-profile",
+	realm: "realm",
+	"realm-tag-context": "realm-tag-context",
+	zone: "zone",
+	subject: "subject",
+	target: "target",
+	root: "root",
+	parent: "parent",
+	owner: "owner",
+	"join-policy": "join-policy",
+	multiple: "multiple",
+	"results-visibility": "results-visibility",
+	closed: "closed",
+	"created-at": "created-at",
+	"updated-at": "updated-at",
+	"published-at": "published-at",
+	"closes-at": "closes-at",
+	"content-license": "content-license",
+	"book-isbn13": "book-isbn13",
+	"book-publication-date": "book-publication-date",
+	"book-page-count": "book-page-count",
+	"book-word-count": "book-word-count",
+	"book-format": "book-format",
+	"media-kind": "media-kind",
+	"media-release-date": "media-release-date",
+	"media-runtime-minutes": "media-runtime-minutes",
+	"media-episode-count": "media-episode-count",
+	"media-season-count": "media-season-count",
+	"software-release-date": "software-release-date",
+	"software-version-label": "software-version-label",
+	"software-platform": "software-platform",
+	"software-requirement-tier": "software-requirement-tier",
+	"realm-tag-vote": "realm-tag-vote",
+} as const;
+
+export type PostApiSearchSharedQueriesStatus201DocumentFilterDocumentControlsFieldEnum =
+	(typeof PostApiSearchSharedQueriesStatus201DocumentFilterDocumentControlsFieldEnum)[keyof typeof PostApiSearchSharedQueriesStatus201DocumentFilterDocumentControlsFieldEnum];
+
+export const PostApiSearchSharedQueriesStatus201DocumentFilterDocumentControlsDisclosureEnum = {
+	visible: "visible",
+	hidden: "hidden",
+} as const;
+
+export type PostApiSearchSharedQueriesStatus201DocumentFilterDocumentControlsDisclosureEnum =
+	(typeof PostApiSearchSharedQueriesStatus201DocumentFilterDocumentControlsDisclosureEnum)[keyof typeof PostApiSearchSharedQueriesStatus201DocumentFilterDocumentControlsDisclosureEnum];
 
 export const PostApiSearchSharedQueriesStatus201DocumentStateSortEnum = {
 	best: "best",
@@ -152361,13 +162628,2137 @@ export type PostApiSearchSharedQueriesStatus201 = {
 	 */
 	document: {
 		/**
-		 * @type number
+		 * @type object
 		 */
-		version: 1;
-		/**
-		 * @type string
-		 */
-		template: PostApiSearchSharedQueriesStatus201DocumentTemplateEnum;
+		filterDocument: {
+			/**
+			 * @type array | undefined
+			 */
+			categories?: PostApiSearchSharedQueriesStatus201DocumentFilterDocumentCategoriesEnum[];
+			/**
+			 * @type object | undefined
+			 */
+			where?: {
+				/**
+				 * @type array | undefined
+				 */
+				all?: UnitPredicate[];
+				/**
+				 * @type array | undefined
+				 */
+				any?: UnitPredicate[];
+				/**
+				 * @type object | undefined
+				 */
+				not?: UnitPredicate;
+				/**
+				 * @type object | undefined
+				 */
+				id?: {
+					/**
+					 * @type array
+					 */
+					in: string[];
+				};
+				/**
+				 * @type object | undefined
+				 */
+				kind?: {
+					/**
+					 * @type array
+					 */
+					in: PostApiSearchSharedQueriesStatus201DocumentFilterDocumentWhereKindInEnum[];
+				};
+				localizations?:
+					| {
+							/**
+							 * @type object
+							 */
+							some: {
+								/**
+								 * @type array | undefined
+								 */
+								all?: LocalizationFilter[];
+								/**
+								 * @type array | undefined
+								 */
+								any?: LocalizationFilter[];
+								/**
+								 * @type object | undefined
+								 */
+								not?: LocalizationFilter;
+								/**
+								 * @type object | undefined
+								 */
+								language?: {
+									/**
+									 * @type array
+									 */
+									in: ("zh" | "en" | "ja" | "ko" | "de" | "fr" | "es")[];
+								};
+							};
+					  }
+					| {
+							/**
+							 * @type object
+							 */
+							none: {
+								/**
+								 * @type array | undefined
+								 */
+								all?: LocalizationFilter[];
+								/**
+								 * @type array | undefined
+								 */
+								any?: LocalizationFilter[];
+								/**
+								 * @type object | undefined
+								 */
+								not?: LocalizationFilter;
+								/**
+								 * @type object | undefined
+								 */
+								language?: {
+									/**
+									 * @type array
+									 */
+									in: ("zh" | "en" | "ja" | "ko" | "de" | "fr" | "es")[];
+								};
+							};
+					  };
+				realms?:
+					| {
+							/**
+							 * @type object
+							 */
+							some: {
+								/**
+								 * @type array | undefined
+								 */
+								all?: RealmPlacementFilter[];
+								/**
+								 * @type array | undefined
+								 */
+								any?: RealmPlacementFilter[];
+								/**
+								 * @type object | undefined
+								 */
+								not?: RealmPlacementFilter;
+								/**
+								 * @type object | undefined
+								 */
+								realm?: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "video"
+											| "audio"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+								/**
+								 * @type object | undefined
+								 */
+								status?: {
+									/**
+									 * @type array
+									 */
+									in: ("pending" | "visible" | "hidden" | "removed")[];
+								};
+								/**
+								 * @type object | undefined
+								 */
+								publicationState?: {
+									/**
+									 * @type array
+									 */
+									in: ("active" | "withdrawn")[];
+								};
+							};
+					  }
+					| {
+							/**
+							 * @type object
+							 */
+							none: {
+								/**
+								 * @type array | undefined
+								 */
+								all?: RealmPlacementFilter[];
+								/**
+								 * @type array | undefined
+								 */
+								any?: RealmPlacementFilter[];
+								/**
+								 * @type object | undefined
+								 */
+								not?: RealmPlacementFilter;
+								/**
+								 * @type object | undefined
+								 */
+								realm?: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "video"
+											| "audio"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+								/**
+								 * @type object | undefined
+								 */
+								status?: {
+									/**
+									 * @type array
+									 */
+									in: ("pending" | "visible" | "hidden" | "removed")[];
+								};
+								/**
+								 * @type object | undefined
+								 */
+								publicationState?: {
+									/**
+									 * @type array
+									 */
+									in: ("active" | "withdrawn")[];
+								};
+							};
+					  };
+				tags?:
+					| {
+							/**
+							 * @type object
+							 */
+							some: {
+								/**
+								 * @type array | undefined
+								 */
+								all?: TagAssertionFilter[];
+								/**
+								 * @type array | undefined
+								 */
+								any?: TagAssertionFilter[];
+								/**
+								 * @type object | undefined
+								 */
+								not?: TagAssertionFilter;
+								/**
+								 * @type object | undefined
+								 */
+								tag?: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "video"
+											| "audio"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+								authority?:
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "global";
+											view:
+												| {
+														/**
+														 * @type string
+														 */
+														kind: "effective";
+														/**
+														 * @type object | undefined
+														 */
+														consensus?: {
+															score?:
+																| {
+																		/**
+																		 * @type array
+																		 */
+																		in: number[];
+																  }
+																| {
+																		range:
+																			| {
+																					/**
+																					 * @type integer
+																					 */
+																					minimum: number;
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					maximum?: number;
+																			  }
+																			| {
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					minimum?: number;
+																					/**
+																					 * @type integer
+																					 */
+																					maximum: number;
+																			  };
+																  };
+															voteCount?:
+																| {
+																		/**
+																		 * @type array
+																		 */
+																		in: number[];
+																  }
+																| {
+																		range:
+																			| {
+																					/**
+																					 * @type integer
+																					 */
+																					minimum: number;
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					maximum?: number;
+																			  }
+																			| {
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					minimum?: number;
+																					/**
+																					 * @type integer
+																					 */
+																					maximum: number;
+																			  };
+																  };
+														};
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														kind: "direct";
+												  };
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "realm";
+											/**
+											 * @type object
+											 */
+											realm: {
+												/**
+												 * @type object | undefined
+												 */
+												id?: {
+													/**
+													 * @type array
+													 */
+													in: string[];
+												};
+												/**
+												 * @type object | undefined
+												 */
+												kind?: {
+													/**
+													 * @type array
+													 */
+													in: (
+														| "slug_namespace"
+														| "profile"
+														| "book"
+														| "software"
+														| "media"
+														| "video"
+														| "audio"
+														| "release"
+														| "entity"
+														| "label"
+														| "tag"
+														| "structure"
+														| "series"
+														| "zone"
+														| "zone_page"
+														| "collection"
+														| "post"
+														| "poll"
+														| "realm"
+														| "realm_rule"
+													)[];
+												};
+											};
+											view:
+												| {
+														/**
+														 * @type string
+														 */
+														kind: "policy";
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														kind: "community";
+														/**
+														 * @type object | undefined
+														 */
+														consensus?: {
+															score?:
+																| {
+																		/**
+																		 * @type array
+																		 */
+																		in: number[];
+																  }
+																| {
+																		range:
+																			| {
+																					/**
+																					 * @type integer
+																					 */
+																					minimum: number;
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					maximum?: number;
+																			  }
+																			| {
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					minimum?: number;
+																					/**
+																					 * @type integer
+																					 */
+																					maximum: number;
+																			  };
+																  };
+															voteCount?:
+																| {
+																		/**
+																		 * @type array
+																		 */
+																		in: number[];
+																  }
+																| {
+																		range:
+																			| {
+																					/**
+																					 * @type integer
+																					 */
+																					minimum: number;
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					maximum?: number;
+																			  }
+																			| {
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					minimum?: number;
+																					/**
+																					 * @type integer
+																					 */
+																					maximum: number;
+																			  };
+																  };
+														};
+												  };
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "profile";
+											/**
+											 * @type object
+											 */
+											profile: {
+												/**
+												 * @type string
+												 */
+												kind: "viewer";
+											};
+									  };
+							};
+					  }
+					| {
+							/**
+							 * @type object
+							 */
+							none: {
+								/**
+								 * @type array | undefined
+								 */
+								all?: TagAssertionFilter[];
+								/**
+								 * @type array | undefined
+								 */
+								any?: TagAssertionFilter[];
+								/**
+								 * @type object | undefined
+								 */
+								not?: TagAssertionFilter;
+								/**
+								 * @type object | undefined
+								 */
+								tag?: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "video"
+											| "audio"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+								authority?:
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "global";
+											view:
+												| {
+														/**
+														 * @type string
+														 */
+														kind: "effective";
+														/**
+														 * @type object | undefined
+														 */
+														consensus?: {
+															score?:
+																| {
+																		/**
+																		 * @type array
+																		 */
+																		in: number[];
+																  }
+																| {
+																		range:
+																			| {
+																					/**
+																					 * @type integer
+																					 */
+																					minimum: number;
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					maximum?: number;
+																			  }
+																			| {
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					minimum?: number;
+																					/**
+																					 * @type integer
+																					 */
+																					maximum: number;
+																			  };
+																  };
+															voteCount?:
+																| {
+																		/**
+																		 * @type array
+																		 */
+																		in: number[];
+																  }
+																| {
+																		range:
+																			| {
+																					/**
+																					 * @type integer
+																					 */
+																					minimum: number;
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					maximum?: number;
+																			  }
+																			| {
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					minimum?: number;
+																					/**
+																					 * @type integer
+																					 */
+																					maximum: number;
+																			  };
+																  };
+														};
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														kind: "direct";
+												  };
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "realm";
+											/**
+											 * @type object
+											 */
+											realm: {
+												/**
+												 * @type object | undefined
+												 */
+												id?: {
+													/**
+													 * @type array
+													 */
+													in: string[];
+												};
+												/**
+												 * @type object | undefined
+												 */
+												kind?: {
+													/**
+													 * @type array
+													 */
+													in: (
+														| "slug_namespace"
+														| "profile"
+														| "book"
+														| "software"
+														| "media"
+														| "video"
+														| "audio"
+														| "release"
+														| "entity"
+														| "label"
+														| "tag"
+														| "structure"
+														| "series"
+														| "zone"
+														| "zone_page"
+														| "collection"
+														| "post"
+														| "poll"
+														| "realm"
+														| "realm_rule"
+													)[];
+												};
+											};
+											view:
+												| {
+														/**
+														 * @type string
+														 */
+														kind: "policy";
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														kind: "community";
+														/**
+														 * @type object | undefined
+														 */
+														consensus?: {
+															score?:
+																| {
+																		/**
+																		 * @type array
+																		 */
+																		in: number[];
+																  }
+																| {
+																		range:
+																			| {
+																					/**
+																					 * @type integer
+																					 */
+																					minimum: number;
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					maximum?: number;
+																			  }
+																			| {
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					minimum?: number;
+																					/**
+																					 * @type integer
+																					 */
+																					maximum: number;
+																			  };
+																  };
+															voteCount?:
+																| {
+																		/**
+																		 * @type array
+																		 */
+																		in: number[];
+																  }
+																| {
+																		range:
+																			| {
+																					/**
+																					 * @type integer
+																					 */
+																					minimum: number;
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					maximum?: number;
+																			  }
+																			| {
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					minimum?: number;
+																					/**
+																					 * @type integer
+																					 */
+																					maximum: number;
+																			  };
+																  };
+														};
+												  };
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "profile";
+											/**
+											 * @type object
+											 */
+											profile: {
+												/**
+												 * @type string
+												 */
+												kind: "viewer";
+											};
+									  };
+							};
+					  };
+				creditAttributions?:
+					| {
+							/**
+							 * @type object
+							 */
+							some: {
+								/**
+								 * @type object | undefined
+								 */
+								id?: {
+									/**
+									 * @type array
+									 */
+									in: string[];
+								};
+								/**
+								 * @type object | undefined
+								 */
+								kind?: {
+									/**
+									 * @type array
+									 */
+									in: (
+										| "slug_namespace"
+										| "profile"
+										| "book"
+										| "software"
+										| "media"
+										| "video"
+										| "audio"
+										| "release"
+										| "entity"
+										| "label"
+										| "tag"
+										| "structure"
+										| "series"
+										| "zone"
+										| "zone_page"
+										| "collection"
+										| "post"
+										| "poll"
+										| "realm"
+										| "realm_rule"
+									)[];
+								};
+							};
+					  }
+					| {
+							/**
+							 * @type object
+							 */
+							none: {
+								/**
+								 * @type object | undefined
+								 */
+								id?: {
+									/**
+									 * @type array
+									 */
+									in: string[];
+								};
+								/**
+								 * @type object | undefined
+								 */
+								kind?: {
+									/**
+									 * @type array
+									 */
+									in: (
+										| "slug_namespace"
+										| "profile"
+										| "book"
+										| "software"
+										| "media"
+										| "video"
+										| "audio"
+										| "release"
+										| "entity"
+										| "label"
+										| "tag"
+										| "structure"
+										| "series"
+										| "zone"
+										| "zone_page"
+										| "collection"
+										| "post"
+										| "poll"
+										| "realm"
+										| "realm_rule"
+									)[];
+								};
+							};
+					  };
+				subjectAssociations?:
+					| {
+							/**
+							 * @type object
+							 */
+							some: {
+								/**
+								 * @type object | undefined
+								 */
+								id?: {
+									/**
+									 * @type array
+									 */
+									in: string[];
+								};
+								/**
+								 * @type object | undefined
+								 */
+								kind?: {
+									/**
+									 * @type array
+									 */
+									in: (
+										| "slug_namespace"
+										| "profile"
+										| "book"
+										| "software"
+										| "media"
+										| "video"
+										| "audio"
+										| "release"
+										| "entity"
+										| "label"
+										| "tag"
+										| "structure"
+										| "series"
+										| "zone"
+										| "zone_page"
+										| "collection"
+										| "post"
+										| "poll"
+										| "realm"
+										| "realm_rule"
+									)[];
+								};
+							};
+					  }
+					| {
+							/**
+							 * @type object
+							 */
+							none: {
+								/**
+								 * @type object | undefined
+								 */
+								id?: {
+									/**
+									 * @type array
+									 */
+									in: string[];
+								};
+								/**
+								 * @type object | undefined
+								 */
+								kind?: {
+									/**
+									 * @type array
+									 */
+									in: (
+										| "slug_namespace"
+										| "profile"
+										| "book"
+										| "software"
+										| "media"
+										| "video"
+										| "audio"
+										| "release"
+										| "entity"
+										| "label"
+										| "tag"
+										| "structure"
+										| "series"
+										| "zone"
+										| "zone_page"
+										| "collection"
+										| "post"
+										| "poll"
+										| "realm"
+										| "realm_rule"
+									)[];
+								};
+							};
+					  };
+				publishers?:
+					| {
+							some:
+								| {
+										/**
+										 * @type string
+										 */
+										kind: "viewer";
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										kind: "profile";
+										/**
+										 * @type object
+										 */
+										id: {
+											/**
+											 * @type array
+											 */
+											in: string[];
+										};
+								  };
+					  }
+					| {
+							none:
+								| {
+										/**
+										 * @type string
+										 */
+										kind: "viewer";
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										kind: "profile";
+										/**
+										 * @type object
+										 */
+										id: {
+											/**
+											 * @type array
+											 */
+											in: string[];
+										};
+								  };
+					  };
+				/**
+				 * @type object | undefined
+				 */
+				scores?: {
+					received?:
+						| {
+								/**
+								 * @type object
+								 */
+								some: {
+									/**
+									 * @type array | undefined
+									 */
+									all?: ScoreFilter[];
+									/**
+									 * @type array | undefined
+									 */
+									any?: ScoreFilter[];
+									/**
+									 * @type object | undefined
+									 */
+									not?: ScoreFilter;
+									value?:
+										| {
+												/**
+												 * @type array
+												 */
+												in: number[];
+										  }
+										| {
+												range:
+													| {
+															/**
+															 * @minLength 1
+															 * @maxLength 10
+															 * @type integer
+															 */
+															minimum: number;
+															/**
+															 * @minLength 1
+															 * @maxLength 10
+															 * @type integer | undefined
+															 */
+															maximum?: number;
+													  }
+													| {
+															/**
+															 * @minLength 1
+															 * @maxLength 10
+															 * @type integer | undefined
+															 */
+															minimum?: number;
+															/**
+															 * @minLength 1
+															 * @maxLength 10
+															 * @type integer
+															 */
+															maximum: number;
+													  };
+										  };
+									/**
+									 * @type object | undefined
+									 */
+									realm?: {
+										/**
+										 * @type object | undefined
+										 */
+										id?: {
+											/**
+											 * @type array
+											 */
+											in: string[];
+										};
+										/**
+										 * @type object | undefined
+										 */
+										kind?: {
+											/**
+											 * @type array
+											 */
+											in: (
+												| "slug_namespace"
+												| "profile"
+												| "book"
+												| "software"
+												| "media"
+												| "video"
+												| "audio"
+												| "release"
+												| "entity"
+												| "label"
+												| "tag"
+												| "structure"
+												| "series"
+												| "zone"
+												| "zone_page"
+												| "collection"
+												| "post"
+												| "poll"
+												| "realm"
+												| "realm_rule"
+											)[];
+										};
+									};
+									/**
+									 * @type object | undefined
+									 */
+									target?: {
+										/**
+										 * @type object | undefined
+										 */
+										id?: {
+											/**
+											 * @type array
+											 */
+											in: string[];
+										};
+										/**
+										 * @type object | undefined
+										 */
+										kind?: {
+											/**
+											 * @type array
+											 */
+											in: (
+												| "slug_namespace"
+												| "profile"
+												| "book"
+												| "software"
+												| "media"
+												| "video"
+												| "audio"
+												| "release"
+												| "entity"
+												| "label"
+												| "tag"
+												| "structure"
+												| "series"
+												| "zone"
+												| "zone_page"
+												| "collection"
+												| "post"
+												| "poll"
+												| "realm"
+												| "realm_rule"
+											)[];
+										};
+									};
+									author?:
+										| {
+												/**
+												 * @type string
+												 */
+												kind: "viewer";
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												kind: "profile";
+												/**
+												 * @type object
+												 */
+												id: {
+													/**
+													 * @type array
+													 */
+													in: string[];
+												};
+										  };
+								};
+						  }
+						| {
+								/**
+								 * @type object
+								 */
+								none: {
+									/**
+									 * @type array | undefined
+									 */
+									all?: ScoreFilter[];
+									/**
+									 * @type array | undefined
+									 */
+									any?: ScoreFilter[];
+									/**
+									 * @type object | undefined
+									 */
+									not?: ScoreFilter;
+									value?:
+										| {
+												/**
+												 * @type array
+												 */
+												in: number[];
+										  }
+										| {
+												range:
+													| {
+															/**
+															 * @minLength 1
+															 * @maxLength 10
+															 * @type integer
+															 */
+															minimum: number;
+															/**
+															 * @minLength 1
+															 * @maxLength 10
+															 * @type integer | undefined
+															 */
+															maximum?: number;
+													  }
+													| {
+															/**
+															 * @minLength 1
+															 * @maxLength 10
+															 * @type integer | undefined
+															 */
+															minimum?: number;
+															/**
+															 * @minLength 1
+															 * @maxLength 10
+															 * @type integer
+															 */
+															maximum: number;
+													  };
+										  };
+									/**
+									 * @type object | undefined
+									 */
+									realm?: {
+										/**
+										 * @type object | undefined
+										 */
+										id?: {
+											/**
+											 * @type array
+											 */
+											in: string[];
+										};
+										/**
+										 * @type object | undefined
+										 */
+										kind?: {
+											/**
+											 * @type array
+											 */
+											in: (
+												| "slug_namespace"
+												| "profile"
+												| "book"
+												| "software"
+												| "media"
+												| "video"
+												| "audio"
+												| "release"
+												| "entity"
+												| "label"
+												| "tag"
+												| "structure"
+												| "series"
+												| "zone"
+												| "zone_page"
+												| "collection"
+												| "post"
+												| "poll"
+												| "realm"
+												| "realm_rule"
+											)[];
+										};
+									};
+									/**
+									 * @type object | undefined
+									 */
+									target?: {
+										/**
+										 * @type object | undefined
+										 */
+										id?: {
+											/**
+											 * @type array
+											 */
+											in: string[];
+										};
+										/**
+										 * @type object | undefined
+										 */
+										kind?: {
+											/**
+											 * @type array
+											 */
+											in: (
+												| "slug_namespace"
+												| "profile"
+												| "book"
+												| "software"
+												| "media"
+												| "video"
+												| "audio"
+												| "release"
+												| "entity"
+												| "label"
+												| "tag"
+												| "structure"
+												| "series"
+												| "zone"
+												| "zone_page"
+												| "collection"
+												| "post"
+												| "poll"
+												| "realm"
+												| "realm_rule"
+											)[];
+										};
+									};
+									author?:
+										| {
+												/**
+												 * @type string
+												 */
+												kind: "viewer";
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												kind: "profile";
+												/**
+												 * @type object
+												 */
+												id: {
+													/**
+													 * @type array
+													 */
+													in: string[];
+												};
+										  };
+								};
+						  };
+				};
+				post?:
+					| {
+							/**
+							 * @type object
+							 */
+							is: {
+								/**
+								 * @type array | undefined
+								 */
+								all?: PostFilter[];
+								/**
+								 * @type array | undefined
+								 */
+								any?: PostFilter[];
+								/**
+								 * @type object | undefined
+								 */
+								not?: PostFilter;
+								/**
+								 * @type object | undefined
+								 */
+								kind?: {
+									/**
+									 * @type array
+									 */
+									in: (
+										| "post"
+										| "reply"
+										| "excerpt"
+										| "review"
+										| "chapter"
+										| "page"
+										| "wiki"
+										| "picture"
+										| "governance_note"
+									)[];
+								};
+								subject?:
+									| {
+											/**
+											 * @type object
+											 */
+											is: {
+												/**
+												 * @type object | undefined
+												 */
+												id?: {
+													/**
+													 * @type array
+													 */
+													in: string[];
+												};
+												/**
+												 * @type object | undefined
+												 */
+												kind?: {
+													/**
+													 * @type array
+													 */
+													in: (
+														| "slug_namespace"
+														| "profile"
+														| "book"
+														| "software"
+														| "media"
+														| "video"
+														| "audio"
+														| "release"
+														| "entity"
+														| "label"
+														| "tag"
+														| "structure"
+														| "series"
+														| "zone"
+														| "zone_page"
+														| "collection"
+														| "post"
+														| "poll"
+														| "realm"
+														| "realm_rule"
+													)[];
+												};
+											};
+									  }
+									| {
+											/**
+											 * @type boolean
+											 */
+											absent: true;
+									  };
+								/**
+								 * @type object | undefined
+								 */
+								scores?: {
+									displayed?:
+										| {
+												/**
+												 * @type object
+												 */
+												some: {
+													/**
+													 * @type array | undefined
+													 */
+													all?: ScoreFilter[];
+													/**
+													 * @type array | undefined
+													 */
+													any?: ScoreFilter[];
+													/**
+													 * @type object | undefined
+													 */
+													not?: ScoreFilter;
+													value?:
+														| {
+																/**
+																 * @type array
+																 */
+																in: number[];
+														  }
+														| {
+																range:
+																	| {
+																			/**
+																			 * @minLength 1
+																			 * @maxLength 10
+																			 * @type integer
+																			 */
+																			minimum: number;
+																			/**
+																			 * @minLength 1
+																			 * @maxLength 10
+																			 * @type integer | undefined
+																			 */
+																			maximum?: number;
+																	  }
+																	| {
+																			/**
+																			 * @minLength 1
+																			 * @maxLength 10
+																			 * @type integer | undefined
+																			 */
+																			minimum?: number;
+																			/**
+																			 * @minLength 1
+																			 * @maxLength 10
+																			 * @type integer
+																			 */
+																			maximum: number;
+																	  };
+														  };
+													/**
+													 * @type object | undefined
+													 */
+													realm?: {
+														/**
+														 * @type object | undefined
+														 */
+														id?: {
+															/**
+															 * @type array
+															 */
+															in: string[];
+														};
+														/**
+														 * @type object | undefined
+														 */
+														kind?: {
+															/**
+															 * @type array
+															 */
+															in: (
+																| "slug_namespace"
+																| "profile"
+																| "book"
+																| "software"
+																| "media"
+																| "video"
+																| "audio"
+																| "release"
+																| "entity"
+																| "label"
+																| "tag"
+																| "structure"
+																| "series"
+																| "zone"
+																| "zone_page"
+																| "collection"
+																| "post"
+																| "poll"
+																| "realm"
+																| "realm_rule"
+															)[];
+														};
+													};
+													/**
+													 * @type object | undefined
+													 */
+													target?: {
+														/**
+														 * @type object | undefined
+														 */
+														id?: {
+															/**
+															 * @type array
+															 */
+															in: string[];
+														};
+														/**
+														 * @type object | undefined
+														 */
+														kind?: {
+															/**
+															 * @type array
+															 */
+															in: (
+																| "slug_namespace"
+																| "profile"
+																| "book"
+																| "software"
+																| "media"
+																| "video"
+																| "audio"
+																| "release"
+																| "entity"
+																| "label"
+																| "tag"
+																| "structure"
+																| "series"
+																| "zone"
+																| "zone_page"
+																| "collection"
+																| "post"
+																| "poll"
+																| "realm"
+																| "realm_rule"
+															)[];
+														};
+													};
+													author?:
+														| {
+																/**
+																 * @type string
+																 */
+																kind: "viewer";
+														  }
+														| {
+																/**
+																 * @type string
+																 */
+																kind: "profile";
+																/**
+																 * @type object
+																 */
+																id: {
+																	/**
+																	 * @type array
+																	 */
+																	in: string[];
+																};
+														  };
+												};
+										  }
+										| {
+												/**
+												 * @type object
+												 */
+												none: {
+													/**
+													 * @type array | undefined
+													 */
+													all?: ScoreFilter[];
+													/**
+													 * @type array | undefined
+													 */
+													any?: ScoreFilter[];
+													/**
+													 * @type object | undefined
+													 */
+													not?: ScoreFilter;
+													value?:
+														| {
+																/**
+																 * @type array
+																 */
+																in: number[];
+														  }
+														| {
+																range:
+																	| {
+																			/**
+																			 * @minLength 1
+																			 * @maxLength 10
+																			 * @type integer
+																			 */
+																			minimum: number;
+																			/**
+																			 * @minLength 1
+																			 * @maxLength 10
+																			 * @type integer | undefined
+																			 */
+																			maximum?: number;
+																	  }
+																	| {
+																			/**
+																			 * @minLength 1
+																			 * @maxLength 10
+																			 * @type integer | undefined
+																			 */
+																			minimum?: number;
+																			/**
+																			 * @minLength 1
+																			 * @maxLength 10
+																			 * @type integer
+																			 */
+																			maximum: number;
+																	  };
+														  };
+													/**
+													 * @type object | undefined
+													 */
+													realm?: {
+														/**
+														 * @type object | undefined
+														 */
+														id?: {
+															/**
+															 * @type array
+															 */
+															in: string[];
+														};
+														/**
+														 * @type object | undefined
+														 */
+														kind?: {
+															/**
+															 * @type array
+															 */
+															in: (
+																| "slug_namespace"
+																| "profile"
+																| "book"
+																| "software"
+																| "media"
+																| "video"
+																| "audio"
+																| "release"
+																| "entity"
+																| "label"
+																| "tag"
+																| "structure"
+																| "series"
+																| "zone"
+																| "zone_page"
+																| "collection"
+																| "post"
+																| "poll"
+																| "realm"
+																| "realm_rule"
+															)[];
+														};
+													};
+													/**
+													 * @type object | undefined
+													 */
+													target?: {
+														/**
+														 * @type object | undefined
+														 */
+														id?: {
+															/**
+															 * @type array
+															 */
+															in: string[];
+														};
+														/**
+														 * @type object | undefined
+														 */
+														kind?: {
+															/**
+															 * @type array
+															 */
+															in: (
+																| "slug_namespace"
+																| "profile"
+																| "book"
+																| "software"
+																| "media"
+																| "video"
+																| "audio"
+																| "release"
+																| "entity"
+																| "label"
+																| "tag"
+																| "structure"
+																| "series"
+																| "zone"
+																| "zone_page"
+																| "collection"
+																| "post"
+																| "poll"
+																| "realm"
+																| "realm_rule"
+															)[];
+														};
+													};
+													author?:
+														| {
+																/**
+																 * @type string
+																 */
+																kind: "viewer";
+														  }
+														| {
+																/**
+																 * @type string
+																 */
+																kind: "profile";
+																/**
+																 * @type object
+																 */
+																id: {
+																	/**
+																	 * @type array
+																	 */
+																	in: string[];
+																};
+														  };
+												};
+										  };
+								};
+								/**
+								 * @type object | undefined
+								 */
+								explainsRealmTag?: {
+									/**
+									 * @type object
+									 */
+									realm: {
+										/**
+										 * @type object | undefined
+										 */
+										id?: {
+											/**
+											 * @type array
+											 */
+											in: string[];
+										};
+										/**
+										 * @type object | undefined
+										 */
+										kind?: {
+											/**
+											 * @type array
+											 */
+											in: (
+												| "slug_namespace"
+												| "profile"
+												| "book"
+												| "software"
+												| "media"
+												| "video"
+												| "audio"
+												| "release"
+												| "entity"
+												| "label"
+												| "tag"
+												| "structure"
+												| "series"
+												| "zone"
+												| "zone_page"
+												| "collection"
+												| "post"
+												| "poll"
+												| "realm"
+												| "realm_rule"
+											)[];
+										};
+									};
+									/**
+									 * @type object | undefined
+									 */
+									tag?: {
+										/**
+										 * @type object | undefined
+										 */
+										id?: {
+											/**
+											 * @type array
+											 */
+											in: string[];
+										};
+										/**
+										 * @type object | undefined
+										 */
+										kind?: {
+											/**
+											 * @type array
+											 */
+											in: (
+												| "slug_namespace"
+												| "profile"
+												| "book"
+												| "software"
+												| "media"
+												| "video"
+												| "audio"
+												| "release"
+												| "entity"
+												| "label"
+												| "tag"
+												| "structure"
+												| "series"
+												| "zone"
+												| "zone_page"
+												| "collection"
+												| "post"
+												| "poll"
+												| "realm"
+												| "realm_rule"
+											)[];
+										};
+									};
+								};
+							};
+					  }
+					| {
+							/**
+							 * @type boolean
+							 */
+							absent: true;
+					  };
+				collection?:
+					| {
+							/**
+							 * @type object
+							 */
+							is: {
+								/**
+								 * @type array | undefined
+								 */
+								all?: CollectionFilter[];
+								/**
+								 * @type array | undefined
+								 */
+								any?: CollectionFilter[];
+								/**
+								 * @type object | undefined
+								 */
+								not?: CollectionFilter;
+								items?:
+									| {
+											/**
+											 * @type object
+											 */
+											some: {
+												/**
+												 * @type object | undefined
+												 */
+												id?: {
+													/**
+													 * @type array
+													 */
+													in: string[];
+												};
+												/**
+												 * @type object | undefined
+												 */
+												kind?: {
+													/**
+													 * @type array
+													 */
+													in: (
+														| "slug_namespace"
+														| "profile"
+														| "book"
+														| "software"
+														| "media"
+														| "video"
+														| "audio"
+														| "release"
+														| "entity"
+														| "label"
+														| "tag"
+														| "structure"
+														| "series"
+														| "zone"
+														| "zone_page"
+														| "collection"
+														| "post"
+														| "poll"
+														| "realm"
+														| "realm_rule"
+													)[];
+												};
+											};
+									  }
+									| {
+											/**
+											 * @type object
+											 */
+											none: {
+												/**
+												 * @type object | undefined
+												 */
+												id?: {
+													/**
+													 * @type array
+													 */
+													in: string[];
+												};
+												/**
+												 * @type object | undefined
+												 */
+												kind?: {
+													/**
+													 * @type array
+													 */
+													in: (
+														| "slug_namespace"
+														| "profile"
+														| "book"
+														| "software"
+														| "media"
+														| "video"
+														| "audio"
+														| "release"
+														| "entity"
+														| "label"
+														| "tag"
+														| "structure"
+														| "series"
+														| "zone"
+														| "zone_page"
+														| "collection"
+														| "post"
+														| "poll"
+														| "realm"
+														| "realm_rule"
+													)[];
+												};
+											};
+									  };
+							};
+					  }
+					| {
+							/**
+							 * @type boolean
+							 */
+							absent: true;
+					  };
+			};
+			/**
+			 * @type array | undefined
+			 */
+			controls?: {
+				/**
+				 * @minLength 1
+				 * @maxLength 64
+				 * @pattern ^[a-z][a-z0-9-]*$
+				 * @type string
+				 */
+				key: string;
+				/**
+				 * @type string | undefined
+				 */
+				field?: PostApiSearchSharedQueriesStatus201DocumentFilterDocumentControlsFieldEnum;
+				/**
+				 * @type boolean | undefined
+				 */
+				enabled?: boolean;
+				/**
+				 * @type string | undefined
+				 */
+				disclosure?: PostApiSearchSharedQueriesStatus201DocumentFilterDocumentControlsDisclosureEnum;
+				/**
+				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+				 * @type string | undefined
+				 */
+				labelUnitId?: string;
+				optionPolicy?:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "all";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "include";
+							/**
+							 * @type array
+							 */
+							values: (string | number | boolean)[];
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "exclude";
+							/**
+							 * @type array
+							 */
+							values: (string | number | boolean)[];
+					  };
+				/**
+				 * @type boolean | undefined
+				 */
+				required?: boolean;
+			}[];
+		};
 		/**
 		 * @type object
 		 */
@@ -152906,17 +165297,102 @@ export type PostApiSearchSharedQueriesStatus429 = {
  */
 export type PostApiSearchSharedQueriesStatus500 = InternalError;
 
-export const PostApiSearchSharedQueriesRequestTemplateEnum = {
-	global: "global",
-	book: "book",
-	media: "media",
-	software: "software",
-	realm: "realm",
-	zone: "zone",
+export const PostApiSearchSharedQueriesRequestFilterDocumentCategoriesEnum = {
+	units: "units",
+	users: "users",
+	entities: "entities",
+	tags: "tags",
+	"tag-structures": "tag-structures",
+	posts: "posts",
+	realms: "realms",
+	collections: "collections",
+	reviews: "reviews",
+	polls: "polls",
 } as const;
 
-export type PostApiSearchSharedQueriesRequestTemplateEnum =
-	(typeof PostApiSearchSharedQueriesRequestTemplateEnum)[keyof typeof PostApiSearchSharedQueriesRequestTemplateEnum];
+export type PostApiSearchSharedQueriesRequestFilterDocumentCategoriesEnum =
+	(typeof PostApiSearchSharedQueriesRequestFilterDocumentCategoriesEnum)[keyof typeof PostApiSearchSharedQueriesRequestFilterDocumentCategoriesEnum];
+
+export const PostApiSearchSharedQueriesRequestFilterDocumentWhereKindInEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type PostApiSearchSharedQueriesRequestFilterDocumentWhereKindInEnum =
+	(typeof PostApiSearchSharedQueriesRequestFilterDocumentWhereKindInEnum)[keyof typeof PostApiSearchSharedQueriesRequestFilterDocumentWhereKindInEnum];
+
+export const PostApiSearchSharedQueriesRequestFilterDocumentControlsFieldEnum = {
+	category: "category",
+	kind: "kind",
+	language: "language",
+	"content-rating": "content-rating",
+	"ai-disclosure": "ai-disclosure",
+	license: "license",
+	tag: "tag",
+	credit: "credit",
+	"credited-profile": "credited-profile",
+	realm: "realm",
+	"realm-tag-context": "realm-tag-context",
+	zone: "zone",
+	subject: "subject",
+	target: "target",
+	root: "root",
+	parent: "parent",
+	owner: "owner",
+	"join-policy": "join-policy",
+	multiple: "multiple",
+	"results-visibility": "results-visibility",
+	closed: "closed",
+	"created-at": "created-at",
+	"updated-at": "updated-at",
+	"published-at": "published-at",
+	"closes-at": "closes-at",
+	"content-license": "content-license",
+	"book-isbn13": "book-isbn13",
+	"book-publication-date": "book-publication-date",
+	"book-page-count": "book-page-count",
+	"book-word-count": "book-word-count",
+	"book-format": "book-format",
+	"media-kind": "media-kind",
+	"media-release-date": "media-release-date",
+	"media-runtime-minutes": "media-runtime-minutes",
+	"media-episode-count": "media-episode-count",
+	"media-season-count": "media-season-count",
+	"software-release-date": "software-release-date",
+	"software-version-label": "software-version-label",
+	"software-platform": "software-platform",
+	"software-requirement-tier": "software-requirement-tier",
+	"realm-tag-vote": "realm-tag-vote",
+} as const;
+
+export type PostApiSearchSharedQueriesRequestFilterDocumentControlsFieldEnum =
+	(typeof PostApiSearchSharedQueriesRequestFilterDocumentControlsFieldEnum)[keyof typeof PostApiSearchSharedQueriesRequestFilterDocumentControlsFieldEnum];
+
+export const PostApiSearchSharedQueriesRequestFilterDocumentControlsDisclosureEnum = {
+	visible: "visible",
+	hidden: "hidden",
+} as const;
+
+export type PostApiSearchSharedQueriesRequestFilterDocumentControlsDisclosureEnum =
+	(typeof PostApiSearchSharedQueriesRequestFilterDocumentControlsDisclosureEnum)[keyof typeof PostApiSearchSharedQueriesRequestFilterDocumentControlsDisclosureEnum];
 
 export const PostApiSearchSharedQueriesRequestStateSortEnum = {
 	best: "best",
@@ -152994,13 +165470,2137 @@ export type PostApiSearchSharedQueriesRequestSelectionsFieldEnum =
  */
 export type PostApiSearchSharedQueriesBody = {
 	/**
-	 * @type number
+	 * @type object
 	 */
-	version: 1;
-	/**
-	 * @type string
-	 */
-	template: PostApiSearchSharedQueriesRequestTemplateEnum;
+	filterDocument: {
+		/**
+		 * @type array | undefined
+		 */
+		categories?: PostApiSearchSharedQueriesRequestFilterDocumentCategoriesEnum[];
+		/**
+		 * @type object | undefined
+		 */
+		where?: {
+			/**
+			 * @type array | undefined
+			 */
+			all?: UnitPredicate[];
+			/**
+			 * @type array | undefined
+			 */
+			any?: UnitPredicate[];
+			/**
+			 * @type object | undefined
+			 */
+			not?: UnitPredicate;
+			/**
+			 * @type object | undefined
+			 */
+			id?: {
+				/**
+				 * @type array
+				 */
+				in: string[];
+			};
+			/**
+			 * @type object | undefined
+			 */
+			kind?: {
+				/**
+				 * @type array
+				 */
+				in: PostApiSearchSharedQueriesRequestFilterDocumentWhereKindInEnum[];
+			};
+			localizations?:
+				| {
+						/**
+						 * @type object
+						 */
+						some: {
+							/**
+							 * @type array | undefined
+							 */
+							all?: LocalizationFilter[];
+							/**
+							 * @type array | undefined
+							 */
+							any?: LocalizationFilter[];
+							/**
+							 * @type object | undefined
+							 */
+							not?: LocalizationFilter;
+							/**
+							 * @type object | undefined
+							 */
+							language?: {
+								/**
+								 * @type array
+								 */
+								in: ("zh" | "en" | "ja" | "ko" | "de" | "fr" | "es")[];
+							};
+						};
+				  }
+				| {
+						/**
+						 * @type object
+						 */
+						none: {
+							/**
+							 * @type array | undefined
+							 */
+							all?: LocalizationFilter[];
+							/**
+							 * @type array | undefined
+							 */
+							any?: LocalizationFilter[];
+							/**
+							 * @type object | undefined
+							 */
+							not?: LocalizationFilter;
+							/**
+							 * @type object | undefined
+							 */
+							language?: {
+								/**
+								 * @type array
+								 */
+								in: ("zh" | "en" | "ja" | "ko" | "de" | "fr" | "es")[];
+							};
+						};
+				  };
+			realms?:
+				| {
+						/**
+						 * @type object
+						 */
+						some: {
+							/**
+							 * @type array | undefined
+							 */
+							all?: RealmPlacementFilter[];
+							/**
+							 * @type array | undefined
+							 */
+							any?: RealmPlacementFilter[];
+							/**
+							 * @type object | undefined
+							 */
+							not?: RealmPlacementFilter;
+							/**
+							 * @type object | undefined
+							 */
+							realm?: {
+								/**
+								 * @type object | undefined
+								 */
+								id?: {
+									/**
+									 * @type array
+									 */
+									in: string[];
+								};
+								/**
+								 * @type object | undefined
+								 */
+								kind?: {
+									/**
+									 * @type array
+									 */
+									in: (
+										| "slug_namespace"
+										| "profile"
+										| "book"
+										| "software"
+										| "media"
+										| "video"
+										| "audio"
+										| "release"
+										| "entity"
+										| "label"
+										| "tag"
+										| "structure"
+										| "series"
+										| "zone"
+										| "zone_page"
+										| "collection"
+										| "post"
+										| "poll"
+										| "realm"
+										| "realm_rule"
+									)[];
+								};
+							};
+							/**
+							 * @type object | undefined
+							 */
+							status?: {
+								/**
+								 * @type array
+								 */
+								in: ("pending" | "visible" | "hidden" | "removed")[];
+							};
+							/**
+							 * @type object | undefined
+							 */
+							publicationState?: {
+								/**
+								 * @type array
+								 */
+								in: ("active" | "withdrawn")[];
+							};
+						};
+				  }
+				| {
+						/**
+						 * @type object
+						 */
+						none: {
+							/**
+							 * @type array | undefined
+							 */
+							all?: RealmPlacementFilter[];
+							/**
+							 * @type array | undefined
+							 */
+							any?: RealmPlacementFilter[];
+							/**
+							 * @type object | undefined
+							 */
+							not?: RealmPlacementFilter;
+							/**
+							 * @type object | undefined
+							 */
+							realm?: {
+								/**
+								 * @type object | undefined
+								 */
+								id?: {
+									/**
+									 * @type array
+									 */
+									in: string[];
+								};
+								/**
+								 * @type object | undefined
+								 */
+								kind?: {
+									/**
+									 * @type array
+									 */
+									in: (
+										| "slug_namespace"
+										| "profile"
+										| "book"
+										| "software"
+										| "media"
+										| "video"
+										| "audio"
+										| "release"
+										| "entity"
+										| "label"
+										| "tag"
+										| "structure"
+										| "series"
+										| "zone"
+										| "zone_page"
+										| "collection"
+										| "post"
+										| "poll"
+										| "realm"
+										| "realm_rule"
+									)[];
+								};
+							};
+							/**
+							 * @type object | undefined
+							 */
+							status?: {
+								/**
+								 * @type array
+								 */
+								in: ("pending" | "visible" | "hidden" | "removed")[];
+							};
+							/**
+							 * @type object | undefined
+							 */
+							publicationState?: {
+								/**
+								 * @type array
+								 */
+								in: ("active" | "withdrawn")[];
+							};
+						};
+				  };
+			tags?:
+				| {
+						/**
+						 * @type object
+						 */
+						some: {
+							/**
+							 * @type array | undefined
+							 */
+							all?: TagAssertionFilter[];
+							/**
+							 * @type array | undefined
+							 */
+							any?: TagAssertionFilter[];
+							/**
+							 * @type object | undefined
+							 */
+							not?: TagAssertionFilter;
+							/**
+							 * @type object | undefined
+							 */
+							tag?: {
+								/**
+								 * @type object | undefined
+								 */
+								id?: {
+									/**
+									 * @type array
+									 */
+									in: string[];
+								};
+								/**
+								 * @type object | undefined
+								 */
+								kind?: {
+									/**
+									 * @type array
+									 */
+									in: (
+										| "slug_namespace"
+										| "profile"
+										| "book"
+										| "software"
+										| "media"
+										| "video"
+										| "audio"
+										| "release"
+										| "entity"
+										| "label"
+										| "tag"
+										| "structure"
+										| "series"
+										| "zone"
+										| "zone_page"
+										| "collection"
+										| "post"
+										| "poll"
+										| "realm"
+										| "realm_rule"
+									)[];
+								};
+							};
+							authority?:
+								| {
+										/**
+										 * @type string
+										 */
+										kind: "global";
+										view:
+											| {
+													/**
+													 * @type string
+													 */
+													kind: "effective";
+													/**
+													 * @type object | undefined
+													 */
+													consensus?: {
+														score?:
+															| {
+																	/**
+																	 * @type array
+																	 */
+																	in: number[];
+															  }
+															| {
+																	range:
+																		| {
+																				/**
+																				 * @type integer
+																				 */
+																				minimum: number;
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				maximum?: number;
+																		  }
+																		| {
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				minimum?: number;
+																				/**
+																				 * @type integer
+																				 */
+																				maximum: number;
+																		  };
+															  };
+														voteCount?:
+															| {
+																	/**
+																	 * @type array
+																	 */
+																	in: number[];
+															  }
+															| {
+																	range:
+																		| {
+																				/**
+																				 * @type integer
+																				 */
+																				minimum: number;
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				maximum?: number;
+																		  }
+																		| {
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				minimum?: number;
+																				/**
+																				 * @type integer
+																				 */
+																				maximum: number;
+																		  };
+															  };
+													};
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													kind: "direct";
+											  };
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										kind: "realm";
+										/**
+										 * @type object
+										 */
+										realm: {
+											/**
+											 * @type object | undefined
+											 */
+											id?: {
+												/**
+												 * @type array
+												 */
+												in: string[];
+											};
+											/**
+											 * @type object | undefined
+											 */
+											kind?: {
+												/**
+												 * @type array
+												 */
+												in: (
+													| "slug_namespace"
+													| "profile"
+													| "book"
+													| "software"
+													| "media"
+													| "video"
+													| "audio"
+													| "release"
+													| "entity"
+													| "label"
+													| "tag"
+													| "structure"
+													| "series"
+													| "zone"
+													| "zone_page"
+													| "collection"
+													| "post"
+													| "poll"
+													| "realm"
+													| "realm_rule"
+												)[];
+											};
+										};
+										view:
+											| {
+													/**
+													 * @type string
+													 */
+													kind: "policy";
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													kind: "community";
+													/**
+													 * @type object | undefined
+													 */
+													consensus?: {
+														score?:
+															| {
+																	/**
+																	 * @type array
+																	 */
+																	in: number[];
+															  }
+															| {
+																	range:
+																		| {
+																				/**
+																				 * @type integer
+																				 */
+																				minimum: number;
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				maximum?: number;
+																		  }
+																		| {
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				minimum?: number;
+																				/**
+																				 * @type integer
+																				 */
+																				maximum: number;
+																		  };
+															  };
+														voteCount?:
+															| {
+																	/**
+																	 * @type array
+																	 */
+																	in: number[];
+															  }
+															| {
+																	range:
+																		| {
+																				/**
+																				 * @type integer
+																				 */
+																				minimum: number;
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				maximum?: number;
+																		  }
+																		| {
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				minimum?: number;
+																				/**
+																				 * @type integer
+																				 */
+																				maximum: number;
+																		  };
+															  };
+													};
+											  };
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										kind: "profile";
+										/**
+										 * @type object
+										 */
+										profile: {
+											/**
+											 * @type string
+											 */
+											kind: "viewer";
+										};
+								  };
+						};
+				  }
+				| {
+						/**
+						 * @type object
+						 */
+						none: {
+							/**
+							 * @type array | undefined
+							 */
+							all?: TagAssertionFilter[];
+							/**
+							 * @type array | undefined
+							 */
+							any?: TagAssertionFilter[];
+							/**
+							 * @type object | undefined
+							 */
+							not?: TagAssertionFilter;
+							/**
+							 * @type object | undefined
+							 */
+							tag?: {
+								/**
+								 * @type object | undefined
+								 */
+								id?: {
+									/**
+									 * @type array
+									 */
+									in: string[];
+								};
+								/**
+								 * @type object | undefined
+								 */
+								kind?: {
+									/**
+									 * @type array
+									 */
+									in: (
+										| "slug_namespace"
+										| "profile"
+										| "book"
+										| "software"
+										| "media"
+										| "video"
+										| "audio"
+										| "release"
+										| "entity"
+										| "label"
+										| "tag"
+										| "structure"
+										| "series"
+										| "zone"
+										| "zone_page"
+										| "collection"
+										| "post"
+										| "poll"
+										| "realm"
+										| "realm_rule"
+									)[];
+								};
+							};
+							authority?:
+								| {
+										/**
+										 * @type string
+										 */
+										kind: "global";
+										view:
+											| {
+													/**
+													 * @type string
+													 */
+													kind: "effective";
+													/**
+													 * @type object | undefined
+													 */
+													consensus?: {
+														score?:
+															| {
+																	/**
+																	 * @type array
+																	 */
+																	in: number[];
+															  }
+															| {
+																	range:
+																		| {
+																				/**
+																				 * @type integer
+																				 */
+																				minimum: number;
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				maximum?: number;
+																		  }
+																		| {
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				minimum?: number;
+																				/**
+																				 * @type integer
+																				 */
+																				maximum: number;
+																		  };
+															  };
+														voteCount?:
+															| {
+																	/**
+																	 * @type array
+																	 */
+																	in: number[];
+															  }
+															| {
+																	range:
+																		| {
+																				/**
+																				 * @type integer
+																				 */
+																				minimum: number;
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				maximum?: number;
+																		  }
+																		| {
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				minimum?: number;
+																				/**
+																				 * @type integer
+																				 */
+																				maximum: number;
+																		  };
+															  };
+													};
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													kind: "direct";
+											  };
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										kind: "realm";
+										/**
+										 * @type object
+										 */
+										realm: {
+											/**
+											 * @type object | undefined
+											 */
+											id?: {
+												/**
+												 * @type array
+												 */
+												in: string[];
+											};
+											/**
+											 * @type object | undefined
+											 */
+											kind?: {
+												/**
+												 * @type array
+												 */
+												in: (
+													| "slug_namespace"
+													| "profile"
+													| "book"
+													| "software"
+													| "media"
+													| "video"
+													| "audio"
+													| "release"
+													| "entity"
+													| "label"
+													| "tag"
+													| "structure"
+													| "series"
+													| "zone"
+													| "zone_page"
+													| "collection"
+													| "post"
+													| "poll"
+													| "realm"
+													| "realm_rule"
+												)[];
+											};
+										};
+										view:
+											| {
+													/**
+													 * @type string
+													 */
+													kind: "policy";
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													kind: "community";
+													/**
+													 * @type object | undefined
+													 */
+													consensus?: {
+														score?:
+															| {
+																	/**
+																	 * @type array
+																	 */
+																	in: number[];
+															  }
+															| {
+																	range:
+																		| {
+																				/**
+																				 * @type integer
+																				 */
+																				minimum: number;
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				maximum?: number;
+																		  }
+																		| {
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				minimum?: number;
+																				/**
+																				 * @type integer
+																				 */
+																				maximum: number;
+																		  };
+															  };
+														voteCount?:
+															| {
+																	/**
+																	 * @type array
+																	 */
+																	in: number[];
+															  }
+															| {
+																	range:
+																		| {
+																				/**
+																				 * @type integer
+																				 */
+																				minimum: number;
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				maximum?: number;
+																		  }
+																		| {
+																				/**
+																				 * @type integer | undefined
+																				 */
+																				minimum?: number;
+																				/**
+																				 * @type integer
+																				 */
+																				maximum: number;
+																		  };
+															  };
+													};
+											  };
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										kind: "profile";
+										/**
+										 * @type object
+										 */
+										profile: {
+											/**
+											 * @type string
+											 */
+											kind: "viewer";
+										};
+								  };
+						};
+				  };
+			creditAttributions?:
+				| {
+						/**
+						 * @type object
+						 */
+						some: {
+							/**
+							 * @type object | undefined
+							 */
+							id?: {
+								/**
+								 * @type array
+								 */
+								in: string[];
+							};
+							/**
+							 * @type object | undefined
+							 */
+							kind?: {
+								/**
+								 * @type array
+								 */
+								in: (
+									| "slug_namespace"
+									| "profile"
+									| "book"
+									| "software"
+									| "media"
+									| "video"
+									| "audio"
+									| "release"
+									| "entity"
+									| "label"
+									| "tag"
+									| "structure"
+									| "series"
+									| "zone"
+									| "zone_page"
+									| "collection"
+									| "post"
+									| "poll"
+									| "realm"
+									| "realm_rule"
+								)[];
+							};
+						};
+				  }
+				| {
+						/**
+						 * @type object
+						 */
+						none: {
+							/**
+							 * @type object | undefined
+							 */
+							id?: {
+								/**
+								 * @type array
+								 */
+								in: string[];
+							};
+							/**
+							 * @type object | undefined
+							 */
+							kind?: {
+								/**
+								 * @type array
+								 */
+								in: (
+									| "slug_namespace"
+									| "profile"
+									| "book"
+									| "software"
+									| "media"
+									| "video"
+									| "audio"
+									| "release"
+									| "entity"
+									| "label"
+									| "tag"
+									| "structure"
+									| "series"
+									| "zone"
+									| "zone_page"
+									| "collection"
+									| "post"
+									| "poll"
+									| "realm"
+									| "realm_rule"
+								)[];
+							};
+						};
+				  };
+			subjectAssociations?:
+				| {
+						/**
+						 * @type object
+						 */
+						some: {
+							/**
+							 * @type object | undefined
+							 */
+							id?: {
+								/**
+								 * @type array
+								 */
+								in: string[];
+							};
+							/**
+							 * @type object | undefined
+							 */
+							kind?: {
+								/**
+								 * @type array
+								 */
+								in: (
+									| "slug_namespace"
+									| "profile"
+									| "book"
+									| "software"
+									| "media"
+									| "video"
+									| "audio"
+									| "release"
+									| "entity"
+									| "label"
+									| "tag"
+									| "structure"
+									| "series"
+									| "zone"
+									| "zone_page"
+									| "collection"
+									| "post"
+									| "poll"
+									| "realm"
+									| "realm_rule"
+								)[];
+							};
+						};
+				  }
+				| {
+						/**
+						 * @type object
+						 */
+						none: {
+							/**
+							 * @type object | undefined
+							 */
+							id?: {
+								/**
+								 * @type array
+								 */
+								in: string[];
+							};
+							/**
+							 * @type object | undefined
+							 */
+							kind?: {
+								/**
+								 * @type array
+								 */
+								in: (
+									| "slug_namespace"
+									| "profile"
+									| "book"
+									| "software"
+									| "media"
+									| "video"
+									| "audio"
+									| "release"
+									| "entity"
+									| "label"
+									| "tag"
+									| "structure"
+									| "series"
+									| "zone"
+									| "zone_page"
+									| "collection"
+									| "post"
+									| "poll"
+									| "realm"
+									| "realm_rule"
+								)[];
+							};
+						};
+				  };
+			publishers?:
+				| {
+						some:
+							| {
+									/**
+									 * @type string
+									 */
+									kind: "viewer";
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									kind: "profile";
+									/**
+									 * @type object
+									 */
+									id: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+							  };
+				  }
+				| {
+						none:
+							| {
+									/**
+									 * @type string
+									 */
+									kind: "viewer";
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									kind: "profile";
+									/**
+									 * @type object
+									 */
+									id: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+							  };
+				  };
+			/**
+			 * @type object | undefined
+			 */
+			scores?: {
+				received?:
+					| {
+							/**
+							 * @type object
+							 */
+							some: {
+								/**
+								 * @type array | undefined
+								 */
+								all?: ScoreFilter[];
+								/**
+								 * @type array | undefined
+								 */
+								any?: ScoreFilter[];
+								/**
+								 * @type object | undefined
+								 */
+								not?: ScoreFilter;
+								value?:
+									| {
+											/**
+											 * @type array
+											 */
+											in: number[];
+									  }
+									| {
+											range:
+												| {
+														/**
+														 * @minLength 1
+														 * @maxLength 10
+														 * @type integer
+														 */
+														minimum: number;
+														/**
+														 * @minLength 1
+														 * @maxLength 10
+														 * @type integer | undefined
+														 */
+														maximum?: number;
+												  }
+												| {
+														/**
+														 * @minLength 1
+														 * @maxLength 10
+														 * @type integer | undefined
+														 */
+														minimum?: number;
+														/**
+														 * @minLength 1
+														 * @maxLength 10
+														 * @type integer
+														 */
+														maximum: number;
+												  };
+									  };
+								/**
+								 * @type object | undefined
+								 */
+								realm?: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "video"
+											| "audio"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+								/**
+								 * @type object | undefined
+								 */
+								target?: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "video"
+											| "audio"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+								author?:
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "viewer";
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "profile";
+											/**
+											 * @type object
+											 */
+											id: {
+												/**
+												 * @type array
+												 */
+												in: string[];
+											};
+									  };
+							};
+					  }
+					| {
+							/**
+							 * @type object
+							 */
+							none: {
+								/**
+								 * @type array | undefined
+								 */
+								all?: ScoreFilter[];
+								/**
+								 * @type array | undefined
+								 */
+								any?: ScoreFilter[];
+								/**
+								 * @type object | undefined
+								 */
+								not?: ScoreFilter;
+								value?:
+									| {
+											/**
+											 * @type array
+											 */
+											in: number[];
+									  }
+									| {
+											range:
+												| {
+														/**
+														 * @minLength 1
+														 * @maxLength 10
+														 * @type integer
+														 */
+														minimum: number;
+														/**
+														 * @minLength 1
+														 * @maxLength 10
+														 * @type integer | undefined
+														 */
+														maximum?: number;
+												  }
+												| {
+														/**
+														 * @minLength 1
+														 * @maxLength 10
+														 * @type integer | undefined
+														 */
+														minimum?: number;
+														/**
+														 * @minLength 1
+														 * @maxLength 10
+														 * @type integer
+														 */
+														maximum: number;
+												  };
+									  };
+								/**
+								 * @type object | undefined
+								 */
+								realm?: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "video"
+											| "audio"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+								/**
+								 * @type object | undefined
+								 */
+								target?: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "video"
+											| "audio"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+								author?:
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "viewer";
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "profile";
+											/**
+											 * @type object
+											 */
+											id: {
+												/**
+												 * @type array
+												 */
+												in: string[];
+											};
+									  };
+							};
+					  };
+			};
+			post?:
+				| {
+						/**
+						 * @type object
+						 */
+						is: {
+							/**
+							 * @type array | undefined
+							 */
+							all?: PostFilter[];
+							/**
+							 * @type array | undefined
+							 */
+							any?: PostFilter[];
+							/**
+							 * @type object | undefined
+							 */
+							not?: PostFilter;
+							/**
+							 * @type object | undefined
+							 */
+							kind?: {
+								/**
+								 * @type array
+								 */
+								in: (
+									| "post"
+									| "reply"
+									| "excerpt"
+									| "review"
+									| "chapter"
+									| "page"
+									| "wiki"
+									| "picture"
+									| "governance_note"
+								)[];
+							};
+							subject?:
+								| {
+										/**
+										 * @type object
+										 */
+										is: {
+											/**
+											 * @type object | undefined
+											 */
+											id?: {
+												/**
+												 * @type array
+												 */
+												in: string[];
+											};
+											/**
+											 * @type object | undefined
+											 */
+											kind?: {
+												/**
+												 * @type array
+												 */
+												in: (
+													| "slug_namespace"
+													| "profile"
+													| "book"
+													| "software"
+													| "media"
+													| "video"
+													| "audio"
+													| "release"
+													| "entity"
+													| "label"
+													| "tag"
+													| "structure"
+													| "series"
+													| "zone"
+													| "zone_page"
+													| "collection"
+													| "post"
+													| "poll"
+													| "realm"
+													| "realm_rule"
+												)[];
+											};
+										};
+								  }
+								| {
+										/**
+										 * @type boolean
+										 */
+										absent: true;
+								  };
+							/**
+							 * @type object | undefined
+							 */
+							scores?: {
+								displayed?:
+									| {
+											/**
+											 * @type object
+											 */
+											some: {
+												/**
+												 * @type array | undefined
+												 */
+												all?: ScoreFilter[];
+												/**
+												 * @type array | undefined
+												 */
+												any?: ScoreFilter[];
+												/**
+												 * @type object | undefined
+												 */
+												not?: ScoreFilter;
+												value?:
+													| {
+															/**
+															 * @type array
+															 */
+															in: number[];
+													  }
+													| {
+															range:
+																| {
+																		/**
+																		 * @minLength 1
+																		 * @maxLength 10
+																		 * @type integer
+																		 */
+																		minimum: number;
+																		/**
+																		 * @minLength 1
+																		 * @maxLength 10
+																		 * @type integer | undefined
+																		 */
+																		maximum?: number;
+																  }
+																| {
+																		/**
+																		 * @minLength 1
+																		 * @maxLength 10
+																		 * @type integer | undefined
+																		 */
+																		minimum?: number;
+																		/**
+																		 * @minLength 1
+																		 * @maxLength 10
+																		 * @type integer
+																		 */
+																		maximum: number;
+																  };
+													  };
+												/**
+												 * @type object | undefined
+												 */
+												realm?: {
+													/**
+													 * @type object | undefined
+													 */
+													id?: {
+														/**
+														 * @type array
+														 */
+														in: string[];
+													};
+													/**
+													 * @type object | undefined
+													 */
+													kind?: {
+														/**
+														 * @type array
+														 */
+														in: (
+															| "slug_namespace"
+															| "profile"
+															| "book"
+															| "software"
+															| "media"
+															| "video"
+															| "audio"
+															| "release"
+															| "entity"
+															| "label"
+															| "tag"
+															| "structure"
+															| "series"
+															| "zone"
+															| "zone_page"
+															| "collection"
+															| "post"
+															| "poll"
+															| "realm"
+															| "realm_rule"
+														)[];
+													};
+												};
+												/**
+												 * @type object | undefined
+												 */
+												target?: {
+													/**
+													 * @type object | undefined
+													 */
+													id?: {
+														/**
+														 * @type array
+														 */
+														in: string[];
+													};
+													/**
+													 * @type object | undefined
+													 */
+													kind?: {
+														/**
+														 * @type array
+														 */
+														in: (
+															| "slug_namespace"
+															| "profile"
+															| "book"
+															| "software"
+															| "media"
+															| "video"
+															| "audio"
+															| "release"
+															| "entity"
+															| "label"
+															| "tag"
+															| "structure"
+															| "series"
+															| "zone"
+															| "zone_page"
+															| "collection"
+															| "post"
+															| "poll"
+															| "realm"
+															| "realm_rule"
+														)[];
+													};
+												};
+												author?:
+													| {
+															/**
+															 * @type string
+															 */
+															kind: "viewer";
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															kind: "profile";
+															/**
+															 * @type object
+															 */
+															id: {
+																/**
+																 * @type array
+																 */
+																in: string[];
+															};
+													  };
+											};
+									  }
+									| {
+											/**
+											 * @type object
+											 */
+											none: {
+												/**
+												 * @type array | undefined
+												 */
+												all?: ScoreFilter[];
+												/**
+												 * @type array | undefined
+												 */
+												any?: ScoreFilter[];
+												/**
+												 * @type object | undefined
+												 */
+												not?: ScoreFilter;
+												value?:
+													| {
+															/**
+															 * @type array
+															 */
+															in: number[];
+													  }
+													| {
+															range:
+																| {
+																		/**
+																		 * @minLength 1
+																		 * @maxLength 10
+																		 * @type integer
+																		 */
+																		minimum: number;
+																		/**
+																		 * @minLength 1
+																		 * @maxLength 10
+																		 * @type integer | undefined
+																		 */
+																		maximum?: number;
+																  }
+																| {
+																		/**
+																		 * @minLength 1
+																		 * @maxLength 10
+																		 * @type integer | undefined
+																		 */
+																		minimum?: number;
+																		/**
+																		 * @minLength 1
+																		 * @maxLength 10
+																		 * @type integer
+																		 */
+																		maximum: number;
+																  };
+													  };
+												/**
+												 * @type object | undefined
+												 */
+												realm?: {
+													/**
+													 * @type object | undefined
+													 */
+													id?: {
+														/**
+														 * @type array
+														 */
+														in: string[];
+													};
+													/**
+													 * @type object | undefined
+													 */
+													kind?: {
+														/**
+														 * @type array
+														 */
+														in: (
+															| "slug_namespace"
+															| "profile"
+															| "book"
+															| "software"
+															| "media"
+															| "video"
+															| "audio"
+															| "release"
+															| "entity"
+															| "label"
+															| "tag"
+															| "structure"
+															| "series"
+															| "zone"
+															| "zone_page"
+															| "collection"
+															| "post"
+															| "poll"
+															| "realm"
+															| "realm_rule"
+														)[];
+													};
+												};
+												/**
+												 * @type object | undefined
+												 */
+												target?: {
+													/**
+													 * @type object | undefined
+													 */
+													id?: {
+														/**
+														 * @type array
+														 */
+														in: string[];
+													};
+													/**
+													 * @type object | undefined
+													 */
+													kind?: {
+														/**
+														 * @type array
+														 */
+														in: (
+															| "slug_namespace"
+															| "profile"
+															| "book"
+															| "software"
+															| "media"
+															| "video"
+															| "audio"
+															| "release"
+															| "entity"
+															| "label"
+															| "tag"
+															| "structure"
+															| "series"
+															| "zone"
+															| "zone_page"
+															| "collection"
+															| "post"
+															| "poll"
+															| "realm"
+															| "realm_rule"
+														)[];
+													};
+												};
+												author?:
+													| {
+															/**
+															 * @type string
+															 */
+															kind: "viewer";
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															kind: "profile";
+															/**
+															 * @type object
+															 */
+															id: {
+																/**
+																 * @type array
+																 */
+																in: string[];
+															};
+													  };
+											};
+									  };
+							};
+							/**
+							 * @type object | undefined
+							 */
+							explainsRealmTag?: {
+								/**
+								 * @type object
+								 */
+								realm: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "video"
+											| "audio"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+								/**
+								 * @type object | undefined
+								 */
+								tag?: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "video"
+											| "audio"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+							};
+						};
+				  }
+				| {
+						/**
+						 * @type boolean
+						 */
+						absent: true;
+				  };
+			collection?:
+				| {
+						/**
+						 * @type object
+						 */
+						is: {
+							/**
+							 * @type array | undefined
+							 */
+							all?: CollectionFilter[];
+							/**
+							 * @type array | undefined
+							 */
+							any?: CollectionFilter[];
+							/**
+							 * @type object | undefined
+							 */
+							not?: CollectionFilter;
+							items?:
+								| {
+										/**
+										 * @type object
+										 */
+										some: {
+											/**
+											 * @type object | undefined
+											 */
+											id?: {
+												/**
+												 * @type array
+												 */
+												in: string[];
+											};
+											/**
+											 * @type object | undefined
+											 */
+											kind?: {
+												/**
+												 * @type array
+												 */
+												in: (
+													| "slug_namespace"
+													| "profile"
+													| "book"
+													| "software"
+													| "media"
+													| "video"
+													| "audio"
+													| "release"
+													| "entity"
+													| "label"
+													| "tag"
+													| "structure"
+													| "series"
+													| "zone"
+													| "zone_page"
+													| "collection"
+													| "post"
+													| "poll"
+													| "realm"
+													| "realm_rule"
+												)[];
+											};
+										};
+								  }
+								| {
+										/**
+										 * @type object
+										 */
+										none: {
+											/**
+											 * @type object | undefined
+											 */
+											id?: {
+												/**
+												 * @type array
+												 */
+												in: string[];
+											};
+											/**
+											 * @type object | undefined
+											 */
+											kind?: {
+												/**
+												 * @type array
+												 */
+												in: (
+													| "slug_namespace"
+													| "profile"
+													| "book"
+													| "software"
+													| "media"
+													| "video"
+													| "audio"
+													| "release"
+													| "entity"
+													| "label"
+													| "tag"
+													| "structure"
+													| "series"
+													| "zone"
+													| "zone_page"
+													| "collection"
+													| "post"
+													| "poll"
+													| "realm"
+													| "realm_rule"
+												)[];
+											};
+										};
+								  };
+						};
+				  }
+				| {
+						/**
+						 * @type boolean
+						 */
+						absent: true;
+				  };
+		};
+		/**
+		 * @type array | undefined
+		 */
+		controls?: {
+			/**
+			 * @minLength 1
+			 * @maxLength 64
+			 * @pattern ^[a-z][a-z0-9-]*$
+			 * @type string
+			 */
+			key: string;
+			/**
+			 * @type string | undefined
+			 */
+			field?: PostApiSearchSharedQueriesRequestFilterDocumentControlsFieldEnum;
+			/**
+			 * @type boolean | undefined
+			 */
+			enabled?: boolean;
+			/**
+			 * @type string | undefined
+			 */
+			disclosure?: PostApiSearchSharedQueriesRequestFilterDocumentControlsDisclosureEnum;
+			/**
+			 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+			 * @type string | undefined
+			 */
+			labelUnitId?: string;
+			optionPolicy?:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "all";
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "include";
+						/**
+						 * @type array
+						 */
+						values: (string | number | boolean)[];
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "exclude";
+						/**
+						 * @type array
+						 */
+						values: (string | number | boolean)[];
+				  };
+			/**
+			 * @type boolean | undefined
+			 */
+			required?: boolean;
+		}[];
+	};
 	/**
 	 * @type object
 	 */
@@ -153480,17 +168080,102 @@ export type GetApiSearchSharedQueriesByIdPath = {
 	id: string;
 };
 
-export const GetApiSearchSharedQueriesByIdStatus200DocumentTemplateEnum = {
-	global: "global",
-	book: "book",
-	media: "media",
-	software: "software",
-	realm: "realm",
-	zone: "zone",
+export const GetApiSearchSharedQueriesByIdStatus200DocumentFilterDocumentCategoriesEnum = {
+	units: "units",
+	users: "users",
+	entities: "entities",
+	tags: "tags",
+	"tag-structures": "tag-structures",
+	posts: "posts",
+	realms: "realms",
+	collections: "collections",
+	reviews: "reviews",
+	polls: "polls",
 } as const;
 
-export type GetApiSearchSharedQueriesByIdStatus200DocumentTemplateEnum =
-	(typeof GetApiSearchSharedQueriesByIdStatus200DocumentTemplateEnum)[keyof typeof GetApiSearchSharedQueriesByIdStatus200DocumentTemplateEnum];
+export type GetApiSearchSharedQueriesByIdStatus200DocumentFilterDocumentCategoriesEnum =
+	(typeof GetApiSearchSharedQueriesByIdStatus200DocumentFilterDocumentCategoriesEnum)[keyof typeof GetApiSearchSharedQueriesByIdStatus200DocumentFilterDocumentCategoriesEnum];
+
+export const GetApiSearchSharedQueriesByIdStatus200DocumentFilterDocumentWhereKindInEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetApiSearchSharedQueriesByIdStatus200DocumentFilterDocumentWhereKindInEnum =
+	(typeof GetApiSearchSharedQueriesByIdStatus200DocumentFilterDocumentWhereKindInEnum)[keyof typeof GetApiSearchSharedQueriesByIdStatus200DocumentFilterDocumentWhereKindInEnum];
+
+export const GetApiSearchSharedQueriesByIdStatus200DocumentFilterDocumentControlsFieldEnum = {
+	category: "category",
+	kind: "kind",
+	language: "language",
+	"content-rating": "content-rating",
+	"ai-disclosure": "ai-disclosure",
+	license: "license",
+	tag: "tag",
+	credit: "credit",
+	"credited-profile": "credited-profile",
+	realm: "realm",
+	"realm-tag-context": "realm-tag-context",
+	zone: "zone",
+	subject: "subject",
+	target: "target",
+	root: "root",
+	parent: "parent",
+	owner: "owner",
+	"join-policy": "join-policy",
+	multiple: "multiple",
+	"results-visibility": "results-visibility",
+	closed: "closed",
+	"created-at": "created-at",
+	"updated-at": "updated-at",
+	"published-at": "published-at",
+	"closes-at": "closes-at",
+	"content-license": "content-license",
+	"book-isbn13": "book-isbn13",
+	"book-publication-date": "book-publication-date",
+	"book-page-count": "book-page-count",
+	"book-word-count": "book-word-count",
+	"book-format": "book-format",
+	"media-kind": "media-kind",
+	"media-release-date": "media-release-date",
+	"media-runtime-minutes": "media-runtime-minutes",
+	"media-episode-count": "media-episode-count",
+	"media-season-count": "media-season-count",
+	"software-release-date": "software-release-date",
+	"software-version-label": "software-version-label",
+	"software-platform": "software-platform",
+	"software-requirement-tier": "software-requirement-tier",
+	"realm-tag-vote": "realm-tag-vote",
+} as const;
+
+export type GetApiSearchSharedQueriesByIdStatus200DocumentFilterDocumentControlsFieldEnum =
+	(typeof GetApiSearchSharedQueriesByIdStatus200DocumentFilterDocumentControlsFieldEnum)[keyof typeof GetApiSearchSharedQueriesByIdStatus200DocumentFilterDocumentControlsFieldEnum];
+
+export const GetApiSearchSharedQueriesByIdStatus200DocumentFilterDocumentControlsDisclosureEnum = {
+	visible: "visible",
+	hidden: "hidden",
+} as const;
+
+export type GetApiSearchSharedQueriesByIdStatus200DocumentFilterDocumentControlsDisclosureEnum =
+	(typeof GetApiSearchSharedQueriesByIdStatus200DocumentFilterDocumentControlsDisclosureEnum)[keyof typeof GetApiSearchSharedQueriesByIdStatus200DocumentFilterDocumentControlsDisclosureEnum];
 
 export const GetApiSearchSharedQueriesByIdStatus200DocumentStateSortEnum = {
 	best: "best",
@@ -153578,13 +168263,2137 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 	 */
 	document: {
 		/**
-		 * @type number
+		 * @type object
 		 */
-		version: 1;
-		/**
-		 * @type string
-		 */
-		template: GetApiSearchSharedQueriesByIdStatus200DocumentTemplateEnum;
+		filterDocument: {
+			/**
+			 * @type array | undefined
+			 */
+			categories?: GetApiSearchSharedQueriesByIdStatus200DocumentFilterDocumentCategoriesEnum[];
+			/**
+			 * @type object | undefined
+			 */
+			where?: {
+				/**
+				 * @type array | undefined
+				 */
+				all?: UnitPredicate[];
+				/**
+				 * @type array | undefined
+				 */
+				any?: UnitPredicate[];
+				/**
+				 * @type object | undefined
+				 */
+				not?: UnitPredicate;
+				/**
+				 * @type object | undefined
+				 */
+				id?: {
+					/**
+					 * @type array
+					 */
+					in: string[];
+				};
+				/**
+				 * @type object | undefined
+				 */
+				kind?: {
+					/**
+					 * @type array
+					 */
+					in: GetApiSearchSharedQueriesByIdStatus200DocumentFilterDocumentWhereKindInEnum[];
+				};
+				localizations?:
+					| {
+							/**
+							 * @type object
+							 */
+							some: {
+								/**
+								 * @type array | undefined
+								 */
+								all?: LocalizationFilter[];
+								/**
+								 * @type array | undefined
+								 */
+								any?: LocalizationFilter[];
+								/**
+								 * @type object | undefined
+								 */
+								not?: LocalizationFilter;
+								/**
+								 * @type object | undefined
+								 */
+								language?: {
+									/**
+									 * @type array
+									 */
+									in: ("zh" | "en" | "ja" | "ko" | "de" | "fr" | "es")[];
+								};
+							};
+					  }
+					| {
+							/**
+							 * @type object
+							 */
+							none: {
+								/**
+								 * @type array | undefined
+								 */
+								all?: LocalizationFilter[];
+								/**
+								 * @type array | undefined
+								 */
+								any?: LocalizationFilter[];
+								/**
+								 * @type object | undefined
+								 */
+								not?: LocalizationFilter;
+								/**
+								 * @type object | undefined
+								 */
+								language?: {
+									/**
+									 * @type array
+									 */
+									in: ("zh" | "en" | "ja" | "ko" | "de" | "fr" | "es")[];
+								};
+							};
+					  };
+				realms?:
+					| {
+							/**
+							 * @type object
+							 */
+							some: {
+								/**
+								 * @type array | undefined
+								 */
+								all?: RealmPlacementFilter[];
+								/**
+								 * @type array | undefined
+								 */
+								any?: RealmPlacementFilter[];
+								/**
+								 * @type object | undefined
+								 */
+								not?: RealmPlacementFilter;
+								/**
+								 * @type object | undefined
+								 */
+								realm?: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "video"
+											| "audio"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+								/**
+								 * @type object | undefined
+								 */
+								status?: {
+									/**
+									 * @type array
+									 */
+									in: ("pending" | "visible" | "hidden" | "removed")[];
+								};
+								/**
+								 * @type object | undefined
+								 */
+								publicationState?: {
+									/**
+									 * @type array
+									 */
+									in: ("active" | "withdrawn")[];
+								};
+							};
+					  }
+					| {
+							/**
+							 * @type object
+							 */
+							none: {
+								/**
+								 * @type array | undefined
+								 */
+								all?: RealmPlacementFilter[];
+								/**
+								 * @type array | undefined
+								 */
+								any?: RealmPlacementFilter[];
+								/**
+								 * @type object | undefined
+								 */
+								not?: RealmPlacementFilter;
+								/**
+								 * @type object | undefined
+								 */
+								realm?: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "video"
+											| "audio"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+								/**
+								 * @type object | undefined
+								 */
+								status?: {
+									/**
+									 * @type array
+									 */
+									in: ("pending" | "visible" | "hidden" | "removed")[];
+								};
+								/**
+								 * @type object | undefined
+								 */
+								publicationState?: {
+									/**
+									 * @type array
+									 */
+									in: ("active" | "withdrawn")[];
+								};
+							};
+					  };
+				tags?:
+					| {
+							/**
+							 * @type object
+							 */
+							some: {
+								/**
+								 * @type array | undefined
+								 */
+								all?: TagAssertionFilter[];
+								/**
+								 * @type array | undefined
+								 */
+								any?: TagAssertionFilter[];
+								/**
+								 * @type object | undefined
+								 */
+								not?: TagAssertionFilter;
+								/**
+								 * @type object | undefined
+								 */
+								tag?: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "video"
+											| "audio"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+								authority?:
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "global";
+											view:
+												| {
+														/**
+														 * @type string
+														 */
+														kind: "effective";
+														/**
+														 * @type object | undefined
+														 */
+														consensus?: {
+															score?:
+																| {
+																		/**
+																		 * @type array
+																		 */
+																		in: number[];
+																  }
+																| {
+																		range:
+																			| {
+																					/**
+																					 * @type integer
+																					 */
+																					minimum: number;
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					maximum?: number;
+																			  }
+																			| {
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					minimum?: number;
+																					/**
+																					 * @type integer
+																					 */
+																					maximum: number;
+																			  };
+																  };
+															voteCount?:
+																| {
+																		/**
+																		 * @type array
+																		 */
+																		in: number[];
+																  }
+																| {
+																		range:
+																			| {
+																					/**
+																					 * @type integer
+																					 */
+																					minimum: number;
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					maximum?: number;
+																			  }
+																			| {
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					minimum?: number;
+																					/**
+																					 * @type integer
+																					 */
+																					maximum: number;
+																			  };
+																  };
+														};
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														kind: "direct";
+												  };
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "realm";
+											/**
+											 * @type object
+											 */
+											realm: {
+												/**
+												 * @type object | undefined
+												 */
+												id?: {
+													/**
+													 * @type array
+													 */
+													in: string[];
+												};
+												/**
+												 * @type object | undefined
+												 */
+												kind?: {
+													/**
+													 * @type array
+													 */
+													in: (
+														| "slug_namespace"
+														| "profile"
+														| "book"
+														| "software"
+														| "media"
+														| "video"
+														| "audio"
+														| "release"
+														| "entity"
+														| "label"
+														| "tag"
+														| "structure"
+														| "series"
+														| "zone"
+														| "zone_page"
+														| "collection"
+														| "post"
+														| "poll"
+														| "realm"
+														| "realm_rule"
+													)[];
+												};
+											};
+											view:
+												| {
+														/**
+														 * @type string
+														 */
+														kind: "policy";
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														kind: "community";
+														/**
+														 * @type object | undefined
+														 */
+														consensus?: {
+															score?:
+																| {
+																		/**
+																		 * @type array
+																		 */
+																		in: number[];
+																  }
+																| {
+																		range:
+																			| {
+																					/**
+																					 * @type integer
+																					 */
+																					minimum: number;
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					maximum?: number;
+																			  }
+																			| {
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					minimum?: number;
+																					/**
+																					 * @type integer
+																					 */
+																					maximum: number;
+																			  };
+																  };
+															voteCount?:
+																| {
+																		/**
+																		 * @type array
+																		 */
+																		in: number[];
+																  }
+																| {
+																		range:
+																			| {
+																					/**
+																					 * @type integer
+																					 */
+																					minimum: number;
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					maximum?: number;
+																			  }
+																			| {
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					minimum?: number;
+																					/**
+																					 * @type integer
+																					 */
+																					maximum: number;
+																			  };
+																  };
+														};
+												  };
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "profile";
+											/**
+											 * @type object
+											 */
+											profile: {
+												/**
+												 * @type string
+												 */
+												kind: "viewer";
+											};
+									  };
+							};
+					  }
+					| {
+							/**
+							 * @type object
+							 */
+							none: {
+								/**
+								 * @type array | undefined
+								 */
+								all?: TagAssertionFilter[];
+								/**
+								 * @type array | undefined
+								 */
+								any?: TagAssertionFilter[];
+								/**
+								 * @type object | undefined
+								 */
+								not?: TagAssertionFilter;
+								/**
+								 * @type object | undefined
+								 */
+								tag?: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "video"
+											| "audio"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+								authority?:
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "global";
+											view:
+												| {
+														/**
+														 * @type string
+														 */
+														kind: "effective";
+														/**
+														 * @type object | undefined
+														 */
+														consensus?: {
+															score?:
+																| {
+																		/**
+																		 * @type array
+																		 */
+																		in: number[];
+																  }
+																| {
+																		range:
+																			| {
+																					/**
+																					 * @type integer
+																					 */
+																					minimum: number;
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					maximum?: number;
+																			  }
+																			| {
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					minimum?: number;
+																					/**
+																					 * @type integer
+																					 */
+																					maximum: number;
+																			  };
+																  };
+															voteCount?:
+																| {
+																		/**
+																		 * @type array
+																		 */
+																		in: number[];
+																  }
+																| {
+																		range:
+																			| {
+																					/**
+																					 * @type integer
+																					 */
+																					minimum: number;
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					maximum?: number;
+																			  }
+																			| {
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					minimum?: number;
+																					/**
+																					 * @type integer
+																					 */
+																					maximum: number;
+																			  };
+																  };
+														};
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														kind: "direct";
+												  };
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "realm";
+											/**
+											 * @type object
+											 */
+											realm: {
+												/**
+												 * @type object | undefined
+												 */
+												id?: {
+													/**
+													 * @type array
+													 */
+													in: string[];
+												};
+												/**
+												 * @type object | undefined
+												 */
+												kind?: {
+													/**
+													 * @type array
+													 */
+													in: (
+														| "slug_namespace"
+														| "profile"
+														| "book"
+														| "software"
+														| "media"
+														| "video"
+														| "audio"
+														| "release"
+														| "entity"
+														| "label"
+														| "tag"
+														| "structure"
+														| "series"
+														| "zone"
+														| "zone_page"
+														| "collection"
+														| "post"
+														| "poll"
+														| "realm"
+														| "realm_rule"
+													)[];
+												};
+											};
+											view:
+												| {
+														/**
+														 * @type string
+														 */
+														kind: "policy";
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														kind: "community";
+														/**
+														 * @type object | undefined
+														 */
+														consensus?: {
+															score?:
+																| {
+																		/**
+																		 * @type array
+																		 */
+																		in: number[];
+																  }
+																| {
+																		range:
+																			| {
+																					/**
+																					 * @type integer
+																					 */
+																					minimum: number;
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					maximum?: number;
+																			  }
+																			| {
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					minimum?: number;
+																					/**
+																					 * @type integer
+																					 */
+																					maximum: number;
+																			  };
+																  };
+															voteCount?:
+																| {
+																		/**
+																		 * @type array
+																		 */
+																		in: number[];
+																  }
+																| {
+																		range:
+																			| {
+																					/**
+																					 * @type integer
+																					 */
+																					minimum: number;
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					maximum?: number;
+																			  }
+																			| {
+																					/**
+																					 * @type integer | undefined
+																					 */
+																					minimum?: number;
+																					/**
+																					 * @type integer
+																					 */
+																					maximum: number;
+																			  };
+																  };
+														};
+												  };
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "profile";
+											/**
+											 * @type object
+											 */
+											profile: {
+												/**
+												 * @type string
+												 */
+												kind: "viewer";
+											};
+									  };
+							};
+					  };
+				creditAttributions?:
+					| {
+							/**
+							 * @type object
+							 */
+							some: {
+								/**
+								 * @type object | undefined
+								 */
+								id?: {
+									/**
+									 * @type array
+									 */
+									in: string[];
+								};
+								/**
+								 * @type object | undefined
+								 */
+								kind?: {
+									/**
+									 * @type array
+									 */
+									in: (
+										| "slug_namespace"
+										| "profile"
+										| "book"
+										| "software"
+										| "media"
+										| "video"
+										| "audio"
+										| "release"
+										| "entity"
+										| "label"
+										| "tag"
+										| "structure"
+										| "series"
+										| "zone"
+										| "zone_page"
+										| "collection"
+										| "post"
+										| "poll"
+										| "realm"
+										| "realm_rule"
+									)[];
+								};
+							};
+					  }
+					| {
+							/**
+							 * @type object
+							 */
+							none: {
+								/**
+								 * @type object | undefined
+								 */
+								id?: {
+									/**
+									 * @type array
+									 */
+									in: string[];
+								};
+								/**
+								 * @type object | undefined
+								 */
+								kind?: {
+									/**
+									 * @type array
+									 */
+									in: (
+										| "slug_namespace"
+										| "profile"
+										| "book"
+										| "software"
+										| "media"
+										| "video"
+										| "audio"
+										| "release"
+										| "entity"
+										| "label"
+										| "tag"
+										| "structure"
+										| "series"
+										| "zone"
+										| "zone_page"
+										| "collection"
+										| "post"
+										| "poll"
+										| "realm"
+										| "realm_rule"
+									)[];
+								};
+							};
+					  };
+				subjectAssociations?:
+					| {
+							/**
+							 * @type object
+							 */
+							some: {
+								/**
+								 * @type object | undefined
+								 */
+								id?: {
+									/**
+									 * @type array
+									 */
+									in: string[];
+								};
+								/**
+								 * @type object | undefined
+								 */
+								kind?: {
+									/**
+									 * @type array
+									 */
+									in: (
+										| "slug_namespace"
+										| "profile"
+										| "book"
+										| "software"
+										| "media"
+										| "video"
+										| "audio"
+										| "release"
+										| "entity"
+										| "label"
+										| "tag"
+										| "structure"
+										| "series"
+										| "zone"
+										| "zone_page"
+										| "collection"
+										| "post"
+										| "poll"
+										| "realm"
+										| "realm_rule"
+									)[];
+								};
+							};
+					  }
+					| {
+							/**
+							 * @type object
+							 */
+							none: {
+								/**
+								 * @type object | undefined
+								 */
+								id?: {
+									/**
+									 * @type array
+									 */
+									in: string[];
+								};
+								/**
+								 * @type object | undefined
+								 */
+								kind?: {
+									/**
+									 * @type array
+									 */
+									in: (
+										| "slug_namespace"
+										| "profile"
+										| "book"
+										| "software"
+										| "media"
+										| "video"
+										| "audio"
+										| "release"
+										| "entity"
+										| "label"
+										| "tag"
+										| "structure"
+										| "series"
+										| "zone"
+										| "zone_page"
+										| "collection"
+										| "post"
+										| "poll"
+										| "realm"
+										| "realm_rule"
+									)[];
+								};
+							};
+					  };
+				publishers?:
+					| {
+							some:
+								| {
+										/**
+										 * @type string
+										 */
+										kind: "viewer";
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										kind: "profile";
+										/**
+										 * @type object
+										 */
+										id: {
+											/**
+											 * @type array
+											 */
+											in: string[];
+										};
+								  };
+					  }
+					| {
+							none:
+								| {
+										/**
+										 * @type string
+										 */
+										kind: "viewer";
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										kind: "profile";
+										/**
+										 * @type object
+										 */
+										id: {
+											/**
+											 * @type array
+											 */
+											in: string[];
+										};
+								  };
+					  };
+				/**
+				 * @type object | undefined
+				 */
+				scores?: {
+					received?:
+						| {
+								/**
+								 * @type object
+								 */
+								some: {
+									/**
+									 * @type array | undefined
+									 */
+									all?: ScoreFilter[];
+									/**
+									 * @type array | undefined
+									 */
+									any?: ScoreFilter[];
+									/**
+									 * @type object | undefined
+									 */
+									not?: ScoreFilter;
+									value?:
+										| {
+												/**
+												 * @type array
+												 */
+												in: number[];
+										  }
+										| {
+												range:
+													| {
+															/**
+															 * @minLength 1
+															 * @maxLength 10
+															 * @type integer
+															 */
+															minimum: number;
+															/**
+															 * @minLength 1
+															 * @maxLength 10
+															 * @type integer | undefined
+															 */
+															maximum?: number;
+													  }
+													| {
+															/**
+															 * @minLength 1
+															 * @maxLength 10
+															 * @type integer | undefined
+															 */
+															minimum?: number;
+															/**
+															 * @minLength 1
+															 * @maxLength 10
+															 * @type integer
+															 */
+															maximum: number;
+													  };
+										  };
+									/**
+									 * @type object | undefined
+									 */
+									realm?: {
+										/**
+										 * @type object | undefined
+										 */
+										id?: {
+											/**
+											 * @type array
+											 */
+											in: string[];
+										};
+										/**
+										 * @type object | undefined
+										 */
+										kind?: {
+											/**
+											 * @type array
+											 */
+											in: (
+												| "slug_namespace"
+												| "profile"
+												| "book"
+												| "software"
+												| "media"
+												| "video"
+												| "audio"
+												| "release"
+												| "entity"
+												| "label"
+												| "tag"
+												| "structure"
+												| "series"
+												| "zone"
+												| "zone_page"
+												| "collection"
+												| "post"
+												| "poll"
+												| "realm"
+												| "realm_rule"
+											)[];
+										};
+									};
+									/**
+									 * @type object | undefined
+									 */
+									target?: {
+										/**
+										 * @type object | undefined
+										 */
+										id?: {
+											/**
+											 * @type array
+											 */
+											in: string[];
+										};
+										/**
+										 * @type object | undefined
+										 */
+										kind?: {
+											/**
+											 * @type array
+											 */
+											in: (
+												| "slug_namespace"
+												| "profile"
+												| "book"
+												| "software"
+												| "media"
+												| "video"
+												| "audio"
+												| "release"
+												| "entity"
+												| "label"
+												| "tag"
+												| "structure"
+												| "series"
+												| "zone"
+												| "zone_page"
+												| "collection"
+												| "post"
+												| "poll"
+												| "realm"
+												| "realm_rule"
+											)[];
+										};
+									};
+									author?:
+										| {
+												/**
+												 * @type string
+												 */
+												kind: "viewer";
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												kind: "profile";
+												/**
+												 * @type object
+												 */
+												id: {
+													/**
+													 * @type array
+													 */
+													in: string[];
+												};
+										  };
+								};
+						  }
+						| {
+								/**
+								 * @type object
+								 */
+								none: {
+									/**
+									 * @type array | undefined
+									 */
+									all?: ScoreFilter[];
+									/**
+									 * @type array | undefined
+									 */
+									any?: ScoreFilter[];
+									/**
+									 * @type object | undefined
+									 */
+									not?: ScoreFilter;
+									value?:
+										| {
+												/**
+												 * @type array
+												 */
+												in: number[];
+										  }
+										| {
+												range:
+													| {
+															/**
+															 * @minLength 1
+															 * @maxLength 10
+															 * @type integer
+															 */
+															minimum: number;
+															/**
+															 * @minLength 1
+															 * @maxLength 10
+															 * @type integer | undefined
+															 */
+															maximum?: number;
+													  }
+													| {
+															/**
+															 * @minLength 1
+															 * @maxLength 10
+															 * @type integer | undefined
+															 */
+															minimum?: number;
+															/**
+															 * @minLength 1
+															 * @maxLength 10
+															 * @type integer
+															 */
+															maximum: number;
+													  };
+										  };
+									/**
+									 * @type object | undefined
+									 */
+									realm?: {
+										/**
+										 * @type object | undefined
+										 */
+										id?: {
+											/**
+											 * @type array
+											 */
+											in: string[];
+										};
+										/**
+										 * @type object | undefined
+										 */
+										kind?: {
+											/**
+											 * @type array
+											 */
+											in: (
+												| "slug_namespace"
+												| "profile"
+												| "book"
+												| "software"
+												| "media"
+												| "video"
+												| "audio"
+												| "release"
+												| "entity"
+												| "label"
+												| "tag"
+												| "structure"
+												| "series"
+												| "zone"
+												| "zone_page"
+												| "collection"
+												| "post"
+												| "poll"
+												| "realm"
+												| "realm_rule"
+											)[];
+										};
+									};
+									/**
+									 * @type object | undefined
+									 */
+									target?: {
+										/**
+										 * @type object | undefined
+										 */
+										id?: {
+											/**
+											 * @type array
+											 */
+											in: string[];
+										};
+										/**
+										 * @type object | undefined
+										 */
+										kind?: {
+											/**
+											 * @type array
+											 */
+											in: (
+												| "slug_namespace"
+												| "profile"
+												| "book"
+												| "software"
+												| "media"
+												| "video"
+												| "audio"
+												| "release"
+												| "entity"
+												| "label"
+												| "tag"
+												| "structure"
+												| "series"
+												| "zone"
+												| "zone_page"
+												| "collection"
+												| "post"
+												| "poll"
+												| "realm"
+												| "realm_rule"
+											)[];
+										};
+									};
+									author?:
+										| {
+												/**
+												 * @type string
+												 */
+												kind: "viewer";
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												kind: "profile";
+												/**
+												 * @type object
+												 */
+												id: {
+													/**
+													 * @type array
+													 */
+													in: string[];
+												};
+										  };
+								};
+						  };
+				};
+				post?:
+					| {
+							/**
+							 * @type object
+							 */
+							is: {
+								/**
+								 * @type array | undefined
+								 */
+								all?: PostFilter[];
+								/**
+								 * @type array | undefined
+								 */
+								any?: PostFilter[];
+								/**
+								 * @type object | undefined
+								 */
+								not?: PostFilter;
+								/**
+								 * @type object | undefined
+								 */
+								kind?: {
+									/**
+									 * @type array
+									 */
+									in: (
+										| "post"
+										| "reply"
+										| "excerpt"
+										| "review"
+										| "chapter"
+										| "page"
+										| "wiki"
+										| "picture"
+										| "governance_note"
+									)[];
+								};
+								subject?:
+									| {
+											/**
+											 * @type object
+											 */
+											is: {
+												/**
+												 * @type object | undefined
+												 */
+												id?: {
+													/**
+													 * @type array
+													 */
+													in: string[];
+												};
+												/**
+												 * @type object | undefined
+												 */
+												kind?: {
+													/**
+													 * @type array
+													 */
+													in: (
+														| "slug_namespace"
+														| "profile"
+														| "book"
+														| "software"
+														| "media"
+														| "video"
+														| "audio"
+														| "release"
+														| "entity"
+														| "label"
+														| "tag"
+														| "structure"
+														| "series"
+														| "zone"
+														| "zone_page"
+														| "collection"
+														| "post"
+														| "poll"
+														| "realm"
+														| "realm_rule"
+													)[];
+												};
+											};
+									  }
+									| {
+											/**
+											 * @type boolean
+											 */
+											absent: true;
+									  };
+								/**
+								 * @type object | undefined
+								 */
+								scores?: {
+									displayed?:
+										| {
+												/**
+												 * @type object
+												 */
+												some: {
+													/**
+													 * @type array | undefined
+													 */
+													all?: ScoreFilter[];
+													/**
+													 * @type array | undefined
+													 */
+													any?: ScoreFilter[];
+													/**
+													 * @type object | undefined
+													 */
+													not?: ScoreFilter;
+													value?:
+														| {
+																/**
+																 * @type array
+																 */
+																in: number[];
+														  }
+														| {
+																range:
+																	| {
+																			/**
+																			 * @minLength 1
+																			 * @maxLength 10
+																			 * @type integer
+																			 */
+																			minimum: number;
+																			/**
+																			 * @minLength 1
+																			 * @maxLength 10
+																			 * @type integer | undefined
+																			 */
+																			maximum?: number;
+																	  }
+																	| {
+																			/**
+																			 * @minLength 1
+																			 * @maxLength 10
+																			 * @type integer | undefined
+																			 */
+																			minimum?: number;
+																			/**
+																			 * @minLength 1
+																			 * @maxLength 10
+																			 * @type integer
+																			 */
+																			maximum: number;
+																	  };
+														  };
+													/**
+													 * @type object | undefined
+													 */
+													realm?: {
+														/**
+														 * @type object | undefined
+														 */
+														id?: {
+															/**
+															 * @type array
+															 */
+															in: string[];
+														};
+														/**
+														 * @type object | undefined
+														 */
+														kind?: {
+															/**
+															 * @type array
+															 */
+															in: (
+																| "slug_namespace"
+																| "profile"
+																| "book"
+																| "software"
+																| "media"
+																| "video"
+																| "audio"
+																| "release"
+																| "entity"
+																| "label"
+																| "tag"
+																| "structure"
+																| "series"
+																| "zone"
+																| "zone_page"
+																| "collection"
+																| "post"
+																| "poll"
+																| "realm"
+																| "realm_rule"
+															)[];
+														};
+													};
+													/**
+													 * @type object | undefined
+													 */
+													target?: {
+														/**
+														 * @type object | undefined
+														 */
+														id?: {
+															/**
+															 * @type array
+															 */
+															in: string[];
+														};
+														/**
+														 * @type object | undefined
+														 */
+														kind?: {
+															/**
+															 * @type array
+															 */
+															in: (
+																| "slug_namespace"
+																| "profile"
+																| "book"
+																| "software"
+																| "media"
+																| "video"
+																| "audio"
+																| "release"
+																| "entity"
+																| "label"
+																| "tag"
+																| "structure"
+																| "series"
+																| "zone"
+																| "zone_page"
+																| "collection"
+																| "post"
+																| "poll"
+																| "realm"
+																| "realm_rule"
+															)[];
+														};
+													};
+													author?:
+														| {
+																/**
+																 * @type string
+																 */
+																kind: "viewer";
+														  }
+														| {
+																/**
+																 * @type string
+																 */
+																kind: "profile";
+																/**
+																 * @type object
+																 */
+																id: {
+																	/**
+																	 * @type array
+																	 */
+																	in: string[];
+																};
+														  };
+												};
+										  }
+										| {
+												/**
+												 * @type object
+												 */
+												none: {
+													/**
+													 * @type array | undefined
+													 */
+													all?: ScoreFilter[];
+													/**
+													 * @type array | undefined
+													 */
+													any?: ScoreFilter[];
+													/**
+													 * @type object | undefined
+													 */
+													not?: ScoreFilter;
+													value?:
+														| {
+																/**
+																 * @type array
+																 */
+																in: number[];
+														  }
+														| {
+																range:
+																	| {
+																			/**
+																			 * @minLength 1
+																			 * @maxLength 10
+																			 * @type integer
+																			 */
+																			minimum: number;
+																			/**
+																			 * @minLength 1
+																			 * @maxLength 10
+																			 * @type integer | undefined
+																			 */
+																			maximum?: number;
+																	  }
+																	| {
+																			/**
+																			 * @minLength 1
+																			 * @maxLength 10
+																			 * @type integer | undefined
+																			 */
+																			minimum?: number;
+																			/**
+																			 * @minLength 1
+																			 * @maxLength 10
+																			 * @type integer
+																			 */
+																			maximum: number;
+																	  };
+														  };
+													/**
+													 * @type object | undefined
+													 */
+													realm?: {
+														/**
+														 * @type object | undefined
+														 */
+														id?: {
+															/**
+															 * @type array
+															 */
+															in: string[];
+														};
+														/**
+														 * @type object | undefined
+														 */
+														kind?: {
+															/**
+															 * @type array
+															 */
+															in: (
+																| "slug_namespace"
+																| "profile"
+																| "book"
+																| "software"
+																| "media"
+																| "video"
+																| "audio"
+																| "release"
+																| "entity"
+																| "label"
+																| "tag"
+																| "structure"
+																| "series"
+																| "zone"
+																| "zone_page"
+																| "collection"
+																| "post"
+																| "poll"
+																| "realm"
+																| "realm_rule"
+															)[];
+														};
+													};
+													/**
+													 * @type object | undefined
+													 */
+													target?: {
+														/**
+														 * @type object | undefined
+														 */
+														id?: {
+															/**
+															 * @type array
+															 */
+															in: string[];
+														};
+														/**
+														 * @type object | undefined
+														 */
+														kind?: {
+															/**
+															 * @type array
+															 */
+															in: (
+																| "slug_namespace"
+																| "profile"
+																| "book"
+																| "software"
+																| "media"
+																| "video"
+																| "audio"
+																| "release"
+																| "entity"
+																| "label"
+																| "tag"
+																| "structure"
+																| "series"
+																| "zone"
+																| "zone_page"
+																| "collection"
+																| "post"
+																| "poll"
+																| "realm"
+																| "realm_rule"
+															)[];
+														};
+													};
+													author?:
+														| {
+																/**
+																 * @type string
+																 */
+																kind: "viewer";
+														  }
+														| {
+																/**
+																 * @type string
+																 */
+																kind: "profile";
+																/**
+																 * @type object
+																 */
+																id: {
+																	/**
+																	 * @type array
+																	 */
+																	in: string[];
+																};
+														  };
+												};
+										  };
+								};
+								/**
+								 * @type object | undefined
+								 */
+								explainsRealmTag?: {
+									/**
+									 * @type object
+									 */
+									realm: {
+										/**
+										 * @type object | undefined
+										 */
+										id?: {
+											/**
+											 * @type array
+											 */
+											in: string[];
+										};
+										/**
+										 * @type object | undefined
+										 */
+										kind?: {
+											/**
+											 * @type array
+											 */
+											in: (
+												| "slug_namespace"
+												| "profile"
+												| "book"
+												| "software"
+												| "media"
+												| "video"
+												| "audio"
+												| "release"
+												| "entity"
+												| "label"
+												| "tag"
+												| "structure"
+												| "series"
+												| "zone"
+												| "zone_page"
+												| "collection"
+												| "post"
+												| "poll"
+												| "realm"
+												| "realm_rule"
+											)[];
+										};
+									};
+									/**
+									 * @type object | undefined
+									 */
+									tag?: {
+										/**
+										 * @type object | undefined
+										 */
+										id?: {
+											/**
+											 * @type array
+											 */
+											in: string[];
+										};
+										/**
+										 * @type object | undefined
+										 */
+										kind?: {
+											/**
+											 * @type array
+											 */
+											in: (
+												| "slug_namespace"
+												| "profile"
+												| "book"
+												| "software"
+												| "media"
+												| "video"
+												| "audio"
+												| "release"
+												| "entity"
+												| "label"
+												| "tag"
+												| "structure"
+												| "series"
+												| "zone"
+												| "zone_page"
+												| "collection"
+												| "post"
+												| "poll"
+												| "realm"
+												| "realm_rule"
+											)[];
+										};
+									};
+								};
+							};
+					  }
+					| {
+							/**
+							 * @type boolean
+							 */
+							absent: true;
+					  };
+				collection?:
+					| {
+							/**
+							 * @type object
+							 */
+							is: {
+								/**
+								 * @type array | undefined
+								 */
+								all?: CollectionFilter[];
+								/**
+								 * @type array | undefined
+								 */
+								any?: CollectionFilter[];
+								/**
+								 * @type object | undefined
+								 */
+								not?: CollectionFilter;
+								items?:
+									| {
+											/**
+											 * @type object
+											 */
+											some: {
+												/**
+												 * @type object | undefined
+												 */
+												id?: {
+													/**
+													 * @type array
+													 */
+													in: string[];
+												};
+												/**
+												 * @type object | undefined
+												 */
+												kind?: {
+													/**
+													 * @type array
+													 */
+													in: (
+														| "slug_namespace"
+														| "profile"
+														| "book"
+														| "software"
+														| "media"
+														| "video"
+														| "audio"
+														| "release"
+														| "entity"
+														| "label"
+														| "tag"
+														| "structure"
+														| "series"
+														| "zone"
+														| "zone_page"
+														| "collection"
+														| "post"
+														| "poll"
+														| "realm"
+														| "realm_rule"
+													)[];
+												};
+											};
+									  }
+									| {
+											/**
+											 * @type object
+											 */
+											none: {
+												/**
+												 * @type object | undefined
+												 */
+												id?: {
+													/**
+													 * @type array
+													 */
+													in: string[];
+												};
+												/**
+												 * @type object | undefined
+												 */
+												kind?: {
+													/**
+													 * @type array
+													 */
+													in: (
+														| "slug_namespace"
+														| "profile"
+														| "book"
+														| "software"
+														| "media"
+														| "video"
+														| "audio"
+														| "release"
+														| "entity"
+														| "label"
+														| "tag"
+														| "structure"
+														| "series"
+														| "zone"
+														| "zone_page"
+														| "collection"
+														| "post"
+														| "poll"
+														| "realm"
+														| "realm_rule"
+													)[];
+												};
+											};
+									  };
+							};
+					  }
+					| {
+							/**
+							 * @type boolean
+							 */
+							absent: true;
+					  };
+			};
+			/**
+			 * @type array | undefined
+			 */
+			controls?: {
+				/**
+				 * @minLength 1
+				 * @maxLength 64
+				 * @pattern ^[a-z][a-z0-9-]*$
+				 * @type string
+				 */
+				key: string;
+				/**
+				 * @type string | undefined
+				 */
+				field?: GetApiSearchSharedQueriesByIdStatus200DocumentFilterDocumentControlsFieldEnum;
+				/**
+				 * @type boolean | undefined
+				 */
+				enabled?: boolean;
+				/**
+				 * @type string | undefined
+				 */
+				disclosure?: GetApiSearchSharedQueriesByIdStatus200DocumentFilterDocumentControlsDisclosureEnum;
+				/**
+				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+				 * @type string | undefined
+				 */
+				labelUnitId?: string;
+				optionPolicy?:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "all";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "include";
+							/**
+							 * @type array
+							 */
+							values: (string | number | boolean)[];
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "exclude";
+							/**
+							 * @type array
+							 */
+							values: (string | number | boolean)[];
+					  };
+				/**
+				 * @type boolean | undefined
+				 */
+				required?: boolean;
+			}[];
+		};
 		/**
 		 * @type object
 		 */

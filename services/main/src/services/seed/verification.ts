@@ -37,7 +37,7 @@ import {
 } from "../database/schema";
 import { includesSeedScenario, type SeedRunOptions } from "./contracts";
 import { DemoCredentials, SeedFixtureTitles } from "./data";
-import { createDefaultSearchDocument, executeSearchFeatureInput } from "../search/templates";
+import { executeSearchFeatureInput } from "../search/filter-document";
 
 export interface SeedVerificationResult {
 	readonly profile: SeedRunOptions["profile"];
@@ -268,10 +268,10 @@ export async function verifySeedDatabase(
 /** Verifies current authoritative PostgreSQL Search against the official Zone fixtures. */
 export async function verifySeedSearch(): Promise<void> {
 	for (const officialZone of OfficialZoneManifest) {
-		const fixture = SeedFixtureTitles[officialZone.searchTemplate];
+		const fixture = SeedFixtureTitles[officialZone.slug];
 		const response = await executeSearchFeatureInput(
 			{
-				document: createDefaultSearchDocument(officialZone.searchTemplate),
+				filterDocument: officialZone.filterDocument,
 				contexts: [{ kind: "zone", zoneId: officialZone.id }],
 				injections: [],
 				state: {
@@ -287,7 +287,7 @@ export async function verifySeedSearch(): Promise<void> {
 		const hits = response.groups.flatMap((group) => group.hits);
 		if (!hits.some((hit) => hit.titles.includes(fixture.en)))
 			throw new Error(
-				`Authoritative Search did not return the official ${officialZone.searchTemplate} fixture`,
+				`Authoritative Search did not return the official ${officialZone.slug} fixture`,
 			);
 	}
 }

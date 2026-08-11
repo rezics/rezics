@@ -60,9 +60,8 @@ function formatDuration(value: string | number | null): string | undefined {
 		: `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
 }
 
-function tagSearchHref(type: UnitType, tagId: string, label: string): string {
-	const template = type === "book" || type === "media" || type === "software" ? type : "global";
-	const query = new URLSearchParams({ template, tag: tagId, tagLabel: label });
+function tagSearchHref(_type: UnitType, tagId: string, label: string): string {
+	const query = new URLSearchParams({ tag: tagId, tagLabel: label });
 	return `/search?${query.toString()}`;
 }
 

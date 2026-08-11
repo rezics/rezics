@@ -2,23 +2,25 @@ import {
 	canonicalSearchFeatureInput,
 	combineUnitPredicates,
 	defaultSearchSort,
+	filterDocumentControlField,
 	isSearchSortAvailable,
 	parseSearchFeatureInput,
-	parseSearchDocument,
+	parseFilterDocument,
 	type ResolvedSearchControl,
 	type SearchControlExpression,
 	type SearchControlValue,
-	type SearchDocument,
-	type SearchDocumentControl,
+	type FilterDocument,
 	type SearchFeatureContext,
 	type SearchFeatureInput,
 	type SearchFeatureSurface,
 	type SearchField,
+	SearchFieldValues,
 	type SearchControlPredicate,
 	type SearchScalar,
+	type SearchOptionPolicy,
+	type SearchSortConfiguration,
 	type SearchSort,
-	type SearchTemplateId,
-	searchSortConfiguration,
+	SearchSortValues,
 	unitFilterSearchQuery,
 } from "@rezics/filter";
 import type { ContentLanguage } from "@rezics/i18n";
@@ -47,18 +49,6 @@ import {
 import { SearchCategories } from "./schema";
 import { ValidatedSearchPlan } from "./validated-plan";
 
-interface SearchTemplateDefinition {
-	readonly id: SearchTemplateId;
-	readonly categories: readonly (typeof SearchCategories)[number][];
-	readonly fields: readonly SearchField[];
-	readonly constraints: readonly SearchControlPredicate[];
-	readonly visible: ReadonlySet<SearchField>;
-	readonly defaultFacets: readonly SearchField[];
-	readonly sorts: readonly SearchSort[];
-	readonly maxPageSize: number;
-	readonly maxResultWindow: number;
-}
-
 const CommonSorts = [
 	"best",
 	"relevance",
@@ -76,149 +66,34 @@ export const ProgressSearchSorts = [
 ] as const satisfies readonly SearchSort[];
 export type ProgressSearchSort = (typeof ProgressSearchSorts)[number];
 
-const CommonFields = [
-	"language",
-	"content-rating",
-	"ai-disclosure",
-	"license",
-	"tag",
-	"credit",
-	"realm",
-	"realm-tag-vote",
-	"created-at",
-	"updated-at",
-	"published-at",
-] as const satisfies readonly SearchField[];
-
-const ContentLicenseFields = ["content-license"] as const satisfies readonly SearchField[];
-const WorkZoneCategories = ["units", "posts", "reviews", "collections"] as const;
 const CreditedProfileCategories = getCurrentSearchFieldDefinition("credited-profile").categories;
 export const SearchMaxResultWindow = WorkPolicy.search.maxResultWindow;
 
-const TemplateDefinitions = {
-	global: {
-		id: "global",
-		categories: SearchCategories,
-		fields: [
-			"category",
-			"kind",
-			...CommonFields,
-			"realm-tag-context",
-			"subject",
-			"target",
-			"root",
-			"parent",
-			"owner",
-			"credited-profile",
-		],
-		constraints: [],
-		visible: new Set<SearchField>(["category", "kind", "language", "content-rating", "tag"]),
-		defaultFacets: ["category", "kind", "language", "content-rating", "tag"],
-		sorts: CommonSorts,
-		maxPageSize: 50,
-		maxResultWindow: SearchMaxResultWindow,
-	},
-	book: {
-		id: "book",
-		categories: WorkZoneCategories,
-		fields: [
-			...CommonFields,
-			...ContentLicenseFields,
-			"book-isbn13",
-			"book-publication-date",
-			"book-page-count",
-			"book-word-count",
-			"book-format",
-		],
-		constraints: [],
-		visible: new Set<SearchField>(["language", "tag", "book-word-count", "book-format"]),
-		defaultFacets: ["language", "tag", "book-format"],
-		sorts: CommonSorts,
-		maxPageSize: 50,
-		maxResultWindow: SearchMaxResultWindow,
-	},
-	media: {
-		id: "media",
-		categories: WorkZoneCategories,
-		fields: [
-			...CommonFields,
-			...ContentLicenseFields,
-			"media-kind",
-			"media-release-date",
-			"media-runtime-minutes",
-			"media-episode-count",
-			"media-season-count",
-		],
-		constraints: [],
-		visible: new Set<SearchField>([
-			"language",
-			"tag",
-			"media-kind",
-			"media-release-date",
-			"media-runtime-minutes",
-		]),
-		defaultFacets: ["language", "tag", "media-kind"],
-		sorts: CommonSorts,
-		maxPageSize: 50,
-		maxResultWindow: SearchMaxResultWindow,
-	},
-	software: {
-		id: "software",
-		categories: WorkZoneCategories,
-		fields: [
-			...CommonFields,
-			...ContentLicenseFields,
-			"software-release-date",
-			"software-version-label",
-			"software-platform",
-			"software-requirement-tier",
-		],
-		constraints: [],
-		visible: new Set<SearchField>([
-			"language",
-			"tag",
-			"software-platform",
-			"software-requirement-tier",
-		]),
-		defaultFacets: ["language", "tag", "software-platform", "software-requirement-tier"],
-		sorts: CommonSorts,
-		maxPageSize: 50,
-		maxResultWindow: SearchMaxResultWindow,
-	},
-	progress: {
-		id: "progress",
-		categories: ["units"],
-		fields: [],
-		constraints: [{ field: "kind", operator: "any-of", values: ["book", "media", "software"] }],
-		visible: new Set<SearchField>(),
-		defaultFacets: [],
-		sorts: ProgressSearchSorts,
-		maxPageSize: 50,
-		maxResultWindow: SearchMaxResultWindow,
-	},
-	realm: {
-		id: "realm",
-		categories: ["realms"],
-		fields: [...CommonFields],
-		constraints: [],
-		visible: new Set<SearchField>(["language", "tag"]),
-		defaultFacets: ["language", "tag"],
-		sorts: CommonSorts,
-		maxPageSize: 50,
-		maxResultWindow: SearchMaxResultWindow,
-	},
-	zone: {
-		id: "zone",
-		categories: ["units"],
-		fields: [...CommonFields],
-		constraints: [{ field: "kind", operator: "equals", value: "zone" }],
-		visible: new Set<SearchField>(["language", "tag"]),
-		defaultFacets: ["language", "tag"],
-		sorts: CommonSorts,
-		maxPageSize: 50,
-		maxResultWindow: SearchMaxResultWindow,
-	},
-} as const satisfies Record<SearchTemplateId, SearchTemplateDefinition>;
+/** The only Search capability ceiling. Filter documents can only narrow it. */
+const GlobalVisibleFields = new Set<SearchField>([
+	"category",
+	"kind",
+	"language",
+	"content-rating",
+	"tag",
+]);
+const GlobalFacetFields = new Set<SearchField>([
+	"category",
+	"kind",
+	"language",
+	"content-rating",
+	"tag",
+]);
+
+export interface SearchEndpointPolicy {
+	readonly fields?: readonly SearchField[];
+	readonly sorts?: readonly SearchSort[];
+	readonly defaultSorts?: Readonly<{
+		search: Readonly<{ emptyQuery: SearchSort; textQuery: SearchSort }>;
+		feed: Readonly<{ emptyQuery: SearchSort; textQuery: SearchSort }>;
+	}>;
+	readonly facets?: readonly SearchField[];
+}
 
 const StaticOptions: Partial<Record<SearchField, readonly SearchScalar[]>> = {
 	category: SearchCategories,
@@ -255,172 +130,125 @@ function optionSourceFor(
 	return definition.facet === "none" ? undefined : { kind: "facet" };
 }
 
-function templateFor(document: SearchDocument): SearchTemplateDefinition {
-	if (document.template.version !== 1)
-		throw new InvalidSearch("Unsupported Search template version");
-	return TemplateDefinitions[document.template.id];
-}
-
-function validateTemplateDocument(document: SearchDocument): SearchTemplateDefinition {
-	const template = templateFor(document);
-	if (!document.categories.every((category) => template.categories.includes(category)))
-		throw new InvalidSearch("Search document category is outside its template");
-	const allowedFields = new Set<SearchField>(template.fields);
-	const fieldCounts = new Map<SearchField, number>();
-	for (const control of document.controls) {
-		if (!allowedFields.has(control.field))
-			throw new InvalidSearch(`Search control ${control.key} is outside its template`);
-		fieldCounts.set(control.field, (fieldCounts.get(control.field) ?? 0) + 1);
-		if (control.field !== "tag" && (fieldCounts.get(control.field) ?? 0) > 1)
-			throw new InvalidSearch(`Search field ${control.field} cannot be repeated`);
-		const definition = fieldDefinition(control.field);
-		if (!definition.categories.some((category) => document.categories.includes(category)))
-			throw new InvalidSearch(`Search control ${control.key} does not apply to its categories`);
-		if (control.optionPolicy && control.optionPolicy.kind !== "all")
-			for (const value of control.optionPolicy.values) validateScalar(control.field, value);
-	}
-	for (const configuration of [document.sort.search, document.sort.feed]) {
-		if (!configuration.options.every((sort) => template.sorts.includes(sort)))
-			throw new InvalidSearch("Search document sort is outside its template");
-		for (const sort of configuration.options)
-			if (
-				template.id !== "progress" &&
-				document.categories.some((category) => !supportsCurrentSearchSort(category, sort))
-			)
-				throw new InvalidSearch(`Search sort ${sort} does not apply to every document category`);
-	}
-	if (document.results.maxPageSize > template.maxPageSize)
-		throw new InvalidSearch("Search document page size exceeds its template");
-	if (document.results.maxResultWindow > template.maxResultWindow)
-		throw new InvalidSearch("Search document result window exceeds its template");
-	return template;
-}
-
-function defaultControl(
+function validateControlOptionPolicy(
 	field: SearchField,
-	template: SearchTemplateDefinition,
-): SearchDocumentControl {
+	optionPolicy: SearchOptionPolicy | undefined,
+): void {
+	if (!optionPolicy || optionPolicy.kind === "all") return;
+	for (const value of optionPolicy.values) validateScalar(field, value);
+}
+
+function resolveControl(
+	field: SearchField,
+	key: string,
+	categories: readonly (typeof SearchCategories)[number][],
+	override: NonNullable<FilterDocument["controls"]>[number] | undefined,
+): ResolvedSearchControl {
+	const definition = fieldDefinition(field);
+	validateControlOptionPolicy(field, override?.optionPolicy);
+	const optionSource = optionSourceFor(field, definition, categories);
 	return {
-		key: field,
+		key,
 		field,
-		enabled: true,
-		disclosure: template.visible.has(field) ? "visible" : "hidden",
+		component: componentFor(definition),
+		operators: [...definition.operators],
+		...(optionSource ? { optionSource } : {}),
+		...(override?.optionPolicy ? { optionPolicy: override.optionPolicy } : {}),
+		...(override?.labelUnitId ? { labelUnitId: override.labelUnitId } : {}),
+		...(override?.required === undefined ? {} : { required: override.required }),
+		enabled: override?.enabled ?? true,
+		disclosure: override?.disclosure ?? (GlobalVisibleFields.has(field) ? "visible" : "hidden"),
 	};
 }
 
-export function createDefaultSearchDocument(templateId: SearchTemplateId): SearchDocument {
-	const template = TemplateDefinitions[templateId];
-	const controls = template.fields.map((field) => defaultControl(field, template));
-	const visibleControls = controls
-		.filter((control) => control.disclosure === "visible")
-		.map((control) => control.key);
-	const hiddenControls = controls
-		.filter((control) => control.disclosure === "hidden")
-		.map((control) => control.key);
-	return parseSearchDocument({
-		version: 1,
-		template: { id: template.id, version: 1 },
-		categories: [...template.categories],
-		query: { enabled: true },
-		defaults: [],
-		controls,
-		sections: [
-			...(visibleControls.length
-				? [
-						{
-							key: "filters" as const,
-							disclosure: "visible" as const,
-							controls: visibleControls,
-						},
-					]
-				: []),
-			...(hiddenControls.length
-				? [
-						{
-							key: "more-filters" as const,
-							disclosure: "hidden" as const,
-							controls: hiddenControls,
-						},
-					]
-				: []),
-		],
-		sort: {
-			search: {
-				defaults:
-					templateId === "progress"
-						? {
-								emptyQuery: "progressLastSeenAt:desc",
-								textQuery: "progressLastSeenAt:desc",
-							}
-						: { emptyQuery: "best", textQuery: "relevance" },
-				options: [...template.sorts],
-			},
-			feed: {
-				defaults:
-					templateId === "progress"
-						? {
-								emptyQuery: "progressLastSeenAt:desc",
-								textQuery: "progressLastSeenAt:desc",
-							}
-						: { emptyQuery: "best", textQuery: "best" },
-				options: template.sorts.filter((sort) => sort !== "relevance"),
-			},
-		},
-		results: {
-			pageSize: 20,
-			maxPageSize: template.maxPageSize,
-			maxResultWindow: template.maxResultWindow,
-			facets: template.defaultFacets.filter((field) =>
-				controls.some((control) => control.key === field),
-			),
-		},
-	});
+function genericSortsFor(categories: readonly (typeof SearchCategories)[number][]): SearchSort[] {
+	return SearchSortValues.filter(
+		(sort) =>
+			(CommonSorts as readonly SearchSort[]).includes(sort) ||
+			categories.every((category) => supportsCurrentSearchSort(category, sort)),
+	);
 }
 
-export function resolveSearchDocument(
+function resolveSortConfiguration(
+	categories: readonly (typeof SearchCategories)[number][],
+	policy: SearchEndpointPolicy,
+) {
+	const searchOptions = [...(policy.sorts ?? genericSortsFor(categories))];
+	const feedOptions = searchOptions.filter((sort) => sort !== "relevance");
+	const defaults =
+		policy.defaultSorts ??
+		({
+			search: { emptyQuery: "best", textQuery: "relevance" },
+			feed: { emptyQuery: "best", textQuery: "best" },
+		} as const);
+	const configurations: readonly [
+		SearchFeatureSurface,
+		readonly SearchSort[],
+		Readonly<{ emptyQuery: SearchSort; textQuery: SearchSort }>,
+	][] = [
+		["search", searchOptions, defaults.search],
+		["feed", feedOptions, defaults.feed],
+	];
+	for (const [surface, options, fallback] of configurations) {
+		if (!options.length) throw new InvalidSearch(`Search ${surface} has no available sort`);
+		if (!options.includes(fallback.emptyQuery) || !options.includes(fallback.textQuery))
+			throw new InvalidSearch(`Search ${surface} fallback is outside the endpoint policy`);
+		if (fallback.emptyQuery === "relevance")
+			throw new InvalidSearch(`Search ${surface} cannot use relevance without a query`);
+	}
+	return {
+		search: { defaults: { ...defaults.search }, options: searchOptions },
+		feed: { defaults: { ...defaults.feed }, options: feedOptions },
+	};
+}
+
+/** Resolves a sparse Filter document against the one server-owned capability ceiling. */
+export function resolveFilterDocument(
 	documentValue: unknown,
 	hasDevelopmentPreviewAccess: boolean,
+	policy: SearchEndpointPolicy = {},
 ) {
-	const parsed = parseSearchDocument(documentValue);
-	const document = hasDevelopmentPreviewAccess
-		? parsed
-		: {
-				...parsed,
-				categories: parsed.categories.filter((category) => category !== "tag-structures"),
-			};
-	validateTemplateDocument(document);
-	const sectionByControl = new Map(
-		document.sections.flatMap((section) =>
-			section.controls.map((controlKey) => [controlKey, section.key] as const),
-		),
+	let filterDocument: FilterDocument;
+	try {
+		filterDocument = parseFilterDocument(documentValue);
+	} catch (cause) {
+		throw new InvalidSearch(cause instanceof Error ? cause.message : "Invalid Filter document");
+	}
+	const configuredCategories = filterDocument.categories ?? SearchCategories;
+	const categories = configuredCategories.filter(
+		(category) => hasDevelopmentPreviewAccess || category !== "tag-structures",
 	);
-	const controls = document.controls
-		.filter((control) => control.enabled)
-		.map((control): ResolvedSearchControl => {
-			const definition = fieldDefinition(control.field);
-			return {
-				key: control.key,
-				field: control.field,
-				component: componentFor(definition),
-				operators: [...definition.operators],
-				...(optionSourceFor(control.field, definition, document.categories)
-					? {
-							optionSource: optionSourceFor(control.field, definition, document.categories),
-						}
-					: {}),
-				...(control.optionPolicy ? { optionPolicy: control.optionPolicy } : {}),
-				...(control.labelUnitId ? { labelUnitId: control.labelUnitId } : {}),
-				...(control.required === undefined ? {} : { required: control.required }),
-				disclosure: control.disclosure,
-				...(sectionByControl.has(control.key)
-					? { sectionKey: sectionByControl.get(control.key) }
-					: {}),
-			};
-		});
-	const controlByKey = new Map(controls.map((control) => [control.key, control]));
-	for (const value of document.defaults)
-		validateControlValue(value, controlByKey.get(value.controlKey));
-	return { document, controls } as const;
+	if (!categories.length) throw new InvalidSearch("Filter document has no available categories");
+	const allowedFields = policy.fields ?? SearchFieldValues;
+	const overrideByKey = new Map(
+		(filterDocument.controls ?? []).map((control) => [control.key, control] as const),
+	);
+	const controls: ResolvedSearchControl[] = [];
+	for (const field of allowedFields) {
+		const definition = fieldDefinition(field);
+		if (!definition.categories.some((category) => categories.includes(category))) continue;
+		controls.push(resolveControl(field, field, categories, overrideByKey.get(field)));
+		overrideByKey.delete(field);
+	}
+	for (const override of overrideByKey.values()) {
+		const field = filterDocumentControlField(override);
+		if (override.key === field)
+			throw new InvalidSearch(`Filter control ${override.key} is unavailable for its categories`);
+		if (!allowedFields.includes(field))
+			throw new InvalidSearch(`Filter control ${override.key} is outside the endpoint policy`);
+		const definition = fieldDefinition(field);
+		if (!definition.categories.some((category) => categories.includes(category)))
+			throw new InvalidSearch(`Filter control ${override.key} does not apply to its categories`);
+		controls.push(resolveControl(field, override.key, categories, override));
+	}
+	if (controls.length > 50) throw new InvalidSearch("Filter document exceeds 50 resolved controls");
+	return {
+		filterDocument,
+		categories,
+		query: { enabled: true, required: false },
+		sort: resolveSortConfiguration(categories, policy),
+		controls,
+	} as const;
 }
 
 function sameScalar(left: SearchScalar, right: SearchScalar): boolean {
@@ -605,6 +433,8 @@ export interface CompiledSearchFeature<
 export interface SearchExecutionPolicy {
 	readonly sortProfile: SearchFeatureSurface;
 	readonly pageBudget: "per-category" | "global";
+	/** Optional endpoint-specific narrowing; it can never add fields or sorts to the global enums. */
+	readonly endpoint?: SearchEndpointPolicy;
 }
 
 export interface GroupedSearchExecutionPolicy extends SearchExecutionPolicy {
@@ -636,58 +466,44 @@ export function compileSearchFeatureInput(
 	} catch (cause) {
 		throw new InvalidSearch(cause instanceof Error ? cause.message : "Invalid Search input");
 	}
-	if (!hasDevelopmentPreviewAccess)
-		input = {
-			...input,
-			document: {
-				...input.document,
-				categories: input.document.categories.filter((category) => category !== "tag-structures"),
-			},
-		};
-	if (input.document.categories.length === 0)
-		throw new InvalidSearch("Search document has no available categories");
-	const template = validateTemplateDocument(input.document);
-	const resolved = resolveSearchDocument(input.document, true);
-	const controls = new Map(resolved.controls.map((control) => [control.key, control]));
+	const resolved = resolveFilterDocument(
+		input.filterDocument,
+		hasDevelopmentPreviewAccess,
+		execution.endpoint,
+	);
+	const enabledControls = resolved.controls.filter((control) => control.enabled);
+	const controls = new Map(enabledControls.map((control) => [control.key, control]));
 	const query = unitFilterSearchQuery(input.state.filter);
-	if (!input.document.query.enabled && query)
-		throw new InvalidSearch("This Search document does not accept a query");
-	if (input.document.query.required && !query.trim())
-		throw new InvalidSearch("Search query is required");
-	const sortConfiguration = searchSortConfiguration(input.document, execution.sortProfile);
+	if (!resolved.query.enabled && query)
+		throw new InvalidSearch("This Filter does not accept a query");
+	if (resolved.query.required && !query.trim()) throw new InvalidSearch("Search query is required");
+	const sortConfiguration: SearchSortConfiguration = resolved.sort[execution.sortProfile];
 	const sort = input.state.sort ?? defaultSearchSort(sortConfiguration, query);
 	if (!sortConfiguration.options.includes(sort))
 		throw new InvalidSearch(`Search sort ${sort} is unavailable`);
 	if (!isSearchSortAvailable(sort, query))
 		throw new InvalidSearch(`Search sort ${sort} requires a text query`);
-	const requestedPageSize = input.state.pageSize ?? input.document.results.pageSize;
-	if (requestedPageSize > input.document.results.maxPageSize)
-		throw new InvalidSearch("Search page size exceeds the configured maximum");
-	const baseline = new Map<string, SearchControlValue>();
-	for (const value of input.document.defaults) baseline.set(value.controlKey, value);
-	// Link and Tag injections are composed constraints, not editable defaults.
-	// Keeping them separate prevents state from replacing them and permits
-	// repeated Tag injections to mean an intersection. Server-established
-	// contexts, including Realm scope, are composed separately below.
+	const requestedPageSize = input.state.pageSize ?? 20;
+	if (requestedPageSize > WorkPolicy.search.maxPageSize)
+		throw new InvalidSearch("Search page size exceeds the server maximum");
+	// Link and Tag injections are composed constraints. Keeping them separate
+	// permits repeated Tag injections to mean an intersection. Empty Filter
+	// documents contribute no baseline expression.
 	const injected = input.injections.map((injection) => injection.value);
 	const used = new Set<string>();
 	let searchExpression = input.state.expression
 		? unwrapExpression(input.state.expression, controls, used)
 		: undefined;
-	const defaults = [
-		...injected,
-		...[...baseline.values()].filter((value) => !used.has(value.controlKey)),
-	];
-	for (const value of defaults) {
+	for (const value of injected) {
 		validateControlValue(value, controls.get(value.controlKey));
 		used.add(value.controlKey);
 	}
-	if (defaults.length)
+	if (injected.length)
 		searchExpression = combineSearchExpressions("all", [
-			...defaults.map((value) => normalizeFilterExpression(value.filter)),
+			...injected.map((value) => normalizeFilterExpression(value.filter)),
 			...(searchExpression ? [searchExpression] : []),
 		]);
-	for (const control of resolved.controls)
+	for (const control of enabledControls)
 		if (control.required && !used.has(control.key))
 			throw new InvalidSearch(`Required Search control ${control.key} is missing`);
 
@@ -699,38 +515,48 @@ export function compileSearchFeatureInput(
 		]);
 	if (searchExpression) assertSearchExpression(searchExpression, { maxDepth: 6, maxNodes: 100 });
 	const categories = searchExpression
-		? input.document.categories.filter(
+		? resolved.categories.filter(
 				(category) =>
 					specializeSearchExpressionForCategory(category, searchExpression).state !== "match-none",
 			)
-		: input.document.categories;
+		: resolved.categories;
 	if (!categories.length) throw new InvalidSearch("Search filters exclude every category");
 	// Per-category Search gives every result group this budget. A Search Feed
 	// applies it once to its single globally ordered candidate stream.
 	const pageSize = requestedPageSize;
-	const facets = input.document.results.facets.map((controlKey) => {
-		const control = controls.get(controlKey);
-		if (!control) throw new InvalidSearch(`Facet control ${controlKey} is unavailable`);
-		if (fieldDefinition(control.field).facet === "none")
-			throw new InvalidSearch(`Search control ${controlKey} cannot provide facets`);
-		return {
-			controlKey,
+	const endpointFacetFields = execution.endpoint?.facets
+		? new Set(execution.endpoint.facets)
+		: undefined;
+	const facets = enabledControls
+		.filter(
+			(control) =>
+				(endpointFacetFields
+					? endpointFacetFields.has(control.field)
+					: control.disclosure === "visible" && GlobalFacetFields.has(control.field)) &&
+				fieldDefinition(control.field).facet !== "none",
+		)
+		.map((control) => ({
+			controlKey: control.key,
 			field: control.field,
 			...(control.optionPolicy ? { optionPolicy: control.optionPolicy } : {}),
-		};
-	});
-	const domainFilter = combineUnitPredicates([input.document.filter, input.state.filter?.where]);
+		}));
+	if (facets.length > WorkPolicy.search.maxFacets)
+		throw new InvalidSearch("Filter document exceeds the server facet maximum");
+	const domainFilter = combineUnitPredicates([
+		input.filterDocument.where,
+		input.state.filter?.where,
+	]);
 	const request: CompiledSearchRequest = {
 		pageBudget: execution.pageBudget,
 		scope: context.scope,
 		categories,
 		query,
-		constraints: [...template.constraints, ...context.contextFilters],
+		constraints: [...context.contextFilters],
 		searchExpression,
 		...(domainFilter ? { domainFilter } : {}),
 		sort,
 		pageSize,
-		maxResultWindow: input.document.results.maxResultWindow,
+		maxResultWindow: WorkPolicy.search.maxResultWindow,
 		cursor: input.state.cursor,
 		facets: [...new Set(facets.map((facet) => facet.field))],
 	};
@@ -741,9 +567,9 @@ export function compileSearchFeatureInput(
 			injections: input.injections.length,
 		}),
 		...(context.enforcedZoneId ? { enforcedZoneId: context.enforcedZoneId } : {}),
-		inputIdentity: `${execution.sortProfile}:${execution.pageBudget}:${canonicalSearchFeatureInput(
-			withoutCursor(input),
-		)}`,
+		inputIdentity: `${execution.sortProfile}:${execution.pageBudget}:${JSON.stringify(
+			execution.endpoint ?? {},
+		)}:${canonicalSearchFeatureInput(withoutCursor(input))}`,
 		facetBindings: facets,
 	};
 }

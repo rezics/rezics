@@ -142,10 +142,10 @@ describe("database bootstrap manifest", () => {
 				{ language: "en", title: "Zones" },
 			],
 		]);
-		expect(OfficialZoneManifest.map((value) => value.boundaryDocument)).toEqual([
+		expect(OfficialZoneManifest.map((value) => value.filterDocument)).toEqual([
 			expect.objectContaining({
 				categories: ["units", "posts", "reviews", "collections"],
-				filter: {
+				where: {
 					any: [
 						{ kind: { in: ["book"] } },
 						{ post: { is: { subject: { is: { kind: { in: ["book"] } } } } } },
@@ -159,13 +159,13 @@ describe("database bootstrap manifest", () => {
 			}),
 			expect.objectContaining({
 				categories: ["units", "posts", "reviews", "collections"],
-				filter: expect.objectContaining({
+				where: expect.objectContaining({
 					any: expect.arrayContaining([{ kind: { in: ["media"] } }]),
 				}),
 			}),
 			expect.objectContaining({
 				categories: ["units", "posts", "reviews", "collections"],
-				filter: expect.objectContaining({
+				where: expect.objectContaining({
 					any: expect.arrayContaining([{ kind: { in: ["software"] } }]),
 				}),
 			}),
@@ -174,7 +174,7 @@ describe("database bootstrap manifest", () => {
 			}),
 			expect.objectContaining({
 				categories: ["units"],
-				filter: { kind: { in: ["zone"] } },
+				where: { kind: { in: ["zone"] } },
 			}),
 		]);
 		for (const value of OfficialZoneManifest) {
@@ -199,13 +199,6 @@ describe("database bootstrap manifest", () => {
 				icon: { provider: "font-awesome", prefix: "fas", name },
 			})),
 		);
-		expect(OfficialZoneManifest.map((value) => value.searchTemplate)).toEqual([
-			"book",
-			"media",
-			"software",
-			"realm",
-			"zone",
-		]);
 	});
 
 	it("uses the REZICS title without making the official Realm a Zone default", () => {

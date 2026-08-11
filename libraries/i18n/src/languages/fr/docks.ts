@@ -55,12 +55,8 @@ export default {
 		orientation: "Orientation",
 		style: "Style",
 		sources: {
-			global: "Modèle global",
-			book: "Modèle de livre",
-			media: "Modèle de média",
-			software: "Modèle de logiciel",
-			realm: `Modèle de ${realmTerms.inline}`,
-			zone: `Modèle d’${zoneTerms.inline}`,
+			global: "Filtre global",
+			inline: "Filtre intégré",
 		},
 		appearances: {
 			inline: "Dans le texte",

@@ -55,12 +55,8 @@ export default {
 		orientation: "Orientation",
 		style: "Style",
 		sources: {
-			global: "Global template",
-			book: "Book template",
-			media: "Media template",
-			software: "Software template",
-			realm: `${realmTerms.label} template`,
-			zone: `${zoneTerms.label} template`,
+			global: "Global filter",
+			inline: "Inline filter",
 		},
 		appearances: {
 			inline: "Inline",

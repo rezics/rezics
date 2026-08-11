@@ -55,12 +55,8 @@ export default {
 		orientation: "방향",
 		style: "스타일",
 		sources: {
-			global: "전역 템플릿",
-			book: "책 템플릿",
-			media: "미디어 템플릿",
-			software: "소프트웨어 템플릿",
-			realm: `${realmTerms.label} 템플릿`,
-			zone: `${zoneTerms.label} 템플릿`,
+			global: "전역 필터",
+			inline: "인라인 필터",
 		},
 		appearances: {
 			inline: "인라인",

@@ -242,8 +242,6 @@ export default {
 	RealmTagVotingDisabled: `该${realmTerms.inline}尚未开启标签投票。`,
 	RealmTagContextRequired: `该${realmTerms.inline}必须先为此标签创建当前可见的正式说明。`,
 	RealmTagSelfReferenceForbidden: "不能将标签应用到该标签本身。",
-	SearchDocumentRevisionConflict: "搜索设置已变更，请重新加载后再保存。",
-	ZoneSearchFeatureNotFound: `此${zoneTerms.inline}尚未激活搜索功能。`,
 	SharedSearchQueryNotFound: "找不到这个共享搜索查询。",
 	InvalidTagStructure: `这个${tagStructureTerms.inline}无效。`,
 	TagStructureNotFound: `找不到这个${tagStructureTerms.inline}。`,

@@ -44,6 +44,7 @@ preflight() {
 }
 
 migrate() {
+	yarn exec tsx scripts/migrate-filter-documents.ts --yes
 	PGOPTIONS="-c lock_timeout=5s -c statement_timeout=30min -c idle_in_transaction_session_timeout=60s" \
 		yarn exec atlas migrate apply --env main --url "${DATABASE_ADMIN_URL}" \
 		--lock-timeout 5s

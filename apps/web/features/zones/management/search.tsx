@@ -1,20 +1,20 @@
 "use client";
 
 import {
-	parseSearchDocument,
+	createFilterDocument,
+	parseFilterDocument,
 	parseSearchFeatureDefinition,
-	type EmbeddableSearchTemplateId,
-	type SearchDocument,
-	type SearchFeatureDefinition,
+	SearchCategoryValues,
+	type FilterDocument,
+	type FilterDocumentControl,
+	type ResolvedSearchControl,
 } from "@rezics/filter";
 import {
-	getApiSearchZonesByZoneIdFeatureQueryKey,
-	getApiSearchZonesByZoneIdFeatureRevisionsQueryKey,
-	useGetApiSearchFeaturesByTemplate,
-	useGetApiSearchZonesByZoneIdFeature,
-	useGetApiSearchZonesByZoneIdFeatureRevisions,
-	usePostApiSearchZonesByZoneIdFeatureRestore,
-	usePutApiSearchZonesByZoneIdFeature,
+	getApiSearchZonesByZoneIdFilterQueryKey,
+	getApiZonesByZoneIdQueryKey,
+	postApiSearchFilterDefinition,
+	useGetApiSearchZonesByZoneIdFilter,
+	usePatchApiZonesByZoneId,
 } from "@rezics/openapi-tanstack-query";
 import {
 	Badge,
@@ -22,10 +22,9 @@ import {
 	Card,
 	CardContent,
 	Checkbox,
+	ChoiceSelect,
 	Field,
-	FieldGroup,
 	FieldLabel,
-	Input,
 	ManagementWorkspaceSectionHeader,
 	NativeSelect,
 	NativeSelectOption,
@@ -34,135 +33,83 @@ import {
 	UnitMultiPicker,
 	UnitPicker,
 } from "@rezics/ui";
-import { useQueryClient } from "@tanstack/react-query";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { zoneManagementHref } from "./model";
 import { useZoneManagement } from "./workspace";
 
-const Templates: readonly EmbeddableSearchTemplateId[] = [
-	"global",
-	"book",
-	"media",
-	"software",
-	"realm",
-	"zone",
-];
+type ControlChange = Partial<
+	Pick<
+		FilterDocumentControl,
+		"enabled" | "disclosure" | "labelUnitId" | "optionPolicy" | "required"
+	>
+>;
 
-function toEmbeddableSearchTemplateId(value: string): EmbeddableSearchTemplateId {
-	return Templates.find((candidate) => candidate === value) ?? "global";
-}
-
-function hasStatus(error: unknown, status: number): boolean {
-	return (
-		typeof error === "object" && error !== null && "status" in error && error.status === status
-	);
+function withoutControlOverrides(document: FilterDocument): FilterDocument {
+	const { controls: _controls, ...filterDocument } = document;
+	return createFilterDocument(filterDocument);
 }
 
 function reviseControl(
-	document: SearchDocument,
-	template: SearchDocument,
-	controlKey: string,
-	change: { readonly enabled?: boolean; readonly disclosure?: "visible" | "hidden" },
-): SearchDocument {
-	const current = document.controls.find((control) => control.key === controlKey);
-	if (!current) return document;
-	const enabled = change.enabled ?? current.enabled;
-	const controls = document.controls.map((control) =>
-		control.key === controlKey ? { ...control, ...change } : control,
+	document: FilterDocument,
+	control: ResolvedSearchControl,
+	baseline: ResolvedSearchControl,
+	change: ControlChange,
+): FilterDocument {
+	const controls = document.controls ?? [];
+	const current = controls.find((candidate) => candidate.key === control.key);
+	const candidate = { ...current, ...change };
+	const custom = control.key !== control.field;
+	const required = candidate.enabled === false ? undefined : candidate.required;
+	const next: FilterDocumentControl = {
+		key: control.key,
+		...(custom ? { field: control.field } : {}),
+		...(candidate.enabled === false ? { enabled: false } : {}),
+		...(candidate.disclosure && candidate.disclosure !== baseline.disclosure
+			? { disclosure: candidate.disclosure }
+			: {}),
+		...(candidate.labelUnitId ? { labelUnitId: candidate.labelUnitId } : {}),
+		...(candidate.optionPolicy && candidate.optionPolicy.kind !== "all"
+			? { optionPolicy: candidate.optionPolicy }
+			: {}),
+		...(required ? { required: true } : {}),
+	};
+	const meaningful = custom || Object.keys(next).length > 1;
+	const revised = controls.flatMap((item) =>
+		item.key === control.key ? (meaningful ? [next] : []) : [item],
 	);
-	let sections = document.sections.map((section) => ({
-		...section,
-		controls: [...section.controls],
-	}));
-	if (!enabled) {
-		sections = sections.map((section) => ({
-			...section,
-			controls: section.controls.filter((key) => key !== controlKey),
-		}));
-	} else if (!sections.some((section) => section.controls.includes(controlKey))) {
-		const templateSection = template.sections.find((section) =>
-			section.controls.includes(controlKey),
-		);
-		if (templateSection) {
-			const target = sections.find((section) => section.key === templateSection.key);
-			if (target) target.controls.push(controlKey);
-			else sections.push({ ...templateSection, controls: [controlKey] });
-		}
-	}
-	const facets = enabled
-		? template.results.facets.includes(controlKey) && !document.results.facets.includes(controlKey)
-			? [...document.results.facets, controlKey]
-			: document.results.facets
-		: document.results.facets.filter((key) => key !== controlKey);
-	return parseSearchDocument({
-		...document,
-		controls,
-		sections: sections.filter((section) => section.controls.length > 0),
-		defaults: enabled
-			? document.defaults
-			: document.defaults.filter((value) => value.controlKey !== controlKey),
-		results: { ...document.results, facets },
-	});
+	if (!current && meaningful) revised.push(next);
+	const { controls: _controls, ...base } = document;
+	return createFilterDocument(revised.length ? { ...base, controls: revised } : base);
 }
 
-function addTagControl(document: SearchDocument, template: SearchDocument): SearchDocument {
-	const source = template.controls.find((control) => control.field === "tag");
-	if (!source) return document;
+function addTagControl(document: FilterDocument, controls: readonly ResolvedSearchControl[]) {
 	let suffix = 2;
-	while (document.controls.some((control) => control.key === `tag-${suffix}`)) suffix += 1;
-	const key = `tag-${suffix}`;
-	const visibleSection = document.sections.find((section) => section.disclosure === "visible");
-	return parseSearchDocument({
+	while (controls.some((control) => control.key === `tag-${suffix}`)) suffix += 1;
+	return createFilterDocument({
 		...document,
-		controls: [...document.controls, { ...source, key, disclosure: "visible" }],
-		sections: visibleSection
-			? document.sections.map((section) =>
-					section.key === visibleSection.key
-						? { ...section, controls: [...section.controls, key] }
-						: section,
-				)
-			: [...document.sections, { key: "filters", disclosure: "visible" as const, controls: [key] }],
-		results: { ...document.results, facets: [...document.results.facets, key] },
+		controls: [...(document.controls ?? []), { key: `tag-${suffix}`, field: "tag" }],
 	});
 }
 
-function removeControl(document: SearchDocument, controlKey: string): SearchDocument {
-	return parseSearchDocument({
-		...document,
-		controls: document.controls.filter((control) => control.key !== controlKey),
-		sections: document.sections
-			.map((section) => ({
-				...section,
-				controls: section.controls.filter((key) => key !== controlKey),
-			}))
-			.filter((section) => section.controls.length > 0),
-		defaults: document.defaults.filter((value) => value.controlKey !== controlKey),
-		results: {
-			...document.results,
-			facets: document.results.facets.filter((key) => key !== controlKey),
-		},
-	});
+function removeCustomControl(document: FilterDocument, key: string) {
+	const controls = (document.controls ?? []).filter((control) => control.key !== key);
+	const { controls: _controls, ...base } = document;
+	return createFilterDocument(controls.length ? { ...base, controls } : base);
 }
 
 export function ZoneSearchManagement() {
 	const { zoneId } = useZoneManagement();
-	const { t } = useTranslation(["errors", "search", "ui", "zones"]);
-	const feature = useGetApiSearchZonesByZoneIdFeature({ path: { zoneId } });
-	if (feature.isPending) return <QueryPending />;
-	const notConfigured = feature.isError && hasStatus(feature.error, 404);
-	if (feature.isError && !notConfigured)
-		return <QueryFailure error={feature.error} retry={() => void feature.refetch()} />;
-	const existing = feature.data
-		? {
-				...feature.data,
-				definition: parseSearchFeatureDefinition(feature.data.definition),
-			}
-		: undefined;
+	const { t } = useTranslation(["search", "ui", "zones"]);
+	const query = useGetApiSearchZonesByZoneIdFilter({ path: { zoneId } });
+	if (query.isPending) return <QueryPending />;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	const definition = parseSearchFeatureDefinition(query.data);
 	return (
 		<section>
 			<ManagementWorkspaceSectionHeader
@@ -172,327 +119,209 @@ export function ZoneSearchManagement() {
 				link={Link}
 				title={t.zones.management.sections.search.label}
 			/>
-			{notConfigured ? (
-				<p className="mb-4 text-sm text-muted-foreground">
-					{t.zones.management.search.notConfigured}
-				</p>
-			) : null}
-			<SearchDocumentEditor existing={existing} zoneId={zoneId} />
+			<FilterDocumentEditor initialDocument={definition.filterDocument} zoneId={zoneId} />
 		</section>
 	);
 }
 
-function SearchDocumentEditor({
-	existing,
+function FilterDocumentEditor({
+	initialDocument,
 	zoneId,
 }: {
-	readonly existing?: {
-		readonly enabled: boolean;
-		readonly latestRevisionId: string;
-		readonly definition: SearchFeatureDefinition;
-	};
+	readonly initialDocument: FilterDocument;
 	readonly zoneId: string;
 }) {
-	const { t, locale } = useTranslation(["errors", "search", "ui", "zones"]);
+	const { t } = useTranslation(["search", "ui", "zones"]);
 	const queryClient = useQueryClient();
-	const [templateId, setTemplateId] = useState<EmbeddableSearchTemplateId>(
-		toEmbeddableSearchTemplateId(existing?.definition.document.template.id ?? "global"),
-	);
-	const [draft, setDraft] = useState<SearchDocument | undefined>(existing?.definition.document);
-	const [message, setMessage] = useState("");
-	const template = useGetApiSearchFeaturesByTemplate({ path: { template: templateId } });
-	const history = useGetApiSearchZonesByZoneIdFeatureRevisions(
-		{ path: { zoneId } },
-		{ query: { enabled: Boolean(existing) } },
-	);
+	const [draft, setDraft] = useState(() => parseFilterDocument(initialDocument));
+	const baselineDocument = useMemo(() => withoutControlOverrides(draft), [draft]);
+	const definitionQuery = useQuery({
+		queryKey: ["filter-document-definition", draft],
+		queryFn: async () => (await postApiSearchFilterDefinition({ body: draft })).data,
+	});
+	const baselineQuery = useQuery({
+		queryKey: ["filter-document-baseline", baselineDocument],
+		queryFn: async () => (await postApiSearchFilterDefinition({ body: baselineDocument })).data,
+	});
 	const invalidate = async () => {
 		await Promise.all([
 			queryClient.invalidateQueries({
-				queryKey: getApiSearchZonesByZoneIdFeatureQueryKey({ path: { zoneId } }),
+				queryKey: getApiZonesByZoneIdQueryKey({ path: { zoneId } }),
 			}),
 			queryClient.invalidateQueries({
-				queryKey: getApiSearchZonesByZoneIdFeatureRevisionsQueryKey({ path: { zoneId } }),
+				queryKey: getApiSearchZonesByZoneIdFilterQueryKey({ path: { zoneId } }),
 			}),
 		]);
 	};
-	const save = usePutApiSearchZonesByZoneIdFeature({ mutation: { onSuccess: invalidate } });
-	const restore = usePostApiSearchZonesByZoneIdFeatureRestore({
-		mutation: { onSuccess: invalidate },
-	});
-	if (template.isPending) return <QueryPending />;
-	if (template.isError)
-		return <QueryFailure error={template.error} retry={() => void template.refetch()} />;
-	const templateDefinition = parseSearchFeatureDefinition(template.data);
-	const document = draft?.template.id === templateId ? draft : templateDefinition.document;
-	const resolvedControls =
-		existing?.definition.document.template.id === templateId
-			? existing.definition.controls
-			: templateDefinition.controls;
-	const controlMetadata = new Map(resolvedControls.map((control) => [control.key, control]));
+	const save = usePatchApiZonesByZoneId({ mutation: { onSuccess: invalidate } });
+	if (definitionQuery.isPending || baselineQuery.isPending) return <QueryPending />;
+	if (definitionQuery.isError)
+		return (
+			<QueryFailure error={definitionQuery.error} retry={() => void definitionQuery.refetch()} />
+		);
+	if (baselineQuery.isError)
+		return <QueryFailure error={baselineQuery.error} retry={() => void baselineQuery.refetch()} />;
+	const definition = parseSearchFeatureDefinition(definitionQuery.data);
+	const baseline = parseSearchFeatureDefinition(baselineQuery.data);
+	const baselineByField = new Map(baseline.controls.map((control) => [control.field, control]));
+	const updateControl = (control: ResolvedSearchControl, change: ControlChange) => {
+		const defaultControl = baselineByField.get(control.field);
+		if (!defaultControl) return;
+		setDraft((current) => reviseControl(current, control, defaultControl, change));
+	};
 
 	return (
-		<div className="grid gap-6">
-			<Card appearance="outlined">
-				<CardContent className="grid gap-6 p-6">
-					<FieldGroup className="grid gap-4">
-						<Field>
-							<FieldLabel>{t.zones.management.search.template}</FieldLabel>
-							<NativeSelect
-								onChange={(event) => {
-									const next = Templates.find(
-										(candidate) => candidate === event.currentTarget.value,
-									);
-									if (next) {
-										setTemplateId(next);
-										setDraft(undefined);
-									}
-								}}
-								value={templateId}
-							>
-								{Templates.map((candidate) => (
-									<NativeSelectOption key={candidate} value={candidate}>
-										{t.zones.management.search.templates[candidate]}
-									</NativeSelectOption>
-								))}
-							</NativeSelect>
-						</Field>
-					</FieldGroup>
-					<div>
-						<div className="flex flex-wrap items-center justify-between gap-3">
-							<h2 className="font-semibold text-lg">{t.zones.management.search.controls}</h2>
-							<Button
-								onClick={() => setDraft(addTagControl(document, templateDefinition.document))}
-								size="sm"
-								type="button"
-								variant="outline"
-							>
-								<Plus aria-hidden /> {t.zones.management.search.addTagControl}
-							</Button>
-						</div>
-						<div className="mt-3 grid gap-3">
-							{document.controls.map((control) => {
-								const metadata = controlMetadata.get(control.key);
-								const custom = !templateDefinition.document.controls.some(
-									(candidate) => candidate.key === control.key,
+		<Card appearance="outlined">
+			<CardContent className="grid gap-6 p-6">
+				<Field>
+					<FieldLabel>{t.zones.create.categories}</FieldLabel>
+					<ChoiceSelect
+						appearance="field"
+						ariaLabel={t.zones.create.categories}
+						className="h-10 w-full"
+						multiple
+						onValueChange={(categories) =>
+							setDraft((current) => {
+								const { categories: _categories, ...base } = current;
+								return createFilterDocument(
+									categories.length ? { ...base, categories: [...categories] } : base,
 								);
-								return (
-									<div
-										className="grid gap-3 rounded-lg border border-border-weak p-4 sm:grid-cols-[minmax(0,1fr)_auto_minmax(10rem,auto)] sm:items-end"
-										key={control.key}
-									>
-										<div className="min-w-0">
-											<div className="flex flex-wrap items-center gap-2">
-												<strong>{t.search.fields[control.field]}</strong>
-												{metadata?.component ? (
-													<Badge variant="secondary">{metadata.component}</Badge>
-												) : null}
-											</div>
-											<code className="text-xs text-muted-foreground">{control.key}</code>
-										</div>
-										<label className="flex items-center gap-2 text-sm">
-											<Checkbox
-												checked={control.enabled}
-												onCheckedChange={(details) =>
-													setDraft(
-														reviseControl(document, templateDefinition.document, control.key, {
-															enabled: details.checked === true,
-														}),
-													)
-												}
-											/>
-											{t.zones.management.search.controlEnabled}
-										</label>
-										<Field>
-											<FieldLabel>{t.zones.management.search.disclosure}</FieldLabel>
-											<NativeSelect
-												disabled={!control.enabled}
-												onChange={(event) =>
-													setDraft(
-														reviseControl(document, templateDefinition.document, control.key, {
-															disclosure:
-																event.currentTarget.value === "hidden" ? "hidden" : "visible",
-														}),
-													)
-												}
-												value={control.disclosure}
-											>
-												<NativeSelectOption value="visible">
-													{t.zones.management.search.visible}
-												</NativeSelectOption>
-												<NativeSelectOption value="hidden">
-													{t.zones.management.search.hidden}
-												</NativeSelectOption>
-											</NativeSelect>
-										</Field>
-										<Field className="sm:col-span-2">
-											<FieldLabel>{t.zones.management.search.labelUnitId}</FieldLabel>
-											<UnitPicker
-												ariaLabel={t.zones.management.search.labelUnitId}
-												onValueChange={(labelUnitId) => {
-													setDraft({
-														...document,
-														controls: document.controls.map((candidate) =>
-															candidate.key === control.key
-																? {
-																		...candidate,
-																		...(labelUnitId
-																			? { labelUnitId }
-																			: {
-																					labelUnitId: undefined,
-																				}),
-																	}
-																: candidate,
-														),
-													});
-												}}
-												placeholder={t.ui.pickerPlaceholders.unit}
-												value={control.labelUnitId ?? ""}
-											/>
-										</Field>
-										{control.field === "tag" ? (
-											<Field>
-												<FieldLabel>{t.zones.management.search.allowedTagIds}</FieldLabel>
-												<UnitMultiPicker
-													ariaLabel={t.zones.management.search.allowedTagIds}
-													index="tags"
-													kinds={["tag"]}
-													onValuesChange={(values) => {
-														setDraft({
-															...document,
-															controls: document.controls.map((candidate) =>
-																candidate.key === control.key
-																	? {
-																			...candidate,
-																			optionPolicy: values.length
-																				? {
-																						kind: "include",
-																						values: [...values],
-																					}
-																				: {
-																						kind: "all",
-																					},
-																		}
-																	: candidate,
-															),
-														});
-													}}
-													removeLabel={t.zones.management.search.removeAllowedTag}
-													placeholder={t.ui.pickerPlaceholders.tag}
-													values={
-														control.optionPolicy?.kind === "include"
-															? control.optionPolicy.values.filter(
-																	(value): value is string => typeof value === "string",
-																)
-															: []
-													}
-												/>
-											</Field>
-										) : null}
-										{custom ? (
-											<Button
-												onClick={() => setDraft(removeControl(document, control.key))}
-												size="sm"
-												type="button"
-												variant="quiet"
-											>
-												<Trash2 aria-hidden /> {t.zones.management.search.removeTagControl}
-											</Button>
-										) : null}
-									</div>
-								);
-							})}
-						</div>
+							})
+						}
+						options={SearchCategoryValues.map((value) => ({
+							value,
+							label: t.search.categoryOptions[value],
+						}))}
+						placeholder={t.zones.create.categoriesPlaceholder}
+						value={draft.categories ?? []}
+					/>
+				</Field>
+				<div>
+					<div className="flex flex-wrap items-center justify-between gap-3">
+						<h2 className="font-semibold text-lg">{t.zones.management.search.controls}</h2>
+						<Button
+							onClick={() => setDraft(addTagControl(draft, definition.controls))}
+							size="sm"
+							type="button"
+							variant="outline"
+						>
+							<Plus aria-hidden /> {t.zones.management.search.addTagControl}
+						</Button>
 					</div>
-					<Field>
-						<FieldLabel>{t.zones.management.search.message}</FieldLabel>
-						<Input
-							maxLength={500}
-							onChange={(event) => setMessage(event.currentTarget.value)}
-							placeholder={t.zones.management.search.messagePlaceholder}
-							value={message}
-						/>
-					</Field>
-					<Button
-						isLoading={save.isPending}
-						onClick={async () => {
-							try {
-								const saved = await save.mutateAsync({
-									path: { zoneId },
-									body: {
-										document,
-										...(existing ? { baseRevisionId: existing.latestRevisionId } : {}),
-										...(message.trim() ? { message: message.trim() } : {}),
-									},
-								});
-								setDraft(parseSearchFeatureDefinition(saved.definition).document);
-								setMessage("");
-							} catch {
-								// The typed mutation state supplies the visible request failure.
-							}
-						}}
-						type="button"
-					>
-						{t.zones.management.search.save}
-					</Button>
-					<RequestFailure error={save.error} fallback={t.ui.retryLater} />
-				</CardContent>
-			</Card>
-			{existing ? (
-				<Card appearance="outlined">
-					<CardContent className="p-6">
-						<h2 className="font-semibold text-lg">{t.zones.management.search.history}</h2>
-						{history.isPending ? <QueryPending /> : null}
-						{history.isError ? (
-							<QueryFailure error={history.error} retry={() => void history.refetch()} />
-						) : null}
-						{history.data ? (
-							<ul className="mt-4 grid gap-3">
-								{history.data.items.map((revision) => (
-									<li
-										className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border-weak p-3"
-										key={revision.id}
-									>
-										<div>
-											<strong>{t.zones.management.search.revisionKinds[revision.kind]}</strong>
-											<p className="text-sm text-muted-foreground">
-												{revision.editSummary ??
-													new Intl.DateTimeFormat(locale.target, {
-														dateStyle: "medium",
-														timeStyle: "short",
-													}).format(new Date(revision.createdAt))}
-											</p>
+					<div className="mt-3 grid gap-3">
+						{definition.controls.map((control) => {
+							const custom = control.key !== control.field;
+							return (
+								<div
+									className="grid gap-3 rounded-lg border border-border-weak p-4 sm:grid-cols-[minmax(0,1fr)_auto_minmax(10rem,auto)] sm:items-end"
+									key={control.key}
+								>
+									<div className="min-w-0">
+										<div className="flex flex-wrap items-center gap-2">
+											<strong>{t.search.fields[control.field]}</strong>
+											<Badge variant="secondary">{control.component}</Badge>
 										</div>
-										<Button
-											disabled={revision.id === existing.latestRevisionId}
-											isLoading={restore.isPending}
-											onClick={async () => {
-												try {
-													const restored = await restore.mutateAsync({
-														path: { zoneId },
-														body: {
-															sourceRevisionId: revision.id,
-															baseRevisionId: existing.latestRevisionId,
-														},
-													});
-													setDraft(parseSearchFeatureDefinition(restored.definition).document);
-												} catch {
-													// The typed mutation state supplies the visible request failure.
+										<code className="text-xs text-muted-foreground">{control.key}</code>
+									</div>
+									<label className="flex items-center gap-2 text-sm">
+										<Checkbox
+											checked={control.enabled}
+											onCheckedChange={(details) =>
+												updateControl(control, { enabled: details.checked === true })
+											}
+										/>
+										{t.zones.management.search.controlEnabled}
+									</label>
+									<Field>
+										<FieldLabel>{t.zones.management.search.disclosure}</FieldLabel>
+										<NativeSelect
+											disabled={!control.enabled}
+											onChange={(event) =>
+												updateControl(control, {
+													disclosure: event.currentTarget.value === "hidden" ? "hidden" : "visible",
+												})
+											}
+											value={control.disclosure}
+										>
+											<NativeSelectOption value="visible">
+												{t.zones.management.search.visible}
+											</NativeSelectOption>
+											<NativeSelectOption value="hidden">
+												{t.zones.management.search.hidden}
+											</NativeSelectOption>
+										</NativeSelect>
+									</Field>
+									<Field className="sm:col-span-2">
+										<FieldLabel>{t.zones.management.search.labelUnitId}</FieldLabel>
+										<UnitPicker
+											ariaLabel={t.zones.management.search.labelUnitId}
+											onValueChange={(labelUnitId) =>
+												updateControl(control, { labelUnitId: labelUnitId || undefined })
+											}
+											placeholder={t.ui.pickerPlaceholders.unit}
+											value={control.labelUnitId ?? ""}
+										/>
+									</Field>
+									{control.field === "tag" ? (
+										<Field>
+											<FieldLabel>{t.zones.management.search.allowedTagIds}</FieldLabel>
+											<UnitMultiPicker
+												ariaLabel={t.zones.management.search.allowedTagIds}
+												index="tags"
+												kinds={["tag"]}
+												onValuesChange={(values) =>
+													updateControl(control, {
+														optionPolicy: values.length
+															? { kind: "include", values: [...values] }
+															: undefined,
+													})
 												}
-											}}
+												removeLabel={t.zones.management.search.removeAllowedTag}
+												placeholder={t.ui.pickerPlaceholders.tag}
+												values={
+													control.optionPolicy?.kind === "include"
+														? control.optionPolicy.values.flatMap((value) =>
+																typeof value === "string" ? [value] : [],
+															)
+														: []
+												}
+											/>
+										</Field>
+									) : null}
+									{custom ? (
+										<Button
+											onClick={() => setDraft(removeCustomControl(draft, control.key))}
 											size="sm"
 											type="button"
-											variant="outline"
+											variant="quiet"
 										>
-											{t.zones.management.search.restore}
+											<Trash2 aria-hidden /> {t.zones.management.search.removeTagControl}
 										</Button>
-									</li>
-								))}
-							</ul>
-						) : null}
-						<RequestFailure error={restore.error} fallback={t.ui.retryLater} />
-					</CardContent>
-				</Card>
-			) : null}
-		</div>
+									) : null}
+								</div>
+							);
+						})}
+					</div>
+				</div>
+				<Button
+					isLoading={save.isPending}
+					onClick={async () => {
+						try {
+							const saved = await save.mutateAsync({
+								path: { zoneId },
+								body: { filterDocument: draft },
+							});
+							setDraft(parseFilterDocument(saved.filterDocument));
+						} catch {
+							// The typed mutation state supplies the visible request failure.
+						}
+					}}
+					type="button"
+				>
+					{t.zones.management.search.save}
+				</Button>
+				<RequestFailure error={save.error} fallback={t.ui.retryLater} />
+			</CardContent>
+		</Card>
 	);
 }

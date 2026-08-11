@@ -1,8 +1,9 @@
 "use client";
 
-import { parseSearchFeatureDefinition, type EmbeddableSearchTemplateId } from "@rezics/filter";
-import { useGetApiSearchFeaturesByTemplate } from "@rezics/openapi-tanstack-query";
+import { parseSearchFeatureDefinition, type FilterDocument } from "@rezics/filter";
+import { postApiSearchFilterDefinition } from "@rezics/openapi-tanstack-query";
 import { QueryFailure, QueryPending } from "@rezics/ui";
+import { useQuery } from "@tanstack/react-query";
 import { useId, useState } from "react";
 
 import {
@@ -15,6 +16,8 @@ import type { FeedDisplayContext } from "@/features/content-feed/model/feed-disp
 import type { FeedPaginationMode } from "@/features/content-feed/model/feed-continuation";
 import { SearchFeature, type SearchFeatureRequest } from "@/features/search/search-feature";
 
+const EmptyFilterDocument = {} satisfies FilterDocument;
+
 export function SearchFeatureFeed({
 	"aria-label": ariaLabel,
 	displayContext,
@@ -23,7 +26,7 @@ export function SearchFeatureFeed({
 	initialRequest,
 	pagination = "load-more",
 	requestedRealmId,
-	template,
+	filterDocument = EmptyFilterDocument,
 }: {
 	readonly "aria-label"?: string;
 	readonly displayContext?: FeedDisplayContext;
@@ -32,16 +35,17 @@ export function SearchFeatureFeed({
 	readonly initialRequest: SearchFeedRequest;
 	readonly pagination?: FeedPaginationMode;
 	readonly requestedRealmId?: string;
-	readonly template: EmbeddableSearchTemplateId;
+	readonly filterDocument?: FilterDocument;
 }) {
 	const id = useId();
-	const definitionQuery = useGetApiSearchFeaturesByTemplate({
-		path: { template },
+	const definitionQuery = useQuery({
+		queryKey: ["filter-definition", filterDocument],
+		queryFn: async () => (await postApiSearchFilterDefinition({ body: filterDocument })).data,
 	});
 	const [activeRequest, setActiveRequest] = useState(initialRequest);
 	const results = useSearchFeedQuery({
 		request: activeRequest,
-		source: { kind: "template", template },
+		source: { kind: "filter", filterDocument },
 		surface: "feed",
 	});
 

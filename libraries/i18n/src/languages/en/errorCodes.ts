@@ -265,8 +265,6 @@ export default {
 	RealmTagVotingDisabled: `Tag voting is not enabled for this ${realmTerms.label}.`,
 	RealmTagContextRequired: `This ${realmTerms.label} must first provide a currently visible formal explanation for the Tag.`,
 	RealmTagSelfReferenceForbidden: "A Tag cannot be applied to itself.",
-	SearchDocumentRevisionConflict: "The search configuration changed. Reload it before saving.",
-	ZoneSearchFeatureNotFound: `This ${zoneTerms.inline} has no enabled search feature.`,
 	SharedSearchQueryNotFound: "This shared search query could not be found.",
 	InvalidTagStructure: `This ${tagStructureTerms.inline} is invalid.`,
 	TagStructureNotFound: `This ${tagStructureTerms.inline} could not be found.`,

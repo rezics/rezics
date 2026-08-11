@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import type { DatabaseExecutor } from "../database";
 import { sharedSearchQuery } from "../database/schema";
 import { InvalidSearch } from "./errors";
-import { compileSearchFeatureInput, createDefaultSearchDocument } from "./templates";
+import { compileSearchFeatureInput } from "./filter-document";
 
 export interface SharedSearchQueryProjection {
 	readonly id: string;
@@ -13,7 +13,7 @@ export interface SharedSearchQueryProjection {
 }
 
 /**
- * Proves both the stored document shape and the template-specific control
+ * Proves both the stored Filter document shape and its executable control
  * semantics. Presentation selections never participate in this proof.
  */
 function validateDocument(value: unknown): SharedSearchQueryDocument {
@@ -27,7 +27,7 @@ function validateDocument(value: unknown): SharedSearchQueryDocument {
 	}
 	compileSearchFeatureInput(
 		{
-			document: createDefaultSearchDocument(document.template),
+			filterDocument: document.filterDocument,
 			contexts: [],
 			injections: [],
 			state: document.state,

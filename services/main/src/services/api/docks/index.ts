@@ -23,6 +23,7 @@ import {
 	unitDock,
 } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
+import { assertExecutableBlockFilterDocuments } from "../../search/block-filter-documents";
 import { NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
 import {
@@ -74,6 +75,7 @@ function ensureSupported(owner: Awaited<ReturnType<typeof getDockOwner>>, kind: 
 function ensureDocument(value: unknown): asserts value is typeof DockDocument.static {
 	try {
 		assertDockDocument(value);
+		assertExecutableBlockFilterDocuments(value, true);
 	} catch {
 		throw new DockDocumentInvalid();
 	}

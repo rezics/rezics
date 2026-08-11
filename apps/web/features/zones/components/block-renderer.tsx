@@ -12,21 +12,21 @@ import {
 	createSimpleFeedFilter,
 	mergeUnitFilter,
 	parseSearchFeatureDefinition,
+	type FilterDocument,
 	type SearchControlValue,
 	type SearchFeatureSurface,
-	type SearchTemplateId,
 	type SimpleFeedContentKind,
 } from "@rezics/filter";
 import {
 	postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute,
+	postApiSearchFilterDefinition,
 	useGetApiCollectionsByCollectionIdItems,
-	useGetApiSearchFeaturesByTemplate,
-	useGetApiSearchZonesByZoneIdFeature,
+	useGetApiSearchZonesByZoneIdFilter,
 	usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute,
 	usePostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecute,
 	type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200,
 } from "@rezics/openapi-tanstack-query";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
 	IdentityAvatar,
 	Menu,
@@ -575,19 +575,29 @@ function ZoneSearchFeature({
 	appearance?: "feed" | "page";
 	surface: SearchFeatureSurface;
 	initialValues?: readonly SearchControlValue[];
-	renderToolbarFilters?: (template: SearchTemplateId) => ReactNode;
+	renderToolbarFilters?: (filterDocument: FilterDocument) => ReactNode;
 }) {
 	const { t } = useTranslation("zones");
 	const context = useZoneBlocks();
-	const template = useGetApiSearchFeaturesByTemplate(
-		{ path: { template: feature.kind === "template" ? feature.template : "global" } },
-		{ query: { enabled: feature.kind === "template" } },
-	);
-	const zone = useGetApiSearchZonesByZoneIdFeature(
+	const embeddedFilterDocument =
+		feature.kind === "global"
+			? ({} satisfies FilterDocument)
+			: feature.kind === "inline"
+				? feature.filterDocument
+				: undefined;
+	const embedded = useQuery({
+		queryKey: ["zone-block-filter-definition", embeddedFilterDocument],
+		enabled: embeddedFilterDocument !== undefined,
+		queryFn: async () => {
+			if (!embeddedFilterDocument) throw new Error("Filter document is unavailable");
+			return (await postApiSearchFilterDefinition({ body: embeddedFilterDocument })).data;
+		},
+	});
+	const zone = useGetApiSearchZonesByZoneIdFilter(
 		{ path: { zoneId: context.projection.zone.id } },
 		{ query: { enabled: feature.kind === "zone" } },
 	);
-	const rawDefinition = feature.kind === "template" ? template.data : zone.data?.definition;
+	const rawDefinition = feature.kind === "zone" ? zone.data : embedded.data;
 	const initialState = useMemo<SearchFeatureRequest["state"] | undefined>(() => {
 		if (!rawDefinition) return undefined;
 		const expression =
@@ -610,9 +620,9 @@ function ZoneSearchFeature({
 			state: initialState,
 		});
 	}, [autoExecute, initialState, onExecute]);
-	if (feature.kind === "template" ? template.isError : zone.isError)
+	if (feature.kind === "zone" ? zone.isError : embedded.isError)
 		return <p className="my-4 text-destructive text-sm">{t.searchFailed}</p>;
-	if ((feature.kind === "template" ? template.isPending : zone.isPending) || !rawDefinition)
+	if ((feature.kind === "zone" ? zone.isPending : embedded.isPending) || !rawDefinition)
 		return null;
 	const definition = parseSearchFeatureDefinition(rawDefinition);
 	return (
@@ -630,7 +640,7 @@ function ZoneSearchFeature({
 				typeof value === "string" ? (context.units.get(value)?.title ?? undefined) : undefined
 			}
 			surface={surface}
-			toolbarFilters={renderToolbarFilters?.(definition.document.template.id)}
+			toolbarFilters={renderToolbarFilters?.(definition.filterDocument)}
 		>
 			{results ? (
 				<SearchResults
@@ -801,8 +811,8 @@ function ZoneFeedBlock({
 				presentation={{ results: "list", showResultCount: presentation.showResultCount }}
 				surface="feed"
 				total={page?.total}
-				renderToolbarFilters={(template) => {
-					const options = workZoneFeedContentKinds(template);
+				renderToolbarFilters={(filterDocument) => {
+					const options = workZoneFeedContentKinds(filterDocument);
 					return options ? (
 						<FeedContentSelector
 							onValueChange={selectContentKinds}

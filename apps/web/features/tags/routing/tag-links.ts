@@ -1,4 +1,3 @@
-import type { EmbeddableSearchTemplateId } from "@rezics/filter";
 import { createLoader, createSerializer, parseAsString, parseAsStringLiteral } from "nuqs/server";
 
 import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
@@ -28,10 +27,6 @@ const unitTagsRouteParsers = {
 };
 const loadUnitTagsRouteSearchParams = createLoader(unitTagsRouteParsers);
 const serializeUnitTagsRouteSearchParams = createSerializer(unitTagsRouteParsers);
-
-function tagSearchTemplate(type: UnitDetailUnitType): EmbeddableSearchTemplateId {
-	return type === "series" ? "global" : type;
-}
 
 export interface UnitTagsRouteState {
 	readonly context: UnitTagVoteContextAddress;
@@ -71,10 +66,9 @@ export function unitTagsHref(
 	})}`;
 }
 
-export function tagSearchHref(type: UnitDetailUnitType, tags: readonly TagSearchTarget[]): string {
+export function tagSearchHref(_type: UnitDetailUnitType, tags: readonly TagSearchTarget[]): string {
 	const unique = new Map(tags.map((tag) => [tag.tagId, tag]));
 	return `/search${serializeSearch({
-		template: tagSearchTemplate(type),
 		tag: [...unique.values()].map(({ tagId }) => tagId),
 		tagLabel: [...unique.values()].map(({ label }) => label),
 	})}`;

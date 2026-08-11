@@ -19,8 +19,12 @@ vi.mock("@rezics/filter", () => ({
 }));
 
 vi.mock("@rezics/openapi-tanstack-query", () => ({
-	useGetApiSearchFeaturesByTemplate: () => ({
-		data: { document: {}, controls: [] },
+	postApiSearchFilterDefinition: vi.fn(),
+}));
+
+vi.mock("@tanstack/react-query", () => ({
+	useQuery: () => ({
+		data: { filterDocument: {}, controls: [] },
 		error: undefined,
 		isError: false,
 		isPending: false,
@@ -96,7 +100,6 @@ describe("SearchFeatureFeed", () => {
 					],
 					state: { sort: "createdAt:desc" },
 				}}
-				template="global"
 			/>,
 		);
 
@@ -109,7 +112,7 @@ describe("SearchFeatureFeed", () => {
 				request: expect.objectContaining({
 					state: { sort: "createdAt:desc" },
 				}),
-				source: { kind: "template", template: "global" },
+				source: { kind: "filter", filterDocument: {} },
 				surface: "feed",
 			}),
 		);

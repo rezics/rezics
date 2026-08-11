@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { FilterSchemaModels } from "@rezics/filter";
+import { FilterSchemaModels, SearchFeatureDefinition } from "@rezics/filter";
 import { and, asc, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import Elysia from "elysia";
 
@@ -64,7 +64,11 @@ import {
 	progressEntryOrderBy,
 	resolveProgressEntrySortAt,
 } from "./pagination";
-import { createProgressSearchCursor, resolveProgressSearchRequest } from "./search";
+import {
+	createProgressSearchCursor,
+	getProgressSearchDefinition,
+	resolveProgressSearchRequest,
+} from "./search";
 
 function toProgressUnitType(value: string): "book" | "media" | "software" {
 	if (value === "book" || value === "media" || value === "software") return value;
@@ -231,6 +235,14 @@ export default new Elysia({ prefix: "/progress" })
 			detail: { summary: "List current profile progress", tags: ["Progress"] },
 		},
 	)
+	.get("/search/filter", () => getProgressSearchDefinition(), {
+		access: "interaction:read",
+		response: { [StatusCodes.OK]: SearchFeatureDefinition },
+		detail: {
+			summary: "Get the Progress Filter definition",
+			tags: ["Progress", "Search"],
+		},
+	})
 	.post(
 		"/search",
 		async ({ profile, body }) => {

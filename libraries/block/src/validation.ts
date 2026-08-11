@@ -1,5 +1,11 @@
 import { type Static, type TSchema } from "@sinclair/typebox";
 import { Check } from "@sinclair/typebox/value";
+import {
+	assertFilterDocument,
+	collectUnitPredicateReferenceIds,
+	filterDocumentControlField,
+	type FilterDocument,
+} from "@rezics/filter";
 import { normalizePortableText } from "@rezics/portable-text";
 
 import {
@@ -299,6 +305,18 @@ function childBlockGroups(block: Block): readonly BlockChildGroup[] {
 	return [];
 }
 
+function inlineFilterDocument(block: Block): FilterDocument | undefined {
+	if (block._type === "feed" && block.feature.kind === "inline")
+		return block.feature.filterDocument;
+	if (
+		block._type === "unit-list" &&
+		block.source.kind === "search" &&
+		block.source.feature.kind === "inline"
+	)
+		return block.source.feature.filterDocument;
+	return undefined;
+}
+
 /** Visit every Block once, including custom Blocks embedded in Portable Text. */
 export function walkBlockTree(
 	document: BlockContainerDocument,
@@ -334,6 +352,8 @@ function assertBlockTree(value: BlockContainerDocument, policy: BlockHostPolicy)
 			new Set(block.source.unitIds).size !== block.source.unitIds.length
 		)
 			throw new TypeError("Unit List Block contains duplicate Unit references");
+		const filterDocument = inlineFilterDocument(block);
+		if (filterDocument) assertFilterDocument(filterDocument);
 		for (const group of childBlockGroups(block)) {
 			if (!group.containerKey) continue;
 			if (keys.has(group.containerKey))
@@ -424,6 +444,22 @@ export function collectBlockReferences(document: BlockContainerDocument): BlockR
 		}
 		if (block._type === "callout" && block.labelUnitId) unitIds.add(block.labelUnitId);
 		if (block._type === "tabs") for (const tab of block.tabs) unitIds.add(tab.labelUnitId);
+		const filterDocument = inlineFilterDocument(block);
+		if (filterDocument) {
+			assertFilterDocument(filterDocument);
+			if (filterDocument.where)
+				for (const id of collectUnitPredicateReferenceIds(filterDocument.where)) unitIds.add(id);
+			for (const control of filterDocument.controls ?? []) {
+				if (control.labelUnitId) unitIds.add(control.labelUnitId);
+				if (
+					filterDocumentControlField(control) === "tag" &&
+					control.optionPolicy &&
+					control.optionPolicy.kind !== "all"
+				)
+					for (const value of control.optionPolicy.values)
+						if (typeof value === "string") unitIds.add(value);
+			}
+		}
 	});
 	return { unitIds, wikiPostIds, assetIds, navigationIds, externalUrls };
 }

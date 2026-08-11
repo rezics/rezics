@@ -1,11 +1,9 @@
 "use client";
 
-import { createZoneBoundaryDocument, createZoneThemeDocument } from "@rezics/block";
-import { SearchCategoryValues, type SearchCategory } from "@rezics/filter";
+import { createZoneThemeDocument } from "@rezics/block";
+import { createFilterDocument, SearchCategoryValues, type SearchCategory } from "@rezics/filter";
 import { usePostApiZones } from "@rezics/openapi-tanstack-query";
 import {
-	Alert,
-	AlertDescription,
 	Button,
 	ChoiceSelect,
 	Field,
@@ -32,8 +30,7 @@ function ZoneCreateContent() {
 	const { t } = useTranslation(["search", "zones"]);
 	const router = useApplicationRouter();
 	const create = usePostApiZones();
-	const [categories, setCategories] = useState<readonly SearchCategory[]>(["units"]);
-	const [categoriesInvalid, setCategoriesInvalid] = useState(false);
+	const [categories, setCategories] = useState<readonly SearchCategory[]>([]);
 	const [accent, setAccent] = useState("#2563eb");
 	const [colorScheme, setColorScheme] = useState<"system" | "light" | "dark">("system");
 	const [density, setDensity] = useState<"comfortable" | "compact">("comfortable");
@@ -48,10 +45,6 @@ function ZoneCreateContent() {
 		const title = String(data.get("title") ?? "").trim();
 		const summary = String(data.get("summary") ?? "").trim();
 		if (!title) return;
-		if (categories.length === 0) {
-			setCategoriesInvalid(true);
-			return;
-		}
 		const contentLanguage = await language.resolveLanguage(formElement);
 		create.mutate(
 			{
@@ -61,7 +54,9 @@ function ZoneCreateContent() {
 						title,
 						...(summary ? { summary } : {}),
 					},
-					boundaryDocument: createZoneBoundaryDocument([...categories]),
+					filterDocument: createFilterDocument(
+						categories.length ? { categories: [...categories] } : {},
+					),
 					themeDocument: createZoneThemeDocument({
 						accent,
 						colorScheme,
@@ -99,17 +94,14 @@ function ZoneCreateContent() {
 							<Textarea maxLength={2000} name="summary" />
 						</Field>
 						<DraftContentLanguageField controller={language.controller} />
-						<Field invalid={categoriesInvalid} required>
+						<Field>
 							<FieldLabel>{t.zones.create.categories}</FieldLabel>
 							<ChoiceSelect
 								appearance="field"
 								ariaLabel={t.zones.create.categories}
 								className="h-10 w-full"
 								multiple
-								onValueChange={(value) => {
-									setCategories(value);
-									if (value.length > 0) setCategoriesInvalid(false);
-								}}
+								onValueChange={setCategories}
 								options={SearchCategoryValues.map((value) => ({
 									value,
 									label: t.search.categoryOptions[value],
@@ -117,11 +109,6 @@ function ZoneCreateContent() {
 								placeholder={t.zones.create.categoriesPlaceholder}
 								value={categories}
 							/>
-							{categoriesInvalid ? (
-								<Alert variant="destructive">
-									<AlertDescription>{t.zones.create.categoriesRequired}</AlertDescription>
-								</Alert>
-							) : null}
 						</Field>
 						<Field>
 							<FieldLabel>{t.zones.create.accent}</FieldLabel>

@@ -10,7 +10,7 @@ export function ProfileSearchPage() {
 			contexts={[{ kind: "profile", profileId: profile.id }]}
 			embedded
 			id={`profile-${profile.id}-search`}
-			source={{ kind: "template", template: "global" }}
+			source={{ kind: "filter", filterDocument: {} }}
 		/>
 	);
 }

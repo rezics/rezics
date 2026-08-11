@@ -257,8 +257,6 @@ export default {
 	RealmTagVotingDisabled: `이 ${realmTerms.label}에서는 태그 투표가 켜져 있지 않습니다.`,
 	RealmTagContextRequired: `이 ${realmTerms.label}에는 현재 볼 수 있는 태그의 공식 설명이 먼저 필요합니다.`,
 	RealmTagSelfReferenceForbidden: "태그를 자기 자신에게 적용할 수 없습니다.",
-	SearchDocumentRevisionConflict: "검색 구성이 변경되었습니다. 저장하기 전에 다시 로드하십시오.",
-	ZoneSearchFeatureNotFound: `이 ${zoneTerms.inline}에는 활성화된 검색 기능이 없습니다.`,
 	SharedSearchQueryNotFound: "이 공유 검색 쿼리를 찾을 수 없습니다.",
 	InvalidTagStructure: `이 ${tagStructureTerms.inline}는 유효하지 않습니다.`,
 	TagStructureNotFound: `이 ${tagStructureTerms.inline}를 찾을 수 없습니다.`,

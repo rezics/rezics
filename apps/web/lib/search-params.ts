@@ -1,6 +1,5 @@
 import { ContentLanguageValues } from "@rezics/i18n";
 import { PostApiSearchByIndexIndex } from "@rezics/openapi-tanstack-query";
-import { EmbeddableSearchTemplateIdValues } from "@rezics/filter";
 import { parseAsArrayOf, parseAsString, parseAsStringLiteral } from "nuqs/server";
 import { AuthPortalModes } from "./auth-redirect";
 
@@ -14,9 +13,6 @@ export const urlStateOptions = {
 export const SearchScopes = Object.values(PostApiSearchByIndexIndex);
 export const searchParamsParsers = {
 	q: parseAsString.withDefault("").withOptions({ ...urlStateOptions, history: "push" }),
-	template: parseAsStringLiteral(EmbeddableSearchTemplateIdValues)
-		.withDefault("global")
-		.withOptions(urlStateOptions),
 	tag: parseAsArrayOf(parseAsString).withDefault([]).withOptions(urlStateOptions),
 	tagLabel: parseAsArrayOf(parseAsString).withDefault([]).withOptions(urlStateOptions),
 	scope: parseAsArrayOf(parseAsStringLiteral(SearchScopes))

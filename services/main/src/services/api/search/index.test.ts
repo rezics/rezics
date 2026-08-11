@@ -1,4 +1,4 @@
-import type { Block } from "@rezics/block";
+import type { Block, SearchFeatureSource } from "@rezics/block";
 import { describe, expect, it } from "vitest";
 
 import { findFeedBlock, findSearchFeatureSource } from "./block-source";
@@ -11,7 +11,10 @@ function document(block: Block) {
 
 describe("Zone Block Search source resolution", () => {
 	it("resolves search-backed UnitList through one trusted path", () => {
-		const feature = { kind: "template", template: "book" } as const;
+		const feature: SearchFeatureSource = {
+			kind: "inline",
+			filterDocument: { categories: ["units"], where: { kind: { in: ["book"] } } },
+		};
 		expect(
 			findSearchFeatureSource(
 				document({
@@ -27,7 +30,7 @@ describe("Zone Block Search source resolution", () => {
 	});
 
 	it("resolves only a Feed block through the Feed execution path", () => {
-		const feature = { kind: "template", template: "book" } as const;
+		const feature = { kind: "global" } as const;
 		expect(
 			findFeedBlock(
 				document({

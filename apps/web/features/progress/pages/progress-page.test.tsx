@@ -55,8 +55,42 @@ vi.mock("@rezics/openapi-tanstack-query", async (importOriginal) => {
 	const actual = await importOriginal<typeof import("@rezics/openapi-tanstack-query")>();
 	return {
 		...actual,
-		useGetApiSearchFeaturesByTemplate: () => ({
-			data: { document: {}, controls: [] },
+		useGetApiProgressSearchFilter: () => ({
+			data: {
+				filterDocument: {
+					categories: ["units"],
+					where: { kind: { in: ["book", "media", "software"] } },
+				},
+				categories: ["units"],
+				query: { enabled: true, required: false },
+				sort: {
+					search: {
+						defaults: {
+							emptyQuery: "progressLastSeenAt:desc",
+							textQuery: "progressLastSeenAt:desc",
+						},
+						options: [
+							"progressLastSeenAt:desc",
+							"progressLastSeenAt:asc",
+							"title:asc",
+							"title:desc",
+						],
+					},
+					feed: {
+						defaults: {
+							emptyQuery: "progressLastSeenAt:desc",
+							textQuery: "progressLastSeenAt:desc",
+						},
+						options: [
+							"progressLastSeenAt:desc",
+							"progressLastSeenAt:asc",
+							"title:asc",
+							"title:desc",
+						],
+					},
+				},
+				controls: [],
+			},
 			error: undefined,
 			isError: false,
 			isPending: false,

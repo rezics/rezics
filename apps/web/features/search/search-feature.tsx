@@ -18,7 +18,6 @@ import {
 	type SearchSort,
 	type SharedSearchQuerySelection,
 	type SharedSearchQueryState,
-	searchSortConfiguration,
 	unitFilterSearchQuery,
 	withUnitFilterSearch,
 } from "@rezics/filter";
@@ -293,7 +292,7 @@ export function SearchFeature({
 	const preferences = usePresentationPreferences();
 	const { t: nav } = useTranslation("nav");
 	const { t: units } = useTranslation("units");
-	const { document, controls } = definition;
+	const controls = definition.controls.filter((control) => control.enabled);
 	const initial = useMemo(() => classifyInitialState(initialState), [initialState]);
 	const initialSelectionByValue = useMemo(
 		() =>
@@ -366,7 +365,7 @@ export function SearchFeature({
 	const [filterOpen, setFilterOpen] = useState(false);
 	const [sortOverride, setSortOverride] = useState<SearchSort | undefined>(initialState?.sort);
 	const [shareState, setShareState] = useState<"idle" | "copied" | "failed">("idle");
-	const sortConfiguration = searchSortConfiguration(document, surface);
+	const sortConfiguration = definition.sort[surface];
 	const availableSorts = sortConfiguration.options.filter((value) =>
 		isSearchSortAvailable(value, query),
 	);
@@ -608,7 +607,7 @@ export function SearchFeature({
 				</div>
 			) : null}
 
-			{document.query.enabled ? (
+			{definition.query.enabled ? (
 				<div className="flex items-stretch gap-2">
 					<div className="relative min-w-0 flex-1">
 						<Search
@@ -622,7 +621,7 @@ export function SearchFeature({
 							maxLength={500}
 							onChange={(event) => setQuery(event.currentTarget.value)}
 							placeholder={queryPlaceholder ?? t.site.placeholder}
-							required={document.query.required}
+							required={definition.query.required}
 							type="search"
 							value={query}
 						/>

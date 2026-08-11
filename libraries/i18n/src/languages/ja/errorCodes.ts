@@ -265,8 +265,6 @@ export default {
 	RealmTagVotingDisabled: `この ${realmTerms.label} ではタグ投票が有効になっていません。`,
 	RealmTagContextRequired: `この ${realmTerms.label} には、現在表示できるタグの正式な説明が先に必要です。`,
 	RealmTagSelfReferenceForbidden: "タグをそのタグ自身に適用することはできません。",
-	SearchDocumentRevisionConflict: "検索設定が変更されました。保存する前にリロードしてください。",
-	ZoneSearchFeatureNotFound: `この ${zoneTerms.inline} には有効な検索機能がありません。`,
 	SharedSearchQueryNotFound: "この共有検索クエリが見つかりませんでした。",
 	InvalidTagStructure: `この ${tagStructureTerms.inline} は無効です。`,
 	TagStructureNotFound: `この ${tagStructureTerms.inline} は見つかりませんでした。`,

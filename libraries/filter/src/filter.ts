@@ -77,9 +77,10 @@ export function canonicalUnitFilter(value: unknown): string {
 export function combineUnitPredicates(
 	predicates: readonly (UnitPredicateValue | undefined)[],
 ): UnitPredicateValue | undefined {
-	const present = predicates.filter(
-		(predicate): predicate is UnitPredicateValue => predicate !== undefined,
-	);
+	const unique = new Map<string, UnitPredicateValue>();
+	for (const predicate of predicates)
+		if (predicate !== undefined) unique.set(canonicalUnitPredicate(predicate), predicate);
+	const present = [...unique.values()];
 	if (!present.length) return undefined;
 	const combined: UnitPredicateValue = present.length === 1 ? present[0]! : { all: present };
 	assertUnitPredicate(combined);

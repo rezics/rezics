@@ -14,11 +14,12 @@ import {
 	withUnitFilterSearch,
 } from "@rezics/filter";
 import {
-	useGetApiSearchFeaturesByTemplate,
-	useGetApiSearchZonesByZoneIdFeature,
+	postApiSearchFilterDefinition,
+	useGetApiSearchZonesByZoneIdFilter,
 	useGetApiSearchSharedQueriesById,
 	usePostApiSearchSharedQueries,
 } from "@rezics/openapi-tanstack-query";
+import { useQuery } from "@tanstack/react-query";
 import { PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
 import { useQueryState, useQueryStates } from "nuqs";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -75,12 +76,16 @@ export function SearchSurface({
 	) => string | undefined;
 }) {
 	const { t } = useTranslation("search");
-	const template = source.kind === "template" ? source.template : "global";
-	const templateDefinition = useGetApiSearchFeaturesByTemplate(
-		{ path: { template } },
-		{ query: { enabled: source.kind === "template" } },
-	);
-	const zoneDefinition = useGetApiSearchZonesByZoneIdFeature(
+	const filterDocument = source.kind === "filter" ? source.filterDocument : undefined;
+	const filterDefinition = useQuery({
+		queryKey: ["search-filter-definition", filterDocument],
+		enabled: filterDocument !== undefined,
+		queryFn: async () => {
+			if (!filterDocument) throw new Error("Filter document is unavailable");
+			return (await postApiSearchFilterDefinition({ body: filterDocument })).data;
+		},
+	});
+	const zoneDefinition = useGetApiSearchZonesByZoneIdFilter(
 		{ path: { zoneId: source.kind === "zone" ? source.zoneId : DisabledZoneId } },
 		{ query: { enabled: source.kind === "zone" } },
 	);
@@ -100,8 +105,7 @@ export function SearchSurface({
 		source,
 		surface: "search",
 	});
-	const rawDefinition =
-		source.kind === "template" ? templateDefinition.data : zoneDefinition.data?.definition;
+	const rawDefinition = source.kind === "filter" ? filterDefinition.data : zoneDefinition.data;
 
 	const run = useCallback(
 		(request: SearchFeatureRequest) => {
@@ -126,9 +130,8 @@ export function SearchSurface({
 	}, [initialQuery, initialState, injections, rawDefinition, run]);
 
 	const definitionPending =
-		source.kind === "template" ? templateDefinition.isPending : zoneDefinition.isPending;
-	const definitionError =
-		source.kind === "template" ? templateDefinition.error : zoneDefinition.error;
+		source.kind === "filter" ? filterDefinition.isPending : zoneDefinition.isPending;
+	const definitionError = source.kind === "filter" ? filterDefinition.error : zoneDefinition.error;
 	const executionPending = Boolean(lastRequest) && results.isFetching;
 	if (definitionPending) return <QueryPending />;
 	if (definitionError || !rawDefinition)
@@ -136,9 +139,7 @@ export function SearchSurface({
 			<QueryFailure
 				error={definitionError}
 				retry={() =>
-					void (source.kind === "template"
-						? templateDefinition.refetch()
-						: zoneDefinition.refetch())
+					void (source.kind === "filter" ? filterDefinition.refetch() : zoneDefinition.refetch())
 				}
 			/>
 		);
@@ -148,8 +149,7 @@ export function SearchSurface({
 	async function share(request: SearchFeatureShareRequest) {
 		const response = await shareMutation.mutateAsync({
 			body: {
-				version: 1,
-				template,
+				filterDocument: definition.filterDocument,
 				state: request.state,
 				selections: [...request.selections],
 			},
@@ -171,7 +171,7 @@ export function SearchSurface({
 			injections={injections}
 			onExecute={run}
 			onInjectionsChange={onInjectionsChange}
-			onShare={source.kind === "template" ? share : undefined}
+			onShare={share}
 			pending={executionPending}
 			resolveOptionLabel={resolveOptionLabel}
 			surface="search"
@@ -275,10 +275,10 @@ function RouteSearchPage() {
 	}));
 	return (
 		<SearchLayout
-			id={`${route.template}-search`}
+			id="global-search"
 			initialQuery={route.q}
 			injections={injections}
-			key={`${route.template}:${route.q}:${route.tag.join(",")}`}
+			key={`${route.q}:${route.tag.join(",")}`}
 			onInjectionsChange={(next) => {
 				const tag = injectedTagIds(next);
 				void setRoute({
@@ -290,7 +290,7 @@ function RouteSearchPage() {
 			resolveOptionLabel={(control, value) =>
 				control.field === "tag" && typeof value === "string" ? labels.get(value) : undefined
 			}
-			source={{ kind: "template", template: route.template }}
+			source={{ kind: "filter", filterDocument: {} }}
 		/>
 	);
 }
@@ -307,7 +307,7 @@ function SharedSearchPage({ id }: { readonly id: string }) {
 			initialSelections={document.selections}
 			initialState={document.state}
 			key={id}
-			source={{ kind: "template", template: document.template }}
+			source={{ kind: "filter", filterDocument: document.filterDocument }}
 		/>
 	);
 }

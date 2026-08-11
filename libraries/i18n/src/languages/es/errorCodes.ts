@@ -283,9 +283,6 @@ export default {
 	RealmTagVotingDisabled: `La votación de etiquetas no está activada en este ${realmTerms.inline}.`,
 	RealmTagContextRequired: `Este ${realmTerms.inline} debe proporcionar primero una explicación formal y actualmente visible de la etiqueta.`,
 	RealmTagSelfReferenceForbidden: "Una etiqueta no se puede aplicar a sí misma.",
-	SearchDocumentRevisionConflict:
-		"La configuración de búsqueda ha cambiado. Vuelve a cargarla antes de guardar.",
-	ZoneSearchFeatureNotFound: `Esta ${zoneTerms.inline} no tiene ninguna función de búsqueda habilitada.`,
 	SharedSearchQueryNotFound: "No se ha encontrado esta consulta de búsqueda compartida.",
 	InvalidTagStructure: `Esta ${tagStructureTerms.inline} no es válida.`,
 	TagStructureNotFound: `No se ha encontrado esta ${tagStructureTerms.inline}.`,

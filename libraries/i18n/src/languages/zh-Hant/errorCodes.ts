@@ -242,8 +242,6 @@ export default {
 	RealmTagVotingDisabled: `此${realmTerms.inline}尚未開啟標籤投票。`,
 	RealmTagContextRequired: `此${realmTerms.inline}必須先為該標籤建立目前可見的正式說明。`,
 	RealmTagSelfReferenceForbidden: "不能將標籤套用到該標籤本身。",
-	SearchDocumentRevisionConflict: "搜尋設定已變更，請重新載入後再儲存。",
-	ZoneSearchFeatureNotFound: `此${zoneTerms.inline}尚未啟用搜尋功能。`,
 	SharedSearchQueryNotFound: "找不到這個分享搜尋查詢。",
 	InvalidTagStructure: `這個${tagStructureTerms.inline}無效。`,
 	TagStructureNotFound: `找不到這個${tagStructureTerms.inline}。`,

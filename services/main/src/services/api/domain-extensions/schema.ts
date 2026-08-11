@@ -4,9 +4,9 @@ import {
 	NavigationDocument,
 	PortableTextDocument,
 	UnitReferencedBlockDocument,
-	ZoneBoundaryDocument,
 	ZoneThemeDocument,
 } from "@rezics/block";
+import { FilterDocument } from "@rezics/filter";
 import { type Static, Type } from "@sinclair/typebox";
 import { t } from "elysia";
 
@@ -25,7 +25,7 @@ import { NullablePublicSlugAddressResponse, SlugLabelInput } from "../slug-addre
 // Exact models are registered by the Zone route plugin. References keep one
 // OpenAPI component and prevent recursive Block static types from expanding
 // through the entire Elysia route chain.
-const ZoneBoundaryResponseDocument = Type.Unsafe<unknown>(Type.Ref("ZoneBoundaryDocument"));
+const FilterResponseDocument = Type.Unsafe<unknown>(Type.Ref("FilterDocument"));
 const ZoneThemeResponseDocument = Type.Unsafe<unknown>(Type.Ref("ZoneThemeDocument"));
 const UnitReferencedBlockResponseDocument = Type.Unsafe<unknown>(
 	Type.Ref("UnitReferencedBlockDocument"),
@@ -33,9 +33,7 @@ const UnitReferencedBlockResponseDocument = Type.Unsafe<unknown>(
 const NavigationResponseDocument = Type.Unsafe<unknown>(Type.Ref("NavigationDocument"));
 const DockResponseDocument = Type.Unsafe<unknown>(Type.Ref(DockDocument));
 const PortableTextResponseDocument = Type.Unsafe<unknown>(Type.Ref(PortableTextDocument));
-const ZoneBoundaryInputDocument = Type.Unsafe<Static<typeof ZoneBoundaryDocument>>(
-	Type.Ref("ZoneBoundaryDocument"),
-);
+const FilterInputDocument = Type.Unsafe<Static<typeof FilterDocument>>(Type.Ref("FilterDocument"));
 const ZoneThemeInputDocument = Type.Unsafe<Static<typeof ZoneThemeDocument>>(
 	Type.Ref("ZoneThemeDocument"),
 );
@@ -88,7 +86,7 @@ const SystemRequirementHardwareResponse = Type.Unsafe<Record<string, JsonValueTy
 export const CreateZoneBody = t.Object(
 	{
 		localization: UnitLocalizationInput,
-		boundaryDocument: ZoneBoundaryInputDocument,
+		filterDocument: FilterInputDocument,
 		themeDocument: ZoneThemeInputDocument,
 		startsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
 		endsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
@@ -128,7 +126,7 @@ export const ZoneNavigationParams = t.Object({
 export const UpdateZoneBody = t.Object(
 	{
 		localization: t.Optional(UnitLocalizationInput),
-		boundaryDocument: t.Optional(ZoneBoundaryInputDocument),
+		filterDocument: t.Optional(FilterInputDocument),
 		themeDocument: t.Optional(ZoneThemeInputDocument),
 		startsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
 		endsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
@@ -244,7 +242,7 @@ export const ZoneResponse = t.Object({
 			cover: ImageAssetResponse,
 		}),
 	),
-	boundaryDocument: ZoneBoundaryResponseDocument,
+	filterDocument: FilterResponseDocument,
 	themeDocument: ZoneThemeResponseDocument,
 	startsAt: t.Nullable(DateTime),
 	endsAt: t.Nullable(DateTime),

@@ -9,17 +9,16 @@ import {
 	type SearchFeatureSource,
 } from "@rezics/block";
 import {
+	FilterDocument,
 	SearchFeatureDefinition,
 	SearchFeatureInput,
-	SearchDocument,
-	EmbeddableSearchTemplateId,
 	SearchFeatureSurface,
+	parseFilterDocument,
 	readSearchLanguageBoundary,
 	readUnitLanguageBoundary,
 	SearchControlExpression,
 	SharedSearchQueryDocument,
 	type SearchFeatureState,
-	SearchTemplateId,
 } from "@rezics/filter";
 import { FilterSchemaModels } from "@rezics/filter";
 import { isContentLanguage, type ContentLanguage } from "@rezics/i18n";
@@ -36,37 +35,24 @@ import {
 } from "../../content-rating/policy";
 import { resolveRecommendationViewer } from "../../recommendations/context";
 import { AuthenticationRequired } from "../../auth/errors";
-import {
-	InvalidSearch,
-	SearchUnavailable,
-	SharedSearchQueryNotFound,
-	ZoneSearchFeatureNotFound,
-} from "../../search/errors";
+import { InvalidSearch, SearchUnavailable, SharedSearchQueryNotFound } from "../../search/errors";
 import { SearchCategories } from "../../search/schema";
 import { searchDomain, searchGrouped } from "../../search/service";
 import {
-	createDefaultSearchDocument,
 	executeSearchFeatureFeedInput,
 	executeSearchFeatureInput,
-	resolveSearchDocument,
+	resolveFilterDocument,
 	type GroupedSearchExecutionPolicy,
-} from "../../search/templates";
+} from "../../search/filter-document";
 import {
 	createSharedSearchQuery,
 	getSharedSearchQuery,
 	type SharedSearchQueryProjection,
 } from "../../search/shared-queries";
 import { database } from "../../database";
-import { unitDock } from "../../database/schema";
+import { unitDock, zone } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
 import { getZonePageUnitById } from "../../zones/pages";
-import {
-	getZoneSearchFeature,
-	listZoneSearchFeatureRevisions,
-	putZoneSearchFeature,
-	restoreZoneSearchFeature,
-	type ZoneSearchFeatureProjection,
-} from "../../zones/search-feature";
 import { ZonePageNotFound } from "../domain-extensions/errors";
 import { DockNotFound } from "../docks/errors";
 import { hydrateFeedItems } from "../feed";
@@ -93,7 +79,6 @@ function logSearchFailure(message: string, eventName: string, error: unknown): v
 
 const SearchUnavailableResponse = toApiErrorResponse(["SearchUnavailable"]);
 const InvalidSearchResponse = toApiErrorResponse(["InvalidSearch"]);
-const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
 
 const ZoneDockSearchParams = t.Object({ zoneId: Uuid, blockKey: BlockKey });
 const ZoneFeedBlockParams = ZoneDockSearchParams;
@@ -101,10 +86,6 @@ const ZonePageSearchParams = t.Object({
 	zoneId: Uuid,
 	pageId: Uuid,
 	blockKey: BlockKey,
-});
-const SearchFeatureTemplateParams = t.Object({ template: SearchTemplateId });
-const ExecutableSearchFeatureTemplateParams = t.Object({
-	template: EmbeddableSearchTemplateId,
 });
 const SharedSearchQueryParams = t.Object({ id: Uuid });
 const SharedSearchQueryResponse = t.Object({
@@ -114,7 +95,8 @@ const SharedSearchQueryResponse = t.Object({
 });
 const SearchFeatureExecutionBody = t.Object(
 	{
-		...t.Omit(SearchFeatureInput, ["document"]).properties,
+		...SearchFeatureInput.properties,
+		filterDocument: Type.Ref("FilterDocument"),
 		localizationLanguages: LocalizationLanguagePriority,
 	},
 	{ additionalProperties: false },
@@ -126,24 +108,24 @@ const SearchFeatureFeedPresentationBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-const ZoneSearchFeatureParams = t.Object({ zoneId: Uuid });
-const ZoneSearchFeatureExecutionBody = t.Object(
+const ZoneFilterParams = t.Object({ zoneId: Uuid });
+const ZoneFilterExecutionBody = t.Object(
 	{
 		...t.Pick(SearchFeatureInput, ["injections", "state"]).properties,
 		localizationLanguages: LocalizationLanguagePriority,
 	},
 	{ additionalProperties: false },
 );
-const ZoneSearchFeatureFeedPresentationBody = t.Object(
+const ZoneFilterFeedPresentationBody = t.Object(
 	{
-		...ZoneSearchFeatureExecutionBody.properties,
+		...ZoneFilterExecutionBody.properties,
 		surface: SearchFeatureSurface,
 	},
 	{ additionalProperties: false },
 );
 const ZoneFeedBlockExecutionBody = t.Object(
 	{
-		...ZoneSearchFeatureExecutionBody.properties,
+		...ZoneFilterExecutionBody.properties,
 		surface: t.Union([
 			t.Object({ kind: t.Literal("dock") }, { additionalProperties: false }),
 			t.Object(
@@ -157,62 +139,22 @@ const ZoneFeedBlockExecutionBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-const SearchDocumentModel = Type.Object(
+const FilterDocumentModel = Type.Object(
 	{
-		...SearchDocument.properties,
-		filter: Type.Optional(Type.Ref("UnitPredicate")),
+		...FilterDocument.properties,
+		where: Type.Optional(Type.Ref("UnitPredicate")),
 	},
-	{ additionalProperties: false, $id: "SearchDocumentV1" },
+	{ additionalProperties: false, $id: "FilterDocument" },
 );
 const SearchFeatureDefinitionModel = Type.Object(
 	{
-		document: Type.Ref("SearchDocumentV1"),
-		controls: SearchFeatureDefinition.properties.controls,
+		...SearchFeatureDefinition.properties,
+		filterDocument: Type.Ref("FilterDocument"),
 	},
-	{ additionalProperties: false, $id: "SearchFeatureDefinitionV1" },
+	{ additionalProperties: false, $id: "SearchFeatureDefinition" },
 );
-const SearchDocumentInput = Type.Unsafe<Static<typeof SearchDocument>>(
-	Type.Ref("SearchDocumentV1"),
-);
-const SearchFeatureDefinitionResponse = Type.Unsafe<unknown>(Type.Ref("SearchFeatureDefinitionV1"));
-const ZoneSearchFeatureResponse = t.Object({
-	zoneId: Uuid,
-	searchDocumentId: Uuid,
-	enabled: t.Boolean(),
-	definition: SearchFeatureDefinitionResponse,
-	latestRevisionId: Uuid,
-	createdAt: DateTime,
-	updatedAt: DateTime,
-});
-const ZoneSearchFeaturePutBody = t.Object(
-	{
-		document: SearchDocumentInput,
-		baseRevisionId: t.Optional(Uuid),
-		message: t.Optional(t.String({ maxLength: 500 })),
-	},
-	{ additionalProperties: false },
-);
-const ZoneSearchFeatureRestoreBody = t.Object(
-	{
-		sourceRevisionId: Uuid,
-		baseRevisionId: Uuid,
-		message: t.Optional(t.String({ maxLength: 500 })),
-	},
-	{ additionalProperties: false },
-);
-const ZoneSearchFeatureRevisionListResponse = t.Object({
-	items: t.Array(
-		t.Object({
-			id: Uuid,
-			parentRevisionId: t.Nullable(Uuid),
-			sourceRevisionId: t.Nullable(Uuid),
-			actorProfileId: t.Nullable(Uuid),
-			kind: t.UnionEnum(["create", "update", "delete", "restore"]),
-			editSummary: t.Nullable(t.String()),
-			createdAt: DateTime,
-		}),
-	),
-});
+const FilterDocumentInput = Type.Unsafe<Static<typeof FilterDocument>>(Type.Ref("FilterDocument"));
+const SearchFeatureDefinitionResponse = Type.Unsafe<unknown>(Type.Ref("SearchFeatureDefinition"));
 
 function presentSharedSearchQuery(record: SharedSearchQueryProjection) {
 	return {
@@ -222,19 +164,14 @@ function presentSharedSearchQuery(record: SharedSearchQueryProjection) {
 	} satisfies typeof SharedSearchQueryResponse.static;
 }
 
-function presentZoneSearchFeature(
-	record: ZoneSearchFeatureProjection,
-	hasDevelopmentPreviewAccess: boolean,
-) {
-	return {
-		zoneId: record.zoneId,
-		searchDocumentId: record.searchDocumentId,
-		enabled: record.enabled,
-		definition: resolveSearchDocument(record.document, hasDevelopmentPreviewAccess),
-		latestRevisionId: record.latestRevisionId,
-		createdAt: record.createdAt,
-		updatedAt: record.updatedAt,
-	} satisfies typeof ZoneSearchFeatureResponse.static;
+async function getZoneFilterDocument(zoneId: string) {
+	const [record] = await database
+		.select({ filterDocument: zone.filterDocument })
+		.from(zone)
+		.where(eq(zone.id, zoneId))
+		.limit(1);
+	if (!record) throw new UnitNotFound("Zone");
+	return parseFilterDocument(record.filterDocument);
 }
 
 interface ZoneBlockExecutionInput {
@@ -249,18 +186,16 @@ interface ZoneBlockExecutionInput {
 
 async function resolveZoneBlockExecution(input: ZoneBlockExecutionInput) {
 	const source = input.source ?? findSearchFeatureSource(input.document, input.blockKey);
-	const baseDocument =
-		source.kind === "template"
-			? createDefaultSearchDocument(source.template)
-			: await database.transaction(async (tx) => {
-					const feature = await getZoneSearchFeature(tx, input.zoneId);
-					if (!feature || !feature.enabled) throw new ZoneSearchFeatureNotFound();
-					return feature.document;
-				});
-	const request = input.body as typeof ZoneSearchFeatureExecutionBody.static;
+	const filterDocument =
+		source.kind === "global"
+			? {}
+			: source.kind === "inline"
+				? source.filterDocument
+				: await getZoneFilterDocument(input.zoneId);
+	const request = input.body as typeof ZoneFilterExecutionBody.static;
 	return {
 		featureInput: {
-			document: baseDocument,
+			filterDocument,
 			contexts: [{ kind: "zone", zoneId: input.zoneId }],
 			injections: request.injections,
 			state: request.state,
@@ -359,30 +294,44 @@ async function presentSearchResultAsFeed(
 export default new Elysia({ prefix: "/search" })
 	.model({
 		...FilterSchemaModels,
-		SearchDocumentV1: SearchDocumentModel,
-		SearchFeatureDefinitionV1: SearchFeatureDefinitionModel,
+		FilterDocument: FilterDocumentModel,
+		SearchFeatureDefinition: SearchFeatureDefinitionModel,
 	})
 	.get(
-		"/features/:template",
-		async ({ params, request }) => {
+		"/filter",
+		async ({ request }) => {
 			const identity = await resolveIdentity(request, "unit:read");
 			const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
 				DevelopmentPreviewCapability,
 			);
-			return resolveSearchDocument(
-				createDefaultSearchDocument(params.template),
-				hasDevelopmentPreviewAccess,
-			);
+			return resolveFilterDocument({}, hasDevelopmentPreviewAccess);
 		},
 		{
-			params: SearchFeatureTemplateParams,
 			response: { [StatusCodes.OK]: SearchFeatureDefinitionResponse },
-			detail: { summary: "Get a system Search Feature template", tags: ["Search"] },
+			detail: { summary: "Get the global Filter capability definition", tags: ["Search"] },
 		},
 	)
 	.post(
-		"/features/:template/execute",
-		async ({ params, body, request }) => {
+		"/filter/definition",
+		async ({ body, request }) => {
+			const identity = await resolveIdentity(request, "unit:read");
+			const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
+				DevelopmentPreviewCapability,
+			);
+			return resolveFilterDocument(body, hasDevelopmentPreviewAccess);
+		},
+		{
+			body: FilterDocumentInput,
+			response: {
+				[StatusCodes.OK]: SearchFeatureDefinitionResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
+			},
+			detail: { summary: "Resolve a Filter document", tags: ["Search"] },
+		},
+	)
+	.post(
+		"/filter/execute",
+		async ({ body, request }) => {
 			try {
 				const identity = await resolveIdentity(request, "unit:read", "search.execute");
 				const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
@@ -390,10 +339,7 @@ export default new Elysia({ prefix: "/search" })
 				);
 				const { localizationLanguages, ...featureInput } = body;
 				return await executeSearchFeatureInput(
-					{
-						document: createDefaultSearchDocument(params.template),
-						...featureInput,
-					},
+					featureInput,
 					{ sortProfile: "search", pageBudget: "per-category" },
 					localizationLanguages,
 					identity.authorization.profileId,
@@ -406,39 +352,34 @@ export default new Elysia({ prefix: "/search" })
 			}
 		},
 		{
-			params: ExecutableSearchFeatureTemplateParams,
 			body: SearchFeatureExecutionBody,
 			response: {
 				[StatusCodes.OK]: SearchResponse,
 				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
 				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
 			},
-			detail: { summary: "Execute a system Search Feature template", tags: ["Search"] },
+			detail: { summary: "Execute a Filter document", tags: ["Search"] },
 		},
 	)
 	.post(
-		"/features/:template/feed",
-		async ({ params, body, request }) => {
+		"/filter/feed",
+		async ({ body, request }) => {
 			try {
 				const identity = await resolveIdentity(request, "unit:read", "search.execute");
 				const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
 					DevelopmentPreviewCapability,
 				);
+				const { surface, localizationLanguages, ...featureInput } = body;
 				const result = await executeSearchFeatureFeedInput(
-					{
-						document: createDefaultSearchDocument(params.template),
-						contexts: body.contexts,
-						injections: body.injections,
-						state: body.state,
-					},
-					{ sortProfile: body.surface, pageBudget: "global" },
-					body.localizationLanguages,
+					featureInput,
+					{ sortProfile: surface, pageBudget: "global" },
+					localizationLanguages,
 					identity.authorization.profileId,
 					hasDevelopmentPreviewAccess,
 				);
 				return presentSearchResultAsFeed(
 					result,
-					body.localizationLanguages,
+					localizationLanguages,
 					body.state,
 					identity.authorization.profileId,
 				);
@@ -453,92 +394,55 @@ export default new Elysia({ prefix: "/search" })
 			}
 		},
 		{
-			params: ExecutableSearchFeatureTemplateParams,
 			body: SearchFeatureFeedPresentationBody,
 			response: {
 				[StatusCodes.OK]: SearchFeedResponse,
 				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
 				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
 			},
-			detail: { summary: "Present a system Search Feature as a Feed", tags: ["Search"] },
+			detail: { summary: "Present a Filter document as a Feed", tags: ["Search"] },
 		},
 	)
 	.get(
-		"/zones/:zoneId/feature",
+		"/zones/:zoneId/filter",
 		async ({ params, request }) => {
 			const identity = await resolveIdentity(request, "unit:read");
 			await identity.authorization.unit.ensureCanRead(
 				params.zoneId,
 				() => new UnitNotFound("Zone"),
 			);
-			const feature = await database.transaction((tx) => getZoneSearchFeature(tx, params.zoneId));
-			if (!feature) throw new ZoneSearchFeatureNotFound();
 			const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
 				DevelopmentPreviewCapability,
 			);
-			return presentZoneSearchFeature(feature, hasDevelopmentPreviewAccess);
-		},
-		{
-			params: ZoneSearchFeatureParams,
-			response: {
-				[StatusCodes.OK]: ZoneSearchFeatureResponse,
-				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZoneSearchFeatureNotFound"]),
-			},
-			detail: { summary: "Get a Zone Search Feature", tags: ["Search", "Zones"] },
-		},
-	)
-	.put(
-		"/zones/:zoneId/feature",
-		async ({ params, body, request }) => {
-			const identity = await resolveIdentity(request, "unit:update");
-			await identity.authorization.unit.ensureCanUpdate(params.zoneId, [["zone", "search"]]);
-			const actorProfileId = identity.authorization.profileId;
-			if (!actorProfileId) throw new UnitNotFound("Profile");
-			const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
-				DevelopmentPreviewCapability,
-			);
-			return presentZoneSearchFeature(
-				await putZoneSearchFeature({
-					zoneId: params.zoneId,
-					enabled: true,
-					document: body.document,
-					baseRevisionId: body.baseRevisionId,
-					actorProfileId,
-					message: body.message,
-				}),
+			return resolveFilterDocument(
+				await getZoneFilterDocument(params.zoneId),
 				hasDevelopmentPreviewAccess,
 			);
 		},
 		{
-			params: ZoneSearchFeatureParams,
-			body: ZoneSearchFeaturePutBody,
+			params: ZoneFilterParams,
 			response: {
-				[StatusCodes.OK]: ZoneSearchFeatureResponse,
-				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+				[StatusCodes.OK]: SearchFeatureDefinitionResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["SearchDocumentRevisionConflict"]),
 			},
-			detail: { summary: "Configure a Zone Search Feature", tags: ["Search", "Zones"] },
+			detail: { summary: "Get a Zone Filter definition", tags: ["Search", "Zones"] },
 		},
 	)
 	.post(
-		"/zones/:zoneId/feature/execute",
+		"/zones/:zoneId/filter/execute",
 		async ({ params, body, request }) => {
 			const identity = await resolveIdentity(request, "unit:read", "search.execute");
 			await identity.authorization.unit.ensureCanRead(
 				params.zoneId,
 				() => new UnitNotFound("Zone"),
 			);
-			const feature = await database.transaction((tx) => getZoneSearchFeature(tx, params.zoneId));
-			if (!feature || !feature.enabled) throw new ZoneSearchFeatureNotFound();
 			const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
 				DevelopmentPreviewCapability,
 			);
 			return executeSearchFeatureInput(
 				{
-					document: feature.document,
+					filterDocument: await getZoneFilterDocument(params.zoneId),
 					contexts: [{ kind: "zone", zoneId: params.zoneId }],
 					injections: body.injections,
 					state: body.state,
@@ -550,19 +454,19 @@ export default new Elysia({ prefix: "/search" })
 			);
 		},
 		{
-			params: ZoneSearchFeatureParams,
-			body: ZoneSearchFeatureExecutionBody,
+			params: ZoneFilterParams,
+			body: ZoneFilterExecutionBody,
 			response: {
 				[StatusCodes.OK]: SearchResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZoneSearchFeatureNotFound"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
 				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
 			},
-			detail: { summary: "Execute a Zone Search Feature", tags: ["Search", "Zones"] },
+			detail: { summary: "Execute a Zone Filter", tags: ["Search", "Zones"] },
 		},
 	)
 	.post(
-		"/zones/:zoneId/feature/feed",
+		"/zones/:zoneId/filter/feed",
 		async ({ params, body, request }) => {
 			try {
 				const identity = await resolveIdentity(request, "unit:read", "search.execute");
@@ -570,14 +474,12 @@ export default new Elysia({ prefix: "/search" })
 					params.zoneId,
 					() => new UnitNotFound("Zone"),
 				);
-				const feature = await database.transaction((tx) => getZoneSearchFeature(tx, params.zoneId));
-				if (!feature || !feature.enabled) throw new ZoneSearchFeatureNotFound();
 				const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
 					DevelopmentPreviewCapability,
 				);
 				const result = await executeSearchFeatureFeedInput(
 					{
-						document: feature.document,
+						filterDocument: await getZoneFilterDocument(params.zoneId),
 						contexts: [{ kind: "zone", zoneId: params.zoneId }],
 						injections: body.injections,
 						state: body.state,
@@ -597,87 +499,28 @@ export default new Elysia({ prefix: "/search" })
 				if (
 					cause instanceof InvalidSearch ||
 					cause instanceof SearchUnavailable ||
-					cause instanceof UnitNotFound ||
-					cause instanceof ZoneSearchFeatureNotFound
+					cause instanceof UnitNotFound
 				)
 					throw cause;
 				logSearchFailure(
-					"Zone Search Feature Feed presentation failed",
-					"search.zone_feature_feed.failed",
+					"Zone Filter Feed presentation failed",
+					"search.zone_filter_feed.failed",
 					cause,
 				);
 				throw new SearchUnavailable(cause);
 			}
 		},
 		{
-			params: ZoneSearchFeatureParams,
-			body: ZoneSearchFeatureFeedPresentationBody,
+			params: ZoneFilterParams,
+			body: ZoneFilterFeedPresentationBody,
 			response: {
 				[StatusCodes.OK]: SearchFeedResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZoneSearchFeatureNotFound"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
 				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
 			},
 			detail: {
-				summary: "Present a Zone Search Feature as a Feed",
-				tags: ["Search", "Zones"],
-			},
-		},
-	)
-	.get(
-		"/zones/:zoneId/feature/revisions",
-		async ({ params, request }) => {
-			const identity = await resolveIdentity(request, "unit:update");
-			await identity.authorization.unit.ensureCanUpdate(params.zoneId, [["zone", "search"]]);
-			const revisions = await database.transaction((tx) =>
-				listZoneSearchFeatureRevisions(tx, params.zoneId),
-			);
-			if (!revisions) throw new ZoneSearchFeatureNotFound();
-			return { items: revisions.items };
-		},
-		{
-			params: ZoneSearchFeatureParams,
-			response: {
-				[StatusCodes.OK]: ZoneSearchFeatureRevisionListResponse,
-				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZoneSearchFeatureNotFound"]),
-			},
-			detail: { summary: "List Zone Search Feature revisions", tags: ["Search", "Zones"] },
-		},
-	)
-	.post(
-		"/zones/:zoneId/feature/restore",
-		async ({ params, body, request }) => {
-			const identity = await resolveIdentity(request, "unit:update");
-			await identity.authorization.unit.ensureCanUpdate(params.zoneId, [["zone", "search"]]);
-			const actorProfileId = identity.authorization.profileId;
-			if (!actorProfileId) throw new UnitNotFound("Profile");
-			const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
-				DevelopmentPreviewCapability,
-			);
-			return presentZoneSearchFeature(
-				await restoreZoneSearchFeature({
-					zoneId: params.zoneId,
-					sourceRevisionId: body.sourceRevisionId,
-					baseRevisionId: body.baseRevisionId,
-					actorProfileId,
-					message: body.message,
-				}),
-				hasDevelopmentPreviewAccess,
-			);
-		},
-		{
-			params: ZoneSearchFeatureParams,
-			body: ZoneSearchFeatureRestoreBody,
-			response: {
-				[StatusCodes.OK]: ZoneSearchFeatureResponse,
-				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZoneSearchFeatureNotFound"]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["SearchDocumentRevisionConflict"]),
-			},
-			detail: {
-				summary: "Restore a Zone Search Feature revision",
+				summary: "Present a Zone Filter as a Feed",
 				tags: ["Search", "Zones"],
 			},
 		},
@@ -719,8 +562,7 @@ export default new Elysia({ prefix: "/search" })
 					cause instanceof InvalidSearch ||
 					cause instanceof SearchUnavailable ||
 					cause instanceof UnitNotFound ||
-					cause instanceof DockNotFound ||
-					cause instanceof ZoneSearchFeatureNotFound
+					cause instanceof DockNotFound
 				)
 					throw cause;
 				logSearchFailure(
@@ -733,14 +575,10 @@ export default new Elysia({ prefix: "/search" })
 		},
 		{
 			params: ZoneDockSearchParams,
-			body: ZoneSearchFeatureExecutionBody,
+			body: ZoneFilterExecutionBody,
 			response: {
 				[StatusCodes.OK]: SearchResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"DockNotFound",
-					"ZoneSearchFeatureNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "DockNotFound"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
 				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
 			},
@@ -776,8 +614,7 @@ export default new Elysia({ prefix: "/search" })
 					cause instanceof InvalidSearch ||
 					cause instanceof SearchUnavailable ||
 					cause instanceof UnitNotFound ||
-					cause instanceof ZonePageNotFound ||
-					cause instanceof ZoneSearchFeatureNotFound
+					cause instanceof ZonePageNotFound
 				)
 					throw cause;
 				logSearchFailure(
@@ -790,14 +627,10 @@ export default new Elysia({ prefix: "/search" })
 		},
 		{
 			params: ZonePageSearchParams,
-			body: ZoneSearchFeatureExecutionBody,
+			body: ZoneFilterExecutionBody,
 			response: {
 				[StatusCodes.OK]: SearchResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"ZonePageNotFound",
-					"ZoneSearchFeatureNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZonePageNotFound"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
 				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
 			},
@@ -852,8 +685,7 @@ export default new Elysia({ prefix: "/search" })
 					cause instanceof SearchUnavailable ||
 					cause instanceof UnitNotFound ||
 					cause instanceof DockNotFound ||
-					cause instanceof ZonePageNotFound ||
-					cause instanceof ZoneSearchFeatureNotFound
+					cause instanceof ZonePageNotFound
 				)
 					throw cause;
 				logSearchFailure("Zone Feed Block execution failed", "search.zone_feed.failed", cause);
@@ -869,7 +701,6 @@ export default new Elysia({ prefix: "/search" })
 					"UnitNotFound",
 					"DockNotFound",
 					"ZonePageNotFound",
-					"ZoneSearchFeatureNotFound",
 				]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
 				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,

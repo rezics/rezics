@@ -14,6 +14,7 @@ const controls = [
 		field: "tag",
 		component: "multi-select",
 		operators: ["equals", "not-equals", "any-of", "all-of", "none-of"],
+		enabled: true,
 		disclosure: "visible",
 		optionSource: { kind: "facet" },
 	},
@@ -22,6 +23,7 @@ const controls = [
 		field: "created-at",
 		component: "date-range",
 		operators: ["range", "exists"],
+		enabled: true,
 		disclosure: "hidden",
 	},
 	{
@@ -29,6 +31,7 @@ const controls = [
 		field: "realm-tag-vote",
 		component: "realm-tag-vote",
 		operators: ["matches"],
+		enabled: true,
 		disclosure: "hidden",
 	},
 ] as const satisfies readonly ResolvedSearchControl[];

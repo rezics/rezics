@@ -22,7 +22,6 @@ export function EntityRelatedFeed({ entityId }: { readonly entityId: string }) {
 				emptyBody={t.entities.relatedContentEmptyDescription}
 				emptyTitle={t.entities.relatedContentEmptyTitle}
 				initialRequest={request}
-				template="global"
 			/>
 		</section>
 	);

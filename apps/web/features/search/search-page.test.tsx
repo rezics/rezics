@@ -29,14 +29,9 @@ vi.mock("@rezics/openapi-tanstack-query", async (importOriginal) => {
 	const actual = await importOriginal<typeof import("@rezics/openapi-tanstack-query")>();
 	return {
 		...actual,
-		useGetApiSearchFeaturesByTemplate: () => ({
-			data: { document: {}, controls: [] },
-			error: undefined,
-			isPending: false,
-			refetch: vi.fn(),
-		}),
+		postApiSearchFilterDefinition: vi.fn(),
 		useGetApiSearchSharedQueriesById: vi.fn(),
-		useGetApiSearchZonesByZoneIdFeature: () => ({
+		useGetApiSearchZonesByZoneIdFilter: () => ({
 			data: undefined,
 			error: undefined,
 			isPending: false,
@@ -53,6 +48,15 @@ vi.mock("@/features/content-feed/data/search-feed-list", () => ({
 	useSearchFeedQuery: mocks.useSearchFeedQuery,
 	withoutSearchFeedCursor: ({ cursor: _cursor, ...state }: { cursor?: string; sort?: string }) =>
 		state,
+}));
+
+vi.mock("@tanstack/react-query", () => ({
+	useQuery: () => ({
+		data: { filterDocument: {}, controls: [] },
+		error: undefined,
+		isPending: false,
+		refetch: vi.fn(),
+	}),
 }));
 
 vi.mock("@/features/search/search-feature", () => ({
@@ -97,7 +101,7 @@ afterEach(() => {
 
 describe("SearchSurface", () => {
 	it("uses infinite Feed continuation and keeps its stable request cursor-free", () => {
-		render(<SearchSurface id="global-search" source={{ kind: "template", template: "global" }} />);
+		render(<SearchSurface id="global-search" source={{ kind: "filter", filterDocument: {} }} />);
 
 		fireEvent.click(screen.getByRole("button", { name: "Execute" }));
 

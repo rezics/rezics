@@ -3,7 +3,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 
-import type { EmbeddableSearchTemplateId, SearchFeatureSurface } from "@rezics/filter";
+import type { SearchFeatureSurface } from "@rezics/filter";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
@@ -145,7 +145,6 @@ export function SearchFeedList({
 	request,
 	requestedRealmId,
 	source,
-	template,
 }: {
 	readonly "aria-label"?: string;
 	readonly displayContext?: FeedDisplayContext;
@@ -154,14 +153,11 @@ export function SearchFeedList({
 	readonly pagination?: FeedPaginationMode;
 	readonly request: SearchFeedRequest;
 	readonly requestedRealmId?: string;
-} & (
-	| Readonly<{ source: SearchFeedSource; template?: never }>
-	| Readonly<{ source?: never; template: EmbeddableSearchTemplateId }>
-)) {
-	const resolvedSource: SearchFeedSource = source ?? { kind: "template", template };
+	readonly source: SearchFeedSource;
+}) {
 	const query = useSearchFeedQuery({
 		request,
-		source: resolvedSource,
+		source,
 		surface: "feed",
 	});
 	return (

@@ -5,10 +5,10 @@ import {
 	createPollContentBlock,
 	createPortableTextDocument,
 	createUnitReferencedBlockDocument,
-	createZoneBoundaryDocument,
 	createZoneThemeDocument,
 	assertWikiPostPortableTextDocument,
 } from "@rezics/block";
+import { createFilterDocument } from "@rezics/filter";
 import { defaultKeyHasher } from "@better-auth/api-key";
 import { hashPassword } from "better-auth/crypto";
 import { and, eq, inArray, isNull, notInArray, sql } from "drizzle-orm";
@@ -864,7 +864,7 @@ async function seedUnitFixtures(
 	await writeBatches(
 		zones.map((value, index) => ({
 			id: value.id,
-			boundaryDocument: createZoneBoundaryDocument(["units"]),
+			filterDocument: createFilterDocument({ categories: ["units"] }),
 			themeDocument: createZoneThemeDocument({
 				accent: itemAt(["#f59e0b", "#3b82f6", "#8b5cf6"], index),
 			}),
@@ -1229,7 +1229,7 @@ async function seedToaruWiki(
 	await tx
 		.update(zone)
 		.set({
-			boundaryDocument: createZoneBoundaryDocument(["units"], undefined, "a10000000001"),
+			filterDocument: createFilterDocument({ categories: ["units"] }),
 			themeDocument: createZoneThemeDocument(
 				{ accent: "#2563eb", colorScheme: "dark", density: "compact" },
 				"a10000000002",
@@ -2813,8 +2813,7 @@ async function seedCoverageContracts(
 	await createSharedSearchQuery(tx, {
 		createdByProfileId: actor.id,
 		document: {
-			version: 1,
-			template: "global",
+			filterDocument: {},
 			state: {},
 			selections: [],
 		},

@@ -501,6 +501,8 @@ import type {
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentResponses,
 	GetApiProgressOptions,
 	GetApiProgressResponses,
+	GetApiProgressSearchFilterOptions,
+	GetApiProgressSearchFilterResponses,
 	PostApiProgressSearchOptions,
 	PostApiProgressSearchResponses,
 	GetApiProgressByUnitIdOptions,
@@ -707,24 +709,20 @@ import type {
 	PutApiRealmsByRealmIdWikiNavigationByNavigationIdResponses,
 	DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdOptions,
 	DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdResponses,
-	GetApiSearchFeaturesByTemplateOptions,
-	GetApiSearchFeaturesByTemplateResponses,
-	PostApiSearchFeaturesByTemplateExecuteOptions,
-	PostApiSearchFeaturesByTemplateExecuteResponses,
-	PostApiSearchFeaturesByTemplateFeedOptions,
-	PostApiSearchFeaturesByTemplateFeedResponses,
-	GetApiSearchZonesByZoneIdFeatureOptions,
-	GetApiSearchZonesByZoneIdFeatureResponses,
-	PutApiSearchZonesByZoneIdFeatureOptions,
-	PutApiSearchZonesByZoneIdFeatureResponses,
-	PostApiSearchZonesByZoneIdFeatureExecuteOptions,
-	PostApiSearchZonesByZoneIdFeatureExecuteResponses,
-	PostApiSearchZonesByZoneIdFeatureFeedOptions,
-	PostApiSearchZonesByZoneIdFeatureFeedResponses,
-	GetApiSearchZonesByZoneIdFeatureRevisionsOptions,
-	GetApiSearchZonesByZoneIdFeatureRevisionsResponses,
-	PostApiSearchZonesByZoneIdFeatureRestoreOptions,
-	PostApiSearchZonesByZoneIdFeatureRestoreResponses,
+	GetApiSearchFilterOptions,
+	GetApiSearchFilterResponses,
+	PostApiSearchFilterDefinitionOptions,
+	PostApiSearchFilterDefinitionResponses,
+	PostApiSearchFilterExecuteOptions,
+	PostApiSearchFilterExecuteResponses,
+	PostApiSearchFilterFeedOptions,
+	PostApiSearchFilterFeedResponses,
+	GetApiSearchZonesByZoneIdFilterOptions,
+	GetApiSearchZonesByZoneIdFilterResponses,
+	PostApiSearchZonesByZoneIdFilterExecuteOptions,
+	PostApiSearchZonesByZoneIdFilterExecuteResponses,
+	PostApiSearchZonesByZoneIdFilterFeedOptions,
+	PostApiSearchZonesByZoneIdFilterFeedResponses,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteOptions,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteResponses,
 	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteOptions,
@@ -5685,6 +5683,26 @@ export function getApiProgress<ThrowOnError extends boolean = true>(
 }
 
 /**
+ * @summary Get the Progress Filter definition
+ * {@link /api/v1/progress/search/filter}
+ */
+export function getApiProgressSearchFilter<ThrowOnError extends boolean = true>(
+	options: Options<GetApiProgressSearchFilterOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiProgressSearchFilterResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/progress/search/filter",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiProgressSearchFilterResponses, ThrowOnError>>;
+}
+
+/**
  * @summary Search current profile progress with a Search Feature state
  * {@link /api/v1/progress/search}
  */
@@ -7687,163 +7705,107 @@ export function deleteApiRealmsByRealmIdWikiNavigationByNavigationId<
 }
 
 /**
- * @summary Get a system Search Feature template
- * {@link /api/v1/search/features/:template}
+ * @summary Get the global Filter capability definition
+ * {@link /api/v1/search/filter}
  */
-export function getApiSearchFeaturesByTemplate<ThrowOnError extends boolean = true>(
-	options: Options<GetApiSearchFeaturesByTemplateOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiSearchFeaturesByTemplateResponses, ThrowOnError>> {
+export function getApiSearchFilter<ThrowOnError extends boolean = true>(
+	options: Options<GetApiSearchFilterOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiSearchFilterResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/v1/search/filter", ...config }) as Promise<
+		RequestResult<GetApiSearchFilterResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Resolve a Filter document
+ * {@link /api/v1/search/filter/definition}
+ */
+export function postApiSearchFilterDefinition<ThrowOnError extends boolean = true>(
+	options: Options<PostApiSearchFilterDefinitionOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiSearchFilterDefinitionResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "POST", url: "/api/v1/search/filter/definition", ...config }) as Promise<
+		RequestResult<PostApiSearchFilterDefinitionResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Execute a Filter document
+ * {@link /api/v1/search/filter/execute}
+ */
+export function postApiSearchFilterExecute<ThrowOnError extends boolean = true>(
+	options: Options<PostApiSearchFilterExecuteOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiSearchFilterExecuteResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "POST", url: "/api/v1/search/filter/execute", ...config }) as Promise<
+		RequestResult<PostApiSearchFilterExecuteResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Present a Filter document as a Feed
+ * {@link /api/v1/search/filter/feed}
+ */
+export function postApiSearchFilterFeed<ThrowOnError extends boolean = true>(
+	options: Options<PostApiSearchFilterFeedOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiSearchFilterFeedResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "POST", url: "/api/v1/search/filter/feed", ...config }) as Promise<
+		RequestResult<PostApiSearchFilterFeedResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Get a Zone Filter definition
+ * {@link /api/v1/search/zones/:zoneId/filter}
+ */
+export function getApiSearchZonesByZoneIdFilter<ThrowOnError extends boolean = true>(
+	options: Options<GetApiSearchZonesByZoneIdFilterOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiSearchZonesByZoneIdFilterResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/v1/search/features/{template}",
+		url: "/api/v1/search/zones/{zoneId}/filter",
 		...config,
-	}) as Promise<RequestResult<GetApiSearchFeaturesByTemplateResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiSearchZonesByZoneIdFilterResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Execute a system Search Feature template
- * {@link /api/v1/search/features/:template/execute}
+ * @summary Execute a Zone Filter
+ * {@link /api/v1/search/zones/:zoneId/filter/execute}
  */
-export function postApiSearchFeaturesByTemplateExecute<ThrowOnError extends boolean = true>(
-	options: Options<PostApiSearchFeaturesByTemplateExecuteOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiSearchFeaturesByTemplateExecuteResponses, ThrowOnError>> {
+export function postApiSearchZonesByZoneIdFilterExecute<ThrowOnError extends boolean = true>(
+	options: Options<PostApiSearchZonesByZoneIdFilterExecuteOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiSearchZonesByZoneIdFilterExecuteResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/v1/search/features/{template}/execute",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
+		url: "/api/v1/search/zones/{zoneId}/filter/execute",
 		...config,
-	}) as Promise<RequestResult<PostApiSearchFeaturesByTemplateExecuteResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PostApiSearchZonesByZoneIdFilterExecuteResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Present a system Search Feature as a Feed
- * {@link /api/v1/search/features/:template/feed}
+ * @summary Present a Zone Filter as a Feed
+ * {@link /api/v1/search/zones/:zoneId/filter/feed}
  */
-export function postApiSearchFeaturesByTemplateFeed<ThrowOnError extends boolean = true>(
-	options: Options<PostApiSearchFeaturesByTemplateFeedOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiSearchFeaturesByTemplateFeedResponses, ThrowOnError>> {
+export function postApiSearchZonesByZoneIdFilterFeed<ThrowOnError extends boolean = true>(
+	options: Options<PostApiSearchZonesByZoneIdFilterFeedOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiSearchZonesByZoneIdFilterFeedResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/v1/search/features/{template}/feed",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
+		url: "/api/v1/search/zones/{zoneId}/filter/feed",
 		...config,
-	}) as Promise<RequestResult<PostApiSearchFeaturesByTemplateFeedResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Get a Zone Search Feature
- * {@link /api/v1/search/zones/:zoneId/feature}
- */
-export function getApiSearchZonesByZoneIdFeature<ThrowOnError extends boolean = true>(
-	options: Options<GetApiSearchZonesByZoneIdFeatureOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiSearchZonesByZoneIdFeatureResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "GET",
-		url: "/api/v1/search/zones/{zoneId}/feature",
-		...config,
-	}) as Promise<RequestResult<GetApiSearchZonesByZoneIdFeatureResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Configure a Zone Search Feature
- * {@link /api/v1/search/zones/:zoneId/feature}
- */
-export function putApiSearchZonesByZoneIdFeature<ThrowOnError extends boolean = true>(
-	options: Options<PutApiSearchZonesByZoneIdFeatureOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiSearchZonesByZoneIdFeatureResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "PUT",
-		url: "/api/v1/search/zones/{zoneId}/feature",
-		...config,
-	}) as Promise<RequestResult<PutApiSearchZonesByZoneIdFeatureResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Execute a Zone Search Feature
- * {@link /api/v1/search/zones/:zoneId/feature/execute}
- */
-export function postApiSearchZonesByZoneIdFeatureExecute<ThrowOnError extends boolean = true>(
-	options: Options<PostApiSearchZonesByZoneIdFeatureExecuteOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiSearchZonesByZoneIdFeatureExecuteResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "POST",
-		url: "/api/v1/search/zones/{zoneId}/feature/execute",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiSearchZonesByZoneIdFeatureExecuteResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Present a Zone Search Feature as a Feed
- * {@link /api/v1/search/zones/:zoneId/feature/feed}
- */
-export function postApiSearchZonesByZoneIdFeatureFeed<ThrowOnError extends boolean = true>(
-	options: Options<PostApiSearchZonesByZoneIdFeatureFeedOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiSearchZonesByZoneIdFeatureFeedResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "POST",
-		url: "/api/v1/search/zones/{zoneId}/feature/feed",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiSearchZonesByZoneIdFeatureFeedResponses, ThrowOnError>>;
-}
-
-/**
- * @summary List Zone Search Feature revisions
- * {@link /api/v1/search/zones/:zoneId/feature/revisions}
- */
-export function getApiSearchZonesByZoneIdFeatureRevisions<ThrowOnError extends boolean = true>(
-	options: Options<GetApiSearchZonesByZoneIdFeatureRevisionsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiSearchZonesByZoneIdFeatureRevisionsResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "GET",
-		url: "/api/v1/search/zones/{zoneId}/feature/revisions",
-		...config,
-	}) as Promise<RequestResult<GetApiSearchZonesByZoneIdFeatureRevisionsResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Restore a Zone Search Feature revision
- * {@link /api/v1/search/zones/:zoneId/feature/restore}
- */
-export function postApiSearchZonesByZoneIdFeatureRestore<ThrowOnError extends boolean = true>(
-	options: Options<PostApiSearchZonesByZoneIdFeatureRestoreOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiSearchZonesByZoneIdFeatureRestoreResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "POST",
-		url: "/api/v1/search/zones/{zoneId}/feature/restore",
-		...config,
-	}) as Promise<RequestResult<PostApiSearchZonesByZoneIdFeatureRestoreResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PostApiSearchZonesByZoneIdFilterFeedResponses, ThrowOnError>>;
 }
 
 /**

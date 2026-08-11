@@ -286,9 +286,6 @@ export default {
 	RealmTagVotingDisabled: `Le vote sur les étiquettes n’est pas activé dans ce ${realmTerms.inline}.`,
 	RealmTagContextRequired: `Ce ${realmTerms.inline} doit d’abord fournir une explication officielle et actuellement visible de cette étiquette.`,
 	RealmTagSelfReferenceForbidden: "Un Tag ne peut pas être appliqué à lui-même.",
-	SearchDocumentRevisionConflict:
-		"La configuration de recherche a changé. Rechargez-la avant d’enregistrer.",
-	ZoneSearchFeatureNotFound: `Cet ${zoneTerms.inline} ne dispose d’aucune fonction de recherche activée.`,
 	SharedSearchQueryNotFound: "Cette requête de recherche partagée est introuvable.",
 	InvalidTagStructure: `Ce ${tagStructureTerms.inline} n’est pas valide.`,
 	TagStructureNotFound: `Ce ${tagStructureTerms.inline} est introuvable.`,

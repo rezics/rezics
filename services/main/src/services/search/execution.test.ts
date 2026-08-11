@@ -15,7 +15,7 @@ vi.mock("./service", () => ({
 
 import { executeCompiledSearchIdentifiers } from "./execution";
 import { parseGlobalSearchCursor } from "./query";
-import { compileSearchFeatureInput, createDefaultSearchDocument } from "./templates";
+import { compileSearchFeatureInput } from "./filter-document";
 
 describe("globally ranked PostgreSQL Search execution", () => {
 	beforeEach(() => {
@@ -42,7 +42,7 @@ describe("globally ranked PostgreSQL Search execution", () => {
 		});
 		const compiled = compileSearchFeatureInput(
 			{
-				document: createDefaultSearchDocument("global"),
+				filterDocument: {},
 				contexts: [],
 				injections: [],
 				state: { pageSize: 3, sort: "createdAt:desc" },
@@ -87,7 +87,7 @@ describe("globally ranked PostgreSQL Search execution", () => {
 		});
 		const compiled = compileSearchFeatureInput(
 			{
-				document: createDefaultSearchDocument("global"),
+				filterDocument: {},
 				contexts: [],
 				injections: [],
 				state: { pageSize: 3, sort: "createdAt:desc" },
@@ -121,7 +121,7 @@ describe("globally ranked PostgreSQL Search execution", () => {
 		});
 		const compiled = compileSearchFeatureInput(
 			{
-				document: createDefaultSearchDocument("global"),
+				filterDocument: {},
 				contexts: [],
 				injections: [],
 				state: { pageSize: 3, sort: "createdAt:desc" },
@@ -139,7 +139,7 @@ describe("globally ranked PostgreSQL Search execution", () => {
 	});
 
 	it("continues the global keyset beyond the former 200-result window", async () => {
-		const document = createDefaultSearchDocument("global");
+		const filterDocument = {};
 		let cursor: string | undefined;
 
 		for (let pageIndex = 0; pageIndex < 5; pageIndex += 1) {
@@ -171,7 +171,7 @@ describe("globally ranked PostgreSQL Search execution", () => {
 			});
 			const compiled = compileSearchFeatureInput(
 				{
-					document,
+					filterDocument,
 					contexts: [],
 					injections: [],
 					state: {

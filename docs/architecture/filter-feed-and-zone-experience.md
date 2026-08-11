@@ -53,24 +53,26 @@ Search is a presentation and execution feature over the same `UnitFilter`. It
 combines:
 
 - optional `UnitFilter.search` input executed by the Search Service;
-- a trusted SearchDocument;
+- a sparse, trusted `FilterDocument` whose omitted members add no condition;
 - user-facing controls, facets, and Search-only relevance sorting;
 - `UnitFilter.where` plus trusted domain predicates for fixed scope;
 - an internal adapter to the current search index.
 
-SearchDocument controls emit bounded `SearchControlPredicate` values. Those
+Resolved Filter controls emit bounded `SearchControlPredicate` values. Those
 values are trusted-control state, not another general Unit Filter: only the
 Search Feature accepts them, and the server resolves them to a private
-Search-Service expression after checking the selected control and template.
+Search-Service expression after checking the selected control against the one
+global field registry. A Filter document may narrow categories, add a fixed
+predicate, or sparsely override controls. It cannot add fields, operators,
+sorts, facets, page sizes, result windows, or engine ranking expressions.
 
-SearchDocument owns separate Search and Feed sort profiles. Each profile
-selects an ordered subset of server-owned strategies and declares defaults for
-empty and non-empty text queries. Search defaults to `best` without text and
-`relevance` with text. Feed defaults to `best` in both states and may never
-include `relevance`, even when its Filter contains a Search match. `best` is a
-recommendation order; `relevance` is text-query ranking and is invalid without
-a non-empty query. A document may select strategies but cannot define raw
-index fields or engine ranking expressions.
+The server owns separate Search and Feed sort policies. Search defaults to
+`best` without text and `relevance` with text. Feed defaults to `best` in both
+states and may never include `relevance`, even when its Filter contains a
+Search match. `best` is a recommendation order; `relevance` is text-query
+ranking and is invalid without a non-empty query. An endpoint such as Progress
+may narrow the global policy for its data source, but that executable policy is
+not a persisted document or preset.
 
 The current authoritative PostgreSQL Search query implements `best` as descending global
 `recommendationBest`, then descending update time, then ascending Unit ID for
@@ -106,20 +108,22 @@ and subject predicates, while its scoring-Realm selector composes a
 displayed-Score predicate. When that Feed also has query text, its execution
 adapter maps the fixed content kind to an internal Search category without
 changing the public Filter. Language, Realm placement, Tags, query text, and
-other user-controlled conditions remain SearchDocument controls or
+other user-controlled conditions remain resolved Filter controls or
 `UnitFilter` state and are passed unchanged when navigating between compact and
 full-page presentations.
 
 Full-text query text remains request state inside the Filter. It is never
-stored as initial text in a SearchDocument, because stored query copy would
-bypass the localization ownership model. Search-index expressions, cursor
-encoding, and engine compilation are server-internal implementation details,
-not another public Filter schema.
+stored in a `FilterDocument`, because stored query copy would bypass the
+localization ownership model. Search-index expressions, cursor encoding, and
+engine compilation are server-internal implementation details, not another
+public Filter schema.
 
-Zone boundaries use an optional `UnitPredicate` plus Search categories. A Feed
-Block does not store a custom Filter. The standard Zone Feed Block uses the
-Zone Search Feature. Its content-type selector emits a `UnitPredicate` and is
-rendered in the same Filter toolbar as sort and the remaining Filter controls.
+A Zone stores one sparse `FilterDocument` directly. A Search or Feed Block may
+use the hosting Zone document, `{}` from the global source, or one inline sparse
+document. The hosting Zone remains an enforced scope in every case. The
+standard Zone Feed Block uses the Zone-owned document. Its content-type
+selector emits a `UnitPredicate` and is rendered in the same Filter toolbar as
+sort and the remaining Filter controls.
 The shared toolbar keeps its product-wide order fixed as sort, schema-selected
 quick filters, then the remaining Filter action. Schema controls capabilities,
 option order, and defaults; it does not duplicate this invariant layout in
@@ -132,24 +136,23 @@ under the user-facing “Content type” label and emits the same
 
 Every live Zone must have:
 
-1. an enabled Search Feature with a valid SearchDocument; and
+1. a valid, possibly empty `FilterDocument` on the Zone row; and
 2. at least one Zone Page containing a Feed Block and placed in the Zone's
    page structure.
 
-Zone creation provisions both requirements in the same database transaction as
-the Zone. The default page is published, addressed as `home`, placed in the
-Zone page structure, and owned by the Zone creator. The Search template is an
-explicit bootstrap input. Ordinary Zones use `global`; official work Zones
-use their Book, Media, or Software template from their bootstrap manifest.
+Zone creation provisions both requirements in the same database transaction.
+The default page is published, addressed as `home`, placed in the Zone page
+structure, and owned by the Zone creator. Omitting every Filter member stores
+`{}`, which contributes no document-level condition.
 
 Bootstrap reconciles this invariant for every Zone, not only official Zones.
-Readiness fails when any live Zone lacks either capability. Updating or deleting
-Zone Pages may not remove the final Feed Block, and the Zone Search API does not
-permit disabling Search.
+Readiness fails when any live Zone lacks either requirement. Updating or
+deleting Zone Pages may not remove the final Feed Block.
 
 Official Bootstrap data includes Book, Media, Software, Realm, and Zone
-workspaces. Each has its own kind boundary, default Search template, Feed home page,
-and deterministic Bootstrap identity.
+workspaces. Book, Media, and Software are ordinary Zones, not Search capability
+profiles. Each official workspace stores its concrete selection boundary as a
+Filter document and has a Feed home page and deterministic Bootstrap identity.
 
 ## Validation and execution
 

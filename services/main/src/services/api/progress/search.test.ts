@@ -11,9 +11,12 @@ describe("progress Search Feature execution boundary", () => {
 		const definition = getProgressSearchDefinition();
 
 		expect(definition.controls).toEqual([]);
-		expect(definition.document.template.id).toBe("progress");
-		expect(definition.document.query.enabled).toBe(true);
-		expect(definition.document.sort.search.options).toEqual([
+		expect(definition.filterDocument).toEqual({
+			categories: ["units"],
+			where: { kind: { in: ["book", "media", "software"] } },
+		});
+		expect(definition.query.enabled).toBe(true);
+		expect(definition.sort.search.options).toEqual([
 			"progressLastSeenAt:desc",
 			"progressLastSeenAt:asc",
 			"title:asc",

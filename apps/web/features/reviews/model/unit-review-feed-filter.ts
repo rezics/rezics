@@ -4,7 +4,7 @@ import type { UnitScore } from "./score-value";
 
 /**
  * Product-owned Review score controls compile into the shared UnitPredicate
- * vocabulary. Realm placement remains a separate SearchDocument control.
+ * vocabulary. Realm placement remains a separate Filter control.
  */
 export function createReviewScorePredicate(input: {
 	readonly realmId?: string;

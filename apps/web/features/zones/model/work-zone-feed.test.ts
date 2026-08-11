@@ -4,7 +4,7 @@ import { workZoneFeedContentKinds } from "./work-zone-feed";
 
 describe("work Zone Feed content kinds", () => {
 	it("limits official units to their direct Unit, Collections, and Posts", () => {
-		expect(workZoneFeedContentKinds("book")).toEqual([
+		expect(workZoneFeedContentKinds({ where: { kind: { in: ["book"] } } })).toEqual([
 			"unit:book",
 			"unit:collection",
 			"post:post",
@@ -14,12 +14,16 @@ describe("work Zone Feed content kinds", () => {
 			"post:wiki",
 			"post:picture",
 		]);
-		expect(workZoneFeedContentKinds("media")).toContain("unit:media");
-		expect(workZoneFeedContentKinds("software")).toContain("unit:software");
+		expect(workZoneFeedContentKinds({ where: { kind: { in: ["media"] } } })).toContain(
+			"unit:media",
+		);
+		expect(workZoneFeedContentKinds({ where: { kind: { in: ["software"] } } })).toContain(
+			"unit:software",
+		);
 	});
 
 	it("does not enable the unit selector for unrelated Zones", () => {
-		expect(workZoneFeedContentKinds("realm")).toBeUndefined();
-		expect(workZoneFeedContentKinds("global")).toBeUndefined();
+		expect(workZoneFeedContentKinds({ categories: ["realms"] })).toBeUndefined();
+		expect(workZoneFeedContentKinds({})).toBeUndefined();
 	});
 });

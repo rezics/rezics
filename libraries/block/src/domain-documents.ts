@@ -1,5 +1,3 @@
-import { UnitPredicate as UnitPredicateSchema, type UnitPredicate } from "@rezics/filter";
-import { SearchCategory } from "@rezics/filter";
 import { type Static, Type } from "@sinclair/typebox";
 
 import { BlockKey, createBlockKey } from "./identity";
@@ -34,17 +32,6 @@ export const PollContentBlock = Type.Object(
 	{ additionalProperties: false, $id: "PollContentBlock" },
 );
 export type PollContentBlock = Static<typeof PollContentBlock>;
-
-export const ZoneBoundaryDocument = Type.Object(
-	{
-		_type: Type.Literal("zone-boundary"),
-		_key: BlockKey,
-		categories: Type.Array(SearchCategory, { minItems: 1, maxItems: 9 }),
-		filter: Type.Optional(Type.Unsafe<UnitPredicate>(UnitPredicateSchema)),
-	},
-	{ additionalProperties: false, $id: "ZoneBoundaryDocument" },
-);
-export type ZoneBoundaryDocument = Static<typeof ZoneBoundaryDocument>;
 
 export const ZoneThemeDocument = Type.Object(
 	{
@@ -100,19 +87,6 @@ export function createPollContentBlock(
 	key: BlockKey = createBlockKey(),
 ): PollContentBlock {
 	return { _type: "poll-content", _key: key, options };
-}
-
-export function createZoneBoundaryDocument(
-	categories: Static<typeof SearchCategory>[],
-	filter?: UnitPredicate,
-	key: BlockKey = createBlockKey(),
-): ZoneBoundaryDocument {
-	return {
-		_type: "zone-boundary",
-		_key: key,
-		categories,
-		...(filter ? { filter } : {}),
-	};
 }
 
 export function createZoneThemeDocument(

@@ -3,7 +3,6 @@ import {
 	createDockDocument,
 	createPortableTextDocument,
 	createUnitReferencedBlockDocument,
-	createZoneBoundaryDocument,
 	createZoneThemeDocument,
 	assertDockDocument,
 	assertNavigationDocument,
@@ -17,7 +16,7 @@ import {
 	type FontAwesomeIconReference,
 } from "@rezics/avatar";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
-import type { UnitPredicate } from "@rezics/filter";
+import { createFilterDocument, type UnitPredicate } from "@rezics/filter";
 import {
 	CuratedCreationTagCollectionUnitIds,
 	OfficialRealmUnitIds,
@@ -658,15 +657,15 @@ function createOfficialZoneContent(input: {
 
 const WorkZoneCategories = ["units", "posts", "reviews", "collections"] as const;
 
-function createWorkZoneBoundaryDocument(kind: "book" | "media" | "software", key: string) {
-	const filter = {
+function createWorkZoneFilterDocument(kind: "book" | "media" | "software") {
+	const where = {
 		any: [
 			{ kind: { in: [kind] } },
 			{ post: { is: { subject: { is: { kind: { in: [kind] } } } } } },
 			{ collection: { is: { items: { some: { kind: { in: [kind] } } } } } },
 		],
 	} satisfies UnitPredicate;
-	return createZoneBoundaryDocument([...WorkZoneCategories], filter, key);
+	return createFilterDocument({ categories: [...WorkZoneCategories], where });
 }
 
 export const OfficialZoneManifest = [
@@ -686,8 +685,7 @@ export const OfficialZoneManifest = [
 			},
 		],
 		ownerProfileId: OfficialProfileIds.editorial,
-		searchTemplate: "book",
-		boundaryDocument: createWorkZoneBoundaryDocument("book", "b00757a70001"),
+		filterDocument: createWorkZoneFilterDocument("book"),
 		themeDocument: createZoneThemeDocument({ accent: "#a16207" }, "b00757a70002"),
 		avatar: officialZoneIcon("book-open"),
 		...createOfficialZoneContent({
@@ -728,8 +726,7 @@ export const OfficialZoneManifest = [
 			},
 		],
 		ownerProfileId: OfficialProfileIds.editorial,
-		searchTemplate: "media",
-		boundaryDocument: createWorkZoneBoundaryDocument("media", "b00757a70004"),
+		filterDocument: createWorkZoneFilterDocument("media"),
 		themeDocument: createZoneThemeDocument({ accent: "#db2777" }, "b00757a70005"),
 		avatar: officialZoneIcon("clapperboard"),
 		...createOfficialZoneContent({
@@ -770,8 +767,7 @@ export const OfficialZoneManifest = [
 			},
 		],
 		ownerProfileId: OfficialProfileIds.editorial,
-		searchTemplate: "software",
-		boundaryDocument: createWorkZoneBoundaryDocument("software", "b00757a70007"),
+		filterDocument: createWorkZoneFilterDocument("software"),
 		themeDocument: createZoneThemeDocument({ accent: "#0d9488" }, "b00757a70008"),
 		avatar: officialZoneIcon("code"),
 		...createOfficialZoneContent({
@@ -812,8 +808,7 @@ export const OfficialZoneManifest = [
 			},
 		],
 		ownerProfileId: OfficialProfileIds.editorial,
-		searchTemplate: "realm",
-		boundaryDocument: createZoneBoundaryDocument(["realms"], undefined, "b00757a7000a"),
+		filterDocument: createFilterDocument({ categories: ["realms"] }),
 		themeDocument: createZoneThemeDocument({ accent: "#7c3aed" }, "b00757a7000b"),
 		avatar: officialZoneIcon("people-group"),
 		...createOfficialZoneContent({
@@ -854,12 +849,10 @@ export const OfficialZoneManifest = [
 			},
 		],
 		ownerProfileId: OfficialProfileIds.editorial,
-		searchTemplate: "zone",
-		boundaryDocument: createZoneBoundaryDocument(
-			["units"],
-			{ kind: { in: ["zone"] } },
-			"b00757a7000d",
-		),
+		filterDocument: createFilterDocument({
+			categories: ["units"],
+			where: { kind: { in: ["zone"] } },
+		}),
 		themeDocument: createZoneThemeDocument({ accent: "#2563eb" }, "b00757a7000e"),
 		avatar: officialZoneIcon("compass"),
 		...createOfficialZoneContent({

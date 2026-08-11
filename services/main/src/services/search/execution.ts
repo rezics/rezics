@@ -3,11 +3,11 @@ import { createHash } from "node:crypto";
 import {
 	canonicalUnitPredicate,
 	combineUnitPredicates,
+	parseFilterDocument,
 	type SearchControlPredicate,
 	type SearchField,
 	type UnitPredicate,
 } from "@rezics/filter";
-import { ZoneBoundaryDocument, parseDocument } from "@rezics/block";
 import { getActiveObservability } from "@rezics/observability";
 import type { ContentLanguage } from "@rezics/i18n";
 import { eq } from "drizzle-orm";
@@ -103,16 +103,18 @@ async function resolveScope(compiled: CompiledSearchRequest): Promise<{
 		};
 
 	const [record] = await database
-		.select({ boundaryDocument: zone.boundaryDocument })
+		.select({ filterDocument: zone.filterDocument })
 		.from(zone)
 		.where(eq(zone.id, compiled.scope.zoneId))
 		.limit(1);
 	if (!record) throw new InvalidSearch("Search Zone scope does not exist");
-	const boundary = parseDocument(ZoneBoundaryDocument, record.boundaryDocument);
+	const filterDocument = parseFilterDocument(record.filterDocument);
 	return {
-		categories: compiled.categories.filter((category) => boundary.categories.includes(category)),
+		categories: filterDocument.categories
+			? compiled.categories.filter((category) => filterDocument.categories?.includes(category))
+			: [...compiled.categories],
 		filters: [],
-		...(boundary.filter ? { domainFilter: boundary.filter } : {}),
+		...(filterDocument.where ? { domainFilter: filterDocument.where } : {}),
 	};
 }
 

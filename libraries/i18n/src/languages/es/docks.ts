@@ -55,12 +55,8 @@ export default {
 		orientation: "Orientación",
 		style: "Estilo",
 		sources: {
-			global: "Plantilla global",
-			book: "Plantilla de libro",
-			media: "Plantilla multimedia",
-			software: "Plantilla de software",
-			realm: `Plantilla de ${realmTerms.inline}`,
-			zone: `Plantilla de ${zoneTerms.inline}`,
+			global: "Filtro global",
+			inline: "Filtro integrado",
 		},
 		appearances: {
 			inline: "En línea",

@@ -60,11 +60,7 @@ const reviewedExemptions = [
 	},
 	{
 		file: "src/services/database/schema/zone.ts",
-		rationale: "Authored point-in-time edit summary, never interface copy.",
-	},
-	{
-		file: "src/services/database/schema/zone.ts",
-		rationale: "Structured contract: search boundary contains only categories and filters.",
+		rationale: "Sparse Filter contract; `{}` adds no Zone conditions.",
 	},
 	{
 		file: "src/services/database/schema/zone.ts",

@@ -7,13 +7,13 @@ import {
 	JsonValue as JsonValueSchema,
 	type JsonValue as JsonValueType,
 } from "@rezics/portable-text";
+import type { Static } from "@sinclair/typebox";
 import { Check } from "@sinclair/typebox/value";
 import {
 	NavigationDocument,
 	DockDocument,
 	UnresolvedBlockReferenceError,
 	UnitReferencedBlockDocument,
-	ZoneBoundaryDocument,
 	ZonePageBlockHostPolicy,
 	ZoneThemeDocument,
 	assertUnitReferencedBlockDocument,
@@ -28,7 +28,14 @@ import {
 	type Block,
 } from "@rezics/block";
 import type { ContentLanguage } from "@rezics/i18n";
-import { assertUnitPredicate, FilterSchemaModels } from "@rezics/filter";
+import {
+	assertFilterDocument,
+	collectUnitPredicateReferenceIds,
+	FilterDocument,
+	FilterSchemaModels,
+	filterDocumentControlField,
+	parseFilterDocument,
+} from "@rezics/filter";
 import { ZoneHomePageSlug } from "@rezics/slug";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -51,6 +58,8 @@ import {
 	imageAsset,
 } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
+import { assertExecutableBlockFilterDocuments } from "../../search/block-filter-documents";
+import { resolveFilterDocument } from "../../search/filter-document";
 import type { DatabaseTransaction } from "../../database";
 import { presentWikiPostPortableTextDocument } from "../../documents/portable-text-presentation";
 import { recordUnitRevision } from "../../units/history";
@@ -91,7 +100,6 @@ import {
 	upsertZonePageUnit,
 	type ZonePageProjection,
 } from "../../zones/pages";
-import { getZoneSearchFeature } from "../../zones/search-feature";
 import { provisionZoneDefaultExperienceInTransaction } from "../../zones/default-experience";
 import { IdResponse, NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
@@ -305,7 +313,7 @@ async function toZoneResponse(
 				cover: presentImageAsset(coverAssetId, "cover"),
 			}),
 		),
-		boundaryDocument: parseDocument(ZoneBoundaryDocument, record.boundaryDocument),
+		filterDocument: parseFilterDocument(record.filterDocument),
 		themeDocument: parseDocument(ZoneThemeDocument, record.themeDocument),
 		capabilities: { canManage },
 	} satisfies typeof ZoneResponse.static;
@@ -392,9 +400,73 @@ function presentRenderUnit(
 function ensureZoneBlockDocument(value: unknown): void {
 	try {
 		assertUnitReferencedBlockDocument(value, ZonePageBlockHostPolicy);
+		assertExecutableBlockFilterDocuments(value, true);
 	} catch {
 		throw new ZoneDocumentInvalid();
 	}
+}
+
+function ensureZoneFilterDocument(value: unknown): asserts value is Static<typeof FilterDocument> {
+	try {
+		assertFilterDocument(value);
+		resolveFilterDocument(value, true);
+	} catch {
+		throw new ZoneDocumentInvalid();
+	}
+}
+
+async function ensureZoneFilterReferences(
+	tx: DatabaseTransaction,
+	document: Static<typeof FilterDocument>,
+): Promise<void> {
+	const labelIds = new Set(
+		(document.controls ?? []).flatMap((control) =>
+			control.labelUnitId ? [control.labelUnitId] : [],
+		),
+	);
+	const tagIds = new Set<string>();
+	for (const control of document.controls ?? [])
+		if (
+			filterDocumentControlField(control) === "tag" &&
+			control.optionPolicy &&
+			control.optionPolicy.kind !== "all"
+		)
+			for (const value of control.optionPolicy.values)
+				if (typeof value === "string") tagIds.add(value);
+	const predicateIds = document.where ? collectUnitPredicateReferenceIds(document.where) : [];
+	const ids = [...new Set([...labelIds, ...tagIds, ...predicateIds])];
+	if (!ids.length) return;
+	const records = await tx
+		.select({
+			id: unit.id,
+			kind: unit.kind,
+			status: unit.status,
+			visibility: unit.visibility,
+			moderationStatus: unit.moderationStatus,
+		})
+		.from(unit)
+		.where(and(inArray(unit.id, ids), isNull(unit.deletedAt)));
+	const recordById = new Map(records.map((record) => [record.id, record]));
+	const isPublicKind = (id: string, kind: "label" | "tag") => {
+		const record = recordById.get(id);
+		return (
+			record?.kind === kind &&
+			record.status === "published" &&
+			record.visibility === "public" &&
+			record.moderationStatus === "approved"
+		);
+	};
+	const isPublicUnit = (id: string) => {
+		const record = recordById.get(id);
+		return (
+			record?.status === "published" &&
+			record.visibility === "public" &&
+			record.moderationStatus === "approved"
+		);
+	};
+	if ([...labelIds].some((id) => !isPublicKind(id, "label"))) throw new ZoneDocumentInvalid();
+	if ([...tagIds].some((id) => !isPublicKind(id, "tag"))) throw new ZoneDocumentInvalid();
+	if (predicateIds.some((id) => !isPublicUnit(id))) throw new ZoneDocumentInvalid();
 }
 
 function ensureZoneNavigationDocument(value: unknown): void {
@@ -449,12 +521,12 @@ async function ensureZoneNavigationReferences(
 	}
 }
 
-const ZoneBoundaryDocumentModel = t.Object(
+const FilterDocumentModel = t.Object(
 	{
-		...ZoneBoundaryDocument.properties,
-		filter: t.Optional(t.Ref("UnitPredicate")),
+		...FilterDocument.properties,
+		where: t.Optional(t.Ref("UnitPredicate")),
 	},
-	{ additionalProperties: false, $id: "ZoneBoundaryDocument" },
+	{ additionalProperties: false, $id: "FilterDocument" },
 );
 
 export default new Elysia()
@@ -464,7 +536,7 @@ export default new Elysia()
 		NavigationDocument,
 		PortableTextDocument,
 		UnitReferencedBlockDocument,
-		ZoneBoundaryDocument: ZoneBoundaryDocumentModel,
+		FilterDocument: FilterDocumentModel,
 		ZoneThemeDocument,
 	})
 	.use(session)
@@ -694,7 +766,7 @@ export default new Elysia()
 							.limit(1);
 						if (zoneWikiPost) wikiPostIds.add(zoneWikiPost.id);
 					}
-					let usesZoneSearchFeature = false;
+					let usesZoneFilter = false;
 					const mergeBlockReferences = (document: { readonly blocks: readonly Block[] }) => {
 						const references = collectBlockReferences(document);
 						for (const id of references.unitIds) unitIds.add(id);
@@ -707,7 +779,7 @@ export default new Elysia()
 									block.source.kind === "search" &&
 									block.source.feature.kind === "zone")
 							)
-								usesZoneSearchFeature = true;
+								usesZoneFilter = true;
 						});
 					};
 					if (page) mergeBlockReferences(page.document);
@@ -716,23 +788,21 @@ export default new Elysia()
 						const references = collectNavigationReferences(navigation.document);
 						for (const id of references.unitIds) unitIds.add(id);
 					}
-					if (usesZoneSearchFeature) {
-						const feature = await database.transaction((tx) =>
-							getZoneSearchFeature(tx, params.zoneId),
-						);
-						if (feature)
-							for (const id of [
-								...feature.document.controls.map((control) => control.labelUnitId),
-								...feature.document.sections.map((section) => section.labelUnitId),
-								...feature.document.controls.flatMap((control) =>
-									control.field === "tag" && control.optionPolicy?.kind !== "all"
-										? (control.optionPolicy?.values ?? []).filter(
-												(value): value is string => typeof value === "string",
-											)
-										: [],
-								),
-							])
-								if (id) unitIds.add(id);
+					if (usesZoneFilter) {
+						const filterDocument = parseFilterDocument(zoneRecord.filterDocument);
+						for (const id of [
+							...(filterDocument.controls ?? []).map((control) => control.labelUnitId),
+							...(filterDocument.controls ?? []).flatMap((control) =>
+								(control.field === "tag" || control.key === "tag") &&
+								control.optionPolicy &&
+								control.optionPolicy.kind !== "all"
+									? control.optionPolicy.values.filter(
+											(value): value is string => typeof value === "string",
+										)
+									: [],
+							),
+						])
+							if (id) unitIds.add(id);
 					}
 
 					const wikiRows = await getReadableRenderLocalizationRows(
@@ -820,15 +890,10 @@ export default new Elysia()
 			.patch(
 				"/:zoneId",
 				async ({ params, profile, authorization, body }) => {
-					if (body.boundaryDocument?.filter)
-						try {
-							assertUnitPredicate(body.boundaryDocument.filter);
-						} catch {
-							throw new ZoneDocumentInvalid();
-						}
+					if (body.filterDocument) ensureZoneFilterDocument(body.filterDocument);
 					const scopes: string[][] = [];
 					if (body.localization) scopes.push(["localizations", body.localization.language]);
-					if (body.boundaryDocument) scopes.push(["zone", "boundary"]);
+					if (body.filterDocument) scopes.push(["zone", "filter"]);
 					if (body.themeDocument) scopes.push(["zone", "theme"]);
 					if (body.startsAt !== undefined || body.endsAt !== undefined)
 						scopes.push(["zone", "settings"]);
@@ -852,6 +917,7 @@ export default new Elysia()
 						await tx.execute(
 							sql`select pg_advisory_xact_lock(hashtextextended(${`zone-graph:${params.zoneId}`}::text, 0))`,
 						);
+						if (body.filterDocument) await ensureZoneFilterReferences(tx, body.filterDocument);
 						if (body.localization) {
 							const storedLocalization = toUnitLocalizationStorage(body.localization);
 							await ensureImageAssetsAttachable(
@@ -868,7 +934,7 @@ export default new Elysia()
 								});
 						}
 						if (
-							body.boundaryDocument ||
+							body.filterDocument ||
 							body.themeDocument ||
 							body.startsAt !== undefined ||
 							body.endsAt !== undefined
@@ -876,7 +942,7 @@ export default new Elysia()
 							await tx
 								.update(zone)
 								.set({
-									...(body.boundaryDocument ? { boundaryDocument: body.boundaryDocument } : {}),
+									...(body.filterDocument ? { filterDocument: body.filterDocument } : {}),
 									...(body.themeDocument ? { themeDocument: body.themeDocument } : {}),
 									...(body.startsAt !== undefined ? { startsAt } : {}),
 									...(body.endsAt !== undefined ? { endsAt } : {}),
@@ -1485,12 +1551,7 @@ export default new Elysia()
 			"",
 			async ({ profile, authorization, body }) => {
 				await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
-				if (body.boundaryDocument.filter)
-					try {
-						assertUnitPredicate(body.boundaryDocument.filter);
-					} catch {
-						throw new ZoneDocumentInvalid();
-					}
+				ensureZoneFilterDocument(body.filterDocument);
 				const startsAt = body.startsAt ? new Date(body.startsAt) : null;
 				const endsAt = body.endsAt ? new Date(body.endsAt) : null;
 				if (startsAt && endsAt && endsAt <= startsAt) throw new ZoneTimeRangeInvalid();
@@ -1500,9 +1561,10 @@ export default new Elysia()
 						localization: body.localization,
 						ownerId: profile.unitId,
 					});
+					await ensureZoneFilterReferences(tx, body.filterDocument);
 					await tx.insert(zone).values({
 						id: unitId,
-						boundaryDocument: body.boundaryDocument,
+						filterDocument: body.filterDocument,
 						themeDocument: body.themeDocument,
 						startsAt,
 						endsAt,
@@ -1517,7 +1579,6 @@ export default new Elysia()
 						actorProfileId: profile.unitId,
 						language: body.localization.language,
 						title: body.localization.title,
-						searchTemplate: "global",
 					});
 					return unitId;
 				});

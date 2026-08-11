@@ -2,7 +2,7 @@
 
 import {
 	type PostApiProgressSearchStatus200,
-	useGetApiSearchFeaturesByTemplate,
+	useGetApiProgressSearchFilter,
 	usePostApiProgressSearch,
 } from "@rezics/openapi-tanstack-query";
 import {
@@ -52,9 +52,7 @@ export function ProgressPage() {
 
 function ProgressList() {
 	const localizationLanguages = useLocalizationLanguages();
-	const definitionQuery = useGetApiSearchFeaturesByTemplate({
-		path: { template: "progress" },
-	});
+	const definitionQuery = useGetApiProgressSearchFilter();
 	const searchMutation = usePostApiProgressSearch();
 	const searchProgress = searchMutation.mutateAsync;
 	const { t } = useTranslation(["engagement", "search", "ui"]);
