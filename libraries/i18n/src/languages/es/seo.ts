@@ -6,6 +6,7 @@ import units from "./units";
 
 const { forms: audioTerms } = esTerminology.audio;
 const { forms: entityTerms } = esTerminology.entity;
+const { forms: metadataTerms } = esTerminology.metadata;
 const { forms: postTerms } = esTerminology.post;
 const { forms: realmTerms } = esTerminology.realm;
 const { forms: tagStructureTerms } = esTerminology.tagStructure;
@@ -41,8 +42,7 @@ export default {
 			name: String,
 			kind: String,
 		}),
-		restricted:
-			"La clasificación de contenido de esta página no permite metadatos para la indexación de búsqueda.",
+		restricted: `La clasificación de contenido de esta página no permite ${metadataTerms.inline} para la indexación de búsqueda.`,
 		unavailable:
 			"La información pública de esta página no está disponible actualmente para la indexación.",
 	},

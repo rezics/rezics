@@ -6,6 +6,7 @@ import units from "./units";
 
 const { forms: audioTerms } = frTerminology.audio;
 const { forms: entityTerms } = frTerminology.entity;
+const { forms: metadataTerms } = frTerminology.metadata;
 const { forms: postTerms } = frTerminology.post;
 const { forms: realmTerms } = frTerminology.realm;
 const { forms: tagStructureTerms } = frTerminology.tagStructure;
@@ -39,8 +40,7 @@ export default {
 			name: String,
 			kind: String,
 		}),
-		restricted:
-			"La classification de cette page exclut la fourniture de métadonnées destinées à l’indexation.",
+		restricted: `La classification de cette page exclut la fourniture de ${metadataTerms.inline} destinées à l’indexation.`,
 		unavailable:
 			"Les informations publiques de cette page sont actuellement indisponibles pour l’indexation.",
 	},

@@ -6,6 +6,7 @@ import units from "./units";
 
 const { forms: audioTerms } = jaTerminology.audio;
 const { forms: entityTerms } = jaTerminology.entity;
+const { forms: metadataTerms } = jaTerminology.metadata;
 const { forms: postTerms } = jaTerminology.post;
 const { forms: realmTerms } = jaTerminology.realm;
 const { forms: tagStructureTerms } = jaTerminology.tagStructure;
@@ -39,7 +40,7 @@ export default {
 			name: String,
 			kind: String,
 		}),
-		restricted: "このページのコンテンツ区分は、検索インデックス用メタデータの対象外です。",
+		restricted: `このページのコンテンツ区分は、検索インデックス用${metadataTerms.label}の対象外です。`,
 		unavailable: "このページの公開情報は現在、検索インデックスに利用できません。",
 	},
 	kinds: {

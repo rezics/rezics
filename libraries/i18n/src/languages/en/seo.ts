@@ -6,6 +6,7 @@ import units from "./units";
 
 const { forms: audioTerms } = enTerminology.audio;
 const { forms: entityTerms } = enTerminology.entity;
+const { forms: metadataTerms } = enTerminology.metadata;
 const { forms: postTerms } = enTerminology.post;
 const { forms: realmTerms } = enTerminology.realm;
 const { forms: tagStructureTerms } = enTerminology.tagStructure;
@@ -39,7 +40,7 @@ export default {
 			name: String,
 			kind: String,
 		}),
-		restricted: "This page’s content rating is not eligible for search indexing metadata.",
+		restricted: `This page’s content rating is not eligible for search indexing ${metadataTerms.inline}.`,
 		unavailable: "Public information for this page is currently unavailable for search indexing.",
 	},
 	kinds: {

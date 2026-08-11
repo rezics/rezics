@@ -6,6 +6,7 @@ import units from "./units";
 
 const { forms: audioTerms } = deTerminology.audio;
 const { forms: entityTerms } = deTerminology.entity;
+const { forms: metadataTerms } = deTerminology.metadata;
 const { forms: postTerms } = deTerminology.post;
 const { forms: realmTerms } = deTerminology.realm;
 const { forms: tagStructureTerms } = deTerminology.tagStructure;
@@ -39,8 +40,7 @@ export default {
 			name: String,
 			kind: String,
 		}),
-		restricted:
-			"Die Inhaltsfreigabe dieser Seite ist von Metadaten für die Suchindexierung ausgeschlossen.",
+		restricted: `Die Inhaltsfreigabe dieser Seite ist von ${metadataTerms.label} für die Suchindexierung ausgeschlossen.`,
 		unavailable:
 			"Die öffentlichen Informationen dieser Seite sind derzeit nicht für die Suchindexierung verfügbar.",
 	},

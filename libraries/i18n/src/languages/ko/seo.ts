@@ -6,6 +6,7 @@ import units from "./units";
 
 const { forms: audioTerms } = koTerminology.audio;
 const { forms: entityTerms } = koTerminology.entity;
+const { forms: metadataTerms } = koTerminology.metadata;
 const { forms: postTerms } = koTerminology.post;
 const { forms: realmTerms } = koTerminology.realm;
 const { forms: tagStructureTerms } = koTerminology.tagStructure;
@@ -39,7 +40,7 @@ export default {
 			name: String,
 			kind: String,
 		}),
-		restricted: "이 페이지의 콘텐츠 등급은 검색 색인 메타데이터 제공 대상이 아닙니다.",
+		restricted: `이 페이지의 콘텐츠 등급은 검색 색인 ${metadataTerms.label} 제공 대상이 아닙니다.`,
 		unavailable: "이 페이지의 공개 정보는 현재 검색 색인에 사용할 수 없습니다.",
 	},
 	kinds: {
