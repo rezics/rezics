@@ -10,6 +10,9 @@
     pkgs.fontconfig
     pkgs.bun
     (pkgs.corepack.override { nodejs-slim = pkgs.nodejs-slim_26; })
+  ] ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
+    pkgs.pkg-config
+    pkgs.webkitgtk_4_1
   ];
 
   env.FONTCONFIG_FILE = pkgs.makeFontsConf {
