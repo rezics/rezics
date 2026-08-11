@@ -42,6 +42,20 @@ describe("Cloudflare language redirects", () => {
 		expect(response.headers.get("location")).toBe("https://about.rezics.com/zh-hant/uses/");
 	});
 
+	test("cuts the retired unlocalized mechanism page over to localized products", async () => {
+		const requestContext = context("/how-it-works?from=legacy", {
+			headers: { "Accept-Language": "ja-JP,ja;q=0.9" },
+		});
+
+		const response = await onRequest(requestContext);
+
+		expect(response.status).toBe(302);
+		expect(response.headers.get("location")).toBe(
+			"https://about.rezics.com/ja/products/?from=legacy",
+		);
+		expect(requestContext.next).not.toHaveBeenCalled();
+	});
+
 	test("prefixes contact before Astro handles locale fallback", async () => {
 		const requestContext = context("/contact-us", {
 			headers: { "Accept-Language": "de" },

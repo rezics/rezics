@@ -1,8 +1,10 @@
 ---
-import { ProductDirectory } from "../../../components/ProductDirectory";
+import { ArrowRight } from "lucide-react";
+
+import { ProductStageBadge } from "../../../components/ProductStageBadge";
 import { getProductDocuments } from "../../../content/productDocuments";
 import { getSiteCopy } from "../../../content/locales";
-import { PRODUCT_LAYER_IDS } from "../../../content/productTypes";
+import { PRODUCT_STAGE_IDS } from "../../../content/productTypes";
 import { ABOUT_LOCALES, requireAboutLocale } from "../../../i18n/locales";
 import { getProductPath } from "../../../i18n/productPaths";
 import SiteLayout from "../../../layouts/SiteLayout.astro";
@@ -16,13 +18,11 @@ const copy = getSiteCopy(locale);
 const products = await getProductDocuments(locale);
 const items = products.map(({ definition, document }) => ({
 	id: definition.id,
-	layer: definition.layer,
 	stage: definition.stage,
 	title: document.data.title,
 	summary: document.data.summary,
 	href: getProductPath(locale, definition.slug),
 }));
-const layers = PRODUCT_LAYER_IDS.map((id) => ({ id, ...copy.products.layers[id] }));
 ---
 
 <SiteLayout locale={locale} active="products" pageKind="products" meta={copy.meta.products}>
@@ -33,19 +33,34 @@ const layers = PRODUCT_LAYER_IDS.map((id) => ({ id, ...copy.products.layers[id] 
       <p class="hero-lead">{copy.products.lead}</p>
     </div>
   </section>
-  <div class="shell">
-    <ProductDirectory
-      client:visible
-      items={items}
-      layers={layers}
-      labels={{
-        search: copy.products.searchLabel,
-        placeholder: copy.products.searchPlaceholder,
-        all: copy.products.allLayers,
-        empty: copy.products.empty,
-        open: copy.products.openProduct,
-        stage: copy.products.stage,
-      }}
-    />
-  </div>
+
+  <section class="page-section products-directory-section">
+    <div class="shell directory">
+      <div aria-label={copy.products.stage.legend} class="stage-legend">
+        <span>{copy.products.stage.legend}</span>
+        {PRODUCT_STAGE_IDS.map((stage) => (
+          <ProductStageBadge label={copy.products.stage.labels[stage]} stage={stage} />
+        ))}
+      </div>
+      <ol class="product-index product-index--editorial">
+        {items.map((item, index) => (
+          <li>
+            <a class="product-index-row" href={item.href}>
+              <span class="product-index-row__number" aria-hidden="true">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <h3>{item.title}</h3>
+              <p>{item.summary}</p>
+              <ProductStageBadge
+                label={copy.products.stage.labels[item.stage]}
+                stage={item.stage}
+              />
+              <ArrowRight aria-hidden="true" />
+              <span class="sr-only">{copy.products.openProduct}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
 </SiteLayout>

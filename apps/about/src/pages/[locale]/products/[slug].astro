@@ -55,7 +55,6 @@ const related = product.relatedProductIds.map((id) => ({
 	definition: getProductById(id),
 	document: documentsById.get(id),
 }));
-const layer = copy.products.layers[product.layer];
 const stageCopy = copy.products.stage;
 const meta = {
 	title: `${document.data.title} — ${verbatimTerms.rezics.value}`,
@@ -80,22 +79,11 @@ const meta = {
       </nav>
       <h1>{document.data.title}</h1>
       <p class="product-hero__summary">{document.data.summary}</p>
-      {
-        stageCopy && document.data.statusNote ? (
-          <div class="product-status-bar">
-            <span class="product-status-bar__label">{stageCopy.current}</span>
-            <ProductStageBadge label={stageCopy.labels[product.stage]} stage={product.stage} />
-            <p>{document.data.statusNote}</p>
-            <span class="product-status-bar__layer">
-              {copy.product.layerLabel}｜{layer.title}
-            </span>
-          </div>
-        ) : (
-          <div class="product-meta">
-            <span>{copy.product.layerLabel}: {layer.title}</span>
-          </div>
-        )
-      }
+      <div class="product-status-bar">
+        <span class="product-status-bar__label">{stageCopy.current}</span>
+        <ProductStageBadge label={stageCopy.labels[product.stage]} stage={product.stage} />
+        <p>{document.data.statusNote}</p>
+      </div>
     </div>
   </section>
 

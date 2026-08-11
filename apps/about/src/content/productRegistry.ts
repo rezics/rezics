@@ -1,4 +1,4 @@
-import type { ProductDefinition, ProductLayerId } from "./productTypes";
+import type { ProductDefinition } from "./productTypes";
 
 export const PRODUCT_IDS = [
 	"unit",
@@ -31,6 +31,35 @@ export const PRODUCT_IDS = [
 
 export type ProductId = (typeof PRODUCT_IDS)[number];
 
+export const PRODUCT_PRESENTATION_ORDER = [
+	"collection",
+	"tag",
+	"wiki",
+	"realm",
+	"book",
+	"progress",
+	"feed",
+	"review",
+	"comment",
+	"score",
+	"unit",
+	"entity",
+	"series",
+	"release",
+	"post",
+	"content-structure",
+	"editor",
+	"history",
+	"zone",
+	"library",
+	"picture",
+	"media",
+	"software",
+	"gamebook",
+	"api-oauth",
+	"token",
+] as const satisfies readonly ProductId[];
+
 const defineProduct = (definition: ProductDefinition<ProductId>): ProductDefinition<ProductId> =>
 	definition;
 
@@ -38,49 +67,42 @@ export const PRODUCT_DEFINITIONS = [
 	defineProduct({
 		id: "unit",
 		slug: "unit",
-		layer: "identity",
 		stage: "available",
 		relatedProductIds: ["book", "media", "software", "series", "release", "entity", "tag"],
 	}),
 	defineProduct({
 		id: "entity",
 		slug: "entity",
-		layer: "identity",
 		stage: "available",
 		relatedProductIds: ["unit", "book", "post", "history"],
 	}),
 	defineProduct({
 		id: "tag",
 		slug: "tag",
-		layer: "identity",
 		stage: "available",
 		relatedProductIds: ["unit", "post", "collection", "realm", "zone"],
 	}),
 	defineProduct({
 		id: "series",
 		slug: "series",
-		layer: "identity",
 		stage: "available",
 		relatedProductIds: ["unit", "book", "media", "release"],
 	}),
 	defineProduct({
 		id: "release",
 		slug: "release",
-		layer: "identity",
 		stage: "available",
 		relatedProductIds: ["unit", "book", "media", "software", "series"],
 	}),
 	defineProduct({
 		id: "book",
 		slug: "book",
-		layer: "form",
 		stage: "available",
 		relatedProductIds: ["unit", "gamebook", "release", "content-structure", "entity"],
 	}),
 	defineProduct({
 		id: "gamebook",
 		slug: "gamebook",
-		layer: "form",
 		stage: "planned",
 		canonicalParentId: "book",
 		relatedProductIds: ["book", "content-structure", "progress", "history"],
@@ -88,36 +110,39 @@ export const PRODUCT_DEFINITIONS = [
 	defineProduct({
 		id: "media",
 		slug: "media",
-		layer: "form",
 		stage: "available",
 		relatedProductIds: ["unit", "series", "release", "entity", "tag"],
 	}),
 	defineProduct({
 		id: "software",
 		slug: "software",
-		layer: "form",
 		stage: "available",
 		relatedProductIds: ["unit", "release", "series", "entity", "tag"],
 	}),
 	defineProduct({
 		id: "post",
 		slug: "post",
-		layer: "form",
 		stage: "available",
 		relatedProductIds: ["wiki", "picture", "review", "editor", "history", "entity"],
 	}),
 	defineProduct({
 		id: "wiki",
 		slug: "wiki",
-		layer: "form",
 		stage: "development",
 		canonicalParentId: "post",
-		relatedProductIds: ["post", "picture", "review", "editor", "history"],
+		relatedProductIds: [
+			"post",
+			"entity",
+			"zone",
+			"realm",
+			"editor",
+			"content-structure",
+			"history",
+		],
 	}),
 	defineProduct({
 		id: "picture",
 		slug: "picture",
-		layer: "form",
 		stage: "development",
 		canonicalParentId: "post",
 		relatedProductIds: ["post", "wiki", "review", "entity", "tag"],
@@ -125,7 +150,6 @@ export const PRODUCT_DEFINITIONS = [
 	defineProduct({
 		id: "review",
 		slug: "review",
-		layer: "form",
 		stage: "available",
 		canonicalParentId: "post",
 		relatedProductIds: ["post", "score", "comment", "entity", "feed"],
@@ -133,49 +157,42 @@ export const PRODUCT_DEFINITIONS = [
 	defineProduct({
 		id: "comment",
 		slug: "comment",
-		layer: "form",
 		stage: "available",
 		relatedProductIds: ["post", "review", "feed", "history"],
 	}),
 	defineProduct({
 		id: "score",
 		slug: "score",
-		layer: "form",
 		stage: "available",
 		relatedProductIds: ["review", "unit", "feed", "history"],
 	}),
 	defineProduct({
 		id: "content-structure",
 		slug: "content-structure",
-		layer: "structure",
 		stage: "available",
 		relatedProductIds: ["book", "gamebook", "post", "editor", "history"],
 	}),
 	defineProduct({
 		id: "editor",
 		slug: "editor",
-		layer: "structure",
 		stage: "available",
 		relatedProductIds: ["post", "book", "content-structure", "history", "api-oauth"],
 	}),
 	defineProduct({
 		id: "history",
 		slug: "history",
-		layer: "structure",
 		stage: "available",
 		relatedProductIds: ["book", "post", "zone", "content-structure", "editor"],
 	}),
 	defineProduct({
 		id: "collection",
 		slug: "collection",
-		layer: "community",
 		stage: "available",
-		relatedProductIds: ["library", "unit", "progress", "realm", "tag"],
+		relatedProductIds: ["unit", "book", "realm", "feed", "tag", "library", "progress"],
 	}),
 	defineProduct({
 		id: "library",
 		slug: "library",
-		layer: "community",
 		stage: "planned",
 		canonicalParentId: "collection",
 		relatedProductIds: ["collection", "book", "unit", "progress"],
@@ -183,42 +200,36 @@ export const PRODUCT_DEFINITIONS = [
 	defineProduct({
 		id: "realm",
 		slug: "realm",
-		layer: "community",
 		stage: "available",
 		relatedProductIds: ["zone", "feed", "collection", "unit", "tag"],
 	}),
 	defineProduct({
 		id: "zone",
 		slug: "zone",
-		layer: "community",
 		stage: "development",
 		relatedProductIds: ["realm", "feed", "collection", "tag", "history"],
 	}),
 	defineProduct({
 		id: "feed",
 		slug: "feed",
-		layer: "community",
 		stage: "available",
 		relatedProductIds: ["realm", "zone", "post", "comment", "tag"],
 	}),
 	defineProduct({
 		id: "progress",
 		slug: "progress",
-		layer: "community",
 		stage: "available",
 		relatedProductIds: ["book", "gamebook", "library", "history"],
 	}),
 	defineProduct({
 		id: "api-oauth",
 		slug: "api-oauth",
-		layer: "open",
 		stage: "development",
 		relatedProductIds: ["token", "content-structure", "editor", "feed", "entity"],
 	}),
 	defineProduct({
 		id: "token",
 		slug: "token",
-		layer: "open",
 		stage: "available",
 		relatedProductIds: ["api-oauth", "content-structure", "editor", "unit"],
 	}),
@@ -235,14 +246,6 @@ const productsBySlug = new Map<ProductSlug, RegisteredProduct>(
 );
 const productIds: ReadonlySet<string> = new Set(PRODUCT_IDS);
 const productSlugs: ReadonlySet<string> = new Set(PRODUCT_DEFINITIONS.map(({ slug }) => slug));
-
-export const PRODUCTS_BY_LAYER = {
-	identity: PRODUCT_DEFINITIONS.filter((product) => product.layer === "identity"),
-	form: PRODUCT_DEFINITIONS.filter((product) => product.layer === "form"),
-	structure: PRODUCT_DEFINITIONS.filter((product) => product.layer === "structure"),
-	community: PRODUCT_DEFINITIONS.filter((product) => product.layer === "community"),
-	open: PRODUCT_DEFINITIONS.filter((product) => product.layer === "open"),
-} as const satisfies Record<ProductLayerId, readonly RegisteredProduct[]>;
 
 export function isProductId(value: string): value is ProductId {
 	return productIds.has(value);
@@ -264,10 +267,6 @@ export function getProductBySlug(slug: ProductSlug): RegisteredProduct {
 	return product;
 }
 
-export function getProductsByLayer(layer: ProductLayerId): readonly RegisteredProduct[] {
-	return PRODUCTS_BY_LAYER[layer];
-}
-
 export function validateProductRegistry(): readonly string[] {
 	const errors: string[] = [];
 	const ids = new Set<string>();
@@ -282,6 +281,15 @@ export function validateProductRegistry(): readonly string[] {
 
 	for (const id of PRODUCT_IDS) {
 		if (!ids.has(id)) errors.push(`Missing product definition: ${id}`);
+	}
+
+	const presentationIds = new Set<ProductId>();
+	for (const id of PRODUCT_PRESENTATION_ORDER) {
+		if (presentationIds.has(id)) errors.push(`Duplicate product presentation id: ${id}`);
+		presentationIds.add(id);
+	}
+	for (const id of PRODUCT_IDS) {
+		if (!presentationIds.has(id)) errors.push(`Missing product presentation id: ${id}`);
 	}
 
 	for (const product of PRODUCT_DEFINITIONS) {

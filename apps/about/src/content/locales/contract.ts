@@ -1,34 +1,8 @@
-import type { AboutPageMeta, ProductLayerId, ProductStageId } from "../productTypes";
+import type { AboutPageMeta, ProductStageId } from "../productTypes";
 
 type CardCopy = { readonly title: string; readonly body: string };
 type JourneyCopy = CardCopy & { readonly result: string };
 type ActionCardCopy = CardCopy & { readonly action: string };
-
-type HowScopeCopy = CardCopy & {
-	readonly items: readonly string[];
-};
-
-type HowMechanismCopy = CardCopy & {
-	readonly points: readonly string[];
-	readonly example: CardCopy;
-	readonly rule: string;
-};
-
-type HowV1Copy = {
-	readonly scope: CardCopy & { readonly layers: readonly HowScopeCopy[] };
-	readonly mechanisms: CardCopy & {
-		readonly exampleLabel: string;
-		readonly ruleLabel: string;
-		readonly capabilityLabel: string;
-		readonly items: readonly HowMechanismCopy[];
-	};
-	readonly loop: CardCopy & {
-		readonly steps: readonly CardCopy[];
-		readonly closing: string;
-		readonly capabilitiesAction: string;
-		readonly usesAction: string;
-	};
-};
 
 type ProductStageCopy = {
 	readonly legend: string;
@@ -37,10 +11,6 @@ type ProductStageCopy = {
 };
 
 type HomeV1Copy = {
-	readonly focus: {
-		readonly label: string;
-		readonly items: readonly string[];
-	};
 	readonly identity: CardCopy & {
 		readonly sourcesTitle: string;
 		readonly sources: readonly string[];
@@ -59,13 +29,12 @@ type HomeV1Copy = {
 	};
 };
 
-export type MainPageId = "home" | "how" | "uses" | "products";
+export type MainPageId = "home" | "uses" | "products";
 export type PageId = MainPageId | "contact" | "legal" | "docs";
 
 export type SiteCopy = {
 	readonly nav: {
 		readonly home: string;
-		readonly how: string;
 		readonly uses: string;
 		readonly products: string;
 		readonly enter: string;
@@ -91,7 +60,7 @@ export type SiteCopy = {
 		readonly title: string;
 		readonly lead: string;
 		readonly explore: string;
-		readonly understand: string;
+		readonly productsAction: string;
 		readonly problem: CardCopy;
 		readonly promise: CardCopy;
 		readonly principles: readonly CardCopy[];
@@ -101,14 +70,6 @@ export type SiteCopy = {
 		readonly closing: ActionCardCopy;
 		readonly contact: ActionCardCopy;
 		readonly v1: HomeV1Copy;
-	};
-	readonly how: {
-		readonly eyebrow: string;
-		readonly title: string;
-		readonly lead: string;
-		readonly stages: readonly CardCopy[];
-		readonly integrity: CardCopy;
-		readonly v1: HowV1Copy;
 	};
 	readonly uses: {
 		readonly eyebrow: string;
@@ -122,18 +83,12 @@ export type SiteCopy = {
 		readonly eyebrow: string;
 		readonly title: string;
 		readonly lead: string;
-		readonly searchLabel: string;
-		readonly searchPlaceholder: string;
-		readonly allLayers: string;
-		readonly empty: string;
 		readonly openProduct: string;
 		readonly stage: ProductStageCopy;
-		readonly layers: Record<ProductLayerId, CardCopy>;
 	};
 	readonly product: {
 		readonly breadcrumbHome: string;
 		readonly breadcrumbProducts: string;
-		readonly layerLabel: string;
 		readonly related: string;
 		readonly readNext: string;
 		readonly enter: string;

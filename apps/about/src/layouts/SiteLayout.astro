@@ -13,7 +13,6 @@ import {
 	getAlternatePaths,
 	getCanonicalForPath,
 	getHomePath,
-	getHowItWorksPath,
 	getLocalizedPath,
 	getProductsPath,
 	getUsesPath,
@@ -39,9 +38,8 @@ const canonicalPath = getLocalizedPath(locale, pageKind, slug);
 const defaultPath = getLocalizedPath(DEFAULT_LOCALE, pageKind, slug);
 const links = [
 	{ id: "home", label: copy.nav.home, href: getHomePath(locale) },
-	{ id: "how", label: copy.nav.how, href: getHowItWorksPath(locale) },
-	{ id: "uses", label: copy.nav.uses, href: getUsesPath(locale) },
 	{ id: "products", label: copy.nav.products, href: getProductsPath(locale) },
+	{ id: "uses", label: copy.nav.uses, href: getUsesPath(locale) },
 ] as const;
 ---
 

@@ -3,7 +3,7 @@ import { Logo } from "@rezics/ui";
 
 import type { SiteCopy } from "../content/locales";
 import type { AboutLocale } from "../i18n/locales";
-import { getHomePath, getHowItWorksPath, getProductsPath, getUsesPath } from "../i18n/productPaths";
+import { getHomePath, getProductsPath, getUsesPath } from "../i18n/productPaths";
 
 type Props = { locale: AboutLocale; copy: SiteCopy };
 const { locale, copy } = Astro.props;
@@ -17,9 +17,8 @@ const { locale, copy } = Astro.props;
     </div>
     <nav aria-label={copy.footer.explore}>
       <h2>{copy.footer.explore}</h2>
-      <a href={getHowItWorksPath(locale)}>{copy.nav.how}</a>
-      <a href={getUsesPath(locale)}>{copy.nav.uses}</a>
       <a href={getProductsPath(locale)}>{copy.nav.products}</a>
+      <a href={getUsesPath(locale)}>{copy.nav.uses}</a>
     </nav>
     <nav aria-label={copy.footer.project}>
       <h2>{copy.footer.project}</h2>

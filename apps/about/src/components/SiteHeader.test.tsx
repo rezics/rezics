@@ -8,9 +8,8 @@ import { SiteHeader } from "./SiteHeader";
 const copy = getSiteCopy("en");
 const links = [
 	{ id: "home" as const, label: copy.nav.home, href: "/en/" },
-	{ id: "how" as const, label: copy.nav.how, href: "/en/how-it-works/" },
-	{ id: "uses" as const, label: copy.nav.uses, href: "/en/uses/" },
 	{ id: "products" as const, label: copy.nav.products, href: "/en/products/" },
+	{ id: "uses" as const, label: copy.nav.uses, href: "/en/uses/" },
 ];
 const alternatePaths = [
 	{ locale: "zh-hant" as const, path: "/zh-hant/" },
@@ -28,7 +27,7 @@ afterEach(() => {
 });
 
 describe("SiteHeader", () => {
-	test("exposes the four navigation destinations and the app entry", () => {
+	test("exposes the three navigation destinations and the app entry", () => {
 		render(
 			<SiteHeader
 				active="home"

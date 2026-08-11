@@ -8,7 +8,6 @@ import {
 	getContactPath,
 	getDocumentationPath,
 	getHomePath,
-	getHowItWorksPath,
 	getLegalPath,
 	getProductPath,
 	getProductsPath,
@@ -27,7 +26,6 @@ export async function GET(): Promise<Response> {
 	const urls = productsByLocale.flatMap(({ locale, products }) =>
 		[
 			getHomePath(locale),
-			getHowItWorksPath(locale),
 			getUsesPath(locale),
 			getProductsPath(locale),
 			...products.map(({ definition }) => getProductPath(locale, definition.slug)),

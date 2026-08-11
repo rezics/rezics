@@ -3,7 +3,7 @@ import { buttonVariants } from "@rezics/ui";
 
 import { getSiteCopy } from "../../content/locales";
 import { ABOUT_LOCALES, getAppEntryUrl, requireAboutLocale } from "../../i18n/locales";
-import { getContactPath, getHowItWorksPath, getUsesPath } from "../../i18n/productPaths";
+import { getContactPath, getProductsPath, getUsesPath } from "../../i18n/productPaths";
 import SiteLayout from "../../layouts/SiteLayout.astro";
 
 export function getStaticPaths() {
@@ -27,8 +27,8 @@ const copy = getSiteCopy(locale);
         >
           {copy.home.explore}
         </a>
-        <a class={buttonVariants({ variant: "outline", size: "xl" })} href={getHowItWorksPath(locale)}>
-          {copy.home.understand}
+        <a class={buttonVariants({ variant: "outline", size: "xl" })} href={getProductsPath(locale)}>
+          {copy.home.productsAction}
         </a>
       </div>
     </div>
@@ -37,17 +37,6 @@ const copy = getSiteCopy(locale);
   {
     copy.home.v1 ? (
       <>
-        <section class="home-focus" aria-label={copy.home.v1.focus.label}>
-          <div class="shell home-focus__inner">
-            <strong>{copy.home.v1.focus.label}</strong>
-            <ul>
-              {copy.home.v1.focus.items.map((item) => (
-                <li>{item}</li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
         <section class="page-section home-identity-section">
           <div class="shell home-identity-layout">
             <div class="section-heading">

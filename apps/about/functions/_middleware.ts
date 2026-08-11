@@ -71,8 +71,11 @@ export async function onRequest(context: PagesMiddlewareContext): Promise<Respon
 	if (hasLocalePrefix(url.pathname)) return context.next();
 
 	const locale = negotiateAboutLocale(context.request.headers.get("accept-language"));
-	const targetPath = isPublicPagePath(url.pathname)
-		? getLocalizedPagePath(url.pathname, locale)
-		: undefined;
+	const targetPath =
+		normalizePathname(url.pathname) === "/how-it-works"
+			? `/${locale}/products/`
+			: isPublicPagePath(url.pathname)
+				? getLocalizedPagePath(url.pathname, locale)
+				: undefined;
 	return targetPath ? redirect(url, targetPath) : context.next();
 }

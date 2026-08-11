@@ -1,7 +1,12 @@
 import { access, readdir, readFile } from "node:fs/promises";
 import { join, relative, sep } from "node:path";
 
-import { PRODUCT_IDS, getProductById, isProductId } from "../src/content/productRegistry";
+import {
+	PRODUCT_IDS,
+	PRODUCT_PRESENTATION_ORDER,
+	getProductById,
+	isProductId,
+} from "../src/content/productRegistry";
 import { CONTACT_LOCALES, isContactLocale } from "../src/content/locales";
 import {
 	ABOUT_LOCALES,
@@ -13,7 +18,7 @@ import {
 	getContactPath,
 	getDocumentationPath,
 	getHomePath,
-	getHowItWorksPath,
+	getLegacyHowItWorksPath,
 	getLegalPath,
 	getProductPath,
 	getProductsPath,
@@ -128,7 +133,7 @@ const documentationDocumentCount = [...documentationFilesByLocale.values()].redu
 	0,
 );
 const expectedUrlCount =
-	ABOUT_LOCALES.length * 4 +
+	ABOUT_LOCALES.length * 3 +
 	[...productIdsByLocale.values()].reduce((count, productIds) => count + productIds.length, 0) +
 	legalDocumentCount +
 	documentationDocumentCount +
@@ -138,6 +143,9 @@ const sitemap = await readFile(join(distRoot, "sitemap.xml"), "utf8");
 const sitemapUrls = sitemap.match(/<url>/g) ?? [];
 if (sitemapUrls.length !== expectedUrlCount) {
 	throw new Error(`Expected ${expectedUrlCount} sitemap URLs, found ${sitemapUrls.length}.`);
+}
+if (sitemap.includes("/how-it-works/")) {
+	throw new Error("The retired How it works page must not appear in the sitemap.");
 }
 
 const expectedFunctionRoutes = [
@@ -181,10 +189,12 @@ for (const locale of ABOUT_LOCALES) {
 	) {
 		throw new Error(`Missing the contact call to action in ${homePath}`);
 	}
+	if (home.includes(`href="${getLegacyHowItWorksPath(locale)}"`)) {
+		throw new Error(`Retired How it works navigation remains in ${homePath}`);
+	}
 
 	const canonicalPaths = [
 		homePath,
-		getHowItWorksPath(locale),
 		getUsesPath(locale),
 		getProductsPath(locale),
 		...(productIdsByLocale.get(locale) ?? []).map((id) =>
@@ -198,6 +208,29 @@ for (const locale of ABOUT_LOCALES) {
 		if (!html.includes(`rel="canonical" href="${canonical}"`)) {
 			throw new Error(`Missing canonical ${canonical} in ${publicPath}`);
 		}
+	}
+
+	const legacyHowPath = getLegacyHowItWorksPath(locale);
+	const productsPath = getProductsPath(locale);
+	const legacyHow = await readOutput(legacyHowPath);
+	if (
+		!legacyHow.includes(`url=${productsPath}`) ||
+		!legacyHow.includes(
+			`rel="canonical" href="${new URL(productsPath, ABOUT_SITE_ORIGIN).toString()}"`,
+		)
+	) {
+		throw new Error(`Missing Products cutover redirect in ${legacyHowPath}`);
+	}
+
+	const productsIndex = await readOutput(productsPath);
+	let previousProductPosition = -1;
+	for (const productId of PRODUCT_PRESENTATION_ORDER) {
+		const productPath = getProductPath(locale, getProductById(productId).slug);
+		const productPosition = productsIndex.indexOf(`href="${productPath}"`);
+		if (productPosition <= previousProductPosition) {
+			throw new Error(`Products are not in editorial order at ${locale}/${productId}.`);
+		}
+		previousProductPosition = productPosition;
 	}
 
 	if (locale !== DEFAULT_LOCALE) {
@@ -304,5 +337,5 @@ for (const unsupportedPath of ["/en/product/", "/en/products/catalog/", "/produc
 }
 
 console.log(
-	`Verified ${expectedUrlCount} canonical pages, fallback redirects, language alternates, app links, and the absence of pre-v1 outputs.`,
+	`Verified ${expectedUrlCount} canonical pages, editorial product order, cutover and fallback redirects, language alternates, app links, and the absence of pre-v1 outputs.`,
 );

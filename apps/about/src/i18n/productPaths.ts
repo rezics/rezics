@@ -2,7 +2,6 @@ import { ABOUT_LOCALES, ABOUT_SITE_ORIGIN, type AboutLocale } from "./locales";
 
 export type PublicPageKind =
 	| "home"
-	| "how-it-works"
 	| "uses"
 	| "products"
 	| "product"
@@ -19,7 +18,7 @@ export function getHomePath(locale: AboutLocale): string {
 	return `/${locale}/`;
 }
 
-export function getHowItWorksPath(locale: AboutLocale): string {
+export function getLegacyHowItWorksPath(locale: AboutLocale): string {
 	return `/${locale}/how-it-works/`;
 }
 
@@ -51,8 +50,6 @@ export function getLocalizedPath(locale: AboutLocale, kind: PublicPageKind, slug
 	switch (kind) {
 		case "home":
 			return getHomePath(locale);
-		case "how-it-works":
-			return getHowItWorksPath(locale);
 		case "uses":
 			return getUsesPath(locale);
 		case "products":

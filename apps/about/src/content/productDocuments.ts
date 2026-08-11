@@ -1,7 +1,13 @@
 import { getCollection, type CollectionEntry } from "astro:content";
 
 import { ABOUT_LOCALES, type AboutLocale } from "../i18n/locales";
-import { PRODUCT_DEFINITIONS, type ProductId, type RegisteredProduct } from "./productRegistry";
+import {
+	PRODUCT_DEFINITIONS,
+	PRODUCT_PRESENTATION_ORDER,
+	getProductById,
+	type ProductId,
+	type RegisteredProduct,
+} from "./productRegistry";
 
 export type ProductDocument = CollectionEntry<"products">;
 
@@ -41,7 +47,8 @@ export async function getProductDocuments(
 		documents.map((document) => [document.data.productId, document]),
 	);
 
-	return PRODUCT_DEFINITIONS.flatMap((definition) => {
+	return PRODUCT_PRESENTATION_ORDER.flatMap((id) => {
+		const definition = getProductById(id);
 		const document = documentsById.get(definition.id);
 		return document ? [{ definition, document }] : [];
 	});
